@@ -1,9 +1,7 @@
 package net.papirus.pyrusservicedesk.repository.data
 
 import com.google.gson.annotations.SerializedName
-import net.papirus.pyrusservicedesk.repository.data.intermediate.Attachments
 import net.papirus.pyrusservicedesk.utils.parseUtcIsoDate
-import java.util.*
 
 internal data class Comment(
         @SerializedName("comment_id")
@@ -13,7 +11,7 @@ internal data class Comment(
         @SerializedName("is_inbound")
         val isInbound: Boolean = false,
         @SerializedName("attachments")
-        val attachments: Attachments? = null,
+        val attachments: List<Attachment>? = null,
         @SerializedName("created_at")
         private val creationDateString: String? = null,
         @SerializedName("author")

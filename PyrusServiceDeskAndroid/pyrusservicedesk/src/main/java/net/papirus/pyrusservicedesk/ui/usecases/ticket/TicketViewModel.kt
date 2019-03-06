@@ -8,7 +8,6 @@ import android.content.Intent
 import android.net.Uri
 import net.papirus.pyrusservicedesk.PyrusServiceDesk
 import net.papirus.pyrusservicedesk.repository.data.*
-import net.papirus.pyrusservicedesk.repository.data.intermediate.Attachments
 import net.papirus.pyrusservicedesk.repository.updates.*
 import net.papirus.pyrusservicedesk.ui.viewmodel.ConnectionViewModelBase
 
@@ -29,18 +28,7 @@ internal class TicketViewModel(
                         repository.getTicket(ticketId)
                     }
             ){
-                comments.value = it?.ticket?.comments?.toMutableList()?.also {
-                    it.add(
-                        Comment(
-                            attachments = Attachments(listOf(Attachment(name = "filename.jpg", size = 12))),
-                            isInbound = false,
-                            author = Author.local("USER")))
-                    it.add(
-                        Comment(
-                            attachments = Attachments(listOf(Attachment(name  = "filename.jpg", size = 12))),
-                            isInbound = true,
-                            author = Author.local("USER")))
-                }
+                comments.value = it?.ticket?.comments
             }
         }
 

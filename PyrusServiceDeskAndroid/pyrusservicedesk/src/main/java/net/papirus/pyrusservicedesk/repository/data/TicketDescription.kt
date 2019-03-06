@@ -1,7 +1,6 @@
 package net.papirus.pyrusservicedesk.repository.data
 
 import com.google.gson.annotations.SerializedName
-import net.papirus.pyrusservicedesk.repository.data.intermediate.Attachments
 
 internal data class TicketDescription(
     @SerializedName("subject")
@@ -9,4 +8,4 @@ internal data class TicketDescription(
     @SerializedName("description")
     val description: String,
     @SerializedName("attachments")
-    val attachments: Attachments? = null)
+    val attachments: List<Attachment>? = null)

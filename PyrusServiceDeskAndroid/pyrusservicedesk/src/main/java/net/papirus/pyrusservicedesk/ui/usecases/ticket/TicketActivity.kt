@@ -109,7 +109,7 @@ internal class TicketActivity : ConnectionActivityBase<TicketViewModel>(TicketVi
     }
 
     private fun sendComment() {
-        if (!input.text.isNullOrEmpty()) {
+        if (!input.text.isNullOrBlank()) {
             viewModel.addComment(input.text.toString())
             input.text = null
         }

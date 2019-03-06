@@ -98,8 +98,8 @@ internal class TicketAdapter: AdapterBase<Comment>() {
         }
 
         private fun bindAttachmentView() {
-            comment.setFileName(getItem().attachments?.attachments?.first()?.name ?: "")
-            comment.setFileSize(getItem().attachments?.attachments?.first()?.size?.toFloat() ?: 0f)
+            comment.setFileName(getItem().attachments?.first()?.name ?: "")
+            comment.setFileSize(getItem().attachments?.first()?.size?.toFloat() ?: 0f)
             comment.setOnDownloadIconClickListener {
 
             }
