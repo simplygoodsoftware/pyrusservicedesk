@@ -199,11 +199,11 @@ SWIFT_CLASS_PROPERTY(@property (nonatomic, class, strong) UIColor * _Nullable cu
 /// Setting name of user. If name is not setted it il be default (“Guest”)
 /// \param userName A name to display in pyrus task.
 ///
-+ (void)setUserName:(NSString * _Nullable)userName;
++ (void)createUserName:(NSString * _Nullable)userName;
 /// Setting path of file with logs. If logPath is setted user will be able to send a logs as attachment in chat. If not, the attachments will be only from camera and library.
 /// \param logPath A full path where logs file is.
 ///
-+ (void)setLogPath:(NSString * _Nullable)logPath;
++ (void)createLogPath:(NSString * _Nullable)logPath;
 /// Stop getting inforamation - stop timer.
 + (void)stop;
 - (nonnull instancetype)init SWIFT_UNAVAILABLE;
