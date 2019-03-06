@@ -18,16 +18,18 @@ internal interface ServiceDeskApi {
     fun getTickets(@Body requestBody: RequestBodyBase)
             : Call<Tickets>
 
-    @POST("getticket/{ticketid}")
+    @POST("getticket/{ticket_id}")
     fun getTicket(@Body requestBody: RequestBodyBase,
-                  @Path("ticketid") ticketId: Int)
+                  @Path("ticket_id") ticketId: Int)
             : Call<Ticket>
 
     @POST("CreateTicket")
     fun createTicket(@Body requestBody: CreateTicketRequestBody): Call<ResponseBody>
 
-    @POST("UpdateTicket")
-    fun addComment(@Body requestBody: AddCommentRequestBody): Call<ResponseBody>
+    @POST("UpdateTicket/{ticket_id}")
+    fun addComment(@Body requestBody: AddCommentRequestBody,
+                   @Path("ticket_id") ticketId: Int)
+            : Call<ResponseBody>
 
     @Multipart
     @POST("UploadFile")

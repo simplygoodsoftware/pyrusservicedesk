@@ -1,9 +1,9 @@
 package net.papirus.pyrusservicedesk.repository.updates
 
-import net.papirus.pyrusservicedesk.repository.data.Ticket
+import net.papirus.pyrusservicedesk.repository.data.TicketShortDescription
 
 internal class GetTicketsUpdate(
-        val tickets: List<Ticket>? = null,
+        val tickets: List<TicketShortDescription>? = null,
         error: UpdateError? = null)
     : UpdateBase(error) {
 

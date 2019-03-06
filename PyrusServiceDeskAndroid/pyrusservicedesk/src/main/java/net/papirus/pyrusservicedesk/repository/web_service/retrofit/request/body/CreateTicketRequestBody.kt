@@ -1,10 +1,13 @@
 package net.papirus.pyrusservicedesk.repository.web_service.retrofit.request.body
 
-import net.papirus.pyrusservicedesk.repository.data.Ticket
-import net.papirus.pyrusservicedesk.repository.web_service.retrofit.request.body.RequestBodyBase
+import com.google.gson.annotations.SerializedName
+import net.papirus.pyrusservicedesk.repository.data.TicketDescription
 
 internal class CreateTicketRequestBody(
         appId: String,
         userId: String,
-        val Ticket: Ticket)
+        @SerializedName("user_name")
+        val userName: String,
+        @SerializedName("ticket")
+        val ticket: TicketDescription)
     : RequestBodyBase(appId, userId)

@@ -1,15 +1,13 @@
 package net.papirus.pyrusservicedesk.repository
 
 import android.arch.lifecycle.LiveData
-import android.arch.lifecycle.MediatorLiveData
-import android.arch.lifecycle.Observer
 import android.arch.lifecycle.Transformations
 import android.content.ContentResolver
 import android.net.Uri
 import android.provider.OpenableColumns.DISPLAY_NAME
 import android.support.v4.content.ContentResolverCompat
 import net.papirus.pyrusservicedesk.repository.data.Attachment
-import net.papirus.pyrusservicedesk.repository.data.Ticket
+import net.papirus.pyrusservicedesk.repository.data.TicketDescription
 import net.papirus.pyrusservicedesk.repository.updates.*
 import net.papirus.pyrusservicedesk.repository.web_service.WebService
 import net.papirus.pyrusservicedesk.repository.web_service.response.Status
@@ -70,12 +68,9 @@ internal class RepositoryImpl(
         }
     }
 
-    override fun addComment(ticketId: Int,
-                            userName: String,
-                            comment: String,
-                            attachments: List<Attachment>?) {
+    override fun addComment(ticketId: Int, comment: String, attachments: List<Attachment>?) {
 
-        webService.addComment(AddCommentRequest(ticketId, userName, comment, attachments))
+        webService.addComment(AddCommentRequest(ticketId, comment, attachments))
                 .observeForever { response ->
                     notifySubscribers(
                             when{
@@ -91,8 +86,8 @@ internal class RepositoryImpl(
                 }
     }
 
-    override fun createTicket(ticket: Ticket) {
-        webService.createTicket(CreateTicketRequest(ticket))
+    override fun createTicket(userName: String, ticket: TicketDescription) {
+        webService.createTicket(CreateTicketRequest(userName, ticket))
                 .observeForever {response ->
                     notifySubscribers(
                             when {
@@ -133,10 +128,10 @@ internal class RepositoryImpl(
                             notifySubscribers(CommentAddedUpdate(error = UpdateError.WebService))
                         else ->
                             addComment(
-                                    ticketId,
-                                    "USER",
-                                    "",
-                                    listOf(Attachment(response.responseData.guid)))
+                                ticketId,
+                                "",
+                                listOf(Attachment(guid = response.responseData.guid))
+                            )
                     }
                 }
     }

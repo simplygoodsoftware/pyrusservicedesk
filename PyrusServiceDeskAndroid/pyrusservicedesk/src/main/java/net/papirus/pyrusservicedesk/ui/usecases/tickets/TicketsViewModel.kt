@@ -6,6 +6,7 @@ import android.arch.lifecycle.MutableLiveData
 import android.arch.lifecycle.Transformations
 import net.papirus.pyrusservicedesk.PyrusServiceDesk
 import net.papirus.pyrusservicedesk.repository.data.Ticket
+import net.papirus.pyrusservicedesk.repository.data.TicketShortDescription
 import net.papirus.pyrusservicedesk.repository.updates.UpdateBase
 import net.papirus.pyrusservicedesk.repository.updates.UpdateType
 import net.papirus.pyrusservicedesk.ui.viewmodel.ConnectionViewModelBase
@@ -14,7 +15,7 @@ internal class TicketsViewModel(serviceDesk: PyrusServiceDesk)
     : ConnectionViewModelBase(serviceDesk) {
 
     private val isLoading = MediatorLiveData<Boolean>()
-    private val tickets = MediatorLiveData<List<Ticket>>()
+    private val tickets = MediatorLiveData<List<TicketShortDescription>>()
     private val request = MutableLiveData<Boolean>()
 
     init{
@@ -55,5 +56,5 @@ internal class TicketsViewModel(serviceDesk: PyrusServiceDesk)
 
     fun getIsLoadingLiveData(): LiveData<Boolean> = isLoading
 
-    fun getTicketsLiveData(): LiveData<List<Ticket>> = tickets
+    fun getTicketsLiveData(): LiveData<List<TicketShortDescription>> = tickets
 }

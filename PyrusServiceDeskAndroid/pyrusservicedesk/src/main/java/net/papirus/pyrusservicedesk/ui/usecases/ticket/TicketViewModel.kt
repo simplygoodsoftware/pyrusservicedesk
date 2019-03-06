@@ -7,10 +7,7 @@ import android.arch.lifecycle.Transformations
 import android.content.Intent
 import android.net.Uri
 import net.papirus.pyrusservicedesk.PyrusServiceDesk
-import net.papirus.pyrusservicedesk.repository.data.Attachment
-import net.papirus.pyrusservicedesk.repository.data.Comment
-import net.papirus.pyrusservicedesk.repository.data.EMPTY_TICKET_ID
-import net.papirus.pyrusservicedesk.repository.data.Ticket
+import net.papirus.pyrusservicedesk.repository.data.*
 import net.papirus.pyrusservicedesk.repository.data.intermediate.Attachments
 import net.papirus.pyrusservicedesk.repository.updates.*
 import net.papirus.pyrusservicedesk.ui.viewmodel.ConnectionViewModelBase
@@ -33,8 +30,16 @@ internal class TicketViewModel(
                     }
             ){
                 comments.value = it?.ticket?.comments?.toMutableList()?.also {
-                    it.add(Comment(attachments = Attachments(listOf(Attachment("filename.jpg", 12))), isInbound = false))
-                    it.add(Comment(attachments = Attachments(listOf(Attachment("filename.jpg", 12))), isInbound = true))
+                    it.add(
+                        Comment(
+                            attachments = Attachments(listOf(Attachment(name = "filename.jpg", size = 12))),
+                            isInbound = false,
+                            author = Author.local("USER")))
+                    it.add(
+                        Comment(
+                            attachments = Attachments(listOf(Attachment(name  = "filename.jpg", size = 12))),
+                            isInbound = true,
+                            author = Author.local("USER")))
                 }
             }
         }
@@ -67,9 +72,9 @@ internal class TicketViewModel(
 
     fun addComment(text: String) {
         if (isNewTicket())
-            repository.createTicket(Ticket(subject = text, description = text))
+            repository.createTicket("USER", TicketDescription(text, text))
         else
-            repository.addComment(ticketId, "USER", text)
+            repository.addComment(ticketId, text)
     }
 
     fun addAttachment(attachmentUri: Uri) {

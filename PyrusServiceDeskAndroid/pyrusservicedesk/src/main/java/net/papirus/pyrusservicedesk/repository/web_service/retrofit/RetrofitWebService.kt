@@ -115,7 +115,7 @@ internal class RetrofitWebService(
 
     override fun addComment(request: AddCommentRequest): LiveData<AddCommentResponse>{
         val result = MutableLiveData<AddCommentResponse>()
-        api.addComment(request.makeRequestBody(appId, userId))
+        api.addComment(request.makeRequestBody(appId, userId), request.ticketId)
                 .enqueue(object: Callback<ResponseBody>{
 
                     override fun onFailure(call: Call<ResponseBody>, t: Throwable) {

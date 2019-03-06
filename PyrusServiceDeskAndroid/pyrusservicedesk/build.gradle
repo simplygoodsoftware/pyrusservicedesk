@@ -89,8 +89,7 @@ ext{
     libraryDescription = 'Service desk by simplygoodsoftware'
 
     siteUrl = 'https://pyrus.com/'
-    gitUrl = '\n' +
-            'https://github.com/simplygoodsoftware/pyrusservicedesk'
+    gitUrl = 'https://github.com/simplygoodsoftware/pyrusservicedesk'
 
     libraryVersion = '0.0.1'
 

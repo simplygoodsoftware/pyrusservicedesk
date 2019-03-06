@@ -6,16 +6,18 @@ import net.papirus.pyrusservicedesk.utils.parseUtcIsoDate
 import java.util.*
 
 internal data class Comment(
-        @SerializedName("CommentId")
-        val commentId: Int? = null,
-        @SerializedName("Body")
+        @SerializedName("comment_id")
+        val commentId: Int = 0,
+        @SerializedName("body")
         val body: String = "",
-        @SerializedName("IsInbound")
-        val isInbound: Boolean,
-        @SerializedName("Attachments")
+        @SerializedName("is_inbound")
+        val isInbound: Boolean = false,
+        @SerializedName("attachments")
         val attachments: Attachments? = null,
-        @SerializedName("CreatedAt")
-        private val creationDateString: String? = null){
+        @SerializedName("created_at")
+        private val creationDateString: String? = null,
+        @SerializedName("author")
+        val author: Author){
 
     fun getCreationDate() = creationDateString?.let { parseUtcIsoDate(creationDateString) }
 

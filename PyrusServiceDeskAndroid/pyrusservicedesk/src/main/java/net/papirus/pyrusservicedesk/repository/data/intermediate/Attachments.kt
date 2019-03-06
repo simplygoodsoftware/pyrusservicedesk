@@ -4,5 +4,5 @@ import com.google.gson.annotations.SerializedName
 import net.papirus.pyrusservicedesk.repository.data.Attachment
 
 internal data class Attachments(
-        @SerializedName("Attachments")
+        @SerializedName("attachments")
         val attachments: List<Attachment> = emptyList())
