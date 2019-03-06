@@ -16,7 +16,7 @@ Pod::Spec.new do |spec|
   #
 
   spec.name         = "PyrusServiceDesk"
-  spec.version      = "1.0.2"
+  spec.version      = "1.0.3"
   spec.summary      = "Create a secvice with chat with support."
 
   # This description is used to generate tags and improve search results.
@@ -67,7 +67,7 @@ Pod::Spec.new do |spec|
   #  Supports git, hg, bzr, svn and HTTP.
   #
 
-spec.source       = { :git => "https://github.com/simplygoodsoftware/pyrusservicedesk.git", :tag => "1.0.2" }
+spec.source       = { :git => "https://github.com/simplygoodsoftware/pyrusservicedesk.git", :tag => "1.0.3" }
 
 
   # ――― Source Code ―――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――― #
@@ -79,7 +79,7 @@ spec.source       = { :git => "https://github.com/simplygoodsoftware/pyrusservic
   #
 
 
-  spec.source_files  = "PyrusServiceDeskIOS/*","PyrusServiceDeskIOS/**/*.{h,m,swift}"
+  spec.source_files  = "PyrusServiceDeskIOS/*", "PyrusServiceDeskIOS/**/*.{h,m,swift}"
 
   # spec.public_header_files = "Classes/**/*.h"
 
