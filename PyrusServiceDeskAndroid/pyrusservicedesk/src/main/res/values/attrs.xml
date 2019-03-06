@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <attr name="colorAccentSecondary" format="reference"/>
+    <attr name="elevationDefault" format="reference"/>
+
+    <declare-styleable name="CommentView">
+        <attr name="type" format="enum">
+            <enum name="inbound" value="0"/>
+            <enum name="outbound" value="1"/>
+        </attr>
+    </declare-styleable>
+
+</resources>

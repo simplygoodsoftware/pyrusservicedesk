@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="psd_accent">#008c8c</color>
+    <color name="psd_accent_secondary">#f4c000</color>
+    <color name="psd_text_color_primary">@android:color/black</color>
+    <color name="psd_text_color_secondary">#65000000</color>
+    <color name="psd_text_color_primary_inverse">@android:color/white</color>
+    <color name="psd_text_color_secondary_inverse">#66FFFFFF</color>
+    <color name="psd_action_bar_icon_color">#99666666</color>
+    <color name="psd_divider_color">#99666666</color>
+    <color name="psd_error_background">#E2E2E2</color>
+    <color name="psd_comment_inbound_background">#CCE2E2E2</color>
+    <color name="psd_comment_outbound_background">?android:colorAccent</color>
+    <color name="psd_error_accent">#D0021B</color>
+</resources>
