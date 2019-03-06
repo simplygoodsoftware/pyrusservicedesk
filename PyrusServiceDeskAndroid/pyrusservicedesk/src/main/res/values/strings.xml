@@ -1,0 +1,11 @@
+<resources>
+    <string name="app_name">PyrusServiceDesk</string>
+    <string name="psd_new_conversation">New conversation</string>
+    <string name="psd_send">Send</string>
+    <string name="psd_comment_input_hint">Add Comment</string>
+    <string name="psd_retry">Retry</string>
+    <string name="psd_no_connection">No Internet Connection</string>
+    <string name="psd_downloading">Downloading…</string>
+    <string name="psd_file_size_mb" formatted="false">%f Mb</string>
+    <string name="psd_time_format">hh:mm aa</string>
+</resources>

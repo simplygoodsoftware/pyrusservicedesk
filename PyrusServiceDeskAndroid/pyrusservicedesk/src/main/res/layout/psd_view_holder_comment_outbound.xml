@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:orientation="horizontal"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_marginEnd="@dimen/psd_comment_creation_time_width_negative"
+    android:layout_marginRight="@dimen/psd_comment_creation_time_width_negative"
+    android:background="?attr/selectableItemBackground">
+
+    <android.support.constraint.ConstraintLayout
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_weight="0.5"
+        android:paddingStart="@dimen/psd_offset_default"
+        android:paddingLeft="@dimen/psd_offset_default"
+        android:paddingEnd="@dimen/psd_offset_default"
+        android:paddingRight="@dimen/psd_offset_default">
+
+        <net.papirus.pyrusservicedesk.ui.view.CommentView
+            android:id="@+id/comment"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="@dimen/psd_offset_small"
+            android:layout_marginEnd="@dimen/psd_offset_small"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="@+id/guideline4"
+            app:layout_constraintTop_toTopOf="parent"
+            app:type="outbound"/>
+
+        <android.support.constraint.Guideline
+            android:id="@+id/guideline4"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            app:layout_constraintGuide_percent="0.2"/>
+
+    </android.support.constraint.ConstraintLayout>
+
+    <android.support.v7.widget.AppCompatTextView
+        android:id="@+id/creation_time"
+        android:layout_width="@dimen/psd_comment_creation_time_width"
+        android:layout_height="match_parent"
+        android:gravity="center_vertical|start"
+        tools:text="@tools:sample/date/hhmm"/>
+</LinearLayout>
