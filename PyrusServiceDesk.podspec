@@ -81,6 +81,4 @@ spec.source       = { :git => "https://github.com/simplygoodsoftware/pyrusservic
 
   spec.source_files  = "PyrusServiceDeskIOS/*", "PyrusServiceDeskIOS/**/*.{h,m,swift}"
 
-  spec.public_header_files = "PyrusServiceDeskIOS/PyrusServiceDesk.framework/Headers/*.h"
-
 end
