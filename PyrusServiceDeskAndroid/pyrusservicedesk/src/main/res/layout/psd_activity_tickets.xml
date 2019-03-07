@@ -27,25 +27,11 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/tickets_toolbar">
 
-        <ProgressBar
-            android:id="@+id/progress_bar"
-            style="?android:attr/progressBarStyleHorizontal"
-            android:layout_width="0dp"
-            android:layout_height="?attr/elevationDefault"
-            android:indeterminate="false"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent" />
-
         <android.support.v7.widget.RecyclerView
             android:id="@+id/tickets"
             android:layout_width="0dp"
             android:layout_height="0dp"
             android:clipToPadding="true"
-            android:paddingStart="@dimen/psd_offset_default"
-            android:paddingLeft="@dimen/psd_offset_default"
-            android:paddingEnd="@dimen/psd_offset_default"
-            android:paddingRight="@dimen/psd_offset_default"
             app:layoutManager="android.support.v7.widget.LinearLayoutManager"
             app:layout_constraintBottom_toTopOf="@+id/new_conversation"
             app:layout_constraintEnd_toEndOf="parent"
@@ -55,6 +41,17 @@
             tools:listitem="@layout/psd_view_holder_ticket">
 
         </android.support.v7.widget.RecyclerView>
+
+        <ProgressBar
+            android:id="@+id/progress_bar"
+            style="?android:attr/progressBarStyleHorizontal"
+            android:layout_width="0dp"
+            android:layout_height="?attr/elevationDefault"
+            android:indeterminate="false"
+            android:max="@integer/psd_progress_max_value"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
 
         <android.support.v7.widget.AppCompatTextView
             android:id="@+id/new_conversation"

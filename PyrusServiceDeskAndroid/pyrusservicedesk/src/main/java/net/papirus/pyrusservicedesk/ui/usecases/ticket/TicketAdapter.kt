@@ -1,7 +1,6 @@
 package net.papirus.pyrusservicedesk.ui.usecases.ticket
 
 import android.graphics.Canvas
-import android.support.annotation.IdRes
 import android.support.annotation.LayoutRes
 import android.support.v4.content.res.ResourcesCompat
 import android.support.v7.widget.RecyclerView
@@ -30,8 +29,8 @@ internal class TicketAdapter: AdapterBase<Comment>() {
     override fun getItemViewType(position: Int): Int {
         return with(itemsList[position]) {
             return@with when {
-                isInbound -> VIEW_TYPE_COMMENT_INBOUND
-                else -> VIEW_TYPE_COMMENT_OUTBOUND
+                isInbound -> VIEW_TYPE_COMMENT_OUTBOUND
+                else -> VIEW_TYPE_COMMENT_INBOUND
             }
         }
     }
@@ -92,14 +91,12 @@ internal class TicketAdapter: AdapterBase<Comment>() {
                 ContentType.Text -> comment.setCommentText(getItem().body)
                 ContentType.Attachment -> bindAttachmentView()
             }
-            creationTime.text = getItem().getCreationDate()?.let {
-                getTimeText(itemView.context, it)
-            }
+            creationTime.text = getTimeText(itemView.context, (getItem().getCreationDate()))
         }
 
         private fun bindAttachmentView() {
             comment.setFileName(getItem().attachments?.first()?.name ?: "")
-            comment.setFileSize(getItem().attachments?.first()?.size?.toFloat() ?: 0f)
+            comment.setFileSize(getItem().attachments?.first()?.bytesSize?.toFloat() ?: 0f)
             comment.setOnDownloadIconClickListener {
 
             }
@@ -123,6 +120,14 @@ internal class TicketAdapter: AdapterBase<Comment>() {
         override fun onSwiped(viewHolder: RecyclerView.ViewHolder?, direction: Int) {
         }
 
+        override fun getSwipeEscapeVelocity(defaultValue: Float): Float {
+            return Float.MAX_VALUE
+        }
+
+        override fun getSwipeThreshold(viewHolder: RecyclerView.ViewHolder?): Float {
+            return Float.MAX_VALUE
+        }
+
         override fun onChildDraw(c: Canvas?,
                                  recyclerView: RecyclerView?,
                                  viewHolder: RecyclerView.ViewHolder?,
@@ -133,15 +138,16 @@ internal class TicketAdapter: AdapterBase<Comment>() {
 
             if (recyclerView == null || viewHolder == null)
                 return
-            if (dX < -(viewHolder as CommentHolder).creationTime.width)
-                return
+            var x = dX
+            if (x < -(viewHolder as CommentHolder).creationTime.width)
+                x = -viewHolder.creationTime.width.toFloat()
             for (position in 0..(recyclerView.childCount - 1)) {
                 recyclerView.findContainingViewHolder(recyclerView.getChildAt(position))?.let {
                     super.onChildDraw(
                             c,
                             recyclerView,
                             it,
-                            dX,
+                            x,
                             dY,
                             actionState,
                             false)

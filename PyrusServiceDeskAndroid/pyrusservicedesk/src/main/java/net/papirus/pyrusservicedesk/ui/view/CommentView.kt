@@ -4,11 +4,8 @@ import android.content.Context
 import android.graphics.PorterDuff
 import android.graphics.drawable.LayerDrawable
 import android.support.annotation.ColorInt
-import android.support.constraint.ConstraintLayout
 import android.support.v4.app.ActivityCompat
 import android.support.v4.content.ContextCompat
-import android.support.v4.content.res.ResourcesCompat
-import android.support.v4.view.GravityCompat
 import android.support.v7.widget.AppCompatImageView
 import android.util.AttributeSet
 import android.view.Gravity
@@ -17,9 +14,7 @@ import android.widget.FrameLayout
 import android.widget.LinearLayout
 import com.example.pyrusservicedesk.R
 import kotlinx.android.synthetic.main.psd_comment.view.*
-import net.papirus.pyrusservicedesk.utils.ColorChannel
-import net.papirus.pyrusservicedesk.utils.adjustColor
-import net.papirus.pyrusservicedesk.utils.getColor
+import net.papirus.pyrusservicedesk.utils.*
 
 private const val TYPE_INBOUND = 0
 private const val TYPE_OUTBOUND = 1
@@ -122,11 +117,15 @@ internal class CommentView @JvmOverloads constructor(
             findDrawableByLayerId(android.R.id.background)
                     .mutate()
                     .setColorFilter(
-                            adjustColor(
-                                    secondaryColor,
-                                    ColorChannel.Alpha,
-                                    DOWNLOAD_PROGRESS_BACKGROUND_MULTIPLIER),
-                            PorterDuff.Mode.SRC_IN)
+                        when (type){
+                            TYPE_INBOUND -> adjustColor(
+                                secondaryColor,
+                                ColorChannel.Alpha,
+                                DOWNLOAD_PROGRESS_BACKGROUND_MULTIPLIER)
+                            else -> secondaryColor
+                        },
+                        PorterDuff.Mode.SRC_IN)
+
             findDrawableByLayerId(android.R.id.progress)
                     .mutate()
                     .setColorFilter(primaryColor, PorterDuff.Mode.SRC_IN)
@@ -171,9 +170,13 @@ internal class CommentView @JvmOverloads constructor(
         file_name.text = fileName
     }
 
-    fun setFileSize(sizeMb: Float) {
-        recentFileSize = sizeMb
-        file_size.text = context.getString(R.string.psd_file_size_mb, sizeMb)
+    fun setFileSize(bytesSize: Float) {
+        recentFileSize = bytesSize
+        val toShow = when {
+            recentFileSize >= BYTES_IN_MEGABYTE / 10 -> recentFileSize / BYTES_IN_MEGABYTE
+            else -> recentFileSize / BYTES_IN_KILOBYTE
+        }
+        file_size.text = context.getString(R.string.psd_file_size, toShow)
     }
 
     fun setDownloadingProgress(progress: Int) {

@@ -2,10 +2,9 @@ package net.papirus.pyrusservicedesk.ui
 
 import android.arch.lifecycle.ViewModel
 import android.arch.lifecycle.ViewModelProviders
-import android.content.Intent
 import android.os.Bundle
-import android.support.v4.app.FragmentActivity
 import android.support.v7.app.AppCompatActivity
+import android.view.View
 import com.example.pyrusservicedesk.R
 import net.papirus.pyrusservicedesk.ui.viewmodel.SharedViewModel
 import net.papirus.pyrusservicedesk.ui.viewmodel.ViewModelFactory
@@ -23,12 +22,20 @@ internal abstract class ActivityBase: AppCompatActivity() {
         setTheme(R.style.PapirusServiceDesk)
         setContentView(layoutResId)
         setSupportActionBar(findViewById(toolbarViewId))
+        findViewById<View>(android.R.id.content).apply {
+            viewTreeObserver.addOnGlobalLayoutListener {
+                val heightDiff = this.rootView.height - this.height
+                onViewHeightChanged(heightDiff)
+            }
+        }
     }
 
     override fun onPostCreate(savedInstanceState: Bundle?) {
         super.onPostCreate(savedInstanceState)
         observeData()
     }
+
+    protected open fun onViewHeightChanged(changedBy: Int) {}
 
     protected fun <T : ViewModel> getViewModel(viewModelClass: Class<T>): Lazy<T> {
 

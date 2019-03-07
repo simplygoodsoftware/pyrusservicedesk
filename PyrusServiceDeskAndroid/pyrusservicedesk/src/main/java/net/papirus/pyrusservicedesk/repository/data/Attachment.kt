@@ -12,7 +12,7 @@ internal data class Attachment(
         @SerializedName("name")
         val name: String = "",
         @SerializedName("size")
-        val size: Int = 0,
+        val bytesSize: Int = 0,
         @SerializedName("is_text")
         val isText: Boolean = false,
         @SerializedName("is_video")

@@ -5,6 +5,10 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
+    android:paddingStart="@dimen/psd_offset_default"
+    android:paddingLeft="@dimen/psd_offset_default"
+    android:paddingEnd="@dimen/psd_offset_default"
+    android:paddingRight="@dimen/psd_offset_default"
     android:background="?attr/selectableItemBackground">
 
     <android.support.v7.widget.AppCompatTextView

@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="psd_tickets_activity_title">Все обсуждения</string>
+    <string name="psd_new_conversation">Новый чат</string>
+    <string name="psd_send">Отправить</string>
+    <string name="psd_comment_input_hint">Новый комментарий</string>
+    <string name="psd_retry">Попробовать снова</string>
+    <string name="psd_no_connection">Нет связи</string>
+    <string name="psd_downloading">Загрузка…</string>
+    <string name="psd_file_size">%f Мб</string>
+    <string name="psd_time_format">HH:mm</string>
+    <string name="psd_organization_support" formatted="false">Поддержка %s</string>
+</resources>

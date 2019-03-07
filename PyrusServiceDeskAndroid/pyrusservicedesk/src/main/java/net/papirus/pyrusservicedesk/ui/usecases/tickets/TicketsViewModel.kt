@@ -32,11 +32,14 @@ internal class TicketsViewModel(serviceDesk: PyrusServiceDesk)
                 }
             ){
                 isLoading.value = false
-                tickets.value = it?.tickets
+                tickets.value = it?.tickets?.sortedWith(TicketShortDescriptionComparator())
+                onDataLoaded()
             }
         }
-        if (isNetworkConnected.value == true)
+        if (isNetworkConnected.value == true) {
             loadData()
+            replayProgress()
+        }
         onInitialized()
     }
 
@@ -49,7 +52,6 @@ internal class TicketsViewModel(serviceDesk: PyrusServiceDesk)
         return setOf(UpdateType.TicketCreated, UpdateType.TicketUpdated)
     }
 
-
     override fun loadData() {
         request.value = true
     }
@@ -57,4 +59,20 @@ internal class TicketsViewModel(serviceDesk: PyrusServiceDesk)
     fun getIsLoadingLiveData(): LiveData<Boolean> = isLoading
 
     fun getTicketsLiveData(): LiveData<List<TicketShortDescription>> = tickets
+
+    private class TicketShortDescriptionComparator : Comparator<TicketShortDescription> {
+
+        override fun compare(o1: TicketShortDescription, o2: TicketShortDescription): Int {
+            return when {
+                o1.lastComment == null -> return when {
+                    o2.lastComment == null -> o1.ticketId - o2.ticketId
+                    else -> -1
+                }
+                o2.lastComment == null -> -1
+                o1.lastComment.getCreationDate().before(o2.lastComment.getCreationDate()) -> 1
+                o1.lastComment.getCreationDate().after(o2.lastComment.getCreationDate()) -> -1
+                else -> o1.ticketId - o2.ticketId
+            }
+        }
+    }
 }

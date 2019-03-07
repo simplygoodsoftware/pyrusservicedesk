@@ -1,6 +1,7 @@
 package net.papirus.pyrusservicedesk
 
 import android.app.Application
+import android.arch.lifecycle.Observer
 import net.papirus.pyrusservicedesk.repository.Repository
 import net.papirus.pyrusservicedesk.repository.RepositoryFactory
 import net.papirus.pyrusservicedesk.repository.web_service.WebServiceFactory
@@ -8,14 +9,15 @@ import net.papirus.pyrusservicedesk.ui.viewmodel.SharedViewModel
 
 class PyrusServiceDesk private constructor(
         internal val application: Application,
-        private val clientId: String){
+        private val clientId: String,
+        internal val clientName: String){
 
     companion object {
         private var INSTANCE: PyrusServiceDesk? = null
 
         @JvmStatic
-        fun init(application: Application, clientId: String) {
-            INSTANCE = PyrusServiceDesk(application, clientId)
+        fun init(application: Application, clientId: String, clientName: String) {
+            INSTANCE = PyrusServiceDesk(application, clientId, clientName)
         }
 
         internal fun getInstance() : PyrusServiceDesk {
@@ -33,5 +35,23 @@ class PyrusServiceDesk private constructor(
         )
     }
 
-    internal val sharedViewModel:SharedViewModel by lazy { SharedViewModel() }
+    private var sharedViewModel: SharedViewModel? = null
+
+    private val quitObserver = Observer<Boolean> {
+        it?.let{value ->
+            if (value)
+                refreshSharedViewModel()
+        }
+    }
+
+    internal fun getSharedViewModel(): SharedViewModel{
+        if (sharedViewModel == null)
+            refreshSharedViewModel()
+        return sharedViewModel!!
+    }
+
+    private fun refreshSharedViewModel() {
+        sharedViewModel?.getQuitServiceDeskLiveData()?.removeObserver(quitObserver)
+        sharedViewModel = SharedViewModel().also { it.getQuitServiceDeskLiveData().observeForever(quitObserver) }
+    }
 }

@@ -6,13 +6,12 @@ import android.arch.lifecycle.ViewModel
 
 internal class SharedViewModel : ViewModel() {
 
-    private val quitServiceDesk = MutableLiveData<Boolean>()
+    private var quitServiceDesk = MutableLiveData<Boolean>()
 
     fun getQuitServiceDeskLiveData():LiveData<Boolean> = quitServiceDesk
 
     fun quitServiceDesk() {
         quitServiceDesk.value = true
-        quitServiceDesk.value = false
     }
 
 }

@@ -13,7 +13,7 @@ import net.papirus.pyrusservicedesk.ui.viewmodel.ConnectionViewModelBase
 
 internal class TicketViewModel(
     serviceDesk: PyrusServiceDesk,
-    val arguments: Intent)
+    arguments: Intent)
     : ConnectionViewModelBase(serviceDesk) {
 
     private var ticketId: Int = TicketActivity.getTicketId(arguments)
@@ -29,19 +29,23 @@ internal class TicketViewModel(
                     }
             ){
                 comments.value = it?.ticket?.comments
+                onDataLoaded()
             }
         }
 
         if (!isNewTicket() && isNetworkConnected.value == true) {
             loadData()
+            replayProgress()
         }
         onInitialized()
     }
 
     override fun <T : UpdateBase> onUpdateReceived(update: T) {
         when (update) {
-            is TicketCreatedUpdate ->
+            is TicketCreatedUpdate -> {
                 ticketId = update.ticketId ?: ticketId
+                commentsRequest.value = true
+            }
             is CommentAddedUpdate -> {
                 if (update.ticketId != ticketId)
                     return

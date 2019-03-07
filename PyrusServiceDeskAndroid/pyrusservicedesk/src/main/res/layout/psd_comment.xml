@@ -16,48 +16,67 @@
         android:background="@drawable/psd_comment_background">
 
         <android.support.constraint.ConstraintLayout
-            android:id="@+id/attachment_layout"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent"
-            tools:visibility="gone">
+                android:id="@+id/attachment_layout"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent"
+                tools:visibility="visible">
 
             <ProgressBar
-                android:id="@+id/file_downloading_progress"
-                style="?android:attr/progressBarStyleHorizontal"
-                android:layout_width="@dimen/psd_recyclerview_item_height_default"
-                android:layout_height="@dimen/psd_recyclerview_item_height_default"
-                android:progressDrawable="@drawable/psd_file_download_progress"
-                android:background="?attr/selectableItemBackground"
-                android:indeterminate="false"
-                app:layout_constraintBottom_toBottomOf="parent"
-                app:layout_constraintLeft_toLeftOf="parent"
-                app:layout_constraintTop_toTopOf="parent"/>
+                    android:id="@+id/file_downloading_progress"
+                    style="?android:attr/progressBarStyleHorizontal"
+                    android:layout_width="@dimen/psd_recyclerview_item_height_default"
+                    android:layout_height="@dimen/psd_recyclerview_item_height_default"
+                    android:progressDrawable="@drawable/psd_file_download_progress"
+                    android:background="?attr/selectableItemBackground"
+                    android:indeterminate="false"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintTop_toTopOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintHorizontal_bias="0.5"
+                    app:layout_constraintEnd_toStartOf="@+id/constraintLayout"/>
 
-            <android.support.v7.widget.AppCompatTextView
-                android:id="@+id/file_name"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                app:layout_constraintBottom_toTopOf="@+id/file_size"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintStart_toEndOf="@+id/file_downloading_progress"
-                app:layout_constraintTop_toTopOf="parent"
-                app:layout_constraintVertical_chainStyle="packed"
-                android:textAppearance="?attr/textAppearanceListItem"
-                tools:text="filename.jpeg"/>
+            <android.support.constraint.ConstraintLayout
+                    android:id="@+id/constraintLayout"
+                    android:layout_width="wrap_content"
+                    android:layout_height="0dp"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintTop_toTopOf="parent"
+                    app:layout_constraintStart_toEndOf="@+id/file_downloading_progress"
+                    app:layout_constraintHorizontal_bias="0.5"
+                    app:layout_constrainedWidth="true"
+                    android:layout_marginLeft="@dimen/psd_offset_small"
+                    android:layout_marginStart="@dimen/psd_offset_small">
 
-            <android.support.v7.widget.AppCompatTextView
-                android:id="@+id/file_size"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="@string/psd_downloading"
-                app:layout_constraintBottom_toBottomOf="parent"
-                app:layout_constraintStart_toStartOf="@+id/file_name"
-                app:layout_constraintTop_toBottomOf="@+id/file_name"
-                android:textAppearance="?attr/textAppearanceListItemSecondary"/>
+                <android.support.v7.widget.AppCompatTextView
+                        android:id="@+id/file_name"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:textAppearance="?attr/textAppearanceListItem"
+                        tools:text="filename.jpeg"
+                        app:layout_constraintTop_toTopOf="parent"
+                        android:ellipsize="end"
+                        app:layout_constraintBottom_toTopOf="@+id/file_size"
+                        app:layout_constraintVertical_chainStyle="packed"
+                        app:layout_constraintStart_toStartOf="parent"/>
+
+                <android.support.v7.widget.AppCompatTextView
+                        android:id="@+id/file_size"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/psd_downloading"
+                        android:ellipsize="end"
+                        app:layout_constraintBottom_toBottomOf="parent"
+                        app:layout_constraintTop_toBottomOf="@+id/file_name"
+                        android:textAppearance="?attr/textAppearanceListItemSecondary"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintHorizontal_bias="0.5"/>
+            </android.support.constraint.ConstraintLayout>
+
         </android.support.constraint.ConstraintLayout>
 
         <android.support.v7.widget.AppCompatTextView
@@ -69,7 +88,8 @@
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent"
-            tools:text="@tools:sample/lorem"/>
+            tools:text="@tools:sample/lorem"
+            tools:visibility="gone"/>
     </android.support.constraint.ConstraintLayout>
 
 </LinearLayout>

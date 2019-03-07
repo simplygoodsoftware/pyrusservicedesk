@@ -1,6 +1,7 @@
 package net.papirus.pyrusservicedesk.ui.usecases.tickets
 
 import android.view.View.GONE
+import android.view.View.VISIBLE
 import android.view.ViewGroup
 import android.widget.TextView
 import com.example.pyrusservicedesk.R
@@ -38,7 +39,11 @@ internal class TicketsAdapter: AdapterBase<TicketShortDescription>() {
             ticketName.text = getItem().subject
             lastComment.text = getItem().lastComment?.body
             date.text = "1 w ago"
-            unreadCounter.visibility = GONE
+            unreadCounter.apply {
+                visibility = if (!getItem().isRead) VISIBLE else GONE
+                if (!getItem().isRead)
+                    text = "1"
+            }
         }
     }
 }

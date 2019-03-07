@@ -10,6 +10,8 @@ import kotlinx.android.synthetic.main.psd_no_connection.*
 import net.papirus.pyrusservicedesk.ui.viewmodel.ConnectionViewModelBase
 import net.papirus.pyrusservicedesk.utils.getColor
 
+private const val ANIMATION_DURATION = 200L
+
 internal abstract class ConnectionActivityBase<T: ConnectionViewModelBase>(viewModelClass: Class<T>)
     : ActivityBase() {
 
@@ -19,7 +21,7 @@ internal abstract class ConnectionActivityBase<T: ConnectionViewModelBase>(viewM
         super.onCreate(savedInstanceState)
         progress_bar?.progressDrawable?.setColorFilter(
                 getColor(this, R.attr.colorAccentSecondary),
-                PorterDuff.Mode.SRC)
+                PorterDuff.Mode.SRC_IN)
         reconnect.setOnClickListener { reconnect() }
     }
 
@@ -35,6 +37,25 @@ internal abstract class ConnectionActivityBase<T: ConnectionViewModelBase>(viewM
                     }
 
                 }
+        )
+
+        viewModel.getLoadingProgressLiveData().observe(
+            this,
+            Observer { progress ->
+                progress?.let {
+                    when {
+                        it >= resources.getInteger(R.integer.psd_progress_max_value) -> {
+                            progress_bar
+                                .animate()
+                                .alpha(0f)
+                                .setDuration(ANIMATION_DURATION)
+                                .start()
+                        }
+                        else -> progress_bar.alpha = 1f
+                    }
+                    progress_bar.progress = it
+                }
+            }
         )
     }
 

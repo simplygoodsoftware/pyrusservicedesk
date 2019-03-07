@@ -51,7 +51,7 @@ internal class TicketActivity : ConnectionActivityBase<TicketViewModel>(TicketVi
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        supportActionBar?.apply { title = "Pyrus Support" }
+        supportActionBar?.apply { title = getString(R.string.psd_organization_support, viewModel.organizationName) }
         ticket_toolbar.setNavigationIcon(R.drawable.psd_menu)
         ticket_toolbar.setNavigationOnClickListener { finish() }
         ticket_toolbar.setOnMenuItemClickListener{ onMenuItemClicked(it) }
@@ -100,12 +100,22 @@ internal class TicketActivity : ConnectionActivityBase<TicketViewModel>(TicketVi
         super.observeData()
         viewModel.getCommentsViewModel().observe(
                 this,
-                Observer {comments -> comments?.let { adapter.setItems(it) } }
+                Observer {commentsList ->
+                    commentsList?.let {
+                        adapter.setItems(it)
+                        comments.scrollToPosition(adapter.itemCount - 1)
+                    }
+                }
         )
         sharedViewModel.getQuitServiceDeskLiveData().observe(
                 this,
                 Observer { quit -> quit?.let { if(it) finish() } }
         )
+    }
+
+    override fun onViewHeightChanged(changedBy: Int) {
+        super.onViewHeightChanged(changedBy)
+        comments.scrollBy(0, changedBy)
     }
 
     private fun sendComment() {
