@@ -3,6 +3,7 @@ package net.papirus.pyrusservicedesk.ui.usecases.ticket
 import android.arch.lifecycle.Observer
 import android.content.Intent
 import android.os.Bundle
+import android.support.v7.widget.LinearLayoutManager
 import android.view.Menu
 import android.view.MenuInflater
 import android.view.MenuItem
@@ -56,6 +57,7 @@ internal class TicketActivity : ConnectionActivityBase<TicketViewModel>(TicketVi
         ticket_toolbar.setNavigationOnClickListener { finish() }
         ticket_toolbar.setOnMenuItemClickListener{ onMenuItemClicked(it) }
         comments.apply {
+            layoutManager = LinearLayoutManager(this@TicketActivity)
             adapter = this@TicketActivity.adapter
             addItemDecoration(
                     SpaceItemDecoration(resources.getInteger(R.integer.psd_comments_item_space)))

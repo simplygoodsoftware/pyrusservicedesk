@@ -8,6 +8,6 @@ public class SampleApp extends Application {
     @Override
     public void onCreate() {
         super.onCreate();
-        PyrusServiceDesk.init(this, "ClientId", "Sample");
+        PyrusServiceDesk.Companion.init(this, "ClientId", "Sample");
     }
 }

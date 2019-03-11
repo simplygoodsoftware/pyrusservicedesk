@@ -2,8 +2,7 @@ package net.papirus.pyrusservicedesk.ui.usecases.tickets
 
 import android.arch.lifecycle.Observer
 import android.os.Bundle
-import android.view.View.GONE
-import android.view.View.VISIBLE
+import android.support.v7.widget.LinearLayoutManager
 import com.example.pyrusservicedesk.R
 import kotlinx.android.synthetic.main.psd_activity_tickets.*
 import net.papirus.pyrusservicedesk.ui.ConnectionActivityBase
@@ -23,6 +22,7 @@ internal class TicketsActivity: ConnectionActivityBase<TicketsViewModel>(Tickets
         supportActionBar?.apply { title = getString(R.string.psd_tickets_activity_title) }
         tickets_toolbar.setNavigationIcon(R.drawable.psd_arrow_back)
         tickets_toolbar.setNavigationOnClickListener { finish() }
+        tickets.layoutManager = LinearLayoutManager(this)
         adapter = TicketsAdapter()
                 .apply {
                     setOnTicketClickListener {

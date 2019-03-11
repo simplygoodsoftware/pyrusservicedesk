@@ -1,10 +1,10 @@
 package net.papirus.servicedesksample;
 
-import android.support.v7.app.AppCompatActivity;
+import android.app.Activity;
 import android.os.Bundle;
 import net.papirus.pyrusservicedesk.ServiceDeskActivity;
 
-public class SampleActivity extends AppCompatActivity {
+public class SampleActivity extends Activity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -12,6 +12,6 @@ public class SampleActivity extends AppCompatActivity {
         setContentView(R.layout.activity_sample);
         findViewById(R.id.support).setOnClickListener(
                 view ->
-                        startActivity(ServiceDeskActivity.createIntent()));
+                        startActivity(ServiceDeskActivity.Companion.createIntent()));
     }
 }

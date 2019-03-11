@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-          package="net.papirus.servicedesksample">
+    xmlns:tools="http://schemas.android.com/tools"
+    package="net.papirus.servicedesksample">
 
     <application
             android:name=".SampleApp"
