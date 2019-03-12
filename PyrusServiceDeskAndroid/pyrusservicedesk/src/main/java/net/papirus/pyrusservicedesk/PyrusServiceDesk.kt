@@ -10,14 +10,15 @@ import net.papirus.pyrusservicedesk.ui.viewmodel.SharedViewModel
 class PyrusServiceDesk private constructor(
         internal val application: Application,
         private val clientId: String,
-        internal val clientName: String){
+        internal val clientName: String,
+        internal val enableRichUi: Boolean){
 
     companion object {
         private var INSTANCE: PyrusServiceDesk? = null
 
         @JvmStatic
-        fun init(application: Application, clientId: String, clientName: String) {
-            INSTANCE = PyrusServiceDesk(application, clientId, clientName)
+        fun init(application: Application, clientId: String, clientName: String, enableRichUi: Boolean) {
+            INSTANCE = PyrusServiceDesk(application, clientId, clientName, enableRichUi)
         }
 
         internal fun getInstance() : PyrusServiceDesk {

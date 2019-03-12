@@ -24,4 +24,6 @@
     <dimen name="psd_comment_creation_time_width_negative">-80dp</dimen>
     <dimen name="psd_comment_error_width">32dp</dimen>
     <dimen name="psd_comment_error_width_negative">-32dp</dimen>
+    <dimen name="psd_avatar_bitmap_size">96px</dimen>
+    <dimen name="psd_avatar_text_size">16sp</dimen>
 </resources>

@@ -44,7 +44,7 @@ internal abstract class ConnectionViewModelBase(private val serviceDesk: PyrusSe
     private val publishProgressRunnable = Runnable {
         val onCompleted = object: Runnable {
             override fun run() {
-                if (recentPublishedProgress < MAX_PROGRESS)
+                if (recentPublishedProgress < MAX_PROGRESS - PROGRESS_INCREMENT_VALUE)
                     publishProgress(
                         recentPublishedProgress + PROGRESS_INCREMENT_VALUE,
                         PROGRESS_ANIMATION_DURATION_MS_DEFAULT,

@@ -4,16 +4,19 @@ import android.arch.lifecycle.LiveData
 import android.arch.lifecycle.MediatorLiveData
 import android.arch.lifecycle.MutableLiveData
 import com.google.gson.Gson
-import net.papirus.pyrusservicedesk.repository.data.Attachment
+import com.google.gson.GsonBuilder
 import net.papirus.pyrusservicedesk.repository.data.Ticket
+import net.papirus.pyrusservicedesk.repository.data.intermediate.Comments
 import net.papirus.pyrusservicedesk.repository.data.intermediate.FileUploadData
 import net.papirus.pyrusservicedesk.repository.data.intermediate.Tickets
 import net.papirus.pyrusservicedesk.repository.web_service.BASE_URL
 import net.papirus.pyrusservicedesk.repository.web_service.WebService
 import net.papirus.pyrusservicedesk.repository.web_service.response.*
 import net.papirus.pyrusservicedesk.repository.web_service.retrofit.request.*
-import net.papirus.pyrusservicedesk.repository.web_service.retrofit.request.body.UploadFileRequestBody
-import okhttp3.*
+import net.papirus.pyrusservicedesk.utils.ISO_DATE_PATTERN
+import okhttp3.Dispatcher
+import okhttp3.OkHttpClient
+import okhttp3.ResponseBody
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
@@ -35,7 +38,9 @@ internal class RetrofitWebService(
 
         val retrofit = Retrofit.Builder()
                 .baseUrl(BASE_URL)
-                .addConverterFactory(GsonConverterFactory.create())
+                .addConverterFactory(
+                    GsonConverterFactory.create(
+                        GsonBuilder().setDateFormat(ISO_DATE_PATTERN).create()))
                 .client(httpBuilder.build())
                 .build()
 
@@ -43,7 +48,27 @@ internal class RetrofitWebService(
     }
 
 
-    override fun getTickets(request: GetTicketsRequest): LiveData<GetTicketsResponse> {
+    override fun getConversation(request: RequestBase): LiveData<GetConversationResponse> {
+        val result = MutableLiveData<GetConversationResponse>()
+        api.getConversation(request.makeRequestBody(appId, userId)).enqueue(object: Callback<Comments>{
+
+            override fun onFailure(call: Call<Comments>, t: Throwable) {
+                result.postValue(GetConversationResponse(Status.WebServiceError, request))
+            }
+
+            override fun onResponse(call: Call<Comments>, response: Response<Comments>) {
+                when (response.isSuccessful) {
+                    true -> result.postValue(
+                        GetConversationResponse(request = request, comments = response.body()?.comments))
+                    else -> result.postValue(
+                        GetConversationResponse(Status.WebServiceError, request))
+                }
+            }
+        })
+        return result
+    }
+
+    override fun getTickets(request: RequestBase): LiveData<GetTicketsResponse> {
         val result = MutableLiveData<GetTicketsResponse>()
         api.getTickets(request.makeRequestBody(appId, userId)).enqueue(object: Callback<Tickets>{
 

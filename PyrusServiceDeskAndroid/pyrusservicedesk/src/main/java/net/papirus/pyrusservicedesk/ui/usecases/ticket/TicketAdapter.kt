@@ -11,11 +11,15 @@ import android.view.ViewGroup
 import android.widget.ImageView
 import android.widget.TextView
 import com.example.pyrusservicedesk.R
+import com.squareup.picasso.Picasso
 import net.papirus.pyrusservicedesk.repository.data.Comment
+import net.papirus.pyrusservicedesk.repository.web_service.getAvatarUrl
 import net.papirus.pyrusservicedesk.ui.view.CommentView
 import net.papirus.pyrusservicedesk.ui.view.ContentType
 import net.papirus.pyrusservicedesk.ui.view.recyclerview.AdapterBase
 import net.papirus.pyrusservicedesk.ui.view.recyclerview.ViewHolderBase
+import net.papirus.pyrusservicedesk.utils.CIRCLE_TRANSFORMATION
+import net.papirus.pyrusservicedesk.utils.getSimpleAvatar
 import net.papirus.pyrusservicedesk.utils.getTimeText
 
 
@@ -42,6 +46,11 @@ internal class TicketAdapter: AdapterBase<Comment>() {
         }
     }
 
+    override fun onViewAttachedToWindow(holder: ViewHolderBase<Comment>) {
+        super.onViewAttachedToWindow(holder)
+        holder.itemView.translationX = 0f
+    }
+
     private inner class InboundCommentHolder(parent: ViewGroup)
         : CommentHolder(parent, R.layout.psd_view_holder_comment_inbound){
 
@@ -58,13 +67,33 @@ internal class TicketAdapter: AdapterBase<Comment>() {
                             R.drawable.psd_counter_background,
                             null))
 
-            // TODO
-            setAuthorVisibility(false)
+            setAuthorNameVisibility(shouldShowAuthorName())
+            setAuthorAvatarVisibility(shouldShowAuthorAvatar())
         }
 
-        private fun setAuthorVisibility(visible: Boolean) {
-            avatar.visibility = if (visible) VISIBLE else INVISIBLE
+        private fun setAuthorNameVisibility(visible: Boolean) {
             authorName.visibility = if (visible) VISIBLE else GONE
+            if (visible)
+                authorName.text = getItem().author.name
+        }
+
+        private fun setAuthorAvatarVisibility(visible: Boolean) {
+            avatar.visibility = if (visible) VISIBLE else INVISIBLE
+            if (visible) {
+                Picasso.get()
+                    .load(getAvatarUrl(getItem().author.avatarId))
+                    .placeholder(getSimpleAvatar(itemView.context, getItem().author))
+                    .transform(CIRCLE_TRANSFORMATION)
+                    .into(avatar)
+            }
+        }
+
+        private fun shouldShowAuthorName(): Boolean {
+            return adapterPosition == 0 || getItem().author != itemsList[adapterPosition - 1].author
+        }
+
+        private fun shouldShowAuthorAvatar(): Boolean {
+            return getItem().author != itemsList.getOrNull(adapterPosition + 1)?.author
         }
     }
 
@@ -91,7 +120,7 @@ internal class TicketAdapter: AdapterBase<Comment>() {
                 ContentType.Text -> comment.setCommentText(getItem().body)
                 ContentType.Attachment -> bindAttachmentView()
             }
-            creationTime.text = getTimeText(itemView.context, (getItem().getCreationDate()))
+            creationTime.text = getTimeText(itemView.context, getItem().creationDate)
         }
 
         private fun bindAttachmentView() {

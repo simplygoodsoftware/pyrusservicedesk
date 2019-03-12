@@ -38,8 +38,24 @@ internal class RepositoryImpl(
         }
     }
 
+
+    override fun getConversation(): LiveData<GetConversationUpdate> {
+        return Transformations.map(webService.getConversation(RequestBase())){ response ->
+            when {
+                response?.responseData == null ->
+                    GetConversationUpdate(error = UpdateError.Unknown)
+
+                response.status == Status.WebServiceError ->
+                    GetConversationUpdate(error = UpdateError.WebService)
+
+                else ->
+                    GetConversationUpdate(response.responseData)
+            }
+        }
+    }
+
     override fun getTickets(): LiveData<GetTicketsUpdate> {
-        return Transformations.map(webService.getTickets(GetTicketsRequest())){ response ->
+        return Transformations.map(webService.getTickets(RequestBase())){ response ->
             when {
                 response?.responseData == null ->
                     GetTicketsUpdate(error = UpdateError.Unknown)

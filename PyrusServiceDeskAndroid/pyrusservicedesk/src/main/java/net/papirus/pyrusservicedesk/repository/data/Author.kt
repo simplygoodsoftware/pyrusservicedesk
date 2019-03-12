@@ -10,8 +10,11 @@ internal data class Author(
     @SerializedName("avatar_color")
     val avatarColorString: String){
 
-
-    companion object {
-        fun local(userName: String) = Author(userName, 0, "")
+    fun getInitials(): String {
+        return with(StringBuilder()){
+            for (part in name.split(" "))
+                append(part[0]);
+            toString()
+        }
     }
 }

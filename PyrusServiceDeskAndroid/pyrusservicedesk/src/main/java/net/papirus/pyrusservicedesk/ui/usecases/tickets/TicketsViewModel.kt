@@ -68,8 +68,8 @@ internal class TicketsViewModel(serviceDesk: PyrusServiceDesk)
                     else -> 1
                 }
                 o2.lastComment == null -> -1
-                o1.lastComment.getCreationDate().before(o2.lastComment.getCreationDate()) -> 1
-                o1.lastComment.getCreationDate().after(o2.lastComment.getCreationDate()) -> -1
+                o1.lastComment.creationDate.before(o2.lastComment.creationDate) -> 1
+                o1.lastComment.creationDate.after(o2.lastComment.creationDate) -> -1
                 else -> o1.ticketId - o2.ticketId
             }
         }

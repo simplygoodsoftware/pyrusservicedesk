@@ -18,5 +18,5 @@ internal abstract class ViewHolderBase<T>(
         this.item = item
     }
 
-    protected fun getItem() = item!!
+    fun getItem() = item!!
 }

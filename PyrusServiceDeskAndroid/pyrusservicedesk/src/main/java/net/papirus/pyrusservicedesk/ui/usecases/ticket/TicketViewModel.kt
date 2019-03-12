@@ -7,8 +7,13 @@ import android.arch.lifecycle.Transformations
 import android.content.Intent
 import android.net.Uri
 import net.papirus.pyrusservicedesk.PyrusServiceDesk
-import net.papirus.pyrusservicedesk.repository.data.*
-import net.papirus.pyrusservicedesk.repository.updates.*
+import net.papirus.pyrusservicedesk.repository.data.Comment
+import net.papirus.pyrusservicedesk.repository.data.EMPTY_TICKET_ID
+import net.papirus.pyrusservicedesk.repository.data.TicketDescription
+import net.papirus.pyrusservicedesk.repository.updates.CommentAddedUpdate
+import net.papirus.pyrusservicedesk.repository.updates.TicketCreatedUpdate
+import net.papirus.pyrusservicedesk.repository.updates.UpdateBase
+import net.papirus.pyrusservicedesk.repository.updates.UpdateType
 import net.papirus.pyrusservicedesk.ui.viewmodel.ConnectionViewModelBase
 
 internal class TicketViewModel(
@@ -23,13 +28,25 @@ internal class TicketViewModel(
 
     init {
         comments.apply{
-            addSource(
+            if (serviceDesk.enableRichUi) {
+                addSource(
                     Transformations.switchMap(commentsRequest){
                         repository.getTicket(ticketId)
                     }
-            ){
-                comments.value = it?.ticket?.comments
-                onDataLoaded()
+                ){
+                    comments.value = it?.ticket?.comments
+                    onDataLoaded()
+                }
+            }
+            else {
+                addSource(
+                    Transformations.switchMap(commentsRequest){
+                        repository.getConversation()
+                    }
+                ){
+                    comments.value = it?.comments
+                    onDataLoaded()
+                }
             }
         }
 

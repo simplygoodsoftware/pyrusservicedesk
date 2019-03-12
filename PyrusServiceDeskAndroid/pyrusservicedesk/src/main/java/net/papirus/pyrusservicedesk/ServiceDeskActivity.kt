@@ -1,6 +1,7 @@
 package net.papirus.pyrusservicedesk
 
 import android.content.Intent
+import net.papirus.pyrusservicedesk.ui.usecases.ticket.TicketActivity
 import net.papirus.pyrusservicedesk.ui.usecases.tickets.TicketsActivity
 
 class ServiceDeskActivity {
@@ -9,7 +10,10 @@ class ServiceDeskActivity {
         fun createIntent(): Intent {
             return Intent(
                     PyrusServiceDesk.getInstance().application,
-                    TicketsActivity::class.java)
+                    if (PyrusServiceDesk.getInstance().enableRichUi)
+                        TicketsActivity::class.java
+                    else
+                        TicketActivity::class.java)
         }
     }
 }
