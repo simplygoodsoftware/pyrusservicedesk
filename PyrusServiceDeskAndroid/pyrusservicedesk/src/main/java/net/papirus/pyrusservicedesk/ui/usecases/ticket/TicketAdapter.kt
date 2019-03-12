@@ -105,39 +105,37 @@ internal class TicketAdapter: AdapterBase<Comment>() {
 
     private inner class TouchCallback : ItemTouchHelper.Callback() {
 
-        override fun getMovementFlags(recyclerView: RecyclerView?,
-                                      viewHolder: RecyclerView.ViewHolder?): Int {
+        override fun getMovementFlags(recyclerView: RecyclerView,
+                                      viewHolder: RecyclerView.ViewHolder): Int {
 
             return makeFlag(ACTION_STATE_SWIPE,  ItemTouchHelper.LEFT)
         }
 
-        override fun onMove(recyclerView: RecyclerView?,
-                            viewHolder: RecyclerView.ViewHolder?,
-                            target: RecyclerView.ViewHolder?): Boolean {
+        override fun onMove(recyclerView: RecyclerView,
+                            viewHolder: RecyclerView.ViewHolder,
+                            target: RecyclerView.ViewHolder): Boolean {
             return false
         }
 
-        override fun onSwiped(viewHolder: RecyclerView.ViewHolder?, direction: Int) {
+        override fun onSwiped(viewHolder: RecyclerView.ViewHolder, direction: Int) {
         }
 
         override fun getSwipeEscapeVelocity(defaultValue: Float): Float {
             return Float.MAX_VALUE
         }
 
-        override fun getSwipeThreshold(viewHolder: RecyclerView.ViewHolder?): Float {
+        override fun getSwipeThreshold(viewHolder: RecyclerView.ViewHolder): Float {
             return Float.MAX_VALUE
         }
 
-        override fun onChildDraw(c: Canvas?,
-                                 recyclerView: RecyclerView?,
-                                 viewHolder: RecyclerView.ViewHolder?,
+        override fun onChildDraw(c: Canvas,
+                                 recyclerView: RecyclerView,
+                                 viewHolder: RecyclerView.ViewHolder,
                                  dX: Float,
                                  dY: Float,
                                  actionState: Int,
                                  isCurrentlyActive: Boolean) {
 
-            if (recyclerView == null || viewHolder == null)
-                return
             var x = dX
             if (x < -(viewHolder as CommentHolder).creationTime.width)
                 x = -viewHolder.creationTime.width.toFloat()

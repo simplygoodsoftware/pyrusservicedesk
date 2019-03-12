@@ -15,6 +15,7 @@ class PyrusServiceDesk private constructor(
     companion object {
         private var INSTANCE: PyrusServiceDesk? = null
 
+        @JvmStatic
         fun init(application: Application, clientId: String, clientName: String) {
             INSTANCE = PyrusServiceDesk(application, clientId, clientName)
         }

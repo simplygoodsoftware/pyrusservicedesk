@@ -28,6 +28,7 @@
             android:id="@+id/comments"
             android:layout_width="0dp"
             android:layout_height="0dp"
+            app:layoutManager="android.support.v7.widget.LinearLayoutManager"
             app:layout_constraintBottom_toTopOf="@+id/input_layout"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"

@@ -12,6 +12,6 @@ public class SampleActivity extends Activity {
         setContentView(R.layout.activity_sample);
         findViewById(R.id.support).setOnClickListener(
                 view ->
-                        startActivity(ServiceDeskActivity.Companion.createIntent()));
+                        startActivity(ServiceDeskActivity.createIntent()));
     }
 }

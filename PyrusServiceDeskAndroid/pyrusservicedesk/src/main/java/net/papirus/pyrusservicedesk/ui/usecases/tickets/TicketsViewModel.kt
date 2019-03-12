@@ -5,7 +5,6 @@ import android.arch.lifecycle.MediatorLiveData
 import android.arch.lifecycle.MutableLiveData
 import android.arch.lifecycle.Transformations
 import net.papirus.pyrusservicedesk.PyrusServiceDesk
-import net.papirus.pyrusservicedesk.repository.data.Ticket
 import net.papirus.pyrusservicedesk.repository.data.TicketShortDescription
 import net.papirus.pyrusservicedesk.repository.updates.UpdateBase
 import net.papirus.pyrusservicedesk.repository.updates.UpdateType
@@ -66,7 +65,7 @@ internal class TicketsViewModel(serviceDesk: PyrusServiceDesk)
             return when {
                 o1.lastComment == null -> return when {
                     o2.lastComment == null -> o1.ticketId - o2.ticketId
-                    else -> -1
+                    else -> 1
                 }
                 o2.lastComment == null -> -1
                 o1.lastComment.getCreationDate().before(o2.lastComment.getCreationDate()) -> 1

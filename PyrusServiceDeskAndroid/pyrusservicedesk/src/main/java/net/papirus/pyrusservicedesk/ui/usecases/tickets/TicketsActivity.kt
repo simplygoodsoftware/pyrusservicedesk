@@ -22,7 +22,6 @@ internal class TicketsActivity: ConnectionActivityBase<TicketsViewModel>(Tickets
         supportActionBar?.apply { title = getString(R.string.psd_tickets_activity_title) }
         tickets_toolbar.setNavigationIcon(R.drawable.psd_arrow_back)
         tickets_toolbar.setNavigationOnClickListener { finish() }
-        tickets.layoutManager = LinearLayoutManager(this)
         adapter = TicketsAdapter()
                 .apply {
                     setOnTicketClickListener {
