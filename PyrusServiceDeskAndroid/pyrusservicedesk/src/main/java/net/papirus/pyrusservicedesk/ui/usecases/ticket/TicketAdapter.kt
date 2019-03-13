@@ -12,10 +12,13 @@ import android.widget.ImageView
 import android.widget.TextView
 import com.example.pyrusservicedesk.R
 import com.squareup.picasso.Picasso
-import net.papirus.pyrusservicedesk.repository.data.Comment
-import net.papirus.pyrusservicedesk.repository.web_service.getAvatarUrl
+import net.papirus.pyrusservicedesk.sdk.web_service.getAvatarUrl
+import net.papirus.pyrusservicedesk.ui.usecases.ticket.entries.CommentEntry
+import net.papirus.pyrusservicedesk.ui.usecases.ticket.entries.DateEntry
+import net.papirus.pyrusservicedesk.ui.usecases.ticket.entries.TicketEntry
 import net.papirus.pyrusservicedesk.ui.view.CommentView
 import net.papirus.pyrusservicedesk.ui.view.ContentType
+import net.papirus.pyrusservicedesk.ui.view.Status
 import net.papirus.pyrusservicedesk.ui.view.recyclerview.AdapterBase
 import net.papirus.pyrusservicedesk.ui.view.recyclerview.ViewHolderBase
 import net.papirus.pyrusservicedesk.utils.CIRCLE_TRANSFORMATION
@@ -25,30 +28,47 @@ import net.papirus.pyrusservicedesk.utils.getTimeText
 
 private const val VIEW_TYPE_COMMENT_INBOUND = 0
 private const val VIEW_TYPE_COMMENT_OUTBOUND = 1
+private const val VIEW_TYPE_DATE = 2
 
-internal class TicketAdapter: AdapterBase<Comment>() {
+internal class TicketAdapter: AdapterBase<TicketEntry>() {
 
     override val itemTouchHelper: ItemTouchHelper? = ItemTouchHelper(TouchCallback())
 
     override fun getItemViewType(position: Int): Int {
         return with(itemsList[position]) {
             return@with when {
-                isInbound -> VIEW_TYPE_COMMENT_OUTBOUND
+                this is DateEntry -> VIEW_TYPE_DATE
+                (this is CommentEntry) && comment.isInbound -> VIEW_TYPE_COMMENT_OUTBOUND
                 else -> VIEW_TYPE_COMMENT_INBOUND
             }
         }
     }
 
-    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolderBase<Comment> {
+    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolderBase<TicketEntry> {
         return when(viewType){
             VIEW_TYPE_COMMENT_INBOUND -> InboundCommentHolder(parent)
-            else -> OutboundCommentHolder(parent)
-        }
+            VIEW_TYPE_COMMENT_OUTBOUND -> OutboundCommentHolder(parent)
+            else -> DateViewHolder(parent)
+        } as ViewHolderBase<TicketEntry>
     }
 
-    override fun onViewAttachedToWindow(holder: ViewHolderBase<Comment>) {
+    override fun onViewAttachedToWindow(holder: ViewHolderBase<TicketEntry>) {
         super.onViewAttachedToWindow(holder)
         holder.itemView.translationX = 0f
+    }
+
+    fun updateComment(comment: CommentEntry) {
+        val index =
+            itemsList.findLast {
+                (it is CommentEntry) && it.comment.localId == comment.comment.localId
+            }?.let{
+                itemsList.indexOf(it)
+            }?: -1
+        if (index != -1) {
+            itemsList[index] = comment
+            notifyItemChanged(index)
+        }
+        else appendItem(comment)
     }
 
     private inner class InboundCommentHolder(parent: ViewGroup)
@@ -59,7 +79,7 @@ internal class TicketAdapter: AdapterBase<Comment>() {
         private val avatar = itemView.findViewById<ImageView>(R.id.avatar)
         private val authorName = itemView.findViewById<TextView>(R.id.author_name)
 
-        override fun bindItem(item: Comment) {
+        override fun bindItem(item: CommentEntry) {
             super.bindItem(item)
             avatar.setImageDrawable(
                     ResourcesCompat.getDrawable(
@@ -74,30 +94,41 @@ internal class TicketAdapter: AdapterBase<Comment>() {
         private fun setAuthorNameVisibility(visible: Boolean) {
             authorName.visibility = if (visible) VISIBLE else GONE
             if (visible)
-                authorName.text = getItem().author.name
+                authorName.text = getItem().comment.author.name
         }
 
         private fun setAuthorAvatarVisibility(visible: Boolean) {
             avatar.visibility = if (visible) VISIBLE else INVISIBLE
             if (visible) {
                 Picasso.get()
-                    .load(getAvatarUrl(getItem().author.avatarId))
-                    .placeholder(getSimpleAvatar(itemView.context, getItem().author))
+                    .load(getAvatarUrl(getItem().comment.author.avatarId))
+                    .placeholder(getSimpleAvatar(itemView.context, getItem().comment.author))
                     .transform(CIRCLE_TRANSFORMATION)
                     .into(avatar)
             }
         }
 
         private fun shouldShowAuthorName(): Boolean {
-            return adapterPosition == 0 || getItem().author != itemsList[adapterPosition - 1].author
+            return adapterPosition == 0
+                    || with(itemsList[adapterPosition - 1]){
+                        return when {
+                            this !is CommentEntry -> true
+                            else -> getItem().comment.author != this.comment.author
+                        }
+                    }
         }
 
         private fun shouldShowAuthorAvatar(): Boolean {
-            return getItem().author != itemsList.getOrNull(adapterPosition + 1)?.author
+            return with (itemsList.getOrNull(adapterPosition + 1)){
+                when(this) {
+                    !is CommentEntry -> true
+                    else -> getItem().comment.author != this.comment.author
+                }
+            }
         }
     }
 
-    private inner class OutboundCommentHolder(parent: ViewGroup)
+    private class OutboundCommentHolder(parent: ViewGroup)
         : CommentHolder(parent, R.layout.psd_view_holder_comment_outbound){
 
         override val comment: CommentView = itemView.findViewById(R.id.comment)
@@ -107,28 +138,44 @@ internal class TicketAdapter: AdapterBase<Comment>() {
     private abstract class CommentHolder(
             parent: ViewGroup,
             @LayoutRes layoutRes: Int)
-        : ViewHolderBase<Comment>(parent, layoutRes){
+        : ViewHolderBase<CommentEntry>(parent, layoutRes){
 
         abstract val comment: CommentView
         abstract val creationTime: TextView
 
-        override fun bindItem(item: Comment) {
+        override fun bindItem(item: CommentEntry) {
             super.bindItem(item)
+            comment.status = when {
+                getItem().hasError() -> Status.Error
+                getItem().comment.isLocal() -> Status.Processing
+                else -> Status.Completed
+            }
             comment.contentType =
-                    if (item.hasAttachments()) ContentType.Attachment else ContentType.Text
+                    if (item.comment.hasAttachments()) ContentType.Attachment else ContentType.Text
             when (comment.contentType){
-                ContentType.Text -> comment.setCommentText(getItem().body)
+                ContentType.Text -> comment.setCommentText(getItem().comment.body)
                 ContentType.Attachment -> bindAttachmentView()
             }
-            creationTime.text = getTimeText(itemView.context, getItem().creationDate)
+            creationTime.text = getTimeText(itemView.context, getItem().comment.creationDate)
         }
 
         private fun bindAttachmentView() {
-            comment.setFileName(getItem().attachments?.first()?.name ?: "")
-            comment.setFileSize(getItem().attachments?.first()?.bytesSize?.toFloat() ?: 0f)
+            comment.setFileName(getItem().comment.attachments?.first()?.name ?: "")
+            comment.setFileSize(getItem().comment.attachments?.first()?.bytesSize?.toFloat() ?: 0f)
             comment.setOnDownloadIconClickListener {
 
             }
+        }
+    }
+
+    private class DateViewHolder(parent: ViewGroup)
+        : ViewHolderBase<DateEntry>(parent, R.layout.psd_view_holder_date) {
+
+        val date = itemView.findViewById<TextView>(R.id.date)
+
+        override fun bindItem(item: DateEntry) {
+            super.bindItem(item)
+            date.text = item.date
         }
     }
 
@@ -165,11 +212,15 @@ internal class TicketAdapter: AdapterBase<Comment>() {
                                  actionState: Int,
                                  isCurrentlyActive: Boolean) {
 
+            if (viewHolder !is CommentHolder)
+                return
             var x = dX
-            if (x < -(viewHolder as CommentHolder).creationTime.width)
+            if (x < -viewHolder.creationTime.width)
                 x = -viewHolder.creationTime.width.toFloat()
             for (position in 0..(recyclerView.childCount - 1)) {
                 recyclerView.findContainingViewHolder(recyclerView.getChildAt(position))?.let {
+                    if (it !is CommentHolder)
+                        return@let
                     super.onChildDraw(
                             c,
                             recyclerView,

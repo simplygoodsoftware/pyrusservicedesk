@@ -2,9 +2,10 @@ package net.papirus.pyrusservicedesk
 
 import android.app.Application
 import android.arch.lifecycle.Observer
-import net.papirus.pyrusservicedesk.repository.Repository
-import net.papirus.pyrusservicedesk.repository.RepositoryFactory
-import net.papirus.pyrusservicedesk.repository.web_service.WebServiceFactory
+import net.papirus.pyrusservicedesk.sdk.Repository
+import net.papirus.pyrusservicedesk.sdk.RepositoryFactory
+import net.papirus.pyrusservicedesk.sdk.data.LocalDataProvider
+import net.papirus.pyrusservicedesk.sdk.web_service.WebServiceFactory
 import net.papirus.pyrusservicedesk.ui.viewmodel.SharedViewModel
 
 class PyrusServiceDesk private constructor(
@@ -32,7 +33,8 @@ class PyrusServiceDesk private constructor(
                 WebServiceFactory.create(
                         "b7206b43-6859-4a20-837d-637a68e92d94",
                         12345.toString()),
-                application.contentResolver
+                application.contentResolver,
+                LocalDataProvider(clientName, 0)
         )
     }
 

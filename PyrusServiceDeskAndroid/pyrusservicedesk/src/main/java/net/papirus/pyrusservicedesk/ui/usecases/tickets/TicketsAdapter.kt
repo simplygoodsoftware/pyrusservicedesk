@@ -5,10 +5,11 @@ import android.view.View.VISIBLE
 import android.view.ViewGroup
 import android.widget.TextView
 import com.example.pyrusservicedesk.R
-import net.papirus.pyrusservicedesk.repository.data.Ticket
-import net.papirus.pyrusservicedesk.repository.data.TicketShortDescription
+import net.papirus.pyrusservicedesk.sdk.data.TicketShortDescription
 import net.papirus.pyrusservicedesk.ui.view.recyclerview.AdapterBase
 import net.papirus.pyrusservicedesk.ui.view.recyclerview.ViewHolderBase
+import net.papirus.pyrusservicedesk.utils.getWhen
+import java.util.*
 
 internal class TicketsAdapter: AdapterBase<TicketShortDescription>() {
 
@@ -38,7 +39,7 @@ internal class TicketsAdapter: AdapterBase<TicketShortDescription>() {
             super.bindItem(item)
             ticketName.text = getItem().subject
             lastComment.text = getItem().lastComment?.body
-            date.text = "1 w ago"
+            date.text = getItem().lastComment?.creationDate?.getWhen(itemView.context, Calendar.getInstance())
             unreadCounter.apply {
                 visibility = if (!getItem().isRead) VISIBLE else GONE
                 if (!getItem().isRead)

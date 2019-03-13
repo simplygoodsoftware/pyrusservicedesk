@@ -10,4 +10,8 @@
     <string name="psd_file_size">%f Мб</string>
     <string name="psd_time_format">HH:mm</string>
     <string name="psd_organization_support" formatted="false">Поддержка %s</string>
+    <string name="psd_today">Сегодня</string>
+    <string name="psd_yesterday">Вчера</string>
+    <string name="psd_date_format_d_m_y">d MMMM yyyy</string>
+    <string name="psd_date_format_d_m">d MMMM</string>
 </resources>

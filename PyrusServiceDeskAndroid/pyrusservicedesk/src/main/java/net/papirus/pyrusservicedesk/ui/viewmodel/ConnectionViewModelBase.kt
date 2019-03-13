@@ -2,9 +2,9 @@ package net.papirus.pyrusservicedesk.ui.viewmodel
 
 import android.animation.Animator
 import android.animation.ValueAnimator
+import android.arch.lifecycle.AndroidViewModel
 import android.arch.lifecycle.LiveData
 import android.arch.lifecycle.MutableLiveData
-import android.arch.lifecycle.ViewModel
 import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
@@ -15,7 +15,7 @@ import android.view.animation.AccelerateInterpolator
 import com.example.pyrusservicedesk.R
 import net.papirus.pyrusservicedesk.PyrusServiceDesk
 import net.papirus.pyrusservicedesk.broadcasts.ReceiverBase
-import net.papirus.pyrusservicedesk.repository.updates.UpdateSubscriber
+import net.papirus.pyrusservicedesk.sdk.updates.UpdateSubscriber
 
 private const val PROGRESS_START_VALUE = 40
 private const val PROGRESS_INCREMENT_VALUE = 20
@@ -23,7 +23,7 @@ private const val PROGRESS_ANIMATION_DURATION_MS_DEFAULT = 1000L
 private const val PROGRESS_ANIMATION_DURATION_MS_QUICK = 400L
 
 internal abstract class ConnectionViewModelBase(private val serviceDesk: PyrusServiceDesk)
-    : ViewModel(),
+    : AndroidViewModel(serviceDesk.application),
         UpdateSubscriber {
 
     val organizationName = serviceDesk.clientName

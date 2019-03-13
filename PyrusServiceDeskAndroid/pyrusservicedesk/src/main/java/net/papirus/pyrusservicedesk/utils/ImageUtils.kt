@@ -7,7 +7,7 @@ import android.graphics.drawable.Drawable
 import android.media.ThumbnailUtils
 import com.example.pyrusservicedesk.R
 import com.squareup.picasso.Transformation
-import net.papirus.pyrusservicedesk.repository.data.Author
+import net.papirus.pyrusservicedesk.sdk.data.Author
 
 internal val CIRCLE_TRANSFORMATION = object : Transformation {
     override fun key(): String = "Circle"

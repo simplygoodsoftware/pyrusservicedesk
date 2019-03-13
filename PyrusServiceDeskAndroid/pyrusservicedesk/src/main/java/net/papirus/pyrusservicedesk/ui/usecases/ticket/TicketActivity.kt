@@ -10,7 +10,7 @@ import android.view.MenuItem.SHOW_AS_ACTION_ALWAYS
 import com.example.pyrusservicedesk.R
 import kotlinx.android.synthetic.main.psd_activity_ticket.*
 import net.papirus.pyrusservicedesk.PyrusServiceDesk
-import net.papirus.pyrusservicedesk.repository.data.EMPTY_TICKET_ID
+import net.papirus.pyrusservicedesk.sdk.data.EMPTY_TICKET_ID
 import net.papirus.pyrusservicedesk.ui.ActivityBase
 import net.papirus.pyrusservicedesk.ui.ConnectionActivityBase
 import net.papirus.pyrusservicedesk.ui.view.recyclerview.item_decorators.SpaceItemDecoration
@@ -74,11 +74,6 @@ internal class TicketActivity : ConnectionActivityBase<TicketViewModel>(TicketVi
         } ?: false
     }
 
-    override fun onPostCreate(savedInstanceState: Bundle?) {
-        super.onPostCreate(savedInstanceState)
-        observeData()
-    }
-
     override fun onCreateOptionsMenu(menu: Menu?): Boolean {
         return menu?.let{
             MenuInflater(this).inflate(R.menu.activity_ticket, menu)
@@ -98,7 +93,7 @@ internal class TicketActivity : ConnectionActivityBase<TicketViewModel>(TicketVi
 
     override fun observeData() {
         super.observeData()
-        viewModel.getCommentsViewModel().observe(
+        viewModel.getTicketEntriesLiveData().observe(
                 this,
                 Observer {commentsList ->
                     commentsList?.let {
@@ -106,6 +101,17 @@ internal class TicketActivity : ConnectionActivityBase<TicketViewModel>(TicketVi
                         comments.scrollToPosition(adapter.itemCount - 1)
                     }
                 }
+        )
+        viewModel.getCommentChangesLiveData().observe(
+            this,
+            Observer { update ->
+                update?.let {
+                    if (it.type == ChangeType.Added)
+                        adapter.appendItem(it.data)
+                    else
+                        adapter.updateComment(it.data)
+                }
+            }
         )
         sharedViewModel.getQuitServiceDeskLiveData().observe(
                 this,

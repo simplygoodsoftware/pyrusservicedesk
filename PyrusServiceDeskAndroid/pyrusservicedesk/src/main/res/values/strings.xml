@@ -10,4 +10,8 @@
     <string name="psd_time_format">hh:mm aa</string>
     <string name="psd_tickets_activity_title">All Conversations</string>
     <string name="psd_organization_support" formatted="false">%s Support</string>
+    <string name="psd_today">Today</string>
+    <string name="psd_yesterday">Yesterday</string>
+    <string name="psd_date_format_d_m_y">MMMM d, yyyy</string>
+    <string name="psd_date_format_d_m">MMMM d</string>
 </resources>

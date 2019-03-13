@@ -2,7 +2,6 @@ package net.papirus.pyrusservicedesk.ui.usecases.tickets
 
 import android.arch.lifecycle.Observer
 import android.os.Bundle
-import android.support.v7.widget.LinearLayoutManager
 import com.example.pyrusservicedesk.R
 import kotlinx.android.synthetic.main.psd_activity_tickets.*
 import net.papirus.pyrusservicedesk.ui.ConnectionActivityBase
@@ -34,11 +33,6 @@ internal class TicketsActivity: ConnectionActivityBase<TicketsViewModel>(Tickets
         tickets.addItemDecoration(
                 SpaceItemDecoration(resources.getInteger(R.integer.psd_tickets_item_space)))
         new_conversation.setOnClickListener { UseCaseNavigator.toNewTicket(this) }
-    }
-
-    override fun onPostCreate(savedInstanceState: Bundle?) {
-        super.onPostCreate(savedInstanceState)
-        observeData()
     }
 
     override fun observeData() {

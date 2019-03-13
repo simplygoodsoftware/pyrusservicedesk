@@ -5,9 +5,9 @@ import android.arch.lifecycle.MediatorLiveData
 import android.arch.lifecycle.MutableLiveData
 import android.arch.lifecycle.Transformations
 import net.papirus.pyrusservicedesk.PyrusServiceDesk
-import net.papirus.pyrusservicedesk.repository.data.TicketShortDescription
-import net.papirus.pyrusservicedesk.repository.updates.UpdateBase
-import net.papirus.pyrusservicedesk.repository.updates.UpdateType
+import net.papirus.pyrusservicedesk.sdk.data.TicketShortDescription
+import net.papirus.pyrusservicedesk.sdk.updates.UpdateBase
+import net.papirus.pyrusservicedesk.sdk.updates.UpdateType
 import net.papirus.pyrusservicedesk.ui.viewmodel.ConnectionViewModelBase
 
 internal class TicketsViewModel(serviceDesk: PyrusServiceDesk)

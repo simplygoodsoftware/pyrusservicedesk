@@ -66,9 +66,18 @@ internal class CommentView @JvmOverloads constructor(
             field = value
         }
 
-    var isErrorVisible: Boolean = false
+    var status = Status.Completed
         set(value) {
-            errorView.visibility = if (value) View.VISIBLE else View.INVISIBLE
+            var visibility = View.VISIBLE
+            var iconResId: Int? = null
+            when (value) {
+                Status.Error -> iconResId = R.drawable.psd_error
+                Status.Processing -> iconResId = R.drawable.psd_clock
+                Status.Completed -> visibility = INVISIBLE
+            }
+            statusView.visibility = visibility
+            iconResId?.let { statusView.setImageResource(it) }
+
             field = value
         }
 
@@ -78,7 +87,7 @@ internal class CommentView @JvmOverloads constructor(
     private val primaryColor: Int
     private val fileDownloadDrawable: LayerDrawable
     private val type: Int
-    private val errorView:AppCompatImageView
+    private val statusView:AppCompatImageView
 
     init {
         View.inflate(context, R.layout.psd_comment, this)
@@ -134,29 +143,28 @@ internal class CommentView @JvmOverloads constructor(
                     .setColorFilter(primaryColor, PorterDuff.Mode.SRC_IN)
         }
         file_downloading_progress.setOnClickListener { onDownloadIconClickListener?.invoke() }
-        errorView = AppCompatImageView(context).apply {
-            setImageResource(R.drawable.psd_error)
+        statusView = AppCompatImageView(context).apply {
             layoutParams = LinearLayout.LayoutParams(
                     resources.getDimension(R.dimen.psd_comment_error_width).toInt(),
                     LayoutParams.WRAP_CONTENT)
                     .apply { gravity = Gravity.CENTER_VERTICAL }
         }
-        isErrorVisible = false
+        status = Status.Completed
     }
 
     override fun onAttachedToWindow() {
         super.onAttachedToWindow()
-        root.removeView(errorView)
+        root.removeView(statusView)
         (layoutParams as MarginLayoutParams).apply {
             val margin = resources.getDimension(R.dimen.psd_comment_error_width_negative).toInt()
             when (type) {
                 TYPE_INBOUND -> {
                     rightMargin = margin
-                    root.addView(errorView)
+                    root.addView(statusView)
                 }
                 else -> {
                     leftMargin = margin
-                    root.addView(errorView, 0)
+                    root.addView(statusView, 0)
                 }
             }
         }
@@ -186,6 +194,12 @@ internal class CommentView @JvmOverloads constructor(
     fun setOnDownloadIconClickListener(listener: () -> Unit) {
         onDownloadIconClickListener = listener
     }
+}
+
+internal enum class Status {
+    Processing,
+    Completed,
+    Error
 }
 
 internal enum class ContentType {

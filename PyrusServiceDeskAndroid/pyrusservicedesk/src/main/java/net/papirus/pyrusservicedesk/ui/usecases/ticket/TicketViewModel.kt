@@ -7,14 +7,19 @@ import android.arch.lifecycle.Transformations
 import android.content.Intent
 import android.net.Uri
 import net.papirus.pyrusservicedesk.PyrusServiceDesk
-import net.papirus.pyrusservicedesk.repository.data.Comment
-import net.papirus.pyrusservicedesk.repository.data.EMPTY_TICKET_ID
-import net.papirus.pyrusservicedesk.repository.data.TicketDescription
-import net.papirus.pyrusservicedesk.repository.updates.CommentAddedUpdate
-import net.papirus.pyrusservicedesk.repository.updates.TicketCreatedUpdate
-import net.papirus.pyrusservicedesk.repository.updates.UpdateBase
-import net.papirus.pyrusservicedesk.repository.updates.UpdateType
+import net.papirus.pyrusservicedesk.sdk.data.Comment
+import net.papirus.pyrusservicedesk.sdk.data.EMPTY_TICKET_ID
+import net.papirus.pyrusservicedesk.sdk.data.TicketDescription
+import net.papirus.pyrusservicedesk.sdk.updates.CommentAddedUpdate
+import net.papirus.pyrusservicedesk.sdk.updates.TicketCreatedUpdate
+import net.papirus.pyrusservicedesk.sdk.updates.UpdateBase
+import net.papirus.pyrusservicedesk.sdk.updates.UpdateType
+import net.papirus.pyrusservicedesk.ui.usecases.ticket.entries.CommentEntry
+import net.papirus.pyrusservicedesk.ui.usecases.ticket.entries.DateEntry
+import net.papirus.pyrusservicedesk.ui.usecases.ticket.entries.TicketEntry
 import net.papirus.pyrusservicedesk.ui.viewmodel.ConnectionViewModelBase
+import net.papirus.pyrusservicedesk.utils.getWhen
+import java.util.*
 
 internal class TicketViewModel(
     serviceDesk: PyrusServiceDesk,
@@ -24,17 +29,18 @@ internal class TicketViewModel(
     private var ticketId: Int = TicketActivity.getTicketId(arguments)
 
     private val commentsRequest = MutableLiveData<Boolean>()
-    private val comments = MediatorLiveData<List<Comment>>()
+    private val entries = MediatorLiveData<MutableList<TicketEntry>>()
+    private val commentChanges = MutableLiveData<CommentChangedUiUpdate>()
 
     init {
-        comments.apply{
+        entries.apply{
             if (serviceDesk.enableRichUi) {
                 addSource(
                     Transformations.switchMap(commentsRequest){
                         repository.getTicket(ticketId)
                     }
                 ){
-                    comments.value = it?.ticket?.comments
+                    entries.value = it?.ticket?.comments?.toTicketEntries()
                     onDataLoaded()
                 }
             }
@@ -44,7 +50,7 @@ internal class TicketViewModel(
                         repository.getConversation()
                     }
                 ){
-                    comments.value = it?.comments
+                    entries.value = it?.comments?.toTicketEntries()
                     onDataLoaded()
                 }
             }
@@ -66,7 +72,9 @@ internal class TicketViewModel(
             is CommentAddedUpdate -> {
                 if (update.ticketId != ticketId)
                     return
-                commentsRequest.value = true
+                applyUpdate(
+                    CommentEntry(update.comment, update.error),
+                    if (update.isNew) ChangeType.Added else ChangeType.Changed)
             }
         }
     }
@@ -90,7 +98,45 @@ internal class TicketViewModel(
         repository.uploadFile(ticketId, attachmentUri)
     }
 
-    fun getCommentsViewModel(): LiveData<List<Comment>> = comments
+    fun getTicketEntriesLiveData(): LiveData<List<TicketEntry>> = entries as LiveData<List<TicketEntry>>
+
+    fun getCommentChangesLiveData(): LiveData<CommentChangedUiUpdate> = commentChanges
 
     private fun isNewTicket() = ticketId == EMPTY_TICKET_ID
+
+    private fun List<Comment>.toTicketEntries(): MutableList<TicketEntry> {
+        val now = Calendar.getInstance()
+        var prevDateGroup: String? = null
+        return foldIndexed(ArrayList(size)){
+            index, acc, comment ->
+            comment.creationDate.getWhen(getApplication(), now).let {
+                if (index == 0 || it != prevDateGroup) {
+                    acc.add(DateEntry(it))
+                    prevDateGroup = it
+                }
+            }
+            acc.add(CommentEntry(comment))
+            acc
+        }
+    }
+
+    private fun applyUpdate(commentEntry: CommentEntry, changeType: ChangeType) {
+        if (entries.value == null) {
+            entries.value = mutableListOf()
+        }
+        val list = entries.value!!
+        commentEntry.comment.creationDate.getWhen(getApplication(), Calendar.getInstance()).let {
+            if (list.isEmpty()
+                || list.findLast { entry -> entry is DateEntry }
+                    ?.let { dateEntry ->  (dateEntry as DateEntry).date == it } == false) {
+
+                list.add(DateEntry(commentEntry.comment.creationDate.getWhen(getApplication(), Calendar.getInstance())))
+            }
+        }
+        list.add(commentEntry)
+        commentChanges.value = CommentChangedUiUpdate(
+            changeType,
+            commentEntry
+        )
+    }
 }
