@@ -5,6 +5,7 @@ import android.arch.lifecycle.ViewModelProvider
 import android.content.Intent
 import net.papirus.pyrusservicedesk.PyrusServiceDesk
 import net.papirus.pyrusservicedesk.ui.usecases.file_preview.FilePreviewViewModel
+import net.papirus.pyrusservicedesk.ui.usecases.ticket.TicketSharedViewModel
 import net.papirus.pyrusservicedesk.ui.usecases.ticket.TicketViewModel
 import net.papirus.pyrusservicedesk.ui.usecases.tickets.TicketsViewModel
 
@@ -20,6 +21,7 @@ internal class ViewModelFactory(val arguments: Intent): ViewModelProvider.Factor
             FilePreviewViewModel::class.java ->
                 FilePreviewViewModel(PyrusServiceDesk.getInstance()) as T
             SharedViewModel::class.java -> PyrusServiceDesk.getInstance().getSharedViewModel() as T
+            TicketSharedViewModel::class.java -> TicketSharedViewModel() as T
             else -> throw IllegalStateException("View model for class $modelClass was not found")
         }
     }

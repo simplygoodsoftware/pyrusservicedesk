@@ -23,8 +23,6 @@
             android:id="@+id/comment"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_marginStart="@dimen/psd_offset_small"
-            android:layout_marginEnd="@dimen/psd_offset_small"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="@+id/guideline4"

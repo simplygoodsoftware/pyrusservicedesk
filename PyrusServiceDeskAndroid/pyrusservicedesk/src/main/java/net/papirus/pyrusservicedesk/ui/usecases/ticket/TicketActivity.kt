@@ -14,7 +14,7 @@ import net.papirus.pyrusservicedesk.sdk.data.EMPTY_TICKET_ID
 import net.papirus.pyrusservicedesk.ui.ConnectionActivityBase
 import net.papirus.pyrusservicedesk.ui.navigation.UiNavigator
 import net.papirus.pyrusservicedesk.ui.view.recyclerview.item_decorators.SpaceItemDecoration
-import net.papirus.pyrusservicedesk.utils.INTENT_IMAGE_TYPE
+import net.papirus.pyrusservicedesk.utils.getViewModel
 
 internal class TicketActivity : ConnectionActivityBase<TicketViewModel>(TicketViewModel::class.java) {
 
@@ -44,6 +44,8 @@ internal class TicketActivity : ConnectionActivityBase<TicketViewModel>(TicketVi
     override val layoutResId = R.layout.psd_activity_ticket
     override val toolbarViewId = R.id.ticket_toolbar
 
+    private val ticketSharedViewModel: TicketSharedViewModel by getViewModel(TicketSharedViewModel::class.java)
+
     private var adapter = TicketAdapter().apply {
         setOnDownloadedFileClickListener {
            UiNavigator.toFilePreview(this@TicketActivity, it)
@@ -63,7 +65,7 @@ internal class TicketActivity : ConnectionActivityBase<TicketViewModel>(TicketVi
             this@TicketActivity.adapter.itemTouchHelper?.attachToRecyclerView(this)
         }
         send.setOnClickListener { sendComment() }
-        attach.setOnClickListener { openFileChooser() }
+        attach.setOnClickListener { showAttachFileVariants() }
     }
 
     private fun onMenuItemClicked(menuItem: MenuItem?): Boolean {
@@ -104,6 +106,14 @@ internal class TicketActivity : ConnectionActivityBase<TicketViewModel>(TicketVi
                 comments.scrollToPosition(adapter.itemCount - 1)
             }
         )
+        ticketSharedViewModel.getFilePickedLiveData().observe(
+            this,
+            Observer { fileUri ->
+                fileUri?.let {
+                    viewModel.addAttachment(it)
+                }
+            }
+        )
     }
 
     override fun onViewHeightChanged(changedBy: Int) {
@@ -118,11 +128,7 @@ internal class TicketActivity : ConnectionActivityBase<TicketViewModel>(TicketVi
         }
     }
 
-    private fun openFileChooser() {
-        Intent(Intent.ACTION_GET_CONTENT).also{
-            it.type = INTENT_IMAGE_TYPE
-            it.putExtra(Intent.EXTRA_ALLOW_MULTIPLE, true)
-            startActivityForResult(it, REQUEST_PICK_IMAGE)
-        }
+    private fun showAttachFileVariants() {
+        AttachFileVariantsFragment().show(supportFragmentManager, "")
     }
 }

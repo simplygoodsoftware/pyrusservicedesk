@@ -230,7 +230,7 @@ internal class TicketAdapter: AdapterBase<TicketEntry>() {
                 x = -viewHolder.creationTime.width.toFloat()
             for (position in 0..(recyclerView.childCount - 1)) {
                 recyclerView.findContainingViewHolder(recyclerView.getChildAt(position))?.let {
-                    if (itemsList[viewHolder.adapterPosition].type != Type.Comment)
+                    if (itemsList[it.adapterPosition].type != Type.Comment)
                         return@let
                     super.onChildDraw(
                             c,

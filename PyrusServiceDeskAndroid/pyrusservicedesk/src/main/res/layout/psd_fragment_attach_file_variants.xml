@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="utf-8"?>
+<android.support.constraint.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content">
+
+    <android.support.v7.widget.AppCompatTextView
+        android:id="@+id/photo_variant"
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/psd_recyclerview_item_height_default"
+        android:text="@string/psd_photo"
+        android:background="?attr/selectableItemBackground"
+        android:textAppearance="?attr/textAppearanceListItem"
+        android:gravity="start|center_vertical"
+        android:paddingLeft="@dimen/psd_offset_default"
+        android:paddingStart="@dimen/psd_offset_default"
+        android:paddingRight="@dimen/psd_offset_default"
+        android:paddingEnd="@dimen/psd_offset_default"
+        app:layout_constraintBottom_toTopOf="@+id/gallery_variant"
+        app:layout_constraintTop_toTopOf="parent"/>
+
+    <android.support.v7.widget.AppCompatTextView
+        android:id="@+id/gallery_variant"
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/psd_recyclerview_item_height_default"
+        android:text="@string/psd_gallery"
+        android:background="?attr/selectableItemBackground"
+        android:textAppearance="?attr/textAppearanceListItem"
+        android:gravity="start|center_vertical"
+        android:paddingLeft="@dimen/psd_offset_default"
+        android:paddingStart="@dimen/psd_offset_default"
+        android:paddingRight="@dimen/psd_offset_default"
+        android:paddingEnd="@dimen/psd_offset_default"
+        app:layout_constraintBottom_toTopOf="@+id/logs_variant"
+        app:layout_constraintTop_toBottomOf="@+id/photo_variant" />
+
+    <android.support.v7.widget.AppCompatTextView
+        android:id="@+id/logs_variant"
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/psd_recyclerview_item_height_default"
+        android:text="@string/psd_send_logs"
+        android:background="?attr/selectableItemBackground"
+        android:textAppearance="?attr/textAppearanceListItem"
+        android:gravity="start|center_vertical"
+        android:paddingLeft="@dimen/psd_offset_default"
+        android:paddingStart="@dimen/psd_offset_default"
+        android:paddingRight="@dimen/psd_offset_default"
+        android:paddingEnd="@dimen/psd_offset_default"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/gallery_variant" />
+
+</android.support.constraint.ConstraintLayout>

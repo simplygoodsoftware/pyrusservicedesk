@@ -9,6 +9,7 @@ import kotlinx.android.synthetic.main.psd_activity_tickets.*
 import kotlinx.android.synthetic.main.psd_no_connection.*
 import net.papirus.pyrusservicedesk.ui.viewmodel.ConnectionViewModelBase
 import net.papirus.pyrusservicedesk.utils.getColor
+import net.papirus.pyrusservicedesk.utils.getViewModel
 
 private const val ANIMATION_DURATION = 200L
 
@@ -31,10 +32,10 @@ internal abstract class ConnectionActivityBase<T: ConnectionViewModelBase>(viewM
                 this,
                 Observer { isConnected ->
                     isConnected?.let {
-//                        if (!it)
-//                            no_connection.visibility = View.VISIBLE
-//                        else
-//                            reconnect()
+                        if (!it)
+                            no_connection.visibility = View.VISIBLE
+                        else
+                            reconnect()
                     }
 
                 }

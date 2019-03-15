@@ -1,14 +1,12 @@
 package net.papirus.pyrusservicedesk.ui
 
 import android.arch.lifecycle.Observer
-import android.arch.lifecycle.ViewModel
-import android.arch.lifecycle.ViewModelProviders
 import android.os.Bundle
 import android.support.v7.app.AppCompatActivity
 import android.view.View
 import com.example.pyrusservicedesk.R
 import net.papirus.pyrusservicedesk.ui.viewmodel.SharedViewModel
-import net.papirus.pyrusservicedesk.ui.viewmodel.ViewModelFactory
+import net.papirus.pyrusservicedesk.utils.getViewModel
 
 
 internal abstract class ActivityBase: AppCompatActivity() {
@@ -37,15 +35,6 @@ internal abstract class ActivityBase: AppCompatActivity() {
     }
 
     protected open fun onViewHeightChanged(changedBy: Int) {}
-
-    protected fun <T : ViewModel> getViewModel(viewModelClass: Class<T>): Lazy<T> {
-
-        return lazy(LazyThreadSafetyMode.NONE) {
-            ViewModelProviders.of(
-                    this,
-                    ViewModelFactory(intent)).get(viewModelClass)
-        }
-    }
 
     protected open fun observeData() {
         sharedViewModel.getQuitServiceDeskLiveData().observe(

@@ -4,7 +4,7 @@ import android.net.Uri
 import java.util.*
 internal class LocalDataProvider(
     clientName: String,
-    initialLocalCommentId: Int = 0) {
+    initialLocalCommentId: Int = -1) {
 
     private val me = Author(clientName)
     private var lastLocalCommentId = initialLocalCommentId

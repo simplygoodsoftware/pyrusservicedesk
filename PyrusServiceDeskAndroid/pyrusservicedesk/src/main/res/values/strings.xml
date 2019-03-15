@@ -14,4 +14,7 @@
     <string name="psd_yesterday">Yesterday</string>
     <string name="psd_date_format_d_m_y">MMMM d, yyyy</string>
     <string name="psd_date_format_d_m">MMMM d</string>
+    <string name="psd_photo">Photo</string>
+    <string name="psd_gallery">Gallery</string>
+    <string name="psd_send_logs">Send logs</string>
 </resources>

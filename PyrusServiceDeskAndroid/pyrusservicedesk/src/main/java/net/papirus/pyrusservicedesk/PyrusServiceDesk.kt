@@ -10,7 +10,8 @@ import net.papirus.pyrusservicedesk.ui.viewmodel.SharedViewModel
 
 class PyrusServiceDesk private constructor(
         internal val application: Application,
-        private val clientId: String,
+        internal val appId: String,
+        internal val clientId: Int,
         internal val clientName: String,
         internal val enableRichUi: Boolean){
 
@@ -18,8 +19,8 @@ class PyrusServiceDesk private constructor(
         private var INSTANCE: PyrusServiceDesk? = null
 
         @JvmStatic
-        fun init(application: Application, clientId: String, clientName: String, enableRichUi: Boolean) {
-            INSTANCE = PyrusServiceDesk(application, clientId, clientName, enableRichUi)
+        fun init(application: Application, appId: String, clientId: Int, clientName: String, enableRichUi: Boolean) {
+            INSTANCE = PyrusServiceDesk(application, appId, clientId, clientName, enableRichUi)
         }
 
         internal fun getInstance() : PyrusServiceDesk {
@@ -31,11 +32,17 @@ class PyrusServiceDesk private constructor(
     internal val repository: Repository by lazy{
         RepositoryFactory.create(
                 WebServiceFactory.create(
-                        "b7206b43-6859-4a20-837d-637a68e92d94",
-                        12345.toString()),
+                        appId,
+                    clientId.toString()),
                 application.contentResolver,
-                LocalDataProvider(clientName, 0)
+                LocalDataProvider(clientName)
         )
+    }
+
+    internal fun getSharedViewModel(): SharedViewModel{
+        if (sharedViewModel == null)
+            refreshSharedViewModel()
+        return sharedViewModel!!
     }
 
     private var sharedViewModel: SharedViewModel? = null
@@ -45,12 +52,6 @@ class PyrusServiceDesk private constructor(
             if (value)
                 refreshSharedViewModel()
         }
-    }
-
-    internal fun getSharedViewModel(): SharedViewModel{
-        if (sharedViewModel == null)
-            refreshSharedViewModel()
-        return sharedViewModel!!
     }
 
     private fun refreshSharedViewModel() {
