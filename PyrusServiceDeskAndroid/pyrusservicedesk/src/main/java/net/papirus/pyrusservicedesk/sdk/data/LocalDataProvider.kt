@@ -1,7 +1,7 @@
 package net.papirus.pyrusservicedesk.sdk.data
 
+import android.net.Uri
 import java.util.*
-
 internal class LocalDataProvider(
     clientName: String,
     initialLocalCommentId: Int = 0) {
@@ -19,11 +19,11 @@ internal class LocalDataProvider(
         )
     }
 
-    fun newLocalAttachmentComment(fileName: String, fileSize: Int): Comment {
+    fun newLocalAttachmentComment(fileName: String, fileSize: Int, fileUri: Uri): Comment {
         return Comment(
             isInbound = true,
             author = me,
-            attachments = listOf(newLocalAttachment(fileName, fileSize)),
+            attachments = listOf(newLocalAttachment(fileName, fileSize, fileUri)),
             creationDate = Calendar . getInstance ().time,
             localId = lastLocalCommentId++
         )
@@ -55,5 +55,8 @@ internal class LocalDataProvider(
         )
     }
 
-    private fun newLocalAttachment(fileName: String, fileSize: Int) = Attachment(name = fileName, bytesSize = fileSize)
+    private fun newLocalAttachment(fileName: String, fileSize: Int, fileUri: Uri): Attachment {
+        return Attachment(name = fileName, bytesSize = fileSize, uri = fileUri)
+    }
 }
+

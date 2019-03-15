@@ -11,8 +11,8 @@ import com.example.pyrusservicedesk.R
 import kotlinx.android.synthetic.main.psd_activity_ticket.*
 import net.papirus.pyrusservicedesk.PyrusServiceDesk
 import net.papirus.pyrusservicedesk.sdk.data.EMPTY_TICKET_ID
-import net.papirus.pyrusservicedesk.ui.ActivityBase
 import net.papirus.pyrusservicedesk.ui.ConnectionActivityBase
+import net.papirus.pyrusservicedesk.ui.navigation.UiNavigator
 import net.papirus.pyrusservicedesk.ui.view.recyclerview.item_decorators.SpaceItemDecoration
 import net.papirus.pyrusservicedesk.utils.INTENT_IMAGE_TYPE
 
@@ -23,20 +23,17 @@ internal class TicketActivity : ConnectionActivityBase<TicketViewModel>(TicketVi
 
         private const val REQUEST_PICK_IMAGE = 0
 
-        fun startNewTicket(source: ActivityBase) = source.startActivity(getIntent())
-
-        fun startTicket(source: ActivityBase, ticketId: Int) {
-            source.startActivity(getIntent().putExtra(KEY_TICKET_ID, ticketId))
-        }
-
         fun getTicketId(arguments: Intent): Int {
             return arguments.getIntExtra(KEY_TICKET_ID, EMPTY_TICKET_ID)
         }
 
-        private fun getIntent(): Intent {
+        fun getLaunchIntent(ticketId:Int? = null): Intent {
             return Intent(
                     PyrusServiceDesk.getInstance().application,
-                    TicketActivity::class.java)
+                    TicketActivity::class.java).also { intent ->
+
+                ticketId?.let {intent.putExtra(KEY_TICKET_ID, it)}
+            }
         }
 
         private fun isExpectedResult(requestCode: Int): Boolean {
@@ -47,13 +44,17 @@ internal class TicketActivity : ConnectionActivityBase<TicketViewModel>(TicketVi
     override val layoutResId = R.layout.psd_activity_ticket
     override val toolbarViewId = R.id.ticket_toolbar
 
-    private var adapter = TicketAdapter()
+    private var adapter = TicketAdapter().apply {
+        setOnDownloadedFileClickListener {
+           UiNavigator.toFilePreview(this@TicketActivity, it)
+        }
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         supportActionBar?.apply { title = getString(R.string.psd_organization_support, viewModel.organizationName) }
         ticket_toolbar.setNavigationIcon(R.drawable.psd_menu)
-        ticket_toolbar.setNavigationOnClickListener { finish() }
+        ticket_toolbar.setNavigationOnClickListener { UiNavigator.toTickets(this@TicketActivity) }
         ticket_toolbar.setOnMenuItemClickListener{ onMenuItemClicked(it) }
         comments.apply {
             adapter = this@TicketActivity.adapter
@@ -68,7 +69,7 @@ internal class TicketActivity : ConnectionActivityBase<TicketViewModel>(TicketVi
     private fun onMenuItemClicked(menuItem: MenuItem?): Boolean {
         return menuItem?.let {
             when (it.itemId) {
-                R.id.psd_ticket_menu_close -> sharedViewModel.quitServiceDesk()
+                R.id.psd_main_menu_close -> sharedViewModel.quitServiceDesk()
             }
             true
         } ?: false
@@ -76,8 +77,8 @@ internal class TicketActivity : ConnectionActivityBase<TicketViewModel>(TicketVi
 
     override fun onCreateOptionsMenu(menu: Menu?): Boolean {
         return menu?.let{
-            MenuInflater(this).inflate(R.menu.activity_ticket, menu)
-            menu.findItem(R.id.psd_ticket_menu_close).setShowAsAction(SHOW_AS_ACTION_ALWAYS)
+            MenuInflater(this).inflate(R.menu.psd_main_menu, menu)
+            menu.findItem(R.id.psd_main_menu_close).setShowAsAction(SHOW_AS_ACTION_ALWAYS)
             true
         } ?: false
     }
@@ -93,29 +94,15 @@ internal class TicketActivity : ConnectionActivityBase<TicketViewModel>(TicketVi
 
     override fun observeData() {
         super.observeData()
-        viewModel.getTicketEntriesLiveData().observe(
-                this,
-                Observer {commentsList ->
-                    commentsList?.let {
-                        adapter.setItems(it)
-                        comments.scrollToPosition(adapter.itemCount - 1)
-                    }
-                }
-        )
-        viewModel.getCommentChangesLiveData().observe(
+        viewModel.getCommentDiffLiveData().observe(
             this,
-            Observer { update ->
-                update?.let {
-                    if (it.type == ChangeType.Added)
-                        adapter.appendItem(it.data)
-                    else
-                        adapter.updateComment(it.data)
+            Observer { result ->
+                result?.let{
+                    adapter.setItemsWithoutUpdate(it.newItems)
+                    it.diffResult.dispatchUpdatesTo(adapter)
                 }
+                comments.scrollToPosition(adapter.itemCount - 1)
             }
-        )
-        sharedViewModel.getQuitServiceDeskLiveData().observe(
-                this,
-                Observer { quit -> quit?.let { if(it) finish() } }
         )
     }
 

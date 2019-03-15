@@ -48,7 +48,7 @@ internal class TicketsViewModel(serviceDesk: PyrusServiceDesk)
     }
 
     override fun getUpdateTypes(): Set<UpdateType> {
-        return setOf(UpdateType.TicketCreated, UpdateType.TicketUpdated)
+        return setOf(UpdateType.TicketCreated, UpdateType.CommentAdded)
     }
 
     override fun loadData() {

@@ -1,15 +1,25 @@
 package net.papirus.pyrusservicedesk.ui.usecases.tickets
 
 import android.arch.lifecycle.Observer
+import android.content.Intent
 import android.os.Bundle
 import com.example.pyrusservicedesk.R
 import kotlinx.android.synthetic.main.psd_activity_tickets.*
+import net.papirus.pyrusservicedesk.PyrusServiceDesk
 import net.papirus.pyrusservicedesk.ui.ConnectionActivityBase
-import net.papirus.pyrusservicedesk.ui.navigation.UseCaseNavigator
+import net.papirus.pyrusservicedesk.ui.navigation.UiNavigator
 import net.papirus.pyrusservicedesk.ui.view.recyclerview.item_decorators.SpaceItemDecoration
 
 
 internal class TicketsActivity: ConnectionActivityBase<TicketsViewModel>(TicketsViewModel::class.java) {
+
+    companion object {
+        fun getLaunchIntent(): Intent {
+            return Intent(
+                PyrusServiceDesk.getInstance().application,
+                TicketsActivity::class.java)
+        }
+    }
 
     override val layoutResId = R.layout.psd_activity_tickets
     override val toolbarViewId = R.id.tickets_toolbar
@@ -25,14 +35,14 @@ internal class TicketsActivity: ConnectionActivityBase<TicketsViewModel>(Tickets
                 .apply {
                     setOnTicketClickListener {
                         it.ticketId.let {
-                            UseCaseNavigator.toTicket(this@TicketsActivity, it)
+                            UiNavigator.toTicket(this@TicketsActivity, it)
                         }
                     }
                 }
                 .also { tickets.adapter  = it }
         tickets.addItemDecoration(
                 SpaceItemDecoration(resources.getInteger(R.integer.psd_tickets_item_space)))
-        new_conversation.setOnClickListener { UseCaseNavigator.toNewTicket(this) }
+        new_conversation.setOnClickListener { UiNavigator.toNewTicket(this) }
     }
 
     override fun observeData() {
@@ -46,10 +56,6 @@ internal class TicketsActivity: ConnectionActivityBase<TicketsViewModel>(Tickets
         viewModel.getTicketsLiveData().observe(
             this,
             Observer { list -> list?.let{ adapter.setItems(it) } }
-        )
-        sharedViewModel.getQuitServiceDeskLiveData().observe(
-            this,
-            Observer { quit -> quit?.let { if(it) finish() } }
         )
     }
 }

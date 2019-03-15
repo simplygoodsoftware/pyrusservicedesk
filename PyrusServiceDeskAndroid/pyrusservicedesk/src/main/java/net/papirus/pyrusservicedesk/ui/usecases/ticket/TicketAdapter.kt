@@ -16,6 +16,7 @@ import net.papirus.pyrusservicedesk.sdk.web_service.getAvatarUrl
 import net.papirus.pyrusservicedesk.ui.usecases.ticket.entries.CommentEntry
 import net.papirus.pyrusservicedesk.ui.usecases.ticket.entries.DateEntry
 import net.papirus.pyrusservicedesk.ui.usecases.ticket.entries.TicketEntry
+import net.papirus.pyrusservicedesk.ui.usecases.ticket.entries.Type
 import net.papirus.pyrusservicedesk.ui.view.CommentView
 import net.papirus.pyrusservicedesk.ui.view.ContentType
 import net.papirus.pyrusservicedesk.ui.view.Status
@@ -33,12 +34,13 @@ private const val VIEW_TYPE_DATE = 2
 internal class TicketAdapter: AdapterBase<TicketEntry>() {
 
     override val itemTouchHelper: ItemTouchHelper? = ItemTouchHelper(TouchCallback())
+    private var onDownloadedFileClickListener: ((Int) -> Unit)? = null
 
     override fun getItemViewType(position: Int): Int {
         return with(itemsList[position]) {
             return@with when {
-                this is DateEntry -> VIEW_TYPE_DATE
-                (this is CommentEntry) && comment.isInbound -> VIEW_TYPE_COMMENT_OUTBOUND
+                type == Type.Date -> VIEW_TYPE_DATE
+                (this as CommentEntry).comment.isInbound -> VIEW_TYPE_COMMENT_OUTBOUND
                 else -> VIEW_TYPE_COMMENT_INBOUND
             }
         }
@@ -57,18 +59,8 @@ internal class TicketAdapter: AdapterBase<TicketEntry>() {
         holder.itemView.translationX = 0f
     }
 
-    fun updateComment(comment: CommentEntry) {
-        val index =
-            itemsList.findLast {
-                (it is CommentEntry) && it.comment.localId == comment.comment.localId
-            }?.let{
-                itemsList.indexOf(it)
-            }?: -1
-        if (index != -1) {
-            itemsList[index] = comment
-            notifyItemChanged(index)
-        }
-        else appendItem(comment)
+    fun setOnDownloadedFileClickListener(listener: (fileId: Int) -> Unit) {
+        onDownloadedFileClickListener = listener
     }
 
     private inner class InboundCommentHolder(parent: ViewGroup)
@@ -112,30 +104,30 @@ internal class TicketAdapter: AdapterBase<TicketEntry>() {
             return adapterPosition == 0
                     || with(itemsList[adapterPosition - 1]){
                         return when {
-                            this !is CommentEntry -> true
-                            else -> getItem().comment.author != this.comment.author
+                            this.type != Type.Comment -> true
+                            else -> getItem().comment.author != (this as CommentEntry).comment.author
                         }
                     }
         }
 
         private fun shouldShowAuthorAvatar(): Boolean {
             return with (itemsList.getOrNull(adapterPosition + 1)){
-                when(this) {
-                    !is CommentEntry -> true
-                    else -> getItem().comment.author != this.comment.author
+                when {
+                    this?.type != Type.Comment -> true
+                    else -> getItem().comment.author != (this as CommentEntry).comment.author
                 }
             }
         }
     }
 
-    private class OutboundCommentHolder(parent: ViewGroup)
+    private inner class OutboundCommentHolder(parent: ViewGroup)
         : CommentHolder(parent, R.layout.psd_view_holder_comment_outbound){
 
         override val comment: CommentView = itemView.findViewById(R.id.comment)
         override val creationTime: TextView = itemView.findViewById(R.id.creation_time)
     }
 
-    private abstract class CommentHolder(
+    private abstract inner class CommentHolder(
             parent: ViewGroup,
             @LayoutRes layoutRes: Int)
         : ViewHolderBase<CommentEntry>(parent, layoutRes){
@@ -143,8 +135,11 @@ internal class TicketAdapter: AdapterBase<TicketEntry>() {
         abstract val comment: CommentView
         abstract val creationTime: TextView
 
+        val onCommentClickListener = OnClickListener { getItem().onClickedCallback.onClicked(getItem()) }
+
         override fun bindItem(item: CommentEntry) {
             super.bindItem(item)
+            comment.setOnClickListener(onCommentClickListener)
             comment.status = when {
                 getItem().hasError() -> Status.Error
                 getItem().comment.isLocal() -> Status.Processing
@@ -159,11 +154,26 @@ internal class TicketAdapter: AdapterBase<TicketEntry>() {
             creationTime.text = getTimeText(itemView.context, getItem().comment.creationDate)
         }
 
+        override fun onDetachedFromWindow() {
+            super.onDetachedFromWindow()
+            getItem().uploadCallbacks?.unsubscribeFromProgress()
+        }
+
         private fun bindAttachmentView() {
+            comment.fileProgressStatus = if (getItem().hasError()) Status.Error else Status.Completed
             comment.setFileName(getItem().comment.attachments?.first()?.name ?: "")
             comment.setFileSize(getItem().comment.attachments?.first()?.bytesSize?.toFloat() ?: 0f)
-            comment.setOnDownloadIconClickListener {
-
+            comment.setOnProgressIconClickListener {
+                when (comment.fileProgressStatus) {
+                    Status.Processing -> getItem().uploadCallbacks?.cancelUploading()
+                    Status.Completed -> onDownloadedFileClickListener?.invoke(getItem().comment.attachments!![0].id)
+                    Status.Error -> comment.performClick()
+                }
+            }
+            getItem().uploadCallbacks?.subscribeOnProgress {
+                if (comment.fileProgressStatus != Status.Processing)
+                    comment.fileProgressStatus = Status.Processing
+                comment.setProgress(it)
             }
         }
     }
@@ -212,14 +222,15 @@ internal class TicketAdapter: AdapterBase<TicketEntry>() {
                                  actionState: Int,
                                  isCurrentlyActive: Boolean) {
 
-            if (viewHolder !is CommentHolder)
+            if (itemsList[viewHolder.adapterPosition].type != Type.Comment)
                 return
+            viewHolder as CommentHolder
             var x = dX
             if (x < -viewHolder.creationTime.width)
                 x = -viewHolder.creationTime.width.toFloat()
             for (position in 0..(recyclerView.childCount - 1)) {
                 recyclerView.findContainingViewHolder(recyclerView.getChildAt(position))?.let {
-                    if (it !is CommentHolder)
+                    if (itemsList[viewHolder.adapterPosition].type != Type.Comment)
                         return@let
                     super.onChildDraw(
                             c,
@@ -232,6 +243,5 @@ internal class TicketAdapter: AdapterBase<TicketEntry>() {
                 }
             }
         }
-
     }
 }

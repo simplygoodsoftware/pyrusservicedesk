@@ -1,7 +1,9 @@
 package net.papirus.pyrusservicedesk.ui.view
 
+import android.animation.ValueAnimator
 import android.content.Context
 import android.graphics.PorterDuff
+import android.graphics.drawable.AnimationDrawable
 import android.graphics.drawable.LayerDrawable
 import android.support.annotation.ColorInt
 import android.support.v4.app.ActivityCompat
@@ -10,6 +12,7 @@ import android.support.v7.widget.AppCompatImageView
 import android.util.AttributeSet
 import android.view.Gravity
 import android.view.View
+import android.view.animation.DecelerateInterpolator
 import android.widget.FrameLayout
 import android.widget.LinearLayout
 import com.example.pyrusservicedesk.R
@@ -19,7 +22,8 @@ import net.papirus.pyrusservicedesk.utils.*
 private const val TYPE_INBOUND = 0
 private const val TYPE_OUTBOUND = 1
 
-private const val DOWNLOAD_PROGRESS_BACKGROUND_MULTIPLIER = 0.3f
+private const val PROGRESS_BACKGROUND_MULTIPLIER = 0.3f
+private const val PROGRESS_CHANGE_ANIMATION_DURATION = 100L
 
 internal class CommentView @JvmOverloads constructor(
         context: Context,
@@ -35,6 +39,7 @@ internal class CommentView @JvmOverloads constructor(
                     attachment_layout.visibility = View.GONE
                 }
                 ContentType.Attachment ->{
+                    recentProgress = 0
                     comment_text.visibility = View.GONE
                     attachment_layout.visibility = View.VISIBLE
                 }
@@ -42,24 +47,23 @@ internal class CommentView @JvmOverloads constructor(
             field = value
         }
 
-    var fileDownloadingState = DownloadingState.Remote
+    var fileProgressStatus = Status.Completed
         set(value) {
             val icon = ActivityCompat.getDrawable(
                     context,
                     when (value) {
-                        DownloadingState.Remote -> R.drawable.psd_download_file
-                        DownloadingState.Downloading -> R.drawable.psd_close
-                        DownloadingState.Error -> R.drawable.psd_refresh
-                        else -> R.drawable.psd_arrow_back
+                        Status.Processing -> R.drawable.psd_close
+                        Status.Error -> R.drawable.psd_refresh
+                        else -> R.drawable.psd_download_file
                     })
             icon?.let {
                 fileDownloadDrawable.setDrawableByLayerId(
                         R.id.progress_icon,
                         it.mutate().apply { setColorFilter(primaryColor, PorterDuff.Mode.SRC_IN) })
             }
-            if (value != DownloadingState.Downloading) {
+            if (value != Status.Processing) {
                 setFileSize(recentFileSize)
-                setDownloadingProgress(0)
+                setProgress(0)
             }
             else
                 file_size.setText(R.string.psd_downloading)
@@ -72,17 +76,22 @@ internal class CommentView @JvmOverloads constructor(
             var iconResId: Int? = null
             when (value) {
                 Status.Error -> iconResId = R.drawable.psd_error
-                Status.Processing -> iconResId = R.drawable.psd_clock
+                Status.Processing -> iconResId = R.drawable.psd_sync_clock
                 Status.Completed -> visibility = INVISIBLE
             }
             statusView.visibility = visibility
-            iconResId?.let { statusView.setImageResource(it) }
+            iconResId?.let {
+                statusView.setImageResource(it)
+                if (value == Status.Processing)
+                    (statusView.drawable as AnimationDrawable).start()
+            }
 
             field = value
         }
 
     private var onDownloadIconClickListener: (() -> Unit)? = null
     private var recentFileSize: Float = 0f
+    private var recentProgress: Int = 0
     @ColorInt
     private val primaryColor: Int
     private val fileDownloadDrawable: LayerDrawable
@@ -122,17 +131,14 @@ internal class CommentView @JvmOverloads constructor(
         file_name.setTextColor(primaryColor)
         file_size.setTextColor(secondaryColor)
 
-        fileDownloadDrawable = (file_downloading_progress.progressDrawable as LayerDrawable).apply {
+        fileDownloadDrawable = (file_progress.progressDrawable as LayerDrawable).apply {
             findDrawableByLayerId(android.R.id.background)
                     .mutate()
                     .setColorFilter(
-                        when (type){
-                            TYPE_INBOUND -> adjustColor(
-                                secondaryColor,
-                                ColorChannel.Alpha,
-                                DOWNLOAD_PROGRESS_BACKGROUND_MULTIPLIER)
-                            else -> secondaryColor
-                        },
+                        adjustColor(
+                            secondaryColor,
+                            ColorChannel.Alpha,
+                            PROGRESS_BACKGROUND_MULTIPLIER),
                         PorterDuff.Mode.SRC_IN)
 
             findDrawableByLayerId(android.R.id.progress)
@@ -142,7 +148,7 @@ internal class CommentView @JvmOverloads constructor(
                     .mutate()
                     .setColorFilter(primaryColor, PorterDuff.Mode.SRC_IN)
         }
-        file_downloading_progress.setOnClickListener { onDownloadIconClickListener?.invoke() }
+        file_progress.setOnClickListener { onDownloadIconClickListener?.invoke() }
         statusView = AppCompatImageView(context).apply {
             layoutParams = LinearLayout.LayoutParams(
                     resources.getDimension(R.dimen.psd_comment_error_width).toInt(),
@@ -187,11 +193,23 @@ internal class CommentView @JvmOverloads constructor(
         file_size.text = context.getString(R.string.psd_file_size, toShow)
     }
 
-    fun setDownloadingProgress(progress: Int) {
-        file_downloading_progress.progress = progress
+    fun setProgress(progress: Int) {
+        val currentProgress = recentProgress
+        recentProgress = progress
+        ValueAnimator.ofInt(file_progress.progress, progress).apply {
+            duration = if (currentProgress == 0) PROGRESS_CHANGE_ANIMATION_DURATION else 0
+            interpolator = DecelerateInterpolator()
+            addUpdateListener {
+                (animatedValue as Int).let { value ->
+                    if (recentProgress > progress)
+                        cancel()
+                    file_progress.progress = value
+                }
+            }
+        }.also{ it.start() }
     }
 
-    fun setOnDownloadIconClickListener(listener: () -> Unit) {
+    fun setOnProgressIconClickListener(listener: () -> Unit) {
         onDownloadIconClickListener = listener
     }
 }
@@ -205,11 +223,4 @@ internal enum class Status {
 internal enum class ContentType {
     Text,
     Attachment
-}
-
-internal enum class DownloadingState{
-    Remote,
-    Downloading,
-    Downloaded,
-    Error
 }

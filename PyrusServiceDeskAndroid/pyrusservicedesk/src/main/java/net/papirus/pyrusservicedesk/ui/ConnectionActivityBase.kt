@@ -26,14 +26,15 @@ internal abstract class ConnectionActivityBase<T: ConnectionViewModelBase>(viewM
     }
 
     override fun observeData() {
+        super.observeData()
         viewModel.getIsNetworkConnectedLiveDate().observe(
                 this,
                 Observer { isConnected ->
                     isConnected?.let {
-                        if (!it)
-                            no_connection.visibility = View.VISIBLE
-                        else
-                            reconnect()
+//                        if (!it)
+//                            no_connection.visibility = View.VISIBLE
+//                        else
+//                            reconnect()
                     }
 
                 }
@@ -41,22 +42,23 @@ internal abstract class ConnectionActivityBase<T: ConnectionViewModelBase>(viewM
 
         viewModel.getLoadingProgressLiveData().observe(
             this,
-            Observer { progress ->
-                progress?.let {
-                    when {
-                        it >= resources.getInteger(R.integer.psd_progress_max_value) -> {
-                            progress_bar
-                                .animate()
-                                .alpha(0f)
-                                .setDuration(ANIMATION_DURATION)
-                                .start()
-                        }
-                        else -> progress_bar.alpha = 1f
-                    }
-                    progress_bar.progress = it
-                }
+            Observer { progress -> progress?.let { updateProgress(it) }
             }
         )
+    }
+
+    protected open fun updateProgress(newProgress: Int) {
+        when {
+            newProgress >= resources.getInteger(R.integer.psd_progress_max_value) -> {
+                progress_bar
+                    .animate()
+                    .alpha(0f)
+                    .setDuration(ANIMATION_DURATION)
+                    .start()
+            }
+            else -> progress_bar.alpha = 1f
+        }
+        progress_bar.progress = newProgress
     }
 
     private fun reconnect() {

@@ -8,12 +8,10 @@ class ServiceDeskActivity {
     companion object {
         @JvmStatic
         fun createIntent(): Intent {
-            return Intent(
-                    PyrusServiceDesk.getInstance().application,
-                    if (PyrusServiceDesk.getInstance().enableRichUi)
-                        TicketsActivity::class.java
-                    else
-                        TicketActivity::class.java)
+            return when(PyrusServiceDesk.getInstance().enableRichUi){
+                true -> TicketsActivity.getLaunchIntent()
+                else -> TicketActivity.getLaunchIntent()
+            }
         }
     }
 }

@@ -1,18 +1,23 @@
 package net.papirus.pyrusservicedesk.sdk.web_service.retrofit.request.body
 
+import net.papirus.pyrusservicedesk.sdk.web_service.retrofit.request.FileUploadCallbacks
 import okhttp3.MediaType
 import okhttp3.MultipartBody
 import okhttp3.RequestBody
-import okhttp3.internal.Util
 import okio.BufferedSink
-import okio.Okio
-import okio.Source
 import java.io.InputStream
 
 internal class UploadFileRequestBody(
         private val fileName: String,
-        private val fileStream: InputStream)
+        private val fileStream: InputStream,
+        private val uploadCallbacks: FileUploadCallbacks)
     :RequestBodyBase("", "") {
+
+    private val fileSize = fileStream.available().toLong()
+
+    init {
+        uploadCallbacks.onProgressPercentChanged(0)
+    }
 
     fun toMultipartBody(): MultipartBody.Part {
         val requestFileBody = object: RequestBody(){
@@ -25,16 +30,24 @@ internal class UploadFileRequestBody(
             }
 
             override fun writeTo(sink: BufferedSink) {
-                var source: Source? = null
-                try {
-                    source = Okio.source(fileStream)
-                    sink.writeAll(source!!)
-                } finally {
-                    Util.closeQuietly(source)
+                val buffer = ByteArray(DEFAULT_BUFFER_SIZE)
+                var uploaded = 0L
+                fileStream.use { fileStream ->
+                    var read: Int = fileStream.read(buffer)
+                    while (read != -1) {
+                        uploaded += read
+                        sink.write(buffer, 0, read)
+                        uploadCallbacks.onProgressPercentChanged(calculateProgress(uploaded))
+                        read = fileStream.read(buffer)
+                    }
                 }
             }
 
         }
         return MultipartBody.Part.createFormData("File", fileName, requestFileBody)
+    }
+
+    private fun calculateProgress(bytesUploaded: Long): Int {
+        return (bytesUploaded.toDouble()/fileSize * 100).toInt()
     }
 }

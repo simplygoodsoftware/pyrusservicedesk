@@ -26,12 +26,11 @@
                 tools:visibility="visible">
 
             <ProgressBar
-                    android:id="@+id/file_downloading_progress"
+                    android:id="@+id/file_progress"
                     style="?android:attr/progressBarStyleHorizontal"
                     android:layout_width="@dimen/psd_recyclerview_item_height_default"
                     android:layout_height="@dimen/psd_recyclerview_item_height_default"
-                    android:progressDrawable="@drawable/psd_file_download_progress"
-                    android:background="?attr/selectableItemBackground"
+                    android:progressDrawable="@drawable/psd_file_progress"
                     android:indeterminate="false"
                     app:layout_constraintBottom_toBottomOf="parent"
                     app:layout_constraintTop_toTopOf="parent"
@@ -46,7 +45,7 @@
                     app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintBottom_toBottomOf="parent"
                     app:layout_constraintTop_toTopOf="parent"
-                    app:layout_constraintStart_toEndOf="@+id/file_downloading_progress"
+                    app:layout_constraintStart_toEndOf="@+id/file_progress"
                     app:layout_constraintHorizontal_bias="0.5"
                     app:layout_constrainedWidth="true"
                     android:layout_marginLeft="@dimen/psd_offset_small"

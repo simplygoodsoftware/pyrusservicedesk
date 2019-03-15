@@ -16,3 +16,4 @@ internal interface WebService{
 }
 
 internal fun getAvatarUrl(avatarId: Int): String = "$BASE_URL/Avatar/$avatarId"
+internal fun getFileUrl(fileId: Int): String = "$BASE_URL/DownloadFile/$fileId"

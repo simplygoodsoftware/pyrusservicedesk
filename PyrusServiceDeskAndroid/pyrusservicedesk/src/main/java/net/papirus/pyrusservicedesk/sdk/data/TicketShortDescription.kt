@@ -8,6 +8,6 @@ internal class TicketShortDescription(
     @SerializedName("subject")
     val subject: String,
     @SerializedName("is_read")
-    val isRead: Boolean,
+    val isRead: Boolean = true,
     @SerializedName("last_comment")
     val lastComment: Comment?)

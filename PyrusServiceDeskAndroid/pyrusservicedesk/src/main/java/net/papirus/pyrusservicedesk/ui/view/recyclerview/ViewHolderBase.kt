@@ -18,5 +18,7 @@ internal abstract class ViewHolderBase<T>(
         this.item = item
     }
 
+    open fun onDetachedFromWindow() {}
+
     fun getItem() = item!!
 }

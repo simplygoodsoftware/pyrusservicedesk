@@ -88,6 +88,13 @@ internal abstract class ConnectionViewModelBase(private val serviceDesk: PyrusSe
         publishProgress(MAX_PROGRESS, PROGRESS_ANIMATION_DURATION_MS_QUICK, null)
     }
 
+    protected fun publishProgress(progress: Int) {
+        when (progress) {
+            MAX_PROGRESS -> onDataLoaded()
+            else -> publishProgress(progress, PROGRESS_ANIMATION_DURATION_MS_DEFAULT, null)
+        }
+    }
+
     private fun publishProgress(progress: Int, durationMs: Long, onCompleted: Runnable?) {
         recentPublishedProgress = progress
         ValueAnimator.ofInt(loadingProgress.value ?: 0, progress).apply {

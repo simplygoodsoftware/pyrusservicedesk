@@ -93,6 +93,13 @@ internal class RepositoryImpl(
         addComment(ticketId, localComment)
     }
 
+    override fun retryComment(ticketId: Int, localComment: Comment) {
+        if (!localComment.hasAttachments())
+            addComment(ticketId, localComment, false)
+        else
+            uploadFile(ticketId, localComment, localComment.attachments!![0].uri!!)
+    }
+
     override fun createTicket(userName: String, ticket: TicketDescription) {
         webService.createTicket(CreateTicketRequest(userName, ticket))
                 .observeForever {response ->
@@ -110,39 +117,58 @@ internal class RepositoryImpl(
     }
 
     override fun uploadFile(ticketId: Int, fileUri: Uri){
+        uploadFile(ticketId, null, fileUri)
+    }
+
+    private fun uploadFile(ticketId: Int, localComment: Comment?, fileUri: Uri) {
         val cursor = ContentResolverCompat.query(
-                contentResolver,
-                fileUri,
-                null,
-                null,
-                null,
-                null,
-                null)
+            contentResolver,
+            fileUri,
+            null,
+            null,
+            null,
+            null,
+            null)
 
         if (!cursor.moveToFirst())
             return
-        val localComment = localDataProvider.newLocalAttachmentComment(
-            cursor.getString(cursor.getColumnIndex(DISPLAY_NAME)),
-            cursor.getInt(cursor.getColumnIndex(SIZE)))
-        notifySubscribers(CommentAddedUpdate(ticketId, localComment))
+        val isNewComment = localComment == null
+        val comment = when{
+            isNewComment -> localDataProvider.newLocalAttachmentComment(
+                cursor.getString(cursor.getColumnIndex(DISPLAY_NAME)),
+                cursor.getInt(cursor.getColumnIndex(SIZE)),
+                fileUri)
+            else -> localComment!!
+        }
+        var cancelled = false
+        val progressCallback = FileUploadCallbacks().also {
+            it.subscribeOnCancel {
+                cancelled = true
+                notifySubscribers(CommentCancelledUpdate(ticketId, comment))
+                it.unsubscribeFromCancel()
+            }
+        }
+        notifySubscribers(CommentAddedUpdate(ticketId, comment, fileUploadCallbacks = progressCallback, isNew = isNewComment))
         webService.uploadFile(
-                UploadFileRequest(
-                        ticketId,
-                        cursor.getString(cursor.getColumnIndex(DISPLAY_NAME)),
-                        contentResolver.openInputStream(fileUri)))
-                .observeForever { response ->
-                    when {
-                        response?.responseData == null ->
-                            notifySubscribers(CommentAddedUpdate(ticketId, localComment, error = UpdateError.Unknown))
-                        response.status == Status.WebServiceError ->
-                            notifySubscribers(CommentAddedUpdate(ticketId, localComment, error = UpdateError.WebService))
-                        else ->
-                            addComment(
-                                ticketId,
-                                localDataProvider.updateLocalToServerAttachment(localComment, response.responseData.guid),
-                                false)
-                    }
+            UploadFileRequest(
+                ticketId,
+                cursor.getString(cursor.getColumnIndex(DISPLAY_NAME)),
+                contentResolver.openInputStream(fileUri),
+                progressCallback))
+            .observeForever { response ->
+                when {
+                    cancelled -> return@observeForever
+                    response?.status == Status.WebServiceError ->
+                        notifySubscribers(CommentAddedUpdate(ticketId, comment, error = UpdateError.WebService))
+                    response?.responseData == null ->
+                        notifySubscribers(CommentAddedUpdate(ticketId, comment, error = UpdateError.Unknown))
+                    else ->
+                        addComment(
+                            ticketId,
+                            localDataProvider.updateLocalToServerAttachment(comment, response.responseData.guid),
+                            false)
                 }
+            }
     }
 
     private fun addComment(ticketId: Int, localComment: Comment, isNewComment: Boolean = true) {
@@ -151,10 +177,10 @@ internal class RepositoryImpl(
             .observeForever { response ->
                 notifySubscribers(
                     when{
+                        response?.status == Status.WebServiceError ->
+                            CommentAddedUpdate(ticketId, localComment, error = UpdateError.WebService)
                         response?.responseData == null ->
                             CommentAddedUpdate(ticketId, localComment, error = UpdateError.Unknown)
-                        response.status == Status.WebServiceError ->
-                            CommentAddedUpdate(ticketId, localComment, error = UpdateError.WebService)
                         else ->
                             CommentAddedUpdate(
                                 response.request.ticketId,

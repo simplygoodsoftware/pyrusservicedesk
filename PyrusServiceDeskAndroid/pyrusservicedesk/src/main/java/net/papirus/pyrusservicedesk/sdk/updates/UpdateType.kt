@@ -4,6 +4,7 @@ internal enum class UpdateType {
     ConversationReceived,
     TicketsReceived,
     TicketReceived,
-    TicketUpdated,
+    CommentAdded,
+    CommentCancelled,
     TicketCreated
 }

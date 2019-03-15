@@ -9,17 +9,26 @@ internal abstract class AdapterBase<Item> : RecyclerView.Adapter<ViewHolderBase<
     protected var itemsList: MutableList<Item> = mutableListOf()
     open val itemTouchHelper: ItemTouchHelper? = null
 
-    fun setItems(items: List<Item>) {
-        this.itemsList = items.toMutableList()
-        notifyDataSetChanged()
-    }
-
     override fun getItemCount(): Int {
         return itemsList.size
     }
 
     override fun onBindViewHolder(holder: ViewHolderBase<Item>, position: Int) {
         holder.bindItem(itemsList[position])
+    }
+
+    override fun onViewDetachedFromWindow(holder: ViewHolderBase<Item>) {
+        super.onViewDetachedFromWindow(holder)
+        holder.onDetachedFromWindow()
+    }
+
+    fun setItems(items: List<Item>) {
+        this.itemsList = items.toMutableList()
+        notifyDataSetChanged()
+    }
+
+    fun setItemsWithoutUpdate(items: List<Item>) {
+        this.itemsList = items.toMutableList()
     }
 
     fun appendItem(item: Item) {
