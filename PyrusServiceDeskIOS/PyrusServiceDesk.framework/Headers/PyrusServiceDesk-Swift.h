@@ -182,20 +182,17 @@ typedef unsigned int swift_uint4  __attribute__((__ext_vector_type__(4)));
 # pragma pop_macro("any")
 #endif
 
-@class UIColor;
 
 SWIFT_CLASS("_TtC16PyrusServiceDesk16PyrusServiceDesk")
 @interface PyrusServiceDesk : NSObject
-/// Customize color. If not set, the application tint color or blue is used.
-SWIFT_CLASS_PROPERTY(@property (nonatomic, class, strong) UIColor * _Nullable customColor;)
-+ (UIColor * _Nullable)customColor SWIFT_WARN_UNUSED_RESULT;
-+ (void)setCustomColor:(UIColor * _Nullable)value;
 /// Init PyrusServiceDesk with new clientId and organizationName.
 /// \param clientId clientId using for all requests. If clientId not setted PyrusServiceDesk Controller will not be created
 ///
-/// \param organizationName Organization Name using to show in navigation Bar title: “organizationName Support”
+/// \param userId The id of user. Pass nil or empty string to automatic id generation.
 ///
-- (nonnull instancetype)init:(NSString * _Nullable)clientId organizationName:(NSString * _Nonnull)organizationName OBJC_DESIGNATED_INITIALIZER;
+/// \param oneChat A flag indicates need to show chat list or show all conversations as one. Default is false - user can create new chat and see the list of old chats. If true - all new messages will be added to open chat.
+///
+- (nonnull instancetype)init:(NSString * _Nullable)clientId userId:(NSString * _Nullable)userId oneChat:(BOOL)oneChat OBJC_DESIGNATED_INITIALIZER;
 /// Setting name of user. If name is not setted it il be default (“Guest”)
 /// \param userName A name to display in pyrus task.
 ///
@@ -203,26 +200,45 @@ SWIFT_CLASS_PROPERTY(@property (nonatomic, class, strong) UIColor * _Nullable cu
 /// Setting path of file with logs. If logPath is setted user will be able to send a logs as attachment in chat. If not, the attachments will be only from camera and library.
 /// \param logPath A full path where logs file is.
 ///
-+ (void)createLogPath:(NSString * _Nullable)logPath;
+/// \param additionalText An additional text to log file. Works only if logPath is setted. For example you can put information about device here.
+///
+/// \param needDeleteAfter A flag indicates is log file need to be deleted after sent.
+///
++ (void)createLogPath:(NSString * _Nullable)logPath logAdditionalText:(NSString * _Nonnull)logAdditionalText needDeleteAfter:(BOOL)needDeleteAfter;
 /// Stop getting inforamation - stop timer.
 + (void)stop;
+/// Total value of new massages
+SWIFT_CLASS_PROPERTY(@property (nonatomic, class) NSInteger newMessagesCount;)
++ (NSInteger)newMessagesCount SWIFT_WARN_UNUSED_RESULT;
++ (void)setNewMessagesCount:(NSInteger)value;
 - (nonnull instancetype)init SWIFT_UNAVAILABLE;
 + (nonnull instancetype)new SWIFT_DEPRECATED_MSG("-init is unavailable");
 @end
 
+@class UIImage;
+@class UIColor;
 @class UIViewController;
-@class NSString;
 @class UIView;
 @class NSBundle;
 @class NSCoder;
 
 SWIFT_CLASS("_TtC16PyrusServiceDesk26PyrusServiceDeskController")
 @interface PyrusServiceDeskController : UINavigationController
+- (nonnull instancetype)init SWIFT_UNAVAILABLE;
++ (nonnull instancetype)new SWIFT_DEPRECATED_MSG("-init is unavailable");
+/// A icon for support imageView in chat. Show when support user has no image or for welcome message. The default is DEFAULT_SUPPORT_ICON.
+- (void)customAvatar:(UIImage * _Nullable)avatar;
+/// A first message that user see in new chat. If not setted - user will not see welcome message.
+- (void)customWelcomeMessage:(NSString * _Nullable)message;
+/// Customize color. If not set, the application tint color or blue is used.
+- (void)customColor:(UIColor * _Nullable)color;
+/// Customizing avatar background color. Using as background color for default avatar image view, that you can see in  welcome message and while support person avatar image is loading. If not set, the custom Color is used.
+- (void)customAvatarColor:(UIColor * _Nullable)color;
+/// Organization Name using to show in navigation Bar title: “organizationName Support”
+- (void)customOrganizationName:(NSString * _Nullable)name;
 - (UIViewController * _Nullable)popViewControllerAnimated:(BOOL)animated SWIFT_WARN_UNUSED_RESULT;
-/// Create PyrusServiceDeskController and start getting info with userId.
-/// \param userId NSString with id of user.
-///
-+ (PyrusServiceDeskController * _Nonnull)createWithUserId:(NSString * _Nullable)userId SWIFT_WARN_UNUSED_RESULT;
+/// Create PyrusServiceDeskController.
++ (PyrusServiceDeskController * _Nonnull)create SWIFT_WARN_UNUSED_RESULT;
 - (void)viewDidLoad;
 - (void)viewDidAppear:(BOOL)animated;
 /// Using to create iPadView in container. On iPadView list of chats is in left side, and chat in right side.
@@ -248,6 +264,13 @@ SWIFT_CLASS("_TtC16PyrusServiceDesk26PyrusServiceDeskController")
 
 
 
+
+
+
+
+@interface UITableView (SWIFT_EXTENSION(PyrusServiceDesk))
+- (void)didMoveToWindow;
+@end
 
 
 
