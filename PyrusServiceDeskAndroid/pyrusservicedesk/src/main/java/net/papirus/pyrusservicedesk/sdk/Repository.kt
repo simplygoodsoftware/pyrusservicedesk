@@ -1,29 +1,23 @@
 package net.papirus.pyrusservicedesk.sdk
 
-import android.arch.lifecycle.LiveData
-import android.net.Uri
-import net.papirus.pyrusservicedesk.sdk.data.Attachment
-import net.papirus.pyrusservicedesk.sdk.data.Comment
-import net.papirus.pyrusservicedesk.sdk.data.TicketDescription
-import net.papirus.pyrusservicedesk.sdk.updates.GetConversationUpdate
-import net.papirus.pyrusservicedesk.sdk.updates.GetTicketUpdate
-import net.papirus.pyrusservicedesk.sdk.updates.GetTicketsUpdate
-import net.papirus.pyrusservicedesk.sdk.updates.UpdateSubscriber
+import net.papirus.pyrusservicedesk.PyrusServiceDesk
+import net.papirus.pyrusservicedesk.sdk.request.AddCommentRequest1
+import net.papirus.pyrusservicedesk.sdk.request.CreateTicketRequest1
+import net.papirus.pyrusservicedesk.sdk.response.*
+
+internal const val BASE_URL = "https://pyrus.com/servicedeskapi/v1/"
 
 internal interface Repository{
-    fun subscribeToUpdates(subscriber: UpdateSubscriber)
-    fun unsubscribeFromUpdates(subscriber: UpdateSubscriber)
-    fun getConversation(): LiveData<GetConversationUpdate>
-    fun getTickets(): LiveData<GetTicketsUpdate>
-    fun getTicket(ticketId: Int): LiveData<GetTicketUpdate>
-    fun createTicket(userName: String, ticket: TicketDescription)
-    // TODO Comment should be passed, must handle file uploading too
-    fun addComment(
-        ticketId: Int,
-        comment: String,
-        attachments: List<Attachment>? = null
-    )
-    // TODO temporary approach, addComment must be sufficient
-    fun retryComment(ticketId: Int, localComment: Comment)
-    fun uploadFile(ticketId: Int, fileUri: Uri)
+    fun getConversation(): GetConversationResponse1
+    fun getTickets(): GetTicketsResponse1
+    fun getTicket(ticketId: Int): GetTicketResponse1
+    fun addComment(request: AddCommentRequest1): AddCommentResponse1
+    fun createTicket(request: CreateTicketRequest1): CreateTicketResponse1
+}
+
+internal fun getAvatarUrl(avatarId: Int): String = "$BASE_URL/Avatar/$avatarId"
+internal fun getFileUrl(fileId: Int): String {
+    return with(PyrusServiceDesk.getInstance()){
+        "$BASE_URL/DownloadFile/$fileId?user_id=$clientId&app_id=$appId"
+    }
 }

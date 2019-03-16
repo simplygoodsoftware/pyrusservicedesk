@@ -2,11 +2,11 @@ package net.papirus.pyrusservicedesk
 
 import android.app.Application
 import android.arch.lifecycle.Observer
+import net.papirus.pyrusservicedesk.sdk.FileResolver
 import net.papirus.pyrusservicedesk.sdk.Repository
 import net.papirus.pyrusservicedesk.sdk.RepositoryFactory
-import net.papirus.pyrusservicedesk.sdk.data.LocalDataProvider
-import net.papirus.pyrusservicedesk.sdk.web_service.WebServiceFactory
-import net.papirus.pyrusservicedesk.ui.viewmodel.SharedViewModel
+import net.papirus.pyrusservicedesk.sdk.web.retrofit.RetrofitWebService
+import net.papirus.pyrusservicedesk.presentation.viewmodel.SharedViewModel
 
 class PyrusServiceDesk private constructor(
         internal val application: Application,
@@ -31,12 +31,7 @@ class PyrusServiceDesk private constructor(
 
     internal val repository: Repository by lazy{
         RepositoryFactory.create(
-                WebServiceFactory.create(
-                        appId,
-                    clientId.toString()),
-                application.contentResolver,
-                LocalDataProvider(clientName)
-        )
+            RetrofitWebService(appId, clientId.toString(), FileResolver(application.contentResolver)))
     }
 
     internal fun getSharedViewModel(): SharedViewModel{

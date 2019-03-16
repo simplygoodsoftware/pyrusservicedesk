@@ -11,12 +11,12 @@
     <application>
 
         <activity
-            android:name="net.papirus.pyrusservicedesk.ui.usecases.tickets.TicketsActivity"
+            android:name="net.papirus.pyrusservicedesk.presentation.usecases.tickets.TicketsActivity"
             android:launchMode="singleTask"/>
 
-        <activity android:name="net.papirus.pyrusservicedesk.ui.usecases.ticket.TicketActivity"/>
+        <activity android:name="net.papirus.pyrusservicedesk.presentation.usecases.ticket.TicketActivity"/>
 
-        <activity android:name="net.papirus.pyrusservicedesk.ui.usecases.file_preview.FilePreviewActivity"/>
+        <activity android:name="net.papirus.pyrusservicedesk.presentation.usecases.file_preview.FilePreviewActivity"/>
 
     </application>
 

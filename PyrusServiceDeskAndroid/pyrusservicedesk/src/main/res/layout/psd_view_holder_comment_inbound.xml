@@ -46,7 +46,7 @@
                 app:layout_constraintStart_toStartOf="parent"
                 tools:srcCompat="@tools:sample/avatars"/>
 
-            <net.papirus.pyrusservicedesk.ui.view.CommentView
+            <net.papirus.pyrusservicedesk.presentation.view.CommentView
                 android:id="@+id/comment"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
