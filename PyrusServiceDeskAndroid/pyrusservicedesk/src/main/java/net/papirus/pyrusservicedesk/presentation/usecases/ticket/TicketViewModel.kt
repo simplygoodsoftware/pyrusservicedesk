@@ -7,14 +7,18 @@ import android.arch.lifecycle.Transformations
 import android.content.Intent
 import android.net.Uri
 import android.support.v7.util.DiffUtil
+import kotlinx.coroutines.*
 import net.papirus.pyrusservicedesk.PyrusServiceDesk
-import net.papirus.pyrusservicedesk.sdk.data.Comment
-import net.papirus.pyrusservicedesk.sdk.data.EMPTY_TICKET_ID
-import net.papirus.pyrusservicedesk.sdk.data.TicketDescription
-import net.papirus.pyrusservicedesk.sdk.updates.*
 import net.papirus.pyrusservicedesk.presentation.usecases.ticket.entries.*
 import net.papirus.pyrusservicedesk.presentation.view.recyclerview.DiffResultWithNewItems
 import net.papirus.pyrusservicedesk.presentation.viewmodel.ConnectionViewModelBase
+import net.papirus.pyrusservicedesk.sdk.RequestFactory
+import net.papirus.pyrusservicedesk.sdk.data.Comment
+import net.papirus.pyrusservicedesk.sdk.data.EMPTY_TICKET_ID
+import net.papirus.pyrusservicedesk.sdk.data.Ticket
+import net.papirus.pyrusservicedesk.sdk.response.ResponseCallback
+import net.papirus.pyrusservicedesk.sdk.response.ResponseError
+import net.papirus.pyrusservicedesk.sdk.updates.*
 import net.papirus.pyrusservicedesk.utils.getWhen
 import java.util.*
 import kotlin.collections.ArrayList
@@ -38,24 +42,24 @@ internal class TicketViewModel(
             if (serviceDesk.enableRichUi) {
                 addSource(
                     Transformations.switchMap(commentsRequest){
-                        repository.getTicket(ticketId)
+                        GetTicketUseCase(requests, ticketId).execute()
                     }
                 ){
-                    entries.value = it?.ticket?.comments
+                    entries.value = it
                     publishEntries(recentTicketEntries, entries.value?.toTicketEntries() ?: emptyList())
                     onDataLoaded()
                 }
             }
             else {
-                addSource(
-                    Transformations.switchMap(commentsRequest){
-                        repository.getConversation()
-                    }
-                ){
-                    entries.value = it?.comments
-                    publishEntries(recentTicketEntries, entries.value?.toTicketEntries() ?: emptyList())
-                    onDataLoaded()
-                }
+//                addSource(
+//                    Transformations.switchMap(commentsRequest){
+//                        repository.getConversation()
+//                    }
+//                ){
+//                    entries.value = it?.comments
+//                    publishEntries(recentTicketEntries, entries.value?.toTicketEntries() ?: emptyList())
+//                    onDataLoaded()
+//                }
             }
         }. also { it.observeForever {  } /*should be observed to trigger transformations*/}
 
@@ -63,7 +67,6 @@ internal class TicketViewModel(
             loadData()
             replayProgress()
         }
-        onInitialized()
     }
 
     override fun <T : UpdateBase> onUpdateReceived(update: T) {
@@ -107,18 +110,20 @@ internal class TicketViewModel(
         if (!item.hasError())
             return
         else {
-            repository.retryComment(ticketId, item.comment)
+//            repository.retryComment(ticketId, item.comment)
         }
     }
 
     fun addComment(text: String) {
-        if (isNewTicket())
-            repository.createTicket("USER", TicketDescription(text, text))
-        else
-            repository.addComment(ticketId, text)
+//        if (isNewTicket())
+//            repository.createTicket("USER", TicketDescription(text, text))
+//        else
+//            repository.addComment(ticketId, text)
     }
 
-    fun addAttachment(attachmentUri: Uri) = repository.uploadFile(ticketId, attachmentUri)
+    fun onAttachmentSelected(attachmentUri: Uri) {
+
+    }
 
     fun getCommentDiffLiveData(): LiveData<DiffResultWithNewItems<TicketEntry>> = commentDiff
 
@@ -226,6 +231,33 @@ internal class TicketViewModel(
         }
     }
 
+}
+
+private class GetTicketUseCase(val requests: RequestFactory, val ticketId: Int) {
+    fun execute(): LiveData<List<Comment>> {
+        val result = MutableLiveData<List<Comment>>()
+        CoroutineScope(Dispatchers.IO).launch {
+            var ticket: Ticket? = null
+            var error: ResponseError? = null
+            runBlocking {
+                requests.getTicketRequest(ticketId).execute(object : ResponseCallback<Ticket> {
+                    override fun onSuccess(data: Ticket) {
+                        ticket = data
+                    }
+
+                    override fun onFailure(responseError: ResponseError) {
+                        error = responseError
+                    }
+                })
+            }
+            withContext(Dispatchers.Main){
+                ticket?.let {
+                    result.value = it.comments
+                }
+            }
+        }
+        return result
+    }
 }
 
 private enum class ChangeType {

@@ -4,11 +4,15 @@ import android.arch.lifecycle.LiveData
 import android.arch.lifecycle.MediatorLiveData
 import android.arch.lifecycle.MutableLiveData
 import android.arch.lifecycle.Transformations
+import kotlinx.coroutines.*
 import net.papirus.pyrusservicedesk.PyrusServiceDesk
+import net.papirus.pyrusservicedesk.presentation.viewmodel.ConnectionViewModelBase
+import net.papirus.pyrusservicedesk.sdk.RequestFactory
 import net.papirus.pyrusservicedesk.sdk.data.TicketShortDescription
+import net.papirus.pyrusservicedesk.sdk.response.ResponseCallback
+import net.papirus.pyrusservicedesk.sdk.response.ResponseError
 import net.papirus.pyrusservicedesk.sdk.updates.UpdateBase
 import net.papirus.pyrusservicedesk.sdk.updates.UpdateType
-import net.papirus.pyrusservicedesk.presentation.viewmodel.ConnectionViewModelBase
 
 internal class TicketsViewModel(serviceDesk: PyrusServiceDesk)
     : ConnectionViewModelBase(serviceDesk) {
@@ -27,11 +31,11 @@ internal class TicketsViewModel(serviceDesk: PyrusServiceDesk)
         tickets.apply {
             addSource(
                 Transformations.switchMap(request){
-                    repository.getTickets()
+                    GetTicketsUseCase(requests).execute()
                 }
             ){
                 isLoading.value = false
-                tickets.value = it?.tickets?.sortedWith(TicketShortDescriptionComparator())
+                tickets.value = it?.sortedWith(TicketShortDescriptionComparator())
                 onDataLoaded()
             }
         }
@@ -39,7 +43,6 @@ internal class TicketsViewModel(serviceDesk: PyrusServiceDesk)
             loadData()
             replayProgress()
         }
-        onInitialized()
     }
 
     override fun <T : UpdateBase> onUpdateReceived(update: T) {
@@ -73,5 +76,33 @@ internal class TicketsViewModel(serviceDesk: PyrusServiceDesk)
                 else -> o1.ticketId - o2.ticketId
             }
         }
+    }
+}
+
+private class GetTicketsUseCase(val requests: RequestFactory) {
+    fun execute(): LiveData<List<TicketShortDescription>> {
+        val result = MutableLiveData<List<TicketShortDescription>>()
+        CoroutineScope(Dispatchers.IO).launch {
+            var tickets: List<TicketShortDescription>? = null
+            var error: ResponseError? = null
+            runBlocking {
+                requests.getTicketsRequest().execute(object: ResponseCallback<List<TicketShortDescription>>{
+                    override fun onSuccess(data: List<TicketShortDescription>) {
+                        tickets = data
+                    }
+
+                    override fun onFailure(responseError: ResponseError) {
+
+                    }
+
+                })
+            }
+            withContext(Dispatchers.Main){
+                tickets?.let {
+                    result.value = it
+                }
+            }
+        }
+        return result
     }
 }

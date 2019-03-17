@@ -12,7 +12,6 @@ import android.widget.ImageView
 import android.widget.TextView
 import com.example.pyrusservicedesk.R
 import com.squareup.picasso.Picasso
-import net.papirus.pyrusservicedesk.sdk.web.getAvatarUrl
 import net.papirus.pyrusservicedesk.presentation.usecases.ticket.entries.CommentEntry
 import net.papirus.pyrusservicedesk.presentation.usecases.ticket.entries.DateEntry
 import net.papirus.pyrusservicedesk.presentation.usecases.ticket.entries.TicketEntry
@@ -22,6 +21,7 @@ import net.papirus.pyrusservicedesk.presentation.view.ContentType
 import net.papirus.pyrusservicedesk.presentation.view.Status
 import net.papirus.pyrusservicedesk.presentation.view.recyclerview.AdapterBase
 import net.papirus.pyrusservicedesk.presentation.view.recyclerview.ViewHolderBase
+import net.papirus.pyrusservicedesk.sdk.getAvatarUrl
 import net.papirus.pyrusservicedesk.utils.CIRCLE_TRANSFORMATION
 import net.papirus.pyrusservicedesk.utils.getSimpleAvatar
 import net.papirus.pyrusservicedesk.utils.getTimeText

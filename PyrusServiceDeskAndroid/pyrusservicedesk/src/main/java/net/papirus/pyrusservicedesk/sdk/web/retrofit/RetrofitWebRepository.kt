@@ -5,12 +5,9 @@ import com.google.gson.GsonBuilder
 import net.papirus.pyrusservicedesk.sdk.BASE_URL
 import net.papirus.pyrusservicedesk.sdk.FileResolver
 import net.papirus.pyrusservicedesk.sdk.Repository
-import net.papirus.pyrusservicedesk.sdk.ResponseStatus
 import net.papirus.pyrusservicedesk.sdk.data.Attachment
 import net.papirus.pyrusservicedesk.sdk.data.Comment
 import net.papirus.pyrusservicedesk.sdk.data.TicketDescription
-import net.papirus.pyrusservicedesk.sdk.request.AddCommentRequest1
-import net.papirus.pyrusservicedesk.sdk.request.CreateTicketRequest1
 import net.papirus.pyrusservicedesk.sdk.request.UploadFileRequest
 import net.papirus.pyrusservicedesk.sdk.response.*
 import net.papirus.pyrusservicedesk.sdk.web.UploadFileHooks
@@ -26,9 +23,10 @@ import retrofit2.converter.gson.GsonConverterFactory
 import java.util.concurrent.Executors
 
 
-internal class RetrofitWebService(
+internal class RetrofitWebRepository(
         private val appId: String,
         private val userId: String,
+        private val userName: String,
         private val fileResolver: FileResolver)
     : Repository {
 
@@ -49,98 +47,94 @@ internal class RetrofitWebService(
         api = retrofit.create(ServiceDeskApi::class.java)
     }
 
-    override fun getConversation(): GetConversationResponse1 {
+    override fun getConversation(): GetConversationResponse {
         return api.getConversation(RequestBodyBase(appId, userId)).execute().run {
             when {
-                isSuccessful && body() != null -> GetConversationResponse1(ResponseStatus.Ok, body()!!.comments)
-                else -> GetConversationResponse1(ResponseStatus.WebServiceError)
+                isSuccessful && body() != null -> GetConversationResponse(comments = body()!!.comments)
+                else -> GetConversationResponse(ResponseError.WebServiceError)
             }
         }
     }
 
-    override fun getTickets(): GetTicketsResponse1 {
+    override fun getTickets(): GetTicketsResponse {
         return api.getTickets(RequestBodyBase(appId, userId)).execute().run {
             when {
-                isSuccessful && body() != null -> GetTicketsResponse1(ResponseStatus.Ok, body()!!.tickets)
-                else -> GetTicketsResponse1(ResponseStatus.WebServiceError)
+                isSuccessful && body() != null -> GetTicketsResponse(tickets =  body()!!.tickets)
+                else -> GetTicketsResponse(ResponseError.WebServiceError)
             }
         }
     }
 
-    override fun getTicket(ticketId: Int): GetTicketResponse1 {
+    override fun getTicket(ticketId: Int): GetTicketResponse {
         return api.getTicket(RequestBodyBase(appId, userId), ticketId).execute().run {
             when {
-                isSuccessful && body() != null -> GetTicketResponse1(ResponseStatus.Ok, body())
-                else -> GetTicketResponse1(ResponseStatus.WebServiceError)
+                isSuccessful && body() != null -> GetTicketResponse(ticket =  body())
+                else -> GetTicketResponse(ResponseError.WebServiceError)
             }
         }
     }
 
-    override fun addComment(request: AddCommentRequest1): AddCommentResponse1 {
-        var req = request
-        if (request.comment.hasAttachments()) {
+    override fun addComment(ticketId: Int, comment: Comment, uploadFileHooks: UploadFileHooks): AddCommentResponse {
+        var cament = comment
+        if (cament.hasAttachments()) {
             val newAttachments =
                 try {
-                    req.comment.attachments!!.upload(req.uploadFileHooks)
+                    cament.attachments!!.upload(uploadFileHooks)
                 } catch (ex: Exception) {
-                    return AddCommentResponse1(ResponseStatus.WebServiceError)
+                    return AddCommentResponse(ResponseError.WebServiceError)
                 }
-            req = AddCommentRequest1(
-                req.ticketId,
-                req.comment.applyNewAttachments(newAttachments),
-                req.uploadFileHooks)
+            cament = cament.applyNewAttachments(newAttachments)
         }
         return api.addComment(
-            AddCommentRequestBody(appId, userId, req.comment.body, req.comment.attachments), req.ticketId)
+            AddCommentRequestBody(appId, userId, cament.body, cament.attachments), ticketId)
             .execute()
             .run {
                 when {
-                    isSuccessful && body() != null -> AddCommentResponse1(
-                        ResponseStatus.Ok,
-                        Gson().fromJson<Map<String, Double>>(
+                    isSuccessful && body() != null -> AddCommentResponse(
+                        commentId = Gson().fromJson<Map<String, Double>>(
                             body()?.string(),
                             Map::class.java)
                             .values
                             .first()
                             .toInt())
-                else -> AddCommentResponse1(ResponseStatus.WebServiceError)
+                else -> AddCommentResponse(ResponseError.WebServiceError)
             }
         }
     }
 
-    override fun createTicket(request: CreateTicketRequest1): CreateTicketResponse1 {
-        var req = request
-        if (req.description.hasAttachments()) {
+    override fun createTicket(
+        description: TicketDescription,
+        uploadFileHooks: UploadFileHooks
+    ): CreateTicketResponse {
+        var descr = description
+        if (descr.hasAttachments()) {
             val newAttachments =
                 try {
-                    req.description.attachments!!.upload(req.uploadFileHooks)
+                    descr.attachments!!.upload(uploadFileHooks)
                 } catch (ex: Exception) {
-                    return CreateTicketResponse1(ResponseStatus.WebServiceError)
+                    return CreateTicketResponse(ResponseError.WebServiceError)
                 }
-            req = CreateTicketRequest1(
-                req.userName,
-                req.description.applyNewAttachments(newAttachments),
-                req.uploadFileHooks)
+
+            descr = descr.applyNewAttachments(newAttachments)
         }
         return api.createTicket(
             CreateTicketRequestBody(
                 appId,
                 userId,
-                req.userName,
-                req.description))
+                userName,
+                descr))
             .execute()
             .run {
                 when {
-                    isSuccessful && body() != null -> CreateTicketResponse1(
-                            ResponseStatus.Ok,
-                            Gson().fromJson<Map<String, Int>>(
+                    isSuccessful && body() != null -> CreateTicketResponse(
+                            ticketId = Gson().fromJson<Map<String, Int>>(
                                 body()?.string(),
                                 Map::class.java)
                                 .values
                                 .first()
                                 .toInt()
                         )
-                    else -> CreateTicketResponse1(ResponseStatus.WebServiceError)
+                    else -> CreateTicketResponse(ResponseError.WebServiceError)
                 }
             }
     }
@@ -155,8 +149,8 @@ internal class RetrofitWebService(
             .execute()
             .run {
                 when{
-                    isSuccessful && body() != null -> UploadFileResponse(ResponseStatus.Ok, body())
-                    else -> UploadFileResponse(ResponseStatus.WebServiceError)
+                    isSuccessful && body() != null -> UploadFileResponse(uploadData = body())
+                    else -> UploadFileResponse(ResponseError.WebServiceError)
                 }
             }
     }
@@ -185,7 +179,7 @@ internal class RetrofitWebService(
         val newAttachments = mutableListOf<Attachment>()
         uploadResponses.forEachIndexed { index, uploadFileResponse ->
 
-            if (uploadFileResponse.status != ResponseStatus.Ok || uploadFileResponse.result == null)
+            if (uploadFileResponse.error != null || uploadFileResponse.result == null)
                 throw Exception()
 
             newAttachments.add(get(index).toRemoteAttachment(uploadFileResponse.result.guid))

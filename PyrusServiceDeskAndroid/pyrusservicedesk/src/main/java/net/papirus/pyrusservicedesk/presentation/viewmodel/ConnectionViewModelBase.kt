@@ -28,7 +28,7 @@ internal abstract class ConnectionViewModelBase(private val serviceDesk: PyrusSe
 
     val organizationName = serviceDesk.clientName
 
-    protected val repository = serviceDesk.repository
+    protected val requests = serviceDesk.requestFactory
     protected val isNetworkConnected = MutableLiveData<Boolean>()
     private val connectivity: ConnectivityManager =
         serviceDesk.application.getSystemService(Context.CONNECTIVITY_SERVICE)
@@ -61,7 +61,6 @@ internal abstract class ConnectionViewModelBase(private val serviceDesk: PyrusSe
 
     override fun onCleared() {
         super.onCleared()
-        repository.unsubscribeFromUpdates(this)
         serviceDesk.application.unregisterReceiver(networkReceiver)
         mainHandler.removeCallbacks(publishProgressRunnable)
     }
@@ -70,13 +69,6 @@ internal abstract class ConnectionViewModelBase(private val serviceDesk: PyrusSe
     fun getLoadingProgressLiveData(): LiveData<Int> = loadingProgress
 
     abstract fun loadData()
-
-    /**
-     * Inheritors have to call this at the end of init to be properly subscribed on repository updates
-     */
-    protected fun onInitialized() {
-        repository.subscribeToUpdates(this)
-    }
 
     protected fun replayProgress() {
         loadingProgress.value = 0

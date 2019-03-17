@@ -10,10 +10,10 @@ import android.view.MenuItem.SHOW_AS_ACTION_ALWAYS
 import com.example.pyrusservicedesk.R
 import kotlinx.android.synthetic.main.psd_activity_ticket.*
 import net.papirus.pyrusservicedesk.PyrusServiceDesk
-import net.papirus.pyrusservicedesk.sdk.data.EMPTY_TICKET_ID
 import net.papirus.pyrusservicedesk.presentation.ConnectionActivityBase
 import net.papirus.pyrusservicedesk.presentation.navigation.UiNavigator
 import net.papirus.pyrusservicedesk.presentation.view.recyclerview.item_decorators.SpaceItemDecoration
+import net.papirus.pyrusservicedesk.sdk.data.EMPTY_TICKET_ID
 import net.papirus.pyrusservicedesk.utils.getViewModel
 
 internal class TicketActivity : ConnectionActivityBase<TicketViewModel>(TicketViewModel::class.java) {
@@ -85,15 +85,6 @@ internal class TicketActivity : ConnectionActivityBase<TicketViewModel>(TicketVi
         } ?: false
     }
 
-    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
-        super.onActivityResult(requestCode, resultCode, data)
-        if (!isExpectedResult(requestCode) || resultCode != RESULT_OK)
-            return
-        data?.data?.let {
-            viewModel.addAttachment(it)
-        }
-    }
-
     override fun observeData() {
         super.observeData()
         viewModel.getCommentDiffLiveData().observe(
@@ -110,7 +101,7 @@ internal class TicketActivity : ConnectionActivityBase<TicketViewModel>(TicketVi
             this,
             Observer { fileUri ->
                 fileUri?.let {
-                    viewModel.addAttachment(it)
+                    viewModel.onAttachmentSelected(it)
                 }
             }
         )
