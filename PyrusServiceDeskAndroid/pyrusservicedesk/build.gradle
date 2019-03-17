@@ -7,6 +7,7 @@ apply from: '../publish.gradle'
 
 android {
     compileSdkVersion rootProject.compileSdk
+    buildToolsVersion rootProject.buildTools
     defaultConfig {
         minSdkVersion rootProject.minSdk
         targetSdkVersion rootProject.targetSdk
@@ -53,6 +54,7 @@ dependencies {
     // architecture
     implementation 'android.arch.lifecycle:extensions:1.1.1'
     implementation 'org.jetbrains.kotlinx:kotlinx-coroutines-core:1.1.1'
+    implementation 'org.jetbrains.kotlinx:kotlinx-coroutines-android:1.1.1'
     //web service
     implementation 'com.squareup.retrofit2:retrofit:2.5.0'
     implementation 'com.squareup.retrofit2:converter-gson:2.5.0'
