@@ -17,6 +17,7 @@
         app:titleTextAppearance="@style/PsdToolbarTitleTextAppearance"/>
 
     <android.support.constraint.ConstraintLayout
+        android:id="@+id/refresh"
         android:layout_width="0dp"
         android:layout_height="0dp"
         app:layout_constraintBottom_toBottomOf="parent"
@@ -24,16 +25,22 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/ticket_toolbar">
 
-        <android.support.v7.widget.RecyclerView
-            android:id="@+id/comments"
+        <net.papirus.pyrusservicedesk.ui.view.swiperefresh.DirectedSwipeRefresh
             android:layout_width="0dp"
             android:layout_height="0dp"
-            app:layoutManager="android.support.v7.widget.LinearLayoutManager"
-            app:layout_constraintBottom_toTopOf="@+id/input_layout"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent"
-            tools:listitem="@layout/psd_view_holder_comment_inbound" />
+            app:layout_constraintTop_toTopOf="parent">
+
+            <android.support.v7.widget.RecyclerView
+                android:id="@+id/comments"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                app:layoutManager="android.support.v7.widget.LinearLayoutManager"
+                app:layout_constraintBottom_toTopOf="@+id/input_layout"
+                tools:listitem="@layout/psd_view_holder_comment_inbound" />
+
+        </net.papirus.pyrusservicedesk.ui.view.swiperefresh.DirectedSwipeRefresh>
 
         <ProgressBar
                 android:id="@+id/progress_bar"
@@ -52,7 +59,7 @@
             android:layout_height="1dp"
             android:background="?android:attr/listDivider"
             app:layout_constraintBottom_toTopOf="@+id/input_layout"
-            app:layout_constraintTop_toBottomOf="@+id/comments" />
+            app:layout_constraintTop_toBottomOf="@+id/refresh" />
 
         <android.support.constraint.ConstraintLayout
             android:id="@+id/input_layout"

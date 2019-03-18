@@ -11,4 +11,13 @@
         </attr>
     </declare-styleable>
 
+    <declare-styleable name="DirectedSwipeRefresh">
+        <attr name="swipeDirection" format="enum">
+            <enum name="top" value="0"/>
+            <enum name="bottom" value="1"/>
+            <enum name="both" value="2"/>
+        </attr>
+        <attr name="allowChildHasOwnDimensions" format="boolean"/>
+    </declare-styleable>
+
 </resources>
