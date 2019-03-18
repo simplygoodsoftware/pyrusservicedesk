@@ -12,6 +12,12 @@ public class SampleActivity extends Activity {
         setContentView(R.layout.activity_sample);
         findViewById(R.id.support).setOnClickListener(
                 view ->
-                        startActivity(ServiceDeskActivity.createIntent()));
+                        startActivity(
+                                new ServiceDeskActivity.Builder()
+                                        .setStyle(
+                                                new ServiceDeskActivity.StyleBuilder()
+                                                        .showAsDialog(true)
+                                                        .build())
+                                        .build()));
     }
 }

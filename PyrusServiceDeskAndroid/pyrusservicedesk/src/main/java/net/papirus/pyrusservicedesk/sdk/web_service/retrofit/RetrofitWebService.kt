@@ -23,18 +23,21 @@ import retrofit2.Response
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 import java.util.concurrent.Executors
+import java.util.concurrent.TimeUnit
 
 
 internal class RetrofitWebService(
         private val appId: String,
-        internal val userId: String)
+        internal val userId: String,
+        private val isFeed: Boolean)
     : WebService {
 
     private val api: ServiceDeskApi
 
     init {
         val httpBuilder = OkHttpClient.Builder()
-                .dispatcher(Dispatcher(Executors.newSingleThreadExecutor()))
+            .dispatcher(Dispatcher(Executors.newSingleThreadExecutor()))
+            .connectTimeout(1, TimeUnit.MINUTES)
 
         val retrofit = Retrofit.Builder()
                 .baseUrl(BASE_URL)
@@ -48,20 +51,20 @@ internal class RetrofitWebService(
     }
 
 
-    override fun getConversation(request: RequestBase): LiveData<GetConversationResponse> {
-        val result = MutableLiveData<GetConversationResponse>()
-        api.getConversation(request.makeRequestBody(appId, userId)).enqueue(object: Callback<Comments>{
+    override fun getTicketFeed(request: RequestBase): LiveData<GetTicketFeedResponse> {
+        val result = MutableLiveData<GetTicketFeedResponse>()
+        api.getTicketFeed(request.makeRequestBody(appId, userId)).enqueue(object: Callback<Comments>{
 
             override fun onFailure(call: Call<Comments>, t: Throwable) {
-                result.postValue(GetConversationResponse(Status.WebServiceError, request))
+                result.postValue(GetTicketFeedResponse(Status.WebServiceError, request))
             }
 
             override fun onResponse(call: Call<Comments>, response: Response<Comments>) {
-                when (response.isSuccessful) {
-                    true -> result.postValue(
-                        GetConversationResponse(request = request, comments = response.body()?.comments))
+                when {
+                    response.isSuccessful -> result.postValue(
+                        GetTicketFeedResponse(request = request, comments = response.body()?.comments))
                     else -> result.postValue(
-                        GetConversationResponse(Status.WebServiceError, request))
+                        GetTicketFeedResponse(Status.WebServiceError, request))
                 }
             }
         })
@@ -140,29 +143,34 @@ internal class RetrofitWebService(
 
     override fun addComment(request: AddCommentRequest): LiveData<AddCommentResponse>{
         val result = MutableLiveData<AddCommentResponse>()
-        api.addComment(request.makeRequestBody(appId, userId), request.ticketId)
-                .enqueue(object: Callback<ResponseBody>{
+        val callback = object: Callback<ResponseBody>{
 
-                    override fun onFailure(call: Call<ResponseBody>, t: Throwable) {
-                        result.postValue(
-                                AddCommentResponse(Status.WebServiceError, request))
-                    }
+            override fun onFailure(call: Call<ResponseBody>, t: Throwable) {
+                result.postValue(
+                    AddCommentResponse(Status.WebServiceError, request))
+            }
 
-                    override fun onResponse(call: Call<ResponseBody>, response: Response<ResponseBody>) {
-                        when (response.isSuccessful) {
-                            true -> result.postValue(
-                                    AddCommentResponse(
-                                            request = request,
-                                            commentId = Gson().fromJson<Map<String, Double>>(
-                                                    response.body()?.string(),
-                                                    Map::class.java)
-                                                    .values
-                                                    .first().toInt()))
-                            else -> result.postValue(
-                                    AddCommentResponse(Status.WebServiceError, request))
-                        }
-                    }
-                })
+            override fun onResponse(call: Call<ResponseBody>, response: Response<ResponseBody>) {
+                when (response.isSuccessful) {
+                    true -> result.postValue(
+                        AddCommentResponse(
+                            request = request,
+                            commentId = Gson().fromJson<Map<String, Double>>(
+                                response.body()?.string(),
+                                Map::class.java)
+                                .values
+                                .first().toInt()))
+                    else -> result.postValue(
+                        AddCommentResponse(Status.WebServiceError, request))
+                }
+            }
+        }
+        with(request.makeRequestBody(appId, userId)) {
+            when {
+                isFeed -> api.addFeedComment(this)
+                else -> api.addComment(this, request.ticketId)
+            }
+        }.run { enqueue(callback) }
         return result
     }
 

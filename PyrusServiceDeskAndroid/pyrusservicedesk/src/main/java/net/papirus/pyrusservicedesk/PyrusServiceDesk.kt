@@ -13,33 +13,33 @@ class PyrusServiceDesk private constructor(
         internal val appId: String,
         internal val clientId: Int,
         internal val clientName: String,
-        internal val enableRichUi: Boolean){
+        internal val enableFeedUi: Boolean){
 
     companion object {
         private var INSTANCE: PyrusServiceDesk? = null
 
         @JvmStatic
-        fun init(application: Application, appId: String, clientId: Int, clientName: String, enableRichUi: Boolean) {
-            INSTANCE = PyrusServiceDesk(application, appId, clientId, clientName, enableRichUi)
+        fun init(application: Application, appId: String, clientId: Int, clientName: String) {
+            INSTANCE = PyrusServiceDesk(application, appId, clientId, clientName, false)
         }
 
         internal fun getInstance() : PyrusServiceDesk {
             return checkNotNull(INSTANCE){ "Instantiate PyrusServiceDesk first" }
-
         }
     }
 
     internal val repository: Repository by lazy{
         RepositoryFactory.create(
                 WebServiceFactory.create(
-                        appId,
-                    clientId.toString()),
+                    appId,
+                    clientId.toString(),
+                    enableFeedUi),
                 application.contentResolver,
                 LocalDataProvider(clientName)
         )
     }
 
-    internal fun getSharedViewModel(): SharedViewModel{
+    internal fun getSharedViewModel(): SharedViewModel {
         if (sharedViewModel == null)
             refreshSharedViewModel()
         return sharedViewModel!!

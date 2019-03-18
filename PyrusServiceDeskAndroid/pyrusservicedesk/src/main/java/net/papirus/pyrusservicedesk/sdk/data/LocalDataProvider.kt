@@ -15,7 +15,7 @@ internal class LocalDataProvider(
             isInbound = true,
             author = me,
             creationDate = Calendar.getInstance().time,
-            localId = lastLocalCommentId++
+            localId = --lastLocalCommentId
         )
     }
 
@@ -25,7 +25,7 @@ internal class LocalDataProvider(
             author = me,
             attachments = listOf(newLocalAttachment(fileName, fileSize, fileUri)),
             creationDate = Calendar . getInstance ().time,
-            localId = lastLocalCommentId++
+            localId = --lastLocalCommentId
         )
     }
 

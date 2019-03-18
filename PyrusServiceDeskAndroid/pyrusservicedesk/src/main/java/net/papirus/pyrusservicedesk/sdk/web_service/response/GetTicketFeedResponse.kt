@@ -3,10 +3,10 @@ package net.papirus.pyrusservicedesk.sdk.web_service.response
 import net.papirus.pyrusservicedesk.sdk.data.Comment
 import net.papirus.pyrusservicedesk.sdk.web_service.retrofit.request.RequestBase
 
-internal class GetConversationResponse(
+internal class GetTicketFeedResponse(
         status: Status = Status.Ok,
         request: RequestBase,
         comments: List<Comment>? = null)
-    : ResponseBase<RequestBase, List<Comment>>(status, request) {
+    : ResponseBase<RequestBase, List<Comment>>(status, request, comments) {
 
 }

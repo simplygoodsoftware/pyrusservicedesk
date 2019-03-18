@@ -15,6 +15,7 @@ import net.papirus.pyrusservicedesk.ui.ConnectionActivityBase
 import net.papirus.pyrusservicedesk.ui.navigation.UiNavigator
 import net.papirus.pyrusservicedesk.ui.view.recyclerview.item_decorators.SpaceItemDecoration
 import net.papirus.pyrusservicedesk.utils.getViewModel
+import net.papirus.pyrusservicedesk.utils.isAtEnd
 
 internal class TicketActivity : ConnectionActivityBase<TicketViewModel>(TicketViewModel::class.java) {
 
@@ -58,6 +59,9 @@ internal class TicketActivity : ConnectionActivityBase<TicketViewModel>(TicketVi
         ticket_toolbar.setNavigationIcon(R.drawable.psd_menu)
         ticket_toolbar.setNavigationOnClickListener { UiNavigator.toTickets(this@TicketActivity) }
         ticket_toolbar.setOnMenuItemClickListener{ onMenuItemClicked(it) }
+        refresh.setOnRefreshListener {
+            viewModel.loadData()
+        }
         comments.apply {
             adapter = this@TicketActivity.adapter
             addItemDecoration(
@@ -100,6 +104,8 @@ internal class TicketActivity : ConnectionActivityBase<TicketViewModel>(TicketVi
             this,
             Observer { result ->
                 result?.let{
+                    if (refresh.isRefreshing)
+                        refresh.isRefreshing = false
                     adapter.setItemsWithoutUpdate(it.newItems)
                     it.diffResult.dispatchUpdatesTo(adapter)
                 }
@@ -118,7 +124,11 @@ internal class TicketActivity : ConnectionActivityBase<TicketViewModel>(TicketVi
 
     override fun onViewHeightChanged(changedBy: Int) {
         super.onViewHeightChanged(changedBy)
-        comments.scrollBy(0, changedBy)
+        when {
+            changedBy == 0 -> return
+            changedBy > 0 -> comments.scrollBy(0, changedBy)
+            !comments.isAtEnd() -> comments.scrollBy(0, changedBy)
+        }
     }
 
     private fun sendComment() {

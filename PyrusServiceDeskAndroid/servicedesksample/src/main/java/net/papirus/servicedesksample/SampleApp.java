@@ -12,7 +12,7 @@ public class SampleApp extends Application {
                 this,
                 "b7206b43-6859-4a20-837d-637a68e92d94",
                 12345,
-                "Android Sample",
-                true);
+                "Android Sample"
+        );
     }
 }

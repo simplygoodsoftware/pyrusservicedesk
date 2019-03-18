@@ -17,7 +17,6 @@
         app:titleTextAppearance="@style/PsdToolbarTitleTextAppearance"/>
 
     <android.support.constraint.ConstraintLayout
-        android:id="@+id/refresh"
         android:layout_width="0dp"
         android:layout_height="0dp"
         app:layout_constraintBottom_toBottomOf="parent"
@@ -26,18 +25,19 @@
         app:layout_constraintTop_toBottomOf="@+id/ticket_toolbar">
 
         <net.papirus.pyrusservicedesk.ui.view.swiperefresh.DirectedSwipeRefresh
+            android:id="@+id/refresh"
             android:layout_width="0dp"
             android:layout_height="0dp"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent">
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintBottom_toTopOf="@+id/input_layout">
 
             <android.support.v7.widget.RecyclerView
                 android:id="@+id/comments"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 app:layoutManager="android.support.v7.widget.LinearLayoutManager"
-                app:layout_constraintBottom_toTopOf="@+id/input_layout"
                 tools:listitem="@layout/psd_view_holder_comment_inbound" />
 
         </net.papirus.pyrusservicedesk.ui.view.swiperefresh.DirectedSwipeRefresh>

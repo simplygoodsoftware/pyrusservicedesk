@@ -25,6 +25,8 @@ internal class TicketViewModel(
     : ConnectionViewModelBase(serviceDesk),
         OnClickedCallback<CommentEntry> {
 
+    val isFeed = serviceDesk.enableFeedUi
+
     private var ticketId: Int = TicketActivity.getTicketId(arguments)
 
     private val commentsRequest = MutableLiveData<Boolean>()
@@ -35,7 +37,7 @@ internal class TicketViewModel(
 
     init {
         entries.apply{
-            if (serviceDesk.enableRichUi) {
+            if (!isFeed) {
                 addSource(
                     Transformations.switchMap(commentsRequest){
                         repository.getTicket(ticketId)
@@ -49,7 +51,7 @@ internal class TicketViewModel(
             else {
                 addSource(
                     Transformations.switchMap(commentsRequest){
-                        repository.getConversation()
+                        repository.getTicketFeed()
                     }
                 ){
                     entries.value = it?.comments
@@ -59,7 +61,8 @@ internal class TicketViewModel(
             }
         }. also { it.observeForever {  } /*should be observed to trigger transformations*/}
 
-        if (!isNewTicket() && isNetworkConnected.value == true) {
+        val wantLoadDataOnStart = isFeed || !isNewTicket()
+        if (wantLoadDataOnStart && isNetworkConnected.value == true) {
             loadData()
             replayProgress()
         }
@@ -76,7 +79,7 @@ internal class TicketViewModel(
             }
             UpdateType.CommentAdded -> {
                 (update as CommentAddedUpdate).let {
-                    if (update.ticketId != ticketId)
+                    if (!isFeed && update.ticketId != ticketId)
                         return
                     applyUpdate(
                         CommentEntry(update.comment, update.fileUploadCallbacks, this, update.error),
@@ -85,7 +88,7 @@ internal class TicketViewModel(
             }
             UpdateType.CommentCancelled -> {
                 (update as CommentCancelledUpdate).let {
-                    if (update.ticketId != ticketId)
+                    if (!isFeed && update.ticketId != ticketId)
                         return
                     applyUpdate(
                         CommentEntry(update.comment, onClickedCallback = this),

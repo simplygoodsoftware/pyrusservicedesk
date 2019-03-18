@@ -14,8 +14,8 @@ import retrofit2.http.*
 
 internal interface ServiceDeskApi {
 
-    @POST("getfeed")
-    fun getConversation(@Body requestBody: RequestBodyBase): Call<Comments>
+    @POST("GetTicketFeed")
+    fun getTicketFeed(@Body requestBody: RequestBodyBase): Call<Comments>
 
     @POST("gettickets")
     fun getTickets(@Body requestBody: RequestBodyBase)
@@ -33,6 +33,9 @@ internal interface ServiceDeskApi {
     fun addComment(@Body requestBody: AddCommentRequestBody,
                    @Path("ticket_id") ticketId: Int)
             : Call<ResponseBody>
+
+    @POST("UpdateTicketFeed")
+    fun addFeedComment(@Body requestBody: AddCommentRequestBody): Call<ResponseBody>
 
     @Multipart
     @POST("UploadFile")

@@ -43,17 +43,17 @@ internal class RepositoryImpl(
     }
 
 
-    override fun getConversation(): LiveData<GetConversationUpdate> {
-        return Transformations.map(webService.getConversation(RequestBase())){ response ->
+    override fun getTicketFeed(): LiveData<GetTicketFeedUpdate> {
+        return Transformations.map(webService.getTicketFeed(RequestBase())){ response ->
             when {
                 response?.responseData == null ->
-                    GetConversationUpdate(error = UpdateError.Unknown)
+                    GetTicketFeedUpdate(error = UpdateError.Unknown)
 
                 response.status == Status.WebServiceError ->
-                    GetConversationUpdate(error = UpdateError.WebService)
+                    GetTicketFeedUpdate(error = UpdateError.WebService)
 
                 else ->
-                    GetConversationUpdate(response.responseData)
+                    GetTicketFeedUpdate(response.responseData)
             }
         }
     }
@@ -173,7 +173,7 @@ internal class RepositoryImpl(
 
     private fun addComment(ticketId: Int, localComment: Comment, isNewComment: Boolean = true) {
         notifySubscribers(CommentAddedUpdate(ticketId, localComment, isNewComment))
-        webService.addComment(AddCommentRequest(ticketId, localComment.body, localComment.attachments))
+        webService.addComment(AddCommentRequest(ticketId, localComment.body, localComment.attachments, localComment.author.name))
             .observeForever { response ->
                 notifySubscribers(
                     when{

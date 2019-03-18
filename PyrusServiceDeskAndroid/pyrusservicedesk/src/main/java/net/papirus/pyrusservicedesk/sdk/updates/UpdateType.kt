@@ -1,7 +1,7 @@
 package net.papirus.pyrusservicedesk.sdk.updates
 
 internal enum class UpdateType {
-    ConversationReceived,
+    TicketFeedReceived,
     TicketsReceived,
     TicketReceived,
     CommentAdded,

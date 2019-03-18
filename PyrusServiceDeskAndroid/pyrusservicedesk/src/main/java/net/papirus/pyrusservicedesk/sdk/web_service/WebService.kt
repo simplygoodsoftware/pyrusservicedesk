@@ -5,10 +5,10 @@ import net.papirus.pyrusservicedesk.PyrusServiceDesk
 import net.papirus.pyrusservicedesk.sdk.web_service.response.*
 import net.papirus.pyrusservicedesk.sdk.web_service.retrofit.request.*
 
-internal const val BASE_URL = "https://pyrus.com/servicedeskapi/v1/"
+internal const val BASE_URL = "https://dev.pyrus.com/servicedeskapi/v1/"
 
 internal interface WebService{
-    fun getConversation(request: RequestBase): LiveData<GetConversationResponse>
+    fun getTicketFeed(request: RequestBase): LiveData<GetTicketFeedResponse>
     fun getTickets(request: RequestBase): LiveData<GetTicketsResponse>
     fun getTicket(request: GetTicketRequest): LiveData<GetTicketResponse>
     fun createTicket(request: CreateTicketRequest): LiveData<CreateTicketResponse>
