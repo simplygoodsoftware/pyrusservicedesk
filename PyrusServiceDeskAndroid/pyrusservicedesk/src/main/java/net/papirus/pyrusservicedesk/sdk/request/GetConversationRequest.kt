@@ -5,5 +5,5 @@ import net.papirus.pyrusservicedesk.sdk.data.Comment
 import net.papirus.pyrusservicedesk.sdk.response.ResponseBase
 
 internal class GetConversationRequest(repository: Repository): RequestBase<List<Comment>>(repository) {
-    override fun run(repository: Repository): ResponseBase<List<Comment>> = repository.getConversation()
+    override suspend fun run(repository: Repository): ResponseBase<List<Comment>> = repository.getConversation()
 }

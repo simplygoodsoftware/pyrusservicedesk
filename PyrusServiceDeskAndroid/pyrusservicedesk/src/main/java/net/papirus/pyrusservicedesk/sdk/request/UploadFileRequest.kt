@@ -5,5 +5,4 @@ import net.papirus.pyrusservicedesk.sdk.web.UploadFileHooks
 
 internal class UploadFileRequest(
         val fileUploadRequestData: FileUploadRequestData,
-        val uploadFileHooks: UploadFileHooks
-)
+        val uploadFileHooks: UploadFileHooks)

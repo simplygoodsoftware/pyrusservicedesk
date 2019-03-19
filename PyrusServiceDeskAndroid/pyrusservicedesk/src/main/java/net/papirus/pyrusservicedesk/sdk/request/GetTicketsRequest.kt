@@ -5,5 +5,5 @@ import net.papirus.pyrusservicedesk.sdk.data.TicketShortDescription
 import net.papirus.pyrusservicedesk.sdk.response.ResponseBase
 
 internal class GetTicketsRequest(repository: Repository): RequestBase<List<TicketShortDescription>>(repository) {
-    override fun run(repository: Repository): ResponseBase<List<TicketShortDescription>> = repository.getTickets()
+    override suspend fun run(repository: Repository): ResponseBase<List<TicketShortDescription>> = repository.getTickets()
 }

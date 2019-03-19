@@ -47,7 +47,7 @@ internal class RetrofitWebRepository(
         api = retrofit.create(ServiceDeskApi::class.java)
     }
 
-    override fun getConversation(): GetConversationResponse {
+    override suspend fun getConversation(): GetConversationResponse {
         return api.getConversation(RequestBodyBase(appId, userId)).execute().run {
             when {
                 isSuccessful && body() != null -> GetConversationResponse(comments = body()!!.comments)
@@ -56,7 +56,7 @@ internal class RetrofitWebRepository(
         }
     }
 
-    override fun getTickets(): GetTicketsResponse {
+    override suspend fun getTickets(): GetTicketsResponse {
         return api.getTickets(RequestBodyBase(appId, userId)).execute().run {
             when {
                 isSuccessful && body() != null -> GetTicketsResponse(tickets =  body()!!.tickets)
@@ -65,7 +65,7 @@ internal class RetrofitWebRepository(
         }
     }
 
-    override fun getTicket(ticketId: Int): GetTicketResponse {
+    override suspend fun getTicket(ticketId: Int): GetTicketResponse {
         return api.getTicket(RequestBodyBase(appId, userId), ticketId).execute().run {
             when {
                 isSuccessful && body() != null -> GetTicketResponse(ticket =  body())
@@ -74,7 +74,7 @@ internal class RetrofitWebRepository(
         }
     }
 
-    override fun addComment(ticketId: Int, comment: Comment, uploadFileHooks: UploadFileHooks): AddCommentResponse {
+    override suspend fun addComment(ticketId: Int, comment: Comment, uploadFileHooks: UploadFileHooks): AddCommentResponse {
         var cament = comment
         if (cament.hasAttachments()) {
             val newAttachments =
@@ -102,7 +102,7 @@ internal class RetrofitWebRepository(
         }
     }
 
-    override fun createTicket(
+    override suspend fun createTicket(
         description: TicketDescription,
         uploadFileHooks: UploadFileHooks
     ): CreateTicketResponse {

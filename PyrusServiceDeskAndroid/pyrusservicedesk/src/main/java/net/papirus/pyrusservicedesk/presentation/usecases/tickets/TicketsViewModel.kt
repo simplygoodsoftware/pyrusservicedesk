@@ -4,7 +4,10 @@ import android.arch.lifecycle.LiveData
 import android.arch.lifecycle.MediatorLiveData
 import android.arch.lifecycle.MutableLiveData
 import android.arch.lifecycle.Transformations
-import kotlinx.coroutines.*
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import net.papirus.pyrusservicedesk.PyrusServiceDesk
 import net.papirus.pyrusservicedesk.presentation.viewmodel.ConnectionViewModelBase
 import net.papirus.pyrusservicedesk.sdk.RequestFactory
@@ -85,18 +88,16 @@ private class GetTicketsUseCase(val requests: RequestFactory) {
         CoroutineScope(Dispatchers.IO).launch {
             var tickets: List<TicketShortDescription>? = null
             var error: ResponseError? = null
-            runBlocking {
-                requests.getTicketsRequest().execute(object: ResponseCallback<List<TicketShortDescription>>{
-                    override fun onSuccess(data: List<TicketShortDescription>) {
-                        tickets = data
-                    }
+            requests.getTicketsRequest().execute(object: ResponseCallback<List<TicketShortDescription>>{
+                override fun onSuccess(data: List<TicketShortDescription>) {
+                    tickets = data
+                }
 
-                    override fun onFailure(responseError: ResponseError) {
+                override fun onFailure(responseError: ResponseError) {
 
-                    }
+                }
 
-                })
-            }
+            })
             withContext(Dispatchers.Main){
                 tickets?.let {
                     result.value = it

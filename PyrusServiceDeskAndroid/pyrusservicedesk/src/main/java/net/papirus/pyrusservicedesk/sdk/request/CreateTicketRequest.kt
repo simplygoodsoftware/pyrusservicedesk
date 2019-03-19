@@ -12,7 +12,7 @@ internal class CreateTicketRequest(
 )
     : RequestBase<Int>(repository){
 
-    override fun run(repository: Repository): ResponseBase<Int> {
+    override suspend fun run(repository: Repository): ResponseBase<Int> {
         return repository.createTicket(description, uploadFileHooks)
     }
 }

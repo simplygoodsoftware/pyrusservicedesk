@@ -2,6 +2,7 @@ package net.papirus.pyrusservicedesk
 
 import android.app.Application
 import android.arch.lifecycle.Observer
+import kotlinx.coroutines.newSingleThreadContext
 import net.papirus.pyrusservicedesk.presentation.viewmodel.SharedViewModel
 import net.papirus.pyrusservicedesk.sdk.FileResolver
 import net.papirus.pyrusservicedesk.sdk.RepositoryFactory
@@ -27,7 +28,10 @@ class PyrusServiceDesk private constructor(
             return checkNotNull(INSTANCE){ "Instantiate PyrusServiceDesk first" }
 
         }
+
+        internal val DISPATCHER_IO_SINGLE = newSingleThreadContext("IO_SINGLE")
     }
+
 
     internal val requestFactory: RequestFactory by lazy {
         RequestFactory(
