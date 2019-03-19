@@ -17,7 +17,7 @@ internal class CentralRepository(private val webRepository: Repository) : Reposi
 
     override suspend fun addComment(ticketId: Int,
                                     comment: Comment,
-                                    uploadFileHooks: UploadFileHooks): AddCommentResponse{
+                                    uploadFileHooks: UploadFileHooks?): AddCommentResponse{
 
         return withContext(DISPATCHER_IO_SINGLE){
             webRepository.addComment(ticketId, comment, uploadFileHooks)

@@ -13,6 +13,10 @@ import android.os.Handler
 import android.support.v4.net.ConnectivityManagerCompat
 import android.view.animation.AccelerateInterpolator
 import com.example.pyrusservicedesk.R
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.cancelChildren
 import net.papirus.pyrusservicedesk.PyrusServiceDesk
 import net.papirus.pyrusservicedesk.broadcasts.ReceiverBase
 import net.papirus.pyrusservicedesk.sdk.updates.UpdateSubscriber
@@ -24,11 +28,13 @@ private const val PROGRESS_ANIMATION_DURATION_MS_QUICK = 400L
 
 internal abstract class ConnectionViewModelBase(private val serviceDesk: PyrusServiceDesk)
     : AndroidViewModel(serviceDesk.application),
-        UpdateSubscriber {
+        UpdateSubscriber,
+        CoroutineScope {
 
     val organizationName = serviceDesk.clientName
 
     protected val requests = serviceDesk.requestFactory
+    protected val localDataProvider = serviceDesk.localDataProvider
     protected val isNetworkConnected = MutableLiveData<Boolean>()
     private val connectivity: ConnectivityManager =
         serviceDesk.application.getSystemService(Context.CONNECTIVITY_SERVICE)
@@ -54,6 +60,11 @@ internal abstract class ConnectionViewModelBase(private val serviceDesk: PyrusSe
         publishProgress(PROGRESS_START_VALUE, PROGRESS_ANIMATION_DURATION_MS_DEFAULT, onCompleted)
     }
 
+    //// coroutine scrope
+    private val job = SupervisorJob()
+    override val coroutineContext = Dispatchers.IO + job
+    ////
+
     init {
         serviceDesk.application.registerReceiver(networkReceiver, networkReceiver.getIntentFilter())
         isNetworkConnected.value = connectivity.activeNetworkInfo?.isConnected ?: false
@@ -63,6 +74,7 @@ internal abstract class ConnectionViewModelBase(private val serviceDesk: PyrusSe
         super.onCleared()
         serviceDesk.application.unregisterReceiver(networkReceiver)
         mainHandler.removeCallbacks(publishProgressRunnable)
+        job.cancelChildren()
     }
 
     fun getIsNetworkConnectedLiveDate(): LiveData<Boolean> = isNetworkConnected

@@ -74,7 +74,7 @@ internal class RetrofitWebRepository(
         }
     }
 
-    override suspend fun addComment(ticketId: Int, comment: Comment, uploadFileHooks: UploadFileHooks): AddCommentResponse {
+    override suspend fun addComment(ticketId: Int, comment: Comment, uploadFileHooks: UploadFileHooks?): AddCommentResponse {
         var cament = comment
         if (cament.hasAttachments()) {
             val newAttachments =
@@ -156,7 +156,7 @@ internal class RetrofitWebRepository(
     }
 
     @Throws(Exception::class)
-    private fun List<Attachment>.upload(uploadFileHooks: UploadFileHooks): List<Attachment> {
+    private fun List<Attachment>.upload(uploadFileHooks: UploadFileHooks?): List<Attachment> {
         val uploadResponses = fold(ArrayList<UploadFileResponse>(size))
         { responses, attachment ->
             if (attachment.uri == null)
@@ -168,8 +168,7 @@ internal class RetrofitWebRepository(
                         uploadFile(
                             UploadFileRequest(
                                 this,
-                                uploadFileHooks
-                            )
+                                uploadFileHooks)
                         )
                     )
                 }

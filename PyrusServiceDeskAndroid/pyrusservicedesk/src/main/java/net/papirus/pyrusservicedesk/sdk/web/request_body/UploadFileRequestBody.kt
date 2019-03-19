@@ -10,12 +10,12 @@ import java.io.InputStream
 internal class UploadFileRequestBody(
         private val fileName: String,
         private val fileStream: InputStream,
-        private val uploadFileHooks: UploadFileHooks) {
+        private val uploadFileHooks: UploadFileHooks?) {
 
     private val fileSize = fileStream.available().toLong()
 
     init {
-        uploadFileHooks.onProgressPercentChanged(0)
+        uploadFileHooks?.onProgressPercentChanged(0)
     }
 
     fun toMultipartBody(): MultipartBody.Part {
@@ -36,7 +36,7 @@ internal class UploadFileRequestBody(
                     while (read != -1) {
                         uploaded += read
                         sink.write(buffer, 0, read)
-                        uploadFileHooks.onProgressPercentChanged(calculateProgress(uploaded))
+                        uploadFileHooks?.onProgressPercentChanged(calculateProgress(uploaded))
                         read = fileStream.read(buffer)
                     }
                 }

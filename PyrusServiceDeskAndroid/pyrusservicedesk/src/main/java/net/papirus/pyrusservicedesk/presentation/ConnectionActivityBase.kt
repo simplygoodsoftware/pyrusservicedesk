@@ -32,10 +32,10 @@ internal abstract class ConnectionActivityBase<T: ConnectionViewModelBase>(viewM
                 this,
                 Observer { isConnected ->
                     isConnected?.let {
-                        if (!it)
-                            no_connection.visibility = View.VISIBLE
-                        else
-                            reconnect()
+//                        if (!it)
+//                            no_connection.visibility = View.VISIBLE
+//                        else
+//                            reconnect()
                     }
 
                 }

@@ -1,21 +1,26 @@
 package net.papirus.pyrusservicedesk.sdk.data
 
 import android.net.Uri
+import net.papirus.pyrusservicedesk.sdk.FileResolver
 import java.util.*
 internal class LocalDataProvider(
     clientName: String,
-    initialLocalCommentId: Int = -1) {
+    initialLocalCommentId: Int = -1,
+    private val fileResolver: FileResolver) {
 
     private val me = Author(clientName)
     private var lastLocalCommentId = initialLocalCommentId
 
-    fun newLocalTextComment(text: String = ""): Comment {
+    fun newLocalComment(text: String = "", fileUri: Uri? = null): Comment {
         return Comment(
             body = text,
             isInbound = true,
             author = me,
+            attachments = fileResolver.getFileData(fileUri)?.let {
+                listOf(newLocalAttachment(it.fileName, it.bytesSize, it.uri))
+            },
             creationDate = Calendar.getInstance().time,
-            localId = lastLocalCommentId++
+            localId = --lastLocalCommentId
         )
     }
 
@@ -25,7 +30,7 @@ internal class LocalDataProvider(
             author = me,
             attachments = listOf(newLocalAttachment(fileName, fileSize, fileUri)),
             creationDate = Calendar . getInstance ().time,
-            localId = lastLocalCommentId++
+            localId = --lastLocalCommentId
         )
     }
 

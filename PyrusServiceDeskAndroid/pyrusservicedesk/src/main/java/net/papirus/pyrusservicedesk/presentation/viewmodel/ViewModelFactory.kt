@@ -4,10 +4,10 @@ import android.arch.lifecycle.ViewModel
 import android.arch.lifecycle.ViewModelProvider
 import android.content.Intent
 import net.papirus.pyrusservicedesk.PyrusServiceDesk
-import net.papirus.pyrusservicedesk.presentation.usecases.file_preview.FilePreviewViewModel
-import net.papirus.pyrusservicedesk.presentation.usecases.ticket.TicketSharedViewModel
-import net.papirus.pyrusservicedesk.presentation.usecases.ticket.TicketViewModel
-import net.papirus.pyrusservicedesk.presentation.usecases.tickets.TicketsViewModel
+import net.papirus.pyrusservicedesk.presentation.ui.navigation_page.file_preview.FilePreviewViewModel
+import net.papirus.pyrusservicedesk.presentation.ui.navigation_page.ticket.TicketSharedViewModel
+import net.papirus.pyrusservicedesk.presentation.ui.navigation_page.ticket.TicketViewModel
+import net.papirus.pyrusservicedesk.presentation.ui.navigation_page.tickets.TicketsViewModel
 
 internal class ViewModelFactory(val arguments: Intent): ViewModelProvider.Factory {
 

@@ -1,8 +1,8 @@
 package net.papirus.pyrusservicedesk
 
 import android.content.Intent
-import net.papirus.pyrusservicedesk.presentation.usecases.ticket.TicketActivity
-import net.papirus.pyrusservicedesk.presentation.usecases.tickets.TicketsActivity
+import net.papirus.pyrusservicedesk.presentation.ui.navigation_page.ticket.TicketActivity
+import net.papirus.pyrusservicedesk.presentation.ui.navigation_page.tickets.TicketsActivity
 
 class ServiceDeskActivity {
     companion object {

@@ -12,7 +12,7 @@ internal interface Repository{
     suspend fun getConversation(): GetConversationResponse
     suspend fun getTickets(): GetTicketsResponse
     suspend fun getTicket(ticketId: Int): GetTicketResponse
-    suspend fun addComment(ticketId: Int, comment: Comment, uploadFileHooks: UploadFileHooks): AddCommentResponse
+    suspend fun addComment(ticketId: Int, comment: Comment, uploadFileHooks: UploadFileHooks? = null): AddCommentResponse
     suspend fun createTicket(description: TicketDescription, uploadFileHooks: UploadFileHooks): CreateTicketResponse
 }
 

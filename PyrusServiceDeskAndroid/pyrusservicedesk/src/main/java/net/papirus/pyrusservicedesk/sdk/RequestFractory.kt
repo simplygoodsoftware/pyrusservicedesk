@@ -16,9 +16,9 @@ internal class RequestFactory(private val repository: Repository) {
                             uploadFileHooks: UploadFileHooks): RequestBase<Int> {
         return CreateTicketRequest(repository, description, uploadFileHooks)
     }
-    fun addCommentRequest(ticketId: Int,
-                          comment: Comment,
-                          uploadFileHooks: UploadFileHooks): RequestBase<Int> {
+    fun getAddCommentRequest(ticketId: Int,
+                             comment: Comment,
+                             uploadFileHooks: UploadFileHooks? = null): RequestBase<Int> {
         return AddCommentRequest(repository, ticketId, comment, uploadFileHooks)
     }
 }

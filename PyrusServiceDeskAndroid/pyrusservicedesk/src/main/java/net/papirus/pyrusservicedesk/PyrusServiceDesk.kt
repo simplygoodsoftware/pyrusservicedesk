@@ -7,6 +7,7 @@ import net.papirus.pyrusservicedesk.presentation.viewmodel.SharedViewModel
 import net.papirus.pyrusservicedesk.sdk.FileResolver
 import net.papirus.pyrusservicedesk.sdk.RepositoryFactory
 import net.papirus.pyrusservicedesk.sdk.RequestFactory
+import net.papirus.pyrusservicedesk.sdk.data.LocalDataProvider
 import net.papirus.pyrusservicedesk.sdk.web.retrofit.RetrofitWebRepository
 
 class PyrusServiceDesk private constructor(
@@ -32,7 +33,6 @@ class PyrusServiceDesk private constructor(
         internal val DISPATCHER_IO_SINGLE = newSingleThreadContext("IO_SINGLE")
     }
 
-
     internal val requestFactory: RequestFactory by lazy {
         RequestFactory(
             RepositoryFactory.create(
@@ -40,8 +40,12 @@ class PyrusServiceDesk private constructor(
                     appId,
                     clientId.toString(),
                     clientName,
-                    FileResolver(application.contentResolver)))
+                    fileResolver))
         )
+    }
+
+    internal val localDataProvider: LocalDataProvider by lazy {
+        LocalDataProvider(clientName, fileResolver =  fileResolver)
     }
 
     internal fun getSharedViewModel(): SharedViewModel{
@@ -49,6 +53,8 @@ class PyrusServiceDesk private constructor(
             refreshSharedViewModel()
         return sharedViewModel!!
     }
+
+    private val fileResolver by lazy { FileResolver(application.contentResolver) }
 
     private var sharedViewModel: SharedViewModel? = null
 

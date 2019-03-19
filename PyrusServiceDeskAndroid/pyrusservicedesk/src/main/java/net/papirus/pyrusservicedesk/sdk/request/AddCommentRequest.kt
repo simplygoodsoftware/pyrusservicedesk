@@ -9,7 +9,7 @@ internal class AddCommentRequest(
         repository: Repository,
         val ticketId: Int,
         val comment: Comment,
-        val uploadFileHooks: UploadFileHooks)
+        val uploadFileHooks: UploadFileHooks? = null)
     : RequestBase<Int>(repository) {
 
     override suspend fun run(repository: Repository): ResponseBase<Int> {
