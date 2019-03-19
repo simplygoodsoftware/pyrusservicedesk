@@ -12,6 +12,7 @@ import android.widget.ImageView
 import android.widget.TextView
 import com.example.pyrusservicedesk.R
 import com.squareup.picasso.Picasso
+import net.papirus.pyrusservicedesk.sdk.data.Attachment
 import net.papirus.pyrusservicedesk.sdk.web_service.getAvatarUrl
 import net.papirus.pyrusservicedesk.ui.usecases.ticket.entries.CommentEntry
 import net.papirus.pyrusservicedesk.ui.usecases.ticket.entries.DateEntry
@@ -34,7 +35,7 @@ private const val VIEW_TYPE_DATE = 2
 internal class TicketAdapter: AdapterBase<TicketEntry>() {
 
     override val itemTouchHelper: ItemTouchHelper? = ItemTouchHelper(TouchCallback())
-    private var onDownloadedFileClickListener: ((Int) -> Unit)? = null
+    private var onDownloadedFileClickListener: ((Attachment) -> Unit)? = null
 
     override fun getItemViewType(position: Int): Int {
         return with(itemsList[position]) {
@@ -59,7 +60,7 @@ internal class TicketAdapter: AdapterBase<TicketEntry>() {
         holder.itemView.translationX = 0f
     }
 
-    fun setOnDownloadedFileClickListener(listener: (fileId: Int) -> Unit) {
+    fun setOnDownloadedFileClickListener(listener: (attachment: Attachment) -> Unit) {
         onDownloadedFileClickListener = listener
     }
 
@@ -166,7 +167,7 @@ internal class TicketAdapter: AdapterBase<TicketEntry>() {
             comment.setOnProgressIconClickListener {
                 when (comment.fileProgressStatus) {
                     Status.Processing -> getItem().uploadCallbacks?.cancelUploading()
-                    Status.Completed -> onDownloadedFileClickListener?.invoke(getItem().comment.attachments!![0].id)
+                    Status.Completed -> onDownloadedFileClickListener?.invoke(getItem().comment.attachments!![0])
                     Status.Error -> comment.performClick()
                 }
             }

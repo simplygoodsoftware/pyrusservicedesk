@@ -16,7 +16,7 @@ public class SampleActivity extends Activity {
                                 new ServiceDeskActivity.Builder()
                                         .setStyle(
                                                 new ServiceDeskActivity.StyleBuilder()
-                                                        .showAsDialog(true)
+                                                        .setShowAsDialog(false)
                                                         .build())
                                         .build()));
     }

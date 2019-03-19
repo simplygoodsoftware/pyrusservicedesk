@@ -29,6 +29,7 @@ internal class TicketViewModel(
 
     private var ticketId: Int = TicketActivity.getTicketId(arguments)
 
+    private val unreadCounter = MutableLiveData<Int>()
     private val commentsRequest = MutableLiveData<Boolean>()
     private val entries = MediatorLiveData<List<Comment>>()
     private val commentDiff = MutableLiveData<DiffResultWithNewItems<TicketEntry>>()
@@ -61,10 +62,13 @@ internal class TicketViewModel(
             }
         }. also { it.observeForever {  } /*should be observed to trigger transformations*/}
 
+        if (!isFeed) {
+            unreadCounter.value = TicketActivity.getUnreadTicketsCount(arguments)
+        }
+
         val wantLoadDataOnStart = isFeed || !isNewTicket()
         if (wantLoadDataOnStart && isNetworkConnected.value == true) {
             loadData()
-            replayProgress()
         }
         onInitialized()
     }
@@ -74,7 +78,7 @@ internal class TicketViewModel(
             UpdateType.TicketCreated -> {
                 (update as TicketCreatedUpdate).let {
                     ticketId = update.ticketId ?: ticketId;
-                    commentsRequest.value = true
+                    onLoadData()
                 }
             }
             UpdateType.CommentAdded -> {
@@ -102,7 +106,7 @@ internal class TicketViewModel(
         return setOf(UpdateType.CommentAdded, UpdateType.CommentCancelled, UpdateType.TicketCreated)
     }
 
-    override fun loadData() {
+    override fun onLoadData() {
         commentsRequest.value = true
     }
 
@@ -124,6 +128,8 @@ internal class TicketViewModel(
     fun addAttachment(attachmentUri: Uri) = repository.uploadFile(ticketId, attachmentUri)
 
     fun getCommentDiffLiveData(): LiveData<DiffResultWithNewItems<TicketEntry>> = commentDiff
+
+    fun getUnreadCounterLiveData(): LiveData<Int> = unreadCounter
 
     private fun isNewTicket() = ticketId == EMPTY_TICKET_ID
 

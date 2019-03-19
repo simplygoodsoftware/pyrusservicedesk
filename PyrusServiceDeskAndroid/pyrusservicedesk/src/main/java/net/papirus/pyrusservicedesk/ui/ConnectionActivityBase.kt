@@ -7,6 +7,7 @@ import android.view.View
 import com.example.pyrusservicedesk.R
 import kotlinx.android.synthetic.main.psd_activity_tickets.*
 import kotlinx.android.synthetic.main.psd_no_connection.*
+import net.papirus.pyrusservicedesk.ui.view.swiperefresh.DirectedSwipeRefresh
 import net.papirus.pyrusservicedesk.ui.viewmodel.ConnectionViewModelBase
 import net.papirus.pyrusservicedesk.utils.getColor
 import net.papirus.pyrusservicedesk.utils.getViewModel
@@ -18,12 +19,17 @@ internal abstract class ConnectionActivityBase<T: ConnectionViewModelBase>(viewM
 
     protected val viewModel: T by getViewModel(viewModelClass)
 
+    abstract val refresherViewId:Int
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         progress_bar?.progressDrawable?.setColorFilter(
                 getColor(this, R.attr.colorAccentSecondary),
                 PorterDuff.Mode.SRC_IN)
         reconnect.setOnClickListener { reconnect() }
+        findViewById<DirectedSwipeRefresh>(refresherViewId)?.setOnRefreshListener {
+            viewModel.loadData()
+        }
     }
 
     override fun observeData() {

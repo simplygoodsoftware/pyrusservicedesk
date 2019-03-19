@@ -23,6 +23,7 @@ internal class TicketsActivity: ConnectionActivityBase<TicketsViewModel>(Tickets
 
     override val layoutResId = R.layout.psd_activity_tickets
     override val toolbarViewId = R.id.tickets_toolbar
+    override val refresherViewId = R.id.refresh
 
     private lateinit var adapter: TicketsAdapter
 
@@ -34,15 +35,19 @@ internal class TicketsActivity: ConnectionActivityBase<TicketsViewModel>(Tickets
         adapter = TicketsAdapter()
                 .apply {
                     setOnTicketClickListener {
-                        it.ticketId.let {
-                            UiNavigator.toTicket(this@TicketsActivity, it)
+                        it.ticketId.let { ticketId ->
+                            UiNavigator.toTicket(
+                                this@TicketsActivity,
+                                ticketId,
+                                if (!it.isRead) viewModel.getUnreadCount() - 1 else viewModel.getUnreadCount())
+                            viewModel.onTicketOpened(it)
                         }
                     }
                 }
                 .also { tickets.adapter  = it }
         tickets.addItemDecoration(
                 SpaceItemDecoration(resources.getInteger(R.integer.psd_tickets_item_space)))
-        new_conversation.setOnClickListener { UiNavigator.toNewTicket(this) }
+        new_conversation.setOnClickListener { UiNavigator.toNewTicket(this, viewModel.getUnreadCount()) }
     }
 
     override fun observeData() {
@@ -55,7 +60,10 @@ internal class TicketsActivity: ConnectionActivityBase<TicketsViewModel>(Tickets
         )
         viewModel.getTicketsLiveData().observe(
             this,
-            Observer { list -> list?.let{ adapter.setItems(it) } }
+            Observer { list ->
+                refresh.isRefreshing = false
+                list?.let{ adapter.setItems(it) }
+            }
         )
     }
 }

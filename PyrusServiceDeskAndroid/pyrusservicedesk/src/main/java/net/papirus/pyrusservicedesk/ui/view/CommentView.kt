@@ -17,6 +17,7 @@ import android.widget.FrameLayout
 import android.widget.LinearLayout
 import com.example.pyrusservicedesk.R
 import kotlinx.android.synthetic.main.psd_comment.view.*
+import net.papirus.pyrusservicedesk.ui.ThemeResolver
 import net.papirus.pyrusservicedesk.utils.*
 
 private const val TYPE_INBOUND = 0
@@ -105,12 +106,10 @@ internal class CommentView @JvmOverloads constructor(
             getInt(R.styleable.CommentView_type, TYPE_INBOUND).also { recycle() }
         }
 
-        val backgroundColor = ContextCompat.getColor(
-                context,
-                when (type){
-                    TYPE_INBOUND -> R.color.psd_comment_inbound_background
-                    else -> R.color.psd_accent
-                })
+        val backgroundColor = when (type){
+            TYPE_INBOUND -> ContextCompat.getColor(context, R.color.psd_comment_inbound_background)
+            else -> ThemeResolver.getInstance().getAccentColor()
+        }
         primaryColor = getColor(
                 context,
                 when (type){
@@ -186,11 +185,12 @@ internal class CommentView @JvmOverloads constructor(
 
     fun setFileSize(bytesSize: Float) {
         recentFileSize = bytesSize
+        val isMegabytes = recentFileSize >= BYTES_IN_MEGABYTE / 10
         val toShow = when {
-            recentFileSize >= BYTES_IN_MEGABYTE / 10 -> recentFileSize / BYTES_IN_MEGABYTE
+            isMegabytes -> recentFileSize / BYTES_IN_MEGABYTE
             else -> recentFileSize / BYTES_IN_KILOBYTE
         }
-        file_size.text = context.getString(R.string.psd_file_size, toShow)
+        file_size.text = context.getString(if (isMegabytes) R.string.psd_file_size_mb else R.string.psd_file_size_kb, toShow)
     }
 
     fun setProgress(progress: Int) {

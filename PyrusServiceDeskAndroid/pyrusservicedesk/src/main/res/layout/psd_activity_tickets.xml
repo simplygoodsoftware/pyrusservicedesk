@@ -27,20 +27,26 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/tickets_toolbar">
 
-        <android.support.v7.widget.RecyclerView
-            android:id="@+id/tickets"
+        <net.papirus.pyrusservicedesk.ui.view.swiperefresh.DirectedSwipeRefresh
+            android:id="@+id/refresh"
             android:layout_width="0dp"
             android:layout_height="0dp"
-            android:clipToPadding="true"
-            app:layoutManager="android.support.v7.widget.LinearLayoutManager"
-            app:layout_constraintBottom_toTopOf="@+id/new_conversation"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent"
-            tools:layoutManager="android.support.v7.widget.LinearLayoutManager"
-            tools:listitem="@layout/psd_view_holder_ticket">
+            app:layout_constraintBottom_toTopOf="@+id/new_conversation"
+            app:swipeDirection="top">
 
-        </android.support.v7.widget.RecyclerView>
+            <android.support.v7.widget.RecyclerView
+                android:id="@+id/tickets"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:clipToPadding="true"
+                app:layoutManager="android.support.v7.widget.LinearLayoutManager"
+                tools:layoutManager="android.support.v7.widget.LinearLayoutManager"
+                tools:listitem="@layout/psd_view_holder_ticket"/>
+
+        </net.papirus.pyrusservicedesk.ui.view.swiperefresh.DirectedSwipeRefresh>
 
         <ProgressBar
             android:id="@+id/progress_bar"

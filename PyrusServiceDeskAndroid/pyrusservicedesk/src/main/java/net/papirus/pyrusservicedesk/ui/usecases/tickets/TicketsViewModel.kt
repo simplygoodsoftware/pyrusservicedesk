@@ -17,6 +17,8 @@ internal class TicketsViewModel(serviceDesk: PyrusServiceDesk)
     private val tickets = MediatorLiveData<List<TicketShortDescription>>()
     private val request = MutableLiveData<Boolean>()
 
+    private var unreadCount = 0
+
     init{
         isLoading.apply {
             addSource(request){
@@ -32,32 +34,43 @@ internal class TicketsViewModel(serviceDesk: PyrusServiceDesk)
             ){
                 isLoading.value = false
                 tickets.value = it?.tickets?.sortedWith(TicketShortDescriptionComparator())
+                unreadCount = tickets.value?.count{ description -> !description.isRead } ?: 0
                 onDataLoaded()
             }
         }
         if (isNetworkConnected.value == true) {
             loadData()
-            replayProgress()
         }
         onInitialized()
     }
 
     override fun <T : UpdateBase> onUpdateReceived(update: T) {
         if (!update.hasError())
-            loadData()
+            onLoadData()
     }
 
     override fun getUpdateTypes(): Set<UpdateType> {
         return setOf(UpdateType.TicketCreated, UpdateType.CommentAdded)
     }
 
-    override fun loadData() {
+    override fun onLoadData() {
         request.value = true
     }
 
     fun getIsLoadingLiveData(): LiveData<Boolean> = isLoading
 
     fun getTicketsLiveData(): LiveData<List<TicketShortDescription>> = tickets
+
+    fun getUnreadCount() = unreadCount
+
+    fun onTicketOpened(ticket: TicketShortDescription) {
+        if (!ticket.isRead) {
+            unreadCount--
+            val ticketsMutable = tickets.value!!.toMutableList()
+            ticketsMutable[ticketsMutable.indexOf(ticket)] = ticket.read()
+            tickets.value = ticketsMutable
+        }
+    }
 
     private class TicketShortDescriptionComparator : Comparator<TicketShortDescription> {
 
@@ -74,4 +87,8 @@ internal class TicketsViewModel(serviceDesk: PyrusServiceDesk)
             }
         }
     }
+}
+
+private fun TicketShortDescription.read(): TicketShortDescription {
+    return TicketShortDescription(ticketId, subject, true, lastComment)
 }

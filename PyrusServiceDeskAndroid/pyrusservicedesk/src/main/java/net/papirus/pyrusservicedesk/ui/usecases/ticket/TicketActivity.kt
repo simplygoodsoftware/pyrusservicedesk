@@ -13,6 +13,7 @@ import net.papirus.pyrusservicedesk.PyrusServiceDesk
 import net.papirus.pyrusservicedesk.sdk.data.EMPTY_TICKET_ID
 import net.papirus.pyrusservicedesk.ui.ConnectionActivityBase
 import net.papirus.pyrusservicedesk.ui.navigation.UiNavigator
+import net.papirus.pyrusservicedesk.ui.view.NavigationCounterDrawable
 import net.papirus.pyrusservicedesk.ui.view.recyclerview.item_decorators.SpaceItemDecoration
 import net.papirus.pyrusservicedesk.utils.getViewModel
 import net.papirus.pyrusservicedesk.utils.isAtEnd
@@ -21,47 +22,46 @@ internal class TicketActivity : ConnectionActivityBase<TicketViewModel>(TicketVi
 
     companion object {
         private const val KEY_TICKET_ID = "KEY_TICKET_ID"
+        private const val KEY_UNREAD_COUNT = "KEY_UNREAD_COUNT"
 
-        private const val REQUEST_PICK_IMAGE = 0
-
-        fun getTicketId(arguments: Intent): Int {
-            return arguments.getIntExtra(KEY_TICKET_ID, EMPTY_TICKET_ID)
-        }
-
-        fun getLaunchIntent(ticketId:Int? = null): Intent {
+        fun getLaunchIntent(ticketId:Int? = null, unreadCount: Int? = 0): Intent {
             return Intent(
                     PyrusServiceDesk.getInstance().application,
                     TicketActivity::class.java).also { intent ->
 
                 ticketId?.let {intent.putExtra(KEY_TICKET_ID, it)}
+                intent.putExtra(KEY_UNREAD_COUNT, unreadCount)
             }
         }
 
-        private fun isExpectedResult(requestCode: Int): Boolean {
-            return requestCode == REQUEST_PICK_IMAGE
+        fun getTicketId(arguments: Intent): Int {
+            return arguments.getIntExtra(KEY_TICKET_ID, EMPTY_TICKET_ID)
+        }
+
+        fun getUnreadTicketsCount(arguments: Intent): Int {
+            return arguments.getIntExtra(KEY_UNREAD_COUNT, 0)
         }
     }
 
     override val layoutResId = R.layout.psd_activity_ticket
     override val toolbarViewId = R.id.ticket_toolbar
+    override val refresherViewId = R.id.refresh
 
     private val ticketSharedViewModel: TicketSharedViewModel by getViewModel(TicketSharedViewModel::class.java)
+    private val navigationCounterIcon by lazy { NavigationCounterDrawable(this) }
 
     private var adapter = TicketAdapter().apply {
         setOnDownloadedFileClickListener {
-           UiNavigator.toFilePreview(this@TicketActivity, it)
+           UiNavigator.toFilePreview(this@TicketActivity, it.id, it.name)
         }
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         supportActionBar?.apply { title = getString(R.string.psd_organization_support, viewModel.organizationName) }
-        ticket_toolbar.setNavigationIcon(R.drawable.psd_menu)
+        ticket_toolbar.navigationIcon = navigationCounterIcon
         ticket_toolbar.setNavigationOnClickListener { UiNavigator.toTickets(this@TicketActivity) }
         ticket_toolbar.setOnMenuItemClickListener{ onMenuItemClicked(it) }
-        refresh.setOnRefreshListener {
-            viewModel.loadData()
-        }
         comments.apply {
             adapter = this@TicketActivity.adapter
             addItemDecoration(
@@ -89,28 +89,22 @@ internal class TicketActivity : ConnectionActivityBase<TicketViewModel>(TicketVi
         } ?: false
     }
 
-    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
-        super.onActivityResult(requestCode, resultCode, data)
-        if (!isExpectedResult(requestCode) || resultCode != RESULT_OK)
-            return
-        data?.data?.let {
-            viewModel.addAttachment(it)
-        }
-    }
-
     override fun observeData() {
         super.observeData()
         viewModel.getCommentDiffLiveData().observe(
             this,
             Observer { result ->
                 result?.let{
-                    if (refresh.isRefreshing)
-                        refresh.isRefreshing = false
+                    refresh.isRefreshing = false
                     adapter.setItemsWithoutUpdate(it.newItems)
                     it.diffResult.dispatchUpdatesTo(adapter)
                 }
                 comments.scrollToPosition(adapter.itemCount - 1)
             }
+        )
+        viewModel.getUnreadCounterLiveData().observe(
+            this,
+            Observer { it?.let { count -> navigationCounterIcon.counter = count } }
         )
         ticketSharedViewModel.getFilePickedLiveData().observe(
             this,
@@ -127,7 +121,12 @@ internal class TicketActivity : ConnectionActivityBase<TicketViewModel>(TicketVi
         when {
             changedBy == 0 -> return
             changedBy > 0 -> comments.scrollBy(0, changedBy)
-            !comments.isAtEnd() -> comments.scrollBy(0, changedBy)
+            else -> {
+                input.clearFocus()
+                if (!comments.isAtEnd())
+                    comments.scrollBy(0, changedBy)
+            }
+
         }
     }
 

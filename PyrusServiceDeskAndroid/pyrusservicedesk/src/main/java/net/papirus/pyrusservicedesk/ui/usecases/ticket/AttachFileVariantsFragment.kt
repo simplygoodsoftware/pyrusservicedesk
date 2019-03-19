@@ -96,7 +96,8 @@ internal class AttachFileVariantsFragment: BottomSheetDialogFragment(), View.OnC
                     val timeStamp: String =
                         SimpleDateFormat("yyyyMMdd_HHmmss", Locale.getDefault())
                             .format(Date())
-                    it.put(MediaStore.Images.Media.DISPLAY_NAME, "PyrusServiceDesk_$timeStamp")
+                    it.put(MediaStore.Images.Media.DISPLAY_NAME, "IMG_$timeStamp.jpg")
+                    it.put(MediaStore.Images.Media.MIME_TYPE, "image/jpg")
                     it.put(MediaStore.Images.Media.DATE_ADDED, timeStamp)
                 }
                 capturePhotoUri =

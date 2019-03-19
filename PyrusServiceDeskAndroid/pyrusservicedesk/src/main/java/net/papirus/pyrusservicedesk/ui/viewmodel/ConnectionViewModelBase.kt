@@ -69,7 +69,12 @@ internal abstract class ConnectionViewModelBase(private val serviceDesk: PyrusSe
     fun getIsNetworkConnectedLiveDate(): LiveData<Boolean> = isNetworkConnected
     fun getLoadingProgressLiveData(): LiveData<Int> = loadingProgress
 
-    abstract fun loadData()
+    fun loadData(){
+        replayProgress()
+        onLoadData()
+    }
+
+    protected abstract fun onLoadData()
 
     /**
      * Inheritors have to call this at the end of init to be properly subscribed on repository updates

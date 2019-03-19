@@ -12,16 +12,16 @@ internal class UiNavigator {
             source.startActivity(TicketsActivity.getLaunchIntent())
         }
 
-        fun toNewTicket(source: ActivityBase) {
-            source.startActivity(TicketActivity.getLaunchIntent())
+        fun toNewTicket(source: ActivityBase, unreadTicketCounter: Int) {
+            source.startActivity(TicketActivity.getLaunchIntent(unreadCount = unreadTicketCounter))
         }
 
-        fun toTicket(source: ActivityBase, ticketId: Int) {
-            source.startActivity(TicketActivity.getLaunchIntent(ticketId))
+        fun toTicket(source: ActivityBase, ticketId: Int, unreadTicketCounter: Int) {
+            source.startActivity(TicketActivity.getLaunchIntent(ticketId, unreadTicketCounter))
         }
 
-        fun toFilePreview(source: ActivityBase, fileId: Int) {
-            source.startActivity(FilePreviewActivity.getLaunchIntent(fileId))
+        fun toFilePreview(source: ActivityBase, fileId: Int, fileName: String) {
+            source.startActivity(FilePreviewActivity.getLaunchIntent(fileId, fileName))
         }
     }
 }

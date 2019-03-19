@@ -630,7 +630,7 @@ public class DirectedSwipeRefresh extends ViewGroup {
 //        if (android.os.Build.VERSION.SDK_INT < 14) {
 //            if (mTarget instanceof AbsListView) {
 //                final AbsListView absListView = (AbsListView) mTarget;
-//                if (absListView.getLastVisiblePosition() + 1 == absListView.getCount()) {
+//                if (absListView.getLastVisiblePosition() + 1 == absListView.getCounter()) {
 //                    int lastIndex = absListView.getLastVisiblePosition() - absListView.getFirstVisiblePosition();
 //
 //                    boolean res = absListView.getChildAt(lastIndex).getBottom() == absListView.getPaddingBottom();
