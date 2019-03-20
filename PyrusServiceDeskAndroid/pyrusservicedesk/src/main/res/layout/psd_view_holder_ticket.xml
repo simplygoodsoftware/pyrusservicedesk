@@ -42,17 +42,15 @@
             android:textAppearance="?attr/textAppearanceListItem"
             tools:text="@tools:sample/lorem/random"/>
 
-        <android.support.v7.widget.AppCompatTextView
+        <android.support.v7.widget.AppCompatImageView
             android:id="@+id/unread_counter"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginRight="@dimen/psd_offset_small"
             android:layout_marginLeft="@dimen/psd_offset_small"
-            android:gravity="center"
-            android:minWidth="@dimen/psd_unread_counter_min_width"
-            android:background="@drawable/psd_counter_background"
-            android:textColor="@android:color/white"
-            tools:text="1"/>
+            android:scaleType="center"
+            android:layout_gravity="center_vertical"
+            app:srcCompat="@drawable/psd_circle_background"
+            tools:visibility="visible" />
     </LinearLayout>
 
     <android.support.v7.widget.AppCompatTextView

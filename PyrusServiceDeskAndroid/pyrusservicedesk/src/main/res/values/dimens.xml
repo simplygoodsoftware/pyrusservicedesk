@@ -16,7 +16,7 @@
     <dimen name="psd_counter_radius">16dp</dimen>
     <dimen name="psd_comment_radius">8dp</dimen>
 
-    <integer name="psd_tickets_item_space">8</integer>
+    <integer name="psd_tickets_item_space">24</integer>
     <integer name="psd_comments_item_space">8</integer>
     <dimen name="psd_unread_counter_min_width">18dp</dimen>
     <dimen name="psd_avatar_size_default">32dp</dimen>
@@ -26,4 +26,5 @@
     <dimen name="psd_comment_error_width_negative">-32dp</dimen>
     <dimen name="psd_avatar_bitmap_size">96px</dimen>
     <dimen name="psd_avatar_text_size">16sp</dimen>
+    <dimen name="psd_icon_size">8dp</dimen>
 </resources>

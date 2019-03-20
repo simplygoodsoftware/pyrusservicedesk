@@ -12,17 +12,15 @@
 
         <activity
             android:name="net.papirus.pyrusservicedesk.ui.usecases.tickets.TicketsActivity"
-            android:launchMode="singleInstance"
+            android:launchMode="singleTask"
             android:theme="@style/PyrusServiceDesk.Dialog"/>
 
         <activity
             android:name="net.papirus.pyrusservicedesk.ui.usecases.ticket.TicketActivity"
-            android:launchMode="singleInstance"
             android:theme="@style/PyrusServiceDesk.Dialog"/>
 
         <activity
             android:name="net.papirus.pyrusservicedesk.ui.usecases.file_preview.FilePreviewActivity"
-            android:launchMode="singleInstance"
             android:theme="@style/PyrusServiceDesk.Dialog"/>
 
     </application>

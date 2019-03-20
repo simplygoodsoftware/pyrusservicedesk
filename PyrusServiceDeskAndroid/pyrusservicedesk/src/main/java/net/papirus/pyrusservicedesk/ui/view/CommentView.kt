@@ -17,13 +17,14 @@ import android.widget.FrameLayout
 import android.widget.LinearLayout
 import com.example.pyrusservicedesk.R
 import kotlinx.android.synthetic.main.psd_comment.view.*
-import net.papirus.pyrusservicedesk.ui.ThemeResolver
 import net.papirus.pyrusservicedesk.utils.*
+import net.papirus.pyrusservicedesk.utils.ThemeUtils.Companion.getAccentColor
 
 private const val TYPE_INBOUND = 0
 private const val TYPE_OUTBOUND = 1
 
 private const val PROGRESS_BACKGROUND_MULTIPLIER = 0.3f
+private const val SECONDARY_TEXT_COLOR_MULTIPLIER = 0.5f
 private const val PROGRESS_CHANGE_ANIMATION_DURATION = 100L
 
 internal class CommentView @JvmOverloads constructor(
@@ -108,21 +109,10 @@ internal class CommentView @JvmOverloads constructor(
 
         val backgroundColor = when (type){
             TYPE_INBOUND -> ContextCompat.getColor(context, R.color.psd_comment_inbound_background)
-            else -> ThemeResolver.getInstance().getAccentColor()
+            else -> getAccentColor(context)
         }
-        primaryColor = getColor(
-                context,
-                when (type){
-                    TYPE_INBOUND -> android.R.attr.textColorPrimary
-                    else -> android.R.attr.textColorPrimaryInverse
-                })
-        val secondaryColor = getColor(
-                context,
-                when(type){
-                    TYPE_INBOUND -> android.R.attr.textColorSecondary
-                    else -> android.R.attr.textColorSecondaryInverse
-
-                })
+        primaryColor = getTextColorOnBackground(context, backgroundColor)
+        val secondaryColor = adjustColor(primaryColor, ColorChannel.Alpha, SECONDARY_TEXT_COLOR_MULTIPLIER)
 
         background_parent.background.mutate().setColorFilter(backgroundColor, PorterDuff.Mode.SRC)
         comment_text.setTextColor(primaryColor)

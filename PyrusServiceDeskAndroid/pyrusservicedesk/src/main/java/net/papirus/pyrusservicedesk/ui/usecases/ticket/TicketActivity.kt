@@ -15,8 +15,10 @@ import net.papirus.pyrusservicedesk.ui.ConnectionActivityBase
 import net.papirus.pyrusservicedesk.ui.navigation.UiNavigator
 import net.papirus.pyrusservicedesk.ui.view.NavigationCounterDrawable
 import net.papirus.pyrusservicedesk.ui.view.recyclerview.item_decorators.SpaceItemDecoration
+import net.papirus.pyrusservicedesk.utils.ThemeUtils
 import net.papirus.pyrusservicedesk.utils.getViewModel
 import net.papirus.pyrusservicedesk.utils.isAtEnd
+import net.papirus.pyrusservicedesk.utils.setCursorColor
 
 internal class TicketActivity : ConnectionActivityBase<TicketViewModel>(TicketViewModel::class.java) {
 
@@ -58,7 +60,10 @@ internal class TicketActivity : ConnectionActivityBase<TicketViewModel>(TicketVi
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        supportActionBar?.apply { title = getString(R.string.psd_organization_support, viewModel.organizationName) }
+
+        val accentColor = ThemeUtils.getAccentColor(this)
+
+        supportActionBar?.apply { title = ThemeUtils.getTitle(this@TicketActivity) }
         ticket_toolbar.navigationIcon = navigationCounterIcon
         ticket_toolbar.setNavigationOnClickListener { UiNavigator.toTickets(this@TicketActivity) }
         ticket_toolbar.setOnMenuItemClickListener{ onMenuItemClicked(it) }
@@ -69,7 +74,11 @@ internal class TicketActivity : ConnectionActivityBase<TicketViewModel>(TicketVi
             this@TicketActivity.adapter.itemTouchHelper?.attachToRecyclerView(this)
         }
         send.setOnClickListener { sendComment() }
+        send.setTextColor(accentColor)
         attach.setOnClickListener { showAttachFileVariants() }
+        attach.setColorFilter(accentColor)
+        input.highlightColor = accentColor
+        input.setCursorColor(accentColor)
     }
 
     private fun onMenuItemClicked(menuItem: MenuItem?): Boolean {
@@ -94,12 +103,14 @@ internal class TicketActivity : ConnectionActivityBase<TicketViewModel>(TicketVi
         viewModel.getCommentDiffLiveData().observe(
             this,
             Observer { result ->
+                val atEnd = comments.isAtEnd()
                 result?.let{
                     refresh.isRefreshing = false
                     adapter.setItemsWithoutUpdate(it.newItems)
                     it.diffResult.dispatchUpdatesTo(adapter)
                 }
-                comments.scrollToPosition(adapter.itemCount - 1)
+                if (adapter.itemCount == 0 || atEnd)
+                    comments.scrollToPosition(adapter.itemCount - 1)
             }
         )
         viewModel.getUnreadCounterLiveData().observe(

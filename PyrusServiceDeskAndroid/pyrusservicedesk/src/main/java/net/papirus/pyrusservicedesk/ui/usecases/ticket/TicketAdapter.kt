@@ -2,7 +2,6 @@ package net.papirus.pyrusservicedesk.ui.usecases.ticket
 
 import android.graphics.Canvas
 import android.support.annotation.LayoutRes
-import android.support.v4.content.res.ResourcesCompat
 import android.support.v7.widget.RecyclerView
 import android.support.v7.widget.helper.ItemTouchHelper
 import android.support.v7.widget.helper.ItemTouchHelper.ACTION_STATE_SWIPE
@@ -74,12 +73,6 @@ internal class TicketAdapter: AdapterBase<TicketEntry>() {
 
         override fun bindItem(item: CommentEntry) {
             super.bindItem(item)
-            avatar.setImageDrawable(
-                    ResourcesCompat.getDrawable(
-                            itemView.resources,
-                            R.drawable.psd_counter_background,
-                            null))
-
             setAuthorNameVisibility(shouldShowAuthorName())
             setAuthorAvatarVisibility(shouldShowAuthorAvatar())
         }
@@ -104,7 +97,7 @@ internal class TicketAdapter: AdapterBase<TicketEntry>() {
         private fun shouldShowAuthorName(): Boolean {
             return adapterPosition == 0
                     || with(itemsList[adapterPosition - 1]){
-                        return when {
+                        when {
                             this.type != Type.Comment -> true
                             else -> getItem().comment.author != (this as CommentEntry).comment.author
                         }

@@ -1,86 +1,78 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout
+<android.support.constraint.ConstraintLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
-    android:orientation="horizontal"
+    android:background="?attr/selectableItemBackground"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:layout_marginEnd="@dimen/psd_comment_creation_time_width_negative"
-    android:layout_marginRight="@dimen/psd_comment_creation_time_width_negative"
-    android:background="?attr/selectableItemBackground">
+    android:clipChildren="false"
+    android:clipToPadding="false"
+    android:paddingStart="@dimen/psd_offset_default"
+    android:paddingLeft="@dimen/psd_offset_default">
 
-    <android.support.constraint.ConstraintLayout
+    <android.support.v7.widget.AppCompatTextView
+        android:id="@+id/author_name"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:layout_weight="0.5"
-        android:paddingStart="@dimen/psd_offset_default"
-        android:paddingLeft="@dimen/psd_offset_default"
-        android:paddingEnd="@dimen/psd_offset_default"
-        android:paddingRight="@dimen/psd_offset_default">
+        android:layout_marginStart="@dimen/psd_offset_small"
+        android:layout_marginLeft="@dimen/psd_offset_small"
+        app:layout_constraintEnd_toEndOf="@+id/constraintLayout2"
+        app:layout_constraintStart_toStartOf="@+id/guideline2"
+        app:layout_constraintTop_toTopOf="parent"
+        tools:text="@tools:sample/full_names"/>
 
-        <android.support.v7.widget.AppCompatTextView
-            android:id="@+id/author_name"
+    <android.support.constraint.ConstraintLayout
+        android:id="@+id/constraintLayout2"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        app:layout_constraintEnd_toStartOf="@+id/guideline3"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/author_name">
+
+        <android.support.v7.widget.AppCompatImageView
+            android:id="@+id/avatar"
+            android:layout_width="@dimen/psd_avatar_size_default"
+            android:layout_height="@dimen/psd_avatar_size_default"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            tools:srcCompat="@tools:sample/avatars"/>
+
+        <net.papirus.pyrusservicedesk.ui.view.CommentView
+            android:id="@+id/comment"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_marginStart="@dimen/psd_offset_small"
             android:layout_marginLeft="@dimen/psd_offset_small"
-            app:layout_constraintEnd_toEndOf="@+id/constraintLayout2"
-            app:layout_constraintStart_toStartOf="@+id/guideline2"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toEndOf="@+id/avatar"
             app:layout_constraintTop_toTopOf="parent"
-            tools:text="@tools:sample/full_names"/>
-
-        <android.support.constraint.ConstraintLayout
-            android:id="@+id/constraintLayout2"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            app:layout_constraintEnd_toStartOf="@+id/guideline3"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/author_name">
-
-            <android.support.v7.widget.AppCompatImageView
-                android:id="@+id/avatar"
-                android:layout_width="@dimen/psd_avatar_size_default"
-                android:layout_height="@dimen/psd_avatar_size_default"
-                app:layout_constraintBottom_toBottomOf="parent"
-                app:layout_constraintStart_toStartOf="parent"
-                tools:srcCompat="@tools:sample/avatars"/>
-
-            <net.papirus.pyrusservicedesk.ui.view.CommentView
-                android:id="@+id/comment"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_marginStart="@dimen/psd_offset_small"
-                android:layout_marginLeft="@dimen/psd_offset_small"
-                app:layout_constraintBottom_toBottomOf="parent"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintStart_toEndOf="@+id/avatar"
-                app:layout_constraintTop_toTopOf="parent"
-                app:type="inbound"/>
-
-        </android.support.constraint.ConstraintLayout>
-
-        <android.support.constraint.Guideline
-            android:id="@+id/guideline2"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:orientation="vertical"
-            app:layout_constraintGuide_begin="@dimen/psd_avatar_size_default" />
-
-        <android.support.constraint.Guideline
-            android:id="@+id/guideline3"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:orientation="vertical"
-            app:layout_constraintGuide_percent="0.8" />
+            app:type="inbound"/>
 
     </android.support.constraint.ConstraintLayout>
+
+    <android.support.constraint.Guideline
+        android:id="@+id/guideline2"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        app:layout_constraintGuide_begin="@dimen/psd_avatar_size_default" />
+
+    <android.support.constraint.Guideline
+        android:id="@+id/guideline3"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        app:layout_constraintGuide_percent="0.8" />
 
     <android.support.v7.widget.AppCompatTextView
         android:id="@+id/creation_time"
         android:layout_width="@dimen/psd_comment_creation_time_width"
-        android:layout_height="match_parent"
-        android:gravity="center_vertical|start"
-        tools:text="@tools:sample/date/hhmm"/>
+        android:layout_height="wrap_content"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        tools:text="@tools:sample/date/hhmm" />
 
-</LinearLayout>
+</android.support.constraint.ConstraintLayout>

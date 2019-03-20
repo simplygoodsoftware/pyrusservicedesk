@@ -1,6 +1,7 @@
 package net.papirus.servicedesksample;
 
 import android.app.Activity;
+import android.graphics.Color;
 import android.os.Bundle;
 import net.papirus.pyrusservicedesk.ServiceDeskActivity;
 
@@ -17,6 +18,9 @@ public class SampleActivity extends Activity {
                                         .setStyle(
                                                 new ServiceDeskActivity.StyleBuilder()
                                                         .setShowAsDialog(false)
+                                                        .setThemeColor(Color.parseColor("#FF8300"))
+                                                        .setTitle("AMAZING")
+                                                        .setWelcomeMessage("Why so serious?")
                                                         .build())
                                         .build()));
     }
