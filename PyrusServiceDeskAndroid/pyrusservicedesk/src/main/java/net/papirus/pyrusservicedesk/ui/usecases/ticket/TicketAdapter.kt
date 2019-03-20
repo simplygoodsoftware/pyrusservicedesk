@@ -23,7 +23,7 @@ import net.papirus.pyrusservicedesk.ui.view.Status
 import net.papirus.pyrusservicedesk.ui.view.recyclerview.AdapterBase
 import net.papirus.pyrusservicedesk.ui.view.recyclerview.ViewHolderBase
 import net.papirus.pyrusservicedesk.utils.CIRCLE_TRANSFORMATION
-import net.papirus.pyrusservicedesk.utils.getSimpleAvatar
+import net.papirus.pyrusservicedesk.utils.ThemeUtils
 import net.papirus.pyrusservicedesk.utils.getTimeText
 
 
@@ -88,7 +88,7 @@ internal class TicketAdapter: AdapterBase<TicketEntry>() {
             if (visible) {
                 Picasso.get()
                     .load(getAvatarUrl(getItem().comment.author.avatarId))
-                    .placeholder(getSimpleAvatar(itemView.context, getItem().comment.author))
+                    .placeholder(ThemeUtils.getSupportAvatar(itemView.context))
                     .transform(CIRCLE_TRANSFORMATION)
                     .into(avatar)
             }

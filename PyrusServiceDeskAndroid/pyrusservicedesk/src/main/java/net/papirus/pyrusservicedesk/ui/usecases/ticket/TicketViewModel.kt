@@ -133,7 +133,7 @@ internal class TicketViewModel(
 
     private fun isNewTicket() = ticketId == EMPTY_TICKET_ID
 
-    private fun List<Comment>.toTicketEntries(): MutableList<TicketEntry> {
+    private fun List<Comment>.toTicketEntries(): List<TicketEntry> {
         val now = Calendar.getInstance()
         var prevDateGroup: String? = null
         return foldIndexed(ArrayList(size)){
