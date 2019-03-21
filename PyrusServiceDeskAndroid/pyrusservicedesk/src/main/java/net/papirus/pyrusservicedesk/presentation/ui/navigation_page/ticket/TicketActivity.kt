@@ -12,12 +12,9 @@ import kotlinx.android.synthetic.main.psd_activity_ticket.*
 import net.papirus.pyrusservicedesk.PyrusServiceDesk
 import net.papirus.pyrusservicedesk.presentation.ConnectionActivityBase
 import net.papirus.pyrusservicedesk.presentation.ui.navigation.UiNavigator
+import net.papirus.pyrusservicedesk.presentation.ui.view.NavigationCounterDrawable
 import net.papirus.pyrusservicedesk.presentation.ui.view.recyclerview.item_decorators.SpaceItemDecoration
 import net.papirus.pyrusservicedesk.sdk.data.EMPTY_TICKET_ID
-import net.papirus.pyrusservicedesk.ui.ConnectionActivityBase
-import net.papirus.pyrusservicedesk.ui.navigation.UiNavigator
-import net.papirus.pyrusservicedesk.ui.view.NavigationCounterDrawable
-import net.papirus.pyrusservicedesk.ui.view.recyclerview.item_decorators.SpaceItemDecoration
 import net.papirus.pyrusservicedesk.utils.ThemeUtils
 import net.papirus.pyrusservicedesk.utils.getViewModel
 import net.papirus.pyrusservicedesk.utils.isAtEnd
@@ -53,7 +50,11 @@ internal class TicketActivity : ConnectionActivityBase<TicketViewModel>(TicketVi
     override val refresherViewId = R.id.refresh
 
     private val ticketSharedViewModel: TicketSharedViewModel by getViewModel(TicketSharedViewModel::class.java)
-    private val navigationCounterIcon by lazy { NavigationCounterDrawable(this) }
+    private val navigationCounterIcon by lazy {
+        NavigationCounterDrawable(
+            this
+        )
+    }
 
     private var adapter = TicketAdapter().apply {
         setOnDownloadedFileClickListener {

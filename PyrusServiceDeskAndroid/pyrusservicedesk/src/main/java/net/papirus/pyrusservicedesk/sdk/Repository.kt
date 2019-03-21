@@ -9,11 +9,12 @@ import net.papirus.pyrusservicedesk.sdk.web.UploadFileHooks
 internal const val BASE_URL = "https://pyrus.com/servicedeskapi/v1/"
 
 internal interface Repository{
-    suspend fun getConversation(): GetConversationResponse
+    suspend fun getFeed(): GetConversationResponse
     suspend fun getTickets(): GetTicketsResponse
     suspend fun getTicket(ticketId: Int): GetTicketResponse
     suspend fun addComment(ticketId: Int, comment: Comment, uploadFileHooks: UploadFileHooks? = null): AddCommentResponse
-    suspend fun createTicket(description: TicketDescription, uploadFileHooks: UploadFileHooks): CreateTicketResponse
+    suspend fun addFeedComment(comment: Comment, uploadFileHooks: UploadFileHooks? = null): AddCommentResponse
+    suspend fun createTicket(description: TicketDescription, uploadFileHooks: UploadFileHooks? = null): CreateTicketResponse
 }
 
 internal fun getAvatarUrl(avatarId: Int): String = "$BASE_URL/Avatar/$avatarId"

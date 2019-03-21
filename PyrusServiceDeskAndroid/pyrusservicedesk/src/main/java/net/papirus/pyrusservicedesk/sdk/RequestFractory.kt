@@ -9,13 +9,19 @@ import net.papirus.pyrusservicedesk.sdk.web.UploadFileHooks
 
 internal class RequestFactory(private val repository: Repository) {
 
-    fun getConversationRequest(): RequestBase<List<Comment>> = GetConversationRequest(repository)
+    fun getFeedRequest(): RequestBase<List<Comment>> = GetFeedRequest(repository)
     fun getTicketsRequest(): RequestBase<List<TicketShortDescription>> = GetTicketsRequest(repository)
     fun getTicketRequest(ticketId: Int): RequestBase<Ticket> = GetTicketRequest(repository, ticketId)
-    fun createTicketRequest(description: TicketDescription,
-                            uploadFileHooks: UploadFileHooks): RequestBase<Int> {
+    fun getCreateTicketRequest(description: TicketDescription,
+                               uploadFileHooks: UploadFileHooks?): RequestBase<Int> {
         return CreateTicketRequest(repository, description, uploadFileHooks)
     }
+
+    fun getAddFeedCommentRequest(comment: Comment,
+                                 uploadFileHooks: UploadFileHooks? = null): RequestBase<Int> {
+        return AddFeedCommentRequest(repository, comment, uploadFileHooks)
+    }
+
     fun getAddCommentRequest(ticketId: Int,
                              comment: Comment,
                              uploadFileHooks: UploadFileHooks? = null): RequestBase<Int> {

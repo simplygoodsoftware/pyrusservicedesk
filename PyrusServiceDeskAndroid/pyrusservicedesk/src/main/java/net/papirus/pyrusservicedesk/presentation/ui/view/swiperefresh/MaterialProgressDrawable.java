@@ -1,4 +1,4 @@
-package net.papirus.pyrusservicedesk.ui.view.swiperefresh;
+package net.papirus.pyrusservicedesk.presentation.ui.view.swiperefresh;
 
 import android.content.Context;
 import android.content.res.Resources;

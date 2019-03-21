@@ -1,4 +1,4 @@
-package net.papirus.pyrusservicedesk.ui.view.swiperefresh;
+package net.papirus.pyrusservicedesk.presentation.ui.view.swiperefresh;
 
 /**
  * Class taken from https://github.com/omadahealth/SwipyRefreshLayout. v.1.2.3.

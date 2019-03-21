@@ -4,13 +4,12 @@ import android.arch.lifecycle.*
 import android.arch.lifecycle.Observer
 import android.content.Intent
 import android.net.Uri
+import android.os.CancellationSignal
 import android.support.v7.util.DiffUtil
 import net.papirus.pyrusservicedesk.PyrusServiceDesk
 import net.papirus.pyrusservicedesk.presentation.ui.navigation_page.ticket.entries.*
 import net.papirus.pyrusservicedesk.presentation.ui.view.recyclerview.DiffResultWithNewItems
-import net.papirus.pyrusservicedesk.presentation.usecase.AddCommentUseCase
-import net.papirus.pyrusservicedesk.presentation.usecase.GetTicketUseCase
-import net.papirus.pyrusservicedesk.presentation.usecase.UseCaseResult
+import net.papirus.pyrusservicedesk.presentation.usecase.*
 import net.papirus.pyrusservicedesk.presentation.viewmodel.ConnectionViewModelBase
 import net.papirus.pyrusservicedesk.sdk.data.Comment
 import net.papirus.pyrusservicedesk.sdk.data.EMPTY_TICKET_ID
@@ -26,8 +25,8 @@ internal class TicketViewModel(
     : ConnectionViewModelBase(serviceDesk),
         OnClickedCallback<CommentEntry> {
 
-    val isFeed = serviceDesk.enableFeedUi
-
+    private var isCreateTicketSent = false
+    private val isFeed = serviceDesk.enableFeedUi
     private var ticketId: Int = TicketActivity.getTicketId(arguments)
 
     private val unreadCounter = MutableLiveData<Int>()
@@ -114,64 +113,25 @@ internal class TicketViewModel(
         if (!item.hasError())
             return
         else {
-//            repository.retryComment(ticketId, item.comment)
+            applyUpdate(item, ChangeType.Cancelled)
+            sendAddComment(item.comment, item.uploadFileHooks)
         }
     }
 
     fun addComment(text: String) {
         val localComment = localDataProvider.newLocalComment(text)
-        applyUpdate(CommentEntry(localComment, onClickedCallback = this), ChangeType.Added)
-        val call = AddCommentUseCase(this, requests, ticketId, localComment, null).execute()
-        val observer = object: Observer<UseCaseResult<Int>> {
-            override fun onChanged(res: UseCaseResult<Int>?) {
-                res?.let {result ->
-                    val entry = when{
-                        result.hasError() -> CommentEntry(
-                            localComment,
-                            onClickedCallback = this@TicketViewModel,
-                            updateError = UpdateError.WebService)
-                        else -> CommentEntry(
-                            localDataProvider.localToServerComment(localComment, result.data!!),
-                            onClickedCallback = this@TicketViewModel)
-                    }
-                    applyUpdate(entry, ChangeType.Changed)
-                }
-                call.removeObserver(this)
-            }
-        }
-        call.observeForever(observer)
+        sendAddComment(localComment)
     }
 
     fun onAttachmentSelected(attachmentUri: Uri) {
         val localComment = localDataProvider.newLocalComment(fileUri = attachmentUri)
         val fileHooks = UploadFileHooks()
-        var cancelled = false
+        val cancellationSignal = CancellationSignal()
         fileHooks.subscribeOnCancel {
-            cancelled = true
+            cancellationSignal.cancel()
             applyUpdate(CommentEntry(localComment, onClickedCallback = this), ChangeType.Cancelled)
         }
-        applyUpdate(CommentEntry(localComment, onClickedCallback = this, uploadFileHooks = fileHooks), ChangeType.Added)
-        val call = AddCommentUseCase(this, requests, ticketId, localComment, fileHooks).execute()
-        val observer = object: Observer<UseCaseResult<Int>> {
-            override fun onChanged(res: UseCaseResult<Int>?) {
-                res?.let {result ->
-                    if (cancelled)
-                        return@let
-                    val entry = when{
-                        result.hasError() -> CommentEntry(
-                            localComment,
-                            onClickedCallback = this@TicketViewModel,
-                            updateError = UpdateError.WebService)
-                        else -> CommentEntry(
-                            localDataProvider.localToServerComment(localComment, result.data!!),
-                            onClickedCallback = this@TicketViewModel)
-                    }
-                    applyUpdate(entry, ChangeType.Changed)
-                }
-                call.removeObserver(this)
-            }
-        }
-        call.observeForever(observer)
+        sendAddComment(localComment, fileHooks, cancellationSignal)
     }
 
     fun getCommentDiffLiveData(): LiveData<DiffResultWithNewItems<TicketEntry>> = commentDiff
@@ -197,6 +157,51 @@ internal class TicketViewModel(
                 acc.add(CommentEntry(comment, onClickedCallback = this@TicketViewModel))
             acc
         }
+    }
+
+    private fun sendAddComment(localComment: Comment,
+                               uploadFileHooks: UploadFileHooks? = null,
+                               cancellationSignal: CancellationSignal? = null) {
+
+        val toNewTicket = !isFeed && isNewTicket() && !isCreateTicketSent
+
+        applyUpdate(CommentEntry(localComment, uploadFileHooks = uploadFileHooks, onClickedCallback = this), ChangeType.Added)
+        val call = when{
+            toNewTicket -> {
+                isCreateTicketSent = true
+                CreateTicketUseCase(this, requests, localComment, uploadFileHooks).execute()
+            }
+            isFeed -> AddFeedCommentUseCase(this, requests, localComment, uploadFileHooks).execute()
+            else -> AddCommentUseCase(this, requests, ticketId, localComment, uploadFileHooks).execute()
+        }
+        val observer = object : Observer<UseCaseResult<Int>> {
+            override fun onChanged(res: UseCaseResult<Int>?) {
+                res?.let { result ->
+                    isCreateTicketSent = false
+                    if (cancellationSignal?.isCanceled == true)
+                        return@let
+                    val entry = when {
+                        result.hasError() -> CommentEntry(
+                            localComment,
+                            onClickedCallback = this@TicketViewModel,
+                            updateError = UpdateError.WebService
+                        )
+                        else ->{
+                            if (toNewTicket)
+                                ticketId = result.data!!
+                            val commentId = if (toNewTicket) localComment.localId else result.data!!
+                            CommentEntry(
+                                localDataProvider.localToServerComment(localComment, commentId),
+                                onClickedCallback = this@TicketViewModel
+                            )
+                        }
+                    }
+                    applyUpdate(entry, ChangeType.Changed)
+                }
+                call.removeObserver(this)
+            }
+        }
+        call.observeForever(observer)
     }
 
     private fun applyUpdate(commentEntry: CommentEntry, changeType: ChangeType) {

@@ -1,4 +1,4 @@
-package net.papirus.pyrusservicedesk.ui.view
+package net.papirus.pyrusservicedesk.presentation.ui.view
 
 import android.content.Context
 import android.graphics.*

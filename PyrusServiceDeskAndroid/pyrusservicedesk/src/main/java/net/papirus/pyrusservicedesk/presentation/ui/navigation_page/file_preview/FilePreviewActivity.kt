@@ -10,15 +10,11 @@ import com.example.pyrusservicedesk.R
 import kotlinx.android.synthetic.main.psd_activity_file_preview.*
 import net.papirus.pyrusservicedesk.PyrusServiceDesk
 import net.papirus.pyrusservicedesk.presentation.ConnectionActivityBase
-import net.papirus.pyrusservicedesk.presentation.ui.navigation.UiNavigator
 import net.papirus.pyrusservicedesk.presentation.viewmodel.ConnectionViewModelBase
 import net.papirus.pyrusservicedesk.sdk.data.FILE_ID_EMPTY
 import net.papirus.pyrusservicedesk.sdk.getFileUrl
 import net.papirus.pyrusservicedesk.sdk.updates.UpdateBase
 import net.papirus.pyrusservicedesk.sdk.updates.UpdateType
-import net.papirus.pyrusservicedesk.sdk.web_service.getFileUrl
-import net.papirus.pyrusservicedesk.ui.ConnectionActivityBase
-import net.papirus.pyrusservicedesk.ui.viewmodel.ConnectionViewModelBase
 
 internal class FilePreviewActivity: ConnectionActivityBase<FilePreviewViewModel>(FilePreviewViewModel::class.java) {
 

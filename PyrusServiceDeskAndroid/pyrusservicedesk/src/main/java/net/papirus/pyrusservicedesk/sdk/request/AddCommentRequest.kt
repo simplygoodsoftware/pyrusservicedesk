@@ -15,5 +15,4 @@ internal class AddCommentRequest(
     override suspend fun run(repository: Repository): ResponseBase<Int> {
         return repository.addComment(ticketId, comment, uploadFileHooks)
     }
-
 }
