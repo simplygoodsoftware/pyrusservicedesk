@@ -10,7 +10,7 @@ import net.papirus.pyrusservicedesk.sdk.data.TicketShortDescription
 import net.papirus.pyrusservicedesk.ui.view.recyclerview.AdapterBase
 import net.papirus.pyrusservicedesk.ui.view.recyclerview.ViewHolderBase
 import net.papirus.pyrusservicedesk.utils.ThemeUtils
-import net.papirus.pyrusservicedesk.utils.getWhen
+import net.papirus.pyrusservicedesk.utils.getTimePassedFrom
 import java.util.*
 
 internal class TicketsAdapter: AdapterBase<TicketShortDescription>() {
@@ -42,7 +42,7 @@ internal class TicketsAdapter: AdapterBase<TicketShortDescription>() {
             super.bindItem(item)
             ticketName.text = getItem().subject
             lastComment.text = getItem().lastComment?.body
-            date.text = getItem().lastComment?.creationDate?.getWhen(itemView.context, Calendar.getInstance())
+            date.text = getItem().lastComment?.creationDate?.getTimePassedFrom(itemView.context, Calendar.getInstance())
             unreadCounter.visibility = if (!getItem().isRead) VISIBLE else GONE
         }
     }

@@ -18,4 +18,18 @@
     <string name="psd_photo">Сделать фото</string>
     <string name="psd_gallery">Галерея</string>
     <string name="psd_send_logs">Выслать логи</string>
+
+    <plurals name="psd_years_ago">
+        <item quantity="one">%d год назад</item>
+        <item quantity="few">%d год назад</item>
+        <item quantity="many">%d лет назад</item>
+        <item quantity="other">%d лут назад</item>
+    </plurals>
+
+    <string name="psd_months_ago" formatted="false">%d м назад</string>
+    <string name="psd_weeks_ago" formatted="false">%d н назад</string>
+    <string name="psd_days_ago" formatted="false">%d д назад</string>
+    <string name="psd_hours_ago" formatted="false">%d ч назад</string>
+    <string name="psd_minutes_ago" formatted="false">%d м назад</string>
+    <string name="psd_recent">только что</string>
 </resources>

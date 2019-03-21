@@ -18,4 +18,16 @@
     <string name="psd_photo">Photo</string>
     <string name="psd_gallery">Gallery</string>
     <string name="psd_send_logs">Send logs</string>
+
+    <plurals name="psd_years_ago">
+        <item quantity="one">%d year ago</item>
+        <item quantity="other">%d years ago</item>
+    </plurals>
+
+    <string name="psd_months_ago" formatted="false">%d m ago</string>
+    <string name="psd_weeks_ago" formatted="false">%d w ago</string>
+    <string name="psd_days_ago" formatted="false">%d d ago</string>
+    <string name="psd_hours_ago" formatted="false">%d h ago</string>
+    <string name="psd_minutes_ago" formatted="false">%d m ago</string>
+    <string name="psd_recent">recent</string>
 </resources>

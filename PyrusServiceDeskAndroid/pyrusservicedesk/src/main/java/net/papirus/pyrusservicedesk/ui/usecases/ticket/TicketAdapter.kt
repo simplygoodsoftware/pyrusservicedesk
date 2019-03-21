@@ -145,7 +145,7 @@ internal class TicketAdapter: AdapterBase<TicketEntry>() {
                 ContentType.Text -> comment.setCommentText(getItem().comment.body)
                 ContentType.Attachment -> bindAttachmentView()
             }
-            creationTime.text = getTimeText(itemView.context, getItem().comment.creationDate)
+            creationTime.text = getItem().comment.creationDate.getTimeText(itemView.context)
         }
 
         override fun onDetachedFromWindow() {

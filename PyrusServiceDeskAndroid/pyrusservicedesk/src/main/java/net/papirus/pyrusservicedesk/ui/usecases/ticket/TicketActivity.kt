@@ -81,15 +81,6 @@ internal class TicketActivity : ConnectionActivityBase<TicketViewModel>(TicketVi
         input.setCursorColor(accentColor)
     }
 
-    private fun onMenuItemClicked(menuItem: MenuItem?): Boolean {
-        return menuItem?.let {
-            when (it.itemId) {
-                R.id.psd_main_menu_close -> sharedViewModel.quitServiceDesk()
-            }
-            true
-        } ?: false
-    }
-
     override fun onCreateOptionsMenu(menu: Menu?): Boolean {
         return menu?.let{
             MenuInflater(this).inflate(R.menu.psd_main_menu, menu)
@@ -139,6 +130,15 @@ internal class TicketActivity : ConnectionActivityBase<TicketViewModel>(TicketVi
             }
 
         }
+    }
+
+    private fun onMenuItemClicked(menuItem: MenuItem?): Boolean {
+        return menuItem?.let {
+            when (it.itemId) {
+                R.id.psd_main_menu_close -> sharedViewModel.quitServiceDesk()
+            }
+            true
+        } ?: false
     }
 
     private fun sendComment() {

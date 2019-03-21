@@ -3,6 +3,9 @@ package net.papirus.pyrusservicedesk.ui.usecases.tickets
 import android.arch.lifecycle.Observer
 import android.content.Intent
 import android.os.Bundle
+import android.view.Menu
+import android.view.MenuInflater
+import android.view.MenuItem
 import com.example.pyrusservicedesk.R
 import kotlinx.android.synthetic.main.psd_activity_tickets.*
 import net.papirus.pyrusservicedesk.PyrusServiceDesk
@@ -30,8 +33,8 @@ internal class TicketsActivity: ConnectionActivityBase<TicketsViewModel>(Tickets
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         supportActionBar?.apply { title = getString(R.string.psd_tickets_activity_title) }
-        tickets_toolbar.setNavigationIcon(R.drawable.psd_arrow_back)
         tickets_toolbar.setNavigationOnClickListener { finish() }
+        tickets_toolbar.setOnMenuItemClickListener{ onMenuItemClicked(it) }
         adapter = TicketsAdapter()
                 .apply {
                     setOnTicketClickListener {
@@ -65,5 +68,22 @@ internal class TicketsActivity: ConnectionActivityBase<TicketsViewModel>(Tickets
                 list?.let{ adapter.setItems(it) }
             }
         )
+    }
+
+    override fun onCreateOptionsMenu(menu: Menu?): Boolean {
+        return menu?.let{
+            MenuInflater(this).inflate(R.menu.psd_main_menu, menu)
+            menu.findItem(R.id.psd_main_menu_close).setShowAsAction(MenuItem.SHOW_AS_ACTION_ALWAYS)
+            true
+        } ?: false
+    }
+
+    private fun onMenuItemClicked(menuItem: MenuItem?): Boolean {
+        return menuItem?.let {
+            when (it.itemId) {
+                R.id.psd_main_menu_close -> sharedViewModel.quitServiceDesk()
+            }
+            true
+        } ?: false
     }
 }
