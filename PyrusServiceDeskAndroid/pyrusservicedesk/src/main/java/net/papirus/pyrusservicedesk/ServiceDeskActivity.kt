@@ -3,8 +3,8 @@ package net.papirus.pyrusservicedesk
 import android.content.Intent
 import android.graphics.drawable.Drawable
 import android.support.annotation.ColorInt
-import net.papirus.pyrusservicedesk.ui.usecases.ticket.TicketActivity
-import net.papirus.pyrusservicedesk.ui.usecases.tickets.TicketsActivity
+import net.papirus.pyrusservicedesk.presentation.ui.navigation_page.ticket.TicketActivity
+import net.papirus.pyrusservicedesk.presentation.ui.navigation_page.tickets.TicketsActivity
 
 class ServiceDeskActivity private constructor(){
     companion object {

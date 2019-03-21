@@ -12,7 +12,7 @@
     android:paddingEnd="@dimen/psd_offset_default"
     android:paddingRight="@dimen/psd_offset_default">
 
-    <net.papirus.pyrusservicedesk.ui.view.CommentView
+    <net.papirus.pyrusservicedesk.presentation.ui.view.CommentView
         android:id="@+id/comment"
         android:layout_width="0dp"
         android:layout_height="wrap_content"

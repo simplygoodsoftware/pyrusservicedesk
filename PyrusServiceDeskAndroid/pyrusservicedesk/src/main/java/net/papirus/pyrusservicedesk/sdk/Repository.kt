@@ -1,29 +1,24 @@
 package net.papirus.pyrusservicedesk.sdk
 
-import android.arch.lifecycle.LiveData
-import android.net.Uri
-import net.papirus.pyrusservicedesk.sdk.data.Attachment
+import net.papirus.pyrusservicedesk.PyrusServiceDesk
 import net.papirus.pyrusservicedesk.sdk.data.Comment
 import net.papirus.pyrusservicedesk.sdk.data.TicketDescription
-import net.papirus.pyrusservicedesk.sdk.updates.GetTicketFeedUpdate
-import net.papirus.pyrusservicedesk.sdk.updates.GetTicketUpdate
-import net.papirus.pyrusservicedesk.sdk.updates.GetTicketsUpdate
-import net.papirus.pyrusservicedesk.sdk.updates.UpdateSubscriber
+import net.papirus.pyrusservicedesk.sdk.response.*
+import net.papirus.pyrusservicedesk.sdk.web.UploadFileHooks
+
+internal const val BASE_URL = "https://pyrus.com/servicedeskapi/v1/"
 
 internal interface Repository{
-    fun subscribeToUpdates(subscriber: UpdateSubscriber)
-    fun unsubscribeFromUpdates(subscriber: UpdateSubscriber)
-    fun getTicketFeed(): LiveData<GetTicketFeedUpdate>
-    fun getTickets(): LiveData<GetTicketsUpdate>
-    fun getTicket(ticketId: Int): LiveData<GetTicketUpdate>
-    fun createTicket(userName: String, ticket: TicketDescription)
-    // TODO Comment should be passed, must handle file uploading too
-    fun addComment(
-        ticketId: Int,
-        comment: String,
-        attachments: List<Attachment>? = null
-    )
-    // TODO temporary approach, addComment must be sufficient
-    fun retryComment(ticketId: Int, localComment: Comment)
-    fun uploadFile(ticketId: Int, fileUri: Uri)
+    suspend fun getConversation(): GetConversationResponse
+    suspend fun getTickets(): GetTicketsResponse
+    suspend fun getTicket(ticketId: Int): GetTicketResponse
+    suspend fun addComment(ticketId: Int, comment: Comment, uploadFileHooks: UploadFileHooks? = null): AddCommentResponse
+    suspend fun createTicket(description: TicketDescription, uploadFileHooks: UploadFileHooks): CreateTicketResponse
+}
+
+internal fun getAvatarUrl(avatarId: Int): String = "$BASE_URL/Avatar/$avatarId"
+internal fun getFileUrl(fileId: Int): String {
+    return with(PyrusServiceDesk.getInstance()){
+        "$BASE_URL/DownloadFile/$fileId?user_id=$clientId&app_id=$appId"
+    }
 }

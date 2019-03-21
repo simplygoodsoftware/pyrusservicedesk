@@ -8,4 +8,7 @@ internal data class TicketDescription(
     @SerializedName("description")
     val description: String,
     @SerializedName("attachments")
-    val attachments: List<Attachment>? = null)
+    val attachments: List<Attachment>? = null){
+
+    fun hasAttachments() = !attachments.isNullOrEmpty()
+}

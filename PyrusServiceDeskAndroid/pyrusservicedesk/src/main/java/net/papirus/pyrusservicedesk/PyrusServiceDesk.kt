@@ -2,11 +2,13 @@ package net.papirus.pyrusservicedesk
 
 import android.app.Application
 import android.arch.lifecycle.Observer
-import net.papirus.pyrusservicedesk.sdk.Repository
+import kotlinx.coroutines.newSingleThreadContext
+import net.papirus.pyrusservicedesk.presentation.viewmodel.SharedViewModel
+import net.papirus.pyrusservicedesk.sdk.FileResolver
 import net.papirus.pyrusservicedesk.sdk.RepositoryFactory
+import net.papirus.pyrusservicedesk.sdk.RequestFactory
 import net.papirus.pyrusservicedesk.sdk.data.LocalDataProvider
-import net.papirus.pyrusservicedesk.sdk.web_service.WebServiceFactory
-import net.papirus.pyrusservicedesk.ui.viewmodel.SharedViewModel
+import net.papirus.pyrusservicedesk.sdk.web.retrofit.RetrofitWebRepository
 
 class PyrusServiceDesk private constructor(
         internal val application: Application,
@@ -26,17 +28,23 @@ class PyrusServiceDesk private constructor(
         internal fun getInstance() : PyrusServiceDesk {
             return checkNotNull(INSTANCE){ "Instantiate PyrusServiceDesk first" }
         }
+
+        internal val DISPATCHER_IO_SINGLE = newSingleThreadContext("IO_SINGLE")
     }
 
-    internal val repository: Repository by lazy{
-        RepositoryFactory.create(
-                WebServiceFactory.create(
+    internal val requestFactory: RequestFactory by lazy {
+        RequestFactory(
+            RepositoryFactory.create(
+                RetrofitWebRepository(
                     appId,
                     clientId.toString(),
-                    enableFeedUi),
-                application.contentResolver,
-                LocalDataProvider(clientName)
+                    clientName,
+                    fileResolver))
         )
+    }
+
+    internal val localDataProvider: LocalDataProvider by lazy {
+        LocalDataProvider(clientName, fileResolver =  fileResolver)
     }
 
     internal fun getSharedViewModel(): SharedViewModel {
@@ -44,6 +52,8 @@ class PyrusServiceDesk private constructor(
             refreshSharedViewModel()
         return sharedViewModel!!
     }
+
+    private val fileResolver by lazy { FileResolver(application.contentResolver) }
 
     private var sharedViewModel: SharedViewModel? = null
 
