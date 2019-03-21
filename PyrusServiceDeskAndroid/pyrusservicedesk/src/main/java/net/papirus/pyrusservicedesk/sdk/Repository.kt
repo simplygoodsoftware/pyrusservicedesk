@@ -5,6 +5,7 @@ import net.papirus.pyrusservicedesk.sdk.data.Comment
 import net.papirus.pyrusservicedesk.sdk.data.TicketDescription
 import net.papirus.pyrusservicedesk.sdk.response.*
 import net.papirus.pyrusservicedesk.sdk.web.UploadFileHooks
+import java.net.URLEncoder
 
 internal const val BASE_URL = "https://pyrus.com/servicedeskapi/v1/"
 
@@ -20,6 +21,10 @@ internal interface Repository{
 internal fun getAvatarUrl(avatarId: Int): String = "$BASE_URL/Avatar/$avatarId"
 internal fun getFileUrl(fileId: Int): String {
     return with(PyrusServiceDesk.getInstance()){
-        "$BASE_URL/DownloadFile/$fileId?user_id=$clientId&app_id=$appId"
+        "$BASE_URL/DownloadFile/$fileId" +
+                "?user_id=" +
+                URLEncoder.encode(clientId.toString(), "UTF-8") +
+                "&app_id=" +
+                URLEncoder.encode(appId, "UTF-8")
     }
 }

@@ -4,10 +4,11 @@ import android.content.Context
 import android.graphics.*
 import android.graphics.drawable.LayerDrawable
 import android.support.v4.content.ContextCompat
+import android.support.v7.content.res.AppCompatResources
 import com.example.pyrusservicedesk.R
 
 internal class NavigationCounterDrawable(private val context: Context)
-    : LayerDrawable(arrayOf(ContextCompat.getDrawable(context, R.drawable.psd_menu))) {
+    : LayerDrawable(arrayOf(AppCompatResources.getDrawable(context, R.drawable.psd_menu))) {
 
     companion object {
         private const val SIZE_FACTOR = .55f

@@ -26,7 +26,7 @@
     </item>
     <item
         android:id="@+id/progress_icon"
-        android:drawable="@drawable/psd_download_file"
+        android:drawable="@color/psd_accent"
         android:width="32dp"
         android:height="32dp"
         android:gravity="center"/>

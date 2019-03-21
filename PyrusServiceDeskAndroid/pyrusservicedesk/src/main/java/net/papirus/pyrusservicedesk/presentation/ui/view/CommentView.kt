@@ -6,8 +6,8 @@ import android.graphics.PorterDuff
 import android.graphics.drawable.AnimationDrawable
 import android.graphics.drawable.LayerDrawable
 import android.support.annotation.ColorInt
-import android.support.v4.app.ActivityCompat
 import android.support.v4.content.ContextCompat
+import android.support.v7.content.res.AppCompatResources
 import android.support.v7.widget.AppCompatImageView
 import android.util.AttributeSet
 import android.view.Gravity
@@ -51,7 +51,7 @@ internal class CommentView @JvmOverloads constructor(
 
     var fileProgressStatus = Status.Completed
         set(value) {
-            val icon = ActivityCompat.getDrawable(
+            val icon = AppCompatResources.getDrawable(
                     context,
                     when (value) {
                         Status.Processing -> R.drawable.psd_close
@@ -61,7 +61,8 @@ internal class CommentView @JvmOverloads constructor(
             icon?.let {
                 fileDownloadDrawable.setDrawableByLayerId(
                         R.id.progress_icon,
-                        it.mutate().apply { setColorFilter(primaryColor, PorterDuff.Mode.SRC_IN) })
+                        it.apply { setColorFilter(primaryColor, PorterDuff.Mode.SRC_IN) })
+
             }
             if (value != Status.Processing) {
                 setFileSize(recentFileSize)

@@ -68,8 +68,11 @@ internal class TicketActivity : ConnectionActivityBase<TicketViewModel>(TicketVi
         val accentColor = ThemeUtils.getAccentColor(this)
 
         supportActionBar?.apply { title = ThemeUtils.getTitle(this@TicketActivity) }
-        ticket_toolbar.navigationIcon = navigationCounterIcon
-        ticket_toolbar.setNavigationOnClickListener { UiNavigator.toTickets(this@TicketActivity) }
+
+        if (!viewModel.isFeed) {
+            ticket_toolbar.navigationIcon = navigationCounterIcon
+            ticket_toolbar.setNavigationOnClickListener { UiNavigator.toTickets(this@TicketActivity) }
+        }
         ticket_toolbar.setOnMenuItemClickListener{ onMenuItemClicked(it) }
         comments.apply {
             adapter = this@TicketActivity.adapter

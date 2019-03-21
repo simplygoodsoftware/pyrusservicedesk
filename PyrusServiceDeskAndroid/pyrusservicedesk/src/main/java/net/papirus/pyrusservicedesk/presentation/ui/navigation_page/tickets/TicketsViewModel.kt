@@ -8,8 +8,6 @@ import net.papirus.pyrusservicedesk.PyrusServiceDesk
 import net.papirus.pyrusservicedesk.presentation.usecase.GetTicketsUseCase
 import net.papirus.pyrusservicedesk.presentation.viewmodel.ConnectionViewModelBase
 import net.papirus.pyrusservicedesk.sdk.data.TicketShortDescription
-import net.papirus.pyrusservicedesk.sdk.updates.UpdateBase
-import net.papirus.pyrusservicedesk.sdk.updates.UpdateType
 
 internal class TicketsViewModel(serviceDesk: PyrusServiceDesk)
     : ConnectionViewModelBase(serviceDesk) {
@@ -42,15 +40,6 @@ internal class TicketsViewModel(serviceDesk: PyrusServiceDesk)
         if (isNetworkConnected.value == true) {
             loadData()
         }
-    }
-
-    override fun <T : UpdateBase> onUpdateReceived(update: T) {
-        if (!update.hasError())
-            onLoadData()
-    }
-
-    override fun getUpdateTypes(): Set<UpdateType> {
-        return setOf(UpdateType.TicketCreated, UpdateType.CommentAdded)
     }
 
     override fun onLoadData() {

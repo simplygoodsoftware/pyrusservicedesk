@@ -19,7 +19,6 @@ import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.cancelChildren
 import net.papirus.pyrusservicedesk.PyrusServiceDesk
 import net.papirus.pyrusservicedesk.broadcasts.ReceiverBase
-import net.papirus.pyrusservicedesk.sdk.updates.UpdateSubscriber
 
 private const val PROGRESS_START_VALUE = 40
 private const val PROGRESS_INCREMENT_VALUE = 20
@@ -28,10 +27,7 @@ private const val PROGRESS_ANIMATION_DURATION_MS_QUICK = 400L
 
 internal abstract class ConnectionViewModelBase(private val serviceDesk: PyrusServiceDesk)
     : AndroidViewModel(serviceDesk.application),
-        UpdateSubscriber,
         CoroutineScope {
-
-    val organizationName = serviceDesk.clientName
 
     protected val requests = serviceDesk.requestFactory
     protected val localDataProvider = serviceDesk.localDataProvider

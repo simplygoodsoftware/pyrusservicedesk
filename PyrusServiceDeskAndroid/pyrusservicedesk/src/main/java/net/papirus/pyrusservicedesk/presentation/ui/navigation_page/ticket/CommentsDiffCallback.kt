@@ -31,7 +31,7 @@ internal class CommentsDiffCallback(
         return when {
             oldEntry is DateEntry && newEntry is DateEntry -> oldEntry.date == newEntry.date
             oldEntry is CommentEntry && newEntry is CommentEntry -> {
-                oldEntry.comment == newEntry.comment && oldEntry.updateError == newEntry.updateError
+                oldEntry.comment == newEntry.comment && oldEntry.error == newEntry.error
             }
             else -> false
         }

@@ -7,5 +7,5 @@
         android:height="@dimen/psd_icon_size"/>
 
     <solid
-        android:color="?attr/colorAccent"/>
+        android:color="@color/psd_accent"/>
 </shape>

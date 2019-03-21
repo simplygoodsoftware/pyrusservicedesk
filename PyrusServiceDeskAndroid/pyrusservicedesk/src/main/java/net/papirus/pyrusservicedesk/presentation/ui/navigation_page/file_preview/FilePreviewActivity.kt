@@ -13,8 +13,6 @@ import net.papirus.pyrusservicedesk.presentation.ConnectionActivityBase
 import net.papirus.pyrusservicedesk.presentation.viewmodel.ConnectionViewModelBase
 import net.papirus.pyrusservicedesk.sdk.data.FILE_ID_EMPTY
 import net.papirus.pyrusservicedesk.sdk.getFileUrl
-import net.papirus.pyrusservicedesk.sdk.updates.UpdateBase
-import net.papirus.pyrusservicedesk.sdk.updates.UpdateType
 
 internal class FilePreviewActivity: ConnectionActivityBase<FilePreviewViewModel>(FilePreviewViewModel::class.java) {
 
@@ -76,10 +74,6 @@ internal class FilePreviewActivity: ConnectionActivityBase<FilePreviewViewModel>
 }
 
 internal class FilePreviewViewModel(pyrusServiceDesk: PyrusServiceDesk): ConnectionViewModelBase(pyrusServiceDesk){
-    override fun <T : UpdateBase> onUpdateReceived(update: T) {}
-
-    override fun getUpdateTypes(): Set<UpdateType> = emptySet()
-
     override fun onLoadData() {}
 
     fun getWebChromeClient() = object: WebChromeClient() {

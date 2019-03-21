@@ -6,6 +6,8 @@ import android.content.Intent
 import android.net.Uri
 import android.os.CancellationSignal
 import android.support.v7.util.DiffUtil
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 import net.papirus.pyrusservicedesk.PyrusServiceDesk
 import net.papirus.pyrusservicedesk.presentation.ui.navigation_page.ticket.entries.*
 import net.papirus.pyrusservicedesk.presentation.ui.view.recyclerview.DiffResultWithNewItems
@@ -13,7 +15,6 @@ import net.papirus.pyrusservicedesk.presentation.usecase.*
 import net.papirus.pyrusservicedesk.presentation.viewmodel.ConnectionViewModelBase
 import net.papirus.pyrusservicedesk.sdk.data.Comment
 import net.papirus.pyrusservicedesk.sdk.data.EMPTY_TICKET_ID
-import net.papirus.pyrusservicedesk.sdk.updates.*
 import net.papirus.pyrusservicedesk.sdk.web.UploadFileHooks
 import net.papirus.pyrusservicedesk.utils.getWhen
 import java.util.*
@@ -25,8 +26,9 @@ internal class TicketViewModel(
     : ConnectionViewModelBase(serviceDesk),
         OnClickedCallback<CommentEntry> {
 
+    val isFeed = serviceDesk.enableFeedUi
+
     private var isCreateTicketSent = false
-    private val isFeed = serviceDesk.enableFeedUi
     private var ticketId: Int = TicketActivity.getTicketId(arguments)
 
     private val unreadCounter = MutableLiveData<Int>()
@@ -50,15 +52,15 @@ internal class TicketViewModel(
                 }
             }
             else {
-//                addSource(
-//                    Transformations.switchMap(commentsRequest){
-//                        repository.getTicketFeed()
-//                    }
-//                ){
-//                    entries.value = it?.comments
-//                    publishEntries(recentTicketEntries, entries.value?.toTicketEntries() ?: emptyList())
-//                    onDataLoaded()
-//                }
+                addSource(
+                    Transformations.switchMap(commentsRequest){
+                        GetFeedUseCase(this@TicketViewModel, requests).execute()
+                    }
+                ){
+                    entries.value = it?.data
+                    publishEntries(recentTicketEntries, entries.value?.toTicketEntries() ?: emptyList())
+                    onDataLoaded()
+                }
             }
         }. also { it.observeForever {  } /*should be observed to trigger transformations*/}
 
@@ -70,39 +72,7 @@ internal class TicketViewModel(
         if (wantLoadDataOnStart && isNetworkConnected.value == true) {
             loadData()
         }
-    }
-
-    override fun <T : UpdateBase> onUpdateReceived(update: T) {
-        when (update.type) {
-            UpdateType.TicketCreated -> {
-                (update as TicketCreatedUpdate).let {
-                    ticketId = update.ticketId ?: ticketId;
-                    onLoadData()
-                }
-            }
-            UpdateType.CommentAdded -> {
-                (update as CommentAddedUpdate).let {
-                    if (!isFeed && update.ticketId != ticketId)
-                        return
-                    applyUpdate(
-                        CommentEntry(update.comment, update.uploadFileHooks, this, update.error),
-                        if (update.isNew) ChangeType.Added else ChangeType.Changed)
-                }
-            }
-            UpdateType.CommentCancelled -> {
-                (update as CommentCancelledUpdate).let {
-                    if (!isFeed && update.ticketId != ticketId)
-                        return
-                    applyUpdate(
-                        CommentEntry(update.comment, onClickedCallback = this),
-                        ChangeType.Cancelled)
-                }
-            }
-        }
-    }
-
-    override fun getUpdateTypes(): Set<UpdateType> {
-        return setOf(UpdateType.CommentAdded, UpdateType.CommentCancelled, UpdateType.TicketCreated)
+        maybeStartAutoRefresh()
     }
 
     override fun onLoadData() {
@@ -137,6 +107,24 @@ internal class TicketViewModel(
     fun getCommentDiffLiveData(): LiveData<DiffResultWithNewItems<TicketEntry>> = commentDiff
 
     fun getUnreadCounterLiveData(): LiveData<Int> = unreadCounter
+
+    private fun maybeStartAutoRefresh() {
+        if (!isNewTicket()) {
+            suspend fun autoRefresh() {
+                delay(30 * 1000)
+                GetTicketUseCase(this@TicketViewModel, requests, ticketId)
+                    .execute()
+                    .observeForever {
+                        it?.let { result ->
+                            entries.value = result.data
+                            publishEntries(recentTicketEntries, entries.value?.toTicketEntries() ?: emptyList())
+                            onDataLoaded()
+                        }
+                    }
+            }
+            launch { autoRefresh() }
+        }
+    }
 
     private fun isNewTicket() = ticketId == EMPTY_TICKET_ID
 
@@ -184,11 +172,13 @@ internal class TicketViewModel(
                         result.hasError() -> CommentEntry(
                             localComment,
                             onClickedCallback = this@TicketViewModel,
-                            updateError = UpdateError.WebService
+                            error = result.error
                         )
                         else ->{
-                            if (toNewTicket)
+                            if (toNewTicket) {
                                 ticketId = result.data!!
+                                maybeStartAutoRefresh()
+                            }
                             val commentId = if (toNewTicket) localComment.localId else result.data!!
                             CommentEntry(
                                 localDataProvider.localToServerComment(localComment, commentId),
