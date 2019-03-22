@@ -13,7 +13,8 @@ internal const val ISO_DATE_PATTERN = "yyyy-MM-dd'T'HH:mm:ss'Z'"
 private const val TIME_ZONE_UTC = "UTC"
 private const val MILLISECONDS_IN_DAY = 24 * 60 * 60 * 1000
 private const val MILLISECONDS_IN_HOUR = 60 * 60 * 1000
-private const val MILLISECONDS_IN_MINUTE = 60 * 1000
+internal const val MILLISECONDS_IN_MINUTE = 60 * 1000
+internal const val MILLISECONDS_IN_SECOND = 1000
 private const val MONTHS_IN_YEAR = 12
 private const val DAYS_IN_WEEK = 7
 

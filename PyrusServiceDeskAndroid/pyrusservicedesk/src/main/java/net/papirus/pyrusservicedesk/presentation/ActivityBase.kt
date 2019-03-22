@@ -8,7 +8,7 @@ import android.view.View.NO_ID
 import android.view.ViewGroup
 import com.example.pyrusservicedesk.R
 import net.papirus.pyrusservicedesk.PyrusServiceDesk
-import net.papirus.pyrusservicedesk.presentation.viewmodel.SharedViewModel
+import net.papirus.pyrusservicedesk.presentation.viewmodel.QuitViewModel
 import net.papirus.pyrusservicedesk.utils.getViewModel
 
 
@@ -17,7 +17,7 @@ internal abstract class ActivityBase: AppCompatActivity() {
     abstract val layoutResId: Int
     abstract val toolbarViewId: Int
 
-    protected val sharedViewModel: SharedViewModel by getViewModel(SharedViewModel::class.java)
+    protected val quitViewModel: QuitViewModel by getViewModel(QuitViewModel::class.java)
     private var recentKeyboardHeight = 0
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -55,7 +55,7 @@ internal abstract class ActivityBase: AppCompatActivity() {
     protected open fun onViewHeightChanged(changedBy: Int) {}
 
     protected open fun observeData() {
-        sharedViewModel.getQuitServiceDeskLiveData().observe(
+        quitViewModel.getQuitServiceDeskLiveData().observe(
             this,
             Observer { quit -> quit?.let { if(it) finish() } }
         )

@@ -4,11 +4,11 @@ import android.app.Activity
 import android.app.Application
 import android.arch.lifecycle.Observer
 import android.content.Intent
-import com.example.pyrusservicedesk.R
 import kotlinx.coroutines.asCoroutineDispatcher
 import net.papirus.pyrusservicedesk.presentation.ui.navigation_page.ticket.TicketActivity
 import net.papirus.pyrusservicedesk.presentation.ui.navigation_page.tickets.TicketsActivity
-import net.papirus.pyrusservicedesk.presentation.viewmodel.SharedViewModel
+import net.papirus.pyrusservicedesk.presentation.viewmodel.LiveUpdates
+import net.papirus.pyrusservicedesk.presentation.viewmodel.QuitViewModel
 import net.papirus.pyrusservicedesk.sdk.FileResolver
 import net.papirus.pyrusservicedesk.sdk.RepositoryFactory
 import net.papirus.pyrusservicedesk.sdk.RequestFactory
@@ -23,48 +23,49 @@ class PyrusServiceDesk private constructor(
         internal val isSingleChat: Boolean){
 
     internal var userId: Int = 0
-    internal var userName: String = application.getString(R.string.psd_guest)
 
     companion object {
         internal val DISPATCHER_IO_SINGLE = Executors.newSingleThreadExecutor().asCoroutineDispatcher()
         private var INSTANCE: PyrusServiceDesk? = null
-        private var THEME: ServiceDeskTheme? = null
+        private var CONFIGURE: ServiceDeskConfigure? = null
 
         @JvmStatic
-        fun init(application: Application, appId: String, singleChat: Boolean) {
-            INSTANCE = PyrusServiceDesk(application, appId, singleChat)
+        fun init(application: Application, appId: String) {
+            INSTANCE = PyrusServiceDesk(application, appId, true)
         }
 
         @JvmStatic
-        fun start(activity: Activity, theme: ServiceDeskTheme? = null) {
-            startImpl(activity = activity, theme = theme)
+        fun start(activity: Activity, configure: ServiceDeskConfigure? = null) {
+            startImpl(activity = activity, configure = configure)
         }
 
         @JvmStatic
-        fun startTicket(ticketId: Int, activity: Activity, theme: ServiceDeskTheme? = null) {
-            startImpl(ticketId, activity, theme)
+        fun startTicket(ticketId: Int, activity: Activity, configure: ServiceDeskConfigure? = null) {
+            startImpl(ticketId, activity, configure)
         }
 
         @JvmStatic
-        fun setUser(userId: Int, userName: String) {
-            getInstance().apply {
-                this.userId = userId
-                this.userName = userName
-            }
+        fun subscribeOnUnreadCounterChanged(subscriber: UnreadCounterChangedSubscriber){
+            getInstance().liveUpdates.subscribeOnUnreadCounterChanged(subscriber)
+        }
+
+        @JvmStatic
+        fun unsubscribeFromUnreadCounterChanged(subscriber: UnreadCounterChangedSubscriber) {
+            getInstance().liveUpdates.unsubscribeFromUnreadCounterChanged(subscriber)
         }
 
         internal fun getInstance() : PyrusServiceDesk {
             return checkNotNull(INSTANCE){ "Instantiate PyrusServiceDesk first" }
         }
 
-        internal fun getTheme(): ServiceDeskTheme {
-            if (THEME == null)
-                THEME = ServiceDeskTheme(getInstance().application.isTablet())
-            return THEME!!
+        internal fun getTheme(): ServiceDeskConfigure {
+            if (CONFIGURE == null)
+                CONFIGURE = ServiceDeskConfigure(isDialogTheme = getInstance().application.isTablet())
+            return CONFIGURE!!
         }
 
-        private fun startImpl(ticketId: Int? = null, activity: Activity, theme: ServiceDeskTheme? = null) {
-            THEME = theme
+        private fun startImpl(ticketId: Int? = null, activity: Activity, configure: ServiceDeskConfigure? = null) {
+            CONFIGURE = configure
             activity.startActivity(createIntent(ticketId))
         }
 
@@ -77,30 +78,36 @@ class PyrusServiceDesk private constructor(
         }
     }
 
-    internal val requestFactory: RequestFactory by lazy {
-        RequestFactory(
+    internal val requestFactory: RequestFactory
+    internal val liveUpdates: LiveUpdates
+
+    internal val localDataProvider: LocalDataProvider by lazy {
+        LocalDataProvider(fileResolver =  fileResolver)
+    }
+
+    private val fileResolver: FileResolver = FileResolver(application.contentResolver)
+
+    init {
+        requestFactory = RequestFactory(
             RepositoryFactory.create(
                 RetrofitWebRepository(
                     appId,
                     userId.toString(),
-                    userName,
-                    fileResolver))
+                    fileResolver
+                )
+            )
         )
+        liveUpdates = LiveUpdates(requestFactory)
     }
 
-    internal val localDataProvider: LocalDataProvider by lazy {
-        LocalDataProvider(userName, fileResolver =  fileResolver)
-    }
-
-    internal fun getSharedViewModel(): SharedViewModel {
-        if (sharedViewModel == null)
+    internal fun getSharedViewModel(): QuitViewModel {
+        if (quitViewModel == null)
             refreshSharedViewModel()
-        return sharedViewModel!!
+        return quitViewModel!!
     }
 
-    private val fileResolver by lazy { FileResolver(application.contentResolver) }
 
-    private var sharedViewModel: SharedViewModel? = null
+    private var quitViewModel: QuitViewModel? = null
 
     private val quitObserver = Observer<Boolean> {
         it?.let{value ->
@@ -110,7 +117,7 @@ class PyrusServiceDesk private constructor(
     }
 
     private fun refreshSharedViewModel() {
-        sharedViewModel?.getQuitServiceDeskLiveData()?.removeObserver(quitObserver)
-        sharedViewModel = SharedViewModel().also { it.getQuitServiceDeskLiveData().observeForever(quitObserver) }
+        quitViewModel?.getQuitServiceDeskLiveData()?.removeObserver(quitObserver)
+        quitViewModel = QuitViewModel().also { it.getQuitServiceDeskLiveData().observeForever(quitObserver) }
     }
 }

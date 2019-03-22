@@ -15,7 +15,7 @@ internal abstract class UseCaseBase<T>(private val scope: CoroutineScope) {
         scope.launch {
             val job = async { run() }
             withContext(Dispatchers.Main) {
-                result.postValue(job.await())
+                result.value = job.await()
             }
         }
         return result

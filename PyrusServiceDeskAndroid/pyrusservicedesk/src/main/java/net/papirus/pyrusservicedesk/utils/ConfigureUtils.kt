@@ -9,7 +9,7 @@ import android.support.v7.content.res.AppCompatResources
 import com.example.pyrusservicedesk.R
 import net.papirus.pyrusservicedesk.PyrusServiceDesk
 
-internal class ThemeUtils{
+internal class ConfigureUtils{
 
     companion object {
 
@@ -34,8 +34,17 @@ internal class ThemeUtils{
 
         fun getSupportAvatar(context: Context): Drawable {
             return when {
-                PyrusServiceDesk.getTheme().supportAvatar != null -> PyrusServiceDesk.getTheme().supportAvatar!!
+                PyrusServiceDesk.getTheme().supportAvatar != null ->
+                    PyrusServiceDesk.getTheme().supportAvatar!!.circle(context)
                 else -> makeSupportAvatar(context, AppCompatResources.getDrawable(context, R.drawable.psd_support_avatar)!!)
+            }
+        }
+
+        fun getUserName(): String {
+            return when {
+                !PyrusServiceDesk.getTheme().userName.isNullOrBlank() ->
+                    PyrusServiceDesk.getTheme().userName!!
+                else -> PyrusServiceDesk.getInstance().application.getString(R.string.psd_guest)
             }
         }
 

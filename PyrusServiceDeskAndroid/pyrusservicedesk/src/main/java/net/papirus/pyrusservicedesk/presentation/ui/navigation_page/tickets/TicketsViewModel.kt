@@ -7,10 +7,13 @@ import android.arch.lifecycle.Transformations
 import net.papirus.pyrusservicedesk.PyrusServiceDesk
 import net.papirus.pyrusservicedesk.presentation.usecase.GetTicketsUseCase
 import net.papirus.pyrusservicedesk.presentation.viewmodel.ConnectionViewModelBase
+import net.papirus.pyrusservicedesk.presentation.viewmodel.LiveUpdates
 import net.papirus.pyrusservicedesk.sdk.data.TicketShortDescription
 
 internal class TicketsViewModel(serviceDesk: PyrusServiceDesk)
-    : ConnectionViewModelBase(serviceDesk) {
+    : ConnectionViewModelBase(serviceDesk),
+        LiveUpdates.LiveUpdateSubscriber{
+
 
     private val isLoading = MediatorLiveData<Boolean>()
     private val tickets = MediatorLiveData<List<TicketShortDescription>>()
@@ -32,18 +35,33 @@ internal class TicketsViewModel(serviceDesk: PyrusServiceDesk)
                 }
             ){
                 isLoading.value = false
-                tickets.value = it?.data?.sortedWith(TicketShortDescriptionComparator())
-                unreadCount = tickets.value?.count{ description -> !description.isRead } ?: 0
+                onNewData(it?.data!!)
                 onDataLoaded()
             }
         }
         if (isNetworkConnected.value == true) {
             loadData()
         }
+
+        liveUpdates.subscribeOnData(this)
     }
 
     override fun onLoadData() {
         request.value = true
+    }
+
+    override fun onNewData(tickets: List<TicketShortDescription>) {
+        this.tickets.value = tickets.sortedWith(TicketShortDescriptionComparator())
+        unreadCount = tickets.count{ description -> !description.isRead }
+    }
+
+    override fun onUnreadCounterChanged(unreadCounter: Int) {
+        unreadCount = unreadCounter
+    }
+
+    override fun onCleared() {
+        super.onCleared()
+        liveUpdates.unsubscribeFromData(this)
     }
 
     fun getIsLoadingLiveData(): LiveData<Boolean> = isLoading

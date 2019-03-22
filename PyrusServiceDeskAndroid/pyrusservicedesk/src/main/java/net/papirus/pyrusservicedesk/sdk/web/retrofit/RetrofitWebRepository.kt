@@ -18,6 +18,7 @@ import net.papirus.pyrusservicedesk.sdk.web.request_body.AddCommentRequestBody
 import net.papirus.pyrusservicedesk.sdk.web.request_body.CreateTicketRequestBody
 import net.papirus.pyrusservicedesk.sdk.web.request_body.RequestBodyBase
 import net.papirus.pyrusservicedesk.sdk.web.request_body.UploadFileRequestBody
+import net.papirus.pyrusservicedesk.utils.ConfigureUtils
 import net.papirus.pyrusservicedesk.utils.ISO_DATE_PATTERN
 import okhttp3.OkHttpClient
 import retrofit2.Retrofit
@@ -29,7 +30,6 @@ import java.util.concurrent.TimeUnit
 internal class RetrofitWebRepository(
         private val appId: String,
         private val userId: String,
-        private val userName: String,
         private val fileResolver: FileResolver)
     : Repository {
 
@@ -110,7 +110,7 @@ internal class RetrofitWebRepository(
                 CreateTicketRequestBody(
                     appId,
                     userId,
-                    userName,
+                    ConfigureUtils.getUserName(),
                     descr)
             )
                 .execute()
@@ -160,9 +160,9 @@ internal class RetrofitWebRepository(
             }
 
             val call = when {
-                isFeed -> api.addFeedComment(AddCommentRequestBody(appId, userId, cament.body, cament.attachments, userName))
+                isFeed -> api.addFeedComment(AddCommentRequestBody(appId, userId, cament.body, cament.attachments, ConfigureUtils.getUserName()))
                 else -> api.addComment(
-                    AddCommentRequestBody(appId, userId, cament.body, cament.attachments, userName),
+                    AddCommentRequestBody(appId, userId, cament.body, cament.attachments, ConfigureUtils.getUserName()),
                     request.ticketId)
             }
             return@withContext call

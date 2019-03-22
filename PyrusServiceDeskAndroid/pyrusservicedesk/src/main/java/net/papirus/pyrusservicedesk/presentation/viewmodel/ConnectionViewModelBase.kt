@@ -30,6 +30,7 @@ internal abstract class ConnectionViewModelBase(private val serviceDesk: PyrusSe
         CoroutineScope {
 
     protected val requests = serviceDesk.requestFactory
+    protected val liveUpdates = serviceDesk.liveUpdates
     protected val localDataProvider = serviceDesk.localDataProvider
     protected val isNetworkConnected = MutableLiveData<Boolean>()
     private val connectivity: ConnectivityManager =

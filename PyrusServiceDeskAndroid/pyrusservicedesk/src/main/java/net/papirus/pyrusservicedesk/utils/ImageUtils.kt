@@ -1,6 +1,9 @@
 package net.papirus.pyrusservicedesk.utils
 
+import android.content.Context
 import android.graphics.*
+import android.graphics.drawable.BitmapDrawable
+import android.graphics.drawable.Drawable
 import android.media.ThumbnailUtils
 import com.squareup.picasso.Transformation
 
@@ -34,4 +37,10 @@ internal fun Bitmap.circle(): Bitmap {
     canvas.drawBitmap(scaled, rect, rect, paint)
     scaled.recycle()
     return output
+}
+
+internal fun BitmapDrawable.circle(context: Context): Drawable {
+    val out = Bitmap.createBitmap(intrinsicWidth, intrinsicHeight, Bitmap.Config.ARGB_8888)
+    draw(Canvas(out))
+    return BitmapDrawable(context.resources, out.circle())
 }

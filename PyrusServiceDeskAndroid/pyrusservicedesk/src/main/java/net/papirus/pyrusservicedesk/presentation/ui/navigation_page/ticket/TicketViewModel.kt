@@ -5,10 +5,11 @@ import android.arch.lifecycle.Observer
 import android.content.Intent
 import android.net.Uri
 import android.os.CancellationSignal
+import android.os.Handler
+import android.os.Looper
 import android.support.v7.util.DiffUtil
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.launch
 import net.papirus.pyrusservicedesk.PyrusServiceDesk
+import net.papirus.pyrusservicedesk.UnreadCounterChangedSubscriber
 import net.papirus.pyrusservicedesk.presentation.ui.navigation_page.ticket.entries.*
 import net.papirus.pyrusservicedesk.presentation.ui.view.recyclerview.DiffResultWithNewItems
 import net.papirus.pyrusservicedesk.presentation.usecase.*
@@ -16,15 +17,19 @@ import net.papirus.pyrusservicedesk.presentation.viewmodel.ConnectionViewModelBa
 import net.papirus.pyrusservicedesk.sdk.data.Comment
 import net.papirus.pyrusservicedesk.sdk.data.EMPTY_TICKET_ID
 import net.papirus.pyrusservicedesk.sdk.web.UploadFileHooks
+import net.papirus.pyrusservicedesk.utils.MILLISECONDS_IN_SECOND
 import net.papirus.pyrusservicedesk.utils.getWhen
 import java.util.*
 import kotlin.collections.ArrayList
+
+private const val TICKET_UPDATE_INTERVAL = 30L
 
 internal class TicketViewModel(
         serviceDesk: PyrusServiceDesk,
         arguments: Intent)
     : ConnectionViewModelBase(serviceDesk),
-        OnClickedCallback<CommentEntry> {
+        OnClickedCallback<CommentEntry>,
+        UnreadCounterChangedSubscriber {
 
     val isFeed = serviceDesk.isSingleChat
 
@@ -38,6 +43,14 @@ internal class TicketViewModel(
 
     private var recentTicketEntries: List<TicketEntry> = emptyList()
 
+    private val mainHandler = Handler(Looper.getMainLooper())
+    private val updateRunnable = object : Runnable {
+        override fun run() {
+            mainHandler.postDelayed(this, TICKET_UPDATE_INTERVAL * MILLISECONDS_IN_SECOND)
+            commentsRequest.value = true
+        }
+    }
+
     init {
         entries.apply{
             if (!isFeed) {
@@ -46,9 +59,7 @@ internal class TicketViewModel(
                         GetTicketUseCase(this@TicketViewModel, requests, ticketId).execute()
                     }
                 ){
-                    entries.value = it?.data
-                    publishEntries(recentTicketEntries, entries.value?.toTicketEntries() ?: emptyList())
-                    onDataLoaded()
+                    applyTicketListUpdate(it?.data!!)
                 }
             }
             else {
@@ -57,9 +68,7 @@ internal class TicketViewModel(
                         GetFeedUseCase(this@TicketViewModel, requests).execute()
                     }
                 ){
-                    entries.value = it?.data
-                    publishEntries(recentTicketEntries, entries.value?.toTicketEntries() ?: emptyList())
-                    onDataLoaded()
+                    applyTicketListUpdate(it?.data!!)
                 }
             }
         }. also { it.observeForever {  } /*should be observed to trigger transformations*/}
@@ -79,6 +88,10 @@ internal class TicketViewModel(
         commentsRequest.value = true
     }
 
+    override fun onUnreadCounterChanged(unreadCounter: Int) {
+        this.unreadCounter.value = unreadCounter
+    }
+
     override fun onClicked(item: CommentEntry) {
         if (!item.hasError())
             return
@@ -86,6 +99,11 @@ internal class TicketViewModel(
             applyUpdate(item, ChangeType.Cancelled)
             sendAddComment(item.comment, item.uploadFileHooks)
         }
+    }
+
+    override fun onCleared() {
+        super.onCleared()
+        mainHandler.removeCallbacks(updateRunnable)
     }
 
     fun addComment(text: String) {
@@ -109,26 +127,14 @@ internal class TicketViewModel(
     fun getUnreadCounterLiveData(): LiveData<Int> = unreadCounter
 
     private fun maybeStartAutoRefresh() {
-        if (!isNewTicket()) {
-            suspend fun autoRefresh() {
-                delay(30 * 1000)
-                GetTicketUseCase(this@TicketViewModel, requests, ticketId)
-                    .execute()
-                    .observeForever {
-                        it?.let { result ->
-                            entries.value = result.data
-                            publishEntries(recentTicketEntries, entries.value?.toTicketEntries() ?: emptyList())
-                            onDataLoaded()
-                        }
-                    }
-            }
-            launch { autoRefresh() }
+        if (isFeed || !isNewTicket()) {
+            mainHandler.post(updateRunnable)
         }
     }
 
     private fun isNewTicket() = ticketId == EMPTY_TICKET_ID
 
-    private fun List<Comment>.toTicketEntries(): List<TicketEntry> {
+    private fun List<Comment>.toTicketEntries(): MutableList<TicketEntry> {
         val now = Calendar.getInstance()
         var prevDateGroup: String? = null
         return foldIndexed(ArrayList(size)){
@@ -192,6 +198,19 @@ internal class TicketViewModel(
             }
         }
         call.observeForever(observer)
+    }
+
+    private fun applyTicketListUpdate(freshList: List<Comment>) {
+        val listOfLocalEntries = mutableListOf<TicketEntry>()
+        for (i in recentTicketEntries.lastIndex downTo 0) {
+            val entry = recentTicketEntries[i]
+            if (entry.type == Type.Comment && !(entry as CommentEntry).comment.isLocal())
+                break
+            listOfLocalEntries.add(0, entry)
+        }
+        val toPublish = freshList.toTicketEntries().apply { addAll(listOfLocalEntries) }
+        publishEntries(recentTicketEntries, toPublish)
+        onDataLoaded()
     }
 
     private fun applyUpdate(commentEntry: CommentEntry, changeType: ChangeType) {

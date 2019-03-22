@@ -18,7 +18,7 @@ import android.widget.LinearLayout
 import com.example.pyrusservicedesk.R
 import kotlinx.android.synthetic.main.psd_comment.view.*
 import net.papirus.pyrusservicedesk.utils.*
-import net.papirus.pyrusservicedesk.utils.ThemeUtils.Companion.getAccentColor
+import net.papirus.pyrusservicedesk.utils.ConfigureUtils.Companion.getAccentColor
 
 private const val TYPE_INBOUND = 0
 private const val TYPE_OUTBOUND = 1

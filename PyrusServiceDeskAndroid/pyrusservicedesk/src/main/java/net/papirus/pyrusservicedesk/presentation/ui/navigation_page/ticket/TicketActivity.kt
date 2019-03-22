@@ -15,7 +15,7 @@ import net.papirus.pyrusservicedesk.presentation.ui.navigation.UiNavigator
 import net.papirus.pyrusservicedesk.presentation.ui.view.NavigationCounterDrawable
 import net.papirus.pyrusservicedesk.presentation.ui.view.recyclerview.item_decorators.SpaceItemDecoration
 import net.papirus.pyrusservicedesk.sdk.data.EMPTY_TICKET_ID
-import net.papirus.pyrusservicedesk.utils.ThemeUtils
+import net.papirus.pyrusservicedesk.utils.ConfigureUtils
 import net.papirus.pyrusservicedesk.utils.getViewModel
 import net.papirus.pyrusservicedesk.utils.isAtEnd
 import net.papirus.pyrusservicedesk.utils.setCursorColor
@@ -65,9 +65,9 @@ internal class TicketActivity : ConnectionActivityBase<TicketViewModel>(TicketVi
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        val accentColor = ThemeUtils.getAccentColor(this)
+        val accentColor = ConfigureUtils.getAccentColor(this)
 
-        supportActionBar?.apply { title = ThemeUtils.getTitle(this@TicketActivity) }
+        supportActionBar?.apply { title = ConfigureUtils.getTitle(this@TicketActivity) }
 
         if (!viewModel.isFeed) {
             ticket_toolbar.navigationIcon = navigationCounterIcon
@@ -142,7 +142,7 @@ internal class TicketActivity : ConnectionActivityBase<TicketViewModel>(TicketVi
     private fun onMenuItemClicked(menuItem: MenuItem?): Boolean {
         return menuItem?.let {
             when (it.itemId) {
-                R.id.psd_main_menu_close -> sharedViewModel.quitServiceDesk()
+                R.id.psd_main_menu_close -> quitViewModel.quitServiceDesk()
             }
             true
         } ?: false

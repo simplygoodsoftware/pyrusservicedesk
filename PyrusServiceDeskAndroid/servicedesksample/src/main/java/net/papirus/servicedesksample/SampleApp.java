@@ -10,7 +10,7 @@ public class SampleApp extends Application {
         super.onCreate();
         PyrusServiceDesk.init(
                 this,
-                "",
-                true);
+                ""
+        );
     }
 }

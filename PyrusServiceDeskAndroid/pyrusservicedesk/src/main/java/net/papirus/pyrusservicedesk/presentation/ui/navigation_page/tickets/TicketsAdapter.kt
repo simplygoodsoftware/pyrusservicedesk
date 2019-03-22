@@ -9,7 +9,7 @@ import com.example.pyrusservicedesk.R
 import net.papirus.pyrusservicedesk.sdk.data.TicketShortDescription
 import net.papirus.pyrusservicedesk.presentation.ui.view.recyclerview.AdapterBase
 import net.papirus.pyrusservicedesk.presentation.ui.view.recyclerview.ViewHolderBase
-import net.papirus.pyrusservicedesk.utils.ThemeUtils
+import net.papirus.pyrusservicedesk.utils.ConfigureUtils
 import net.papirus.pyrusservicedesk.utils.getTimePassedFrom
 import java.util.*
 
@@ -35,7 +35,7 @@ internal class TicketsAdapter: AdapterBase<TicketShortDescription>() {
 
         init {
             itemView.setOnClickListener{ ticketClickListener?.invoke(getItem()) }
-            unreadCounter.setColorFilter(ThemeUtils.getAccentColor(itemView.context))
+            unreadCounter.setColorFilter(ConfigureUtils.getAccentColor(itemView.context))
         }
 
         override fun bindItem(item: TicketShortDescription) {
