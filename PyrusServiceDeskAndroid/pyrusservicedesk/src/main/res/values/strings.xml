@@ -30,4 +30,5 @@
     <string name="psd_hours_ago" formatted="false">%d h ago</string>
     <string name="psd_minutes_ago" formatted="false">%d m ago</string>
     <string name="psd_recent">recent</string>
+    <string name="psd_guest">Guest</string>
 </resources>

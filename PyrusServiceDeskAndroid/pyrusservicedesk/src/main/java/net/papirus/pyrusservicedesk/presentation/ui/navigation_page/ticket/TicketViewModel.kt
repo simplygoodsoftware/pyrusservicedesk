@@ -26,7 +26,7 @@ internal class TicketViewModel(
     : ConnectionViewModelBase(serviceDesk),
         OnClickedCallback<CommentEntry> {
 
-    val isFeed = serviceDesk.enableFeedUi
+    val isFeed = serviceDesk.isSingleChat
 
     private var isCreateTicketSent = false
     private var ticketId: Int = TicketActivity.getTicketId(arguments)

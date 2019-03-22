@@ -1,12 +1,15 @@
 package net.papirus.pyrusservicedesk.utils
 
 import android.content.Context
+import android.content.res.Configuration
 import android.content.res.Resources
 import android.graphics.Color
 import android.support.annotation.AttrRes
 import android.support.annotation.ColorInt
 import android.support.v4.content.ContextCompat
 import android.util.TypedValue
+
+
 
 /**
  * Extracts color from context theme by attribute id
@@ -23,5 +26,9 @@ internal fun getColor(context: Context, @AttrRes colorAttrId: Int): Int {
     } catch (ex: Resources.NotFoundException) {
         Color.WHITE
     }
+}
 
+internal fun Context.isTablet(): Boolean {
+    return resources.configuration.screenLayout and
+            Configuration.SCREENLAYOUT_SIZE_MASK >= Configuration.SCREENLAYOUT_SIZE_LARGE
 }

@@ -2,8 +2,10 @@ package net.papirus.servicedesksample;
 
 import android.app.Activity;
 import android.graphics.Color;
+import android.graphics.drawable.ColorDrawable;
 import android.os.Bundle;
-import net.papirus.pyrusservicedesk.ServiceDeskActivity;
+import net.papirus.pyrusservicedesk.PyrusServiceDesk;
+import net.papirus.pyrusservicedesk.ServiceDeskTheme;
 
 public class SampleActivity extends Activity {
 
@@ -11,17 +13,16 @@ public class SampleActivity extends Activity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_sample);
+        PyrusServiceDesk.setUser(12345, "man of the hour");
         findViewById(R.id.support).setOnClickListener(
-                view ->
-                        startActivity(
-                                new ServiceDeskActivity.Builder()
-                                        .setStyle(
-                                                new ServiceDeskActivity.StyleBuilder()
-                                                        .setShowAsDialog(false)
-                                                        .setThemeColor(Color.parseColor("#FF8300"))
-                                                        .setTitle("AMAZING")
-                                                        .setWelcomeMessage("Why so serious?")
-                                                        .build())
-                                        .build()));
+                view -> PyrusServiceDesk.start(
+                        this,
+                        new ServiceDeskTheme.Builder()
+                                .setThemeColor(Color.parseColor("#FF8300"))
+                                .setChatTitle("AMAZING")
+                                .setWelcomeMessage("Why so serious?")
+                                .setAvatarForSupport(new ColorDrawable(Color.BLUE))
+                                .build())
+        );
     }
 }

@@ -7,7 +7,7 @@ import android.view.View
 import android.view.View.NO_ID
 import android.view.ViewGroup
 import com.example.pyrusservicedesk.R
-import net.papirus.pyrusservicedesk.ServiceDeskActivity
+import net.papirus.pyrusservicedesk.PyrusServiceDesk
 import net.papirus.pyrusservicedesk.presentation.viewmodel.SharedViewModel
 import net.papirus.pyrusservicedesk.utils.getViewModel
 
@@ -23,7 +23,7 @@ internal abstract class ActivityBase: AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         val theme = when{
-            ServiceDeskActivity.getStyle().isDialogStyle -> R.style.PyrusServiceDesk_Dialog
+            PyrusServiceDesk.getTheme().isDialogTheme -> R.style.PyrusServiceDesk_Dialog
             else -> R.style.PyrusServiceDesk
         }
         setTheme(theme)

@@ -7,7 +7,7 @@ import android.graphics.drawable.Drawable
 import android.support.annotation.ColorInt
 import android.support.v7.content.res.AppCompatResources
 import com.example.pyrusservicedesk.R
-import net.papirus.pyrusservicedesk.ServiceDeskActivity
+import net.papirus.pyrusservicedesk.PyrusServiceDesk
 
 internal class ThemeUtils{
 
@@ -18,23 +18,23 @@ internal class ThemeUtils{
         @ColorInt
         fun getAccentColor(activity: Context): Int {
             return when{
-                ServiceDeskActivity.getStyle().themeColor != null -> ServiceDeskActivity.getStyle().themeColor!!
+                PyrusServiceDesk.getTheme().themeColor != null -> PyrusServiceDesk.getTheme().themeColor!!
                 else -> getColor(activity, R.attr.colorAccent)
             }
         }
 
         fun getTitle(context: Context): String {
             return when{
-                !ServiceDeskActivity.getStyle().title.isNullOrEmpty() -> ServiceDeskActivity.getStyle().title!!
+                !PyrusServiceDesk.getTheme().title.isNullOrEmpty() -> PyrusServiceDesk.getTheme().title!!
                 else -> context.resources.getString(R.string.psd_organization_support)
             }
         }
 
-        fun getWelcomeMessage(): String? = ServiceDeskActivity.getStyle().welcomeMessage
+        fun getWelcomeMessage(): String? = PyrusServiceDesk.getTheme().welcomeMessage
 
         fun getSupportAvatar(context: Context): Drawable {
             return when {
-                ServiceDeskActivity.getStyle().supportAvatar != null -> ServiceDeskActivity.getStyle().supportAvatar!!
+                PyrusServiceDesk.getTheme().supportAvatar != null -> PyrusServiceDesk.getTheme().supportAvatar!!
                 else -> makeSupportAvatar(context, AppCompatResources.getDrawable(context, R.drawable.psd_support_avatar)!!)
             }
         }

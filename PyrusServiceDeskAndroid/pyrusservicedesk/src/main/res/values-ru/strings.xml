@@ -32,4 +32,5 @@
     <string name="psd_hours_ago" formatted="false">%d ч назад</string>
     <string name="psd_minutes_ago" formatted="false">%d м назад</string>
     <string name="psd_recent">только что</string>
+    <string name="psd_guest">Гость</string>
 </resources>

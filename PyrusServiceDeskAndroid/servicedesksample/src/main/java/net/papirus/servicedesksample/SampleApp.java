@@ -11,8 +11,6 @@ public class SampleApp extends Application {
         PyrusServiceDesk.init(
                 this,
                 "",
-                12345,
-                "Android Sample"
-        );
+                true);
     }
 }
