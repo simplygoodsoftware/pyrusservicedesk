@@ -17,11 +17,11 @@ public class SampleActivity extends Activity implements UnreadCounterChangedSubs
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_sample);
-        PyrusServiceDesk.setUser("man of the hour");
         findViewById(R.id.support).setOnClickListener(
                 view -> PyrusServiceDesk.start(
                         this,
                         new ServiceDeskConfigure.Builder()
+                                .setUserName("Ivan Ivanov")
                                 .setThemeColor(Color.parseColor("#FF8300"))
                                 .setChatTitle("AMAZING")
                                 .setWelcomeMessage("Why so serious?")

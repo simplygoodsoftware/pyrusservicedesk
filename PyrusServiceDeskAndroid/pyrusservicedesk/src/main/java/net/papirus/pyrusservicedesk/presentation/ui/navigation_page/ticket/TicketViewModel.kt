@@ -59,7 +59,12 @@ internal class TicketViewModel(
                         GetTicketUseCase(this@TicketViewModel, requests, ticketId).execute()
                     }
                 ){
-                    applyTicketListUpdate(it?.data!!)
+                    it?.let { result ->
+                        when {
+                            result.hasError() -> {}
+                            else -> applyTicketListUpdate(result.data!!)
+                        }
+                    }
                 }
             }
             else {
@@ -68,7 +73,12 @@ internal class TicketViewModel(
                         GetFeedUseCase(this@TicketViewModel, requests).execute()
                     }
                 ){
-                    applyTicketListUpdate(it?.data!!)
+                    it?.let { result ->
+                        when {
+                            result.hasError() -> {}
+                            else -> applyTicketListUpdate(result.data!!)
+                        }
+                    }
                 }
             }
         }. also { it.observeForever {  } /*should be observed to trigger transformations*/}
@@ -114,12 +124,10 @@ internal class TicketViewModel(
     fun onAttachmentSelected(attachmentUri: Uri) {
         val localComment = localDataProvider.newLocalComment(fileUri = attachmentUri)
         val fileHooks = UploadFileHooks()
-        val cancellationSignal = CancellationSignal()
-        fileHooks.subscribeOnCancel {
-            cancellationSignal.cancel()
+        fileHooks.subscribeOnCancel(CancellationSignal.OnCancelListener {
             applyUpdate(CommentEntry(localComment, onClickedCallback = this), ChangeType.Cancelled)
-        }
-        sendAddComment(localComment, fileHooks, cancellationSignal)
+        })
+        sendAddComment(localComment, fileHooks)
     }
 
     fun getCommentDiffLiveData(): LiveData<DiffResultWithNewItems<TicketEntry>> = commentDiff
@@ -154,8 +162,7 @@ internal class TicketViewModel(
     }
 
     private fun sendAddComment(localComment: Comment,
-                               uploadFileHooks: UploadFileHooks? = null,
-                               cancellationSignal: CancellationSignal? = null) {
+                               uploadFileHooks: UploadFileHooks? = null) {
 
         val toNewTicket = !isFeed && isNewTicket() && !isCreateTicketSent
 
@@ -172,12 +179,13 @@ internal class TicketViewModel(
             override fun onChanged(res: UseCaseResult<Int>?) {
                 res?.let { result ->
                     isCreateTicketSent = false
-                    if (cancellationSignal?.isCanceled == true)
+                    if (uploadFileHooks?.isCancelled == true)
                         return@let
                     val entry = when {
                         result.hasError() -> CommentEntry(
                             localComment,
-                            onClickedCallback = this@TicketViewModel,
+                            uploadFileHooks, // for retry purpose
+                            this@TicketViewModel,
                             error = result.error
                         )
                         else ->{

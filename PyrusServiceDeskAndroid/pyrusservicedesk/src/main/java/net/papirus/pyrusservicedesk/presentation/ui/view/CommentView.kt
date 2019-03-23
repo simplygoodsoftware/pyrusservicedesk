@@ -61,7 +61,7 @@ internal class CommentView @JvmOverloads constructor(
             icon?.let {
                 fileDownloadDrawable.setDrawableByLayerId(
                         R.id.progress_icon,
-                        it.apply { setColorFilter(primaryColor, PorterDuff.Mode.SRC_IN) })
+                        it.mutate().apply { setColorFilter(primaryColor, PorterDuff.Mode.SRC_IN) })
 
             }
             if (value != Status.Processing) {

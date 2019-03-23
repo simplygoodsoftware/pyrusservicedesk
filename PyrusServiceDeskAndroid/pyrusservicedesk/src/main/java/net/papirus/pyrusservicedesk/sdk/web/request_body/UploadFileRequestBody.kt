@@ -34,9 +34,11 @@ internal class UploadFileRequestBody(
                 fileStream.use { fileStream ->
                     var read: Int = fileStream.read(buffer)
                     while (read != -1) {
+                        if (uploadFileHooks?.isCancelled == true)
+                            break
                         uploaded += read
                         sink.write(buffer, 0, read)
-                        uploadFileHooks?.onProgressPercentChanged(calculateProgress(uploaded))
+                        uploadFileHooks?.onProgressPercentChanged(uploaded.toProgress())
                         read = fileStream.read(buffer)
                     }
                 }
@@ -46,7 +48,7 @@ internal class UploadFileRequestBody(
         return MultipartBody.Part.createFormData("File", fileName, requestFileBody)
     }
 
-    private fun calculateProgress(bytesUploaded: Long): Int {
-        return (bytesUploaded.toDouble()/fileSize * 100).toInt()
+    private fun Long.toProgress(): Int {
+        return (toDouble()/fileSize * 100).toInt()
     }
 }

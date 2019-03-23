@@ -2,6 +2,7 @@ package net.papirus.pyrusservicedesk.sdk.web.retrofit
 
 import com.google.gson.Gson
 import com.google.gson.GsonBuilder
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import net.papirus.pyrusservicedesk.PyrusServiceDesk
 import net.papirus.pyrusservicedesk.sdk.BASE_URL
@@ -52,36 +53,53 @@ internal class RetrofitWebRepository(
         api = retrofit.create(ServiceDeskApi::class.java)
     }
 
-    override suspend fun getFeed(): GetConversationResponse {
-        return api.getTicketFeed(RequestBodyBase(appId, userId)).execute().run {
-            when {
-                isSuccessful && body() != null -> GetConversationResponse(comments = body()!!.comments)
-                else -> GetConversationResponse(ResponseError.WebServiceError)
+    override suspend fun getFeed(): GetFeedResponse {
+        return withContext(Dispatchers.IO){
+            try {
+                api.getTicketFeed(RequestBodyBase(appId, userId)).execute().run {
+                    when {
+                        isSuccessful && body() != null -> GetFeedResponse(comments = body()!!.comments)
+                        else -> GetFeedResponse(ResponseError.ApiCallError)
+                    }
+                }
+            } catch (ex: Exception) {
+                GetFeedResponse(ResponseError.NoInternetConnection)
             }
         }
     }
 
     override suspend fun getTickets(): GetTicketsResponse {
-        return api.getTickets(RequestBodyBase(appId, userId)).execute().run {
-            when {
-                isSuccessful && body() != null -> GetTicketsResponse(tickets =  body()!!.tickets)
-                else -> GetTicketsResponse(ResponseError.WebServiceError)
+        return withContext(Dispatchers.IO){
+            try {
+                api.getTickets(RequestBodyBase(appId, userId)).execute().run {
+                    when {
+                        isSuccessful && body() != null -> GetTicketsResponse(tickets = body()!!.tickets)
+                        else -> GetTicketsResponse(ResponseError.ApiCallError)
+                    }
+                }
+            } catch (ex: Exception) {
+                GetTicketsResponse(ResponseError.NoInternetConnection)
             }
         }
     }
 
     override suspend fun getTicket(ticketId: Int): GetTicketResponse {
-        return api.getTicket(RequestBodyBase(appId, userId), ticketId).execute().run {
-            when {
-                isSuccessful && body() != null -> GetTicketResponse(ticket =  body())
-                else -> GetTicketResponse(ResponseError.WebServiceError)
+        return withContext(Dispatchers.IO){
+            try {
+                api.getTicket(RequestBodyBase(appId, userId), ticketId).execute().run {
+                    when {
+                        isSuccessful && body() != null -> GetTicketResponse(ticket = body())
+                        else -> GetTicketResponse(ResponseError.ApiCallError)
+                    }
+                }
+            } catch (ex: Exception) {
+                GetTicketResponse(ResponseError.NoInternetConnection)
             }
         }
     }
 
     override suspend fun addComment(ticketId: Int, comment: Comment, uploadFileHooks: UploadFileHooks?)
             : AddCommentResponse {
-
         return addComment(false, ticketId, comment, uploadFileHooks)
     }
 
@@ -95,47 +113,58 @@ internal class RetrofitWebRepository(
         sequentialRequests.offer(CreateTicketRequest())
 
         return withContext(PyrusServiceDesk.DISPATCHER_IO_SINGLE) {
+
             var descr = description
             if (descr.hasAttachments()) {
                 val newAttachments =
                     try {
                         descr.attachments!!.upload(uploadFileHooks)
                     } catch (ex: Exception) {
-                        return@withContext CreateTicketResponse(ResponseError.WebServiceError)
+                        sequentialRequests.poll()
+                        return@withContext CreateTicketResponse(ResponseError.ApiCallError)
                     }
 
                 descr = descr.applyNewAttachments(newAttachments)
             }
-            return@withContext api.createTicket(
-                CreateTicketRequestBody(
-                    appId,
-                    userId,
-                    ConfigureUtils.getUserName(),
-                    descr)
-            )
-                .execute()
-                .run {
-                    sequentialRequests.poll()
-                    when {
-                        isSuccessful && body() != null -> {
-                            val ticketId =
-                                Gson().fromJson<Map<String, Int>>(
-                                    body()?.string(),
-                                    Map::class.java)
-                                    .values.first().toInt()
+            return@withContext try {
+                api.createTicket(
+                    CreateTicketRequestBody(
+                        appId,
+                        userId,
+                        ConfigureUtils.getUserName(),
+                        descr
+                    )
+                )
+                    .execute()
+                    .run {
+                        sequentialRequests.poll()
+                        when {
+                            isSuccessful && body() != null -> {
+                                val ticketId =
+                                    Gson().fromJson<Map<String, Int>>(
+                                        body()?.string(),
+                                        Map::class.java
+                                    )
+                                        .values.first().toInt()
 
-                            with(sequentialRequests.iterator()) {
-                                while (hasNext()) {
-                                    val element = next() as? CommentRequest ?: break
-                                    element.ticketId = ticketId
+                                with(sequentialRequests.iterator()) {
+                                    while (hasNext()) {
+                                        val element = next()
+                                        if (element !is CommentRequest || element.ticketId != EMPTY_TICKET_ID)
+                                            break
+                                        element.ticketId = ticketId
+                                    }
                                 }
-                            }
 
-                            CreateTicketResponse(ticketId = ticketId)
+                                CreateTicketResponse(ticketId = ticketId)
+                            }
+                            else -> CreateTicketResponse(ResponseError.ApiCallError)
                         }
-                        else -> CreateTicketResponse(ResponseError.WebServiceError)
                     }
-                }
+            } catch (ex: Exception) {
+                sequentialRequests.poll()
+                CreateTicketResponse(ResponseError.NoInternetConnection)
+            }
         }
     }
 
@@ -154,7 +183,8 @@ internal class RetrofitWebRepository(
                     try {
                         cament.attachments!!.upload(uploadFileHooks)
                     } catch (ex: Exception) {
-                        return@withContext AddCommentResponse(ResponseError.WebServiceError)
+                        sequentialRequests.poll()
+                        return@withContext AddCommentResponse(ResponseError.ApiCallError)
                     }
                 cament = cament.applyNewAttachments(newAttachments)
             }
@@ -165,21 +195,28 @@ internal class RetrofitWebRepository(
                     AddCommentRequestBody(appId, userId, cament.body, cament.attachments, ConfigureUtils.getUserName()),
                     request.ticketId)
             }
-            return@withContext call
-                .execute()
-                .run {
-                    sequentialRequests.poll()
-                    when {
-                        isSuccessful && body() != null -> AddCommentResponse(
-                            commentId = Gson().fromJson<Map<String, Double>>(
-                                body()?.string(),
-                                Map::class.java
+            return@withContext try {
+                call
+                    .execute()
+                    .run {
+                        when {
+                            isSuccessful && body() != null -> AddCommentResponse(
+                                commentId = Gson().fromJson<Map<String, Double>>(
+                                    body()?.string(),
+                                    Map::class.java
+                                )
+                                    .values.first().toInt()
                             )
-                                .values.first().toInt()
-                        )
-                        else -> AddCommentResponse(ResponseError.WebServiceError)
+                            else -> AddCommentResponse(ResponseError.ApiCallError)
+                        }
                     }
-                }
+            }
+            catch (ex: Exception){
+                AddCommentResponse(ResponseError.NoInternetConnection)
+            }
+            finally {
+                sequentialRequests.poll()
+            }
         }
     }
 
@@ -203,6 +240,8 @@ internal class RetrofitWebRepository(
             }
             responses
         }
+        if(uploadFileHooks?.isCancelled == true)
+            throw Exception()
         val newAttachments = mutableListOf<Attachment>()
         uploadResponses.forEachIndexed { index, uploadFileResponse ->
 
@@ -215,19 +254,25 @@ internal class RetrofitWebRepository(
     }
 
     private fun uploadFile(request: UploadFileRequest): UploadFileResponse {
-        return api.uploadFile(
-            UploadFileRequestBody(
-                request.fileUploadRequestData.fileName,
-                request.fileUploadRequestData.fileInputStream,
-                request.uploadFileHooks)
-                .toMultipartBody())
-            .execute()
-            .run {
-                when{
-                    isSuccessful && body() != null -> UploadFileResponse(uploadData = body())
-                    else -> UploadFileResponse(ResponseError.WebServiceError)
+        return try {
+            api.uploadFile(
+                UploadFileRequestBody(
+                    request.fileUploadRequestData.fileName,
+                    request.fileUploadRequestData.fileInputStream,
+                    request.uploadFileHooks
+                )
+                    .toMultipartBody()
+            )
+                .execute()
+                .run {
+                    when {
+                        isSuccessful && body() != null -> UploadFileResponse(uploadData = body())
+                        else -> UploadFileResponse(ResponseError.ApiCallError)
+                    }
                 }
-            }
+        } catch (ex: Exception) {
+            UploadFileResponse(ResponseError.NoInternetConnection)
+        }
     }
 }
 

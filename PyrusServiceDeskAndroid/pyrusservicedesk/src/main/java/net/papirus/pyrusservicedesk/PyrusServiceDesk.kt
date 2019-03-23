@@ -22,7 +22,7 @@ class PyrusServiceDesk private constructor(
         internal val appId: String,
         internal val isSingleChat: Boolean){
 
-    internal var userId: Int = 0
+    internal var userId: Int = 12345
 
     companion object {
         internal val DISPATCHER_IO_SINGLE = Executors.newSingleThreadExecutor().asCoroutineDispatcher()

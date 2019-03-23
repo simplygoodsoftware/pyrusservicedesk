@@ -39,12 +39,13 @@ class ServiceDeskConfigure internal constructor(
             return this
         }
 
-        fun setUserName(userName: String) {
+        fun setUserName(userName: String): Builder {
             this.userName = userName
+            return this
         }
 
-        fun build() {
-            ServiceDeskConfigure(
+        fun build(): ServiceDeskConfigure {
+            return ServiceDeskConfigure(
                 userName,
                 PyrusServiceDesk.getInstance().application.isTablet(),
                 title,

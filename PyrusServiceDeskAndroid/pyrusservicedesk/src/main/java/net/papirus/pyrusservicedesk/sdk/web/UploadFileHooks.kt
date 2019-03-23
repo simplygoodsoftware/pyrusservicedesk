@@ -1,23 +1,32 @@
 package net.papirus.pyrusservicedesk.sdk.web
 
+import android.os.CancellationSignal.OnCancelListener
 import android.os.Handler
 import android.os.Looper
+import com.example.pyrusservicedesk.R
+import net.papirus.pyrusservicedesk.PyrusServiceDesk
 
 internal class UploadFileHooks {
 
+    private val MAX_PERCENT = PyrusServiceDesk.getInstance().application.resources.getInteger(R.integer.psd_progress_max_value)
     private var recentProgress = 0
+    private val cancellationSubscribers = mutableSetOf<OnCancelListener>()
     private var progressSubscription: ((Int) -> Unit)? = null
-    private var cancelSubscription: (() -> Unit)? = null
     private val uiHandler = Handler(Looper.getMainLooper())
 
+    var isCancelled = false
+        @Synchronized get() = field
+        @Synchronized private set(value){ field = value }
+
     @Synchronized
-    fun subscribeOnCancel(subscription: () -> Unit) {
-        cancelSubscription = subscription
+    fun subscribeOnCancel(subscription: OnCancelListener) {
+        cancellationSubscribers.add(subscription)
     }
 
     @Synchronized
-    fun unsubscribeFromCancel() {
-        cancelSubscription = null
+    private fun destroy() {
+        cancellationSubscribers.clear()
+        progressSubscription = null
     }
 
     @Synchronized
@@ -33,12 +42,17 @@ internal class UploadFileHooks {
 
     @Synchronized
     fun cancelUploading() {
-        cancelSubscription?.invoke()
+        isCancelled = true
+        cancellationSubscribers.forEach{ it.onCancel() }
+        destroy()
     }
 
     @Synchronized
     fun onProgressPercentChanged(newProgressPercent: Int){
         recentProgress = newProgressPercent
-        uiHandler.post{ progressSubscription?.invoke(recentProgress) }
+        val progressSubscriber = progressSubscription
+        uiHandler.post{ progressSubscriber?.invoke(recentProgress) }
+        if (newProgressPercent >= MAX_PERCENT)
+            destroy()
     }
 }

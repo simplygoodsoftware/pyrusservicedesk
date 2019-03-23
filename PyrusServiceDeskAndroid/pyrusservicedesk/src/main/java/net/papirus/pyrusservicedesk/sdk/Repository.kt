@@ -10,7 +10,7 @@ import java.net.URLEncoder
 internal const val BASE_URL = "https://pyrus.com/servicedeskapi/v1/"
 
 internal interface Repository{
-    suspend fun getFeed(): GetConversationResponse
+    suspend fun getFeed(): GetFeedResponse
     suspend fun getTickets(): GetTicketsResponse
     suspend fun getTicket(ticketId: Int): GetTicketResponse
     suspend fun addComment(ticketId: Int, comment: Comment, uploadFileHooks: UploadFileHooks? = null): AddCommentResponse
