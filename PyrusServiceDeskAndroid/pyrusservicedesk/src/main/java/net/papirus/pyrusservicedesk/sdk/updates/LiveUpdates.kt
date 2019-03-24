@@ -1,11 +1,10 @@
-package net.papirus.pyrusservicedesk.presentation.viewmodel
+package net.papirus.pyrusservicedesk.sdk.updates
 
 import android.os.Handler
 import android.os.Looper
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
-import net.papirus.pyrusservicedesk.UnreadCounterChangedSubscriber
 import net.papirus.pyrusservicedesk.sdk.RequestFactory
 import net.papirus.pyrusservicedesk.sdk.data.TicketShortDescription
 import net.papirus.pyrusservicedesk.sdk.response.ResponseCallback
@@ -18,7 +17,8 @@ internal class LiveUpdates(requests: RequestFactory) {
 
     // notified in UI thread
     private val dataSubscribers = mutableSetOf<LiveUpdateSubscriber>()
-    private val counterChangedSubscribers = mutableSetOf<UnreadCounterChangedSubscriber>()
+    private val newReplySubscribers = mutableSetOf<OnNewReplySubscriber>()
+    private val ticketCountChangedSubscribers = mutableSetOf<OnUnreadTicketCountChangedSubscriber>()
 
     private var recentUnreadCounter = 0
 
@@ -35,10 +35,13 @@ internal class LiveUpdates(requests: RequestFactory) {
                                 dataSubscribers.forEach{
                                     it.onNewData(data)
                                     if (isChanged)
-                                        it.onUnreadCounterChanged(newUnread)
+                                        it.onUnreadTicketCountChanged(newUnread)
                                 }
-                                if (isChanged)
-                                    counterChangedSubscribers.forEach{ it.onUnreadCounterChanged(newUnread) }
+                                if (isChanged) {
+                                    ticketCountChangedSubscribers.forEach { it.onUnreadTicketCountChanged(newUnread) }
+                                    if (isChanged && newUnread > 0)
+                                        newReplySubscribers.forEach { it.onNewReply() }
+                                }
                                 recentUnreadCounter = newUnread
                             }
                         }
@@ -57,23 +60,35 @@ internal class LiveUpdates(requests: RequestFactory) {
         mainHandler.post(ticketsUpdateRunnable)
     }
 
-    fun subscribeOnUnreadCounterChanged(subscriber: UnreadCounterChangedSubscriber) {
-        counterChangedSubscribers.add(subscriber)
+    fun subscribeOnReply(subscriber: OnNewReplySubscriber) {
+        newReplySubscribers.add(subscriber)
     }
 
-    fun unsubscribeFromUnreadCounterChanged(subscriber: UnreadCounterChangedSubscriber) {
-        counterChangedSubscribers.remove(subscriber)
+    fun unsubscribeFromReplies(subscriber: OnNewReplySubscriber) {
+        newReplySubscribers.remove(subscriber)
     }
 
-    fun subscribeOnData(liveUpdateSubscriber: LiveUpdateSubscriber) {
+    internal fun subscribeOnUnreadTicketCountChanged(subscriber: OnUnreadTicketCountChangedSubscriber) {
+        ticketCountChangedSubscribers.add(subscriber)
+    }
+
+    internal fun unsubscribeFromTicketCountChanged(subscriber: OnUnreadTicketCountChangedSubscriber) {
+        ticketCountChangedSubscribers.remove(subscriber)
+    }
+
+    internal fun subscribeOnData(liveUpdateSubscriber: LiveUpdateSubscriber) {
         dataSubscribers.add(liveUpdateSubscriber)
     }
 
-    fun unsubscribeFromData(liveUpdateSubscriber: LiveUpdateSubscriber) {
+    internal fun unsubscribeFromData(liveUpdateSubscriber: LiveUpdateSubscriber) {
         dataSubscribers.remove(liveUpdateSubscriber)
     }
+}
 
-    internal interface LiveUpdateSubscriber: UnreadCounterChangedSubscriber {
-        fun onNewData(tickets: List<TicketShortDescription>)
-    }
+internal interface LiveUpdateSubscriber: OnUnreadTicketCountChangedSubscriber {
+    fun onNewData(tickets: List<TicketShortDescription>)
+}
+
+internal interface OnUnreadTicketCountChangedSubscriber{
+    fun onUnreadTicketCountChanged(unreadTicketCount: Int)
 }

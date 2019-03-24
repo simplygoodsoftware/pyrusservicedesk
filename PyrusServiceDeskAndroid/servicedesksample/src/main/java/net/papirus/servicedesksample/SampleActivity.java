@@ -9,14 +9,15 @@ import android.os.Bundle;
 import android.widget.TextView;
 import net.papirus.pyrusservicedesk.PyrusServiceDesk;
 import net.papirus.pyrusservicedesk.ServiceDeskConfigure;
-import net.papirus.pyrusservicedesk.UnreadCounterChangedSubscriber;
+import net.papirus.pyrusservicedesk.sdk.updates.OnNewReplySubscriber;
 
-public class SampleActivity extends Activity implements UnreadCounterChangedSubscriber {
+public class SampleActivity extends Activity implements OnNewReplySubscriber {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_sample);
+        PyrusServiceDesk.subscribeOnNewReply(this);
         findViewById(R.id.support).setOnClickListener(
                 view -> PyrusServiceDesk.start(
                         this,
@@ -40,11 +41,11 @@ public class SampleActivity extends Activity implements UnreadCounterChangedSubs
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        PyrusServiceDesk.unsubscribeFromUnreadCounterChanged(this);
+        PyrusServiceDesk.unsubscribeFromNewReply(this);
     }
 
     @Override
-    public void onUnreadCounterChanged(int unreadCounter) {
-        ((TextView)findViewById(R.id.unread)).setText("Unread: " + unreadCounter);
+    public void onNewReply() {
+        ((TextView)findViewById(R.id.unread)).setText("Has unread tickets");
     }
 }

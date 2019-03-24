@@ -7,12 +7,13 @@ import android.content.Intent
 import kotlinx.coroutines.asCoroutineDispatcher
 import net.papirus.pyrusservicedesk.presentation.ui.navigation_page.ticket.TicketActivity
 import net.papirus.pyrusservicedesk.presentation.ui.navigation_page.tickets.TicketsActivity
-import net.papirus.pyrusservicedesk.presentation.viewmodel.LiveUpdates
 import net.papirus.pyrusservicedesk.presentation.viewmodel.QuitViewModel
 import net.papirus.pyrusservicedesk.sdk.FileResolver
 import net.papirus.pyrusservicedesk.sdk.RepositoryFactory
 import net.papirus.pyrusservicedesk.sdk.RequestFactory
 import net.papirus.pyrusservicedesk.sdk.data.LocalDataProvider
+import net.papirus.pyrusservicedesk.sdk.updates.LiveUpdates
+import net.papirus.pyrusservicedesk.sdk.updates.OnNewReplySubscriber
 import net.papirus.pyrusservicedesk.sdk.web.retrofit.RetrofitWebRepository
 import net.papirus.pyrusservicedesk.utils.isTablet
 import java.util.concurrent.Executors
@@ -45,13 +46,13 @@ class PyrusServiceDesk private constructor(
         }
 
         @JvmStatic
-        fun subscribeOnUnreadCounterChanged(subscriber: UnreadCounterChangedSubscriber){
-            getInstance().liveUpdates.subscribeOnUnreadCounterChanged(subscriber)
+        fun subscribeOnNewReply(subscriber: OnNewReplySubscriber){
+            getInstance().liveUpdates.subscribeOnReply(subscriber)
         }
 
         @JvmStatic
-        fun unsubscribeFromUnreadCounterChanged(subscriber: UnreadCounterChangedSubscriber) {
-            getInstance().liveUpdates.unsubscribeFromUnreadCounterChanged(subscriber)
+        fun unsubscribeFromNewReply(subscriber: OnNewReplySubscriber) {
+            getInstance().liveUpdates.unsubscribeFromReplies(subscriber)
         }
 
         internal fun getInstance() : PyrusServiceDesk {

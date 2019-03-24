@@ -7,12 +7,12 @@ import android.arch.lifecycle.Transformations
 import net.papirus.pyrusservicedesk.PyrusServiceDesk
 import net.papirus.pyrusservicedesk.presentation.usecase.GetTicketsUseCase
 import net.papirus.pyrusservicedesk.presentation.viewmodel.ConnectionViewModelBase
-import net.papirus.pyrusservicedesk.presentation.viewmodel.LiveUpdates
 import net.papirus.pyrusservicedesk.sdk.data.TicketShortDescription
+import net.papirus.pyrusservicedesk.sdk.updates.LiveUpdateSubscriber
 
 internal class TicketsViewModel(serviceDesk: PyrusServiceDesk)
     : ConnectionViewModelBase(serviceDesk),
-        LiveUpdates.LiveUpdateSubscriber{
+    LiveUpdateSubscriber {
 
 
     private val isLoading = MediatorLiveData<Boolean>()
@@ -55,8 +55,8 @@ internal class TicketsViewModel(serviceDesk: PyrusServiceDesk)
         unreadCount = tickets.count{ description -> !description.isRead }
     }
 
-    override fun onUnreadCounterChanged(unreadCounter: Int) {
-        unreadCount = unreadCounter
+    override fun onUnreadTicketCountChanged(unreadTicketCount: Int) {
+        unreadCount = unreadTicketCount
     }
 
     override fun onCleared() {

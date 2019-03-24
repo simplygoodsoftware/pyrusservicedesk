@@ -9,13 +9,13 @@ import android.os.Handler
 import android.os.Looper
 import android.support.v7.util.DiffUtil
 import net.papirus.pyrusservicedesk.PyrusServiceDesk
-import net.papirus.pyrusservicedesk.UnreadCounterChangedSubscriber
 import net.papirus.pyrusservicedesk.presentation.ui.navigation_page.ticket.entries.*
 import net.papirus.pyrusservicedesk.presentation.ui.view.recyclerview.DiffResultWithNewItems
 import net.papirus.pyrusservicedesk.presentation.usecase.*
 import net.papirus.pyrusservicedesk.presentation.viewmodel.ConnectionViewModelBase
 import net.papirus.pyrusservicedesk.sdk.data.Comment
 import net.papirus.pyrusservicedesk.sdk.data.EMPTY_TICKET_ID
+import net.papirus.pyrusservicedesk.sdk.updates.OnUnreadTicketCountChangedSubscriber
 import net.papirus.pyrusservicedesk.sdk.web.UploadFileHooks
 import net.papirus.pyrusservicedesk.utils.ConfigureUtils
 import net.papirus.pyrusservicedesk.utils.MILLISECONDS_IN_SECOND
@@ -30,7 +30,7 @@ internal class TicketViewModel(
         arguments: Intent)
     : ConnectionViewModelBase(serviceDesk),
         OnClickedCallback<CommentEntry>,
-        UnreadCounterChangedSubscriber {
+        OnUnreadTicketCountChangedSubscriber {
 
     val isFeed = serviceDesk.isSingleChat
 
@@ -93,14 +93,15 @@ internal class TicketViewModel(
             loadData()
         }
         maybeStartAutoRefresh()
+        liveUpdates.subscribeOnUnreadTicketCountChanged(this)
     }
 
     override fun onLoadData() {
         commentsRequest.value = true
     }
 
-    override fun onUnreadCounterChanged(unreadCounter: Int) {
-        this.unreadCounter.value = unreadCounter
+    override fun onUnreadTicketCountChanged(unreadTicketCount: Int) {
+        this.unreadCounter.value = unreadTicketCount
     }
 
     override fun onClicked(item: CommentEntry) {
@@ -115,6 +116,7 @@ internal class TicketViewModel(
     override fun onCleared() {
         super.onCleared()
         mainHandler.removeCallbacks(updateRunnable)
+        liveUpdates.unsubscribeFromTicketCountChanged(this)
     }
 
     fun addComment(text: String) {

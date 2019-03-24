@@ -113,7 +113,10 @@ internal class TicketActivity : ConnectionActivityBase<TicketViewModel>(TicketVi
         )
         viewModel.getUnreadCounterLiveData().observe(
             this,
-            Observer { it?.let { count -> navigationCounterIcon.counter = count } }
+            Observer { it?.let { count ->
+                if (!viewModel.isFeed)
+                    navigationCounterIcon.counter = count
+            } }
         )
         ticketSharedViewModel.getFilePickedLiveData().observe(
             this,
