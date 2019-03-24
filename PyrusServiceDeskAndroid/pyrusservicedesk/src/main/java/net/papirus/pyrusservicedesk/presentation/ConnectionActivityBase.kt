@@ -3,7 +3,8 @@ package net.papirus.pyrusservicedesk.presentation
 import android.arch.lifecycle.Observer
 import android.graphics.PorterDuff
 import android.os.Bundle
-import android.view.View
+import android.view.View.GONE
+import android.view.View.VISIBLE
 import com.example.pyrusservicedesk.R
 import kotlinx.android.synthetic.main.psd_activity_tickets.*
 import kotlinx.android.synthetic.main.psd_no_connection.*
@@ -38,15 +39,10 @@ internal abstract class ConnectionActivityBase<T: ConnectionViewModelBase>(viewM
                 this,
                 Observer { isConnected ->
                     isConnected?.let {
-//                        if (!it)
-//                            no_connection.visibility = View.VISIBLE
-//                        else
-//                            reconnect()
+                        no_connection.visibility = if (it) GONE else VISIBLE
                     }
-
                 }
         )
-
         viewModel.getLoadingProgressLiveData().observe(
             this,
             Observer { progress -> progress?.let { updateProgress(it) }
@@ -68,10 +64,7 @@ internal abstract class ConnectionActivityBase<T: ConnectionViewModelBase>(viewM
         progress_bar.progress = newProgress
     }
 
-    private fun reconnect() {
-        if (viewModel.getIsNetworkConnectedLiveDate().value == false)
-            return
-        no_connection.visibility = View.GONE
+    protected open fun reconnect() {
         viewModel.loadData()
     }
 }

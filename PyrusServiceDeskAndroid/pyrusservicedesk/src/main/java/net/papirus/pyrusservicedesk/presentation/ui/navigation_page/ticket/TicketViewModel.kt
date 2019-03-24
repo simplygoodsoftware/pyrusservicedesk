@@ -17,6 +17,7 @@ import net.papirus.pyrusservicedesk.presentation.viewmodel.ConnectionViewModelBa
 import net.papirus.pyrusservicedesk.sdk.data.Comment
 import net.papirus.pyrusservicedesk.sdk.data.EMPTY_TICKET_ID
 import net.papirus.pyrusservicedesk.sdk.web.UploadFileHooks
+import net.papirus.pyrusservicedesk.utils.ConfigureUtils
 import net.papirus.pyrusservicedesk.utils.MILLISECONDS_IN_SECOND
 import net.papirus.pyrusservicedesk.utils.getWhen
 import java.util.*
@@ -61,7 +62,7 @@ internal class TicketViewModel(
                 ){
                     it?.let { result ->
                         when {
-                            result.hasError() -> {}
+                            result.hasError() -> {  }
                             else -> applyTicketListUpdate(result.data!!)
                         }
                     }
@@ -216,7 +217,12 @@ internal class TicketViewModel(
                 break
             listOfLocalEntries.add(0, entry)
         }
-        val toPublish = freshList.toTicketEntries().apply { addAll(listOfLocalEntries) }
+        val toPublish = mutableListOf<TicketEntry>().apply {
+            ConfigureUtils.getWelcomeMessage()?.let { add(0, WelcomeMessageEntry(it)) }
+            addAll(freshList.toTicketEntries())
+            addAll(listOfLocalEntries)
+
+        }
         publishEntries(recentTicketEntries, toPublish)
         onDataLoaded()
     }

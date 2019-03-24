@@ -11,10 +11,7 @@ import android.widget.ImageView
 import android.widget.TextView
 import com.example.pyrusservicedesk.R
 import com.squareup.picasso.Picasso
-import net.papirus.pyrusservicedesk.presentation.ui.navigation_page.ticket.entries.CommentEntry
-import net.papirus.pyrusservicedesk.presentation.ui.navigation_page.ticket.entries.DateEntry
-import net.papirus.pyrusservicedesk.presentation.ui.navigation_page.ticket.entries.TicketEntry
-import net.papirus.pyrusservicedesk.presentation.ui.navigation_page.ticket.entries.Type
+import net.papirus.pyrusservicedesk.presentation.ui.navigation_page.ticket.entries.*
 import net.papirus.pyrusservicedesk.presentation.ui.view.CommentView
 import net.papirus.pyrusservicedesk.presentation.ui.view.ContentType
 import net.papirus.pyrusservicedesk.presentation.ui.view.Status
@@ -29,7 +26,8 @@ import net.papirus.pyrusservicedesk.utils.getTimeText
 
 private const val VIEW_TYPE_COMMENT_INBOUND = 0
 private const val VIEW_TYPE_COMMENT_OUTBOUND = 1
-private const val VIEW_TYPE_DATE = 2
+private const val VIEW_TYPE_WELCOME_MESSAGE = 2
+private const val VIEW_TYPE_DATE = 3
 
 internal class TicketAdapter: AdapterBase<TicketEntry>() {
 
@@ -40,16 +38,19 @@ internal class TicketAdapter: AdapterBase<TicketEntry>() {
         return with(itemsList[position]) {
             return@with when {
                 type == Type.Date -> VIEW_TYPE_DATE
+                type == Type.WelcomeMessage -> VIEW_TYPE_WELCOME_MESSAGE
                 (this as CommentEntry).comment.isInbound -> VIEW_TYPE_COMMENT_OUTBOUND
                 else -> VIEW_TYPE_COMMENT_INBOUND
             }
         }
     }
 
+    @Suppress("UNCHECKED_CAST")
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolderBase<TicketEntry> {
         return when(viewType){
             VIEW_TYPE_COMMENT_INBOUND -> InboundCommentHolder(parent)
             VIEW_TYPE_COMMENT_OUTBOUND -> OutboundCommentHolder(parent)
+            VIEW_TYPE_WELCOME_MESSAGE -> WelcomeMessageHolder(parent)
             else -> DateViewHolder(parent)
         } as ViewHolderBase<TicketEntry>
     }
@@ -174,10 +175,26 @@ internal class TicketAdapter: AdapterBase<TicketEntry>() {
         }
     }
 
+    private class WelcomeMessageHolder(parent: ViewGroup) :
+        ViewHolderBase<WelcomeMessageEntry>(parent, R.layout.psd_view_holder_comment_inbound) {
+
+        private val comment: CommentView = itemView.findViewById(R.id.comment)
+        private val avatar = itemView.findViewById<ImageView>(R.id.avatar)
+        private val authorName = itemView.findViewById<TextView>(R.id.author_name)
+
+        override fun bindItem(item: WelcomeMessageEntry) {
+            super.bindItem(item)
+            authorName.visibility = GONE
+            avatar.setImageDrawable(ConfigureUtils.getSupportAvatar(itemView.context))
+            comment.contentType = ContentType.Text
+            comment.setCommentText(item.message)
+        }
+    }
+
     private class DateViewHolder(parent: ViewGroup)
         : ViewHolderBase<DateEntry>(parent, R.layout.psd_view_holder_date) {
 
-        val date = itemView.findViewById<TextView>(R.id.date)
+        private val date = itemView.findViewById<TextView>(R.id.date)
 
         override fun bindItem(item: DateEntry) {
             super.bindItem(item)

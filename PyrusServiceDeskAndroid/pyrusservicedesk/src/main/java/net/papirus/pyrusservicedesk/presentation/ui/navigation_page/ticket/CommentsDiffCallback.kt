@@ -4,6 +4,7 @@ import android.support.v7.util.DiffUtil
 import net.papirus.pyrusservicedesk.presentation.ui.navigation_page.ticket.entries.CommentEntry
 import net.papirus.pyrusservicedesk.presentation.ui.navigation_page.ticket.entries.DateEntry
 import net.papirus.pyrusservicedesk.presentation.ui.navigation_page.ticket.entries.TicketEntry
+import net.papirus.pyrusservicedesk.presentation.ui.navigation_page.ticket.entries.WelcomeMessageEntry
 import net.papirus.pyrusservicedesk.sdk.data.Comment
 
 internal class CommentsDiffCallback(
@@ -17,6 +18,7 @@ internal class CommentsDiffCallback(
         return when{
             oldEntry is DateEntry && newEntry is DateEntry -> oldEntry.date == newEntry.date
             oldEntry is CommentEntry && newEntry is CommentEntry -> oldEntry.comment.isSameWith(newEntry.comment)
+            oldEntry is WelcomeMessageEntry && newEntry is WelcomeMessageEntry -> oldEntry.message == newEntry.message
             else -> false
         }
     }
@@ -33,6 +35,7 @@ internal class CommentsDiffCallback(
             oldEntry is CommentEntry && newEntry is CommentEntry -> {
                 oldEntry.comment == newEntry.comment && oldEntry.error == newEntry.error
             }
+            oldEntry is WelcomeMessageEntry && newEntry is WelcomeMessageEntry -> oldEntry.message == newEntry.message
             else -> false
         }
     }

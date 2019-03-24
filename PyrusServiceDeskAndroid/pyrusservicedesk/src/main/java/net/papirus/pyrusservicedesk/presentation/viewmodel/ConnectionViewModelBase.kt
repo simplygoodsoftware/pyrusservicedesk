@@ -78,6 +78,7 @@ internal abstract class ConnectionViewModelBase(serviceDesk: PyrusServiceDesk)
     }
 
     protected fun onDataLoaded() {
+        isNetworkConnected.value = true
         publishProgress(MAX_PROGRESS, PROGRESS_ANIMATION_DURATION_MS_QUICK, null)
     }
 
