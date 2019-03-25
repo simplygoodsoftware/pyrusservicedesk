@@ -120,7 +120,7 @@ internal class TicketViewModel(
     }
 
     fun addComment(text: String) {
-        val localComment = localDataProvider.newLocalComment(text)
+        val localComment = localDataProvider.newLocalComment(text.trim())
         sendAddComment(localComment)
     }
 
@@ -156,7 +156,7 @@ internal class TicketViewModel(
                     prevDateGroup = it
                 }
             }
-            if (comment.hasAttachments() && comment.attachments?.size!! > 1)
+            if (comment.hasAttachments())
                 acc.addAll(comment.splitToEntriesByFiles())
             else
                 acc.add(CommentEntry(comment, onClickedCallback = this@TicketViewModel))

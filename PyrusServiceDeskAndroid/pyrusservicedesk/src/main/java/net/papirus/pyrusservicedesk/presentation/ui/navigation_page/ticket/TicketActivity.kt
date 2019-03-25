@@ -2,6 +2,7 @@ package net.papirus.pyrusservicedesk.presentation.ui.navigation_page.ticket
 
 import android.arch.lifecycle.Observer
 import android.content.Intent
+import android.net.Uri
 import android.os.Bundle
 import android.view.Menu
 import android.view.MenuInflater
@@ -14,7 +15,10 @@ import net.papirus.pyrusservicedesk.presentation.ConnectionActivityBase
 import net.papirus.pyrusservicedesk.presentation.ui.navigation.UiNavigator
 import net.papirus.pyrusservicedesk.presentation.ui.view.NavigationCounterDrawable
 import net.papirus.pyrusservicedesk.presentation.ui.view.recyclerview.item_decorators.SpaceItemDecoration
+import net.papirus.pyrusservicedesk.sdk.data.Attachment
 import net.papirus.pyrusservicedesk.sdk.data.EMPTY_TICKET_ID
+import net.papirus.pyrusservicedesk.sdk.data.intermediate.FileData
+import net.papirus.pyrusservicedesk.sdk.getFileUrl
 import net.papirus.pyrusservicedesk.utils.ConfigUtils
 import net.papirus.pyrusservicedesk.utils.getViewModel
 import net.papirus.pyrusservicedesk.utils.isAtEnd
@@ -58,7 +62,7 @@ internal class TicketActivity : ConnectionActivityBase<TicketViewModel>(TicketVi
 
     private var adapter = TicketAdapter().apply {
         setOnDownloadedFileClickListener {
-           UiNavigator.toFilePreview(this@TicketActivity, it.id, it.name)
+           UiNavigator.toFilePreview(this@TicketActivity, it.toFileData())
         }
     }
 
@@ -161,4 +165,12 @@ internal class TicketActivity : ConnectionActivityBase<TicketViewModel>(TicketVi
     private fun showAttachFileVariants() {
         AttachFileVariantsFragment().show(supportFragmentManager, "")
     }
+}
+
+private fun Attachment.toFileData(): FileData {
+    return FileData(
+        name,
+        bytesSize,
+        uri ?: Uri.parse(getFileUrl(id))
+    )
 }

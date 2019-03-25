@@ -11,27 +11,22 @@ import com.example.pyrusservicedesk.R
 import kotlinx.android.synthetic.main.psd_activity_file_preview.*
 import net.papirus.pyrusservicedesk.PyrusServiceDesk
 import net.papirus.pyrusservicedesk.presentation.ConnectionActivityBase
-import net.papirus.pyrusservicedesk.presentation.ui.navigation_page.file_preview.FilePreviewActivity.Companion.getFileId
 import net.papirus.pyrusservicedesk.presentation.viewmodel.ConnectionViewModelBase
-import net.papirus.pyrusservicedesk.sdk.data.FILE_ID_EMPTY
-import net.papirus.pyrusservicedesk.sdk.getFileUrl
+import net.papirus.pyrusservicedesk.sdk.data.intermediate.FileData
+
+private const val KEY_FILE_DATA = "KEY_FILE_DATA"
+
 
 internal class FilePreviewActivity: ConnectionActivityBase<FilePreviewViewModel>(FilePreviewViewModel::class.java) {
 
     companion object {
-        private const val KEY_FILE_ID = "KEY_FILE_ID"
-        private const val KEY_FILE_NAME = "KEY_FILE_NAME"
 
-        fun getLaunchIntent(fileId: Int, fileName: String): Intent {
+        fun getLaunchIntent(fileData: FileData): Intent {
             return Intent(
                     PyrusServiceDesk.getInstance().application,
                     FilePreviewActivity::class.java)
-                .putExtra(KEY_FILE_ID, fileId)
-                .putExtra(KEY_FILE_NAME, fileName)
+                .putExtra(KEY_FILE_DATA, fileData)
         }
-
-        internal fun Intent.getFileId() = getIntExtra(KEY_FILE_ID, FILE_ID_EMPTY)
-        private fun Intent.getFileName() = getStringExtra(KEY_FILE_NAME)
     }
 
     override val layoutResId: Int = R.layout.psd_activity_file_preview
@@ -42,7 +37,7 @@ internal class FilePreviewActivity: ConnectionActivityBase<FilePreviewViewModel>
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        supportActionBar?.apply { title = intent.getFileName() }
+        supportActionBar?.apply { title = intent.getFileData().fileName }
         file_preview_toolbar.setNavigationIcon(R.drawable.psd_arrow_back)
         file_preview_toolbar.setNavigationOnClickListener { finish() }
 
@@ -114,7 +109,7 @@ internal class FilePreviewViewModel(pyrusServiceDesk: PyrusServiceDesk,
     }
 
     override fun onLoadData() {
-        urlViewModel.value = getFileUrl(intent.getFileId())
+        urlViewModel.value = intent.getFileData().uri.toString()
         urlViewModel.postValue(null)
     }
 
@@ -124,3 +119,5 @@ internal class FilePreviewViewModel(pyrusServiceDesk: PyrusServiceDesk,
         publishProgress(progress)
     }
 }
+
+internal fun Intent.getFileData() = getParcelableExtra<FileData>(KEY_FILE_DATA)

@@ -39,9 +39,17 @@ internal class FileResolver(private val contentResolver: ContentResolver) {
             null)
         if (!cursor.moveToFirst())
             return null
+        var size = cursor.getInt(cursor.getColumnIndex(OpenableColumns.SIZE))
+        if (size == 0) {
+            contentResolver.openInputStream(fileUri).use {
+                it?.let { stream ->
+                    size = stream.available()
+                }
+            }
+        }
         return FileData(
             cursor.getString(cursor.getColumnIndex(OpenableColumns.DISPLAY_NAME)),
-            cursor.getInt(cursor.getColumnIndex(OpenableColumns.SIZE)),
+            size,
             fileUri)
     }
 }
