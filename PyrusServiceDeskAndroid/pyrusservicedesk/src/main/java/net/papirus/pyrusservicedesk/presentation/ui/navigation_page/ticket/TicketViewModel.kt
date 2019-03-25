@@ -300,7 +300,20 @@ internal class TicketViewModel(
     private fun Comment.splitToEntriesByFiles(): Collection<TicketEntry> {
         if (this.attachments.isNullOrEmpty())
             return listOf(CommentEntry(this, onClickedCallback = this@TicketViewModel))
-        return this.attachments.fold(ArrayList()){
+        val result = mutableListOf<CommentEntry>()
+        if (!body.isBlank())
+            result.add(CommentEntry(
+                Comment(
+                    this.commentId,
+                    this.body,
+                    this.isInbound,
+                    null,
+                    this.creationDate,
+                    this.author,
+                    this.localId),
+                onClickedCallback = this@TicketViewModel
+            ))
+        return this.attachments.fold(result){
                 entriesList, attachment ->
             entriesList.add(CommentEntry(
                 Comment(
