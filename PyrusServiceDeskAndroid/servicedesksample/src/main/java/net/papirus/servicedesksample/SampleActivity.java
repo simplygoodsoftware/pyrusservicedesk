@@ -8,7 +8,7 @@ import android.graphics.drawable.BitmapDrawable;
 import android.os.Bundle;
 import android.widget.TextView;
 import net.papirus.pyrusservicedesk.PyrusServiceDesk;
-import net.papirus.pyrusservicedesk.ServiceDeskConfigure;
+import net.papirus.pyrusservicedesk.ServiceDeskConfiguration;
 import net.papirus.pyrusservicedesk.sdk.updates.OnNewReplySubscriber;
 
 public class SampleActivity extends Activity implements OnNewReplySubscriber {
@@ -21,7 +21,7 @@ public class SampleActivity extends Activity implements OnNewReplySubscriber {
         findViewById(R.id.support).setOnClickListener(
                 view -> PyrusServiceDesk.start(
                         this,
-                        new ServiceDeskConfigure.Builder()
+                        new ServiceDeskConfiguration.Builder()
                                 .setUserName("Ivan Ivanov")
                                 .setThemeColor(Color.parseColor("#FF8300"))
                                 .setChatTitle("AMAZING")
