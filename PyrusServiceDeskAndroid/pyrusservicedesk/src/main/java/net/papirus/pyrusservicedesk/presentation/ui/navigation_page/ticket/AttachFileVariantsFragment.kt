@@ -1,5 +1,6 @@
 package net.papirus.pyrusservicedesk.presentation.ui.navigation_page.ticket
 
+import android.Manifest.permission.CAMERA
 import android.Manifest.permission.WRITE_EXTERNAL_STORAGE
 import android.annotation.SuppressLint
 import android.app.Activity.RESULT_OK
@@ -92,7 +93,14 @@ internal class AttachFileVariantsFragment: BottomSheetDialogFragment(), View.OnC
 
     private fun startTakingPhoto() {
         activity?.let { activity ->
-            if (activity.hasPermission(WRITE_EXTERNAL_STORAGE)) {
+
+            val permissionToAsk = mutableListOf<String>()
+            if (!activity.hasPermission(WRITE_EXTERNAL_STORAGE))
+                permissionToAsk.add(WRITE_EXTERNAL_STORAGE)
+            if (!activity.hasPermission(CAMERA))
+                permissionToAsk.add(CAMERA)
+
+            if (permissionToAsk.isEmpty()) {
                 val contentValues = ContentValues().also {
                     val timeStamp: String =
                         SimpleDateFormat("yyyyMMdd_HHmmss", Locale.getDefault())
@@ -118,7 +126,7 @@ internal class AttachFileVariantsFragment: BottomSheetDialogFragment(), View.OnC
                 }
             }
             else
-                requestPermission(WRITE_EXTERNAL_STORAGE)
+                requestPermissions(permissionToAsk.toTypedArray(), REQUEST_CODE_PERMISSION)
         }
     }
 
@@ -126,21 +134,21 @@ internal class AttachFileVariantsFragment: BottomSheetDialogFragment(), View.OnC
         super.onRequestPermissionsResult(requestCode, permissions, grantResults)
         if (requestCode != REQUEST_CODE_PERMISSION)
             return
+        val granted = mutableListOf<String>()
         permissions.forEachIndexed {
                 index, permission ->
             if (grantResults[index] == PackageManager.PERMISSION_GRANTED)
-                onPermissionGranted(permission)
+                granted.add(permission)
         }
+        if (!granted.isEmpty())
+            onPermissionsGranted(granted.toTypedArray())
     }
 
-    private fun onPermissionGranted(permission: String) {
-        when (permission) {
-            WRITE_EXTERNAL_STORAGE -> startTakingPhoto()
+    private fun onPermissionsGranted(permissions: Array<String>) {
+        when {
+            activity?.let { it.hasPermission(WRITE_EXTERNAL_STORAGE) && it.hasPermission(CAMERA) } ?: false ->
+                startTakingPhoto()
         }
-    }
-
-    private fun requestPermission(permission: String) {
-        requestPermissions(arrayOf(permission), REQUEST_CODE_PERMISSION)
     }
 
     private fun isExpectedResult(requestCode: Int): Boolean {
