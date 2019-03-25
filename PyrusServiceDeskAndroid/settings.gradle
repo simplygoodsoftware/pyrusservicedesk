@@ -1,1 +1,1 @@
-include ':pyrusservicedesk', ':servicedesksample'
+include ':pyrusservicedesk', ':servicedesksample', ':playground'

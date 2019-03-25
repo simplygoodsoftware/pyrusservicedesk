@@ -13,3 +13,4 @@
 .externalNativeBuild
 
 /publish.properties
+/playground
