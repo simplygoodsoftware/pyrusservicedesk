@@ -1,6 +1,7 @@
 package net.papirus.pyrusservicedesk.presentation.ui.navigation_page.ticket
 
 import android.Manifest.permission.WRITE_EXTERNAL_STORAGE
+import android.annotation.SuppressLint
 import android.app.Activity.RESULT_OK
 import android.content.ContentValues
 import android.content.Intent
@@ -24,7 +25,6 @@ import java.text.SimpleDateFormat
 import java.util.*
 
 
-
 internal class AttachFileVariantsFragment: BottomSheetDialogFragment(), View.OnClickListener {
 
     private companion object {
@@ -37,6 +37,7 @@ internal class AttachFileVariantsFragment: BottomSheetDialogFragment(), View.OnC
     private var capturePhotoUri: Uri? = null
     private val sharedModel: TicketSharedViewModel by getViewModelWithActivityScope(TicketSharedViewModel::class.java)
 
+    @SuppressLint("InflateParams")
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         super.onCreateView(inflater, container, savedInstanceState)
         dialog.setOnShowListener { dialog ->

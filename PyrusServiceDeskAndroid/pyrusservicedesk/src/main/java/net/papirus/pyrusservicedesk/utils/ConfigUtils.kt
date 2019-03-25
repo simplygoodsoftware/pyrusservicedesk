@@ -9,7 +9,7 @@ import android.support.v7.content.res.AppCompatResources
 import com.example.pyrusservicedesk.R
 import net.papirus.pyrusservicedesk.PyrusServiceDesk
 
-internal class ConfigureUtils{
+internal class ConfigUtils{
 
     companion object {
 
@@ -18,32 +18,32 @@ internal class ConfigureUtils{
         @ColorInt
         fun getAccentColor(activity: Context): Int {
             return when{
-                PyrusServiceDesk.getTheme().themeColor != null -> PyrusServiceDesk.getTheme().themeColor!!
+                PyrusServiceDesk.getConfiguration().themeColor != null -> PyrusServiceDesk.getConfiguration().themeColor!!
                 else -> getColor(activity, R.attr.colorAccent)
             }
         }
 
         fun getTitle(context: Context): String {
             return when{
-                !PyrusServiceDesk.getTheme().title.isNullOrEmpty() -> PyrusServiceDesk.getTheme().title!!
+                !PyrusServiceDesk.getConfiguration().title.isNullOrEmpty() -> PyrusServiceDesk.getConfiguration().title!!
                 else -> context.resources.getString(R.string.psd_organization_support)
             }
         }
 
-        fun getWelcomeMessage(): String? = PyrusServiceDesk.getTheme().welcomeMessage
+        fun getWelcomeMessage(): String? = PyrusServiceDesk.getConfiguration().welcomeMessage
 
         fun getSupportAvatar(context: Context): Drawable {
             return when {
-                PyrusServiceDesk.getTheme().supportAvatar != null ->
-                    PyrusServiceDesk.getTheme().supportAvatar!!.circle(context)
+                PyrusServiceDesk.getConfiguration().supportAvatar != null ->
+                    PyrusServiceDesk.getConfiguration().supportAvatar!!.circle(context)
                 else -> makeSupportAvatar(context, AppCompatResources.getDrawable(context, R.drawable.psd_support_avatar)!!)
             }
         }
 
         fun getUserName(): String {
             return when {
-                !PyrusServiceDesk.getTheme().userName.isNullOrBlank() ->
-                    PyrusServiceDesk.getTheme().userName!!
+                !PyrusServiceDesk.getConfiguration().userName.isNullOrBlank() ->
+                    PyrusServiceDesk.getConfiguration().userName!!
                 else -> PyrusServiceDesk.getInstance().application.getString(R.string.psd_guest)
             }
         }
@@ -58,7 +58,7 @@ internal class ConfigureUtils{
 
             val icon = Bitmap.createBitmap(drawable.intrinsicHeight, drawable.intrinsicWidth, Bitmap.Config.ARGB_8888)
             val iconCanvas = Canvas(icon)
-            drawable.setBounds(0, 0, iconCanvas.width, iconCanvas.height);
+            drawable.setBounds(0, 0, iconCanvas.width, iconCanvas.height)
             drawable.draw(iconCanvas)
 
             paint.colorFilter = PorterDuffColorFilter(getTextColorOnBackground(context, paint.color), PorterDuff.Mode.SRC_IN)

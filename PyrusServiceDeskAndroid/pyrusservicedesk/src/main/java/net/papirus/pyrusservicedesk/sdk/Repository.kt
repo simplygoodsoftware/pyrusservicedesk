@@ -23,7 +23,7 @@ internal fun getFileUrl(fileId: Int): String {
     return with(PyrusServiceDesk.getInstance()){
         "$BASE_URL/DownloadFile/$fileId" +
                 "?user_id=" +
-                URLEncoder.encode(userId.toString(), "UTF-8") +
+                URLEncoder.encode(userId, "UTF-8") +
                 "&app_id=" +
                 URLEncoder.encode(appId, "UTF-8")
     }

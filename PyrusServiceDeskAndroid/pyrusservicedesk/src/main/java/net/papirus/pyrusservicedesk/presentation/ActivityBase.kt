@@ -23,7 +23,7 @@ internal abstract class ActivityBase: AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         val theme = when{
-            PyrusServiceDesk.getTheme().isDialogTheme -> R.style.PyrusServiceDesk_Dialog
+            PyrusServiceDesk.getConfiguration().isDialogTheme -> R.style.PyrusServiceDesk_Dialog
             else -> R.style.PyrusServiceDesk
         }
         setTheme(theme)

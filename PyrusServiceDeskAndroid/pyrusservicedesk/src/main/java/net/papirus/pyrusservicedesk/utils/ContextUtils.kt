@@ -6,8 +6,6 @@ import android.support.v4.app.Fragment
 import android.support.v4.app.FragmentActivity
 import net.papirus.pyrusservicedesk.presentation.viewmodel.ViewModelFactory
 
-
-
 internal fun <T : ViewModel> FragmentActivity.getViewModel(viewModelClass: Class<T>): Lazy<T> {
 
     return lazy(LazyThreadSafetyMode.NONE) {

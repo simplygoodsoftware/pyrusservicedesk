@@ -17,7 +17,7 @@ import net.papirus.pyrusservicedesk.sdk.data.Comment
 import net.papirus.pyrusservicedesk.sdk.data.EMPTY_TICKET_ID
 import net.papirus.pyrusservicedesk.sdk.updates.OnUnreadTicketCountChangedSubscriber
 import net.papirus.pyrusservicedesk.sdk.web.UploadFileHooks
-import net.papirus.pyrusservicedesk.utils.ConfigureUtils
+import net.papirus.pyrusservicedesk.utils.ConfigUtils
 import net.papirus.pyrusservicedesk.utils.MILLISECONDS_IN_SECOND
 import net.papirus.pyrusservicedesk.utils.getWhen
 import java.util.*
@@ -213,14 +213,16 @@ internal class TicketViewModel(
 
     private fun applyTicketListUpdate(freshList: List<Comment>) {
         val listOfLocalEntries = mutableListOf<TicketEntry>()
-        for (i in recentTicketEntries.lastIndex downTo 0) {
-            val entry = recentTicketEntries[i]
-            if (entry.type == Type.Comment && !(entry as CommentEntry).comment.isLocal())
-                break
-            listOfLocalEntries.add(0, entry)
+        if (hasRealComments()) {
+            for (i in recentTicketEntries.lastIndex downTo 0) {
+                val entry = recentTicketEntries[i]
+                if (entry.type == Type.Comment && !(entry as CommentEntry).comment.isLocal())
+                    break
+                listOfLocalEntries.add(0, entry)
+            }
         }
         val toPublish = mutableListOf<TicketEntry>().apply {
-            ConfigureUtils.getWelcomeMessage()?.let { add(0, WelcomeMessageEntry(it)) }
+            ConfigUtils.getWelcomeMessage()?.let { add(0, WelcomeMessageEntry(it)) }
             addAll(freshList.toTicketEntries())
             addAll(listOfLocalEntries)
 
@@ -229,11 +231,13 @@ internal class TicketViewModel(
         onDataLoaded()
     }
 
+    private fun hasRealComments(): Boolean = recentTicketEntries.any { it.type == Type.Comment }
+
     private fun applyUpdate(commentEntry: CommentEntry, changeType: ChangeType) {
         val newEntries = recentTicketEntries.toMutableList()
         fun maybeAddDate(){
             commentEntry.comment.creationDate.getWhen(getApplication(), Calendar.getInstance()).let {
-                if (newEntries.isEmpty()
+                if (!hasRealComments()
                     || newEntries.findLast { entry -> entry.type == Type.Date}
                         ?.let { dateEntry ->  (dateEntry as DateEntry).date == it } == false) {
 

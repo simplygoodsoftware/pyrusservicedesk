@@ -8,8 +8,8 @@ import net.papirus.pyrusservicedesk.presentation.ui.navigation_page.ticket.entri
 import net.papirus.pyrusservicedesk.sdk.data.Comment
 
 internal class CommentsDiffCallback(
-    val oldList: List<TicketEntry>,
-    val newList: List<TicketEntry>)
+    private val oldList: List<TicketEntry>,
+    private val newList: List<TicketEntry>)
     : DiffUtil.Callback() {
 
     override fun areItemsTheSame(oldItemPosition: Int, newItemPosition: Int): Boolean {

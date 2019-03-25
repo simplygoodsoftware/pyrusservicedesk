@@ -4,6 +4,7 @@ import android.app.Activity
 import android.app.Application
 import android.arch.lifecycle.Observer
 import android.content.Intent
+import com.google.android.gms.iid.InstanceID
 import kotlinx.coroutines.asCoroutineDispatcher
 import net.papirus.pyrusservicedesk.presentation.ui.navigation_page.ticket.TicketActivity
 import net.papirus.pyrusservicedesk.presentation.ui.navigation_page.tickets.TicketsActivity
@@ -15,7 +16,6 @@ import net.papirus.pyrusservicedesk.sdk.data.LocalDataProvider
 import net.papirus.pyrusservicedesk.sdk.updates.LiveUpdates
 import net.papirus.pyrusservicedesk.sdk.updates.OnNewReplySubscriber
 import net.papirus.pyrusservicedesk.sdk.web.retrofit.RetrofitWebRepository
-import net.papirus.pyrusservicedesk.utils.isTablet
 import java.util.concurrent.Executors
 
 class PyrusServiceDesk private constructor(
@@ -23,33 +23,50 @@ class PyrusServiceDesk private constructor(
         internal val appId: String,
         internal val isSingleChat: Boolean){
 
-    internal var userId: Int = 12345
+    @Suppress("DEPRECATION")
+    internal var userId: String = InstanceID.getInstance(application).id
 
     companion object {
         internal val DISPATCHER_IO_SINGLE = Executors.newSingleThreadExecutor().asCoroutineDispatcher()
         private var INSTANCE: PyrusServiceDesk? = null
-        private var CONFIGURE: ServiceDeskConfigure? = null
+        private var CONFIGURATION: ServiceDeskConfiguration? = null
 
+        /**
+         * Initializes PyrusServiceDesk embeddable module.
+         * The best approach is to call this in [Application.onCreate]
+         * ***PS***: Should be done before [start] is called. Unhandled IllegalStateException is thrown otherwise.
+         *
+         * @param application instance of the enclosing application
+         * @param appId id of a client
+         */
         @JvmStatic
         fun init(application: Application, appId: String) {
             INSTANCE = PyrusServiceDesk(application, appId, true)
         }
 
+        /**
+         * Launches UI of the PyrusServiceDesk.
+         *
+         * @param activity activity that is used for launching service desk ui
+         * @param configuration instance of [ServiceDeskConfiguration].
+         *      If null is passed, default Configuration is used.
+         */
         @JvmStatic
-        fun start(activity: Activity, configure: ServiceDeskConfigure? = null) {
-            startImpl(activity = activity, configure = configure)
+        fun start(activity: Activity, configuration: ServiceDeskConfiguration? = null) {
+            startImpl(activity = activity, configuration = configuration)
         }
 
-        @JvmStatic
-        fun startTicket(ticketId: Int, activity: Activity, configure: ServiceDeskConfigure? = null) {
-            startImpl(ticketId, activity, configure)
-        }
-
+        /**
+         * Registers [subscriber] on updates of new reply from support
+         */
         @JvmStatic
         fun subscribeOnNewReply(subscriber: OnNewReplySubscriber){
             getInstance().liveUpdates.subscribeOnReply(subscriber)
         }
 
+        /**
+         * Unregisters [subscriber] from updates of new reply from support
+         */
         @JvmStatic
         fun unsubscribeFromNewReply(subscriber: OnNewReplySubscriber) {
             getInstance().liveUpdates.unsubscribeFromReplies(subscriber)
@@ -59,14 +76,14 @@ class PyrusServiceDesk private constructor(
             return checkNotNull(INSTANCE){ "Instantiate PyrusServiceDesk first" }
         }
 
-        internal fun getTheme(): ServiceDeskConfigure {
-            if (CONFIGURE == null)
-                CONFIGURE = ServiceDeskConfigure(isDialogTheme = getInstance().application.isTablet())
-            return CONFIGURE!!
+        internal fun getConfiguration(): ServiceDeskConfiguration {
+            if (CONFIGURATION == null)
+                CONFIGURATION = ServiceDeskConfiguration()
+            return CONFIGURATION!!
         }
 
-        private fun startImpl(ticketId: Int? = null, activity: Activity, configure: ServiceDeskConfigure? = null) {
-            CONFIGURE = configure
+        private fun startImpl(ticketId: Int? = null, activity: Activity, configuration: ServiceDeskConfiguration? = null) {
+            CONFIGURATION = configuration
             activity.startActivity(createIntent(ticketId))
         }
 
@@ -93,7 +110,7 @@ class PyrusServiceDesk private constructor(
             RepositoryFactory.create(
                 RetrofitWebRepository(
                     appId,
-                    userId.toString(),
+                    userId,
                     fileResolver
                 )
             )

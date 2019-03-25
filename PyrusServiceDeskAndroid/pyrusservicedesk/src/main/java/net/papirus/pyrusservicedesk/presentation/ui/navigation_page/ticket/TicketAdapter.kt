@@ -20,7 +20,7 @@ import net.papirus.pyrusservicedesk.presentation.ui.view.recyclerview.ViewHolder
 import net.papirus.pyrusservicedesk.sdk.data.Attachment
 import net.papirus.pyrusservicedesk.sdk.getAvatarUrl
 import net.papirus.pyrusservicedesk.utils.CIRCLE_TRANSFORMATION
-import net.papirus.pyrusservicedesk.utils.ConfigureUtils
+import net.papirus.pyrusservicedesk.utils.ConfigUtils
 import net.papirus.pyrusservicedesk.utils.getTimeText
 
 
@@ -89,7 +89,7 @@ internal class TicketAdapter: AdapterBase<TicketEntry>() {
             if (visible) {
                 Picasso.get()
                     .load(getAvatarUrl(getItem().comment.author.avatarId))
-                    .placeholder(ConfigureUtils.getSupportAvatar(itemView.context))
+                    .placeholder(ConfigUtils.getSupportAvatar(itemView.context))
                     .transform(CIRCLE_TRANSFORMATION)
                     .into(avatar)
             }
@@ -185,7 +185,7 @@ internal class TicketAdapter: AdapterBase<TicketEntry>() {
         override fun bindItem(item: WelcomeMessageEntry) {
             super.bindItem(item)
             authorName.visibility = GONE
-            avatar.setImageDrawable(ConfigureUtils.getSupportAvatar(itemView.context))
+            avatar.setImageDrawable(ConfigUtils.getSupportAvatar(itemView.context))
             comment.contentType = ContentType.Text
             comment.setCommentText(item.message)
         }

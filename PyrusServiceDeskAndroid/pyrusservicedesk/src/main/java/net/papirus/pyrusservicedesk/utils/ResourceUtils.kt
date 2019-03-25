@@ -9,8 +9,6 @@ import android.support.annotation.ColorInt
 import android.support.v4.content.ContextCompat
 import android.util.TypedValue
 
-
-
 /**
  * Extracts color from context theme by attribute id
  * @param context context which theme is used to resolve the attribute

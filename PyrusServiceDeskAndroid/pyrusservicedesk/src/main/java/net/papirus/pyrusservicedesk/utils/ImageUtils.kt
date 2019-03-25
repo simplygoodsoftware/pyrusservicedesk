@@ -41,6 +41,9 @@ internal fun Bitmap.circle(): Bitmap {
 
 internal fun BitmapDrawable.circle(context: Context): Drawable {
     val out = Bitmap.createBitmap(intrinsicWidth, intrinsicHeight, Bitmap.Config.ARGB_8888)
-    draw(Canvas(out))
+    this.mutate().run {
+        setBounds(0, 0, out.width, out.height)
+        draw(Canvas(out))
+    }
     return BitmapDrawable(context.resources, out.circle())
 }

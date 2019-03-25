@@ -2,7 +2,7 @@ package net.papirus.pyrusservicedesk.sdk.data
 
 import android.net.Uri
 import net.papirus.pyrusservicedesk.sdk.FileResolver
-import net.papirus.pyrusservicedesk.utils.ConfigureUtils
+import net.papirus.pyrusservicedesk.utils.ConfigUtils
 import java.util.*
 internal class LocalDataProvider(initialLocalCommentId: Int = -1,
                                  private val fileResolver: FileResolver) {
@@ -13,7 +13,7 @@ internal class LocalDataProvider(initialLocalCommentId: Int = -1,
         return Comment(
             body = text,
             isInbound = true,
-            author = Author(ConfigureUtils.getUserName()),
+            author = Author(ConfigUtils.getUserName()),
             attachments = fileResolver.getFileData(fileUri)?.let {
                 listOf(newLocalAttachment(it.fileName, it.bytesSize, it.uri))
             },

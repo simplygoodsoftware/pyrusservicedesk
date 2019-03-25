@@ -8,8 +8,6 @@ import android.support.v7.widget.RecyclerView
 import android.widget.EditText
 import android.widget.TextView
 
-
-
 /**
  * Checks whether given recyclerview is at end.
  *
