@@ -69,7 +69,7 @@ internal class CommentView @JvmOverloads constructor(
                 setProgress(0)
             }
             else
-                file_size.setText(R.string.psd_downloading)
+                file_size.setText(R.string.psd_uploading)
             field = value
         }
 

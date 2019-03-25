@@ -5,7 +5,7 @@
     <string name="psd_comment_input_hint">Add Comment</string>
     <string name="psd_retry">Retry</string>
     <string name="psd_no_connection">No Internet Connection</string>
-    <string name="psd_downloading">Downloading…</string>
+    <string name="psd_uploading">Uploading…</string>
     <string name="psd_file_size_mb" formatted="false">%.1f MB</string>
     <string name="psd_file_size_kb" formatted="false">%.1f KB</string>
     <string name="psd_time_format">hh:mm aa</string>

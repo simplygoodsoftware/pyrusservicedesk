@@ -6,7 +6,7 @@
     <string name="psd_comment_input_hint">Новый комментарий</string>
     <string name="psd_retry">Попробовать снова</string>
     <string name="psd_no_connection">Нет связи</string>
-    <string name="psd_downloading">Загрузка…</string>
+    <string name="psd_uploading">Загрузка…</string>
     <string name="psd_file_size_mb">%f МБ</string>
     <string name="psd_file_size_kb">%f КБ</string>
     <string name="psd_time_format">HH:mm</string>

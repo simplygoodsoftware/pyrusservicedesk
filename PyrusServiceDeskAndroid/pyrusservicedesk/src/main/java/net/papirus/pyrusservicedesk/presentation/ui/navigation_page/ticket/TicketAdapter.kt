@@ -33,6 +33,7 @@ internal class TicketAdapter: AdapterBase<TicketEntry>() {
 
     override val itemTouchHelper: ItemTouchHelper? = ItemTouchHelper(TouchCallback())
     private var onDownloadedFileClickListener: ((Attachment) -> Unit)? = null
+    private var recentInboundCommentPositionWithAvatar = 0
 
     override fun getItemViewType(position: Int): Int {
         return with(itemsList[position]) {
@@ -64,8 +65,8 @@ internal class TicketAdapter: AdapterBase<TicketEntry>() {
         onDownloadedFileClickListener = listener
     }
 
-    private inner class InboundCommentHolder(parent: ViewGroup)
-        : CommentHolder(parent, R.layout.psd_view_holder_comment_inbound){
+    private inner class InboundCommentHolder(parent: ViewGroup) :
+        CommentHolder(parent, R.layout.psd_view_holder_comment_inbound) {
 
         override val comment: CommentView = itemView.findViewById(R.id.comment)
         override val creationTime: TextView = itemView.findViewById(R.id.creation_time)
@@ -75,13 +76,24 @@ internal class TicketAdapter: AdapterBase<TicketEntry>() {
         override fun bindItem(item: CommentEntry) {
             super.bindItem(item)
             setAuthorNameVisibility(shouldShowAuthorName())
-            setAuthorAvatarVisibility(shouldShowAuthorAvatar())
+            with(shouldShowAuthorAvatar()) {
+                setAuthorAvatarVisibility(this)
+                if (this && shouldRedrawRecentCommentWithAvatar()) {
+                    val toRedraw = recentInboundCommentPositionWithAvatar
+                    itemView.post { notifyItemChanged(toRedraw) }
+                    recentInboundCommentPositionWithAvatar = adapterPosition
+                }
+            }
         }
+
+        private fun shouldRedrawRecentCommentWithAvatar(): Boolean =
+            adapterPosition == itemsList.lastIndex && recentInboundCommentPositionWithAvatar != adapterPosition
 
         private fun setAuthorNameVisibility(visible: Boolean) {
             authorName.visibility = if (visible) VISIBLE else GONE
-            if (visible)
-                authorName.text = getItem().comment.author.name
+            if (visible) {
+            }
+            authorName.text = getItem().comment.author.name
         }
 
         private fun setAuthorAvatarVisibility(visible: Boolean) {
@@ -97,16 +109,16 @@ internal class TicketAdapter: AdapterBase<TicketEntry>() {
 
         private fun shouldShowAuthorName(): Boolean {
             return adapterPosition == 0
-                    || with(itemsList[adapterPosition - 1]){
-                        when {
-                            this.type != Type.Comment -> true
-                            else -> getItem().comment.author != (this as CommentEntry).comment.author
-                        }
-                    }
+                    || with(itemsList[adapterPosition - 1]) {
+                when {
+                    this.type != Type.Comment -> true
+                    else -> getItem().comment.author != (this as CommentEntry).comment.author
+                }
+            }
         }
 
         private fun shouldShowAuthorAvatar(): Boolean {
-            return with (itemsList.getOrNull(adapterPosition + 1)){
+            return with(itemsList.getOrNull(adapterPosition + 1)) {
                 when {
                     this?.type != Type.Comment -> true
                     else -> getItem().comment.author != (this as CommentEntry).comment.author
@@ -243,7 +255,7 @@ internal class TicketAdapter: AdapterBase<TicketEntry>() {
                 x = -viewHolder.creationTime.width.toFloat()
             for (position in 0..(recyclerView.childCount - 1)) {
                 recyclerView.findContainingViewHolder(recyclerView.getChildAt(position))?.let {
-                    if (itemsList[it.adapterPosition].type != Type.Comment)
+                    if (it.adapterPosition == - 1 || itemsList[it.adapterPosition].type != Type.Comment)
                         return@let
                     super.onChildDraw(
                             c,
