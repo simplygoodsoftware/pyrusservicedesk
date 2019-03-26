@@ -28,15 +28,15 @@
                 android:layout_width="@dimen/psd_recyclerview_item_height_default"
                 android:layout_height="@dimen/psd_recyclerview_item_height_default"
                 android:progressDrawable="@drawable/psd_file_progress"
+                android:layout_marginRight="@dimen/psd_offset_small"
+                android:layout_marginEnd="@dimen/psd_offset_small"
                 android:indeterminate="false"/>
 
             <LinearLayout
                 android:layout_width="wrap_content"
                 android:layout_height="match_parent"
                 android:gravity="center_vertical"
-                android:orientation="vertical"
-                android:layout_marginLeft="@dimen/psd_offset_small"
-                android:layout_marginStart="@dimen/psd_offset_small">
+                android:orientation="vertical">
 
                 <android.support.v7.widget.AppCompatTextView
                     android:id="@+id/file_name"

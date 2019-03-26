@@ -73,6 +73,12 @@ internal class CommentView @JvmOverloads constructor(
             field = value
         }
 
+    var isFileProgressVisible = true
+        set(value) {
+            file_progress.visibility = if (value) View.VISIBLE else View.GONE
+            field = value
+        }
+
     var status = Status.Completed
         set(value) {
             var visibility = View.VISIBLE
@@ -146,6 +152,7 @@ internal class CommentView @JvmOverloads constructor(
                     .apply { gravity = Gravity.CENTER_VERTICAL }
         }
         status = Status.Completed
+        isFileProgressVisible = true
     }
 
     override fun onAttachedToWindow() {

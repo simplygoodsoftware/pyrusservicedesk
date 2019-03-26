@@ -45,9 +45,8 @@ internal class FilePreviewActivity: ConnectionActivityBase<FilePreviewViewModel>
             settings.apply {
                 builtInZoomControls = true
                 setSupportZoom(true)
-                loadWithOverviewMode = true
                 useWideViewPort = true
-                domStorageEnabled = true
+                javaScriptEnabled = true
             }
             webViewClient = object: WebViewClient(){
                 override fun onReceivedError(view: WebView?, request: WebResourceRequest?, error: WebResourceError?) {
@@ -58,14 +57,16 @@ internal class FilePreviewActivity: ConnectionActivityBase<FilePreviewViewModel>
             }
             webChromeClient = object: WebChromeClient() {
                 override fun onProgressChanged(view: WebView?, newProgress: Int) {
-                    if (!wasError)
+                    if (!wasError) {
                         viewModel.onProgressChanged(newProgress)
+                    }
                 }
             }
         }
 
-        if (savedInstanceState != null)
+        if (savedInstanceState != null) {
             web_view.restoreState(savedInstanceState)
+        }
     }
 
     override fun onSaveInstanceState(outState: Bundle?) {
