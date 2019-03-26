@@ -17,8 +17,10 @@ import android.support.design.widget.BottomSheetDialogFragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.View.INVISIBLE
+import android.view.View.VISIBLE
 import android.view.ViewGroup
 import kotlinx.android.synthetic.main.psd_fragment_attach_file_variants.*
+import net.papirus.pyrusservicedesk.PyrusServiceDesk
 import net.papirus.pyrusservicedesk.utils.INTENT_IMAGE_TYPE
 import net.papirus.pyrusservicedesk.utils.getViewModelWithActivityScope
 import net.papirus.pyrusservicedesk.utils.hasPermission
@@ -30,9 +32,9 @@ internal class AttachFileVariantsFragment: BottomSheetDialogFragment(), View.OnC
 
     private companion object {
         const val REQUEST_CODE_PERMISSION = 0
-
-        const val REQUEST_PICK_IMAGE = 1
-        const val REQUEST_TAKE_PHOTO = 2
+        const val REQUEST_CODE_CUSTOM_CHOOSER = 1
+        const val REQUEST_CODE_PICK_IMAGE = 2
+        const val REQUEST_CODE_TAKE_PHOTO = 3
     }
 
     private var capturePhotoUri: Uri? = null
@@ -53,15 +55,15 @@ internal class AttachFileVariantsFragment: BottomSheetDialogFragment(), View.OnC
         super.onViewCreated(view, savedInstanceState)
         photo_variant.setOnClickListener(this)
         gallery_variant.setOnClickListener(this)
-        logs_variant.setOnClickListener(this)
-        logs_variant.visibility = INVISIBLE
+        custom_variant.setOnClickListener(this)
+        custom_variant.visibility = if (PyrusServiceDesk.FILE_CHOOSER == null) INVISIBLE else VISIBLE
     }
 
     override fun onClick(view: View) {
         when (view) {
             photo_variant -> startTakingPhoto()
             gallery_variant -> startPickingImage()
-            logs_variant -> sendLogs()
+            custom_variant -> openCustomChooser()
         }
     }
 
@@ -71,7 +73,7 @@ internal class AttachFileVariantsFragment: BottomSheetDialogFragment(), View.OnC
             capturePhotoUri = null
             return
         }
-        val isPhoto = requestCode == REQUEST_TAKE_PHOTO
+        val isPhoto = requestCode == REQUEST_CODE_TAKE_PHOTO
         val location: Uri? = if (isPhoto) capturePhotoUri else data?.data
         location?.let {
             sharedModel.onFilePicked(it)
@@ -80,14 +82,16 @@ internal class AttachFileVariantsFragment: BottomSheetDialogFragment(), View.OnC
         capturePhotoUri = null
     }
 
-    private fun sendLogs() {
-
+    private fun openCustomChooser() {
+        val chooserIntent = PyrusServiceDesk.FILE_CHOOSER?.getIntent() ?: return
+        activity?.packageManager?.resolveActivity(chooserIntent, 0) ?: return
+        startActivityForResult(chooserIntent, REQUEST_CODE_CUSTOM_CHOOSER)
     }
 
     private fun startPickingImage() {
         Intent(Intent.ACTION_GET_CONTENT).also{
             it.type = INTENT_IMAGE_TYPE
-            startActivityForResult(it, REQUEST_PICK_IMAGE)
+            startActivityForResult(it, REQUEST_CODE_PICK_IMAGE)
         }
     }
 
@@ -121,7 +125,7 @@ internal class AttachFileVariantsFragment: BottomSheetDialogFragment(), View.OnC
                             componentName.packageName,
                             capturePhotoUri,
                             Intent.FLAG_GRANT_WRITE_URI_PERMISSION)
-                        startActivityForResult(intent, REQUEST_TAKE_PHOTO)
+                        startActivityForResult(intent, REQUEST_CODE_TAKE_PHOTO)
                     }
                 }
             }
@@ -152,6 +156,11 @@ internal class AttachFileVariantsFragment: BottomSheetDialogFragment(), View.OnC
     }
 
     private fun isExpectedResult(requestCode: Int): Boolean {
-        return requestCode == REQUEST_TAKE_PHOTO || requestCode == REQUEST_PICK_IMAGE
+        return when (requestCode){
+            REQUEST_CODE_TAKE_PHOTO -> true
+            REQUEST_CODE_PICK_IMAGE -> true
+            REQUEST_CODE_CUSTOM_CHOOSER -> true
+            else -> false
+        }
     }
 }

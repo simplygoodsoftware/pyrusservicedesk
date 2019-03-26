@@ -31,11 +31,11 @@
         android:paddingStart="@dimen/psd_offset_default"
         android:paddingRight="@dimen/psd_offset_default"
         android:paddingEnd="@dimen/psd_offset_default"
-        app:layout_constraintBottom_toTopOf="@+id/logs_variant"
+        app:layout_constraintBottom_toTopOf="@+id/custom_variant"
         app:layout_constraintTop_toBottomOf="@+id/photo_variant" />
 
     <android.support.v7.widget.AppCompatTextView
-        android:id="@+id/logs_variant"
+        android:id="@+id/custom_variant"
         android:layout_width="match_parent"
         android:layout_height="@dimen/psd_recyclerview_item_height_default"
         android:text="@string/psd_send_logs"

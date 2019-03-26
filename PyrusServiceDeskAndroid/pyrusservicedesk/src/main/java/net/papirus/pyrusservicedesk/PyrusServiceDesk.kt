@@ -28,6 +28,7 @@ class PyrusServiceDesk private constructor(
 
     companion object {
         internal val DISPATCHER_IO_SINGLE = Executors.newSingleThreadExecutor().asCoroutineDispatcher()
+        internal var FILE_CHOOSER: FileChooser? = null
         private var INSTANCE: PyrusServiceDesk? = null
         private var CONFIGURATION: ServiceDeskConfiguration? = null
 
@@ -79,6 +80,11 @@ class PyrusServiceDesk private constructor(
         @JvmStatic
         fun unsubscribeFromReplies(subscriber: NewReplySubscriber) {
             getInstance().liveUpdates.unsubscribeFromReplies(subscriber)
+        }
+
+        @JvmStatic
+        fun registerFileChooser(fileChooser: FileChooser) {
+            FILE_CHOOSER = fileChooser
         }
 
         internal fun getInstance() : PyrusServiceDesk {
