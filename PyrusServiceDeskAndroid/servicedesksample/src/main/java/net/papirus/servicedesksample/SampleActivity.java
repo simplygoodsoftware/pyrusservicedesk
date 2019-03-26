@@ -26,7 +26,7 @@ public class SampleActivity extends Activity implements OnNewReplySubscriber {
                                 .setThemeColor(Color.parseColor("#FF8300"))
                                 .setChatTitle("AMAZING")
                                 .setWelcomeMessage("Why so serious?")
-                                .setAvatarForSupport(drawable())
+                                .setAvatarForSupport(R.drawable.psd_download_file)
                                 .build())
         );
     }
