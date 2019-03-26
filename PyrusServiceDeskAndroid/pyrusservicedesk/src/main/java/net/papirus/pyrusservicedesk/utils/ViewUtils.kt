@@ -17,7 +17,7 @@ internal fun RecyclerView.isAtEnd(): Boolean {
     return adapter == null
             || layoutManager == null
             || childCount == 0
-            || (layoutManager as LinearLayoutManager).findLastCompletelyVisibleItemPosition() == adapter!!.itemCount - 1
+            || (layoutManager as LinearLayoutManager).findLastVisibleItemPosition() == adapter!!.itemCount - 1
 }
 
 internal fun EditText.setCursorColor(@ColorInt color: Int) {

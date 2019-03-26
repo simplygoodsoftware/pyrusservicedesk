@@ -111,8 +111,18 @@ internal class TicketActivity : ConnectionActivityBase<TicketViewModel>(TicketVi
                     adapter.setItemsWithoutUpdate(it.newItems)
                     it.diffResult.dispatchUpdatesTo(adapter)
                 }
-                if (adapter.itemCount == 0 || atEnd)
+                if (atEnd){
                     comments.scrollToPosition(adapter.itemCount - 1)
+                    comments.post {
+                        if(comments == null)
+                            return@post
+                        val offset = when {
+                            comments.childCount > 0 -> comments.getChildAt(comments.childCount - 1).height
+                            else -> 0
+                        }
+                        comments.scrollBy(0, offset)
+                    }
+                }
             }
         )
         viewModel.getUnreadCounterLiveData().observe(
