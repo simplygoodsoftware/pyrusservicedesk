@@ -1,10 +1,7 @@
 package net.papirus.servicedesksample;
 
 import android.app.Activity;
-import android.graphics.Bitmap;
-import android.graphics.Canvas;
 import android.graphics.Color;
-import android.graphics.drawable.BitmapDrawable;
 import android.os.Bundle;
 import android.widget.TextView;
 import net.papirus.pyrusservicedesk.PyrusServiceDesk;
@@ -24,18 +21,11 @@ public class SampleActivity extends Activity implements OnNewReplySubscriber {
                         new ServiceDeskConfiguration.Builder()
                                 .setUserName("Ivan Ivanov")
                                 .setThemeColor(Color.parseColor("#FF8300"))
-                                .setChatTitle("AMAZING")
-                                .setWelcomeMessage("Why so serious?")
+                                .setChatTitle("Sample Support")
+                                .setWelcomeMessage("How can I help you?")
                                 .setAvatarForSupport(R.drawable.psd_download_file)
                                 .build())
         );
-    }
-
-    private BitmapDrawable drawable() {
-        Bitmap bmp = Bitmap.createBitmap(96, 96, Bitmap.Config.ARGB_8888);
-        Canvas canvas = new Canvas(bmp);
-        canvas.drawRGB(0, 255, 0);
-        return new BitmapDrawable(getResources(), bmp);
     }
 
     @Override
