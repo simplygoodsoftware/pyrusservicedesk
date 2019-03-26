@@ -39,7 +39,7 @@ internal fun Bitmap.circle(): Bitmap {
     return output
 }
 
-internal fun BitmapDrawable.circle(context: Context): Drawable {
+internal fun Drawable.circle(context: Context): Drawable {
     val out = Bitmap.createBitmap(intrinsicWidth, intrinsicHeight, Bitmap.Config.ARGB_8888)
     this.mutate().run {
         setBounds(0, 0, out.width, out.height)

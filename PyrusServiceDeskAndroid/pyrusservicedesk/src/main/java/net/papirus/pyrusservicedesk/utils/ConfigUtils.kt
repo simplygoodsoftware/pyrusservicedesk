@@ -5,6 +5,7 @@ import android.graphics.*
 import android.graphics.drawable.BitmapDrawable
 import android.graphics.drawable.Drawable
 import android.support.annotation.ColorInt
+import android.support.v4.content.ContextCompat
 import android.support.v7.content.res.AppCompatResources
 import com.example.pyrusservicedesk.R
 import net.papirus.pyrusservicedesk.PyrusServiceDesk
@@ -35,7 +36,15 @@ internal class ConfigUtils{
         fun getSupportAvatar(context: Context): Drawable {
             return when {
                 PyrusServiceDesk.getConfiguration().supportAvatar != null ->
-                    PyrusServiceDesk.getConfiguration().supportAvatar!!.circle(context)
+                    try {
+                        ContextCompat.getDrawable(context, PyrusServiceDesk.getConfiguration().supportAvatar!!)!!.circle(context)
+                    }
+                    catch (ex: Exception) {
+                        makeSupportAvatar(
+                            context,
+                            AppCompatResources.getDrawable(context, R.drawable.psd_support_avatar)!!
+                        )
+                    }
                 else -> makeSupportAvatar(context, AppCompatResources.getDrawable(context, R.drawable.psd_support_avatar)!!)
             }
         }

@@ -82,6 +82,10 @@ class PyrusServiceDesk private constructor(
             return CONFIGURATION!!
         }
 
+        internal fun forceConfiguration(config: ServiceDeskConfiguration) {
+            CONFIGURATION = config
+        }
+
         private fun startImpl(ticketId: Int? = null, activity: Activity, configuration: ServiceDeskConfiguration? = null) {
             CONFIGURATION = configuration
             activity.startActivity(createIntent(ticketId))

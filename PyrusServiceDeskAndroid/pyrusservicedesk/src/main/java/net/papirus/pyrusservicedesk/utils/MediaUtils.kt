@@ -24,5 +24,6 @@ internal enum class FileFormat (val extension: String){
     XLS(".xls"),
     XLSX(".xlsx"),
     RTF(".rtf"),
-    TXT(".txt")
+    TXT(".txt"),
+    TIF(".tif")
 }

@@ -11,6 +11,7 @@ import android.view.MenuItem.SHOW_AS_ACTION_ALWAYS
 import com.example.pyrusservicedesk.R
 import kotlinx.android.synthetic.main.psd_activity_ticket.*
 import net.papirus.pyrusservicedesk.PyrusServiceDesk
+import net.papirus.pyrusservicedesk.ServiceDeskConfiguration
 import net.papirus.pyrusservicedesk.presentation.ConnectionActivityBase
 import net.papirus.pyrusservicedesk.presentation.ui.navigation.UiNavigator
 import net.papirus.pyrusservicedesk.presentation.ui.view.NavigationCounterDrawable
@@ -69,6 +70,8 @@ internal class TicketActivity : ConnectionActivityBase<TicketViewModel>(TicketVi
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
+        savedInstanceState?.let { ServiceDeskConfiguration.restore(it) }
+
         val accentColor = ConfigUtils.getAccentColor(this)
 
         supportActionBar?.apply { title = ConfigUtils.getTitle(this@TicketActivity) }
@@ -90,6 +93,13 @@ internal class TicketActivity : ConnectionActivityBase<TicketViewModel>(TicketVi
         attach.setColorFilter(accentColor)
         input.highlightColor = accentColor
         input.setCursorColor(accentColor)
+    }
+
+    override fun onSaveInstanceState(outState: Bundle?) {
+        super.onSaveInstanceState(outState)
+        outState?.let {
+            ServiceDeskConfiguration.save(it)
+        }
     }
 
     override fun onCreateOptionsMenu(menu: Menu?): Boolean {
