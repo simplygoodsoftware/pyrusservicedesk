@@ -6,15 +6,15 @@ import android.os.Bundle;
 import android.widget.TextView;
 import net.papirus.pyrusservicedesk.PyrusServiceDesk;
 import net.papirus.pyrusservicedesk.ServiceDeskConfiguration;
-import net.papirus.pyrusservicedesk.sdk.updates.OnNewReplySubscriber;
+import net.papirus.pyrusservicedesk.sdk.updates.NewReplySubscriber;
 
-public class SampleActivity extends Activity implements OnNewReplySubscriber {
+public class SampleActivity extends Activity implements NewReplySubscriber {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_sample);
-        PyrusServiceDesk.subscribeOnNewReply(this);
+        PyrusServiceDesk.subscribeToReplies(this);
         findViewById(R.id.support).setOnClickListener(
                 view -> PyrusServiceDesk.start(
                         this,
@@ -31,7 +31,7 @@ public class SampleActivity extends Activity implements OnNewReplySubscriber {
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        PyrusServiceDesk.unsubscribeFromNewReply(this);
+        PyrusServiceDesk.unsubscribeFromReplies(this);
     }
 
     @Override

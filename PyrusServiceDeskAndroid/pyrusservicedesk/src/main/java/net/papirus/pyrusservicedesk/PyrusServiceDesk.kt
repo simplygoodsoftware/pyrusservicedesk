@@ -14,7 +14,7 @@ import net.papirus.pyrusservicedesk.sdk.RepositoryFactory
 import net.papirus.pyrusservicedesk.sdk.RequestFactory
 import net.papirus.pyrusservicedesk.sdk.data.LocalDataProvider
 import net.papirus.pyrusservicedesk.sdk.updates.LiveUpdates
-import net.papirus.pyrusservicedesk.sdk.updates.OnNewReplySubscriber
+import net.papirus.pyrusservicedesk.sdk.updates.NewReplySubscriber
 import net.papirus.pyrusservicedesk.sdk.web.retrofit.RetrofitWebRepository
 import java.util.concurrent.Executors
 
@@ -49,18 +49,27 @@ class PyrusServiceDesk private constructor(
          *
          * @param activity activity that is used for launching service desk ui
          * @param configuration instance of [ServiceDeskConfiguration].
-         *      If null is passed, default Configuration is used.
          */
         @JvmStatic
-        fun start(activity: Activity, configuration: ServiceDeskConfiguration? = null) {
+        fun start(activity: Activity, configuration: ServiceDeskConfiguration) {
             startImpl(activity = activity, configuration = configuration)
+        }
+
+        /**
+         * Launches UI of the PyrusServiceDesk with default configuration.
+         *
+         * @param activity activity that is used for launching service desk ui
+         */
+        @JvmStatic
+        fun start(activity: Activity) {
+            startImpl(activity = activity)
         }
 
         /**
          * Registers [subscriber] on updates of new reply from support
          */
         @JvmStatic
-        fun subscribeOnNewReply(subscriber: OnNewReplySubscriber){
+        fun subscribeToReplies(subscriber: NewReplySubscriber){
             getInstance().liveUpdates.subscribeOnReply(subscriber)
         }
 
@@ -68,7 +77,7 @@ class PyrusServiceDesk private constructor(
          * Unregisters [subscriber] from updates of new reply from support
          */
         @JvmStatic
-        fun unsubscribeFromNewReply(subscriber: OnNewReplySubscriber) {
+        fun unsubscribeFromReplies(subscriber: NewReplySubscriber) {
             getInstance().liveUpdates.unsubscribeFromReplies(subscriber)
         }
 

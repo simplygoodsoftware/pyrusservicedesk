@@ -17,7 +17,7 @@ internal class LiveUpdates(requests: RequestFactory) {
 
     // notified in UI thread
     private val dataSubscribers = mutableSetOf<LiveUpdateSubscriber>()
-    private val newReplySubscribers = mutableSetOf<OnNewReplySubscriber>()
+    private val newReplySubscribers = mutableSetOf<NewReplySubscriber>()
     private val ticketCountChangedSubscribers = mutableSetOf<OnUnreadTicketCountChangedSubscriber>()
 
     private var recentUnreadCounter = 0
@@ -60,11 +60,11 @@ internal class LiveUpdates(requests: RequestFactory) {
         mainHandler.post(ticketsUpdateRunnable)
     }
 
-    fun subscribeOnReply(subscriber: OnNewReplySubscriber) {
+    fun subscribeOnReply(subscriber: NewReplySubscriber) {
         newReplySubscribers.add(subscriber)
     }
 
-    fun unsubscribeFromReplies(subscriber: OnNewReplySubscriber) {
+    fun unsubscribeFromReplies(subscriber: NewReplySubscriber) {
         newReplySubscribers.remove(subscriber)
     }
 
