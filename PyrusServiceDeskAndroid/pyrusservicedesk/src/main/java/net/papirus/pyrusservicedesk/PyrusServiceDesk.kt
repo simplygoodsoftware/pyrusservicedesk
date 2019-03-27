@@ -82,6 +82,10 @@ class PyrusServiceDesk private constructor(
             getInstance().liveUpdates.unsubscribeFromReplies(subscriber)
         }
 
+        /**
+         * Assigns custom file chooser, that is appended as variant when the user is offered to choose the source
+         * to attach a file to comment from.
+         */
         @JvmStatic
         fun registerFileChooser(fileChooser: FileChooser) {
             FILE_CHOOSER = fileChooser
