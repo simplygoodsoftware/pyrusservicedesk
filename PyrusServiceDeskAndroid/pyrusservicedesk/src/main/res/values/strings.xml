@@ -31,4 +31,5 @@
     <string name="psd_minutes_ago" formatted="false">%d m ago</string>
     <string name="psd_recent">recent</string>
     <string name="psd_guest">Guest</string>
+    <string name="psd_file_size_exceeded_message" formatted="false">File size should not exceed %d MB.</string>
 </resources>

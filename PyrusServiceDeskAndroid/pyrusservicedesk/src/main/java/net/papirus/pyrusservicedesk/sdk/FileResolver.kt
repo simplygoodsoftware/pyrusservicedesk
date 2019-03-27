@@ -18,7 +18,7 @@ internal class FileResolver(private val contentResolver: ContentResolver) {
             null,
             null,
             null)
-        if (!cursor.moveToFirst())
+        if (cursor == null || !cursor.moveToFirst())
             return null
         return FileUploadRequestData(
             cursor.getString(cursor.getColumnIndex(OpenableColumns.DISPLAY_NAME)),
@@ -37,7 +37,7 @@ internal class FileResolver(private val contentResolver: ContentResolver) {
             null,
             null,
             null)
-        if (!cursor.moveToFirst())
+        if (cursor == null || !cursor.moveToFirst())
             return null
         var size = cursor.getInt(cursor.getColumnIndex(OpenableColumns.SIZE))
         if (size == 0) {

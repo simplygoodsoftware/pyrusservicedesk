@@ -2,19 +2,25 @@ package net.papirus.pyrusservicedesk.presentation.ui.navigation_page.ticket
 
 import android.arch.lifecycle.*
 import android.arch.lifecycle.Observer
+import android.content.Context
 import android.content.Intent
 import android.net.Uri
 import android.os.CancellationSignal
 import android.os.Handler
 import android.os.Looper
 import android.support.v7.util.DiffUtil
+import android.widget.Toast
+import com.example.pyrusservicedesk.R
 import net.papirus.pyrusservicedesk.PyrusServiceDesk
 import net.papirus.pyrusservicedesk.presentation.ui.navigation_page.ticket.entries.*
 import net.papirus.pyrusservicedesk.presentation.ui.view.recyclerview.DiffResultWithNewItems
 import net.papirus.pyrusservicedesk.presentation.usecase.*
 import net.papirus.pyrusservicedesk.presentation.viewmodel.ConnectionViewModelBase
+import net.papirus.pyrusservicedesk.sdk.data.Attachment
 import net.papirus.pyrusservicedesk.sdk.data.Comment
 import net.papirus.pyrusservicedesk.sdk.data.EMPTY_TICKET_ID
+import net.papirus.pyrusservicedesk.sdk.request.MAX_FILE_SIZE_BYTES
+import net.papirus.pyrusservicedesk.sdk.request.MAX_FILE_SIZE_MEGABYTES
 import net.papirus.pyrusservicedesk.sdk.updates.OnUnreadTicketCountChangedSubscriber
 import net.papirus.pyrusservicedesk.sdk.web.UploadFileHooks
 import net.papirus.pyrusservicedesk.utils.ConfigUtils
@@ -31,6 +37,24 @@ internal class TicketViewModel(
     : ConnectionViewModelBase(serviceDesk),
         OnClickedCallback<CommentEntry>,
         OnUnreadTicketCountChangedSubscriber {
+
+    private companion object {
+
+        fun checkComment(comment: Comment): CheckCommentError? {
+            return when{
+                comment.isEmpty() -> CheckCommentError.CommentIsEmpty
+                comment.hasAttachmentWithExceededSize() -> CheckCommentError.FileSizeExceeded
+                else -> null
+            }
+        }
+
+        fun Comment.isEmpty(): Boolean = body.isBlank() && attachments.isNullOrEmpty()
+
+        private fun Comment.hasAttachmentWithExceededSize(): Boolean =
+            attachments?.let { it.any { attach -> attach.hasExceededFileSize()} } ?: false
+
+        private fun Attachment.hasExceededFileSize(): Boolean = bytesSize > MAX_FILE_SIZE_BYTES
+    }
 
     val isFeed = serviceDesk.isSingleChat
 
@@ -167,10 +191,27 @@ internal class TicketViewModel(
     private fun sendAddComment(localComment: Comment,
                                uploadFileHooks: UploadFileHooks? = null) {
 
+        when (checkComment(localComment)) {
+            CheckCommentError.CommentIsEmpty -> return
+            CheckCommentError.FileSizeExceeded -> {
+                (getApplication() as Context).run {
+                    Toast.makeText(
+                        this,
+                        this.getString(R.string.psd_file_size_exceeded_message, MAX_FILE_SIZE_MEGABYTES),
+                        Toast.LENGTH_SHORT)
+                        .show()
+                }
+                return
+            }
+        }
+
         val toNewTicket = !isFeed && isNewTicket() && !isCreateTicketSent
 
-        applyUpdate(CommentEntry(localComment, uploadFileHooks = uploadFileHooks, onClickedCallback = this), ChangeType.Added)
-        val call = when{
+        applyUpdate(
+            CommentEntry(localComment, uploadFileHooks = uploadFileHooks, onClickedCallback = this),
+            ChangeType.Added
+        )
+        val call = when {
             toNewTicket -> {
                 isCreateTicketSent = true
                 CreateTicketUseCase(this, requests, localComment, uploadFileHooks).execute()
@@ -191,7 +232,7 @@ internal class TicketViewModel(
                             this@TicketViewModel,
                             error = result.error
                         )
-                        else ->{
+                        else -> {
                             if (toNewTicket) {
                                 ticketId = result.data!!
                                 maybeStartAutoRefresh()
@@ -335,4 +376,9 @@ private enum class ChangeType {
     Added,
     Changed,
     Cancelled
+}
+
+private enum class CheckCommentError {
+    CommentIsEmpty,
+    FileSizeExceeded
 }

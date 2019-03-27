@@ -5,7 +5,7 @@ import android.graphics.Color
 import android.support.annotation.ColorInt
 import android.support.v4.graphics.ColorUtils
 
-internal const val CHANNEL_MAX_VALUE = 255
+internal const val COLOR_CHANNEL_MAX_VALUE = 255
 
 @ColorInt
 internal fun adjustColor(@ColorInt color: Int, channel: ColorChannel, multiplier: Float): Int {
