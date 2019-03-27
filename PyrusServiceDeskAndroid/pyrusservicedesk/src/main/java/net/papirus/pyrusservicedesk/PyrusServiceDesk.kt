@@ -5,7 +5,6 @@ import android.app.Application
 import android.arch.lifecycle.Observer
 import android.content.Context
 import android.content.Intent
-import com.google.android.gms.iid.InstanceID
 import kotlinx.coroutines.asCoroutineDispatcher
 import net.papirus.pyrusservicedesk.presentation.ui.navigation_page.ticket.TicketActivity
 import net.papirus.pyrusservicedesk.presentation.ui.navigation_page.tickets.TicketsActivity
@@ -17,15 +16,13 @@ import net.papirus.pyrusservicedesk.sdk.data.LocalDataProvider
 import net.papirus.pyrusservicedesk.sdk.repositories.draft.DraftRepository
 import net.papirus.pyrusservicedesk.sdk.updates.LiveUpdates
 import net.papirus.pyrusservicedesk.sdk.updates.NewReplySubscriber
+import net.papirus.pyrusservicedesk.utils.ConfigUtils
 import java.util.concurrent.Executors
 
 class PyrusServiceDesk private constructor(
         internal val application: Application,
         internal val appId: String,
         internal val isSingleChat: Boolean){
-
-    @Suppress("DEPRECATION")
-    internal var userId: String = InstanceID.getInstance(application).id
 
     companion object {
         internal val DISPATCHER_IO_SINGLE = Executors.newSingleThreadExecutor().asCoroutineDispatcher()
@@ -131,6 +128,8 @@ class PyrusServiceDesk private constructor(
 
     private val fileResolver: FileResolver = FileResolver(application.contentResolver)
     private val preferences = application.getSharedPreferences(PREFERENCE_KEY, Context.MODE_PRIVATE)
+
+    internal var userId: String = ConfigUtils.getUserId(preferences)
 
     init {
         val repositoryFactory = RepositoryFactory(fileResolver, preferences)
