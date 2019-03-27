@@ -3,6 +3,7 @@ package net.papirus.pyrusservicedesk
 import android.app.Activity
 import android.app.Application
 import android.arch.lifecycle.Observer
+import android.content.Context
 import android.content.Intent
 import com.google.android.gms.iid.InstanceID
 import kotlinx.coroutines.asCoroutineDispatcher
@@ -13,9 +14,9 @@ import net.papirus.pyrusservicedesk.sdk.FileResolver
 import net.papirus.pyrusservicedesk.sdk.RepositoryFactory
 import net.papirus.pyrusservicedesk.sdk.RequestFactory
 import net.papirus.pyrusservicedesk.sdk.data.LocalDataProvider
+import net.papirus.pyrusservicedesk.sdk.repositories.draft.DraftRepository
 import net.papirus.pyrusservicedesk.sdk.updates.LiveUpdates
 import net.papirus.pyrusservicedesk.sdk.updates.NewReplySubscriber
-import net.papirus.pyrusservicedesk.sdk.web.retrofit.RetrofitWebRepository
 import java.util.concurrent.Executors
 
 class PyrusServiceDesk private constructor(
@@ -29,6 +30,7 @@ class PyrusServiceDesk private constructor(
     companion object {
         internal val DISPATCHER_IO_SINGLE = Executors.newSingleThreadExecutor().asCoroutineDispatcher()
         internal var FILE_CHOOSER: FileChooser? = null
+        private var PREFERENCE_KEY = "net.papirus.pyrusservicedesk.PREFERENCES"
         private var INSTANCE: PyrusServiceDesk? = null
         private var CONFIGURATION: ServiceDeskConfiguration? = null
 
@@ -120,6 +122,7 @@ class PyrusServiceDesk private constructor(
     }
 
     internal val requestFactory: RequestFactory
+    internal val draftRepository: DraftRepository
     internal val liveUpdates: LiveUpdates
 
     internal val localDataProvider: LocalDataProvider by lazy {
@@ -127,17 +130,12 @@ class PyrusServiceDesk private constructor(
     }
 
     private val fileResolver: FileResolver = FileResolver(application.contentResolver)
+    private val preferences = application.getSharedPreferences(PREFERENCE_KEY, Context.MODE_PRIVATE)
 
     init {
-        requestFactory = RequestFactory(
-            RepositoryFactory.create(
-                RetrofitWebRepository(
-                    appId,
-                    userId,
-                    fileResolver
-                )
-            )
-        )
+        val repositoryFactory = RepositoryFactory(fileResolver, preferences)
+        requestFactory = RequestFactory(repositoryFactory.createCentralRepository(appId, userId))
+        draftRepository = repositoryFactory.createDraftRepository()
         liveUpdates = LiveUpdates(requestFactory)
     }
 

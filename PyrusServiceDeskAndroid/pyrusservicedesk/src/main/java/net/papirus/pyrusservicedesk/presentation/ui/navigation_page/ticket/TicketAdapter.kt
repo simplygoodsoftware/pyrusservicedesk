@@ -18,7 +18,7 @@ import net.papirus.pyrusservicedesk.presentation.ui.view.Status
 import net.papirus.pyrusservicedesk.presentation.ui.view.recyclerview.AdapterBase
 import net.papirus.pyrusservicedesk.presentation.ui.view.recyclerview.ViewHolderBase
 import net.papirus.pyrusservicedesk.sdk.data.Attachment
-import net.papirus.pyrusservicedesk.sdk.getAvatarUrl
+import net.papirus.pyrusservicedesk.sdk.repositories.general.getAvatarUrl
 import net.papirus.pyrusservicedesk.utils.CIRCLE_TRANSFORMATION
 import net.papirus.pyrusservicedesk.utils.ConfigUtils
 import net.papirus.pyrusservicedesk.utils.canBePreviewed

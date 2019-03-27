@@ -82,7 +82,6 @@
                 android:layout_marginEnd="@dimen/psd_offset_small"
                 android:layout_marginRight="@dimen/psd_offset_small"
                 android:layout_marginBottom="@dimen/psd_offset_small"
-                android:background="?attr/selectableItemBackground"
                 android:text="@string/psd_send"
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintEnd_toEndOf="parent"

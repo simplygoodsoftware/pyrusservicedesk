@@ -57,6 +57,9 @@ internal class TicketViewModel(
     }
 
     val isFeed = serviceDesk.isSingleChat
+    val draft: String
+
+    private val draftRepository = serviceDesk.draftRepository
 
     private var isCreateTicketSent = false
     private var ticketId: Int = TicketActivity.getTicketId(arguments)
@@ -77,6 +80,7 @@ internal class TicketViewModel(
     }
 
     init {
+        draft = draftRepository.getDraft()
         entries.apply{
             if (!isFeed) {
                 addSource(
@@ -160,6 +164,10 @@ internal class TicketViewModel(
     fun getCommentDiffLiveData(): LiveData<DiffResultWithNewItems<TicketEntry>> = commentDiff
 
     fun getUnreadCounterLiveData(): LiveData<Int> = unreadCounter
+
+    fun onInputTextChanged(text: String) {
+        draftRepository.saveDraft(text)
+    }
 
     private fun maybeStartAutoRefresh() {
         if (isFeed || !isNewTicket()) {

@@ -2,8 +2,11 @@ package net.papirus.pyrusservicedesk.presentation.ui.navigation_page.ticket
 
 import android.arch.lifecycle.Observer
 import android.content.Intent
+import android.content.res.ColorStateList
 import android.net.Uri
 import android.os.Bundle
+import android.text.Editable
+import android.text.TextWatcher
 import android.view.Menu
 import android.view.MenuInflater
 import android.view.MenuItem
@@ -19,7 +22,7 @@ import net.papirus.pyrusservicedesk.presentation.ui.view.recyclerview.item_decor
 import net.papirus.pyrusservicedesk.sdk.data.Attachment
 import net.papirus.pyrusservicedesk.sdk.data.EMPTY_TICKET_ID
 import net.papirus.pyrusservicedesk.sdk.data.intermediate.FileData
-import net.papirus.pyrusservicedesk.sdk.getFileUrl
+import net.papirus.pyrusservicedesk.sdk.repositories.general.getFileUrl
 import net.papirus.pyrusservicedesk.utils.ConfigUtils
 import net.papirus.pyrusservicedesk.utils.getViewModel
 import net.papirus.pyrusservicedesk.utils.isAtEnd
@@ -61,9 +64,22 @@ internal class TicketActivity : ConnectionActivityBase<TicketViewModel>(TicketVi
         )
     }
 
-    private var adapter = TicketAdapter().apply {
+    private val adapter = TicketAdapter().apply {
         setOnDownloadedFileClickListener {
            UiNavigator.toFilePreview(this@TicketActivity, it.toFileData())
+        }
+    }
+
+    private val inputTextWatcher = object : TextWatcher {
+        override fun afterTextChanged(s: Editable?) {
+        }
+
+        override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {
+        }
+
+        override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
+            send.isEnabled = !s.isNullOrBlank()
+            viewModel.onInputTextChanged(s.toString())
         }
     }
 
@@ -88,11 +104,26 @@ internal class TicketActivity : ConnectionActivityBase<TicketViewModel>(TicketVi
             this@TicketActivity.adapter.itemTouchHelper?.attachToRecyclerView(this)
         }
         send.setOnClickListener { sendComment() }
-        send.setTextColor(accentColor)
+        val stateList = ColorStateList(
+            arrayOf(
+                intArrayOf(android.R.attr.state_enabled),
+                intArrayOf(-android.R.attr.state_enabled)
+            ),
+            intArrayOf(
+                accentColor,
+                net.papirus.pyrusservicedesk.utils.getColor(this, android.R.attr.textColorSecondary)
+            )
+
+        )
+        send.setTextColor(stateList)
         attach.setOnClickListener { showAttachFileVariants() }
         attach.setColorFilter(accentColor)
+        if(savedInstanceState == null)
+            input.setText(viewModel.draft)
         input.highlightColor = accentColor
         input.setCursorColor(accentColor)
+        input.addTextChangedListener(inputTextWatcher)
+        send.isEnabled = !input.text.isNullOrBlank()
     }
 
     override fun onSaveInstanceState(outState: Bundle?) {

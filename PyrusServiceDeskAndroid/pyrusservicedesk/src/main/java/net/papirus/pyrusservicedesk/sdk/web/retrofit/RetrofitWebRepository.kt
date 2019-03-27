@@ -5,13 +5,13 @@ import com.google.gson.GsonBuilder
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import net.papirus.pyrusservicedesk.PyrusServiceDesk
-import net.papirus.pyrusservicedesk.sdk.BASE_URL
 import net.papirus.pyrusservicedesk.sdk.FileResolver
-import net.papirus.pyrusservicedesk.sdk.Repository
 import net.papirus.pyrusservicedesk.sdk.data.Attachment
 import net.papirus.pyrusservicedesk.sdk.data.Comment
 import net.papirus.pyrusservicedesk.sdk.data.EMPTY_TICKET_ID
 import net.papirus.pyrusservicedesk.sdk.data.TicketDescription
+import net.papirus.pyrusservicedesk.sdk.repositories.general.BASE_URL
+import net.papirus.pyrusservicedesk.sdk.repositories.general.GeneralRepository
 import net.papirus.pyrusservicedesk.sdk.request.UploadFileRequest
 import net.papirus.pyrusservicedesk.sdk.response.*
 import net.papirus.pyrusservicedesk.sdk.web.UploadFileHooks
@@ -32,7 +32,7 @@ internal class RetrofitWebRepository(
         private val appId: String,
         private val userId: String,
         private val fileResolver: FileResolver)
-    : Repository {
+    : GeneralRepository {
 
     private val api: ServiceDeskApi
 

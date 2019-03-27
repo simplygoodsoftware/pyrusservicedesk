@@ -1,4 +1,4 @@
-package net.papirus.pyrusservicedesk.sdk
+package net.papirus.pyrusservicedesk.sdk.repositories.general
 
 import net.papirus.pyrusservicedesk.PyrusServiceDesk
 import net.papirus.pyrusservicedesk.sdk.data.Comment
@@ -9,7 +9,7 @@ import java.net.URLEncoder
 
 internal const val BASE_URL = "https://pyrus.com/servicedeskapi/v1/"
 
-internal interface Repository{
+internal interface GeneralRepository{
     suspend fun getFeed(): GetFeedResponse
     suspend fun getTickets(): GetTicketsResponse
     suspend fun getTicket(ticketId: Int): GetTicketResponse

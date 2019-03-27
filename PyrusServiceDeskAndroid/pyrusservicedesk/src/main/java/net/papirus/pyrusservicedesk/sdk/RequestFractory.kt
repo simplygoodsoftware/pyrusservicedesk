@@ -4,10 +4,11 @@ import net.papirus.pyrusservicedesk.sdk.data.Comment
 import net.papirus.pyrusservicedesk.sdk.data.Ticket
 import net.papirus.pyrusservicedesk.sdk.data.TicketDescription
 import net.papirus.pyrusservicedesk.sdk.data.TicketShortDescription
+import net.papirus.pyrusservicedesk.sdk.repositories.general.GeneralRepository
 import net.papirus.pyrusservicedesk.sdk.request.*
 import net.papirus.pyrusservicedesk.sdk.web.UploadFileHooks
 
-internal class RequestFactory(private val repository: Repository) {
+internal class RequestFactory(private val repository: GeneralRepository) {
 
     fun getFeedRequest(): RequestBase<List<Comment>> = GetFeedRequest(repository)
     fun getTicketsRequest(): RequestBase<List<TicketShortDescription>> = GetTicketsRequest(repository)
