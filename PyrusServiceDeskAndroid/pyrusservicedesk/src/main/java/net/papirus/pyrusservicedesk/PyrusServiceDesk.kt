@@ -5,7 +5,9 @@ import android.app.Application
 import android.arch.lifecycle.Observer
 import android.content.Context
 import android.content.Intent
+import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.asCoroutineDispatcher
+import kotlinx.coroutines.launch
 import net.papirus.pyrusservicedesk.presentation.ui.navigation_page.ticket.TicketActivity
 import net.papirus.pyrusservicedesk.presentation.ui.navigation_page.tickets.TicketsActivity
 import net.papirus.pyrusservicedesk.presentation.viewmodel.QuitViewModel
@@ -14,6 +16,8 @@ import net.papirus.pyrusservicedesk.sdk.RepositoryFactory
 import net.papirus.pyrusservicedesk.sdk.RequestFactory
 import net.papirus.pyrusservicedesk.sdk.data.LocalDataProvider
 import net.papirus.pyrusservicedesk.sdk.repositories.draft.DraftRepository
+import net.papirus.pyrusservicedesk.sdk.response.ResponseCallback
+import net.papirus.pyrusservicedesk.sdk.response.ResponseError
 import net.papirus.pyrusservicedesk.sdk.updates.LiveUpdates
 import net.papirus.pyrusservicedesk.sdk.updates.NewReplySubscriber
 import net.papirus.pyrusservicedesk.utils.ConfigUtils
@@ -88,6 +92,37 @@ class PyrusServiceDesk private constructor(
         @JvmStatic
         fun registerFileChooser(fileChooser: FileChooser) {
             FILE_CHOOSER = fileChooser
+        }
+
+        /**
+         * Launches request for for registering push token. Callback is invoked without error when
+         * token is successfully registered.
+         * Callback can be invoked in a thread that differs from the one that has invoked [setPushToken]
+         */
+        @JvmStatic
+        fun setPushToken(token: String, callback: SetPushTokenCallback) {
+            val serviceDesk = getInstance()
+            when{
+                token.isBlank() -> callback.onResult(Exception("Token is empty"))
+                serviceDesk.appId.isBlank() -> callback.onResult(Exception("AppId is not assigned"))
+                serviceDesk.userId.isBlank() -> callback.onResult(Exception("UserId is not assigned"))
+                else -> {
+                    GlobalScope.launch {
+                        var exception: Exception? = null
+                        serviceDesk
+                            .requestFactory
+                            .getSetPushTokenRequest(serviceDesk.appId)
+                            .execute(object: ResponseCallback<Unit>{
+                                override fun onSuccess(data: Unit) {
+                                }
+                                override fun onFailure(responseError: ResponseError) {
+                                    exception = responseError
+                                }
+                            })
+                        callback.onResult(exception)
+                    }
+                }
+            }
         }
 
         internal fun getInstance() : PyrusServiceDesk {

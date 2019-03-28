@@ -7,6 +7,7 @@ import net.papirus.pyrusservicedesk.sdk.data.intermediate.Tickets
 import net.papirus.pyrusservicedesk.sdk.web.request_body.AddCommentRequestBody
 import net.papirus.pyrusservicedesk.sdk.web.request_body.CreateTicketRequestBody
 import net.papirus.pyrusservicedesk.sdk.web.request_body.RequestBodyBase
+import net.papirus.pyrusservicedesk.sdk.web.request_body.SetPushTokenBody
 import okhttp3.MultipartBody
 import okhttp3.ResponseBody
 import retrofit2.Call
@@ -40,4 +41,7 @@ internal interface ServiceDeskApi {
     @Multipart
     @POST("UploadFile")
     fun uploadFile(@Part file: MultipartBody.Part): Call<FileUploadResponseData>
+
+    @POST("SetPushToken")
+    fun setPushToken(@Body setPushTokenBody: SetPushTokenBody): Call<ResponseBody>
 }

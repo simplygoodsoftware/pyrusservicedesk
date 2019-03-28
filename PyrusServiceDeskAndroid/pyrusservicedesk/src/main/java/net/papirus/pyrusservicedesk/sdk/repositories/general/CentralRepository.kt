@@ -2,7 +2,6 @@ package net.papirus.pyrusservicedesk.sdk.repositories.general
 
 import net.papirus.pyrusservicedesk.sdk.data.Comment
 import net.papirus.pyrusservicedesk.sdk.data.TicketDescription
-import net.papirus.pyrusservicedesk.sdk.repositories.general.GeneralRepository
 import net.papirus.pyrusservicedesk.sdk.response.*
 import net.papirus.pyrusservicedesk.sdk.web.UploadFileHooks
 
@@ -32,4 +31,6 @@ internal class CentralRepository(private val webRepository: GeneralRepository) :
 
         return webRepository.createTicket(description, uploadFileHooks)
     }
+
+    override suspend fun setPushToken(token: String): SetPushTokenResponse = webRepository.setPushToken(token)
 }

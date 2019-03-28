@@ -16,6 +16,7 @@ internal interface GeneralRepository{
     suspend fun addComment(ticketId: Int, comment: Comment, uploadFileHooks: UploadFileHooks? = null): AddCommentResponse
     suspend fun addFeedComment(comment: Comment, uploadFileHooks: UploadFileHooks? = null): AddCommentResponse
     suspend fun createTicket(description: TicketDescription, uploadFileHooks: UploadFileHooks? = null): CreateTicketResponse
+    suspend fun setPushToken(token: String): SetPushTokenResponse
 }
 
 internal fun getAvatarUrl(avatarId: Int): String = "$BASE_URL/Avatar/$avatarId"
