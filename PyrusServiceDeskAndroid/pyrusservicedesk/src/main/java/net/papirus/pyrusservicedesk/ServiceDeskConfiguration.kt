@@ -56,34 +56,70 @@ class ServiceDeskConfiguration internal constructor() {
         }
     }
 
+    /**
+     * Builder for composing custom [ServiceDeskConfiguration] instance.
+     */
     class Builder {
         private var configuration = ServiceDeskConfiguration()
 
+        /**
+         * Assigns the title text of the comment feed.
+         * "Support" is used by default
+         *
+         * @param title text to be shown
+         */
         fun setChatTitle(title: String): Builder {
             configuration.title = title
             return this
         }
 
+        /**
+         * Assigns the text of the message that is used as first message of the comment feed.
+         * If not assigned, welcome message will be omitted.
+         *
+         * @param message text of the welcome message
+         */
         fun setWelcomeMessage(message: String): Builder {
             configuration.welcomeMessage = message
             return this
         }
 
+        /**
+         * Assigns the accent color of the service desk module.
+         * Default value is #008C8C
+         *
+         * @param color int representation of the color to be applied.
+         */
         fun setThemeColor(@ColorInt color: Int): Builder {
             configuration.themeColor = color
             return this
         }
 
+        /**
+         * Assigns the drawable resource id that is used as placeholder for the avatar of the supporting person.
+         * By default chat bubble on the accent color background is drawn.
+         *
+         * @param id of the drawable resource
+         */
         fun setAvatarForSupport(@DrawableRes iconResId: Int): Builder {
             configuration.supportAvatar = iconResId
             return this
         }
 
+        /**
+         * Assigns the name of the user who appeals to support.
+         * "Guest" is used by default.
+         *
+         * @param userName name of the user to be applied
+         */
         fun setUserName(userName: String): Builder {
             configuration.userName = userName
             return this
         }
 
+        /**
+         * Composes [ServiceDeskConfiguration] instance.
+         */
         fun build() = configuration
     }
 }
