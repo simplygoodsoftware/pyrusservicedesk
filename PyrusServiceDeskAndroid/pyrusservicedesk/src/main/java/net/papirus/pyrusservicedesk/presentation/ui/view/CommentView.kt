@@ -7,8 +7,10 @@ import android.graphics.drawable.AnimationDrawable
 import android.graphics.drawable.LayerDrawable
 import android.support.annotation.ColorInt
 import android.support.v4.content.ContextCompat
+import android.support.v4.text.util.LinkifyCompat
 import android.support.v7.content.res.AppCompatResources
 import android.support.v7.widget.AppCompatImageView
+import android.text.util.Linkify
 import android.util.AttributeSet
 import android.view.Gravity
 import android.view.View
@@ -175,6 +177,7 @@ internal class CommentView @JvmOverloads constructor(
 
     fun setCommentText(text: String) {
         comment_text.text = text
+        LinkifyCompat.addLinks(comment_text, Linkify.WEB_URLS)
     }
 
     fun setFileName(fileName: String) {

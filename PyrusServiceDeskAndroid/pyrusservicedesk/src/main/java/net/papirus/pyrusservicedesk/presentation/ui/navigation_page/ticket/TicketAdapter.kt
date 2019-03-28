@@ -156,7 +156,7 @@ internal class TicketAdapter: AdapterBase<TicketEntry>() {
             comment.contentType =
                     if (item.comment.hasAttachments()) ContentType.Attachment else ContentType.Text
             when (comment.contentType){
-                ContentType.Text -> comment.setCommentText(getItem().comment.body)
+                ContentType.Text -> bindTextView()
                 ContentType.Attachment -> bindAttachmentView()
             }
             creationTime.text = getItem().comment.creationDate.getTimeText(itemView.context)
@@ -165,6 +165,10 @@ internal class TicketAdapter: AdapterBase<TicketEntry>() {
         override fun onDetachedFromWindow() {
             super.onDetachedFromWindow()
             getItem().uploadFileHooks?.unsubscribeFromProgress()
+        }
+
+        private fun bindTextView() {
+            comment.setCommentText(getItem().comment.body)
         }
 
         private fun bindAttachmentView() {
