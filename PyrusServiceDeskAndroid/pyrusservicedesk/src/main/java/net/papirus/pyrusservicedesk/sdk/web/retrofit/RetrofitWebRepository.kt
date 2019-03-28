@@ -10,7 +10,6 @@ import net.papirus.pyrusservicedesk.sdk.data.Attachment
 import net.papirus.pyrusservicedesk.sdk.data.Comment
 import net.papirus.pyrusservicedesk.sdk.data.EMPTY_TICKET_ID
 import net.papirus.pyrusservicedesk.sdk.data.TicketDescription
-import net.papirus.pyrusservicedesk.sdk.repositories.general.BASE_URL
 import net.papirus.pyrusservicedesk.sdk.repositories.general.GeneralRepository
 import net.papirus.pyrusservicedesk.sdk.request.UploadFileRequest
 import net.papirus.pyrusservicedesk.sdk.response.*
@@ -18,6 +17,7 @@ import net.papirus.pyrusservicedesk.sdk.web.UploadFileHooks
 import net.papirus.pyrusservicedesk.sdk.web.request_body.*
 import net.papirus.pyrusservicedesk.utils.ConfigUtils
 import net.papirus.pyrusservicedesk.utils.ISO_DATE_PATTERN
+import net.papirus.pyrusservicedesk.utils.RequestUtils.Companion.BASE_URL
 import okhttp3.OkHttpClient
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory

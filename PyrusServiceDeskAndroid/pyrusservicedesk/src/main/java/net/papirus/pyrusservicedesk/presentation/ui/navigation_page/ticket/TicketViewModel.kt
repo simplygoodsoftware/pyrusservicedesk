@@ -19,12 +19,12 @@ import net.papirus.pyrusservicedesk.presentation.viewmodel.ConnectionViewModelBa
 import net.papirus.pyrusservicedesk.sdk.data.Attachment
 import net.papirus.pyrusservicedesk.sdk.data.Comment
 import net.papirus.pyrusservicedesk.sdk.data.EMPTY_TICKET_ID
-import net.papirus.pyrusservicedesk.sdk.request.MAX_FILE_SIZE_BYTES
-import net.papirus.pyrusservicedesk.sdk.request.MAX_FILE_SIZE_MEGABYTES
 import net.papirus.pyrusservicedesk.sdk.updates.OnUnreadTicketCountChangedSubscriber
 import net.papirus.pyrusservicedesk.sdk.web.UploadFileHooks
 import net.papirus.pyrusservicedesk.utils.ConfigUtils
 import net.papirus.pyrusservicedesk.utils.MILLISECONDS_IN_SECOND
+import net.papirus.pyrusservicedesk.utils.RequestUtils.Companion.MAX_FILE_SIZE_BYTES
+import net.papirus.pyrusservicedesk.utils.RequestUtils.Companion.MAX_FILE_SIZE_MEGABYTES
 import net.papirus.pyrusservicedesk.utils.getWhen
 import java.util.*
 import kotlin.collections.ArrayList
@@ -205,7 +205,9 @@ internal class TicketViewModel(
                 (getApplication() as Context).run {
                     Toast.makeText(
                         this,
-                        this.getString(R.string.psd_file_size_exceeded_message, MAX_FILE_SIZE_MEGABYTES),
+                        this.getString(R.string.psd_file_size_exceeded_message,
+                            MAX_FILE_SIZE_MEGABYTES
+                        ),
                         Toast.LENGTH_SHORT)
                         .show()
                 }
