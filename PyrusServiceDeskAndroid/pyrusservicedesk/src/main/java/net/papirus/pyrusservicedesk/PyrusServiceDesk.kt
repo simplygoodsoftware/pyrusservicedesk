@@ -5,7 +5,9 @@ import android.app.Application
 import android.arch.lifecycle.Observer
 import android.content.Context
 import android.content.Intent
+import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.asCoroutineDispatcher
+import kotlinx.coroutines.launch
 import net.papirus.pyrusservicedesk.presentation.ui.navigation_page.ticket.TicketActivity
 import net.papirus.pyrusservicedesk.presentation.ui.navigation_page.tickets.TicketsActivity
 import net.papirus.pyrusservicedesk.presentation.viewmodel.QuitViewModel
@@ -14,6 +16,8 @@ import net.papirus.pyrusservicedesk.sdk.RepositoryFactory
 import net.papirus.pyrusservicedesk.sdk.RequestFactory
 import net.papirus.pyrusservicedesk.sdk.data.LocalDataProvider
 import net.papirus.pyrusservicedesk.sdk.repositories.draft.DraftRepository
+import net.papirus.pyrusservicedesk.sdk.response.ResponseCallback
+import net.papirus.pyrusservicedesk.sdk.response.ResponseError
 import net.papirus.pyrusservicedesk.sdk.updates.LiveUpdates
 import net.papirus.pyrusservicedesk.sdk.updates.NewReplySubscriber
 import net.papirus.pyrusservicedesk.utils.ConfigUtils
@@ -34,7 +38,8 @@ class PyrusServiceDesk private constructor(
         /**
          * Initializes PyrusServiceDesk embeddable module.
          * The best approach is to call this in [Application.onCreate]
-         * ***PS***: Should be done before [start] is called. Unhandled IllegalStateException is thrown otherwise.
+         * ***PS***: Should be done before other public methods are is called.
+         * Unhandled IllegalStateException is thrown otherwise.
          *
          * @param application instance of the enclosing application
          * @param appId id of a client
@@ -45,20 +50,9 @@ class PyrusServiceDesk private constructor(
         }
 
         /**
-         * Launches UI of the PyrusServiceDesk.
-         *
-         * @param activity activity that is used for launching service desk ui
-         * @param configuration instance of [ServiceDeskConfiguration].
-         */
-        @JvmStatic
-        fun start(activity: Activity, configuration: ServiceDeskConfiguration) {
-            startImpl(activity = activity, configuration = configuration)
-        }
-
-        /**
          * Launches UI of the PyrusServiceDesk with default configuration.
          *
-         * @param activity activity that is used for launching service desk ui
+         * @param activity activity that is used for launching service desk UI
          */
         @JvmStatic
         fun start(activity: Activity) {
@@ -66,7 +60,18 @@ class PyrusServiceDesk private constructor(
         }
 
         /**
-         * Registers [subscriber] on updates of new reply from support
+         * Launches UI of the PyrusServiceDesk.
+         *
+         * @param activity activity that is used for launching service desk UI
+         * @param configuration instance of [ServiceDeskConfiguration]. This is used for customizing UI
+         */
+        @JvmStatic
+        fun start(activity: Activity, configuration: ServiceDeskConfiguration) {
+            startImpl(activity = activity, configuration = configuration)
+        }
+
+        /**
+         * Registers [subscriber] that will be notified when new replies from support are received
          */
         @JvmStatic
         fun subscribeToReplies(subscriber: NewReplySubscriber){
@@ -84,10 +89,48 @@ class PyrusServiceDesk private constructor(
         /**
          * Assigns custom file chooser, that is appended as variant when the user is offered to choose the source
          * to attach a file to comment from.
+         * Files which size exceed [RequestUtils.MAX_FILE_SIZE_MEGABYTES] MB will be ignored.
+         *
+         * @param fileChooser FileChooser instance that is used for launching custom UI for picking files.
+         *                  null can be passed to unregister custom chooser.
          */
         @JvmStatic
         fun registerFileChooser(fileChooser: FileChooser) {
             FILE_CHOOSER = fileChooser
+        }
+
+        /**
+         * Launches the request for registering push token.
+         * Callback can be invoked in a thread that differs from the one that has invoked [setPushToken]
+         *
+         * @param token string token to be registered
+         * @param callback callback that is invoked when result of registering of the token is received.
+         *  This is invoked without error when token is successfully registered.
+         */
+        @JvmStatic
+        fun setPushToken(token: String, callback: SetPushTokenCallback) {
+            val serviceDesk = getInstance()
+            when{
+                token.isBlank() -> callback.onResult(Exception("Token is empty"))
+                serviceDesk.appId.isBlank() -> callback.onResult(Exception("AppId is not assigned"))
+                serviceDesk.userId.isBlank() -> callback.onResult(Exception("UserId is not assigned"))
+                else -> {
+                    GlobalScope.launch {
+                        var exception: Exception? = null
+                        serviceDesk
+                            .requestFactory
+                            .getSetPushTokenRequest(serviceDesk.appId)
+                            .execute(object: ResponseCallback<Unit>{
+                                override fun onSuccess(data: Unit) {
+                                }
+                                override fun onFailure(responseError: ResponseError) {
+                                    exception = responseError
+                                }
+                            })
+                        callback.onResult(exception)
+                    }
+                }
+            }
         }
 
         internal fun getInstance() : PyrusServiceDesk {

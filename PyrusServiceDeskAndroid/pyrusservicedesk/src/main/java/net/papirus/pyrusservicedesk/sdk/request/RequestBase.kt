@@ -1,12 +1,9 @@
 package net.papirus.pyrusservicedesk.sdk.request
 
 import net.papirus.pyrusservicedesk.sdk.repositories.general.GeneralRepository
+import net.papirus.pyrusservicedesk.sdk.response.EmptyDataError
 import net.papirus.pyrusservicedesk.sdk.response.ResponseBase
 import net.papirus.pyrusservicedesk.sdk.response.ResponseCallback
-import net.papirus.pyrusservicedesk.sdk.response.ResponseError
-
-internal const val MAX_FILE_SIZE_MEGABYTES = 250
-internal const val MAX_FILE_SIZE_BYTES = MAX_FILE_SIZE_MEGABYTES * 1024 * 1024
 
 internal abstract class RequestBase<ResponseData>(private val repository: GeneralRepository) {
 
@@ -16,7 +13,7 @@ internal abstract class RequestBase<ResponseData>(private val repository: Genera
         with(run(repository)) {
             when {
                 error != null -> callback.onFailure(error)
-                result == null -> callback.onFailure(ResponseError.InvalidDataError)
+                result == null -> callback.onFailure(EmptyDataError())
                 else -> callback.onSuccess(result)
             }
         }

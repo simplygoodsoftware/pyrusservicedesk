@@ -28,4 +28,8 @@ internal class RequestFactory(private val repository: GeneralRepository) {
                              uploadFileHooks: UploadFileHooks? = null): RequestBase<Int> {
         return AddCommentRequest(repository, ticketId, comment, uploadFileHooks)
     }
+
+    fun getSetPushTokenRequest(token: String): RequestBase<Unit> {
+        return SetPushTokenRequest(repository, token)
+    }
 }

@@ -22,8 +22,8 @@ import net.papirus.pyrusservicedesk.presentation.ui.view.recyclerview.item_decor
 import net.papirus.pyrusservicedesk.sdk.data.Attachment
 import net.papirus.pyrusservicedesk.sdk.data.EMPTY_TICKET_ID
 import net.papirus.pyrusservicedesk.sdk.data.intermediate.FileData
-import net.papirus.pyrusservicedesk.sdk.repositories.general.getFileUrl
 import net.papirus.pyrusservicedesk.utils.ConfigUtils
+import net.papirus.pyrusservicedesk.utils.RequestUtils.Companion.getFileUrl
 import net.papirus.pyrusservicedesk.utils.getViewModel
 import net.papirus.pyrusservicedesk.utils.isAtEnd
 import net.papirus.pyrusservicedesk.utils.setCursorColor

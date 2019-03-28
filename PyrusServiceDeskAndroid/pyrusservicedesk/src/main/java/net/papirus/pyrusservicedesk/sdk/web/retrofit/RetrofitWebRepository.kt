@@ -10,17 +10,14 @@ import net.papirus.pyrusservicedesk.sdk.data.Attachment
 import net.papirus.pyrusservicedesk.sdk.data.Comment
 import net.papirus.pyrusservicedesk.sdk.data.EMPTY_TICKET_ID
 import net.papirus.pyrusservicedesk.sdk.data.TicketDescription
-import net.papirus.pyrusservicedesk.sdk.repositories.general.BASE_URL
 import net.papirus.pyrusservicedesk.sdk.repositories.general.GeneralRepository
 import net.papirus.pyrusservicedesk.sdk.request.UploadFileRequest
 import net.papirus.pyrusservicedesk.sdk.response.*
 import net.papirus.pyrusservicedesk.sdk.web.UploadFileHooks
-import net.papirus.pyrusservicedesk.sdk.web.request_body.AddCommentRequestBody
-import net.papirus.pyrusservicedesk.sdk.web.request_body.CreateTicketRequestBody
-import net.papirus.pyrusservicedesk.sdk.web.request_body.RequestBodyBase
-import net.papirus.pyrusservicedesk.sdk.web.request_body.UploadFileRequestBody
+import net.papirus.pyrusservicedesk.sdk.web.request_body.*
 import net.papirus.pyrusservicedesk.utils.ConfigUtils
 import net.papirus.pyrusservicedesk.utils.ISO_DATE_PATTERN
+import net.papirus.pyrusservicedesk.utils.RequestUtils.Companion.BASE_URL
 import okhttp3.OkHttpClient
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
@@ -59,11 +56,11 @@ internal class RetrofitWebRepository(
                 api.getTicketFeed(RequestBodyBase(appId, userId)).execute().run {
                     when {
                         isSuccessful && body() != null -> GetFeedResponse(comments = body()!!.comments)
-                        else -> GetFeedResponse(ResponseError.ApiCallError)
+                        else -> GetFeedResponse(ApiCallError(this.message()))
                     }
                 }
             } catch (ex: Exception) {
-                GetFeedResponse(ResponseError.NoInternetConnection)
+                GetFeedResponse(NoInternetConnection("No internet connection"))
             }
         }
     }
@@ -74,11 +71,11 @@ internal class RetrofitWebRepository(
                 api.getTickets(RequestBodyBase(appId, userId)).execute().run {
                     when {
                         isSuccessful && body() != null -> GetTicketsResponse(tickets = body()!!.tickets)
-                        else -> GetTicketsResponse(ResponseError.ApiCallError)
+                        else -> GetTicketsResponse(ApiCallError(this.message()))
                     }
                 }
             } catch (ex: Exception) {
-                GetTicketsResponse(ResponseError.NoInternetConnection)
+                GetTicketsResponse(NoInternetConnection("No internet connection"))
             }
         }
     }
@@ -89,11 +86,11 @@ internal class RetrofitWebRepository(
                 api.getTicket(RequestBodyBase(appId, userId), ticketId).execute().run {
                     when {
                         isSuccessful && body() != null -> GetTicketResponse(ticket = body())
-                        else -> GetTicketResponse(ResponseError.ApiCallError)
+                        else -> GetTicketResponse(ApiCallError(this.message()))
                     }
                 }
             } catch (ex: Exception) {
-                GetTicketResponse(ResponseError.NoInternetConnection)
+                GetTicketResponse(NoInternetConnection("No internet connection"))
             }
         }
     }
@@ -121,7 +118,7 @@ internal class RetrofitWebRepository(
                         descr.attachments!!.upload(uploadFileHooks)
                     } catch (ex: Exception) {
                         sequentialRequests.poll()
-                        return@withContext CreateTicketResponse(ResponseError.ApiCallError)
+                        return@withContext CreateTicketResponse(ApiCallError(ex.message ?: "Error while uploading files"))
                     }
 
                 descr = descr.applyNewAttachments(newAttachments)
@@ -158,12 +155,27 @@ internal class RetrofitWebRepository(
 
                                 CreateTicketResponse(ticketId = ticketId)
                             }
-                            else -> CreateTicketResponse(ResponseError.ApiCallError)
+                            else -> CreateTicketResponse(ApiCallError(this.message()))
                         }
                     }
             } catch (ex: Exception) {
                 sequentialRequests.poll()
-                CreateTicketResponse(ResponseError.NoInternetConnection)
+                CreateTicketResponse(NoInternetConnection("No internet connection"))
+            }
+        }
+    }
+
+    override suspend fun setPushToken(token: String): SetPushTokenResponse {
+        return withContext(Dispatchers.IO){
+            try {
+                api.setPushToken(SetPushTokenBody(appId, userId, token)).execute().run {
+                    when {
+                        isSuccessful -> SetPushTokenResponse()
+                        else -> SetPushTokenResponse(ApiCallError(this.message()))
+                    }
+                }
+            } catch (ex: Exception) {
+                SetPushTokenResponse(NoInternetConnection("No internet connection"))
             }
         }
     }
@@ -184,7 +196,7 @@ internal class RetrofitWebRepository(
                         cament.attachments!!.upload(uploadFileHooks)
                     } catch (ex: Exception) {
                         sequentialRequests.poll()
-                        return@withContext AddCommentResponse(ResponseError.ApiCallError)
+                        return@withContext AddCommentResponse(ApiCallError(ex.message ?: "Error while uploading files"))
                     }
                 cament = cament.applyNewAttachments(newAttachments)
             }
@@ -207,12 +219,12 @@ internal class RetrofitWebRepository(
                                 )
                                     .values.first().toInt()
                             )
-                            else -> AddCommentResponse(ResponseError.ApiCallError)
+                            else -> AddCommentResponse(ApiCallError(this.message()))
                         }
                     }
             }
             catch (ex: Exception){
-                AddCommentResponse(ResponseError.NoInternetConnection)
+                AddCommentResponse(NoInternetConnection("No internet connection"))
             }
             finally {
                 sequentialRequests.poll()
@@ -267,11 +279,11 @@ internal class RetrofitWebRepository(
                 .run {
                     when {
                         isSuccessful && body() != null -> UploadFileResponse(uploadData = body())
-                        else -> UploadFileResponse(ResponseError.ApiCallError)
+                        else -> UploadFileResponse(ApiCallError(this.message()))
                     }
                 }
         } catch (ex: Exception) {
-            UploadFileResponse(ResponseError.NoInternetConnection)
+            UploadFileResponse(NoInternetConnection("No internet connection"))
         }
     }
 }
