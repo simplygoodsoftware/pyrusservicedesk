@@ -18,6 +18,7 @@
 
         <activity
             android:name="net.papirus.pyrusservicedesk.presentation.ui.navigation_page.ticket.TicketActivity"
+            android:launchMode="singleTask"
             android:theme="@style/PyrusServiceDesk.Dialog"/>
 
         <activity

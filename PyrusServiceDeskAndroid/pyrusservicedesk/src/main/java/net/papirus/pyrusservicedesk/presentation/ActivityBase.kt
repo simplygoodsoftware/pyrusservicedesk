@@ -22,6 +22,7 @@ internal abstract class ActivityBase: AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        overridePendingTransition()
         val theme = when{
             PyrusServiceDesk.getConfiguration().isDialogTheme -> R.style.PyrusServiceDesk_Dialog
             else -> R.style.PyrusServiceDesk
@@ -52,6 +53,11 @@ internal abstract class ActivityBase: AppCompatActivity() {
         observeData()
     }
 
+    override fun finish() {
+        super.finish()
+        overridePendingTransition()
+    }
+
     protected open fun onViewHeightChanged(changedBy: Int) {}
 
     protected open fun observeData() {
@@ -59,5 +65,11 @@ internal abstract class ActivityBase: AppCompatActivity() {
             this,
             Observer { quit -> quit?.let { if(it) finish() } }
         )
+    }
+
+    private fun overridePendingTransition() {
+        val enter = R.anim.psd_animation_window_enter
+        val exit = R.anim.psd_animation_window_exit
+        super.overridePendingTransition(enter, exit)
     }
 }

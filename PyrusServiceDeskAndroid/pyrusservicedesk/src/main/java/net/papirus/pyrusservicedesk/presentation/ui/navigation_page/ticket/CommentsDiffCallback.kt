@@ -40,5 +40,5 @@ internal class CommentsDiffCallback(
         }
     }
 
-    private fun Comment.isSameWith(another: Comment) = commentId == another.commentId && localId == another.localId
+    private fun Comment.isSameWith(another: Comment) = commentId == another.commentId || localId == another.localId
 }

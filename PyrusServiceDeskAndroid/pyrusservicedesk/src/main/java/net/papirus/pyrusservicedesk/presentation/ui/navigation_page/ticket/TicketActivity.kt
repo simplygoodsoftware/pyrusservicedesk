@@ -5,6 +5,7 @@ import android.content.Intent
 import android.content.res.ColorStateList
 import android.net.Uri
 import android.os.Bundle
+import android.support.v7.widget.DefaultItemAnimator
 import android.text.Editable
 import android.text.TextWatcher
 import android.view.Menu
@@ -100,7 +101,11 @@ internal class TicketActivity : ConnectionActivityBase<TicketViewModel>(TicketVi
         comments.apply {
             adapter = this@TicketActivity.adapter
             addItemDecoration(
-                    SpaceItemDecoration(resources.getInteger(R.integer.psd_comments_item_space)))
+                SpaceItemDecoration(
+                    resources.getDimensionPixelSize(R.dimen.psd_comments_item_space),
+                    this@TicketActivity.adapter.itemSpaceMultiplier)
+            )
+            itemAnimator = DefaultItemAnimator().apply { changeDuration = 0 }
             this@TicketActivity.adapter.itemTouchHelper?.attachToRecyclerView(this)
         }
         send.setOnClickListener { sendComment() }

@@ -42,6 +42,8 @@
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 android:clipToPadding="true"
+                android:paddingTop="@dimen/psd_tickets_item_space"
+                android:paddingBottom="@dimen/psd_tickets_item_space"
                 app:layoutManager="android.support.v7.widget.LinearLayoutManager"
                 tools:layoutManager="android.support.v7.widget.LinearLayoutManager"
                 tools:listitem="@layout/psd_view_holder_ticket"/>

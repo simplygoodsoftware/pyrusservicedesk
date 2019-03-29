@@ -48,8 +48,7 @@ internal class TicketsActivity: ConnectionActivityBase<TicketsViewModel>(Tickets
                     }
                 }
                 .also { tickets.adapter  = it }
-        tickets.addItemDecoration(
-                SpaceItemDecoration(resources.getInteger(R.integer.psd_tickets_item_space)))
+        tickets.addItemDecoration(SpaceItemDecoration(resources.getDimensionPixelSize(R.dimen.psd_tickets_item_space)))
         new_conversation.setOnClickListener { UiNavigator.toNewTicket(this, viewModel.getUnreadCount()) }
     }
 

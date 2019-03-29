@@ -6,7 +6,6 @@ import android.graphics.*
 import android.graphics.drawable.BitmapDrawable
 import android.graphics.drawable.Drawable
 import android.support.annotation.ColorInt
-import android.support.v4.content.ContextCompat
 import android.support.v7.content.res.AppCompatResources
 import android.util.Base64
 import com.example.pyrusservicedesk.R
@@ -41,7 +40,7 @@ internal class ConfigUtils{
             return when {
                 PyrusServiceDesk.getConfiguration().supportAvatar != null ->
                     try {
-                        ContextCompat.getDrawable(context, PyrusServiceDesk.getConfiguration().supportAvatar!!)!!.circle(context)
+                        AppCompatResources.getDrawable(context, PyrusServiceDesk.getConfiguration().supportAvatar!!)!!.circle(context)
                     }
                     catch (ex: Exception) {
                         makeSupportAvatar(

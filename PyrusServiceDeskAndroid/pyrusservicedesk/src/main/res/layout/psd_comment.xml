@@ -19,6 +19,7 @@
             android:id="@+id/attachment_layout"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:gravity="center_vertical"
             android:orientation="horizontal"
             tools:visibility="visible">
 
@@ -34,7 +35,7 @@
 
             <LinearLayout
                 android:layout_width="wrap_content"
-                android:layout_height="match_parent"
+                android:layout_height="wrap_content"
                 android:gravity="center_vertical"
                 android:orientation="vertical">
 
@@ -62,6 +63,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:textAppearance="?attr/textAppearanceListItem"
+            android:textIsSelectable="true"
             tools:text="@tools:sample/lorem"
             tools:visibility="gone"/>
     </FrameLayout>

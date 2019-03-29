@@ -123,8 +123,9 @@ internal class CommentView @JvmOverloads constructor(
         primaryColor = getTextColorOnBackground(context, backgroundColor)
         val secondaryColor = adjustColor(primaryColor, ColorChannel.Alpha, SECONDARY_TEXT_COLOR_MULTIPLIER)
 
-        background_parent.background.mutate().setColorFilter(backgroundColor, PorterDuff.Mode.SRC)
+        background_parent.background.mutate().setColorFilter(backgroundColor, PorterDuff.Mode.SRC_IN)
         comment_text.setTextColor(primaryColor)
+        comment_text.setLinkTextColor(primaryColor)
         root.gravity = Gravity.BOTTOM or if (type == TYPE_INBOUND) Gravity.START else Gravity.END
         file_name.setTextColor(primaryColor)
         file_size.setTextColor(secondaryColor)
@@ -177,7 +178,7 @@ internal class CommentView @JvmOverloads constructor(
 
     fun setCommentText(text: String) {
         comment_text.text = text
-        LinkifyCompat.addLinks(comment_text, Linkify.WEB_URLS)
+        LinkifyCompat.addLinks(comment_text, Linkify.WEB_URLS or Linkify.PHONE_NUMBERS)
     }
 
     fun setFileName(fileName: String) {

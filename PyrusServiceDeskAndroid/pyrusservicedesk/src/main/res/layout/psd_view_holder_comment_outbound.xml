@@ -36,6 +36,7 @@
         tools:text="@tools:sample/date/hhmm"
         android:layout_marginStart="@dimen/psd_offset_default"
         android:layout_marginLeft="@dimen/psd_offset_default"
+        android:textSize="@dimen/psd_creation_time_text_size"
         app:layout_constraintStart_toEndOf="parent"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintBottom_toBottomOf="parent"/>

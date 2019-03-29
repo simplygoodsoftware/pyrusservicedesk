@@ -10,6 +10,7 @@ import kotlinx.android.synthetic.main.psd_activity_tickets.*
 import kotlinx.android.synthetic.main.psd_no_connection.*
 import net.papirus.pyrusservicedesk.presentation.ui.view.swiperefresh.DirectedSwipeRefresh
 import net.papirus.pyrusservicedesk.presentation.viewmodel.ConnectionViewModelBase
+import net.papirus.pyrusservicedesk.utils.ConfigUtils
 import net.papirus.pyrusservicedesk.utils.getColor
 import net.papirus.pyrusservicedesk.utils.getViewModel
 
@@ -28,6 +29,7 @@ internal abstract class ConnectionActivityBase<T: ConnectionViewModelBase>(viewM
                 getColor(this, R.attr.colorAccentSecondary),
                 PorterDuff.Mode.SRC_IN)
         reconnect.setOnClickListener { reconnect() }
+        reconnect.setTextColor(ConfigUtils.getAccentColor(this))
         findViewById<DirectedSwipeRefresh>(refresherViewId)?.setOnRefreshListener {
             viewModel.loadData()
         }

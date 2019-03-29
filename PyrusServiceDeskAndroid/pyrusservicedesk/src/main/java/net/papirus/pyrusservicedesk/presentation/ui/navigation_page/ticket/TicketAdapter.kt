@@ -5,6 +5,7 @@ import android.support.annotation.LayoutRes
 import android.support.v7.widget.RecyclerView
 import android.support.v7.widget.helper.ItemTouchHelper
 import android.support.v7.widget.helper.ItemTouchHelper.ACTION_STATE_SWIPE
+import android.view.View
 import android.view.View.*
 import android.view.ViewGroup
 import android.widget.ImageView
@@ -17,12 +18,14 @@ import net.papirus.pyrusservicedesk.presentation.ui.view.ContentType
 import net.papirus.pyrusservicedesk.presentation.ui.view.Status
 import net.papirus.pyrusservicedesk.presentation.ui.view.recyclerview.AdapterBase
 import net.papirus.pyrusservicedesk.presentation.ui.view.recyclerview.ViewHolderBase
+import net.papirus.pyrusservicedesk.presentation.ui.view.recyclerview.item_decorators.SpaceMultiplier
 import net.papirus.pyrusservicedesk.sdk.data.Attachment
 import net.papirus.pyrusservicedesk.utils.CIRCLE_TRANSFORMATION
 import net.papirus.pyrusservicedesk.utils.ConfigUtils
 import net.papirus.pyrusservicedesk.utils.RequestUtils.Companion.getAvatarUrl
 import net.papirus.pyrusservicedesk.utils.canBePreviewed
 import net.papirus.pyrusservicedesk.utils.getTimeText
+import kotlin.math.abs
 
 
 private const val VIEW_TYPE_COMMENT_INBOUND = 0
@@ -33,6 +36,18 @@ private const val VIEW_TYPE_DATE = 3
 internal class TicketAdapter: AdapterBase<TicketEntry>() {
 
     override val itemTouchHelper: ItemTouchHelper? = ItemTouchHelper(TouchCallback())
+    val itemSpaceMultiplier = object: SpaceMultiplier{
+        override fun getMultiplier(adapterPosition: Int): Float {
+            return when {
+                adapterPosition == -1 -> 1f
+                itemsList[adapterPosition].type == Type.Comment
+                        && itemsList[adapterPosition -1].type == Type.Comment
+                        && (itemsList[adapterPosition] as CommentEntry).comment.isInbound !=
+                            (itemsList[adapterPosition - 1] as CommentEntry).comment.isInbound -> 2f
+                else -> 1f
+            }
+        }
+    }
     private var onDownloadedFileClickListener: ((Attachment) -> Unit)? = null
     private var recentInboundCommentPositionWithAvatar = 0
 
@@ -60,6 +75,7 @@ internal class TicketAdapter: AdapterBase<TicketEntry>() {
     override fun onViewAttachedToWindow(holder: ViewHolderBase<TicketEntry>) {
         super.onViewAttachedToWindow(holder)
         holder.itemView.translationX = 0f
+        holder.itemView.findViewById<View>(R.id.author_and_comment)?.let { it.translationX = 0f }
     }
 
     fun setOnDownloadedFileClickListener(listener: (attachment: Attachment) -> Unit) {
@@ -143,7 +159,15 @@ internal class TicketAdapter: AdapterBase<TicketEntry>() {
         abstract val comment: CommentView
         abstract val creationTime: TextView
 
-        val onCommentClickListener = OnClickListener { getItem().onClickedCallback.onClicked(getItem()) }
+        val onCommentClickListener = OnClickListener {
+            when {
+                comment.contentType == ContentType.Attachment
+                        && comment.fileProgressStatus == Status.Completed ->
+                    onDownloadedFileClickListener?.invoke(getItem().comment.attachments!!.first())
+
+                else -> getItem().onClickedCallback.onClicked(getItem())
+            }
+        }
 
         override fun bindItem(item: CommentEntry) {
             super.bindItem(item)
@@ -213,7 +237,7 @@ internal class TicketAdapter: AdapterBase<TicketEntry>() {
         override fun bindItem(item: WelcomeMessageEntry) {
             super.bindItem(item)
             authorName.visibility = GONE
-            avatar.setImageDrawable(ConfigUtils.getSupportAvatar(itemView.context))
+            avatar.visibility = INVISIBLE
             comment.contentType = ContentType.Text
             comment.setCommentText(item.message)
         }
@@ -263,26 +287,35 @@ internal class TicketAdapter: AdapterBase<TicketEntry>() {
                                  actionState: Int,
                                  isCurrentlyActive: Boolean) {
 
-            if (itemsList[viewHolder.adapterPosition].type != Type.Comment)
+            if (itemsList[viewHolder.adapterPosition].isNonShiftable())
                 return
-            viewHolder as CommentHolder
+            val maxItemViewShift = recyclerView.resources.getDimensionPixelSize(R.dimen.psd_comment_creation_time_width)
+            val minInboundOffset =  recyclerView.resources.getDimensionPixelSize(R.dimen.psd_offset_default)
             var x = dX
-            if (x < -viewHolder.creationTime.width)
-                x = -viewHolder.creationTime.width.toFloat()
+            if (x < -maxItemViewShift)
+                x = -maxItemViewShift.toFloat()
             for (position in 0..(recyclerView.childCount - 1)) {
                 recyclerView.findContainingViewHolder(recyclerView.getChildAt(position))?.let {
-                    if (it.adapterPosition == - 1 || itemsList[it.adapterPosition].type != Type.Comment)
+                    if (it.adapterPosition == - 1 || itemsList[it.adapterPosition].isNonShiftable())
                         return@let
-                    super.onChildDraw(
-                            c,
-                            recyclerView,
-                            it,
-                            x,
-                            dY,
-                            actionState,
-                            false)
+                    it.itemView.translationX = x
+                    if (itemsList[it.adapterPosition].isConsideredInbound()) {
+                        it.itemView.findViewById<View>(R.id.author_and_comment)?.let { author_and_comment ->
+                            if(abs(x) > author_and_comment.left - minInboundOffset)
+                                author_and_comment.translationX = abs(x) - author_and_comment.left + minInboundOffset
+                            else
+                                author_and_comment.translationX = 0f
+                        }
+                    }
                 }
             }
         }
     }
 }
+
+private fun TicketEntry.isConsideredInbound(): Boolean {
+    return type == Type.WelcomeMessage
+            || type == Type.Comment && !(this as CommentEntry).comment.isInbound
+}
+
+private fun TicketEntry.isNonShiftable(): Boolean = type == Type.Date
