@@ -2,7 +2,8 @@ package net.papirus.pyrusservicedesk.utils
 
 import net.papirus.pyrusservicedesk.utils.FileFormat.*
 
-internal const val INTENT_IMAGE_TYPE = "image/*"
+internal const val MIME_TYPE_IMAGE_ANY = "image/*"
+internal const val MIME_TYPE_IMAGE_JPEG = "image/jpeg"
 internal const val BYTES_IN_MEGABYTE = 1000000
 internal const val BYTES_IN_KILOBYTE = 1000
 

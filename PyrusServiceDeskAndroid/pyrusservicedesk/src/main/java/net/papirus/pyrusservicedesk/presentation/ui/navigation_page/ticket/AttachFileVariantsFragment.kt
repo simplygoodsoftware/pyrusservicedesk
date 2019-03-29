@@ -4,28 +4,20 @@ import android.Manifest.permission.CAMERA
 import android.Manifest.permission.WRITE_EXTERNAL_STORAGE
 import android.annotation.SuppressLint
 import android.app.Activity.RESULT_OK
-import android.content.ContentValues
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.net.Uri
 import android.os.Bundle
-import android.provider.MediaStore
-import android.provider.MediaStore.Images.Media.EXTERNAL_CONTENT_URI
 import android.support.design.widget.BottomSheetBehavior
 import android.support.design.widget.BottomSheetDialog
 import android.support.design.widget.BottomSheetDialogFragment
 import android.view.LayoutInflater
 import android.view.View
-import android.view.View.INVISIBLE
-import android.view.View.VISIBLE
+import android.view.View.*
 import android.view.ViewGroup
 import kotlinx.android.synthetic.main.psd_fragment_attach_file_variants.*
 import net.papirus.pyrusservicedesk.PyrusServiceDesk
-import net.papirus.pyrusservicedesk.utils.INTENT_IMAGE_TYPE
-import net.papirus.pyrusservicedesk.utils.getViewModelWithActivityScope
-import net.papirus.pyrusservicedesk.utils.hasPermission
-import java.text.SimpleDateFormat
-import java.util.*
+import net.papirus.pyrusservicedesk.utils.*
 
 
 internal class AttachFileVariantsFragment: BottomSheetDialogFragment(), View.OnClickListener {
@@ -54,6 +46,7 @@ internal class AttachFileVariantsFragment: BottomSheetDialogFragment(), View.OnC
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         photo_variant.setOnClickListener(this)
+        photo_variant.visibility = if (isCapturingPhotoSupported()) VISIBLE else GONE
         gallery_variant.setOnClickListener(this)
         custom_variant.setOnClickListener(this)
         custom_variant.visibility = if (PyrusServiceDesk.FILE_CHOOSER == null) INVISIBLE else VISIBLE
@@ -90,7 +83,7 @@ internal class AttachFileVariantsFragment: BottomSheetDialogFragment(), View.OnC
 
     private fun startPickingImage() {
         Intent(Intent.ACTION_GET_CONTENT).also{
-            it.type = INTENT_IMAGE_TYPE
+            it.type = MIME_TYPE_IMAGE_ANY
             startActivityForResult(it, REQUEST_CODE_PICK_IMAGE)
         }
     }
@@ -104,31 +97,8 @@ internal class AttachFileVariantsFragment: BottomSheetDialogFragment(), View.OnC
             if (!activity.hasPermission(CAMERA))
                 permissionToAsk.add(CAMERA)
 
-            if (permissionToAsk.isEmpty()) {
-                val contentValues = ContentValues().also {
-                    val timeStamp: String =
-                        SimpleDateFormat("yyyyMMdd_HHmmss", Locale.getDefault())
-                            .format(Date())
-                    it.put(MediaStore.Images.Media.DISPLAY_NAME, "IMG_$timeStamp.jpg")
-                    it.put(MediaStore.Images.Media.MIME_TYPE, "image/jpg")
-                    it.put(MediaStore.Images.Media.DATE_ADDED, timeStamp)
-                }
-                capturePhotoUri =
-                        activity.contentResolver?.insert(
-                            EXTERNAL_CONTENT_URI,
-                            contentValues)
-                Intent(MediaStore.ACTION_IMAGE_CAPTURE).also { intent ->
-                    intent.putExtra(MediaStore.EXTRA_OUTPUT, capturePhotoUri)
-                    intent.addFlags(Intent.FLAG_GRANT_WRITE_URI_PERMISSION)
-                    intent.resolveActivity(activity.packageManager)?.also { componentName ->
-                        activity.grantUriPermission(
-                            componentName.packageName,
-                            capturePhotoUri,
-                            Intent.FLAG_GRANT_WRITE_URI_PERMISSION)
-                        startActivityForResult(intent, REQUEST_CODE_TAKE_PHOTO)
-                    }
-                }
-            }
+            if (permissionToAsk.isEmpty())
+                capturePhotoUri = dispatchTakePhotoIntent(REQUEST_CODE_TAKE_PHOTO)
             else
                 requestPermissions(permissionToAsk.toTypedArray(), REQUEST_CODE_PERMISSION)
         }
