@@ -20,9 +20,9 @@ internal class CommentsDiffCallback(
         val oldEntry = oldList[oldItemPosition]
         val newEntry = newList[newItemPosition]
         return when{
-            oldEntry is DateEntry && newEntry is DateEntry -> oldEntry.date == newEntry.date
+            oldEntry is DateEntry && newEntry is DateEntry -> true
             oldEntry is CommentEntry && newEntry is CommentEntry -> oldEntry.comment.isSameWith(newEntry.comment)
-            oldEntry is WelcomeMessageEntry && newEntry is WelcomeMessageEntry -> oldEntry.message == newEntry.message
+            oldEntry is WelcomeMessageEntry && newEntry is WelcomeMessageEntry -> true
             else -> false
         }
     }

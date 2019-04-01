@@ -1,6 +1,7 @@
 package net.papirus.pyrusservicedesk.presentation.ui.navigation_page.ticket
 
-import android.arch.lifecycle.*
+import android.arch.lifecycle.LiveData
+import android.arch.lifecycle.MutableLiveData
 import android.arch.lifecycle.Observer
 import android.content.Context
 import android.content.Intent
@@ -75,59 +76,28 @@ internal class TicketViewModel(
     private var ticketId: Int = TicketActivity.getTicketId(arguments)
 
     private val unreadCounter = MutableLiveData<Int>()
-    private val commentsRequest = MutableLiveData<Boolean>()
-    private val entries = MediatorLiveData<List<Comment>>()
     private val commentDiff = MutableLiveData<DiffResultWithNewItems<TicketEntry>>()
 
-    private var recentTicketEntries: List<TicketEntry> = emptyList()
+    private var ticketEntries: List<TicketEntry> = emptyList()
 
     private val mainHandler = Handler(Looper.getMainLooper())
     private val updateRunnable = object : Runnable {
         override fun run() {
             mainHandler.postDelayed(this, TICKET_UPDATE_INTERVAL * MILLISECONDS_IN_SECOND)
-            commentsRequest.value = true
+            update()
         }
     }
 
+    private var lastServerCommentId = 0
+
     init {
         draft = draftRepository.getDraft()
-        entries.apply{
-            if (!isFeed) {
-                addSource(
-                    Transformations.switchMap(commentsRequest){
-                        GetTicketCallAdapter(this@TicketViewModel, requests, ticketId).execute()
-                    }
-                ){
-                    it?.let { result ->
-                        when {
-                            result.hasError() -> {  }
-                            else -> applyTicketListUpdate(result.data!!)
-                        }
-                    }
-                }
-            }
-            else {
-                addSource(
-                    Transformations.switchMap(commentsRequest){
-                        GetFeedCallAdapter(this@TicketViewModel, requests).execute()
-                    }
-                ){
-                    it?.let { result ->
-                        when {
-                            result.hasError() -> {}
-                            else -> applyTicketListUpdate(result.data!!)
-                        }
-                    }
-                }
-            }
-        }. also { it.observeForever {  } /*should be observed to trigger transformations*/}
 
         if (!isFeed) {
             unreadCounter.value = TicketActivity.getUnreadTicketsCount(arguments)
         }
 
-        val wantLoadDataOnStart = isFeed || !isNewTicket()
-        if (wantLoadDataOnStart && isNetworkConnected.value == true) {
+        if (canBeUpdated() && isNetworkConnected.value == true) {
             loadData()
         }
         maybeStartAutoRefresh()
@@ -135,7 +105,7 @@ internal class TicketViewModel(
     }
 
     override fun onLoadData() {
-        commentsRequest.value = true
+        update()
     }
 
     override fun onUnreadTicketCountChanged(unreadTicketCount: Int) {
@@ -146,7 +116,7 @@ internal class TicketViewModel(
         if (!item.hasError())
             return
         else {
-            applyUpdate(item, ChangeType.Cancelled)
+            applyCommentUpdate(item, ChangeType.Cancelled)
             sendAddComment(item.comment, item.uploadFileHooks)
         }
     }
@@ -163,6 +133,9 @@ internal class TicketViewModel(
      * @param text text that is entered in an input field
      */
     fun onSendClicked(text: String) {
+        if (text.isBlank()) {
+            return
+        }
         val localComment = localDataProvider.createLocalComment(text.trim())
         sendAddComment(localComment)
     }
@@ -176,7 +149,7 @@ internal class TicketViewModel(
         val localComment = localDataProvider.createLocalComment(fileUri = attachmentUri)
         val fileHooks = UploadFileHooks()
         fileHooks.subscribeOnCancel(CancellationSignal.OnCancelListener {
-            applyUpdate(CommentEntry(localComment, onClickedCallback = this), ChangeType.Cancelled)
+            applyCommentUpdate(CommentEntry(localComment, onClickedCallback = this), ChangeType.Cancelled)
         })
         sendAddComment(localComment, fileHooks)
     }
@@ -200,11 +173,29 @@ internal class TicketViewModel(
         draftRepository.saveDraft(text)
     }
 
+    private fun update() {
+        val call = when {
+            isFeed -> GetFeedCallAdapter(this@TicketViewModel, requests).execute()
+            else -> GetTicketCallAdapter(this@TicketViewModel, requests, ticketId).execute()
+        }
+        val observer = Observer<CallResult<List<Comment>>> { result ->
+                if (result == null)
+                    return@Observer
+                when {
+                    result.hasError() -> {  }
+                    else -> applyTicketUpdate(result.data!!)
+                }
+            }
+        call.observeForever(observer)
+    }
+
     private fun maybeStartAutoRefresh() {
-        if (isFeed || !isNewTicket()) {
+        if (canBeUpdated()) {
             mainHandler.post(updateRunnable)
         }
     }
+
+    private fun canBeUpdated() = isFeed || !isNewTicket()
 
     private fun isNewTicket() = ticketId == EMPTY_TICKET_ID
 
@@ -219,10 +210,7 @@ internal class TicketViewModel(
                     prevDateGroup = it
                 }
             }
-            if (comment.hasAttachments())
-                acc.addAll(comment.splitToEntriesByFiles())
-            else
-                acc.add(CommentEntry(comment, onClickedCallback = this@TicketViewModel))
+            acc.addAll(comment.splitToEntries())
             acc
         }
     }
@@ -246,7 +234,7 @@ internal class TicketViewModel(
 
         val toNewTicket = !isFeed && isNewTicket() && !isCreateTicketSent
 
-        applyUpdate(
+        applyCommentUpdate(
             CommentEntry(localComment, uploadFileHooks = uploadFileHooks, onClickedCallback = this),
             ChangeType.Added
         )
@@ -258,8 +246,7 @@ internal class TicketViewModel(
             isFeed -> AddFeedCommentCallAdapter(this, requests, localComment, uploadFileHooks).execute()
             else -> AddCommentCallAdapter(this, requests, ticketId, localComment, uploadFileHooks).execute()
         }
-        val observer = object : Observer<CallResult<Int>> {
-            override fun onChanged(res: CallResult<Int>?) {
+        val observer = Observer<CallResult<Int>> { res ->
                 res?.let { result ->
                     isCreateTicketSent = false
                     if (uploadFileHooks?.isCancelled == true)
@@ -283,22 +270,29 @@ internal class TicketViewModel(
                             )
                         }
                     }
-                    applyUpdate(entry, ChangeType.Changed)
+                    applyCommentUpdate(entry, ChangeType.Changed)
                 }
-                call.removeObserver(this)
             }
-        }
         call.observeForever(observer)
     }
 
-    private fun applyTicketListUpdate(freshList: List<Comment>) {
+    private fun applyTicketUpdate(freshList: List<Comment>) {
+        when{
+            freshList.isEmpty() -> return
+            freshList.last().commentId < lastServerCommentId -> return
+            freshList.last().commentId == lastServerCommentId -> {
+                onDataLoaded()
+                return
+            }
+        }
         val listOfLocalEntries = mutableListOf<TicketEntry>()
         if (hasRealComments()) {
-            for (i in recentTicketEntries.lastIndex downTo 0) {
-                val entry = recentTicketEntries[i]
-                if (entry.type == Type.Comment && !(entry as CommentEntry).comment.isLocal())
+            for (i in ticketEntries.lastIndex downTo 0) {
+                val entry = ticketEntries[i]
+                if (entry.type == Type.Comment && (entry as CommentEntry).comment.commentId == lastServerCommentId)
                     break
-                listOfLocalEntries.add(0, entry)
+                if (entry.type == Type.Comment && (entry as CommentEntry).comment.isLocal())
+                    listOfLocalEntries.add(0, entry)
             }
         }
         val toPublish = mutableListOf<TicketEntry>().apply {
@@ -307,14 +301,15 @@ internal class TicketViewModel(
             addAll(listOfLocalEntries)
 
         }
-        publishEntries(recentTicketEntries, toPublish)
+        publishEntries(ticketEntries, toPublish)
+        lastServerCommentId = freshList.last().commentId
         onDataLoaded()
     }
 
-    private fun hasRealComments(): Boolean = recentTicketEntries.any { it.type == Type.Comment }
+    private fun hasRealComments(): Boolean = ticketEntries.any { it.type == Type.Comment }
 
-    private fun applyUpdate(commentEntry: CommentEntry, changeType: ChangeType) {
-        val newEntries = recentTicketEntries.toMutableList()
+    private fun applyCommentUpdate(commentEntry: CommentEntry, changeType: ChangeType) {
+        val newEntries = ticketEntries.toMutableList()
         fun maybeAddDate(){
             commentEntry.comment.creationDate.getWhen(getApplication(), Calendar.getInstance()).let {
                 if (!hasRealComments()
@@ -366,19 +361,19 @@ internal class TicketViewModel(
                 }
             }
         }
-        publishEntries(recentTicketEntries, newEntries)
+        publishEntries(ticketEntries, newEntries)
     }
 
     private fun publishEntries(oldEntries: List<TicketEntry>, newEntries: List<TicketEntry>) {
-        recentTicketEntries = newEntries
+        ticketEntries = newEntries
         commentDiff.value = DiffResultWithNewItems(
             DiffUtil.calculateDiff(
-                CommentsDiffCallback(oldEntries, recentTicketEntries), false),
-            recentTicketEntries)
+                CommentsDiffCallback(oldEntries, ticketEntries), false),
+            ticketEntries)
     }
 
-    private fun Comment.splitToEntriesByFiles(): Collection<TicketEntry> {
-        if (this.attachments.isNullOrEmpty())
+    private fun Comment.splitToEntries(): Collection<TicketEntry> {
+        if (!this.hasAttachments())
             return listOf(CommentEntry(this, onClickedCallback = this@TicketViewModel))
         val result = mutableListOf<CommentEntry>()
         if (!body.isBlank())
@@ -393,7 +388,7 @@ internal class TicketViewModel(
                     this.localId),
                 onClickedCallback = this@TicketViewModel
             ))
-        return this.attachments.fold(result){
+        return this.attachments!!.fold(result){
                 entriesList, attachment ->
             entriesList.add(CommentEntry(
                 Comment(

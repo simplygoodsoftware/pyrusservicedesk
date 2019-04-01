@@ -29,7 +29,7 @@ internal data class Comment(
     /**
      * @return TRUE when comment contains attachments
      */
-    fun hasAttachments() = attachments != null
+    fun hasAttachments() = !attachments.isNullOrEmpty()
 
     /**
      * @return TRUE if this comment is local one.

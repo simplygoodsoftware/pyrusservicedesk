@@ -29,10 +29,17 @@ internal class AttachFileVariantsFragment: BottomSheetDialogFragment(), View.OnC
         const val REQUEST_CODE_CUSTOM_CHOOSER = 1
         const val REQUEST_CODE_PICK_IMAGE = 2
         const val REQUEST_CODE_TAKE_PHOTO = 3
+
+        const val STATE_KEY_PHOTO_URI = "STATE_KEY_PHOTO_URI"
     }
 
     private var capturePhotoUri: Uri? = null
     private val sharedModel: TicketSharedViewModel by getViewModelWithActivityScope(TicketSharedViewModel::class.java)
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        capturePhotoUri = savedInstanceState?.getParcelable(STATE_KEY_PHOTO_URI)
+    }
 
     @SuppressLint("InflateParams")
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
@@ -52,6 +59,11 @@ internal class AttachFileVariantsFragment: BottomSheetDialogFragment(), View.OnC
         gallery_variant.setOnClickListener(this)
         custom_variant.setOnClickListener(this)
         custom_variant.visibility = if (PyrusServiceDesk.FILE_CHOOSER == null) INVISIBLE else VISIBLE
+    }
+
+    override fun onSaveInstanceState(outState: Bundle) {
+        super.onSaveInstanceState(outState)
+        outState.putParcelable(STATE_KEY_PHOTO_URI, capturePhotoUri)
     }
 
     override fun onClick(view: View) {

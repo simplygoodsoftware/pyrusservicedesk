@@ -49,11 +49,7 @@ internal fun Fragment.dispatchTakePhotoIntent(requestCode: Int): Uri? {
         Intent(MediaStore.ACTION_IMAGE_CAPTURE).also { intent ->
             intent.putExtra(MediaStore.EXTRA_OUTPUT, it)
             intent.addFlags(Intent.FLAG_GRANT_WRITE_URI_PERMISSION)
-            intent.resolveActivity(activity!!.packageManager)?.also { componentName ->
-                activity!!.grantUriPermission(
-                    componentName.packageName,
-                    it,
-                    Intent.FLAG_GRANT_WRITE_URI_PERMISSION)
+            intent.resolveActivity(activity!!.packageManager)?.let {
                 startActivityForResult(intent, requestCode)
             }
         }

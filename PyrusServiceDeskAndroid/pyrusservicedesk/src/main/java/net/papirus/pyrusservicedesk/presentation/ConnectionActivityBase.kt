@@ -33,6 +33,8 @@ internal abstract class ConnectionActivityBase<T: ConnectionViewModelBase>(viewM
      */
     abstract val refresherViewId:Int
 
+    private var refresher: DirectedSwipeRefresh? = null
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         progress_bar?.progressDrawable?.setColorFilter(
@@ -40,9 +42,8 @@ internal abstract class ConnectionActivityBase<T: ConnectionViewModelBase>(viewM
                 PorterDuff.Mode.SRC_IN)
         reconnect.setOnClickListener { reconnect() }
         reconnect.setTextColor(ConfigUtils.getAccentColor(this))
-        (findViewById(refresherViewId) as? DirectedSwipeRefresh)?.setOnRefreshListener {
-            viewModel.loadData()
-        }
+        refresher = findViewById(refresherViewId)
+        refresher?.setOnRefreshListener { viewModel.loadData() }
     }
 
     override fun startObserveData() {
@@ -74,6 +75,7 @@ internal abstract class ConnectionActivityBase<T: ConnectionViewModelBase>(viewM
                     .alpha(0f)
                     .setDuration(ANIMATION_DURATION)
                     .start()
+                refresher?.isRefreshing = false
             }
             else -> progress_bar.alpha = 1f
         }

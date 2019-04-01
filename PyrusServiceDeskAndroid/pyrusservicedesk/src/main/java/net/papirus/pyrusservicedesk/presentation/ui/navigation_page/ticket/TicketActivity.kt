@@ -243,10 +243,8 @@ internal class TicketActivity : ConnectionActivityBase<TicketViewModel>(TicketVi
     }
 
     private fun sendComment() {
-        if (!input.text.isNullOrBlank()) {
-            viewModel.onSendClicked(input.text.toString())
-            input.text = null
-        }
+        viewModel.onSendClicked(input.text.toString())
+        input.text = null
     }
 
     private fun showAttachFileVariants() {
