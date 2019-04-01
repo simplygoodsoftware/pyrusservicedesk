@@ -163,6 +163,7 @@ typedef unsigned int swift_uint4  __attribute__((__ext_vector_type__(4)));
 # define SWIFT_DEPRECATED_OBJC(Msg) SWIFT_DEPRECATED_MSG(Msg)
 #endif
 #if __has_feature(modules)
+@import Foundation;
 @import ObjectiveC;
 @import UIKit;
 #endif
@@ -182,12 +183,48 @@ typedef unsigned int swift_uint4  __attribute__((__ext_vector_type__(4)));
 # pragma pop_macro("any")
 #endif
 
+@protocol FileChooserDelegate;
+
+/// Interface with label(String) and chooserDelegate(FileChooserDelegate).
+SWIFT_PROTOCOL("_TtP16PyrusServiceDesk11FileChooser_")
+@protocol FileChooser
+/// Is name that need show to user
+@property (nonatomic, copy) NSString * _Nonnull label;
+/// Protocol to send status messages of completion.
+@property (nonatomic, weak) id <FileChooserDelegate> _Nullable chooserDelegate;
+@end
+
+
+/// Protocol to send status messages of completion.
+SWIFT_PROTOCOL("_TtP16PyrusServiceDesk19FileChooserDelegate_")
+@protocol FileChooserDelegate
+/// Send succes status
+/// \param data Data that need to send attachment to chat. If empty or nil will show error alert.
+///
+- (void)didEndWithSuccess:(NSData * _Nullable)data url:(NSURL * _Nullable)url;
+/// Send cancel status. Will do nothing. Just close.
+- (void)didEndWithCancel;
+@end
+
+
+/// The protocol for sending a notification that a new message has arrived
+SWIFT_PROTOCOL("_TtP16PyrusServiceDesk18NewReplySubscriber_")
+@protocol NewReplySubscriber
+/// The new message was send
+- (void)onNewReply;
+@end
+
 @class UIViewController;
 @class ServiceDeskConfiguration;
 
 SWIFT_CLASS("_TtC16PyrusServiceDesk16PyrusServiceDesk")
 @interface PyrusServiceDesk : NSObject
-+ (void)setPushToken:(NSString * _Nullable)token;
+/// Send device id to server
+/// \param token String with device id
+///
+/// \param completion Error. Not nil if success. See error.localizedDescription to understand why its happened
+///
++ (void)setPushToken:(NSString * _Nullable)token completion:(void (^ _Nonnull)(NSError * _Nullable))completion;
 /// Show chat
 /// \param viewController ViewController that must present chat
 ///
@@ -195,42 +232,20 @@ SWIFT_CLASS("_TtC16PyrusServiceDesk16PyrusServiceDesk")
 /// Show chat
 /// \param viewController ViewController that must present chat
 ///
-/// \param configuration ServiceDeskConfiguration object or nil. ServiceDeskConfiguration is object that create custom interface: theme color,welcome message, image for support’s avatar and organization name for navigation bar title. If nil, the default design will be used.
+/// \param configuration ServiceDeskConfiguration object or nil. ServiceDeskConfiguration is object that create custom interface: theme color,welcome message, image for support’s avatar and chat title for navigation bar title. If nil, the default design will be used.
 ///
 + (void)startOn:(UIViewController * _Nonnull)viewController configuration:(ServiceDeskConfiguration * _Nullable)configuration;
-/// Show chat
-/// \param tiketId The id of chat that need to be opened.
-///
-/// \param viewController ViewController that must present chat
-///
-+ (void)startWithTiketId:(NSString * _Nullable)tiketId on:(UIViewController * _Nonnull)viewController;
-/// Show chat
-/// \param tiketId The id of chat that need to be opened.
-///
-/// \param viewController ViewController that must present chat
-///
-/// \param configuration ServiceDeskConfiguration object or nil. ServiceDeskConfiguration is object that create custom interface: theme color,welcome message, image for support’s avatar and organization name for navigation bar title. If nil, the default design will be used.
-///
-+ (void)startWithTiketId:(NSString * _Nullable)tiketId on:(UIViewController * _Nonnull)viewController configuration:(ServiceDeskConfiguration * _Nullable)configuration;
 /// Dont forget to call unsubscribeFromNewReply(subscriber: NSObject) when subscriber deallocated
-+ (void)subscribeOnNewReply:(NSObject * _Nonnull)subscriber selector:(SEL _Nonnull)selector;
-+ (void)unsubscribeFromNewReply:(NSObject * _Nonnull)subscriber;
-/// Init PyrusServiceDesk with new clientId and organizationName.
++ (void)subscribeToReplies:(id <NewReplySubscriber> _Nullable)subscriber;
++ (void)unsubscribeFromReplies:(id <NewReplySubscriber> _Nullable)subscriber;
+/// Init PyrusServiceDesk with new clientId.
 /// \param clientId clientId using for all requests. If clientId not setted PyrusServiceDesk Controller will not be created
 ///
 - (nonnull instancetype)init:(NSString * _Nullable)clientId OBJC_DESIGNATED_INITIALIZER;
-/// Setting path of file with logs. If logPath is setted user will be able to send a logs as attachment in chat. If not, the attachments will be only from camera and library.
-/// \param logPath A full path where logs file is.
+/// Save viewController with FileChooser interface. Use to add custom row in attachment-add-menu
+/// \param chooser (FileChooser & UIViewController) to present.
 ///
-/// \param additionalText An additional text to log file. Works only if logPath is setted. For example you can put information about device here.
-///
-/// \param needDeleteAfter A flag indicates is log file need to be deleted after sent.
-///
-+ (void)createLogPath:(NSString * _Nullable)logPath logAdditionalText:(NSString * _Nonnull)logAdditionalText needDeleteAfter:(BOOL)needDeleteAfter;
-/// Total value of new massages
-SWIFT_CLASS_PROPERTY(@property (nonatomic, class) NSInteger newMessagesCount;)
-+ (NSInteger)newMessagesCount SWIFT_WARN_UNUSED_RESULT;
-+ (void)setNewMessagesCount:(NSInteger)value;
++ (void)registerFileChooser:(UIViewController <FileChooser> * _Nullable)chooser;
 - (nonnull instancetype)init SWIFT_UNAVAILABLE;
 + (nonnull instancetype)new SWIFT_DEPRECATED_MSG("-init is unavailable");
 @end
@@ -240,7 +255,7 @@ SWIFT_CLASS_PROPERTY(@property (nonatomic, class) NSInteger newMessagesCount;)
 
 SWIFT_CLASS("_TtC16PyrusServiceDesk24ServiceDeskConfiguration")
 @interface ServiceDeskConfiguration : NSObject
-/// Organization Name using to show in navigation Bar title: “organizationName Support”
+/// Chat title using to show in navigation Bar title
 @property (nonatomic, copy) NSString * _Nullable chatTitle;
 /// Customize color. If not set, the application tint color or blue is used.
 @property (nonatomic, strong) UIColor * _Nullable themeColor;
