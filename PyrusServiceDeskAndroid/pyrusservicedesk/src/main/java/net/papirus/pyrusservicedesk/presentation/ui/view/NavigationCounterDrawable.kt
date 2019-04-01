@@ -7,6 +7,9 @@ import android.support.v4.content.ContextCompat
 import android.support.v7.content.res.AppCompatResources
 import com.example.pyrusservicedesk.R
 
+/**
+ * Drawable that can render counter above the navigation icon.
+ */
 internal class NavigationCounterDrawable(private val context: Context)
     : LayerDrawable(arrayOf(AppCompatResources.getDrawable(context, R.drawable.psd_menu))) {
 
@@ -20,6 +23,10 @@ internal class NavigationCounterDrawable(private val context: Context)
     private val backgroundPaint: Paint = Paint()
     private val textPaint: Paint
 
+    /**
+     * Value that is used for rendering counter.
+     * When 0, counter icon is hidden. Max value is 99. Values above this are rendered as "99+"
+     */
     var counter: Int = 0
         set(value) {
             if (value != field) {

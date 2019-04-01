@@ -9,7 +9,12 @@ import net.papirus.pyrusservicedesk.presentation.ui.navigation_page.ticket.Ticke
 import net.papirus.pyrusservicedesk.presentation.ui.navigation_page.ticket.TicketViewModel
 import net.papirus.pyrusservicedesk.presentation.ui.navigation_page.tickets.TicketsViewModel
 
-internal class ViewModelFactory(val arguments: Intent): ViewModelProvider.Factory {
+/**
+ * Factory that provides view models.
+ * @param arguments is optional arguments that are requested by some view models and should be provided by
+ * the request side
+ */
+internal class ViewModelFactory(private val arguments: Intent): ViewModelProvider.Factory {
 
     @Suppress("UNCHECKED_CAST")
     override fun <T : ViewModel?> create(modelClass: Class<T>): T {

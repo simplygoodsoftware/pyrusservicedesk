@@ -33,9 +33,16 @@ private const val VIEW_TYPE_COMMENT_OUTBOUND = 1
 private const val VIEW_TYPE_WELCOME_MESSAGE = 2
 private const val VIEW_TYPE_DATE = 3
 
+/**
+ * Adapter that is used for rendering comment feed of the ticket screen.
+ */
 internal class TicketAdapter: AdapterBase<TicketEntry>() {
 
     override val itemTouchHelper: ItemTouchHelper? = ItemTouchHelper(TouchCallback())
+
+    /**
+     * [SpaceMultiplier] implementation for customizing spaces between items fot the feed.
+     */
     val itemSpaceMultiplier = object: SpaceMultiplier{
         override fun getMultiplier(adapterPosition: Int): Float {
             return when {
@@ -48,7 +55,8 @@ internal class TicketAdapter: AdapterBase<TicketEntry>() {
             }
         }
     }
-    private var onDownloadedFileClickListener: ((Attachment) -> Unit)? = null
+    private var onFileReadyToPreviewClickListener: ((Attachment) -> Unit)? = null
+    private var onTextCommentLongClicked: ((String) -> Unit)? = null
     private var recentInboundCommentPositionWithAvatar = 0
 
     override fun getItemViewType(position: Int): Int {
@@ -78,8 +86,23 @@ internal class TicketAdapter: AdapterBase<TicketEntry>() {
         holder.itemView.findViewById<View>(R.id.author_and_comment)?.let { it.translationX = 0f }
     }
 
-    fun setOnDownloadedFileClickListener(listener: (attachment: Attachment) -> Unit) {
-        onDownloadedFileClickListener = listener
+    override fun setItems(items: List<TicketEntry>) {
+        this.itemsList = items.toMutableList()
+    }
+
+    /**
+     * Assigns [listener] ths is invoked when comment with the file that is
+     * ready to be previewed was clicked.
+     */
+    fun setOnFileReadyForPreviewClickListener(listener: (attachment: Attachment) -> Unit) {
+        onFileReadyToPreviewClickListener = listener
+    }
+
+    /**
+     * Assigns [listener] that is invoked when text comment was long pressed by the user.
+     */
+    fun setOnTextCommentLongClicked(listener: (String) -> Unit) {
+        onTextCommentLongClicked = listener
     }
 
     private inner class InboundCommentHolder(parent: ViewGroup) :
@@ -163,14 +186,25 @@ internal class TicketAdapter: AdapterBase<TicketEntry>() {
             when {
                 comment.contentType == ContentType.Attachment
                         && comment.fileProgressStatus == Status.Completed ->
-                    onDownloadedFileClickListener?.invoke(getItem().comment.attachments!!.first())
+                    onFileReadyToPreviewClickListener?.invoke(getItem().comment.attachments!!.first())
 
                 else -> getItem().onClickedCallback.onClicked(getItem())
             }
         }
 
+        val onCommentLongClickListener = OnLongClickListener {
+            return@OnLongClickListener when {
+                !getItem().comment.hasAttachments() -> {
+                    onTextCommentLongClicked?.invoke(getItem().comment.body)
+                    true
+                }
+                else -> false
+            }
+        }
+
         override fun bindItem(item: CommentEntry) {
             super.bindItem(item)
+            comment.setOnLongClickListener(onCommentLongClickListener)
             comment.setOnClickListener(onCommentClickListener)
             comment.status = when {
                 getItem().hasError() -> Status.Error
@@ -207,7 +241,7 @@ internal class TicketAdapter: AdapterBase<TicketEntry>() {
             comment.setOnProgressIconClickListener {
                 when (comment.fileProgressStatus) {
                     Status.Processing -> getItem().uploadFileHooks?.cancelUploading()
-                    Status.Completed -> onDownloadedFileClickListener?.invoke(getItem().comment.attachments!![0])
+                    Status.Completed -> onFileReadyToPreviewClickListener?.invoke(getItem().comment.attachments!![0])
                     Status.Error -> comment.performClick()
                 }
             }
@@ -265,6 +299,10 @@ internal class TicketAdapter: AdapterBase<TicketEntry>() {
         override fun onMove(recyclerView: RecyclerView,
                             viewHolder: RecyclerView.ViewHolder,
                             target: RecyclerView.ViewHolder): Boolean {
+            return false
+        }
+
+        override fun isLongPressDragEnabled(): Boolean {
             return false
         }
 

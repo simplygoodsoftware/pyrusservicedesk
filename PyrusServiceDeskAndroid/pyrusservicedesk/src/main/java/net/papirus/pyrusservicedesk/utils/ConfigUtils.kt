@@ -19,6 +19,9 @@ internal class ConfigUtils{
         private const val SCALE_SUPPORT_ICON_DEFAULT = .5f
         private const val PREFS_KEY_USER_ID = "net.papirus.pyrusservicedesk.PREFS_KEY_USER_ID"
 
+        /**
+         * Provides accent color taking [PyrusServiceDesk.CONFIGURATION] into account
+         */
         @ColorInt
         fun getAccentColor(activity: Context): Int {
             return when{
@@ -27,6 +30,9 @@ internal class ConfigUtils{
             }
         }
 
+        /**
+         * Provides chat title taking [PyrusServiceDesk.CONFIGURATION] into account
+         */
         fun getTitle(context: Context): String {
             return when{
                 !PyrusServiceDesk.getConfiguration().title.isNullOrEmpty() -> PyrusServiceDesk.getConfiguration().title!!
@@ -34,8 +40,15 @@ internal class ConfigUtils{
             }
         }
 
+        /**
+         * Provides chat welcome message taking [PyrusServiceDesk.CONFIGURATION] into account
+         */
         fun getWelcomeMessage(): String? = PyrusServiceDesk.getConfiguration().welcomeMessage
 
+
+        /**
+         * Provides avatar placeholder taking [PyrusServiceDesk.CONFIGURATION] into account
+         */
         fun getSupportAvatar(context: Context): Drawable {
             return when {
                 PyrusServiceDesk.getConfiguration().supportAvatar != null ->
@@ -52,6 +65,9 @@ internal class ConfigUtils{
             }
         }
 
+        /**
+         * Provides user name taking [PyrusServiceDesk.CONFIGURATION] into account
+         */
         fun getUserName(): String {
             return when {
                 !PyrusServiceDesk.getConfiguration().userName.isNullOrBlank() ->
@@ -60,6 +76,9 @@ internal class ConfigUtils{
             }
         }
 
+        /**
+         * Provides userId. [preference] is used for storing generated user id.
+         */
         fun getUserId(preference: SharedPreferences): String {
             return when {
                 preference.contains(PREFS_KEY_USER_ID) -> preference.getString(PREFS_KEY_USER_ID, "")

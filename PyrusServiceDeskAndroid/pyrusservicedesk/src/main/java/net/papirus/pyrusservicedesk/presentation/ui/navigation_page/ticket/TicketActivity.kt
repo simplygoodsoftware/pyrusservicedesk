@@ -1,17 +1,20 @@
 package net.papirus.pyrusservicedesk.presentation.ui.navigation_page.ticket
 
 import android.arch.lifecycle.Observer
+import android.content.ClipData
+import android.content.ClipboardManager
+import android.content.Context
 import android.content.Intent
 import android.content.res.ColorStateList
 import android.net.Uri
 import android.os.Bundle
-import android.support.v7.widget.DefaultItemAnimator
 import android.text.Editable
 import android.text.TextWatcher
 import android.view.Menu
 import android.view.MenuInflater
 import android.view.MenuItem
 import android.view.MenuItem.SHOW_AS_ACTION_ALWAYS
+import android.widget.Toast
 import com.example.pyrusservicedesk.R
 import kotlinx.android.synthetic.main.psd_activity_ticket.*
 import net.papirus.pyrusservicedesk.PyrusServiceDesk
@@ -29,12 +32,24 @@ import net.papirus.pyrusservicedesk.utils.getViewModel
 import net.papirus.pyrusservicedesk.utils.isAtEnd
 import net.papirus.pyrusservicedesk.utils.setCursorColor
 
+/**
+ * Activity for rendering ticket/feed comments.
+ */
 internal class TicketActivity : ConnectionActivityBase<TicketViewModel>(TicketViewModel::class.java) {
 
     companion object {
         private const val KEY_TICKET_ID = "KEY_TICKET_ID"
         private const val KEY_UNREAD_COUNT = "KEY_UNREAD_COUNT"
 
+        /**
+         * Provides intent for launching the screen.
+         *
+         * @param ticketId id of ticket to be rendered.
+         * When [PyrusServiceDesk.isSingleChat] is used this should be omitted.
+         * When not, this should be omitted for the new ticket.
+         * @param unreadCount current count of unread tickets.
+         * Can be omitted in [PyrusServiceDesk.isSingleChat] mode
+         */
         fun getLaunchIntent(ticketId:Int? = null, unreadCount: Int? = 0): Intent {
             return Intent(
                     PyrusServiceDesk.getInstance().application,
@@ -45,10 +60,23 @@ internal class TicketActivity : ConnectionActivityBase<TicketViewModel>(TicketVi
             }
         }
 
+        /**
+         * Extracts ticket id from the given [arguments].
+         * Expected that [arguments] are made by [getLaunchIntent].
+         *
+         * @return id of the ticket stored in [arguments] or [EMPTY_TICKET_ID] if
+         * [arguments] doesn't contain it
+         */
         fun getTicketId(arguments: Intent): Int {
             return arguments.getIntExtra(KEY_TICKET_ID, EMPTY_TICKET_ID)
         }
 
+        /**
+         * Extracts unread ticket count from the [arguments].
+         * Expected that [arguments] are made by [getLaunchIntent].
+         *
+         * @return count of the unread tickets, or 0 if it was not specified.
+         */
         fun getUnreadTicketsCount(arguments: Intent): Int {
             return arguments.getIntExtra(KEY_UNREAD_COUNT, 0)
         }
@@ -66,8 +94,11 @@ internal class TicketActivity : ConnectionActivityBase<TicketViewModel>(TicketVi
     }
 
     private val adapter = TicketAdapter().apply {
-        setOnDownloadedFileClickListener {
+        setOnFileReadyForPreviewClickListener {
            UiNavigator.toFilePreview(this@TicketActivity, it.toFileData())
+        }
+        setOnTextCommentLongClicked {
+            copyToClipboard(it)
         }
     }
 
@@ -105,7 +136,7 @@ internal class TicketActivity : ConnectionActivityBase<TicketViewModel>(TicketVi
                     resources.getDimensionPixelSize(R.dimen.psd_comments_item_space),
                     this@TicketActivity.adapter.itemSpaceMultiplier)
             )
-            itemAnimator = DefaultItemAnimator().apply { changeDuration = 0 }
+            itemAnimator = null
             this@TicketActivity.adapter.itemTouchHelper?.attachToRecyclerView(this)
         }
         send.setOnClickListener { sendComment() }
@@ -146,15 +177,15 @@ internal class TicketActivity : ConnectionActivityBase<TicketViewModel>(TicketVi
         } ?: false
     }
 
-    override fun observeData() {
-        super.observeData()
+    override fun startObserveData() {
+        super.startObserveData()
         viewModel.getCommentDiffLiveData().observe(
             this,
             Observer { result ->
                 val atEnd = comments.isAtEnd()
                 result?.let{
                     refresh.isRefreshing = false
-                    adapter.setItemsWithoutUpdate(it.newItems)
+                    adapter.setItems(it.newItems)
                     it.diffResult.dispatchUpdatesTo(adapter)
                 }
                 if (atEnd){
@@ -213,13 +244,20 @@ internal class TicketActivity : ConnectionActivityBase<TicketViewModel>(TicketVi
 
     private fun sendComment() {
         if (!input.text.isNullOrBlank()) {
-            viewModel.addComment(input.text.toString())
+            viewModel.onSendClicked(input.text.toString())
             input.text = null
         }
     }
 
     private fun showAttachFileVariants() {
         AttachFileVariantsFragment().show(supportFragmentManager, "")
+    }
+
+    private fun copyToClipboard(text: String) {
+        (getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager).apply {
+            primaryClip = ClipData.newPlainText("Copied text", text)
+        }
+        Toast.makeText(applicationContext, R.string.psd_copied_to_clipboard, Toast.LENGTH_SHORT).show()
     }
 }
 

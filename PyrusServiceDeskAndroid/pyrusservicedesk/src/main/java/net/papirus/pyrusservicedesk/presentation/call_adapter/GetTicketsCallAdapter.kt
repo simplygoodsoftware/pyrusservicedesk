@@ -1,4 +1,4 @@
-package net.papirus.pyrusservicedesk.presentation.usecase
+package net.papirus.pyrusservicedesk.presentation.call_adapter
 
 import kotlinx.coroutines.CoroutineScope
 import net.papirus.pyrusservicedesk.sdk.RequestFactory
@@ -6,12 +6,16 @@ import net.papirus.pyrusservicedesk.sdk.data.TicketShortDescription
 import net.papirus.pyrusservicedesk.sdk.response.ResponseCallback
 import net.papirus.pyrusservicedesk.sdk.response.ResponseError
 
-internal class GetTicketsUseCase(
+/**
+ * Adapter for obtaining list of available tickets.
+ * @param scope coroutine scope for executing request.
+ */
+internal class GetTicketsCallAdapter(
         scope: CoroutineScope,
         private val requests: RequestFactory)
-    : UseCaseBase<List<TicketShortDescription>>(scope) {
+    : CallAdapterBase<List<TicketShortDescription>>(scope) {
 
-    override suspend fun run(): UseCaseResult<List<TicketShortDescription>> {
+    override suspend fun run(): CallResult<List<TicketShortDescription>> {
         var tickets: List<TicketShortDescription>? = null
         var error: ResponseError? = null
         requests.getTicketsRequest().execute(
@@ -26,6 +30,6 @@ internal class GetTicketsUseCase(
 
             }
         )
-        return UseCaseResult(tickets, error)
+        return CallResult(tickets, error)
     }
 }

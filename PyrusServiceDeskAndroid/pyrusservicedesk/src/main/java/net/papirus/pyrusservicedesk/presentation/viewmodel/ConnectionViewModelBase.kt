@@ -18,14 +18,28 @@ private const val PROGRESS_INCREMENT_VALUE = 20
 private const val PROGRESS_ANIMATION_DURATION_MS_DEFAULT = 1000L
 private const val PROGRESS_ANIMATION_DURATION_MS_QUICK = 400L
 
+/**
+ * Base class for view models that are able to make requests using [RequestFactory] and publish progress.
+ * This also is [CoroutineScope] to be able to safely launch requests using call adapters.
+ * [coroutineContext] of this scope is cancelled in [onCleared]
+ *
+ * @param serviceDesk current [PyrusServiceDesk] implementation.
+ */
 internal abstract class ConnectionViewModelBase(serviceDesk: PyrusServiceDesk)
     : AndroidViewModel(serviceDesk.application),
         CoroutineScope {
 
+    // request factory that can be used for making requests to a repository.
     protected val requests = serviceDesk.requestFactory
+    // updates that can be observed by extenders.
     protected val liveUpdates = serviceDesk.liveUpdates
+    // provider of temporary data to be rendered by ui, for example, local comments etc.
     protected val localDataProvider = serviceDesk.localDataProvider
+    // live data that exposes state of the network.
+    // The state is not completely fair, because it is assigned when instance is created and it explicitly cleared
+    // when successful data loading has been performed.
     protected val isNetworkConnected = MutableLiveData<Boolean>()
+
     private val connectivity: ConnectivityManager =
         serviceDesk.application.getSystemService(Context.CONNECTIVITY_SERVICE)
                 as ConnectivityManager
@@ -61,32 +75,54 @@ internal abstract class ConnectionViewModelBase(serviceDesk: PyrusServiceDesk)
         coroutineContext.cancel()
     }
 
+    /**
+     * Provides live data that exposes state of the network. See [isNetworkConnected].
+     */
     fun getIsNetworkConnectedLiveDate(): LiveData<Boolean> = isNetworkConnected
+
+    /**
+     * Provides live data that exposes current progress of data loading.
+     */
     fun getLoadingProgressLiveData(): LiveData<Int> = loadingProgress
 
+    /**
+     * This is used for loading the main data of the model.
+     * This also triggers publishing progress from the start.
+     */
     fun loadData(){
         replayProgress()
         onLoadData()
     }
 
+    /**
+     * Implementations should do loading of the main model's data loading here.
+     */
     protected abstract fun onLoadData()
 
-    private fun replayProgress() {
-        loadingProgress.value = 0
-        recentPublishedProgress = 0
-        mainHandler.post(publishProgressRunnable)
-    }
-
+    /**
+     * Callback that should be invoked when [onLoadData] completed successfully.
+     * This properly completes publishing of the progress.
+     * Without calling this progress will freeze on a value of 80%.
+     */
     protected fun onDataLoaded() {
         isNetworkConnected.value = true
         publishProgress(MAX_PROGRESS, PROGRESS_ANIMATION_DURATION_MS_QUICK, null)
     }
 
+    /**
+     * Publishes [progress] to [loadingProgress]
+     */
     protected fun publishProgress(progress: Int) {
         when (progress) {
             MAX_PROGRESS -> onDataLoaded()
             else -> publishProgress(progress, PROGRESS_ANIMATION_DURATION_MS_DEFAULT, null)
         }
+    }
+
+    private fun replayProgress() {
+        loadingProgress.value = 0
+        recentPublishedProgress = 0
+        mainHandler.post(publishProgressRunnable)
     }
 
     private fun publishProgress(progress: Int, durationMs: Long, onCompleted: Runnable?) {

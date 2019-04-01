@@ -7,6 +7,10 @@ import android.graphics.drawable.Drawable
 import android.media.ThumbnailUtils
 import com.squareup.picasso.Transformation
 
+/**
+ * Picasa [Transformation] implementation that uses [circle] for
+ * transforming image.
+ */
 internal val CIRCLE_TRANSFORMATION = object : Transformation {
     override fun key(): String = "Circle"
     override fun transform(source: Bitmap): Bitmap = source.circle()
@@ -39,6 +43,10 @@ internal fun Bitmap.circle(): Bitmap {
     return output
 }
 
+/**
+ * Makes drawable circle.
+ * @return new drawable instance that has circle shape
+ */
 internal fun Drawable.circle(context: Context): Drawable {
     val out = Bitmap.createBitmap(intrinsicWidth, intrinsicHeight, Bitmap.Config.ARGB_8888)
     this.mutate().run {

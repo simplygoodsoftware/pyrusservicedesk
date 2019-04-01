@@ -29,12 +29,28 @@ private const val PROGRESS_BACKGROUND_MULTIPLIER = 0.3f
 private const val SECONDARY_TEXT_COLOR_MULTIPLIER = 0.5f
 private const val PROGRESS_CHANGE_ANIMATION_DURATION = 100L
 
+/**
+ * View that is used for rendering comment.
+ * Can can be it one of the [ContentType]. [ContentType.Text] is used by default.
+ * Switching the [contentType] automatically changes the appearance of the view.
+ *
+ * Also appearance depends on the [R.styleable.CommentView_type] that can be specified in
+ * xml declaration of the view. By default [TYPE_INBOUND] is used.
+ */
 internal class CommentView @JvmOverloads constructor(
         context: Context,
         attrs: AttributeSet? = null,
         defStyleAttr: Int = 0)
     : FrameLayout(context, attrs, defStyleAttr) {
 
+    /**
+     * Type of the content that is intended to be shown.
+     * See [ContentType].
+     * Assigning automatically changes the appearance of the view.
+     * For example if [ContentType.Text] was assigned, then invocations of any methods that
+     * are related to [ContentType.Attachment] are not give any visible effects.
+     *
+     */
     var contentType: ContentType = ContentType.Text
         set(value) {
             when (value) {
@@ -51,6 +67,10 @@ internal class CommentView @JvmOverloads constructor(
             field = value
         }
 
+    /**
+     * Change this if status of downloading/uploading status was changed.
+     * This causes change of the appearance of the progress icon.
+     */
     var fileProgressStatus = Status.Completed
         set(value) {
             val icon = AppCompatResources.getDrawable(
@@ -75,12 +95,19 @@ internal class CommentView @JvmOverloads constructor(
             field = value
         }
 
+    /**
+     * Progress icon can be completely hidden by switching this value to FALSE
+     */
     var isFileProgressVisible = true
         set(value) {
             file_progress.visibility = if (value) View.VISIBLE else View.GONE
             field = value
         }
 
+    /**
+     * Overall comment state.
+     * User for rendering of the comments states, like indicating progress and errors.
+     */
     var status = Status.Completed
         set(value) {
             var visibility = View.VISIBLE
@@ -121,7 +148,7 @@ internal class CommentView @JvmOverloads constructor(
             else -> getAccentColor(context)
         }
         primaryColor = getTextColorOnBackground(context, backgroundColor)
-        val secondaryColor = adjustColor(primaryColor, ColorChannel.Alpha, SECONDARY_TEXT_COLOR_MULTIPLIER)
+        val secondaryColor = adjustColorChannel(primaryColor, ColorChannel.Alpha, SECONDARY_TEXT_COLOR_MULTIPLIER)
 
         background_parent.background.mutate().setColorFilter(backgroundColor, PorterDuff.Mode.SRC_IN)
         comment_text.setTextColor(primaryColor)
@@ -134,7 +161,7 @@ internal class CommentView @JvmOverloads constructor(
             findDrawableByLayerId(android.R.id.background)
                     .mutate()
                     .setColorFilter(
-                        adjustColor(
+                        adjustColorChannel(
                             secondaryColor,
                             ColorChannel.Alpha,
                             PROGRESS_BACKGROUND_MULTIPLIER),
@@ -158,6 +185,14 @@ internal class CommentView @JvmOverloads constructor(
         isFileProgressVisible = true
     }
 
+    override fun setOnClickListener(l: OnClickListener?) {
+        background_parent.setOnClickListener(l)
+    }
+
+    override fun setOnLongClickListener(l: OnLongClickListener?) {
+        background_parent.setOnLongClickListener(l)
+    }
+
     override fun onAttachedToWindow() {
         super.onAttachedToWindow()
         root.removeView(statusView)
@@ -176,15 +211,27 @@ internal class CommentView @JvmOverloads constructor(
         }
     }
 
+    /**
+     * Assigns [text] of the comments.
+     * Works with [ContentType.Text].
+     */
     fun setCommentText(text: String) {
         comment_text.text = text
         LinkifyCompat.addLinks(comment_text, Linkify.WEB_URLS or Linkify.PHONE_NUMBERS)
     }
 
+    /**
+     * Assigns [fileName] of the file to be shown.
+     * Works with [ContentType.Attachment].
+     */
     fun setFileName(fileName: String) {
         file_name.text = fileName
     }
 
+    /**
+     * Uses [bytesSize] to render the size of the file.
+     * Works with [ContentType.Attachment].
+     */
     fun setFileSize(bytesSize: Float) {
         recentFileSize = bytesSize
         val isMegabytes = recentFileSize >= BYTES_IN_MEGABYTE / 10
@@ -195,6 +242,10 @@ internal class CommentView @JvmOverloads constructor(
         file_size.text = context.getString(if (isMegabytes) R.string.psd_file_size_mb else R.string.psd_file_size_kb, toShow)
     }
 
+    /**
+     * Assigns [progress] that should shown on progress icon.
+     * Works with [ContentType.Attachment].
+     */
     fun setProgress(progress: Int) {
         val currentProgress = recentProgress
         recentProgress = progress
@@ -211,17 +262,27 @@ internal class CommentView @JvmOverloads constructor(
         }.also{ it.start() }
     }
 
+    /**
+     * Assigns [listener] that is invoked when progress icon was clicked by user.
+     */
     fun setOnProgressIconClickListener(listener: () -> Unit) {
         onDownloadIconClickListener = listener
     }
 }
 
+/**
+ * Used for definition of status of the comment overall by [status] or
+ * status of file uploading/downloading by [fileProgressStatus]
+ */
 internal enum class Status {
     Processing,
     Completed,
     Error
 }
 
+/**
+ * Used for definition of the content type of [CommentView]
+ */
 internal enum class ContentType {
     Text,
     Attachment

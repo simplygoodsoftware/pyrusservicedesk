@@ -63,7 +63,6 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:textAppearance="?attr/textAppearanceListItem"
-            android:textIsSelectable="true"
             tools:text="@tools:sample/lorem"
             tools:visibility="gone"/>
     </FrameLayout>

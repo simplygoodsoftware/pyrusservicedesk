@@ -13,6 +13,9 @@ import net.papirus.pyrusservicedesk.utils.ConfigUtils
 import net.papirus.pyrusservicedesk.utils.getTimePassedFrom
 import java.util.*
 
+/**
+ * Adapter for rendering list of available tickets.
+ */
 internal class TicketsAdapter: AdapterBase<TicketShortDescription>() {
 
     private var ticketClickListener: ((ticket: TicketShortDescription) -> Unit)? = null
@@ -21,6 +24,9 @@ internal class TicketsAdapter: AdapterBase<TicketShortDescription>() {
         return TicketHolder(parent)
     }
 
+    /**
+     * Assigns [listener] that is invoked when used clicked on any ticket.
+     */
     fun setOnTicketClickListener(listener: (ticket: TicketShortDescription) -> Unit){
         ticketClickListener = listener
     }

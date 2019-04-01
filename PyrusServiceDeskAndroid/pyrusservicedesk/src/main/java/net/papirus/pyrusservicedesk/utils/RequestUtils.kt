@@ -5,11 +5,25 @@ import java.net.URLEncoder
 
 class RequestUtils{
     companion object {
+        /**
+         * Max supported file sizes.
+         */
         const val MAX_FILE_SIZE_MEGABYTES = 250
         const val MAX_FILE_SIZE_BYTES = MAX_FILE_SIZE_MEGABYTES * 1024 * 1024
 
+        /**
+         * Base URL used for api calls
+         */
         internal const val BASE_URL = "https://pyrus.com/servicedeskapi/v1/"
+
+        /**
+         * Provides url for getting the avatar.
+         */
         internal fun getAvatarUrl(avatarId: Int): String = "$BASE_URL/Avatar/$avatarId"
+
+        /**
+         * Provides url for getting the file.
+         */
         internal fun getFileUrl(fileId: Int): String {
             return with(PyrusServiceDesk.getInstance()){
                 "$BASE_URL/DownloadFile/$fileId" +

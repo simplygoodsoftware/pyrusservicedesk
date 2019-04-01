@@ -14,9 +14,15 @@ import net.papirus.pyrusservicedesk.presentation.ui.navigation.UiNavigator
 import net.papirus.pyrusservicedesk.presentation.ui.view.recyclerview.item_decorators.SpaceItemDecoration
 
 
+/**
+ * Activity for rendering list of current tickets
+ */
 internal class TicketsActivity: ConnectionActivityBase<TicketsViewModel>(TicketsViewModel::class.java) {
 
     companion object {
+        /**
+         * Provides intent for launching activity
+         */
         fun getLaunchIntent(): Intent {
             return Intent(
                 PyrusServiceDesk.getInstance().application,
@@ -52,14 +58,8 @@ internal class TicketsActivity: ConnectionActivityBase<TicketsViewModel>(Tickets
         new_conversation.setOnClickListener { UiNavigator.toNewTicket(this, viewModel.getUnreadCount()) }
     }
 
-    override fun observeData() {
-        super.observeData()
-        viewModel.getIsLoadingLiveData().observe(
-            this,
-            Observer { isLoading ->
-                isLoading?.let {  }
-            }
-        )
+    override fun startObserveData() {
+        super.startObserveData()
         viewModel.getTicketsLiveData().observe(
             this,
             Observer { list ->

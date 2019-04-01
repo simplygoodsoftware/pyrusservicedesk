@@ -6,12 +6,6 @@ import android.support.annotation.DrawableRes
 import net.papirus.pyrusservicedesk.ServiceDeskConfiguration.Builder
 import net.papirus.pyrusservicedesk.utils.isTablet
 
-private const val KEY_USER_NAME = "ServiceDeskConfiguration_KEY_USER_NAME"
-private const val KEY_TITLE = "ServiceDeskConfiguration_KEY_TITLE"
-private const val KEY_WELCOME_MESSAGE = "ServiceDeskConfiguration_KEY_WELCOME_MESSAGE"
-private const val KEY_THEME_COLOR = "ServiceDeskConfiguration_KEY_THEME_COLOR"
-private const val KEY_SUPPORT_AVATAR = "ServiceDeskConfiguration_KEY_SUPPORT_AVATAR"
-
 /**
  * Represents custom settings that can be applied when service desk is started via [PyrusServiceDesk.start]
  * Use [Builder] to perform setup and make an instance]
@@ -27,6 +21,12 @@ class ServiceDeskConfiguration internal constructor() {
     internal val isDialogTheme: Boolean = PyrusServiceDesk.getInstance().application.isTablet()
 
     internal companion object {
+        private const val KEY_USER_NAME = "ServiceDeskConfiguration_KEY_USER_NAME"
+        private const val KEY_TITLE = "ServiceDeskConfiguration_KEY_TITLE"
+        private const val KEY_WELCOME_MESSAGE = "ServiceDeskConfiguration_KEY_WELCOME_MESSAGE"
+        private const val KEY_THEME_COLOR = "ServiceDeskConfiguration_KEY_THEME_COLOR"
+        private const val KEY_SUPPORT_AVATAR = "ServiceDeskConfiguration_KEY_SUPPORT_AVATAR"
+
         fun save(bundle: Bundle) {
             with(PyrusServiceDesk.getConfiguration()) {
                 bundle.apply {
@@ -44,7 +44,7 @@ class ServiceDeskConfiguration internal constructor() {
         fun restore(bundle: Bundle) {
             if (!bundle.containsKey(KEY_USER_NAME))
                 return
-            PyrusServiceDesk.forceConfiguration(
+            PyrusServiceDesk.setConfiguration(
                 ServiceDeskConfiguration().apply {
                     userName = bundle.getString(KEY_USER_NAME)
                     title = bundle.getString(KEY_TITLE)

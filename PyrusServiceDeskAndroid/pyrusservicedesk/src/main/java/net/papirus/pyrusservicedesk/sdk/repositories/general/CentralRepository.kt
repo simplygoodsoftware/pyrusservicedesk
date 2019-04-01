@@ -5,6 +5,10 @@ import net.papirus.pyrusservicedesk.sdk.data.TicketDescription
 import net.papirus.pyrusservicedesk.sdk.response.*
 import net.papirus.pyrusservicedesk.sdk.web.UploadFileHooks
 
+/**
+ * [GeneralRepository] implementation that handles all general requests.
+ * Current implementation just delegates calls to the [webRepository].
+ */
 internal class CentralRepository(private val webRepository: GeneralRepository) :
     GeneralRepository {
 

@@ -19,7 +19,9 @@ import kotlinx.android.synthetic.main.psd_fragment_attach_file_variants.*
 import net.papirus.pyrusservicedesk.PyrusServiceDesk
 import net.papirus.pyrusservicedesk.utils.*
 
-
+/**
+ * UI that is used for attaching files to the comments.
+ */
 internal class AttachFileVariantsFragment: BottomSheetDialogFragment(), View.OnClickListener {
 
     private companion object {
@@ -88,6 +90,20 @@ internal class AttachFileVariantsFragment: BottomSheetDialogFragment(), View.OnC
         }
     }
 
+    override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<out String>, grantResults: IntArray) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults)
+        if (requestCode != REQUEST_CODE_PERMISSION)
+            return
+        val granted = mutableListOf<String>()
+        permissions.forEachIndexed {
+                index, permission ->
+            if (grantResults[index] == PackageManager.PERMISSION_GRANTED)
+                granted.add(permission)
+        }
+        if (!granted.isEmpty())
+            onPermissionsGranted(granted.toTypedArray())
+    }
+
     private fun startTakingPhoto() {
         activity?.let { activity ->
 
@@ -102,20 +118,6 @@ internal class AttachFileVariantsFragment: BottomSheetDialogFragment(), View.OnC
             else
                 requestPermissions(permissionToAsk.toTypedArray(), REQUEST_CODE_PERMISSION)
         }
-    }
-
-    override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<out String>, grantResults: IntArray) {
-        super.onRequestPermissionsResult(requestCode, permissions, grantResults)
-        if (requestCode != REQUEST_CODE_PERMISSION)
-            return
-        val granted = mutableListOf<String>()
-        permissions.forEachIndexed {
-                index, permission ->
-            if (grantResults[index] == PackageManager.PERMISSION_GRANTED)
-                granted.add(permission)
-        }
-        if (!granted.isEmpty())
-            onPermissionsGranted(granted.toTypedArray())
     }
 
     private fun onPermissionsGranted(permissions: Array<String>) {

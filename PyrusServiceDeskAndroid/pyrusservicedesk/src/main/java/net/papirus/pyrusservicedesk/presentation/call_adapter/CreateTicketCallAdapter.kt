@@ -1,4 +1,4 @@
-package net.papirus.pyrusservicedesk.presentation.usecase
+package net.papirus.pyrusservicedesk.presentation.call_adapter
 
 import kotlinx.coroutines.CoroutineScope
 import net.papirus.pyrusservicedesk.sdk.RequestFactory
@@ -8,14 +8,21 @@ import net.papirus.pyrusservicedesk.sdk.response.ResponseCallback
 import net.papirus.pyrusservicedesk.sdk.response.ResponseError
 import net.papirus.pyrusservicedesk.sdk.web.UploadFileHooks
 
-internal class CreateTicketUseCase(
+/**
+ * Adapter for creating ticket.
+ * @param scope coroutine scope for executing request.
+ * @param requests factory to obtain request from.
+ * @param comment comment to be added as initial comment of the ticket.
+ * @param uploadFileHooks file hooks that are used for managing uploading of the file in comment.
+ */
+internal class CreateTicketCallAdapter(
         scope: CoroutineScope,
         private val requests: RequestFactory,
         private val comment: Comment,
         private val uploadFileHooks: UploadFileHooks? = null)
-    : UseCaseBase<Int>(scope) {
+    : CallAdapterBase<Int>(scope) {
 
-    override suspend fun run(): UseCaseResult<Int> {
+    override suspend fun run(): CallResult<Int> {
         var result: Int? = null
         var error: ResponseError? = null
         requests.getCreateTicketRequest(comment.toTicketDescription(), uploadFileHooks).execute(
@@ -30,7 +37,7 @@ internal class CreateTicketUseCase(
 
             }
         )
-        return UseCaseResult(result, error)
+        return CallResult(result, error)
     }
 }
 

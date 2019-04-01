@@ -12,9 +12,9 @@ import android.support.v7.util.DiffUtil
 import android.widget.Toast
 import com.example.pyrusservicedesk.R
 import net.papirus.pyrusservicedesk.PyrusServiceDesk
+import net.papirus.pyrusservicedesk.presentation.call_adapter.*
 import net.papirus.pyrusservicedesk.presentation.ui.navigation_page.ticket.entries.*
 import net.papirus.pyrusservicedesk.presentation.ui.view.recyclerview.DiffResultWithNewItems
-import net.papirus.pyrusservicedesk.presentation.usecase.*
 import net.papirus.pyrusservicedesk.presentation.viewmodel.ConnectionViewModelBase
 import net.papirus.pyrusservicedesk.sdk.data.Attachment
 import net.papirus.pyrusservicedesk.sdk.data.Comment
@@ -29,8 +29,9 @@ import net.papirus.pyrusservicedesk.utils.getWhen
 import java.util.*
 import kotlin.collections.ArrayList
 
-private const val TICKET_UPDATE_INTERVAL = 30L
-
+/**
+ * ViewModel for the ticket screen.
+ */
 internal class TicketViewModel(
         serviceDesk: PyrusServiceDesk,
         arguments: Intent)
@@ -39,6 +40,8 @@ internal class TicketViewModel(
         OnUnreadTicketCountChangedSubscriber {
 
     private companion object {
+
+        const val TICKET_UPDATE_INTERVAL = 30L
 
         fun checkComment(comment: Comment): CheckCommentError? {
             return when{
@@ -50,13 +53,20 @@ internal class TicketViewModel(
 
         fun Comment.isEmpty(): Boolean = body.isBlank() && attachments.isNullOrEmpty()
 
-        private fun Comment.hasAttachmentWithExceededSize(): Boolean =
+        fun Comment.hasAttachmentWithExceededSize(): Boolean =
             attachments?.let { it.any { attach -> attach.hasExceededFileSize()} } ?: false
 
-        private fun Attachment.hasExceededFileSize(): Boolean = bytesSize > MAX_FILE_SIZE_BYTES
+        fun Attachment.hasExceededFileSize(): Boolean = bytesSize > MAX_FILE_SIZE_BYTES
     }
 
+    /**
+     * Denotes whether [PyrusServiceDesk.isSingleChat] is enabled.
+     */
     val isFeed = serviceDesk.isSingleChat
+
+    /**
+     * Drafted text. Assigned once when view model is created.
+     */
     val draft: String
 
     private val draftRepository = serviceDesk.draftRepository
@@ -85,7 +95,7 @@ internal class TicketViewModel(
             if (!isFeed) {
                 addSource(
                     Transformations.switchMap(commentsRequest){
-                        GetTicketUseCase(this@TicketViewModel, requests, ticketId).execute()
+                        GetTicketCallAdapter(this@TicketViewModel, requests, ticketId).execute()
                     }
                 ){
                     it?.let { result ->
@@ -99,7 +109,7 @@ internal class TicketViewModel(
             else {
                 addSource(
                     Transformations.switchMap(commentsRequest){
-                        GetFeedUseCase(this@TicketViewModel, requests).execute()
+                        GetFeedCallAdapter(this@TicketViewModel, requests).execute()
                     }
                 ){
                     it?.let { result ->
@@ -147,13 +157,23 @@ internal class TicketViewModel(
         liveUpdates.unsubscribeFromTicketCountChanged(this)
     }
 
-    fun addComment(text: String) {
-        val localComment = localDataProvider.newLocalComment(text.trim())
+    /**
+     * Callback to be invoked when user clicks "send" button.
+     *
+     * @param text text that is entered in an input field
+     */
+    fun onSendClicked(text: String) {
+        val localComment = localDataProvider.createLocalComment(text.trim())
         sendAddComment(localComment)
     }
 
+    /**
+     * Callback to be invoked when user picked file to send.
+     *
+     * @param attachmentUri URI of the file to be sent
+     */
     fun onAttachmentSelected(attachmentUri: Uri) {
-        val localComment = localDataProvider.newLocalComment(fileUri = attachmentUri)
+        val localComment = localDataProvider.createLocalComment(fileUri = attachmentUri)
         val fileHooks = UploadFileHooks()
         fileHooks.subscribeOnCancel(CancellationSignal.OnCancelListener {
             applyUpdate(CommentEntry(localComment, onClickedCallback = this), ChangeType.Cancelled)
@@ -161,10 +181,21 @@ internal class TicketViewModel(
         sendAddComment(localComment, fileHooks)
     }
 
+    /**
+     * Provides live data that delivers [DiffResultWithNewItems] which contains list of
+     * current [TicketEntry]s and [DiffUtil.DiffResult] that is used for correctly apply
+     * changes to UI.
+     */
     fun getCommentDiffLiveData(): LiveData<DiffResultWithNewItems<TicketEntry>> = commentDiff
 
+    /**
+     * Provides live data that delivers counter of unread tickets.
+     */
     fun getUnreadCounterLiveData(): LiveData<Int> = unreadCounter
 
+    /**
+     * Callback to be invoked when user input changed.
+     */
     fun onInputTextChanged(text: String) {
         draftRepository.saveDraft(text)
     }
@@ -205,9 +236,7 @@ internal class TicketViewModel(
                 (getApplication() as Context).run {
                     Toast.makeText(
                         this,
-                        this.getString(R.string.psd_file_size_exceeded_message,
-                            MAX_FILE_SIZE_MEGABYTES
-                        ),
+                        this.getString(R.string.psd_file_size_exceeded_message, MAX_FILE_SIZE_MEGABYTES),
                         Toast.LENGTH_SHORT)
                         .show()
                 }
@@ -224,13 +253,13 @@ internal class TicketViewModel(
         val call = when {
             toNewTicket -> {
                 isCreateTicketSent = true
-                CreateTicketUseCase(this, requests, localComment, uploadFileHooks).execute()
+                CreateTicketCallAdapter(this, requests, localComment, uploadFileHooks).execute()
             }
-            isFeed -> AddFeedCommentUseCase(this, requests, localComment, uploadFileHooks).execute()
-            else -> AddCommentUseCase(this, requests, ticketId, localComment, uploadFileHooks).execute()
+            isFeed -> AddFeedCommentCallAdapter(this, requests, localComment, uploadFileHooks).execute()
+            else -> AddCommentCallAdapter(this, requests, ticketId, localComment, uploadFileHooks).execute()
         }
-        val observer = object : Observer<UseCaseResult<Int>> {
-            override fun onChanged(res: UseCaseResult<Int>?) {
+        val observer = object : Observer<CallResult<Int>> {
+            override fun onChanged(res: CallResult<Int>?) {
                 res?.let { result ->
                     isCreateTicketSent = false
                     if (uploadFileHooks?.isCancelled == true)
@@ -249,7 +278,7 @@ internal class TicketViewModel(
                             }
                             val commentId = if (toNewTicket) localComment.localId else result.data!!
                             CommentEntry(
-                                localDataProvider.localToServerComment(localComment, commentId),
+                                localDataProvider.convertLocalCommentToServer(localComment, commentId),
                                 onClickedCallback = this@TicketViewModel
                             )
                         }

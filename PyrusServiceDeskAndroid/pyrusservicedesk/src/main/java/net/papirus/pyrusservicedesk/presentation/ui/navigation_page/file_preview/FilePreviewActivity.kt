@@ -16,11 +16,19 @@ import net.papirus.pyrusservicedesk.sdk.data.intermediate.FileData
 
 private const val KEY_FILE_DATA = "KEY_FILE_DATA"
 
-
+/**
+ * Activity for previewing files
+ */
 internal class FilePreviewActivity: ConnectionActivityBase<FilePreviewViewModel>(FilePreviewViewModel::class.java) {
 
     companion object {
 
+        /**
+         * Provides intent for launching the activity.
+         *
+         * @param fileData data of the attachment to be reviewed.
+         * @return intent to be used for launching the preview.
+         */
         fun getLaunchIntent(fileData: FileData): Intent {
             return Intent(
                     PyrusServiceDesk.getInstance().application,
@@ -33,7 +41,6 @@ internal class FilePreviewActivity: ConnectionActivityBase<FilePreviewViewModel>
     override val toolbarViewId: Int = R.id.file_preview_toolbar
     override val refresherViewId: Int = NO_ID
 
-    var wasError = false
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -51,15 +58,12 @@ internal class FilePreviewActivity: ConnectionActivityBase<FilePreviewViewModel>
             webViewClient = object: WebViewClient(){
                 override fun onReceivedError(view: WebView?, request: WebResourceRequest?, error: WebResourceError?) {
                     super.onReceivedError(view, request, error)
-                    no_connection.visibility = VISIBLE
-                    wasError = true
+                    viewModel.onReceivedError()
                 }
             }
             webChromeClient = object: WebChromeClient() {
                 override fun onProgressChanged(view: WebView?, newProgress: Int) {
-                    if (!wasError) {
-                        viewModel.onProgressChanged(newProgress)
-                    }
+                    viewModel.onProgressChanged(newProgress)
                 }
             }
         }
@@ -74,9 +78,9 @@ internal class FilePreviewActivity: ConnectionActivityBase<FilePreviewViewModel>
         web_view.saveState(outState)
     }
 
-    override fun observeData() {
-        super.observeData()
-        viewModel.getUrlViewModel().observe(
+    override fun startObserveData() {
+        super.startObserveData()
+        viewModel.getUrlLiveData().observe(
             this,
             Observer {
                 it?.let { url ->
@@ -84,12 +88,20 @@ internal class FilePreviewActivity: ConnectionActivityBase<FilePreviewViewModel>
                 }
             }
         )
+
+        viewModel.getHasErrorLiveData().observe(
+            this,
+            Observer {
+                it?.let { hasError ->
+                    no_connection.visibility = if (hasError) VISIBLE else GONE
+                }
+            }
+        )
     }
 
     override fun reconnect() {
         super.reconnect()
-        no_connection.visibility = GONE
-        wasError = false
+        viewModel.onReconnect()
     }
 
     override fun updateProgress(newProgress: Int) {
@@ -99,11 +111,17 @@ internal class FilePreviewActivity: ConnectionActivityBase<FilePreviewViewModel>
     }
 }
 
+
+/**
+ * ViewModel for the file previews.
+ */
 internal class FilePreviewViewModel(pyrusServiceDesk: PyrusServiceDesk,
                                     private val intent: Intent)
     : ConnectionViewModelBase(pyrusServiceDesk){
 
     private val urlViewModel = MutableLiveData<String>()
+
+    private var hasError = MutableLiveData<Boolean>()
 
     init {
         loadData()
@@ -114,11 +132,45 @@ internal class FilePreviewViewModel(pyrusServiceDesk: PyrusServiceDesk,
         urlViewModel.postValue(null)
     }
 
-    fun getUrlViewModel(): LiveData<String> = urlViewModel
+    /**
+     * Provides liva data with url of the file to be shown.
+     *
+     * @return live data with url string to be observed
+     */
+    fun getUrlLiveData(): LiveData<String> = urlViewModel
 
+    /**
+     * Provides live data with the error state of the file previewing.
+     *
+     * @return live data with the error state of the previewing. Normally this value
+     * is null.
+     */
+    fun getHasErrorLiveData(): LiveData<Boolean> = hasError
+
+    /**
+     * Callback to be called when progress of the file downloading for preview is changed.
+     *
+     * @progress current progress of the file downloading
+     */
     fun onProgressChanged(progress: Int) {
-        publishProgress(progress)
+        if (hasError.value == false)
+            publishProgress(progress)
+    }
+
+    /**
+     * Callback to be called when user tries to reconnect to the network.
+     */
+    fun onReconnect() {
+        hasError.value = false
+    }
+
+    /**
+     * Callback to be called when user received an error while being downloaded the preview
+     * of the attachment.
+     */
+    fun onReceivedError() {
+        hasError.value = true
     }
 }
 
-internal fun Intent.getFileData() = getParcelableExtra<FileData>(KEY_FILE_DATA)
+private fun Intent.getFileData() = getParcelableExtra<FileData>(KEY_FILE_DATA)

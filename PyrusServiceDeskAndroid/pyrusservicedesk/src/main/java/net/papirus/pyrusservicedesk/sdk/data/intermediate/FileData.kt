@@ -4,6 +4,10 @@ import android.net.Uri
 import android.os.Parcel
 import android.os.Parcelable
 
+/**
+ * Intermediate data for transfer attachment data between UI elements.
+ * @param uri can contain either url of the server attachment or uri of the local file.
+ */
 internal data class FileData(val fileName: String, val bytesSize: Int, val uri: Uri) : Parcelable {
 
     constructor(parcel: Parcel) : this(

@@ -5,12 +5,16 @@ import java.util.*
 
 private const val COMMENT_ID_EMPTY = 0
 
+/**
+ * Represents single comment.
+ * @param isInbound  TRUE means that comment is inbound for support, not for user of the service desk.
+ * @param localId id of local comment. For server comments this is always [COMMENT_ID_EMPTY]
+ */
 internal data class Comment(
         @SerializedName("comment_id")
         val commentId: Int = COMMENT_ID_EMPTY,
         @SerializedName("body")
         val body: String = "",
-        // inbound for support, not for user
         @SerializedName("is_inbound")
         val isInbound: Boolean = false,
         @SerializedName("attachments")
@@ -22,7 +26,13 @@ internal data class Comment(
         @Transient
         val localId: Int = COMMENT_ID_EMPTY){
 
+    /**
+     * @return TRUE when comment contains attachments
+     */
     fun hasAttachments() = attachments != null
 
+    /**
+     * @return TRUE if this comment is local one.
+     */
     fun isLocal() = commentId == COMMENT_ID_EMPTY && localId != COMMENT_ID_EMPTY
 }

@@ -34,4 +34,5 @@
     <string name="psd_recent">только что</string>
     <string name="psd_guest">Гость</string>
     <string name="psd_file_size_exceeded_message" formatted="false">Размер файла не должен превышать %d Мб.</string>
+    <string name="psd_copied_to_clipboard">Скопировано в буфер обмена</string>
 </resources>

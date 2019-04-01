@@ -1,4 +1,4 @@
-package net.papirus.pyrusservicedesk.presentation.usecase
+package net.papirus.pyrusservicedesk.presentation.call_adapter
 
 import kotlinx.coroutines.CoroutineScope
 import net.papirus.pyrusservicedesk.sdk.RequestFactory
@@ -6,13 +6,18 @@ import net.papirus.pyrusservicedesk.sdk.data.Comment
 import net.papirus.pyrusservicedesk.sdk.response.ResponseCallback
 import net.papirus.pyrusservicedesk.sdk.response.ResponseError
 
-internal class GetFeedUseCase(
+/**
+ * Adapter for obtaining ticket feed.
+ * @param scope coroutine scope for executing request.
+ * @param requests factory to obtain request from.
+ */
+internal class GetFeedCallAdapter(
         scope: CoroutineScope,
         private val requests: RequestFactory)
-    : UseCaseBase<List<Comment>>(scope){
+    : CallAdapterBase<List<Comment>>(scope){
 
 
-    override suspend fun run(): UseCaseResult<List<Comment>> {
+    override suspend fun run(): CallResult<List<Comment>> {
         var result: List<Comment>? = null
         var error: ResponseError? = null
         requests.getFeedRequest().execute(
@@ -27,6 +32,6 @@ internal class GetFeedUseCase(
             }
         )
 
-        return UseCaseResult(result, error)
+        return CallResult(result, error)
     }
 }

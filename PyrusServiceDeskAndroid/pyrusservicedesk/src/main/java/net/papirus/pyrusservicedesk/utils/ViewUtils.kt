@@ -20,6 +20,9 @@ internal fun RecyclerView.isAtEnd(): Boolean {
             || (layoutManager as LinearLayoutManager).findLastVisibleItemPosition() == adapter!!.itemCount - 1
 }
 
+/**
+ * Assigns [EditText]'s cursor color to [color]
+ */
 internal fun EditText.setCursorColor(@ColorInt color: Int) {
     try {
         // Get the cursor resource id

@@ -24,7 +24,13 @@ import retrofit2.converter.gson.GsonConverterFactory
 import java.util.concurrent.LinkedBlockingQueue
 import java.util.concurrent.TimeUnit
 
-
+/**
+ * Web [GeneralRepository] implementation based on [Retrofit] library.
+ *
+ * @param appId id of the app that obtained through special Pyrus form.
+ * @param userId UID of user. Generated installation id is used by default.
+ * @param fileResolver helper for making upload file requests.
+ */
 internal class RetrofitWebRepository(
         private val appId: String,
         private val userId: String,

@@ -7,6 +7,13 @@ import okhttp3.RequestBody
 import okio.BufferedSink
 import java.io.InputStream
 
+/**
+ * Request body for sending single file to the server.
+ *
+ * @param fileName name of the file to be sent.
+ * @param fileStream file stream to read data from for sending.
+ * @param uploadFileHooks hooks for publishing progress and for checking cancellation signal.
+ */
 internal class UploadFileRequestBody(
         private val fileName: String,
         private val fileStream: InputStream,
@@ -18,6 +25,9 @@ internal class UploadFileRequestBody(
         uploadFileHooks?.onProgressPercentChanged(0)
     }
 
+    /**
+     * Prepares multipart body.
+     */
     fun toMultipartBody(): MultipartBody.Part {
         val requestFileBody = object: RequestBody(){
             override fun contentType(): MediaType? {

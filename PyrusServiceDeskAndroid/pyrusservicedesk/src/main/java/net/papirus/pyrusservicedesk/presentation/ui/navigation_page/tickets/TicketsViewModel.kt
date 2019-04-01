@@ -5,36 +5,30 @@ import android.arch.lifecycle.MediatorLiveData
 import android.arch.lifecycle.MutableLiveData
 import android.arch.lifecycle.Transformations
 import net.papirus.pyrusservicedesk.PyrusServiceDesk
-import net.papirus.pyrusservicedesk.presentation.usecase.GetTicketsUseCase
+import net.papirus.pyrusservicedesk.presentation.call_adapter.GetTicketsCallAdapter
 import net.papirus.pyrusservicedesk.presentation.viewmodel.ConnectionViewModelBase
 import net.papirus.pyrusservicedesk.sdk.data.TicketShortDescription
 import net.papirus.pyrusservicedesk.sdk.updates.LiveUpdateSubscriber
 
+/**
+ * ViewModel for rendering UI with list of tickets
+ */
 internal class TicketsViewModel(serviceDesk: PyrusServiceDesk)
     : ConnectionViewModelBase(serviceDesk),
     LiveUpdateSubscriber {
 
-
-    private val isLoading = MediatorLiveData<Boolean>()
     private val tickets = MediatorLiveData<List<TicketShortDescription>>()
     private val request = MutableLiveData<Boolean>()
 
     private var unreadCount = 0
 
     init{
-        isLoading.apply {
-            addSource(request){
-                value = true
-            }
-        }
-
         tickets.apply {
             addSource(
                 Transformations.switchMap(request){
-                    GetTicketsUseCase(this@TicketsViewModel, requests).execute()
+                    GetTicketsCallAdapter(this@TicketsViewModel, requests).execute()
                 }
             ){
-                isLoading.value = false
                 onNewData(it?.data!!)
                 onDataLoaded()
             }
@@ -64,12 +58,19 @@ internal class TicketsViewModel(serviceDesk: PyrusServiceDesk)
         liveUpdates.unsubscribeFromData(this)
     }
 
-    fun getIsLoadingLiveData(): LiveData<Boolean> = isLoading
-
+    /**
+     * Provides live data that delivers list of [TicketShortDescription] to be rendered.
+     */
     fun getTicketsLiveData(): LiveData<List<TicketShortDescription>> = tickets
 
+    /**
+     * Provides live data that delivers count of currently unread tickets
+     */
     fun getUnreadCount() = unreadCount
 
+    /**
+     * Callback to be invoked when user opens [ticket] in UI
+     */
     fun onTicketOpened(ticket: TicketShortDescription) {
         if (!ticket.isRead) {
             unreadCount--

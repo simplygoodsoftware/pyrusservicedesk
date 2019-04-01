@@ -4,9 +4,18 @@ import android.support.v7.widget.RecyclerView
 import android.support.v7.widget.helper.ItemTouchHelper
 
 
+/**
+ * Base [RecyclerView.Adapter] implementation.
+ */
 internal abstract class AdapterBase<Item> : RecyclerView.Adapter<ViewHolderBase<Item>>() {
 
+    /**
+     * List of items that are rendered by adapter.
+     */
     protected var itemsList: MutableList<Item> = mutableListOf()
+    /**
+     * [ItemTouchHelper] implementation that can be provided by the extender.
+     */
     open val itemTouchHelper: ItemTouchHelper? = null
 
     override fun getItemCount(): Int {
@@ -22,17 +31,12 @@ internal abstract class AdapterBase<Item> : RecyclerView.Adapter<ViewHolderBase<
         holder.onDetachedFromWindow()
     }
 
-    fun setItems(items: List<Item>) {
+    /**
+     * Applies [items] as current rendered list of items. [notifyDataSetChanged] is called by default when new
+     * list is applied.
+     */
+    open fun setItems(items: List<Item>) {
         this.itemsList = items.toMutableList()
         notifyDataSetChanged()
-    }
-
-    fun setItemsWithoutUpdate(items: List<Item>) {
-        this.itemsList = items.toMutableList()
-    }
-
-    fun appendItem(item: Item) {
-        itemsList.add(item)
-        notifyItemInserted(itemsList.lastIndex)
     }
 }

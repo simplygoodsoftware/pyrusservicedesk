@@ -15,6 +15,9 @@ import java.util.*
 
 private const val DATE_FORMAT_CAPTURE_IMAGES = "yyyyMMdd_HHmmss"
 
+/**
+ * Lazily provides view model.
+ */
 internal fun <T : ViewModel> FragmentActivity.getViewModel(viewModelClass: Class<T>): Lazy<T> {
 
     return lazy(LazyThreadSafetyMode.NONE) {
@@ -25,10 +28,16 @@ internal fun <T : ViewModel> FragmentActivity.getViewModel(viewModelClass: Class
     }
 }
 
+/**
+ * Lazily provides view model with activity scope. Such view model can be used as event bus within single activity
+ */
 internal fun <T : ViewModel> Fragment.getViewModelWithActivityScope(viewModelClass: Class<T>): Lazy<T> {
     return lazy(LazyThreadSafetyMode.NONE) { activity!!.getViewModel(viewModelClass).value }
 }
 
+/**
+ * Dispatches event for taking photo that should be handled by the receiver fragment.
+ */
 internal fun Fragment.dispatchTakePhotoIntent(requestCode: Int): Uri? {
     val capturePhotoUri = activity?.let {
         when {

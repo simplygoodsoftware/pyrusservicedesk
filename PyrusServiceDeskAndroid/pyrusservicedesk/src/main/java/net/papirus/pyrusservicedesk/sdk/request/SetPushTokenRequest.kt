@@ -3,6 +3,9 @@ package net.papirus.pyrusservicedesk.sdk.request
 import net.papirus.pyrusservicedesk.sdk.repositories.general.GeneralRepository
 import net.papirus.pyrusservicedesk.sdk.response.ResponseBase
 
+/**
+ * Request for registering push token.
+ */
 internal class SetPushTokenRequest(repository: GeneralRepository,
                                    private val token: String) :
     RequestBase<Unit>(repository) {

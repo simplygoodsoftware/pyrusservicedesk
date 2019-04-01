@@ -3,8 +3,12 @@ package net.papirus.pyrusservicedesk.sdk.data
 import android.net.Uri
 import com.google.gson.annotations.SerializedName
 
-internal const val FILE_ID_EMPTY = 0
+private const val FILE_ID_EMPTY = 0
 
+/**
+ * Represents an attachment of the comment.
+ * @param uri transient field that is used only for local comments.
+ */
 internal data class Attachment(
         @SerializedName("id")
         val id:Int = FILE_ID_EMPTY,

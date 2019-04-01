@@ -16,11 +16,21 @@ import net.papirus.pyrusservicedesk.utils.getViewModel
 
 private const val ANIMATION_DURATION = 200L
 
+/**
+ * Base class for activities that are able to show progress and connection error.
+ * Appropriate view model for this activity is lazily loaded by [getViewModel].
+ */
 internal abstract class ConnectionActivityBase<T: ConnectionViewModelBase>(viewModelClass: Class<T>)
     : ActivityBase() {
 
+    /**
+     * Instance of the view model that is defined by the particular type of the activity.
+     */
     protected val viewModel: T by getViewModel(viewModelClass)
 
+    /**
+     * Optional id of the swiperefreshlayout that is used for launch loading the data from [viewModel]
+     */
     abstract val refresherViewId:Int
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -30,13 +40,13 @@ internal abstract class ConnectionActivityBase<T: ConnectionViewModelBase>(viewM
                 PorterDuff.Mode.SRC_IN)
         reconnect.setOnClickListener { reconnect() }
         reconnect.setTextColor(ConfigUtils.getAccentColor(this))
-        findViewById<DirectedSwipeRefresh>(refresherViewId)?.setOnRefreshListener {
+        (findViewById(refresherViewId) as? DirectedSwipeRefresh)?.setOnRefreshListener {
             viewModel.loadData()
         }
     }
 
-    override fun observeData() {
-        super.observeData()
+    override fun startObserveData() {
+        super.startObserveData()
         viewModel.getIsNetworkConnectedLiveDate().observe(
                 this,
                 Observer { isConnected ->
@@ -47,11 +57,15 @@ internal abstract class ConnectionActivityBase<T: ConnectionViewModelBase>(viewM
         )
         viewModel.getLoadingProgressLiveData().observe(
             this,
-            Observer { progress -> progress?.let { updateProgress(it) }
+            Observer { progress ->
+                progress?.let { updateProgress(it) }
             }
         )
     }
 
+    /**
+     * Changes progress of the progress bar and handles its appearance and disappearance.
+     */
     protected open fun updateProgress(newProgress: Int) {
         when {
             newProgress >= resources.getInteger(R.integer.psd_progress_max_value) -> {
@@ -66,6 +80,9 @@ internal abstract class ConnectionActivityBase<T: ConnectionViewModelBase>(viewM
         progress_bar.progress = newProgress
     }
 
+    /**
+     * Called when user tries to reconnect to the network.
+     */
     protected open fun reconnect() {
         viewModel.loadData()
     }

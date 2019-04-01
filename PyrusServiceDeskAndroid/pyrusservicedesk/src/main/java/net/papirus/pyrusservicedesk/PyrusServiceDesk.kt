@@ -2,7 +2,6 @@ package net.papirus.pyrusservicedesk
 
 import android.app.Activity
 import android.app.Application
-import android.arch.lifecycle.Observer
 import android.content.Context
 import android.content.Intent
 import kotlinx.coroutines.GlobalScope
@@ -143,7 +142,7 @@ class PyrusServiceDesk private constructor(
             return CONFIGURATION!!
         }
 
-        internal fun forceConfiguration(config: ServiceDeskConfiguration) {
+        internal fun setConfiguration(config: ServiceDeskConfiguration) {
             CONFIGURATION = config
         }
 
@@ -161,6 +160,8 @@ class PyrusServiceDesk private constructor(
         }
     }
 
+    internal var userId: String
+
     internal val requestFactory: RequestFactory
     internal val draftRepository: DraftRepository
     internal val liveUpdates: LiveUpdates
@@ -169,36 +170,21 @@ class PyrusServiceDesk private constructor(
         LocalDataProvider(fileResolver =  fileResolver)
     }
 
+    private var quitViewModel = QuitViewModel()
+
     private val fileResolver: FileResolver = FileResolver(application.contentResolver)
     private val preferences = application.getSharedPreferences(PREFERENCE_KEY, Context.MODE_PRIVATE)
 
-    internal var userId: String = ConfigUtils.getUserId(preferences)
 
     init {
+        userId = ConfigUtils.getUserId(preferences)
         val repositoryFactory = RepositoryFactory(fileResolver, preferences)
         requestFactory = RequestFactory(repositoryFactory.createCentralRepository(appId, userId))
         draftRepository = repositoryFactory.createDraftRepository()
         liveUpdates = LiveUpdates(requestFactory)
     }
 
-    internal fun getSharedViewModel(): QuitViewModel {
-        if (quitViewModel == null)
-            refreshSharedViewModel()
-        return quitViewModel!!
-    }
+    internal fun getSharedViewModel() = quitViewModel
 
 
-    private var quitViewModel: QuitViewModel? = null
-
-    private val quitObserver = Observer<Boolean> {
-        it?.let{value ->
-            if (value)
-                refreshSharedViewModel()
-        }
-    }
-
-    private fun refreshSharedViewModel() {
-        quitViewModel?.getQuitServiceDeskLiveData()?.removeObserver(quitObserver)
-        quitViewModel = QuitViewModel().also { it.getQuitServiceDeskLiveData().observeForever(quitObserver) }
-    }
 }

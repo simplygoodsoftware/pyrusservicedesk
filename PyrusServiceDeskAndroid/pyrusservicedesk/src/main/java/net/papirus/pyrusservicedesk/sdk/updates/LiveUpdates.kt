@@ -13,6 +13,13 @@ import net.papirus.pyrusservicedesk.utils.MILLISECONDS_IN_MINUTE
 
 private const val TICKETS_UPDATE_INTERVAL = 5L
 
+/**
+ * Class for recurring requesting data.
+ * Exposes notifications of unread ticket count changes, of new reply from support received.
+ * Also exposes result of requesting data.
+ *
+ * Subscription types: [LiveUpdateSubscriber], [NewReplySubscriber], [OnUnreadTicketCountChangedSubscriber]
+ */
 internal class LiveUpdates(requests: RequestFactory) {
 
     // notified in UI thread
@@ -60,35 +67,65 @@ internal class LiveUpdates(requests: RequestFactory) {
         mainHandler.post(ticketsUpdateRunnable)
     }
 
+    /**
+     * Registers [subscriber] to on new reply events
+     */
     fun subscribeOnReply(subscriber: NewReplySubscriber) {
         newReplySubscribers.add(subscriber)
     }
 
+    /**
+     * Unregisters [subscriber] from new reply events
+     */
     fun unsubscribeFromReplies(subscriber: NewReplySubscriber) {
         newReplySubscribers.remove(subscriber)
     }
 
+    /**
+     * Registers [subscriber] on unread ticket count changed events
+     */
     internal fun subscribeOnUnreadTicketCountChanged(subscriber: OnUnreadTicketCountChangedSubscriber) {
         ticketCountChangedSubscribers.add(subscriber)
     }
 
+    /**
+     * Unregisters [subscriber] from unread ticket count changed events
+     */
     internal fun unsubscribeFromTicketCountChanged(subscriber: OnUnreadTicketCountChangedSubscriber) {
         ticketCountChangedSubscribers.remove(subscriber)
     }
 
+    /**
+     * Registers [liveUpdateSubscriber] on new data received event
+     */
     internal fun subscribeOnData(liveUpdateSubscriber: LiveUpdateSubscriber) {
         dataSubscribers.add(liveUpdateSubscriber)
     }
 
+    /**
+     * Unregisters [liveUpdateSubscriber] from new data received event
+     */
     internal fun unsubscribeFromData(liveUpdateSubscriber: LiveUpdateSubscriber) {
         dataSubscribers.remove(liveUpdateSubscriber)
     }
 }
 
+/**
+ * Interface for observing updates of data.
+ */
 internal interface LiveUpdateSubscriber: OnUnreadTicketCountChangedSubscriber {
+    /**
+     * Invoked when new portion of [tickets] data is received.
+     */
     fun onNewData(tickets: List<TicketShortDescription>)
 }
 
+/**
+ * Interface for observing changes of unread tickets count.
+ */
 internal interface OnUnreadTicketCountChangedSubscriber{
+    /**
+     * Invoked when count of unread tickets is changed.
+     */
     fun onUnreadTicketCountChanged(unreadTicketCount: Int)
 }

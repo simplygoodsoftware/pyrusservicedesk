@@ -7,13 +7,16 @@ import java.text.SimpleDateFormat
 import java.util.*
 
 internal const val ISO_DATE_PATTERN = "yyyy-MM-dd'T'HH:mm:ss'Z'"
-private const val MILLISECONDS_IN_DAY = 24 * 60 * 60 * 1000
-private const val MILLISECONDS_IN_HOUR = 60 * 60 * 1000
 internal const val MILLISECONDS_IN_MINUTE = 60 * 1000
 internal const val MILLISECONDS_IN_SECOND = 1000
+private const val MILLISECONDS_IN_DAY = 24 * 60 * 60 * 1000
+private const val MILLISECONDS_IN_HOUR = 60 * 60 * 1000
 private const val MONTHS_IN_YEAR = 12
 private const val DAYS_IN_WEEK = 7
 
+/**
+ * Provides localized time text of the receiver date.
+ */
 @SuppressLint("SimpleDateFormat")
 internal fun Date.getTimeText(context: Context): String {
     return SimpleDateFormat(context.resources.getString(R.string.psd_time_format))
@@ -23,6 +26,10 @@ internal fun Date.getTimeText(context: Context): String {
             })
 }
 
+/**
+ * Provides localized date in a "when" manner, like "today" or "20th of march". [now] is used as reference values
+ * to calculate the result.
+ */
 @SuppressLint("SimpleDateFormat")
 internal fun Date.getWhen(context: Context, now: Calendar): String {
     val zone = TimeZone.getDefault()
@@ -35,6 +42,10 @@ internal fun Date.getWhen(context: Context, now: Calendar): String {
     }
 }
 
+/**
+ * Provides localized date in a "how much passed" manner like "1 day ago" of "5 years ago". [from] is used as
+ * reference value to calculate the result.
+ */
 internal fun Date.getTimePassedFrom(context: Context, from: Calendar): String {
     val zone = TimeZone.getDefault()
     val date = Calendar.getInstance(zone).apply { timeInMillis = this@getTimePassedFrom.time + zone.rawOffset}

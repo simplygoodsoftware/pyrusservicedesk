@@ -26,6 +26,9 @@ internal fun getColor(context: Context, @AttrRes colorAttrId: Int): Int {
     }
 }
 
+/**
+ * @return TRUE if device is considered tablet.
+ */
 internal fun Context.isTablet(): Boolean {
     return resources.configuration.screenLayout and
             Configuration.SCREENLAYOUT_SIZE_MASK >= Configuration.SCREENLAYOUT_SIZE_LARGE

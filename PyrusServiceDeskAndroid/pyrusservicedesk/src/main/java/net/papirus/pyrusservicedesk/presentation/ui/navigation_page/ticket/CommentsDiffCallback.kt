@@ -7,6 +7,10 @@ import net.papirus.pyrusservicedesk.presentation.ui.navigation_page.ticket.entri
 import net.papirus.pyrusservicedesk.presentation.ui.navigation_page.ticket.entries.WelcomeMessageEntry
 import net.papirus.pyrusservicedesk.sdk.data.Comment
 
+/**
+ * Diff callback implementation that compares two lists of ticket entries.
+ * Used for updating the comment feed.
+ */
 internal class CommentsDiffCallback(
     private val oldList: List<TicketEntry>,
     private val newList: List<TicketEntry>)
