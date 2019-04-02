@@ -115,18 +115,17 @@ class PyrusServiceDesk private constructor(
                 serviceDesk.userId.isBlank() -> callback.onResult(Exception("UserId is not assigned"))
                 else -> {
                     GlobalScope.launch {
-                        var exception: Exception? = null
                         serviceDesk
                             .requestFactory
                             .getSetPushTokenRequest(serviceDesk.appId)
                             .execute(object: ResponseCallback<Unit>{
                                 override fun onSuccess(data: Unit) {
+                                    callback.onResult(null)
                                 }
                                 override fun onFailure(responseError: ResponseError) {
-                                    exception = responseError
+                                    callback.onResult(responseError)
                                 }
                             })
-                        callback.onResult(exception)
                     }
                 }
             }
