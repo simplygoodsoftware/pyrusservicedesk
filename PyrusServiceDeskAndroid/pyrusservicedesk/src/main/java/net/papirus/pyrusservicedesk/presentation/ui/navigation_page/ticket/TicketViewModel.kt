@@ -290,7 +290,10 @@ internal class TicketViewModel(
 
     private fun applyTicketUpdate(freshList: List<Comment>) {
         when{
-            freshList.isEmpty() -> return
+            freshList.isEmpty() -> {
+                onDataLoaded()
+                return
+            }
             freshList.last().commentId < lastServerCommentId -> return
             freshList.last().commentId == lastServerCommentId -> {
                 onDataLoaded()
