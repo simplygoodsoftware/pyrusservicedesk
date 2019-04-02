@@ -22,7 +22,9 @@ internal fun Date.getTimeText(context: Context): String {
     return SimpleDateFormat(context.resources.getString(R.string.psd_time_format))
         .format(
             with(TimeZone.getDefault()){
-                Calendar.getInstance(this).apply { timeInMillis = this@getTimeText.time + rawOffset }.time
+                Calendar.getInstance(this).apply {
+                    timeInMillis = this@getTimeText.time + rawOffset
+                }.time
             })
 }
 
@@ -33,7 +35,9 @@ internal fun Date.getTimeText(context: Context): String {
 @SuppressLint("SimpleDateFormat")
 internal fun Date.getWhen(context: Context, now: Calendar): String {
     val zone = TimeZone.getDefault()
-    val date = Calendar.getInstance(zone).apply { timeInMillis = this@getWhen.time + zone.rawOffset }
+    val date = Calendar.getInstance(zone).apply {
+        timeInMillis = this@getWhen.time + zone.rawOffset
+    }
     return when {
         date.isSameDay(now) -> context.getString(R.string.psd_today)
         date.isOneDayBefore(now) -> context.getString(R.string.psd_yesterday)
@@ -48,7 +52,9 @@ internal fun Date.getWhen(context: Context, now: Calendar): String {
  */
 internal fun Date.getTimePassedFrom(context: Context, from: Calendar): String {
     val zone = TimeZone.getDefault()
-    val date = Calendar.getInstance(zone).apply { timeInMillis = this@getTimePassedFrom.time + zone.rawOffset}
+    val date = Calendar.getInstance(zone).apply {
+        timeInMillis = this@getTimePassedFrom.time + zone.rawOffset
+    }
     with(arrayOf(
         from.yearsFrom(date),
         from.monthsFrom(date),

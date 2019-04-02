@@ -84,7 +84,12 @@ internal abstract class ActivityBase: AppCompatActivity() {
     protected open fun startObserveData() {
         quitViewModel.getQuitServiceDeskLiveData().observe(
             this,
-            Observer { quit -> quit?.let { if(it) finish() } }
+            Observer { quit ->
+                quit?.let {
+                    if(it)
+                        finish()
+                }
+            }
         )
     }
 

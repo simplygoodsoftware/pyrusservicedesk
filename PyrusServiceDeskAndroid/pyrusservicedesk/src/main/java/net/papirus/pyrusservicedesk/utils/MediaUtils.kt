@@ -23,16 +23,9 @@ internal fun String.hasFormat(format: FileFormat) = endsWith(format.extension, t
 internal fun String.hasAnyFormatOf(vararg formats: FileFormat) = formats.any { hasFormat(it) }
 
 internal enum class FileFormat (val extension: String){
-    PDF(".pdf"),
     JPEG(".jpeg"),
     JPG(".jpg"),
     GIF(".gif"),
     PNG(".png"),
-    DOC(".doc"),
-    DOCX(".docx"),
-    XLS(".xls"),
-    XLSX(".xlsx"),
-    RTF(".rtf"),
-    TXT(".txt"),
-    TIF(".tif")
+    TXT(".txt")
 }

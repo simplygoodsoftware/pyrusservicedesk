@@ -48,14 +48,19 @@ internal class TicketsActivity: ConnectionActivityBase<TicketsViewModel>(Tickets
                             UiNavigator.toTicket(
                                 this@TicketsActivity,
                                 ticketId,
-                                if (!it.isRead) viewModel.getUnreadCount() - 1 else viewModel.getUnreadCount())
+                                when{
+                                    !it.isRead -> viewModel.getUnreadCount() - 1
+                                    else -> viewModel.getUnreadCount()
+                                })
                             viewModel.onTicketOpened(it)
                         }
                     }
                 }
-                .also { tickets.adapter  = it }
+        tickets.adapter  = adapter
         tickets.addItemDecoration(SpaceItemDecoration(resources.getDimensionPixelSize(R.dimen.psd_tickets_item_space)))
-        new_conversation.setOnClickListener { UiNavigator.toNewTicket(this, viewModel.getUnreadCount()) }
+        new_conversation.setOnClickListener {
+            UiNavigator.toNewTicket(this, viewModel.getUnreadCount())
+        }
     }
 
     override fun startObserveData() {

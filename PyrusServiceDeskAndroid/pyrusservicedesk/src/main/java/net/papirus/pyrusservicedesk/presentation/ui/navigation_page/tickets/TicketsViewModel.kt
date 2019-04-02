@@ -2,8 +2,6 @@ package net.papirus.pyrusservicedesk.presentation.ui.navigation_page.tickets
 
 import android.arch.lifecycle.LiveData
 import android.arch.lifecycle.MediatorLiveData
-import android.arch.lifecycle.MutableLiveData
-import android.arch.lifecycle.Transformations
 import net.papirus.pyrusservicedesk.PyrusServiceDesk
 import net.papirus.pyrusservicedesk.presentation.call_adapter.GetTicketsCallAdapter
 import net.papirus.pyrusservicedesk.presentation.viewmodel.ConnectionViewModelBase
@@ -18,21 +16,11 @@ internal class TicketsViewModel(serviceDesk: PyrusServiceDesk)
     LiveUpdateSubscriber {
 
     private val tickets = MediatorLiveData<List<TicketShortDescription>>()
-    private val request = MutableLiveData<Boolean>()
 
     private var unreadCount = 0
 
     init{
-        tickets.apply {
-            addSource(
-                Transformations.switchMap(request){
-                    GetTicketsCallAdapter(this@TicketsViewModel, requests).execute()
-                }
-            ){
-                onNewData(it?.data!!)
-                onDataLoaded()
-            }
-        }
+
         if (isNetworkConnected.value == true) {
             loadData()
         }
@@ -41,7 +29,7 @@ internal class TicketsViewModel(serviceDesk: PyrusServiceDesk)
     }
 
     override fun onLoadData() {
-        request.value = true
+        update()
     }
 
     override fun onNewData(tickets: List<TicketShortDescription>) {
@@ -78,6 +66,22 @@ internal class TicketsViewModel(serviceDesk: PyrusServiceDesk)
             ticketsMutable[ticketsMutable.indexOf(ticket)] = ticket.read()
             tickets.value = ticketsMutable
         }
+    }
+
+    private fun update() {
+        GetTicketsCallAdapter(this@TicketsViewModel, requests)
+            .execute()
+            .observeForever { result ->
+                if (result == null)
+                    return@observeForever
+                when {
+                    result.hasError() -> {  }
+                    else ->{
+                        onNewData(result.data!!)
+                        onDataLoaded()
+                    }
+                }
+            }
     }
 
     private class TicketShortDescriptionComparator : Comparator<TicketShortDescription> {

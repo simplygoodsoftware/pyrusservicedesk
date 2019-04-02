@@ -36,26 +36,13 @@ internal class LiveUpdates(requests: RequestFactory) {
                 requests.getTicketsRequest().execute(
                     object: ResponseCallback<List<TicketShortDescription>> {
                         override fun onSuccess(data: List<TicketShortDescription>) {
+                            val newUnread = data.count{ !it.isRead }
                             this@launch.launch(Dispatchers.Main) {
-                                val newUnread = data.count{ !it.isRead }
-                                val isChanged = recentUnreadCounter != newUnread
-                                dataSubscribers.forEach{
-                                    it.onNewData(data)
-                                    if (isChanged)
-                                        it.onUnreadTicketCountChanged(newUnread)
-                                }
-                                if (isChanged) {
-                                    ticketCountChangedSubscribers.forEach { it.onUnreadTicketCountChanged(newUnread) }
-                                    if (isChanged && newUnread > 0)
-                                        newReplySubscribers.forEach { it.onNewReply() }
-                                }
-                                recentUnreadCounter = newUnread
+                                processSuccess(data, newUnread)
                             }
                         }
-
                         override fun onFailure(responseError: ResponseError) {
                         }
-
                     }
                 )
             }
@@ -107,6 +94,21 @@ internal class LiveUpdates(requests: RequestFactory) {
      */
     internal fun unsubscribeFromData(liveUpdateSubscriber: LiveUpdateSubscriber) {
         dataSubscribers.remove(liveUpdateSubscriber)
+    }
+
+    private fun processSuccess(data: List<TicketShortDescription>, newUnreadCount: Int) {
+        val isChanged = recentUnreadCounter != newUnreadCount
+        dataSubscribers.forEach{
+            it.onNewData(data)
+            if (isChanged)
+                it.onUnreadTicketCountChanged(newUnreadCount)
+        }
+        if (isChanged) {
+            ticketCountChangedSubscribers.forEach { it.onUnreadTicketCountChanged(newUnreadCount) }
+            if (isChanged && newUnreadCount > 0)
+                newReplySubscribers.forEach { it.onNewReply() }
+        }
+        recentUnreadCounter = newUnreadCount
     }
 }
 

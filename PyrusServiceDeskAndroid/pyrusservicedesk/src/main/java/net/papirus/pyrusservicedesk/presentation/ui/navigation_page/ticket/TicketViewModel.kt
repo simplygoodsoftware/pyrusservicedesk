@@ -218,19 +218,8 @@ internal class TicketViewModel(
     private fun sendAddComment(localComment: Comment,
                                uploadFileHooks: UploadFileHooks? = null) {
 
-        when (checkComment(localComment)) {
-            CheckCommentError.CommentIsEmpty -> return
-            CheckCommentError.FileSizeExceeded -> {
-                (getApplication() as Context).run {
-                    Toast.makeText(
-                        this,
-                        this.getString(R.string.psd_file_size_exceeded_message, MAX_FILE_SIZE_MEGABYTES),
-                        Toast.LENGTH_SHORT)
-                        .show()
-                }
-                return
-            }
-        }
+        if (commentContainsError(localComment))
+            return
 
         val toNewTicket = !isFeed && isNewTicket() && !isCreateTicketSent
 
@@ -246,34 +235,57 @@ internal class TicketViewModel(
             isFeed -> AddFeedCommentCallAdapter(this, requests, localComment, uploadFileHooks).execute()
             else -> AddCommentCallAdapter(this, requests, ticketId, localComment, uploadFileHooks).execute()
         }
-        val observer = Observer<CallResult<Int>> { res ->
-                res?.let { result ->
-                    isCreateTicketSent = false
-                    if (uploadFileHooks?.isCancelled == true)
-                        return@let
-                    val entry = when {
-                        result.hasError() -> CommentEntry(
-                            localComment,
-                            uploadFileHooks, // for retry purpose
-                            this@TicketViewModel,
-                            error = result.error
-                        )
-                        else -> {
-                            if (toNewTicket) {
-                                ticketId = result.data!!
-                                maybeStartAutoRefresh()
-                            }
-                            val commentId = if (toNewTicket) localComment.localId else result.data!!
-                            CommentEntry(
-                                localDataProvider.convertLocalCommentToServer(localComment, commentId),
-                                onClickedCallback = this@TicketViewModel
-                            )
+        call.observeForever(getObserverForAddCommentCall(localComment, uploadFileHooks, toNewTicket))
+    }
+
+    private fun getObserverForAddCommentCall(localComment: Comment,
+                                             uploadFileHooks: UploadFileHooks?,
+                                             toNewTicket: Boolean): Observer<CallResult<Int>> {
+
+        return Observer { res ->
+            res?.let { result ->
+                isCreateTicketSent = false
+                if (uploadFileHooks?.isCancelled == true)
+                    return@let
+                val entry = when {
+                    result.hasError() -> CommentEntry(
+                        localComment,
+                        uploadFileHooks, // for retry purpose
+                        this@TicketViewModel,
+                        error = result.error
+                    )
+                    else -> {
+                        if (toNewTicket) {
+                            ticketId = result.data!!
+                            maybeStartAutoRefresh()
                         }
+                        val commentId = if (toNewTicket) localComment.localId else result.data!!
+                        CommentEntry(
+                            localDataProvider.convertLocalCommentToServer(localComment, commentId),
+                            onClickedCallback = this@TicketViewModel
+                        )
                     }
-                    applyCommentUpdate(entry, ChangeType.Changed)
                 }
+                applyCommentUpdate(entry, ChangeType.Changed)
             }
-        call.observeForever(observer)
+        }
+    }
+
+    private fun commentContainsError(localComment: Comment): Boolean {
+        when (checkComment(localComment)) {
+            CheckCommentError.CommentIsEmpty -> return true
+            CheckCommentError.FileSizeExceeded -> {
+                (getApplication() as Context).run {
+                    Toast.makeText(
+                        this,
+                        this.getString(R.string.psd_file_size_exceeded_message, MAX_FILE_SIZE_MEGABYTES),
+                        Toast.LENGTH_SHORT)
+                        .show()
+                }
+                return true
+            }
+        }
+        return false
     }
 
     private fun applyTicketUpdate(freshList: List<Comment>) {
@@ -310,58 +322,60 @@ internal class TicketViewModel(
 
     private fun applyCommentUpdate(commentEntry: CommentEntry, changeType: ChangeType) {
         val newEntries = ticketEntries.toMutableList()
-        fun maybeAddDate(){
-            commentEntry.comment.creationDate.getWhen(getApplication(), Calendar.getInstance()).let {
-                if (!hasRealComments()
-                    || newEntries.findLast { entry -> entry.type == Type.Date}
-                        ?.let { dateEntry ->  (dateEntry as DateEntry).date == it } == false) {
-
-                    newEntries.add(DateEntry(commentEntry.comment.creationDate.getWhen(getApplication(), Calendar.getInstance())))
-                }
-            }
-        }
-        fun findIndex(): Int{
-            return newEntries.findLast {
-                (it.type == Type.Comment) && (it as CommentEntry).comment.localId == commentEntry.comment.localId
-            }?.let{
-                newEntries.indexOf(it)
-            }?: -1
-        }
         when (changeType) {
             ChangeType.Added -> {
-                maybeAddDate()
+                maybeAddDate(commentEntry, newEntries)
                 newEntries.add(commentEntry)
             }
             ChangeType.Changed -> {
-                maybeAddDate()
-                findIndex().let {
-                    if (it != -1)
-                        newEntries[it] = commentEntry
-                    else
-                        newEntries.add(commentEntry)
+                maybeAddDate(commentEntry, newEntries)
+                newEntries.findIndex(commentEntry).let {
+                    when(it){
+                        -1 -> newEntries.add(commentEntry)
+                        else -> newEntries[it] = commentEntry
+                    }
                 }
             }
             ChangeType.Cancelled -> {
-                findIndex().let {
-                    when (it){
-                        -1 -> return@let
-                        0 -> newEntries.removeAt(0)
-                        newEntries.lastIndex -> {
+                val indexOfComment = newEntries.findIndex(commentEntry)
+                when (indexOfComment){
+                    -1 -> return
+                    0 -> newEntries.removeAt(0)
+                    newEntries.lastIndex -> {
+                        newEntries.removeAt(newEntries.lastIndex)
+                        if (newEntries.last() is DateEntry)
                             newEntries.removeAt(newEntries.lastIndex)
-                            if (newEntries.last() is DateEntry)
-                                newEntries.removeAt(newEntries.lastIndex)
-                        }
-                        else -> {
-                            newEntries.removeAt(it)
-                            if (newEntries[it].type == Type.Date && newEntries[it - 1].type == Type.Date)
-                                newEntries.removeAt(it - 1)
-                        }
                     }
-
+                    else -> {
+                        newEntries.removeAt(indexOfComment)
+                        if (newEntries[indexOfComment].type == Type.Date && newEntries[indexOfComment - 1].type == Type.Date)
+                            newEntries.removeAt(indexOfComment - 1)
+                    }
                 }
             }
         }
         publishEntries(ticketEntries, newEntries)
+    }
+
+    private fun maybeAddDate(commentEntry: CommentEntry, newEntries: MutableList<TicketEntry>){
+        commentEntry.comment.creationDate.getWhen(getApplication(), Calendar.getInstance()).let {
+            if (!hasRealComments()
+                || newEntries.findLast { entry -> entry.type == Type.Date}
+                    ?.let { dateEntry ->
+                        (dateEntry as DateEntry).date == it
+                    } == false) {
+
+                newEntries.add(DateEntry(commentEntry.comment.creationDate.getWhen(getApplication(), Calendar.getInstance())))
+            }
+        }
+    }
+
+    private fun List<TicketEntry>.findIndex(commentEntry: CommentEntry): Int{
+        return findLast {
+            (it.type == Type.Comment) && (it as CommentEntry).comment.localId == commentEntry.comment.localId
+        }?.let{
+            indexOf(it)
+        }?: -1
     }
 
     private fun publishEntries(oldEntries: List<TicketEntry>, newEntries: List<TicketEntry>) {

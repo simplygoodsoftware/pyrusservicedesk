@@ -49,8 +49,18 @@ class ServiceDeskConfiguration internal constructor() {
                     userName = bundle.getString(KEY_USER_NAME)
                     title = bundle.getString(KEY_TITLE)
                     welcomeMessage = bundle.getString(KEY_WELCOME_MESSAGE)
-                    themeColor = bundle.getInt(KEY_THEME_COLOR).let { if (it == 0) null else it }
-                    supportAvatar = bundle.getInt(KEY_SUPPORT_AVATAR).let { if (it == 0) null else it }
+                    themeColor = bundle.getInt(KEY_THEME_COLOR).let {
+                        when (it) {
+                            0 -> null
+                            else -> it
+                        }
+                    }
+                    supportAvatar = bundle.getInt(KEY_SUPPORT_AVATAR).let {
+                        when (it) {
+                            0 -> null
+                            else -> it
+                        }
+                    }
                 }
             )
         }
@@ -99,7 +109,7 @@ class ServiceDeskConfiguration internal constructor() {
          * Assigns the drawable resource id that is used as placeholder for the avatar of the supporting person.
          * By default chat bubble on the accent color background is drawn.
          *
-         * @param id of the drawable resource
+         * @param iconResId of the drawable resource
          */
         fun setAvatarForSupport(@DrawableRes iconResId: Int): Builder {
             configuration.supportAvatar = iconResId

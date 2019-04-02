@@ -48,7 +48,7 @@ internal abstract class ConnectionActivityBase<T: ConnectionViewModelBase>(viewM
 
     override fun startObserveData() {
         super.startObserveData()
-        viewModel.getIsNetworkConnectedLiveDate().observe(
+        viewModel.getIsNetworkConnectedLiveData().observe(
                 this,
                 Observer { isConnected ->
                     isConnected?.let {

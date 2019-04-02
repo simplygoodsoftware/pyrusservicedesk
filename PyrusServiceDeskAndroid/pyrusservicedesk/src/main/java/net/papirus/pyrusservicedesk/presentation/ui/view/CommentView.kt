@@ -153,7 +153,10 @@ internal class CommentView @JvmOverloads constructor(
         background_parent.background.mutate().setColorFilter(backgroundColor, PorterDuff.Mode.SRC_IN)
         comment_text.setTextColor(primaryColor)
         comment_text.setLinkTextColor(primaryColor)
-        root.gravity = Gravity.BOTTOM or if (type == TYPE_INBOUND) Gravity.START else Gravity.END
+        root.gravity = Gravity.BOTTOM or when(type){
+            TYPE_INBOUND -> Gravity.START
+            else -> Gravity.END
+        }
         file_name.setTextColor(primaryColor)
         file_size.setTextColor(secondaryColor)
 
@@ -239,7 +242,11 @@ internal class CommentView @JvmOverloads constructor(
             isMegabytes -> recentFileSize / BYTES_IN_MEGABYTE
             else -> recentFileSize / BYTES_IN_KILOBYTE
         }
-        file_size.text = context.getString(if (isMegabytes) R.string.psd_file_size_mb else R.string.psd_file_size_kb, toShow)
+        val textResId = when{
+            isMegabytes -> R.string.psd_file_size_mb
+            else -> R.string.psd_file_size_kb
+        }
+        file_size.text = context.getString(textResId, toShow)
     }
 
     /**
@@ -250,7 +257,10 @@ internal class CommentView @JvmOverloads constructor(
         val currentProgress = recentProgress
         recentProgress = progress
         ValueAnimator.ofInt(file_progress.progress, progress).apply {
-            duration = if (currentProgress == 0) PROGRESS_CHANGE_ANIMATION_DURATION else 0
+            duration = when (currentProgress){
+                0 -> PROGRESS_CHANGE_ANIMATION_DURATION
+                else -> 0
+            }
             interpolator = DecelerateInterpolator()
             addUpdateListener {
                 (animatedValue as Int).let { value ->
@@ -274,6 +284,7 @@ internal class CommentView @JvmOverloads constructor(
  * Used for definition of status of the comment overall by [status] or
  * status of file uploading/downloading by [fileProgressStatus]
  */
+@Suppress("KDocUnresolvedReference")
 internal enum class Status {
     Processing,
     Completed,

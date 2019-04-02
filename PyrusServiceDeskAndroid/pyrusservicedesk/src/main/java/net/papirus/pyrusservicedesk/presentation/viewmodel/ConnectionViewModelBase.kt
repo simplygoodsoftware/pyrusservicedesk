@@ -78,7 +78,7 @@ internal abstract class ConnectionViewModelBase(serviceDesk: PyrusServiceDesk)
     /**
      * Provides live data that exposes state of the network. See [isNetworkConnected].
      */
-    fun getIsNetworkConnectedLiveDate(): LiveData<Boolean> = isNetworkConnected
+    fun getIsNetworkConnectedLiveData(): LiveData<Boolean> = isNetworkConnected
 
     /**
      * Provides live data that exposes current progress of data loading.

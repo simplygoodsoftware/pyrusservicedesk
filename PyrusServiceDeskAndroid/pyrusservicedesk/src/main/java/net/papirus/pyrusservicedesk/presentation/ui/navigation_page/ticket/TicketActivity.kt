@@ -55,7 +55,7 @@ internal class TicketActivity : ConnectionActivityBase<TicketViewModel>(TicketVi
                     PyrusServiceDesk.getInstance().application,
                     TicketActivity::class.java).also { intent ->
 
-                ticketId?.let {intent.putExtra(KEY_TICKET_ID, it)}
+                ticketId?.let { intent.putExtra(KEY_TICKET_ID, it) }
                 intent.putExtra(KEY_UNREAD_COUNT, unreadCount)
             }
         }

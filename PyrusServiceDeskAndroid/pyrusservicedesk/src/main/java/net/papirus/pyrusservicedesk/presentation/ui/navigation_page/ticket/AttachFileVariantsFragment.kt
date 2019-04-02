@@ -133,8 +133,8 @@ internal class AttachFileVariantsFragment: BottomSheetDialogFragment(), View.OnC
     }
 
     private fun onPermissionsGranted(permissions: Array<String>) {
-        when {
-            activity?.let { it.hasPermission(WRITE_EXTERNAL_STORAGE) && it.hasPermission(CAMERA) } ?: false ->
+        activity?.let {
+            if (it.hasPermission(WRITE_EXTERNAL_STORAGE) && activity!!.hasPermission(CAMERA))
                 startTakingPhoto()
         }
     }

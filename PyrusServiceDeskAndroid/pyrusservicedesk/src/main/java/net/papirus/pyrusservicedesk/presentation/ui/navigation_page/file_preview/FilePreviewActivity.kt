@@ -44,7 +44,9 @@ internal class FilePreviewActivity: ConnectionActivityBase<FilePreviewViewModel>
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        supportActionBar?.apply { title = intent.getFileData().fileName }
+        supportActionBar?.apply {
+            title = intent.getFileData().fileName
+        }
         file_preview_toolbar.setNavigationIcon(R.drawable.psd_arrow_back)
         file_preview_toolbar.setNavigationOnClickListener { finish() }
 
@@ -153,7 +155,7 @@ internal class FilePreviewViewModel(pyrusServiceDesk: PyrusServiceDesk,
      * @progress current progress of the file downloading
      */
     fun onProgressChanged(progress: Int) {
-        if (hasError.value == false)
+        if (hasError.value != true)
             publishProgress(progress)
     }
 

@@ -19,6 +19,10 @@ internal class UploadFileRequestBody(
         private val fileStream: InputStream,
         private val uploadFileHooks: UploadFileHooks?) {
 
+    private companion object {
+        const val MEDIA_TYPE = "multipart/form-responseData"
+    }
+
     private val fileSize = fileStream.available().toLong()
 
     init {
@@ -31,7 +35,7 @@ internal class UploadFileRequestBody(
     fun toMultipartBody(): MultipartBody.Part {
         val requestFileBody = object: RequestBody(){
             override fun contentType(): MediaType? {
-                return MediaType.parse("multipart/form-responseData")
+                return MediaType.parse(MEDIA_TYPE)
             }
 
             override fun contentLength(): Long {
