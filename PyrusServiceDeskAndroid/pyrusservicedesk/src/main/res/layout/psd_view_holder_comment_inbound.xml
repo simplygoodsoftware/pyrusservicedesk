@@ -19,12 +19,13 @@
         app:layout_constraintStart_toStartOf="parent"
         tools:srcCompat="@tools:sample/avatars" />
 
-    <android.support.constraint.ConstraintLayout
+    <LinearLayout
         android:id="@+id/author_and_comment"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_marginStart="@dimen/psd_offset_small"
         android:layout_marginLeft="@dimen/psd_offset_small"
+        android:orientation="vertical"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toStartOf="@+id/guideline3"
         app:layout_constraintStart_toEndOf="@+id/avatar"
@@ -32,14 +33,8 @@
 
         <android.support.v7.widget.AppCompatTextView
             android:id="@+id/author_name"
-            android:layout_width="0dp"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            app:layout_constraintBottom_toTopOf="@+id/comment"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintHorizontal_bias="0.5"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent"
-            app:layout_constraintVertical_chainStyle="spread_inside"
             android:maxLines="1"
             android:singleLine="true"
             android:ellipsize="end"
@@ -47,16 +42,11 @@
 
         <net.papirus.pyrusservicedesk.presentation.ui.view.CommentView
             android:id="@+id/comment"
-            android:layout_width="0dp"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintHorizontal_bias="0.5"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/author_name"
             app:type="inbound" />
 
-    </android.support.constraint.ConstraintLayout>
+    </LinearLayout>
 
     <android.support.constraint.Guideline
         android:id="@+id/guideline2"
