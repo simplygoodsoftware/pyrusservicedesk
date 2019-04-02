@@ -1,6 +1,6 @@
 package net.papirus.pyrusservicedesk.sdk.web
 
-import android.os.CancellationSignal.OnCancelListener
+
 import android.os.Handler
 import android.os.Looper
 import com.example.pyrusservicedesk.R
@@ -80,4 +80,14 @@ internal class UploadFileHooks {
         cancellationSubscribers.clear()
         progressSubscription = null
     }
+}
+
+/**
+ * Listens for cancellation.
+ */
+internal interface OnCancelListener {
+    /**
+     * Called when [UploadFileHooks.cancel] is invoked.
+     */
+    fun onCancel()
 }

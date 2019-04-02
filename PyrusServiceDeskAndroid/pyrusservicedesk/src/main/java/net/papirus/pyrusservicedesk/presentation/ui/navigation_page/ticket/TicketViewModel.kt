@@ -6,7 +6,6 @@ import android.arch.lifecycle.Observer
 import android.content.Context
 import android.content.Intent
 import android.net.Uri
-import android.os.CancellationSignal
 import android.os.Handler
 import android.os.Looper
 import android.support.v7.util.DiffUtil
@@ -21,6 +20,7 @@ import net.papirus.pyrusservicedesk.sdk.data.Attachment
 import net.papirus.pyrusservicedesk.sdk.data.Comment
 import net.papirus.pyrusservicedesk.sdk.data.EMPTY_TICKET_ID
 import net.papirus.pyrusservicedesk.sdk.updates.OnUnreadTicketCountChangedSubscriber
+import net.papirus.pyrusservicedesk.sdk.web.OnCancelListener
 import net.papirus.pyrusservicedesk.sdk.web.UploadFileHooks
 import net.papirus.pyrusservicedesk.utils.ConfigUtils
 import net.papirus.pyrusservicedesk.utils.MILLISECONDS_IN_SECOND
@@ -148,8 +148,11 @@ internal class TicketViewModel(
     fun onAttachmentSelected(attachmentUri: Uri) {
         val localComment = localDataProvider.createLocalComment(fileUri = attachmentUri)
         val fileHooks = UploadFileHooks()
-        fileHooks.subscribeOnCancel(CancellationSignal.OnCancelListener {
-            applyCommentUpdate(CommentEntry(localComment, onClickedCallback = this), ChangeType.Cancelled)
+        fileHooks.subscribeOnCancel(object : OnCancelListener {
+            override fun onCancel() {
+                return applyCommentUpdate(
+                    CommentEntry(localComment, onClickedCallback = this@TicketViewModel), ChangeType.Cancelled)
+            }
         })
         sendAddComment(localComment, fileHooks)
     }
