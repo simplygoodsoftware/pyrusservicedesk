@@ -284,7 +284,6 @@ internal class CommentView @JvmOverloads constructor(
  * Used for definition of status of the comment overall by [CommentView.status] or
  * status of file uploading/downloading by [CommentView.fileProgressStatus]
  */
-@Suppress("KDocUnresolvedReference")
 internal enum class Status {
     Processing,
     Completed,
