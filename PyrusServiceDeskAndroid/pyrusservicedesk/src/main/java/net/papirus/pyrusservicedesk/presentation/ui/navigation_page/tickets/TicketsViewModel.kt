@@ -3,7 +3,7 @@ package net.papirus.pyrusservicedesk.presentation.ui.navigation_page.tickets
 import android.arch.lifecycle.LiveData
 import android.arch.lifecycle.MediatorLiveData
 import net.papirus.pyrusservicedesk.PyrusServiceDesk
-import net.papirus.pyrusservicedesk.presentation.call_adapter.GetTicketsCallAdapter
+import net.papirus.pyrusservicedesk.presentation.call_adapter.GetTicketsCall
 import net.papirus.pyrusservicedesk.presentation.viewmodel.ConnectionViewModelBase
 import net.papirus.pyrusservicedesk.sdk.data.TicketShortDescription
 import net.papirus.pyrusservicedesk.sdk.updates.LiveUpdateSubscriber
@@ -69,7 +69,7 @@ internal class TicketsViewModel(serviceDesk: PyrusServiceDesk)
     }
 
     private fun update() {
-        GetTicketsCallAdapter(this@TicketsViewModel, requests)
+        GetTicketsCall(this@TicketsViewModel, requests)
             .execute()
             .observeForever { result ->
                 if (result == null)

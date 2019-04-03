@@ -45,6 +45,7 @@ internal interface SpaceMultiplier {
     /**
      * Provides multiplier that should be applied to each space that is going to be applied.
      * @param adapterPosition position of the item to which top space is going to be applied.
+     * NB: 0th position always treated by [SpaceItemDecoration]
      */
     fun getMultiplier(adapterPosition: Int): Float
 }

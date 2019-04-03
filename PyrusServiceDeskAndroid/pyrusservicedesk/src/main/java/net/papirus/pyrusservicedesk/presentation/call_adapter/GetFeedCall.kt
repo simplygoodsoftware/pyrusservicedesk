@@ -5,38 +5,33 @@ import net.papirus.pyrusservicedesk.sdk.RequestFactory
 import net.papirus.pyrusservicedesk.sdk.data.Comment
 import net.papirus.pyrusservicedesk.sdk.response.ResponseCallback
 import net.papirus.pyrusservicedesk.sdk.response.ResponseError
-import net.papirus.pyrusservicedesk.sdk.web.UploadFileHooks
-
 
 /**
- * Adapter for adding comments to a comment feed.
+ * Adapter for obtaining ticket feed.
  * @param scope coroutine scope for executing request.
  * @param requests factory to obtain request from.
- * @param comment comment to be added.
- * @param uploadFileHooks file hooks that are used for managing uploading of the file in comment.
  */
-internal class AddFeedCommentCallAdapter(
+internal class GetFeedCall(
         scope: CoroutineScope,
-        private val requests: RequestFactory,
-        private val comment: Comment,
-        private val uploadFileHooks: UploadFileHooks? = null)
-    : CallAdapterBase<Int>(scope) {
+        private val requests: RequestFactory)
+    : BaseCall<List<Comment>>(scope){
 
-    override suspend fun run(): CallResult<Int> {
-        var result: Int? = null
+
+    override suspend fun run(): CallResult<List<Comment>> {
+        var result: List<Comment>? = null
         var error: ResponseError? = null
-        requests.getAddFeedCommentRequest(comment, uploadFileHooks).execute(
-            object: ResponseCallback<Int> {
-                override fun onSuccess(data: Int) {
+        requests.getFeedRequest().execute(
+            object : ResponseCallback<List<Comment>> {
+                override fun onSuccess(data: List<Comment>) {
                     result = data
                 }
 
                 override fun onFailure(responseError: ResponseError) {
                     error = responseError
                 }
-
             }
         )
+
         return CallResult(result, error)
     }
 }

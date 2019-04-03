@@ -10,7 +10,7 @@ import net.papirus.pyrusservicedesk.sdk.response.ResponseError
  * The reason on having this objects is that this can be easily extended to perform custom transformations of the
  * domain data provided by [run] implementation using the given [scope].
  */
-internal abstract class CallAdapterBase<T>(private val scope: CoroutineScope) {
+internal abstract class BaseCall<T>(private val scope: CoroutineScope) {
 
     /**
      * Implementations can execute requests here and provide the taken result.
@@ -36,7 +36,7 @@ internal abstract class CallAdapterBase<T>(private val scope: CoroutineScope) {
 }
 
 /**
- * Result of [CallAdapterBase.execute] method. Can either contain [data] of contain [error].
+ * Result of [BaseCall.execute] method. Can either contain [data] of contain [error].
  */
 internal class CallResult<T>(val data: T? = null, val error: ResponseError? = null){
     /**

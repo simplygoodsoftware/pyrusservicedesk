@@ -60,7 +60,7 @@ internal class FilePreviewActivity: ConnectionActivityBase<FilePreviewViewModel>
             webViewClient = object: WebViewClient(){
                 override fun onReceivedError(view: WebView?, request: WebResourceRequest?, error: WebResourceError?) {
                     super.onReceivedError(view, request, error)
-                    viewModel.onReceivedError()
+                    viewModel.onErrorReceived()
                 }
             }
             webChromeClient = object: WebChromeClient() {
@@ -101,11 +101,6 @@ internal class FilePreviewActivity: ConnectionActivityBase<FilePreviewViewModel>
         )
     }
 
-    override fun reconnect() {
-        super.reconnect()
-        viewModel.onReconnect()
-    }
-
     override fun updateProgress(newProgress: Int) {
         super.updateProgress(newProgress)
         if (newProgress == resources.getInteger(R.integer.psd_progress_max_value))
@@ -130,6 +125,7 @@ internal class FilePreviewViewModel(pyrusServiceDesk: PyrusServiceDesk,
     }
 
     override fun onLoadData() {
+        hasError.value = false
         urlViewModel.value = intent.getFileData().uri.toString()
         urlViewModel.postValue(null)
     }
@@ -160,17 +156,10 @@ internal class FilePreviewViewModel(pyrusServiceDesk: PyrusServiceDesk,
     }
 
     /**
-     * Callback to be called when user tries to reconnect to the network.
-     */
-    fun onReconnect() {
-        hasError.value = false
-    }
-
-    /**
      * Callback to be called when user received an error while being downloaded the preview
      * of the attachment.
      */
-    fun onReceivedError() {
+    fun onErrorReceived() {
         hasError.value = true
     }
 }

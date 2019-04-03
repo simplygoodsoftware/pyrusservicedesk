@@ -2,36 +2,34 @@ package net.papirus.pyrusservicedesk.presentation.call_adapter
 
 import kotlinx.coroutines.CoroutineScope
 import net.papirus.pyrusservicedesk.sdk.RequestFactory
-import net.papirus.pyrusservicedesk.sdk.data.Comment
+import net.papirus.pyrusservicedesk.sdk.data.TicketShortDescription
 import net.papirus.pyrusservicedesk.sdk.response.ResponseCallback
 import net.papirus.pyrusservicedesk.sdk.response.ResponseError
 
 /**
- * Adapter for obtaining ticket feed.
+ * Adapter for obtaining list of available tickets.
  * @param scope coroutine scope for executing request.
- * @param requests factory to obtain request from.
  */
-internal class GetFeedCallAdapter(
+internal class GetTicketsCall(
         scope: CoroutineScope,
         private val requests: RequestFactory)
-    : CallAdapterBase<List<Comment>>(scope){
+    : BaseCall<List<TicketShortDescription>>(scope) {
 
-
-    override suspend fun run(): CallResult<List<Comment>> {
-        var result: List<Comment>? = null
+    override suspend fun run(): CallResult<List<TicketShortDescription>> {
+        var tickets: List<TicketShortDescription>? = null
         var error: ResponseError? = null
-        requests.getFeedRequest().execute(
-            object : ResponseCallback<List<Comment>> {
-                override fun onSuccess(data: List<Comment>) {
-                    result = data
+        requests.getTicketsRequest().execute(
+            object: ResponseCallback<List<TicketShortDescription>> {
+                override fun onSuccess(data: List<TicketShortDescription>) {
+                    tickets = data
                 }
 
                 override fun onFailure(responseError: ResponseError) {
                     error = responseError
                 }
+
             }
         )
-
-        return CallResult(result, error)
+        return CallResult(tickets, error)
     }
 }

@@ -13,11 +13,11 @@ import net.papirus.pyrusservicedesk.sdk.response.ResponseError
  * @param requests factory to obtain request from.
  * @param ticketId id of the desired ticket.
  */
-internal class GetTicketCallAdapter(
+internal class GetTicketCall(
         scope: CoroutineScope,
         private val requests: RequestFactory,
         val ticketId: Int)
-    : CallAdapterBase<List<Comment>>(scope){
+    : BaseCall<List<Comment>>(scope){
 
 
     override suspend fun run(): CallResult<List<Comment>> {

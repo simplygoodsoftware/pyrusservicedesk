@@ -178,8 +178,8 @@ internal class TicketViewModel(
 
     private fun update() {
         val call = when {
-            isFeed -> GetFeedCallAdapter(this@TicketViewModel, requests).execute()
-            else -> GetTicketCallAdapter(this@TicketViewModel, requests, ticketId).execute()
+            isFeed -> GetFeedCall(this@TicketViewModel, requests).execute()
+            else -> GetTicketCall(this@TicketViewModel, requests, ticketId).execute()
         }
         val observer = Observer<CallResult<List<Comment>>> { result ->
                 if (result == null)
@@ -233,10 +233,10 @@ internal class TicketViewModel(
         val call = when {
             toNewTicket -> {
                 isCreateTicketSent = true
-                CreateTicketCallAdapter(this, requests, localComment, uploadFileHooks).execute()
+                CreateTicketCall(this, requests, localComment, uploadFileHooks).execute()
             }
-            isFeed -> AddFeedCommentCallAdapter(this, requests, localComment, uploadFileHooks).execute()
-            else -> AddCommentCallAdapter(this, requests, ticketId, localComment, uploadFileHooks).execute()
+            isFeed -> AddFeedCommentCall(this, requests, localComment, uploadFileHooks).execute()
+            else -> AddCommentCall(this, requests, ticketId, localComment, uploadFileHooks).execute()
         }
         call.observeForever(getObserverForAddCommentCall(localComment, uploadFileHooks, toNewTicket))
     }

@@ -46,7 +46,7 @@ internal class TicketAdapter: AdapterBase<TicketEntry>() {
     val itemSpaceMultiplier = object: SpaceMultiplier{
         override fun getMultiplier(adapterPosition: Int): Float {
             return when {
-                adapterPosition == -1 -> 1f
+                adapterPosition <= 0 -> 1f
                 itemsList[adapterPosition].type == Type.Comment
                         && itemsList[adapterPosition -1].type == Type.Comment
                         && (itemsList[adapterPosition] as CommentEntry).comment.isInbound !=

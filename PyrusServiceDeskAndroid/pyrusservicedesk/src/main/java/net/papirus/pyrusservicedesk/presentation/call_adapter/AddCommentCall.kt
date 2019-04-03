@@ -15,13 +15,13 @@ import net.papirus.pyrusservicedesk.sdk.web.UploadFileHooks
  * @param comment comment to be added.
  * @param uploadFileHooks file hooks that are used for managing uploading of the file in comment.
  */
-internal class AddCommentCallAdapter(
+internal class AddCommentCall(
         scope: CoroutineScope,
         private val requests: RequestFactory,
         private val ticketId: Int,
         private val comment: Comment,
         private val uploadFileHooks: UploadFileHooks? = null)
-    : CallAdapterBase<Int>(scope) {
+    : BaseCall<Int>(scope) {
 
     override suspend fun run(): CallResult<Int> {
         var result: Int? = null
