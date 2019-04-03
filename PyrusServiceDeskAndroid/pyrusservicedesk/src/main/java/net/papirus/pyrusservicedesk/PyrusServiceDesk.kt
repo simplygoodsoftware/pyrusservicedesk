@@ -117,7 +117,7 @@ class PyrusServiceDesk private constructor(
                     GlobalScope.launch {
                         serviceDesk
                             .requestFactory
-                            .getSetPushTokenRequest(serviceDesk.appId)
+                            .getSetPushTokenRequest(token)
                             .execute(object: ResponseCallback<Unit>{
                                 override fun onSuccess(data: Unit) {
                                     callback.onResult(null)
