@@ -185,8 +185,11 @@ internal class TicketAdapter: AdapterBase<TicketEntry>() {
         val onCommentClickListener = OnClickListener {
             when {
                 comment.contentType == ContentType.Attachment
-                        && comment.fileProgressStatus == Status.Completed ->
-                    onFileReadyToPreviewClickListener?.invoke(getItem().comment.attachments!!.first())
+                        && comment.fileProgressStatus == Status.Completed -> {
+
+                    if (!shouldHideFileButton())
+                        onFileReadyToPreviewClickListener?.invoke(getItem().comment.attachments!!.first())
+                }
 
                 else -> getItem().onClickedCallback.onClicked(getItem())
             }

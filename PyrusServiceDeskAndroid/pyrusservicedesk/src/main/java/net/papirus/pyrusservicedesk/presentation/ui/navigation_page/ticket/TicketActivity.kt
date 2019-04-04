@@ -43,6 +43,8 @@ internal class TicketActivity : ConnectionActivityBase<TicketViewModel>(TicketVi
         private const val KEY_TICKET_ID = "KEY_TICKET_ID"
         private const val KEY_UNREAD_COUNT = "KEY_UNREAD_COUNT"
 
+        private const val STATE_KEYBOARD_SHOWN = "STATE_KEYBOARD_SHOWN"
+
         /**
          * Provides intent for launching the screen.
          *
@@ -118,6 +120,8 @@ internal class TicketActivity : ConnectionActivityBase<TicketViewModel>(TicketVi
         }
     }
 
+    private var needShowKeyboard: Boolean = false
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
@@ -159,16 +163,27 @@ internal class TicketActivity : ConnectionActivityBase<TicketViewModel>(TicketVi
         attach.setColorFilter(accentColor)
         if(savedInstanceState == null)
             input.setText(viewModel.draft)
-        input.highlightColor = accentColor
-        input.setCursorColor(accentColor)
-        input.addTextChangedListener(inputTextWatcher)
+        input.apply {
+            highlightColor = accentColor
+            setCursorColor(accentColor)
+            addTextChangedListener(inputTextWatcher)
+        }
         send.isEnabled = !input.text.isNullOrBlank()
+    }
+
+    override fun onRestoreInstanceState(savedInstanceState: Bundle?) {
+        super.onRestoreInstanceState(savedInstanceState)
+        savedInstanceState?.let {
+            if (it.getBoolean(STATE_KEYBOARD_SHOWN))
+                showKeyboardOn(input)
+        }
     }
 
     override fun onSaveInstanceState(outState: Bundle?) {
         super.onSaveInstanceState(outState)
         outState?.let {
             ServiceDeskConfiguration.save(it)
+            it.putBoolean(STATE_KEYBOARD_SHOWN, input.hasFocus())
         }
     }
 

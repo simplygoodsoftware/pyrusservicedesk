@@ -1,19 +1,29 @@
 package net.papirus.pyrusservicedesk.presentation
 
 import android.arch.lifecycle.Observer
+import android.content.Context
 import android.os.Bundle
+import android.support.v4.view.ViewCompat
 import android.support.v7.app.AppCompatActivity
 import android.view.View
+import android.view.inputmethod.InputMethodManager
 import com.example.pyrusservicedesk.R
+import kotlinx.android.synthetic.main.psd_activity_ticket.*
+import kotlinx.coroutines.*
 import net.papirus.pyrusservicedesk.PyrusServiceDesk
 import net.papirus.pyrusservicedesk.presentation.viewmodel.QuitViewModel
 import net.papirus.pyrusservicedesk.utils.getViewModel
+import kotlin.coroutines.CoroutineContext
 
 
 /**
  * Base class for service desk activities.
  */
-internal abstract class ActivityBase: AppCompatActivity() {
+internal abstract class ActivityBase: AppCompatActivity(), CoroutineScope {
+
+    private companion object {
+        const val SHOW_KEYBOARD_RETRY_DELAY_MS = 100L
+    }
 
     /**
      * Implementations should provide layout resource ids to be inflated to content view
@@ -32,6 +42,8 @@ internal abstract class ActivityBase: AppCompatActivity() {
     protected val quitViewModel: QuitViewModel by getViewModel(QuitViewModel::class.java)
 
     private var recentContentHeight = 0
+
+    override val coroutineContext: CoroutineContext = Dispatchers.Main + Job()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -53,6 +65,11 @@ internal abstract class ActivityBase: AppCompatActivity() {
         }
     }
 
+    override fun onDestroy() {
+        super.onDestroy()
+        coroutineContext.cancel()
+    }
+
     override fun onPostCreate(savedInstanceState: Bundle?) {
         super.onPostCreate(savedInstanceState)
         startObserveData()
@@ -61,6 +78,15 @@ internal abstract class ActivityBase: AppCompatActivity() {
     override fun finish() {
         super.finish()
         overridePendingTransition()
+    }
+
+    protected fun showKeyboardOn(view: View) {
+        launch {
+            while(!ViewCompat.isLaidOut(view))
+                delay(SHOW_KEYBOARD_RETRY_DELAY_MS)
+            view.requestFocus()
+            (getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager).showSoftInput(input, 0)
+        }
     }
 
     /**

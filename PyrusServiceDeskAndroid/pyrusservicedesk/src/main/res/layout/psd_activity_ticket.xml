@@ -91,6 +91,7 @@
                 android:paddingTop="@dimen/psd_input_padding"
                 android:paddingBottom="@dimen/psd_input_padding"
                 android:hint="@string/psd_comment_input_hint"
+                android:inputType="textCapSentences"
                 android:imeOptions="flagNoExtractUi|flagNoFullscreen"
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintEnd_toStartOf="@+id/send"
