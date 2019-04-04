@@ -254,12 +254,11 @@ internal class CommentView @JvmOverloads constructor(
      * Works with [ContentType.Attachment].
      */
     fun setProgress(progress: Int) {
-        val currentProgress = recentProgress
         recentProgress = progress
         ValueAnimator.ofInt(file_progress.progress, progress).apply {
-            duration = when (currentProgress){
-                0 -> PROGRESS_CHANGE_ANIMATION_DURATION
-                else -> 0
+            duration = when (progress){
+                0 -> 0
+                else -> PROGRESS_CHANGE_ANIMATION_DURATION
             }
             interpolator = DecelerateInterpolator()
             addUpdateListener {

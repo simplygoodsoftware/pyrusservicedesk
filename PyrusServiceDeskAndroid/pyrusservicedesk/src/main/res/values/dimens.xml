@@ -30,4 +30,7 @@
     <dimen name="psd_icon_size">8dp</dimen>
     <dimen name="psd_max_input_height">80dp</dimen>
     <dimen name="psd_creation_time_text_size">12sp</dimen>
+    <dimen name="psd_attach_button_width">40dp</dimen>
+    <dimen name="psd_min_input_height">48dp</dimen>
+    <dimen name="psd_input_padding">4dp</dimen>
 </resources>

@@ -6,6 +6,7 @@ import android.os.Bundle
 import android.view.Menu
 import android.view.MenuInflater
 import android.view.MenuItem
+import android.view.View
 import com.example.pyrusservicedesk.R
 import kotlinx.android.synthetic.main.psd_activity_tickets.*
 import net.papirus.pyrusservicedesk.PyrusServiceDesk
@@ -33,6 +34,7 @@ internal class TicketsActivity: ConnectionActivityBase<TicketsViewModel>(Tickets
     override val layoutResId = R.layout.psd_activity_tickets
     override val toolbarViewId = R.id.tickets_toolbar
     override val refresherViewId = R.id.refresh
+    override val progressBarViewId: Int = View.NO_ID
 
     private lateinit var adapter: TicketsAdapter
 
