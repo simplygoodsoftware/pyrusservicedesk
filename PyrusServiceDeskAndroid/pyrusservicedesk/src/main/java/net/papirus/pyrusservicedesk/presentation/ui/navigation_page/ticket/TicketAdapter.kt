@@ -328,7 +328,7 @@ internal class TicketAdapter: AdapterBase<TicketEntry>() {
                                  actionState: Int,
                                  isCurrentlyActive: Boolean) {
 
-            if (itemsList[viewHolder.adapterPosition].isNonShiftable())
+            if (viewHolder.adapterPosition == -1 || itemsList[viewHolder.adapterPosition].isNonShiftable())
                 return
             val maxItemViewShift = recyclerView.resources.getDimensionPixelSize(R.dimen.psd_comment_creation_time_width)
             val minInboundOffset =  recyclerView.resources.getDimensionPixelSize(R.dimen.psd_offset_default)
