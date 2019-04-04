@@ -40,7 +40,7 @@ internal class FilePreviewActivity: ConnectionActivityBase<FilePreviewViewModel>
     override val layoutResId: Int = R.layout.psd_activity_file_preview
     override val toolbarViewId: Int = R.id.file_preview_toolbar
     override val refresherViewId: Int = NO_ID
-
+    override val progressBarViewId: Int = R.id.progress_bar
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)

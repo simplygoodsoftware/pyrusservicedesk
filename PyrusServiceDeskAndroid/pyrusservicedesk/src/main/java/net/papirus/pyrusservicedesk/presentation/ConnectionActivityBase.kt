@@ -5,6 +5,7 @@ import android.graphics.PorterDuff
 import android.os.Bundle
 import android.view.View.GONE
 import android.view.View.VISIBLE
+import android.widget.ProgressBar
 import com.example.pyrusservicedesk.R
 import kotlinx.android.synthetic.main.psd_activity_tickets.*
 import kotlinx.android.synthetic.main.psd_no_connection.*
@@ -31,13 +32,16 @@ internal abstract class ConnectionActivityBase<T: ConnectionViewModelBase>(viewM
     /**
      * Optional id of the swiperefreshlayout that is used for launch loading the data from [viewModel]
      */
-    abstract val refresherViewId:Int
+    protected abstract val refresherViewId:Int
+    protected abstract val progressBarViewId: Int
 
     private var refresher: DirectedSwipeRefresh? = null
+    private var progressBar: ProgressBar? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        progress_bar?.progressDrawable?.setColorFilter(
+        progressBar = findViewById(progressBarViewId)
+        progressBar?.progressDrawable?.setColorFilter(
                 getColor(this, R.attr.colorAccentSecondary),
                 PorterDuff.Mode.SRC_IN)
         reconnect.setOnClickListener { reconnect() }
@@ -70,16 +74,19 @@ internal abstract class ConnectionActivityBase<T: ConnectionViewModelBase>(viewM
     protected open fun updateProgress(newProgress: Int) {
         when {
             newProgress >= resources.getInteger(R.integer.psd_progress_max_value) -> {
-                progress_bar
-                    .animate()
-                    .alpha(0f)
-                    .setDuration(ANIMATION_DURATION)
-                    .start()
+                progressBar
+                    ?.animate()
+                    ?.alpha(0f)
+                    ?.setDuration(ANIMATION_DURATION)
+                    ?.start()
                 refresher?.isRefreshing = false
             }
-            else -> progress_bar.alpha = 1f
+            else -> {
+                refresher?.isRefreshing = true
+                progressBar?.alpha = 1f
+            }
         }
-        progress_bar.progress = newProgress
+        progressBar?.progress = newProgress
     }
 
     /**

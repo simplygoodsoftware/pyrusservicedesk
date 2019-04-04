@@ -49,17 +49,6 @@
 
         </net.papirus.pyrusservicedesk.presentation.ui.view.swiperefresh.DirectedSwipeRefresh>
 
-        <ProgressBar
-                android:id="@+id/progress_bar"
-                style="?android:attr/progressBarStyleHorizontal"
-                android:layout_width="0dp"
-                android:layout_height="?attr/elevationDefault"
-                android:indeterminate="false"
-                android:max="@integer/psd_progress_max_value"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toTopOf="parent" />
-
         <View
             android:id="@+id/divider"
             android:layout_width="match_parent"
@@ -76,15 +65,18 @@
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent">
 
-            <android.support.v7.widget.AppCompatButton
+            <android.support.v7.widget.AppCompatTextView
                 android:id="@+id/send"
-                style="@style/Widget.AppCompat.Button.Borderless.Colored"
                 android:layout_width="wrap_content"
                 android:layout_height="@dimen/psd_recyclerview_item_height_default"
                 android:background="?attr/selectableItemBackground"
                 android:text="@string/psd_send"
-                android:paddingEnd="@dimen/psd_offset_small"
+                android:gravity="center"
+                android:textAllCaps="true"
                 android:paddingStart="@dimen/psd_offset_small"
+                android:paddingEnd="@dimen/psd_offset_small"
+                android:layout_marginEnd="@dimen/psd_offset_small"
+                android:layout_marginRight="@dimen/psd_offset_small"
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintEnd_toEndOf="parent" />
 
@@ -95,7 +87,9 @@
                 android:background="@android:color/transparent"
                 android:scrollbars="vertical"
                 android:maxHeight="@dimen/psd_max_input_height"
-                android:minHeight="@dimen/psd_recyclerview_item_height_default"
+                android:minHeight="@dimen/psd_min_input_height"
+                android:paddingTop="@dimen/psd_input_padding"
+                android:paddingBottom="@dimen/psd_input_padding"
                 android:hint="@string/psd_comment_input_hint"
                 android:imeOptions="flagNoExtractUi|flagNoFullscreen"
                 app:layout_constraintBottom_toBottomOf="parent"
@@ -105,12 +99,9 @@
 
             <android.support.v7.widget.AppCompatImageButton
                 android:id="@+id/attach"
-                style="@style/Widget.AppCompat.ImageButton"
-                android:layout_width="wrap_content"
+                style="?attr/toolbarNavigationButtonStyle"
+                android:layout_width="@dimen/psd_attach_button_width"
                 android:layout_height="@dimen/psd_recyclerview_item_height_default"
-                android:paddingStart="@dimen/psd_offset_small"
-                android:paddingEnd="@dimen/psd_offset_small"
-                android:background="?attr/selectableItemBackground"
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
                 app:srcCompat="@drawable/psd_add_accent" />

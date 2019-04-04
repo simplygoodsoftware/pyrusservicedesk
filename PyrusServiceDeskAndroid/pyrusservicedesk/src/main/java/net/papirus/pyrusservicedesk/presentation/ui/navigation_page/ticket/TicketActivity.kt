@@ -14,6 +14,7 @@ import android.view.Menu
 import android.view.MenuInflater
 import android.view.MenuItem
 import android.view.MenuItem.SHOW_AS_ACTION_ALWAYS
+import android.view.View.NO_ID
 import android.widget.Toast
 import com.example.pyrusservicedesk.R
 import kotlinx.android.synthetic.main.psd_activity_ticket.*
@@ -22,6 +23,7 @@ import net.papirus.pyrusservicedesk.ServiceDeskConfiguration
 import net.papirus.pyrusservicedesk.presentation.ConnectionActivityBase
 import net.papirus.pyrusservicedesk.presentation.ui.navigation.UiNavigator
 import net.papirus.pyrusservicedesk.presentation.ui.view.NavigationCounterDrawable
+import net.papirus.pyrusservicedesk.presentation.ui.view.recyclerview.item_animator.ItemAnimatorNoFade
 import net.papirus.pyrusservicedesk.presentation.ui.view.recyclerview.item_decorators.SpaceItemDecoration
 import net.papirus.pyrusservicedesk.sdk.data.Attachment
 import net.papirus.pyrusservicedesk.sdk.data.EMPTY_TICKET_ID
@@ -85,6 +87,7 @@ internal class TicketActivity : ConnectionActivityBase<TicketViewModel>(TicketVi
     override val layoutResId = R.layout.psd_activity_ticket
     override val toolbarViewId = R.id.ticket_toolbar
     override val refresherViewId = R.id.refresh
+    override val progressBarViewId: Int = NO_ID
 
     private val ticketSharedViewModel: TicketSharedViewModel by getViewModel(TicketSharedViewModel::class.java)
     private val navigationCounterIcon by lazy {
@@ -136,7 +139,7 @@ internal class TicketActivity : ConnectionActivityBase<TicketViewModel>(TicketVi
                     resources.getDimensionPixelSize(R.dimen.psd_comments_item_space),
                     this@TicketActivity.adapter.itemSpaceMultiplier)
             )
-            itemAnimator = null
+            itemAnimator = ItemAnimatorNoFade()
             this@TicketActivity.adapter.itemTouchHelper?.attachToRecyclerView(this)
         }
         send.setOnClickListener { sendComment() }

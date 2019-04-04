@@ -194,7 +194,8 @@ internal class TicketViewModel(
 
     private fun maybeStartAutoRefresh() {
         if (canBeUpdated()) {
-            mainHandler.post(updateRunnable)
+            // delayed to prevent launching second unnecessary update in [init]
+            mainHandler.postDelayed(updateRunnable, TICKET_UPDATE_INTERVAL * MILLISECONDS_IN_SECOND)
         }
     }
 
@@ -294,6 +295,9 @@ internal class TicketViewModel(
     private fun applyTicketUpdate(freshList: List<Comment>) {
         when{
             freshList.isEmpty() -> {
+                ConfigUtils.getWelcomeMessage()?.let {
+                    publishEntries(ticketEntries, listOf(WelcomeMessageEntry(it)))
+                }
                 onDataLoaded()
                 return
             }
