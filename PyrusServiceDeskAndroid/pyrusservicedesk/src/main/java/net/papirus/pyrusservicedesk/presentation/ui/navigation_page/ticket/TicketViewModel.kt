@@ -194,6 +194,7 @@ internal class TicketViewModel(
 
     private fun maybeStartAutoRefresh() {
         if (canBeUpdated()) {
+            // delayed to prevent launching second unnecessary update in [init]
             mainHandler.postDelayed(updateRunnable, TICKET_UPDATE_INTERVAL * MILLISECONDS_IN_SECOND)
         }
     }

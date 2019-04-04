@@ -31,7 +31,7 @@ internal abstract class ActivityBase: AppCompatActivity() {
      */
     protected val quitViewModel: QuitViewModel by getViewModel(QuitViewModel::class.java)
 
-    private var recentHeight = 0
+    private var recentContentHeight = 0
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -45,10 +45,10 @@ internal abstract class ActivityBase: AppCompatActivity() {
         setSupportActionBar(findViewById(toolbarViewId))
         findViewById<View>(android.R.id.content).apply {
             viewTreeObserver.addOnGlobalLayoutListener {
-                val changedHeight = recentHeight - height
+                val changedHeight = recentContentHeight - height
                 if (changedHeight != 0)
                     onViewHeightChanged(changedHeight)
-                recentHeight = height
+                recentContentHeight = height
             }
         }
     }
