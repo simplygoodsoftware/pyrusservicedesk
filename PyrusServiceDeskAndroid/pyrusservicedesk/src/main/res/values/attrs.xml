@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <attr name="colorAccentSecondary" format="reference"/>
+    <attr name="elevationDefault" format="reference"/>
+
+    <declare-styleable name="CommentView">
+        <attr name="type" format="enum">
+            <enum name="inbound" value="0"/>
+            <enum name="outbound" value="1"/>
+        </attr>
+    </declare-styleable>
+
+    <declare-styleable name="DirectedSwipeRefresh">
+        <attr name="swipeDirection" format="enum">
+            <enum name="top" value="0"/>
+            <enum name="bottom" value="1"/>
+            <enum name="both" value="2"/>
+        </attr>
+        <attr name="allowChildHasOwnDimensions" format="boolean"/>
+    </declare-styleable>
+
+</resources>

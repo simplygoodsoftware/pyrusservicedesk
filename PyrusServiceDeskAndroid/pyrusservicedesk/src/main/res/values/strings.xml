@@ -1,0 +1,36 @@
+<resources>
+    <string name="app_name" translatable="false">PyrusServiceDesk</string>
+    <string name="psd_new_conversation">New Conversation</string>
+    <string name="psd_send">Send</string>
+    <string name="psd_comment_input_hint">Add Comment</string>
+    <string name="psd_retry">Retry</string>
+    <string name="psd_no_connection">No Internet Connection</string>
+    <string name="psd_uploading">Uploading…</string>
+    <string name="psd_file_size_mb" formatted="false">%.1f MB</string>
+    <string name="psd_file_size_kb" formatted="false">%.1f KB</string>
+    <string name="psd_time_format">hh:mm aa</string>
+    <string name="psd_tickets_activity_title">All Conversations</string>
+    <string name="psd_organization_support">Support</string>
+    <string name="psd_today">Today</string>
+    <string name="psd_yesterday">Yesterday</string>
+    <string name="psd_date_format_d_m_y">MMMM d, yyyy</string>
+    <string name="psd_date_format_d_m">MMMM d</string>
+    <string name="psd_photo">Photo</string>
+    <string name="psd_gallery">Gallery</string>
+    <string name="psd_send_logs">Send logs</string>
+
+    <plurals name="psd_years_ago">
+        <item quantity="one">%d year ago</item>
+        <item quantity="other">%d years ago</item>
+    </plurals>
+
+    <string name="psd_months_ago" formatted="false">%d m ago</string>
+    <string name="psd_weeks_ago" formatted="false">%d w ago</string>
+    <string name="psd_days_ago" formatted="false">%d d ago</string>
+    <string name="psd_hours_ago" formatted="false">%d h ago</string>
+    <string name="psd_minutes_ago" formatted="false">%d m ago</string>
+    <string name="psd_recent">recent</string>
+    <string name="psd_guest">Guest</string>
+    <string name="psd_file_size_exceeded_message" formatted="false">File size should not exceed %d MB.</string>
+    <string name="psd_copied_to_clipboard">Copied to clipboard</string>
+</resources>

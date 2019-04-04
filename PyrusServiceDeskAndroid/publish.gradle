@@ -1,0 +1,42 @@
+apply plugin: 'com.novoda.bintray-release'
+
+ext{
+    ORG_NAME = 'simplygoodsoftware'
+    REPO_NAME = 'PyrusServiceDesk'
+
+    GROUP_ID = 'net.papirus'
+    ARTIFACT_ID = 'pyrusservicedesk'
+
+    VERSION = '0.9.9'
+    DESCRIPTION = 'Service desk by simplygoodsoftware'
+
+    WEBSITE = 'https://pyrus.com/'
+    GITHUB = 'https://github.com/simplygoodsoftware/pyrusservicedesk'
+
+    LICENCE = 'MIT'
+
+}
+
+Properties properties = new Properties()
+properties.load(project.file('publish.properties').newDataInputStream())
+
+
+// Apache-2.0 licensing is used by default
+publish {
+    userOrg = ORG_NAME
+    repoName = REPO_NAME
+
+    groupId = GROUP_ID
+    artifactId = ARTIFACT_ID
+
+    publishVersion = VERSION
+    desc = DESCRIPTION
+
+    bintrayUser = properties.getProperty("bintray.user")
+    bintrayKey = properties.getProperty("bintray.apikey")
+
+    website = WEBSITE
+    repository = GITHUB
+
+    licences = LICENCE
+}

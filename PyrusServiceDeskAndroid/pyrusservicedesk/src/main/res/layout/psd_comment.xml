@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+    android:id="@+id/root"
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:gravity="bottom"
+    android:orientation="horizontal">
+
+    <FrameLayout
+        android:id="@+id/background_parent"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:background="@drawable/psd_comment_background">
+
+        <LinearLayout
+            android:id="@+id/attachment_layout"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:gravity="center_vertical"
+            android:orientation="horizontal"
+            tools:visibility="visible">
+
+            <ProgressBar
+                android:id="@+id/file_progress"
+                style="?android:attr/progressBarStyleHorizontal"
+                android:layout_width="@dimen/psd_recyclerview_item_height_default"
+                android:layout_height="@dimen/psd_recyclerview_item_height_default"
+                android:progressDrawable="@drawable/psd_file_progress"
+                android:layout_marginRight="@dimen/psd_offset_small"
+                android:layout_marginEnd="@dimen/psd_offset_small"
+                android:indeterminate="false"/>
+
+            <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:gravity="center_vertical"
+                android:orientation="vertical">
+
+                <android.support.v7.widget.AppCompatTextView
+                    android:id="@+id/file_name"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:textAppearance="?attr/textAppearanceListItem"
+                    tools:text="filename.jpeg"
+                    android:ellipsize="end"/>
+
+                <android.support.v7.widget.AppCompatTextView
+                    android:id="@+id/file_size"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/psd_uploading"
+                    android:ellipsize="end"
+                    android:textAppearance="?attr/textAppearanceListItemSecondary"/>
+            </LinearLayout>
+
+        </LinearLayout>
+
+        <android.support.v7.widget.AppCompatTextView
+            android:id="@+id/comment_text"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textAppearance="?attr/textAppearanceListItem"
+            tools:text="@tools:sample/lorem"
+            tools:visibility="gone"/>
+    </FrameLayout>
+
+</LinearLayout>

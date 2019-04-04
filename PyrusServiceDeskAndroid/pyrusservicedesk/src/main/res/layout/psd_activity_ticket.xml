@@ -1,0 +1,133 @@
+<?xml version="1.0" encoding="utf-8"?>
+<android.support.constraint.ConstraintLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:focusable="true"
+    android:focusableInTouchMode="true"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <android.support.v7.widget.Toolbar
+        android:id="@+id/ticket_toolbar"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        style="?attr/actionBarStyle"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:titleTextAppearance="@style/PsdToolbarTitleTextAppearance"/>
+
+    <android.support.constraint.ConstraintLayout
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/ticket_toolbar">
+
+        <net.papirus.pyrusservicedesk.presentation.ui.view.swiperefresh.DirectedSwipeRefresh
+            android:id="@+id/refresh"
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintBottom_toTopOf="@+id/input_layout"
+            app:swipeDirection="both">
+
+            <android.support.v7.widget.RecyclerView
+                android:id="@+id/comments"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:clipChildren="false"
+                android:clipToPadding="false"
+                android:paddingTop="@dimen/psd_comments_item_space_double"
+                android:paddingBottom="@dimen/psd_comments_item_space_double"
+                app:layoutManager="android.support.v7.widget.LinearLayoutManager"
+                tools:listitem="@layout/psd_view_holder_comment_inbound" />
+
+        </net.papirus.pyrusservicedesk.presentation.ui.view.swiperefresh.DirectedSwipeRefresh>
+
+        <ProgressBar
+                android:id="@+id/progress_bar"
+                style="?android:attr/progressBarStyleHorizontal"
+                android:layout_width="0dp"
+                android:layout_height="?attr/elevationDefault"
+                android:indeterminate="false"
+                android:max="@integer/psd_progress_max_value"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent" />
+
+        <View
+            android:id="@+id/divider"
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:background="?android:attr/listDivider"
+            app:layout_constraintBottom_toTopOf="@+id/input_layout"
+            app:layout_constraintTop_toBottomOf="@+id/refresh" />
+
+        <android.support.constraint.ConstraintLayout
+            android:id="@+id/input_layout"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent">
+
+            <android.support.v7.widget.AppCompatButton
+                android:id="@+id/send"
+                style="@style/Widget.AppCompat.Button.Borderless.Colored"
+                android:layout_width="wrap_content"
+                android:layout_height="@dimen/psd_recyclerview_item_height_default"
+                android:background="?attr/selectableItemBackground"
+                android:text="@string/psd_send"
+                android:paddingEnd="@dimen/psd_offset_small"
+                android:paddingStart="@dimen/psd_offset_small"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toEndOf="parent" />
+
+            <android.support.v7.widget.AppCompatEditText
+                android:id="@+id/input"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:background="@android:color/transparent"
+                android:scrollbars="vertical"
+                android:maxHeight="@dimen/psd_max_input_height"
+                android:minHeight="@dimen/psd_recyclerview_item_height_default"
+                android:hint="@string/psd_comment_input_hint"
+                android:imeOptions="flagNoExtractUi|flagNoFullscreen"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toStartOf="@+id/send"
+                app:layout_constraintStart_toEndOf="@+id/attach"
+                app:layout_constraintTop_toTopOf="parent" />
+
+            <android.support.v7.widget.AppCompatImageButton
+                android:id="@+id/attach"
+                style="@style/Widget.AppCompat.ImageButton"
+                android:layout_width="wrap_content"
+                android:layout_height="@dimen/psd_recyclerview_item_height_default"
+                android:paddingStart="@dimen/psd_offset_small"
+                android:paddingEnd="@dimen/psd_offset_small"
+                android:background="?attr/selectableItemBackground"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:srcCompat="@drawable/psd_add_accent" />
+        </android.support.constraint.ConstraintLayout>
+
+    </android.support.constraint.ConstraintLayout>
+
+    <include
+        android:id="@+id/no_connection"
+        layout="@layout/psd_no_connection"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/ticket_toolbar"
+        android:visibility="gone"/>
+
+
+</android.support.constraint.ConstraintLayout>

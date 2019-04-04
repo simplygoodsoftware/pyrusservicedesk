@@ -1,0 +1,30 @@
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+          package="com.example.pyrusservicedesk">
+
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+    <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE"/>
+
+    <!-- Runtime permissions -->
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"/>
+    <uses-permission android:name="android.permission.CAMERA"/>
+
+    <application>
+
+        <activity
+            android:name="net.papirus.pyrusservicedesk.presentation.ui.navigation_page.tickets.TicketsActivity"
+            android:launchMode="singleTask"
+            android:theme="@style/PyrusServiceDesk.Dialog"/>
+
+        <activity
+            android:name="net.papirus.pyrusservicedesk.presentation.ui.navigation_page.ticket.TicketActivity"
+            android:launchMode="singleTask"
+            android:theme="@style/PyrusServiceDesk.Dialog"/>
+
+        <activity
+            android:name="net.papirus.pyrusservicedesk.presentation.ui.navigation_page.file_preview.FilePreviewActivity"
+            android:theme="@style/PyrusServiceDesk.Dialog"/>
+
+    </application>
+
+</manifest>

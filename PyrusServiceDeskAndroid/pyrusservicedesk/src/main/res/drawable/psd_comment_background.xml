@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<shape xmlns:android="http://schemas.android.com/apk/res/android"
+    android:shape="rectangle">
+
+    <corners android:radius="@dimen/psd_comment_radius"/>
+    <padding
+        android:bottom="@dimen/psd_offset_small"
+        android:top="@dimen/psd_offset_small"
+        android:left="@dimen/psd_offset_small"
+        android:right="@dimen/psd_offset_small"/>
+
+</shape>

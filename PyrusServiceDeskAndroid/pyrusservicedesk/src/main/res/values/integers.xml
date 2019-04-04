@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <integer name="psd_progress_max_value">100</integer>
+    <integer name="psd_sync_animation_frame_duration">40</integer>
+    <integer name="psd_window_animation_duration">200</integer>
+</resources>

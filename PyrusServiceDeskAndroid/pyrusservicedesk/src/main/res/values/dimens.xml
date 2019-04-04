@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <!--- COMMON -->
+    <dimen name="psd_elevation_default">4dp</dimen>
+    <dimen name="psd_offset_default">16dp</dimen>
+    <dimen name="psd_offset_small">8dp</dimen>
+
+    <!-- THEME -->
+    <dimen name="psd_theme_text_size_default">14sp</dimen>
+
+    <dimen name="psd_toolbar_title_text_size">18sp</dimen>
+
+    <dimen name="psd_recyclerview_item_height_default">56dp</dimen>
+
+    <dimen name="psd_counter_radius">16dp</dimen>
+    <dimen name="psd_comment_radius">8dp</dimen>
+
+    <dimen name="psd_tickets_item_space">16dp</dimen>
+    <dimen name="psd_comments_item_space">4dp</dimen>
+    <dimen name="psd_comments_item_space_double">8dp</dimen>
+    <dimen name="psd_unread_counter_min_width">18dp</dimen>
+    <dimen name="psd_avatar_size_default">32dp</dimen>
+    <dimen name="psd_comment_creation_time_width">64dp</dimen>
+    <dimen name="psd_comment_creation_time_width_negative">-64dp</dimen>
+    <dimen name="psd_comment_error_width">32dp</dimen>
+    <dimen name="psd_comment_error_width_negative">-32dp</dimen>
+    <dimen name="psd_avatar_bitmap_size">96px</dimen>
+    <dimen name="psd_avatar_text_size">16sp</dimen>
+    <dimen name="psd_icon_size">8dp</dimen>
+    <dimen name="psd_max_input_height">80dp</dimen>
+    <dimen name="psd_creation_time_text_size">12sp</dimen>
+</resources>
