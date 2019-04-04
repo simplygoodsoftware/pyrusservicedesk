@@ -7,7 +7,7 @@ ext{
     GROUP_ID = 'net.papirus'
     ARTIFACT_ID = 'pyrusservicedesk'
 
-    VERSION = '0.9.9'
+    VERSION = '1.0.0'
     DESCRIPTION = 'Service desk by simplygoodsoftware'
 
     WEBSITE = 'https://pyrus.com/'
@@ -21,7 +21,6 @@ Properties properties = new Properties()
 properties.load(project.file('publish.properties').newDataInputStream())
 
 
-// Apache-2.0 licensing is used by default
 publish {
     userOrg = ORG_NAME
     repoName = REPO_NAME
