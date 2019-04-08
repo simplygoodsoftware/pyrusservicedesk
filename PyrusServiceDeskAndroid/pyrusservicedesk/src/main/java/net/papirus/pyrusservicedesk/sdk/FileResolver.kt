@@ -67,6 +67,7 @@ internal class FileResolver(private val contentResolver: ContentResolver) {
         return FileData(
             cursor.getString(cursor.getColumnIndex(OpenableColumns.DISPLAY_NAME)),
             size,
-            fileUri)
+            fileUri,
+            true)
     }
 }

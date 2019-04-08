@@ -1,10 +1,17 @@
 package net.papirus.pyrusservicedesk.presentation.ui.navigation_page.file_preview
 
+import android.app.Application
+import android.app.DownloadManager
 import android.arch.lifecycle.LiveData
 import android.arch.lifecycle.MutableLiveData
 import android.arch.lifecycle.Observer
+import android.content.Context
 import android.content.Intent
 import android.os.Bundle
+import android.os.Environment
+import android.view.Menu
+import android.view.MenuInflater
+import android.view.MenuItem
 import android.view.View.*
 import android.webkit.*
 import com.example.pyrusservicedesk.R
@@ -49,6 +56,7 @@ internal class FilePreviewActivity: ConnectionActivityBase<FilePreviewViewModel>
         }
         file_preview_toolbar.setNavigationIcon(R.drawable.psd_arrow_back)
         file_preview_toolbar.setNavigationOnClickListener { finish() }
+        file_preview_toolbar.setOnMenuItemClickListener { onMenuItemClicked(it) }
 
         web_view.apply{
             settings.apply {
@@ -75,9 +83,27 @@ internal class FilePreviewActivity: ConnectionActivityBase<FilePreviewViewModel>
         }
     }
 
+    private fun onMenuItemClicked(item: MenuItem?): Boolean {
+        if (item == null)
+            return false
+        when (item.itemId) {
+            R.id.download -> viewModel.downloadFile()
+        }
+        return true
+    }
+
     override fun onSaveInstanceState(outState: Bundle?) {
         super.onSaveInstanceState(outState)
         web_view.saveState(outState)
+    }
+
+    override fun onCreateOptionsMenu(menu: Menu?): Boolean {
+        if (viewModel.isLocalFile())
+            return false
+        return menu?.let{
+            MenuInflater(this).inflate(R.menu.psd_file_preview_menu, menu)
+            true
+        } ?: false
     }
 
     override fun startObserveData() {
@@ -161,6 +187,22 @@ internal class FilePreviewViewModel(pyrusServiceDesk: PyrusServiceDesk,
      */
     fun onErrorReceived() {
         hasError.value = true
+    }
+
+    fun downloadFile() {
+        TODO("storage permission is requested")
+        val fileData = intent.getFileData()
+        val request = DownloadManager.Request(fileData.uri)
+        request.setDescription(fileData.fileName)
+        request.setNotificationVisibility(DownloadManager.Request.VISIBILITY_VISIBLE)
+        request.setDestinationInExternalPublicDir(Environment.DIRECTORY_DOWNLOADS, fileData.fileName)
+        ((getApplication() as Application)
+            .getSystemService(Context.DOWNLOAD_SERVICE) as  DownloadManager)
+            .enqueue(request)
+    }
+
+    fun isLocalFile(): Boolean {
+        return intent.getFileData().isLocal
     }
 }
 

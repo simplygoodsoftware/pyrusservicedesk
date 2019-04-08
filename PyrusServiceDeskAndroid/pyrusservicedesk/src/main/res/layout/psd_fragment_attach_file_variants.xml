@@ -38,7 +38,6 @@
         android:id="@+id/custom_variant"
         android:layout_width="match_parent"
         android:layout_height="@dimen/psd_recyclerview_item_height_default"
-        android:text="@string/psd_send_logs"
         android:background="?attr/selectableItemBackground"
         android:textAppearance="?attr/textAppearanceListItem"
         android:gravity="start|center_vertical"

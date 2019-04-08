@@ -120,8 +120,6 @@ internal class TicketActivity : ConnectionActivityBase<TicketViewModel>(TicketVi
         }
     }
 
-    private var needShowKeyboard: Boolean = false
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
@@ -281,6 +279,7 @@ private fun Attachment.toFileData(): FileData {
     return FileData(
         name,
         bytesSize,
-        uri ?: Uri.parse(getFileUrl(id))
+        uri ?: Uri.parse(getFileUrl(id)),
+        uri != null
     )
 }

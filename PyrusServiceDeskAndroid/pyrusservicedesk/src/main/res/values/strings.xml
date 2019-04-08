@@ -33,4 +33,5 @@
     <string name="psd_guest">Guest</string>
     <string name="psd_file_size_exceeded_message" formatted="false">File size should not exceed %d MB.</string>
     <string name="psd_copied_to_clipboard">Copied to clipboard</string>
+    <string name="psd_download">Download</string>
 </resources>

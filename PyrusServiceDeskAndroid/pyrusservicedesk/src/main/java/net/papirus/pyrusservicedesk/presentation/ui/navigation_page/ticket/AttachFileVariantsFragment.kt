@@ -13,7 +13,8 @@ import android.support.design.widget.BottomSheetDialog
 import android.support.design.widget.BottomSheetDialogFragment
 import android.view.LayoutInflater
 import android.view.View
-import android.view.View.*
+import android.view.View.GONE
+import android.view.View.VISIBLE
 import android.view.ViewGroup
 import kotlinx.android.synthetic.main.psd_fragment_attach_file_variants.*
 import net.papirus.pyrusservicedesk.PyrusServiceDesk
@@ -57,8 +58,11 @@ internal class AttachFileVariantsFragment: BottomSheetDialogFragment(), View.OnC
         photo_variant.setOnClickListener(this)
         photo_variant.visibility = if (isCapturingPhotoSupported()) VISIBLE else GONE
         gallery_variant.setOnClickListener(this)
-        custom_variant.setOnClickListener(this)
-        custom_variant.visibility = if (PyrusServiceDesk.FILE_CHOOSER == null) INVISIBLE else VISIBLE
+        PyrusServiceDesk.FILE_CHOOSER?.let {
+            custom_variant.setOnClickListener(this)
+            custom_variant.visibility = VISIBLE
+            custom_variant.text = it.getLabel()
+        }
     }
 
     override fun onSaveInstanceState(outState: Bundle) {
