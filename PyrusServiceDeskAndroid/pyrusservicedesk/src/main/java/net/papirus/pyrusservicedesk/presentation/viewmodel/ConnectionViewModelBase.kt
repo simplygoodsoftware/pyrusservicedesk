@@ -126,7 +126,8 @@ internal abstract class ConnectionViewModelBase(serviceDesk: PyrusServiceDesk)
     }
 
     private fun publishProgress(progress: Int, durationMs: Long, onCompleted: Runnable?) {
-        recentPublishedProgress = progress
+        if (progress > recentPublishedProgress)
+            recentPublishedProgress = progress
         ValueAnimator.ofInt(loadingProgress.value ?: 0, progress).apply {
             duration = durationMs
             interpolator = AccelerateInterpolator()

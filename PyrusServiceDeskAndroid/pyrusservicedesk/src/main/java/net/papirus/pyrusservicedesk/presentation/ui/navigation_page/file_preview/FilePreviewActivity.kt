@@ -1,27 +1,24 @@
 package net.papirus.pyrusservicedesk.presentation.ui.navigation_page.file_preview
 
-import android.app.Application
-import android.app.DownloadManager
-import android.arch.lifecycle.LiveData
-import android.arch.lifecycle.MutableLiveData
+import android.Manifest
 import android.arch.lifecycle.Observer
-import android.content.Context
 import android.content.Intent
+import android.content.Intent.ACTION_VIEW
+import android.net.Uri
 import android.os.Bundle
-import android.os.Environment
 import android.view.Menu
 import android.view.MenuInflater
 import android.view.MenuItem
+import android.view.MenuItem.SHOW_AS_ACTION_ALWAYS
 import android.view.View.*
 import android.webkit.*
 import com.example.pyrusservicedesk.R
 import kotlinx.android.synthetic.main.psd_activity_file_preview.*
 import net.papirus.pyrusservicedesk.PyrusServiceDesk
 import net.papirus.pyrusservicedesk.presentation.ConnectionActivityBase
-import net.papirus.pyrusservicedesk.presentation.viewmodel.ConnectionViewModelBase
 import net.papirus.pyrusservicedesk.sdk.data.intermediate.FileData
+import net.papirus.pyrusservicedesk.utils.hasPermission
 
-private const val KEY_FILE_DATA = "KEY_FILE_DATA"
 
 /**
  * Activity for previewing files
@@ -29,6 +26,9 @@ private const val KEY_FILE_DATA = "KEY_FILE_DATA"
 internal class FilePreviewActivity: ConnectionActivityBase<FilePreviewViewModel>(FilePreviewViewModel::class.java) {
 
     companion object {
+
+        internal const val KEY_FILE_DATA = "KEY_FILE_DATA"
+        private const val REQUEST_PERMISSION_WRITE_EXTERNAL_STORAGE = 1
 
         /**
          * Provides intent for launching the activity.
@@ -38,8 +38,9 @@ internal class FilePreviewActivity: ConnectionActivityBase<FilePreviewViewModel>
          */
         fun getLaunchIntent(fileData: FileData): Intent {
             return Intent(
-                    PyrusServiceDesk.getInstance().application,
-                    FilePreviewActivity::class.java)
+                PyrusServiceDesk.getInstance().application,
+                FilePreviewActivity::class.java
+            )
                 .putExtra(KEY_FILE_DATA, fileData)
         }
     }
@@ -52,11 +53,12 @@ internal class FilePreviewActivity: ConnectionActivityBase<FilePreviewViewModel>
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         supportActionBar?.apply {
-            title = intent.getFileData().fileName
+            title = viewModel.getFileName()
         }
         file_preview_toolbar.setNavigationIcon(R.drawable.psd_arrow_back)
         file_preview_toolbar.setNavigationOnClickListener { finish() }
         file_preview_toolbar.setOnMenuItemClickListener { onMenuItemClicked(it) }
+        file_extension.text = viewModel.getExtension()
 
         web_view.apply{
             settings.apply {
@@ -83,48 +85,65 @@ internal class FilePreviewActivity: ConnectionActivityBase<FilePreviewViewModel>
         }
     }
 
-    private fun onMenuItemClicked(item: MenuItem?): Boolean {
-        if (item == null)
-            return false
-        when (item.itemId) {
-            R.id.download -> viewModel.downloadFile()
-        }
-        return true
-    }
-
     override fun onSaveInstanceState(outState: Bundle?) {
         super.onSaveInstanceState(outState)
         web_view.saveState(outState)
     }
 
     override fun onCreateOptionsMenu(menu: Menu?): Boolean {
-        if (viewModel.isLocalFile())
-            return false
         return menu?.let{
             MenuInflater(this).inflate(R.menu.psd_file_preview_menu, menu)
+            it.findItem(R.id.download).setShowAsAction(SHOW_AS_ACTION_ALWAYS)
             true
         } ?: false
     }
 
     override fun startObserveData() {
         super.startObserveData()
-        viewModel.getUrlLiveData().observe(
+        viewModel.getFileLiveData().observe(
             this,
             Observer {
-                it?.let { url ->
-                    web_view.loadUrl(url)
+                it?.let { model ->
+                    applyViewModel(model)
                 }
             }
         )
+    }
 
-        viewModel.getHasErrorLiveData().observe(
-            this,
-            Observer {
-                it?.let { hasError ->
-                    no_connection.visibility = if (hasError) VISIBLE else GONE
+    private fun applyViewModel(model: FileViewModel) {
+        when {
+            model.canBePreviewed -> {
+                progress_bar.visibility = VISIBLE
+                no_preview.visibility = GONE
+                when {
+                    model.hasError -> {
+                        no_connection.visibility = VISIBLE
+                        web_view.visibility = GONE
+                        file_preview_toolbar.menu.findItem(R.id.download)?.isVisible = false
+                    }
+                    else -> {
+                        web_view.visibility = VISIBLE
+                        no_connection.visibility = GONE
+                        web_view.loadUrl(model.fileUri.toString())
+                        file_preview_toolbar.menu.findItem(R.id.download)?.isVisible = true
+                    }
                 }
             }
-        )
+            else -> {
+                web_view.visibility = GONE
+                progress_bar.visibility = GONE
+                no_preview.visibility = VISIBLE
+                file_preview_toolbar.menu.findItem(R.id.download)?.isVisible = !model.hasError && !model.isLocal
+                download_button.text = if (model.isLocal) "open" else "download"
+                download_button.setOnClickListener{
+                    when {
+                        model.isLocal -> dispatchOpenFile(model.fileUri)
+                        else -> startDownloadFile()
+                    }
+                }
+            }
+        }
+        invalidateOptionsMenu()
     }
 
     override fun updateProgress(newProgress: Int) {
@@ -132,78 +151,39 @@ internal class FilePreviewActivity: ConnectionActivityBase<FilePreviewViewModel>
         if (newProgress == resources.getInteger(R.integer.psd_progress_max_value))
             while (web_view.zoomOut()){}
     }
-}
 
+    override fun isValidPermissionRequestCode(requestCode: Int)
+            = requestCode == REQUEST_PERMISSION_WRITE_EXTERNAL_STORAGE
 
-/**
- * ViewModel for the file previews.
- */
-internal class FilePreviewViewModel(pyrusServiceDesk: PyrusServiceDesk,
-                                    private val intent: Intent)
-    : ConnectionViewModelBase(pyrusServiceDesk){
-
-    private val urlViewModel = MutableLiveData<String>()
-
-    private var hasError = MutableLiveData<Boolean>()
-
-    init {
-        loadData()
+    override fun onPermissionsGranted(permissions: Array<String>) {
+        super.onPermissionsGranted(permissions)
+        if (permissions.contains(Manifest.permission.WRITE_EXTERNAL_STORAGE))
+            startDownloadFile()
     }
 
-    override fun onLoadData() {
-        hasError.value = false
-        urlViewModel.value = intent.getFileData().uri.toString()
-        urlViewModel.postValue(null)
+    private fun dispatchOpenFile(fileUri: Uri) {
+        val intent = Intent(ACTION_VIEW)
+        intent.setDataAndType(fileUri, contentResolver.getType(fileUri))
+        if (intent.resolveActivity(packageManager) != null) {
+            startActivity(intent)
+        }
     }
 
-    /**
-     * Provides liva data with url of the file to be shown.
-     *
-     * @return live data with url string to be observed
-     */
-    fun getUrlLiveData(): LiveData<String> = urlViewModel
-
-    /**
-     * Provides live data with the error state of the file previewing.
-     *
-     * @return live data with the error state of the previewing. Normally this value
-     * is null.
-     */
-    fun getHasErrorLiveData(): LiveData<Boolean> = hasError
-
-    /**
-     * Callback to be called when progress of the file downloading for preview is changed.
-     *
-     * @progress current progress of the file downloading
-     */
-    fun onProgressChanged(progress: Int) {
-        if (hasError.value != true)
-            publishProgress(progress)
+    private fun onMenuItemClicked(item: MenuItem?): Boolean {
+        if (item == null)
+            return false
+        when (item.itemId) {
+            R.id.download -> startDownloadFile()
+        }
+        return true
     }
 
-    /**
-     * Callback to be called when user received an error while being downloaded the preview
-     * of the attachment.
-     */
-    fun onErrorReceived() {
-        hasError.value = true
-    }
-
-    fun downloadFile() {
-        TODO("storage permission is requested")
-        val fileData = intent.getFileData()
-        val request = DownloadManager.Request(fileData.uri)
-        request.setDescription(fileData.fileName)
-        request.setNotificationVisibility(DownloadManager.Request.VISIBILITY_VISIBLE)
-        request.setDestinationInExternalPublicDir(Environment.DIRECTORY_DOWNLOADS, fileData.fileName)
-        ((getApplication() as Application)
-            .getSystemService(Context.DOWNLOAD_SERVICE) as  DownloadManager)
-            .enqueue(request)
-    }
-
-    fun isLocalFile(): Boolean {
-        return intent.getFileData().isLocal
+    private fun startDownloadFile() {
+        when{
+            hasPermission(Manifest.permission.WRITE_EXTERNAL_STORAGE) -> viewModel.onDownloadFileClicked()
+            else -> requestPermissionsCompat(
+                arrayOf(Manifest.permission.WRITE_EXTERNAL_STORAGE),
+                REQUEST_PERMISSION_WRITE_EXTERNAL_STORAGE)
+        }
     }
 }
-
-private fun Intent.getFileData() = getParcelableExtra<FileData>(KEY_FILE_DATA)

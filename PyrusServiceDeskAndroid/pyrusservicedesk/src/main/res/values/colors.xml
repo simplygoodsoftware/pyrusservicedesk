@@ -12,4 +12,5 @@
     <color name="psd_comment_inbound_background">#CCE2E2E2</color>
     <color name="psd_comment_outbound_background">?android:colorAccent</color>
     <color name="psd_error_accent">#D0021B</color>
+    <color name="psd_no_file_preview_background">#333333</color>
 </resources>

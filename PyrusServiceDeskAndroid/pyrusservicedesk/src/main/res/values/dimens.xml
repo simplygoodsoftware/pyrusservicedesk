@@ -33,4 +33,5 @@
     <dimen name="psd_attach_button_width">40dp</dimen>
     <dimen name="psd_min_input_height">48dp</dimen>
     <dimen name="psd_input_padding">4dp</dimen>
+    <dimen name="psd_file_preview_extension_text_size">64sp</dimen>
 </resources>

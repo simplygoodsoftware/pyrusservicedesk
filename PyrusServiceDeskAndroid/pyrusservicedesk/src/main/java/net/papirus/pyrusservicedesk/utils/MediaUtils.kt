@@ -22,6 +22,16 @@ internal fun String.hasFormat(format: FileFormat) = endsWith(format.extension, t
  */
 internal fun String.hasAnyFormatOf(vararg formats: FileFormat) = formats.any { hasFormat(it) }
 
+/**
+ * Provides extension of the file. If filename doesn't contains extension returns empty string.
+ */
+internal fun String.getExtension(): String {
+    return when{
+        contains('.') -> split('.').last()
+        else -> ""
+    }
+}
+
 internal enum class FileFormat (val extension: String){
     JPEG(".jpeg"),
     JPG(".jpg"),

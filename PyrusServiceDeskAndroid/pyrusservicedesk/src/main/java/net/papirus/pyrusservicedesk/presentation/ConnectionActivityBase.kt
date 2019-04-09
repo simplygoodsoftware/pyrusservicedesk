@@ -7,7 +7,7 @@ import android.view.View.GONE
 import android.view.View.VISIBLE
 import android.widget.ProgressBar
 import com.example.pyrusservicedesk.R
-import kotlinx.android.synthetic.main.psd_activity_tickets.*
+import kotlinx.android.synthetic.main.psd_activity_ticket.*
 import kotlinx.android.synthetic.main.psd_no_connection.*
 import net.papirus.pyrusservicedesk.presentation.ui.view.swiperefresh.DirectedSwipeRefresh
 import net.papirus.pyrusservicedesk.presentation.viewmodel.ConnectionViewModelBase

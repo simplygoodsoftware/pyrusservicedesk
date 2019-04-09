@@ -23,7 +23,6 @@ import net.papirus.pyrusservicedesk.sdk.data.Attachment
 import net.papirus.pyrusservicedesk.utils.CIRCLE_TRANSFORMATION
 import net.papirus.pyrusservicedesk.utils.ConfigUtils
 import net.papirus.pyrusservicedesk.utils.RequestUtils.Companion.getAvatarUrl
-import net.papirus.pyrusservicedesk.utils.canBePreviewed
 import net.papirus.pyrusservicedesk.utils.getTimeText
 import kotlin.math.abs
 
@@ -187,8 +186,7 @@ internal class TicketAdapter: AdapterBase<TicketEntry>() {
                 comment.contentType == ContentType.Attachment
                         && comment.fileProgressStatus == Status.Completed -> {
 
-                    if (!shouldHideFileButton())
-                        onFileReadyToPreviewClickListener?.invoke(getItem().comment.attachments!!.first())
+                    onFileReadyToPreviewClickListener?.invoke(getItem().comment.attachments!!.first())
                 }
 
                 else -> getItem().onClickedCallback.onClicked(getItem())
@@ -235,10 +233,6 @@ internal class TicketAdapter: AdapterBase<TicketEntry>() {
         private fun bindAttachmentView() {
             comment.setFileName(getItem().comment.attachments?.first()?.name ?: "")
             comment.setFileSize(getItem().comment.attachments?.first()?.bytesSize?.toFloat() ?: 0f)
-            if (shouldHideFileButton()) {
-                comment.isFileProgressVisible = false
-                return
-            }
             comment.isFileProgressVisible = true
             comment.fileProgressStatus = if (getItem().hasError()) Status.Error else Status.Completed
             comment.setOnProgressIconClickListener {
@@ -255,12 +249,6 @@ internal class TicketAdapter: AdapterBase<TicketEntry>() {
                     comment.setProgress(it)
                 }
             }
-        }
-
-        private fun shouldHideFileButton(): Boolean {
-            return !getItem().comment.isLocal()
-                    && !getItem().hasError()
-                    && getItem().comment.attachments?.first()?.name?.canBePreviewed() == false
         }
     }
 
