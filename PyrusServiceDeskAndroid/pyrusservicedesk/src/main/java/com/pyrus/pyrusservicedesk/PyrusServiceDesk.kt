@@ -4,9 +4,6 @@ import android.app.Activity
 import android.app.Application
 import android.content.Context
 import android.content.Intent
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.asCoroutineDispatcher
-import kotlinx.coroutines.launch
 import com.pyrus.pyrusservicedesk.presentation.ui.navigation_page.ticket.TicketActivity
 import com.pyrus.pyrusservicedesk.presentation.ui.navigation_page.tickets.TicketsActivity
 import com.pyrus.pyrusservicedesk.presentation.viewmodel.QuitViewModel
@@ -20,6 +17,11 @@ import com.pyrus.pyrusservicedesk.sdk.response.ResponseError
 import com.pyrus.pyrusservicedesk.sdk.updates.LiveUpdates
 import com.pyrus.pyrusservicedesk.sdk.updates.NewReplySubscriber
 import com.pyrus.pyrusservicedesk.utils.ConfigUtils
+import com.pyrus.pyrusservicedesk.utils.PREFERENCE_KEY
+import com.pyrus.pyrusservicedesk.utils.migratePreferences
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.asCoroutineDispatcher
+import kotlinx.coroutines.launch
 import java.util.concurrent.Executors
 
 class PyrusServiceDesk private constructor(
@@ -30,7 +32,6 @@ class PyrusServiceDesk private constructor(
     companion object {
         internal val DISPATCHER_IO_SINGLE = Executors.newSingleThreadExecutor().asCoroutineDispatcher()
         internal var FILE_CHOOSER: FileChooser? = null
-        private var PREFERENCE_KEY = "com.pyrus.pyrusservicedesk.PREFERENCES"
         private var INSTANCE: PyrusServiceDesk? = null
         private var CONFIGURATION: ServiceDeskConfiguration? = null
 
@@ -176,6 +177,7 @@ class PyrusServiceDesk private constructor(
 
 
     init {
+        migratePreferences(application, preferences)
         userId = ConfigUtils.getUserId(preferences)
         val repositoryFactory = RepositoryFactory(fileResolver, preferences)
         requestFactory = RequestFactory(repositoryFactory.createCentralRepository(appId, userId))

@@ -17,7 +17,6 @@ internal class ConfigUtils{
     companion object {
 
         private const val SCALE_SUPPORT_ICON_DEFAULT = .5f
-        private const val PREFS_KEY_USER_ID = "com.pyrus.pyrusservicedesk.PREFS_KEY_USER_ID"
 
         /**
          * Provides accent color taking [PyrusServiceDesk.CONFIGURATION] into account
@@ -81,7 +80,7 @@ internal class ConfigUtils{
          */
         fun getUserId(preference: SharedPreferences): String {
             return when {
-                preference.contains(PREFS_KEY_USER_ID) -> preference.getString(PREFS_KEY_USER_ID, "")
+                preference.contains(PREFERENCE_KEY_USER_ID) -> preference.getString(PREFERENCE_KEY_USER_ID, "")
                 else -> {
                     val userId = Base64.encodeToString(
                         ByteArray(75).run {
@@ -89,7 +88,7 @@ internal class ConfigUtils{
                             this
                         },
                         Base64.NO_WRAP)
-                    preference.edit().putString(PREFS_KEY_USER_ID, userId).apply()
+                    preference.edit().putString(PREFERENCE_KEY_USER_ID, userId).apply()
                     userId
                 }
             }

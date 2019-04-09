@@ -1,8 +1,7 @@
 package com.pyrus.pyrusservicedesk.sdk.repositories.draft
 
 import android.content.SharedPreferences
-
-private const val PREFERENCE_KEY_DRAFT = "com.pyrus.pyrusservicedesk.PREFERENCE_KEY_DRAFT"
+import com.pyrus.pyrusservicedesk.utils.PREFERENCE_KEY_DRAFT
 
 /**
  * [DraftRepository] implementation based on usage of [SharedPreferences] as the private storage.
