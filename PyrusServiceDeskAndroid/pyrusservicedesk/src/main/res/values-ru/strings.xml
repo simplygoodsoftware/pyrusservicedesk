@@ -36,4 +36,7 @@
     <string name="psd_file_size_exceeded_message" formatted="false">Размер файла не должен превышать %d Мб.</string>
     <string name="psd_copied_to_clipboard">Скопировано в буфер обмена</string>
     <string name="psd_download">Скачать</string>
+    <string name="psd_downloading">Скачивается…</string>
+    <string name="psd_open">Открыть</string>
+    <string name="psd_no_preview_available">Превью недоступно</string>
 </resources>

@@ -63,6 +63,16 @@
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/file_extension" />
 
+        <android.support.v7.widget.AppCompatTextView
+            android:id="@+id/no_preview_text"
+            android:textColor="?android:textColorPrimaryInverse"
+            android:text="@string/psd_no_preview_available"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/download_button"/>
+
 
     </android.support.constraint.ConstraintLayout>
 

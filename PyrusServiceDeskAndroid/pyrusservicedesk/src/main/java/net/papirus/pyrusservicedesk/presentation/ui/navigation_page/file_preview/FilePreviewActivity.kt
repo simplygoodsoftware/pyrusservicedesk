@@ -14,6 +14,8 @@ import android.view.View.*
 import android.webkit.*
 import com.example.pyrusservicedesk.R
 import kotlinx.android.synthetic.main.psd_activity_file_preview.*
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 import net.papirus.pyrusservicedesk.PyrusServiceDesk
 import net.papirus.pyrusservicedesk.presentation.ConnectionActivityBase
 import net.papirus.pyrusservicedesk.sdk.data.intermediate.FileData
@@ -29,6 +31,8 @@ internal class FilePreviewActivity: ConnectionActivityBase<FilePreviewViewModel>
 
         internal const val KEY_FILE_DATA = "KEY_FILE_DATA"
         private const val REQUEST_PERMISSION_WRITE_EXTERNAL_STORAGE = 1
+
+        private const val CHECK_MENU_INFLATED_DELAY = 100L
 
         /**
          * Provides intent for launching the activity.
@@ -104,46 +108,13 @@ internal class FilePreviewActivity: ConnectionActivityBase<FilePreviewViewModel>
             this,
             Observer {
                 it?.let { model ->
-                    applyViewModel(model)
+                    when (model){
+                        is PreviewableFileViewModel -> applyPreviewableViewModel(model)
+                        is NonPreviewableViewModel -> applyNonPreviewableViewModel(model)
+                    }
                 }
             }
         )
-    }
-
-    private fun applyViewModel(model: FileViewModel) {
-        when {
-            model.canBePreviewed -> {
-                progress_bar.visibility = VISIBLE
-                no_preview.visibility = GONE
-                when {
-                    model.hasError -> {
-                        no_connection.visibility = VISIBLE
-                        web_view.visibility = GONE
-                        file_preview_toolbar.menu.findItem(R.id.download)?.isVisible = false
-                    }
-                    else -> {
-                        web_view.visibility = VISIBLE
-                        no_connection.visibility = GONE
-                        web_view.loadUrl(model.fileUri.toString())
-                        file_preview_toolbar.menu.findItem(R.id.download)?.isVisible = true
-                    }
-                }
-            }
-            else -> {
-                web_view.visibility = GONE
-                progress_bar.visibility = GONE
-                no_preview.visibility = VISIBLE
-                file_preview_toolbar.menu.findItem(R.id.download)?.isVisible = !model.hasError && !model.isLocal
-                download_button.text = if (model.isLocal) "open" else "download"
-                download_button.setOnClickListener{
-                    when {
-                        model.isLocal -> dispatchOpenFile(model.fileUri)
-                        else -> startDownloadFile()
-                    }
-                }
-            }
-        }
-        invalidateOptionsMenu()
     }
 
     override fun updateProgress(newProgress: Int) {
@@ -161,12 +132,87 @@ internal class FilePreviewActivity: ConnectionActivityBase<FilePreviewViewModel>
             startDownloadFile()
     }
 
-    private fun dispatchOpenFile(fileUri: Uri) {
-        val intent = Intent(ACTION_VIEW)
-        intent.setDataAndType(fileUri, contentResolver.getType(fileUri))
-        if (intent.resolveActivity(packageManager) != null) {
-            startActivity(intent)
+    private fun applyNonPreviewableViewModel(model: NonPreviewableViewModel) {
+        web_view.visibility = GONE
+        progress_bar.visibility = GONE
+        no_preview.visibility = VISIBLE
+        setDownloadActionBarItemVisibility(!model.hasError && !model.isLocal && !model.isDownloading)
+
+        download_button.setOnClickListener{
+            when {
+                model.isLocal -> dispatchOpenFile(model.fileUri)
+                else -> startDownloadFile()
+            }
         }
+
+        when {
+            model.isDownloading -> {
+                download_button.text = resources.getString(R.string.psd_downloading)
+                download_button.isEnabled = false
+                download_button.visibility = VISIBLE
+                no_preview_text.visibility = GONE
+            }
+            model.isLocal -> {
+                if (canBePreviewedInOtherApp(model.fileUri)) {
+                    download_button.visibility = VISIBLE
+                    no_preview_text.visibility = GONE
+                    download_button.isEnabled = true
+                    download_button.text = resources.getString(R.string.psd_open)
+                }
+                else{
+                    download_button.visibility = GONE
+                    no_preview_text.visibility = VISIBLE
+                }
+            }
+            else -> {
+                download_button.visibility = VISIBLE
+                download_button.text = resources.getString(R.string.psd_download)
+                download_button.isEnabled = true
+                no_preview_text.visibility = GONE
+            }
+        }
+
+    }
+
+    private fun applyPreviewableViewModel(model: PreviewableFileViewModel) {
+        progress_bar.visibility = VISIBLE
+        no_preview.visibility = GONE
+        setDownloadActionBarItemVisibility(!model.hasError && !model.isLocal && !model.isDownloading)
+        when {
+            model.hasError -> {
+                no_connection.visibility = VISIBLE
+                web_view.visibility = GONE
+            }
+            else -> {
+                web_view.visibility = VISIBLE
+                no_connection.visibility = GONE
+                web_view.loadUrl(model.fileUri.toString())
+            }
+        }
+    }
+
+    private fun setDownloadActionBarItemVisibility(isVisible: Boolean) {
+        launch {
+            while (file_preview_toolbar.menu.findItem(R.id.download) == null)
+                delay(CHECK_MENU_INFLATED_DELAY)
+            file_preview_toolbar.menu.findItem(R.id.download)?.isVisible = isVisible
+        }
+    }
+
+    private fun canBePreviewedInOtherApp(fileUri: Uri): Boolean {
+        return Intent(ACTION_VIEW)
+            .setDataAndType(fileUri, contentResolver.getType(fileUri))
+            .resolveActivity(packageManager) != null
+    }
+
+    private fun dispatchOpenFile(fileUri: Uri) {
+        Intent(ACTION_VIEW)
+            .setDataAndType(fileUri, contentResolver.getType(fileUri))
+            .setFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION).also {
+                if (it.resolveActivity(packageManager) != null) {
+                    startActivity(it)
+                }
+            }
     }
 
     private fun onMenuItemClicked(item: MenuItem?): Boolean {

@@ -4,8 +4,11 @@ import android.app.Application
 import android.app.DownloadManager
 import android.arch.lifecycle.LiveData
 import android.arch.lifecycle.MutableLiveData
+import android.content.ContentResolver
 import android.content.Context
 import android.content.Intent
+import android.media.MediaScannerConnection
+import android.net.Uri
 import android.os.Environment
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
@@ -22,6 +25,10 @@ import net.papirus.pyrusservicedesk.utils.getExtension
 internal class FilePreviewViewModel(pyrusServiceDesk: PyrusServiceDesk,
                                     private val intent: Intent) : ConnectionViewModelBase(pyrusServiceDesk){
 
+    private companion object {
+        const val CHECK_FILE_DOWNLOADED_DELAY = 300L
+    }
+
     private val fileLiveData = MutableLiveData<FileViewModel>()
 
     private var downloadRequestId: Long = -1
@@ -34,13 +41,19 @@ internal class FilePreviewViewModel(pyrusServiceDesk: PyrusServiceDesk,
     }
 
     override fun onLoadData() {
-        fileLiveData.value = FileViewModel(
-            intent.getFileData().uri,
-            isLocalFile(),
-            fileCanBePreviewed(),
-            isNetworkConnected.value == false)
+        fileLiveData.value = when{
+            fileCanBePreviewed() -> PreviewableFileViewModel(intent.getFileData().uri, isNetworkConnected.value == false)
+            else -> NonPreviewableViewModel(
+                intent.getFileData().uri,
+                isNetworkConnected.value == false,
+                isLocal = isLocalFile()
+            )
+        }
     }
 
+    /**
+     * Provides live data with file model
+     */
     fun getFileLiveData(): LiveData<FileViewModel> = fileLiveData
 
     /**
@@ -59,11 +72,23 @@ internal class FilePreviewViewModel(pyrusServiceDesk: PyrusServiceDesk,
      */
     fun onErrorReceived() {
         fileLiveData.value = with(fileLiveData.value!!) {
-            FileViewModel(fileUri, isLocal, canBePreviewed, true)
+            when (this) {
+                is PreviewableFileViewModel -> PreviewableFileViewModel(fileUri, true)
+                is NonPreviewableViewModel -> NonPreviewableViewModel(fileUri, true, isLocal = isLocal)
+            }
         }
     }
 
+    /**
+     * Callback to be invoked when download file ui was clicked
+     */
     fun onDownloadFileClicked() {
+        fileLiveData.value = with(fileLiveData.value!!) {
+            when (this) {
+                is PreviewableFileViewModel -> PreviewableFileViewModel(fileUri, hasError, true)
+                is NonPreviewableViewModel -> NonPreviewableViewModel(fileUri, hasError, true, true)
+            }
+        }
         val fileData = intent.getFileData()
         val request = DownloadManager.Request(fileData.uri)
         request.setDescription(fileData.fileName)
@@ -73,28 +98,73 @@ internal class FilePreviewViewModel(pyrusServiceDesk: PyrusServiceDesk,
         observeProgress()
     }
 
+    /**
+     * Provides file extension
+     */
+    fun getExtension(): String = intent.getFileData().fileName.getExtension()
+
+    /**
+     * Provides file name
+     */
+    fun getFileName(): CharSequence = intent.getFileData().fileName
+
     private fun observeProgress() {
         launch {
             var isDownloaded = false
             while(!isDownloaded) {
-                delay(300)
+                delay(CHECK_FILE_DOWNLOADED_DELAY)
                 val c = downloadManager.query(DownloadManager.Query().setFilterById(downloadRequestId))
                 if (c != null
                     && c.moveToFirst()
                     && c.getInt(c.getColumnIndex(DownloadManager.COLUMN_STATUS)) == DownloadManager.STATUS_SUCCESSFUL) {
 
-                    fileLiveData.postValue(FileViewModel(
-                        downloadManager.getUriForDownloadedFile(downloadRequestId),
-                        true,
-                        fileCanBePreviewed()))
+                    processDownloadedFileUriAsync(downloadManager.getUriForDownloadedFile(downloadRequestId))
                     isDownloaded = true
                 }
             }
         }
     }
 
-    fun getExtension(): String = intent.getFileData().fileName.getExtension()
-    fun getFileName(): CharSequence = intent.getFileData().fileName
+    private fun processDownloadedFileUriAsync(fileUri: Uri?) {
+        if (fileUri == null) {
+            fileLiveData.postValue(
+                when (fileLiveData.value!!) {
+                    is PreviewableFileViewModel ->
+                        PreviewableFileViewModel(intent.getFileData().uri, false, false)
+                    is NonPreviewableViewModel ->
+                        NonPreviewableViewModel(intent.getFileData().uri, false, false, true)
+                }
+            )
+            return
+        }
+        when (fileUri.scheme){
+            ContentResolver.SCHEME_FILE ->
+                MediaScannerConnection.scanFile(
+                    getApplication(),
+                    arrayOf(fileUri.path),
+                    arrayOf(downloadManager.getMimeTypeForDownloadedFile(downloadRequestId))) { _, uri ->
+
+                    fileLiveData.postValue(
+                        when (fileLiveData.value!!) {
+                            is PreviewableFileViewModel ->
+                                PreviewableFileViewModel(uri, false, false, true)
+                            is NonPreviewableViewModel ->
+                                NonPreviewableViewModel(uri, false, false, true)
+                        }
+                    )
+
+                }
+            else -> fileLiveData.postValue(
+                when (fileLiveData.value!!) {
+                    is PreviewableFileViewModel ->
+                        PreviewableFileViewModel(fileUri, false, false, true)
+                    is NonPreviewableViewModel ->
+                        NonPreviewableViewModel(fileUri, false, false, true)
+                }
+            )
+        }
+
+    }
 
     private fun isLocalFile(): Boolean = intent.getFileData().isLocal
     private fun fileCanBePreviewed(): Boolean = intent.getFileData().fileName.canBePreviewed()
