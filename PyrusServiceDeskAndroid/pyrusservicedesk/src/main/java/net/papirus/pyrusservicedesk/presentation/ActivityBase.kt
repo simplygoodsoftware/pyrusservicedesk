@@ -118,6 +118,9 @@ internal abstract class ActivityBase: AppCompatActivity(), CoroutineScope {
         }
     }
 
+    /**
+     * Requests [permissions] using [requestCode]. [requestCode] must be non-negative
+     */
     protected fun requestPermissionsCompat(permissions: Array<String>, requestCode: Int) {
         ActivityCompat.requestPermissions(this, permissions, requestCode)
     }
