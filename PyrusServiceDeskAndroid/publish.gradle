@@ -5,7 +5,7 @@ ext{
     REPO_NAME = 'PyrusServiceDesk'
 
     GROUP_ID = 'com.pyrus'
-    ARTIFACT_ID = 'com.pyrus.pyrusservicedesk'
+    ARTIFACT_ID = 'servicedesk'
 
     VERSION = '0.9.1'
     DESCRIPTION = 'Service desk by simplygoodsoftware'
