@@ -5,6 +5,7 @@ import android.content.Context
 import android.graphics.PorterDuff
 import android.graphics.drawable.AnimationDrawable
 import android.graphics.drawable.LayerDrawable
+import android.net.Uri
 import android.support.annotation.ColorInt
 import android.support.v4.content.ContextCompat
 import android.support.v4.text.util.LinkifyCompat
@@ -18,6 +19,8 @@ import android.view.animation.DecelerateInterpolator
 import android.widget.FrameLayout
 import android.widget.LinearLayout
 import com.example.pyrusservicedesk.R
+import com.squareup.picasso.Callback
+import com.squareup.picasso.Picasso
 import kotlinx.android.synthetic.main.psd_comment.view.*
 import net.papirus.pyrusservicedesk.utils.*
 import net.papirus.pyrusservicedesk.utils.ConfigUtils.Companion.getAccentColor
@@ -57,11 +60,19 @@ internal class CommentView @JvmOverloads constructor(
                 ContentType.Text -> {
                     comment_text.visibility = View.VISIBLE
                     attachment_layout.visibility = View.GONE
+                    preview_layout.visibility = GONE
                 }
-                ContentType.Attachment ->{
+                ContentType.Attachment -> {
                     recentProgress = 0
                     comment_text.visibility = View.GONE
                     attachment_layout.visibility = View.VISIBLE
+                    preview_layout.visibility = View.GONE
+                }
+                ContentType.AttachmentFullSize -> {
+                    recentProgress = 0
+                    comment_text.visibility = GONE
+                    attachment_layout.visibility = GONE
+                    preview_layout.visibility = View.VISIBLE
                 }
             }
             field = value
@@ -100,7 +111,7 @@ internal class CommentView @JvmOverloads constructor(
      */
     var isFileProgressVisible = true
         set(value) {
-            file_progress.visibility = if (value) View.VISIBLE else View.GONE
+            attachment_progress.visibility = if (value) View.VISIBLE else View.GONE
             field = value
         }
 
@@ -160,7 +171,7 @@ internal class CommentView @JvmOverloads constructor(
         file_name.setTextColor(primaryColor)
         file_size.setTextColor(secondaryColor)
 
-        fileDownloadDrawable = (file_progress.progressDrawable as LayerDrawable).apply {
+        fileDownloadDrawable = (attachment_progress.progressDrawable as LayerDrawable).apply {
             findDrawableByLayerId(android.R.id.background)
                     .mutate()
                     .setColorFilter(
@@ -177,7 +188,7 @@ internal class CommentView @JvmOverloads constructor(
                     .mutate()
                     .setColorFilter(primaryColor, PorterDuff.Mode.SRC_IN)
         }
-        file_progress.setOnClickListener { onDownloadIconClickListener?.invoke() }
+        attachment_progress.setOnClickListener { onDownloadIconClickListener?.invoke() }
         statusView = AppCompatImageView(context).apply {
             layoutParams = LinearLayout.LayoutParams(
                     resources.getDimension(R.dimen.psd_comment_error_width).toInt(),
@@ -255,7 +266,7 @@ internal class CommentView @JvmOverloads constructor(
      */
     fun setProgress(progress: Int) {
         recentProgress = progress
-        ValueAnimator.ofInt(file_progress.progress, progress).apply {
+        ValueAnimator.ofInt(attachment_progress.progress, progress).apply {
             duration = when (progress){
                 0 -> 0
                 else -> PROGRESS_CHANGE_ANIMATION_DURATION
@@ -265,7 +276,7 @@ internal class CommentView @JvmOverloads constructor(
                 (animatedValue as Int).let { value ->
                     if (recentProgress > progress)
                         cancel()
-                    file_progress.progress = value
+                    attachment_progress.progress = value
                 }
             }
         }.also{ it.start() }
@@ -276,6 +287,31 @@ internal class CommentView @JvmOverloads constructor(
      */
     fun setOnProgressIconClickListener(listener: () -> Unit) {
         onDownloadIconClickListener = listener
+    }
+
+    fun setPreview(previewUri: Uri, isLocal: Boolean) {
+        when {
+            isLocal -> preview_progress.visibility = View.GONE
+            else -> {
+                preview_progress.visibility = View.VISIBLE
+                preview_progress.progress = 40
+            }
+        }
+        Picasso.get()
+            .load(previewUri)
+            .into(
+                preview,
+                object : Callback{
+                    override fun onSuccess() {
+                        preview_progress.progress = 100
+                        preview_progress.visibility = View.GONE
+                    }
+
+                    override fun onError(e: Exception?) {
+
+                    }
+
+                })
     }
 }
 
@@ -294,5 +330,6 @@ internal enum class Status {
  */
 internal enum class ContentType {
     Text,
-    Attachment
+    Attachment,
+    AttachmentFullSize
 }

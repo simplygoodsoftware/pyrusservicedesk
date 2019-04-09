@@ -24,7 +24,7 @@
             tools:visibility="visible">
 
             <ProgressBar
-                android:id="@+id/file_progress"
+                android:id="@+id/attachment_progress"
                 style="?android:attr/progressBarStyleHorizontal"
                 android:layout_width="@dimen/psd_recyclerview_item_height_default"
                 android:layout_height="@dimen/psd_recyclerview_item_height_default"
@@ -57,6 +57,28 @@
             </LinearLayout>
 
         </LinearLayout>
+
+        <FrameLayout
+            android:id="@+id/preview_layout"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content">
+
+            <android.support.v7.widget.AppCompatImageView
+                android:id="@+id/preview"
+                android:scaleType="centerCrop"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content" />
+
+            <ProgressBar
+                android:id="@+id/preview_progress"
+                style="?android:attr/progressBarStyleHorizontal"
+                android:layout_width="@dimen/psd_recyclerview_item_height_default"
+                android:layout_height="@dimen/psd_recyclerview_item_height_default"
+                android:progressDrawable="@drawable/psd_file_progress"
+                android:layout_gravity="center"
+                android:indeterminate="false"/>
+
+        </FrameLayout>
 
         <android.support.v7.widget.AppCompatTextView
             android:id="@+id/comment_text"

@@ -1,6 +1,7 @@
 package net.papirus.pyrusservicedesk.presentation.ui.navigation_page.ticket
 
 import android.graphics.Canvas
+import android.net.Uri
 import android.support.annotation.LayoutRes
 import android.support.v7.widget.RecyclerView
 import android.support.v7.widget.helper.ItemTouchHelper
@@ -23,7 +24,9 @@ import net.papirus.pyrusservicedesk.sdk.data.Attachment
 import net.papirus.pyrusservicedesk.utils.CIRCLE_TRANSFORMATION
 import net.papirus.pyrusservicedesk.utils.ConfigUtils
 import net.papirus.pyrusservicedesk.utils.RequestUtils.Companion.getAvatarUrl
+import net.papirus.pyrusservicedesk.utils.RequestUtils.Companion.getPreviewUrl
 import net.papirus.pyrusservicedesk.utils.getTimeText
+import net.papirus.pyrusservicedesk.utils.isImage
 import kotlin.math.abs
 
 
@@ -183,7 +186,8 @@ internal class TicketAdapter: AdapterBase<TicketEntry>() {
 
         val onCommentClickListener = OnClickListener {
             when {
-                comment.contentType == ContentType.Attachment
+                (comment.contentType == ContentType.Attachment
+                        || comment.contentType == ContentType.AttachmentFullSize)
                         && comment.fileProgressStatus == Status.Completed -> {
 
                     onFileReadyToPreviewClickListener?.invoke(getItem().comment.attachments!!.first())
@@ -212,11 +216,15 @@ internal class TicketAdapter: AdapterBase<TicketEntry>() {
                 getItem().comment.isLocal() -> Status.Processing
                 else -> Status.Completed
             }
-            comment.contentType =
-                    if (item.comment.hasAttachments()) ContentType.Attachment else ContentType.Text
+            comment.contentType = when {
+                !item.comment.hasAttachments() -> ContentType.Text
+                item.comment.attachments!!.first().name.isImage() -> ContentType.AttachmentFullSize
+                else -> ContentType.Attachment
+            }
             when (comment.contentType){
                 ContentType.Text -> bindTextView()
                 ContentType.Attachment -> bindAttachmentView()
+                ContentType.AttachmentFullSize -> bindAttachmentPreview()
             }
             creationTime.text = getItem().comment.creationDate.getTimeText(itemView.context)
         }
@@ -248,6 +256,13 @@ internal class TicketAdapter: AdapterBase<TicketEntry>() {
                         comment.fileProgressStatus = Status.Processing
                     comment.setProgress(it)
                 }
+            }
+        }
+
+        private fun bindAttachmentPreview() {
+            getItem().comment.attachments!!.first().let {
+                val previewUri = it.uri ?: Uri.parse(getPreviewUrl(it.id))
+                comment.setPreview(previewUri,it.uri != null)
             }
         }
     }

@@ -14,7 +14,7 @@ class RequestUtils{
         /**
          * Base URL used for api calls
          */
-        internal const val BASE_URL = "https://pyrus.com/servicedeskapi/v1/"
+        internal const val BASE_URL = "https://dev.pyrus.com/servicedeskapi/v1/"
 
         /**
          * Provides url for getting the avatar.
@@ -27,6 +27,16 @@ class RequestUtils{
         internal fun getFileUrl(fileId: Int): String {
             return with(PyrusServiceDesk.getInstance()){
                 "$BASE_URL/DownloadFile/$fileId" +
+                        "?user_id=" +
+                        URLEncoder.encode(userId, "UTF-8") +
+                        "&app_id=" +
+                        URLEncoder.encode(appId, "UTF-8")
+            }
+        }
+
+        internal fun getPreviewUrl(fileId: Int): String {
+            return with(PyrusServiceDesk.getInstance()){
+                "$BASE_URL/DownloadFilePreview/$fileId" +
                         "?user_id=" +
                         URLEncoder.encode(userId, "UTF-8") +
                         "&app_id=" +
