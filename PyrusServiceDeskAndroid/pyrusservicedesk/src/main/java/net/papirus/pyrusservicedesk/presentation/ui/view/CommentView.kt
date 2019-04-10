@@ -58,18 +58,21 @@ internal class CommentView @JvmOverloads constructor(
         set(value) {
             when (value) {
                 ContentType.Text -> {
+                    background_parent.visibility = View.VISIBLE
                     comment_text.visibility = View.VISIBLE
                     attachment_layout.visibility = View.GONE
                     preview_layout.visibility = GONE
                 }
                 ContentType.Attachment -> {
                     recentProgress = 0
+                    background_parent.visibility = View.VISIBLE
                     comment_text.visibility = View.GONE
                     attachment_layout.visibility = View.VISIBLE
                     preview_layout.visibility = View.GONE
                 }
                 ContentType.AttachmentFullSize -> {
                     recentProgress = 0
+                    background_parent.visibility = GONE
                     comment_text.visibility = GONE
                     attachment_layout.visibility = GONE
                     preview_layout.visibility = View.VISIBLE
@@ -146,6 +149,8 @@ internal class CommentView @JvmOverloads constructor(
     private val fileDownloadDrawable: LayerDrawable
     private val type: Int
     private val statusView:AppCompatImageView
+
+    private var backgroundTransformation = RoundedCornerTransformation(resources.getDimension(R.dimen.psd_comment_radius))
 
     init {
         View.inflate(context, R.layout.psd_comment, this)
@@ -299,6 +304,7 @@ internal class CommentView @JvmOverloads constructor(
         }
         Picasso.get()
             .load(previewUri)
+            .transform(backgroundTransformation)
             .into(
                 preview,
                 object : Callback{
