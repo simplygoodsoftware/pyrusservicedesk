@@ -8,7 +8,7 @@ internal val PREFERENCE_KEY = "com.pyrus.pyrusservicedesk.PREFERENCES"
 private val PREFERENCE_KEY_LEGACY = "net.papirus.pyrusservicedesk.PREFERENCES"
 
 internal const val PREFERENCE_KEY_USER_ID = "PREFERENCE_KEY_USER_ID"
-private const val PREFERENCE_KEY_USER_ID_LEGACY = "net.papirus.pyrusservicedesk.PREFERENCE_KEY_USER_ID"
+private const val PREFERENCE_KEY_USER_ID_LEGACY = "net.papirus.pyrusservicedesk.PREFS_KEY_USER_ID"
 
 internal const val PREFERENCE_KEY_DRAFT = "PREFERENCE_KEY_DRAFT"
 private const val PREFERENCE_KEY_DRAFT_LEGACY = "net.papirus.pyrusservicedesk.PREFERENCE_KEY_DRAFT"

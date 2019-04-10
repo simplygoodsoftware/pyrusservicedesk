@@ -7,7 +7,7 @@ ext{
     GROUP_ID = 'com.pyrus'
     ARTIFACT_ID = 'servicedesk'
 
-    VERSION = '0.9.1'
+    VERSION = '0.9.2'
     DESCRIPTION = 'Service desk by simplygoodsoftware'
 
     WEBSITE = 'https://pyrus.com/'
