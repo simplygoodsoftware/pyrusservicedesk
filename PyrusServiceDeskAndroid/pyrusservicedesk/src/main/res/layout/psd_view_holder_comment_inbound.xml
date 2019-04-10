@@ -40,7 +40,7 @@
             android:ellipsize="end"
             tools:text="@tools:sample/full_names" />
 
-        <net.papirus.pyrusservicedesk.presentation.ui.view.CommentView
+        <com.pyrus.pyrusservicedesk.presentation.ui.view.CommentView
             android:id="@+id/comment"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
