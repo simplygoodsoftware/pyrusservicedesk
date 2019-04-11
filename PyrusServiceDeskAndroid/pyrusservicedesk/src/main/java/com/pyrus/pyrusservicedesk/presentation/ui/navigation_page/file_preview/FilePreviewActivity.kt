@@ -3,6 +3,7 @@ package com.pyrus.pyrusservicedesk.presentation.ui.navigation_page.file_preview
 import android.Manifest
 import android.arch.lifecycle.Observer
 import android.content.Intent
+import android.content.Intent.ACTION_SEND
 import android.content.Intent.ACTION_VIEW
 import android.net.Uri
 import android.os.Bundle
@@ -15,15 +16,11 @@ import android.webkit.*
 import com.pyrus.pyrusservicedesk.PyrusServiceDesk
 import com.pyrus.pyrusservicedesk.R
 import com.pyrus.pyrusservicedesk.presentation.ConnectionActivityBase
-import com.pyrus.pyrusservicedesk.presentation.viewmodel.ConnectionViewModelBase
 import com.pyrus.pyrusservicedesk.sdk.data.intermediate.FileData
+import com.pyrus.pyrusservicedesk.utils.hasPermission
 import kotlinx.android.synthetic.main.psd_activity_file_preview.*
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
-import net.papirus.pyrusservicedesk.PyrusServiceDesk
-import net.papirus.pyrusservicedesk.presentation.ConnectionActivityBase
-import net.papirus.pyrusservicedesk.sdk.data.intermediate.FileData
-import net.papirus.pyrusservicedesk.utils.hasPermission
 
 
 /**
@@ -102,6 +99,7 @@ internal class FilePreviewActivity: ConnectionActivityBase<FilePreviewViewModel>
         return menu?.let{
             MenuInflater(this).inflate(R.menu.psd_file_preview_menu, menu)
             it.findItem(R.id.download).setShowAsAction(SHOW_AS_ACTION_ALWAYS)
+            it.findItem(R.id.share).setShowAsAction(SHOW_AS_ACTION_ALWAYS)
             true
         } ?: false
     }
@@ -140,11 +138,12 @@ internal class FilePreviewActivity: ConnectionActivityBase<FilePreviewViewModel>
         web_view.visibility = GONE
         progress_bar.visibility = GONE
         no_preview.visibility = VISIBLE
-        setDownloadActionBarItemVisibility(!model.hasError && !model.isLocal && !model.isDownloading)
+        setActionBarItemVisibility(R.id.download, !model.hasError && !model.isLocal && !model.isDownloading)
+        setActionBarItemVisibility(R.id.share, model.isLocal)
 
         download_button.setOnClickListener{
             when {
-                model.isLocal -> dispatchOpenFile(model.fileUri)
+                model.isLocal -> dispatchLocalFileAction(model.fileUri, ACTION_VIEW)
                 else -> startDownloadFile()
             }
         }
@@ -181,7 +180,9 @@ internal class FilePreviewActivity: ConnectionActivityBase<FilePreviewViewModel>
     private fun applyPreviewableViewModel(model: PreviewableFileViewModel) {
         progress_bar.visibility = VISIBLE
         no_preview.visibility = GONE
-        setDownloadActionBarItemVisibility(!model.hasError && !model.isLocal && !model.isDownloading)
+        setActionBarItemVisibility(R.id.download,!model.hasError && !model.isLocal && !model.isDownloading)
+        setActionBarItemVisibility(R.id.share, model.isLocal)
+
         when {
             model.hasError -> {
                 no_connection.visibility = VISIBLE
@@ -195,11 +196,11 @@ internal class FilePreviewActivity: ConnectionActivityBase<FilePreviewViewModel>
         }
     }
 
-    private fun setDownloadActionBarItemVisibility(isVisible: Boolean) {
+    private fun setActionBarItemVisibility(itemId: Int, isVisible: Boolean) {
         launch {
-            while (file_preview_toolbar.menu.findItem(R.id.download) == null)
+            while (file_preview_toolbar.menu.findItem(itemId) == null)
                 delay(CHECK_MENU_INFLATED_DELAY)
-            file_preview_toolbar.menu.findItem(R.id.download)?.isVisible = isVisible
+            file_preview_toolbar.menu.findItem(itemId)?.isVisible = isVisible
         }
     }
 
@@ -209,10 +210,12 @@ internal class FilePreviewActivity: ConnectionActivityBase<FilePreviewViewModel>
             .resolveActivity(packageManager) != null
     }
 
-    private fun dispatchOpenFile(fileUri: Uri) {
-        Intent(ACTION_VIEW)
+    private fun dispatchLocalFileAction(fileUri: Uri, intentAction: String) {
+        Intent(intentAction)
             .setDataAndType(fileUri, contentResolver.getType(fileUri))
             .setFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION).also {
+                if (intentAction == ACTION_SEND)
+                    it.putExtra(Intent.EXTRA_STREAM, fileUri)
                 if (it.resolveActivity(packageManager) != null) {
                     startActivity(it)
                 }
@@ -224,6 +227,11 @@ internal class FilePreviewActivity: ConnectionActivityBase<FilePreviewViewModel>
             return false
         when (item.itemId) {
             R.id.download -> startDownloadFile()
+            R.id.share -> {
+                viewModel.getFileLiveData().value?.let {
+                    dispatchLocalFileAction(it.fileUri, ACTION_SEND)
+                }
+            }
         }
         return true
     }
