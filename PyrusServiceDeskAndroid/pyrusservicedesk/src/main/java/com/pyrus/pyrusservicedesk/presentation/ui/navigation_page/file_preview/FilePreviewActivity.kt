@@ -5,6 +5,7 @@ import android.arch.lifecycle.Observer
 import android.content.Intent
 import android.content.Intent.ACTION_SEND
 import android.content.Intent.ACTION_VIEW
+import android.graphics.drawable.RotateDrawable
 import android.net.Uri
 import android.os.Bundle
 import android.view.Menu
@@ -12,11 +13,13 @@ import android.view.MenuInflater
 import android.view.MenuItem
 import android.view.MenuItem.SHOW_AS_ACTION_ALWAYS
 import android.view.View.*
+import android.view.animation.LinearInterpolator
 import android.webkit.*
 import com.pyrus.pyrusservicedesk.PyrusServiceDesk
 import com.pyrus.pyrusservicedesk.R
 import com.pyrus.pyrusservicedesk.presentation.ConnectionActivityBase
 import com.pyrus.pyrusservicedesk.sdk.data.intermediate.FileData
+import com.pyrus.pyrusservicedesk.utils.animateInfinite
 import com.pyrus.pyrusservicedesk.utils.hasPermission
 import kotlinx.android.synthetic.main.psd_activity_file_preview.*
 import kotlinx.coroutines.delay
@@ -33,7 +36,10 @@ internal class FilePreviewActivity: ConnectionActivityBase<FilePreviewViewModel>
         internal const val KEY_FILE_DATA = "KEY_FILE_DATA"
         private const val REQUEST_PERMISSION_WRITE_EXTERNAL_STORAGE = 1
 
-        private const val CHECK_MENU_INFLATED_DELAY = 100L
+        private const val CHECK_MENU_INFLATED_DELAY_MS = 100L
+        private const val LOADING_ICON_ANIMATION_DURATION_MS = 1000L
+
+        private const val STATE_FINISHED_SUCCESSFULLY = "STATE_FINISHED_SUCCESSFULLY"
 
         /**
          * Provides intent for launching the activity.
@@ -54,6 +60,8 @@ internal class FilePreviewActivity: ConnectionActivityBase<FilePreviewViewModel>
     override val toolbarViewId: Int = R.id.file_preview_toolbar
     override val refresherViewId: Int = NO_ID
     override val progressBarViewId: Int = R.id.progress_bar
+
+    private var pageFinishedSuccessfully = false
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -77,6 +85,11 @@ internal class FilePreviewActivity: ConnectionActivityBase<FilePreviewViewModel>
                     super.onReceivedError(view, request, error)
                     viewModel.onErrorReceived()
                 }
+
+                override fun onPageFinished(view: WebView?, url: String?) {
+                    super.onPageFinished(view, url)
+                    pageFinishedSuccessfully = true
+                }
             }
             webChromeClient = object: WebChromeClient() {
                 override fun onProgressChanged(view: WebView?, newProgress: Int) {
@@ -87,19 +100,27 @@ internal class FilePreviewActivity: ConnectionActivityBase<FilePreviewViewModel>
 
         if (savedInstanceState != null) {
             web_view.restoreState(savedInstanceState)
+            pageFinishedSuccessfully = savedInstanceState.getBoolean(STATE_FINISHED_SUCCESSFULLY)
         }
     }
 
     override fun onSaveInstanceState(outState: Bundle?) {
         super.onSaveInstanceState(outState)
+        if(outState == null)
+            return
         web_view.saveState(outState)
+        outState.putBoolean(STATE_FINISHED_SUCCESSFULLY, pageFinishedSuccessfully)
     }
 
     override fun onCreateOptionsMenu(menu: Menu?): Boolean {
-        return menu?.let{
+        return menu?.let{ menu ->
             MenuInflater(this).inflate(R.menu.psd_file_preview_menu, menu)
-            it.findItem(R.id.download).setShowAsAction(SHOW_AS_ACTION_ALWAYS)
-            it.findItem(R.id.share).setShowAsAction(SHOW_AS_ACTION_ALWAYS)
+            menu.findItem(R.id.download).setShowAsAction(SHOW_AS_ACTION_ALWAYS)
+            menu.findItem(R.id.share).setShowAsAction(SHOW_AS_ACTION_ALWAYS)
+            menu.findItem(R.id.loading)?.let {
+                it.setShowAsAction(SHOW_AS_ACTION_ALWAYS)
+                (it.icon as? RotateDrawable)?.animateInfinite(LOADING_ICON_ANIMATION_DURATION_MS, LinearInterpolator())
+            }
             true
         } ?: false
     }
@@ -138,6 +159,7 @@ internal class FilePreviewActivity: ConnectionActivityBase<FilePreviewViewModel>
         web_view.visibility = GONE
         progress_bar.visibility = GONE
         no_preview.visibility = VISIBLE
+        setActionBarItemVisibility(R.id.loading, model.isDownloading)
         setActionBarItemVisibility(R.id.download, !model.hasError && !model.isLocal && !model.isDownloading)
         setActionBarItemVisibility(R.id.share, model.isLocal)
 
@@ -180,6 +202,7 @@ internal class FilePreviewActivity: ConnectionActivityBase<FilePreviewViewModel>
     private fun applyPreviewableViewModel(model: PreviewableFileViewModel) {
         progress_bar.visibility = VISIBLE
         no_preview.visibility = GONE
+        setActionBarItemVisibility(R.id.loading, model.isDownloading)
         setActionBarItemVisibility(R.id.download,!model.hasError && !model.isLocal && !model.isDownloading)
         setActionBarItemVisibility(R.id.share, model.isLocal)
 
@@ -191,7 +214,8 @@ internal class FilePreviewActivity: ConnectionActivityBase<FilePreviewViewModel>
             else -> {
                 web_view.visibility = VISIBLE
                 no_connection.visibility = GONE
-                web_view.loadUrl(model.fileUri.toString())
+                if (!pageFinishedSuccessfully)
+                    web_view.loadUrl(model.fileUri.toString())
             }
         }
     }
@@ -199,7 +223,7 @@ internal class FilePreviewActivity: ConnectionActivityBase<FilePreviewViewModel>
     private fun setActionBarItemVisibility(itemId: Int, isVisible: Boolean) {
         launch {
             while (file_preview_toolbar.menu.findItem(itemId) == null)
-                delay(CHECK_MENU_INFLATED_DELAY)
+                delay(CHECK_MENU_INFLATED_DELAY_MS)
             file_preview_toolbar.menu.findItem(itemId)?.isVisible = isVisible
         }
     }

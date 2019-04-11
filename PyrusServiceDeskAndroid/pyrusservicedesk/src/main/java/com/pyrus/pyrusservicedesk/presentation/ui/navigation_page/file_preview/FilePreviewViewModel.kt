@@ -27,7 +27,7 @@ internal class FilePreviewViewModel(pyrusServiceDesk: PyrusServiceDesk,
     : ConnectionViewModelBase(pyrusServiceDesk) {
 
     private companion object {
-        const val CHECK_FILE_DOWNLOADED_DELAY = 300L
+        const val CHECK_FILE_DOWNLOADED_DELAY_MS = 300L
     }
 
     private val fileLiveData = MutableLiveData<FileViewModel>()
@@ -133,7 +133,7 @@ internal class FilePreviewViewModel(pyrusServiceDesk: PyrusServiceDesk,
         launch {
             var isCompleted = false
             while (!isCompleted) {
-                delay(CHECK_FILE_DOWNLOADED_DELAY)
+                delay(CHECK_FILE_DOWNLOADED_DELAY_MS)
                 val cursor = downloadManager.query(DownloadManager.Query().setFilterById(downloadRequestId))
                 if (cursor == null || !cursor.moveToFirst()) {
                     break
