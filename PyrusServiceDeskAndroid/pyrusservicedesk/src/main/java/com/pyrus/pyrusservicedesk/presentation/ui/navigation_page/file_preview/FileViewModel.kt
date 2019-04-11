@@ -1,4 +1,4 @@
-package net.papirus.pyrusservicedesk.presentation.ui.navigation_page.file_preview
+package com.pyrus.pyrusservicedesk.presentation.ui.navigation_page.file_preview
 
 import android.net.Uri
 

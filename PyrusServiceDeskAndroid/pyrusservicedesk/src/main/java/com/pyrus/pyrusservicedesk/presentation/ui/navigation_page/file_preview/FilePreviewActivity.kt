@@ -15,21 +15,18 @@ import android.webkit.*
 import com.pyrus.pyrusservicedesk.PyrusServiceDesk
 import com.pyrus.pyrusservicedesk.R
 import com.pyrus.pyrusservicedesk.presentation.ConnectionActivityBase
-import com.pyrus.pyrusservicedesk.presentation.viewmodel.ConnectionViewModelBase
 import com.pyrus.pyrusservicedesk.sdk.data.intermediate.FileData
+import com.pyrus.pyrusservicedesk.utils.hasPermission
 import kotlinx.android.synthetic.main.psd_activity_file_preview.*
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
-import net.papirus.pyrusservicedesk.PyrusServiceDesk
-import net.papirus.pyrusservicedesk.presentation.ConnectionActivityBase
-import net.papirus.pyrusservicedesk.sdk.data.intermediate.FileData
-import net.papirus.pyrusservicedesk.utils.hasPermission
 
 
 /**
  * Activity for previewing files
  */
-internal class FilePreviewActivity: ConnectionActivityBase<FilePreviewViewModel>(FilePreviewViewModel::class.java) {
+internal class FilePreviewActivity: ConnectionActivityBase<FilePreviewViewModel>(
+    FilePreviewViewModel::class.java) {
 
     companion object {
 

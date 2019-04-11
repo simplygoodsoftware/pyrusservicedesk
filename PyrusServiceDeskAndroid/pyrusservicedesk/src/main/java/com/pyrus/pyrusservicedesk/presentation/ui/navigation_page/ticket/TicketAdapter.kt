@@ -23,23 +23,10 @@ import com.pyrus.pyrusservicedesk.sdk.data.Attachment
 import com.pyrus.pyrusservicedesk.utils.CIRCLE_TRANSFORMATION
 import com.pyrus.pyrusservicedesk.utils.ConfigUtils
 import com.pyrus.pyrusservicedesk.utils.RequestUtils.Companion.getAvatarUrl
-import com.pyrus.pyrusservicedesk.utils.canBePreviewed
+import com.pyrus.pyrusservicedesk.utils.RequestUtils.Companion.getPreviewUrl
 import com.pyrus.pyrusservicedesk.utils.getTimeText
+import com.pyrus.pyrusservicedesk.utils.isImage
 import com.squareup.picasso.Picasso
-import net.papirus.pyrusservicedesk.presentation.ui.navigation_page.ticket.entries.*
-import net.papirus.pyrusservicedesk.presentation.ui.view.CommentView
-import net.papirus.pyrusservicedesk.presentation.ui.view.ContentType
-import net.papirus.pyrusservicedesk.presentation.ui.view.Status
-import net.papirus.pyrusservicedesk.presentation.ui.view.recyclerview.AdapterBase
-import net.papirus.pyrusservicedesk.presentation.ui.view.recyclerview.ViewHolderBase
-import net.papirus.pyrusservicedesk.presentation.ui.view.recyclerview.item_decorators.SpaceMultiplier
-import net.papirus.pyrusservicedesk.sdk.data.Attachment
-import net.papirus.pyrusservicedesk.utils.CIRCLE_TRANSFORMATION
-import net.papirus.pyrusservicedesk.utils.ConfigUtils
-import net.papirus.pyrusservicedesk.utils.RequestUtils.Companion.getAvatarUrl
-import net.papirus.pyrusservicedesk.utils.RequestUtils.Companion.getPreviewUrl
-import net.papirus.pyrusservicedesk.utils.getTimeText
-import net.papirus.pyrusservicedesk.utils.isImage
 import kotlin.math.abs
 
 

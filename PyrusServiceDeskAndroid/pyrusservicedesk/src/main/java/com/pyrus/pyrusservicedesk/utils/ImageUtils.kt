@@ -56,7 +56,10 @@ internal fun Drawable.circle(context: Context): Drawable {
     return BitmapDrawable(context.resources, out.circle())
 }
 
-private fun Bitmap.roundCorners(cornerRadius: Float): Bitmap {
+/**
+ * Transforms [this] applying corner rounding with [cornerRadius]
+ */
+internal fun Bitmap.roundCorners(cornerRadius: Float): Bitmap {
     val output = Bitmap.createBitmap(this.width, this.height, Bitmap.Config.ARGB_8888)
     val canvas = Canvas(output)
     canvas.drawARGB(0, 0, 0, 0)

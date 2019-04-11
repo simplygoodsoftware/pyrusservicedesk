@@ -24,7 +24,10 @@ internal class ViewModelFactory(private val arguments: Intent): ViewModelProvide
             TicketViewModel::class.java ->
                 TicketViewModel(PyrusServiceDesk.getInstance(), arguments) as T
             FilePreviewViewModel::class.java ->
-                FilePreviewViewModel(PyrusServiceDesk.getInstance(), arguments) as T
+                FilePreviewViewModel(
+                    PyrusServiceDesk.getInstance(),
+                    arguments
+                ) as T
             QuitViewModel::class.java -> PyrusServiceDesk.getInstance().getSharedViewModel() as T
             TicketSharedViewModel::class.java -> TicketSharedViewModel() as T
             else -> throw IllegalStateException("View model for class $modelClass was not found")

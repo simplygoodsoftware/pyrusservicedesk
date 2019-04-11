@@ -58,21 +58,21 @@ internal class CommentView @JvmOverloads constructor(
         set(value) {
             when (value) {
                 ContentType.Text -> {
-                    background_parent.visibility = View.VISIBLE
+                    background_parent.setPadding(backgroundPadding, backgroundPadding, backgroundPadding, backgroundPadding)
                     comment_text.visibility = View.VISIBLE
                     attachment_layout.visibility = View.GONE
                     preview_layout.visibility = GONE
                 }
                 ContentType.Attachment -> {
                     recentProgress = 0
-                    background_parent.visibility = View.VISIBLE
+                    background_parent.setPadding(backgroundPadding, backgroundPadding, backgroundPadding, backgroundPadding)
                     comment_text.visibility = View.GONE
                     attachment_layout.visibility = View.VISIBLE
                     preview_layout.visibility = View.GONE
                 }
                 ContentType.AttachmentFullSize -> {
                     recentProgress = 0
-                    background_parent.visibility = GONE
+                    background_parent.setPadding(0, 0, 0, 0)
                     comment_text.visibility = GONE
                     attachment_layout.visibility = GONE
                     preview_layout.visibility = View.VISIBLE
@@ -141,6 +141,8 @@ internal class CommentView @JvmOverloads constructor(
             field = value
         }
 
+    private var backgroundPadding = resources.getDimensionPixelSize(R.dimen.psd_comment_radius)
+
     private var onDownloadIconClickListener: (() -> Unit)? = null
     private var recentFileSize: Float = 0f
     private var recentProgress: Int = 0
@@ -149,8 +151,6 @@ internal class CommentView @JvmOverloads constructor(
     private val fileDownloadDrawable: LayerDrawable
     private val type: Int
     private val statusView:AppCompatImageView
-
-    private var backgroundTransformation = RoundedCornerTransformation(resources.getDimension(R.dimen.psd_comment_radius))
 
     init {
         View.inflate(context, R.layout.psd_comment, this)
@@ -304,7 +304,7 @@ internal class CommentView @JvmOverloads constructor(
         }
         Picasso.get()
             .load(previewUri)
-            .transform(backgroundTransformation)
+            .noFade() // fade breaks image appearance when loaded
             .into(
                 preview,
                 object : Callback{
