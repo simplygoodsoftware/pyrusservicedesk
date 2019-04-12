@@ -5,6 +5,7 @@ import android.graphics.*
 import android.graphics.drawable.BitmapDrawable
 import android.graphics.drawable.Drawable
 import android.media.ThumbnailUtils
+import android.support.media.ExifInterface
 import com.squareup.picasso.Transformation
 
 /**
@@ -75,6 +76,26 @@ internal fun Bitmap.roundCorners(cornerRadius: Float): Bitmap {
     canvas.drawBitmap(this, 0f, 0f, paint)
     this.recycle()
     return output
+}
+
+internal fun Bitmap.rotate(rotationDegrees: Float): Bitmap {
+    return Bitmap.createBitmap(
+        this,
+        0,
+        0,
+        width,
+        height,
+        Matrix().apply { setRotate(rotationDegrees) },
+        true)
+}
+
+internal fun getImageRotation(exifInterface: ExifInterface): Int {
+    return when (exifInterface.getAttribute(ExifInterface.TAG_ORIENTATION)?.toInt()) {
+        ExifInterface.ORIENTATION_ROTATE_270 -> 270
+        ExifInterface.ORIENTATION_ROTATE_180 -> 180
+        ExifInterface.ORIENTATION_ROTATE_90 -> 90
+        else -> 0
+    }
 }
 
 internal class RoundedCornerTransformation(private val cornerRadius: Float): Transformation{

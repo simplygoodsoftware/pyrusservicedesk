@@ -1,28 +1,38 @@
 package com.pyrus.pyrusservicedesk.presentation.ui.view
 
+import android.animation.Animator
+import android.animation.ObjectAnimator
 import android.animation.ValueAnimator
 import android.content.Context
+import android.graphics.Bitmap
+import android.graphics.BitmapFactory
+import android.graphics.Color
 import android.graphics.PorterDuff
 import android.graphics.drawable.AnimationDrawable
+import android.graphics.drawable.Drawable
 import android.graphics.drawable.LayerDrawable
 import android.net.Uri
 import android.support.annotation.ColorInt
+import android.support.media.ExifInterface
 import android.support.v4.content.ContextCompat
 import android.support.v4.text.util.LinkifyCompat
 import android.support.v7.content.res.AppCompatResources
 import android.support.v7.widget.AppCompatImageView
 import android.text.util.Linkify
 import android.util.AttributeSet
+import android.util.Log
 import android.view.Gravity
 import android.view.View
+import android.view.View.OnClickListener
 import android.view.animation.DecelerateInterpolator
 import android.widget.FrameLayout
+import android.widget.ImageView
 import android.widget.LinearLayout
 import com.pyrus.pyrusservicedesk.R
 import com.pyrus.pyrusservicedesk.utils.*
 import com.pyrus.pyrusservicedesk.utils.ConfigUtils.Companion.getAccentColor
-import com.squareup.picasso.Callback
 import com.squareup.picasso.Picasso
+import com.squareup.picasso.Target
 import kotlinx.android.synthetic.main.psd_comment.view.*
 
 private const val TYPE_INBOUND = 0
@@ -45,6 +55,37 @@ internal class CommentView @JvmOverloads constructor(
         attrs: AttributeSet? = null,
         defStyleAttr: Int = 0)
     : FrameLayout(context, attrs, defStyleAttr) {
+
+    private companion object {
+        val ratioMap = mutableMapOf<Uri, Float>()
+
+        fun getFullSizePreviewWidth(previewUri: Uri, height: Int): Int {
+            return when{
+                ratioMap.containsKey(previewUri) -> (height * (ratioMap[previewUri] ?: 1f)).toInt()
+                else -> height
+            }
+        }
+
+        fun LayerDrawable.adjustSettingsForProgress(primaryColor: Int, secondaryColor: Int) {
+            findDrawableByLayerId(android.R.id.background)
+                .mutate()
+                .setColorFilter(
+                    adjustColorChannel(
+                        secondaryColor,
+                        ColorChannel.Alpha,
+                        PROGRESS_BACKGROUND_MULTIPLIER
+                    ),
+                    PorterDuff.Mode.SRC_IN
+                )
+
+            findDrawableByLayerId(android.R.id.progress)
+                .mutate()
+                .setColorFilter(primaryColor, PorterDuff.Mode.SRC_IN)
+            findDrawableByLayerId(R.id.progress_icon)
+                .mutate()
+                .setColorFilter(primaryColor, PorterDuff.Mode.SRC_IN)
+        }
+    }
 
     /**
      * Type of the content that is intended to be shown.
@@ -95,10 +136,14 @@ internal class CommentView @JvmOverloads constructor(
                         else -> R.drawable.psd_download_file
                     })
             icon?.let {
-                fileDownloadDrawable.setDrawableByLayerId(
+                val drawable = when (contentType) {
+                    ContentType.Attachment -> fileDownloadDrawable
+                    ContentType.AttachmentFullSize -> previewDownloadDrawable
+                    else -> null
+                }
+                drawable?.setDrawableByLayerId(
                         R.id.progress_icon,
                         it.mutate().apply { setColorFilter(primaryColor, PorterDuff.Mode.SRC_IN) })
-
             }
             if (value != Status.Processing) {
                 setFileSize(recentFileSize)
@@ -106,15 +151,6 @@ internal class CommentView @JvmOverloads constructor(
             }
             else
                 file_size.setText(R.string.psd_uploading)
-            field = value
-        }
-
-    /**
-     * Progress icon can be completely hidden by switching this value to FALSE
-     */
-    var isFileProgressVisible = true
-        set(value) {
-            attachment_progress.visibility = if (value) View.VISIBLE else View.GONE
             field = value
         }
 
@@ -149,8 +185,11 @@ internal class CommentView @JvmOverloads constructor(
     @ColorInt
     private val primaryColor: Int
     private val fileDownloadDrawable: LayerDrawable
+    private val previewDownloadDrawable: LayerDrawable
     private val type: Int
     private val statusView:AppCompatImageView
+
+    private val progressClickListener = OnClickListener { onDownloadIconClickListener?.invoke() }
 
     init {
         View.inflate(context, R.layout.psd_comment, this)
@@ -158,6 +197,8 @@ internal class CommentView @JvmOverloads constructor(
         type = with(getContext().obtainStyledAttributes(attrs, R.styleable.CommentView)){
             getInt(R.styleable.CommentView_type, TYPE_INBOUND).also { recycle() }
         }
+
+        preview_passive_progress.indeterminateDrawable.setColorFilter(Color.BLACK, PorterDuff.Mode.SRC_IN)
 
         val backgroundColor = when (type){
             TYPE_INBOUND -> ContextCompat.getColor(context, R.color.psd_comment_inbound_background)
@@ -167,33 +208,24 @@ internal class CommentView @JvmOverloads constructor(
         val secondaryColor = adjustColorChannel(primaryColor, ColorChannel.Alpha, SECONDARY_TEXT_COLOR_MULTIPLIER)
 
         background_parent.background.mutate().setColorFilter(backgroundColor, PorterDuff.Mode.SRC_IN)
+
         comment_text.setTextColor(primaryColor)
         comment_text.setLinkTextColor(primaryColor)
+        file_name.setTextColor(primaryColor)
+        file_size.setTextColor(secondaryColor)
+
+        fileDownloadDrawable = attachment_progress.progressDrawable as LayerDrawable
+        fileDownloadDrawable.adjustSettingsForProgress(primaryColor, secondaryColor)
+        previewDownloadDrawable = preview_progress.progressDrawable as LayerDrawable
+        previewDownloadDrawable.adjustSettingsForProgress(primaryColor, secondaryColor)
+
         root.gravity = Gravity.BOTTOM or when(type){
             TYPE_INBOUND -> Gravity.START
             else -> Gravity.END
         }
-        file_name.setTextColor(primaryColor)
-        file_size.setTextColor(secondaryColor)
 
-        fileDownloadDrawable = (attachment_progress.progressDrawable as LayerDrawable).apply {
-            findDrawableByLayerId(android.R.id.background)
-                    .mutate()
-                    .setColorFilter(
-                        adjustColorChannel(
-                            secondaryColor,
-                            ColorChannel.Alpha,
-                            PROGRESS_BACKGROUND_MULTIPLIER),
-                        PorterDuff.Mode.SRC_IN)
-
-            findDrawableByLayerId(android.R.id.progress)
-                    .mutate()
-                    .setColorFilter(primaryColor, PorterDuff.Mode.SRC_IN)
-            findDrawableByLayerId(R.id.progress_icon)
-                    .mutate()
-                    .setColorFilter(primaryColor, PorterDuff.Mode.SRC_IN)
-        }
-        attachment_progress.setOnClickListener { onDownloadIconClickListener?.invoke() }
+        preview_progress.setOnClickListener(progressClickListener)
+        attachment_progress.setOnClickListener(progressClickListener)
         statusView = AppCompatImageView(context).apply {
             layoutParams = LinearLayout.LayoutParams(
                     resources.getDimension(R.dimen.psd_comment_error_width).toInt(),
@@ -201,7 +233,6 @@ internal class CommentView @JvmOverloads constructor(
                     .apply { gravity = Gravity.CENTER_VERTICAL }
         }
         status = Status.Completed
-        isFileProgressVisible = true
     }
 
     override fun setOnClickListener(l: OnClickListener?) {
@@ -216,7 +247,7 @@ internal class CommentView @JvmOverloads constructor(
         super.onAttachedToWindow()
         root.removeView(statusView)
         (layoutParams as MarginLayoutParams).apply {
-            val margin = resources.getDimension(R.dimen.psd_comment_error_width_negative).toInt()
+            val margin = -statusView.layoutParams.width
             when (type) {
                 TYPE_INBOUND -> {
                     rightMargin = margin
@@ -271,20 +302,29 @@ internal class CommentView @JvmOverloads constructor(
      */
     fun setProgress(progress: Int) {
         recentProgress = progress
-        ValueAnimator.ofInt(attachment_progress.progress, progress).apply {
-            duration = when (progress){
-                0 -> 0
-                else -> PROGRESS_CHANGE_ANIMATION_DURATION
-            }
-            interpolator = DecelerateInterpolator()
-            addUpdateListener {
-                (animatedValue as Int).let { value ->
-                    if (recentProgress > progress)
-                        cancel()
-                    attachment_progress.progress = value
+        val progressBar = when(contentType){
+            ContentType.Attachment -> attachment_progress
+            ContentType.AttachmentFullSize -> preview_progress
+            else -> null
+        }
+        progressBar?.let { progressbar ->
+            ValueAnimator.ofInt(progressbar.progress, progress)
+                .apply {
+                    duration = when (progress){
+                        0 -> 0
+                        else -> PROGRESS_CHANGE_ANIMATION_DURATION
+                    }
+                    interpolator = DecelerateInterpolator()
+                    addUpdateListener {
+                        (animatedValue as Int).let { value ->
+                            if (recentProgress > progress)
+                                cancel()
+                            progressbar.progress = value
+                        }
+                    }
                 }
-            }
-        }.also{ it.start() }
+                .start()
+        }
     }
 
     /**
@@ -295,29 +335,71 @@ internal class CommentView @JvmOverloads constructor(
     }
 
     fun setPreview(previewUri: Uri, isLocal: Boolean) {
+        preview_progress.visibility = if (isLocal) View.VISIBLE else GONE
+        preview.setImageBitmap(null)
         when {
-            isLocal -> preview_progress.visibility = View.GONE
-            else -> {
-                preview_progress.visibility = View.VISIBLE
-                preview_progress.progress = 40
-            }
+            isLocal -> setLocalPreview(previewUri)
+            else -> setNetworkPreview(previewUri)
         }
+    }
+
+    private fun setNetworkPreview(previewUri: Uri) {
+        preview.layoutParams.width = getFullSizePreviewWidth(previewUri, preview.layoutParams.height)
         Picasso.get()
             .load(previewUri)
             .noFade() // fade breaks image appearance when loaded
-            .into(
-                preview,
-                object : Callback{
-                    override fun onSuccess() {
-                        preview_progress.progress = 100
-                        preview_progress.visibility = View.GONE
-                    }
+            .into(ChangingSizeTarget(preview, previewUri, ratioMap))
+    }
 
-                    override fun onError(e: Exception?) {
+    /**
+     * There is a problem with [Picasso] that doesn't allow to use [ChangingSizeTarget] with local files.
+     */
+    private fun setLocalPreview(previewUri: Uri) {
+        val exif = ExifInterface(context.contentResolver.openInputStream(previewUri))
+        val bitmap = (exif.thumbnailBitmap
+            ?: BitmapFactory.decodeStream(context.contentResolver.openInputStream(previewUri)))
+            .also {
+                it.rotate(getImageRotation(exif).toFloat())
+            }
+        val ratio  = bitmap.width.toFloat() / bitmap.height
+        if (!ratioMap.containsKey(previewUri))
+            ratioMap += previewUri to ratio
+        preview.layoutParams.width = getFullSizePreviewWidth(previewUri, preview.layoutParams.height)
+        preview.setImageBitmap(bitmap)
+    }
+}
 
-                    }
+private class ChangingSizeTarget(val targetView: ImageView, val uri: Uri, val ratioMap: MutableMap<Uri, Float>) : Target {
+    override fun onPrepareLoad(placeHolderDrawable: Drawable?) {
+    }
 
-                })
+    override fun onBitmapFailed(e: Exception?, errorDrawable: Drawable?) {
+        Log.d("", "")
+    }
+
+    override fun onBitmapLoaded(bitmap: Bitmap?, from: Picasso.LoadedFrom?) {
+        if (bitmap == null)
+            return
+        if (ratioMap.containsKey(uri)) {
+            targetView.setImageBitmap(bitmap)
+            return
+        }
+        val ratio = bitmap.width.toFloat() / bitmap.height
+        ratioMap += uri to ratio
+        val animator = ObjectAnimator.ofFloat(1f, ratio)
+        animator.duration = 100L
+        animator.addUpdateListener {
+            targetView.layoutParams.width = (targetView.layoutParams.height * it.animatedValue as Float).toInt()
+            targetView.requestLayout()
+        }
+        animator.addListener(object: Animator.AnimatorListener{
+            override fun onAnimationRepeat(animation: Animator?) {}
+            override fun onAnimationEnd(animation: Animator?) = targetView.setImageBitmap(bitmap)
+            override fun onAnimationCancel(animation: Animator?) {}
+            override fun onAnimationStart(animation: Animator?) {}
+
+        })
+        animator.start()
     }
 }
 

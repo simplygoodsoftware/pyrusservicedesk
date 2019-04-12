@@ -70,14 +70,19 @@
         <FrameLayout
             android:id="@+id/preview_layout"
             android:layout_width="wrap_content"
-            android:layout_height="wrap_content">
+            android:layout_height="wrap_content"
+            android:background="@color/psd_comment_inbound_background">
+
+            <ProgressBar
+                android:id="@+id/preview_passive_progress"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content" />
 
             <android.support.v7.widget.AppCompatImageView
                 android:id="@+id/preview"
                 android:scaleType="centerCrop"
                 android:layout_width="wrap_content"
-                android:minWidth="140dp"
-                android:layout_height="140dp"/>
+                android:layout_height="@dimen/psd_preview_default_size"/>
 
             <ProgressBar
                 android:id="@+id/preview_progress"

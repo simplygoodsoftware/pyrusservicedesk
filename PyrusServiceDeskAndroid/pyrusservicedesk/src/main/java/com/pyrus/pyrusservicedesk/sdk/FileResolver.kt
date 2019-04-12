@@ -33,10 +33,12 @@ internal class FileResolver(private val contentResolver: ContentResolver) {
             null)
         if (cursor == null || !cursor.moveToFirst())
             return null
-        return FileUploadRequestData(
-            cursor.getString(cursor.getColumnIndex(OpenableColumns.DISPLAY_NAME)),
-            contentResolver.openInputStream(fileUri)
-        )
+        return cursor.use {
+            FileUploadRequestData(
+                it.getString(it.getColumnIndex(OpenableColumns.DISPLAY_NAME)),
+                contentResolver.openInputStream(fileUri)
+            )
+        }
     }
 
     /**
@@ -64,10 +66,12 @@ internal class FileResolver(private val contentResolver: ContentResolver) {
                 }
             }
         }
-        return FileData(
-            cursor.getString(cursor.getColumnIndex(OpenableColumns.DISPLAY_NAME)),
-            size,
-            fileUri,
-            true)
+        return cursor.use {
+            FileData(
+                it.getString(it.getColumnIndex(OpenableColumns.DISPLAY_NAME)),
+                size,
+                fileUri,
+                true)
+        }
     }
 }

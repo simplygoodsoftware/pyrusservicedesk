@@ -241,7 +241,6 @@ internal class TicketAdapter: AdapterBase<TicketEntry>() {
         private fun bindAttachmentView() {
             comment.setFileName(getItem().comment.attachments?.first()?.name ?: "")
             comment.setFileSize(getItem().comment.attachments?.first()?.bytesSize?.toFloat() ?: 0f)
-            comment.isFileProgressVisible = true
             comment.fileProgressStatus = if (getItem().hasError()) Status.Error else Status.Completed
             comment.setOnProgressIconClickListener {
                 when (comment.fileProgressStatus) {
@@ -263,6 +262,20 @@ internal class TicketAdapter: AdapterBase<TicketEntry>() {
             getItem().comment.attachments!!.first().let {
                 val previewUri = it.uri ?: Uri.parse(getPreviewUrl(it.id))
                 comment.setPreview(previewUri,it.uri != null)
+                comment.setOnProgressIconClickListener {
+                    when (comment.fileProgressStatus) {
+                        Status.Processing -> getItem().uploadFileHooks?.cancelUploading()
+                        Status.Completed -> onFileReadyToPreviewClickListener?.invoke(getItem().comment.attachments!![0])
+                        Status.Error -> comment.performClick()
+                    }
+                }
+                if (!getItem().hasError()) {
+                    getItem().uploadFileHooks?.subscribeOnProgress {
+                        if (comment.fileProgressStatus != Status.Processing)
+                            comment.fileProgressStatus = Status.Processing
+                        comment.setProgress(it)
+                    }
+                }
             }
         }
     }
