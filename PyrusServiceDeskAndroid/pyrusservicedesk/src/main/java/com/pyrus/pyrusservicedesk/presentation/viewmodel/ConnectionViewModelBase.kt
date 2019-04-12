@@ -9,9 +9,9 @@ import android.content.Context
 import android.net.ConnectivityManager
 import android.os.Handler
 import android.view.animation.AccelerateInterpolator
+import com.pyrus.pyrusservicedesk.PyrusServiceDesk
 import com.pyrus.pyrusservicedesk.R
 import kotlinx.coroutines.*
-import com.pyrus.pyrusservicedesk.PyrusServiceDesk
 
 private const val PROGRESS_START_VALUE = 40
 private const val PROGRESS_INCREMENT_VALUE = 20

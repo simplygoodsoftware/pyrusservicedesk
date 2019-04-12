@@ -23,10 +23,11 @@ import kotlinx.coroutines.launch
  * ViewModel for the file previews.
  */
 internal class FilePreviewViewModel(pyrusServiceDesk: PyrusServiceDesk,
-                                    private val intent: Intent) : ConnectionViewModelBase(pyrusServiceDesk){
+                                    private val intent: Intent)
+    : ConnectionViewModelBase(pyrusServiceDesk) {
 
     private companion object {
-        const val CHECK_FILE_DOWNLOADED_DELAY = 300L
+        const val CHECK_FILE_DOWNLOADED_DELAY_MS = 300L
     }
 
     private val fileLiveData = MutableLiveData<FileViewModel>()
@@ -41,7 +42,7 @@ internal class FilePreviewViewModel(pyrusServiceDesk: PyrusServiceDesk,
     }
 
     override fun onLoadData() {
-        fileLiveData.value = when{
+        fileLiveData.value = when {
             fileCanBePreviewed() -> PreviewableFileViewModel(
                 intent.getFileData().uri,
                 isNetworkConnected.value == false
@@ -65,8 +66,9 @@ internal class FilePreviewViewModel(pyrusServiceDesk: PyrusServiceDesk,
      * @progress current progress of the file downloading
      */
     fun onProgressChanged(progress: Int) {
-        if (fileLiveData.value?.hasError != true)
-            publishProgress(progress)
+        if (fileLiveData.value?.hasError != true) {
+        }
+        publishProgress(progress)
     }
 
     /**
@@ -103,7 +105,7 @@ internal class FilePreviewViewModel(pyrusServiceDesk: PyrusServiceDesk,
                 is NonPreviewableViewModel -> NonPreviewableViewModel(
                     fileUri,
                     hasError,
-                    true,
+
                     true
                 )
             }
@@ -111,7 +113,8 @@ internal class FilePreviewViewModel(pyrusServiceDesk: PyrusServiceDesk,
         val fileData = intent.getFileData()
         val request = DownloadManager.Request(fileData.uri)
         request.setDescription(fileData.fileName)
-        request.setNotificationVisibility(DownloadManager.Request.VISIBILITY_VISIBLE)
+        request.allowScanningByMediaScanner()
+        request.setNotificationVisibility(DownloadManager.Request.VISIBILITY_VISIBLE_NOTIFY_COMPLETED)
         request.setDestinationInExternalPublicDir(Environment.DIRECTORY_DOWNLOADS, fileData.fileName)
         downloadRequestId = downloadManager.enqueue(request)
         observeProgress()
@@ -123,54 +126,65 @@ internal class FilePreviewViewModel(pyrusServiceDesk: PyrusServiceDesk,
     fun getExtension(): String = intent.getFileData().fileName.getExtension()
 
     /**
-     * Provides file name
+     * Provides file name without path
      */
     fun getFileName(): CharSequence = intent.getFileData().fileName
 
     private fun observeProgress() {
         launch {
-            var isDownloaded = false
-            while(!isDownloaded) {
-                delay(CHECK_FILE_DOWNLOADED_DELAY)
-                val c = downloadManager.query(DownloadManager.Query().setFilterById(downloadRequestId))
-                if (c != null
-                    && c.moveToFirst()
-                    && c.getInt(c.getColumnIndex(DownloadManager.COLUMN_STATUS)) == DownloadManager.STATUS_SUCCESSFUL) {
-
-                    processDownloadedFileUriAsync(downloadManager.getUriForDownloadedFile(downloadRequestId))
-                    isDownloaded = true
+            var isCompleted = false
+            while (!isCompleted) {
+                delay(CHECK_FILE_DOWNLOADED_DELAY_MS)
+                val cursor = downloadManager.query(DownloadManager.Query().setFilterById(downloadRequestId))
+                if (cursor == null || !cursor.moveToFirst()) {
+                    break
+                }
+                when (cursor.getInt(cursor.getColumnIndex(DownloadManager.COLUMN_STATUS))) {
+                    DownloadManager.STATUS_SUCCESSFUL -> {
+                        processDownloadedFileUriAsync(downloadManager.getUriForDownloadedFile(downloadRequestId))
+                        isCompleted = true
+                    }
+                    DownloadManager.STATUS_FAILED ->{
+                        processDownloadingFailedAsync()
+                        isCompleted = true
+                    }
                 }
             }
         }
     }
 
+    private fun processDownloadingFailedAsync(){
+        fileLiveData.postValue(
+            when (fileLiveData.value!!) {
+                is PreviewableFileViewModel ->
+                    PreviewableFileViewModel(
+                        intent.getFileData().uri,
+                        false,
+                        false
+                    )
+
+                is NonPreviewableViewModel ->
+                    NonPreviewableViewModel(
+                        intent.getFileData().uri,
+                        false,
+                        false
+                    )
+            }
+        )
+    }
+
     private fun processDownloadedFileUriAsync(fileUri: Uri?) {
         if (fileUri == null) {
-            fileLiveData.postValue(
-                when (fileLiveData.value!!) {
-                    is PreviewableFileViewModel ->
-                        PreviewableFileViewModel(
-                            intent.getFileData().uri,
-                            false,
-                            false
-                        )
-                    is NonPreviewableViewModel ->
-                        NonPreviewableViewModel(
-                            intent.getFileData().uri,
-                            false,
-                            false,
-                            true
-                        )
-                }
-            )
+            processDownloadingFailedAsync()
             return
         }
-        when (fileUri.scheme){
+        when (fileUri.scheme) {
             ContentResolver.SCHEME_FILE ->
                 MediaScannerConnection.scanFile(
                     getApplication(),
                     arrayOf(fileUri.path),
-                    arrayOf(downloadManager.getMimeTypeForDownloadedFile(downloadRequestId))) { _, uri ->
+                    arrayOf(downloadManager.getMimeTypeForDownloadedFile(downloadRequestId))
+                ) { _, uri ->
 
                     fileLiveData.postValue(
                         when (fileLiveData.value!!) {

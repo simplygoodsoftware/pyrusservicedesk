@@ -6,4 +6,17 @@
         android:title="@string/psd_download"
         android:icon="@drawable/psd_file_download"
         app:showAsAction="always"/>
+
+    <item
+        android:id="@+id/share"
+        android:title="@string/psd_share"
+        android:icon="@drawable/psd_share"
+        app:showAsAction="always"/>
+
+    <item
+        android:id="@+id/loading"
+        android:title="@string/psd_downloading"
+        android:icon="@drawable/psd_loading_rotate"
+        android:enabled="false"
+        app:showAsAction="always"/>
 </menu>

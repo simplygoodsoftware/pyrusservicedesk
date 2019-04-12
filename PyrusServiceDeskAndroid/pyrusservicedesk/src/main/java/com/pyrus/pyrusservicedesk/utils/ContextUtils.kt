@@ -36,6 +36,13 @@ internal fun <T : ViewModel> Fragment.getViewModelWithActivityScope(viewModelCla
 }
 
 /**
+ * Provides the name of the application. Not an extension over the [Context] as may be used
+ * with [AndroidViewModel.getApplication] which is surprisingly returns an <T extends Application> an can't be
+ * used as receiver without being explicitly cast.
+ */
+internal fun getApplicationName(context: Context): String = context.getString(context.applicationInfo.labelRes)
+
+/**
  * Dispatches event for taking photo that should be handled by the receiver fragment.
  */
 internal fun Fragment.dispatchTakePhotoIntent(requestCode: Int): Uri? {
