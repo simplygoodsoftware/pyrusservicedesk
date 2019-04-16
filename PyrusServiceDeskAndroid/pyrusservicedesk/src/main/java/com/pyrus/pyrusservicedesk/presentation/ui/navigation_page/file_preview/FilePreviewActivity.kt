@@ -19,7 +19,6 @@ import com.pyrus.pyrusservicedesk.PyrusServiceDesk
 import com.pyrus.pyrusservicedesk.R
 import com.pyrus.pyrusservicedesk.presentation.ConnectionActivityBase
 import com.pyrus.pyrusservicedesk.sdk.data.intermediate.FileData
-import com.pyrus.pyrusservicedesk.utils.hasPermission
 import com.pyrus.pyrusservicedesk.utils.animateInfinite
 import com.pyrus.pyrusservicedesk.utils.hasPermission
 import kotlinx.android.synthetic.main.psd_activity_file_preview.*

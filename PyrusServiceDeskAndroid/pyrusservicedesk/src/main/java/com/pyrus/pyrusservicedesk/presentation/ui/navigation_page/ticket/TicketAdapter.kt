@@ -223,8 +223,7 @@ internal class TicketAdapter: AdapterBase<TicketEntry>() {
             }
             when (comment.contentType){
                 ContentType.Text -> bindTextView()
-                ContentType.Attachment -> bindAttachmentView()
-                ContentType.AttachmentFullSize -> bindAttachmentPreview()
+                else -> bindAttachmentView()
             }
             creationTime.text = getItem().comment.creationDate.getTimeText(itemView.context)
         }
@@ -239,34 +238,17 @@ internal class TicketAdapter: AdapterBase<TicketEntry>() {
         }
 
         private fun bindAttachmentView() {
-            comment.setFileName(getItem().comment.attachments?.first()?.name ?: "")
-            comment.setFileSize(getItem().comment.attachments?.first()?.bytesSize?.toFloat() ?: 0f)
-            comment.fileProgressStatus = if (getItem().hasError()) Status.Error else Status.Completed
-            comment.setOnProgressIconClickListener {
-                when (comment.fileProgressStatus) {
-                    Status.Processing -> getItem().uploadFileHooks?.cancelUploading()
-                    Status.Completed -> onFileReadyToPreviewClickListener?.invoke(getItem().comment.attachments!![0])
-                    Status.Error -> comment.performClick()
-                }
-            }
-            if (!getItem().hasError()) {
-                getItem().uploadFileHooks?.subscribeOnProgress {
-                    if (comment.fileProgressStatus != Status.Processing)
-                        comment.fileProgressStatus = Status.Processing
-                    comment.setProgress(it)
-                }
-            }
-        }
-
-        private fun bindAttachmentPreview() {
             getItem().comment.attachments!!.first().let {
+                comment.setFileName(getItem().comment.attachments?.first()?.name ?: "")
+                comment.setFileSize(getItem().comment.attachments?.first()?.bytesSize?.toFloat() ?: 0f)
                 val previewUri = it.uri ?: Uri.parse(getPreviewUrl(it.id))
-                comment.setPreview(previewUri,it.uri != null)
+                comment.setPreview(previewUri)
+                comment.fileProgressStatus = if (getItem().hasError()) Status.Error else Status.Completed
                 comment.setOnProgressIconClickListener {
                     when (comment.fileProgressStatus) {
                         Status.Processing -> getItem().uploadFileHooks?.cancelUploading()
                         Status.Completed -> onFileReadyToPreviewClickListener?.invoke(getItem().comment.attachments!![0])
-                        Status.Error -> comment.performClick()
+                        Status.Error -> onCommentClickListener.onClick(comment)
                     }
                 }
                 if (!getItem().hasError()) {

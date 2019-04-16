@@ -12,32 +12,48 @@
     <com.pyrus.pyrusservicedesk.presentation.ui.view.RoundCornersLayout
         android:id="@+id/background_parent"
         android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:padding="@dimen/psd_offset_small"
-        android:background="@drawable/psd_comment_background">
+        android:layout_height="wrap_content">
 
         <LinearLayout
             android:id="@+id/attachment_layout"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:minHeight="@dimen/psd_attachment_layout_min_height"
             android:gravity="center_vertical"
             android:orientation="horizontal"
             tools:visibility="visible">
+
+            <FrameLayout
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent">
 
             <ProgressBar
                 android:id="@+id/attachment_progress"
                 style="?android:attr/progressBarStyleHorizontal"
                 android:layout_width="@dimen/psd_recyclerview_item_height_default"
                 android:layout_height="@dimen/psd_recyclerview_item_height_default"
+                android:layout_marginTop="@dimen/psd_offset_small"
+                android:layout_marginLeft="@dimen/psd_offset_small"
+                android:layout_marginStart="@dimen/psd_offset_small"
+                android:layout_marginBottom="@dimen/psd_offset_small"
+                android:layout_gravity="center_vertical"
                 android:progressDrawable="@drawable/psd_file_progress"
-                android:layout_marginRight="@dimen/psd_offset_small"
-                android:layout_marginEnd="@dimen/psd_offset_small"
                 android:indeterminate="false"/>
+
+            <com.pyrus.pyrusservicedesk.presentation.ui.view.OutlineImageView
+                android:id="@+id/preview_mini"
+                android:layout_width="@dimen/psd_preview_mini_width"
+                android:layout_height="match_parent"
+                android:scaleType="centerCrop"
+                android:visibility="gone"/>
+
+            </FrameLayout>
 
             <LinearLayout
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:gravity="center_vertical"
+                android:padding="@dimen/psd_offset_small"
                 android:orientation="vertical">
 
                 <android.support.v7.widget.AppCompatTextView
@@ -45,6 +61,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:textAppearance="?attr/textAppearanceListItem"
+                    android:maxLines="2"
                     tools:text="filename.jpeg"
                     android:ellipsize="end"/>
 
@@ -64,6 +81,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:textAppearance="?attr/textAppearanceListItem"
+            android:padding="@dimen/psd_offset_small"
             tools:text="@tools:sample/lorem"
             tools:visibility="gone"/>
 
@@ -71,15 +89,17 @@
             android:id="@+id/preview_layout"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:background="@color/psd_comment_inbound_background">
+            android:background="@color/psd_comment_inbound_background"
+            android:visibility="gone">
 
             <ProgressBar
                 android:id="@+id/preview_passive_progress"
                 android:layout_width="wrap_content"
-                android:layout_height="wrap_content" />
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"/>
 
-            <android.support.v7.widget.AppCompatImageView
-                android:id="@+id/preview"
+            <com.pyrus.pyrusservicedesk.presentation.ui.view.OutlineImageView
+                android:id="@+id/preview_full"
                 android:scaleType="centerCrop"
                 android:layout_width="wrap_content"
                 android:layout_height="@dimen/psd_preview_default_size"/>

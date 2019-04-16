@@ -2,7 +2,6 @@ package com.pyrus.pyrusservicedesk.presentation.ui.view
 
 import android.animation.Animator
 import android.animation.ObjectAnimator
-import android.animation.ValueAnimator
 import android.content.Context
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
@@ -14,13 +13,13 @@ import android.graphics.drawable.LayerDrawable
 import android.net.Uri
 import android.support.annotation.ColorInt
 import android.support.media.ExifInterface
+import android.support.v4.app.ActivityCompat
 import android.support.v4.content.ContextCompat
 import android.support.v4.text.util.LinkifyCompat
 import android.support.v7.content.res.AppCompatResources
 import android.support.v7.widget.AppCompatImageView
 import android.text.util.Linkify
 import android.util.AttributeSet
-import android.util.Log
 import android.view.Gravity
 import android.view.View
 import android.view.View.OnClickListener
@@ -29,8 +28,10 @@ import android.widget.FrameLayout
 import android.widget.ImageView
 import android.widget.LinearLayout
 import com.pyrus.pyrusservicedesk.R
+import com.pyrus.pyrusservicedesk.presentation.ui.view.OutlineImageView.Companion.EDGE_RIGHT
 import com.pyrus.pyrusservicedesk.utils.*
 import com.pyrus.pyrusservicedesk.utils.ConfigUtils.Companion.getAccentColor
+import com.squareup.picasso.Callback
 import com.squareup.picasso.Picasso
 import com.squareup.picasso.Target
 import kotlinx.android.synthetic.main.psd_comment.view.*
@@ -57,11 +58,13 @@ internal class CommentView @JvmOverloads constructor(
     : FrameLayout(context, attrs, defStyleAttr) {
 
     private companion object {
-        val ratioMap = mutableMapOf<Uri, Float>()
+        const val PREVIEW_RETRY_STEP_MS = 10 * 1000L
+        const val MAX_PREVIEW_RETRY_MS = 60 * 1000L
+        val previewRatioMap = mutableMapOf<Uri, Float>()
 
         fun getFullSizePreviewWidth(previewUri: Uri, height: Int): Int {
             return when{
-                ratioMap.containsKey(previewUri) -> (height * (ratioMap[previewUri] ?: 1f)).toInt()
+                previewRatioMap.containsKey(previewUri) -> (height * (previewRatioMap[previewUri] ?: 1f)).toInt()
                 else -> height
             }
         }
@@ -93,27 +96,23 @@ internal class CommentView @JvmOverloads constructor(
      * Assigning automatically changes the appearance of the view.
      * For example if [ContentType.Text] was assigned, then invocations of any methods that
      * are related to [ContentType.Attachment] are not give any visible effects.
-     *
      */
     var contentType: ContentType = ContentType.Text
         set(value) {
             when (value) {
                 ContentType.Text -> {
-                    background_parent.setPadding(backgroundPadding, backgroundPadding, backgroundPadding, backgroundPadding)
                     comment_text.visibility = View.VISIBLE
                     attachment_layout.visibility = View.GONE
                     preview_layout.visibility = GONE
                 }
                 ContentType.Attachment -> {
                     recentProgress = 0
-                    background_parent.setPadding(backgroundPadding, backgroundPadding, backgroundPadding, backgroundPadding)
                     comment_text.visibility = View.GONE
                     attachment_layout.visibility = View.VISIBLE
                     preview_layout.visibility = View.GONE
                 }
                 ContentType.AttachmentFullSize -> {
                     recentProgress = 0
-                    background_parent.setPadding(0, 0, 0, 0)
                     comment_text.visibility = GONE
                     attachment_layout.visibility = GONE
                     preview_layout.visibility = View.VISIBLE
@@ -145,12 +144,12 @@ internal class CommentView @JvmOverloads constructor(
                         R.id.progress_icon,
                         it.mutate().apply { setColorFilter(primaryColor, PorterDuff.Mode.SRC_IN) })
             }
-            if (value != Status.Processing) {
-                setFileSize(recentFileSize)
-                setProgress(0)
+            when (contentType) {
+                ContentType.Attachment -> applyProgressStatusToAttachmentView(value)
+                ContentType.AttachmentFullSize -> applyProgressStatusToPreview(value)
+                else -> {}
             }
-            else
-                file_size.setText(R.string.psd_uploading)
+
             field = value
         }
 
@@ -177,7 +176,6 @@ internal class CommentView @JvmOverloads constructor(
             field = value
         }
 
-    private var backgroundPadding = resources.getDimensionPixelSize(R.dimen.psd_comment_radius)
 
     private var onDownloadIconClickListener: (() -> Unit)? = null
     private var recentFileSize: Float = 0f
@@ -207,7 +205,8 @@ internal class CommentView @JvmOverloads constructor(
         primaryColor = getTextColorOnBackground(context, backgroundColor)
         val secondaryColor = adjustColorChannel(primaryColor, ColorChannel.Alpha, SECONDARY_TEXT_COLOR_MULTIPLIER)
 
-        background_parent.background.mutate().setColorFilter(backgroundColor, PorterDuff.Mode.SRC_IN)
+        background_parent.setBackgroundColor(backgroundColor)
+        background_parent.cornerRadius = resources.getDimension(R.dimen.psd_comment_radius)
 
         comment_text.setTextColor(primaryColor)
         comment_text.setLinkTextColor(primaryColor)
@@ -218,6 +217,15 @@ internal class CommentView @JvmOverloads constructor(
         fileDownloadDrawable.adjustSettingsForProgress(primaryColor, secondaryColor)
         previewDownloadDrawable = preview_progress.progressDrawable as LayerDrawable
         previewDownloadDrawable.adjustSettingsForProgress(primaryColor, secondaryColor)
+
+        preview_full.outlineColor = ActivityCompat.getColor(context, R.color.psd_comment_preview_outline)
+        preview_full.outlineRadius = resources.getDimensionPixelSize(R.dimen.psd_comment_radius)
+        preview_full.outlineWidth = resources.getDimensionPixelSize(R.dimen.psd_comment_preview_outline_radius)
+
+        preview_mini.outlineColor = backgroundColor
+        preview_mini.outlineRadius = resources.getDimensionPixelSize(R.dimen.psd_comment_radius)
+        preview_mini.outlineWidth = resources.getDimensionPixelSize(R.dimen.psd_comment_preview_outline_radius)
+        preview_mini.edges = preview_mini.edges and EDGE_RIGHT.inv()
 
         root.gravity = Gravity.BOTTOM or when(type){
             TYPE_INBOUND -> Gravity.START
@@ -307,23 +315,16 @@ internal class CommentView @JvmOverloads constructor(
             ContentType.AttachmentFullSize -> preview_progress
             else -> null
         }
-        progressBar?.let { progressbar ->
-            ValueAnimator.ofInt(progressbar.progress, progress)
+        progressBar?.let {
+            ObjectAnimator.ofInt(it, "progress", progress)
                 .apply {
                     duration = when (progress){
                         0 -> 0
                         else -> PROGRESS_CHANGE_ANIMATION_DURATION
                     }
                     interpolator = DecelerateInterpolator()
-                    addUpdateListener {
-                        (animatedValue as Int).let { value ->
-                            if (recentProgress > progress)
-                                cancel()
-                            progressbar.progress = value
-                        }
-                    }
                 }
-                .start()
+                .start();
         }
     }
 
@@ -334,52 +335,179 @@ internal class CommentView @JvmOverloads constructor(
         onDownloadIconClickListener = listener
     }
 
-    fun setPreview(previewUri: Uri, isLocal: Boolean) {
-        preview_progress.visibility = if (isLocal) View.VISIBLE else GONE
-        preview.setImageBitmap(null)
-        when {
-            isLocal -> setLocalPreview(previewUri)
-            else -> setNetworkPreview(previewUri)
+    /**
+     * Assigns file preview
+     */
+    fun setPreview(previewUri: Uri) {
+        when(contentType){
+            ContentType.AttachmentFullSize -> setFullSizePreview(previewUri)
+            ContentType.Attachment -> setMiniPreview(previewUri)
+            else -> return
         }
     }
 
-    private fun setNetworkPreview(previewUri: Uri) {
-        preview.layoutParams.width = getFullSizePreviewWidth(previewUri, preview.layoutParams.height)
-        Picasso.get()
-            .load(previewUri)
-            .noFade() // fade breaks image appearance when loaded
-            .into(ChangingSizeTarget(preview, previewUri, ratioMap))
+    private fun setMiniPreview(previewUri: Uri) {
+        preview_mini.setImageBitmap(null)
+        preview_mini.visibility = GONE
+        when {
+            previewUri.isRemote() -> setNetworkPreview(previewUri, preview_mini, false)
+            else -> setLocalPreview(preview_mini, previewUri, true) {
+                preview_mini.visibility = GONE
+            }
+        }
+    }
+
+    private fun setFullSizePreview(previewUri: Uri) {
+        val isRemote = previewUri.isRemote()
+        preview_progress.visibility = if (isRemote) GONE else View.VISIBLE
+        preview_full.setImageBitmap(null)
+        when {
+            isRemote -> setNetworkPreview(previewUri, preview_full, true)
+            else -> setLocalPreview(preview_full, previewUri, true)
+        }
+    }
+
+    private fun applyProgressStatusToPreview(status: Status) {
+        preview_progress.visibility = when(status){
+            Status.Completed -> GONE
+            else -> View.VISIBLE
+        }
+    }
+
+    private fun applyProgressStatusToAttachmentView(status: Status) {
+        if (status != Status.Processing) {
+            setFileSize(recentFileSize)
+            setProgress(0)
+        }
+        else
+            file_size.setText(R.string.psd_uploading)
+    }
+
+    private fun setNetworkPreview(previewUri: Uri,
+                                  target: ImageView,
+                                  adjustTargetDimensions: Boolean) {
+
+        setNetworkPreviewDelayed(previewUri, target, adjustTargetDimensions, 0)
+    }
+
+    private fun setNetworkPreviewDelayed(previewUri: Uri,
+                                         target: ImageView,
+                                         adjustTargetDimensions: Boolean,
+                                         delayMs: Long) {
+
+        val request  = Picasso.get().load(previewUri)
+        when {
+            adjustTargetDimensions -> {
+                target.layoutParams.width = getFullSizePreviewWidth(previewUri, target.layoutParams.height)
+                request.into(
+                    ChangingSizeTarget(
+                        target,
+                        previewUri,
+                        previewRatioMap,
+                        onFailed = {
+                            setNetworkPreviewDelayed(
+                                previewUri,
+                                target,
+                                adjustTargetDimensions,
+                                when (delayMs){
+                                    0L -> PREVIEW_RETRY_STEP_MS
+                                    else -> Math.min(delayMs + PREVIEW_RETRY_STEP_MS, MAX_PREVIEW_RETRY_MS)
+                                })
+                        })
+                )
+            }
+            else -> {
+                request.into(
+                    target,
+                    object : Callback{
+                        override fun onSuccess() {
+                            target.visibility = View.VISIBLE
+                        }
+                        override fun onError(e: java.lang.Exception?) {
+                            setNetworkPreviewDelayed(
+                                previewUri,
+                                target,
+                                adjustTargetDimensions,
+                                when (delayMs){
+                                    0L -> PREVIEW_RETRY_STEP_MS
+                                    else -> Math.min(delayMs + PREVIEW_RETRY_STEP_MS, MAX_PREVIEW_RETRY_MS)
+                                })
+                        }
+                    })
+
+            }
+        }
     }
 
     /**
      * There is a problem with [Picasso] that doesn't allow to use [ChangingSizeTarget] with local files.
      */
-    private fun setLocalPreview(previewUri: Uri) {
-        val exif = ExifInterface(context.contentResolver.openInputStream(previewUri))
-        val bitmap = (exif.thumbnailBitmap
-            ?: BitmapFactory.decodeStream(context.contentResolver.openInputStream(previewUri)))
-            .also {
-                it.rotate(getImageRotation(exif).toFloat())
+    private fun setLocalPreview(target: ImageView,
+                                previewUri: Uri,
+                                adjustTargetDimension: Boolean,
+                                onFailed: (() -> Unit)? = null) {
+
+        val bitmap = try {
+            val exif = context.contentResolver.openInputStream(previewUri)?.use {
+                ExifInterface(it)
             }
-        val ratio  = bitmap.width.toFloat() / bitmap.height
-        if (!ratioMap.containsKey(previewUri))
-            ratioMap += previewUri to ratio
-        preview.layoutParams.width = getFullSizePreviewWidth(previewUri, preview.layoutParams.height)
-        preview.setImageBitmap(bitmap)
+            val source = exif?.thumbnailBitmap
+                ?: BitmapFactory.decodeStream(context.contentResolver.openInputStream(previewUri))
+            with(source) {
+                exif?.let {
+                    this.rotate(getImageRotation(it).toFloat())
+                } ?: this
+            }
+        } catch (ex: java.lang.Exception) {
+            onFailed?.invoke()
+            return
+        }
+
+        if (adjustTargetDimension) {
+            val ratio  = bitmap.width.toFloat() / bitmap.height
+            if (!previewRatioMap.containsKey(previewUri)){}
+                previewRatioMap += previewUri to ratio
+            target.layoutParams.width = getFullSizePreviewWidth(previewUri, target.layoutParams.height)
+            target.requestLayout()
+        }
+        target.setImageBitmap(bitmap)
     }
 }
 
-private class ChangingSizeTarget(val targetView: ImageView, val uri: Uri, val ratioMap: MutableMap<Uri, Float>) : Target {
+/**
+ * [hashCode] and [equals] are required by [Target] description
+ */
+private class ChangingSizeTarget(val targetView: ImageView,
+                                 val uri: Uri,
+                                 val ratioMap: MutableMap<Uri, Float>,
+                                 val onFailed: () -> Unit)
+    : Target {
+
+    private companion object {
+        const val CHANGING_SIZE_ANIMATION_DURATION_MS = 100L
+    }
+
+    /**
+     * [Picasso] stores targets in weak references, which can lead to missing of calling the callbacks as
+     * particular target can be garbage collected. We handle it by storing an instance in view's tag
+     */
+    init {
+        targetView.tag = this
+    }
+
     override fun onPrepareLoad(placeHolderDrawable: Drawable?) {
     }
 
     override fun onBitmapFailed(e: Exception?, errorDrawable: Drawable?) {
-        Log.d("", "")
+        targetView.tag = null
+        onFailed.invoke()
     }
 
     override fun onBitmapLoaded(bitmap: Bitmap?, from: Picasso.LoadedFrom?) {
-        if (bitmap == null)
+        targetView.tag = null
+        if (bitmap == null) {
             return
+        }
         if (ratioMap.containsKey(uri)) {
             targetView.setImageBitmap(bitmap)
             return
@@ -387,7 +515,7 @@ private class ChangingSizeTarget(val targetView: ImageView, val uri: Uri, val ra
         val ratio = bitmap.width.toFloat() / bitmap.height
         ratioMap += uri to ratio
         val animator = ObjectAnimator.ofFloat(1f, ratio)
-        animator.duration = 100L
+        animator.duration = CHANGING_SIZE_ANIMATION_DURATION_MS
         animator.addUpdateListener {
             targetView.layoutParams.width = (targetView.layoutParams.height * it.animatedValue as Float).toInt()
             targetView.requestLayout()
@@ -400,6 +528,18 @@ private class ChangingSizeTarget(val targetView: ImageView, val uri: Uri, val ra
 
         })
         animator.start()
+    }
+
+    override fun equals(other: Any?): Boolean {
+        return when {
+            this === other -> true
+            other !is ChangingSizeTarget -> false
+            else -> uri == other.uri
+        }
+    }
+
+    override fun hashCode(): Int {
+        return uri.hashCode()
     }
 }
 

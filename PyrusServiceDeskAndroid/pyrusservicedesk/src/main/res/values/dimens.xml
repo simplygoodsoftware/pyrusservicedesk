@@ -34,4 +34,7 @@
     <dimen name="psd_input_padding">4dp</dimen>
     <dimen name="psd_file_preview_extension_text_size">64sp</dimen>
     <dimen name="psd_preview_default_size">140dp</dimen>
+    <dimen name="psd_comment_preview_outline_radius">1dp</dimen>
+    <dimen name="psd_preview_mini_width">64dp</dimen>
+    <dimen name="psd_attachment_layout_min_height">72dp</dimen>
 </resources>

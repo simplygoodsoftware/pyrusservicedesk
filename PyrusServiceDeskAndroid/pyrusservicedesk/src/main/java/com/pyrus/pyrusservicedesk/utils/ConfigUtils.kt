@@ -25,7 +25,7 @@ internal class ConfigUtils{
         fun getAccentColor(activity: Context): Int {
             return when{
                 PyrusServiceDesk.getConfiguration().themeColor != null -> PyrusServiceDesk.getConfiguration().themeColor!!
-                else -> getColor(activity, R.attr.colorAccent)
+                else -> getColorByAttrId(activity, R.attr.colorAccent)
             }
         }
 

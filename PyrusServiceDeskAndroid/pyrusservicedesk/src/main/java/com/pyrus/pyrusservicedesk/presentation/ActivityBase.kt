@@ -7,14 +7,15 @@ import android.os.Bundle
 import android.support.v4.app.ActivityCompat
 import android.support.v4.view.ViewCompat
 import android.support.v7.app.AppCompatActivity
+import android.support.v7.app.AppCompatDelegate
 import android.view.View
 import android.view.inputmethod.InputMethodManager
-import com.pyrus.pyrusservicedesk.R
-import kotlinx.android.synthetic.main.psd_activity_ticket.*
-import kotlinx.coroutines.*
 import com.pyrus.pyrusservicedesk.PyrusServiceDesk
+import com.pyrus.pyrusservicedesk.R
 import com.pyrus.pyrusservicedesk.presentation.viewmodel.QuitViewModel
 import com.pyrus.pyrusservicedesk.utils.getViewModel
+import kotlinx.android.synthetic.main.psd_activity_ticket.*
+import kotlinx.coroutines.*
 import kotlin.coroutines.CoroutineContext
 
 
@@ -49,6 +50,8 @@ internal abstract class ActivityBase: AppCompatActivity(), CoroutineScope {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        // Vectors inside another type of drawables may not work without this
+        AppCompatDelegate.setCompatVectorFromResourcesEnabled(true)
         overridePendingTransition()
         val theme = when{
             PyrusServiceDesk.getConfiguration().isDialogTheme -> R.style.PyrusServiceDesk_Dialog
