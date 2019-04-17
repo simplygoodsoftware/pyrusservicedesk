@@ -140,10 +140,16 @@ internal class CommentView @JvmOverloads constructor(
                     ContentType.AttachmentFullSize -> previewDownloadDrawable
                     else -> null
                 }
-                drawable?.setDrawableByLayerId(
+                drawable?.let { draw ->
+                    draw.setDrawableByLayerId(
                         R.id.progress_icon,
                         it.mutate().apply { setColorFilter(primaryColor, PorterDuff.Mode.SRC_IN) })
+                    draw.invalidateSelf()
+                }
             }
+            if (value != Status.Processing)
+                setProgress(0)
+
             when (contentType) {
                 ContentType.Attachment -> applyProgressStatusToAttachmentView(value)
                 ContentType.AttachmentFullSize -> applyProgressStatusToPreview(value)
@@ -188,6 +194,9 @@ internal class CommentView @JvmOverloads constructor(
     private val statusView:AppCompatImageView
 
     private val progressClickListener = OnClickListener { onDownloadIconClickListener?.invoke() }
+
+    private var recentPicassoTarget: Target? = null
+    private var recentPicassoTargetView: ImageView? = null
 
     init {
         View.inflate(context, R.layout.psd_comment, this)
@@ -266,6 +275,16 @@ internal class CommentView @JvmOverloads constructor(
                     root.addView(statusView, 0)
                 }
             }
+        }
+    }
+
+    override fun onDetachedFromWindow() {
+        super.onDetachedFromWindow()
+        recentPicassoTargetView?.let {
+            Picasso.get().cancelRequest(it)
+        }
+        recentPicassoTarget?.let {
+            Picasso.get().cancelRequest(it)
         }
     }
 
@@ -375,10 +394,8 @@ internal class CommentView @JvmOverloads constructor(
     }
 
     private fun applyProgressStatusToAttachmentView(status: Status) {
-        if (status != Status.Processing) {
+        if (status != Status.Processing)
             setFileSize(recentFileSize)
-            setProgress(0)
-        }
         else
             file_size.setText(R.string.psd_uploading)
     }
@@ -398,25 +415,26 @@ internal class CommentView @JvmOverloads constructor(
         val request  = Picasso.get().load(previewUri)
         when {
             adjustTargetDimensions -> {
+                val picassoTarget = ChangingSizeTarget(
+                    target,
+                    previewUri,
+                    previewRatioMap,
+                    onFailed = {
+                        setNetworkPreviewDelayed(
+                            previewUri,
+                            target,
+                            adjustTargetDimensions,
+                            when (delayMs){
+                                0L -> PREVIEW_RETRY_STEP_MS
+                                else -> Math.min(delayMs + PREVIEW_RETRY_STEP_MS, MAX_PREVIEW_RETRY_MS)
+                            })
+                    })
+                recentPicassoTarget = picassoTarget
                 target.layoutParams.width = getFullSizePreviewWidth(previewUri, target.layoutParams.height)
-                request.into(
-                    ChangingSizeTarget(
-                        target,
-                        previewUri,
-                        previewRatioMap,
-                        onFailed = {
-                            setNetworkPreviewDelayed(
-                                previewUri,
-                                target,
-                                adjustTargetDimensions,
-                                when (delayMs){
-                                    0L -> PREVIEW_RETRY_STEP_MS
-                                    else -> Math.min(delayMs + PREVIEW_RETRY_STEP_MS, MAX_PREVIEW_RETRY_MS)
-                                })
-                        })
-                )
+                request.into(picassoTarget)
             }
             else -> {
+                recentPicassoTargetView = target
                 request.into(
                     target,
                     object : Callback{

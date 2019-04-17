@@ -10,8 +10,8 @@ import android.os.Handler
 import android.os.Looper
 import android.support.v7.util.DiffUtil
 import android.widget.Toast
-import com.pyrus.pyrusservicedesk.R
 import com.pyrus.pyrusservicedesk.PyrusServiceDesk
+import com.pyrus.pyrusservicedesk.R
 import com.pyrus.pyrusservicedesk.presentation.call.*
 import com.pyrus.pyrusservicedesk.presentation.ui.navigation_page.ticket.entries.*
 import com.pyrus.pyrusservicedesk.presentation.ui.view.recyclerview.DiffResultWithNewItems
@@ -117,7 +117,7 @@ internal class TicketViewModel(
             return
         else {
             applyCommentUpdate(item, ChangeType.Cancelled)
-            sendAddComment(item.comment, item.uploadFileHooks)
+            sendAddComment(item.comment, item.uploadFileHooks.also { it?.resetProgress() })
         }
     }
 
