@@ -88,16 +88,6 @@ internal class TicketViewModel(
         }
     }
 
-    /**
-     * Comments that currently are being processed.
-     * This is necessary to minimize comments list inconsistency when getFeed response already contains
-     * comments ids that are expected to be received by addComment response.
-     *
-     * NB: addComment responses that are delivered with an error should not remove the requested comment from
-     * the list, otherwise comments with error are lost
-     */
-    private val commentsInProcess: MutableList<Comment> by lazy { mutableListOf<Comment>() }
-
     init {
         draft = draftRepository.getDraft()
 
@@ -124,7 +114,6 @@ internal class TicketViewModel(
         if (!item.hasError())
             return
         else {
-            commentsInProcess -= item.comment
             applyCommentUpdate(item, ChangeType.Cancelled)
             sendAddComment(item.comment, item.uploadFileHooks.also { it?.resetProgress() })
         }
@@ -234,8 +223,6 @@ internal class TicketViewModel(
         if (commentContainsError(localComment))
             return
 
-        commentsInProcess += localComment
-
         val toNewTicket = !isFeed && isNewTicket() && !isCreateTicketSent
 
         applyCommentUpdate(
@@ -260,7 +247,7 @@ internal class TicketViewModel(
         return Observer { res ->
             res?.let { result ->
                 isCreateTicketSent = false
-                if (uploadFileHooks?.isCancelled == true || !commentsInProcess.contains(localComment))
+                if (uploadFileHooks?.isCancelled == true)
                     return@let
                 val entry = when {
                     result.hasError() -> CommentEntry(
@@ -275,7 +262,8 @@ internal class TicketViewModel(
                             maybeStartAutoRefresh()
                         }
                         val commentId = if (toNewTicket) localComment.localId else result.data!!
-                        commentsInProcess -= localComment
+                        if(hasComment(commentId))
+                            return@let
                         CommentEntry(
                             localDataProvider.convertLocalCommentToServer(localComment, commentId),
                             onClickedCallback = this@TicketViewModel
@@ -285,6 +273,12 @@ internal class TicketViewModel(
                 applyCommentUpdate(entry, ChangeType.Changed)
             }
         }
+    }
+
+    private fun hasComment(commentId: Int): Boolean {
+        return ticketEntries.findLast {
+            it.type == Type.Comment && (it as CommentEntry).comment.commentId == commentId
+        } != null
     }
 
     private fun commentContainsError(localComment: Comment): Boolean {
@@ -309,31 +303,12 @@ internal class TicketViewModel(
             onDataLoaded()
             return
         }
-        val lastCurrentMyCommentId =
-            (ticketEntries.findLast {
-                (it.type == Type.Comment) && (it as CommentEntry).comment.isInbound && !it.comment.isLocal()
-            } as? CommentEntry)
-                ?.comment
-                ?.commentId
-                ?: 0
-        var myNewCommentsCount = 0
-        for (i in freshList.lastIndex downTo 0) {
-            val comment = freshList[i]
-            if (comment.commentId <= lastCurrentMyCommentId) {
-                break
-            }
-            if (!comment.isInbound)
-                myNewCommentsCount++
-        }
-        removeCommentsFromProcessingHead(myNewCommentsCount)
-
         val listOfLocalEntries = mutableListOf<TicketEntry>()
         if (hasRealComments()) {
             for (i in ticketEntries.lastIndex downTo 0) {
                 val entry = ticketEntries[i]
                 if (entry.type == Type.Comment
-                    && (entry as CommentEntry).comment.isLocal()
-                    && commentsInProcess.contains(entry.comment)) {
+                    && (entry as CommentEntry).comment.isLocal()) {
 
                     listOfLocalEntries.add(0, entry)
                 }
@@ -375,14 +350,6 @@ internal class TicketViewModel(
                 break
         }
         return true
-    }
-
-    private fun removeCommentsFromProcessingHead(commentCountToRemove: Int) {
-        if (commentCountToRemove == 0 || commentsInProcess.size < commentCountToRemove)
-            return
-        for (i in 0..commentCountToRemove) {
-            commentsInProcess.removeAt(0)
-        }
     }
 
     private fun hasRealComments(): Boolean = ticketEntries.any { it.type == Type.Comment }
