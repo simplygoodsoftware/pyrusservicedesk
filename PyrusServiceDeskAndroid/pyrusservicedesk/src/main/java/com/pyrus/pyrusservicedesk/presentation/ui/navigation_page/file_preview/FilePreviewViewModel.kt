@@ -109,6 +109,7 @@ internal class FilePreviewViewModel(pyrusServiceDesk: PyrusServiceDesk,
                 delay(CHECK_FILE_DOWNLOADED_DELAY_MS)
                 val cursor = downloadManager.query(DownloadManager.Query().setFilterById(downloadRequestId))
                 if (cursor == null || !cursor.moveToFirst()) {
+                    processDownloadingFailedAsync()
                     break
                 }
                 when (cursor.getInt(cursor.getColumnIndex(DownloadManager.COLUMN_STATUS))) {
