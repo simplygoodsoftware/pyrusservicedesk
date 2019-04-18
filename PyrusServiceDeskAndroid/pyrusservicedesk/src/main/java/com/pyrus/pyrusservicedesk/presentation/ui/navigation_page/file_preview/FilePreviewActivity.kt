@@ -29,7 +29,8 @@ import kotlinx.coroutines.launch
 /**
  * Activity for previewing files
  */
-internal class FilePreviewActivity: ConnectionActivityBase<FilePreviewViewModel>(FilePreviewViewModel::class.java) {
+internal class FilePreviewActivity: ConnectionActivityBase<FilePreviewViewModel>(
+    FilePreviewViewModel::class.java) {
 
     companion object {
 
@@ -131,9 +132,9 @@ internal class FilePreviewActivity: ConnectionActivityBase<FilePreviewViewModel>
             this,
             Observer {
                 it?.let { model ->
-                    when (model){
-                        is PreviewableFileViewModel -> applyPreviewableViewModel(model)
-                        is NonPreviewableViewModel -> applyNonPreviewableViewModel(model)
+                    when {
+                        model.isPreviewable -> applyPreviewableViewModel(model)
+                        else -> applyNonPreviewableViewModel(model)
                     }
                 }
             }
@@ -155,7 +156,7 @@ internal class FilePreviewActivity: ConnectionActivityBase<FilePreviewViewModel>
             startDownloadFile()
     }
 
-    private fun applyNonPreviewableViewModel(model: NonPreviewableViewModel) {
+    private fun applyNonPreviewableViewModel(model: FileViewModel) {
         web_view.visibility = GONE
         progress_bar.visibility = GONE
         no_preview.visibility = VISIBLE
@@ -199,7 +200,7 @@ internal class FilePreviewActivity: ConnectionActivityBase<FilePreviewViewModel>
 
     }
 
-    private fun applyPreviewableViewModel(model: PreviewableFileViewModel) {
+    private fun applyPreviewableViewModel(model: FileViewModel) {
         progress_bar.visibility = VISIBLE
         no_preview.visibility = GONE
         setActionBarItemVisibility(R.id.loading, model.isDownloading)

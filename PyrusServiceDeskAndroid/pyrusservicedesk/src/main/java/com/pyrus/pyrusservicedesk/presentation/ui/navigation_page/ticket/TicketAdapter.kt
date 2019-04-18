@@ -1,6 +1,7 @@
 package com.pyrus.pyrusservicedesk.presentation.ui.navigation_page.ticket
 
 import android.graphics.Canvas
+import android.net.Uri
 import android.support.annotation.LayoutRes
 import android.support.v7.widget.RecyclerView
 import android.support.v7.widget.helper.ItemTouchHelper
@@ -22,7 +23,9 @@ import com.pyrus.pyrusservicedesk.sdk.data.Attachment
 import com.pyrus.pyrusservicedesk.utils.CIRCLE_TRANSFORMATION
 import com.pyrus.pyrusservicedesk.utils.ConfigUtils
 import com.pyrus.pyrusservicedesk.utils.RequestUtils.Companion.getAvatarUrl
+import com.pyrus.pyrusservicedesk.utils.RequestUtils.Companion.getPreviewUrl
 import com.pyrus.pyrusservicedesk.utils.getTimeText
+import com.pyrus.pyrusservicedesk.utils.isImage
 import com.squareup.picasso.Picasso
 import kotlin.math.abs
 
@@ -183,7 +186,8 @@ internal class TicketAdapter: AdapterBase<TicketEntry>() {
 
         val onCommentClickListener = OnClickListener {
             when {
-                comment.contentType == ContentType.Attachment
+                (comment.contentType == ContentType.Attachment
+                        || comment.contentType == ContentType.PreviewableAttachment)
                         && comment.fileProgressStatus == Status.Completed -> {
 
                     onFileReadyToPreviewClickListener?.invoke(getItem().comment.attachments!!.first())
@@ -212,11 +216,14 @@ internal class TicketAdapter: AdapterBase<TicketEntry>() {
                 getItem().comment.isLocal() -> Status.Processing
                 else -> Status.Completed
             }
-            comment.contentType =
-                    if (item.comment.hasAttachments()) ContentType.Attachment else ContentType.Text
+            comment.contentType = when {
+                !item.comment.hasAttachments() -> ContentType.Text
+                item.comment.attachments!!.first().name.isImage() -> ContentType.PreviewableAttachment
+                else -> ContentType.Attachment
+            }
             when (comment.contentType){
                 ContentType.Text -> bindTextView()
-                ContentType.Attachment -> bindAttachmentView()
+                else -> bindAttachmentView()
             }
             creationTime.text = getItem().comment.creationDate.getTimeText(itemView.context)
         }
@@ -231,25 +238,28 @@ internal class TicketAdapter: AdapterBase<TicketEntry>() {
         }
 
         private fun bindAttachmentView() {
-            comment.setFileName(getItem().comment.attachments?.first()?.name ?: "")
-            comment.setFileSize(getItem().comment.attachments?.first()?.bytesSize?.toFloat() ?: 0f)
-            comment.isFileProgressVisible = true
-            comment.fileProgressStatus = if (getItem().hasError()) Status.Error else Status.Completed
-            comment.setOnProgressIconClickListener {
-                when (comment.fileProgressStatus) {
-                    Status.Processing -> getItem().uploadFileHooks?.cancelUploading()
-                    Status.Completed -> onFileReadyToPreviewClickListener?.invoke(getItem().comment.attachments!![0])
-                    Status.Error -> comment.performClick()
+            getItem().comment.attachments!!.first().let {
+                comment.setFileName(getItem().comment.attachments?.first()?.name ?: "")
+                comment.setFileSize(getItem().comment.attachments?.first()?.bytesSize?.toFloat() ?: 0f)
+                val previewUri = it.uri ?: Uri.parse(getPreviewUrl(it.id))
+                comment.setPreview(previewUri)
+                comment.fileProgressStatus = if (getItem().hasError()) Status.Error else Status.Completed
+                comment.setOnProgressIconClickListener {
+                    when (comment.fileProgressStatus) {
+                        Status.Processing -> getItem().uploadFileHooks?.cancelUploading()
+                        Status.Completed -> onFileReadyToPreviewClickListener?.invoke(getItem().comment.attachments!![0])
+                        Status.Error -> onCommentClickListener.onClick(comment)
+                    }
                 }
-            }
-            if (!getItem().hasError()) {
-                getItem().uploadFileHooks?.subscribeOnProgress {
-                    comment.setProgress(it)
-                    when {
-                        it == itemView.resources.getInteger(R.integer.psd_progress_max_value) ->
-                            comment.fileProgressStatus = Status.Completed
-                        comment.fileProgressStatus != Status.Processing ->
-                            comment.fileProgressStatus = Status.Processing
+                if (!getItem().hasError()) {
+                    getItem().uploadFileHooks?.subscribeOnProgress {
+                        comment.setProgress(it)
+                        when {
+                            it == itemView.resources.getInteger(R.integer.psd_progress_max_value) ->
+                                comment.fileProgressStatus = Status.Completed
+                            comment.fileProgressStatus != Status.Processing ->
+                                comment.fileProgressStatus = Status.Processing
+                        }
                     }
                 }
             }

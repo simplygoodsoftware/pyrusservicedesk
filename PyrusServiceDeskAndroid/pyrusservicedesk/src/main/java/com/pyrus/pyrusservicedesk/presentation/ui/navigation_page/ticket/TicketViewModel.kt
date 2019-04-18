@@ -128,7 +128,7 @@ internal class TicketViewModel(
         else {
             commentsInProcess -= item.comment
             applyCommentUpdate(item, ChangeType.Cancelled)
-            sendAddComment(item.comment, item.uploadFileHooks)
+            sendAddComment(item.comment, item.uploadFileHooks.also { it?.resetProgress() })
         }
     }
 

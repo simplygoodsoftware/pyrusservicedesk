@@ -29,6 +29,8 @@ import com.pyrus.pyrusservicedesk.sdk.data.intermediate.FileData
 import com.pyrus.pyrusservicedesk.utils.*
 import com.pyrus.pyrusservicedesk.utils.RequestUtils.Companion.getFileUrl
 import kotlinx.android.synthetic.main.psd_activity_ticket.*
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 
 /**
  * Activity for rendering ticket/feed comments.
@@ -40,6 +42,8 @@ internal class TicketActivity : ConnectionActivityBase<TicketViewModel>(TicketVi
         private const val KEY_UNREAD_COUNT = "KEY_UNREAD_COUNT"
 
         private const val STATE_KEYBOARD_SHOWN = "STATE_KEYBOARD_SHOWN"
+
+        private const val CHECK_IS_AT_BOTTOM_DELAY_MS = 50L
 
         /**
          * Provides intent for launching the screen.
@@ -137,8 +141,7 @@ internal class TicketActivity : ConnectionActivityBase<TicketViewModel>(TicketVi
                     resources.getDimensionPixelSize(R.dimen.psd_comments_item_space),
                     this@TicketActivity.adapter.itemSpaceMultiplier)
             )
-            itemAnimator =
-                    com.pyrus.pyrusservicedesk.presentation.ui.view.recyclerview.item_animator.ItemAnimatorNoFade()
+            itemAnimator = null
             this@TicketActivity.adapter.itemTouchHelper?.attachToRecyclerView(this)
         }
         send.setOnClickListener { sendComment() }
@@ -149,7 +152,7 @@ internal class TicketActivity : ConnectionActivityBase<TicketViewModel>(TicketVi
             ),
             intArrayOf(
                 accentColor,
-                getColor(this, android.R.attr.textColorSecondary)
+                getColorByAttrId(this, android.R.attr.textColorSecondary)
             )
 
         )
@@ -200,21 +203,25 @@ internal class TicketActivity : ConnectionActivityBase<TicketViewModel>(TicketVi
             this,
             Observer { result ->
                 val atEnd = comments.isAtEnd()
+                val isEmpty = comments.adapter.itemCount == 0
                 result?.let{
                     refresh.isRefreshing = false
                     adapter.setItems(it.newItems)
                     it.diffResult.dispatchUpdatesTo(adapter)
                 }
                 if (atEnd){
-                    comments.scrollToPosition(adapter.itemCount - 1)
-                    comments.post {
-                        if(comments == null)
-                            return@post
+                    if (isEmpty)
+                        comments.scrollToPosition(adapter.itemCount - 1)
+                    else
+                        comments.smoothScrollToPosition(adapter.itemCount - 1)
+                    launch {
+                        while(!comments.isAtEnd())
+                            delay(CHECK_IS_AT_BOTTOM_DELAY_MS)
                         val offset = when {
                             comments.childCount > 0 -> comments.getChildAt(comments.childCount - 1).height
                             else -> 0
                         }
-                        comments.scrollBy(0, offset)
+                        comments.smoothScrollBy(0, offset)
                     }
                 }
             }

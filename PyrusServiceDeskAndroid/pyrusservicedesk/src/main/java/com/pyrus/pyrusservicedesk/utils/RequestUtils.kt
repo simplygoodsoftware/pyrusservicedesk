@@ -33,6 +33,16 @@ class RequestUtils{
                         URLEncoder.encode(appId, "UTF-8")
             }
         }
+
+        internal fun getPreviewUrl(fileId: Int): String {
+            return with(PyrusServiceDesk.getInstance()){
+                "$BASE_URL/DownloadFilePreview/$fileId" +
+                        "?user_id=" +
+                        URLEncoder.encode(userId, "UTF-8") +
+                        "&app_id=" +
+                        URLEncoder.encode(appId, "UTF-8")
+            }
+        }
     }
 }
 

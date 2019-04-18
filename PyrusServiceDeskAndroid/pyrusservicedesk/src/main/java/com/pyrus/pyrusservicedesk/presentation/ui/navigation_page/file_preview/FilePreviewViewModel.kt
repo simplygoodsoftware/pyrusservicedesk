@@ -42,17 +42,11 @@ internal class FilePreviewViewModel(pyrusServiceDesk: PyrusServiceDesk,
     }
 
     override fun onLoadData() {
-        fileLiveData.value = when {
-            fileCanBePreviewed() -> PreviewableFileViewModel(
-                intent.getFileData().uri,
-                isNetworkConnected.value == false
-            )
-            else -> NonPreviewableViewModel(
-                intent.getFileData().uri,
-                isNetworkConnected.value == false,
-                isLocal = isLocalFile()
-            )
-        }
+        fileLiveData.value = FileViewModel(
+            intent.getFileData().uri,
+            fileCanBePreviewed(),
+            isNetworkConnected.value == false,
+            isLocal = isLocalFile())
     }
 
     /**
@@ -67,8 +61,8 @@ internal class FilePreviewViewModel(pyrusServiceDesk: PyrusServiceDesk,
      */
     fun onProgressChanged(progress: Int) {
         if (fileLiveData.value?.hasError != true) {
+            publishProgress(progress)
         }
-        publishProgress(progress)
     }
 
     /**
@@ -77,17 +71,7 @@ internal class FilePreviewViewModel(pyrusServiceDesk: PyrusServiceDesk,
      */
     fun onErrorReceived() {
         fileLiveData.value = with(fileLiveData.value!!) {
-            when (this) {
-                is PreviewableFileViewModel -> PreviewableFileViewModel(
-                    fileUri,
-                    true
-                )
-                is NonPreviewableViewModel -> NonPreviewableViewModel(
-                    fileUri,
-                    true,
-                    isLocal = isLocal
-                )
-            }
+            FileViewModel(fileUri, isPreviewable, hasError = true, isLocal = isLocal)
         }
     }
 
@@ -96,18 +80,7 @@ internal class FilePreviewViewModel(pyrusServiceDesk: PyrusServiceDesk,
      */
     fun onDownloadFileClicked() {
         fileLiveData.value = with(fileLiveData.value!!) {
-            when (this) {
-                is PreviewableFileViewModel -> PreviewableFileViewModel(
-                    fileUri,
-                    hasError,
-                    true
-                )
-                is NonPreviewableViewModel -> NonPreviewableViewModel(
-                    fileUri,
-                    hasError,
-                    true
-                )
-            }
+            FileViewModel(fileUri, isPreviewable, hasError, isDownloading = true)
         }
         val fileData = intent.getFileData()
         val request = DownloadManager.Request(fileData.uri)
@@ -154,20 +127,8 @@ internal class FilePreviewViewModel(pyrusServiceDesk: PyrusServiceDesk,
 
     private fun processDownloadingFailedAsync(){
         fileLiveData.postValue(
-            when (fileLiveData.value!!) {
-                is PreviewableFileViewModel ->
-                    PreviewableFileViewModel(
-                        intent.getFileData().uri,
-                        false,
-                        false
-                    )
-
-                is NonPreviewableViewModel ->
-                    NonPreviewableViewModel(
-                        intent.getFileData().uri,
-                        false,
-                        false
-                    )
+            with(fileLiveData.value!!) {
+                FileViewModel(fileUri, isPreviewable, hasError = false, isDownloading = false)
             }
         )
     }
@@ -186,41 +147,14 @@ internal class FilePreviewViewModel(pyrusServiceDesk: PyrusServiceDesk,
                 ) { _, uri ->
 
                     fileLiveData.postValue(
-                        when (fileLiveData.value!!) {
-                            is PreviewableFileViewModel ->
-                                PreviewableFileViewModel(
-                                    uri,
-                                    false,
-                                    false,
-                                    true
-                                )
-                            is NonPreviewableViewModel ->
-                                NonPreviewableViewModel(
-                                    uri,
-                                    false,
-                                    false,
-                                    true
-                                )
+                        with(fileLiveData.value!!) {
+                            FileViewModel(uri, isPreviewable, hasError = false, isDownloading = false, isLocal = true)
                         }
                     )
-
                 }
             else -> fileLiveData.postValue(
-                when (fileLiveData.value!!) {
-                    is PreviewableFileViewModel ->
-                        PreviewableFileViewModel(
-                            fileUri,
-                            false,
-                            false,
-                            true
-                        )
-                    is NonPreviewableViewModel ->
-                        NonPreviewableViewModel(
-                            fileUri,
-                            false,
-                            false,
-                            true
-                        )
+                with(fileLiveData.value!!) {
+                    FileViewModel(fileUri, isPreviewable, hasError = false, isDownloading = false, isLocal = true)
                 }
             )
         }

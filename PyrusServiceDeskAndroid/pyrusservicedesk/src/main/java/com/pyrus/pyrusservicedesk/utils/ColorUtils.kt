@@ -34,8 +34,8 @@ internal fun adjustColorChannel(@ColorInt color: Int, channel: ColorChannel, mul
 internal fun getTextColorOnBackground(context: Context, @ColorInt backgroundColor: Int): Int {
     return with (Color.parseColor(String.format("#%06X", 0xFFFFFF and backgroundColor))){
         when {
-            ColorUtils.calculateLuminance(this) > 0.6 -> getColor(context, android.R.attr.textColorPrimary)
-            else -> getColor(context, android.R.attr.textColorPrimaryInverse)
+            ColorUtils.calculateLuminance(this) > 0.6 -> getColorByAttrId(context, android.R.attr.textColorPrimary)
+            else -> getColorByAttrId(context, android.R.attr.textColorPrimaryInverse)
         }
     }
 }

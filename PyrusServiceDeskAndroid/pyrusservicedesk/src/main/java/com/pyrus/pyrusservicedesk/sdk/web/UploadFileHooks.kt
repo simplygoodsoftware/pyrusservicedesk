@@ -3,6 +3,8 @@ package com.pyrus.pyrusservicedesk.sdk.web
 
 import android.os.Handler
 import android.os.Looper
+import com.pyrus.pyrusservicedesk.PyrusServiceDesk
+import com.pyrus.pyrusservicedesk.R
 
 /**
  * Class that is used for propagating events while file uploading in progress.
@@ -23,6 +25,11 @@ internal class UploadFileHooks {
     var isCancelled = false
         @Synchronized get() = field
         @Synchronized private set(value){ field = value }
+
+    @Synchronized
+    fun resetProgress() {
+        recentProgress = 0
+    }
 
     /**
      * Append [subscription] on uploading cancellation.
