@@ -31,6 +31,7 @@ import com.pyrus.pyrusservicedesk.R
 import com.pyrus.pyrusservicedesk.presentation.ui.view.OutlineImageView.Companion.EDGE_RIGHT
 import com.pyrus.pyrusservicedesk.utils.*
 import com.pyrus.pyrusservicedesk.utils.ConfigUtils.Companion.getAccentColor
+import com.squareup.picasso.Callback
 import com.squareup.picasso.Picasso
 import com.squareup.picasso.Target
 import kotlinx.android.synthetic.main.psd_comment.view.*
@@ -365,9 +366,6 @@ internal class CommentView @JvmOverloads constructor(
         preview_mini.visibility = GONE
         when {
             previewUri.isRemote() -> setNetworkPreview(previewUri, preview_mini, false)
-            else -> setLocalPreview(preview_mini, previewUri, true) {
-                preview_mini.visibility = GONE
-            }
         }
     }
 
@@ -426,7 +424,18 @@ internal class CommentView @JvmOverloads constructor(
             else -> SimpleTarget(target, previewUri, onFailed) { target.visibility = View.VISIBLE }
         }
         recentPicassoTarget = picassoTarget
-        Picasso.get().load(previewUri).into(picassoTarget)
+        /**
+         * For unknown reason loading without fetch can cause losing the result of the request, this means that
+         * no callbacks of the target can be called.
+         */
+        Picasso.get().load(previewUri).fetch(object : Callback{
+            override fun onSuccess() {
+                Picasso.get().load(previewUri).into(picassoTarget)
+            }
+            override fun onError(e: Exception?) {
+                onFailed.invoke()
+            }
+        })
     }
 
     /**
@@ -499,8 +508,8 @@ private open class SimpleTarget(val targetView: ImageView,
     override fun equals(other: Any?): Boolean {
         return when {
             this === other -> true
-            other !is ChangingSizeTarget -> false
-            else -> uri == other.uri
+            other == null || other.javaClass != this.javaClass -> false
+            else -> uri == (other as SimpleTarget).uri
         }
     }
 
@@ -516,24 +525,20 @@ private class ChangingSizeTarget(targetView: ImageView,
     : SimpleTarget(targetView, uri, onFailed) {
 
     private companion object {
-        const val CHANGING_SIZE_ANIMATION_DURATION_MS = 100L
+        const val CHANGING_SIZE_ANIMATION_DURATION_MS = 150L
     }
 
     init {
         targetView.layoutParams.width =
                 CommentView.getFullSizePreviewWidth(uri, targetView.layoutParams.height)
-
     }
 
     override fun onBitmapLoaded(bitmap: Bitmap?, from: Picasso.LoadedFrom?) {
-        if (bitmap == null) {
+        if (bitmap == null || ratioMap.containsKey(uri)) {
             super.onBitmapLoaded(bitmap, from)
             return
         }
-        if (ratioMap.containsKey(uri)) {
-            targetView.setImageBitmap(bitmap)
-            return
-        }
+
         val ratio = bitmap.width.toFloat() / bitmap.height
         ratioMap += uri to ratio
         val animator = ObjectAnimator.ofFloat(1f, ratio)

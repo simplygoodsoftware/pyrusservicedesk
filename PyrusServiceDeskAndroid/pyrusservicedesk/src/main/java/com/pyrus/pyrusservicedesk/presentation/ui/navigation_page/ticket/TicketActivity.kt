@@ -209,10 +209,10 @@ internal class TicketActivity : ConnectionActivityBase<TicketViewModel>(TicketVi
                     adapter.setItems(it.newItems)
                     it.diffResult.dispatchUpdatesTo(adapter)
                 }
-                if (atEnd){
+                if (adapter.itemCount > 0 && atEnd){
                     if (isEmpty)
                         comments.scrollToPosition(adapter.itemCount - 1)
-                    else
+                    else if (!comments.isAtEnd())
                         comments.smoothScrollToPosition(adapter.itemCount - 1)
                     launch {
                         while(!comments.isAtEnd())

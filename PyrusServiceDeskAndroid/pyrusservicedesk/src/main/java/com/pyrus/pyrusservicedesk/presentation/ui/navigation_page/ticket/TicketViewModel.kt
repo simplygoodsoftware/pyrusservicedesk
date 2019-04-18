@@ -333,18 +333,17 @@ internal class TicketViewModel(
         val iterator = ticketEntries.asReversed().iterator()
         for (i in freshList.lastIndex downTo 0) {
             val serverId = freshList[i].commentId
-            while(iterator.hasNext()){
+            loop@ while(iterator.hasNext()){
                 val entry = iterator.next()
                 if (entry.type != Type.Comment)
                     continue
                 entry as CommentEntry
-                if (entry.comment.isLocal())
-                    continue
-                if (entry.comment.commentId > serverId)
-                    return false
-                if (entry.comment.commentId < serverId)
-                    return true
-                break
+                return when {
+                    entry.comment.isLocal() -> continue@loop
+                    entry.comment.commentId > serverId -> false
+                    entry.comment.commentId < serverId -> true
+                    else -> break@loop
+                }
             }
             if (!iterator.hasNext())
                 break
