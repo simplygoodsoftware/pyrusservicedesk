@@ -57,27 +57,6 @@ internal fun Drawable.circle(context: Context): Drawable {
     return BitmapDrawable(context.resources, out.circle())
 }
 
-/**
- * Transforms [this] applying corner rounding with [cornerRadius]
- */
-internal fun Bitmap.roundCorners(cornerRadius: Float): Bitmap {
-    val output = Bitmap.createBitmap(this.width, this.height, Bitmap.Config.ARGB_8888)
-    val canvas = Canvas(output)
-    canvas.drawARGB(0, 0, 0, 0)
-    val paint = Paint().apply {
-        isAntiAlias = true
-    }
-    canvas.drawRoundRect(
-        RectF(0f, 0f, this.width.toFloat(), this.height.toFloat()),
-        cornerRadius,
-        cornerRadius,
-        paint)
-    paint.xfermode = PorterDuffXfermode(PorterDuff.Mode.SRC_IN)
-    canvas.drawBitmap(this, 0f, 0f, paint)
-    this.recycle()
-    return output
-}
-
 internal fun Bitmap.rotate(rotationDegrees: Float): Bitmap {
     return Bitmap.createBitmap(
         this,
@@ -96,9 +75,4 @@ internal fun getImageRotation(exifInterface: ExifInterface): Int {
         ExifInterface.ORIENTATION_ROTATE_90 -> 90
         else -> 0
     }
-}
-
-internal class RoundedCornerTransformation(private val cornerRadius: Float): Transformation{
-    override fun key(): String = "Rounded corner"
-    override fun transform(source: Bitmap): Bitmap = source.roundCorners(cornerRadius)
 }

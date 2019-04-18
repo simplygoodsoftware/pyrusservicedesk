@@ -187,7 +187,7 @@ internal class TicketAdapter: AdapterBase<TicketEntry>() {
         val onCommentClickListener = OnClickListener {
             when {
                 (comment.contentType == ContentType.Attachment
-                        || comment.contentType == ContentType.AttachmentFullSize)
+                        || comment.contentType == ContentType.PreviewableAttachment)
                         && comment.fileProgressStatus == Status.Completed -> {
 
                     onFileReadyToPreviewClickListener?.invoke(getItem().comment.attachments!!.first())
@@ -218,7 +218,7 @@ internal class TicketAdapter: AdapterBase<TicketEntry>() {
             }
             comment.contentType = when {
                 !item.comment.hasAttachments() -> ContentType.Text
-                item.comment.attachments!!.first().name.isImage() -> ContentType.AttachmentFullSize
+                item.comment.attachments!!.first().name.isImage() -> ContentType.PreviewableAttachment
                 else -> ContentType.Attachment
             }
             when (comment.contentType){
