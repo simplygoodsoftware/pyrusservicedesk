@@ -10,7 +10,12 @@ internal const val BYTES_IN_KILOBYTE = 1000
 /**
  * @return TRUE if preview for the file format is supported.
  */
-internal fun String.canBePreviewed() = hasAnyFormatOf(JPEG, JPG, PNG, GIF, TXT)
+internal fun String.canBePreviewed() = isImage() || hasFormat(TXT)
+
+/**
+ * return TRUE if the file is image
+ */
+internal fun String.isImage() = hasAnyFormatOf(JPEG, JPG, PNG, GIF)
 
 /**
  * @return TRUE of file has specified [format]

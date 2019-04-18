@@ -16,7 +16,7 @@ import android.util.TypedValue
  * @return int color value
  */
 @ColorInt
-internal fun getColor(context: Context, @AttrRes colorAttrId: Int): Int {
+internal fun getColorByAttrId(context: Context, @AttrRes colorAttrId: Int): Int {
     val typedValue = TypedValue()
     context.theme.resolveAttribute(colorAttrId, typedValue, true)
     return try {

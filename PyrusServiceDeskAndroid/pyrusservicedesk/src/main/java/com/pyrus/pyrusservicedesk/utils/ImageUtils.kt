@@ -5,10 +5,11 @@ import android.graphics.*
 import android.graphics.drawable.BitmapDrawable
 import android.graphics.drawable.Drawable
 import android.media.ThumbnailUtils
+import android.support.media.ExifInterface
 import com.squareup.picasso.Transformation
 
 /**
- * Picasa [Transformation] implementation that uses [circle] for
+ * Picasso [Transformation] implementation that uses [circle] for
  * transforming image.
  */
 internal val CIRCLE_TRANSFORMATION = object : Transformation {
@@ -54,4 +55,24 @@ internal fun Drawable.circle(context: Context): Drawable {
         draw(Canvas(out))
     }
     return BitmapDrawable(context.resources, out.circle())
+}
+
+internal fun Bitmap.rotate(rotationDegrees: Float): Bitmap {
+    return Bitmap.createBitmap(
+        this,
+        0,
+        0,
+        width,
+        height,
+        Matrix().apply { setRotate(rotationDegrees) },
+        true)
+}
+
+internal fun getImageRotation(exifInterface: ExifInterface): Int {
+    return when (exifInterface.getAttribute(ExifInterface.TAG_ORIENTATION)?.toInt()) {
+        ExifInterface.ORIENTATION_ROTATE_270 -> 270
+        ExifInterface.ORIENTATION_ROTATE_180 -> 180
+        ExifInterface.ORIENTATION_ROTATE_90 -> 90
+        else -> 0
+    }
 }

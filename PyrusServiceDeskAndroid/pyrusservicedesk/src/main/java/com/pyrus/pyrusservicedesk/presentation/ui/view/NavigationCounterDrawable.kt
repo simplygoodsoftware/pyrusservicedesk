@@ -6,7 +6,7 @@ import android.graphics.drawable.LayerDrawable
 import android.support.v4.content.ContextCompat
 import android.support.v7.content.res.AppCompatResources
 import com.pyrus.pyrusservicedesk.R
-import com.pyrus.pyrusservicedesk.utils.getColor
+import com.pyrus.pyrusservicedesk.utils.getColorByAttrId
 
 /**
  * Drawable that can render counter above the navigation icon.
@@ -85,7 +85,7 @@ internal class NavigationCounterDrawable(private val context: Context)
             cornerRad,
             cornerRad,
             Paint().apply {
-                color = getColor(context, R.attr.colorPrimary)
+                color = getColorByAttrId(context, R.attr.colorPrimary)
             })
 
         canvas.drawRoundRect(

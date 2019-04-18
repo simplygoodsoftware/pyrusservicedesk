@@ -9,7 +9,7 @@ import android.widget.ProgressBar
 import com.pyrus.pyrusservicedesk.R
 import com.pyrus.pyrusservicedesk.presentation.viewmodel.ConnectionViewModelBase
 import com.pyrus.pyrusservicedesk.utils.ConfigUtils
-import com.pyrus.pyrusservicedesk.utils.getColor
+import com.pyrus.pyrusservicedesk.utils.getColorByAttrId
 import com.pyrus.pyrusservicedesk.utils.getViewModel
 import kotlinx.android.synthetic.main.psd_activity_ticket.*
 import kotlinx.android.synthetic.main.psd_no_connection.*
@@ -41,7 +41,7 @@ internal abstract class ConnectionActivityBase<T: ConnectionViewModelBase>(viewM
         super.onCreate(savedInstanceState)
         progressBar = findViewById(progressBarViewId)
         progressBar?.progressDrawable?.setColorFilter(
-                getColor(this, R.attr.colorAccentSecondary),
+                getColorByAttrId(this, R.attr.colorAccentSecondary),
                 PorterDuff.Mode.SRC_IN)
         reconnect.setOnClickListener { reconnect() }
         reconnect.setTextColor(ConfigUtils.getAccentColor(this))
