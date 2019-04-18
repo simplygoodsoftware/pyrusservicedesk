@@ -61,8 +61,8 @@ internal class FilePreviewViewModel(pyrusServiceDesk: PyrusServiceDesk,
      */
     fun onProgressChanged(progress: Int) {
         if (fileLiveData.value?.hasError != true) {
+            publishProgress(progress)
         }
-        publishProgress(progress)
     }
 
     /**
