@@ -3,19 +3,15 @@ package com.pyrus.pyrusservicedesk.sdk.web
 
 import android.os.Handler
 import android.os.Looper
-import com.pyrus.pyrusservicedesk.R
-import com.pyrus.pyrusservicedesk.PyrusServiceDesk
 
 /**
  * Class that is used for propagating events while file uploading in progress.
  * This exposes events on changing of the uploading progress and provides the opportunity
  * to cancel uploading.
  * All method invocations are thread safe.
- * Automatically disposes subscribers when cancellation was invoked or progress reached [MAX_PERCENT]
  */
 internal class UploadFileHooks {
 
-    private val MAX_PERCENT = PyrusServiceDesk.getInstance().application.resources.getInteger(R.integer.psd_progress_max_value)
     private var recentProgress = 0
     private val cancellationSubscribers = mutableSetOf<OnCancelListener>()
     private var progressSubscription: ((Int) -> Unit)? = null
@@ -71,8 +67,6 @@ internal class UploadFileHooks {
         recentProgress = newProgressPercent
         val progressSubscriber = progressSubscription
         uiHandler.post{ progressSubscriber?.invoke(recentProgress) }
-        if (newProgressPercent >= MAX_PERCENT)
-            destroy()
     }
 
     @Synchronized

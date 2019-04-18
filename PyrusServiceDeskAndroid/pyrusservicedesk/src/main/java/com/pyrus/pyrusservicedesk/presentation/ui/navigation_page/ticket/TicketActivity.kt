@@ -16,8 +16,8 @@ import android.view.MenuItem
 import android.view.MenuItem.SHOW_AS_ACTION_ALWAYS
 import android.view.View.NO_ID
 import android.widget.Toast
-import com.pyrus.pyrusservicedesk.R
 import com.pyrus.pyrusservicedesk.PyrusServiceDesk
+import com.pyrus.pyrusservicedesk.R
 import com.pyrus.pyrusservicedesk.ServiceDeskConfiguration
 import com.pyrus.pyrusservicedesk.presentation.ConnectionActivityBase
 import com.pyrus.pyrusservicedesk.presentation.ui.navigation.UiNavigator
@@ -156,8 +156,12 @@ internal class TicketActivity : ConnectionActivityBase<TicketViewModel>(TicketVi
         send.setTextColor(stateList)
         attach.setOnClickListener { showAttachFileVariants() }
         attach.setColorFilter(accentColor)
-        if(savedInstanceState == null)
+        if(savedInstanceState == null) {
             input.setText(viewModel.draft)
+            showKeyboardOn(input){
+                input.setSelection(input.length())
+            }
+        }
         input.apply {
             highlightColor = accentColor
             setCursorColor(accentColor)

@@ -9,12 +9,12 @@ import android.support.v4.view.ViewCompat
 import android.support.v7.app.AppCompatActivity
 import android.view.View
 import android.view.inputmethod.InputMethodManager
-import com.pyrus.pyrusservicedesk.R
-import kotlinx.android.synthetic.main.psd_activity_ticket.*
-import kotlinx.coroutines.*
 import com.pyrus.pyrusservicedesk.PyrusServiceDesk
+import com.pyrus.pyrusservicedesk.R
 import com.pyrus.pyrusservicedesk.presentation.viewmodel.QuitViewModel
 import com.pyrus.pyrusservicedesk.utils.getViewModel
+import kotlinx.android.synthetic.main.psd_activity_ticket.*
+import kotlinx.coroutines.*
 import kotlin.coroutines.CoroutineContext
 
 
@@ -109,12 +109,13 @@ internal abstract class ActivityBase: AppCompatActivity(), CoroutineScope {
     /**
      * Captures focus on the [view] and shows the keyboard
      */
-    protected fun showKeyboardOn(view: View) {
+    protected fun showKeyboardOn(view: View, onKeyboardShown: (() -> Unit)? = null) {
         launch {
             while(!ViewCompat.isLaidOut(view))
                 delay(SHOW_KEYBOARD_RETRY_DELAY_MS)
             view.requestFocus()
             (getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager).showSoftInput(input, 0)
+            onKeyboardShown?.invoke()
         }
     }
 

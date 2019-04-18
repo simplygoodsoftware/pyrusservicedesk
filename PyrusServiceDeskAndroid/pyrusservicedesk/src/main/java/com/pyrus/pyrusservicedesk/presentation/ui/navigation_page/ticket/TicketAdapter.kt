@@ -244,9 +244,13 @@ internal class TicketAdapter: AdapterBase<TicketEntry>() {
             }
             if (!getItem().hasError()) {
                 getItem().uploadFileHooks?.subscribeOnProgress {
-                    if (comment.fileProgressStatus != Status.Processing)
-                        comment.fileProgressStatus = Status.Processing
                     comment.setProgress(it)
+                    when {
+                        it == itemView.resources.getInteger(R.integer.psd_progress_max_value) ->
+                            comment.fileProgressStatus = Status.Completed
+                        comment.fileProgressStatus != Status.Processing ->
+                            comment.fileProgressStatus = Status.Processing
+                    }
                 }
             }
         }

@@ -10,8 +10,8 @@ import android.os.Handler
 import android.os.Looper
 import android.support.v7.util.DiffUtil
 import android.widget.Toast
-import com.pyrus.pyrusservicedesk.R
 import com.pyrus.pyrusservicedesk.PyrusServiceDesk
+import com.pyrus.pyrusservicedesk.R
 import com.pyrus.pyrusservicedesk.presentation.call.*
 import com.pyrus.pyrusservicedesk.presentation.ui.navigation_page.ticket.entries.*
 import com.pyrus.pyrusservicedesk.presentation.ui.view.recyclerview.DiffResultWithNewItems
@@ -88,7 +88,17 @@ internal class TicketViewModel(
         }
     }
 
-    private var lastServerCommentId = 0
+    private val lastServerCommentIdHolder = LastCommentIdHolder()
+
+    /**
+     * Comments that currently are being processed.
+     * This is necessary to minimize comments list inconsistency when getFeed response already contains
+     * comments ids that are expected to be received by addComment response.
+     *
+     * NB: addComment responses that are delivered with an error should not remove the requested comment from
+     * the list, otherwise comments with error are lost
+     */
+    private val commentsInProcess: MutableList<Comment> by lazy { mutableListOf<Comment>() }
 
     init {
         draft = draftRepository.getDraft()
@@ -116,6 +126,7 @@ internal class TicketViewModel(
         if (!item.hasError())
             return
         else {
+            commentsInProcess -= item.comment
             applyCommentUpdate(item, ChangeType.Cancelled)
             sendAddComment(item.comment, item.uploadFileHooks)
         }
@@ -225,6 +236,8 @@ internal class TicketViewModel(
         if (commentContainsError(localComment))
             return
 
+        commentsInProcess += localComment
+
         val toNewTicket = !isFeed && isNewTicket() && !isCreateTicketSent
 
         applyCommentUpdate(
@@ -249,7 +262,7 @@ internal class TicketViewModel(
         return Observer { res ->
             res?.let { result ->
                 isCreateTicketSent = false
-                if (uploadFileHooks?.isCancelled == true)
+                if (uploadFileHooks?.isCancelled == true || !commentsInProcess.contains(localComment))
                     return@let
                 val entry = when {
                     result.hasError() -> CommentEntry(
@@ -264,6 +277,10 @@ internal class TicketViewModel(
                             maybeStartAutoRefresh()
                         }
                         val commentId = if (toNewTicket) localComment.localId else result.data!!
+                        if(commentId > lastServerCommentIdHolder.commentId){
+                            lastServerCommentIdHolder.setLastCommentIdFromAddComment(commentId)
+                        }
+                        commentsInProcess -= localComment
                         CommentEntry(
                             localDataProvider.convertLocalCommentToServer(localComment, commentId),
                             onClickedCallback = this@TicketViewModel
@@ -301,20 +318,47 @@ internal class TicketViewModel(
                 onDataLoaded()
                 return
             }
-            freshList.last().commentId < lastServerCommentId -> return
-            freshList.last().commentId == lastServerCommentId -> {
+            freshList.last().commentId < lastServerCommentIdHolder.commentId -> return
+            // Last comment may have been obtained from the addComment event, so
+            // there are new comments might be before the added comment.
+            // If last comment was obtained via getFeed this is not the case.
+            !lastServerCommentIdHolder.isFromAddComment
+                    && freshList.last().commentId == lastServerCommentIdHolder.commentId -> {
                 onDataLoaded()
                 return
             }
         }
+        val lastCurrentMyCommentId =
+            (ticketEntries.findLast {
+                (it.type == Type.Comment) && !(it as CommentEntry).comment.isInbound
+            } as? CommentEntry)
+                ?.comment
+                ?.commentId
+                ?: 0
+        var myNewCommentsCount = 0
+        for (i in freshList.lastIndex downTo 0) {
+            val comment = freshList[i]
+            if (comment.commentId <= lastCurrentMyCommentId) {
+                break
+            }
+            if (!comment.isInbound)
+                myNewCommentsCount++
+        }
+        removeCommentsFromProcessingHead(myNewCommentsCount)
+
         val listOfLocalEntries = mutableListOf<TicketEntry>()
         if (hasRealComments()) {
             for (i in ticketEntries.lastIndex downTo 0) {
                 val entry = ticketEntries[i]
-                if (entry.type == Type.Comment && (entry as CommentEntry).comment.commentId == lastServerCommentId)
+                if (entry.type == Type.Comment
+                    && (entry as CommentEntry).comment.commentId == lastServerCommentIdHolder.commentId)
                     break
-                if (entry.type == Type.Comment && (entry as CommentEntry).comment.isLocal())
+                if (entry.type == Type.Comment
+                    && (entry as CommentEntry).comment.isLocal()
+                    && commentsInProcess.contains(entry.comment)) {
+
                     listOfLocalEntries.add(0, entry)
+                }
             }
         }
         val toPublish = mutableListOf<TicketEntry>().apply {
@@ -324,8 +368,16 @@ internal class TicketViewModel(
 
         }
         publishEntries(ticketEntries, toPublish)
-        lastServerCommentId = freshList.last().commentId
+        lastServerCommentIdHolder.setLastCommentId(freshList.last().commentId)
         onDataLoaded()
+    }
+
+    private fun removeCommentsFromProcessingHead(commentCountToRemove: Int) {
+        if (commentCountToRemove == 0 || commentsInProcess.size < commentCountToRemove)
+            return
+        for (i in 0..commentCountToRemove) {
+            commentsInProcess.removeAt(0)
+        }
     }
 
     private fun hasRealComments(): Boolean = ticketEntries.any { it.type == Type.Comment }
@@ -428,6 +480,22 @@ internal class TicketViewModel(
         }
     }
 
+}
+
+private class LastCommentIdHolder() {
+    var isFromAddComment = false
+        private set
+    var commentId = 0
+        private set
+
+    fun setLastCommentIdFromAddComment(commentId: Int) {
+        isFromAddComment = true
+        this.commentId = commentId
+    }
+
+    fun setLastCommentId(commentId: Int) {
+        this.commentId = commentId
+    }
 }
 
 private enum class ChangeType {
