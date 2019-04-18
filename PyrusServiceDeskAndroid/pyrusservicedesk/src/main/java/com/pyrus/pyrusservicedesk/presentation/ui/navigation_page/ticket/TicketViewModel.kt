@@ -305,8 +305,7 @@ internal class TicketViewModel(
     }
 
     private fun applyTicketUpdate(freshList: List<Comment>) {
-        val lastMatchedCommentId = findLastMatchedCommentId(freshList)
-        if (lastMatchedCommentId == -1) {
+        if (!needUpdateCommentsList(freshList)) {
             onDataLoaded()
             return
         }
@@ -333,9 +332,6 @@ internal class TicketViewModel(
             for (i in ticketEntries.lastIndex downTo 0) {
                 val entry = ticketEntries[i]
                 if (entry.type == Type.Comment
-                    && (entry as CommentEntry).comment.commentId == lastMatchedCommentId)
-                    break
-                if (entry.type == Type.Comment
                     && (entry as CommentEntry).comment.isLocal()
                     && commentsInProcess.contains(entry.comment)) {
 
@@ -353,13 +349,12 @@ internal class TicketViewModel(
         onDataLoaded()
     }
 
-    private fun findLastMatchedCommentId(freshList: List<Comment>): Int {
+    private fun needUpdateCommentsList(freshList: List<Comment>): Boolean {
         if (freshList.isEmpty()) {
-            return if (hasRealComments()) -1 else 0
+            return !hasRealComments()
         }
         if (!hasRealComments())
-            return 0
-        var lastCommentIdWithFullyMatchedBelow = 0
+            return true
         val iterator = ticketEntries.asReversed().iterator()
         for (i in freshList.lastIndex downTo 0) {
             val serverId = freshList[i].commentId
@@ -371,16 +366,15 @@ internal class TicketViewModel(
                 if (entry.comment.isLocal())
                     continue
                 if (entry.comment.commentId > serverId)
-                    return -1
+                    return false
                 if (entry.comment.commentId < serverId)
-                    return entry.comment.commentId
-                if (i == freshList.lastIndex) {
-                    lastCommentIdWithFullyMatchedBelow = serverId
-                    break
-                }
+                    return true
+                break
             }
+            if (!iterator.hasNext())
+                break
         }
-        return lastCommentIdWithFullyMatchedBelow
+        return true
     }
 
     private fun removeCommentsFromProcessingHead(commentCountToRemove: Int) {
