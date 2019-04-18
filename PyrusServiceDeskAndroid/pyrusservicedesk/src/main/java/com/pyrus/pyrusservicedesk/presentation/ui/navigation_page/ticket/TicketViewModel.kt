@@ -494,6 +494,7 @@ private class LastCommentIdHolder() {
     }
 
     fun setLastCommentId(commentId: Int) {
+        isFromAddComment = false
         this.commentId = commentId
     }
 }

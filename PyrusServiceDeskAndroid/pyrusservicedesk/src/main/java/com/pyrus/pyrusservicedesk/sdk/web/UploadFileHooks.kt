@@ -3,8 +3,6 @@ package com.pyrus.pyrusservicedesk.sdk.web
 
 import android.os.Handler
 import android.os.Looper
-import com.pyrus.pyrusservicedesk.PyrusServiceDesk
-import com.pyrus.pyrusservicedesk.R
 
 /**
  * Class that is used for propagating events while file uploading in progress.
