@@ -88,8 +88,6 @@ internal class TicketViewModel(
         }
     }
 
-    private val lastServerCommentIdHolder = LastCommentIdHolder()
-
     /**
      * Comments that currently are being processed.
      * This is necessary to minimize comments list inconsistency when getFeed response already contains
@@ -277,9 +275,6 @@ internal class TicketViewModel(
                             maybeStartAutoRefresh()
                         }
                         val commentId = if (toNewTicket) localComment.localId else result.data!!
-                        if(commentId > lastServerCommentIdHolder.commentId){
-                            lastServerCommentIdHolder.setLastCommentIdFromAddComment(commentId)
-                        }
                         commentsInProcess -= localComment
                         CommentEntry(
                             localDataProvider.convertLocalCommentToServer(localComment, commentId),
@@ -310,27 +305,14 @@ internal class TicketViewModel(
     }
 
     private fun applyTicketUpdate(freshList: List<Comment>) {
-        when{
-            freshList.isEmpty() -> {
-                ConfigUtils.getWelcomeMessage()?.let {
-                    publishEntries(ticketEntries, listOf(WelcomeMessageEntry(it)))
-                }
-                onDataLoaded()
-                return
-            }
-            freshList.last().commentId < lastServerCommentIdHolder.commentId -> return
-            // Last comment may have been obtained from the addComment event, so
-            // there are new comments might be before the added comment.
-            // If last comment was obtained via getFeed this is not the case.
-            !lastServerCommentIdHolder.isFromAddComment
-                    && freshList.last().commentId == lastServerCommentIdHolder.commentId -> {
-                onDataLoaded()
-                return
-            }
+        val lastMatchedCommentId = findLastMatchedCommentId(freshList)
+        if (lastMatchedCommentId == -1) {
+            onDataLoaded()
+            return
         }
         val lastCurrentMyCommentId =
             (ticketEntries.findLast {
-                (it.type == Type.Comment) && !(it as CommentEntry).comment.isInbound
+                (it.type == Type.Comment) && (it as CommentEntry).comment.isInbound && !it.comment.isLocal()
             } as? CommentEntry)
                 ?.comment
                 ?.commentId
@@ -351,7 +333,7 @@ internal class TicketViewModel(
             for (i in ticketEntries.lastIndex downTo 0) {
                 val entry = ticketEntries[i]
                 if (entry.type == Type.Comment
-                    && (entry as CommentEntry).comment.commentId == lastServerCommentIdHolder.commentId)
+                    && (entry as CommentEntry).comment.commentId == lastMatchedCommentId)
                     break
                 if (entry.type == Type.Comment
                     && (entry as CommentEntry).comment.isLocal()
@@ -368,8 +350,37 @@ internal class TicketViewModel(
 
         }
         publishEntries(ticketEntries, toPublish)
-        lastServerCommentIdHolder.setLastCommentId(freshList.last().commentId)
         onDataLoaded()
+    }
+
+    private fun findLastMatchedCommentId(freshList: List<Comment>): Int {
+        if (freshList.isEmpty()) {
+            return if (hasRealComments()) -1 else 0
+        }
+        if (!hasRealComments())
+            return 0
+        var lastCommentIdWithFullyMatchedBelow = 0
+        val iterator = ticketEntries.asReversed().iterator()
+        for (i in freshList.lastIndex downTo 0) {
+            val serverId = freshList[i].commentId
+            while(iterator.hasNext()){
+                val entry = iterator.next()
+                if (entry.type != Type.Comment)
+                    continue
+                entry as CommentEntry
+                if (entry.comment.isLocal())
+                    continue
+                if (entry.comment.commentId > serverId)
+                    return -1
+                if (entry.comment.commentId < serverId)
+                    return entry.comment.commentId
+                if (i == freshList.lastIndex) {
+                    lastCommentIdWithFullyMatchedBelow = serverId
+                    break
+                }
+            }
+        }
+        return lastCommentIdWithFullyMatchedBelow
     }
 
     private fun removeCommentsFromProcessingHead(commentCountToRemove: Int) {
@@ -480,23 +491,6 @@ internal class TicketViewModel(
         }
     }
 
-}
-
-private class LastCommentIdHolder() {
-    var isFromAddComment = false
-        private set
-    var commentId = 0
-        private set
-
-    fun setLastCommentIdFromAddComment(commentId: Int) {
-        isFromAddComment = true
-        this.commentId = commentId
-    }
-
-    fun setLastCommentId(commentId: Int) {
-        isFromAddComment = false
-        this.commentId = commentId
-    }
 }
 
 private enum class ChangeType {
