@@ -317,8 +317,10 @@ internal class TicketViewModel(
         val toPublish = mutableListOf<TicketEntry>().apply {
             ConfigUtils.getWelcomeMessage()?.let { add(0, WelcomeMessageEntry(it)) }
             addAll(freshList.toTicketEntries())
-            addAll(listOfLocalEntries)
-
+            listOfLocalEntries.forEach {
+                maybeAddDate(it as CommentEntry, this)
+                add(it)
+            }
         }
         publishEntries(ticketEntries, toPublish)
         onDataLoaded()
