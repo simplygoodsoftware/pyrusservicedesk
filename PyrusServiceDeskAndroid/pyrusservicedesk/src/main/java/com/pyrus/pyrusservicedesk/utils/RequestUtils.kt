@@ -26,7 +26,7 @@ class RequestUtils{
          */
         internal fun getFileUrl(fileId: Int): String {
             return with(PyrusServiceDesk.getInstance()){
-                "$BASE_URL/DownloadFile/$fileId" +
+                "${BASE_URL}DownloadFile/$fileId" +
                         "?user_id=" +
                         URLEncoder.encode(userId, "UTF-8") +
                         "&app_id=" +
@@ -36,7 +36,7 @@ class RequestUtils{
 
         internal fun getPreviewUrl(fileId: Int): String {
             return with(PyrusServiceDesk.getInstance()){
-                "$BASE_URL/DownloadFilePreview/$fileId" +
+                "${BASE_URL}DownloadFilePreview/$fileId" +
                         "?user_id=" +
                         URLEncoder.encode(userId, "UTF-8") +
                         "&app_id=" +

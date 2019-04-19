@@ -59,7 +59,10 @@ internal class UploadFileRequestBody(
             }
 
         }
-        return MultipartBody.Part.createFormData("File", fileName, requestFileBody)
+        return MultipartBody.Part.createFormData(
+            "File",
+            fileName.replace(Regex("[^\\p{ASCII}]"), "_"), // Only ASCII symbols are allowed
+            requestFileBody)
     }
 
     private fun Long.toProgress(): Int {
