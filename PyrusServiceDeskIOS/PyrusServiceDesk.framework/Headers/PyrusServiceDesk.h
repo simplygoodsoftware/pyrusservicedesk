@@ -1,10 +1,3 @@
-//
-//  PyrusServiceDesk.h
-//  PyrusServiceDesk
-//
-//  Created by  Галина Муравьева on 23.01.2019.
-//  Copyright © 2019  Галина Муравьева. All rights reserved.
-//
 
 #import <UIKit/UIKit.h>
 //! Project version number for PyrusServiceDesk.
