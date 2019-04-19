@@ -435,10 +435,6 @@ internal class CommentView @JvmOverloads constructor(
         clearCurrentPreviewRequest()
         recentPicassoTarget = picassoTarget
         loadPreviewRunnable = Runnable {
-            /**
-             * For unknown reason loading without fetch can cause losing the result of the request, this means that
-             * no callbacks of the target can be called.
-             */
             Picasso.get().load(previewUri).into(picassoTarget)
         }
         postDelayed(loadPreviewRunnable, delayMs)
