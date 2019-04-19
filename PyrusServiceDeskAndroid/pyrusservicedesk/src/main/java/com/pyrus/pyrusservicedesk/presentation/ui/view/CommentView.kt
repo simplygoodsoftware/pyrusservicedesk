@@ -426,6 +426,7 @@ internal class CommentView @JvmOverloads constructor(
                 target,
                 previewUri,
                 ++previewCallId,
+                resources.getDimensionPixelSize(R.dimen.psd_recyclerview_item_height_default),
                 previewRatioMap,
                 allowApplyResult,
                 onFailed)
@@ -539,6 +540,7 @@ private open class SimpleTarget(protected val targetView: ImageView,
 private class ChangingSizeTarget(targetView: ImageView,
                                  uri: Uri,
                                  callId: Int,
+                                 private val minWidth: Int,
                                  val ratioMap: MutableMap<Uri, Float>,
                                  canApplyResult: (Int) -> Boolean,
                                  onFailed: (Int) -> Unit)
@@ -549,8 +551,9 @@ private class ChangingSizeTarget(targetView: ImageView,
     }
 
     init {
-        targetView.layoutParams.width =
-                CommentView.getFullSizePreviewWidth(uri, targetView.layoutParams.height)
+        targetView.layoutParams.width = Math.max(
+            CommentView.getFullSizePreviewWidth(uri, targetView.layoutParams.height),
+            minWidth)
     }
 
     override fun onBitmapLoaded(bitmap: Bitmap?, from: Picasso.LoadedFrom?) {
@@ -566,7 +569,9 @@ private class ChangingSizeTarget(targetView: ImageView,
         val animator = ObjectAnimator.ofFloat(1f, ratio)
         animator.duration = CHANGING_SIZE_ANIMATION_DURATION_MS
         animator.addUpdateListener {
-            targetView.layoutParams.width = (targetView.layoutParams.height * it.animatedValue as Float).toInt()
+            targetView.layoutParams.width = Math.max(
+                (targetView.layoutParams.height * it.animatedValue as Float).toInt(),
+                minWidth)
             targetView.requestLayout()
         }
         fun onAnimationEnd() {
