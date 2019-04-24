@@ -2,6 +2,7 @@ package com.pyrus.pyrusservicedesk.sdk.updates
 
 import android.os.Handler
 import android.os.Looper
+import android.support.annotation.MainThread
 import com.pyrus.pyrusservicedesk.sdk.RequestFactory
 import com.pyrus.pyrusservicedesk.sdk.data.TicketShortDescription
 import com.pyrus.pyrusservicedesk.sdk.response.ResponseCallback
@@ -30,6 +31,8 @@ internal class LiveUpdates(requests: RequestFactory) {
     private var recentUnreadCounter = 0
 
     private val mainHandler = Handler(Looper.getMainLooper())
+    private var isStarted = false
+
     private val ticketsUpdateRunnable = object : Runnable {
         override fun run() {
             GlobalScope.launch(Dispatchers.IO) {
@@ -49,21 +52,19 @@ internal class LiveUpdates(requests: RequestFactory) {
             mainHandler.postDelayed(this, TICKETS_UPDATE_INTERVAL * MILLISECONDS_IN_MINUTE)
         }
     }
-
-    init {
-        mainHandler.postDelayed(ticketsUpdateRunnable, TICKETS_UPDATE_INTERVAL * MILLISECONDS_IN_MINUTE)
-    }
-
     /**
      * Registers [subscriber] to on new reply events
      */
+    @MainThread
     fun subscribeOnReply(subscriber: NewReplySubscriber) {
+        onNewSubscriber()
         newReplySubscribers.add(subscriber)
     }
 
     /**
      * Unregisters [subscriber] from new reply events
      */
+    @MainThread
     fun unsubscribeFromReplies(subscriber: NewReplySubscriber) {
         newReplySubscribers.remove(subscriber)
     }
@@ -71,13 +72,16 @@ internal class LiveUpdates(requests: RequestFactory) {
     /**
      * Registers [subscriber] on unread ticket count changed events
      */
+    @MainThread
     internal fun subscribeOnUnreadTicketCountChanged(subscriber: OnUnreadTicketCountChangedSubscriber) {
+        onNewSubscriber()
         ticketCountChangedSubscribers.add(subscriber)
     }
 
     /**
      * Unregisters [subscriber] from unread ticket count changed events
      */
+    @MainThread
     internal fun unsubscribeFromTicketCountChanged(subscriber: OnUnreadTicketCountChangedSubscriber) {
         ticketCountChangedSubscribers.remove(subscriber)
     }
@@ -85,17 +89,28 @@ internal class LiveUpdates(requests: RequestFactory) {
     /**
      * Registers [liveUpdateSubscriber] on new data received event
      */
+    @MainThread
     internal fun subscribeOnData(liveUpdateSubscriber: LiveUpdateSubscriber) {
+        onNewSubscriber()
         dataSubscribers.add(liveUpdateSubscriber)
     }
 
     /**
      * Unregisters [liveUpdateSubscriber] from new data received event
      */
+    @MainThread
     internal fun unsubscribeFromData(liveUpdateSubscriber: LiveUpdateSubscriber) {
         dataSubscribers.remove(liveUpdateSubscriber)
     }
 
+    private fun onNewSubscriber() {
+        if (!isStarted) {
+            isStarted = true
+            mainHandler.post(ticketsUpdateRunnable)
+        }
+    }
+
+    @MainThread
     private fun processSuccess(data: List<TicketShortDescription>, newUnreadCount: Int) {
         val isChanged = recentUnreadCounter != newUnreadCount
         dataSubscribers.forEach{

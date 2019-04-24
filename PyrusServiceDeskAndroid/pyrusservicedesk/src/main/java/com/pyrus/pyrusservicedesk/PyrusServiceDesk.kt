@@ -4,6 +4,7 @@ import android.app.Activity
 import android.app.Application
 import android.content.Context
 import android.content.Intent
+import android.support.annotation.MainThread
 import com.pyrus.pyrusservicedesk.presentation.ui.navigation_page.ticket.TicketActivity
 import com.pyrus.pyrusservicedesk.presentation.ui.navigation_page.tickets.TicketsActivity
 import com.pyrus.pyrusservicedesk.presentation.viewmodel.QuitViewModel
@@ -74,6 +75,7 @@ class PyrusServiceDesk private constructor(
          * Registers [subscriber] that will be notified when new replies from support are received
          */
         @JvmStatic
+        @MainThread
         fun subscribeToReplies(subscriber: NewReplySubscriber){
             getInstance().liveUpdates.subscribeOnReply(subscriber)
         }
@@ -82,6 +84,7 @@ class PyrusServiceDesk private constructor(
          * Unregisters [subscriber] from updates of new reply from support
          */
         @JvmStatic
+        @MainThread
         fun unsubscribeFromReplies(subscriber: NewReplySubscriber) {
             getInstance().liveUpdates.unsubscribeFromReplies(subscriber)
         }
