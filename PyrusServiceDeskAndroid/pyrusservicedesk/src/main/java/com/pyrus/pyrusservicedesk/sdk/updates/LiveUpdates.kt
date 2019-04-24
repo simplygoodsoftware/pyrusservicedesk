@@ -2,14 +2,14 @@ package com.pyrus.pyrusservicedesk.sdk.updates
 
 import android.os.Handler
 import android.os.Looper
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.launch
 import com.pyrus.pyrusservicedesk.sdk.RequestFactory
 import com.pyrus.pyrusservicedesk.sdk.data.TicketShortDescription
 import com.pyrus.pyrusservicedesk.sdk.response.ResponseCallback
 import com.pyrus.pyrusservicedesk.sdk.response.ResponseError
 import com.pyrus.pyrusservicedesk.utils.MILLISECONDS_IN_MINUTE
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
 
 private const val TICKETS_UPDATE_INTERVAL = 5L
 
@@ -51,7 +51,7 @@ internal class LiveUpdates(requests: RequestFactory) {
     }
 
     init {
-        mainHandler.post(ticketsUpdateRunnable)
+        mainHandler.postDelayed(ticketsUpdateRunnable, TICKETS_UPDATE_INTERVAL * MILLISECONDS_IN_MINUTE)
     }
 
     /**

@@ -19,9 +19,3 @@
 # If you keep the line number information, uncomment this to
 # hide the original source file name.
 #-renamesourcefileattribute SourceFile
-
-# Seems like there is a problem with class Atomic*FieldUpdater which leads to crashes on some devices, caused
-# by unreachable code in kotlin.coroutines package. Found at https://sourceforge.net/p/proguard/bugs/660/
--keepclassmembernames class kotlinx.coroutines.** {
-    volatile <fields>;
-}
