@@ -290,13 +290,6 @@ SWIFT_CLASS("_TtC16PyrusServiceDesk24ServiceDeskConfiguration")
 
 
 
-@interface UITableView (SWIFT_EXTENSION(PyrusServiceDesk))
-- (void)didMoveToSuperview;
-@end
-
-
-
-
 
 
 
@@ -595,13 +588,6 @@ SWIFT_CLASS("_TtC16PyrusServiceDesk24ServiceDeskConfiguration")
 
 
 
-@interface UITableView (SWIFT_EXTENSION(PyrusServiceDesk))
-- (void)didMoveToSuperview;
-@end
-
-
-
-
 
 
 
@@ -611,7 +597,6 @@ SWIFT_CLASS("_TtC16PyrusServiceDesk24ServiceDeskConfiguration")
 #pragma clang diagnostic pop
 
 #endif
-
 #else
 
 #if 0
@@ -901,13 +886,6 @@ SWIFT_CLASS("_TtC16PyrusServiceDesk24ServiceDeskConfiguration")
 
 
 
-
-
-
-
-@interface UITableView (SWIFT_EXTENSION(PyrusServiceDesk))
-- (void)didMoveToSuperview;
-@end
 
 
 
@@ -1206,13 +1184,6 @@ SWIFT_CLASS("_TtC16PyrusServiceDesk24ServiceDeskConfiguration")
 
 
 
-
-
-
-
-@interface UITableView (SWIFT_EXTENSION(PyrusServiceDesk))
-- (void)didMoveToSuperview;
-@end
 
 
 
