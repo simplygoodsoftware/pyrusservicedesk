@@ -241,6 +241,14 @@ SWIFT_CLASS("_TtC16PyrusServiceDesk16PyrusServiceDesk")
 /// \param configuration ServiceDeskConfiguration object or nil. ServiceDeskConfiguration is object that create custom interface: theme color,welcome message, image for support’s avatar and chat title for navigation bar title. If nil, the default design will be used.
 ///
 + (void)startOn:(UIViewController * _Nonnull)viewController configuration:(ServiceDeskConfiguration * _Nullable)configuration;
+/// Show chat
+/// \param viewController ViewController that must present chat
+///
+/// \param configuration ServiceDeskConfiguration object or nil. ServiceDeskConfiguration is object that create custom interface: theme color,welcome message, image for support’s avatar and chat title for navigation bar title. If nil, the default design will be used.
+///
+/// \param completion The block to execute after the presentation finishes. This block has no return value and takes no parameters. You may specify nil for this parameter.
+///
++ (void)startOn:(UIViewController * _Nonnull)viewController configuration:(ServiceDeskConfiguration * _Nullable)configuration completion:(void (^ _Nullable)(void))completion;
 /// Subscribe [subscriber] for notifications that new messages from support have appeared in the chat.
 + (void)subscribeToReplies:(id <NewReplySubscriber> _Nullable)subscriber;
 /// Unsubscribe [subscriber] from alerts for new messages from chat support.
@@ -539,6 +547,14 @@ SWIFT_CLASS("_TtC16PyrusServiceDesk16PyrusServiceDesk")
 /// \param configuration ServiceDeskConfiguration object or nil. ServiceDeskConfiguration is object that create custom interface: theme color,welcome message, image for support’s avatar and chat title for navigation bar title. If nil, the default design will be used.
 ///
 + (void)startOn:(UIViewController * _Nonnull)viewController configuration:(ServiceDeskConfiguration * _Nullable)configuration;
+/// Show chat
+/// \param viewController ViewController that must present chat
+///
+/// \param configuration ServiceDeskConfiguration object or nil. ServiceDeskConfiguration is object that create custom interface: theme color,welcome message, image for support’s avatar and chat title for navigation bar title. If nil, the default design will be used.
+///
+/// \param completion The block to execute after the presentation finishes. This block has no return value and takes no parameters. You may specify nil for this parameter.
+///
++ (void)startOn:(UIViewController * _Nonnull)viewController configuration:(ServiceDeskConfiguration * _Nullable)configuration completion:(void (^ _Nullable)(void))completion;
 /// Subscribe [subscriber] for notifications that new messages from support have appeared in the chat.
 + (void)subscribeToReplies:(id <NewReplySubscriber> _Nullable)subscriber;
 /// Unsubscribe [subscriber] from alerts for new messages from chat support.
@@ -841,6 +857,14 @@ SWIFT_CLASS("_TtC16PyrusServiceDesk16PyrusServiceDesk")
 /// \param configuration ServiceDeskConfiguration object or nil. ServiceDeskConfiguration is object that create custom interface: theme color,welcome message, image for support’s avatar and chat title for navigation bar title. If nil, the default design will be used.
 ///
 + (void)startOn:(UIViewController * _Nonnull)viewController configuration:(ServiceDeskConfiguration * _Nullable)configuration;
+/// Show chat
+/// \param viewController ViewController that must present chat
+///
+/// \param configuration ServiceDeskConfiguration object or nil. ServiceDeskConfiguration is object that create custom interface: theme color,welcome message, image for support’s avatar and chat title for navigation bar title. If nil, the default design will be used.
+///
+/// \param completion The block to execute after the presentation finishes. This block has no return value and takes no parameters. You may specify nil for this parameter.
+///
++ (void)startOn:(UIViewController * _Nonnull)viewController configuration:(ServiceDeskConfiguration * _Nullable)configuration completion:(void (^ _Nullable)(void))completion;
 /// Subscribe [subscriber] for notifications that new messages from support have appeared in the chat.
 + (void)subscribeToReplies:(id <NewReplySubscriber> _Nullable)subscriber;
 /// Unsubscribe [subscriber] from alerts for new messages from chat support.
@@ -1139,6 +1163,14 @@ SWIFT_CLASS("_TtC16PyrusServiceDesk16PyrusServiceDesk")
 /// \param configuration ServiceDeskConfiguration object or nil. ServiceDeskConfiguration is object that create custom interface: theme color,welcome message, image for support’s avatar and chat title for navigation bar title. If nil, the default design will be used.
 ///
 + (void)startOn:(UIViewController * _Nonnull)viewController configuration:(ServiceDeskConfiguration * _Nullable)configuration;
+/// Show chat
+/// \param viewController ViewController that must present chat
+///
+/// \param configuration ServiceDeskConfiguration object or nil. ServiceDeskConfiguration is object that create custom interface: theme color,welcome message, image for support’s avatar and chat title for navigation bar title. If nil, the default design will be used.
+///
+/// \param completion The block to execute after the presentation finishes. This block has no return value and takes no parameters. You may specify nil for this parameter.
+///
++ (void)startOn:(UIViewController * _Nonnull)viewController configuration:(ServiceDeskConfiguration * _Nullable)configuration completion:(void (^ _Nullable)(void))completion;
 /// Subscribe [subscriber] for notifications that new messages from support have appeared in the chat.
 + (void)subscribeToReplies:(id <NewReplySubscriber> _Nullable)subscriber;
 /// Unsubscribe [subscriber] from alerts for new messages from chat support.
