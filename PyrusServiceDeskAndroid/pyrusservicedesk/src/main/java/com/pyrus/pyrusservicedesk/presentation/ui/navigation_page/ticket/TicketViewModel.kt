@@ -95,7 +95,7 @@ internal class TicketViewModel(serviceDeskProvider: ServiceDeskProvider,
         else{
             runBlocking {
                 val response = requests.getPendingFeedCommentsRequest().execute()
-                if (!response.hasError()) {
+                if (!response.hasError() && !response.getData().isNullOrEmpty()) {
                     applyTicketUpdate(response.getData()!!, true)
                 }
             }
