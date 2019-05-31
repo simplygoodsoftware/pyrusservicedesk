@@ -8,4 +8,4 @@ import com.pyrus.pyrusservicedesk.sdk.data.Comment
 internal class GetFeedResponse(
     error: ResponseError? = null,
     comments: List<Comment>? = null)
-    : ResponseBase<List<Comment>>(error, comments)
+    : ResponseImpl<List<Comment>>(error, comments)

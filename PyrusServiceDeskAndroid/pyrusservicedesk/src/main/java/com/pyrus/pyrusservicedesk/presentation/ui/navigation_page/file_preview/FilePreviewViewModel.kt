@@ -10,7 +10,7 @@ import android.content.Intent
 import android.media.MediaScannerConnection
 import android.net.Uri
 import android.os.Environment
-import com.pyrus.pyrusservicedesk.PyrusServiceDesk
+import com.pyrus.pyrusservicedesk.ServiceDeskProvider
 import com.pyrus.pyrusservicedesk.presentation.ui.navigation_page.file_preview.FilePreviewActivity.Companion.KEY_FILE_DATA
 import com.pyrus.pyrusservicedesk.presentation.viewmodel.ConnectionViewModelBase
 import com.pyrus.pyrusservicedesk.sdk.data.intermediate.FileData
@@ -22,9 +22,9 @@ import kotlinx.coroutines.launch
 /**
  * ViewModel for the file previews.
  */
-internal class FilePreviewViewModel(pyrusServiceDesk: PyrusServiceDesk,
+internal class FilePreviewViewModel(serviceDeskProvider: ServiceDeskProvider,
                                     private val intent: Intent)
-    : ConnectionViewModelBase(pyrusServiceDesk) {
+    : ConnectionViewModelBase(serviceDeskProvider) {
 
     private companion object {
         const val CHECK_FILE_DOWNLOADED_DELAY_MS = 300L
@@ -66,7 +66,7 @@ internal class FilePreviewViewModel(pyrusServiceDesk: PyrusServiceDesk,
     }
 
     /**
-     * Callback to be called when user received an error while being downloaded the preview
+     * Callback to be called when user received an responseError while being downloaded the preview
      * of the attachment.
      */
     fun onErrorReceived() {

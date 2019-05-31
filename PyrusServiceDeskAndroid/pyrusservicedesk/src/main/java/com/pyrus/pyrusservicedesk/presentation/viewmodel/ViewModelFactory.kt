@@ -5,8 +5,9 @@ import android.arch.lifecycle.ViewModelProvider
 import android.content.Intent
 import com.pyrus.pyrusservicedesk.PyrusServiceDesk
 import com.pyrus.pyrusservicedesk.presentation.ui.navigation_page.file_preview.FilePreviewViewModel
-import com.pyrus.pyrusservicedesk.presentation.ui.navigation_page.ticket.TicketSharedViewModel
 import com.pyrus.pyrusservicedesk.presentation.ui.navigation_page.ticket.TicketViewModel
+import com.pyrus.pyrusservicedesk.presentation.ui.navigation_page.ticket.dialogs.attach_files.AttachFileSharedViewModel
+import com.pyrus.pyrusservicedesk.presentation.ui.navigation_page.ticket.dialogs.comment_actions.PendingCommentActionSharedViewModel
 import com.pyrus.pyrusservicedesk.presentation.ui.navigation_page.tickets.TicketsViewModel
 
 /**
@@ -20,16 +21,20 @@ internal class ViewModelFactory(private val arguments: Intent): ViewModelProvide
     override fun <T : ViewModel?> create(modelClass: Class<T>): T {
         return when (modelClass) {
             TicketsViewModel::class.java ->
-                TicketsViewModel(PyrusServiceDesk.getInstance()) as T
+                TicketsViewModel(PyrusServiceDesk.get().serviceDeskProvider) as T
             TicketViewModel::class.java ->
-                TicketViewModel(PyrusServiceDesk.getInstance(), arguments) as T
+                TicketViewModel(
+                    PyrusServiceDesk.get().serviceDeskProvider,
+                    arguments,
+                    PyrusServiceDesk.get().isSingleChat) as T
             FilePreviewViewModel::class.java ->
                 FilePreviewViewModel(
-                    PyrusServiceDesk.getInstance(),
+                    PyrusServiceDesk.get().serviceDeskProvider,
                     arguments
                 ) as T
-            QuitViewModel::class.java -> PyrusServiceDesk.getInstance().getSharedViewModel() as T
-            TicketSharedViewModel::class.java -> TicketSharedViewModel() as T
+            QuitViewModel::class.java -> PyrusServiceDesk.get().getSharedViewModel() as T
+            AttachFileSharedViewModel::class.java -> AttachFileSharedViewModel() as T
+            PendingCommentActionSharedViewModel::class.java -> PendingCommentActionSharedViewModel() as T
             else -> throw IllegalStateException("View model for class $modelClass was not found")
         }
     }

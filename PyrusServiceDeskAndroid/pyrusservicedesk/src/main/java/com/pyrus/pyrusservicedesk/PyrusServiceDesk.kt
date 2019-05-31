@@ -4,22 +4,30 @@ import android.app.Activity
 import android.app.Application
 import android.content.Context
 import android.content.Intent
+import android.net.Uri
 import android.support.annotation.MainThread
+import com.google.gson.GsonBuilder
 import com.pyrus.pyrusservicedesk.presentation.ui.navigation_page.ticket.TicketActivity
 import com.pyrus.pyrusservicedesk.presentation.ui.navigation_page.tickets.TicketsActivity
 import com.pyrus.pyrusservicedesk.presentation.viewmodel.QuitViewModel
-import com.pyrus.pyrusservicedesk.sdk.FileResolver
-import com.pyrus.pyrusservicedesk.sdk.RepositoryFactory
+import com.pyrus.pyrusservicedesk.sdk.FileResolverImpl
 import com.pyrus.pyrusservicedesk.sdk.RequestFactory
 import com.pyrus.pyrusservicedesk.sdk.data.LocalDataProvider
+import com.pyrus.pyrusservicedesk.sdk.data.gson.RemoteGsonExclusionStrategy
+import com.pyrus.pyrusservicedesk.sdk.data.gson.UriGsonAdapter
 import com.pyrus.pyrusservicedesk.sdk.repositories.draft.DraftRepository
+import com.pyrus.pyrusservicedesk.sdk.repositories.draft.PreferenceDraftRepository
+import com.pyrus.pyrusservicedesk.sdk.repositories.general.CentralRepository
+import com.pyrus.pyrusservicedesk.sdk.repositories.offline.OfflineRepository
+import com.pyrus.pyrusservicedesk.sdk.repositories.offline.PreferenceOfflineRepository
 import com.pyrus.pyrusservicedesk.sdk.response.ResponseCallback
 import com.pyrus.pyrusservicedesk.sdk.response.ResponseError
 import com.pyrus.pyrusservicedesk.sdk.updates.LiveUpdates
 import com.pyrus.pyrusservicedesk.sdk.updates.NewReplySubscriber
-import com.pyrus.pyrusservicedesk.utils.ConfigUtils
-import com.pyrus.pyrusservicedesk.utils.PREFERENCE_KEY
-import com.pyrus.pyrusservicedesk.utils.migratePreferences
+import com.pyrus.pyrusservicedesk.sdk.verify.LocalDataVerifier
+import com.pyrus.pyrusservicedesk.sdk.verify.LocalDataVerifierImpl
+import com.pyrus.pyrusservicedesk.sdk.web.retrofit.RetrofitWebRepository
+import com.pyrus.pyrusservicedesk.utils.*
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.asCoroutineDispatcher
 import kotlinx.coroutines.launch
@@ -77,7 +85,7 @@ class PyrusServiceDesk private constructor(
         @JvmStatic
         @MainThread
         fun subscribeToReplies(subscriber: NewReplySubscriber){
-            getInstance().liveUpdates.subscribeOnReply(subscriber)
+            get().liveUpdates.subscribeOnReply(subscriber)
         }
 
         /**
@@ -86,7 +94,7 @@ class PyrusServiceDesk private constructor(
         @JvmStatic
         @MainThread
         fun unsubscribeFromReplies(subscriber: NewReplySubscriber) {
-            getInstance().liveUpdates.unsubscribeFromReplies(subscriber)
+            get().liveUpdates.unsubscribeFromReplies(subscriber)
         }
 
         /**
@@ -108,11 +116,11 @@ class PyrusServiceDesk private constructor(
          *
          * @param token string token to be registered
          * @param callback callback that is invoked when result of registering of the token is received.
-         *  This is invoked without error when token is successfully registered.
+         *  This is invoked without responseError when token is successfully registered.
          */
         @JvmStatic
         fun setPushToken(token: String, callback: SetPushTokenCallback) {
-            val serviceDesk = getInstance()
+            val serviceDesk = get()
             when{
                 token.isBlank() -> callback.onResult(Exception("Token is empty"))
                 serviceDesk.appId.isBlank() -> callback.onResult(Exception("AppId is not assigned"))
@@ -135,7 +143,7 @@ class PyrusServiceDesk private constructor(
             }
         }
 
-        internal fun getInstance() : PyrusServiceDesk {
+        internal fun get() : PyrusServiceDesk {
             return checkNotNull(INSTANCE){ "Instantiate PyrusServiceDesk first" }
         }
 
@@ -157,38 +165,67 @@ class PyrusServiceDesk private constructor(
         private fun createIntent(ticketId: Int? = null): Intent {
             return when{
                 ticketId != null -> TicketActivity.getLaunchIntent(ticketId)
-                PyrusServiceDesk.getInstance().isSingleChat -> TicketActivity.getLaunchIntent()
+                PyrusServiceDesk.get().isSingleChat -> TicketActivity.getLaunchIntent()
                 else -> TicketsActivity.getLaunchIntent()
             }
         }
     }
 
+    internal val serviceDeskProvider: ServiceDeskProvider by lazy {
+        object : ServiceDeskProvider{
+            override fun getApplication(): Application = application
+            override fun getRequestFactory(): RequestFactory = requestFactory
+            override fun getDraftRepository(): DraftRepository = draftRepository
+            override fun getLiveUpdates(): LiveUpdates = liveUpdates
+            override fun getLocalDataProvider(): LocalDataProvider = localDataProvider
+            override fun getLocalDataVerifier(): LocalDataVerifier = localDataVerifier
+        }
+    }
+
     internal var userId: String
 
-    internal val requestFactory: RequestFactory
-    internal val draftRepository: DraftRepository
-    internal val liveUpdates: LiveUpdates
+    private val requestFactory: RequestFactory
+    private val draftRepository: DraftRepository
+    private val liveUpdates: LiveUpdates
 
-    internal val localDataProvider: LocalDataProvider by lazy {
-        LocalDataProvider(fileResolver =  fileResolver)
-    }
+    private val localDataProvider: LocalDataProvider by lazy { LocalDataProvider(offlineRepository, fileResolver) }
+    private val localDataVerifier: LocalDataVerifier
 
     private var quitViewModel = QuitViewModel()
 
-    private val fileResolver: FileResolver = FileResolver(application.contentResolver)
+    private val fileResolver: FileResolverImpl = FileResolverImpl(application.contentResolver)
     private val preferences = application.getSharedPreferences(PREFERENCE_KEY, Context.MODE_PRIVATE)
-
+    private val offlineRepository: OfflineRepository
 
     init {
         migratePreferences(application, preferences)
+
         userId = ConfigUtils.getUserId(preferences)
-        val repositoryFactory = RepositoryFactory(fileResolver, preferences)
-        requestFactory = RequestFactory(repositoryFactory.createCentralRepository(appId, userId))
-        draftRepository = repositoryFactory.createDraftRepository()
+
+        localDataVerifier = LocalDataVerifierImpl(fileResolver)
+
+        val offlineGson =
+            GsonBuilder()
+                .setDateFormat(ISO_DATE_PATTERN)
+                .registerTypeAdapter(Uri::class.java, UriGsonAdapter())
+                .create()
+        offlineRepository = PreferenceOfflineRepository(preferences, localDataVerifier, offlineGson)
+
+        val remoteGson =
+            GsonBuilder()
+                .setDateFormat(ISO_DATE_PATTERN)
+                .addSerializationExclusionStrategy(RemoteGsonExclusionStrategy())
+                .create()
+
+        val centralRepository = CentralRepository(
+            RetrofitWebRepository(appId, userId, fileResolver, remoteGson),
+            offlineRepository
+        )
+
+        requestFactory = RequestFactory(centralRepository)
+        draftRepository = PreferenceDraftRepository(preferences)
         liveUpdates = LiveUpdates(requestFactory)
     }
 
     internal fun getSharedViewModel() = quitViewModel
-
-
 }

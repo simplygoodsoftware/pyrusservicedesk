@@ -1,4 +1,4 @@
-package com.pyrus.pyrusservicedesk.presentation.ui.navigation_page.ticket
+package com.pyrus.pyrusservicedesk.presentation.ui.navigation_page.ticket.dialogs.attach_files
 
 import android.Manifest.permission.CAMERA
 import android.Manifest.permission.WRITE_EXTERNAL_STORAGE
@@ -7,6 +7,7 @@ import android.app.Activity.RESULT_OK
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.net.Uri
+import android.os.Build
 import android.os.Bundle
 import android.support.design.widget.BottomSheetBehavior
 import android.support.design.widget.BottomSheetDialog
@@ -36,7 +37,8 @@ internal class AttachFileVariantsFragment: BottomSheetDialogFragment(), View.OnC
     }
 
     private var capturePhotoUri: Uri? = null
-    private val sharedModel: TicketSharedViewModel by getViewModelWithActivityScope(TicketSharedViewModel::class.java)
+    private val sharedModel: AttachFileSharedViewModel by getViewModelWithActivityScope(
+        AttachFileSharedViewModel::class.java)
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -88,6 +90,11 @@ internal class AttachFileVariantsFragment: BottomSheetDialogFragment(), View.OnC
         val isPhoto = requestCode == REQUEST_CODE_TAKE_PHOTO
         val location: Uri? = if (isPhoto) capturePhotoUri else data?.data
         location?.let {
+            if (!isPhoto && Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
+                context?.contentResolver?.takePersistableUriPermission(
+                    it,
+                    Intent.FLAG_GRANT_READ_URI_PERMISSION)
+            }
             sharedModel.onFilePicked(it)
             dismiss()
         }
@@ -97,13 +104,27 @@ internal class AttachFileVariantsFragment: BottomSheetDialogFragment(), View.OnC
     private fun openCustomChooser() {
         val chooserIntent = PyrusServiceDesk.FILE_CHOOSER?.getIntent() ?: return
         activity?.packageManager?.resolveActivity(chooserIntent, 0) ?: return
-        startActivityForResult(chooserIntent, REQUEST_CODE_CUSTOM_CHOOSER)
+        startActivityForResult(chooserIntent,
+            REQUEST_CODE_CUSTOM_CHOOSER
+        )
     }
 
     private fun startPickingImage() {
-        Intent(Intent.ACTION_GET_CONTENT).also{
+        Intent().also{
+            it.flags = Intent.FLAG_GRANT_READ_URI_PERMISSION
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
+                // We forced to use Intent.ACTION_OPEN_DOCUMENT to save uri access when the application
+                // is restarted
+                it.action = Intent.ACTION_OPEN_DOCUMENT
+                it.flags = it.flags or Intent.FLAG_GRANT_PERSISTABLE_URI_PERMISSION
+            }
+            else{
+                it.action = Intent.ACTION_GET_CONTENT
+            }
             it.type = MIME_TYPE_IMAGE_ANY
-            startActivityForResult(it, REQUEST_CODE_PICK_IMAGE)
+            startActivityForResult(it,
+                REQUEST_CODE_PICK_IMAGE
+            )
         }
     }
 
@@ -133,7 +154,9 @@ internal class AttachFileVariantsFragment: BottomSheetDialogFragment(), View.OnC
             if (permissionToAsk.isEmpty())
                 capturePhotoUri = dispatchTakePhotoIntent(REQUEST_CODE_TAKE_PHOTO)
             else
-                requestPermissions(permissionToAsk.toTypedArray(), REQUEST_CODE_PERMISSION)
+                requestPermissions(permissionToAsk.toTypedArray(),
+                    REQUEST_CODE_PERMISSION
+                )
         }
     }
 

@@ -25,7 +25,7 @@ class RequestUtils{
          * Provides url for getting the file.
          */
         internal fun getFileUrl(fileId: Int): String {
-            return with(PyrusServiceDesk.getInstance()){
+            return with(PyrusServiceDesk.get()){
                 "${BASE_URL}DownloadFile/$fileId" +
                         "?user_id=" +
                         URLEncoder.encode(userId, "UTF-8") +
@@ -35,7 +35,7 @@ class RequestUtils{
         }
 
         internal fun getPreviewUrl(fileId: Int): String {
-            return with(PyrusServiceDesk.getInstance()){
+            return with(PyrusServiceDesk.get()){
                 "${BASE_URL}DownloadFilePreview/$fileId" +
                         "?user_id=" +
                         URLEncoder.encode(userId, "UTF-8") +

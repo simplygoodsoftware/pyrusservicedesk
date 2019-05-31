@@ -14,7 +14,6 @@ import com.pyrus.pyrusservicedesk.PyrusServiceDesk
 import com.pyrus.pyrusservicedesk.R
 import com.pyrus.pyrusservicedesk.presentation.viewmodel.QuitViewModel
 import com.pyrus.pyrusservicedesk.utils.getViewModel
-import kotlinx.android.synthetic.main.psd_activity_ticket.*
 import kotlinx.coroutines.*
 import kotlin.coroutines.CoroutineContext
 
@@ -117,7 +116,7 @@ internal abstract class ActivityBase: AppCompatActivity(), CoroutineScope {
             while(!ViewCompat.isLaidOut(view))
                 delay(SHOW_KEYBOARD_RETRY_DELAY_MS)
             view.requestFocus()
-            (getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager).showSoftInput(input, 0)
+            (getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager).showSoftInput(view, 0)
             onKeyboardShown?.invoke()
         }
     }

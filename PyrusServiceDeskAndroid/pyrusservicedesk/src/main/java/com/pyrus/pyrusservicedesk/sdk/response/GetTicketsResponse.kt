@@ -8,4 +8,4 @@ import com.pyrus.pyrusservicedesk.sdk.data.TicketShortDescription
 internal class GetTicketsResponse(
     error: ResponseError? = null,
     tickets: List<TicketShortDescription>? = null)
-    : ResponseBase<List<TicketShortDescription>>(error, tickets)
+    : ResponseImpl<List<TicketShortDescription>>(error, tickets)

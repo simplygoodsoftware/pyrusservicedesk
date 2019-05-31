@@ -1,28 +1,28 @@
 package com.pyrus.pyrusservicedesk.sdk.web.retrofit
 
 import com.google.gson.Gson
-import com.google.gson.GsonBuilder
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.withContext
 import com.pyrus.pyrusservicedesk.PyrusServiceDesk
-import com.pyrus.pyrusservicedesk.sdk.FileResolver
+import com.pyrus.pyrusservicedesk.sdk.FileResolverImpl
 import com.pyrus.pyrusservicedesk.sdk.data.Attachment
 import com.pyrus.pyrusservicedesk.sdk.data.Comment
 import com.pyrus.pyrusservicedesk.sdk.data.EMPTY_TICKET_ID
 import com.pyrus.pyrusservicedesk.sdk.data.TicketDescription
 import com.pyrus.pyrusservicedesk.sdk.repositories.general.GeneralRepository
+import com.pyrus.pyrusservicedesk.sdk.repositories.general.RemoteRepository
 import com.pyrus.pyrusservicedesk.sdk.request.UploadFileRequest
 import com.pyrus.pyrusservicedesk.sdk.response.*
 import com.pyrus.pyrusservicedesk.sdk.web.UploadFileHooks
 import com.pyrus.pyrusservicedesk.sdk.web.request_body.*
 import com.pyrus.pyrusservicedesk.utils.ConfigUtils
-import com.pyrus.pyrusservicedesk.utils.ISO_DATE_PATTERN
 import com.pyrus.pyrusservicedesk.utils.RequestUtils.Companion.BASE_URL
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 import okhttp3.OkHttpClient
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 import java.util.concurrent.LinkedBlockingQueue
 import java.util.concurrent.TimeUnit
+import kotlin.coroutines.coroutineContext
 
 /**
  * Web [GeneralRepository] implementation based on [Retrofit] library.
@@ -32,10 +32,11 @@ import java.util.concurrent.TimeUnit
  * @param fileResolver helper for making upload file requests.
  */
 internal class RetrofitWebRepository(
-        private val appId: String,
-        private val userId: String,
-        private val fileResolver: FileResolver)
-    : GeneralRepository {
+    private val appId: String,
+    private val userId: String,
+    private val fileResolver: FileResolverImpl,
+    private val gson: Gson)
+    : RemoteRepository {
 
     private val api: ServiceDeskApi
 
@@ -47,26 +48,25 @@ internal class RetrofitWebRepository(
 
         val retrofit = Retrofit.Builder()
                 .baseUrl(BASE_URL)
-                .addConverterFactory(
-                    GsonConverterFactory.create(
-                        GsonBuilder().setDateFormat(ISO_DATE_PATTERN).create()))
+                .addConverterFactory(GsonConverterFactory.create(gson))
                 .client(httpBuilder.build())
                 .build()
 
         api = retrofit.create(ServiceDeskApi::class.java)
     }
 
-    override suspend fun getFeed(): GetFeedResponse {
-        return withContext(Dispatchers.IO){
+    override suspend fun getFeed(): Response<List<Comment>> {
+        return withContext<Response<List<Comment>>>(Dispatchers.IO){
             try {
                 api.getTicketFeed(RequestBodyBase(appId, userId)).execute().run {
                     when {
-                        isSuccessful && body() != null -> GetFeedResponse(comments = body()!!.comments)
-                        else -> GetFeedResponse(ApiCallError(this.message()))
+                        isSuccessful && body() != null -> ResponseImpl.success(body()!!.comments)
+                        else -> ResponseImpl.failure(ApiCallError(this.message()))
                     }
                 }
+
             } catch (ex: Exception) {
-                GetFeedResponse(NoInternetConnection("No internet connection"))
+                ResponseImpl.failure(NoInternetConnection("No internet connection"))
             }
         }
     }
@@ -116,7 +116,6 @@ internal class RetrofitWebRepository(
         sequentialRequests.offer(CreateTicketRequest())
 
         return withContext(PyrusServiceDesk.DISPATCHER_IO_SINGLE) {
-
             var descr = description
             if (descr.hasAttachments()) {
                 val newAttachments =
@@ -144,7 +143,7 @@ internal class RetrofitWebRepository(
                         when {
                             isSuccessful && body() != null -> {
                                 val ticketId =
-                                    Gson().fromJson<Map<String, Int>>(
+                                    gson.fromJson<Map<String, Int>>(
                                         body()?.string(),
                                         Map::class.java
                                     )
@@ -219,7 +218,7 @@ internal class RetrofitWebRepository(
                     .run {
                         when {
                             isSuccessful && body() != null -> AddCommentResponse(
-                                commentId = Gson().fromJson<Map<String, Double>>(
+                                commentId = gson.fromJson<Map<String, Double>>(
                                     body()?.string(),
                                     Map::class.java
                                 )
@@ -239,12 +238,12 @@ internal class RetrofitWebRepository(
     }
 
     @Throws(Exception::class)
-    private fun List<Attachment>.upload(uploadFileHooks: UploadFileHooks?): List<Attachment> {
+    private suspend fun List<Attachment>.upload(uploadFileHooks: UploadFileHooks?): List<Attachment> {
         val uploadResponses = fold(ArrayList<UploadFileResponse>(size))
         { responses, attachment ->
-            if (attachment.uri == null)
+            if (attachment.localUri == null)
                 throw Exception()
-            with(fileResolver.getUploadFileData(attachment.uri)) {
+            with(fileResolver.getUploadFileData(attachment.localUri)) {
                 when (this) {
                     null -> throw Exception()
                     else -> responses.add(
@@ -263,7 +262,7 @@ internal class RetrofitWebRepository(
         val newAttachments = mutableListOf<Attachment>()
         uploadResponses.forEachIndexed { index, uploadFileResponse ->
 
-            if (uploadFileResponse.error != null || uploadFileResponse.result == null)
+            if (uploadFileResponse.responseError != null || uploadFileResponse.result == null)
                 throw Exception()
 
             newAttachments.add(get(index).toRemoteAttachment(uploadFileResponse.result.guid))
@@ -271,13 +270,14 @@ internal class RetrofitWebRepository(
         return newAttachments
     }
 
-    private fun uploadFile(request: UploadFileRequest): UploadFileResponse {
+    private suspend fun uploadFile(request: UploadFileRequest): UploadFileResponse {
         return try {
             api.uploadFile(
                 UploadFileRequestBody(
                     request.fileUploadRequestData.fileName,
                     request.fileUploadRequestData.fileInputStream,
-                    request.uploadFileHooks
+                    request.uploadFileHooks,
+                    coroutineContext
                 )
                     .toMultipartBody()
             )
@@ -302,7 +302,7 @@ private fun Comment.applyNewAttachments(newAttachments: List<Attachment>): Comme
     return Comment(commentId, body, isInbound, newAttachments, creationDate, author, localId)
 }
 
-private fun Attachment.toRemoteAttachment(guid: String) = Attachment(id, guid, type, name, bytesSize, isText, isVideo, uri)
+private fun Attachment.toRemoteAttachment(guid: String) = Attachment(id, guid, type, name, bytesSize, isText, isVideo, localUri)
 
 
 private interface SequentialRequest

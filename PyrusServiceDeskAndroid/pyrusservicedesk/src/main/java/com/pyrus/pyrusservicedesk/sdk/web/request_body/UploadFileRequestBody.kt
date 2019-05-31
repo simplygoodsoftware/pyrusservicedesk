@@ -1,11 +1,14 @@
 package com.pyrus.pyrusservicedesk.sdk.web.request_body
 
 import com.pyrus.pyrusservicedesk.sdk.web.UploadFileHooks
+import kotlinx.coroutines.isActive
 import okhttp3.MediaType
 import okhttp3.MultipartBody
 import okhttp3.RequestBody
 import okio.BufferedSink
+import java.io.IOException
 import java.io.InputStream
+import kotlin.coroutines.CoroutineContext
 
 /**
  * Request body for sending single file to the server.
@@ -13,11 +16,13 @@ import java.io.InputStream
  * @param fileName name of the file to be sent.
  * @param fileStream file stream to read data from for sending.
  * @param uploadFileHooks hooks for publishing progress and for checking cancellation signal.
+ * @param context current coroutine context. Used for checking if it is alive while file uploading.
  */
 internal class UploadFileRequestBody(
         private val fileName: String,
         private val fileStream: InputStream,
-        private val uploadFileHooks: UploadFileHooks?) {
+        private val uploadFileHooks: UploadFileHooks?,
+        private val context: CoroutineContext) {
 
     private companion object {
         const val MEDIA_TYPE = "multipart/form-responseData"
@@ -50,6 +55,9 @@ internal class UploadFileRequestBody(
                     while (read != -1) {
                         if (uploadFileHooks?.isCancelled == true)
                             break
+                        if (!context.isActive) {
+                            throw IOException("Scope is no longer active")
+                        }
                         uploaded += read
                         sink.write(buffer, 0, read)
                         uploadFileHooks?.onProgressPercentChanged(uploaded.toProgress())

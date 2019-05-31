@@ -10,7 +10,7 @@ import com.pyrus.pyrusservicedesk.sdk.web.UploadFileHooks
 
 internal class RequestFactory(private val repository: GeneralRepository) {
 
-    fun getFeedRequest(): RequestBase<List<Comment>> = GetFeedRequest(repository)
+    fun getFeedRequest(): Request<List<Comment>> = GetFeedRequest(repository, true)
     fun getTicketsRequest(): RequestBase<List<TicketShortDescription>> = GetTicketsRequest(repository)
     fun getTicketRequest(ticketId: Int): RequestBase<Ticket> = GetTicketRequest(repository, ticketId)
     fun getCreateTicketRequest(description: TicketDescription,
@@ -32,4 +32,7 @@ internal class RequestFactory(private val repository: GeneralRepository) {
     fun getSetPushTokenRequest(token: String): RequestBase<Unit> {
         return SetPushTokenRequest(repository, token)
     }
+
+    fun getPendingFeedCommentsRequest(): Request<List<Comment>> = GetFeedRequest(repository, false)
+    fun getRemovePendingCommentRequest(comment: Comment) = RemovePendingCommentRequest(repository, comment)
 }

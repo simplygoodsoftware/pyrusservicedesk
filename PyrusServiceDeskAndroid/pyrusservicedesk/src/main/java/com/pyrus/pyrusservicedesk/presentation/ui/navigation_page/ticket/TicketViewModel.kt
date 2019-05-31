@@ -12,6 +12,7 @@ import android.support.v7.util.DiffUtil
 import android.widget.Toast
 import com.pyrus.pyrusservicedesk.PyrusServiceDesk
 import com.pyrus.pyrusservicedesk.R
+import com.pyrus.pyrusservicedesk.ServiceDeskProvider
 import com.pyrus.pyrusservicedesk.presentation.call.*
 import com.pyrus.pyrusservicedesk.presentation.ui.navigation_page.ticket.entries.*
 import com.pyrus.pyrusservicedesk.presentation.ui.view.recyclerview.DiffResultWithNewItems
@@ -19,7 +20,10 @@ import com.pyrus.pyrusservicedesk.presentation.viewmodel.ConnectionViewModelBase
 import com.pyrus.pyrusservicedesk.sdk.data.Attachment
 import com.pyrus.pyrusservicedesk.sdk.data.Comment
 import com.pyrus.pyrusservicedesk.sdk.data.EMPTY_TICKET_ID
+import com.pyrus.pyrusservicedesk.sdk.data.LocalDataProvider
+import com.pyrus.pyrusservicedesk.sdk.response.PendingDataError
 import com.pyrus.pyrusservicedesk.sdk.updates.OnUnreadTicketCountChangedSubscriber
+import com.pyrus.pyrusservicedesk.sdk.verify.LocalDataVerifier
 import com.pyrus.pyrusservicedesk.sdk.web.OnCancelListener
 import com.pyrus.pyrusservicedesk.sdk.web.UploadFileHooks
 import com.pyrus.pyrusservicedesk.utils.ConfigUtils
@@ -27,32 +31,27 @@ import com.pyrus.pyrusservicedesk.utils.MILLISECONDS_IN_SECOND
 import com.pyrus.pyrusservicedesk.utils.RequestUtils.Companion.MAX_FILE_SIZE_BYTES
 import com.pyrus.pyrusservicedesk.utils.RequestUtils.Companion.MAX_FILE_SIZE_MEGABYTES
 import com.pyrus.pyrusservicedesk.utils.getWhen
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.withContext
 import java.util.*
 import kotlin.collections.ArrayList
 
 /**
  * ViewModel for the ticket screen.
+ *
+ * [isFeed] Denotes whether [PyrusServiceDesk.isSingleChat] is enabled.
  */
-internal class TicketViewModel(
-        serviceDesk: PyrusServiceDesk,
-        arguments: Intent)
-    : ConnectionViewModelBase(serviceDesk),
-        OnClickedCallback<CommentEntry>,
+internal class TicketViewModel(serviceDeskProvider: ServiceDeskProvider,
+                               arguments: Intent,
+                               val isFeed: Boolean)
+    : ConnectionViewModelBase(serviceDeskProvider),
         OnUnreadTicketCountChangedSubscriber {
 
     private companion object {
 
         const val TICKET_UPDATE_INTERVAL = 30L
-
-        fun checkComment(comment: Comment): CheckCommentError? {
-            return when{
-                comment.isEmpty() -> CheckCommentError.CommentIsEmpty
-                comment.hasAttachmentWithExceededSize() -> CheckCommentError.FileSizeExceeded
-                else -> null
-            }
-        }
-
-        fun Comment.isEmpty(): Boolean = body.isBlank() && attachments.isNullOrEmpty()
 
         fun Comment.hasAttachmentWithExceededSize(): Boolean =
             attachments?.let { it.any { attach -> attach.hasExceededFileSize()} } ?: false
@@ -61,16 +60,13 @@ internal class TicketViewModel(
     }
 
     /**
-     * Denotes whether [PyrusServiceDesk.isSingleChat] is enabled.
-     */
-    val isFeed = serviceDesk.isSingleChat
-
-    /**
      * Drafted text. Assigned once when view model is created.
      */
     val draft: String
 
-    private val draftRepository = serviceDesk.draftRepository
+    private val draftRepository = serviceDeskProvider.getDraftRepository()
+    private val localDataProvider: LocalDataProvider = serviceDeskProvider.getLocalDataProvider()
+    private val localDataVerifier: LocalDataVerifier = serviceDeskProvider.getLocalDataVerifier()
 
     private var isCreateTicketSent = false
     private var ticketId: Int = TicketActivity.getTicketId(arguments)
@@ -88,11 +84,21 @@ internal class TicketViewModel(
         }
     }
 
+    private var pendingCommentUnderAction: CommentEntry? = null
+
     init {
         draft = draftRepository.getDraft()
 
         if (!isFeed) {
             unreadCounter.value = TicketActivity.getUnreadTicketsCount(arguments)
+        }
+        else{
+            runBlocking {
+                val response = requests.getPendingFeedCommentsRequest().execute()
+                if (!response.hasError()) {
+                    applyTicketUpdate(response.getData()!!, true)
+                }
+            }
         }
 
         if (canBeUpdated() && isNetworkConnected.value == true) {
@@ -108,15 +114,6 @@ internal class TicketViewModel(
 
     override fun onUnreadTicketCountChanged(unreadTicketCount: Int) {
         this.unreadCounter.value = unreadTicketCount
-    }
-
-    override fun onClicked(item: CommentEntry) {
-        if (!item.hasError())
-            return
-        else {
-            applyCommentUpdate(item, ChangeType.Cancelled)
-            sendAddComment(item.comment, item.uploadFileHooks.also { it?.resetProgress() })
-        }
     }
 
     override fun onCleared() {
@@ -149,7 +146,7 @@ internal class TicketViewModel(
         fileHooks.subscribeOnCancel(object : OnCancelListener {
             override fun onCancel() {
                 return applyCommentUpdate(
-                    CommentEntry(localComment, onClickedCallback = this@TicketViewModel), ChangeType.Cancelled)
+                    CommentEntry(localComment), ChangeType.Cancelled)
             }
         })
         sendAddComment(localComment, fileHooks)
@@ -174,6 +171,47 @@ internal class TicketViewModel(
         draftRepository.saveDraft(text)
     }
 
+    /**
+     * Callback to be invoked when user chooses to retry sending pending comment
+     */
+    fun onPendingCommentRetried() {
+        pendingCommentUnderAction?.let { comment ->
+            applyCommentUpdate(comment, ChangeType.Cancelled)
+            sendAddComment(comment.comment, comment.uploadFileHooks.also { it?.resetProgress() })
+        }
+        pendingCommentUnderAction = null
+    }
+
+    /**
+     * Callback to be invoked when user chooses to delete pending comment
+     */
+    fun onPendingCommentDeleted() {
+        pendingCommentUnderAction?.let {
+            launch {
+                if (!requests.getRemovePendingCommentRequest(it.comment).execute().hasError()) {
+                    withContext(Dispatchers.Main){
+                        applyCommentUpdate(it, ChangeType.Cancelled)
+                        pendingCommentUnderAction = null
+                    }
+                }
+            }
+        }
+    }
+
+    /**
+     * Callback to be invoked when user decided not to perform any action on a pending comment
+     */
+    fun onChoosingCommentActionCancelled() {
+        pendingCommentUnderAction = null
+    }
+
+    /**
+     * Callback to be invoked when user starts choosing action on given pending [commentEntry]
+     */
+    fun onUserStartChoosingCommentAction(commentEntry: CommentEntry) {
+        pendingCommentUnderAction = commentEntry
+    }
+
     private fun update() {
         val call = when {
             isFeed -> GetFeedCall(this@TicketViewModel, requests).execute()
@@ -184,7 +222,7 @@ internal class TicketViewModel(
                     return@Observer
                 when {
                     result.hasError() -> {  }
-                    else -> applyTicketUpdate(result.data!!)
+                    else -> applyTicketUpdate(result.data!!, false)
                 }
             }
         call.observeForever(observer)
@@ -226,7 +264,7 @@ internal class TicketViewModel(
         val toNewTicket = !isFeed && isNewTicket() && !isCreateTicketSent
 
         applyCommentUpdate(
-            CommentEntry(localComment, uploadFileHooks = uploadFileHooks, onClickedCallback = this),
+            CommentEntry(localComment, uploadFileHooks = uploadFileHooks),
             ChangeType.Added
         )
         val call = when {
@@ -253,7 +291,6 @@ internal class TicketViewModel(
                     result.hasError() -> CommentEntry(
                         localComment,
                         uploadFileHooks, // for retry purpose
-                        this@TicketViewModel,
                         error = result.error
                     )
                     else -> {
@@ -264,10 +301,7 @@ internal class TicketViewModel(
                         val commentId = if (toNewTicket) localComment.localId else result.data!!
                         if(hasComment(commentId))
                             return@let
-                        CommentEntry(
-                            localDataProvider.convertLocalCommentToServer(localComment, commentId),
-                            onClickedCallback = this@TicketViewModel
-                        )
+                        CommentEntry(localDataProvider.convertLocalCommentToServer(localComment, commentId))
                     }
                 }
                 applyCommentUpdate(entry, ChangeType.Changed)
@@ -282,7 +316,12 @@ internal class TicketViewModel(
     }
 
     private fun commentContainsError(localComment: Comment): Boolean {
-        when (checkComment(localComment)) {
+        val commentError = when{
+            localDataVerifier.isLocalCommentEmpty(localComment) -> CheckCommentError.CommentIsEmpty
+            localComment.hasAttachmentWithExceededSize() -> CheckCommentError.FileSizeExceeded
+            else -> null
+        }
+        when (commentError) {
             CheckCommentError.CommentIsEmpty -> return true
             CheckCommentError.FileSizeExceeded -> {
                 (getApplication() as Context).run {
@@ -298,8 +337,8 @@ internal class TicketViewModel(
         return false
     }
 
-    private fun applyTicketUpdate(freshList: List<Comment>) {
-        if (!needUpdateCommentsList(freshList)) {
+    private fun applyTicketUpdate(freshList: List<Comment>, arePendingComments: Boolean) {
+        if (!arePendingComments && !needUpdateCommentsList(freshList)) {
             onDataLoaded()
             return
         }
@@ -323,7 +362,8 @@ internal class TicketViewModel(
             }
         }
         publishEntries(ticketEntries, toPublish)
-        onDataLoaded()
+        if (!arePendingComments)
+            onDataLoaded()
     }
 
     private fun needUpdateCommentsList(freshList: List<Comment>): Boolean {
@@ -422,46 +462,52 @@ internal class TicketViewModel(
     }
 
     private fun Comment.splitToEntries(): Collection<TicketEntry> {
+        val pendingError = when{
+            isLocal() -> PendingDataError()
+            else -> null
+        }
         if (!this.hasAttachments())
-            return listOf(CommentEntry(this, onClickedCallback = this@TicketViewModel))
+            return listOf(CommentEntry(this, error = pendingError))
         val result = mutableListOf<CommentEntry>()
         if (!body.isBlank())
-            result.add(CommentEntry(
-                Comment(
-                    this.commentId,
-                    this.body,
-                    this.isInbound,
-                    null,
-                    this.creationDate,
-                    this.author,
-                    this.localId),
-                onClickedCallback = this@TicketViewModel
-            ))
-        return this.attachments!!.fold(result){
-                entriesList, attachment ->
-            entriesList.add(CommentEntry(
-                Comment(
-                    this.commentId,
-                    this.body,
-                    this.isInbound,
-                    listOf(attachment),
-                    this.creationDate,
-                    this.author,
-                    this.localId),
-                onClickedCallback = this@TicketViewModel))
-            entriesList
-        }
+            result.add(
+                CommentEntry(
+                    Comment(
+                        this.commentId,
+                        this.body,
+                        this.isInbound,
+                        null,
+                        this.creationDate,
+                        this.author,
+                        this.localId),
+                    error = pendingError)
+            )
+        return this.attachments!!
+            .fold(result){ entriesList, attachment ->
+                entriesList.add(
+                    CommentEntry(
+                        Comment(
+                            this.commentId,
+                            this.body,
+                            this.isInbound,
+                            listOf(attachment),
+                            this.creationDate,
+                            this.author,
+                            this.localId),
+                        error = pendingError)
+                )
+                entriesList
+            }
     }
 
-}
+    private enum class ChangeType {
+        Added,
+        Changed,
+        Cancelled
+    }
 
-private enum class ChangeType {
-    Added,
-    Changed,
-    Cancelled
-}
-
-private enum class CheckCommentError {
-    CommentIsEmpty,
-    FileSizeExceeded
+    private enum class CheckCommentError {
+        CommentIsEmpty,
+        FileSizeExceeded
+    }
 }

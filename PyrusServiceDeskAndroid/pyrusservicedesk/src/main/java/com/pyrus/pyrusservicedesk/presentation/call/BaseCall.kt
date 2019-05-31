@@ -2,8 +2,8 @@ package com.pyrus.pyrusservicedesk.presentation.call
 
 import android.arch.lifecycle.LiveData
 import android.arch.lifecycle.MutableLiveData
-import kotlinx.coroutines.*
 import com.pyrus.pyrusservicedesk.sdk.response.ResponseError
+import kotlinx.coroutines.*
 
 /**
  * Base class that bounds requests to a data that can be consumed by ViewModels in a form of LiveData.
@@ -40,7 +40,7 @@ internal abstract class BaseCall<T>(private val scope: CoroutineScope) {
  */
 internal class CallResult<T>(val data: T? = null, val error: ResponseError? = null){
     /**
-     * @return true if result contains an error.
+     * @return true if result contains an responseError.
      */
     fun hasError() = error != null
 }

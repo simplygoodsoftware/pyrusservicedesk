@@ -2,12 +2,13 @@ package com.pyrus.pyrusservicedesk.sdk.data
 
 import android.net.Uri
 import com.google.gson.annotations.SerializedName
+import com.pyrus.pyrusservicedesk.sdk.data.gson.Local
 
 private const val FILE_ID_EMPTY = 0
 
 /**
  * Represents an attachment of the comment.
- * @param uri transient field that is used only for local comments.
+ * @param localUri transient field that is used only for local comments.
  */
 internal data class Attachment(
         @SerializedName("id")
@@ -24,5 +25,6 @@ internal data class Attachment(
         val isText: Boolean = false,
         @SerializedName("is_video")
         val isVideo: Boolean = false,
-        @Transient
-        val uri: Uri? = null)
+        @Local
+        @SerializedName("local_uri")
+        val localUri: Uri? = null)

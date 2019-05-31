@@ -2,17 +2,18 @@ package com.pyrus.pyrusservicedesk.sdk.repositories.general
 
 import com.pyrus.pyrusservicedesk.sdk.data.Comment
 import com.pyrus.pyrusservicedesk.sdk.data.TicketDescription
+import com.pyrus.pyrusservicedesk.sdk.repositories.offline.OfflineRepository
 import com.pyrus.pyrusservicedesk.sdk.response.*
 import com.pyrus.pyrusservicedesk.sdk.web.UploadFileHooks
 
 /**
  * [GeneralRepository] implementation that handles all general requests.
- * Current implementation just delegates calls to the [webRepository].
  */
-internal class CentralRepository(private val webRepository: GeneralRepository) :
-    GeneralRepository {
+internal class CentralRepository(private val webRepository: RemoteRepository,
+                                 private val offlineRepository: OfflineRepository)
+    : GeneralRepository {
 
-    override suspend fun getFeed(): GetFeedResponse = webRepository.getFeed()
+    override suspend fun getFeed(): Response<List<Comment>> = webRepository.getFeed()
 
     override suspend fun getTickets(): GetTicketsResponse = webRepository.getTickets()
 
@@ -27,7 +28,12 @@ internal class CentralRepository(private val webRepository: GeneralRepository) :
     }
 
     override suspend fun addFeedComment(comment: Comment, uploadFileHooks: UploadFileHooks?): AddCommentResponse {
-        return webRepository.addFeedComment(comment, uploadFileHooks)
+        addPendingFeedComment(comment)
+        val response = webRepository.addFeedComment(comment, uploadFileHooks)
+        if (response.responseError == null) {
+            removePendingComment(comment)
+        }
+        return response
     }
 
     override suspend fun createTicket(description: TicketDescription,
@@ -37,4 +43,10 @@ internal class CentralRepository(private val webRepository: GeneralRepository) :
     }
 
     override suspend fun setPushToken(token: String): SetPushTokenResponse = webRepository.setPushToken(token)
+
+    override suspend fun addPendingFeedComment(comment: Comment) = offlineRepository.addPendingFeedComment(comment)
+
+    override suspend fun getPendingFeedComments() = offlineRepository.getPendingFeedComments()
+
+    override suspend fun removePendingComment(comment: Comment) = offlineRepository.removePendingComment(comment)
 }

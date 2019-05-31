@@ -38,4 +38,5 @@
     <string name="psd_open">Open</string>
     <string name="psd_no_preview_available">No preview available</string>
     <string name="psd_share">Share</string>
+    <string name="psd_delete">Delete</string>
 </resources>

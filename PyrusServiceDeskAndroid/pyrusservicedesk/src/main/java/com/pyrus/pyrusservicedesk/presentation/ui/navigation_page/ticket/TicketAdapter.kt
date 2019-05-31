@@ -59,6 +59,7 @@ internal class TicketAdapter: AdapterBase<TicketEntry>() {
     }
     private var onFileReadyToPreviewClickListener: ((Attachment) -> Unit)? = null
     private var onTextCommentLongClicked: ((String) -> Unit)? = null
+    private var onErrorCommentEntryClickListener: ((CommentEntry) -> Unit)? = null
     private var recentInboundCommentPositionWithAvatar = 0
 
     override fun getItemViewType(position: Int): Int {
@@ -98,6 +99,13 @@ internal class TicketAdapter: AdapterBase<TicketEntry>() {
      */
     fun setOnFileReadyForPreviewClickListener(listener: (attachment: Attachment) -> Unit) {
         onFileReadyToPreviewClickListener = listener
+    }
+
+    /**
+     * Assigns [listener] that is invoked when comment with error was clicked.
+     */
+    fun setOnErrorCommentEntryClickListener(listener: (entry: CommentEntry) -> Unit) {
+        onErrorCommentEntryClickListener = listener
     }
 
     /**
@@ -186,14 +194,13 @@ internal class TicketAdapter: AdapterBase<TicketEntry>() {
 
         val onCommentClickListener = OnClickListener {
             when {
+                getItem().hasError() -> onErrorCommentEntryClickListener?.invoke(getItem())
                 (comment.contentType == ContentType.Attachment
                         || comment.contentType == ContentType.PreviewableAttachment)
                         && comment.fileProgressStatus == Status.Completed -> {
 
                     onFileReadyToPreviewClickListener?.invoke(getItem().comment.attachments!!.first())
                 }
-
-                else -> getItem().onClickedCallback.onClicked(getItem())
             }
         }
 
@@ -209,6 +216,10 @@ internal class TicketAdapter: AdapterBase<TicketEntry>() {
 
         override fun bindItem(item: CommentEntry) {
             super.bindItem(item)
+            itemView.setOnClickListener {
+                if (getItem().hasError())
+                    onErrorCommentEntryClickListener?.invoke(getItem())
+            }
             comment.setOnLongClickListener(onCommentLongClickListener)
             comment.setOnClickListener(onCommentClickListener)
             comment.status = when {
@@ -241,7 +252,7 @@ internal class TicketAdapter: AdapterBase<TicketEntry>() {
             getItem().comment.attachments!!.first().let {
                 comment.setFileName(getItem().comment.attachments?.first()?.name ?: "")
                 comment.setFileSize(getItem().comment.attachments?.first()?.bytesSize?.toFloat() ?: 0f)
-                val previewUri = it.uri ?: Uri.parse(getPreviewUrl(it.id))
+                val previewUri = it.localUri ?: Uri.parse(getPreviewUrl(it.id))
                 comment.setPreview(previewUri)
                 comment.fileProgressStatus = if (getItem().hasError()) Status.Error else Status.Completed
                 comment.setOnProgressIconClickListener {

@@ -8,4 +8,4 @@ import com.pyrus.pyrusservicedesk.sdk.data.Ticket
 internal class GetTicketResponse(
     error: ResponseError? = null,
     ticket: Ticket? = null)
-    : ResponseBase<Ticket>(error, ticket)
+    : ResponseImpl<Ticket>(error, ticket)

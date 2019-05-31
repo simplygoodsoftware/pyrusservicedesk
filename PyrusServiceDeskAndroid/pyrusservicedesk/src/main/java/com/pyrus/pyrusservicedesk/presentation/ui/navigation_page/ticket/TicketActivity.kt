@@ -21,6 +21,10 @@ import com.pyrus.pyrusservicedesk.R
 import com.pyrus.pyrusservicedesk.ServiceDeskConfiguration
 import com.pyrus.pyrusservicedesk.presentation.ConnectionActivityBase
 import com.pyrus.pyrusservicedesk.presentation.ui.navigation.UiNavigator
+import com.pyrus.pyrusservicedesk.presentation.ui.navigation_page.ticket.dialogs.attach_files.AttachFileSharedViewModel
+import com.pyrus.pyrusservicedesk.presentation.ui.navigation_page.ticket.dialogs.attach_files.AttachFileVariantsFragment
+import com.pyrus.pyrusservicedesk.presentation.ui.navigation_page.ticket.dialogs.comment_actions.PendingCommentActionSharedViewModel
+import com.pyrus.pyrusservicedesk.presentation.ui.navigation_page.ticket.dialogs.comment_actions.PendingCommentActionsDialog
 import com.pyrus.pyrusservicedesk.presentation.ui.view.NavigationCounterDrawable
 import com.pyrus.pyrusservicedesk.presentation.ui.view.recyclerview.item_decorators.SpaceItemDecoration
 import com.pyrus.pyrusservicedesk.sdk.data.Attachment
@@ -56,7 +60,7 @@ internal class TicketActivity : ConnectionActivityBase<TicketViewModel>(TicketVi
          */
         fun getLaunchIntent(ticketId:Int? = null, unreadCount: Int? = 0): Intent {
             return Intent(
-                    PyrusServiceDesk.getInstance().application,
+                    PyrusServiceDesk.get().application,
                     TicketActivity::class.java).also { intent ->
 
                 ticketId?.let { intent.putExtra(KEY_TICKET_ID, it) }
@@ -91,7 +95,10 @@ internal class TicketActivity : ConnectionActivityBase<TicketViewModel>(TicketVi
     override val refresherViewId = R.id.refresh
     override val progressBarViewId: Int = NO_ID
 
-    private val ticketSharedViewModel: TicketSharedViewModel by getViewModel(TicketSharedViewModel::class.java)
+    private val attachFileSharedViewModel: AttachFileSharedViewModel by getViewModel(
+        AttachFileSharedViewModel::class.java)
+    private val commentActionsSharedViewModel: PendingCommentActionSharedViewModel by getViewModel(
+        PendingCommentActionSharedViewModel::class.java)
     private val navigationCounterIcon by lazy {
         NavigationCounterDrawable(
             this
@@ -101,6 +108,10 @@ internal class TicketActivity : ConnectionActivityBase<TicketViewModel>(TicketVi
     private val adapter = TicketAdapter().apply {
         setOnFileReadyForPreviewClickListener {
            UiNavigator.toFilePreview(this@TicketActivity, it.toFileData())
+        }
+        setOnErrorCommentEntryClickListener {
+            viewModel.onUserStartChoosingCommentAction(it)
+            PendingCommentActionsDialog().show(supportFragmentManager, "")
         }
         setOnTextCommentLongClicked {
             copyToClipboard(it)
@@ -233,11 +244,23 @@ internal class TicketActivity : ConnectionActivityBase<TicketViewModel>(TicketVi
                     navigationCounterIcon.counter = count
             } }
         )
-        ticketSharedViewModel.getFilePickedLiveData().observe(
+        attachFileSharedViewModel.getFilePickedLiveData().observe(
             this,
             Observer { fileUri ->
                 fileUri?.let {
                     viewModel.onAttachmentSelected(it)
+                }
+            }
+        )
+        commentActionsSharedViewModel.getSelectedActionLiveData().observe(
+            this,
+            Observer { action ->
+                action?.let {
+                    when{
+                        PendingCommentActionSharedViewModel.isRetryClicked(it) -> viewModel.onPendingCommentRetried()
+                        PendingCommentActionSharedViewModel.isDeleteClicked(it) -> viewModel.onPendingCommentDeleted()
+                        PendingCommentActionSharedViewModel.isCancelled(it) -> viewModel.onChoosingCommentActionCancelled()
+                    }
                 }
             }
         )
@@ -272,7 +295,8 @@ internal class TicketActivity : ConnectionActivityBase<TicketViewModel>(TicketVi
     }
 
     private fun showAttachFileVariants() {
-        AttachFileVariantsFragment().show(supportFragmentManager, "")
+        AttachFileVariantsFragment()
+            .show(supportFragmentManager, "")
     }
 
     private fun copyToClipboard(text: String) {
@@ -287,7 +311,7 @@ private fun Attachment.toFileData(): FileData {
     return FileData(
         name,
         bytesSize,
-        uri ?: Uri.parse(getFileUrl(id)),
-        uri != null
+        localUri ?: Uri.parse(getFileUrl(id)),
+        localUri != null
     )
 }

@@ -50,7 +50,7 @@ internal class FilePreviewActivity: ConnectionActivityBase<FilePreviewViewModel>
          */
         fun getLaunchIntent(fileData: FileData): Intent {
             return Intent(
-                PyrusServiceDesk.getInstance().application,
+                PyrusServiceDesk.get().application,
                 FilePreviewActivity::class.java
             )
                 .putExtra(KEY_FILE_DATA, fileData)

@@ -2,7 +2,7 @@ package com.pyrus.pyrusservicedesk.sdk.request
 
 import com.pyrus.pyrusservicedesk.sdk.data.TicketDescription
 import com.pyrus.pyrusservicedesk.sdk.repositories.general.GeneralRepository
-import com.pyrus.pyrusservicedesk.sdk.response.ResponseBase
+import com.pyrus.pyrusservicedesk.sdk.response.ResponseImpl
 import com.pyrus.pyrusservicedesk.sdk.web.UploadFileHooks
 
 
@@ -17,7 +17,7 @@ internal class CreateTicketRequest(repository: GeneralRepository,
                                    private val uploadFileHooks: UploadFileHooks?)
     : RequestBase<Int>(repository){
 
-    override suspend fun run(repository: GeneralRepository): ResponseBase<Int> {
+    override suspend fun run(repository: GeneralRepository): ResponseImpl<Int> {
         return repository.createTicket(description, uploadFileHooks)
     }
 }

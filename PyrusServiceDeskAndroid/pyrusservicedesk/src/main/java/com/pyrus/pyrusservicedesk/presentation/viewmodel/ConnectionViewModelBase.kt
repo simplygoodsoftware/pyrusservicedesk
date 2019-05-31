@@ -11,6 +11,7 @@ import android.os.Handler
 import android.view.animation.AccelerateInterpolator
 import com.pyrus.pyrusservicedesk.PyrusServiceDesk
 import com.pyrus.pyrusservicedesk.R
+import com.pyrus.pyrusservicedesk.ServiceDeskProvider
 import kotlinx.coroutines.*
 
 private const val PROGRESS_START_VALUE = 40
@@ -25,28 +26,26 @@ private const val PROGRESS_ANIMATION_DURATION_MS_QUICK = 400L
  *
  * @param serviceDesk current [PyrusServiceDesk] implementation.
  */
-internal abstract class ConnectionViewModelBase(serviceDesk: PyrusServiceDesk)
-    : AndroidViewModel(serviceDesk.application),
+internal abstract class ConnectionViewModelBase(serviceDeskProvider: ServiceDeskProvider)
+    : AndroidViewModel(serviceDeskProvider.getApplication()),
         CoroutineScope {
 
     // request factory that can be used for making requests to a repository.
-    protected val requests = serviceDesk.requestFactory
+    protected val requests = serviceDeskProvider.getRequestFactory()
     // updates that can be observed by extenders.
-    protected val liveUpdates = serviceDesk.liveUpdates
-    // provider of temporary data to be rendered by ui, for example, local comments etc.
-    protected val localDataProvider = serviceDesk.localDataProvider
+    protected val liveUpdates = serviceDeskProvider.getLiveUpdates()
     // live data that exposes state of the network.
     // The state is not completely fair, because it is assigned when instance is created and it explicitly cleared
     // when successful data loading has been performed.
     protected val isNetworkConnected = MutableLiveData<Boolean>()
 
     private val connectivity: ConnectivityManager =
-        serviceDesk.application.getSystemService(Context.CONNECTIVITY_SERVICE)
+        serviceDeskProvider.getApplication().getSystemService(Context.CONNECTIVITY_SERVICE)
                 as ConnectivityManager
 
-    private val MAX_PROGRESS = serviceDesk.application.resources.getInteger(R.integer.psd_progress_max_value)
+    private val MAX_PROGRESS = serviceDeskProvider.getApplication().resources.getInteger(R.integer.psd_progress_max_value)
     private val loadingProgress = MutableLiveData<Int>()
-    private val mainHandler = Handler(serviceDesk.application.mainLooper)
+    private val mainHandler = Handler(serviceDeskProvider.getApplication().mainLooper)
 
     private var recentPublishedProgress = 0
 

@@ -1,4 +1,4 @@
-package com.pyrus.pyrusservicedesk.presentation.ui.navigation_page.ticket
+package com.pyrus.pyrusservicedesk.presentation.ui.navigation_page.ticket.dialogs.attach_files
 
 import android.arch.lifecycle.LiveData
 import android.arch.lifecycle.MutableLiveData
@@ -9,7 +9,7 @@ import android.net.Uri
  * Shared view model of the ticket activity.
  * Used for sharing state between activity and child fragments.
  */
-internal class TicketSharedViewModel: ViewModel() {
+internal class AttachFileSharedViewModel: ViewModel() {
 
     private val filePickedData = MutableLiveData<Uri>()
 
@@ -20,7 +20,7 @@ internal class TicketSharedViewModel: ViewModel() {
      */
     fun onFilePicked(fileUri: Uri) {
         filePickedData.value = fileUri
-        // Posting null is necessary to clear current value to prevent publishing recent uri again if
+        // Posting null is necessary to clear current value to prevent publishing recent localUri again if
         // observer is connected.
         // Without post only null is received to an observer.
         filePickedData.postValue(null)

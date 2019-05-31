@@ -6,7 +6,7 @@ import android.os.Parcelable
 
 /**
  * Intermediate data for transfer attachment data between UI elements.
- * @param uri can contain either url of the server attachment or uri of the local file.
+ * @param uri can contain either url of the server attachment or localUri of the local file.
  */
 internal data class FileData(val fileName: String,
                              val bytesSize: Int,

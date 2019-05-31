@@ -71,7 +71,7 @@ internal class ConfigUtils{
             return when {
                 !PyrusServiceDesk.getConfiguration().userName.isNullOrBlank() ->
                     PyrusServiceDesk.getConfiguration().userName!!
-                else -> PyrusServiceDesk.getInstance().application.getString(R.string.psd_guest)
+                else -> PyrusServiceDesk.get().application.getString(R.string.psd_guest)
             }
         }
 

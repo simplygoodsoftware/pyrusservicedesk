@@ -2,7 +2,7 @@ package com.pyrus.pyrusservicedesk.presentation.ui.navigation_page.tickets
 
 import android.arch.lifecycle.LiveData
 import android.arch.lifecycle.MediatorLiveData
-import com.pyrus.pyrusservicedesk.PyrusServiceDesk
+import com.pyrus.pyrusservicedesk.ServiceDeskProvider
 import com.pyrus.pyrusservicedesk.presentation.call.GetTicketsCall
 import com.pyrus.pyrusservicedesk.presentation.viewmodel.ConnectionViewModelBase
 import com.pyrus.pyrusservicedesk.sdk.data.TicketShortDescription
@@ -11,8 +11,8 @@ import com.pyrus.pyrusservicedesk.sdk.updates.LiveUpdateSubscriber
 /**
  * ViewModel for rendering UI with list of tickets
  */
-internal class TicketsViewModel(serviceDesk: PyrusServiceDesk)
-    : ConnectionViewModelBase(serviceDesk),
+internal class TicketsViewModel(serviceDeskProvider: ServiceDeskProvider)
+    : ConnectionViewModelBase(serviceDeskProvider),
     LiveUpdateSubscriber {
 
     private val tickets = MediatorLiveData<List<TicketShortDescription>>()
@@ -99,8 +99,8 @@ internal class TicketsViewModel(serviceDesk: PyrusServiceDesk)
             }
         }
     }
-}
 
-private fun TicketShortDescription.read(): TicketShortDescription {
-    return TicketShortDescription(ticketId, subject, true, lastComment)
+    private fun TicketShortDescription.read(): TicketShortDescription {
+        return TicketShortDescription(ticketId, subject, true, lastComment)
+    }
 }

@@ -26,7 +26,7 @@ internal class TicketsActivity: ConnectionActivityBase<TicketsViewModel>(Tickets
          */
         fun getLaunchIntent(): Intent {
             return Intent(
-                PyrusServiceDesk.getInstance().application,
+                PyrusServiceDesk.get().application,
                 TicketsActivity::class.java)
         }
     }

@@ -1,9 +1,12 @@
 package com.pyrus.pyrusservicedesk.sdk.data
 
 import android.net.Uri
+import android.support.annotation.MainThread
 import com.pyrus.pyrusservicedesk.sdk.FileResolver
 import com.pyrus.pyrusservicedesk.sdk.data.intermediate.FileData
+import com.pyrus.pyrusservicedesk.sdk.repositories.offline.OfflineRepository
 import com.pyrus.pyrusservicedesk.utils.ConfigUtils
+import kotlinx.coroutines.runBlocking
 import java.util.*
 
 /**
@@ -11,19 +14,31 @@ import java.util.*
  * Also is responsible for converting local instances to the server ones.
  * Each new local comment is guaranteed to have its unique [Comment.localId].
  *
- * @param initialLocalCommentId is used for for avoiding of the collapse of local comment ids of two different comments.
  * @param fileResolver helper for composing local attachment instances.
  */
-internal class LocalDataProvider(initialLocalCommentId: Int = -1,
+internal class LocalDataProvider(offlineRepository: OfflineRepository,
                                  private val fileResolver: FileResolver) {
 
-    private var lastLocalCommentId = initialLocalCommentId
+    private var lastLocalCommentId: Int = 0
+
+    init {
+        runBlocking {
+            // assigns last pending comment id as last local
+            lastLocalCommentId = offlineRepository
+                .getPendingFeedComments()
+                .getData()
+                ?.lastOrNull()
+                ?.localId
+                ?: 0
+        }
+    }
 
     /**
      * Creates local comment instance using given [text] and [fileUri].
      *
      * @return [Comment] instance with [Comment.isLocal] is TRUE.
      */
+    @MainThread
     fun createLocalComment(text: String = "", fileUri: Uri? = null): Comment {
         return Comment(
             body = text,
@@ -43,7 +58,7 @@ internal class LocalDataProvider(initialLocalCommentId: Int = -1,
      * this method.
      *
      * NB: If [localComment] contains local attachment, returned comment not equals to the pure server comment
-     * as local attachments points to a local file in [Attachment.uri], and still doesn't have [Attachment.id]
+     * as local attachments points to a local file in [Attachment.localUri], and still doesn't have [Attachment.id]
      *
      * @return comment instance with the substituted [serverCommentId]
      */
@@ -60,7 +75,7 @@ internal class LocalDataProvider(initialLocalCommentId: Int = -1,
     }
 
     private fun createLocalAttachment(fileData: FileData): Attachment {
-        return Attachment(name = fileData.fileName, bytesSize = fileData.bytesSize, uri = fileData.uri)
+        return Attachment(name = fileData.fileName, bytesSize = fileData.bytesSize, localUri = fileData.uri)
     }
 }
 

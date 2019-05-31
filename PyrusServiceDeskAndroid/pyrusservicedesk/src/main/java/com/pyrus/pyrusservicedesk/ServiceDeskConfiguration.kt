@@ -18,7 +18,7 @@ class ServiceDeskConfiguration internal constructor() {
     @DrawableRes
     internal var supportAvatar: Int? = null
 
-    internal val isDialogTheme: Boolean = PyrusServiceDesk.getInstance().application.isTablet()
+    internal val isDialogTheme: Boolean = PyrusServiceDesk.get().application.isTablet()
 
     internal companion object {
         private const val KEY_USER_NAME = "ServiceDeskConfiguration_KEY_USER_NAME"

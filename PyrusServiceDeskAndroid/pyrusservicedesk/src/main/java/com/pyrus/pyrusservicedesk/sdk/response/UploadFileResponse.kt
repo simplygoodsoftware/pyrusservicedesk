@@ -8,5 +8,5 @@ import com.pyrus.pyrusservicedesk.sdk.data.intermediate.FileUploadResponseData
 internal class UploadFileResponse(
     error: ResponseError? = null,
     uploadData: FileUploadResponseData? = null)
-    : ResponseBase<FileUploadResponseData>(error, uploadData)
+    : ResponseImpl<FileUploadResponseData>(error, uploadData)
 

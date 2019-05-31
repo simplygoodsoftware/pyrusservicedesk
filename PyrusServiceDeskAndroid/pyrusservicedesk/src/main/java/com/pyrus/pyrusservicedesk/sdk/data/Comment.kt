@@ -1,6 +1,7 @@
 package com.pyrus.pyrusservicedesk.sdk.data
 
 import com.google.gson.annotations.SerializedName
+import com.pyrus.pyrusservicedesk.sdk.data.gson.Local
 import java.util.*
 
 private const val COMMENT_ID_EMPTY = 0
@@ -23,7 +24,8 @@ internal data class Comment(
         val creationDate: Date,
         @SerializedName("author")
         val author: Author,
-        @Transient
+        @Local
+        @SerializedName("local_comment_id")
         val localId: Int = COMMENT_ID_EMPTY){
 
     /**

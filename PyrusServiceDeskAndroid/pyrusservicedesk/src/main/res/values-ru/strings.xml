@@ -40,4 +40,5 @@
     <string name="psd_open">Открыть</string>
     <string name="psd_no_preview_available">Превью недоступно</string>
     <string name="psd_share">Поделиться</string>
+    <string name="psd_delete">Удалить</string>
 </resources>
