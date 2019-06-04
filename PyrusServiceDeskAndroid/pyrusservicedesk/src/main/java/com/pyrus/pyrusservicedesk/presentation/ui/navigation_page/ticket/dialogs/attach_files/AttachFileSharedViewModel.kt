@@ -20,7 +20,7 @@ internal class AttachFileSharedViewModel: ViewModel() {
      */
     fun onFilePicked(fileUri: Uri) {
         filePickedData.value = fileUri
-        // Posting null is necessary to clear current value to prevent publishing recent localUri again if
+        // Posting null is necessary to clear current value to prevent publishing recent uri again if
         // observer is connected.
         // Without post only null is received to an observer.
         filePickedData.postValue(null)
