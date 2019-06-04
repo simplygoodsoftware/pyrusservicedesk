@@ -1,7 +1,7 @@
 package com.pyrus.pyrusservicedesk.sdk.response
 
 /**
- * Base responseError that can happen during request processing.
+ * Base error that can happen during request processing.
  * @param message user-friendly message
  */
 internal sealed class ResponseError(message: String): Exception(message)

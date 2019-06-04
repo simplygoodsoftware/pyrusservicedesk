@@ -15,7 +15,7 @@ internal abstract class RequestBase<ResponseData>(private val repository: Genera
     /**
      * Implementation should provide response using the given [repository]
      *
-     * @return response that contains either data or responseError.
+     * @return response that contains either data or error.
      */
     protected abstract suspend fun run(repository: GeneralRepository): Response<ResponseData>
 

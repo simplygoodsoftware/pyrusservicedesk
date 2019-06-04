@@ -40,7 +40,7 @@ internal abstract class BaseCall<T>(private val scope: CoroutineScope) {
  */
 internal class CallResult<T>(val data: T? = null, val error: ResponseError? = null){
     /**
-     * @return true if result contains an responseError.
+     * @return true if result contains an error.
      */
     fun hasError() = error != null
 }

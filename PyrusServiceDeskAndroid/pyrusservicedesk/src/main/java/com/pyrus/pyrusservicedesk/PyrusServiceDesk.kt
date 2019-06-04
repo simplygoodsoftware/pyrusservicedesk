@@ -116,7 +116,7 @@ class PyrusServiceDesk private constructor(
          *
          * @param token string token to be registered
          * @param callback callback that is invoked when result of registering of the token is received.
-         *  This is invoked without responseError when token is successfully registered.
+         *  This is invoked without error when token is successfully registered.
          */
         @JvmStatic
         fun setPushToken(token: String, callback: SetPushTokenCallback) {

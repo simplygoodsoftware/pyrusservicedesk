@@ -10,7 +10,7 @@ internal interface ResponseCallback<Data> {
     fun onSuccess(data: Data)
 
     /**
-     * Invoked when request was executed with an responseError.
+     * Invoked when request was executed with an error.
      */
     fun onFailure(responseError: ResponseError)
 }

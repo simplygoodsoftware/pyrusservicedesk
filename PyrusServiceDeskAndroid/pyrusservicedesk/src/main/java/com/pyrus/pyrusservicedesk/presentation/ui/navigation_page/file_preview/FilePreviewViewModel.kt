@@ -66,7 +66,7 @@ internal class FilePreviewViewModel(serviceDeskProvider: ServiceDeskProvider,
     }
 
     /**
-     * Callback to be called when user received an responseError while being downloaded the preview
+     * Callback to be called when user received an error while being downloaded the preview
      * of the attachment.
      */
     fun onErrorReceived() {

@@ -12,14 +12,14 @@ internal class CommentEntry(
         val comment: Comment,
         // used for rendering uploading progress as well as for cancelling an upload.
         val uploadFileHooks: UploadFileHooks? = null,
-        // responseError that is used for rendering errors
+        // error that is used for rendering errors
         var error: ResponseError? = null)
     : TicketEntry() {
 
     override val type: Type = Type.Comment
 
     /**
-     * @return true if current entry contains an responseError
+     * @return true if current entry contains an error
      */
     fun hasError() = error != null
 }

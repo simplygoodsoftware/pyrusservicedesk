@@ -8,7 +8,7 @@ import com.pyrus.pyrusservicedesk.sdk.response.Response
 internal interface Request<U> {
     /**
      * Launches processing of the request that is always finishes with [Response] which
-     * contains an responseError if any responseError occurred
+     * contains an error if any error occurred
      */
     suspend fun execute(): Response<U>
 }

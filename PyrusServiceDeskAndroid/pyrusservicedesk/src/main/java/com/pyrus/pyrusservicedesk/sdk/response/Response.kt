@@ -7,7 +7,7 @@ internal interface Response<T> {
 
     /**
      * Data that response contains.
-     * May be null if an responseError is occurred
+     * May be null if an error is occurred
      */
     fun getData(): T?
 
@@ -18,7 +18,7 @@ internal interface Response<T> {
     fun getError(): ResponseError?
 
     /**
-     * @return TRUE if response contains an responseError
+     * @return TRUE if response contains an error
      */
     fun hasError() = getError() != null
 }

@@ -17,7 +17,7 @@ import kotlinx.android.synthetic.main.psd_no_connection.*
 private const val ANIMATION_DURATION = 200L
 
 /**
- * Base class for activities that are able to show progress and connection responseError.
+ * Base class for activities that are able to show progress and connection error.
  * Appropriate view model for this activity is lazily loaded by [getViewModel].
  */
 internal abstract class ConnectionActivityBase<T: ConnectionViewModelBase>(viewModelClass: Class<T>)

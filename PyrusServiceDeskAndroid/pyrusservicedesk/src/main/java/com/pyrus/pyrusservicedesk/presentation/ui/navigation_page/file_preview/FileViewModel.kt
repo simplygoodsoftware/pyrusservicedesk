@@ -7,7 +7,7 @@ import android.net.Uri
  *
  * @param fileUri localUri of the file
  * @param isPreviewable TRUE if localUri's content can be previewed
- * @param hasError TRUE if there is an responseError occurred
+ * @param hasError TRUE if there is an error occurred
  * @param isDownloading TRUE if file is being currently downloaded
  * @param isLocal TRUE if file download complete successfully. When TRUE, [fileUri] must point to a local file resource.
  */
