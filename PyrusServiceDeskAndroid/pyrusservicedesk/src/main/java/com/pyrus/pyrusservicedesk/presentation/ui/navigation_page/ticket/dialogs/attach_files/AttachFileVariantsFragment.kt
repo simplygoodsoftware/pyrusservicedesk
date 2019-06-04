@@ -90,7 +90,10 @@ internal class AttachFileVariantsFragment: BottomSheetDialogFragment(), View.OnC
         val isPhoto = requestCode == REQUEST_CODE_TAKE_PHOTO
         val location: Uri? = if (isPhoto) capturePhotoUri else data?.data
         location?.let {
-            if (!isPhoto && Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
+            if (!isPhoto
+                && requestCode != REQUEST_CODE_CUSTOM_CHOOSER
+                && Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
+
                 context?.contentResolver?.takePersistableUriPermission(
                     it,
                     Intent.FLAG_GRANT_READ_URI_PERMISSION)
