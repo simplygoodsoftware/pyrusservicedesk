@@ -47,12 +47,12 @@ internal class LocalDataProvider(initialLocalCommentId: Int = -1,
      *
      * @return comment instance with the substituted [serverCommentId]
      */
-    fun convertLocalCommentToServer(localComment: Comment, serverCommentId: Int): Comment {
+    fun convertLocalCommentToServer(localComment: Comment, serverCommentId: Int, attachments: List<Attachment>?): Comment {
         return Comment(
             serverCommentId,
             localComment.body,
             localComment.isInbound,
-            localComment.attachments,
+            attachments,
             localComment.creationDate,
             localComment.author,
             localComment.localId

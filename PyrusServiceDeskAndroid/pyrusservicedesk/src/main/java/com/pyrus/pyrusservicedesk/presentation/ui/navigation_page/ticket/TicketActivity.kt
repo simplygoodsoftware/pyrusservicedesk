@@ -287,7 +287,7 @@ private fun Attachment.toFileData(): FileData {
     return FileData(
         name,
         bytesSize,
-        uri ?: Uri.parse(getFileUrl(id)),
-        uri != null
+        if (isLocal() && uri != null) uri else Uri.parse(getFileUrl(id)),
+        isLocal()
     )
 }

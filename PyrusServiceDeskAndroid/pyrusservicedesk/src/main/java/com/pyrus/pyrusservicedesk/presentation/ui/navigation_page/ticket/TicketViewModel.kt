@@ -19,6 +19,8 @@ import com.pyrus.pyrusservicedesk.presentation.viewmodel.ConnectionViewModelBase
 import com.pyrus.pyrusservicedesk.sdk.data.Attachment
 import com.pyrus.pyrusservicedesk.sdk.data.Comment
 import com.pyrus.pyrusservicedesk.sdk.data.EMPTY_TICKET_ID
+import com.pyrus.pyrusservicedesk.sdk.data.intermediate.AddCommentResponseData
+import com.pyrus.pyrusservicedesk.sdk.data.intermediate.CreateTicketResponseData
 import com.pyrus.pyrusservicedesk.sdk.updates.OnUnreadTicketCountChangedSubscriber
 import com.pyrus.pyrusservicedesk.sdk.web.OnCancelListener
 import com.pyrus.pyrusservicedesk.sdk.web.UploadFileHooks
@@ -229,49 +231,21 @@ internal class TicketViewModel(
             CommentEntry(localComment, uploadFileHooks = uploadFileHooks, onClickedCallback = this),
             ChangeType.Added
         )
-        val call = when {
+        when {
             toNewTicket -> {
                 isCreateTicketSent = true
-                CreateTicketCall(this, requests, localComment, uploadFileHooks).execute()
+                CreateTicketCall(this, requests, localComment, uploadFileHooks)
+                    .execute()
+                    .observeForever(CreateTicketObserver(uploadFileHooks, localComment))
             }
-            isFeed -> AddFeedCommentCall(this, requests, localComment, uploadFileHooks).execute()
-            else -> AddCommentCall(this, requests, ticketId, localComment, uploadFileHooks).execute()
-        }
-        call.observeForever(getObserverForAddCommentCall(localComment, uploadFileHooks, toNewTicket))
-    }
-
-    private fun getObserverForAddCommentCall(localComment: Comment,
-                                             uploadFileHooks: UploadFileHooks?,
-                                             toNewTicket: Boolean): Observer<CallResult<Int>> {
-
-        return Observer { res ->
-            res?.let { result ->
-                isCreateTicketSent = false
-                if (uploadFileHooks?.isCancelled == true)
-                    return@let
-                val entry = when {
-                    result.hasError() -> CommentEntry(
-                        localComment,
-                        uploadFileHooks, // for retry purpose
-                        this@TicketViewModel,
-                        error = result.error
-                    )
-                    else -> {
-                        if (toNewTicket) {
-                            ticketId = result.data!!
-                            maybeStartAutoRefresh()
-                        }
-                        val commentId = if (toNewTicket) localComment.localId else result.data!!
-                        if(hasComment(commentId))
-                            return@let
-                        CommentEntry(
-                            localDataProvider.convertLocalCommentToServer(localComment, commentId),
-                            onClickedCallback = this@TicketViewModel
-                        )
-                    }
-                }
-                applyCommentUpdate(entry, ChangeType.Changed)
-            }
+            isFeed ->
+                AddFeedCommentCall(this, requests, localComment, uploadFileHooks)
+                    .execute()
+                    .observeForever(AddCommentObserver(uploadFileHooks, localComment))
+            else ->
+                AddCommentCall(this, requests, ticketId, localComment, uploadFileHooks)
+                    .execute()
+                    .observeForever(AddCommentObserver(uploadFileHooks, localComment))
         }
     }
 
@@ -451,6 +425,74 @@ internal class TicketViewModel(
                 onClickedCallback = this@TicketViewModel))
             entriesList
         }
+    }
+
+    private inner class AddCommentObserver(uploadFileHooks: UploadFileHooks?,
+                                           localComment: Comment)
+        : AddCommentObserverBase<CallResult<AddCommentResponseData>, AddCommentResponseData>(uploadFileHooks, localComment){
+
+        override fun getAttachments(data: AddCommentResponseData) = data.sentAttachments
+
+        override fun getCommentId(data: AddCommentResponseData): Int = data.commentId
+
+        override fun onSuccess(data: AddCommentResponseData) {}
+
+    }
+
+    private inner class CreateTicketObserver(uploadFileHooks: UploadFileHooks?,
+                                             localComment: Comment)
+        : AddCommentObserverBase<CallResult<CreateTicketResponseData>, CreateTicketResponseData>(uploadFileHooks, localComment){
+
+        override fun getAttachments(data: CreateTicketResponseData) = data.sentAttachments
+
+        override fun getCommentId(data: CreateTicketResponseData): Int {
+            return localComment.localId
+        }
+
+        override fun onSuccess(data: CreateTicketResponseData) {
+            ticketId = data.ticketId
+            maybeStartAutoRefresh()
+        }
+    }
+
+    private abstract inner class AddCommentObserverBase<T : CallResult<U>, U>(val uploadFileHooks: UploadFileHooks?,
+                                                                              val localComment: Comment)
+        : Observer<T> {
+
+        override fun onChanged(t: T?) {
+            t?.let { result ->
+                isCreateTicketSent = false
+                if (uploadFileHooks?.isCancelled == true)
+                    return@let
+                val entry = when {
+                    result.hasError() -> CommentEntry(
+                        localComment,
+                        uploadFileHooks, // for retry purpose
+                        this@TicketViewModel,
+                        error = result.error
+                    )
+                    else -> {
+                        onSuccess(result.data!!)
+                        val commentId = getCommentId(result.data)
+                        val attachments = getAttachments(result.data)
+                        if(hasComment(commentId))
+                            return@let
+                        CommentEntry(
+                            localDataProvider.convertLocalCommentToServer(localComment, commentId, attachments),
+                            onClickedCallback = this@TicketViewModel
+                        )
+                    }
+                }
+                applyCommentUpdate(entry, ChangeType.Changed)
+            }
+        }
+
+        abstract fun getAttachments(data: U): List<Attachment>?
+
+        abstract fun getCommentId(data: U): Int
+
+        abstract fun onSuccess(data: U)
+
     }
 
 }

@@ -4,6 +4,8 @@ import com.pyrus.pyrusservicedesk.sdk.data.Comment
 import com.pyrus.pyrusservicedesk.sdk.data.Ticket
 import com.pyrus.pyrusservicedesk.sdk.data.TicketDescription
 import com.pyrus.pyrusservicedesk.sdk.data.TicketShortDescription
+import com.pyrus.pyrusservicedesk.sdk.data.intermediate.AddCommentResponseData
+import com.pyrus.pyrusservicedesk.sdk.data.intermediate.CreateTicketResponseData
 import com.pyrus.pyrusservicedesk.sdk.repositories.general.GeneralRepository
 import com.pyrus.pyrusservicedesk.sdk.request.*
 import com.pyrus.pyrusservicedesk.sdk.web.UploadFileHooks
@@ -14,18 +16,18 @@ internal class RequestFactory(private val repository: GeneralRepository) {
     fun getTicketsRequest(): RequestBase<List<TicketShortDescription>> = GetTicketsRequest(repository)
     fun getTicketRequest(ticketId: Int): RequestBase<Ticket> = GetTicketRequest(repository, ticketId)
     fun getCreateTicketRequest(description: TicketDescription,
-                               uploadFileHooks: UploadFileHooks?): RequestBase<Int> {
+                               uploadFileHooks: UploadFileHooks?): RequestBase<CreateTicketResponseData> {
         return CreateTicketRequest(repository, description, uploadFileHooks)
     }
 
     fun getAddFeedCommentRequest(comment: Comment,
-                                 uploadFileHooks: UploadFileHooks? = null): RequestBase<Int> {
+                                 uploadFileHooks: UploadFileHooks? = null): RequestBase<AddCommentResponseData> {
         return AddFeedCommentRequest(repository, comment, uploadFileHooks)
     }
 
     fun getAddCommentRequest(ticketId: Int,
                              comment: Comment,
-                             uploadFileHooks: UploadFileHooks? = null): RequestBase<Int> {
+                             uploadFileHooks: UploadFileHooks? = null): RequestBase<AddCommentResponseData> {
         return AddCommentRequest(repository, ticketId, comment, uploadFileHooks)
     }
 

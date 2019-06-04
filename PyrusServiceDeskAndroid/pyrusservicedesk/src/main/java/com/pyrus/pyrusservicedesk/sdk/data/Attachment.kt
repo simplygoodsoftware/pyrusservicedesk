@@ -11,7 +11,7 @@ private const val FILE_ID_EMPTY = 0
  */
 internal data class Attachment(
         @SerializedName("id")
-        val id:Int = FILE_ID_EMPTY,
+        val id: Int = FILE_ID_EMPTY,
         @SerializedName("guid")
         val guid: String = "",
         @SerializedName("type")
@@ -25,4 +25,7 @@ internal data class Attachment(
         @SerializedName("is_video")
         val isVideo: Boolean = false,
         @Transient
-        val uri: Uri? = null)
+        val uri: Uri? = null) {
+
+        fun isLocal() = id == FILE_ID_EMPTY
+}

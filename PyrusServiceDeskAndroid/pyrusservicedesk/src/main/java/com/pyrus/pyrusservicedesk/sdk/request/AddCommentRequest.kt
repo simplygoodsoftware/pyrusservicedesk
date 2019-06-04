@@ -1,6 +1,7 @@
 package com.pyrus.pyrusservicedesk.sdk.request
 
 import com.pyrus.pyrusservicedesk.sdk.data.Comment
+import com.pyrus.pyrusservicedesk.sdk.data.intermediate.AddCommentResponseData
 import com.pyrus.pyrusservicedesk.sdk.repositories.general.GeneralRepository
 import com.pyrus.pyrusservicedesk.sdk.response.ResponseBase
 import com.pyrus.pyrusservicedesk.sdk.web.UploadFileHooks
@@ -16,9 +17,9 @@ internal class AddCommentRequest(repository: GeneralRepository,
                                  val ticketId: Int,
                                  val comment: Comment,
                                  val uploadFileHooks: UploadFileHooks? = null)
-    : RequestBase<Int>(repository) {
+    : RequestBase<AddCommentResponseData>(repository) {
 
-    override suspend fun run(repository: GeneralRepository): ResponseBase<Int> {
+    override suspend fun run(repository: GeneralRepository): ResponseBase<AddCommentResponseData> {
         return repository.addComment(ticketId, comment, uploadFileHooks)
     }
 }
