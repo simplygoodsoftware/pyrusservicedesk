@@ -31,7 +31,6 @@ internal class PreferenceOfflineRepository(private val preferences: SharedPrefer
                 list.removeAt(existingIndex)
             }
             list.add(comment)
-            list
         }
         if (comments.size > MAX_PENDING_COMMENTS_SIZE) {
             comments = comments.subList(comments.size - MAX_PENDING_COMMENTS_SIZE, comments.size)
