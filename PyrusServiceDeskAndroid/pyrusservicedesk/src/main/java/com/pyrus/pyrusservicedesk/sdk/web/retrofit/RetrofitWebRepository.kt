@@ -293,23 +293,31 @@ internal class RetrofitWebRepository(
 }
 
 private fun CreateTicketResponseData.applyAttachments(attachments: List<Attachment>?): CreateTicketResponseData {
-    if (attachments.isNullOrEmpty() || this.attachmentIds.isNullOrEmpty() || attachments.size != this.attachmentIds.size)
+    if (!mustBeConvertedToRemoteAttachments(attachments, attachmentIds))
         return this
-    val newAttachmentsList = mutableListOf<Attachment>()
-    attachments.forEachIndexed { index, attachment ->
-        newAttachmentsList.add(attachment.withRemoteId(attachmentIds[index]))
-    }
-    return CreateTicketResponseData(ticketId, attachmentIds, newAttachmentsList)
+    return CreateTicketResponseData(ticketId, attachmentIds, applyRemoteIdsToAttachments(attachments!!, attachmentIds!!))
 }
 
 private fun AddCommentResponseData.applyAttachments(attachments: List<Attachment>?): AddCommentResponseData {
-    if (attachments.isNullOrEmpty() || this.attachmentIds.isNullOrEmpty() || attachments.size != this.attachmentIds.size)
+    if (!mustBeConvertedToRemoteAttachments(attachments, attachmentIds))
         return this
+    return AddCommentResponseData(commentId, attachmentIds, applyRemoteIdsToAttachments(attachments!!, attachmentIds!!))
+}
+
+private fun applyRemoteIdsToAttachments(sentAttachments: List<Attachment>, remoteAttachmentIds: List<Int>): List<Attachment> {
     val newAttachmentsList = mutableListOf<Attachment>()
-    attachments.forEachIndexed { index, attachment ->
-        newAttachmentsList.add(attachment.withRemoteId(attachmentIds[index]))
+    sentAttachments.forEachIndexed { index, attachment ->
+        newAttachmentsList.add(attachment.withRemoteId(remoteAttachmentIds[index]))
     }
-    return AddCommentResponseData(commentId, attachmentIds, newAttachmentsList)
+    return newAttachmentsList
+}
+
+private fun mustBeConvertedToRemoteAttachments(sentAttachments: List<Attachment>?,
+                                               remoteAttachmentIds: List<Int>?): Boolean {
+
+    return !sentAttachments.isNullOrEmpty()
+            && !remoteAttachmentIds.isNullOrEmpty()
+            && sentAttachments.size == remoteAttachmentIds.size
 }
 
 private fun TicketDescription.applyNewAttachments(newAttachments: List<Attachment>): TicketDescription {
