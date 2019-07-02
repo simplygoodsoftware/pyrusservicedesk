@@ -2,6 +2,7 @@ package com.pyrus.pyrusservicedesk.sdk.repositories.general
 
 import com.pyrus.pyrusservicedesk.sdk.data.Comment
 import com.pyrus.pyrusservicedesk.sdk.data.TicketDescription
+import com.pyrus.pyrusservicedesk.sdk.data.intermediate.AddCommentResponseData
 import com.pyrus.pyrusservicedesk.sdk.response.*
 import com.pyrus.pyrusservicedesk.sdk.web.UploadFileHooks
 
@@ -26,14 +27,14 @@ internal interface RemoteRepository {
      *
      * @param uploadFileHooks is used for posting progress as well as checking cancellation signal.
      */
-    suspend fun addComment(ticketId: Int, comment: Comment, uploadFileHooks: UploadFileHooks? = null): AddCommentResponse
+    suspend fun addComment(ticketId: Int, comment: Comment, uploadFileHooks: UploadFileHooks? = null): Response<AddCommentResponseData>
 
     /**
      * Appends [comment] to the ticket to comment feed.
      *
      * @param uploadFileHooks is used for posting progress as well as checking cancellation signal.
      */
-    suspend fun addFeedComment(comment: Comment, uploadFileHooks: UploadFileHooks? = null): AddCommentResponse
+    suspend fun addFeedComment(comment: Comment, uploadFileHooks: UploadFileHooks? = null): Response<AddCommentResponseData>
 
     /**
      * Creates ticket using the given [description].

@@ -2,6 +2,7 @@ package com.pyrus.pyrusservicedesk.sdk.repositories.general
 
 import com.pyrus.pyrusservicedesk.sdk.data.Comment
 import com.pyrus.pyrusservicedesk.sdk.data.TicketDescription
+import com.pyrus.pyrusservicedesk.sdk.data.intermediate.AddCommentResponseData
 import com.pyrus.pyrusservicedesk.sdk.repositories.offline.OfflineRepository
 import com.pyrus.pyrusservicedesk.sdk.response.*
 import com.pyrus.pyrusservicedesk.sdk.web.UploadFileHooks
@@ -21,16 +22,16 @@ internal class CentralRepository(private val webRepository: RemoteRepository,
 
     override suspend fun addComment(ticketId: Int,
                                     comment: Comment,
-                                    uploadFileHooks: UploadFileHooks?): AddCommentResponse{
+                                    uploadFileHooks: UploadFileHooks?): Response<AddCommentResponseData>{
 
 
         return webRepository.addComment(ticketId, comment, uploadFileHooks)
     }
 
-    override suspend fun addFeedComment(comment: Comment, uploadFileHooks: UploadFileHooks?): AddCommentResponse {
+    override suspend fun addFeedComment(comment: Comment, uploadFileHooks: UploadFileHooks?): Response<AddCommentResponseData> {
         addPendingFeedComment(comment)
         val response = webRepository.addFeedComment(comment, uploadFileHooks)
-        if (response.responseError == null) {
+        if (!response.hasError()) {
             removePendingComment(comment)
         }
         return response

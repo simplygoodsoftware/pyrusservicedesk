@@ -1,7 +1,6 @@
 package com.pyrus.pyrusservicedesk.sdk.web.retrofit
 
 import com.google.gson.Gson
-import com.google.gson.GsonBuilder
 import com.pyrus.pyrusservicedesk.PyrusServiceDesk
 import com.pyrus.pyrusservicedesk.sdk.FileResolverImpl
 import com.pyrus.pyrusservicedesk.sdk.data.Attachment
@@ -105,11 +104,11 @@ internal class RetrofitWebRepository(
     }
 
     override suspend fun addComment(ticketId: Int, comment: Comment, uploadFileHooks: UploadFileHooks?)
-            : AddCommentResponse {
+            : Response<AddCommentResponseData> {
         return addComment(false, ticketId, comment, uploadFileHooks)
     }
 
-    override suspend fun addFeedComment(comment: Comment, uploadFileHooks: UploadFileHooks?): AddCommentResponse {
+    override suspend fun addFeedComment(comment: Comment, uploadFileHooks: UploadFileHooks?): Response<AddCommentResponseData> {
         return addComment(true, EMPTY_TICKET_ID, comment, uploadFileHooks)
     }
 
@@ -188,12 +187,12 @@ internal class RetrofitWebRepository(
     private suspend fun addComment(isFeed: Boolean,
                                    ticketId: Int,
                                    comment: Comment,
-                                   uploadFileHooks: UploadFileHooks?): AddCommentResponse {
+                                   uploadFileHooks: UploadFileHooks?): Response<AddCommentResponseData> {
 
         val request = CommentRequest(ticketId)
         sequentialRequests.offer(request)
 
-        return withContext(PyrusServiceDesk.DISPATCHER_IO_SINGLE) {
+        return withContext<Response<AddCommentResponseData>>(PyrusServiceDesk.DISPATCHER_IO_SINGLE) {
             var cament = comment
             if (cament.hasAttachments()) {
                 val newAttachments =
@@ -201,7 +200,7 @@ internal class RetrofitWebRepository(
                         cament.attachments!!.upload(uploadFileHooks)
                     } catch (ex: Exception) {
                         sequentialRequests.poll()
-                        return@withContext AddCommentResponse(ApiCallError(ex.message ?: "Error while uploading files"))
+                        return@withContext ResponseImpl.failure(ApiCallError(ex.message ?: "Error while uploading files"))
                     }
                 cament = cament.applyNewAttachments(newAttachments)
             }
@@ -222,14 +221,14 @@ internal class RetrofitWebRepository(
                                     body()!!.attachmentIds.isNullOrEmpty() -> body()
                                     else -> body()!!.applyAttachments(cament.attachments)
                                 }
-                                AddCommentResponse(commentData = data)
+                                ResponseImpl.success(data!!)
                             }
-                            else -> AddCommentResponse(ApiCallError(this.message()))
+                            else -> ResponseImpl.failure(ApiCallError(this.message()))
                         }
                     }
             }
             catch (ex: Exception){
-                AddCommentResponse(NoInternetConnection("No internet connection"))
+                ResponseImpl.failure(NoInternetConnection("No internet connection"))
             }
             finally {
                 sequentialRequests.poll()

@@ -21,9 +21,9 @@ import com.pyrus.pyrusservicedesk.sdk.data.Attachment
 import com.pyrus.pyrusservicedesk.sdk.data.Comment
 import com.pyrus.pyrusservicedesk.sdk.data.EMPTY_TICKET_ID
 import com.pyrus.pyrusservicedesk.sdk.data.LocalDataProvider
-import com.pyrus.pyrusservicedesk.sdk.response.PendingDataError
 import com.pyrus.pyrusservicedesk.sdk.data.intermediate.AddCommentResponseData
 import com.pyrus.pyrusservicedesk.sdk.data.intermediate.CreateTicketResponseData
+import com.pyrus.pyrusservicedesk.sdk.response.PendingDataError
 import com.pyrus.pyrusservicedesk.sdk.updates.OnUnreadTicketCountChangedSubscriber
 import com.pyrus.pyrusservicedesk.sdk.verify.LocalDataVerifier
 import com.pyrus.pyrusservicedesk.sdk.web.OnCancelListener
@@ -542,7 +542,6 @@ internal class TicketViewModel(serviceDeskProvider: ServiceDeskProvider,
                     result.hasError() -> CommentEntry(
                         localComment,
                         uploadFileHooks, // for retry purpose
-                        this@TicketViewModel,
                         error = result.error
                     )
                     else -> {
@@ -552,8 +551,7 @@ internal class TicketViewModel(serviceDeskProvider: ServiceDeskProvider,
                         if (hasComment(commentId))
                             return@let
                         CommentEntry(
-                            localDataProvider.convertLocalCommentToServer(localComment, commentId, attachments),
-                            onClickedCallback = this@TicketViewModel
+                            localDataProvider.convertLocalCommentToServer(localComment, commentId, attachments)
                         )
                     }
                 }
