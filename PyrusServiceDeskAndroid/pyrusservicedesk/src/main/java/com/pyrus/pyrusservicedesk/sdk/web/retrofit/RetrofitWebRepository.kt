@@ -1,12 +1,15 @@
 package com.pyrus.pyrusservicedesk.sdk.web.retrofit
 
 import com.google.gson.Gson
+import com.google.gson.GsonBuilder
 import com.pyrus.pyrusservicedesk.PyrusServiceDesk
 import com.pyrus.pyrusservicedesk.sdk.FileResolverImpl
 import com.pyrus.pyrusservicedesk.sdk.data.Attachment
 import com.pyrus.pyrusservicedesk.sdk.data.Comment
 import com.pyrus.pyrusservicedesk.sdk.data.EMPTY_TICKET_ID
 import com.pyrus.pyrusservicedesk.sdk.data.TicketDescription
+import com.pyrus.pyrusservicedesk.sdk.data.intermediate.AddCommentResponseData
+import com.pyrus.pyrusservicedesk.sdk.data.intermediate.CreateTicketResponseData
 import com.pyrus.pyrusservicedesk.sdk.repositories.general.GeneralRepository
 import com.pyrus.pyrusservicedesk.sdk.repositories.general.RemoteRepository
 import com.pyrus.pyrusservicedesk.sdk.request.UploadFileRequest
@@ -142,23 +145,20 @@ internal class RetrofitWebRepository(
                         sequentialRequests.poll()
                         when {
                             isSuccessful && body() != null -> {
-                                val ticketId =
-                                    gson.fromJson<Map<String, Int>>(
-                                        body()?.string(),
-                                        Map::class.java
-                                    )
-                                        .values.first().toInt()
-
                                 with(sequentialRequests.iterator()) {
                                     while (hasNext()) {
                                         val element = next()
                                         if (element !is CommentRequest || element.ticketId != EMPTY_TICKET_ID)
                                             break
-                                        element.ticketId = ticketId
+                                        element.ticketId = body()!!.ticketId
                                     }
                                 }
+                                val data = when{
+                                    body()!!.attachmentIds.isNullOrEmpty() -> body()
+                                    else -> body()!!.applyAttachments(descr.attachments)
+                                }
 
-                                CreateTicketResponse(ticketId = ticketId)
+                                CreateTicketResponse(data = data)
                             }
                             else -> CreateTicketResponse(ApiCallError(this.message()))
                         }
@@ -217,13 +217,13 @@ internal class RetrofitWebRepository(
                     .execute()
                     .run {
                         when {
-                            isSuccessful && body() != null -> AddCommentResponse(
-                                commentId = gson.fromJson<Map<String, Double>>(
-                                    body()?.string(),
-                                    Map::class.java
-                                )
-                                    .values.first().toInt()
-                            )
+                            isSuccessful && body() != null -> {
+                                val data = when{
+                                    body()!!.attachmentIds.isNullOrEmpty() -> body()
+                                    else -> body()!!.applyAttachments(cament.attachments)
+                                }
+                                AddCommentResponse(commentData = data)
+                            }
                             else -> AddCommentResponse(ApiCallError(this.message()))
                         }
                     }
@@ -294,6 +294,34 @@ internal class RetrofitWebRepository(
     }
 }
 
+private fun CreateTicketResponseData.applyAttachments(attachments: List<Attachment>?): CreateTicketResponseData {
+    if (!mustBeConvertedToRemoteAttachments(attachments, attachmentIds))
+        return this
+    return CreateTicketResponseData(ticketId, attachmentIds, applyRemoteIdsToAttachments(attachments!!, attachmentIds!!))
+}
+
+private fun AddCommentResponseData.applyAttachments(attachments: List<Attachment>?): AddCommentResponseData {
+    if (!mustBeConvertedToRemoteAttachments(attachments, attachmentIds))
+        return this
+    return AddCommentResponseData(commentId, attachmentIds, applyRemoteIdsToAttachments(attachments!!, attachmentIds!!))
+}
+
+private fun applyRemoteIdsToAttachments(sentAttachments: List<Attachment>, remoteAttachmentIds: List<Int>): List<Attachment> {
+    val newAttachmentsList = mutableListOf<Attachment>()
+    sentAttachments.forEachIndexed { index, attachment ->
+        newAttachmentsList.add(attachment.withRemoteId(remoteAttachmentIds[index]))
+    }
+    return newAttachmentsList
+}
+
+private fun mustBeConvertedToRemoteAttachments(sentAttachments: List<Attachment>?,
+                                               remoteAttachmentIds: List<Int>?): Boolean {
+
+    return !sentAttachments.isNullOrEmpty()
+            && !remoteAttachmentIds.isNullOrEmpty()
+            && sentAttachments.size == remoteAttachmentIds.size
+}
+
 private fun TicketDescription.applyNewAttachments(newAttachments: List<Attachment>): TicketDescription {
     return TicketDescription(subject, description, newAttachments)
 }
@@ -303,6 +331,7 @@ private fun Comment.applyNewAttachments(newAttachments: List<Attachment>): Comme
 }
 
 private fun Attachment.toRemoteAttachment(guid: String) = Attachment(id, guid, type, name, bytesSize, isText, isVideo, localUri)
+private fun Attachment.withRemoteId(remoteId: Int) = Attachment(remoteId, guid, type, name, bytesSize, isText, isVideo, localUri)
 
 
 private interface SequentialRequest

@@ -1,9 +1,11 @@
 package com.pyrus.pyrusservicedesk.sdk.response
 
+import com.pyrus.pyrusservicedesk.sdk.data.intermediate.AddCommentResponseData
+
 /**
  * Response on [AddCommentRequest]
  */
 internal class AddCommentResponse(
     error: ResponseError? = null,
-    commentId: Int? = null)
-    : ResponseImpl<Int>(error, commentId)
+    commentData: AddCommentResponseData? = null)
+    : ResponseImpl<Int>(error, commentData)

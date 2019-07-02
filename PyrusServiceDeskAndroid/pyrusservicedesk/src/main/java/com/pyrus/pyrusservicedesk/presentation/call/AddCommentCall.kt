@@ -1,11 +1,12 @@
 package com.pyrus.pyrusservicedesk.presentation.call
 
-import kotlinx.coroutines.CoroutineScope
 import com.pyrus.pyrusservicedesk.sdk.RequestFactory
 import com.pyrus.pyrusservicedesk.sdk.data.Comment
+import com.pyrus.pyrusservicedesk.sdk.data.intermediate.AddCommentResponseData
 import com.pyrus.pyrusservicedesk.sdk.response.ResponseCallback
 import com.pyrus.pyrusservicedesk.sdk.response.ResponseError
 import com.pyrus.pyrusservicedesk.sdk.web.UploadFileHooks
+import kotlinx.coroutines.CoroutineScope
 
 /**
  * Adapter for adding comments to a ticket with the given id.
@@ -21,14 +22,14 @@ internal class AddCommentCall(
         private val ticketId: Int,
         private val comment: Comment,
         private val uploadFileHooks: UploadFileHooks? = null)
-    : BaseCall<Int>(scope) {
+    : BaseCall<AddCommentResponseData>(scope) {
 
-    override suspend fun run(): CallResult<Int> {
-        var result: Int? = null
+    override suspend fun run(): CallResult<AddCommentResponseData> {
+        var result: AddCommentResponseData? = null
         var error: ResponseError? = null
         requests.getAddCommentRequest(ticketId, comment, uploadFileHooks).execute(
-            object: ResponseCallback<Int>{
-                override fun onSuccess(data: Int) {
+            object: ResponseCallback<AddCommentResponseData>{
+                override fun onSuccess(data: AddCommentResponseData) {
                     result = data
                 }
 

@@ -1,9 +1,7 @@
 package com.pyrus.pyrusservicedesk.sdk.web.retrofit
 
 import com.pyrus.pyrusservicedesk.sdk.data.Ticket
-import com.pyrus.pyrusservicedesk.sdk.data.intermediate.Comments
-import com.pyrus.pyrusservicedesk.sdk.data.intermediate.FileUploadResponseData
-import com.pyrus.pyrusservicedesk.sdk.data.intermediate.Tickets
+import com.pyrus.pyrusservicedesk.sdk.data.intermediate.*
 import com.pyrus.pyrusservicedesk.sdk.web.request_body.AddCommentRequestBody
 import com.pyrus.pyrusservicedesk.sdk.web.request_body.CreateTicketRequestBody
 import com.pyrus.pyrusservicedesk.sdk.web.request_body.RequestBodyBase
@@ -43,7 +41,7 @@ internal interface ServiceDeskApi {
      * Api call for creating ticket.
      */
     @POST("CreateTicket")
-    fun createTicket(@Body requestBody: CreateTicketRequestBody): Call<ResponseBody>
+    fun createTicket(@Body requestBody: CreateTicketRequestBody): Call<CreateTicketResponseData>
 
     /**
      * Api call for sending comment to the ticket with the given [ticketId].
@@ -51,13 +49,13 @@ internal interface ServiceDeskApi {
     @POST("UpdateTicket/{ticket_id}")
     fun addComment(@Body requestBody: AddCommentRequestBody,
                    @Path("ticket_id") ticketId: Int)
-            : Call<ResponseBody>
+            : Call<AddCommentResponseData>
 
     /**
      * Api call for sending comment to the feed.
      */
     @POST("UpdateTicketFeed")
-    fun addFeedComment(@Body requestBody: AddCommentRequestBody): Call<ResponseBody>
+    fun addFeedComment(@Body requestBody: AddCommentRequestBody): Call<AddCommentResponseData>
 
     /**
      * Api call for uploading files.

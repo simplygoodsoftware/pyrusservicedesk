@@ -22,6 +22,8 @@ import com.pyrus.pyrusservicedesk.sdk.data.Comment
 import com.pyrus.pyrusservicedesk.sdk.data.EMPTY_TICKET_ID
 import com.pyrus.pyrusservicedesk.sdk.data.LocalDataProvider
 import com.pyrus.pyrusservicedesk.sdk.response.PendingDataError
+import com.pyrus.pyrusservicedesk.sdk.data.intermediate.AddCommentResponseData
+import com.pyrus.pyrusservicedesk.sdk.data.intermediate.CreateTicketResponseData
 import com.pyrus.pyrusservicedesk.sdk.updates.OnUnreadTicketCountChangedSubscriber
 import com.pyrus.pyrusservicedesk.sdk.verify.LocalDataVerifier
 import com.pyrus.pyrusservicedesk.sdk.web.OnCancelListener
@@ -54,7 +56,7 @@ internal class TicketViewModel(serviceDeskProvider: ServiceDeskProvider,
         const val TICKET_UPDATE_INTERVAL = 30L
 
         fun Comment.hasAttachmentWithExceededSize(): Boolean =
-            attachments?.let { it.any { attach -> attach.hasExceededFileSize()} } ?: false
+            attachments?.let { it.any { attach -> attach.hasExceededFileSize() } } ?: false
 
         fun Attachment.hasExceededFileSize(): Boolean = bytesSize > MAX_FILE_SIZE_BYTES
     }
@@ -91,8 +93,7 @@ internal class TicketViewModel(serviceDeskProvider: ServiceDeskProvider,
 
         if (!isFeed) {
             unreadCounter.value = TicketActivity.getUnreadTicketsCount(arguments)
-        }
-        else{
+        } else {
             runBlocking {
                 val response = requests.getPendingFeedCommentsRequest().execute()
                 if (!response.hasError() && !response.getData().isNullOrEmpty()) {
@@ -146,7 +147,8 @@ internal class TicketViewModel(serviceDeskProvider: ServiceDeskProvider,
         fileHooks.subscribeOnCancel(object : OnCancelListener {
             override fun onCancel() {
                 return applyCommentUpdate(
-                    CommentEntry(localComment), ChangeType.Cancelled)
+                    CommentEntry(localComment), ChangeType.Cancelled
+                )
             }
         })
         sendAddComment(localComment, fileHooks)
@@ -189,7 +191,7 @@ internal class TicketViewModel(serviceDeskProvider: ServiceDeskProvider,
         pendingCommentUnderAction?.let {
             launch {
                 if (!requests.getRemovePendingCommentRequest(it.comment).execute().hasError()) {
-                    withContext(Dispatchers.Main){
+                    withContext(Dispatchers.Main) {
                         applyCommentUpdate(it, ChangeType.Cancelled)
                         pendingCommentUnderAction = null
                     }
@@ -218,13 +220,14 @@ internal class TicketViewModel(serviceDeskProvider: ServiceDeskProvider,
             else -> GetTicketCall(this@TicketViewModel, requests, ticketId).execute()
         }
         val observer = Observer<CallResult<List<Comment>>> { result ->
-                if (result == null)
-                    return@Observer
-                when {
-                    result.hasError() -> {  }
-                    else -> applyTicketUpdate(result.data!!, false)
+            if (result == null)
+                return@Observer
+            when {
+                result.hasError() -> {
                 }
+                else -> applyTicketUpdate(result.data!!, false)
             }
+        }
         call.observeForever(observer)
     }
 
@@ -242,8 +245,7 @@ internal class TicketViewModel(serviceDeskProvider: ServiceDeskProvider,
     private fun List<Comment>.toTicketEntries(): MutableList<TicketEntry> {
         val now = Calendar.getInstance()
         var prevDateGroup: String? = null
-        return foldIndexed(ArrayList(size)){
-            index, acc, comment ->
+        return foldIndexed(ArrayList(size)) { index, acc, comment ->
             comment.creationDate.getWhen(getApplication(), now).let {
                 if (index == 0 || it != prevDateGroup) {
                     acc.add(DateEntry(it))
@@ -255,8 +257,10 @@ internal class TicketViewModel(serviceDeskProvider: ServiceDeskProvider,
         }
     }
 
-    private fun sendAddComment(localComment: Comment,
-                               uploadFileHooks: UploadFileHooks? = null) {
+    private fun sendAddComment(
+        localComment: Comment,
+        uploadFileHooks: UploadFileHooks? = null
+    ) {
 
         if (commentContainsError(localComment))
             return
@@ -267,45 +271,21 @@ internal class TicketViewModel(serviceDeskProvider: ServiceDeskProvider,
             CommentEntry(localComment, uploadFileHooks = uploadFileHooks),
             ChangeType.Added
         )
-        val call = when {
+        when {
             toNewTicket -> {
                 isCreateTicketSent = true
-                CreateTicketCall(this, requests, localComment, uploadFileHooks).execute()
+                CreateTicketCall(this, requests, localComment, uploadFileHooks)
+                    .execute()
+                    .observeForever(CreateTicketObserver(uploadFileHooks, localComment))
             }
-            isFeed -> AddFeedCommentCall(this, requests, localComment, uploadFileHooks).execute()
-            else -> AddCommentCall(this, requests, ticketId, localComment, uploadFileHooks).execute()
-        }
-        call.observeForever(getObserverForAddCommentCall(localComment, uploadFileHooks, toNewTicket))
-    }
-
-    private fun getObserverForAddCommentCall(localComment: Comment,
-                                             uploadFileHooks: UploadFileHooks?,
-                                             toNewTicket: Boolean): Observer<CallResult<Int>> {
-
-        return Observer { res ->
-            res?.let { result ->
-                isCreateTicketSent = false
-                if (uploadFileHooks?.isCancelled == true)
-                    return@let
-                val entry = when {
-                    result.hasError() -> CommentEntry(
-                        localComment,
-                        uploadFileHooks, // for retry purpose
-                        error = result.error
-                    )
-                    else -> {
-                        if (toNewTicket) {
-                            ticketId = result.data!!
-                            maybeStartAutoRefresh()
-                        }
-                        val commentId = if (toNewTicket) localComment.localId else result.data!!
-                        if(hasComment(commentId))
-                            return@let
-                        CommentEntry(localDataProvider.convertLocalCommentToServer(localComment, commentId))
-                    }
-                }
-                applyCommentUpdate(entry, ChangeType.Changed)
-            }
+            isFeed ->
+                AddFeedCommentCall(this, requests, localComment, uploadFileHooks)
+                    .execute()
+                    .observeForever(AddCommentObserver(uploadFileHooks, localComment))
+            else ->
+                AddCommentCall(this, requests, ticketId, localComment, uploadFileHooks)
+                    .execute()
+                    .observeForever(AddCommentObserver(uploadFileHooks, localComment))
         }
     }
 
@@ -328,7 +308,8 @@ internal class TicketViewModel(serviceDeskProvider: ServiceDeskProvider,
                     Toast.makeText(
                         this,
                         this.getString(R.string.psd_file_size_exceeded_message, MAX_FILE_SIZE_MEGABYTES),
-                        Toast.LENGTH_SHORT)
+                        Toast.LENGTH_SHORT
+                    )
                         .show()
                 }
                 return true
@@ -347,7 +328,8 @@ internal class TicketViewModel(serviceDeskProvider: ServiceDeskProvider,
             for (i in ticketEntries.lastIndex downTo 0) {
                 val entry = ticketEntries[i]
                 if (entry.type == Type.Comment
-                    && (entry as CommentEntry).comment.isLocal()) {
+                    && (entry as CommentEntry).comment.isLocal()
+                ) {
 
                     listOfLocalEntries.add(0, entry)
                 }
@@ -375,7 +357,7 @@ internal class TicketViewModel(serviceDeskProvider: ServiceDeskProvider,
         val iterator = ticketEntries.asReversed().iterator()
         for (i in freshList.lastIndex downTo 0) {
             val serverId = freshList[i].commentId
-            loop@ while(iterator.hasNext()){
+            loop@ while (iterator.hasNext()) {
                 val entry = iterator.next()
                 if (entry.type != Type.Comment)
                     continue
@@ -405,7 +387,7 @@ internal class TicketViewModel(serviceDeskProvider: ServiceDeskProvider,
             ChangeType.Changed -> {
                 maybeAddDate(commentEntry, newEntries)
                 newEntries.findIndex(commentEntry).let {
-                    when(it){
+                    when (it) {
                         -1 -> newEntries.add(commentEntry)
                         else -> newEntries[it] = commentEntry
                     }
@@ -413,7 +395,7 @@ internal class TicketViewModel(serviceDeskProvider: ServiceDeskProvider,
             }
             ChangeType.Cancelled -> {
                 val indexOfComment = newEntries.findIndex(commentEntry)
-                when (indexOfComment){
+                when (indexOfComment) {
                     -1 -> return
                     0 -> newEntries.removeAt(0)
                     newEntries.lastIndex -> {
@@ -432,33 +414,43 @@ internal class TicketViewModel(serviceDeskProvider: ServiceDeskProvider,
         publishEntries(ticketEntries, newEntries)
     }
 
-    private fun maybeAddDate(commentEntry: CommentEntry, newEntries: MutableList<TicketEntry>){
+    private fun maybeAddDate(commentEntry: CommentEntry, newEntries: MutableList<TicketEntry>) {
         commentEntry.comment.creationDate.getWhen(getApplication(), Calendar.getInstance()).let {
             if (!hasRealComments()
-                || newEntries.findLast { entry -> entry.type == Type.Date}
+                || newEntries.findLast { entry -> entry.type == Type.Date }
                     ?.let { dateEntry ->
                         (dateEntry as DateEntry).date == it
-                    } == false) {
+                    } == false
+            ) {
 
-                newEntries.add(DateEntry(commentEntry.comment.creationDate.getWhen(getApplication(), Calendar.getInstance())))
+                newEntries.add(
+                    DateEntry(
+                        commentEntry.comment.creationDate.getWhen(
+                            getApplication(),
+                            Calendar.getInstance()
+                        )
+                    )
+                )
             }
         }
     }
 
-    private fun List<TicketEntry>.findIndex(commentEntry: CommentEntry): Int{
+    private fun List<TicketEntry>.findIndex(commentEntry: CommentEntry): Int {
         return findLast {
             (it.type == Type.Comment) && (it as CommentEntry).comment.localId == commentEntry.comment.localId
-        }?.let{
+        }?.let {
             indexOf(it)
-        }?: -1
+        } ?: -1
     }
 
     private fun publishEntries(oldEntries: List<TicketEntry>, newEntries: List<TicketEntry>) {
         ticketEntries = newEntries
         commentDiff.value = DiffResultWithNewItems(
             DiffUtil.calculateDiff(
-                CommentsDiffCallback(oldEntries, ticketEntries), false),
-            ticketEntries)
+                CommentsDiffCallback(oldEntries, ticketEntries), false
+            ),
+            ticketEntries
+        )
     }
 
     private fun Comment.splitToEntries(): Collection<TicketEntry> {
@@ -498,6 +490,83 @@ internal class TicketViewModel(serviceDeskProvider: ServiceDeskProvider,
                 )
                 entriesList
             }
+    }
+
+    private inner class AddCommentObserver(
+        uploadFileHooks: UploadFileHooks?,
+        localComment: Comment
+    ) : AddCommentObserverBase<CallResult<AddCommentResponseData>, AddCommentResponseData>(
+        uploadFileHooks,
+        localComment
+    ) {
+
+        override fun getAttachments(data: AddCommentResponseData) = data.sentAttachments
+
+        override fun getCommentId(data: AddCommentResponseData): Int = data.commentId
+
+        override fun onSuccess(data: AddCommentResponseData) {}
+
+    }
+
+    private inner class CreateTicketObserver(
+        uploadFileHooks: UploadFileHooks?,
+        localComment: Comment
+    ) : AddCommentObserverBase<CallResult<CreateTicketResponseData>, CreateTicketResponseData>(
+        uploadFileHooks,
+        localComment
+    ) {
+
+        override fun getAttachments(data: CreateTicketResponseData) = data.sentAttachments
+
+        override fun getCommentId(data: CreateTicketResponseData): Int {
+            return localComment.localId
+        }
+
+        override fun onSuccess(data: CreateTicketResponseData) {
+            ticketId = data.ticketId
+            maybeStartAutoRefresh()
+        }
+    }
+
+    private abstract inner class AddCommentObserverBase<T : CallResult<U>, U>(
+        val uploadFileHooks: UploadFileHooks?,
+        val localComment: Comment
+    ) : Observer<T> {
+
+        override fun onChanged(t: T?) {
+            t?.let { result ->
+                isCreateTicketSent = false
+                if (uploadFileHooks?.isCancelled == true)
+                    return@let
+                val entry = when {
+                    result.hasError() -> CommentEntry(
+                        localComment,
+                        uploadFileHooks, // for retry purpose
+                        this@TicketViewModel,
+                        error = result.error
+                    )
+                    else -> {
+                        onSuccess(result.data!!)
+                        val commentId = getCommentId(result.data)
+                        val attachments = getAttachments(result.data)
+                        if (hasComment(commentId))
+                            return@let
+                        CommentEntry(
+                            localDataProvider.convertLocalCommentToServer(localComment, commentId, attachments),
+                            onClickedCallback = this@TicketViewModel
+                        )
+                    }
+                }
+                applyCommentUpdate(entry, ChangeType.Changed)
+            }
+        }
+
+        abstract fun getAttachments(data: U): List<Attachment>?
+
+        abstract fun getCommentId(data: U): Int
+
+        abstract fun onSuccess(data: U)
+
     }
 
     private enum class ChangeType {

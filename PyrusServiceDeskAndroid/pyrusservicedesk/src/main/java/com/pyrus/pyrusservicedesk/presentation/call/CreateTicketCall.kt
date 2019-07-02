@@ -1,12 +1,13 @@
 package com.pyrus.pyrusservicedesk.presentation.call
 
-import kotlinx.coroutines.CoroutineScope
 import com.pyrus.pyrusservicedesk.sdk.RequestFactory
 import com.pyrus.pyrusservicedesk.sdk.data.Comment
 import com.pyrus.pyrusservicedesk.sdk.data.TicketDescription
+import com.pyrus.pyrusservicedesk.sdk.data.intermediate.CreateTicketResponseData
 import com.pyrus.pyrusservicedesk.sdk.response.ResponseCallback
 import com.pyrus.pyrusservicedesk.sdk.response.ResponseError
 import com.pyrus.pyrusservicedesk.sdk.web.UploadFileHooks
+import kotlinx.coroutines.CoroutineScope
 
 /**
  * Adapter for creating ticket.
@@ -20,14 +21,14 @@ internal class CreateTicketCall(
         private val requests: RequestFactory,
         private val comment: Comment,
         private val uploadFileHooks: UploadFileHooks? = null)
-    : BaseCall<Int>(scope) {
+    : BaseCall<CreateTicketResponseData>(scope) {
 
-    override suspend fun run(): CallResult<Int> {
-        var result: Int? = null
+    override suspend fun run(): CallResult<CreateTicketResponseData> {
+        var result: CreateTicketResponseData? = null
         var error: ResponseError? = null
         requests.getCreateTicketRequest(comment.toTicketDescription(), uploadFileHooks).execute(
-            object: ResponseCallback<Int> {
-                override fun onSuccess(data: Int) {
+            object: ResponseCallback<CreateTicketResponseData> {
+                override fun onSuccess(data: CreateTicketResponseData) {
                     result = data
                 }
 
