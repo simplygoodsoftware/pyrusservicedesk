@@ -1,14 +1,14 @@
 package com.pyrus.pyrusservicedesk.utils
 
-import android.arch.lifecycle.ViewModel
-import android.arch.lifecycle.ViewModelProviders
+import androidx.lifecycle.ViewModel
+import androidx.lifecycle.ViewModelProviders
 import android.content.ContentValues
 import android.content.Context
 import android.content.Intent
 import android.net.Uri
 import android.provider.MediaStore
-import android.support.v4.app.Fragment
-import android.support.v4.app.FragmentActivity
+import androidx.fragment.app.Fragment
+import androidx.fragment.app.FragmentActivity
 import com.pyrus.pyrusservicedesk.presentation.viewmodel.ViewModelFactory
 import java.text.SimpleDateFormat
 import java.util.*
@@ -18,7 +18,7 @@ private const val DATE_FORMAT_CAPTURE_IMAGES = "yyyyMMdd_HHmmss"
 /**
  * Lazily provides view model.
  */
-internal fun <T : ViewModel> FragmentActivity.getViewModel(viewModelClass: Class<T>): Lazy<T> {
+internal fun <T : ViewModel> androidx.fragment.app.FragmentActivity.getViewModel(viewModelClass: Class<T>): Lazy<T> {
 
     return lazy(LazyThreadSafetyMode.NONE) {
         ViewModelProviders.of(
@@ -31,7 +31,7 @@ internal fun <T : ViewModel> FragmentActivity.getViewModel(viewModelClass: Class
 /**
  * Lazily provides view model with activity scope. Such view model can be used as event bus within single activity
  */
-internal fun <T : ViewModel> Fragment.getViewModelWithActivityScope(viewModelClass: Class<T>): Lazy<T> {
+internal fun <T : ViewModel> androidx.fragment.app.Fragment.getViewModelWithActivityScope(viewModelClass: Class<T>): Lazy<T> {
     return lazy(LazyThreadSafetyMode.NONE) { activity!!.getViewModel(viewModelClass).value }
 }
 
@@ -45,7 +45,7 @@ internal fun getApplicationName(context: Context): String = context.getString(co
 /**
  * Dispatches event for taking photo that should be handled by the receiver fragment.
  */
-internal fun Fragment.dispatchTakePhotoIntent(requestCode: Int): Uri? {
+internal fun androidx.fragment.app.Fragment.dispatchTakePhotoIntent(requestCode: Int): Uri? {
     val capturePhotoUri = activity?.let {
         when {
             isCapturingPhotoSupported() ->it.createPhotoUriApi16AndAbove()

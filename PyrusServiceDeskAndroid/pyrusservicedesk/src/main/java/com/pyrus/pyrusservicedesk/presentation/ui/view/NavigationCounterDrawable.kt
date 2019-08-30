@@ -3,8 +3,8 @@ package com.pyrus.pyrusservicedesk.presentation.ui.view
 import android.content.Context
 import android.graphics.*
 import android.graphics.drawable.LayerDrawable
-import android.support.v4.content.ContextCompat
-import android.support.v7.content.res.AppCompatResources
+import androidx.core.content.ContextCompat
+import androidx.appcompat.content.res.AppCompatResources
 import com.pyrus.pyrusservicedesk.R
 import com.pyrus.pyrusservicedesk.utils.getColorByAttrId
 

@@ -11,13 +11,13 @@ import android.graphics.drawable.AnimationDrawable
 import android.graphics.drawable.Drawable
 import android.graphics.drawable.LayerDrawable
 import android.net.Uri
-import android.support.annotation.ColorInt
-import android.support.media.ExifInterface
-import android.support.v4.app.ActivityCompat
-import android.support.v4.content.ContextCompat
-import android.support.v4.text.util.LinkifyCompat
-import android.support.v7.content.res.AppCompatResources
-import android.support.v7.widget.AppCompatImageView
+import androidx.annotation.ColorInt
+import androidx.exifinterface.media.ExifInterface
+import androidx.core.app.ActivityCompat
+import androidx.core.content.ContextCompat
+import androidx.core.text.util.LinkifyCompat
+import androidx.appcompat.content.res.AppCompatResources
+import androidx.appcompat.widget.AppCompatImageView
 import android.text.util.Linkify
 import android.util.AttributeSet
 import android.view.Gravity
@@ -459,7 +459,7 @@ internal class CommentView @JvmOverloads constructor(
 
         val bitmap = try {
             val exif = context.contentResolver.openInputStream(previewUri)?.use {
-                ExifInterface(it)
+                androidx.exifinterface.media.ExifInterface(it)
             }
             val source = exif?.thumbnailBitmap
                 ?: BitmapFactory.decodeStream(context.contentResolver.openInputStream(previewUri))

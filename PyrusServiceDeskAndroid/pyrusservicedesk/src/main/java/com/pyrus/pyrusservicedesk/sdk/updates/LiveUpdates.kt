@@ -2,7 +2,7 @@ package com.pyrus.pyrusservicedesk.sdk.updates
 
 import android.os.Handler
 import android.os.Looper
-import android.support.annotation.MainThread
+import androidx.annotation.MainThread
 import com.pyrus.pyrusservicedesk.sdk.RequestFactory
 import com.pyrus.pyrusservicedesk.sdk.data.TicketShortDescription
 import com.pyrus.pyrusservicedesk.sdk.response.ResponseCallback

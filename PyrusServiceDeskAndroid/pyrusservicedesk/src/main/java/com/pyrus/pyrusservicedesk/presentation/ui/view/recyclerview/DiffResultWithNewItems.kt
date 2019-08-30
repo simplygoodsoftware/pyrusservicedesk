@@ -1,6 +1,6 @@
 package com.pyrus.pyrusservicedesk.presentation.ui.view.recyclerview
 
-import android.support.v7.util.DiffUtil
+import androidx.recyclerview.widget.DiffUtil
 
 /**
  * Object that incapsulates data to be applied to [AdapterBase]

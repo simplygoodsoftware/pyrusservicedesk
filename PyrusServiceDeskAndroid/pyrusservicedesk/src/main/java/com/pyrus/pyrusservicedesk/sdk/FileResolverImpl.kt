@@ -3,7 +3,7 @@ package com.pyrus.pyrusservicedesk.sdk
 import android.content.ContentResolver
 import android.net.Uri
 import android.provider.OpenableColumns
-import android.support.v4.content.ContentResolverCompat
+import androidx.core.content.ContentResolverCompat
 import com.pyrus.pyrusservicedesk.sdk.data.intermediate.FileData
 import com.pyrus.pyrusservicedesk.sdk.data.intermediate.FileUploadRequestData
 
@@ -36,7 +36,7 @@ internal class FileResolverImpl(private val contentResolver: ContentResolver) : 
         return cursor.use {
             FileUploadRequestData(
                 it.getString(it.getColumnIndex(OpenableColumns.DISPLAY_NAME)),
-                contentResolver.openInputStream(fileUri)
+                contentResolver.openInputStream(fileUri)!!
             )
         }
     }

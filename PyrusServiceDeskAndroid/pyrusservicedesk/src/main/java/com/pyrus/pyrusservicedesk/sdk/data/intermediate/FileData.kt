@@ -14,12 +14,11 @@ internal data class FileData(val fileName: String,
                              val isLocal: Boolean) : Parcelable {
 
     constructor(parcel: Parcel) : this(
-        parcel.readString(),
+        parcel.readString()!!,
         parcel.readInt(),
-        parcel.readParcelable(Uri::class.java.classLoader),
+        parcel.readParcelable(Uri::class.java.classLoader)!!,
         parcel.readByte() != 0.toByte()
-    ) {
-    }
+    )
 
     override fun writeToParcel(parcel: Parcel, flags: Int) {
         parcel.writeString(fileName)

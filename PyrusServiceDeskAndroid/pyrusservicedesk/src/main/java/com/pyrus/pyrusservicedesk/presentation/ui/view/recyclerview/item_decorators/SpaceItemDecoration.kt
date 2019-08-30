@@ -1,8 +1,8 @@
 package com.pyrus.pyrusservicedesk.presentation.ui.view.recyclerview.item_decorators
 
 import android.graphics.Rect
-import android.support.annotation.Px
-import android.support.v7.widget.RecyclerView
+import androidx.annotation.Px
+import androidx.recyclerview.widget.RecyclerView
 import android.view.View
 
 /**
@@ -17,12 +17,12 @@ import android.view.View
  */
 internal class SpaceItemDecoration(@Px val itemSpace: Int,
                                    private val itemSpaceMultiplier: SpaceMultiplier? = null)
-    : RecyclerView.ItemDecoration() {
+    : androidx.recyclerview.widget.RecyclerView.ItemDecoration() {
 
     override fun getItemOffsets(outRect: Rect,
                                 view: View,
-                                parent: RecyclerView,
-                                state: RecyclerView.State) {
+                                parent: androidx.recyclerview.widget.RecyclerView,
+                                state: androidx.recyclerview.widget.RecyclerView.State) {
 
         if (parent.getChildAdapterPosition(view) == 0) {
             outRect.top = 0

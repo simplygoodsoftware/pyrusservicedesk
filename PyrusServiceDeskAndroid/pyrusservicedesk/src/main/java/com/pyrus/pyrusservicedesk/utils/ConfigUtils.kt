@@ -5,8 +5,8 @@ import android.content.SharedPreferences
 import android.graphics.*
 import android.graphics.drawable.BitmapDrawable
 import android.graphics.drawable.Drawable
-import android.support.annotation.ColorInt
-import android.support.v7.content.res.AppCompatResources
+import androidx.annotation.ColorInt
+import androidx.appcompat.content.res.AppCompatResources
 import android.util.Base64
 import com.pyrus.pyrusservicedesk.PyrusServiceDesk
 import com.pyrus.pyrusservicedesk.R
@@ -80,7 +80,7 @@ internal class ConfigUtils{
          */
         fun getUserId(preference: SharedPreferences): String {
             return when {
-                preference.contains(PREFERENCE_KEY_USER_ID) -> preference.getString(PREFERENCE_KEY_USER_ID, "")
+                preference.contains(PREFERENCE_KEY_USER_ID) -> preference.getString(PREFERENCE_KEY_USER_ID, "")!!
                 else -> {
                     val userId = Base64.encodeToString(
                         ByteArray(75).run {

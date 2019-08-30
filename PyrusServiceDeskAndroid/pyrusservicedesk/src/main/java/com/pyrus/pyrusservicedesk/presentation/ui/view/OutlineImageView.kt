@@ -2,7 +2,7 @@ package com.pyrus.pyrusservicedesk.presentation.ui.view
 
 import android.content.Context
 import android.graphics.*
-import android.support.v7.widget.AppCompatImageView
+import androidx.appcompat.widget.AppCompatImageView
 import android.util.AttributeSet
 
 /**

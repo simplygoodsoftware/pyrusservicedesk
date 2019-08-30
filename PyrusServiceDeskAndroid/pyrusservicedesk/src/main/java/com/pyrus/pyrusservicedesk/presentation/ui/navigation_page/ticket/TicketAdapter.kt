@@ -2,10 +2,10 @@ package com.pyrus.pyrusservicedesk.presentation.ui.navigation_page.ticket
 
 import android.graphics.Canvas
 import android.net.Uri
-import android.support.annotation.LayoutRes
-import android.support.v7.widget.RecyclerView
-import android.support.v7.widget.helper.ItemTouchHelper
-import android.support.v7.widget.helper.ItemTouchHelper.ACTION_STATE_SWIPE
+import androidx.annotation.LayoutRes
+import androidx.recyclerview.widget.RecyclerView
+import androidx.recyclerview.widget.ItemTouchHelper
+import androidx.recyclerview.widget.ItemTouchHelper.ACTION_STATE_SWIPE
 import android.view.View
 import android.view.View.*
 import android.view.ViewGroup
@@ -306,15 +306,15 @@ internal class TicketAdapter: AdapterBase<TicketEntry>() {
 
     private inner class TouchCallback : ItemTouchHelper.Callback() {
 
-        override fun getMovementFlags(recyclerView: RecyclerView,
-                                      viewHolder: RecyclerView.ViewHolder): Int {
+        override fun getMovementFlags(recyclerView: androidx.recyclerview.widget.RecyclerView,
+                                      viewHolder: androidx.recyclerview.widget.RecyclerView.ViewHolder): Int {
 
             return makeFlag(ACTION_STATE_SWIPE,  ItemTouchHelper.LEFT)
         }
 
-        override fun onMove(recyclerView: RecyclerView,
-                            viewHolder: RecyclerView.ViewHolder,
-                            target: RecyclerView.ViewHolder): Boolean {
+        override fun onMove(recyclerView: androidx.recyclerview.widget.RecyclerView,
+                            viewHolder: androidx.recyclerview.widget.RecyclerView.ViewHolder,
+                            target: androidx.recyclerview.widget.RecyclerView.ViewHolder): Boolean {
             return false
         }
 
@@ -322,20 +322,20 @@ internal class TicketAdapter: AdapterBase<TicketEntry>() {
             return false
         }
 
-        override fun onSwiped(viewHolder: RecyclerView.ViewHolder, direction: Int) {
+        override fun onSwiped(viewHolder: androidx.recyclerview.widget.RecyclerView.ViewHolder, direction: Int) {
         }
 
         override fun getSwipeEscapeVelocity(defaultValue: Float): Float {
             return Float.MAX_VALUE
         }
 
-        override fun getSwipeThreshold(viewHolder: RecyclerView.ViewHolder): Float {
+        override fun getSwipeThreshold(viewHolder: androidx.recyclerview.widget.RecyclerView.ViewHolder): Float {
             return Float.MAX_VALUE
         }
 
         override fun onChildDraw(c: Canvas,
-                                 recyclerView: RecyclerView,
-                                 viewHolder: RecyclerView.ViewHolder,
+                                 recyclerView: androidx.recyclerview.widget.RecyclerView,
+                                 viewHolder: androidx.recyclerview.widget.RecyclerView.ViewHolder,
                                  dX: Float,
                                  dY: Float,
                                  actionState: Int,

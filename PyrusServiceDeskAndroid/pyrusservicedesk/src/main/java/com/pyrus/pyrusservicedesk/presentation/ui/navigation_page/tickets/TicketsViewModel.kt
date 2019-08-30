@@ -1,7 +1,7 @@
 package com.pyrus.pyrusservicedesk.presentation.ui.navigation_page.tickets
 
-import android.arch.lifecycle.LiveData
-import android.arch.lifecycle.MediatorLiveData
+import androidx.lifecycle.LiveData
+import androidx.lifecycle.MediatorLiveData
 import com.pyrus.pyrusservicedesk.ServiceDeskProvider
 import com.pyrus.pyrusservicedesk.presentation.call.GetTicketsCall
 import com.pyrus.pyrusservicedesk.presentation.viewmodel.ConnectionViewModelBase

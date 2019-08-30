@@ -1,6 +1,6 @@
 package com.pyrus.pyrusservicedesk.presentation.ui.navigation_page.ticket
 
-import android.support.v7.util.DiffUtil
+import androidx.recyclerview.widget.DiffUtil
 import com.pyrus.pyrusservicedesk.presentation.ui.navigation_page.ticket.entries.CommentEntry
 import com.pyrus.pyrusservicedesk.presentation.ui.navigation_page.ticket.entries.DateEntry
 import com.pyrus.pyrusservicedesk.presentation.ui.navigation_page.ticket.entries.TicketEntry

@@ -1,7 +1,7 @@
 package com.pyrus.pyrusservicedesk.presentation.call
 
-import android.arch.lifecycle.LiveData
-import android.arch.lifecycle.MutableLiveData
+import androidx.lifecycle.LiveData
+import androidx.lifecycle.MutableLiveData
 import com.pyrus.pyrusservicedesk.sdk.response.ResponseError
 import kotlinx.coroutines.*
 

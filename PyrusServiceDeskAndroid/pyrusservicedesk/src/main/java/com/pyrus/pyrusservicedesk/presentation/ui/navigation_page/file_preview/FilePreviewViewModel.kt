@@ -2,8 +2,8 @@ package com.pyrus.pyrusservicedesk.presentation.ui.navigation_page.file_preview
 
 import android.app.Application
 import android.app.DownloadManager
-import android.arch.lifecycle.LiveData
-import android.arch.lifecycle.MutableLiveData
+import androidx.lifecycle.LiveData
+import androidx.lifecycle.MutableLiveData
 import android.content.ContentResolver
 import android.content.Context
 import android.content.Intent

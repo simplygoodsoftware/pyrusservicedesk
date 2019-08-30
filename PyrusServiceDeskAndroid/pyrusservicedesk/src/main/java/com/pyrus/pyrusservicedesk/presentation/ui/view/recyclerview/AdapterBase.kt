@@ -1,13 +1,13 @@
 package com.pyrus.pyrusservicedesk.presentation.ui.view.recyclerview
 
-import android.support.v7.widget.RecyclerView
-import android.support.v7.widget.helper.ItemTouchHelper
+import androidx.recyclerview.widget.RecyclerView
+import androidx.recyclerview.widget.ItemTouchHelper
 
 
 /**
  * Base [RecyclerView.Adapter] implementation.
  */
-internal abstract class AdapterBase<Item> : RecyclerView.Adapter<ViewHolderBase<Item>>() {
+internal abstract class AdapterBase<Item> : androidx.recyclerview.widget.RecyclerView.Adapter<ViewHolderBase<Item>>() {
 
     /**
      * List of items that are rendered by adapter.

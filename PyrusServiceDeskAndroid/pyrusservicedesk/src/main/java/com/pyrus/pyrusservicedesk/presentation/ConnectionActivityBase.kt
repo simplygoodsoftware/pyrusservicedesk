@@ -1,6 +1,6 @@
 package com.pyrus.pyrusservicedesk.presentation
 
-import android.arch.lifecycle.Observer
+import androidx.lifecycle.Observer
 import android.graphics.PorterDuff
 import android.os.Bundle
 import android.view.View.GONE

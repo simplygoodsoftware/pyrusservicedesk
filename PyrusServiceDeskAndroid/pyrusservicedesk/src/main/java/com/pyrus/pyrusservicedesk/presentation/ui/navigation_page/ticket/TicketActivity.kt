@@ -1,6 +1,6 @@
 package com.pyrus.pyrusservicedesk.presentation.ui.navigation_page.ticket
 
-import android.arch.lifecycle.Observer
+import androidx.lifecycle.Observer
 import android.content.ClipData
 import android.content.ClipboardManager
 import android.content.Context
@@ -214,7 +214,7 @@ internal class TicketActivity : ConnectionActivityBase<TicketViewModel>(TicketVi
             this,
             Observer { result ->
                 val atEnd = comments.isAtEnd()
-                val isEmpty = comments.adapter.itemCount == 0
+                val isEmpty = comments.adapter?.itemCount == 0
                 result?.let{
                     refresh.isRefreshing = false
                     adapter.setItems(it.newItems)
@@ -301,7 +301,7 @@ internal class TicketActivity : ConnectionActivityBase<TicketViewModel>(TicketVi
 
     private fun copyToClipboard(text: String) {
         (getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager).apply {
-            primaryClip = ClipData.newPlainText("Copied text", text)
+            setPrimaryClip(ClipData.newPlainText("Copied text", text))
         }
         Toast.makeText(applicationContext, R.string.psd_copied_to_clipboard, Toast.LENGTH_SHORT).show()
     }

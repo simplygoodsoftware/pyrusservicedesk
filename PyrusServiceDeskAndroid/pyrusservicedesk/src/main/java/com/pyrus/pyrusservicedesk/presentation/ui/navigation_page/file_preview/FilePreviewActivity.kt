@@ -1,7 +1,7 @@
 package com.pyrus.pyrusservicedesk.presentation.ui.navigation_page.file_preview
 
 import android.Manifest
-import android.arch.lifecycle.Observer
+import androidx.lifecycle.Observer
 import android.content.Intent
 import android.content.Intent.ACTION_SEND
 import android.content.Intent.ACTION_VIEW
