@@ -14,7 +14,7 @@ import android.view.ViewGroup
 internal abstract class ViewHolderBase<T>(
         parent: ViewGroup,
         @LayoutRes layoutId: Int)
-    : androidx.recyclerview.widget.RecyclerView.ViewHolder(
+    : RecyclerView.ViewHolder(
         LayoutInflater.from(parent.context)
                 .inflate(layoutId, parent, false)){
 

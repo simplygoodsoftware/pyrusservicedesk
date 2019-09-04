@@ -68,11 +68,11 @@ internal fun Bitmap.rotate(rotationDegrees: Float): Bitmap {
         true)
 }
 
-internal fun getImageRotation(exifInterface: androidx.exifinterface.media.ExifInterface): Int {
-    return when (exifInterface.getAttribute(androidx.exifinterface.media.ExifInterface.TAG_ORIENTATION)?.toInt()) {
-        androidx.exifinterface.media.ExifInterface.ORIENTATION_ROTATE_270 -> 270
-        androidx.exifinterface.media.ExifInterface.ORIENTATION_ROTATE_180 -> 180
-        androidx.exifinterface.media.ExifInterface.ORIENTATION_ROTATE_90 -> 90
+internal fun getImageRotation(exifInterface: ExifInterface): Int {
+    return when (exifInterface.getAttribute(ExifInterface.TAG_ORIENTATION)?.toInt()) {
+        ExifInterface.ORIENTATION_ROTATE_270 -> 270
+        ExifInterface.ORIENTATION_ROTATE_180 -> 180
+        ExifInterface.ORIENTATION_ROTATE_90 -> 90
         else -> 0
     }
 }

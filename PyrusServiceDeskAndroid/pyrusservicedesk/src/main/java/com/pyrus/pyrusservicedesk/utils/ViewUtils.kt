@@ -13,11 +13,11 @@ import android.widget.TextView
  *
  * NB: applicable to recyclerviews that have [LinearLayoutManager] only
  */
-internal fun androidx.recyclerview.widget.RecyclerView.isAtEnd(): Boolean {
+internal fun RecyclerView.isAtEnd(): Boolean {
     return adapter == null
             || layoutManager == null
             || childCount == 0
-            || (layoutManager as androidx.recyclerview.widget.LinearLayoutManager).findLastVisibleItemPosition() == adapter!!.itemCount - 1
+            || (layoutManager as LinearLayoutManager).findLastVisibleItemPosition() == adapter!!.itemCount - 1
 }
 
 /**

@@ -7,7 +7,7 @@ import androidx.recyclerview.widget.ItemTouchHelper
 /**
  * Base [RecyclerView.Adapter] implementation.
  */
-internal abstract class AdapterBase<Item> : androidx.recyclerview.widget.RecyclerView.Adapter<ViewHolderBase<Item>>() {
+internal abstract class AdapterBase<Item> : RecyclerView.Adapter<ViewHolderBase<Item>>() {
 
     /**
      * List of items that are rendered by adapter.

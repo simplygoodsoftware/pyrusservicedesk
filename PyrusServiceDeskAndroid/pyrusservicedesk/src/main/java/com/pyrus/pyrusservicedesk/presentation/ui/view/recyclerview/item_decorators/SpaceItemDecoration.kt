@@ -17,12 +17,12 @@ import android.view.View
  */
 internal class SpaceItemDecoration(@Px val itemSpace: Int,
                                    private val itemSpaceMultiplier: SpaceMultiplier? = null)
-    : androidx.recyclerview.widget.RecyclerView.ItemDecoration() {
+    : RecyclerView.ItemDecoration() {
 
     override fun getItemOffsets(outRect: Rect,
                                 view: View,
-                                parent: androidx.recyclerview.widget.RecyclerView,
-                                state: androidx.recyclerview.widget.RecyclerView.State) {
+                                parent: RecyclerView,
+                                state: RecyclerView.State) {
 
         if (parent.getChildAdapterPosition(view) == 0) {
             outRect.top = 0
