@@ -214,8 +214,7 @@ internal class CommentView @JvmOverloads constructor(
         primaryColor = getTextColorOnBackground(context, backgroundColor)
         val secondaryColor = adjustColorChannel(primaryColor, ColorChannel.Alpha, SECONDARY_TEXT_COLOR_MULTIPLIER)
 
-        background_parent.setBackgroundColor(backgroundColor)
-        background_parent.cornerRadius = resources.getDimension(R.dimen.psd_comment_radius)
+        background_parent.setCardBackgroundColor(backgroundColor)
 
         comment_text.setTextColor(primaryColor)
         comment_text.setLinkTextColor(primaryColor)
@@ -338,7 +337,7 @@ internal class CommentView @JvmOverloads constructor(
                     }
                     interpolator = DecelerateInterpolator()
                 }
-                .start();
+                .start()
         }
     }
 
@@ -459,7 +458,7 @@ internal class CommentView @JvmOverloads constructor(
 
         val bitmap = try {
             val exif = context.contentResolver.openInputStream(previewUri)?.use {
-                androidx.exifinterface.media.ExifInterface(it)
+                ExifInterface(it)
             }
             val source = exif?.thumbnailBitmap
                 ?: BitmapFactory.decodeStream(context.contentResolver.openInputStream(previewUri))
@@ -475,7 +474,7 @@ internal class CommentView @JvmOverloads constructor(
 
         if (adjustTargetDimension) {
             val ratio  = bitmap.width.toFloat() / bitmap.height
-            if (!previewRatioMap.containsKey(previewUri)){}
+            if (!previewRatioMap.containsKey(previewUri))
                 previewRatioMap += previewUri to ratio
             target.layoutParams.width = getFullSizePreviewWidth(previewUri, target.layoutParams.height)
             target.requestLayout()

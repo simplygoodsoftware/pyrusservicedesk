@@ -4,8 +4,8 @@ import android.annotation.SuppressLint
 import android.content.Context
 import android.content.SharedPreferences
 
-internal val PREFERENCE_KEY = "com.pyrus.pyrusservicedesk.PREFERENCES"
-private val PREFERENCE_KEY_LEGACY = "net.papirus.pyrusservicedesk.PREFERENCES"
+internal const val PREFERENCE_KEY = "com.pyrus.pyrusservicedesk.PREFERENCES"
+private const val PREFERENCE_KEY_LEGACY = "net.papirus.pyrusservicedesk.PREFERENCES"
 
 internal const val PREFERENCE_KEY_USER_ID = "PREFERENCE_KEY_USER_ID"
 private const val PREFERENCE_KEY_USER_ID_LEGACY = "net.papirus.pyrusservicedesk.PREFS_KEY_USER_ID"

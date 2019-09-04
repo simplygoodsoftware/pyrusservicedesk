@@ -1,17 +1,17 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <color name="psd_accent">#008c8c</color>
-    <color name="psd_accent_secondary">#f4c000</color>
-    <color name="psd_text_color_primary">@android:color/black</color>
-    <color name="psd_text_color_secondary">#65000000</color>
-    <color name="psd_text_color_primary_inverse">@android:color/white</color>
-    <color name="psd_text_color_secondary_inverse">#66FFFFFF</color>
-    <color name="psd_action_bar_icon_color">#99666666</color>
-    <color name="psd_divider_color">#dddddd</color>
+    <color name="psd_accent">#008C8C</color>
+    <color name="psd_accent_secondary">#F4C000</color>
+    <color name="psd_text_color_primary">#000000</color>
+    <color name="psd_text_color_secondary">#999999</color>
+    <color name="psd_text_color_primary_inverse">#FFFFFF</color>
+    <color name="psd_text_color_secondary_inverse">#666666</color>
+    <color name="psd_action_bar_icon_color">#666666</color>
+    <color name="psd_divider_color">#DDDDDD</color>
     <color name="psd_error_background">#E2E2E2</color>
-    <color name="psd_comment_inbound_background">#CCE2E2E2</color>
-    <color name="psd_comment_outbound_background">?android:colorAccent</color>
+    <color name="psd_comment_inbound_background">#E9E9E9</color>
+    <color name="psd_comment_outbound_background">@color/psd_accent</color>
     <color name="psd_error_accent">#D0021B</color>
     <color name="psd_no_file_preview_background">#333333</color>
-    <color name="psd_comment_preview_outline">#26000000</color>
+    <color name="psd_comment_preview_outline">#D9D9D9</color>
 </resources>
