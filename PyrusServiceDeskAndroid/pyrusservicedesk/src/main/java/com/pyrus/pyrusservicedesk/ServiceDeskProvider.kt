@@ -1,7 +1,7 @@
 package com.pyrus.pyrusservicedesk
 
 import android.app.Application
-import android.support.annotation.MainThread
+import androidx.annotation.MainThread
 import com.pyrus.pyrusservicedesk.sdk.RequestFactory
 import com.pyrus.pyrusservicedesk.sdk.data.LocalDataProvider
 import com.pyrus.pyrusservicedesk.sdk.repositories.draft.DraftRepository

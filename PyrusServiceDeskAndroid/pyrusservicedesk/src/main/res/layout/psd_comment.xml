@@ -9,10 +9,13 @@
     android:gravity="bottom"
     android:orientation="horizontal">
 
-    <com.pyrus.pyrusservicedesk.presentation.ui.view.RoundCornersLayout
+    <androidx.cardview.widget.CardView
         android:id="@+id/background_parent"
         android:layout_width="wrap_content"
-        android:layout_height="wrap_content">
+        android:layout_height="wrap_content"
+        app:cardCornerRadius="@dimen/psd_comment_radius"
+        app:cardElevation="0dp"
+        app:cardPreventCornerOverlap="false">
 
         <LinearLayout
             android:id="@+id/attachment_layout"
@@ -56,7 +59,7 @@
                 android:padding="@dimen/psd_offset_small"
                 android:orientation="vertical">
 
-                <android.support.v7.widget.AppCompatTextView
+                <androidx.appcompat.widget.AppCompatTextView
                     android:id="@+id/file_name"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
@@ -65,7 +68,7 @@
                     tools:text="filename.jpeg"
                     android:ellipsize="end"/>
 
-                <android.support.v7.widget.AppCompatTextView
+                <androidx.appcompat.widget.AppCompatTextView
                     android:id="@+id/file_size"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
@@ -76,7 +79,7 @@
 
         </LinearLayout>
 
-        <android.support.v7.widget.AppCompatTextView
+        <androidx.appcompat.widget.AppCompatTextView
             android:id="@+id/comment_text"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
@@ -114,6 +117,6 @@
                 android:indeterminate="false"/>
 
         </FrameLayout>
-    </com.pyrus.pyrusservicedesk.presentation.ui.view.RoundCornersLayout>
+    </androidx.cardview.widget.CardView>
 
 </LinearLayout>

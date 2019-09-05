@@ -1,7 +1,7 @@
 package com.pyrus.pyrusservicedesk.presentation.viewmodel
 
-import android.arch.lifecycle.ViewModel
-import android.arch.lifecycle.ViewModelProvider
+import androidx.lifecycle.ViewModel
+import androidx.lifecycle.ViewModelProvider
 import android.content.Intent
 import com.pyrus.pyrusservicedesk.PyrusServiceDesk
 import com.pyrus.pyrusservicedesk.presentation.ui.navigation_page.file_preview.FilePreviewViewModel

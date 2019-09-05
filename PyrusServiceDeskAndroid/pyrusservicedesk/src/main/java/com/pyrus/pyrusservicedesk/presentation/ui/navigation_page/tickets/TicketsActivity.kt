@@ -1,6 +1,6 @@
 package com.pyrus.pyrusservicedesk.presentation.ui.navigation_page.tickets
 
-import android.arch.lifecycle.Observer
+import androidx.lifecycle.Observer
 import android.content.Intent
 import android.os.Bundle
 import android.view.Menu

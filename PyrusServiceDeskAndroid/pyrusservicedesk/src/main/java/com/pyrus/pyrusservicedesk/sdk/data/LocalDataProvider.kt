@@ -1,7 +1,7 @@
 package com.pyrus.pyrusservicedesk.sdk.data
 
 import android.net.Uri
-import android.support.annotation.MainThread
+import androidx.annotation.MainThread
 import com.pyrus.pyrusservicedesk.sdk.FileResolver
 import com.pyrus.pyrusservicedesk.sdk.data.intermediate.FileData
 import com.pyrus.pyrusservicedesk.sdk.repositories.offline.OfflineRepository

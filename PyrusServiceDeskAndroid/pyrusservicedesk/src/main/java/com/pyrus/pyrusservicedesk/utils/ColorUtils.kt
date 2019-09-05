@@ -2,8 +2,8 @@ package com.pyrus.pyrusservicedesk.utils
 
 import android.content.Context
 import android.graphics.Color
-import android.support.annotation.ColorInt
-import android.support.v4.graphics.ColorUtils
+import androidx.annotation.ColorInt
+import androidx.core.graphics.ColorUtils
 
 internal const val COLOR_CHANNEL_MAX_VALUE = 255
 

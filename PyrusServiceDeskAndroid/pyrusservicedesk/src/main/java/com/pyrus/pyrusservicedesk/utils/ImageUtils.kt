@@ -5,7 +5,7 @@ import android.graphics.*
 import android.graphics.drawable.BitmapDrawable
 import android.graphics.drawable.Drawable
 import android.media.ThumbnailUtils
-import android.support.media.ExifInterface
+import androidx.exifinterface.media.ExifInterface
 import com.squareup.picasso.Transformation
 
 /**

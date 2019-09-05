@@ -1,8 +1,8 @@
 package com.pyrus.pyrusservicedesk.presentation.ui.view.recyclerview.item_decorators
 
 import android.graphics.Rect
-import android.support.annotation.Px
-import android.support.v7.widget.RecyclerView
+import androidx.annotation.Px
+import androidx.recyclerview.widget.RecyclerView
 import android.view.View
 
 /**

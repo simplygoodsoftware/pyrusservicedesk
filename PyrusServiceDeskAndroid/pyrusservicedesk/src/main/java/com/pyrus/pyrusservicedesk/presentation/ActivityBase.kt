@@ -1,13 +1,13 @@
 package com.pyrus.pyrusservicedesk.presentation
 
-import android.arch.lifecycle.Observer
+import androidx.lifecycle.Observer
 import android.content.Context
 import android.content.pm.PackageManager
 import android.os.Bundle
-import android.support.v4.app.ActivityCompat
-import android.support.v4.view.ViewCompat
-import android.support.v7.app.AppCompatActivity
-import android.support.v7.app.AppCompatDelegate
+import androidx.core.app.ActivityCompat
+import androidx.core.view.ViewCompat
+import androidx.appcompat.app.AppCompatActivity
+import androidx.appcompat.app.AppCompatDelegate
 import android.view.View
 import android.view.inputmethod.InputMethodManager
 import com.pyrus.pyrusservicedesk.PyrusServiceDesk

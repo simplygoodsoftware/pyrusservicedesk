@@ -1,14 +1,14 @@
 package com.pyrus.pyrusservicedesk.utils
 
-import android.arch.lifecycle.ViewModel
-import android.arch.lifecycle.ViewModelProviders
+import androidx.lifecycle.ViewModel
+import androidx.lifecycle.ViewModelProviders
 import android.content.ContentValues
 import android.content.Context
 import android.content.Intent
 import android.net.Uri
 import android.provider.MediaStore
-import android.support.v4.app.Fragment
-import android.support.v4.app.FragmentActivity
+import androidx.fragment.app.Fragment
+import androidx.fragment.app.FragmentActivity
 import com.pyrus.pyrusservicedesk.presentation.viewmodel.ViewModelFactory
 import java.text.SimpleDateFormat
 import java.util.*

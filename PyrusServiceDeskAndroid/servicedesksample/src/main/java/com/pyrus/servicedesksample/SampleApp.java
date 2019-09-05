@@ -17,7 +17,7 @@ public class SampleApp extends Application {
         PyrusServiceDesk.setPushToken(
                 "my_push_token",
                 exception -> {
-                    Log.d("SAMPLE_APP", exception.getMessage());
+                    Log.w("SAMPLE_APP", exception);
                 });
 
     }

@@ -11,13 +11,13 @@ import android.graphics.drawable.AnimationDrawable
 import android.graphics.drawable.Drawable
 import android.graphics.drawable.LayerDrawable
 import android.net.Uri
-import android.support.annotation.ColorInt
-import android.support.media.ExifInterface
-import android.support.v4.app.ActivityCompat
-import android.support.v4.content.ContextCompat
-import android.support.v4.text.util.LinkifyCompat
-import android.support.v7.content.res.AppCompatResources
-import android.support.v7.widget.AppCompatImageView
+import androidx.annotation.ColorInt
+import androidx.exifinterface.media.ExifInterface
+import androidx.core.app.ActivityCompat
+import androidx.core.content.ContextCompat
+import androidx.core.text.util.LinkifyCompat
+import androidx.appcompat.content.res.AppCompatResources
+import androidx.appcompat.widget.AppCompatImageView
 import android.text.util.Linkify
 import android.util.AttributeSet
 import android.view.Gravity
@@ -214,8 +214,7 @@ internal class CommentView @JvmOverloads constructor(
         primaryColor = getTextColorOnBackground(context, backgroundColor)
         val secondaryColor = adjustColorChannel(primaryColor, ColorChannel.Alpha, SECONDARY_TEXT_COLOR_MULTIPLIER)
 
-        background_parent.setBackgroundColor(backgroundColor)
-        background_parent.cornerRadius = resources.getDimension(R.dimen.psd_comment_radius)
+        background_parent.setCardBackgroundColor(backgroundColor)
 
         comment_text.setTextColor(primaryColor)
         comment_text.setLinkTextColor(primaryColor)
@@ -338,7 +337,7 @@ internal class CommentView @JvmOverloads constructor(
                     }
                     interpolator = DecelerateInterpolator()
                 }
-                .start();
+                .start()
         }
     }
 
@@ -475,7 +474,7 @@ internal class CommentView @JvmOverloads constructor(
 
         if (adjustTargetDimension) {
             val ratio  = bitmap.width.toFloat() / bitmap.height
-            if (!previewRatioMap.containsKey(previewUri)){}
+            if (!previewRatioMap.containsKey(previewUri))
                 previewRatioMap += previewUri to ratio
             target.layoutParams.width = getFullSizePreviewWidth(previewUri, target.layoutParams.height)
             target.requestLayout()

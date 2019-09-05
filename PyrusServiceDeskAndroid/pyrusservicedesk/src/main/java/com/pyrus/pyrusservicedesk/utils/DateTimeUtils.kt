@@ -5,6 +5,7 @@ import android.content.Context
 import com.pyrus.pyrusservicedesk.R
 import java.text.SimpleDateFormat
 import java.util.*
+import kotlin.math.ceil
 
 internal const val ISO_DATE_PATTERN = "yyyy-MM-dd'T'HH:mm:ss'Z'"
 internal const val MILLISECONDS_IN_MINUTE = 60 * 1000
@@ -65,7 +66,7 @@ internal fun Date.getTimePassedFrom(context: Context, from: Calendar): String {
         return when {
             get(0) > 0 -> context.resources.getQuantityString(R.plurals.psd_years_ago, get(0))
             get(1) > 0 -> context.getString(R.string.psd_months_ago, get(1))
-            get(2) > DAYS_IN_WEEK -> context.getString(R.string.psd_weeks_ago, Math.ceil(get(2) / DAYS_IN_WEEK.toDouble()).toInt())
+            get(2) > DAYS_IN_WEEK -> context.getString(R.string.psd_weeks_ago, ceil(get(2) / DAYS_IN_WEEK.toDouble()).toInt())
             get(2) > 0 -> context.getString(R.string.psd_days_ago, get(2))
             get(3) > 0 -> context.getString(R.string.psd_hours_ago, get(3))
             get(4) > 0 -> context.getString(R.string.psd_minutes_ago, get(4))
@@ -82,20 +83,20 @@ private fun Calendar.isSameYear(another: Calendar) = get(Calendar.YEAR) == anoth
 
 private fun Calendar.minutesFrom(another: Calendar): Int {
     val millisecondsInMinute = MILLISECONDS_IN_MINUTE.toDouble()
-    return Math.ceil(this.timeInMillis / millisecondsInMinute).toInt() -
-            Math.ceil(another.timeInMillis / millisecondsInMinute).toInt()
+    return ceil(this.timeInMillis / millisecondsInMinute).toInt() -
+            ceil(another.timeInMillis / millisecondsInMinute).toInt()
 }
 
 private fun Calendar.hoursFrom(another: Calendar): Int {
     val millisecondsInHour = MILLISECONDS_IN_HOUR.toDouble()
-    return Math.ceil(this.timeInMillis / millisecondsInHour).toInt() -
-            Math.ceil(another.timeInMillis / millisecondsInHour).toInt()
+    return ceil(this.timeInMillis / millisecondsInHour).toInt() -
+            ceil(another.timeInMillis / millisecondsInHour).toInt()
 }
 
 private fun Calendar.daysFrom(another: Calendar): Int {
     val millisecondsInDay = MILLISECONDS_IN_DAY.toDouble()
-    return Math.ceil(this.timeInMillis / millisecondsInDay).toInt() -
-            Math.ceil(another.timeInMillis / millisecondsInDay).toInt()
+    return ceil(this.timeInMillis / millisecondsInDay).toInt() -
+            ceil(another.timeInMillis / millisecondsInDay).toInt()
 }
 
 private fun Calendar.monthsFrom(another: Calendar): Int {

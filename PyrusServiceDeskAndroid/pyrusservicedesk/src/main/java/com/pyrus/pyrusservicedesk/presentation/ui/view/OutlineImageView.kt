@@ -2,7 +2,7 @@ package com.pyrus.pyrusservicedesk.presentation.ui.view
 
 import android.content.Context
 import android.graphics.*
-import android.support.v7.widget.AppCompatImageView
+import androidx.appcompat.widget.AppCompatImageView
 import android.util.AttributeSet
 
 /**
@@ -64,8 +64,8 @@ internal class OutlineImageView @JvmOverloads constructor(context: Context,
             isFilterBitmap = true
         }
 
-        paint.xfermode = PorterDuffXfermode(PorterDuff.Mode.CLEAR)
-        paint.color = Color.TRANSPARENT
+        paint.xfermode = PorterDuffXfermode(PorterDuff.Mode.SRC)
+        paint.color = Color.WHITE
         val rect = RectF(0f, 0f, width.toFloat(), height.toFloat())
         canvas.drawRect(rect, paint)
 

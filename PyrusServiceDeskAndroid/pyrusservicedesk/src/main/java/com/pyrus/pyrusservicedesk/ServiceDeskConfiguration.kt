@@ -1,8 +1,8 @@
 package com.pyrus.pyrusservicedesk
 
 import android.os.Bundle
-import android.support.annotation.ColorInt
-import android.support.annotation.DrawableRes
+import androidx.annotation.ColorInt
+import androidx.annotation.DrawableRes
 import com.pyrus.pyrusservicedesk.ServiceDeskConfiguration.Builder
 import com.pyrus.pyrusservicedesk.utils.isTablet
 
