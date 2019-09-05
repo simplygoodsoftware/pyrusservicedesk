@@ -64,8 +64,8 @@ internal class OutlineImageView @JvmOverloads constructor(context: Context,
             isFilterBitmap = true
         }
 
-        paint.xfermode = PorterDuffXfermode(PorterDuff.Mode.CLEAR)
-        paint.color = Color.TRANSPARENT
+        paint.xfermode = PorterDuffXfermode(PorterDuff.Mode.SRC)
+        paint.color = Color.WHITE
         val rect = RectF(0f, 0f, width.toFloat(), height.toFloat())
         canvas.drawRect(rect, paint)
 

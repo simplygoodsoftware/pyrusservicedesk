@@ -14,7 +14,7 @@
     <dimen name="psd_recyclerview_item_height_default">56dp</dimen>
 
     <dimen name="psd_counter_radius">16dp</dimen>
-    <dimen name="psd_comment_radius">0dp</dimen>
+    <dimen name="psd_comment_radius">8dp</dimen>
 
     <dimen name="psd_tickets_item_space">16dp</dimen>
     <dimen name="psd_comments_item_space">4dp</dimen>
