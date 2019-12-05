@@ -184,17 +184,17 @@ internal class TicketActivity : ConnectionActivityBase<TicketViewModel>(TicketVi
         send.isEnabled = !input.text.isNullOrBlank()
     }
 
-    override fun onRestoreInstanceState(savedInstanceState: Bundle?) {
+    override fun onRestoreInstanceState(savedInstanceState: Bundle) {
         super.onRestoreInstanceState(savedInstanceState)
-        savedInstanceState?.let {
+        savedInstanceState.let {
             if (it.getBoolean(STATE_KEYBOARD_SHOWN))
                 showKeyboardOn(input)
         }
     }
 
-    override fun onSaveInstanceState(outState: Bundle?) {
+    override fun onSaveInstanceState(outState: Bundle) {
         super.onSaveInstanceState(outState)
-        outState?.let {
+        outState.let {
             ServiceDeskConfiguration.save(it)
             it.putBoolean(STATE_KEYBOARD_SHOWN, input.hasFocus())
         }

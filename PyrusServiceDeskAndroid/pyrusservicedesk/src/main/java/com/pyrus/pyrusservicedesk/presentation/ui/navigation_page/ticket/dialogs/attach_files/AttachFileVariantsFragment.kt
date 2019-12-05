@@ -48,7 +48,7 @@ internal class AttachFileVariantsFragment: BottomSheetDialogFragment(), View.OnC
     @SuppressLint("InflateParams")
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         super.onCreateView(inflater, container, savedInstanceState)
-        dialog.setOnShowListener { dialog ->
+        dialog?.setOnShowListener { dialog ->
             val d = dialog as BottomSheetDialog
             val bottomSheetInternal = d.findViewById<View>(R.id.design_bottom_sheet)
             BottomSheetBehavior.from(bottomSheetInternal!!).state = BottomSheetBehavior.STATE_EXPANDED

@@ -105,10 +105,8 @@ internal class FilePreviewActivity: ConnectionActivityBase<FilePreviewViewModel>
         }
     }
 
-    override fun onSaveInstanceState(outState: Bundle?) {
+    override fun onSaveInstanceState(outState: Bundle) {
         super.onSaveInstanceState(outState)
-        if(outState == null)
-            return
         web_view.saveState(outState)
         outState.putBoolean(STATE_FINISHED_SUCCESSFULLY, pageFinishedSuccessfully)
     }

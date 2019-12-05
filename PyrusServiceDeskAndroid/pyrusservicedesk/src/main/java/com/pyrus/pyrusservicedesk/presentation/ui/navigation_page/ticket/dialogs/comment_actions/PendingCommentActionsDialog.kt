@@ -49,7 +49,7 @@ internal class PendingCommentActionsDialog: DialogFragment(), View.OnClickListen
         dismiss()
     }
 
-    override fun onCancel(dialog: DialogInterface?) {
+    override fun onCancel(dialog: DialogInterface) {
         super.onCancel(dialog)
         sharedModel.onCancelled()
     }
