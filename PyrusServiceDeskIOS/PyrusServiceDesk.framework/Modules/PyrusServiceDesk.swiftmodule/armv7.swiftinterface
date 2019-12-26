@@ -1,0 +1,44 @@
+// swift-interface-format-version: 1.0
+// swift-compiler-version: Apple Swift version 5.1.3 (swiftlang-1100.0.282.1 clang-1100.0.33.15)
+// swift-module-flags: -target armv7-apple-ios9.0 -enable-objc-interop -enable-library-evolution -swift-version 5 -enforce-exclusivity=checked -O -module-name PyrusServiceDesk
+import AVFoundation
+import Foundation
+import ImageIO
+import MobileCoreServices
+import Photos
+@_exported import PyrusServiceDesk
+import Swift
+import UIKit
+import WebKit
+@objc public class ServiceDeskConfiguration : ObjectiveC.NSObject {
+  @objc public var chatTitle: Swift.String?
+  @objc public var themeColor: UIKit.UIColor?
+  @objc public var welcomeMessage: Swift.String?
+  @objc public var avatarForSupport: UIKit.UIImage?
+  @objc public var userName: Swift.String?
+  @objc override dynamic public init()
+  @objc deinit
+}
+@objc public protocol FileChooser {
+  @objc var label: Swift.String { get set }
+  @objc weak var chooserDelegate: PyrusServiceDesk.FileChooserDelegate? { get set }
+}
+@objc public protocol FileChooserDelegate {
+  @objc func didEndWithSuccess(_ data: Foundation.Data?, url: Foundation.URL?)
+  @objc func didEndWithCancel()
+}
+@objc public protocol NewReplySubscriber {
+  @objc func onNewReply()
+}
+@objc public class PyrusServiceDesk : ObjectiveC.NSObject {
+  @objc public static func setPushToken(_ token: Swift.String?, completion: @escaping (Swift.Error?) -> Swift.Void)
+  @objc public static func start(on viewController: UIKit.UIViewController)
+  @objc public static func start(on viewController: UIKit.UIViewController, configuration: PyrusServiceDesk.ServiceDeskConfiguration?)
+  @objc public static func start(on viewController: UIKit.UIViewController, configuration: PyrusServiceDesk.ServiceDeskConfiguration?, completion: (() -> Swift.Void)? = nil)
+  @objc public static func subscribeToReplies(_ subscriber: PyrusServiceDesk.NewReplySubscriber?)
+  @objc public static func unsubscribeFromReplies(_ subscriber: PyrusServiceDesk.NewReplySubscriber?)
+  @objc public init(_ clientId: Swift.String?)
+  @objc public static func registerFileChooser(_ chooser: (UIKit.UIViewController & PyrusServiceDesk.FileChooser)?)
+  @objc override dynamic public init()
+  @objc deinit
+}
