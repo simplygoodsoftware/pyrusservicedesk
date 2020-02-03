@@ -37,7 +37,7 @@ import WebKit
   @objc public static func start(on viewController: UIKit.UIViewController, configuration: PyrusServiceDesk.ServiceDeskConfiguration?, completion: (() -> Swift.Void)? = nil)
   @objc public static func subscribeToReplies(_ subscriber: PyrusServiceDesk.NewReplySubscriber?)
   @objc public static func unsubscribeFromReplies(_ subscriber: PyrusServiceDesk.NewReplySubscriber?)
-  @objc public init(_ clientId: Swift.String?)
+  @objc public static func createWith(_ clientId: Swift.String?)
   @objc public static func registerFileChooser(_ chooser: (UIKit.UIViewController & PyrusServiceDesk.FileChooser)?)
   @objc override dynamic public init()
   @objc deinit
