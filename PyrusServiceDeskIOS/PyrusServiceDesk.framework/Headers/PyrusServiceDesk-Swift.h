@@ -269,6 +269,8 @@ SWIFT_CLASS("_TtC16PyrusServiceDesk16PyrusServiceDesk")
 /// \param completion The block to execute after the presentation finishes. This block has no return value and takes no parameters. You may specify nil for this parameter.
 ///
 + (void)startOn:(UIViewController * _Nonnull)viewController configuration:(ServiceDeskConfiguration * _Nullable)configuration completion:(void (^ _Nullable)(void))completion;
+/// Close PyrusServiceDesk
++ (void)stopWithCompletion:(void (^ _Nullable)(void))completion;
 /// Subscribe [subscriber] for notifications that new messages from support have appeared in the chat.
 + (void)subscribeToReplies:(id <NewReplySubscriber> _Nullable)subscriber;
 /// Unsubscribe [subscriber] from alerts for new messages from chat support.
@@ -596,6 +598,8 @@ SWIFT_CLASS("_TtC16PyrusServiceDesk16PyrusServiceDesk")
 /// \param completion The block to execute after the presentation finishes. This block has no return value and takes no parameters. You may specify nil for this parameter.
 ///
 + (void)startOn:(UIViewController * _Nonnull)viewController configuration:(ServiceDeskConfiguration * _Nullable)configuration completion:(void (^ _Nullable)(void))completion;
+/// Close PyrusServiceDesk
++ (void)stopWithCompletion:(void (^ _Nullable)(void))completion;
 /// Subscribe [subscriber] for notifications that new messages from support have appeared in the chat.
 + (void)subscribeToReplies:(id <NewReplySubscriber> _Nullable)subscriber;
 /// Unsubscribe [subscriber] from alerts for new messages from chat support.
@@ -927,6 +931,8 @@ SWIFT_CLASS("_TtC16PyrusServiceDesk16PyrusServiceDesk")
 /// \param completion The block to execute after the presentation finishes. This block has no return value and takes no parameters. You may specify nil for this parameter.
 ///
 + (void)startOn:(UIViewController * _Nonnull)viewController configuration:(ServiceDeskConfiguration * _Nullable)configuration completion:(void (^ _Nullable)(void))completion;
+/// Close PyrusServiceDesk
++ (void)stopWithCompletion:(void (^ _Nullable)(void))completion;
 /// Subscribe [subscriber] for notifications that new messages from support have appeared in the chat.
 + (void)subscribeToReplies:(id <NewReplySubscriber> _Nullable)subscriber;
 /// Unsubscribe [subscriber] from alerts for new messages from chat support.
@@ -1254,6 +1260,8 @@ SWIFT_CLASS("_TtC16PyrusServiceDesk16PyrusServiceDesk")
 /// \param completion The block to execute after the presentation finishes. This block has no return value and takes no parameters. You may specify nil for this parameter.
 ///
 + (void)startOn:(UIViewController * _Nonnull)viewController configuration:(ServiceDeskConfiguration * _Nullable)configuration completion:(void (^ _Nullable)(void))completion;
+/// Close PyrusServiceDesk
++ (void)stopWithCompletion:(void (^ _Nullable)(void))completion;
 /// Subscribe [subscriber] for notifications that new messages from support have appeared in the chat.
 + (void)subscribeToReplies:(id <NewReplySubscriber> _Nullable)subscriber;
 /// Unsubscribe [subscriber] from alerts for new messages from chat support.

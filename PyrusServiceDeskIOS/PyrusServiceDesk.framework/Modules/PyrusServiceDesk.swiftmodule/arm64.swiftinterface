@@ -31,10 +31,12 @@ import WebKit
   @objc func onNewReply()
 }
 @_inheritsConvenienceInitializers @objc public class PyrusServiceDesk : ObjectiveC.NSObject {
+  public static var PSD_CLOSED_NOTIFICATION_NAME: Swift.String
   @objc public static func setPushToken(_ token: Swift.String?, completion: @escaping (Swift.Error?) -> Swift.Void)
   @objc public static func start(on viewController: UIKit.UIViewController)
   @objc public static func start(on viewController: UIKit.UIViewController, configuration: PyrusServiceDesk.ServiceDeskConfiguration?)
   @objc public static func start(on viewController: UIKit.UIViewController, configuration: PyrusServiceDesk.ServiceDeskConfiguration?, completion: (() -> Swift.Void)? = nil)
+  @objc public static func stop(completion: (() -> Swift.Void)? = nil)
   @objc public static func subscribeToReplies(_ subscriber: PyrusServiceDesk.NewReplySubscriber?)
   @objc public static func unsubscribeFromReplies(_ subscriber: PyrusServiceDesk.NewReplySubscriber?)
   @objc public static func createWith(_ clientId: Swift.String?)
