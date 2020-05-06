@@ -15,14 +15,13 @@ internal class QuitViewModel : ViewModel() {
     /**
      * Provides live data to be subscribed to events that user completely quit service desk.
      */
-    fun getQuitServiceDeskLiveData():LiveData<Boolean> = quitServiceDesk
+    fun getQuitServiceDeskLiveData(): LiveData<Boolean> = quitServiceDesk
 
     /**
      * Should be called when it necessary to completely quit service desk.
      */
-    fun quitServiceDesk() {
-        quitServiceDesk.value = true
-        quitServiceDesk.postValue(null)
-    }
+    fun quitServiceDesk() = quitServiceDesk.postValue(true)
+
+    fun clear() = quitServiceDesk.postValue(false)
 
 }

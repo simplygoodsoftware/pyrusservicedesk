@@ -280,6 +280,12 @@ internal class TicketActivity : ConnectionActivityBase<TicketViewModel>(TicketVi
         }
     }
 
+    override fun finish() {
+        super.finish()
+        if (PyrusServiceDesk.get().isSingleChat)
+            PyrusServiceDesk.onServiceDeskClose()
+    }
+
     private fun onMenuItemClicked(menuItem: MenuItem?): Boolean {
         return menuItem?.let {
             when (it.itemId) {
@@ -305,6 +311,7 @@ internal class TicketActivity : ConnectionActivityBase<TicketViewModel>(TicketVi
         }
         Toast.makeText(applicationContext, R.string.psd_copied_to_clipboard, Toast.LENGTH_SHORT).show()
     }
+
 }
 
 private fun Attachment.toFileData(): FileData {

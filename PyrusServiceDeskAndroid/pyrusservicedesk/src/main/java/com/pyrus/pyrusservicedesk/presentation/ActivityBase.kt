@@ -67,6 +67,9 @@ internal abstract class ActivityBase: AppCompatActivity(), CoroutineScope {
                 recentContentHeight = height
             }
         }
+
+        if (quitViewModel.getQuitServiceDeskLiveData().value == true)
+            finish()
     }
 
     override fun onDestroy() {
@@ -141,7 +144,7 @@ internal abstract class ActivityBase: AppCompatActivity(), CoroutineScope {
             this,
             Observer { quit ->
                 quit?.let {
-                    if(it)
+                    if (it)
                         finish()
                 }
             }
