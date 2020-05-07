@@ -14,7 +14,11 @@ allprojects {
     repositories {
         google()
         jcenter()
-        
+    }
+
+    // https://github.com/novoda/bintray-release/issues/71#issuecomment-305291320
+    tasks.withType(Javadoc).all {
+        enabled = false
     }
 }
 
