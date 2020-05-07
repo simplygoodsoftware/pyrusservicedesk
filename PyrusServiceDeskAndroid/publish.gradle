@@ -1,13 +1,13 @@
 apply plugin: 'com.novoda.bintray-release'
 
-ext{
+ext {
     ORG_NAME = 'simplygoodsoftware'
     REPO_NAME = 'PyrusServiceDesk'
 
     GROUP_ID = 'com.pyrus'
     ARTIFACT_ID = 'servicedesk'
 
-    VERSION = '1.3.1'
+    VERSION = '1.3.2'
     DESCRIPTION = 'Service desk by simplygoodsoftware'
 
     WEBSITE = 'https://pyrus.com/'
