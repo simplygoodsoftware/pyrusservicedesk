@@ -283,7 +283,7 @@ internal class TicketActivity : ConnectionActivityBase<TicketViewModel>(TicketVi
     override fun finish() {
         super.finish()
         if (PyrusServiceDesk.get().isSingleChat)
-            PyrusServiceDesk.onServiceDeskClose()
+            PyrusServiceDesk.onServiceDeskStop()
     }
 
     private fun onMenuItemClicked(menuItem: MenuItem?): Boolean {

@@ -22,9 +22,9 @@ import com.pyrus.pyrusservicedesk.sdk.repositories.offline.OfflineRepository
 import com.pyrus.pyrusservicedesk.sdk.repositories.offline.PreferenceOfflineRepository
 import com.pyrus.pyrusservicedesk.sdk.response.ResponseCallback
 import com.pyrus.pyrusservicedesk.sdk.response.ResponseError
-import com.pyrus.pyrusservicedesk.sdk.updates.CloseSubscriber
 import com.pyrus.pyrusservicedesk.sdk.updates.LiveUpdates
 import com.pyrus.pyrusservicedesk.sdk.updates.NewReplySubscriber
+import com.pyrus.pyrusservicedesk.sdk.updates.OnStopCallback
 import com.pyrus.pyrusservicedesk.sdk.verify.LocalDataVerifier
 import com.pyrus.pyrusservicedesk.sdk.verify.LocalDataVerifierImpl
 import com.pyrus.pyrusservicedesk.sdk.web.retrofit.RetrofitWebRepository
@@ -35,12 +35,14 @@ import kotlinx.coroutines.launch
 import java.util.concurrent.Executors
 
 class PyrusServiceDesk private constructor(
-        internal val application: Application,
-        internal val appId: String,
-        internal val isSingleChat: Boolean){
+    internal val application: Application,
+    internal val appId: String,
+    internal val isSingleChat: Boolean
+) {
 
     companion object {
-        internal val DISPATCHER_IO_SINGLE = Executors.newSingleThreadExecutor().asCoroutineDispatcher()
+        internal val DISPATCHER_IO_SINGLE =
+            Executors.newSingleThreadExecutor().asCoroutineDispatcher()
         internal var FILE_CHOOSER: FileChooser? = null
         private var INSTANCE: PyrusServiceDesk? = null
         private var CONFIGURATION: ServiceDeskConfiguration? = null
@@ -62,35 +64,37 @@ class PyrusServiceDesk private constructor(
         /**
          * Launches UI of the PyrusServiceDesk.
          *
-         * @param activity activity that is used for launching service desk UI
-         * @param configuration instance of [ServiceDeskConfiguration]. This is used for customizing UI
+         * @param activity Activity that is used for launching service desk UI.
+         * @param configuration Instance of [ServiceDeskConfiguration]. This is used for customizing UI.
+         * @param onStopCallback The [OnStopCallback] interface to receive notification of stopping PyruServiceDesk.
          */
         @JvmStatic
         @JvmOverloads
         fun start(
             activity: Activity,
-            configuration: ServiceDeskConfiguration? = null
-        ) {
-            startImpl(activity = activity, configuration = configuration)
-        }
+            configuration: ServiceDeskConfiguration? = null,
+            onStopCallback: OnStopCallback? = null
+        ) = startImpl(
+            activity = activity,
+            configuration = configuration,
+            onStopCallback = onStopCallback
+        )
 
         /**
          * Registers [subscriber] that will be notified when new replies from support are received
          */
         @JvmStatic
         @MainThread
-        fun subscribeToReplies(subscriber: NewReplySubscriber){
+        fun subscribeToReplies(subscriber: NewReplySubscriber) =
             get().liveUpdates.subscribeOnReply(subscriber)
-        }
 
         /**
          * Unregisters [subscriber] from updates of new reply from support
          */
         @JvmStatic
         @MainThread
-        fun unsubscribeFromReplies(subscriber: NewReplySubscriber) {
+        fun unsubscribeFromReplies(subscriber: NewReplySubscriber) =
             get().liveUpdates.unsubscribeFromReplies(subscriber)
-        }
 
         /**
          * Assigns custom file chooser, that is appended as variant when the user is offered to choose the source
@@ -116,7 +120,7 @@ class PyrusServiceDesk private constructor(
         @JvmStatic
         fun setPushToken(token: String, callback: SetPushTokenCallback) {
             val serviceDesk = get()
-            when{
+            when {
                 token.isBlank() -> callback.onResult(Exception("Token is empty"))
                 serviceDesk.appId.isBlank() -> callback.onResult(Exception("AppId is not assigned"))
                 serviceDesk.userId.isBlank() -> callback.onResult(Exception("UserId is not assigned"))
@@ -125,10 +129,11 @@ class PyrusServiceDesk private constructor(
                         serviceDesk
                             .requestFactory
                             .getSetPushTokenRequest(token)
-                            .execute(object: ResponseCallback<Unit>{
+                            .execute(object : ResponseCallback<Unit> {
                                 override fun onSuccess(data: Unit) {
                                     callback.onResult(null)
                                 }
+
                                 override fun onFailure(responseError: ResponseError) {
                                     callback.onResult(responseError)
                                 }
@@ -138,29 +143,19 @@ class PyrusServiceDesk private constructor(
             }
         }
 
+        /**
+         * Stops PyrusServiceDesk. If UI was hidden, it will be finished during creating.
+         */
         @JvmStatic
-        fun close() {
-            get().quitViewModel.quitServiceDesk()
+        fun stop() = get().quitViewModel.quitServiceDesk()
+
+        internal fun onServiceDeskStop() {
+            get().onStopCallback?.onServiceDeskStop()
+            get().onStopCallback = null
         }
 
-        @JvmStatic
-        @MainThread
-        fun subscribeToClose(subscriber: CloseSubscriber) {
-            get().onCloseServiceDeskSubscriber = subscriber
-        }
-
-        @JvmStatic
-        @MainThread
-        fun unsubscribeFromClose() {
-            get().onCloseServiceDeskSubscriber = null
-        }
-
-        internal fun onServiceDeskClose() =
-            get().onCloseServiceDeskSubscriber?.onServiceDeskClose()
-
-
-        internal fun get() : PyrusServiceDesk {
-            return checkNotNull(INSTANCE){ "Instantiate PyrusServiceDesk first" }
+        internal fun get(): PyrusServiceDesk {
+            return checkNotNull(INSTANCE) { "Instantiate PyrusServiceDesk first" }
         }
 
         internal fun getConfiguration(): ServiceDeskConfiguration {
@@ -176,15 +171,17 @@ class PyrusServiceDesk private constructor(
         private fun startImpl(
             ticketId: Int? = null,
             activity: Activity,
-            configuration: ServiceDeskConfiguration? = null
+            configuration: ServiceDeskConfiguration? = null,
+            onStopCallback: OnStopCallback? = null
         ) {
             CONFIGURATION = configuration
             get().quitViewModel.clear()
+            get().onStopCallback = onStopCallback
             activity.startActivity(createIntent(ticketId))
         }
 
         private fun createIntent(ticketId: Int? = null): Intent {
-            return when{
+            return when {
                 ticketId != null -> TicketActivity.getLaunchIntent(ticketId)
                 get().isSingleChat -> TicketActivity.getLaunchIntent()
                 else -> TicketsActivity.getLaunchIntent()
@@ -193,7 +190,7 @@ class PyrusServiceDesk private constructor(
     }
 
     internal val serviceDeskProvider: ServiceDeskProvider by lazy {
-        object : ServiceDeskProvider{
+        object : ServiceDeskProvider {
             override fun getApplication(): Application = application
             override fun getRequestFactory(): RequestFactory = requestFactory
             override fun getDraftRepository(): DraftRepository = draftRepository
@@ -209,7 +206,12 @@ class PyrusServiceDesk private constructor(
     private val draftRepository: DraftRepository
     private val liveUpdates: LiveUpdates
 
-    private val localDataProvider: LocalDataProvider by lazy { LocalDataProvider(offlineRepository, fileResolver) }
+    private val localDataProvider: LocalDataProvider by lazy {
+        LocalDataProvider(
+            offlineRepository,
+            fileResolver
+        )
+    }
     private val localDataVerifier: LocalDataVerifier
 
     private var quitViewModel = QuitViewModel()
@@ -218,7 +220,7 @@ class PyrusServiceDesk private constructor(
     private val preferences = application.getSharedPreferences(PREFERENCE_KEY, Context.MODE_PRIVATE)
     private val offlineRepository: OfflineRepository
 
-    private var onCloseServiceDeskSubscriber: CloseSubscriber? = null
+    private var onStopCallback: OnStopCallback? = null
 
     init {
         migratePreferences(application, preferences)

@@ -86,7 +86,7 @@ internal class TicketsActivity: ConnectionActivityBase<TicketsViewModel>(Tickets
 
     override fun finish() {
         super.finish()
-        PyrusServiceDesk.onServiceDeskClose()
+        PyrusServiceDesk.onServiceDeskStop()
     }
 
     private fun onMenuItemClicked(menuItem: MenuItem?): Boolean {
