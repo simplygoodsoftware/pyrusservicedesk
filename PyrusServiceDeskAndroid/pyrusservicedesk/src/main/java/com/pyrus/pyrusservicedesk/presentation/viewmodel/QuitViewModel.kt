@@ -6,7 +6,7 @@ import androidx.lifecycle.ViewModel
 
 /**
  * For sharing state that user has completely quit the service desk.
- * All activities rect on this event by finishing itself.
+ * All activities react on this event by finishing itself.
  */
 internal class QuitViewModel : ViewModel() {
 
@@ -22,6 +22,9 @@ internal class QuitViewModel : ViewModel() {
      */
     fun quitServiceDesk() = quitServiceDesk.postValue(true)
 
+    /**
+     * Should be called before service desk start.
+     */
     fun clear() = quitServiceDesk.postValue(false)
 
 }
