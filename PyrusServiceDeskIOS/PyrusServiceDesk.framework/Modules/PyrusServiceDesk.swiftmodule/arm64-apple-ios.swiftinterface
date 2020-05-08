@@ -38,7 +38,7 @@ import WebKit
   @objc public static func start(on viewController: UIKit.UIViewController, onStopCallback: PyrusServiceDesk.OnStopCallback? = nil)
   @objc public static func start(on viewController: UIKit.UIViewController, configuration: PyrusServiceDesk.ServiceDeskConfiguration?, onStopCallback: PyrusServiceDesk.OnStopCallback? = nil)
   @objc public static func start(on viewController: UIKit.UIViewController, configuration: PyrusServiceDesk.ServiceDeskConfiguration?, completion: (() -> Swift.Void)? = nil, onStopCallback: PyrusServiceDesk.OnStopCallback? = nil)
-  @objc public static func stop(completion: (() -> Swift.Void)? = nil)
+  @objc public static func stop()
   @objc public static func subscribeToReplies(_ subscriber: PyrusServiceDesk.NewReplySubscriber?)
   @objc public static func unsubscribeFromReplies(_ subscriber: PyrusServiceDesk.NewReplySubscriber?)
   @objc public static func createWith(_ clientId: Swift.String?)
