@@ -240,6 +240,14 @@ SWIFT_PROTOCOL("_TtP16PyrusServiceDesk18NewReplySubscriber_")
 - (void)onNewReply;
 @end
 
+
+/// The protocol for getting a notification that PyrusServiceDesk was closed
+SWIFT_PROTOCOL("_TtP16PyrusServiceDesk14OnStopCallback_")
+@protocol OnStopCallback
+/// The callback that PyrusServiceDesk was closed
+- (void)onStop;
+@end
+
 @class UIViewController;
 @class ServiceDeskConfiguration;
 
@@ -254,13 +262,17 @@ SWIFT_CLASS("_TtC16PyrusServiceDesk16PyrusServiceDesk")
 /// Show chat
 /// \param viewController ViewController that must present chat
 ///
-+ (void)startOn:(UIViewController * _Nonnull)viewController;
+/// \param onStopCallback OnStopCallback object or nil. OnStopCallback is object for getting a notification that PyrusServiceDesk was closed.
+///
++ (void)startOn:(UIViewController * _Nonnull)viewController onStopCallback:(id <OnStopCallback> _Nullable)onStopCallback;
 /// Show chat
 /// \param viewController ViewController that must present chat
 ///
 /// \param configuration ServiceDeskConfiguration object or nil. ServiceDeskConfiguration is object that create custom interface: theme color,welcome message, image for support’s avatar and chat title for navigation bar title. If nil, the default design will be used.
 ///
-+ (void)startOn:(UIViewController * _Nonnull)viewController configuration:(ServiceDeskConfiguration * _Nullable)configuration;
+/// \param onStopCallback OnStopCallback object or nil. OnStopCallback is object for getting a notification that PyrusServiceDesk was closed.
+///
++ (void)startOn:(UIViewController * _Nonnull)viewController configuration:(ServiceDeskConfiguration * _Nullable)configuration onStopCallback:(id <OnStopCallback> _Nullable)onStopCallback;
 /// Show chat
 /// \param viewController ViewController that must present chat
 ///
@@ -268,7 +280,9 @@ SWIFT_CLASS("_TtC16PyrusServiceDesk16PyrusServiceDesk")
 ///
 /// \param completion The block to execute after the presentation finishes. This block has no return value and takes no parameters. You may specify nil for this parameter.
 ///
-+ (void)startOn:(UIViewController * _Nonnull)viewController configuration:(ServiceDeskConfiguration * _Nullable)configuration completion:(void (^ _Nullable)(void))completion;
+/// \param onStopCallback OnStopCallback object or nil. OnStopCallback is object for getting a notification that PyrusServiceDesk was closed.
+///
++ (void)startOn:(UIViewController * _Nonnull)viewController configuration:(ServiceDeskConfiguration * _Nullable)configuration completion:(void (^ _Nullable)(void))completion onStopCallback:(id <OnStopCallback> _Nullable)onStopCallback;
 /// Close PyrusServiceDesk
 + (void)stopWithCompletion:(void (^ _Nullable)(void))completion;
 /// Subscribe [subscriber] for notifications that new messages from support have appeared in the chat.
@@ -569,6 +583,14 @@ SWIFT_PROTOCOL("_TtP16PyrusServiceDesk18NewReplySubscriber_")
 - (void)onNewReply;
 @end
 
+
+/// The protocol for getting a notification that PyrusServiceDesk was closed
+SWIFT_PROTOCOL("_TtP16PyrusServiceDesk14OnStopCallback_")
+@protocol OnStopCallback
+/// The callback that PyrusServiceDesk was closed
+- (void)onStop;
+@end
+
 @class UIViewController;
 @class ServiceDeskConfiguration;
 
@@ -583,13 +605,17 @@ SWIFT_CLASS("_TtC16PyrusServiceDesk16PyrusServiceDesk")
 /// Show chat
 /// \param viewController ViewController that must present chat
 ///
-+ (void)startOn:(UIViewController * _Nonnull)viewController;
+/// \param onStopCallback OnStopCallback object or nil. OnStopCallback is object for getting a notification that PyrusServiceDesk was closed.
+///
++ (void)startOn:(UIViewController * _Nonnull)viewController onStopCallback:(id <OnStopCallback> _Nullable)onStopCallback;
 /// Show chat
 /// \param viewController ViewController that must present chat
 ///
 /// \param configuration ServiceDeskConfiguration object or nil. ServiceDeskConfiguration is object that create custom interface: theme color,welcome message, image for support’s avatar and chat title for navigation bar title. If nil, the default design will be used.
 ///
-+ (void)startOn:(UIViewController * _Nonnull)viewController configuration:(ServiceDeskConfiguration * _Nullable)configuration;
+/// \param onStopCallback OnStopCallback object or nil. OnStopCallback is object for getting a notification that PyrusServiceDesk was closed.
+///
++ (void)startOn:(UIViewController * _Nonnull)viewController configuration:(ServiceDeskConfiguration * _Nullable)configuration onStopCallback:(id <OnStopCallback> _Nullable)onStopCallback;
 /// Show chat
 /// \param viewController ViewController that must present chat
 ///
@@ -597,7 +623,9 @@ SWIFT_CLASS("_TtC16PyrusServiceDesk16PyrusServiceDesk")
 ///
 /// \param completion The block to execute after the presentation finishes. This block has no return value and takes no parameters. You may specify nil for this parameter.
 ///
-+ (void)startOn:(UIViewController * _Nonnull)viewController configuration:(ServiceDeskConfiguration * _Nullable)configuration completion:(void (^ _Nullable)(void))completion;
+/// \param onStopCallback OnStopCallback object or nil. OnStopCallback is object for getting a notification that PyrusServiceDesk was closed.
+///
++ (void)startOn:(UIViewController * _Nonnull)viewController configuration:(ServiceDeskConfiguration * _Nullable)configuration completion:(void (^ _Nullable)(void))completion onStopCallback:(id <OnStopCallback> _Nullable)onStopCallback;
 /// Close PyrusServiceDesk
 + (void)stopWithCompletion:(void (^ _Nullable)(void))completion;
 /// Subscribe [subscriber] for notifications that new messages from support have appeared in the chat.
@@ -902,6 +930,14 @@ SWIFT_PROTOCOL("_TtP16PyrusServiceDesk18NewReplySubscriber_")
 - (void)onNewReply;
 @end
 
+
+/// The protocol for getting a notification that PyrusServiceDesk was closed
+SWIFT_PROTOCOL("_TtP16PyrusServiceDesk14OnStopCallback_")
+@protocol OnStopCallback
+/// The callback that PyrusServiceDesk was closed
+- (void)onStop;
+@end
+
 @class UIViewController;
 @class ServiceDeskConfiguration;
 
@@ -916,13 +952,17 @@ SWIFT_CLASS("_TtC16PyrusServiceDesk16PyrusServiceDesk")
 /// Show chat
 /// \param viewController ViewController that must present chat
 ///
-+ (void)startOn:(UIViewController * _Nonnull)viewController;
+/// \param onStopCallback OnStopCallback object or nil. OnStopCallback is object for getting a notification that PyrusServiceDesk was closed.
+///
++ (void)startOn:(UIViewController * _Nonnull)viewController onStopCallback:(id <OnStopCallback> _Nullable)onStopCallback;
 /// Show chat
 /// \param viewController ViewController that must present chat
 ///
 /// \param configuration ServiceDeskConfiguration object or nil. ServiceDeskConfiguration is object that create custom interface: theme color,welcome message, image for support’s avatar and chat title for navigation bar title. If nil, the default design will be used.
 ///
-+ (void)startOn:(UIViewController * _Nonnull)viewController configuration:(ServiceDeskConfiguration * _Nullable)configuration;
+/// \param onStopCallback OnStopCallback object or nil. OnStopCallback is object for getting a notification that PyrusServiceDesk was closed.
+///
++ (void)startOn:(UIViewController * _Nonnull)viewController configuration:(ServiceDeskConfiguration * _Nullable)configuration onStopCallback:(id <OnStopCallback> _Nullable)onStopCallback;
 /// Show chat
 /// \param viewController ViewController that must present chat
 ///
@@ -930,7 +970,9 @@ SWIFT_CLASS("_TtC16PyrusServiceDesk16PyrusServiceDesk")
 ///
 /// \param completion The block to execute after the presentation finishes. This block has no return value and takes no parameters. You may specify nil for this parameter.
 ///
-+ (void)startOn:(UIViewController * _Nonnull)viewController configuration:(ServiceDeskConfiguration * _Nullable)configuration completion:(void (^ _Nullable)(void))completion;
+/// \param onStopCallback OnStopCallback object or nil. OnStopCallback is object for getting a notification that PyrusServiceDesk was closed.
+///
++ (void)startOn:(UIViewController * _Nonnull)viewController configuration:(ServiceDeskConfiguration * _Nullable)configuration completion:(void (^ _Nullable)(void))completion onStopCallback:(id <OnStopCallback> _Nullable)onStopCallback;
 /// Close PyrusServiceDesk
 + (void)stopWithCompletion:(void (^ _Nullable)(void))completion;
 /// Subscribe [subscriber] for notifications that new messages from support have appeared in the chat.
@@ -1231,6 +1273,14 @@ SWIFT_PROTOCOL("_TtP16PyrusServiceDesk18NewReplySubscriber_")
 - (void)onNewReply;
 @end
 
+
+/// The protocol for getting a notification that PyrusServiceDesk was closed
+SWIFT_PROTOCOL("_TtP16PyrusServiceDesk14OnStopCallback_")
+@protocol OnStopCallback
+/// The callback that PyrusServiceDesk was closed
+- (void)onStop;
+@end
+
 @class UIViewController;
 @class ServiceDeskConfiguration;
 
@@ -1245,13 +1295,17 @@ SWIFT_CLASS("_TtC16PyrusServiceDesk16PyrusServiceDesk")
 /// Show chat
 /// \param viewController ViewController that must present chat
 ///
-+ (void)startOn:(UIViewController * _Nonnull)viewController;
+/// \param onStopCallback OnStopCallback object or nil. OnStopCallback is object for getting a notification that PyrusServiceDesk was closed.
+///
++ (void)startOn:(UIViewController * _Nonnull)viewController onStopCallback:(id <OnStopCallback> _Nullable)onStopCallback;
 /// Show chat
 /// \param viewController ViewController that must present chat
 ///
 /// \param configuration ServiceDeskConfiguration object or nil. ServiceDeskConfiguration is object that create custom interface: theme color,welcome message, image for support’s avatar and chat title for navigation bar title. If nil, the default design will be used.
 ///
-+ (void)startOn:(UIViewController * _Nonnull)viewController configuration:(ServiceDeskConfiguration * _Nullable)configuration;
+/// \param onStopCallback OnStopCallback object or nil. OnStopCallback is object for getting a notification that PyrusServiceDesk was closed.
+///
++ (void)startOn:(UIViewController * _Nonnull)viewController configuration:(ServiceDeskConfiguration * _Nullable)configuration onStopCallback:(id <OnStopCallback> _Nullable)onStopCallback;
 /// Show chat
 /// \param viewController ViewController that must present chat
 ///
@@ -1259,7 +1313,9 @@ SWIFT_CLASS("_TtC16PyrusServiceDesk16PyrusServiceDesk")
 ///
 /// \param completion The block to execute after the presentation finishes. This block has no return value and takes no parameters. You may specify nil for this parameter.
 ///
-+ (void)startOn:(UIViewController * _Nonnull)viewController configuration:(ServiceDeskConfiguration * _Nullable)configuration completion:(void (^ _Nullable)(void))completion;
+/// \param onStopCallback OnStopCallback object or nil. OnStopCallback is object for getting a notification that PyrusServiceDesk was closed.
+///
++ (void)startOn:(UIViewController * _Nonnull)viewController configuration:(ServiceDeskConfiguration * _Nullable)configuration completion:(void (^ _Nullable)(void))completion onStopCallback:(id <OnStopCallback> _Nullable)onStopCallback;
 /// Close PyrusServiceDesk
 + (void)stopWithCompletion:(void (^ _Nullable)(void))completion;
 /// Subscribe [subscriber] for notifications that new messages from support have appeared in the chat.
