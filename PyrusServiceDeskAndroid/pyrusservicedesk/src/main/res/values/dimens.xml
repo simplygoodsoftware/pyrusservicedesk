@@ -29,7 +29,7 @@
     <dimen name="psd_icon_size">8dp</dimen>
     <dimen name="psd_max_input_height">80dp</dimen>
     <dimen name="psd_creation_time_text_size">12sp</dimen>
-    <dimen name="psd_attach_button_width">40dp</dimen>
+    <dimen name="psd_attach_button_width">24dp</dimen>
     <dimen name="psd_min_input_height">48dp</dimen>
     <dimen name="psd_input_padding">4dp</dimen>
     <dimen name="psd_file_preview_extension_text_size">64sp</dimen>
@@ -37,4 +37,5 @@
     <dimen name="psd_comment_preview_outline_radius">1dp</dimen>
     <dimen name="psd_preview_mini_width">64dp</dimen>
     <dimen name="psd_attachment_layout_min_height">72dp</dimen>
+    <dimen name="input_layout_height">44dp</dimen>
 </resources>
