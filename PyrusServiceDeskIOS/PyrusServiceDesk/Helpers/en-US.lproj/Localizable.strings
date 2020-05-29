@@ -1,0 +1,59 @@
+
+"Last_Message" = "This is the last message from that conversation";
+"Comment" = "Comment...";
+"Default_User_Name" = "Guest";
+"Uploading" = "Uploading...";
+"Empty_Description" = "Empty";
+"All_Conversations" = "All conversations";
+"Support_Default_Name" = "Support";
+
+//Buttons' Title
+"New_Conversation" = "New conversation";
+"New_Conversation_Short" = "New";
+"Cancel" = "Cancel";
+"Settings" = "Settings";
+"Send" = "Send";
+"Back" = "Back";
+"Done" = "Done";
+"CancelDownload" = "Cancel download";
+"FileLoadError"="Can't load file preview";
+"NoPreviewAvailable" = "No preview available";
+"OpenWith" = "Open with";
+"RetryButton" = "Retry";
+"DeleteButton" = "Delete";
+
+//For attachments
+"Camera" = "Photo";
+"Camera_Access_Error" = "No access to camera or microphone";
+"Phone_Gallery" = "Gallery";
+"Phone_Gallery_Access_Error" = "No access to phone gallery";
+"Access_Error" = "Access error";
+"Size_Error" = "File size should not exceed 200 MB.";
+"No_File_Error"="File doesn't exist";
+
+//Append time from data
+"Interval_Recent" = "recent";
+"Interval_Minute" = "%% min ago";
+"Interval_Hour" = "%% h ago";
+"Interval_Day" = "%% d ago";
+"Interval_Week" = "%% w ago";
+"Interval_Mounth" = "%% m ago";
+
+"Interval_One_Year" = "%% year ago";
+"Interval_One_End_Year" = "%% years ago";
+"Interval_Years_234" = "%% years ago";
+"Interval_Years" = "%% years ago";
+
+//Date as string
+"Today" = "Today";
+"Yesterday" = "Yesterday";
+"Date_Format" = "EE, MMM dd";
+"Date_Format_Year" = "EE, MMM dd, yyyy";
+"Time_Format" = "hh:mm a";
+"Numbers_Date_Format" = "yyyyMMddHHmmss";
+//For requests
+"No_Connection" = "No Internet Connection";
+"Retry" = "RETRY";
+"Error" = "Error";
+"AttachmentLoadError"="Can't load this attachment";
+"ErrorServerError"="Server connection interrupted";
