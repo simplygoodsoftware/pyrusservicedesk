@@ -5,7 +5,7 @@ internal interface AttachmentEntry {
     val type : Type
 
     enum class Type {
-        LOG,
+        TEXT,
         IMAGE
     }
 

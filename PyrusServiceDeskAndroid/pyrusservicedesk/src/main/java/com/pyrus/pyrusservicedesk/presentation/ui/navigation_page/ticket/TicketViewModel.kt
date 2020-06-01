@@ -1,19 +1,23 @@
 package com.pyrus.pyrusservicedesk.presentation.ui.navigation_page.ticket
 
-import androidx.lifecycle.LiveData
-import androidx.lifecycle.MutableLiveData
-import androidx.lifecycle.Observer
 import android.content.Context
 import android.content.Intent
 import android.net.Uri
 import android.os.Handler
 import android.os.Looper
-import androidx.recyclerview.widget.DiffUtil
 import android.widget.Toast
+import androidx.lifecycle.LiveData
+import androidx.lifecycle.MutableLiveData
+import androidx.lifecycle.Observer
+import androidx.recyclerview.widget.DiffUtil
 import com.pyrus.pyrusservicedesk.PyrusServiceDesk
 import com.pyrus.pyrusservicedesk.R
 import com.pyrus.pyrusservicedesk.ServiceDeskProvider
 import com.pyrus.pyrusservicedesk.presentation.call.*
+import com.pyrus.pyrusservicedesk.presentation.ui.navigation_page.ticket.attached_files.AttachmentEntry
+import com.pyrus.pyrusservicedesk.presentation.ui.navigation_page.ticket.attached_files.AttachmentsDiffCallback
+import com.pyrus.pyrusservicedesk.presentation.ui.navigation_page.ticket.attached_files.ImageEntry
+import com.pyrus.pyrusservicedesk.presentation.ui.navigation_page.ticket.attached_files.TextEntry
 import com.pyrus.pyrusservicedesk.presentation.ui.navigation_page.ticket.entries.*
 import com.pyrus.pyrusservicedesk.presentation.ui.view.recyclerview.DiffResultWithNewItems
 import com.pyrus.pyrusservicedesk.presentation.viewmodel.ConnectionViewModelBase
@@ -33,6 +37,7 @@ import com.pyrus.pyrusservicedesk.utils.MILLISECONDS_IN_SECOND
 import com.pyrus.pyrusservicedesk.utils.RequestUtils.Companion.MAX_FILE_SIZE_BYTES
 import com.pyrus.pyrusservicedesk.utils.RequestUtils.Companion.MAX_FILE_SIZE_MEGABYTES
 import com.pyrus.pyrusservicedesk.utils.getWhen
+import com.pyrus.pyrusservicedesk.utils.isImage
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
@@ -77,6 +82,9 @@ internal class TicketViewModel(serviceDeskProvider: ServiceDeskProvider,
     private val commentDiff = MutableLiveData<DiffResultWithNewItems<TicketEntry>>()
 
     private var ticketEntries: List<TicketEntry> = emptyList()
+
+    private val attachmentDiff = MutableLiveData<DiffResultWithNewItems<AttachmentEntry>>()
+    private var attachmentEntries: List<AttachmentEntry> = emptyList()
 
     private val mainHandler = Handler(Looper.getMainLooper())
     private val updateRunnable = object : Runnable {
@@ -129,11 +137,32 @@ internal class TicketViewModel(serviceDeskProvider: ServiceDeskProvider,
      * @param text text that is entered in an input field
      */
     fun onSendClicked(text: String) {
-        if (text.isBlank()) {
-            return
+        if (text.isNotBlank()) {
+            val localComment = localDataProvider.createLocalComment(text.trim())
+            sendAddComment(localComment)
         }
-        val localComment = localDataProvider.createLocalComment(text.trim())
-        sendAddComment(localComment)
+        if (attachmentEntries.isNotEmpty()) {
+            for (attachmentEntry in attachmentEntries) {
+                val attachment = when (attachmentEntry) {
+                    is ImageEntry -> attachmentEntry.attachment
+                    is TextEntry -> attachmentEntry.attachment
+                    else -> null
+                }?: continue
+
+                val localComment = localDataProvider.createLocalComment(fileUri = attachment.localUri)
+                val fileHooks = UploadFileHooks()
+                fileHooks.subscribeOnCancel(object : OnCancelListener {
+                    override fun onCancel() {
+                        return applyCommentUpdate(
+                            CommentEntry(localComment), CommentChangeType.Cancelled
+                        )
+                    }
+                })
+                sendAddComment(localComment, fileHooks)
+
+                onAttachmentRemoved(attachmentEntry)
+            }
+        }
     }
 
     /**
@@ -142,16 +171,35 @@ internal class TicketViewModel(serviceDeskProvider: ServiceDeskProvider,
      * @param attachmentUri URI of the file to be sent
      */
     fun onAttachmentSelected(attachmentUri: Uri) {
-        val localComment = localDataProvider.createLocalComment(fileUri = attachmentUri)
-        val fileHooks = UploadFileHooks()
-        fileHooks.subscribeOnCancel(object : OnCancelListener {
-            override fun onCancel() {
-                return applyCommentUpdate(
-                    CommentEntry(localComment), ChangeType.Cancelled
-                )
+        val attachment = localDataProvider.createLocalAttachmentFromUri(attachmentUri)
+        val entryToAdd = when {
+            attachment.name.isImage() -> ImageEntry(attachment)
+            else -> TextEntry(attachment)
+        }
+
+        entryToAdd.let {
+            launch {
+                withContext(Dispatchers.Main) {
+                    applyAttachmentUpdate(it, AttachmentChangeType.Added)
+                }
             }
-        })
-        sendAddComment(localComment, fileHooks)
+        }
+    }
+
+    /**
+     * Callback to be invoked when user picked file to send.
+     *
+
+     */
+    fun onAttachmentRemoved(entryToRemove : AttachmentEntry) {
+        entryToRemove.let {
+            launch {
+                withContext(Dispatchers.Main) {
+                    applyAttachmentUpdate(it, AttachmentChangeType.Removed)
+                    pendingCommentUnderAction = null
+                }
+            }
+        }
     }
 
     /**
@@ -160,6 +208,11 @@ internal class TicketViewModel(serviceDeskProvider: ServiceDeskProvider,
      * changes to UI.
      */
     fun getCommentDiffLiveData(): LiveData<DiffResultWithNewItems<TicketEntry>> = commentDiff
+
+    /**
+
+     */
+    fun getAttachmentDiffLiveData(): LiveData<DiffResultWithNewItems<AttachmentEntry>> = attachmentDiff
 
     /**
      * Provides live data that delivers counter of unread tickets.
@@ -178,7 +231,7 @@ internal class TicketViewModel(serviceDeskProvider: ServiceDeskProvider,
      */
     fun onPendingCommentRetried() {
         pendingCommentUnderAction?.let { comment ->
-            applyCommentUpdate(comment, ChangeType.Cancelled)
+            applyCommentUpdate(comment, CommentChangeType.Cancelled)
             sendAddComment(comment.comment, comment.uploadFileHooks.also { it?.resetProgress() })
         }
         pendingCommentUnderAction = null
@@ -192,7 +245,7 @@ internal class TicketViewModel(serviceDeskProvider: ServiceDeskProvider,
             launch {
                 if (!requests.getRemovePendingCommentRequest(it.comment).execute().hasError()) {
                     withContext(Dispatchers.Main) {
-                        applyCommentUpdate(it, ChangeType.Cancelled)
+                        applyCommentUpdate(it, CommentChangeType.Cancelled)
                         pendingCommentUnderAction = null
                     }
                 }
@@ -269,7 +322,7 @@ internal class TicketViewModel(serviceDeskProvider: ServiceDeskProvider,
 
         applyCommentUpdate(
             CommentEntry(localComment, uploadFileHooks = uploadFileHooks),
-            ChangeType.Added
+            CommentChangeType.Added
         )
         when {
             toNewTicket -> {
@@ -377,14 +430,14 @@ internal class TicketViewModel(serviceDeskProvider: ServiceDeskProvider,
 
     private fun hasRealComments(): Boolean = ticketEntries.any { it.type == Type.Comment }
 
-    private fun applyCommentUpdate(commentEntry: CommentEntry, changeType: ChangeType) {
+    private fun applyCommentUpdate(commentEntry: CommentEntry, changeType: CommentChangeType) {
         val newEntries = ticketEntries.toMutableList()
         when (changeType) {
-            ChangeType.Added -> {
+            CommentChangeType.Added -> {
                 maybeAddDate(commentEntry, newEntries)
                 newEntries.add(commentEntry)
             }
-            ChangeType.Changed -> {
+            CommentChangeType.Changed -> {
                 maybeAddDate(commentEntry, newEntries)
                 newEntries.findIndex(commentEntry).let {
                     when (it) {
@@ -393,9 +446,8 @@ internal class TicketViewModel(serviceDeskProvider: ServiceDeskProvider,
                     }
                 }
             }
-            ChangeType.Cancelled -> {
-                val indexOfComment = newEntries.findIndex(commentEntry)
-                when (indexOfComment) {
+            CommentChangeType.Cancelled -> {
+                when (val indexOfComment = newEntries.findIndex(commentEntry)) {
                     -1 -> return
                     0 -> newEntries.removeAt(0)
                     newEntries.lastIndex -> {
@@ -412,6 +464,16 @@ internal class TicketViewModel(serviceDeskProvider: ServiceDeskProvider,
             }
         }
         publishEntries(ticketEntries, newEntries)
+    }
+
+    private fun applyAttachmentUpdate(attachmentEntry: AttachmentEntry, changeType: AttachmentChangeType) {
+        val newEntries = attachmentEntries.toMutableList()
+        when (changeType) {
+            AttachmentChangeType.Added -> newEntries.add(attachmentEntry)
+
+            AttachmentChangeType.Removed -> newEntries.remove(attachmentEntry)
+        }
+        publishAttachmentEntries(attachmentEntries, newEntries)
     }
 
     private fun maybeAddDate(commentEntry: CommentEntry, newEntries: MutableList<TicketEntry>) {
@@ -450,6 +512,16 @@ internal class TicketViewModel(serviceDeskProvider: ServiceDeskProvider,
                 CommentsDiffCallback(oldEntries, ticketEntries), false
             ),
             ticketEntries
+        )
+    }
+
+    private fun publishAttachmentEntries(oldEntries: List<AttachmentEntry>, newEntries: List<AttachmentEntry>) {
+        attachmentEntries = newEntries
+        attachmentDiff.value = DiffResultWithNewItems(
+            DiffUtil.calculateDiff(
+                AttachmentsDiffCallback(oldEntries, attachmentEntries), false
+            ),
+            attachmentEntries
         )
     }
 
@@ -555,7 +627,7 @@ internal class TicketViewModel(serviceDeskProvider: ServiceDeskProvider,
                         )
                     }
                 }
-                applyCommentUpdate(entry, ChangeType.Changed)
+                applyCommentUpdate(entry, CommentChangeType.Changed)
             }
         }
 
@@ -567,10 +639,15 @@ internal class TicketViewModel(serviceDeskProvider: ServiceDeskProvider,
 
     }
 
-    private enum class ChangeType {
+    private enum class CommentChangeType {
         Added,
         Changed,
         Cancelled
+    }
+
+    private enum class AttachmentChangeType {
+        Added,
+        Removed
     }
 
     private enum class CheckCommentError {

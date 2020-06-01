@@ -2,10 +2,11 @@ package com.pyrus.pyrusservicedesk.presentation.ui.navigation_page.ticket.attach
 
 import android.view.View
 import android.view.ViewGroup
-import android.widget.ImageView
 import android.widget.TextView
 import androidx.annotation.LayoutRes
+import androidx.core.app.ActivityCompat
 import com.pyrus.pyrusservicedesk.R
+import com.pyrus.pyrusservicedesk.presentation.ui.view.OutlineImageView
 import com.pyrus.pyrusservicedesk.presentation.ui.view.recyclerview.AdapterBase
 import com.pyrus.pyrusservicedesk.presentation.ui.view.recyclerview.ViewHolderBase
 import com.squareup.picasso.Picasso
@@ -20,7 +21,7 @@ internal class AttachedFileAdapter(
     override fun getItemViewType(position: Int): Int {
         return with(itemsList[position]) {
             return@with when (type) {
-                AttachmentEntry.Type.LOG -> VIEW_TYPE_LOG
+                AttachmentEntry.Type.TEXT -> VIEW_TYPE_LOG
                 AttachmentEntry.Type.IMAGE -> VIEW_TYPE_IMAGE
             }
         }
@@ -38,28 +39,28 @@ internal class AttachedFileAdapter(
         this.itemsList = items.toMutableList()
     }
 
-    private inner class LogHolder(parent: ViewGroup) : AbstractHolder(parent, R.layout.psd_view_holder_log) {
+    private inner class LogHolder(parent: ViewGroup) : AbstractHolder(parent, R.layout.psd_view_holder_text_file) {
 
         override lateinit var removeButton: View
 
         override fun bindItem(item: AttachmentEntry) {
-            if (item !is LogEntry)
+            if (item !is TextEntry)
                 return
 
-            removeButton = itemView.findViewById(R.id.vh_log_remove_button)
+            removeButton = itemView.findViewById(R.id.vh_tf_remove_button)
 
-            itemView.findViewById<TextView>(R.id.vh_log_name_tv).text = item.logName
+            itemView.findViewById<TextView>(R.id.vh_tf_name_tv).text = item.attachment.name
 
             super.bindItem(item)
         }
 
     }
 
-    private inner class ImageHolder(parent: ViewGroup) : AbstractHolder(parent, R.layout.psd_view_holder_image) {
+    private inner class ImageHolder(parent: ViewGroup) : AbstractHolder(parent, R.layout.psd_view_holder_image_file) {
 
         override lateinit var removeButton: View
 
-        private lateinit var imageView : ImageView
+        private lateinit var imageView : OutlineImageView
 
         override fun bindItem(item: AttachmentEntry) {
             if (item !is ImageEntry)
@@ -68,13 +69,24 @@ internal class AttachedFileAdapter(
             removeButton = itemView.findViewById(R.id.vh_image_remove_button)
             imageView = itemView.findViewById(R.id.vh_image_iv)
 
-            Picasso.get().load(item.imageUri).into(imageView)
+            imageView.outlineColor = ActivityCompat.getColor(imageView.context, R.color.psd_comment_preview_outline)
+            imageView.outlineRadius = imageView.resources.getDimensionPixelSize(R.dimen.psd_comment_radius)
+            imageView.outlineWidth = imageView.resources.getDimensionPixelSize(R.dimen.psd_comment_preview_outline_radius)
+
+            Picasso
+                .get()
+                .load(item.attachment.localUri)
+                .fit()
+                .centerCrop()
+                .into(imageView)
 
             super.bindItem(item)
         }
 
         override fun onDetachedFromWindow() {
-            Picasso.get().cancelRequest(imageView)
+            Picasso
+                .get()
+                .cancelRequest(imageView)
 
             super.onDetachedFromWindow()
         }

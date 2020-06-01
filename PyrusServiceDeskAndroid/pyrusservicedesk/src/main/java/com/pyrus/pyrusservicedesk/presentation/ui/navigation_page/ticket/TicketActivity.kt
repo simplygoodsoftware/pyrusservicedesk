@@ -1,6 +1,5 @@
 package com.pyrus.pyrusservicedesk.presentation.ui.navigation_page.ticket
 
-import androidx.lifecycle.Observer
 import android.content.ClipData
 import android.content.ClipboardManager
 import android.content.Context
@@ -14,15 +13,17 @@ import android.view.Menu
 import android.view.MenuInflater
 import android.view.MenuItem
 import android.view.MenuItem.SHOW_AS_ACTION_ALWAYS
-import android.view.View.NO_ID
+import android.view.View.*
 import android.widget.Toast
+import androidx.lifecycle.Observer
+import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
 import com.pyrus.pyrusservicedesk.PyrusServiceDesk
 import com.pyrus.pyrusservicedesk.R
 import com.pyrus.pyrusservicedesk.ServiceDeskConfiguration
 import com.pyrus.pyrusservicedesk.presentation.ConnectionActivityBase
 import com.pyrus.pyrusservicedesk.presentation.ui.navigation.UiNavigator
 import com.pyrus.pyrusservicedesk.presentation.ui.navigation_page.ticket.attached_files.AttachedFileAdapter
-import com.pyrus.pyrusservicedesk.presentation.ui.navigation_page.ticket.attached_files.AttachmentEntry
 import com.pyrus.pyrusservicedesk.presentation.ui.navigation_page.ticket.dialogs.attach_files.AttachFileSharedViewModel
 import com.pyrus.pyrusservicedesk.presentation.ui.navigation_page.ticket.dialogs.attach_files.AttachFileVariantsFragment
 import com.pyrus.pyrusservicedesk.presentation.ui.navigation_page.ticket.dialogs.comment_actions.PendingCommentActionSharedViewModel
@@ -107,7 +108,7 @@ internal class TicketActivity : ConnectionActivityBase<TicketViewModel>(TicketVi
         )
     }
 
-    private val ticketAdapter = TicketAdapter().apply {
+    private val commentAdapter = TicketAdapter().apply {
         setOnFileReadyForPreviewClickListener {
            UiNavigator.toFilePreview(this@TicketActivity, it.toFileData())
         }
@@ -121,7 +122,7 @@ internal class TicketActivity : ConnectionActivityBase<TicketViewModel>(TicketVi
     }
 
     private val attachmentAdapter = AttachedFileAdapter {
-
+        viewModel.onAttachmentRemoved(it)
     }
 
     private val inputTextWatcher = object : TextWatcher {
@@ -132,7 +133,7 @@ internal class TicketActivity : ConnectionActivityBase<TicketViewModel>(TicketVi
         }
 
         override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
-            send.isEnabled = !s.isNullOrBlank()
+            setCanSendComment()
             viewModel.onInputTextChanged(s.toString())
         }
     }
@@ -152,16 +153,17 @@ internal class TicketActivity : ConnectionActivityBase<TicketViewModel>(TicketVi
         }
         ticket_toolbar.setOnMenuItemClickListener{ onMenuItemClicked(it) }
         comments.apply {
-            adapter = this@TicketActivity.ticketAdapter
+            adapter = this@TicketActivity.commentAdapter
             addItemDecoration(
                 SpaceItemDecoration(
                     resources.getDimensionPixelSize(R.dimen.psd_comments_item_space),
-                    this@TicketActivity.ticketAdapter.itemSpaceMultiplier)
+                    this@TicketActivity.commentAdapter.itemSpaceMultiplier)
             )
             itemAnimator = null
-            this@TicketActivity.ticketAdapter.itemTouchHelper?.attachToRecyclerView(this)
+            this@TicketActivity.commentAdapter.itemTouchHelper?.attachToRecyclerView(this)
         }
         attached_files_rv.apply {
+            layoutManager = LinearLayoutManager(context, RecyclerView.HORIZONTAL, false)
             adapter = this@TicketActivity.attachmentAdapter
         }
         send.setOnClickListener { sendComment() }
@@ -190,7 +192,7 @@ internal class TicketActivity : ConnectionActivityBase<TicketViewModel>(TicketVi
             setCursorColor(accentColor)
             addTextChangedListener(inputTextWatcher)
         }
-        send.isEnabled = !input.text.isNullOrBlank()
+        setCanSendComment()
     }
 
     override fun onRestoreInstanceState(savedInstanceState: Bundle) {
@@ -226,14 +228,14 @@ internal class TicketActivity : ConnectionActivityBase<TicketViewModel>(TicketVi
                 val isEmpty = comments.adapter?.itemCount == 0
                 result?.let{
                     refresh.isRefreshing = false
-                    ticketAdapter.setItems(it.newItems)
-                    it.diffResult.dispatchUpdatesTo(ticketAdapter)
+                    commentAdapter.setItems(it.newItems)
+                    it.diffResult.dispatchUpdatesTo(commentAdapter)
                 }
-                if (ticketAdapter.itemCount > 0 && atEnd){
+                if (commentAdapter.itemCount > 0 && atEnd){
                     if (isEmpty)
-                        comments.scrollToPosition(ticketAdapter.itemCount - 1)
+                        comments.scrollToPosition(commentAdapter.itemCount - 1)
                     else if (!comments.isAtEnd())
-                        comments.smoothScrollToPosition(ticketAdapter.itemCount - 1)
+                        comments.smoothScrollToPosition(commentAdapter.itemCount - 1)
                     launch {
                         while(!comments.isAtEnd())
                             delay(CHECK_IS_AT_BOTTOM_DELAY_MS)
@@ -243,6 +245,21 @@ internal class TicketActivity : ConnectionActivityBase<TicketViewModel>(TicketVi
                         }
                         comments.smoothScrollBy(0, offset)
                     }
+                }
+            }
+        )
+        viewModel.getAttachmentDiffLiveData().observe(
+            this,
+            Observer { result ->
+                result?.let{
+                    attached_files_rv.visibility = when (it.newItems.isEmpty()) {
+                        true -> GONE
+                        false -> VISIBLE
+                    }
+
+                    attachmentAdapter.setItems(it.newItems)
+                    it.diffResult.dispatchUpdatesTo(attachmentAdapter)
+                    setCanSendComment()
                 }
             }
         )
@@ -319,6 +336,13 @@ internal class TicketActivity : ConnectionActivityBase<TicketViewModel>(TicketVi
             setPrimaryClip(ClipData.newPlainText("Copied text", text))
         }
         Toast.makeText(applicationContext, R.string.psd_copied_to_clipboard, Toast.LENGTH_SHORT).show()
+    }
+
+    private fun setCanSendComment() {
+        val text = input.editableText.toString()
+        val attachmentsCount = attachmentAdapter.itemCount
+
+        send.isEnabled = text.isNotBlank() || attachmentsCount > 0
     }
 
 }

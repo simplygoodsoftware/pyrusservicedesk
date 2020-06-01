@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.constraintlayout.widget.ConstraintLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="wrap_content"
     android:layout_height="wrap_content"
@@ -11,10 +12,11 @@
     android:clipToPadding="false"
     tools:ignore="RtlSymmetry">
 
-    <ImageView
+    <com.pyrus.pyrusservicedesk.presentation.ui.view.OutlineImageView
         android:id="@+id/vh_image_iv"
         android:layout_width="@dimen/psd_attachment_outline_width"
         android:layout_height="@dimen/psd_attachment_outline_width"
+        android:padding="@dimen/psd_offset_minimum"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintRight_toRightOf="parent"
@@ -31,12 +33,16 @@
         app:layout_constraintRight_toRightOf="@id/vh_image_iv"
         app:layout_constraintLeft_toRightOf="@id/vh_image_iv">
 
-        <ImageView
+        <View
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:background="@color/psd_text_color_primary_inverse"
-            app:srcCompat="@drawable/psd_remove_attachment"
-            tools:ignore="ContentDescription" />
+            android:layout_margin="@dimen/psd_offset_minimum"
+            android:background="@drawable/psd_remove_bg" />
+
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:background="@drawable/psd_remove_attachment" />
 
     </FrameLayout>
 
