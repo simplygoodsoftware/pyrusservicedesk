@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:paddingTop="@dimen/psd_offset_mini"
+    android:paddingBottom="@dimen/psd_offset_mini"
+    android:paddingLeft="@dimen/psd_offset_mini"
+    android:paddingStart="@dimen/psd_offset_mini"
+    android:clipToPadding="false"
+    tools:ignore="RtlSymmetry">
+
+    <ImageView
+        android:id="@+id/vh_image_iv"
+        android:layout_width="@dimen/psd_attachment_outline_width"
+        android:layout_height="@dimen/psd_attachment_outline_width"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintRight_toRightOf="parent"
+        app:layout_constraintTop_toBottomOf="parent"
+        tools:ignore="ContentDescription" />
+
+    <FrameLayout
+        android:id="@+id/vh_image_remove_button"
+        android:layout_width="@dimen/psd_remove_attachment_button_width"
+        android:layout_height="@dimen/psd_remove_attachment_button_width"
+        android:background="?attr/selectableItemBackgroundBorderless"
+        app:layout_constraintTop_toTopOf="@id/vh_image_iv"
+        app:layout_constraintBottom_toTopOf="@id/vh_image_iv"
+        app:layout_constraintRight_toRightOf="@id/vh_image_iv"
+        app:layout_constraintLeft_toRightOf="@id/vh_image_iv">
+
+        <ImageView
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:background="@color/psd_text_color_primary_inverse"
+            app:srcCompat="@drawable/psd_remove_attachment"
+            tools:ignore="ContentDescription" />
+
+    </FrameLayout>
+
+</androidx.constraintlayout.widget.ConstraintLayout>

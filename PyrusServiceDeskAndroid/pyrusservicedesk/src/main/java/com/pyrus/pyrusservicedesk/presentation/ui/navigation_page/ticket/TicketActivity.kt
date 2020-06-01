@@ -21,6 +21,8 @@ import com.pyrus.pyrusservicedesk.R
 import com.pyrus.pyrusservicedesk.ServiceDeskConfiguration
 import com.pyrus.pyrusservicedesk.presentation.ConnectionActivityBase
 import com.pyrus.pyrusservicedesk.presentation.ui.navigation.UiNavigator
+import com.pyrus.pyrusservicedesk.presentation.ui.navigation_page.ticket.attached_files.AttachedFileAdapter
+import com.pyrus.pyrusservicedesk.presentation.ui.navigation_page.ticket.attached_files.AttachmentEntry
 import com.pyrus.pyrusservicedesk.presentation.ui.navigation_page.ticket.dialogs.attach_files.AttachFileSharedViewModel
 import com.pyrus.pyrusservicedesk.presentation.ui.navigation_page.ticket.dialogs.attach_files.AttachFileVariantsFragment
 import com.pyrus.pyrusservicedesk.presentation.ui.navigation_page.ticket.dialogs.comment_actions.PendingCommentActionSharedViewModel
@@ -105,7 +107,7 @@ internal class TicketActivity : ConnectionActivityBase<TicketViewModel>(TicketVi
         )
     }
 
-    private val adapter = TicketAdapter().apply {
+    private val ticketAdapter = TicketAdapter().apply {
         setOnFileReadyForPreviewClickListener {
            UiNavigator.toFilePreview(this@TicketActivity, it.toFileData())
         }
@@ -116,6 +118,10 @@ internal class TicketActivity : ConnectionActivityBase<TicketViewModel>(TicketVi
         setOnTextCommentLongClicked {
             copyToClipboard(it)
         }
+    }
+
+    private val attachmentAdapter = AttachedFileAdapter {
+
     }
 
     private val inputTextWatcher = object : TextWatcher {
@@ -146,14 +152,17 @@ internal class TicketActivity : ConnectionActivityBase<TicketViewModel>(TicketVi
         }
         ticket_toolbar.setOnMenuItemClickListener{ onMenuItemClicked(it) }
         comments.apply {
-            adapter = this@TicketActivity.adapter
+            adapter = this@TicketActivity.ticketAdapter
             addItemDecoration(
                 SpaceItemDecoration(
                     resources.getDimensionPixelSize(R.dimen.psd_comments_item_space),
-                    this@TicketActivity.adapter.itemSpaceMultiplier)
+                    this@TicketActivity.ticketAdapter.itemSpaceMultiplier)
             )
             itemAnimator = null
-            this@TicketActivity.adapter.itemTouchHelper?.attachToRecyclerView(this)
+            this@TicketActivity.ticketAdapter.itemTouchHelper?.attachToRecyclerView(this)
+        }
+        attached_files_rv.apply {
+            adapter = this@TicketActivity.attachmentAdapter
         }
         send.setOnClickListener { sendComment() }
         val stateList = ColorStateList(
@@ -217,14 +226,14 @@ internal class TicketActivity : ConnectionActivityBase<TicketViewModel>(TicketVi
                 val isEmpty = comments.adapter?.itemCount == 0
                 result?.let{
                     refresh.isRefreshing = false
-                    adapter.setItems(it.newItems)
-                    it.diffResult.dispatchUpdatesTo(adapter)
+                    ticketAdapter.setItems(it.newItems)
+                    it.diffResult.dispatchUpdatesTo(ticketAdapter)
                 }
-                if (adapter.itemCount > 0 && atEnd){
+                if (ticketAdapter.itemCount > 0 && atEnd){
                     if (isEmpty)
-                        comments.scrollToPosition(adapter.itemCount - 1)
+                        comments.scrollToPosition(ticketAdapter.itemCount - 1)
                     else if (!comments.isAtEnd())
-                        comments.smoothScrollToPosition(adapter.itemCount - 1)
+                        comments.smoothScrollToPosition(ticketAdapter.itemCount - 1)
                     launch {
                         while(!comments.isAtEnd())
                             delay(CHECK_IS_AT_BOTTOM_DELAY_MS)

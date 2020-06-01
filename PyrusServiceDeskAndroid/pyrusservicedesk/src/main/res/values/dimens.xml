@@ -5,6 +5,7 @@
     <dimen name="psd_elevation_default">4dp</dimen>
     <dimen name="psd_offset_default">16dp</dimen>
     <dimen name="psd_offset_small">8dp</dimen>
+    <dimen name="psd_offset_mini">6dp</dimen>
 
     <!-- THEME -->
     <dimen name="psd_theme_text_size_default">14sp</dimen>
@@ -38,4 +39,7 @@
     <dimen name="psd_preview_mini_width">64dp</dimen>
     <dimen name="psd_attachment_layout_min_height">72dp</dimen>
     <dimen name="input_layout_height">44dp</dimen>
+    <dimen name="psd_attachment_outline_width">60dp</dimen>
+    <dimen name="psd_remove_attachment_button_width">16dp</dimen>
+    <dimen name="psd_text_size_small">10sp</dimen>
 </resources>

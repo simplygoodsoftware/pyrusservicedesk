@@ -33,7 +33,7 @@
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent"
-            app:layout_constraintBottom_toTopOf="@+id/input_layout"
+            app:layout_constraintBottom_toTopOf="@+id/divider"
             app:swipeDirection="both">
 
             <androidx.recyclerview.widget.RecyclerView
@@ -54,8 +54,19 @@
             android:layout_width="match_parent"
             android:layout_height="1dp"
             android:background="?android:attr/listDivider"
-            app:layout_constraintBottom_toTopOf="@+id/input_layout"
+            app:layout_constraintBottom_toTopOf="@+id/attached_files_rv"
             app:layout_constraintTop_toBottomOf="@+id/refresh" />
+
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/attached_files_rv"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            app:layout_constraintTop_toBottomOf="@id/divider"
+            app:layout_constraintBottom_toTopOf="@+id/input_layout"
+            android:padding="@dimen/psd_offset_mini"
+            android:visibility="gone"
+            tools:visibility="visible"
+            android:clipToPadding="false"/>
 
         <androidx.constraintlayout.widget.ConstraintLayout
             android:id="@+id/input_layout"
