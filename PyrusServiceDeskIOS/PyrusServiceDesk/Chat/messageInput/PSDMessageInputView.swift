@@ -106,6 +106,9 @@ class PSDMessageInputView: UIView, PSDMessageTextViewDelegate,PSDMessageSendButt
     ///Clear text.
     func clearAll(){
         inputTextView.text = ""
+        inputTextView.textViewDidChange(inputTextView)
+        attachmentsPresenter?.cleanAll()
+        checkCollectionHeight()
         checkSendButton()
     }
     

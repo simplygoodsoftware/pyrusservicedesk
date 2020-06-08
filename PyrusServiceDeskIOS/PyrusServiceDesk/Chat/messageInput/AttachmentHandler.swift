@@ -209,18 +209,37 @@ class AttachmentHandler: NSObject,UIImagePickerControllerDelegate, UINavigationC
         if error != nil {
             if needShowSizeError(for: nil, on: nil){}
         } else {
-            self.fetchLastImage(){
-                (url: URL?) in
-                if((url) != nil){
-                    let imageCompressedData = image.compressImage()
-                    if(!self.needShowSizeError(for: imageCompressedData, on: nil))
-                    {
-                        self.attachmentPickedBlock?(imageCompressedData!, url!,true)
+            let status = PHPhotoLibrary.authorizationStatus()
+            switch status{
+            case .authorized:
+                self.fetchLastImage(image: image)
+            case .notDetermined:
+                PHPhotoLibrary.requestAuthorization({ (status) in
+                    if status == PHAuthorizationStatus.authorized{
+                        self.fetchLastImage(image: image)
                     }
-                    
+                })
+            case .restricted,.denied:
+                guard let vc = UIApplication.topViewController() else{
+                    break
                 }
+                self.alertAccess(.gallery, on:vc)
+            default:
+                break
             }
-            
+        }
+    }
+    private func fetchLastImage(image:UIImage) {
+        self.fetchLastImage(){
+            (url: URL?) in
+            if((url) != nil){
+                let imageCompressedData = image.compressImage()
+                if(!self.needShowSizeError(for: imageCompressedData, on: nil))
+                {
+                    self.attachmentPickedBlock?(imageCompressedData!, url!,true)
+                }
+                
+            }
         }
     }
     func fetchLastImage(completion: @escaping (_ url: URL?) -> Void)

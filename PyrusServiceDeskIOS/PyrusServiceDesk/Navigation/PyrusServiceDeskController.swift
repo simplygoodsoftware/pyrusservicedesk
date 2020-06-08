@@ -60,11 +60,18 @@ class PyrusServiceDeskController: PSDNavigationController {
     }
     //reload current top viewControllers
     func updateInfo(){
-        if UIApplication.topViewController() is PSDUpdateInfo{
-            (UIApplication.topViewController() as! PSDUpdateInfo).startGettingInfo()
+        (UIApplication.topViewController() as? PSDUpdateInfo)?.startGettingInfo()
+    }
+    ///reload chat with showing refresh ui
+    func refreshChat() {
+        for viewController in self.viewControllers{
+            guard let chatController = viewController as? PSDUpdateInfo else{
+                continue
+            }
+            chatController.refreshChat()
+            break
         }
     }
-    
     func passChanges(chats:[PSDChat]){
         if self.viewControllers[0] is PSDChatsViewController{
             (self.viewControllers[0] as! PSDChatsViewController).tableView.chats = chats

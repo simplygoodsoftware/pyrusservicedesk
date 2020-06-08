@@ -121,6 +121,28 @@ class PSDRefreshControl : UIControl{
             super.observeValue(forKeyPath: keyPath, of: object, change: change, context: context)
         }
     }
+    func forceRefresh() {
+        guard let scroll = self.superview as? UIScrollView, !self.isRefreshing else{
+            return
+        }
+        self.willChangeState(true)
+        
+        var inset = scroll.contentInset
+        switch(position){
+        case .top:
+            inset.top = inset.top + REFRESH_CONTROL_HEIGHT
+        case .bottom:
+            inset.bottom = inset.bottom + REFRESH_CONTROL_HEIGHT
+        }
+        let duration = REFRESH_CONTROL_INSET_DURATOIN
+        UIView.animate(withDuration: duration, animations: {
+            scroll.contentInset = inset
+        }, completion: { finished in
+            self.insetHeight = REFRESH_CONTROL_HEIGHT
+            self.changeState(true)
+            self.activityScale(scale:MAXIMUM_ACTIVITY_SCALE)
+            })
+    }
     ///Set frame to refresh.
     ///- parameter automatic: Is need automatic calculation of y position. If true refresh is show according to superview contentOffset, else it show on its visible position (0 from top or bottom).
     private func keepOnPlase(){
@@ -214,31 +236,11 @@ class PSDRefreshControl : UIControl{
     }
     ///Begin refreshing - animated set content inset and pass actions for .valueChanged
     ///- parameter checkState: Is need check is canBeginRefreshing(). If no - did not change inset - start animate and pass action for .valueChanged. Using in fireRefreshing.
-    private func beginRefreshing(){
-        if self.isRefreshing || !(self.superview is UIScrollView){
+    private func beginRefreshing() {
+        guard !canBeginRefreshing() else {
             return
         }
-        let scroll = self.superview as! UIScrollView
-        if !canBeginRefreshing(){
-            return
-        }
-        self.willChangeState(true)
-        
-        var inset = scroll.contentInset
-        switch(position){
-        case .top:
-            inset.top = inset.top + REFRESH_CONTROL_HEIGHT
-        case .bottom:
-            inset.bottom = inset.bottom + REFRESH_CONTROL_HEIGHT
-        }
-        let duration = REFRESH_CONTROL_INSET_DURATOIN
-        UIView.animate(withDuration: duration, animations: {
-            scroll.contentInset = inset
-        }, completion: { finished in
-            self.insetHeight = REFRESH_CONTROL_HEIGHT
-            self.changeState(true)
-            self.activityScale(scale:MAXIMUM_ACTIVITY_SCALE)
-            })
+        forceRefresh()
     }
     
     func endRefreshing(){

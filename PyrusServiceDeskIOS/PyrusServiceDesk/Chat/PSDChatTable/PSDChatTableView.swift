@@ -38,6 +38,15 @@ class PSDChatTableView: PSDDetailTableView{
     deinit {
         self.removeRefreshControls()
     }
+    func forceBottomRefresh() {
+        if contentSize.height > frame.size.height{
+            scrollsToBottom(animated: true)
+            bottomRefresh.forceRefresh()
+        }else{
+            customRefresh.forceRefresh()
+        }
+        updateChat(needProgress: true)
+    }
     ///Setups needed properties to table view
     func setupTableView() {
         self.delegate=self

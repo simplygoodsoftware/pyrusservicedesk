@@ -105,6 +105,13 @@ struct PSDMessagesStorage{
         }
         return messagesStorage
     }
+    ///Removes all saved messages in storage
+    static func cleanStorage() {
+        let allMessages = messagesFromStorage()
+        for message in allMessages{
+            removeFromStorage(messageId: message.localId)
+        }
+    }
     static private func saveToStorage(messageDict : [String:Any]){
         guard let messageLocalId = messageDict[MESSAGE_LOCAL_ID_KEY] as? String else{
             return

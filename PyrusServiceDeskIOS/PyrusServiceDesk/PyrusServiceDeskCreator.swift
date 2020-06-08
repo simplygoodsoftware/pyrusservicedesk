@@ -125,11 +125,12 @@ import UIKit
         if clientId != nil && (clientId?.count ?? 0)>0 {
             PyrusServiceDesk.clientId = clientId
             PyrusServiceDesk.oneChat = true
-            PyrusServiceDesk.changeUserId(nil)
+            PyrusServiceDesk.createUserId()
         }
     }
-    
-    
+    @objc static public func refresh() {
+        PyrusServiceDesk.mainController?.refreshChat()
+    }
     /*
     ///Init PyrusServiceDesk with new clientId.
     ///- parameter clientId: clientId using for all requests. If clientId not setted PyrusServiceDesk Controller will not be created
@@ -142,24 +143,20 @@ import UIKit
         }
     }*/
     private static let PSD_USER_ID_KEY = "PSDUserId"
-     private static func changeUserId(_ newUserId: String?){
-        if !PSDIsOpen(){//block changes when chat is opened now
-            if let newUserId = newUserId, newUserId.count > 0 {
-                PyrusServiceDesk.userId = newUserId
-            }
-            else {
-                let userId : String
-                if let existKey =   PSDMessagesStorage.pyrusUserDefaults()?.object(forKey: PSD_USER_ID_KEY) as? String{
-                    userId = existKey
-                }else{
-                    userId = UIDevice.current.identifierForVendor?.uuidString ?? String.getUiqueString()
-                    PSDMessagesStorage.pyrusUserDefaults()?.set(userId, forKey: PSD_USER_ID_KEY)
-                    PSDMessagesStorage.pyrusUserDefaults()?.synchronize()
-                }
-                PyrusServiceDesk.userId = userId
-            }
+     private static func createUserId(_ reset: Bool = false) {
+        //block changes when chat is opened now
+        guard !PSDIsOpen() else {
+            return
         }
-        
+        let userId : String
+        if let existKey =   PSDMessagesStorage.pyrusUserDefaults()?.object(forKey: PSD_USER_ID_KEY) as? String, !reset{
+            userId = existKey
+        }else{
+            userId = reset ? String.getUiqueString() : (UIDevice.current.identifierForVendor?.uuidString ?? String.getUiqueString())
+            PSDMessagesStorage.pyrusUserDefaults()?.set(userId, forKey: PSD_USER_ID_KEY)
+            PSDMessagesStorage.pyrusUserDefaults()?.synchronize()
+        }
+        PyrusServiceDesk.userId = userId
     }
     private static func PSDIsOpen()->Bool{
         return (UIApplication.topViewController() is PSDChatViewController) || (UIApplication.topViewController() is PSDChatsViewController) || (UIApplication.topViewController() is PSDAttachmentLoadViewController)

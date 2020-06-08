@@ -90,7 +90,7 @@ struct PSDGetChat {
         }
     }
     static func isActive()->Bool{
-        for (taskIdentifier, chatGetter) in chatGetters{
+        for (_, chatGetter) in chatGetters{
             if chatGetter.task?.state == .running{
                 return true
             }
