@@ -293,6 +293,7 @@ SWIFT_CLASS("_TtC16PyrusServiceDesk16PyrusServiceDesk")
 /// \param clientId clientId using for all requests. If clientId not setted PyrusServiceDesk Controller will not be created
 ///
 + (void)createWith:(NSString * _Nullable)clientId;
++ (void)refresh;
 /// Save viewController with FileChooser interface. Use to add custom row in attachment-add-menu
 /// \param chooser (FileChooser & UIViewController) to present.
 ///
@@ -636,6 +637,7 @@ SWIFT_CLASS("_TtC16PyrusServiceDesk16PyrusServiceDesk")
 /// \param clientId clientId using for all requests. If clientId not setted PyrusServiceDesk Controller will not be created
 ///
 + (void)createWith:(NSString * _Nullable)clientId;
++ (void)refresh;
 /// Save viewController with FileChooser interface. Use to add custom row in attachment-add-menu
 /// \param chooser (FileChooser & UIViewController) to present.
 ///
@@ -687,6 +689,7 @@ SWIFT_CLASS("_TtC16PyrusServiceDesk24ServiceDeskConfiguration")
 #pragma clang diagnostic pop
 
 #endif
+
 #else
 #if 0
 #elif defined(__arm64__) && __arm64__
@@ -982,6 +985,7 @@ SWIFT_CLASS("_TtC16PyrusServiceDesk16PyrusServiceDesk")
 /// \param clientId clientId using for all requests. If clientId not setted PyrusServiceDesk Controller will not be created
 ///
 + (void)createWith:(NSString * _Nullable)clientId;
++ (void)refresh;
 /// Save viewController with FileChooser interface. Use to add custom row in attachment-add-menu
 /// \param chooser (FileChooser & UIViewController) to present.
 ///
@@ -1325,6 +1329,7 @@ SWIFT_CLASS("_TtC16PyrusServiceDesk16PyrusServiceDesk")
 /// \param clientId clientId using for all requests. If clientId not setted PyrusServiceDesk Controller will not be created
 ///
 + (void)createWith:(NSString * _Nullable)clientId;
++ (void)refresh;
 /// Save viewController with FileChooser interface. Use to add custom row in attachment-add-menu
 /// \param chooser (FileChooser & UIViewController) to present.
 ///
