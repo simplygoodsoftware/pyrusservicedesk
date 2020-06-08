@@ -5,12 +5,13 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 
 /**
- * For sharing state that user has completely quit the service desk.
- * All activities react on this event by finishing itself.
+ * For sharing state that user has completely quit the service desk or there need to upgrade
+ * the feed.
  */
-internal class QuitViewModel : ViewModel() {
+internal class SharedViewModel : ViewModel() {
 
-    private var quitServiceDesk = MutableLiveData<Boolean>()
+    private val quitServiceDesk = MutableLiveData<Boolean>()
+    private val updateServiceDesk = MutableLiveData<Any>()
 
     /**
      * Provides live data to be subscribed to events that user completely quit service desk.
@@ -26,5 +27,15 @@ internal class QuitViewModel : ViewModel() {
      * Should be called before service desk start.
      */
     fun clear() = quitServiceDesk.postValue(false)
+
+    /**
+     * Provides live data to be subscribed to events that app want to update feed.
+     */
+    fun getUpdateServiceDeskLiveData(): LiveData<Any> = updateServiceDesk
+
+    /**
+     * Triggers manually update of PyrusServiceDesk's feed.
+     */
+    fun triggerUpdate() = updateServiceDesk.postValue(Any())
 
 }

@@ -32,7 +32,7 @@ internal class ViewModelFactory(private val arguments: Intent): ViewModelProvide
                     PyrusServiceDesk.get().serviceDeskProvider,
                     arguments
                 ) as T
-            QuitViewModel::class.java -> PyrusServiceDesk.get().getSharedViewModel() as T
+            SharedViewModel::class.java -> PyrusServiceDesk.get().getSharedViewModel() as T
             AttachFileSharedViewModel::class.java -> AttachFileSharedViewModel() as T
             PendingCommentActionSharedViewModel::class.java -> PendingCommentActionSharedViewModel() as T
             else -> throw IllegalStateException("View model for class $modelClass was not found")

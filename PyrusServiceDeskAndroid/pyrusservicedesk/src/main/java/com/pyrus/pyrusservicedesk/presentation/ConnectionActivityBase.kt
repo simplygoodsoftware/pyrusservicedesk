@@ -65,6 +65,12 @@ internal abstract class ConnectionActivityBase<T: ConnectionViewModelBase>(viewM
                 progress?.let { updateProgress(it) }
             }
         )
+        sharedViewModel.getUpdateServiceDeskLiveData().observe(
+            this,
+            Observer {
+                viewModel.loadData()
+            }
+        )
     }
 
     /**
