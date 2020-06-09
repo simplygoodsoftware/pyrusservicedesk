@@ -289,7 +289,7 @@ internal class TicketActivity : ConnectionActivityBase<TicketViewModel>(TicketVi
     private fun onMenuItemClicked(menuItem: MenuItem?): Boolean {
         return menuItem?.let {
             when (it.itemId) {
-                R.id.psd_main_menu_close -> quitViewModel.quitServiceDesk()
+                R.id.psd_main_menu_close -> sharedViewModel.quitServiceDesk()
             }
             true
         } ?: false

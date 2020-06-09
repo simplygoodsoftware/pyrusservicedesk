@@ -120,7 +120,7 @@ internal class LiveUpdates(requests: RequestFactory) {
         }
         if (isChanged) {
             ticketCountChangedSubscribers.forEach { it.onUnreadTicketCountChanged(newUnreadCount) }
-            if (isChanged && newUnreadCount > 0)
+            if (newUnreadCount > 0)
                 newReplySubscribers.forEach { it.onNewReply() }
         }
         recentUnreadCounter = newUnreadCount
