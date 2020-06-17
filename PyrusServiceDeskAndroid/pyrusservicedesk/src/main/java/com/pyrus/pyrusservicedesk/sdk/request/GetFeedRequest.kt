@@ -1,6 +1,6 @@
 package com.pyrus.pyrusservicedesk.sdk.request
 
-import com.pyrus.pyrusservicedesk.sdk.data.Comment
+import com.pyrus.pyrusservicedesk.sdk.data.intermediate.Comments
 import com.pyrus.pyrusservicedesk.sdk.repositories.general.GeneralRepository
 import com.pyrus.pyrusservicedesk.sdk.response.Response
 
@@ -10,9 +10,9 @@ import com.pyrus.pyrusservicedesk.sdk.response.Response
  */
 internal class GetFeedRequest(repository: GeneralRepository,
                               private val requestsRemoteComments: Boolean)
-    : RequestBase<List<Comment>>(repository) {
+    : RequestBase<Comments>(repository) {
 
-    override suspend fun run(repository: GeneralRepository): Response<List<Comment>> =
+    override suspend fun run(repository: GeneralRepository): Response<Comments> =
         when {
             requestsRemoteComments -> repository.getFeed()
             else -> repository.getPendingFeedComments()

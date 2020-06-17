@@ -1,7 +1,7 @@
 package com.pyrus.pyrusservicedesk.presentation.call
 
 import com.pyrus.pyrusservicedesk.sdk.RequestFactory
-import com.pyrus.pyrusservicedesk.sdk.data.Comment
+import com.pyrus.pyrusservicedesk.sdk.data.intermediate.Comments
 import kotlinx.coroutines.CoroutineScope
 
 /**
@@ -12,10 +12,10 @@ import kotlinx.coroutines.CoroutineScope
 internal class GetFeedCall(
         scope: CoroutineScope,
         private val requests: RequestFactory)
-    : BaseCall<List<Comment>>(scope){
+    : BaseCall<Comments>(scope){
 
 
-    override suspend fun run(): CallResult<List<Comment>> {
+    override suspend fun run(): CallResult<Comments> {
         val response = requests.getFeedRequest().execute()
         return CallResult(response.getData(), response.getError())
     }

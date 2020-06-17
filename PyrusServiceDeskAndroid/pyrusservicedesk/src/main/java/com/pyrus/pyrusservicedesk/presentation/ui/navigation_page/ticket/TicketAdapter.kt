@@ -20,6 +20,7 @@ import com.pyrus.pyrusservicedesk.presentation.ui.view.recyclerview.AdapterBase
 import com.pyrus.pyrusservicedesk.presentation.ui.view.recyclerview.ViewHolderBase
 import com.pyrus.pyrusservicedesk.presentation.ui.view.recyclerview.item_decorators.SpaceMultiplier
 import com.pyrus.pyrusservicedesk.sdk.data.Attachment
+import com.pyrus.pyrusservicedesk.utils.*
 import com.pyrus.pyrusservicedesk.utils.CIRCLE_TRANSFORMATION
 import com.pyrus.pyrusservicedesk.utils.ConfigUtils
 import com.pyrus.pyrusservicedesk.utils.RequestUtils.Companion.getAvatarUrl
@@ -27,6 +28,7 @@ import com.pyrus.pyrusservicedesk.utils.RequestUtils.Companion.getPreviewUrl
 import com.pyrus.pyrusservicedesk.utils.getTimeText
 import com.pyrus.pyrusservicedesk.utils.isImage
 import com.squareup.picasso.Picasso
+import kotlinx.android.synthetic.main.psd_view_holder_rating.view.*
 import kotlin.math.abs
 
 
@@ -34,6 +36,7 @@ private const val VIEW_TYPE_COMMENT_INBOUND = 0
 private const val VIEW_TYPE_COMMENT_OUTBOUND = 1
 private const val VIEW_TYPE_WELCOME_MESSAGE = 2
 private const val VIEW_TYPE_DATE = 3
+private const val VIEW_TYPE_RATING = 4
 
 /**
  * Adapter that is used for rendering comment feed of the ticket screen.
@@ -61,12 +64,14 @@ internal class TicketAdapter: AdapterBase<TicketEntry>() {
     private var onTextCommentLongClicked: ((String) -> Unit)? = null
     private var onErrorCommentEntryClickListener: ((CommentEntry) -> Unit)? = null
     private var recentInboundCommentPositionWithAvatar = 0
+    private var onRatingClickListener: ((Int) -> Unit)? = null
 
     override fun getItemViewType(position: Int): Int {
         return with(itemsList[position]) {
             return@with when {
                 type == Type.Date -> VIEW_TYPE_DATE
                 type == Type.WelcomeMessage -> VIEW_TYPE_WELCOME_MESSAGE
+                type == Type.Rating -> VIEW_TYPE_RATING
                 (this as CommentEntry).comment.isInbound -> VIEW_TYPE_COMMENT_OUTBOUND
                 else -> VIEW_TYPE_COMMENT_INBOUND
             }
@@ -79,6 +84,7 @@ internal class TicketAdapter: AdapterBase<TicketEntry>() {
             VIEW_TYPE_COMMENT_INBOUND -> InboundCommentHolder(parent)
             VIEW_TYPE_COMMENT_OUTBOUND -> OutboundCommentHolder(parent)
             VIEW_TYPE_WELCOME_MESSAGE -> WelcomeMessageHolder(parent)
+            VIEW_TYPE_RATING -> RatingHolder(parent)
             else -> DateViewHolder(parent)
         } as ViewHolderBase<TicketEntry>
     }
@@ -113,6 +119,10 @@ internal class TicketAdapter: AdapterBase<TicketEntry>() {
      */
     fun setOnTextCommentLongClicked(listener: (String) -> Unit) {
         onTextCommentLongClicked = listener
+    }
+
+    fun setOnRatingClickListener(listener: ((Int) -> Unit)) {
+        onRatingClickListener = listener
     }
 
     private inner class InboundCommentHolder(parent: ViewGroup) :
@@ -207,7 +217,7 @@ internal class TicketAdapter: AdapterBase<TicketEntry>() {
         val onCommentLongClickListener = OnLongClickListener {
             return@OnLongClickListener when {
                 !getItem().comment.hasAttachments() -> {
-                    onTextCommentLongClicked?.invoke(getItem().comment.body)
+                    onTextCommentLongClicked?.invoke(getItem().comment.body ?: "")
                     true
                 }
                 else -> false
@@ -245,7 +255,12 @@ internal class TicketAdapter: AdapterBase<TicketEntry>() {
         }
 
         private fun bindTextView() {
-            comment.setCommentText(getItem().comment.body)
+            var text = getItem().comment.body
+            if (text.isNullOrEmpty()) {
+                val rating = getItem().comment.rating
+                text = rating.ratingToEmoji()
+            }
+            comment.setCommentText(text)
         }
 
         private fun bindAttachmentView() {
@@ -303,6 +318,31 @@ internal class TicketAdapter: AdapterBase<TicketEntry>() {
             date.text = item.date
         }
     }
+
+    private inner class RatingHolder(parent: ViewGroup) :
+        ViewHolderBase<RatingEntry>(parent, R.layout.psd_view_holder_rating) {
+
+        override fun bindItem(item: RatingEntry) {
+            super.bindItem(item)
+            with(itemView) {
+                rating1.setOnClickListener { onRatingClickListener?.invoke(1)}
+                rating2.setOnClickListener { onRatingClickListener?.invoke(2)}
+                rating3.setOnClickListener { onRatingClickListener?.invoke(3)}
+                rating4.setOnClickListener { onRatingClickListener?.invoke(4)}
+                rating5.setOnClickListener { onRatingClickListener?.invoke(5)}
+            }
+        }
+    }
+
+    private fun Int?.ratingToEmoji(): String =
+        when (this) {
+            1 -> "😩"
+            2 -> "🙁"
+            3 -> "😐"
+            4 -> "🙂"
+            5 -> "😄"
+            else -> ""
+        }
 
     private inner class TouchCallback : ItemTouchHelper.Callback() {
 
@@ -372,4 +412,4 @@ private fun TicketEntry.isConsideredInbound(): Boolean {
             || type == Type.Comment && !(this as CommentEntry).comment.isInbound
 }
 
-private fun TicketEntry.isNonShiftable(): Boolean = type == Type.Date
+private fun TicketEntry.isNonShiftable(): Boolean = type == Type.Date || type == Type.Rating

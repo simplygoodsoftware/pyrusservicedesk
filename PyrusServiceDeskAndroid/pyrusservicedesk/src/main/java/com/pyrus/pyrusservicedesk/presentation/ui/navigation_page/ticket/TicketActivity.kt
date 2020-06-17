@@ -116,6 +116,9 @@ internal class TicketActivity : ConnectionActivityBase<TicketViewModel>(TicketVi
         setOnTextCommentLongClicked {
             copyToClipboard(it)
         }
+        setOnRatingClickListener { rating ->
+            viewModel.onRatingClick(rating)
+        }
     }
 
     private val inputTextWatcher = object : TextWatcher {
