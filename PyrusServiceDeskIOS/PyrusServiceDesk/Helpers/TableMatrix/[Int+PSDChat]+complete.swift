@@ -162,14 +162,14 @@ extension Array where Element == [PSDRowMessage]{
             let end :Int = count - startFrom.section
             for i in 1...end{
                 for (row,message) in self[count-i].enumerated().reversed(){
-                    if message.message.state == .sent && !message.hasId() && message.text == findMessage.text && message.attachment?.name == findMessage.attachment?.name{
+                    if message.message.state == .sent && !message.hasId() && message.text == findMessage.text && message.attachment?.name == findMessage.attachment?.name && message.rating == findMessage.rating{
                         message.message.messageId = findMessage.message.messageId
                     }
                     if message.message.localId == findMessage.message.localId{
                         return true
                     }
                     if message.message.messageId == findMessage.message.messageId && findMessage.hasId(){
-                        if message.message.owner.personId == PyrusServiceDesk.userId{
+                        if (message.message.owner.personId == PyrusServiceDesk.userId) || (message.rating ?? 0 != 0){
                             message.attachment?.serverIdentifer = findMessage.attachment?.serverIdentifer //set new server id that comes from server, because old may be uncorrect
                             return true
                         }else if message.attachment?.serverIdentifer == findMessage.attachment?.serverIdentifer{  //if from server comes many attachments in one message we separate them into different messages. All of them has same ids.

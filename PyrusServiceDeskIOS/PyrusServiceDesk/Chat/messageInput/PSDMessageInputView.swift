@@ -3,10 +3,12 @@ import UIKit
 
 protocol PSDMessageInputViewDelegate: class {
     func send(_ message:String,_ attachments:[PSDAttachment])
+    func sendRate(_ rateValue:Int)
 }
 let DEFAULT_LAYOUT_MARGINS : CGFloat = 8
 let BUTTONS_CORNER_RADIUS : CGFloat = 8
 class PSDMessageInputView: UIView, PSDMessageTextViewDelegate,PSDMessageSendButtonDelegate {
+    private let RATE_HEIGHT : CGFloat = 64
     private static let heightForAttach : CGFloat = 30
     private static let interItemSpaceForAttach : CGFloat = 0.1
     weak var delegate: PSDMessageInputViewDelegate?
@@ -21,6 +23,8 @@ class PSDMessageInputView: UIView, PSDMessageTextViewDelegate,PSDMessageSendButt
     var topGrayLine : UIView!
     ///Visible part of input
     var backgroundView : UIView!
+    ///The view with rate buttons
+    private var rateView: PSDRateView!
     ///Stack with attachments
     private var attachmentsCollection : AttachmentCollectionView!
     private var attachmentsPresenter : AttachmentCollectionViewPresenterProtocol!
@@ -29,6 +33,15 @@ class PSDMessageInputView: UIView, PSDMessageTextViewDelegate,PSDMessageSendButt
     let distToAdd : CGFloat = 21
     let distToSend : CGFloat = 15
     private static let attachmentsHeight : CGFloat = 80
+    var showRate = false{
+        didSet(oldValue) {
+            guard oldValue != showRate else{
+                return
+            }
+            rateHeightConstraint?.constant = showRate ? RATE_HEIGHT : 0
+            rateView.isHidden = !showRate
+        }
+    }
     override init(frame: CGRect) {
         super.init(frame: frame)
         
@@ -67,6 +80,8 @@ class PSDMessageInputView: UIView, PSDMessageTextViewDelegate,PSDMessageSendButt
         inputTextView = PSDMessageTextView(frame: CGRect(x: x, y: 0, width: sendButton.frame.origin.x - distTextToSend - x, height: defaultTextHeight))
         inputTextView.messageDelegate = self
        
+        rateView = PSDRateView()
+        rateView.delegate = self
     
         self.addSubview(backgroundView)
         backgroundView.addSubview(topGrayLine)
@@ -74,6 +89,8 @@ class PSDMessageInputView: UIView, PSDMessageTextViewDelegate,PSDMessageSendButt
         backgroundView.addSubview(inputTextView)
         backgroundView.addSubview(sendButton)
         backgroundView.addSubview(attachmentsCollection)
+        backgroundView.addSubview(rateView)
+        rateView.isHidden = !showRate
         
         addConstraints()
     }
@@ -156,6 +173,7 @@ class PSDMessageInputView: UIView, PSDMessageTextViewDelegate,PSDMessageSendButt
     ///Text field height constraint. Change when isLandscape.
     var heightConstraint  : NSLayoutConstraint?
     private var attachmentsHeightConstraint :NSLayoutConstraint?
+    private var rateHeightConstraint :NSLayoutConstraint?
     func addConstraints() {
         guard let inputTextView = inputTextView, let sendButton = sendButton else{
             return
@@ -163,6 +181,11 @@ class PSDMessageInputView: UIView, PSDMessageTextViewDelegate,PSDMessageSendButt
         self.autoresizingMask = [.flexibleHeight, .flexibleWidth, .flexibleBottomMargin]
         addBackgroundViewConstraints()
         addTopGrayLineConstraints()
+        
+        rateView.translatesAutoresizingMaskIntoConstraints = false
+        rateView.addZeroConstraint([.left,.right, .top])
+        rateHeightConstraint = rateView.heightAnchor.constraint(equalToConstant: showRate ? RATE_HEIGHT : 0)
+        rateHeightConstraint?.isActive = true
         
         attachmentsCollection.translatesAutoresizingMaskIntoConstraints = false
         attachmentsCollection.addZeroConstraint([.left,.right])
@@ -274,8 +297,9 @@ class PSDMessageInputView: UIView, PSDMessageTextViewDelegate,PSDMessageSendButt
     }
     private func addTopGrayLineConstraints(){
         topGrayLine.translatesAutoresizingMaskIntoConstraints = false
-        topGrayLine.addZeroConstraint([.top,.left,.right])
+        topGrayLine.addZeroConstraint([.left,.right])
         topGrayLine.addSizeConstraint([.height], constant: 0.5)
+        topGrayLine.topAnchor.constraint(equalTo: rateView.bottomAnchor).isActive = true
         
     }
     
@@ -306,5 +330,11 @@ extension PSDMessageInputView: AttachmentsAddButtonDelegate{
             attachment.rename(with: url)
         }
         addAttachment(attachment)
+    }
+}
+extension PSDMessageInputView: PSDRateViewDelegate {
+    func didTapRate(_ rateValue: Int) {
+        showRate = false
+        delegate?.sendRate(rateValue)
     }
 }

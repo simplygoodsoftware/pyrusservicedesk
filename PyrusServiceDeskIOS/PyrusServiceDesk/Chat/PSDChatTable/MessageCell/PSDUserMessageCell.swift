@@ -33,7 +33,7 @@ class PSDUserMessageCell: PSDChatMessageCell, PSDMessageStateButtonDelegate,PSDM
     override func draw(message:PSDRowMessage)
     {
         super.draw(message: message)
-        messageStateView._messageState = message.text.count > 0 ? message.message.state : .sent
+        messageStateView._messageState = (message.text.count > 0 || message.rating != nil) ? message.message.state : .sent
         updateTopMessageConstrint()
     }
     //PSDMessageStateButtonDelegate

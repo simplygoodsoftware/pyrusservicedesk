@@ -11,12 +11,14 @@ import Foundation
 class PSDRowMessage: NSObject {
     //messages saved in PyrusServiceDeskCreator is not denited
     var text: String
+    var rating : Int?
     var attachment: PSDAttachment?
     var message : PSDMessage
     init(message: PSDMessage, attachment: PSDAttachment?){
         self.message = message
         self.text = message.text
         self.attachment = attachment
+        self.rating = message.rating
         super.init()
     }
     func updateWith(message : PSDMessage){
