@@ -91,6 +91,11 @@ class PSDChatTableView: PSDDetailTableView{
                                 self?.removeNoConnectionView()
                                 UIView.performWithoutAnimation {
                                     self?.scrollsToBottom(animated: false)
+                                    self?.setNeedsLayout()
+                                    self?.layoutIfNeeded()
+                                    self?.scrollsToBottom(animated: false)
+                                    self?.layoutIfNeeded()
+                                    self?.scrollsToBottom(animated: false)
                                 }
                             }
                             
@@ -216,24 +221,7 @@ class PSDChatTableView: PSDDetailTableView{
         let lastRow = self.lastIndexPath()
         if(lastRow.row>=0 || lastRow.section>=0){
             if !(lastRow.row == 0 && lastRow.section==0 ){
-                self.scrollAnimationPerform = animated
-                let duration : Double = animated ? 0.2 : 0.0
-                let yOffset = max(self.contentSize.height - self.visibleHeight(),-self.contentInset.top)
-                UIView.animate(withDuration: duration, delay: 0.0, options: [.beginFromCurrentState], animations: {
-                    self.contentOffset = CGPoint(x: 0, y: yOffset)
-                }, completion: { success in
-                     let deadlineTime = DispatchTime.now() + .milliseconds(PSDChatTableView.delayBeforeUpdates)
-                    DispatchQueue.main.asyncAfter(deadline: deadlineTime) {
-                        [weak self] in
-                        self?.scrollAnimationPerform = false
-                    }
-                    
-                    if !animated || (self.lastRow()?.frame.size.height ?? 0) > self.visibleHeight(){
-                        DispatchQueue.main.async { self.scrollToRow(at: lastRow, at: .bottom, animated: false)}
-                    }
-                })
-                
-                
+                self.scrollToRow(at: lastRow, at: .bottom, animated: animated)
             }
         }
     }
