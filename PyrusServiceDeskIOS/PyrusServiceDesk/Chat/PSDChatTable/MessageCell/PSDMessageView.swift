@@ -1,16 +1,9 @@
 
 import UIKit
 let MESSAGE_CORNER_RADIUS : CGFloat = 15.0
-protocol PSDMessageViewDelegate: class{
-    ///Pass to delegate  that PSDMessageStateButton was pressed
-    func passStateButtonPressed()
-    //pass to delegate to send again
-    func showRetryAction()
-}
 class PSDMessageView: UIView{
     
-    weak var delegate: PSDMessageViewDelegate?
-    
+    weak var delegate: PSDRetryActionDelegate?
     enum colorType {
         case brightColor
         case defaultColor
@@ -60,7 +53,6 @@ class PSDMessageView: UIView{
             guard let attachmentView = attachmentView else{
                 return
             }
-            attachmentView.delegate = self
             attachmentHolderView.addSubview(attachmentView)
             attachmentView.maxWidth = maxWidth
             attachmentView.draw(data, state: message.message.state)
@@ -78,11 +70,11 @@ class PSDMessageView: UIView{
         return gesture
     }()
     @objc private func handleTap(sender: UITapGestureRecognizer) {
-        self.delegate?.passStateButtonPressed()
+        self.delegate?.tryShowRetryAction()
     }
     private static let messageTextViewFontSize : CGFloat = 18.0
     private static let separatorHeight : CGFloat = 3.0
-    var messageTextView : PSDCopyTextView = {
+    private(set) var messageTextView : PSDCopyTextView = {
         let text = PSDCopyTextView.init(frame: CGRect.zero)
         text.backgroundColor = .clear
         text.font = UIFont.systemFont(ofSize: messageTextViewFontSize)
@@ -120,7 +112,7 @@ class PSDMessageView: UIView{
         self.addSubview(messageTextView)
         self.addSubview(attachmentHolderView)
         self.addSubview(separatorView)
-        messageTextView.addGestureRecognizer(tapGesture)
+        self.addGestureRecognizer(tapGesture)
         addConstraints()
     }
     required init?(coder aDecoder: NSCoder) {
@@ -166,11 +158,6 @@ class PSDMessageView: UIView{
     }
     override var intrinsicContentSize: CGSize{
         return CGSize.zero
-    }
-}
-extension PSDMessageView : PSDAttachmentViewDelegate{
-    func showRetryAction(){
-        self.delegate?.showRetryAction()
     }
 }
 

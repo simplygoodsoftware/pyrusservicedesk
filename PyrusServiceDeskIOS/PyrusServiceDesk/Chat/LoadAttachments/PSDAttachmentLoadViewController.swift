@@ -124,6 +124,8 @@ class PSDAttachmentLoadViewController: UIViewController{
         if !self.view.subviews.contains(self.previewView){
             self.view.addSubview(previewView)
         }
+        
+        previewView.needBackground = attachment?.isImage ?? false
         previewView.drawAttachment(url)
     }
     ///Add PSDNoConnectionView and remove PreviewView, ErrorView and DownloadView
