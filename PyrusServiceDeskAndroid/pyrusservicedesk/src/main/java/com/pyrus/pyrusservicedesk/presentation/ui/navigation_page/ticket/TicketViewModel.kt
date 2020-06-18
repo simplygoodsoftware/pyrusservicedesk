@@ -76,7 +76,6 @@ internal class TicketViewModel(serviceDeskProvider: ServiceDeskProvider,
 
     private val unreadCounter = MutableLiveData<Int>()
     private val commentDiff = MutableLiveData<DiffResultWithNewItems<TicketEntry>>()
-    private val showRating = MutableLiveData(false)
 
     private var ticketEntries: List<TicketEntry> = emptyList()
 
@@ -321,7 +320,6 @@ internal class TicketViewModel(serviceDeskProvider: ServiceDeskProvider,
     }
 
     private fun applyTicketUpdate(freshList: Comments, arePendingComments: Boolean) {
-        showRating.value = freshList.showRating
         if (!arePendingComments && !needUpdateCommentsList(freshList.comments)) {
             onDataLoaded()
             return
@@ -416,6 +414,7 @@ internal class TicketViewModel(serviceDeskProvider: ServiceDeskProvider,
                 }
             }
         }
+        newEntries.removeAll { it.type == Type.Rating }
         publishEntries(ticketEntries, newEntries)
     }
 
@@ -497,11 +496,8 @@ internal class TicketViewModel(serviceDeskProvider: ServiceDeskProvider,
             }
     }
 
-    fun onRatingClick(rating: Int) {
-        sendAddComment(localDataProvider.createLocalComment(
-            rating = rating
-        ))
-    }
+    fun onRatingClick(rating: Int) =
+        sendAddComment(localDataProvider.createLocalComment(rating = rating))
 
     private inner class AddCommentObserver(
         uploadFileHooks: UploadFileHooks?,
