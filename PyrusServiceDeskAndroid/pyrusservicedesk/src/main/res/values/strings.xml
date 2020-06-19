@@ -44,4 +44,5 @@
     <string name="emoji_rating_3" translatable="false">😐</string>
     <string name="emoji_rating_4" translatable="false">🙂</string>
     <string name="emoji_rating_5" translatable="false">😄</string>
+    <string name="emoji_rating_default" translatable="false">😶</string>
 </resources>

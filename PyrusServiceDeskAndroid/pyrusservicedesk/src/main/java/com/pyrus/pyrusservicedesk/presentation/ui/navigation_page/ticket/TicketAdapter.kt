@@ -1,6 +1,7 @@
 package com.pyrus.pyrusservicedesk.presentation.ui.navigation_page.ticket
 
 import android.graphics.Canvas
+import android.graphics.drawable.AnimationDrawable
 import android.net.Uri
 import androidx.annotation.LayoutRes
 import androidx.recyclerview.widget.RecyclerView
@@ -20,7 +21,6 @@ import com.pyrus.pyrusservicedesk.presentation.ui.view.recyclerview.AdapterBase
 import com.pyrus.pyrusservicedesk.presentation.ui.view.recyclerview.ViewHolderBase
 import com.pyrus.pyrusservicedesk.presentation.ui.view.recyclerview.item_decorators.SpaceMultiplier
 import com.pyrus.pyrusservicedesk.sdk.data.Attachment
-import com.pyrus.pyrusservicedesk.utils.*
 import com.pyrus.pyrusservicedesk.utils.CIRCLE_TRANSFORMATION
 import com.pyrus.pyrusservicedesk.utils.ConfigUtils
 import com.pyrus.pyrusservicedesk.utils.RequestUtils.Companion.getAvatarUrl
@@ -28,6 +28,7 @@ import com.pyrus.pyrusservicedesk.utils.RequestUtils.Companion.getPreviewUrl
 import com.pyrus.pyrusservicedesk.utils.getTimeText
 import com.pyrus.pyrusservicedesk.utils.isImage
 import com.squareup.picasso.Picasso
+import kotlinx.android.synthetic.main.psd_view_holder_comment_rating.view.*
 import kotlinx.android.synthetic.main.psd_view_holder_rating.view.*
 import kotlin.math.abs
 
@@ -37,6 +38,7 @@ private const val VIEW_TYPE_COMMENT_OUTBOUND = 1
 private const val VIEW_TYPE_WELCOME_MESSAGE = 2
 private const val VIEW_TYPE_DATE = 3
 private const val VIEW_TYPE_RATING = 4
+private const val VIEW_TYPE_COMMENT_RATING = 5
 
 /**
  * Adapter that is used for rendering comment feed of the ticket screen.
@@ -72,7 +74,8 @@ internal class TicketAdapter: AdapterBase<TicketEntry>() {
                 type == Type.Date -> VIEW_TYPE_DATE
                 type == Type.WelcomeMessage -> VIEW_TYPE_WELCOME_MESSAGE
                 type == Type.Rating -> VIEW_TYPE_RATING
-                (this as CommentEntry).comment.isInbound -> VIEW_TYPE_COMMENT_OUTBOUND
+                (this as CommentEntry).comment.rating != null -> VIEW_TYPE_COMMENT_RATING
+                this.comment.isInbound -> VIEW_TYPE_COMMENT_OUTBOUND
                 else -> VIEW_TYPE_COMMENT_INBOUND
             }
         }
@@ -85,6 +88,7 @@ internal class TicketAdapter: AdapterBase<TicketEntry>() {
             VIEW_TYPE_COMMENT_OUTBOUND -> OutboundCommentHolder(parent)
             VIEW_TYPE_WELCOME_MESSAGE -> WelcomeMessageHolder(parent)
             VIEW_TYPE_RATING -> RatingHolder(parent)
+            VIEW_TYPE_COMMENT_RATING -> RatingCommentHolder(parent)
             else -> DateViewHolder(parent)
         } as ViewHolderBase<TicketEntry>
     }
@@ -258,7 +262,7 @@ internal class TicketAdapter: AdapterBase<TicketEntry>() {
             var text = getItem().comment.body
             if (text.isNullOrEmpty()) {
                 val rating = getItem().comment.rating
-                text = rating.ratingToEmoji()
+                text = comment.context.getString(rating.ratingToEmojiRes())
             }
             comment.setCommentText(text)
         }
@@ -334,27 +338,58 @@ internal class TicketAdapter: AdapterBase<TicketEntry>() {
         }
     }
 
-    private fun Int?.ratingToEmoji(): String =
-        when (this) {
-            1 -> "😩"
-            2 -> "🙁"
-            3 -> "😐"
-            4 -> "🙂"
-            5 -> "😄"
-            else -> ""
+    private fun Int?.ratingToEmojiRes(): Int {
+        return when (this) {
+            1 -> R.string.emoji_rating_1
+            2 -> R.string.emoji_rating_2
+            3 -> R.string.emoji_rating_3
+            4 -> R.string.emoji_rating_4
+            5 -> R.string.emoji_rating_5
+            else -> R.string.emoji_rating_default
         }
+    }
+
+    private inner class RatingCommentHolder(parent: ViewGroup) :
+        ViewHolderBase<CommentEntry>(parent, R.layout.psd_view_holder_comment_rating) {
+
+        override fun bindItem(item: CommentEntry) {
+            super.bindItem(item)
+            with(itemView) {
+                ratingText.setText(item.comment.rating?.ratingToEmojiRes() ?: R.string.emoji_rating_default)
+                when {
+                    getItem().hasError() -> {
+                        statusIcon.setImageResource(R.drawable.psd_error)
+                        statusIcon.visibility = VISIBLE
+                    }
+                    getItem().comment.isLocal() -> {
+                        statusIcon.setImageResource(R.drawable.psd_sync_clock)
+                        statusIcon.visibility = VISIBLE
+                        (statusIcon.drawable as AnimationDrawable).start()
+                    }
+                    else -> {
+                        statusIcon.visibility = GONE
+                    }
+                }
+                setOnClickListener {
+                    if (getItem().hasError())
+                        onErrorCommentEntryClickListener?.invoke(getItem())
+                }
+            }
+        }
+
+    }
 
     private inner class TouchCallback : ItemTouchHelper.Callback() {
 
-        override fun getMovementFlags(recyclerView: androidx.recyclerview.widget.RecyclerView,
-                                      viewHolder: androidx.recyclerview.widget.RecyclerView.ViewHolder): Int {
+        override fun getMovementFlags(recyclerView: RecyclerView,
+                                      viewHolder: RecyclerView.ViewHolder): Int {
 
             return makeFlag(ACTION_STATE_SWIPE,  ItemTouchHelper.LEFT)
         }
 
-        override fun onMove(recyclerView: androidx.recyclerview.widget.RecyclerView,
-                            viewHolder: androidx.recyclerview.widget.RecyclerView.ViewHolder,
-                            target: androidx.recyclerview.widget.RecyclerView.ViewHolder): Boolean {
+        override fun onMove(recyclerView: RecyclerView,
+                            viewHolder: RecyclerView.ViewHolder,
+                            target: RecyclerView.ViewHolder): Boolean {
             return false
         }
 
@@ -362,20 +397,20 @@ internal class TicketAdapter: AdapterBase<TicketEntry>() {
             return false
         }
 
-        override fun onSwiped(viewHolder: androidx.recyclerview.widget.RecyclerView.ViewHolder, direction: Int) {
+        override fun onSwiped(viewHolder: RecyclerView.ViewHolder, direction: Int) {
         }
 
         override fun getSwipeEscapeVelocity(defaultValue: Float): Float {
             return Float.MAX_VALUE
         }
 
-        override fun getSwipeThreshold(viewHolder: androidx.recyclerview.widget.RecyclerView.ViewHolder): Float {
+        override fun getSwipeThreshold(viewHolder: RecyclerView.ViewHolder): Float {
             return Float.MAX_VALUE
         }
 
         override fun onChildDraw(c: Canvas,
-                                 recyclerView: androidx.recyclerview.widget.RecyclerView,
-                                 viewHolder: androidx.recyclerview.widget.RecyclerView.ViewHolder,
+                                 recyclerView: RecyclerView,
+                                 viewHolder: RecyclerView.ViewHolder,
                                  dX: Float,
                                  dY: Float,
                                  actionState: Int,
