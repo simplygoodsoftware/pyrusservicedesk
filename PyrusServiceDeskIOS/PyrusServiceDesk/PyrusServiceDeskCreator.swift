@@ -110,6 +110,7 @@ import UIKit
     weak static  private(set) var subscriber : NewReplySubscriber?
     ///The subscriber for PyrusSecviceDeskClose.
     weak static  private(set) var stopCallback : OnStopCallback?
+    weak static private(set) var logEvent: LogEvents?
     ///Subscribe [subscriber] for notifications that new messages from support have appeared in the chat.
     @objc public static func subscribeToReplies(_ subscriber: NewReplySubscriber?){
         PyrusServiceDesk.subscriber = subscriber
@@ -117,6 +118,10 @@ import UIKit
     ///Unsubscribe [subscriber] from alerts for new messages from chat support.
     @objc public static func unsubscribeFromReplies(_ subscriber: NewReplySubscriber?){
         PyrusServiceDesk.subscriber = nil
+    }
+    
+    @objc public static func subscribeToGogEvents(_ subscriber: LogEvents){
+        PyrusServiceDesk.logEvent = subscriber
     }
     
     ///Init PyrusServiceDesk with new clientId.

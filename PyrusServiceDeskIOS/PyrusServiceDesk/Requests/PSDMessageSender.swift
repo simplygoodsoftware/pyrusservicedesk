@@ -79,6 +79,9 @@ class PSDMessageSender: NSObject {
             attachment.size = attachment.data.count
             attachment.data = Data()//clear saved data
         }
+        if messageToPass.fromStrorage{
+            messageToPass.date = Date()//mesages from the storage can have old date - change it to the current, to avoid diffrent drawing after second enter into chat
+        }
         delegate?.refresh(message:messageToPass, changedToSent: success)
     }
     private static let commentParameter = "comment"

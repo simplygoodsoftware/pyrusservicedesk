@@ -20,7 +20,7 @@ class PSDMessage: NSObject {
     var localId : String
     var date : Date = Date()
     var state : messageState
-    
+    var fromStrorage: Bool = false
     init(text: String?, attachments: [PSDAttachment]? ,messageId:String? , owner:PSDUser?, date: Date?){
         self.text = text ?? ""        
         self.attachments = attachments

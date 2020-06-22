@@ -4,11 +4,7 @@ extension Array where Element == [PSDRowMessage]{
     ///complete array with unsent messages from storage
     mutating func completeWithUnsentMessages(){
         let messagesFromStorage = PSDMessagesStorage.messagesFromStorage()
-        var rowMessages = [PSDRowMessage]()
-        for message in messagesFromStorage{
-            rowMessages.append(contentsOf: PSDObjectsCreator.parseMessageToRowMessage(message))
-        }
-        let _ = self.completeWithMessages(rowMessages)
+        complete(with: messagesFromStorage, startMessage: nil, completion: nil)
     }
     ///Complete array with messages. Messages always add to last section, and checked for duplication by localId
     ///- parameter messages: messages to add
@@ -36,7 +32,6 @@ extension Array where Element == [PSDRowMessage]{
             }
         }
         return true
-        
     }
     /**
      Complete tableMatrix from PSDChat massages.
@@ -48,20 +43,23 @@ extension Array where Element == [PSDRowMessage]{
      - sections: IndexSet need to be inserted
      */
      mutating func complete(from chat:PSDChat, startMessage: PSDMessage?, completion: @escaping (_ indexPaths: [IndexPath], _ sections:IndexSet) -> Void){
+        complete(with: chat.messages, startMessage: startMessage, completion: completion)
+    }
+    mutating private func complete(with messages:[PSDMessage], startMessage: PSDMessage?, completion: ( (_ indexPaths: [IndexPath], _ sections:IndexSet) -> Void)?){
         let startMessageIndexPath = self.index(of: startMessage)
         
         var index:Int = 0//the index of message in received chat
-        if startMessage != nil{
-            index = self.index(of:startMessage!, in:chat.messages)
+        if let startMessage = startMessage{
+            index = self.index(of:startMessage, in:messages)
             index = index + 1//start with next message
         }
         
         //completion for update table
         var indexPaths : [IndexPath] =  [IndexPath]()
         var reloadSections : [Int] = [Int]()
-        if chat.messages.count > index{
-            for i in index..<chat.messages.count{
-                let message = chat.messages[i]
+        if messages.count > index{
+            for i in index..<messages.count{
+                let message = messages[i]
                 //if self have this message ignore it
                 var alreadyHasMessage = false
                 let rowMessages = PSDObjectsCreator.parseMessageToRowMessage(message)
@@ -102,7 +100,7 @@ extension Array where Element == [PSDRowMessage]{
             }
                 
         }
-        completion(indexPaths,IndexSet(reloadSections))
+        completion?(indexPaths,IndexSet(reloadSections))
     }
     ///Find indexPath of message by its messageId start from bottom.
     private func index(of searchMessage:PSDMessage?)->IndexPath{
@@ -133,7 +131,7 @@ extension Array where Element == [PSDRowMessage]{
         return 0
     }
     ///return row for message according to its time
-    private func row(forMessage: PSDMessage, section: Int)->Int{
+    func row(forMessage: PSDMessage, section: Int)->Int{
         for (row,message) in self[section].enumerated().reversed(){
             if message.message.state != .sent{
                 continue

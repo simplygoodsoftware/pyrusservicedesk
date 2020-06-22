@@ -34,6 +34,13 @@ struct PSDObjectsCreator {
             return [PSDRowMessage(message: message, attachment: nil)]
         }
     }
+    ///Returns number of PSDRowMessage after parsing PSDMessage, minimum value is 1
+    static func rowMessagesCount(for message: PSDMessage) -> Int {
+        if let attachments = message.attachments, attachments.count > 0{
+            return attachments.count
+        }
+        return 1
+    }
     /**
      Create a new message that was not sent.
      - parameter data: Any object to message. If has string
