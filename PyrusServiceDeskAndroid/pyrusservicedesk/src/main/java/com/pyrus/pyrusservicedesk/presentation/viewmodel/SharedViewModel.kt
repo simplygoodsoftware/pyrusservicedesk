@@ -26,7 +26,7 @@ internal class SharedViewModel : ViewModel() {
     /**
      * Should be called before service desk start.
      */
-    fun clear() = quitServiceDesk.postValue(false)
+    fun clearQuitServiceDesk() = quitServiceDesk.postValue(false)
 
     /**
      * Provides live data to be subscribed to events that app want to update feed.
