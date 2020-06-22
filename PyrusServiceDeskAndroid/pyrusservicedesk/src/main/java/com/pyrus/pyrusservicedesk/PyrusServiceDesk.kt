@@ -181,7 +181,7 @@ class PyrusServiceDesk private constructor(
             onStopCallback: OnStopCallback? = null
         ) {
             CONFIGURATION = configuration
-            get().sharedViewModel.clear()
+            get().sharedViewModel.clearQuitServiceDesk()
             get().onStopCallback = onStopCallback
             activity.startActivity(createIntent(ticketId))
         }
