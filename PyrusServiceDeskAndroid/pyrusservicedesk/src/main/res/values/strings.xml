@@ -39,10 +39,4 @@
     <string name="psd_no_preview_available">No preview available</string>
     <string name="psd_share">Share</string>
     <string name="psd_delete">Delete</string>
-    <string name="emoji_rating_1" translatable="false">😩</string>
-    <string name="emoji_rating_2" translatable="false">🙁</string>
-    <string name="emoji_rating_3" translatable="false">😐</string>
-    <string name="emoji_rating_4" translatable="false">🙂</string>
-    <string name="emoji_rating_5" translatable="false">😄</string>
-    <string name="emoji_rating_default" translatable="false">😶</string>
 </resources>

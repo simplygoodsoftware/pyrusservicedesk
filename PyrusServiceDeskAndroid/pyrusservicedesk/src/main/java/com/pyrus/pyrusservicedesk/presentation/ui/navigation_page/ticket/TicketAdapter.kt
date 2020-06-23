@@ -340,12 +340,12 @@ internal class TicketAdapter: AdapterBase<TicketEntry>() {
 
     private fun Int?.ratingToEmojiRes(): Int {
         return when (this) {
-            1 -> R.string.emoji_rating_1
-            2 -> R.string.emoji_rating_2
-            3 -> R.string.emoji_rating_3
-            4 -> R.string.emoji_rating_4
-            5 -> R.string.emoji_rating_5
-            else -> R.string.emoji_rating_default
+            1 -> R.drawable.ic_emoji_rating_1
+            2 -> R.drawable.ic_emoji_rating_2
+            3 -> R.drawable.ic_emoji_rating_3
+            4 -> R.drawable.ic_emoji_rating_4
+            5 -> R.drawable.ic_emoji_rating_5
+            else -> R.drawable.ic_emoji_rating_3
         }
     }
 
@@ -355,7 +355,7 @@ internal class TicketAdapter: AdapterBase<TicketEntry>() {
         override fun bindItem(item: CommentEntry) {
             super.bindItem(item)
             with(itemView) {
-                ratingText.setText(item.comment.rating?.ratingToEmojiRes() ?: R.string.emoji_rating_default)
+                ratingImage.setImageResource(item.comment.rating?.ratingToEmojiRes() ?: R.drawable.ic_emoji_rating_3)
                 when {
                     getItem().hasError() -> {
                         statusIcon.setImageResource(R.drawable.psd_error)
