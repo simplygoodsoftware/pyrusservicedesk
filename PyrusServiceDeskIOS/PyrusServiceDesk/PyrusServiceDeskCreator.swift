@@ -45,10 +45,12 @@ import UIKit
     @objc public static func setPushToken(_ token:String?, completion: @escaping(Error?) -> Void){
         guard let clientId = clientId, clientId.count > 0, clientId != "0"  else{
             completion(PSDError.init(description: "AppId is invalid"))
+            EventsLogger.logEvent(.emptyClientId)
             return
         }
         guard let token = token, token.count > 0 else{
             completion(PSDError.init(description: "Token is invalid"))
+            EventsLogger.logEvent(.invalidPushToken)
             return
         }
         PSDPushToken.send(token, completion: {
@@ -131,6 +133,8 @@ import UIKit
             PyrusServiceDesk.clientId = clientId
             PyrusServiceDesk.oneChat = true
             PyrusServiceDesk.createUserId()
+        }else{
+            EventsLogger.logEvent(.emptyClientId)
         }
     }
     @objc static public func refresh() {

@@ -6,22 +6,28 @@ import Foundation
 }
 enum EventsLogger {
     case didNotFindMessageAfterUpdate
+    case emptyClientId
+    case previewOpenForEmptyAttachment
+    case invalidPushToken
     static func logEvent(_ logCase: EventsLogger, additionalInfo: String? = nil){
-        guard var logString = stringForEvent(.didNotFindMessageAfterUpdate) else{
-            return
-        }
+        var logString = stringForEvent(logCase)
         if let additionalInfo = additionalInfo{
             logString = logString + " " + additionalInfo
         }
         PyrusServiceDesk.logEvent?.logPyrusServiceDesk(event: logString)
     }
-    static private func stringForEvent(_ logCase: EventsLogger) -> String? {
+    static private func stringForEvent(_ logCase: EventsLogger) -> String{
         let defaultString = "PyrusServiceDesk: "
         switch logCase {
         case .didNotFindMessageAfterUpdate:
             return defaultString + "Message was not finded in chat after sent"
-        default:
-            return nil
+        case .emptyClientId:
+            return defaultString + "Empty clientId"
+        case .previewOpenForEmptyAttachment:
+            return defaultString + "Try to open preview for attachment with empty id"
+        case .invalidPushToken:
+            return defaultString + "Main application passed empty push token"
+        
         }
     }
 }

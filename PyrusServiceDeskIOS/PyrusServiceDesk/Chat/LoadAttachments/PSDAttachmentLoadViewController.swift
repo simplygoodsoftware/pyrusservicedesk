@@ -18,13 +18,13 @@ class PSDAttachmentLoadViewController: UIViewController{
     override func viewDidLoad() {
         super.viewDidLoad()
         self.design()
-        if(attachment != nil && attachment!.serverIdentifer != nil){
-            self.attachmentId = attachment!.serverIdentifer!
-            self.attachmentName = attachment!.name
-            
-            self.drawDownload()
-
+        guard let attachment = attachment, let serverIdentifer = attachment.serverIdentifer else{
+            EventsLogger.logEvent(.previewOpenForEmptyAttachment)
+            return
         }
+        self.attachmentId = serverIdentifer
+        self.attachmentName = attachment.name
+        self.drawDownload()
         
         let defaultName = PSD_ChatTitle()
         self.title = attachmentName.count>0 ? attachmentName : defaultName
