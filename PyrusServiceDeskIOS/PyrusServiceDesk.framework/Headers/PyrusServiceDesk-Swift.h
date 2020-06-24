@@ -693,6 +693,7 @@ SWIFT_CLASS("_TtC16PyrusServiceDesk24ServiceDeskConfiguration")
 #pragma clang diagnostic pop
 
 #endif
+
 #else
 #if 0
 #elif defined(__arm64__) && __arm64__
