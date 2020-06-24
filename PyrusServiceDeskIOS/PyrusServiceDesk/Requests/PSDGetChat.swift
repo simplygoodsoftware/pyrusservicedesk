@@ -6,6 +6,7 @@ protocol  PSDGetDelegate : class{
 Get chat from server.
  */
 struct PSDGetChat {
+    private static let SHOW_RATING_KEY = "show_rating"
     private static var chatGetters : [Int: ChatGetter] = [Int: ChatGetter]()
   //  private static var sessionTask : URLSessionDataTask? = nil
     /**
@@ -101,7 +102,9 @@ struct PSDGetChat {
     {
         var massages : [PSDMessage] = [PSDMessage]()
         massages = PSDGetChat.generateMessages(from: response["comments"] as? NSArray ?? NSArray())
-        return PSDChat(chatId: response.stringOfKey(ticketIdParameter), date: Date(), messages: massages)
+        let chat = PSDChat(chatId: response.stringOfKey(ticketIdParameter), date: Date(), messages: massages)
+        chat.showRating = (response[PSDGetChat.SHOW_RATING_KEY] as? Bool) ?? false
+        return chat
     }
     private static func generateMessages(from array:NSArray) -> [PSDMessage]
     {
@@ -122,13 +125,17 @@ struct PSDGetChat {
                 user = createUser(from: dic)
                 
             }
-            var textForMessage : String? = nil
-            var attachmentsForMessage : [PSDAttachment]? = nil
+            var textForMessage: String? = nil
+            var attachmentsForMessage: [PSDAttachment]? = nil
+            var rating: Int? = nil
             
             //Check is message has only attachments and no text
             if dic.stringOfKey("body").count>0{
                 textForMessage = dic.stringOfKey("body")
                 
+            }
+            if dic.intOfKey(ratingParameter) != 0 {
+                rating = dic.intOfKey(ratingParameter)
             }
             //Check is message has some attachments, if has -  create one new messages for each attachment
             if let ats = dic[attachmentsParameter] as? [[String : Any]], ats.count > 0{
@@ -140,8 +147,9 @@ struct PSDGetChat {
                     attachmentsForMessage?.append(attachment)
                 }
             }
-            if (attachmentsForMessage?.count ?? 0) > 0 || (textForMessage?.count ?? 0) > 0{
+            if (attachmentsForMessage?.count ?? 0) > 0 || (textForMessage?.count ?? 0) > 0 || rating != nil{
                 let message = PSDMessage(text: textForMessage, attachments:attachmentsForMessage, messageId: dic.stringOfKey(commentIdParameter), owner: user, date: date)
+                message.rating = rating
                 messages.append(message)
             }
         }
