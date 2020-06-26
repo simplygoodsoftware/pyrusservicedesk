@@ -34,7 +34,7 @@ class PSDUserMessageCell: PSDChatMessageCell {
     {
         super.draw(message: message)
         self.message = message
-        messageStateView._messageState = message.text.count > 0 ? message.message.state : .sent
+        messageStateView._messageState = (message.text.count > 0 || message.rating != nil) ? message.message.state : .sent
         updateTopMessageConstrint()
     }
     private func cancelMessage(){

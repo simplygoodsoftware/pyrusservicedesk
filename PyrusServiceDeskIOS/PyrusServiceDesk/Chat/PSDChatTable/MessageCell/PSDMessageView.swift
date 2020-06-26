@@ -59,6 +59,15 @@ class PSDMessageView: UIView{
             attachmentView.color = self.color == .defaultColor ?  .psdLabel : UIColor.appTextColor
             attachmentView.addZeroConstraint([.leading,.trailing,.top,.bottom])
         }
+        if let rating = message.rating{
+            ratingLabel.text = rateArray[rating]
+            if(message.attachment == nil && message.text.count == 0){
+                self.backgroundColor = .clear
+            }
+        }else{
+            ratingLabel.text = nil
+        }
+        
         attachmentHolderRightConstraint?.isActive = !hasImageAttachment
         attachmentHolderImageRightConstraint?.isActive = hasImageAttachment
         separatorHeightConstraint?.constant = (messageTextView.text.count == 0 || attachmentView == nil) ? 0 : PSDMessageView.separatorHeight //show separatoe only is has both text and image
@@ -92,6 +101,11 @@ class PSDMessageView: UIView{
         
         return text
     }()
+    private var ratingLabel: UILabel = {
+        let label = UILabel()
+        label.font = UIFont.RATING_FONT
+        return label
+    }()
     private lazy var attachmentHolderView : UIView = {
         let view = UIView()
         view.backgroundColor = .clear
@@ -113,6 +127,7 @@ class PSDMessageView: UIView{
         self.addSubview(attachmentHolderView)
         self.addSubview(separatorView)
         self.addGestureRecognizer(tapGesture)
+        self.addSubview(ratingLabel)
         addConstraints()
     }
     required init?(coder aDecoder: NSCoder) {
@@ -130,8 +145,14 @@ class PSDMessageView: UIView{
         messageTextView.translatesAutoresizingMaskIntoConstraints = false
         attachmentHolderView.translatesAutoresizingMaskIntoConstraints = false
         separatorView.translatesAutoresizingMaskIntoConstraints = false
+        ratingLabel.translatesAutoresizingMaskIntoConstraints = false
         
-        attachmentHolderView.addZeroConstraint([.top])
+        ratingLabel.addZeroConstraint([.top])
+        ratingLabel.leftAnchor.constraint(greaterThanOrEqualTo: leftAnchor, constant: 0).isActive = true
+        ratingLabel.rightAnchor.constraint(lessThanOrEqualTo: rightAnchor, constant: 0).isActive = true
+        ratingLabel.centerXAnchor.constraint(equalTo: centerXAnchor).isActive = true
+        
+        attachmentHolderView.topAnchor.constraint(equalTo: ratingLabel.bottomAnchor, constant: 0).isActive = true
         attachmentHolderView.leftAnchor.constraint(equalTo: leftAnchor, constant: 0).isActive = true
         attachmentHolderRightConstraint = attachmentHolderView.rightAnchor.constraint(lessThanOrEqualTo: rightAnchor, constant: 0)
         attachmentHolderRightConstraint?.isActive = true
@@ -160,4 +181,6 @@ class PSDMessageView: UIView{
         return CGSize.zero
     }
 }
-
+private extension UIFont {
+    static let RATING_FONT = UIFont.systemFont(ofSize: 40)
+}

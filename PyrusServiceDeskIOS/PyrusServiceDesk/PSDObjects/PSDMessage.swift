@@ -16,10 +16,11 @@ class PSDMessage: NSObject {
     var text: String
     var attachments: [PSDAttachment]?
     var owner: PSDUser
-    var messageId :String
-    var localId : String
-    var date : Date = Date()
-    var state : messageState
+    var messageId: String
+    var localId: String
+    var date = Date()
+    var state: messageState
+    var rating: Int?
     var fromStrorage: Bool = false
     init(text: String?, attachments: [PSDAttachment]? ,messageId:String? , owner:PSDUser?, date: Date?){
         self.text = text ?? ""        

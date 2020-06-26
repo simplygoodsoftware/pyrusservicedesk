@@ -2,6 +2,7 @@ import Foundation
 
 let commentIdParameter = "comment_id"
 let ticketIdParameter = "ticket_id"
+let ratingParameter = "rating"
 let subjectParameter = "subject"
 let createdAtParameter = "created_at"
 let attachmentsParameter = "attachments"
@@ -37,7 +38,7 @@ class PSDMessageSender: NSObject {
             PSDMessageSend.taskArray.append(task)
         }
         else {
-            let task = PSDMessageSender.pass(messageToPass.text,messageToPass.attachments, to: chatId){
+            let task = PSDMessageSender.pass(messageToPass.text,messageToPass.attachments, rating: messageToPass.rating, to: chatId){
                 (commentId: String?, attachments: NSArray?) in
                 if commentId != nil &&  commentId?.count ?? 0>0{
                     //put attachments id
@@ -98,16 +99,17 @@ class PSDMessageSender: NSObject {
      - completion: Completion of passing message.
      - commentId: Return id of new message as String. If Request end with error return nil or "0" if received bad data from server.
      */
-    private static func pass(_ message:String, _ attachments:[PSDAttachment]?, to chatId:String, completion: @escaping (_ commentId: String?, _ attachments: NSArray?) -> Void)->URLSessionDataTask
-    {
+    private static func pass(_ message: String, _ attachments: [PSDAttachment]?, rating: Int?, to chatId: String, completion: @escaping (_ commentId: String?, _ attachments: NSArray?) -> Void) -> URLSessionDataTask {
         //Generate additional parameters for request body
         var parameters = [String: Any]()
         parameters[commentParameter] = message
+        if let rating = rating{
+            parameters[ratingParameter] = rating
+        }
         parameters[userNameParameter] = PyrusServiceDesk.userName
         if let attachments = attachments, attachments.count > 0{
             parameters[attachmentsParameter] = generateAttacments(attachments)
         }
-        
         var  request : URLRequest
         if(PyrusServiceDesk.oneChat){
             request = URLRequest.createRequest(type:.updateFeed, parameters: parameters)

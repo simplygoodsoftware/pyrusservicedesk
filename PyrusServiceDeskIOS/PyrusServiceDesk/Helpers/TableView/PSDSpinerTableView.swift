@@ -235,9 +235,8 @@ class PSDRefreshControl : UIControl{
         self.activity.layer.transform = transform
     }
     ///Begin refreshing - animated set content inset and pass actions for .valueChanged
-    ///- parameter checkState: Is need check is canBeginRefreshing(). If no - did not change inset - start animate and pass action for .valueChanged. Using in fireRefreshing.
     private func beginRefreshing() {
-        guard !canBeginRefreshing() else {
+        guard canBeginRefreshing() else {
             return
         }
         forceRefresh()

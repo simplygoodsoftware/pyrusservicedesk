@@ -87,8 +87,8 @@ struct PSDMessageSend {
      */
     static func pass(_ messageToPass:PSDMessage, to chatId:String, delegate:PSDMessageSendDelegate?)
     {
+        PSDMessagesStorage.saveInStorage(message:messageToPass)
         dispatchQueue.async {
-            PSDMessagesStorage.saveInStorage(message:messageToPass)
         if (PSDChatTableView.isNewChat(chatId) && !PSDMessageSend.passingMessagesIds.contains(messageToPass.localId)){
             if needWhait{
                 passQueueArray.append(messageToPass)

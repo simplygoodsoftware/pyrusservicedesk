@@ -1,9 +1,13 @@
 import UIKit
+protocol PSDChatTableViewDelegate: NSObjectProtocol {
+    func needShowRate(_ showRate: Bool)
+}
 class PSDChatTableView: PSDDetailTableView{
     ///The id of chat that is shown in table view
     var chatId :String = ""
-    
+    weak var chatDelegate: PSDChatTableViewDelegate?
     private let footerHeight : CGFloat = 10.0
+    private var needShowRating : Bool = false
     private static let userCellId = "CellUser"
     private static let supportCellId = "CellSupport"
     private var tableMatrix : [[PSDRowMessage]] = [[PSDRowMessage]()]
@@ -78,7 +82,8 @@ class PSDChatTableView: PSDDetailTableView{
                     (chat : PSDChat?) in
                     DispatchQueue.main.async {
                         if self != nil{
-                            
+                            self?.needShowRating = chat?.showRating ?? false
+                            self?.showRateIfNeed()
                             
                             
                             self?.isLoading = false
@@ -114,6 +119,10 @@ class PSDChatTableView: PSDDetailTableView{
             }
             
         }
+    }
+    private func showRateIfNeed() {
+        let needShow = needShowRating && !PSDMessagesStorage.hasRatingInStorage()
+        self.chatDelegate?.needShowRate(needShow)
     }
     private func addRefreshControls(){
         if !(self.superview?.subviews.contains(self.noConnectionView) ?? false){
@@ -156,6 +165,10 @@ class PSDChatTableView: PSDDetailTableView{
             PSDGetChat.get(chatIdWeak, needShowError:needProgress, delegate: nil){
                 (chat : PSDChat?) in
                 if((chat) != nil){
+                    DispatchQueue.main.async  {
+                        self?.needShowRating = chat?.showRating ?? false
+                        self?.showRateIfNeed()
+                    }
                     //compare number of messages it two last sections
                     
                     if self?.tableMatrix != nil {
@@ -361,7 +374,7 @@ extension PSDChatTableView : UITableViewDelegate,UITableViewDataSource{
             message = PSDObjectsCreator.createWelcomeMessage()
         }
         let cell : PSDChatMessageCell
-        if(message.message.owner.personId == PyrusServiceDesk.userId){
+        if (message.rating ?? 0) != 0 || (message.message.owner.personId == PyrusServiceDesk.userId){
             cell = self.dequeueReusableCell(withIdentifier: PSDChatTableView.userCellId, for: indexPath) as! PSDUserMessageCell
             (cell as! PSDUserMessageCell).delegate = self
             
@@ -535,7 +548,12 @@ extension PSDChatTableView : PSDMessageSendDelegate{
                 indexPaths.append( indexPath)
             }
         }
-        PSDMessagesStorage.removeFromStorage(messageId: message.localId)
+        DispatchQueue.main.async {
+            PSDMessagesStorage.removeFromStorage(messageId: message.localId)
+            DispatchQueue.main.async {
+                 self.showRateIfNeed()
+            }
+        }
         if indexPaths.count > 0{
             let section = indexPaths[0].section
             self.deleteRows(at: indexPaths, with: .none)

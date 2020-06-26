@@ -16,6 +16,8 @@ struct PSDMessagesStorage{
     private static let MESSAGE_LOCAL_ID_KEY = "localId"
     ///The key to store text of message
     private static let MESSAGE_TEXT_KEY = "messageText"
+    ///The key to store rating of message
+    private static let MESSAGE_RATING_KEY = "messageRating"
     ///The key to store name of message's attachment - need for drawing, and to create file where is attachment's data is in
     private static let ATTACHMENT_ARRAY_KEY = "attachmentsArray"
     ///The key to store name of message's attachment - need for drawing, and to create file where is attachment's data is in
@@ -36,7 +38,7 @@ struct PSDMessagesStorage{
             }
         }
         
-        if message.text.count == 0 && !hasSomeAttachment{
+        if message.text.count == 0 && !hasSomeAttachment && message.rating == nil{
             return
         }
         
@@ -44,6 +46,7 @@ struct PSDMessagesStorage{
         messageDict[MESSAGE_LOCAL_ID_KEY] = message.localId
         messageDict[MESSAGE_TEXT_KEY] = message.text
         messageDict[MESSAGE_DATE_KEY] = message.date
+        messageDict[MESSAGE_RATING_KEY] = message.rating
         DispatchQueue.global().async {
             
             if hasSomeAttachment, let attachments = message.attachments, attachments.count > 0{
@@ -158,6 +161,9 @@ struct PSDMessagesStorage{
         let messagesStorage = getMessagesStorage()
         for dict in messagesStorage {
             let message = PSDMessage(text: dict[MESSAGE_TEXT_KEY] as? String ?? "", attachments:nil, messageId: nil, owner:PSDUsers.user, date:nil)
+            if let rating = dict[MESSAGE_RATING_KEY] as? Int{
+                message.rating = rating
+            }
             message.localId = (dict[MESSAGE_LOCAL_ID_KEY] as? String) ?? message.localId
             message.state = .cantSend
             message.date = dict[MESSAGE_DATE_KEY] as? Date ?? Date()
@@ -174,7 +180,7 @@ struct PSDMessagesStorage{
                 }
             }
             message.attachments = attachments
-            if message.attachments?.count ?? 0 > 0 || message.text.count > 0{
+            if message.attachments?.count ?? 0 > 0 || message.text.count > 0 || message.rating != nil{
                  arrayWithMessages.append(message)
             }else{
                 ///this is break data - remove it from storage
@@ -183,5 +189,16 @@ struct PSDMessagesStorage{
            
         }
         return arrayWithMessages
-    }    
+    }
+    ///Returns true, if there is some messages in storage to set rating
+    static func hasRatingInStorage() -> Bool {
+        let messages = messagesFromStorage()
+        for message in messages{
+            guard message.rating != nil else{
+                continue
+            }
+            return true
+        }
+        return false
+    }
 }

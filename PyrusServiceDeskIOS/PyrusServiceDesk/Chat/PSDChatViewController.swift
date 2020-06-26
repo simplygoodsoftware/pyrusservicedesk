@@ -17,6 +17,7 @@ class PSDChatViewController: UIViewController{
             self.tableView.contentInsetAdjustmentBehavior = .never//.automatic
             
         }
+        self.tableView.chatDelegate = self
         self.automaticallyAdjustsScrollViewInsets = false
         
         self.design()
@@ -271,6 +272,11 @@ extension PSDChatViewController : PSDMessageInputViewDelegate{
         tableView.addNewRow(message: newMessage)
         PSDMessageSend.pass(newMessage, to: self.tableView.chatId, delegate:self.tableView)
     }
+    func sendRate(_ rateValue: Int) {
+        let newMessage = PSDObjectsCreator.createMessage(rating: rateValue)
+        tableView.addNewRow(message: newMessage)
+        PSDMessageSend.pass(newMessage, to: self.tableView.chatId, delegate:self.tableView)
+    }
 }
 extension PSDChatViewController : PSDUpdateInfo{
     func startGettingInfo() {
@@ -281,5 +287,10 @@ extension PSDChatViewController : PSDUpdateInfo{
         if !PSDChatTableView.isNewChat(self.tableView.chatId){
             self.tableView.forceBottomRefresh()
         }
+    }
+}
+extension PSDChatViewController: PSDChatTableViewDelegate {
+    func needShowRate(_ showRate: Bool) {
+        messageInputView.showRate = showRate
     }
 }

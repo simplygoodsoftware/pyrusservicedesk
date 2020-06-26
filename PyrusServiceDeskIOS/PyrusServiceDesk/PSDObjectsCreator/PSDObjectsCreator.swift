@@ -26,6 +26,7 @@ struct PSDObjectsCreator {
                 let rowMessage = PSDRowMessage(message: message, attachment: attachment)
                 if i > 0{
                     rowMessage.text = ""
+                    rowMessage.rating = nil
                 }
                 rowMessages.append(rowMessage)
             }
@@ -40,6 +41,11 @@ struct PSDObjectsCreator {
             return attachments.count
         }
         return 1
+    }
+    static func createMessage(rating: Int) -> PSDMessage {
+        let message = PSDObjectsCreator.createMessage("", attachments: nil, user: PSDUsers.user)
+        message.rating = rating
+        return message
     }
     /**
      Create a new message that was not sent.
