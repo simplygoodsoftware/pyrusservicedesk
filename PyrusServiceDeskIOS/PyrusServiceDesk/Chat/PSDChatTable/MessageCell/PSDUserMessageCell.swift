@@ -102,7 +102,7 @@ extension PSDUserMessageCell: PSDRetryActionDelegate {
         guard let message = message, message.message.state == .cantSend, let viewController = self.findViewController() else{
             return
         }
-        guard message.attachment != nil || message.text.count > 0 else{
+        guard message.attachment != nil || message.text.count > 0 || message.rating != nil else{
             return
         }
         let actions : [UIAlertAction] = [

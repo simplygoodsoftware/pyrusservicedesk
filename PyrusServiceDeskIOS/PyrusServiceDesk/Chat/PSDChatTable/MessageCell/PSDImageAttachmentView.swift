@@ -62,6 +62,10 @@ class PSDImageAttachmentView: PSDAttachmentView {
         
         self.superview?.layoutIfNeeded()
         self.previewImageView.widthConstraint?.constant = self.calculateWidth()
+        if !animated{
+            previewImageView.invalidateIntrinsicContentSize()
+            self.superview?.layoutIfNeeded()
+        }
         if #available(iOS 10.0, *){
             if(animated){
                 var rect = self.frame
