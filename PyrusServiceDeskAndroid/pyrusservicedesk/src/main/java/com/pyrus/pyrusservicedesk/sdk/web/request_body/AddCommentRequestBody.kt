@@ -17,5 +17,7 @@ internal class AddCommentRequestBody(
         @SerializedName("attachments")
         val attachments: List<Attachment>? = null,
         @SerializedName("user_name")
-        val userName: String)
-    : RequestBodyBase(appId, userId)
+        val userName: String,
+        @SerializedName("rating")
+        val rating: Int? = null
+) : RequestBodyBase(appId, userId)

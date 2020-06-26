@@ -22,6 +22,7 @@ import com.pyrus.pyrusservicedesk.sdk.data.Comment
 import com.pyrus.pyrusservicedesk.sdk.data.EMPTY_TICKET_ID
 import com.pyrus.pyrusservicedesk.sdk.data.LocalDataProvider
 import com.pyrus.pyrusservicedesk.sdk.data.intermediate.AddCommentResponseData
+import com.pyrus.pyrusservicedesk.sdk.data.intermediate.Comments
 import com.pyrus.pyrusservicedesk.sdk.data.intermediate.CreateTicketResponseData
 import com.pyrus.pyrusservicedesk.sdk.response.PendingDataError
 import com.pyrus.pyrusservicedesk.sdk.updates.OnUnreadTicketCountChangedSubscriber
@@ -96,7 +97,7 @@ internal class TicketViewModel(serviceDeskProvider: ServiceDeskProvider,
         } else {
             runBlocking {
                 val response = requests.getPendingFeedCommentsRequest().execute()
-                if (!response.hasError() && !response.getData().isNullOrEmpty()) {
+                if (!response.hasError() && !response.getData()?.comments.isNullOrEmpty()) {
                     applyTicketUpdate(response.getData()!!, true)
                 }
             }
@@ -219,7 +220,7 @@ internal class TicketViewModel(serviceDeskProvider: ServiceDeskProvider,
             isFeed -> GetFeedCall(this@TicketViewModel, requests).execute()
             else -> GetTicketCall(this@TicketViewModel, requests, ticketId).execute()
         }
-        val observer = Observer<CallResult<List<Comment>>> { result ->
+        val observer = Observer<CallResult<Comments>> { result ->
             if (result == null)
                 return@Observer
             when {
@@ -318,8 +319,8 @@ internal class TicketViewModel(serviceDeskProvider: ServiceDeskProvider,
         return false
     }
 
-    private fun applyTicketUpdate(freshList: List<Comment>, arePendingComments: Boolean) {
-        if (!arePendingComments && !needUpdateCommentsList(freshList)) {
+    private fun applyTicketUpdate(freshList: Comments, arePendingComments: Boolean) {
+        if (!arePendingComments && !needUpdateCommentsList(freshList.comments)) {
             onDataLoaded()
             return
         }
@@ -337,11 +338,13 @@ internal class TicketViewModel(serviceDeskProvider: ServiceDeskProvider,
         }
         val toPublish = mutableListOf<TicketEntry>().apply {
             ConfigUtils.getWelcomeMessage()?.let { add(0, WelcomeMessageEntry(it)) }
-            addAll(freshList.toTicketEntries())
+            addAll(freshList.comments.toTicketEntries())
             listOfLocalEntries.forEach {
                 maybeAddDate(it as CommentEntry, this)
                 add(it)
             }
+            if (freshList.showRating)
+                add(RatingEntry())
         }
         publishEntries(ticketEntries, toPublish)
         if (!arePendingComments)
@@ -411,6 +414,7 @@ internal class TicketViewModel(serviceDeskProvider: ServiceDeskProvider,
                 }
             }
         }
+        newEntries.removeAll { it.type == Type.Rating }
         publishEntries(ticketEntries, newEntries)
     }
 
@@ -461,7 +465,7 @@ internal class TicketViewModel(serviceDeskProvider: ServiceDeskProvider,
         if (!this.hasAttachments())
             return listOf(CommentEntry(this, error = pendingError))
         val result = mutableListOf<CommentEntry>()
-        if (!body.isBlank())
+        if (body?.isBlank() == false)
             result.add(
                 CommentEntry(
                     Comment(
@@ -491,6 +495,9 @@ internal class TicketViewModel(serviceDeskProvider: ServiceDeskProvider,
                 entriesList
             }
     }
+
+    fun onRatingClick(rating: Int) =
+        sendAddComment(localDataProvider.createLocalComment(rating = rating))
 
     private inner class AddCommentObserver(
         uploadFileHooks: UploadFileHooks?,

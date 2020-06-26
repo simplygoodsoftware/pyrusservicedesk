@@ -1,6 +1,7 @@
 package com.pyrus.pyrusservicedesk.sdk.repositories.offline
 
 import com.pyrus.pyrusservicedesk.sdk.data.Comment
+import com.pyrus.pyrusservicedesk.sdk.data.intermediate.Comments
 import com.pyrus.pyrusservicedesk.sdk.response.Response
 
 /**
@@ -16,7 +17,7 @@ internal interface OfflineRepository {
     /**
      * Provides all pending feed comments
      */
-    suspend fun getPendingFeedComments(): Response<List<Comment>>
+    suspend fun getPendingFeedComments(): Response<Comments>
 
     /**
      * Removes pending comment from offline repository

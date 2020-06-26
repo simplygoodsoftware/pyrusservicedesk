@@ -44,7 +44,7 @@ internal class CreateTicketCall(
 
 private fun Comment.toTicketDescription(): TicketDescription {
     val body = when {
-        !body.isEmpty() -> body
+        body?.isEmpty() == false -> body
         !attachments.isNullOrEmpty() -> attachments[0].name
         else -> ""
     }
