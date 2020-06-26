@@ -320,6 +320,7 @@ extension PSDMessageInputView: AttachmentsAddButtonDelegate{
         }
     }
     func prepairToShowAlert(){
+        EventsLogger.logEvent(.resignFirstResponder, additionalInfo: "prepair to show alert")
         self.inputTextView.resignFirstResponder()
     }
     func attachmentChoosed(_ data:Data, _ url:URL, _ fromLibrary:Bool)

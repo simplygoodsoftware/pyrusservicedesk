@@ -135,6 +135,7 @@ class PSDChatViewController: UIViewController{
     override func viewWillDisappear(_ animated: Bool) {
         super.viewWillDisappear(animated)
         NotificationCenter.default.removeObserver(self)
+        EventsLogger.logEvent(.resignFirstResponder, additionalInfo: "hideAllKeyboard() called in viewWillDisappear")
         hideAllKeyboard()
         self.tableView.removeListeners()
         stopGettingInfo()
@@ -226,7 +227,7 @@ class PSDChatViewController: UIViewController{
                 navigationController.remove()
             }
         }
-        
+        EventsLogger.logEvent(.resignFirstResponder, additionalInfo: "hideAllKeyboard() called after press on back button")
         UIView.performWithoutAnimation {
             hideAllKeyboard()
         }

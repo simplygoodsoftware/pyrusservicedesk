@@ -95,6 +95,7 @@ import UIKit
     private static func start(ticketId: String?, on viewController:UIViewController, configuration:ServiceDeskConfiguration?, completion:(() -> Void)?, onStopCallback: OnStopCallback?){
         stopCallback = onStopCallback
         if !PSDIsOpen(){
+            EventsLogger.logEvent(.openPSD)
             let psd : PyrusServiceDeskController = PyrusServiceDeskController.create()
             configuration?.buildCustomization()
             psd.show(chatId: ticketId, on: viewController, completion: completion)

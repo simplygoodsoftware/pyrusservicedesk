@@ -467,6 +467,7 @@ extension PSDChatTableView : PSDNoConnectionViewDelegate{
 extension PSDChatTableView : PSDGetDelegate{
     func showNoConnectionView(){
         DispatchQueue.main.async {
+            EventsLogger.logEvent(.resignFirstResponder, additionalInfo: "while show noConnectionView")
             if !(self.superview?.subviews.contains(self.noConnectionView) ?? false) && self.lastRow() == nil{
                 self.superview?.addSubview(self.noConnectionView)
                 (self.findViewController()?.inputAccessoryView as? PSDMessageInputView)?.inputTextView.resignFirstResponder()

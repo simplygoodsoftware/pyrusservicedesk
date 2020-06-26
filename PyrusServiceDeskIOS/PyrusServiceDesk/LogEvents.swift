@@ -9,11 +9,14 @@ enum EventsLogger {
     case emptyClientId
     case previewOpenForEmptyAttachment
     case invalidPushToken
+    case resignFirstResponder
+    case openPSD
     static func logEvent(_ logCase: EventsLogger, additionalInfo: String? = nil){
         var logString = stringForEvent(logCase)
         if let additionalInfo = additionalInfo{
-            logString = logString + " " + additionalInfo
+            logString = logString + ": " + additionalInfo
         }
+        print(logString)//test
         PyrusServiceDesk.logEvent?.logPyrusServiceDesk(event: logString)
     }
     static private func stringForEvent(_ logCase: EventsLogger) -> String{
@@ -27,7 +30,10 @@ enum EventsLogger {
             return defaultString + "Try to open preview for attachment with empty id"
         case .invalidPushToken:
             return defaultString + "Main application passed empty push token"
-        
+        case .resignFirstResponder:
+            return defaultString + "ResignFirstResponder was called"
+        case .openPSD:
+            return defaultString + "PyrusServiceDesk open"
         }
     }
 }
