@@ -73,9 +73,7 @@ class PSDAttachmentView: UIView{
         return gesture
     }()
     @objc private func handleTap(sender: UITapGestureRecognizer) {
-        if canOpenAttachment(){
-            openAttachment()
-        }
+        openAttachment()
     }
     fileprivate func canOpenAttachment() -> Bool {
         return !(attachment?.emptyId() ?? true )
