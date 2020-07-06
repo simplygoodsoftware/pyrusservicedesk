@@ -96,6 +96,11 @@ class PSDChatTableView: PSDDetailTableView{
                                 self?.removeNoConnectionView()
                                 UIView.performWithoutAnimation {
                                     self?.scrollsToBottom(animated: false)
+                                    self?.setNeedsLayout()
+                                    self?.layoutIfNeeded()
+                                    self?.scrollsToBottom(animated: false)
+                                    self?.layoutIfNeeded()
+                                    self?.scrollsToBottom(animated: false)
                                 }
                             }
                             
@@ -229,24 +234,7 @@ class PSDChatTableView: PSDDetailTableView{
         let lastRow = self.lastIndexPath()
         if(lastRow.row>=0 || lastRow.section>=0){
             if !(lastRow.row == 0 && lastRow.section==0 ){
-                self.scrollAnimationPerform = animated
-                let duration : Double = animated ? 0.2 : 0.0
-                let yOffset = max(self.contentSize.height - self.visibleHeight(),-self.contentInset.top)
-                UIView.animate(withDuration: duration, delay: 0.0, options: [.beginFromCurrentState], animations: {
-                    self.contentOffset = CGPoint(x: 0, y: yOffset)
-                }, completion: { success in
-                     let deadlineTime = DispatchTime.now() + .milliseconds(PSDChatTableView.delayBeforeUpdates)
-                    DispatchQueue.main.asyncAfter(deadline: deadlineTime) {
-                        [weak self] in
-                        self?.scrollAnimationPerform = false
-                    }
-                    
-                    if !animated || (self.lastRow()?.frame.size.height ?? 0) > self.visibleHeight(){
-                        DispatchQueue.main.async { self.scrollToRow(at: lastRow, at: .bottom, animated: false)}
-                    }
-                })
-                
-                
+                self.scrollToRow(at: lastRow, at: .bottom, animated: animated)
             }
         }
     }
@@ -479,6 +467,7 @@ extension PSDChatTableView : PSDNoConnectionViewDelegate{
 extension PSDChatTableView : PSDGetDelegate{
     func showNoConnectionView(){
         DispatchQueue.main.async {
+            EventsLogger.logEvent(.resignFirstResponder, additionalInfo: "while show noConnectionView")
             if !(self.superview?.subviews.contains(self.noConnectionView) ?? false) && self.lastRow() == nil{
                 self.superview?.addSubview(self.noConnectionView)
                 (self.findViewController()?.inputAccessoryView as? PSDMessageInputView)?.inputTextView.resignFirstResponder()
@@ -552,14 +541,12 @@ extension PSDChatTableView : PSDMessageSendDelegate{
         self.chatId = chatId
     }
     func remove(message:PSDMessage){
-        let indexPathsAndRows = self.tableMatrix.findIndexPath(ofMessage: message.localId)
+        let indexPathsAndRows = self.tableMatrix.findIndexPath(ofMessage: message.localId).keys.sorted(by:{$0 > $1})
         var indexPaths = [IndexPath]()
-        for indexPathAndRow in indexPathsAndRows{
-            for (indexPath,_) in indexPathAndRow{
-                if tableMatrix.has(indexPath: indexPath){
-                    tableMatrix[indexPath.section].remove(at: indexPath.row)
-                    indexPaths.append( indexPath)
-                }
+        for indexPath in indexPathsAndRows{
+            if tableMatrix.has(indexPath: indexPath){
+                tableMatrix[indexPath.section].remove(at: indexPath.row)
+                indexPaths.append( indexPath)
             }
         }
         DispatchQueue.main.async {
@@ -585,53 +572,72 @@ extension PSDChatTableView : PSDMessageSendDelegate{
                 guard let self = self else{
                     return
                 }
-                let indexPaths = self.tableMatrix.findIndexPath(ofMessage: message.localId)
-                guard  indexPaths.count > 0 else{
+                let indexPathsAndMessages = self.tableMatrix.findIndexPath(ofMessage: message.localId)
+                guard  indexPathsAndMessages.count > 0 else{
+                    EventsLogger.logEvent(.didNotFindMessageAfterUpdate)
                     return
                 }
-                var lastIndexPath :IndexPath? = nil
-                if(changedToSent){
-                //is state was changed need to move sendded message up to sent block
-                    let ip = Array(indexPaths[0].keys)[0]
-                    lastIndexPath = self.tableMatrix.lastSentMessage(before:ip)
-                }
-                for (i,indexPathAndRow) in indexPaths.enumerated(){
-                    for (indexPath, rowMessage) in indexPathAndRow{
-                        guard self.tableMatrix.has(indexPath: indexPath) else{
-                            continue
-                        }
-                        var newIndexPath : IndexPath = indexPath
-                        //If state of message was changed from !.sent to .sent
-                        if(changedToSent){
-                            //is state was changed need to move sendded message up to sent block
-                            if let lastIndexPath = lastIndexPath{
-                                newIndexPath = lastIndexPath
-                                newIndexPath.row = newIndexPath.row + 1 + i
-                                
-                            }
-                            if(newIndexPath.section != indexPath.section){//if it has other date, leave it, dont move
-                                newIndexPath = indexPath
-                            }
-                            newIndexPath.row = max(min(newIndexPath.row, self.tableMatrix[newIndexPath.section].endIndex - 1),0) // newIndexPath must not be more than current rows number - 1(deleted), but not less than 0
-                        }
-                        //refresh data
-                        rowMessage.updateWith(message:message)
-                        self.tableMatrix[indexPath.section].remove(at: indexPath.row)
-                        self.tableMatrix[newIndexPath.section].insert(rowMessage, at:newIndexPath.row)
-                        
-                        if(newIndexPath != indexPath){
+                var lastIndexPath: [IndexPath]? = nil
+                
+                if changedToSent && message.fromStrorage {
+                    //is state was changed need to move sendded message up to sent block
+                    lastIndexPath = self.tableMatrix.indexPathsAfterSent(for: message)
+                    if let lastIndexPath = lastIndexPath, lastIndexPath.count > 0{
+                        let newSection = lastIndexPath[0].section
+                        if self.tableMatrix.count-1 < newSection {
+                            self.tableMatrix.append([PSDRowMessage]())
                             if #available(iOS 11.0, *) {
                                 self.performBatchUpdates({
-                                    self.moveRow(at: indexPath, to: newIndexPath)
+                                    self.insertSections(IndexSet(arrayLiteral: newSection), with: .none)
                                 }, completion: nil)
                             } else {
                                 self.beginUpdates()
-                                self.moveRow(at: indexPath, to: newIndexPath)
+                                self.insertSections(IndexSet(arrayLiteral: newSection), with: .none)
                                 self.endUpdates()
                             }
                         }
-                        self.redrawCell(at:newIndexPath,with: rowMessage)
-                        
+                    }
+                }
+                var oldSection = 0
+                let indexPaths = indexPathsAndMessages.keys.sorted(by: {$0 < $1})
+                var movedRows = 0
+                for (i,indexPath) in indexPaths.enumerated(){
+                    oldSection = indexPath.section
+                    let movedIndexPath = IndexPath(row: indexPath.row - movedRows, section: indexPath.section)
+                    guard self.tableMatrix.has(indexPath: movedIndexPath), let rowMessage = indexPathsAndMessages[indexPath] else{
+                        continue
+                    }
+                    rowMessage.updateWith(message: message)
+                    self.redrawCell(at:movedIndexPath,with: rowMessage)
+                    if let lastIndexPath = lastIndexPath, lastIndexPath.count > i{
+                        let newIndexPath = lastIndexPath[i]
+                        print(newIndexPath, movedIndexPath)
+                        if newIndexPath != indexPath{
+                            movedRows = movedRows + 1
+                            self.tableMatrix[movedIndexPath.section].remove(at: movedIndexPath.row)
+                            self.tableMatrix[newIndexPath.section].insert(rowMessage, at:newIndexPath.row)
+                            if #available(iOS 11.0, *) {
+                                self.performBatchUpdates({
+                                    self.moveRow(at: movedIndexPath, to: newIndexPath)
+                                }, completion: nil)
+                            } else {
+                                self.beginUpdates()
+                                self.moveRow(at: movedIndexPath, to: newIndexPath)
+                                self.endUpdates()
+                            }
+                        }
+                    }
+                }
+                if self.tableMatrix[oldSection].count == 0{
+                    self.tableMatrix.remove(at: oldSection)
+                    if #available(iOS 11.0, *) {
+                        self.performBatchUpdates({
+                            self.deleteSections(IndexSet(arrayLiteral: oldSection), with: .none)
+                        }, completion: nil)
+                    } else {
+                        self.beginUpdates()
+                        self.deleteSections(IndexSet(arrayLiteral: oldSection), with: .none)
+                        self.endUpdates()
                     }
                 }
                 if let index = self.waitingMessagesList.index(forKey: message){

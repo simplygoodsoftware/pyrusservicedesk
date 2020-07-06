@@ -45,10 +45,12 @@ import UIKit
     @objc public static func setPushToken(_ token:String?, completion: @escaping(Error?) -> Void){
         guard let clientId = clientId, clientId.count > 0, clientId != "0"  else{
             completion(PSDError.init(description: "AppId is invalid"))
+            EventsLogger.logEvent(.emptyClientId)
             return
         }
         guard let token = token, token.count > 0 else{
             completion(PSDError.init(description: "Token is invalid"))
+            EventsLogger.logEvent(.invalidPushToken)
             return
         }
         PSDPushToken.send(token, completion: {
@@ -93,6 +95,7 @@ import UIKit
     private static func start(ticketId: String?, on viewController:UIViewController, configuration:ServiceDeskConfiguration?, completion:(() -> Void)?, onStopCallback: OnStopCallback?){
         stopCallback = onStopCallback
         if !PSDIsOpen(){
+            EventsLogger.logEvent(.openPSD)
             let psd : PyrusServiceDeskController = PyrusServiceDeskController.create()
             configuration?.buildCustomization()
             psd.show(chatId: ticketId, on: viewController, completion: completion)
@@ -110,6 +113,7 @@ import UIKit
     weak static  private(set) var subscriber : NewReplySubscriber?
     ///The subscriber for PyrusSecviceDeskClose.
     weak static  private(set) var stopCallback : OnStopCallback?
+    weak static private(set) var logEvent: LogEvents?
     ///Subscribe [subscriber] for notifications that new messages from support have appeared in the chat.
     @objc public static func subscribeToReplies(_ subscriber: NewReplySubscriber?){
         PyrusServiceDesk.subscriber = subscriber
@@ -119,6 +123,10 @@ import UIKit
         PyrusServiceDesk.subscriber = nil
     }
     
+    @objc public static func subscribeToGogEvents(_ subscriber: LogEvents){
+        PyrusServiceDesk.logEvent = subscriber
+    }
+    
     ///Init PyrusServiceDesk with new clientId.
     ///- parameter clientId: clientId using for all requests. If clientId not setted PyrusServiceDesk Controller will not be created
     @objc static public func createWith(_ clientId: String?)  {
@@ -126,6 +134,8 @@ import UIKit
             PyrusServiceDesk.clientId = clientId
             PyrusServiceDesk.oneChat = true
             PyrusServiceDesk.createUserId()
+        }else{
+            EventsLogger.logEvent(.emptyClientId)
         }
     }
     @objc static public func refresh() {

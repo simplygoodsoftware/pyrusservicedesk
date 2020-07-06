@@ -6,9 +6,9 @@ protocol PSDChatMessageCellDelegate : class{
     ///Pass to delegate  that PSDMessageStateButton was pressed while messageState = .cantSend, so need to delete message from local storage
     func deleteMessage(from cell:PSDChatMessageCell)
 }
-class PSDUserMessageCell: PSDChatMessageCell, PSDMessageStateButtonDelegate,PSDMessageViewDelegate {
+class PSDUserMessageCell: PSDChatMessageCell {
     weak var delegate: PSDChatMessageCellDelegate?
-
+    private weak var message : PSDRowMessage?
     ///A view that displays the current status of the message (see messageState)
     let messageStateView :PSDMessageStateButton = {
         let button = PSDMessageStateButton()
@@ -33,23 +33,9 @@ class PSDUserMessageCell: PSDChatMessageCell, PSDMessageStateButtonDelegate,PSDM
     override func draw(message:PSDRowMessage)
     {
         super.draw(message: message)
+        self.message = message
         messageStateView._messageState = (message.text.count > 0 || message.rating != nil) ? message.message.state : .sent
         updateTopMessageConstrint()
-    }
-    //PSDMessageStateButtonDelegate
-    ///Sending not passed message, send one more time
-    func showRetryAction(){
-        let actions : [UIAlertAction] = [
-            UIAlertAction(title: "RetryButton".localizedPSD(), style: .default, handler: { (action) -> Void in self.retryMessage()}),
-            UIAlertAction(title: "DeleteButton".localizedPSD(), style: .destructive, handler: { (action) -> Void in self.cancelMessage()}),
-        ]
-        if self.findViewController() != nil{
-            if let vc  =  UIApplication.topViewController() as? PSDChatViewController{
-                (vc.inputAccessoryView as? PSDMessageInputView)?.prepairToShowAlert()
-            }
-            showMenuAlert(actions, on: self.findViewController()!, sourseView: nil)
-        }
-        
     }
     private func cancelMessage(){
         self.delegate?.deleteMessage(from: self)
@@ -58,13 +44,7 @@ class PSDUserMessageCell: PSDChatMessageCell, PSDMessageStateButtonDelegate,PSDM
         self.delegate?.sendAgainMessage(from:self)
     }
     
-    //PSDMessageViewDelegate
-    func passStateButtonPressed(){
-        if messageStateView.superview == self.contentView{
-            messageStateView.stateButtonPressed()
-        }
-        
-    }
+    
     //restart animation
     override func prepareForReuse() {
         super.prepareForReuse()
@@ -114,6 +94,24 @@ class PSDUserMessageCell: PSDChatMessageCell, PSDMessageStateButtonDelegate,PSDM
     
     override func awakeFromNib() {
         super.awakeFromNib()
-        // Initialization code
     }   
+}
+extension PSDUserMessageCell: PSDRetryActionDelegate {
+    ///Sending not passed message, send one more time
+    func tryShowRetryAction(){
+        guard let message = message, message.message.state == .cantSend, let viewController = self.findViewController() else{
+            return
+        }
+        guard message.attachment != nil || message.text.count > 0 || message.rating != nil else{
+            return
+        }
+        let actions : [UIAlertAction] = [
+            UIAlertAction(title: "RetryButton".localizedPSD(), style: .default, handler: { (action) -> Void in self.retryMessage()}),
+            UIAlertAction(title: "DeleteButton".localizedPSD(), style: .destructive, handler: { (action) -> Void in self.cancelMessage()}),
+        ]
+        if let vc  =  UIApplication.topViewController() as? PSDChatViewController{
+            (vc.inputAccessoryView as? PSDMessageInputView)?.prepairToShowAlert()
+        }
+        showMenuAlert(actions, on: viewController, sourseView: nil)
+    }
 }

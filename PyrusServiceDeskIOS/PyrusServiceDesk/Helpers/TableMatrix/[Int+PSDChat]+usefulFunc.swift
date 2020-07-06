@@ -17,34 +17,36 @@ extension Array where Element == [PSDRowMessage]{
         }
     }
     ///Find indexPath of message by its local id start from bottom.
-    func findIndexPath(ofMessage localId:String)-> [[IndexPath: PSDRowMessage]]{
-        var indexPaths = [[IndexPath:PSDRowMessage]]()
+    func findIndexPath(ofMessage localId:String)-> [IndexPath: PSDRowMessage]{
+        var indexPaths = [IndexPath:PSDRowMessage]()
         for (section,messages) in self.enumerated().reversed(){
             for (row,message) in messages.enumerated().reversed(){
                 if message.message.localId == localId
                 {
-                    indexPaths.append([IndexPath.init(row: row, section: section) : message])
+                    indexPaths[IndexPath.init(row: row, section: section)] = message
                 }
             }
         }
-        return indexPaths.reversed()
+        return indexPaths
     }
-    
-    ///Find indexPath of last message with state .sent
-    func lastSentMessage(before indexPath: IndexPath)->IndexPath?{
-        if(self.count > indexPath.section)
-        {
-            for (row,message) in self[indexPath.section].enumerated().reversed(){
-                if message.message.state == .sent
-                {
-                    let sentIndexPath = IndexPath.init(row: row, section: indexPath.section)
-                    if sentIndexPath != indexPath && sentIndexPath.row < indexPath.row{
-                        return sentIndexPath
-                    }
-                }
-            }
+    ///Return last index path
+    func indexPathsAfterSent(for message: PSDMessage) -> [IndexPath]?{
+        guard self.count > 0 else {
+            return nil
         }
-        return nil
+        let lastSection = count - 1
+        let lastSectionDate = self[lastSection][0].message.date
+        var firstRow = 0
+        var section = lastSection + 1
+        if lastSectionDate.compareWithoutTime(with: message.date) == .equal{
+            firstRow = self[lastSection].count
+            section = lastSection
+        }
+        var indexPaths = [IndexPath]()
+        for i in 0...PSDObjectsCreator.rowMessagesCount(for: message)-1{
+            indexPaths.append(IndexPath(row: firstRow + i, section: section))
+        }
+        return indexPaths
     }
     ///Creates table matrix in format [[PSDMessage]] where in every index are messages with same date
     mutating func create(from chat : PSDChat)

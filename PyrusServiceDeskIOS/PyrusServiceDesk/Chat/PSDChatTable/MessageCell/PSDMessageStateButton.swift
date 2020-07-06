@@ -1,11 +1,11 @@
 
 import UIKit
-protocol PSDMessageStateButtonDelegate: class{
-    ///Pass to delegate  that PSDMessageStateButton was pressed while messageState = .cantSend, so need to try send one more time
-    func showRetryAction()
+protocol PSDRetryActionDelegate: class{
+    ///Pass to delegate  that message was pressed so need to try send one more time, if it needs to
+    func tryShowRetryAction()
 }
 class PSDMessageStateButton: UIButton {
-    weak var delegate: PSDMessageStateButtonDelegate?
+    weak var delegate: PSDRetryActionDelegate?
     ///state of PSDMessageStateButton taken from PSDMessage. Default is .sent.
     var _messageState : messageState = .sent{
         didSet(oldValue)
@@ -22,10 +22,8 @@ class PSDMessageStateButton: UIButton {
         self.addSubview(stateImage)
         self.addTarget(self, action: #selector(stateButtonPressed), for: .touchUpInside)
     }
-    @objc func stateButtonPressed(){
-        if _messageState == .cantSend{
-            self.delegate?.showRetryAction()
-        }
+    @objc private func stateButtonPressed() {
+        self.delegate?.tryShowRetryAction()
     }
     required init?(coder aDecoder: NSCoder) {
         super.init(coder: aDecoder)

@@ -1,9 +1,5 @@
 
 import UIKit
-protocol PSDAttachmentViewDelegate : class{
-    //pass to delegate to show retry action
-    func showRetryAction()
-}
 class PSDAttachmentImageView: UIImageView{
     var widthConstraint : NSLayoutConstraint?
     var heightConstraint : NSLayoutConstraint?
@@ -26,7 +22,6 @@ class PSDAttachmentImageView: UIImageView{
    }
 }
 class PSDAttachmentView: UIView{
-    weak var delegate: PSDAttachmentViewDelegate?
     var attachment : PSDAttachment?
     var color :UIColor = .white{
         didSet{
@@ -68,6 +63,7 @@ class PSDAttachmentView: UIView{
         super.init(frame: frame)
         self.addSubview(uploadView)
         self.addGestureRecognizer(tapGesture)
+        tapGesture.delegate = self
         self.translatesAutoresizingMaskIntoConstraints = false
         
     }
@@ -77,12 +73,10 @@ class PSDAttachmentView: UIView{
         return gesture
     }()
     @objc private func handleTap(sender: UITapGestureRecognizer) {
-        if !(attachment?.emptyId() ?? true ){
-                openAttachment()
-        }
-        else if(self.downloadState == .cantSend){
-            showRetryAction()
-        }
+        openAttachment()
+    }
+    fileprivate func canOpenAttachment() -> Bool {
+        return !(attachment?.emptyId() ?? true )
     }
     ///Open attachment in PSDAttachmentLoadViewController
     private func openAttachment(){
@@ -97,12 +91,6 @@ class PSDAttachmentView: UIView{
         self.findViewController()?.navigationController?.present(navCotroller, animated: true, completion: nil)
         }
        
-    }
-    private func showRetryAction(){
-        if self.attachment != nil{
-            self.delegate?.showRetryAction()
-        }
-        
     }
     
     ///Redraw view with attachment
@@ -157,5 +145,10 @@ extension PSDAttachmentView : PSDUploadViewDelegate{
         if self.attachment != nil{
             PSDMessageSend.stopUpload(self.attachment!)
         }
+    }
+}
+extension PSDAttachmentView: UIGestureRecognizerDelegate{
+    override func gestureRecognizerShouldBegin(_ gestureRecognizer: UIGestureRecognizer) -> Bool {
+        return canOpenAttachment()
     }
 }

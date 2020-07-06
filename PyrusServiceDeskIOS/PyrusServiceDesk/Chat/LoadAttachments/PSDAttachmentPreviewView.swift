@@ -16,6 +16,11 @@ class PSDAttachmentPreviewView: UIView {
     func drawAttachment(_ url : URL){
         webView.loadFileURL(url, allowingReadAccessTo: url)
     }
+    var needBackground: Bool = false{
+        didSet{
+            webView.isOpaque = !needBackground
+        }
+    }
     deinit {
         webView.stopLoading()
     }

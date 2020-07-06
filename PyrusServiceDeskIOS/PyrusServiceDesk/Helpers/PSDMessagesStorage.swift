@@ -22,6 +22,8 @@ struct PSDMessagesStorage{
     private static let ATTACHMENT_ARRAY_KEY = "attachmentsArray"
     ///The key to store name of message's attachment - need for drawing, and to create file where is attachment's data is in
     private static let ATTACHMENT_NAME_KEY = "attachmentName"
+    ///The key to store date of message
+    private static let MESSAGE_DATE_KEY = "messageDate"
     ///The key to store size of message's attachment - need for drawing
     private static let ATTACHMENT_SIZE_KEY = "attachmentSize"
     ///Seve message in storage - if message has text - save its text, if has attachment - save attachment to file
@@ -43,6 +45,7 @@ struct PSDMessagesStorage{
         var messageDict : [String:Any] = [String:Any]()
         messageDict[MESSAGE_LOCAL_ID_KEY] = message.localId
         messageDict[MESSAGE_TEXT_KEY] = message.text
+        messageDict[MESSAGE_DATE_KEY] = message.date
         messageDict[MESSAGE_RATING_KEY] = message.rating
         DispatchQueue.global().async {
             
@@ -163,6 +166,8 @@ struct PSDMessagesStorage{
             }
             message.localId = (dict[MESSAGE_LOCAL_ID_KEY] as? String) ?? message.localId
             message.state = .cantSend
+            message.date = dict[MESSAGE_DATE_KEY] as? Date ?? Date()
+            message.fromStrorage = true
             var attachments = [PSDAttachment]()
             if let attachmetsArray = dict[ATTACHMENT_ARRAY_KEY] as? [[String:Any]], attachmetsArray.count > 0{
                 for attachmentDict in attachmetsArray{

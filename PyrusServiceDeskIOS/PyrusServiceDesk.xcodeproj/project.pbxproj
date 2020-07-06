@@ -148,6 +148,7 @@
 		4BB855AA22086C1900F7CCE5 /* Localizable.strings in Resources */ = {isa = PBXBuildFile; fileRef = 4BB855AC22086C1900F7CCE5 /* Localizable.strings */; };
 		4BB855AF220873CA00F7CCE5 /* PSDChatsTableView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4BB855AE220873CA00F7CCE5 /* PSDChatsTableView.swift */; };
 		4BB855B12208741600F7CCE5 /* PSDChatInfoTableViewCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4BB855B02208741600F7CCE5 /* PSDChatInfoTableViewCell.swift */; };
+		4BBB9B06249D152900059A23 /* LogEvents.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4BBB9B05249D152900059A23 /* LogEvents.swift */; };
 		4BC210D622671EC000CFE255 /* PSDAttachmentPreviewView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4BC210D522671EC000CFE255 /* PSDAttachmentPreviewView.swift */; };
 		4BC210D822674A5600CFE255 /* PSDNavigationController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4BC210D722674A5600CFE255 /* PSDNavigationController.swift */; };
 		4BCEB433220C150C008B29B6 /* UIImage+color.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4BCEB432220C150C008B29B6 /* UIImage+color.swift */; };
@@ -322,6 +323,7 @@
 		4BB855AD22086C2800F7CCE5 /* ru */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = ru; path = ru.lproj/Localizable.strings; sourceTree = "<group>"; };
 		4BB855AE220873CA00F7CCE5 /* PSDChatsTableView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PSDChatsTableView.swift; sourceTree = "<group>"; };
 		4BB855B02208741600F7CCE5 /* PSDChatInfoTableViewCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PSDChatInfoTableViewCell.swift; sourceTree = "<group>"; };
+		4BBB9B05249D152900059A23 /* LogEvents.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LogEvents.swift; sourceTree = "<group>"; };
 		4BC210D522671EC000CFE255 /* PSDAttachmentPreviewView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PSDAttachmentPreviewView.swift; sourceTree = "<group>"; };
 		4BC210D722674A5600CFE255 /* PSDNavigationController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PSDNavigationController.swift; sourceTree = "<group>"; };
 		4BCEB432220C150C008B29B6 /* UIImage+color.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "UIImage+color.swift"; sourceTree = "<group>"; };
@@ -613,6 +615,7 @@
 				4B66011C223948CE00AA45E6 /* PyrusServiceDeskCustomization.swift */,
 				4B873BB3224B7EE600A96E93 /* PSDNewReplySubscriber.swift */,
 				4BD29A082464B72B000CC420 /* OnStopCallback.swift */,
+				4BBB9B05249D152900059A23 /* LogEvents.swift */,
 				4B2F47AB224A22FF00E3B23A /* PSDChooser.swift */,
 				4B2E6513220DE3A500E70A2F /* PSDObjectsCreator */,
 				4B2E650F220DE1E000E70A2F /* PSDObjects */,
@@ -1029,6 +1032,7 @@
 				4B873BB4224B7EE600A96E93 /* PSDNewReplySubscriber.swift in Sources */,
 				4B6D4A3F244E2326007C6082 /* AttachmentFileCollectionViewCell.swift in Sources */,
 				4BD7DE68223680A600ED2557 /* UIButton+backgroundColor.swift in Sources */,
+				4BBB9B06249D152900059A23 /* LogEvents.swift in Sources */,
 				4B5AFEAB21FB0A7B00AAF233 /* PSDMessageSendButton.swift in Sources */,
 				4B9B0BBB2266344200090DB5 /* PSDAttachmentPreviewErrorView.swift in Sources */,
 				4BCEB433220C150C008B29B6 /* UIImage+color.swift in Sources */,

@@ -11,6 +11,7 @@ class PyrusServiceDeskController: PSDNavigationController {
                 self.init(rootViewController: pyrusChat)
             }
             else{
+                EventsLogger.logEvent(.emptyClientId)
                 let openedPyrusChats : PSDChatsViewController = PSDChatsViewController(nibName:nil, bundle:nil)
                 self.init(rootViewController: openedPyrusChats)
             }

@@ -35,6 +35,13 @@ struct PSDObjectsCreator {
             return [PSDRowMessage(message: message, attachment: nil)]
         }
     }
+    ///Returns number of PSDRowMessage after parsing PSDMessage, minimum value is 1
+    static func rowMessagesCount(for message: PSDMessage) -> Int {
+        if let attachments = message.attachments, attachments.count > 0{
+            return attachments.count
+        }
+        return 1
+    }
     static func createMessage(rating: Int) -> PSDMessage {
         let message = PSDObjectsCreator.createMessage("", attachments: nil, user: PSDUsers.user)
         message.rating = rating
