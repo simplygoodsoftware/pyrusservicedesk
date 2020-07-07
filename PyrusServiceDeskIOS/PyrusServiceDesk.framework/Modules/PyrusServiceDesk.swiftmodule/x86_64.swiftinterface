@@ -33,6 +33,9 @@ import WebKit
 @objc public protocol NewReplySubscriber {
   @objc func onNewReply()
 }
+@objc public protocol LogEvents {
+  @objc func logPyrusServiceDesk(event: Swift.String)
+}
 @_inheritsConvenienceInitializers @objc public class PyrusServiceDesk : ObjectiveC.NSObject {
   public static var PSD_CLOSED_NOTIFICATION_NAME: Swift.String
   @objc public static func setPushToken(_ token: Swift.String?, completion: @escaping (Swift.Error?) -> Swift.Void)
@@ -42,6 +45,7 @@ import WebKit
   @objc public static func stop()
   @objc public static func subscribeToReplies(_ subscriber: PyrusServiceDesk.NewReplySubscriber?)
   @objc public static func unsubscribeFromReplies(_ subscriber: PyrusServiceDesk.NewReplySubscriber?)
+  @objc public static func subscribeToGogEvents(_ subscriber: PyrusServiceDesk.LogEvents)
   @objc public static func createWith(_ clientId: Swift.String?)
   @objc public static func refresh()
   @objc public static func registerFileChooser(_ chooser: (UIKit.UIViewController & PyrusServiceDesk.FileChooser)?)

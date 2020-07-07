@@ -233,6 +233,14 @@ SWIFT_PROTOCOL("_TtP16PyrusServiceDesk19FileChooserDelegate_")
 @end
 
 
+/// The protocol for log some evnts from PyrusServiceDesk
+SWIFT_PROTOCOL("_TtP16PyrusServiceDesk9LogEvents_")
+@protocol LogEvents
+/// The callback that PyrusServiceDesk was closed
+- (void)logPyrusServiceDeskWithEvent:(NSString * _Nonnull)event;
+@end
+
+
 /// The protocol for sending a notification that a new message has arrived
 SWIFT_PROTOCOL("_TtP16PyrusServiceDesk18NewReplySubscriber_")
 @protocol NewReplySubscriber
@@ -289,6 +297,7 @@ SWIFT_CLASS("_TtC16PyrusServiceDesk16PyrusServiceDesk")
 + (void)subscribeToReplies:(id <NewReplySubscriber> _Nullable)subscriber;
 /// Unsubscribe [subscriber] from alerts for new messages from chat support.
 + (void)unsubscribeFromReplies:(id <NewReplySubscriber> _Nullable)subscriber;
++ (void)subscribeToGogEvents:(id <LogEvents> _Nonnull)subscriber;
 /// Init PyrusServiceDesk with new clientId.
 /// \param clientId clientId using for all requests. If clientId not setted PyrusServiceDesk Controller will not be created
 ///
@@ -579,6 +588,14 @@ SWIFT_PROTOCOL("_TtP16PyrusServiceDesk19FileChooserDelegate_")
 @end
 
 
+/// The protocol for log some evnts from PyrusServiceDesk
+SWIFT_PROTOCOL("_TtP16PyrusServiceDesk9LogEvents_")
+@protocol LogEvents
+/// The callback that PyrusServiceDesk was closed
+- (void)logPyrusServiceDeskWithEvent:(NSString * _Nonnull)event;
+@end
+
+
 /// The protocol for sending a notification that a new message has arrived
 SWIFT_PROTOCOL("_TtP16PyrusServiceDesk18NewReplySubscriber_")
 @protocol NewReplySubscriber
@@ -635,6 +652,7 @@ SWIFT_CLASS("_TtC16PyrusServiceDesk16PyrusServiceDesk")
 + (void)subscribeToReplies:(id <NewReplySubscriber> _Nullable)subscriber;
 /// Unsubscribe [subscriber] from alerts for new messages from chat support.
 + (void)unsubscribeFromReplies:(id <NewReplySubscriber> _Nullable)subscriber;
++ (void)subscribeToGogEvents:(id <LogEvents> _Nonnull)subscriber;
 /// Init PyrusServiceDesk with new clientId.
 /// \param clientId clientId using for all requests. If clientId not setted PyrusServiceDesk Controller will not be created
 ///
@@ -929,6 +947,14 @@ SWIFT_PROTOCOL("_TtP16PyrusServiceDesk19FileChooserDelegate_")
 @end
 
 
+/// The protocol for log some evnts from PyrusServiceDesk
+SWIFT_PROTOCOL("_TtP16PyrusServiceDesk9LogEvents_")
+@protocol LogEvents
+/// The callback that PyrusServiceDesk was closed
+- (void)logPyrusServiceDeskWithEvent:(NSString * _Nonnull)event;
+@end
+
+
 /// The protocol for sending a notification that a new message has arrived
 SWIFT_PROTOCOL("_TtP16PyrusServiceDesk18NewReplySubscriber_")
 @protocol NewReplySubscriber
@@ -985,6 +1011,7 @@ SWIFT_CLASS("_TtC16PyrusServiceDesk16PyrusServiceDesk")
 + (void)subscribeToReplies:(id <NewReplySubscriber> _Nullable)subscriber;
 /// Unsubscribe [subscriber] from alerts for new messages from chat support.
 + (void)unsubscribeFromReplies:(id <NewReplySubscriber> _Nullable)subscriber;
++ (void)subscribeToGogEvents:(id <LogEvents> _Nonnull)subscriber;
 /// Init PyrusServiceDesk with new clientId.
 /// \param clientId clientId using for all requests. If clientId not setted PyrusServiceDesk Controller will not be created
 ///
@@ -1275,6 +1302,14 @@ SWIFT_PROTOCOL("_TtP16PyrusServiceDesk19FileChooserDelegate_")
 @end
 
 
+/// The protocol for log some evnts from PyrusServiceDesk
+SWIFT_PROTOCOL("_TtP16PyrusServiceDesk9LogEvents_")
+@protocol LogEvents
+/// The callback that PyrusServiceDesk was closed
+- (void)logPyrusServiceDeskWithEvent:(NSString * _Nonnull)event;
+@end
+
+
 /// The protocol for sending a notification that a new message has arrived
 SWIFT_PROTOCOL("_TtP16PyrusServiceDesk18NewReplySubscriber_")
 @protocol NewReplySubscriber
@@ -1331,6 +1366,7 @@ SWIFT_CLASS("_TtC16PyrusServiceDesk16PyrusServiceDesk")
 + (void)subscribeToReplies:(id <NewReplySubscriber> _Nullable)subscriber;
 /// Unsubscribe [subscriber] from alerts for new messages from chat support.
 + (void)unsubscribeFromReplies:(id <NewReplySubscriber> _Nullable)subscriber;
++ (void)subscribeToGogEvents:(id <LogEvents> _Nonnull)subscriber;
 /// Init PyrusServiceDesk with new clientId.
 /// \param clientId clientId using for all requests. If clientId not setted PyrusServiceDesk Controller will not be created
 ///
