@@ -94,14 +94,16 @@ class PSDChatTableView: PSDDetailTableView{
                                 self?.reloadData()
                                 
                                 self?.removeNoConnectionView()
-                                UIView.performWithoutAnimation {
+                                
+                                UIView.setAnimationsEnabled(false)
                                     self?.scrollsToBottom(animated: false)
                                     self?.setNeedsLayout()
                                     self?.layoutIfNeeded()
                                     self?.scrollsToBottom(animated: false)
                                     self?.layoutIfNeeded()
                                     self?.scrollsToBottom(animated: false)
-                                }
+                                UIView.setAnimationsEnabled(true)
+                                
                             }
                             
                             self?.addRefreshControls()
