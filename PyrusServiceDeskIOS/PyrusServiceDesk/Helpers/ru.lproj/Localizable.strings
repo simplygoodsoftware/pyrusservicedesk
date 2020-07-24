@@ -23,7 +23,7 @@
 "DeleteButton" = "Удалить";
 
 //For attachments
-"Camera" = "Сделать фото";
+"Camera" = "Снять фото или видео";
 "Camera_Access_Error" = "Нет доступа к камере или микрофону";
 "Phone_Gallery" = "Галерея";
 "Phone_Gallery_Access_Error" = "Нет доступа к галлерее";

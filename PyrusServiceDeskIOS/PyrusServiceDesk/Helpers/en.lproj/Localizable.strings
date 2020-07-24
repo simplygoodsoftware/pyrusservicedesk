@@ -23,7 +23,7 @@
 "DeleteButton" = "Delete";
 
 //For attachments
-"Camera" = "Photo";
+"Camera" = "Take a photo or video";
 "Camera_Access_Error" = "No access to camera or microphone";
 "Phone_Gallery" = "Gallery";
 "Phone_Gallery_Access_Error" = "No access to phone gallery";

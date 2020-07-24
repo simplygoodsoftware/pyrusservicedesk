@@ -155,6 +155,10 @@ struct PSDMessagesStorage{
     private static func getMessagesStorage()-> [[String:Any]]{
         return pyrusUserDefaults()?.array(forKey: PSD_MESSAGES_STORAGE_KEY) as? [[String:Any]] ?? [[String:Any]]()
     }
+    private static func resaveInStorageMessage(_ message: PSDMessage) {
+        removeFromStorage(messageId: message.messageId)
+        saveInStorage(message: message)
+    }
     ///Returns [PSDMessage] in storage
     static func messagesFromStorage()->[PSDMessage]{
         var arrayWithMessages = [PSDMessage]()
@@ -181,7 +185,10 @@ struct PSDMessagesStorage{
             }
             message.attachments = attachments
             if message.attachments?.count ?? 0 > 0 || message.text.count > 0 || message.rating != nil{
-                 arrayWithMessages.append(message)
+                if dict[MESSAGE_DATE_KEY] as? Date == nil{
+                    resaveInStorageMessage(message)//resave massage with date to avoid nil next time
+                }
+                arrayWithMessages.append(message)
             }else{
                 ///this is break data - remove it from storage
                 removeFromStorage(messageId: message.messageId)

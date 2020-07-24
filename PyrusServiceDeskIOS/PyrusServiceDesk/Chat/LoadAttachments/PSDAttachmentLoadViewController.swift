@@ -165,9 +165,12 @@ class PSDAttachmentLoadViewController: UIViewController{
         addDownloadView()
         DispatchQueue.global().async {
             [weak self] in
-            let url = PyrusServiceDeskAPI.PSDURL(type: .download, ticketId: self!.attachmentId)
-            self?.downloader.expectedSize = self?.attachment?.size ?? 0
-            self?.downloader.load(from: url)
+            guard let weakSelf = self else{
+                return
+            }
+            let url = PyrusServiceDeskAPI.PSDURL(type: .download, ticketId: weakSelf.attachmentId)
+            weakSelf.downloader.expectedSize = weakSelf.attachment?.size ?? 0
+            weakSelf.downloader.load(from: url)
         }
     }
 }
