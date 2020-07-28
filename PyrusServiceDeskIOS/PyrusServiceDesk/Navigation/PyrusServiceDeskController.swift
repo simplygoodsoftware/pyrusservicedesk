@@ -124,10 +124,17 @@ class PyrusServiceDeskController: PSDNavigationController {
         else{
             self.view.autoresizingMask = [.flexibleWidth,.flexibleHeight]
         }
-       
-        
-        
     }
+    
+    func updateTitleChat() {
+        for vc in viewControllers{
+            if let vcChat =  vc as? PSDChatViewController{
+                vcChat.updateTitle()
+                break
+            }
+        }
+    }
+    
     ///Vertical right separator view for iPad
     private lazy var separatorView: UIView = {
         let view = UIView()

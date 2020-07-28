@@ -11,6 +11,12 @@ class PSDChatViewController: UIViewController{
     
     var chatId: String = ""
 
+    
+    public func updateTitle(){
+        closeInfo()
+        designNavigation()
+    }
+    
     override func viewDidLoad() {
         super.viewDidLoad()
         if #available(iOS 11.0, *) {
@@ -27,6 +33,12 @@ class PSDChatViewController: UIViewController{
         self.openChat()
         
         self.startGettingInfo()
+        if PSD_InfoTitle() != nil && !(PSDMessagesStorage.pyrusUserDefaults()?.bool(forKey: PSD_WAS_CLOSE_INFO_KEY) ?? true) {
+            view.addSubview(infoView)
+            infoView.widthAnchor.constraint(equalTo: view.widthAnchor).isActive = true
+            infoView.centerXAnchor.constraint(equalTo: view.centerXAnchor).isActive = true
+            infoView.topAnchor.constraint(equalTo: view.topAnchor, constant: (self.navigationController?.navigationBar.frame.size.height ?? 0) +  UIApplication.shared.statusBarFrame.height).isActive = true
+        }
         
     }
     override func viewWillLayoutSubviews() {
@@ -40,6 +52,10 @@ class PSDChatViewController: UIViewController{
         if #available(iOS 11.0, *) {
             fr.origin.x = self.view.safeAreaInsets.left
             fr.size.width = fr.size.width - (fr.origin.x*2)
+        }
+        if PSD_InfoTitle() != nil && !(PSDMessagesStorage.pyrusUserDefaults()?.bool(forKey: PSD_WAS_CLOSE_INFO_KEY) ?? true){
+            fr.origin.y += 95
+            fr.size.height -= 95
         }
         self.tableView.frame = fr
         
@@ -111,6 +127,7 @@ class PSDChatViewController: UIViewController{
     }
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
+        self.navigationController?.navigationBar.isHidden = false
         startGettingInfo()
       //  self.becomeFirstResponder()
         resizeTable()
@@ -163,6 +180,53 @@ class PSDChatViewController: UIViewController{
         table.setupTableView()
         return table
     }()
+    
+    lazy var infoView: UIView = {
+        let infoV = UIView(frame: CGRect(x: 0, y: 0, width: self.tableView.frame.size.width, height: 95))
+        infoV.translatesAutoresizingMaskIntoConstraints = false
+        infoV.backgroundColor = UIColor(red: 54/255.0, green: 108/255.0, blue: 222/255.0, alpha: 1.0)
+        let label = UILabel()
+        label.numberOfLines = 0
+        label.textColor = .white
+        label.text = "Чтобы заявка была обработана быстрее, выберите ваш ресторан"
+        infoV.addSubview(label)
+        label.translatesAutoresizingMaskIntoConstraints = false
+        infoV.heightAnchor.constraint(equalToConstant: 95).isActive = true
+        label.leadingAnchor.constraint(equalTo: infoV.leadingAnchor, constant: 16).isActive = true
+        label.trailingAnchor.constraint(equalTo: infoV.trailingAnchor, constant: -55).isActive = true
+        label.centerYAnchor.constraint(equalTo: infoV.centerYAnchor, constant: 0).isActive = true
+
+        if #available(iOS 13.0, *) {
+            let crossButton = UIButton.systemButton(with: UIImage(named: "icn_cross") ?? UIImage(), target: self, action: #selector(closeInfo))
+            infoV.addSubview(crossButton)
+            crossButton.translatesAutoresizingMaskIntoConstraints = false
+            crossButton.widthAnchor.constraint(equalToConstant: 22).isActive = true
+            crossButton.heightAnchor.constraint(equalToConstant: 22).isActive = true
+            crossButton.tintColor = .white
+            crossButton.trailingAnchor.constraint(equalTo: infoV.trailingAnchor, constant: -16).isActive = true
+            crossButton.centerYAnchor.constraint(equalTo: infoV.centerYAnchor, constant: 0).isActive = true
+            
+            let buttonInfo = UIButton(frame: CGRect.zero)
+            buttonInfo.translatesAutoresizingMaskIntoConstraints = false
+            infoV.addSubview(buttonInfo)
+            buttonInfo.leadingAnchor.constraint(equalTo: infoV.leadingAnchor).isActive = true
+            buttonInfo.topAnchor.constraint(equalTo: infoV.topAnchor).isActive = true
+            buttonInfo.bottomAnchor.constraint(equalTo: infoV.bottomAnchor).isActive = true
+            buttonInfo.trailingAnchor.constraint(equalTo: crossButton.leadingAnchor, constant: 10).isActive = true
+            buttonInfo.addTarget(self, action: #selector(showChooseCafe), for: .touchUpInside)
+        } else {
+            // Fallback on earlier versions
+        }
+        return infoV
+    }()
+    
+    @objc private func closeInfo(){
+        infoView.removeFromSuperview()
+        PSDMessagesStorage.pyrusUserDefaults()?.set(true, forKey: PSD_WAS_CLOSE_INFO_KEY)
+        PSDMessagesStorage.pyrusUserDefaults()?.synchronize()
+        resizeTable()
+    }
+    
     /**Setting design To PyrusSupportChatViewController view, add subviews*/
     private func design() {
         self.view.backgroundColor = .psdBackground
@@ -174,7 +238,18 @@ class PSDChatViewController: UIViewController{
     //Setting design to navigation bar, title and buttons
     private func designNavigation()
     {
-        self.title = PSD_ChatTitle()
+        if let attributedTitle = PSD_ChatAttribitesTitle(){
+            let label = UILabel()
+            label.textAlignment = .center
+            label.numberOfLines = 2
+            label.attributedText = attributedTitle
+            self.navigationItem.titleView = label
+            self.title = nil
+        } else {
+            self.title = PSD_ChatTitle()
+            self.navigationItem.titleView = nil
+        }
+        
         self.setItems()
     }
     ///Set chats item if it's not iPadView or oneChat mode.
@@ -184,7 +259,32 @@ class PSDChatViewController: UIViewController{
         if !PyrusServiceDeskController.iPadView && !PyrusServiceDesk.oneChat{
             self.navigationItem.rightBarButtonItem = chatsItem
         }
+        if PSD_SettingsViewController() != nil{
+            if #available(iOS 13.0, *) {
+            let settingsButton = UIBarButtonItem(image: UIImage(systemName: "gear"), style: .done, target: self, action: #selector(showSettings))
+                settingsButton.tintColor = PSD_CustomColor()
+                navigationItem.rightBarButtonItem = settingsButton
+            }
+            
+        }
     }
+    
+    @objc private func showChooseCafe() {
+        if let chooseCafeVC = PSD_ChooseCafeViewController(){
+            self.navigationController?.pushViewController(chooseCafeVC, animated: true)
+            closeInfo()
+        }
+        
+    }
+    
+    @objc private func showSettings() {
+        if let settingVC = PSD_SettingsViewController(){
+            settingVC.navigationController?.popViewController(animated: false)
+            self.present(settingVC, animated: true, completion: nil)
+        }
+        
+    }
+    
     private lazy var leftButton : UIButton = {
         let button = UIButton.init(type: .custom)
         button.setTitle("Back".localizedPSD(), for: .normal)
@@ -199,6 +299,10 @@ class PSDChatViewController: UIViewController{
         resetImage()
     }
     private func resetImage(){
+        if PSD_HideLeftBarButton(){
+            navigationItem.leftBarButtonItem = nil
+            return
+        }
         leftButton.setImage(UIImage.PSDImage(name: "Back").imageWith(color: UIColor.darkAppColor), for: .normal)
         let item = UIBarButtonItem.init(customView: leftButton)
         navigationItem.leftBarButtonItem = item

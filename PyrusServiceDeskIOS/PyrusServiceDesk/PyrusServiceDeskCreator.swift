@@ -59,6 +59,13 @@ import UIKit
         })
     }
     
+    @objc public static func updateAdress(_ title: NSAttributedString){
+        if  title.string.count>0{
+            PyrusServiceDesk.mainController?.customization.chatAttributedTitle = title
+            PyrusServiceDesk.mainController?.updateTitleChat()
+        }
+    }
+    
     ///Show chat
     ///- parameter viewController: ViewController that must present chat
     ///- parameter onStopCallback: OnStopCallback object or nil. OnStopCallback is object for getting a notification that PyrusServiceDesk was closed.
@@ -138,6 +145,17 @@ import UIKit
             EventsLogger.logEvent(.emptyClientId)
         }
     }
+    
+    @objc static public func createWith(_ clientId: String?, reset: Bool) {
+        if clientId != nil && (clientId?.count ?? 0)>0 {
+            PyrusServiceDesk.clientId = clientId
+            PyrusServiceDesk.oneChat = true
+            PyrusServiceDesk.createUserId(reset)
+        }else{
+            EventsLogger.logEvent(.emptyClientId)
+        }
+    }
+    
     @objc static public func refresh() {
         PyrusServiceDesk.mainController?.refreshChat()
     }
@@ -164,6 +182,7 @@ import UIKit
         }else{
             userId = reset ? String.getUiqueString() : (UIDevice.current.identifierForVendor?.uuidString ?? String.getUiqueString())
             PSDMessagesStorage.pyrusUserDefaults()?.set(userId, forKey: PSD_USER_ID_KEY)
+            PSDMessagesStorage.pyrusUserDefaults()?.set(false, forKey: PSD_WAS_CLOSE_INFO_KEY)
             PSDMessagesStorage.pyrusUserDefaults()?.synchronize()
         }
         PyrusServiceDesk.userId = userId
