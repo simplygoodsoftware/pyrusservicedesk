@@ -10,15 +10,34 @@ protocol PSDUpdateInfo{
 class PSDChatViewController: UIViewController{
     
     var chatId: String = ""
+    
+    let labelTitle: UILabel = {
+        let label = UILabel()
+        
+
+        label.isUserInteractionEnabled = true
+        label.textAlignment = .center
+        label.numberOfLines = 2
+        return label
+    }()
 
     
     public func updateTitle(){
         closeInfo()
         designNavigation()
+        self.messageInputView.setToDefault()
+        self.tableView.isLoading = false
+        self.tableView.chatId = self.chatId
+        self.tableView.reloadChat()
     }
     
     override func viewDidLoad() {
         super.viewDidLoad()
+        let tapGr = UITapGestureRecognizer(target: self, action: #selector(showChooseCafe))
+        tapGr.cancelsTouchesInView = false
+        tapGr.numberOfTouchesRequired = 1
+        self.labelTitle.addGestureRecognizer(tapGr)
+        
         if #available(iOS 11.0, *) {
             self.tableView.contentInsetAdjustmentBehavior = .never//.automatic
             
@@ -39,6 +58,11 @@ class PSDChatViewController: UIViewController{
             infoView.centerXAnchor.constraint(equalTo: view.centerXAnchor).isActive = true
             infoView.topAnchor.constraint(equalTo: view.topAnchor, constant: (self.navigationController?.navigationBar.frame.size.height ?? 0) +  UIApplication.shared.statusBarFrame.height).isActive = true
         }
+        let deadlineTime = DispatchTime.now() + 0.45
+        DispatchQueue.main.asyncAfter(deadline: deadlineTime, execute: {
+            self.messageInputView.inputTextView.becomeFirstResponder()
+        })
+        
         
     }
     override func viewWillLayoutSubviews() {
@@ -188,7 +212,7 @@ class PSDChatViewController: UIViewController{
         let label = UILabel()
         label.numberOfLines = 0
         label.textColor = .white
-        label.text = "Чтобы заявка была обработана быстрее, выберите ваш ресторан"
+        label.text = PSD_InfoTitle()
         infoV.addSubview(label)
         label.translatesAutoresizingMaskIntoConstraints = false
         infoV.heightAnchor.constraint(equalToConstant: 95).isActive = true
@@ -197,7 +221,7 @@ class PSDChatViewController: UIViewController{
         label.centerYAnchor.constraint(equalTo: infoV.centerYAnchor, constant: 0).isActive = true
 
         if #available(iOS 13.0, *) {
-            let crossButton = UIButton.systemButton(with: UIImage(named: "icn_cross") ?? UIImage(), target: self, action: #selector(closeInfo))
+            let crossButton = UIButton.systemButton(with: UIImage(named: "mainImg.png") ?? UIImage(), target: self, action: #selector(closeInfo))
             infoV.addSubview(crossButton)
             crossButton.translatesAutoresizingMaskIntoConstraints = false
             crossButton.widthAnchor.constraint(equalToConstant: 22).isActive = true
@@ -238,16 +262,16 @@ class PSDChatViewController: UIViewController{
     //Setting design to navigation bar, title and buttons
     private func designNavigation()
     {
+        self.navigationItem.titleView = labelTitle
         if let attributedTitle = PSD_ChatAttribitesTitle(){
-            let label = UILabel()
-            label.textAlignment = .center
-            label.numberOfLines = 2
-            label.attributedText = attributedTitle
-            self.navigationItem.titleView = label
-            self.title = nil
+            
+            labelTitle.attributedText = attributedTitle
+            labelTitle.sizeToFit()
+            navigationController?.navigationBar.layoutIfNeeded()
         } else {
-            self.title = PSD_ChatTitle()
-            self.navigationItem.titleView = nil
+            labelTitle.text = PSD_ChatTitle()
+//            self.title = PSD_ChatTitle()
+//            self.navigationItem.titleView = nil
         }
         
         self.setItems()
@@ -261,25 +285,29 @@ class PSDChatViewController: UIViewController{
         }
         if PSD_SettingsViewController() != nil{
             if #available(iOS 13.0, *) {
-            let settingsButton = UIBarButtonItem(image: UIImage(systemName: "gear"), style: .done, target: self, action: #selector(showSettings))
+                let settingsButton = UIBarButtonItem(image: UIImage(systemName: "gear"), style: .done, target: self, action: #selector(showSettings))
                 settingsButton.tintColor = PSD_CustomColor()
                 navigationItem.rightBarButtonItem = settingsButton
+                
+//                let chooseCafeButton = UIBarButtonItem(image: UIImage(systemName: "icn_cross"), style: .done, target: self, action: #selector(showChooseCafe))
+                let chooseCafeButton = UIBarButtonItem(image: UIImage(named: "Slice"), style: .done, target: self, action: #selector(showChooseCafe))
+                chooseCafeButton.tintColor = PSD_CustomColor()
+                navigationItem.leftBarButtonItem = chooseCafeButton
             }
-            
         }
     }
     
     @objc private func showChooseCafe() {
-        if let chooseCafeVC = PSD_ChooseCafeViewController(){
-            self.navigationController?.pushViewController(chooseCafeVC, animated: true)
-            closeInfo()
+        if let chooseCafeVC = PSD_ChooseCafeViewController() as? UINavigationController{
+            chooseCafeVC.popToRootViewController(animated: true)
+            self.present(chooseCafeVC, animated: true, completion: nil)
         }
         
     }
     
     @objc private func showSettings() {
-        if let settingVC = PSD_SettingsViewController(){
-            settingVC.navigationController?.popViewController(animated: false)
+        if let settingVC = PSD_SettingsViewController() as? UINavigationController{
+            settingVC.popToRootViewController(animated: false)
             self.present(settingVC, animated: true, completion: nil)
         }
         
@@ -300,7 +328,12 @@ class PSDChatViewController: UIViewController{
     }
     private func resetImage(){
         if PSD_HideLeftBarButton(){
-            navigationItem.leftBarButtonItem = nil
+            if #available(iOS 13.0, *) {
+                let chooseCafeButton = UIBarButtonItem(image: UIImage(named: "Slice"), style: .done, target: self, action: #selector(showChooseCafe))
+//                let chooseCafeButton = UIBarButtonItem(image: UIImage(systemName: "icn_cross"), style: .done, target: self, action: #selector(showChooseCafe))
+                chooseCafeButton.tintColor = PSD_CustomColor()
+                navigationItem.leftBarButtonItem = chooseCafeButton
+            }
             return
         }
         leftButton.setImage(UIImage.PSDImage(name: "Back").imageWith(color: UIColor.darkAppColor), for: .normal)

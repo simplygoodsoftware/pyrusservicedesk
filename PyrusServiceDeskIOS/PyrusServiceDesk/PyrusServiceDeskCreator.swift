@@ -59,10 +59,15 @@ import UIKit
         })
     }
     
-    @objc public static func updateAdress(_ title: NSAttributedString){
+    @objc public static func updateAdress(_ title: NSAttributedString, _ name: String){
         if  title.string.count>0{
+            PyrusServiceDesk.createUserId(true)
+            if name.count>1{
+                PyrusServiceDesk.setUser(name)
+            }
             PyrusServiceDesk.mainController?.customization.chatAttributedTitle = title
             PyrusServiceDesk.mainController?.updateTitleChat()
+            
         }
     }
     
