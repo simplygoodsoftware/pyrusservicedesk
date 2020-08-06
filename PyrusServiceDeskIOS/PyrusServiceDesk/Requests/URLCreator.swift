@@ -27,9 +27,9 @@ enum urlType : String{
 }
 
 struct PyrusServiceDeskAPI {
-    private static let baseURLString = "https://pyrus.com/servicedeskapi/v1/"//dev.
+    private static let baseURLString = "https://dev.pyrus.com/servicedeskapi/v1/"//dev.//test
     ///Create URL for urlType in [.chats, .createNew, .upload, .chatFeed, .updateFeed, .token]
-    static func PSDURL(type:urlType)->URL{
+    static func PSDURL(type: urlType) -> URL {
         let validTypes : [urlType] = [.chats, .createNew, .upload, .chatFeed, .updateFeed, .token]
         if !(validTypes.contains(type)){
             fatalError("Bad urlType for this function, type = \(urlType.RawValue())")
@@ -37,15 +37,15 @@ struct PyrusServiceDeskAPI {
         return PSDURL(type:type,ticketId:"0")
     }
     ///Create URL all urlType exept avatar
-    static func PSDURL(type:urlType,ticketId:String)->URL{
-        if type == .avatar{
+    static func PSDURL(type: urlType, ticketId: String) -> URL {
+        if type == .avatar {
             fatalError("Bad urlType for this function")
         }
-        var urlString : String = "\(baseURLString)" + type.rawValue
+        var urlString: String = "\(baseURLString)" + type.rawValue
 
-        if type == .download || type == .downloadPreview{
-            let userIdEncodeed : String = PyrusServiceDesk.userId.addingPercentEncoding(withAllowedCharacters: NSCharacterSet.urlHostAllowed) ?? PyrusServiceDesk.userId
-            let appIdEncodeed : String = PyrusServiceDesk.clientId?.addingPercentEncoding(withAllowedCharacters: CharacterSet.rfc3986Unreserved) ?? PyrusServiceDesk.clientId ?? ""
+        if type == .download || type == .downloadPreview {
+            let userIdEncodeed: String = PyrusServiceDesk.userId.addingPercentEncoding(withAllowedCharacters: NSCharacterSet.urlHostAllowed) ?? PyrusServiceDesk.userId
+            let appIdEncodeed: String = PyrusServiceDesk.clientId?.addingPercentEncoding(withAllowedCharacters: CharacterSet.rfc3986Unreserved) ?? PyrusServiceDesk.clientId ?? ""
             urlString = urlString + "/" + ticketId + "?user_id=" + userIdEncodeed + "&app_id=" + appIdEncodeed
             
         }

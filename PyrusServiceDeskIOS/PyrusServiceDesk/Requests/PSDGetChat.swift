@@ -100,6 +100,7 @@ struct PSDGetChat {
     }
     private static func generateChat(from response:[String: Any]) -> PSDChat
     {
+        print("//test response = \(response)")
         var massages : [PSDMessage] = [PSDMessage]()
         massages = PSDGetChat.generateMessages(from: response["comments"] as? NSArray ?? NSArray())
         let chat = PSDChat(chatId: response.stringOfKey(ticketIdParameter), date: Date(), messages: massages)
@@ -150,6 +151,10 @@ struct PSDGetChat {
             if (attachmentsForMessage?.count ?? 0) > 0 || (textForMessage?.count ?? 0) > 0 || rating != nil{
                 let message = PSDMessage(text: textForMessage, attachments:attachmentsForMessage, messageId: dic.stringOfKey(commentIdParameter), owner: user, date: date)
                 message.rating = rating
+                let clientId = dic.stringOfKey(CLIENT_ID_KEY)
+                if clientId.count > 0 {
+                    message.localId = clientId
+                }
                 messages.append(message)
             }
         }
