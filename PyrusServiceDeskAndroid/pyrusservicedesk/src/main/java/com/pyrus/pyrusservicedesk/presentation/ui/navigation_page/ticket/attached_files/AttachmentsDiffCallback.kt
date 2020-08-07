@@ -2,10 +2,6 @@ package com.pyrus.pyrusservicedesk.presentation.ui.navigation_page.ticket.attach
 
 import androidx.recyclerview.widget.DiffUtil
 
-/**
-
-
- */
 internal class AttachmentsDiffCallback(
     private val oldList: List<AttachmentEntry>,
     private val newList: List<AttachmentEntry>

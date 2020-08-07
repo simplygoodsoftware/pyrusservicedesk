@@ -194,12 +194,8 @@ internal class TicketViewModel(serviceDeskProvider: ServiceDeskProvider,
      */
     fun onAttachmentRemoved(entryToRemove : AttachmentEntry) {
         entryToRemove.let {
-            launch {
-                withContext(Dispatchers.Main) {
-                    applyAttachmentUpdate(it, AttachmentChangeType.Removed)
-                    pendingCommentUnderAction = null
-                }
-            }
+            applyAttachmentUpdate(it, AttachmentChangeType.Removed)
+            pendingCommentUnderAction = null
         }
     }
 

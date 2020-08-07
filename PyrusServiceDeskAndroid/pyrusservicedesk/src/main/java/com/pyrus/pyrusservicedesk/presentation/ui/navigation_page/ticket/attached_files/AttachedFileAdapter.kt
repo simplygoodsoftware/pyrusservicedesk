@@ -11,7 +11,7 @@ import com.pyrus.pyrusservicedesk.presentation.ui.view.recyclerview.AdapterBase
 import com.pyrus.pyrusservicedesk.presentation.ui.view.recyclerview.ViewHolderBase
 import com.squareup.picasso.Picasso
 
-private const val VIEW_TYPE_LOG = 0
+private const val VIEW_TYPE_TEXT = 0
 private const val VIEW_TYPE_IMAGE = 1
 
 internal class AttachedFileAdapter(
@@ -21,7 +21,7 @@ internal class AttachedFileAdapter(
     override fun getItemViewType(position: Int): Int {
         return with(itemsList[position]) {
             return@with when (type) {
-                AttachmentEntry.Type.TEXT -> VIEW_TYPE_LOG
+                AttachmentEntry.Type.TEXT -> VIEW_TYPE_TEXT
                 AttachmentEntry.Type.IMAGE -> VIEW_TYPE_IMAGE
             }
         }
@@ -30,7 +30,7 @@ internal class AttachedFileAdapter(
     @Suppress("UNCHECKED_CAST")
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolderBase<AttachmentEntry> {
         return when(viewType){
-            VIEW_TYPE_LOG -> LogHolder(parent)
+            VIEW_TYPE_TEXT -> TextHolder(parent)
             else -> ImageHolder(parent)
         }
     }
@@ -39,7 +39,7 @@ internal class AttachedFileAdapter(
         this.itemsList = items.toMutableList()
     }
 
-    private inner class LogHolder(parent: ViewGroup) : AbstractHolder(parent, R.layout.psd_view_holder_text_file) {
+    private inner class TextHolder(parent: ViewGroup) : AbstractHolder(parent, R.layout.psd_view_holder_text_file) {
 
         override lateinit var removeButton: View
 
