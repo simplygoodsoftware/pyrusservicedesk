@@ -4,6 +4,7 @@ import android.content.SharedPreferences
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
 import com.pyrus.pyrusservicedesk.sdk.data.Comment
+import com.pyrus.pyrusservicedesk.sdk.data.intermediate.Comments
 import com.pyrus.pyrusservicedesk.sdk.response.Response
 import com.pyrus.pyrusservicedesk.sdk.response.ResponseImpl
 import com.pyrus.pyrusservicedesk.sdk.verify.LocalDataVerifier
@@ -24,7 +25,7 @@ internal class PreferenceOfflineRepository(private val preferences: SharedPrefer
     }
 
     override suspend fun addPendingFeedComment(comment: Comment): Response<Boolean> {
-        var comments = getPendingFeedComments().getData()?.toMutableList() ?: mutableListOf()
+        var comments = getPendingFeedComments().getData()?.comments?.toMutableList() ?: mutableListOf()
         comments.let { list ->
             val existingIndex = list.indexOfFirst { it.localId == comment.localId }
             if (existingIndex >= 0) {
@@ -39,7 +40,7 @@ internal class PreferenceOfflineRepository(private val preferences: SharedPrefer
         return ResponseImpl.success(true)
     }
 
-    override suspend fun getPendingFeedComments(): Response<List<Comment>> {
+    override suspend fun getPendingFeedComments(): Response<Comments> {
         val commentsList =
             gson.fromJson<List<Comment>>(
                 preferences.getString(PREFERENCE_KEY_OFFLINE_COMMENTS, "[]"),
@@ -47,13 +48,14 @@ internal class PreferenceOfflineRepository(private val preferences: SharedPrefer
             .toMutableList()
         if (commentsList.removeAll { localDataVerifier.isLocalCommentEmpty(it) })
             writeComments(commentsList)
-        return ResponseImpl.success(commentsList)
+        return ResponseImpl.success(Comments(commentsList))
     }
 
     override suspend fun removePendingComment(comment: Comment): Response<Boolean> {
         val removed =
             getPendingFeedComments()
                 .getData()
+                ?.comments
                 ?.toMutableList()
                 ?.let { list ->
                     if (list.removeAll{ it.localId == comment.localId }) {

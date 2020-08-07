@@ -8,4 +8,8 @@ import com.pyrus.pyrusservicedesk.sdk.data.Comment
  */
 internal data class Comments(
     @SerializedName("comments")
-    val comments: List<Comment> = emptyList())
+    val comments: List<Comment> = emptyList(),
+
+    @SerializedName("show_rating")
+    val showRating: Boolean = false
+)

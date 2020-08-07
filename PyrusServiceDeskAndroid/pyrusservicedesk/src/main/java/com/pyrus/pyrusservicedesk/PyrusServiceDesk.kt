@@ -9,7 +9,7 @@ import androidx.annotation.MainThread
 import com.google.gson.GsonBuilder
 import com.pyrus.pyrusservicedesk.presentation.ui.navigation_page.ticket.TicketActivity
 import com.pyrus.pyrusservicedesk.presentation.ui.navigation_page.tickets.TicketsActivity
-import com.pyrus.pyrusservicedesk.presentation.viewmodel.QuitViewModel
+import com.pyrus.pyrusservicedesk.presentation.viewmodel.SharedViewModel
 import com.pyrus.pyrusservicedesk.sdk.FileResolverImpl
 import com.pyrus.pyrusservicedesk.sdk.RequestFactory
 import com.pyrus.pyrusservicedesk.sdk.data.LocalDataProvider
@@ -147,7 +147,13 @@ class PyrusServiceDesk private constructor(
          * Stops PyrusServiceDesk. If UI was hidden, it will be finished during creating.
          */
         @JvmStatic
-        fun stop() = get().quitViewModel.quitServiceDesk()
+        fun stop() = get().sharedViewModel.quitServiceDesk()
+
+        /**
+         * Manually refreshes feed of PyrusServiceDesk.
+         */
+        @JvmStatic
+        fun refresh() = get().sharedViewModel.triggerUpdate()
 
         internal fun onServiceDeskStop() {
             get().onStopCallback?.onServiceDeskStop()
@@ -175,7 +181,7 @@ class PyrusServiceDesk private constructor(
             onStopCallback: OnStopCallback? = null
         ) {
             CONFIGURATION = configuration
-            get().quitViewModel.clear()
+            get().sharedViewModel.clearQuitServiceDesk()
             get().onStopCallback = onStopCallback
             activity.startActivity(createIntent(ticketId))
         }
@@ -214,7 +220,7 @@ class PyrusServiceDesk private constructor(
     }
     private val localDataVerifier: LocalDataVerifier
 
-    private var quitViewModel = QuitViewModel()
+    private var sharedViewModel = SharedViewModel()
 
     private val fileResolver: FileResolverImpl = FileResolverImpl(application.contentResolver)
     private val preferences = application.getSharedPreferences(PREFERENCE_KEY, Context.MODE_PRIVATE)
@@ -252,5 +258,5 @@ class PyrusServiceDesk private constructor(
         liveUpdates = LiveUpdates(requestFactory)
     }
 
-    internal fun getSharedViewModel() = quitViewModel
+    internal fun getSharedViewModel() = sharedViewModel
 }

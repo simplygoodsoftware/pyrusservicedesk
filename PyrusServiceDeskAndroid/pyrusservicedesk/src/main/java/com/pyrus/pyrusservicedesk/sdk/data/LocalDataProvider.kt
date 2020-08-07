@@ -27,6 +27,7 @@ internal class LocalDataProvider(offlineRepository: OfflineRepository,
             lastLocalCommentId = offlineRepository
                 .getPendingFeedComments()
                 .getData()
+                ?.comments
                 ?.lastOrNull()
                 ?.localId
                 ?: 0
@@ -39,7 +40,7 @@ internal class LocalDataProvider(offlineRepository: OfflineRepository,
      * @return [Comment] instance with [Comment.isLocal] is TRUE.
      */
     @MainThread
-    fun createLocalComment(text: String = "", fileUri: Uri? = null): Comment {
+    fun createLocalComment(text: String = "", fileUri: Uri? = null, rating: Int? = null): Comment {
         return Comment(
             body = text,
             isInbound = true,
@@ -48,7 +49,8 @@ internal class LocalDataProvider(offlineRepository: OfflineRepository,
                 listOf(createLocalAttachment(it))
             },
             creationDate = Calendar.getInstance().time,
-            localId = --lastLocalCommentId
+            localId = --lastLocalCommentId,
+            rating = rating
         )
     }
 
@@ -70,7 +72,8 @@ internal class LocalDataProvider(offlineRepository: OfflineRepository,
             attachments,
             localComment.creationDate,
             localComment.author,
-            localComment.localId
+            localComment.localId,
+            localComment.rating
         )
     }
 

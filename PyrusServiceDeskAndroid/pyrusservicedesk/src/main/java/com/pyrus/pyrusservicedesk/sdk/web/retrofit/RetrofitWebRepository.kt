@@ -8,6 +8,7 @@ import com.pyrus.pyrusservicedesk.sdk.data.Comment
 import com.pyrus.pyrusservicedesk.sdk.data.EMPTY_TICKET_ID
 import com.pyrus.pyrusservicedesk.sdk.data.TicketDescription
 import com.pyrus.pyrusservicedesk.sdk.data.intermediate.AddCommentResponseData
+import com.pyrus.pyrusservicedesk.sdk.data.intermediate.Comments
 import com.pyrus.pyrusservicedesk.sdk.data.intermediate.CreateTicketResponseData
 import com.pyrus.pyrusservicedesk.sdk.repositories.general.GeneralRepository
 import com.pyrus.pyrusservicedesk.sdk.repositories.general.RemoteRepository
@@ -57,12 +58,12 @@ internal class RetrofitWebRepository(
         api = retrofit.create(ServiceDeskApi::class.java)
     }
 
-    override suspend fun getFeed(): Response<List<Comment>> {
-        return withContext<Response<List<Comment>>>(Dispatchers.IO){
+    override suspend fun getFeed(): Response<Comments> {
+        return withContext<Response<Comments>>(Dispatchers.IO){
             try {
                 api.getTicketFeed(RequestBodyBase(appId, userId)).execute().run {
                     when {
-                        isSuccessful && body() != null -> ResponseImpl.success(body()!!.comments)
+                        isSuccessful && body() != null -> ResponseImpl.success(body()!!)
                         else -> ResponseImpl.failure(ApiCallError(this.message()))
                     }
                 }
@@ -206,9 +207,9 @@ internal class RetrofitWebRepository(
             }
 
             val call = when {
-                isFeed -> api.addFeedComment(AddCommentRequestBody(appId, userId, cament.body, cament.attachments, ConfigUtils.getUserName()))
+                isFeed -> api.addFeedComment(AddCommentRequestBody(appId, userId, cament.body, cament.attachments, ConfigUtils.getUserName(), cament.rating))
                 else -> api.addComment(
-                    AddCommentRequestBody(appId, userId, cament.body, cament.attachments, ConfigUtils.getUserName()),
+                    AddCommentRequestBody(appId, userId, cament.body, cament.attachments, ConfigUtils.getUserName(), cament.rating),
                     request.ticketId)
             }
             return@withContext try {

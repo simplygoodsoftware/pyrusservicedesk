@@ -12,7 +12,7 @@ import android.view.View
 import android.view.inputmethod.InputMethodManager
 import com.pyrus.pyrusservicedesk.PyrusServiceDesk
 import com.pyrus.pyrusservicedesk.R
-import com.pyrus.pyrusservicedesk.presentation.viewmodel.QuitViewModel
+import com.pyrus.pyrusservicedesk.presentation.viewmodel.SharedViewModel
 import com.pyrus.pyrusservicedesk.utils.getViewModel
 import kotlinx.coroutines.*
 import kotlin.coroutines.CoroutineContext
@@ -41,7 +41,7 @@ internal abstract class ActivityBase: AppCompatActivity(), CoroutineScope {
      * All activities share the same model to be able to trigger "rage" quit event that will close
      * all service desk activities of the current task.
      */
-    protected val quitViewModel: QuitViewModel by getViewModel(QuitViewModel::class.java)
+    protected val sharedViewModel: SharedViewModel by getViewModel(SharedViewModel::class.java)
 
     private var recentContentHeight = 0
 
@@ -68,7 +68,7 @@ internal abstract class ActivityBase: AppCompatActivity(), CoroutineScope {
             }
         }
 
-        if (quitViewModel.getQuitServiceDeskLiveData().value == true)
+        if (sharedViewModel.getQuitServiceDeskLiveData().value == true)
             finish()
     }
 
@@ -140,7 +140,7 @@ internal abstract class ActivityBase: AppCompatActivity(), CoroutineScope {
      * Extenders can safely start observe view model's data here.
      */
     protected open fun startObserveData() {
-        quitViewModel.getQuitServiceDeskLiveData().observe(
+        sharedViewModel.getQuitServiceDeskLiveData().observe(
             this,
             Observer { quit ->
                 quit?.let {

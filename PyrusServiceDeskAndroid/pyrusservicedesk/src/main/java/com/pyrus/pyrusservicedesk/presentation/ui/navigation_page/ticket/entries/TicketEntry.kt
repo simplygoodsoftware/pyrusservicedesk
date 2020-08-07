@@ -18,5 +18,6 @@ internal abstract class TicketEntry {
 internal enum class Type {
     Comment,
     Date,
-    WelcomeMessage
+    WelcomeMessage,
+    Rating
 }
