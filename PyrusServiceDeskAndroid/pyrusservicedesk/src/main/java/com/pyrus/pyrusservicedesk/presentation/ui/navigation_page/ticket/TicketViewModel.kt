@@ -134,14 +134,11 @@ internal class TicketViewModel(serviceDeskProvider: ServiceDeskProvider,
 
     /**
      * Callback to be invoked when user clicks "send" button.
-     *
      * @param text text that is entered in an input field
      */
     fun onSendClicked(text: String) {
-        if (text.isNotBlank()) {
-            val localComment = localDataProvider.createLocalComment(text.trim())
-            sendAddComment(localComment)
-        }
+        if (text.isNotBlank())
+            sendAddComment(localDataProvider.createLocalComment(text.trim()))
         if (attachmentEntries.isNotEmpty()) {
             for (attachmentEntry in attachmentEntries) {
                 val attachment = when (attachmentEntry) {
@@ -168,7 +165,6 @@ internal class TicketViewModel(serviceDeskProvider: ServiceDeskProvider,
 
     /**
      * Callback to be invoked when user picked file to send.
-     *
      * @param attachmentUri URI of the file to be sent
      */
     fun onAttachmentSelected(attachmentUri: Uri) {
@@ -178,19 +174,11 @@ internal class TicketViewModel(serviceDeskProvider: ServiceDeskProvider,
             else -> TextEntry(attachment)
         }
 
-        entryToAdd.let {
-            launch {
-                withContext(Dispatchers.Main) {
-                    applyAttachmentUpdate(it, AttachmentChangeType.Added)
-                }
-            }
-        }
+        applyAttachmentUpdate(entryToAdd, AttachmentChangeType.Added)
     }
 
     /**
-     * Callback to be invoked when user picked file to send.
-     *
-
+     * Callback to be invoked when user wants to remove attached file from the message.
      */
     fun onAttachmentRemoved(entryToRemove : AttachmentEntry) {
         entryToRemove.let {
@@ -207,7 +195,7 @@ internal class TicketViewModel(serviceDeskProvider: ServiceDeskProvider,
     fun getCommentDiffLiveData(): LiveData<DiffResultWithNewItems<TicketEntry>> = commentDiff
 
     /**
-
+     * Life data for attachment entries.
      */
     fun getAttachmentDiffLiveData(): LiveData<DiffResultWithNewItems<AttachmentEntry>> = attachmentDiff
 

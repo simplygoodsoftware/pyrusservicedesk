@@ -136,7 +136,7 @@ internal class TicketActivity : ConnectionActivityBase<TicketViewModel>(TicketVi
         }
 
         override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
-            setCanSendComment()
+            updateSendCommentUi()
             viewModel.onInputTextChanged(s.toString())
         }
     }
@@ -195,7 +195,7 @@ internal class TicketActivity : ConnectionActivityBase<TicketViewModel>(TicketVi
             setCursorColor(accentColor)
             addTextChangedListener(inputTextWatcher)
         }
-        setCanSendComment()
+        updateSendCommentUi()
     }
 
     override fun onRestoreInstanceState(savedInstanceState: Bundle) {
@@ -262,7 +262,7 @@ internal class TicketActivity : ConnectionActivityBase<TicketViewModel>(TicketVi
 
                     attachmentAdapter.setItems(it.newItems)
                     it.diffResult.dispatchUpdatesTo(attachmentAdapter)
-                    setCanSendComment()
+                    updateSendCommentUi()
                 }
             }
         )
@@ -341,7 +341,7 @@ internal class TicketActivity : ConnectionActivityBase<TicketViewModel>(TicketVi
         Toast.makeText(applicationContext, R.string.psd_copied_to_clipboard, Toast.LENGTH_SHORT).show()
     }
 
-    private fun setCanSendComment() {
+    private fun updateSendCommentUi() {
         val text = input.editableText.toString()
         val attachmentsCount = attachmentAdapter.itemCount
 

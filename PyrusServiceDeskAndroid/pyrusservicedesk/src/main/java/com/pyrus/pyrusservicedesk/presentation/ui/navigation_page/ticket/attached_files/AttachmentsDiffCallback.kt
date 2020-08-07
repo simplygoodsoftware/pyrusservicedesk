@@ -13,10 +13,10 @@ internal class AttachmentsDiffCallback(
         return when {
             oldEntry is ImageEntry
                     && newEntry is ImageEntry
-                    && oldEntry.attachment.id == newEntry.attachment.id -> true
+                    && oldEntry.attachment == newEntry.attachment -> true
             oldEntry is TextEntry
                     && newEntry is TextEntry
-                    && oldEntry.attachment.id == newEntry.attachment.id -> true
+                    && oldEntry.attachment == newEntry.attachment -> true
             else -> false
         }
     }
