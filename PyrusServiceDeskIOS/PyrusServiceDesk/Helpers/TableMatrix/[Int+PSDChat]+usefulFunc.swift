@@ -21,7 +21,7 @@ extension Array where Element == [PSDRowMessage]{
         var indexPaths = [IndexPath:PSDRowMessage]()
         for (section,messages) in self.enumerated().reversed(){
             for (row,message) in messages.enumerated().reversed(){
-                if message.message.localId == localId
+                if message.message.clientId == localId
                 {
                     indexPaths[IndexPath.init(row: row, section: section)] = message
                 }

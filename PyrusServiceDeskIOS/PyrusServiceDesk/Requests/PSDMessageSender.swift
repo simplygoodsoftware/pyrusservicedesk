@@ -21,7 +21,7 @@ class PSDMessageSender: NSObject {
     func pass(_ messageToPass:PSDMessage, to chatId:String, delegate:PSDMessageSendDelegate?, completion: @escaping(_ chatId : String?) -> Void)
     {
         if(PSDChatTableView.isNewChat(chatId)){
-            let task = PSDMessageSender.passFirst(messageToPass.text, messageToPass.attachments, messageToPass.localId){
+            let task = PSDMessageSender.passFirst(messageToPass.text, messageToPass.attachments, messageToPass.clientId){
                 newChatId in
                 //If passFirst end with success send new ChatId to delegate
                 if newChatId.count>0{
@@ -39,7 +39,7 @@ class PSDMessageSender: NSObject {
             PSDMessageSend.taskArray.append(task)
         }
         else {
-            let task = PSDMessageSender.pass(messageToPass.text,messageToPass.attachments, rating: messageToPass.rating, clientId: messageToPass.localId, to: chatId){
+            let task = PSDMessageSender.pass(messageToPass.text,messageToPass.attachments, rating: messageToPass.rating, clientId: messageToPass.clientId, to: chatId){
                 (commentId: String?, attachments: NSArray?) in
                 if commentId != nil &&  commentId?.count ?? 0>0{
                     //put attachments id
@@ -68,7 +68,7 @@ class PSDMessageSender: NSObject {
     ///
     static func showResult(of messageToPass:PSDMessage, success:Bool, delegate:PSDMessageSendDelegate?){
         if(success){
-            PSDMessagesStorage.removeFromStorage(messageId: messageToPass.localId)
+            PSDMessagesStorage.removeFromStorage(messageId: messageToPass.clientId)
         }
         
         

@@ -153,7 +153,7 @@ struct PSDGetChat {
                 message.rating = rating
                 let clientId = dic.stringOfKey(CLIENT_ID_KEY)
                 if clientId.count > 0 {
-                    message.localId = clientId
+                    message.clientId = clientId
                 }
                 messages.append(message)
             }

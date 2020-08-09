@@ -163,7 +163,7 @@ extension Array where Element == [PSDRowMessage]{
                     if message.message.state == .sent && !message.hasId() && message.text == findMessage.text && message.attachment?.name == findMessage.attachment?.name && message.rating == findMessage.rating{
                         message.message.messageId = findMessage.message.messageId
                     }
-                    if message.message.localId == findMessage.message.localId{
+                    if message.message.clientId == findMessage.message.clientId{
                         return true
                     }
                     if message.message.messageId == findMessage.message.messageId && findMessage.hasId(){

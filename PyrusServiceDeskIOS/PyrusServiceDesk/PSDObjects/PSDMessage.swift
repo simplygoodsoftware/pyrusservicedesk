@@ -17,7 +17,7 @@ class PSDMessage: NSObject {
     var attachments: [PSDAttachment]?
     var owner: PSDUser
     var messageId: String
-    var localId: String
+    var clientId: String
     var date = Date()
     var state: messageState
     var rating: Int?
@@ -30,7 +30,7 @@ class PSDMessage: NSObject {
         self.messageId = messageId ?? "0"
         self.date = date ?? Date()
         self.state = .sending
-        self.localId = UUID().uuidString
+        self.clientId = UUID().uuidString
         super.init()
         
         if(self.hasId() || (self.owner != PSDUsers.user)){
