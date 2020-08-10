@@ -23,27 +23,16 @@
         app:layout_constraintTop_toBottomOf="parent"
         tools:ignore="ContentDescription" />
 
-    <FrameLayout
+    <ImageView
         android:id="@+id/vh_image_remove_button"
         android:layout_width="@dimen/psd_remove_attachment_button_width"
         android:layout_height="@dimen/psd_remove_attachment_button_width"
         android:background="?attr/selectableItemBackgroundBorderless"
+        app:srcCompat="@drawable/psd_remove_attachment"
         app:layout_constraintTop_toTopOf="@id/vh_image_iv"
         app:layout_constraintBottom_toTopOf="@id/vh_image_iv"
         app:layout_constraintRight_toRightOf="@id/vh_image_iv"
-        app:layout_constraintLeft_toRightOf="@id/vh_image_iv">
-
-        <View
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:layout_margin="@dimen/psd_offset_minimum"
-            android:background="@drawable/psd_remove_bg" />
-
-        <View
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:background="@drawable/psd_remove_attachment" />
-
-    </FrameLayout>
+        app:layout_constraintLeft_toRightOf="@id/vh_image_iv"
+        tools:ignore="ContentDescription" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>
