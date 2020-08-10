@@ -221,7 +221,7 @@ class PSDChatViewController: UIViewController{
         label.centerYAnchor.constraint(equalTo: infoV.centerYAnchor, constant: 0).isActive = true
 
         if #available(iOS 13.0, *) {
-            let crossButton = UIButton.systemButton(with: UIImage(named: "mainImg.png") ?? UIImage(), target: self, action: #selector(closeInfo))
+            let crossButton = UIButton.systemButton(with: UIImage(named: "icn_cross") ?? UIImage(), target: self, action: #selector(closeInfo))
             infoV.addSubview(crossButton)
             crossButton.translatesAutoresizingMaskIntoConstraints = false
             crossButton.widthAnchor.constraint(equalToConstant: 22).isActive = true
@@ -289,8 +289,7 @@ class PSDChatViewController: UIViewController{
                 settingsButton.tintColor = PSD_CustomColor()
                 navigationItem.rightBarButtonItem = settingsButton
                 
-//                let chooseCafeButton = UIBarButtonItem(image: UIImage(systemName: "icn_cross"), style: .done, target: self, action: #selector(showChooseCafe))
-                let chooseCafeButton = UIBarButtonItem(image: UIImage(named: "Slice"), style: .done, target: self, action: #selector(showChooseCafe))
+                let chooseCafeButton = UIBarButtonItem(image: UIImage(named: "CustomPin"), style: .done, target: self, action: #selector(showChooseCafe))
                 chooseCafeButton.tintColor = PSD_CustomColor()
                 navigationItem.leftBarButtonItem = chooseCafeButton
             }
@@ -329,8 +328,7 @@ class PSDChatViewController: UIViewController{
     private func resetImage(){
         if PSD_HideLeftBarButton(){
             if #available(iOS 13.0, *) {
-                let chooseCafeButton = UIBarButtonItem(image: UIImage(named: "Slice"), style: .done, target: self, action: #selector(showChooseCafe))
-//                let chooseCafeButton = UIBarButtonItem(image: UIImage(systemName: "icn_cross"), style: .done, target: self, action: #selector(showChooseCafe))
+                let chooseCafeButton = UIBarButtonItem(image: UIImage(named: "CustomPin"), style: .done, target: self, action: #selector(showChooseCafe))
                 chooseCafeButton.tintColor = PSD_CustomColor()
                 navigationItem.leftBarButtonItem = chooseCafeButton
             }
