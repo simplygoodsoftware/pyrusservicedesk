@@ -148,6 +148,7 @@
 		4BB855AA22086C1900F7CCE5 /* Localizable.strings in Resources */ = {isa = PBXBuildFile; fileRef = 4BB855AC22086C1900F7CCE5 /* Localizable.strings */; };
 		4BB855AF220873CA00F7CCE5 /* PSDChatsTableView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4BB855AE220873CA00F7CCE5 /* PSDChatsTableView.swift */; };
 		4BB855B12208741600F7CCE5 /* PSDChatInfoTableViewCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4BB855B02208741600F7CCE5 /* PSDChatInfoTableViewCell.swift */; };
+		4BB9950A24E3178400D6CF87 /* PSDInfoView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4BB9950924E3178400D6CF87 /* PSDInfoView.swift */; };
 		4BBB9B06249D152900059A23 /* LogEvents.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4BBB9B05249D152900059A23 /* LogEvents.swift */; };
 		4BC210D622671EC000CFE255 /* PSDAttachmentPreviewView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4BC210D522671EC000CFE255 /* PSDAttachmentPreviewView.swift */; };
 		4BC210D822674A5600CFE255 /* PSDNavigationController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4BC210D722674A5600CFE255 /* PSDNavigationController.swift */; };
@@ -327,6 +328,7 @@
 		4BB855AD22086C2800F7CCE5 /* ru */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = ru; path = ru.lproj/Localizable.strings; sourceTree = "<group>"; };
 		4BB855AE220873CA00F7CCE5 /* PSDChatsTableView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PSDChatsTableView.swift; sourceTree = "<group>"; };
 		4BB855B02208741600F7CCE5 /* PSDChatInfoTableViewCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PSDChatInfoTableViewCell.swift; sourceTree = "<group>"; };
+		4BB9950924E3178400D6CF87 /* PSDInfoView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PSDInfoView.swift; sourceTree = "<group>"; };
 		4BBB9B05249D152900059A23 /* LogEvents.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LogEvents.swift; sourceTree = "<group>"; };
 		4BC210D522671EC000CFE255 /* PSDAttachmentPreviewView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PSDAttachmentPreviewView.swift; sourceTree = "<group>"; };
 		4BC210D722674A5600CFE255 /* PSDNavigationController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PSDNavigationController.swift; sourceTree = "<group>"; };
@@ -625,6 +627,7 @@
 				4BD29A082464B72B000CC420 /* OnStopCallback.swift */,
 				4BBB9B05249D152900059A23 /* LogEvents.swift */,
 				4B2F47AB224A22FF00E3B23A /* PSDChooser.swift */,
+				4BB9950924E3178400D6CF87 /* PSDInfoView.swift */,
 				4B2E6513220DE3A500E70A2F /* PSDObjectsCreator */,
 				4B2E650F220DE1E000E70A2F /* PSDObjects */,
 				4BB8559E2208559200F7CCE5 /* Requests */,
@@ -1010,6 +1013,7 @@
 				4BB7DADF225E280800F6D1F0 /* PSDFileAttachmentView.swift in Sources */,
 				4B82A49C2268C29700654CE0 /* PSDCoverHorizontalAnimator.swift in Sources */,
 				4B17DD0523E816B1003CF4D9 /* String + uuid.swift in Sources */,
+				4BB9950A24E3178400D6CF87 /* PSDInfoView.swift in Sources */,
 				4B63393421FA0F2C00A154B5 /* PSDChatTableView.swift in Sources */,
 				4B5533732264C07B00353941 /* PSDDownloader.swift in Sources */,
 				4B88C6FB221482AC00BDB304 /* Date+usefulFunc.swift in Sources */,
