@@ -1,15 +1,19 @@
 package com.pyrus.pyrusservicedesk.utils
 
-import androidx.lifecycle.ViewModel
-import androidx.lifecycle.ViewModelProviders
-import android.content.ContentValues
 import android.content.Context
 import android.content.Intent
 import android.net.Uri
+import android.os.Build
+import android.os.Environment
 import android.provider.MediaStore
+import androidx.core.content.FileProvider
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentActivity
+import androidx.lifecycle.ViewModel
+import androidx.lifecycle.ViewModelProvider
 import com.pyrus.pyrusservicedesk.presentation.viewmodel.ViewModelFactory
+import java.io.File
+import java.lang.Exception
 import java.text.SimpleDateFormat
 import java.util.*
 
@@ -21,7 +25,7 @@ private const val DATE_FORMAT_CAPTURE_IMAGES = "yyyyMMdd_HHmmss"
 internal fun <T : ViewModel> FragmentActivity.getViewModel(viewModelClass: Class<T>): Lazy<T> {
 
     return lazy(LazyThreadSafetyMode.NONE) {
-        ViewModelProviders.of(
+        ViewModelProvider(
             this,
             ViewModelFactory(intent)
         ).get(viewModelClass)
@@ -65,15 +69,29 @@ internal fun Fragment.dispatchTakePhotoIntent(requestCode: Int): Uri? {
 }
 
 private fun Context.createPhotoUriApi16AndAbove(): Uri? {
-    val contentValues = ContentValues().also {
-        val timeStamp: String =
-            SimpleDateFormat(DATE_FORMAT_CAPTURE_IMAGES, Locale.getDefault())
-                .format(Date())
-        it.put(MediaStore.Images.Media.DISPLAY_NAME, "IMG_$timeStamp.jpg")
-        it.put(MediaStore.Images.Media.MIME_TYPE, MIME_TYPE_IMAGE_JPEG)
-        it.put(MediaStore.Images.Media.DATE_ADDED, timeStamp)
-    }
-    return contentResolver?.insert(
-        MediaStore.Images.Media.EXTERNAL_CONTENT_URI,
-        contentValues)
+    val timeStamp: String =
+        SimpleDateFormat(DATE_FORMAT_CAPTURE_IMAGES, Locale.getDefault())
+            .format(Date())
+    val fileName = "IMG_$timeStamp.jpg"
+
+    val mediaStorageDir = getExternalFilesDir(Environment.DIRECTORY_DCIM) ?: return null
+
+    if (!mediaStorageDir.exists())
+        return null
+
+    // Return the file target for the photo based on filename
+    val file = File(mediaStorageDir.path + File.separator + fileName)
+
+    if (!file.createNewFile())
+        return null
+
+    return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N)
+        try {
+            FileProvider.getUriForFile(this, "com.pyrus.pyrusservicedesk.FILE_PROVIDER", file)
+        }
+        catch (e: Exception) {
+            return null
+        }
+    else
+        Uri.fromFile(file)
 }

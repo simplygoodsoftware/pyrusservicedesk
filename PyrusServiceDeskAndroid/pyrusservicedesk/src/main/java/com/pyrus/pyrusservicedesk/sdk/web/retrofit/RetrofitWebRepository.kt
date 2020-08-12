@@ -2,7 +2,7 @@ package com.pyrus.pyrusservicedesk.sdk.web.retrofit
 
 import com.google.gson.Gson
 import com.pyrus.pyrusservicedesk.PyrusServiceDesk
-import com.pyrus.pyrusservicedesk.sdk.FileResolverImpl
+import com.pyrus.pyrusservicedesk.sdk.FileResolver
 import com.pyrus.pyrusservicedesk.sdk.data.Attachment
 import com.pyrus.pyrusservicedesk.sdk.data.Comment
 import com.pyrus.pyrusservicedesk.sdk.data.EMPTY_TICKET_ID
@@ -37,9 +37,9 @@ import kotlin.coroutines.coroutineContext
 internal class RetrofitWebRepository(
     private val appId: String,
     private val userId: String,
-    private val fileResolver: FileResolverImpl,
-    private val gson: Gson)
-    : RemoteRepository {
+    private val fileResolver: FileResolver,
+    gson: Gson
+) : RemoteRepository {
 
     private val api: ServiceDeskApi
 
