@@ -146,20 +146,8 @@ internal class AttachFileVariantsFragment: BottomSheetDialogFragment(), View.OnC
     }
 
     private fun startTakingPhoto() {
-        activity?.let { activity ->
-
-            val permissionToAsk = mutableListOf<String>()
-            if (!activity.hasPermission(WRITE_EXTERNAL_STORAGE))
-                permissionToAsk.add(WRITE_EXTERNAL_STORAGE)
-            if (!activity.hasPermission(CAMERA))
-                permissionToAsk.add(CAMERA)
-
-            if (permissionToAsk.isEmpty())
-                capturePhotoUri = dispatchTakePhotoIntent(REQUEST_CODE_TAKE_PHOTO)
-            else
-                requestPermissions(permissionToAsk.toTypedArray(),
-                    REQUEST_CODE_PERMISSION
-                )
+        activity?.let {
+            capturePhotoUri = dispatchTakePhotoIntent(REQUEST_CODE_TAKE_PHOTO)
         }
     }
 
