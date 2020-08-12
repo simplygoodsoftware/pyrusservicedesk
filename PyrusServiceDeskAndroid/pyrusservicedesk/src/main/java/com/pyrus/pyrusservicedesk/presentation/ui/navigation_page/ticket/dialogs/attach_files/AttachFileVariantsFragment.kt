@@ -1,7 +1,6 @@
 package com.pyrus.pyrusservicedesk.presentation.ui.navigation_page.ticket.dialogs.attach_files
 
 import android.Manifest.permission.CAMERA
-import android.Manifest.permission.WRITE_EXTERNAL_STORAGE
 import android.annotation.SuppressLint
 import android.app.Activity.RESULT_OK
 import android.content.Intent
@@ -141,19 +140,29 @@ internal class AttachFileVariantsFragment: BottomSheetDialogFragment(), View.OnC
             if (grantResults[index] == PackageManager.PERMISSION_GRANTED)
                 granted.add(permission)
         }
-        if (!granted.isEmpty())
+        if (granted.isNotEmpty())
             onPermissionsGranted(granted.toTypedArray())
     }
 
     private fun startTakingPhoto() {
-        activity?.let {
-            capturePhotoUri = dispatchTakePhotoIntent(REQUEST_CODE_TAKE_PHOTO)
+        context?.let {
+            /*
+             * Note: if you app targets {@link android.os.Build.VERSION_CODES#M M} and above
+             * and declares as using the {@link android.Manifest.permission#CAMERA} permission which
+             * is not granted, then attempting to use this action will result in a {@link
+             * java.lang.SecurityException}.
+             * https://developer.android.com/reference/android/provider/MediaStore#ACTION_IMAGE_CAPTURE
+             */
+            if (it.hasPermissionInManifeset(CAMERA) && it.hasPermission(CAMERA).not())
+                requestPermissions(arrayOf(CAMERA), REQUEST_CODE_PERMISSION)
+            else
+                capturePhotoUri = dispatchTakePhotoIntent(REQUEST_CODE_TAKE_PHOTO)
         }
     }
 
     private fun onPermissionsGranted(permissions: Array<String>) {
         activity?.let {
-            if (it.hasPermission(WRITE_EXTERNAL_STORAGE) && activity!!.hasPermission(CAMERA))
+            if (it.hasPermission(CAMERA))
                 startTakingPhoto()
         }
     }
