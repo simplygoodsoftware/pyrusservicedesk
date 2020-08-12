@@ -3,14 +3,17 @@ package com.pyrus.pyrusservicedesk.utils
 import android.content.Context
 import android.content.Intent
 import android.net.Uri
+import android.os.Build
 import android.os.Environment
 import android.provider.MediaStore
+import androidx.core.content.FileProvider
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentActivity
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import com.pyrus.pyrusservicedesk.presentation.viewmodel.ViewModelFactory
 import java.io.File
+import java.lang.Exception
 import java.text.SimpleDateFormat
 import java.util.*
 
@@ -79,5 +82,16 @@ private fun Context.createPhotoUriApi16AndAbove(): Uri? {
     // Return the file target for the photo based on filename
     val file = File(mediaStorageDir.path + File.separator + fileName)
 
-    return Uri.fromFile(file)
+    if (!file.createNewFile())
+        return null
+
+    return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N)
+        try {
+            FileProvider.getUriForFile(this, "com.pyrus.pyrusservicedesk.FILE_PROVIDER", file)
+        }
+        catch (e: Exception) {
+            return null
+        }
+    else
+        Uri.fromFile(file)
 }
