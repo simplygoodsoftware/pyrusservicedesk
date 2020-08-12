@@ -9,7 +9,6 @@ import android.content.Context
 import android.content.Intent
 import android.media.MediaScannerConnection
 import android.net.Uri
-import android.os.Environment
 import com.pyrus.pyrusservicedesk.ServiceDeskProvider
 import com.pyrus.pyrusservicedesk.presentation.ui.navigation_page.file_preview.FilePreviewActivity.Companion.KEY_FILE_DATA
 import com.pyrus.pyrusservicedesk.presentation.viewmodel.ConnectionViewModelBase
@@ -83,11 +82,10 @@ internal class FilePreviewViewModel(serviceDeskProvider: ServiceDeskProvider,
             FileViewModel(fileUri, isPreviewable, hasError, isDownloading = true)
         }
         val fileData = intent.getFileData()
-        val request = DownloadManager.Request(fileData.uri)
-        request.setDescription(fileData.fileName)
-        request.allowScanningByMediaScanner()
-        request.setNotificationVisibility(DownloadManager.Request.VISIBILITY_VISIBLE_NOTIFY_COMPLETED)
-        request.setDestinationInExternalPublicDir(Environment.DIRECTORY_DOWNLOADS, fileData.fileName)
+        val request = DownloadManager.Request(fileData.uri).apply {
+            setTitle(fileData.fileName)
+            setNotificationVisibility(DownloadManager.Request.VISIBILITY_VISIBLE_NOTIFY_COMPLETED)
+        }
         downloadRequestId = downloadManager.enqueue(request)
         observeProgress()
     }
