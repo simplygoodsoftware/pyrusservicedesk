@@ -3,11 +3,10 @@
 
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
     <uses-permission android:name="android.permission.INTERNET" />
-    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE"/>
 
-    <!-- Runtime permissions -->
-    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"/>
-    <uses-permission android:name="android.permission.CAMERA"/>
+    <uses-permission
+        android:name="android.permission.WRITE_EXTERNAL_STORAGE"
+        android:maxSdkVersion="18" />
 
     <application>
 
@@ -24,6 +23,16 @@
         <activity
             android:name="com.pyrus.pyrusservicedesk.presentation.ui.navigation_page.file_preview.FilePreviewActivity"
             android:theme="@style/PyrusServiceDesk.Dialog"/>
+
+        <provider
+            android:name=".sdk.PSDFileProvider"
+            android:authorities="com.pyrus.pyrusservicedesk.FILE_PROVIDER"
+            android:exported="false"
+            android:grantUriPermissions="true">
+            <meta-data
+                android:name="android.support.FILE_PROVIDER_PATHS"
+                android:resource="@xml/pyrusservicedesk_file_provider_paths" />
+        </provider>
 
     </application>
 
