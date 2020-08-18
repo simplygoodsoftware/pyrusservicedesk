@@ -16,7 +16,6 @@ enum EventsLogger {
         if let additionalInfo = additionalInfo{
             logString = logString + ": " + additionalInfo
         }
-        print(logString)//test
         PyrusServiceDesk.logEvent?.logPyrusServiceDesk(event: logString)
     }
     static private func stringForEvent(_ logCase: EventsLogger) -> String{

@@ -175,7 +175,7 @@ class PSDChatTableView: PSDDetailTableView{
                     
                     if self?.tableMatrix != nil {
                         self?.tableMatrix.complete(from: chat!, startMessage:self?.lastMessageFromServer){
-                            (indexPaths: [IndexPath], sections:IndexSet) in
+                            (indexPaths: [IndexPath], sections:IndexSet, _) in
                             DispatchQueue.main.async  {
                                 self?.removeNoConnectionView()
                                 self?.lastMessageFromServer = chat?.messages.last
