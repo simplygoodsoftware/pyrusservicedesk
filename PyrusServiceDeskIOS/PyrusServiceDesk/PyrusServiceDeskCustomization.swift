@@ -18,12 +18,15 @@ import Foundation
 
     @objc public var hideLeftBarButton = false
     
+    @objc public var userId: String?
+    
+    @objc public var secretId: String?
+    
     @objc public var settingsViewController: UIViewController?
     
     @objc public var chooseCafeViewController: UIViewController?
 
     
-    @objc public var infoTitle: String?
     
     func buildCustomization(){
         if avatarForSupport != nil{
@@ -49,12 +52,13 @@ import Foundation
         
         PyrusServiceDesk.mainController?.customization.hideLeftBarButton = hideLeftBarButton
         
-        PyrusServiceDesk.mainController?.customization.infoTitle = infoTitle
         
         if(userName != nil && userName!.count>1){
             PyrusServiceDesk.setUser(userName)
         }
         
+        PyrusServiceDesk.customUserId = userId
+        PyrusServiceDesk.secretId = secretId
         
     }
     
@@ -67,7 +71,6 @@ class PyrusServiceDeskCustomization {
     var chatAttributedTitle : NSAttributedString?
     var hideLeftBarButton = false
     var settingsViewController: UIViewController?
-    var infoTitle: String?
     var chooseCafeViewController: UIViewController?
 }
 class PyrusServiceDeskLogs{
@@ -104,9 +107,4 @@ func PSD_SettingsViewController() -> UIViewController?{
 func PSD_ChooseCafeViewController() -> UIViewController?{
     return PyrusServiceDesk.mainController?.customization.chooseCafeViewController
 }
-
-func PSD_InfoTitle() -> String?{
-    return PyrusServiceDesk.mainController?.customization.infoTitle
-}
-
 

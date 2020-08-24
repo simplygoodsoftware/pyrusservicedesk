@@ -2,6 +2,7 @@ import UIKit
 protocol PSDChatTableViewDelegate: NSObjectProtocol {
     func needShowRate(_ showRate: Bool)
 }
+
 class PSDChatTableView: PSDDetailTableView{
     ///The id of chat that is shown in table view
     var chatId :String = ""
@@ -35,7 +36,7 @@ class PSDChatTableView: PSDDetailTableView{
     }()
     @objc private func refreshChat() {
         if !(self.superview?.subviews.contains(self.noConnectionView) ?? false) && !PSDGetChat.isActive(){
-            updateChat(needProgress: true)
+            updateChat(needProgress: true, needScroll: false)
         }
         
     }
@@ -49,7 +50,7 @@ class PSDChatTableView: PSDDetailTableView{
         }else{
             customRefresh.forceRefresh()
         }
-        updateChat(needProgress: true)
+        updateChat(needProgress: true, needScroll: true)
     }
     ///Setups needed properties to table view
     func setupTableView() {
@@ -160,7 +161,7 @@ class PSDChatTableView: PSDDetailTableView{
     }
     ///update taable matrix
     ///- parameter needProgress: Determines whether the view should respond to updating(need to show error) 
-    func updateChat(needProgress:Bool){
+    func updateChat(needProgress:Bool, needScroll: Bool) {
         let chatIdWeak : String  = self.chatId
         DispatchQueue.global().async {
             [weak self] in
@@ -174,6 +175,10 @@ class PSDChatTableView: PSDDetailTableView{
                     //compare number of messages it two last sections
                     
                     if self?.tableMatrix != nil {
+//                        var needScrollAfterLoad = false
+//                        if needScroll, let lastIndex = self?.lastIndexPath(), self?.indexPathsForVisibleRows?.contains(lastIndex) ?? false {
+//                            needScrollAfterLoad = true
+//                        }
                         self?.tableMatrix.complete(from: chat!, startMessage:self?.lastMessageFromServer){
                             (indexPaths: [IndexPath], sections:IndexSet) in
                             DispatchQueue.main.async  {
@@ -188,8 +193,18 @@ class PSDChatTableView: PSDDetailTableView{
                                         self?.insertRows(at: indexPaths, with: .none)
                                     }
                                     self?.endUpdates()
+//                                    if needScrollAfterLoad{
+//                                        DispatchQueue.main.async  {
+//                                            self?.layoutSubviews()
+//                                            DispatchQueue.main.async  {
+//                                                self?.scrollsToBottom(animated: true)
+//                                            }
+//                                        }
+//                                    }
+                                    
                                 }
-                                }
+                                
+                            }
                         }
                     }
                 }

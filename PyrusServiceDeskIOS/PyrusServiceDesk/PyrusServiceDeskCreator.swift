@@ -59,15 +59,16 @@ import UIKit
         })
     }
     
-    @objc public static func updateAdress(_ title: NSAttributedString, _ name: String){
+    @objc public static func changeUserId(userId: String, secretId: String, title: NSAttributedString, name: String){
+        PyrusServiceDesk.secretId = secretId
+        PyrusServiceDesk.customUserId = userId
+        PyrusServiceDesk.createUserId(true)
         if  title.string.count>0{
-            PyrusServiceDesk.createUserId(true)
             if name.count>1{
                 PyrusServiceDesk.setUser(name)
             }
             PyrusServiceDesk.mainController?.customization.chatAttributedTitle = title
             PyrusServiceDesk.mainController?.updateTitleChat()
-            
         }
     }
     
@@ -161,6 +162,21 @@ import UIKit
         }
     }
     
+    static var customUserId: String?
+    static var secretId: String?
+    
+    @objc static public func createWith(_ clientId: String?, userId: String, secretId: String, reset: Bool) {
+        if clientId != nil && (clientId?.count ?? 0)>0 {
+            PyrusServiceDesk.clientId = clientId
+            PyrusServiceDesk.oneChat = true
+            PyrusServiceDesk.secretId = secretId
+            PyrusServiceDesk.customUserId = userId
+            PyrusServiceDesk.createUserId(reset)
+        }else{
+            EventsLogger.logEvent(.emptyClientId)
+        }
+    }
+    
     @objc static public func refresh() {
         PyrusServiceDesk.mainController?.refreshChat()
     }
@@ -187,7 +203,6 @@ import UIKit
         }else{
             userId = reset ? String.getUiqueString() : (UIDevice.current.identifierForVendor?.uuidString ?? String.getUiqueString())
             PSDMessagesStorage.pyrusUserDefaults()?.set(userId, forKey: PSD_USER_ID_KEY)
-            PSDMessagesStorage.pyrusUserDefaults()?.set(false, forKey: PSD_WAS_CLOSE_INFO_KEY)
             PSDMessagesStorage.pyrusUserDefaults()?.synchronize()
         }
         PyrusServiceDesk.userId = userId
