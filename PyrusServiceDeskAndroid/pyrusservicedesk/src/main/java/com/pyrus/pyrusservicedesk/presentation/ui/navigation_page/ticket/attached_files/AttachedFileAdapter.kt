@@ -47,7 +47,7 @@ internal class AttachedFileAdapter(
             if (item !is TextEntry)
                 return
 
-            removeButton = itemView.findViewById(R.id.vh_tf_remove_button)
+            removeButton = itemView.findViewById(R.id.vh_image_remove_button)
 
             itemView.findViewById<TextView>(R.id.vh_tf_name_tv).text = item.attachment.name
 
