@@ -37,14 +37,19 @@ internal class LiveUpdates(requests: RequestFactory) {
         override fun run() {
             GlobalScope.launch(Dispatchers.IO) {
                 requests.getTicketsRequest().execute(
-                    object: ResponseCallback<List<TicketShortDescription>> {
+                    object : ResponseCallback<List<TicketShortDescription>> {
                         override fun onSuccess(data: List<TicketShortDescription>) {
-                            val newUnread = data.count{ !it.isRead }
+                            val newUnread = data.count { !it.isRead }
                             this@launch.launch(Dispatchers.Main) {
-                                processSuccess(data, newUnread)
+                                if (data.isEmpty())
+                                    stopUpdates()
+                                else
+                                    processSuccess(data, newUnread)
                             }
                         }
+
                         override fun onFailure(responseError: ResponseError) {
+                            // ¯\_(ツ)_/¯
                         }
                     }
                 )
@@ -52,13 +57,14 @@ internal class LiveUpdates(requests: RequestFactory) {
             mainHandler.postDelayed(this, TICKETS_UPDATE_INTERVAL * MILLISECONDS_IN_MINUTE)
         }
     }
+
     /**
      * Registers [subscriber] to on new reply events
      */
     @MainThread
     fun subscribeOnReply(subscriber: NewReplySubscriber) {
-        onNewSubscriber()
         newReplySubscribers.add(subscriber)
+        onSubscribe()
     }
 
     /**
@@ -67,6 +73,7 @@ internal class LiveUpdates(requests: RequestFactory) {
     @MainThread
     fun unsubscribeFromReplies(subscriber: NewReplySubscriber) {
         newReplySubscribers.remove(subscriber)
+        onUnsubscribe()
     }
 
     /**
@@ -74,8 +81,8 @@ internal class LiveUpdates(requests: RequestFactory) {
      */
     @MainThread
     internal fun subscribeOnUnreadTicketCountChanged(subscriber: OnUnreadTicketCountChangedSubscriber) {
-        onNewSubscriber()
         ticketCountChangedSubscribers.add(subscriber)
+        onSubscribe()
     }
 
     /**
@@ -84,6 +91,7 @@ internal class LiveUpdates(requests: RequestFactory) {
     @MainThread
     internal fun unsubscribeFromTicketCountChanged(subscriber: OnUnreadTicketCountChangedSubscriber) {
         ticketCountChangedSubscribers.remove(subscriber)
+        onUnsubscribe()
     }
 
     /**
@@ -91,8 +99,8 @@ internal class LiveUpdates(requests: RequestFactory) {
      */
     @MainThread
     internal fun subscribeOnData(liveUpdateSubscriber: LiveUpdateSubscriber) {
-        onNewSubscriber()
         dataSubscribers.add(liveUpdateSubscriber)
+        onSubscribe()
     }
 
     /**
@@ -101,19 +109,38 @@ internal class LiveUpdates(requests: RequestFactory) {
     @MainThread
     internal fun unsubscribeFromData(liveUpdateSubscriber: LiveUpdateSubscriber) {
         dataSubscribers.remove(liveUpdateSubscriber)
+        onUnsubscribe()
     }
 
-    private fun onNewSubscriber() {
-        if (!isStarted) {
-            isStarted = true
-            mainHandler.post(ticketsUpdateRunnable)
-        }
+    private fun onSubscribe() {
+        if (!isStarted)
+            startUpdates()
+    }
+
+    private fun onUnsubscribe() {
+        if (!isStarted)
+            return
+
+        if (newReplySubscribers.isEmpty()
+                && ticketCountChangedSubscribers.isEmpty()
+                && dataSubscribers.isEmpty())
+            stopUpdates()
+    }
+
+    private fun startUpdates() {
+        isStarted = true
+        mainHandler.post(ticketsUpdateRunnable)
+    }
+
+    private fun stopUpdates() {
+        isStarted = false
+        mainHandler.removeCallbacks(ticketsUpdateRunnable)
     }
 
     @MainThread
     private fun processSuccess(data: List<TicketShortDescription>, newUnreadCount: Int) {
         val isChanged = recentUnreadCounter != newUnreadCount
-        dataSubscribers.forEach{
+        dataSubscribers.forEach {
             it.onNewData(data)
             if (isChanged)
                 it.onUnreadTicketCountChanged(newUnreadCount)
@@ -125,6 +152,7 @@ internal class LiveUpdates(requests: RequestFactory) {
         }
         recentUnreadCounter = newUnreadCount
     }
+
 }
 
 /**
