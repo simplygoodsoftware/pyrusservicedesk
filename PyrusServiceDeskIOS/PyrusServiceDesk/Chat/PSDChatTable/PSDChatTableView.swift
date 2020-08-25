@@ -213,7 +213,7 @@ class PSDChatTableView: PSDDetailTableView{
         let expectedBottomOffset = oldContentSize.height - (self.frame.size.height - contentInset.top - contentInset.bottom)
         let hasChanges = oldContentSize != self.contentSize
         if expectedBottomOffset - BOTTOM_INFELICITY < oldOffset.y && hasChanges{
-            self.scrollsToBottom(animated: false)
+            self.scrollsToBottom(animated: true)
         }
     }
     lazy var noConnectionView : PSDNoConnectionView  = {
