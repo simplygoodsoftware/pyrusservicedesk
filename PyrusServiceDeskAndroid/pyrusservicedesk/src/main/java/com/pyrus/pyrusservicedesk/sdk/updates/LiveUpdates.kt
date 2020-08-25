@@ -12,7 +12,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 
-private const val TICKETS_UPDATE_INTERVAL = 5L
+private const val TICKETS_UPDATE_INTERVAL_MINUTES = 30L
 
 /**
  * Class for recurring requesting data.
@@ -54,7 +54,7 @@ internal class LiveUpdates(requests: RequestFactory) {
                     }
                 )
             }
-            mainHandler.postDelayed(this, TICKETS_UPDATE_INTERVAL * MILLISECONDS_IN_MINUTE)
+            mainHandler.postDelayed(this, TICKETS_UPDATE_INTERVAL_MINUTES * MILLISECONDS_IN_MINUTE)
         }
     }
 
