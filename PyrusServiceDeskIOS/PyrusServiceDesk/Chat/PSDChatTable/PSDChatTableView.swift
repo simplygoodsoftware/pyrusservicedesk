@@ -8,6 +8,7 @@ class PSDChatTableView: PSDDetailTableView{
     var chatId :String = ""
     weak var chatDelegate: PSDChatTableViewDelegate?
     private let footerHeight : CGFloat = 10.0
+    private let BOTTOM_INFELICITY : CGFloat = 10.0
     private var needShowRating : Bool = false
     private static let userCellId = "CellUser"
     private static let supportCellId = "CellSupport"
@@ -34,9 +35,9 @@ class PSDChatTableView: PSDDetailTableView{
         refreshControl.addTarget(self, action: #selector(refreshChat), for: .valueChanged)
         return refreshControl
     }()
-    @objc private func refreshChat() {
-        if !(self.superview?.subviews.contains(self.noConnectionView) ?? false) && !PSDGetChat.isActive(){
-            updateChat(needProgress: true, needScroll: false)
+    @objc private func refreshChat(sender: PSDRefreshControl) {
+        if !(self.superview?.subviews.contains(self.noConnectionView) ?? false) && !PSDGetChat.isActive() && sender.isRefreshing{
+            updateChat(needProgress: true)
         }
         
     }
@@ -50,7 +51,7 @@ class PSDChatTableView: PSDDetailTableView{
         }else{
             customRefresh.forceRefresh()
         }
-        updateChat(needProgress: true, needScroll: true)
+        updateChat(needProgress: true)
     }
     ///Setups needed properties to table view
     func setupTableView() {
@@ -161,7 +162,7 @@ class PSDChatTableView: PSDDetailTableView{
     }
     ///update taable matrix
     ///- parameter needProgress: Determines whether the view should respond to updating(need to show error) 
-    func updateChat(needProgress:Bool, needScroll: Bool) {
+    func updateChat(needProgress:Bool) {
         let chatIdWeak : String  = self.chatId
         DispatchQueue.global().async {
             [weak self] in
@@ -173,15 +174,12 @@ class PSDChatTableView: PSDDetailTableView{
                         self?.showRateIfNeed()
                     }
                     //compare number of messages it two last sections
-                    
                     if self?.tableMatrix != nil {
-//                        var needScrollAfterLoad = false
-//                        if needScroll, let lastIndex = self?.lastIndexPath(), self?.indexPathsForVisibleRows?.contains(lastIndex) ?? false {
-//                            needScrollAfterLoad = true
-//                        }
                         self?.tableMatrix.complete(from: chat!, startMessage:self?.lastMessageFromServer){
                             (indexPaths: [IndexPath], sections:IndexSet) in
                             DispatchQueue.main.async  {
+                                let oldContentOffset = self?.contentOffset
+                                let oldContentSize = self?.contentSize
                                 self?.removeNoConnectionView()
                                 self?.lastMessageFromServer = chat?.messages.last
                                 if indexPaths.count>0 || sections.count>0{
@@ -193,18 +191,9 @@ class PSDChatTableView: PSDDetailTableView{
                                         self?.insertRows(at: indexPaths, with: .none)
                                     }
                                     self?.endUpdates()
-//                                    if needScrollAfterLoad{
-//                                        DispatchQueue.main.async  {
-//                                            self?.layoutSubviews()
-//                                            DispatchQueue.main.async  {
-//                                                self?.scrollsToBottom(animated: true)
-//                                            }
-//                                        }
-//                                    }
-                                    
+                                    self?.scrollToBottomAfterRefresh(with: oldContentOffset, oldContentSize: oldContentSize)
+                                    }
                                 }
-                                
-                            }
                         }
                     }
                 }
@@ -215,7 +204,19 @@ class PSDChatTableView: PSDDetailTableView{
             }
         }
     }
-   
+    ///Scrolls table to bottom after refresh, if table view was in bottom scroll position and new messages received
+    private func scrollToBottomAfterRefresh(with oldOffset: CGPoint?, oldContentSize: CGSize?) {
+        guard let oldOffset = oldOffset, let oldContentSize = oldContentSize else {
+            return
+        }
+        self.setNeedsLayout()
+        self.layoutIfNeeded()
+        let expectedBottomOffset = oldContentSize.height - (self.frame.size.height - contentInset.top - contentInset.bottom)
+        let hasChanges = oldContentSize != self.contentSize
+        if expectedBottomOffset - BOTTOM_INFELICITY < oldOffset.y && hasChanges{
+            self.scrollsToBottom(animated: true)
+        }
+    }
     lazy var noConnectionView : PSDNoConnectionView  = {
         let view = PSDNoConnectionView.init(frame: self.frame)
         view.delegate = self

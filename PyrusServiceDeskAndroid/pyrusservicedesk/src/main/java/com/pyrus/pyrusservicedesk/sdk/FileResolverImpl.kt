@@ -23,6 +23,9 @@ internal class FileResolverImpl(private val contentResolver: ContentResolver) : 
      * NULL may be returned if file form the specified [fileUri] was not found or [Uri.getScheme] != "content"
      */
     override fun getUploadFileData(fileUri: Uri): FileUploadRequestData? {
+        if (fileUri.scheme == ContentResolver.SCHEME_FILE)
+            return FileResolverSchemeFile.getUploadFileData(fileUri)
+
         val cursor = ContentResolverCompat.query(
             contentResolver,
             fileUri,
@@ -44,6 +47,10 @@ internal class FileResolverImpl(private val contentResolver: ContentResolver) : 
     override fun isLocalFileExists(localFileUri: Uri?): Boolean {
         if (localFileUri == null)
             return false
+
+        if (localFileUri.scheme == ContentResolver.SCHEME_FILE)
+            return FileResolverSchemeFile.isLocalFileExists(localFileUri)
+
         val cursor = ContentResolverCompat.query(
             contentResolver,
             localFileUri,
@@ -64,6 +71,10 @@ internal class FileResolverImpl(private val contentResolver: ContentResolver) : 
     override fun getFileData(fileUri: Uri?): FileData? {
         if (fileUri == null)
             return null
+
+        if (fileUri.scheme == ContentResolver.SCHEME_FILE)
+            return FileResolverSchemeFile.getFileData(fileUri)
+
         val cursor = ContentResolverCompat.query(
             contentResolver,
             fileUri,

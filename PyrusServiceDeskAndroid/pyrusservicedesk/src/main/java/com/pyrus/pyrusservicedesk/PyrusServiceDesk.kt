@@ -10,6 +10,7 @@ import com.google.gson.GsonBuilder
 import com.pyrus.pyrusservicedesk.presentation.ui.navigation_page.ticket.TicketActivity
 import com.pyrus.pyrusservicedesk.presentation.ui.navigation_page.tickets.TicketsActivity
 import com.pyrus.pyrusservicedesk.presentation.viewmodel.SharedViewModel
+import com.pyrus.pyrusservicedesk.sdk.FileResolver
 import com.pyrus.pyrusservicedesk.sdk.FileResolverImpl
 import com.pyrus.pyrusservicedesk.sdk.RequestFactory
 import com.pyrus.pyrusservicedesk.sdk.data.LocalDataProvider
@@ -222,7 +223,7 @@ class PyrusServiceDesk private constructor(
 
     private var sharedViewModel = SharedViewModel()
 
-    private val fileResolver: FileResolverImpl = FileResolverImpl(application.contentResolver)
+    private val fileResolver: FileResolver = FileResolverImpl(application.contentResolver)
     private val preferences = application.getSharedPreferences(PREFERENCE_KEY, Context.MODE_PRIVATE)
     private val offlineRepository: OfflineRepository
 

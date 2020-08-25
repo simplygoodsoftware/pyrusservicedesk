@@ -20,7 +20,6 @@ import com.pyrus.pyrusservicedesk.R
 import com.pyrus.pyrusservicedesk.presentation.ConnectionActivityBase
 import com.pyrus.pyrusservicedesk.sdk.data.intermediate.FileData
 import com.pyrus.pyrusservicedesk.utils.animateInfinite
-import com.pyrus.pyrusservicedesk.utils.hasPermission
 import kotlinx.android.synthetic.main.psd_activity_file_preview.*
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
@@ -260,11 +259,6 @@ internal class FilePreviewActivity: ConnectionActivityBase<FilePreviewViewModel>
     }
 
     private fun startDownloadFile() {
-        when{
-            hasPermission(Manifest.permission.WRITE_EXTERNAL_STORAGE) -> viewModel.onDownloadFileClicked()
-            else -> requestPermissionsCompat(
-                arrayOf(Manifest.permission.WRITE_EXTERNAL_STORAGE),
-                REQUEST_PERMISSION_WRITE_EXTERNAL_STORAGE)
-        }
+        viewModel.onDownloadFileClicked()
     }
 }

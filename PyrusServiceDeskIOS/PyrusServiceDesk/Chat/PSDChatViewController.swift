@@ -342,7 +342,7 @@ class PSDChatViewController: UIViewController{
     }
     @objc private func updateTable(){
         if !PSDChatTableView.isNewChat(self.tableView.chatId) && !hasNoConnection() && !PSDGetChat.isActive(){
-           self.tableView.updateChat(needProgress:false, needScroll: false)
+           self.tableView.updateChat(needProgress:false)
         }
         
     }
