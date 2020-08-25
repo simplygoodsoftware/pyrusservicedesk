@@ -26,7 +26,7 @@
 
         <provider
             android:name=".sdk.PSDFileProvider"
-            android:authorities="com.pyrus.pyrusservicedesk.FILE_PROVIDER"
+            android:authorities="${applicationId}.com.pyrus.pyrusservicedesk.sdk.PSDFileProvider"
             android:exported="false"
             android:grantUriPermissions="true">
             <meta-data
