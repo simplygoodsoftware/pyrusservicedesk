@@ -68,6 +68,8 @@ class PSDMessageSender: NSObject {
     static func showResult(of messageToPass:PSDMessage, success:Bool, delegate:PSDMessageSendDelegate?){
         if(success){
             PSDMessagesStorage.removeFromStorage(messageId: messageToPass.localId)
+            PyrusServiceDesk.setDidStartChatWithSupport()
+            PyrusServiceDesk.restartTimer()
         }
         
         
