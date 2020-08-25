@@ -87,7 +87,7 @@ private fun Context.createPhotoUriApi16AndAbove(): Uri? {
 
     return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N)
         try {
-            FileProvider.getUriForFile(this, "com.pyrus.pyrusservicedesk.FILE_PROVIDER", file)
+            FileProvider.getUriForFile(this, "${packageName}.com.pyrus.pyrusservicedesk.PSDFileProvider", file)
         }
         catch (e: Exception) {
             return null
