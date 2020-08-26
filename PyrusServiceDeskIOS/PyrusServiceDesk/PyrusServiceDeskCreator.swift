@@ -223,9 +223,13 @@ import UIKit
     ///- parameter rightNow: Is need to fire timer.
     private static func startGettingInfo(rightNow:Bool){
         stopGettingInfo()
-        timer = Timer.scheduledTimer(timeInterval: reloadInterval, target: self, selector: #selector(updateUserInfo), userInfo:nil , repeats: didStartChatWithSupport())
-        if rightNow{
-            timer?.fire()
+        if rightNow && didStartChatWithSupport(){
+            updateUserInfo()
+        }else{
+            timer = Timer.scheduledTimer(timeInterval: reloadInterval, target: self, selector: #selector(updateUserInfo), userInfo:nil , repeats: true)
+            if rightNow{
+                timer?.fire()
+            }
         }
     }
     ///Restart PyrusServiceDesk.timer - move next fire to reloadInterval.
