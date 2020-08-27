@@ -22,9 +22,6 @@ import Foundation
     ///Custom UIBarButtonItem to show in left side of navigation Bar. Default value is nil. If nil there will be drawn back button. If specify custom left button, Pyrus ServiceDesk cannot be closed.
     @objc public var customLeftBarButtonItem: UIBarButtonItem?
     
-    ///The view to show additional information under chat
-    @objc public var infoView: PSDInfoView?
-
     
     func buildCustomization(){
         if avatarForSupport != nil{
@@ -45,9 +42,7 @@ import Foundation
         PyrusServiceDesk.mainController?.customization.customRightBarButtonItem = customRightBarButtonItem
         
         PyrusServiceDesk.mainController?.customization.customLeftBarButtonItem = customLeftBarButtonItem
-                        
-        PyrusServiceDesk.mainController?.customization.infoView = infoView
-        
+                                
         if(userName != nil && userName!.count>1){
             PyrusServiceDesk.setUser(userName)
         }
@@ -68,7 +63,6 @@ class PyrusServiceDeskCustomization {
     }
     var customRightBarButtonItem: UIBarButtonItem?
     var customLeftBarButtonItem: UIBarButtonItem?
-    var infoView: PSDInfoView?
 }
 class PyrusServiceDeskLogs{
     var logPath : String?
@@ -100,8 +94,5 @@ func PSD_СustomLeftBarButtonItem() -> UIBarButtonItem?{
     return PyrusServiceDesk.mainController?.customization.customLeftBarButtonItem
 }
 
-func PSD_InfoView() -> PSDInfoView?{
-    return PyrusServiceDesk.mainController?.customization.infoView
-}
 
 

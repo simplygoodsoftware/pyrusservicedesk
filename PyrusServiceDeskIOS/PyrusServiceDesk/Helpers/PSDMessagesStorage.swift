@@ -1,7 +1,6 @@
 import Foundation
 let PSD_MESSAGES_STORAGE_KEY : String = "PSDMessagesStorage"
 let PSD_USER_DEFAULTS_SUITE_KEY : String = "com.PyrusServiceDesk"
-let PSD_WAS_CLOSE_INFO_KEY : String = "com.PyrusServiceDesk.wasCloseInfo"
 
 /**
  The storage for unsend messages.
