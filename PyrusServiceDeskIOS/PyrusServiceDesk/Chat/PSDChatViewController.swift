@@ -126,12 +126,7 @@ class PSDChatViewController: UIViewController{
         super.viewWillAppear(animated)
         self.navigationController?.navigationBar.isHidden = false
         startGettingInfo()
-      //  self.becomeFirstResponder()
         resizeTable()
-     //   self.tableView.addKeyboardListeners()
-        navigationItem.leftBarButtonItem?.tintColor = PSD_CustomColor()
-        navigationItem.rightBarButtonItem?.tintColor = PSD_CustomColor()
-
         NotificationCenter.default.addObserver(self, selector: #selector(appEnteredBackground), name: UIApplication.didEnterBackgroundNotification, object: nil)
         NotificationCenter.default.addObserver(self, selector: #selector(appEnteredForeground), name: UIApplication.willEnterForegroundNotification, object: nil)
     }
