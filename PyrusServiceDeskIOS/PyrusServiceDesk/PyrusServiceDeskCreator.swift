@@ -58,18 +58,15 @@ import UIKit
             completion(error)
         })
     }
-    
-    @objc public static func changeUserId(userId: String, secretId: String, title: NSAttributedString, name: String){
+    @objc public static func changeUserId(userId: String, secretId: String, title: NSAttributedString, name: String, _ chatTitleView: UIView?){
         PyrusServiceDesk.secretId = secretId
         PyrusServiceDesk.customUserId = userId
         PyrusServiceDesk.createUserId(true)
-        if  title.string.count>0{
-            if name.count>1{
-                PyrusServiceDesk.setUser(name)
-            }
-            PyrusServiceDesk.mainController?.customization.chatAttributedTitle = title
-            PyrusServiceDesk.mainController?.updateTitleChat()
+        if name.count>0{
+            PyrusServiceDesk.setUser(name)
         }
+        PyrusServiceDesk.mainController?.customization.chatTitleView = chatTitleView
+        PyrusServiceDesk.mainController?.updateTitleChat()
     }
     
     ///Show chat
@@ -179,6 +176,16 @@ import UIKit
     
     @objc static public func refresh() {
         PyrusServiceDesk.mainController?.refreshChat()
+    }
+    @objc static public func present(_ viewController: UIViewController, animated: Bool, completion: (() -> Void)?){
+        guard PSDIsOpen() else{
+            return
+            
+        }
+        if let topViewController = UIApplication.topViewController() as? PSDChatViewController{
+            viewController.presentationController?.delegate = topViewController
+        }
+        UIApplication.topViewController()?.present(viewController, animated: animated, completion: completion)
     }
     /*
     ///Init PyrusServiceDesk with new clientId.

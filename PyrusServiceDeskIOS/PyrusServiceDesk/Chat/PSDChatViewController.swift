@@ -10,17 +10,6 @@ protocol PSDUpdateInfo{
 class PSDChatViewController: UIViewController{
     
     var chatId: String = ""
-
-    let labelTitle: UILabel = {
-        let label = UILabel()
-        
-
-        label.isUserInteractionEnabled = true
-        label.textAlignment = .center
-        label.numberOfLines = 2
-        return label
-    }()
-
     
     public func updateTitle(){
         designNavigation()
@@ -32,11 +21,7 @@ class PSDChatViewController: UIViewController{
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        let tapGr = UITapGestureRecognizer(target: self, action: #selector(showChooseCafe))
-        tapGr.cancelsTouchesInView = false
-        tapGr.numberOfTouchesRequired = 1
-        self.labelTitle.addGestureRecognizer(tapGr)
-        
+        presentationController?.delegate = self
         if #available(iOS 11.0, *) {
             self.tableView.contentInsetAdjustmentBehavior = .never//.automatic
             
@@ -55,14 +40,13 @@ class PSDChatViewController: UIViewController{
         DispatchQueue.main.asyncAfter(deadline: deadlineTime, execute: {
             self.messageInputView.inputTextView.becomeFirstResponder()
         })
-        
-        
     }
+    
     override func viewWillLayoutSubviews() {
         super.viewWillLayoutSubviews()
         resizeTable()
     }
-    private func resizeTable(){
+    func resizeTable(){
         var fr = self.view.bounds
         fr.origin.y = (self.navigationController?.navigationBar.frame.size.height ?? 0) +  UIApplication.shared.statusBarFrame.height
         fr.size.height =  fr.size.height - fr.origin.y 
@@ -145,7 +129,9 @@ class PSDChatViewController: UIViewController{
       //  self.becomeFirstResponder()
         resizeTable()
      //   self.tableView.addKeyboardListeners()
-        
+        navigationItem.leftBarButtonItem?.tintColor = PSD_CustomColor()
+        navigationItem.rightBarButtonItem?.tintColor = PSD_CustomColor()
+
         NotificationCenter.default.addObserver(self, selector: #selector(appEnteredBackground), name: UIApplication.didEnterBackgroundNotification, object: nil)
         NotificationCenter.default.addObserver(self, selector: #selector(appEnteredForeground), name: UIApplication.willEnterForegroundNotification, object: nil)
     }
@@ -205,84 +191,45 @@ class PSDChatViewController: UIViewController{
     //Setting design to navigation bar, title and buttons
     private func designNavigation()
     {
-        self.navigationItem.titleView = labelTitle
-        if let attributedTitle = PSD_ChatAttribitesTitle(){
-            
-            labelTitle.attributedText = attributedTitle
-            labelTitle.sizeToFit()
+        if let view = PSD_ChatTitleView(){
+            self.navigationItem.titleView = view
+            view.sizeToFit()
             navigationController?.navigationBar.layoutIfNeeded()
         } else {
-            labelTitle.text = PSD_ChatTitle()
-//            self.title = PSD_ChatTitle()
-//            self.navigationItem.titleView = nil
+            self.title = PSD_ChatTitle()
         }
         
         self.setItems()
     }
-    ///Set chats item if it's not iPadView or oneChat mode.
+    ///Set navigation items
     private func setItems()
     {
-        resetImage()
         if !PyrusServiceDeskController.iPadView && !PyrusServiceDesk.oneChat{
             self.navigationItem.rightBarButtonItem = chatsItem
         }
-        if PSD_SettingsViewController() != nil{
-            if #available(iOS 13.0, *) {
-                let settingsButton = UIBarButtonItem(image: UIImage(systemName: "gear"), style: .done, target: self, action: #selector(showSettings))
-                settingsButton.tintColor = PSD_CustomColor()
-                navigationItem.rightBarButtonItem = settingsButton
-                
-                let chooseCafeButton = UIBarButtonItem(image: UIImage(named: "CustomPin"), style: .done, target: self, action: #selector(showChooseCafe))
-                chooseCafeButton.tintColor = PSD_CustomColor()
-                navigationItem.leftBarButtonItem = chooseCafeButton
-            }
+        if let rightBarButtonItem = PSD_СustomRightBarButtonItem(){
+            rightBarButtonItem.tintColor = PSD_CustomColor()
+            navigationItem.rightBarButtonItem = rightBarButtonItem
+        }
+        if let leftBarButtonItem = PSD_СustomLeftBarButtonItem(){
+            leftBarButtonItem.tintColor = PSD_CustomColor()
+            navigationItem.leftBarButtonItem = leftBarButtonItem
+        }else{
+            let item = UIBarButtonItem.init(customView: leftButton)
+            navigationItem.leftBarButtonItem = item
         }
     }
-    
-    @objc private func showChooseCafe() {
-        if let chooseCafeVC = PSD_ChooseCafeViewController() as? UINavigationController{
-            chooseCafeVC.popToRootViewController(animated: true)
-            messageInputView.inputTextView.resignFirstResponder()
-            self.present(chooseCafeVC, animated: true, completion: nil)
-        }
-        
-    }
-    
-    @objc private func showSettings() {
-        if let settingVC = PSD_SettingsViewController() as? UINavigationController{
-            settingVC.popToRootViewController(animated: false)
-            messageInputView.inputTextView.resignFirstResponder()
-            self.present(settingVC, animated: true, completion: nil)
-        }
-        
-    }
-    
+
     private lazy var leftButton : UIButton = {
         let button = UIButton.init(type: .custom)
         button.setTitle("Back".localizedPSD(), for: .normal)
         button.setTitleColor(UIColor.darkAppColor, for: .normal)
-        button.setImage(UIImage.PSDImage(name: "Back").imageWith(color: UIColor.darkAppColor), for: .normal)
+        let backImage = UIImage.PSDImage(name: "Back").withRenderingMode(.alwaysTemplate)
+        button.setImage(backImage, for: .normal)
         button.addTarget(self, action: #selector(closeButtonAction), for: .touchUpInside)
         button.sizeToFit()
         return button
     }()
-    override func traitCollectionDidChange(_ previousTraitCollection: UITraitCollection?) {
-        super.traitCollectionDidChange(previousTraitCollection)
-        resetImage()
-    }
-    private func resetImage(){
-        if PSD_HideLeftBarButton(){
-            if #available(iOS 13.0, *) {
-                let chooseCafeButton = UIBarButtonItem(image: UIImage(named: "CustomPin"), style: .done, target: self, action: #selector(showChooseCafe))
-                chooseCafeButton.tintColor = PSD_CustomColor()
-                navigationItem.leftBarButtonItem = chooseCafeButton
-            }
-            return
-        }
-        leftButton.setImage(UIImage.PSDImage(name: "Back").imageWith(color: UIColor.darkAppColor), for: .normal)
-        let item = UIBarButtonItem.init(customView: leftButton)
-        navigationItem.leftBarButtonItem = item
-    }
   
     lazy private var chatsItem: ChatListBarButtonItem = {
         let chatsListItem = ChatListBarButtonItem.init()
@@ -373,5 +320,12 @@ extension PSDChatViewController : PSDUpdateInfo{
 extension PSDChatViewController: PSDChatTableViewDelegate {
     func needShowRate(_ showRate: Bool) {
         messageInputView.showRate = showRate
+    }
+}
+
+extension PSDChatViewController: UIAdaptivePresentationControllerDelegate {
+    override func present(_ viewControllerToPresent: UIViewController, animated flag: Bool, completion: (() -> Void)? = nil) {
+        self.messageInputView.inputTextView.resignFirstResponder()
+        super.present(viewControllerToPresent, animated: flag, completion: completion)
     }
 }
