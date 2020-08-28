@@ -1,6 +1,7 @@
 import UIKit
 
 @objc public class PyrusServiceDesk: NSObject {
+    private static let PSD_USER_START_CHAT_KEY = "PSDUserStartChat"
     public static var PSD_CLOSED_NOTIFICATION_NAME = "PyrusServiceDeskWasClosed"
     ///AppId needed for request
     static var clientId: String?
@@ -196,20 +197,39 @@ import UIKit
     @objc public static func registerFileChooser(_ chooser: (FileChooser & UIViewController)?){
         self.fileChooserController = chooser
     }
-    
+    private static func didStartChatWithSupport() -> Bool {
+        if let pyrusUserDefaults = PSDMessagesStorage.pyrusUserDefaults(){
+            return pyrusUserDefaults.bool(forKey: userDidStartChatKey())
+        }
+        return false
+    }
+    ///Set didStartChatWithSupport to true
+    static func setDidStartChatWithSupport(){
+        if let pyrusUserDefaults = PSDMessagesStorage.pyrusUserDefaults(), !didStartChatWithSupport(){
+            pyrusUserDefaults.set(true, forKey: userDidStartChatKey())
+            pyrusUserDefaults.synchronize()
+        }
+    }
+    private static func userDidStartChatKey() -> String{
+        return PSD_USER_START_CHAT_KEY + "_" + userId
+    }
     
     //MARK: get user info automatic
     ///The reload interval to get info from server(chats list)
-    private static let reloadInterval : TimeInterval = 300.0
+    private static let reloadInterval : TimeInterval = 1800.0
     ///The timer to get info from server(chats list) with reloadInterval.
     private static var timer :Timer?
     ///Create timer to get chats list from server.
     ///- parameter rightNow: Is need to fire timer.
-    static func startGettingInfo(rightNow:Bool){
+    private static func startGettingInfo(rightNow:Bool){
         stopGettingInfo()
-        timer = Timer.scheduledTimer(timeInterval: reloadInterval, target: self, selector: #selector(updateUserInfo), userInfo:nil , repeats: true)
-        if rightNow{
-            timer?.fire()
+        if rightNow && didStartChatWithSupport(){
+            updateUserInfo()
+        }else{
+            timer = Timer.scheduledTimer(timeInterval: reloadInterval, target: self, selector: #selector(updateUserInfo), userInfo:nil , repeats: true)
+            if rightNow{
+                timer?.fire()
+            }
         }
     }
     ///Restart PyrusServiceDesk.timer - move next fire to reloadInterval.
@@ -245,6 +265,13 @@ import UIKit
                         }
                         hasInfo = true
                         if chats.count > 0{
+                            for chat in chats{
+                                if chat.messages.count > 0{
+                                    setDidStartChatWithSupport()
+                                    restartTimer()
+                                    break
+                                }
+                            }
                             mainController?.passChanges(chats: chats)
                         }
                         
