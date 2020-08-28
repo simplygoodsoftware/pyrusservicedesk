@@ -256,8 +256,6 @@ SWIFT_PROTOCOL("_TtP16PyrusServiceDesk14OnStopCallback_")
 - (void)onStop;
 @end
 
-@class NSAttributedString;
-@class UIView;
 @class UIViewController;
 @class ServiceDeskConfiguration;
 
@@ -269,7 +267,6 @@ SWIFT_CLASS("_TtC16PyrusServiceDesk16PyrusServiceDesk")
 /// \param completion Error. Not nil if success. See error.localizedDescription to understand why its happened
 ///
 + (void)setPushToken:(NSString * _Nullable)token completion:(void (^ _Nonnull)(NSError * _Nullable))completion;
-+ (void)changeUserIdWithUserId:(NSString * _Nonnull)userId secretId:(NSString * _Nonnull)secretId title:(NSAttributedString * _Nonnull)title name:(NSString * _Nonnull)name :(UIView * _Nullable)chatTitleView;
 /// Show chat
 /// \param viewController ViewController that must present chat
 ///
@@ -305,10 +302,7 @@ SWIFT_CLASS("_TtC16PyrusServiceDesk16PyrusServiceDesk")
 /// \param clientId clientId using for all requests. If clientId not setted PyrusServiceDesk Controller will not be created
 ///
 + (void)createWith:(NSString * _Nullable)clientId;
-+ (void)createWith:(NSString * _Nullable)clientId reset:(BOOL)reset;
-+ (void)createWith:(NSString * _Nullable)clientId userId:(NSString * _Nonnull)userId secretId:(NSString * _Nonnull)secretId reset:(BOOL)reset;
 + (void)refresh;
-+ (void)present:(UIViewController * _Nonnull)viewController animated:(BOOL)animated completion:(void (^ _Nullable)(void))completion;
 /// Save viewController with FileChooser interface. Use to add custom row in attachment-add-menu
 /// \param chooser (FileChooser & UIViewController) to present.
 ///
@@ -318,7 +312,6 @@ SWIFT_CLASS("_TtC16PyrusServiceDesk16PyrusServiceDesk")
 
 @class UIColor;
 @class UIImage;
-@class UIBarButtonItem;
 
 SWIFT_CLASS("_TtC16PyrusServiceDesk24ServiceDeskConfiguration")
 @interface ServiceDeskConfiguration : NSObject
@@ -332,14 +325,6 @@ SWIFT_CLASS("_TtC16PyrusServiceDesk24ServiceDeskConfiguration")
 @property (nonatomic, strong) UIImage * _Nullable avatarForSupport;
 /// A user name. The default is “Guest”
 @property (nonatomic, copy) NSString * _Nullable userName;
-/// View to show in  chat navigation bar
-@property (nonatomic, strong) UIView * _Nullable chatTitleView;
-/// Custom UIBarButtonItem to show in right side of navigationBar. Default is nil.
-@property (nonatomic, strong) UIBarButtonItem * _Nullable customRightBarButtonItem;
-/// Custom UIBarButtonItem to show in left side of navigation Bar. Default value is nil. If nil there will be drawn back button. If specify custom left button, Pyrus ServiceDesk cannot be closed.
-@property (nonatomic, strong) UIBarButtonItem * _Nullable customLeftBarButtonItem;
-@property (nonatomic, copy) NSString * _Nullable userId;
-@property (nonatomic, copy) NSString * _Nullable secretId;
 - (nonnull instancetype)init OBJC_DESIGNATED_INITIALIZER;
 @end
 
@@ -626,8 +611,6 @@ SWIFT_PROTOCOL("_TtP16PyrusServiceDesk14OnStopCallback_")
 - (void)onStop;
 @end
 
-@class NSAttributedString;
-@class UIView;
 @class UIViewController;
 @class ServiceDeskConfiguration;
 
@@ -639,7 +622,6 @@ SWIFT_CLASS("_TtC16PyrusServiceDesk16PyrusServiceDesk")
 /// \param completion Error. Not nil if success. See error.localizedDescription to understand why its happened
 ///
 + (void)setPushToken:(NSString * _Nullable)token completion:(void (^ _Nonnull)(NSError * _Nullable))completion;
-+ (void)changeUserIdWithUserId:(NSString * _Nonnull)userId secretId:(NSString * _Nonnull)secretId title:(NSAttributedString * _Nonnull)title name:(NSString * _Nonnull)name :(UIView * _Nullable)chatTitleView;
 /// Show chat
 /// \param viewController ViewController that must present chat
 ///
@@ -675,10 +657,7 @@ SWIFT_CLASS("_TtC16PyrusServiceDesk16PyrusServiceDesk")
 /// \param clientId clientId using for all requests. If clientId not setted PyrusServiceDesk Controller will not be created
 ///
 + (void)createWith:(NSString * _Nullable)clientId;
-+ (void)createWith:(NSString * _Nullable)clientId reset:(BOOL)reset;
-+ (void)createWith:(NSString * _Nullable)clientId userId:(NSString * _Nonnull)userId secretId:(NSString * _Nonnull)secretId reset:(BOOL)reset;
 + (void)refresh;
-+ (void)present:(UIViewController * _Nonnull)viewController animated:(BOOL)animated completion:(void (^ _Nullable)(void))completion;
 /// Save viewController with FileChooser interface. Use to add custom row in attachment-add-menu
 /// \param chooser (FileChooser & UIViewController) to present.
 ///
@@ -688,7 +667,6 @@ SWIFT_CLASS("_TtC16PyrusServiceDesk16PyrusServiceDesk")
 
 @class UIColor;
 @class UIImage;
-@class UIBarButtonItem;
 
 SWIFT_CLASS("_TtC16PyrusServiceDesk24ServiceDeskConfiguration")
 @interface ServiceDeskConfiguration : NSObject
@@ -702,14 +680,6 @@ SWIFT_CLASS("_TtC16PyrusServiceDesk24ServiceDeskConfiguration")
 @property (nonatomic, strong) UIImage * _Nullable avatarForSupport;
 /// A user name. The default is “Guest”
 @property (nonatomic, copy) NSString * _Nullable userName;
-/// View to show in  chat navigation bar
-@property (nonatomic, strong) UIView * _Nullable chatTitleView;
-/// Custom UIBarButtonItem to show in right side of navigationBar. Default is nil.
-@property (nonatomic, strong) UIBarButtonItem * _Nullable customRightBarButtonItem;
-/// Custom UIBarButtonItem to show in left side of navigation Bar. Default value is nil. If nil there will be drawn back button. If specify custom left button, Pyrus ServiceDesk cannot be closed.
-@property (nonatomic, strong) UIBarButtonItem * _Nullable customLeftBarButtonItem;
-@property (nonatomic, copy) NSString * _Nullable userId;
-@property (nonatomic, copy) NSString * _Nullable secretId;
 - (nonnull instancetype)init OBJC_DESIGNATED_INITIALIZER;
 @end
 
@@ -1000,8 +970,6 @@ SWIFT_PROTOCOL("_TtP16PyrusServiceDesk14OnStopCallback_")
 - (void)onStop;
 @end
 
-@class NSAttributedString;
-@class UIView;
 @class UIViewController;
 @class ServiceDeskConfiguration;
 
@@ -1013,7 +981,6 @@ SWIFT_CLASS("_TtC16PyrusServiceDesk16PyrusServiceDesk")
 /// \param completion Error. Not nil if success. See error.localizedDescription to understand why its happened
 ///
 + (void)setPushToken:(NSString * _Nullable)token completion:(void (^ _Nonnull)(NSError * _Nullable))completion;
-+ (void)changeUserIdWithUserId:(NSString * _Nonnull)userId secretId:(NSString * _Nonnull)secretId title:(NSAttributedString * _Nonnull)title name:(NSString * _Nonnull)name :(UIView * _Nullable)chatTitleView;
 /// Show chat
 /// \param viewController ViewController that must present chat
 ///
@@ -1049,10 +1016,7 @@ SWIFT_CLASS("_TtC16PyrusServiceDesk16PyrusServiceDesk")
 /// \param clientId clientId using for all requests. If clientId not setted PyrusServiceDesk Controller will not be created
 ///
 + (void)createWith:(NSString * _Nullable)clientId;
-+ (void)createWith:(NSString * _Nullable)clientId reset:(BOOL)reset;
-+ (void)createWith:(NSString * _Nullable)clientId userId:(NSString * _Nonnull)userId secretId:(NSString * _Nonnull)secretId reset:(BOOL)reset;
 + (void)refresh;
-+ (void)present:(UIViewController * _Nonnull)viewController animated:(BOOL)animated completion:(void (^ _Nullable)(void))completion;
 /// Save viewController with FileChooser interface. Use to add custom row in attachment-add-menu
 /// \param chooser (FileChooser & UIViewController) to present.
 ///
@@ -1062,7 +1026,6 @@ SWIFT_CLASS("_TtC16PyrusServiceDesk16PyrusServiceDesk")
 
 @class UIColor;
 @class UIImage;
-@class UIBarButtonItem;
 
 SWIFT_CLASS("_TtC16PyrusServiceDesk24ServiceDeskConfiguration")
 @interface ServiceDeskConfiguration : NSObject
@@ -1076,14 +1039,6 @@ SWIFT_CLASS("_TtC16PyrusServiceDesk24ServiceDeskConfiguration")
 @property (nonatomic, strong) UIImage * _Nullable avatarForSupport;
 /// A user name. The default is “Guest”
 @property (nonatomic, copy) NSString * _Nullable userName;
-/// View to show in  chat navigation bar
-@property (nonatomic, strong) UIView * _Nullable chatTitleView;
-/// Custom UIBarButtonItem to show in right side of navigationBar. Default is nil.
-@property (nonatomic, strong) UIBarButtonItem * _Nullable customRightBarButtonItem;
-/// Custom UIBarButtonItem to show in left side of navigation Bar. Default value is nil. If nil there will be drawn back button. If specify custom left button, Pyrus ServiceDesk cannot be closed.
-@property (nonatomic, strong) UIBarButtonItem * _Nullable customLeftBarButtonItem;
-@property (nonatomic, copy) NSString * _Nullable userId;
-@property (nonatomic, copy) NSString * _Nullable secretId;
 - (nonnull instancetype)init OBJC_DESIGNATED_INITIALIZER;
 @end
 
@@ -1370,8 +1325,6 @@ SWIFT_PROTOCOL("_TtP16PyrusServiceDesk14OnStopCallback_")
 - (void)onStop;
 @end
 
-@class NSAttributedString;
-@class UIView;
 @class UIViewController;
 @class ServiceDeskConfiguration;
 
@@ -1383,7 +1336,6 @@ SWIFT_CLASS("_TtC16PyrusServiceDesk16PyrusServiceDesk")
 /// \param completion Error. Not nil if success. See error.localizedDescription to understand why its happened
 ///
 + (void)setPushToken:(NSString * _Nullable)token completion:(void (^ _Nonnull)(NSError * _Nullable))completion;
-+ (void)changeUserIdWithUserId:(NSString * _Nonnull)userId secretId:(NSString * _Nonnull)secretId title:(NSAttributedString * _Nonnull)title name:(NSString * _Nonnull)name :(UIView * _Nullable)chatTitleView;
 /// Show chat
 /// \param viewController ViewController that must present chat
 ///
@@ -1419,10 +1371,7 @@ SWIFT_CLASS("_TtC16PyrusServiceDesk16PyrusServiceDesk")
 /// \param clientId clientId using for all requests. If clientId not setted PyrusServiceDesk Controller will not be created
 ///
 + (void)createWith:(NSString * _Nullable)clientId;
-+ (void)createWith:(NSString * _Nullable)clientId reset:(BOOL)reset;
-+ (void)createWith:(NSString * _Nullable)clientId userId:(NSString * _Nonnull)userId secretId:(NSString * _Nonnull)secretId reset:(BOOL)reset;
 + (void)refresh;
-+ (void)present:(UIViewController * _Nonnull)viewController animated:(BOOL)animated completion:(void (^ _Nullable)(void))completion;
 /// Save viewController with FileChooser interface. Use to add custom row in attachment-add-menu
 /// \param chooser (FileChooser & UIViewController) to present.
 ///
@@ -1432,7 +1381,6 @@ SWIFT_CLASS("_TtC16PyrusServiceDesk16PyrusServiceDesk")
 
 @class UIColor;
 @class UIImage;
-@class UIBarButtonItem;
 
 SWIFT_CLASS("_TtC16PyrusServiceDesk24ServiceDeskConfiguration")
 @interface ServiceDeskConfiguration : NSObject
@@ -1446,14 +1394,6 @@ SWIFT_CLASS("_TtC16PyrusServiceDesk24ServiceDeskConfiguration")
 @property (nonatomic, strong) UIImage * _Nullable avatarForSupport;
 /// A user name. The default is “Guest”
 @property (nonatomic, copy) NSString * _Nullable userName;
-/// View to show in  chat navigation bar
-@property (nonatomic, strong) UIView * _Nullable chatTitleView;
-/// Custom UIBarButtonItem to show in right side of navigationBar. Default is nil.
-@property (nonatomic, strong) UIBarButtonItem * _Nullable customRightBarButtonItem;
-/// Custom UIBarButtonItem to show in left side of navigation Bar. Default value is nil. If nil there will be drawn back button. If specify custom left button, Pyrus ServiceDesk cannot be closed.
-@property (nonatomic, strong) UIBarButtonItem * _Nullable customLeftBarButtonItem;
-@property (nonatomic, copy) NSString * _Nullable userId;
-@property (nonatomic, copy) NSString * _Nullable secretId;
 - (nonnull instancetype)init OBJC_DESIGNATED_INITIALIZER;
 @end
 
