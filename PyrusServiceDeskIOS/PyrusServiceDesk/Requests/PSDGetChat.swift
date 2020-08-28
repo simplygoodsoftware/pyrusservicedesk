@@ -150,6 +150,10 @@ struct PSDGetChat {
             if (attachmentsForMessage?.count ?? 0) > 0 || (textForMessage?.count ?? 0) > 0 || rating != nil{
                 let message = PSDMessage(text: textForMessage, attachments:attachmentsForMessage, messageId: dic.stringOfKey(commentIdParameter), owner: user, date: date)
                 message.rating = rating
+                let clientId = dic.stringOfKey(CLIENT_ID_KEY)
+                if clientId.count > 0 {
+                    message.clientId = clientId
+                }
                 messages.append(message)
             }
         }

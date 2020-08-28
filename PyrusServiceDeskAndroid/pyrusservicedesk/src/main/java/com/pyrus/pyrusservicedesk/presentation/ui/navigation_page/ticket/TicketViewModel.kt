@@ -511,7 +511,9 @@ internal class TicketViewModel(serviceDeskProvider: ServiceDeskProvider,
 
         override fun getCommentId(data: AddCommentResponseData): Int = data.commentId
 
-        override fun onSuccess(data: AddCommentResponseData) {}
+        override fun onSuccess(data: AddCommentResponseData) {
+            liveUpdates.subscribeOnUnreadTicketCountChanged(this@TicketViewModel)
+        }
 
     }
 

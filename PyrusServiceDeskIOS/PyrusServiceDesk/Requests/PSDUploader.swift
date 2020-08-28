@@ -106,7 +106,7 @@ class PSDUploader: NSObject {
         task.cancel()
         if tasksMap[task] != nil{
             tasksMap[task]!.sendingDelegate?.remove(message: tasksMap[task]!.message)
-            PSDMessagesStorage.removeFromStorage(messageId:tasksMap[task]!.message.localId)
+            PSDMessagesStorage.removeFromStorage(messageId:tasksMap[task]!.message.clientId)
         }
         
         

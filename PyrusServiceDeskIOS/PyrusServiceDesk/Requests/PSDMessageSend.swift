@@ -89,7 +89,7 @@ struct PSDMessageSend {
     {
         PSDMessagesStorage.saveInStorage(message:messageToPass)
         dispatchQueue.async {
-        if (PSDChatTableView.isNewChat(chatId) && !PSDMessageSend.passingMessagesIds.contains(messageToPass.localId)){
+        if (PSDChatTableView.isNewChat(chatId) && !PSDMessageSend.passingMessagesIds.contains(messageToPass.clientId)){
             if needWhait{
                 passQueueArray.append(messageToPass)
                 return
@@ -100,11 +100,11 @@ struct PSDMessageSend {
             
         }
         if !(PSDChatTableView.isNewChat(chatId)){
-            if PSDMessageSend.passingMessagesIds.contains(messageToPass.localId){
+            if PSDMessageSend.passingMessagesIds.contains(messageToPass.clientId){
                 //при отпрвке атачей эта же функция вызывается снова, продолжаем отправку не блокируя очередь
             }
             else{
-                PSDMessageSend.passingMessagesIds.append(messageToPass.localId)
+                PSDMessageSend.passingMessagesIds.append(messageToPass.clientId)
                 _ = PSDMessageSend.semaphore.wait(timeout: DispatchTime.distantFuture)
             }
         }
@@ -147,7 +147,7 @@ struct PSDMessageSend {
                 passQueueArray.removeAll()
             }
         }
-        PSDMessageSend.passingMessagesIds.removeAll(where: {$0 == messageToPass.localId})
+        PSDMessageSend.passingMessagesIds.removeAll(where: {$0 == messageToPass.clientId})
         semaphore.signal()
     }
     static func clearAndRemove(sender:PSDMessageSender){
