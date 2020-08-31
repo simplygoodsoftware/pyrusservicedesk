@@ -14,6 +14,10 @@ enum FilesSupportedExtension : String,CaseIterable {
     case xlsx = ".xlsx"
     case heic = ".heic"
 }
+private enum VideodExtension : String,CaseIterable {
+    case mov = ".mov"
+    
+}
 extension String {
     func isSupportedFileFormat() -> Bool {
         for i in FilesSupportedExtension.allCases{
@@ -28,5 +32,13 @@ extension String {
             return true
         }
         return false
+    }
+    func isVideoFormat() -> Bool {
+      for i in VideodExtension.allCases{
+          if self.lowercased().hasSuffix(i.rawValue.lowercased()){
+              return true
+          }
+      }
+      return false
     }
 }
