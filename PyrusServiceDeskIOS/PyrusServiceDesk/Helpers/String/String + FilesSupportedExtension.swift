@@ -16,7 +16,13 @@ enum FilesSupportedExtension : String,CaseIterable {
 }
 private enum VideodExtension : String,CaseIterable {
     case mov = ".mov"
-    
+    case gt = ".gt"
+    case avi = ".avi"
+    case mp4 = ".mp4"
+    case m4p = ".m4p"
+    case m4v = ".m4v"
+    case gpp = ".3gp"
+    case gpp2 = ".3g2"
 }
 extension String {
     func isSupportedFileFormat() -> Bool {
