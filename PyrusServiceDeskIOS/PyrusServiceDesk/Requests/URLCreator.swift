@@ -44,7 +44,7 @@ struct PyrusServiceDeskAPI {
         var urlString: String = "\(baseURLString)" + type.rawValue
 
         if type == .download || type == .downloadPreview {
-            let userIdEncodeed: String = PyrusServiceDesk.userId.addingPercentEncoding(withAllowedCharacters: NSCharacterSet.urlHostAllowed) ?? PyrusServiceDesk.userId
+            let userIdEncodeed: String = PyrusServiceDesk.userId.addingPercentEncoding(withAllowedCharacters: CharacterSet.rfc3986Unreserved) ?? PyrusServiceDesk.userId
             let appIdEncodeed: String = PyrusServiceDesk.clientId?.addingPercentEncoding(withAllowedCharacters: CharacterSet.rfc3986Unreserved) ?? PyrusServiceDesk.clientId ?? ""
             urlString = urlString + "/" + ticketId + "?user_id=" + userIdEncodeed + "&app_id=" + appIdEncodeed
             
