@@ -25,6 +25,11 @@ extension String {
                 return true
             }
         }
+        for i in VideodExtension.allCases{
+            if self.lowercased().hasSuffix(i.rawValue.lowercased()){
+                return true
+            }
+        }
         return false
     }
     func isImageFileFormat() -> Bool {

@@ -49,8 +49,9 @@ class PSDAttachmentPreviewView: UIView {
     }
     private var webView: WKWebView?
     private var videoPlayer: AVPlayerViewController?
+    private var player: AVPlayer?
     private func showVideo(url: URL){
-        let player = AVPlayer.init(url: url)
+        player = AVPlayer.init(url: url)
         videoPlayer = AVPlayerViewController()
             
         if let videoPlayer = videoPlayer{
@@ -58,7 +59,6 @@ class PSDAttachmentPreviewView: UIView {
             videoPlayer.videoGravity = .resizeAspect
             addSubview(videoPlayer.view)
             videoPlayer.player = player
-            player.play()
         }
     }
     private func showWebView(url: URL){
