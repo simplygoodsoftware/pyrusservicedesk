@@ -176,7 +176,7 @@ class PSDChatTableView: PSDDetailTableView{
                     //compare number of messages it two last sections
                     if self?.tableMatrix != nil {
                         self?.tableMatrix.complete(from: chat!, startMessage:self?.lastMessageFromServer){
-                            (indexPaths: [IndexPath], sections:IndexSet) in
+                            (indexPaths: [IndexPath], sections:IndexSet, _) in
                             DispatchQueue.main.async  {
                                 let oldContentOffset = self?.contentOffset
                                 let oldContentSize = self?.contentSize
@@ -559,7 +559,7 @@ extension PSDChatTableView : PSDMessageSendDelegate{
         self.chatId = chatId
     }
     func remove(message:PSDMessage){
-        let indexPathsAndRows = self.tableMatrix.findIndexPath(ofMessage: message.localId).keys.sorted(by:{$0 > $1})
+        let indexPathsAndRows = self.tableMatrix.findIndexPath(ofMessage: message.clientId).keys.sorted(by:{$0 > $1})
         var indexPaths = [IndexPath]()
         for indexPath in indexPathsAndRows{
             if tableMatrix.has(indexPath: indexPath){
@@ -568,7 +568,7 @@ extension PSDChatTableView : PSDMessageSendDelegate{
             }
         }
         DispatchQueue.main.async {
-            PSDMessagesStorage.removeFromStorage(messageId: message.localId)
+            PSDMessagesStorage.removeFromStorage(messageId: message.clientId)
             DispatchQueue.main.async {
                  self.showRateIfNeed()
             }
@@ -590,7 +590,7 @@ extension PSDChatTableView : PSDMessageSendDelegate{
                 guard let self = self else{
                     return
                 }
-                let indexPathsAndMessages = self.tableMatrix.findIndexPath(ofMessage: message.localId)
+                let indexPathsAndMessages = self.tableMatrix.findIndexPath(ofMessage: message.clientId)
                 guard  indexPathsAndMessages.count > 0 else{
                     EventsLogger.logEvent(.didNotFindMessageAfterUpdate)
                     return

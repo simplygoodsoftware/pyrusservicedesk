@@ -4,7 +4,12 @@ extension Array where Element == [PSDRowMessage]{
     ///complete array with unsent messages from storage
     mutating func completeWithUnsentMessages(){
         let messagesFromStorage = PSDMessagesStorage.messagesFromStorage()
-        complete(with: messagesFromStorage, startMessage: nil, completion: nil)
+        complete(with: messagesFromStorage, startMessage: nil, completion: { _,_, messages in
+            let res = messagesFromStorage.filter { !messages.contains($0)}
+            for message in res{
+                PSDMessagesStorage.removeFromStorage(messageId: message.clientId)
+            }
+        })
     }
     ///Complete array with messages. Messages always add to last section, and checked for duplication by localId
     ///- parameter messages: messages to add
@@ -42,10 +47,10 @@ extension Array where Element == [PSDRowMessage]{
      - indexPaths: [IndexPath] with indexPaths need to be inserted
      - sections: IndexSet need to be inserted
      */
-     mutating func complete(from chat:PSDChat, startMessage: PSDMessage?, completion: @escaping (_ indexPaths: [IndexPath], _ sections:IndexSet) -> Void){
+     mutating func complete(from chat:PSDChat, startMessage: PSDMessage?, completion: @escaping (_ indexPaths: [IndexPath], _ sections:IndexSet, _ messages: [PSDMessage]) -> Void){
         complete(with: chat.messages, startMessage: startMessage, completion: completion)
     }
-    mutating private func complete(with messages:[PSDMessage], startMessage: PSDMessage?, completion: ( (_ indexPaths: [IndexPath], _ sections:IndexSet) -> Void)?){
+    mutating private func complete(with messages:[PSDMessage], startMessage: PSDMessage?, completion: ( (_ indexPaths: [IndexPath], _ sections:IndexSet, _ messages: [PSDMessage]) -> Void)?){
         let startMessageIndexPath = self.index(of: startMessage)
         
         var index:Int = 0//the index of message in received chat
@@ -57,6 +62,7 @@ extension Array where Element == [PSDRowMessage]{
         //completion for update table
         var indexPaths : [IndexPath] =  [IndexPath]()
         var reloadSections : [Int] = [Int]()
+        var adddedMessages = [PSDMessage]()
         if messages.count > index{
             for i in index..<messages.count{
                 let message = messages[i]
@@ -95,12 +101,12 @@ extension Array where Element == [PSDRowMessage]{
                     self.insert(PSDObjectsCreator.parseMessageToRowMessage(message), at: section)
                     reloadSections.append(section)
                 }
-                
+                adddedMessages.append(message)
                 
             }
                 
         }
-        completion?(indexPaths,IndexSet(reloadSections))
+        completion?(indexPaths,IndexSet(reloadSections), adddedMessages)
     }
     ///Find indexPath of message by its messageId start from bottom.
     private func index(of searchMessage:PSDMessage?)->IndexPath{
@@ -163,7 +169,7 @@ extension Array where Element == [PSDRowMessage]{
                     if message.message.state == .sent && !message.hasId() && message.text == findMessage.text && message.attachment?.name == findMessage.attachment?.name && message.rating == findMessage.rating{
                         message.message.messageId = findMessage.message.messageId
                     }
-                    if message.message.localId == findMessage.message.localId{
+                    if message.message.clientId.lowercased() == findMessage.message.clientId.lowercased(){
                         return true
                     }
                     if message.message.messageId == findMessage.message.messageId && findMessage.hasId(){

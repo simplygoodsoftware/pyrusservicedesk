@@ -29,7 +29,7 @@ enum urlType : String{
 struct PyrusServiceDeskAPI {
     private static let baseURLString = "https://pyrus.com/servicedeskapi/v1/"//dev.
     ///Create URL for urlType in [.chats, .createNew, .upload, .chatFeed, .updateFeed, .token]
-    static func PSDURL(type:urlType)->URL{
+    static func PSDURL(type: urlType) -> URL {
         let validTypes : [urlType] = [.chats, .createNew, .upload, .chatFeed, .updateFeed, .token]
         if !(validTypes.contains(type)){
             fatalError("Bad urlType for this function, type = \(urlType.RawValue())")
@@ -37,11 +37,11 @@ struct PyrusServiceDeskAPI {
         return PSDURL(type:type,ticketId:"0")
     }
     ///Create URL all urlType exept avatar
-    static func PSDURL(type:urlType,ticketId:String)->URL{
-        if type == .avatar{
+    static func PSDURL(type: urlType, ticketId: String) -> URL {
+        if type == .avatar {
             fatalError("Bad urlType for this function")
         }
-        var urlString : String = "\(baseURLString)" + type.rawValue
+        var urlString: String = "\(baseURLString)" + type.rawValue
 
         if type == .download || type == .downloadPreview{
             if let secretKey = PyrusServiceDesk.secretId, let customUserId = PyrusServiceDesk.customUserId {

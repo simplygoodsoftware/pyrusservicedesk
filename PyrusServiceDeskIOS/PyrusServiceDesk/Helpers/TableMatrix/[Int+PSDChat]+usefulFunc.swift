@@ -21,7 +21,7 @@ extension Array where Element == [PSDRowMessage]{
         var indexPaths = [IndexPath:PSDRowMessage]()
         for (section,messages) in self.enumerated().reversed(){
             for (row,message) in messages.enumerated().reversed(){
-                if message.message.localId == localId
+                if message.message.clientId.lowercased() == localId.lowercased()
                 {
                     indexPaths[IndexPath.init(row: row, section: section)] = message
                 }
@@ -39,7 +39,7 @@ extension Array where Element == [PSDRowMessage]{
         var firstRow = 0
         var section = lastSection + 1
         if lastSectionDate.compareWithoutTime(with: message.date) == .equal{
-            firstRow = self[lastSection].count
+            firstRow = self[lastSection].count - 1
             section = lastSection
         }
         var indexPaths = [IndexPath]()
