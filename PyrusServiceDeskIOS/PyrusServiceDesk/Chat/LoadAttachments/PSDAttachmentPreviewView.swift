@@ -10,7 +10,7 @@ class PSDAttachmentPreviewView: UIView {
     override init(frame: CGRect) {
         super.init(frame: frame)
         self.backgroundColor = .psdLightGray
-        
+        isUserInteractionEnabled = true
     }
     ///Show preview of Attachment
     ///- parameter url: The file's url that need to show
@@ -58,7 +58,9 @@ class PSDAttachmentPreviewView: UIView {
             videoPlayer.view.frame = frame
             videoPlayer.videoGravity = .resizeAspect
             addSubview(videoPlayer.view)
-            videoPlayer.player = player
+        }
+        DispatchQueue.main.async() {
+            self.videoPlayer?.player = self.player
         }
     }
     private func showWebView(url: URL){

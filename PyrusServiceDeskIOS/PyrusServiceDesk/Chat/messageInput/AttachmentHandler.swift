@@ -211,6 +211,8 @@ class AttachmentHandler: NSObject,UIImagePickerControllerDelegate, UINavigationC
         } else {
             let status = PHPhotoLibrary.authorizationStatus()
             switch status{
+            case .limited:
+                self.fetchLastImage(image: image)
             case .authorized:
                 self.fetchLastImage(image: image)
             case .notDetermined:
