@@ -34,8 +34,14 @@ class PSDChatViewController: UIViewController{
         self.customiseDesign(color: UIColor.darkAppColor)
         
         self.openChat()
-        
         self.startGettingInfo()
+        if let infoView = PSD_InfoView(), !(PSDMessagesStorage.pyrusUserDefaults()?.bool(forKey: PSD_WAS_CLOSE_INFO_KEY) ?? true) {
+            view.addSubview(infoView)
+            infoView.widthAnchor.constraint(equalTo: view.widthAnchor).isActive = true
+            infoView.centerXAnchor.constraint(equalTo: view.centerXAnchor).isActive = true
+            infoView.topAnchor.constraint(equalTo: view.topAnchor, constant: (self.navigationController?.navigationBar.frame.size.height ?? 0) +  UIApplication.shared.statusBarFrame.height).isActive = true
+        }
+
         let deadlineTime = DispatchTime.now() + 0.45
         DispatchQueue.main.asyncAfter(deadline: deadlineTime, execute: {
             self.messageInputView.inputTextView.becomeFirstResponder()
@@ -54,6 +60,11 @@ class PSDChatViewController: UIViewController{
             fr.origin.x = self.view.safeAreaInsets.left
             fr.size.width = fr.size.width - (fr.origin.x*2)
         }
+        if let infoView = PSD_InfoView(), !(PSDMessagesStorage.pyrusUserDefaults()?.bool(forKey: PSD_WAS_CLOSE_INFO_KEY) ?? true){
+            fr.origin.y += infoView.frame.size.height
+            fr.size.height -= infoView.frame.size.height
+        }
+
         self.tableView.frame = fr
         
     }

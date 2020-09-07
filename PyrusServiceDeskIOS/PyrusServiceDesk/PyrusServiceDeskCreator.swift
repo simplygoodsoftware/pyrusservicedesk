@@ -211,6 +211,7 @@ import UIKit
         }else{
             userId = reset ? String.getUiqueString() : (UIDevice.current.identifierForVendor?.uuidString ?? String.getUiqueString())
             PSDMessagesStorage.pyrusUserDefaults()?.set(userId, forKey: PSD_USER_ID_KEY)
+            PSDMessagesStorage.pyrusUserDefaults()?.set(false, forKey: PSD_WAS_CLOSE_INFO_KEY)
             PSDMessagesStorage.pyrusUserDefaults()?.synchronize()
         }
         PyrusServiceDesk.userId = userId
