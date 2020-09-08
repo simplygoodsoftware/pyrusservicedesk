@@ -10,7 +10,6 @@ class PSDAttachmentPreviewView: UIView {
     override init(frame: CGRect) {
         super.init(frame: frame)
         self.backgroundColor = .psdLightGray
-        isUserInteractionEnabled = true
     }
     ///Show preview of Attachment
     ///- parameter url: The file's url that need to show
