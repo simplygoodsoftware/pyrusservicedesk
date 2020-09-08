@@ -58,7 +58,9 @@ class PSDAttachmentPreviewView: UIView {
             videoPlayer.view.frame = frame
             videoPlayer.videoGravity = .resizeAspect
             addSubview(videoPlayer.view)
-            videoPlayer.player = player
+        }
+        DispatchQueue.main.async() {
+            self.videoPlayer?.player = self.player
         }
     }
     private func showWebView(url: URL){
