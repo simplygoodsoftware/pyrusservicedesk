@@ -30,7 +30,7 @@ func localURL (fileName: String, messageLocalId: String) -> URL{
 }
 ///Return local document path
 private func getDocumentsDirectory() -> NSString {
-    let paths = NSSearchPathForDirectoriesInDomains(.documentDirectory, .userDomainMask, true)
+    let paths = NSSearchPathForDirectoriesInDomains(.documentDirectory, .userDomainMask, true)//test не нравится способ формирования пути, думаю нужно сделать свою и спапками
     let documentsDirectory = paths[0]
     return documentsDirectory as NSString
 }

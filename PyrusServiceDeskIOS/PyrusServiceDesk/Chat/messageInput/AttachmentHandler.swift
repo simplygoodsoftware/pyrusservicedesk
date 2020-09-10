@@ -63,7 +63,7 @@ class AttachmentHandler: NSObject,UIImagePickerControllerDelegate, UINavigationC
         else if(type == .gallery){
             let status = PHPhotoLibrary.authorizationStatus()
             switch status{
-            case .limited, .authorized:
+            case .authorized://test .limited,
                 self.openGallery(viewController)
             case .notDetermined:
                 PHPhotoLibrary.requestAuthorization({ (status) in
