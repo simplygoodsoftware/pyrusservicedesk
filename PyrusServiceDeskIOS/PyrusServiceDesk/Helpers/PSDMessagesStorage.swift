@@ -11,7 +11,7 @@ struct PSDMessagesStorage{
     ///The maximum number of messages to store. If has more - they are start deliting from start.
     private static let MAX_SAVED_MESSAGES_NUMBER  = 20
     ///The maximum size of attachment. Bigger attachment will not be saved to store.
-    private static let MAX_SAVEDATTACHMENT_SIZE = 500000//bytes
+    private static let MAX_SAVEDATTACHMENT_SIZE = 5000000//bytes
     ///The key to store local id of message
     private static let MESSAGE_LOCAL_ID_KEY = "localId"
     ///The key to store text of message
@@ -74,11 +74,10 @@ struct PSDMessagesStorage{
     private static func saveToFileAttachment(_ attachment : PSDAttachment, messageLocalId: String)->Bool{
         if attachment.data.count > 0{
             if attachment.data.count > MAX_SAVEDATTACHMENT_SIZE{
+                print("attachment is too big to safe")
                 return false
             }
-            if let _ = attachment.data.dataToFile(fileName: attachment.name, messageLocalId: messageLocalId){
-                return true
-            }
+            return PSDFilesManager.saveAttchment(attachment, forMessageWith: messageLocalId)
         }
         return false
         
@@ -99,7 +98,7 @@ struct PSDMessagesStorage{
                         guard let attachmentName = attachmentDict[ATTACHMENT_NAME_KEY] as? String else{
                             continue
                         }
-                        removeLocalFile(fileName: attachmentName, messageLocalId: messageId)
+                        PSDFilesManager.removeLocalFile(fileName: attachmentName, messageLocalId: messageId)
                     }
                 }
                 
@@ -175,12 +174,9 @@ struct PSDMessagesStorage{
             var attachments = [PSDAttachment]()
             if let attachmetsArray = dict[ATTACHMENT_ARRAY_KEY] as? [[String: Any]], attachmetsArray.count > 0 {
                 for attachmentDict in attachmetsArray {
-                    guard let attName = attachmentDict[ATTACHMENT_NAME_KEY] as? String, attName.count > 0, let data = dataFromLocalURL(fileName:attName, messageLocalId: message.clientId) else {
+                    guard let attName = attachmentDict[ATTACHMENT_NAME_KEY] as? String, attName.count > 0, let attachment = PSDFilesManager.getAtttachment(attName, messageLocalId: message.clientId) else {
                         continue
                     }
-                    let attachment: PSDAttachment =  PSDAttachment.init(localPath: "", data: data,serverIdentifer:nil)
-                    attachment.name = attName
-                    attachment.size = (attachmentDict[ATTACHMENT_SIZE_KEY] as? Int) ?? 0
                     attachments.append(attachment)
                 }
             }
