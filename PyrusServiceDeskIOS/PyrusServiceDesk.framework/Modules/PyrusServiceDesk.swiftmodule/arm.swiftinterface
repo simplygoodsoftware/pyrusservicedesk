@@ -1,5 +1,5 @@
 // swift-interface-format-version: 1.0
-// swift-compiler-version: Apple Swift version 5.3 (swiftlang-1200.0.29.2 clang-1200.0.30.1)
+// swift-compiler-version: Apple Swift version 5.2.4 (swiftlang-1103.0.32.9 clang-1103.0.32.53)
 // swift-module-flags: -target armv7-apple-ios9.0 -enable-objc-interop -enable-library-evolution -swift-version 5 -enforce-exclusivity=checked -O -module-name PyrusServiceDesk
 import AVFoundation
 import AVKit
@@ -17,6 +17,11 @@ import WebKit
   @objc public var welcomeMessage: Swift.String?
   @objc public var avatarForSupport: UIKit.UIImage?
   @objc public var userName: Swift.String?
+  @objc public var chatTitleView: UIKit.UIView?
+  @objc public var customRightBarButtonItem: UIKit.UIBarButtonItem?
+  @objc public var customLeftBarButtonItem: UIKit.UIBarButtonItem?
+  @objc public var userId: Swift.String?
+  @objc public var secretId: Swift.String?
   @objc deinit
   @objc override dynamic public init()
 }
@@ -40,6 +45,7 @@ import WebKit
 @_inheritsConvenienceInitializers @objc public class PyrusServiceDesk : ObjectiveC.NSObject {
   public static var PSD_CLOSED_NOTIFICATION_NAME: Swift.String
   @objc public static func setPushToken(_ token: Swift.String?, completion: @escaping (Swift.Error?) -> Swift.Void)
+  @objc public static func changeUserId(userId: Swift.String, secretId: Swift.String, title: Foundation.NSAttributedString, name: Swift.String, _ chatTitleView: UIKit.UIView?)
   @objc public static func start(on viewController: UIKit.UIViewController, onStopCallback: PyrusServiceDesk.OnStopCallback? = nil)
   @objc public static func start(on viewController: UIKit.UIViewController, configuration: PyrusServiceDesk.ServiceDeskConfiguration?, onStopCallback: PyrusServiceDesk.OnStopCallback? = nil)
   @objc public static func start(on viewController: UIKit.UIViewController, configuration: PyrusServiceDesk.ServiceDeskConfiguration?, completion: (() -> Swift.Void)? = nil, onStopCallback: PyrusServiceDesk.OnStopCallback? = nil)
@@ -48,7 +54,10 @@ import WebKit
   @objc public static func unsubscribeFromReplies(_ subscriber: PyrusServiceDesk.NewReplySubscriber?)
   @objc public static func subscribeToGogEvents(_ subscriber: PyrusServiceDesk.LogEvents)
   @objc public static func createWith(_ clientId: Swift.String?)
+  @objc public static func createWith(_ clientId: Swift.String?, reset: Swift.Bool)
+  @objc public static func createWith(_ clientId: Swift.String?, userId: Swift.String, secretId: Swift.String, reset: Swift.Bool)
   @objc public static func refresh()
+  @objc public static func present(_ viewController: UIKit.UIViewController, animated: Swift.Bool, completion: (() -> Swift.Void)?)
   @objc public static func registerFileChooser(_ chooser: (UIKit.UIViewController & PyrusServiceDesk.FileChooser)?)
   @objc deinit
   @objc override dynamic public init()
