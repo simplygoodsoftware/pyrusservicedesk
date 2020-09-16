@@ -23,10 +23,15 @@ class PSDAttachment: NSObject {
     ///The preview image of attacment
     var previewImage : UIImage?
     var localId : String
-    init(localPath: String, data:Data?, serverIdentifer:String?)  {
+    init(localPath: String? , data:Data?, serverIdentifer:String?)  {
         self.localPath = localPath
-        let url = URL.init(string: localPath)
-        self.name = url?.lastPathComponent.trimmingCharacters(in: .whitespacesAndNewlines) ?? ""
+        if let localPath = localPath{
+            let url = URL.init(string: localPath)
+            self.name = url?.lastPathComponent.trimmingCharacters(in: .whitespacesAndNewlines) ?? ""
+        }
+        if(self.name.count == 0){
+            self.name = Date().asNumbersString() + ".jpeg"
+        }
         self.canOpen = name.isSupportedFileFormat()
         self.isImage = name.isImageFileFormat()
         self.localId = UUID().uuidString
@@ -36,11 +41,6 @@ class PSDAttachment: NSObject {
             self.size = self.data.count
         }
         self.serverIdentifer = serverIdentifer
-    }
-    func rename(with url:URL){
-        if(self.isImage){
-            self.name = Date().asNumbersString() + ".jpeg"
-        }
     }
     private static func createPreviewImage(from data:Data)-> UIImage?{
         if data.count > 0{
