@@ -4,6 +4,7 @@ import MobileCoreServices
 
 let contenttype = "application/json; charset=utf-8"
 extension URLRequest {
+    private static let VERSION_API = 2
     /**
      Create URLRequest with RequestType that don't need any id.
      - Parameter parameters: [String: Any] is an additional parameters to "AppId" and "UserId". If no need in additional parameters send nil.
@@ -58,11 +59,11 @@ extension URLRequest {
         if type != .token, let secretKey = PyrusServiceDesk.secretId, let customUserId = PyrusServiceDesk.customUserId {
             fullJSOn["user_id"] = customUserId
             fullJSOn["security_key"] = secretKey
-            fullJSOn["version"] = 1
             fullJSOn["instance_id"] = PyrusServiceDesk.userId
         } else {
             fullJSOn["user_id"] = PyrusServiceDesk.userId
         }
+        fullJSOn["version"] = URLRequest.VERSION_API
         if((PyrusServiceDesk.clientId) == nil){
             fatalError("no client Id")
         }
