@@ -6,7 +6,7 @@ import MobileCoreServices
 /*
  Use example
  AttachmentHandler.shared.showAttachmentActionSheet(vc: self, sourseView:nil)
- AttachmentHandler.shared.attachmentPickedBlock = { (data, url, fromLibrary) in
+ AttachmentHandler.shared.attachmentPickedBlock = { (data, url) in
  /* get your image here */
  }
  */
@@ -63,7 +63,7 @@ class AttachmentHandler: NSObject,UIImagePickerControllerDelegate, UINavigationC
         else if(type == .gallery){
             let status = PHPhotoLibrary.authorizationStatus()
             switch status{
-            case .authorized:
+            case .authorized://test .limited,
                 self.openGallery(viewController)
             case .notDetermined:
                 PHPhotoLibrary.requestAuthorization({ (status) in
@@ -100,7 +100,7 @@ class AttachmentHandler: NSObject,UIImagePickerControllerDelegate, UINavigationC
                 self._alertWindow!.isHidden = true
                 self._alertWindow = nil
                 if !self.needShowSizeError(for: data, on: nil) && url != nil{
-                    self.attachmentPickedBlock?(data!,url!,false)
+                    self.attachmentPickedBlock?(data!,url!)
                 }
             })
         }
@@ -178,12 +178,7 @@ class AttachmentHandler: NSObject,UIImagePickerControllerDelegate, UINavigationC
             let imageCompressedData = image.compressImage()
             hadSizeError = needShowSizeError(for: imageCompressedData, on: picker)
             if !hadSizeError{
-                if info[UIImagePickerController.InfoKey.referenceURL] == nil {
-                    UIImageWriteToSavedPhotosAlbum(image, self, #selector(image(_:didFinishSavingWithError:contextInfo:)), nil)
-                }
-                else{
-                    self.attachmentPickedBlock?(imageCompressedData!, (info[UIImagePickerController.InfoKey.referenceURL] as? URL)!, true)
-                }
+                self.attachmentPickedBlock?(imageCompressedData!, (info[UIImagePickerController.InfoKey.referenceURL] as? URL))
             }
         } else if let videoUrl = info[UIImagePickerController.InfoKey.mediaURL] as? NSURL{
             do {
@@ -191,7 +186,7 @@ class AttachmentHandler: NSObject,UIImagePickerControllerDelegate, UINavigationC
                 hadSizeError = needShowSizeError(for: data, on: picker)
                 //compressWithSessionStatusFunc(videoUrl)
                 if !hadSizeError{
-                    self.attachmentPickedBlock?(data , videoUrl as URL,true)
+                    self.attachmentPickedBlock?(data , videoUrl as URL)
                 }
             } catch {
                 hadSizeError = needShowSizeError(for: nil, on: picker)
@@ -204,68 +199,6 @@ class AttachmentHandler: NSObject,UIImagePickerControllerDelegate, UINavigationC
             
         }
         
-    }
-    @objc func image(_ image: UIImage, didFinishSavingWithError error: NSError?, contextInfo: UnsafeRawPointer) {
-        if error != nil {
-            if needShowSizeError(for: nil, on: nil){}
-        } else {
-            let status = PHPhotoLibrary.authorizationStatus()
-            switch status{
-            case .authorized:
-                self.fetchLastImage(image: image)
-            case .notDetermined:
-                PHPhotoLibrary.requestAuthorization({ (status) in
-                    if status == PHAuthorizationStatus.authorized{
-                        self.fetchLastImage(image: image)
-                    }
-                })
-            case .restricted,.denied:
-                guard let vc = UIApplication.topViewController() else{
-                    break
-                }
-                self.alertAccess(.gallery, on:vc)
-            default:
-                break
-            }
-        }
-    }
-    private func fetchLastImage(image:UIImage) {
-        self.fetchLastImage(){
-            (url: URL?) in
-            if((url) != nil){
-                let imageCompressedData = image.compressImage()
-                if(!self.needShowSizeError(for: imageCompressedData, on: nil))
-                {
-                    self.attachmentPickedBlock?(imageCompressedData!, url!,true)
-                }
-                
-            }
-        }
-    }
-    func fetchLastImage(completion: @escaping (_ url: URL?) -> Void)
-    {
-        let fetchOptions = PHFetchOptions()
-        fetchOptions.sortDescriptors = [NSSortDescriptor(key: "creationDate", ascending: false)]
-        fetchOptions.fetchLimit = 1
-        
-        let fetchResult = PHAsset.fetchAssets(with: .image, options: fetchOptions)
-        if (fetchResult.firstObject != nil)
-        {
-            let lastImageAsset: PHAsset? = fetchResult.firstObject
-            if lastImageAsset == nil{
-                if needShowSizeError(for: nil, on: nil){}
-            } else{
-                getURL(ofPhotoWith: lastImageAsset!){
-                    (url: URL?) in
-                    completion(url)
-                }
-            }
-            
-        }
-        else
-        {
-            completion(nil)
-        }
     }
     func getURL(ofPhotoWith mPhasset: PHAsset, completionHandler : @escaping ((_ responseURL : URL?) -> Void)) {
         
@@ -336,7 +269,7 @@ class AttachmentHandler: NSObject,UIImagePickerControllerDelegate, UINavigationC
 
     //MARK: - Internal Properties
     ///Comletion block with data, url, fromLibrary
-    var attachmentPickedBlock: ((Data,URL,Bool) -> Void)?
+    var attachmentPickedBlock: ((Data, URL?) -> Void)?
     var closeBlock: ((Bool) -> Void)?
 }
 let MAX_ATTACHMENT_SIZE = Double(200)

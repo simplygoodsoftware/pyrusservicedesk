@@ -66,6 +66,7 @@
 		4B705E002225820C0086C09F /* Refresh@3x.png in Resources */ = {isa = PBXBuildFile; fileRef = 4B705DFD2225820C0086C09F /* Refresh@3x.png */; };
 		4B7918E22237A00D0071CA72 /* UITableView+keyboard.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4B7918E12237A00D0071CA72 /* UITableView+keyboard.swift */; };
 		4B7918E42237E24B0071CA72 /* CloseButtonItem.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4B7918E32237E24B0071CA72 /* CloseButtonItem.swift */; };
+		4B7AD4D6250A06C9004E9C48 /* PSDFilesManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4B7AD4D5250A06C9004E9C48 /* PSDFilesManager.swift */; };
 		4B7DAE4F2226DE3E002A35FC /* [Int+PSDChat]+usefulFunc.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4B7DAE4E2226DE3E002A35FC /* [Int+PSDChat]+usefulFunc.swift */; };
 		4B7EA884221EB01B009C9B41 /* PSDErrorParser.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4B7EA883221EB01B009C9B41 /* PSDErrorParser.swift */; };
 		4B7EA886221EB0B3009C9B41 /* PSDAlertDisplay.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4B7EA885221EB0B3009C9B41 /* PSDAlertDisplay.swift */; };
@@ -236,6 +237,7 @@
 		4B705DFD2225820C0086C09F /* Refresh@3x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "Refresh@3x.png"; sourceTree = "<group>"; };
 		4B7918E12237A00D0071CA72 /* UITableView+keyboard.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "UITableView+keyboard.swift"; sourceTree = "<group>"; };
 		4B7918E32237E24B0071CA72 /* CloseButtonItem.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CloseButtonItem.swift; sourceTree = "<group>"; };
+		4B7AD4D5250A06C9004E9C48 /* PSDFilesManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PSDFilesManager.swift; sourceTree = "<group>"; };
 		4B7DAE4E2226DE3E002A35FC /* [Int+PSDChat]+usefulFunc.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "[Int+PSDChat]+usefulFunc.swift"; sourceTree = "<group>"; };
 		4B7EA883221EB01B009C9B41 /* PSDErrorParser.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PSDErrorParser.swift; sourceTree = "<group>"; };
 		4B7EA885221EB0B3009C9B41 /* PSDAlertDisplay.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PSDAlertDisplay.swift; sourceTree = "<group>"; };
@@ -450,6 +452,7 @@
 				4B7918E32237E24B0071CA72 /* CloseButtonItem.swift */,
 				4B6E9DA6225F74E50037462F /* PSDDownloadView.swift */,
 				4B1ED2AB228190BA00B98516 /* PSDMessagesStorage.swift */,
+				4B7AD4D5250A06C9004E9C48 /* PSDFilesManager.swift */,
 				4BB855AC22086C1900F7CCE5 /* Localizable.strings */,
 				4B1CD38F230BE58000C06F71 /* applicationColors.swift */,
 			);
@@ -1060,6 +1063,7 @@
 				4B64B870224384F3003116C3 /* String+years.swift in Sources */,
 				4B6D4A42244E2B29007C6082 /* AttachmentCollectionViewCell.swift in Sources */,
 				4B7DAE4F2226DE3E002A35FC /* [Int+PSDChat]+usefulFunc.swift in Sources */,
+				4B7AD4D6250A06C9004E9C48 /* PSDFilesManager.swift in Sources */,
 				4B7EA884221EB01B009C9B41 /* PSDErrorParser.swift in Sources */,
 				4BA3FF4022116C1100CE497A /* AttachmentHandler.swift in Sources */,
 				4B56BE4B2216CCC0004E6685 /* PSDAttachment.swift in Sources */,
