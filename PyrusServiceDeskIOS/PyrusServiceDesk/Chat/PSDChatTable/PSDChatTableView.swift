@@ -164,9 +164,9 @@ class PSDChatTableView: PSDDetailTableView{
     ///- parameter needProgress: Determines whether the view should respond to updating(need to show error) 
     func updateChat(needProgress:Bool) {
         let chatIdWeak : String  = self.chatId
-        DispatchQueue.global().async {
-            [weak self] in
-            PSDGetChat.get(chatIdWeak, needShowError:needProgress, delegate: nil){
+//        DispatchQueue.global().async {
+//            [weak self] in
+            PSDGetChat.get(chatIdWeak, needShowError:needProgress, delegate: nil){ [weak self]
                 (chat : PSDChat?) in
                 if((chat) != nil){
                     DispatchQueue.main.async  {
@@ -202,7 +202,7 @@ class PSDChatTableView: PSDDetailTableView{
                     self?.bottomRefresh.endRefreshing()
                 }
             }
-        }
+//        }
     }
     ///Scrolls table to bottom after refresh, if table view was in bottom scroll position and new messages received
     private func scrollToBottomAfterRefresh(with oldOffset: CGPoint?, oldContentSize: CGSize?) {
