@@ -307,6 +307,8 @@ SWIFT_CLASS("_TtC16PyrusServiceDesk16PyrusServiceDesk")
 + (void)createWith:(NSString * _Nullable)clientId reset:(BOOL)reset;
 + (void)createWith:(NSString * _Nullable)clientId userId:(NSString * _Nonnull)userId secretId:(NSString * _Nonnull)secretId reset:(BOOL)reset;
 + (void)refresh;
+/// Scrolls chat to bottom, starts refreshing chat and shows fake message from support is psd is open.
++ (void)refreshFromPush;
 + (void)present:(UIViewController * _Nonnull)viewController animated:(BOOL)animated completion:(void (^ _Nullable)(void))completion;
 /// Save viewController with FileChooser interface. Use to add custom row in attachment-add-menu
 /// \param chooser (FileChooser & UIViewController) to present.
@@ -670,6 +672,8 @@ SWIFT_CLASS("_TtC16PyrusServiceDesk16PyrusServiceDesk")
 + (void)createWith:(NSString * _Nullable)clientId reset:(BOOL)reset;
 + (void)createWith:(NSString * _Nullable)clientId userId:(NSString * _Nonnull)userId secretId:(NSString * _Nonnull)secretId reset:(BOOL)reset;
 + (void)refresh;
+/// Scrolls chat to bottom, starts refreshing chat and shows fake message from support is psd is open.
++ (void)refreshFromPush;
 + (void)present:(UIViewController * _Nonnull)viewController animated:(BOOL)animated completion:(void (^ _Nullable)(void))completion;
 /// Save viewController with FileChooser interface. Use to add custom row in attachment-add-menu
 /// \param chooser (FileChooser & UIViewController) to present.
@@ -1031,6 +1035,8 @@ SWIFT_CLASS("_TtC16PyrusServiceDesk16PyrusServiceDesk")
 + (void)createWith:(NSString * _Nullable)clientId reset:(BOOL)reset;
 + (void)createWith:(NSString * _Nullable)clientId userId:(NSString * _Nonnull)userId secretId:(NSString * _Nonnull)secretId reset:(BOOL)reset;
 + (void)refresh;
+/// Scrolls chat to bottom, starts refreshing chat and shows fake message from support is psd is open.
++ (void)refreshFromPush;
 + (void)present:(UIViewController * _Nonnull)viewController animated:(BOOL)animated completion:(void (^ _Nullable)(void))completion;
 /// Save viewController with FileChooser interface. Use to add custom row in attachment-add-menu
 /// \param chooser (FileChooser & UIViewController) to present.
