@@ -60,7 +60,7 @@ class PSDChatTableView: PSDDetailTableView{
                 }
             }
             if scrollsToBottom{
-                self.scrollsToBottom(animated: true)
+                self.scrollsToBottom(animated: false)
             }
             updateChat(needProgress: true)
             

@@ -19,15 +19,15 @@ extension Array where Element == [PSDRowMessage]{
         let lastSection = self.count > 0 ? self.count - 1 : 0
         let lastMessage = self[lastSection].last
         var indexPaths =  [IndexPath]()
-        var reloadSections = [Int]()
+        var addSections = [Int]()
         if let lastMessage = lastMessage, fakeMessage.date.compareWithoutTime(with: lastMessage.message.date)  == .equal{
             indexPaths.append(IndexPath(row: self[lastSection].count, section: lastSection))
         }
         else{
-            reloadSections.append(lastSection + 1)
+            addSections.append(lastSection + 1)
         }
         let _ = completeWithMessages(messages)
-        return (indexPaths, IndexSet(reloadSections))
+        return (indexPaths, IndexSet(addSections))
     }
     mutating func removeFakeMessages() -> ([IndexPath],IndexSet) {
         var indexPaths =  [IndexPath]()
