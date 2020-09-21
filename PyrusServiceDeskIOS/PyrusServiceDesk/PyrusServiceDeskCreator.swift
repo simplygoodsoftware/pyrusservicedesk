@@ -62,7 +62,6 @@ import UIKit
     @objc public static func changeUserId(userId: String, secretId: String, title: NSAttributedString, name: String, _ chatTitleView: UIView?){
         PyrusServiceDesk.secretId = secretId
         PyrusServiceDesk.customUserId = userId
-        PyrusServiceDesk.createUserId(true)
         if name.count>0{
             PyrusServiceDesk.setUser(name)
         }
