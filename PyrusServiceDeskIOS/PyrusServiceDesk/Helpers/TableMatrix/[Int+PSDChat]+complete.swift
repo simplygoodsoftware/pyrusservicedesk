@@ -49,9 +49,12 @@ extension Array where Element == [PSDRowMessage]{
         }
         for i in 1...end{
             for (row,message) in selfCopy[selfCopy.count-i].enumerated().reversed(){
-                guard let _ = message.message as? PSDPlaceholderMessage, message.message.owner.personId != PyrusServiceDesk.userId else{
-                    needStop = true
-                    break
+                guard let _ = message.message as? PSDPlaceholderMessage else{
+                    needStop = message.message.owner.personId != PyrusServiceDesk.userId
+                    if needStop{
+                        break
+                    }
+                    continue
                 }
                 let ip  = IndexPath(row: row, section: selfCopy.count-i)
                 self.removeMessage(at: ip)
