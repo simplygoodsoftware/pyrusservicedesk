@@ -175,7 +175,14 @@ import UIKit
     }
     
     @objc static public func refresh() {
-        PyrusServiceDesk.mainController?.refreshChat()
+        PyrusServiceDesk.mainController?.refreshChat(scrollsToBottom: false, showFakeMessage: false)
+    }
+    ///Scrolls chat to bottom, starts refreshing chat and shows fake message from support is psd is open.
+    @objc static public func refreshFromPush(){
+        guard PSDIsOpen() else{
+            return
+        }
+        PyrusServiceDesk.mainController?.refreshChat(scrollsToBottom: true, showFakeMessage: true)
     }
     @objc static public func present(_ viewController: UIViewController, animated: Bool, completion: (() -> Void)?){
         guard PSDIsOpen() else{

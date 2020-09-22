@@ -7,6 +7,11 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		4B062A832518A8D100B317D3 /* PSDPlaceholderMessage.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4B062A822518A8D100B317D3 /* PSDPlaceholderMessage.swift */; };
+		4B062A882518AC9500B317D3 /* messagePlaceholder@3x.png in Resources */ = {isa = PBXBuildFile; fileRef = 4B062A872518AC9500B317D3 /* messagePlaceholder@3x.png */; };
+		4B062A8C2518AD0500B317D3 /* messagePlaceholder@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 4B062A8B2518AD0500B317D3 /* messagePlaceholder@2x.png */; };
+		4B062A902518AD0B00B317D3 /* messagePlaceholder.png in Resources */ = {isa = PBXBuildFile; fileRef = 4B062A8F2518AD0B00B317D3 /* messagePlaceholder.png */; };
+		4B062A962518BFFC00B317D3 /* PSDPlaceholderUser.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4B062A952518BFFC00B317D3 /* PSDPlaceholderUser.swift */; };
 		4B10E5F0222844EA00CF118B /* PSDAttachmentLoadViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4B10E5EF222844EA00CF118B /* PSDAttachmentLoadViewController.swift */; };
 		4B17DD0523E816B1003CF4D9 /* String + uuid.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4B17DD0423E816B1003CF4D9 /* String + uuid.swift */; };
 		4B1CD390230BE58000C06F71 /* applicationColors.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4B1CD38F230BE58000C06F71 /* applicationColors.swift */; };
@@ -182,6 +187,11 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		4B062A822518A8D100B317D3 /* PSDPlaceholderMessage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PSDPlaceholderMessage.swift; sourceTree = "<group>"; };
+		4B062A872518AC9500B317D3 /* messagePlaceholder@3x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "messagePlaceholder@3x.png"; sourceTree = "<group>"; };
+		4B062A8B2518AD0500B317D3 /* messagePlaceholder@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "messagePlaceholder@2x.png"; sourceTree = "<group>"; };
+		4B062A8F2518AD0B00B317D3 /* messagePlaceholder.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = messagePlaceholder.png; sourceTree = "<group>"; };
+		4B062A952518BFFC00B317D3 /* PSDPlaceholderUser.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PSDPlaceholderUser.swift; sourceTree = "<group>"; };
 		4B10E5EF222844EA00CF118B /* PSDAttachmentLoadViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PSDAttachmentLoadViewController.swift; sourceTree = "<group>"; };
 		4B17DD0423E816B1003CF4D9 /* String + uuid.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "String + uuid.swift"; sourceTree = "<group>"; };
 		4B1CD38F230BE58000C06F71 /* applicationColors.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = applicationColors.swift; sourceTree = "<group>"; };
@@ -370,14 +380,26 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		4B062A862518AC7C00B317D3 /* messagePlaceholder */ = {
+			isa = PBXGroup;
+			children = (
+				4B062A8F2518AD0B00B317D3 /* messagePlaceholder.png */,
+				4B062A8B2518AD0500B317D3 /* messagePlaceholder@2x.png */,
+				4B062A872518AC9500B317D3 /* messagePlaceholder@3x.png */,
+			);
+			path = messagePlaceholder;
+			sourceTree = "<group>";
+		};
 		4B2E650F220DE1E000E70A2F /* PSDObjects */ = {
 			isa = PBXGroup;
 			children = (
 				4B2E650D220DE1C300E70A2F /* PSDMessage.swift */,
 				4B2E6510220DE20400E70A2F /* PSDUser.swift */,
+				4B062A952518BFFC00B317D3 /* PSDPlaceholderUser.swift */,
 				4B88C6F8221467FF00BDB304 /* PSDChat.swift */,
 				4B56BE4A2216CCC0004E6685 /* PSDAttachment.swift */,
 				4B9C205C2451904E004DEF7A /* PSDRowMessage.swift */,
+				4B062A822518A8D100B317D3 /* PSDPlaceholderMessage.swift */,
 			);
 			path = PSDObjects;
 			sourceTree = "<group>";
@@ -654,6 +676,7 @@
 		4B7F350F21F8A77900977C6D /* images */ = {
 			isa = PBXGroup;
 			children = (
+				4B062A862518AC7C00B317D3 /* messagePlaceholder */,
 				7B9545F524D07EE2006F6AED /* icn_cross.png */,
 				7B9545F624D07EE2006F6AED /* icn_cross@2x.png */,
 				7B9545F424D07EE2006F6AED /* icn_cross@3x.png */,
@@ -917,6 +940,7 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				4B062A8C2518AD0500B317D3 /* messagePlaceholder@2x.png in Resources */,
 				7B9545F924D07EE2006F6AED /* icn_cross@2x.png in Resources */,
 				4B63395121FA165000A154B5 /* Add.png in Resources */,
 				4BB1A302245B8D6000A817C1 /* file2@3x.png in Resources */,
@@ -927,6 +951,7 @@
 				4BA85A192224183600B48CA6 /* icn_error@3x.png in Resources */,
 				4BA85A2622242C5200B48CA6 /* clock-face@3x.png in Resources */,
 				4BB1A2F4245B8CB800A817C1 /* dotted_line@2x.png in Resources */,
+				4B062A902518AD0B00B317D3 /* messagePlaceholder.png in Resources */,
 				4B7F139622157989007C6358 /* SupportIcon@2x.png in Resources */,
 				4B63395021FA165000A154B5 /* Add@2x.png in Resources */,
 				4B63395721FA166800A154B5 /* ConversationsNew@2x.png in Resources */,
@@ -952,6 +977,7 @@
 				4BE18EB9230D673C001C38DC /* clock-dark@3x.gif in Resources */,
 				4B82A4A62268E17600654CE0 /* Back@3x.png in Resources */,
 				4BB1A2E8245B8B3600A817C1 /* delete@2x.png in Resources */,
+				4B062A882518AC9500B317D3 /* messagePlaceholder@3x.png in Resources */,
 				4B63396121FA168500A154B5 /* DownloadWhite@2x.png in Resources */,
 				4B63396321FA168500A154B5 /* DownloadWhite@3x.png in Resources */,
 				4BB1A2E7245B8B3600A817C1 /* delete@3x.png in Resources */,
@@ -1063,6 +1089,7 @@
 				4BB68608221AAAC600E9EC07 /* Image+compress.swift in Sources */,
 				4BAA8817221C57FD00B81B76 /* View+asImage.swift in Sources */,
 				4B7918E42237E24B0071CA72 /* CloseButtonItem.swift in Sources */,
+				4B062A962518BFFC00B317D3 /* PSDPlaceholderUser.swift in Sources */,
 				4BB855A52208681400F7CCE5 /* LocalizationString.swift in Sources */,
 				4B7EA886221EB0B3009C9B41 /* PSDAlertDisplay.swift in Sources */,
 				4BAA214F222D60D000B8BED7 /* Dictionary+asString.swift in Sources */,
@@ -1070,6 +1097,7 @@
 				4B9F781C228C2813003CC83D /* PSDTableView.swift in Sources */,
 				4B7F350621F8687000977C6D /* PyrusServiceDeskCreator.swift in Sources */,
 				4BB855A02208593200F7CCE5 /* URLCreator.swift in Sources */,
+				4B062A832518A8D100B317D3 /* PSDPlaceholderMessage.swift in Sources */,
 				4B8216AB2201CAAF0011CDF3 /* PSDMessageView.swift in Sources */,
 				4B2E6515220DE4AE00E70A2F /* PSDObjectsCreator.swift in Sources */,
 				4B6D4A3D244E22C9007C6082 /* AttachmentPreviewCollectionViewCell.swift in Sources */,
