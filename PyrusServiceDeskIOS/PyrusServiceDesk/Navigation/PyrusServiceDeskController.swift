@@ -64,12 +64,12 @@ class PyrusServiceDeskController: PSDNavigationController {
         (UIApplication.topViewController() as? PSDUpdateInfo)?.startGettingInfo()
     }
     ///reload chat with showing refresh ui
-    func refreshChat(scrollsToBottom: Bool, showFakeMessage: Bool) {
+    func refreshChat(showFakeMessage: Int?) {
         for viewController in self.viewControllers{
             guard let chatController = viewController as? PSDUpdateInfo else{
                 continue
             }
-            chatController.refreshChat(scrollsToBottom: scrollsToBottom, showFakeMessage: showFakeMessage)
+            chatController.refreshChat(showFakeMessage: showFakeMessage)
             break
         }
     }

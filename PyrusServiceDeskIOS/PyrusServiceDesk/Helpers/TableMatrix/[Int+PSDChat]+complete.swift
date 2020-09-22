@@ -12,14 +12,22 @@ extension Array where Element == [PSDRowMessage]{
             }
         })
     }
-    mutating func addFakeMessagge() -> ([IndexPath],IndexSet) {
+
+    mutating func addFakeMessagge(messageId: Int) -> ([IndexPath],IndexSet) {
         let fakeUser = PSDPlaceholderUser()
-        let fakeMessage = PSDPlaceholderMessage(owner: fakeUser)
-        let messages = PSDObjectsCreator.parseMessageToRowMessage(fakeMessage)
+        let fakeMessage = PSDPlaceholderMessage(owner: fakeUser, messageId: "\(messageId)")
         let lastSection = self.count > 0 ? self.count - 1 : 0
         let lastMessage = self[lastSection].last
+        let oldIndex = index(of: fakeMessage)
         var indexPaths =  [IndexPath]()
         var addSections = [Int]()
+        guard oldIndex.row == 0, oldIndex.section == 0 else{
+            return (indexPaths, IndexSet(addSections))
+        }
+        guard lastMessage?.message.owner as? PSDPlaceholderUser == nil else {
+            return (indexPaths, IndexSet(addSections))
+        }
+        let messages = PSDObjectsCreator.parseMessageToRowMessage(fakeMessage)
         if let lastMessage = lastMessage, fakeMessage.date.compareWithoutTime(with: lastMessage.message.date)  == .equal{
             indexPaths.append(IndexPath(row: self[lastSection].count, section: lastSection))
         }

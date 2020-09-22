@@ -36,7 +36,7 @@ class PSDChatsViewController: UIViewController,PSDChatsTableViewDelegate,CloseBu
     func startGettingInfo(){
         tableView.reloadChats(needProgress:true)
     }
-    func refreshChat(scrollsToBottom: Bool, showFakeMessage: Bool) {
+    func refreshChat(showFakeMessage: Int?) {
     }
     lazy var progressView: PSDProgressView = {
         let view = PSDProgressView()
