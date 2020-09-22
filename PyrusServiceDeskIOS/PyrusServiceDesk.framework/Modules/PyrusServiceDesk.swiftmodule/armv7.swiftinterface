@@ -57,7 +57,7 @@ import WebKit
   @objc public static func createWith(_ clientId: Swift.String?, reset: Swift.Bool)
   @objc public static func createWith(_ clientId: Swift.String?, userId: Swift.String, secretId: Swift.String, reset: Swift.Bool)
   @objc public static func refresh()
-  @objc public static func refreshFromPush()
+  @objc public static func refreshFromPush(messageId: Swift.Int)
   @objc public static func present(_ viewController: UIKit.UIViewController, animated: Swift.Bool, completion: (() -> Swift.Void)?)
   @objc public static func registerFileChooser(_ chooser: (UIKit.UIViewController & PyrusServiceDesk.FileChooser)?)
   @objc deinit
