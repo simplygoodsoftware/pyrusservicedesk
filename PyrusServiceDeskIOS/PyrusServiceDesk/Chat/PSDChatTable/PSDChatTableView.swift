@@ -44,10 +44,10 @@ class PSDChatTableView: PSDDetailTableView{
     deinit {
         self.removeRefreshControls()
     }
-    func forceRefresh(scrollsToBottom: Bool, showFakeMessage: Bool) {
+    func forceRefresh(showFakeMessage: Int?) {
         if !PSDGetChat.isActive(){
-            if showFakeMessage{
-                let (addIndexPaths, addSections) =  tableMatrix.addFakeMessagge()
+            if let showFakeMessage = showFakeMessage, showFakeMessage != 0 {
+                let (addIndexPaths, addSections) =  tableMatrix.addFakeMessagge(messageId: showFakeMessage)
                 if addIndexPaths.count>0 || addSections.count>0{
                     self.beginUpdates()
                     if(addIndexPaths.count>0){
@@ -57,10 +57,8 @@ class PSDChatTableView: PSDDetailTableView{
                         self.insertSections(addSections, with: .none)
                     }
                     self.endUpdates()
+                    self.scrollsToBottom(animated: false)
                 }
-            }
-            if scrollsToBottom{
-                self.scrollsToBottom(animated: false)
             }
             updateChat(needProgress: true)
             

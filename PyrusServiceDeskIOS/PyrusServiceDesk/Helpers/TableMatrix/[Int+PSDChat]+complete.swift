@@ -12,14 +12,22 @@ extension Array where Element == [PSDRowMessage]{
             }
         })
     }
-    mutating func addFakeMessagge() -> ([IndexPath],IndexSet) {
+
+    mutating func addFakeMessagge(messageId: Int) -> ([IndexPath],IndexSet) {
         let fakeUser = PSDPlaceholderUser()
-        let fakeMessage = PSDPlaceholderMessage(owner: fakeUser)
-        let messages = PSDObjectsCreator.parseMessageToRowMessage(fakeMessage)
+        let fakeMessage = PSDPlaceholderMessage(owner: fakeUser, messageId: "\(messageId)")
         let lastSection = self.count > 0 ? self.count - 1 : 0
         let lastMessage = self[lastSection].last
+        let oldIndex = index(of: fakeMessage)
         var indexPaths =  [IndexPath]()
         var addSections = [Int]()
+        guard oldIndex.row == 0, oldIndex.section == 0 else{
+            return (indexPaths, IndexSet(addSections))
+        }
+        guard lastMessage?.message.owner as? PSDPlaceholderUser == nil else {
+            return (indexPaths, IndexSet(addSections))
+        }
+        let messages = PSDObjectsCreator.parseMessageToRowMessage(fakeMessage)
         if let lastMessage = lastMessage, fakeMessage.date.compareWithoutTime(with: lastMessage.message.date)  == .equal{
             indexPaths.append(IndexPath(row: self[lastSection].count, section: lastSection))
         }
@@ -41,9 +49,12 @@ extension Array where Element == [PSDRowMessage]{
         }
         for i in 1...end{
             for (row,message) in selfCopy[selfCopy.count-i].enumerated().reversed(){
-                guard let _ = message.message as? PSDPlaceholderMessage, message.message.owner.personId != PyrusServiceDesk.userId else{
-                    needStop = true
-                    break
+                guard let _ = message.message as? PSDPlaceholderMessage else{
+                    needStop = message.message.owner.personId != PyrusServiceDesk.userId
+                    if needStop{
+                        break
+                    }
+                    continue
                 }
                 let ip  = IndexPath(row: row, section: selfCopy.count-i)
                 self.removeMessage(at: ip)
