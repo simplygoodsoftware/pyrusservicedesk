@@ -138,9 +138,9 @@ extension Array where Element == [PSDRowMessage]{
         return 0
     }
     ///return row for message according to its time
-    func row(forMessage: PSDMessage, section: Int)->Int{
+    private func row(forMessage: PSDMessage, section: Int)->Int{
         for (row,message) in self[section].enumerated().reversed(){
-            if message.message.state != .sent{
+            if message.message.state == .sending{
                 continue
             }
             if message.message.date.compareTime(with: forMessage.date) == .more || message.message.date.compareTime(with: forMessage.date) == .equal{
