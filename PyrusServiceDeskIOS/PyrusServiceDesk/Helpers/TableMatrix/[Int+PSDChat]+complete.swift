@@ -5,6 +5,8 @@ extension Array where Element == [PSDRowMessage]{
     mutating func completeWithUnsentMessages(){
         let messagesFromStorage = PSDMessagesStorage.messagesFromStorage()
         let sortedMessages = messagesFromStorage.sorted(by: {$0.date > $1.date})
+        print("arrrrrrr\(self)")
+        print("sortedMessages\(sortedMessages)")
         complete(with: sortedMessages, startMessage: nil, completion: { _,_, messages in
             let res = messagesFromStorage.filter { !messages.contains($0)}
             for message in res{

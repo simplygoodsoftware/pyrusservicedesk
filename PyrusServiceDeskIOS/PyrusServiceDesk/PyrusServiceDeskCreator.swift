@@ -28,7 +28,7 @@ import UIKit
     
     
     ///A flag indicates need to show chat list or show all conversations as one. Default is false - user can create new chat and see the list of old chats. If true - all new messages will be added to open chat.
-    @objc private(set) static var  oneChat:Bool = false
+    @objc private(set) static var  oneChat:Bool = true
     
       
     @objc static let mainSession : URLSession = {
@@ -238,6 +238,26 @@ import UIKit
             }
             
         }
+    }
+    @objc public static func sendMessage(_ comment:String, attachment: Data?, attachmentUrl: URL?, rating: Int){
+        var psdAttachements = [PSDAttachment]()
+        if let attachment = attachment {
+            let psdAttach = PSDObjectsCreator.createAttachment(attachment, attachmentUrl)
+            psdAttachements.append(psdAttach)
+        }
+        
+        if let mainVC = PyrusServiceDesk.mainController {
+            for vc in mainVC.viewControllers {
+                if let vcChat =  vc as? PSDChatViewController{
+                    if psdAttachements.count > 0 || comment.count > 0 {
+                        vcChat.send(comment, psdAttachements)
+                    }
+                    vcChat.sendRate(rating)
+                    break
+                }
+            }
+        }
+//        PSDMessageSend.pass(message, to: "", delegate: nil)
     }
     
     ///viewController with FileChooser interface. Use to add custom row in attachment-add-menu

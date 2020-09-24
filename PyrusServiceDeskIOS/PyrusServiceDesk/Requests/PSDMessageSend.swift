@@ -78,7 +78,7 @@ struct PSDMessageSend {
     ///If first message sending end with error - error will be passed to all messages in array.
     static private var passQueueArray = [PSDMessage]()
     
-    static private let dispatchQueue = DispatchQueue(label: "PSDSendMesasges")
+    static private let dispatchQueue = DispatchQueue(label: "PSDSendMesasges", attributes: .concurrent)
     /**
      Pass message to server.
      - parameter messageToPass: PSDMessage need to be passed.
@@ -87,18 +87,23 @@ struct PSDMessageSend {
      */
     static func pass(_ messageToPass:PSDMessage, to chatId:String, delegate:PSDMessageSendDelegate?)
     {
+        print("STARTTTT PASSS)")
         PSDMessagesStorage.saveInStorage(message:messageToPass)
+        print("sennndddd 1")
+
         dispatchQueue.async {
-        if (PSDChatTableView.isNewChat(chatId) && !PSDMessageSend.passingMessagesIds.contains(messageToPass.clientId)){
-            if needWhait{
-                passQueueArray.append(messageToPass)
-                return
-            }
-            else{
-                needWhait = true
-            }
-            
-        }
+            print("sennndddd 2")
+//        if (PSDChatTableView.isNewChat(chatId) && !PSDMessageSend.passingMessagesIds.contains(messageToPass.clientId)){
+//            if needWhait{
+//                passQueueArray.append(messageToPass)
+//                return
+//            }
+//            else{
+//                needWhait = true
+//            }
+//
+//        }
+
         if !(PSDChatTableView.isNewChat(chatId)){
             if PSDMessageSend.passingMessagesIds.contains(messageToPass.clientId){
                 //при отпрвке атачей эта же функция вызывается снова, продолжаем отправку не блокируя очередь
@@ -113,6 +118,8 @@ struct PSDMessageSend {
         if let attachments = messageToPass.attachments, attachments.count > 0{
             for (i,attachment) in attachments.enumerated(){
                 if attachment.emptyId(){
+                    print("sennndddd PASSS) \(delegate)")
+
                     PSDMessageSend.passFile(messageToPass, attachmentIdex: i, to: chatId, delegate: delegate)
                     hasUnsendAttachments = true
                     break
@@ -121,8 +128,13 @@ struct PSDMessageSend {
             }
             
         }
+            print("sennndddd PASSS)")
+
         if !hasUnsendAttachments{
+
             let sender = PSDMessageSender()
+            print("sennndddd ssss) \(sender)")
+
                 sender.pass(messageToPass, to: chatId, delegate: delegate, completion: {
                     newChatId in
                     didEndPassMessage(messageToPass, to: newChatId, delegate: delegate)

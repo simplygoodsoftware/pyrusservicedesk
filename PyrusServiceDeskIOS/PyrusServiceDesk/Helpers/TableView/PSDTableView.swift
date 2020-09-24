@@ -153,26 +153,26 @@ class PSDTableView : UITableView{
 
     private func changeConstraints(emptyTable:Bool, completion: @escaping () -> Void){
         if(self.isLoading){
-            DispatchQueue.main.async {
+//            DispatchQueue.main.async {
                 if(self.topActivityConstraint?.constant != self.calculateConstraint(emptyTable:emptyTable)){
                     
                     var oldFrame = self.activity.frame
                     oldFrame.origin.y = self.calculateConstraint(emptyTable:emptyTable)
-                    let duration = emptyTable ? PSDTableView.ACTIVITY_MOVE_DURATION : 0.1
-                    UIView.animate(withDuration: TimeInterval(duration), delay: 0, options: [ .beginFromCurrentState,.curveLinear], animations: {
+//                    let duration = emptyTable ? PSDTableView.ACTIVITY_MOVE_DURATION : 0.1
+//                    UIView.animate(withDuration: TimeInterval(duration), delay: 0, options: [ .beginFromCurrentState,.curveLinear], animations: {
                         self.activity.frame = oldFrame
-                    }, completion:{ (comleted : Bool) in
-                        if(comleted){
-                            self.topActivityConstraint?.constant = self.calculateConstraint(emptyTable:emptyTable)
-                        }
-                        completion()
-                    })
+//                    }, completion:{ (comleted : Bool) in
+//                        if(comleted){
+                    
+                    self.topActivityConstraint?.constant = self.calculateConstraint(emptyTable:emptyTable)
+//                        }
+                    
+                    completion()
+//                    })
                 }
                 else{
                     completion()
                 }
-                
-            }
         }
         else{
             completion()

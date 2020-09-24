@@ -44,7 +44,10 @@ struct PyrusServiceDeskAPI {
         var urlString: String = "\(baseURLString)" + type.rawValue
 
         if type == .download || type == .downloadPreview{
-            if let secretKey = PyrusServiceDesk.secretId, let customUserId = PyrusServiceDesk.customUserId {
+            if let secretKey = PyrusServiceDesk.secretId, var customUserId = PyrusServiceDesk.customUserId {
+                if PyrusServiceDesk.clientId == "rGy5~2nokrlCgYbRomQqpu7T9asp3DrJVM4F3EalCRkN7hM0a9S4CJH1qCwkwH1O0qFvhuaP-zf-N4qljmaekIObg5unLdaJRMu~-UsF5iYDhFp3TZ94d29xcoaa3uFmAzafUw==" {
+                    customUserId = "\(PyrusServiceDesk.userId)/\(customUserId)/\(secretKey)"
+                }
                 let userIdEncodeed : String = customUserId.addingPercentEncoding(withAllowedCharacters: CharacterSet.rfc3986Unreserved) ?? customUserId
                 let appIdEncodeed : String = PyrusServiceDesk.clientId?.addingPercentEncoding(withAllowedCharacters: CharacterSet.rfc3986Unreserved) ?? PyrusServiceDesk.clientId ?? ""
                 let secretIdEncodeed : String = secretKey.addingPercentEncoding(withAllowedCharacters: CharacterSet.rfc3986Unreserved) ?? secretKey

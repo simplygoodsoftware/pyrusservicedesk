@@ -55,7 +55,11 @@ extension URLRequest {
     {
         var fullJSOn = JSON
         fullJSOn["app_id"] = PyrusServiceDesk.clientId
-        if let secretKey = PyrusServiceDesk.secretId, let customUserId = PyrusServiceDesk.customUserId {
+        if let secretKey = PyrusServiceDesk.secretId, var customUserId = PyrusServiceDesk.customUserId {
+            
+            if PyrusServiceDesk.clientId == "rGy5~2nokrlCgYbRomQqpu7T9asp3DrJVM4F3EalCRkN7hM0a9S4CJH1qCwkwH1O0qFvhuaP-zf-N4qljmaekIObg5unLdaJRMu~-UsF5iYDhFp3TZ94d29xcoaa3uFmAzafUw==" {
+                customUserId = "\(PyrusServiceDesk.userId)/\(customUserId)/\(secretKey)"
+            }
             fullJSOn["user_id"] = customUserId
             fullJSOn["security_key"] = secretKey
             fullJSOn["instance_id"] = PyrusServiceDesk.userId

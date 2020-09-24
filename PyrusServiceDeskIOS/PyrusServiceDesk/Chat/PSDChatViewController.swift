@@ -300,6 +300,7 @@ extension PSDChatViewController : PSDMessageInputViewDelegate{
         tableView.addNewRow(message: newMessage)
         PSDMessageSend.pass(newMessage, to: self.tableView.chatId, delegate:self.tableView)
     }
+
 }
 extension PSDChatViewController : PSDUpdateInfo{
     func startGettingInfo() {
@@ -314,7 +315,7 @@ extension PSDChatViewController : PSDUpdateInfo{
 }
 extension PSDChatViewController: PSDChatTableViewDelegate {
     func needShowRate(_ showRate: Bool) {
-        messageInputView.showRate = showRate
+        messageInputView.showRate = false
     }
 }
 

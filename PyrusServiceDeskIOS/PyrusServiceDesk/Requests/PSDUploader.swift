@@ -162,6 +162,7 @@ class PSDUploader: NSObject {
     ///If end with success send attachment id to server
     private func endUpload(_ guid:String, task : URLSessionTask)
     {
+        print("upload complete")
         if let uploadData  = tasksMap[task]{
             if guid.count>0{
                 uploadData.file.serverIdentifer = guid

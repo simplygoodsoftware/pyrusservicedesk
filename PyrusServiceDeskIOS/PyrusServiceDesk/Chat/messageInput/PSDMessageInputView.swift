@@ -34,6 +34,7 @@ class PSDMessageInputView: UIView, PSDMessageTextViewDelegate,PSDMessageSendButt
     let distToSend : CGFloat = 15
     private static let attachmentsHeight : CGFloat = 80
     var showRate = false{
+    
         didSet(oldValue) {
             guard oldValue != showRate else{
                 return

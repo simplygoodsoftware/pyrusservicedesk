@@ -48,7 +48,7 @@ struct PSDMessagesStorage{
         messageDict[MESSAGE_TEXT_KEY] = message.text
         messageDict[MESSAGE_DATE_KEY] = message.date
         messageDict[MESSAGE_RATING_KEY] = message.rating
-        DispatchQueue.global().async {
+//        DispatchQueue.global().async {
             
             if hasSomeAttachment, let attachments = message.attachments, attachments.count > 0{
                 var attachmentsArray = [[String:Any]]()
@@ -64,10 +64,10 @@ struct PSDMessagesStorage{
                     messageDict[ATTACHMENT_ARRAY_KEY] = attachmentsArray
                 }
             }
-            DispatchQueue.main.async {
+//            DispatchQueue.main.async {
                 saveToStorage(messageDict: messageDict)
-            }
-        }
+//            }
+//        }
         
     }
     ///Save message's attachment to local file named same as attachment.

@@ -289,6 +289,7 @@ class PSDChatTableView: PSDDetailTableView{
     {
         if(self.numberOfRows(inSection: 0) == 0){
             self.addNewRow(){
+                print("matrix\(self.tableMatrix)")
                 var lastSection = self.tableMatrix.count-1
                 let lastRowDate = self.tableMatrix.date(of:lastSection)
                 if(lastRowDate != nil && message.date.compareWithoutTime(with:lastRowDate!)  != .equal){//if massage has other date create new section
@@ -311,6 +312,7 @@ class PSDChatTableView: PSDDetailTableView{
         }
         
     }
+    
     ///Returns last PSDChatMessageCell in tableView
     private func lastRow() -> PSDChatMessageCell?{
         return self.cellForRow(at: lastIndexPath()) as? PSDChatMessageCell

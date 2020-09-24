@@ -8,7 +8,7 @@
 
 import Foundation
 extension String {
-    private static let uuidLength = 75
+    private static let uuidLength = 30
     static func getUiqueString()->String{
         guard let a = NSMutableData(length: String.uuidLength) else{
             return UUID().uuidString

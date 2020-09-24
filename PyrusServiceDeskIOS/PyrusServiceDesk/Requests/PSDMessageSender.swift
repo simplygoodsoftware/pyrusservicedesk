@@ -21,6 +21,7 @@ class PSDMessageSender: NSObject {
     func pass(_ messageToPass:PSDMessage, to chatId:String, delegate:PSDMessageSendDelegate?, completion: @escaping(_ chatId : String?) -> Void)
     {
         if(PSDChatTableView.isNewChat(chatId)){
+            print("task2222222")
             let task = PSDMessageSender.passFirst(messageToPass.text, messageToPass.attachments, messageToPass.clientId){
                 newChatId in
                 //If passFirst end with success send new ChatId to delegate
@@ -39,6 +40,8 @@ class PSDMessageSender: NSObject {
             PSDMessageSend.taskArray.append(task)
         }
         else {
+            print("task1111111")
+
             let task = PSDMessageSender.pass(messageToPass.text,messageToPass.attachments, rating: messageToPass.rating, clientId: messageToPass.clientId, to: chatId){
                 (commentId: String?, attachments: NSArray?) in
                 if commentId != nil &&  commentId?.count ?? 0>0{
@@ -137,6 +140,7 @@ class PSDMessageSender: NSObject {
                 
                 do{
                     let messageData = try JSONSerialization.jsonObject(with: data, options: .allowFragments) as? [String: Any] ?? [String: Any]()
+                    print("OOOOOO\(messageData)")
                     completion(messageData.stringOfKey(commentIdParameter), messageData[attachmentsParameter] as? NSArray)
                 }catch{
                     //print("Pass error when convert to dictionary")

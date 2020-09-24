@@ -66,6 +66,7 @@ struct PSDGetChat {
             }
             do{
                 let chatData = try JSONSerialization.jsonObject(with: data, options: .allowFragments) as? [String : Any] ?? [String: Any]()
+                print("Chat ______\(chatData)")
                 completion(generateChat(from:chatData))
                
             }catch{
