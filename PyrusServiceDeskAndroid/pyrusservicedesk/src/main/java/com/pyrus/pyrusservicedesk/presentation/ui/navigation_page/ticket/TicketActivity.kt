@@ -204,6 +204,10 @@ internal class TicketActivity : ConnectionActivityBase<TicketViewModel>(TicketVi
     }
 
     override fun onCreateOptionsMenu(menu: Menu?): Boolean {
+        val menuDelegate = ConfigUtils.getMainMenuDelegate()
+        if (menuDelegate != null && menu != null)
+            return menuDelegate.onCreateOptionsMenu(menu, this)
+
         return menu?.let{
             MenuInflater(this).inflate(R.menu.psd_main_menu, menu)
             menu.findItem(R.id.psd_main_menu_close).setShowAsAction(SHOW_AS_ACTION_ALWAYS)
@@ -290,6 +294,10 @@ internal class TicketActivity : ConnectionActivityBase<TicketViewModel>(TicketVi
     }
 
     private fun onMenuItemClicked(menuItem: MenuItem?): Boolean {
+        val menuDelegate = ConfigUtils.getMainMenuDelegate()
+        if (menuDelegate != null && menuItem != null)
+            return menuDelegate.onOptionsItemSelected(menuItem, this)
+
         return menuItem?.let {
             when (it.itemId) {
                 R.id.psd_main_menu_close -> sharedViewModel.quitServiceDesk()

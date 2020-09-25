@@ -11,4 +11,11 @@ internal open class RequestBodyBase(
         @SerializedName("app_id")
         val appId: String,
         @SerializedName("user_id")
-        val userId: String)
+        val userId: String,
+        @SerializedName("security_key")
+        val securityKey: String?,
+        @SerializedName("instance_id")
+        val instanceId: String?,
+        @SerializedName("version")
+        val version: Int
+)
