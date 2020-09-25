@@ -1,7 +1,6 @@
 package com.pyrus.pyrusservicedesk.sdk.web.retrofit
 
 import com.google.gson.Gson
-import com.pyrus.pyrusservicedesk.BuildConfig
 import com.pyrus.pyrusservicedesk.PyrusServiceDesk
 import com.pyrus.pyrusservicedesk.sdk.FileResolver
 import com.pyrus.pyrusservicedesk.sdk.data.Attachment
@@ -22,7 +21,6 @@ import com.pyrus.pyrusservicedesk.utils.RequestUtils.Companion.BASE_URL
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import okhttp3.OkHttpClient
-import okhttp3.logging.HttpLoggingInterceptor
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 import java.util.concurrent.LinkedBlockingQueue
