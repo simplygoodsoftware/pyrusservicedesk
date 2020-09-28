@@ -323,13 +323,10 @@ extension PSDMessageInputView: AttachmentsAddButtonDelegate{
         EventsLogger.logEvent(.resignFirstResponder, additionalInfo: "prepair to show alert")
         self.inputTextView.resignFirstResponder()
     }
-    func attachmentChoosed(_ data:Data, _ url:URL, _ fromLibrary:Bool)
+    func attachmentChoosed(_ data:Data, _ url:URL?)
     {
         showInput()
         let attachment : PSDAttachment = PSDObjectsCreator.createAttachment(data,url)
-        if(fromLibrary){
-            attachment.rename(with: url)
-        }
         addAttachment(attachment)
     }
 }

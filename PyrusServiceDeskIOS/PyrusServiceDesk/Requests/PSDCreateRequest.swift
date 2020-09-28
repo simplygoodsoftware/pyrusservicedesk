@@ -55,11 +55,11 @@ extension URLRequest {
     {
         var fullJSOn = JSON
         fullJSOn["app_id"] = PyrusServiceDesk.clientId
-        if type != .token, let secretKey = PyrusServiceDesk.secretId, let customUserId = PyrusServiceDesk.customUserId {
+        if let secretKey = PyrusServiceDesk.secretId, let customUserId = PyrusServiceDesk.customUserId {
             fullJSOn["user_id"] = customUserId
             fullJSOn["security_key"] = secretKey
-            fullJSOn["version"] = 1
             fullJSOn["instance_id"] = PyrusServiceDesk.userId
+            fullJSOn["version"] = 1
         } else {
             fullJSOn["user_id"] = PyrusServiceDesk.userId
         }

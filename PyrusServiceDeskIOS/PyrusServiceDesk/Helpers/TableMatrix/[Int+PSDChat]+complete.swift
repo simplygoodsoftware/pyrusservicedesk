@@ -4,12 +4,73 @@ extension Array where Element == [PSDRowMessage]{
     ///complete array with unsent messages from storage
     mutating func completeWithUnsentMessages(){
         let messagesFromStorage = PSDMessagesStorage.messagesFromStorage()
-        complete(with: messagesFromStorage, startMessage: nil, completion: { _,_, messages in
+        let sortedMessages = messagesFromStorage.sorted(by: {$0.date > $1.date})
+        complete(with: sortedMessages, startMessage: nil, completion: { _,_, messages in
             let res = messagesFromStorage.filter { !messages.contains($0)}
             for message in res{
                 PSDMessagesStorage.removeFromStorage(messageId: message.clientId)
             }
         })
+    }
+
+    mutating func addFakeMessagge(messageId: Int) -> ([IndexPath],IndexSet) {
+        let fakeUser = PSDPlaceholderUser()
+        let fakeMessage = PSDPlaceholderMessage(owner: fakeUser, messageId: "\(messageId)")
+        let lastSection = self.count > 0 ? self.count - 1 : 0
+        let lastMessage = self[lastSection].last
+        let oldIndex = index(of: fakeMessage)
+        var indexPaths =  [IndexPath]()
+        var addSections = [Int]()
+        guard oldIndex.row == 0, oldIndex.section == 0 else{
+            return (indexPaths, IndexSet(addSections))
+        }
+        guard lastMessage?.message.owner as? PSDPlaceholderUser == nil else {
+            return (indexPaths, IndexSet(addSections))
+        }
+        let messages = PSDObjectsCreator.parseMessageToRowMessage(fakeMessage)
+        if let lastMessage = lastMessage, fakeMessage.date.compareWithoutTime(with: lastMessage.message.date)  == .equal{
+            indexPaths.append(IndexPath(row: self[lastSection].count, section: lastSection))
+        }
+        else{
+            addSections.append(lastSection + 1)
+        }
+        let _ = completeWithMessages(messages)
+        return (indexPaths, IndexSet(addSections))
+    }
+    mutating func removeFakeMessages() -> ([IndexPath],IndexSet) {
+        var indexPaths =  [IndexPath]()
+        var reloadSections = [Int]()
+        var selfCopy = [[PSDRowMessage]]()
+        selfCopy.append(contentsOf: self)
+        var needStop = false
+        let end = count
+        guard end > 0 else {
+            return (indexPaths, IndexSet(reloadSections))
+        }
+        for i in 1...end{
+            for (row,message) in selfCopy[selfCopy.count-i].enumerated().reversed(){
+                guard let _ = message.message as? PSDPlaceholderMessage else{
+                    needStop = message.message.owner.personId != PyrusServiceDesk.userId
+                    if needStop{
+                        break
+                    }
+                    continue
+                }
+                let ip  = IndexPath(row: row, section: selfCopy.count-i)
+                self.removeMessage(at: ip)
+                if self[selfCopy.count-i].count == 0{
+                    reloadSections.append(selfCopy.count-i)
+                    self.remove(at: selfCopy.count-i)
+                    break
+                }else{
+                    indexPaths.append(ip)
+                }
+            }
+            if needStop{
+                break
+            }
+        }
+        return (indexPaths, IndexSet(reloadSections))
     }
     ///Complete array with messages. Messages always add to last section, and checked for duplication by localId
     ///- parameter messages: messages to add
@@ -137,9 +198,9 @@ extension Array where Element == [PSDRowMessage]{
         return 0
     }
     ///return row for message according to its time
-    func row(forMessage: PSDMessage, section: Int)->Int{
+    private func row(forMessage: PSDMessage, section: Int)->Int{
         for (row,message) in self[section].enumerated().reversed(){
-            if message.message.state != .sent{
+            if message.message.state == .sending{
                 continue
             }
             if message.message.date.compareTime(with: forMessage.date) == .more || message.message.date.compareTime(with: forMessage.date) == .equal{

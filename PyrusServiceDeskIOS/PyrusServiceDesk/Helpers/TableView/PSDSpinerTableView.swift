@@ -121,7 +121,7 @@ class PSDRefreshControl : UIControl{
             super.observeValue(forKeyPath: keyPath, of: object, change: change, context: context)
         }
     }
-    func forceRefresh() {
+    private func forceRefresh() {
         guard let scroll = self.superview as? UIScrollView, !self.isRefreshing else{
             return
         }

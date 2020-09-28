@@ -62,7 +62,6 @@ import UIKit
     @objc public static func changeUserId(userId: String, secretId: String, title: NSAttributedString, name: String, _ chatTitleView: UIView?){
         PyrusServiceDesk.secretId = secretId
         PyrusServiceDesk.customUserId = userId
-        PyrusServiceDesk.createUserId(true)
         if name.count>0{
             PyrusServiceDesk.setUser(name)
         }
@@ -176,7 +175,14 @@ import UIKit
     }
     
     @objc static public func refresh() {
-        PyrusServiceDesk.mainController?.refreshChat()
+        PyrusServiceDesk.mainController?.refreshChat(showFakeMessage: nil)
+    }
+    ///Scrolls chat to bottom, starts refreshing chat and shows fake message from support is psd is open.
+    @objc static public func refreshFromPush(messageId: Int){
+        guard PSDIsOpen() else{
+            return
+        }
+        PyrusServiceDesk.mainController?.refreshChat(showFakeMessage: messageId)
     }
     @objc static public func present(_ viewController: UIViewController, animated: Bool, completion: (() -> Void)?){
         guard PSDIsOpen() else{

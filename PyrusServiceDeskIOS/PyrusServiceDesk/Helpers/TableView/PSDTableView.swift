@@ -15,7 +15,42 @@ class PSDTableView : UITableView{
             }
         }
     }
-    
+    ///Comparing rows and sections to remove with rows and section to add
+    ///returs removeIndexPaths, addIndexPaths, reloadIndexPaths, removeSections, addSections, reloadSections
+    static func compareAddAndRemoveRows(removeIndexPaths: [IndexPath], addIndexPaths: [IndexPath], removeSections: IndexSet, addSections: IndexSet) -> ([IndexPath], [IndexPath], [IndexPath], IndexSet, IndexSet, IndexSet){
+        var newRemoveIndexPaths = removeIndexPaths
+        var newAddIndexPaths = addIndexPaths
+        var reloadIndexPaths = [IndexPath]()
+        
+        var newRemoveSections = removeSections
+        var newAddsections = addSections
+        var reloadSections = [Int]()
+        
+        if removeIndexPaths.count > 0{
+            for removeIP in removeIndexPaths{
+                for ip in addIndexPaths{
+                    if removeIP.row == ip.row && removeIP.section == ip.section{
+                        newRemoveIndexPaths.removeAll(where: {$0.row == ip.row && $0.section == ip.section})
+                        newAddIndexPaths.removeAll(where: {$0.row == ip.row && $0.section == ip.section})
+                        reloadIndexPaths.append(IndexPath(row: ip.row, section: ip.section))
+                    }
+                }
+            }
+        }
+        if removeSections.count > 0{
+            for removeSec in removeSections{
+                for sec in addSections{
+                    if removeSec == sec{
+                        newRemoveSections.remove(removeSec)
+                        newAddsections.remove(removeSec)
+                        reloadSections.append(removeSec)
+                    }
+                }
+            }
+        }
+        
+        return (newRemoveIndexPaths, newAddIndexPaths, reloadIndexPaths, newRemoveSections, newAddsections, IndexSet(reloadSections))
+    }
     private lazy var activity : UIActivityIndicatorView = {
         let activity = UIActivityIndicatorView()
         activity.style = UIActivityIndicatorView.Style.whiteLarge

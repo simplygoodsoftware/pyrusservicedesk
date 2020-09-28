@@ -11,7 +11,7 @@ class PSDShareBarItemView: UIBarButtonItem{
     }
     deinit{
          if let url = self.shareFileUrl as URL?{
-            removeFile(url:url)
+            PSDFilesManager.removeFile(url:url)
         }
         
     }

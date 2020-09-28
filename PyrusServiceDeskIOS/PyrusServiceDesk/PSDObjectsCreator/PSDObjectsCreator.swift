@@ -16,8 +16,8 @@ struct PSDObjectsCreator {
         let message = PSDObjectsCreator.createMessage(PSD_WelcomeMessage(), attachments:nil, user: PSDUser(personId: "", name: "", type: .support, imagePath: ""))
         return PSDRowMessage(message: message, attachment: nil)
     }
-    static func createAttachment(_ data:Data, _ url :URL)->PSDAttachment{
-        return PSDAttachment(localPath: url.absoluteString, data: data, serverIdentifer:nil)
+    static func createAttachment(_ data: Data, _ url: URL?) -> PSDAttachment {
+        return PSDAttachment(localPath: url?.absoluteString, data: data, serverIdentifer:nil)
     }
     static func parseMessageToRowMessage(_ message: PSDMessage)->[PSDRowMessage]{
         if let attachments = message.attachments, attachments.count > 0{

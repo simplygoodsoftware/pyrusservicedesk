@@ -85,6 +85,14 @@ extension Array where Element == [PSDRowMessage]{
         }
         let currentUser = personForMessage(at: IndexPath.init(row: indexPath.row, section: indexPath.section))
         let nextUser = personForMessage(at: IndexPath.init(row: indexPath.row+1, section: indexPath.section))
+        if currentUser as? PSDPlaceholderUser != nil{
+            let previousUser = personForMessage(at: IndexPath.init(row: indexPath.row-1, section: indexPath.section))
+            if let previousUser = previousUser, previousUser.personId != PyrusServiceDesk.userId{
+                return false
+            }else{
+                return true
+            }
+        }
         if(!(currentUser?.equalTo(user:nextUser) ?? false) || nextUser == nil){
             return true
         }
@@ -94,6 +102,13 @@ extension Array where Element == [PSDRowMessage]{
     func needShowName(at indexPath: IndexPath)->Bool{
         let previousUser = personForMessage(at: IndexPath.init(row: indexPath.row-1, section: indexPath.section))
         let currentUser = personForMessage(at: IndexPath.init(row: indexPath.row, section: indexPath.section))
+        if currentUser as? PSDPlaceholderUser != nil{
+            if let previousUser = previousUser, previousUser.personId != PyrusServiceDesk.userId{
+                return false
+            }else{
+                return true
+            }
+        }
         if(!(currentUser?.equalTo(user:previousUser) ?? false) || previousUser == nil){
             return true
         }

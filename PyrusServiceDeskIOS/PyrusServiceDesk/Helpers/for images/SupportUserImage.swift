@@ -26,8 +26,13 @@ struct PSDSupportImageSetter {
     private static var loadingUsers: [PSDUser:Bool] = [PSDUser:Bool]()
     ///Return image for support user. Or start load it if need
     static func setImage(for user: PSDUser, in imageView:UIImageView, delagate: PSDSupportImageSetterDelegate?) {
-        imageView.image = DEFAULT_SUPPORT_IMAGE
+        if user as? PSDPlaceholderUser != nil {
+            imageView.image = nil
+            imageView.backgroundColor = UIColor.psdLightGray
+            return
+        }
         imageView.backgroundColor = defaultBackAvatarColor()
+        imageView.image = DEFAULT_SUPPORT_IMAGE
         if (user.image) != nil{
             imageView.image = user.image!
         }

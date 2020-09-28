@@ -4,7 +4,7 @@ import UIKit
 ///Protocol for updateting info
 protocol PSDUpdateInfo{
     func startGettingInfo()
-    func refreshChat()
+    func refreshChat(showFakeMessage: Int?)
 }
 
 class PSDChatViewController: UIViewController{
@@ -317,9 +317,9 @@ extension PSDChatViewController : PSDUpdateInfo{
         stopGettingInfo()
         timer = Timer.scheduledTimer(timeInterval: reloadInterval, target: self, selector: #selector(updateTable), userInfo:nil , repeats: true)
     }
-    func refreshChat() {
+    func refreshChat(showFakeMessage: Int?) {
         if !PSDChatTableView.isNewChat(self.tableView.chatId){
-            self.tableView.forceBottomRefresh()
+            self.tableView.forceRefresh(showFakeMessage: showFakeMessage)
         }
     }
 }
