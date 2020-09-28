@@ -20,6 +20,7 @@ import WebKit
   @objc public var chatTitleView: UIKit.UIView?
   @objc public var customRightBarButtonItem: UIKit.UIBarButtonItem?
   @objc public var customLeftBarButtonItem: UIKit.UIBarButtonItem?
+  @objc public var infoView: PyrusServiceDesk.PSDInfoView?
   @objc public var userId: Swift.String?
   @objc public var secretId: Swift.String?
   @objc deinit
@@ -41,6 +42,12 @@ import WebKit
 }
 @objc public protocol LogEvents {
   @objc func logPyrusServiceDesk(event: Swift.String)
+}
+@objc @_inheritsConvenienceInitializers public class PSDInfoView : UIKit.UIView {
+  @objc override dynamic public func removeFromSuperview()
+  @objc deinit
+  @objc override dynamic public init(frame: CoreGraphics.CGRect)
+  @objc required dynamic public init?(coder: Foundation.NSCoder)
 }
 @_inheritsConvenienceInitializers @objc public class PyrusServiceDesk : ObjectiveC.NSObject {
   public static var PSD_CLOSED_NOTIFICATION_NAME: Swift.String
