@@ -58,10 +58,7 @@ class PyrusServiceDesk private constructor(
          * @param appId id of a client
          */
         @JvmStatic
-        fun init(
-            application: Application,
-            appId: String
-        ) {
+        fun init(application: Application, appId: String) {
             INSTANCE = PyrusServiceDesk(application, appId, true)
         }
 
@@ -127,7 +124,7 @@ class PyrusServiceDesk private constructor(
             when {
                 token.isBlank() -> callback.onResult(Exception("Token is empty"))
                 serviceDesk.appId.isBlank() -> callback.onResult(Exception("AppId is not assigned"))
-                serviceDesk.instanceId.isBlank() -> callback.onResult(Exception("UserId is not assigned"))
+                serviceDesk.userId.isBlank() -> callback.onResult(Exception("UserId is not assigned"))
                 else -> {
                     GlobalScope.launch {
                         serviceDesk
@@ -188,15 +185,6 @@ class PyrusServiceDesk private constructor(
             get().sharedViewModel.clearQuitServiceDesk()
             get().onStopCallback = onStopCallback
             activity.startActivity(createIntent(ticketId))
-
-            if (configuration == null)
-                return
-            val currentUserId = get().preferences.getString(PREFERENCE_KEY_USER_ID_V2, null)
-            if (currentUserId != configuration.userId) {
-
-                refresh()
-            }
-            get().preferences.edit().putString(PREFERENCE_KEY_USER_ID_V2, configuration.userId).apply()
         }
 
         private fun createIntent(ticketId: Int? = null): Intent {
@@ -219,7 +207,7 @@ class PyrusServiceDesk private constructor(
         }
     }
 
-    internal var instanceId: String
+    internal var userId: String
 
     private val requestFactory: RequestFactory
     private val draftRepository: DraftRepository
@@ -244,7 +232,7 @@ class PyrusServiceDesk private constructor(
     init {
         migratePreferences(application, preferences)
 
-        instanceId = ConfigUtils.getInstanceId(preferences)
+        userId = ConfigUtils.getUserId(preferences)
 
         localDataVerifier = LocalDataVerifierImpl(fileResolver)
 
@@ -262,7 +250,7 @@ class PyrusServiceDesk private constructor(
                 .create()
 
         val centralRepository = CentralRepository(
-            RetrofitWebRepository(appId, instanceId, fileResolver, remoteGson),
+            RetrofitWebRepository(appId, userId, fileResolver, remoteGson),
             offlineRepository
         )
 

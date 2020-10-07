@@ -1,15 +1,15 @@
 package com.pyrus.pyrusservicedesk.presentation.ui.navigation_page.ticket
 
+import androidx.lifecycle.LiveData
+import androidx.lifecycle.MutableLiveData
+import androidx.lifecycle.Observer
 import android.content.Context
 import android.content.Intent
 import android.net.Uri
 import android.os.Handler
 import android.os.Looper
-import android.widget.Toast
-import androidx.lifecycle.LiveData
-import androidx.lifecycle.MutableLiveData
-import androidx.lifecycle.Observer
 import androidx.recyclerview.widget.DiffUtil
+import android.widget.Toast
 import com.pyrus.pyrusservicedesk.PyrusServiceDesk
 import com.pyrus.pyrusservicedesk.R
 import com.pyrus.pyrusservicedesk.ServiceDeskProvider
@@ -88,7 +88,6 @@ internal class TicketViewModel(serviceDeskProvider: ServiceDeskProvider,
     }
 
     private var pendingCommentUnderAction: CommentEntry? = null
-    private var userId = ConfigUtils.getUserId()
 
     init {
         draft = draftRepository.getDraft()
@@ -353,10 +352,6 @@ internal class TicketViewModel(serviceDeskProvider: ServiceDeskProvider,
     }
 
     private fun needUpdateCommentsList(freshList: List<Comment>): Boolean {
-        if (userId != ConfigUtils.getUserId()) {
-            userId = ConfigUtils.getUserId()
-            return true
-        }
         if (freshList.isEmpty()) {
             return !hasRealComments()
         }
