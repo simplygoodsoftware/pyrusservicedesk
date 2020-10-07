@@ -3,8 +3,15 @@ import UIKit
 @objc public class PyrusServiceDesk: NSObject {
     private static let PSD_USER_START_CHAT_KEY = "PSDUserStartChat"
     public static var PSD_CLOSED_NOTIFICATION_NAME = "PyrusServiceDeskWasClosed"
+    private static let SET_PUSH_TIME_INTEVAL = TimeInterval(5*60)
+    private static let REFRESH_TIME_INTEVAL = TimeInterval(1*60)
+    private static let REFRESH_MAX_COUNT = 20
+    static let PSD_LAST_ACTIVITY_KEY = "PSDLastActivityDate"
+    private static let PSD_LAST_ACTIVITY_INTEVAL = TimeInterval(3*24*60*60)
     ///AppId needed for request
     static var clientId: String?
+    private static var lastSetPushToken: Date?
+    private static var lastRefreshes = [Date]()
 
     ///UserId needed for request
     static private(set) var userId: String = "" {
@@ -44,6 +51,13 @@ import UIKit
      - parameter completion: Error. Not nil if success. See error.localizedDescription to understand why its happened
  */
     @objc public static func setPushToken(_ token:String?, completion: @escaping(Error?) -> Void){
+        if let lastSetPushToken = lastSetPushToken{
+            let difference = Date().timeIntervalSince(lastSetPushToken)
+            if difference < SET_PUSH_TIME_INTEVAL{
+                completion(PSDError.init(description: "Too many requests"))
+                return
+            }
+        }
         guard let clientId = clientId, clientId.count > 0, clientId != "0"  else{
             completion(PSDError.init(description: "AppId is invalid"))
             EventsLogger.logEvent(.emptyClientId)
@@ -57,6 +71,7 @@ import UIKit
         PSDPushToken.send(token, completion: {
             error in
             completion(error)
+            lastSetPushToken = Date()
         })
     }
     
@@ -140,6 +155,18 @@ import UIKit
         }
     }
     @objc static public func refresh() {
+        if lastRefreshes.count == REFRESH_MAX_COUNT{
+            let lastRefresh = lastRefreshes[0]
+            let difference = Date().timeIntervalSince(lastRefresh)
+            if difference < REFRESH_TIME_INTEVAL{
+                EventsLogger.logEvent(.tooManyRefresh)
+                return
+            }
+        }
+        lastRefreshes.append(Date())
+        if lastRefreshes.count > REFRESH_MAX_COUNT{
+            lastRefreshes.remove(at: 0)
+        }
         PyrusServiceDesk.mainController?.refreshChat()
     }
     /*
@@ -216,7 +243,9 @@ import UIKit
     
     //MARK: get user info automatic
     ///The reload interval to get info from server(chats list)
-    private static let reloadInterval : TimeInterval = 1800.0
+    private static let reloadInterval: TimeInterval = 1800.0
+    ///The reload interval to get info from server(chats list)
+    private static let recentlyActive_reloadInterval: TimeInterval = 180.0
     ///The timer to get info from server(chats list) with reloadInterval.
     private static var timer :Timer?
     ///Create timer to get chats list from server.
@@ -226,11 +255,38 @@ import UIKit
         if rightNow && didStartChatWithSupport(){
             updateUserInfo()
         }else{
-            timer = Timer.scheduledTimer(timeInterval: reloadInterval, target: self, selector: #selector(updateUserInfo), userInfo:nil , repeats: true)
+            let interval = getTimer()
+            timer = Timer.scheduledTimer(timeInterval: interval, target: self, selector: #selector(updateUserInfo), userInfo:nil , repeats: true)
             if rightNow{
                 timer?.fire()
             }
         }
+    }
+    private static func getTimer() -> TimeInterval{
+        if let pyrusUserDefaults = PSDMessagesStorage.pyrusUserDefaults(), let date = pyrusUserDefaults.object(forKey: userLastActivityKey()) as? Date{
+            let difference = Date().timeIntervalSince(date)
+            if difference <= PSD_LAST_ACTIVITY_INTEVAL{
+                return recentlyActive_reloadInterval
+            }
+        }
+        return reloadInterval
+    }
+    private static func userLastActivityKey() -> String{
+        return PSD_LAST_ACTIVITY_KEY + "_" + userId
+    }
+    ///Set last user acivity date to NOW if date paramemeter is nil, returns true if setted
+    static func setLastActivityDate(_ date: Date? = nil) -> Bool{
+        if let pyrusUserDefaults = PSDMessagesStorage.pyrusUserDefaults(){
+            if let newDate = date, let oldDate = pyrusUserDefaults.object(forKey: userLastActivityKey()) as? Date{
+                if oldDate.compare(newDate) == .orderedDescending || oldDate.compare(newDate) == .orderedSame{
+                    return false
+                }
+            }
+            pyrusUserDefaults.set(date ?? Date(), forKey: userLastActivityKey())
+            pyrusUserDefaults.synchronize()
+            return true
+        }
+        return false
     }
     ///Restart PyrusServiceDesk.timer - move next fire to reloadInterval.
     static func restartTimer(){
