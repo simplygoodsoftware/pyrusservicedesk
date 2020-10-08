@@ -31,6 +31,7 @@ import com.pyrus.pyrusservicedesk.sdk.web.OnCancelListener
 import com.pyrus.pyrusservicedesk.sdk.web.UploadFileHooks
 import com.pyrus.pyrusservicedesk.utils.ConfigUtils
 import com.pyrus.pyrusservicedesk.utils.MILLISECONDS_IN_SECOND
+import com.pyrus.pyrusservicedesk.utils.PREFERENCE_KEY_LAST_ACTIVITY_TIME
 import com.pyrus.pyrusservicedesk.utils.RequestUtils.Companion.MAX_FILE_SIZE_BYTES
 import com.pyrus.pyrusservicedesk.utils.RequestUtils.Companion.MAX_FILE_SIZE_MEGABYTES
 import com.pyrus.pyrusservicedesk.utils.getWhen
@@ -235,7 +236,7 @@ internal class TicketViewModel(serviceDeskProvider: ServiceDeskProvider,
     private fun maybeStartAutoRefresh() {
         if (canBeUpdated()) {
             // delayed to prevent launching second unnecessary update in [init]
-            mainHandler.postDelayed(updateRunnable, TICKET_UPDATE_INTERVAL * MILLISECONDS_IN_SECOND)
+            mainHandler.post(updateRunnable)
         }
     }
 
@@ -288,6 +289,7 @@ internal class TicketViewModel(serviceDeskProvider: ServiceDeskProvider,
                     .execute()
                     .observeForever(AddCommentObserver(uploadFileHooks, localComment))
         }
+        PyrusServiceDesk.getSharedPreferences().edit().putLong(PREFERENCE_KEY_LAST_ACTIVITY_TIME, System.currentTimeMillis()).apply()
     }
 
     private fun hasComment(commentId: Int): Boolean {

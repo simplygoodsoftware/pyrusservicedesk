@@ -3,16 +3,21 @@ package com.pyrus.pyrusservicedesk.sdk.updates
 import android.os.Handler
 import android.os.Looper
 import androidx.annotation.MainThread
+import com.pyrus.pyrusservicedesk.PyrusServiceDesk
 import com.pyrus.pyrusservicedesk.sdk.RequestFactory
 import com.pyrus.pyrusservicedesk.sdk.data.TicketShortDescription
 import com.pyrus.pyrusservicedesk.sdk.response.ResponseCallback
 import com.pyrus.pyrusservicedesk.sdk.response.ResponseError
+import com.pyrus.pyrusservicedesk.utils.MILLISECONDS_IN_DAY
 import com.pyrus.pyrusservicedesk.utils.MILLISECONDS_IN_MINUTE
+import com.pyrus.pyrusservicedesk.utils.PREFERENCE_KEY_LAST_ACTIVITY_TIME
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 
-private const val TICKETS_UPDATE_INTERVAL_MINUTES = 30L
+private const val LONG_TICKETS_UPDATE_INTERVAL_MINUTES = 30L
+private const val SHORT_TICKETS_UPDATE_INTERVAL_MINUTES = 3L
+private const val LAST_ACTIVITY_INTERVAL_DAYS = 3L
 
 /**
  * Class for recurring requesting data.
@@ -22,6 +27,22 @@ private const val TICKETS_UPDATE_INTERVAL_MINUTES = 30L
  * Subscription types: [LiveUpdateSubscriber], [NewReplySubscriber], [OnUnreadTicketCountChangedSubscriber]
  */
 internal class LiveUpdates(requests: RequestFactory) {
+
+    private val ticketsUpdateInterval: Long
+
+    init {
+        val preferences = PyrusServiceDesk.getSharedPreferences()
+
+        val lastActiveTime = preferences.getLong(PREFERENCE_KEY_LAST_ACTIVITY_TIME, -1L)
+        ticketsUpdateInterval =
+            when {
+                lastActiveTime == -1L -> -1L
+                System.currentTimeMillis() - lastActiveTime < LAST_ACTIVITY_INTERVAL_DAYS * MILLISECONDS_IN_DAY ->
+                    SHORT_TICKETS_UPDATE_INTERVAL_MINUTES * MILLISECONDS_IN_MINUTE
+                else -> LONG_TICKETS_UPDATE_INTERVAL_MINUTES * MILLISECONDS_IN_MINUTE
+            }
+
+    }
 
     // notified in UI thread
     private val dataSubscribers = mutableSetOf<LiveUpdateSubscriber>()
@@ -54,7 +75,7 @@ internal class LiveUpdates(requests: RequestFactory) {
                     }
                 )
             }
-            mainHandler.postDelayed(this, TICKETS_UPDATE_INTERVAL_MINUTES * MILLISECONDS_IN_MINUTE)
+            mainHandler.postDelayed(this, ticketsUpdateInterval * MILLISECONDS_IN_MINUTE)
         }
     }
 
@@ -128,6 +149,8 @@ internal class LiveUpdates(requests: RequestFactory) {
     }
 
     private fun startUpdates() {
+        if (ticketsUpdateInterval == -1L)
+            return
         isStarted = true
         mainHandler.post(ticketsUpdateRunnable)
     }
