@@ -95,18 +95,30 @@ internal class ConfigUtils{
             }
         }
 
+        /**
+         * Provides userId for api version v2 configuration.
+         */
         fun getUserId(): String? {
             return PyrusServiceDesk.getConfiguration().userId
         }
 
+        /**
+         * Provides security key for api version v2 configuration.
+         */
         fun getSecurityKey(): String? {
             return PyrusServiceDesk.getConfiguration().securityKey
         }
 
+        /**
+         * Provides configuration's api version.
+         */
         fun getApiVersion(): Int {
             return PyrusServiceDesk.getConfiguration().apiVersion
         }
 
+        /**
+         * Provides main menu delegate of configuration.
+         */
         fun getMainMenuDelegate(): MainMenuDelegate? {
             return PyrusServiceDesk.getConfiguration().mainMenuDelegate
         }
