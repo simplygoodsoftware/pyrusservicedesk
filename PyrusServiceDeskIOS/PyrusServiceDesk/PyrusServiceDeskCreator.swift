@@ -155,7 +155,7 @@ import UIKit
         }
     }
     @objc static public func refresh() {
-        if lastRefreshes.count == REFRESH_MAX_COUNT{
+        if lastRefreshes.count >= REFRESH_MAX_COUNT{
             let lastRefresh = lastRefreshes[0]
             let difference = Date().timeIntervalSince(lastRefresh)
             if difference < REFRESH_TIME_INTEVAL{
