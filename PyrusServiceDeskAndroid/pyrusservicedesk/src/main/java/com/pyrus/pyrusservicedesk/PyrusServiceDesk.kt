@@ -177,6 +177,13 @@ class PyrusServiceDesk private constructor(
             get().sharedViewModel.triggerUpdate()
         }
 
+        /**
+         * Start tickets update if it is not already running.
+         */
+        internal fun startTicketsUpdatesIfNeeded() {
+            get().liveUpdates.startUpdatesIfNeeded()
+        }
+
         internal fun onServiceDeskStop() {
             get().onStopCallback?.onServiceDeskStop()
             get().onStopCallback = null

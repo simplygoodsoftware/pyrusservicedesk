@@ -290,6 +290,7 @@ internal class TicketViewModel(serviceDeskProvider: ServiceDeskProvider,
                     .observeForever(AddCommentObserver(uploadFileHooks, localComment))
         }
         PyrusServiceDesk.getSharedPreferences().edit().putLong(PREFERENCE_KEY_LAST_ACTIVITY_TIME, System.currentTimeMillis()).apply()
+        PyrusServiceDesk.startTicketsUpdatesIfNeeded()
     }
 
     private fun hasComment(commentId: Int): Boolean {

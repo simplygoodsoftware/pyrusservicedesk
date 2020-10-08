@@ -133,6 +133,14 @@ internal class LiveUpdates(requests: RequestFactory) {
         onUnsubscribe()
     }
 
+    /**
+     * Start tickets update if it is not already running.
+     */
+    internal fun startUpdatesIfNeeded() {
+        if (!isStarted)
+            startUpdates()
+    }
+
     private fun onSubscribe() {
         if (!isStarted)
             startUpdates()
