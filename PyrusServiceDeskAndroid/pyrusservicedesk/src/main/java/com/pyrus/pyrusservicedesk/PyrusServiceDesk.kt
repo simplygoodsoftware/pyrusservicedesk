@@ -48,6 +48,8 @@ class PyrusServiceDesk private constructor(
         private var INSTANCE: PyrusServiceDesk? = null
         private var CONFIGURATION: ServiceDeskConfiguration? = null
 
+        private const val SET_PUSH_TOKEN_TIMEOUT = 5 // Minutes
+
         /**
          * Initializes PyrusServiceDesk embeddable module.
          * The best approach is to call this in [Application.onCreate]
@@ -121,11 +123,17 @@ class PyrusServiceDesk private constructor(
         @JvmStatic
         fun setPushToken(token: String, callback: SetPushTokenCallback) {
             val serviceDesk = get()
+            val lastUpdateTime = serviceDesk.preferences.getLong(PREFERENCE_KEY_LAST_SET_TOKEN, -1L)
+            val isSkip = lastUpdateTime != -1L
+                    && System.currentTimeMillis() - lastUpdateTime < SET_PUSH_TOKEN_TIMEOUT * MILLISECONDS_IN_MINUTE
+
             when {
+                isSkip -> callback.onResult(Exception("Too many requests. Maximum once every $SET_PUSH_TOKEN_TIMEOUT minutes."))
                 token.isBlank() -> callback.onResult(Exception("Token is empty"))
                 serviceDesk.appId.isBlank() -> callback.onResult(Exception("AppId is not assigned"))
                 serviceDesk.userId.isBlank() -> callback.onResult(Exception("UserId is not assigned"))
                 else -> {
+                    serviceDesk.preferences.edit().putLong(PREFERENCE_KEY_LAST_SET_TOKEN, System.currentTimeMillis()).apply()
                     GlobalScope.launch {
                         serviceDesk
                             .requestFactory

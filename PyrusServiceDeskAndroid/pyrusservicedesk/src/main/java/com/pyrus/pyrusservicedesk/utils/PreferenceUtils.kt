@@ -15,6 +15,8 @@ private const val PREFERENCE_KEY_DRAFT_LEGACY = "net.papirus.pyrusservicedesk.PR
 
 private const val PREFERENCE_KEY_VERSION = "PREFERENCE_KEY_VERSION"
 
+internal const val PREFERENCE_KEY_LAST_SET_TOKEN = "PREFERENCE_KEY_LAST_SET_TOKEN"
+
 /**
  * Current version to migrate user preferences to
  */
