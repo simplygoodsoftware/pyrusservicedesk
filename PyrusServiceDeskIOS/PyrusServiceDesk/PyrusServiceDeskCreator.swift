@@ -119,6 +119,9 @@ import UIKit
     @objc public static func stop(){
         PyrusServiceDesk.mainController?.remove(animated: false)
     }
+    
+    @objc public static var failedAuthorizedCallBack :  ((Error?) -> Void)?
+    
     ///The subscriber for new messages from support.
     weak static  private(set) var subscriber : NewReplySubscriber?
     ///The subscriber for PyrusSecviceDeskClose.
