@@ -154,12 +154,13 @@ import UIKit
             EventsLogger.logEvent(.emptyClientId)
         }
     }
-    @objc static public func refresh() {
+    @objc static public func refresh(completion: ((Error?) -> Void)? = nil) {
         if lastRefreshes.count >= REFRESH_MAX_COUNT{
             let lastRefresh = lastRefreshes[0]
             let difference = Date().timeIntervalSince(lastRefresh)
             if difference < REFRESH_TIME_INTEVAL{
                 EventsLogger.logEvent(.tooManyRefresh)
+                completion?(PSDError.init(description: "Too many requests"))
                 return
             }
         }
@@ -168,6 +169,7 @@ import UIKit
             lastRefreshes.remove(at: 0)
         }
         PyrusServiceDesk.mainController?.refreshChat()
+        completion?(nil)
     }
     /*
     ///Init PyrusServiceDesk with new clientId.

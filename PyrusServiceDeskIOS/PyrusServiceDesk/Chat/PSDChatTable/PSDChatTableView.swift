@@ -124,10 +124,18 @@ class PSDChatTableView: PSDDetailTableView{
         }
     }
     private func setLastActivityDate(){
-        if let lastMessage = self.lastMessageFromServer{
-            if PyrusServiceDesk.setLastActivityDate(lastMessage.date){
-                PyrusServiceDesk.restartTimer()
-            }
+        var lastDate: Date?
+        if let lastMessage = self.lastMessageFromServer, lastMessage.owner.personId == PyrusServiceDesk.userId {
+            lastDate = lastMessage.date
+        } else{
+            lastDate = self.tableMatrix.lastUserMessageDate()
+        }
+        guard let date = lastDate else {
+            return
+        }
+        print("date = \(date)")
+        if PyrusServiceDesk.setLastActivityDate(date){
+            PyrusServiceDesk.restartTimer()
         }
     }
     private func showRateIfNeed() {
