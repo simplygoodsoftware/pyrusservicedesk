@@ -234,10 +234,8 @@ internal class TicketViewModel(serviceDeskProvider: ServiceDeskProvider,
     }
 
     private fun maybeStartAutoRefresh() {
-        if (canBeUpdated()) {
-            // delayed to prevent launching second unnecessary update in [init]
+        if (canBeUpdated())
             mainHandler.post(updateRunnable)
-        }
     }
 
     private fun canBeUpdated() = isFeed || !isNewTicket()
