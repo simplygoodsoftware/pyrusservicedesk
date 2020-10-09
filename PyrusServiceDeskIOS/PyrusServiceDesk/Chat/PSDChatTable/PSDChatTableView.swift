@@ -133,7 +133,6 @@ class PSDChatTableView: PSDDetailTableView{
         guard let date = lastDate else {
             return
         }
-        print("date = \(date)")
         if PyrusServiceDesk.setLastActivityDate(date){
             PyrusServiceDesk.restartTimer()
         }
