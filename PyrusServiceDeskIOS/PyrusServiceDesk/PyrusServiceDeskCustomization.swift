@@ -28,6 +28,8 @@ import Foundation
 
     @objc public var secretKey: String?
 
+    @objc public var onAuthorizationFailed :  (() -> Void)?
+
 
     func buildCustomization(){
         if avatarForSupport != nil{
@@ -57,7 +59,7 @@ import Foundation
         
         PyrusServiceDesk.customUserId = userId
         PyrusServiceDesk.secretKey = secretKey
-        
+        PyrusServiceDesk.onAuthorizationFailed = onAuthorizationFailed
     }
     
 }

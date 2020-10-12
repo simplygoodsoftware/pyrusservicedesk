@@ -104,7 +104,7 @@ import UIKit
     ///- parameter onStopCallback: OnStopCallback object or nil. OnStopCallback is object for getting a notification that PyrusServiceDesk was closed.
     private static func start(ticketId: String?, on viewController:UIViewController, configuration:ServiceDeskConfiguration?, completion:(() -> Void)?, onStopCallback: OnStopCallback?){
         stopCallback = onStopCallback
-        if !PSDIsOpen(){
+        if !PyrusServiceDeskController.PSDIsOpen(){
             EventsLogger.logEvent(.openPSD)
             let psd : PyrusServiceDeskController = PyrusServiceDeskController.create()
             configuration?.buildCustomization()
@@ -120,7 +120,7 @@ import UIKit
         PyrusServiceDesk.mainController?.remove(animated: false)
     }
     
-    @objc public static var onAuthorizationFailed :  ((Error?) -> Void)?
+    @objc public static var onAuthorizationFailed :  (() -> Void)?
     
     ///The subscriber for new messages from support.
     weak static  private(set) var subscriber : NewReplySubscriber?
@@ -182,13 +182,13 @@ import UIKit
     }
     ///Scrolls chat to bottom, starts refreshing chat and shows fake message from support is psd is open.
     @objc static public func refreshFromPush(messageId: Int){
-        guard PSDIsOpen() else{
+        guard PyrusServiceDeskController.PSDIsOpen() else{
             return
         }
         PyrusServiceDesk.mainController?.refreshChat(showFakeMessage: messageId)
     }
     @objc static public func present(_ viewController: UIViewController, animated: Bool, completion: (() -> Void)?){
-        guard PSDIsOpen() else{
+        guard PyrusServiceDeskController.PSDIsOpen() else{
             return
             
         }
@@ -211,7 +211,7 @@ import UIKit
     private static let PSD_USER_ID_KEY = "PSDUserId"
      private static func createUserId(_ reset: Bool = false) {
         //block changes when chat is opened now
-        guard !PSDIsOpen() else {
+        guard !PyrusServiceDeskController.PSDIsOpen() else {
             return
         }
         let userId : String
@@ -225,9 +225,7 @@ import UIKit
         }
         PyrusServiceDesk.userId = userId
     }
-    private static func PSDIsOpen()->Bool{
-        return (UIApplication.topViewController() is PSDChatViewController) || (UIApplication.topViewController() is PSDChatsViewController) || (UIApplication.topViewController() is PSDAttachmentLoadViewController)
-    }
+
     
     ///Setting name of user. If name is not setted it il be default ("Guest")
     ///- parameter userName: A name to display in pyrus task.

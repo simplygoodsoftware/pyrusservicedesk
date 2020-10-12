@@ -41,6 +41,16 @@ struct PSDGetChats {
             }
             
             if let httpStatus = response as? HTTPURLResponse, httpStatus.statusCode != 200 {           // check for http errors
+                DispatchQueue.main.async {
+                    if httpStatus.statusCode == 403 {
+                        if let onFailed = PyrusServiceDesk.onAuthorizationFailed {
+                            onFailed()
+                        } else {
+                            PyrusServiceDesk.mainController?.closeServiceDesk()
+                        }
+                    }
+                }
+
                 completion([])
                 if needShowError {
                     DispatchQueue.main.async {showError(httpStatus.statusCode, on:topViewController)}
