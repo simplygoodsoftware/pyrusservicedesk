@@ -26,7 +26,7 @@ import Foundation
 
     @objc public var userId: String?
 
-    @objc public var secretId: String?
+    @objc public var secretKey: String?
 
 
     func buildCustomization(){
@@ -56,7 +56,7 @@ import Foundation
         }
         
         PyrusServiceDesk.customUserId = userId
-        PyrusServiceDesk.secretId = secretId
+        PyrusServiceDesk.secretKey = secretKey
         
     }
     

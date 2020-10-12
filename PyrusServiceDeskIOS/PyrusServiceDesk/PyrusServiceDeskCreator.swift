@@ -59,8 +59,8 @@ import UIKit
             completion(error)
         })
     }
-    @objc public static func changeUserId(userId: String, secretId: String, title: NSAttributedString, name: String, _ chatTitleView: UIView?){
-        PyrusServiceDesk.secretId = secretId
+    @objc public static func changeUserId(userId: String, secretKey: String, title: NSAttributedString, name: String, _ chatTitleView: UIView?){
+        PyrusServiceDesk.secretKey = secretKey
         PyrusServiceDesk.customUserId = userId
         if name.count>0{
             PyrusServiceDesk.setUser(name)
@@ -120,7 +120,7 @@ import UIKit
         PyrusServiceDesk.mainController?.remove(animated: false)
     }
     
-    @objc public static var failedAuthorizedCallBack :  ((Error?) -> Void)?
+    @objc public static var onAuthorizationFailed :  ((Error?) -> Void)?
     
     ///The subscriber for new messages from support.
     weak static  private(set) var subscriber : NewReplySubscriber?
@@ -163,13 +163,13 @@ import UIKit
     }
     
     static var customUserId: String?
-    static var secretId: String?
+    static var secretKey: String?
     
-    @objc static public func createWith(_ clientId: String?, userId: String, secretId: String, reset: Bool) {
+    @objc static public func createWith(_ clientId: String?, userId: String, secretKey: String, reset: Bool) {
         if clientId != nil && (clientId?.count ?? 0)>0 {
             PyrusServiceDesk.clientId = clientId
             PyrusServiceDesk.oneChat = true
-            PyrusServiceDesk.secretId = secretId
+            PyrusServiceDesk.secretKey = secretKey
             PyrusServiceDesk.customUserId = userId
             PyrusServiceDesk.createUserId(reset)
         }else{

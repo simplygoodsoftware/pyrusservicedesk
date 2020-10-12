@@ -44,12 +44,12 @@ struct PyrusServiceDeskAPI {
         var urlString: String = "\(baseURLString)" + type.rawValue
 
         if type == .download || type == .downloadPreview{
-            if let secretKey = PyrusServiceDesk.secretId, let customUserId = PyrusServiceDesk.customUserId {
+            if let secretKey = PyrusServiceDesk.secretKey, let customUserId = PyrusServiceDesk.customUserId {
                 let userIdEncodeed : String = customUserId.addingPercentEncoding(withAllowedCharacters: CharacterSet.rfc3986Unreserved) ?? customUserId
                 let appIdEncodeed : String = PyrusServiceDesk.clientId?.addingPercentEncoding(withAllowedCharacters: CharacterSet.rfc3986Unreserved) ?? PyrusServiceDesk.clientId ?? ""
-                let secretIdEncodeed : String = secretKey.addingPercentEncoding(withAllowedCharacters: CharacterSet.rfc3986Unreserved) ?? secretKey
+                let secretKeyEncodeed : String = secretKey.addingPercentEncoding(withAllowedCharacters: CharacterSet.rfc3986Unreserved) ?? secretKey
                 let instanceIdEncodeed : String = PyrusServiceDesk.userId.addingPercentEncoding(withAllowedCharacters: CharacterSet.rfc3986Unreserved) ?? PyrusServiceDesk.userId
-                urlString = urlString + "/" + ticketId + "?version=1&user_id=" + userIdEncodeed + "&security_key=" + secretIdEncodeed + "&instance_id=" + instanceIdEncodeed + "&app_id=" + appIdEncodeed
+                urlString = urlString + "/" + ticketId + "?version=1&user_id=" + userIdEncodeed + "&security_key=" + secretKeyEncodeed + "&instance_id=" + instanceIdEncodeed + "&app_id=" + appIdEncodeed
             } else {
                 let userIdEncodeed : String = PyrusServiceDesk.userId.addingPercentEncoding(withAllowedCharacters: CharacterSet.rfc3986Unreserved) ?? PyrusServiceDesk.userId
                 let appIdEncodeed : String = PyrusServiceDesk.clientId?.addingPercentEncoding(withAllowedCharacters: CharacterSet.rfc3986Unreserved) ?? PyrusServiceDesk.clientId ?? ""
