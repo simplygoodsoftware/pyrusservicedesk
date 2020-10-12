@@ -1,9 +1,10 @@
 package com.pyrus.pyrusservicedesk.sdk.updates
 
+import android.content.SharedPreferences
 import android.os.Handler
 import android.os.Looper
+import android.util.Log
 import androidx.annotation.MainThread
-import com.pyrus.pyrusservicedesk.PyrusServiceDesk
 import com.pyrus.pyrusservicedesk.sdk.RequestFactory
 import com.pyrus.pyrusservicedesk.sdk.data.TicketShortDescription
 import com.pyrus.pyrusservicedesk.sdk.response.ResponseCallback
@@ -26,20 +27,18 @@ private const val LAST_ACTIVITY_INTERVAL_DAYS = 3L
  *
  * Subscription types: [LiveUpdateSubscriber], [NewReplySubscriber], [OnUnreadTicketCountChangedSubscriber]
  */
-internal class LiveUpdates(requests: RequestFactory) {
+internal class LiveUpdates(requests: RequestFactory, preferences: SharedPreferences) {
 
-    private val ticketsUpdateInterval: Long
+    private var ticketsUpdateInterval: Long
 
     init {
-        val preferences = PyrusServiceDesk.getSharedPreferences()
-
         val lastActiveTime = preferences.getLong(PREFERENCE_KEY_LAST_ACTIVITY_TIME, -1L)
         ticketsUpdateInterval =
             when {
                 lastActiveTime == -1L -> -1L
                 System.currentTimeMillis() - lastActiveTime < LAST_ACTIVITY_INTERVAL_DAYS * MILLISECONDS_IN_DAY ->
-                    SHORT_TICKETS_UPDATE_INTERVAL_MINUTES * MILLISECONDS_IN_MINUTE
-                else -> LONG_TICKETS_UPDATE_INTERVAL_MINUTES * MILLISECONDS_IN_MINUTE
+                    SHORT_TICKETS_UPDATE_INTERVAL_MINUTES
+                else -> LONG_TICKETS_UPDATE_INTERVAL_MINUTES
             }
 
     }
@@ -56,6 +55,7 @@ internal class LiveUpdates(requests: RequestFactory) {
 
     private val ticketsUpdateRunnable = object : Runnable {
         override fun run() {
+            Log.d("SDS", "ticketsUpdateRunnable " + System.currentTimeMillis().toString())
             GlobalScope.launch(Dispatchers.IO) {
                 requests.getTicketsRequest().execute(
                     object : ResponseCallback<List<TicketShortDescription>> {
@@ -137,6 +137,7 @@ internal class LiveUpdates(requests: RequestFactory) {
      * Start tickets update if it is not already running.
      */
     internal fun startUpdatesIfNeeded() {
+        ticketsUpdateInterval = SHORT_TICKETS_UPDATE_INTERVAL_MINUTES
         if (!isStarted)
             startUpdates()
     }

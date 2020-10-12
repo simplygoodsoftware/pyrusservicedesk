@@ -294,7 +294,7 @@ class PyrusServiceDesk private constructor(
 
         requestFactory = RequestFactory(centralRepository)
         draftRepository = PreferenceDraftRepository(preferences)
-        liveUpdates = LiveUpdates(requestFactory)
+        liveUpdates = LiveUpdates(requestFactory, preferences)
     }
 
     internal fun getSharedViewModel() = sharedViewModel
