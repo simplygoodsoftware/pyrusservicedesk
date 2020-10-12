@@ -31,12 +31,12 @@ import kotlin.coroutines.coroutineContext
  * Web [GeneralRepository] implementation based on [Retrofit] library.
  *
  * @param appId id of the app that obtained through special Pyrus form.
- * @param instanceId UID of app instance. Generated installation id is used by default.
+ * @param userId UID of user. Generated installation id is used by default.
  * @param fileResolver helper for making upload file requests.
  */
 internal class RetrofitWebRepository(
     private val appId: String,
-    private val instanceId: String,
+    private val userId: String,
     private val fileResolver: FileResolver,
     gson: Gson
 ) : RemoteRepository {
@@ -61,7 +61,7 @@ internal class RetrofitWebRepository(
     override suspend fun getFeed(): Response<Comments> {
         return withContext<Response<Comments>>(Dispatchers.IO){
             try {
-                api.getTicketFeed(RequestBodyBase(appId, getUserId(), getSecurityKey(), instanceId, getVersion())).execute().run {
+                api.getTicketFeed(RequestBodyBase(appId, userId)).execute().run {
                     when {
                         isSuccessful && body() != null -> ResponseImpl.success(body()!!)
                         else -> ResponseImpl.failure(ApiCallError(this.message()))
@@ -77,7 +77,7 @@ internal class RetrofitWebRepository(
     override suspend fun getTickets(): GetTicketsResponse {
         return withContext(Dispatchers.IO){
             try {
-                api.getTickets(RequestBodyBase(appId, getUserId(), getSecurityKey(), getInstanceId(), getVersion())).execute().run {
+                api.getTickets(RequestBodyBase(appId, userId)).execute().run {
                     when {
                         isSuccessful && body() != null -> GetTicketsResponse(tickets = body()!!.tickets)
                         else -> GetTicketsResponse(ApiCallError(this.message()))
@@ -92,7 +92,7 @@ internal class RetrofitWebRepository(
     override suspend fun getTicket(ticketId: Int): GetTicketResponse {
         return withContext(Dispatchers.IO){
             try {
-                api.getTicket(RequestBodyBase(appId, getUserId(), getSecurityKey(), getInstanceId(), getVersion()), ticketId).execute().run {
+                api.getTicket(RequestBodyBase(appId, userId), ticketId).execute().run {
                     when {
                         isSuccessful && body() != null -> GetTicketResponse(ticket = body())
                         else -> GetTicketResponse(ApiCallError(this.message()))
@@ -135,10 +135,7 @@ internal class RetrofitWebRepository(
                 api.createTicket(
                     CreateTicketRequestBody(
                         appId,
-                        getUserId(),
-                        getSecurityKey(),
-                        getInstanceId(),
-                        getVersion(),
+                        userId,
                         ConfigUtils.getUserName(),
                         descr
                     )
@@ -176,16 +173,7 @@ internal class RetrofitWebRepository(
     override suspend fun setPushToken(token: String): SetPushTokenResponse {
         return withContext(Dispatchers.IO){
             try {
-                api.setPushToken(
-                    SetPushTokenBody(
-                        appId,
-                        getUserId(),
-                        getSecurityKey(),
-                        getInstanceId(),
-                        getVersion(),
-                        token
-                    )
-                ).execute().run {
+                api.setPushToken(SetPushTokenBody(appId, userId, token)).execute().run {
                     when {
                         isSuccessful -> SetPushTokenResponse()
                         else -> SetPushTokenResponse(ApiCallError(this.message()))
@@ -195,28 +183,6 @@ internal class RetrofitWebRepository(
                 SetPushTokenResponse(NoInternetConnection("No internet connection"))
             }
         }
-    }
-
-    private fun getUserId(): String {
-        if (getVersion() == 1)
-            return ConfigUtils.getUserId() ?: instanceId
-        return instanceId
-    }
-
-    private fun getVersion(): Int {
-        return ConfigUtils.getApiVersion()
-    }
-
-    private fun getSecurityKey(): String? {
-        if (getVersion() == 1)
-            return ConfigUtils.getSecurityKey()
-        return null
-    }
-
-    private fun getInstanceId(): String? {
-        if (getVersion() == 1)
-            return instanceId
-        return null
     }
 
     private suspend fun addComment(isFeed: Boolean,
@@ -241,30 +207,10 @@ internal class RetrofitWebRepository(
             }
 
             val call = when {
-                isFeed -> api.addFeedComment(AddCommentRequestBody(
-                    appId,
-                    getUserId(),
-                    getSecurityKey(),
-                    getInstanceId(),
-                    getVersion(),
-                    cament.body,
-                    cament.attachments,
-                    ConfigUtils.getUserName(),
-                    cament.rating))
+                isFeed -> api.addFeedComment(AddCommentRequestBody(appId, userId, cament.body, cament.attachments, ConfigUtils.getUserName(), cament.rating))
                 else -> api.addComment(
-                    AddCommentRequestBody(
-                        appId,
-                        getUserId(),
-                        getSecurityKey(),
-                        getInstanceId(),
-                        getVersion(),
-                        cament.body,
-                        cament.attachments,
-                        ConfigUtils.getUserName(),
-                        cament.rating
-                    ),
-                    request.ticketId
-                )
+                    AddCommentRequestBody(appId, userId, cament.body, cament.attachments, ConfigUtils.getUserName(), cament.rating),
+                    request.ticketId)
             }
             return@withContext try {
                 call

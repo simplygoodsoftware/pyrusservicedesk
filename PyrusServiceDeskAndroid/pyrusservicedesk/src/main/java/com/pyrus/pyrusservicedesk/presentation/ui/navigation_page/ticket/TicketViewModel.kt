@@ -1,15 +1,15 @@
 package com.pyrus.pyrusservicedesk.presentation.ui.navigation_page.ticket
 
+import androidx.lifecycle.LiveData
+import androidx.lifecycle.MutableLiveData
+import androidx.lifecycle.Observer
 import android.content.Context
 import android.content.Intent
 import android.net.Uri
 import android.os.Handler
 import android.os.Looper
-import android.widget.Toast
-import androidx.lifecycle.LiveData
-import androidx.lifecycle.MutableLiveData
-import androidx.lifecycle.Observer
 import androidx.recyclerview.widget.DiffUtil
+import android.widget.Toast
 import com.pyrus.pyrusservicedesk.PyrusServiceDesk
 import com.pyrus.pyrusservicedesk.R
 import com.pyrus.pyrusservicedesk.ServiceDeskProvider
@@ -31,6 +31,7 @@ import com.pyrus.pyrusservicedesk.sdk.web.OnCancelListener
 import com.pyrus.pyrusservicedesk.sdk.web.UploadFileHooks
 import com.pyrus.pyrusservicedesk.utils.ConfigUtils
 import com.pyrus.pyrusservicedesk.utils.MILLISECONDS_IN_SECOND
+import com.pyrus.pyrusservicedesk.utils.PREFERENCE_KEY_LAST_ACTIVITY_TIME
 import com.pyrus.pyrusservicedesk.utils.RequestUtils.Companion.MAX_FILE_SIZE_BYTES
 import com.pyrus.pyrusservicedesk.utils.RequestUtils.Companion.MAX_FILE_SIZE_MEGABYTES
 import com.pyrus.pyrusservicedesk.utils.getWhen
@@ -88,7 +89,6 @@ internal class TicketViewModel(serviceDeskProvider: ServiceDeskProvider,
     }
 
     private var pendingCommentUnderAction: CommentEntry? = null
-    private var userId = ConfigUtils.getUserId()
 
     init {
         draft = draftRepository.getDraft()
@@ -234,10 +234,8 @@ internal class TicketViewModel(serviceDeskProvider: ServiceDeskProvider,
     }
 
     private fun maybeStartAutoRefresh() {
-        if (canBeUpdated()) {
-            // delayed to prevent launching second unnecessary update in [init]
-            mainHandler.postDelayed(updateRunnable, TICKET_UPDATE_INTERVAL * MILLISECONDS_IN_SECOND)
-        }
+        if (canBeUpdated())
+            mainHandler.post(updateRunnable)
     }
 
     private fun canBeUpdated() = isFeed || !isNewTicket()
@@ -289,6 +287,8 @@ internal class TicketViewModel(serviceDeskProvider: ServiceDeskProvider,
                     .execute()
                     .observeForever(AddCommentObserver(uploadFileHooks, localComment))
         }
+        PyrusServiceDesk.getSharedPreferences().edit().putLong(PREFERENCE_KEY_LAST_ACTIVITY_TIME, System.currentTimeMillis()).apply()
+        PyrusServiceDesk.startTicketsUpdatesIfNeeded()
     }
 
     private fun hasComment(commentId: Int): Boolean {
@@ -353,10 +353,6 @@ internal class TicketViewModel(serviceDeskProvider: ServiceDeskProvider,
     }
 
     private fun needUpdateCommentsList(freshList: List<Comment>): Boolean {
-        if (userId != ConfigUtils.getUserId()) {
-            userId = ConfigUtils.getUserId()
-            return true
-        }
         if (freshList.isEmpty()) {
             return !hasRealComments()
         }
