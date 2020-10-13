@@ -3,7 +3,6 @@ package com.pyrus.pyrusservicedesk.sdk.web.request_body
 import com.pyrus.pyrusservicedesk.sdk.web.UploadFileHooks
 import kotlinx.coroutines.isActive
 import okhttp3.MediaType
-import okhttp3.MediaType.Companion.toMediaTypeOrNull
 import okhttp3.MultipartBody
 import okhttp3.RequestBody
 import okio.BufferedSink
@@ -41,7 +40,7 @@ internal class UploadFileRequestBody(
     fun toMultipartBody(): MultipartBody.Part {
         val requestFileBody = object: RequestBody(){
             override fun contentType(): MediaType? {
-                return MEDIA_TYPE.toMediaTypeOrNull()
+                return MediaType.parse(MEDIA_TYPE)
             }
 
             override fun contentLength(): Long {
