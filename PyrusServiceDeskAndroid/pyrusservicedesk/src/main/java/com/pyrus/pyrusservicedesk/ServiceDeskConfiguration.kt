@@ -131,22 +131,6 @@ class ServiceDeskConfiguration internal constructor() {
             return this
         }
 
-        fun setUser(userId: String, securityKey: String): Builder {
-            configuration.userId = userId
-            configuration.securityKey = securityKey
-            return this
-        }
-
-        fun setApiVersion(apiVersion: Int): Builder {
-            configuration.apiVersion = apiVersion
-            return this
-        }
-
-        fun setChatMenuDelegate(mainMenuDelegate: MainMenuDelegate): Builder {
-            configuration.mainMenuDelegate = mainMenuDelegate
-            return this
-        }
-
         /**
          * Assigns id and security key of the user who appeals to support.
          *
