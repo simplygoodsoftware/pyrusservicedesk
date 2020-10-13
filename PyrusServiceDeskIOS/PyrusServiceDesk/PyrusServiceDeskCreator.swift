@@ -192,22 +192,23 @@ import UIKit
         }
     }
     
-@objc static public func refresh(onError: ((Error?) -> Void)? = nil) {
-if lastRefreshes.count >= REFRESH_MAX_COUNT{
-let lastRefresh = lastRefreshes[0]
-let difference = Date().timeIntervalSince(lastRefresh)
-if difference < REFRESH_TIME_INTEVAL{
-EventsLogger.logEvent(.tooManyRefresh)
-onError?(PSDError.init(description: "Too many requests"))
-return
-}
-}
-lastRefreshes.append(Date())
-if lastRefreshes.count > REFRESH_MAX_COUNT{
-lastRefreshes.remove(at: 0)
-}
-PyrusServiceDesk.mainController?.refreshChat()
+    @objc static public func refresh(onError: ((Error?) -> Void)? = nil) {
+        if lastRefreshes.count >= REFRESH_MAX_COUNT{
+            let lastRefresh = lastRefreshes[0]
+            let difference = Date().timeIntervalSince(lastRefresh)
+            if difference < REFRESH_TIME_INTEVAL{
+                EventsLogger.logEvent(.tooManyRefresh)
+                onError?(PSDError.init(description: "Too many requests"))
+                return
+            }
+        }
+        lastRefreshes.append(Date())
+        if lastRefreshes.count > REFRESH_MAX_COUNT{
+        lastRefreshes.remove(at: 0)
+        }
+        PyrusServiceDesk.mainController?.refreshChat(showFakeMessage: 0)
     }
+    
     ///Scrolls chat to bottom, starts refreshing chat and shows fake message from support is psd is open.
     @objc static public func refreshFromPush(messageId: Int){
         guard PyrusServiceDeskController.PSDIsOpen() else{
