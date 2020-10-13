@@ -70,6 +70,7 @@ class PSDMessageSender: NSObject {
         if(success){
             PSDMessagesStorage.removeFromStorage(messageId: messageToPass.clientId)
             PyrusServiceDesk.setDidStartChatWithSupport()
+            let _ = PyrusServiceDesk.setLastActivityDate()
             PyrusServiceDesk.restartTimer()
         }
         
