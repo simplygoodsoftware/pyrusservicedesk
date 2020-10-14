@@ -291,7 +291,9 @@ import UIKit
     }
     ///Restart PyrusServiceDesk.timer - move next fire to reloadInterval.
     static func restartTimer(){
-        PyrusServiceDesk.startGettingInfo(rightNow: false)
+        DispatchQueue.main.async {
+            PyrusServiceDesk.startGettingInfo(rightNow: false)
+        }
     }
     ///Stops PyrusServiceDesk.timer.
     private static func stopGettingInfo(){
