@@ -47,6 +47,10 @@ class PyrusServiceDesk private constructor(
         internal var FILE_CHOOSER: FileChooser? = null
         private var INSTANCE: PyrusServiceDesk? = null
         private var CONFIGURATION: ServiceDeskConfiguration? = null
+        private var lastRefreshes = ArrayList<Long>()
+
+        private const val SET_PUSH_TOKEN_TIMEOUT = 5 // Minutes
+        private const val REFRESH_MAX_COUNT = 20 // in minute
 
         /**
          * Initializes PyrusServiceDesk embeddable module.
@@ -58,10 +62,7 @@ class PyrusServiceDesk private constructor(
          * @param appId id of a client
          */
         @JvmStatic
-        fun init(
-            application: Application,
-            appId: String
-        ) {
+        fun init(application: Application, appId: String) {
             INSTANCE = PyrusServiceDesk(application, appId, true)
         }
 
@@ -124,11 +125,17 @@ class PyrusServiceDesk private constructor(
         @JvmStatic
         fun setPushToken(token: String, callback: SetPushTokenCallback) {
             val serviceDesk = get()
+            val lastUpdateTime = serviceDesk.preferences.getLong(PREFERENCE_KEY_LAST_SET_TOKEN, -1L)
+            val isSkip = lastUpdateTime != -1L
+                    && System.currentTimeMillis() - lastUpdateTime < SET_PUSH_TOKEN_TIMEOUT * MILLISECONDS_IN_MINUTE
+
             when {
+                isSkip -> callback.onResult(Exception("Too many requests. Maximum once every $SET_PUSH_TOKEN_TIMEOUT minutes."))
                 token.isBlank() -> callback.onResult(Exception("Token is empty"))
                 serviceDesk.appId.isBlank() -> callback.onResult(Exception("AppId is not assigned"))
-                serviceDesk.instanceId.isBlank() -> callback.onResult(Exception("UserId is not assigned"))
+                serviceDesk.userId.isBlank() -> callback.onResult(Exception("UserId is not assigned"))
                 else -> {
+                    serviceDesk.preferences.edit().putLong(PREFERENCE_KEY_LAST_SET_TOKEN, System.currentTimeMillis()).apply()
                     GlobalScope.launch {
                         serviceDesk
                             .requestFactory
@@ -157,7 +164,25 @@ class PyrusServiceDesk private constructor(
          * Manually refreshes feed of PyrusServiceDesk.
          */
         @JvmStatic
-        fun refresh() = get().sharedViewModel.triggerUpdate()
+        fun refresh() {
+            if (lastRefreshes.size == REFRESH_MAX_COUNT
+                && System.currentTimeMillis() - lastRefreshes.first() < MILLISECONDS_IN_MINUTE
+            )
+                return
+
+            lastRefreshes.add(System.currentTimeMillis())
+            if (lastRefreshes.size > REFRESH_MAX_COUNT)
+                lastRefreshes.removeAt(0)
+
+            get().sharedViewModel.triggerUpdate()
+        }
+
+        /**
+         * Start tickets update if it is not already running.
+         */
+        internal fun startTicketsUpdatesIfNeeded() {
+            get().liveUpdates.startUpdatesIfNeeded()
+        }
 
         internal fun onServiceDeskStop() {
             get().onStopCallback?.onServiceDeskStop()
@@ -167,6 +192,8 @@ class PyrusServiceDesk private constructor(
         internal fun get(): PyrusServiceDesk {
             return checkNotNull(INSTANCE) { "Instantiate PyrusServiceDesk first" }
         }
+
+        internal fun getSharedPreferences() = get().preferences
 
         internal fun getConfiguration(): ServiceDeskConfiguration {
             if (CONFIGURATION == null)
@@ -188,15 +215,6 @@ class PyrusServiceDesk private constructor(
             get().sharedViewModel.clearQuitServiceDesk()
             get().onStopCallback = onStopCallback
             activity.startActivity(createIntent(ticketId))
-
-            if (configuration == null)
-                return
-            val currentUserId = get().preferences.getString(PREFERENCE_KEY_USER_ID_V2, null)
-            if (currentUserId != configuration.userId) {
-
-                refresh()
-            }
-            get().preferences.edit().putString(PREFERENCE_KEY_USER_ID_V2, configuration.userId).apply()
         }
 
         private fun createIntent(ticketId: Int? = null): Intent {
@@ -219,7 +237,7 @@ class PyrusServiceDesk private constructor(
         }
     }
 
-    internal var instanceId: String
+    internal var userId: String
 
     private val requestFactory: RequestFactory
     private val draftRepository: DraftRepository
@@ -244,7 +262,15 @@ class PyrusServiceDesk private constructor(
     init {
         migratePreferences(application, preferences)
 
-        instanceId = ConfigUtils.getInstanceId(preferences)
+        val lastSetTokenTime = preferences.getLong(PREFERENCE_KEY_LAST_SET_TOKEN, -1L)
+        if (lastSetTokenTime != -1L && System.currentTimeMillis() < lastSetTokenTime)
+            preferences.edit().putLong(PREFERENCE_KEY_LAST_SET_TOKEN, -1L).apply()
+
+        val lastActiveTime = preferences.getLong(PREFERENCE_KEY_LAST_ACTIVITY_TIME, -1L)
+        if (lastActiveTime != -1L && System.currentTimeMillis() < lastActiveTime)
+            preferences.edit().putLong(PREFERENCE_KEY_LAST_ACTIVITY_TIME, -1L).apply()
+
+        userId = ConfigUtils.getUserId(preferences)
 
         localDataVerifier = LocalDataVerifierImpl(fileResolver)
 
@@ -262,13 +288,13 @@ class PyrusServiceDesk private constructor(
                 .create()
 
         val centralRepository = CentralRepository(
-            RetrofitWebRepository(appId, instanceId, fileResolver, remoteGson),
+            RetrofitWebRepository(appId, userId, fileResolver, remoteGson),
             offlineRepository
         )
 
         requestFactory = RequestFactory(centralRepository)
         draftRepository = PreferenceDraftRepository(preferences)
-        liveUpdates = LiveUpdates(requestFactory)
+        liveUpdates = LiveUpdates(requestFactory, preferences)
     }
 
     internal fun getSharedViewModel() = sharedViewModel

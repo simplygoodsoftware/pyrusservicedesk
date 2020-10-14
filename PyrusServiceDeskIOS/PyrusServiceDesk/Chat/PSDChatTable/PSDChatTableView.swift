@@ -91,6 +91,7 @@ class PSDChatTableView: PSDDetailTableView{
                                 self?.tableMatrix.create(from: chat!)
                                 
                                 self?.lastMessageFromServer = chat?.messages.last
+                                self?.setLastActivityDate()
                                 self?.reloadData()
                                 
                                 self?.removeNoConnectionView()
@@ -120,6 +121,20 @@ class PSDChatTableView: PSDDetailTableView{
                 self.reloadData()
             }
             
+        }
+    }
+    private func setLastActivityDate(){
+        var lastDate: Date?
+        if let lastMessage = self.lastMessageFromServer, lastMessage.owner.personId == PyrusServiceDesk.userId {
+            lastDate = lastMessage.date
+        } else{
+            lastDate = self.tableMatrix.lastUserMessageDate()
+        }
+        guard let date = lastDate else {
+            return
+        }
+        if PyrusServiceDesk.setLastActivityDate(date){
+            PyrusServiceDesk.restartTimer()
         }
     }
     private func showRateIfNeed() {
@@ -179,6 +194,8 @@ class PSDChatTableView: PSDDetailTableView{
                             DispatchQueue.main.async  {
                                 self?.removeNoConnectionView()
                                 self?.lastMessageFromServer = chat?.messages.last
+                                self?.setLastActivityDate()
+                                
                                 if indexPaths.count>0 || sections.count>0{
                                     self?.beginUpdates()
                                     if(sections.count>0){
