@@ -78,7 +78,7 @@ struct PSDMessageSend {
     ///If first message sending end with error - error will be passed to all messages in array.
     static private var passQueueArray = [PSDMessage]()
     
-    static private let dispatchQueue = DispatchQueue(label: "PSDSendMesasges", attributes: .concurrent)
+    static private let dispatchQueue = DispatchQueue(label: "PSDSendMesasges")
     /**
      Pass message to server.
      - parameter messageToPass: PSDMessage need to be passed.

@@ -17,6 +17,10 @@ class ServiceDeskConfiguration internal constructor() {
     internal var themeColor: Int? = null
     @DrawableRes
     internal var supportAvatar: Int? = null
+    internal var userId: String? = null
+    internal var securityKey: String? = null
+    internal var apiVersion: Int = 0
+    internal var mainMenuDelegate: MainMenuDelegate? = null
 
     internal val isDialogTheme: Boolean = PyrusServiceDesk.get().application.isTablet()
 
@@ -124,6 +128,39 @@ class ServiceDeskConfiguration internal constructor() {
          */
         fun setUserName(userName: String): Builder {
             configuration.userName = userName
+            return this
+        }
+
+        /**
+         * Assigns id and security key of the user who appeals to support.
+         *
+         * @param userId id of the user to be applied
+         * @param securityKey security key of the user to be applied
+         */
+        fun setUser(userId: String, securityKey: String): Builder {
+            configuration.userId = userId
+            configuration.securityKey = securityKey
+            return this
+        }
+
+        /**
+         * Sets apiVersion of the service desk configuration.
+         * Depending on it different params and features will be used for requests.
+         *
+         * @param apiVersion version of api.
+         */
+        fun setApiVersion(apiVersion: Int): Builder {
+            configuration.apiVersion = apiVersion
+            return this
+        }
+
+        /**
+         * Sets chat menu delegate of service desk configuration.
+         *
+         * @param mainMenuDelegate delegate that has callbacks for chat menu actions.
+         */
+        fun setChatMenuDelegate(mainMenuDelegate: MainMenuDelegate): Builder {
+            configuration.mainMenuDelegate = mainMenuDelegate
             return this
         }
 

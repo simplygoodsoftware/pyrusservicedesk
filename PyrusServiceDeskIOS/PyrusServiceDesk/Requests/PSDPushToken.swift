@@ -15,7 +15,7 @@ struct PSDPushToken {
         request = URLRequest.createRequest(type:.token, parameters: parameters)
         
         let task = PyrusServiceDesk.mainSession.dataTask(with: request) { data, response, error in
-            guard let data = data, error == nil else {
+            guard let _ = data, error == nil else {
                 // check for fundamental networking error
                 completion(PSDError.init(description: "No internet connection"))
                 return
@@ -26,17 +26,7 @@ struct PSDPushToken {
                 
             }
             else{
-                do{
-                    let resp = try JSONSerialization.jsonObject(with: data, options: .allowFragments) as? [String : Any] ?? [String: Any]()
-                    if let error = resp["error"]{
-                        completion(PSDError.init(description: "\(error)"))
-                    }
-                    else{
-                        completion(nil)
-                    }
-                }catch{
-                    completion(nil)
-                }
+                completion(nil)
             }
         }
         task.resume()

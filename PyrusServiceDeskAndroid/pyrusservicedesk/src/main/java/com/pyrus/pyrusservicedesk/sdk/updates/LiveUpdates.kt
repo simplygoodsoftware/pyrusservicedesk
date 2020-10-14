@@ -1,24 +1,18 @@
 package com.pyrus.pyrusservicedesk.sdk.updates
 
-import android.content.SharedPreferences
 import android.os.Handler
 import android.os.Looper
-import android.util.Log
 import androidx.annotation.MainThread
 import com.pyrus.pyrusservicedesk.sdk.RequestFactory
 import com.pyrus.pyrusservicedesk.sdk.data.TicketShortDescription
 import com.pyrus.pyrusservicedesk.sdk.response.ResponseCallback
 import com.pyrus.pyrusservicedesk.sdk.response.ResponseError
-import com.pyrus.pyrusservicedesk.utils.MILLISECONDS_IN_DAY
 import com.pyrus.pyrusservicedesk.utils.MILLISECONDS_IN_MINUTE
-import com.pyrus.pyrusservicedesk.utils.PREFERENCE_KEY_LAST_ACTIVITY_TIME
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 
-private const val LONG_TICKETS_UPDATE_INTERVAL_MINUTES = 30L
-private const val SHORT_TICKETS_UPDATE_INTERVAL_MINUTES = 3L
-private const val LAST_ACTIVITY_INTERVAL_DAYS = 3L
+private const val TICKETS_UPDATE_INTERVAL_MINUTES = 30L
 
 /**
  * Class for recurring requesting data.
@@ -27,21 +21,7 @@ private const val LAST_ACTIVITY_INTERVAL_DAYS = 3L
  *
  * Subscription types: [LiveUpdateSubscriber], [NewReplySubscriber], [OnUnreadTicketCountChangedSubscriber]
  */
-internal class LiveUpdates(requests: RequestFactory, preferences: SharedPreferences) {
-
-    private var ticketsUpdateInterval: Long
-
-    init {
-        val lastActiveTime = preferences.getLong(PREFERENCE_KEY_LAST_ACTIVITY_TIME, -1L)
-        ticketsUpdateInterval =
-            when {
-                lastActiveTime == -1L -> -1L
-                System.currentTimeMillis() - lastActiveTime < LAST_ACTIVITY_INTERVAL_DAYS * MILLISECONDS_IN_DAY ->
-                    SHORT_TICKETS_UPDATE_INTERVAL_MINUTES
-                else -> LONG_TICKETS_UPDATE_INTERVAL_MINUTES
-            }
-
-    }
+internal class LiveUpdates(requests: RequestFactory) {
 
     // notified in UI thread
     private val dataSubscribers = mutableSetOf<LiveUpdateSubscriber>()
@@ -55,7 +35,6 @@ internal class LiveUpdates(requests: RequestFactory, preferences: SharedPreferen
 
     private val ticketsUpdateRunnable = object : Runnable {
         override fun run() {
-            Log.d("SDS", "ticketsUpdateRunnable " + System.currentTimeMillis().toString())
             GlobalScope.launch(Dispatchers.IO) {
                 requests.getTicketsRequest().execute(
                     object : ResponseCallback<List<TicketShortDescription>> {
@@ -75,7 +54,7 @@ internal class LiveUpdates(requests: RequestFactory, preferences: SharedPreferen
                     }
                 )
             }
-            mainHandler.postDelayed(this, ticketsUpdateInterval * MILLISECONDS_IN_MINUTE)
+            mainHandler.postDelayed(this, TICKETS_UPDATE_INTERVAL_MINUTES * MILLISECONDS_IN_MINUTE)
         }
     }
 
@@ -133,15 +112,6 @@ internal class LiveUpdates(requests: RequestFactory, preferences: SharedPreferen
         onUnsubscribe()
     }
 
-    /**
-     * Start tickets update if it is not already running.
-     */
-    internal fun startUpdatesIfNeeded() {
-        ticketsUpdateInterval = SHORT_TICKETS_UPDATE_INTERVAL_MINUTES
-        if (!isStarted)
-            startUpdates()
-    }
-
     private fun onSubscribe() {
         if (!isStarted)
             startUpdates()
@@ -158,8 +128,6 @@ internal class LiveUpdates(requests: RequestFactory, preferences: SharedPreferen
     }
 
     private fun startUpdates() {
-        if (ticketsUpdateInterval == -1L)
-            return
         isStarted = true
         mainHandler.post(ticketsUpdateRunnable)
     }

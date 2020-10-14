@@ -124,16 +124,6 @@ extension Array where Element == [PSDRowMessage]{
         }
         return false
     }
-    ///Returns the date of last  message from user
-    func lastUserMessageDate() -> Date? {
-        for messageByDate in self.reversed(){
-            for messageRow in messageByDate.reversed(){
-                if messageRow.message.owner.personId == PyrusServiceDesk.userId && messageRow.hasId(){
-                    return messageRow.message.date
-                }
-            }
-        }
-        return nil
-    }
+        
 }
 

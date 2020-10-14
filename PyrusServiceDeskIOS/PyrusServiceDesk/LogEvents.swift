@@ -11,7 +11,6 @@ enum EventsLogger {
     case invalidPushToken
     case resignFirstResponder
     case openPSD
-    case tooManyRefresh
     static func logEvent(_ logCase: EventsLogger, additionalInfo: String? = nil){
         var logString = stringForEvent(logCase)
         if let additionalInfo = additionalInfo{
@@ -34,8 +33,6 @@ enum EventsLogger {
             return defaultString + "ResignFirstResponder was called"
         case .openPSD:
             return defaultString + "PyrusServiceDesk open"
-        case .tooManyRefresh:
-            return defaultString + "PyrusServiceDesk too many refreshes"
         }
     }
 }
