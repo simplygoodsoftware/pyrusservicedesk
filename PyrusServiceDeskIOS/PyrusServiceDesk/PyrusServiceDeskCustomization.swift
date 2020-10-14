@@ -24,13 +24,6 @@ import Foundation
     ///The view to show additional information under chat
     @objc public var infoView: PSDInfoView?
 
-    @objc public var userId: String?
-
-    @objc public var secretKey: String?
-
-    @objc public var onAuthorizationFailed :  (() -> Void)?
-
-
     func buildCustomization(){
         if avatarForSupport != nil{
             PyrusServiceDesk.mainController?.customization.customAvatar = avatarForSupport!
@@ -56,10 +49,6 @@ import Foundation
         if(userName != nil && userName!.count>1){
             PyrusServiceDesk.setUser(userName)
         }
-        PyrusServiceDesk.onAuthorizationFailed = onAuthorizationFailed
-        PyrusServiceDesk.secretKey = secretKey
-        PyrusServiceDesk.customUserId = userId
-        
     }
     
 }

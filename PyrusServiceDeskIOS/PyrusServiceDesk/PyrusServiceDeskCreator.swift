@@ -157,6 +157,13 @@ import UIKit
             PyrusServiceDesk.clientId = clientId
             PyrusServiceDesk.oneChat = true
             PyrusServiceDesk.createUserId()
+            let needReloadUI = PyrusServiceDesk.customUserId?.count ?? 0 > 0
+            PyrusServiceDesk.secretKey = nil
+            PyrusServiceDesk.customUserId = nil
+            if needReloadUI {
+                PyrusServiceDesk.mainController?.updateTitleChat()
+            }
+
         }else{
             EventsLogger.logEvent(.emptyClientId)
         }
