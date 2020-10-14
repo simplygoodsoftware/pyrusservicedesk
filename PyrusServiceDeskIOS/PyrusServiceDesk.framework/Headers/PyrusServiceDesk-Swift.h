@@ -355,9 +355,6 @@ SWIFT_CLASS("_TtC16PyrusServiceDesk24ServiceDeskConfiguration")
 @property (nonatomic, strong) UIBarButtonItem * _Nullable customLeftBarButtonItem;
 /// The view to show additional information under chat
 @property (nonatomic, strong) PSDInfoView * _Nullable infoView;
-@property (nonatomic, copy) NSString * _Nullable userId;
-@property (nonatomic, copy) NSString * _Nullable secretKey;
-@property (nonatomic, copy) void (^ _Nullable onAuthorizationFailed)(void);
 - (nonnull instancetype)init OBJC_DESIGNATED_INITIALIZER;
 @end
 
@@ -737,9 +734,6 @@ SWIFT_CLASS("_TtC16PyrusServiceDesk24ServiceDeskConfiguration")
 @property (nonatomic, strong) UIBarButtonItem * _Nullable customLeftBarButtonItem;
 /// The view to show additional information under chat
 @property (nonatomic, strong) PSDInfoView * _Nullable infoView;
-@property (nonatomic, copy) NSString * _Nullable userId;
-@property (nonatomic, copy) NSString * _Nullable secretKey;
-@property (nonatomic, copy) void (^ _Nullable onAuthorizationFailed)(void);
 - (nonnull instancetype)init OBJC_DESIGNATED_INITIALIZER;
 @end
 
@@ -1117,9 +1111,6 @@ SWIFT_CLASS("_TtC16PyrusServiceDesk24ServiceDeskConfiguration")
 @property (nonatomic, strong) UIBarButtonItem * _Nullable customLeftBarButtonItem;
 /// The view to show additional information under chat
 @property (nonatomic, strong) PSDInfoView * _Nullable infoView;
-@property (nonatomic, copy) NSString * _Nullable userId;
-@property (nonatomic, copy) NSString * _Nullable secretKey;
-@property (nonatomic, copy) void (^ _Nullable onAuthorizationFailed)(void);
 - (nonnull instancetype)init OBJC_DESIGNATED_INITIALIZER;
 @end
 
@@ -1143,3 +1134,5 @@ SWIFT_CLASS("_TtC16PyrusServiceDesk24ServiceDeskConfiguration")
 #endif
 
 #endif
+
+

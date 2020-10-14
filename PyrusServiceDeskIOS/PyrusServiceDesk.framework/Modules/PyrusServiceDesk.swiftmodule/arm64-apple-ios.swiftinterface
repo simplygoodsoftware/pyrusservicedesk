@@ -21,9 +21,6 @@ import WebKit
   @objc public var customRightBarButtonItem: UIKit.UIBarButtonItem?
   @objc public var customLeftBarButtonItem: UIKit.UIBarButtonItem?
   @objc public var infoView: PyrusServiceDesk.PSDInfoView?
-  @objc public var userId: Swift.String?
-  @objc public var secretKey: Swift.String?
-  @objc public var onAuthorizationFailed: (() -> Swift.Void)?
   @objc deinit
   @objc override dynamic public init()
 }
