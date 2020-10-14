@@ -180,13 +180,13 @@ import UIKit
     static var customUserId: String?
     static var secretKey: String?
     
-    @objc static public func createWith(_ clientId: String?, userId: String, secretKey: String, reset: Bool) {
+    @objc static public func createWith(_ clientId: String?, userId: String, secretKey: String) {
         if clientId != nil && (clientId?.count ?? 0)>0 {
             PyrusServiceDesk.clientId = clientId
             PyrusServiceDesk.oneChat = true
             PyrusServiceDesk.secretKey = secretKey
             PyrusServiceDesk.customUserId = userId
-            PyrusServiceDesk.createUserId(reset)
+            PyrusServiceDesk.createUserId(false)
         }else{
             EventsLogger.logEvent(.emptyClientId)
         }

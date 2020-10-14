@@ -56,10 +56,10 @@ import Foundation
         if(userName != nil && userName!.count>1){
             PyrusServiceDesk.setUser(userName)
         }
-        
-        PyrusServiceDesk.customUserId = userId
-        PyrusServiceDesk.secretKey = secretKey
         PyrusServiceDesk.onAuthorizationFailed = onAuthorizationFailed
+        PyrusServiceDesk.secretKey = secretKey
+        PyrusServiceDesk.customUserId = userId
+        
     }
     
 }
