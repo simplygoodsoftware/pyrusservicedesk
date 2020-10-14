@@ -73,7 +73,9 @@ struct PSDGetChat {
             do{
                 let chatData = try JSONSerialization.jsonObject(with: data, options: .allowFragments) as? [String : Any] ?? [String: Any]()
                 completion(generateChat(from:chatData))
-               
+                DispatchQueue.main.async {
+                    PyrusServiceDesk.newMessagesCount = 0
+                }
             }catch{
                 //print("PSDGetChat error when convert to dictionary")
             }

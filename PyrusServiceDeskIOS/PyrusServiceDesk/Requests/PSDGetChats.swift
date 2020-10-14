@@ -122,11 +122,14 @@ struct PSDGetChats {
         
     }
     static func refreshNewMessagesCount(_ unread:Int){
+        guard let subscriber = PyrusServiceDesk.subscriber else {
+            return
+        }
         if PyrusServiceDesk.newMessagesCount != unread{
             PyrusServiceDesk.newMessagesCount = unread
             NotificationCenter.default.post(name: MESSAGES_NUMBER_NOTIFICATION_NAME, object: unread, userInfo: nil)
             if(unread>0){
-                PyrusServiceDesk.subscriber?.onNewReply()
+                subscriber.onNewReply()
             }
         }
     }
