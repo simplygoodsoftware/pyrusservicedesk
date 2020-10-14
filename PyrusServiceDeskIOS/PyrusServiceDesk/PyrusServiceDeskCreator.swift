@@ -63,11 +63,6 @@ import UIKit
             EventsLogger.logEvent(.emptyClientId)
             return
         }
-        guard let token = token, token.count > 0 else{
-            completion(PSDError.init(description: "Token is invalid"))
-            EventsLogger.logEvent(.invalidPushToken)
-            return
-        }
         PSDPushToken.send(token, completion: {
             error in
             completion(error)
@@ -172,6 +167,12 @@ import UIKit
             PyrusServiceDesk.clientId = clientId
             PyrusServiceDesk.oneChat = true
             PyrusServiceDesk.createUserId(reset)
+            let needReloadUI = PyrusServiceDesk.customUserId?.count ?? 0 > 0
+            PyrusServiceDesk.secretKey = nil
+            PyrusServiceDesk.customUserId = nil
+            if needReloadUI {
+                PyrusServiceDesk.mainController?.updateTitleChat()
+            }
         }else{
             EventsLogger.logEvent(.emptyClientId)
         }
@@ -180,13 +181,17 @@ import UIKit
     static var customUserId: String?
     static var secretKey: String?
     
-    @objc static public func createWith(_ clientId: String?, userId: String, secretKey: String) {
+    @objc static public func createWith(_ clientId: String?, userId: String?, secretKey: String?) {
         if clientId != nil && (clientId?.count ?? 0)>0 {
             PyrusServiceDesk.clientId = clientId
             PyrusServiceDesk.oneChat = true
             PyrusServiceDesk.secretKey = secretKey
+            let needReloadUI = PyrusServiceDesk.customUserId != userId
             PyrusServiceDesk.customUserId = userId
             PyrusServiceDesk.createUserId(false)
+            if needReloadUI {
+                PyrusServiceDesk.mainController?.updateTitleChat()
+            }
         }else{
             EventsLogger.logEvent(.emptyClientId)
         }

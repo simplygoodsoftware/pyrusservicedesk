@@ -5,12 +5,16 @@ struct PSDPushToken {
      - parameter token:String with devise Id
      - parameter success: Bool. true if token was send
      */
-    static func send(_ token:String, completion: @escaping(Error?) -> Void)
+    static func send(_ token:String?, completion: @escaping(Error?) -> Void)
     {
         
         var  request : URLRequest
         var parameters = [String: Any]()
-        parameters["token"] = token
+        if let token = token  {
+            parameters["token"] = token
+        } else {
+            parameters["token"] = NSNull()
+        }
         parameters["type"] = "ios"
         request = URLRequest.createRequest(type:.token, parameters: parameters)
         
