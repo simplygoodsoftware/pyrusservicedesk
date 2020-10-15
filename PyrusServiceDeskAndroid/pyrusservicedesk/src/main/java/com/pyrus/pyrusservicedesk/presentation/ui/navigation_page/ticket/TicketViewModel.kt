@@ -88,7 +88,7 @@ internal class TicketViewModel(serviceDeskProvider: ServiceDeskProvider,
     }
 
     private var pendingCommentUnderAction: CommentEntry? = null
-    private var userId = ConfigUtils.getUserId()
+    private var userId = PyrusServiceDesk.get().userId
 
     init {
         draft = draftRepository.getDraft()
@@ -353,8 +353,8 @@ internal class TicketViewModel(serviceDeskProvider: ServiceDeskProvider,
     }
 
     private fun needUpdateCommentsList(freshList: List<Comment>): Boolean {
-        if (userId != ConfigUtils.getUserId()) {
-            userId = ConfigUtils.getUserId()
+        if (userId != PyrusServiceDesk.get().userId) {
+            userId = PyrusServiceDesk.get().userId
             return true
         }
         if (freshList.isEmpty()) {

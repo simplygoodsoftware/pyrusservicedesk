@@ -33,15 +33,13 @@ class RequestUtils{
         }
 
         private fun getPathParams(): String {
-            val version = ConfigUtils.getApiVersion()
-            val userId = ConfigUtils.getUserId()
-            val securityKey = ConfigUtils.getSecurityKey()
+            val version = PyrusServiceDesk.get().apiVersion
             return with(PyrusServiceDesk.get()) {
                 if (version == 1)
                     "?user_id=" +
                             URLEncoder.encode(userId, "UTF-8") +
                             "&security_key=" +
-                            URLEncoder.encode(securityKey, "UTF-8") +
+                            URLEncoder.encode(PyrusServiceDesk.get().secretKey, "UTF-8") +
                             "&instance_id=" +
                             URLEncoder.encode(instanceId, "UTF-8") +
                             "&version=" +

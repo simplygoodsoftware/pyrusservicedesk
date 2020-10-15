@@ -147,8 +147,7 @@ internal class LiveUpdates(requests: RequestFactory) {
         }
         if (isChanged) {
             ticketCountChangedSubscribers.forEach { it.onUnreadTicketCountChanged(newUnreadCount) }
-            if (newUnreadCount > 0)
-                newReplySubscribers.forEach { it.onNewReply() }
+            newReplySubscribers.forEach { it.onNewReply(newUnreadCount > 0) }
         }
         recentUnreadCounter = newUnreadCount
     }

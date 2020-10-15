@@ -1,6 +1,7 @@
 package com.pyrus.pyrusservicedesk.sdk.request
 
 import com.pyrus.pyrusservicedesk.sdk.repositories.general.GeneralRepository
+import com.pyrus.pyrusservicedesk.sdk.response.AuthorizationError
 import com.pyrus.pyrusservicedesk.sdk.response.EmptyDataError
 import com.pyrus.pyrusservicedesk.sdk.response.Response
 import com.pyrus.pyrusservicedesk.sdk.response.ResponseCallback
@@ -27,7 +28,12 @@ internal abstract class RequestBase<ResponseData>(private val repository: Genera
     suspend fun execute(callback: ResponseCallback<ResponseData>){
         with(run(repository)) {
             when {
-                hasError() -> callback.onFailure(getError()!!)
+                hasError() -> {
+                    val error = getError()
+                    if (error != null && error is AuthorizationError)
+                        error.doOnAuthorizationFailure?.invoke()
+                    callback.onFailure(error!!)
+                }
                 getData() == null -> callback.onFailure(EmptyDataError())
                 else -> callback.onSuccess(getData()!!)
             }

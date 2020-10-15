@@ -12,7 +12,7 @@ import com.pyrus.pyrusservicedesk.sdk.data.Attachment
 internal class AddCommentRequestBody(
         appId: String,
         userId: String,
-        securityKey: String?,
+        secretKey: String?,
         instanceId: String?,
         version: Int,
         @SerializedName("comment")
@@ -23,4 +23,4 @@ internal class AddCommentRequestBody(
         val userName: String,
         @SerializedName("rating")
         val rating: Int? = null
-) : RequestBodyBase(appId, userId, securityKey, instanceId, version)
+) : RequestBodyBase(appId, userId, secretKey, instanceId, version)

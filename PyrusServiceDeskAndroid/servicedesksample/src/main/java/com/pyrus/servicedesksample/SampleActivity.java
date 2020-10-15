@@ -39,7 +39,7 @@ public class SampleActivity extends Activity implements NewReplySubscriber {
     }
 
     @Override
-    public void onNewReply() {
+    public void onNewReply(boolean hasUnreadComments) {
         ((TextView)findViewById(R.id.unread)).setText("Has unread tickets");
     }
 }

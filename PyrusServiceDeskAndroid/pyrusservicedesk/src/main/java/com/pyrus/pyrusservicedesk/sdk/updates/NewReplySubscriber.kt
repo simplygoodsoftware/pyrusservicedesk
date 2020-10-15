@@ -6,6 +6,7 @@ package com.pyrus.pyrusservicedesk.sdk.updates
 interface NewReplySubscriber {
     /**
      * Invoked on subscriber when there is a new reply from support is received
+     * @param hasUnreadComments true if reply subscriber has some unread comments.
      */
-    fun onNewReply()
+    fun onNewReply(hasUnreadComments : Boolean)
 }
