@@ -139,7 +139,7 @@ internal class TicketAdapter: AdapterBase<TicketEntry>() {
 
         override fun bindItem(item: CommentEntry) {
             super.bindItem(item)
-            setAuthorNameVisibility(shouldShowAuthorName())
+            setAuthorNameAndVisibility(shouldShowAuthorName())
             with(shouldShowAuthorAvatar()) {
                 setAuthorAvatarVisibility(this)
                 if (this && shouldRedrawRecentCommentWithAvatar()) {
@@ -153,10 +153,8 @@ internal class TicketAdapter: AdapterBase<TicketEntry>() {
         private fun shouldRedrawRecentCommentWithAvatar(): Boolean =
             adapterPosition == itemsList.lastIndex && recentInboundCommentPositionWithAvatar != adapterPosition
 
-        private fun setAuthorNameVisibility(visible: Boolean) {
+        private fun setAuthorNameAndVisibility(visible: Boolean) {
             authorName.visibility = if (visible) VISIBLE else GONE
-            if (visible) {
-            }
             authorName.text = getItem().comment.author.name
         }
 
@@ -423,7 +421,7 @@ internal class TicketAdapter: AdapterBase<TicketEntry>() {
             var x = dX
             if (x < -maxItemViewShift)
                 x = -maxItemViewShift.toFloat()
-            for (position in 0..(recyclerView.childCount - 1)) {
+            for (position in 0 until recyclerView.childCount) {
                 recyclerView.findContainingViewHolder(recyclerView.getChildAt(position))?.let {
                     if (it.adapterPosition == - 1 || itemsList[it.adapterPosition].isNonShiftable())
                         return@let
