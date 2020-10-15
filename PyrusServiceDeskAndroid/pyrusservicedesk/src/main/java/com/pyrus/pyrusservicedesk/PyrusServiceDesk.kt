@@ -179,6 +179,8 @@ class PyrusServiceDesk private constructor(
 
         /**
          * Start tickets update if it is not already running.
+         *
+         * @param lastActiveTime Time of last user activity in unit millisecond
          */
         internal fun startTicketsUpdatesIfNeeded(lastActiveTime: Long) {
             get().liveUpdates.startUpdatesIfNeeded(lastActiveTime)
