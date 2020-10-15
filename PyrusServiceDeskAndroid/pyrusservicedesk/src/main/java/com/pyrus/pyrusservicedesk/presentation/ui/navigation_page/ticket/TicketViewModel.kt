@@ -1,15 +1,15 @@
 package com.pyrus.pyrusservicedesk.presentation.ui.navigation_page.ticket
 
-import androidx.lifecycle.LiveData
-import androidx.lifecycle.MutableLiveData
-import androidx.lifecycle.Observer
 import android.content.Context
 import android.content.Intent
 import android.net.Uri
 import android.os.Handler
 import android.os.Looper
-import androidx.recyclerview.widget.DiffUtil
 import android.widget.Toast
+import androidx.lifecycle.LiveData
+import androidx.lifecycle.MutableLiveData
+import androidx.lifecycle.Observer
+import androidx.recyclerview.widget.DiffUtil
 import com.pyrus.pyrusservicedesk.PyrusServiceDesk
 import com.pyrus.pyrusservicedesk.R
 import com.pyrus.pyrusservicedesk.ServiceDeskProvider
@@ -31,7 +31,6 @@ import com.pyrus.pyrusservicedesk.sdk.web.OnCancelListener
 import com.pyrus.pyrusservicedesk.sdk.web.UploadFileHooks
 import com.pyrus.pyrusservicedesk.utils.ConfigUtils
 import com.pyrus.pyrusservicedesk.utils.MILLISECONDS_IN_SECOND
-import com.pyrus.pyrusservicedesk.utils.PREFERENCE_KEY_LAST_ACTIVITY_TIME
 import com.pyrus.pyrusservicedesk.utils.RequestUtils.Companion.MAX_FILE_SIZE_BYTES
 import com.pyrus.pyrusservicedesk.utils.RequestUtils.Companion.MAX_FILE_SIZE_MEGABYTES
 import com.pyrus.pyrusservicedesk.utils.getWhen
@@ -287,8 +286,7 @@ internal class TicketViewModel(serviceDeskProvider: ServiceDeskProvider,
                     .execute()
                     .observeForever(AddCommentObserver(uploadFileHooks, localComment))
         }
-        PyrusServiceDesk.getSharedPreferences().edit().putLong(PREFERENCE_KEY_LAST_ACTIVITY_TIME, System.currentTimeMillis()).apply()
-        PyrusServiceDesk.startTicketsUpdatesIfNeeded()
+        PyrusServiceDesk.startTicketsUpdatesIfNeeded(System.currentTimeMillis())
     }
 
     private fun hasComment(commentId: Int): Boolean {
@@ -450,6 +448,13 @@ internal class TicketViewModel(serviceDeskProvider: ServiceDeskProvider,
 
     private fun publishEntries(oldEntries: List<TicketEntry>, newEntries: List<TicketEntry>) {
         ticketEntries = newEntries
+
+        PyrusServiceDesk.startTicketsUpdatesIfNeeded(
+            (newEntries.findLast {
+                it is CommentEntry && it.comment.isInbound
+            } as CommentEntry?)?.comment?.creationDate?.time ?: 0
+        )
+
         commentDiff.value = DiffResultWithNewItems(
             DiffUtil.calculateDiff(
                 CommentsDiffCallback(oldEntries, ticketEntries), false

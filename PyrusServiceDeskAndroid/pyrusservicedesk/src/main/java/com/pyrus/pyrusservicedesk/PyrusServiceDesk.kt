@@ -180,8 +180,8 @@ class PyrusServiceDesk private constructor(
         /**
          * Start tickets update if it is not already running.
          */
-        internal fun startTicketsUpdatesIfNeeded() {
-            get().liveUpdates.startUpdatesIfNeeded()
+        internal fun startTicketsUpdatesIfNeeded(lastActiveTime: Long) {
+            get().liveUpdates.startUpdatesIfNeeded(lastActiveTime)
         }
 
         internal fun onServiceDeskStop() {
