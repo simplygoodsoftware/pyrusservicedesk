@@ -17,6 +17,7 @@ class ServiceDeskConfiguration internal constructor() {
     internal var themeColor: Int? = null
     @DrawableRes
     internal var supportAvatar: Int? = null
+    internal var doOnAuthorizationFailed: (() -> Unit)? = null
 
     internal val isDialogTheme: Boolean = PyrusServiceDesk.get().application.isTablet()
 
@@ -124,6 +125,18 @@ class ServiceDeskConfiguration internal constructor() {
          */
         fun setUserName(userName: String): Builder {
             configuration.userName = userName
+            return this
+        }
+
+        /**
+         * Sets a callback for when authorization of user has failed.
+         * When not set a simple error dialog is shown in case of authorization failure.
+         *
+         * @param doOnAuthorizationFailed lambda that executes when authorization error has occurred.
+         * Has error message as param.
+         */
+        fun setDoOnAuthorizationFailed(doOnAuthorizationFailed: () -> Unit): Builder {
+            configuration.doOnAuthorizationFailed = doOnAuthorizationFailed
             return this
         }
 
