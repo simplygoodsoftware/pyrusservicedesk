@@ -148,7 +148,7 @@ import UIKit
             PyrusServiceDesk.oneChat = true
             PyrusServiceDesk.createUserId()
             let needReloadUI = PyrusServiceDesk.customUserId?.count ?? 0 > 0
-            PyrusServiceDesk.secretKey = nil
+            PyrusServiceDesk.securityKey = nil
             PyrusServiceDesk.customUserId = nil
             if needReloadUI {
                 PyrusServiceDesk.mainController?.updateTitleChat()
@@ -165,7 +165,7 @@ import UIKit
             PyrusServiceDesk.oneChat = true
             PyrusServiceDesk.createUserId(reset)
             let needReloadUI = PyrusServiceDesk.customUserId?.count ?? 0 > 0
-            PyrusServiceDesk.secretKey = nil
+            PyrusServiceDesk.securityKey = nil
             PyrusServiceDesk.customUserId = nil
             if needReloadUI {
                 PyrusServiceDesk.mainController?.updateTitleChat()
@@ -176,13 +176,13 @@ import UIKit
     }
     
     static var customUserId: String?
-    static var secretKey: String?
+    static var securityKey: String?
     
-    @objc static public func createWith(_ clientId: String?, userId: String?, secretKey: String?) {
+    @objc static public func createWith(_ clientId: String?, userId: String?, securityKey: String?) {
         if clientId != nil && (clientId?.count ?? 0)>0 {
             PyrusServiceDesk.clientId = clientId
             PyrusServiceDesk.oneChat = true
-            PyrusServiceDesk.secretKey = secretKey
+            PyrusServiceDesk.securityKey = securityKey
             let needReloadUI = PyrusServiceDesk.customUserId != userId
             PyrusServiceDesk.customUserId = userId
             PyrusServiceDesk.createUserId(false)
