@@ -13,7 +13,7 @@ extension URLRequest {
             fatalError("Bad type in this method")
         }
         let url = PyrusServiceDeskAPI.PSDURL(type:type)
-        return createRequest(url:url, json:parameters, type: type)
+        return createRequest(url:url, json:parameters)
     }
     
     /**
@@ -23,7 +23,7 @@ extension URLRequest {
      */
     static func createRequest(with chatId:String, type: urlType, parameters:[String: Any]) -> URLRequest{
         let url = PyrusServiceDeskAPI.PSDURL(type:type, ticketId:chatId)
-        return createRequest(url:url, json:parameters, type: type)
+        return createRequest(url:url, json:parameters)
     }
     
     /**
@@ -41,8 +41,8 @@ extension URLRequest {
         return request
     }
     
-    private static func createRequest(url: URL, json:[String: Any], type: urlType) -> URLRequest {
-        let body = addStaticKeys(to: json, type: type)
+    private static func createRequest(url: URL, json:[String: Any]) -> URLRequest {
+        let body = addStaticKeys(to: json)
         let jsonData = try? JSONSerialization.data(withJSONObject: body)
         var request = URLRequest(url: url, cachePolicy: .reloadIgnoringLocalCacheData, timeoutInterval: 60)
         request.httpMethod = "POST"
@@ -51,7 +51,7 @@ extension URLRequest {
         request.addValue("\(jsonData!.count)", forHTTPHeaderField: "Content-Length")       
         return request
     }
-    private static func addStaticKeys(to JSON:[String: Any], type: urlType) -> [String: Any]
+    private static func addStaticKeys(to JSON:[String: Any]) -> [String: Any]
     {
         var fullJSOn = JSON
         fullJSOn["app_id"] = PyrusServiceDesk.clientId

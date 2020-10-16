@@ -122,7 +122,7 @@ struct PSDGetChats {
         
     }
     static func refreshNewMessagesCount(_ unread:Int){
-        guard let subscriber = PyrusServiceDesk.subscriber else {
+        guard let subscriber = PyrusServiceDesk.subscriber, !PyrusServiceDeskController.PSDIsOpen() else {
             return
         }
         if PyrusServiceDesk.newMessagesCount != unread{

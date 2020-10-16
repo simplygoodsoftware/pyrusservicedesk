@@ -69,15 +69,6 @@ import UIKit
             lastSetPushToken = Date()
         })
     }
-    @objc public static func changeUserId(userId: String, secretKey: String, title: NSAttributedString, name: String, _ chatTitleView: UIView?){
-        PyrusServiceDesk.secretKey = secretKey
-        PyrusServiceDesk.customUserId = userId
-        if name.count>0{
-            PyrusServiceDesk.setUser(name)
-        }
-        PyrusServiceDesk.mainController?.customization.chatTitleView = chatTitleView
-        PyrusServiceDesk.mainController?.updateTitleChat()
-    }
     
     ///Show chat
     ///- parameter viewController: ViewController that must present chat
