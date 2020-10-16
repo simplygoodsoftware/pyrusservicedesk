@@ -9,16 +9,13 @@ import com.pyrus.pyrusservicedesk.sdk.RequestFactory
 import com.pyrus.pyrusservicedesk.sdk.data.TicketShortDescription
 import com.pyrus.pyrusservicedesk.sdk.response.ResponseCallback
 import com.pyrus.pyrusservicedesk.sdk.response.ResponseError
+import com.pyrus.pyrusservicedesk.utils.*
 import com.pyrus.pyrusservicedesk.utils.MILLISECONDS_IN_DAY
 import com.pyrus.pyrusservicedesk.utils.MILLISECONDS_IN_MINUTE
 import com.pyrus.pyrusservicedesk.utils.PREFERENCE_KEY_LAST_ACTIVITY_TIME
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
-
-private const val LONG_TICKETS_UPDATE_INTERVAL_MINUTES = 30L
-private const val SHORT_TICKETS_UPDATE_INTERVAL_MINUTES = 3L
-private const val LAST_ACTIVITY_INTERVAL_DAYS = 3L
 
 /**
  * Class for recurring requesting data.
@@ -29,11 +26,8 @@ private const val LAST_ACTIVITY_INTERVAL_DAYS = 3L
  */
 internal class LiveUpdates(requests: RequestFactory, private val preferences: SharedPreferences) {
 
-    private var ticketsUpdateInterval: Long
-
-    init {
-        ticketsUpdateInterval = getTicketsUpdateInterval(preferences.getLong(PREFERENCE_KEY_LAST_ACTIVITY_TIME, -1L))
-    }
+    private var lastActiveTime: Long = preferences.getLong(PREFERENCE_KEY_LAST_ACTIVITY_TIME, -1L)
+    private var activeScreenCount = 0
 
     // notified in UI thread
     private val dataSubscribers = mutableSetOf<LiveUpdateSubscriber>()
@@ -47,7 +41,6 @@ internal class LiveUpdates(requests: RequestFactory, private val preferences: Sh
 
     private val ticketsUpdateRunnable = object : Runnable {
         override fun run() {
-            Log.d("SDS", "ticketsUpdateRunnable " + System.currentTimeMillis().toString())
             GlobalScope.launch(Dispatchers.IO) {
                 requests.getTicketsRequest().execute(
                     object : ResponseCallback<List<TicketShortDescription>> {
@@ -67,7 +60,15 @@ internal class LiveUpdates(requests: RequestFactory, private val preferences: Sh
                     }
                 )
             }
-            mainHandler.postDelayed(this, ticketsUpdateInterval * MILLISECONDS_IN_MINUTE)
+            val interval = getTicketsUpdateInterval(lastActiveTime)
+            Log.d("SDS", "ticketsUpdateRunnable, interval = ${interval / MILLISECONDS_IN_SECOND}, lastActiveTime $lastActiveTime")
+            if (interval == -1L) {
+                stopUpdates()
+                Log.d("SDS", "ticketsUpdateRunnable, stopUpdates = ${interval / MILLISECONDS_IN_SECOND}")
+                return
+            }
+            Log.d("SDS", "ticketsUpdateRunnable, postDelayed = ${interval / MILLISECONDS_IN_SECOND}")
+            mainHandler.postDelayed(this, interval)
         }
     }
 
@@ -135,13 +136,25 @@ internal class LiveUpdates(requests: RequestFactory, private val preferences: Sh
         if (lastActiveTime > currentLastActiveTime)
             preferences.edit().putLong(PREFERENCE_KEY_LAST_ACTIVITY_TIME, lastActiveTime).apply()
         val interval = getTicketsUpdateInterval(lastActiveTime)
-        if (interval == ticketsUpdateInterval && isStarted)
+        val currentInterval = getTicketsUpdateInterval(currentLastActiveTime)
+
+        this.lastActiveTime = lastActiveTime
+        if (interval == currentInterval && isStarted)
             return
-        ticketsUpdateInterval = interval
         if (isStarted)
             stopUpdates()
-        if (ticketsUpdateInterval != -1L)
+        if (currentInterval != -1L || activeScreenCount > 0)
             startUpdates()
+    }
+
+    internal fun increaseActiveScreenCount() {
+        activeScreenCount++
+        Log.d("SDS", "increaseActiveScreenCount, activeScreenCount = $activeScreenCount")
+    }
+
+    internal fun decreaseActiveScreenCount() {
+        activeScreenCount--
+        Log.d("SDS", "decreaseActiveScreenCount, activeScreenCount = $activeScreenCount")
     }
 
     private fun onSubscribe() {
@@ -159,11 +172,14 @@ internal class LiveUpdates(requests: RequestFactory, private val preferences: Sh
     }
 
     private fun getTicketsUpdateInterval(lastActiveTime: Long): Long {
+        val diff = System.currentTimeMillis() - lastActiveTime
+        Log.d("SDS", "diff = ${diff / MILLISECONDS_IN_SECOND}")
         return when {
-            lastActiveTime == -1L -> -1L
-            System.currentTimeMillis() - lastActiveTime < LAST_ACTIVITY_INTERVAL_DAYS * MILLISECONDS_IN_DAY ->
-                SHORT_TICKETS_UPDATE_INTERVAL_MINUTES
-            else -> LONG_TICKETS_UPDATE_INTERVAL_MINUTES
+            diff < 1.5 * MILLISECONDS_IN_MINUTE -> 5L * MILLISECONDS_IN_SECOND
+            diff < 5 * MILLISECONDS_IN_MINUTE -> 15L * MILLISECONDS_IN_SECOND
+            diff < MILLISECONDS_IN_HOUR || activeScreenCount > 0 * MILLISECONDS_IN_SECOND -> MILLISECONDS_IN_MINUTE.toLong()
+            diff < 3 * MILLISECONDS_IN_DAY -> 3L * MILLISECONDS_IN_MINUTE
+            else -> -1L
         }
     }
 
@@ -185,9 +201,10 @@ internal class LiveUpdates(requests: RequestFactory, private val preferences: Sh
             if (isChanged)
                 it.onUnreadTicketCountChanged(newUnreadCount)
         }
+        Log.d("SDS", "processSuccess, activeScreenCount = $activeScreenCount")
         if (isChanged) {
             ticketCountChangedSubscribers.forEach { it.onUnreadTicketCountChanged(newUnreadCount) }
-            if (newUnreadCount > 0)
+            if (newUnreadCount > 0 && activeScreenCount <= 0)
                 newReplySubscribers.forEach { it.onNewReply() }
         }
         recentUnreadCounter = newUnreadCount

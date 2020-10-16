@@ -505,6 +505,14 @@ internal class TicketViewModel(serviceDeskProvider: ServiceDeskProvider,
     fun onRatingClick(rating: Int) =
         sendAddComment(localDataProvider.createLocalComment(rating = rating))
 
+    fun onStart() {
+        liveUpdates.increaseActiveScreenCount()
+    }
+
+    fun onStop() {
+        liveUpdates.decreaseActiveScreenCount()
+    }
+
     private inner class AddCommentObserver(
         uploadFileHooks: UploadFileHooks?,
         localComment: Comment
