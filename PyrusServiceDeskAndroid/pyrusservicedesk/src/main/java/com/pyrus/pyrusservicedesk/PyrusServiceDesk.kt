@@ -3,11 +3,9 @@ package com.pyrus.pyrusservicedesk
 import android.app.Activity
 import android.app.Application
 import android.content.Context
-import android.content.DialogInterface
 import android.content.Intent
 import android.net.Uri
 import androidx.annotation.MainThread
-import androidx.appcompat.app.AlertDialog
 import com.google.gson.GsonBuilder
 import com.pyrus.pyrusservicedesk.presentation.ui.navigation_page.ticket.TicketActivity
 import com.pyrus.pyrusservicedesk.presentation.ui.navigation_page.tickets.TicketsActivity
@@ -50,6 +48,9 @@ class PyrusServiceDesk private constructor(
         internal val DISPATCHER_IO_SINGLE =
             Executors.newSingleThreadExecutor().asCoroutineDispatcher()
         internal var FILE_CHOOSER: FileChooser? = null
+        internal var onAuthorizationFailed: Runnable? = Runnable {
+            get().getSharedViewModel().quitServiceDesk()
+        }
         private var INSTANCE: PyrusServiceDesk? = null
         private var CONFIGURATION: ServiceDeskConfiguration? = null
         private var lastRefreshes = ArrayList<Long>()
@@ -111,8 +112,10 @@ class PyrusServiceDesk private constructor(
             if (CONFIGURATION != null) {
                 if (userId == null)
                     get().getSharedViewModel().quitServiceDesk()
-                else if (get().userId != userId)
+                else if (get().userId != userId) {
+                    get().serviceDeskProvider.getDraftRepository().saveDraft("")
                     get().getSharedViewModel().triggerUpdate()
+                }
             }
         }
 
@@ -162,6 +165,17 @@ class PyrusServiceDesk private constructor(
         @JvmStatic
         fun registerFileChooser(fileChooser: FileChooser?) {
             FILE_CHOOSER = fileChooser
+        }
+
+        /**
+         * Sets a callback for when authorization of user has failed.
+         * When nothing is passed ServiceDesk will be closed after authorization failure.
+         *
+         * @param onAuthorizationFailed lambda that executes when authorization error has occurred.
+         */
+        @JvmStatic
+        fun setOnAuthorizationFailed(onAuthorizationFailed: Runnable?) {
+            this.onAuthorizationFailed = onAuthorizationFailed
         }
 
         /**
@@ -266,24 +280,6 @@ class PyrusServiceDesk private constructor(
             CONFIGURATION = configuration
             get().sharedViewModel.clearQuitServiceDesk()
             get().onStopCallback = onStopCallback
-
-            if (get().apiVersion == API_VERSION_2 && CONFIGURATION?.doOnAuthorizationFailed == null) {
-                CONFIGURATION?.doOnAuthorizationFailed = {
-                    val dialog =
-                        AlertDialog
-                            .Builder(activity)
-                            .create()
-
-                    dialog.setTitle("Authorization Error.")
-                    dialog.setMessage("Failed to authorize with the provided credentials.")
-                    dialog.setButton(
-                        DialogInterface.BUTTON_POSITIVE,
-                        "OK"
-                    ) { dialog1, _ -> dialog1.dismiss() }
-
-                    dialog.show()
-                }
-            }
 
             activity.startActivity(createIntent(ticketId))
 

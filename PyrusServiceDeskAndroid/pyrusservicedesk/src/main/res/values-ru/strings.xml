@@ -41,6 +41,4 @@
     <string name="psd_no_preview_available">Превью недоступно</string>
     <string name="psd_share">Поделиться</string>
     <string name="psd_delete">Удалить</string>
-    <string name="psd_auth_error">Ошибка авторизации.</string>
-    <string name="psd_auth_error_message">Не получилось авторизоваться с указанными данными.</string>
 </resources>

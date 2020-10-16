@@ -29,4 +29,4 @@ internal class EmptyDataError : ResponseError("Data is empty (null was received)
 /**
  * Error that happens when authorization request has failed. Can happen if userId or secretKey are not valid.
  */
-internal class AuthorizationError(message: String, internal val doOnAuthorizationFailure: (() -> Unit)? = null): ResponseError(message)
+internal class AuthorizationError(message: String): ResponseError(message)

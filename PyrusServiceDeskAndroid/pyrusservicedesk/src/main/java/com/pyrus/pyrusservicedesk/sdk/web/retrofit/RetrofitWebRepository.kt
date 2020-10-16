@@ -18,8 +18,7 @@ import com.pyrus.pyrusservicedesk.sdk.web.UploadFileHooks
 import com.pyrus.pyrusservicedesk.sdk.web.request_body.*
 import com.pyrus.pyrusservicedesk.utils.ConfigUtils
 import com.pyrus.pyrusservicedesk.utils.RequestUtils.Companion.BASE_URL
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.withContext
+import kotlinx.coroutines.*
 import okhttp3.OkHttpClient
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
@@ -352,7 +351,14 @@ private const val FAILED_AUTHORIZATION_ERROR_CODE = 403
 
 private fun <T> createError(response: retrofit2.Response<T>): ResponseError {
     return when (FAILED_AUTHORIZATION_ERROR_CODE) {
-        response.code() -> AuthorizationError(response.message(), PyrusServiceDesk.getConfiguration().doOnAuthorizationFailed)
+        response.code() -> {
+            GlobalScope.launch {
+                withContext(Dispatchers.Main) {
+                    PyrusServiceDesk.onAuthorizationFailed?.run()
+                }
+            }
+            AuthorizationError(response.message())
+        }
         else -> ApiCallError(response.message())
     }
 }

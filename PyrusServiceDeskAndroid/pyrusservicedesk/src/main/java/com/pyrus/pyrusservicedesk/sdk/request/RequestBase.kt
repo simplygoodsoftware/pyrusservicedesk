@@ -28,12 +28,7 @@ internal abstract class RequestBase<ResponseData>(private val repository: Genera
     suspend fun execute(callback: ResponseCallback<ResponseData>){
         with(run(repository)) {
             when {
-                hasError() -> {
-                    val error = getError()
-                    if (error != null && error is AuthorizationError)
-                        error.doOnAuthorizationFailure?.invoke()
-                    callback.onFailure(error!!)
-                }
+                hasError() -> callback.onFailure(getError()!!)
                 getData() == null -> callback.onFailure(EmptyDataError())
                 else -> callback.onSuccess(getData()!!)
             }
