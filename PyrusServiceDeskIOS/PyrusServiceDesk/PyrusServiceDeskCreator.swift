@@ -206,7 +206,7 @@ import UIKit
         }
         lastRefreshes.append(Date())
         if lastRefreshes.count > REFRESH_MAX_COUNT{
-        lastRefreshes.remove(at: 0)
+            lastRefreshes.remove(at: 0)
         }
         PyrusServiceDesk.mainController?.refreshChat(showFakeMessage: 0)
     }
@@ -323,6 +323,7 @@ import UIKit
     
     ///Set last user acivity date to NOW if date paramemeter is nil, returns true if setted
     static func setLastActivityDate(_ date: Date? = nil) -> Bool{
+        print ("\(date)")
         if let pyrusUserDefaults = PSDMessagesStorage.pyrusUserDefaults(){
             if let newDate = date, let oldDate = pyrusUserDefaults.object(forKey: PSDChatViewController.userLastActivityKey()) as? Date{
                 if oldDate.compare(newDate) == .orderedDescending || oldDate.compare(newDate) == .orderedSame{

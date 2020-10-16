@@ -1,6 +1,7 @@
 import UIKit
 protocol PSDChatTableViewDelegate: NSObjectProtocol {
     func needShowRate(_ showRate: Bool)
+    func restartTimer()
 }
 
 class PSDChatTableView: PSDDetailTableView{
@@ -148,6 +149,7 @@ class PSDChatTableView: PSDDetailTableView{
         }
         if PyrusServiceDesk.setLastActivityDate(date){
             PyrusServiceDesk.restartTimer()
+            self.chatDelegate?.restartTimer()
         }
     }
     private func showRateIfNeed() {
@@ -629,6 +631,7 @@ extension PSDChatTableView : PSDMessageSendDelegate{
     func refresh(message:PSDMessage, changedToSent: Bool){
         DispatchQueue.main.async{
             [weak self] in
+            self?.chatDelegate?.restartTimer()
             if !(self?.scrollAnimationPerform ?? false){
                 guard let self = self else{
                     return

@@ -341,6 +341,7 @@ extension PSDChatViewController : PSDUpdateInfo{
     }
 
     
+    
     func startGettingInfo() {
         stopGettingInfo()
         timer = Timer.scheduledTimer(timeInterval: PSDChatViewController.getTimerInerval(), target: self, selector: #selector(updateTable), userInfo:nil , repeats: false)
@@ -354,6 +355,10 @@ extension PSDChatViewController : PSDUpdateInfo{
 extension PSDChatViewController: PSDChatTableViewDelegate {
     func needShowRate(_ showRate: Bool) {
         messageInputView.showRate = showRate
+    }
+    
+    func restartTimer() {
+        startGettingInfo()
     }
 }
 
