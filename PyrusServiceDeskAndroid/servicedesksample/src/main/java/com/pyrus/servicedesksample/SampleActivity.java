@@ -4,13 +4,10 @@ import android.app.Activity;
 import android.graphics.Color;
 import android.os.Bundle;
 import android.widget.TextView;
+
 import com.pyrus.pyrusservicedesk.PyrusServiceDesk;
 import com.pyrus.pyrusservicedesk.ServiceDeskConfiguration;
 import com.pyrus.pyrusservicedesk.sdk.updates.NewReplySubscriber;
-import com.pyrus.pyrusservicedesk.PyrusServiceDesk;
-import com.pyrus.pyrusservicedesk.ServiceDeskConfiguration;
-import com.pyrus.pyrusservicedesk.sdk.updates.NewReplySubscriber;
-import com.pyrus.servicedesksample.R;
 
 public class SampleActivity extends Activity implements NewReplySubscriber {
 
@@ -40,6 +37,10 @@ public class SampleActivity extends Activity implements NewReplySubscriber {
 
     @Override
     public void onNewReply(boolean hasUnreadComments) {
-        ((TextView)findViewById(R.id.unread)).setText("Has unread tickets");
+        ((TextView) findViewById(R.id.unread)).setText(
+                hasUnreadComments
+                        ? "Has unread tickets"
+                        : null
+        );
     }
 }

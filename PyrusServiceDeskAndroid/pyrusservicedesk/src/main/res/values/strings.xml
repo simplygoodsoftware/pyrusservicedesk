@@ -39,4 +39,6 @@
     <string name="psd_no_preview_available">No preview available</string>
     <string name="psd_share">Share</string>
     <string name="psd_delete">Delete</string>
+    <string name="psd_auth_error">Authorization Error.</string>
+    <string name="psd_auth_error_message">Failed to authorize with the provided credentials.</string>
 </resources>
