@@ -317,7 +317,7 @@ SWIFT_CLASS_PROPERTY(@property (nonatomic, class, copy) void (^ _Nullable onAuth
 ///
 + (void)createWith:(NSString * _Nullable)clientId;
 + (void)createWith:(NSString * _Nullable)clientId reset:(BOOL)reset;
-+ (void)createWith:(NSString * _Nullable)clientId userId:(NSString * _Nullable)userId secretKey:(NSString * _Nullable)secretKey;
++ (void)createWith:(NSString * _Nullable)clientId userId:(NSString * _Nullable)userId securityKey:(NSString * _Nullable)securityKey;
 + (void)refreshOnError:(void (^ _Nullable)(NSError * _Nullable))onError;
 /// Scrolls chat to bottom, starts refreshing chat and shows fake message from support is psd is open.
 + (void)refreshFromPushWithMessageId:(NSInteger)messageId;
@@ -694,7 +694,7 @@ SWIFT_CLASS_PROPERTY(@property (nonatomic, class, copy) void (^ _Nullable onAuth
 ///
 + (void)createWith:(NSString * _Nullable)clientId;
 + (void)createWith:(NSString * _Nullable)clientId reset:(BOOL)reset;
-+ (void)createWith:(NSString * _Nullable)clientId userId:(NSString * _Nullable)userId secretKey:(NSString * _Nullable)secretKey;
++ (void)createWith:(NSString * _Nullable)clientId userId:(NSString * _Nullable)userId securityKey:(NSString * _Nullable)securityKey;
 + (void)refreshOnError:(void (^ _Nullable)(NSError * _Nullable))onError;
 /// Scrolls chat to bottom, starts refreshing chat and shows fake message from support is psd is open.
 + (void)refreshFromPushWithMessageId:(NSInteger)messageId;
@@ -1069,7 +1069,7 @@ SWIFT_CLASS_PROPERTY(@property (nonatomic, class, copy) void (^ _Nullable onAuth
 ///
 + (void)createWith:(NSString * _Nullable)clientId;
 + (void)createWith:(NSString * _Nullable)clientId reset:(BOOL)reset;
-+ (void)createWith:(NSString * _Nullable)clientId userId:(NSString * _Nullable)userId secretKey:(NSString * _Nullable)secretKey;
++ (void)createWith:(NSString * _Nullable)clientId userId:(NSString * _Nullable)userId securityKey:(NSString * _Nullable)securityKey;
 + (void)refreshOnError:(void (^ _Nullable)(NSError * _Nullable))onError;
 /// Scrolls chat to bottom, starts refreshing chat and shows fake message from support is psd is open.
 + (void)refreshFromPushWithMessageId:(NSInteger)messageId;
