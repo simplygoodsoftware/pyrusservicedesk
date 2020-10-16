@@ -507,6 +507,7 @@ internal class TicketViewModel(serviceDeskProvider: ServiceDeskProvider,
 
     fun onStart() {
         liveUpdates.increaseActiveScreenCount()
+        liveUpdates.resetUnreadCount()
     }
 
     fun onStop() {

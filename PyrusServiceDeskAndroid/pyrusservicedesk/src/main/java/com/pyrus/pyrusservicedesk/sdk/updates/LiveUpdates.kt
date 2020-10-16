@@ -143,10 +143,23 @@ internal class LiveUpdates(requests: RequestFactory, private val preferences: Sh
             startUpdates()
     }
 
+    /**
+     * Reset unread token count to 0.
+     */
+    internal fun resetUnreadCount() {
+        recentUnreadCounter = 0
+    }
+
+    /**
+     * Increase active screen count by one.
+     */
     internal fun increaseActiveScreenCount() {
         activeScreenCount++
     }
 
+    /**
+     * Decrease active screen count by one.
+     */
     internal fun decreaseActiveScreenCount() {
         activeScreenCount--
     }
