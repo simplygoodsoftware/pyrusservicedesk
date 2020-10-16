@@ -6,8 +6,7 @@ import UIKit
     private static let SET_PUSH_TIME_INTEVAL = TimeInterval(5*60)
     private static let REFRESH_TIME_INTEVAL = TimeInterval(1*60)
     private static let REFRESH_MAX_COUNT = 20
-    static let PSD_LAST_ACTIVITY_KEY = "PSDLastActivityDate"
-    private static let PSD_LAST_ACTIVITY_INTEVAL = TimeInterval(3*24*60*60)
+    
     ///AppId needed for request
     static var clientId: String?
     private static var lastSetPushToken: Date?
@@ -283,65 +282,54 @@ import UIKit
     @objc public static func registerFileChooser(_ chooser: (FileChooser & UIViewController)?){
         self.fileChooserController = chooser
     }
-    private static func didStartChatWithSupport() -> Bool {
-        if let pyrusUserDefaults = PSDMessagesStorage.pyrusUserDefaults(){
-            return pyrusUserDefaults.bool(forKey: userDidStartChatKey())
-        }
-        return false
-    }
-    ///Set didStartChatWithSupport to true
-    static func setDidStartChatWithSupport(){
-        if let pyrusUserDefaults = PSDMessagesStorage.pyrusUserDefaults(), !didStartChatWithSupport(){
-            pyrusUserDefaults.set(true, forKey: userDidStartChatKey())
-            pyrusUserDefaults.synchronize()
-        }
-    }
+
     private static func userDidStartChatKey() -> String{
         return PSD_USER_START_CHAT_KEY + "_" + userId
     }
     
     //MARK: get user info automatic
-    ///The reload interval to get info from server(chats list)
-    private static let reloadInterval: TimeInterval = 1800.0
-    ///The reload interval to get info from server(chats list)
-    private static let recentlyActive_reloadInterval: TimeInterval = 180.0
     ///The timer to get info from server(chats list) with reloadInterval.
     private static var timer :Timer?
     ///Create timer to get chats list from server.
     ///- parameter rightNow: Is need to fire timer.
     private static func startGettingInfo(rightNow:Bool){
         stopGettingInfo()
-        if rightNow && didStartChatWithSupport(){
+        if rightNow {
             updateUserInfo()
         }else{
-            let interval = getTimer()
-            timer = Timer.scheduledTimer(timeInterval: interval, target: self, selector: #selector(updateUserInfo), userInfo:nil , repeats: true)
-            if rightNow{
-                timer?.fire()
+            if let interval = getTimerInerval() {
+                timer = Timer.scheduledTimer(timeInterval: interval, target: self, selector: #selector(updateUserInfo), userInfo:nil , repeats: false)
+                if rightNow{
+                    timer?.fire()
+                }
             }
         }
     }
-    private static func getTimer() -> TimeInterval{
-        if let pyrusUserDefaults = PSDMessagesStorage.pyrusUserDefaults(), let date = pyrusUserDefaults.object(forKey: userLastActivityKey()) as? Date{
+    private static func getTimerInerval() -> TimeInterval?{
+        if let pyrusUserDefaults = PSDMessagesStorage.pyrusUserDefaults(), let date = pyrusUserDefaults.object(forKey: PSDChatViewController.userLastActivityKey()) as? Date{
             let difference = Date().timeIntervalSince(date)
-            if difference <= PSD_LAST_ACTIVITY_INTEVAL{
-                return recentlyActive_reloadInterval
+            if difference <= PSDChatViewController.PSD_LAST_ACTIVITY_INTEVAL_MINUTE{
+                return PSDChatViewController.REFRESH_TIME_INTEVAL_5_SECONDS
+            } else if difference <=  PSDChatViewController.PSD_LAST_ACTIVITY_INTEVAL_5_MINUTES{
+                return  PSDChatViewController.REFRESH_TIME_INTEVAL_15_SECONDS
+            } else if difference <=  PSDChatViewController.PSD_LAST_ACTIVITY_INTEVAL_HOUR{
+                return  PSDChatViewController.REFRESH_TIME_INTEVAL_1_MINUTE
+            } else if difference <=  PSDChatViewController.PSD_LAST_ACTIVITY_INTEVAL_3_DAYS{
+                return  PSDChatViewController.REFRESH_TIME_INTEVAL_3_MINUTES
             }
         }
-        return reloadInterval
+        return nil
     }
-    private static func userLastActivityKey() -> String{
-        return PSD_LAST_ACTIVITY_KEY + "_" + userId
-    }
+    
     ///Set last user acivity date to NOW if date paramemeter is nil, returns true if setted
     static func setLastActivityDate(_ date: Date? = nil) -> Bool{
         if let pyrusUserDefaults = PSDMessagesStorage.pyrusUserDefaults(){
-            if let newDate = date, let oldDate = pyrusUserDefaults.object(forKey: userLastActivityKey()) as? Date{
+            if let newDate = date, let oldDate = pyrusUserDefaults.object(forKey: PSDChatViewController.userLastActivityKey()) as? Date{
                 if oldDate.compare(newDate) == .orderedDescending || oldDate.compare(newDate) == .orderedSame{
                     return false
                 }
             }
-            pyrusUserDefaults.set(date ?? Date(), forKey: userLastActivityKey())
+            pyrusUserDefaults.set(date ?? Date(), forKey: PSDChatViewController.userLastActivityKey())
             pyrusUserDefaults.synchronize()
             return true
         }
@@ -349,7 +337,9 @@ import UIKit
     }
     ///Restart PyrusServiceDesk.timer - move next fire to reloadInterval.
     static func restartTimer(){
-        PyrusServiceDesk.startGettingInfo(rightNow: false)
+        DispatchQueue.main.async {
+            PyrusServiceDesk.startGettingInfo(rightNow: false)
+        }
     }
     ///Stops PyrusServiceDesk.timer.
     private static func stopGettingInfo(){
@@ -371,6 +361,7 @@ import UIKit
     ///Updates user info - get chats list from server.
     @objc private static func updateUserInfo(){
         if(userId.count > 0){
+            restartTimer()
             DispatchQueue.global().async {
                 PSDGetChats.get(delegate: nil, needShowError: !hasInfo){
                     (chats:[PSDChat]?) in
@@ -380,16 +371,8 @@ import UIKit
                         }
                         hasInfo = true
                         if chats.count > 0{
-                            for chat in chats{
-                                if chat.messages.count > 0{
-                                    setDidStartChatWithSupport()
-                                    restartTimer()
-                                    break
-                                }
-                            }
                             mainController?.passChanges(chats: chats)
                         }
-                        
                     }
                 }
             }

@@ -27,20 +27,12 @@ private const val LAST_ACTIVITY_INTERVAL_DAYS = 3L
  *
  * Subscription types: [LiveUpdateSubscriber], [NewReplySubscriber], [OnUnreadTicketCountChangedSubscriber]
  */
-internal class LiveUpdates(requests: RequestFactory, preferences: SharedPreferences) {
+internal class LiveUpdates(requests: RequestFactory, private val preferences: SharedPreferences) {
 
     private var ticketsUpdateInterval: Long
 
     init {
-        val lastActiveTime = preferences.getLong(PREFERENCE_KEY_LAST_ACTIVITY_TIME, -1L)
-        ticketsUpdateInterval =
-            when {
-                lastActiveTime == -1L -> -1L
-                System.currentTimeMillis() - lastActiveTime < LAST_ACTIVITY_INTERVAL_DAYS * MILLISECONDS_IN_DAY ->
-                    SHORT_TICKETS_UPDATE_INTERVAL_MINUTES
-                else -> LONG_TICKETS_UPDATE_INTERVAL_MINUTES
-            }
-
+        ticketsUpdateInterval = getTicketsUpdateInterval(preferences.getLong(PREFERENCE_KEY_LAST_ACTIVITY_TIME, -1L))
     }
 
     // notified in UI thread
@@ -85,6 +77,8 @@ internal class LiveUpdates(requests: RequestFactory, preferences: SharedPreferen
     @MainThread
     fun subscribeOnReply(subscriber: NewReplySubscriber) {
         newReplySubscribers.add(subscriber)
+        if (recentUnreadCounter > 0)
+            subscriber.onNewReply()
         onSubscribe()
     }
 
@@ -136,15 +130,22 @@ internal class LiveUpdates(requests: RequestFactory, preferences: SharedPreferen
     /**
      * Start tickets update if it is not already running.
      */
-    internal fun startUpdatesIfNeeded() {
-        ticketsUpdateInterval = SHORT_TICKETS_UPDATE_INTERVAL_MINUTES
-        if (!isStarted)
+    internal fun startUpdatesIfNeeded(lastActiveTime: Long) {
+        val currentLastActiveTime = preferences.getLong(PREFERENCE_KEY_LAST_ACTIVITY_TIME, -1L)
+        if (lastActiveTime > currentLastActiveTime)
+            preferences.edit().putLong(PREFERENCE_KEY_LAST_ACTIVITY_TIME, lastActiveTime).apply()
+        val interval = getTicketsUpdateInterval(lastActiveTime)
+        if (interval == ticketsUpdateInterval && isStarted)
+            return
+        ticketsUpdateInterval = interval
+        if (isStarted)
+            stopUpdates()
+        if (ticketsUpdateInterval != -1L)
             startUpdates()
     }
 
     private fun onSubscribe() {
-        if (!isStarted)
-            startUpdates()
+        startUpdatesIfNeeded(preferences.getLong(PREFERENCE_KEY_LAST_ACTIVITY_TIME, -1L))
     }
 
     private fun onUnsubscribe() {
@@ -157,9 +158,16 @@ internal class LiveUpdates(requests: RequestFactory, preferences: SharedPreferen
             stopUpdates()
     }
 
+    private fun getTicketsUpdateInterval(lastActiveTime: Long): Long {
+        return when {
+            lastActiveTime == -1L -> -1L
+            System.currentTimeMillis() - lastActiveTime < LAST_ACTIVITY_INTERVAL_DAYS * MILLISECONDS_IN_DAY ->
+                SHORT_TICKETS_UPDATE_INTERVAL_MINUTES
+            else -> LONG_TICKETS_UPDATE_INTERVAL_MINUTES
+        }
+    }
+
     private fun startUpdates() {
-        if (ticketsUpdateInterval == -1L)
-            return
         isStarted = true
         mainHandler.post(ticketsUpdateRunnable)
     }
