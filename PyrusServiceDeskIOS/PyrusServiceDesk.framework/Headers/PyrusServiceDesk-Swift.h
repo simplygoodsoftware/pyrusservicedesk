@@ -189,8 +189,10 @@ typedef unsigned int swift_uint4  __attribute__((__ext_vector_type__(4)));
 #if __has_warning("-Watimport-in-framework-header")
 #pragma clang diagnostic ignored "-Watimport-in-framework-header"
 #endif
+@import CoreGraphics;
 @import Foundation;
 @import ObjectiveC;
+@import UIKit;
 #endif
 
 #pragma clang diagnostic ignored "-Wproperty-attribute-mismatch"
@@ -244,7 +246,7 @@ SWIFT_PROTOCOL("_TtP16PyrusServiceDesk9LogEvents_")
 SWIFT_PROTOCOL("_TtP16PyrusServiceDesk18NewReplySubscriber_")
 @protocol NewReplySubscriber
 /// The new message was send
-- (void)onNewReply;
+- (void)onNewReplyWithHasUnreadComments:(BOOL)hasUnreadComments;
 @end
 
 
@@ -253,6 +255,16 @@ SWIFT_PROTOCOL("_TtP16PyrusServiceDesk14OnStopCallback_")
 @protocol OnStopCallback
 /// The callback that PyrusServiceDesk was closed
 - (void)onStop;
+@end
+
+@class NSCoder;
+
+/// The showed
+SWIFT_CLASS("_TtC16PyrusServiceDesk11PSDInfoView")
+@interface PSDInfoView : UIView
+- (void)removeFromSuperview;
+- (nonnull instancetype)initWithFrame:(CGRect)frame OBJC_DESIGNATED_INITIALIZER;
+- (nullable instancetype)initWithCoder:(NSCoder * _Nonnull)coder OBJC_DESIGNATED_INITIALIZER;
 @end
 
 @class UIViewController;
@@ -292,6 +304,9 @@ SWIFT_CLASS("_TtC16PyrusServiceDesk16PyrusServiceDesk")
 + (void)startOn:(UIViewController * _Nonnull)viewController configuration:(ServiceDeskConfiguration * _Nullable)configuration completion:(void (^ _Nullable)(void))completion onStopCallback:(id <OnStopCallback> _Nullable)onStopCallback;
 /// Close PyrusServiceDesk
 + (void)stop;
+SWIFT_CLASS_PROPERTY(@property (nonatomic, class, copy) void (^ _Nullable onAuthorizationFailed)(void);)
++ (void (^ _Nullable)(void))onAuthorizationFailed SWIFT_WARN_UNUSED_RESULT;
++ (void)setOnAuthorizationFailed:(void (^ _Nullable)(void))value;
 /// Subscribe [subscriber] for notifications that new messages from support have appeared in the chat.
 + (void)subscribeToReplies:(id <NewReplySubscriber> _Nullable)subscriber;
 /// Unsubscribe [subscriber] from alerts for new messages from chat support.
@@ -301,7 +316,12 @@ SWIFT_CLASS("_TtC16PyrusServiceDesk16PyrusServiceDesk")
 /// \param clientId clientId using for all requests. If clientId not setted PyrusServiceDesk Controller will not be created
 ///
 + (void)createWith:(NSString * _Nullable)clientId;
++ (void)createWith:(NSString * _Nullable)clientId reset:(BOOL)reset;
++ (void)createWith:(NSString * _Nullable)clientId userId:(NSString * _Nullable)userId secretKey:(NSString * _Nullable)secretKey;
 + (void)refreshOnError:(void (^ _Nullable)(NSError * _Nullable))onError;
+/// Scrolls chat to bottom, starts refreshing chat and shows fake message from support is psd is open.
++ (void)refreshFromPushWithMessageId:(NSInteger)messageId;
++ (void)present:(UIViewController * _Nonnull)viewController animated:(BOOL)animated completion:(void (^ _Nullable)(void))completion;
 /// Save viewController with FileChooser interface. Use to add custom row in attachment-add-menu
 /// \param chooser (FileChooser & UIViewController) to present.
 ///
@@ -311,6 +331,7 @@ SWIFT_CLASS("_TtC16PyrusServiceDesk16PyrusServiceDesk")
 
 @class UIColor;
 @class UIImage;
+@class UIBarButtonItem;
 
 SWIFT_CLASS("_TtC16PyrusServiceDesk24ServiceDeskConfiguration")
 @interface ServiceDeskConfiguration : NSObject
@@ -324,6 +345,14 @@ SWIFT_CLASS("_TtC16PyrusServiceDesk24ServiceDeskConfiguration")
 @property (nonatomic, strong) UIImage * _Nullable avatarForSupport;
 /// A user name. The default is “Guest”
 @property (nonatomic, copy) NSString * _Nullable userName;
+/// View to show in  chat navigation bar
+@property (nonatomic, strong) UIView * _Nullable chatTitleView;
+/// Custom UIBarButtonItem to show in right side of navigationBar. Default is nil.
+@property (nonatomic, strong) UIBarButtonItem * _Nullable customRightBarButtonItem;
+/// Custom UIBarButtonItem to show in left side of navigation Bar. Default value is nil. If nil there will be drawn back button. If specify custom left button, Pyrus ServiceDesk cannot be closed.
+@property (nonatomic, strong) UIBarButtonItem * _Nullable customLeftBarButtonItem;
+/// The view to show additional information under chat
+@property (nonatomic, strong) PSDInfoView * _Nullable infoView;
 - (nonnull instancetype)init OBJC_DESIGNATED_INITIALIZER;
 @end
 
@@ -537,8 +566,10 @@ typedef unsigned int swift_uint4  __attribute__((__ext_vector_type__(4)));
 #if __has_warning("-Watimport-in-framework-header")
 #pragma clang diagnostic ignored "-Watimport-in-framework-header"
 #endif
+@import CoreGraphics;
 @import Foundation;
 @import ObjectiveC;
+@import UIKit;
 #endif
 
 #pragma clang diagnostic ignored "-Wproperty-attribute-mismatch"
@@ -592,7 +623,7 @@ SWIFT_PROTOCOL("_TtP16PyrusServiceDesk9LogEvents_")
 SWIFT_PROTOCOL("_TtP16PyrusServiceDesk18NewReplySubscriber_")
 @protocol NewReplySubscriber
 /// The new message was send
-- (void)onNewReply;
+- (void)onNewReplyWithHasUnreadComments:(BOOL)hasUnreadComments;
 @end
 
 
@@ -601,6 +632,16 @@ SWIFT_PROTOCOL("_TtP16PyrusServiceDesk14OnStopCallback_")
 @protocol OnStopCallback
 /// The callback that PyrusServiceDesk was closed
 - (void)onStop;
+@end
+
+@class NSCoder;
+
+/// The showed
+SWIFT_CLASS("_TtC16PyrusServiceDesk11PSDInfoView")
+@interface PSDInfoView : UIView
+- (void)removeFromSuperview;
+- (nonnull instancetype)initWithFrame:(CGRect)frame OBJC_DESIGNATED_INITIALIZER;
+- (nullable instancetype)initWithCoder:(NSCoder * _Nonnull)coder OBJC_DESIGNATED_INITIALIZER;
 @end
 
 @class UIViewController;
@@ -640,6 +681,9 @@ SWIFT_CLASS("_TtC16PyrusServiceDesk16PyrusServiceDesk")
 + (void)startOn:(UIViewController * _Nonnull)viewController configuration:(ServiceDeskConfiguration * _Nullable)configuration completion:(void (^ _Nullable)(void))completion onStopCallback:(id <OnStopCallback> _Nullable)onStopCallback;
 /// Close PyrusServiceDesk
 + (void)stop;
+SWIFT_CLASS_PROPERTY(@property (nonatomic, class, copy) void (^ _Nullable onAuthorizationFailed)(void);)
++ (void (^ _Nullable)(void))onAuthorizationFailed SWIFT_WARN_UNUSED_RESULT;
++ (void)setOnAuthorizationFailed:(void (^ _Nullable)(void))value;
 /// Subscribe [subscriber] for notifications that new messages from support have appeared in the chat.
 + (void)subscribeToReplies:(id <NewReplySubscriber> _Nullable)subscriber;
 /// Unsubscribe [subscriber] from alerts for new messages from chat support.
@@ -649,7 +693,12 @@ SWIFT_CLASS("_TtC16PyrusServiceDesk16PyrusServiceDesk")
 /// \param clientId clientId using for all requests. If clientId not setted PyrusServiceDesk Controller will not be created
 ///
 + (void)createWith:(NSString * _Nullable)clientId;
++ (void)createWith:(NSString * _Nullable)clientId reset:(BOOL)reset;
++ (void)createWith:(NSString * _Nullable)clientId userId:(NSString * _Nullable)userId secretKey:(NSString * _Nullable)secretKey;
 + (void)refreshOnError:(void (^ _Nullable)(NSError * _Nullable))onError;
+/// Scrolls chat to bottom, starts refreshing chat and shows fake message from support is psd is open.
++ (void)refreshFromPushWithMessageId:(NSInteger)messageId;
++ (void)present:(UIViewController * _Nonnull)viewController animated:(BOOL)animated completion:(void (^ _Nullable)(void))completion;
 /// Save viewController with FileChooser interface. Use to add custom row in attachment-add-menu
 /// \param chooser (FileChooser & UIViewController) to present.
 ///
@@ -659,6 +708,7 @@ SWIFT_CLASS("_TtC16PyrusServiceDesk16PyrusServiceDesk")
 
 @class UIColor;
 @class UIImage;
+@class UIBarButtonItem;
 
 SWIFT_CLASS("_TtC16PyrusServiceDesk24ServiceDeskConfiguration")
 @interface ServiceDeskConfiguration : NSObject
@@ -672,6 +722,14 @@ SWIFT_CLASS("_TtC16PyrusServiceDesk24ServiceDeskConfiguration")
 @property (nonatomic, strong) UIImage * _Nullable avatarForSupport;
 /// A user name. The default is “Guest”
 @property (nonatomic, copy) NSString * _Nullable userName;
+/// View to show in  chat navigation bar
+@property (nonatomic, strong) UIView * _Nullable chatTitleView;
+/// Custom UIBarButtonItem to show in right side of navigationBar. Default is nil.
+@property (nonatomic, strong) UIBarButtonItem * _Nullable customRightBarButtonItem;
+/// Custom UIBarButtonItem to show in left side of navigation Bar. Default value is nil. If nil there will be drawn back button. If specify custom left button, Pyrus ServiceDesk cannot be closed.
+@property (nonatomic, strong) UIBarButtonItem * _Nullable customLeftBarButtonItem;
+/// The view to show additional information under chat
+@property (nonatomic, strong) PSDInfoView * _Nullable infoView;
 - (nonnull instancetype)init OBJC_DESIGNATED_INITIALIZER;
 @end
 
@@ -883,8 +941,10 @@ typedef unsigned int swift_uint4  __attribute__((__ext_vector_type__(4)));
 #if __has_warning("-Watimport-in-framework-header")
 #pragma clang diagnostic ignored "-Watimport-in-framework-header"
 #endif
+@import CoreGraphics;
 @import Foundation;
 @import ObjectiveC;
+@import UIKit;
 #endif
 
 #pragma clang diagnostic ignored "-Wproperty-attribute-mismatch"
@@ -938,7 +998,7 @@ SWIFT_PROTOCOL("_TtP16PyrusServiceDesk9LogEvents_")
 SWIFT_PROTOCOL("_TtP16PyrusServiceDesk18NewReplySubscriber_")
 @protocol NewReplySubscriber
 /// The new message was send
-- (void)onNewReply;
+- (void)onNewReplyWithHasUnreadComments:(BOOL)hasUnreadComments;
 @end
 
 
@@ -947,6 +1007,16 @@ SWIFT_PROTOCOL("_TtP16PyrusServiceDesk14OnStopCallback_")
 @protocol OnStopCallback
 /// The callback that PyrusServiceDesk was closed
 - (void)onStop;
+@end
+
+@class NSCoder;
+
+/// The showed
+SWIFT_CLASS("_TtC16PyrusServiceDesk11PSDInfoView")
+@interface PSDInfoView : UIView
+- (void)removeFromSuperview;
+- (nonnull instancetype)initWithFrame:(CGRect)frame OBJC_DESIGNATED_INITIALIZER;
+- (nullable instancetype)initWithCoder:(NSCoder * _Nonnull)coder OBJC_DESIGNATED_INITIALIZER;
 @end
 
 @class UIViewController;
@@ -986,6 +1056,9 @@ SWIFT_CLASS("_TtC16PyrusServiceDesk16PyrusServiceDesk")
 + (void)startOn:(UIViewController * _Nonnull)viewController configuration:(ServiceDeskConfiguration * _Nullable)configuration completion:(void (^ _Nullable)(void))completion onStopCallback:(id <OnStopCallback> _Nullable)onStopCallback;
 /// Close PyrusServiceDesk
 + (void)stop;
+SWIFT_CLASS_PROPERTY(@property (nonatomic, class, copy) void (^ _Nullable onAuthorizationFailed)(void);)
++ (void (^ _Nullable)(void))onAuthorizationFailed SWIFT_WARN_UNUSED_RESULT;
++ (void)setOnAuthorizationFailed:(void (^ _Nullable)(void))value;
 /// Subscribe [subscriber] for notifications that new messages from support have appeared in the chat.
 + (void)subscribeToReplies:(id <NewReplySubscriber> _Nullable)subscriber;
 /// Unsubscribe [subscriber] from alerts for new messages from chat support.
@@ -995,7 +1068,12 @@ SWIFT_CLASS("_TtC16PyrusServiceDesk16PyrusServiceDesk")
 /// \param clientId clientId using for all requests. If clientId not setted PyrusServiceDesk Controller will not be created
 ///
 + (void)createWith:(NSString * _Nullable)clientId;
++ (void)createWith:(NSString * _Nullable)clientId reset:(BOOL)reset;
++ (void)createWith:(NSString * _Nullable)clientId userId:(NSString * _Nullable)userId secretKey:(NSString * _Nullable)secretKey;
 + (void)refreshOnError:(void (^ _Nullable)(NSError * _Nullable))onError;
+/// Scrolls chat to bottom, starts refreshing chat and shows fake message from support is psd is open.
++ (void)refreshFromPushWithMessageId:(NSInteger)messageId;
++ (void)present:(UIViewController * _Nonnull)viewController animated:(BOOL)animated completion:(void (^ _Nullable)(void))completion;
 /// Save viewController with FileChooser interface. Use to add custom row in attachment-add-menu
 /// \param chooser (FileChooser & UIViewController) to present.
 ///
@@ -1005,6 +1083,7 @@ SWIFT_CLASS("_TtC16PyrusServiceDesk16PyrusServiceDesk")
 
 @class UIColor;
 @class UIImage;
+@class UIBarButtonItem;
 
 SWIFT_CLASS("_TtC16PyrusServiceDesk24ServiceDeskConfiguration")
 @interface ServiceDeskConfiguration : NSObject
@@ -1018,6 +1097,14 @@ SWIFT_CLASS("_TtC16PyrusServiceDesk24ServiceDeskConfiguration")
 @property (nonatomic, strong) UIImage * _Nullable avatarForSupport;
 /// A user name. The default is “Guest”
 @property (nonatomic, copy) NSString * _Nullable userName;
+/// View to show in  chat navigation bar
+@property (nonatomic, strong) UIView * _Nullable chatTitleView;
+/// Custom UIBarButtonItem to show in right side of navigationBar. Default is nil.
+@property (nonatomic, strong) UIBarButtonItem * _Nullable customRightBarButtonItem;
+/// Custom UIBarButtonItem to show in left side of navigation Bar. Default value is nil. If nil there will be drawn back button. If specify custom left button, Pyrus ServiceDesk cannot be closed.
+@property (nonatomic, strong) UIBarButtonItem * _Nullable customLeftBarButtonItem;
+/// The view to show additional information under chat
+@property (nonatomic, strong) PSDInfoView * _Nullable infoView;
 - (nonnull instancetype)init OBJC_DESIGNATED_INITIALIZER;
 @end
 
@@ -1041,3 +1128,4 @@ SWIFT_CLASS("_TtC16PyrusServiceDesk24ServiceDeskConfiguration")
 #endif
 
 #endif
+
