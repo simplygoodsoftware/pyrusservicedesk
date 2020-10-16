@@ -261,6 +261,7 @@ class PSDChatViewController: UIViewController{
         }
     }
     @objc private func updateTable(){
+        startGettingInfo()
         if !PSDChatTableView.isNewChat(self.tableView.chatId) && !hasNoConnection() && !PSDGetChat.isActive(){
            self.tableView.updateChat(needProgress:false)
         }
@@ -280,9 +281,36 @@ extension PSDChatViewController : PSDMessageInputViewDelegate{
     }
 }
 extension PSDChatViewController : PSDUpdateInfo{
+    public static let PSD_LAST_ACTIVITY_INTEVAL_MINUTE = TimeInterval(90)
+    public static let PSD_LAST_ACTIVITY_INTEVAL_5_MINUTES = TimeInterval(300)
+    public static let PSD_LAST_ACTIVITY_INTEVAL_HOUR = TimeInterval(3600)
+    public static let PSD_LAST_ACTIVITY_INTEVAL_3_DAYS = TimeInterval(3*24*60*60)
+    public static let REFRESH_TIME_INTEVAL_5_SECONDS = TimeInterval(5)
+    public static let REFRESH_TIME_INTEVAL_15_SECONDS = TimeInterval(15)
+    public static let REFRESH_TIME_INTEVAL_1_MINUTE = TimeInterval(60)
+    public static let REFRESH_TIME_INTEVAL_3_MINUTES = TimeInterval(180)
+    private static let PSD_LAST_ACTIVITY_KEY = "PSDLastActivityDate"
+
+    static func userLastActivityKey() -> String{
+        return PSD_LAST_ACTIVITY_KEY + "_" + PyrusServiceDesk.userId
+    }
+    
+    private static func getTimerInerval() -> TimeInterval{
+        if let pyrusUserDefaults = PSDMessagesStorage.pyrusUserDefaults(), let date = pyrusUserDefaults.object(forKey: PSDChatViewController.userLastActivityKey()) as? Date{
+            let difference = Date().timeIntervalSince(date)
+            if difference <= PSD_LAST_ACTIVITY_INTEVAL_MINUTE{
+                return REFRESH_TIME_INTEVAL_5_SECONDS
+            } else if difference <= PSD_LAST_ACTIVITY_INTEVAL_5_MINUTES{
+                return REFRESH_TIME_INTEVAL_15_SECONDS
+            }
+        }
+        return REFRESH_TIME_INTEVAL_1_MINUTE
+    }
+
+    
     func startGettingInfo() {
         stopGettingInfo()
-        timer = Timer.scheduledTimer(timeInterval: reloadInterval, target: self, selector: #selector(updateTable), userInfo:nil , repeats: true)
+        timer = Timer.scheduledTimer(timeInterval: PSDChatViewController.getTimerInerval(), target: self, selector: #selector(updateTable), userInfo:nil , repeats: false)
     }
     func refreshChat() {
         if !PSDChatTableView.isNewChat(self.tableView.chatId){
