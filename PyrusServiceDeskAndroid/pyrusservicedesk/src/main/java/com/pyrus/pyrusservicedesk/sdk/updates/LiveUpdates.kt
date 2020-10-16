@@ -3,7 +3,6 @@ package com.pyrus.pyrusservicedesk.sdk.updates
 import android.content.SharedPreferences
 import android.os.Handler
 import android.os.Looper
-import android.util.Log
 import androidx.annotation.MainThread
 import com.pyrus.pyrusservicedesk.sdk.RequestFactory
 import com.pyrus.pyrusservicedesk.sdk.data.TicketShortDescription
@@ -61,13 +60,10 @@ internal class LiveUpdates(requests: RequestFactory, private val preferences: Sh
                 )
             }
             val interval = getTicketsUpdateInterval(lastActiveTime)
-            Log.d("SDS", "ticketsUpdateRunnable, interval = ${interval / MILLISECONDS_IN_SECOND}, lastActiveTime $lastActiveTime")
             if (interval == -1L) {
                 stopUpdates()
-                Log.d("SDS", "ticketsUpdateRunnable, stopUpdates = ${interval / MILLISECONDS_IN_SECOND}")
                 return
             }
-            Log.d("SDS", "ticketsUpdateRunnable, postDelayed = ${interval / MILLISECONDS_IN_SECOND}")
             mainHandler.postDelayed(this, interval)
         }
     }
@@ -149,12 +145,10 @@ internal class LiveUpdates(requests: RequestFactory, private val preferences: Sh
 
     internal fun increaseActiveScreenCount() {
         activeScreenCount++
-        Log.d("SDS", "increaseActiveScreenCount, activeScreenCount = $activeScreenCount")
     }
 
     internal fun decreaseActiveScreenCount() {
         activeScreenCount--
-        Log.d("SDS", "decreaseActiveScreenCount, activeScreenCount = $activeScreenCount")
     }
 
     private fun onSubscribe() {
@@ -173,7 +167,6 @@ internal class LiveUpdates(requests: RequestFactory, private val preferences: Sh
 
     private fun getTicketsUpdateInterval(lastActiveTime: Long): Long {
         val diff = System.currentTimeMillis() - lastActiveTime
-        Log.d("SDS", "diff = ${diff / MILLISECONDS_IN_SECOND}")
         return when {
             diff < 1.5 * MILLISECONDS_IN_MINUTE -> 5L * MILLISECONDS_IN_SECOND
             diff < 5 * MILLISECONDS_IN_MINUTE -> 15L * MILLISECONDS_IN_SECOND
@@ -201,7 +194,6 @@ internal class LiveUpdates(requests: RequestFactory, private val preferences: Sh
             if (isChanged)
                 it.onUnreadTicketCountChanged(newUnreadCount)
         }
-        Log.d("SDS", "processSuccess, activeScreenCount = $activeScreenCount")
         if (isChanged) {
             ticketCountChangedSubscribers.forEach { it.onUnreadTicketCountChanged(newUnreadCount) }
             if (newUnreadCount > 0 && activeScreenCount <= 0)
