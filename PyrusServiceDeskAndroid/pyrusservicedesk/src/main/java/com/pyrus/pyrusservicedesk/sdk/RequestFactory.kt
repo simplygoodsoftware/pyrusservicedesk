@@ -32,6 +32,9 @@ internal class RequestFactory(private val repository: GeneralRepository) {
         return AddCommentRequest(repository, ticketId, comment, uploadFileHooks)
     }
 
+    /**
+     * @param token can be null. Push Notifications will stop then.
+     */
     fun getSetPushTokenRequest(token: String?): RequestBase<Unit> {
         return SetPushTokenRequest(repository, token)
     }
