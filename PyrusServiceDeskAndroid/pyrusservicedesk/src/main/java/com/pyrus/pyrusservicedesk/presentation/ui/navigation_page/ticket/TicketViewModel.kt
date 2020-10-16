@@ -319,6 +319,7 @@ internal class TicketViewModel(serviceDeskProvider: ServiceDeskProvider,
     }
 
     private fun applyTicketUpdate(freshList: Comments, arePendingComments: Boolean) {
+        liveUpdates.resetUnreadCount()
         if (!arePendingComments && !needUpdateCommentsList(freshList.comments)) {
             onDataLoaded()
             return
@@ -507,7 +508,6 @@ internal class TicketViewModel(serviceDeskProvider: ServiceDeskProvider,
 
     fun onStart() {
         liveUpdates.increaseActiveScreenCount()
-        liveUpdates.resetUnreadCount()
     }
 
     fun onStop() {
