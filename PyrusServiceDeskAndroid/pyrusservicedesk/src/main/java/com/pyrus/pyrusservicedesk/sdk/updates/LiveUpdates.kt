@@ -68,6 +68,11 @@ internal class LiveUpdates(requests: RequestFactory, private val preferences: Sh
         }
     }
 
+    init {
+        if (!isStarted)
+            startUpdates()
+    }
+
     /**
      * Registers [subscriber] to on new reply events
      */
