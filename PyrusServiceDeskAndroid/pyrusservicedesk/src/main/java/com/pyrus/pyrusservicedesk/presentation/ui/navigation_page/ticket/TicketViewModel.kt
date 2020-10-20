@@ -320,6 +320,7 @@ internal class TicketViewModel(serviceDeskProvider: ServiceDeskProvider,
     }
 
     private fun applyTicketUpdate(freshList: Comments, arePendingComments: Boolean) {
+        liveUpdates.resetUnreadCount()
         if (!arePendingComments && !needUpdateCommentsList(freshList.comments)) {
             onDataLoaded()
             return
@@ -509,6 +510,14 @@ internal class TicketViewModel(serviceDeskProvider: ServiceDeskProvider,
 
     fun onRatingClick(rating: Int) =
         sendAddComment(localDataProvider.createLocalComment(rating = rating))
+
+    fun onStart() {
+        liveUpdates.increaseActiveScreenCount()
+    }
+
+    fun onStop() {
+        liveUpdates.decreaseActiveScreenCount()
+    }
 
     private inner class AddCommentObserver(
         uploadFileHooks: UploadFileHooks?,

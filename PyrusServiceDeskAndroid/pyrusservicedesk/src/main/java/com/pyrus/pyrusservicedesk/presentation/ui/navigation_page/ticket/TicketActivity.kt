@@ -187,6 +187,16 @@ internal class TicketActivity : ConnectionActivityBase<TicketViewModel>(TicketVi
         send.isEnabled = !input.text.isNullOrBlank()
     }
 
+    override fun onStart() {
+        super.onStart()
+        viewModel.onStart()
+    }
+
+    override fun onStop() {
+        super.onStop()
+        viewModel.onStop()
+    }
+
     override fun onRestoreInstanceState(savedInstanceState: Bundle) {
         super.onRestoreInstanceState(savedInstanceState)
         savedInstanceState.let {

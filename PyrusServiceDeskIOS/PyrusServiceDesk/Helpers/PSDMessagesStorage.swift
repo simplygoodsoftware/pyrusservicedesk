@@ -1,6 +1,8 @@
 import Foundation
 let PSD_MESSAGES_STORAGE_KEY : String = "PSDMessagesStorage"
 let PSD_USER_DEFAULTS_SUITE_KEY : String = "com.PyrusServiceDesk"
+let PSD_WAS_CLOSE_INFO_KEY : String = "com.PyrusServiceDesk.wasCloseInfo"
+
 /**
  The storage for unsend messages.
  The storage is array with dictionary that is contain informatin need to draw message and repeat its sending.
@@ -137,6 +139,7 @@ struct PSDMessagesStorage{
             let _ = removeFromStorage(messageId: messageId, needSave: true)
         }
     }
+    
     ///Return array with saved messages info in storage.
     private static func saveToStorage(_ messagesStorage:[[String:Any]]){
         pyrusUserDefaults()?.set(messagesStorage, forKey: PSD_MESSAGES_STORAGE_KEY)

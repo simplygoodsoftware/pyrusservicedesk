@@ -58,3 +58,6 @@
 "Error" = "Ошибка";
 "AttachmentLoadError"="Не могу загрузить данное вложение";
 "ErrorServerError"="Связь с сервером прервана";
+
+"AcсessDenied"="Нет доступа";
+"OK"="ОК";

@@ -57,3 +57,6 @@
 "Error" = "Error";
 "AttachmentLoadError"="Can't load this attachment";
 "ErrorServerError"="Server connection interrupted";
+
+"AcсessDenied"="Access denied";
+"OK"="OK";

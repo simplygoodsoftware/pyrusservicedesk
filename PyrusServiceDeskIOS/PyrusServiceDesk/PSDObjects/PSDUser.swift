@@ -49,13 +49,13 @@ class PSDUser: NSObject {
         self.imagePath = imagePath
     }
     func equalTo(user:PSDUser?)->Bool{
-        if user == nil{
+        guard let user = user else{
             return false
         }
-        if PyrusServiceDesk.userId == user!.personId && user!.personId == self.personId {
+        if PyrusServiceDesk.userId == user.personId && user.personId == self.personId {
             return true
         }
-        if self.name == user!.name && self.imagePath == user!.imagePath{
+        if self.name == user.name && self.imagePath == user.imagePath{
             return true
         }
         

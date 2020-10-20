@@ -69,7 +69,6 @@ class PSDMessageSender: NSObject {
     static func showResult(of messageToPass:PSDMessage, success:Bool, delegate:PSDMessageSendDelegate?){
         if(success){
             PSDMessagesStorage.removeFromStorage(messageId: messageToPass.clientId)
-            PyrusServiceDesk.setDidStartChatWithSupport()
             let _ = PyrusServiceDesk.setLastActivityDate()
             PyrusServiceDesk.restartTimer()
         }
@@ -122,15 +121,23 @@ class PSDMessageSender: NSObject {
         else{
             request = URLRequest.createRequest(with:chatId,type:.update, parameters: parameters)
         }
-        //print("pass request body \(String(describing: String(data: request.httpBody!, encoding: String.Encoding.utf8)))")
+        
         let task = PyrusServiceDesk.mainSession.dataTask(with: request) { data, response, error in
-            
             guard let data = data, error == nil else {                                                 // check for fundamental networking error
                 completion(nil,nil)
                 return
             }
             
             if let httpStatus = response as? HTTPURLResponse, httpStatus.statusCode != 200 {           // check for http errors
+                DispatchQueue.main.async {
+                    if httpStatus.statusCode == 403 {
+                        if let onFailed = PyrusServiceDesk.onAuthorizationFailed {
+                            onFailed()
+                        } else {
+                            PyrusServiceDesk.mainController?.closeServiceDesk()
+                        }
+                    }
+                }
                 completion(nil,nil)
             }
             
@@ -167,7 +174,6 @@ class PSDMessageSender: NSObject {
         parameters[ticketParameter] = generateTiket(message,attachments ?? [PSDAttachment](), clientId: clientId)
         
         let  request : URLRequest = URLRequest.createRequest(type:.createNew, parameters: parameters)
-        // print("request parameters = \(parameters)")
         // print("passFirst request body \(String(describing: String(data: request.httpBody!, encoding: String.Encoding.utf8)))")
         
         let task = PyrusServiceDesk.mainSession.dataTask(with: request) { data, response, error in
@@ -177,6 +183,16 @@ class PSDMessageSender: NSObject {
             }
             
             if let httpStatus = response as? HTTPURLResponse, httpStatus.statusCode != 200 {           // check for http errors
+                DispatchQueue.main.async {
+                    if httpStatus.statusCode == 403 {
+                        if let onFailed = PyrusServiceDesk.onAuthorizationFailed {
+                            onFailed()
+                        } else {
+                            PyrusServiceDesk.mainController?.closeServiceDesk()
+                        }
+                    }
+                }
+
                 completion("")
             }
             

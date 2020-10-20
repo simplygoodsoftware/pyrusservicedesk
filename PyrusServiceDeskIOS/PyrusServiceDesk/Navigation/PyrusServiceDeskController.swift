@@ -64,12 +64,12 @@ class PyrusServiceDeskController: PSDNavigationController {
         (UIApplication.topViewController() as? PSDUpdateInfo)?.startGettingInfo()
     }
     ///reload chat with showing refresh ui
-    func refreshChat() {
+    func refreshChat(showFakeMessage: Int?) {
         for viewController in self.viewControllers{
             guard let chatController = viewController as? PSDUpdateInfo else{
                 continue
             }
-            chatController.refreshChat()
+            chatController.refreshChat(showFakeMessage: showFakeMessage)
             break
         }
     }
@@ -124,10 +124,27 @@ class PyrusServiceDeskController: PSDNavigationController {
         else{
             self.view.autoresizingMask = [.flexibleWidth,.flexibleHeight]
         }
-       
-        
-        
     }
+    
+    func updateTitleChat() {
+        for vc in viewControllers{
+            if let vcChat =  vc as? PSDChatViewController{
+                vcChat.updateTitle()
+                break
+            }
+        }
+    }
+    
+    func closeServiceDesk() {
+        if PyrusServiceDeskController.PSDIsOpen() {
+            let alertAuthorized = UIAlertController(title: nil, message: "AcсessDenied".localizedPSD(), preferredStyle: .alert)
+            alertAuthorized.addAction(UIAlertAction(title: "OK".localizedPSD(), style: .default, handler: { (_) in
+                self.remove()
+            }))
+            self.present(alertAuthorized, animated: true, completion: nil)
+        }
+    }
+    
     ///Vertical right separator view for iPad
     private lazy var separatorView: UIView = {
         let view = UIView()
@@ -204,5 +221,7 @@ class PyrusServiceDeskController: PSDNavigationController {
         
     }
     
-
+    public static func PSDIsOpen()->Bool{
+        return (UIApplication.topViewController() is PSDChatViewController) || (UIApplication.topViewController() is PSDChatsViewController) || (UIApplication.topViewController() is PSDAttachmentLoadViewController)
+    }
 }

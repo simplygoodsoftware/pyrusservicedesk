@@ -24,10 +24,10 @@ extension UIColor {
            switch traitCollection.userInterfaceStyle {
            case
              .unspecified,
-             .light: return UIColor.appColor.darkerColor()
+             .light: return UIColor.appColor
            case .dark: return UIColor.appColor.darkerColor()
            @unknown default:
-                return UIColor.appColor.darkerColor()
+                return UIColor.appColor
         }
        }
     private func darkerColor() -> UIColor{

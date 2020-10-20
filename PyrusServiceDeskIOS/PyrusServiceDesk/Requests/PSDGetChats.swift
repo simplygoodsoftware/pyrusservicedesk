@@ -41,6 +41,16 @@ struct PSDGetChats {
             }
             
             if let httpStatus = response as? HTTPURLResponse, httpStatus.statusCode != 200 {           // check for http errors
+                DispatchQueue.main.async {
+                    if httpStatus.statusCode == 403 {
+                        if let onFailed = PyrusServiceDesk.onAuthorizationFailed {
+                            onFailed()
+                        } else {
+                            PyrusServiceDesk.mainController?.closeServiceDesk()
+                        }
+                    }
+                }
+
                 completion([])
                 if needShowError {
                     DispatchQueue.main.async {showError(httpStatus.statusCode, on:topViewController)}
@@ -112,15 +122,13 @@ struct PSDGetChats {
         
     }
     static func refreshNewMessagesCount(_ unread:Int){
-        guard let subscriber = PyrusServiceDesk.subscriber else {
+        guard let subscriber = PyrusServiceDesk.subscriber, !PyrusServiceDeskController.PSDIsOpen() else {
             return
         }
         if PyrusServiceDesk.newMessagesCount != unread{
             PyrusServiceDesk.newMessagesCount = unread
             NotificationCenter.default.post(name: MESSAGES_NUMBER_NOTIFICATION_NAME, object: unread, userInfo: nil)
-            if(unread>0){
-                subscriber.onNewReply()
-            }
+            subscriber.onNewReply(hasUnreadComments: unread>0)
         }
     }
 }
