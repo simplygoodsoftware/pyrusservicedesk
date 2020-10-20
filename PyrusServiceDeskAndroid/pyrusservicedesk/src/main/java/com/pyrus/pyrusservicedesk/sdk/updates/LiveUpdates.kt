@@ -213,7 +213,8 @@ internal class LiveUpdates(requests: RequestFactory, private val preferences: Sh
         }
         if (isChanged) {
             ticketCountChangedSubscribers.forEach { it.onUnreadTicketCountChanged(newUnreadCount) }
-            newReplySubscribers.forEach { it.onNewReply(newUnreadCount > 0 && activeScreenCount <= 0) }
+            if (activeScreenCount <= 0)
+                newReplySubscribers.forEach { it.onNewReply(newUnreadCount > 0) }
         }
         recentUnreadCounter = newUnreadCount
     }
