@@ -8,12 +8,12 @@ import com.google.gson.annotations.SerializedName
  */
 internal class SetPushTokenBody(appId: String,
                                 userId: String,
-                                secretKey: String?,
+                                securityKey: String?,
                                 instanceId: String?,
                                 version: Int,
                                 @SerializedName("token")
                                 private val token: String?)
-    : RequestBodyBase(appId, userId, secretKey, instanceId, version){
+    : RequestBodyBase(appId, userId, securityKey, instanceId, version){
 
     @SerializedName("type")
     private val type = "android"

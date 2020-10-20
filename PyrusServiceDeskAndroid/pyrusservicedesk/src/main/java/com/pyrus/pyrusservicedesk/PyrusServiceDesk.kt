@@ -30,9 +30,8 @@ import com.pyrus.pyrusservicedesk.sdk.verify.LocalDataVerifier
 import com.pyrus.pyrusservicedesk.sdk.verify.LocalDataVerifierImpl
 import com.pyrus.pyrusservicedesk.sdk.web.retrofit.RetrofitWebRepository
 import com.pyrus.pyrusservicedesk.utils.*
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.asCoroutineDispatcher
-import kotlinx.coroutines.launch
+import kotlinx.coroutines.*
+import java.lang.Runnable
 import java.util.concurrent.Executors
 
 class PyrusServiceDesk private constructor(
@@ -40,7 +39,7 @@ class PyrusServiceDesk private constructor(
     internal val appId: String,
     internal val isSingleChat: Boolean,
     internal val userId: String?,
-    internal val secretKey: String?,
+    internal val securityKey: String?,
     internal val apiVersion: Int
 ) {
 
@@ -88,35 +87,41 @@ class PyrusServiceDesk private constructor(
          * @param application instance of the enclosing application
          * @param appId id of a client
          * @param userId of the user who is initializing service desk
-         * @param secretKey of the user far safe initialization
+         * @param securityKey of the user far safe initialization
          */
         @JvmStatic
         fun init(
             application: Application,
             appId: String,
             userId: String,
-            secretKey: String
+            securityKey: String
         ) {
-            initInternal(application, appId, userId, secretKey, API_VERSION_2)
+            initInternal(application, appId, userId, securityKey, API_VERSION_2)
         }
 
         private fun initInternal(
             application: Application,
             appId: String,
             userId: String? = null,
-            secretKey: String? = null,
+            securityKey: String? = null,
             apiVersion: Int = API_VERSION_1
         ) {
-            INSTANCE = PyrusServiceDesk(application, appId, true, userId, secretKey, apiVersion)
-
-            if (CONFIGURATION != null) {
-                if (userId == null)
-                    get().getSharedViewModel().quitServiceDesk()
-                else if (get().userId != userId) {
-                    get().serviceDeskProvider.getDraftRepository().saveDraft("")
-                    get().getSharedViewModel().triggerUpdate()
+            if (CONFIGURATION != null || INSTANCE != null && (userId != null || get().userId != userId)) {
+                clearLocalData {
+                    if (CONFIGURATION != null)
+                        stop()
+                    INSTANCE = PyrusServiceDesk(
+                        application,
+                        appId,
+                        true,
+                        userId,
+                        securityKey,
+                        apiVersion
+                    )
                 }
             }
+            else
+                INSTANCE = PyrusServiceDesk(application, appId, true, userId, securityKey, apiVersion)
         }
 
         /**
@@ -286,10 +291,8 @@ class PyrusServiceDesk private constructor(
             if (configuration == null)
                 return
             val currentUserId = get().preferences.getString(PREFERENCE_KEY_USER_ID_V2, null)
-            if (currentUserId != get().userId) {
-
+            if (currentUserId != get().userId)
                 refresh()
-            }
             get().preferences.edit().putString(PREFERENCE_KEY_USER_ID_V2, get().userId).apply()
         }
 
@@ -298,6 +301,18 @@ class PyrusServiceDesk private constructor(
                 ticketId != null -> TicketActivity.getLaunchIntent(ticketId)
                 get().isSingleChat -> TicketActivity.getLaunchIntent()
                 else -> TicketsActivity.getLaunchIntent()
+            }
+        }
+
+        private fun clearLocalData(doOnCleared : () -> Unit) {
+            GlobalScope.launch {
+                if (get().serviceDeskProvider.getRequestFactory().getRemoveAllPendingCommentsRequest().execute().hasError().not()) {
+                    withContext(Dispatchers.Main) {
+                        get().draftRepository.saveDraft("")
+                        refresh()
+                        doOnCleared.invoke()
+                    }
+                }
             }
         }
     }

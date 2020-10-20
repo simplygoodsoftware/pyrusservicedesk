@@ -12,16 +12,14 @@ public class SampleApp extends Application {
         super.onCreate();
         PyrusServiceDesk.init(
                 this,
-                "24Ed4oIBtoeHnqDHNU5O7zLeOILVziiMP2pkghQZAL1SXHztt0w8HSv5u9LNGitjNR~pU3JOLPGt3jq-1jwwDUjJzgqlvV3TpyDyD8Bq72clDyhWyOrW8lr9lf4yfrwt0tb80w==",
-                "111111",
-                "222222"
+                "my_app_id",
+                "user_id",
+                "security_key"
         );
 
         PyrusServiceDesk.setPushToken(
                 "my_push_token",
-                exception -> {
-                    Log.w("SAMPLE_APP", exception);
-                });
+                exception -> Log.w("SAMPLE_APP", exception));
 
         PyrusServiceDesk.setOnAuthorizationFailed(null);
     }

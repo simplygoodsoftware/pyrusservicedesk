@@ -41,4 +41,5 @@ internal class RequestFactory(private val repository: GeneralRepository) {
 
     fun getPendingFeedCommentsRequest(): Request<Comments> = GetFeedRequest(repository, false)
     fun getRemovePendingCommentRequest(comment: Comment) = RemovePendingCommentRequest(repository, comment)
+    fun getRemoveAllPendingCommentsRequest() = RemoveAllPendingCommentsRequest(repository)
 }

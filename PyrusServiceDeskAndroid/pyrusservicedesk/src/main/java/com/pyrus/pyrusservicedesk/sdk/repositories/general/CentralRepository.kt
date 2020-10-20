@@ -51,4 +51,7 @@ internal class CentralRepository(private val webRepository: RemoteRepository,
     override suspend fun getPendingFeedComments() = offlineRepository.getPendingFeedComments()
 
     override suspend fun removePendingComment(comment: Comment) = offlineRepository.removePendingComment(comment)
+
+    override suspend fun removeAllPendingComments() = offlineRepository.removeAllPendingComments()
+
 }

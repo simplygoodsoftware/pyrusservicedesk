@@ -60,7 +60,7 @@ internal class RetrofitWebRepository(
     override suspend fun getFeed(): Response<Comments> {
         return withContext<Response<Comments>>(Dispatchers.IO){
             try {
-                api.getTicketFeed(RequestBodyBase(appId, getUserId(), getSecretKey(), instanceId, getVersion())).execute().run {
+                api.getTicketFeed(RequestBodyBase(appId, getUserId(), getSecurityKey(), instanceId, getVersion())).execute().run {
                     when {
                         isSuccessful && body() != null -> ResponseImpl.success(body()!!)
                         else -> ResponseImpl.failure(createError(this))
@@ -76,7 +76,7 @@ internal class RetrofitWebRepository(
     override suspend fun getTickets(): GetTicketsResponse {
         return withContext(Dispatchers.IO){
             try {
-                api.getTickets(RequestBodyBase(appId, getUserId(), getSecretKey(), getInstanceId(), getVersion())).execute().run {
+                api.getTickets(RequestBodyBase(appId, getUserId(), getSecurityKey(), getInstanceId(), getVersion())).execute().run {
                     when {
                         isSuccessful && body() != null -> GetTicketsResponse(tickets = body()!!.tickets)
                         else -> GetTicketsResponse(createError(this))
@@ -91,7 +91,7 @@ internal class RetrofitWebRepository(
     override suspend fun getTicket(ticketId: Int): GetTicketResponse {
         return withContext(Dispatchers.IO){
             try {
-                api.getTicket(RequestBodyBase(appId, getUserId(), getSecretKey(), getInstanceId(), getVersion()), ticketId).execute().run {
+                api.getTicket(RequestBodyBase(appId, getUserId(), getSecurityKey(), getInstanceId(), getVersion()), ticketId).execute().run {
                     when {
                         isSuccessful && body() != null -> GetTicketResponse(ticket = body())
                         else -> GetTicketResponse(createError(this))
@@ -135,7 +135,7 @@ internal class RetrofitWebRepository(
                     CreateTicketRequestBody(
                         appId,
                         getUserId(),
-                        getSecretKey(),
+                        getSecurityKey(),
                         getInstanceId(),
                         getVersion(),
                         ConfigUtils.getUserName(),
@@ -179,7 +179,7 @@ internal class RetrofitWebRepository(
                     SetPushTokenBody(
                         appId,
                         getUserId(),
-                        getSecretKey(),
+                        getSecurityKey(),
                         getInstanceId(),
                         getVersion(),
                         token
@@ -206,9 +206,9 @@ internal class RetrofitWebRepository(
         return PyrusServiceDesk.get().apiVersion
     }
 
-    private fun getSecretKey(): String? {
+    private fun getSecurityKey(): String? {
         if (getVersion() == 1)
-            return PyrusServiceDesk.get().secretKey
+            return PyrusServiceDesk.get().securityKey
         return null
     }
 
@@ -243,7 +243,7 @@ internal class RetrofitWebRepository(
                 isFeed -> api.addFeedComment(AddCommentRequestBody(
                     appId,
                     getUserId(),
-                    getSecretKey(),
+                    getSecurityKey(),
                     getInstanceId(),
                     getVersion(),
                     cament.body,
@@ -254,7 +254,7 @@ internal class RetrofitWebRepository(
                     AddCommentRequestBody(
                         appId,
                         getUserId(),
-                        getSecretKey(),
+                        getSecurityKey(),
                         getInstanceId(),
                         getVersion(),
                         cament.body,

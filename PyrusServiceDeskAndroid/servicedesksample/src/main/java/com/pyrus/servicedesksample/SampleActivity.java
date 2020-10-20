@@ -44,7 +44,7 @@ public class SampleActivity extends Activity implements NewReplySubscriber {
                             (dialog1, which) -> {
                                 PyrusServiceDesk.init(
                                         getApplication(),
-                                        "24Ed4oIBtoeHnqDHNU5O7zLeOILVziiMP2pkghQZAL1SXHztt0w8HSv5u9LNGitjNR~pU3JOLPGt3jq-1jwwDUjJzgqlvV3TpyDyD8Bq72clDyhWyOrW8lr9lf4yfrwt0tb80w=="
+                                        "my_app_id"
                                 );
                                 dialog1.cancel();
                             }

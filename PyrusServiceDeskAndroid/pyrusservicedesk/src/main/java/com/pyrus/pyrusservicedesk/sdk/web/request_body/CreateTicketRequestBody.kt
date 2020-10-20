@@ -9,11 +9,11 @@ import com.pyrus.pyrusservicedesk.sdk.data.TicketDescription
 internal class CreateTicketRequestBody(
         appId: String,
         userId: String,
-        secretKey: String?,
+        securityKey: String?,
         instanceId: String?,
         version: Int,
         @SerializedName("user_name")
         val userName: String,
         @SerializedName("ticket")
         val ticket: TicketDescription)
-    : RequestBodyBase(appId, userId, secretKey, instanceId, version)
+    : RequestBodyBase(appId, userId, securityKey, instanceId, version)

@@ -39,7 +39,7 @@ class RequestUtils{
                     "?user_id=" +
                             URLEncoder.encode(userId, "UTF-8") +
                             "&security_key=" +
-                            URLEncoder.encode(PyrusServiceDesk.get().secretKey, "UTF-8") +
+                            URLEncoder.encode(PyrusServiceDesk.get().securityKey, "UTF-8") +
                             "&instance_id=" +
                             URLEncoder.encode(instanceId, "UTF-8") +
                             "&version=" +
