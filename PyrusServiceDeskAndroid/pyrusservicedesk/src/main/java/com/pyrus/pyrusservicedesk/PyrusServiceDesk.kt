@@ -48,7 +48,7 @@ class PyrusServiceDesk private constructor(
             Executors.newSingleThreadExecutor().asCoroutineDispatcher()
         internal var FILE_CHOOSER: FileChooser? = null
         internal var onAuthorizationFailed: Runnable? = Runnable {
-            get().getSharedViewModel().quitServiceDesk()
+            stop()
         }
         private var INSTANCE: PyrusServiceDesk? = null
         private var CONFIGURATION: ServiceDeskConfiguration? = null
