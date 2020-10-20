@@ -179,7 +179,7 @@ class PyrusServiceDesk private constructor(
          * @param onAuthorizationFailed lambda that executes when authorization error has occurred.
          */
         @JvmStatic
-        fun setOnAuthorizationFailed(onAuthorizationFailed: Runnable?) {
+        fun onAuthorizationFailed(onAuthorizationFailed: Runnable?) {
             this.onAuthorizationFailed = onAuthorizationFailed
         }
 

@@ -21,6 +21,6 @@ public class SampleApp extends Application {
                 "my_push_token",
                 exception -> Log.w("SAMPLE_APP", exception));
 
-        PyrusServiceDesk.setOnAuthorizationFailed(null);
+        PyrusServiceDesk.onAuthorizationFailed(null);
     }
 }

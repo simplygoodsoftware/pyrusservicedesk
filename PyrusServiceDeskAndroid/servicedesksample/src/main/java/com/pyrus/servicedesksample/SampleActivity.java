@@ -30,7 +30,7 @@ public class SampleActivity extends Activity implements NewReplySubscriber {
                                 .build())
         );
 
-        PyrusServiceDesk.setOnAuthorizationFailed(
+        PyrusServiceDesk.onAuthorizationFailed(
                 () -> {
                     AlertDialog dialog = new AlertDialog
                             .Builder(this)
