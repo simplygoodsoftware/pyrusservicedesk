@@ -23,4 +23,9 @@ internal interface OfflineRepository {
      * Removes pending comment from offline repository
      */
     suspend fun removePendingComment(comment: Comment): Response<Boolean>
+
+    /**
+     * Removes all pending comments from offline repository
+     */
+    suspend fun removeAllPendingComments()
 }

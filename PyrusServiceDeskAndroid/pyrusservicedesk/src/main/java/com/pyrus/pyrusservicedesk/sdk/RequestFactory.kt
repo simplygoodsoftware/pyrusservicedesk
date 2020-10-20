@@ -32,10 +32,14 @@ internal class RequestFactory(private val repository: GeneralRepository) {
         return AddCommentRequest(repository, ticketId, comment, uploadFileHooks)
     }
 
-    fun getSetPushTokenRequest(token: String): RequestBase<Unit> {
+    /**
+     * @param token can be null. Push Notifications will stop then.
+     */
+    fun getSetPushTokenRequest(token: String?): RequestBase<Unit> {
         return SetPushTokenRequest(repository, token)
     }
 
     fun getPendingFeedCommentsRequest(): Request<Comments> = GetFeedRequest(repository, false)
     fun getRemovePendingCommentRequest(comment: Comment) = RemovePendingCommentRequest(repository, comment)
+    fun getRemoveAllPendingCommentsRequest() = RemoveAllPendingCommentsRequest(repository)
 }

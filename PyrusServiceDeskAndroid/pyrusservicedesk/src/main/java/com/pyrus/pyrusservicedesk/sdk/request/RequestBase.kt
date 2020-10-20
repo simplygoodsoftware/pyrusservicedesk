@@ -1,6 +1,7 @@
 package com.pyrus.pyrusservicedesk.sdk.request
 
 import com.pyrus.pyrusservicedesk.sdk.repositories.general.GeneralRepository
+import com.pyrus.pyrusservicedesk.sdk.response.AuthorizationError
 import com.pyrus.pyrusservicedesk.sdk.response.EmptyDataError
 import com.pyrus.pyrusservicedesk.sdk.response.Response
 import com.pyrus.pyrusservicedesk.sdk.response.ResponseCallback

@@ -30,27 +30,35 @@ import com.pyrus.pyrusservicedesk.sdk.verify.LocalDataVerifier
 import com.pyrus.pyrusservicedesk.sdk.verify.LocalDataVerifierImpl
 import com.pyrus.pyrusservicedesk.sdk.web.retrofit.RetrofitWebRepository
 import com.pyrus.pyrusservicedesk.utils.*
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.asCoroutineDispatcher
-import kotlinx.coroutines.launch
+import kotlinx.coroutines.*
+import java.lang.Runnable
 import java.util.concurrent.Executors
 
 class PyrusServiceDesk private constructor(
     internal val application: Application,
     internal val appId: String,
-    internal val isSingleChat: Boolean
+    internal val isSingleChat: Boolean,
+    internal val userId: String?,
+    internal val securityKey: String?,
+    internal val apiVersion: Int
 ) {
 
     companion object {
         internal val DISPATCHER_IO_SINGLE =
             Executors.newSingleThreadExecutor().asCoroutineDispatcher()
         internal var FILE_CHOOSER: FileChooser? = null
+        internal var onAuthorizationFailed: Runnable? = Runnable {
+            stop()
+        }
         private var INSTANCE: PyrusServiceDesk? = null
         private var CONFIGURATION: ServiceDeskConfiguration? = null
         private var lastRefreshes = ArrayList<Long>()
 
         private const val SET_PUSH_TOKEN_TIMEOUT = 5 // Minutes
         private const val REFRESH_MAX_COUNT = 20 // in minute
+
+        private const val API_VERSION_1 = 0
+        private const val API_VERSION_2 = 1
 
         /**
          * Initializes PyrusServiceDesk embeddable module.
@@ -62,8 +70,58 @@ class PyrusServiceDesk private constructor(
          * @param appId id of a client
          */
         @JvmStatic
-        fun init(application: Application, appId: String) {
-            INSTANCE = PyrusServiceDesk(application, appId, true)
+        fun init(
+            application: Application,
+            appId: String
+        ) {
+            initInternal(application, appId)
+        }
+
+        /**
+         * Initializes PyrusServiceDesk embeddable module.
+         * This init is used for authorized users with device independent sessions.
+         * The best approach is to call this in [Application.onCreate]
+         * ***PS***: Should be done before other public methods are is called.
+         * Unhandled IllegalStateException is thrown otherwise.
+         *
+         * @param application instance of the enclosing application
+         * @param appId id of a client
+         * @param userId of the user who is initializing service desk
+         * @param securityKey of the user far safe initialization
+         */
+        @JvmStatic
+        fun init(
+            application: Application,
+            appId: String,
+            userId: String,
+            securityKey: String
+        ) {
+            initInternal(application, appId, userId, securityKey, API_VERSION_2)
+        }
+
+        private fun initInternal(
+            application: Application,
+            appId: String,
+            userId: String? = null,
+            securityKey: String? = null,
+            apiVersion: Int = API_VERSION_1
+        ) {
+            if (CONFIGURATION != null || INSTANCE != null && (userId != null || get().userId != userId)) {
+                clearLocalData {
+                    if (CONFIGURATION != null)
+                        stop()
+                    INSTANCE = PyrusServiceDesk(
+                        application,
+                        appId,
+                        true,
+                        userId,
+                        securityKey,
+                        apiVersion
+                    )
+                }
+            }
+            else
+                INSTANCE = PyrusServiceDesk(application, appId, true, userId, securityKey, apiVersion)
         }
 
         /**
@@ -115,15 +173,27 @@ class PyrusServiceDesk private constructor(
         }
 
         /**
+         * Sets a callback for when authorization of user has failed.
+         * When nothing is passed ServiceDesk will be closed after authorization failure.
+         *
+         * @param onAuthorizationFailed lambda that executes when authorization error has occurred.
+         */
+        @JvmStatic
+        fun onAuthorizationFailed(onAuthorizationFailed: Runnable?) {
+            this.onAuthorizationFailed = onAuthorizationFailed
+        }
+
+        /**
          * Launches the request for registering push token.
          * Callback can be invoked in a thread that differs from the one that has invoked [setPushToken]
+         * Pass null as token in order to stop push updates.
          *
-         * @param token string token to be registered
+         * @param token string token to be registered. If null then push notifications stop.
          * @param callback callback that is invoked when result of registering of the token is received.
          *  This is invoked without error when token is successfully registered.
          */
         @JvmStatic
-        fun setPushToken(token: String, callback: SetPushTokenCallback) {
+        fun setPushToken(token: String?, callback: SetPushTokenCallback) {
             val serviceDesk = get()
             val lastUpdateTime = serviceDesk.preferences.getLong(PREFERENCE_KEY_LAST_SET_TOKEN, -1L)
             val isSkip = lastUpdateTime != -1L
@@ -131,9 +201,8 @@ class PyrusServiceDesk private constructor(
 
             when {
                 isSkip -> callback.onResult(Exception("Too many requests. Maximum once every $SET_PUSH_TOKEN_TIMEOUT minutes."))
-                token.isBlank() -> callback.onResult(Exception("Token is empty"))
                 serviceDesk.appId.isBlank() -> callback.onResult(Exception("AppId is not assigned"))
-                serviceDesk.userId.isBlank() -> callback.onResult(Exception("UserId is not assigned"))
+                serviceDesk.instanceId.isBlank() -> callback.onResult(Exception("UserId is not assigned"))
                 else -> {
                     serviceDesk.preferences.edit().putLong(PREFERENCE_KEY_LAST_SET_TOKEN, System.currentTimeMillis()).apply()
                     GlobalScope.launch {
@@ -216,7 +285,15 @@ class PyrusServiceDesk private constructor(
             CONFIGURATION = configuration
             get().sharedViewModel.clearQuitServiceDesk()
             get().onStopCallback = onStopCallback
+
             activity.startActivity(createIntent(ticketId))
+
+            if (configuration == null)
+                return
+            val currentUserId = get().preferences.getString(PREFERENCE_KEY_USER_ID_V2, null)
+            if (currentUserId != get().userId)
+                refresh()
+            get().preferences.edit().putString(PREFERENCE_KEY_USER_ID_V2, get().userId).apply()
         }
 
         private fun createIntent(ticketId: Int? = null): Intent {
@@ -224,6 +301,18 @@ class PyrusServiceDesk private constructor(
                 ticketId != null -> TicketActivity.getLaunchIntent(ticketId)
                 get().isSingleChat -> TicketActivity.getLaunchIntent()
                 else -> TicketsActivity.getLaunchIntent()
+            }
+        }
+
+        private fun clearLocalData(doOnCleared : () -> Unit) {
+            GlobalScope.launch {
+                if (get().serviceDeskProvider.getRequestFactory().getRemoveAllPendingCommentsRequest().execute().hasError().not()) {
+                    withContext(Dispatchers.Main) {
+                        get().draftRepository.saveDraft("")
+                        refresh()
+                        doOnCleared.invoke()
+                    }
+                }
             }
         }
     }
@@ -239,7 +328,7 @@ class PyrusServiceDesk private constructor(
         }
     }
 
-    internal var userId: String
+    internal var instanceId: String
 
     private val requestFactory: RequestFactory
     private val draftRepository: DraftRepository
@@ -272,7 +361,7 @@ class PyrusServiceDesk private constructor(
         if (lastActiveTime != -1L && System.currentTimeMillis() < lastActiveTime)
             preferences.edit().putLong(PREFERENCE_KEY_LAST_ACTIVITY_TIME, -1L).apply()
 
-        userId = ConfigUtils.getUserId(preferences)
+        instanceId = ConfigUtils.getInstanceId(preferences)
 
         localDataVerifier = LocalDataVerifierImpl(fileResolver)
 
@@ -290,7 +379,7 @@ class PyrusServiceDesk private constructor(
                 .create()
 
         val centralRepository = CentralRepository(
-            RetrofitWebRepository(appId, userId, fileResolver, remoteGson),
+            RetrofitWebRepository(appId, instanceId, fileResolver, remoteGson),
             offlineRepository
         )
 

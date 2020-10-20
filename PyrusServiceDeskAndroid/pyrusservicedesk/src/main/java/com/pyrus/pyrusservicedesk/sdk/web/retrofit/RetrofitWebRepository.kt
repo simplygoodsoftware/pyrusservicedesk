@@ -18,8 +18,7 @@ import com.pyrus.pyrusservicedesk.sdk.web.UploadFileHooks
 import com.pyrus.pyrusservicedesk.sdk.web.request_body.*
 import com.pyrus.pyrusservicedesk.utils.ConfigUtils
 import com.pyrus.pyrusservicedesk.utils.RequestUtils.Companion.BASE_URL
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.withContext
+import kotlinx.coroutines.*
 import okhttp3.OkHttpClient
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
@@ -31,12 +30,12 @@ import kotlin.coroutines.coroutineContext
  * Web [GeneralRepository] implementation based on [Retrofit] library.
  *
  * @param appId id of the app that obtained through special Pyrus form.
- * @param userId UID of user. Generated installation id is used by default.
+ * @param instanceId UID of app instance. Generated installation id is used by default.
  * @param fileResolver helper for making upload file requests.
  */
 internal class RetrofitWebRepository(
     private val appId: String,
-    private val userId: String,
+    private val instanceId: String,
     private val fileResolver: FileResolver,
     gson: Gson
 ) : RemoteRepository {
@@ -61,10 +60,10 @@ internal class RetrofitWebRepository(
     override suspend fun getFeed(): Response<Comments> {
         return withContext<Response<Comments>>(Dispatchers.IO){
             try {
-                api.getTicketFeed(RequestBodyBase(appId, userId)).execute().run {
+                api.getTicketFeed(RequestBodyBase(appId, getUserId(), getSecurityKey(), instanceId, getVersion())).execute().run {
                     when {
                         isSuccessful && body() != null -> ResponseImpl.success(body()!!)
-                        else -> ResponseImpl.failure(ApiCallError(this.message()))
+                        else -> ResponseImpl.failure(createError(this))
                     }
                 }
 
@@ -77,10 +76,10 @@ internal class RetrofitWebRepository(
     override suspend fun getTickets(): GetTicketsResponse {
         return withContext(Dispatchers.IO){
             try {
-                api.getTickets(RequestBodyBase(appId, userId)).execute().run {
+                api.getTickets(RequestBodyBase(appId, getUserId(), getSecurityKey(), getInstanceId(), getVersion())).execute().run {
                     when {
                         isSuccessful && body() != null -> GetTicketsResponse(tickets = body()!!.tickets)
-                        else -> GetTicketsResponse(ApiCallError(this.message()))
+                        else -> GetTicketsResponse(createError(this))
                     }
                 }
             } catch (ex: Exception) {
@@ -92,10 +91,10 @@ internal class RetrofitWebRepository(
     override suspend fun getTicket(ticketId: Int): GetTicketResponse {
         return withContext(Dispatchers.IO){
             try {
-                api.getTicket(RequestBodyBase(appId, userId), ticketId).execute().run {
+                api.getTicket(RequestBodyBase(appId, getUserId(), getSecurityKey(), getInstanceId(), getVersion()), ticketId).execute().run {
                     when {
                         isSuccessful && body() != null -> GetTicketResponse(ticket = body())
-                        else -> GetTicketResponse(ApiCallError(this.message()))
+                        else -> GetTicketResponse(createError(this))
                     }
                 }
             } catch (ex: Exception) {
@@ -135,7 +134,10 @@ internal class RetrofitWebRepository(
                 api.createTicket(
                     CreateTicketRequestBody(
                         appId,
-                        userId,
+                        getUserId(),
+                        getSecurityKey(),
+                        getInstanceId(),
+                        getVersion(),
                         ConfigUtils.getUserName(),
                         descr
                     )
@@ -160,7 +162,7 @@ internal class RetrofitWebRepository(
 
                                 CreateTicketResponse(data = data)
                             }
-                            else -> CreateTicketResponse(ApiCallError(this.message()))
+                            else -> CreateTicketResponse(createError(this))
                         }
                     }
             } catch (ex: Exception) {
@@ -170,19 +172,50 @@ internal class RetrofitWebRepository(
         }
     }
 
-    override suspend fun setPushToken(token: String): SetPushTokenResponse {
+    override suspend fun setPushToken(token: String?): SetPushTokenResponse {
         return withContext(Dispatchers.IO){
             try {
-                api.setPushToken(SetPushTokenBody(appId, userId, token)).execute().run {
+                api.setPushToken(
+                    SetPushTokenBody(
+                        appId,
+                        getUserId(),
+                        getSecurityKey(),
+                        getInstanceId(),
+                        getVersion(),
+                        token
+                    )
+                ).execute().run {
                     when {
                         isSuccessful -> SetPushTokenResponse()
-                        else -> SetPushTokenResponse(ApiCallError(this.message()))
+                        else -> SetPushTokenResponse(createError(this))
                     }
                 }
             } catch (ex: Exception) {
                 SetPushTokenResponse(NoInternetConnection("No internet connection"))
             }
         }
+    }
+
+    private fun getUserId(): String {
+        if (getVersion() == 1)
+            return PyrusServiceDesk.get().userId ?: instanceId
+        return instanceId
+    }
+
+    private fun getVersion(): Int {
+        return PyrusServiceDesk.get().apiVersion
+    }
+
+    private fun getSecurityKey(): String? {
+        if (getVersion() == 1)
+            return PyrusServiceDesk.get().securityKey
+        return null
+    }
+
+    private fun getInstanceId(): String? {
+        if (getVersion() == 1)
+            return instanceId
+        return null
     }
 
     private suspend fun addComment(isFeed: Boolean,
@@ -207,10 +240,30 @@ internal class RetrofitWebRepository(
             }
 
             val call = when {
-                isFeed -> api.addFeedComment(AddCommentRequestBody(appId, userId, cament.body, cament.attachments, ConfigUtils.getUserName(), cament.rating))
+                isFeed -> api.addFeedComment(AddCommentRequestBody(
+                    appId,
+                    getUserId(),
+                    getSecurityKey(),
+                    getInstanceId(),
+                    getVersion(),
+                    cament.body,
+                    cament.attachments,
+                    ConfigUtils.getUserName(),
+                    cament.rating))
                 else -> api.addComment(
-                    AddCommentRequestBody(appId, userId, cament.body, cament.attachments, ConfigUtils.getUserName(), cament.rating),
-                    request.ticketId)
+                    AddCommentRequestBody(
+                        appId,
+                        getUserId(),
+                        getSecurityKey(),
+                        getInstanceId(),
+                        getVersion(),
+                        cament.body,
+                        cament.attachments,
+                        ConfigUtils.getUserName(),
+                        cament.rating
+                    ),
+                    request.ticketId
+                )
             }
             return@withContext try {
                 call
@@ -224,7 +277,7 @@ internal class RetrofitWebRepository(
                                 }
                                 ResponseImpl.success(data!!)
                             }
-                            else -> ResponseImpl.failure(ApiCallError(this.message()))
+                            else -> ResponseImpl.failure(createError(this))
                         }
                     }
             }
@@ -285,12 +338,28 @@ internal class RetrofitWebRepository(
                 .run {
                     when {
                         isSuccessful && body() != null -> UploadFileResponse(uploadData = body())
-                        else -> UploadFileResponse(ApiCallError(this.message()))
+                        else -> UploadFileResponse(createError(this))
                     }
                 }
         } catch (ex: Exception) {
             UploadFileResponse(NoInternetConnection("No internet connection"))
         }
+    }
+}
+
+private const val FAILED_AUTHORIZATION_ERROR_CODE = 403
+
+private fun <T> createError(response: retrofit2.Response<T>): ResponseError {
+    return when (FAILED_AUTHORIZATION_ERROR_CODE) {
+        response.code() -> {
+            GlobalScope.launch {
+                withContext(Dispatchers.Main) {
+                    PyrusServiceDesk.onAuthorizationFailed?.run()
+                }
+            }
+            AuthorizationError(response.message())
+        }
+        else -> ApiCallError(response.message())
     }
 }
 

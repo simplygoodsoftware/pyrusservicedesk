@@ -79,8 +79,7 @@ internal class LiveUpdates(requests: RequestFactory, private val preferences: Sh
     @MainThread
     fun subscribeOnReply(subscriber: NewReplySubscriber) {
         newReplySubscribers.add(subscriber)
-        if (recentUnreadCounter > 0)
-            subscriber.onNewReply()
+        subscriber.onNewReply(recentUnreadCounter > 0)
         onSubscribe()
     }
 
@@ -214,8 +213,7 @@ internal class LiveUpdates(requests: RequestFactory, private val preferences: Sh
         }
         if (isChanged) {
             ticketCountChangedSubscribers.forEach { it.onUnreadTicketCountChanged(newUnreadCount) }
-            if (newUnreadCount > 0 && activeScreenCount <= 0)
-                newReplySubscribers.forEach { it.onNewReply() }
+            newReplySubscribers.forEach { it.onNewReply(newUnreadCount > 0 && activeScreenCount <= 0) }
         }
         recentUnreadCounter = newUnreadCount
     }

@@ -44,11 +44,14 @@ internal class CentralRepository(private val webRepository: RemoteRepository,
         return webRepository.createTicket(description, uploadFileHooks)
     }
 
-    override suspend fun setPushToken(token: String): SetPushTokenResponse = webRepository.setPushToken(token)
+    override suspend fun setPushToken(token: String?): SetPushTokenResponse = webRepository.setPushToken(token)
 
     override suspend fun addPendingFeedComment(comment: Comment) = offlineRepository.addPendingFeedComment(comment)
 
     override suspend fun getPendingFeedComments() = offlineRepository.getPendingFeedComments()
 
     override suspend fun removePendingComment(comment: Comment) = offlineRepository.removePendingComment(comment)
+
+    override suspend fun removeAllPendingComments() = offlineRepository.removeAllPendingComments()
+
 }

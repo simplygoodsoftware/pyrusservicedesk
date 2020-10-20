@@ -78,7 +78,7 @@ internal class ConfigUtils{
         /**
          * Provides userId. [preference] is used for storing generated user id.
          */
-        fun getUserId(preference: SharedPreferences): String {
+        fun getInstanceId(preference: SharedPreferences): String {
             return when {
                 preference.contains(PREFERENCE_KEY_USER_ID) -> preference.getString(PREFERENCE_KEY_USER_ID, "")!!
                 else -> {
