@@ -17,6 +17,7 @@ class ServiceDeskConfiguration internal constructor() {
     internal var themeColor: Int? = null
     @DrawableRes
     internal var supportAvatar: Int? = null
+    internal var mainMenuDelegate: MainMenuDelegate? = null
 
     internal val isDialogTheme: Boolean = PyrusServiceDesk.get().application.isTablet()
 
@@ -124,6 +125,16 @@ class ServiceDeskConfiguration internal constructor() {
          */
         fun setUserName(userName: String): Builder {
             configuration.userName = userName
+            return this
+        }
+
+        /**
+         * Set your own chat menu instead of the standard menu.
+         *
+         * @param mainMenuDelegate Menu interaction interface.
+         */
+        fun setChatMenuDelegate(mainMenuDelegate: MainMenuDelegate): Builder {
+            configuration.mainMenuDelegate = mainMenuDelegate
             return this
         }
 
