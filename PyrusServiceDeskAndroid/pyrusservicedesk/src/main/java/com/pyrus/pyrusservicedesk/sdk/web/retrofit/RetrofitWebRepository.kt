@@ -1,5 +1,6 @@
 package com.pyrus.pyrusservicedesk.sdk.web.retrofit
 
+import androidx.annotation.Keep
 import com.google.gson.Gson
 import com.pyrus.pyrusservicedesk.PyrusServiceDesk
 import com.pyrus.pyrusservicedesk.sdk.FileResolver
@@ -33,6 +34,7 @@ import kotlin.coroutines.coroutineContext
  * @param instanceId UID of app instance. Generated installation id is used by default.
  * @param fileResolver helper for making upload file requests.
  */
+@Keep
 internal class RetrofitWebRepository(
     private val appId: String,
     private val instanceId: String,

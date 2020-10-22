@@ -1,5 +1,6 @@
 package com.pyrus.pyrusservicedesk.sdk.web.request_body
 
+import androidx.annotation.Keep
 import com.google.gson.annotations.SerializedName
 
 /**
@@ -8,6 +9,7 @@ import com.google.gson.annotations.SerializedName
  * @param userId UID of user. Generated installation id is used by default.
  * @param securityKey used as key for external authorization.
  */
+@Keep
 internal open class RequestBodyBase(
         @SerializedName("app_id")
         val appId: String,
