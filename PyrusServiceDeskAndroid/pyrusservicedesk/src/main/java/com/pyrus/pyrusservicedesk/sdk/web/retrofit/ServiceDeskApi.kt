@@ -1,5 +1,6 @@
 package com.pyrus.pyrusservicedesk.sdk.web.retrofit
 
+import androidx.annotation.Keep
 import com.pyrus.pyrusservicedesk.sdk.data.Ticket
 import com.pyrus.pyrusservicedesk.sdk.data.intermediate.*
 import com.pyrus.pyrusservicedesk.sdk.web.request_body.AddCommentRequestBody
@@ -14,6 +15,7 @@ import retrofit2.http.*
 /**
  * Interface that is used for making api calls using [RetrofitWebRepository].
  */
+@Keep
 internal interface ServiceDeskApi {
 
     /**

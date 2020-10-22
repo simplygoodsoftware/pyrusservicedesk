@@ -1,8 +1,10 @@
 package com.pyrus.pyrusservicedesk.utils
 
+import androidx.annotation.Keep
 import com.pyrus.pyrusservicedesk.PyrusServiceDesk
 import java.net.URLEncoder
 
+@Keep
 class RequestUtils{
     companion object {
         /**
