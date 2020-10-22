@@ -1,6 +1,5 @@
 package com.pyrus.pyrusservicedesk.sdk.web.request_body
 
-import androidx.annotation.Keep
 import com.pyrus.pyrusservicedesk.sdk.web.UploadFileHooks
 import kotlinx.coroutines.isActive
 import okhttp3.MediaType
@@ -19,7 +18,6 @@ import kotlin.coroutines.CoroutineContext
  * @param uploadFileHooks hooks for publishing progress and for checking cancellation signal.
  * @param context current coroutine context. Used for checking if it is alive while file uploading.
  */
-@Keep
 internal class UploadFileRequestBody(
         private val fileName: String,
         private val fileStream: InputStream,

@@ -1,6 +1,5 @@
 package com.pyrus.pyrusservicedesk.sdk.web.retrofit
 
-import androidx.annotation.Keep
 import com.google.gson.Gson
 import com.pyrus.pyrusservicedesk.PyrusServiceDesk
 import com.pyrus.pyrusservicedesk.sdk.FileResolver
@@ -19,7 +18,10 @@ import com.pyrus.pyrusservicedesk.sdk.web.UploadFileHooks
 import com.pyrus.pyrusservicedesk.sdk.web.request_body.*
 import com.pyrus.pyrusservicedesk.utils.ConfigUtils
 import com.pyrus.pyrusservicedesk.utils.RequestUtils.Companion.BASE_URL
-import kotlinx.coroutines.*
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import okhttp3.OkHttpClient
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
@@ -34,7 +36,6 @@ import kotlin.coroutines.coroutineContext
  * @param instanceId UID of app instance. Generated installation id is used by default.
  * @param fileResolver helper for making upload file requests.
  */
-@Keep
 internal class RetrofitWebRepository(
     private val appId: String,
     private val instanceId: String,

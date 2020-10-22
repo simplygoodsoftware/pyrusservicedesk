@@ -3,7 +3,6 @@ package com.pyrus.pyrusservicedesk.sdk.web
 
 import android.os.Handler
 import android.os.Looper
-import androidx.annotation.Keep
 
 /**
  * Class that is used for propagating events while file uploading in progress.
@@ -11,7 +10,6 @@ import androidx.annotation.Keep
  * to cancel uploading.
  * All method invocations are thread safe.
  */
-@Keep
 internal class UploadFileHooks {
 
     private var recentProgress = 0
