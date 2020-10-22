@@ -8,6 +8,7 @@ import android.graphics.drawable.Drawable
 import androidx.annotation.ColorInt
 import androidx.appcompat.content.res.AppCompatResources
 import android.util.Base64
+import com.pyrus.pyrusservicedesk.MainMenuDelegate
 import com.pyrus.pyrusservicedesk.PyrusServiceDesk
 import com.pyrus.pyrusservicedesk.R
 import java.security.SecureRandom
@@ -92,6 +93,13 @@ internal class ConfigUtils{
                     userId
                 }
             }
+        }
+
+        /**
+         * @return Menu delegate interface.
+         */
+        internal fun getMainMenuDelegate(): MainMenuDelegate? {
+            return PyrusServiceDesk.getConfiguration().mainMenuDelegate
         }
 
         private fun makeSupportAvatar(context: Context, drawable: Drawable): Drawable {
