@@ -37,6 +37,7 @@ internal class LiveUpdates(requests: RequestFactory, private val preferences: Sh
 
     private val mainHandler = Handler(Looper.getMainLooper())
     private var isStarted = false
+    private var hasUnread: Boolean? = null
 
     private val ticketsUpdateRunnable = object : Runnable {
         override fun run() {
@@ -79,7 +80,7 @@ internal class LiveUpdates(requests: RequestFactory, private val preferences: Sh
     @MainThread
     fun subscribeOnReply(subscriber: NewReplySubscriber) {
         newReplySubscribers.add(subscriber)
-        subscriber.onNewReply(recentUnreadCounter > 0)
+        hasUnread?.let { subscriber.onNewReply(it) }
         onSubscribe()
     }
 
@@ -151,6 +152,9 @@ internal class LiveUpdates(requests: RequestFactory, private val preferences: Sh
      * Reset unread token count to 0.
      */
     internal fun resetUnreadCount() {
+        hasUnread = false
+        if (recentUnreadCounter > 0)
+            newReplySubscribers.forEach { it.onNewReply(false) }
         recentUnreadCounter = 0
     }
 
@@ -212,9 +216,11 @@ internal class LiveUpdates(requests: RequestFactory, private val preferences: Sh
                 it.onUnreadTicketCountChanged(newUnreadCount)
         }
         if (isChanged) {
+            val hasNewComments = newUnreadCount > 0
+            hasUnread = hasNewComments
             ticketCountChangedSubscribers.forEach { it.onUnreadTicketCountChanged(newUnreadCount) }
             if (activeScreenCount <= 0)
-                newReplySubscribers.forEach { it.onNewReply(newUnreadCount > 0) }
+                newReplySubscribers.forEach { it.onNewReply(hasNewComments) }
         }
         recentUnreadCounter = newUnreadCount
     }
