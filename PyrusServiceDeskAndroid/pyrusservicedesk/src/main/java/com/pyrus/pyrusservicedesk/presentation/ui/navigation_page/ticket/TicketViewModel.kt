@@ -25,6 +25,7 @@ import com.pyrus.pyrusservicedesk.sdk.data.intermediate.AddCommentResponseData
 import com.pyrus.pyrusservicedesk.sdk.data.intermediate.Comments
 import com.pyrus.pyrusservicedesk.sdk.data.intermediate.CreateTicketResponseData
 import com.pyrus.pyrusservicedesk.sdk.response.PendingDataError
+import com.pyrus.pyrusservicedesk.sdk.updates.NewReplySubscriber
 import com.pyrus.pyrusservicedesk.sdk.updates.OnUnreadTicketCountChangedSubscriber
 import com.pyrus.pyrusservicedesk.sdk.verify.LocalDataVerifier
 import com.pyrus.pyrusservicedesk.sdk.web.OnCancelListener
@@ -50,7 +51,9 @@ internal class TicketViewModel(serviceDeskProvider: ServiceDeskProvider,
                                arguments: Intent,
                                val isFeed: Boolean)
     : ConnectionViewModelBase(serviceDeskProvider),
-        OnUnreadTicketCountChangedSubscriber {
+        OnUnreadTicketCountChangedSubscriber,
+        NewReplySubscriber
+{
 
     private companion object {
 
@@ -109,10 +112,16 @@ internal class TicketViewModel(serviceDeskProvider: ServiceDeskProvider,
         }
         maybeStartAutoRefresh()
         liveUpdates.subscribeOnUnreadTicketCountChanged(this)
+        liveUpdates.subscribeOnLocalReply(this)
     }
 
     override fun onLoadData() {
         update()
+    }
+
+    override fun onNewReply(hasUnreadComments: Boolean) {
+        if (hasUnreadComments)
+            update()
     }
 
     override fun onUnreadTicketCountChanged(unreadTicketCount: Int) {
@@ -123,6 +132,7 @@ internal class TicketViewModel(serviceDeskProvider: ServiceDeskProvider,
         super.onCleared()
         mainHandler.removeCallbacks(updateRunnable)
         liveUpdates.unsubscribeFromTicketCountChanged(this)
+        liveUpdates.unsubscribeFromLocalReplies(this)
     }
 
     /**
@@ -458,7 +468,7 @@ internal class TicketViewModel(serviceDeskProvider: ServiceDeskProvider,
         PyrusServiceDesk.startTicketsUpdatesIfNeeded(
             (newEntries.findLast {
                 it is CommentEntry && it.comment.isInbound
-            } as CommentEntry?)?.comment?.creationDate?.time ?: 0
+            } as CommentEntry?)?.comment?.creationDate?.time ?: -1
         )
 
         commentDiff.value = DiffResultWithNewItems(

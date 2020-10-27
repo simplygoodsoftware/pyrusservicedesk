@@ -106,7 +106,10 @@ class PyrusServiceDesk private constructor(
             securityKey: String? = null,
             apiVersion: Int = API_VERSION_1
         ) {
-            if (CONFIGURATION != null || INSTANCE != null && (userId != null || get().userId != userId)) {
+            if (INSTANCE != null && get().userId != userId)
+                INSTANCE?.liveUpdates?.reset(userId)
+
+            if (CONFIGURATION != null || INSTANCE != null && get().userId != userId) {
                 clearLocalData {
                     if (CONFIGURATION != null)
                         stop()
@@ -385,7 +388,7 @@ class PyrusServiceDesk private constructor(
 
         requestFactory = RequestFactory(centralRepository)
         draftRepository = PreferenceDraftRepository(preferences)
-        liveUpdates = LiveUpdates(requestFactory, preferences)
+        liveUpdates = LiveUpdates(requestFactory, preferences, userId)
     }
 
     internal fun getSharedViewModel() = sharedViewModel
