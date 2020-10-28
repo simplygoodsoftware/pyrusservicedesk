@@ -267,8 +267,6 @@ class PyrusServiceDesk private constructor(
             return checkNotNull(INSTANCE) { "Instantiate PyrusServiceDesk first" }
         }
 
-        internal fun getSharedPreferences() = get().preferences
-
         internal fun getConfiguration(): ServiceDeskConfiguration {
             if (CONFIGURATION == null)
                 CONFIGURATION = ServiceDeskConfiguration()
@@ -358,11 +356,11 @@ class PyrusServiceDesk private constructor(
 
         val lastSetTokenTime = preferences.getLong(PREFERENCE_KEY_LAST_SET_TOKEN, -1L)
         if (lastSetTokenTime != -1L && System.currentTimeMillis() < lastSetTokenTime)
-            preferences.edit().putLong(PREFERENCE_KEY_LAST_SET_TOKEN, -1L).apply()
+            preferences.edit().putLong(PREFERENCE_KEY_LAST_SET_TOKEN, -1L).commit()
 
         val lastActiveTime = preferences.getLong(PREFERENCE_KEY_LAST_ACTIVITY_TIME, -1L)
         if (lastActiveTime != -1L && System.currentTimeMillis() < lastActiveTime)
-            preferences.edit().putLong(PREFERENCE_KEY_LAST_ACTIVITY_TIME, -1L).apply()
+            preferences.edit().putLong(PREFERENCE_KEY_LAST_ACTIVITY_TIME, -1L).commit()
 
         instanceId = ConfigUtils.getInstanceId(preferences)
 

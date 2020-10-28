@@ -10,9 +10,6 @@ import com.pyrus.pyrusservicedesk.sdk.data.TicketShortDescription
 import com.pyrus.pyrusservicedesk.sdk.response.ResponseCallback
 import com.pyrus.pyrusservicedesk.sdk.response.ResponseError
 import com.pyrus.pyrusservicedesk.utils.*
-import com.pyrus.pyrusservicedesk.utils.MILLISECONDS_IN_DAY
-import com.pyrus.pyrusservicedesk.utils.MILLISECONDS_IN_MINUTE
-import com.pyrus.pyrusservicedesk.utils.PREFERENCE_KEY_LAST_ACTIVITY_TIME
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
@@ -162,7 +159,7 @@ internal class LiveUpdates(requests: RequestFactory, private val preferences: Sh
     internal fun startUpdatesIfNeeded(lastActiveTime: Long) {
         val currentLastActiveTime = preferences.getLong(PREFERENCE_KEY_LAST_ACTIVITY_TIME, -1L)
         if (lastActiveTime > currentLastActiveTime)
-            preferences.edit().putLong(PREFERENCE_KEY_LAST_ACTIVITY_TIME, lastActiveTime).apply()
+            preferences.edit().putLong(PREFERENCE_KEY_LAST_ACTIVITY_TIME, lastActiveTime).commit()
         val interval = getTicketsUpdateInterval(lastActiveTime)
         val currentInterval = getTicketsUpdateInterval(currentLastActiveTime)
 
@@ -171,7 +168,7 @@ internal class LiveUpdates(requests: RequestFactory, private val preferences: Sh
             return
         if (isStarted)
             stopUpdates()
-        if (currentInterval != -1L || activeScreenCount > 0)
+        if (interval != -1L || activeScreenCount > 0)
             startUpdates()
     }
 
