@@ -46,6 +46,9 @@ class PyrusServiceDesk private constructor(
 ) {
 
     companion object {
+
+        private val TAG = PyrusServiceDesk::class.java.simpleName
+
         internal val DISPATCHER_IO_SINGLE =
             Executors.newSingleThreadExecutor().asCoroutineDispatcher()
         internal var FILE_CHOOSER: FileChooser? = null
@@ -116,6 +119,7 @@ class PyrusServiceDesk private constructor(
             apiVersion: Int = API_VERSION_1,
             loggingEnabled: Boolean
         ) {
+            PLog.d(TAG, "initInternal, appId: $appId, userId: $userId, apiVersion: $apiVersion")
             if (INSTANCE != null && get().userId != userId)
                 INSTANCE?.liveUpdates?.reset(userId)
 
@@ -162,16 +166,20 @@ class PyrusServiceDesk private constructor(
          */
         @JvmStatic
         @MainThread
-        fun subscribeToReplies(subscriber: NewReplySubscriber) =
+        fun subscribeToReplies(subscriber: NewReplySubscriber) {
+            PLog.d(TAG, "subscribeToReplies")
             get().liveUpdates.subscribeOnReply(subscriber)
+        }
 
         /**
          * Unregisters [subscriber] from updates of new reply from support
          */
         @JvmStatic
         @MainThread
-        fun unsubscribeFromReplies(subscriber: NewReplySubscriber) =
+        fun unsubscribeFromReplies(subscriber: NewReplySubscriber) {
+            PLog.d(TAG, "unsubscribeFromReplies")
             get().liveUpdates.unsubscribeFromReplies(subscriber)
+        }
 
         /**
          * Assigns custom file chooser, that is appended as variant when the user is offered to choose the source
@@ -183,6 +191,7 @@ class PyrusServiceDesk private constructor(
          */
         @JvmStatic
         fun registerFileChooser(fileChooser: FileChooser?) {
+            PLog.d(TAG, "registerFileChooser, fileChooser == null ${fileChooser == null}")
             FILE_CHOOSER = fileChooser
         }
 
@@ -208,6 +217,7 @@ class PyrusServiceDesk private constructor(
          */
         @JvmStatic
         fun setPushToken(token: String?, callback: SetPushTokenCallback) {
+            PLog.d(TAG, "setPushToken, token: $token")
             val serviceDesk = get()
             val lastUpdateTime = serviceDesk.preferences.getLong(PREFERENCE_KEY_LAST_SET_TOKEN, -1L)
             val isSkip = lastUpdateTime != -1L
@@ -241,18 +251,23 @@ class PyrusServiceDesk private constructor(
          * Stops PyrusServiceDesk. If UI was hidden, it will be finished during creating.
          */
         @JvmStatic
-        fun stop() = get().sharedViewModel.quitServiceDesk()
+        fun stop() {
+            PLog.d(TAG, "stop")
+            get().sharedViewModel.quitServiceDesk()
+        }
 
         /**
          * Manually refreshes feed of PyrusServiceDesk.
          */
         @JvmStatic
         fun refresh() {
+            PLog.d(TAG, "refresh")
             if (lastRefreshes.size == REFRESH_MAX_COUNT
                 && System.currentTimeMillis() - lastRefreshes.first() < MILLISECONDS_IN_MINUTE
             )
                 return
 
+            PLog.d(TAG, "refresh, execute")
             lastRefreshes.add(System.currentTimeMillis())
             if (lastRefreshes.size > REFRESH_MAX_COUNT)
                 lastRefreshes.removeAt(0)
@@ -369,12 +384,16 @@ class PyrusServiceDesk private constructor(
             PLog.instantiate(application)
 
         val lastSetTokenTime = preferences.getLong(PREFERENCE_KEY_LAST_SET_TOKEN, -1L)
-        if (lastSetTokenTime != -1L && System.currentTimeMillis() < lastSetTokenTime)
+        if (lastSetTokenTime != -1L && System.currentTimeMillis() < lastSetTokenTime) {
+            PLog.d(TAG, "init, clear lastSetTokenTime")
             preferences.edit().putLong(PREFERENCE_KEY_LAST_SET_TOKEN, -1L).commit()
+        }
 
         val lastActiveTime = preferences.getLong(PREFERENCE_KEY_LAST_ACTIVITY_TIME, -1L)
-        if (lastActiveTime != -1L && System.currentTimeMillis() < lastActiveTime)
+        if (lastActiveTime != -1L && System.currentTimeMillis() < lastActiveTime) {
+            PLog.d(TAG, "init, clear lastActiveTime")
             preferences.edit().putLong(PREFERENCE_KEY_LAST_ACTIVITY_TIME, -1L).commit()
+        }
 
         instanceId = ConfigUtils.getInstanceId(preferences)
 
