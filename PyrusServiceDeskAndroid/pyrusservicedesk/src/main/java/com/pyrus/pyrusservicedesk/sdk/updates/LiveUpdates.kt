@@ -5,6 +5,7 @@ import android.os.Handler
 import android.os.Looper
 import androidx.annotation.MainThread
 import com.pyrus.pyrusservicedesk.PyrusServiceDesk
+import com.pyrus.pyrusservicedesk.log.PLog
 import com.pyrus.pyrusservicedesk.sdk.RequestFactory
 import com.pyrus.pyrusservicedesk.sdk.data.TicketShortDescription
 import com.pyrus.pyrusservicedesk.sdk.response.ResponseCallback
@@ -67,6 +68,7 @@ internal class LiveUpdates(requests: RequestFactory, private val preferences: Sh
                 )
             }
             val interval = getTicketsUpdateInterval(lastActiveTime)
+            PLog.d(TAG, "ticketsUpdateRunnable, interval: ${interval / 1000 / 60f}")
             if (interval == -1L) {
                 stopUpdates()
                 return
@@ -259,6 +261,10 @@ internal class LiveUpdates(requests: RequestFactory, private val preferences: Sh
         recentUnreadCounter = -1
         hasUnread = null
         //TODO add active time reset
+    }
+
+    companion object {
+        private val TAG = LiveUpdates::class.java.simpleName
     }
 
 }
