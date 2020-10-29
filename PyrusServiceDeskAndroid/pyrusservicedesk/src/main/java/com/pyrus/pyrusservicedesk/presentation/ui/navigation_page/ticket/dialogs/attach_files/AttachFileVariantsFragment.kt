@@ -16,10 +16,13 @@ import android.view.View
 import android.view.View.GONE
 import android.view.View.VISIBLE
 import android.view.ViewGroup
+import androidx.core.util.Consumer
 import com.pyrus.pyrusservicedesk.PyrusServiceDesk
 import com.pyrus.pyrusservicedesk.R
+import com.pyrus.pyrusservicedesk.log.PLog
 import com.pyrus.pyrusservicedesk.utils.*
 import kotlinx.android.synthetic.main.psd_fragment_attach_file_variants.*
+import java.io.File
 
 /**
  * UI that is used for attaching files to the comments.
@@ -38,6 +41,14 @@ internal class AttachFileVariantsFragment: BottomSheetDialogFragment(), View.OnC
     private var capturePhotoUri: Uri? = null
     private val sharedModel: AttachFileSharedViewModel by getViewModelWithActivityScope(
         AttachFileSharedViewModel::class.java)
+
+    private val logSubscriber: Consumer<File> = Consumer {
+        if (it == null)
+            return@Consumer
+        val uri = Uri.fromFile(it)
+        sharedModel.onFilePicked(uri)
+        dismiss()
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -60,11 +71,24 @@ internal class AttachFileVariantsFragment: BottomSheetDialogFragment(), View.OnC
         photo_variant.setOnClickListener(this)
         photo_variant.visibility = if (isCapturingPhotoSupported()) VISIBLE else GONE
         gallery_variant.setOnClickListener(this)
+        custom_variant.visibility = if (PyrusServiceDesk.FILE_CHOOSER != null) VISIBLE else GONE
         PyrusServiceDesk.FILE_CHOOSER?.let {
             custom_variant.setOnClickListener(this)
-            custom_variant.visibility = VISIBLE
             custom_variant.text = it.getLabel()
         }
+        send_logs_variant.visibility = if (PyrusServiceDesk.logging) VISIBLE else GONE
+        if (PyrusServiceDesk.logging)
+            send_logs_variant.setOnClickListener(this)
+    }
+
+    override fun onStart() {
+        super.onStart()
+        PLog.addLogSubscriber(logSubscriber)
+    }
+
+    override fun onStop() {
+        PLog.removeLogSubscriber(logSubscriber)
+        super.onStop()
     }
 
     override fun onSaveInstanceState(outState: Bundle) {
@@ -77,6 +101,7 @@ internal class AttachFileVariantsFragment: BottomSheetDialogFragment(), View.OnC
             photo_variant -> startTakingPhoto()
             gallery_variant -> startPickingImage()
             custom_variant -> openCustomChooser()
+            send_logs_variant -> PLog.collectLogs()
         }
     }
 

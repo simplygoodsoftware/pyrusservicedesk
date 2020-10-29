@@ -7,6 +7,7 @@ import android.content.Intent
 import android.net.Uri
 import androidx.annotation.MainThread
 import com.google.gson.GsonBuilder
+import com.pyrus.pyrusservicedesk.log.PLog
 import com.pyrus.pyrusservicedesk.presentation.ui.navigation_page.ticket.TicketActivity
 import com.pyrus.pyrusservicedesk.presentation.ui.navigation_page.tickets.TicketsActivity
 import com.pyrus.pyrusservicedesk.presentation.viewmodel.SharedViewModel
@@ -40,10 +41,14 @@ class PyrusServiceDesk private constructor(
     internal val isSingleChat: Boolean,
     internal val userId: String?,
     internal val securityKey: String?,
-    internal val apiVersion: Int
+    internal val apiVersion: Int,
+    loggingEnabled: Boolean
 ) {
 
     companion object {
+
+        private val TAG = PyrusServiceDesk::class.java.simpleName
+
         internal val DISPATCHER_IO_SINGLE =
             Executors.newSingleThreadExecutor().asCoroutineDispatcher()
         internal var FILE_CHOOSER: FileChooser? = null
@@ -60,6 +65,9 @@ class PyrusServiceDesk private constructor(
         private const val API_VERSION_1 = 0
         private const val API_VERSION_2 = 1
 
+        internal var logging = false
+            private set
+
         /**
          * Initializes PyrusServiceDesk embeddable module.
          * The best approach is to call this in [Application.onCreate]
@@ -70,11 +78,13 @@ class PyrusServiceDesk private constructor(
          * @param appId id of a client
          */
         @JvmStatic
+        @JvmOverloads
         fun init(
             application: Application,
-            appId: String
+            appId: String,
+            loggingEnabled: Boolean = false
         ) {
-            initInternal(application, appId)
+            initInternal(application, appId, null, null, API_VERSION_1, loggingEnabled)
         }
 
         /**
@@ -90,23 +100,30 @@ class PyrusServiceDesk private constructor(
          * @param securityKey of the user far safe initialization
          */
         @JvmStatic
+        @JvmOverloads
         fun init(
             application: Application,
             appId: String,
             userId: String,
-            securityKey: String
+            securityKey: String,
+            loggingEnabled: Boolean = false
         ) {
-            initInternal(application, appId, userId, securityKey, API_VERSION_2)
+            initInternal(application, appId, userId, securityKey, API_VERSION_2, loggingEnabled)
         }
 
         private fun initInternal(
             application: Application,
             appId: String,
-            userId: String? = null,
-            securityKey: String? = null,
-            apiVersion: Int = API_VERSION_1
+            userId: String?,
+            securityKey: String?,
+            apiVersion: Int = API_VERSION_1,
+            loggingEnabled: Boolean
         ) {
-            if (CONFIGURATION != null || INSTANCE != null && (userId != null || get().userId != userId)) {
+            PLog.d(TAG, "initInternal, appId: $appId, userId: $userId, apiVersion: $apiVersion")
+            if (INSTANCE != null && get().userId != userId)
+                INSTANCE?.liveUpdates?.reset(userId)
+
+            if (CONFIGURATION != null || INSTANCE != null && get().userId != userId) {
                 clearLocalData {
                     if (CONFIGURATION != null)
                         stop()
@@ -116,12 +133,13 @@ class PyrusServiceDesk private constructor(
                         true,
                         userId,
                         securityKey,
-                        apiVersion
+                        apiVersion,
+                        loggingEnabled
                     )
                 }
             }
             else
-                INSTANCE = PyrusServiceDesk(application, appId, true, userId, securityKey, apiVersion)
+                INSTANCE = PyrusServiceDesk(application, appId, true, userId, securityKey, apiVersion, loggingEnabled)
         }
 
         /**
@@ -148,16 +166,20 @@ class PyrusServiceDesk private constructor(
          */
         @JvmStatic
         @MainThread
-        fun subscribeToReplies(subscriber: NewReplySubscriber) =
+        fun subscribeToReplies(subscriber: NewReplySubscriber) {
+            PLog.d(TAG, "subscribeToReplies")
             get().liveUpdates.subscribeOnReply(subscriber)
+        }
 
         /**
          * Unregisters [subscriber] from updates of new reply from support
          */
         @JvmStatic
         @MainThread
-        fun unsubscribeFromReplies(subscriber: NewReplySubscriber) =
+        fun unsubscribeFromReplies(subscriber: NewReplySubscriber) {
+            PLog.d(TAG, "unsubscribeFromReplies")
             get().liveUpdates.unsubscribeFromReplies(subscriber)
+        }
 
         /**
          * Assigns custom file chooser, that is appended as variant when the user is offered to choose the source
@@ -169,6 +191,7 @@ class PyrusServiceDesk private constructor(
          */
         @JvmStatic
         fun registerFileChooser(fileChooser: FileChooser?) {
+            PLog.d(TAG, "registerFileChooser, fileChooser == null ${fileChooser == null}")
             FILE_CHOOSER = fileChooser
         }
 
@@ -194,6 +217,7 @@ class PyrusServiceDesk private constructor(
          */
         @JvmStatic
         fun setPushToken(token: String?, callback: SetPushTokenCallback) {
+            PLog.d(TAG, "setPushToken, token: $token")
             val serviceDesk = get()
             val lastUpdateTime = serviceDesk.preferences.getLong(PREFERENCE_KEY_LAST_SET_TOKEN, -1L)
             val isSkip = lastUpdateTime != -1L
@@ -227,18 +251,23 @@ class PyrusServiceDesk private constructor(
          * Stops PyrusServiceDesk. If UI was hidden, it will be finished during creating.
          */
         @JvmStatic
-        fun stop() = get().sharedViewModel.quitServiceDesk()
+        fun stop() {
+            PLog.d(TAG, "stop")
+            get().sharedViewModel.quitServiceDesk()
+        }
 
         /**
          * Manually refreshes feed of PyrusServiceDesk.
          */
         @JvmStatic
         fun refresh() {
+            PLog.d(TAG, "refresh")
             if (lastRefreshes.size == REFRESH_MAX_COUNT
                 && System.currentTimeMillis() - lastRefreshes.first() < MILLISECONDS_IN_MINUTE
             )
                 return
 
+            PLog.d(TAG, "refresh, execute")
             lastRefreshes.add(System.currentTimeMillis())
             if (lastRefreshes.size > REFRESH_MAX_COUNT)
                 lastRefreshes.removeAt(0)
@@ -263,8 +292,6 @@ class PyrusServiceDesk private constructor(
         internal fun get(): PyrusServiceDesk {
             return checkNotNull(INSTANCE) { "Instantiate PyrusServiceDesk first" }
         }
-
-        internal fun getSharedPreferences() = get().preferences
 
         internal fun getConfiguration(): ServiceDeskConfiguration {
             if (CONFIGURATION == null)
@@ -352,14 +379,21 @@ class PyrusServiceDesk private constructor(
 
     init {
         migratePreferences(application, preferences)
+        logging = loggingEnabled
+        if (logging)
+            PLog.instantiate(application)
 
         val lastSetTokenTime = preferences.getLong(PREFERENCE_KEY_LAST_SET_TOKEN, -1L)
-        if (lastSetTokenTime != -1L && System.currentTimeMillis() < lastSetTokenTime)
-            preferences.edit().putLong(PREFERENCE_KEY_LAST_SET_TOKEN, -1L).apply()
+        if (lastSetTokenTime != -1L && System.currentTimeMillis() < lastSetTokenTime) {
+            PLog.d(TAG, "init, clear lastSetTokenTime")
+            preferences.edit().putLong(PREFERENCE_KEY_LAST_SET_TOKEN, -1L).commit()
+        }
 
         val lastActiveTime = preferences.getLong(PREFERENCE_KEY_LAST_ACTIVITY_TIME, -1L)
-        if (lastActiveTime != -1L && System.currentTimeMillis() < lastActiveTime)
-            preferences.edit().putLong(PREFERENCE_KEY_LAST_ACTIVITY_TIME, -1L).apply()
+        if (lastActiveTime != -1L && System.currentTimeMillis() < lastActiveTime) {
+            PLog.d(TAG, "init, clear lastActiveTime")
+            preferences.edit().putLong(PREFERENCE_KEY_LAST_ACTIVITY_TIME, -1L).commit()
+        }
 
         instanceId = ConfigUtils.getInstanceId(preferences)
 
@@ -385,7 +419,7 @@ class PyrusServiceDesk private constructor(
 
         requestFactory = RequestFactory(centralRepository)
         draftRepository = PreferenceDraftRepository(preferences)
-        liveUpdates = LiveUpdates(requestFactory, preferences)
+        liveUpdates = LiveUpdates(requestFactory, preferences, userId)
     }
 
     internal fun getSharedViewModel() = sharedViewModel

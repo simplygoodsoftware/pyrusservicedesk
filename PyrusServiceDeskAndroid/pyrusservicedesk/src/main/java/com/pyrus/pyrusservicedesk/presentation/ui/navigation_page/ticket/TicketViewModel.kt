@@ -13,6 +13,7 @@ import androidx.recyclerview.widget.DiffUtil
 import com.pyrus.pyrusservicedesk.PyrusServiceDesk
 import com.pyrus.pyrusservicedesk.R
 import com.pyrus.pyrusservicedesk.ServiceDeskProvider
+import com.pyrus.pyrusservicedesk.log.PLog
 import com.pyrus.pyrusservicedesk.presentation.call.*
 import com.pyrus.pyrusservicedesk.presentation.ui.navigation_page.ticket.entries.*
 import com.pyrus.pyrusservicedesk.presentation.ui.view.recyclerview.DiffResultWithNewItems
@@ -25,6 +26,7 @@ import com.pyrus.pyrusservicedesk.sdk.data.intermediate.AddCommentResponseData
 import com.pyrus.pyrusservicedesk.sdk.data.intermediate.Comments
 import com.pyrus.pyrusservicedesk.sdk.data.intermediate.CreateTicketResponseData
 import com.pyrus.pyrusservicedesk.sdk.response.PendingDataError
+import com.pyrus.pyrusservicedesk.sdk.updates.NewReplySubscriber
 import com.pyrus.pyrusservicedesk.sdk.updates.OnUnreadTicketCountChangedSubscriber
 import com.pyrus.pyrusservicedesk.sdk.verify.LocalDataVerifier
 import com.pyrus.pyrusservicedesk.sdk.web.OnCancelListener
@@ -50,11 +52,14 @@ internal class TicketViewModel(serviceDeskProvider: ServiceDeskProvider,
                                arguments: Intent,
                                val isFeed: Boolean)
     : ConnectionViewModelBase(serviceDeskProvider),
-        OnUnreadTicketCountChangedSubscriber {
+        OnUnreadTicketCountChangedSubscriber,
+        NewReplySubscriber
+{
 
     private companion object {
 
         const val TICKET_UPDATE_INTERVAL = 30L
+        private val TAG = TicketViewModel::class.java.simpleName
 
         fun Comment.hasAttachmentWithExceededSize(): Boolean =
             attachments?.let { it.any { attach -> attach.hasExceededFileSize() } } ?: false
@@ -109,10 +114,16 @@ internal class TicketViewModel(serviceDeskProvider: ServiceDeskProvider,
         }
         maybeStartAutoRefresh()
         liveUpdates.subscribeOnUnreadTicketCountChanged(this)
+        liveUpdates.subscribeOnLocalReply(this)
     }
 
     override fun onLoadData() {
         update()
+    }
+
+    override fun onNewReply(hasUnreadComments: Boolean) {
+        if (hasUnreadComments)
+            update()
     }
 
     override fun onUnreadTicketCountChanged(unreadTicketCount: Int) {
@@ -123,6 +134,7 @@ internal class TicketViewModel(serviceDeskProvider: ServiceDeskProvider,
         super.onCleared()
         mainHandler.removeCallbacks(updateRunnable)
         liveUpdates.unsubscribeFromTicketCountChanged(this)
+        liveUpdates.unsubscribeFromLocalReplies(this)
     }
 
     /**
@@ -287,7 +299,9 @@ internal class TicketViewModel(serviceDeskProvider: ServiceDeskProvider,
                     .execute()
                     .observeForever(AddCommentObserver(uploadFileHooks, localComment))
         }
-        PyrusServiceDesk.startTicketsUpdatesIfNeeded(System.currentTimeMillis())
+        val lastActiveTime = System.currentTimeMillis()
+        PLog.d(TAG, "sendAddComment, lastActiveTime: $lastActiveTime, commentLocalId: ${localComment.localId}")
+        PyrusServiceDesk.startTicketsUpdatesIfNeeded(lastActiveTime)
     }
 
     private fun hasComment(commentId: Int): Boolean {
@@ -455,11 +469,11 @@ internal class TicketViewModel(serviceDeskProvider: ServiceDeskProvider,
     private fun publishEntries(oldEntries: List<TicketEntry>, newEntries: List<TicketEntry>) {
         ticketEntries = newEntries
 
-        PyrusServiceDesk.startTicketsUpdatesIfNeeded(
-            (newEntries.findLast {
-                it is CommentEntry && it.comment.isInbound
-            } as CommentEntry?)?.comment?.creationDate?.time ?: 0
-        )
+        val lastActiveTime = (newEntries.findLast {
+            it is CommentEntry && it.comment.isInbound
+        } as CommentEntry?)?.comment?.creationDate?.time ?: -1
+        PLog.d(TAG, "publishEntries, lastActiveTime: $lastActiveTime, newEntries count: ${newEntries.size}")
+        PyrusServiceDesk.startTicketsUpdatesIfNeeded(lastActiveTime)
 
         commentDiff.value = DiffResultWithNewItems(
             DiffUtil.calculateDiff(
