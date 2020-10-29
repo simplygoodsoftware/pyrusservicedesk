@@ -13,6 +13,7 @@ import androidx.recyclerview.widget.DiffUtil
 import com.pyrus.pyrusservicedesk.PyrusServiceDesk
 import com.pyrus.pyrusservicedesk.R
 import com.pyrus.pyrusservicedesk.ServiceDeskProvider
+import com.pyrus.pyrusservicedesk.log.PLog
 import com.pyrus.pyrusservicedesk.presentation.call.*
 import com.pyrus.pyrusservicedesk.presentation.ui.navigation_page.ticket.entries.*
 import com.pyrus.pyrusservicedesk.presentation.ui.view.recyclerview.DiffResultWithNewItems
@@ -58,6 +59,7 @@ internal class TicketViewModel(serviceDeskProvider: ServiceDeskProvider,
     private companion object {
 
         const val TICKET_UPDATE_INTERVAL = 30L
+        private val TAG = TicketViewModel::class.java.simpleName
 
         fun Comment.hasAttachmentWithExceededSize(): Boolean =
             attachments?.let { it.any { attach -> attach.hasExceededFileSize() } } ?: false
@@ -297,7 +299,9 @@ internal class TicketViewModel(serviceDeskProvider: ServiceDeskProvider,
                     .execute()
                     .observeForever(AddCommentObserver(uploadFileHooks, localComment))
         }
-        PyrusServiceDesk.startTicketsUpdatesIfNeeded(System.currentTimeMillis())
+        val lastActiveTime = System.currentTimeMillis()
+        PLog.d(TAG, "sendAddComment, lastActiveTime: $lastActiveTime, commentLocalId: ${localComment.localId}")
+        PyrusServiceDesk.startTicketsUpdatesIfNeeded(lastActiveTime)
     }
 
     private fun hasComment(commentId: Int): Boolean {
@@ -465,11 +469,11 @@ internal class TicketViewModel(serviceDeskProvider: ServiceDeskProvider,
     private fun publishEntries(oldEntries: List<TicketEntry>, newEntries: List<TicketEntry>) {
         ticketEntries = newEntries
 
-        PyrusServiceDesk.startTicketsUpdatesIfNeeded(
-            (newEntries.findLast {
-                it is CommentEntry && it.comment.isInbound
-            } as CommentEntry?)?.comment?.creationDate?.time ?: -1
-        )
+        val lastActiveTime = (newEntries.findLast {
+            it is CommentEntry && it.comment.isInbound
+        } as CommentEntry?)?.comment?.creationDate?.time ?: -1
+        PLog.d(TAG, "publishEntries, lastActiveTime: $lastActiveTime, newEntries count: ${newEntries.size}")
+        PyrusServiceDesk.startTicketsUpdatesIfNeeded(lastActiveTime)
 
         commentDiff.value = DiffResultWithNewItems(
             DiffUtil.calculateDiff(

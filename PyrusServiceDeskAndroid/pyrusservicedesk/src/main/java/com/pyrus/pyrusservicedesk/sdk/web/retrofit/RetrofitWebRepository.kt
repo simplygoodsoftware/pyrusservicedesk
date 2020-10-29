@@ -3,6 +3,7 @@ package com.pyrus.pyrusservicedesk.sdk.web.retrofit
 import androidx.annotation.Keep
 import com.google.gson.Gson
 import com.pyrus.pyrusservicedesk.PyrusServiceDesk
+import com.pyrus.pyrusservicedesk.log.PLog
 import com.pyrus.pyrusservicedesk.sdk.FileResolver
 import com.pyrus.pyrusservicedesk.sdk.data.Attachment
 import com.pyrus.pyrusservicedesk.sdk.data.Comment
@@ -63,9 +64,16 @@ internal class RetrofitWebRepository(
     }
 
     override suspend fun getFeed(): Response<Comments> {
+        PLog.d(TAG, "getFeed, " +
+                "appId: ${appId.substring(0, 10)}, " +
+                "userId: ${getUserId().substring(0, 10)}, " +
+                "instanceId: ${getInstanceId()?.substring(0, 10)}, " +
+                "apiVersion: ${getVersion()}"
+        )
         return withContext<Response<Comments>>(Dispatchers.IO){
             try {
                 api.getTicketFeed(RequestBodyBase(appId, getUserId(), getSecurityKey(), instanceId, getVersion())).execute().run {
+                    PLog.d(TAG, "getFeed, isSuccessful: $isSuccessful, body() != null: ${body() != null}")
                     when {
                         isSuccessful && body() != null -> ResponseImpl.success(body()!!)
                         else -> ResponseImpl.failure(createError(this))
@@ -79,9 +87,16 @@ internal class RetrofitWebRepository(
     }
 
     override suspend fun getTickets(): GetTicketsResponse {
+        PLog.d(TAG, "getTickets, " +
+                "appId: ${appId.substring(0, 10)}, " +
+                "userId: ${getUserId().substring(0, 10)}, " +
+                "instanceId: ${getInstanceId()?.substring(0, 10)}, " +
+                "apiVersion: ${getVersion()}"
+        )
         return withContext(Dispatchers.IO){
             try {
                 api.getTickets(RequestBodyBase(appId, getUserId(), getSecurityKey(), getInstanceId(), getVersion())).execute().run {
+                    PLog.d(TAG, "getTickets, isSuccessful: $isSuccessful, body() != null: ${body() != null}")
                     when {
                         isSuccessful && body() != null -> GetTicketsResponse(tickets = body()!!.tickets)
                         else -> GetTicketsResponse(createError(this))
@@ -94,9 +109,17 @@ internal class RetrofitWebRepository(
     }
 
     override suspend fun getTicket(ticketId: Int): GetTicketResponse {
+        PLog.d(TAG, "getTicket, " +
+                "appId: ${appId.substring(0, 10)}, " +
+                "userId: ${getUserId().substring(0, 10)}, " +
+                "instanceId: ${getInstanceId()?.substring(0, 10)}, " +
+                "apiVersion: ${getVersion()}, " +
+                "ticketId: $ticketId"
+        )
         return withContext(Dispatchers.IO){
             try {
                 api.getTicket(RequestBodyBase(appId, getUserId(), getSecurityKey(), getInstanceId(), getVersion()), ticketId).execute().run {
+                    PLog.d(TAG, "getTicket, isSuccessful: $isSuccessful, body() != null: ${body() != null}")
                     when {
                         isSuccessful && body() != null -> GetTicketResponse(ticket = body())
                         else -> GetTicketResponse(createError(this))
@@ -178,6 +201,13 @@ internal class RetrofitWebRepository(
     }
 
     override suspend fun setPushToken(token: String?): SetPushTokenResponse {
+        PLog.d(TAG, "setPushToken, " +
+                "appId: ${appId.substring(0, 10)}, " +
+                "userId: ${getUserId().substring(0, 10)}, " +
+                "instanceId: ${getInstanceId()?.substring(0, 10)}, " +
+                "apiVersion: ${getVersion()}, " +
+                "token: $token"
+        )
         return withContext(Dispatchers.IO){
             try {
                 api.setPushToken(
@@ -190,6 +220,7 @@ internal class RetrofitWebRepository(
                         token
                     )
                 ).execute().run {
+                    PLog.d(TAG, "setPushToken, isSuccessful: $isSuccessful, body() != null: ${body() != null}")
                     when {
                         isSuccessful -> SetPushTokenResponse()
                         else -> SetPushTokenResponse(createError(this))
@@ -227,6 +258,14 @@ internal class RetrofitWebRepository(
                                    ticketId: Int,
                                    comment: Comment,
                                    uploadFileHooks: UploadFileHooks?): Response<AddCommentResponseData> {
+
+        PLog.d(TAG, "addComment, " +
+                "appId: ${appId.substring(0, 10)}, " +
+                "userId: ${getUserId().substring(0, 10)}, " +
+                "instanceId: ${getInstanceId()?.substring(0, 10)}, " +
+                "apiVersion: ${getVersion()}, " +
+                "ticketId: $ticketId"
+        )
 
         val request = CommentRequest(ticketId)
         sequentialRequests.offer(request)
@@ -274,6 +313,7 @@ internal class RetrofitWebRepository(
                 call
                     .execute()
                     .run {
+                        PLog.d(TAG, "addComment, isSuccessful: $isSuccessful, body() != null: ${body() != null}")
                         when {
                             isSuccessful && body() != null -> {
                                 val data = when{
@@ -350,6 +390,11 @@ internal class RetrofitWebRepository(
             UploadFileResponse(NoInternetConnection("No internet connection"))
         }
     }
+
+    companion object {
+        private val TAG = RetrofitWebRepository::class.java.simpleName
+    }
+
 }
 
 private const val FAILED_AUTHORIZATION_ERROR_CODE = 403

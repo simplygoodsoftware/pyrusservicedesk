@@ -5,17 +5,16 @@ import android.os.Handler
 import android.os.Looper
 import androidx.annotation.MainThread
 import com.pyrus.pyrusservicedesk.PyrusServiceDesk
+import com.pyrus.pyrusservicedesk.log.PLog
 import com.pyrus.pyrusservicedesk.sdk.RequestFactory
 import com.pyrus.pyrusservicedesk.sdk.data.TicketShortDescription
 import com.pyrus.pyrusservicedesk.sdk.response.ResponseCallback
 import com.pyrus.pyrusservicedesk.sdk.response.ResponseError
 import com.pyrus.pyrusservicedesk.utils.*
-import com.pyrus.pyrusservicedesk.utils.MILLISECONDS_IN_DAY
-import com.pyrus.pyrusservicedesk.utils.MILLISECONDS_IN_MINUTE
-import com.pyrus.pyrusservicedesk.utils.PREFERENCE_KEY_LAST_ACTIVITY_TIME
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
+import kotlin.math.max
 
 /**
  * Class for recurring requesting data.
@@ -63,12 +62,13 @@ internal class LiveUpdates(requests: RequestFactory, private val preferences: Sh
                         }
 
                         override fun onFailure(responseError: ResponseError) {
-                            // ¯\_(ツ)_/¯
+                            PLog.d(TAG, "ticketsUpdateRunnable, onFailure")
                         }
                     }
                 )
             }
             val interval = getTicketsUpdateInterval(lastActiveTime)
+            PLog.d(TAG, "ticketsUpdateRunnable, interval: $interval")
             if (interval == -1L) {
                 stopUpdates()
                 return
@@ -87,8 +87,12 @@ internal class LiveUpdates(requests: RequestFactory, private val preferences: Sh
      */
     @MainThread
     fun subscribeOnReply(subscriber: NewReplySubscriber) {
+        PLog.d(TAG, "subscribeOnReply")
         newReplySubscribers.add(subscriber)
-        hasUnread?.let { subscriber.onNewReply(it) }
+        hasUnread?.let {
+            PLog.d(TAG, "subscribeOnReply, NewReplySubscriber (hasUnreadComments = $it)")
+            subscriber.onNewReply(it)
+        }
         onSubscribe()
     }
 
@@ -97,7 +101,27 @@ internal class LiveUpdates(requests: RequestFactory, private val preferences: Sh
      */
     @MainThread
     fun unsubscribeFromReplies(subscriber: NewReplySubscriber) {
+        PLog.d(TAG, "unsubscribeFromReplies")
         newReplySubscribers.remove(subscriber)
+        onUnsubscribe()
+    }
+
+    /**
+     * Registers [subscriber] to on new reply events. For local subscribers.
+     */
+    @MainThread
+    fun subscribeOnLocalReply(subscriber: NewReplySubscriber) {
+        newReplyLocalSubscribers.add(subscriber)
+        hasUnread?.let { subscriber.onNewReply(it) }
+        onSubscribe()
+    }
+
+    /**
+    * Unregisters [subscriber] from new reply events. For local subscribers.
+    */
+    @MainThread
+    fun unsubscribeFromLocalReplies(subscriber: NewReplySubscriber) {
+        newReplyLocalSubscribers.remove(subscriber)
         onUnsubscribe()
     }
 
@@ -160,18 +184,28 @@ internal class LiveUpdates(requests: RequestFactory, private val preferences: Sh
      * Start tickets update if it is not already running.
      */
     internal fun startUpdatesIfNeeded(lastActiveTime: Long) {
+        val maxLastActiveTime = max(preferences.getLong(PREFERENCE_KEY_LAST_ACTIVITY_TIME, -1L), lastActiveTime)
         val currentLastActiveTime = preferences.getLong(PREFERENCE_KEY_LAST_ACTIVITY_TIME, -1L)
-        if (lastActiveTime > currentLastActiveTime)
-            preferences.edit().putLong(PREFERENCE_KEY_LAST_ACTIVITY_TIME, lastActiveTime).apply()
-        val interval = getTicketsUpdateInterval(lastActiveTime)
-        val currentInterval = getTicketsUpdateInterval(currentLastActiveTime)
+        PLog.d(TAG, "startUpdatesIfNeeded, lastActiveTime: $lastActiveTime, currentLastActiveTime: $currentLastActiveTime")
+        if (maxLastActiveTime > currentLastActiveTime) {
+            PLog.d(TAG, "startUpdatesIfNeeded, write last active time in preferences, time: $maxLastActiveTime")
+            preferences.edit().putLong(PREFERENCE_KEY_LAST_ACTIVITY_TIME, lastActiveTime).commit()
+        }
+        this.lastActiveTime = maxLastActiveTime
 
-        this.lastActiveTime = lastActiveTime
+        val interval = getTicketsUpdateInterval(maxLastActiveTime)
+        val currentInterval = getTicketsUpdateInterval(currentLastActiveTime)
+        PLog.d(TAG, "startUpdatesIfNeeded, " +
+                "interval: $interval, " +
+                "currentInterval: $currentInterval, " +
+                "system time: ${System.currentTimeMillis()}"
+        )
         if (interval == currentInterval && isStarted)
             return
+        PLog.d(TAG, "startUpdatesIfNeeded, change interval, isStarted $isStarted")
         if (isStarted)
             stopUpdates()
-        if (currentInterval != -1L || activeScreenCount > 0)
+        if (interval != -1L || activeScreenCount > 0)
             startUpdates()
     }
 
@@ -189,6 +223,8 @@ internal class LiveUpdates(requests: RequestFactory, private val preferences: Sh
      */
     internal fun increaseActiveScreenCount() {
         activeScreenCount++
+        PLog.d(TAG, "increaseActiveScreenCount, activeScreenCount: $activeScreenCount")
+        startUpdatesIfNeeded(preferences.getLong(PREFERENCE_KEY_LAST_ACTIVITY_TIME, -1L))
     }
 
     /**
@@ -196,6 +232,7 @@ internal class LiveUpdates(requests: RequestFactory, private val preferences: Sh
      */
     internal fun decreaseActiveScreenCount() {
         activeScreenCount--
+        PLog.d(TAG, "decreaseActiveScreenCount, activeScreenCount: $activeScreenCount")
         startUpdatesIfNeeded(preferences.getLong(PREFERENCE_KEY_LAST_ACTIVITY_TIME, -1L))
     }
 
@@ -227,11 +264,13 @@ internal class LiveUpdates(requests: RequestFactory, private val preferences: Sh
     }
 
     private fun startUpdates() {
+        PLog.d(TAG, "startUpdates")
         isStarted = true
         mainHandler.post(ticketsUpdateRunnable)
     }
 
     private fun stopUpdates() {
+        PLog.d(TAG, "stopUpdates")
         isStarted = false
         mainHandler.removeCallbacks(ticketsUpdateRunnable)
     }
@@ -239,6 +278,7 @@ internal class LiveUpdates(requests: RequestFactory, private val preferences: Sh
     @MainThread
     private fun processSuccess(data: List<TicketShortDescription>, newUnreadCount: Int) {
         val isChanged = recentUnreadCounter != newUnreadCount
+        PLog.d(TAG, "processSuccess, isChanged: $isChanged, recentUnreadCounter: $recentUnreadCounter, newUnreadCount: $newUnreadCount")
         dataSubscribers.forEach {
             it.onNewData(data)
             if (isChanged)
@@ -247,19 +287,28 @@ internal class LiveUpdates(requests: RequestFactory, private val preferences: Sh
         hasUnread = newUnreadCount > 0
         if (isChanged) {
             val hasNewComments = newUnreadCount > 0
+            PLog.d(TAG, "processSuccess, hasNewComments: $hasNewComments, activeScreenCount: $activeScreenCount")
             ticketCountChangedSubscribers.forEach { it.onUnreadTicketCountChanged(newUnreadCount) }
-            if (activeScreenCount <= 0)
+            if (activeScreenCount <= 0) {
+                PLog.d(TAG, "processSuccess, NewReplySubscriber(hasUnreadComments = $hasNewComments)")
                 newReplySubscribers.forEach { it.onNewReply(hasNewComments) }
+            newReplyLocalSubscribers.forEach { it.onNewReply(hasNewComments) }
+            }
             newReplyLocalSubscribers.forEach { it.onNewReply(hasNewComments) }
         }
         recentUnreadCounter = newUnreadCount
     }
 
     fun reset(userId: String?) {
+        PLog.d(TAG, "reset")
         this.userId = userId
         recentUnreadCounter = -1
         hasUnread = null
         //TODO add active time reset
+    }
+
+    companion object {
+        private val TAG = LiveUpdates::class.java.simpleName
     }
 
 }
