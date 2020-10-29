@@ -65,9 +65,9 @@ internal class RetrofitWebRepository(
 
     override suspend fun getFeed(): Response<Comments> {
         PLog.d(TAG, "getFeed, " +
-                "appId: $appId, " +
-                "userId: ${getUserId()}, " +
-                "instanceId: ${getInstanceId()}, " +
+                "appId: ${appId.substring(0, 10)}, " +
+                "userId: ${getUserId().substring(0, 10)}, " +
+                "instanceId: ${getInstanceId()?.substring(0, 10)}, " +
                 "apiVersion: ${getVersion()}"
         )
         return withContext<Response<Comments>>(Dispatchers.IO){
@@ -88,9 +88,9 @@ internal class RetrofitWebRepository(
 
     override suspend fun getTickets(): GetTicketsResponse {
         PLog.d(TAG, "getTickets, " +
-                "appId: $appId, " +
-                "userId: ${getUserId()}, " +
-                "instanceId: ${getInstanceId()}, " +
+                "appId: ${appId.substring(0, 10)}, " +
+                "userId: ${getUserId().substring(0, 10)}, " +
+                "instanceId: ${getInstanceId()?.substring(0, 10)}, " +
                 "apiVersion: ${getVersion()}"
         )
         return withContext(Dispatchers.IO){
@@ -110,9 +110,9 @@ internal class RetrofitWebRepository(
 
     override suspend fun getTicket(ticketId: Int): GetTicketResponse {
         PLog.d(TAG, "getTicket, " +
-                "appId: $appId, " +
-                "userId: ${getUserId()}, " +
-                "instanceId: ${getInstanceId()}, " +
+                "appId: ${appId.substring(0, 10)}, " +
+                "userId: ${getUserId().substring(0, 10)}, " +
+                "instanceId: ${getInstanceId()?.substring(0, 10)}, " +
                 "apiVersion: ${getVersion()}, " +
                 "ticketId: $ticketId"
         )
@@ -202,9 +202,9 @@ internal class RetrofitWebRepository(
 
     override suspend fun setPushToken(token: String?): SetPushTokenResponse {
         PLog.d(TAG, "setPushToken, " +
-                "appId: $appId, " +
-                "userId: ${getUserId()}, " +
-                "instanceId: ${getInstanceId()}, " +
+                "appId: ${appId.substring(0, 10)}, " +
+                "userId: ${getUserId().substring(0, 10)}, " +
+                "instanceId: ${getInstanceId()?.substring(0, 10)}, " +
                 "apiVersion: ${getVersion()}, " +
                 "token: $token"
         )
@@ -260,9 +260,9 @@ internal class RetrofitWebRepository(
                                    uploadFileHooks: UploadFileHooks?): Response<AddCommentResponseData> {
 
         PLog.d(TAG, "addComment, " +
-                "appId: $appId, " +
-                "userId: ${getUserId()}, " +
-                "instanceId: ${getInstanceId()}, " +
+                "appId: ${appId.substring(0, 10)}, " +
+                "userId: ${getUserId().substring(0, 10)}, " +
+                "instanceId: ${getInstanceId()?.substring(0, 10)}, " +
                 "apiVersion: ${getVersion()}, " +
                 "ticketId: $ticketId"
         )
