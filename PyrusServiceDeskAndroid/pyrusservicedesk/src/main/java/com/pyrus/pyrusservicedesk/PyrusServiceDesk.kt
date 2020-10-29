@@ -119,7 +119,7 @@ class PyrusServiceDesk private constructor(
             apiVersion: Int = API_VERSION_1,
             loggingEnabled: Boolean
         ) {
-            PLog.d(TAG, "initInternal, appId: $appId, userId: $userId, apiVersion: $apiVersion")
+            PLog.d(TAG, "initInternal, appId: ${appId.substring(0, 10)}, userId: ${userId?.substring(0, 10)}, apiVersion: $apiVersion")
             if (INSTANCE != null && get().userId != userId)
                 INSTANCE?.liveUpdates?.reset(userId)
 
