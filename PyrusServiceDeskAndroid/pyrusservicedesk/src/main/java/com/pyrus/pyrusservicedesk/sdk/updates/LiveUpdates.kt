@@ -13,6 +13,7 @@ import com.pyrus.pyrusservicedesk.utils.*
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
+import kotlin.math.max
 
 /**
  * Class for recurring requesting data.
@@ -157,13 +158,14 @@ internal class LiveUpdates(requests: RequestFactory, private val preferences: Sh
      * Start tickets update if it is not already running.
      */
     internal fun startUpdatesIfNeeded(lastActiveTime: Long) {
+        val maxLastActiveTime = max(preferences.getLong(PREFERENCE_KEY_LAST_ACTIVITY_TIME, -1L), lastActiveTime)
         val currentLastActiveTime = preferences.getLong(PREFERENCE_KEY_LAST_ACTIVITY_TIME, -1L)
-        if (lastActiveTime > currentLastActiveTime)
+        if (maxLastActiveTime > currentLastActiveTime)
             preferences.edit().putLong(PREFERENCE_KEY_LAST_ACTIVITY_TIME, lastActiveTime).commit()
-        val interval = getTicketsUpdateInterval(lastActiveTime)
-        val currentInterval = getTicketsUpdateInterval(currentLastActiveTime)
+        this.lastActiveTime = maxLastActiveTime
 
-        this.lastActiveTime = lastActiveTime
+        val interval = getTicketsUpdateInterval(maxLastActiveTime)
+        val currentInterval = getTicketsUpdateInterval(currentLastActiveTime)
         if (interval == currentInterval && isStarted)
             return
         if (isStarted)
