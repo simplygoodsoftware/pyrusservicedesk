@@ -62,7 +62,6 @@ internal class LiveUpdates(requests: RequestFactory, private val preferences: Sh
                         }
 
                         override fun onFailure(responseError: ResponseError) {
-                            // ¯\_(ツ)_/¯
                             PLog.d(TAG, "ticketsUpdateRunnable, onFailure")
                         }
                     }
