@@ -525,11 +525,11 @@ internal class TicketViewModel(serviceDeskProvider: ServiceDeskProvider,
     fun onRatingClick(rating: Int) =
         sendAddComment(localDataProvider.createLocalComment(rating = rating))
 
-    fun onStart() {
+    fun onCreate() {
         liveUpdates.increaseActiveScreenCount()
     }
 
-    fun onStop() {
+    fun onDestroy() {
         liveUpdates.decreaseActiveScreenCount()
     }
 

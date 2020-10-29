@@ -185,16 +185,12 @@ internal class TicketActivity : ConnectionActivityBase<TicketViewModel>(TicketVi
             addTextChangedListener(inputTextWatcher)
         }
         send.isEnabled = !input.text.isNullOrBlank()
+        viewModel.onCreate()
     }
 
-    override fun onStart() {
-        super.onStart()
-        viewModel.onStart()
-    }
-
-    override fun onStop() {
-        super.onStop()
-        viewModel.onStop()
+    override fun onDestroy() {
+        viewModel.onDestroy()
+        super.onDestroy()
     }
 
     override fun onRestoreInstanceState(savedInstanceState: Bundle) {
