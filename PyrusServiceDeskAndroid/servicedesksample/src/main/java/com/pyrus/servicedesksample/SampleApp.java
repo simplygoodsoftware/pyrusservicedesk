@@ -12,9 +12,8 @@ public class SampleApp extends Application {
         super.onCreate();
         PyrusServiceDesk.init(
                 this,
-                "my_app_id",
-                "user_id",
-                "security_key"
+                "0HUi7grFuWVFHqWtL3f5YD-4PYJXiOEoLfCDb2yhTthkHBpedNbNU4O01YD2OnsSpvbMiXmweUF8akomZZIW1Ilb-W9mOPuK70L4lCI1mK0dJqXYUp0l-MJlsUv9tr8dSmKCSw==",
+                true
         );
 
         PyrusServiceDesk.setPushToken(

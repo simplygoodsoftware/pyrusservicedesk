@@ -7,6 +7,7 @@ import android.content.Intent
 import android.net.Uri
 import androidx.annotation.MainThread
 import com.google.gson.GsonBuilder
+import com.pyrus.pyrusservicedesk.log.PLog
 import com.pyrus.pyrusservicedesk.presentation.ui.navigation_page.ticket.TicketActivity
 import com.pyrus.pyrusservicedesk.presentation.ui.navigation_page.tickets.TicketsActivity
 import com.pyrus.pyrusservicedesk.presentation.viewmodel.SharedViewModel
@@ -40,7 +41,8 @@ class PyrusServiceDesk private constructor(
     internal val isSingleChat: Boolean,
     internal val userId: String?,
     internal val securityKey: String?,
-    internal val apiVersion: Int
+    internal val apiVersion: Int,
+    loggingEnabled: Boolean
 ) {
 
     companion object {
@@ -60,6 +62,9 @@ class PyrusServiceDesk private constructor(
         private const val API_VERSION_1 = 0
         private const val API_VERSION_2 = 1
 
+        internal var logging = false
+            private set
+
         /**
          * Initializes PyrusServiceDesk embeddable module.
          * The best approach is to call this in [Application.onCreate]
@@ -70,11 +75,13 @@ class PyrusServiceDesk private constructor(
          * @param appId id of a client
          */
         @JvmStatic
+        @JvmOverloads
         fun init(
             application: Application,
-            appId: String
+            appId: String,
+            loggingEnabled: Boolean = false
         ) {
-            initInternal(application, appId)
+            initInternal(application, appId, null, null, API_VERSION_1, loggingEnabled)
         }
 
         /**
@@ -90,21 +97,24 @@ class PyrusServiceDesk private constructor(
          * @param securityKey of the user far safe initialization
          */
         @JvmStatic
+        @JvmOverloads
         fun init(
             application: Application,
             appId: String,
             userId: String,
-            securityKey: String
+            securityKey: String,
+            loggingEnabled: Boolean = false
         ) {
-            initInternal(application, appId, userId, securityKey, API_VERSION_2)
+            initInternal(application, appId, userId, securityKey, API_VERSION_2, loggingEnabled)
         }
 
         private fun initInternal(
             application: Application,
             appId: String,
-            userId: String? = null,
-            securityKey: String? = null,
-            apiVersion: Int = API_VERSION_1
+            userId: String?,
+            securityKey: String?,
+            apiVersion: Int = API_VERSION_1,
+            loggingEnabled: Boolean
         ) {
             if (INSTANCE != null && get().userId != userId)
                 INSTANCE?.liveUpdates?.reset(userId)
@@ -119,12 +129,13 @@ class PyrusServiceDesk private constructor(
                         true,
                         userId,
                         securityKey,
-                        apiVersion
+                        apiVersion,
+                        loggingEnabled
                     )
                 }
             }
             else
-                INSTANCE = PyrusServiceDesk(application, appId, true, userId, securityKey, apiVersion)
+                INSTANCE = PyrusServiceDesk(application, appId, true, userId, securityKey, apiVersion, loggingEnabled)
         }
 
         /**
@@ -353,6 +364,9 @@ class PyrusServiceDesk private constructor(
 
     init {
         migratePreferences(application, preferences)
+        logging = loggingEnabled
+        if (logging)
+            PLog.instantiate(application)
 
         val lastSetTokenTime = preferences.getLong(PREFERENCE_KEY_LAST_SET_TOKEN, -1L)
         if (lastSetTokenTime != -1L && System.currentTimeMillis() < lastSetTokenTime)
