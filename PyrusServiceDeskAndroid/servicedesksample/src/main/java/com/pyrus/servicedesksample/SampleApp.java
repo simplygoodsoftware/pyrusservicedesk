@@ -14,7 +14,8 @@ public class SampleApp extends Application {
                 this,
                 "my_app_id",
                 "user_id",
-                "security_key"
+                "security_key",
+                true
         );
 
         PyrusServiceDesk.setPushToken(
