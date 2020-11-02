@@ -51,7 +51,7 @@
     <androidx.appcompat.widget.AppCompatTextView
         android:id="@+id/send_logs_variant"
         android:layout_width="match_parent"
-        android:text="Send library logs"
+        android:text="@string/send_library_logs"
         android:layout_height="@dimen/psd_recyclerview_item_height_default"
         android:background="?attr/selectableItemBackground"
         android:textAppearance="?attr/textAppearanceListItem"

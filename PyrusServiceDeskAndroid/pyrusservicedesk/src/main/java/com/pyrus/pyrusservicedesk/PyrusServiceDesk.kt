@@ -76,6 +76,8 @@ class PyrusServiceDesk private constructor(
          *
          * @param application instance of the enclosing application
          * @param appId id of a client
+         * @param loggingEnabled If true, then the library will write logs,
+         * and they can be sent as a file to chat by clicking the "Send Library Logs" button in the menu under the "+" sign.
          */
         @JvmStatic
         @JvmOverloads
@@ -98,6 +100,8 @@ class PyrusServiceDesk private constructor(
          * @param appId id of a client
          * @param userId of the user who is initializing service desk
          * @param securityKey of the user far safe initialization
+         * @param loggingEnabled If true, then the library will write logs,
+         * and they can be sent as a file to chat by clicking the "Send Library Logs" button in the menu under the "+" sign.
          */
         @JvmStatic
         @JvmOverloads
@@ -119,7 +123,7 @@ class PyrusServiceDesk private constructor(
             apiVersion: Int = API_VERSION_1,
             loggingEnabled: Boolean
         ) {
-            PLog.d(TAG, "initInternal, appId: ${appId.substring(0, 10)}, userId: ${userId?.substring(0, 10)}, apiVersion: $apiVersion")
+            PLog.d(TAG, "initInternal, appId: ${appId.getFirstNSymbols(10)}, userId: ${userId?.getFirstNSymbols(10)}, apiVersion: $apiVersion")
             if (INSTANCE != null && get().userId != userId)
                 INSTANCE?.liveUpdates?.reset(userId)
 
