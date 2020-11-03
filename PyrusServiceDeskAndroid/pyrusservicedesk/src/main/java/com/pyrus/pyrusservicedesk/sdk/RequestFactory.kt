@@ -15,7 +15,7 @@ internal class RequestFactory(private val repository: GeneralRepository) {
 
     fun getFeedRequest(): Request<Comments> = GetFeedRequest(repository, true)
     fun getTicketsRequest(): RequestBase<List<TicketShortDescription>> = GetTicketsRequest(repository)
-    fun getTicketRequest(ticketId: Int): RequestBase<Ticket> = GetTicketRequest(repository, ticketId)
+    fun getTicketRequest(ticketId: Int, isActive: Boolean? = null): RequestBase<Ticket> = GetTicketRequest(repository, ticketId, isActive)
     fun getCreateTicketRequest(description: TicketDescription,
                                uploadFileHooks: UploadFileHooks?): RequestBase<CreateTicketResponseData> {
         return CreateTicketRequest(repository, description, uploadFileHooks)

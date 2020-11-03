@@ -27,6 +27,7 @@ import com.pyrus.pyrusservicedesk.sdk.response.ResponseError
 import com.pyrus.pyrusservicedesk.sdk.updates.LiveUpdates
 import com.pyrus.pyrusservicedesk.sdk.updates.NewReplySubscriber
 import com.pyrus.pyrusservicedesk.sdk.updates.OnStopCallback
+import com.pyrus.pyrusservicedesk.sdk.updates.PreferencesManager
 import com.pyrus.pyrusservicedesk.sdk.verify.LocalDataVerifier
 import com.pyrus.pyrusservicedesk.sdk.verify.LocalDataVerifierImpl
 import com.pyrus.pyrusservicedesk.sdk.web.retrofit.RetrofitWebRepository
@@ -285,7 +286,7 @@ class PyrusServiceDesk private constructor(
          * @param lastActiveTime Time of last user activity in unit millisecond
          */
         internal fun startTicketsUpdatesIfNeeded(lastActiveTime: Long) {
-            get().liveUpdates.startUpdatesIfNeeded(lastActiveTime)
+            get().liveUpdates.updateGetTicketsIntervalIfNeeded(lastActiveTime)
         }
 
         internal fun onServiceDeskStop() {
@@ -305,6 +306,13 @@ class PyrusServiceDesk private constructor(
 
         internal fun setConfiguration(config: ServiceDeskConfiguration) {
             CONFIGURATION = config
+        }
+
+        /**
+         * @return Service desk shared preferences.
+         */
+        internal fun getPreferencesManager(): PreferencesManager {
+            return get().preferencesManager
         }
 
         private fun startImpl(
@@ -377,6 +385,7 @@ class PyrusServiceDesk private constructor(
 
     private val fileResolver: FileResolver = FileResolverImpl(application.contentResolver)
     private val preferences = application.getSharedPreferences(PREFERENCE_KEY, Context.MODE_PRIVATE)
+    private val preferencesManager = PreferencesManager(preferences)
     private val offlineRepository: OfflineRepository
 
     private var onStopCallback: OnStopCallback? = null
@@ -386,18 +395,6 @@ class PyrusServiceDesk private constructor(
         logging = loggingEnabled
         if (logging)
             PLog.instantiate(application)
-
-        val lastSetTokenTime = preferences.getLong(PREFERENCE_KEY_LAST_SET_TOKEN, -1L)
-        if (lastSetTokenTime != -1L && System.currentTimeMillis() < lastSetTokenTime) {
-            PLog.d(TAG, "init, clear lastSetTokenTime")
-            preferences.edit().putLong(PREFERENCE_KEY_LAST_SET_TOKEN, -1L).commit()
-        }
-
-        val lastActiveTime = preferences.getLong(PREFERENCE_KEY_LAST_ACTIVITY_TIME, -1L)
-        if (lastActiveTime != -1L && System.currentTimeMillis() < lastActiveTime) {
-            PLog.d(TAG, "init, clear lastActiveTime")
-            preferences.edit().putLong(PREFERENCE_KEY_LAST_ACTIVITY_TIME, -1L).commit()
-        }
 
         instanceId = ConfigUtils.getInstanceId(preferences)
 
@@ -423,7 +420,7 @@ class PyrusServiceDesk private constructor(
 
         requestFactory = RequestFactory(centralRepository)
         draftRepository = PreferenceDraftRepository(preferences)
-        liveUpdates = LiveUpdates(requestFactory, preferences, userId)
+        liveUpdates = LiveUpdates(requestFactory, preferencesManager, userId)
     }
 
     internal fun getSharedViewModel() = sharedViewModel

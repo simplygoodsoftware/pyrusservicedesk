@@ -19,7 +19,8 @@ internal class CentralRepository(private val webRepository: RemoteRepository,
 
     override suspend fun getTickets(): GetTicketsResponse = webRepository.getTickets()
 
-    override suspend fun getTicket(ticketId: Int): GetTicketResponse = webRepository.getTicket(ticketId)
+    override suspend fun getTicket(ticketId: Int, isActive: Boolean?): GetTicketResponse =
+        webRepository.getTicket(ticketId, isActive)
 
     override suspend fun addComment(ticketId: Int,
                                     comment: Comment,

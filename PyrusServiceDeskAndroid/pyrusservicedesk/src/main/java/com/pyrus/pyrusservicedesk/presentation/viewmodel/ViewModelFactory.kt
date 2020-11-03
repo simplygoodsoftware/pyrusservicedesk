@@ -26,7 +26,9 @@ internal class ViewModelFactory(private val arguments: Intent): ViewModelProvide
                 TicketViewModel(
                     PyrusServiceDesk.get().serviceDeskProvider,
                     arguments,
-                    PyrusServiceDesk.get().isSingleChat) as T
+                    PyrusServiceDesk.get().isSingleChat,
+                    PyrusServiceDesk.getPreferencesManager()
+                ) as T
             FilePreviewViewModel::class.java ->
                 FilePreviewViewModel(
                     PyrusServiceDesk.get().serviceDeskProvider,

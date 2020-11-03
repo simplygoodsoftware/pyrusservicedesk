@@ -28,8 +28,7 @@ internal interface ServiceDeskApi {
      * Api call for getting tikets.
      */
     @POST("gettickets")
-    fun getTickets(@Body requestBody: RequestBodyBase)
-            : Call<Tickets>
+    fun getTickets(@Body requestBody: RequestBodyBase): Call<Tickets>
 
     /**
      * Api call for getting ticket with the given [ticketId].

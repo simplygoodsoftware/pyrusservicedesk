@@ -1,5 +1,6 @@
 package com.pyrus.servicedesksample;
 
+import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.DialogInterface;
@@ -7,9 +8,13 @@ import android.graphics.Color;
 import android.os.Bundle;
 import android.widget.TextView;
 
+import androidx.annotation.Nullable;
+
 import com.pyrus.pyrusservicedesk.PyrusServiceDesk;
 import com.pyrus.pyrusservicedesk.ServiceDeskConfiguration;
 import com.pyrus.pyrusservicedesk.sdk.updates.NewReplySubscriber;
+
+import java.util.List;
 
 public class SampleActivity extends Activity implements NewReplySubscriber {
 
@@ -62,12 +67,30 @@ public class SampleActivity extends Activity implements NewReplySubscriber {
         PyrusServiceDesk.unsubscribeFromReplies(this);
     }
 
+    @SuppressLint("SetTextI18n")
     @Override
-    public void onNewReply(boolean hasUnreadComments) {
-        ((TextView) findViewById(R.id.unread)).setText(
-                hasUnreadComments
-                        ? "Has unread tickets"
-                        : null
+    public void onNewReply(
+            boolean hasUnreadComments,
+            @Nullable String lastCommentText,
+            int lastCommentAttachmentsCount,
+            @Nullable List<String> lastCommentAttachments, int id, long utcTime) {
+
+        String text;
+        if (lastCommentText != null)
+            text = lastCommentText;
+        else
+            text = "no text";
+
+        StringBuilder attachmentNames = new StringBuilder();
+        if (lastCommentAttachments != null)
+            for (String attachmentName: lastCommentAttachments)
+                attachmentNames.append(attachmentName);
+
+        ((TextView) findViewById(R.id.info)).setText(
+                "Has unread tickets: " + hasUnreadComments + "\n" +
+                "Last comment text: " + text + "\n" +
+                "Attachments count: " + lastCommentAttachmentsCount + "\n" +
+                "AttachmentNames: " + attachmentNames
         );
     }
 }

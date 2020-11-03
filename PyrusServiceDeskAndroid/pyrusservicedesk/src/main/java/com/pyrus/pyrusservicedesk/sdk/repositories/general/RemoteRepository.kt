@@ -21,7 +21,7 @@ internal interface RemoteRepository {
     /**
      * Provides ticket with the given [ticketId].
      */
-    suspend fun getTicket(ticketId: Int): GetTicketResponse
+    suspend fun getTicket(ticketId: Int, isActive: Boolean?): GetTicketResponse
 
     /**
      * Appends [comment] to the ticket with the given [ticketId].

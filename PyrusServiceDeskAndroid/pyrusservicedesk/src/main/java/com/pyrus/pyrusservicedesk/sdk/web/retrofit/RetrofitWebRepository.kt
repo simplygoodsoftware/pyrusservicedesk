@@ -109,17 +109,18 @@ internal class RetrofitWebRepository(
         }
     }
 
-    override suspend fun getTicket(ticketId: Int): GetTicketResponse {
+    override suspend fun getTicket(ticketId: Int, isActive: Boolean?): GetTicketResponse {
         PLog.d(TAG, "getTicket, " +
                 "appId: ${appId.getFirstNSymbols(10)}, " +
                 "userId: ${getUserId().getFirstNSymbols(10)}, " +
                 "instanceId: ${getInstanceId()?.getFirstNSymbols(10)}, " +
                 "apiVersion: ${getVersion()}, " +
-                "ticketId: $ticketId"
+                "ticketId: $ticketId, " +
+                "IsActive: $isActive"
         )
         return withContext(Dispatchers.IO){
             try {
-                api.getTicket(RequestBodyBase(appId, getUserId(), getSecurityKey(), getInstanceId(), getVersion()), ticketId).execute().run {
+                api.getTicket(RequestBodyGetTicket(appId, getUserId(), getSecurityKey(), getInstanceId(), getVersion(), isActive), ticketId).execute().run {
                     PLog.d(TAG, "getTicket, isSuccessful: $isSuccessful, body() != null: ${body() != null}")
                     when {
                         isSuccessful && body() != null -> GetTicketResponse(ticket = body())
