@@ -1,8 +1,11 @@
 
 import UIKit
 
-class PSDChatsViewController: UIViewController,PSDChatsTableViewDelegate,CloseButtonItemDelegate,PSDUpdateInfo {
-    ///Chat id that need to be open when viewcontroller appear.
+class PSDChatsViewController: UIViewController{
+    ///Не используется, удалить
+    /*PSDChatsTableViewDelegate,CloseButtonItemDelegate,PSDUpdateInfo {
+    
+     ///Chat id that need to be open when viewcontroller appear.
     ///If nil will be opened last chat or new chat.
     var customFirstChatId :String?
     
@@ -118,4 +121,5 @@ class PSDChatsViewController: UIViewController,PSDChatsTableViewDelegate,CloseBu
         table.setupTableView()
         return table
     }()
+     */
 }

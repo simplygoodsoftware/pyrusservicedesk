@@ -153,4 +153,7 @@ extension Date {
         }
         return .more
     }
+    func utc() -> Double {
+        return self.timeIntervalSince1970
+    }
 }

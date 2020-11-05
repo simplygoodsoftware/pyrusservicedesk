@@ -21,11 +21,11 @@ class PSDMessageSender: NSObject {
     func pass(_ messageToPass:PSDMessage, to chatId:String, delegate:PSDMessageSendDelegate?, completion: @escaping(_ chatId : String?) -> Void)
     {
         if(PSDChatTableView.isNewChat(chatId)){
+            //passFirst не используется, удалить
             let task = PSDMessageSender.passFirst(messageToPass.text, messageToPass.attachments, messageToPass.clientId){
                 newChatId in
                 //If passFirst end with success send new ChatId to delegate
                 if newChatId.count>0{
-                    delegate?.change(newChatId)
                     
                     PSDMessageSender.showResult(of: messageToPass, success: true, delegate: delegate)
                     

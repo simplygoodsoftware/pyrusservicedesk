@@ -34,7 +34,7 @@ import UIKit
     
     
     ///A flag indicates need to show chat list or show all conversations as one. Default is false - user can create new chat and see the list of old chats. If true - all new messages will be added to open chat.
-    @objc private(set) static var  oneChat:Bool = false
+    @objc private(set) static var  oneChat: Bool = true//test нужно убрать этот флаг
     
       
     @objc static let mainSession : URLSession = {
@@ -323,7 +323,6 @@ import UIKit
     
     ///Set last user acivity date to NOW if date paramemeter is nil, returns true if setted
     static func setLastActivityDate(_ date: Date? = nil) -> Bool{
-        print ("\(date)")
         if let pyrusUserDefaults = PSDMessagesStorage.pyrusUserDefaults(){
             if let newDate = date, let oldDate = pyrusUserDefaults.object(forKey: PSDChatViewController.userLastActivityKey()) as? Date{
                 if oldDate.compare(newDate) == .orderedDescending || oldDate.compare(newDate) == .orderedSame{
@@ -349,14 +348,8 @@ import UIKit
             timer=nil
         }
     }
-    ///Total value of new massages
-    static var newMessagesCount : Int = 0
-    ///Total value of chats
-    static var chatsCount : Int = 0
     ///All of chats
     static var chats : [PSDChat] = [PSDChat]()
-    ///Has some information been uploaded. False if the information has not yet been loaded and newMessagesCount and chatsCount can be equal to 0 because of this. Use to reflect the relevance of the information of newMessagesCount and chatsCount.
-    static var hasInfo : Bool = false
     ///The main view controller. nil - if chat was closed.
     weak static var mainController : PyrusServiceDeskController?
     ///Updates user info - get chats list from server.
@@ -364,16 +357,20 @@ import UIKit
         if(userId.count > 0){
             restartTimer()
             DispatchQueue.global().async {
-                PSDGetChats.get(delegate: nil, needShowError: !hasInfo){
+                PSDGetChats.get(delegate: nil, needShowError: false){/// needShowError и делегат не нужны у  PSDGetChats, избавиться
                     (chats:[PSDChat]?) in
                     DispatchQueue.main.async {
-                        guard let chats = chats else{
+                        guard let chats = chats, chats.count > 0 else{
                             return
                         }
-                        hasInfo = true
-                        if chats.count > 0{
-                            mainController?.passChanges(chats: chats)
+                        var unreadChats = 0
+                        for chat in chats {
+                            guard !chat.isRead else{
+                                continue
+                            }
+                            unreadChats = unreadChats + 1
                         }
+                        UnreadMessageManager.refreshNewMessagesCount(unreadChats)
                     }
                 }
             }

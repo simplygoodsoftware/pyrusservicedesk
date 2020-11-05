@@ -16,7 +16,7 @@ struct PSDGetChat {
      - parameter delegate: PSDGetDelegate. Works only if showError is true. If not equal to nil - calls showNoConnectionView(), when no internet connection. Else remembers the current ViewController. And if it has not changed when response receive, on it displays an error.
      On completion returns PSDChat object if it was received.
      */
-    static func get(_ chatId:String, needShowError:Bool, delegate: PSDGetDelegate?, completion: @escaping (_ chat: PSDChat?) -> Void)
+    static func get(_ chatId:String, needShowError:Bool, delegate: PSDGetDelegate?,  completion: @escaping (_ chat: PSDChat?) -> Void)
     {
         //remove old session if it is
         remove()
@@ -73,9 +73,6 @@ struct PSDGetChat {
             do{
                 let chatData = try JSONSerialization.jsonObject(with: data, options: .allowFragments) as? [String : Any] ?? [String: Any]()
                 completion(generateChat(from:chatData))
-                DispatchQueue.main.async {
-                    PyrusServiceDesk.newMessagesCount = 0
-                }
             }catch{
                 //print("PSDGetChat error when convert to dictionary")
             }

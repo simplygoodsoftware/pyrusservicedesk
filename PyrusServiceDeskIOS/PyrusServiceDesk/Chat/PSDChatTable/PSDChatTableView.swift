@@ -6,7 +6,7 @@ protocol PSDChatTableViewDelegate: NSObjectProtocol {
 
 class PSDChatTableView: PSDDetailTableView{
     ///The id of chat that is shown in table view
-    var chatId :String = ""
+    private var chatId :String = ""//Не используется
     weak var chatDelegate: PSDChatTableViewDelegate?
     private let footerHeight : CGFloat = 10.0
     private let BOTTOM_INFELICITY : CGFloat = 10.0
@@ -181,7 +181,7 @@ class PSDChatTableView: PSDDetailTableView{
     }
     ///Is chat is new. Chat is new if it has no id or its id is 0. One-chat mode has no id at all, so chat is always not new.
     ///- parameter idChat: is id of chat that need to check.
-    static func isNewChat(_ idChat:String)->Bool{
+    static func isNewChat(_ idChat:String)->Bool{//Не ипользуется, удалить
         if((idChat == "" || idChat == "0") && !PyrusServiceDesk.oneChat)
         {
             return true
@@ -600,9 +600,6 @@ extension PSDChatTableView : PSDSupportImageSetterDelegate{
 }
 //MARK: PSDMessageSendDelegate
 extension PSDChatTableView : PSDMessageSendDelegate{
-    func change(_ chatId:String){
-        self.chatId = chatId
-    }
     func remove(message:PSDMessage){
         let indexPathsAndRows = self.tableMatrix.findIndexPath(ofMessage: message.clientId).keys.sorted(by:{$0 > $1})
         var indexPaths = [IndexPath]()

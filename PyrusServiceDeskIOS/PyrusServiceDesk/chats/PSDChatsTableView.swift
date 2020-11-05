@@ -6,7 +6,11 @@ protocol PSDChatsTableViewDelegate: class {
     func removeOneNewMessage()
 }
 
-class PSDChatsTableView: PSDTableView,UITableViewDelegate,UITableViewDataSource,PSDGetDelegate,PSDNoConnectionViewDelegate {
+class PSDChatsTableView: PSDTableView{
+    //Не используется, удалить
+    /*
+},UITableViewDelegate,UITableViewDataSource,PSDGetDelegate,PSDNoConnectionViewDelegate {
+    
     weak var chatsDelegate: PSDChatsTableViewDelegate?
     let chatCellId = "ChatCell"
     var progressView : PSDProgressView?
@@ -232,5 +236,5 @@ class PSDChatsTableView: PSDTableView,UITableViewDelegate,UITableViewDataSource,
         line.autoresizingMask = [.flexibleWidth,.flexibleBottomMargin]
         return line
     }
-
+*/
 }

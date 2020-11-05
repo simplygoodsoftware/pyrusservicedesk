@@ -25,7 +25,7 @@ class PyrusServiceDeskController: PSDNavigationController {
     func show(chatId:String?, on viewController: UIViewController, completion:(() -> Void)? = nil){
         DispatchQueue.main.async  {
             if self.viewControllers.first is PSDChatsViewController && chatId != nil && (chatId?.count ?? 0)>0 && chatId != DEFAULT_CHAT_ID{
-                (self.viewControllers.first as! PSDChatsViewController).customFirstChatId = chatId
+                //не используется, удалить (self.viewControllers.first as! PSDChatsViewController).customFirstChatId = chatId
             }
             if UIDevice.current.userInterfaceIdiom != .pad{
                 viewController.present(self, animated:  true, completion: completion)
@@ -45,8 +45,8 @@ class PyrusServiceDeskController: PSDNavigationController {
         super.popViewController(animated: animated)
         let vc = self.topViewController
         if vc is PSDChatsViewController{
-            let table = (vc as! PSDChatsViewController).tableView
-            table.deselectRow()
+            //не используется, удалить let table = (vc as! PSDChatsViewController).tableView
+            //table.deselectRow()
         }
         return vc
     }
@@ -71,11 +71,6 @@ class PyrusServiceDeskController: PSDNavigationController {
             }
             chatController.refreshChat(showFakeMessage: showFakeMessage)
             break
-        }
-    }
-    func passChanges(chats:[PSDChat]){
-        if self.viewControllers[0] is PSDChatsViewController{
-            (self.viewControllers[0] as! PSDChatsViewController).tableView.chats = chats
         }
     }
     ///Clean all saved data

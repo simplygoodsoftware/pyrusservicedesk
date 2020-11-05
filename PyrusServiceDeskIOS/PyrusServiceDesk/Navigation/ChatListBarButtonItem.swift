@@ -4,12 +4,13 @@ import UIKit
 ///Name for notification when chats' number was received.
 let CHATS_NOTIFICATION_NAME = Notification.Name.init("PSDChatsChanging")
 ///Name for notification when new messages was received.
-let MESSAGES_NUMBER_NOTIFICATION_NAME = Notification.Name.init("PSDMessagesNumberChanging")
+//let MESSAGES_NUMBER_NOTIFICATION_NAME = Notification.Name.init("PSDMessagesNumberChanging")
 
 
 ///UIBarButtonItem, that observers number of chats and new messages, and change self view according to its data. If no messages and chats this button is not enabled.
 class ChatListBarButtonItem: UIBarButtonItem {
-    private var chatsCount : Int = PyrusServiceDesk.chatsCount
+    ///Не используется, нужно удалить
+    /*private var chatsCount : Int = PyrusServiceDesk.chatsCount
     {
         didSet (oldValue){
             if oldValue != chatsCount{
@@ -203,5 +204,5 @@ class ChatListBarButtonItem: UIBarButtonItem {
     deinit {
         NotificationCenter.default.removeObserver(self, name: CHATS_NOTIFICATION_NAME, object: nil)
         NotificationCenter.default.removeObserver(self, name: MESSAGES_NUMBER_NOTIFICATION_NAME, object: nil)
-    }
+    }*/
 }

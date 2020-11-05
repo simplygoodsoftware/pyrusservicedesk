@@ -82,7 +82,6 @@ struct PSDGetChats {
     private static func generateChats(from response:NSArray)->[PSDChat]
     {
         var chats : [PSDChat] = []
-        var unread = 0
         for i in 0..<response.count{
             let dic :[String:Any] = response[i] as! [String : Any]
             var messages : [PSDMessage] = [PSDMessage]()
@@ -97,15 +96,11 @@ struct PSDGetChats {
             }
             let chat = PSDChat.init(chatId: dic.stringOfKey(ticketIdParameter), date: date, messages: messages)
             let isRead = dic["is_read"] as? Bool ??  true
-            if !isRead{
-                unread=unread+1
-            }
             chat.isRead = isRead
             chats.append(chat)
         }
         DispatchQueue.main.async {
             refreshChatsCount(chats.count)
-            refreshNewMessagesCount(unread)
         }
         
         return sortByLastMessage(chats)
@@ -115,20 +110,10 @@ struct PSDGetChats {
         return chats.sorted(by: { $0.date ?? Date() > $1.date ?? Date()})
     }
     static func refreshChatsCount(_ chats:Int){
-        if PyrusServiceDesk.chatsCount != chats{
+        /*if PyrusServiceDesk.chatsCount != chats{
             PyrusServiceDesk.chatsCount = chats
             NotificationCenter.default.post(name: CHATS_NOTIFICATION_NAME, object:chats, userInfo: nil)
-        }
+        }*/
         
-    }
-    static func refreshNewMessagesCount(_ unread:Int){
-        guard let subscriber = PyrusServiceDesk.subscriber, !PyrusServiceDeskController.PSDIsOpen() else {
-            return
-        }
-        if PyrusServiceDesk.newMessagesCount != unread{
-            PyrusServiceDesk.newMessagesCount = unread
-            NotificationCenter.default.post(name: MESSAGES_NUMBER_NOTIFICATION_NAME, object: unread, userInfo: nil)
-            subscriber.onNewReply(hasUnreadComments: unread>0)
-        }
     }
 }

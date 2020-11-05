@@ -120,6 +120,8 @@
 		4B9BF878224CBCBC006AD05C /* PSDCopyLabel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4B9BF877224CBCBC006AD05C /* PSDCopyLabel.swift */; };
 		4B9C205D2451904E004DEF7A /* PSDRowMessage.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4B9C205C2451904E004DEF7A /* PSDRowMessage.swift */; };
 		4B9F781C228C2813003CC83D /* PSDTableView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4B9F781B228C2813003CC83D /* PSDTableView.swift */; };
+		4B9FAFA125542FB700FCE51D /* UnreadMessageManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4B9FAFA025542FB700FCE51D /* UnreadMessageManager.swift */; };
+		4B9FAFA5255435CA00FCE51D /* PSDLastUnreadMessage.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4B9FAFA4255435CA00FCE51D /* PSDLastUnreadMessage.swift */; };
 		4BA3FF4022116C1100CE497A /* AttachmentHandler.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4BA3FF3F22116C1100CE497A /* AttachmentHandler.swift */; };
 		4BA3FF4222117E1600CE497A /* UIView+findViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4BA3FF4122117E1600CE497A /* UIView+findViewController.swift */; };
 		4BA85A172224183600B48CA6 /* icn_error.png in Resources */ = {isa = PBXBuildFile; fileRef = 4BA85A142224183600B48CA6 /* icn_error.png */; };
@@ -305,6 +307,8 @@
 		4B9BF877224CBCBC006AD05C /* PSDCopyLabel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PSDCopyLabel.swift; sourceTree = "<group>"; };
 		4B9C205C2451904E004DEF7A /* PSDRowMessage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PSDRowMessage.swift; sourceTree = "<group>"; };
 		4B9F781B228C2813003CC83D /* PSDTableView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PSDTableView.swift; sourceTree = "<group>"; };
+		4B9FAFA025542FB700FCE51D /* UnreadMessageManager.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = UnreadMessageManager.swift; sourceTree = "<group>"; };
+		4B9FAFA4255435CA00FCE51D /* PSDLastUnreadMessage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PSDLastUnreadMessage.swift; sourceTree = "<group>"; };
 		4BA3FF3F22116C1100CE497A /* AttachmentHandler.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AttachmentHandler.swift; sourceTree = "<group>"; };
 		4BA3FF4122117E1600CE497A /* UIView+findViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "UIView+findViewController.swift"; sourceTree = "<group>"; };
 		4BA85A142224183600B48CA6 /* icn_error.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = icn_error.png; sourceTree = "<group>"; };
@@ -402,6 +406,7 @@
 				4B56BE4A2216CCC0004E6685 /* PSDAttachment.swift */,
 				4B9C205C2451904E004DEF7A /* PSDRowMessage.swift */,
 				4B062A822518A8D100B317D3 /* PSDPlaceholderMessage.swift */,
+				4B9FAFA4255435CA00FCE51D /* PSDLastUnreadMessage.swift */,
 			);
 			path = PSDObjects;
 			sourceTree = "<group>";
@@ -484,6 +489,7 @@
 				4B7918E32237E24B0071CA72 /* CloseButtonItem.swift */,
 				4B6E9DA6225F74E50037462F /* PSDDownloadView.swift */,
 				4B1ED2AB228190BA00B98516 /* PSDMessagesStorage.swift */,
+				4B9FAFA025542FB700FCE51D /* UnreadMessageManager.swift */,
 				4B7AD4D5250A06C9004E9C48 /* PSDFilesManager.swift */,
 				4BB855AC22086C1900F7CCE5 /* Localizable.strings */,
 				4B1CD38F230BE58000C06F71 /* applicationColors.swift */,
@@ -1046,6 +1052,7 @@
 				4B5533732264C07B00353941 /* PSDDownloader.swift in Sources */,
 				4B88C6FB221482AC00BDB304 /* Date+usefulFunc.swift in Sources */,
 				4B7F351321F8AC3300977C6D /* PSDBundleImage.swift in Sources */,
+				4B9FAFA5255435CA00FCE51D /* PSDLastUnreadMessage.swift in Sources */,
 				4BE3450E225F9684009E2135 /* PSDDownloadImage.swift in Sources */,
 				4B63393621FA106400A154B5 /* PSDChatMessageCell.swift in Sources */,
 				4B10E5F0222844EA00CF118B /* PSDAttachmentLoadViewController.swift in Sources */,
@@ -1070,6 +1077,7 @@
 				4B81B6FF2220275700EE1253 /* PSDMessageStateButton.swift in Sources */,
 				4B2F47AC224A22FF00E3B23A /* PSDChooser.swift in Sources */,
 				4B90E517221DB21000A18245 /* PSDNoConnectionView.swift in Sources */,
+				4B9FAFA125542FB700FCE51D /* UnreadMessageManager.swift in Sources */,
 				4B2F47B8224A679A00E3B23A /* String + FilesSupportedExtension.swift in Sources */,
 				4B81B6FD221FF7FB00EE1253 /* UITableView + swipeForDetail.swift in Sources */,
 				4B82A49E2268C3D000654CE0 /* PSDFakeController.swift in Sources */,

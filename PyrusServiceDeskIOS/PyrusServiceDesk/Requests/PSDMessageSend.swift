@@ -1,7 +1,6 @@
 import UIKit
 
 protocol PSDMessageSendDelegate: class {
-    func change(_ chatId:String)
     ///Pass delegate to refresh object with new data. Attention! may call from background!
     ///- parameter changedToSent: If state of message was changed from !.sent to .sent
     func refresh(message:PSDMessage, changedToSent: Bool)
