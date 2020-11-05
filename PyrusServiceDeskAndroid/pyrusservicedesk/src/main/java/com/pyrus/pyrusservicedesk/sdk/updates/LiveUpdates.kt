@@ -42,8 +42,7 @@ internal class LiveUpdates(requests: RequestFactory, private val preferences: Sh
 
     private val mainHandler = Handler(Looper.getMainLooper())
     private var isStarted = false
-    private var hasUnread: Boolean = false
-    private var lastNotificationIsShown = true
+    private var hasUnread: Boolean? = null
 
     private val ticketsUpdateRunnable = object : Runnable {
         override fun run() {
@@ -90,10 +89,9 @@ internal class LiveUpdates(requests: RequestFactory, private val preferences: Sh
     fun subscribeOnReply(subscriber: NewReplySubscriber) {
         PLog.d(TAG, "subscribeOnReply")
         newReplySubscribers.add(subscriber)
-        if (!lastNotificationIsShown) {
-            lastNotificationIsShown = true
-            PLog.d(TAG, "subscribeOnReply, NewReplySubscriber (hasUnreadComments = $hasUnread)")
-            subscriber.onNewReply(hasUnread)
+        hasUnread?.let {
+            PLog.d(TAG, "subscribeOnReply, NewReplySubscriber (hasUnreadComments = $it)")
+            subscriber.onNewReply(it)
         }
         onSubscribe()
     }
@@ -114,7 +112,7 @@ internal class LiveUpdates(requests: RequestFactory, private val preferences: Sh
     @MainThread
     fun subscribeOnLocalReply(subscriber: NewReplySubscriber) {
         newReplyLocalSubscribers.add(subscriber)
-        subscriber.onNewReply(hasUnread)
+        hasUnread?.let { subscriber.onNewReply(it) }
         onSubscribe()
     }
 
@@ -196,8 +194,8 @@ internal class LiveUpdates(requests: RequestFactory, private val preferences: Sh
      * Reset unread token count to 0.
      */
     internal fun resetUnreadCount() {
-        PLog.d(TAG, "resetUnreadCount, hasUnread: $hasUnread, recentUnreadCounter: $recentUnreadCounter")
-        hasUnread = false
+        if (hasUnread != null)
+            hasUnread = false
         recentUnreadCounter = 0
     }
 
@@ -272,29 +270,20 @@ internal class LiveUpdates(requests: RequestFactory, private val preferences: Sh
             val hasNewComments = newUnreadCount > 0
             PLog.d(TAG, "processSuccess, hasNewComments: $hasNewComments, activeScreenCount: $activeScreenCount")
             ticketCountChangedSubscribers.forEach { it.onUnreadTicketCountChanged(newUnreadCount) }
-            notifyOnNewReplySubscribers(hasNewComments)
+            if (activeScreenCount <= 0) {
+                PLog.d(TAG, "processSuccess, NewReplySubscriber(hasUnreadComments = $hasNewComments)")
+                newReplySubscribers.forEach { it.onNewReply(hasNewComments) }
+            }
             newReplyLocalSubscribers.forEach { it.onNewReply(hasNewComments) }
         }
         recentUnreadCounter = newUnreadCount
-    }
-
-    private fun notifyOnNewReplySubscribers(hasNewComments: Boolean) {
-        if (newReplySubscribers.isEmpty()) {
-            lastNotificationIsShown = false
-            return
-        }
-        lastNotificationIsShown = true
-        if (activeScreenCount > 0)
-            return
-
-        PLog.d(TAG, "notifyOnNewReplySubscribers, NewReplySubscriber(hasUnreadComments = $hasNewComments)")
-        newReplySubscribers.forEach { it.onNewReply(hasNewComments) }
     }
 
     fun reset(userId: String?) {
         PLog.d(TAG, "reset")
         this.userId = userId
         recentUnreadCounter = -1
+        hasUnread = null
         //TODO add active time reset
     }
 
