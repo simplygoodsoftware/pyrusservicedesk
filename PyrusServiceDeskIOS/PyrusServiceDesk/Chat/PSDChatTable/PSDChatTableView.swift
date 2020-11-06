@@ -95,6 +95,9 @@ class PSDChatTableView: PSDDetailTableView{
                 PSDGetChat.get(chatIdWeak, needShowError:true, delegate: self){
                     (chat : PSDChat?) in
                     DispatchQueue.main.async {
+                        if chat != nil {
+                            UnreadMessageManager.removeLastComment()
+                        }
                         if self != nil{
                             self?.needShowRating = chat?.showRating ?? false
                             self?.showRateIfNeed()
@@ -198,6 +201,7 @@ class PSDChatTableView: PSDDetailTableView{
                 (chat : PSDChat?) in
                 if let chat = chat{
                     DispatchQueue.main.async  {
+                        UnreadMessageManager.removeLastComment()
                         self?.needShowRating = chat.showRating
                         self?.showRateIfNeed()
                     }

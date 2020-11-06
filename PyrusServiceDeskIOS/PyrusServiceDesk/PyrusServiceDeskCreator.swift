@@ -123,7 +123,11 @@ import UIKit
     @objc public static var onAuthorizationFailed :  (() -> Void)?
     
     ///The subscriber for new messages from support.
-    weak static  private(set) var subscriber : NewReplySubscriber?
+    weak static  private(set) var subscriber : NewReplySubscriber?{
+        didSet{
+            UnreadMessageManager.checkLastComment()
+        }
+    }
     ///The subscriber for PyrusSecviceDeskClose.
     weak static  private(set) var stopCallback : OnStopCallback?
     weak static private(set) var logEvent: LogEvents?
@@ -254,6 +258,9 @@ import UIKit
             PSDMessagesStorage.pyrusUserDefaults()?.set(false, forKey: PSD_WAS_CLOSE_INFO_KEY)
             PSDMessagesStorage.pyrusUserDefaults()?.synchronize()
         }
+        if reset {
+            
+        }
         PyrusServiceDesk.userId = userId
     }
 
@@ -364,13 +371,15 @@ import UIKit
                             return
                         }
                         var unreadChats = 0
+                        var lasMessage: PSDMessage?
                         for chat in chats {
+                            lasMessage = chat.messages.last
                             guard !chat.isRead else{
                                 continue
                             }
                             unreadChats = unreadChats + 1
                         }
-                        UnreadMessageManager.refreshNewMessagesCount(unreadChats)
+                        UnreadMessageManager.refreshNewMessagesCount(unreadChats, lastMessage: lasMessage)
                     }
                 }
             }

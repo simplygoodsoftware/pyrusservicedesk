@@ -7,6 +7,7 @@ Get chat from server.
  */
 struct PSDGetChat {
     private static let SHOW_RATING_KEY = "show_rating"
+    private static let KEEP_UNREAD_RATING_KEY = "keep_unread"
     private static var chatGetters : [Int: ChatGetter] = [Int: ChatGetter]()
   //  private static var sessionTask : URLSessionDataTask? = nil
     /**
@@ -16,7 +17,7 @@ struct PSDGetChat {
      - parameter delegate: PSDGetDelegate. Works only if showError is true. If not equal to nil - calls showNoConnectionView(), when no internet connection. Else remembers the current ViewController. And if it has not changed when response receive, on it displays an error.
      On completion returns PSDChat object if it was received.
      */
-    static func get(_ chatId:String, needShowError:Bool, delegate: PSDGetDelegate?,  completion: @escaping (_ chat: PSDChat?) -> Void)
+    static func get(_ chatId:String, needShowError:Bool, delegate: PSDGetDelegate?, keepUnread: Bool = false,  completion: @escaping (_ chat: PSDChat?) -> Void)
     {
         //remove old session if it is
         remove()
@@ -27,13 +28,12 @@ struct PSDGetChat {
                 topViewController = UIApplication.topViewController()
             }
         }
-        var  request : URLRequest
-        if PyrusServiceDesk.oneChat{
-            request = URLRequest.createRequest(type:.chatFeed, parameters: [String: Any]())
+        var parameters = [String: Any]()
+        if keepUnread{
+            parameters[KEEP_UNREAD_RATING_KEY] = true
         }
-        else{
-            request = URLRequest.createRequest(with:chatId, type:.chat, parameters: [String: Any]())
-        }
+        let  request = URLRequest.createRequest(type: .chatFeed, parameters: parameters)
+    
         let localId = UUID().uuidString
         let task = PyrusServiceDesk.mainSession.dataTask(with: request) { data, response, error in
             guard let data = data, error == nil else {

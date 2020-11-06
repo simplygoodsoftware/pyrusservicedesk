@@ -22,37 +22,62 @@ class UnreadMessageManager {
         }
         return PSDLastUnreadMessage(dictionary: dict)
     }
-    static func refreshNewMessagesCount(_ unread:Int){
+    ///check the las saved comment and send it to subscriber
+    static func checkLastComment() {
+        guard let _ = PyrusServiceDesk.subscriber, !PyrusServiceDeskController.PSDIsOpen(), let comment = getLastComment() else {
+            return
+        }
+        checkLastComment(comment)
+    }
+    static func refreshNewMessagesCount(_ unread:Int, lastMessage: PSDMessage?){
         guard unread > 0 else{
+            sendNoNewIfNeed()
             removeLastComment()
             return
         }
-        guard let _ = PyrusServiceDesk.subscriber, !PyrusServiceDeskController.PSDIsOpen() else {
+        guard !PyrusServiceDeskController.PSDIsOpen() else {
             return
         }
         let storedUnreadMessage = getLastComment()
         var needResponse = storedUnreadMessage == nil
-        if !needResponse, let storedUnreadMessage = storedUnreadMessage, !storedUnreadMessage.isShown{
-            needResponse = true
+        if !needResponse, let storedUnreadMessage = storedUnreadMessage, storedUnreadMessage.isShown{
+            if let messageId = Int(storedUnreadMessage.messageId), messageId > 0{
+                let lastMessageId = Int(storedUnreadMessage.messageId) ?? 0
+                needResponse = messageId < lastMessageId
+            }else{
+                needResponse = true
+            }
         }
         guard needResponse else {
             return
         }
         getLastCommentFromServer()
     }
+    ///Sends to subscriber that there is no new messages in chat, if previus callback was with hasUnreadComments == true
+    private static func sendNoNewIfNeed() {
+        guard let subscriber = PyrusServiceDesk.subscriber, !PyrusServiceDeskController.PSDIsOpen(), let storedUnreadMessage = getLastComment(), storedUnreadMessage.isShown else {
+            return
+        }
+        subscriber.onNewReply(hasUnreadComments: false, lastCommentText: nil, lastCommentAttachmentsCount: 0, lastCommentAttachments: nil, commetId: nil, utcTime: 0)
+    }
     private static func getLastCommentFromServer() {
-        PSDGetChat.get("", needShowError: false, delegate: nil, completion: {
+        PSDGetChat.get("", needShowError: false, delegate: nil, keepUnread: true, completion: {
             (chat : PSDChat?) in
             guard let lastMessage = chat?.messages.last else{
                 return
             }
-            ///test нужно проверять на isRead?
-            let lastComment = saveLastComment(lastMessage)
-            guard let subscriber = PyrusServiceDesk.subscriber, !PyrusServiceDeskController.PSDIsOpen() else {
-                return
+            DispatchQueue.main.async  {
+                let lastComment = saveLastComment(lastMessage)
+                checkLastComment(lastComment)
             }
-            subscriber.onNewReply(hasUnreadComments: true, lastCommentText: lastComment.text, lastCommentAttachmentsCount: lastComment.attchmentsCount, lastCommentAttachments: lastComment.attachments, commetId: lastComment.messageId, utcTime: lastComment.utcTime)
         })
-        //subscriber.onNewReply(hasUnreadComments: unread>0)
+    }
+    private static func checkLastComment(_ lastComment: PSDLastUnreadMessage) {
+        guard let subscriber = PyrusServiceDesk.subscriber, !PyrusServiceDeskController.PSDIsOpen(), !lastComment.isShown else {
+            return
+        }
+        subscriber.onNewReply(hasUnreadComments: true, lastCommentText: lastComment.text, lastCommentAttachmentsCount: lastComment.attchmentsCount, lastCommentAttachments: lastComment.attachments, commetId: lastComment.messageId, utcTime: lastComment.utcTime)
+        lastComment.isShown = true
+        resaveLastComment(lastComment)
     }
 }
