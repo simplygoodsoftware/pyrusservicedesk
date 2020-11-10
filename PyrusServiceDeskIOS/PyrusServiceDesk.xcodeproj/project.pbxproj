@@ -109,6 +109,7 @@
 		4B88C6F722145ACA00BDB304 /* PSDGetChats.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4B88C6F622145ACA00BDB304 /* PSDGetChats.swift */; };
 		4B88C6F9221467FF00BDB304 /* PSDChat.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4B88C6F8221467FF00BDB304 /* PSDChat.swift */; };
 		4B88C6FB221482AC00BDB304 /* Date+usefulFunc.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4B88C6FA221482AC00BDB304 /* Date+usefulFunc.swift */; };
+		4B8EE7C9255AAE0A0068B266 /* Data+gZip.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4B8EE7C8255AAE0A0068B266 /* Data+gZip.swift */; };
 		4B90E514221D55B800A18245 /* SupportUserImage.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4B90E513221D55B800A18245 /* SupportUserImage.swift */; };
 		4B90E517221DB21000A18245 /* PSDNoConnectionView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4B90E516221DB21000A18245 /* PSDNoConnectionView.swift */; };
 		4B92CB44224E007B002795FB /* PSDError.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4B92CB43224E007B002795FB /* PSDError.swift */; };
@@ -295,6 +296,7 @@
 		4B88C6F622145ACA00BDB304 /* PSDGetChats.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PSDGetChats.swift; sourceTree = "<group>"; };
 		4B88C6F8221467FF00BDB304 /* PSDChat.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PSDChat.swift; sourceTree = "<group>"; };
 		4B88C6FA221482AC00BDB304 /* Date+usefulFunc.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Date+usefulFunc.swift"; sourceTree = "<group>"; };
+		4B8EE7C8255AAE0A0068B266 /* Data+gZip.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Data+gZip.swift"; sourceTree = "<group>"; };
 		4B90E513221D55B800A18245 /* SupportUserImage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SupportUserImage.swift; sourceTree = "<group>"; };
 		4B90E515221D7B5000A18245 /* en-US */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = "en-US"; path = "en-US.lproj/Localizable.strings"; sourceTree = "<group>"; };
 		4B90E516221DB21000A18245 /* PSDNoConnectionView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PSDNoConnectionView.swift; sourceTree = "<group>"; };
@@ -492,6 +494,7 @@
 				4B7AD4D5250A06C9004E9C48 /* PSDFilesManager.swift */,
 				4BB855AC22086C1900F7CCE5 /* Localizable.strings */,
 				4B1CD38F230BE58000C06F71 /* applicationColors.swift */,
+				4B8EE7C8255AAE0A0068B266 /* Data+gZip.swift */,
 			);
 			path = Helpers;
 			sourceTree = "<group>";
@@ -1117,6 +1120,7 @@
 				4B9F781C228C2813003CC83D /* PSDTableView.swift in Sources */,
 				4B7F350621F8687000977C6D /* PyrusServiceDeskCreator.swift in Sources */,
 				4BB855A02208593200F7CCE5 /* URLCreator.swift in Sources */,
+				4B8EE7C9255AAE0A0068B266 /* Data+gZip.swift in Sources */,
 				4B062A832518A8D100B317D3 /* PSDPlaceholderMessage.swift in Sources */,
 				4B8216AB2201CAAF0011CDF3 /* PSDMessageView.swift in Sources */,
 				4B2E6515220DE4AE00E70A2F /* PSDObjectsCreator.swift in Sources */,

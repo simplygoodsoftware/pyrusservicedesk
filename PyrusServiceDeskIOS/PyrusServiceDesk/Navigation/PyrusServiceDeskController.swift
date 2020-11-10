@@ -155,6 +155,7 @@ class PyrusServiceDeskController: PSDNavigationController {
      Remove Pyrus Service Desk Controllers and clean saved data
  */
     func remove(animated: Bool = true){
+        PyrusLogger.shared.saveLocalLogToDisk()
         if self.parent == nil{
             self.dismiss(animated: animated, completion: {
                 PyrusServiceDesk.stopCallback?.onStop()

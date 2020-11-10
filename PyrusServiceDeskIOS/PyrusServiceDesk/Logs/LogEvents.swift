@@ -18,7 +18,7 @@ enum EventsLogger {
             logString = logString + ": " + additionalInfo
         }
         PyrusServiceDesk.logEvent?.logPyrusServiceDesk(event: logString)
-        PyrusLogger.logEvent(logString)
+        PyrusLogger.shared.logEvent(logString)
     }
     static private func stringForEvent(_ logCase: EventsLogger) -> String{
         let defaultString = "PyrusServiceDesk: "

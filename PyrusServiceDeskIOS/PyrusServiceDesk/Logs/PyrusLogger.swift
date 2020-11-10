@@ -3,10 +3,29 @@ import zlib
 
 let LOG_DATE_FORMAT = "dd(Z) HH:mm:ss.SSS"
 let LOG_DATE_FILE_FORMAT = "d_MM_YYYY_HH_mm_ss"
+protocol LogsSendProtocol: FileChooser {
+    func sendData(_ data: Data?, withUrl: URL?)
+}
 
+///The class for log events to file.
+///Usage : PyrusLogger.shared.logEvent(logString)
 class PyrusLogger: NSObject {
     static let shared = PyrusLogger()
     fileprivate var loglines = [String]()
+    @objc func saveLocalLogToDisk() {
+        PyrusLogger.loggerQueue.async { [weak self] in
+            self?.flush2disk()
+        }
+    }
+    override init() {
+        super.init()
+        checkAndRemoveOldLogs()
+        NotificationCenter.default.addObserver(self, selector: #selector(saveLocalLogToDisk), name: UIApplication.willResignActiveNotification, object: nil)
+    }
+    deinit {
+        NotificationCenter.default.removeObserver(self)
+    }
+    ///Write the lines to file
     func logEvent(_ loggedString: String) {
         let tId: mach_port_t = pthread_mach_thread_np(pthread_self())
         let line = "\(Date().stringWithFormat(LOG_DATE_FORMAT)) [\(tId)] \(loggedString)\n"
@@ -17,7 +36,9 @@ class PyrusLogger: NSObject {
             self?.loglines.append(line)
         }
     }
-    func collectLogs() {
+    ///Returns data from logs files in gZip format
+    ///- parameter controller: The LogsSendProtocol, that 
+    func collectLogs(in controller: LogsSendProtocol) {
         PyrusLogger.loggerQueue.async { [weak self] in
             let version = Bundle.main.object(forInfoDictionaryKey: BUNDLE_VERSION_KEY) as? String
             let device = UIDevice.current
@@ -26,9 +47,10 @@ class PyrusLogger: NSObject {
             
             let content = self?.getLocalLog()
             let body = intro.appending("\n\n\(content ?? "error getLocalLog")")
-            let lsizekb = 0
             let data = body.data(using: .utf8)
-            let dataZ = data.com
+            let dataZ = Data.gzipData(data)
+            let url = URL(string: String(format: LOG_FILE_NAME, PyrusServiceDesk.userId))
+            controller.sendData(dataZ, withUrl: url)
         }
     }
 }
@@ -40,7 +62,7 @@ private extension PyrusLogger {
         return pyrusPath
     }()
     static func directoryOldLogs() -> String? {
-        return (NSSearchPathForDirectoriesInDomains(.cachesDirectory, .userDomainMask, true).last as NSString?)?.appendingPathComponent(OLD_LOGS_PATH)
+        return (NSSearchPathForDirectoriesInDomains(.cachesDirectory, .userDomainMask, true).last as NSString?)?.appendingPathComponent(OLD_LOGS_PATH)//test PSDFilesManager.getDocumentsDirectory()?
     }
     static func oldLogFileURL() -> URL? {
         let fileManager = FileManager.default
@@ -95,7 +117,7 @@ private extension PyrusLogger {
     }
     func getLocalLog() -> String {
         flush2disk()
-        let log : String?
+        var log: String? = nil
         do {
             try log = String(contentsOfFile: PyrusLogger.logPath.absoluteString, encoding: .utf8)
         } catch {
@@ -134,17 +156,38 @@ private extension PyrusLogger {
             (str1, str2) in
             let firstFileName = (str1 as NSString).deletingPathExtension
             let secondFileName = (str2 as NSString).deletingPathExtension
-            let date = Date.getDate(from: firstFileName, with: LOG_DATE_FILE_FORMAT)
-            let firstDate = Date.getDate(from: firstFileName, with: LOG_DATE_FILE_FORMAT)
-            let secondDate = Date.getDate(from: firstFileName, with: LOG_DATE_FILE_FORMAT)
-            return firstDate?.compare(secondDate) ?? false
+            guard let firstDate = Date.getDate(from: firstFileName, with: LOG_DATE_FILE_FORMAT), let secondDate = Date.getDate(from: secondFileName, with: LOG_DATE_FILE_FORMAT) else {
+                return false
+            }
+            return firstDate.compare(secondDate) == .orderedDescending
         })
         return logFiles
+    }
+    func checkAndRemoveOldLogs() {
+        PyrusLogger.loggerQueue.async { [weak self] in
+            guard let pathForLogs = PyrusLogger.directoryOldLogs(), let logFiles = self?.getSortedLogFiles(), logFiles.count > MAX_LOG_FILES_COUNT else {
+                return
+            }
+            let fileManger = FileManager.default
+            for (i,path) in logFiles.enumerated(){
+                guard i < logFiles.count - MAX_LOG_FILES_COUNT else {
+                    return
+                }
+                let pathToRemove = (pathForLogs as NSString).appendingPathComponent(path)
+                do{
+                    try fileManger.removeItem(atPath: pathToRemove)
+                } catch {
+                    
+                }
+            }
+        }
     }
 }
 private let LOGLINES_BUFFER = 300
 private let MAX_LOG_SIZE = 10000000
+private let MAX_LOG_FILES_COUNT = 1
 private let LOG_FILE_PATH = "local_log.txt"
 private let BUNDLE_VERSION_KEY = "CFBundleVersion"
 private let OLD_LOGS_PATH = "oldLogs"
 private let DEFAULT_VERSION = "error get version"
+private let LOG_FILE_NAME = "pyrus_ios_%lu.txt.gz"
