@@ -28,6 +28,7 @@ class PyrusLogger: NSObject {
     func logEvent(_ loggedString: String) {
         let tId: mach_port_t = pthread_mach_thread_np(pthread_self())
         let line = "\(Date().stringWithFormat(LOG_DATE_FORMAT)) [\(tId)] \(loggedString)\n"
+        print("logEvent = \(line)")//test
         PyrusLogger.loggerQueue.async { [weak self] in
             if self?.loglines.count ?? 0 >= LOGLINES_BUFFER{
                 self?.flush2disk()
@@ -38,6 +39,7 @@ class PyrusLogger: NSObject {
     ///Returns data from logs files in gZip format
     ///- parameter controller: The LogsSendProtocol, that
     func collectLogs(in controller: LogsSendProtocol) {
+        print("collect logs start")//test
         PyrusLogger.loggerQueue.async { [weak self] in
             let version = Bundle.main.object(forInfoDictionaryKey: BUNDLE_VERSION_KEY) as? String
             let device = UIDevice.current
@@ -46,10 +48,12 @@ class PyrusLogger: NSObject {
             
             let content = self?.getLocalLog()
             let body = intro.appending("\n\n\(content ?? "error getLocalLog")")
+            print("body = \(body)")
             let data = body.data(using: .utf8)
             let dataZ = Data.gzipData(data)
             let url = URL(string: String(format: LOG_FILE_NAME, PyrusServiceDesk.userId))
             DispatchQueue.main.async {
+                print("collect logs end, controller = \(controller), dataZ = \(dataZ?.count), url = \(url)")//test
                 controller.sendData(dataZ, with: url)
             }
         }
@@ -59,7 +63,7 @@ private extension PyrusLogger {
     static let loggerQueue = DispatchQueue(label: "com.pyrus_service_desk.logger.queue.serial")
     static let logPath: URL = {
         var pyrusPath = PSDFilesManager.getDocumentsDirectory()
-        pyrusPath.appendPathComponent(LOG_FILE_PATH)
+        pyrusPath.appendPathComponent(LOG_FILE_PATH, isDirectory: false)
         return pyrusPath
     }()
     static func directoryOldLogs() -> String? {
@@ -83,17 +87,29 @@ private extension PyrusLogger {
     }
     func flush2disk() {
         guard loglines.count > 0 else {
+            print("loglines is empty")//test
             return
         }
         var lines = loglines.joined()
         loglines.removeAll()
         lines.append("\n")
-        var fileHandler = FileHandle(forWritingAtPath: PyrusLogger.logPath.absoluteString)
+        let docUrl = PSDFilesManager.getDocumentsDirectory()
+        if !FileManager.default.fileExists(atPath: docUrl.path){
+            do {
+                try FileManager.default.createDirectory(at: docUrl, withIntermediateDirectories: true, attributes: nil)
+            }catch {
+                print("Error create folder: \(error.localizedDescription)")//test
+            }
+        }
+        var fileHandler = FileHandle(forWritingAtPath: PyrusLogger.logPath.path)
+        print("logPath = \(PyrusLogger.logPath.path), fileHandler = \(fileHandler)")//test
         if fileHandler == nil {
             do {
-                try "".write(toFile: PyrusLogger.logPath.absoluteString, atomically: true, encoding: .utf8)
-                fileHandler = FileHandle(forWritingAtPath: PyrusLogger.logPath.absoluteString)
-            } catch {
+                
+                try "".write(toFile: PyrusLogger.logPath.path, atomically: true, encoding: .utf8)
+                fileHandler = FileHandle(forWritingAtPath: PyrusLogger.logPath.path)
+            } catch { error
+                print("error WritingAtPath = \(error)")//test
             }
         }
         guard let data = lines.data(using: .utf8) else {
@@ -104,11 +120,12 @@ private extension PyrusLogger {
         fileHandler?.write(data)
         fileHandler?.synchronizeFile()
         fileHandler?.closeFile()
+        print("flush2disk successed: \(fileHandler != nil)")//test
         checkFileSize()
     }
     func checkFileSize() {
         do {
-            let attributes = try FileManager.default.attributesOfItem(atPath:  PyrusLogger.logPath.absoluteString)
+            let attributes = try FileManager.default.attributesOfItem(atPath:  PyrusLogger.logPath.path)
             let fileSize = attributes[.size] as? Int//test
             if fileSize ?? 0 > MAX_LOG_SIZE, let url = PyrusLogger.oldLogFileURL() {
                 try FileManager.default.moveItem(at: PyrusLogger.logPath, to: url)
@@ -120,7 +137,7 @@ private extension PyrusLogger {
         flush2disk()
         var log: String? = nil
         do {
-            try log = String(contentsOfFile: PyrusLogger.logPath.absoluteString, encoding: .utf8)
+            try log = String(contentsOfFile: PyrusLogger.logPath.path, encoding: .utf8)
         } catch {
         }
         let oldLogs = getSortedLogFiles()

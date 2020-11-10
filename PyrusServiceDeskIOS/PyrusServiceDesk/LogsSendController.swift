@@ -1,7 +1,7 @@
 import Foundation
 class LogsSendController: UIViewController&FileChooser {
     var label: String = NSLocalizedString("SendLog", comment: "")//test
-    weak var chooserDelegate: FileChooserDelegate?
+    var chooserDelegate: FileChooserDelegate?
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -33,7 +33,7 @@ class LogsSendController: UIViewController&FileChooser {
         prepareView.addSubview(prepareLabel)
         
         prepareView.translatesAutoresizingMaskIntoConstraints = false
-        prepareView.translatesAutoresizingMaskIntoConstraints = false
+        prepareLabel.translatesAutoresizingMaskIntoConstraints = false
         
         prepareView.leftAnchor.constraint(equalTo: view.leftAnchor, constant: DISTANCE_TO_BOARD).isActive = true
         prepareView.rightAnchor.constraint(equalTo: view.rightAnchor, constant: -DISTANCE_TO_BOARD).isActive = true

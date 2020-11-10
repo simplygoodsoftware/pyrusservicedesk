@@ -148,7 +148,7 @@ import UIKit
     ///- parameter clientId: clientId using for all requests. If clientId not setted PyrusServiceDesk Controller will not be created
     ///- parameter loggingEnabled If true, then the library will write logs, and they can be sent as a file to chat by clicking the "Send Library Logs" button in the menu under the "+" sign.
     @objc static public func createWith(_ clientId: String?, loggingEnabled: Bool = false)  {
-        createWith(clientId, userId: nil, securityKey: nil, reset: false)
+        createWith(clientId, userId: nil, securityKey: nil, reset: false, loggingEnabled: loggingEnabled)
     }
     
     ///Init PyrusServiceDesk with new clientId.
@@ -156,7 +156,7 @@ import UIKit
     ///- parameter reset: If true, user will be reseted
     ///- parameter loggingEnabled If true, then the library will write logs, and they can be sent as a file to chat by clicking the "Send Library Logs" button in the menu under the "+" sign.
     @objc static public func createWith(_ clientId: String?, reset: Bool, loggingEnabled: Bool = false) {
-        createWith(clientId, userId: nil, securityKey: nil, reset: reset)
+        createWith(clientId, userId: nil, securityKey: nil, reset: reset, loggingEnabled: loggingEnabled)
     }
     
     ///Init PyrusServiceDesk with new clientId.
@@ -165,7 +165,7 @@ import UIKit
     ///- parameter securityKey: security key of the user for safe initialization
     ///- parameter loggingEnabled If true, then the library will write logs, and they can be sent as a file to chat by clicking the "Send Library Logs" button in the menu under the "+" sign.
     @objc static public func createWith(_ clientId: String?, userId: String?, securityKey: String?, loggingEnabled: Bool = false) {
-        createWith(clientId, userId: userId, securityKey: securityKey, reset: false)
+        createWith(clientId, userId: userId, securityKey: securityKey, reset: false, loggingEnabled: loggingEnabled)
     }
     private static func createWith(_ clientId: String?, userId: String?, securityKey: String?, reset: Bool, loggingEnabled: Bool = false) {
         PyrusServiceDesk.loggingEnabled = loggingEnabled

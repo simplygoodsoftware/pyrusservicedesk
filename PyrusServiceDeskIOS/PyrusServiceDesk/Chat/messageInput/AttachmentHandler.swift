@@ -33,6 +33,7 @@ class AttachmentHandler: NSObject,UIImagePickerControllerDelegate, UINavigationC
         if PyrusServiceDesk.loggingEnabled {
             if logsSendController == logsSendController {
                 logsSendController = LogsSendController()
+                logsSendController?.chooserDelegate = self
             }
             actions.append(UIAlertAction(title: logsSendController?.label, style: .default, handler: { (action) -> Void in
                 self.authorizationStatus(type: .localLogs, viewController: viewController)
@@ -63,7 +64,7 @@ class AttachmentHandler: NSObject,UIImagePickerControllerDelegate, UINavigationC
             }
         }
     }
-    /// is window to present PyrusServiceDesk.fileChooserController over keyboard
+    /// is window to present PyrusServiceDesk.fileChooserController over keyboard (accessoryView)
     var _alertWindow : UIWindow? = nil
     func authorizationStatus(type: AttachmentType, viewController: UIViewController){
         switch type {
@@ -110,7 +111,7 @@ class AttachmentHandler: NSObject,UIImagePickerControllerDelegate, UINavigationC
     //FileChooserDelegate
     func didEndWithSuccess(_ data: Data?, url: URL?) {
          DispatchQueue.main.async {
-            let viewController = self._alertWindow?.rootViewController?.presentingViewController
+            let viewController = self._alertWindow?.rootViewController?.presentedViewController
             viewController?.dismiss(animated: true, completion: {
                 self._alertWindow?.isHidden = true
                 self._alertWindow = nil
