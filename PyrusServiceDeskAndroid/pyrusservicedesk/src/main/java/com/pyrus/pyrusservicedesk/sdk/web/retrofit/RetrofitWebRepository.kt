@@ -64,7 +64,7 @@ internal class RetrofitWebRepository(
         api = retrofit.create(ServiceDeskApi::class.java)
     }
 
-    override suspend fun getFeed(): Response<Comments> {
+    override suspend fun getFeed(keepUnread: Boolean): Response<Comments> {
         PLog.d(TAG, "getFeed, " +
                 "appId: ${appId.getFirstNSymbols(10)}, " +
                 "userId: ${getUserId().getFirstNSymbols(10)}, " +
@@ -73,7 +73,7 @@ internal class RetrofitWebRepository(
         )
         return withContext<Response<Comments>>(Dispatchers.IO){
             try {
-                api.getTicketFeed(RequestBodyBase(appId, getUserId(), getSecurityKey(), instanceId, getVersion())).execute().run {
+                api.getTicketFeed(GetFeedBody(appId, getUserId(), getSecurityKey(), instanceId, getVersion(), keepUnread)).execute().run {
                     PLog.d(TAG, "getFeed, isSuccessful: $isSuccessful, body() != null: ${body() != null}")
                     when {
                         isSuccessful && body() != null -> ResponseImpl.success(body()!!)
@@ -109,18 +109,17 @@ internal class RetrofitWebRepository(
         }
     }
 
-    override suspend fun getTicket(ticketId: Int, isActive: Boolean?): GetTicketResponse {
+    override suspend fun getTicket(ticketId: Int): GetTicketResponse {
         PLog.d(TAG, "getTicket, " +
                 "appId: ${appId.getFirstNSymbols(10)}, " +
                 "userId: ${getUserId().getFirstNSymbols(10)}, " +
                 "instanceId: ${getInstanceId()?.getFirstNSymbols(10)}, " +
                 "apiVersion: ${getVersion()}, " +
-                "ticketId: $ticketId, " +
-                "IsActive: $isActive"
+                "ticketId: $ticketId"
         )
         return withContext(Dispatchers.IO){
             try {
-                api.getTicket(RequestBodyGetTicket(appId, getUserId(), getSecurityKey(), getInstanceId(), getVersion(), isActive), ticketId).execute().run {
+                api.getTicket(RequestBodyBase(appId, getUserId(), getSecurityKey(), getInstanceId(), getVersion()), ticketId).execute().run {
                     PLog.d(TAG, "getTicket, isSuccessful: $isSuccessful, body() != null: ${body() != null}")
                     when {
                         isSuccessful && body() != null -> GetTicketResponse(ticket = body())

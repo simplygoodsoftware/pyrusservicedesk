@@ -8,13 +8,16 @@ import com.pyrus.pyrusservicedesk.sdk.response.Response
  * Request for obtaining ticket feed.
  * [requestsRemoteComments] should be TRUE to obtain remote comments
  */
-internal class GetFeedRequest(repository: GeneralRepository,
-                              private val requestsRemoteComments: Boolean)
+internal class GetFeedRequest(
+    repository: GeneralRepository,
+    private val requestsRemoteComments: Boolean,
+    private val keepUnread: Boolean
+)
     : RequestBase<Comments>(repository) {
 
     override suspend fun run(repository: GeneralRepository): Response<Comments> =
         when {
-            requestsRemoteComments -> repository.getFeed()
+            requestsRemoteComments -> repository.getFeed(keepUnread)
             else -> repository.getPendingFeedComments()
         }
 }

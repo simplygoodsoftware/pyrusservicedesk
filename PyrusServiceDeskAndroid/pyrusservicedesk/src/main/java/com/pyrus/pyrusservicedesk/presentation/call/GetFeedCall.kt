@@ -11,12 +11,14 @@ import kotlinx.coroutines.CoroutineScope
  */
 internal class GetFeedCall(
         scope: CoroutineScope,
-        private val requests: RequestFactory)
+        private val requests: RequestFactory,
+        private val keepUnread: Boolean = false
+)
     : BaseCall<Comments>(scope){
 
 
     override suspend fun run(): CallResult<Comments> {
-        val response = requests.getFeedRequest().execute()
+        val response = requests.getFeedRequest(keepUnread).execute()
         return CallResult(response.getData(), response.getError())
     }
 }

@@ -13,9 +13,9 @@ import com.pyrus.pyrusservicedesk.sdk.web.UploadFileHooks
 
 internal class RequestFactory(private val repository: GeneralRepository) {
 
-    fun getFeedRequest(): Request<Comments> = GetFeedRequest(repository, true)
+    fun getFeedRequest(keepUnread: Boolean = false): Request<Comments> = GetFeedRequest(repository, true, keepUnread)
     fun getTicketsRequest(): RequestBase<List<TicketShortDescription>> = GetTicketsRequest(repository)
-    fun getTicketRequest(ticketId: Int, isActive: Boolean? = null): RequestBase<Ticket> = GetTicketRequest(repository, ticketId, isActive)
+    fun getTicketRequest(ticketId: Int): RequestBase<Ticket> = GetTicketRequest(repository, ticketId)
     fun getCreateTicketRequest(description: TicketDescription,
                                uploadFileHooks: UploadFileHooks?): RequestBase<CreateTicketResponseData> {
         return CreateTicketRequest(repository, description, uploadFileHooks)
@@ -39,7 +39,7 @@ internal class RequestFactory(private val repository: GeneralRepository) {
         return SetPushTokenRequest(repository, token)
     }
 
-    fun getPendingFeedCommentsRequest(): Request<Comments> = GetFeedRequest(repository, false)
+    fun getPendingFeedCommentsRequest(): Request<Comments> = GetFeedRequest(repository, false, false)
     fun getRemovePendingCommentRequest(comment: Comment) = RemovePendingCommentRequest(repository, comment)
     fun getRemoveAllPendingCommentsRequest() = RemoveAllPendingCommentsRequest(repository)
 }

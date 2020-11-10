@@ -11,7 +11,7 @@ internal interface RemoteRepository {
     /**
      * Provides tickets in single feed representation.
      */
-    suspend fun getFeed(): Response<Comments>
+    suspend fun getFeed(keepUnread: Boolean): Response<Comments>
 
     /**
      * Provides available tickets.
@@ -21,7 +21,7 @@ internal interface RemoteRepository {
     /**
      * Provides ticket with the given [ticketId].
      */
-    suspend fun getTicket(ticketId: Int, isActive: Boolean?): GetTicketResponse
+    suspend fun getTicket(ticketId: Int): GetTicketResponse
 
     /**
      * Appends [comment] to the ticket with the given [ticketId].

@@ -16,7 +16,7 @@ class RequestUtils{
         /**
          * Base URL used for api calls
          */
-        internal const val BASE_URL = "https://pyrus.com/servicedeskapi/v1/"
+        internal const val BASE_URL = "https://dev.pyrus.com/servicedeskapi/v1/"
 
         /**
          * Provides url for getting the avatar.

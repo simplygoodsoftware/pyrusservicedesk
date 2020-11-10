@@ -7,10 +7,6 @@ import com.pyrus.pyrusservicedesk.sdk.response.ResponseImpl
 /**
  * Request for obtaining ticket.
  */
-internal class GetTicketRequest(
-    repository: GeneralRepository,
-    val ticketId: Int,
-    val isActive: Boolean? = null
-): RequestBase<Ticket>(repository) {
-    override suspend fun run(repository: GeneralRepository): ResponseImpl<Ticket> = repository.getTicket(ticketId, isActive)
+internal class GetTicketRequest(repository: GeneralRepository, val ticketId: Int): RequestBase<Ticket>(repository) {
+    override suspend fun run(repository: GeneralRepository): ResponseImpl<Ticket> = repository.getTicket(ticketId)
 }
