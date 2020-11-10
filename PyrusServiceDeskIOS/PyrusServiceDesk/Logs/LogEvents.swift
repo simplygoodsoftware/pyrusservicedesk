@@ -1,5 +1,5 @@
 import Foundation
-///The protocol for log some evnts from PyrusServiceDesk
+///The protocol for log some events from PyrusServiceDesk
 @objc public protocol LogEvents{
     ///The callback that PyrusServiceDesk was closed
     @objc func logPyrusServiceDesk(event: String)
@@ -18,6 +18,7 @@ enum EventsLogger {
             logString = logString + ": " + additionalInfo
         }
         PyrusServiceDesk.logEvent?.logPyrusServiceDesk(event: logString)
+        PyrusLogger.logEvent(logString)
     }
     static private func stringForEvent(_ logCase: EventsLogger) -> String{
         let defaultString = "PyrusServiceDesk: "

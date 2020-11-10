@@ -146,6 +146,8 @@
 		4BB1A301245B8D6000A817C1 /* file2.png in Resources */ = {isa = PBXBuildFile; fileRef = 4BB1A2FE245B8D6000A817C1 /* file2.png */; };
 		4BB1A302245B8D6000A817C1 /* file2@3x.png in Resources */ = {isa = PBXBuildFile; fileRef = 4BB1A2FF245B8D6000A817C1 /* file2@3x.png */; };
 		4BB68608221AAAC600E9EC07 /* Image+compress.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4BB68607221AAAC600E9EC07 /* Image+compress.swift */; };
+		4BB6CDC325597E4C004C680A /* PyrusLogger.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4BB6CDC225597E4C004C680A /* PyrusLogger.swift */; };
+		4BB6CDCA2559B242004C680A /* UIDevice + modelName.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4BB6CDC92559B242004C680A /* UIDevice + modelName.swift */; };
 		4BB7DADD225E1BC300F6D1F0 /* PSDImageAttachmentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4BB7DADC225E1BC300F6D1F0 /* PSDImageAttachmentView.swift */; };
 		4BB7DADF225E280800F6D1F0 /* PSDFileAttachmentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4BB7DADE225E280800F6D1F0 /* PSDFileAttachmentView.swift */; };
 		4BB855A02208593200F7CCE5 /* URLCreator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4BB8559F2208593200F7CCE5 /* URLCreator.swift */; };
@@ -331,6 +333,8 @@
 		4BB1A2FE245B8D6000A817C1 /* file2.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = file2.png; sourceTree = "<group>"; };
 		4BB1A2FF245B8D6000A817C1 /* file2@3x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "file2@3x.png"; sourceTree = "<group>"; };
 		4BB68607221AAAC600E9EC07 /* Image+compress.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Image+compress.swift"; sourceTree = "<group>"; };
+		4BB6CDC225597E4C004C680A /* PyrusLogger.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PyrusLogger.swift; sourceTree = "<group>"; };
+		4BB6CDC92559B242004C680A /* UIDevice + modelName.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "UIDevice + modelName.swift"; sourceTree = "<group>"; };
 		4BB7DADC225E1BC300F6D1F0 /* PSDImageAttachmentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PSDImageAttachmentView.swift; sourceTree = "<group>"; };
 		4BB7DADE225E280800F6D1F0 /* PSDFileAttachmentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PSDFileAttachmentView.swift; sourceTree = "<group>"; };
 		4BB8559F2208593200F7CCE5 /* URLCreator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = URLCreator.swift; sourceTree = "<group>"; };
@@ -470,6 +474,7 @@
 				4B64B86E224382C8003116C3 /* String */,
 				4B90E518221DB42000A18245 /* for images */,
 				4B7EA885221EB0B3009C9B41 /* PSDAlertDisplay.swift */,
+				4BB6CDC92559B242004C680A /* UIDevice + modelName.swift */,
 				4B64B8732243D402003116C3 /* CharacterSet+urlEncode.swift */,
 				4B7F350B21F8949700977C6D /* customColor.swift */,
 				4B88C6FA221482AC00BDB304 /* Date+usefulFunc.swift */,
@@ -650,7 +655,7 @@
 				4B66011C223948CE00AA45E6 /* PyrusServiceDeskCustomization.swift */,
 				4B873BB3224B7EE600A96E93 /* PSDNewReplySubscriber.swift */,
 				4BD29A082464B72B000CC420 /* OnStopCallback.swift */,
-				4BBB9B05249D152900059A23 /* LogEvents.swift */,
+				4BB6CDC625597E56004C680A /* Logs */,
 				4B2F47AB224A22FF00E3B23A /* PSDChooser.swift */,
 				7B1E8D57250665F800C1E5AC /* PSDInfoView.swift */,
 				4B2E6513220DE3A500E70A2F /* PSDObjectsCreator */,
@@ -806,6 +811,15 @@
 				4BB1A2FF245B8D6000A817C1 /* file2@3x.png */,
 			);
 			path = File;
+			sourceTree = "<group>";
+		};
+		4BB6CDC625597E56004C680A /* Logs */ = {
+			isa = PBXGroup;
+			children = (
+				4BBB9B05249D152900059A23 /* LogEvents.swift */,
+				4BB6CDC225597E4C004C680A /* PyrusLogger.swift */,
+			);
+			path = Logs;
 			sourceTree = "<group>";
 		};
 		4BB8559E2208559200F7CCE5 /* Requests */ = {
@@ -1085,10 +1099,12 @@
 				4B9B0BBB2266344200090DB5 /* PSDAttachmentPreviewErrorView.swift in Sources */,
 				4BCEB433220C150C008B29B6 /* UIImage+color.swift in Sources */,
 				7B1E8D58250665F800C1E5AC /* PSDInfoView.swift in Sources */,
+				4BB6CDC325597E4C004C680A /* PyrusLogger.swift in Sources */,
 				4B7F350A21F8900A00977C6D /* PSDChatViewController.swift in Sources */,
 				4B6D4A39244E1B6A007C6082 /* AttachmentCollectionView.swift in Sources */,
 				4B659AFE223FA9E400D79489 /* PSDSpinerTableView.swift in Sources */,
 				4B82A49A2268B57B00654CE0 /* PSDAttachmentLoadViewControllerInterface.swift in Sources */,
+				4BB6CDCA2559B242004C680A /* UIDevice + modelName.swift in Sources */,
 				4B7918E22237A00D0071CA72 /* UITableView+keyboard.swift in Sources */,
 				4BB68608221AAAC600E9EC07 /* Image+compress.swift in Sources */,
 				4BAA8817221C57FD00B81B76 /* View+asImage.swift in Sources */,

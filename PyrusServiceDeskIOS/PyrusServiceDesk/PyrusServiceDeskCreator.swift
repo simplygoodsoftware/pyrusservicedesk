@@ -34,7 +34,7 @@ import UIKit
     
     
     ///A flag indicates need to show chat list or show all conversations as one. Default is false - user can create new chat and see the list of old chats. If true - all new messages will be added to open chat.
-    @objc private(set) static var  oneChat:Bool = false
+    @objc private(set) static var  oneChat:Bool = true
     
       
     @objc static let mainSession : URLSession = {
@@ -140,57 +140,44 @@ import UIKit
         PyrusServiceDesk.logEvent = subscriber
     }
     
-    ///Init PyrusServiceDesk with new clientId.
-    ///- parameter clientId: clientId using for all requests. If clientId not setted PyrusServiceDesk Controller will not be created
-    @objc static public func createWith(_ clientId: String?)  {
-        if clientId != nil && (clientId?.count ?? 0)>0 {
-            PyrusServiceDesk.clientId = clientId
-            PyrusServiceDesk.oneChat = true
-            PyrusServiceDesk.createUserId()
-            let needReloadUI = PyrusServiceDesk.customUserId?.count ?? 0 > 0
-            PyrusServiceDesk.securityKey = nil
-            PyrusServiceDesk.customUserId = nil
-            if needReloadUI {
-                PyrusServiceDesk.mainController?.updateTitleChat()
-            }
-
-        }else{
-            EventsLogger.logEvent(.emptyClientId)
-        }
-    }
-    
-    @objc static public func createWith(_ clientId: String?, reset: Bool) {
-        if clientId != nil && (clientId?.count ?? 0)>0 {
-            PyrusServiceDesk.clientId = clientId
-            PyrusServiceDesk.oneChat = true
-            PyrusServiceDesk.createUserId(reset)
-            let needReloadUI = PyrusServiceDesk.customUserId?.count ?? 0 > 0
-            PyrusServiceDesk.securityKey = nil
-            PyrusServiceDesk.customUserId = nil
-            if needReloadUI {
-                PyrusServiceDesk.mainController?.updateTitleChat()
-            }
-        }else{
-            EventsLogger.logEvent(.emptyClientId)
-        }
-    }
-    
     static var customUserId: String?
     static var securityKey: String?
     
-    @objc static public func createWith(_ clientId: String?, userId: String?, securityKey: String?) {
-        if clientId != nil && (clientId?.count ?? 0)>0 {
-            PyrusServiceDesk.clientId = clientId
-            PyrusServiceDesk.oneChat = true
-            PyrusServiceDesk.securityKey = securityKey
-            let needReloadUI = PyrusServiceDesk.customUserId != userId
-            PyrusServiceDesk.customUserId = userId
-            PyrusServiceDesk.createUserId(false)
-            if needReloadUI {
-                PyrusServiceDesk.mainController?.updateTitleChat()
-            }
-        }else{
+    ///Init PyrusServiceDesk with new clientId.
+    ///- parameter clientId: clientId using for all requests. If clientId not setted PyrusServiceDesk Controller will not be created
+    ///- parameter loggingEnabled If true, then the library will write logs, and they can be sent as a file to chat by clicking the "Send Library Logs" button in the menu under the "+" sign.
+    @objc static public func createWith(_ clientId: String?, loggingEnabled: Bool = false)  {
+        createWith(clientId, userId: nil, securityKey: nil, reset: false)
+    }
+    
+    ///Init PyrusServiceDesk with new clientId.
+    ///- parameter clientId: clientId using for all requests. If clientId not setted PyrusServiceDesk Controller will not be created
+    ///- parameter reset: If true, user will be reseted
+    ///- parameter loggingEnabled If true, then the library will write logs, and they can be sent as a file to chat by clicking the "Send Library Logs" button in the menu under the "+" sign.
+    @objc static public func createWith(_ clientId: String?, reset: Bool, loggingEnabled: Bool = false) {
+        createWith(clientId, userId: nil, securityKey: nil, reset: reset)
+    }
+    
+    ///Init PyrusServiceDesk with new clientId.
+    ///- parameter clientId: clientId using for all requests. If clientId not setted PyrusServiceDesk Controller will not be created
+    ///- parameter userId: userId of the user who is initializing service desk
+    ///- parameter securityKey: security key of the user for safe initialization
+    ///- parameter loggingEnabled If true, then the library will write logs, and they can be sent as a file to chat by clicking the "Send Library Logs" button in the menu under the "+" sign.
+    @objc static public func createWith(_ clientId: String?, userId: String?, securityKey: String?, loggingEnabled: Bool = false) {
+        createWith(clientId, userId: userId, securityKey: securityKey, reset: false)
+    }
+    private static func createWith(_ clientId: String?, userId: String?, securityKey: String?, reset: Bool, loggingEnabled: Bool = false) {
+        guard let clientId = clientId, clientId.count > 0 else {
             EventsLogger.logEvent(.emptyClientId)
+            return
+        }
+        PyrusServiceDesk.clientId = clientId
+        PyrusServiceDesk.securityKey = securityKey
+        let needReloadUI = PyrusServiceDesk.customUserId != userId
+        PyrusServiceDesk.customUserId = userId
+        PyrusServiceDesk.createUserId(reset)
+        if needReloadUI {
+            PyrusServiceDesk.mainController?.updateTitleChat()
         }
     }
     
