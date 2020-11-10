@@ -1,10 +1,9 @@
 import Foundation
-import zlib
 
 let LOG_DATE_FORMAT = "dd(Z) HH:mm:ss.SSS"
 let LOG_DATE_FILE_FORMAT = "d_MM_YYYY_HH_mm_ss"
 protocol LogsSendProtocol: FileChooser {
-    func sendData(_ data: Data?, withUrl: URL?)
+    func sendData(_ data: Data?, with Url: URL?)
 }
 
 ///The class for log events to file.
@@ -37,7 +36,7 @@ class PyrusLogger: NSObject {
         }
     }
     ///Returns data from logs files in gZip format
-    ///- parameter controller: The LogsSendProtocol, that 
+    ///- parameter controller: The LogsSendProtocol, that
     func collectLogs(in controller: LogsSendProtocol) {
         PyrusLogger.loggerQueue.async { [weak self] in
             let version = Bundle.main.object(forInfoDictionaryKey: BUNDLE_VERSION_KEY) as? String
@@ -50,7 +49,9 @@ class PyrusLogger: NSObject {
             let data = body.data(using: .utf8)
             let dataZ = Data.gzipData(data)
             let url = URL(string: String(format: LOG_FILE_NAME, PyrusServiceDesk.userId))
-            controller.sendData(dataZ, withUrl: url)
+            DispatchQueue.main.async {
+                controller.sendData(dataZ, with: url)
+            }
         }
     }
 }

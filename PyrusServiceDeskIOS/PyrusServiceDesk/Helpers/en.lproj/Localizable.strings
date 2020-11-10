@@ -62,3 +62,6 @@
 
 "AcсessDenied"="Access denied";
 "OK"="OK";
+
+"PrepareLog"="Preparing log...";
+"SendLog"="Send Log";

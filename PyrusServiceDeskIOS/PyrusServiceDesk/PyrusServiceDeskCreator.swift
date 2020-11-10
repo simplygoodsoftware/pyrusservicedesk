@@ -142,6 +142,7 @@ import UIKit
     
     static var customUserId: String?
     static var securityKey: String?
+    static var loggingEnabled: Bool = false
     
     ///Init PyrusServiceDesk with new clientId.
     ///- parameter clientId: clientId using for all requests. If clientId not setted PyrusServiceDesk Controller will not be created
@@ -167,6 +168,7 @@ import UIKit
         createWith(clientId, userId: userId, securityKey: securityKey, reset: false)
     }
     private static func createWith(_ clientId: String?, userId: String?, securityKey: String?, reset: Bool, loggingEnabled: Bool = false) {
+        PyrusServiceDesk.loggingEnabled = loggingEnabled
         guard let clientId = clientId, clientId.count > 0 else {
             EventsLogger.logEvent(.emptyClientId)
             return
