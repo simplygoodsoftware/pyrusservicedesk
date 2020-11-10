@@ -22,7 +22,6 @@ public class SampleActivity extends Activity implements NewReplySubscriber {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_sample);
-        PyrusServiceDesk.subscribeToReplies(this);
         findViewById(R.id.support).setOnClickListener(
                 view -> PyrusServiceDesk.start(
                         this,
@@ -62,9 +61,15 @@ public class SampleActivity extends Activity implements NewReplySubscriber {
     }
 
     @Override
-    protected void onDestroy() {
-        super.onDestroy();
+    protected void onStart() {
+        super.onStart();
+        PyrusServiceDesk.subscribeToReplies(this);
+    }
+
+    @Override
+    protected void onStop() {
         PyrusServiceDesk.unsubscribeFromReplies(this);
+        super.onStop();
     }
 
     @SuppressLint("SetTextI18n")

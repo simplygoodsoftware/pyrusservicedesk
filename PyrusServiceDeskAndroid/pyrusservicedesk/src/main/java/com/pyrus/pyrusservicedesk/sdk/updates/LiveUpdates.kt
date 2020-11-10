@@ -48,6 +48,8 @@ internal class LiveUpdates(
     private var isStarted = false
 
     private var lastComment: Comment? = null
+    private var hasUnread: Boolean = false
+    private var lastNotificationIsShown = true
 
     private val ticketsUpdateRunnable = object : Runnable {
         override fun run() {
@@ -193,6 +195,12 @@ internal class LiveUpdates(
         val lastComment = preferencesManager.getLastComment()
         if (lastComment != null)
             preferencesManager.saveLastComment(lastComment.copy(isShown = true, isRead = true))
+    }
+
+    internal fun resetUnreadCount() {
+        PLog.d(TAG, "resetUnreadCount, hasUnread: $hasUnread, recentUnreadCounter: $recentUnreadCounter")
+        hasUnread = false
+        recentUnreadCounter = 0
     }
 
     /**
@@ -350,6 +358,25 @@ internal class LiveUpdates(
             lastComment.id,
             lastComment.utcTime
         )
+
+    private fun notifyOnNewReplySubscribers(hasNewComments: Boolean) {
+        if (newReplySubscribers.isEmpty()) {
+            lastNotificationIsShown = false
+            return
+        }
+        lastNotificationIsShown = true
+        if (activeScreenCount > 0)
+            return
+
+        PLog.d(TAG, "notifyOnNewReplySubscribers, NewReplySubscriber(hasUnreadComments = $hasNewComments)")
+        newReplySubscribers.forEach { it.onNewReply(hasNewComments) }
+    }
+
+    fun reset(userId: String?) {
+        PLog.d(TAG, "reset")
+        this.userId = userId
+        recentUnreadCounter = -1
+        //TODO add active time reset
     }
 
     companion object {
