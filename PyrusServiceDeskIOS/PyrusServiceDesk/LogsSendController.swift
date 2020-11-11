@@ -1,6 +1,6 @@
 import Foundation
 class LogsSendController: UIViewController&FileChooser {
-    var label: String = NSLocalizedString("SendLog", comment: "")//test
+    var label: String = NSLocalizedString("SendLog", comment: "")
     var chooserDelegate: FileChooserDelegate?
     
     override func viewDidLoad() {

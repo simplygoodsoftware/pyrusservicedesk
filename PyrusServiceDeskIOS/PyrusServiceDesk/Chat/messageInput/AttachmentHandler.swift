@@ -87,7 +87,7 @@ class AttachmentHandler: NSObject,UIImagePickerControllerDelegate, UINavigationC
                 break
             }
         case .customChooser, .localLogs:
-            if type == .customChooser{
+            if type == .customChooser {
                 PyrusServiceDesk.fileChooserController?.chooserDelegate = self
             }
             let fileController = type == .customChooser ? PyrusServiceDesk.fileChooserController : logsSendController
