@@ -28,7 +28,6 @@ class PyrusLogger: NSObject {
     func logEvent(_ loggedString: String) {
         let tId: mach_port_t = pthread_mach_thread_np(pthread_self())
         let line = "\(Date().stringWithFormat(LOG_DATE_FORMAT)) [\(tId)] \(loggedString)\n"
-        print("logEvent = \(line)")//test
         PyrusLogger.loggerQueue.async { [weak self] in
             if self?.loglines.count ?? 0 >= LOGLINES_BUFFER{
                 self?.flush2disk()
@@ -39,7 +38,6 @@ class PyrusLogger: NSObject {
     ///Returns data from logs files in gZip format
     ///- parameter controller: The LogsSendProtocol, that
     func collectLogs(in controller: LogsSendProtocol) {
-        print("collect logs start")//test
         PyrusLogger.loggerQueue.async { [weak self] in
             let version = Bundle.main.object(forInfoDictionaryKey: BUNDLE_VERSION_KEY) as? String
             let device = UIDevice.current
@@ -48,12 +46,10 @@ class PyrusLogger: NSObject {
             
             let content = self?.getLocalLog()
             let body = intro.appending("\n\n\(content ?? "error getLocalLog")")
-            print("body = \(body)")
             let data = body.data(using: .utf8)
             let dataZ = Data.gzipData(data)
             let url = URL(string: String(format: LOG_FILE_NAME, PyrusServiceDesk.userId))
             DispatchQueue.main.async {
-                print("collect logs end, controller = \(controller), dataZ = \(dataZ?.count), url = \(url)")//test
                 controller.sendData(dataZ, with: url)
             }
         }
@@ -66,28 +62,28 @@ private extension PyrusLogger {
         pyrusPath.appendPathComponent(LOG_FILE_PATH, isDirectory: false)
         return pyrusPath
     }()
-    static func directoryOldLogs() -> String? {
-        return (NSSearchPathForDirectoriesInDomains(.cachesDirectory, .userDomainMask, true).last as NSString?)?.appendingPathComponent(OLD_LOGS_PATH)//test PSDFilesManager.getDocumentsDirectory()?
+    static func directoryOldLogs() -> URL? {
+        let paths = NSSearchPathForDirectoriesInDomains(.cachesDirectory, .userDomainMask, true)
+        let cachesDirectory = URL(fileURLWithPath: paths.last ?? "")
+        return cachesDirectory.appendingPathComponent(OLD_LOGS_PATH, isDirectory: true)
     }
     static func oldLogFileURL() -> URL? {
         let fileManager = FileManager.default
         guard let directoryToOldLogs = directoryOldLogs() else {
             return nil
         }
-        if !fileManager.fileExists(atPath: directoryToOldLogs) {
+        if !fileManager.fileExists(atPath: directoryToOldLogs.path) {
             do {
-                try fileManager.createDirectory(atPath: directoryToOldLogs, withIntermediateDirectories: true, attributes: nil)
+                try fileManager.createDirectory(atPath: directoryToOldLogs.path, withIntermediateDirectories: true, attributes: nil)
             } catch {
             }
         }
-        var oldLogFileName = Date().stringWithFormat(LOG_DATE_FILE_FORMAT)
-        oldLogFileName = (directoryToOldLogs as NSString).appendingPathComponent(oldLogFileName)
-        return URL(string: oldLogFileName)
+        let oldLogFileName = Date().stringWithFormat(LOG_DATE_FILE_FORMAT)
+        return directoryToOldLogs.appendingPathComponent(oldLogFileName, isDirectory: false)
         
     }
     func flush2disk() {
         guard loglines.count > 0 else {
-            print("loglines is empty")//test
             return
         }
         var lines = loglines.joined()
@@ -98,18 +94,15 @@ private extension PyrusLogger {
             do {
                 try FileManager.default.createDirectory(at: docUrl, withIntermediateDirectories: true, attributes: nil)
             }catch {
-                print("Error create folder: \(error.localizedDescription)")//test
             }
         }
         var fileHandler = FileHandle(forWritingAtPath: PyrusLogger.logPath.path)
-        print("logPath = \(PyrusLogger.logPath.path), fileHandler = \(fileHandler)")//test
         if fileHandler == nil {
             do {
                 
                 try "".write(toFile: PyrusLogger.logPath.path, atomically: true, encoding: .utf8)
                 fileHandler = FileHandle(forWritingAtPath: PyrusLogger.logPath.path)
-            } catch { error
-                print("error WritingAtPath = \(error)")//test
+            } catch {
             }
         }
         guard let data = lines.data(using: .utf8) else {
@@ -120,13 +113,12 @@ private extension PyrusLogger {
         fileHandler?.write(data)
         fileHandler?.synchronizeFile()
         fileHandler?.closeFile()
-        print("flush2disk successed: \(fileHandler != nil)")//test
         checkFileSize()
     }
     func checkFileSize() {
         do {
             let attributes = try FileManager.default.attributesOfItem(atPath:  PyrusLogger.logPath.path)
-            let fileSize = attributes[.size] as? Int//test
+            let fileSize = attributes[.size] as? Int
             if fileSize ?? 0 > MAX_LOG_SIZE, let url = PyrusLogger.oldLogFileURL() {
                 try FileManager.default.moveItem(at: PyrusLogger.logPath, to: url)
             }
@@ -143,9 +135,9 @@ private extension PyrusLogger {
         let oldLogs = getSortedLogFiles()
         var oldLog: String = ""
         if oldLogs.count > 0, let lastLog = oldLogs.last, let pathForLogs = PyrusLogger.directoryOldLogs(){
-            let pathForOldFile = (pathForLogs as NSString).appendingPathComponent(lastLog)
+            let pathForOldFile = pathForLogs.appendingPathComponent(lastLog)
             do {
-                try oldLog = String(contentsOfFile: pathForOldFile, encoding: .utf8)
+                try oldLog = String(contentsOfFile: pathForOldFile.path, encoding: .utf8)
             } catch {
             }
         }
@@ -163,7 +155,7 @@ private extension PyrusLogger {
         var logFiles = [String]()
         if let directory = PyrusLogger.directoryOldLogs(){
             do{
-                let files = try fileManger.contentsOfDirectory(atPath: directory)
+                let files = try fileManger.contentsOfDirectory(atPath: directory.path)
                 for file in files {
                     logFiles.append(file)
                 }
@@ -191,11 +183,10 @@ private extension PyrusLogger {
                 guard i < logFiles.count - MAX_LOG_FILES_COUNT else {
                     return
                 }
-                let pathToRemove = (pathForLogs as NSString).appendingPathComponent(path)
+                let pathToRemove = pathForLogs.appendingPathComponent(path, isDirectory: false)
                 do{
-                    try fileManger.removeItem(atPath: pathToRemove)
+                    try fileManger.removeItem(atPath: pathToRemove.path)
                 } catch {
-                    
                 }
             }
         }
@@ -206,6 +197,6 @@ private let MAX_LOG_SIZE = 10000000
 private let MAX_LOG_FILES_COUNT = 1
 private let LOG_FILE_PATH = "local_log.txt"
 private let BUNDLE_VERSION_KEY = "CFBundleVersion"
-private let OLD_LOGS_PATH = "oldLogs"
+private let OLD_LOGS_PATH = "PSDOldLogs"
 private let DEFAULT_VERSION = "error get version"
 private let LOG_FILE_NAME = "pyrus_ios_%lu.txt.gz"

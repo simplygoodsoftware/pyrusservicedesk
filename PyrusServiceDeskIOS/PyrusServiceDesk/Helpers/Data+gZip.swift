@@ -11,7 +11,7 @@ extension Data {
         data.withUnsafeBytes({
             buffer in
             guard let bytes = buffer.baseAddress?.assumingMemoryBound(to: Bytef.self) else {
-                    return//test
+                    return
             }
             stream.next_in = UnsafeMutablePointer<Bytef>(mutating: bytes)
             
@@ -41,7 +41,7 @@ extension Data {
             compressedData.withUnsafeMutableBytes({
                 buffer in
                 guard let bytes = buffer.baseAddress?.assumingMemoryBound(to: Bytef.self) else {
-                        return//test
+                        return
                 }
                 stream.next_out = bytes.advanced(by: Int(stream.total_out))
                 

@@ -137,6 +137,7 @@ import UIKit
     }
     
     @objc public static func subscribeToGogEvents(_ subscriber: LogEvents){
+        PyrusLogger.shared.logEvent("Did add logs subscriber.")
         PyrusServiceDesk.logEvent = subscriber
     }
     
@@ -173,6 +174,7 @@ import UIKit
             EventsLogger.logEvent(.emptyClientId)
             return
         }
+        PyrusLogger.shared.logEvent("Created with userId = \(userId ?? "no userId"), reset = \(reset), loggingEnabled = \(loggingEnabled)")
         PyrusServiceDesk.clientId = clientId
         PyrusServiceDesk.securityKey = securityKey
         let needReloadUI = PyrusServiceDesk.customUserId != userId
@@ -184,6 +186,7 @@ import UIKit
     }
     
     @objc static public func refresh(onError: ((Error?) -> Void)? = nil) {
+        PyrusLogger.shared.logEvent("Try to refresh from the main application.")
         if lastRefreshes.count >= REFRESH_MAX_COUNT{
             let lastRefresh = lastRefreshes[0]
             let difference = Date().timeIntervalSince(lastRefresh)
@@ -269,6 +272,7 @@ import UIKit
      - parameter chooser: (FileChooser & UIViewController) to present.
      */
     @objc public static func registerFileChooser(_ chooser: (FileChooser & UIViewController)?){
+        PyrusLogger.shared.logEvent("Did register file chooser: \(String(describing: chooser))")
         self.fileChooserController = chooser
     }
 
@@ -295,24 +299,28 @@ import UIKit
         }
     }
     private static func getTimerInerval() -> TimeInterval?{
+        PyrusLogger.shared.logEvent("getTimerInerval started")
         if let pyrusUserDefaults = PSDMessagesStorage.pyrusUserDefaults(), let date = pyrusUserDefaults.object(forKey: PSDChatViewController.userLastActivityKey()) as? Date{
             let difference = Date().timeIntervalSince(date)
+            var timeInterval: TimeInterval? = nil
             if difference <= PSDChatViewController.PSD_LAST_ACTIVITY_INTEVAL_MINUTE{
-                return PSDChatViewController.REFRESH_TIME_INTEVAL_5_SECONDS
+                timeInterval = PSDChatViewController.REFRESH_TIME_INTEVAL_5_SECONDS
             } else if difference <=  PSDChatViewController.PSD_LAST_ACTIVITY_INTEVAL_5_MINUTES{
-                return  PSDChatViewController.REFRESH_TIME_INTEVAL_15_SECONDS
+                timeInterval =  PSDChatViewController.REFRESH_TIME_INTEVAL_15_SECONDS
             } else if difference <=  PSDChatViewController.PSD_LAST_ACTIVITY_INTEVAL_HOUR{
-                return  PSDChatViewController.REFRESH_TIME_INTEVAL_1_MINUTE
+                timeInterval =  PSDChatViewController.REFRESH_TIME_INTEVAL_1_MINUTE
             } else if difference <=  PSDChatViewController.PSD_LAST_ACTIVITY_INTEVAL_3_DAYS{
-                return  PSDChatViewController.REFRESH_TIME_INTEVAL_3_MINUTES
+                timeInterval =  PSDChatViewController.REFRESH_TIME_INTEVAL_3_MINUTES
             }
+            PyrusLogger.shared.logEvent("getTimerInerval ended with time: \(String(describing: timeInterval))")
+            return timeInterval
         }
+        PyrusLogger.shared.logEvent("getTimerInerval ended with nil, last activity = \(PSDMessagesStorage.pyrusUserDefaults()?.object(forKey: PSDChatViewController.userLastActivityKey()) ?? "nil")")
         return nil
     }
     
     ///Set last user acivity date to NOW if date paramemeter is nil, returns true if setted
     static func setLastActivityDate(_ date: Date? = nil) -> Bool{
-        print ("\(date)")
         if let pyrusUserDefaults = PSDMessagesStorage.pyrusUserDefaults(){
             if let newDate = date, let oldDate = pyrusUserDefaults.object(forKey: PSDChatViewController.userLastActivityKey()) as? Date{
                 if oldDate.compare(newDate) == .orderedDescending || oldDate.compare(newDate) == .orderedSame{
@@ -352,10 +360,12 @@ import UIKit
     @objc private static func updateUserInfo(){
         if(userId.count > 0){
             restartTimer()
+            PyrusLogger.shared.logEvent("PSDGetChats did begin.")
             DispatchQueue.global().async {
                 PSDGetChats.get(delegate: nil, needShowError: !hasInfo){
                     (chats:[PSDChat]?) in
                     DispatchQueue.main.async {
+                        PyrusLogger.shared.logEvent("PSDGetChats did end with chats count: \(chats?.count ?? 0).")
                         guard let chats = chats else{
                             return
                         }
@@ -369,6 +379,7 @@ import UIKit
            
         }
         else{
+            PyrusLogger.shared.logEvent("Empty userId, stop requesting PSDGetChats.")
             stopGettingInfo()
         }
     }
