@@ -91,7 +91,7 @@ struct PSDGetChats {
             messages.append(firstMessage)
             if let lastComment = dic["last_comment"] as? [String : Any]{
                 date =  lastComment.stringOfKey(createdAtParameter).dateFromString(format: "yyyy-MM-dd'T'HH:mm:ss'Z'")
-                let lastMessage :PSDMessage = PSDMessage.init(text: lastComment.stringOfKey("body"), attachments:nil, messageId: nil, owner: nil, date: nil)
+                let lastMessage :PSDMessage = PSDMessage.init(text: lastComment.stringOfKey("body"), attachments:nil, messageId: lastComment.stringOfKey(commentIdParameter), owner: nil, date: nil)
                 messages.append(lastMessage)
             }
             let chat = PSDChat.init(chatId: dic.stringOfKey(ticketIdParameter), date: date, messages: messages)

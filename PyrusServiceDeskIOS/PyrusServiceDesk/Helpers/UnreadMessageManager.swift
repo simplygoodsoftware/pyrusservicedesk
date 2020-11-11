@@ -42,7 +42,7 @@ class UnreadMessageManager {
         var needResponse = storedUnreadMessage == nil
         if !needResponse, let storedUnreadMessage = storedUnreadMessage, storedUnreadMessage.isShown{
             if let messageId = Int(storedUnreadMessage.messageId), messageId > 0{
-                let lastMessageId = Int(storedUnreadMessage.messageId) ?? 0
+                let lastMessageId = Int(lastMessage?.messageId ?? "") ?? 0
                 needResponse = messageId < lastMessageId
             }else{
                 needResponse = true
