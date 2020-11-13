@@ -13,6 +13,7 @@ import com.pyrus.pyrusservicedesk.sdk.data.intermediate.AddCommentResponseData
 import com.pyrus.pyrusservicedesk.sdk.data.intermediate.Comments
 import com.pyrus.pyrusservicedesk.sdk.repositories.general.GeneralRepository
 import com.pyrus.pyrusservicedesk.sdk.response.*
+import com.pyrus.pyrusservicedesk.sdk.updates.LastComment
 import com.pyrus.pyrusservicedesk.sdk.updates.LiveUpdates
 import com.pyrus.pyrusservicedesk.sdk.updates.NewReplySubscriber
 import com.pyrus.pyrusservicedesk.sdk.updates.Preferences
@@ -73,6 +74,13 @@ class LiveUpdatesTest {
         val liveUpdates = createLiveUpdatesWithTwoComments(false)
         liveUpdates.subscribeOnReply(newReplySubscriber)
         checkNewReplySubscriber(true, SERVER_FIRST_COMMENT_ID)
+    }
+
+    @Test
+    fun onStartHasNewShowedCommentTest() {
+        val liveUpdates = createLiveUpdatesWithTwoComments(false, lastShowedIsShown = true)
+        liveUpdates.subscribeOnReply(newReplySubscriber)
+        checkNewReplySubscriber(true, SERVER_FIRST_COMMENT_ID, Mockito.never())
     }
 
     @Test
@@ -161,7 +169,11 @@ class LiveUpdatesTest {
         )
     }
 
-    private fun createLiveUpdatesWithTwoComments(serverCommentIsRead: Boolean, lastActivityTimePassed: Long = 10L * MILLISECONDS_IN_SECOND): LiveUpdates {
+    private fun createLiveUpdatesWithTwoComments(
+        serverCommentIsRead: Boolean,
+        lastActivityTimePassed: Long = 10L * MILLISECONDS_IN_SECOND,
+        lastShowedIsShown: Boolean = false
+    ): LiveUpdates {
         val currentTime = System.currentTimeMillis()
         val lastUserActiveTime = currentTime - lastActivityTimePassed
 
@@ -171,11 +183,27 @@ class LiveUpdatesTest {
             listOf(
                 createComment(USER_FIRST_COMMENT_ID, lastUserActiveTime, true),
                 createComment(SERVER_FIRST_COMMENT_ID, currentTime - 5 * 1000, false)
-            )
+            ),
+            if (lastShowedIsShown)
+                LastComment(
+                    SERVER_SECOND_COMMENT_ID,
+                    serverCommentIsRead,
+                    true,
+                    "",
+                    null,
+                    0,
+                    currentTime - 5 * 1000
+                )
+            else
+                null
         )
     }
 
-    private fun createLiveUpdatesWithTwoComments(getTicketsResponse: GetTicketsResponse, lastActivityTimePassed: Long = 10L * MILLISECONDS_IN_SECOND): LiveUpdates {
+    private fun createLiveUpdatesWithTwoComments(
+        getTicketsResponse: GetTicketsResponse,
+        lastActivityTimePassed: Long = 10L * MILLISECONDS_IN_SECOND,
+        lastComment: LastComment? = null
+    ): LiveUpdates {
         val currentTime = System.currentTimeMillis()
         val lastUserActiveTime = currentTime - lastActivityTimePassed
 
@@ -185,7 +213,8 @@ class LiveUpdatesTest {
             listOf(
                 createComment(USER_FIRST_COMMENT_ID, lastUserActiveTime, true),
                 createComment(SERVER_FIRST_COMMENT_ID, currentTime - 5 * 1000, false)
-            )
+            ),
+            lastComment
         )
     }
 
@@ -206,6 +235,7 @@ class LiveUpdatesTest {
         getTicketsResponse: GetTicketsResponse,
         lastUserActiveTime: Long,
         comments: List<Comment>?,
+        lastComment: LastComment?,
         error: ResponseError? = null
     ): LiveUpdates {
         return createLiveUpdates(
@@ -213,17 +243,19 @@ class LiveUpdatesTest {
                 createGetFeedResponse(comments, error),
                 getTicketsResponse
             )),
-            lastUserActiveTime
+            lastUserActiveTime,
+            lastComment
         )
     }
 
     private fun createLiveUpdates(
         requestFactory: RequestFactory,
-        lastUserActiveTime: Long
+        lastUserActiveTime: Long,
+        lastComment: LastComment?
     ): LiveUpdates {
         return LiveUpdates(
             requestFactory,
-            createCustomPreferencesMock(lastUserActiveTime),
+            createCustomPreferencesMock(lastUserActiveTime, lastComment),
             null,
             mainThreadSurrogate,
             mainThreadSurrogate
@@ -299,11 +331,24 @@ class LiveUpdatesTest {
 
     }
 
-    private fun createCustomPreferencesMock(defaultLastActiveTime: Long = -1): Preferences {
+    private fun createCustomPreferencesMock(defaultLastActiveTime: Long = -1, defaultLastComment: LastComment? = null): Preferences {
 
         return object : Preferences {
 
             private var lastActiveTime = defaultLastActiveTime
+            private var lasComment: LastComment? = defaultLastComment
+
+            override fun saveLastComment(comment: LastComment) {
+                lasComment = comment
+            }
+
+            override fun getLastComment(): LastComment? {
+                return lasComment
+            }
+
+            override fun removeLastComment() {
+                lasComment = null
+            }
 
             override fun saveLastActiveTime(time: Long) {
                 lastActiveTime = time

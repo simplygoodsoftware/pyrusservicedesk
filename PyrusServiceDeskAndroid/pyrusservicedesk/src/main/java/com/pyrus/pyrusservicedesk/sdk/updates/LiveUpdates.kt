@@ -52,8 +52,6 @@ internal class LiveUpdates(
     private val mainHandler = Handler(Looper.getMainLooper())
     private var isStarted = false
 
-    private var lastComment: LastComment? = null
-
     private val ticketsUpdateRunnable = object : Runnable {
         override fun run() {
             val requestUserId = userId
@@ -94,9 +92,9 @@ internal class LiveUpdates(
     fun subscribeOnReply(subscriber: NewReplySubscriber) {
         PLog.d(TAG, "subscribeOnReply")
         newReplySubscribers.add(subscriber)
-        val lastComment = this.lastComment
+        val lastComment = preferencesManager.getLastComment()
         if (lastComment != null && !lastComment.isShown) {
-            this.lastComment = lastComment.copy(isShown = true)
+            preferencesManager.saveLastComment(lastComment.copy(isShown = true))
             notifyNewReplySubscriber(subscriber, lastComment)
         }
         onSubscribe()
@@ -153,7 +151,7 @@ internal class LiveUpdates(
         this.userId = userId
         lastCommentId = 0
         preferencesManager.saveLastActiveTime(-1)
-        this.lastComment = null
+        preferencesManager.removeLastComment()
     }
 
     /**
@@ -189,9 +187,9 @@ internal class LiveUpdates(
      * Reset lastComment
      */
     internal fun onReadComments() {
-        val lastComment = this.lastComment
+        val lastComment = preferencesManager.getLastComment()
         if (lastComment != null)
-            this.lastComment = lastComment.copy(isShown = true, isRead = true)
+            preferencesManager.saveLastComment(lastComment.copy(isShown = true, isRead = true))
     }
 
     /**
@@ -258,7 +256,7 @@ internal class LiveUpdates(
         notifyUnreadCountSubscribers(isChanged, newUnreadCount)
         recentUnreadCounter = newUnreadCount
 
-        val lastSavedComment = this.lastComment
+        val lastSavedComment = preferencesManager.getLastComment()
         val hasUnreadTickets = newUnreadCount > 0
 
         val lastCommentId = data.firstOrNull()?.lastComment?.commentId ?: return
@@ -267,7 +265,7 @@ internal class LiveUpdates(
             val chatIsShown = activeScreenCount > 0
 
             val lastComment = lastSavedComment.copy(isShown = newReplySubscribers.isNotEmpty() || chatIsShown, isRead = true)
-            this.lastComment = lastComment
+            preferencesManager.saveLastComment(lastComment)
             if (!chatIsShown)
                 notifyNewReplySubscribers(lastComment)
         }
@@ -291,7 +289,7 @@ internal class LiveUpdates(
 
                     val comments = response.getData()?.comments ?: return@main
 
-                    val lastSavedCommentInMainScope = this@LiveUpdates.lastComment
+                    val lastSavedCommentInMainScope = this@LiveUpdates.preferencesManager.getLastComment()
                     val lastServerComment = comments.findLast { !it.isInbound } ?: return@main
                     if (lastServerComment.commentId <= lastSavedCommentInMainScope?.id ?: 0)
                         return@main
@@ -307,7 +305,7 @@ internal class LiveUpdates(
                         lastServerComment
                     )
 
-                    this@LiveUpdates.lastComment = lastComment
+                    this@LiveUpdates.preferencesManager.saveLastComment(lastComment)
                     if (!chatIsShown)
                         notifyNewReplySubscribers(lastComment)
                 }
