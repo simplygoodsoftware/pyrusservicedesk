@@ -8,6 +8,7 @@ import kotlinx.coroutines.CoroutineScope
  * Adapter for obtaining ticket feed.
  * @param scope coroutine scope for executing request.
  * @param requests factory to obtain request from.
+ * @param keepUnread True - keep comments unread. False - otherwise.
  */
 internal class GetFeedCall(
         scope: CoroutineScope,

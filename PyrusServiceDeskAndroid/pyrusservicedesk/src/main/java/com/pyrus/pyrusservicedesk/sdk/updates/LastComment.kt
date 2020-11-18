@@ -13,6 +13,9 @@ internal data class LastComment(
     val utcTime: Long
 ) {
     companion object {
+
+        private const val MAX_COMMENT_LENGTH = 500
+
         internal fun mapFromComment(isShown: Boolean, isRead: Boolean, comment: Comment): LastComment {
             return LastComment(
                 comment.commentId,
@@ -28,11 +31,7 @@ internal data class LastComment(
         private fun trimCommentText(text: String?): String? {
             if (text == null)
                 return null
-            val moreThanMax = text.length > 500
-            val result = StringBuilder(text.getFirstNSymbols(500 - if (moreThanMax) 1 else 0))
-            if (moreThanMax)
-                result.append('…')
-            return result.toString()
+            return text.getFirstNSymbols(MAX_COMMENT_LENGTH)
         }
 
     }

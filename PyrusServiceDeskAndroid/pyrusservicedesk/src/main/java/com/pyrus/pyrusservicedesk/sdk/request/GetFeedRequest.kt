@@ -7,6 +7,7 @@ import com.pyrus.pyrusservicedesk.sdk.response.Response
 /**
  * Request for obtaining ticket feed.
  * [requestsRemoteComments] should be TRUE to obtain remote comments
+ * [keepUnread] True - keep comments unread. False - otherwise.
  */
 internal class GetFeedRequest(
     repository: GeneralRepository,
