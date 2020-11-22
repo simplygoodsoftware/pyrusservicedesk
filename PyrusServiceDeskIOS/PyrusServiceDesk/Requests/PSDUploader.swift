@@ -1,13 +1,9 @@
-let DEFAULT_CHAT_ID = "0"
 class PSDTasksData : NSObject {
     
-    var chatId : String = DEFAULT_CHAT_ID
-    weak var sendingDelegate : PSDMessageSendDelegate?
-    var message : PSDMessage
-    var file : PSDAttachment
-    init (_ message:PSDMessage, chatId:String,delegate:PSDMessageSendDelegate?, file : PSDAttachment)
-    {
-        self.chatId = chatId
+    weak var sendingDelegate: PSDMessageSendDelegate?
+    var message: PSDMessage
+    var file: PSDAttachment
+    init (_ message: PSDMessage, delegate: PSDMessageSendDelegate?, file: PSDAttachment) {
         self.sendingDelegate = delegate
         self.file = file
         self.message = message
@@ -43,17 +39,16 @@ class PSDUploader: NSObject {
     /**
      Create new task to session.
      - parameter messageWithAttachment: PSDMessage object with file that need to be passed to server.
-     - parameter chatId: Id of chat to which will need to attach this attachment after its id will be received.
      - parameter delegate: PSDMessageSendDelegate object to receive completion or error. Used in second step.
      */
-    func createUploadTask(from messageWithAttachment:PSDMessage, indexOfAttachment:Int, chatId:String,delegate:PSDMessageSendDelegate?){
+    func createUploadTask(from messageWithAttachment:PSDMessage, indexOfAttachment:Int,delegate:PSDMessageSendDelegate?){
         guard let attachments = messageWithAttachment.attachments, attachments.count > indexOfAttachment else{
             return
         }
         if(attachments[indexOfAttachment].data.count == 0){
             return
         }
-        let taskData : PSDTasksData = PSDTasksData.init(messageWithAttachment, chatId: chatId, delegate: delegate, file:  attachments[indexOfAttachment])
+        let taskData : PSDTasksData = PSDTasksData.init(messageWithAttachment, delegate: delegate, file:  attachments[indexOfAttachment])
         
         var request = URLRequest.createUploadRequest()
         
@@ -87,11 +82,6 @@ class PSDUploader: NSObject {
 
     }
     var tasksMap : [URLSessionTask : PSDTasksData] = [URLSessionTask : PSDTasksData]()
-    func changeChatId(_ newChatId: String){
-        for (_, data) in tasksMap{
-            data.chatId = newChatId
-        }
-    }
     func stopAll(){
         self.downloadsSession?.getTasksWithCompletionHandler { (dataTasks: Array, uploadTasks: Array, downloadTasks: Array) in
             for task in downloadTasks {
@@ -167,14 +157,14 @@ class PSDUploader: NSObject {
                 uploadData.file.serverIdentifer = guid
                 PSDTasksData.updateMessage(uploadData.message, with: uploadData.file, uploadingProgress: 0.95)
                 uploadData.sendingDelegate?.refresh(message: uploadData.message,changedToSent: false)
-                PSDMessageSend.pass(uploadData.message, to: uploadData.chatId, delegate: uploadData.sendingDelegate)
+                PSDMessageSend.pass(uploadData.message, delegate: uploadData.sendingDelegate)
             }
             else{
                 //some error happend
                 PSDTasksData.updateMessage(uploadData.message, with: uploadData.file, uploadingProgress: 0.0)
                 uploadData.message.state = .cantSend
                 uploadData.sendingDelegate?.refresh(message: uploadData.message,changedToSent: false)
-                PSDMessageSend.fileSendingEndWithError(uploadData.message, to: uploadData.chatId, delegate: uploadData.sendingDelegate)
+                PSDMessageSend.fileSendingEndWithError(uploadData.message, delegate: uploadData.sendingDelegate)
             }
             
         }

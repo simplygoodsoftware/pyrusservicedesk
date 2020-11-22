@@ -9,7 +9,7 @@ protocol PSDUpdateInfo{
 
 class PSDChatViewController: UIViewController{
         
-    public func updateTitle(){//Не используется, переделать,
+    public func updateTitle(){
         designNavigation()
         self.messageInputView.setToDefault()
         self.tableView.isLoading = false
@@ -206,9 +206,6 @@ class PSDChatViewController: UIViewController{
     ///Set navigation items
     private func setItems()
     {
-        if !PyrusServiceDeskController.iPadView && !PyrusServiceDesk.oneChat{
-            self.navigationItem.rightBarButtonItem = chatsItem
-        }
         if let rightBarButtonItem = PSD_СustomRightBarButtonItem(){
             rightBarButtonItem.tintColor = PSD_CustomColor()
             navigationItem.rightBarButtonItem = rightBarButtonItem
@@ -232,20 +229,10 @@ class PSDChatViewController: UIViewController{
         button.sizeToFit()
         return button
     }()
-  
-    lazy private var chatsItem: ChatListBarButtonItem = {
-        let chatsListItem = ChatListBarButtonItem.init()
-        chatsListItem.target = self
-        chatsListItem.action = #selector(openChatsList)
-        return chatsListItem
-    }()
     private func customiseDesign(color:UIColor)
     {
         self.navigationItem.leftBarButtonItem?.tintColor = color
         self.navigationItem.rightBarButtonItem?.tintColor = color
-    }
-    @objc private func openChatsList(){
-        self.navigationController?.popViewController(animated: true)
     }
     @objc private func closeButtonAction(){
         if(PyrusServiceDesk.mainController != nil){
@@ -301,12 +288,12 @@ extension PSDChatViewController : PSDMessageInputViewDelegate{
     func send(_ message:String,_ attachments:[PSDAttachment]){
         let newMessage :PSDMessage = PSDObjectsCreator.createMessage(message, attachments: attachments)
         tableView.addNewRow(message: newMessage)
-        PSDMessageSend.pass(newMessage, to: "", delegate:self.tableView)
+        PSDMessageSend.pass(newMessage, delegate: self.tableView)
     }
     func sendRate(_ rateValue: Int) {
         let newMessage = PSDObjectsCreator.createMessage(rating: rateValue)
         tableView.addNewRow(message: newMessage)
-        PSDMessageSend.pass(newMessage, to: "", delegate:self.tableView)
+        PSDMessageSend.pass(newMessage, delegate: self.tableView)
     }
 }
 extension PSDChatViewController : PSDUpdateInfo{

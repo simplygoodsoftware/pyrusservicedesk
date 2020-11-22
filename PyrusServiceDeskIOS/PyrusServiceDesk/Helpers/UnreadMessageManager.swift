@@ -5,16 +5,13 @@ class UnreadMessageManager {
     private static func saveLastComment(_ message: PSDMessage) -> PSDLastUnreadMessage {
         let unreadMessage = PSDLastUnreadMessage(message: message)
         PSDMessagesStorage.pyrusUserDefaults()?.set(unreadMessage.toDictioanary(), forKey: LAST_MESSAGE_KEY)
-        PSDMessagesStorage.pyrusUserDefaults()?.synchronize()
         return unreadMessage
     }
-    private static func resaveLastComment(_ message: PSDLastUnreadMessage) {
+    private static func updateLastComment(_ message: PSDLastUnreadMessage) {
         PSDMessagesStorage.pyrusUserDefaults()?.set(message.toDictioanary(), forKey: LAST_MESSAGE_KEY)
-        PSDMessagesStorage.pyrusUserDefaults()?.synchronize()
     }
     static func removeLastComment() {
         PSDMessagesStorage.pyrusUserDefaults()?.removeObject(forKey: LAST_MESSAGE_KEY)
-        PSDMessagesStorage.pyrusUserDefaults()?.synchronize()
     }
     private static func getLastComment() ->  PSDLastUnreadMessage? {
         guard let dict = PSDMessagesStorage.pyrusUserDefaults()?.object(forKey: LAST_MESSAGE_KEY) as? [String: Any] else {
@@ -22,15 +19,15 @@ class UnreadMessageManager {
         }
         return PSDLastUnreadMessage(dictionary: dict)
     }
-    ///check the las saved comment and send it to subscriber
+    ///Check the last saved comment and send it to subscriber
     static func checkLastComment() {
         guard let _ = PyrusServiceDesk.subscriber, !PyrusServiceDeskController.PSDIsOpen(), let comment = getLastComment() else {
             return
         }
         checkLastComment(comment)
     }
-    static func refreshNewMessagesCount(_ unread:Int, lastMessage: PSDMessage?){
-        guard unread > 0 else{
+    static func refreshNewMessagesCount(_ unread: Bool, lastMessage: PSDMessage?) {
+        guard unread else{
             sendNoNewIfNeed()
             removeLastComment()
             return
@@ -61,7 +58,7 @@ class UnreadMessageManager {
         subscriber.onNewReply(hasUnreadComments: false, lastCommentText: nil, lastCommentAttachmentsCount: 0, lastCommentAttachments: nil, commetId: nil, utcTime: 0)
     }
     private static func getLastCommentFromServer() {
-        PSDGetChat.get("", needShowError: false, delegate: nil, keepUnread: true, completion: {
+        PSDGetChat.get(needShowError: false, delegate: nil, keepUnread: true, completion: {
             (chat : PSDChat?) in
             guard let lastMessage = chat?.messages.last else{
                 return
@@ -78,6 +75,6 @@ class UnreadMessageManager {
         }
         subscriber.onNewReply(hasUnreadComments: true, lastCommentText: lastComment.text, lastCommentAttachmentsCount: lastComment.attchmentsCount, lastCommentAttachments: lastComment.attachments, commetId: lastComment.messageId, utcTime: lastComment.utcTime)
         lastComment.isShown = true
-        resaveLastComment(lastComment)
+        updateLastComment(lastComment)
     }
 }

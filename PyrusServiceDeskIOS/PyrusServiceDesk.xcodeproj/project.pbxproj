@@ -33,18 +33,12 @@
 		4B5AFEAB21FB0A7B00AAF233 /* PSDMessageSendButton.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4B5AFEAA21FB0A7B00AAF233 /* PSDMessageSendButton.swift */; };
 		4B63393421FA0F2C00A154B5 /* PSDChatTableView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4B63393321FA0F2C00A154B5 /* PSDChatTableView.swift */; };
 		4B63393621FA106400A154B5 /* PSDChatMessageCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4B63393521FA106400A154B5 /* PSDChatMessageCell.swift */; };
-		4B63393B21FA160D00A154B5 /* Conversations.png in Resources */ = {isa = PBXBuildFile; fileRef = 4B63393821FA160D00A154B5 /* Conversations.png */; };
-		4B63393C21FA160D00A154B5 /* Conversations@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 4B63393921FA160D00A154B5 /* Conversations@2x.png */; };
-		4B63393D21FA160D00A154B5 /* Conversations@3x.png in Resources */ = {isa = PBXBuildFile; fileRef = 4B63393A21FA160D00A154B5 /* Conversations@3x.png */; };
 		4B63394521FA163300A154B5 /* Close.png in Resources */ = {isa = PBXBuildFile; fileRef = 4B63393F21FA163300A154B5 /* Close.png */; };
 		4B63394721FA163300A154B5 /* Close@3x.png in Resources */ = {isa = PBXBuildFile; fileRef = 4B63394121FA163300A154B5 /* Close@3x.png */; };
 		4B63394A21FA163300A154B5 /* Close@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 4B63394421FA163300A154B5 /* Close@2x.png */; };
 		4B63394F21FA165000A154B5 /* Add@3x.png in Resources */ = {isa = PBXBuildFile; fileRef = 4B63394C21FA165000A154B5 /* Add@3x.png */; };
 		4B63395021FA165000A154B5 /* Add@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 4B63394D21FA165000A154B5 /* Add@2x.png */; };
 		4B63395121FA165000A154B5 /* Add.png in Resources */ = {isa = PBXBuildFile; fileRef = 4B63394E21FA165000A154B5 /* Add.png */; };
-		4B63395621FA166800A154B5 /* ConversationsNew.png in Resources */ = {isa = PBXBuildFile; fileRef = 4B63395321FA166800A154B5 /* ConversationsNew.png */; };
-		4B63395721FA166800A154B5 /* ConversationsNew@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 4B63395421FA166800A154B5 /* ConversationsNew@2x.png */; };
-		4B63395821FA166800A154B5 /* ConversationsNew@3x.png in Resources */ = {isa = PBXBuildFile; fileRef = 4B63395521FA166800A154B5 /* ConversationsNew@3x.png */; };
 		4B63396021FA168500A154B5 /* DownloadWhite.png in Resources */ = {isa = PBXBuildFile; fileRef = 4B63395A21FA168400A154B5 /* DownloadWhite.png */; };
 		4B63396121FA168500A154B5 /* DownloadWhite@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 4B63395B21FA168500A154B5 /* DownloadWhite@2x.png */; };
 		4B63396221FA168500A154B5 /* DownloadBlack@3x.png in Resources */ = {isa = PBXBuildFile; fileRef = 4B63395C21FA168500A154B5 /* DownloadBlack@3x.png */; };
@@ -89,7 +83,6 @@
 		4B7F350A21F8900A00977C6D /* PSDChatViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4B7F350921F8900A00977C6D /* PSDChatViewController.swift */; };
 		4B7F350C21F8949700977C6D /* customColor.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4B7F350B21F8949700977C6D /* customColor.swift */; };
 		4B7F350E21F8A76D00977C6D /* ic_menu_close_clear_cancel.png in Resources */ = {isa = PBXBuildFile; fileRef = 4B7F350D21F8A76D00977C6D /* ic_menu_close_clear_cancel.png */; };
-		4B7F351121F8A89600977C6D /* ChatListBarButtonItem.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4B7F351021F8A89600977C6D /* ChatListBarButtonItem.swift */; };
 		4B7F351321F8AC3300977C6D /* PSDBundleImage.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4B7F351221F8AC3300977C6D /* PSDBundleImage.swift */; };
 		4B81B6FD221FF7FB00EE1253 /* UITableView + swipeForDetail.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4B81B6FC221FF7FB00EE1253 /* UITableView + swipeForDetail.swift */; };
 		4B81B6FF2220275700EE1253 /* PSDMessageStateButton.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4B81B6FE2220275700EE1253 /* PSDMessageStateButton.swift */; };
@@ -151,10 +144,8 @@
 		4BB7DADD225E1BC300F6D1F0 /* PSDImageAttachmentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4BB7DADC225E1BC300F6D1F0 /* PSDImageAttachmentView.swift */; };
 		4BB7DADF225E280800F6D1F0 /* PSDFileAttachmentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4BB7DADE225E280800F6D1F0 /* PSDFileAttachmentView.swift */; };
 		4BB855A02208593200F7CCE5 /* URLCreator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4BB8559F2208593200F7CCE5 /* URLCreator.swift */; };
-		4BB855A3220865FE00F7CCE5 /* PSDChatsViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4BB855A2220865FE00F7CCE5 /* PSDChatsViewController.swift */; };
 		4BB855A52208681400F7CCE5 /* LocalizationString.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4BB855A42208681400F7CCE5 /* LocalizationString.swift */; };
 		4BB855AA22086C1900F7CCE5 /* Localizable.strings in Resources */ = {isa = PBXBuildFile; fileRef = 4BB855AC22086C1900F7CCE5 /* Localizable.strings */; };
-		4BB855AF220873CA00F7CCE5 /* PSDChatsTableView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4BB855AE220873CA00F7CCE5 /* PSDChatsTableView.swift */; };
 		4BB855B12208741600F7CCE5 /* PSDChatInfoTableViewCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4BB855B02208741600F7CCE5 /* PSDChatInfoTableViewCell.swift */; };
 		4BBB9B06249D152900059A23 /* LogEvents.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4BBB9B05249D152900059A23 /* LogEvents.swift */; };
 		4BC210D622671EC000CFE255 /* PSDAttachmentPreviewView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4BC210D522671EC000CFE255 /* PSDAttachmentPreviewView.swift */; };
@@ -216,18 +207,12 @@
 		4B5AFEAA21FB0A7B00AAF233 /* PSDMessageSendButton.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PSDMessageSendButton.swift; sourceTree = "<group>"; };
 		4B63393321FA0F2C00A154B5 /* PSDChatTableView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PSDChatTableView.swift; sourceTree = "<group>"; };
 		4B63393521FA106400A154B5 /* PSDChatMessageCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PSDChatMessageCell.swift; sourceTree = "<group>"; };
-		4B63393821FA160D00A154B5 /* Conversations.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = Conversations.png; sourceTree = "<group>"; };
-		4B63393921FA160D00A154B5 /* Conversations@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "Conversations@2x.png"; sourceTree = "<group>"; };
-		4B63393A21FA160D00A154B5 /* Conversations@3x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "Conversations@3x.png"; sourceTree = "<group>"; };
 		4B63393F21FA163300A154B5 /* Close.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = Close.png; sourceTree = "<group>"; };
 		4B63394121FA163300A154B5 /* Close@3x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "Close@3x.png"; sourceTree = "<group>"; };
 		4B63394421FA163300A154B5 /* Close@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "Close@2x.png"; sourceTree = "<group>"; };
 		4B63394C21FA165000A154B5 /* Add@3x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "Add@3x.png"; sourceTree = "<group>"; };
 		4B63394D21FA165000A154B5 /* Add@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "Add@2x.png"; sourceTree = "<group>"; };
 		4B63394E21FA165000A154B5 /* Add.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = Add.png; sourceTree = "<group>"; };
-		4B63395321FA166800A154B5 /* ConversationsNew.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = ConversationsNew.png; sourceTree = "<group>"; };
-		4B63395421FA166800A154B5 /* ConversationsNew@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "ConversationsNew@2x.png"; sourceTree = "<group>"; };
-		4B63395521FA166800A154B5 /* ConversationsNew@3x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "ConversationsNew@3x.png"; sourceTree = "<group>"; };
 		4B63395A21FA168400A154B5 /* DownloadWhite.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = DownloadWhite.png; sourceTree = "<group>"; };
 		4B63395B21FA168500A154B5 /* DownloadWhite@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "DownloadWhite@2x.png"; sourceTree = "<group>"; };
 		4B63395C21FA168500A154B5 /* DownloadBlack@3x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "DownloadBlack@3x.png"; sourceTree = "<group>"; };
@@ -275,7 +260,6 @@
 		4B7F350921F8900A00977C6D /* PSDChatViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PSDChatViewController.swift; sourceTree = "<group>"; };
 		4B7F350B21F8949700977C6D /* customColor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = customColor.swift; sourceTree = "<group>"; };
 		4B7F350D21F8A76D00977C6D /* ic_menu_close_clear_cancel.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = ic_menu_close_clear_cancel.png; sourceTree = "<group>"; };
-		4B7F351021F8A89600977C6D /* ChatListBarButtonItem.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChatListBarButtonItem.swift; sourceTree = "<group>"; };
 		4B7F351221F8AC3300977C6D /* PSDBundleImage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PSDBundleImage.swift; sourceTree = "<group>"; };
 		4B81B6FC221FF7FB00EE1253 /* UITableView + swipeForDetail.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "UITableView + swipeForDetail.swift"; sourceTree = "<group>"; };
 		4B81B6FE2220275700EE1253 /* PSDMessageStateButton.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PSDMessageStateButton.swift; sourceTree = "<group>"; };
@@ -338,11 +322,9 @@
 		4BB7DADC225E1BC300F6D1F0 /* PSDImageAttachmentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PSDImageAttachmentView.swift; sourceTree = "<group>"; };
 		4BB7DADE225E280800F6D1F0 /* PSDFileAttachmentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PSDFileAttachmentView.swift; sourceTree = "<group>"; };
 		4BB8559F2208593200F7CCE5 /* URLCreator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = URLCreator.swift; sourceTree = "<group>"; };
-		4BB855A2220865FE00F7CCE5 /* PSDChatsViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PSDChatsViewController.swift; sourceTree = "<group>"; };
 		4BB855A42208681400F7CCE5 /* LocalizationString.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LocalizationString.swift; sourceTree = "<group>"; };
 		4BB855AB22086C1900F7CCE5 /* en */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = en; path = en.lproj/Localizable.strings; sourceTree = "<group>"; };
 		4BB855AD22086C2800F7CCE5 /* ru */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = ru; path = ru.lproj/Localizable.strings; sourceTree = "<group>"; };
-		4BB855AE220873CA00F7CCE5 /* PSDChatsTableView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PSDChatsTableView.swift; sourceTree = "<group>"; };
 		4BB855B02208741600F7CCE5 /* PSDChatInfoTableViewCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PSDChatInfoTableViewCell.swift; sourceTree = "<group>"; };
 		4BBB9B05249D152900059A23 /* LogEvents.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LogEvents.swift; sourceTree = "<group>"; };
 		4BC210D522671EC000CFE255 /* PSDAttachmentPreviewView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PSDAttachmentPreviewView.swift; sourceTree = "<group>"; };
@@ -451,7 +433,6 @@
 				4B82A49D2268C3D000654CE0 /* PSDFakeController.swift */,
 				4B82A49B2268C29700654CE0 /* PSDCoverHorizontalAnimator.swift */,
 				4B7F34F121F861FD00977C6D /* PyrusServiceDeskController.swift */,
-				4B7F351021F8A89600977C6D /* ChatListBarButtonItem.swift */,
 			);
 			path = Navigation;
 			sourceTree = "<group>";
@@ -497,16 +478,6 @@
 			path = Helpers;
 			sourceTree = "<group>";
 		};
-		4B63393721FA15FC00A154B5 /* Conversations */ = {
-			isa = PBXGroup;
-			children = (
-				4B63393821FA160D00A154B5 /* Conversations.png */,
-				4B63393921FA160D00A154B5 /* Conversations@2x.png */,
-				4B63393A21FA160D00A154B5 /* Conversations@3x.png */,
-			);
-			path = Conversations;
-			sourceTree = "<group>";
-		};
 		4B63393E21FA161900A154B5 /* Close */ = {
 			isa = PBXGroup;
 			children = (
@@ -525,16 +496,6 @@
 				4B63394C21FA165000A154B5 /* Add@3x.png */,
 			);
 			path = Add;
-			sourceTree = "<group>";
-		};
-		4B63395221FA165B00A154B5 /* ConversationsNew */ = {
-			isa = PBXGroup;
-			children = (
-				4B63395321FA166800A154B5 /* ConversationsNew.png */,
-				4B63395421FA166800A154B5 /* ConversationsNew@2x.png */,
-				4B63395521FA166800A154B5 /* ConversationsNew@3x.png */,
-			);
-			path = ConversationsNew;
 			sourceTree = "<group>";
 		};
 		4B63395921FA166B00A154B5 /* Download */ = {
@@ -700,10 +661,8 @@
 				4BA85A132224181900B48CA6 /* Error */,
 				4B7F139122157978007C6358 /* SupportIcon */,
 				4B63395921FA166B00A154B5 /* Download */,
-				4B63395221FA165B00A154B5 /* ConversationsNew */,
 				4B63394B21FA164000A154B5 /* Add */,
 				4B63393E21FA161900A154B5 /* Close */,
-				4B63393721FA15FC00A154B5 /* Conversations */,
 				4B7F350D21F8A76D00977C6D /* ic_menu_close_clear_cancel.png */,
 			);
 			path = images;
@@ -836,8 +795,6 @@
 		4BB855A1220865D500F7CCE5 /* chats */ = {
 			isa = PBXGroup;
 			children = (
-				4BB855A2220865FE00F7CCE5 /* PSDChatsViewController.swift */,
-				4BB855AE220873CA00F7CCE5 /* PSDChatsTableView.swift */,
 				4BB855B02208741600F7CCE5 /* PSDChatInfoTableViewCell.swift */,
 			);
 			path = chats;
@@ -956,14 +913,12 @@
 				4B63394A21FA163300A154B5 /* Close@2x.png in Resources */,
 				4B705DFF2225820C0086C09F /* Refresh@2x.png in Resources */,
 				4B9B0BC12266480600090DB5 /* file-preview@2x.png in Resources */,
-				4B63395621FA166800A154B5 /* ConversationsNew.png in Resources */,
 				4BA85A192224183600B48CA6 /* icn_error@3x.png in Resources */,
 				4BA85A2622242C5200B48CA6 /* clock-face@3x.png in Resources */,
 				4BB1A2F4245B8CB800A817C1 /* dotted_line@2x.png in Resources */,
 				4B062A902518AD0B00B317D3 /* messagePlaceholder.png in Resources */,
 				4B7F139622157989007C6358 /* SupportIcon@2x.png in Resources */,
 				4B63395021FA165000A154B5 /* Add@2x.png in Resources */,
-				4B63395721FA166800A154B5 /* ConversationsNew@2x.png in Resources */,
 				4BA85A2522242C5200B48CA6 /* clock-face.png in Resources */,
 				4B9B0BBD226639E200090DB5 /* file-preview.png in Resources */,
 				4B82A4AF2268E1B000654CE0 /* Share@2x.png in Resources */,
@@ -1001,14 +956,10 @@
 				4BA85A1E22241A3700B48CA6 /* clock@2x.gif in Resources */,
 				4BB1A2E6245B8B3600A817C1 /* delete.png in Resources */,
 				4B63394721FA163300A154B5 /* Close@3x.png in Resources */,
-				4B63395821FA166800A154B5 /* ConversationsNew@3x.png in Resources */,
 				4B9B0BC22266480600090DB5 /* file-preview@3x.png in Resources */,
 				4B63396221FA168500A154B5 /* DownloadBlack@3x.png in Resources */,
-				4B63393B21FA160D00A154B5 /* Conversations.png in Resources */,
 				4BA85A172224183600B48CA6 /* icn_error.png in Resources */,
 				4BE18EB5230D673C001C38DC /* clock-face-dark@2x.png in Resources */,
-				4B63393C21FA160D00A154B5 /* Conversations@2x.png in Resources */,
-				4B63393D21FA160D00A154B5 /* Conversations@3x.png in Resources */,
 				4BE18EB6230D673C001C38DC /* clock-face-dark@3x.png in Resources */,
 				4B82A4AE2268E1B000654CE0 /* Share@3x.png in Resources */,
 				4B82A4A72268E17600654CE0 /* Back.png in Resources */,
@@ -1040,7 +991,6 @@
 				4BCEB43B220C869A008B29B6 /* PSDMessageSend.swift in Sources */,
 				4BCEB437220C3CF8008B29B6 /* PSDCreateRequest.swift in Sources */,
 				4B92CB44224E007B002795FB /* PSDError.swift in Sources */,
-				4B7F351121F8A89600977C6D /* ChatListBarButtonItem.swift in Sources */,
 				4B5533752264CB8C00353941 /* PSDShareBarItemView.swift in Sources */,
 				4B6B904A223A59A50003D7F9 /* [Int+PSDChat]+complete.swift in Sources */,
 				4B88C6F522145AB000BDB304 /* PSDGetChat.swift in Sources */,
@@ -1067,7 +1017,6 @@
 				4B88C6F722145ACA00BDB304 /* PSDGetChats.swift in Sources */,
 				4BCEB439220C5FF2008B29B6 /* PSDMessageTextView.swift in Sources */,
 				4BD29A092464B72B000CC420 /* OnStopCallback.swift in Sources */,
-				4BB855A3220865FE00F7CCE5 /* PSDChatsViewController.swift in Sources */,
 				4B697CCC2254AF6B002B0A10 /* PSDSupportMessageCell.swift in Sources */,
 				4B3F72E12498C01600318F1F /* PSDRateView.swift in Sources */,
 				4BAA214D222D202900B8BED7 /* UIView+constraints.swift in Sources */,
@@ -1124,7 +1073,6 @@
 				4BA3FF4022116C1100CE497A /* AttachmentHandler.swift in Sources */,
 				4B56BE4B2216CCC0004E6685 /* PSDAttachment.swift in Sources */,
 				4B6E9DA3225F3B570037462F /* PSDPreviewSetter.swift in Sources */,
-				4BB855AF220873CA00F7CCE5 /* PSDChatsTableView.swift in Sources */,
 				4B6E9DA7225F74E50037462F /* PSDDownloadView.swift in Sources */,
 				4B64B8742243D402003116C3 /* CharacterSet+urlEncode.swift in Sources */,
 				4B2E650E220DE1C300E70A2F /* PSDMessage.swift in Sources */,

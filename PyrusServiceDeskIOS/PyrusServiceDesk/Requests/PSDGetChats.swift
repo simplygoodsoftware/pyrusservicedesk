@@ -94,26 +94,14 @@ struct PSDGetChats {
                 let lastMessage :PSDMessage = PSDMessage.init(text: lastComment.stringOfKey("body"), attachments:nil, messageId: lastComment.stringOfKey(commentIdParameter), owner: nil, date: nil)
                 messages.append(lastMessage)
             }
-            let chat = PSDChat.init(chatId: dic.stringOfKey(ticketIdParameter), date: date, messages: messages)
-            let isRead = dic["is_read"] as? Bool ??  true
-            chat.isRead = isRead
+            let chat = PSDChat.init(date: date, messages: messages)
+            chat.isRead = dic["is_read"] as? Bool ??  true
             chats.append(chat)
         }
-        DispatchQueue.main.async {
-            refreshChatsCount(chats.count)
-        }
-        
         return sortByLastMessage(chats)
     }
     private static func sortByLastMessage(_ chats:[PSDChat])->[PSDChat]{
         
         return chats.sorted(by: { $0.date ?? Date() > $1.date ?? Date()})
-    }
-    static func refreshChatsCount(_ chats:Int){
-        /*if PyrusServiceDesk.chatsCount != chats{
-            PyrusServiceDesk.chatsCount = chats
-            NotificationCenter.default.post(name: CHATS_NOTIFICATION_NAME, object:chats, userInfo: nil)
-        }*/
-        
     }
 }

@@ -31,7 +31,7 @@ class PSDLastUnreadMessage: NSObject {
             }
         }
         messageId = message.messageId
-        utcTime = message.date.utc()
+        utcTime = message.date.timeIntervalSince1970
     }
     init(dictionary: [String: Any]) {
         text = dictionary[keys.text.rawValue] as? String

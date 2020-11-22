@@ -6,27 +6,18 @@ class PyrusServiceDeskController: PSDNavigationController {
     let customization : PyrusServiceDeskCustomization = PyrusServiceDeskCustomization()
     convenience init() {
         if(PyrusServiceDesk.clientId != nil){
-            if(PyrusServiceDesk.oneChat){
-                let pyrusChat : PSDChatViewController = PSDChatViewController(nibName:nil, bundle:nil)
-                self.init(rootViewController: pyrusChat)
-            }
-            else{
-                EventsLogger.logEvent(.emptyClientId)
-                let openedPyrusChats : PSDChatsViewController = PSDChatsViewController(nibName:nil, bundle:nil)
-                self.init(rootViewController: openedPyrusChats)
-            }
+            let pyrusChat = PSDChatViewController()
+            self.init(rootViewController: pyrusChat)
             self.transitioningDelegate  = self
             self.isModalInPopover = true
             self.modalPresentationStyle = .overFullScreen
         }else{
-             self.init(rootViewController: UIViewController())
+            EventsLogger.logEvent(.emptyClientId)
+            self.init(rootViewController: UIViewController())
         }
     }
-    func show(chatId:String?, on viewController: UIViewController, completion:(() -> Void)? = nil){
+    func show(on viewController: UIViewController, completion: (() -> Void)? = nil) {
         DispatchQueue.main.async  {
-            if self.viewControllers.first is PSDChatsViewController && chatId != nil && (chatId?.count ?? 0)>0 && chatId != DEFAULT_CHAT_ID{
-                //не используется, удалить (self.viewControllers.first as! PSDChatsViewController).customFirstChatId = chatId
-            }
             if UIDevice.current.userInterfaceIdiom != .pad{
                 viewController.present(self, animated:  true, completion: completion)
             }
@@ -39,16 +30,6 @@ class PyrusServiceDeskController: PSDNavigationController {
                 viewController.present(fake, animated: true, completion: completion)
             }
         }
-    }
-    
-    public override func popViewController(animated: Bool) -> UIViewController? {
-        super.popViewController(animated: animated)
-        let vc = self.topViewController
-        if vc is PSDChatsViewController{
-            //не используется, удалить let table = (vc as! PSDChatsViewController).tableView
-            //table.deselectRow()
-        }
-        return vc
     }
     ///Create PyrusServiceDeskController.
     class func create()->PyrusServiceDeskController
@@ -90,8 +71,6 @@ class PyrusServiceDeskController: PSDNavigationController {
     //
     //MARK: IPad
     //
-    ///Using only on iPadView. A chat on right side of container.
-    static var pyrusChat : PSDChatViewController? = nil
     ///On iPadView list of chats is in left side, and chat in right side.
     static var iPadView : Bool = false
     /**
@@ -105,20 +84,7 @@ class PyrusServiceDeskController: PSDNavigationController {
         viewController.addChild(self)
         inContainer.addSubview(self.view)
         self.didMove(toParent: viewController)
-        
-        if(!PyrusServiceDesk.oneChat){
-            inContainer.addSubview(separatorView)
-            
-            PyrusServiceDeskController.pyrusChat = PSDChatViewController(nibName:nil, bundle:nil)
-            let navigationChat :UINavigationController = UINavigationController.init(rootViewController: PyrusServiceDeskController.pyrusChat!)
-            viewController.addChild(navigationChat)
-            inContainer.addSubview(navigationChat.view)
-            navigationChat.didMove(toParent: viewController)
-            self.addConstraints(to: navigationChat.view, and: self.view, separator:separatorView, inContainer:inContainer)
-        }
-        else{
-            self.view.autoresizingMask = [.flexibleWidth,.flexibleHeight]
-        }
+        self.view.autoresizingMask = [.flexibleWidth,.flexibleHeight]
     }
     
     func updateTitleChat() {
@@ -216,7 +182,7 @@ class PyrusServiceDeskController: PSDNavigationController {
         
     }
     
-    public static func PSDIsOpen()->Bool{
-        return (UIApplication.topViewController() is PSDChatViewController) || (UIApplication.topViewController() is PSDChatsViewController) || (UIApplication.topViewController() is PSDAttachmentLoadViewController)
+    public static func PSDIsOpen()->Bool{//test ты не мне не нравишься
+        return (UIApplication.topViewController() is PSDChatViewController) || (UIApplication.topViewController() is PSDAttachmentLoadViewController)
     }
 }

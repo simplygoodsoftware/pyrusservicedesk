@@ -12,12 +12,11 @@ struct PSDGetChat {
   //  private static var sessionTask : URLSessionDataTask? = nil
     /**
      Get chat from server.
-     - parameter chatId: String. id of chat that need to take.
      - parameter needShowError: Bool. Pass true if need to show error. If don't need it (for example in auto reloading) pass false.
      - parameter delegate: PSDGetDelegate. Works only if showError is true. If not equal to nil - calls showNoConnectionView(), when no internet connection. Else remembers the current ViewController. And if it has not changed when response receive, on it displays an error.
      On completion returns PSDChat object if it was received.
      */
-    static func get(_ chatId:String, needShowError:Bool, delegate: PSDGetDelegate?, keepUnread: Bool = false,  completion: @escaping (_ chat: PSDChat?) -> Void)
+    static func get(needShowError:Bool, delegate: PSDGetDelegate?, keepUnread: Bool = false,  completion: @escaping (_ chat: PSDChat?) -> Void)
     {
         //remove old session if it is
         remove()
@@ -29,9 +28,7 @@ struct PSDGetChat {
             }
         }
         var parameters = [String: Any]()
-        if keepUnread{
-            parameters[KEEP_UNREAD_RATING_KEY] = true
-        }
+        parameters[KEEP_UNREAD_RATING_KEY] = keepUnread
         let  request = URLRequest.createRequest(type: .chatFeed, parameters: parameters)
     
         let localId = UUID().uuidString
@@ -107,7 +104,7 @@ struct PSDGetChat {
     {
         var massages : [PSDMessage] = [PSDMessage]()
         massages = PSDGetChat.generateMessages(from: response["comments"] as? NSArray ?? NSArray())
-        let chat = PSDChat(chatId: response.stringOfKey(ticketIdParameter), date: Date(), messages: massages)
+        let chat = PSDChat(date: Date(), messages: massages)
         chat.showRating = (response[PSDGetChat.SHOW_RATING_KEY] as? Bool) ?? false
         return chat
     }
