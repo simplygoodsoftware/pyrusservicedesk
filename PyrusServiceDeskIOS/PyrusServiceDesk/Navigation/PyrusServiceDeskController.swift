@@ -182,7 +182,7 @@ class PyrusServiceDeskController: PSDNavigationController {
         
     }
     
-    public static func PSDIsOpen()->Bool{//test ты не мне не нравишься
-        return (UIApplication.topViewController() is PSDChatViewController) || (UIApplication.topViewController() is PSDAttachmentLoadViewController)
+    public static func PSDIsOpen() -> Bool {
+        return PyrusServiceDesk.mainController != nil
     }
 }
