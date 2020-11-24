@@ -466,7 +466,7 @@ extension PSDChatTableView : UITableViewDelegate,UITableViewDataSource{
         view.frame = CGRect(x: 0, y: 0, width: self.frame.size.width, height: headerHeight)
         let dateLabel = UILabel()
         dateLabel.textColor = .psdLabel
-        dateLabel.font = UIFont.systemFont(ofSize: 16.0)
+        dateLabel.font = .dateLabel
         var labelFrame = view.bounds
         labelFrame.size.width = labelFrame.size.width
         dateLabel.frame = labelFrame
@@ -714,4 +714,6 @@ extension PSDChatTableView : PSDMessageSendDelegate{
     }
     
 }
-
+private extension UIFont {
+    static let dateLabel = PSD_SystemFont(ofSize: 16.0)
+}

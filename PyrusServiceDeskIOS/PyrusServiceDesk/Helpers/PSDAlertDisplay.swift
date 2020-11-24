@@ -46,7 +46,6 @@ func showMenuAlert(_ actions:[UIAlertAction], on viewController: UIViewControlle
         
     }
     private func present(_ alert: UIAlertController , on viewController:UIViewController, sourseView: UIView?) {
-        alert.view.tintColor = UIColor.darkAppColor
         var viewControllerForPresent = viewController
         if(viewController.navigationController?.parent != nil){
             viewControllerForPresent = (viewController.navigationController?.parent!)! 
@@ -61,6 +60,7 @@ func showMenuAlert(_ actions:[UIAlertAction], on viewController: UIViewControlle
             }
             popoverController.permittedArrowDirections = []
         }
+        prepareWithCustomizationAlert(alert)
         viewControllerForPresent.present(alert , animated: true, completion: {() -> Void in
                 
         })

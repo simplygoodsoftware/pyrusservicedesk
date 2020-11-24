@@ -11,8 +11,8 @@ class PSDMessageTextView: UITextView, UITextViewDelegate {
     override init(frame: CGRect, textContainer: NSTextContainer?) {
         super.init(frame: frame, textContainer: textContainer)
         self.autoresizingMask = [.flexibleWidth,.flexibleHeight]
-        backgroundColor = .psdBackground
-        font = textFont
+        backgroundColor = .clear
+        font = .textFont
         tintColor = .darkAppColor
         textColor = .psdLabel
         self.delegate = self
@@ -25,17 +25,20 @@ class PSDMessageTextView: UITextView, UITextViewDelegate {
         NotificationCenter.default.addObserver(self, selector: #selector(saveDraft), name: UIApplication.willResignActiveNotification, object: nil)
         
     }
-    private let textFont = UIFont.systemFont(ofSize: 16.0 )
     required init?(coder aDecoder: NSCoder) {
         super.init(coder: aDecoder)
     }
     override func setContentOffset(_ contentOffset: CGPoint, animated: Bool) {
         super.setContentOffset(contentOffset, animated: false)
     }
+    override var textColor: UIColor? {
+        didSet {
+            placeholder.textColor = textColor
+        }
+    }
     private let placeholder : UILabel = {
         let label = UILabel ()
         label.text = "Comment".localizedPSD()
-        label.textColor = .psdLabel
         label.alpha = PLACEHOLDER_ALPHA
         label.textAlignment = .left
         return label
@@ -95,4 +98,7 @@ class PSDMessageTextView: UITextView, UITextViewDelegate {
     override var intrinsicContentSize: CGSize {
         return CGSize(width: 0, height: self.contentSize.height)
     }
+}
+private extension UIFont {
+    static let textFont = PSD_SystemFont(ofSize: 16.0)
 }

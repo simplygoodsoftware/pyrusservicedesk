@@ -50,7 +50,6 @@ class PSDMessageInputView: UIView, PSDMessageTextViewDelegate,PSDMessageSendButt
         
         self.backgroundView = UIView()
         self.backgroundView.frame = frame
-        self.backgroundView.backgroundColor = .psdBackground
         
         topGrayLine = UIView.init(frame: CGRect(x: 0, y: 0, width: frame.size.width, height: 0.5))
         topGrayLine.backgroundColor = UIColor.psdSeparator

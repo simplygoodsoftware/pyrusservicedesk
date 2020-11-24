@@ -8,12 +8,17 @@ protocol PSDSupportImageSetterDelegate: class {
 }
 struct PSDSupportImageSetter {
     static func defaultSupportImage()->UIImage{
-        let color :UIColor = defaultBackAvatarColor().isDarkColor ? .white : .black
-        let image : UIImage = PSD_CustomAvatar() != nil ? PSD_CustomAvatar()! : DEFAULT_SUPPORT_ICON.imageWith(color: color) ?? DEFAULT_SUPPORT_ICON
+        let color: UIColor = defaultBackAvatarColor().isDarkColor ? .white : .black
+        let image: UIImage
+        if let customAvatar = PyrusServiceDesk.mainController?.customization?.avatarForSupport {
+            image = customAvatar
+        } else{
+            image = DEFAULT_SUPPORT_ICON.imageWith(color: color) ?? DEFAULT_SUPPORT_ICON
+        }
         return image
     }
     private static func defaultBackAvatarColor()->UIColor{
-        if PSD_CustomAvatar() != nil{
+        if PyrusServiceDesk.mainController?.customization?.avatarForSupport != nil{
             return UIColor.psdBackground
         }
         return UIColor.appColor

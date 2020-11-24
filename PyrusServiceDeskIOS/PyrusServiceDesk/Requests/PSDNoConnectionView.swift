@@ -20,7 +20,7 @@ class PSDNoConnectionView: UIView {
     private lazy var noConnectionLabel : UILabel = {
         let label = UILabel()
         label.textColor = .psdGray
-        label.font = UIFont.systemFont(ofSize: 17.0)
+        label.font = .noConnectionLabel
         label.text = "No_Connection".localizedPSD()
         label.numberOfLines = 0
         label.lineBreakMode = .byWordWrapping
@@ -34,10 +34,9 @@ class PSDNoConnectionView: UIView {
         self.translatesAutoresizingMaskIntoConstraints = false
         self.addZeroConstraint([.top,.bottom,.leading,.trailing])
     }
-    private let retryButtonFontSize: CGFloat = 17.0
     private lazy var retryButton : UIButton = {
         let button = UIButton()
-        button.titleLabel?.font = UIFont.systemFont(ofSize: retryButtonFontSize)
+        button.titleLabel?.font = .retryButton
         button.setTitle("Retry".localizedPSD(), for: .normal)
         button.setTitleColor(.darkAppColor, for: .normal)
         button.addTarget(self, action: #selector(retryButtonPressed), for: .touchUpInside)
@@ -88,4 +87,8 @@ class PSDNoConnectionView: UIView {
             ).isActive = true
     }
 
+}
+private extension UIFont {
+    static let noConnectionLabel = PSD_SystemFont(ofSize: 17.0)
+    static let retryButton = PSD_SystemFont(ofSize: 17.0)
 }

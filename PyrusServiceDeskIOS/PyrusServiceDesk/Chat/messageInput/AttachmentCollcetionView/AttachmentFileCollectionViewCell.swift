@@ -10,7 +10,6 @@ import Foundation
 class AttachmentFileCollectionViewCell: AttachmentCollectionViewCell {
     private static let dist : CGFloat = 8.0
     private static let linesNumber : Int = 2
-    private static let fontSize : CGFloat = 9
     var fileName : String = ""{
         didSet{
             label.text = fileName
@@ -29,7 +28,7 @@ class AttachmentFileCollectionViewCell: AttachmentCollectionViewCell {
         label.textColor = UIColor.psdGray
         label.textAlignment = .center
         label.numberOfLines = AttachmentFileCollectionViewCell.linesNumber
-        label.font = UIFont.systemFont(ofSize: AttachmentFileCollectionViewCell.fontSize)
+        label.font = .label
         return label
     }()
     override init(frame: CGRect) {
@@ -55,4 +54,7 @@ class AttachmentFileCollectionViewCell: AttachmentCollectionViewCell {
         label.rightAnchor.constraint(equalTo: holderView.rightAnchor, constant: -AttachmentFileCollectionViewCell.dist).isActive = true
         label.bottomAnchor.constraint(lessThanOrEqualTo: holderView.bottomAnchor, constant: -AttachmentFileCollectionViewCell.dist).isActive = true
     }
+}
+private extension UIFont {
+    static let label = PSD_SystemFont(ofSize: 9)
 }

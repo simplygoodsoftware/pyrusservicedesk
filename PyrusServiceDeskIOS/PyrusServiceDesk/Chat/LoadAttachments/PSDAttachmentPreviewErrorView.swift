@@ -36,7 +36,7 @@ class PSDAttachmentLoadErrorView: UIView {
             if(attachmentExtension.count>0){
                 let label = UILabel.init()
                 label.textColor = UIColor.psdGray
-                label.font = UIFont.systemFont(ofSize: PSDAttachmentLoadErrorView.imageViewSize/2)
+                label.font = .attachmentExtension
                 label.text = attachmentExtension
                 label.sizeToFit()
                 attachmentExtentionLogo = label.asImage()
@@ -48,7 +48,7 @@ class PSDAttachmentLoadErrorView: UIView {
             redraw()
         }
     }
-    private static let imageViewSize : CGFloat = 100.0
+    fileprivate static let imageViewSize : CGFloat = 100.0
     private func redraw(){
         switch state {
         case .noPreview:
@@ -79,13 +79,12 @@ class PSDAttachmentLoadErrorView: UIView {
         iv.contentMode = .scaleAspectFit
         return iv
     }()
-    private static let buttonFontSize : CGFloat = 18.0
     ///The button on view changes according to LoadErrorMode.
     ///If mode == noPreview - performs the option "open"
     ///If mode == cantLoad - performs the option "retry"
     lazy var button : UIButton = {
         let button = UIButton()
-        button.titleLabel?.font = UIFont.systemFont(ofSize: PSDAttachmentLoadErrorView.buttonFontSize)
+        button.titleLabel?.font = .buttonFont
         button.setTitleColor(.darkAppColor, for: .normal)
         button.addTarget(self, action: #selector(buttonPressed), for: .touchUpInside)
         return button
@@ -152,4 +151,8 @@ class PSDAttachmentLoadErrorView: UIView {
             ).isActive = true
     }
     
+}
+private extension UIFont {
+    static let attachmentExtension = PSD_SystemFont(ofSize: PSDAttachmentLoadErrorView.imageViewSize/2)
+    static let buttonFont = PSD_SystemFont(ofSize: 18.0)
 }

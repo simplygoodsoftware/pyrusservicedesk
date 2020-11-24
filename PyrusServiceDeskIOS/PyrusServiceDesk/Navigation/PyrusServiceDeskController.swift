@@ -3,24 +3,37 @@ import UIKit
 
 ///The main service desk controller.
 class PyrusServiceDeskController: PSDNavigationController {
-    let customization : PyrusServiceDeskCustomization = PyrusServiceDeskCustomization()
-    convenience init() {
+    let customization: ServiceDeskConfiguration?
+    init(_ customization: ServiceDeskConfiguration?) {
+        self.customization = customization
         if(PyrusServiceDesk.clientId != nil){
             if(PyrusServiceDesk.oneChat){
                 let pyrusChat : PSDChatViewController = PSDChatViewController(nibName:nil, bundle:nil)
-                self.init(rootViewController: pyrusChat)
+                super.init(rootViewController: pyrusChat)
             }
             else{
                 EventsLogger.logEvent(.emptyClientId)
                 let openedPyrusChats : PSDChatsViewController = PSDChatsViewController(nibName:nil, bundle:nil)
-                self.init(rootViewController: openedPyrusChats)
+                super.init(rootViewController: openedPyrusChats)
             }
             self.transitioningDelegate  = self
             self.isModalInPopover = true
             self.modalPresentationStyle = .overFullScreen
+            designNavigation()
         }else{
-             self.init(rootViewController: UIViewController())
+            super.init(rootViewController: UIViewController())
         }
+    }
+    private func designNavigation() {
+        if let barStyle = PSD_BarStyle(for:self) {
+            navigationBar.barStyle = barStyle
+        }
+        if let color = PyrusServiceDesk.mainController?.customization?.customBarColor {
+            navigationBar.barTintColor = color
+        }
+    }
+    required init?(coder aDecoder: NSCoder) {
+        fatalError("PyrusServiceDeskController is not prepared to work in storyboard.")
     }
     func show(chatId:String?, on viewController: UIViewController, completion:(() -> Void)? = nil){
         DispatchQueue.main.async  {
@@ -49,11 +62,6 @@ class PyrusServiceDeskController: PSDNavigationController {
             table.deselectRow()
         }
         return vc
-    }
-    ///Create PyrusServiceDeskController.
-    class func create()->PyrusServiceDeskController
-    {
-        return PyrusServiceDeskController.init()
     }
     override public func viewDidLoad() {
         super.viewDidLoad()
@@ -223,5 +231,20 @@ class PyrusServiceDeskController: PSDNavigationController {
     
     public static func PSDIsOpen()->Bool{
         return (UIApplication.topViewController() is PSDChatViewController) || (UIApplication.topViewController() is PSDChatsViewController) || (UIApplication.topViewController() is PSDAttachmentLoadViewController)
+    }
+    override var preferredStatusBarStyle: UIStatusBarStyle {
+        guard  let statusBarStyle = PSD_StatusBarStyle(for: self) else {
+            return super.preferredStatusBarStyle
+        }
+        return statusBarStyle
+    }
+    override func traitCollectionDidChange(_ previousTraitCollection: UITraitCollection?) {
+        super.traitCollectionDidChange(previousTraitCollection)
+        if #available(iOS 13.0, *) {
+            guard self.traitCollection.hasDifferentColorAppearance(comparedTo: previousTraitCollection) else {
+                return
+            }
+            designNavigation()
+        }
     }
 }

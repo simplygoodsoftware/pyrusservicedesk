@@ -30,7 +30,7 @@ import UIKit
         }
     }
     ///User's name needed for request. If don't set used Default_User_Name
-    @objc static private(set) var userName : String = "Default_User_Name".localizedPSD()
+    @objc static private(set) var userName = DEFAULT_USER_NAME
     
     
     ///A flag indicates need to show chat list or show all conversations as one. Default is false - user can create new chat and see the list of old chats. If true - all new messages will be added to open chat.
@@ -106,8 +106,7 @@ import UIKit
         stopCallback = onStopCallback
         if !PyrusServiceDeskController.PSDIsOpen(){
             EventsLogger.logEvent(.openPSD)
-            let psd : PyrusServiceDeskController = PyrusServiceDeskController.create()
-            configuration?.buildCustomization()
+            let psd : PyrusServiceDeskController = PyrusServiceDeskController.init(configuration)
             psd.show(chatId: ticketId, on: viewController, completion: completion)
         }
         else{
@@ -260,16 +259,10 @@ import UIKit
     
     ///Setting name of user. If name is not setted it il be default ("Guest")
     ///- parameter userName: A name to display in pyrus task.
-    static func setUser(_ userName:String?){
-        guard let userName = userName else{
-            return
-        }
-        if userName.count>0{
-            PyrusServiceDesk.userName = userName
-            if PSDUsers.user != nil{
-                PSDUsers.user.name = userName
-            }
-            
+    static func setUser(_ userName: String?) {
+        PyrusServiceDesk.userName = userName ?? DEFAULT_USER_NAME
+        if PSDUsers.user != nil{
+            PSDUsers.user.name = userName
         }
     }
     
@@ -384,3 +377,4 @@ import UIKit
         }
     }
 }
+private let DEFAULT_USER_NAME = "Default_User_Name".localizedPSD()

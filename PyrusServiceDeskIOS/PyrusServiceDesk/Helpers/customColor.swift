@@ -6,11 +6,11 @@ let DARKER_COLOR_AMOUNT : CGFloat = 0.75
 extension UIColor {
     ///The main application color - color for user messages.
     static var appColor: UIColor {
-        if PSD_CustomColor() != nil{
-            return PSD_CustomColor()!
+        guard let color = PyrusServiceDesk.mainController?.customization?.themeColor else {
+            let sharedApp = UIApplication.shared
+            return sharedApp.delegate?.window??.tintColor ?? defaultColor
         }
-        let sharedApp = UIApplication.shared
-        return sharedApp.delegate?.window??.tintColor ?? defaultColor
+        return color
     }
     ///The main application color - color for all buttons.
     static var darkAppColor : UIColor{

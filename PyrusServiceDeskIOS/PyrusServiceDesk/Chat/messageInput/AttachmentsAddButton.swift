@@ -20,7 +20,8 @@ class AttachmentsAddButton: UIButton {
         resetImage()
     }
     private func resetImage(){
-        let addImage : UIImage = UIImage.PSDImage(name: "Add").imageWith(color: UIColor.darkAppColor)!
+        let color = PyrusServiceDesk.mainController?.customization?.addAttachmentButtonColor ?? UIColor.darkAppColor
+        let addImage = UIImage.PSDImage(name: "Add").imageWith(color: color)
         self.setImage(addImage, for: .normal)
     }
     @objc func buttonPressed()

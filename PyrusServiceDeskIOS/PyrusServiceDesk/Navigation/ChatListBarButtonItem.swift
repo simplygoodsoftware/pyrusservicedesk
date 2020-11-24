@@ -141,7 +141,7 @@ class ChatListBarButtonItem: UIBarButtonItem {
         label.textColor = UIColor.darkAppColor.isDarkColor ? .white : .black
         label.tintColor = label.textColor
         label.backgroundColor = .darkAppColor
-        label.font = UIFont.systemFont(ofSize: 12.0)
+        label.font = .messagesCountLabel
         label.textAlignment = .center
         return label
     }()
@@ -204,4 +204,7 @@ class ChatListBarButtonItem: UIBarButtonItem {
         NotificationCenter.default.removeObserver(self, name: CHATS_NOTIFICATION_NAME, object: nil)
         NotificationCenter.default.removeObserver(self, name: MESSAGES_NUMBER_NOTIFICATION_NAME, object: nil)
     }
+}
+private extension UIFont {
+    static let messagesCountLabel = PSD_SystemFont(ofSize: 12.0)
 }

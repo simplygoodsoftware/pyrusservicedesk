@@ -17,17 +17,17 @@ class PSDMessageView: UIView{
     private func recolor(){
         switch (color) {
         case .brightColor:
-            self.backgroundColor = UIColor.appColor
-            messageTextView.textColor = UIColor.appTextColor
-            attachmentView?.color = UIColor.appTextColor
-            separatorView.tintColor = UIColor.appTextColor.withAlphaComponent(PSDMessageView.separatorAlpha)
-            
+            self.backgroundColor = PSD_UserMassageBackgroundColor()
+            recolorWithTextColor(PSD_UserMassageTextColor())
         case .defaultColor:
-            self.backgroundColor = UIColor.psdLightGray
-            messageTextView.textColor = .psdLabel
-            attachmentView?.color = .psdLabel
-            separatorView.tintColor = UIColor.psdLabel.withAlphaComponent(PSDMessageView.separatorAlpha)
+            self.backgroundColor = PSD_SupportMassageBackgroundColor()
+            recolorWithTextColor(PSD_SupportMassageTextColor())
         }
+    }
+    private func recolorWithTextColor(_ color: UIColor) {
+        messageTextView.textColor = color
+        attachmentView?.color = color
+        separatorView.tintColor = color.withAlphaComponent(PSDMessageView.separatorAlpha)
     }
     private static let distToBoard : CGFloat = 10.0
     private let PLACEHOLDER_HEIGHT: CGFloat = 20
@@ -60,7 +60,7 @@ class PSDMessageView: UIView{
             attachmentHolderView.addSubview(attachmentView)
             attachmentView.maxWidth = maxWidth
             attachmentView.draw(data, state: message.message.state)
-            attachmentView.color = self.color == .defaultColor ?  .psdLabel : UIColor.appTextColor
+            attachmentView.color = self.color == .defaultColor ?  .psdLabel : UIColor.appTextColor//test
             attachmentView.addZeroConstraint([.leading,.trailing,.top,.bottom])
         }
         if let rating = message.rating{
@@ -90,7 +90,7 @@ class PSDMessageView: UIView{
     private(set) var messageTextView : PSDCopyTextView = {
         let text = PSDCopyTextView.init(frame: CGRect.zero)
         text.backgroundColor = .clear
-        text.font = UIFont.systemFont(ofSize: messageTextViewFontSize)
+        text.font = .messageTextView
         text.textColor = .psdLabel
         text.isScrollEnabled = false
         text.isEditable = false
@@ -113,7 +113,7 @@ class PSDMessageView: UIView{
     }()
     private var ratingLabel: UILabel = {
         let label = UILabel()
-        label.font = UIFont.RATING_FONT
+        label.font = .ratingLabel
         return label
     }()
     private lazy var attachmentHolderView : UIView = {
@@ -203,5 +203,6 @@ class PSDMessageView: UIView{
     }
 }
 private extension UIFont {
-    static let RATING_FONT = UIFont.systemFont(ofSize: 40)
+    static let ratingLabel = PSD_SystemFont(ofSize: 40)
+    static let messageTextView = PSD_SystemFont(ofSize: 18.0)
 }
