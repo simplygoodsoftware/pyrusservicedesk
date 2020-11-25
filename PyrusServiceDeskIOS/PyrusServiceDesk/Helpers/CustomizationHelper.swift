@@ -59,7 +59,10 @@ func PSD_UserMassageBackgroundColor() -> UIColor {
 }
 func PSD_UserMassageTextColor() -> UIColor {
     guard let color = PyrusServiceDesk.mainController?.customization?.userTextColor else {
-        return UIColor.appTextColor
+        guard let backColor = PyrusServiceDesk.mainController?.customization?.userMessageBackgroundColor else {
+            return UIColor.appTextColor
+        }
+        return UIColor.getTextColor(for: backColor)
     }
     return color
 }
@@ -71,7 +74,10 @@ func PSD_SupportMassageBackgroundColor() -> UIColor {
 }
 func PSD_SupportMassageTextColor() -> UIColor {
     guard let color = PyrusServiceDesk.mainController?.customization?.supportTextColor else {
-        return UIColor.psdLabel
+        guard let backColor = PyrusServiceDesk.mainController?.customization?.supportMessageBackgroundColor else {
+            return UIColor.psdLabel
+        }
+        return UIColor.getTextColor(for: backColor)
     }
     return color
 }
@@ -89,9 +95,12 @@ func PSD_BarStyle(for controller: UIViewController) -> UIBarStyle? {
         return nil
     }
 }
-func prepareWithCustomizationAlert(_ alert: UIAlertController) {
-    if let color = PyrusServiceDesk.mainController?.customization?.attachmentMenuBackgroundColor {
-        //test
+func getTextColorForTable() -> UIColor {
+    guard let color = PyrusServiceDesk.mainController?.customization?.customBackgroundColor else {
+        return .psdLabel
     }
+    return UIColor.getTextColor(for: color)
+}
+func prepareWithCustomizationAlert(_ alert: UIAlertController) {
     alert.view.tintColor = PyrusServiceDesk.mainController?.customization?.attachmentMenuTextColor ?? UIColor.darkAppColor
 }

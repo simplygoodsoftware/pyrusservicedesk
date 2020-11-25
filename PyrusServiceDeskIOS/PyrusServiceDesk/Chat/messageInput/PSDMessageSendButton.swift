@@ -9,14 +9,14 @@ class PSDMessageSendButton: UIButton {
     
     weak var delegate: PSDMessageSendButtonDelegate?
     private let titleHorizontalInsets : CGFloat = 4.0
-    private let titleDisabledAlpha : CGFloat = 0.3
+    static let titleDisabledAlpha: CGFloat = 0.3
     override init(frame: CGRect) {
         super.init(frame: frame)
         self.setTitle( "Send".localizedPSD() , for:.normal)
         self.titleLabel?.font = .title
         let color = PyrusServiceDesk.mainController?.customization?.sendButtonColor ?? UIColor.darkAppColor
         setTitleColor(color, for: .normal)
-        setTitleColor(UIColor.psdLabel.withAlphaComponent(titleDisabledAlpha), for: .disabled)//test
+        setTitleColor(UIColor.psdLabel.withAlphaComponent(PSDMessageSendButton.titleDisabledAlpha), for: .disabled)
         isEnabled = false
         self.contentEdgeInsets = UIEdgeInsets(top: 0.0, left: titleHorizontalInsets, bottom: 0.0, right: titleHorizontalInsets)
         

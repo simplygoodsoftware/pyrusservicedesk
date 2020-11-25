@@ -7,7 +7,7 @@ protocol PSDUpdateInfo{
     func refreshChat(showFakeMessage: Int?)
 }
 
-class PSDChatViewController: UIViewController{
+class PSDChatViewController: PSDViewController {
     
     var chatId: String = ""
     
@@ -31,7 +31,7 @@ class PSDChatViewController: UIViewController{
         
         self.design()
         self.designNavigation()
-        self.customiseDesign(color: PyrusServiceDesk.mainController?.customization?.backButtonTintColor ?? UIColor.darkAppColor)
+        self.customiseDesign(color: PyrusServiceDesk.mainController?.customization?.barButtonTintColor ?? UIColor.darkAppColor)
         
         self.openChat()
         self.startGettingInfo()
@@ -51,6 +51,15 @@ class PSDChatViewController: UIViewController{
     override func viewWillLayoutSubviews() {
         super.viewWillLayoutSubviews()
         resizeTable()
+    }
+    override func traitCollectionDidChange(_ previousTraitCollection: UITraitCollection?) {
+        super.traitCollectionDidChange(previousTraitCollection)
+        if #available(iOS 13.0, *) {
+            guard self.traitCollection.hasDifferentColorAppearance(comparedTo: previousTraitCollection) else {
+                return
+            }
+            recolorTextInput(messageInputView)
+        }
     }
     func resizeTable(){
         var fr = self.view.bounds
@@ -178,19 +187,7 @@ class PSDChatViewController: UIViewController{
     lazy private var messageInputView : PSDMessageInputView = {
         let inputView = PSDMessageInputView.init(frame: CGRect(x: 0, y: self.view.frame.size.height-70, width: self.view.frame.size.width, height: 50))
         inputView.delegate = self
-        let style = PSD_KeyboardStyle(for: self)
-        inputView.inputTextView.keyboardAppearance = style
-        switch style {
-        case .dark:
-            inputView.backgroundView.backgroundColor = .black
-            inputView.inputTextView.textColor = .white
-        case .light:
-            inputView.backgroundView.backgroundColor = .white
-            inputView.inputTextView.textColor = .black
-        default:
-            inputView.backgroundView.backgroundColor = .psdBackground
-            inputView.inputTextView.textColor = .psdLabel
-        }
+        recolorTextInput(inputView)
         return inputView
     }()
     lazy var tableView: PSDChatTableView = {
@@ -198,7 +195,30 @@ class PSDChatViewController: UIViewController{
         table.setupTableView()
         return table
     }()
-    
+    private func recolorTextInput(_ input: PSDMessageInputView) {
+        let style = PSD_KeyboardStyle(for: self)
+        input.inputTextView.keyboardAppearance = style
+        let (backInputColor, textInputColor) = colorForInput()
+        input.backgroundView.backgroundColor = backInputColor
+        input.inputTextView.textColor = textInputColor
+        input.sendButton.setTitleColor(textInputColor.withAlphaComponent(PSDMessageSendButton.titleDisabledAlpha), for: .disabled)
+    }
+    ///Returns back color and text color fror message input
+    private func colorForInput() -> (UIColor, UIColor) {
+        let style = PSD_KeyboardStyle(for: self)
+        if let color = PyrusServiceDesk.mainController?.customization?.keyboardColor {
+            return (color, UIColor.getTextColor(for: color))
+        }
+        
+        switch style {
+        case .dark:
+            return (.black, .white)
+        case .light:
+            return (.white, .black)
+        default:
+            return (.psdBackground, .psdLabel)
+        }
+    }
     /**Setting design To PyrusSupportChatViewController view, add subviews*/
     private func design() {
         self.view.backgroundColor = PyrusServiceDesk.mainController?.customization?.customBackgroundColor ?? .psdBackground
@@ -214,22 +234,11 @@ class PSDChatViewController: UIViewController{
             navigationItem.titleView = view
             view.sizeToFit()
             navigationController?.navigationBar.layoutIfNeeded()
-        } else if PyrusServiceDesk.mainController?.customization?.chatTitleColor != nil || PyrusServiceDesk.mainController?.customization?.customFontName != nil {
-            navigationItem.titleView = customNavigationTitle()
-            view.sizeToFit()
-            navigationController?.navigationBar.layoutIfNeeded()
         } else {
             title = PSD_ChatTitle()
         }
         
         self.setItems()
-    }
-    private func customNavigationTitle() -> UIView? {
-        let label = UILabel()
-        label.textColor = PyrusServiceDesk.mainController?.customization?.chatTitleColor ?? .psdLabel
-        label.font = .titleFont
-        label.text = PSD_ChatTitle()
-        return label
     }
     ///Set navigation items
     private func setItems()
@@ -238,11 +247,11 @@ class PSDChatViewController: UIViewController{
             self.navigationItem.rightBarButtonItem = chatsItem
         }
         if let rightBarButtonItem = PyrusServiceDesk.mainController?.customization?.customRightBarButtonItem {
-            rightBarButtonItem.tintColor = PyrusServiceDesk.mainController?.customization?.themeColor
+            rightBarButtonItem.tintColor = PyrusServiceDesk.mainController?.customization?.themeColor ?? PyrusServiceDesk.mainController?.customization?.barButtonTintColor
             navigationItem.rightBarButtonItem = rightBarButtonItem
         }
         if let leftBarButtonItem = PyrusServiceDesk.mainController?.customization?.customLeftBarButtonItem {
-            leftBarButtonItem.tintColor = PyrusServiceDesk.mainController?.customization?.themeColor
+            leftBarButtonItem.tintColor = PyrusServiceDesk.mainController?.customization?.themeColor ?? PyrusServiceDesk.mainController?.customization?.barButtonTintColor
             navigationItem.leftBarButtonItem = leftBarButtonItem
         }else{
             let item = UIBarButtonItem.init(customView: leftButton)
@@ -254,12 +263,12 @@ class PSDChatViewController: UIViewController{
         let button = UIButton.init(type: .custom)
         button.titleLabel?.font = .backButton
         button.setTitle("Back".localizedPSD(), for: .normal)
-        button.setTitleColor(PyrusServiceDesk.mainController?.customization?.backButtonTintColor ?? UIColor.darkAppColor, for: .normal)
+        button.setTitleColor(PyrusServiceDesk.mainController?.customization?.barButtonTintColor ?? UIColor.darkAppColor, for: .normal)
         let backImage = UIImage.PSDImage(name: "Back").withRenderingMode(.alwaysTemplate)
         button.setImage(backImage, for: .normal)
         button.addTarget(self, action: #selector(closeButtonAction), for: .touchUpInside)
         button.sizeToFit()
-        button.tintColor = PyrusServiceDesk.mainController?.customization?.backButtonTintColor ?? UIColor.darkAppColor
+        button.tintColor = PyrusServiceDesk.mainController?.customization?.barButtonTintColor ?? UIColor.darkAppColor
         return button
     }()
   
@@ -396,5 +405,4 @@ extension PSDChatViewController: UIAdaptivePresentationControllerDelegate {
 }
 private extension UIFont {
     static let backButton = PSD_SystemFont(ofSize: 18)
-    static let titleFont = PSD_SystemBoldFont(ofSize: 18)
 }

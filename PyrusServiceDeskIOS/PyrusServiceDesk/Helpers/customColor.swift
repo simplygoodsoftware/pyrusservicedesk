@@ -80,4 +80,7 @@ extension UIColor {
     static let defaultColor: UIColor = #colorLiteral(red: 0, green: 0.4784313725, blue: 1, alpha: 1)
     static var goldColor: UIColor = #colorLiteral(red: 0.9568627451, green: 0.7490196078, blue: 0.1882352941, alpha: 1)
     
+    static func getTextColor(for color: UIColor) -> UIColor {
+        return color.isDarkColor ? .white : .black
+    }
 }

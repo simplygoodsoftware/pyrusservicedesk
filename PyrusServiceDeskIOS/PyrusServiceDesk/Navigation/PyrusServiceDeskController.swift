@@ -19,17 +19,8 @@ class PyrusServiceDeskController: PSDNavigationController {
             self.transitioningDelegate  = self
             self.isModalInPopover = true
             self.modalPresentationStyle = .overFullScreen
-            designNavigation()
         }else{
             super.init(rootViewController: UIViewController())
-        }
-    }
-    private func designNavigation() {
-        if let barStyle = PSD_BarStyle(for:self) {
-            navigationBar.barStyle = barStyle
-        }
-        if let color = PyrusServiceDesk.mainController?.customization?.customBarColor {
-            navigationBar.barTintColor = color
         }
     }
     required init?(coder aDecoder: NSCoder) {
@@ -231,20 +222,5 @@ class PyrusServiceDeskController: PSDNavigationController {
     
     public static func PSDIsOpen()->Bool{
         return (UIApplication.topViewController() is PSDChatViewController) || (UIApplication.topViewController() is PSDChatsViewController) || (UIApplication.topViewController() is PSDAttachmentLoadViewController)
-    }
-    override var preferredStatusBarStyle: UIStatusBarStyle {
-        guard  let statusBarStyle = PSD_StatusBarStyle(for: self) else {
-            return super.preferredStatusBarStyle
-        }
-        return statusBarStyle
-    }
-    override func traitCollectionDidChange(_ previousTraitCollection: UITraitCollection?) {
-        super.traitCollectionDidChange(previousTraitCollection)
-        if #available(iOS 13.0, *) {
-            guard self.traitCollection.hasDifferentColorAppearance(comparedTo: previousTraitCollection) else {
-                return
-            }
-            designNavigation()
-        }
     }
 }

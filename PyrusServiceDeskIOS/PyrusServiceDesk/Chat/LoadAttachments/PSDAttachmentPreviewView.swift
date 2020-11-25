@@ -9,7 +9,7 @@ class PSDAttachmentPreviewView: UIView {
 
     override init(frame: CGRect) {
         super.init(frame: frame)
-        self.backgroundColor = .psdLightGray
+        self.backgroundColor = PyrusServiceDesk.mainController?.customization?.customBackgroundColor ?? .psdLightGray
     }
     ///Show preview of Attachment
     ///- parameter url: The file's url that need to show
@@ -69,7 +69,7 @@ class PSDAttachmentPreviewView: UIView {
             let configuration = WKWebViewConfiguration()
             configuration.preferences = preference
             let webV = WKWebView(frame: self.bounds, configuration: configuration)
-            webV.backgroundColor = UIColor.psdBackground
+            webV.backgroundColor = PyrusServiceDesk.mainController?.customization?.customBackgroundColor ?? UIColor.psdBackground
             webV.autoresizingMask = [.flexibleWidth,.flexibleHeight]
             webView = webV
             webView?.isOpaque = !needBackground

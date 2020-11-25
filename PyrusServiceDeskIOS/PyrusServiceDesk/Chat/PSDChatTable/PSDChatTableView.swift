@@ -27,12 +27,14 @@ class PSDChatTableView: PSDDetailTableView{
     private lazy var customRefresh: PSDRefreshControl = {
         let refreshControl = PSDRefreshControl.init(frame: self.bounds)
         refreshControl.position = .top
+        refreshControl.tintColor = getTextColorForTable()
         refreshControl.addTarget(self, action: #selector(refreshChat), for: .valueChanged)
         return refreshControl
     }()
     private lazy var bottomRefresh : PSDRefreshControl = {
         let refreshControl = PSDRefreshControl.init(frame: self.bounds)
         refreshControl.position = .bottom
+        refreshControl.tintColor = getTextColorForTable()
         refreshControl.addTarget(self, action: #selector(refreshChat), for: .valueChanged)
         return refreshControl
     }()
@@ -63,6 +65,17 @@ class PSDChatTableView: PSDDetailTableView{
             }
             updateChat(needProgress: true)
             
+        }
+    }
+    override func traitCollectionDidChange(_ previousTraitCollection: UITraitCollection?) {
+        super.traitCollectionDidChange(previousTraitCollection)
+        if #available(iOS 13.0, *) {
+            guard traitCollection.hasDifferentColorAppearance(comparedTo: previousTraitCollection) else {
+                return
+            }
+            customRefresh.tintColor = getTextColorForTable()
+            bottomRefresh.tintColor = getTextColorForTable()
+            reloadData()
         }
     }
     ///Setups needed properties to table view
@@ -465,7 +478,7 @@ extension PSDChatTableView : UITableViewDelegate,UITableViewDataSource{
         let view = UIView()
         view.frame = CGRect(x: 0, y: 0, width: self.frame.size.width, height: headerHeight)
         let dateLabel = UILabel()
-        dateLabel.textColor = .psdLabel
+        dateLabel.textColor = getTextColorForTable()
         dateLabel.font = .dateLabel
         var labelFrame = view.bounds
         labelFrame.size.width = labelFrame.size.width

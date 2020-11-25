@@ -11,7 +11,7 @@ class PSDProgressDownloadView: UIView {
     weak var delegate: PSDProgressDownloadViewDelegate?
     override init(frame: CGRect) {
         super.init(frame: frame)
-        self.backgroundColor = .psdLightGray
+        self.backgroundColor = PyrusServiceDesk.mainController?.customization?.customBackgroundColor ?? .psdLightGray
         self.addSubview(progressLoader)
         self.addSubview(cancelButton)
         setConstraints()

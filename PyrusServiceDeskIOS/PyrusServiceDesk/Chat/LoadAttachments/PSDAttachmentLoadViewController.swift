@@ -5,7 +5,7 @@ import UIKit
  A view controller with WKWebView to show attachments.
  Needs attachmentId and attachmentName.  attachmentName used to show in navigation title, and attachmentId used for create url for URLRequest.
  */
-class PSDAttachmentLoadViewController: UIViewController{
+class PSDAttachmentLoadViewController: PSDViewController {
     ///The id of attachment from server. Using To create url for URLRequest.
     private var attachmentId : String =  " "
     ///The name of attachment. Using to create title in navigation bar. And to create file name
@@ -55,7 +55,7 @@ class PSDAttachmentLoadViewController: UIViewController{
     }
   
     private func design() {
-        self.view.backgroundColor = UIColor.psdBackground
+        self.view.backgroundColor = PyrusServiceDesk.mainController?.customization?.customBackgroundColor ?? UIColor.psdBackground
         self.setCloseButton()
         self.setDownloadButton()
     }
@@ -66,7 +66,7 @@ class PSDAttachmentLoadViewController: UIViewController{
     ///UIBarButtonItem that open share menu
     lazy var shareBarItem : PSDShareBarItemView = {
         let item = PSDShareBarItemView.init()
-        item.tintColor = UIColor.darkAppColor
+        item.tintColor = PyrusServiceDesk.mainController?.customization?.barButtonTintColor ?? UIColor.darkAppColor
         return item
     }()
     private func setDownloadButton(){

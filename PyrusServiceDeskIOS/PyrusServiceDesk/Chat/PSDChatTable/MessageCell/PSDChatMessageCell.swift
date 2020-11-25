@@ -17,12 +17,20 @@ class PSDChatMessageCell: UITableViewCell {
     let timeLabel : UILabel =
     {
         let label = UILabel()
-        label.textColor = UIColor.psdLabel.withAlphaComponent(timeAlpha)
+        label.textColor = getTextColorForTable().withAlphaComponent(timeAlpha)
         label.font = DETAIL_FONT
         label.frame = CGRect(x: 0, y: 0, width: OFFSET_FOR_DETAIL, height: 30)
         return label;
     }()
-    
+    override func traitCollectionDidChange(_ previousTraitCollection: UITraitCollection?) {
+        super.traitCollectionDidChange(previousTraitCollection)
+        if #available(iOS 13.0, *) {
+            guard traitCollection.hasDifferentColorAppearance(comparedTo: previousTraitCollection) else {
+                return
+            }
+        }
+        timeLabel.textColor = getTextColorForTable().withAlphaComponent(PSDChatMessageCell.timeAlpha)
+    }
     override init(style: UITableViewCell.CellStyle, reuseIdentifier: String?) {
         super.init(style: style, reuseIdentifier: reuseIdentifier)
         self.backgroundColor = .clear
@@ -38,7 +46,7 @@ class PSDChatMessageCell: UITableViewCell {
     override func setSelected(_ selected: Bool, animated: Bool) {
         super.setSelected(selected, animated: animated)
         if(selected){
-            self.contentView.backgroundColor = .psdLightGray
+            self.contentView.backgroundColor = .psdLightGray//test
         }
         else{
             self.contentView.backgroundColor = .clear

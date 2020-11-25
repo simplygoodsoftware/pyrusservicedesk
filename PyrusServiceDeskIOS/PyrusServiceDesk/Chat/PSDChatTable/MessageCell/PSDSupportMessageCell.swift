@@ -9,11 +9,20 @@ class PSDSupportMessageCell: PSDChatMessageCell {
     private let nameLabel : UILabel =
     {
         let label = UILabel()
-        label.textColor = UIColor.psdLabel.withAlphaComponent(personNameAlpha)
+        label.textColor = getTextColorForTable().withAlphaComponent(personNameAlpha)
         label.font = .nameLabel
         label.text = ""
         return label;
     }()
+    override func traitCollectionDidChange(_ previousTraitCollection: UITraitCollection?) {
+        super.traitCollectionDidChange(previousTraitCollection)
+        if #available(iOS 13.0, *) {
+            guard traitCollection.hasDifferentColorAppearance(comparedTo: previousTraitCollection) else {
+                return
+            }
+        }
+        nameLabel.textColor = getTextColorForTable().withAlphaComponent(PSDSupportMessageCell.personNameAlpha)
+    }
     ///Is avatarView need to be shown. (Shhow only next with last user's avatar)
     var needShowAvatar = false
     ///UIImageView with person avatar image or default image. Has only "support" users. Show only if needShowAvatar

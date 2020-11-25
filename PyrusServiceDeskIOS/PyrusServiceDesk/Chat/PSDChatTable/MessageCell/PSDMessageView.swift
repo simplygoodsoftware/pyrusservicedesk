@@ -24,6 +24,15 @@ class PSDMessageView: UIView{
             recolorWithTextColor(PSD_SupportMassageTextColor())
         }
     }
+    override func traitCollectionDidChange(_ previousTraitCollection: UITraitCollection?) {
+        super.traitCollectionDidChange(previousTraitCollection)
+        if #available(iOS 13.0, *) {
+            guard self.traitCollection.hasDifferentColorAppearance(comparedTo: previousTraitCollection) else {
+                return
+            }
+            recolor()
+        }
+    }
     private func recolorWithTextColor(_ color: UIColor) {
         messageTextView.textColor = color
         attachmentView?.color = color

@@ -55,6 +55,13 @@ import Foundation
     ///The custom appearance style of the keyboard for the message input for dark appearance.
     private(set) var keyboardAppearanceDark: UIKeyboardAppearance?
     
+    ///The custom color for message input.
+    @objc public func setKeyboardColor(_ color: UIColor) {
+        keyboardColor = color
+    }
+    ///The custom color for message input.
+    private(set) var keyboardColor: UIColor?
+    
     ///The custom font name.
     ///- parameter fontName The custom font name for elements.
     @objc public func setFontName(_ fontName: String?) {
@@ -122,10 +129,10 @@ import Foundation
     
     ///The custom color of back button tint. Can be used only if customLeftBarButtonItem was not setted. Otherwise customLeftBarButtonItem has highest priority.
     ///The custom color of navigation bar.
-    @objc public func setBackButtonColor(_ color: UIColor?) {
-        backButtonTintColor = color
+    @objc public func setBarButtonColor(_ color: UIColor?) {
+        barButtonTintColor = color
     }
-    private(set) var backButtonTintColor: UIColor?
+    private(set) var barButtonTintColor: UIColor?
     
     ///The custom color for chat background.
     @objc public func setBackgroundColor(_ color: UIColor?) {
