@@ -97,7 +97,8 @@ class AttachmentHandler: NSObject,UIImagePickerControllerDelegate, UINavigationC
             if _alertWindow == nil {
                 _alertWindow = UIWindow(frame: overlayFrame)
             }
-            guard let _alertWindow = _alertWindow , let controller = fileController else {
+            guard let _alertWindow = _alertWindow,
+                  let controller = fileController else {
                 return
             }
             _alertWindow.rootViewController = UIViewController()

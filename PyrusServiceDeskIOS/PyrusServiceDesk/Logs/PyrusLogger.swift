@@ -1,7 +1,5 @@
 import Foundation
 
-let LOG_DATE_FORMAT = "dd(Z) HH:mm:ss.SSS"
-let LOG_DATE_FILE_FORMAT = "d_MM_YYYY_HH_mm_ss"
 protocol LogsSendProtocol: FileChooser {
     func sendData(_ data: Data?, with Url: URL?)
 }
@@ -200,3 +198,5 @@ private let BUNDLE_VERSION_KEY = "CFBundleVersion"
 private let OLD_LOGS_PATH = "PSDOldLogs"
 private let DEFAULT_VERSION = "error get version"
 private let LOG_FILE_NAME = "pyrus_ios_%lu.txt.gz"
+private let LOG_DATE_FORMAT = "dd(Z) HH:mm:ss.SSS"
+private let LOG_DATE_FILE_FORMAT = "d_MM_YYYY_HH_mm_ss"

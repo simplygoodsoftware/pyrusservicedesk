@@ -19,8 +19,8 @@ extension Data {
         stream.avail_in = uint(data.count)
         
         let initError = deflateInit2_(&stream, Z_DEFAULT_COMPRESSION, Z_DEFLATED, MAX_WBITS + 16, MAX_MEM_LEVEL, Z_DEFAULT_STRATEGY, ZLIB_VERSION, STREAM_SIZE)
-        guard initError == Z_OK else{
-            var errorMsg: String?
+        guard initError == Z_OK else {
+            let errorMsg: String
             switch initError {
             case Z_STREAM_ERROR:
                 errorMsg = "Invalid parameter passed in to function."
@@ -31,7 +31,7 @@ extension Data {
             default:
                 errorMsg = "Unknown error code."
             }
-            PyrusLogger.shared.logEvent("\(#function): deflateInit2() Error: \(errorMsg ?? "") Message: \(String(describing: stream.msg))")
+            PyrusLogger.shared.logEvent("\(#function): deflateInit2() Error: \(errorMsg) Message: \(String(describing: stream.msg))")
             return nil
         }
         var compressedData = Data(count: data.count * Int(1.001) + 12)
@@ -52,7 +52,7 @@ extension Data {
         }
         
         if deflateStatus != Z_STREAM_END {
-            var errorMsg: String?
+            let errorMsg: String
             switch deflateStatus {
             case Z_ERRNO:
                 errorMsg = "Error occured while reading file."
@@ -69,7 +69,7 @@ extension Data {
             default:
                 errorMsg = "Unknown error code."
             }
-            PyrusLogger.shared.logEvent("\(#function): zlib error while attempting compression \(errorMsg ?? "") Message: \(String(describing: stream.msg))")
+            PyrusLogger.shared.logEvent("\(#function): zlib error while attempting compression \(errorMsg) Message: \(String(describing: stream.msg))")
             deflateEnd(&stream)
             return nil
         }
