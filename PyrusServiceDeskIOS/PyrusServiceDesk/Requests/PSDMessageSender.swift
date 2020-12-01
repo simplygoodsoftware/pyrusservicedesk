@@ -17,8 +17,7 @@ class PSDMessageSender: NSObject {
      - parameter delegate: PSDMessageSendDelegate object to receive completion or error.
      - parameter completion: comptetion block. 
      */
-    func pass(_ messageToPass:PSDMessage, delegate:PSDMessageSendDelegate?, completion: @escaping() -> Void)
-    {
+    func pass(_ messageToPass:PSDMessage, delegate:PSDMessageSendDelegate?, completion: @escaping() -> Void) {
         let task = PSDMessageSender.pass(messageToPass.text, messageToPass.attachments, rating: messageToPass.rating, clientId: messageToPass.clientId) {
             commentId, attachments in
             if let commentId = commentId, commentId.count > 0 {
@@ -33,8 +32,7 @@ class PSDMessageSender: NSObject {
                 }
                 messageToPass.messageId = commentId
                 PSDMessageSender.showResult(of: messageToPass, success: true, delegate: delegate)
-            }
-            else{
+            } else {
                 PSDMessageSender.showResult(of: messageToPass, success: false, delegate: delegate)
             }
             completion()

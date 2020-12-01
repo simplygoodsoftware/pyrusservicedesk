@@ -1,12 +1,7 @@
 import Foundation
 ///MARK: PSDLastUnreadMessage
 ///The object to store las unread message
-class PSDLastUnreadMessage: NSObject {
-    ///MARK: constants
-    private let MAX_ATTACHMENTS_COUNT = 10
-    private let MAX_ATTACHMENT_NAME_COUNT = 30
-    private let MAX_TEXT_COUNT = 500
-    
+final class PSDLastUnreadMessage: NSObject, Codable {
     ///MARK: properties
     private(set) var text: String?
     private(set) var attachments: [String]?
@@ -33,35 +28,32 @@ class PSDLastUnreadMessage: NSObject {
         messageId = message.messageId
         utcTime = message.date.timeIntervalSince1970
     }
-    init(dictionary: [String: Any]) {
-        text = dictionary[keys.text.rawValue] as? String
-        attachments = dictionary[keys.attachments.rawValue] as? [String]
-        attchmentsCount = dictionary[keys.attchmentsCount.rawValue] as? Int ?? 0
-        utcTime = dictionary[keys.utcTime.rawValue] as? Double ?? 0
-        messageId = dictionary[keys.messageId.rawValue] as? String ?? "0"
-        isRead = dictionary[keys.isRead.rawValue] as? Bool ?? false
-        isShown = dictionary[keys.isShown.rawValue]  as? Bool ?? false
+    private enum CodingKeys: String, CodingKey {
+        case text, attachments, attchmentsCount, utcTime, messageId, isRead, isShown
     }
-    func toDictioanary() -> [String: Any] {
-        var dict = [String: Any]()
-        dict[keys.text.rawValue] = text
-        dict[keys.attachments.rawValue] = attachments
-        dict[keys.attchmentsCount.rawValue] = attchmentsCount
-        dict[keys.utcTime.rawValue] = utcTime
-        dict[keys.messageId.rawValue] = messageId
-        dict[keys.isRead.rawValue] = isRead
-        dict[keys.isShown.rawValue] = isShown
-        return dict
+    
+    required public init(from decoder: Decoder) throws {
+        let values = try decoder.container(keyedBy: CodingKeys.self)
+        text = try values.decode(String.self, forKey: .text)
+        attachments = try values.decodeIfPresent([String].self, forKey: .attachments)
+        attchmentsCount = try values.decode(Int.self, forKey: .attchmentsCount)
+        utcTime = try values.decode(Double.self, forKey: .utcTime)
+        messageId = try values.decode(String.self, forKey: .messageId)
+        isRead = try values.decode(Bool.self, forKey: .isRead)
+        isShown = try values.decode(Bool.self, forKey: .isShown)
+    }
+    func encode(to encoder: Encoder) throws {
+        var values = encoder.container(keyedBy: CodingKeys.self)
+        try values.encode(text, forKey: .text)
+        try values.encode(attachments, forKey: .attachments)
+        try values.encode(attchmentsCount, forKey: .attchmentsCount)
+        try values.encode(utcTime, forKey: .utcTime)
+        try values.encode(messageId, forKey: .messageId)
+        try values.encode(isRead, forKey: .isRead)
+        try values.encode(isShown, forKey: .isShown)
     }
 }
-
-///MARK: Keys for  Dictionary
-private enum keys: String {
-    case text = "text"
-    case attachments = "attachments"
-    case attchmentsCount = "attchmentsCount"
-    case utcTime = "utcTime"
-    case messageId = "messageId"
-    case isRead = "isRead"
-    case isShown = "isShown"
-}
+///MARK: constants
+private let MAX_ATTACHMENTS_COUNT = 10
+private let MAX_ATTACHMENT_NAME_COUNT = 30
+private let MAX_TEXT_COUNT = 500

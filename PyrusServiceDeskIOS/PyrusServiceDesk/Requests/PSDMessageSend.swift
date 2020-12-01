@@ -41,7 +41,7 @@ struct PSDMessageSend {
         }
         
     }
-    static func fileSendingEndWithError(_ messageToPass:PSDMessage, delegate:PSDMessageSendDelegate?){
+    static func fileSendingEndWithError(_ messageToPass: PSDMessage, delegate: PSDMessageSendDelegate?) {
         didEndPassMessage(messageToPass, delegate: delegate)
     }
     /**
@@ -75,8 +75,7 @@ struct PSDMessageSend {
      - parameter messageToPass: PSDMessage need to be passed.
      - parameter delegate: PSDMessageSendDelegate object to receive completion or error.
      */
-    static func pass(_ messageToPass: PSDMessage, delegate: PSDMessageSendDelegate?)
-    {
+    static func pass(_ messageToPass: PSDMessage, delegate: PSDMessageSendDelegate?) {
         PSDMessagesStorage.saveInStorage(message:messageToPass)
         dispatchQueue.async {
             if PSDMessageSend.passingMessagesIds.contains(messageToPass.clientId) {

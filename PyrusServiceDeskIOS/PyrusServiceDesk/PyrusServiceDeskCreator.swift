@@ -112,8 +112,8 @@ import UIKit
     @objc public static var onAuthorizationFailed :  (() -> Void)?
     
     ///The subscriber for new messages from support.
-    weak static  private(set) var subscriber : NewReplySubscriber?{
-        didSet{
+    weak static private(set) var subscriber: NewReplySubscriber? {
+        didSet {
             UnreadMessageManager.checkLastComment()
         }
     }
@@ -335,7 +335,7 @@ import UIKit
         if(userId.count > 0){
             restartTimer()
             DispatchQueue.global().async {
-                PSDGetChats.get(delegate: nil, needShowError: false){/// needShowError и делегат не нужны у  PSDGetChats, избавиться
+                PSDGetChats.get(){
                     (chats:[PSDChat]?) in
                     DispatchQueue.main.async {
                         guard let chats = chats, chats.count > 0 else{

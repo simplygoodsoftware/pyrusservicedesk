@@ -6,37 +6,18 @@ struct PSDGetChats {
     private static var sessionTask : URLSessionDataTask? = nil
     /**
      Get chats from server.
-     - parameter delegate: PSDGetDelegate. Works only if showError is true.  If delegate not equal to nil - calls showNoConnectionView(), when no internet connection. Else remembers the current ViewController. And if it has not changed when response receive, on it displays an error.
-     - parameter needShowError: Bool. Pass true if need to show error. If don't need it (for example in auto reloading) pass false.
      On completion returns [PSDChat] if it was received, or empty nil, if no connection.
      */
-    static func get(delegate: PSDGetDelegate?, needShowError:Bool, completion: @escaping (_ chatsArray: [PSDChat]?) -> Void)
+    static func get(completion: @escaping (_ chatsArray: [PSDChat]?) -> Void)
     {
         //remove old session if it is
         remove()
-        var topViewController : UIViewController? = nil
-        DispatchQueue.main.async {
-            //if need show error - remember current top UIViewController
-            if needShowError && delegate == nil{
-                    topViewController = UIApplication.topViewController()
-            }
-        }
-        
         
         let  request : URLRequest = URLRequest.createRequest(type:.chats, parameters: [String: Any]())
         
         PSDGetChats.sessionTask = PyrusServiceDesk.mainSession.dataTask(with: request) { data, response, error in
             guard let data = data, error == nil else {                                                 // check for fundamental networking error
                 completion(nil)
-                if needShowError {
-                    DispatchQueue.main.async {
-                        if(PSDGetChats.sessionTask?.state != .canceling){
-                            delegate?.showNoConnectionView()
-                            showError(nil, on:topViewController)
-                        }
-                        
-                    }
-                }
                 return
             }
             
@@ -52,9 +33,6 @@ struct PSDGetChats {
                 }
 
                 completion([])
-                if needShowError {
-                    DispatchQueue.main.async {showError(httpStatus.statusCode, on:topViewController)}
-                }
             }
             do{
                 let chatsData = try JSONSerialization.jsonObject(with: data, options: .allowFragments) as? [String : Any] ?? [String: Any]()

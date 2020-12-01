@@ -41,14 +41,14 @@ class PSDUploader: NSObject {
      - parameter messageWithAttachment: PSDMessage object with file that need to be passed to server.
      - parameter delegate: PSDMessageSendDelegate object to receive completion or error. Used in second step.
      */
-    func createUploadTask(from messageWithAttachment:PSDMessage, indexOfAttachment:Int,delegate:PSDMessageSendDelegate?){
+    func createUploadTask(from messageWithAttachment: PSDMessage, indexOfAttachment: Int,delegate: PSDMessageSendDelegate?) {
         guard let attachments = messageWithAttachment.attachments, attachments.count > indexOfAttachment else{
             return
         }
         if(attachments[indexOfAttachment].data.count == 0){
             return
         }
-        let taskData : PSDTasksData = PSDTasksData.init(messageWithAttachment, delegate: delegate, file:  attachments[indexOfAttachment])
+        let taskData = PSDTasksData.init(messageWithAttachment, delegate: delegate, file: attachments[indexOfAttachment])
         
         var request = URLRequest.createUploadRequest()
         

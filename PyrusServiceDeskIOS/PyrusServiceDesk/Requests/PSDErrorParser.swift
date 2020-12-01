@@ -6,10 +6,8 @@ import Foundation
  - parameter viewController: UIViewController where alert must be presented. Pas nil if dont need to alert error.
 */
 func showError(_ statusCode:Int?, on viewController:UIViewController? ){
-    guard let viewController = viewController else {
-        return
-    }
-    guard let newTopController = UIApplication.topViewController(),
+    guard let viewController = viewController,
+          let newTopController = UIApplication.topViewController(),
           newTopController == viewController,
           viewController is PSDChatViewController else {
         return

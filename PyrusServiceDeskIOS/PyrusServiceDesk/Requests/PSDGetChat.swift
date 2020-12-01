@@ -16,8 +16,7 @@ struct PSDGetChat {
      - parameter delegate: PSDGetDelegate. Works only if showError is true. If not equal to nil - calls showNoConnectionView(), when no internet connection. Else remembers the current ViewController. And if it has not changed when response receive, on it displays an error.
      On completion returns PSDChat object if it was received.
      */
-    static func get(needShowError:Bool, delegate: PSDGetDelegate?, keepUnread: Bool = false,  completion: @escaping (_ chat: PSDChat?) -> Void)
-    {
+    static func get(needShowError: Bool, delegate: PSDGetDelegate?, keepUnread: Bool = false, completion: @escaping (_ chat: PSDChat?) -> Void) {
         //remove old session if it is
         remove()
         var topViewController : UIViewController? = nil
@@ -27,9 +26,8 @@ struct PSDGetChat {
                 topViewController = UIApplication.topViewController()
             }
         }
-        var parameters = [String: Any]()
-        parameters[KEEP_UNREAD_RATING_KEY] = keepUnread
-        let  request = URLRequest.createRequest(type: .chatFeed, parameters: parameters)
+        let parameters = [KEEP_UNREAD_RATING_KEY: keepUnread]
+        let request = URLRequest.createRequest(type: .chatFeed, parameters: parameters)
     
         let localId = UUID().uuidString
         let task = PyrusServiceDesk.mainSession.dataTask(with: request) { data, response, error in

@@ -4,20 +4,26 @@ class UnreadMessageManager {
     private static let LAST_MESSAGE_KEY = "PSDLastUnreadMessage"
     private static func saveLastComment(_ message: PSDMessage) -> PSDLastUnreadMessage {
         let unreadMessage = PSDLastUnreadMessage(message: message)
-        PSDMessagesStorage.pyrusUserDefaults()?.set(unreadMessage.toDictioanary(), forKey: LAST_MESSAGE_KEY)
+        updateLastComment(unreadMessage)
         return unreadMessage
     }
     private static func updateLastComment(_ message: PSDLastUnreadMessage) {
-        PSDMessagesStorage.pyrusUserDefaults()?.set(message.toDictioanary(), forKey: LAST_MESSAGE_KEY)
+        let encoder = JSONEncoder()
+        guard let data = try? encoder.encode(message) else {
+            return
+        }
+        PSDMessagesStorage.pyrusUserDefaults()?.set(data, forKey: LAST_MESSAGE_KEY)
     }
     static func removeLastComment() {
         PSDMessagesStorage.pyrusUserDefaults()?.removeObject(forKey: LAST_MESSAGE_KEY)
     }
     private static func getLastComment() ->  PSDLastUnreadMessage? {
-        guard let dict = PSDMessagesStorage.pyrusUserDefaults()?.object(forKey: LAST_MESSAGE_KEY) as? [String: Any] else {
+        let decoder = JSONDecoder()
+        guard let messageData = PSDMessagesStorage.pyrusUserDefaults()?.object(forKey: LAST_MESSAGE_KEY) as? Data,
+              let message = try? decoder.decode(PSDLastUnreadMessage.self, from: messageData) else {
             return nil
         }
-        return PSDLastUnreadMessage(dictionary: dict)
+        return message
     }
     ///Check the last saved comment and send it to subscriber
     static func checkLastComment() {
