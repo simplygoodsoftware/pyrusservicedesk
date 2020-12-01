@@ -88,7 +88,7 @@ class PSDChatTableView: PSDDetailTableView{
         }
         DispatchQueue.global().async {
             [weak self] in
-            PSDGetChat.get(needShowError:true, delegate: self){
+            PSDGetChat.get(needShowError: true, delegate: self) {
                 chat in
                 DispatchQueue.main.async {
                     if chat != nil {
@@ -101,10 +101,10 @@ class PSDChatTableView: PSDDetailTableView{
                     self.showRateIfNeed()
                     
                     self.isLoading = false
-                    if chat != nil {
-                        self.tableMatrix.create(from: chat!)
+                    if let chat = chat {
+                        self.tableMatrix.create(from: chat)
                         
-                        self.lastMessageFromServer = chat?.messages.last
+                        self.lastMessageFromServer = chat.messages.last
                         self.setLastActivityDate()
                         self.reloadData()
                         
@@ -171,7 +171,7 @@ class PSDChatTableView: PSDDetailTableView{
     func updateChat(needProgress:Bool) {
 //        DispatchQueue.global().async {
 //            [weak self] in
-            PSDGetChat.get(needShowError: needProgress, delegate: nil){ [weak self]
+            PSDGetChat.get(needShowError: needProgress, delegate: nil) { [weak self]
                 (chat : PSDChat?) in
                 if let chat = chat{
                     DispatchQueue.main.async  {

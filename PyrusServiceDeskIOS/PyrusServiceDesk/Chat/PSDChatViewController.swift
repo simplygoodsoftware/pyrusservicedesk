@@ -278,7 +278,7 @@ class PSDChatViewController: UIViewController{
     }
     @objc private func updateTable(){
         startGettingInfo()
-        if !hasNoConnection() && !PSDGetChat.isActive(){
+        if !hasNoConnection() && !PSDGetChat.isActive() {
            self.tableView.updateChat(needProgress:false)
         }
         
