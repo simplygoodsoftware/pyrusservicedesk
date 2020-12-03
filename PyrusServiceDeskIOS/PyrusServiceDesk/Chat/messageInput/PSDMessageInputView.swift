@@ -290,10 +290,7 @@ class PSDMessageInputView: UIView, PSDMessageTextViewDelegate,PSDMessageSendButt
     private func addBackgroundViewConstraints(){
         backgroundView.translatesAutoresizingMaskIntoConstraints = false
         backgroundView.addZeroConstraint([.top,.bottom])
-        if !PyrusServiceDeskController.iPadView{
-            backgroundView.addZeroConstraint([.left,.right])
-        }
-        
+        backgroundView.addZeroConstraint([.left,.right])
     }
     private func addTopGrayLineConstraints(){
         topGrayLine.translatesAutoresizingMaskIntoConstraints = false
