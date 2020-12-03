@@ -49,9 +49,14 @@ class PSDRefreshControl : UIControl{
         let activity = UIActivityIndicatorView()
         activity.style = UIActivityIndicatorView.Style.whiteLarge
         activity.hidesWhenStopped = false
-        activity.color = .psdLabel
+        activity.color = tintColor
         return activity
     }()
+    override var tintColor: UIColor! {
+        didSet {
+            activity.color = tintColor
+        }
+    }
     var position : horisontalPosition = .top
     enum horisontalPosition{
         case top

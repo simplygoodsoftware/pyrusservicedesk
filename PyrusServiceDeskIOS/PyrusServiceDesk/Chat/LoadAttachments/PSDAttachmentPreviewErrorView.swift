@@ -12,7 +12,7 @@ class PSDAttachmentLoadErrorView: UIView {
     weak var delegate: PSDAttachmentLoadErrorViewDelegate?
     override init(frame: CGRect) {
         super.init(frame: frame)
-        self.backgroundColor = .psdLightGray
+        recolor()
         self.addSubview(errorMessage)
         self.addSubview(button)
         self.addSubview(imageView)
@@ -35,11 +35,11 @@ class PSDAttachmentLoadErrorView: UIView {
         didSet{
             if(attachmentExtension.count>0){
                 let label = UILabel.init()
-                label.textColor = UIColor.psdGray
+                label.textColor = getTextColorForTable().withAlphaComponent(TEXT_ALPHA)
                 label.font = .attachmentExtension
                 label.text = attachmentExtension
                 label.sizeToFit()
-                attachmentExtentionLogo = label.asImage()
+                attachmentExtentionLogo = label.asImage().withRenderingMode(.alwaysTemplate)
             }
         }
     }
@@ -58,7 +58,7 @@ class PSDAttachmentLoadErrorView: UIView {
         case .cantLoad:
             self.errorMessage.text = "FileLoadError".localizedPSD()
             self.button.setTitle("RetryButton".localizedPSD(), for: .normal)
-            self.imageView.image = UIImage.PSDImage(name: "file-preview")
+            self.imageView.image = previewImage
         }
         
         self.errorMessage.sizeToFit()
@@ -66,9 +66,31 @@ class PSDAttachmentLoadErrorView: UIView {
         self.setNeedsLayout()
         self.setNeedsDisplay()
     }
+    private var previewImage: UIImage? {
+        if #available(iOS 13.0, *) {
+            if UITraitCollection.current.userInterfaceStyle == .dark {
+                return UIImage.PSDImage(name: "landscape_light")
+            }
+        }
+        return UIImage.PSDImage(name: "landscape_dark")
+    }
+    override func traitCollectionDidChange(_ previousTraitCollection: UITraitCollection?) {
+        super.traitCollectionDidChange(previousTraitCollection)
+        if #available(iOS 13.0, *) {
+            guard self.traitCollection.hasDifferentColorAppearance(comparedTo: previousTraitCollection) else {
+                return
+            }
+            redraw()
+            recolor()
+        }
+    }
+    private func recolor() {
+        self.backgroundColor = PSD_grayViewColor
+        self.imageView.tintColor = getTextColorForTable().withAlphaComponent(TEXT_ALPHA)
+        errorMessage.textColor = getTextColorForTable().withAlphaComponent(TEXT_ALPHA)
+    }
     private lazy var errorMessage : UILabel = {
         let label = UILabel.init()
-        label.textColor = UIColor.psdGray
         label.numberOfLines = 0
         label.lineBreakMode = .byWordWrapping
         label.textAlignment = .center
@@ -156,3 +178,4 @@ private extension UIFont {
     static let attachmentExtension = PSD_SystemFont(ofSize: PSDAttachmentLoadErrorView.imageViewSize/2)
     static let buttonFont = PSD_SystemFont(ofSize: 18.0)
 }
+private let TEXT_ALPHA: CGFloat = 0.6

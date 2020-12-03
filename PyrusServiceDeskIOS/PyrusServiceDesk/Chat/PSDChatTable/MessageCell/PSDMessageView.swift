@@ -23,6 +23,7 @@ class PSDMessageView: UIView{
             self.backgroundColor = PSD_SupportMassageBackgroundColor()
             recolorWithTextColor(PSD_SupportMassageTextColor())
         }
+        
     }
     override func traitCollectionDidChange(_ previousTraitCollection: UITraitCollection?) {
         super.traitCollectionDidChange(previousTraitCollection)
@@ -69,7 +70,6 @@ class PSDMessageView: UIView{
             attachmentHolderView.addSubview(attachmentView)
             attachmentView.maxWidth = maxWidth
             attachmentView.draw(data, state: message.message.state)
-            attachmentView.color = self.color == .defaultColor ?  .psdLabel : UIColor.appTextColor//test
             attachmentView.addZeroConstraint([.leading,.trailing,.top,.bottom])
         }
         if let rating = message.rating{
@@ -100,7 +100,6 @@ class PSDMessageView: UIView{
         let text = PSDCopyTextView.init(frame: CGRect.zero)
         text.backgroundColor = .clear
         text.font = .messageTextView
-        text.textColor = .psdLabel
         text.isScrollEnabled = false
         text.isEditable = false
         let inset = UIEdgeInsets(top: PSDMessageView.distToBoard, left: PSDMessageView.distToBoard, bottom: PSDMessageView.distToBoard, right: PSDMessageView.distToBoard)
@@ -132,10 +131,9 @@ class PSDMessageView: UIView{
     }()
     private lazy var separatorView : UIImageView = {
         let view = UIImageView()
-        let image = UIImage.PSDImage(name: "dotted_line").withRenderingMode(.alwaysTemplate)
+        let image = UIImage.PSDImage(name: "dotted_line")?.withRenderingMode(.alwaysTemplate)
         view.image = image
         view.contentMode = .scaleAspectFit
-        view.tintColor = UIColor.psdLabel.withAlphaComponent(PSDMessageView.separatorAlpha)
         return view
     }()
     var attachmentView : PSDAttachmentView?

@@ -40,8 +40,8 @@ class PSDRateView: UIView {
             button.layer.cornerRadius = BUTTON_CORNER_RADIUS
             button.setTitle(rate.value, for: .normal)
             button.tag = rate.key
-            button.setBackgroundColor(color: .psdLightGray, forState: .normal)
-            button.setBackgroundColor(color: .psdGray, forState: .highlighted)
+            button.setBackgroundColor(color: PSD_lightGrayViewColor, forState: .normal)
+            button.setBackgroundColor(color: PSD_grayViewColor, forState: .highlighted)
             
             button.addTarget(self, action: #selector(didTapButton), for: .touchUpInside)
             

@@ -46,7 +46,7 @@ class PSDChatMessageCell: UITableViewCell {
     override func setSelected(_ selected: Bool, animated: Bool) {
         super.setSelected(selected, animated: animated)
         if(selected){
-            self.contentView.backgroundColor = .psdLightGray//test
+            self.contentView.backgroundColor = PSD_lightGrayViewColor
         }
         else{
             self.contentView.backgroundColor = .clear

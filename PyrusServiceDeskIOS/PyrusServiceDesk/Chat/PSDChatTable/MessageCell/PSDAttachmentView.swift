@@ -33,7 +33,7 @@ class PSDAttachmentView: UIView{
     }
     lazy private(set) var previewImageView : PSDAttachmentImageView = {
         let iv = PSDAttachmentImageView.init(frame: CGRect.zero)
-        iv.backgroundColor = UIColor.psdLightGray//test
+        iv.backgroundColor = PSD_lightGrayViewColor
         iv.clipsToBounds = true
         iv.contentMode = .scaleAspectFill
         return iv

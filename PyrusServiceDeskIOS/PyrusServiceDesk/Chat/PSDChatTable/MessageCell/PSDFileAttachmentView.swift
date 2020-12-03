@@ -14,6 +14,7 @@ class PSDFileAttachmentView: PSDAttachmentView {
         didSet{
             nameLabel.textColor = self.color
             stateLabel.textColor = self.color
+            previewBorderLayer.strokeColor = color.withAlphaComponent(0.15).cgColor
         }
     }
     override init(frame: CGRect) {
@@ -114,10 +115,6 @@ class PSDFileAttachmentView: PSDAttachmentView {
         borderLayer.lineWidth = PREVIEW_BORDER_WIDTH
         return borderLayer
     }()
-    override func traitCollectionDidChange(_ previousTraitCollection: UITraitCollection?) {
-        super.traitCollectionDidChange(previousTraitCollection)
-        previewBorderLayer.strokeColor = UIColor.psdLabel.withAlphaComponent(0.15).cgColor
-    }
     private func addConstraints(){
         uploadView.addConstraint([.leading], constant: PSDFileAttachmentView.distance)
         uploadView.addZeroConstraint([.centerY])

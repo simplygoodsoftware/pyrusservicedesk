@@ -18,7 +18,7 @@ class AttachmentFileCollectionViewCell: AttachmentCollectionViewCell {
     private static let imageName = "file2"
     private lazy var imageView : UIImageView = {
         let imageView = UIImageView()
-        let image =  UIImage.PSDImage(name: AttachmentFileCollectionViewCell.imageName).withRenderingMode(.alwaysTemplate)
+        let image =  UIImage.PSDImage(name: AttachmentFileCollectionViewCell.imageName)?.withRenderingMode(.alwaysTemplate)
         imageView.image = image
         imageView.tintColor = UIColor.psdGray
         return imageView

@@ -3,11 +3,8 @@ import Foundation
 import ImageIO
 extension UIImage {
     ///Take image from Pyrus Service Desk framework bundle. Return image, if no image - fatalError
-    class func PSDImage(name: String) -> UIImage{
-        guard let image = UIImage(named: name, in: PSD_BUNDLE, compatibleWith: nil)else {
-            fatalError("Missing MyImage..., name = \(name)")
-        }
-        return image
+    class func PSDImage(name: String) -> UIImage? {
+        return UIImage(named: name, in: PSD_BUNDLE, compatibleWith: nil)
     }
     ///Take gif image from Pyrus Service Desk framework bundle. Return array with images, if no gif image - fatalError
     class func PSDGifImage(name: String) -> [UIImage]{

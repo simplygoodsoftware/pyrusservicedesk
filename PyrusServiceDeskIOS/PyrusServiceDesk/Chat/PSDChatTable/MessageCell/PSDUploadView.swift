@@ -81,7 +81,7 @@ class PSDUploadView: UIButton {
     }
     ///Draw upload view with progress, and cancel action
     private func drawWithLoad(){
-        let image = UIImage.PSDImage(name: "Close").imageWith(color: color)
+        let image = UIImage.PSDImage(name: "Close")?.imageWith(color: color)
         self.setImage(image, for: .selected)
         self.isSelected=true
         progressLayer.isHidden = false
@@ -97,7 +97,7 @@ class PSDUploadView: UIButton {
         self.isSelected=true
         progressLayer.isHidden = true
         
-        let image = UIImage.PSDImage(name: "Refresh").imageWith(color: color)
+        let image = UIImage.PSDImage(name: "Refresh")?.imageWith(color: color)
         self.setImage(image, for: .selected)
     }
     

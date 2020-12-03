@@ -22,9 +22,9 @@ func PSD_StatusBarStyle(for controller: UIViewController) -> UIStatusBarStyle? {
         return PyrusServiceDesk.mainController?.customization?.statusBarStyle
     }
 }
-func PSD_KeyboardStyle(for controller: UIViewController) -> UIKeyboardAppearance {
-    if #available(iOS 12.0, *) {
-        switch controller.traitCollection.userInterfaceStyle {
+func PSD_KeyboardStyle() -> UIKeyboardAppearance {
+    if #available(iOS 13.0, *) {
+        switch UITraitCollection.current.userInterfaceStyle {
         case .light, .unspecified:
             return PyrusServiceDesk.mainController?.customization?.keyboardAppearance ?? .default
         case .dark:
@@ -101,6 +101,60 @@ func getTextColorForTable() -> UIColor {
     }
     return UIColor.getTextColor(for: color)
 }
+func PSD_TextColorForInput() -> UIColor {
+    let (_, textColor) = PSD_colorForInput()
+    return textColor
+}
+///Returns back color and text color fror message input
+func PSD_colorForInput() -> (UIColor, UIColor) {
+    let style = PSD_KeyboardStyle()
+    if let color = PyrusServiceDesk.mainController?.customization?.keyboardColor {
+        return (color, UIColor.getTextColor(for: color))
+    }
+    
+    switch style {
+    case .dark:
+        return (.black, .white)
+    case .light:
+        return (.white, .black)
+    default:
+        return (.psdBackground, .psdLabel)
+    }
+}
 func prepareWithCustomizationAlert(_ alert: UIAlertController) {
     alert.view.tintColor = PyrusServiceDesk.mainController?.customization?.attachmentMenuTextColor ?? UIColor.darkAppColor
 }
+var PSD_grayViewColor: UIColor {
+    guard let color = PyrusServiceDesk.mainController?.customization?.customBackgroundColor else {
+        return PSD_grayDefaultColor
+    }
+    return color.isDarkColor ? UIColor.white.withAlphaComponent(GRAY_VIEW_ALPHA) : UIColor.black.withAlphaComponent(GRAY_VIEW_ALPHA)
+}
+var PSD_lightGrayViewColor: UIColor {
+    guard let color = PyrusServiceDesk.mainController?.customization?.customBackgroundColor else {
+        return PSD_lightGrayDefaultColor
+    }
+    return color.isDarkColor ? UIColor.white.withAlphaComponent(LIGHT_GRAY_VIEW_ALPHA) : UIColor.black.withAlphaComponent(LIGHT_GRAY_VIEW_ALPHA)
+}
+
+var PSD_grayInputColor: UIColor {
+    guard let color = PyrusServiceDesk.mainController?.customization?.keyboardColor else {
+        return PSD_grayDefaultColor
+    }
+    return color.isDarkColor ? UIColor.white.withAlphaComponent(GRAY_VIEW_ALPHA) : UIColor.black.withAlphaComponent(GRAY_VIEW_ALPHA)
+}
+var PSD_lightGrayInputColor: UIColor {
+    guard let color = PyrusServiceDesk.mainController?.customization?.keyboardColor else {
+        return PSD_lightGrayDefaultColor
+    }
+    return color.isDarkColor ? UIColor.white.withAlphaComponent(LIGHT_GRAY_VIEW_ALPHA) : UIColor.black.withAlphaComponent(LIGHT_GRAY_VIEW_ALPHA)
+}
+
+private var PSD_grayDefaultColor: UIColor {
+    return UIColor.themedColor(lightColor: UIColor.black.withAlphaComponent(GRAY_VIEW_ALPHA),darkColor: UIColor.white.withAlphaComponent(GRAY_VIEW_ALPHA))
+}
+private var PSD_lightGrayDefaultColor: UIColor {
+    return UIColor.themedColor(lightColor: UIColor.black.withAlphaComponent(LIGHT_GRAY_VIEW_ALPHA),darkColor: UIColor.white.withAlphaComponent(LIGHT_GRAY_VIEW_ALPHA))
+}
+private let GRAY_VIEW_ALPHA: CGFloat = 0.1
+private let LIGHT_GRAY_VIEW_ALPHA: CGFloat = 0.05

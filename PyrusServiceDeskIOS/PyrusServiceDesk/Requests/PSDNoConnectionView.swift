@@ -8,10 +8,10 @@ class PSDNoConnectionView: UIView {
     weak var delegate: PSDNoConnectionViewDelegate?
     override init(frame: CGRect) {
         super.init(frame: frame)
-        self.backgroundColor = .psdLightGray
         self.addSubview(noConnectionLabel)
         self.addSubview(retryButton)
         setConstraints()
+        recolor()
     }
     required init?(coder aDecoder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
@@ -19,7 +19,6 @@ class PSDNoConnectionView: UIView {
     
     private lazy var noConnectionLabel : UILabel = {
         let label = UILabel()
-        label.textColor = .psdGray
         label.font = .noConnectionLabel
         label.text = "No_Connection".localizedPSD()
         label.numberOfLines = 0
@@ -86,9 +85,22 @@ class PSDNoConnectionView: UIView {
             constant: -PSDNoConnectionView.dist
             ).isActive = true
     }
-
+    override func traitCollectionDidChange(_ previousTraitCollection: UITraitCollection?) {
+        super.traitCollectionDidChange(previousTraitCollection)
+        if #available(iOS 13.0, *) {
+            guard self.traitCollection.hasDifferentColorAppearance(comparedTo: previousTraitCollection) else {
+                return
+            }
+            recolor()
+        }
+    }
+    private func recolor() {
+        self.backgroundColor = PSD_grayViewColor
+        noConnectionLabel.textColor = getTextColorForTable().withAlphaComponent(TEXT_ALPHA)
+    }
 }
 private extension UIFont {
     static let noConnectionLabel = PSD_SystemFont(ofSize: 17.0)
     static let retryButton = PSD_SystemFont(ofSize: 17.0)
 }
+private let TEXT_ALPHA: CGFloat = 0.6

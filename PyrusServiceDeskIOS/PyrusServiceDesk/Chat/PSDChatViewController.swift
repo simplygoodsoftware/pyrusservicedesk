@@ -196,28 +196,12 @@ class PSDChatViewController: PSDViewController {
         return table
     }()
     private func recolorTextInput(_ input: PSDMessageInputView) {
-        let style = PSD_KeyboardStyle(for: self)
+        let style = PSD_KeyboardStyle()
         input.inputTextView.keyboardAppearance = style
-        let (backInputColor, textInputColor) = colorForInput()
+        let (backInputColor, textInputColor) = PSD_colorForInput()
         input.backgroundView.backgroundColor = backInputColor
         input.inputTextView.textColor = textInputColor
         input.sendButton.setTitleColor(textInputColor.withAlphaComponent(PSDMessageSendButton.titleDisabledAlpha), for: .disabled)
-    }
-    ///Returns back color and text color fror message input
-    private func colorForInput() -> (UIColor, UIColor) {
-        let style = PSD_KeyboardStyle(for: self)
-        if let color = PyrusServiceDesk.mainController?.customization?.keyboardColor {
-            return (color, UIColor.getTextColor(for: color))
-        }
-        
-        switch style {
-        case .dark:
-            return (.black, .white)
-        case .light:
-            return (.white, .black)
-        default:
-            return (.psdBackground, .psdLabel)
-        }
     }
     /**Setting design To PyrusSupportChatViewController view, add subviews*/
     private func design() {
@@ -264,7 +248,7 @@ class PSDChatViewController: PSDViewController {
         button.titleLabel?.font = .backButton
         button.setTitle("Back".localizedPSD(), for: .normal)
         button.setTitleColor(PyrusServiceDesk.mainController?.customization?.barButtonTintColor ?? UIColor.darkAppColor, for: .normal)
-        let backImage = UIImage.PSDImage(name: "Back").withRenderingMode(.alwaysTemplate)
+        let backImage = UIImage.PSDImage(name: "Back")?.withRenderingMode(.alwaysTemplate)
         button.setImage(backImage, for: .normal)
         button.addTarget(self, action: #selector(closeButtonAction), for: .touchUpInside)
         button.sizeToFit()

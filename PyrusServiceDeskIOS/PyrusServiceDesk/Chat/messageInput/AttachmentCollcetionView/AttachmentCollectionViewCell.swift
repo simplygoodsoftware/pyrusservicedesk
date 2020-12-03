@@ -13,14 +13,18 @@ protocol AttachmentCollectionViewCellDelegate : NSObjectProtocol{
 class AttachmentCollectionViewCell : UICollectionViewCell{
     weak var delegate : AttachmentCollectionViewCellDelegate?
     private static let buttonSize : CGFloat = 15
-    private static let buttonImageName = "delete"
+    private var buttonImageName: String = {
+        if PSD_TextColorForInput() == .white {
+            return "ic_remove"
+        }
+        return "ic_remove_darkmode"
+    }()
     static let distToBoard : CGFloat = 7
     private static let holderRadius : CGFloat = 6.0
     private static let holderBorderWidth : CGFloat = 1.0
     private lazy var removeButton : UIButton = {
         let button = UIButton()
-        button.backgroundColor = #colorLiteral(red: 0.9490196078, green: 0.9490196078, blue: 0.968627451, alpha: 1)
-        button.setImage(UIImage.PSDImage(name: AttachmentCollectionViewCell.buttonImageName), for: .normal)
+        button.setImage(UIImage.PSDImage(name: buttonImageName), for: .normal)
         button.layer.cornerRadius = AttachmentCollectionViewCell.buttonSize/2
         return button
     }()
@@ -29,7 +33,6 @@ class AttachmentCollectionViewCell : UICollectionViewCell{
         view.backgroundColor = .clear
         view.layer.cornerRadius = AttachmentCollectionViewCell.holderRadius
         view.layer.borderWidth = AttachmentCollectionViewCell.holderBorderWidth
-        view.layer.borderColor = UIColor.psdLightGray.cgColor
         view.clipsToBounds = true
         return view
     }()
@@ -59,8 +62,23 @@ class AttachmentCollectionViewCell : UICollectionViewCell{
         removeButton.heightAnchor.constraint(equalToConstant: AttachmentCollectionViewCell.buttonSize).isActive = true
         
         removeButton.addTarget(self, action: #selector(removeButtonPressed), for: .touchUpInside)
+        recolor()
     }
     @objc private func removeButtonPressed(){
         delegate?.removePressed(for: self)
+    }
+    override func traitCollectionDidChange(_ previousTraitCollection: UITraitCollection?) {
+        super.traitCollectionDidChange(previousTraitCollection)
+        if #available(iOS 13.0, *) {
+            guard traitCollection.hasDifferentColorAppearance(comparedTo: previousTraitCollection) else {
+                return
+            }
+            recolor()
+        }
+    }
+    private func recolor() {
+        removeButton.setImage(UIImage.PSDImage(name: buttonImageName), for: .normal)
+        removeButton.backgroundColor = PyrusServiceDesk.mainController?.customization?.keyboardColor ?? PSD_lightGrayInputColor
+        holderView.layer.borderColor = PSD_lightGrayInputColor.cgColor
     }
 }

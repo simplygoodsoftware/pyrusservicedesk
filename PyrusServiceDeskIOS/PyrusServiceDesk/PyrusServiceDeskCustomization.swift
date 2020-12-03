@@ -141,13 +141,6 @@ import Foundation
     ///The custom color for chat background.
     private(set) var customBackgroundColor: UIColor?
     
-    ///The custom background color for menu for attachment choosing.
-    @objc public func setAttachmentMenuBackgroundColor(_ color: UIColor?) {
-        attachmentMenuBackgroundColor = color
-    }
-    ///The custom background color for menu for attachment choosing.
-    private(set) var attachmentMenuBackgroundColor: UIColor?
-    
     ///The custom text color for menu for attachment choosing.
     @objc public func setAttachmentMenuTextColor(_ color: UIColor?) {
         attachmentMenuTextColor = color
