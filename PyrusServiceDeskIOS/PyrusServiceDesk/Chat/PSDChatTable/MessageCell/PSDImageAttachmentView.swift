@@ -16,14 +16,9 @@ class PSDImageAttachmentView: PSDAttachmentView {
         self.backgroundColor = .clear
         
         self.previewImageView.layer.borderWidth = PREVIEW_BORDER_WIDTH
-        self.previewImageView.layer.borderColor = UIColor.psdLabel.withAlphaComponent(0.15).cgColor
         self.previewImageView.layer.cornerRadius = MESSAGE_CORNER_RADIUS
         
         self.addConstraints()
-    }
-    override func traitCollectionDidChange(_ previousTraitCollection: UITraitCollection?) {
-        super.traitCollectionDidChange(previousTraitCollection)
-        self.previewImageView.layer.borderColor = UIColor.psdLabel.withAlphaComponent(0.15).cgColor
     }
     ///The min supported width
     private var minWidth :CGFloat = 65
@@ -106,8 +101,12 @@ class PSDImageAttachmentView: PSDAttachmentView {
             self.uploadView.isHidden = downloadState == .sent
         }
     }
-    private lazy var downloadView : PSDDownloadView = {
-        let view = PSDDownloadView.init(frame: CGRect.zero)
-        return view
-    }()
+    private let downloadView = PSDDownloadView()
+    override var color: UIColor {
+        didSet {
+            self.previewImageView.layer.borderColor = color.withAlphaComponent(BORDER_ALPHA).cgColor
+            downloadView.color = color
+        }
+    }
 }
+private let BORDER_ALPHA: CGFloat = 0.15

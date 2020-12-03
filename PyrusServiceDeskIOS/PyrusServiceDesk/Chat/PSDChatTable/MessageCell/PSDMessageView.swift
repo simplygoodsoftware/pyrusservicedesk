@@ -71,6 +71,7 @@ class PSDMessageView: UIView{
             attachmentView.maxWidth = maxWidth
             attachmentView.draw(data, state: message.message.state)
             attachmentView.addZeroConstraint([.leading,.trailing,.top,.bottom])
+            recolor()
         }
         if let rating = message.rating{
             ratingLabel.text = rateArray[rating]
