@@ -194,10 +194,8 @@ internal class TicketViewModel(serviceDeskProvider: ServiceDeskProvider,
      * Callback to be invoked when user wants to remove attached file from the message.
      */
     fun onAttachmentRemoved(entryToRemove : AttachmentEntry) {
-        entryToRemove.let {
-            applyAttachmentUpdate(it, AttachmentChangeType.Removed)
-            pendingCommentUnderAction = null
-        }
+        applyAttachmentUpdate(entryToRemove, AttachmentChangeType.Removed)
+        pendingCommentUnderAction = null
     }
 
     /**

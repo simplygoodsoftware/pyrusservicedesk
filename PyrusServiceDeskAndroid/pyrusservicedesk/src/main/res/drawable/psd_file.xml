@@ -1,10 +1,10 @@
 <vector xmlns:android="http://schemas.android.com/apk/res/android"
-    android:width="24dp"
-    android:height="24dp"
-    android:viewportWidth="24"
-    android:viewportHeight="24">
+    android:width="@dimen/psd_attach_button_width"
+    android:height="@dimen/psd_attach_button_width"
+    android:viewportWidth="24.0"
+    android:viewportHeight="24.0">
     <path
-        android:fillAlpha=".6"
-        android:fillColor="#666666"
+        android:fillAlpha="0.6"
+        android:fillColor="@color/psd_action_bar_icon_color"
         android:pathData="M13.6,2L20,8.667v11.11C20,21 19.04,22 17.867,22L6.123,22C4.949,22 4,21 4,19.778l0.01,-15.556C4.01,3 4.96,2 6.134,2L13.6,2zM17,16L7,16v2h10v-2zM13,12L7,12v2h6v-2zM12.533,3.667v6.11L18.4,9.777l-5.867,-6.11z" />
 </vector>

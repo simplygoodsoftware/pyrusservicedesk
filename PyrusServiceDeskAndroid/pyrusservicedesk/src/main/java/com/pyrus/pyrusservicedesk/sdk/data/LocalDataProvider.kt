@@ -88,7 +88,7 @@ internal class LocalDataProvider(offlineRepository: OfflineRepository,
     }
 
     private fun createLocalAttachment(fileData: FileData): Attachment {
-        return Attachment(id = lastLocalAttachmentId++, name = fileData.fileName, bytesSize = fileData.bytesSize, localUri = fileData.uri)
+        return Attachment(id = --lastLocalAttachmentId, name = fileData.fileName, bytesSize = fileData.bytesSize, localUri = fileData.uri)
     }
 }
 

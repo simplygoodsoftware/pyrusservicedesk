@@ -15,4 +15,5 @@
     <color name="psd_no_file_preview_background">#333333</color>
     <color name="psd_comment_preview_outline">#D9D9D9</color>
     <color name="psd_attachment_outline">#80979797</color>
+    <color name="psd_remove_attachment">#B0B0B0</color>
 </resources>
