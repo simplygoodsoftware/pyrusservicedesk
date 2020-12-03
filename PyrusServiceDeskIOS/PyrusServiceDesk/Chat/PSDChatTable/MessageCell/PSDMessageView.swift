@@ -30,13 +30,17 @@ class PSDMessageView: UIView{
         }
     }
     private static let distToBoard : CGFloat = 10.0
-    
+    private let PLACEHOLDER_HEIGHT: CGFloat = 20
+    private let PLACEHOLDER_WIDTH: CGFloat = 50
     var maxWidth : CGFloat = 50
     private static let separatorAlpha :CGFloat = 0.8
     func draw(message:PSDRowMessage)
     {
         messageTextView.text = message.text
         attachmentView?.removeFromSuperview()
+        placeholderImageView.isHidden = message.message as? PSDPlaceholderMessage == nil
+        placeholderBottomConstraint?.isActive = message.message as? PSDPlaceholderMessage != nil
+        placeholderRightConstraint?.isActive = message.message as? PSDPlaceholderMessage != nil
         attachmentView = nil
         if(self.backgroundColor == .clear){
             self.recolor()
@@ -101,6 +105,12 @@ class PSDMessageView: UIView{
         
         return text
     }()
+    private let placeholderImageView: UIImageView = {
+        let imageView = UIImageView()
+        imageView.image = UIImage.PSDImage(name: "messagePlaceholder")
+        imageView.contentMode = .scaleAspectFit
+        return imageView
+    }()
     private var ratingLabel: UILabel = {
         let label = UILabel()
         label.font = UIFont.RATING_FONT
@@ -128,17 +138,19 @@ class PSDMessageView: UIView{
         self.addSubview(separatorView)
         self.addGestureRecognizer(tapGesture)
         self.addSubview(ratingLabel)
+        addSubview(placeholderImageView)
         addConstraints()
     }
     required init?(coder aDecoder: NSCoder) {
         super.init(coder: aDecoder)
     }
-    
-    private var separatorWidthConstraint : NSLayoutConstraint?
-    private var separatorHeightConstraint : NSLayoutConstraint?
-    private var messageEmptyHeightConstraint : NSLayoutConstraint?
-    private var attachmentHolderRightConstraint : NSLayoutConstraint?//the cosntaint to right side with "lessThanOrEqualTo"
-    private var attachmentHolderImageRightConstraint : NSLayoutConstraint?//the cosntaint to right side with "EqualTo""
+    private var placeholderBottomConstraint: NSLayoutConstraint?
+    private var placeholderRightConstraint: NSLayoutConstraint?
+    private var separatorWidthConstraint: NSLayoutConstraint?
+    private var separatorHeightConstraint: NSLayoutConstraint?
+    private var messageEmptyHeightConstraint: NSLayoutConstraint?
+    private var attachmentHolderRightConstraint: NSLayoutConstraint?//the cosntaint to right side with "lessThanOrEqualTo"
+    private var attachmentHolderImageRightConstraint: NSLayoutConstraint?//the cosntaint to right side with "EqualTo""
     
     private func addConstraints()
     {
@@ -146,6 +158,15 @@ class PSDMessageView: UIView{
         attachmentHolderView.translatesAutoresizingMaskIntoConstraints = false
         separatorView.translatesAutoresizingMaskIntoConstraints = false
         ratingLabel.translatesAutoresizingMaskIntoConstraints = false
+        placeholderImageView.translatesAutoresizingMaskIntoConstraints = false
+        
+        placeholderImageView.leftAnchor.constraint(equalTo: leftAnchor, constant: PSDMessageView.distToBoard).isActive = true
+        placeholderImageView.topAnchor.constraint(equalTo: topAnchor, constant: PSDMessageView.distToBoard).isActive = true
+        placeholderBottomConstraint = placeholderImageView.bottomAnchor.constraint(equalTo: bottomAnchor, constant: -PSDMessageView.distToBoard)
+        placeholderRightConstraint = placeholderImageView.rightAnchor.constraint(equalTo: rightAnchor, constant: -PSDMessageView.distToBoard)
+        placeholderImageView.heightAnchor.constraint(equalToConstant: PLACEHOLDER_HEIGHT).isActive = true
+        placeholderImageView.widthAnchor.constraint(equalToConstant: PLACEHOLDER_WIDTH).isActive = true
+        
         
         ratingLabel.addZeroConstraint([.top])
         ratingLabel.leftAnchor.constraint(greaterThanOrEqualTo: leftAnchor, constant: 0).isActive = true

@@ -30,18 +30,14 @@ struct PSDGetChat {
         var  request : URLRequest
         if PyrusServiceDesk.oneChat{
             request = URLRequest.createRequest(type:.chatFeed, parameters: [String: Any]())
-            //print("request.url = \(String(describing: request.url))")
-            //print("pass request body \(String(describing: String(data: request.httpBody!, encoding: String.Encoding.utf8)))")
         }
         else{
             request = URLRequest.createRequest(with:chatId, type:.chat, parameters: [String: Any]())
         }
         let localId = UUID().uuidString
-        //PSDGetChat.sessionTask =
         let task = PyrusServiceDesk.mainSession.dataTask(with: request) { data, response, error in
             guard let data = data, error == nil else {
                 // check for fundamental networking error
-                
                 if needShowError {
                     DispatchQueue.main.async {
                         for (_, chatGetter) in chatGetters{
@@ -59,6 +55,16 @@ struct PSDGetChat {
             }
             
             if let httpStatus = response as? HTTPURLResponse, httpStatus.statusCode != 200 {           // check for http errors
+                DispatchQueue.main.async {
+                    if httpStatus.statusCode == 403 {
+                        if let onFailed = PyrusServiceDesk.onAuthorizationFailed {
+                            onFailed()
+                        } else {
+                            PyrusServiceDesk.mainController?.closeServiceDesk()
+                        }
+                    }
+                }
+                
                 if needShowError {
                     DispatchQueue.main.async {showError(httpStatus.statusCode, on:topViewController)}
                 }
@@ -67,7 +73,9 @@ struct PSDGetChat {
             do{
                 let chatData = try JSONSerialization.jsonObject(with: data, options: .allowFragments) as? [String : Any] ?? [String: Any]()
                 completion(generateChat(from:chatData))
-               
+                DispatchQueue.main.async {
+                    PyrusServiceDesk.newMessagesCount = 0
+                }
             }catch{
                 //print("PSDGetChat error when convert to dictionary")
             }
@@ -150,6 +158,10 @@ struct PSDGetChat {
             if (attachmentsForMessage?.count ?? 0) > 0 || (textForMessage?.count ?? 0) > 0 || rating != nil{
                 let message = PSDMessage(text: textForMessage, attachments:attachmentsForMessage, messageId: dic.stringOfKey(commentIdParameter), owner: user, date: date)
                 message.rating = rating
+                let clientId = dic.stringOfKey(CLIENT_ID_KEY)
+                if clientId.count > 0 {
+                    message.clientId = clientId
+                }
                 messages.append(message)
             }
         }

@@ -21,7 +21,7 @@ extension Array where Element == [PSDRowMessage]{
         var indexPaths = [IndexPath:PSDRowMessage]()
         for (section,messages) in self.enumerated().reversed(){
             for (row,message) in messages.enumerated().reversed(){
-                if message.message.localId == localId
+                if message.message.clientId.lowercased() == localId.lowercased()
                 {
                     indexPaths[IndexPath.init(row: row, section: section)] = message
                 }
@@ -39,7 +39,7 @@ extension Array where Element == [PSDRowMessage]{
         var firstRow = 0
         var section = lastSection + 1
         if lastSectionDate.compareWithoutTime(with: message.date) == .equal{
-            firstRow = self[lastSection].count
+            firstRow = self[lastSection].count - 1
             section = lastSection
         }
         var indexPaths = [IndexPath]()
@@ -85,6 +85,14 @@ extension Array where Element == [PSDRowMessage]{
         }
         let currentUser = personForMessage(at: IndexPath.init(row: indexPath.row, section: indexPath.section))
         let nextUser = personForMessage(at: IndexPath.init(row: indexPath.row+1, section: indexPath.section))
+        if currentUser as? PSDPlaceholderUser != nil{
+            let previousUser = personForMessage(at: IndexPath.init(row: indexPath.row-1, section: indexPath.section))
+            if let previousUser = previousUser, previousUser.personId != PyrusServiceDesk.userId{
+                return false
+            }else{
+                return true
+            }
+        }
         if(!(currentUser?.equalTo(user:nextUser) ?? false) || nextUser == nil){
             return true
         }
@@ -94,6 +102,13 @@ extension Array where Element == [PSDRowMessage]{
     func needShowName(at indexPath: IndexPath)->Bool{
         let previousUser = personForMessage(at: IndexPath.init(row: indexPath.row-1, section: indexPath.section))
         let currentUser = personForMessage(at: IndexPath.init(row: indexPath.row, section: indexPath.section))
+        if currentUser as? PSDPlaceholderUser != nil{
+            if let previousUser = previousUser, previousUser.personId != PyrusServiceDesk.userId{
+                return false
+            }else{
+                return true
+            }
+        }
         if(!(currentUser?.equalTo(user:previousUser) ?? false) || previousUser == nil){
             return true
         }
@@ -124,6 +139,16 @@ extension Array where Element == [PSDRowMessage]{
         }
         return false
     }
-        
+    ///Returns the date of last  message from user
+    func lastUserMessageDate() -> Date? {
+        for messageByDate in self.reversed(){
+            for messageRow in messageByDate.reversed(){
+                if messageRow.message.owner.personId == PyrusServiceDesk.userId && messageRow.hasId(){
+                    return messageRow.message.date
+                }
+            }
+        }
+        return nil
+    }
 }
 

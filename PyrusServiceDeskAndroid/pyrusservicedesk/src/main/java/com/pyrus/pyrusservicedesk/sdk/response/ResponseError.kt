@@ -25,3 +25,8 @@ internal class NoInternetConnection(message: String): ResponseError(message)
  * Error that is happened when response contains no data. Normally can't be happened. For requests that return any data.
  */
 internal class EmptyDataError : ResponseError("Data is empty (null was received)")
+
+/**
+ * Error that happens when authorization request has failed. Can happen if userId or securityKey are not valid.
+ */
+internal class AuthorizationError(message: String): ResponseError(message)

@@ -16,8 +16,8 @@ import com.pyrus.pyrusservicedesk.sdk.response.ResponseError
 internal class GetTicketCall(
         scope: CoroutineScope,
         private val requests: RequestFactory,
-        val ticketId: Int)
-    : BaseCall<Comments>(scope){
+        val ticketId: Int
+) : BaseCall<Comments>(scope){
 
 
     override suspend fun run(): CallResult<Comments> {

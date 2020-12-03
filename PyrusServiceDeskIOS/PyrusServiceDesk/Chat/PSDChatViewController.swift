@@ -4,15 +4,24 @@ import UIKit
 ///Protocol for updateting info
 protocol PSDUpdateInfo{
     func startGettingInfo()
-    func refreshChat()
+    func refreshChat(showFakeMessage: Int?)
 }
 
 class PSDChatViewController: UIViewController{
     
     var chatId: String = ""
-
+    
+    public func updateTitle(){
+        designNavigation()
+        self.messageInputView.setToDefault()
+        self.tableView.isLoading = false
+        self.tableView.chatId = self.chatId
+        self.tableView.reloadChat()
+    }
+    
     override func viewDidLoad() {
         super.viewDidLoad()
+        presentationController?.delegate = self
         if #available(iOS 11.0, *) {
             self.tableView.contentInsetAdjustmentBehavior = .never//.automatic
             
@@ -25,15 +34,25 @@ class PSDChatViewController: UIViewController{
         self.customiseDesign(color: UIColor.darkAppColor)
         
         self.openChat()
-        
         self.startGettingInfo()
-        
+        if let infoView = PSD_InfoView(), !(PSDMessagesStorage.pyrusUserDefaults()?.bool(forKey: PSD_WAS_CLOSE_INFO_KEY) ?? true) {
+            view.addSubview(infoView)
+            infoView.widthAnchor.constraint(equalTo: view.widthAnchor).isActive = true
+            infoView.centerXAnchor.constraint(equalTo: view.centerXAnchor).isActive = true
+            infoView.topAnchor.constraint(equalTo: view.topAnchor, constant: (self.navigationController?.navigationBar.frame.size.height ?? 0) +  UIApplication.shared.statusBarFrame.height).isActive = true
+        }
+
+        let deadlineTime = DispatchTime.now() + 0.45
+        DispatchQueue.main.asyncAfter(deadline: deadlineTime, execute: {
+            self.messageInputView.inputTextView.becomeFirstResponder()
+        })
     }
+    
     override func viewWillLayoutSubviews() {
         super.viewWillLayoutSubviews()
         resizeTable()
     }
-    private func resizeTable(){
+    func resizeTable(){
         var fr = self.view.bounds
         fr.origin.y = (self.navigationController?.navigationBar.frame.size.height ?? 0) +  UIApplication.shared.statusBarFrame.height
         fr.size.height =  fr.size.height - fr.origin.y 
@@ -41,6 +60,11 @@ class PSDChatViewController: UIViewController{
             fr.origin.x = self.view.safeAreaInsets.left
             fr.size.width = fr.size.width - (fr.origin.x*2)
         }
+        if let infoView = PSD_InfoView(), !(PSDMessagesStorage.pyrusUserDefaults()?.bool(forKey: PSD_WAS_CLOSE_INFO_KEY) ?? true){
+            fr.origin.y += infoView.frame.size.height
+            fr.size.height -= infoView.frame.size.height
+        }
+
         self.tableView.frame = fr
         
     }
@@ -111,11 +135,9 @@ class PSDChatViewController: UIViewController{
     }
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
+        self.navigationController?.navigationBar.isHidden = false
         startGettingInfo()
-      //  self.becomeFirstResponder()
         resizeTable()
-     //   self.tableView.addKeyboardListeners()
-        
         NotificationCenter.default.addObserver(self, selector: #selector(appEnteredBackground), name: UIApplication.didEnterBackgroundNotification, object: nil)
         NotificationCenter.default.addObserver(self, selector: #selector(appEnteredForeground), name: UIApplication.willEnterForegroundNotification, object: nil)
     }
@@ -163,6 +185,7 @@ class PSDChatViewController: UIViewController{
         table.setupTableView()
         return table
     }()
+    
     /**Setting design To PyrusSupportChatViewController view, add subviews*/
     private func design() {
         self.view.backgroundColor = .psdBackground
@@ -174,35 +197,45 @@ class PSDChatViewController: UIViewController{
     //Setting design to navigation bar, title and buttons
     private func designNavigation()
     {
-        self.title = PSD_ChatTitle()
+        if let view = PSD_ChatTitleView(){
+            self.navigationItem.titleView = view
+            view.sizeToFit()
+            navigationController?.navigationBar.layoutIfNeeded()
+        } else {
+            self.title = PSD_ChatTitle()
+        }
+        
         self.setItems()
     }
-    ///Set chats item if it's not iPadView or oneChat mode.
+    ///Set navigation items
     private func setItems()
     {
-        resetImage()
         if !PyrusServiceDeskController.iPadView && !PyrusServiceDesk.oneChat{
             self.navigationItem.rightBarButtonItem = chatsItem
         }
+        if let rightBarButtonItem = PSD_СustomRightBarButtonItem(){
+            rightBarButtonItem.tintColor = PSD_CustomColor()
+            navigationItem.rightBarButtonItem = rightBarButtonItem
+        }
+        if let leftBarButtonItem = PSD_СustomLeftBarButtonItem(){
+            leftBarButtonItem.tintColor = PSD_CustomColor()
+            navigationItem.leftBarButtonItem = leftBarButtonItem
+        }else{
+            let item = UIBarButtonItem.init(customView: leftButton)
+            navigationItem.leftBarButtonItem = item
+        }
     }
+
     private lazy var leftButton : UIButton = {
         let button = UIButton.init(type: .custom)
         button.setTitle("Back".localizedPSD(), for: .normal)
         button.setTitleColor(UIColor.darkAppColor, for: .normal)
-        button.setImage(UIImage.PSDImage(name: "Back").imageWith(color: UIColor.darkAppColor), for: .normal)
+        let backImage = UIImage.PSDImage(name: "Back").withRenderingMode(.alwaysTemplate)
+        button.setImage(backImage, for: .normal)
         button.addTarget(self, action: #selector(closeButtonAction), for: .touchUpInside)
         button.sizeToFit()
         return button
     }()
-    override func traitCollectionDidChange(_ previousTraitCollection: UITraitCollection?) {
-        super.traitCollectionDidChange(previousTraitCollection)
-        resetImage()
-    }
-    private func resetImage(){
-        leftButton.setImage(UIImage.PSDImage(name: "Back").imageWith(color: UIColor.darkAppColor), for: .normal)
-        let item = UIBarButtonItem.init(customView: leftButton)
-        navigationItem.leftBarButtonItem = item
-    }
   
     lazy private var chatsItem: ChatListBarButtonItem = {
         let chatsListItem = ChatListBarButtonItem.init()
@@ -261,6 +294,7 @@ class PSDChatViewController: UIViewController{
         }
     }
     @objc private func updateTable(){
+        startGettingInfo()
         if !PSDChatTableView.isNewChat(self.tableView.chatId) && !hasNoConnection() && !PSDGetChat.isActive(){
            self.tableView.updateChat(needProgress:false)
         }
@@ -280,18 +314,57 @@ extension PSDChatViewController : PSDMessageInputViewDelegate{
     }
 }
 extension PSDChatViewController : PSDUpdateInfo{
+    public static let PSD_LAST_ACTIVITY_INTEVAL_MINUTE = TimeInterval(90)
+    public static let PSD_LAST_ACTIVITY_INTEVAL_5_MINUTES = TimeInterval(300)
+    public static let PSD_LAST_ACTIVITY_INTEVAL_HOUR = TimeInterval(3600)
+    public static let PSD_LAST_ACTIVITY_INTEVAL_3_DAYS = TimeInterval(3*24*60*60)
+    public static let REFRESH_TIME_INTEVAL_5_SECONDS = TimeInterval(5)
+    public static let REFRESH_TIME_INTEVAL_15_SECONDS = TimeInterval(15)
+    public static let REFRESH_TIME_INTEVAL_1_MINUTE = TimeInterval(60)
+    public static let REFRESH_TIME_INTEVAL_3_MINUTES = TimeInterval(180)
+    private static let PSD_LAST_ACTIVITY_KEY = "PSDLastActivityDate"
+
+    static func userLastActivityKey() -> String{
+        return PSD_LAST_ACTIVITY_KEY + "_" + PyrusServiceDesk.userId
+    }
+    
+    private static func getTimerInerval() -> TimeInterval{
+        if let pyrusUserDefaults = PSDMessagesStorage.pyrusUserDefaults(), let date = pyrusUserDefaults.object(forKey: PSDChatViewController.userLastActivityKey()) as? Date{
+            let difference = Date().timeIntervalSince(date)
+            if difference <= PSD_LAST_ACTIVITY_INTEVAL_MINUTE{
+                return REFRESH_TIME_INTEVAL_5_SECONDS
+            } else if difference <= PSD_LAST_ACTIVITY_INTEVAL_5_MINUTES{
+                return REFRESH_TIME_INTEVAL_15_SECONDS
+            }
+        }
+        return REFRESH_TIME_INTEVAL_1_MINUTE
+    }
+
+    
+    
     func startGettingInfo() {
         stopGettingInfo()
-        timer = Timer.scheduledTimer(timeInterval: reloadInterval, target: self, selector: #selector(updateTable), userInfo:nil , repeats: true)
+        timer = Timer.scheduledTimer(timeInterval: PSDChatViewController.getTimerInerval(), target: self, selector: #selector(updateTable), userInfo:nil , repeats: false)
     }
-    func refreshChat() {
+    func refreshChat(showFakeMessage: Int?) {
         if !PSDChatTableView.isNewChat(self.tableView.chatId){
-            self.tableView.forceBottomRefresh()
+            self.tableView.forceRefresh(showFakeMessage: showFakeMessage)
         }
     }
 }
 extension PSDChatViewController: PSDChatTableViewDelegate {
     func needShowRate(_ showRate: Bool) {
         messageInputView.showRate = showRate
+    }
+    
+    func restartTimer() {
+        startGettingInfo()
+    }
+}
+
+extension PSDChatViewController: UIAdaptivePresentationControllerDelegate {
+    override func present(_ viewControllerToPresent: UIViewController, animated flag: Bool, completion: (() -> Void)? = nil) {
+        self.messageInputView.inputTextView.resignFirstResponder()
+        super.present(viewControllerToPresent, animated: flag, completion: completion)
     }
 }

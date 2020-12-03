@@ -13,6 +13,7 @@ import androidx.recyclerview.widget.DiffUtil
 import com.pyrus.pyrusservicedesk.PyrusServiceDesk
 import com.pyrus.pyrusservicedesk.R
 import com.pyrus.pyrusservicedesk.ServiceDeskProvider
+import com.pyrus.pyrusservicedesk.log.PLog
 import com.pyrus.pyrusservicedesk.presentation.call.*
 import com.pyrus.pyrusservicedesk.presentation.ui.navigation_page.ticket.attached_files.AttachmentEntry
 import com.pyrus.pyrusservicedesk.presentation.ui.navigation_page.ticket.attached_files.AttachmentsDiffCallback
@@ -29,6 +30,7 @@ import com.pyrus.pyrusservicedesk.sdk.data.intermediate.AddCommentResponseData
 import com.pyrus.pyrusservicedesk.sdk.data.intermediate.Comments
 import com.pyrus.pyrusservicedesk.sdk.data.intermediate.CreateTicketResponseData
 import com.pyrus.pyrusservicedesk.sdk.response.PendingDataError
+import com.pyrus.pyrusservicedesk.sdk.updates.NewReplySubscriber
 import com.pyrus.pyrusservicedesk.sdk.updates.OnUnreadTicketCountChangedSubscriber
 import com.pyrus.pyrusservicedesk.sdk.verify.LocalDataVerifier
 import com.pyrus.pyrusservicedesk.sdk.web.OnCancelListener
@@ -55,11 +57,14 @@ internal class TicketViewModel(serviceDeskProvider: ServiceDeskProvider,
                                arguments: Intent,
                                val isFeed: Boolean)
     : ConnectionViewModelBase(serviceDeskProvider),
-        OnUnreadTicketCountChangedSubscriber {
+        OnUnreadTicketCountChangedSubscriber,
+        NewReplySubscriber
+{
 
     private companion object {
 
         const val TICKET_UPDATE_INTERVAL = 30L
+        private val TAG = TicketViewModel::class.java.simpleName
 
         fun Comment.hasAttachmentWithExceededSize(): Boolean =
             attachments?.let { it.any { attach -> attach.hasExceededFileSize() } } ?: false
@@ -96,6 +101,7 @@ internal class TicketViewModel(serviceDeskProvider: ServiceDeskProvider,
     }
 
     private var pendingCommentUnderAction: CommentEntry? = null
+    private var userId = PyrusServiceDesk.get().userId
 
     init {
         draft = draftRepository.getDraft()
@@ -116,10 +122,16 @@ internal class TicketViewModel(serviceDeskProvider: ServiceDeskProvider,
         }
         maybeStartAutoRefresh()
         liveUpdates.subscribeOnUnreadTicketCountChanged(this)
+        liveUpdates.subscribeOnLocalReply(this)
     }
 
     override fun onLoadData() {
         update()
+    }
+
+    override fun onNewReply(hasUnreadComments: Boolean) {
+        if (hasUnreadComments)
+            update()
     }
 
     override fun onUnreadTicketCountChanged(unreadTicketCount: Int) {
@@ -130,6 +142,7 @@ internal class TicketViewModel(serviceDeskProvider: ServiceDeskProvider,
         super.onCleared()
         mainHandler.removeCallbacks(updateRunnable)
         liveUpdates.unsubscribeFromTicketCountChanged(this)
+        liveUpdates.unsubscribeFromLocalReplies(this)
     }
 
     /**
@@ -270,10 +283,8 @@ internal class TicketViewModel(serviceDeskProvider: ServiceDeskProvider,
     }
 
     private fun maybeStartAutoRefresh() {
-        if (canBeUpdated()) {
-            // delayed to prevent launching second unnecessary update in [init]
-            mainHandler.postDelayed(updateRunnable, TICKET_UPDATE_INTERVAL * MILLISECONDS_IN_SECOND)
-        }
+        if (canBeUpdated())
+            mainHandler.post(updateRunnable)
     }
 
     private fun canBeUpdated() = isFeed || !isNewTicket()
@@ -325,6 +336,9 @@ internal class TicketViewModel(serviceDeskProvider: ServiceDeskProvider,
                     .execute()
                     .observeForever(AddCommentObserver(uploadFileHooks, localComment))
         }
+        val lastActiveTime = System.currentTimeMillis()
+        PLog.d(TAG, "sendAddComment, lastActiveTime: $lastActiveTime, commentLocalId: ${localComment.localId}")
+        PyrusServiceDesk.startTicketsUpdatesIfNeeded(lastActiveTime)
     }
 
     private fun hasComment(commentId: Int): Boolean {
@@ -357,6 +371,7 @@ internal class TicketViewModel(serviceDeskProvider: ServiceDeskProvider,
     }
 
     private fun applyTicketUpdate(freshList: Comments, arePendingComments: Boolean) {
+        liveUpdates.resetUnreadCount()
         if (!arePendingComments && !needUpdateCommentsList(freshList.comments)) {
             onDataLoaded()
             return
@@ -389,6 +404,10 @@ internal class TicketViewModel(serviceDeskProvider: ServiceDeskProvider,
     }
 
     private fun needUpdateCommentsList(freshList: List<Comment>): Boolean {
+        if (userId != PyrusServiceDesk.get().userId) {
+            userId = PyrusServiceDesk.get().userId
+            return true
+        }
         if (freshList.isEmpty()) {
             return !hasRealComments()
         }
@@ -495,6 +514,13 @@ internal class TicketViewModel(serviceDeskProvider: ServiceDeskProvider,
 
     private fun publishEntries(oldEntries: List<TicketEntry>, newEntries: List<TicketEntry>) {
         ticketEntries = newEntries
+
+        val lastActiveTime = (newEntries.findLast {
+            it is CommentEntry && it.comment.isInbound
+        } as CommentEntry?)?.comment?.creationDate?.time ?: -1
+        PLog.d(TAG, "publishEntries, lastActiveTime: $lastActiveTime, newEntries count: ${newEntries.size}")
+        PyrusServiceDesk.startTicketsUpdatesIfNeeded(lastActiveTime)
+
         commentDiff.value = DiffResultWithNewItems(
             DiffUtil.calculateDiff(
                 CommentsDiffCallback(oldEntries, ticketEntries), false
@@ -555,6 +581,14 @@ internal class TicketViewModel(serviceDeskProvider: ServiceDeskProvider,
     fun onRatingClick(rating: Int) =
         sendAddComment(localDataProvider.createLocalComment(rating = rating))
 
+    fun onStart() {
+        liveUpdates.increaseActiveScreenCount()
+    }
+
+    fun onStop() {
+        liveUpdates.decreaseActiveScreenCount()
+    }
+
     private inner class AddCommentObserver(
         uploadFileHooks: UploadFileHooks?,
         localComment: Comment
@@ -567,7 +601,9 @@ internal class TicketViewModel(serviceDeskProvider: ServiceDeskProvider,
 
         override fun getCommentId(data: AddCommentResponseData): Int = data.commentId
 
-        override fun onSuccess(data: AddCommentResponseData) {}
+        override fun onSuccess(data: AddCommentResponseData) {
+            liveUpdates.subscribeOnUnreadTicketCountChanged(this@TicketViewModel)
+        }
 
     }
 

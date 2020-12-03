@@ -1,5 +1,6 @@
 package com.pyrus.pyrusservicedesk.sdk.request
 
+import androidx.annotation.Keep
 import com.pyrus.pyrusservicedesk.sdk.repositories.general.GeneralRepository
 import com.pyrus.pyrusservicedesk.sdk.response.EmptyDataError
 import com.pyrus.pyrusservicedesk.sdk.response.Response
@@ -10,6 +11,7 @@ import com.pyrus.pyrusservicedesk.sdk.response.ResponseCallback
  *
  * @param repository repository that is used for executing requests
  */
+@Keep
 internal abstract class RequestBase<ResponseData>(private val repository: GeneralRepository): Request<ResponseData> {
 
     /**

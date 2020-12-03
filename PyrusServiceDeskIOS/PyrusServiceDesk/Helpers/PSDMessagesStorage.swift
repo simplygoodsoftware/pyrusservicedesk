@@ -1,6 +1,8 @@
 import Foundation
 let PSD_MESSAGES_STORAGE_KEY : String = "PSDMessagesStorage"
 let PSD_USER_DEFAULTS_SUITE_KEY : String = "com.PyrusServiceDesk"
+let PSD_WAS_CLOSE_INFO_KEY : String = "com.PyrusServiceDesk.wasCloseInfo"
+
 /**
  The storage for unsend messages.
  The storage is array with dictionary that is contain informatin need to draw message and repeat its sending.
@@ -11,7 +13,7 @@ struct PSDMessagesStorage{
     ///The maximum number of messages to store. If has more - they are start deliting from start.
     private static let MAX_SAVED_MESSAGES_NUMBER  = 20
     ///The maximum size of attachment. Bigger attachment will not be saved to store.
-    private static let MAX_SAVEDATTACHMENT_SIZE = 500000//bytes
+    private static let MAX_SAVEDATTACHMENT_SIZE = 5000000//bytes
     ///The key to store local id of message
     private static let MESSAGE_LOCAL_ID_KEY = "localId"
     ///The key to store text of message
@@ -43,7 +45,7 @@ struct PSDMessagesStorage{
         }
         
         var messageDict : [String:Any] = [String:Any]()
-        messageDict[MESSAGE_LOCAL_ID_KEY] = message.localId
+        messageDict[MESSAGE_LOCAL_ID_KEY] = message.clientId
         messageDict[MESSAGE_TEXT_KEY] = message.text
         messageDict[MESSAGE_DATE_KEY] = message.date
         messageDict[MESSAGE_RATING_KEY] = message.rating
@@ -52,7 +54,7 @@ struct PSDMessagesStorage{
             if hasSomeAttachment, let attachments = message.attachments, attachments.count > 0{
                 var attachmentsArray = [[String:Any]]()
                 for attachment in attachments{
-                    if saveToFileAttachment(attachment, messageLocalId: message.localId){//if has attachment and it was written to disk - save message to storage
+                    if saveToFileAttachment(attachment, messageLocalId: message.clientId){//if has attachment and it was written to disk - save message to storage
                         var attachmentDict = [String:Any]()
                         attachmentDict[ATTACHMENT_NAME_KEY] = attachment.name
                         attachmentDict[ATTACHMENT_SIZE_KEY] = attachment.size
@@ -74,11 +76,10 @@ struct PSDMessagesStorage{
     private static func saveToFileAttachment(_ attachment : PSDAttachment, messageLocalId: String)->Bool{
         if attachment.data.count > 0{
             if attachment.data.count > MAX_SAVEDATTACHMENT_SIZE{
+                print("attachment is too big to safe")
                 return false
             }
-            if let _ = attachment.data.dataToFile(fileName: attachment.name, messageLocalId: messageLocalId){
-                return true
-            }
+            return PSDFilesManager.saveAttchment(attachment, forMessageWith: messageLocalId)
         }
         return false
         
@@ -99,7 +100,7 @@ struct PSDMessagesStorage{
                         guard let attachmentName = attachmentDict[ATTACHMENT_NAME_KEY] as? String else{
                             continue
                         }
-                        removeLocalFile(fileName: attachmentName, messageLocalId: messageId)
+                        PSDFilesManager.removeLocalFile(fileName: attachmentName, messageLocalId: messageId)
                     }
                 }
                 
@@ -115,7 +116,7 @@ struct PSDMessagesStorage{
     static func cleanStorage() {
         let allMessages = messagesFromStorage()
         for message in allMessages{
-            removeFromStorage(messageId: message.localId)
+            removeFromStorage(messageId: message.clientId)
         }
     }
     static private func saveToStorage(messageDict : [String:Any]){
@@ -138,6 +139,7 @@ struct PSDMessagesStorage{
             let _ = removeFromStorage(messageId: messageId, needSave: true)
         }
     }
+    
     ///Return array with saved messages info in storage.
     private static func saveToStorage(_ messagesStorage:[[String:Any]]){
         pyrusUserDefaults()?.set(messagesStorage, forKey: PSD_MESSAGES_STORAGE_KEY)
@@ -152,7 +154,7 @@ struct PSDMessagesStorage{
         }
     }
     ///Return array with saved messages info in storage.
-    private static func getMessagesStorage()-> [[String:Any]]{
+    private static func getMessagesStorage() -> [[String: Any]] {
         return pyrusUserDefaults()?.array(forKey: PSD_MESSAGES_STORAGE_KEY) as? [[String:Any]] ?? [[String:Any]]()
     }
     private static func resaveInStorageMessage(_ message: PSDMessage) {
@@ -160,32 +162,30 @@ struct PSDMessagesStorage{
         saveInStorage(message: message)
     }
     ///Returns [PSDMessage] in storage
-    static func messagesFromStorage()->[PSDMessage]{
+    static func messagesFromStorage() -> [PSDMessage] {
         var arrayWithMessages = [PSDMessage]()
         let messagesStorage = getMessagesStorage()
         for dict in messagesStorage {
-            let message = PSDMessage(text: dict[MESSAGE_TEXT_KEY] as? String ?? "", attachments:nil, messageId: nil, owner:PSDUsers.user, date:nil)
-            if let rating = dict[MESSAGE_RATING_KEY] as? Int{
+            let message = PSDMessage(text: dict[MESSAGE_TEXT_KEY] as? String ?? "", attachments: nil, messageId: nil, owner: PSDUsers.user, date: nil)
+            if let rating = dict[MESSAGE_RATING_KEY] as? Int {
                 message.rating = rating
             }
-            message.localId = (dict[MESSAGE_LOCAL_ID_KEY] as? String) ?? message.localId
+            message.clientId = (dict[MESSAGE_LOCAL_ID_KEY] as? String) ?? message.clientId
             message.state = .cantSend
             message.date = dict[MESSAGE_DATE_KEY] as? Date ?? Date()
             message.fromStrorage = true
             var attachments = [PSDAttachment]()
-            if let attachmetsArray = dict[ATTACHMENT_ARRAY_KEY] as? [[String:Any]], attachmetsArray.count > 0{
-                for attachmentDict in attachmetsArray{
-                    if let attName = attachmentDict[ATTACHMENT_NAME_KEY] as? String, attName.count > 0, let data = dataFromLocalURL(fileName:attName, messageLocalId: message.localId){
-                        let attachment : PSDAttachment =  PSDAttachment.init(localPath: "", data: data,serverIdentifer:nil)
-                        attachment.name = attName
-                        attachment.size = (attachmentDict[ATTACHMENT_SIZE_KEY] as? Int) ?? 0
-                        attachments.append(attachment)
+            if let attachmetsArray = dict[ATTACHMENT_ARRAY_KEY] as? [[String: Any]], attachmetsArray.count > 0 {
+                for attachmentDict in attachmetsArray {
+                    guard let attName = attachmentDict[ATTACHMENT_NAME_KEY] as? String, attName.count > 0, let attachment = PSDFilesManager.getAtttachment(attName, messageLocalId: message.clientId) else {
+                        continue
                     }
+                    attachments.append(attachment)
                 }
             }
             message.attachments = attachments
-            if message.attachments?.count ?? 0 > 0 || message.text.count > 0 || message.rating != nil{
-                if dict[MESSAGE_DATE_KEY] as? Date == nil{
+            if message.attachments?.count ?? 0 > 0 || message.text.count > 0 || message.rating != nil {
+                if dict[MESSAGE_DATE_KEY] as? Date == nil {
                     resaveInStorageMessage(message)//resave massage with date to avoid nil next time
                 }
                 arrayWithMessages.append(message)

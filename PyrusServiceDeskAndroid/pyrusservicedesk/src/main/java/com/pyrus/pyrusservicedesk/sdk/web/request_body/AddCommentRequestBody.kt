@@ -1,5 +1,6 @@
 package com.pyrus.pyrusservicedesk.sdk.web.request_body
 
+import androidx.annotation.Keep
 import com.google.gson.annotations.SerializedName
 import com.pyrus.pyrusservicedesk.sdk.data.Attachment
 
@@ -9,9 +10,13 @@ import com.pyrus.pyrusservicedesk.sdk.data.Attachment
  * @param attachments list of attachments. Can be null
  * @param userName name of the sending person
  */
+@Keep
 internal class AddCommentRequestBody(
         appId: String,
         userId: String,
+        securityKey: String?,
+        instanceId: String?,
+        version: Int,
         @SerializedName("comment")
         val comment: String? = null,
         @SerializedName("attachments")
@@ -20,4 +25,4 @@ internal class AddCommentRequestBody(
         val userName: String,
         @SerializedName("rating")
         val rating: Int? = null
-) : RequestBodyBase(appId, userId)
+) : RequestBodyBase(appId, userId, securityKey, instanceId, version)

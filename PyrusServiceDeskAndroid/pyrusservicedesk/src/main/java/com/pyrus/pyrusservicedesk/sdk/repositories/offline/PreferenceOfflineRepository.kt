@@ -68,6 +68,8 @@ internal class PreferenceOfflineRepository(private val preferences: SharedPrefer
         return ResponseImpl.success(removed)
     }
 
+    override suspend fun removeAllPendingComments() = writeComments(emptyList())
+
     private fun writeComments(comments: List<Comment>) {
         preferences
             .edit()

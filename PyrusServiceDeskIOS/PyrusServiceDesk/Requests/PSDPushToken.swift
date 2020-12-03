@@ -5,17 +5,21 @@ struct PSDPushToken {
      - parameter token:String with devise Id
      - parameter success: Bool. true if token was send
      */
-    static func send(_ token:String, completion: @escaping(Error?) -> Void)
+    static func send(_ token:String?, completion: @escaping(Error?) -> Void)
     {
         
         var  request : URLRequest
         var parameters = [String: Any]()
-        parameters["token"] = token
+        if let token = token  {
+            parameters["token"] = token
+        } else {
+            parameters["token"] = NSNull()
+        }
         parameters["type"] = "ios"
         request = URLRequest.createRequest(type:.token, parameters: parameters)
         
         let task = PyrusServiceDesk.mainSession.dataTask(with: request) { data, response, error in
-            guard let _ = data, error == nil else {
+            guard let data = data, error == nil else {
                 // check for fundamental networking error
                 completion(PSDError.init(description: "No internet connection"))
                 return
@@ -26,7 +30,17 @@ struct PSDPushToken {
                 
             }
             else{
-                completion(nil)
+                do{
+                    let resp = try JSONSerialization.jsonObject(with: data, options: .allowFragments) as? [String : Any] ?? [String: Any]()
+                    if let error = resp["error"]{
+                        completion(PSDError.init(description: "\(error)"))
+                    }
+                    else{
+                        completion(nil)
+                    }
+                }catch{
+                    completion(nil)
+                }
             }
         }
         task.resume()

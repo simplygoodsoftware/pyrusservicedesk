@@ -8,6 +8,7 @@ import android.graphics.drawable.Drawable
 import androidx.annotation.ColorInt
 import androidx.appcompat.content.res.AppCompatResources
 import android.util.Base64
+import com.pyrus.pyrusservicedesk.MainMenuDelegate
 import com.pyrus.pyrusservicedesk.PyrusServiceDesk
 import com.pyrus.pyrusservicedesk.R
 import java.security.SecureRandom
@@ -78,7 +79,7 @@ internal class ConfigUtils{
         /**
          * Provides userId. [preference] is used for storing generated user id.
          */
-        fun getUserId(preference: SharedPreferences): String {
+        fun getInstanceId(preference: SharedPreferences): String {
             return when {
                 preference.contains(PREFERENCE_KEY_USER_ID) -> preference.getString(PREFERENCE_KEY_USER_ID, "")!!
                 else -> {
@@ -92,6 +93,13 @@ internal class ConfigUtils{
                     userId
                 }
             }
+        }
+
+        /**
+         * @return Menu delegate interface.
+         */
+        internal fun getMainMenuDelegate(): MainMenuDelegate? {
+            return PyrusServiceDesk.getConfiguration().mainMenuDelegate
         }
 
         private fun makeSupportAvatar(context: Context, drawable: Drawable): Drawable {

@@ -1,12 +1,15 @@
 import UIKit
 protocol PSDChatTableViewDelegate: NSObjectProtocol {
     func needShowRate(_ showRate: Bool)
+    func restartTimer()
 }
+
 class PSDChatTableView: PSDDetailTableView{
     ///The id of chat that is shown in table view
     var chatId :String = ""
     weak var chatDelegate: PSDChatTableViewDelegate?
     private let footerHeight : CGFloat = 10.0
+    private let BOTTOM_INFELICITY : CGFloat = 10.0
     private var needShowRating : Bool = false
     private static let userCellId = "CellUser"
     private static let supportCellId = "CellSupport"
@@ -33,8 +36,8 @@ class PSDChatTableView: PSDDetailTableView{
         refreshControl.addTarget(self, action: #selector(refreshChat), for: .valueChanged)
         return refreshControl
     }()
-    @objc private func refreshChat() {
-        if !(self.superview?.subviews.contains(self.noConnectionView) ?? false) && !PSDGetChat.isActive(){
+    @objc private func refreshChat(sender: PSDRefreshControl) {
+        if !(self.superview?.subviews.contains(self.noConnectionView) ?? false) && !PSDGetChat.isActive() && sender.isRefreshing{
             updateChat(needProgress: true)
         }
         
@@ -42,14 +45,25 @@ class PSDChatTableView: PSDDetailTableView{
     deinit {
         self.removeRefreshControls()
     }
-    func forceBottomRefresh() {
-        if contentSize.height > frame.size.height{
-            scrollsToBottom(animated: true)
-            bottomRefresh.forceRefresh()
-        }else{
-            customRefresh.forceRefresh()
+    func forceRefresh(showFakeMessage: Int?) {
+        if !PSDGetChat.isActive(){
+            if let showFakeMessage = showFakeMessage, showFakeMessage != 0 {
+                let (addIndexPaths, addSections) =  tableMatrix.addFakeMessagge(messageId: showFakeMessage)
+                if addIndexPaths.count>0 || addSections.count>0{
+                    self.beginUpdates()
+                    if(addIndexPaths.count>0){
+                        self.insertRows(at: addIndexPaths, with: .none)
+                    }
+                    if(addSections.count>0){
+                        self.insertSections(addSections, with: .none)
+                    }
+                    self.endUpdates()
+                    self.scrollsToBottom(animated: false)
+                }
+            }
+            updateChat(needProgress: true)
+            
         }
-        updateChat(needProgress: true)
     }
     ///Setups needed properties to table view
     func setupTableView() {
@@ -91,6 +105,7 @@ class PSDChatTableView: PSDDetailTableView{
                                 self?.tableMatrix.create(from: chat!)
                                 
                                 self?.lastMessageFromServer = chat?.messages.last
+                                self?.setLastActivityDate()
                                 self?.reloadData()
                                 
                                 self?.removeNoConnectionView()
@@ -120,6 +135,21 @@ class PSDChatTableView: PSDDetailTableView{
                 self.reloadData()
             }
             
+        }
+    }
+    private func setLastActivityDate(){
+        var lastDate: Date?
+        if let lastMessage = self.lastMessageFromServer, lastMessage.owner.personId == PyrusServiceDesk.userId {
+            lastDate = lastMessage.date
+        } else{
+            lastDate = self.tableMatrix.lastUserMessageDate()
+        }
+        guard let date = lastDate else {
+            return
+        }
+        if PyrusServiceDesk.setLastActivityDate(date){
+            PyrusServiceDesk.restartTimer()
+            self.chatDelegate?.restartTimer()
         }
     }
     private func showRateIfNeed() {
@@ -160,47 +190,78 @@ class PSDChatTableView: PSDDetailTableView{
     }
     ///update taable matrix
     ///- parameter needProgress: Determines whether the view should respond to updating(need to show error) 
-    func updateChat(needProgress:Bool){
+    func updateChat(needProgress:Bool) {
         let chatIdWeak : String  = self.chatId
-        DispatchQueue.global().async {
-            [weak self] in
-            PSDGetChat.get(chatIdWeak, needShowError:needProgress, delegate: nil){
+//        DispatchQueue.global().async {
+//            [weak self] in
+            PSDGetChat.get(chatIdWeak, needShowError:needProgress, delegate: nil){ [weak self]
                 (chat : PSDChat?) in
-                if((chat) != nil){
+                if let chat = chat{
                     DispatchQueue.main.async  {
-                        self?.needShowRating = chat?.showRating ?? false
+                        self?.needShowRating = chat.showRating
                         self?.showRateIfNeed()
                     }
                     //compare number of messages it two last sections
-                    
-                    if self?.tableMatrix != nil {
-                        self?.tableMatrix.complete(from: chat!, startMessage:self?.lastMessageFromServer){
-                            (indexPaths: [IndexPath], sections:IndexSet) in
-                            DispatchQueue.main.async  {
-                                self?.removeNoConnectionView()
-                                self?.lastMessageFromServer = chat?.messages.last
-                                if indexPaths.count>0 || sections.count>0{
-                                    self?.beginUpdates()
-                                    if(sections.count>0){
-                                        self?.insertSections(sections, with: .none)
-                                    }
-                                    if(indexPaths.count>0){
-                                        self?.insertRows(at: indexPaths, with: .none)
-                                    }
-                                    self?.endUpdates()
-                                }
-                                }
-                        }
+                    guard let _ = self?.tableMatrix else{
+                        return
                     }
+                    let (removeIndexPaths, removeSections) = self?.tableMatrix.removeFakeMessages() ?? ([IndexPath](), IndexSet())
+                    self?.tableMatrix.complete(from: chat, startMessage:self?.lastMessageFromServer){
+                        (indexPaths: [IndexPath], sections:IndexSet, _) in
+                        DispatchQueue.main.async  {
+                            let oldContentOffset = self?.contentOffset
+                            let oldContentSize = self?.contentSize
+                            self?.removeNoConnectionView()
+                            self?.lastMessageFromServer = chat.messages.last
+                            self?.setLastActivityDate()
+                            if indexPaths.count>0 || sections.count>0 || removeIndexPaths.count>0 || removeSections.count>0{
+                                let (newRemoveIndexPaths, addIndexPaths, reloadIndexPaths, newRemoveSections, addSections, reloadSections) = PSDTableView.compareAddAndRemoveRows(removeIndexPaths: removeIndexPaths, addIndexPaths: indexPaths, removeSections: removeSections, addSections: sections)
+                                self?.beginUpdates()
+                                if(newRemoveIndexPaths.count>0){
+                                    self?.deleteRows(at: newRemoveIndexPaths, with: .none)
+                                }
+                                if(newRemoveSections.count>0){
+                                    self?.deleteSections(newRemoveSections, with: .none)
+                                }
+                                if(addIndexPaths.count>0){
+                                    self?.insertRows(at: addIndexPaths, with: .none)
+                                }
+                                if(addSections.count>0){
+                                    self?.insertSections(addSections, with: .none)
+                                }
+                                if(reloadIndexPaths.count>0){
+                                    self?.reloadRows(at: reloadIndexPaths, with: .none)
+                                }
+                                if(reloadSections.count>0){
+                                    self?.reloadSections(reloadSections, with: .none)
+                                }
+                                self?.endUpdates()
+                                self?.scrollToBottomAfterRefresh(with: oldContentOffset, oldContentSize: oldContentSize)
+                                }
+                            }
+                    }
+
                 }
                 DispatchQueue.main.async  {
                     self?.customRefresh.endRefreshing()
                     self?.bottomRefresh.endRefreshing()
                 }
             }
+//        }
+    }
+    ///Scrolls table to bottom after refresh, if table view was in bottom scroll position and new messages received
+    private func scrollToBottomAfterRefresh(with oldOffset: CGPoint?, oldContentSize: CGSize?) {
+        guard let oldOffset = oldOffset, let oldContentSize = oldContentSize else {
+            return
+        }
+        self.setNeedsLayout()
+        self.layoutIfNeeded()
+        let expectedBottomOffset = oldContentSize.height - (self.frame.size.height - contentInset.top - contentInset.bottom)
+        let hasChanges = oldContentSize != self.contentSize
+        if expectedBottomOffset - BOTTOM_INFELICITY < oldOffset.y && hasChanges{
+            self.scrollsToBottom(animated: true)
         }
     }
-   
     lazy var noConnectionView : PSDNoConnectionView  = {
         let view = PSDNoConnectionView.init(frame: self.frame)
         view.delegate = self
@@ -543,7 +604,7 @@ extension PSDChatTableView : PSDMessageSendDelegate{
         self.chatId = chatId
     }
     func remove(message:PSDMessage){
-        let indexPathsAndRows = self.tableMatrix.findIndexPath(ofMessage: message.localId).keys.sorted(by:{$0 > $1})
+        let indexPathsAndRows = self.tableMatrix.findIndexPath(ofMessage: message.clientId).keys.sorted(by:{$0 > $1})
         var indexPaths = [IndexPath]()
         for indexPath in indexPathsAndRows{
             if tableMatrix.has(indexPath: indexPath){
@@ -552,7 +613,7 @@ extension PSDChatTableView : PSDMessageSendDelegate{
             }
         }
         DispatchQueue.main.async {
-            PSDMessagesStorage.removeFromStorage(messageId: message.localId)
+            PSDMessagesStorage.removeFromStorage(messageId: message.clientId)
             DispatchQueue.main.async {
                  self.showRateIfNeed()
             }
@@ -570,11 +631,12 @@ extension PSDChatTableView : PSDMessageSendDelegate{
     func refresh(message:PSDMessage, changedToSent: Bool){
         DispatchQueue.main.async{
             [weak self] in
+            self?.chatDelegate?.restartTimer()
             if !(self?.scrollAnimationPerform ?? false){
                 guard let self = self else{
                     return
                 }
-                let indexPathsAndMessages = self.tableMatrix.findIndexPath(ofMessage: message.localId)
+                let indexPathsAndMessages = self.tableMatrix.findIndexPath(ofMessage: message.clientId)
                 guard  indexPathsAndMessages.count > 0 else{
                     EventsLogger.logEvent(.didNotFindMessageAfterUpdate)
                     return
@@ -613,7 +675,6 @@ extension PSDChatTableView : PSDMessageSendDelegate{
                     self.redrawCell(at:movedIndexPath,with: rowMessage)
                     if let lastIndexPath = lastIndexPath, lastIndexPath.count > i{
                         let newIndexPath = lastIndexPath[i]
-                        print(newIndexPath, movedIndexPath)
                         if newIndexPath != indexPath{
                             movedRows = movedRows + 1
                             self.tableMatrix[movedIndexPath.section].remove(at: movedIndexPath.row)

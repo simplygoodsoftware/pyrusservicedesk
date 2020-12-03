@@ -45,7 +45,22 @@
         android:paddingStart="@dimen/psd_offset_default"
         android:paddingRight="@dimen/psd_offset_default"
         android:paddingEnd="@dimen/psd_offset_default"
-        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintBottom_toTopOf="@id/custom_variant"
         app:layout_constraintTop_toBottomOf="@+id/gallery_variant" />
+
+    <androidx.appcompat.widget.AppCompatTextView
+        android:id="@+id/send_logs_variant"
+        android:layout_width="match_parent"
+        android:text="@string/send_library_logs"
+        android:layout_height="@dimen/psd_recyclerview_item_height_default"
+        android:background="?attr/selectableItemBackground"
+        android:textAppearance="?attr/textAppearanceListItem"
+        android:gravity="start|center_vertical"
+        android:paddingLeft="@dimen/psd_offset_default"
+        android:paddingStart="@dimen/psd_offset_default"
+        android:paddingRight="@dimen/psd_offset_default"
+        android:paddingEnd="@dimen/psd_offset_default"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/custom_variant" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

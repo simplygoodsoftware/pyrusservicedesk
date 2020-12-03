@@ -7,6 +7,7 @@ let subjectParameter = "subject"
 let createdAtParameter = "created_at"
 let attachmentsParameter = "attachments"
 let guidParameter = "guid"
+let CLIENT_ID_KEY = "client_id"
 
 
 class PSDMessageSender: NSObject {
@@ -20,7 +21,7 @@ class PSDMessageSender: NSObject {
     func pass(_ messageToPass:PSDMessage, to chatId:String, delegate:PSDMessageSendDelegate?, completion: @escaping(_ chatId : String?) -> Void)
     {
         if(PSDChatTableView.isNewChat(chatId)){
-            let task = PSDMessageSender.passFirst(messageToPass.text, messageToPass.attachments){
+            let task = PSDMessageSender.passFirst(messageToPass.text, messageToPass.attachments, messageToPass.clientId){
                 newChatId in
                 //If passFirst end with success send new ChatId to delegate
                 if newChatId.count>0{
@@ -38,7 +39,7 @@ class PSDMessageSender: NSObject {
             PSDMessageSend.taskArray.append(task)
         }
         else {
-            let task = PSDMessageSender.pass(messageToPass.text,messageToPass.attachments, rating: messageToPass.rating, to: chatId){
+            let task = PSDMessageSender.pass(messageToPass.text,messageToPass.attachments, rating: messageToPass.rating, clientId: messageToPass.clientId, to: chatId){
                 (commentId: String?, attachments: NSArray?) in
                 if commentId != nil &&  commentId?.count ?? 0>0{
                     //put attachments id
@@ -67,7 +68,9 @@ class PSDMessageSender: NSObject {
     ///
     static func showResult(of messageToPass:PSDMessage, success:Bool, delegate:PSDMessageSendDelegate?){
         if(success){
-            PSDMessagesStorage.removeFromStorage(messageId: messageToPass.localId)
+            PSDMessagesStorage.removeFromStorage(messageId: messageToPass.clientId)
+            let _ = PyrusServiceDesk.setLastActivityDate()
+            PyrusServiceDesk.restartTimer()
         }
         
         
@@ -99,10 +102,11 @@ class PSDMessageSender: NSObject {
      - completion: Completion of passing message.
      - commentId: Return id of new message as String. If Request end with error return nil or "0" if received bad data from server.
      */
-    private static func pass(_ message: String, _ attachments: [PSDAttachment]?, rating: Int?, to chatId: String, completion: @escaping (_ commentId: String?, _ attachments: NSArray?) -> Void) -> URLSessionDataTask {
+    private static func pass(_ message: String, _ attachments: [PSDAttachment]?, rating: Int?, clientId: String, to chatId: String, completion: @escaping (_ commentId: String?, _ attachments: NSArray?) -> Void) -> URLSessionDataTask {
         //Generate additional parameters for request body
         var parameters = [String: Any]()
         parameters[commentParameter] = message
+        parameters[CLIENT_ID_KEY] = clientId
         if let rating = rating{
             parameters[ratingParameter] = rating
         }
@@ -117,15 +121,23 @@ class PSDMessageSender: NSObject {
         else{
             request = URLRequest.createRequest(with:chatId,type:.update, parameters: parameters)
         }
-        //print("pass request body \(String(describing: String(data: request.httpBody!, encoding: String.Encoding.utf8)))")
+        
         let task = PyrusServiceDesk.mainSession.dataTask(with: request) { data, response, error in
-            
             guard let data = data, error == nil else {                                                 // check for fundamental networking error
                 completion(nil,nil)
                 return
             }
             
             if let httpStatus = response as? HTTPURLResponse, httpStatus.statusCode != 200 {           // check for http errors
+                DispatchQueue.main.async {
+                    if httpStatus.statusCode == 403 {
+                        if let onFailed = PyrusServiceDesk.onAuthorizationFailed {
+                            onFailed()
+                        } else {
+                            PyrusServiceDesk.mainController?.closeServiceDesk()
+                        }
+                    }
+                }
                 completion(nil,nil)
             }
             
@@ -155,14 +167,13 @@ class PSDMessageSender: NSObject {
      - completion: Completion of passing message.
      - ticketId: Return id of new chat as String. If Request end with error return "".
      */
-    private static func passFirst(_ message:String, _ attachments:[PSDAttachment]?, completion: @escaping (_ ticketId: String) -> Void)->URLSessionDataTask
+    private static func passFirst(_ message:String, _ attachments:[PSDAttachment]?, _ clientId: String, completion: @escaping (_ ticketId: String) -> Void)->URLSessionDataTask
     {
         var parameters = [String: Any]()
         parameters[userNameParameter] = PyrusServiceDesk.userName
-        parameters[ticketParameter] = generateTiket(message,attachments ?? [PSDAttachment]())
+        parameters[ticketParameter] = generateTiket(message,attachments ?? [PSDAttachment](), clientId: clientId)
         
         let  request : URLRequest = URLRequest.createRequest(type:.createNew, parameters: parameters)
-        // print("request parameters = \(parameters)")
         // print("passFirst request body \(String(describing: String(data: request.httpBody!, encoding: String.Encoding.utf8)))")
         
         let task = PyrusServiceDesk.mainSession.dataTask(with: request) { data, response, error in
@@ -172,6 +183,16 @@ class PSDMessageSender: NSObject {
             }
             
             if let httpStatus = response as? HTTPURLResponse, httpStatus.statusCode != 200 {           // check for http errors
+                DispatchQueue.main.async {
+                    if httpStatus.statusCode == 403 {
+                        if let onFailed = PyrusServiceDesk.onAuthorizationFailed {
+                            onFailed()
+                        } else {
+                            PyrusServiceDesk.mainController?.closeServiceDesk()
+                        }
+                    }
+                }
+
                 completion("")
             }
             
@@ -189,7 +210,7 @@ class PSDMessageSender: NSObject {
     /**
      Create additional [key:value] with ticket for request body.
      */
-    private static func generateTiket(_ allString: String,_ attachments: [PSDAttachment])->[String: Any]{
+    private static func generateTiket(_ allString: String,_ attachments: [PSDAttachment], clientId: String)->[String: Any]{
         var subjectString : String = ""
         var descriptionString : String = ""
         

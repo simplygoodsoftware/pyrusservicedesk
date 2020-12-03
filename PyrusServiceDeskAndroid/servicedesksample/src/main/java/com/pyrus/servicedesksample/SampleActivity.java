@@ -1,16 +1,15 @@
 package com.pyrus.servicedesksample;
 
 import android.app.Activity;
+import android.app.AlertDialog;
+import android.content.DialogInterface;
 import android.graphics.Color;
 import android.os.Bundle;
 import android.widget.TextView;
+
 import com.pyrus.pyrusservicedesk.PyrusServiceDesk;
 import com.pyrus.pyrusservicedesk.ServiceDeskConfiguration;
 import com.pyrus.pyrusservicedesk.sdk.updates.NewReplySubscriber;
-import com.pyrus.pyrusservicedesk.PyrusServiceDesk;
-import com.pyrus.pyrusservicedesk.ServiceDeskConfiguration;
-import com.pyrus.pyrusservicedesk.sdk.updates.NewReplySubscriber;
-import com.pyrus.servicedesksample.R;
 
 public class SampleActivity extends Activity implements NewReplySubscriber {
 
@@ -18,7 +17,6 @@ public class SampleActivity extends Activity implements NewReplySubscriber {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_sample);
-        PyrusServiceDesk.subscribeToReplies(this);
         findViewById(R.id.support).setOnClickListener(
                 view -> PyrusServiceDesk.start(
                         this,
@@ -28,18 +26,53 @@ public class SampleActivity extends Activity implements NewReplySubscriber {
                                 .setChatTitle("Sample Support")
                                 .setWelcomeMessage("How can I help you?")
                                 .setAvatarForSupport(R.drawable.psd_download_file)
+                                .setChatMenuDelegate(new ChatMenuDelegate())
                                 .build())
+        );
+
+        PyrusServiceDesk.onAuthorizationFailed(
+                () -> {
+                    AlertDialog dialog = new AlertDialog
+                            .Builder(this)
+                            .create();
+
+                    dialog.setTitle("Authorization Error.");
+                    dialog.setMessage("Failed to authorize with the provided credentials.");
+                    dialog.setButton(
+                            DialogInterface.BUTTON_POSITIVE,
+                            "OK",
+                            (dialog1, which) -> {
+                                PyrusServiceDesk.init(
+                                        getApplication(),
+                                        "my_app_id"
+                                );
+                                dialog1.cancel();
+                            }
+                    );
+
+                    dialog.show();
+                }
         );
     }
 
     @Override
-    protected void onDestroy() {
-        super.onDestroy();
-        PyrusServiceDesk.unsubscribeFromReplies(this);
+    protected void onStart() {
+        super.onStart();
+        PyrusServiceDesk.subscribeToReplies(this);
     }
 
     @Override
-    public void onNewReply() {
-        ((TextView)findViewById(R.id.unread)).setText("Has unread tickets");
+    protected void onStop() {
+        PyrusServiceDesk.unsubscribeFromReplies(this);
+        super.onStop();
+    }
+
+    @Override
+    public void onNewReply(boolean hasUnreadComments) {
+        ((TextView) findViewById(R.id.unread)).setText(
+                hasUnreadComments
+                        ? "Has unread tickets"
+                        : null
+        );
     }
 }
