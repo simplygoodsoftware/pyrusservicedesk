@@ -181,7 +181,8 @@ internal class TicketViewModel(serviceDeskProvider: ServiceDeskProvider,
      * @param attachmentUri URI of the file to be sent
      */
     fun onAttachmentSelected(attachmentUri: Uri) {
-        val attachment = localDataProvider.createLocalAttachmentFromUri(attachmentUri)
+        val attachment = localDataProvider.createLocalAttachmentFromUri(attachmentUri) ?: return
+
         val entryToAdd = when {
             attachment.name.isImage() -> ImageEntry(attachment)
             else -> TextEntry(attachment)
