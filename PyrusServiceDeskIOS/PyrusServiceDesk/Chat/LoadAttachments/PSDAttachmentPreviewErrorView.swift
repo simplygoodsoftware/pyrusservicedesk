@@ -48,7 +48,6 @@ class PSDAttachmentLoadErrorView: UIView {
             redraw()
         }
     }
-    fileprivate static let imageViewSize : CGFloat = 100.0
     private func redraw(){
         switch state {
         case .noPreview:
@@ -134,7 +133,7 @@ class PSDAttachmentLoadErrorView: UIView {
         self.imageView.translatesAutoresizingMaskIntoConstraints = false
         self.button.translatesAutoresizingMaskIntoConstraints = false
         
-        self.imageView.addSizeConstraint([.width,.height], constant: PSDAttachmentLoadErrorView.imageViewSize)
+        self.imageView.addSizeConstraint([.width,.height], constant: IMAGE_VIEW_SIZE)
         self.imageView.addZeroConstraint([.centerX])
         
         self.addConstraint(NSLayoutConstraint(
@@ -175,7 +174,8 @@ class PSDAttachmentLoadErrorView: UIView {
     
 }
 private extension UIFont {
-    static let attachmentExtension = PSD_SystemFont(ofSize: PSDAttachmentLoadErrorView.imageViewSize/2)
+    static let attachmentExtension = PSD_SystemFont(ofSize: IMAGE_VIEW_SIZE/2)
     static let buttonFont = PSD_SystemFont(ofSize: 18.0)
 }
 private let TEXT_ALPHA: CGFloat = 0.6
+private let IMAGE_VIEW_SIZE: CGFloat = 100.0
