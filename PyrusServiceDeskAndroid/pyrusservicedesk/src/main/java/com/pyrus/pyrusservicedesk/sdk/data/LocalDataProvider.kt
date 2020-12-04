@@ -21,6 +21,8 @@ internal class LocalDataProvider(offlineRepository: OfflineRepository,
 
     private var lastLocalCommentId: Int = 0
 
+    private var lastLocalAttachmentId : Int = 0
+
     init {
         runBlocking {
             // assigns last pending comment id as last local
@@ -77,8 +79,18 @@ internal class LocalDataProvider(offlineRepository: OfflineRepository,
         )
     }
 
+    /**
+     * Creates a local attachment with local id.
+     *
+     * @param uri of the file for attachment.
+     */
+    fun createLocalAttachmentFromUri(uri: Uri): Attachment? {
+        val fileData = fileResolver.getFileData(uri) ?: return null
+        return createLocalAttachment(fileData)
+    }
+
     private fun createLocalAttachment(fileData: FileData): Attachment {
-        return Attachment(name = fileData.fileName, bytesSize = fileData.bytesSize, localUri = fileData.uri)
+        return Attachment(id = --lastLocalAttachmentId, name = fileData.fileName, bytesSize = fileData.bytesSize, localUri = fileData.uri)
     }
 }
 
