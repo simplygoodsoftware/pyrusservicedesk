@@ -28,6 +28,7 @@ class AttachmentCollectionViewCell : UICollectionViewCell{
         button.layer.cornerRadius = AttachmentCollectionViewCell.buttonSize/2
         return button
     }()
+    private let removeButtonBack = UIView()
     lazy var holderView : UIView = {
         let view = UIView()
         view.backgroundColor = .clear
@@ -47,21 +48,24 @@ class AttachmentCollectionViewCell : UICollectionViewCell{
     }
     private func customInit(){
         addSubview(holderView)
-        addSubview(removeButton)
+        addSubview(removeButtonBack)
+        removeButtonBack.addSubview(removeButton)
+        removeButtonBack.translatesAutoresizingMaskIntoConstraints = false
         removeButton.translatesAutoresizingMaskIntoConstraints = false
         holderView.translatesAutoresizingMaskIntoConstraints = false
         
         holderView.leftAnchor.constraint(equalTo: leftAnchor, constant: AttachmentCollectionViewCell.distToBoard).isActive = true
         holderView.rightAnchor.constraint(equalTo: rightAnchor, constant: -AttachmentCollectionViewCell.distToBoard).isActive = true
         holderView.bottomAnchor.constraint(equalTo: bottomAnchor, constant: -AttachmentCollectionViewCell.distToBoard).isActive = true
-        holderView.topAnchor.constraint(equalTo: removeButton.topAnchor, constant: AttachmentCollectionViewCell.distToBoard).isActive = true
+        holderView.topAnchor.constraint(equalTo: removeButtonBack.topAnchor, constant: AttachmentCollectionViewCell.distToBoard).isActive = true
         
-        removeButton.rightAnchor.constraint(equalTo: rightAnchor, constant: 0).isActive = true
-        removeButton.topAnchor.constraint(equalTo: topAnchor, constant: DEFAULT_LAYOUT_MARGINS).isActive = true
-        removeButton.widthAnchor.constraint(equalToConstant: AttachmentCollectionViewCell.buttonSize).isActive = true
-        removeButton.heightAnchor.constraint(equalToConstant: AttachmentCollectionViewCell.buttonSize).isActive = true
-        
+        removeButtonBack.rightAnchor.constraint(equalTo: rightAnchor, constant: 0).isActive = true
+        removeButtonBack.topAnchor.constraint(equalTo: topAnchor, constant: DEFAULT_LAYOUT_MARGINS).isActive = true
+        removeButtonBack.widthAnchor.constraint(equalToConstant: AttachmentCollectionViewCell.buttonSize).isActive = true
+        removeButtonBack.heightAnchor.constraint(equalToConstant: AttachmentCollectionViewCell.buttonSize).isActive = true
+        removeButton.addZeroConstraint([.top, .bottom, .left, .right])
         removeButton.addTarget(self, action: #selector(removeButtonPressed), for: .touchUpInside)
+        removeButtonBack.layer.cornerRadius = AttachmentCollectionViewCell.buttonSize/2
         recolor()
     }
     @objc private func removeButtonPressed(){
@@ -78,7 +82,9 @@ class AttachmentCollectionViewCell : UICollectionViewCell{
     }
     private func recolor() {
         removeButton.setImage(UIImage.PSDImage(name: buttonImageName), for: .normal)
-        removeButton.backgroundColor = PyrusServiceDesk.mainController?.customization?.keyboardColor ?? PSD_lightGrayInputColor
+        removeButton.alpha = BUTTON_ALPHA
+        removeButtonBack.backgroundColor = PyrusServiceDesk.mainController?.customization?.keyboardColor ?? PSD_lightGrayInputColor
         holderView.layer.borderColor = PSD_lightGrayInputColor.cgColor
     }
 }
+let BUTTON_ALPHA: CGFloat = 0.6
