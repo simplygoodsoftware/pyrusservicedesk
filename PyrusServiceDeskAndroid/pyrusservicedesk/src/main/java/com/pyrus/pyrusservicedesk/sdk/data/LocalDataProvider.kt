@@ -85,10 +85,8 @@ internal class LocalDataProvider(offlineRepository: OfflineRepository,
      * @param uri of the file for attachment.
      */
     fun createLocalAttachmentFromUri(uri: Uri): Attachment? {
-        return when (val fileData = fileResolver.getFileData(uri)) {
-            null -> null
-            else -> createLocalAttachment(fileData)
-        }
+        val fileData = fileResolver.getFileData(uri) ?: return null
+        return createLocalAttachment(fileData)
     }
 
     private fun createLocalAttachment(fileData: FileData): Attachment {
