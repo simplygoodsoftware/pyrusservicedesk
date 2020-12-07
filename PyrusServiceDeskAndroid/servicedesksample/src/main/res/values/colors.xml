@@ -3,4 +3,11 @@
     <color name="colorPrimary">#008577</color>
     <color name="colorPrimaryDark">#00574B</color>
     <color name="colorAccent">#D81B60</color>
+
+    <color name="redColorSample">#A10F30</color>
+    <color name="barColorSample">#DBCCFF</color>
+    <color name="backColorSample">#C4B5FF</color>
+    <color name="statusBarColorSample">#9E6FBC</color>
+    <color name="supColorSample">#1A143B</color>
+    <color name="userColorSample">#FFD4D1</color>
 </resources>

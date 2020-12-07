@@ -63,7 +63,9 @@ internal class AttachFileVariantsFragment: BottomSheetDialogFragment(), View.OnC
             val bottomSheetInternal = d.findViewById<View>(R.id.design_bottom_sheet)
             BottomSheetBehavior.from(bottomSheetInternal!!).state = BottomSheetBehavior.STATE_EXPANDED
         }
-        return inflater.inflate(R.layout.psd_fragment_attach_file_variants, null, false)
+        val view = inflater.inflate(R.layout.psd_fragment_attach_file_variants, null, false)
+        view.setBackgroundColor(ConfigUtils.getFileMenuBackgroundColor(inflater.context))
+        return view
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
@@ -79,6 +81,17 @@ internal class AttachFileVariantsFragment: BottomSheetDialogFragment(), View.OnC
         send_logs_variant.visibility = if (PyrusServiceDesk.logging) VISIBLE else GONE
         if (PyrusServiceDesk.logging)
             send_logs_variant.setOnClickListener(this)
+
+        val textColor = ConfigUtils.getFileMenuTextColor(requireContext())
+        photo_variant.setTextColor(textColor)
+        gallery_variant.setTextColor(textColor)
+        send_logs_variant.setTextColor(textColor)
+
+        ConfigUtils.getMainFontTypeface(requireContext())?.let {
+            photo_variant.typeface = it
+            gallery_variant.typeface = it
+            send_logs_variant.typeface = it
+        }
     }
 
     override fun onStart() {

@@ -3,15 +3,15 @@ package com.pyrus.pyrusservicedesk.presentation.ui.navigation_page.ticket
 import android.graphics.Canvas
 import android.graphics.drawable.AnimationDrawable
 import android.net.Uri
-import androidx.annotation.LayoutRes
-import androidx.recyclerview.widget.RecyclerView
-import androidx.recyclerview.widget.ItemTouchHelper
-import androidx.recyclerview.widget.ItemTouchHelper.ACTION_STATE_SWIPE
 import android.view.View
 import android.view.View.*
 import android.view.ViewGroup
 import android.widget.ImageView
 import android.widget.TextView
+import androidx.annotation.LayoutRes
+import androidx.recyclerview.widget.ItemTouchHelper
+import androidx.recyclerview.widget.ItemTouchHelper.ACTION_STATE_SWIPE
+import androidx.recyclerview.widget.RecyclerView
 import com.pyrus.pyrusservicedesk.R
 import com.pyrus.pyrusservicedesk.presentation.ui.navigation_page.ticket.entries.*
 import com.pyrus.pyrusservicedesk.presentation.ui.view.CommentView
@@ -45,7 +45,7 @@ private const val VIEW_TYPE_COMMENT_RATING = 5
  */
 internal class TicketAdapter: AdapterBase<TicketEntry>() {
 
-    override val itemTouchHelper: ItemTouchHelper? = ItemTouchHelper(TouchCallback())
+    override val itemTouchHelper: ItemTouchHelper = ItemTouchHelper(TouchCallback())
 
     /**
      * [SpaceMultiplier] implementation for customizing spaces between items fot the feed.
@@ -137,6 +137,15 @@ internal class TicketAdapter: AdapterBase<TicketEntry>() {
         private val avatar = itemView.findViewById<ImageView>(R.id.avatar)
         private val authorName = itemView.findViewById<TextView>(R.id.author_name)
 
+        init {
+            ConfigUtils.getMainFontTypeface(parent.context)?.let {
+                creationTime.typeface = it
+                authorName.typeface = it
+            }
+            authorName.setTextColor(ConfigUtils.getSecondaryColorOnMainBackground(parent.context))
+            creationTime.setTextColor(ConfigUtils.getSecondaryColorOnMainBackground(parent.context))
+        }
+
         override fun bindItem(item: CommentEntry) {
             super.bindItem(item)
             setAuthorNameAndVisibility(shouldShowAuthorName())
@@ -190,10 +199,16 @@ internal class TicketAdapter: AdapterBase<TicketEntry>() {
     }
 
     private inner class OutboundCommentHolder(parent: ViewGroup)
-        : CommentHolder(parent, R.layout.psd_view_holder_comment_outbound){
+        : CommentHolder(parent, R.layout.psd_view_holder_comment_outbound) {
 
         override val comment: CommentView = itemView.findViewById(R.id.comment)
         override val creationTime: TextView = itemView.findViewById(R.id.creation_time)
+
+        init {
+            ConfigUtils.getMainFontTypeface(parent.context)?.let {
+                creationTime.typeface = it
+            }
+        }
     }
 
     private abstract inner class CommentHolder(
@@ -266,7 +281,7 @@ internal class TicketAdapter: AdapterBase<TicketEntry>() {
         }
 
         private fun bindAttachmentView() {
-            getItem().comment.attachments!!.first().let {
+            getItem().comment.attachments!!.first().let { it ->
                 comment.setFileName(getItem().comment.attachments?.first()?.name ?: "")
                 comment.setFileSize(getItem().comment.attachments?.first()?.bytesSize?.toFloat() ?: 0f)
                 val previewUri = it.localUri ?: Uri.parse(getPreviewUrl(it.id))
@@ -301,6 +316,12 @@ internal class TicketAdapter: AdapterBase<TicketEntry>() {
         private val avatar = itemView.findViewById<ImageView>(R.id.avatar)
         private val authorName = itemView.findViewById<TextView>(R.id.author_name)
 
+        init {
+            ConfigUtils.getMainFontTypeface(parent.context)?.let {
+                authorName.typeface = it
+            }
+        }
+
         override fun bindItem(item: WelcomeMessageEntry) {
             super.bindItem(item)
             authorName.visibility = GONE
@@ -315,6 +336,13 @@ internal class TicketAdapter: AdapterBase<TicketEntry>() {
 
         private val date = itemView.findViewById<TextView>(R.id.date)
 
+        init {
+            ConfigUtils.getMainFontTypeface(parent.context)?.let {
+                date.typeface = it
+            }
+            date.setTextColor(ConfigUtils.getSecondaryColorOnMainBackground(itemView.context))
+        }
+
         override fun bindItem(item: DateEntry) {
             super.bindItem(item)
             date.text = item.date
@@ -323,6 +351,16 @@ internal class TicketAdapter: AdapterBase<TicketEntry>() {
 
     private inner class RatingHolder(parent: ViewGroup) :
         ViewHolderBase<RatingEntry>(parent, R.layout.psd_view_holder_rating) {
+
+        init {
+            ConfigUtils.getSecondaryColorOnMainBackground(itemView.context).apply {
+                itemView.rating1.setBackgroundColor(this)
+                itemView.rating2.setBackgroundColor(this)
+                itemView.rating3.setBackgroundColor(this)
+                itemView.rating4.setBackgroundColor(this)
+                itemView.rating5.setBackgroundColor(this)
+            }
+        }
 
         override fun bindItem(item: RatingEntry) {
             super.bindItem(item)

@@ -6,6 +6,7 @@ import android.content.ClipboardManager
 import android.content.Context
 import android.content.Intent
 import android.content.res.ColorStateList
+import android.graphics.PorterDuff
 import android.net.Uri
 import android.os.Bundle
 import android.text.Editable
@@ -15,6 +16,7 @@ import android.view.MenuInflater
 import android.view.MenuItem
 import android.view.MenuItem.SHOW_AS_ACTION_ALWAYS
 import android.view.View.NO_ID
+import android.view.WindowManager
 import android.widget.Toast
 import com.pyrus.pyrusservicedesk.PyrusServiceDesk
 import com.pyrus.pyrusservicedesk.R
@@ -33,6 +35,9 @@ import com.pyrus.pyrusservicedesk.sdk.data.intermediate.FileData
 import com.pyrus.pyrusservicedesk.utils.*
 import com.pyrus.pyrusservicedesk.utils.RequestUtils.Companion.getFileUrl
 import kotlinx.android.synthetic.main.psd_activity_ticket.*
+import kotlinx.android.synthetic.main.psd_activity_ticket.view.*
+import kotlinx.android.synthetic.main.psd_activity_tickets.view.*
+import kotlinx.android.synthetic.main.psd_no_connection.*
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
@@ -141,7 +146,35 @@ internal class TicketActivity : ConnectionActivityBase<TicketViewModel>(TicketVi
 
         val accentColor = ConfigUtils.getAccentColor(this)
 
-        supportActionBar?.apply { title = ConfigUtils.getTitle(this@TicketActivity) }
+        supportActionBar?.apply { title = "" }
+        ticket_toolbar.toolbar_title.text = ConfigUtils.getTitle(this@TicketActivity)
+
+        root.setBackgroundColor(ConfigUtils.getMainBackgroundColor(this))
+
+        val toolbarColor = ConfigUtils.getHeaderBackgroundColor(this)
+        ticket_toolbar.toolbar_title.setTextColor(
+            ConfigUtils.getChatTitleTextColor(
+                this
+            )
+        )
+        ticket_toolbar.setBackgroundColor(toolbarColor)
+
+        ConfigUtils.getMainFontTypeface(this)?.let {
+            send.typeface = it
+            input.typeface = it
+            noConnectionTextView.typeface = it
+            reconnectButton.typeface = it
+        }
+
+        val secondaryColor = getSecondaryColorOnBackground(ConfigUtils.getNoPreviewBackgroundColor(this))
+        noConnectionImageView.setColorFilter(secondaryColor)
+        noConnectionTextView.setTextColor(secondaryColor)
+        reconnectButton.setTextColor(ConfigUtils.getAccentColor(this))
+        no_connection.setBackgroundColor(ConfigUtils.getNoConnectionBackgroundColor(this))
+
+        ConfigUtils.getMainBoldFontTypeface(this)?.let {
+            ticket_toolbar.toolbar_title.typeface = it
+        }
 
         if (!viewModel.isFeed) {
             ticket_toolbar.navigationIcon = navigationCounterIcon
@@ -165,14 +198,14 @@ internal class TicketActivity : ConnectionActivityBase<TicketViewModel>(TicketVi
                 intArrayOf(-android.R.attr.state_enabled)
             ),
             intArrayOf(
-                accentColor,
-                getColorByAttrId(this, android.R.attr.textColorSecondary)
+                ConfigUtils.getSendButtonColor(this),
+                ConfigUtils.getSecondaryColorOnMainBackground(this)
             )
 
         )
         send.setTextColor(stateList)
         attach.setOnClickListener { showAttachFileVariants() }
-        attach.setColorFilter(accentColor)
+        attach.setColorFilter(ConfigUtils.getFileMenuButtonColor(this))
         if(savedInstanceState == null) {
             input.setText(viewModel.draft)
             showKeyboardOn(input){
@@ -182,9 +215,19 @@ internal class TicketActivity : ConnectionActivityBase<TicketViewModel>(TicketVi
         input.apply {
             highlightColor = accentColor
             setCursorColor(accentColor)
+            setHintTextColor(ConfigUtils.getSecondaryColorOnMainBackground(this@TicketActivity))
+            setTextColor(ConfigUtils.getInputTextColor(this@TicketActivity))
             addTextChangedListener(inputTextWatcher)
         }
         send.isEnabled = !input.text.isNullOrBlank()
+        divider.setBackgroundColor(getColorOnBackground(ConfigUtils.getMainBackgroundColor(this), 30))
+        refresh.setProgressBackgroundColor(ConfigUtils.getSecondaryColorOnMainBackground(this))
+
+        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.LOLLIPOP) {
+            window.clearFlags(WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS)
+            window.addFlags(WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS)
+            window.statusBarColor = ConfigUtils.getStatusBarColor(this)?: window.statusBarColor
+        }
     }
 
     override fun onStart() {
@@ -220,7 +263,9 @@ internal class TicketActivity : ConnectionActivityBase<TicketViewModel>(TicketVi
 
         return menu?.let{
             MenuInflater(this).inflate(R.menu.psd_main_menu, menu)
-            menu.findItem(R.id.psd_main_menu_close).setShowAsAction(SHOW_AS_ACTION_ALWAYS)
+            val closeItem = menu.findItem(R.id.psd_main_menu_close)
+            closeItem.setShowAsAction(SHOW_AS_ACTION_ALWAYS)
+            closeItem.icon?.setColorFilter(ConfigUtils.getToolbarButtonColor(this), PorterDuff.Mode.SRC_ATOP)
             true
         } ?: false
     }

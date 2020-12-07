@@ -3,7 +3,7 @@ package com.pyrus.servicedesksample;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.DialogInterface;
-import android.graphics.Color;
+import android.graphics.Typeface;
 import android.os.Bundle;
 import android.widget.TextView;
 
@@ -17,16 +17,39 @@ public class SampleActivity extends Activity implements NewReplySubscriber {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_sample);
+        Typeface.createFromAsset(this.getApplication().getAssets(), "fonts/nerko_one.ttf");
+
+
+        String welcomeMessage = "Hi there i have a long message for you :) Maybe you have one for me too?";
+        String chatTitle = "Pink Chat";
+
+
         findViewById(R.id.support).setOnClickListener(
                 view -> PyrusServiceDesk.start(
                         this,
                         new ServiceDeskConfiguration.Builder()
                                 .setUserName("Ivan Ivanov")
-                                .setThemeColor(Color.parseColor("#FF8300"))
+                                .setThemeColor(getResources().getColor(R.color.redColorSample))
+
+                                .setFontFamily(R.font.titillium_web)
+                                .setUserTextColor(R.color.psd_accent_secondary)
+                                .setUserMessageBackgroundColor(R.color.userColorSample)
+                                .setSupportTextColor(R.color.psd_accent_secondary)
+                                .setSupportMessageBackgroundColor(R.color.supColorSample)
+                                .setChatTitleColor(R.color.psd_accent_secondary)
+                                .setToolbarColor(R.color.barColorSample)
+                                .setSendButtonColor(R.color.redColorSample)
+                                .setAttachmentMenuButtonColor(R.color.redColorSample)
+                                .setAttachmentMenuBackgroundColor(R.color.backColorSample)
+                                .setAttachmentMenuTextColor(R.color.redColorSample)
+                                .setBackgroundColor(R.color.backColorSample)
+                                .setToolbarButtonColor(R.color.redColorSample)
+                                .setStatusBarColor(R.color.statusBarColorSample)
+
                                 .setChatTitle("Sample Support")
                                 .setWelcomeMessage("How can I help you?")
                                 .setAvatarForSupport(R.drawable.psd_download_file)
-                                .setChatMenuDelegate(new ChatMenuDelegate())
+//                                .setChatMenuDelegate(new ChatMenuDelegate())
                                 .build())
         );
 

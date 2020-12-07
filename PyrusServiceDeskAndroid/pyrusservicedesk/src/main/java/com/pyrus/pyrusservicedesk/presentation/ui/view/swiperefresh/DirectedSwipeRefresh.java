@@ -481,11 +481,11 @@ public class DirectedSwipeRefresh extends ViewGroup {
     /**
      * Set the background color of the progress spinner disc.
      *
-     * @param colorRes Resource id of the color.
+     * @param color Resource id of the color.
      */
-    public void setProgressBackgroundColor(int colorRes) {
-        mCircleView.setBackgroundColor(colorRes);
-        mProgress.setBackgroundColor(getResources().getColor(colorRes));
+    public void setProgressBackgroundColor(int color) {
+        mCircleView.setBackgroundColor(color);
+        mProgress.setBackgroundColor(color);
     }
 
     /**
