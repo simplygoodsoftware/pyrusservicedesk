@@ -361,7 +361,7 @@ class ServiceDeskConfiguration internal constructor() {
         }
 
         /**
-         * Sets whether or not to allow force dark to apply to this view.
+         * Sets whether or not to allow force dark.
          *
          * Setting this to false will disable the auto-dark feature.
          * Setting this to true will allow this view to be automatically made dark.
