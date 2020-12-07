@@ -4,7 +4,7 @@ let PROGRESS_LINE_WIDTH : CGFloat = 2.0
 ///Black download image (not full circle)
 class PSDDownloadImage{
     static func image(color: UIColor) -> UIImage {
-        guard color == .black else {
+        guard color.isDarkColor else {
                 return imageWhite
         }
         return imageBlack

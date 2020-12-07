@@ -13,18 +13,13 @@ protocol AttachmentCollectionViewCellDelegate : NSObjectProtocol{
 class AttachmentCollectionViewCell : UICollectionViewCell{
     weak var delegate : AttachmentCollectionViewCellDelegate?
     private static let buttonSize : CGFloat = 15
-    private var buttonImageName: String = {
-        if PSD_TextColorForInput() == .white {
-            return "ic_remove"
-        }
-        return "ic_remove_darkmode"
-    }()
     static let distToBoard : CGFloat = 7
     private static let holderRadius : CGFloat = 6.0
     private static let holderBorderWidth : CGFloat = 1.0
     private lazy var removeButton : UIButton = {
         let button = UIButton()
-        button.setImage(UIImage.PSDImage(name: buttonImageName), for: .normal)
+        button.setTitle("✗", for: .normal)
+        button.titleLabel?.font = .removeButton
         button.layer.cornerRadius = AttachmentCollectionViewCell.buttonSize/2
         return button
     }()
@@ -81,10 +76,13 @@ class AttachmentCollectionViewCell : UICollectionViewCell{
         }
     }
     private func recolor() {
-        removeButton.setImage(UIImage.PSDImage(name: buttonImageName), for: .normal)
-        removeButton.alpha = BUTTON_ALPHA
-        removeButtonBack.backgroundColor = PyrusServiceDesk.mainController?.customization?.keyboardColor ?? PSD_lightGrayInputColor
+        removeButton.setTitleColor(PSD_TextColorForInput().withAlphaComponent(CROSS_ALPHA), for: .normal)
+        removeButtonBack.backgroundColor = PSD_grayInputColor.withAlphaComponent(BUTTON_ALPHA)
         holderView.layer.borderColor = PSD_lightGrayInputColor.cgColor
     }
 }
-let BUTTON_ALPHA: CGFloat = 0.6
+let BUTTON_ALPHA: CGFloat = 0.3
+let CROSS_ALPHA: CGFloat = 0.8
+private extension UIFont {
+    static let removeButton = UIFont.boldSystemFont(ofSize: 13)
+}

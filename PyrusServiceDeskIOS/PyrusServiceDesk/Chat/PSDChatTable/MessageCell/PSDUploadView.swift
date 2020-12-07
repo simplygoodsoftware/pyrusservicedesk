@@ -50,7 +50,7 @@ class PSDUploadView: UIButton {
     var color : UIColor = .white{
         didSet(oldColor){
             
-            if(color == .black){
+            if(color.isDarkColor){
                 self.setImage(self.image(for: .selected)?.imageWith(color: .black), for: .selected)
                 self.setImage(UIImage.PSDImage(name: "DownloadBlack"), for: .normal)
                 progressLayer.strokeColor = UIColor.black.cgColor
@@ -60,7 +60,7 @@ class PSDUploadView: UIButton {
                 self.setImage(self.image(for: .selected)?.imageWith(color: color), for: .selected)
                 self.setImage(UIImage.PSDImage(name: "DownloadWhite"), for: .normal)
                 progressLayer.strokeColor = color.cgColor
-                shapeLayer.fillColor = color.withAlphaComponent(0.1).cgColor
+                shapeLayer.fillColor = UIColor.white.withAlphaComponent(0.1).cgColor
             }
         }
     }

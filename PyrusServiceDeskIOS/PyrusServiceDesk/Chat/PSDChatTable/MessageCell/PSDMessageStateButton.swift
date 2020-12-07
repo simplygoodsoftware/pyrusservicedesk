@@ -83,7 +83,7 @@ class PSDMessageStateButton: UIButton {
         }
     }
     private static func clockGifImageName()->String{
-        if getTextColorForTable() == .white {
+        guard getTextColorForTable().isDarkColor else {
             return "clock-light-"
         }
         return "clock-dark-"
