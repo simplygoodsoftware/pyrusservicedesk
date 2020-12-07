@@ -76,6 +76,7 @@ internal class ConfigUtils{
         /**
          * Provides user message text color taking [PyrusServiceDesk.CONFIGURATION] into account.
          * @param context Activity context.
+         * @param backgroundColor Background color of text.
          */
         @ColorInt
         fun getUserMessageTextColor(context: Context, backgroundColor: Int): Int {
@@ -98,6 +99,7 @@ internal class ConfigUtils{
         /**
          * Provides support message text color taking [PyrusServiceDesk.CONFIGURATION] into account.
          * @param context Activity context.
+         * @param backgroundColor Background color of text.
          */
         @ColorInt
         fun getSupportMessageTextColor(context: Context, backgroundColor: Int): Int {

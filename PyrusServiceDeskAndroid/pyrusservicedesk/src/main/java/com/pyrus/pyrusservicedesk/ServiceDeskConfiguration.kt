@@ -35,6 +35,7 @@ class ServiceDeskConfiguration internal constructor() {
     internal var fileMenuTextColor: Int? = null
     internal var sendButtonColor: Int? = null
     internal var statusBarColor: Int? = null
+    internal var forceDarkAllowed: Boolean = false
 
     internal val isDialogTheme: Boolean = PyrusServiceDesk.get().application.isTablet()
 
@@ -60,6 +61,7 @@ class ServiceDeskConfiguration internal constructor() {
         private const val KEY_FILE_MENU_TEXT_COLOR = "ServiceDeskConfiguration_KEY_FILE_MENU_TEXT_COLOR"
         private const val KEY_SEND_BUTTON_COLOR = "ServiceDeskConfiguration_KEY_SEND_BUTTON_COLOR"
         private const val KEY_STATUS_BAR_COLOR = "ServiceDeskConfiguration_KEY_STATUS_BAR_COLOR"
+        private const val KEY_FORCE_DARK_ALLOWED = "ServiceDeskConfiguration_KKEY_FORCE_DARK_ALLOWED"
 
         fun save(bundle: Bundle) {
             with(PyrusServiceDesk.getConfiguration()) {
@@ -87,6 +89,7 @@ class ServiceDeskConfiguration internal constructor() {
                     fileMenuTextColor?.let { putInt(KEY_FILE_MENU_TEXT_COLOR, it) }
                     sendButtonColor?.let { putInt(KEY_SEND_BUTTON_COLOR, it) }
                     statusBarColor?.let { putInt(KEY_STATUS_BAR_COLOR, it) }
+                    putBoolean(KEY_FORCE_DARK_ALLOWED, forceDarkAllowed)
                 }
             }
         }
@@ -117,6 +120,7 @@ class ServiceDeskConfiguration internal constructor() {
                     fileMenuButtonColor = bundle.getNullableInt(KEY_FILE_MENU_BUTTON_COLOR)
                     sendButtonColor = bundle.getNullableInt(KEY_SEND_BUTTON_COLOR)
                     statusBarColor = bundle.getNullableInt(KEY_STATUS_BAR_COLOR)
+                    forceDarkAllowed = bundle.getBoolean(KEY_FORCE_DARK_ALLOWED, false)
                 }
             )
         }
@@ -353,6 +357,21 @@ class ServiceDeskConfiguration internal constructor() {
          */
         fun setStatusBarColor(@ColorRes color: Int): Builder {
             configuration.statusBarColor = color
+            return this
+        }
+
+        /**
+         * Sets whether or not to allow force dark to apply to this view.
+         *
+         * Setting this to false will disable the auto-dark feature.
+         * Setting this to true will allow this view to be automatically made dark.
+         *
+         * False by default.
+         *
+         * @param forceDarkAllowed Force dark state.
+         */
+        fun setForceDarkAllowed(forceDarkAllowed: Boolean): Builder {
+            configuration.forceDarkAllowed = forceDarkAllowed
             return this
         }
 

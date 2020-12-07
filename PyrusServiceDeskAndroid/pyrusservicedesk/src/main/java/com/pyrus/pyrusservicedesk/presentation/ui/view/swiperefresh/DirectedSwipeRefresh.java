@@ -3,6 +3,8 @@ package com.pyrus.pyrusservicedesk.presentation.ui.view.swiperefresh;
 import android.content.Context;
 import android.content.res.Resources;
 import android.content.res.TypedArray;
+
+import androidx.annotation.ColorInt;
 import androidx.core.view.MotionEventCompat;
 import androidx.core.view.ViewCompat;
 import android.util.AttributeSet;
@@ -481,9 +483,9 @@ public class DirectedSwipeRefresh extends ViewGroup {
     /**
      * Set the background color of the progress spinner disc.
      *
-     * @param color Resource id of the color.
+     * @param color Color int.
      */
-    public void setProgressBackgroundColor(int color) {
+    public void setProgressBackgroundColor(@ColorInt int color) {
         mCircleView.setBackgroundColor(color);
         mProgress.setBackgroundColor(color);
     }
