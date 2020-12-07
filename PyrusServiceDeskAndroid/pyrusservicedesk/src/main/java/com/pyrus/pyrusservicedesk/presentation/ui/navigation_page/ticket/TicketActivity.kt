@@ -146,6 +146,7 @@ internal class TicketActivity : ConnectionActivityBase<TicketViewModel>(TicketVi
 
         val accentColor = ConfigUtils.getAccentColor(this)
 
+        // if you don't set empty text, Android will set the app name
         supportActionBar?.apply { title = "" }
         ticket_toolbar.toolbar_title.text = ConfigUtils.getTitle(this@TicketActivity)
 

@@ -77,9 +77,12 @@ internal class ConfigUtils{
          * Provides user message text color taking [PyrusServiceDesk.CONFIGURATION] into account.
          * @param context Activity context.
          * @param backgroundColor Background color of text.
+         *
+         * If no custom text color is set, the color is calculated based on the brightness of the [backgroundColor].
+         * If the [backgroundColor] is bright, the text color will be dark, and vice versa, if the [backgroundColor] is light, the text will be light.
          */
         @ColorInt
-        fun getUserMessageTextColor(context: Context, backgroundColor: Int): Int {
+        fun getUserMessageTextColor(context: Context, @ColorInt backgroundColor: Int): Int {
             val colorRes = PyrusServiceDesk.getConfiguration().userMessageTextColor
                 ?:                return getTextColorOnBackground(context, backgroundColor)
             return getColor(context.applicationContext, colorRes)
@@ -100,9 +103,12 @@ internal class ConfigUtils{
          * Provides support message text color taking [PyrusServiceDesk.CONFIGURATION] into account.
          * @param context Activity context.
          * @param backgroundColor Background color of text.
+         *
+         * If no custom text color is set, the color is calculated based on the brightness of the [backgroundColor].
+         * If the [backgroundColor] is bright, the text color will be dark, and vice versa, if the [backgroundColor] is light, the text will be light.
          */
         @ColorInt
-        fun getSupportMessageTextColor(context: Context, backgroundColor: Int): Int {
+        fun getSupportMessageTextColor(context: Context, @ColorInt backgroundColor: Int): Int {
             val colorRes = PyrusServiceDesk.getConfiguration().supportMessageTextColor
                 ?: return getTextColorOnBackground(context, backgroundColor)
             return getColor(context.applicationContext, colorRes)

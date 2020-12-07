@@ -74,6 +74,7 @@ internal class FilePreviewActivity: ConnectionActivityBase<FilePreviewViewModel>
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        // if you don't set empty text, Android will set the app name
         supportActionBar?.apply {
             title = ""
         }
