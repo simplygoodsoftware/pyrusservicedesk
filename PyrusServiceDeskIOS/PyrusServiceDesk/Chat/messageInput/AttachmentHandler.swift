@@ -14,7 +14,7 @@ import MobileCoreServices
 class AttachmentHandler: NSObject,UIImagePickerControllerDelegate, UINavigationControllerDelegate,FileChooserDelegate{
     
     static let shared = AttachmentHandler()
-    var logsSendController: LogsSendController?
+    private var logsSendController: LogsSendController?
     enum AttachmentType: String{
         case camera, gallery, customChooser, localLogs
     }
@@ -31,8 +31,9 @@ class AttachmentHandler: NSObject,UIImagePickerControllerDelegate, UINavigationC
             }))
         }
         if PyrusServiceDesk.loggingEnabled {
-            if logsSendController == logsSendController {
+            if logsSendController == nil {
                 logsSendController = LogsSendController()
+                logsSendController?.modalPresentationStyle = .overFullScreen
                 logsSendController?.chooserDelegate = self
             }
             actions.append(UIAlertAction(title: logsSendController?.label, style: .default, handler: { (action) -> Void in

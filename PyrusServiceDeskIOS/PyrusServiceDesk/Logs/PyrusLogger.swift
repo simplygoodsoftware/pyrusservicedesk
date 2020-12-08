@@ -14,7 +14,7 @@ class PyrusLogger: NSObject {
             self?.flush2disk()
         }
     }
-    override init() {
+    private override init() {
         super.init()
         checkAndRemoveOldLogs()
         NotificationCenter.default.addObserver(self, selector: #selector(saveLocalLogToDisk), name: UIApplication.willResignActiveNotification, object: nil)
@@ -27,10 +27,13 @@ class PyrusLogger: NSObject {
         let tId: mach_port_t = pthread_mach_thread_np(pthread_self())
         let line = "\(Date().stringWithFormat(LOG_DATE_FORMAT)) [\(tId)] \(loggedString)\n"
         PyrusLogger.loggerQueue.async { [weak self] in
-            if self?.loglines.count ?? 0 >= LOGLINES_BUFFER{
-                self?.flush2disk()
+            guard let self = self else{
+                return
             }
-            self?.loglines.append(line)
+            if self.loglines.count >= LOGLINES_BUFFER{
+                self.flush2disk()
+            }
+            self.loglines.append(line)
         }
     }
     ///Returns data from logs files in gZip format
@@ -71,10 +74,7 @@ private extension PyrusLogger {
             return nil
         }
         if !fileManager.fileExists(atPath: directoryToOldLogs.path) {
-            do {
-                try fileManager.createDirectory(atPath: directoryToOldLogs.path, withIntermediateDirectories: true, attributes: nil)
-            } catch {
-            }
+            try? fileManager.createDirectory(atPath: directoryToOldLogs.path, withIntermediateDirectories: true, attributes: nil)
         }
         let oldLogFileName = Date().stringWithFormat(LOG_DATE_FILE_FORMAT)
         return directoryToOldLogs.appendingPathComponent(oldLogFileName, isDirectory: false)
@@ -89,19 +89,12 @@ private extension PyrusLogger {
         lines.append("\n")
         let docUrl = PSDFilesManager.getDocumentsDirectory()
         if !FileManager.default.fileExists(atPath: docUrl.path){
-            do {
-                try FileManager.default.createDirectory(at: docUrl, withIntermediateDirectories: true, attributes: nil)
-            }catch {
-            }
+            try? FileManager.default.createDirectory(at: docUrl, withIntermediateDirectories: true, attributes: nil)
         }
         var fileHandler = FileHandle(forWritingAtPath: PyrusLogger.logPath.path)
         if fileHandler == nil {
-            do {
-                
-                try "".write(toFile: PyrusLogger.logPath.path, atomically: true, encoding: .utf8)
+            try? "".write(toFile: PyrusLogger.logPath.path, atomically: true, encoding: .utf8)
                 fileHandler = FileHandle(forWritingAtPath: PyrusLogger.logPath.path)
-            } catch {
-            }
         }
         guard let data = lines.data(using: .utf8) else {
             return
@@ -114,30 +107,24 @@ private extension PyrusLogger {
         checkFileSize()
     }
     func checkFileSize() {
-        do {
-            let attributes = try FileManager.default.attributesOfItem(atPath:  PyrusLogger.logPath.path)
-            let fileSize = attributes[.size] as? Int
-            if fileSize ?? 0 > MAX_LOG_SIZE, let url = PyrusLogger.oldLogFileURL() {
-                try FileManager.default.moveItem(at: PyrusLogger.logPath, to: url)
-            }
-        } catch {
+        guard let attributes = try? FileManager.default.attributesOfItem(atPath:  PyrusLogger.logPath.path) else {
+            return
         }
+        let fileSize = attributes[.size] as? Int
+        if fileSize ?? 0 > MAX_LOG_SIZE, let url = PyrusLogger.oldLogFileURL() {
+            try? FileManager.default.moveItem(at: PyrusLogger.logPath, to: url)
+        }
+            
+        
     }
     func getLocalLog() -> String {
         flush2disk()
-        var log: String? = nil
-        do {
-            try log = String(contentsOfFile: PyrusLogger.logPath.path, encoding: .utf8)
-        } catch {
-        }
+        let log = try? String(contentsOfFile: PyrusLogger.logPath.path, encoding: .utf8)
         let oldLogs = getSortedLogFiles()
         var oldLog: String = ""
         if oldLogs.count > 0, let lastLog = oldLogs.last, let pathForLogs = PyrusLogger.directoryOldLogs(){
             let pathForOldFile = pathForLogs.appendingPathComponent(lastLog)
-            do {
-                try oldLog = String(contentsOfFile: pathForOldFile.path, encoding: .utf8)
-            } catch {
-            }
+            try? oldLog = String(contentsOfFile: pathForOldFile.path, encoding: .utf8)
         }
         
         guard let log_ = log else {
@@ -152,12 +139,11 @@ private extension PyrusLogger {
         let fileManger = FileManager.default
         var logFiles = [String]()
         if let directory = PyrusLogger.directoryOldLogs(){
-            do{
-                let files = try fileManger.contentsOfDirectory(atPath: directory.path)
-                for file in files {
-                    logFiles.append(file)
-                }
-            } catch {
+            guard let files = try? fileManger.contentsOfDirectory(atPath: directory.path) else {
+                return logFiles
+            }
+            for file in files {
+                logFiles.append(file)
             }
         }
         logFiles.sort(by: {
@@ -182,10 +168,7 @@ private extension PyrusLogger {
                     return
                 }
                 let pathToRemove = pathForLogs.appendingPathComponent(path, isDirectory: false)
-                do{
-                    try fileManger.removeItem(atPath: pathToRemove.path)
-                } catch {
-                }
+                try? fileManger.removeItem(atPath: pathToRemove.path)
             }
         }
     }

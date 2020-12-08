@@ -1,6 +1,6 @@
 import Foundation
 class LogsSendController: UIViewController&FileChooser {
-    var label: String = NSLocalizedString("SendLog", comment: "")
+    var label: String = "SendLog".localizedPSD()
     var chooserDelegate: FileChooserDelegate?
     
     override func viewDidLoad() {
@@ -14,22 +14,19 @@ class LogsSendController: UIViewController&FileChooser {
         sendLogs()
     }
 
-    var prepareLabelFontSize: CGFloat = 16.0
-
     private func showLoading() {
         view.backgroundColor = UIColor.clear
 
         let prepareView = UIView()
         prepareView.layer.cornerRadius = PREPARE_CORNER_RADIUS
-        let prepareColor = UIColor.prepareViewColor
-        prepareView.backgroundColor = prepareColor.withAlphaComponent(PREPARE_ALPHA)
+        prepareView.backgroundColor = .prepareViewColor
         view.addSubview(prepareView)
 
 
         let prepareLabel = UILabel()
-        prepareLabel.textColor = UIColor.white
-        prepareLabel.text = NSLocalizedString("PrepareLog", comment: "")
-        prepareLabel.font = UIFont.label
+        prepareLabel.textColor = .white
+        prepareLabel.text = "PrepareLog".localizedPSD()
+        prepareLabel.font = .label
         prepareView.addSubview(prepareLabel)
         
         prepareView.translatesAutoresizingMaskIntoConstraints = false
@@ -60,13 +57,12 @@ extension LogsSendController: LogsSendProtocol {
     }
 }
 private extension UIColor {
-    static let prepareViewColor = #colorLiteral(red: 0.07843137255, green: 0.07843137255, blue: 0.07843137255, alpha: 1)
+    static let prepareViewColor = #colorLiteral(red: 0.07843137255, green: 0.07843137255, blue: 0.07843137255, alpha: 0.9)
 }
 private extension UIFont {
     static let label = UIFont.systemFont(ofSize: 16)
 }
-let PREPARE_HEIGHT: CGFloat = 45.0
-let PREPARE_CORNER_RADIUS: CGFloat = 10.0
-let PREPARE_ALPHA: CGFloat = 0.9
-let DISTANCE_TO_BOARD: CGFloat = 15
-let DISTANCE_TO_BOTOM: CGFloat = 35
+private let PREPARE_HEIGHT: CGFloat = 45.0
+private let PREPARE_CORNER_RADIUS: CGFloat = 10.0
+private let DISTANCE_TO_BOARD: CGFloat = 15
+private let DISTANCE_TO_BOTOM: CGFloat = 35

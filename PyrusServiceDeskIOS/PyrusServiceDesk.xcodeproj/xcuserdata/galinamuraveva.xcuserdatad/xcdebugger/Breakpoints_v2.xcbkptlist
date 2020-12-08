@@ -3,4 +3,22 @@
    uuid = "6CCD77EF-F7A3-4DB1-B2E4-F895D03A66C6"
    type = "1"
    version = "2.0">
+   <Breakpoints>
+      <BreakpointProxy
+         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
+         <BreakpointContent
+            uuid = "57D8DF35-BEB1-43CE-87F6-903CBB8D5E20"
+            shouldBeEnabled = "No"
+            ignoreCount = "0"
+            continueAfterRunningActions = "No"
+            filePath = "../../../../var/folders/ry/nm_x5nr970jg867c2dphnh900000gn/T/xcode/scm/pyrusservicedesk/a366f9c90807bb5d4930f9d03d2bd48acaf09b36/PyrusServiceDeskIOS/PyrusServiceDesk/Chat/messageInput/AttachmentHandler.swift"
+            startingColumnNumber = "9223372036854775807"
+            endingColumnNumber = "9223372036854775807"
+            startingLineNumber = "96"
+            endingLineNumber = "96"
+            landmarkName = "authorizationStatus(type:viewController:)"
+            landmarkType = "7">
+         </BreakpointContent>
+      </BreakpointProxy>
+   </Breakpoints>
 </Bucket>
