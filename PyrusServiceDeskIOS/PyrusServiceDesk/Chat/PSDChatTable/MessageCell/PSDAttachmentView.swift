@@ -33,7 +33,7 @@ class PSDAttachmentView: UIView{
     }
     lazy private(set) var previewImageView : PSDAttachmentImageView = {
         let iv = PSDAttachmentImageView.init(frame: CGRect.zero)
-        iv.backgroundColor = PSD_lightGrayViewColor
+        iv.backgroundColor = CustomizationHelper.lightGrayViewColor
         iv.clipsToBounds = true
         iv.contentMode = .scaleAspectFill
         return iv
@@ -86,7 +86,7 @@ class PSDAttachmentView: UIView{
         if (self.attachment?.serverIdentifer?.count ?? 0)>0{
             let web :PSDAttachmentLoadViewController = PSDAttachmentLoadViewController(nibName:nil, bundle:nil)
             web.attachment = self.attachment
-            let navCotroller = PSDNavigationController.init(rootViewController: web)
+            let navCotroller = PSDNavigationController(rootViewController: web)
                 navCotroller.modalPresentationStyle = .overFullScreen
         self.findViewController()?.navigationController?.present(navCotroller, animated: true, completion: nil)
         }

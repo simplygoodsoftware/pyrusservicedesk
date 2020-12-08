@@ -116,5 +116,5 @@ class PSDProgressDownloadView: UIView {
     }
 }
 private extension UIFont {
-    static let cancelButton = PSD_SystemFont(ofSize: 17.0)
+    static let cancelButton = CustomizationHelper.systemFont(ofSize: 17.0)
 }

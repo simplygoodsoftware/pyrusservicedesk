@@ -8,7 +8,7 @@ protocol PSDRateViewDelegate: NSObjectProtocol{
 /**
  The view to show rating buttons
  */
-class PSDRateView: UIView {
+class PSDRateView: PSDView {
     weak var delegate: PSDRateViewDelegate?
     private let BUTTON_CORNER_RADIUS: CGFloat = 10
     private let STACK_LEFT_SPACING: CGFloat = 5
@@ -40,8 +40,8 @@ class PSDRateView: UIView {
             button.layer.cornerRadius = BUTTON_CORNER_RADIUS
             button.setTitle(rate.value, for: .normal)
             button.tag = rate.key
-            button.setBackgroundColor(color: PSD_lightGrayViewColor, forState: .normal)
-            button.setBackgroundColor(color: PSD_grayViewColor, forState: .highlighted)
+            button.setBackgroundColor(color: CustomizationHelper.lightGrayViewColor, forState: .normal)
+            button.setBackgroundColor(color: CustomizationHelper.grayViewColor, forState: .highlighted)
             
             button.addTarget(self, action: #selector(didTapButton), for: .touchUpInside)
             
@@ -56,22 +56,14 @@ class PSDRateView: UIView {
     required init?(coder: NSCoder) {
         super.init(coder: coder)
     }
-    override func traitCollectionDidChange(_ previousTraitCollection: UITraitCollection?) {
-        super.traitCollectionDidChange(previousTraitCollection)
-        if #available(iOS 13.0, *) {
-            guard self.traitCollection.hasDifferentColorAppearance(comparedTo: previousTraitCollection) else {
-                return
-            }
-            recolor()
-        }
-    }
-    private func recolor() {
+    override func recolor() {
+        super.recolor()
         for view in stackView.arrangedSubviews {
             guard let button = view as? UIButton else {
                 continue
             }
-            button.setBackgroundColor(color: PSD_lightGrayViewColor, forState: .normal)
-            button.setBackgroundColor(color: PSD_grayViewColor, forState: .highlighted)
+            button.setBackgroundColor(color: CustomizationHelper.lightGrayViewColor, forState: .normal)
+            button.setBackgroundColor(color: CustomizationHelper.grayViewColor, forState: .highlighted)
         }
     }
 }

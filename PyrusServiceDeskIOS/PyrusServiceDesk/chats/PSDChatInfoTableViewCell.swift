@@ -190,8 +190,8 @@ class PSDChatInfoTableViewCell: UITableViewCell {
     }
 }
 private extension UIFont {
-    static let timeLabel = PSD_SystemFont(ofSize: 15.0)
-    static let messageLabel = PSD_SystemFont(ofSize: 17)
-    static let notificationButton = PSD_SystemFont(ofSize: 12.0)
-    static let lastMessageInfo = PSD_SystemFont(ofSize: 15.0)
+    static let timeLabel = CustomizationHelper.systemFont(ofSize: 15.0)
+    static let messageLabel = CustomizationHelper.systemFont(ofSize: 17)
+    static let notificationButton = CustomizationHelper.systemFont(ofSize: 12.0)
+    static let lastMessageInfo = CustomizationHelper.systemFont(ofSize: 15.0)
 }

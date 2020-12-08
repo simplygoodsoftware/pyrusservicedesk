@@ -2,7 +2,7 @@ import Foundation
 class PSDViewController: UIViewController {
     override var title: String? {
         didSet {
-            designNavigation()
+            recolor()
         }
     }
     private func customNavigationTitle() -> UIView? {
@@ -17,16 +17,18 @@ class PSDViewController: UIViewController {
         label.lineBreakMode = .byTruncatingTail
         return label
     }
+}
+extension PSDViewController: Recolorable {
     override func traitCollectionDidChange(_ previousTraitCollection: UITraitCollection?) {
         super.traitCollectionDidChange(previousTraitCollection)
         if #available(iOS 13.0, *) {
             guard self.traitCollection.hasDifferentColorAppearance(comparedTo: previousTraitCollection) else {
                 return
             }
-            designNavigation()
+            recolor()
         }
     }
-    private func designNavigation() {
+    @objc func recolor() {
         guard PyrusServiceDesk.mainController?.customization?.chatTitleColor != nil || PyrusServiceDesk.mainController?.customization?.customFontName != nil  else {
             return
         }
@@ -36,5 +38,5 @@ class PSDViewController: UIViewController {
     }
 }
 private extension UIFont {
-    static let titleFont = PSD_SystemBoldFont(ofSize: 18)
+    static let titleFont = CustomizationHelper.systemBoldFont(ofSize: 18)
 }

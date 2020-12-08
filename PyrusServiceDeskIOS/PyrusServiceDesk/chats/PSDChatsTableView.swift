@@ -234,5 +234,5 @@ class PSDChatsTableView: PSDTableView,UITableViewDelegate,UITableViewDataSource,
 
 }
 private extension UIFont {
-    static let newConversation = PSD_SystemFont(ofSize: 17.0)
+    static let newConversation = CustomizationHelper.systemFont(ofSize: 17.0)
 }

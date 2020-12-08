@@ -1,7 +1,7 @@
 
 import UIKit
 let MESSAGE_CORNER_RADIUS : CGFloat = 15.0
-class PSDMessageView: UIView{
+class PSDMessageView: PSDView{
     
     weak var delegate: PSDRetryActionDelegate?
     enum colorType {
@@ -14,25 +14,17 @@ class PSDMessageView: UIView{
             recolor()
         }
     }
-    private func recolor(){
+    override func recolor(){
+        super.recolor()
         switch (color) {
         case .brightColor:
-            self.backgroundColor = PSD_UserMassageBackgroundColor()
-            recolorWithTextColor(PSD_UserMassageTextColor())
+            self.backgroundColor = CustomizationHelper.userMassageBackgroundColor
+            recolorWithTextColor(CustomizationHelper.userMassageTextColor)
         case .defaultColor:
-            self.backgroundColor = PSD_SupportMassageBackgroundColor()
-            recolorWithTextColor(PSD_SupportMassageTextColor())
+            self.backgroundColor = CustomizationHelper.supportMassageBackgroundColor
+            recolorWithTextColor(CustomizationHelper.supportMassageTextColor)
         }
         
-    }
-    override func traitCollectionDidChange(_ previousTraitCollection: UITraitCollection?) {
-        super.traitCollectionDidChange(previousTraitCollection)
-        if #available(iOS 13.0, *) {
-            guard self.traitCollection.hasDifferentColorAppearance(comparedTo: previousTraitCollection) else {
-                return
-            }
-            recolor()
-        }
     }
     private func recolorWithTextColor(_ color: UIColor) {
         messageTextView.textColor = color
@@ -211,6 +203,6 @@ class PSDMessageView: UIView{
     }
 }
 private extension UIFont {
-    static let ratingLabel = PSD_SystemFont(ofSize: 40)
-    static let messageTextView = PSD_SystemFont(ofSize: 18.0)
+    static let ratingLabel = CustomizationHelper.systemFont(ofSize: 40)
+    static let messageTextView = CustomizationHelper.systemFont(ofSize: 18.0)
 }

@@ -1,5 +1,5 @@
 import Foundation
-var DETAIL_FONT = PSD_SystemFont(ofSize: 12.0)
+var DETAIL_FONT = CustomizationHelper.systemFont(ofSize: 12.0)
 var OFFSET_FOR_DETAIL :CGFloat = ("Time_Format".localizedPSD()+" ").size(withAttributes: [NSAttributedString.Key.font:DETAIL_FONT]).width+TO_BOARD_DISTANCE
 let TO_BOARD_DISTANCE : CGFloat = 7.0
 /**

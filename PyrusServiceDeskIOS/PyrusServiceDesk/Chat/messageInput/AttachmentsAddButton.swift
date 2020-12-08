@@ -51,6 +51,6 @@ class AttachmentsAddButton: UIButton {
     }
     private func recolor() {
         resetImage()
-        self.setBackgroundColor(color: PSD_lightGrayInputColor, forState: .highlighted)
+        self.setBackgroundColor(color: CustomizationHelper.lightGrayInputColor, forState: .highlighted)
     }
 }

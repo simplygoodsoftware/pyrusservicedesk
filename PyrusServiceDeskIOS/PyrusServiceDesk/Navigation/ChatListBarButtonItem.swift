@@ -206,5 +206,5 @@ class ChatListBarButtonItem: UIBarButtonItem {
     }
 }
 private extension UIFont {
-    static let messagesCountLabel = PSD_SystemFont(ofSize: 12.0)
+    static let messagesCountLabel = CustomizationHelper.systemFont(ofSize: 12.0)
 }

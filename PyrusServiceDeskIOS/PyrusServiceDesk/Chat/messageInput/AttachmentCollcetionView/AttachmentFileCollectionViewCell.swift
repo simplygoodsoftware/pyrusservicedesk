@@ -56,5 +56,5 @@ class AttachmentFileCollectionViewCell: AttachmentCollectionViewCell {
     }
 }
 private extension UIFont {
-    static let label = PSD_SystemFont(ofSize: 9)
+    static let label = CustomizationHelper.systemFont(ofSize: 9)
 }

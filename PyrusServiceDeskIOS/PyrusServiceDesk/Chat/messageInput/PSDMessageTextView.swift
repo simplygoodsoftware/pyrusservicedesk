@@ -100,5 +100,5 @@ class PSDMessageTextView: UITextView, UITextViewDelegate {
     }
 }
 private extension UIFont {
-    static let textFont = PSD_SystemFont(ofSize: 16.0)
+    static let textFont = CustomizationHelper.systemFont(ofSize: 16.0)
 }

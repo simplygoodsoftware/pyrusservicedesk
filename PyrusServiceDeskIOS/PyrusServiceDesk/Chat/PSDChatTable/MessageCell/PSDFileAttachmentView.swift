@@ -208,6 +208,6 @@ class PSDFileAttachmentView: PSDAttachmentView {
     }
 }
 private extension UIFont {
-    static let nameFont = PSD_SystemFont(ofSize: 16.0)
-    static let stateFont = PSD_SystemFont(ofSize: 14.0)
+    static let nameFont = CustomizationHelper.systemFont(ofSize: 16.0)
+    static let stateFont = CustomizationHelper.systemFont(ofSize: 14.0)
 }

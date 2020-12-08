@@ -52,14 +52,10 @@ class PSDChatViewController: PSDViewController {
         super.viewWillLayoutSubviews()
         resizeTable()
     }
-    override func traitCollectionDidChange(_ previousTraitCollection: UITraitCollection?) {
-        super.traitCollectionDidChange(previousTraitCollection)
-        if #available(iOS 13.0, *) {
-            guard self.traitCollection.hasDifferentColorAppearance(comparedTo: previousTraitCollection) else {
-                return
-            }
-            recolorTextInput(messageInputView)
-        }
+
+    override func recolor() {
+        super.recolor()
+        recolorTextInput(messageInputView)
     }
     func resizeTable(){
         var fr = self.view.bounds
@@ -196,9 +192,9 @@ class PSDChatViewController: PSDViewController {
         return table
     }()
     private func recolorTextInput(_ input: PSDMessageInputView) {
-        let style = PSD_KeyboardStyle()
+        let style = CustomizationHelper.keyboardStyle
         input.inputTextView.keyboardAppearance = style
-        let (backInputColor, textInputColor) = PSD_colorForInput()
+        let (backInputColor, textInputColor) = CustomizationHelper.colorsForInput
         input.backgroundView.backgroundColor = backInputColor
         input.inputTextView.textColor = textInputColor
         input.sendButton.setTitleColor(textInputColor.withAlphaComponent(PSDMessageSendButton.titleDisabledAlpha), for: .disabled)
@@ -219,7 +215,7 @@ class PSDChatViewController: PSDViewController {
             view.sizeToFit()
             navigationController?.navigationBar.layoutIfNeeded()
         } else {
-            title = PSD_ChatTitle()
+            title = CustomizationHelper.chatTitle
         }
         
         self.setItems()
@@ -388,5 +384,5 @@ extension PSDChatViewController: UIAdaptivePresentationControllerDelegate {
     }
 }
 private extension UIFont {
-    static let backButton = PSD_SystemFont(ofSize: 18)
+    static let backButton = CustomizationHelper.systemFont(ofSize: 18)
 }

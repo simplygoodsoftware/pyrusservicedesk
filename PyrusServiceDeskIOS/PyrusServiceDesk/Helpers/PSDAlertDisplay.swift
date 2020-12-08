@@ -60,7 +60,7 @@ func showMenuAlert(_ actions:[UIAlertAction], on viewController: UIViewControlle
             }
             popoverController.permittedArrowDirections = []
         }
-        prepareWithCustomizationAlert(alert)
+        CustomizationHelper.prepareWithCustomizationAlert(alert)
         viewControllerForPresent.present(alert , animated: true, completion: {() -> Void in
                 
         })

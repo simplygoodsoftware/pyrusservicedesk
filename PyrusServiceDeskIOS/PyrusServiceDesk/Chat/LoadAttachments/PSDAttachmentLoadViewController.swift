@@ -26,7 +26,7 @@ class PSDAttachmentLoadViewController: PSDViewController {
         self.attachmentName = attachment.name
         self.drawDownload()
         
-        let defaultName = PSD_ChatTitle()
+        let defaultName = CustomizationHelper.chatTitle
         self.title = attachmentName.count>0 ? attachmentName : defaultName
        
         if #available(iOS 11.0, *) {

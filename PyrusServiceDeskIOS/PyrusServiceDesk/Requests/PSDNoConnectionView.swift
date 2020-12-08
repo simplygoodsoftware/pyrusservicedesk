@@ -4,7 +4,7 @@ protocol PSDNoConnectionViewDelegate
     func retryPressed()
 }
 ///A view with "no connection" message and retry button. This view has same size as it's superview. When retry button pressed - pass to its delegate retryPressed()
-class PSDNoConnectionView: UIView {
+class PSDNoConnectionView: PSDView {
     weak var delegate: PSDNoConnectionViewDelegate?
     override init(frame: CGRect) {
         super.init(frame: frame)
@@ -85,22 +85,13 @@ class PSDNoConnectionView: UIView {
             constant: -PSDNoConnectionView.dist
             ).isActive = true
     }
-    override func traitCollectionDidChange(_ previousTraitCollection: UITraitCollection?) {
-        super.traitCollectionDidChange(previousTraitCollection)
-        if #available(iOS 13.0, *) {
-            guard self.traitCollection.hasDifferentColorAppearance(comparedTo: previousTraitCollection) else {
-                return
-            }
-            recolor()
-        }
-    }
-    private func recolor() {
-        self.backgroundColor = PSD_grayViewColor
-        noConnectionLabel.textColor = getTextColorForTable().withAlphaComponent(TEXT_ALPHA)
+    override func recolor() {
+        self.backgroundColor = CustomizationHelper.grayViewColor
+        noConnectionLabel.textColor = CustomizationHelper.textColorForTable.withAlphaComponent(TEXT_ALPHA)
     }
 }
 private extension UIFont {
-    static let noConnectionLabel = PSD_SystemFont(ofSize: 17.0)
-    static let retryButton = PSD_SystemFont(ofSize: 17.0)
+    static let noConnectionLabel = CustomizationHelper.systemFont(ofSize: 17.0)
+    static let retryButton = CustomizationHelper.systemFont(ofSize: 17.0)
 }
 private let TEXT_ALPHA: CGFloat = 0.6

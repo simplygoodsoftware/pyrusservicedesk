@@ -5,7 +5,7 @@ import UIKit
 class PSDNavigationController: UINavigationController, UIViewControllerTransitioningDelegate{
     override init(rootViewController: UIViewController) {
         super.init(rootViewController: rootViewController)
-        designNavigation()
+        recolor()
     }
     required init?(coder aDecoder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
@@ -19,27 +19,29 @@ class PSDNavigationController: UINavigationController, UIViewControllerTransitio
         
         return CoverHorizontalAnimator.init(transitionType: .dismissing)
     }
-    private func designNavigation() {
-        if let barStyle = PSD_BarStyle(for:self) {
-            navigationBar.barStyle = barStyle
+    override var preferredStatusBarStyle: UIStatusBarStyle {
+        guard let statusBarStyle = CustomizationHelper.statusBarStyle(for: self) else {
+            return super.preferredStatusBarStyle
         }
-        if let color = PyrusServiceDesk.mainController?.customization?.customBarColor {
-            navigationBar.barTintColor = color
-        }
+        return statusBarStyle
     }
+}
+extension PSDNavigationController: Recolorable {
     override func traitCollectionDidChange(_ previousTraitCollection: UITraitCollection?) {
         super.traitCollectionDidChange(previousTraitCollection)
         if #available(iOS 13.0, *) {
             guard self.traitCollection.hasDifferentColorAppearance(comparedTo: previousTraitCollection) else {
                 return
             }
-            designNavigation()
+            recolor()
         }
     }
-    override var preferredStatusBarStyle: UIStatusBarStyle {
-        guard  let statusBarStyle = PSD_StatusBarStyle(for: self) else {
-            return super.preferredStatusBarStyle
+    func recolor() {
+        if let barStyle = CustomizationHelper.barStyle {
+            navigationBar.barStyle = barStyle
         }
-        return statusBarStyle
+        if let color = PyrusServiceDesk.mainController?.customization?.customBarColor {
+            navigationBar.barTintColor = color
+        }
     }
 }

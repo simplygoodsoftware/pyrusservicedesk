@@ -9,19 +9,14 @@ class PSDSupportMessageCell: PSDChatMessageCell {
     private let nameLabel : UILabel =
     {
         let label = UILabel()
-        label.textColor = getTextColorForTable().withAlphaComponent(personNameAlpha)
+        label.textColor = CustomizationHelper.textColorForTable.withAlphaComponent(personNameAlpha)
         label.font = .nameLabel
         label.text = ""
         return label;
     }()
-    override func traitCollectionDidChange(_ previousTraitCollection: UITraitCollection?) {
-        super.traitCollectionDidChange(previousTraitCollection)
-        if #available(iOS 13.0, *) {
-            guard traitCollection.hasDifferentColorAppearance(comparedTo: previousTraitCollection) else {
-                return
-            }
-        }
-        nameLabel.textColor = getTextColorForTable().withAlphaComponent(PSDSupportMessageCell.personNameAlpha)
+    override func recolor() {
+        super.recolor()
+        nameLabel.textColor = CustomizationHelper.textColorForTable.withAlphaComponent(PSDSupportMessageCell.personNameAlpha)
     }
     ///Is avatarView need to be shown. (Shhow only next with last user's avatar)
     var needShowAvatar = false
@@ -140,5 +135,5 @@ class PSDSupportMessageCell: PSDChatMessageCell {
     }
 }
 private extension UIFont {
-    static let nameLabel = PSD_SystemFont(ofSize: 14)
+    static let nameLabel = CustomizationHelper.systemFont(ofSize: 14)
 }

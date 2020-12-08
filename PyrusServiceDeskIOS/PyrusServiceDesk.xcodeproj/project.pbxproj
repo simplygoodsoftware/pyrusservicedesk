@@ -270,6 +270,8 @@
 		4BCEB43B220C869A008B29B6 /* PSDMessageSend.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4BCEB43A220C869A008B29B6 /* PSDMessageSend.swift */; };
 		4BD29A092464B72B000CC420 /* OnStopCallback.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4BD29A082464B72B000CC420 /* OnStopCallback.swift */; };
 		4BD7DE68223680A600ED2557 /* UIButton+backgroundColor.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4BD7DE67223680A600ED2557 /* UIButton+backgroundColor.swift */; };
+		4BDDE42B257F70C800DF40B2 /* Recolorable.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4BDDE42A257F70C800DF40B2 /* Recolorable.swift */; };
+		4BDDE42F257F7DB900DF40B2 /* PSDVIew.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4BDDE42E257F7DB900DF40B2 /* PSDVIew.swift */; };
 		4BE3450E225F9684009E2135 /* PSDDownloadImage.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4BE3450D225F9684009E2135 /* PSDDownloadImage.swift */; };
 		7B1E8D58250665F800C1E5AC /* PSDInfoView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7B1E8D57250665F800C1E5AC /* PSDInfoView.swift */; };
 		7B743A8224D2E1A300B34904 /* assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 7B743A8124D2E1A300B34904 /* assets.xcassets */; };
@@ -557,6 +559,8 @@
 		4BCEB43A220C869A008B29B6 /* PSDMessageSend.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PSDMessageSend.swift; sourceTree = "<group>"; };
 		4BD29A082464B72B000CC420 /* OnStopCallback.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OnStopCallback.swift; sourceTree = "<group>"; };
 		4BD7DE67223680A600ED2557 /* UIButton+backgroundColor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "UIButton+backgroundColor.swift"; sourceTree = "<group>"; };
+		4BDDE42A257F70C800DF40B2 /* Recolorable.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Recolorable.swift; sourceTree = "<group>"; };
+		4BDDE42E257F7DB900DF40B2 /* PSDVIew.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PSDVIew.swift; sourceTree = "<group>"; };
 		4BE3450D225F9684009E2135 /* PSDDownloadImage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PSDDownloadImage.swift; sourceTree = "<group>"; };
 		7B1E8D57250665F800C1E5AC /* PSDInfoView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PSDInfoView.swift; sourceTree = "<group>"; };
 		7B743A8124D2E1A300B34904 /* assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = assets.xcassets; sourceTree = "<group>"; };
@@ -692,6 +696,8 @@
 				4B1CD38F230BE58000C06F71 /* applicationColors.swift */,
 				4B1C63E1256D3F3300902C8E /* CustomizationHelper.swift */,
 				4B1C63E5256D8D6500902C8E /* CustomFontHelper.swift */,
+				4BDDE42A257F70C800DF40B2 /* Recolorable.swift */,
+				4BDDE42E257F7DB900DF40B2 /* PSDVIew.swift */,
 			);
 			path = Helpers;
 			sourceTree = "<group>";
@@ -1458,6 +1464,7 @@
 				4B3F72E12498C01600318F1F /* PSDRateView.swift in Sources */,
 				4BAA214D222D202900B8BED7 /* UIView+constraints.swift in Sources */,
 				4B2E6511220DE20400E70A2F /* PSDUser.swift in Sources */,
+				4BDDE42B257F70C800DF40B2 /* Recolorable.swift in Sources */,
 				4B90E514221D55B800A18245 /* SupportUserImage.swift in Sources */,
 				4B9B0BB82266071100090DB5 /* PSDProgressDownloadView.swift in Sources */,
 				4B81B6FF2220275700EE1253 /* PSDMessageStateButton.swift in Sources */,
@@ -1492,6 +1499,7 @@
 				4B7EA886221EB0B3009C9B41 /* PSDAlertDisplay.swift in Sources */,
 				4BAA214F222D60D000B8BED7 /* Dictionary+asString.swift in Sources */,
 				4B1ED2AC228190BA00B98516 /* PSDMessagesStorage.swift in Sources */,
+				4BDDE42F257F7DB900DF40B2 /* PSDVIew.swift in Sources */,
 				4B9F781C228C2813003CC83D /* PSDTableView.swift in Sources */,
 				4B7F350621F8687000977C6D /* PyrusServiceDeskCreator.swift in Sources */,
 				4BB855A02208593200F7CCE5 /* URLCreator.swift in Sources */,

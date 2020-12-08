@@ -8,7 +8,7 @@ protocol PSDAttachmentLoadErrorViewDelegate: class {
     func openPressed()
 }
 ///A view with Error message and button. This view has same size as it's superview. Has two mode, see LoadErrorMode. When cancel button pressed - pass to its delegate cancelPressed(),When open button pressed - pass to its delegate openPressed().
-class PSDAttachmentLoadErrorView: UIView {
+class PSDAttachmentLoadErrorView: PSDView {
     weak var delegate: PSDAttachmentLoadErrorViewDelegate?
     override init(frame: CGRect) {
         super.init(frame: frame)
@@ -35,7 +35,7 @@ class PSDAttachmentLoadErrorView: UIView {
         didSet{
             if(attachmentExtension.count>0){
                 let label = UILabel.init()
-                label.textColor = getTextColorForTable().withAlphaComponent(TEXT_ALPHA)
+                label.textColor = CustomizationHelper.textColorForTable.withAlphaComponent(TEXT_ALPHA)
                 label.font = .attachmentExtension
                 label.text = attachmentExtension
                 label.sizeToFit()
@@ -73,20 +73,12 @@ class PSDAttachmentLoadErrorView: UIView {
         }
         return UIImage.PSDImage(name: "landscape_dark")
     }
-    override func traitCollectionDidChange(_ previousTraitCollection: UITraitCollection?) {
-        super.traitCollectionDidChange(previousTraitCollection)
-        if #available(iOS 13.0, *) {
-            guard self.traitCollection.hasDifferentColorAppearance(comparedTo: previousTraitCollection) else {
-                return
-            }
-            redraw()
-            recolor()
-        }
-    }
-    private func recolor() {
-        self.backgroundColor = PSD_grayViewColor
-        self.imageView.tintColor = getTextColorForTable().withAlphaComponent(TEXT_ALPHA)
-        errorMessage.textColor = getTextColorForTable().withAlphaComponent(TEXT_ALPHA)
+    override func recolor() {
+        super.recolor()
+        redraw()
+        self.backgroundColor = CustomizationHelper.grayViewColor
+        self.imageView.tintColor = CustomizationHelper.textColorForTable.withAlphaComponent(TEXT_ALPHA)
+        errorMessage.textColor = CustomizationHelper.textColorForTable.withAlphaComponent(TEXT_ALPHA)
     }
     private lazy var errorMessage : UILabel = {
         let label = UILabel.init()
@@ -174,8 +166,8 @@ class PSDAttachmentLoadErrorView: UIView {
     
 }
 private extension UIFont {
-    static let attachmentExtension = PSD_SystemFont(ofSize: IMAGE_VIEW_SIZE/2)
-    static let buttonFont = PSD_SystemFont(ofSize: 18.0)
+    static let attachmentExtension = CustomizationHelper.systemFont(ofSize: IMAGE_VIEW_SIZE/2)
+    static let buttonFont = CustomizationHelper.systemFont(ofSize: 18.0)
 }
 private let TEXT_ALPHA: CGFloat = 0.6
 private let IMAGE_VIEW_SIZE: CGFloat = 100.0

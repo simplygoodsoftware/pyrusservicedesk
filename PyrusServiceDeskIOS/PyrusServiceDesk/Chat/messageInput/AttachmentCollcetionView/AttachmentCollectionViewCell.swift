@@ -66,6 +66,9 @@ class AttachmentCollectionViewCell : UICollectionViewCell{
     @objc private func removeButtonPressed(){
         delegate?.removePressed(for: self)
     }
+    
+}
+extension AttachmentCollectionViewCell: Recolorable {
     override func traitCollectionDidChange(_ previousTraitCollection: UITraitCollection?) {
         super.traitCollectionDidChange(previousTraitCollection)
         if #available(iOS 13.0, *) {
@@ -75,10 +78,10 @@ class AttachmentCollectionViewCell : UICollectionViewCell{
             recolor()
         }
     }
-    private func recolor() {
-        removeButton.setTitleColor(PSD_TextColorForInput().withAlphaComponent(CROSS_ALPHA), for: .normal)
-        removeButtonBack.backgroundColor = PSD_grayInputColor.withAlphaComponent(BUTTON_ALPHA)
-        holderView.layer.borderColor = PSD_lightGrayInputColor.cgColor
+    func recolor() {
+        removeButton.setTitleColor(CustomizationHelper.textColorForInput.withAlphaComponent(CROSS_ALPHA), for: .normal)
+        removeButtonBack.backgroundColor = CustomizationHelper.grayInputColor.withAlphaComponent(BUTTON_ALPHA)
+        holderView.layer.borderColor = CustomizationHelper.lightGrayInputColor.cgColor
     }
 }
 let BUTTON_ALPHA: CGFloat = 0.3

@@ -32,6 +32,11 @@ class PSDMessageSendButton: UIButton {
     required init?(coder aDecoder: NSCoder) {
         super.init(coder: aDecoder)
     }
+}
+private extension UIFont {
+    static let title = CustomizationHelper.systemFont(ofSize: 16.0)
+}
+extension PSDMessageSendButton: Recolorable {
     override func traitCollectionDidChange(_ previousTraitCollection: UITraitCollection?) {
         super.traitCollectionDidChange(previousTraitCollection)
         if #available(iOS 13.0, *) {
@@ -41,11 +46,8 @@ class PSDMessageSendButton: UIButton {
             recolor()
         }
     }
-    private func recolor() {
-        self.setBackgroundColor(color: PSD_lightGrayInputColor, forState: .highlighted)
-        setTitleColor(PSD_TextColorForInput().withAlphaComponent(PSDMessageSendButton.titleDisabledAlpha), for: .disabled)
+    func recolor() {
+        self.setBackgroundColor(color: CustomizationHelper.lightGrayInputColor, forState: .highlighted)
+        setTitleColor(CustomizationHelper.textColorForInput.withAlphaComponent(PSDMessageSendButton.titleDisabledAlpha), for: .disabled)
     }
-}
-private extension UIFont {
-    static let title = PSD_SystemFont(ofSize: 16.0)
 }
