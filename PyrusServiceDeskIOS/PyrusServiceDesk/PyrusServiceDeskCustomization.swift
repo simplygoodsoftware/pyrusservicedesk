@@ -129,7 +129,7 @@ import Foundation
     
     ///The custom color of back button tint. Can be used only if customLeftBarButtonItem was not setted. Otherwise customLeftBarButtonItem has highest priority.
     ///The custom color of navigation bar.
-    @objc public func setBarButtonColor(_ color: UIColor?) {
+    @objc public func setToolbarButtonColor(_ color: UIColor?) {
         barButtonTintColor = color
     }
     private(set) var barButtonTintColor: UIColor?
