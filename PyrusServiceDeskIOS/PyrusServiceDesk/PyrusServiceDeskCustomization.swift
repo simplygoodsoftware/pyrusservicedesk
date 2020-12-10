@@ -111,7 +111,7 @@ import Foundation
     ///The custom style of navigation bar.
     ///- parameter barStyle The custom style of navigation bar for light appearance.
     ///- parameter darkBarStyle The custom style of navigation bar for dark appearance.
-    @objc public func setBarStyle(_ barStyle: UIBarStyle, _ darkBarStyle: UIBarStyle) {
+    @objc public func setToolbarStyle(_ barStyle: UIBarStyle, _ darkBarStyle: UIBarStyle) {
         self.barStyle = barStyle
         barStyleDark = darkBarStyle
     }
@@ -121,7 +121,7 @@ import Foundation
     private(set) var barStyleDark: UIBarStyle?
     
     ///The custom color of navigation bar.
-    @objc public func setBarColor(_ color: UIColor?) {
+    @objc public func setToolbarColor(_ color: UIColor?) {
         customBarColor = color
     }
     ///The custom color of navigation bar.
@@ -149,7 +149,7 @@ import Foundation
     var attachmentMenuTextColor: UIColor?
     
     ///The custom color for button for attachment choosing.
-    @objc public func setAttachmentButtonColor(_ color: UIColor?) {
+    @objc public func setAttachmentMenuButtonColor(_ color: UIColor?) {
         addAttachmentButtonColor = color
     }
     ///The custom color for button for attachment choosing.
