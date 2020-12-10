@@ -43,6 +43,9 @@ internal class ConfigUtils{
             PyrusServiceDesk.getConfiguration().mainFontPath?.let {
                 return Typeface.createFromAsset(context.applicationContext.assets, it)
             }
+            PyrusServiceDesk.getConfiguration().mainFontName?.let {
+                return Typeface.create(it, Typeface.NORMAL)
+            }
             return null
         }
 
@@ -56,6 +59,9 @@ internal class ConfigUtils{
             }
             PyrusServiceDesk.getConfiguration().mainFontPath?.let {
                 font = Typeface.createFromAsset(context.applicationContext.assets, it)
+            }
+            PyrusServiceDesk.getConfiguration().mainFontName?.let {
+                return Typeface.create(it, Typeface.BOLD)
             }
             if (font == null)
                 return null

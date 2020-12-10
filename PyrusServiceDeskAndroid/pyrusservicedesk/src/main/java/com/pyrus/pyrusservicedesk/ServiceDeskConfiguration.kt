@@ -22,6 +22,7 @@ class ServiceDeskConfiguration internal constructor() {
 
     internal var mainFontResId: Int? = null
     internal var mainFontPath: String? = null
+    internal var mainFontName: String? = null
     internal var userMessageTextBackgroundColor: Int? = null
     internal var userMessageTextColor: Int? = null
     internal var supportMessageTextBackgroundColor: Int? = null
@@ -48,6 +49,7 @@ class ServiceDeskConfiguration internal constructor() {
 
         private const val KEY_MAIN_FONT_RES_ID = "ServiceDeskConfiguration_KEY_MAIN_FONT_RES_ID"
         private const val KEY_MAIN_FONT_PATH = "ServiceDeskConfiguration_KEY_MAIN_FONT_PATH"
+        private const val KEY_MAIN_FONT_NAME = "ServiceDeskConfiguration_KEY_MAIN_FONT_NAME"
         private const val KEY_USER_MESSAGE_TEXT_BACKGROUND_COLOR = "ServiceDeskConfiguration_KEY_USER_MESSAGE_TEXT_BACKGROUND_COLOR"
         private const val KEY_USER_MESSAGE_TEXT_COLOR = "ServiceDeskConfiguration_KEY_USER_MESSAGE_TEXT_COLOR"
         private const val KEY_SUPPORT_MESSAGE_TEXT_BACKGROUND_COLOR = "ServiceDeskConfiguration_KEY_SUPPORT_MESSAGE_TEXT_BACKGROUND_COLOR"
@@ -76,6 +78,7 @@ class ServiceDeskConfiguration internal constructor() {
 
                     mainFontResId?.let { putInt(KEY_MAIN_FONT_RES_ID, it) }
                     putString(KEY_MAIN_FONT_PATH, mainFontPath)
+                    putString(KEY_MAIN_FONT_PATH, mainFontName)
                     userMessageTextBackgroundColor?.let { putInt(KEY_USER_MESSAGE_TEXT_BACKGROUND_COLOR, it) }
                     userMessageTextColor?.let { putInt(KEY_USER_MESSAGE_TEXT_COLOR, it) }
                     supportMessageTextBackgroundColor?.let { putInt(KEY_SUPPORT_MESSAGE_TEXT_BACKGROUND_COLOR, it) }
@@ -107,6 +110,7 @@ class ServiceDeskConfiguration internal constructor() {
 
                     mainFontResId = bundle.getNullableInt(KEY_MAIN_FONT_RES_ID)
                     mainFontPath = bundle.getString(KEY_MAIN_FONT_PATH)
+                    mainFontName = bundle.getString(KEY_MAIN_FONT_NAME)
                     userMessageTextBackgroundColor = bundle.getNullableInt(KEY_USER_MESSAGE_TEXT_BACKGROUND_COLOR)
                     userMessageTextColor = bundle.getNullableInt(KEY_USER_MESSAGE_TEXT_COLOR)
                     supportMessageTextBackgroundColor = bundle.getNullableInt(KEY_SUPPORT_MESSAGE_TEXT_BACKGROUND_COLOR)
@@ -211,8 +215,9 @@ class ServiceDeskConfiguration internal constructor() {
          *
          * @param fontResId Id of font family.
          */
-        fun setFontFamily(fontResId: Int): Builder {
+        fun setFont(fontResId: Int): Builder {
             configuration.mainFontPath = null
+            configuration.mainFontName = null
             configuration.mainFontResId = fontResId
             return this
         }
@@ -222,9 +227,22 @@ class ServiceDeskConfiguration internal constructor() {
          *
          * @param fontPath Path to the font.ttf from the assets folder.
          */
-        fun setFontFamily(fontPath: String): Builder {
+        fun setFontFromAssets(fontPath: String): Builder {
             configuration.mainFontResId = null
+            configuration.mainFontName = null
             configuration.mainFontPath = fontPath
+            return this
+        }
+
+        /**
+         * The custom font family.
+         *
+         * @param fontName Android font name.
+         */
+        fun setFont(fontName: String): Builder {
+            configuration.mainFontResId = null
+            configuration.mainFontPath = null
+            configuration.mainFontName = fontName
             return this
         }
 
