@@ -87,7 +87,7 @@ internal class AttachFileVariantsFragment: BottomSheetDialogFragment(), View.OnC
         gallery_variant.setTextColor(textColor)
         send_logs_variant.setTextColor(textColor)
 
-        ConfigUtils.getMainFontTypeface(requireContext())?.let {
+        ConfigUtils.getMainFontTypeface()?.let {
             photo_variant.typeface = it
             gallery_variant.typeface = it
             send_logs_variant.typeface = it

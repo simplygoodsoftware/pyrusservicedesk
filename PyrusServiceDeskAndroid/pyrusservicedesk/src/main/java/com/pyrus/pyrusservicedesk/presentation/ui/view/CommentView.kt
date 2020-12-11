@@ -210,7 +210,7 @@ internal class CommentView @JvmOverloads constructor(
 
         preview_passive_progress.indeterminateDrawable.setColorFilter(Color.BLACK, PorterDuff.Mode.SRC_IN)
 
-        ConfigUtils.getMainFontTypeface(context)?.let {
+        ConfigUtils.getMainFontTypeface()?.let {
             file_name.typeface = it
             file_size.typeface = it
             comment_text.typeface = it

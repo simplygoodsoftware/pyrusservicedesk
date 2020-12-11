@@ -160,7 +160,7 @@ internal class TicketActivity : ConnectionActivityBase<TicketViewModel>(TicketVi
         )
         ticket_toolbar.setBackgroundColor(toolbarColor)
 
-        ConfigUtils.getMainFontTypeface(this)?.let {
+        ConfigUtils.getMainFontTypeface()?.let {
             send.typeface = it
             input.typeface = it
             noConnectionTextView.typeface = it
@@ -173,7 +173,7 @@ internal class TicketActivity : ConnectionActivityBase<TicketViewModel>(TicketVi
         reconnectButton.setTextColor(ConfigUtils.getAccentColor(this))
         no_connection.setBackgroundColor(ConfigUtils.getNoConnectionBackgroundColor(this))
 
-        ConfigUtils.getMainBoldFontTypeface(this)?.let {
+        ConfigUtils.getMainBoldFontTypeface()?.let {
             ticket_toolbar.toolbar_title.typeface = it
         }
 

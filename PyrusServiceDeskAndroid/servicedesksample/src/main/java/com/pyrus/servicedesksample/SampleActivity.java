@@ -25,7 +25,6 @@ public class SampleActivity extends Activity implements NewReplySubscriber {
                                 .setThemeColor(Color.parseColor("#FF8300"))
                                 .setChatTitle("Sample Support")
                                 .setWelcomeMessage("How can I help you?")
-                                .setFont("sans-serif-light")
                                 .setAvatarForSupport(R.drawable.psd_download_file)
                                 .setChatMenuDelegate(new ChatMenuDelegate())
                                 .build())

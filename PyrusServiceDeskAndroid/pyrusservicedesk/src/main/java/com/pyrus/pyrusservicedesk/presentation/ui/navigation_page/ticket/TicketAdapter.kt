@@ -138,7 +138,7 @@ internal class TicketAdapter: AdapterBase<TicketEntry>() {
         private val authorName = itemView.findViewById<TextView>(R.id.author_name)
 
         init {
-            ConfigUtils.getMainFontTypeface(parent.context)?.let {
+            ConfigUtils.getMainFontTypeface()?.let {
                 creationTime.typeface = it
                 authorName.typeface = it
             }
@@ -205,7 +205,7 @@ internal class TicketAdapter: AdapterBase<TicketEntry>() {
         override val creationTime: TextView = itemView.findViewById(R.id.creation_time)
 
         init {
-            ConfigUtils.getMainFontTypeface(parent.context)?.let {
+            ConfigUtils.getMainFontTypeface()?.let {
                 creationTime.typeface = it
             }
         }
@@ -317,7 +317,7 @@ internal class TicketAdapter: AdapterBase<TicketEntry>() {
         private val authorName = itemView.findViewById<TextView>(R.id.author_name)
 
         init {
-            ConfigUtils.getMainFontTypeface(parent.context)?.let {
+            ConfigUtils.getMainFontTypeface()?.let {
                 authorName.typeface = it
             }
         }
@@ -337,7 +337,7 @@ internal class TicketAdapter: AdapterBase<TicketEntry>() {
         private val date = itemView.findViewById<TextView>(R.id.date)
 
         init {
-            ConfigUtils.getMainFontTypeface(parent.context)?.let {
+            ConfigUtils.getMainFontTypeface()?.let {
                 date.typeface = it
             }
             date.setTextColor(ConfigUtils.getSecondaryColorOnMainBackground(itemView.context))

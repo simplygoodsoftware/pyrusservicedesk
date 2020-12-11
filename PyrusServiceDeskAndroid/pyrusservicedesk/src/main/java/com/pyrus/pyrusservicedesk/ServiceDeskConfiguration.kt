@@ -20,8 +20,6 @@ class ServiceDeskConfiguration internal constructor() {
     internal var supportAvatar: Int? = null
     internal var mainMenuDelegate: MainMenuDelegate? = null
 
-    internal var mainFontResId: Int? = null
-    internal var mainFontPath: String? = null
     internal var mainFontName: String? = null
     internal var userMessageTextBackgroundColor: Int? = null
     internal var userMessageTextColor: Int? = null
@@ -47,8 +45,6 @@ class ServiceDeskConfiguration internal constructor() {
         private const val KEY_THEME_COLOR = "ServiceDeskConfiguration_KEY_THEME_COLOR"
         private const val KEY_SUPPORT_AVATAR = "ServiceDeskConfiguration_KEY_SUPPORT_AVATAR"
 
-        private const val KEY_MAIN_FONT_RES_ID = "ServiceDeskConfiguration_KEY_MAIN_FONT_RES_ID"
-        private const val KEY_MAIN_FONT_PATH = "ServiceDeskConfiguration_KEY_MAIN_FONT_PATH"
         private const val KEY_MAIN_FONT_NAME = "ServiceDeskConfiguration_KEY_MAIN_FONT_NAME"
         private const val KEY_USER_MESSAGE_TEXT_BACKGROUND_COLOR = "ServiceDeskConfiguration_KEY_USER_MESSAGE_TEXT_BACKGROUND_COLOR"
         private const val KEY_USER_MESSAGE_TEXT_COLOR = "ServiceDeskConfiguration_KEY_USER_MESSAGE_TEXT_COLOR"
@@ -76,9 +72,7 @@ class ServiceDeskConfiguration internal constructor() {
                     if (supportAvatar != null)
                         putInt(KEY_SUPPORT_AVATAR, supportAvatar!!)
 
-                    mainFontResId?.let { putInt(KEY_MAIN_FONT_RES_ID, it) }
-                    putString(KEY_MAIN_FONT_PATH, mainFontPath)
-                    putString(KEY_MAIN_FONT_PATH, mainFontName)
+                    putString(KEY_MAIN_FONT_NAME, mainFontName)
                     userMessageTextBackgroundColor?.let { putInt(KEY_USER_MESSAGE_TEXT_BACKGROUND_COLOR, it) }
                     userMessageTextColor?.let { putInt(KEY_USER_MESSAGE_TEXT_COLOR, it) }
                     supportMessageTextBackgroundColor?.let { putInt(KEY_SUPPORT_MESSAGE_TEXT_BACKGROUND_COLOR, it) }
@@ -108,8 +102,6 @@ class ServiceDeskConfiguration internal constructor() {
                     themeColor = bundle.getNullableInt(KEY_THEME_COLOR)
                     supportAvatar = bundle.getNullableInt(KEY_SUPPORT_AVATAR)
 
-                    mainFontResId = bundle.getNullableInt(KEY_MAIN_FONT_RES_ID)
-                    mainFontPath = bundle.getString(KEY_MAIN_FONT_PATH)
                     mainFontName = bundle.getString(KEY_MAIN_FONT_NAME)
                     userMessageTextBackgroundColor = bundle.getNullableInt(KEY_USER_MESSAGE_TEXT_BACKGROUND_COLOR)
                     userMessageTextColor = bundle.getNullableInt(KEY_USER_MESSAGE_TEXT_COLOR)
@@ -213,35 +205,9 @@ class ServiceDeskConfiguration internal constructor() {
         /**
          * The custom font family.
          *
-         * @param fontResId Id of font family.
-         */
-        fun setFont(fontResId: Int): Builder {
-            configuration.mainFontPath = null
-            configuration.mainFontName = null
-            configuration.mainFontResId = fontResId
-            return this
-        }
-
-        /**
-         * The custom font family.
-         *
-         * @param fontPath Path to the font.ttf from the assets folder.
-         */
-        fun setFontFromAssets(fontPath: String): Builder {
-            configuration.mainFontResId = null
-            configuration.mainFontName = null
-            configuration.mainFontPath = fontPath
-            return this
-        }
-
-        /**
-         * The custom font family.
-         *
          * @param fontName Android font name.
          */
         fun setFont(fontName: String): Builder {
-            configuration.mainFontResId = null
-            configuration.mainFontPath = null
             configuration.mainFontName = fontName
             return this
         }

@@ -17,12 +17,10 @@ import android.view.View.*
 import android.view.WindowManager
 import android.view.animation.LinearInterpolator
 import android.webkit.*
-import androidx.core.content.ContextCompat
 import com.pyrus.pyrusservicedesk.PyrusServiceDesk
 import com.pyrus.pyrusservicedesk.R
 import com.pyrus.pyrusservicedesk.presentation.ConnectionActivityBase
 import com.pyrus.pyrusservicedesk.sdk.data.intermediate.FileData
-import com.pyrus.pyrusservicedesk.utils.*
 import com.pyrus.pyrusservicedesk.utils.ConfigUtils
 import com.pyrus.pyrusservicedesk.utils.animateInfinite
 import com.pyrus.pyrusservicedesk.utils.getColorOnBackground
@@ -89,12 +87,12 @@ internal class FilePreviewActivity: ConnectionActivityBase<FilePreviewViewModel>
         file_preview_toolbar.setOnMenuItemClickListener { onMenuItemClicked(it) }
         file_extension.text = viewModel.getExtension()
 
-        ConfigUtils.getMainFontTypeface(this)?.let {
+        ConfigUtils.getMainFontTypeface()?.let {
             file_extension.typeface = it
             download_button.typeface = it
             no_preview_text.typeface = it
         }
-        ConfigUtils.getMainBoldFontTypeface(this)?.let {
+        ConfigUtils.getMainBoldFontTypeface()?.let {
             toolbar_title.typeface = it
         }
         val secondaryColor = getSecondaryColorOnBackground(ConfigUtils.getNoPreviewBackgroundColor(this))

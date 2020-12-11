@@ -9,7 +9,6 @@ import android.util.Base64
 import androidx.annotation.ColorInt
 import androidx.appcompat.content.res.AppCompatResources
 import androidx.core.content.ContextCompat.getColor
-import androidx.core.content.res.ResourcesCompat
 import com.pyrus.pyrusservicedesk.MainMenuDelegate
 import com.pyrus.pyrusservicedesk.PyrusServiceDesk
 import com.pyrus.pyrusservicedesk.R
@@ -36,13 +35,7 @@ internal class ConfigUtils{
         /**
          * Provides main font Typeface taking [PyrusServiceDesk.CONFIGURATION] into account.
          */
-        fun getMainFontTypeface(context: Context): Typeface? {
-            PyrusServiceDesk.getConfiguration().mainFontResId?.let {
-                return ResourcesCompat.getFont(context, it)
-            }
-            PyrusServiceDesk.getConfiguration().mainFontPath?.let {
-                return Typeface.createFromAsset(context.applicationContext.assets, it)
-            }
+        fun getMainFontTypeface(): Typeface? {
             PyrusServiceDesk.getConfiguration().mainFontName?.let {
                 return Typeface.create(it, Typeface.NORMAL)
             }
@@ -52,20 +45,11 @@ internal class ConfigUtils{
         /**
          * Provides main bold font Typeface taking [PyrusServiceDesk.CONFIGURATION] into account.
          */
-        fun getMainBoldFontTypeface(context: Context): Typeface? {
-            var font: Typeface? = null
-            PyrusServiceDesk.getConfiguration().mainFontResId?.let {
-                font = ResourcesCompat.getFont(context, it)
-            }
-            PyrusServiceDesk.getConfiguration().mainFontPath?.let {
-                font = Typeface.createFromAsset(context.applicationContext.assets, it)
-            }
+        fun getMainBoldFontTypeface(): Typeface? {
             PyrusServiceDesk.getConfiguration().mainFontName?.let {
                 return Typeface.create(it, Typeface.BOLD)
             }
-            if (font == null)
-                return null
-            return Typeface.create(font, Typeface.BOLD)
+            return null
         }
 
         /**
