@@ -54,7 +54,8 @@ internal abstract class ActivityBase: AppCompatActivity(), CoroutineScope {
         overridePendingTransition()
         val theme = when{
             PyrusServiceDesk.getConfiguration().isDialogTheme -> R.style.PyrusServiceDesk_Dialog
-            else -> R.style.PyrusServiceDesk
+            PyrusServiceDesk.getConfiguration().forceDarkAllowed -> R.style.PyrusServiceDesk
+            else -> R.style.BasePyrusServiceDesk
         }
         setTheme(theme)
         setContentView(layoutResId)

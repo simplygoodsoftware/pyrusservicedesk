@@ -14,55 +14,33 @@ class PSDMessageSender: NSObject {
     /**
      Pass message to server.
      - parameter messageToPass: PSDMessage need to be passed.
-     - parameter chatId: The id of chat as String where message is sending, if this is new chat, pass "" or DEFAULT_CHAT_ID
      - parameter delegate: PSDMessageSendDelegate object to receive completion or error.
-     - parameter completion: comptetion block needs to be performed ufter passing ends. Pass chatId if chat was new, if new pass chatId on success, or 0 if end with error
+     - parameter completion: comptetion block. 
      */
-    func pass(_ messageToPass:PSDMessage, to chatId:String, delegate:PSDMessageSendDelegate?, completion: @escaping(_ chatId : String?) -> Void)
-    {
-        if(PSDChatTableView.isNewChat(chatId)){
-            let task = PSDMessageSender.passFirst(messageToPass.text, messageToPass.attachments, messageToPass.clientId){
-                newChatId in
-                //If passFirst end with success send new ChatId to delegate
-                if newChatId.count>0{
-                    delegate?.change(newChatId)
-                    
-                    PSDMessageSender.showResult(of: messageToPass, success: true, delegate: delegate)
-                    
-                }
-                else{
-                    PSDMessageSender.showResult(of: messageToPass, success: false, delegate: delegate)
-                }
-                completion(newChatId)
-                PSDMessageSend.clearAndRemove(sender:self)
-            }
-            PSDMessageSend.taskArray.append(task)
-        }
-        else {
-            let task = PSDMessageSender.pass(messageToPass.text,messageToPass.attachments, rating: messageToPass.rating, clientId: messageToPass.clientId, to: chatId){
-                (commentId: String?, attachments: NSArray?) in
-                if commentId != nil &&  commentId?.count ?? 0>0{
-                    //put attachments id
-                    if let attachments = attachments{
-                        for (i,attachmentId) in attachments.enumerated(){
-                            if let attArr = messageToPass.attachments, attArr.count > 0{
-                                messageToPass.attachments?[i].serverIdentifer = "\(attachmentId)"
-                            }
+    func pass(_ messageToPass:PSDMessage, delegate:PSDMessageSendDelegate?, completion: @escaping() -> Void) {
+        let task = PSDMessageSender.pass(messageToPass.text, messageToPass.attachments, rating: messageToPass.rating, clientId: messageToPass.clientId) {
+            commentId, attachments in
+            if let commentId = commentId, commentId.count > 0 {
+                //put attachments id
+                if let attachments = attachments {
+                    for (i,attachmentId) in attachments.enumerated() {
+                        guard let attArr = messageToPass.attachments, attArr.count > 0 else {
+                            continue
                         }
+                        messageToPass.attachments?[i].serverIdentifer = "\(attachmentId)"
                     }
-                    messageToPass.messageId = commentId!
-                    PSDMessageSender.showResult(of: messageToPass, success: true, delegate: delegate)
                 }
-                else{
-                    PSDMessageSender.showResult(of: messageToPass, success: false, delegate: delegate)
-                }
-                completion(nil)
+                messageToPass.messageId = commentId
+                PSDMessageSender.showResult(of: messageToPass, success: true, delegate: delegate)
+            } else {
+                PSDMessageSender.showResult(of: messageToPass, success: false, delegate: delegate)
             }
-            PSDMessageSend.taskArray.append(task)
-            
-            //messages to exist chat no need to be in queue, so we can remove it
-            PSDMessageSend.clearAndRemove(sender:self)
+            completion()
         }
+        PSDMessageSend.taskArray.append(task)
+        
+        //messages to exist chat no need to be in queue, so we can remove it
+        PSDMessageSend.clearAndRemove(sender:self)
     }
     ///Show result
     ///
@@ -98,11 +76,10 @@ class PSDMessageSender: NSObject {
      - Parameters:
      - message: Message (text) that need to send.
      - attachments: PSDAttachment object that need to send.
-     - chatId: The id of chat where message is sent to.
      - completion: Completion of passing message.
      - commentId: Return id of new message as String. If Request end with error return nil or "0" if received bad data from server.
      */
-    private static func pass(_ message: String, _ attachments: [PSDAttachment]?, rating: Int?, clientId: String, to chatId: String, completion: @escaping (_ commentId: String?, _ attachments: NSArray?) -> Void) -> URLSessionDataTask {
+    private static func pass(_ message: String, _ attachments: [PSDAttachment]?, rating: Int?, clientId: String, completion: @escaping (_ commentId: String?, _ attachments: NSArray?) -> Void) -> URLSessionDataTask {
         //Generate additional parameters for request body
         var parameters = [String: Any]()
         parameters[commentParameter] = message
@@ -114,13 +91,7 @@ class PSDMessageSender: NSObject {
         if let attachments = attachments, attachments.count > 0{
             parameters[attachmentsParameter] = generateAttacments(attachments)
         }
-        var  request : URLRequest
-        if(PyrusServiceDesk.oneChat){
-            request = URLRequest.createRequest(type:.updateFeed, parameters: parameters)
-        }
-        else{
-            request = URLRequest.createRequest(with:chatId,type:.update, parameters: parameters)
-        }
+        let request = URLRequest.createRequest(type:.updateFeed, parameters: parameters)
         
         let task = PyrusServiceDesk.mainSession.dataTask(with: request) { data, response, error in
             guard let data = data, error == nil else {                                                 // check for fundamental networking error
@@ -155,54 +126,6 @@ class PSDMessageSender: NSObject {
             else{
                 completion(nil,nil)
             }
-        }
-        task.resume()
-        return task
-    }
-    /**
-     Pass message to sever. As complition create new chat.
-     - Parameters:
-     - message: Message (text) that need to send.
-     - attachments: PSDAttachment object that need to send.
-     - completion: Completion of passing message.
-     - ticketId: Return id of new chat as String. If Request end with error return "".
-     */
-    private static func passFirst(_ message:String, _ attachments:[PSDAttachment]?, _ clientId: String, completion: @escaping (_ ticketId: String) -> Void)->URLSessionDataTask
-    {
-        var parameters = [String: Any]()
-        parameters[userNameParameter] = PyrusServiceDesk.userName
-        parameters[ticketParameter] = generateTiket(message,attachments ?? [PSDAttachment](), clientId: clientId)
-        
-        let  request : URLRequest = URLRequest.createRequest(type:.createNew, parameters: parameters)
-        // print("passFirst request body \(String(describing: String(data: request.httpBody!, encoding: String.Encoding.utf8)))")
-        
-        let task = PyrusServiceDesk.mainSession.dataTask(with: request) { data, response, error in
-            guard let data = data, error == nil else {                                                 // check for fundamental networking error
-                completion("")
-                return
-            }
-            
-            if let httpStatus = response as? HTTPURLResponse, httpStatus.statusCode != 200 {           // check for http errors
-                DispatchQueue.main.async {
-                    if httpStatus.statusCode == 403 {
-                        if let onFailed = PyrusServiceDesk.onAuthorizationFailed {
-                            onFailed()
-                        } else {
-                            PyrusServiceDesk.mainController?.closeServiceDesk()
-                        }
-                    }
-                }
-
-                completion("")
-            }
-            
-            do{
-                let movieData = try JSONSerialization.jsonObject(with: data, options: .allowFragments) as? [String: Any] ?? [String: Any]()
-                completion(movieData.stringOfKey(ticketIdParameter))
-            }catch{
-                //print("passFirst error when convert to dictionary")
-            }
-            
         }
         task.resume()
         return task

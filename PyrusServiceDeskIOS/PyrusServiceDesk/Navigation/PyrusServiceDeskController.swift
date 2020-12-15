@@ -4,55 +4,26 @@ import UIKit
 ///The main service desk controller.
 class PyrusServiceDeskController: PSDNavigationController {
     let customization: ServiceDeskConfiguration?
-    init(_ customization: ServiceDeskConfiguration?) {
+    required init(_ customization: ServiceDeskConfiguration?) {
         self.customization = customization
         if(PyrusServiceDesk.clientId != nil){
-            if(PyrusServiceDesk.oneChat){
-                let pyrusChat : PSDChatViewController = PSDChatViewController(nibName:nil, bundle:nil)
-                super.init(rootViewController: pyrusChat)
-            }
-            else{
-                EventsLogger.logEvent(.emptyClientId)
-                let openedPyrusChats : PSDChatsViewController = PSDChatsViewController(nibName:nil, bundle:nil)
-                super.init(rootViewController: openedPyrusChats)
-            }
+            let pyrusChat = PSDChatViewController()
+            super.init(rootViewController: pyrusChat)
             self.transitioningDelegate  = self
             self.isModalInPopover = true
             self.modalPresentationStyle = .overFullScreen
         }else{
+            EventsLogger.logEvent(.emptyClientId)
             super.init(rootViewController: UIViewController())
         }
     }
     required init?(coder aDecoder: NSCoder) {
-        fatalError("PyrusServiceDeskController is not prepared to work in storyboard.")
+        fatalError("init(coder:) has not been implemented")
     }
-    func show(chatId:String?, on viewController: UIViewController, completion:(() -> Void)? = nil){
+    func show(on viewController: UIViewController, completion: (() -> Void)? = nil) {
         DispatchQueue.main.async  {
-            if self.viewControllers.first is PSDChatsViewController && chatId != nil && (chatId?.count ?? 0)>0 && chatId != DEFAULT_CHAT_ID{
-                (self.viewControllers.first as! PSDChatsViewController).customFirstChatId = chatId
-            }
-            if UIDevice.current.userInterfaceIdiom != .pad{
-                viewController.present(self, animated:  true, completion: completion)
-            }
-            else{
-                let fake : PSDFakeController = PSDFakeController.init()
-                fake.transitioningDelegate  = fake
-                fake.isModalInPopover = true
-                fake.modalPresentationStyle = .overFullScreen
-                self.add(to: fake, inContainer: fake.view)
-                viewController.present(fake, animated: true, completion: completion)
-            }
+            viewController.present(self, animated:  true, completion: completion)
         }
-    }
-    
-    public override func popViewController(animated: Bool) -> UIViewController? {
-        super.popViewController(animated: animated)
-        let vc = self.topViewController
-        if vc is PSDChatsViewController{
-            let table = (vc as! PSDChatsViewController).tableView
-            table.deselectRow()
-        }
-        return vc
     }
     override public func viewDidLoad() {
         super.viewDidLoad()
@@ -72,11 +43,6 @@ class PyrusServiceDeskController: PSDNavigationController {
             break
         }
     }
-    func passChanges(chats:[PSDChat]){
-        if self.viewControllers[0] is PSDChatsViewController{
-            (self.viewControllers[0] as! PSDChatsViewController).tableView.chats = chats
-        }
-    }
     ///Clean all saved data
     private func clean(){
         //clean main controller
@@ -91,39 +57,7 @@ class PyrusServiceDeskController: PSDNavigationController {
         PSDMessageSend.stopAll()
         PSDGetChat.remove()
     }
-    //
-    //MARK: IPad
-    //
-    ///Using only on iPadView. A chat on right side of container.
-    static var pyrusChat : PSDChatViewController? = nil
-    ///On iPadView list of chats is in left side, and chat in right side.
-    static var iPadView : Bool = false
-    /**
-     Using to create iPadView in container. On iPadView list of chats is in left side, and chat in right side.
-    - parameter viewController: viewController who become a parent.
-    - parameter inContainer: UIView where service desk is drawing.
-     */
-    func add(to viewController:UIViewController,inContainer:UIView){
-        PyrusServiceDeskController.iPadView = true
-        
-        viewController.addChild(self)
-        inContainer.addSubview(self.view)
-        self.didMove(toParent: viewController)
-        
-        if(!PyrusServiceDesk.oneChat){
-            inContainer.addSubview(separatorView)
-            
-            PyrusServiceDeskController.pyrusChat = PSDChatViewController(nibName:nil, bundle:nil)
-            let navigationChat :UINavigationController = UINavigationController.init(rootViewController: PyrusServiceDeskController.pyrusChat!)
-            viewController.addChild(navigationChat)
-            inContainer.addSubview(navigationChat.view)
-            navigationChat.didMove(toParent: viewController)
-            self.addConstraints(to: navigationChat.view, and: self.view, separator:separatorView, inContainer:inContainer)
-        }
-        else{
-            self.view.autoresizingMask = [.flexibleWidth,.flexibleHeight]
-        }
-    }
+    
     
     func updateTitleChat() {
         for vc in viewControllers{
@@ -154,6 +88,7 @@ class PyrusServiceDeskController: PSDNavigationController {
      Remove Pyrus Service Desk Controllers and clean saved data
  */
     func remove(animated: Bool = true){
+        PyrusLogger.shared.saveLocalLogToDisk()
         if self.parent == nil{
             self.dismiss(animated: animated, completion: {
                 PyrusServiceDesk.stopCallback?.onStop()
@@ -220,7 +155,7 @@ class PyrusServiceDeskController: PSDNavigationController {
         
     }
     
-    public static func PSDIsOpen()->Bool{
-        return (UIApplication.topViewController() is PSDChatViewController) || (UIApplication.topViewController() is PSDChatsViewController) || (UIApplication.topViewController() is PSDAttachmentLoadViewController)
+    public static func PSDIsOpen() -> Bool {
+        return PyrusServiceDesk.mainController != nil
     }
 }

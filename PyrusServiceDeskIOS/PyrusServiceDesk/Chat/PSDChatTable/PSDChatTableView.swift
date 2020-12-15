@@ -6,7 +6,6 @@ protocol PSDChatTableViewDelegate: NSObjectProtocol {
 
 class PSDChatTableView: PSDDetailTableView{
     ///The id of chat that is shown in table view
-    var chatId :String = ""
     weak var chatDelegate: PSDChatTableViewDelegate?
     private let footerHeight : CGFloat = 10.0
     private let BOTTOM_INFELICITY : CGFloat = 10.0
@@ -83,65 +82,53 @@ class PSDChatTableView: PSDDetailTableView{
         self.separatorColor = .clear
     }
     /**
-     If(!PSDChatTableView.isNewChat):
-     Reloads ChatTableView according to its chatId. If chatId == "" - this is a new chat, and sending a message will generate .createNew RequestType, and auto reloading not working. If chatId not empty String, it is considered that there is a chat with messages, auto reloading is on, "pullToRefresh" is on, and RequestType is .update.
- */
+     Reloads ChatTableView. Creates the new tableMatrix.
+     */
     func reloadChat()  {
         self.bottomPSDRefreshControl.insetHeight = 0.0
         self.removeRefreshControls()
         heightsMap = [IndexPath : CGFloat]()
-        if(!PSDChatTableView.isNewChat(chatId)){
-            tableMatrix = [[PSDRowMessage]()] // clean old chat
-            DispatchQueue.main.async {
-                self.reloadData()
-                self.isLoading = true
-            }
-            let chatIdWeak : String  = self.chatId
-            DispatchQueue.global().async {
-                [weak self] in
-                PSDGetChat.get(chatIdWeak, needShowError:true, delegate: self){
-                    (chat : PSDChat?) in
-                    DispatchQueue.main.async {
-                        if self != nil{
-                            self?.needShowRating = chat?.showRating ?? false
-                            self?.showRateIfNeed()
-                            
-                            
-                            self?.isLoading = false
-                            if((chat) != nil){
-                                self?.tableMatrix.create(from: chat!)
-                                
-                                self?.lastMessageFromServer = chat?.messages.last
-                                self?.setLastActivityDate()
-                                self?.reloadData()
-                                
-                                self?.removeNoConnectionView()
-                                
-                                UIView.setAnimationsEnabled(false)
-                                    self?.scrollsToBottom(animated: false)
-                                    self?.setNeedsLayout()
-                                    self?.layoutIfNeeded()
-                                    self?.scrollsToBottom(animated: false)
-                                    self?.layoutIfNeeded()
-                                    self?.scrollsToBottom(animated: false)
-                                UIView.setAnimationsEnabled(true)
-                                
-                            }
-                            
-                            self?.addRefreshControls()
-
-                        }
+        tableMatrix = [[PSDRowMessage]()] // clean old chat
+        DispatchQueue.main.async {
+            self.reloadData()
+            self.isLoading = true
+        }
+        DispatchQueue.global().async {
+            [weak self] in
+            PSDGetChat.get(needShowError: true, delegate: self) {
+                chat in
+                DispatchQueue.main.async {
+                    if chat != nil {
+                        UnreadMessageManager.removeLastComment()
                     }
+                    guard let self = self else {
+                        return
+                    }
+                    self.needShowRating = chat?.showRating ?? false
+                    self.showRateIfNeed()
+                    
+                    self.isLoading = false
+                    if let chat = chat {
+                        self.tableMatrix.create(from: chat)
+                        
+                        self.lastMessageFromServer = chat.messages.last
+                        self.setLastActivityDate()
+                        self.reloadData()
+                        
+                        self.removeNoConnectionView()
+                        
+                        UIView.setAnimationsEnabled(false)
+                            self.scrollsToBottom(animated: false)
+                            self.setNeedsLayout()
+                            self.layoutIfNeeded()
+                            self.scrollsToBottom(animated: false)
+                            self.layoutIfNeeded()
+                            self.scrollsToBottom(animated: false)
+                        UIView.setAnimationsEnabled(true)
+                    }
+                    self.addRefreshControls()
                 }
             }
-        }
-        else{
-            DispatchQueue.main.async {
-                self.removeNoConnectionView()
-                self.tableMatrix.defaultMatrix()
-                self.reloadData()
-            }
-            
         }
     }
     private func setLastActivityDate(){
@@ -186,25 +173,16 @@ class PSDChatTableView: PSDDetailTableView{
         self.customRefresh.endRefreshing()
         self.customRefresh.removeFromSuperview()
     }
-    ///Is chat is new. Chat is new if it has no id or its id is 0. One-chat mode has no id at all, so chat is always not new.
-    ///- parameter idChat: is id of chat that need to check.
-    static func isNewChat(_ idChat:String)->Bool{
-        if((idChat == "" || idChat == "0") && !PyrusServiceDesk.oneChat)
-        {
-            return true
-        }
-        return false
-    }
     ///update taable matrix
     ///- parameter needProgress: Determines whether the view should respond to updating(need to show error) 
     func updateChat(needProgress:Bool) {
-        let chatIdWeak : String  = self.chatId
 //        DispatchQueue.global().async {
 //            [weak self] in
-            PSDGetChat.get(chatIdWeak, needShowError:needProgress, delegate: nil){ [weak self]
+            PSDGetChat.get(needShowError: needProgress, delegate: nil) { [weak self]
                 (chat : PSDChat?) in
                 if let chat = chat{
                     DispatchQueue.main.async  {
+                        UnreadMessageManager.removeLastComment()
                         self?.needShowRating = chat.showRating
                         self?.showRateIfNeed()
                     }
@@ -556,7 +534,7 @@ extension PSDChatTableView : PSDChatMessageCellDelegate{
             }
             if let message = self.getMessage(at: indexPath){
                 message.state = .sending
-                PSDMessageSend.pass(message, to: self.chatId, delegate: self)
+                PSDMessageSend.pass(message, delegate: self)
             }
         }
         else{
@@ -607,9 +585,6 @@ extension PSDChatTableView : PSDSupportImageSetterDelegate{
 }
 //MARK: PSDMessageSendDelegate
 extension PSDChatTableView : PSDMessageSendDelegate{
-    func change(_ chatId:String){
-        self.chatId = chatId
-    }
     func remove(message:PSDMessage){
         let indexPathsAndRows = self.tableMatrix.findIndexPath(ofMessage: message.clientId).keys.sorted(by:{$0 > $1})
         var indexPaths = [IndexPath]()

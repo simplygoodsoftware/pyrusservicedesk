@@ -5,8 +5,7 @@ extension String {
      Returns date (timeZone is UTC) from string with expected format.
      - parameter format: Is expected format of date.
      */
-    func dateFromString(format:String)->Date
-    {
+    func dateFromString(format: String) -> Date {
         if self.count == 0{
             return Date()
         }

@@ -9,13 +9,10 @@ protocol PSDUpdateInfo{
 
 class PSDChatViewController: PSDViewController {
     
-    var chatId: String = ""
-    
     public func updateTitle(){
         designNavigation()
         self.messageInputView.setToDefault()
         self.tableView.isLoading = false
-        self.tableView.chatId = self.chatId
         self.tableView.reloadChat()
     }
     
@@ -94,50 +91,6 @@ class PSDChatViewController: PSDViewController {
             
         }
     }
-    ///Constraint to inputView width for iPad View.
-    private var iPadInputConstraintWidth : NSLayoutConstraint?
-    ///Constraint to inputView origin x for iPad View.
-    private var iPadInputConstraintX : NSLayoutConstraint?
-    override func viewDidLayoutSubviews() {
-        super.viewDidLayoutSubviews()
-        if(PyrusServiceDeskController.iPadView){
-            if(iPadInputConstraintWidth == nil)
-            {
-                iPadInputConstraintWidth = NSLayoutConstraint(
-                    item: self.messageInputView.backgroundView!,
-                    attribute: .width,
-                    relatedBy: .equal,
-                    toItem: nil,
-                    attribute: .notAnAttribute,
-                    multiplier: 1,
-                    constant:self.view.frame.size.width)
-                self.messageInputView.addConstraint(iPadInputConstraintWidth!)
-            }
-            else{
-                iPadInputConstraintWidth?.constant = self.view.frame.size.width
-            }
-            if(iPadInputConstraintX == nil)
-            {
-                let originPointX = self.view.convert(self.view.frame.origin, to: nil).x
-                iPadInputConstraintX = NSLayoutConstraint(
-                    item: self.messageInputView.backgroundView!,
-                    attribute: .leading,
-                    relatedBy: .equal,
-                    toItem: self.messageInputView,
-                    attribute: .leading,
-                    multiplier: 1,
-                    constant:originPointX  )
-                self.messageInputView.addConstraint(iPadInputConstraintX!)
-            }
-            else{
-                let originPointX = self.view.convert(self.view.frame.origin, to: nil).x
-                iPadInputConstraintX?.constant = originPointX
-            }
-            
-        }
-        
-        
-    }
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
         self.navigationController?.navigationBar.isHidden = false
@@ -176,7 +129,6 @@ class PSDChatViewController: PSDViewController {
     func openChat(){
         self.messageInputView.setToDefault()
         self.tableView.isLoading = true
-        self.tableView.chatId = self.chatId
         self.tableView.reloadChat()
         
     }
@@ -223,9 +175,6 @@ class PSDChatViewController: PSDViewController {
     ///Set navigation items
     private func setItems()
     {
-        if !PyrusServiceDeskController.iPadView && !PyrusServiceDesk.oneChat{
-            self.navigationItem.rightBarButtonItem = chatsItem
-        }
         if let rightBarButtonItem = PyrusServiceDesk.mainController?.customization?.customRightBarButtonItem {
             rightBarButtonItem.tintColor = PyrusServiceDesk.mainController?.customization?.themeColor ?? PyrusServiceDesk.mainController?.customization?.barButtonTintColor
             navigationItem.rightBarButtonItem = rightBarButtonItem
@@ -251,20 +200,10 @@ class PSDChatViewController: PSDViewController {
         button.tintColor = PyrusServiceDesk.mainController?.customization?.barButtonTintColor ?? UIColor.darkAppColor
         return button
     }()
-  
-    lazy private var chatsItem: ChatListBarButtonItem = {
-        let chatsListItem = ChatListBarButtonItem.init()
-        chatsListItem.target = self
-        chatsListItem.action = #selector(openChatsList)
-        return chatsListItem
-    }()
     private func customiseDesign(color:UIColor)
     {
         self.navigationItem.leftBarButtonItem?.tintColor = color
         self.navigationItem.rightBarButtonItem?.tintColor = color
-    }
-    @objc private func openChatsList(){
-        self.navigationController?.popViewController(animated: true)
     }
     @objc private func closeButtonAction(){
         if(PyrusServiceDesk.mainController != nil){
@@ -310,7 +249,7 @@ class PSDChatViewController: PSDViewController {
     }
     @objc private func updateTable(){
         startGettingInfo()
-        if !PSDChatTableView.isNewChat(self.tableView.chatId) && !hasNoConnection() && !PSDGetChat.isActive(){
+        if !hasNoConnection() && !PSDGetChat.isActive() {
            self.tableView.updateChat(needProgress:false)
         }
         
@@ -320,12 +259,12 @@ extension PSDChatViewController : PSDMessageInputViewDelegate{
     func send(_ message:String,_ attachments:[PSDAttachment]){
         let newMessage :PSDMessage = PSDObjectsCreator.createMessage(message, attachments: attachments)
         tableView.addNewRow(message: newMessage)
-        PSDMessageSend.pass(newMessage, to: self.tableView.chatId, delegate:self.tableView)
+        PSDMessageSend.pass(newMessage, delegate: self.tableView)
     }
     func sendRate(_ rateValue: Int) {
         let newMessage = PSDObjectsCreator.createMessage(rating: rateValue)
         tableView.addNewRow(message: newMessage)
-        PSDMessageSend.pass(newMessage, to: self.tableView.chatId, delegate:self.tableView)
+        PSDMessageSend.pass(newMessage, delegate: self.tableView)
     }
 }
 extension PSDChatViewController : PSDUpdateInfo{
@@ -362,9 +301,7 @@ extension PSDChatViewController : PSDUpdateInfo{
         timer = Timer.scheduledTimer(timeInterval: PSDChatViewController.getTimerInerval(), target: self, selector: #selector(updateTable), userInfo:nil , repeats: false)
     }
     func refreshChat(showFakeMessage: Int?) {
-        if !PSDChatTableView.isNewChat(self.tableView.chatId){
-            self.tableView.forceRefresh(showFakeMessage: showFakeMessage)
-        }
+        self.tableView.forceRefresh(showFakeMessage: showFakeMessage)
     }
 }
 extension PSDChatViewController: PSDChatTableViewDelegate {
