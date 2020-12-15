@@ -3,7 +3,9 @@ package com.pyrus.pyrusservicedesk.utils
 import android.content.Context
 import android.graphics.Color
 import androidx.annotation.ColorInt
+import androidx.annotation.IntRange
 import androidx.core.graphics.ColorUtils
+import kotlin.math.roundToInt
 
 internal const val COLOR_CHANNEL_MAX_VALUE = 255
 
@@ -32,10 +34,36 @@ internal fun adjustColorChannel(@ColorInt color: Int, channel: ColorChannel, mul
  */
 @ColorInt
 internal fun getTextColorOnBackground(context: Context, @ColorInt backgroundColor: Int): Int {
-    return with (Color.parseColor(String.format("#%06X", 0xFFFFFF and backgroundColor))){
+    return with (Color.parseColor(String.format("#%06X", 0xFFFFFF and backgroundColor))) {
         when {
-            ColorUtils.calculateLuminance(this) > 0.6 -> getColorByAttrId(context, android.R.attr.textColorPrimary)
+            ColorUtils.calculateLuminance(this) > 0.5 -> getColorByAttrId(context, android.R.attr.textColorPrimary)
             else -> getColorByAttrId(context, android.R.attr.textColorPrimaryInverse)
+        }
+    }
+}
+
+/**
+ * Calculates secondary color that is appropriate for the given [backgroundColor]
+ */
+@ColorInt
+internal fun getSecondaryColorOnBackground(@ColorInt backgroundColor: Int): Int {
+    return getColorOnBackground(backgroundColor, 60)
+}
+
+/**
+ * Calculates color that is appropriate for the given [backgroundColor]
+ */
+@ColorInt
+internal fun getColorOnBackground(
+    @ColorInt
+    backgroundColor: Int,
+    @IntRange(from = 0, to = 100)
+    alphaComponent: Int
+): Int {
+    return with (Color.parseColor(String.format("#%06X", 0xFFFFFF and backgroundColor))) {
+        when {
+            ColorUtils.calculateLuminance(this) > 0.5 -> ColorUtils.setAlphaComponent(Color.BLACK, ((255f / 100f) * alphaComponent).roundToInt())
+            else -> ColorUtils.setAlphaComponent(Color.WHITE, ((255f / 100f) * alphaComponent).roundToInt())
         }
     }
 }

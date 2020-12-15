@@ -5,9 +5,10 @@ import android.content.SharedPreferences
 import android.graphics.*
 import android.graphics.drawable.BitmapDrawable
 import android.graphics.drawable.Drawable
+import android.util.Base64
 import androidx.annotation.ColorInt
 import androidx.appcompat.content.res.AppCompatResources
-import android.util.Base64
+import androidx.core.content.ContextCompat.getColor
 import com.pyrus.pyrusservicedesk.MainMenuDelegate
 import com.pyrus.pyrusservicedesk.PyrusServiceDesk
 import com.pyrus.pyrusservicedesk.R
@@ -20,14 +21,226 @@ internal class ConfigUtils{
         private const val SCALE_SUPPORT_ICON_DEFAULT = .5f
 
         /**
-         * Provides accent color taking [PyrusServiceDesk.CONFIGURATION] into account
+         * Provides accent color taking [PyrusServiceDesk.CONFIGURATION] into account.
+         * @param context Activity context.
          */
         @ColorInt
-        fun getAccentColor(activity: Context): Int {
-            return when{
+        fun getAccentColor(context: Context): Int {
+            return when {
                 PyrusServiceDesk.getConfiguration().themeColor != null -> PyrusServiceDesk.getConfiguration().themeColor!!
-                else -> getColorByAttrId(activity, R.attr.colorAccent)
+                else -> getColorByAttrId(context, R.attr.colorAccent)
             }
+        }
+
+        /**
+         * Provides main font Typeface taking [PyrusServiceDesk.CONFIGURATION] into account.
+         */
+        fun getMainFontTypeface(): Typeface? {
+            PyrusServiceDesk.getConfiguration().mainFontName?.let {
+                return Typeface.create(it, Typeface.NORMAL)
+            }
+            return null
+        }
+
+        /**
+         * Provides main bold font Typeface taking [PyrusServiceDesk.CONFIGURATION] into account.
+         */
+        fun getMainBoldFontTypeface(): Typeface? {
+            PyrusServiceDesk.getConfiguration().mainFontName?.let {
+                return Typeface.create(it, Typeface.BOLD)
+            }
+            return null
+        }
+
+        /**
+         * Provides user message text background color taking [PyrusServiceDesk.CONFIGURATION] into account.
+         * @param context Activity context.
+         */
+        @ColorInt
+        fun getUserMessageTextBackgroundColor(context: Context): Int {
+            val colorRes = PyrusServiceDesk.getConfiguration().userMessageTextBackgroundColor
+                ?:                return getAccentColor(context)
+            return getColor(context.applicationContext, colorRes)
+        }
+
+        /**
+         * Provides user message text color taking [PyrusServiceDesk.CONFIGURATION] into account.
+         * @param context Activity context.
+         * @param backgroundColor Background color of text.
+         *
+         * If no custom text color is set, the color is calculated based on the brightness of the [backgroundColor].
+         * If the [backgroundColor] is bright, the text color will be dark, and vice versa, if the [backgroundColor] is light, the text will be light.
+         */
+        @ColorInt
+        fun getUserMessageTextColor(context: Context, @ColorInt backgroundColor: Int): Int {
+            val colorRes = PyrusServiceDesk.getConfiguration().userMessageTextColor
+                ?:                return getTextColorOnBackground(context, backgroundColor)
+            return getColor(context.applicationContext, colorRes)
+        }
+
+        /**
+         * Provides support message text background color taking [PyrusServiceDesk.CONFIGURATION] into account.
+         * @param context Activity context.
+         */
+        @ColorInt
+        fun getSupportMessageTextBackgroundColor(context: Context): Int {
+            val colorRes = PyrusServiceDesk.getConfiguration().supportMessageTextBackgroundColor
+                ?: return getColor(context, R.color.psd_comment_inbound_background)
+            return getColor(context.applicationContext, colorRes)
+        }
+
+        /**
+         * Provides support message text color taking [PyrusServiceDesk.CONFIGURATION] into account.
+         * @param context Activity context.
+         * @param backgroundColor Background color of text.
+         *
+         * If no custom text color is set, the color is calculated based on the brightness of the [backgroundColor].
+         * If the [backgroundColor] is bright, the text color will be dark, and vice versa, if the [backgroundColor] is light, the text will be light.
+         */
+        @ColorInt
+        fun getSupportMessageTextColor(context: Context, @ColorInt backgroundColor: Int): Int {
+            val colorRes = PyrusServiceDesk.getConfiguration().supportMessageTextColor
+                ?: return getTextColorOnBackground(context, backgroundColor)
+            return getColor(context.applicationContext, colorRes)
+        }
+
+        /**
+         * Provides chat title text color taking [PyrusServiceDesk.CONFIGURATION] into account.
+         * @param context Activity context.
+         */
+        @ColorInt
+        fun getChatTitleTextColor(context: Context): Int {
+            val colorRes = PyrusServiceDesk.getConfiguration().chatTitleTextColor
+                ?: return getTextColorOnBackground(context, getHeaderBackgroundColor(context))
+            return getColor(context.applicationContext, colorRes)
+        }
+
+        /**
+         * Provides header background color taking [PyrusServiceDesk.CONFIGURATION] into account.
+         * @param context Activity context.
+         */
+        @ColorInt
+        fun getHeaderBackgroundColor(context: Context): Int {
+            val colorRes = PyrusServiceDesk.getConfiguration().headerBackgroundColor
+                ?: return getColorByAttrId(context, R.attr.colorPrimary)
+            return getColor(context.applicationContext, colorRes)
+        }
+
+        /**
+         * Provides back button color taking [PyrusServiceDesk.CONFIGURATION] into account.
+         * @param context Activity context.
+         */
+        @ColorInt
+        fun getToolbarButtonColor(context: Context): Int {
+            val colorRes = PyrusServiceDesk.getConfiguration().backButtonColor
+                ?: return getTextColorOnBackground(context, getHeaderBackgroundColor(context))
+            return getColor(context.applicationContext, colorRes)
+        }
+
+        /**
+         * Provides main background color taking [PyrusServiceDesk.CONFIGURATION] into account.
+         * @param context Activity context.
+         */
+        @ColorInt
+        fun getMainBackgroundColor(context: Context): Int {
+            val colorRes = PyrusServiceDesk.getConfiguration().mainBackgroundColor
+                ?: return getColorByAttrId(context, R.attr.colorOnBackground)
+            return getColor(context.applicationContext, colorRes)
+        }
+
+        /**
+         * Provides no file preview background color taking [PyrusServiceDesk.CONFIGURATION] into account.
+         * @param context Activity context.
+         */
+        @ColorInt
+        fun getNoPreviewBackgroundColor(context: Context): Int {
+            val colorRes = PyrusServiceDesk.getConfiguration().mainBackgroundColor
+                ?: return getColor(context, R.color.psd_no_file_preview_background)
+            return getColor(context.applicationContext, colorRes)
+        }
+
+        /**
+         * Provides no connection background color taking [PyrusServiceDesk.CONFIGURATION] into account.
+         * @param context Activity context.
+         */
+        @ColorInt
+        fun getNoConnectionBackgroundColor(context: Context): Int {
+            val colorRes = PyrusServiceDesk.getConfiguration().mainBackgroundColor
+                ?: return getColor(context, R.color.psd_error_background)
+            return getColor(context.applicationContext, colorRes)
+        }
+
+        /**
+         * Provides file menu background color taking [PyrusServiceDesk.CONFIGURATION] into account.
+         * @param context Activity context.
+         */
+        @ColorInt
+        fun getFileMenuBackgroundColor(context: Context): Int {
+            val colorRes = PyrusServiceDesk.getConfiguration().fileMenuBackgroundColor
+                ?: return getColorByAttrId(context, R.attr.colorOnBackground)
+            return getColor(context.applicationContext, colorRes)
+        }
+
+        /**
+         * Provides file menu button color taking [PyrusServiceDesk.CONFIGURATION] into account.
+         * @param context Activity context.
+         */
+        @ColorInt
+        fun getFileMenuButtonColor(context: Context): Int {
+            val colorRes = PyrusServiceDesk.getConfiguration().fileMenuButtonColor
+                ?: return getAccentColor(context)
+            return getColor(context.applicationContext, colorRes)
+        }
+
+        /**
+         * Provides status bar color taking [PyrusServiceDesk.CONFIGURATION] into account.
+         * @param context Activity context.
+         */
+        @ColorInt
+        fun getStatusBarColor(context: Context): Int? {
+            val colorRes = PyrusServiceDesk.getConfiguration().statusBarColor ?: return null
+            return getColor(context.applicationContext, colorRes)
+
+        }
+
+        /**
+         * Provides file menu text color taking [PyrusServiceDesk.CONFIGURATION] into account.
+         * @param context Activity context.
+         */
+        @ColorInt
+        fun getFileMenuTextColor(context: Context): Int {
+            val colorRes = PyrusServiceDesk.getConfiguration().fileMenuTextColor
+                ?: return getTextColorOnBackground(context, getFileMenuBackgroundColor(context))
+            return getColor(context.applicationContext, colorRes)
+        }
+
+        /**
+         * Provides send button color taking [PyrusServiceDesk.CONFIGURATION] into account.
+         * @param context Activity context.
+         */
+        @ColorInt
+        fun getSendButtonColor(context: Context): Int {
+            val colorRes = PyrusServiceDesk.getConfiguration().sendButtonColor
+                ?: return getAccentColor(context)
+            return getColor(context.applicationContext, colorRes)
+        }
+
+        /**
+         * Provides secondary color on main background.
+         * @param context Activity context.
+         */
+        @ColorInt
+        fun getSecondaryColorOnMainBackground(context: Context): Int {
+            return getSecondaryColorOnBackground(getMainBackgroundColor(context))
+        }
+
+        /**
+         * Provides input hint text color.
+         * @param context Activity context.
+         */
+        @ColorInt
+        fun getInputTextColor(context: Context): Int {
+            return getTextColorOnBackground(context, getMainBackgroundColor(context))
         }
 
         /**
