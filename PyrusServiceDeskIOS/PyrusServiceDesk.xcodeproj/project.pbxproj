@@ -108,6 +108,8 @@
 		4B88C6F722145ACA00BDB304 /* PSDGetChats.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4B88C6F622145ACA00BDB304 /* PSDGetChats.swift */; };
 		4B88C6F9221467FF00BDB304 /* PSDChat.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4B88C6F8221467FF00BDB304 /* PSDChat.swift */; };
 		4B88C6FB221482AC00BDB304 /* Date+usefulFunc.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4B88C6FA221482AC00BDB304 /* Date+usefulFunc.swift */; };
+		4B8EE7C9255AAE0A0068B266 /* Data+gZip.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4B8EE7C8255AAE0A0068B266 /* Data+gZip.swift */; };
+		4B8EE7CD255AE4170068B266 /* LogsSendController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4B8EE7CC255AE4160068B266 /* LogsSendController.swift */; };
 		4B90E514221D55B800A18245 /* SupportUserImage.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4B90E513221D55B800A18245 /* SupportUserImage.swift */; };
 		4B90E517221DB21000A18245 /* PSDNoConnectionView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4B90E516221DB21000A18245 /* PSDNoConnectionView.swift */; };
 		4B92CB44224E007B002795FB /* PSDError.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4B92CB43224E007B002795FB /* PSDError.swift */; };
@@ -145,6 +147,8 @@
 		4BB1A301245B8D6000A817C1 /* file2.png in Resources */ = {isa = PBXBuildFile; fileRef = 4BB1A2FE245B8D6000A817C1 /* file2.png */; };
 		4BB1A302245B8D6000A817C1 /* file2@3x.png in Resources */ = {isa = PBXBuildFile; fileRef = 4BB1A2FF245B8D6000A817C1 /* file2@3x.png */; };
 		4BB68608221AAAC600E9EC07 /* Image+compress.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4BB68607221AAAC600E9EC07 /* Image+compress.swift */; };
+		4BB6CDC325597E4C004C680A /* PyrusLogger.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4BB6CDC225597E4C004C680A /* PyrusLogger.swift */; };
+		4BB6CDCA2559B242004C680A /* UIDevice + modelName.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4BB6CDC92559B242004C680A /* UIDevice + modelName.swift */; };
 		4BB7DADD225E1BC300F6D1F0 /* PSDImageAttachmentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4BB7DADC225E1BC300F6D1F0 /* PSDImageAttachmentView.swift */; };
 		4BB7DADF225E280800F6D1F0 /* PSDFileAttachmentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4BB7DADE225E280800F6D1F0 /* PSDFileAttachmentView.swift */; };
 		4BB855A02208593200F7CCE5 /* URLCreator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4BB8559F2208593200F7CCE5 /* URLCreator.swift */; };
@@ -291,6 +295,8 @@
 		4B88C6F622145ACA00BDB304 /* PSDGetChats.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PSDGetChats.swift; sourceTree = "<group>"; };
 		4B88C6F8221467FF00BDB304 /* PSDChat.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PSDChat.swift; sourceTree = "<group>"; };
 		4B88C6FA221482AC00BDB304 /* Date+usefulFunc.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Date+usefulFunc.swift"; sourceTree = "<group>"; };
+		4B8EE7C8255AAE0A0068B266 /* Data+gZip.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Data+gZip.swift"; sourceTree = "<group>"; };
+		4B8EE7CC255AE4160068B266 /* LogsSendController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LogsSendController.swift; sourceTree = "<group>"; };
 		4B90E513221D55B800A18245 /* SupportUserImage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SupportUserImage.swift; sourceTree = "<group>"; };
 		4B90E515221D7B5000A18245 /* en-US */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = "en-US"; path = "en-US.lproj/Localizable.strings"; sourceTree = "<group>"; };
 		4B90E516221DB21000A18245 /* PSDNoConnectionView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PSDNoConnectionView.swift; sourceTree = "<group>"; };
@@ -329,6 +335,8 @@
 		4BB1A2FE245B8D6000A817C1 /* file2.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = file2.png; sourceTree = "<group>"; };
 		4BB1A2FF245B8D6000A817C1 /* file2@3x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "file2@3x.png"; sourceTree = "<group>"; };
 		4BB68607221AAAC600E9EC07 /* Image+compress.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Image+compress.swift"; sourceTree = "<group>"; };
+		4BB6CDC225597E4C004C680A /* PyrusLogger.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PyrusLogger.swift; sourceTree = "<group>"; };
+		4BB6CDC92559B242004C680A /* UIDevice + modelName.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "UIDevice + modelName.swift"; sourceTree = "<group>"; };
 		4BB7DADC225E1BC300F6D1F0 /* PSDImageAttachmentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PSDImageAttachmentView.swift; sourceTree = "<group>"; };
 		4BB7DADE225E280800F6D1F0 /* PSDFileAttachmentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PSDFileAttachmentView.swift; sourceTree = "<group>"; };
 		4BB8559F2208593200F7CCE5 /* URLCreator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = URLCreator.swift; sourceTree = "<group>"; };
@@ -467,6 +475,7 @@
 				4B64B86E224382C8003116C3 /* String */,
 				4B90E518221DB42000A18245 /* for images */,
 				4B7EA885221EB0B3009C9B41 /* PSDAlertDisplay.swift */,
+				4BB6CDC92559B242004C680A /* UIDevice + modelName.swift */,
 				4B64B8732243D402003116C3 /* CharacterSet+urlEncode.swift */,
 				4B7F350B21F8949700977C6D /* customColor.swift */,
 				4B88C6FA221482AC00BDB304 /* Date+usefulFunc.swift */,
@@ -484,6 +493,7 @@
 				4B7AD4D5250A06C9004E9C48 /* PSDFilesManager.swift */,
 				4BB855AC22086C1900F7CCE5 /* Localizable.strings */,
 				4B1CD38F230BE58000C06F71 /* applicationColors.swift */,
+				4B8EE7C8255AAE0A0068B266 /* Data+gZip.swift */,
 			);
 			path = Helpers;
 			sourceTree = "<group>";
@@ -647,7 +657,7 @@
 				4B66011C223948CE00AA45E6 /* PyrusServiceDeskCustomization.swift */,
 				4B873BB3224B7EE600A96E93 /* PSDNewReplySubscriber.swift */,
 				4BD29A082464B72B000CC420 /* OnStopCallback.swift */,
-				4BBB9B05249D152900059A23 /* LogEvents.swift */,
+				4BB6CDC625597E56004C680A /* Logs */,
 				4B2F47AB224A22FF00E3B23A /* PSDChooser.swift */,
 				7B1E8D57250665F800C1E5AC /* PSDInfoView.swift */,
 				4B2E6513220DE3A500E70A2F /* PSDObjectsCreator */,
@@ -659,6 +669,7 @@
 				4BB855A1220865D500F7CCE5 /* chats */,
 				4B7F350F21F8A77900977C6D /* images */,
 				4B7F34D721F85E2A00977C6D /* Info.plist */,
+				4B8EE7CC255AE4160068B266 /* LogsSendController.swift */,
 				7B743A8124D2E1A300B34904 /* assets.xcassets */,
 			);
 			path = PyrusServiceDesk;
@@ -803,6 +814,15 @@
 				4BB1A2FF245B8D6000A817C1 /* file2@3x.png */,
 			);
 			path = File;
+			sourceTree = "<group>";
+		};
+		4BB6CDC625597E56004C680A /* Logs */ = {
+			isa = PBXGroup;
+			children = (
+				4BBB9B05249D152900059A23 /* LogEvents.swift */,
+				4BB6CDC225597E4C004C680A /* PyrusLogger.swift */,
+			);
+			path = Logs;
 			sourceTree = "<group>";
 		};
 		4BB8559E2208559200F7CCE5 /* Requests */ = {
@@ -1058,6 +1078,7 @@
 				4BCEB439220C5FF2008B29B6 /* PSDMessageTextView.swift in Sources */,
 				4BD29A092464B72B000CC420 /* OnStopCallback.swift in Sources */,
 				4BB855A3220865FE00F7CCE5 /* PSDChatsViewController.swift in Sources */,
+				4B8EE7CD255AE4170068B266 /* LogsSendController.swift in Sources */,
 				4B697CCC2254AF6B002B0A10 /* PSDSupportMessageCell.swift in Sources */,
 				4B3F72E12498C01600318F1F /* PSDRateView.swift in Sources */,
 				4BAA214D222D202900B8BED7 /* UIView+constraints.swift in Sources */,
@@ -1081,10 +1102,12 @@
 				4B9B0BBB2266344200090DB5 /* PSDAttachmentPreviewErrorView.swift in Sources */,
 				4BCEB433220C150C008B29B6 /* UIImage+color.swift in Sources */,
 				7B1E8D58250665F800C1E5AC /* PSDInfoView.swift in Sources */,
+				4BB6CDC325597E4C004C680A /* PyrusLogger.swift in Sources */,
 				4B7F350A21F8900A00977C6D /* PSDChatViewController.swift in Sources */,
 				4B6D4A39244E1B6A007C6082 /* AttachmentCollectionView.swift in Sources */,
 				4B659AFE223FA9E400D79489 /* PSDSpinerTableView.swift in Sources */,
 				4B82A49A2268B57B00654CE0 /* PSDAttachmentLoadViewControllerInterface.swift in Sources */,
+				4BB6CDCA2559B242004C680A /* UIDevice + modelName.swift in Sources */,
 				4B7918E22237A00D0071CA72 /* UITableView+keyboard.swift in Sources */,
 				4BB68608221AAAC600E9EC07 /* Image+compress.swift in Sources */,
 				4BAA8817221C57FD00B81B76 /* View+asImage.swift in Sources */,
@@ -1097,6 +1120,7 @@
 				4B9F781C228C2813003CC83D /* PSDTableView.swift in Sources */,
 				4B7F350621F8687000977C6D /* PyrusServiceDeskCreator.swift in Sources */,
 				4BB855A02208593200F7CCE5 /* URLCreator.swift in Sources */,
+				4B8EE7C9255AAE0A0068B266 /* Data+gZip.swift in Sources */,
 				4B062A832518A8D100B317D3 /* PSDPlaceholderMessage.swift in Sources */,
 				4B8216AB2201CAAF0011CDF3 /* PSDMessageView.swift in Sources */,
 				4B2E6515220DE4AE00E70A2F /* PSDObjectsCreator.swift in Sources */,

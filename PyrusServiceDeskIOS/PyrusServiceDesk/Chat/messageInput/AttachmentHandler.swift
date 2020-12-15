@@ -14,8 +14,9 @@ import MobileCoreServices
 class AttachmentHandler: NSObject,UIImagePickerControllerDelegate, UINavigationControllerDelegate,FileChooserDelegate{
     
     static let shared = AttachmentHandler()
+    private var logsSendController: LogsSendController?
     enum AttachmentType: String{
-        case camera, gallery, customChooser
+        case camera, gallery, customChooser, localLogs
     }
     //https://medium.com/@deepakrajmurugesan/swift-access-ios-camera-photo-library-video-and-file-from-user-device-6a7fd66beca2
     
@@ -27,6 +28,16 @@ class AttachmentHandler: NSObject,UIImagePickerControllerDelegate, UINavigationC
         if PyrusServiceDesk.fileChooserController != nil {
             actions.append(UIAlertAction(title: PyrusServiceDesk.fileChooserController?.label, style: .default, handler: { (action) -> Void in
                 self.authorizationStatus(type: .customChooser, viewController: viewController)
+            }))
+        }
+        if PyrusServiceDesk.loggingEnabled {
+            if logsSendController == nil {
+                logsSendController = LogsSendController()
+                logsSendController?.modalPresentationStyle = .overFullScreen
+                logsSendController?.chooserDelegate = self
+            }
+            actions.append(UIAlertAction(title: logsSendController?.label, style: .default, handler: { (action) -> Void in
+                self.authorizationStatus(type: .localLogs, viewController: viewController)
             }))
         }
         showMenuAlert(actions, on: viewController, sourseView: sourseView)
@@ -54,13 +65,13 @@ class AttachmentHandler: NSObject,UIImagePickerControllerDelegate, UINavigationC
             }
         }
     }
-    /// is window to present PyrusServiceDesk.fileChooserController over keyboard
+    /// is window to present PyrusServiceDesk.fileChooserController over keyboard (accessoryView)
     var _alertWindow : UIWindow? = nil
     func authorizationStatus(type: AttachmentType, viewController: UIViewController){
-        if(type == .camera){
+        switch type {
+        case .camera:
             self.cameraAutorizationStatus(type: .video, nextType: .audio, viewController: viewController)
-        }
-        else if(type == .gallery){
+        case .gallery:
             let status = PHPhotoLibrary.authorizationStatus()
             switch status{
             case .authorized, .limited:
@@ -76,19 +87,25 @@ class AttachmentHandler: NSObject,UIImagePickerControllerDelegate, UINavigationC
             default:
                 break
             }
-        }
-        else if(type == .customChooser)
-        {
-            PyrusServiceDesk.fileChooserController?.chooserDelegate = self
-            
-            guard let overlayFrame = viewController.view?.window?.frame else { return }
-            if(_alertWindow == nil){
-                _alertWindow = UIWindow(frame: overlayFrame)
-                _alertWindow!.rootViewController = UIViewController()
-                _alertWindow!.windowLevel = .alert
-                _alertWindow!.isHidden = false
-                _alertWindow!.rootViewController?.present(PyrusServiceDesk.fileChooserController!, animated: true, completion: nil)
+        case .customChooser, .localLogs:
+            if type == .customChooser {
+                PyrusServiceDesk.fileChooserController?.chooserDelegate = self
             }
+            let fileController = type == .customChooser ? PyrusServiceDesk.fileChooserController : logsSendController
+            guard let overlayFrame = viewController.view?.window?.frame else {
+                return
+            }
+            if _alertWindow == nil {
+                _alertWindow = UIWindow(frame: overlayFrame)
+            }
+            guard let _alertWindow = _alertWindow,
+                  let controller = fileController else {
+                return
+            }
+            _alertWindow.rootViewController = UIViewController()
+            _alertWindow.windowLevel = .alert
+            _alertWindow.isHidden = false
+            _alertWindow.rootViewController?.present(controller, animated: true, completion: nil)
         }
     }
     
@@ -96,11 +113,12 @@ class AttachmentHandler: NSObject,UIImagePickerControllerDelegate, UINavigationC
     //FileChooserDelegate
     func didEndWithSuccess(_ data: Data?, url: URL?) {
          DispatchQueue.main.async {
-            PyrusServiceDesk.fileChooserController?.dismiss(animated: true, completion: {
-                self._alertWindow!.isHidden = true
+            let viewController = self._alertWindow?.rootViewController?.presentedViewController
+            viewController?.dismiss(animated: true, completion: {
+                self._alertWindow?.isHidden = true
                 self._alertWindow = nil
-                if !self.needShowSizeError(for: data, on: nil) && url != nil{
-                    self.attachmentPickedBlock?(data!,url!)
+                if !self.needShowSizeError(for: data, on: nil), let data = data, let  url = url {
+                    self.attachmentPickedBlock?(data,url)
                 }
             })
         }
@@ -108,9 +126,10 @@ class AttachmentHandler: NSObject,UIImagePickerControllerDelegate, UINavigationC
     }
     func didEndWithCancel() {
          DispatchQueue.main.async {
-            PyrusServiceDesk.fileChooserController?.dismiss(animated: true, completion: {
+            let viewController = self._alertWindow?.rootViewController?.presentingViewController
+            viewController?.dismiss(animated: true, completion: {
                 self.closeBlock?(true)
-                self._alertWindow!.isHidden = true
+                self._alertWindow?.isHidden = true
                 self._alertWindow = nil
             })
         }
