@@ -7,7 +7,7 @@
     xmlns:app="http://schemas.android.com/apk/res-auto">
 
     <androidx.appcompat.widget.AppCompatImageView
-        android:id="@+id/imageView"
+        android:id="@+id/noConnectionImageView"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginStart="@dimen/psd_offset_small"
@@ -16,7 +16,7 @@
         android:layout_marginEnd="@dimen/psd_offset_small"
         android:layout_marginRight="@dimen/psd_offset_small"
         android:layout_marginBottom="@dimen/psd_offset_small"
-        app:layout_constraintBottom_toTopOf="@+id/textView"
+        app:layout_constraintBottom_toTopOf="@+id/noConnectionTextView"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.5"
         app:layout_constraintStart_toStartOf="parent"
@@ -26,25 +26,25 @@
         app:srcCompat="@drawable/psd_no_connection" />
 
     <androidx.appcompat.widget.AppCompatTextView
-        android:id="@+id/textView"
+        android:id="@+id/noConnectionTextView"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginTop="@dimen/psd_offset_default"
         android:layout_marginBottom="@dimen/psd_offset_small"
         android:text="@string/psd_no_connection"
-        app:layout_constraintBottom_toTopOf="@+id/reconnect"
-        app:layout_constraintEnd_toEndOf="@+id/imageView"
-        app:layout_constraintStart_toStartOf="@+id/imageView"
-        app:layout_constraintTop_toBottomOf="@+id/imageView" />
+        app:layout_constraintBottom_toTopOf="@+id/reconnectButton"
+        app:layout_constraintEnd_toEndOf="@+id/noConnectionImageView"
+        app:layout_constraintStart_toStartOf="@+id/noConnectionImageView"
+        app:layout_constraintTop_toBottomOf="@+id/noConnectionImageView" />
 
     <androidx.appcompat.widget.AppCompatButton
-        android:id="@+id/reconnect"
+        android:id="@+id/reconnectButton"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="@string/psd_retry"
         style="@style/Widget.AppCompat.Button.Borderless.Colored"
         app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="@+id/imageView"
-        app:layout_constraintStart_toStartOf="@+id/imageView"
-        app:layout_constraintTop_toBottomOf="@+id/textView" />
+        app:layout_constraintEnd_toEndOf="@+id/noConnectionImageView"
+        app:layout_constraintStart_toStartOf="@+id/noConnectionImageView"
+        app:layout_constraintTop_toBottomOf="@+id/noConnectionTextView" />
 </androidx.constraintlayout.widget.ConstraintLayout>

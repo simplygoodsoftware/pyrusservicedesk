@@ -55,9 +55,7 @@ class PSDChatsTableView: PSDTableView,UITableViewDelegate,UITableViewDataSource,
     }
     override init(frame: CGRect, style: UITableView.Style) {
         super.init(frame: frame, style: style)
-        if(!PyrusServiceDeskController.iPadView){
-            self.contentInset = UIEdgeInsets(top: self.contentInset.top, left: self.contentInset.left, bottom: newConversation.frame.size.height, right: self.contentInset.right)
-        }
+        self.contentInset = UIEdgeInsets(top: self.contentInset.top, left: self.contentInset.left, bottom: newConversation.frame.size.height, right: self.contentInset.right)
         
     }
     
@@ -66,13 +64,11 @@ class PSDChatsTableView: PSDTableView,UITableViewDelegate,UITableViewDataSource,
     }
     override func didMoveToSuperview() {
         super.didMoveToSuperview()
-        if(!PyrusServiceDeskController.iPadView){
-            if self.superview != nil {
-                self.superview?.addSubview(newConversation)
-            }
-            else{
-                newConversation.removeFromSuperview()
-            }
+        if self.superview != nil {
+            self.superview?.addSubview(newConversation)
+        }
+        else{
+            newConversation.removeFromSuperview()
         }
         if self.superview != nil{
             self.setupAutoLayout(view: self.superview!)

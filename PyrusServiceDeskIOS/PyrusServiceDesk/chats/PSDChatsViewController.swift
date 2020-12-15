@@ -17,19 +17,13 @@ class PSDChatsViewController: UIViewController,PSDChatsTableViewDelegate,CloseBu
             openLastChat()
         }
         
-        
-        if PyrusServiceDeskController.iPadView{
-            self.tableView.addKeyboardListeners()
-        }
         if #available(iOS 11.0, *) {
             self.tableView.contentInsetAdjustmentBehavior = .automatic
         } 
     }
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
-        if(!PyrusServiceDeskController.iPadView){
-            self.tableView.deselectRow()
-        }
+        self.tableView.deselectRow()
         startGettingInfo()
 
     }
@@ -54,17 +48,7 @@ class PSDChatsViewController: UIViewController,PSDChatsTableViewDelegate,CloseBu
     func setCloseButton()
     {
         let rightButtonItem : UIBarButtonItem
-        if(PyrusServiceDeskController.iPadView){
-            rightButtonItem = UIBarButtonItem.init(
-                image: nil,
-                style: .plain,
-                target: self,
-                action: #selector(openNewButtonAction))
-            rightButtonItem.title = "New_Conversation_Short".localizedPSD()
-        }
-        else{
-            rightButtonItem = CloseButtonItem.init(self)
-        }
+        rightButtonItem = CloseButtonItem.init(self)
         self.navigationItem.rightBarButtonItem = rightButtonItem
         self.navigationItem.rightBarButtonItem?.tintColor = .darkAppColor
         
@@ -77,31 +61,10 @@ class PSDChatsViewController: UIViewController,PSDChatsTableViewDelegate,CloseBu
         self.openChat("",animated: true)
     }
     func openLastChat(){
-        if(PyrusServiceDesk.chats.first?.chatId?.count ?? 0) > 0 && PyrusServiceDesk.chats.first?.chatId != DEFAULT_CHAT_ID{
-            let lastChat = PyrusServiceDesk.chats.first
-            if !(lastChat?.isRead ?? true) {
-                self.removeOneNewMessage()
-            }
-            self.openChat((lastChat?.chatId)!,animated:false)
-        }
-        else{
-            self.openChat("",animated:false)
-        }
-        
     }
     //PSDChatsTableViewDelegate
     func openChat(_ id : String, animated: Bool)
     {
-        //pyrusChat is on screan just pass value
-        if(PyrusServiceDeskController.pyrusChat != nil){
-            PyrusServiceDeskController.pyrusChat?.chatId = id
-            PyrusServiceDeskController.pyrusChat?.openChat()
-        }
-        else{//if it does not exist create and open
-            let pyrusChat = PSDChatViewController(nibName:nil, bundle:nil)
-            pyrusChat.chatId = id
-            self.navigationController?.pushViewController(pyrusChat, animated: animated)
-        }
     }
     ///Remove from new messages counter 1
     func removeOneNewMessage(){

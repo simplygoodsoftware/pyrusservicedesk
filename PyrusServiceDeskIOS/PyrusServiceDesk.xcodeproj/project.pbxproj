@@ -96,7 +96,6 @@
 		4B8216AB2201CAAF0011CDF3 /* PSDMessageView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4B8216AA2201CAAF0011CDF3 /* PSDMessageView.swift */; };
 		4B82A49A2268B57B00654CE0 /* PSDAttachmentLoadViewControllerInterface.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4B82A4992268B57B00654CE0 /* PSDAttachmentLoadViewControllerInterface.swift */; };
 		4B82A49C2268C29700654CE0 /* PSDCoverHorizontalAnimator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4B82A49B2268C29700654CE0 /* PSDCoverHorizontalAnimator.swift */; };
-		4B82A49E2268C3D000654CE0 /* PSDFakeController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4B82A49D2268C3D000654CE0 /* PSDFakeController.swift */; };
 		4B82A4A62268E17600654CE0 /* Back@3x.png in Resources */ = {isa = PBXBuildFile; fileRef = 4B82A4A32268E17600654CE0 /* Back@3x.png */; };
 		4B82A4A72268E17600654CE0 /* Back.png in Resources */ = {isa = PBXBuildFile; fileRef = 4B82A4A42268E17600654CE0 /* Back.png */; };
 		4B82A4A82268E17600654CE0 /* Back@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 4B82A4A52268E17600654CE0 /* Back@2x.png */; };
@@ -284,7 +283,6 @@
 		4B8216AA2201CAAF0011CDF3 /* PSDMessageView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PSDMessageView.swift; sourceTree = "<group>"; };
 		4B82A4992268B57B00654CE0 /* PSDAttachmentLoadViewControllerInterface.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PSDAttachmentLoadViewControllerInterface.swift; sourceTree = "<group>"; };
 		4B82A49B2268C29700654CE0 /* PSDCoverHorizontalAnimator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PSDCoverHorizontalAnimator.swift; sourceTree = "<group>"; };
-		4B82A49D2268C3D000654CE0 /* PSDFakeController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PSDFakeController.swift; sourceTree = "<group>"; };
 		4B82A4A32268E17600654CE0 /* Back@3x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "Back@3x.png"; sourceTree = "<group>"; };
 		4B82A4A42268E17600654CE0 /* Back.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = Back.png; sourceTree = "<group>"; };
 		4B82A4A52268E17600654CE0 /* Back@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "Back@2x.png"; sourceTree = "<group>"; };
@@ -451,7 +449,6 @@
 			isa = PBXGroup;
 			children = (
 				4BC210D722674A5600CFE255 /* PSDNavigationController.swift */,
-				4B82A49D2268C3D000654CE0 /* PSDFakeController.swift */,
 				4B82A49B2268C29700654CE0 /* PSDCoverHorizontalAnimator.swift */,
 				4B7F34F121F861FD00977C6D /* PyrusServiceDeskController.swift */,
 				4B7F351021F8A89600977C6D /* ChatListBarButtonItem.swift */,
@@ -1093,7 +1090,6 @@
 				4B90E517221DB21000A18245 /* PSDNoConnectionView.swift in Sources */,
 				4B2F47B8224A679A00E3B23A /* String + FilesSupportedExtension.swift in Sources */,
 				4B81B6FD221FF7FB00EE1253 /* UITableView + swipeForDetail.swift in Sources */,
-				4B82A49E2268C3D000654CE0 /* PSDFakeController.swift in Sources */,
 				4B7F350C21F8949700977C6D /* customColor.swift in Sources */,
 				4B7F13992215C494007C6358 /* Data+append.swift in Sources */,
 				4BAA8815221BDD8C00B81B76 /* PSDProgressView.swift in Sources */,
