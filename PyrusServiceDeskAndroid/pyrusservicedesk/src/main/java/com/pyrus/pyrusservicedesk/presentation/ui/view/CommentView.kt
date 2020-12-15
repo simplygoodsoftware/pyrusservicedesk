@@ -14,7 +14,6 @@ import android.net.Uri
 import androidx.annotation.ColorInt
 import androidx.exifinterface.media.ExifInterface
 import androidx.core.app.ActivityCompat
-import androidx.core.content.ContextCompat
 import androidx.core.text.util.LinkifyCompat
 import androidx.appcompat.content.res.AppCompatResources
 import androidx.appcompat.widget.AppCompatImageView
@@ -30,7 +29,6 @@ import android.widget.LinearLayout
 import com.pyrus.pyrusservicedesk.R
 import com.pyrus.pyrusservicedesk.presentation.ui.view.OutlineImageView.Companion.EDGE_RIGHT
 import com.pyrus.pyrusservicedesk.utils.*
-import com.pyrus.pyrusservicedesk.utils.ConfigUtils.Companion.getAccentColor
 import com.squareup.picasso.Picasso
 import com.squareup.picasso.Target
 import kotlinx.android.synthetic.main.psd_comment.view.*
@@ -178,6 +176,11 @@ internal class CommentView @JvmOverloads constructor(
                     (statusView.drawable as AnimationDrawable).start()
             }
 
+            if (value == Status.Processing)
+                statusView.setColorFilter(ConfigUtils.getSecondaryColorOnMainBackground(context), PorterDuff.Mode.SRC_ATOP)
+            else
+                statusView.colorFilter = null
+
             field = value
         }
 
@@ -207,16 +210,25 @@ internal class CommentView @JvmOverloads constructor(
 
         preview_passive_progress.indeterminateDrawable.setColorFilter(Color.BLACK, PorterDuff.Mode.SRC_IN)
 
+        ConfigUtils.getMainFontTypeface()?.let {
+            file_name.typeface = it
+            file_size.typeface = it
+            comment_text.typeface = it
+        }
         val backgroundColor = when (type){
-            TYPE_INBOUND -> ContextCompat.getColor(context, R.color.psd_comment_inbound_background)
-            else -> getAccentColor(context)
+            TYPE_INBOUND -> ConfigUtils.getSupportMessageTextBackgroundColor(context)
+            else -> ConfigUtils.getUserMessageTextBackgroundColor(context)
+
         }
         primaryColor = getTextColorOnBackground(context, backgroundColor)
         val secondaryColor = adjustColorChannel(primaryColor, ColorChannel.Alpha, SECONDARY_TEXT_COLOR_MULTIPLIER)
 
         background_parent.setCardBackgroundColor(backgroundColor)
 
-        comment_text.setTextColor(primaryColor)
+        comment_text.setTextColor(when(type) {
+            TYPE_INBOUND -> ConfigUtils.getSupportMessageTextColor(context, backgroundColor)
+            else -> ConfigUtils.getUserMessageTextColor(context, backgroundColor)
+        })
         comment_text.setLinkTextColor(primaryColor)
         file_name.setTextColor(primaryColor)
         file_size.setTextColor(secondaryColor)

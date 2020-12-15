@@ -43,8 +43,8 @@ internal abstract class ConnectionActivityBase<T: ConnectionViewModelBase>(viewM
         progressBar?.progressDrawable?.setColorFilter(
                 getColorByAttrId(this, R.attr.colorAccentSecondary),
                 PorterDuff.Mode.SRC_IN)
-        reconnect.setOnClickListener { reconnect() }
-        reconnect.setTextColor(ConfigUtils.getAccentColor(this))
+        reconnectButton.setOnClickListener { reconnect() }
+        reconnectButton.setTextColor(ConfigUtils.getAccentColor(this))
         refresher = findViewById(refresherViewId)
         refresher?.setOnRefreshListener { viewModel.loadData() }
     }

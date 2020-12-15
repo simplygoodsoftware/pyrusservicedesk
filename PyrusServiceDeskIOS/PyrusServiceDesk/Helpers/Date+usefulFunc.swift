@@ -67,6 +67,22 @@ extension Date {
         return formatter.string(from: self)
     }
     /**
+     Returns String with given format
+     */
+    func stringWithFormat(_ format: String) -> String {
+        let formatter = DateFormatter()
+        formatter.dateFormat = format
+        return formatter.string(from: self)
+    }
+    /**
+     Returns Date from string with given format
+     */
+    static func getDate(from string: String, with format: String) -> Date? {
+        let dateFormatter = DateFormatter()
+        dateFormatter.dateFormat = format
+        return dateFormatter.date(from: string)
+    }
+    /**
       Returns date's time as string.
  */
     func timeAsString()->String

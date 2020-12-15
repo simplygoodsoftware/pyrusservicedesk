@@ -14,7 +14,17 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        app:titleTextAppearance="@style/PsdToolbarTitleTextAppearance"/>
+        app:titleTextAppearance="@style/PsdToolbarTitleTextAppearance">
+
+        <TextView
+            android:id="@+id/toolbar_title"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textSize="@dimen/psd_toolbar_title_text_size"
+            android:textStyle="bold"
+            tools:text="Toolbar Title" />
+
+    </androidx.appcompat.widget.Toolbar>
 
     <WebView
         android:id="@+id/web_view"
@@ -52,7 +62,7 @@
             tools:text="ZIP" />
 
         <androidx.appcompat.widget.AppCompatButton
-            style="@style/Widget.AppCompat.Button.Colored"
+            style="@style/Widget.AppCompat.Button.Borderless.Colored"
             android:id="@+id/download_button"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"

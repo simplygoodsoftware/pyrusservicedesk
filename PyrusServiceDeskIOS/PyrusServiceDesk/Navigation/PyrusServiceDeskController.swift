@@ -18,17 +18,7 @@ class PyrusServiceDeskController: PSDNavigationController {
     }
     func show(on viewController: UIViewController, completion: (() -> Void)? = nil) {
         DispatchQueue.main.async  {
-            if UIDevice.current.userInterfaceIdiom != .pad{
-                viewController.present(self, animated:  true, completion: completion)
-            }
-            else{
-                let fake : PSDFakeController = PSDFakeController.init()
-                fake.transitioningDelegate  = fake
-                fake.isModalInPopover = true
-                fake.modalPresentationStyle = .overFullScreen
-                self.add(to: fake, inContainer: fake.view)
-                viewController.present(fake, animated: true, completion: completion)
-            }
+            viewController.present(self, animated:  true, completion: completion)
         }
     }
     ///Create PyrusServiceDeskController.
@@ -68,24 +58,7 @@ class PyrusServiceDeskController: PSDNavigationController {
         PSDMessageSend.stopAll()
         PSDGetChat.remove()
     }
-    //
-    //MARK: IPad
-    //
-    ///On iPadView list of chats is in left side, and chat in right side.
-    static var iPadView : Bool = false
-    /**
-     Using to create iPadView in container. On iPadView list of chats is in left side, and chat in right side.
-    - parameter viewController: viewController who become a parent.
-    - parameter inContainer: UIView where service desk is drawing.
-     */
-    func add(to viewController:UIViewController,inContainer:UIView){
-        PyrusServiceDeskController.iPadView = true
-        
-        viewController.addChild(self)
-        inContainer.addSubview(self.view)
-        self.didMove(toParent: viewController)
-        self.view.autoresizingMask = [.flexibleWidth,.flexibleHeight]
-    }
+    
     
     func updateTitleChat() {
         for vc in viewControllers{
@@ -116,6 +89,7 @@ class PyrusServiceDeskController: PSDNavigationController {
      Remove Pyrus Service Desk Controllers and clean saved data
  */
     func remove(animated: Bool = true){
+        PyrusLogger.shared.saveLocalLogToDisk()
         if self.parent == nil{
             self.dismiss(animated: animated, completion: {
                 PyrusServiceDesk.stopCallback?.onStop()
