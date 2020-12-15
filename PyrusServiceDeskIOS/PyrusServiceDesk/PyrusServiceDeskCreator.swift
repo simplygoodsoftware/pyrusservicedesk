@@ -32,10 +32,6 @@ import UIKit
     ///User's name needed for request. If don't set used Default_User_Name
     @objc static private(set) var userName : String = "Default_User_Name".localizedPSD()
     
-    
-    ///A flag indicates need to show chat list or show all conversations as one. Default is false - user can create new chat and see the list of old chats. If true - all new messages will be added to open chat.
-    @objc private(set) static var  oneChat:Bool = true
-    
       
     @objc static let mainSession : URLSession = {
         let config = URLSessionConfiguration.default
@@ -73,14 +69,14 @@ import UIKit
     ///- parameter viewController: ViewController that must present chat
     ///- parameter onStopCallback: OnStopCallback object or nil. OnStopCallback is object for getting a notification that PyrusServiceDesk was closed.
     @objc public static func start(on viewController:UIViewController, onStopCallback: OnStopCallback? = nil){
-        start(ticketId: nil, on: viewController, configuration: nil, completion: nil, onStopCallback: onStopCallback)
+        psdStart(on: viewController, configuration: nil, completion: nil, onStopCallback: onStopCallback)
     }
     ///Show chat
     ///- parameter viewController: ViewController that must present chat
     ///- parameter configuration: ServiceDeskConfiguration object or nil. ServiceDeskConfiguration is object that create custom interface: theme color,welcome message, image for support's avatar and chat title for navigation bar title. If nil, the default design will be used.
     ///- parameter onStopCallback: OnStopCallback object or nil. OnStopCallback is object for getting a notification that PyrusServiceDesk was closed.
     @objc public static func start(on viewController:UIViewController, configuration:ServiceDeskConfiguration?, onStopCallback: OnStopCallback? = nil){
-        start(ticketId: nil, on: viewController, configuration: configuration, completion: nil, onStopCallback: onStopCallback)
+        psdStart(on: viewController, configuration: configuration, completion: nil, onStopCallback: onStopCallback)
     }
     ///Show chat
     ///- parameter viewController: ViewController that must present chat
@@ -88,27 +84,20 @@ import UIKit
     ///- parameter completion: The block to execute after the presentation finishes. This block has no return value and takes no parameters. You may specify nil for this parameter.
     ///- parameter onStopCallback: OnStopCallback object or nil. OnStopCallback is object for getting a notification that PyrusServiceDesk was closed.
     @objc public static func start(on viewController:UIViewController, configuration:ServiceDeskConfiguration?, completion:(() -> Void)? = nil, onStopCallback: OnStopCallback? = nil){
-        start(ticketId: nil, on: viewController, configuration: configuration, completion: completion, onStopCallback: onStopCallback)
+        psdStart(on: viewController, configuration: configuration, completion: completion, onStopCallback: onStopCallback)
     }
-    ///Show chat
-    /// - parameter ticketId: The id of chat that need to be opened.
-    ///- parameter viewController: ViewController that must present chat
-    ///- parameter onStopCallback: OnStopCallback object or nil. OnStopCallback is object for getting a notification that PyrusServiceDesk was closed.
-    private static func start(ticketId: String?, on viewController:UIViewController, onStopCallback: OnStopCallback?){
-        start(ticketId: nil, on: viewController, configuration: nil, completion: nil, onStopCallback: onStopCallback)
-    }
-    ///Show chat
-    /// - parameter ticketId: The id of chat that need to be opened.
+    ///The private function to show chat, all public calles this one.
     ///- parameter viewController: ViewController that must present chat
     ///- parameter configuration: ServiceDeskConfiguration object or nil. ServiceDeskConfiguration is object that create custom interface: theme color,welcome message, image for support's avatar and chat title for navigation bar title. If nil, the default design will be used.
+    ///- parameter completion: The block to execute after the presentation finishes. This block has no return value and takes no parameters. You may specify nil for this parameter.
     ///- parameter onStopCallback: OnStopCallback object or nil. OnStopCallback is object for getting a notification that PyrusServiceDesk was closed.
-    private static func start(ticketId: String?, on viewController:UIViewController, configuration:ServiceDeskConfiguration?, completion:(() -> Void)?, onStopCallback: OnStopCallback?){
+    private static func psdStart(on viewController: UIViewController, configuration: ServiceDeskConfiguration?, completion:(() -> Void)?, onStopCallback: OnStopCallback?) {
         stopCallback = onStopCallback
         if !PyrusServiceDeskController.PSDIsOpen(){
             EventsLogger.logEvent(.openPSD)
             let psd : PyrusServiceDeskController = PyrusServiceDeskController.create()
             configuration?.buildCustomization()
-            psd.show(chatId: ticketId, on: viewController, completion: completion)
+            psd.show(on: viewController, completion: completion)
         }
         else{
             PyrusServiceDesk.mainController?.updateInfo()
@@ -123,7 +112,11 @@ import UIKit
     @objc public static var onAuthorizationFailed :  (() -> Void)?
     
     ///The subscriber for new messages from support.
-    weak static  private(set) var subscriber : NewReplySubscriber?
+    weak static private(set) var subscriber: NewReplySubscriber? {
+        didSet {
+            UnreadMessageManager.checkLastComment()
+        }
+    }
     ///The subscriber for PyrusSecviceDeskClose.
     weak static  private(set) var stopCallback : OnStopCallback?
     weak static private(set) var logEvent: LogEvents?
@@ -220,17 +213,6 @@ import UIKit
         }
         UIApplication.topViewController()?.present(viewController, animated: animated, completion: completion)
     }
-    /*
-    ///Init PyrusServiceDesk with new clientId.
-    ///- parameter clientId: clientId using for all requests. If clientId not setted PyrusServiceDesk Controller will not be created
-    ///- parameter userId: The id of user. Pass nil or empty string to automatic id generation.
-   /// - parameter oneChat: A flag indicates need to show chat list or show all conversations as one. Default is false - user can create new chat and see the list of old chats. If true - all new messages will be added to open chat.
-    @objc public init(_ clientId: String?, oneChat:Bool)  {
-        if clientId != nil && (clientId?.count ?? 0)>0 {
-            PyrusServiceDesk.clientId = clientId
-            PyrusServiceDesk.oneChat = oneChat
-        }
-    }*/
     private static let PSD_USER_ID_KEY = "PSDUserId"
      private static func createUserId(_ reset: Bool = false) {
         //block changes when chat is opened now
@@ -244,7 +226,6 @@ import UIKit
             userId = reset ? String.getUiqueString() : (UIDevice.current.identifierForVendor?.uuidString ?? String.getUiqueString())
             PSDMessagesStorage.pyrusUserDefaults()?.set(userId, forKey: PSD_USER_ID_KEY)
             PSDMessagesStorage.pyrusUserDefaults()?.set(false, forKey: PSD_WAS_CLOSE_INFO_KEY)
-            PSDMessagesStorage.pyrusUserDefaults()?.synchronize()
         }
         PyrusServiceDesk.userId = userId
     }
@@ -346,14 +327,8 @@ import UIKit
             timer=nil
         }
     }
-    ///Total value of new massages
-    static var newMessagesCount : Int = 0
-    ///Total value of chats
-    static var chatsCount : Int = 0
     ///All of chats
     static var chats : [PSDChat] = [PSDChat]()
-    ///Has some information been uploaded. False if the information has not yet been loaded and newMessagesCount and chatsCount can be equal to 0 because of this. Use to reflect the relevance of the information of newMessagesCount and chatsCount.
-    static var hasInfo : Bool = false
     ///The main view controller. nil - if chat was closed.
     weak static var mainController : PyrusServiceDeskController?
     ///Updates user info - get chats list from server.
@@ -362,17 +337,23 @@ import UIKit
             restartTimer()
             PyrusLogger.shared.logEvent("PSDGetChats did begin.")
             DispatchQueue.global().async {
-                PSDGetChats.get(delegate: nil, needShowError: !hasInfo){
+                PSDGetChats.get(){
                     (chats:[PSDChat]?) in
                     DispatchQueue.main.async {
                         PyrusLogger.shared.logEvent("PSDGetChats did end with chats count: \(chats?.count ?? 0).")
                         guard let chats = chats else{
                             return
                         }
-                        hasInfo = true
-                        if chats.count > 0{
-                            mainController?.passChanges(chats: chats)
+                        var unreadChats = 0
+                        var lasMessage: PSDMessage?
+                        for chat in chats {
+                            lasMessage = chat.messages.last
+                            guard !chat.isRead else{
+                                continue
+                            }
+                            unreadChats = unreadChats + 1
                         }
+                        UnreadMessageManager.refreshNewMessagesCount(unreadChats > 0, lastMessage: lasMessage)
                     }
                 }
             }
