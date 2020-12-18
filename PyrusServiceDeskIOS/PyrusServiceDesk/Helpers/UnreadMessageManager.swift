@@ -66,6 +66,7 @@ class UnreadMessageManager {
               storedUnreadMessage.isShown else {
             return
         }
+        EventsLogger.logEvent(.cancelUnread, additionalInfo: storedUnreadMessage.messageId)
         subscriber.onNewReply(hasUnreadComments: false, lastCommentText: nil, lastCommentAttachmentsCount: 0, lastCommentAttachments: nil, commetId: nil, utcTime: 0)
     }
     private static func getLastCommentFromServer() {
@@ -86,6 +87,7 @@ class UnreadMessageManager {
               !lastComment.isShown else {
             return
         }
+        EventsLogger.logEvent(.showUnread, additionalInfo: lastComment.messageId)
         subscriber.onNewReply(hasUnreadComments: true, lastCommentText: lastComment.text, lastCommentAttachmentsCount: lastComment.attchmentsCount, lastCommentAttachments: lastComment.attachments, commetId: lastComment.messageId, utcTime: lastComment.utcTime)
         lastComment.isShown = true
         updateLastComment(lastComment)

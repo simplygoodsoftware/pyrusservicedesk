@@ -67,6 +67,7 @@ struct PSDGetChat {
             }
             do{
                 let chatData = try JSONSerialization.jsonObject(with: data, options: .allowFragments) as? [String : Any] ?? [String: Any]()
+                EventsLogger.logEvent(.getTicketResponse, additionalInfo: "\(chatData)")
                 completion(generateChat(from:chatData))
             }catch{
                 //print("PSDGetChat error when convert to dictionary")
