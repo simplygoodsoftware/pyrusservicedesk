@@ -36,6 +36,7 @@ struct PSDGetChats {
             }
             do{
                 let chatsData = try JSONSerialization.jsonObject(with: data, options: .allowFragments) as? [String : Any] ?? [String: Any]()
+                EventsLogger.logEvent(.getTicketResponse, additionalInfo: "\(chatsData)")
                 let chatsArray = chatsData["tickets"] as? NSArray ?? NSArray()
                 let chats = generateChats(from:chatsArray)
                 PyrusServiceDesk.chats = chats
