@@ -13,7 +13,9 @@ extension URLRequest {
             fatalError("Bad type in this method")
         }
         let url = PyrusServiceDeskAPI.PSDURL(type:type)
-        return createRequest(url:url, json:parameters)
+        let request = createRequest(url:url, json:parameters)
+        EventsLogger.logEvent(.sendRequest, additionalInfo: "\(request)")
+        return request
     }
     
     /**
@@ -33,6 +35,7 @@ extension URLRequest {
     
     private static func createRequest(url: URL, json:[String: Any]) -> URLRequest {
         let body = addStaticKeys(to: json)
+        EventsLogger.logEvent(.createParams, additionalInfo: "URL: \(url) Body:\(body)")
         let jsonData = try? JSONSerialization.data(withJSONObject: body)
         var request = URLRequest(url: url, cachePolicy: .reloadIgnoringLocalCacheData, timeoutInterval: 60)
         request.httpMethod = "POST"

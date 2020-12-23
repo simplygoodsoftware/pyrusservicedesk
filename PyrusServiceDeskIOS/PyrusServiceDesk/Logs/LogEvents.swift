@@ -15,6 +15,9 @@ enum EventsLogger {
     case tooManyRefresh
     case cancelUnread
     case showUnread
+    case sendRequest
+    case createParams
+    
     static func logEvent(_ logCase: EventsLogger, additionalInfo: String? = nil){
         var logString = stringForEvent(logCase)
         if let additionalInfo = additionalInfo{
@@ -46,6 +49,10 @@ enum EventsLogger {
             return defaultString + "ShowUnread"
         case .cancelUnread:
             return defaultString + "Cancel Unread"
+        case .sendRequest:
+            return defaultString + "SendRequest"
+        case .createParams:
+            return defaultString + "CreateParams"
         }
     }
 }
