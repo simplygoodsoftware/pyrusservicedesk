@@ -214,6 +214,7 @@ class ServiceDeskConfiguration internal constructor() {
 
         /**
          * The custom background color for user's messages. The default value is equal to themeColor.
+         * For a dark theme use the color resource from the directory with the "night" qualifier.
          *
          * @param color Id of color resource.
          */
@@ -225,6 +226,7 @@ class ServiceDeskConfiguration internal constructor() {
         /**
          * The custom text color for user's messages.
          * If was not settled, this color will be automatically calculated according to message background view color.
+         * For a dark theme use the color resource from the directory with the "night" qualifier.
          *
          * @param color Id of color resource.
          */
@@ -235,6 +237,7 @@ class ServiceDeskConfiguration internal constructor() {
 
         /**
          * The custom background color for support's messages.
+         * For a dark theme use the color resource from the directory with the "night" qualifier.
          *
          * @param color Id of color resource.
          */
@@ -245,6 +248,7 @@ class ServiceDeskConfiguration internal constructor() {
 
         /**
          * The custom text color for support's messages. Default value is is UIColor.label.
+         * For a dark theme use the color resource from the directory with the "night" qualifier.
          *
          * @param color Id of color resource.
          */
@@ -255,6 +259,7 @@ class ServiceDeskConfiguration internal constructor() {
 
         /**
          * The custom color for toolbar title.
+         * For a dark theme use the color resource from the directory with the "night" qualifier.
          *
          * @param color Id of color resource.
          */
@@ -265,6 +270,7 @@ class ServiceDeskConfiguration internal constructor() {
 
         /**
          * The custom color of toolbar.
+         * For a dark theme use the color resource from the directory with the "night" qualifier.
          *
          * @param color Id of color resource.
          */
@@ -275,6 +281,7 @@ class ServiceDeskConfiguration internal constructor() {
 
         /**
          * The custom color of back button tint.
+         * For a dark theme use the color resource from the directory with the "night" qualifier.
          *
          * @param color Id of color resource.
          */
@@ -285,6 +292,7 @@ class ServiceDeskConfiguration internal constructor() {
 
         /**
          * The custom color for chat background.
+         * For a dark theme use the color resource from the directory with the "night" qualifier.
          *
          * @param color Id of color resource.
          */
@@ -295,6 +303,7 @@ class ServiceDeskConfiguration internal constructor() {
 
         /**
          * The custom background color for menu for attachment choosing.
+         * For a dark theme use the color resource from the directory with the "night" qualifier.
          *
          * @param color Id of color resource.
          */
@@ -305,6 +314,7 @@ class ServiceDeskConfiguration internal constructor() {
 
         /**
          * The custom text color for menu for attachment choosing.
+         * For a dark theme use the color resource from the directory with the "night" qualifier.
          *
          * @param color Id of color resource.
          */
@@ -315,6 +325,7 @@ class ServiceDeskConfiguration internal constructor() {
 
         /**
          * The custom color for button for attachment menu.
+         * For a dark theme use the color resource from the directory with the "night" qualifier.
          *
          * @param color Id of color resource.
          */
@@ -325,6 +336,7 @@ class ServiceDeskConfiguration internal constructor() {
 
         /**
          * The custom color for button for sending message.
+         * For a dark theme use the color resource from the directory with the "night" qualifier.
          *
          * @param color Id of color resource.
          */
@@ -336,6 +348,7 @@ class ServiceDeskConfiguration internal constructor() {
         /**
          * The custom color of the device’s status bar.
          * Color will be set if android api is greater than 21 (Lollipop 5.1).
+         * For a dark theme use the color resource from the directory with the "night" qualifier.
          *
          * @param color Id of color resource.
          */
