@@ -1,5 +1,5 @@
 // swift-interface-format-version: 1.0
-// swift-compiler-version: Apple Swift version 5.3.2 (swiftlang-1200.0.45 clang-1200.0.32.28)
+// swift-compiler-version: Apple Swift version 5.3.1 (swiftlang-1200.0.41 clang-1200.0.32.8)
 // swift-module-flags: -target x86_64-apple-ios9.0-simulator -enable-objc-interop -enable-library-evolution -swift-version 5 -enforce-exclusivity=checked -O -module-name PyrusServiceDesk
 import AVFoundation
 import AVKit
@@ -13,18 +13,66 @@ import Swift
 import UIKit
 import WebKit
 import zlib
-@_inheritsConvenienceInitializers @objc public class ServiceDeskConfiguration : ObjectiveC.NSObject {
-  @objc public var chatTitle: Swift.String?
-  @objc public var themeColor: UIKit.UIColor?
-  @objc public var welcomeMessage: Swift.String?
-  @objc public var avatarForSupport: UIKit.UIImage?
-  @objc public var userName: Swift.String?
-  @objc public var chatTitleView: UIKit.UIView?
-  @objc public var customRightBarButtonItem: UIKit.UIBarButtonItem?
-  @objc public var customLeftBarButtonItem: UIKit.UIBarButtonItem?
-  @objc public var infoView: PyrusServiceDesk.PSDInfoView?
+@_inheritsConvenienceInitializers @_hasMissingDesignatedInitializers @objc public class ServiceDeskConfiguration : ObjectiveC.NSObject {
+  public var welcomeMessage: Swift.String? {
+    get
+  }
+  @_inheritsConvenienceInitializers @objc(ServiceDeskConfigurationBuilder) public class Builder : ObjectiveC.NSObject {
+    @discardableResult
+    @objc public func setChatTitle(_ chatTitle: Swift.String?) -> PyrusServiceDesk.ServiceDeskConfiguration.Builder
+    @discardableResult
+    @objc public func setThemeColor(_ themeColor: UIKit.UIColor?) -> PyrusServiceDesk.ServiceDeskConfiguration.Builder
+    @discardableResult
+    @objc public func setWelcomeMessage(_ welcomeMessage: Swift.String?) -> PyrusServiceDesk.ServiceDeskConfiguration.Builder
+    @discardableResult
+    @objc public func setAvatarForSupport(_ avatarForSupport: UIKit.UIImage?) -> PyrusServiceDesk.ServiceDeskConfiguration.Builder
+    @discardableResult
+    @objc public func setUserName(_ userName: Swift.String?) -> PyrusServiceDesk.ServiceDeskConfiguration.Builder
+    @discardableResult
+    @objc public func setChatTitleView(_ chatTitleView: UIKit.UIView?) -> PyrusServiceDesk.ServiceDeskConfiguration.Builder
+    @discardableResult
+    @objc public func setCustomRightBarButtonItem(_ customRightBarButtonItem: UIKit.UIBarButtonItem?) -> PyrusServiceDesk.ServiceDeskConfiguration.Builder
+    @discardableResult
+    @objc public func setCustomLeftBarButtonItem(_ customLeftBarButtonItem: UIKit.UIBarButtonItem?) -> PyrusServiceDesk.ServiceDeskConfiguration.Builder
+    @discardableResult
+    @objc public func setInfoView(_ infoView: PyrusServiceDesk.PSDInfoView?) -> PyrusServiceDesk.ServiceDeskConfiguration.Builder
+    @discardableResult
+    @objc(setStatusBarStyle:darkBarStyle:) public func setStatusBarStyle(_ barStyle: UIKit.UIStatusBarStyle, _ darkBarStyle: UIKit.UIStatusBarStyle) -> PyrusServiceDesk.ServiceDeskConfiguration.Builder
+    @discardableResult
+    @objc(setKeyboardAppearance:darkKeyboardAppearance:) public func setKeyboardAppearance(_ keyboardAppearance: UIKit.UIKeyboardAppearance, _ darkKeyboardAppearance: UIKit.UIKeyboardAppearance) -> PyrusServiceDesk.ServiceDeskConfiguration.Builder
+    @discardableResult
+    @objc public func setKeyboardColor(_ color: UIKit.UIColor) -> PyrusServiceDesk.ServiceDeskConfiguration.Builder
+    @discardableResult
+    @objc public func setFontName(_ fontName: Swift.String?) -> PyrusServiceDesk.ServiceDeskConfiguration.Builder
+    @discardableResult
+    @objc public func setUserTextColor(_ color: UIKit.UIColor?) -> PyrusServiceDesk.ServiceDeskConfiguration.Builder
+    @discardableResult
+    @objc public func setUserMessageBackgroundColor(_ color: UIKit.UIColor?) -> PyrusServiceDesk.ServiceDeskConfiguration.Builder
+    @discardableResult
+    @objc public func setSupportTextColor(_ color: UIKit.UIColor?) -> PyrusServiceDesk.ServiceDeskConfiguration.Builder
+    @discardableResult
+    @objc public func setSupportMessageBackgroundColor(_ color: UIKit.UIColor?) -> PyrusServiceDesk.ServiceDeskConfiguration.Builder
+    @discardableResult
+    @objc public func setChatTitleColor(_ color: UIKit.UIColor?) -> PyrusServiceDesk.ServiceDeskConfiguration.Builder
+    @discardableResult
+    @objc(setToolbarStyle:darkBarStyle:) public func setToolbarStyle(_ barStyle: UIKit.UIBarStyle, _ darkBarStyle: UIKit.UIBarStyle) -> PyrusServiceDesk.ServiceDeskConfiguration.Builder
+    @discardableResult
+    @objc public func setToolbarColor(_ color: UIKit.UIColor?) -> PyrusServiceDesk.ServiceDeskConfiguration.Builder
+    @discardableResult
+    @objc public func setToolbarButtonColor(_ color: UIKit.UIColor?) -> PyrusServiceDesk.ServiceDeskConfiguration.Builder
+    @discardableResult
+    @objc public func setBackgroundColor(_ color: UIKit.UIColor?) -> PyrusServiceDesk.ServiceDeskConfiguration.Builder
+    @discardableResult
+    @objc public func setAttachmentMenuTextColor(_ color: UIKit.UIColor?) -> PyrusServiceDesk.ServiceDeskConfiguration.Builder
+    @discardableResult
+    @objc public func setAttachmentMenuButtonColor(_ color: UIKit.UIColor?) -> PyrusServiceDesk.ServiceDeskConfiguration.Builder
+    @discardableResult
+    @objc public func setSendButtonColor(_ color: UIKit.UIColor?) -> PyrusServiceDesk.ServiceDeskConfiguration.Builder
+    @objc public func build() -> PyrusServiceDesk.ServiceDeskConfiguration
+    @objc deinit
+    @objc override dynamic public init()
+  }
   @objc deinit
-  @objc override dynamic public init()
 }
 @objc public protocol OnStopCallback {
   @objc func onStop()
