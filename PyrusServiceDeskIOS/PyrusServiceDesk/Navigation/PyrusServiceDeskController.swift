@@ -6,36 +6,20 @@ class PyrusServiceDeskController: PSDNavigationController {
     let customization : PyrusServiceDeskCustomization = PyrusServiceDeskCustomization()
     convenience init() {
         if(PyrusServiceDesk.clientId != nil){
-            if(PyrusServiceDesk.oneChat){
-                let pyrusChat : PSDChatViewController = PSDChatViewController(nibName:nil, bundle:nil)
-                self.init(rootViewController: pyrusChat)
-            }
-            else{
-                EventsLogger.logEvent(.emptyClientId)
-                let openedPyrusChats : PSDChatsViewController = PSDChatsViewController(nibName:nil, bundle:nil)
-                self.init(rootViewController: openedPyrusChats)
-            }
+            let pyrusChat = PSDChatViewController()
+            self.init(rootViewController: pyrusChat)
             self.transitioningDelegate  = self
             self.isModalInPopover = true
             self.modalPresentationStyle = .overFullScreen
         }else{
-             self.init(rootViewController: UIViewController())
+            EventsLogger.logEvent(.emptyClientId)
+            self.init(rootViewController: UIViewController())
         }
     }
-    func show(chatId:String?, on viewController: UIViewController, completion:(() -> Void)? = nil){
+    func show(on viewController: UIViewController, completion: (() -> Void)? = nil) {
         DispatchQueue.main.async  {
             viewController.present(self, animated:  true, completion: completion)
         }
-    }
-    
-    public override func popViewController(animated: Bool) -> UIViewController? {
-        super.popViewController(animated: animated)
-        let vc = self.topViewController
-        if vc is PSDChatsViewController{
-            let table = (vc as! PSDChatsViewController).tableView
-            table.deselectRow()
-        }
-        return vc
     }
     ///Create PyrusServiceDeskController.
     class func create()->PyrusServiceDeskController
@@ -60,11 +44,6 @@ class PyrusServiceDeskController: PSDNavigationController {
             break
         }
     }
-    func passChanges(chats:[PSDChat]){
-        if self.viewControllers[0] is PSDChatsViewController{
-            (self.viewControllers[0] as! PSDChatsViewController).tableView.chats = chats
-        }
-    }
     ///Clean all saved data
     private func clean(){
         //clean main controller
@@ -79,6 +58,7 @@ class PyrusServiceDeskController: PSDNavigationController {
         PSDMessageSend.stopAll()
         PSDGetChat.remove()
     }
+    
     
     func updateTitleChat() {
         for vc in viewControllers{
@@ -109,6 +89,7 @@ class PyrusServiceDeskController: PSDNavigationController {
      Remove Pyrus Service Desk Controllers and clean saved data
  */
     func remove(animated: Bool = true){
+        PyrusLogger.shared.saveLocalLogToDisk()
         if self.parent == nil{
             self.dismiss(animated: animated, completion: {
                 PyrusServiceDesk.stopCallback?.onStop()
@@ -175,7 +156,7 @@ class PyrusServiceDeskController: PSDNavigationController {
         
     }
     
-    public static func PSDIsOpen()->Bool{
-        return (UIApplication.topViewController() is PSDChatViewController) || (UIApplication.topViewController() is PSDChatsViewController) || (UIApplication.topViewController() is PSDAttachmentLoadViewController)
+    public static func PSDIsOpen() -> Bool {
+        return PyrusServiceDesk.mainController != nil
     }
 }
