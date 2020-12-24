@@ -11,7 +11,7 @@ class CloseButtonItem: UIBarButtonItem {
                   target: delegate,
                   action: #selector(delegate.closeButtonAction))
         self.title = "Done".localizedPSD()
-        self.tintColor = UIColor.darkAppColor
+        self.tintColor = PyrusServiceDesk.mainController?.customization?.barButtonTintColor ?? UIColor.darkAppColor
         
     }
 }

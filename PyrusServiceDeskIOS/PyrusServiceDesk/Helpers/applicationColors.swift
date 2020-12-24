@@ -40,3 +40,20 @@ extension UIColor{
     }
     
 }
+extension UIColor {
+    static func themedColor(lightColor: UIColor, darkColor: UIColor) -> UIColor {
+        return {
+            if #available(iOS 13.0, *) {
+                return UIColor {
+                    switch $0.userInterfaceStyle {
+                    case .dark:
+                        return darkColor
+                    default:
+                        return lightColor
+                    }
+                }
+            }
+            return lightColor
+        }()
+    }
+}

@@ -11,16 +11,12 @@ class AttachmentsAddButton: UIButton {
         super.init(frame: frame)
         self.contentMode = .scaleAspectFit
         self.addTarget(self, action: #selector(buttonPressed), for: .touchUpInside)
-        resetImage()
-        self.setBackgroundColor(color: .psdLightGray, forState: .highlighted)
         self.layer.cornerRadius = BUTTONS_CORNER_RADIUS
-    }
-    override func traitCollectionDidChange(_ previousTraitCollection: UITraitCollection?) {
-        super.traitCollectionDidChange(previousTraitCollection)
-        resetImage()
+        recolor()
     }
     private func resetImage(){
-        let addImage : UIImage = UIImage.PSDImage(name: "Add").imageWith(color: UIColor.darkAppColor)!
+        let color = PyrusServiceDesk.mainController?.customization?.addAttachmentButtonColor ?? UIColor.darkAppColor
+        let addImage = UIImage.PSDImage(name: "Add")?.imageWith(color: color)
         self.setImage(addImage, for: .normal)
     }
     @objc func buttonPressed()
@@ -43,5 +39,18 @@ class AttachmentsAddButton: UIButton {
     }
     required init?(coder aDecoder: NSCoder) {
         super.init(coder: aDecoder)
+    }
+    override func traitCollectionDidChange(_ previousTraitCollection: UITraitCollection?) {
+        super.traitCollectionDidChange(previousTraitCollection)
+        if #available(iOS 13.0, *) {
+            guard self.traitCollection.hasDifferentColorAppearance(comparedTo: previousTraitCollection) else {
+                return
+            }
+            recolor()
+        }
+    }
+    private func recolor() {
+        resetImage()
+        self.setBackgroundColor(color: CustomizationHelper.lightGrayInputColor, forState: .highlighted)
     }
 }

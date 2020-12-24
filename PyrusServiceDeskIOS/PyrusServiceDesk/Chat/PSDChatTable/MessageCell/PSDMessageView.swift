@@ -1,7 +1,7 @@
 
 import UIKit
 let MESSAGE_CORNER_RADIUS : CGFloat = 15.0
-class PSDMessageView: UIView{
+class PSDMessageView: PSDView{
     
     weak var delegate: PSDRetryActionDelegate?
     enum colorType {
@@ -14,20 +14,22 @@ class PSDMessageView: UIView{
             recolor()
         }
     }
-    private func recolor(){
+    override func recolor(){
+        super.recolor()
         switch (color) {
         case .brightColor:
-            self.backgroundColor = UIColor.appColor
-            messageTextView.textColor = UIColor.appTextColor
-            attachmentView?.color = UIColor.appTextColor
-            separatorView.tintColor = UIColor.appTextColor.withAlphaComponent(PSDMessageView.separatorAlpha)
-            
+            self.backgroundColor = CustomizationHelper.userMassageBackgroundColor
+            recolorWithTextColor(CustomizationHelper.userMassageTextColor)
         case .defaultColor:
-            self.backgroundColor = UIColor.psdLightGray
-            messageTextView.textColor = .psdLabel
-            attachmentView?.color = .psdLabel
-            separatorView.tintColor = UIColor.psdLabel.withAlphaComponent(PSDMessageView.separatorAlpha)
+            self.backgroundColor = CustomizationHelper.supportMassageBackgroundColor
+            recolorWithTextColor(CustomizationHelper.supportMassageTextColor)
         }
+        
+    }
+    private func recolorWithTextColor(_ color: UIColor) {
+        messageTextView.textColor = color
+        attachmentView?.color = color
+        separatorView.tintColor = color.withAlphaComponent(PSDMessageView.separatorAlpha)
     }
     private static let distToBoard : CGFloat = 10.0
     private let PLACEHOLDER_HEIGHT: CGFloat = 20
@@ -60,8 +62,8 @@ class PSDMessageView: UIView{
             attachmentHolderView.addSubview(attachmentView)
             attachmentView.maxWidth = maxWidth
             attachmentView.draw(data, state: message.message.state)
-            attachmentView.color = self.color == .defaultColor ?  .psdLabel : UIColor.appTextColor
             attachmentView.addZeroConstraint([.leading,.trailing,.top,.bottom])
+            recolor()
         }
         if let rating = message.rating{
             ratingLabel.text = rateArray[rating]
@@ -90,8 +92,7 @@ class PSDMessageView: UIView{
     private(set) var messageTextView : PSDCopyTextView = {
         let text = PSDCopyTextView.init(frame: CGRect.zero)
         text.backgroundColor = .clear
-        text.font = UIFont.systemFont(ofSize: messageTextViewFontSize)
-        text.textColor = .psdLabel
+        text.font = .messageTextView
         text.isScrollEnabled = false
         text.isEditable = false
         let inset = UIEdgeInsets(top: PSDMessageView.distToBoard, left: PSDMessageView.distToBoard, bottom: PSDMessageView.distToBoard, right: PSDMessageView.distToBoard)
@@ -113,7 +114,7 @@ class PSDMessageView: UIView{
     }()
     private var ratingLabel: UILabel = {
         let label = UILabel()
-        label.font = UIFont.RATING_FONT
+        label.font = .ratingLabel
         return label
     }()
     private lazy var attachmentHolderView : UIView = {
@@ -123,10 +124,9 @@ class PSDMessageView: UIView{
     }()
     private lazy var separatorView : UIImageView = {
         let view = UIImageView()
-        let image = UIImage.PSDImage(name: "dotted_line").withRenderingMode(.alwaysTemplate)
+        let image = UIImage.PSDImage(name: "dotted_line")?.withRenderingMode(.alwaysTemplate)
         view.image = image
         view.contentMode = .scaleAspectFit
-        view.tintColor = UIColor.psdLabel.withAlphaComponent(PSDMessageView.separatorAlpha)
         return view
     }()
     var attachmentView : PSDAttachmentView?
@@ -203,5 +203,6 @@ class PSDMessageView: UIView{
     }
 }
 private extension UIFont {
-    static let RATING_FONT = UIFont.systemFont(ofSize: 40)
+    static let ratingLabel = CustomizationHelper.systemFont(ofSize: 40)
+    static let messageTextView = CustomizationHelper.systemFont(ofSize: 18.0)
 }

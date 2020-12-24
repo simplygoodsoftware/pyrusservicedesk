@@ -6,11 +6,11 @@ let DARKER_COLOR_AMOUNT : CGFloat = 0.75
 extension UIColor {
     ///The main application color - color for user messages.
     static var appColor: UIColor {
-        if PSD_CustomColor() != nil{
-            return PSD_CustomColor()!
+        guard let color = PyrusServiceDesk.mainController?.customization?.themeColor else {
+            let sharedApp = UIApplication.shared
+            return sharedApp.delegate?.window??.tintColor ?? defaultColor
         }
-        let sharedApp = UIApplication.shared
-        return sharedApp.delegate?.window??.tintColor ?? defaultColor
+        return color
     }
     ///The main application color - color for all buttons.
     static var darkAppColor : UIColor{
@@ -80,4 +80,7 @@ extension UIColor {
     static let defaultColor: UIColor = #colorLiteral(red: 0, green: 0.4784313725, blue: 1, alpha: 1)
     static var goldColor: UIColor = #colorLiteral(red: 0.9568627451, green: 0.7490196078, blue: 0.1882352941, alpha: 1)
     
+    static func getTextColor(for color: UIColor) -> UIColor {
+        return color.isDarkColor ? .white : .black
+    }
 }

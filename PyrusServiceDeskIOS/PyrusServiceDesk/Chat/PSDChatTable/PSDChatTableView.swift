@@ -26,12 +26,14 @@ class PSDChatTableView: PSDDetailTableView{
     private lazy var customRefresh: PSDRefreshControl = {
         let refreshControl = PSDRefreshControl.init(frame: self.bounds)
         refreshControl.position = .top
+        refreshControl.tintColor = CustomizationHelper.textColorForTable
         refreshControl.addTarget(self, action: #selector(refreshChat), for: .valueChanged)
         return refreshControl
     }()
     private lazy var bottomRefresh : PSDRefreshControl = {
         let refreshControl = PSDRefreshControl.init(frame: self.bounds)
         refreshControl.position = .bottom
+        refreshControl.tintColor = CustomizationHelper.textColorForTable
         refreshControl.addTarget(self, action: #selector(refreshChat), for: .valueChanged)
         return refreshControl
     }()
@@ -63,6 +65,11 @@ class PSDChatTableView: PSDDetailTableView{
             updateChat(needProgress: true)
             
         }
+    }
+    override func recolor() {
+        customRefresh.tintColor = CustomizationHelper.textColorForTable
+        bottomRefresh.tintColor = CustomizationHelper.textColorForTable
+        reloadData()
     }
     ///Setups needed properties to table view
     func setupTableView() {
@@ -443,8 +450,8 @@ extension PSDChatTableView : UITableViewDelegate,UITableViewDataSource{
         let view = UIView()
         view.frame = CGRect(x: 0, y: 0, width: self.frame.size.width, height: headerHeight)
         let dateLabel = UILabel()
-        dateLabel.textColor = .psdLabel
-        dateLabel.font = UIFont.systemFont(ofSize: 16.0)
+        dateLabel.textColor = CustomizationHelper.textColorForTable
+        dateLabel.font = .dateLabel
         var labelFrame = view.bounds
         labelFrame.size.width = labelFrame.size.width
         dateLabel.frame = labelFrame
@@ -689,4 +696,6 @@ extension PSDChatTableView : PSDMessageSendDelegate{
     }
     
 }
-
+private extension UIFont {
+    static let dateLabel = CustomizationHelper.systemFont(ofSize: 16.0)
+}

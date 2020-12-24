@@ -178,7 +178,6 @@ class PSDChatsTableView: PSDTableView,UITableViewDelegate,UITableViewDataSource,
     func tableView(_ tableView: UITableView, heightForFooterInSection section: Int) -> CGFloat {
         return 1.0
     }
-    private let newConversationFontSize : CGFloat = 17.0
     private let footerHeight: CGFloat = 50
     ///New conversation view with tapGestureRecognizer.
     lazy var newConversation: UIView = {
@@ -191,7 +190,7 @@ class PSDChatsTableView: PSDTableView,UITableViewDelegate,UITableViewDataSource,
         let label = UILabel()
         label.textColor = .darkAppColor
         label.text = "New_Conversation".localizedPSD()
-        label.font = UIFont.systemFont(ofSize: newConversationFontSize)
+        label.font = .newConversation
         label.numberOfLines = 0
         label.lineBreakMode = .byWordWrapping
         label.preferredMaxLayoutWidth = self.frame.size.width
@@ -229,4 +228,7 @@ class PSDChatsTableView: PSDTableView,UITableViewDelegate,UITableViewDataSource,
         return line
     }
 
+}
+private extension UIFont {
+    static let newConversation = CustomizationHelper.systemFont(ofSize: 17.0)
 }

@@ -3,28 +3,27 @@ import UIKit
 
 ///The main service desk controller.
 class PyrusServiceDeskController: PSDNavigationController {
-    let customization : PyrusServiceDeskCustomization = PyrusServiceDeskCustomization()
-    convenience init() {
+    let customization: ServiceDeskConfiguration?
+    required init(_ customization: ServiceDeskConfiguration?) {
+        self.customization = customization
         if(PyrusServiceDesk.clientId != nil){
             let pyrusChat = PSDChatViewController()
-            self.init(rootViewController: pyrusChat)
+            super.init(rootViewController: pyrusChat)
             self.transitioningDelegate  = self
             self.isModalInPopover = true
             self.modalPresentationStyle = .overFullScreen
         }else{
             EventsLogger.logEvent(.emptyClientId)
-            self.init(rootViewController: UIViewController())
+            super.init(rootViewController: UIViewController())
         }
+    }
+    required init?(coder aDecoder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
     }
     func show(on viewController: UIViewController, completion: (() -> Void)? = nil) {
         DispatchQueue.main.async  {
             viewController.present(self, animated:  true, completion: completion)
         }
-    }
-    ///Create PyrusServiceDeskController.
-    class func create()->PyrusServiceDeskController
-    {
-        return PyrusServiceDeskController.init()
     }
     override public func viewDidLoad() {
         super.viewDidLoad()

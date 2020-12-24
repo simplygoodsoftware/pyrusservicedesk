@@ -8,11 +8,11 @@ protocol PSDAttachmentLoadErrorViewDelegate: class {
     func openPressed()
 }
 ///A view with Error message and button. This view has same size as it's superview. Has two mode, see LoadErrorMode. When cancel button pressed - pass to its delegate cancelPressed(),When open button pressed - pass to its delegate openPressed().
-class PSDAttachmentLoadErrorView: UIView {
+class PSDAttachmentLoadErrorView: PSDView {
     weak var delegate: PSDAttachmentLoadErrorViewDelegate?
     override init(frame: CGRect) {
         super.init(frame: frame)
-        self.backgroundColor = .psdLightGray
+        recolor()
         self.addSubview(errorMessage)
         self.addSubview(button)
         self.addSubview(imageView)
@@ -35,11 +35,11 @@ class PSDAttachmentLoadErrorView: UIView {
         didSet{
             if(attachmentExtension.count>0){
                 let label = UILabel.init()
-                label.textColor = UIColor.psdGray
-                label.font = UIFont.systemFont(ofSize: PSDAttachmentLoadErrorView.imageViewSize/2)
+                label.textColor = CustomizationHelper.textColorForTable.withAlphaComponent(TEXT_ALPHA)
+                label.font = .attachmentExtension
                 label.text = attachmentExtension
                 label.sizeToFit()
-                attachmentExtentionLogo = label.asImage()
+                attachmentExtentionLogo = label.asImage().withRenderingMode(.alwaysTemplate)
             }
         }
     }
@@ -48,7 +48,6 @@ class PSDAttachmentLoadErrorView: UIView {
             redraw()
         }
     }
-    private static let imageViewSize : CGFloat = 100.0
     private func redraw(){
         switch state {
         case .noPreview:
@@ -58,7 +57,7 @@ class PSDAttachmentLoadErrorView: UIView {
         case .cantLoad:
             self.errorMessage.text = "FileLoadError".localizedPSD()
             self.button.setTitle("RetryButton".localizedPSD(), for: .normal)
-            self.imageView.image = UIImage.PSDImage(name: "file-preview")
+            self.imageView.image = previewImage
         }
         
         self.errorMessage.sizeToFit()
@@ -66,9 +65,23 @@ class PSDAttachmentLoadErrorView: UIView {
         self.setNeedsLayout()
         self.setNeedsDisplay()
     }
+    private var previewImage: UIImage? {
+        if #available(iOS 13.0, *) {
+            if UITraitCollection.current.userInterfaceStyle == .dark {
+                return UIImage.PSDImage(name: "landscape_light")
+            }
+        }
+        return UIImage.PSDImage(name: "landscape_dark")
+    }
+    override func recolor() {
+        super.recolor()
+        redraw()
+        self.backgroundColor = CustomizationHelper.grayViewColor
+        self.imageView.tintColor = CustomizationHelper.textColorForTable.withAlphaComponent(TEXT_ALPHA)
+        errorMessage.textColor = CustomizationHelper.textColorForTable.withAlphaComponent(TEXT_ALPHA)
+    }
     private lazy var errorMessage : UILabel = {
         let label = UILabel.init()
-        label.textColor = UIColor.psdGray
         label.numberOfLines = 0
         label.lineBreakMode = .byWordWrapping
         label.textAlignment = .center
@@ -79,13 +92,12 @@ class PSDAttachmentLoadErrorView: UIView {
         iv.contentMode = .scaleAspectFit
         return iv
     }()
-    private static let buttonFontSize : CGFloat = 18.0
     ///The button on view changes according to LoadErrorMode.
     ///If mode == noPreview - performs the option "open"
     ///If mode == cantLoad - performs the option "retry"
     lazy var button : UIButton = {
         let button = UIButton()
-        button.titleLabel?.font = UIFont.systemFont(ofSize: PSDAttachmentLoadErrorView.buttonFontSize)
+        button.titleLabel?.font = .buttonFont
         button.setTitleColor(.darkAppColor, for: .normal)
         button.addTarget(self, action: #selector(buttonPressed), for: .touchUpInside)
         return button
@@ -113,7 +125,7 @@ class PSDAttachmentLoadErrorView: UIView {
         self.imageView.translatesAutoresizingMaskIntoConstraints = false
         self.button.translatesAutoresizingMaskIntoConstraints = false
         
-        self.imageView.addSizeConstraint([.width,.height], constant: PSDAttachmentLoadErrorView.imageViewSize)
+        self.imageView.addSizeConstraint([.width,.height], constant: IMAGE_VIEW_SIZE)
         self.imageView.addZeroConstraint([.centerX])
         
         self.addConstraint(NSLayoutConstraint(
@@ -153,3 +165,9 @@ class PSDAttachmentLoadErrorView: UIView {
     }
     
 }
+private extension UIFont {
+    static let attachmentExtension = CustomizationHelper.systemFont(ofSize: IMAGE_VIEW_SIZE/2)
+    static let buttonFont = CustomizationHelper.systemFont(ofSize: 18.0)
+}
+private let TEXT_ALPHA: CGFloat = 0.6
+private let IMAGE_VIEW_SIZE: CGFloat = 100.0

@@ -21,13 +21,10 @@ class PSDDownloadView : UIImageView{
             }
         }
     }
-    override init(frame: CGRect) {
-        super.init(frame: frame)
-        self.image = PSDDownloadImage.image()
-    }
-    override func traitCollectionDidChange(_ previousTraitCollection: UITraitCollection?) {
-        super.traitCollectionDidChange(previousTraitCollection)
-        self.image = PSDDownloadImage.image()
+    var color: UIColor = .white {
+        didSet {
+            self.image = PSDDownloadImage.image(color: color)
+        }
     }
     static let downloadSize : CGFloat = 50.0
     
@@ -38,8 +35,5 @@ class PSDDownloadView : UIImageView{
         else{
             isAnimateRotation = true
         }
-    }
-    required init?(coder aDecoder: NSCoder) {
-        fatalError("init(coder:) has not been implemented")
     }
 }

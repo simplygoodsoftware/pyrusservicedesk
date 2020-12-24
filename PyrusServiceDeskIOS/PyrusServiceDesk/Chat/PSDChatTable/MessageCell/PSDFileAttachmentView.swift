@@ -14,6 +14,7 @@ class PSDFileAttachmentView: PSDAttachmentView {
         didSet{
             nameLabel.textColor = self.color
             stateLabel.textColor = self.color
+            previewBorderLayer.strokeColor = color.withAlphaComponent(0.15).cgColor
         }
     }
     override init(frame: CGRect) {
@@ -40,16 +41,14 @@ class PSDFileAttachmentView: PSDAttachmentView {
     required init?(coder aDecoder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
     }
-    private let nameFont = UIFont .systemFont(ofSize: 16.0)
-    private let stateFont = UIFont .systemFont(ofSize: 14.0)
     override func draw(_ attachment: PSDAttachment, state: messageState) {
         super.draw(attachment, state: state)
         previewImageView.isHidden = true
         PSDFileAttachmentView.sizeString = attachment.dataSize()
         updateStateText(with: state)
         
-        stateLabel.font = stateFont
-        nameLabel.font = nameFont
+        stateLabel.font = .stateFont
+        nameLabel.font = .nameFont
         nameLabel.text = attachment.name
         
         var rect = nameLabel.frame
@@ -83,12 +82,12 @@ class PSDFileAttachmentView: PSDAttachmentView {
     }
     ///Calculate name label width
     private func nameLabelWidth()->CGFloat{
-        return nameLabel.text?.size(withAttributes: [NSAttributedString.Key.font:nameFont]).width ?? 0
+        return nameLabel.text?.size(withAttributes: [NSAttributedString.Key.font: UIFont.nameFont]).width ?? 0
     }
     ///Calculate State label width
     private func maxStateLabelWidth()->CGFloat{
-        let downloadWidth :CGFloat = PSDFileAttachmentView.uploadString.size(withAttributes: [NSAttributedString.Key.font:stateFont]).width
-        let attachmentSizeWidth :CGFloat = PSDFileAttachmentView.sizeString.size(withAttributes: [NSAttributedString.Key.font:stateFont]).width
+        let downloadWidth :CGFloat = PSDFileAttachmentView.uploadString.size(withAttributes: [NSAttributedString.Key.font: UIFont.stateFont]).width
+        let attachmentSizeWidth :CGFloat = PSDFileAttachmentView.sizeString.size(withAttributes: [NSAttributedString.Key.font: UIFont.stateFont]).width
         return max(downloadWidth,attachmentSizeWidth)
     }
     
@@ -116,10 +115,6 @@ class PSDFileAttachmentView: PSDAttachmentView {
         borderLayer.lineWidth = PREVIEW_BORDER_WIDTH
         return borderLayer
     }()
-    override func traitCollectionDidChange(_ previousTraitCollection: UITraitCollection?) {
-        super.traitCollectionDidChange(previousTraitCollection)
-        previewBorderLayer.strokeColor = UIColor.psdLabel.withAlphaComponent(0.15).cgColor
-    }
     private func addConstraints(){
         uploadView.addConstraint([.leading], constant: PSDFileAttachmentView.distance)
         uploadView.addZeroConstraint([.centerY])
@@ -211,4 +206,8 @@ class PSDFileAttachmentView: PSDAttachmentView {
     private func showPreviewImage(){
         self.previewImageView.isHidden = false
     }
+}
+private extension UIFont {
+    static let nameFont = CustomizationHelper.systemFont(ofSize: 16.0)
+    static let stateFont = CustomizationHelper.systemFont(ofSize: 14.0)
 }
