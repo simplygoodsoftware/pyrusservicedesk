@@ -1253,8 +1253,6 @@
 				4B281F702577FBCF0042C235 /* clock-dark-34@3x.png in Resources */,
 				4B281F352577FBCF0042C235 /* clock-dark-24@3x.png in Resources */,
 				4B281F512577FBCF0042C235 /* clock-light-48@3x.png in Resources */,
-				4B63395621FA166800A154B5 /* ConversationsNew.png in Resources */,
-				4B9B0BC12266480600090DB5 /* file-preview@2x.png in Resources */,
 				4BA85A192224183600B48CA6 /* icn_error@3x.png in Resources */,
 				4B281F742577FBCF0042C235 /* clock-light-46@3x.png in Resources */,
 				4B281F362577FBCF0042C235 /* clock-dark-47@3x.png in Resources */,
@@ -1282,11 +1280,8 @@
 				4B281F9825781CE10042C235 /* landscape_light@3x.png in Resources */,
 				4B7F139622157989007C6358 /* SupportIcon@2x.png in Resources */,
 				4B63395021FA165000A154B5 /* Add@2x.png in Resources */,
-				4B63395721FA166800A154B5 /* ConversationsNew@2x.png in Resources */,
 				4B281F7F2577FBCF0042C235 /* clock-light-30@3x.png in Resources */,
 				4B281F2B2577FBCF0042C235 /* clock-dark-44@3x.png in Resources */,
-				4BA85A2522242C5200B48CA6 /* clock-face.png in Resources */,
-				4B9B0BBD226639E200090DB5 /* file-preview.png in Resources */,
 				4B82A4AF2268E1B000654CE0 /* Share@2x.png in Resources */,
 				4B281F4D2577FBCF0042C235 /* clock-light-28@3x.png in Resources */,
 				4B281F322577FBCF0042C235 /* clock-dark-13@3x.png in Resources */,
@@ -1358,14 +1353,11 @@
 				4B281F3B2577FBCF0042C235 /* clock-dark-20@3x.png in Resources */,
 				4B63394721FA163300A154B5 /* Close@3x.png in Resources */,
 				4B281F3D2577FBCF0042C235 /* clock-light-31@3x.png in Resources */,
-				4B63395821FA166800A154B5 /* ConversationsNew@3x.png in Resources */,
 				4B281F7E2577FBCF0042C235 /* clock-dark-50@3x.png in Resources */,
 				4B281F652577FBCF0042C235 /* clock-light-51@3x.png in Resources */,
 				4B281F5D2577FBCF0042C235 /* clock-light-20@3x.png in Resources */,
 				4B281F4F2577FBCF0042C235 /* clock-dark-39@3x.png in Resources */,
-				4B9B0BC22266480600090DB5 /* file-preview@3x.png in Resources */,
 				4B63396221FA168500A154B5 /* DownloadBlack@3x.png in Resources */,
-				4B63393B21FA160D00A154B5 /* Conversations.png in Resources */,
 				4B281F9425781CE10042C235 /* landscape_dark@2x.png in Resources */,
 				4B281F222577FBCF0042C235 /* clock-light-18@3x.png in Resources */,
 				4B281F7C2577FBCF0042C235 /* clock-light-35@3x.png in Resources */,
@@ -1377,11 +1369,7 @@
 				4B281F692577FBCF0042C235 /* clock-dark-18@3x.png in Resources */,
 				4B281F202577FBCF0042C235 /* clock-light-27@3x.png in Resources */,
 				4B281F1C2577FBCF0042C235 /* clock-light-34@3x.png in Resources */,
-				4B63393C21FA160D00A154B5 /* Conversations@2x.png in Resources */,
 				4B281F672577FBCF0042C235 /* clock-light-08@3x.png in Resources */,
-				4B63393D21FA160D00A154B5 /* Conversations@3x.png in Resources */,
-				4BE18EB5230D673C001C38DC /* clock-face-dark@2x.png in Resources */,
-				4BE18EB6230D673C001C38DC /* clock-face-dark@3x.png in Resources */,
 				4B82A4AE2268E1B000654CE0 /* Share@3x.png in Resources */,
 				4B82A4A72268E17600654CE0 /* Back.png in Resources */,
 				7B9545F724D07EE2006F6AED /* icn_cross@3x.png in Resources */,
@@ -1557,6 +1545,7 @@
 			buildSettings = {
 				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = NO;
 				ALWAYS_SEARCH_USER_PATHS = NO;
+				BITCODE_GENERATION_MODE = marker;
 				BUILD_LIBRARY_FOR_DISTRIBUTION = NO;
 				CLANG_ANALYZER_LOCALIZABILITY_NONLOCALIZED = YES;
 				CLANG_ANALYZER_NONNULL = YES;
@@ -1612,7 +1601,7 @@
 				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
 				MTL_FAST_MATH = YES;
 				ONLY_ACTIVE_ARCH = NO;
-				OTHER_CFLAGS = "";
+				OTHER_CFLAGS = "-fembed-bitcode-marker";
 				SDKROOT = iphoneos;
 				SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG;
 				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
@@ -1627,6 +1616,7 @@
 			buildSettings = {
 				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = NO;
 				ALWAYS_SEARCH_USER_PATHS = NO;
+				BITCODE_GENERATION_MODE = bitcode;
 				BUILD_LIBRARY_FOR_DISTRIBUTION = NO;
 				CLANG_ANALYZER_LOCALIZABILITY_NONLOCALIZED = YES;
 				CLANG_ANALYZER_NONNULL = YES;
@@ -1676,7 +1666,7 @@
 				IPHONEOS_DEPLOYMENT_TARGET = 9.0;
 				MTL_ENABLE_DEBUG_INFO = NO;
 				MTL_FAST_MATH = YES;
-				OTHER_CFLAGS = "";
+				OTHER_CFLAGS = "-fembed-bitcode";
 				SDKROOT = iphoneos;
 				SWIFT_COMPILATION_MODE = wholemodule;
 				SWIFT_OPTIMIZATION_LEVEL = "-O";
