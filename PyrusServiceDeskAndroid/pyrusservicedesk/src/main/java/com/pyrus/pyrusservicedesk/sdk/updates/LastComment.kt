@@ -22,10 +22,18 @@ internal data class LastComment(
                 isRead,
                 isShown,
                 trimCommentText(comment.body),
-                comment.attachments?.subList(0, 10)?.map { attachment -> attachment.name },
+                getFirstTenElements(comment.attachments)?.map { attachment -> attachment.name },
                 comment.attachments?.size ?: 0,
                 comment.creationDate.time
             )
+        }
+
+        private fun <E> getFirstTenElements(list: List<E>?): List<E>? {
+            if (list == null)
+                return null
+            if (list.size < 10)
+                return list.toMutableList()
+            return list.subList(0, 10)
         }
 
         private fun trimCommentText(text: String?): String? {
