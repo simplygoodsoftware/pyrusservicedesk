@@ -28,7 +28,7 @@ class PSDUsers: NSObject {
     }
 }
 ///
-let DEFAULT_SUPPORT_IMAGE: UIImage = PSDSupportImageSetter.defaultSupportImage()
+let DEFAULT_SUPPORT_IMAGE = PSDSupportImageSetter.defaultSupportImage()
 class PSDUser: NSObject {
     //user saved in PyrusServiceDeskCreator is not denited
     ///Has only not support user

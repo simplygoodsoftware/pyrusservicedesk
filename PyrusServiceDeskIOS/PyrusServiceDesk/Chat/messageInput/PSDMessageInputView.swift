@@ -50,7 +50,6 @@ class PSDMessageInputView: UIView, PSDMessageTextViewDelegate,PSDMessageSendButt
         
         self.backgroundView = UIView()
         self.backgroundView.frame = frame
-        self.backgroundView.backgroundColor = .psdBackground
         
         topGrayLine = UIView.init(frame: CGRect(x: 0, y: 0, width: frame.size.width, height: 0.5))
         topGrayLine.backgroundColor = UIColor.psdSeparator
@@ -290,10 +289,7 @@ class PSDMessageInputView: UIView, PSDMessageTextViewDelegate,PSDMessageSendButt
     private func addBackgroundViewConstraints(){
         backgroundView.translatesAutoresizingMaskIntoConstraints = false
         backgroundView.addZeroConstraint([.top,.bottom])
-        if !PyrusServiceDeskController.iPadView{
-            backgroundView.addZeroConstraint([.left,.right])
-        }
-        
+        backgroundView.addZeroConstraint([.left,.right])
     }
     private func addTopGrayLineConstraints(){
         topGrayLine.translatesAutoresizingMaskIntoConstraints = false

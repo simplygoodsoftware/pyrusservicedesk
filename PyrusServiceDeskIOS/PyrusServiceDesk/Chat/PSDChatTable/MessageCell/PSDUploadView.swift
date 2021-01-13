@@ -50,7 +50,7 @@ class PSDUploadView: UIButton {
     var color : UIColor = .white{
         didSet(oldColor){
             
-            if(color == .black){
+            if(color.isDarkColor){
                 self.setImage(self.image(for: .selected)?.imageWith(color: .black), for: .selected)
                 self.setImage(UIImage.PSDImage(name: "DownloadBlack"), for: .normal)
                 progressLayer.strokeColor = UIColor.black.cgColor
@@ -60,7 +60,7 @@ class PSDUploadView: UIButton {
                 self.setImage(self.image(for: .selected)?.imageWith(color: color), for: .selected)
                 self.setImage(UIImage.PSDImage(name: "DownloadWhite"), for: .normal)
                 progressLayer.strokeColor = color.cgColor
-                shapeLayer.fillColor = color.withAlphaComponent(0.1).cgColor
+                shapeLayer.fillColor = UIColor.white.withAlphaComponent(0.1).cgColor
             }
         }
     }
@@ -81,7 +81,7 @@ class PSDUploadView: UIButton {
     }
     ///Draw upload view with progress, and cancel action
     private func drawWithLoad(){
-        let image = UIImage.PSDImage(name: "Close").imageWith(color: color)
+        let image = UIImage.PSDImage(name: "Close")?.imageWith(color: color)
         self.setImage(image, for: .selected)
         self.isSelected=true
         progressLayer.isHidden = false
@@ -97,7 +97,7 @@ class PSDUploadView: UIButton {
         self.isSelected=true
         progressLayer.isHidden = true
         
-        let image = UIImage.PSDImage(name: "Refresh").imageWith(color: color)
+        let image = UIImage.PSDImage(name: "Refresh")?.imageWith(color: color)
         self.setImage(image, for: .selected)
     }
     

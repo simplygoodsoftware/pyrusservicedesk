@@ -3,15 +3,13 @@ import Foundation
 let PROGRESS_LINE_WIDTH : CGFloat = 2.0
 ///Black download image (not full circle)
 class PSDDownloadImage{
-    static func image()->UIImage{
-        if #available(iOS 13.0, *) {
-            if UITraitCollection.current.userInterfaceStyle.rawValue == UIUserInterfaceStyle.dark.rawValue{
+    static func image(color: UIColor) -> UIImage {
+        guard color.isDarkColor else {
                 return imageWhite
-            }
         }
         return imageBlack
     }
-    private static let imageWhite = createImage(.psdLabel)
+    private static let imageWhite = createImage(.white)
     private static let imageBlack = createImage(.black)
     
     ///Create image (open black circle line)

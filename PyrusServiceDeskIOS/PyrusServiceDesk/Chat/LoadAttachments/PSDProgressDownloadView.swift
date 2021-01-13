@@ -11,7 +11,7 @@ class PSDProgressDownloadView: UIView {
     weak var delegate: PSDProgressDownloadViewDelegate?
     override init(frame: CGRect) {
         super.init(frame: frame)
-        self.backgroundColor = .psdLightGray
+        self.backgroundColor = PyrusServiceDesk.mainController?.customization?.customBackgroundColor ?? .psdLightGray
         self.addSubview(progressLoader)
         self.addSubview(cancelButton)
         setConstraints()
@@ -69,10 +69,9 @@ class PSDProgressDownloadView: UIView {
         view.backgroundColor = .clear
         return view
     }()
-    private static let cancelButtonFontSize : CGFloat = 17.0
     private lazy var cancelButton : UIButton = {
         let button = UIButton()
-        button.titleLabel?.font = UIFont.systemFont(ofSize: PSDProgressDownloadView.cancelButtonFontSize)
+        button.titleLabel?.font = .cancelButton
         button.setTitle("CancelDownload".localizedPSD(), for: .normal)
         button.setTitleColor(.darkAppColor, for: .normal)
         button.addTarget(self, action: #selector(cancelButtonPressed), for: .touchUpInside)
@@ -115,4 +114,7 @@ class PSDProgressDownloadView: UIView {
             constant: -PSDProgressDownloadView.dist
             ).isActive = true
     }
+}
+private extension UIFont {
+    static let cancelButton = CustomizationHelper.systemFont(ofSize: 17.0)
 }

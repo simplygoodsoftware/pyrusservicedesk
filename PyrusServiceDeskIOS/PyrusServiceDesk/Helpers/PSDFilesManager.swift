@@ -57,8 +57,8 @@ struct PSDFilesManager {
         DispatchQueue.global().async {
             do {
                 try FileManager.default.removeItem(at: url)
-            } catch _ as NSError {
-                print("Error removing file")
+            } catch {
+                PyrusLogger.shared.logEvent("Error remove file = \(("Error removing file \(error)"))")
             }
         }
        

@@ -4,14 +4,14 @@ protocol PSDNoConnectionViewDelegate
     func retryPressed()
 }
 ///A view with "no connection" message and retry button. This view has same size as it's superview. When retry button pressed - pass to its delegate retryPressed()
-class PSDNoConnectionView: UIView {
+class PSDNoConnectionView: PSDView {
     weak var delegate: PSDNoConnectionViewDelegate?
     override init(frame: CGRect) {
         super.init(frame: frame)
-        self.backgroundColor = .psdLightGray
         self.addSubview(noConnectionLabel)
         self.addSubview(retryButton)
         setConstraints()
+        recolor()
     }
     required init?(coder aDecoder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
@@ -19,8 +19,7 @@ class PSDNoConnectionView: UIView {
     
     private lazy var noConnectionLabel : UILabel = {
         let label = UILabel()
-        label.textColor = .psdGray
-        label.font = UIFont.systemFont(ofSize: 17.0)
+        label.font = .noConnectionLabel
         label.text = "No_Connection".localizedPSD()
         label.numberOfLines = 0
         label.lineBreakMode = .byWordWrapping
@@ -34,10 +33,9 @@ class PSDNoConnectionView: UIView {
         self.translatesAutoresizingMaskIntoConstraints = false
         self.addZeroConstraint([.top,.bottom,.leading,.trailing])
     }
-    private let retryButtonFontSize: CGFloat = 17.0
     private lazy var retryButton : UIButton = {
         let button = UIButton()
-        button.titleLabel?.font = UIFont.systemFont(ofSize: retryButtonFontSize)
+        button.titleLabel?.font = .retryButton
         button.setTitle("Retry".localizedPSD(), for: .normal)
         button.setTitleColor(.darkAppColor, for: .normal)
         button.addTarget(self, action: #selector(retryButtonPressed), for: .touchUpInside)
@@ -87,5 +85,13 @@ class PSDNoConnectionView: UIView {
             constant: -PSDNoConnectionView.dist
             ).isActive = true
     }
-
+    override func recolor() {
+        self.backgroundColor = CustomizationHelper.grayViewColor
+        noConnectionLabel.textColor = CustomizationHelper.textColorForTable.withAlphaComponent(TEXT_ALPHA)
+    }
 }
+private extension UIFont {
+    static let noConnectionLabel = CustomizationHelper.systemFont(ofSize: 17.0)
+    static let retryButton = CustomizationHelper.systemFont(ofSize: 17.0)
+}
+private let TEXT_ALPHA: CGFloat = 0.6

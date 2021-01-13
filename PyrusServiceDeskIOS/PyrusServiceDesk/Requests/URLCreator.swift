@@ -4,14 +4,10 @@ import Foundation
 enum urlType : String{
     ///Add gettickets to baseURLString. Use PSDURL(type:urlType).
     case chats = "gettickets"
-    ///Add getticket/{ticketid} to baseURLString. Use PSDURL(type:urlType,ticketId:String).
-    case chat = "getticket"
     ///Add GetTicketFeed to baseURLString. Use PSDURL(type:urlType).
     case chatFeed = "GetTicketFeed"
     ///Add CreateTicket to baseURLString. Use PSDURL(type:urlType).
     case createNew = "CreateTicket"
-    ///Add UpdateTicket/{ticketid} to baseURLString. Use PSDURL(type:urlType,ticketId:String).
-    case update = "UpdateTicket"
     ///Add UpdateTicketFeed to baseURLString. Use PSDURL(type:urlType).
     case updateFeed = "UpdateTicketFeed"
     ///Add UploadFile to baseURLString. Use PSDURL(type:urlType).

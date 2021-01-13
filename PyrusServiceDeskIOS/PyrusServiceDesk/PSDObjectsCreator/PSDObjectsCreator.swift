@@ -13,7 +13,7 @@ struct PSDObjectsCreator {
         return PSDObjectsCreator.createMessage(comment, attachments: attachments, user:PSDUsers.user)
     }
     static func createWelcomeMessage()->PSDRowMessage{
-        let message = PSDObjectsCreator.createMessage(PSD_WelcomeMessage(), attachments:nil, user: PSDUser(personId: "", name: "", type: .support, imagePath: ""))
+        let message = PSDObjectsCreator.createMessage(CustomizationHelper.welcomeMessage, attachments:nil, user: PSDUser(personId: "", name: "", type: .support, imagePath: ""))
         return PSDRowMessage(message: message, attachment: nil)
     }
     static func createAttachment(_ data: Data, _ url: URL?) -> PSDAttachment {

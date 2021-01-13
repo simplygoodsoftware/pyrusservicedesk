@@ -3,18 +3,21 @@ import UIKit
 
 class PSDSupportMessageCell: PSDChatMessageCell {
     private static let personNameAlpha : CGFloat = 0.6
-    private static let personNameFonSize : CGFloat = 14
     
     ///Is nameLabel need to be shown. (Show only next to first user's message)
     ///A label with name of person show only needShowName = true
     private let nameLabel : UILabel =
     {
         let label = UILabel()
-        label.textColor = UIColor.psdLabel.withAlphaComponent(personNameAlpha)
-        label.font = UIFont.systemFont(ofSize: personNameFonSize)
+        label.textColor = CustomizationHelper.textColorForTable.withAlphaComponent(personNameAlpha)
+        label.font = .nameLabel
         label.text = ""
         return label;
     }()
+    override func recolor() {
+        super.recolor()
+        nameLabel.textColor = CustomizationHelper.textColorForTable.withAlphaComponent(PSDSupportMessageCell.personNameAlpha)
+    }
     ///Is avatarView need to be shown. (Shhow only next with last user's avatar)
     var needShowAvatar = false
     ///UIImageView with person avatar image or default image. Has only "support" users. Show only if needShowAvatar
@@ -130,4 +133,7 @@ class PSDSupportMessageCell: PSDChatMessageCell {
         super.awakeFromNib()
         // Initialization code
     }
+}
+private extension UIFont {
+    static let nameLabel = CustomizationHelper.systemFont(ofSize: 14)
 }

@@ -5,6 +5,7 @@ import androidx.lifecycle.Observer
 import android.content.Intent
 import android.content.Intent.ACTION_SEND
 import android.content.Intent.ACTION_VIEW
+import android.graphics.PorterDuff
 import android.graphics.drawable.RotateDrawable
 import android.net.Uri
 import android.os.Bundle
@@ -13,14 +14,20 @@ import android.view.MenuInflater
 import android.view.MenuItem
 import android.view.MenuItem.SHOW_AS_ACTION_ALWAYS
 import android.view.View.*
+import android.view.WindowManager
 import android.view.animation.LinearInterpolator
 import android.webkit.*
 import com.pyrus.pyrusservicedesk.PyrusServiceDesk
 import com.pyrus.pyrusservicedesk.R
 import com.pyrus.pyrusservicedesk.presentation.ConnectionActivityBase
 import com.pyrus.pyrusservicedesk.sdk.data.intermediate.FileData
+import com.pyrus.pyrusservicedesk.utils.ConfigUtils
 import com.pyrus.pyrusservicedesk.utils.animateInfinite
+import com.pyrus.pyrusservicedesk.utils.getColorOnBackground
+import com.pyrus.pyrusservicedesk.utils.getSecondaryColorOnBackground
+import com.pyrus.pyrusservicedesk.utils.getTextColorOnBackground
 import kotlinx.android.synthetic.main.psd_activity_file_preview.*
+import kotlinx.android.synthetic.main.psd_no_connection.*
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
@@ -65,13 +72,42 @@ internal class FilePreviewActivity: ConnectionActivityBase<FilePreviewViewModel>
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        // if you don't set empty text, Android will set the app name
         supportActionBar?.apply {
-            title = viewModel.getFileName()
+            title = ""
         }
+        toolbar_title.text = viewModel.getFileName()
+        toolbar_title.setTextColor(getTextColorOnBackground(this, ConfigUtils.getHeaderBackgroundColor(this)))
         file_preview_toolbar.setNavigationIcon(R.drawable.psd_arrow_back)
         file_preview_toolbar.setNavigationOnClickListener { finish() }
+        file_preview_toolbar.navigationIcon?.setColorFilter(
+            ConfigUtils.getToolbarButtonColor(this),
+            PorterDuff.Mode.SRC_ATOP
+        )
         file_preview_toolbar.setOnMenuItemClickListener { onMenuItemClicked(it) }
         file_extension.text = viewModel.getExtension()
+
+        ConfigUtils.getMainFontTypeface()?.let {
+            file_extension.typeface = it
+            download_button.typeface = it
+            no_preview_text.typeface = it
+        }
+        ConfigUtils.getMainBoldFontTypeface()?.let {
+            toolbar_title.typeface = it
+        }
+        val secondaryColor = getSecondaryColorOnBackground(ConfigUtils.getNoPreviewBackgroundColor(this))
+        file_extension.setTextColor(getColorOnBackground(ConfigUtils.getNoPreviewBackgroundColor(this), 40))
+        no_preview_text.setTextColor(secondaryColor)
+
+        download_button.setTextColor(ConfigUtils.getAccentColor(this))
+
+        file_preview_toolbar.setBackgroundColor(ConfigUtils.getHeaderBackgroundColor(this))
+
+
+        noConnectionImageView.setColorFilter(secondaryColor)
+        noConnectionTextView.setTextColor(secondaryColor)
+        reconnectButton.setTextColor(ConfigUtils.getAccentColor(this))
+        no_connection.setBackgroundColor(ConfigUtils.getNoConnectionBackgroundColor(this))
 
         web_view.apply{
             settings.apply {
@@ -102,6 +138,14 @@ internal class FilePreviewActivity: ConnectionActivityBase<FilePreviewViewModel>
             web_view.restoreState(savedInstanceState)
             pageFinishedSuccessfully = savedInstanceState.getBoolean(STATE_FINISHED_SUCCESSFULLY)
         }
+
+        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.LOLLIPOP) {
+            window.clearFlags(WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS)
+            window.addFlags(WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS)
+            window.statusBarColor = ConfigUtils.getStatusBarColor(this)?: window.statusBarColor
+        }
+
+        no_preview.setBackgroundColor(ConfigUtils.getNoPreviewBackgroundColor(this))
     }
 
     override fun onSaveInstanceState(outState: Bundle) {
@@ -119,6 +163,10 @@ internal class FilePreviewActivity: ConnectionActivityBase<FilePreviewViewModel>
                 it.setShowAsAction(SHOW_AS_ACTION_ALWAYS)
                 (it.icon as? RotateDrawable)?.animateInfinite(LOADING_ICON_ANIMATION_DURATION_MS, LinearInterpolator())
             }
+            val iconColor = ConfigUtils.getToolbarButtonColor(this)
+            menu.findItem(R.id.download).icon?.setColorFilter(iconColor, PorterDuff.Mode.SRC_ATOP)
+            menu.findItem(R.id.share).icon?.setColorFilter(iconColor, PorterDuff.Mode.SRC_ATOP)
+            menu.findItem(R.id.loading)?.icon?.setColorFilter(iconColor, PorterDuff.Mode.SRC_ATOP)
             true
         } ?: false
     }

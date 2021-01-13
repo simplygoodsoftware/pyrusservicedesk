@@ -8,7 +8,7 @@ extension Array where Element == [PSDRowMessage]{
     }
     ///Create new matrix with no elements or with welcome message if it was setted.
     mutating func defaultMatrix(){
-        if PSD_WelcomeMessage().count>0
+        if CustomizationHelper.welcomeMessage.count>0
         {
             self = [[PSDObjectsCreator.createWelcomeMessage()]]
         }
@@ -80,7 +80,7 @@ extension Array where Element == [PSDRowMessage]{
     }
     ///Detect if need show avatar. If current user is same as next don't show avatar
     func needShowAvatar(at indexPath: IndexPath)->Bool{
-        if indexPath.row == 0 && indexPath.section == 0 &&  PSD_WelcomeMessage().count>0 {
+        if indexPath.row == 0 && indexPath.section == 0 &&  CustomizationHelper.welcomeMessage.count>0 {
             return false//if first message is welcome - dont show avatar
         }
         let currentUser = personForMessage(at: IndexPath.init(row: indexPath.row, section: indexPath.section))

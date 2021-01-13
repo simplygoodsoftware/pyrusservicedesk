@@ -55,7 +55,7 @@ class PSDTableView : UITableView{
         let activity = UIActivityIndicatorView()
         activity.style = UIActivityIndicatorView.Style.whiteLarge
         activity.hidesWhenStopped = true
-        activity.color = .psdLabel
+        activity.color = CustomizationHelper.textColorForTable
         let transform = CATransform3DScale(CATransform3DIdentity, MAXIMUM_ACTIVITY_SCALE, MAXIMUM_ACTIVITY_SCALE, MAXIMUM_ACTIVITY_SCALE)
         activity.layer.transform = transform
         return activity
@@ -189,5 +189,19 @@ class PSDTableView : UITableView{
     }
     private func topActivityPosition()->CGFloat{
         return REFRESH_CONTROL_DISTANCE
+    }
+}
+extension PSDTableView: Recolorable {
+    override func traitCollectionDidChange(_ previousTraitCollection: UITraitCollection?) {
+        super.traitCollectionDidChange(previousTraitCollection)
+        if #available(iOS 13.0, *) {
+            guard traitCollection.hasDifferentColorAppearance(comparedTo: previousTraitCollection) else {
+                return
+            }
+            recolor()
+        }
+    }
+    @objc func recolor() {
+        activity.color = CustomizationHelper.textColorForTable
     }
 }

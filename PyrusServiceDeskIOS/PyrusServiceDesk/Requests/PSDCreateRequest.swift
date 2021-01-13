@@ -9,20 +9,10 @@ extension URLRequest {
      - Parameter parameters: [String: Any] is an additional parameters to "AppId" and "UserId". If no need in additional parameters send nil.
      */
     static func createRequest(type: urlType, parameters:[String: Any]) -> URLRequest{
-        if(type == .upload || type == .chat){
+        if(type == .upload){
             fatalError("Bad type in this method")
         }
         let url = PyrusServiceDeskAPI.PSDURL(type:type)
-        return createRequest(url:url, json:parameters)
-    }
-    
-    /**
-     Create URLRequest with that need tiket id.
-     - Parameter parameters: [String: Any] is an additional parameters to "AppId" and "UserId". If no need in additional parameters send nil.
-     - Parameter chatId: id of tiket
-     */
-    static func createRequest(with chatId:String, type: urlType, parameters:[String: Any]) -> URLRequest{
-        let url = PyrusServiceDeskAPI.PSDURL(type:type, ticketId:chatId)
         return createRequest(url:url, json:parameters)
     }
     

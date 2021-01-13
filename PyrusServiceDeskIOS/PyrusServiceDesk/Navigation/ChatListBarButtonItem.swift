@@ -99,7 +99,7 @@ class ChatListBarButtonItem: UIBarButtonItem {
     ///Redraws ChatListBarButtonItem with itemMode .Default. Make ChatListBarButtonItem enabled
     private func drawDefault()
     {
-        redraw(image:UIImage.PSDImage(name: "Conversations"))
+        redraw(image: UIImage.PSDImage(name: "Conversations"))
     }
     ///Redraws ChatListBarButtonItem with itemMode .hasNewMessage. Make ChatListBarButtonItem enabled
     private func drawNewMessage()
@@ -111,10 +111,10 @@ class ChatListBarButtonItem: UIBarButtonItem {
     ///Redraw image named:"ConversationsNew" with new messages count.
     private func imageChangedMessages()->UIImage{
         var initialImage = UIImage.PSDImage(name: "ConversationsNew")
-        initialImage = initialImage.imageWith(color: .darkAppColor) ?? initialImage
+        initialImage = initialImage?.imageWith(color: .darkAppColor) ?? initialImage
         
         let imgeView = UIImageView()
-        imgeView.frame = CGRect(x: 0, y: 0, width: initialImage.size.width, height: initialImage.size.height)
+        imgeView.frame = CGRect(x: 0, y: 0, width: initialImage?.size.width ?? 0, height: initialImage?.size.height ?? 0)
         imgeView.image = initialImage
         imgeView.contentMode = .left
         
@@ -125,13 +125,13 @@ class ChatListBarButtonItem: UIBarButtonItem {
         }
         messagesCountLabel.text = messagesString
         messagesCountLabel.sizeToFit()
-        let labelHeight : CGFloat = initialImage.size.height/1.4
+        let labelHeight : CGFloat = (initialImage?.size.height ?? 0)/1.4
         messagesCountLabel.frame = CGRect(x: imgeView.frame.size.width - (labelHeight/2.3), y: 0, width: max(messagesCountLabel.frame.size.width + 6,labelHeight), height: labelHeight)
         messagesCountLabel.layer.cornerRadius = min(messagesCountLabel.frame.size.height/2, messagesCountLabel.frame.size.width/2)
         messagesCountLabel.clipsToBounds = true
         imgeView .addSubview(messagesCountLabel)
         
-        imgeView.frame = CGRect(x: 0, y: 0, width: imgeView.frame.size.width+messagesCountLabel.frame.size.width, height: initialImage.size.height)
+        imgeView.frame = CGRect(x: 0, y: 0, width: imgeView.frame.size.width+messagesCountLabel.frame.size.width, height: initialImage?.size.height ?? 0)
         messagesCountLabel.center = CGPoint(x: messagesCountLabel.center.x, y: imgeView.frame.size.height/2)
         return imgeView.asImage()
     }
@@ -141,14 +141,14 @@ class ChatListBarButtonItem: UIBarButtonItem {
         label.textColor = UIColor.darkAppColor.isDarkColor ? .white : .black
         label.tintColor = label.textColor
         label.backgroundColor = .darkAppColor
-        label.font = UIFont.systemFont(ofSize: 12.0)
+        label.font = .messagesCountLabel
         label.textAlignment = .center
         return label
     }()
     
     ///Redraws ChatListBarButtonItem with image
     ///- parameter image: UIImage to set to ChatListBarButtonItem
-    private func redraw(image:UIImage)
+    private func redraw(image: UIImage?)
     {
         self.isEnabled = true
         self.image = image
@@ -204,4 +204,7 @@ class ChatListBarButtonItem: UIBarButtonItem {
         NotificationCenter.default.removeObserver(self, name: CHATS_NOTIFICATION_NAME, object: nil)
         NotificationCenter.default.removeObserver(self, name: MESSAGES_NUMBER_NOTIFICATION_NAME, object: nil)
     }
+}
+private extension UIFont {
+    static let messagesCountLabel = CustomizationHelper.systemFont(ofSize: 12.0)
 }

@@ -2,40 +2,36 @@
 import UIKit
 
 class PSDChatInfoTableViewCell: UITableViewCell {
-    private static let timeLabelFontSize : CGFloat = 15.0
-    private let timeLabel : UILabel = {
+    private let timeLabel: UILabel = {
         let label = UILabel()
         label.textColor = .psdGray
-        label.font = UIFont.systemFont(ofSize: timeLabelFontSize)
+        label.font = .timeLabel
         label.adjustsFontSizeToFitWidth = true
         return label;
     }()
-    private static let messageLabelFontSize : CGFloat = 17.0
-    private static let messageLabelLines : Int = 1
-    private let messageLabel : UILabel = {
+    private static let messageLabelLines: Int = 1
+    private let messageLabel: UILabel = {
         let label = UILabel()
         label.textColor = .psdLabel
-        label.font = UIFont.systemFont(ofSize: messageLabelFontSize)
+        label.font = .messageLabel
         label.numberOfLines = messageLabelLines
         label.lineBreakMode = .byTruncatingTail
         return label;
     }()
-    private static let notificationButtonFontSize : CGFloat = 12.0
-    private let notificationButton : UIButton = {
+    private let notificationButton: UIButton = {
         let button = UIButton()
         button.backgroundColor = .appColor
         button .setTitleColor(UIColor.appTextColor, for: .normal)
-        button.titleLabel?.font = UIFont.systemFont(ofSize: notificationButtonFontSize)
+        button.titleLabel?.font = .notificationButton
         button.isUserInteractionEnabled = false
         button.isHidden = true
         return button;
     }()
-    private static let lastMessageInfoFontSize : CGFloat = 15.0
-    private static let lastMessageLines : Int = 2
-    private let lastMessageInfo : UILabel = {
+    private static let lastMessageLines: Int = 2
+    private let lastMessageInfo: UILabel = {
         let label = UILabel()
         label.textColor = .psdGray
-        label.font = UIFont.systemFont(ofSize: lastMessageInfoFontSize)
+        label.font = .lastMessageInfo
         label.numberOfLines = lastMessageLines
         label.lineBreakMode = .byTruncatingTail
         label.text = "Last_Message".localizedPSD()
@@ -192,4 +188,10 @@ class PSDChatInfoTableViewCell: UITableViewCell {
     override func layoutSubviews() {
         super.layoutSubviews()
     }
+}
+private extension UIFont {
+    static let timeLabel = CustomizationHelper.systemFont(ofSize: 15.0)
+    static let messageLabel = CustomizationHelper.systemFont(ofSize: 17)
+    static let notificationButton = CustomizationHelper.systemFont(ofSize: 12.0)
+    static let lastMessageInfo = CustomizationHelper.systemFont(ofSize: 15.0)
 }
