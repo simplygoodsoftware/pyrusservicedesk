@@ -73,14 +73,14 @@ class LiveUpdatesTest {
     fun onStartHasNewCommentTest() {
         val liveUpdates = createLiveUpdatesWithTwoComments(false)
         liveUpdates.subscribeOnReply(newReplySubscriber)
-        checkNewReplySubscriber(true, SERVER_FIRST_COMMENT_ID)
+        checkNewReplySubscriber(true)
     }
 
     @Test
     fun onStartHasNewShowedCommentTest() {
         val liveUpdates = createLiveUpdatesWithTwoComments(false, lastShowedIsShown = true)
         liveUpdates.subscribeOnReply(newReplySubscriber)
-        checkNewReplySubscriber(true, SERVER_FIRST_COMMENT_ID, Mockito.never())
+        checkNewReplySubscriber(true, Mockito.never())
     }
 
     @Test
@@ -88,21 +88,21 @@ class LiveUpdatesTest {
         val liveUpdates = createLiveUpdatesWithTwoComments(false)
         liveUpdates.increaseActiveScreenCount()
         liveUpdates.subscribeOnReply(newReplySubscriber)
-        checkNewReplySubscriber(true, SERVER_FIRST_COMMENT_ID, Mockito.never())
+        checkNewReplySubscriber(true, Mockito.never())
     }
 
     @Test
     fun onStartNoNewCommentsTest() {
         val liveUpdates = createLiveUpdatesWithTwoComments(true)
         liveUpdates.subscribeOnReply(newReplySubscriber)
-        checkNewReplySubscriber(false, NO_COMMENT_ID)
+        checkNewReplySubscriber(false)
     }
 
     @Test
     fun notifyTwiceTest() {
         val liveUpdates = createLiveUpdatesWithTwoComments(false)
         liveUpdates.subscribeOnReply(newReplySubscriber)
-        checkNewReplySubscriber(true, SERVER_FIRST_COMMENT_ID, Mockito.after(5L * MILLISECONDS_IN_SECOND).only())
+        checkNewReplySubscriber(true, Mockito.after(5L * MILLISECONDS_IN_SECOND).only())
     }
 
     @Test
@@ -151,12 +151,11 @@ class LiveUpdatesTest {
         liveUpdates.subscribeOnReply(newReplySubscriber)
         liveUpdates.unsubscribeFromReplies(newReplySubscriber)
         liveUpdates.subscribeOnReply(newReplySubscriber)
-        checkNewReplySubscriber(true, SERVER_FIRST_COMMENT_ID)
+        checkNewReplySubscriber(true)
     }
 
     private fun checkNewReplySubscriber(
         hasNewComments: Boolean? = null,
-        lastCommentId: Int? = null,
         mode: VerificationMode = Mockito.timeout(TIMEOUT).only()
     ) {
         then(newReplySubscriber).should(mode).onNewReply(
@@ -164,7 +163,6 @@ class LiveUpdatesTest {
             kAny(),
             Mockito.anyInt(),
             kAny(),
-            if (lastCommentId != null) kEq(lastCommentId) else Mockito.anyInt(),
             Mockito.anyLong()
         )
     }

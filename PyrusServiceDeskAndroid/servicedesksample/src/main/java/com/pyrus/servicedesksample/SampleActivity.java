@@ -78,7 +78,9 @@ public class SampleActivity extends Activity implements NewReplySubscriber {
             boolean hasUnreadComments,
             @Nullable String lastCommentText,
             int lastCommentAttachmentsCount,
-            @Nullable List<String> lastCommentAttachments, int id, long utcTime) {
+            @Nullable List<String> lastCommentAttachments,
+            long utcTime
+    ) {
 
         String text;
         if (lastCommentText != null)

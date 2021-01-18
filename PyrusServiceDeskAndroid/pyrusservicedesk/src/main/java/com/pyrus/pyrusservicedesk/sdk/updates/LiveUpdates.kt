@@ -343,7 +343,6 @@ internal class LiveUpdates(
             if (hasNewComments) lastComment.text else null,
             if (hasNewComments) lastComment.attachesCount else 0,
             if (hasNewComments) lastComment.attaches else null,
-            if (hasNewComments) lastComment.id else 0,
             if (hasNewComments) lastComment.utcTime else 0
         )
     }
