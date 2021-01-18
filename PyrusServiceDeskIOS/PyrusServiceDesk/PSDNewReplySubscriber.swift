@@ -6,14 +6,12 @@ import Foundation
     ///- parameter lastCommentText: The text of last unread message.  Returns nil if there is no new messages or text in it.
     ///- parameter lastCommentAttachmentsCount: Total number of attachments in the message.  Returns 0 if there is no new messages or attachments in it.
     ///- parameter lastCommentAttachments: The list of attachments' names. Returns nil if there is no new messages, or atttachments in it.
-    ///- parameter commetId: The server id of last unread message. Returns nil if there is no new messages.
     ///- parameter utcTime: The date of last unread message in(utc). Returns 0 if there is no new messages.
     @objc func onNewReply(
         hasUnreadComments: Bool,
         lastCommentText: String?,
         lastCommentAttachmentsCount: Int,
         lastCommentAttachments: [String]?,
-        commetId: String?,
         utcTime: Double
     )
 }

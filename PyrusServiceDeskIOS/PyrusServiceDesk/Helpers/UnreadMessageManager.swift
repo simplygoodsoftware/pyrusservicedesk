@@ -66,7 +66,7 @@ class UnreadMessageManager {
               storedUnreadMessage.isShown else {
             return
         }
-        subscriber.onNewReply(hasUnreadComments: false, lastCommentText: nil, lastCommentAttachmentsCount: 0, lastCommentAttachments: nil, commetId: nil, utcTime: 0)
+        subscriber.onNewReply(hasUnreadComments: false, lastCommentText: nil, lastCommentAttachmentsCount: 0, lastCommentAttachments: nil, utcTime: 0)
     }
     private static func getLastCommentFromServer() {
         PSDGetChat.get(needShowError: false, delegate: nil, keepUnread: true, completion: {
@@ -86,7 +86,7 @@ class UnreadMessageManager {
               !lastComment.isShown else {
             return
         }
-        subscriber.onNewReply(hasUnreadComments: true, lastCommentText: lastComment.text, lastCommentAttachmentsCount: lastComment.attchmentsCount, lastCommentAttachments: lastComment.attachments, commetId: lastComment.messageId, utcTime: lastComment.utcTime)
+        subscriber.onNewReply(hasUnreadComments: true, lastCommentText: lastComment.text, lastCommentAttachmentsCount: lastComment.attchmentsCount, lastCommentAttachments: lastComment.attachments, utcTime: lastComment.utcTime)
         lastComment.isShown = true
         updateLastComment(lastComment)
     }
