@@ -357,77 +357,45 @@ SWIFT_CLASS_PROPERTY(@property (nonatomic, class, copy) void (^ _Nullable onAuth
 - (nonnull instancetype)init OBJC_DESIGNATED_INITIALIZER;
 @end
 
+
+SWIFT_CLASS("_TtC16PyrusServiceDesk24ServiceDeskConfiguration")
+@interface ServiceDeskConfiguration : NSObject
+- (nonnull instancetype)init SWIFT_UNAVAILABLE;
++ (nonnull instancetype)new SWIFT_UNAVAILABLE_MSG("-init is unavailable");
+@end
+
 @class UIColor;
 @class UIImage;
 @class UIBarButtonItem;
 
-SWIFT_CLASS("_TtC16PyrusServiceDesk24ServiceDeskConfiguration")
-@interface ServiceDeskConfiguration : NSObject
-/// Chat title using to show in navigation Bar title
-@property (nonatomic, copy) NSString * _Nullable chatTitle;
-/// Customize color. If not set, the application tint color or blue is used.
-@property (nonatomic, strong) UIColor * _Nullable themeColor;
-/// A first message that user see in new chat. If not setted - user will not see welcome message.
-@property (nonatomic, copy) NSString * _Nullable welcomeMessage;
-/// A icon for support imageView in chat. Show when support user has no image or for welcome message. The default is DEFAULT_SUPPORT_ICON.
-@property (nonatomic, strong) UIImage * _Nullable avatarForSupport;
-/// A user name. The default is “Guest”
-@property (nonatomic, copy) NSString * _Nullable userName;
-/// View to show in  chat navigation bar
-@property (nonatomic, strong) UIView * _Nullable chatTitleView;
-/// Custom UIBarButtonItem to show in right side of navigationBar. Default is nil.
-@property (nonatomic, strong) UIBarButtonItem * _Nullable customRightBarButtonItem;
-/// Custom UIBarButtonItem to show in left side of navigation Bar. Default value is nil. If nil there will be drawn back button. If specify custom left button, Pyrus ServiceDesk cannot be closed.
-@property (nonatomic, strong) UIBarButtonItem * _Nullable customLeftBarButtonItem;
-/// The view to show additional information under chat
-@property (nonatomic, strong) PSDInfoView * _Nullable infoView;
-/// The custom style of the device’s status bar.
-/// \param barStyle The custom style of the device’s status bar for light appearance.
-///
-/// \param darkBarStyle The custom style of the device’s status bar for dark appearance.
-///
-- (void)setStatusBarStyle:(UIStatusBarStyle)barStyle :(UIStatusBarStyle)darkBarStyle;
-/// The custom appearance style of the keyboard for the message input.
-/// \param barStyle The custom appearance style of the keyboard for the message input for light appearance.
-///
-/// \param darkBarStyle The custom appearance style of the keyboard for the message input for dark appearance.
-///
-- (void)setKeyboardAppearance:(UIKeyboardAppearance)keyboardAppearance :(UIKeyboardAppearance)darkKeyboardAppearance;
-/// The custom color for message input.
-- (void)setKeyboardColor:(UIColor * _Nonnull)color;
-/// The custom font name.
-/// \param fontName The custom font name for elements.
-///
-- (void)setFontName:(NSString * _Nullable)fontName;
-/// The custom text color for user’s messages. Default value is is nil. If was not settled, this color will be automatically calculated according to message background view color.
-- (void)setUserTextColor:(UIColor * _Nullable)color;
-/// The custom background color for user’s messages. The default value is equal to themeColor.
-- (void)setUserMessageBackgroundColor:(UIColor * _Nullable)color;
-/// The custom text color for support’s messages. Default value is is UIColor.label.
-- (void)setSupportTextColor:(UIColor * _Nullable)color;
-/// The custom background color for support’s  messages. The default value is UIColor.secondarySystemBackground.
-- (void)setSupportMessageBackgroundColor:(UIColor * _Nullable)color;
-/// The custom color for navigation title. Can be used only if chatTitleView was not setted. Otherwise chatTitleView has highest priority.
-- (void)setChatTitleColor:(UIColor * _Nullable)color;
-/// The custom style of navigation bar.
-/// \param barStyle The custom style of navigation bar for light appearance.
-///
-/// \param darkBarStyle The custom style of navigation bar for dark appearance.
-///
-- (void)setToolbarStyle:(UIBarStyle)barStyle :(UIBarStyle)darkBarStyle;
-/// The custom color of navigation bar.
-- (void)setToolbarColor:(UIColor * _Nullable)color;
-/// The custom color of back button tint. Can be used only if customLeftBarButtonItem was not setted. Otherwise customLeftBarButtonItem has highest priority.
-/// The custom color of navigation bar.
-- (void)setToolbarButtonColor:(UIColor * _Nullable)color;
-/// The custom color for chat background.
-- (void)setBackgroundColor:(UIColor * _Nullable)color;
-/// The custom text color for menu for attachment choosing.
-- (void)setAttachmentMenuTextColor:(UIColor * _Nullable)color;
-/// The custom color for button for attachment choosing.
-- (void)setAttachmentMenuButtonColor:(UIColor * _Nullable)color;
-/// The custom color for button for sending message.
-- (void)setSendButtonColor:(UIColor * _Nullable)color;
+SWIFT_CLASS_NAMED("Builder")
+@interface ServiceDeskConfigurationBuilder : NSObject
+- (ServiceDeskConfigurationBuilder * _Nonnull)setChatTitle:(NSString * _Nullable)chatTitle;
+- (ServiceDeskConfigurationBuilder * _Nonnull)setThemeColor:(UIColor * _Nullable)themeColor;
+- (ServiceDeskConfigurationBuilder * _Nonnull)setWelcomeMessage:(NSString * _Nullable)welcomeMessage;
+- (ServiceDeskConfigurationBuilder * _Nonnull)setAvatarForSupport:(UIImage * _Nullable)avatarForSupport;
+- (ServiceDeskConfigurationBuilder * _Nonnull)setUserName:(NSString * _Nullable)userName;
+- (ServiceDeskConfigurationBuilder * _Nonnull)setChatTitleView:(UIView * _Nullable)chatTitleView;
+- (ServiceDeskConfigurationBuilder * _Nonnull)setCustomRightBarButtonItem:(UIBarButtonItem * _Nullable)customRightBarButtonItem;
+- (ServiceDeskConfigurationBuilder * _Nonnull)setCustomLeftBarButtonItem:(UIBarButtonItem * _Nullable)customLeftBarButtonItem;
+- (ServiceDeskConfigurationBuilder * _Nonnull)setInfoView:(PSDInfoView * _Nullable)infoView;
+- (ServiceDeskConfigurationBuilder * _Nonnull)setStatusBarStyle:(UIStatusBarStyle)barStyle darkBarStyle:(UIStatusBarStyle)darkBarStyle;
+- (ServiceDeskConfigurationBuilder * _Nonnull)setKeyboardAppearance:(UIKeyboardAppearance)keyboardAppearance darkKeyboardAppearance:(UIKeyboardAppearance)darkKeyboardAppearance;
+- (ServiceDeskConfigurationBuilder * _Nonnull)setKeyboardColor:(UIColor * _Nonnull)color;
+- (ServiceDeskConfigurationBuilder * _Nonnull)setFontName:(NSString * _Nullable)fontName;
+- (ServiceDeskConfigurationBuilder * _Nonnull)setUserTextColor:(UIColor * _Nullable)color;
+- (ServiceDeskConfigurationBuilder * _Nonnull)setUserMessageBackgroundColor:(UIColor * _Nullable)color;
+- (ServiceDeskConfigurationBuilder * _Nonnull)setSupportTextColor:(UIColor * _Nullable)color;
+- (ServiceDeskConfigurationBuilder * _Nonnull)setSupportMessageBackgroundColor:(UIColor * _Nullable)color;
+- (ServiceDeskConfigurationBuilder * _Nonnull)setChatTitleColor:(UIColor * _Nullable)color;
+- (ServiceDeskConfigurationBuilder * _Nonnull)setToolbarStyle:(UIBarStyle)barStyle darkBarStyle:(UIBarStyle)darkBarStyle;
+- (ServiceDeskConfigurationBuilder * _Nonnull)setToolbarColor:(UIColor * _Nullable)color;
+- (ServiceDeskConfigurationBuilder * _Nonnull)setToolbarButtonColor:(UIColor * _Nullable)color;
+- (ServiceDeskConfigurationBuilder * _Nonnull)setBackgroundColor:(UIColor * _Nullable)color;
+- (ServiceDeskConfigurationBuilder * _Nonnull)setAttachmentMenuTextColor:(UIColor * _Nullable)color;
+- (ServiceDeskConfigurationBuilder * _Nonnull)setAttachmentMenuButtonColor:(UIColor * _Nullable)color;
+- (ServiceDeskConfigurationBuilder * _Nonnull)setSendButtonColor:(UIColor * _Nullable)color;
+- (ServiceDeskConfiguration * _Nonnull)build SWIFT_WARN_UNUSED_RESULT;
 - (nonnull instancetype)init OBJC_DESIGNATED_INITIALIZER;
 @end
 
@@ -827,77 +795,45 @@ SWIFT_CLASS_PROPERTY(@property (nonatomic, class, copy) void (^ _Nullable onAuth
 - (nonnull instancetype)init OBJC_DESIGNATED_INITIALIZER;
 @end
 
+
+SWIFT_CLASS("_TtC16PyrusServiceDesk24ServiceDeskConfiguration")
+@interface ServiceDeskConfiguration : NSObject
+- (nonnull instancetype)init SWIFT_UNAVAILABLE;
++ (nonnull instancetype)new SWIFT_UNAVAILABLE_MSG("-init is unavailable");
+@end
+
 @class UIColor;
 @class UIImage;
 @class UIBarButtonItem;
 
-SWIFT_CLASS("_TtC16PyrusServiceDesk24ServiceDeskConfiguration")
-@interface ServiceDeskConfiguration : NSObject
-/// Chat title using to show in navigation Bar title
-@property (nonatomic, copy) NSString * _Nullable chatTitle;
-/// Customize color. If not set, the application tint color or blue is used.
-@property (nonatomic, strong) UIColor * _Nullable themeColor;
-/// A first message that user see in new chat. If not setted - user will not see welcome message.
-@property (nonatomic, copy) NSString * _Nullable welcomeMessage;
-/// A icon for support imageView in chat. Show when support user has no image or for welcome message. The default is DEFAULT_SUPPORT_ICON.
-@property (nonatomic, strong) UIImage * _Nullable avatarForSupport;
-/// A user name. The default is “Guest”
-@property (nonatomic, copy) NSString * _Nullable userName;
-/// View to show in  chat navigation bar
-@property (nonatomic, strong) UIView * _Nullable chatTitleView;
-/// Custom UIBarButtonItem to show in right side of navigationBar. Default is nil.
-@property (nonatomic, strong) UIBarButtonItem * _Nullable customRightBarButtonItem;
-/// Custom UIBarButtonItem to show in left side of navigation Bar. Default value is nil. If nil there will be drawn back button. If specify custom left button, Pyrus ServiceDesk cannot be closed.
-@property (nonatomic, strong) UIBarButtonItem * _Nullable customLeftBarButtonItem;
-/// The view to show additional information under chat
-@property (nonatomic, strong) PSDInfoView * _Nullable infoView;
-/// The custom style of the device’s status bar.
-/// \param barStyle The custom style of the device’s status bar for light appearance.
-///
-/// \param darkBarStyle The custom style of the device’s status bar for dark appearance.
-///
-- (void)setStatusBarStyle:(UIStatusBarStyle)barStyle :(UIStatusBarStyle)darkBarStyle;
-/// The custom appearance style of the keyboard for the message input.
-/// \param barStyle The custom appearance style of the keyboard for the message input for light appearance.
-///
-/// \param darkBarStyle The custom appearance style of the keyboard for the message input for dark appearance.
-///
-- (void)setKeyboardAppearance:(UIKeyboardAppearance)keyboardAppearance :(UIKeyboardAppearance)darkKeyboardAppearance;
-/// The custom color for message input.
-- (void)setKeyboardColor:(UIColor * _Nonnull)color;
-/// The custom font name.
-/// \param fontName The custom font name for elements.
-///
-- (void)setFontName:(NSString * _Nullable)fontName;
-/// The custom text color for user’s messages. Default value is is nil. If was not settled, this color will be automatically calculated according to message background view color.
-- (void)setUserTextColor:(UIColor * _Nullable)color;
-/// The custom background color for user’s messages. The default value is equal to themeColor.
-- (void)setUserMessageBackgroundColor:(UIColor * _Nullable)color;
-/// The custom text color for support’s messages. Default value is is UIColor.label.
-- (void)setSupportTextColor:(UIColor * _Nullable)color;
-/// The custom background color for support’s  messages. The default value is UIColor.secondarySystemBackground.
-- (void)setSupportMessageBackgroundColor:(UIColor * _Nullable)color;
-/// The custom color for navigation title. Can be used only if chatTitleView was not setted. Otherwise chatTitleView has highest priority.
-- (void)setChatTitleColor:(UIColor * _Nullable)color;
-/// The custom style of navigation bar.
-/// \param barStyle The custom style of navigation bar for light appearance.
-///
-/// \param darkBarStyle The custom style of navigation bar for dark appearance.
-///
-- (void)setToolbarStyle:(UIBarStyle)barStyle :(UIBarStyle)darkBarStyle;
-/// The custom color of navigation bar.
-- (void)setToolbarColor:(UIColor * _Nullable)color;
-/// The custom color of back button tint. Can be used only if customLeftBarButtonItem was not setted. Otherwise customLeftBarButtonItem has highest priority.
-/// The custom color of navigation bar.
-- (void)setToolbarButtonColor:(UIColor * _Nullable)color;
-/// The custom color for chat background.
-- (void)setBackgroundColor:(UIColor * _Nullable)color;
-/// The custom text color for menu for attachment choosing.
-- (void)setAttachmentMenuTextColor:(UIColor * _Nullable)color;
-/// The custom color for button for attachment choosing.
-- (void)setAttachmentMenuButtonColor:(UIColor * _Nullable)color;
-/// The custom color for button for sending message.
-- (void)setSendButtonColor:(UIColor * _Nullable)color;
+SWIFT_CLASS_NAMED("Builder")
+@interface ServiceDeskConfigurationBuilder : NSObject
+- (ServiceDeskConfigurationBuilder * _Nonnull)setChatTitle:(NSString * _Nullable)chatTitle;
+- (ServiceDeskConfigurationBuilder * _Nonnull)setThemeColor:(UIColor * _Nullable)themeColor;
+- (ServiceDeskConfigurationBuilder * _Nonnull)setWelcomeMessage:(NSString * _Nullable)welcomeMessage;
+- (ServiceDeskConfigurationBuilder * _Nonnull)setAvatarForSupport:(UIImage * _Nullable)avatarForSupport;
+- (ServiceDeskConfigurationBuilder * _Nonnull)setUserName:(NSString * _Nullable)userName;
+- (ServiceDeskConfigurationBuilder * _Nonnull)setChatTitleView:(UIView * _Nullable)chatTitleView;
+- (ServiceDeskConfigurationBuilder * _Nonnull)setCustomRightBarButtonItem:(UIBarButtonItem * _Nullable)customRightBarButtonItem;
+- (ServiceDeskConfigurationBuilder * _Nonnull)setCustomLeftBarButtonItem:(UIBarButtonItem * _Nullable)customLeftBarButtonItem;
+- (ServiceDeskConfigurationBuilder * _Nonnull)setInfoView:(PSDInfoView * _Nullable)infoView;
+- (ServiceDeskConfigurationBuilder * _Nonnull)setStatusBarStyle:(UIStatusBarStyle)barStyle darkBarStyle:(UIStatusBarStyle)darkBarStyle;
+- (ServiceDeskConfigurationBuilder * _Nonnull)setKeyboardAppearance:(UIKeyboardAppearance)keyboardAppearance darkKeyboardAppearance:(UIKeyboardAppearance)darkKeyboardAppearance;
+- (ServiceDeskConfigurationBuilder * _Nonnull)setKeyboardColor:(UIColor * _Nonnull)color;
+- (ServiceDeskConfigurationBuilder * _Nonnull)setFontName:(NSString * _Nullable)fontName;
+- (ServiceDeskConfigurationBuilder * _Nonnull)setUserTextColor:(UIColor * _Nullable)color;
+- (ServiceDeskConfigurationBuilder * _Nonnull)setUserMessageBackgroundColor:(UIColor * _Nullable)color;
+- (ServiceDeskConfigurationBuilder * _Nonnull)setSupportTextColor:(UIColor * _Nullable)color;
+- (ServiceDeskConfigurationBuilder * _Nonnull)setSupportMessageBackgroundColor:(UIColor * _Nullable)color;
+- (ServiceDeskConfigurationBuilder * _Nonnull)setChatTitleColor:(UIColor * _Nullable)color;
+- (ServiceDeskConfigurationBuilder * _Nonnull)setToolbarStyle:(UIBarStyle)barStyle darkBarStyle:(UIBarStyle)darkBarStyle;
+- (ServiceDeskConfigurationBuilder * _Nonnull)setToolbarColor:(UIColor * _Nullable)color;
+- (ServiceDeskConfigurationBuilder * _Nonnull)setToolbarButtonColor:(UIColor * _Nullable)color;
+- (ServiceDeskConfigurationBuilder * _Nonnull)setBackgroundColor:(UIColor * _Nullable)color;
+- (ServiceDeskConfigurationBuilder * _Nonnull)setAttachmentMenuTextColor:(UIColor * _Nullable)color;
+- (ServiceDeskConfigurationBuilder * _Nonnull)setAttachmentMenuButtonColor:(UIColor * _Nullable)color;
+- (ServiceDeskConfigurationBuilder * _Nonnull)setSendButtonColor:(UIColor * _Nullable)color;
+- (ServiceDeskConfiguration * _Nonnull)build SWIFT_WARN_UNUSED_RESULT;
 - (nonnull instancetype)init OBJC_DESIGNATED_INITIALIZER;
 @end
 
@@ -1295,77 +1231,45 @@ SWIFT_CLASS_PROPERTY(@property (nonatomic, class, copy) void (^ _Nullable onAuth
 - (nonnull instancetype)init OBJC_DESIGNATED_INITIALIZER;
 @end
 
+
+SWIFT_CLASS("_TtC16PyrusServiceDesk24ServiceDeskConfiguration")
+@interface ServiceDeskConfiguration : NSObject
+- (nonnull instancetype)init SWIFT_UNAVAILABLE;
++ (nonnull instancetype)new SWIFT_UNAVAILABLE_MSG("-init is unavailable");
+@end
+
 @class UIColor;
 @class UIImage;
 @class UIBarButtonItem;
 
-SWIFT_CLASS("_TtC16PyrusServiceDesk24ServiceDeskConfiguration")
-@interface ServiceDeskConfiguration : NSObject
-/// Chat title using to show in navigation Bar title
-@property (nonatomic, copy) NSString * _Nullable chatTitle;
-/// Customize color. If not set, the application tint color or blue is used.
-@property (nonatomic, strong) UIColor * _Nullable themeColor;
-/// A first message that user see in new chat. If not setted - user will not see welcome message.
-@property (nonatomic, copy) NSString * _Nullable welcomeMessage;
-/// A icon for support imageView in chat. Show when support user has no image or for welcome message. The default is DEFAULT_SUPPORT_ICON.
-@property (nonatomic, strong) UIImage * _Nullable avatarForSupport;
-/// A user name. The default is “Guest”
-@property (nonatomic, copy) NSString * _Nullable userName;
-/// View to show in  chat navigation bar
-@property (nonatomic, strong) UIView * _Nullable chatTitleView;
-/// Custom UIBarButtonItem to show in right side of navigationBar. Default is nil.
-@property (nonatomic, strong) UIBarButtonItem * _Nullable customRightBarButtonItem;
-/// Custom UIBarButtonItem to show in left side of navigation Bar. Default value is nil. If nil there will be drawn back button. If specify custom left button, Pyrus ServiceDesk cannot be closed.
-@property (nonatomic, strong) UIBarButtonItem * _Nullable customLeftBarButtonItem;
-/// The view to show additional information under chat
-@property (nonatomic, strong) PSDInfoView * _Nullable infoView;
-/// The custom style of the device’s status bar.
-/// \param barStyle The custom style of the device’s status bar for light appearance.
-///
-/// \param darkBarStyle The custom style of the device’s status bar for dark appearance.
-///
-- (void)setStatusBarStyle:(UIStatusBarStyle)barStyle :(UIStatusBarStyle)darkBarStyle;
-/// The custom appearance style of the keyboard for the message input.
-/// \param barStyle The custom appearance style of the keyboard for the message input for light appearance.
-///
-/// \param darkBarStyle The custom appearance style of the keyboard for the message input for dark appearance.
-///
-- (void)setKeyboardAppearance:(UIKeyboardAppearance)keyboardAppearance :(UIKeyboardAppearance)darkKeyboardAppearance;
-/// The custom color for message input.
-- (void)setKeyboardColor:(UIColor * _Nonnull)color;
-/// The custom font name.
-/// \param fontName The custom font name for elements.
-///
-- (void)setFontName:(NSString * _Nullable)fontName;
-/// The custom text color for user’s messages. Default value is is nil. If was not settled, this color will be automatically calculated according to message background view color.
-- (void)setUserTextColor:(UIColor * _Nullable)color;
-/// The custom background color for user’s messages. The default value is equal to themeColor.
-- (void)setUserMessageBackgroundColor:(UIColor * _Nullable)color;
-/// The custom text color for support’s messages. Default value is is UIColor.label.
-- (void)setSupportTextColor:(UIColor * _Nullable)color;
-/// The custom background color for support’s  messages. The default value is UIColor.secondarySystemBackground.
-- (void)setSupportMessageBackgroundColor:(UIColor * _Nullable)color;
-/// The custom color for navigation title. Can be used only if chatTitleView was not setted. Otherwise chatTitleView has highest priority.
-- (void)setChatTitleColor:(UIColor * _Nullable)color;
-/// The custom style of navigation bar.
-/// \param barStyle The custom style of navigation bar for light appearance.
-///
-/// \param darkBarStyle The custom style of navigation bar for dark appearance.
-///
-- (void)setToolbarStyle:(UIBarStyle)barStyle :(UIBarStyle)darkBarStyle;
-/// The custom color of navigation bar.
-- (void)setToolbarColor:(UIColor * _Nullable)color;
-/// The custom color of back button tint. Can be used only if customLeftBarButtonItem was not setted. Otherwise customLeftBarButtonItem has highest priority.
-/// The custom color of navigation bar.
-- (void)setToolbarButtonColor:(UIColor * _Nullable)color;
-/// The custom color for chat background.
-- (void)setBackgroundColor:(UIColor * _Nullable)color;
-/// The custom text color for menu for attachment choosing.
-- (void)setAttachmentMenuTextColor:(UIColor * _Nullable)color;
-/// The custom color for button for attachment choosing.
-- (void)setAttachmentMenuButtonColor:(UIColor * _Nullable)color;
-/// The custom color for button for sending message.
-- (void)setSendButtonColor:(UIColor * _Nullable)color;
+SWIFT_CLASS_NAMED("Builder")
+@interface ServiceDeskConfigurationBuilder : NSObject
+- (ServiceDeskConfigurationBuilder * _Nonnull)setChatTitle:(NSString * _Nullable)chatTitle;
+- (ServiceDeskConfigurationBuilder * _Nonnull)setThemeColor:(UIColor * _Nullable)themeColor;
+- (ServiceDeskConfigurationBuilder * _Nonnull)setWelcomeMessage:(NSString * _Nullable)welcomeMessage;
+- (ServiceDeskConfigurationBuilder * _Nonnull)setAvatarForSupport:(UIImage * _Nullable)avatarForSupport;
+- (ServiceDeskConfigurationBuilder * _Nonnull)setUserName:(NSString * _Nullable)userName;
+- (ServiceDeskConfigurationBuilder * _Nonnull)setChatTitleView:(UIView * _Nullable)chatTitleView;
+- (ServiceDeskConfigurationBuilder * _Nonnull)setCustomRightBarButtonItem:(UIBarButtonItem * _Nullable)customRightBarButtonItem;
+- (ServiceDeskConfigurationBuilder * _Nonnull)setCustomLeftBarButtonItem:(UIBarButtonItem * _Nullable)customLeftBarButtonItem;
+- (ServiceDeskConfigurationBuilder * _Nonnull)setInfoView:(PSDInfoView * _Nullable)infoView;
+- (ServiceDeskConfigurationBuilder * _Nonnull)setStatusBarStyle:(UIStatusBarStyle)barStyle darkBarStyle:(UIStatusBarStyle)darkBarStyle;
+- (ServiceDeskConfigurationBuilder * _Nonnull)setKeyboardAppearance:(UIKeyboardAppearance)keyboardAppearance darkKeyboardAppearance:(UIKeyboardAppearance)darkKeyboardAppearance;
+- (ServiceDeskConfigurationBuilder * _Nonnull)setKeyboardColor:(UIColor * _Nonnull)color;
+- (ServiceDeskConfigurationBuilder * _Nonnull)setFontName:(NSString * _Nullable)fontName;
+- (ServiceDeskConfigurationBuilder * _Nonnull)setUserTextColor:(UIColor * _Nullable)color;
+- (ServiceDeskConfigurationBuilder * _Nonnull)setUserMessageBackgroundColor:(UIColor * _Nullable)color;
+- (ServiceDeskConfigurationBuilder * _Nonnull)setSupportTextColor:(UIColor * _Nullable)color;
+- (ServiceDeskConfigurationBuilder * _Nonnull)setSupportMessageBackgroundColor:(UIColor * _Nullable)color;
+- (ServiceDeskConfigurationBuilder * _Nonnull)setChatTitleColor:(UIColor * _Nullable)color;
+- (ServiceDeskConfigurationBuilder * _Nonnull)setToolbarStyle:(UIBarStyle)barStyle darkBarStyle:(UIBarStyle)darkBarStyle;
+- (ServiceDeskConfigurationBuilder * _Nonnull)setToolbarColor:(UIColor * _Nullable)color;
+- (ServiceDeskConfigurationBuilder * _Nonnull)setToolbarButtonColor:(UIColor * _Nullable)color;
+- (ServiceDeskConfigurationBuilder * _Nonnull)setBackgroundColor:(UIColor * _Nullable)color;
+- (ServiceDeskConfigurationBuilder * _Nonnull)setAttachmentMenuTextColor:(UIColor * _Nullable)color;
+- (ServiceDeskConfigurationBuilder * _Nonnull)setAttachmentMenuButtonColor:(UIColor * _Nullable)color;
+- (ServiceDeskConfigurationBuilder * _Nonnull)setSendButtonColor:(UIColor * _Nullable)color;
+- (ServiceDeskConfiguration * _Nonnull)build SWIFT_WARN_UNUSED_RESULT;
 - (nonnull instancetype)init OBJC_DESIGNATED_INITIALIZER;
 @end
 
