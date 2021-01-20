@@ -51,6 +51,7 @@ internal class LiveUpdates(
 
     private val mainHandler = Handler(Looper.getMainLooper())
     private var isStarted = false
+    private var firstReplyIsShown = false
 
     private val ticketsUpdateRunnable = object : Runnable {
         override fun run() {
@@ -261,6 +262,7 @@ internal class LiveUpdates(
 
         val lastCommentId = data.firstOrNull()?.lastComment?.commentId ?: return
 
+
         if (lastSavedComment != null && lastSavedComment.id == lastCommentId && !lastSavedComment.isRead && !hasUnreadTickets) {
             val chatIsShown = activeScreenCount > 0
 
@@ -268,6 +270,10 @@ internal class LiveUpdates(
             preferencesManager.saveLastComment(lastComment)
             if (!chatIsShown)
                 notifyNewReplySubscribers(lastComment)
+        }
+        else if (!hasUnreadTickets && !firstReplyIsShown) {
+            if (activeScreenCount <= 0)
+                notifyNewReplySubscribers(LastComment(0, true, false, null, null, 0, 0))
         }
         else if (lastSavedComment?.id ?: 0 < lastCommentId && this.lastCommentId < lastCommentId) {
             this.lastCommentId = lastCommentId
@@ -337,6 +343,7 @@ internal class LiveUpdates(
 
     private fun notifyNewReplySubscriber(subscriber: NewReplySubscriber, lastComment: LastComment) {
         PLog.d(TAG, "notifyNewReplySubscriber, comment: $lastComment")
+        firstReplyIsShown = true
         val hasNewComments = !lastComment.isRead
         subscriber.onNewReply(
             hasNewComments,
