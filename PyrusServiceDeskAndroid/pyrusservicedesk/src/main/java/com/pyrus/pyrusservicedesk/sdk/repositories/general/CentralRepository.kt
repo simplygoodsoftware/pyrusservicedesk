@@ -15,7 +15,8 @@ internal class CentralRepository(private val webRepository: RemoteRepository,
                                  private val offlineRepository: OfflineRepository)
     : GeneralRepository {
 
-    override suspend fun getFeed(): Response<Comments> = webRepository.getFeed()
+    override suspend fun getFeed(keepUnread: Boolean): Response<Comments> =
+        webRepository.getFeed(keepUnread)
 
     override suspend fun getTickets(): GetTicketsResponse = webRepository.getTickets()
 

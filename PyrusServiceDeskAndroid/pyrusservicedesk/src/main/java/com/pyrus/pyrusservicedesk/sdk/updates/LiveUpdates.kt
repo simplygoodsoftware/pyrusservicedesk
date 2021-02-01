@@ -1,6 +1,5 @@
 package com.pyrus.pyrusservicedesk.sdk.updates
 
-import android.content.SharedPreferences
 import android.os.Handler
 import android.os.Looper
 import androidx.annotation.MainThread
@@ -10,7 +9,11 @@ import com.pyrus.pyrusservicedesk.sdk.RequestFactory
 import com.pyrus.pyrusservicedesk.sdk.data.TicketShortDescription
 import com.pyrus.pyrusservicedesk.sdk.response.ResponseCallback
 import com.pyrus.pyrusservicedesk.sdk.response.ResponseError
-import com.pyrus.pyrusservicedesk.utils.*
+import com.pyrus.pyrusservicedesk.utils.MILLISECONDS_IN_DAY
+import com.pyrus.pyrusservicedesk.utils.MILLISECONDS_IN_HOUR
+import com.pyrus.pyrusservicedesk.utils.MILLISECONDS_IN_MINUTE
+import com.pyrus.pyrusservicedesk.utils.MILLISECONDS_IN_SECOND
+import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
@@ -24,41 +27,46 @@ import kotlin.math.max
  * Subscription types: [LiveUpdateSubscriber], [NewReplySubscriber], [OnUnreadTicketCountChangedSubscriber]
  *
  * @param requests Service desk request factory.
- * @param preferences App shared preferences.
+ * @param preferencesManager Manager of shared preferences.
  * @param userId Id of current user. May by null.
  */
-internal class LiveUpdates(requests: RequestFactory, private val preferences: SharedPreferences, private var userId: String?) {
+internal class LiveUpdates(
+    private val requests: RequestFactory,
+    private val preferencesManager: Preferences,
+    private var userId: String?,
+    private val mainDispatcher: CoroutineDispatcher = Dispatchers.Main,
+    private val ioDispatcher: CoroutineDispatcher = Dispatchers.IO
+) {
 
-    private var lastActiveTime: Long = preferences.getLong(PREFERENCE_KEY_LAST_ACTIVITY_TIME, -1L)
+    private var lastActiveTime: Long = preferencesManager.getLastActiveTime()
     private var activeScreenCount = 0
+    private var lastCommentId = 0
 
     // notified in UI thread
     private val dataSubscribers = mutableSetOf<LiveUpdateSubscriber>()
     private val newReplySubscribers = mutableSetOf<NewReplySubscriber>()
-    private val newReplyLocalSubscribers = mutableSetOf<NewReplySubscriber>()
     private val ticketCountChangedSubscribers = mutableSetOf<OnUnreadTicketCountChangedSubscriber>()
 
     private var recentUnreadCounter = -1
 
     private val mainHandler = Handler(Looper.getMainLooper())
     private var isStarted = false
-    private var hasUnread: Boolean = false
-    private var lastNotificationIsShown = true
+    private var firstReplyIsShown = false
 
     private val ticketsUpdateRunnable = object : Runnable {
         override fun run() {
             val requestUserId = userId
-            GlobalScope.launch(Dispatchers.IO) {
+            GlobalScope.launch(ioDispatcher) {
                 requests.getTicketsRequest().execute(
                     object : ResponseCallback<List<TicketShortDescription>> {
                         override fun onSuccess(data: List<TicketShortDescription>) {
                             val newUnread = data.count { !it.isRead }
-                            this@launch.launch(Dispatchers.Main) {
+                            this@launch.launch(mainDispatcher) {
                                 val userId = PyrusServiceDesk.get().userId
                                 if (data.isEmpty())
                                     stopUpdates()
                                 else if (requestUserId == userId)
-                                    processSuccess(data, newUnread)
+                                    processGetTicketsSuccess(data, newUnread)
                             }
                         }
 
@@ -78,11 +86,6 @@ internal class LiveUpdates(requests: RequestFactory, private val preferences: Sh
         }
     }
 
-    init {
-        if (!isStarted)
-            startUpdates()
-    }
-
     /**
      * Registers [subscriber] to on new reply events
      */
@@ -90,10 +93,10 @@ internal class LiveUpdates(requests: RequestFactory, private val preferences: Sh
     fun subscribeOnReply(subscriber: NewReplySubscriber) {
         PLog.d(TAG, "subscribeOnReply")
         newReplySubscribers.add(subscriber)
-        if (!lastNotificationIsShown) {
-            lastNotificationIsShown = true
-            PLog.d(TAG, "subscribeOnReply, NewReplySubscriber (hasUnreadComments = $hasUnread)")
-            subscriber.onNewReply(hasUnread)
+        val lastComment = preferencesManager.getLastComment()
+        if (lastComment != null && !lastComment.isShown) {
+            preferencesManager.saveLastComment(lastComment.copy(isShown = true))
+            notifyNewReplySubscriber(subscriber, lastComment)
         }
         onSubscribe()
     }
@@ -105,25 +108,6 @@ internal class LiveUpdates(requests: RequestFactory, private val preferences: Sh
     fun unsubscribeFromReplies(subscriber: NewReplySubscriber) {
         PLog.d(TAG, "unsubscribeFromReplies")
         newReplySubscribers.remove(subscriber)
-        onUnsubscribe()
-    }
-
-    /**
-     * Registers [subscriber] to on new reply events. For local subscribers.
-     */
-    @MainThread
-    fun subscribeOnLocalReply(subscriber: NewReplySubscriber) {
-        newReplyLocalSubscribers.add(subscriber)
-        subscriber.onNewReply(hasUnread)
-        onSubscribe()
-    }
-
-    /**
-    * Unregisters [subscriber] from new reply events. For local subscribers.
-    */
-    @MainThread
-    fun unsubscribeFromLocalReplies(subscriber: NewReplySubscriber) {
-        newReplyLocalSubscribers.remove(subscriber)
         onUnsubscribe()
     }
 
@@ -163,16 +147,24 @@ internal class LiveUpdates(requests: RequestFactory, private val preferences: Sh
         onUnsubscribe()
     }
 
+    internal fun reset(userId: String?) {
+        PLog.d(TAG, "reset")
+        this.userId = userId
+        lastCommentId = 0
+        preferencesManager.saveLastActiveTime(-1)
+        preferencesManager.removeLastComment()
+    }
+
     /**
      * Start tickets update if it is not already running.
      */
-    internal fun startUpdatesIfNeeded(lastActiveTime: Long) {
-        val maxLastActiveTime = max(preferences.getLong(PREFERENCE_KEY_LAST_ACTIVITY_TIME, -1L), lastActiveTime)
-        val currentLastActiveTime = preferences.getLong(PREFERENCE_KEY_LAST_ACTIVITY_TIME, -1L)
+    internal fun updateGetTicketsIntervalIfNeeded(lastActiveTime: Long) {
+        val currentLastActiveTime = preferencesManager.getLastActiveTime()
+        val maxLastActiveTime = max(currentLastActiveTime, lastActiveTime)
         PLog.d(TAG, "startUpdatesIfNeeded, lastActiveTime: $lastActiveTime, currentLastActiveTime: $currentLastActiveTime")
         if (maxLastActiveTime > currentLastActiveTime) {
             PLog.d(TAG, "startUpdatesIfNeeded, write last active time in preferences, time: $maxLastActiveTime")
-            preferences.edit().putLong(PREFERENCE_KEY_LAST_ACTIVITY_TIME, lastActiveTime).commit()
+            preferencesManager.saveLastActiveTime(maxLastActiveTime)
         }
         this.lastActiveTime = maxLastActiveTime
 
@@ -193,12 +185,12 @@ internal class LiveUpdates(requests: RequestFactory, private val preferences: Sh
     }
 
     /**
-     * Reset unread token count to 0.
+     * Reset lastComment
      */
-    internal fun resetUnreadCount() {
-        PLog.d(TAG, "resetUnreadCount, hasUnread: $hasUnread, recentUnreadCounter: $recentUnreadCounter")
-        hasUnread = false
-        recentUnreadCounter = 0
+    internal fun onReadComments() {
+        val lastComment = preferencesManager.getLastComment()
+        if (lastComment != null)
+            preferencesManager.saveLastComment(lastComment.copy(isShown = true, isRead = true))
     }
 
     /**
@@ -207,7 +199,7 @@ internal class LiveUpdates(requests: RequestFactory, private val preferences: Sh
     internal fun increaseActiveScreenCount() {
         activeScreenCount++
         PLog.d(TAG, "increaseActiveScreenCount, activeScreenCount: $activeScreenCount")
-        startUpdatesIfNeeded(preferences.getLong(PREFERENCE_KEY_LAST_ACTIVITY_TIME, -1L))
+        updateGetTicketsIntervalIfNeeded(preferencesManager.getLastActiveTime())
     }
 
     /**
@@ -216,11 +208,11 @@ internal class LiveUpdates(requests: RequestFactory, private val preferences: Sh
     internal fun decreaseActiveScreenCount() {
         activeScreenCount--
         PLog.d(TAG, "decreaseActiveScreenCount, activeScreenCount: $activeScreenCount")
-        startUpdatesIfNeeded(preferences.getLong(PREFERENCE_KEY_LAST_ACTIVITY_TIME, -1L))
+        updateGetTicketsIntervalIfNeeded(preferencesManager.getLastActiveTime())
     }
 
     private fun onSubscribe() {
-        startUpdatesIfNeeded(preferences.getLong(PREFERENCE_KEY_LAST_ACTIVITY_TIME, -1L))
+        updateGetTicketsIntervalIfNeeded(preferencesManager.getLastActiveTime())
     }
 
     private fun onUnsubscribe() {
@@ -230,7 +222,6 @@ internal class LiveUpdates(requests: RequestFactory, private val preferences: Sh
         if (newReplySubscribers.isEmpty()
             && ticketCountChangedSubscribers.isEmpty()
             && dataSubscribers.isEmpty()
-            && newReplyLocalSubscribers.isEmpty()
         )
             stopUpdates()
     }
@@ -259,43 +250,108 @@ internal class LiveUpdates(requests: RequestFactory, private val preferences: Sh
     }
 
     @MainThread
-    private fun processSuccess(data: List<TicketShortDescription>, newUnreadCount: Int) {
+    private fun processGetTicketsSuccess(data: List<TicketShortDescription>, newUnreadCount: Int) {
         val isChanged = recentUnreadCounter != newUnreadCount
         PLog.d(TAG, "processSuccess, isChanged: $isChanged, recentUnreadCounter: $recentUnreadCounter, newUnreadCount: $newUnreadCount")
+        notifyDataSubscribers(data, isChanged, newUnreadCount)
+        notifyUnreadCountSubscribers(isChanged, newUnreadCount)
+        recentUnreadCounter = newUnreadCount
+
+        val lastSavedComment = preferencesManager.getLastComment()
+        val hasUnreadTickets = newUnreadCount > 0
+
+        val lastCommentId = data.firstOrNull()?.lastComment?.commentId ?: return
+
+
+        if (lastSavedComment != null && lastSavedComment.id == lastCommentId && !lastSavedComment.isRead && !hasUnreadTickets) {
+            val chatIsShown = activeScreenCount > 0
+
+            val lastComment = lastSavedComment.copy(isShown = newReplySubscribers.isNotEmpty() || chatIsShown, isRead = true)
+            preferencesManager.saveLastComment(lastComment)
+            if (!chatIsShown)
+                notifyNewReplySubscribers(lastComment)
+        }
+        else if (!hasUnreadTickets && !firstReplyIsShown) {
+            if (activeScreenCount <= 0)
+                notifyNewReplySubscribers(LastComment(0, true, false, null, null, 0, 0))
+        }
+        else if (lastSavedComment?.id ?: 0 < lastCommentId && this.lastCommentId < lastCommentId) {
+            this.lastCommentId = lastCommentId
+
+            val responseUserId = userId
+            PLog.d(TAG, "getTicketRequest")
+            GlobalScope.launch(ioDispatcher) {
+                val response = requests.getFeedRequest(true).execute()
+
+                launch(mainDispatcher) main@ {
+                    if (responseUserId != userId)
+                        return@main
+
+                    if (response.hasError()) {
+                        this@LiveUpdates.lastCommentId = 0
+                        PLog.d(TAG, "response.hasError, error: ${response.getError()}")
+                        return@main
+                    }
+
+                    val comments = response.getData()?.comments ?: return@main
+
+                    val lastSavedCommentInMainScope = this@LiveUpdates.preferencesManager.getLastComment()
+                    val lastServerComment = comments.findLast { !it.isInbound } ?: return@main
+                    if (lastServerComment.commentId <= lastSavedCommentInMainScope?.id ?: 0)
+                        return@main
+
+                    val lastUserComment = comments.findLast { it.isInbound } ?: return@main
+
+                    updateGetTicketsIntervalIfNeeded(lastUserComment.creationDate.time)
+
+                    val chatIsShown = activeScreenCount > 0
+                    val lastComment = LastComment.mapFromComment(
+                        newReplySubscribers.isNotEmpty() || chatIsShown,
+                        !hasUnreadTickets,
+                        lastServerComment
+                    )
+
+                    this@LiveUpdates.preferencesManager.saveLastComment(lastComment)
+                    if (!chatIsShown)
+                        notifyNewReplySubscribers(lastComment)
+                }
+            }
+        }
+    }
+
+    private fun notifyUnreadCountSubscribers(isChanged: Boolean, newUnreadCount: Int) {
+        if (isChanged) {
+            val hasNewComments = newUnreadCount > 0
+            PLog.d(TAG, "notifyUnreadCountSubscribers, hasNewComments: $hasNewComments, activeScreenCount: $activeScreenCount")
+            ticketCountChangedSubscribers.forEach { it.onUnreadTicketCountChanged(newUnreadCount) }
+        }
+    }
+
+    private fun notifyDataSubscribers(data: List<TicketShortDescription>, isChanged: Boolean, newUnreadCount: Int) {
         dataSubscribers.forEach {
             it.onNewData(data)
             if (isChanged)
                 it.onUnreadTicketCountChanged(newUnreadCount)
         }
-        hasUnread = newUnreadCount > 0
-        if (isChanged) {
-            val hasNewComments = newUnreadCount > 0
-            PLog.d(TAG, "processSuccess, hasNewComments: $hasNewComments, activeScreenCount: $activeScreenCount")
-            ticketCountChangedSubscribers.forEach { it.onUnreadTicketCountChanged(newUnreadCount) }
-            notifyOnNewReplySubscribers(hasNewComments)
-            newReplyLocalSubscribers.forEach { it.onNewReply(hasNewComments) }
-        }
-        recentUnreadCounter = newUnreadCount
     }
 
-    private fun notifyOnNewReplySubscribers(hasNewComments: Boolean) {
-        if (newReplySubscribers.isEmpty()) {
-            lastNotificationIsShown = false
-            return
+    private fun notifyNewReplySubscribers(lastComment: LastComment) {
+        newReplySubscribers.forEach {
+            notifyNewReplySubscriber(it, lastComment)
         }
-        lastNotificationIsShown = true
-        if (activeScreenCount > 0)
-            return
-
-        PLog.d(TAG, "notifyOnNewReplySubscribers, NewReplySubscriber(hasUnreadComments = $hasNewComments)")
-        newReplySubscribers.forEach { it.onNewReply(hasNewComments) }
     }
 
-    fun reset(userId: String?) {
-        PLog.d(TAG, "reset")
-        this.userId = userId
-        recentUnreadCounter = -1
-        //TODO add active time reset
+    private fun notifyNewReplySubscriber(subscriber: NewReplySubscriber, lastComment: LastComment) {
+        PLog.d(TAG, "notifyNewReplySubscriber, comment: $lastComment")
+        firstReplyIsShown = true
+        val hasNewComments = !lastComment.isRead
+        subscriber.onNewReply(
+            hasNewComments,
+            if (hasNewComments) lastComment.text else null,
+            if (hasNewComments) lastComment.attachesCount else 0,
+            if (hasNewComments) lastComment.attaches else null,
+            if (hasNewComments) lastComment.utcTime else 0
+        )
     }
 
     companion object {

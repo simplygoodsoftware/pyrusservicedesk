@@ -64,7 +64,7 @@ internal class RetrofitWebRepository(
         api = retrofit.create(ServiceDeskApi::class.java)
     }
 
-    override suspend fun getFeed(): Response<Comments> {
+    override suspend fun getFeed(keepUnread: Boolean): Response<Comments> {
         PLog.d(TAG, "getFeed, " +
                 "appId: ${appId.getFirstNSymbols(10)}, " +
                 "userId: ${getUserId().getFirstNSymbols(10)}, " +
@@ -73,7 +73,7 @@ internal class RetrofitWebRepository(
         )
         return withContext<Response<Comments>>(Dispatchers.IO){
             try {
-                api.getTicketFeed(RequestBodyBase(appId, getUserId(), getSecurityKey(), instanceId, getVersion())).execute().run {
+                api.getTicketFeed(GetFeedBody(appId, getUserId(), getSecurityKey(), instanceId, getVersion(), keepUnread)).execute().run {
                     PLog.d(TAG, "getFeed, isSuccessful: $isSuccessful, body() != null: ${body() != null}")
                     when {
                         isSuccessful && body() != null -> ResponseImpl.success(body()!!)
