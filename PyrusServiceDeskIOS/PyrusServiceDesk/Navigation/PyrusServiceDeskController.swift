@@ -8,13 +8,15 @@ class PyrusServiceDeskController: PSDNavigationController {
         self.customization = customization
         if(PyrusServiceDesk.clientId != nil){
             let pyrusChat = PSDChatViewController()
-            super.init(rootViewController: pyrusChat)
+            super.init(nibName: nil, bundle: nil)
+            pushViewController(pyrusChat, animated: false)
             self.transitioningDelegate  = self
             self.isModalInPopover = true
             self.modalPresentationStyle = .overFullScreen
         }else{
             EventsLogger.logEvent(.emptyClientId)
-            super.init(rootViewController: UIViewController())
+            super.init(nibName: nil, bundle: nil)
+            pushViewController(UIViewController(), animated: false)
         }
     }
     required init?(coder aDecoder: NSCoder) {
