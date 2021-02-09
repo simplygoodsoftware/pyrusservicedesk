@@ -763,7 +763,7 @@ SWIFT_CLASS_PROPERTY(@property (nonatomic, class, copy) void (^ _Nullable onAuth
 /// Init PyrusServiceDesk with new clientId.
 /// \param clientId clientId using for all requests. If clientId not setted PyrusServiceDesk Controller will not be created
 ///
-/// \param loggingEnabled If true, then the library will write logs, and they can be sent as a file to chat by clicking the “Send Library Logs” button in the menu under the “+” sign.
+/// \param loggingEnabled If true, then the library will write logs, and they can be sent as a file to chat by clicking the “Send Library Logs” button in the menu under the “+” sign. 
 ///
 + (void)createWith:(NSString * _Nullable)clientId loggingEnabled:(BOOL)loggingEnabled;
 /// Init PyrusServiceDesk with new clientId.
@@ -771,7 +771,7 @@ SWIFT_CLASS_PROPERTY(@property (nonatomic, class, copy) void (^ _Nullable onAuth
 ///
 /// \param reset If true, user will be reseted
 ///
-/// \param loggingEnabled If true, then the library will write logs, and they can be sent as a file to chat by clicking the “Send Library Logs” button in the menu under the “+” sign.
+/// \param loggingEnabled If true, then the library will write logs, and they can be sent as a file to chat by clicking the “Send Library Logs” button in the menu under the “+” sign. 
 ///
 + (void)createWith:(NSString * _Nullable)clientId reset:(BOOL)reset loggingEnabled:(BOOL)loggingEnabled;
 /// Init PyrusServiceDesk with new clientId.
@@ -781,7 +781,7 @@ SWIFT_CLASS_PROPERTY(@property (nonatomic, class, copy) void (^ _Nullable onAuth
 ///
 /// \param securityKey security key of the user for safe initialization
 ///
-/// \param loggingEnabled If true, then the library will write logs, and they can be sent as a file to chat by clicking the “Send Library Logs” button in the menu under the “+” sign.
+/// \param loggingEnabled If true, then the library will write logs, and they can be sent as a file to chat by clicking the “Send Library Logs” button in the menu under the “+” sign. 
 ///
 + (void)createWith:(NSString * _Nullable)clientId userId:(NSString * _Nullable)userId securityKey:(NSString * _Nullable)securityKey loggingEnabled:(BOOL)loggingEnabled;
 + (void)refreshOnError:(void (^ _Nullable)(NSError * _Nullable))onError;
@@ -1199,7 +1199,7 @@ SWIFT_CLASS_PROPERTY(@property (nonatomic, class, copy) void (^ _Nullable onAuth
 /// Init PyrusServiceDesk with new clientId.
 /// \param clientId clientId using for all requests. If clientId not setted PyrusServiceDesk Controller will not be created
 ///
-/// \param loggingEnabled If true, then the library will write logs, and they can be sent as a file to chat by clicking the “Send Library Logs” button in the menu under the “+” sign.
+/// \param loggingEnabled If true, then the library will write logs, and they can be sent as a file to chat by clicking the “Send Library Logs” button in the menu under the “+” sign. 
 ///
 + (void)createWith:(NSString * _Nullable)clientId loggingEnabled:(BOOL)loggingEnabled;
 /// Init PyrusServiceDesk with new clientId.
@@ -1207,7 +1207,7 @@ SWIFT_CLASS_PROPERTY(@property (nonatomic, class, copy) void (^ _Nullable onAuth
 ///
 /// \param reset If true, user will be reseted
 ///
-/// \param loggingEnabled If true, then the library will write logs, and they can be sent as a file to chat by clicking the “Send Library Logs” button in the menu under the “+” sign.
+/// \param loggingEnabled If true, then the library will write logs, and they can be sent as a file to chat by clicking the “Send Library Logs” button in the menu under the “+” sign. 
 ///
 + (void)createWith:(NSString * _Nullable)clientId reset:(BOOL)reset loggingEnabled:(BOOL)loggingEnabled;
 /// Init PyrusServiceDesk with new clientId.
@@ -1217,7 +1217,7 @@ SWIFT_CLASS_PROPERTY(@property (nonatomic, class, copy) void (^ _Nullable onAuth
 ///
 /// \param securityKey security key of the user for safe initialization
 ///
-/// \param loggingEnabled If true, then the library will write logs, and they can be sent as a file to chat by clicking the “Send Library Logs” button in the menu under the “+” sign.
+/// \param loggingEnabled If true, then the library will write logs, and they can be sent as a file to chat by clicking the “Send Library Logs” button in the menu under the “+” sign. 
 ///
 + (void)createWith:(NSString * _Nullable)clientId userId:(NSString * _Nullable)userId securityKey:(NSString * _Nullable)securityKey loggingEnabled:(BOOL)loggingEnabled;
 + (void)refreshOnError:(void (^ _Nullable)(NSError * _Nullable))onError;
@@ -1309,7 +1309,4 @@ SWIFT_CLASS_NAMED("Builder")
 #endif
 
 #endif
-
 #endif
-
-
