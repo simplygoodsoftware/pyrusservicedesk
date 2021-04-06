@@ -1,22 +1,29 @@
+apply plugin: 'io.codearte.nexus-staging'
 
 buildscript {
     repositories {
         google()
-        jcenter()
-
+        jcenter{
+            content {
+                // https://youtrack.jetbrains.com/issue/IDEA-261387
+                includeModule("org.jetbrains.trove4j", "trove4j")
+            }
+        }
+        mavenCentral()
     }
     dependencies {
-        classpath 'com.android.tools.build:gradle:3.6.3'
+        classpath 'com.android.tools.build:gradle:4.1.3'
+        classpath 'io.codearte.gradle.nexus:gradle-nexus-staging-plugin:0.22.0'
     }
 }
 
 allprojects {
     repositories {
         google()
-        jcenter()
+        mavenCentral()
     }
 
-    // https://github.com/novoda/bintray-release/issues/71#issuecomment-305291320
+    // https://github.com/novoda/bintray-release/issues/71#issuecomment-305291320 // TODO
     tasks.withType(Javadoc).all {
         enabled = false
     }
@@ -32,4 +39,8 @@ ext {
     minSdk = 15
     targetSdk = 29
     compileSdk = targetSdk
+
+    PUBLISH_GROUP_ID = 'com.pyrus'
+    PUBLISH_VERSION = '1.5.1'
+    PUBLISH_ARTIFACT_ID = 'servicedesk'
 }

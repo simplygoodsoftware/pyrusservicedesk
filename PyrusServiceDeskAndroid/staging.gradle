@@ -1,0 +1,6 @@
+nexusStaging {
+    packageGroup = PUBLISH_GROUP_ID
+    stagingProfileId = sonatypeStagingProfileId
+    username = ossrhUsername
+    password = ossrhPassword
+}
