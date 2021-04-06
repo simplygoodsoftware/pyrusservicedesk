@@ -21,18 +21,18 @@ allprojects {
     repositories {
         google()
         mavenCentral()
-    }
-
-    // https://github.com/novoda/bintray-release/issues/71#issuecomment-305291320 // TODO
-    tasks.withType(Javadoc).all {
-        enabled = false
+        jcenter{
+            content {
+                // https://youtrack.jetbrains.com/issue/IDEA-261387
+                includeModule("org.jetbrains.trove4j", "trove4j")
+            }
+        }
     }
 }
 
 task clean(type: Delete) {
     delete rootProject.buildDir
 }
-
 
 ext {
     buildTools = '29.0.2'
@@ -41,6 +41,27 @@ ext {
     compileSdk = targetSdk
 
     PUBLISH_GROUP_ID = 'com.pyrus'
-    PUBLISH_VERSION = '1.5.1'
+    PUBLISH_VERSION = '1.5.0'
     PUBLISH_ARTIFACT_ID = 'servicedesk'
+}
+
+nexusStaging {
+    File secretPropsFile = project.rootProject.file('local.properties')
+    if (secretPropsFile.exists()) {
+        Properties p = new Properties()
+        p.load(new FileInputStream(secretPropsFile))
+        p.each { name, value ->
+            ext[name] = value
+        }
+    } else {
+        ext["ossrhUsername"] = System.getenv('OSSRH_USERNAME')
+        ext["ossrhPassword"] = System.getenv('OSSRH_PASSWORD')
+        ext["sonatypeStagingProfileId"] = System.getenv('SONATYPE_STAGING_PROFILE_ID')
+    }
+
+    packageGroup = PUBLISH_GROUP_ID
+    stagingProfileId = sonatypeStagingProfileId
+    username = ossrhUsername
+    password = ossrhPassword
+    serverUrl = 'https://s01.oss.sonatype.org/service/local/'
 }

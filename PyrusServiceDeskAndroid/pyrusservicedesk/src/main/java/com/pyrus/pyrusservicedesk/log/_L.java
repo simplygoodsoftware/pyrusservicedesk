@@ -462,7 +462,7 @@ class _L {
 
         @Override
         protected File doInBackground(Object... context) {
-            String subj = "ServiceDesk Android Client " + BuildConfig.VERSION_NAME + " logs (" + _dateFormat.format(new Date()) + ")";
+            String subj = "ServiceDesk Android Client logs (" + _dateFormat.format(new Date()) + ")";
             String text = Build.DEVICE
                     + " / " + Build.MANUFACTURER
                     + " / " + Build.HARDWARE
