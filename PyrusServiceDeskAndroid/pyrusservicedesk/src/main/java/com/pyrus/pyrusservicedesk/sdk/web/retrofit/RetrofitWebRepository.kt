@@ -53,9 +53,9 @@ internal class RetrofitWebRepository(
 
     init {
         val httpBuilder = OkHttpClient.Builder()
-                .connectTimeout(15, TimeUnit.SECONDS)
-                .writeTimeout(15, TimeUnit.SECONDS)
-                .writeTimeout(15, TimeUnit.SECONDS)
+                .connectTimeout(30, TimeUnit.SECONDS)
+                .writeTimeout(30, TimeUnit.SECONDS)
+                .writeTimeout(30, TimeUnit.SECONDS)
 
         val retrofit = Retrofit.Builder()
                 .baseUrl(BASE_URL)
