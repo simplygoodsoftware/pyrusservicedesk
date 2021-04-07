@@ -6,6 +6,7 @@
 /build
 /captures
 .externalNativeBuild
+/.log
 
 /publish.properties
 /playground
