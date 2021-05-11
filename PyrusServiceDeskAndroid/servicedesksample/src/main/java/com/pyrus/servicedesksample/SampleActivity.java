@@ -58,6 +58,24 @@ public class SampleActivity extends Activity implements NewReplySubscriber {
                     dialog.show();
                 }
         );
+
+        findViewById(R.id.justInit).setOnClickListener(view -> {
+            PyrusServiceDesk.init(
+                    getApplication(),
+                    SampleApp.APP_ID,
+                    true
+            );
+        });
+
+        findViewById(R.id.userInit).setOnClickListener(view -> {
+            PyrusServiceDesk.init(
+                    getApplication(),
+                    SampleApp.APP_ID,
+                    "394513",
+                    "vVIE+SQdDreBsS9GIewTfT+fIxuCAoppuIfjmT5DbpA/t42sdTwetanQr9z6cmXujDZen44A5Pi+c/Zryv26/g==",
+                    true
+            );
+        });
     }
 
     @Override
