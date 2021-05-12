@@ -26,10 +26,6 @@ internal class UploadFileRequestBody(
         private val uploadFileHooks: UploadFileHooks?,
         private val context: CoroutineContext) {
 
-    private companion object {
-        const val MEDIA_TYPE = "multipart/form-responseData"
-    }
-
     private val fileSize = fileStream.available().toLong()
 
     init {
@@ -50,7 +46,7 @@ internal class UploadFileRequestBody(
             }
 
             override fun writeTo(sink: BufferedSink) {
-                val buffer = ByteArray(DEFAULT_BUFFER_SIZE)
+                val buffer = ByteArray(BUFFER_SIZE)
                 var uploaded = 0L
                 fileStream.use { fileStream ->
                     var read: Int = fileStream.read(buffer)
@@ -78,4 +74,10 @@ internal class UploadFileRequestBody(
     private fun Long.toProgress(): Int {
         return (toDouble()/fileSize * 100).toInt()
     }
+
+    private companion object {
+        const val MEDIA_TYPE = "multipart/form-responseData"
+        private const val BUFFER_SIZE = 1024
+    }
+
 }
