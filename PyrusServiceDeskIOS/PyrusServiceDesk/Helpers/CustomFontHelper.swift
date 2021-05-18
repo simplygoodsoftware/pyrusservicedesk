@@ -1,4 +1,4 @@
-import Foundation
+import UIKit
 extension UIFont {
 
     private func withTraits(traits:UIFontDescriptor.SymbolicTraits...) -> UIFont? {

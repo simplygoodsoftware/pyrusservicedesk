@@ -1,4 +1,4 @@
-import Foundation
+import UIKit
 ///The showed
 public class PSDInfoView: UIView {
     public override func removeFromSuperview() {

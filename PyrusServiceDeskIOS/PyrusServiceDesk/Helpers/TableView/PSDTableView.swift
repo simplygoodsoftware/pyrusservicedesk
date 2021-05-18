@@ -1,4 +1,4 @@
-import Foundation
+import UIKit
 class PSDTableView : UITableView{
     let headerHeight :CGFloat = 40
     ///Is table view is loading. Hides or show activity.

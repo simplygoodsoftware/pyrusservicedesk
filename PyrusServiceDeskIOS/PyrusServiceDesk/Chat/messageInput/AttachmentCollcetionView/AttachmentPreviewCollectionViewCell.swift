@@ -6,7 +6,7 @@
 //  Copyright © 2020  Галина Муравьева. All rights reserved.
 //
 
-import Foundation
+import UIKit
 class AttachmentPreviewCollectionViewCell: AttachmentCollectionViewCell {
     var image : UIImage?{
         didSet{

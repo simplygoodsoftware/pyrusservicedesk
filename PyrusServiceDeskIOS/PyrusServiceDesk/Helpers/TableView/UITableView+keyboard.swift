@@ -1,4 +1,4 @@
-import Foundation
+import UIKit
 extension PSDTableView   {
     func addKeyboardListeners(){
         NotificationCenter.default.addObserver(self, selector:  #selector(keyboardWillHide(_:)), name: UIResponder.keyboardWillHideNotification, object: nil)

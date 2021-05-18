@@ -1,5 +1,5 @@
 
-import Foundation
+import UIKit
 extension UIView {
     /**
      Add constraint to view superview. Attribute add to same superview's attribute

@@ -1,5 +1,5 @@
 
-import Foundation
+import UIKit
 class PSDCopyTextView :UITextView,UIGestureRecognizerDelegate, UITextViewDelegate{
     override init(frame: CGRect, textContainer: NSTextContainer?) {
         super.init(frame: frame, textContainer:textContainer)

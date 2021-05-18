@@ -1,5 +1,5 @@
 
-import Foundation
+import UIKit
 
 extension UIImage {
     ///Redraw image with new color

@@ -1,5 +1,5 @@
 
-import Foundation
+import UIKit
 let PROGRESS_LINE_WIDTH : CGFloat = 2.0
 ///Black download image (not full circle)
 class PSDDownloadImage{

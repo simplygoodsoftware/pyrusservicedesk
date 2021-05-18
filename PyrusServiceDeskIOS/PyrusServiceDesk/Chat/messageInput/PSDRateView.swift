@@ -1,4 +1,4 @@
-import Foundation
+import UIKit
 let rateArray = [1 : "😩", 2 : "🙁", 3 : "😐", 4 : "🙂", 5 :"😄"]
 private let STACK_SPACING: CGFloat = 10
 

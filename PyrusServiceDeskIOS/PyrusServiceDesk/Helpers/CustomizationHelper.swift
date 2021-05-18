@@ -1,4 +1,4 @@
-import Foundation
+import UIKit
 ///The class in which contains helpful functions for customizing the interface.
 ///Returns colors and customization settings based on PyrusServiceDeskController values
 class CustomizationHelper {

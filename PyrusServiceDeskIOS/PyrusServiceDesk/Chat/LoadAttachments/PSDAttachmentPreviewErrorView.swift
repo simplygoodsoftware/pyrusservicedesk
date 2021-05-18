@@ -1,5 +1,5 @@
 
-import Foundation
+import UIKit
 
 protocol PSDAttachmentLoadErrorViewDelegate: class {
     ///Error buttom was pressed. Need to retry load attachment.

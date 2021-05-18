@@ -1,5 +1,5 @@
 
-import Foundation
+import UIKit
 import ImageIO
 extension UIImage {
     ///Take image from Pyrus Service Desk framework bundle. Return image, if no image - fatalError

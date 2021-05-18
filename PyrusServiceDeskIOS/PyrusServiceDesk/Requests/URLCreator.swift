@@ -1,4 +1,5 @@
 import Foundation
+import CoreGraphics
 
 ///Type of url to automatic url generation
 enum urlType : String{

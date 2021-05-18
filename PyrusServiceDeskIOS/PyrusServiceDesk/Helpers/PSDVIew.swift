@@ -1,4 +1,4 @@
-import Foundation
+import UIKit
 class PSDView: UIView, Recolorable {
     override func traitCollectionDidChange(_ previousTraitCollection: UITraitCollection?) {
         super.traitCollectionDidChange(previousTraitCollection)

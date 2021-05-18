@@ -1,5 +1,5 @@
 
-import Foundation
+import UIKit
 let PSDImage_Size_Max : CGFloat = 1600 //pt
 let IMAGE_COMPRESSION_QUALITY : CGFloat = 0.7
 extension UIImage {

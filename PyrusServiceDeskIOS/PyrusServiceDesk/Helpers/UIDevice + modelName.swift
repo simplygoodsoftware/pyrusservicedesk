@@ -1,4 +1,4 @@
-import Foundation
+import UIKit
 ///See https://stackoverflow.com/questions/26028918/how-to-determine-the-current-iphone-device-model
 extension UIDevice {
 

@@ -1,5 +1,5 @@
 
-import Foundation
+import UIKit
 //MARK: CloseButtonItemDelegate
 extension PSDAttachmentLoadViewController : CloseButtonItemDelegate{
     @objc func closeButtonAction(){

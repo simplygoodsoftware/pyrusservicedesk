@@ -1,4 +1,5 @@
 import Foundation
+import CoreGraphics
 
 let commentIdParameter = "comment_id"
 let ticketIdParameter = "ticket_id"

@@ -1,5 +1,5 @@
 
-import Foundation
+import UIKit
 extension UIButton {
     func setBackgroundColor(color: UIColor, forState: UIControl.State) {
         self.clipsToBounds = true  // add this to maintain corner radius

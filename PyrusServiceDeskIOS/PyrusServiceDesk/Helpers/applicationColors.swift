@@ -6,7 +6,7 @@
 //  Copyright © 2019  Галина Муравьева. All rights reserved.
 //
 
-import Foundation
+import UIKit
 extension UIColor{
     static var psdLightGray : UIColor {
         if #available(iOS 13, * ) {

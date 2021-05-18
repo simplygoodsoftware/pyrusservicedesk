@@ -1,5 +1,5 @@
 
-import Foundation
+import UIKit
 let TRANSITION_DURATION = 0.3
 
 class CoverHorizontalAnimator: NSObject, UIViewControllerAnimatedTransitioning {

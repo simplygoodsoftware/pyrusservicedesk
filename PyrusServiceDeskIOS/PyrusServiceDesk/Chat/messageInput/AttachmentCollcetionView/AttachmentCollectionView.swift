@@ -6,7 +6,7 @@
 //  Copyright © 2020  Галина Муравьева. All rights reserved.
 //
 
-import Foundation
+import UIKit
 protocol AttachmentCollectionViewDelegateProtocol : NSObjectProtocol{
     func attachmentRemoved()
 }

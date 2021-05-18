@@ -1,4 +1,4 @@
-import Foundation
+import UIKit
 
 class PSDAttachment: NSObject {
     var localPath: String?

@@ -1,4 +1,4 @@
-import Foundation
+import UIKit
 class LogsSendController: UIViewController&FileChooser {
     var label: String = "SendLog".localizedPSD()
     var chooserDelegate: FileChooserDelegate?

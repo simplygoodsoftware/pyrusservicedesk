@@ -1,5 +1,5 @@
 
-import Foundation
+import UIKit
 ///Is rotating  PSDDownloadImage
 class PSDDownloadView : UIImageView{
      private var isAnimateRotation : Bool = false{

@@ -1,5 +1,5 @@
 
-import Foundation
+import UIKit
     /**
      Showing alert Access_Error with actions: cancel and open application settings
      - Parameter alertMessage: String to show in Alert.

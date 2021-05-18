@@ -1,5 +1,5 @@
 
-import Foundation
+import UIKit
 protocol PSDPreviewSetterDelegate : class{
     func reloadCells(with attachmentId: String)
 }

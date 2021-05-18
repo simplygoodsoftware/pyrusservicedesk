@@ -1,4 +1,4 @@
-import Foundation
+import UIKit
 @objc public class ServiceDeskConfiguration: NSObject{
     @objc private override init() {
         super.init()

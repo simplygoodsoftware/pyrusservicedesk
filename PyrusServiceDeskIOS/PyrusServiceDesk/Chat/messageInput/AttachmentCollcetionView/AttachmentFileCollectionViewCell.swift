@@ -6,7 +6,7 @@
 //  Copyright © 2020  Галина Муравьева. All rights reserved.
 //
 
-import Foundation
+import UIKit
 class AttachmentFileCollectionViewCell: AttachmentCollectionViewCell {
     private static let dist : CGFloat = 8.0
     private static let linesNumber : Int = 2

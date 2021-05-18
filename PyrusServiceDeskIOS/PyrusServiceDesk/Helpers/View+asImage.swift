@@ -1,5 +1,5 @@
 
-import Foundation
+import UIKit
 //took from
 //https://stackoverflow.com/questions/30696307/how-to-convert-a-uiview-to-an-image
 extension UIView {

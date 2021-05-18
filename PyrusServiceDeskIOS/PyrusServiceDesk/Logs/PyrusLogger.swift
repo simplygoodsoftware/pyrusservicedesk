@@ -1,4 +1,4 @@
-import Foundation
+import UIKit
 
 protocol LogsSendProtocol: FileChooser {
     func sendData(_ data: Data?, with Url: URL?)

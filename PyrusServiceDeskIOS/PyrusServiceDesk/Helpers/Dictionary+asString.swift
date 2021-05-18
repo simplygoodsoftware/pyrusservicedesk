@@ -1,5 +1,5 @@
 
-import Foundation
+import UIKit
 extension Dictionary where Key ==  String , Value == Any{
     ///Return any object in key as String, if
     func stringOfKey(_ key:String)->String{

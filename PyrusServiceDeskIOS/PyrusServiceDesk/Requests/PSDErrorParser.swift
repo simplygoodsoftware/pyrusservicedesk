@@ -1,4 +1,4 @@
-import Foundation
+import UIKit
 
 /**
  Show alert error on viewController if it is exist and now is top most.

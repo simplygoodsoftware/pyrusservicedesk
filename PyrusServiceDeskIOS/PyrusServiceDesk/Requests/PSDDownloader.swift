@@ -1,4 +1,5 @@
 import Foundation
+import CoreGraphics
 ///Delegate for PSDDownloader. Pass messages to change progress, and about completion result.
 protocol PSDDownloaderDelegate: class {
     /// pass the progress of download
