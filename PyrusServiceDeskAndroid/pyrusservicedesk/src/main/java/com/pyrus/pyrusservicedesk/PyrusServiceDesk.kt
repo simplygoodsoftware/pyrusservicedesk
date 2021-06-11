@@ -64,7 +64,7 @@ class PyrusServiceDesk private constructor(
         private const val REFRESH_MAX_COUNT = 20 // in minute
 
         private const val API_VERSION_1 = 0
-        private const val API_VERSION_2 = 1
+        private const val API_VERSION_2 = 2
 
         internal var logging = false
             private set
