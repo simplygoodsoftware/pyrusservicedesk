@@ -3,6 +3,7 @@ package com.pyrus.pyrusservicedesk.sdk.web.retrofit
 import androidx.annotation.Keep
 import com.google.gson.Gson
 import com.pyrus.pyrusservicedesk.PyrusServiceDesk
+import com.pyrus.pyrusservicedesk.PyrusServiceDesk.Companion.API_VERSION_2
 import com.pyrus.pyrusservicedesk.log.PLog
 import com.pyrus.pyrusservicedesk.sdk.FileResolver
 import com.pyrus.pyrusservicedesk.sdk.data.Attachment
@@ -236,7 +237,7 @@ internal class RetrofitWebRepository(
     }
 
     private fun getUserId(): String {
-        if (getVersion() == 1)
+        if (getVersion() == API_VERSION_2)
             return PyrusServiceDesk.get().userId ?: instanceId
         return instanceId
     }
@@ -246,13 +247,13 @@ internal class RetrofitWebRepository(
     }
 
     private fun getSecurityKey(): String? {
-        if (getVersion() == 1)
+        if (getVersion() == API_VERSION_2)
             return PyrusServiceDesk.get().securityKey
         return null
     }
 
     private fun getInstanceId(): String? {
-        if (getVersion() == 1)
+        if (getVersion() == API_VERSION_2)
             return instanceId
         return null
     }

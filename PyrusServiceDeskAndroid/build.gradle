@@ -30,7 +30,7 @@ ext {
     compileSdk = targetSdk
 
     PUBLISH_GROUP_ID = 'com.pyrus'
-    PUBLISH_VERSION = '0.0.07'
+    PUBLISH_VERSION = '0.0.08'
     PUBLISH_ARTIFACT_ID = 'servicedesk'
 }
 
