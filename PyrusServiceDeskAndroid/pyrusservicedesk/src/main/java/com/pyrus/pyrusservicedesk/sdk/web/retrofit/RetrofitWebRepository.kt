@@ -237,8 +237,9 @@ internal class RetrofitWebRepository(
     }
 
     private fun getUserId(): String {
-        if (getVersion() == API_VERSION_2)
+        if (getVersion() == API_VERSION_2) {
             return PyrusServiceDesk.get().userId ?: instanceId
+        }
         return instanceId
     }
 
