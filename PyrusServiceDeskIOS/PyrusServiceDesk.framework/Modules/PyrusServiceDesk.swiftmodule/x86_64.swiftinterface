@@ -1,5 +1,5 @@
 // swift-interface-format-version: 1.0
-// swift-compiler-version: Apple Swift version 5.4 (swiftlang-1205.0.26.9 clang-1205.0.19.55)
+// swift-compiler-version: Apple Swift version 5.3.2 (swiftlang-1200.0.45 clang-1200.0.32.28)
 // swift-module-flags: -target x86_64-apple-ios9.0-simulator -enable-objc-interop -enable-library-evolution -swift-version 5 -enforce-exclusivity=checked -O -module-name PyrusServiceDesk
 import AVFoundation
 import AVKit
@@ -69,8 +69,8 @@ import zlib
     @discardableResult
     @objc public func setSendButtonColor(_ color: UIKit.UIColor?) -> PyrusServiceDesk.ServiceDeskConfiguration.Builder
     @objc public func build() -> PyrusServiceDesk.ServiceDeskConfiguration
-    @objc override dynamic public init()
     @objc deinit
+    @objc override dynamic public init()
   }
   @objc deinit
 }
@@ -93,9 +93,9 @@ import zlib
 }
 @objc @_inheritsConvenienceInitializers public class PSDInfoView : UIKit.UIView {
   @objc override dynamic public func removeFromSuperview()
+  @objc deinit
   @objc override dynamic public init(frame: CoreGraphics.CGRect)
   @objc required dynamic public init?(coder: Foundation.NSCoder)
-  @objc deinit
 }
 @_inheritsConvenienceInitializers @objc public class PyrusServiceDesk : ObjectiveC.NSObject {
   public static var PSD_CLOSED_NOTIFICATION_NAME: Swift.String
@@ -115,6 +115,6 @@ import zlib
   @objc public static func refreshFromPush(messageId: Swift.Int)
   @objc public static func present(_ viewController: UIKit.UIViewController, animated: Swift.Bool, completion: (() -> Swift.Void)?)
   @objc public static func registerFileChooser(_ chooser: (UIKit.UIViewController & PyrusServiceDesk.FileChooser)?)
-  @objc override dynamic public init()
   @objc deinit
+  @objc override dynamic public init()
 }
