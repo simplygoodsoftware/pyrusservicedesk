@@ -93,6 +93,11 @@ internal class LiveUpdates(
     fun subscribeOnReply(subscriber: NewReplySubscriber) {
         PLog.d(TAG, "subscribeOnReply")
         newReplySubscriber = subscriber
+        val lastComment = preferencesManager.getLastComment()
+        if (lastComment != null && !lastComment.isShown) {
+            preferencesManager.saveLastComment(lastComment.copy(isShown = true))
+            notifyNewReplySubscriber(lastComment)
+        }
         onSubscribe()
     }
 
