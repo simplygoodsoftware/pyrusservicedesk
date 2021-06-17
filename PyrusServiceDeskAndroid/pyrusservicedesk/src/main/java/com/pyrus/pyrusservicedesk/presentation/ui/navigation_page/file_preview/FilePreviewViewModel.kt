@@ -42,7 +42,7 @@ internal class FilePreviewViewModel(serviceDeskProvider: ServiceDeskProvider,
 
     override fun onLoadData() {
         fileLiveData.value = FileViewModel(
-            intent.getFileData().uri,
+            intent.getFileData()!!.uri,
             fileCanBePreviewed(),
             isNetworkConnected.value == false,
             isLocal = isLocalFile())
@@ -82,7 +82,7 @@ internal class FilePreviewViewModel(serviceDeskProvider: ServiceDeskProvider,
             FileViewModel(fileUri, isPreviewable, hasError, isDownloading = true)
         }
         val fileData = intent.getFileData()
-        val request = DownloadManager.Request(fileData.uri).apply {
+        val request = DownloadManager.Request(fileData!!.uri).apply {
             setTitle(fileData.fileName)
             setNotificationVisibility(DownloadManager.Request.VISIBILITY_VISIBLE_NOTIFY_COMPLETED)
         }
@@ -93,12 +93,12 @@ internal class FilePreviewViewModel(serviceDeskProvider: ServiceDeskProvider,
     /**
      * Provides file extension
      */
-    fun getExtension(): String = intent.getFileData().fileName.getExtension()
+    fun getExtension(): String = intent.getFileData()!!.fileName.getExtension()
 
     /**
      * Provides file name without path
      */
-    fun getFileName(): CharSequence = intent.getFileData().fileName
+    fun getFileName(): CharSequence = intent.getFileData()!!.fileName
 
     private fun observeProgress() {
         launch {
@@ -160,8 +160,8 @@ internal class FilePreviewViewModel(serviceDeskProvider: ServiceDeskProvider,
 
     }
 
-    private fun isLocalFile(): Boolean = intent.getFileData().isLocal
-    private fun fileCanBePreviewed(): Boolean = intent.getFileData().fileName.canBePreviewed()
+    private fun isLocalFile(): Boolean = intent.getFileData()!!.isLocal
+    private fun fileCanBePreviewed(): Boolean = intent.getFileData()!!.fileName.canBePreviewed()
 }
 
 internal fun Intent.getFileData() = getParcelableExtra<FileData>(KEY_FILE_DATA)

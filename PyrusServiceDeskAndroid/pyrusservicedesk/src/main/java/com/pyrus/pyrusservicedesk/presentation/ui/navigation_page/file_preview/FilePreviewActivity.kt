@@ -155,20 +155,21 @@ internal class FilePreviewActivity: ConnectionActivityBase<FilePreviewViewModel>
     }
 
     override fun onCreateOptionsMenu(menu: Menu?): Boolean {
-        return menu?.let{ menu ->
-            MenuInflater(this).inflate(R.menu.psd_file_preview_menu, menu)
-            menu.findItem(R.id.download).setShowAsAction(SHOW_AS_ACTION_ALWAYS)
-            menu.findItem(R.id.share).setShowAsAction(SHOW_AS_ACTION_ALWAYS)
-            menu.findItem(R.id.loading)?.let {
-                it.setShowAsAction(SHOW_AS_ACTION_ALWAYS)
-                (it.icon as? RotateDrawable)?.animateInfinite(LOADING_ICON_ANIMATION_DURATION_MS, LinearInterpolator())
-            }
-            val iconColor = ConfigUtils.getToolbarButtonColor(this)
-            menu.findItem(R.id.download).icon?.setColorFilter(iconColor, PorterDuff.Mode.SRC_ATOP)
-            menu.findItem(R.id.share).icon?.setColorFilter(iconColor, PorterDuff.Mode.SRC_ATOP)
-            menu.findItem(R.id.loading)?.icon?.setColorFilter(iconColor, PorterDuff.Mode.SRC_ATOP)
-            true
-        } ?: false
+        if (menu == null)
+            return false
+
+        MenuInflater(this).inflate(R.menu.psd_file_preview_menu, menu)
+        menu.findItem(R.id.download).setShowAsAction(SHOW_AS_ACTION_ALWAYS)
+        menu.findItem(R.id.share).setShowAsAction(SHOW_AS_ACTION_ALWAYS)
+        menu.findItem(R.id.loading)?.let {
+            it.setShowAsAction(SHOW_AS_ACTION_ALWAYS)
+            (it.icon as? RotateDrawable)?.animateInfinite(LOADING_ICON_ANIMATION_DURATION_MS, LinearInterpolator())
+        }
+        val iconColor = ConfigUtils.getToolbarButtonColor(this)
+        menu.findItem(R.id.download).icon?.setColorFilter(iconColor, PorterDuff.Mode.SRC_ATOP)
+        menu.findItem(R.id.share).icon?.setColorFilter(iconColor, PorterDuff.Mode.SRC_ATOP)
+        menu.findItem(R.id.loading)?.icon?.setColorFilter(iconColor, PorterDuff.Mode.SRC_ATOP)
+        return true
     }
 
     override fun startObserveData() {

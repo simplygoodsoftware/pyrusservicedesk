@@ -2,6 +2,7 @@ package com.pyrus.pyrusservicedesk.utils
 
 import androidx.annotation.Keep
 import com.pyrus.pyrusservicedesk.PyrusServiceDesk
+import com.pyrus.pyrusservicedesk.PyrusServiceDesk.Companion.API_VERSION_2
 import java.net.URLEncoder
 
 @Keep
@@ -37,7 +38,7 @@ class RequestUtils{
         private fun getPathParams(): String {
             val version = PyrusServiceDesk.get().apiVersion
             return with(PyrusServiceDesk.get()) {
-                if (version == 1)
+                if (version == API_VERSION_2)
                     "?user_id=" +
                             URLEncoder.encode(userId, "UTF-8") +
                             "&security_key=" +
