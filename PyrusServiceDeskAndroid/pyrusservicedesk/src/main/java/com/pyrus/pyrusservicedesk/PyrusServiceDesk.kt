@@ -63,8 +63,8 @@ class PyrusServiceDesk private constructor(
         private const val SET_PUSH_TOKEN_TIMEOUT = 5 // Minutes
         private const val REFRESH_MAX_COUNT = 20 // in minute
 
-        private const val API_VERSION_1 = 0
-        private const val API_VERSION_2 = 1
+        internal const val API_VERSION_1: Int = 0
+        internal const val API_VERSION_2: Int = 2
 
         internal var logging = false
             private set
