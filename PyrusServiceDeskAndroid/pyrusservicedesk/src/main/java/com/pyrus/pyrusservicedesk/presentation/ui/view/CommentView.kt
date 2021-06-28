@@ -3,6 +3,7 @@ package com.pyrus.pyrusservicedesk.presentation.ui.view
 import android.animation.Animator
 import android.animation.ObjectAnimator
 import android.content.Context
+import android.content.Intent
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.graphics.Color
@@ -11,12 +12,10 @@ import android.graphics.drawable.AnimationDrawable
 import android.graphics.drawable.Drawable
 import android.graphics.drawable.LayerDrawable
 import android.net.Uri
-import androidx.annotation.ColorInt
-import androidx.exifinterface.media.ExifInterface
-import androidx.core.app.ActivityCompat
-import androidx.core.text.util.LinkifyCompat
-import androidx.appcompat.content.res.AppCompatResources
-import androidx.appcompat.widget.AppCompatImageView
+import android.text.SpannableStringBuilder
+import android.text.TextPaint
+import android.text.method.LinkMovementMethod
+import android.text.style.ClickableSpan
 import android.text.util.Linkify
 import android.util.AttributeSet
 import android.view.Gravity
@@ -26,12 +25,21 @@ import android.view.animation.DecelerateInterpolator
 import android.widget.FrameLayout
 import android.widget.ImageView
 import android.widget.LinearLayout
+import androidx.annotation.ColorInt
+import androidx.appcompat.content.res.AppCompatResources
+import androidx.appcompat.widget.AppCompatImageView
+import androidx.appcompat.widget.AppCompatTextView
+import androidx.core.app.ActivityCompat
+import androidx.core.text.util.LinkifyCompat
+import androidx.exifinterface.media.ExifInterface
 import com.pyrus.pyrusservicedesk.R
 import com.pyrus.pyrusservicedesk.presentation.ui.view.OutlineImageView.Companion.EDGE_RIGHT
 import com.pyrus.pyrusservicedesk.utils.*
 import com.squareup.picasso.Picasso
 import com.squareup.picasso.Target
 import kotlinx.android.synthetic.main.psd_comment.view.*
+import java.util.regex.Matcher
+import java.util.regex.Pattern
 
 private const val TYPE_INBOUND = 0
 private const val TYPE_OUTBOUND = 1
@@ -301,6 +309,55 @@ internal class CommentView @JvmOverloads constructor(
     fun setCommentText(text: String) {
         comment_text.text = text
         LinkifyCompat.addLinks(comment_text, Linkify.WEB_URLS or Linkify.PHONE_NUMBERS)
+        addDeepLinks(comment_text)
+    }
+
+    private fun addDeepLinks(textView: AppCompatTextView) {
+        val ssb = SpannableStringBuilder(comment_text.text)
+        val m: Matcher = Pattern.compile("(\\S+)://\\S+").matcher(ssb)
+
+        var anyFound = false
+        while (m.find()) {
+
+            val group = m.group(1)
+            if (group == "http" || group == "https") {
+                continue
+            }
+
+            anyFound = true
+
+            val deepLink = m.group()
+
+            val clickableSpan = object : ClickableSpan() {
+
+                override fun updateDrawState(ds: TextPaint) {
+                    super.updateDrawState(ds)
+                    ds.isUnderlineText = true
+                }
+
+                override fun onClick(widget: View) {
+
+                    try {
+                        context.startActivity(
+                            Intent(Intent.ACTION_VIEW).apply {
+                                data = Uri.parse(deepLink)
+                            }
+                        )
+                    }
+                    catch (exception: Exception) {
+                        exception.printStackTrace()
+                    }
+                }
+
+            }
+
+            ssb.setSpan(clickableSpan, m.start(), m.end(), 0)
+        }
+        if (anyFound) {
+            textView.movementMethod = LinkMovementMethod.getInstance()
+            textView.text = ssb
+        }
+
     }
 
     /**
