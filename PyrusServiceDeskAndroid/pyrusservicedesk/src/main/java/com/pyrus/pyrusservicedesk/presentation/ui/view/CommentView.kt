@@ -313,20 +313,20 @@ internal class CommentView @JvmOverloads constructor(
     }
 
     private fun addDeepLinks(textView: AppCompatTextView) {
-        val ssb = SpannableStringBuilder(comment_text.text)
-        val m: Matcher = Pattern.compile("(\\S+)://\\S+").matcher(ssb)
+        val ssb = SpannableStringBuilder(textView.text)
+        val matcher: Matcher = Pattern.compile("(\\S+)://\\S+").matcher(ssb)
 
         var anyFound = false
-        while (m.find()) {
+        while (matcher.find()) {
 
-            val group = m.group(1)
+            val group = matcher.group(1)
             if (group == "http" || group == "https") {
                 continue
             }
 
             anyFound = true
 
-            val deepLink = m.group()
+            val deepLink = matcher.group()
 
             val clickableSpan = object : ClickableSpan() {
 
@@ -351,7 +351,7 @@ internal class CommentView @JvmOverloads constructor(
 
             }
 
-            ssb.setSpan(clickableSpan, m.start(), m.end(), 0)
+            ssb.setSpan(clickableSpan, matcher.start(), matcher.end(), 0)
         }
         if (anyFound) {
             textView.movementMethod = LinkMovementMethod.getInstance()
