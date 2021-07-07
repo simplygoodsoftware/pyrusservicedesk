@@ -176,63 +176,88 @@ class PSDChatTableView: PSDDetailTableView{
     ///update taable matrix
     ///- parameter needProgress: Determines whether the view should respond to updating(need to show error) 
     func updateChat(needProgress:Bool) {
-//        DispatchQueue.global().async {
-//            [weak self] in
             PSDGetChat.get(needShowError: needProgress, delegate: nil) { [weak self]
                 (chat : PSDChat?) in
-                if let chat = chat{
-                    DispatchQueue.main.async  {
+                DispatchQueue.main.async  {
+                    if let chat = chat{
                         UnreadMessageManager.removeLastComment()
                         self?.needShowRating = chat.showRating
                         self?.showRateIfNeed()
-                    }
-                    //compare number of messages it two last sections
-                    guard let _ = self?.tableMatrix else{
-                        return
-                    }
-                    let (removeIndexPaths, removeSections) = self?.tableMatrix.removeFakeMessages() ?? ([IndexPath](), IndexSet())
-                    self?.tableMatrix.complete(from: chat, startMessage:self?.lastMessageFromServer){
-                        (indexPaths: [IndexPath], sections:IndexSet, _) in
-                        DispatchQueue.main.async  {
-                            let oldContentOffset = self?.contentOffset
-                            let oldContentSize = self?.contentSize
-                            self?.removeNoConnectionView()
-                            self?.lastMessageFromServer = chat.messages.last
-                            self?.setLastActivityDate()
-                            if indexPaths.count>0 || sections.count>0 || removeIndexPaths.count>0 || removeSections.count>0{
-                                let (newRemoveIndexPaths, addIndexPaths, reloadIndexPaths, newRemoveSections, addSections, reloadSections) = PSDTableView.compareAddAndRemoveRows(removeIndexPaths: removeIndexPaths, addIndexPaths: indexPaths, removeSections: removeSections, addSections: sections)
-                                self?.beginUpdates()
-                                if(newRemoveIndexPaths.count>0){
-                                    self?.deleteRows(at: newRemoveIndexPaths, with: .none)
+                        //compare number of messages it two last sections
+                        guard let self = self else{
+                            return
+                        }
+                        var hasChanges = false
+                        let (removeIndexPaths, removeSections) = self.tableMatrix.removeFakeMessages()
+                        if removeIndexPaths.count > 0
+                            || removeSections.count > 0,
+                           self.tableMatrix.count > 0
+                        {
+                            if !hasChanges {
+                                hasChanges = true
+                                PyrusLogger.shared.logEvent("Колличество ячеек до удаления: \(self.tableMatrix[self.tableMatrix.count-1].count)")
+                                PyrusLogger.shared.logEvent("Колличество ячеек после удаления: \(self.tableMatrix[self.tableMatrix.count-1].count)")
+                            }
+                        }
+                        self.tableMatrix.complete(from: chat, startMessage:self.lastMessageFromServer){
+                            (indexPaths: [IndexPath], sections:IndexSet, _) in
+                            DispatchQueue.main.async  {
+                                if indexPaths.count > 0 ||
+                                    sections.count > 0,
+                                   self.tableMatrix.count > 0
+                                {
+                                    if !hasChanges {
+                                        hasChanges = true
+                                        PyrusLogger.shared.logEvent("Колличество ячеек до удаления: \(self.tableMatrix[self.tableMatrix.count-1].count)")
+                                    }
+                                    PyrusLogger.shared.logEvent("Колличество ячеек после добавления: \(self.tableMatrix[self.tableMatrix.count-1].count)")
+                                    PyrusLogger.shared.logEvent("При удалении фейка: ячейки = \(removeIndexPaths), секции \(removeSections)")
+                                    PyrusLogger.shared.logEvent("При добавленни нового сообщения: ячейки = \(indexPaths), секции \(sections)")
                                 }
-                                if(newRemoveSections.count>0){
-                                    self?.deleteSections(newRemoveSections, with: .none)
-                                }
-                                if(addIndexPaths.count>0){
-                                    self?.insertRows(at: addIndexPaths, with: .none)
-                                }
-                                if(addSections.count>0){
-                                    self?.insertSections(addSections, with: .none)
-                                }
-                                if(reloadIndexPaths.count>0){
-                                    self?.reloadRows(at: reloadIndexPaths, with: .none)
-                                }
-                                if(reloadSections.count>0){
-                                    self?.reloadSections(reloadSections, with: .none)
-                                }
-                                self?.endUpdates()
-                                self?.scrollToBottomAfterRefresh(with: oldContentOffset, oldContentSize: oldContentSize)
+                                let oldContentOffset = self.contentOffset
+                                let oldContentSize = self.contentSize
+                                self.removeNoConnectionView()
+                                self.lastMessageFromServer = chat.messages.last
+                                self.setLastActivityDate()
+                                if indexPaths.count > 0
+                                    || sections.count > 0
+                                    || removeIndexPaths.count > 0
+                                    || removeSections.count > 0
+                                {
+                                    let (newRemoveIndexPaths, addIndexPaths, reloadIndexPaths, newRemoveSections, addSections, reloadSections) = PSDTableView.compareAddAndRemoveRows(removeIndexPaths: removeIndexPaths, addIndexPaths: indexPaths, removeSections: removeSections, addSections: sections)
+                                    PyrusLogger.shared.logEvent("Результат после сопоставления: удалять = \(newRemoveIndexPaths), \(newRemoveSections); \n добавлять = \(addIndexPaths), \(addSections); \n Обновлять = \(reloadIndexPaths), \(reloadSections)")
+                                    self.beginUpdates()
+                                    if newRemoveIndexPaths.count > 0 {
+                                        self.deleteRows(at: newRemoveIndexPaths, with: .none)
+                                    }
+                                    if newRemoveSections.count > 0 {
+                                        self.deleteSections(newRemoveSections, with: .none)
+                                    }
+                                    if addIndexPaths.count > 0{
+                                        self.insertRows(at: addIndexPaths, with: .none)
+                                    }
+                                    if addSections.count > 0 {
+                                        self.insertSections(addSections, with: .none)
+                                    }
+                                    if reloadIndexPaths.count > 0 {
+                                        self.reloadRows(at: reloadIndexPaths, with: .none)
+                                    }
+                                    if reloadSections.count > 0 {
+                                        self.reloadSections(reloadSections, with: .none)
+                                    }
+                                    self.endUpdates()
+                                    self.scrollToBottomAfterRefresh(with: oldContentOffset, oldContentSize: oldContentSize)
                                 }
                             }
-                    }
+                        }
 
+                    }
                 }
                 DispatchQueue.main.async  {
                     self?.customRefresh.endRefreshing()
                     self?.bottomRefresh.endRefreshing()
                 }
             }
-//        }
     }
     ///Scrolls table to bottom after refresh, if table view was in bottom scroll position and new messages received
     private func scrollToBottomAfterRefresh(with oldOffset: CGPoint?, oldContentSize: CGSize?) {
