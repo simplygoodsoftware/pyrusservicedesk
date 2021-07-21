@@ -44,7 +44,7 @@ internal class LiveUpdates(
 
     // notified in UI thread
     private val dataSubscribers = mutableSetOf<LiveUpdateSubscriber>()
-    private var newReplySubscriber: NewReplySubscriber? = null
+    private val newReplySubscribers = mutableSetOf<NewReplySubscriber>()
     private val ticketCountChangedSubscribers = mutableSetOf<OnUnreadTicketCountChangedSubscriber>()
 
     private var recentUnreadCounter = -1
@@ -92,11 +92,11 @@ internal class LiveUpdates(
     @MainThread
     fun subscribeOnReply(subscriber: NewReplySubscriber) {
         PLog.d(TAG, "subscribeOnReply")
-        newReplySubscriber = subscriber
+        newReplySubscribers.add(subscriber)
         val lastComment = preferencesManager.getLastComment()
         if (lastComment != null && !lastComment.isShown) {
             preferencesManager.saveLastComment(lastComment.copy(isShown = true))
-            notifyNewReplySubscriber(lastComment)
+            notifyNewReplySubscriber(subscriber, lastComment)
         }
         onSubscribe()
     }
@@ -107,7 +107,7 @@ internal class LiveUpdates(
     @MainThread
     fun unsubscribeFromReplies(subscriber: NewReplySubscriber) {
         PLog.d(TAG, "unsubscribeFromReplies")
-        newReplySubscriber = null
+        newReplySubscribers.remove(subscriber)
         onUnsubscribe()
     }
 
@@ -219,7 +219,7 @@ internal class LiveUpdates(
         if (!isStarted)
             return
 
-        if (newReplySubscriber == null
+        if (newReplySubscribers.isEmpty()
             && ticketCountChangedSubscribers.isEmpty()
             && dataSubscribers.isEmpty()
         )
@@ -266,14 +266,14 @@ internal class LiveUpdates(
         if (lastSavedComment != null && lastSavedComment.id == lastCommentId && !lastSavedComment.isRead && !hasUnreadTickets) {
             val chatIsShown = activeScreenCount > 0
 
-            val lastComment = lastSavedComment.copy(isShown = newReplySubscriber != null || chatIsShown, isRead = true)
+            val lastComment = lastSavedComment.copy(isShown = newReplySubscribers.isNotEmpty() || chatIsShown, isRead = true)
             preferencesManager.saveLastComment(lastComment)
             if (!chatIsShown)
-                notifyNewReplySubscriber(lastComment)
+                notifyNewReplySubscribers(lastComment)
         }
         else if (!hasUnreadTickets && !firstReplyIsShown) {
             if (activeScreenCount <= 0)
-                notifyNewReplySubscriber(LastComment(0, true, false, null, null, 0, 0))
+                notifyNewReplySubscribers(LastComment(0, true, false, null, null, 0, 0))
         }
         else if (lastSavedComment?.id ?: 0 < lastCommentId && this.lastCommentId < lastCommentId) {
             this.lastCommentId = lastCommentId
@@ -306,14 +306,14 @@ internal class LiveUpdates(
 
                     val chatIsShown = activeScreenCount > 0
                     val lastComment = LastComment.mapFromComment(
-                        newReplySubscriber != null || chatIsShown,
+                        newReplySubscribers.isNotEmpty() || chatIsShown,
                         !hasUnreadTickets,
                         lastServerComment
                     )
 
                     this@LiveUpdates.preferencesManager.saveLastComment(lastComment)
                     if (!chatIsShown)
-                        notifyNewReplySubscriber(lastComment)
+                        notifyNewReplySubscribers(lastComment)
                 }
             }
         }
@@ -335,9 +335,14 @@ internal class LiveUpdates(
         }
     }
 
-    private fun notifyNewReplySubscriber(lastComment: LastComment) {
+    private fun notifyNewReplySubscribers(lastComment: LastComment) {
+        newReplySubscribers.forEach {
+            notifyNewReplySubscriber(it, lastComment)
+        }
+    }
+
+    private fun notifyNewReplySubscriber(subscriber: NewReplySubscriber, lastComment: LastComment) {
         PLog.d(TAG, "notifyNewReplySubscriber, comment: $lastComment")
-        val subscriber = newReplySubscriber ?: return
         firstReplyIsShown = true
         val hasNewComments = !lastComment.isRead
         subscriber.onNewReply(
