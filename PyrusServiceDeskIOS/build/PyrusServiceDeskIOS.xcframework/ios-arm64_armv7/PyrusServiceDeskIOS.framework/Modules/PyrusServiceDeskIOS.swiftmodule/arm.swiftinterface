@@ -1,0 +1,120 @@
+// swift-interface-format-version: 1.0
+// swift-compiler-version: Apple Swift version 5.4.2 (swiftlang-1205.0.28.2 clang-1205.0.19.57)
+// swift-module-flags: -target armv7-apple-ios9.0 -enable-objc-interop -enable-library-evolution -swift-version 5 -enforce-exclusivity=checked -O -module-name PyrusServiceDeskIOS
+import AVFoundation
+import AVKit
+import Compression
+import Foundation
+import ImageIO
+import MobileCoreServices
+import Photos
+@_exported import PyrusServiceDeskIOS
+import Swift
+import UIKit
+import WebKit
+import zlib
+@_inheritsConvenienceInitializers @_hasMissingDesignatedInitializers @objc public class ServiceDeskConfiguration : ObjectiveC.NSObject {
+  public var welcomeMessage: Swift.String? {
+    get
+  }
+  @_inheritsConvenienceInitializers @objc(ServiceDeskConfigurationBuilder) public class Builder : ObjectiveC.NSObject {
+    @discardableResult
+    @objc public func setChatTitle(_ chatTitle: Swift.String?) -> PyrusServiceDeskIOS.ServiceDeskConfiguration.Builder
+    @discardableResult
+    @objc public func setThemeColor(_ themeColor: UIKit.UIColor?) -> PyrusServiceDeskIOS.ServiceDeskConfiguration.Builder
+    @discardableResult
+    @objc public func setWelcomeMessage(_ welcomeMessage: Swift.String?) -> PyrusServiceDeskIOS.ServiceDeskConfiguration.Builder
+    @discardableResult
+    @objc public func setAvatarForSupport(_ avatarForSupport: UIKit.UIImage?) -> PyrusServiceDeskIOS.ServiceDeskConfiguration.Builder
+    @discardableResult
+    @objc public func setUserName(_ userName: Swift.String?) -> PyrusServiceDeskIOS.ServiceDeskConfiguration.Builder
+    @discardableResult
+    @objc public func setChatTitleView(_ chatTitleView: UIKit.UIView?) -> PyrusServiceDeskIOS.ServiceDeskConfiguration.Builder
+    @discardableResult
+    @objc public func setCustomRightBarButtonItem(_ customRightBarButtonItem: UIKit.UIBarButtonItem?) -> PyrusServiceDeskIOS.ServiceDeskConfiguration.Builder
+    @discardableResult
+    @objc public func setCustomLeftBarButtonItem(_ customLeftBarButtonItem: UIKit.UIBarButtonItem?) -> PyrusServiceDeskIOS.ServiceDeskConfiguration.Builder
+    @discardableResult
+    @objc public func setInfoView(_ infoView: PyrusServiceDeskIOS.PSDInfoView?) -> PyrusServiceDeskIOS.ServiceDeskConfiguration.Builder
+    @discardableResult
+    @objc(setStatusBarStyle:darkBarStyle:) public func setStatusBarStyle(_ barStyle: UIKit.UIStatusBarStyle, _ darkBarStyle: UIKit.UIStatusBarStyle) -> PyrusServiceDeskIOS.ServiceDeskConfiguration.Builder
+    @discardableResult
+    @objc(setKeyboardAppearance:darkKeyboardAppearance:) public func setKeyboardAppearance(_ keyboardAppearance: UIKit.UIKeyboardAppearance, _ darkKeyboardAppearance: UIKit.UIKeyboardAppearance) -> PyrusServiceDeskIOS.ServiceDeskConfiguration.Builder
+    @discardableResult
+    @objc public func setKeyboardColor(_ color: UIKit.UIColor) -> PyrusServiceDeskIOS.ServiceDeskConfiguration.Builder
+    @discardableResult
+    @objc public func setFontName(_ fontName: Swift.String?) -> PyrusServiceDeskIOS.ServiceDeskConfiguration.Builder
+    @discardableResult
+    @objc public func setUserTextColor(_ color: UIKit.UIColor?) -> PyrusServiceDeskIOS.ServiceDeskConfiguration.Builder
+    @discardableResult
+    @objc public func setUserMessageBackgroundColor(_ color: UIKit.UIColor?) -> PyrusServiceDeskIOS.ServiceDeskConfiguration.Builder
+    @discardableResult
+    @objc public func setSupportTextColor(_ color: UIKit.UIColor?) -> PyrusServiceDeskIOS.ServiceDeskConfiguration.Builder
+    @discardableResult
+    @objc public func setSupportMessageBackgroundColor(_ color: UIKit.UIColor?) -> PyrusServiceDeskIOS.ServiceDeskConfiguration.Builder
+    @discardableResult
+    @objc public func setChatTitleColor(_ color: UIKit.UIColor?) -> PyrusServiceDeskIOS.ServiceDeskConfiguration.Builder
+    @discardableResult
+    @objc(setToolbarStyle:darkBarStyle:) public func setToolbarStyle(_ barStyle: UIKit.UIBarStyle, _ darkBarStyle: UIKit.UIBarStyle) -> PyrusServiceDeskIOS.ServiceDeskConfiguration.Builder
+    @discardableResult
+    @objc public func setToolbarColor(_ color: UIKit.UIColor?) -> PyrusServiceDeskIOS.ServiceDeskConfiguration.Builder
+    @discardableResult
+    @objc public func setToolbarButtonColor(_ color: UIKit.UIColor?) -> PyrusServiceDeskIOS.ServiceDeskConfiguration.Builder
+    @discardableResult
+    @objc public func setBackgroundColor(_ color: UIKit.UIColor?) -> PyrusServiceDeskIOS.ServiceDeskConfiguration.Builder
+    @discardableResult
+    @objc public func setAttachmentMenuTextColor(_ color: UIKit.UIColor?) -> PyrusServiceDeskIOS.ServiceDeskConfiguration.Builder
+    @discardableResult
+    @objc public func setAttachmentMenuButtonColor(_ color: UIKit.UIColor?) -> PyrusServiceDeskIOS.ServiceDeskConfiguration.Builder
+    @discardableResult
+    @objc public func setSendButtonColor(_ color: UIKit.UIColor?) -> PyrusServiceDeskIOS.ServiceDeskConfiguration.Builder
+    @objc public func build() -> PyrusServiceDeskIOS.ServiceDeskConfiguration
+    @objc override dynamic public init()
+    @objc deinit
+  }
+  @objc deinit
+}
+@objc public protocol OnStopCallback {
+  @objc func onStop()
+}
+@objc public protocol FileChooser {
+  @objc var label: Swift.String { get set }
+  @objc weak var chooserDelegate: PyrusServiceDeskIOS.FileChooserDelegate? { get set }
+}
+@objc public protocol FileChooserDelegate {
+  @objc func didEndWithSuccess(_ data: Foundation.Data?, url: Foundation.URL?)
+  @objc func didEndWithCancel()
+}
+@objc public protocol NewReplySubscriber {
+  @objc func onNewReply(hasUnreadComments: Swift.Bool, lastCommentText: Swift.String?, lastCommentAttachmentsCount: Swift.Int, lastCommentAttachments: [Swift.String]?, utcTime: Swift.Double)
+}
+@objc public protocol LogEvents {
+  @objc func logPyrusServiceDesk(event: Swift.String)
+}
+@objc @_inheritsConvenienceInitializers public class PSDInfoView : UIKit.UIView {
+  @objc override dynamic public func removeFromSuperview()
+  @objc override dynamic public init(frame: CoreGraphics.CGRect)
+  @objc required dynamic public init?(coder: Foundation.NSCoder)
+  @objc deinit
+}
+@_inheritsConvenienceInitializers @objc public class PyrusServiceDesk : ObjectiveC.NSObject {
+  public static var PSD_CLOSED_NOTIFICATION_NAME: Swift.String
+  @objc public static func setPushToken(_ token: Swift.String?, completion: @escaping (Swift.Error?) -> Swift.Void)
+  @objc public static func start(on viewController: UIKit.UIViewController, onStopCallback: PyrusServiceDeskIOS.OnStopCallback? = nil)
+  @objc public static func start(on viewController: UIKit.UIViewController, configuration: PyrusServiceDeskIOS.ServiceDeskConfiguration?, onStopCallback: PyrusServiceDeskIOS.OnStopCallback? = nil)
+  @objc public static func start(on viewController: UIKit.UIViewController, configuration: PyrusServiceDeskIOS.ServiceDeskConfiguration?, completion: (() -> Swift.Void)? = nil, onStopCallback: PyrusServiceDeskIOS.OnStopCallback? = nil)
+  @objc public static func stop()
+  @objc public static var onAuthorizationFailed: (() -> Swift.Void)?
+  @objc public static func subscribeToReplies(_ subscriber: PyrusServiceDeskIOS.NewReplySubscriber?)
+  @objc public static func unsubscribeFromReplies(_ subscriber: PyrusServiceDeskIOS.NewReplySubscriber?)
+  @objc public static func subscribeToGogEvents(_ subscriber: PyrusServiceDeskIOS.LogEvents)
+  @objc public static func createWith(_ clientId: Swift.String?, loggingEnabled: Swift.Bool = false)
+  @objc public static func createWith(_ clientId: Swift.String?, reset: Swift.Bool, loggingEnabled: Swift.Bool = false)
+  @objc public static func createWith(_ clientId: Swift.String?, userId: Swift.String?, securityKey: Swift.String?, loggingEnabled: Swift.Bool = false)
+  @objc public static func refresh(onError: ((Swift.Error?) -> Swift.Void)? = nil)
+  @objc public static func refreshFromPush(messageId: Swift.Int)
+  @objc public static func present(_ viewController: UIKit.UIViewController, animated: Swift.Bool, completion: (() -> Swift.Void)?)
+  @objc public static func registerFileChooser(_ chooser: (UIKit.UIViewController & PyrusServiceDeskIOS.FileChooser)?)
+  @objc override dynamic public init()
+  @objc deinit
+}
