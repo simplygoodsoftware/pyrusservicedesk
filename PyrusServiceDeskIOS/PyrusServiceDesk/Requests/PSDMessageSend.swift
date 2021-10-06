@@ -76,6 +76,14 @@ struct PSDMessageSend {
      - parameter delegate: PSDMessageSendDelegate object to receive completion or error.
      */
     static func pass(_ messageToPass: PSDMessage, delegate: PSDMessageSendDelegate?) {
+        if let attachments = messageToPass.attachments {
+            for attachment in attachments{
+                guard attachment.emptyId() else {
+                    continue
+                }
+                attachment.uploadingProgress = 0
+            }
+        }
         PSDMessagesStorage.saveInStorage(message:messageToPass)
         dispatchQueue.async {
             if PSDMessageSend.passingMessagesIds.contains(messageToPass.clientId) {

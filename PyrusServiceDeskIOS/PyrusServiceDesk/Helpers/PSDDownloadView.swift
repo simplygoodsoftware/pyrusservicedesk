@@ -1,10 +1,10 @@
 
 import Foundation
 ///Is rotating  PSDDownloadImage
-class PSDDownloadView : UIImageView{
-     private var isAnimateRotation : Bool = false{
+class PSDDownloadView: UIImageView {
+     private var isAnimateRotation: Bool = false {
         didSet{
-            if(isAnimateRotation){
+            if isAnimateRotation {
                 startRotation()
             }
         }
@@ -16,7 +16,7 @@ class PSDDownloadView : UIImageView{
                 self!.transform = self!.transform.rotated(by: CGFloat(Double.pi))
             }
         }) { [weak self] finished in
-            if(self?.isAnimateRotation ?? false){
+            if self?.isAnimateRotation ?? false {
                 self?.startRotation()
             }
         }
@@ -26,10 +26,10 @@ class PSDDownloadView : UIImageView{
             self.image = PSDDownloadImage.image(color: color)
         }
     }
-    static let downloadSize : CGFloat = 50.0
+    static let downloadSize: CGFloat = 50.0
     
     override func didMoveToSuperview() {
-        if(self.superview == nil){
+        if self.superview == nil {
             isAnimateRotation = false
         }
         else{

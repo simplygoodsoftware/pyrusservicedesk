@@ -52,8 +52,8 @@ class PSDMessageSender: NSObject {
         }
         
         
-        let newState : messageState = success ? .sent : .cantSend
-        let newProgress :CGFloat = success ? 1.0 : 0.0
+        let newState: messageState = success ? .sent : .cantSend
+        let newProgress: CGFloat = success ? 1.0 : 0.0
         
         messageToPass.state = newState
         for attachment in (messageToPass.attachments ?? [PSDAttachment]()){
