@@ -49,7 +49,7 @@ extension URLRequest {
             fullJSOn["user_id"] = customUserId
             fullJSOn["security_key"] = securityKey
             fullJSOn["instance_id"] = PyrusServiceDesk.userId
-            fullJSOn["version"] = 1
+            fullJSOn["version"] = 2
         } else {
             fullJSOn["user_id"] = PyrusServiceDesk.userId
         }
