@@ -59,10 +59,10 @@ import UIKit
             return
         }
         if
-            lastSetPushTokens.count > SET_PUSH_MAX_COUNT,
-            let lastDate =  lastSetPushTokens.first
+            lastSetPushTokens.count >= SET_PUSH_MAX_COUNT,
+            let firstDate =  lastSetPushTokens.first
         {
-            let difference = Date().timeIntervalSince(lastDate)
+            let difference = Date().timeIntervalSince(firstDate)
             if difference < SET_PUSH_TIME_INTEVAL {
                 completion(PSDError.init(description: "Too many requests"))
                 return
