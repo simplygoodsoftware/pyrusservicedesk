@@ -257,14 +257,27 @@ class PSDChatViewController: PSDViewController {
 }
 extension PSDChatViewController : PSDMessageInputViewDelegate{
     func send(_ message:String,_ attachments:[PSDAttachment]){
-        let newMessage :PSDMessage = PSDObjectsCreator.createMessage(message, attachments: attachments)
+        let newMessage = PSDObjectsCreator.createMessage(message, attachments: attachments)
+        prepareMessageForDrawing(newMessage)
         tableView.addNewRow(message: newMessage)
         PSDMessageSend.pass(newMessage, delegate: self.tableView)
     }
     func sendRate(_ rateValue: Int) {
         let newMessage = PSDObjectsCreator.createMessage(rating: rateValue)
+        prepareMessageForDrawing(newMessage)
         tableView.addNewRow(message: newMessage)
         PSDMessageSend.pass(newMessage, delegate: self.tableView)
+    }
+    private func prepareMessageForDrawing(_ newMessage: PSDMessage) {
+        newMessage.state = .sending
+        if let attachments = newMessage.attachments {
+            for attachment in attachments{
+                guard attachment.emptyId() else {
+                    continue
+                }
+                attachment.uploadingProgress = 0
+            }
+        }
     }
 }
 extension PSDChatViewController : PSDUpdateInfo{
