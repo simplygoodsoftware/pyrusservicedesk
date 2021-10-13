@@ -75,21 +75,22 @@ class PSDChatViewController: PSDViewController {
         super.viewWillTransition(to: size, with: coordinator)
         self.tableView.removeListeners()
         self.tableView.bottomPSDRefreshControl.isEnabled = false
-        if(self.tableView.visibleCells.last  != nil ){
-            let lastVisibleRow : IndexPath? = self.tableView.indexPath(for: self.tableView.visibleCells.last!)
-            if(lastVisibleRow != nil){
-                coordinator.animateAlongsideTransition(in: self.tableView, animation: { (context) in
-                    self.tableView.reloadData()
-                    if(self.tableView.contentOffset.y > 100){
-                        self.tableView.scrollToRow(at: lastVisibleRow!, at: .bottom, animated: false)
-                    }
-                }, completion: { context in
-                    self.tableView.bottomPSDRefreshControl.isEnabled = true
-                    self.tableView.addKeyboardListeners()
-                })
-            }
-            
+        guard let lastVisibleCell = self.tableView.visibleCells.last,
+              let lastVisibleRow = self.tableView.indexPath(for: lastVisibleCell) else {
+            return
         }
+        coordinator.animateAlongsideTransition(in: self.tableView, animation: { (context) in
+            self.tableView.reloadData()
+            if self.tableView.contentOffset.y > 100,
+               self.tableView.numberOfSections > lastVisibleRow.section,
+               self.tableView.numberOfRows(inSection: lastVisibleRow.section) > lastVisibleRow.row
+            {
+                self.tableView.scrollToRow(at: lastVisibleRow, at: .bottom, animated: false)
+            }
+        }, completion: { context in
+            self.tableView.bottomPSDRefreshControl.isEnabled = true
+            self.tableView.addKeyboardListeners()
+        })
     }
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
