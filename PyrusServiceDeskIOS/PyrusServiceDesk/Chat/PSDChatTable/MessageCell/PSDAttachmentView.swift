@@ -50,7 +50,7 @@ class PSDAttachmentView: UIView{
             uploadView.progress = newValue
         }
     }
-    var downloadState :messageState = .sent{
+    var downloadState: messageState = .sent {
         didSet(oldValue){
             uploadView.downloadState = downloadState
         }

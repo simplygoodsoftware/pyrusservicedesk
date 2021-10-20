@@ -7,12 +7,13 @@ protocol PSDRetryActionDelegate: class{
 class PSDMessageStateButton: UIButton {
     weak var delegate: PSDRetryActionDelegate?
     ///state of PSDMessageStateButton taken from PSDMessage. Default is .sent.
-    var _messageState : messageState = .sent{
+    var _messageState: messageState = .sent{
         didSet(oldValue)
         {
-            if(oldValue != _messageState){
-                redraw()
+            guard oldValue != _messageState else {
+                return
             }
+            redraw()
         }
     }
     let stateSize :CGFloat = 20.0
@@ -38,8 +39,8 @@ class PSDMessageStateButton: UIButton {
     }
     /**
      Redraw button according to it messageState
- */
-    private func redraw(){
+    */
+    private func redraw() {
         self.stateImage.animationImages=nil
         switch _messageState {
         case .sent:
@@ -50,39 +51,43 @@ class PSDMessageStateButton: UIButton {
             redrawCantSend()
         }
     }
+    
     ///A image that displays the current status of the message. Clock or error.
-    private lazy var stateImage:UIImageView = {
+    private lazy var stateImage: UIImageView = {
         let imV = UIImageView()
         imV.frame=CGRect(x: 0, y: 0, width: stateSize-2, height: stateSize-2)
         imV.center=CGPoint(x:stateSize/2,y:stateSize/2)
         return imV
     }()
-    private func redrawSent(){
+    
+    private func redrawSent() {
         self.isHidden = true
     }
-    private func redrawSending()
-    {
+    
+    private func redrawSending() {
         self.isHidden = false
         resetGifClockImage()
     }
-    private func resetGifClockImage(){
-        if _messageState == .sending{
-            var images = [UIImage]()
-            let imagePrefix = PSDMessageStateButton.clockGifImageName()
-            for i in 1...CLOCK_IMAGES_COUNT {
-                let imageSuffix = String(format: "%02d", i)
-                guard let image = UIImage.PSDImage(name: imagePrefix+imageSuffix) else {
-                    continue
-                }
-                images.append(image)
-            }
-            self.stateImage.animationImages = images
-            self.stateImage.animationDuration = 10.0
-            self.stateImage.animationRepeatCount = 0
-            self.stateImage.startAnimating()
+    
+    private func resetGifClockImage() {
+        guard _messageState == .sending else {
+            return
         }
+        var images = [UIImage]()
+        let imagePrefix = PSDMessageStateButton.clockGifImageName()
+        for i in 1...CLOCK_IMAGES_COUNT {
+            let imageSuffix = String(format: "%02d", i)
+            guard let image = UIImage.PSDImage(name: imagePrefix+imageSuffix) else {
+                continue
+            }
+            images.append(image)
+        }
+        stateImage.animationImages = images
+        stateImage.animationDuration = 5
+        stateImage.animationRepeatCount = 0
+        stateImage.startAnimating()
     }
-    private static func clockGifImageName()->String{
+    private static func clockGifImageName() -> String {
         guard CustomizationHelper.textColorForTable.isDarkColor else {
             return "clock-light-"
         }
@@ -96,8 +101,7 @@ class PSDMessageStateButton: UIButton {
             }
         }
     }
-    private func redrawCantSend()
-    {
+    private func redrawCantSend() {
         let image = UIImage.PSDImage(name: "icn_error")
         self.isHidden = false
         self.stateImage.image=image

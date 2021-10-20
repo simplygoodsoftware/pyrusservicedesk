@@ -75,21 +75,22 @@ class PSDChatViewController: PSDViewController {
         super.viewWillTransition(to: size, with: coordinator)
         self.tableView.removeListeners()
         self.tableView.bottomPSDRefreshControl.isEnabled = false
-        if(self.tableView.visibleCells.last  != nil ){
-            let lastVisibleRow : IndexPath? = self.tableView.indexPath(for: self.tableView.visibleCells.last!)
-            if(lastVisibleRow != nil){
-                coordinator.animateAlongsideTransition(in: self.tableView, animation: { (context) in
-                    self.tableView.reloadData()
-                    if(self.tableView.contentOffset.y > 100){
-                        self.tableView.scrollToRow(at: lastVisibleRow!, at: .bottom, animated: false)
-                    }
-                }, completion: { context in
-                    self.tableView.bottomPSDRefreshControl.isEnabled = true
-                    self.tableView.addKeyboardListeners()
-                })
-            }
-            
+        guard let lastVisibleCell = self.tableView.visibleCells.last,
+              let lastVisibleRow = self.tableView.indexPath(for: lastVisibleCell) else {
+            return
         }
+        coordinator.animateAlongsideTransition(in: self.tableView, animation: { (context) in
+            self.tableView.reloadData()
+            if self.tableView.contentOffset.y > 100,
+               self.tableView.numberOfSections > lastVisibleRow.section,
+               self.tableView.numberOfRows(inSection: lastVisibleRow.section) > lastVisibleRow.row
+            {
+                self.tableView.scrollToRow(at: lastVisibleRow, at: .bottom, animated: false)
+            }
+        }, completion: { context in
+            self.tableView.bottomPSDRefreshControl.isEnabled = true
+            self.tableView.addKeyboardListeners()
+        })
     }
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
@@ -257,14 +258,27 @@ class PSDChatViewController: PSDViewController {
 }
 extension PSDChatViewController : PSDMessageInputViewDelegate{
     func send(_ message:String,_ attachments:[PSDAttachment]){
-        let newMessage :PSDMessage = PSDObjectsCreator.createMessage(message, attachments: attachments)
+        let newMessage = PSDObjectsCreator.createMessage(message, attachments: attachments)
+        prepareMessageForDrawing(newMessage)
         tableView.addNewRow(message: newMessage)
         PSDMessageSend.pass(newMessage, delegate: self.tableView)
     }
     func sendRate(_ rateValue: Int) {
         let newMessage = PSDObjectsCreator.createMessage(rating: rateValue)
+        prepareMessageForDrawing(newMessage)
         tableView.addNewRow(message: newMessage)
         PSDMessageSend.pass(newMessage, delegate: self.tableView)
+    }
+    private func prepareMessageForDrawing(_ newMessage: PSDMessage) {
+        newMessage.state = .sending
+        if let attachments = newMessage.attachments {
+            for attachment in attachments{
+                guard attachment.emptyId() else {
+                    continue
+                }
+                attachment.uploadingProgress = 0
+            }
+        }
     }
 }
 extension PSDChatViewController : PSDUpdateInfo{

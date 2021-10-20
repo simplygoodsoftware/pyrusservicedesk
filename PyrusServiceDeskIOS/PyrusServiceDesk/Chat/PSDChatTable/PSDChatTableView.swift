@@ -388,14 +388,14 @@ class PSDChatTableView: PSDDetailTableView{
         return nil
     }
     
-    private func redrawCell(at indexPath: IndexPath,with message:PSDRowMessage){
+    private func redrawCell(at indexPath: IndexPath,with message: PSDRowMessage) {
         
         //If cell is on the screen and this is attachments cell, we should not reload it because it will restart all animation (bad looking), so just pass progress
-        let cellOnScrean :Bool = self.indexPathsForVisibleRows?.contains(indexPath) ?? false
+        let cellOnScrean = self.indexPathsForVisibleRows?.contains(indexPath) ?? false
         var needReload = true
-        if cellOnScrean && message.attachment != nil{
+        if cellOnScrean && message.attachment != nil {
             let attachmentView = (self.cellForRow(at: indexPath) as? PSDChatMessageCell)?.cloudView.attachmentView
-            if attachmentView != nil && message.message.state == .sending{
+            if attachmentView != nil && message.message.state == .sending {
                 needReload = false
                 self.redrawSendingAttachmentCell(at: indexPath, with: message)
             }
@@ -413,20 +413,26 @@ class PSDChatTableView: PSDDetailTableView{
     }
     ///Redraw cell with sending attachment - pass progress and download state, hide stateView
     private func redrawSendingAttachmentCell(at indexPath: IndexPath,with message:PSDRowMessage){
-        let cellOnScrean :Bool = self.indexPathsForVisibleRows?.contains(indexPath) ?? false
-        if cellOnScrean && message.attachment != nil{
-            let attachmentView = (self.cellForRow(at: indexPath) as? PSDChatMessageCell)?.cloudView.attachmentView
-            if attachmentView != nil && message.message.state == .sending{
-                attachmentView!.progress = message.attachment!.uploadingProgress
-                attachmentView?.downloadState = message.message.state
-                if(message.message.state == .sending){
-                    let stateView = (self.cellForRow(at: indexPath) as? PSDUserMessageCell)?.messageStateView
-                    stateView?._messageState = .sent //hide pass animation if uploading attach now
-                }
-            }
-            
+        let cellOnScreen = self.indexPathsForVisibleRows?.contains(indexPath) ?? false
+        guard
+            cellOnScreen,
+            let attachment = message.attachment
+        else {
+            return
         }
-        
+        guard
+            let attachmentView = (self.cellForRow(at: indexPath) as? PSDChatMessageCell)?.cloudView.attachmentView,
+            message.message.state == .sending
+        else {
+            return
+        }
+        attachmentView.progress = attachment.uploadingProgress
+        attachmentView.downloadState = message.message.state
+        guard message.message.state == .sending else {
+            return
+        }
+        let stateView = (self.cellForRow(at: indexPath) as? PSDUserMessageCell)?.messageStateView
+        stateView?._messageState = .sent //hide pass animation if uploading attach now
     }
 }
 
