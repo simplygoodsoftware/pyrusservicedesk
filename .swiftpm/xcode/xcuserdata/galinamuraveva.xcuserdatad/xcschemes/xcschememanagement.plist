@@ -17,6 +17,11 @@
 	</dict>
 	<key>SuppressBuildableAutocreation</key>
 	<dict>
+		<key>PyrusServiceDesk</key>
+		<dict>
+			<key>primary</key>
+			<true/>
+		</dict>
 		<key>PyrusServiceDeskIOS</key>
 		<dict>
 			<key>primary</key>

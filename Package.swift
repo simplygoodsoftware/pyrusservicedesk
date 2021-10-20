@@ -16,6 +16,6 @@ let package = Package(
     targets: [
         .binaryTarget(
                     name: "PyrusServiceDesk",
-                    path: "PyrusServiceDeskIOS/PyrusServiceDeskIOS.xcframework")
+                    path: "PyrusServiceDeskIOS/PyrusServiceDesk.xcframework")
     ]
 )
