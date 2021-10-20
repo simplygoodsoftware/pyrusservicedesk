@@ -3,19 +3,19 @@
 
 import PackageDescription
 let package = Package(
-    name: "PyrusServiceDeskIOS",
+    name: "PyrusServiceDesk",
     platforms: [
             .iOS(.v11)
         ],
     products: [
         .library(
-            name: "PyrusServiceDeskIOS",
-            targets: ["PyrusServiceDeskIOS"]
+            name: "PyrusServiceDesk",
+            targets: ["PyrusServiceDesk"]
         )
     ],
     targets: [
         .binaryTarget(
-                    name: "PyrusServiceDeskIOS",
+                    name: "PyrusServiceDesk",
                     path: "PyrusServiceDeskIOS/PyrusServiceDeskIOS.xcframework")
     ]
 )
