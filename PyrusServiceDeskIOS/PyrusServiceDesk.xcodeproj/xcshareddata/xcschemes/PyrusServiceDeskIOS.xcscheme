@@ -15,7 +15,7 @@
             <BuildableReference
                BuildableIdentifier = "primary"
                BlueprintIdentifier = "4B7F34D221F85E2A00977C6D"
-               BuildableName = "PyrusServiceDeskIOS.framework"
+               BuildableName = "PyrusServiceDesk.framework"
                BlueprintName = "PyrusServiceDesk"
                ReferencedContainer = "container:PyrusServiceDesk.xcodeproj">
             </BuildableReference>
@@ -51,7 +51,7 @@
          <BuildableReference
             BuildableIdentifier = "primary"
             BlueprintIdentifier = "4B7F34D221F85E2A00977C6D"
-            BuildableName = "PyrusServiceDeskIOS.framework"
+            BuildableName = "PyrusServiceDesk.framework"
             BlueprintName = "PyrusServiceDesk"
             ReferencedContainer = "container:PyrusServiceDesk.xcodeproj">
          </BuildableReference>
