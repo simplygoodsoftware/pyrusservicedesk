@@ -2,7 +2,7 @@ BCSymbolMap Version: 2.0
 Apple clang version 13.0.0 (clang-1300.0.29.3)
 /Applications/Xcode.app/Contents/Developer/Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS15.0.sdk
 iPhoneOS15.0.sdk
-/Users/galinamuraveva/Library/Developer/Xcode/DerivedData/PyrusServiceDesk-dxyxkjqrqrqmgpeogbjwbnzmdpxl/Build/Intermediates.noindex/ArchiveIntermediates/PyrusServiceDesk/IntermediateBuildFilesPath/PyrusServiceDesk.build/Release-iphoneos/PyrusServiceDesk.build/DerivedSources/PyrusServiceDesk_vers.c
+/Users/galinamuraveva/Library/Developer/Xcode/DerivedData/PyrusServiceDesk-dxyxkjqrqrqmgpeogbjwbnzmdpxl/Build/Intermediates.noindex/ArchiveIntermediates/PyrusServiceDeskIOS/IntermediateBuildFilesPath/PyrusServiceDesk.build/Release-iphoneos/PyrusServiceDesk.build/DerivedSources/PyrusServiceDesk_vers.c
 /Users/galinamuraveva/pyrusservicedesk/PyrusServiceDeskIOS
 _$s16PyrusServiceDesk21PSDUploadViewDelegateP10stopUploadyyFTj
 _$s16PyrusServiceDesk13PSDUploadViewC6redrawyyF
