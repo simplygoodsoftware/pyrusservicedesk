@@ -133,7 +133,7 @@ class PyrusServiceDesk private constructor(
                 INSTANCE?.liveUpdates?.reset(userId)
             }
 
-            //TODO sds validate base url and throw
+            val validDomain = if (validateDomain(domain)) domain else null
 
             if (CONFIGURATION != null || INSTANCE != null && get().userId != userId) {
                 clearLocalData {
@@ -145,7 +145,7 @@ class PyrusServiceDesk private constructor(
                         true,
                         userId,
                         securityKey,
-                        domain,
+                        validDomain,
                         apiVersion,
                         loggingEnabled
                     )
@@ -154,6 +154,14 @@ class PyrusServiceDesk private constructor(
             else {
                 INSTANCE = PyrusServiceDesk(application, appId, true, userId, securityKey, domain, apiVersion, loggingEnabled)
             }
+        }
+
+        private fun validateDomain(domain: String?): Boolean {
+            if (domain == null) {
+                return true
+            }
+            val domainRegex = """\w+.\w+""".toRegex()
+            return domainRegex.matches(domain)
         }
 
         /**
