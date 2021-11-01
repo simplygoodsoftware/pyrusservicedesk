@@ -28,13 +28,21 @@ extension Array where Element == [PSDRowMessage]{
             return (indexPaths, IndexSet(addSections))
         }
         let messages = PSDObjectsCreator.parseMessageToRowMessage(fakeMessage)
-        if let lastMessage = lastMessage, fakeMessage.date.compareWithoutTime(with: lastMessage.message.date)  == .equal{
+        var addRow = false
+        if let lastMessage = lastMessage,
+           fakeMessage.date.compareWithoutTime(with: lastMessage.message.date)  == .equal {
+            addRow = true
             indexPaths.append(IndexPath(row: self[lastSection].count, section: lastSection))
         }
         else{
             addSections.append(lastSection + 1)
         }
+        let oldCount = addRow ? self[lastSection].count : self.count
         let _ = completeWithMessages(messages)
+        let newCount = addRow ? self[lastSection].count : self.count
+        if oldCount == newCount {
+            PyrusLogger.shared.logEvent("Неверный результат добавления фейкового сообщения. Добавлялись ячейки, а не секции = \(addRow), старое количество = \(oldCount), новое количество = \(newCount)")
+        }
         return (indexPaths, IndexSet(addSections))
     }
     mutating func removeFakeMessages() -> ([IndexPath],IndexSet) {
@@ -148,7 +156,9 @@ extension Array where Element == [PSDRowMessage]{
                         let row = self.row(forMessage: message, section: section)
                         self[section].insert(contentsOf:PSDObjectsCreator.parseMessageToRowMessage(message), at: row)
                         if(!reloadSections.contains(section)){
-                            indexPaths.append(IndexPath.init(row: row, section: section))
+                            for i in 0...rowMessages.count-1 {
+                                indexPaths.append(IndexPath.init(row: row+i, section: section))
+                            }
                         }
                       
                     }

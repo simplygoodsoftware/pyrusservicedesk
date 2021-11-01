@@ -4,12 +4,14 @@ import UIKit
     private static let PSD_USER_START_CHAT_KEY = "PSDUserStartChat"
     public static var PSD_CLOSED_NOTIFICATION_NAME = "PyrusServiceDeskWasClosed"
     private static let SET_PUSH_TIME_INTEVAL = TimeInterval(5*60)
+    private static let SET_PUSH_MAX_COUNT = 5
     private static let REFRESH_TIME_INTEVAL = TimeInterval(1*60)
     private static let REFRESH_MAX_COUNT = 20
     
     ///AppId needed for request
     static var clientId: String?
     private static var lastSetPushToken: Date?
+    private static var lastSetPushTokens = [Date]()
     private static var lastRefreshes = [Date]()
 
     ///UserId needed for request
@@ -46,22 +48,43 @@ import UIKit
      - parameter completion: Error. Not nil if success. See error.localizedDescription to understand why its happened
  */
     @objc public static func setPushToken(_ token:String?, completion: @escaping(Error?) -> Void){
-        if let lastSetPushToken = lastSetPushToken{
-            let difference = Date().timeIntervalSince(lastSetPushToken)
-            if difference < SET_PUSH_TIME_INTEVAL{
-                completion(PSDError.init(description: "Too many requests"))
-                return
-            }
-        }
-        guard let clientId = clientId, clientId.count > 0, clientId != "0"  else{
+        
+        guard
+            let clientId = clientId,
+            clientId.count > 0,
+            clientId != "0"
+        else {
             completion(PSDError.init(description: "AppId is invalid"))
             EventsLogger.logEvent(.emptyClientId)
             return
         }
+        if
+            lastSetPushTokens.count >= SET_PUSH_MAX_COUNT,
+            let firstDate =  lastSetPushTokens.first
+        {
+            let difference = Date().timeIntervalSince(firstDate)
+            if difference < SET_PUSH_TIME_INTEVAL {
+                completion(PSDError.init(description: "Too many requests"))
+                return
+            }
+            else {
+                lastSetPushTokens.removeFirst()
+            }
+        }
+        if let lastSetPushToken = lastSetPushToken {
+            let difference = Date().timeIntervalSince(lastSetPushToken)
+            if difference < SET_PUSH_TIME_INTEVAL {
+                completion(PSDError.init(description: "Too many requests"))
+                return
+            }
+        }
         PSDPushToken.send(token, completion: {
             error in
             completion(error)
-            lastSetPushToken = Date()
+            lastSetPushTokens.append(Date())
+            if error == nil {
+                lastSetPushToken = Date()
+            }
         })
     }
     
@@ -172,6 +195,7 @@ import UIKit
         let needReloadUI = PyrusServiceDesk.customUserId != userId
         PyrusServiceDesk.customUserId = userId
         PyrusServiceDesk.createUserId(reset)
+        lastSetPushToken = nil
         if needReloadUI {
             PyrusServiceDesk.mainController?.updateTitleChat()
         }

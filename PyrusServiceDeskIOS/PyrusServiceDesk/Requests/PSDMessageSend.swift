@@ -1,11 +1,12 @@
 import UIKit
 
-protocol PSDMessageSendDelegate: class {
+protocol PSDMessageSendDelegate: AnyObject {
     ///Pass delegate to refresh object with new data. Attention! may call from background!
     ///- parameter changedToSent: If state of message was changed from !.sent to .sent
     func refresh(message:PSDMessage, changedToSent: Bool)
     func remove(message:PSDMessage)
 }
+
 struct PSDMessageSend {
     ///DispatchSemaphore to pass message one by one
     private static let semaphore = DispatchSemaphore(value: 1)
@@ -76,6 +77,14 @@ struct PSDMessageSend {
      - parameter delegate: PSDMessageSendDelegate object to receive completion or error.
      */
     static func pass(_ messageToPass: PSDMessage, delegate: PSDMessageSendDelegate?) {
+        if let attachments = messageToPass.attachments {
+            for attachment in attachments{
+                guard attachment.emptyId() else {
+                    continue
+                }
+                attachment.uploadingProgress = 0
+            }
+        }
         PSDMessagesStorage.saveInStorage(message:messageToPass)
         dispatchQueue.async {
             if PSDMessageSend.passingMessagesIds.contains(messageToPass.clientId) {

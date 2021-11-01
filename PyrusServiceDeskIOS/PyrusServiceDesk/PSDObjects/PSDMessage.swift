@@ -35,7 +35,7 @@ class PSDMessage: NSObject {
         self.clientId = UUID().uuidString
         super.init()
         
-        if(self.hasId() || (self.owner != PSDUsers.user)){
+        if self.hasId() || self.owner != PSDUsers.user {
             self.state = .sent
         }
         

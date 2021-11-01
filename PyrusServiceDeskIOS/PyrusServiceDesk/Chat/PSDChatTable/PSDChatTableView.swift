@@ -176,63 +176,88 @@ class PSDChatTableView: PSDDetailTableView{
     ///update taable matrix
     ///- parameter needProgress: Determines whether the view should respond to updating(need to show error) 
     func updateChat(needProgress:Bool) {
-//        DispatchQueue.global().async {
-//            [weak self] in
             PSDGetChat.get(needShowError: needProgress, delegate: nil) { [weak self]
                 (chat : PSDChat?) in
-                if let chat = chat{
-                    DispatchQueue.main.async  {
+                DispatchQueue.main.async  {
+                    if let chat = chat{
                         UnreadMessageManager.removeLastComment()
                         self?.needShowRating = chat.showRating
                         self?.showRateIfNeed()
-                    }
-                    //compare number of messages it two last sections
-                    guard let _ = self?.tableMatrix else{
-                        return
-                    }
-                    let (removeIndexPaths, removeSections) = self?.tableMatrix.removeFakeMessages() ?? ([IndexPath](), IndexSet())
-                    self?.tableMatrix.complete(from: chat, startMessage:self?.lastMessageFromServer){
-                        (indexPaths: [IndexPath], sections:IndexSet, _) in
-                        DispatchQueue.main.async  {
-                            let oldContentOffset = self?.contentOffset
-                            let oldContentSize = self?.contentSize
-                            self?.removeNoConnectionView()
-                            self?.lastMessageFromServer = chat.messages.last
-                            self?.setLastActivityDate()
-                            if indexPaths.count>0 || sections.count>0 || removeIndexPaths.count>0 || removeSections.count>0{
-                                let (newRemoveIndexPaths, addIndexPaths, reloadIndexPaths, newRemoveSections, addSections, reloadSections) = PSDTableView.compareAddAndRemoveRows(removeIndexPaths: removeIndexPaths, addIndexPaths: indexPaths, removeSections: removeSections, addSections: sections)
-                                self?.beginUpdates()
-                                if(newRemoveIndexPaths.count>0){
-                                    self?.deleteRows(at: newRemoveIndexPaths, with: .none)
+                        //compare number of messages it two last sections
+                        guard let self = self else{
+                            return
+                        }
+                        var hasChanges = false
+                        let (removeIndexPaths, removeSections) = self.tableMatrix.removeFakeMessages()
+                        if removeIndexPaths.count > 0
+                            || removeSections.count > 0,
+                           self.tableMatrix.count > 0
+                        {
+                            if !hasChanges {
+                                hasChanges = true
+                                PyrusLogger.shared.logEvent("Колличество ячеек до удаления: \(self.tableMatrix[self.tableMatrix.count-1].count)")
+                                PyrusLogger.shared.logEvent("Колличество ячеек после удаления: \(self.tableMatrix[self.tableMatrix.count-1].count)")
+                            }
+                        }
+                        self.tableMatrix.complete(from: chat, startMessage:self.lastMessageFromServer){
+                            (indexPaths: [IndexPath], sections:IndexSet, _) in
+                            DispatchQueue.main.async  {
+                                if indexPaths.count > 0 ||
+                                    sections.count > 0,
+                                   self.tableMatrix.count > 0
+                                {
+                                    if !hasChanges {
+                                        hasChanges = true
+                                        PyrusLogger.shared.logEvent("Колличество ячеек до удаления: \(self.tableMatrix[self.tableMatrix.count-1].count)")
+                                    }
+                                    PyrusLogger.shared.logEvent("Колличество ячеек после добавления: \(self.tableMatrix[self.tableMatrix.count-1].count)")
+                                    PyrusLogger.shared.logEvent("При удалении фейка: ячейки = \(removeIndexPaths), секции \(removeSections)")
+                                    PyrusLogger.shared.logEvent("При добавленни нового сообщения: ячейки = \(indexPaths), секции \(sections)")
                                 }
-                                if(newRemoveSections.count>0){
-                                    self?.deleteSections(newRemoveSections, with: .none)
-                                }
-                                if(addIndexPaths.count>0){
-                                    self?.insertRows(at: addIndexPaths, with: .none)
-                                }
-                                if(addSections.count>0){
-                                    self?.insertSections(addSections, with: .none)
-                                }
-                                if(reloadIndexPaths.count>0){
-                                    self?.reloadRows(at: reloadIndexPaths, with: .none)
-                                }
-                                if(reloadSections.count>0){
-                                    self?.reloadSections(reloadSections, with: .none)
-                                }
-                                self?.endUpdates()
-                                self?.scrollToBottomAfterRefresh(with: oldContentOffset, oldContentSize: oldContentSize)
+                                let oldContentOffset = self.contentOffset
+                                let oldContentSize = self.contentSize
+                                self.removeNoConnectionView()
+                                self.lastMessageFromServer = chat.messages.last
+                                self.setLastActivityDate()
+                                if indexPaths.count > 0
+                                    || sections.count > 0
+                                    || removeIndexPaths.count > 0
+                                    || removeSections.count > 0
+                                {
+                                    let (newRemoveIndexPaths, addIndexPaths, reloadIndexPaths, newRemoveSections, addSections, reloadSections) = PSDTableView.compareAddAndRemoveRows(removeIndexPaths: removeIndexPaths, addIndexPaths: indexPaths, removeSections: removeSections, addSections: sections)
+                                    PyrusLogger.shared.logEvent("Результат после сопоставления: удалять = \(newRemoveIndexPaths), \(newRemoveSections); \n добавлять = \(addIndexPaths), \(addSections); \n Обновлять = \(reloadIndexPaths), \(reloadSections)")
+                                    self.beginUpdates()
+                                    if newRemoveIndexPaths.count > 0 {
+                                        self.deleteRows(at: newRemoveIndexPaths, with: .none)
+                                    }
+                                    if newRemoveSections.count > 0 {
+                                        self.deleteSections(newRemoveSections, with: .none)
+                                    }
+                                    if addIndexPaths.count > 0{
+                                        self.insertRows(at: addIndexPaths, with: .none)
+                                    }
+                                    if addSections.count > 0 {
+                                        self.insertSections(addSections, with: .none)
+                                    }
+                                    if reloadIndexPaths.count > 0 {
+                                        self.reloadRows(at: reloadIndexPaths, with: .none)
+                                    }
+                                    if reloadSections.count > 0 {
+                                        self.reloadSections(reloadSections, with: .none)
+                                    }
+                                    self.endUpdates()
+                                    self.scrollToBottomAfterRefresh(with: oldContentOffset, oldContentSize: oldContentSize)
                                 }
                             }
-                    }
+                        }
 
+                    }
                 }
                 DispatchQueue.main.async  {
                     self?.customRefresh.endRefreshing()
                     self?.bottomRefresh.endRefreshing()
                 }
             }
-//        }
     }
     ///Scrolls table to bottom after refresh, if table view was in bottom scroll position and new messages received
     private func scrollToBottomAfterRefresh(with oldOffset: CGPoint?, oldContentSize: CGSize?) {
@@ -363,14 +388,14 @@ class PSDChatTableView: PSDDetailTableView{
         return nil
     }
     
-    private func redrawCell(at indexPath: IndexPath,with message:PSDRowMessage){
+    private func redrawCell(at indexPath: IndexPath,with message: PSDRowMessage) {
         
         //If cell is on the screen and this is attachments cell, we should not reload it because it will restart all animation (bad looking), so just pass progress
-        let cellOnScrean :Bool = self.indexPathsForVisibleRows?.contains(indexPath) ?? false
+        let cellOnScrean = self.indexPathsForVisibleRows?.contains(indexPath) ?? false
         var needReload = true
-        if cellOnScrean && message.attachment != nil{
+        if cellOnScrean && message.attachment != nil {
             let attachmentView = (self.cellForRow(at: indexPath) as? PSDChatMessageCell)?.cloudView.attachmentView
-            if attachmentView != nil && message.message.state == .sending{
+            if attachmentView != nil && message.message.state == .sending {
                 needReload = false
                 self.redrawSendingAttachmentCell(at: indexPath, with: message)
             }
@@ -388,20 +413,26 @@ class PSDChatTableView: PSDDetailTableView{
     }
     ///Redraw cell with sending attachment - pass progress and download state, hide stateView
     private func redrawSendingAttachmentCell(at indexPath: IndexPath,with message:PSDRowMessage){
-        let cellOnScrean :Bool = self.indexPathsForVisibleRows?.contains(indexPath) ?? false
-        if cellOnScrean && message.attachment != nil{
-            let attachmentView = (self.cellForRow(at: indexPath) as? PSDChatMessageCell)?.cloudView.attachmentView
-            if attachmentView != nil && message.message.state == .sending{
-                attachmentView!.progress = message.attachment!.uploadingProgress
-                attachmentView?.downloadState = message.message.state
-                if(message.message.state == .sending){
-                    let stateView = (self.cellForRow(at: indexPath) as? PSDUserMessageCell)?.messageStateView
-                    stateView?._messageState = .sent //hide pass animation if uploading attach now
-                }
-            }
-            
+        let cellOnScreen = self.indexPathsForVisibleRows?.contains(indexPath) ?? false
+        guard
+            cellOnScreen,
+            let attachment = message.attachment
+        else {
+            return
         }
-        
+        guard
+            let attachmentView = (self.cellForRow(at: indexPath) as? PSDChatMessageCell)?.cloudView.attachmentView,
+            message.message.state == .sending
+        else {
+            return
+        }
+        attachmentView.progress = attachment.uploadingProgress
+        attachmentView.downloadState = message.message.state
+        guard message.message.state == .sending else {
+            return
+        }
+        let stateView = (self.cellForRow(at: indexPath) as? PSDUserMessageCell)?.messageStateView
+        stateView?._messageState = .sent //hide pass animation if uploading attach now
     }
 }
 

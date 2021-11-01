@@ -30,6 +30,7 @@ class PyrusServiceDeskController: PSDNavigationController {
     override public func viewDidLoad() {
         super.viewDidLoad()
         PyrusServiceDesk.mainController = self
+        recolor()
     }
     //reload current top viewControllers
     func updateInfo(){
