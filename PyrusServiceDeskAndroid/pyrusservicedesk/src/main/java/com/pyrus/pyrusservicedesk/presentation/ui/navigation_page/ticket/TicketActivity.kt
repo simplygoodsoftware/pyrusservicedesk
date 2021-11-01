@@ -222,7 +222,8 @@ internal class TicketActivity : ConnectionActivityBase<TicketViewModel>(TicketVi
         }
         send.isEnabled = !input.text.isNullOrBlank()
         divider.setBackgroundColor(getColorOnBackground(ConfigUtils.getMainBackgroundColor(this), 30))
-        refresh.setProgressBackgroundColor(ConfigUtils.getSecondaryColorOnMainBackground(this))
+        refresh.setProgressBackgroundColor(ConfigUtils.getMainBackgroundColor(this))
+        refresh.setColorSchemeColors(ConfigUtils.getAccentColor(this))
 
         if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.LOLLIPOP) {
             window.clearFlags(WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS)

@@ -90,7 +90,6 @@ class PSDUploader: NSObject {
             self.downloadsSession?.invalidateAndCancel()
             self.downloadsSession = nil
         }
-        self.tasksMap.removeAll()
     }
     func stopUpload(task:URLSessionTask){
         task.cancel()
@@ -166,7 +165,7 @@ class PSDUploader: NSObject {
                 uploadData.sendingDelegate?.refresh(message: uploadData.message,changedToSent: false)
                 PSDMessageSend.fileSendingEndWithError(uploadData.message, delegate: uploadData.sendingDelegate)
             }
-            
+            tasksMap.removeValue(forKey: task)
         }
         
     }

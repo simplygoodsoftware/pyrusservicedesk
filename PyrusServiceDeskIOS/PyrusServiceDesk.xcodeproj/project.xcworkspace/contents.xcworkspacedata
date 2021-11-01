@@ -2,6 +2,6 @@
 <Workspace
    version = "1.0">
    <FileRef
-      location = "self:PyrusServiceDesk.xcodeproj">
+      location = "self:/Users/galinamuraveva/pyrusservicedesk/PyrusServiceDeskIOS/PyrusServiceDesk.xcodeproj">
    </FileRef>
 </Workspace>
