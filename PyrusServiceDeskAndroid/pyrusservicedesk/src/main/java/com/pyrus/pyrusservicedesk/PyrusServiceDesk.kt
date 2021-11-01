@@ -86,10 +86,10 @@ class PyrusServiceDesk private constructor(
         fun init(
             application: Application,
             appId: String,
-            baseUrl: String? = null,
+            domain: String? = null,
             loggingEnabled: Boolean = false
         ) {
-            initInternal(application, appId, null, null, baseUrl,  API_VERSION_1, loggingEnabled)
+            initInternal(application, appId, null, null, domain,  API_VERSION_1, loggingEnabled)
         }
 
         /**
