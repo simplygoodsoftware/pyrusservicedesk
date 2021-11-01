@@ -160,7 +160,7 @@ class PyrusServiceDesk private constructor(
             if (domain == null) {
                 return true
             }
-            val domainRegex = """\w+.\w+""".toRegex()
+            val domainRegex = """\w+(.\w+)+""".toRegex()
             return domainRegex.matches(domain)
         }
 
