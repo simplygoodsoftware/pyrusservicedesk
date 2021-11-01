@@ -11,11 +11,12 @@ public class SampleApp extends Application {
     public void onCreate() {
         super.onCreate();
         PyrusServiceDesk.init(
-                this,
-                "my_app_id",
-                "user_id",
-                "security_key",
-                true
+            this,
+            "my_app_id",
+            "user_id",
+            "security_key",
+            null,
+            true
         );
 
         PyrusServiceDesk.setPushToken(

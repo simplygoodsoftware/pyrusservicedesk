@@ -22,17 +22,27 @@ class RequestUtils{
         /**
          * Provides url for getting the avatar.
          */
-        internal fun getAvatarUrl(avatarId: Int): String = "$BASE_URL/Avatar/$avatarId"
+        internal fun getAvatarUrl(avatarId: Int, domain: String?): String = "${getBaseUrl(domain)}/Avatar/$avatarId"
+
+        /**
+         * @return baseU
+         */
+        internal fun getBaseUrl(domain: String?): String {
+            if (domain == null) {
+                return "https://pyrus.com/servicedeskapi/v1/"
+            }
+            return "https://$domain/servicedeskapi/v1/"
+        }
 
         /**
          * Provides url for getting the file.
          */
-        internal fun getFileUrl(fileId: Int): String {
-            return "${BASE_URL}DownloadFile/$fileId" + getPathParams()
+        internal fun getFileUrl(fileId: Int, domain: String?): String {
+            return "${getBaseUrl(domain)}DownloadFile/$fileId" + getPathParams()
         }
 
-        internal fun getPreviewUrl(fileId: Int): String {
-            return "${BASE_URL}DownloadFilePreview/$fileId" + getPathParams()
+        internal fun getPreviewUrl(fileId: Int, domain: String?): String {
+            return "${getBaseUrl(domain)}DownloadFilePreview/$fileId" + getPathParams()
         }
 
         private fun getPathParams(): String {

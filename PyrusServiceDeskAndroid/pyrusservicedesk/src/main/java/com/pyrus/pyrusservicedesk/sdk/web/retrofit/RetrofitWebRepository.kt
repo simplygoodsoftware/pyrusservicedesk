@@ -20,7 +20,7 @@ import com.pyrus.pyrusservicedesk.sdk.response.*
 import com.pyrus.pyrusservicedesk.sdk.web.UploadFileHooks
 import com.pyrus.pyrusservicedesk.sdk.web.request_body.*
 import com.pyrus.pyrusservicedesk.utils.ConfigUtils
-import com.pyrus.pyrusservicedesk.utils.RequestUtils.Companion.BASE_URL
+import com.pyrus.pyrusservicedesk.utils.RequestUtils.Companion.getBaseUrl
 import com.pyrus.pyrusservicedesk.utils.getFirstNSymbols
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
@@ -45,6 +45,7 @@ internal class RetrofitWebRepository(
     private val appId: String,
     private val instanceId: String,
     private val fileResolver: FileResolver,
+    domain: String?,
     gson: Gson
 ) : RemoteRepository {
 
@@ -59,7 +60,7 @@ internal class RetrofitWebRepository(
                 .writeTimeout(30, TimeUnit.SECONDS)
 
         val retrofit = Retrofit.Builder()
-                .baseUrl(BASE_URL)
+                .baseUrl(getBaseUrl(domain))
                 .addConverterFactory(GsonConverterFactory.create(gson))
                 .client(httpBuilder.build())
                 .build()

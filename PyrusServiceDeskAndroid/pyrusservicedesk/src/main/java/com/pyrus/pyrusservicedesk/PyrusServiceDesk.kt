@@ -42,6 +42,7 @@ class PyrusServiceDesk private constructor(
     internal val isSingleChat: Boolean,
     internal val userId: String?,
     internal val securityKey: String?,
+    internal val domain: String?,
     internal val apiVersion: Int,
     loggingEnabled: Boolean
 ) {
@@ -85,9 +86,10 @@ class PyrusServiceDesk private constructor(
         fun init(
             application: Application,
             appId: String,
+            baseUrl: String? = null,
             loggingEnabled: Boolean = false
         ) {
-            initInternal(application, appId, null, null, API_VERSION_1, loggingEnabled)
+            initInternal(application, appId, null, null, baseUrl,  API_VERSION_1, loggingEnabled)
         }
 
         /**
@@ -111,9 +113,10 @@ class PyrusServiceDesk private constructor(
             appId: String,
             userId: String,
             securityKey: String,
+            domain: String? = null,
             loggingEnabled: Boolean = false
         ) {
-            initInternal(application, appId, userId, securityKey, API_VERSION_2, loggingEnabled)
+            initInternal(application, appId, userId, securityKey, domain, API_VERSION_2, loggingEnabled)
         }
 
         private fun initInternal(
@@ -121,12 +124,16 @@ class PyrusServiceDesk private constructor(
             appId: String,
             userId: String?,
             securityKey: String?,
+            domain: String? = null,
             apiVersion: Int = API_VERSION_1,
             loggingEnabled: Boolean
         ) {
             PLog.d(TAG, "initInternal, appId: ${appId.getFirstNSymbols(10)}, userId: ${userId?.getFirstNSymbols(10)}, apiVersion: $apiVersion")
-            if (INSTANCE != null && get().userId != userId)
+            if (INSTANCE != null && get().userId != userId) {
                 INSTANCE?.liveUpdates?.reset(userId)
+            }
+
+            //TODO sds validate base url and throw
 
             if (CONFIGURATION != null || INSTANCE != null && get().userId != userId) {
                 clearLocalData {
@@ -138,13 +145,15 @@ class PyrusServiceDesk private constructor(
                         true,
                         userId,
                         securityKey,
+                        domain,
                         apiVersion,
                         loggingEnabled
                     )
                 }
             }
-            else
-                INSTANCE = PyrusServiceDesk(application, appId, true, userId, securityKey, apiVersion, loggingEnabled)
+            else {
+                INSTANCE = PyrusServiceDesk(application, appId, true, userId, securityKey, domain, apiVersion, loggingEnabled)
+            }
         }
 
         /**
@@ -414,7 +423,7 @@ class PyrusServiceDesk private constructor(
                 .create()
 
         val centralRepository = CentralRepository(
-            RetrofitWebRepository(appId, instanceId, fileResolver, remoteGson),
+            RetrofitWebRepository(appId, instanceId, fileResolver, domain, remoteGson),
             offlineRepository
         )
 
