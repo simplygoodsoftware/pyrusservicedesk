@@ -78,6 +78,7 @@ class PyrusServiceDesk private constructor(
          *
          * @param application instance of the enclosing application
          * @param appId id of a client
+         * @param domain Base domain for network requests. If the [domain] is null, the default pyrus.com will be used.
          * @param loggingEnabled If true, then the library will write logs,
          * and they can be sent as a file to chat by clicking the "Send Library Logs" button in the menu under the "+" sign.
          */
@@ -103,6 +104,7 @@ class PyrusServiceDesk private constructor(
          * @param appId id of a client
          * @param userId of the user who is initializing service desk
          * @param securityKey of the user far safe initialization
+         * @param domain Base domain for network requests. If the [domain] is null, the default pyrus.com will be used.
          * @param loggingEnabled If true, then the library will write logs,
          * and they can be sent as a file to chat by clicking the "Send Library Logs" button in the menu under the "+" sign.
          */

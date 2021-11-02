@@ -17,7 +17,7 @@ class RequestUtils{
         /**
          * Base URL used for api calls
          */
-        internal const val BASE_URL = "https://pyrus.com/servicedeskapi/v1/"
+        internal const val PYRUS_BASE_URL = "https://pyrus.com/servicedeskapi/v1/"
 
         /**
          * Provides url for getting the avatar.
@@ -29,7 +29,7 @@ class RequestUtils{
          */
         internal fun getBaseUrl(domain: String?): String {
             if (domain == null) {
-                return "https://pyrus.com/servicedeskapi/v1/"
+                return PYRUS_BASE_URL
             }
             return "https://$domain/servicedeskapi/v1/"
         }
