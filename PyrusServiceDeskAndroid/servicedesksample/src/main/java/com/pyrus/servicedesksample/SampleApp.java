@@ -12,8 +12,8 @@ public class SampleApp extends Application {
         super.onCreate();
         PyrusServiceDesk.init(
             this,
-            "0HUi7grFuWVFHqWtL3f5YD-4PYJXiOEoLfCDb2yhTthkHBpedNbNU4O01YD2OnsSpvbMiXmweUF8akomZZIW1Ilb-W9mOPuK70L4lCI1mK0dJqXYUp0l-MJlsUv9tr8dSmKCSw==",
-            "pyrus.com",
+            "cdT-ZLBgrDP9bot0Cy4Cpd1~XLljnKl28gZwxSYxBVG7Wlr6EyLpayocdEyuPEQ~W1HT7i3-5M5p-E9kVMkGZwVDbL3mAUclExos4cSP4cfeUa8wQsAn4mPy4LzoF9IrpMYKhA==",
+            "demo.kiloplan.ru",
             true
         );
 
