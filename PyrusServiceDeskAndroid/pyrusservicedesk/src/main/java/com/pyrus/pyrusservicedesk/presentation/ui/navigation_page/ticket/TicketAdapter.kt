@@ -12,6 +12,7 @@ import androidx.annotation.LayoutRes
 import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.ItemTouchHelper.ACTION_STATE_SWIPE
 import androidx.recyclerview.widget.RecyclerView
+import com.pyrus.pyrusservicedesk.PyrusServiceDesk
 import com.pyrus.pyrusservicedesk.R
 import com.pyrus.pyrusservicedesk.presentation.ui.navigation_page.ticket.entries.*
 import com.pyrus.pyrusservicedesk.presentation.ui.view.CommentView
@@ -171,7 +172,7 @@ internal class TicketAdapter: AdapterBase<TicketEntry>() {
             avatar.visibility = if (visible) VISIBLE else INVISIBLE
             if (visible) {
                 Picasso.get()
-                    .load(getAvatarUrl(getItem().comment.author.avatarId))
+                    .load(getAvatarUrl(getItem().comment.author.avatarId, PyrusServiceDesk.get().domain))
                     .placeholder(ConfigUtils.getSupportAvatar(itemView.context))
                     .transform(CIRCLE_TRANSFORMATION)
                     .into(avatar)
@@ -284,7 +285,7 @@ internal class TicketAdapter: AdapterBase<TicketEntry>() {
             getItem().comment.attachments!!.first().let { it ->
                 comment.setFileName(getItem().comment.attachments?.first()?.name ?: "")
                 comment.setFileSize(getItem().comment.attachments?.first()?.bytesSize?.toFloat() ?: 0f)
-                val previewUri = it.localUri ?: Uri.parse(getPreviewUrl(it.id))
+                val previewUri = it.localUri ?: Uri.parse(getPreviewUrl(it.id, PyrusServiceDesk.get().domain))
                 comment.setPreview(previewUri)
                 comment.fileProgressStatus = if (getItem().hasError()) Status.Error else Status.Completed
                 comment.setOnProgressIconClickListener {

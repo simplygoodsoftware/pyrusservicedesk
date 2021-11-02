@@ -42,6 +42,7 @@ class PyrusServiceDesk private constructor(
     internal val isSingleChat: Boolean,
     internal val userId: String?,
     internal val securityKey: String?,
+    internal val domain: String?,
     internal val apiVersion: Int,
     loggingEnabled: Boolean
 ) {
@@ -77,6 +78,7 @@ class PyrusServiceDesk private constructor(
          *
          * @param application instance of the enclosing application
          * @param appId id of a client
+         * @param domain Base domain for network requests. If the [domain] is null, the default pyrus.com will be used.
          * @param loggingEnabled If true, then the library will write logs,
          * and they can be sent as a file to chat by clicking the "Send Library Logs" button in the menu under the "+" sign.
          */
@@ -85,9 +87,10 @@ class PyrusServiceDesk private constructor(
         fun init(
             application: Application,
             appId: String,
+            domain: String? = null,
             loggingEnabled: Boolean = false
         ) {
-            initInternal(application, appId, null, null, API_VERSION_1, loggingEnabled)
+            initInternal(application, appId, null, null, domain,  API_VERSION_1, loggingEnabled)
         }
 
         /**
@@ -101,6 +104,7 @@ class PyrusServiceDesk private constructor(
          * @param appId id of a client
          * @param userId of the user who is initializing service desk
          * @param securityKey of the user far safe initialization
+         * @param domain Base domain for network requests. If the [domain] is null, the default pyrus.com will be used.
          * @param loggingEnabled If true, then the library will write logs,
          * and they can be sent as a file to chat by clicking the "Send Library Logs" button in the menu under the "+" sign.
          */
@@ -111,9 +115,10 @@ class PyrusServiceDesk private constructor(
             appId: String,
             userId: String,
             securityKey: String,
+            domain: String? = null,
             loggingEnabled: Boolean = false
         ) {
-            initInternal(application, appId, userId, securityKey, API_VERSION_2, loggingEnabled)
+            initInternal(application, appId, userId, securityKey, domain, API_VERSION_2, loggingEnabled)
         }
 
         private fun initInternal(
@@ -121,12 +126,16 @@ class PyrusServiceDesk private constructor(
             appId: String,
             userId: String?,
             securityKey: String?,
+            domain: String? = null,
             apiVersion: Int = API_VERSION_1,
             loggingEnabled: Boolean
         ) {
             PLog.d(TAG, "initInternal, appId: ${appId.getFirstNSymbols(10)}, userId: ${userId?.getFirstNSymbols(10)}, apiVersion: $apiVersion")
-            if (INSTANCE != null && get().userId != userId)
+            if (INSTANCE != null && get().userId != userId) {
                 INSTANCE?.liveUpdates?.reset(userId)
+            }
+
+            val validDomain = if (validateDomain(domain)) domain else null
 
             if (CONFIGURATION != null || INSTANCE != null && get().userId != userId) {
                 clearLocalData {
@@ -138,13 +147,23 @@ class PyrusServiceDesk private constructor(
                         true,
                         userId,
                         securityKey,
+                        validDomain,
                         apiVersion,
                         loggingEnabled
                     )
                 }
             }
-            else
-                INSTANCE = PyrusServiceDesk(application, appId, true, userId, securityKey, apiVersion, loggingEnabled)
+            else {
+                INSTANCE = PyrusServiceDesk(application, appId, true, userId, securityKey, domain, apiVersion, loggingEnabled)
+            }
+        }
+
+        private fun validateDomain(domain: String?): Boolean {
+            if (domain == null) {
+                return true
+            }
+            val domainRegex = """\w+(.\w+)+""".toRegex()
+            return domainRegex.matches(domain)
         }
 
         /**
@@ -414,7 +433,7 @@ class PyrusServiceDesk private constructor(
                 .create()
 
         val centralRepository = CentralRepository(
-            RetrofitWebRepository(appId, instanceId, fileResolver, remoteGson),
+            RetrofitWebRepository(appId, instanceId, fileResolver, domain, remoteGson),
             offlineRepository
         )
 

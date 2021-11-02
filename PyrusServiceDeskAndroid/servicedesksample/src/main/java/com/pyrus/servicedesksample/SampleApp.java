@@ -15,6 +15,7 @@ public class SampleApp extends Application {
                 "my_app_id",
                 "user_id",
                 "security_key",
+                null,
                 true
         );
 

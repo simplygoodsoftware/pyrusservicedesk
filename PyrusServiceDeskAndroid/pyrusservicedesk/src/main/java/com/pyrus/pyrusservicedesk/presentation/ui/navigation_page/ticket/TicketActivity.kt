@@ -386,7 +386,7 @@ private fun Attachment.toFileData(): FileData {
     return FileData(
         name,
         bytesSize,
-        if (isLocal() && localUri != null) localUri else Uri.parse(getFileUrl(id)),
+        if (isLocal() && localUri != null) localUri else Uri.parse(getFileUrl(id, PyrusServiceDesk.get().domain)),
         isLocal()
     )
 }
