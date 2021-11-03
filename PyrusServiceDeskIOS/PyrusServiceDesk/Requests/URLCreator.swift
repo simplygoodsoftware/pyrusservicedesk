@@ -23,7 +23,10 @@ enum urlType : String{
 }
 
 struct PyrusServiceDeskAPI {
-    private static let baseURLString = "https://pyrus.com/servicedeskapi/v1/"//dev.
+    private static var baseURLString: String {
+        let domain = PyrusServiceDesk.domain ?? "pyrus.com"
+        return "https://\(domain)/servicedeskapi/v1/"
+    }
     ///Create URL for urlType in [.chats, .createNew, .upload, .chatFeed, .updateFeed, .token]
     static func PSDURL(type: urlType) -> URL {
         let validTypes : [urlType] = [.chats, .createNew, .upload, .chatFeed, .updateFeed, .token]

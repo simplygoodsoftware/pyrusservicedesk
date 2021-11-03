@@ -12,6 +12,7 @@ enum EventsLogger {
     case resignFirstResponder
     case openPSD
     case tooManyRefresh
+    case invalidDomain
     static func logEvent(_ logCase: EventsLogger, additionalInfo: String? = nil){
         var logString = stringForEvent(logCase)
         if let additionalInfo = additionalInfo{
@@ -37,6 +38,8 @@ enum EventsLogger {
             return defaultString + "PyrusServiceDesk open"
         case .tooManyRefresh:
             return defaultString + "PyrusServiceDesk too many refreshes"
+        case .invalidDomain:
+            return defaultString + "PyrusServiceDesk invalid domain"
         }
     }
 }
