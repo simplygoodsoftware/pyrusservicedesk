@@ -11,19 +11,6 @@ extension String {
         }
         return nil
     }
-    private static var MIN_ENCODER: Int = 1000000
-    func encodeToInt() -> Int {
-        var b = String.MIN_ENCODER
-        let str = self.addingPercentEncoding(withAllowedCharacters: NSCharacterSet.urlQueryAllowed) ?? self
-        for (i,char) in str.asciiValues.enumerated() {
-            b = b + (Int(char) * (i + 1))
-        }
-        return b
-    }
-}
-
-private extension StringProtocol {
-    var asciiValues: [UInt8] { compactMap(\.asciiValue) }
 }
 
 private extension URL {
