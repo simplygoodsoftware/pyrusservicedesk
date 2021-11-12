@@ -328,27 +328,32 @@ SWIFT_CLASS_PROPERTY(@property (nonatomic, class, copy) void (^ _Nullable onAuth
 /// Init PyrusServiceDesk with new clientId.
 /// \param clientId clientId using for all requests. If clientId not setted PyrusServiceDesk Controller will not be created
 ///
+/// \param domain Base domain for network requests. If the [domain] is null, the default pyrus.com will be used.
+///
 /// \param loggingEnabled If true, then the library will write logs, and they can be sent as a file to chat by clicking the “Send Library Logs” button in the menu under the “+” sign. 
 ///
-+ (void)createWith:(NSString * _Nullable)clientId loggingEnabled:(BOOL)loggingEnabled;
++ (void)createWith:(NSString * _Nullable)clientId domain:(NSString * _Nullable)domain loggingEnabled:(BOOL)loggingEnabled;
 /// Init PyrusServiceDesk with new clientId.
 /// \param clientId clientId using for all requests. If clientId not setted PyrusServiceDesk Controller will not be created
 ///
 /// \param reset If true, user will be reseted
 ///
+/// \param domain Base domain for network requests. If the [domain] is null, the default pyrus.com will be used.
+///
 /// \param loggingEnabled If true, then the library will write logs, and they can be sent as a file to chat by clicking the “Send Library Logs” button in the menu under the “+” sign. 
 ///
-+ (void)createWith:(NSString * _Nullable)clientId reset:(BOOL)reset loggingEnabled:(BOOL)loggingEnabled;
++ (void)createWith:(NSString * _Nullable)clientId reset:(BOOL)reset domain:(NSString * _Nullable)domain loggingEnabled:(BOOL)loggingEnabled;
 /// Init PyrusServiceDesk with new clientId.
 /// \param clientId clientId using for all requests. If clientId not setted PyrusServiceDesk Controller will not be created
 ///
 /// \param userId userId of the user who is initializing service desk
 ///
 /// \param securityKey security key of the user for safe initialization
+/// ///- parameter domain: Base domain for network requests. If the [domain] is null, the default pyrus.com will be used.
 ///
 /// \param loggingEnabled If true, then the library will write logs, and they can be sent as a file to chat by clicking the “Send Library Logs” button in the menu under the “+” sign. 
 ///
-+ (void)createWith:(NSString * _Nullable)clientId userId:(NSString * _Nullable)userId securityKey:(NSString * _Nullable)securityKey loggingEnabled:(BOOL)loggingEnabled;
++ (void)createWith:(NSString * _Nullable)clientId userId:(NSString * _Nullable)userId securityKey:(NSString * _Nullable)securityKey domain:(NSString * _Nullable)domain loggingEnabled:(BOOL)loggingEnabled;
 + (void)refreshOnError:(void (^ _Nullable)(NSError * _Nullable))onError;
 /// Scrolls chat to bottom, starts refreshing chat and shows fake message from support is psd is open.
 + (void)refreshFromPushWithMessageId:(NSInteger)messageId;

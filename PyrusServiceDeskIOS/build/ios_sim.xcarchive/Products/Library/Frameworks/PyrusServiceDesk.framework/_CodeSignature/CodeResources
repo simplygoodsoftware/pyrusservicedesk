@@ -66,7 +66,7 @@
 		</data>
 		<key>Headers/PyrusServiceDesk-Swift.h</key>
 		<data>
-		/TUGJzfGjGMwrnkOKSiGLqgMLVY=
+		J0y4gaR/7hMluBCV/EPqpJtXoKE=
 		</data>
 		<key>Headers/PyrusServiceDesk.h</key>
 		<data>
@@ -78,27 +78,27 @@
 		</data>
 		<key>Modules/PyrusServiceDesk.swiftmodule/x86_64-apple-ios-simulator.swiftdoc</key>
 		<data>
-		kLW9TCR0M6M6Z5LdSkpcBxnaDn0=
+		VWq8uHNmPrG5bWqQiOoNHfrh11I=
 		</data>
 		<key>Modules/PyrusServiceDesk.swiftmodule/x86_64-apple-ios-simulator.swiftinterface</key>
 		<data>
-		3SnMdgCd16nQZrkP37RpMJsIFtA=
+		4+liMCKyTSz61f9HJKZ64xUHhj4=
 		</data>
 		<key>Modules/PyrusServiceDesk.swiftmodule/x86_64-apple-ios-simulator.swiftmodule</key>
 		<data>
-		fKw+bf8CcI7jK/Wv3+n709SWj/U=
+		ogh3mJbx5+1sAPmlmBgDj95vQAg=
 		</data>
 		<key>Modules/PyrusServiceDesk.swiftmodule/x86_64.swiftdoc</key>
 		<data>
-		kLW9TCR0M6M6Z5LdSkpcBxnaDn0=
+		VWq8uHNmPrG5bWqQiOoNHfrh11I=
 		</data>
 		<key>Modules/PyrusServiceDesk.swiftmodule/x86_64.swiftinterface</key>
 		<data>
-		3SnMdgCd16nQZrkP37RpMJsIFtA=
+		4+liMCKyTSz61f9HJKZ64xUHhj4=
 		</data>
 		<key>Modules/PyrusServiceDesk.swiftmodule/x86_64.swiftmodule</key>
 		<data>
-		fKw+bf8CcI7jK/Wv3+n709SWj/U=
+		ogh3mJbx5+1sAPmlmBgDj95vQAg=
 		</data>
 		<key>Modules/module.modulemap</key>
 		<data>
@@ -867,11 +867,11 @@
 		<dict>
 			<key>hash</key>
 			<data>
-			/TUGJzfGjGMwrnkOKSiGLqgMLVY=
+			J0y4gaR/7hMluBCV/EPqpJtXoKE=
 			</data>
 			<key>hash2</key>
 			<data>
-			4r0r8pdNMQd/oRqB/cPpSkFfNChfQcCMy5xT2RnbLFc=
+			z+5mym0UgcsPFhazMFhOKSFkI3bzwv9AvTUybgLWrso=
 			</data>
 		</dict>
 		<key>Headers/PyrusServiceDesk.h</key>
@@ -889,66 +889,66 @@
 		<dict>
 			<key>hash</key>
 			<data>
-			kLW9TCR0M6M6Z5LdSkpcBxnaDn0=
+			VWq8uHNmPrG5bWqQiOoNHfrh11I=
 			</data>
 			<key>hash2</key>
 			<data>
-			oKv21nxqVfMOX//SdwdT4GEWgWyg0LNL1RZD4a3aWCs=
+			PtaiqJIZEy8ERESbKLbhspOUPTKkKIJsi5al4CY9beA=
 			</data>
 		</dict>
 		<key>Modules/PyrusServiceDesk.swiftmodule/x86_64-apple-ios-simulator.swiftinterface</key>
 		<dict>
 			<key>hash</key>
 			<data>
-			3SnMdgCd16nQZrkP37RpMJsIFtA=
+			4+liMCKyTSz61f9HJKZ64xUHhj4=
 			</data>
 			<key>hash2</key>
 			<data>
-			itTStEE2FtSP3G/BB0jm/aEZz7NADieXEq1mp5Il/Ho=
+			wxU9Eb79VEb3S+i5O3/kS2AEskkQztxY7b7LElsKiv0=
 			</data>
 		</dict>
 		<key>Modules/PyrusServiceDesk.swiftmodule/x86_64-apple-ios-simulator.swiftmodule</key>
 		<dict>
 			<key>hash</key>
 			<data>
-			fKw+bf8CcI7jK/Wv3+n709SWj/U=
+			ogh3mJbx5+1sAPmlmBgDj95vQAg=
 			</data>
 			<key>hash2</key>
 			<data>
-			0Hzfn8w6bArlAjG/FNc39350Vk7Vs+oY/giTnp0h6G0=
+			pSHVNtAJjfXRraFTEFLKCbD2yp6lkPhSB/5+ZtXTKwk=
 			</data>
 		</dict>
 		<key>Modules/PyrusServiceDesk.swiftmodule/x86_64.swiftdoc</key>
 		<dict>
 			<key>hash</key>
 			<data>
-			kLW9TCR0M6M6Z5LdSkpcBxnaDn0=
+			VWq8uHNmPrG5bWqQiOoNHfrh11I=
 			</data>
 			<key>hash2</key>
 			<data>
-			oKv21nxqVfMOX//SdwdT4GEWgWyg0LNL1RZD4a3aWCs=
+			PtaiqJIZEy8ERESbKLbhspOUPTKkKIJsi5al4CY9beA=
 			</data>
 		</dict>
 		<key>Modules/PyrusServiceDesk.swiftmodule/x86_64.swiftinterface</key>
 		<dict>
 			<key>hash</key>
 			<data>
-			3SnMdgCd16nQZrkP37RpMJsIFtA=
+			4+liMCKyTSz61f9HJKZ64xUHhj4=
 			</data>
 			<key>hash2</key>
 			<data>
-			itTStEE2FtSP3G/BB0jm/aEZz7NADieXEq1mp5Il/Ho=
+			wxU9Eb79VEb3S+i5O3/kS2AEskkQztxY7b7LElsKiv0=
 			</data>
 		</dict>
 		<key>Modules/PyrusServiceDesk.swiftmodule/x86_64.swiftmodule</key>
 		<dict>
 			<key>hash</key>
 			<data>
-			fKw+bf8CcI7jK/Wv3+n709SWj/U=
+			ogh3mJbx5+1sAPmlmBgDj95vQAg=
 			</data>
 			<key>hash2</key>
 			<data>
-			0Hzfn8w6bArlAjG/FNc39350Vk7Vs+oY/giTnp0h6G0=
+			pSHVNtAJjfXRraFTEFLKCbD2yp6lkPhSB/5+ZtXTKwk=
 			</data>
 		</dict>
 		<key>Modules/module.modulemap</key>
