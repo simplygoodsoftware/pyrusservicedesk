@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		4B060F2A2732AD8C002E20A7 /* StringHelper.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4B060F292732AD8C002E20A7 /* StringHelper.swift */; };
 		4B062A832518A8D100B317D3 /* PSDPlaceholderMessage.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4B062A822518A8D100B317D3 /* PSDPlaceholderMessage.swift */; };
 		4B062A882518AC9500B317D3 /* messagePlaceholder@3x.png in Resources */ = {isa = PBXBuildFile; fileRef = 4B062A872518AC9500B317D3 /* messagePlaceholder@3x.png */; };
 		4B062A8C2518AD0500B317D3 /* messagePlaceholder@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 4B062A8B2518AD0500B317D3 /* messagePlaceholder@2x.png */; };
@@ -287,6 +288,7 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		4B060F292732AD8C002E20A7 /* StringHelper.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StringHelper.swift; sourceTree = "<group>"; };
 		4B062A822518A8D100B317D3 /* PSDPlaceholderMessage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PSDPlaceholderMessage.swift; sourceTree = "<group>"; };
 		4B062A872518AC9500B317D3 /* messagePlaceholder@3x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "messagePlaceholder@3x.png"; sourceTree = "<group>"; };
 		4B062A8B2518AD0500B317D3 /* messagePlaceholder@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "messagePlaceholder@2x.png"; sourceTree = "<group>"; };
@@ -737,6 +739,7 @@
 				4B7F138F22155F62007C6358 /* String+Date.swift */,
 				4B64B86F224384F3003116C3 /* String+years.swift */,
 				4B17DD0423E816B1003CF4D9 /* String + uuid.swift */,
+				4B060F292732AD8C002E20A7 /* StringHelper.swift */,
 			);
 			path = String;
 			sourceTree = "<group>";
@@ -1496,6 +1499,7 @@
 				4B7EA884221EB01B009C9B41 /* PSDErrorParser.swift in Sources */,
 				4BA3FF4022116C1100CE497A /* AttachmentHandler.swift in Sources */,
 				4B56BE4B2216CCC0004E6685 /* PSDAttachment.swift in Sources */,
+				4B060F2A2732AD8C002E20A7 /* StringHelper.swift in Sources */,
 				4B6E9DA3225F3B570037462F /* PSDPreviewSetter.swift in Sources */,
 				4B6E9DA7225F74E50037462F /* PSDDownloadView.swift in Sources */,
 				4B64B8742243D402003116C3 /* CharacterSet+urlEncode.swift in Sources */,
