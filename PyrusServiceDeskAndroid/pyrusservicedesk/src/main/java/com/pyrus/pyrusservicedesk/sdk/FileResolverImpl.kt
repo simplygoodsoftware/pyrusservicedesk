@@ -7,6 +7,7 @@ import android.util.Log
 import androidx.core.content.ContentResolverCompat
 import com.pyrus.pyrusservicedesk.sdk.data.intermediate.FileData
 import com.pyrus.pyrusservicedesk.sdk.data.intermediate.FileUploadRequestData
+import java.io.InputStream
 
 /**
  * Helper for working with files.
@@ -43,6 +44,14 @@ internal class FileResolverImpl(private val contentResolver: ContentResolver) : 
                 it.getString(it.getColumnIndex(OpenableColumns.DISPLAY_NAME)),
                 contentResolver.openInputStream(fileUri)!!
             )
+        }
+    }
+
+    override fun getInputStream(fileUri: Uri): InputStream? {
+        return when (fileUri.scheme) {
+            ContentResolver.SCHEME_FILE -> FileResolverSchemeFile.getInputStream(fileUri)
+            ContentResolver.SCHEME_CONTENT -> contentResolver.openInputStream(fileUri)
+            else -> null
         }
     }
 

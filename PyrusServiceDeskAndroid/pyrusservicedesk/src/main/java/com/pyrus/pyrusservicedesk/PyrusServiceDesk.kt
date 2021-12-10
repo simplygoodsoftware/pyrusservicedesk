@@ -12,6 +12,7 @@ import com.pyrus.pyrusservicedesk.presentation.viewmodel.SharedViewModel
 import com.pyrus.pyrusservicedesk.sdk.FileResolver
 import com.pyrus.pyrusservicedesk.sdk.FileResolverImpl
 import com.pyrus.pyrusservicedesk.sdk.RequestFactory
+import com.pyrus.pyrusservicedesk.sdk.data.Copypaster
 import com.pyrus.pyrusservicedesk.sdk.data.LocalDataProvider
 import com.pyrus.pyrusservicedesk.sdk.data.gson.RemoteGsonExclusionStrategy
 import com.pyrus.pyrusservicedesk.sdk.data.gson.UriGsonAdapter
@@ -369,6 +370,7 @@ class PyrusServiceDesk private constructor(
             override fun getDraftRepository(): DraftRepository = draftRepository
             override fun getLiveUpdates(): LiveUpdates = liveUpdates
             override fun getLocalDataProvider(): LocalDataProvider = localDataProvider
+            override fun getCopypaster(): Copypaster = copypaster
             override fun getLocalDataVerifier(): LocalDataVerifier = localDataVerifier
         }
     }
@@ -384,6 +386,9 @@ class PyrusServiceDesk private constructor(
             offlineRepository,
             fileResolver
         )
+    }
+    private val copypaster: Copypaster by lazy {
+        Copypaster(application, fileResolver)
     }
     private val localDataVerifier: LocalDataVerifier
 

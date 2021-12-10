@@ -20,6 +20,7 @@ import com.pyrus.pyrusservicedesk.presentation.ui.view.recyclerview.DiffResultWi
 import com.pyrus.pyrusservicedesk.presentation.viewmodel.ConnectionViewModelBase
 import com.pyrus.pyrusservicedesk.sdk.data.Attachment
 import com.pyrus.pyrusservicedesk.sdk.data.Comment
+import com.pyrus.pyrusservicedesk.sdk.data.Copypaster
 import com.pyrus.pyrusservicedesk.sdk.data.LocalDataProvider
 import com.pyrus.pyrusservicedesk.sdk.data.intermediate.AddCommentResponseData
 import com.pyrus.pyrusservicedesk.sdk.data.intermediate.Comments
@@ -35,10 +36,9 @@ import com.pyrus.pyrusservicedesk.utils.MILLISECONDS_IN_SECOND
 import com.pyrus.pyrusservicedesk.utils.RequestUtils.Companion.MAX_FILE_SIZE_BYTES
 import com.pyrus.pyrusservicedesk.utils.RequestUtils.Companion.MAX_FILE_SIZE_MEGABYTES
 import com.pyrus.pyrusservicedesk.utils.getWhen
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.runBlocking
-import kotlinx.coroutines.withContext
+import kotlinx.coroutines.*
+import java.lang.Exception
+import java.lang.Runnable
 import java.util.*
 import kotlin.collections.ArrayList
 
@@ -67,6 +67,7 @@ internal class TicketViewModel(
 
     private val draftRepository = serviceDeskProvider.getDraftRepository()
     private val localDataProvider: LocalDataProvider = serviceDeskProvider.getLocalDataProvider()
+    private val copypaster: Copypaster = serviceDeskProvider.getCopypaster()
     private val localDataVerifier: LocalDataVerifier = serviceDeskProvider.getLocalDataVerifier()
 
     private var isCreateTicketSent = false
@@ -141,17 +142,26 @@ internal class TicketViewModel(
      * @param attachmentUri URI of the file to be sent
      */
     fun onAttachmentSelected(attachmentUri: Uri) {
-        Log.d("SDS", "onAttachmentSelected")
-        val localComment = localDataProvider.createLocalComment(fileUri = attachmentUri)
-        val fileHooks = UploadFileHooks()
-        fileHooks.subscribeOnCancel(object : OnCancelListener {
-            override fun onCancel() {
-                return applyCommentUpdate(
-                    CommentEntry(localComment), ChangeType.Cancelled
-                )
-            }
-        })
-        sendAddComment(localComment, fileHooks)
+       launch {
+           val fileUri = try {
+               copypaster.copyFile(attachmentUri)
+           } catch (e: Exception) {
+               return@launch
+           }
+           withContext(Dispatchers.Main) {
+               Log.d("SDS", "onAttachmentSelected")
+               val localComment = localDataProvider.createLocalComment(fileUri = fileUri)
+               val fileHooks = UploadFileHooks()
+               fileHooks.subscribeOnCancel(object : OnCancelListener {
+                   override fun onCancel() {
+                       return applyCommentUpdate(
+                           CommentEntry(localComment), ChangeType.Cancelled
+                       )
+                   }
+               })
+               sendAddComment(localComment, fileHooks)
+           }
+       }
     }
 
     /**

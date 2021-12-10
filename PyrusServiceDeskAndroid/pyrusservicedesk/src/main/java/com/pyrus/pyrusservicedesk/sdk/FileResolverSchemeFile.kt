@@ -5,6 +5,8 @@ import com.pyrus.pyrusservicedesk.sdk.data.intermediate.FileData
 import com.pyrus.pyrusservicedesk.sdk.data.intermediate.FileUploadRequestData
 import com.pyrus.pyrusservicedesk.utils.RequestUtils
 import java.io.File
+import java.io.InputStream
+import java.io.OutputStream
 
 /**
  * Helper for working with files.
@@ -20,6 +22,14 @@ internal object FileResolverSchemeFile : FileResolver {
         if (file.exists().not())
             return null
         return FileUploadRequestData(file.name, file.inputStream())
+    }
+
+    override fun getInputStream(fileUri: Uri): InputStream? {
+        val file = File(fileUri.path ?: return null)
+        if (file.exists().not()) {
+            return null
+        }
+        return file.inputStream()
     }
 
     override fun isLocalFileExists(localFileUri: Uri?): Boolean {
