@@ -23,8 +23,8 @@ internal class UploadFileHooks {
      * Property that defines whether uploading of the file was cancelled.
      */
     var isCancelled = false
-        @Synchronized get() = field
-        @Synchronized private set(value){ field = value }
+        @Synchronized get
+        @Synchronized private set
 
     @Synchronized
     fun resetProgress() {

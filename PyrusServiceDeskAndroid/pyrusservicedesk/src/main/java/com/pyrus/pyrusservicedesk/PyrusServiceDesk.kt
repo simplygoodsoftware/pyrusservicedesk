@@ -3,13 +3,11 @@ package com.pyrus.pyrusservicedesk
 import android.app.Activity
 import android.app.Application
 import android.content.Context
-import android.content.Intent
 import android.net.Uri
 import androidx.annotation.MainThread
 import com.google.gson.GsonBuilder
 import com.pyrus.pyrusservicedesk.log.PLog
 import com.pyrus.pyrusservicedesk.presentation.ui.navigation_page.ticket.TicketActivity
-import com.pyrus.pyrusservicedesk.presentation.ui.navigation_page.tickets.TicketsActivity
 import com.pyrus.pyrusservicedesk.presentation.viewmodel.SharedViewModel
 import com.pyrus.pyrusservicedesk.sdk.FileResolver
 import com.pyrus.pyrusservicedesk.sdk.FileResolverImpl
@@ -39,7 +37,6 @@ import java.util.concurrent.Executors
 class PyrusServiceDesk private constructor(
     internal val application: Application,
     internal val appId: String,
-    internal val isSingleChat: Boolean,
     internal val userId: String?,
     internal val securityKey: String?,
     internal val domain: String?,
@@ -144,7 +141,6 @@ class PyrusServiceDesk private constructor(
                     INSTANCE = PyrusServiceDesk(
                         application,
                         appId,
-                        true,
                         userId,
                         securityKey,
                         validDomain,
@@ -154,7 +150,7 @@ class PyrusServiceDesk private constructor(
                 }
             }
             else {
-                INSTANCE = PyrusServiceDesk(application, appId, true, userId, securityKey, domain, apiVersion, loggingEnabled)
+                INSTANCE = PyrusServiceDesk(application, appId, userId, securityKey, domain, apiVersion, loggingEnabled)
             }
         }
 
@@ -335,7 +331,6 @@ class PyrusServiceDesk private constructor(
         }
 
         private fun startImpl(
-            ticketId: Int? = null,
             activity: Activity,
             configuration: ServiceDeskConfiguration? = null,
             onStopCallback: OnStopCallback? = null
@@ -344,7 +339,7 @@ class PyrusServiceDesk private constructor(
             get().sharedViewModel.clearQuitServiceDesk()
             get().onStopCallback = onStopCallback
 
-            activity.startActivity(createIntent(ticketId))
+            activity.startActivity(TicketActivity.getLaunchIntent())
 
             if (configuration == null)
                 return
@@ -352,14 +347,6 @@ class PyrusServiceDesk private constructor(
             if (currentUserId != get().userId)
                 refresh()
             get().preferences.edit().putString(PREFERENCE_KEY_USER_ID_V2, get().userId).apply()
-        }
-
-        private fun createIntent(ticketId: Int? = null): Intent {
-            return when {
-                ticketId != null -> TicketActivity.getLaunchIntent(ticketId)
-                get().isSingleChat -> TicketActivity.getLaunchIntent()
-                else -> TicketsActivity.getLaunchIntent()
-            }
         }
 
         private fun clearLocalData(doOnCleared : () -> Unit) {

@@ -1,7 +1,6 @@
 package com.pyrus.pyrusservicedesk.presentation.ui.navigation_page.file_preview
 
 import android.Manifest
-import androidx.lifecycle.Observer
 import android.content.Intent
 import android.content.Intent.ACTION_SEND
 import android.content.Intent.ACTION_VIEW
@@ -21,11 +20,7 @@ import com.pyrus.pyrusservicedesk.PyrusServiceDesk
 import com.pyrus.pyrusservicedesk.R
 import com.pyrus.pyrusservicedesk.presentation.ConnectionActivityBase
 import com.pyrus.pyrusservicedesk.sdk.data.intermediate.FileData
-import com.pyrus.pyrusservicedesk.utils.ConfigUtils
-import com.pyrus.pyrusservicedesk.utils.animateInfinite
-import com.pyrus.pyrusservicedesk.utils.getColorOnBackground
-import com.pyrus.pyrusservicedesk.utils.getSecondaryColorOnBackground
-import com.pyrus.pyrusservicedesk.utils.getTextColorOnBackground
+import com.pyrus.pyrusservicedesk.utils.*
 import kotlinx.android.synthetic.main.psd_activity_file_preview.*
 import kotlinx.android.synthetic.main.psd_no_connection.*
 import kotlinx.coroutines.delay
@@ -176,7 +171,7 @@ internal class FilePreviewActivity: ConnectionActivityBase<FilePreviewViewModel>
         super.startObserveData()
         viewModel.getFileLiveData().observe(
             this,
-            Observer {
+            {
                 it?.let { model ->
                     when {
                         model.isPreviewable -> applyPreviewableViewModel(model)

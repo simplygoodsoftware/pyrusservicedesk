@@ -3,6 +3,7 @@ package com.pyrus.pyrusservicedesk.sdk
 import android.content.ContentResolver
 import android.net.Uri
 import android.provider.OpenableColumns
+import android.util.Log
 import androidx.core.content.ContentResolverCompat
 import com.pyrus.pyrusservicedesk.sdk.data.intermediate.FileData
 import com.pyrus.pyrusservicedesk.sdk.data.intermediate.FileUploadRequestData
@@ -23,6 +24,7 @@ internal class FileResolverImpl(private val contentResolver: ContentResolver) : 
      * NULL may be returned if file form the specified [fileUri] was not found or [Uri.getScheme] != "content"
      */
     override fun getUploadFileData(fileUri: Uri): FileUploadRequestData? {
+        Log.d("SDS", "getUploadFileData URI: $fileUri")
         if (fileUri.scheme == ContentResolver.SCHEME_FILE)
             return FileResolverSchemeFile.getUploadFileData(fileUri)
 
@@ -45,6 +47,7 @@ internal class FileResolverImpl(private val contentResolver: ContentResolver) : 
     }
 
     override fun isLocalFileExists(localFileUri: Uri?): Boolean {
+        Log.d("SDS", "isLocalFileExists, uri: $localFileUri")
         if (localFileUri == null)
             return false
 

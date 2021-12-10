@@ -8,7 +8,6 @@ import com.pyrus.pyrusservicedesk.presentation.ui.navigation_page.file_preview.F
 import com.pyrus.pyrusservicedesk.presentation.ui.navigation_page.ticket.TicketViewModel
 import com.pyrus.pyrusservicedesk.presentation.ui.navigation_page.ticket.dialogs.attach_files.AttachFileSharedViewModel
 import com.pyrus.pyrusservicedesk.presentation.ui.navigation_page.ticket.dialogs.comment_actions.PendingCommentActionSharedViewModel
-import com.pyrus.pyrusservicedesk.presentation.ui.navigation_page.tickets.TicketsViewModel
 
 /**
  * Factory that provides view models.
@@ -20,13 +19,9 @@ internal class ViewModelFactory(private val arguments: Intent): ViewModelProvide
     @Suppress("UNCHECKED_CAST")
     override fun <T : ViewModel?> create(modelClass: Class<T>): T {
         return when (modelClass) {
-            TicketsViewModel::class.java ->
-                TicketsViewModel(PyrusServiceDesk.get().serviceDeskProvider) as T
             TicketViewModel::class.java ->
                 TicketViewModel(
                     PyrusServiceDesk.get().serviceDeskProvider,
-                    arguments,
-                    PyrusServiceDesk.get().isSingleChat,
                     PyrusServiceDesk.getPreferencesManager()
                 ) as T
             FilePreviewViewModel::class.java ->
