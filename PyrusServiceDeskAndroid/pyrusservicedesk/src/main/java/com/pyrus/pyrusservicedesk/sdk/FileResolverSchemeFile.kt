@@ -6,7 +6,6 @@ import com.pyrus.pyrusservicedesk.sdk.data.intermediate.FileUploadRequestData
 import com.pyrus.pyrusservicedesk.utils.RequestUtils
 import java.io.File
 import java.io.InputStream
-import java.io.OutputStream
 
 /**
  * Helper for working with files.

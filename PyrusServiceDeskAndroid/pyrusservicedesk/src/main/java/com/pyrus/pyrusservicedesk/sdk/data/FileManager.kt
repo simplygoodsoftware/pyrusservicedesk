@@ -1,16 +1,15 @@
 package com.pyrus.pyrusservicedesk.sdk.data
 
+import android.content.ContentResolver
 import android.content.Context
 import android.database.Cursor
 import android.net.Uri
+import android.provider.OpenableColumns
 import com.pyrus.pyrusservicedesk.sdk.FileResolver
 import java.io.File
 import java.io.FileOutputStream
-import android.provider.OpenableColumns
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.withContext
 
-internal class Copypaster(
+internal class FileManager(
     private val context: Context,
     private val fileResolver: FileResolver
 ) {
@@ -41,13 +40,13 @@ internal class Copypaster(
 
     private fun getTempFilesDirPath(): String {
         val rootDir = context.filesDir
-        return rootDir.path + "/temp_files/"
+        return rootDir.path + "/sd_temp_files/"
     }
 
     private fun createTempFile(fileName: String): File {
         initFilesDir()
 
-        val tempPath = getTempFilesDirPath() + System.currentTimeMillis() + fileName
+        val tempPath = getTempFilesDirPath() + fileName
         val tempFile = File(tempPath)
 
         val dir = File(tempFile.parent!!)
@@ -78,6 +77,26 @@ internal class Copypaster(
         return result
     }
 
+    fun removeFile(uri: Uri?) {
+        if (uri == null) {
+            return
+        }
+        if (uri.scheme != ContentResolver.SCHEME_FILE) {
+            return
+        }
+        val path = uri.path?: return
+        val file = File(path)
+        if (!file.exists()) {
+            return
+        }
+        file.delete()
+    }
+
+    fun clearTempDir() {
+        File(getTempFilesDirPath()).listFiles()?.forEach {
+            it.delete()
+        }
+    }
 
 
 }

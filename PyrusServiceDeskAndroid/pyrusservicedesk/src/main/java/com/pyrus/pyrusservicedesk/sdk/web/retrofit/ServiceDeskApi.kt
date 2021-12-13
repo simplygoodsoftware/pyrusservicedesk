@@ -1,7 +1,6 @@
 package com.pyrus.pyrusservicedesk.sdk.web.retrofit
 
 import androidx.annotation.Keep
-import com.pyrus.pyrusservicedesk.sdk.data.Ticket
 import com.pyrus.pyrusservicedesk.sdk.data.intermediate.*
 import com.pyrus.pyrusservicedesk.sdk.web.request_body.*
 import okhttp3.MultipartBody

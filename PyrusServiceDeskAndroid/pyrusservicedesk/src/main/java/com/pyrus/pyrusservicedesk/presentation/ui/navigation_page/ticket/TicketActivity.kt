@@ -81,7 +81,11 @@ internal class TicketActivity : ConnectionActivityBase<TicketViewModel>(TicketVi
 
     private val adapter = TicketAdapter().apply {
         setOnFileReadyForPreviewClickListener {
-            startActivity(FilePreviewActivity.getLaunchIntent(it.toFileData()))
+            val fileData = it.toFileData()
+            if (fileData.isLocal) {
+                return@setOnFileReadyForPreviewClickListener
+            }
+            startActivity(FilePreviewActivity.getLaunchIntent(fileData))
         }
         setOnErrorCommentEntryClickListener {
             viewModel.onUserStartChoosingCommentAction(it)

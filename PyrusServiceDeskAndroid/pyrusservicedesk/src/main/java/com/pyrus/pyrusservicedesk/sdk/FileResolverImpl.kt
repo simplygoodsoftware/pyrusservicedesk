@@ -2,9 +2,6 @@ package com.pyrus.pyrusservicedesk.sdk
 
 import android.content.ContentResolver
 import android.net.Uri
-import android.provider.OpenableColumns
-import android.util.Log
-import androidx.core.content.ContentResolverCompat
 import com.pyrus.pyrusservicedesk.sdk.data.intermediate.FileData
 import com.pyrus.pyrusservicedesk.sdk.data.intermediate.FileUploadRequestData
 import java.io.InputStream
@@ -25,26 +22,11 @@ internal class FileResolverImpl(private val contentResolver: ContentResolver) : 
      * NULL may be returned if file form the specified [fileUri] was not found or [Uri.getScheme] != "content"
      */
     override fun getUploadFileData(fileUri: Uri): FileUploadRequestData? {
-        Log.d("SDS", "getUploadFileData URI: $fileUri")
-        if (fileUri.scheme == ContentResolver.SCHEME_FILE)
+        if (fileUri.scheme == ContentResolver.SCHEME_FILE) {
             return FileResolverSchemeFile.getUploadFileData(fileUri)
-
-        val cursor = ContentResolverCompat.query(
-            contentResolver,
-            fileUri,
-            null,
-            null,
-            null,
-            null,
-            null)
-        if (cursor == null || !cursor.moveToFirst())
-            return null
-        return cursor.use {
-            FileUploadRequestData(
-                it.getString(it.getColumnIndex(OpenableColumns.DISPLAY_NAME)),
-                contentResolver.openInputStream(fileUri)!!
-            )
         }
+
+        return null
     }
 
     override fun getInputStream(fileUri: Uri): InputStream? {
@@ -56,24 +38,13 @@ internal class FileResolverImpl(private val contentResolver: ContentResolver) : 
     }
 
     override fun isLocalFileExists(localFileUri: Uri?): Boolean {
-        Log.d("SDS", "isLocalFileExists, uri: $localFileUri")
-        if (localFileUri == null)
+        if (localFileUri == null) {
             return false
-
-        if (localFileUri.scheme == ContentResolver.SCHEME_FILE)
-            return FileResolverSchemeFile.isLocalFileExists(localFileUri)
-
-        val cursor = ContentResolverCompat.query(
-            contentResolver,
-            localFileUri,
-            null,
-            null,
-            null,
-            null,
-            null)
-        if (cursor == null || !cursor.moveToFirst())
+        }
+        if (localFileUri.scheme != ContentResolver.SCHEME_FILE) {
             return false
-        return true
+        }
+        return FileResolverSchemeFile.isLocalFileExists(localFileUri)
     }
 
     /**
@@ -81,36 +52,12 @@ internal class FileResolverImpl(private val contentResolver: ContentResolver) : 
      * NULL may be returned when [fileUri] is null or [fileUri] has [Uri.getScheme] != "content"
      */
     override fun getFileData(fileUri: Uri?): FileData? {
-        if (fileUri == null)
+        if (fileUri == null) {
             return null
-
-        if (fileUri.scheme == ContentResolver.SCHEME_FILE)
-            return FileResolverSchemeFile.getFileData(fileUri)
-
-        val cursor = ContentResolverCompat.query(
-            contentResolver,
-            fileUri,
-            null,
-            null,
-            null,
-            null,
-            null)
-        if (cursor == null || !cursor.moveToFirst())
+        }
+        if (fileUri.scheme != ContentResolver.SCHEME_FILE) {
             return null
-        var size = cursor.getInt(cursor.getColumnIndex(OpenableColumns.SIZE))
-        if (size == 0) {
-            contentResolver.openInputStream(fileUri).use {
-                it?.let { stream ->
-                    size = stream.available()
-                }
-            }
         }
-        return cursor.use {
-            FileData(
-                it.getString(it.getColumnIndex(OpenableColumns.DISPLAY_NAME)),
-                size,
-                fileUri,
-                true)
-        }
+        return FileResolverSchemeFile.getFileData(fileUri)
     }
 }

@@ -5,7 +5,6 @@ import com.pyrus.pyrusservicedesk.sdk.data.intermediate.FileData
 import com.pyrus.pyrusservicedesk.sdk.data.intermediate.FileUploadRequestData
 import com.pyrus.pyrusservicedesk.sdk.verify.LocalFileVerifier
 import java.io.InputStream
-import java.io.OutputStream
 
 /**
  * Helper for dealing with files

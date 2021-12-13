@@ -8,6 +8,7 @@ import com.pyrus.pyrusservicedesk.log.PLog
 import com.pyrus.pyrusservicedesk.sdk.FileResolver
 import com.pyrus.pyrusservicedesk.sdk.data.Attachment
 import com.pyrus.pyrusservicedesk.sdk.data.Comment
+import com.pyrus.pyrusservicedesk.sdk.data.FileManager
 import com.pyrus.pyrusservicedesk.sdk.data.EMPTY_TICKET_ID
 import com.pyrus.pyrusservicedesk.sdk.data.intermediate.AddCommentResponseData
 import com.pyrus.pyrusservicedesk.sdk.data.intermediate.Comments
@@ -43,6 +44,7 @@ internal class RetrofitWebRepository(
     private val appId: String,
     private val instanceId: String,
     private val fileResolver: FileResolver,
+    private val fileManager: FileManager,
     domain: String?,
     gson: Gson
 ) : RemoteRepository {
@@ -265,6 +267,7 @@ internal class RetrofitWebRepository(
                 throw Exception()
 
             newAttachments.add(get(index).toRemoteAttachment(uploadFileResponse.result.guid))
+            fileManager.removeFile(get(index).localUri)
         }
         return newAttachments
     }
