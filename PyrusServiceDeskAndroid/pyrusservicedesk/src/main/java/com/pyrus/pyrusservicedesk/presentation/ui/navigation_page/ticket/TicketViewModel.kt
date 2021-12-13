@@ -66,7 +66,7 @@ internal class TicketViewModel(
 
     private val draftRepository = serviceDeskProvider.getDraftRepository()
     private val localDataProvider: LocalDataProvider = serviceDeskProvider.getLocalDataProvider()
-    private val fileManager: FileManager = serviceDeskProvider.getCopypaster()
+    private val fileManager: FileManager = serviceDeskProvider.getFileManager()
     private val localDataVerifier: LocalDataVerifier = serviceDeskProvider.getLocalDataVerifier()
 
     private var isCreateTicketSent = false

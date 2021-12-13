@@ -22,11 +22,10 @@ internal class FileResolverImpl(private val contentResolver: ContentResolver) : 
      * NULL may be returned if file form the specified [fileUri] was not found or [Uri.getScheme] != "content"
      */
     override fun getUploadFileData(fileUri: Uri): FileUploadRequestData? {
-        if (fileUri.scheme == ContentResolver.SCHEME_FILE) {
-            return FileResolverSchemeFile.getUploadFileData(fileUri)
+        if (fileUri.scheme != ContentResolver.SCHEME_FILE) {
+            return null
         }
-
-        return null
+        return FileResolverSchemeFile.getUploadFileData(fileUri)
     }
 
     override fun getInputStream(fileUri: Uri): InputStream? {

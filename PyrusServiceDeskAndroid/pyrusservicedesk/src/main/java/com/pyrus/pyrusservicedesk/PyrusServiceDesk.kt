@@ -373,7 +373,7 @@ class PyrusServiceDesk private constructor(
             override fun getDraftRepository(): DraftRepository = draftRepository
             override fun getLiveUpdates(): LiveUpdates = liveUpdates
             override fun getLocalDataProvider(): LocalDataProvider = localDataProvider
-            override fun getCopypaster(): FileManager = fileManager
+            override fun getFileManager(): FileManager = fileManager
             override fun getLocalDataVerifier(): LocalDataVerifier = localDataVerifier
         }
     }

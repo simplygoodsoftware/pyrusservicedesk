@@ -39,7 +39,10 @@ internal interface ServiceDeskProvider {
      */
     fun getLocalDataProvider(): LocalDataProvider
 
-    fun getCopypaster(): FileManager
+    /**
+     * Provides [FileManager]
+     */
+    fun getFileManager(): FileManager
 
     /**
      * Provides [LocalDataVerifier]
