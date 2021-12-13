@@ -21,7 +21,7 @@ internal class FileManager(
         val ous = fileResolver.getInputStream(uri) ?: return null
         ous.use { inputStream ->
             FileOutputStream(tempFile).use { fileOutputStream ->
-                val buf = ByteArray(1024)
+                val buf = ByteArray(BUFFER_SIZE)
                 var len: Int
                 while (inputStream.read(buf).also { len = it } > 0) {
                     fileOutputStream.write(buf, 0, len)
@@ -98,5 +98,10 @@ internal class FileManager(
         }
     }
 
+    companion object {
+
+        private const val BUFFER_SIZE = 1024
+
+    }
 
 }

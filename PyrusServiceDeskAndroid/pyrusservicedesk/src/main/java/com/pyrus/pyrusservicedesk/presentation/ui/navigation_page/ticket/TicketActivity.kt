@@ -32,7 +32,9 @@ import com.pyrus.pyrusservicedesk.sdk.data.intermediate.FileData
 import com.pyrus.pyrusservicedesk.utils.*
 import com.pyrus.pyrusservicedesk.utils.RequestUtils.Companion.getFileUrl
 import kotlinx.android.synthetic.main.psd_activity_ticket.*
+import kotlinx.android.synthetic.main.psd_activity_ticket.root
 import kotlinx.android.synthetic.main.psd_activity_ticket.view.*
+import kotlinx.android.synthetic.main.psd_comment.*
 import kotlinx.android.synthetic.main.psd_no_connection.*
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
@@ -80,8 +82,8 @@ internal class TicketActivity : ConnectionActivityBase<TicketViewModel>(TicketVi
         PendingCommentActionSharedViewModel::class.java)
 
     private val adapter = TicketAdapter().apply {
-        setOnFileReadyForPreviewClickListener {
-            val fileData = it.toFileData()
+        setOnFileReadyForPreviewClickListener { attachment ->
+            val fileData = attachment.toFileData()
             if (fileData.isLocal) {
                 return@setOnFileReadyForPreviewClickListener
             }
@@ -270,26 +272,22 @@ internal class TicketActivity : ConnectionActivityBase<TicketViewModel>(TicketVi
                 }
             }
         )
-        attachFileSharedViewModel.getFilePickedLiveData().observe(
-            this,
-            { fileUri ->
-                fileUri?.let {
-                    viewModel.onAttachmentSelected(it)
+        attachFileSharedViewModel.getFilePickedLiveData().observe(this) { fileUri ->
+            fileUri?.let {
+                viewModel.onAttachmentSelected(it)
+            }
+        }
+
+        commentActionsSharedViewModel.getSelectedActionLiveData().observe(this) { action ->
+            action?.let {
+                when {
+                    PendingCommentActionSharedViewModel.isRetryClicked(it) -> viewModel.onPendingCommentRetried()
+                    PendingCommentActionSharedViewModel.isDeleteClicked(it) -> viewModel.onPendingCommentDeleted()
+                    PendingCommentActionSharedViewModel.isCancelled(it) -> viewModel.onChoosingCommentActionCancelled()
                 }
             }
-        )
-        commentActionsSharedViewModel.getSelectedActionLiveData().observe(
-            this,
-            { action ->
-                action?.let {
-                    when{
-                        PendingCommentActionSharedViewModel.isRetryClicked(it) -> viewModel.onPendingCommentRetried()
-                        PendingCommentActionSharedViewModel.isDeleteClicked(it) -> viewModel.onPendingCommentDeleted()
-                        PendingCommentActionSharedViewModel.isCancelled(it) -> viewModel.onChoosingCommentActionCancelled()
-                    }
-                }
-            }
-        )
+        }
+
     }
 
     override fun onViewHeightChanged(changedBy: Int) {

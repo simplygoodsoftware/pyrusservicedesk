@@ -169,17 +169,15 @@ internal class FilePreviewActivity: ConnectionActivityBase<FilePreviewViewModel>
 
     override fun startObserveData() {
         super.startObserveData()
-        viewModel.getFileLiveData().observe(
-            this,
-            {
-                it?.let { model ->
-                    when {
-                        model.isPreviewable -> applyPreviewableViewModel(model)
-                        else -> applyNonPreviewableViewModel(model)
-                    }
+        viewModel.getFileLiveData().observe(this) {
+            it?.let { model ->
+                when {
+                    model.isPreviewable -> applyPreviewableViewModel(model)
+                    else -> applyNonPreviewableViewModel(model)
                 }
             }
-        )
+        }
+
     }
 
     override fun updateProgress(newProgress: Int) {
