@@ -151,7 +151,7 @@ class PyrusServiceDesk private constructor(
                 }
             }
             else {
-                INSTANCE = PyrusServiceDesk(application, appId, userId, securityKey, domain, apiVersion, loggingEnabled)
+                INSTANCE = PyrusServiceDesk(application, appId, userId, securityKey, validDomain, apiVersion, loggingEnabled)
             }
         }
 
