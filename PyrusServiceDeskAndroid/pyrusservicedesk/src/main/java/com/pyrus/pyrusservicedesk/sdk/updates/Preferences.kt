@@ -27,4 +27,24 @@ internal interface Preferences {
      */
     fun getLastActiveTime(): Long
 
+    /**
+     * Save the list of token registration times
+     */
+    fun setTokenRegisterTimeList(timeList: List<Long>)
+
+    /**
+     * @return the list of token registration times
+     */
+    fun getTokenRegisterTimeList(): List<Long>
+
+    /**
+     * Save the map of token registration time to user
+     */
+    fun setLastTokenRegisterMap(timeMap: Map<String, Long>)
+
+    /**
+     * @return the map of token registration time to user
+     */
+    fun getLastTokenRegisterMap(): Map<String, Long>
+
 }

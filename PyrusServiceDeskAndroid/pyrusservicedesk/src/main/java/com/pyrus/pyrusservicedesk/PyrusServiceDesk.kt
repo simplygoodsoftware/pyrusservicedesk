@@ -27,6 +27,7 @@ import com.pyrus.pyrusservicedesk.sdk.updates.LiveUpdates
 import com.pyrus.pyrusservicedesk.sdk.updates.NewReplySubscriber
 import com.pyrus.pyrusservicedesk.sdk.updates.OnStopCallback
 import com.pyrus.pyrusservicedesk.sdk.updates.PreferencesManager
+import com.pyrus.pyrusservicedesk.sdk.updates.PreferencesManager.Companion.S_NO_ID
 import com.pyrus.pyrusservicedesk.sdk.verify.LocalDataVerifier
 import com.pyrus.pyrusservicedesk.sdk.verify.LocalDataVerifierImpl
 import com.pyrus.pyrusservicedesk.sdk.web.retrofit.RetrofitWebRepository
@@ -240,16 +241,15 @@ class PyrusServiceDesk private constructor(
         fun setPushToken(token: String?, callback: SetPushTokenCallback) {
             PLog.d(TAG, "setPushToken, token: $token")
             val serviceDesk = get()
-            val lastUpdateTime = serviceDesk.preferences.getLong(PREFERENCE_KEY_LAST_SET_TOKEN, -1L)
-            val isSkip = lastUpdateTime != -1L
-                    && System.currentTimeMillis() - lastUpdateTime < SET_PUSH_TOKEN_TIMEOUT * MILLISECONDS_IN_MINUTE
+
+           val userId = serviceDesk.userId
 
             when {
-                isSkip -> callback.onResult(Exception("Too many requests. Maximum once every $SET_PUSH_TOKEN_TIMEOUT minutes."))
+                calculateSkipTokenRegister(userId) -> callback.onResult(Exception("Too many requests. Maximum once every $SET_PUSH_TOKEN_TIMEOUT minutes."))
                 serviceDesk.appId.isBlank() -> callback.onResult(Exception("AppId is not assigned"))
                 serviceDesk.instanceId.isBlank() -> callback.onResult(Exception("UserId is not assigned"))
                 else -> {
-                    serviceDesk.preferences.edit().putLong(PREFERENCE_KEY_LAST_SET_TOKEN, System.currentTimeMillis()).apply()
+                    updateTokenTime(userId, System.currentTimeMillis())
                     GlobalScope.launch {
                         serviceDesk
                             .requestFactory
@@ -363,6 +363,38 @@ class PyrusServiceDesk private constructor(
                     }
                 }
             }
+        }
+
+        private fun updateTokenTime(userId: String?, time: Long) {
+            val pm = getPreferencesManager()
+            val timeMap = HashMap(pm.getLastTokenRegisterMap())
+            val timeList = ArrayList<Long>(pm.getTokenRegisterTimeList())
+
+            timeMap[userId?: S_NO_ID] = time
+
+            while (timeList.size >= 5) {
+                timeList.removeAt(0)
+            }
+            timeList.add(time)
+
+            pm.setLastTokenRegisterMap(timeMap)
+            pm.setTokenRegisterTimeList(timeList)
+        }
+
+        private fun calculateSkipTokenRegister(userId: String?): Boolean {
+            val currentTime = System.currentTimeMillis()
+
+            val lastUserTime = getPreferencesManager().getLastTokenRegisterMap()[userId?: S_NO_ID]
+            if (lastUserTime != null) {
+                return currentTime - lastUserTime < SET_PUSH_TOKEN_TIMEOUT * MILLISECONDS_IN_MINUTE
+            }
+
+            val tokenTimeList = getPreferencesManager().getTokenRegisterTimeList()
+
+            val nWithinFiveMin: Int = tokenTimeList.count { time ->
+                currentTime - time < SET_PUSH_TOKEN_TIMEOUT * MILLISECONDS_IN_MINUTE
+            }
+            return nWithinFiveMin >= 5
         }
     }
 

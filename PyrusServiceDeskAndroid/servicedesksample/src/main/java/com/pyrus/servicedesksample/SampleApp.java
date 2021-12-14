@@ -13,7 +13,7 @@ public class SampleApp extends Application {
         PyrusServiceDesk.init(
                 this,
                 "my_app_id",
-                "user_id",
+                "ghfghfghf",
                 "security_key",
                 null,
                 true
