@@ -13,7 +13,9 @@ import UIKit
     private static var lastSetPushToken: Date?
     private static var lastSetPushTokens = [Date]()
     private static var lastRefreshes = [Date]()
-
+    
+    static private(set) var domain: String?
+    
     ///UserId needed for request
     static private(set) var userId: String = "" {
         didSet(oldUserId){
@@ -162,35 +164,45 @@ import UIKit
     
     ///Init PyrusServiceDesk with new clientId.
     ///- parameter clientId: clientId using for all requests. If clientId not setted PyrusServiceDesk Controller will not be created
+    ///- parameter domain: Base domain for network requests. If the [domain] is null, the default pyrus.com will be used.
     ///- parameter loggingEnabled If true, then the library will write logs, and they can be sent as a file to chat by clicking the "Send Library Logs" button in the menu under the "+" sign.
-    @objc static public func createWith(_ clientId: String?, loggingEnabled: Bool = false)  {
-        createWith(clientId, userId: nil, securityKey: nil, reset: false, loggingEnabled: loggingEnabled)
+    @objc static public func createWith(_ clientId: String?, domain: String? = nil, loggingEnabled: Bool = false)  {
+        createWith(clientId, userId: nil, securityKey: nil, reset: false, domain: domain, loggingEnabled: loggingEnabled)
     }
     
     ///Init PyrusServiceDesk with new clientId.
     ///- parameter clientId: clientId using for all requests. If clientId not setted PyrusServiceDesk Controller will not be created
     ///- parameter reset: If true, user will be reseted
+    ///- parameter domain: Base domain for network requests. If the [domain] is null, the default pyrus.com will be used.
     ///- parameter loggingEnabled If true, then the library will write logs, and they can be sent as a file to chat by clicking the "Send Library Logs" button in the menu under the "+" sign.
-    @objc static public func createWith(_ clientId: String?, reset: Bool, loggingEnabled: Bool = false) {
-        createWith(clientId, userId: nil, securityKey: nil, reset: reset, loggingEnabled: loggingEnabled)
+    @objc static public func createWith(_ clientId: String?, reset: Bool, domain: String? = nil, loggingEnabled: Bool = false) {
+        createWith(clientId, userId: nil, securityKey: nil, reset: reset, domain: domain, loggingEnabled: loggingEnabled)
     }
     
     ///Init PyrusServiceDesk with new clientId.
     ///- parameter clientId: clientId using for all requests. If clientId not setted PyrusServiceDesk Controller will not be created
     ///- parameter userId: userId of the user who is initializing service desk
     ///- parameter securityKey: security key of the user for safe initialization
+    //////- parameter domain: Base domain for network requests. If the [domain] is null, the default pyrus.com will be used.
     ///- parameter loggingEnabled If true, then the library will write logs, and they can be sent as a file to chat by clicking the "Send Library Logs" button in the menu under the "+" sign.
-    @objc static public func createWith(_ clientId: String?, userId: String?, securityKey: String?, loggingEnabled: Bool = false) {
-        createWith(clientId, userId: userId, securityKey: securityKey, reset: false, loggingEnabled: loggingEnabled)
+    @objc static public func createWith(_ clientId: String?, userId: String?, securityKey: String?, domain: String? = nil, loggingEnabled: Bool = false) {
+        createWith(clientId, userId: userId, securityKey: securityKey, reset: false, domain: domain, loggingEnabled: loggingEnabled)
     }
-    private static func createWith(_ clientId: String?, userId: String?, securityKey: String?, reset: Bool, loggingEnabled: Bool = false) {
+    private static func createWith(_ clientId: String?, userId: String?, securityKey: String?, reset: Bool, domain: String?, loggingEnabled: Bool) {
         PyrusServiceDesk.loggingEnabled = loggingEnabled
         guard let clientId = clientId, clientId.count > 0 else {
             EventsLogger.logEvent(.emptyClientId)
             return
         }
-        PyrusLogger.shared.logEvent("Created with userId = \(userId ?? "no userId"), reset = \(reset), loggingEnabled = \(loggingEnabled)")
+        if let domain = domain,
+           domain.hostString() == nil
+        {
+            EventsLogger.logEvent(.invalidDomain)
+            return
+        }
+        PyrusLogger.shared.logEvent("Created with userId = \(userId ?? "no userId"), reset = \(reset), domain = \(domain ?? "domain is nil") loggingEnabled = \(loggingEnabled)")
         PyrusServiceDesk.clientId = clientId
+        PyrusServiceDesk.domain = domain?.hostString()
         PyrusServiceDesk.securityKey = securityKey
         let needReloadUI = PyrusServiceDesk.customUserId != userId
         PyrusServiceDesk.customUserId = userId
