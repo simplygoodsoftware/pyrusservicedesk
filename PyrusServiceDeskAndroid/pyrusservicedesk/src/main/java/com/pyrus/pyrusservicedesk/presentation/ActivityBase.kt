@@ -143,7 +143,7 @@ internal abstract class ActivityBase: AppCompatActivity(), CoroutineScope {
     protected open fun startObserveData() {
         sharedViewModel.getQuitServiceDeskLiveData().observe(
             this,
-            Observer { quit ->
+            { quit ->
                 quit?.let {
                     if (it)
                         finish()

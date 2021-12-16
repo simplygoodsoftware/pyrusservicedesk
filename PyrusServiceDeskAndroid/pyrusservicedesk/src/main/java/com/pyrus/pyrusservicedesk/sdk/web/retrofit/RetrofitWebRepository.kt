@@ -8,11 +8,10 @@ import com.pyrus.pyrusservicedesk.log.PLog
 import com.pyrus.pyrusservicedesk.sdk.FileResolver
 import com.pyrus.pyrusservicedesk.sdk.data.Attachment
 import com.pyrus.pyrusservicedesk.sdk.data.Comment
+import com.pyrus.pyrusservicedesk.sdk.data.FileManager
 import com.pyrus.pyrusservicedesk.sdk.data.EMPTY_TICKET_ID
-import com.pyrus.pyrusservicedesk.sdk.data.TicketDescription
 import com.pyrus.pyrusservicedesk.sdk.data.intermediate.AddCommentResponseData
 import com.pyrus.pyrusservicedesk.sdk.data.intermediate.Comments
-import com.pyrus.pyrusservicedesk.sdk.data.intermediate.CreateTicketResponseData
 import com.pyrus.pyrusservicedesk.sdk.repositories.general.GeneralRepository
 import com.pyrus.pyrusservicedesk.sdk.repositories.general.RemoteRepository
 import com.pyrus.pyrusservicedesk.sdk.request.UploadFileRequest
@@ -45,6 +44,7 @@ internal class RetrofitWebRepository(
     private val appId: String,
     private val instanceId: String,
     private val fileResolver: FileResolver,
+    private val fileManager: FileManager,
     domain: String?,
     gson: Gson
 ) : RemoteRepository {
@@ -113,96 +113,8 @@ internal class RetrofitWebRepository(
         }
     }
 
-    override suspend fun getTicket(ticketId: Int): GetTicketResponse {
-        PLog.d(TAG, "getTicket, " +
-                "appId: ${appId.getFirstNSymbols(10)}, " +
-                "userId: ${getUserId().getFirstNSymbols(10)}, " +
-                "instanceId: ${getInstanceId()?.getFirstNSymbols(10)}, " +
-                "apiVersion: ${getVersion()}, " +
-                "ticketId: $ticketId"
-        )
-        return withContext(Dispatchers.IO){
-            try {
-                api.getTicket(RequestBodyBase(appId, getUserId(), getSecurityKey(), getInstanceId(), getVersion()), ticketId).execute().run {
-                    PLog.d(TAG, "getTicket, isSuccessful: $isSuccessful, body() != null: ${body() != null}")
-                    when {
-                        isSuccessful && body() != null -> GetTicketResponse(ticket = body())
-                        else -> GetTicketResponse(createError(this))
-                    }
-                }
-            } catch (ex: Exception) {
-                GetTicketResponse(NoInternetConnection("No internet connection"))
-            }
-        }
-    }
-
-    override suspend fun addComment(ticketId: Int, comment: Comment, uploadFileHooks: UploadFileHooks?)
-            : Response<AddCommentResponseData> {
-        return addComment(false, ticketId, comment, uploadFileHooks)
-    }
-
     override suspend fun addFeedComment(comment: Comment, uploadFileHooks: UploadFileHooks?): Response<AddCommentResponseData> {
-        return addComment(true, EMPTY_TICKET_ID, comment, uploadFileHooks)
-    }
-
-    override suspend fun createTicket(description: TicketDescription, uploadFileHooks: UploadFileHooks?)
-            : CreateTicketResponse {
-
-        sequentialRequests.offer(CreateTicketRequest())
-
-        return withContext(PyrusServiceDesk.DISPATCHER_IO_SINGLE) {
-            var descr = description
-            if (descr.hasAttachments()) {
-                val newAttachments =
-                    try {
-                        descr.attachments!!.upload(uploadFileHooks)
-                    } catch (ex: Exception) {
-                        sequentialRequests.poll()
-                        return@withContext CreateTicketResponse(ApiCallError(ex.message ?: "Error while uploading files"))
-                    }
-
-                descr = descr.applyNewAttachments(newAttachments)
-            }
-            return@withContext try {
-                api.createTicket(
-                    CreateTicketRequestBody(
-                        appId,
-                        getUserId(),
-                        getSecurityKey(),
-                        getInstanceId(),
-                        getVersion(),
-                        ConfigUtils.getUserName(),
-                        descr
-                    )
-                )
-                    .execute()
-                    .run {
-                        sequentialRequests.poll()
-                        when {
-                            isSuccessful && body() != null -> {
-                                with(sequentialRequests.iterator()) {
-                                    while (hasNext()) {
-                                        val element = next()
-                                        if (element !is CommentRequest || element.ticketId != EMPTY_TICKET_ID)
-                                            break
-                                        element.ticketId = body()!!.ticketId
-                                    }
-                                }
-                                val data = when{
-                                    body()!!.attachmentIds.isNullOrEmpty() -> body()
-                                    else -> body()!!.applyAttachments(descr.attachments)
-                                }
-
-                                CreateTicketResponse(data = data)
-                            }
-                            else -> CreateTicketResponse(createError(this))
-                        }
-                    }
-            } catch (ex: Exception) {
-                sequentialRequests.poll()
-                CreateTicketResponse(NoInternetConnection("No internet connection"))
-            }
-        }
+        return addComment(EMPTY_TICKET_ID, comment, uploadFileHooks)
     }
 
     override suspend fun setPushToken(token: String?): SetPushTokenResponse {
@@ -260,10 +172,11 @@ internal class RetrofitWebRepository(
         return null
     }
 
-    private suspend fun addComment(isFeed: Boolean,
-                                   ticketId: Int,
-                                   comment: Comment,
-                                   uploadFileHooks: UploadFileHooks?): Response<AddCommentResponseData> {
+    private suspend fun addComment(
+        ticketId: Int,
+        comment: Comment,
+        uploadFileHooks: UploadFileHooks?
+    ): Response<AddCommentResponseData> {
 
         PLog.d(TAG, "addComment, " +
                 "appId: ${appId.getFirstNSymbols(10)}, " +
@@ -273,7 +186,7 @@ internal class RetrofitWebRepository(
                 "ticketId: $ticketId"
         )
 
-        val request = CommentRequest(ticketId)
+        val request = CommentRequest()
         sequentialRequests.offer(request)
 
         return withContext<Response<AddCommentResponseData>>(PyrusServiceDesk.DISPATCHER_IO_SINGLE) {
@@ -289,32 +202,16 @@ internal class RetrofitWebRepository(
                 cament = cament.applyNewAttachments(newAttachments)
             }
 
-            val call = when {
-                isFeed -> api.addFeedComment(AddCommentRequestBody(
-                    appId,
-                    getUserId(),
-                    getSecurityKey(),
-                    getInstanceId(),
-                    getVersion(),
-                    cament.body,
-                    cament.attachments,
-                    ConfigUtils.getUserName(),
-                    cament.rating))
-                else -> api.addComment(
-                    AddCommentRequestBody(
-                        appId,
-                        getUserId(),
-                        getSecurityKey(),
-                        getInstanceId(),
-                        getVersion(),
-                        cament.body,
-                        cament.attachments,
-                        ConfigUtils.getUserName(),
-                        cament.rating
-                    ),
-                    request.ticketId
-                )
-            }
+            val call = api.addFeedComment(AddCommentRequestBody(
+                appId,
+                getUserId(),
+                getSecurityKey(),
+                getInstanceId(),
+                getVersion(),
+                cament.body,
+                cament.attachments,
+                ConfigUtils.getUserName(),
+                cament.rating))
             return@withContext try {
                 call
                     .execute()
@@ -370,6 +267,7 @@ internal class RetrofitWebRepository(
                 throw Exception()
 
             newAttachments.add(get(index).toRemoteAttachment(uploadFileResponse.result.guid))
+            fileManager.removeFile(get(index).localUri)
         }
         return newAttachments
     }
@@ -419,12 +317,6 @@ private fun <T> createError(response: retrofit2.Response<T>): ResponseError {
     }
 }
 
-private fun CreateTicketResponseData.applyAttachments(attachments: List<Attachment>?): CreateTicketResponseData {
-    if (!mustBeConvertedToRemoteAttachments(attachments, attachmentIds))
-        return this
-    return CreateTicketResponseData(ticketId, attachmentIds, applyRemoteIdsToAttachments(attachments!!, attachmentIds!!))
-}
-
 private fun AddCommentResponseData.applyAttachments(attachments: List<Attachment>?): AddCommentResponseData {
     if (!mustBeConvertedToRemoteAttachments(attachments, attachmentIds))
         return this
@@ -447,10 +339,6 @@ private fun mustBeConvertedToRemoteAttachments(sentAttachments: List<Attachment>
             && sentAttachments.size == remoteAttachmentIds.size
 }
 
-private fun TicketDescription.applyNewAttachments(newAttachments: List<Attachment>): TicketDescription {
-    return TicketDescription(subject, description, newAttachments)
-}
-
 private fun Comment.applyNewAttachments(newAttachments: List<Attachment>): Comment {
     return Comment(commentId, body, isInbound, newAttachments, creationDate, author, localId)
 }
@@ -460,5 +348,4 @@ private fun Attachment.withRemoteId(remoteId: Int) = Attachment(remoteId, guid, 
 
 
 private interface SequentialRequest
-private class CommentRequest(var ticketId: Int): SequentialRequest
-private class CreateTicketRequest: SequentialRequest
+private class CommentRequest : SequentialRequest

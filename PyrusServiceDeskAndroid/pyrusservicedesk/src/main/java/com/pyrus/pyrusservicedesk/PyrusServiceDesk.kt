@@ -3,17 +3,16 @@ package com.pyrus.pyrusservicedesk
 import android.app.Activity
 import android.app.Application
 import android.content.Context
-import android.content.Intent
 import android.net.Uri
 import androidx.annotation.MainThread
 import com.google.gson.GsonBuilder
 import com.pyrus.pyrusservicedesk.log.PLog
 import com.pyrus.pyrusservicedesk.presentation.ui.navigation_page.ticket.TicketActivity
-import com.pyrus.pyrusservicedesk.presentation.ui.navigation_page.tickets.TicketsActivity
 import com.pyrus.pyrusservicedesk.presentation.viewmodel.SharedViewModel
 import com.pyrus.pyrusservicedesk.sdk.FileResolver
 import com.pyrus.pyrusservicedesk.sdk.FileResolverImpl
 import com.pyrus.pyrusservicedesk.sdk.RequestFactory
+import com.pyrus.pyrusservicedesk.sdk.data.FileManager
 import com.pyrus.pyrusservicedesk.sdk.data.LocalDataProvider
 import com.pyrus.pyrusservicedesk.sdk.data.gson.RemoteGsonExclusionStrategy
 import com.pyrus.pyrusservicedesk.sdk.data.gson.UriGsonAdapter
@@ -39,7 +38,6 @@ import java.util.concurrent.Executors
 class PyrusServiceDesk private constructor(
     internal val application: Application,
     internal val appId: String,
-    internal val isSingleChat: Boolean,
     internal val userId: String?,
     internal val securityKey: String?,
     internal val domain: String?,
@@ -144,7 +142,6 @@ class PyrusServiceDesk private constructor(
                     INSTANCE = PyrusServiceDesk(
                         application,
                         appId,
-                        true,
                         userId,
                         securityKey,
                         validDomain,
@@ -154,7 +151,7 @@ class PyrusServiceDesk private constructor(
                 }
             }
             else {
-                INSTANCE = PyrusServiceDesk(application, appId, true, userId, securityKey, domain, apiVersion, loggingEnabled)
+                INSTANCE = PyrusServiceDesk(application, appId, userId, securityKey, validDomain, apiVersion, loggingEnabled)
             }
         }
 
@@ -335,7 +332,6 @@ class PyrusServiceDesk private constructor(
         }
 
         private fun startImpl(
-            ticketId: Int? = null,
             activity: Activity,
             configuration: ServiceDeskConfiguration? = null,
             onStopCallback: OnStopCallback? = null
@@ -344,7 +340,7 @@ class PyrusServiceDesk private constructor(
             get().sharedViewModel.clearQuitServiceDesk()
             get().onStopCallback = onStopCallback
 
-            activity.startActivity(createIntent(ticketId))
+            activity.startActivity(TicketActivity.getLaunchIntent())
 
             if (configuration == null)
                 return
@@ -354,17 +350,12 @@ class PyrusServiceDesk private constructor(
             get().preferences.edit().putString(PREFERENCE_KEY_USER_ID_V2, get().userId).apply()
         }
 
-        private fun createIntent(ticketId: Int? = null): Intent {
-            return when {
-                ticketId != null -> TicketActivity.getLaunchIntent(ticketId)
-                get().isSingleChat -> TicketActivity.getLaunchIntent()
-                else -> TicketsActivity.getLaunchIntent()
-            }
-        }
-
         private fun clearLocalData(doOnCleared : () -> Unit) {
             GlobalScope.launch {
                 if (get().serviceDeskProvider.getRequestFactory().getRemoveAllPendingCommentsRequest().execute().hasError().not()) {
+
+                    get().fileManager.clearTempDir()
+
                     withContext(Dispatchers.Main) {
                         get().draftRepository.saveDraft("")
                         refresh()
@@ -382,6 +373,7 @@ class PyrusServiceDesk private constructor(
             override fun getDraftRepository(): DraftRepository = draftRepository
             override fun getLiveUpdates(): LiveUpdates = liveUpdates
             override fun getLocalDataProvider(): LocalDataProvider = localDataProvider
+            override fun getFileManager(): FileManager = fileManager
             override fun getLocalDataVerifier(): LocalDataVerifier = localDataVerifier
         }
     }
@@ -397,6 +389,9 @@ class PyrusServiceDesk private constructor(
             offlineRepository,
             fileResolver
         )
+    }
+    private val fileManager: FileManager by lazy {
+        FileManager(application, fileResolver)
     }
     private val localDataVerifier: LocalDataVerifier
 
@@ -433,7 +428,7 @@ class PyrusServiceDesk private constructor(
                 .create()
 
         val centralRepository = CentralRepository(
-            RetrofitWebRepository(appId, instanceId, fileResolver, domain, remoteGson),
+            RetrofitWebRepository(appId, instanceId, fileResolver, fileManager, domain, remoteGson),
             offlineRepository
         )
 

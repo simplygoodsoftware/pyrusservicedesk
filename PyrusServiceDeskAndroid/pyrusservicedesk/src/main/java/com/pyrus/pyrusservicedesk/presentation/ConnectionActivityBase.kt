@@ -52,22 +52,22 @@ internal abstract class ConnectionActivityBase<T: ConnectionViewModelBase>(viewM
     override fun startObserveData() {
         super.startObserveData()
         viewModel.getIsNetworkConnectedLiveData().observe(
-                this,
-                Observer { isConnected ->
-                    isConnected?.let {
-                        no_connection.visibility = if (it) GONE else VISIBLE
-                    }
+            this,
+            { isConnected ->
+                isConnected?.let {
+                    no_connection.visibility = if (it) GONE else VISIBLE
                 }
+            }
         )
         viewModel.getLoadingProgressLiveData().observe(
             this,
-            Observer { progress ->
+            { progress ->
                 progress?.let { updateProgress(it) }
             }
         )
         sharedViewModel.getUpdateServiceDeskLiveData().observe(
             this,
-            Observer {
+            {
                 viewModel.loadData()
             }
         )

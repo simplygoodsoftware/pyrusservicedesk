@@ -4,6 +4,7 @@ import android.net.Uri
 import com.pyrus.pyrusservicedesk.sdk.data.intermediate.FileData
 import com.pyrus.pyrusservicedesk.sdk.data.intermediate.FileUploadRequestData
 import com.pyrus.pyrusservicedesk.sdk.verify.LocalFileVerifier
+import java.io.InputStream
 
 /**
  * Helper for dealing with files
@@ -15,6 +16,8 @@ internal interface FileResolver: LocalFileVerifier {
      * NULL may be returned if file form the specified [fileUri] was not found or [Uri.getScheme] != "content"
      */
     fun getUploadFileData(fileUri: Uri): FileUploadRequestData?
+
+    fun getInputStream(fileUri: Uri): InputStream?
 
     /**
      * Provides file data for the UI purposes. See [FileData].

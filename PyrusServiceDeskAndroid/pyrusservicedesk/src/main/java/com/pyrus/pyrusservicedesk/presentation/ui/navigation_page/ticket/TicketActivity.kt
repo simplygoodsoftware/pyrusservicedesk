@@ -1,6 +1,5 @@
 package com.pyrus.pyrusservicedesk.presentation.ui.navigation_page.ticket
 
-import androidx.lifecycle.Observer
 import android.content.ClipData
 import android.content.ClipboardManager
 import android.content.Context
@@ -22,21 +21,20 @@ import com.pyrus.pyrusservicedesk.PyrusServiceDesk
 import com.pyrus.pyrusservicedesk.R
 import com.pyrus.pyrusservicedesk.ServiceDeskConfiguration
 import com.pyrus.pyrusservicedesk.presentation.ConnectionActivityBase
-import com.pyrus.pyrusservicedesk.presentation.ui.navigation.UiNavigator
+import com.pyrus.pyrusservicedesk.presentation.ui.navigation_page.file_preview.FilePreviewActivity
 import com.pyrus.pyrusservicedesk.presentation.ui.navigation_page.ticket.dialogs.attach_files.AttachFileSharedViewModel
 import com.pyrus.pyrusservicedesk.presentation.ui.navigation_page.ticket.dialogs.attach_files.AttachFileVariantsFragment
 import com.pyrus.pyrusservicedesk.presentation.ui.navigation_page.ticket.dialogs.comment_actions.PendingCommentActionSharedViewModel
 import com.pyrus.pyrusservicedesk.presentation.ui.navigation_page.ticket.dialogs.comment_actions.PendingCommentActionsDialog
-import com.pyrus.pyrusservicedesk.presentation.ui.view.NavigationCounterDrawable
 import com.pyrus.pyrusservicedesk.presentation.ui.view.recyclerview.item_decorators.SpaceItemDecoration
 import com.pyrus.pyrusservicedesk.sdk.data.Attachment
-import com.pyrus.pyrusservicedesk.sdk.data.EMPTY_TICKET_ID
 import com.pyrus.pyrusservicedesk.sdk.data.intermediate.FileData
 import com.pyrus.pyrusservicedesk.utils.*
 import com.pyrus.pyrusservicedesk.utils.RequestUtils.Companion.getFileUrl
 import kotlinx.android.synthetic.main.psd_activity_ticket.*
+import kotlinx.android.synthetic.main.psd_activity_ticket.root
 import kotlinx.android.synthetic.main.psd_activity_ticket.view.*
-import kotlinx.android.synthetic.main.psd_activity_tickets.view.*
+import kotlinx.android.synthetic.main.psd_comment.*
 import kotlinx.android.synthetic.main.psd_no_connection.*
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
@@ -58,10 +56,8 @@ internal class TicketActivity : ConnectionActivityBase<TicketViewModel>(TicketVi
          * Provides intent for launching the screen.
          *
          * @param ticketId id of ticket to be rendered.
-         * When [PyrusServiceDesk.isSingleChat] is used this should be omitted.
          * When not, this should be omitted for the new ticket.
          * @param unreadCount current count of unread tickets.
-         * Can be omitted in [PyrusServiceDesk.isSingleChat] mode
          */
         fun getLaunchIntent(ticketId:Int? = null, unreadCount: Int? = 0): Intent {
             return Intent(
@@ -73,26 +69,6 @@ internal class TicketActivity : ConnectionActivityBase<TicketViewModel>(TicketVi
             }
         }
 
-        /**
-         * Extracts ticket id from the given [arguments].
-         * Expected that [arguments] are made by [getLaunchIntent].
-         *
-         * @return id of the ticket stored in [arguments] or [EMPTY_TICKET_ID] if
-         * [arguments] doesn't contain it
-         */
-        fun getTicketId(arguments: Intent): Int {
-            return arguments.getIntExtra(KEY_TICKET_ID, EMPTY_TICKET_ID)
-        }
-
-        /**
-         * Extracts unread ticket count from the [arguments].
-         * Expected that [arguments] are made by [getLaunchIntent].
-         *
-         * @return count of the unread tickets, or 0 if it was not specified.
-         */
-        fun getUnreadTicketsCount(arguments: Intent): Int {
-            return arguments.getIntExtra(KEY_UNREAD_COUNT, 0)
-        }
     }
 
     override val layoutResId = R.layout.psd_activity_ticket
@@ -104,15 +80,14 @@ internal class TicketActivity : ConnectionActivityBase<TicketViewModel>(TicketVi
         AttachFileSharedViewModel::class.java)
     private val commentActionsSharedViewModel: PendingCommentActionSharedViewModel by getViewModel(
         PendingCommentActionSharedViewModel::class.java)
-    private val navigationCounterIcon by lazy {
-        NavigationCounterDrawable(
-            this
-        )
-    }
 
     private val adapter = TicketAdapter().apply {
-        setOnFileReadyForPreviewClickListener {
-           UiNavigator.toFilePreview(this@TicketActivity, it.toFileData())
+        setOnFileReadyForPreviewClickListener { attachment ->
+            val fileData = attachment.toFileData()
+            if (fileData.isLocal) {
+                return@setOnFileReadyForPreviewClickListener
+            }
+            startActivity(FilePreviewActivity.getLaunchIntent(fileData))
         }
         setOnErrorCommentEntryClickListener {
             viewModel.onUserStartChoosingCommentAction(it)
@@ -177,10 +152,6 @@ internal class TicketActivity : ConnectionActivityBase<TicketViewModel>(TicketVi
             ticket_toolbar.toolbar_title.typeface = it
         }
 
-        if (!viewModel.isFeed) {
-            ticket_toolbar.navigationIcon = navigationCounterIcon
-            ticket_toolbar.setNavigationOnClickListener { UiNavigator.toTickets(this@TicketActivity) }
-        }
         ticket_toolbar.setOnMenuItemClickListener{ onMenuItemClicked(it) }
         comments.apply {
             adapter = this@TicketActivity.adapter
@@ -190,7 +161,7 @@ internal class TicketActivity : ConnectionActivityBase<TicketViewModel>(TicketVi
                     this@TicketActivity.adapter.itemSpaceMultiplier)
             )
             itemAnimator = null
-            this@TicketActivity.adapter.itemTouchHelper?.attachToRecyclerView(this)
+            this@TicketActivity.adapter.itemTouchHelper.attachToRecyclerView(this)
         }
         send.setOnClickListener { sendComment() }
         val stateList = ColorStateList(
@@ -276,7 +247,7 @@ internal class TicketActivity : ConnectionActivityBase<TicketViewModel>(TicketVi
         super.startObserveData()
         viewModel.getCommentDiffLiveData().observe(
             this,
-            Observer { result ->
+            { result ->
                 val atEnd = comments.isAtEnd()
                 val isEmpty = comments.adapter?.itemCount == 0
                 result?.let{
@@ -301,33 +272,22 @@ internal class TicketActivity : ConnectionActivityBase<TicketViewModel>(TicketVi
                 }
             }
         )
-        viewModel.getUnreadCounterLiveData().observe(
-            this,
-            Observer { it?.let { count ->
-                if (!viewModel.isFeed)
-                    navigationCounterIcon.counter = count
-            } }
-        )
-        attachFileSharedViewModel.getFilePickedLiveData().observe(
-            this,
-            Observer { fileUri ->
-                fileUri?.let {
-                    viewModel.onAttachmentSelected(it)
+        attachFileSharedViewModel.getFilePickedLiveData().observe(this) { fileUri ->
+            fileUri?.let {
+                viewModel.onAttachmentSelected(it)
+            }
+        }
+
+        commentActionsSharedViewModel.getSelectedActionLiveData().observe(this) { action ->
+            action?.let {
+                when {
+                    PendingCommentActionSharedViewModel.isRetryClicked(it) -> viewModel.onPendingCommentRetried()
+                    PendingCommentActionSharedViewModel.isDeleteClicked(it) -> viewModel.onPendingCommentDeleted()
+                    PendingCommentActionSharedViewModel.isCancelled(it) -> viewModel.onChoosingCommentActionCancelled()
                 }
             }
-        )
-        commentActionsSharedViewModel.getSelectedActionLiveData().observe(
-            this,
-            Observer { action ->
-                action?.let {
-                    when{
-                        PendingCommentActionSharedViewModel.isRetryClicked(it) -> viewModel.onPendingCommentRetried()
-                        PendingCommentActionSharedViewModel.isDeleteClicked(it) -> viewModel.onPendingCommentDeleted()
-                        PendingCommentActionSharedViewModel.isCancelled(it) -> viewModel.onChoosingCommentActionCancelled()
-                    }
-                }
-            }
-        )
+        }
+
     }
 
     override fun onViewHeightChanged(changedBy: Int) {
@@ -346,8 +306,7 @@ internal class TicketActivity : ConnectionActivityBase<TicketViewModel>(TicketVi
 
     override fun finish() {
         super.finish()
-        if (PyrusServiceDesk.get().isSingleChat)
-            PyrusServiceDesk.onServiceDeskStop()
+        PyrusServiceDesk.onServiceDeskStop()
     }
 
     private fun onMenuItemClicked(menuItem: MenuItem?): Boolean {
@@ -369,8 +328,7 @@ internal class TicketActivity : ConnectionActivityBase<TicketViewModel>(TicketVi
     }
 
     private fun showAttachFileVariants() {
-        AttachFileVariantsFragment()
-            .show(supportFragmentManager, "")
+        AttachFileVariantsFragment().show(supportFragmentManager, "")
     }
 
     private fun copyToClipboard(text: String) {

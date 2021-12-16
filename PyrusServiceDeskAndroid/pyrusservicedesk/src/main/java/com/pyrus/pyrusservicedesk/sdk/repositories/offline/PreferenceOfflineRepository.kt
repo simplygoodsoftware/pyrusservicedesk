@@ -46,8 +46,9 @@ internal class PreferenceOfflineRepository(private val preferences: SharedPrefer
                 preferences.getString(PREFERENCE_KEY_OFFLINE_COMMENTS, "[]"),
                 commentListTokenType)
             .toMutableList()
-        if (commentsList.removeAll { localDataVerifier.isLocalCommentEmpty(it) })
+        if (commentsList.removeAll { localDataVerifier.isLocalCommentEmpty(it) }) {
             writeComments(commentsList)
+        }
         return ResponseImpl.success(Comments(commentsList))
     }
 

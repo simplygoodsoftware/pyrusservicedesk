@@ -1,14 +1,8 @@
 package com.pyrus.pyrusservicedesk.sdk.web.retrofit
 
 import androidx.annotation.Keep
-import com.pyrus.pyrusservicedesk.sdk.data.Ticket
 import com.pyrus.pyrusservicedesk.sdk.data.intermediate.*
 import com.pyrus.pyrusservicedesk.sdk.web.request_body.*
-import com.pyrus.pyrusservicedesk.sdk.web.request_body.AddCommentRequestBody
-import com.pyrus.pyrusservicedesk.sdk.web.request_body.CreateTicketRequestBody
-import com.pyrus.pyrusservicedesk.sdk.web.request_body.GetFeedBody
-import com.pyrus.pyrusservicedesk.sdk.web.request_body.RequestBodyBase
-import com.pyrus.pyrusservicedesk.sdk.web.request_body.SetPushTokenBody
 import okhttp3.MultipartBody
 import okhttp3.ResponseBody
 import retrofit2.Call
@@ -32,28 +26,6 @@ internal interface ServiceDeskApi {
     @POST("gettickets")
     fun getTickets(@Body requestBody: RequestBodyBase)
             : Call<Tickets>
-
-    /**
-     * Api call for getting ticket with the given [ticketId].
-     */
-    @POST("getticket/{ticket_id}")
-    fun getTicket(@Body requestBody: RequestBodyBase,
-                  @Path("ticket_id") ticketId: Int)
-            : Call<Ticket>
-
-    /**
-     * Api call for creating ticket.
-     */
-    @POST("CreateTicket")
-    fun createTicket(@Body requestBody: CreateTicketRequestBody): Call<CreateTicketResponseData>
-
-    /**
-     * Api call for sending comment to the ticket with the given [ticketId].
-     */
-    @POST("UpdateTicket/{ticket_id}")
-    fun addComment(@Body requestBody: AddCommentRequestBody,
-                   @Path("ticket_id") ticketId: Int)
-            : Call<AddCommentResponseData>
 
     /**
      * Api call for sending comment to the feed.

@@ -1,7 +1,6 @@
 package com.pyrus.pyrusservicedesk.presentation.ui.navigation_page.ticket
 
 import android.content.Context
-import android.content.Intent
 import android.net.Uri
 import android.os.Handler
 import android.os.Looper
@@ -20,11 +19,10 @@ import com.pyrus.pyrusservicedesk.presentation.ui.view.recyclerview.DiffResultWi
 import com.pyrus.pyrusservicedesk.presentation.viewmodel.ConnectionViewModelBase
 import com.pyrus.pyrusservicedesk.sdk.data.Attachment
 import com.pyrus.pyrusservicedesk.sdk.data.Comment
-import com.pyrus.pyrusservicedesk.sdk.data.EMPTY_TICKET_ID
+import com.pyrus.pyrusservicedesk.sdk.data.FileManager
 import com.pyrus.pyrusservicedesk.sdk.data.LocalDataProvider
 import com.pyrus.pyrusservicedesk.sdk.data.intermediate.AddCommentResponseData
 import com.pyrus.pyrusservicedesk.sdk.data.intermediate.Comments
-import com.pyrus.pyrusservicedesk.sdk.data.intermediate.CreateTicketResponseData
 import com.pyrus.pyrusservicedesk.sdk.response.PendingDataError
 import com.pyrus.pyrusservicedesk.sdk.updates.OnUnreadTicketCountChangedSubscriber
 import com.pyrus.pyrusservicedesk.sdk.updates.PreferencesManager
@@ -37,22 +35,17 @@ import com.pyrus.pyrusservicedesk.utils.MILLISECONDS_IN_SECOND
 import com.pyrus.pyrusservicedesk.utils.RequestUtils.Companion.MAX_FILE_SIZE_BYTES
 import com.pyrus.pyrusservicedesk.utils.RequestUtils.Companion.MAX_FILE_SIZE_MEGABYTES
 import com.pyrus.pyrusservicedesk.utils.getWhen
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.runBlocking
-import kotlinx.coroutines.withContext
+import kotlinx.coroutines.*
+import java.lang.Exception
+import java.lang.Runnable
 import java.util.*
 import kotlin.collections.ArrayList
 
 /**
  * ViewModel for the ticket screen.
- *
- * [isFeed] Denotes whether [PyrusServiceDesk.isSingleChat] is enabled.
  */
 internal class TicketViewModel(
     serviceDeskProvider: ServiceDeskProvider,
-    arguments: Intent,
-    val isFeed: Boolean,
     private val preferencesManager: PreferencesManager
 ) : ConnectionViewModelBase(serviceDeskProvider), OnUnreadTicketCountChangedSubscriber {
 
@@ -73,10 +66,10 @@ internal class TicketViewModel(
 
     private val draftRepository = serviceDeskProvider.getDraftRepository()
     private val localDataProvider: LocalDataProvider = serviceDeskProvider.getLocalDataProvider()
+    private val fileManager: FileManager = serviceDeskProvider.getFileManager()
     private val localDataVerifier: LocalDataVerifier = serviceDeskProvider.getLocalDataVerifier()
 
     private var isCreateTicketSent = false
-    private var ticketId: Int = TicketActivity.getTicketId(arguments)
 
     private val unreadCounter = MutableLiveData<Int>()
     private val commentDiff = MutableLiveData<DiffResultWithNewItems<TicketEntry>>()
@@ -101,18 +94,14 @@ internal class TicketViewModel(
     init {
         draft = draftRepository.getDraft()
 
-        if (!isFeed) {
-            unreadCounter.value = TicketActivity.getUnreadTicketsCount(arguments)
-        } else {
-            runBlocking {
-                val response = requests.getPendingFeedCommentsRequest().execute()
-                if (!response.hasError() && !response.getData()?.comments.isNullOrEmpty()) {
-                    applyTicketUpdate(response.getData()!!, true)
-                }
+        runBlocking {
+            val response = requests.getPendingFeedCommentsRequest().execute()
+            if (!response.hasError() && !response.getData()?.comments.isNullOrEmpty()) {
+                applyTicketUpdate(response.getData()!!, true)
             }
         }
 
-        if (canBeUpdated() && isNetworkConnected.value == true) {
+        if (isNetworkConnected.value == true) {
             loadData()
         }
         maybeStartAutoRefresh()
@@ -152,16 +141,25 @@ internal class TicketViewModel(
      * @param attachmentUri URI of the file to be sent
      */
     fun onAttachmentSelected(attachmentUri: Uri) {
-        val localComment = localDataProvider.createLocalComment(fileUri = attachmentUri)
-        val fileHooks = UploadFileHooks()
-        fileHooks.subscribeOnCancel(object : OnCancelListener {
-            override fun onCancel() {
-                return applyCommentUpdate(
-                    CommentEntry(localComment), ChangeType.Cancelled
-                )
-            }
-        })
-        sendAddComment(localComment, fileHooks)
+       launch {
+           val fileUri = try {
+               fileManager.copyFile(attachmentUri)
+           } catch (e: Exception) {
+               return@launch
+           }
+           withContext(Dispatchers.Main) {
+               val localComment = localDataProvider.createLocalComment(fileUri = fileUri)
+               val fileHooks = UploadFileHooks()
+               fileHooks.subscribeOnCancel(object : OnCancelListener {
+                   override fun onCancel() {
+                       return applyCommentUpdate(
+                           CommentEntry(localComment), ChangeType.Cancelled
+                       )
+                   }
+               })
+               sendAddComment(localComment, fileHooks)
+           }
+       }
     }
 
     /**
@@ -170,11 +168,6 @@ internal class TicketViewModel(
      * changes to UI.
      */
     fun getCommentDiffLiveData(): LiveData<DiffResultWithNewItems<TicketEntry>> = commentDiff
-
-    /**
-     * Provides live data that delivers counter of unread tickets.
-     */
-    fun getUnreadCounterLiveData(): LiveData<Int> = unreadCounter
 
     /**
      * Callback to be invoked when user input changed.
@@ -225,10 +218,7 @@ internal class TicketViewModel(
     }
 
     private fun update() {
-        val call = when {
-            isFeed -> GetFeedCall(this@TicketViewModel, requests).execute()
-            else -> GetTicketCall(this@TicketViewModel, requests, ticketId).execute()
-        }
+        val call = GetFeedCall(this@TicketViewModel, requests).execute()
         val observer = Observer<CallResult<Comments>> { result ->
             if (result == null)
                 return@Observer
@@ -242,13 +232,8 @@ internal class TicketViewModel(
     }
 
     private fun maybeStartAutoRefresh() {
-        if (canBeUpdated())
-            mainHandler.post(updateRunnable)
+        mainHandler.post(updateRunnable)
     }
-
-    private fun canBeUpdated() = isFeed || !isNewTicket()
-
-    private fun isNewTicket() = ticketId == EMPTY_TICKET_ID
 
     private fun List<Comment>.toTicketEntries(): MutableList<TicketEntry> {
         val now = Calendar.getInstance()
@@ -273,28 +258,14 @@ internal class TicketViewModel(
         if (commentContainsError(localComment))
             return
 
-        val toNewTicket = !isFeed && isNewTicket() && !isCreateTicketSent
-
         applyCommentUpdate(
             CommentEntry(localComment, uploadFileHooks = uploadFileHooks),
             ChangeType.Added
         )
-        when {
-            toNewTicket -> {
-                isCreateTicketSent = true
-                CreateTicketCall(this, requests, localComment, uploadFileHooks)
-                    .execute()
-                    .observeForever(CreateTicketObserver(uploadFileHooks, localComment))
-            }
-            isFeed ->
-                AddFeedCommentCall(this, requests, localComment, uploadFileHooks)
-                    .execute()
-                    .observeForever(AddCommentObserver(uploadFileHooks, localComment))
-            else ->
-                AddCommentCall(this, requests, ticketId, localComment, uploadFileHooks)
-                    .execute()
-                    .observeForever(AddCommentObserver(uploadFileHooks, localComment))
-        }
+        AddFeedCommentCall(this, requests, localComment, uploadFileHooks)
+            .execute()
+            .observeForever(AddCommentObserver(uploadFileHooks, localComment))
+
         val lastActiveTime = System.currentTimeMillis()
         PLog.d(TAG, "sendAddComment, lastActiveTime: $lastActiveTime, commentLocalId: ${localComment.localId}")
         PyrusServiceDesk.startTicketsUpdatesIfNeeded(lastActiveTime)
@@ -547,26 +518,6 @@ internal class TicketViewModel(
 
     }
 
-
-    private inner class CreateTicketObserver(
-        uploadFileHooks: UploadFileHooks?,
-        localComment: Comment
-    ) : AddCommentObserverBase<CallResult<CreateTicketResponseData>, CreateTicketResponseData>(
-        uploadFileHooks,
-        localComment
-    ) {
-        override fun getAttachments(data: CreateTicketResponseData) = data.sentAttachments
-
-        override fun getCommentId(data: CreateTicketResponseData): Int {
-            return localComment.localId
-        }
-
-        override fun onSuccess(data: CreateTicketResponseData) {
-            ticketId = data.ticketId
-            maybeStartAutoRefresh()
-        }
-
-    }
 
     private abstract inner class AddCommentObserverBase<T : CallResult<U>, U>(
         val uploadFileHooks: UploadFileHooks?,
