@@ -61,6 +61,7 @@ class PyrusServiceDesk private constructor(
         private var lastRefreshes = ArrayList<Long>()
 
         private const val SET_PUSH_TOKEN_TIMEOUT = 5 // Minutes
+        private const val SET_PUSH_TOKEN_TIMES_WITHIN_TIMEOUT = 5 // in minute
         private const val REFRESH_MAX_COUNT = 20 // in minute
 
         internal const val API_VERSION_1: Int = 0
@@ -372,7 +373,7 @@ class PyrusServiceDesk private constructor(
 
             timeMap[userId?: S_NO_ID] = time
 
-            while (timeList.size >= 5) {
+            while (timeList.size >= SET_PUSH_TOKEN_TIMES_WITHIN_TIMEOUT) {
                 timeList.removeAt(0)
             }
             timeList.add(time)
@@ -394,7 +395,7 @@ class PyrusServiceDesk private constructor(
             val nWithinFiveMin: Int = tokenTimeList.count { time ->
                 currentTime - time < SET_PUSH_TOKEN_TIMEOUT * MILLISECONDS_IN_MINUTE
             }
-            return nWithinFiveMin >= 5
+            return nWithinFiveMin >= SET_PUSH_TOKEN_TIMES_WITHIN_TIMEOUT
         }
     }
 
