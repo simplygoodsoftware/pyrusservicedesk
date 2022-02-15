@@ -94,14 +94,14 @@ import UIKit
     ///- parameter viewController: ViewController that must present chat
     ///- parameter onStopCallback: OnStopCallback object or nil. OnStopCallback is object for getting a notification that PyrusServiceDesk was closed.
     @objc public static func start(on viewController:UIViewController, onStopCallback: OnStopCallback? = nil){
-        psdStart(on: viewController, configuration: nil, completion: nil, onStopCallback: onStopCallback)
+        let _ = psdStart(on: viewController, configuration: nil, completion: nil, onStopCallback: onStopCallback)
     }
     ///Show chat
     ///- parameter viewController: ViewController that must present chat
     ///- parameter configuration: ServiceDeskConfiguration object or nil. ServiceDeskConfiguration is object that create custom interface: theme color,welcome message, image for support's avatar and chat title for navigation bar title. If nil, the default design will be used.
     ///- parameter onStopCallback: OnStopCallback object or nil. OnStopCallback is object for getting a notification that PyrusServiceDesk was closed.
     @objc public static func start(on viewController:UIViewController, configuration:ServiceDeskConfiguration?, onStopCallback: OnStopCallback? = nil){
-        psdStart(on: viewController, configuration: configuration, completion: nil, onStopCallback: onStopCallback)
+        let _ = psdStart(on: viewController, configuration: configuration, completion: nil, onStopCallback: onStopCallback)
     }
     ///Show chat
     ///- parameter viewController: ViewController that must present chat
@@ -109,23 +109,35 @@ import UIKit
     ///- parameter completion: The block to execute after the presentation finishes. This block has no return value and takes no parameters. You may specify nil for this parameter.
     ///- parameter onStopCallback: OnStopCallback object or nil. OnStopCallback is object for getting a notification that PyrusServiceDesk was closed.
     @objc public static func start(on viewController:UIViewController, configuration:ServiceDeskConfiguration?, completion:(() -> Void)? = nil, onStopCallback: OnStopCallback? = nil){
-        psdStart(on: viewController, configuration: configuration, completion: completion, onStopCallback: onStopCallback)
+        let _ = psdStart(on: viewController, configuration: configuration, completion: completion, onStopCallback: onStopCallback)
     }
+    
+    ///Show chat
+    ///- parameter configuration: ServiceDeskConfiguration object or nil. ServiceDeskConfiguration is object that create custom interface: theme color,welcome message, image for support's avatar and chat title for navigation bar title. If nil, the default design will be used.
+    @objc public static func start(with configuration:ServiceDeskConfiguration?) -> UINavigationController? {
+        return psdStart(on: nil, configuration: configuration, completion: nil, onStopCallback: nil)
+    }
+    
     ///The private function to show chat, all public calles this one.
     ///- parameter viewController: ViewController that must present chat
     ///- parameter configuration: ServiceDeskConfiguration object or nil. ServiceDeskConfiguration is object that create custom interface: theme color,welcome message, image for support's avatar and chat title for navigation bar title. If nil, the default design will be used.
     ///- parameter completion: The block to execute after the presentation finishes. This block has no return value and takes no parameters. You may specify nil for this parameter.
     ///- parameter onStopCallback: OnStopCallback object or nil. OnStopCallback is object for getting a notification that PyrusServiceDesk was closed.
-    private static func psdStart(on viewController: UIViewController, configuration: ServiceDeskConfiguration?, completion:(() -> Void)?, onStopCallback: OnStopCallback?) {
+    private static func psdStart(on viewController: UIViewController?, configuration: ServiceDeskConfiguration?, completion:(() -> Void)?, onStopCallback: OnStopCallback?) -> UINavigationController? {
         stopCallback = onStopCallback
         if !PyrusServiceDeskController.PSDIsOpen(){
             EventsLogger.logEvent(.openPSD)
-            let psd : PyrusServiceDeskController = PyrusServiceDeskController.init(configuration)
-            psd.show(on: viewController, completion: completion)
+            let psd : PyrusServiceDeskController = PyrusServiceDeskController.init(configuration, customPresent: viewController == nil)
+            if let viewController = viewController {
+                psd.show(on: viewController, completion: completion)
+            } else {
+                return psd
+            }
         }
         else{
             PyrusServiceDesk.mainController?.updateInfo()
         }
+        return nil
         
     }
     ///Close PyrusServiceDesk

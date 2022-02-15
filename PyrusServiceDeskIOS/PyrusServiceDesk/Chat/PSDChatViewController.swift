@@ -8,7 +8,7 @@ protocol PSDUpdateInfo{
 }
 
 class PSDChatViewController: PSDViewController {
-    
+    private var firstLoad: Bool = true
     public func updateTitle(){
         designNavigation()
         self.messageInputView.setToDefault()
@@ -21,6 +21,7 @@ class PSDChatViewController: PSDViewController {
         presentationController?.delegate = self
         if #available(iOS 11.0, *) {
             self.tableView.contentInsetAdjustmentBehavior = .never//.automatic
+            navigationItem.largeTitleDisplayMode = .never
             
         }
         self.tableView.chatDelegate = self
@@ -38,11 +39,7 @@ class PSDChatViewController: PSDViewController {
             infoView.centerXAnchor.constraint(equalTo: view.centerXAnchor).isActive = true
             infoView.topAnchor.constraint(equalTo: view.topAnchor, constant: (self.navigationController?.navigationBar.frame.size.height ?? 0) +  UIApplication.shared.statusBarFrame.height).isActive = true
         }
-
-        let deadlineTime = DispatchTime.now() + 0.45
-        DispatchQueue.main.asyncAfter(deadline: deadlineTime, execute: {
-            self.messageInputView.inputTextView.becomeFirstResponder()
-        })
+        
     }
     
     override func viewWillLayoutSubviews() {
@@ -103,8 +100,13 @@ class PSDChatViewController: PSDViewController {
     override func viewDidAppear(_ animated: Bool) {
         super.viewDidAppear(animated)
         self.tableView.addKeyboardListeners()
+        print("viewDidAppear")
         UIView.performWithoutAnimation {
              self.becomeFirstResponder()
+        }
+        if firstLoad {
+            self.messageInputView.inputTextView.becomeFirstResponder()
+            firstLoad = false
         }
     }
     @objc private func appEnteredForeground(){
