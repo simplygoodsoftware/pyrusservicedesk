@@ -100,7 +100,6 @@ class PSDChatViewController: PSDViewController {
     override func viewDidAppear(_ animated: Bool) {
         super.viewDidAppear(animated)
         self.tableView.addKeyboardListeners()
-        print("viewDidAppear")
         UIView.performWithoutAnimation {
              self.becomeFirstResponder()
         }
