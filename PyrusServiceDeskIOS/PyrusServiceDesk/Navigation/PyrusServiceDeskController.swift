@@ -4,15 +4,17 @@ import UIKit
 ///The main service desk controller.
 class PyrusServiceDeskController: PSDNavigationController {
     let customization: ServiceDeskConfiguration?
-    required init(_ customization: ServiceDeskConfiguration?) {
+    required init(_ customization: ServiceDeskConfiguration?, customPresent: Bool) {
         self.customization = customization
         if(PyrusServiceDesk.clientId != nil){
             let pyrusChat = PSDChatViewController()
             super.init(nibName: nil, bundle: nil)
             pushViewController(pyrusChat, animated: false)
-            self.transitioningDelegate  = self
-            self.isModalInPopover = true
-            self.modalPresentationStyle = .overFullScreen
+            if !customPresent {
+                self.transitioningDelegate  = self
+                self.isModalInPopover = true
+                self.modalPresentationStyle = .overFullScreen
+            }
         }else{
             EventsLogger.logEvent(.emptyClientId)
             super.init(nibName: nil, bundle: nil)
