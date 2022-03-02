@@ -133,6 +133,7 @@ class PSDTableView : UITableView{
             if(!self.isDragging){
                 changeConstraints(emptyTable: self.numberOfRows(inSection: 0) == 0){}
             }
+            PyrusLogger.shared.logEvent("PSDTableView change inset: \(contentInset)")
         }
     }
 

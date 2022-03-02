@@ -88,6 +88,10 @@ import Foundation
     ///The custom color for button for sending message.
     private(set) var sendButtonColor: UIColor?
     
+    func printableStringForLogs() -> String {
+        return "Заголовок чата {\(chatTitle ?? "empty")}, Первое сообщение {\(welcomeMessage)}, Вид для заголовка {\(chatTitleView)}, Кастомная правая кнопка: {\(customRightBarButtonItem)}, Кастомная левая кнопка: {\(customLeftBarButtonItem)}, Информационный вид {\(infoView)}, Стиль навигации {\(barStyle?.rawValue), \(barStyleDark?.rawValue)}"
+    }
+    
     @objc(ServiceDeskConfigurationBuilder) public class Builder: NSObject {
         private var configuration = ServiceDeskConfiguration()
         

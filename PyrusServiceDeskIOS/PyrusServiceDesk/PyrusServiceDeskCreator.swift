@@ -125,6 +125,10 @@ import UIKit
     ///- parameter onStopCallback: OnStopCallback object or nil. OnStopCallback is object for getting a notification that PyrusServiceDesk was closed.
     private static func psdStart(on viewController: UIViewController?, configuration: ServiceDeskConfiguration?, completion:(() -> Void)?, onStopCallback: OnStopCallback?) -> UINavigationController? {
         stopCallback = onStopCallback
+        PyrusLogger.shared.logEvent("PSD start with configuration: \(configuration?.printableStringForLogs() ?? "empty configuration")")
+        if loggingEnabled {
+            PyrusLogger.shared.logEvent("Custom appearance: \(TestClass.printInv())")
+        }
         if !PyrusServiceDeskController.PSDIsOpen(){
             EventsLogger.logEvent(.openPSD)
             let psd : PyrusServiceDeskController = PyrusServiceDeskController.init(configuration, customPresent: viewController == nil)
@@ -165,7 +169,7 @@ import UIKit
         PyrusServiceDesk.subscriber = nil
     }
     
-    @objc public static func subscribeToGogEvents(_ subscriber: LogEvents){
+    @objc public static func subscribeToLogEvents(_ subscriber: LogEvents){
         PyrusLogger.shared.logEvent("Did add logs subscriber.")
         PyrusServiceDesk.logEvent = subscriber
     }

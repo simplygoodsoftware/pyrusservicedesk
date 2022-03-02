@@ -270,6 +270,8 @@
 		4BDDE42B257F70C800DF40B2 /* Recolorable.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4BDDE42A257F70C800DF40B2 /* Recolorable.swift */; };
 		4BDDE42F257F7DB900DF40B2 /* PSDVIew.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4BDDE42E257F7DB900DF40B2 /* PSDVIew.swift */; };
 		4BE3450E225F9684009E2135 /* PSDDownloadImage.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4BE3450D225F9684009E2135 /* PSDDownloadImage.swift */; };
+		4BEC5E4027CFC818004F62A0 /* TestClass.h in Headers */ = {isa = PBXBuildFile; fileRef = 4BEC5E3E27CFC818004F62A0 /* TestClass.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		4BEC5E4127CFC818004F62A0 /* TestClass.m in Sources */ = {isa = PBXBuildFile; fileRef = 4BEC5E3F27CFC818004F62A0 /* TestClass.m */; };
 		7B1E8D58250665F800C1E5AC /* PSDInfoView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7B1E8D57250665F800C1E5AC /* PSDInfoView.swift */; };
 		7B743A8224D2E1A300B34904 /* assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 7B743A8124D2E1A300B34904 /* assets.xcassets */; };
 		7B9545F724D07EE2006F6AED /* icn_cross@3x.png in Resources */ = {isa = PBXBuildFile; fileRef = 7B9545F424D07EE2006F6AED /* icn_cross@3x.png */; };
@@ -556,6 +558,8 @@
 		4BDDE42A257F70C800DF40B2 /* Recolorable.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Recolorable.swift; sourceTree = "<group>"; };
 		4BDDE42E257F7DB900DF40B2 /* PSDVIew.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PSDVIew.swift; sourceTree = "<group>"; };
 		4BE3450D225F9684009E2135 /* PSDDownloadImage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PSDDownloadImage.swift; sourceTree = "<group>"; };
+		4BEC5E3E27CFC818004F62A0 /* TestClass.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = TestClass.h; sourceTree = "<group>"; };
+		4BEC5E3F27CFC818004F62A0 /* TestClass.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = TestClass.m; sourceTree = "<group>"; };
 		7B1E8D57250665F800C1E5AC /* PSDInfoView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PSDInfoView.swift; sourceTree = "<group>"; };
 		7B743A8124D2E1A300B34904 /* assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = assets.xcassets; sourceTree = "<group>"; };
 		7B9545F424D07EE2006F6AED /* icn_cross@3x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "icn_cross@3x.png"; sourceTree = "<group>"; };
@@ -834,6 +838,8 @@
 			isa = PBXGroup;
 			children = (
 				4B7F34D621F85E2A00977C6D /* PyrusServiceDesk.h */,
+				4BEC5E3E27CFC818004F62A0 /* TestClass.h */,
+				4BEC5E3F27CFC818004F62A0 /* TestClass.m */,
 				4B7F350521F8687000977C6D /* PyrusServiceDeskCreator.swift */,
 				4B66011C223948CE00AA45E6 /* PyrusServiceDeskCustomization.swift */,
 				4B873BB3224B7EE600A96E93 /* PSDNewReplySubscriber.swift */,
@@ -1139,6 +1145,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				4B7F34E421F85E2A00977C6D /* PyrusServiceDesk.h in Headers */,
+				4BEC5E4027CFC818004F62A0 /* TestClass.h in Headers */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1193,7 +1200,7 @@
 				TargetAttributes = {
 					4B7F34D221F85E2A00977C6D = {
 						CreatedOnToolsVersion = 10.1;
-						LastSwiftMigration = 1020;
+						LastSwiftMigration = 1320;
 					};
 					4B7F34DB21F85E2A00977C6D = {
 						CreatedOnToolsVersion = 10.1;
@@ -1414,6 +1421,7 @@
 				4B6B904A223A59A50003D7F9 /* [Int+PSDChat]+complete.swift in Sources */,
 				4B88C6F522145AB000BDB304 /* PSDGetChat.swift in Sources */,
 				4B56BE492216CC0E004E6685 /* PSDUploader.swift in Sources */,
+				4BEC5E4127CFC818004F62A0 /* TestClass.m in Sources */,
 				4BB7DADF225E280800F6D1F0 /* PSDFileAttachmentView.swift in Sources */,
 				4B82A49C2268C29700654CE0 /* PSDCoverHorizontalAnimator.swift in Sources */,
 				4B17DD0523E816B1003CF4D9 /* String + uuid.swift in Sources */,
@@ -1685,7 +1693,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = NO;
-				BUILD_LIBRARY_FOR_DISTRIBUTION = YES;
+				BUILD_LIBRARY_FOR_DISTRIBUTION = NO;
 				CLANG_ENABLE_MODULES = YES;
 				CODE_SIGN_IDENTITY = "";
 				CODE_SIGN_STYLE = Automatic;
@@ -1706,6 +1714,7 @@
 				PRODUCT_BUNDLE_IDENTIFIER = "-23.PyrusServiceDesk";
 				PRODUCT_NAME = "$(TARGET_NAME:c99extidentifier)";
 				SKIP_INSTALL = YES;
+				SWIFT_OBJC_BRIDGING_HEADER = "";
 				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
@@ -1717,7 +1726,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = NO;
-				BUILD_LIBRARY_FOR_DISTRIBUTION = YES;
+				BUILD_LIBRARY_FOR_DISTRIBUTION = NO;
 				CLANG_ENABLE_MODULES = YES;
 				CODE_SIGN_IDENTITY = "";
 				CODE_SIGN_STYLE = Automatic;
@@ -1738,6 +1747,7 @@
 				PRODUCT_BUNDLE_IDENTIFIER = "-23.PyrusServiceDesk";
 				PRODUCT_NAME = "$(TARGET_NAME:c99extidentifier)";
 				SKIP_INSTALL = YES;
+				SWIFT_OBJC_BRIDGING_HEADER = "";
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
 				VALID_ARCHS = "arm64 arm64e armv7 armv7s x86_64";

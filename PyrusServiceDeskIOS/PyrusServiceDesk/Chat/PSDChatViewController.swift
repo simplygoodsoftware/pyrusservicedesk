@@ -181,6 +181,7 @@ class PSDChatViewController: PSDViewController {
             rightBarButtonItem.tintColor = PyrusServiceDesk.mainController?.customization?.themeColor ?? PyrusServiceDesk.mainController?.customization?.barButtonTintColor
             navigationItem.rightBarButtonItem = rightBarButtonItem
         }
+        print("PyrusServiceDesk.mainController?.customization?.customLeftBarButtonItem = \(PyrusServiceDesk.mainController?.customization?.customLeftBarButtonItem)")
         if let leftBarButtonItem = PyrusServiceDesk.mainController?.customization?.customLeftBarButtonItem {
             leftBarButtonItem.tintColor = PyrusServiceDesk.mainController?.customization?.themeColor ?? PyrusServiceDesk.mainController?.customization?.barButtonTintColor
             navigationItem.leftBarButtonItem = leftBarButtonItem
