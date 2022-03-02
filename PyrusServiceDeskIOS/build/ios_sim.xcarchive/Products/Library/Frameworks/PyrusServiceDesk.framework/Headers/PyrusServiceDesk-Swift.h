@@ -331,7 +331,7 @@ SWIFT_CLASS_PROPERTY(@property (nonatomic, class, copy) void (^ _Nullable onAuth
 + (void)subscribeToReplies:(id <NewReplySubscriber> _Nullable)subscriber;
 /// Unsubscribe [subscriber] from alerts for new messages from chat support.
 + (void)unsubscribeFromReplies:(id <NewReplySubscriber> _Nullable)subscriber;
-+ (void)subscribeToGogEvents:(id <LogEvents> _Nonnull)subscriber;
++ (void)subscribeToLogEvents:(id <LogEvents> _Nonnull)subscriber;
 /// Init PyrusServiceDesk with new clientId.
 /// \param clientId clientId using for all requests. If clientId not setted PyrusServiceDesk Controller will not be created
 ///
@@ -781,7 +781,7 @@ SWIFT_CLASS_PROPERTY(@property (nonatomic, class, copy) void (^ _Nullable onAuth
 + (void)subscribeToReplies:(id <NewReplySubscriber> _Nullable)subscriber;
 /// Unsubscribe [subscriber] from alerts for new messages from chat support.
 + (void)unsubscribeFromReplies:(id <NewReplySubscriber> _Nullable)subscriber;
-+ (void)subscribeToGogEvents:(id <LogEvents> _Nonnull)subscriber;
++ (void)subscribeToLogEvents:(id <LogEvents> _Nonnull)subscriber;
 /// Init PyrusServiceDesk with new clientId.
 /// \param clientId clientId using for all requests. If clientId not setted PyrusServiceDesk Controller will not be created
 ///

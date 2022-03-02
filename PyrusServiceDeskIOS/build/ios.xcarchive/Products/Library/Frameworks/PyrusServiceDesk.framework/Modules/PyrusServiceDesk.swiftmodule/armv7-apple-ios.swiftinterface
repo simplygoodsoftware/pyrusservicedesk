@@ -109,7 +109,7 @@ import zlib
   @objc public static var onAuthorizationFailed: (() -> Swift.Void)?
   @objc public static func subscribeToReplies(_ subscriber: PyrusServiceDesk.NewReplySubscriber?)
   @objc public static func unsubscribeFromReplies(_ subscriber: PyrusServiceDesk.NewReplySubscriber?)
-  @objc public static func subscribeToGogEvents(_ subscriber: PyrusServiceDesk.LogEvents)
+  @objc public static func subscribeToLogEvents(_ subscriber: PyrusServiceDesk.LogEvents)
   @objc public static func createWith(_ clientId: Swift.String?, domain: Swift.String? = nil, loggingEnabled: Swift.Bool = false)
   @objc public static func createWith(_ clientId: Swift.String?, reset: Swift.Bool, domain: Swift.String? = nil, loggingEnabled: Swift.Bool = false)
   @objc public static func createWith(_ clientId: Swift.String?, userId: Swift.String?, securityKey: Swift.String?, domain: Swift.String? = nil, loggingEnabled: Swift.Bool = false)
