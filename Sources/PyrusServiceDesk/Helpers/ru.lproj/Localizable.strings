@@ -1,0 +1,66 @@
+
+"Last_Message" = "Это последнее сообщение из этой беседы";
+"Comment" = "Ваш комментарий";
+"Default_User_Name" = "Гость";
+"Uploading" = "Загрузка...";
+"Empty_Description" = "Пусто";
+"All_Conversations" = "Все обсуждения";
+"Support_Default_Name" = "Поддержка";
+
+//Buttons' Title
+"New_Conversation" = "Новый чат";
+"New_Conversation_Short" = "Создать";
+"Cancel" = "Отмена";
+"Settings" = "Настройки";
+"Send" = "Отправить";
+"Back" = "Назад";
+"Done" = "Готово";
+"CancelDownload" = "Отменить загрузку";
+"FileLoadError"="Не удалось загрузить файл";
+"NoPreviewAvailable" = "Предпросмотр недоступен";
+"OpenWith" = "Открыть";
+"RetryButton" = "Повторить";
+"DeleteButton" = "Удалить";
+
+//For attachments
+"Camera" = "Снять фото или видео";
+"Camera_Access_Error" = "Нет доступа к камере или микрофону";
+"Phone_Gallery" = "Галерея";
+"Phone_Gallery_Access_Error" = "Нет доступа к галлерее";
+"Access_Error" = "Ошибка доступа";
+"Size_Error" = "Размер файла не должен привышать 200 МБ.";
+"No_File_Error"="Файл не найден";
+
+
+//Append time from data
+"Interval_Recent" = "только что";
+"Interval_Minute" = "%% мин назад";
+"Interval_Hour" = "%% ч назад";
+"Interval_Day" = "%% д назад";
+"Interval_Week" = "%% н назад";
+"Interval_Mounth" = "%% м назад";
+
+"Interval_One_Year" = "%% год назад";
+"Interval_One_End_Year" = "%% год назад";
+"Interval_Years_234" = "%% года назад";
+"Interval_Years" = "%% лет назад";
+
+//Date as string
+"Today" = "Сегодня";
+"Yesterday" = "Вчера";
+"Date_Format" = "EE, dd MMM";
+"Date_Format_Year" = "EE, dd MMM, yyyy";
+"Time_Format" = "HH:mm";
+"Numbers_Date_Format" = "yyyyMMddHHmmss";
+//For requests
+"No_Connection" = "Нет интернет-соединения";
+"Retry" = "Попробовать заново";
+"Error" = "Ошибка";
+"AttachmentLoadError"="Не могу загрузить данное вложение";
+"ErrorServerError"="Связь с сервером прервана";
+
+"AcсessDenied"="Нет доступа";
+"OK"="ОК";
+
+"PrepareLog"="Подготовка лога...";
+"SendLog"="Отправить логи библиотеки";
