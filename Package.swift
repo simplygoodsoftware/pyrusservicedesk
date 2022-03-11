@@ -15,7 +15,10 @@ let package = Package(
         )
     ],
     targets: [
-        .target(
-                    name: "PyrusServiceDesk")
+        .binaryTarget(
+                    name: "PyrusServiceDesk",
+                    url: "https://github.com/simplygoodsoftware/pyrusservicedesk/tree/kl/testSPM/PyrusServiceDeskIOS/Framework/PyrusServiceDesk.xcframework.zip",
+                    checksum: ""
+        )
     ]
 )
