@@ -48,7 +48,7 @@ struct PyrusServiceDeskAPI {
                 let appIdEncodeed : String = PyrusServiceDesk.clientId?.addingPercentEncoding(withAllowedCharacters: CharacterSet.rfc3986Unreserved) ?? PyrusServiceDesk.clientId ?? ""
                 let securityKeyEncodeed : String = securityKey.addingPercentEncoding(withAllowedCharacters: CharacterSet.rfc3986Unreserved) ?? securityKey
                 let instanceIdEncodeed : String = PyrusServiceDesk.userId.addingPercentEncoding(withAllowedCharacters: CharacterSet.rfc3986Unreserved) ?? PyrusServiceDesk.userId
-                urlString = urlString + "/" + ticketId + "?version=1&user_id=" + userIdEncodeed + "&security_key=" + securityKeyEncodeed + "&instance_id=" + instanceIdEncodeed + "&app_id=" + appIdEncodeed
+                urlString = urlString + "/" + ticketId + "?version=1&user_id=" + userIdEncodeed + "&security_key=" + securityKeyEncodeed + "&instance_id=" + instanceIdEncodeed + "&app_id=" + appIdEncodeed + "&api_sign=" + PyrusServiceDesk.apiSign()
             } else {
                 let userIdEncodeed : String = PyrusServiceDesk.userId.addingPercentEncoding(withAllowedCharacters: CharacterSet.rfc3986Unreserved) ?? PyrusServiceDesk.userId
                 let appIdEncodeed : String = PyrusServiceDesk.clientId?.addingPercentEncoding(withAllowedCharacters: CharacterSet.rfc3986Unreserved) ?? PyrusServiceDesk.clientId ?? ""
