@@ -306,6 +306,21 @@ extension String {
 }
 
 class HelpersStrings {
+    
+    static func insideDomain(url: URL) -> Bool {
+        guard
+            let domains = PyrusServiceDesk.privateDomains,
+            domains.count > 0
+        else {
+            return true
+        }
+        guard let host = url.absoluteString.hostString()
+        else {
+            return false
+        }
+        return domains.contains(host)
+    }
+    
     static func attributedString(byDecodingHTMLEntities strAttr: NSMutableAttributedString) -> NSMutableAttributedString {
         var range: NSRange = NSRange(location: 0, length: strAttr.length)
         var subrange: NSRange = (strAttr.string as NSString).range(of: "&", options: .backwards, range: range)

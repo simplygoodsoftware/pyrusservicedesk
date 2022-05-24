@@ -1,6 +1,11 @@
-
 import Foundation
-class PSDCopyTextView :UITextView,UIGestureRecognizerDelegate, UITextViewDelegate{
+
+protocol LinkDelegate: NSObject {
+    func showLinkOpenAlert(_ title: String)
+}
+
+class PSDCopyTextView :UITextView,UIGestureRecognizerDelegate, UITextViewDelegate {
+    weak var linkDelegate: LinkDelegate?
     override init(frame: CGRect, textContainer: NSTextContainer?) {
         super.init(frame: frame, textContainer:textContainer)
         self.isEditable = false
@@ -27,7 +32,17 @@ class PSDCopyTextView :UITextView,UIGestureRecognizerDelegate, UITextViewDelegat
             return false
         }
         let startIndex = offset(from: beginningOfDocument, to: range.start)
-        return attributedText.attribute(.link, at: startIndex, effectiveRange: nil) != nil
+        guard let link = attributedText.attribute(.link, at: startIndex, effectiveRange: nil) else {
+            return false
+        }
+        if
+            let link = link as? URL,
+            !HelpersStrings.insideDomain(url: link)
+        {
+            linkDelegate?.showLinkOpenAlert(link.absoluteString)
+            return false
+        }
+        return true
     }
     required init?(coder aDecoder: NSCoder) {
         fatalError("init(coder:) has not been implemented")

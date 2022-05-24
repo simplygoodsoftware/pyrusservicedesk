@@ -2,6 +2,7 @@ import UIKit
 protocol PSDChatTableViewDelegate: NSObjectProtocol {
     func needShowRate(_ showRate: Bool)
     func restartTimer()
+    func showLinkOpenAlert(_ linkString: String)
 }
 
 class PSDChatTableView: PSDDetailTableView{
@@ -471,6 +472,7 @@ extension PSDChatTableView : UITableViewDelegate,UITableViewDataSource{
         cell.draw(message:message)
         PSDPreviewSetter.setPreview(of: message.attachment, in: cell.cloudView.attachmentView, delegate: self, animated: false)
         self.redrawSendingAttachmentCell(at: indexPath, with: message)
+        cell.cloudView.messageTextView.linkDelegate = self
         return cell
     }
     func tableView(_ tableView: UITableView, willDisplay cell: UITableViewCell, forRowAt indexPath: IndexPath) {
@@ -729,4 +731,10 @@ extension PSDChatTableView : PSDMessageSendDelegate{
 }
 private extension UIFont {
     static let dateLabel = CustomizationHelper.systemFont(ofSize: 16.0)
+}
+
+extension PSDChatTableView: LinkDelegate {
+    func showLinkOpenAlert(_ linkString: String) {
+        chatDelegate?.showLinkOpenAlert(linkString)
+    }
 }
