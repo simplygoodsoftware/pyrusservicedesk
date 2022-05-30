@@ -273,11 +273,7 @@ internal class TicketAdapter: AdapterBase<TicketEntry>() {
         }
 
         private fun bindTextView() {
-            var text = getItem().comment.body
-            if (text.isNullOrEmpty()) {
-                val rating = getItem().comment.rating
-                text = comment.context.getString(rating.ratingToEmojiRes())
-            }
+            val text = getItem().comment.body ?: ""
             comment.setCommentText(text)
         }
 

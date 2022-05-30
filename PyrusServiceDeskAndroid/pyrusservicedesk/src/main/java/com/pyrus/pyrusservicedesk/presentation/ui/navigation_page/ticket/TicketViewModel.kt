@@ -245,7 +245,9 @@ internal class TicketViewModel(
                     prevDateGroup = it
                 }
             }
-            acc.addAll(comment.splitToEntries())
+            if (comment.isLocal() || !comment.body.isNullOrEmpty() || !comment.attachments.isNullOrEmpty() || comment.rating != null) {
+                acc.addAll(comment.splitToEntries())
+            }
             acc
         }
     }
