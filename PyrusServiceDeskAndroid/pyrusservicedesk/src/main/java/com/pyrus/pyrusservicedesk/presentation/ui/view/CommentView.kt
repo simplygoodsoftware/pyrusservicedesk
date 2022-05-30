@@ -2,6 +2,7 @@ package com.pyrus.pyrusservicedesk.presentation.ui.view
 
 import android.animation.Animator
 import android.animation.ObjectAnimator
+import android.app.Activity
 import android.content.Context
 import android.content.Intent
 import android.graphics.Bitmap
@@ -12,8 +13,7 @@ import android.graphics.drawable.AnimationDrawable
 import android.graphics.drawable.Drawable
 import android.graphics.drawable.LayerDrawable
 import android.net.Uri
-import android.text.SpannableStringBuilder
-import android.text.TextPaint
+import android.text.*
 import android.text.method.LinkMovementMethod
 import android.text.style.ClickableSpan
 import android.text.util.Linkify
@@ -26,6 +26,7 @@ import android.widget.FrameLayout
 import android.widget.ImageView
 import android.widget.LinearLayout
 import androidx.annotation.ColorInt
+import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.content.res.AppCompatResources
 import androidx.appcompat.widget.AppCompatImageView
 import androidx.appcompat.widget.AppCompatTextView
@@ -33,6 +34,7 @@ import androidx.core.app.ActivityCompat
 import androidx.core.text.util.LinkifyCompat
 import androidx.exifinterface.media.ExifInterface
 import com.pyrus.pyrusservicedesk.R
+import com.pyrus.pyrusservicedesk.ServiceDeskConfiguration
 import com.pyrus.pyrusservicedesk.presentation.ui.view.OutlineImageView.Companion.EDGE_RIGHT
 import com.pyrus.pyrusservicedesk.utils.*
 import com.squareup.picasso.Picasso
@@ -310,6 +312,95 @@ internal class CommentView @JvmOverloads constructor(
         comment_text.text = text
         LinkifyCompat.addLinks(comment_text, Linkify.WEB_URLS or Linkify.PHONE_NUMBERS)
         addDeepLinks(comment_text)
+        comment_text.text = replaceLinkTagsWithSpans(comment_text.text)
+    }
+
+    private fun replaceLinkTagsWithSpans(text: CharSequence): CharSequence {
+        val ranges = mutableListOf<Triple<String, String, IntRange>>()
+
+        var offset = 0
+
+        val res = text.replace(Regex("<a href=\"(.*?)\">(.*?)</a>")) { matchResult ->
+            if (matchResult.groups.size < 3 || matchResult.groups[1] == null || matchResult.groups[2] == null) {
+                return@replace matchResult.value
+            }
+            val link = matchResult.groups[1]!!.value
+            val word = matchResult.groups[2]!!.value
+
+            val visibleStart = matchResult.groups[2]!!.range.first - (matchResult.groups[2]!!.range.first - matchResult.range.first) - offset
+            val visibleLength = matchResult.groups[2]!!.range.last - matchResult.groups[2]!!.range.first - offset
+
+            val realRange = visibleStart..visibleStart + visibleLength
+            ranges.add(Triple(link, word, realRange))
+
+            offset += (matchResult.range.last - matchResult.range.first) - visibleLength
+
+            matchResult.groups[2]!!.value
+        }
+
+        val ssb = SpannableStringBuilder(res)
+
+        ranges.forEach { span ->
+            ssb.setSpan(
+                createClickableSpan(span.first, span.second),
+                span.third.first,
+                span.third.last,
+                Spannable.SPAN_INCLUSIVE_INCLUSIVE
+            )
+        }
+
+        return ssb
+    }
+
+    fun isLinkSafe(url: String, text: String?): Boolean {
+        val urlWithoutProtocol = url
+            .removePrefix("https://")
+            .removePrefix("http://")
+            .removeSuffix("/")
+
+        return text == url
+                || ConfigUtils.getTrustedUrls()?.any { urlWithoutProtocol.startsWith(it) } == true
+                || text == null
+    }
+
+    private fun createClickableSpan(url: String, text: String? = null): ClickableSpan {
+        return object : ClickableSpan() {
+
+            override fun updateDrawState(ds: TextPaint) {
+                super.updateDrawState(ds)
+                ds.isUnderlineText = true
+            }
+
+            override fun onClick(widget: View) {
+                if (isLinkSafe(url, text)) {
+                    try {
+                        context.startActivity(Intent(Intent.ACTION_VIEW).apply { data = Uri.parse(url) })
+                    }
+                    catch (exception: Exception) {
+                        exception.printStackTrace()
+                    }
+                }
+                else {
+                    showLinkDialog(rootView.context as Activity, url) {
+                        try {
+                            context.startActivity(Intent(Intent.ACTION_VIEW).apply { data = Uri.parse(url) })
+                        }
+                        catch (exception: Exception) {
+                            exception.printStackTrace()
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    private fun showLinkDialog(context: Activity, url: String, onClick: ()-> Unit) {
+        AlertDialog.Builder(context)
+            .setPositiveButton(R.string.psd_open) { _, _ -> onClick.invoke() }
+            .setNegativeButton(android.R.string.cancel) { _, _ -> }
+            .setMessage(context.getString(R.string.link_warning, url))
+            .create()
+            .show()
     }
 
     private fun addDeepLinks(textView: AppCompatTextView) {
@@ -318,7 +409,6 @@ internal class CommentView @JvmOverloads constructor(
 
         var anyFound = false
         while (matcher.find()) {
-
             val group = matcher.group(1)
             if (group == "http" || group == "https") {
                 continue
@@ -326,30 +416,7 @@ internal class CommentView @JvmOverloads constructor(
 
             anyFound = true
 
-            val deepLink = matcher.group()
-
-            val clickableSpan = object : ClickableSpan() {
-
-                override fun updateDrawState(ds: TextPaint) {
-                    super.updateDrawState(ds)
-                    ds.isUnderlineText = true
-                }
-
-                override fun onClick(widget: View) {
-
-                    try {
-                        context.startActivity(
-                            Intent(Intent.ACTION_VIEW).apply {
-                                data = Uri.parse(deepLink)
-                            }
-                        )
-                    }
-                    catch (exception: Exception) {
-                        exception.printStackTrace()
-                    }
-                }
-
-            }
+            val clickableSpan = createClickableSpan(matcher.group())
 
             ssb.setSpan(clickableSpan, matcher.start(), matcher.end(), 0)
         }

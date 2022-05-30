@@ -278,6 +278,7 @@ internal class TicketAdapter: AdapterBase<TicketEntry>() {
                 val rating = getItem().comment.rating
                 text = comment.context.getString(rating.ratingToEmojiRes())
             }
+            val fakeText = "<a href=\"https://yandex.ru\">dog</a>"
             comment.setCommentText(text)
         }
 

@@ -36,6 +36,8 @@ class ServiceDeskConfiguration internal constructor() {
     internal var statusBarColor: Int? = null
     internal var forceDarkAllowed: Boolean = false
 
+    internal var trustedUrls: ArrayList<String>? = null
+
     internal val isDialogTheme: Boolean = PyrusServiceDesk.get().application.isTablet()
 
     internal companion object {
@@ -60,6 +62,7 @@ class ServiceDeskConfiguration internal constructor() {
         private const val KEY_SEND_BUTTON_COLOR = "ServiceDeskConfiguration_KEY_SEND_BUTTON_COLOR"
         private const val KEY_STATUS_BAR_COLOR = "ServiceDeskConfiguration_KEY_STATUS_BAR_COLOR"
         private const val KEY_FORCE_DARK_ALLOWED = "ServiceDeskConfiguration_KKEY_FORCE_DARK_ALLOWED"
+        private const val KEY_TRUSTED_URLS = "ServiceDeskConfiguration_KEY_TRUSTED_URLS"
 
         fun save(bundle: Bundle) {
             with(PyrusServiceDesk.getConfiguration()) {
@@ -86,6 +89,7 @@ class ServiceDeskConfiguration internal constructor() {
                     fileMenuTextColor?.let { putInt(KEY_FILE_MENU_TEXT_COLOR, it) }
                     sendButtonColor?.let { putInt(KEY_SEND_BUTTON_COLOR, it) }
                     statusBarColor?.let { putInt(KEY_STATUS_BAR_COLOR, it) }
+                    trustedUrls?.let { putStringArrayList(KEY_TRUSTED_URLS, it) }
                     putBoolean(KEY_FORCE_DARK_ALLOWED, forceDarkAllowed)
                 }
             }
@@ -369,6 +373,15 @@ class ServiceDeskConfiguration internal constructor() {
          */
         fun setForceDarkAllowed(forceDarkAllowed: Boolean): Builder {
             configuration.forceDarkAllowed = forceDarkAllowed
+            return this
+        }
+
+        /**
+         * Defines the set of urls that are considered as safe.
+         * Warning dialog will not be shown when user clicks on that links in comment
+         */
+        fun setTrustedUrls(urls: Collection<String>): Builder {
+            configuration.trustedUrls = ArrayList(urls)
             return this
         }
 
