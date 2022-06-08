@@ -273,12 +273,7 @@ internal class TicketAdapter: AdapterBase<TicketEntry>() {
         }
 
         private fun bindTextView() {
-            var text = getItem().comment.body
-            if (text.isNullOrEmpty()) {
-                val rating = getItem().comment.rating
-                text = comment.context.getString(rating.ratingToEmojiRes())
-            }
-            val fakeText = "<a href=\"https://yandex.ru\">dog</a>"
+            val text = getItem().comment.body ?: ""
             comment.setCommentText(text)
         }
 
