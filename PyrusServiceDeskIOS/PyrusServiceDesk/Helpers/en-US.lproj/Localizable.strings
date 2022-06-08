@@ -64,7 +64,6 @@
 "PrepareLog"="Preparing log...";
 "SendLog"="Send library logs";
 
-"PyrusLeaving" = "You are now leaving the Pyrus";
-"ExternalSourceWarning" = "This link leads to a third party resource. Do you really want to follow the link?";
+"ExternalSourceWarning" = "This link leads to a %@\nDo you really want to follow the link?";
 "ShortYes" = "Yes";
 "ShortNo" = "No";

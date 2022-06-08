@@ -309,7 +309,7 @@ class HelpersStrings {
     
     static func insideDomain(url: URL) -> Bool {
         guard
-            let domains = PyrusServiceDesk.privateDomains,
+            let domains = PyrusServiceDesk.trustedUrls,
             domains.count > 0
         else {
             return true

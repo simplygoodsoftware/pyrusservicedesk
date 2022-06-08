@@ -17,7 +17,7 @@ import UIKit
     static private(set) var domain: String?
     
     ///An array with domains. Used to determine if an alert should be shown when a link is clicked. If the user clicked on a link with a domain from the array, then the application will immediately navigate.
-    public static var privateDomains: [String]?
+    public static var trustedUrls: [String]?
     
     ///UserId needed for request
     static private(set) var userId: String = "" {

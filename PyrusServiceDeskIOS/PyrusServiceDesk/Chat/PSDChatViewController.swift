@@ -334,20 +334,20 @@ extension PSDChatViewController: PSDChatTableViewDelegate {
         else {
             return
         }
-        let message = linkString + "\n" + "ExternalSourceWarning".localizedPSD()
+        let message = String(format: "ExternalSourceWarning".localizedPSD(), linkString)
         let alert = UIAlertController(
-            title: "PyrusLeaving".localizedPSD(),
+            title: nil,
             message: message,
             preferredStyle: .alert)
         alert.addAction(
             UIAlertAction(
                 title: "ShortNo".localizedPSD(),
-                style: .default)
+                style: .cancel)
         )
         alert.addAction(
             UIAlertAction(
                 title: "ShortYes".localizedPSD(),
-                style: .cancel,
+                style: .default,
                 handler: {
                     _ in
                     if #available(iOS 10.0, *) {
