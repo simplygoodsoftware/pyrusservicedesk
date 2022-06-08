@@ -245,6 +245,8 @@ SWIFT_PROTOCOL("_TtP16PyrusServiceDesk9LogEvents_")
 - (void)logPyrusServiceDeskWithEvent:(NSString * _Nonnull)event;
 @end
 
+
+
 @class NSNumber;
 
 /// The protocol for sending a notification that a new message has arrived
@@ -371,6 +373,7 @@ SWIFT_CLASS_PROPERTY(@property (nonatomic, class, copy) void (^ _Nullable onAuth
 + (void)registerFileChooser:(UIViewController <FileChooser> * _Nullable)chooser;
 - (nonnull instancetype)init OBJC_DESIGNATED_INITIALIZER;
 @end
+
 
 
 SWIFT_CLASS("_TtC16PyrusServiceDesk24ServiceDeskConfiguration")
@@ -695,6 +698,8 @@ SWIFT_PROTOCOL("_TtP16PyrusServiceDesk9LogEvents_")
 - (void)logPyrusServiceDeskWithEvent:(NSString * _Nonnull)event;
 @end
 
+
+
 @class NSNumber;
 
 /// The protocol for sending a notification that a new message has arrived
@@ -821,6 +826,7 @@ SWIFT_CLASS_PROPERTY(@property (nonatomic, class, copy) void (^ _Nullable onAuth
 + (void)registerFileChooser:(UIViewController <FileChooser> * _Nullable)chooser;
 - (nonnull instancetype)init OBJC_DESIGNATED_INITIALIZER;
 @end
+
 
 
 SWIFT_CLASS("_TtC16PyrusServiceDesk24ServiceDeskConfiguration")

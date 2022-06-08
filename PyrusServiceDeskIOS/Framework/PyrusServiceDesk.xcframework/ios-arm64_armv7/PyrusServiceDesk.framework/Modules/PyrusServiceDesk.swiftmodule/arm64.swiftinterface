@@ -100,6 +100,7 @@ import zlib
 }
 @_inheritsConvenienceInitializers @objc public class PyrusServiceDesk : ObjectiveC.NSObject {
   public static var PSD_CLOSED_NOTIFICATION_NAME: Swift.String
+  public static var trustedUrls: [Swift.String]?
   @objc public static func setPushToken(_ token: Swift.String?, completion: @escaping (Swift.Error?) -> Swift.Void)
   @objc public static func start(on viewController: UIKit.UIViewController, onStopCallback: OnStopCallback? = nil)
   @objc public static func start(on viewController: UIKit.UIViewController, configuration: ServiceDeskConfiguration?, onStopCallback: OnStopCallback? = nil)
