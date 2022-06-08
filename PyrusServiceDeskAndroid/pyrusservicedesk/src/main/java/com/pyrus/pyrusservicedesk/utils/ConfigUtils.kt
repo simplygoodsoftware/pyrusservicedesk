@@ -258,6 +258,7 @@ internal class ConfigUtils{
          */
         fun getWelcomeMessage(): String? = PyrusServiceDesk.getConfiguration().welcomeMessage
 
+        fun getTrustedUrls() = PyrusServiceDesk.getConfiguration().trustedUrls
 
         /**
          * Provides avatar placeholder taking [PyrusServiceDesk.CONFIGURATION] into account
