@@ -34,7 +34,6 @@ import androidx.core.app.ActivityCompat
 import androidx.core.text.util.LinkifyCompat
 import androidx.exifinterface.media.ExifInterface
 import com.pyrus.pyrusservicedesk.R
-import com.pyrus.pyrusservicedesk.ServiceDeskConfiguration
 import com.pyrus.pyrusservicedesk.presentation.ui.view.OutlineImageView.Companion.EDGE_RIGHT
 import com.pyrus.pyrusservicedesk.utils.*
 import com.squareup.picasso.Picasso
@@ -328,9 +327,9 @@ internal class CommentView @JvmOverloads constructor(
             val word = matchResult.groups[2]!!.value
 
             val visibleStart = matchResult.groups[2]!!.range.first - (matchResult.groups[2]!!.range.first - matchResult.range.first) - offset
-            val visibleLength = matchResult.groups[2]!!.range.last - matchResult.groups[2]!!.range.first - offset
-
+            val visibleLength = matchResult.groups[2]!!.range.last - matchResult.groups[2]!!.range.first
             val realRange = visibleStart..visibleStart + visibleLength
+
             ranges.add(Triple(link, word, realRange))
 
             offset += (matchResult.range.last - matchResult.range.first) - visibleLength
@@ -381,7 +380,7 @@ internal class CommentView @JvmOverloads constructor(
                     }
                 }
                 else {
-                    showLinkDialog(rootView.context as Activity, url) {
+                    showLinkDialog(context as Activity, url) {
                         try {
                             context.startActivity(Intent(Intent.ACTION_VIEW).apply { data = Uri.parse(url) })
                         }

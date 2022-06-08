@@ -14,6 +14,7 @@ import com.pyrus.pyrusservicedesk.PyrusServiceDesk;
 import com.pyrus.pyrusservicedesk.ServiceDeskConfiguration;
 import com.pyrus.pyrusservicedesk.sdk.updates.NewReplySubscriber;
 
+import java.util.Arrays;
 import java.util.List;
 
 public class SampleActivity extends Activity implements NewReplySubscriber {
@@ -32,6 +33,7 @@ public class SampleActivity extends Activity implements NewReplySubscriber {
                                 .setWelcomeMessage("How can I help you?")
                                 .setAvatarForSupport(R.drawable.psd_download_file)
                                 .setChatMenuDelegate(new ChatMenuDelegate())
+                                .setTrustedUrls(Arrays.asList("pyrus.com", "dev.pyrus.com"))
                                 .build())
         );
 

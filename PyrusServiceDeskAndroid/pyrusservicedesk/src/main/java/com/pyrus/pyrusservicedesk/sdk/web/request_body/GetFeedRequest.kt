@@ -19,5 +19,7 @@ internal open class GetFeedBody(
         instanceId: String?,
         version: Int,
         @SerializedName("keep_unread")
-        val keepUnread: Boolean
+        val keepUnread: Boolean,
+        @SerializedName("api_sign")
+        val apiSign: String?,
 ): RequestBodyBase(appId, userId, securityKey, instanceId, version)
