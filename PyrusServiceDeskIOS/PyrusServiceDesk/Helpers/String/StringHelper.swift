@@ -312,9 +312,16 @@ class HelpersStrings {
             let domains = PyrusServiceDesk.trustedUrls,
             domains.count > 0
         else {
+            return false
+        }
+        if
+            let scheme = url.scheme,
+            domains.contains(scheme)
+        {
             return true
         }
-        guard let host = url.absoluteString.hostString()
+        guard
+            let host = url.absoluteString.hostString()
         else {
             return false
         }
