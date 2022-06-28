@@ -14,6 +14,8 @@
 		4B062A902518AD0B00B317D3 /* messagePlaceholder.png in Resources */ = {isa = PBXBuildFile; fileRef = 4B062A8F2518AD0B00B317D3 /* messagePlaceholder.png */; };
 		4B062A962518BFFC00B317D3 /* PSDPlaceholderUser.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4B062A952518BFFC00B317D3 /* PSDPlaceholderUser.swift */; };
 		4B10E5F0222844EA00CF118B /* PSDAttachmentLoadViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4B10E5EF222844EA00CF118B /* PSDAttachmentLoadViewController.swift */; };
+		4B13E836286A2BC900E2428F /* ButtonsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4B13E835286A2BC900E2428F /* ButtonsView.swift */; };
+		4B13E839286A46BB00E2428F /* ButtonViewCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4B13E838286A46BB00E2428F /* ButtonViewCell.swift */; };
 		4B17DD0523E816B1003CF4D9 /* String + uuid.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4B17DD0423E816B1003CF4D9 /* String + uuid.swift */; };
 		4B1C63E2256D3F3300902C8E /* CustomizationHelper.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4B1C63E1256D3F3300902C8E /* CustomizationHelper.swift */; };
 		4B1C63E6256D8D6500902C8E /* CustomFontHelper.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4B1C63E5256D8D6500902C8E /* CustomFontHelper.swift */; };
@@ -272,6 +274,7 @@
 		4BDDE42B257F70C800DF40B2 /* Recolorable.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4BDDE42A257F70C800DF40B2 /* Recolorable.swift */; };
 		4BDDE42F257F7DB900DF40B2 /* PSDVIew.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4BDDE42E257F7DB900DF40B2 /* PSDVIew.swift */; };
 		4BE3450E225F9684009E2135 /* PSDDownloadImage.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4BE3450D225F9684009E2135 /* PSDDownloadImage.swift */; };
+		4BE97A12286BB5310027D5AC /* AlignedCollectionViewFlowLayout.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4BE97A11286BB5300027D5AC /* AlignedCollectionViewFlowLayout.swift */; };
 		7B1E8D58250665F800C1E5AC /* PSDInfoView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7B1E8D57250665F800C1E5AC /* PSDInfoView.swift */; };
 		7B743A8224D2E1A300B34904 /* assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 7B743A8124D2E1A300B34904 /* assets.xcassets */; };
 		7B9545F724D07EE2006F6AED /* icn_cross@3x.png in Resources */ = {isa = PBXBuildFile; fileRef = 7B9545F424D07EE2006F6AED /* icn_cross@3x.png */; };
@@ -297,6 +300,8 @@
 		4B062A8F2518AD0B00B317D3 /* messagePlaceholder.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = messagePlaceholder.png; sourceTree = "<group>"; };
 		4B062A952518BFFC00B317D3 /* PSDPlaceholderUser.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PSDPlaceholderUser.swift; sourceTree = "<group>"; };
 		4B10E5EF222844EA00CF118B /* PSDAttachmentLoadViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PSDAttachmentLoadViewController.swift; sourceTree = "<group>"; };
+		4B13E835286A2BC900E2428F /* ButtonsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ButtonsView.swift; sourceTree = "<group>"; };
+		4B13E838286A46BB00E2428F /* ButtonViewCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ButtonViewCell.swift; sourceTree = "<group>"; };
 		4B17DD0423E816B1003CF4D9 /* String + uuid.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "String + uuid.swift"; sourceTree = "<group>"; };
 		4B1C63E1256D3F3300902C8E /* CustomizationHelper.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CustomizationHelper.swift; sourceTree = "<group>"; };
 		4B1C63E5256D8D6500902C8E /* CustomFontHelper.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CustomFontHelper.swift; sourceTree = "<group>"; };
@@ -560,6 +565,7 @@
 		4BDDE42A257F70C800DF40B2 /* Recolorable.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Recolorable.swift; sourceTree = "<group>"; };
 		4BDDE42E257F7DB900DF40B2 /* PSDVIew.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PSDVIew.swift; sourceTree = "<group>"; };
 		4BE3450D225F9684009E2135 /* PSDDownloadImage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PSDDownloadImage.swift; sourceTree = "<group>"; };
+		4BE97A11286BB5300027D5AC /* AlignedCollectionViewFlowLayout.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AlignedCollectionViewFlowLayout.swift; sourceTree = "<group>"; };
 		7B1E8D57250665F800C1E5AC /* PSDInfoView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PSDInfoView.swift; sourceTree = "<group>"; };
 		7B743A8124D2E1A300B34904 /* assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = assets.xcassets; sourceTree = "<group>"; };
 		7B9545F424D07EE2006F6AED /* icn_cross@3x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "icn_cross@3x.png"; sourceTree = "<group>"; };
@@ -594,6 +600,16 @@
 				4B062A872518AC9500B317D3 /* messagePlaceholder@3x.png */,
 			);
 			path = messagePlaceholder;
+			sourceTree = "<group>";
+		};
+		4B13E837286A2BCD00E2428F /* ButtonsView */ = {
+			isa = PBXGroup;
+			children = (
+				4B13E835286A2BC900E2428F /* ButtonsView.swift */,
+				4B13E838286A46BB00E2428F /* ButtonViewCell.swift */,
+				4BE97A11286BB5300027D5AC /* AlignedCollectionViewFlowLayout.swift */,
+			);
+			path = ButtonsView;
 			sourceTree = "<group>";
 		};
 		4B2E650F220DE1E000E70A2F /* PSDObjects */ = {
@@ -771,6 +787,7 @@
 			isa = PBXGroup;
 			children = (
 				4B63393321FA0F2C00A154B5 /* PSDChatTableView.swift */,
+				4B13E837286A2BCD00E2428F /* ButtonsView */,
 				4B697CC82254AD7C002B0A10 /* MessageCell */,
 			);
 			path = PSDChatTable;
@@ -1422,6 +1439,7 @@
 				4B56BE492216CC0E004E6685 /* PSDUploader.swift in Sources */,
 				4BB7DADF225E280800F6D1F0 /* PSDFileAttachmentView.swift in Sources */,
 				4B82A49C2268C29700654CE0 /* PSDCoverHorizontalAnimator.swift in Sources */,
+				4B13E839286A46BB00E2428F /* ButtonViewCell.swift in Sources */,
 				4B17DD0523E816B1003CF4D9 /* String + uuid.swift in Sources */,
 				4B63393421FA0F2C00A154B5 /* PSDChatTableView.swift in Sources */,
 				4B5533732264C07B00353941 /* PSDDownloader.swift in Sources */,
@@ -1440,6 +1458,7 @@
 				4B66011D223948CE00AA45E6 /* PyrusServiceDeskCustomization.swift in Sources */,
 				4B9BF878224CBCBC006AD05C /* PSDCopyLabel.swift in Sources */,
 				4B88C6F722145ACA00BDB304 /* PSDGetChats.swift in Sources */,
+				4BE97A12286BB5310027D5AC /* AlignedCollectionViewFlowLayout.swift in Sources */,
 				4BCEB439220C5FF2008B29B6 /* PSDMessageTextView.swift in Sources */,
 				4BD29A092464B72B000CC420 /* OnStopCallback.swift in Sources */,
 				4B8EE7CD255AE4170068B266 /* LogsSendController.swift in Sources */,
@@ -1512,6 +1531,7 @@
 				4B64B8742243D402003116C3 /* CharacterSet+urlEncode.swift in Sources */,
 				4B2E650E220DE1C300E70A2F /* PSDMessage.swift in Sources */,
 				4B6EFFC0282440F6004ECA2B /* ApiSignManager.swift in Sources */,
+				4B13E836286A2BC900E2428F /* ButtonsView.swift in Sources */,
 				4B88C6F9221467FF00BDB304 /* PSDChat.swift in Sources */,
 				4BC210D822674A5600CFE255 /* PSDNavigationController.swift in Sources */,
 				4B1CD390230BE58000C06F71 /* applicationColors.swift in Sources */,

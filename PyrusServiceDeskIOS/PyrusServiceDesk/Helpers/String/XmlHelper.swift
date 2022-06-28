@@ -2,16 +2,24 @@ import UIKit
 
 enum HTMLTag: CaseIterable {
     case a
+    case button
     ///Возвращает стрингу которая должна быть внутри тега
     var tag: String {
         switch self {
         case .a:
             return "a"
+        case .button:
+            return "button"
         }
     }
     ///Может ли тег существовать без параметров?
     var mayBeWithoutParameters: Bool {
-        return false
+        switch self {
+        case .a:
+            return false
+        case .button:
+            return true
+        }
     }
     ///Если необходимо заменить на что-то, кроме пустого места
     func replaced(data: Any?) -> String {
@@ -33,7 +41,7 @@ extension NSString {
     /// - Parameter needMention: Хак для черновика и редактирования комментария, по дефолту true, можно не заполнять
     func parseXMLToAttributedString(needDetectLink: Bool = true,
                                     needMention: Bool = true,
-                                    fontColor: UIColor) -> NSAttributedString? {
+                                    fontColor: UIColor) -> (NSAttributedString?, [String]?) {
         return parseXMLToAttributedString(needDetectLink: needDetectLink, needMention: needMention, font: .messageTextView, fontColor: fontColor)
     }
     
@@ -43,7 +51,9 @@ extension NSString {
     func parseXMLToAttributedString(needDetectLink: Bool = true,
                                     needMention: Bool = true,
                                     font: UIFont,
-                                    fontColor: UIColor) -> NSAttributedString? {
+                                    fontColor: UIColor) -> (NSAttributedString?, [String]?) {
+        ///Массив кнопок из тегов
+        var buttons = [String]()
         ///Массив наших тегов.
         var tags = [HTMLTag: (count: Int, data: Any?)]()
         ///Откуда начинается наш AttributedString при смене типа текста.
@@ -64,6 +74,8 @@ extension NSString {
                     if let link = info.data as? URL {
                         dict.updateValue(link, forKey: .link)
                     }
+                case .button:
+                    continue
                 }
             }
             return dict
@@ -93,8 +105,10 @@ extension NSString {
         var range = NSRange(location: 0, length: str.length)
         
         while range.location != NSNotFound && range.length > 0 {
+            print("str = \(str), range = \(range)")
             //Ищем теги в нашей строке
             let tagRange = (str as NSString).range(of: String.tagRegex, options: .regularExpression, range: range)
+            var removedString = false
             if tagRange.location != NSNotFound {
                 lastTagLocation = tagRange.location
                 //Получаем стрингу внутри тега (без "<" и ">")
@@ -107,35 +121,50 @@ extension NSString {
                     //Удаляем тег из строки
                     str = str.replacingCharacters(in: tagRange, with: tag.isOpen ? tag.tagType.replaced(data: tag.data) : "") as NSString
                     attrStr.replaceCharacters(in: tagRange, with: tag.isOpen ? tag.tagType.replaced(data: tag.data) : "")
+                    if tag.tagType == .button {
+                        let button = str.substring(with: addAttrRange)
+                        if button.count > 0 {
+                            buttons.append(button)
+                            str = str.replacingCharacters(in: addAttrRange, with: "") as NSString
+                            attrStr.replaceCharacters(in: addAttrRange, with: "")
+                            removedString = true
+                        }
+                    }
                 } else {
                     //Если мы не знаем такой тег, то с чистой совестью удаляем его
                     str = str.replacingCharacters(in: tagRange, with: "") as NSString
                     attrStr.replaceCharacters(in: tagRange, with: "")
                 }
+                if removedString {
+                    let loc = addAttrRange.location + tagRange.location
+                    //Обновляем границы поиска до начала тега который нашли (потому что мы его удалили)
+                    range = NSRange(location: addAttrRange.location, length: str.length - loc)
+                }
             }
-            //Обновляем границы поиска до начала тега который нашли (потому что мы его удалили)
-            range = NSRange(location: tagRange.location, length: str.length - tagRange.location)
+            if !removedString {
+                //Обновляем границы поиска до начала тега который нашли (потому что мы его удалили)
+                range = NSRange(location: tagRange.location, length: str.length - tagRange.location)
+            }
         }
         
         //Применяем аттрибуты для последнего отрывка нашей строки
         if lastTagLocation != str.length {
             attrStr.addAttributes(getAttr(for: tags), range: NSRange(location: lastTagLocation, length: str.length - lastTagLocation))
         }
-        
         //Добавляем последний отрывок нашей строки (если он есть) в результирующий массив
         let subStrRange = NSRange(location: lastRemoveLocation, length: str.length - lastRemoveLocation)
         let attrSubStr = NSMutableAttributedString(attributedString: attrStr.attributedSubstring(from: subStrRange))
         if subStrRange.length > 0 {
             if needDetectLink {
-                return HelpersStrings.attributedString(byDecodingHTMLEntities: attrSubStr)
+                return (HelpersStrings.attributedString(byDecodingHTMLEntities: attrSubStr)
                                                 .detectEmail()
                                                 .detectLink()
-                                                .detectPhoneNumber()
+                                                .detectPhoneNumber(), buttons)
              } else {
-                 return HelpersStrings.attributedString(byDecodingHTMLEntities: attrSubStr)
+                 return (HelpersStrings.attributedString(byDecodingHTMLEntities: attrSubStr), buttons)
              }
         }
-        return nil
+        return (nil, nil)
     }
     
     ///Поиск электронной почты

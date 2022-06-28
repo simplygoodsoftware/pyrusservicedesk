@@ -1,9 +1,6 @@
 import Foundation
 
-struct PSDObjectsCreator {
-    /*
-     {\"CommentId\":182744765,\"Body\":\"Привет\",\"IsInbound\":true,\"CreatedAt\":\"2019-02-13T13:21:28Z\"}
- */
+class PSDObjectsCreator {
     /**
      Create a new message that was not sent. PSDMessage date is always now and owner is current user. TicketId is empty string.
      - parameter comment: A text sending to server.

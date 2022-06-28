@@ -15,6 +15,14 @@ class PSDChatTableView: PSDDetailTableView{
     private static let supportCellId = "CellSupport"
     private var tableMatrix : [[PSDRowMessage]] = [[PSDRowMessage]()]
     private var heightsMap : [IndexPath : CGFloat] = [IndexPath : CGFloat]()
+    private lazy var buttonsView: ButtonsView = {
+        let view = ButtonsView(frame: .zero)
+        tableFooterView = view
+        view.autoresizingMask = [.flexibleHeight]
+        view.translatesAutoresizingMaskIntoConstraints = true
+        view.tapDelegate = self
+        return view
+    }()
     override init(frame: CGRect, style: UITableView.Style) {
         super.init(frame: frame, style: .grouped)
         self.allowsMultipleSelection = false
@@ -47,6 +55,19 @@ class PSDChatTableView: PSDDetailTableView{
     deinit {
         self.removeRefreshControls()
     }
+    
+    override func layoutSubviews() {
+        super.layoutSubviews()
+        var newFrame = buttonsView.frame
+        if newFrame.size.height != buttonsView.collectionView.contentSize.height {
+            newFrame.size.width = frame.size.width
+            newFrame.size.height = buttonsView.collectionView.contentSize.height
+            print(newFrame.size.height)
+            buttonsView.frame = newFrame
+            tableFooterView = buttonsView
+        }
+    }
+    
     func forceRefresh(showFakeMessage: Int?) {
         if !PSDGetChat.isActive(){
             if let showFakeMessage = showFakeMessage, showFakeMessage != 0 {
@@ -111,9 +132,9 @@ class PSDChatTableView: PSDDetailTableView{
                     self.isLoading = false
                     if let chat = chat {
                         self.tableMatrix.create(from: chat)
-                        
                         self.lastMessageFromServer = chat.messages.last
                         self.setLastActivityDate()
+                        self.buttonsView.updateWithButtons(chat.draftAnswers())
                         self.reloadData()
                         
                         self.removeNoConnectionView()
@@ -126,6 +147,8 @@ class PSDChatTableView: PSDDetailTableView{
                             self.layoutIfNeeded()
                             self.scrollsToBottom(animated: false)
                         UIView.setAnimationsEnabled(true)
+                    } else {
+                        self.buttonsView.updateWithButtons(nil)
                     }
                     self.addRefreshControls()
                 }
@@ -247,6 +270,7 @@ class PSDChatTableView: PSDDetailTableView{
                                         self.reloadSections(reloadSections, with: .none)
                                     }
                                     self.endUpdates()
+                                    self.buttonsView.updateWithButtons(chat.draftAnswers())
                                     self.scrollToBottomAfterRefresh(with: oldContentOffset, oldContentSize: oldContentSize)
                                 }
                             }
@@ -255,6 +279,7 @@ class PSDChatTableView: PSDDetailTableView{
                     }
                 }
                 DispatchQueue.main.async  {
+                    self?.buttonsView.updateWithButtons(chat?.draftAnswers())
                     self?.customRefresh.endRefreshing()
                     self?.bottomRefresh.endRefreshing()
                 }
@@ -300,16 +325,21 @@ class PSDChatTableView: PSDDetailTableView{
             self.refresh(message: message, changedToSent: changedToSent)
         }
     }
-    private static let delayBeforeUpdates : Int = 20//milliseconds
+    private static let delayBeforeUpdates: Int = 20//milliseconds
     ///Scroll tableview to its bottom position without animation
-    private func scrollsToBottom(animated: Bool){
-        self.layoutIfNeeded()
-
-        let lastRow = self.lastIndexPath()
-        if(lastRow.row>=0 || lastRow.section>=0){
-            if !(lastRow.row == 0 && lastRow.section==0 ){
-                self.scrollToRow(at: lastRow, at: .bottom, animated: animated)
-            }
+    private func scrollsToBottom(animated: Bool) {
+        layoutIfNeeded()
+        let lastRow = lastIndexPath()
+        if
+            let tableFooterView = tableFooterView,
+            tableFooterView.frame.size.height > 0
+        {
+            scrollRectToVisible(tableFooterView.frame, animated: animated)
+        } else if
+            lastRow.row >= 0 || lastRow.section >= 0,
+            !(lastRow.row == 0 && lastRow.section == 0)
+        {
+            scrollToRow(at: lastRow, at: .bottom, animated: animated)
         }
     }
     ///Adds new row to table view to last index.
@@ -736,5 +766,12 @@ private extension UIFont {
 extension PSDChatTableView: LinkDelegate {
     func showLinkOpenAlert(_ linkString: String) {
         chatDelegate?.showLinkOpenAlert(linkString)
+    }
+}
+
+extension PSDChatTableView: ButtonsCollectionDelegate {
+    func didTapOnButton(_ text: String) {
+        let message = PSDObjectsCreator.createMessage(text, attachments: nil)
+        addNewRow(message: message)
     }
 }
