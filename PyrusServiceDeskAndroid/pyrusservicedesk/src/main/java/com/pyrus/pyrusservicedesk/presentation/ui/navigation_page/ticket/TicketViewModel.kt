@@ -448,7 +448,7 @@ internal class TicketViewModel(
         return Regex("<button>(.*?)</button>").findAll(comment.body).map { it.groupValues[1] }.toList()
     }
 
-    private fun removeButtonTags(entries: List<TicketEntry>): List<TicketEntry> {
+    private fun removeEmptyButtonTags(entries: List<TicketEntry>): List<TicketEntry> {
         return entries.filter {
             it !is CommentEntry || !(it.comment
                 .body
@@ -476,7 +476,7 @@ internal class TicketViewModel(
     }
 
     private fun publishEntries(oldEntries: List<TicketEntry>, newEntries: List<TicketEntry>) {
-        ticketEntries = removeButtonTags(addButtonsIfNeeded(newEntries))
+        ticketEntries = removeEmptyButtonTags(addButtonsIfNeeded(newEntries))
 
         val lastActiveTime = (newEntries.findLast {
             it is CommentEntry && it.comment.isInbound
