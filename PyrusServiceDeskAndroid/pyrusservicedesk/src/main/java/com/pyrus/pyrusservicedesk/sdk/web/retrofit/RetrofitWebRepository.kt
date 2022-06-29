@@ -53,7 +53,7 @@ internal class RetrofitWebRepository(
 
     private val sequentialRequests = LinkedBlockingQueue<SequentialRequest>()
 
-    private val apiFlag = "AAAAAAAAAAAE"
+    private val apiFlag = "AAAAAAAAAAAU"
 
     init {
         val httpBuilder = OkHttpClient.Builder()
