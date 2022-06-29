@@ -135,10 +135,9 @@ extension NSString {
                     attrStr.replaceCharacters(in: tagRange, with: "")
                 }
                 if removedString {
-                    let loc = addAttrRange.location + tagRange.location
                     lastTagLocation = addAttrRange.location
                     //Обновляем границы поиска до начала тега который нашли (потому что мы его удалили)
-                    range = NSRange(location: addAttrRange.location, length: str.length - loc)
+                    range = NSRange(location: addAttrRange.location, length: str.length - addAttrRange.location)
                 }
             }
             if !removedString {
