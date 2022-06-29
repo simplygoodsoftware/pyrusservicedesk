@@ -435,8 +435,48 @@ internal class TicketViewModel(
         } ?: -1
     }
 
+    private fun CommentEntry.containsButtons(): Boolean {
+        if (this.comment.body == null) { return false }
+        return Regex("<button>.*</button>").containsMatchIn(this.comment.body)
+    }
+
+    private fun extractButtons(comment: Comment): List<String> {
+        if (comment.body == null) {
+            return emptyList()
+        }
+
+        return Regex("<button>(.*?)</button>").findAll(comment.body).map { it.groupValues[1] }.toList()
+    }
+
+    private fun removeButtonTags(entries: List<TicketEntry>): List<TicketEntry> {
+        return entries.filter {
+            it !is CommentEntry || !(it.comment
+                .body
+                ?.replace(Regex("\n?<button>(.*)</button>\n?|<br>"), "")
+                .isNullOrBlank())
+        }
+    }
+
+    private fun addButtonsIfNeeded(newEntries: List<TicketEntry>): List<TicketEntry> {
+        if (newEntries.isEmpty()) {
+            return newEntries
+        }
+
+        val commentWithButtons = newEntries.last()
+
+        if (commentWithButtons !is CommentEntry
+            || commentWithButtons.comment.author.name == ConfigUtils.getUserName()
+            || !commentWithButtons.containsButtons()) {
+            return newEntries
+        }
+
+        return newEntries + ButtonsEntry(extractButtons(commentWithButtons.comment)) {
+            onSendClicked(it)
+        }
+    }
+
     private fun publishEntries(oldEntries: List<TicketEntry>, newEntries: List<TicketEntry>) {
-        ticketEntries = newEntries
+        ticketEntries = removeButtonTags(addButtonsIfNeeded(newEntries))
 
         val lastActiveTime = (newEntries.findLast {
             it is CommentEntry && it.comment.isInbound

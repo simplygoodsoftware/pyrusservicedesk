@@ -311,7 +311,7 @@ internal class CommentView @JvmOverloads constructor(
         comment_text.text = text
         LinkifyCompat.addLinks(comment_text, Linkify.WEB_URLS or Linkify.PHONE_NUMBERS)
         addDeepLinks(comment_text)
-        comment_text.text = replaceLinkTagsWithSpans(comment_text.text)
+        comment_text.text = replaceLinkTagsWithSpans(comment_text.text).replace(Regex("<button>(.*)</button>|<br>"), "")
     }
 
     private fun replaceLinkTagsWithSpans(text: CharSequence): CharSequence {

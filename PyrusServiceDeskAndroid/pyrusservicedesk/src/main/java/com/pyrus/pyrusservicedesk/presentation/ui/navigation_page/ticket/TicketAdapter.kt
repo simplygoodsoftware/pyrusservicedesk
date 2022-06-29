@@ -1,6 +1,8 @@
 package com.pyrus.pyrusservicedesk.presentation.ui.navigation_page.ticket
 
+import android.content.res.ColorStateList
 import android.graphics.Canvas
+import android.graphics.PorterDuff
 import android.graphics.drawable.AnimationDrawable
 import android.net.Uri
 import android.view.View
@@ -29,6 +31,7 @@ import com.pyrus.pyrusservicedesk.utils.RequestUtils.Companion.getPreviewUrl
 import com.pyrus.pyrusservicedesk.utils.getTimeText
 import com.pyrus.pyrusservicedesk.utils.isImage
 import com.squareup.picasso.Picasso
+import kotlinx.android.synthetic.main.psd_view_holder_buttons.view.*
 import kotlinx.android.synthetic.main.psd_view_holder_comment_rating.view.*
 import kotlinx.android.synthetic.main.psd_view_holder_rating.view.*
 import kotlin.math.abs
@@ -40,6 +43,7 @@ private const val VIEW_TYPE_WELCOME_MESSAGE = 2
 private const val VIEW_TYPE_DATE = 3
 private const val VIEW_TYPE_RATING = 4
 private const val VIEW_TYPE_COMMENT_RATING = 5
+private const val VIEW_TYPE_COMMENT_BUTTONS = 6
 
 /**
  * Adapter that is used for rendering comment feed of the ticket screen.
@@ -75,6 +79,7 @@ internal class TicketAdapter: AdapterBase<TicketEntry>() {
                 type == Type.Date -> VIEW_TYPE_DATE
                 type == Type.WelcomeMessage -> VIEW_TYPE_WELCOME_MESSAGE
                 type == Type.Rating -> VIEW_TYPE_RATING
+                type == Type.Buttons -> VIEW_TYPE_COMMENT_BUTTONS
                 (this as CommentEntry).comment.rating != null -> VIEW_TYPE_COMMENT_RATING
                 this.comment.isInbound -> VIEW_TYPE_COMMENT_OUTBOUND
                 else -> VIEW_TYPE_COMMENT_INBOUND
@@ -90,6 +95,7 @@ internal class TicketAdapter: AdapterBase<TicketEntry>() {
             VIEW_TYPE_WELCOME_MESSAGE -> WelcomeMessageHolder(parent)
             VIEW_TYPE_RATING -> RatingHolder(parent)
             VIEW_TYPE_COMMENT_RATING -> RatingCommentHolder(parent)
+            VIEW_TYPE_COMMENT_BUTTONS -> ButtonsHolder(parent)
             else -> DateViewHolder(parent)
         } as ViewHolderBase<TicketEntry>
     }
@@ -410,6 +416,31 @@ internal class TicketAdapter: AdapterBase<TicketEntry>() {
             }
         }
 
+    }
+
+    private class ButtonsHolder(parent: ViewGroup): ViewHolderBase<ButtonsEntry>(parent, R.layout.psd_view_holder_buttons) {
+
+        override fun bindItem(item: ButtonsEntry) {
+            super.bindItem(item)
+
+            item.buttons.forEachIndexed { index, buttonText ->
+                (itemView.flButtons.getChildAt(index) as TextView).apply {
+                    text = buttonText
+                    val frame = background
+                    frame.setColorFilter(ConfigUtils.getAccentColor(itemView.context), PorterDuff.Mode.SRC_ATOP)
+                    setTextColor(ConfigUtils.getAccentColor(itemView.context))
+                    setOnClickListener { item.onButtonClick.invoke(buttonText) }
+                    visibility = VISIBLE
+                }
+            }
+
+            repeat(itemView.flButtons.childCount - item.buttons.size) {
+                itemView.flButtons.getChildAt(itemView.flButtons.childCount - 1 - it).apply {
+                    visibility = GONE
+                    setOnClickListener(null)
+                }
+            }
+        }
     }
 
     private inner class TouchCallback : ItemTouchHelper.Callback() {
