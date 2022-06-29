@@ -2,6 +2,7 @@ import Foundation
 
 class ButtonViewCell: UICollectionViewCell {
     private let color = PyrusServiceDesk.mainController?.customization?.sendButtonColor ?? UIColor.darkAppColor
+    private var maxWidthConstraint: NSLayoutConstraint?
     private lazy var label: UILabel = {
         let label = UILabel()
         label.translatesAutoresizingMaskIntoConstraints = false
@@ -26,6 +27,12 @@ class ButtonViewCell: UICollectionViewCell {
             label.text = text
         }
     }
+    
+    var maxWidth: CGFloat = 0 {
+        didSet {
+            maxWidthConstraint?.constant = maxWidth
+        }
+    }
     override init(frame: CGRect) {
         super.init(frame: frame)
         contentView.addSubview(backView)
@@ -40,7 +47,8 @@ class ButtonViewCell: UICollectionViewCell {
         label.topAnchor.constraint(equalTo: backView.topAnchor, constant: DIST).isActive = true
         label.bottomAnchor.constraint(equalTo: backView.bottomAnchor, constant: -DIST).isActive = true
         label.trailingAnchor.constraint(equalTo: backView.trailingAnchor, constant: -DIST).isActive = true
-        
+        maxWidthConstraint = backView.widthAnchor.constraint(lessThanOrEqualToConstant: maxWidth)
+        maxWidthConstraint?.isActive = true
     }
     
     required init?(coder: NSCoder) {

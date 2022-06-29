@@ -64,6 +64,7 @@ extension ButtonsView: UICollectionViewDelegate, UICollectionViewDataSource {
             return cell
         }
         cell.text = buttons[indexPath.row]
+        cell.maxWidth = collectionView.frame.size.width
         return cell
     }
     

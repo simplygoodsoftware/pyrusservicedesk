@@ -334,6 +334,7 @@ class HelpersStrings {
 
         // if no ampersands, we've got a quick way out
         guard subrange.length > 0 else {
+            strAttr.trailingNewlineChopped()
             return strAttr
         }
         while subrange.length != 0 {
@@ -409,7 +410,18 @@ class HelpersStrings {
                 
             subrange = (strAttr.string as NSString).range(of: "&", options: .backwards, range: range)
         }
+        strAttr.trailingNewlineChopped()
         return strAttr
+    }
+}
+
+private extension NSMutableAttributedString {
+    func trailingNewlineChopped() {
+        if string.hasSuffix("\n") {
+            deleteCharacters(in: NSRange(location: length - 1,length: 1))
+        } else {
+            return
+        }
     }
 }
 

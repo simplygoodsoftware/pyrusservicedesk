@@ -105,7 +105,6 @@ extension NSString {
         var range = NSRange(location: 0, length: str.length)
         
         while range.location != NSNotFound && range.length > 0 {
-            print("str = \(str), range = \(range)")
             //Ищем теги в нашей строке
             let tagRange = (str as NSString).range(of: String.tagRegex, options: .regularExpression, range: range)
             var removedString = false
@@ -137,6 +136,7 @@ extension NSString {
                 }
                 if removedString {
                     let loc = addAttrRange.location + tagRange.location
+                    lastTagLocation = addAttrRange.location
                     //Обновляем границы поиска до начала тега который нашли (потому что мы его удалили)
                     range = NSRange(location: addAttrRange.location, length: str.length - loc)
                 }

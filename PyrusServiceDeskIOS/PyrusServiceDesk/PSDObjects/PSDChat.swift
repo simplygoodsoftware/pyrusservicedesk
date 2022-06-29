@@ -9,13 +9,14 @@ class PSDChat: NSObject {
         self.messages = messages
     }
     
-    func draftAnswers() -> [String]? {
+    static func draftAnswers(_ tableMatrix: [[PSDRowMessage]]) -> [String]? {
         guard
-            let message = messages.last
+            let messages = tableMatrix.last,
+            let message = messages.last?.message
         else {
             return nil
         }
-        let (_, links) = (message.text as NSString) .parseXMLToAttributedString(fontColor: .appTextColor)
+        let (_, links) = (message.text as NSString).parseXMLToAttributedString(fontColor: .appTextColor)
         guard
             let links = links,
             links.count > 0

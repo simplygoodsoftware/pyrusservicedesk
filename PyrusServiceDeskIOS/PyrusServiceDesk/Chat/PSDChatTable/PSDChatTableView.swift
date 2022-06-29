@@ -3,6 +3,7 @@ protocol PSDChatTableViewDelegate: NSObjectProtocol {
     func needShowRate(_ showRate: Bool)
     func restartTimer()
     func showLinkOpenAlert(_ linkString: String)
+    func send(_ message:String,_ attachments:[PSDAttachment])
 }
 
 class PSDChatTableView: PSDDetailTableView{
@@ -62,7 +63,6 @@ class PSDChatTableView: PSDDetailTableView{
         if newFrame.size.height != buttonsView.collectionView.contentSize.height {
             newFrame.size.width = frame.size.width
             newFrame.size.height = buttonsView.collectionView.contentSize.height
-            print(newFrame.size.height)
             buttonsView.frame = newFrame
             tableFooterView = buttonsView
         }
@@ -134,7 +134,7 @@ class PSDChatTableView: PSDDetailTableView{
                         self.tableMatrix.create(from: chat)
                         self.lastMessageFromServer = chat.messages.last
                         self.setLastActivityDate()
-                        self.buttonsView.updateWithButtons(chat.draftAnswers())
+                        self.buttonsView.updateWithButtons(PSDChat.draftAnswers(self.tableMatrix))
                         self.reloadData()
                         
                         self.removeNoConnectionView()
@@ -270,7 +270,7 @@ class PSDChatTableView: PSDDetailTableView{
                                         self.reloadSections(reloadSections, with: .none)
                                     }
                                     self.endUpdates()
-                                    self.buttonsView.updateWithButtons(chat.draftAnswers())
+                                    self.buttonsView.updateWithButtons(PSDChat.draftAnswers(self.tableMatrix))
                                     self.scrollToBottomAfterRefresh(with: oldContentOffset, oldContentSize: oldContentSize)
                                 }
                             }
@@ -279,9 +279,11 @@ class PSDChatTableView: PSDDetailTableView{
                     }
                 }
                 DispatchQueue.main.async  {
-                    self?.buttonsView.updateWithButtons(chat?.draftAnswers())
-                    self?.customRefresh.endRefreshing()
-                    self?.bottomRefresh.endRefreshing()
+                    if let self = self {
+                        self.buttonsView.updateWithButtons(PSDChat.draftAnswers(self.tableMatrix))
+                        self.customRefresh.endRefreshing()
+                        self.bottomRefresh.endRefreshing()
+                    }
                 }
             }
     }
@@ -368,6 +370,10 @@ class PSDChatTableView: PSDDetailTableView{
                 self.addRow(at: lastSection, dataForRow: rowMessage)
             }
         }
+        buttonsView.updateWithButtons(PSDChat.draftAnswers(tableMatrix))
+        UIView.animate(withDuration: 0.1, animations: {
+            self.layoutIfNeeded()
+        })
         
     }
     ///Returns last PSDChatMessageCell in tableView
@@ -771,7 +777,6 @@ extension PSDChatTableView: LinkDelegate {
 
 extension PSDChatTableView: ButtonsCollectionDelegate {
     func didTapOnButton(_ text: String) {
-        let message = PSDObjectsCreator.createMessage(text, attachments: nil)
-        addNewRow(message: message)
+        chatDelegate?.send(text, [])
     }
 }
