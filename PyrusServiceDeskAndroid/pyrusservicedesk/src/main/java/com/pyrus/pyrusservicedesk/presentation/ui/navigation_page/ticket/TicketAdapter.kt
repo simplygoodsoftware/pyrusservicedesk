@@ -11,6 +11,7 @@ import android.view.ViewGroup
 import android.widget.ImageView
 import android.widget.TextView
 import androidx.annotation.LayoutRes
+import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.ItemTouchHelper.ACTION_STATE_SWIPE
 import androidx.recyclerview.widget.RecyclerView
@@ -424,7 +425,7 @@ internal class TicketAdapter: AdapterBase<TicketEntry>() {
             super.bindItem(item)
 
             item.buttons.forEachIndexed { index, buttonText ->
-                (itemView.flButtons.getChildAt(index) as TextView).apply {
+                (itemView.flButtons.getChildAt(index) as? TextView)?.apply {
                     text = buttonText
                     val frame = background
                     frame.setColorFilter(ConfigUtils.getAccentColor(itemView.context), PorterDuff.Mode.SRC_ATOP)

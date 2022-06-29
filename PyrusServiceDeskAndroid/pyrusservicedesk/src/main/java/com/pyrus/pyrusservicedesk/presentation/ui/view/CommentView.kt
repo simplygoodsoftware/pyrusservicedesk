@@ -33,6 +33,7 @@ import androidx.appcompat.widget.AppCompatTextView
 import androidx.core.app.ActivityCompat
 import androidx.core.text.util.LinkifyCompat
 import androidx.exifinterface.media.ExifInterface
+import com.pyrus.pyrusservicedesk.PyrusServiceDesk
 import com.pyrus.pyrusservicedesk.R
 import com.pyrus.pyrusservicedesk.presentation.ui.view.OutlineImageView.Companion.EDGE_RIGHT
 import com.pyrus.pyrusservicedesk.utils.*
@@ -396,10 +397,18 @@ internal class CommentView @JvmOverloads constructor(
     }
 
     private fun showLinkDialog(context: Activity, url: String, onClick: ()-> Unit) {
+        val message = SpannableStringBuilder(context.getString(R.string.link_warning, url))
+        val range = Regex(url).find(message)?.range
+        range?.let {
+            if (range.first != -1 && range.last != -1 && range.last > range.first) {
+                message.setSpan(createClickableSpan(url), range.first, range.last + 1, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE)
+            }
+        }
+
         AlertDialog.Builder(context)
             .setPositiveButton(R.string.psd_open) { _, _ -> onClick.invoke() }
             .setNegativeButton(android.R.string.cancel) { _, _ -> }
-            .setMessage(context.getString(R.string.link_warning, url))
+            .setMessage(message)
             .create()
             .show()
     }
