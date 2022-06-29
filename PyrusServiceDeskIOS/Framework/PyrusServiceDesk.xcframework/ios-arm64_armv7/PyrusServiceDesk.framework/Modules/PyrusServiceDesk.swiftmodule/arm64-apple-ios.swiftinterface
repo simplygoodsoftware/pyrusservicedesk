@@ -75,6 +75,28 @@ import zlib
   }
   @objc deinit
 }
+public enum HorizontalAlignment {
+  case left
+  case right
+  case leading
+  case trailing
+  case justified
+  public static func == (a: HorizontalAlignment, b: HorizontalAlignment) -> Swift.Bool
+  public func hash(into hasher: inout Swift.Hasher)
+  public var hashValue: Swift.Int {
+    get
+  }
+}
+public enum VerticalAlignment {
+  case top
+  case center
+  case bottom
+  public static func == (a: VerticalAlignment, b: VerticalAlignment) -> Swift.Bool
+  public func hash(into hasher: inout Swift.Hasher)
+  public var hashValue: Swift.Int {
+    get
+  }
+}
 @objc public protocol OnStopCallback {
   @objc func onStop()
 }
@@ -100,6 +122,7 @@ import zlib
 }
 @_inheritsConvenienceInitializers @objc public class PyrusServiceDesk : ObjectiveC.NSObject {
   public static var PSD_CLOSED_NOTIFICATION_NAME: Swift.String
+  public static var trustedUrls: [Swift.String]?
   @objc public static func setPushToken(_ token: Swift.String?, completion: @escaping (Swift.Error?) -> Swift.Void)
   @objc public static func start(on viewController: UIKit.UIViewController, onStopCallback: OnStopCallback? = nil)
   @objc public static func start(on viewController: UIKit.UIViewController, configuration: ServiceDeskConfiguration?, onStopCallback: OnStopCallback? = nil)
@@ -120,3 +143,10 @@ import zlib
   @objc override dynamic public init()
   @objc deinit
 }
+extension PyrusServiceDesk {
+  @objc public static func apiSign() -> Swift.String
+}
+extension HorizontalAlignment : Swift.Equatable {}
+extension HorizontalAlignment : Swift.Hashable {}
+extension VerticalAlignment : Swift.Equatable {}
+extension VerticalAlignment : Swift.Hashable {}

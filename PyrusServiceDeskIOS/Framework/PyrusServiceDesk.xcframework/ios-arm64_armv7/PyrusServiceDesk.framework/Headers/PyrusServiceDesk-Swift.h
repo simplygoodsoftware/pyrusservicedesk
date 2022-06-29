@@ -245,6 +245,9 @@ SWIFT_PROTOCOL("_TtP16PyrusServiceDesk9LogEvents_")
 - (void)logPyrusServiceDeskWithEvent:(NSString * _Nonnull)event;
 @end
 
+
+
+
 @class NSNumber;
 
 /// The protocol for sending a notification that a new message has arrived
@@ -373,6 +376,13 @@ SWIFT_CLASS_PROPERTY(@property (nonatomic, class, copy) void (^ _Nullable onAuth
 @end
 
 
+@interface PyrusServiceDesk (SWIFT_EXTENSION(PyrusServiceDesk))
+/// Активирует поддержку фич от бека
+/// Для настройки флагов воспользуйся [ссылкой](https://dev.pyrus.com/admin/api-flags
++ (NSString * _Nonnull)apiSign SWIFT_WARN_UNUSED_RESULT;
+@end
+
+
 SWIFT_CLASS("_TtC16PyrusServiceDesk24ServiceDeskConfiguration")
 @interface ServiceDeskConfiguration : NSObject
 - (nonnull instancetype)init SWIFT_UNAVAILABLE;
@@ -413,6 +423,8 @@ SWIFT_CLASS_NAMED("Builder")
 - (ServiceDeskConfiguration * _Nonnull)build SWIFT_WARN_UNUSED_RESULT;
 - (nonnull instancetype)init OBJC_DESIGNATED_INITIALIZER;
 @end
+
+
 
 
 
@@ -695,6 +707,9 @@ SWIFT_PROTOCOL("_TtP16PyrusServiceDesk9LogEvents_")
 - (void)logPyrusServiceDeskWithEvent:(NSString * _Nonnull)event;
 @end
 
+
+
+
 @class NSNumber;
 
 /// The protocol for sending a notification that a new message has arrived
@@ -823,6 +838,13 @@ SWIFT_CLASS_PROPERTY(@property (nonatomic, class, copy) void (^ _Nullable onAuth
 @end
 
 
+@interface PyrusServiceDesk (SWIFT_EXTENSION(PyrusServiceDesk))
+/// Активирует поддержку фич от бека
+/// Для настройки флагов воспользуйся [ссылкой](https://dev.pyrus.com/admin/api-flags
++ (NSString * _Nonnull)apiSign SWIFT_WARN_UNUSED_RESULT;
+@end
+
+
 SWIFT_CLASS("_TtC16PyrusServiceDesk24ServiceDeskConfiguration")
 @interface ServiceDeskConfiguration : NSObject
 - (nonnull instancetype)init SWIFT_UNAVAILABLE;
@@ -863,6 +885,8 @@ SWIFT_CLASS_NAMED("Builder")
 - (ServiceDeskConfiguration * _Nonnull)build SWIFT_WARN_UNUSED_RESULT;
 - (nonnull instancetype)init OBJC_DESIGNATED_INITIALIZER;
 @end
+
+
 
 
 
