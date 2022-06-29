@@ -308,10 +308,10 @@ internal class CommentView @JvmOverloads constructor(
      * Works with [ContentType.Text].
      */
     fun setCommentText(text: String) {
-        comment_text.text = text
+        comment_text.text = text.replace(Regex("\\n?<button>(.*?)</button>|<br>|\\n *?$|^ *?\\n"), "")
         LinkifyCompat.addLinks(comment_text, Linkify.WEB_URLS or Linkify.PHONE_NUMBERS)
         addDeepLinks(comment_text)
-        comment_text.text = replaceLinkTagsWithSpans(comment_text.text).replace(Regex("\\n?<button>(.*)</button>\\n?|<br>"), "")
+        comment_text.text = replaceLinkTagsWithSpans(comment_text.text)
     }
 
     private fun replaceLinkTagsWithSpans(text: CharSequence): CharSequence {
@@ -328,7 +328,7 @@ internal class CommentView @JvmOverloads constructor(
 
             val visibleStart = matchResult.groups[2]!!.range.first - (matchResult.groups[2]!!.range.first - matchResult.range.first) - offset
             val visibleLength = matchResult.groups[2]!!.range.last - matchResult.groups[2]!!.range.first
-            val realRange = visibleStart..visibleStart + visibleLength
+            val realRange = visibleStart..visibleStart + visibleLength + 1
 
             ranges.add(Triple(link, word, realRange))
 
@@ -368,6 +368,7 @@ internal class CommentView @JvmOverloads constructor(
             override fun updateDrawState(ds: TextPaint) {
                 super.updateDrawState(ds)
                 ds.isUnderlineText = true
+                ds.color = ConfigUtils.getAccentColor(context)
             }
 
             override fun onClick(widget: View) {

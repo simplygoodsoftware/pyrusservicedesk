@@ -452,7 +452,7 @@ internal class TicketViewModel(
         return entries.filter {
             it !is CommentEntry || !(it.comment
                 .body
-                ?.replace(Regex("\n?<button>(.*)</button>\n?|<br>"), "")
+                ?.replace(Regex("\\n?<button>(.*)</button>\\n?|<br>"), "")
                 .isNullOrBlank())
         }
     }
