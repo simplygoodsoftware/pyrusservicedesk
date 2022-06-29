@@ -417,8 +417,21 @@ class HelpersStrings {
 
 private extension NSMutableAttributedString {
     func trailingNewlineChopped() {
+        checkPrefix()
+        checkSuffix()
+    }
+    
+    private func checkSuffix() {
         if string.hasSuffix("\n") {
             deleteCharacters(in: NSRange(location: length - 1,length: 1))
+        } else {
+            return
+        }
+    }
+    
+    private func checkPrefix() {
+        if string.hasPrefix("\n") {
+            deleteCharacters(in: NSRange(location: 0,length: 1))
         } else {
             return
         }

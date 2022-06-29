@@ -28,7 +28,7 @@ class ButtonsView: UIView {
     override init(frame: CGRect) {
         super.init(frame: frame)
         addSubview(collectionView)
-        collectionView.trailingAnchor.constraint(equalTo: trailingAnchor).isActive = true
+        collectionView.trailingAnchor.constraint(equalTo: trailingAnchor, constant: -TO_BOARD_DISTANCE).isActive = true
         collectionView.leadingAnchor.constraint(equalTo: leadingAnchor, constant: LEADING_FOOTER).isActive = true
         collectionView.topAnchor.constraint(equalTo: topAnchor).isActive = true
         collectionView.bottomAnchor.constraint(equalTo: bottomAnchor).isActive = true
@@ -81,6 +81,6 @@ extension ButtonsView: UICollectionViewDelegate, UICollectionViewDataSource {
                             
 private extension ButtonsView {
     var CELL_IDENT: String { "ButtonCell" }
-    var LEADING_FOOTER: CGFloat { 18.0 }
+    var LEADING_FOOTER: CGFloat { TO_BOARD_DISTANCE + (AVATAR_SIZE * 2) + 24 }
     var ROWS_SPACING: CGFloat { 10.0 }
 }
