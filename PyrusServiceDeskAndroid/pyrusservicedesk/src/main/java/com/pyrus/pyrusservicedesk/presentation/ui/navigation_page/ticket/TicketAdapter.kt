@@ -5,7 +5,6 @@ import android.graphics.Canvas
 import android.graphics.PorterDuff
 import android.graphics.drawable.AnimationDrawable
 import android.net.Uri
-import android.view.Gravity
 import android.view.View
 import android.view.View.*
 import android.view.ViewGroup
@@ -53,10 +52,6 @@ private const val VIEW_TYPE_COMMENT_BUTTONS = 6
 internal class TicketAdapter: AdapterBase<TicketEntry>() {
 
     override val itemTouchHelper: ItemTouchHelper = ItemTouchHelper(TouchCallback())
-
-    companion object {
-        const val MAX_LENGTH_BEFORE_TEXT_LEFT_ALIGNMENT = 50
-    }
 
     /**
      * [SpaceMultiplier] implementation for customizing spaces between items fot the feed.
@@ -433,16 +428,9 @@ internal class TicketAdapter: AdapterBase<TicketEntry>() {
                 (itemView.flButtons.getChildAt(index) as? TextView)?.apply {
                     text = buttonText
                     val frame = background
-                    if (buttonText.length > MAX_LENGTH_BEFORE_TEXT_LEFT_ALIGNMENT) {
-                        gravity = Gravity.START
-                    }
-
                     frame.setColorFilter(ConfigUtils.getAccentColor(itemView.context), PorterDuff.Mode.SRC_ATOP)
                     setTextColor(ConfigUtils.getAccentColor(itemView.context))
-                    setOnClickListener {
-                        item.onButtonClick.invoke(buttonText)
-                        this@ButtonsHolder.itemView.visibility = GONE
-                    }
+                    setOnClickListener { item.onButtonClick.invoke(buttonText) }
                     visibility = VISIBLE
                 }
             }
