@@ -19,5 +19,6 @@ internal enum class Type {
     Comment,
     Date,
     WelcomeMessage,
-    Rating
+    Rating,
+    Buttons
 }
