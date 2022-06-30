@@ -462,14 +462,12 @@ internal class TicketViewModel(
             return newEntries
         }
 
-        val commentWithButtons = newEntries.last()
-
+        val commentWithButtons = newEntries.findLast { it is CommentEntry && !it.comment.isLocal() } ?: newEntries.last()
+        //commentWithButtons.comment.author.name == ConfigUtils.getUserName() && !commentWithButtons.comment.isLocal()
         if (commentWithButtons !is CommentEntry
-            || commentWithButtons.comment.author.name == ConfigUtils.getUserName()
             || !commentWithButtons.containsButtons()) {
             return newEntries
         }
-
         return newEntries + ButtonsEntry(extractButtons(commentWithButtons.comment)) {
             onSendClicked(it)
         }
