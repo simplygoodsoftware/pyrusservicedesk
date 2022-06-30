@@ -330,19 +330,21 @@ class PSDChatTableView: PSDDetailTableView{
     private static let delayBeforeUpdates: Int = 20//milliseconds
     ///Scroll tableview to its bottom position without animation
     private func scrollsToBottom(animated: Bool) {
-        layoutIfNeeded()
         let lastRow = lastIndexPath()
-        if
-            lastRow.row >= 0 || lastRow.section >= 0,
-            !(lastRow.row == 0 && lastRow.section == 0)
-        {
-            scrollToRow(at: lastRow, at: .bottom, animated: animated)
-        }
         if
             let tableFooterView = tableFooterView,
             tableFooterView.frame.size.height > 0
         {
+            contentOffset = CGPoint(x: 0, y: tableFooterView.frame.maxY)
+            layoutIfNeeded()
             scrollRectToVisible(tableFooterView.frame, animated: animated)
+        }
+        else if
+            lastRow.row >= 0 || lastRow.section >= 0,
+            !(lastRow.row == 0 && lastRow.section == 0)
+        {
+            layoutIfNeeded()
+            scrollToRow(at: lastRow, at: .bottom, animated: animated)
         }
     }
     ///Adds new row to table view to last index.
