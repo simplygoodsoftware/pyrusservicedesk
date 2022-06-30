@@ -434,6 +434,9 @@ internal class TicketAdapter: AdapterBase<TicketEntry>() {
                     if (buttonText.length > MAX_SYMBOLS_BEFORE_LEFT_ALIGNMENT) {
                         gravity = Gravity.START
                     }
+                    else {
+                        gravity - Gravity.CENTER
+                    }
 
                     val frame = background
                     frame.setColorFilter(ConfigUtils.getAccentColor(itemView.context), PorterDuff.Mode.SRC_ATOP)
