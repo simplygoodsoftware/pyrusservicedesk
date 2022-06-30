@@ -7,10 +7,10 @@
     app:justifyContent="flex_end"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:layout_marginRight="16dp"
-    android:layout_marginEnd="16dp"
-    android:layout_marginLeft="64dp"
-    android:layout_marginStart="64dp">
+    android:layout_marginRight="@dimen/psd_offset_default"
+    android:layout_marginEnd="@dimen/psd_offset_default"
+    android:layout_marginLeft="@dimen/psd_preview_mini_width"
+    android:layout_marginStart="@dimen/psd_preview_mini_width">
 
     <TextView
         android:id="@+id/btnButton1"
