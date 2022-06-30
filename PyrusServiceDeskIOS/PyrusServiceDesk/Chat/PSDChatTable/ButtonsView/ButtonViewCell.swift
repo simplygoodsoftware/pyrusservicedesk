@@ -41,13 +41,28 @@ class ButtonViewCell: UICollectionViewCell {
         backView.topAnchor.constraint(equalTo: contentView.topAnchor).isActive = true
         backView.bottomAnchor.constraint(equalTo: contentView.bottomAnchor).isActive = true
         backView.trailingAnchor.constraint(equalTo: contentView.trailingAnchor).isActive = true
-        backView.heightAnchor.constraint(greaterThanOrEqualToConstant: MIN_HEIGHT).isActive = true
+        let heightConstant = backView.heightAnchor.constraint(greaterThanOrEqualToConstant: MIN_HEIGHT)
+        heightConstant.priority = UILayoutPriority(rawValue: 999)
+        heightConstant.isActive = true
         
-        label.leadingAnchor.constraint(equalTo: backView.leadingAnchor, constant: DIST).isActive = true
-        label.topAnchor.constraint(equalTo: backView.topAnchor, constant: DIST).isActive = true
-        label.bottomAnchor.constraint(equalTo: backView.bottomAnchor, constant: -DIST).isActive = true
-        label.trailingAnchor.constraint(equalTo: backView.trailingAnchor, constant: -DIST).isActive = true
+        let leadingConstant = label.leadingAnchor.constraint(equalTo: backView.leadingAnchor, constant: DIST)
+        leadingConstant.priority = UILayoutPriority(rawValue: 999)
+        leadingConstant.isActive = true
+        
+        let topConstant = label.topAnchor.constraint(equalTo: backView.topAnchor, constant: DIST)
+        topConstant.priority = UILayoutPriority(rawValue: 999)
+        topConstant.isActive = true
+        
+        let bottomConstant = label.bottomAnchor.constraint(equalTo: backView.bottomAnchor, constant: -DIST)
+        bottomConstant.priority = UILayoutPriority(rawValue: 999)
+        bottomConstant.isActive = true
+        
+        let trailingConstant = label.trailingAnchor.constraint(equalTo: backView.trailingAnchor, constant: -DIST)
+        trailingConstant.priority = UILayoutPriority(rawValue: 999)
+        trailingConstant.isActive = true
+        
         maxWidthConstraint = backView.widthAnchor.constraint(lessThanOrEqualToConstant: maxWidth)
+        maxWidthConstraint?.priority = UILayoutPriority(rawValue: 999)
         maxWidthConstraint?.isActive = true
     }
     
