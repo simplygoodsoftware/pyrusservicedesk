@@ -53,6 +53,8 @@ internal class TicketViewModel(
 
         private val TAG = TicketViewModel::class.java.simpleName
 
+        private const val BUTTON_PATTERN = "<button>(.*?)</button>"
+
         fun Comment.hasAttachmentWithExceededSize(): Boolean =
             attachments?.let { it.any { attach -> attach.hasExceededFileSize() } } ?: false
 
@@ -90,6 +92,8 @@ internal class TicketViewModel(
     private var userId = PyrusServiceDesk.get().userId
 
     private var currentInterval: Long = 0
+
+    private var clickedButtons = mutableListOf<Int>()
 
     init {
         draft = draftRepository.getDraft()
@@ -437,7 +441,7 @@ internal class TicketViewModel(
 
     private fun CommentEntry.containsButtons(): Boolean {
         if (this.comment.body == null) { return false }
-        return Regex("<button>.*</button>").containsMatchIn(this.comment.body)
+        return Regex(BUTTON_PATTERN).containsMatchIn(this.comment.body)
     }
 
     private fun extractButtons(comment: Comment): List<String> {
@@ -445,14 +449,15 @@ internal class TicketViewModel(
             return emptyList()
         }
 
-        return Regex("<button>(.*?)</button>").findAll(comment.body).map { it.groupValues[1] }.toList()
+        return Regex(BUTTON_PATTERN).findAll(comment.body).map { it.groupValues[1] }.toList()
     }
 
-    private fun removeEmptyButtonTags(entries: List<TicketEntry>): List<TicketEntry> {
+    // buttons are displayed in other entries, so if comment contains nothing but buttons we don't need it
+    private fun removeEmptyComments(entries: List<TicketEntry>): List<TicketEntry> {
         return entries.filter {
             it !is CommentEntry || !(it.comment
                 .body
-                ?.replace(Regex("\\n?<button>(.*)</button>\\n?|<br>"), "")
+                ?.replace(Regex("\\n?$BUTTON_PATTERN\\n?|<br>"), "")
                 .isNullOrBlank())
         }
     }
@@ -465,16 +470,19 @@ internal class TicketViewModel(
         val commentWithButtons = newEntries.findLast { it is CommentEntry && !it.comment.isLocal() } ?: newEntries.last()
 
         if (commentWithButtons !is CommentEntry
-            || !commentWithButtons.containsButtons()) {
+            || !commentWithButtons.containsButtons()
+            || commentWithButtons.comment.commentId in clickedButtons) {
             return newEntries
         }
         return newEntries + ButtonsEntry(extractButtons(commentWithButtons.comment)) {
+            clickedButtons.add(commentWithButtons.comment.commentId)
+            update()
             onSendClicked(it)
         }
     }
 
     private fun publishEntries(oldEntries: List<TicketEntry>, newEntries: List<TicketEntry>) {
-        ticketEntries = removeEmptyButtonTags(addButtonsIfNeeded(newEntries))
+        ticketEntries = removeEmptyComments(addButtonsIfNeeded(newEntries))
 
         val lastActiveTime = (newEntries.findLast {
             it is CommentEntry && it.comment.isInbound
