@@ -466,7 +466,8 @@ internal class TicketViewModel(
 
         if (commentWithButtons !is CommentEntry
             || commentWithButtons.comment.author.name == ConfigUtils.getUserName()
-            || !commentWithButtons.containsButtons()) {
+            || !commentWithButtons.containsButtons()
+            || pendingCommentUnderAction != null) {
             return newEntries
         }
 
