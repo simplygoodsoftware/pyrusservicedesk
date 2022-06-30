@@ -505,6 +505,7 @@ extension PSDChatTableView : UITableViewDelegate,UITableViewDataSource{
             
         }
         cell.needShowName = self.tableMatrix.needShowName(at: indexPath)
+        cell.drawEmpty = self.tableMatrix.emptyMessage(at: indexPath)
         cell.firstMessageInDate = indexPath.row == 0
         cell.draw(message:message)
         PSDPreviewSetter.setPreview(of: message.attachment, in: cell.cloudView.attachmentView, delegate: self, animated: false)

@@ -87,9 +87,9 @@ extension Array where Element == [PSDRowMessage]{
             return false//if first message is welcome - dont show avatar
         }
         let currentUser = personForMessage(at: IndexPath.init(row: indexPath.row, section: indexPath.section))
-        let nextUser = personForMessage(at: IndexPath.init(row: indexPath.row+1, section: indexPath.section))
+        let nextUser = personForMessage(at: nextNotEmpty(indexPath))
         if currentUser as? PSDPlaceholderUser != nil{
-            let previousUser = personForMessage(at: IndexPath.init(row: indexPath.row-1, section: indexPath.section))
+            let previousUser = personForMessage(at: previousNotEmpty(indexPath))
             if let previousUser = previousUser, previousUser.personId != PyrusServiceDesk.userId{
                 return false
             }else{
@@ -106,7 +106,7 @@ extension Array where Element == [PSDRowMessage]{
         if emptyMessage(at: indexPath) {
             return false
         }
-        let previousUser = personForMessage(at: IndexPath.init(row: indexPath.row-1, section: indexPath.section))
+        let previousUser = personForMessage(at: previousNotEmpty(indexPath))
         let currentUser = personForMessage(at: IndexPath.init(row: indexPath.row, section: indexPath.section))
         if currentUser as? PSDPlaceholderUser != nil{
             if let previousUser = previousUser, previousUser.personId != PyrusServiceDesk.userId{
@@ -129,7 +129,7 @@ extension Array where Element == [PSDRowMessage]{
     }
     
     ///Check if row message has empty data (ex.: that can be if support sent only buttons)
-    private func emptyMessage(at indexPath: IndexPath) -> Bool {
+    func emptyMessage(at indexPath: IndexPath) -> Bool {
         if
             indexPath.row >= 0,
             count > indexPath.section,
@@ -139,6 +139,24 @@ extension Array where Element == [PSDRowMessage]{
             return rowMessage.message.attachments?.count ?? 0 == 0 && rowMessage.attributedText?.string.count ?? 0 == 0
         }
         return false
+    }
+    
+    private func previousNotEmpty(_ currentIP: IndexPath) -> IndexPath {
+        return notEmptyIndexPath(currentIP, step: -1)
+    }
+    
+    private func nextNotEmpty(_ currentIP: IndexPath) -> IndexPath {
+        return notEmptyIndexPath(currentIP, step: 1)
+    }
+    
+    private func notEmptyIndexPath(_ currentIP: IndexPath, step: Int) -> IndexPath {
+        var row = currentIP.row
+        var isEmpty = true
+        while isEmpty {
+            row = row + step
+            isEmpty = emptyMessage(at: IndexPath(row: row, section: currentIP.section))
+        }
+        return IndexPath(row: row, section: currentIP.section)
     }
     
     ///Returns first date in section

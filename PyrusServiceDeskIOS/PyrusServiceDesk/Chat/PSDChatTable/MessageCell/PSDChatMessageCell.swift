@@ -6,6 +6,7 @@ let AVATAR_SIZE : CGFloat = 32.0
 class PSDChatMessageCell: UITableViewCell {
    
     var needShowName = false
+    var drawEmpty = false
     private static let timeAlpha : CGFloat = 0.4
     ///Cloud that show message body (text OR attachment)
     let cloudView : PSDMessageView =

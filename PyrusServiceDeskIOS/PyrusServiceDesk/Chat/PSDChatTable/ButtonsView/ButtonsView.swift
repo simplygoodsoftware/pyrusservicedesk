@@ -18,6 +18,7 @@ class ButtonsView: UIView {
         layout.minimumInteritemSpacing = ROWS_SPACING
         let collectionView = UICollectionView(frame: .zero, collectionViewLayout: layout)
         collectionView.translatesAutoresizingMaskIntoConstraints = false
+        collectionView.backgroundColor = .clear
         collectionView.delegate = self
         collectionView.dataSource = self
         collectionView.register(ButtonViewCell.self, forCellWithReuseIdentifier: CELL_IDENT)
