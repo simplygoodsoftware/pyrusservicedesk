@@ -86,7 +86,7 @@
 		</data>
 		<key>Modules/PyrusServiceDesk.swiftmodule/arm64-apple-ios-simulator.swiftmodule</key>
 		<data>
-		eaJsj/rzLdEdd7W4HezDVuRLl0k=
+		uU4svok9oZbcNir3BenjUZqBEf4=
 		</data>
 		<key>Modules/PyrusServiceDesk.swiftmodule/arm64.swiftdoc</key>
 		<data>
@@ -98,7 +98,7 @@
 		</data>
 		<key>Modules/PyrusServiceDesk.swiftmodule/arm64.swiftmodule</key>
 		<data>
-		eaJsj/rzLdEdd7W4HezDVuRLl0k=
+		uU4svok9oZbcNir3BenjUZqBEf4=
 		</data>
 		<key>Modules/PyrusServiceDesk.swiftmodule/x86_64-apple-ios-simulator.swiftdoc</key>
 		<data>
@@ -110,7 +110,7 @@
 		</data>
 		<key>Modules/PyrusServiceDesk.swiftmodule/x86_64-apple-ios-simulator.swiftmodule</key>
 		<data>
-		voTedBmbdGi27JHFClFmiskvTYU=
+		ymopOBepZ7ES/ifZXa2exVnqB40=
 		</data>
 		<key>Modules/PyrusServiceDesk.swiftmodule/x86_64.swiftdoc</key>
 		<data>
@@ -122,7 +122,7 @@
 		</data>
 		<key>Modules/PyrusServiceDesk.swiftmodule/x86_64.swiftmodule</key>
 		<data>
-		voTedBmbdGi27JHFClFmiskvTYU=
+		ymopOBepZ7ES/ifZXa2exVnqB40=
 		</data>
 		<key>Modules/module.modulemap</key>
 		<data>
@@ -935,11 +935,11 @@
 		<dict>
 			<key>hash</key>
 			<data>
-			eaJsj/rzLdEdd7W4HezDVuRLl0k=
+			uU4svok9oZbcNir3BenjUZqBEf4=
 			</data>
 			<key>hash2</key>
 			<data>
-			pKkyxLmKfr//t79n0fFCiIEIeBv6GwgAKNKkl6ASo38=
+			hRzJbvSHtA7PzIt8+YTqhv0knVSJQsaBuTnsN7hBCjw=
 			</data>
 		</dict>
 		<key>Modules/PyrusServiceDesk.swiftmodule/arm64.swiftdoc</key>
@@ -968,11 +968,11 @@
 		<dict>
 			<key>hash</key>
 			<data>
-			eaJsj/rzLdEdd7W4HezDVuRLl0k=
+			uU4svok9oZbcNir3BenjUZqBEf4=
 			</data>
 			<key>hash2</key>
 			<data>
-			pKkyxLmKfr//t79n0fFCiIEIeBv6GwgAKNKkl6ASo38=
+			hRzJbvSHtA7PzIt8+YTqhv0knVSJQsaBuTnsN7hBCjw=
 			</data>
 		</dict>
 		<key>Modules/PyrusServiceDesk.swiftmodule/x86_64-apple-ios-simulator.swiftdoc</key>
@@ -1001,11 +1001,11 @@
 		<dict>
 			<key>hash</key>
 			<data>
-			voTedBmbdGi27JHFClFmiskvTYU=
+			ymopOBepZ7ES/ifZXa2exVnqB40=
 			</data>
 			<key>hash2</key>
 			<data>
-			7zBBA+Km3auDOlMre3WGK8D8Hk/ZISNs61EJOt4h6uQ=
+			htJW2+wpDTaE2zt0bDpsI8OCKz6yJEvv/03lGMEp1sk=
 			</data>
 		</dict>
 		<key>Modules/PyrusServiceDesk.swiftmodule/x86_64.swiftdoc</key>
@@ -1034,11 +1034,11 @@
 		<dict>
 			<key>hash</key>
 			<data>
-			voTedBmbdGi27JHFClFmiskvTYU=
+			ymopOBepZ7ES/ifZXa2exVnqB40=
 			</data>
 			<key>hash2</key>
 			<data>
-			7zBBA+Km3auDOlMre3WGK8D8Hk/ZISNs61EJOt4h6uQ=
+			htJW2+wpDTaE2zt0bDpsI8OCKz6yJEvv/03lGMEp1sk=
 			</data>
 		</dict>
 		<key>Modules/module.modulemap</key>
