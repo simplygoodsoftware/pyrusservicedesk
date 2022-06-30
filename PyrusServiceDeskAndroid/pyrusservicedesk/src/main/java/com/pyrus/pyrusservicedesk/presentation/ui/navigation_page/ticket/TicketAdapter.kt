@@ -1,17 +1,16 @@
 package com.pyrus.pyrusservicedesk.presentation.ui.navigation_page.ticket
 
-import android.content.res.ColorStateList
 import android.graphics.Canvas
 import android.graphics.PorterDuff
 import android.graphics.drawable.AnimationDrawable
 import android.net.Uri
+import android.view.Gravity
 import android.view.View
 import android.view.View.*
 import android.view.ViewGroup
 import android.widget.ImageView
 import android.widget.TextView
 import androidx.annotation.LayoutRes
-import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.ItemTouchHelper.ACTION_STATE_SWIPE
 import androidx.recyclerview.widget.RecyclerView
@@ -50,6 +49,10 @@ private const val VIEW_TYPE_COMMENT_BUTTONS = 6
  * Adapter that is used for rendering comment feed of the ticket screen.
  */
 internal class TicketAdapter: AdapterBase<TicketEntry>() {
+
+    companion object {
+        const val MAX_SYMBOLS_BEFORE_LEFT_ALIGNMENT = 8
+    }
 
     override val itemTouchHelper: ItemTouchHelper = ItemTouchHelper(TouchCallback())
 
@@ -427,6 +430,11 @@ internal class TicketAdapter: AdapterBase<TicketEntry>() {
             item.buttons.forEachIndexed { index, buttonText ->
                 (itemView.flButtons.getChildAt(index) as? TextView)?.apply {
                     text = buttonText
+
+                    if (buttonText.length > MAX_SYMBOLS_BEFORE_LEFT_ALIGNMENT) {
+                        gravity = Gravity.START
+                    }
+
                     val frame = background
                     frame.setColorFilter(ConfigUtils.getAccentColor(itemView.context), PorterDuff.Mode.SRC_ATOP)
                     setTextColor(ConfigUtils.getAccentColor(itemView.context))
