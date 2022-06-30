@@ -33,6 +33,7 @@ import androidx.appcompat.widget.AppCompatTextView
 import androidx.core.app.ActivityCompat
 import androidx.core.text.util.LinkifyCompat
 import androidx.exifinterface.media.ExifInterface
+import com.pyrus.pyrusservicedesk.PyrusServiceDesk
 import com.pyrus.pyrusservicedesk.R
 import com.pyrus.pyrusservicedesk.presentation.ui.view.OutlineImageView.Companion.EDGE_RIGHT
 import com.pyrus.pyrusservicedesk.utils.*
@@ -308,10 +309,11 @@ internal class CommentView @JvmOverloads constructor(
      * Works with [ContentType.Text].
      */
     fun setCommentText(text: String) {
-        comment_text.text = text
+        comment_text.setLinkTextColor(ConfigUtils.getAccentColor(context))
+        comment_text.text = replaceLinkTagsWithSpans(text.replace(Regex("\\n?<button>(.*?)</button>|<br>|\\n *?$|^ *?\\n"), ""))
         LinkifyCompat.addLinks(comment_text, Linkify.WEB_URLS or Linkify.PHONE_NUMBERS)
         addDeepLinks(comment_text)
-        comment_text.text = replaceLinkTagsWithSpans(comment_text.text)
+        comment_text.movementMethod = LinkMovementMethod.getInstance()
     }
 
     private fun replaceLinkTagsWithSpans(text: CharSequence): CharSequence {
@@ -328,7 +330,7 @@ internal class CommentView @JvmOverloads constructor(
 
             val visibleStart = matchResult.groups[2]!!.range.first - (matchResult.groups[2]!!.range.first - matchResult.range.first) - offset
             val visibleLength = matchResult.groups[2]!!.range.last - matchResult.groups[2]!!.range.first
-            val realRange = visibleStart..visibleStart + visibleLength
+            val realRange = visibleStart..visibleStart + visibleLength + 1
 
             ranges.add(Triple(link, word, realRange))
 
@@ -368,6 +370,7 @@ internal class CommentView @JvmOverloads constructor(
             override fun updateDrawState(ds: TextPaint) {
                 super.updateDrawState(ds)
                 ds.isUnderlineText = true
+                ds.color = ConfigUtils.getAccentColor(context)
             }
 
             override fun onClick(widget: View) {
@@ -394,10 +397,18 @@ internal class CommentView @JvmOverloads constructor(
     }
 
     private fun showLinkDialog(context: Activity, url: String, onClick: ()-> Unit) {
+        val message = SpannableStringBuilder(context.getString(R.string.link_warning, url))
+        val range = Regex(url).find(message)?.range
+        range?.let {
+            if (range.first != -1 && range.last != -1 && range.last > range.first) {
+                message.setSpan(createClickableSpan(url), range.first, range.last + 1, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE)
+            }
+        }
+
         AlertDialog.Builder(context)
             .setPositiveButton(R.string.psd_open) { _, _ -> onClick.invoke() }
             .setNegativeButton(android.R.string.cancel) { _, _ -> }
-            .setMessage(context.getString(R.string.link_warning, url))
+            .setMessage(message)
             .create()
             .show()
     }
