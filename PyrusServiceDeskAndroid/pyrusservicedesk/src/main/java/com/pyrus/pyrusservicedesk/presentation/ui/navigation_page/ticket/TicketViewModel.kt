@@ -93,8 +93,6 @@ internal class TicketViewModel(
 
     private var currentInterval: Long = 0
 
-    private var clickedButtons = mutableListOf<Int>()
-
     init {
         draft = draftRepository.getDraft()
 
@@ -135,6 +133,7 @@ internal class TicketViewModel(
         if (text.isBlank()) {
             return
         }
+        update()
         val localComment = localDataProvider.createLocalComment(text.trim())
         sendAddComment(localComment)
     }
@@ -454,11 +453,11 @@ internal class TicketViewModel(
 
     // buttons are displayed in other entries, so if comment contains nothing but buttons we don't need it
     private fun removeEmptyComments(entries: List<TicketEntry>): List<TicketEntry> {
-        return entries.filter {
-            it !is CommentEntry || !(it.comment
+        return entries.filterNot {
+            it is CommentEntry && it.comment
                 .body
                 ?.replace(Regex("\\n?$BUTTON_PATTERN\\n?|<br>"), "")
-                .isNullOrBlank())
+                .isNullOrBlank()
         }
     }
 
@@ -467,22 +466,23 @@ internal class TicketViewModel(
             return newEntries
         }
 
-        val commentWithButtons = newEntries.findLast { it is CommentEntry && !it.comment.isLocal() } ?: newEntries.last()
+        val commentWithButtons = newEntries.last()
 
-        if (commentWithButtons !is CommentEntry
-            || !commentWithButtons.containsButtons()
-            || commentWithButtons.comment.commentId in clickedButtons) {
+        if (commentWithButtons !is CommentEntry || !commentWithButtons.containsButtons()) {
             return newEntries
         }
+
         return newEntries + ButtonsEntry(extractButtons(commentWithButtons.comment)) {
-            clickedButtons.add(commentWithButtons.comment.commentId)
-            update()
             onSendClicked(it)
         }
     }
 
+    private fun removeOldButtons(newEntries: List<TicketEntry>): List<TicketEntry> {
+        return newEntries.filter { it.type != Type.Buttons }
+    }
+
     private fun publishEntries(oldEntries: List<TicketEntry>, newEntries: List<TicketEntry>) {
-        ticketEntries = removeEmptyComments(addButtonsIfNeeded(newEntries))
+        ticketEntries = removeEmptyComments(addButtonsIfNeeded(removeOldButtons(newEntries)))
 
         val lastActiveTime = (newEntries.findLast {
             it is CommentEntry && it.comment.isInbound
