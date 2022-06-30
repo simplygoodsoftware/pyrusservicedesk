@@ -333,15 +333,16 @@ class PSDChatTableView: PSDDetailTableView{
         layoutIfNeeded()
         let lastRow = lastIndexPath()
         if
-            let tableFooterView = tableFooterView,
-            tableFooterView.frame.size.height > 0
-        {
-            scrollRectToVisible(tableFooterView.frame, animated: animated)
-        } else if
             lastRow.row >= 0 || lastRow.section >= 0,
             !(lastRow.row == 0 && lastRow.section == 0)
         {
             scrollToRow(at: lastRow, at: .bottom, animated: animated)
+        }
+        if
+            let tableFooterView = tableFooterView,
+            tableFooterView.frame.size.height > 0
+        {
+            scrollRectToVisible(tableFooterView.frame, animated: animated)
         }
     }
     ///Adds new row to table view to last index.

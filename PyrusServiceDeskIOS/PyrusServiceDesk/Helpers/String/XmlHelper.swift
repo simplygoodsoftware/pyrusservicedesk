@@ -3,6 +3,7 @@ import UIKit
 enum HTMLTag: CaseIterable {
     case a
     case button
+    case lineBreak
     ///Возвращает стрингу которая должна быть внутри тега
     var tag: String {
         switch self {
@@ -10,6 +11,8 @@ enum HTMLTag: CaseIterable {
             return "a"
         case .button:
             return "button"
+        case .lineBreak:
+            return "br"
         }
     }
     ///Может ли тег существовать без параметров?
@@ -17,13 +20,27 @@ enum HTMLTag: CaseIterable {
         switch self {
         case .a:
             return false
-        case .button:
-            return true
+        default: return true
         }
     }
     ///Если необходимо заменить на что-то, кроме пустого места
     func replaced(data: Any?) -> String {
-        return ""
+        switch self {
+        case .a:
+            return ""
+        case .button:
+            return ""
+        case .lineBreak:
+            return "\n"
+        }
+    }
+    ///Если необходимо заменить на что-то строчку внутри тега
+    func replaceString() -> Bool {
+        switch self {
+        case .button:
+            return true
+        default: return false
+        }
     }
     ///Для хранения идентификатора типа текста в комментарии в ключе отправляемой библиотеки
     var resultDictKey: TypeOfText {
@@ -74,7 +91,7 @@ extension NSString {
                     if let link = info.data as? URL {
                         dict.updateValue(link, forKey: .link)
                     }
-                case .button:
+                case .button, .lineBreak:
                     continue
                 }
             }
@@ -118,14 +135,18 @@ extension NSString {
                 attrStr.addAttributes(getAttr(for: tags), range: addAttrRange)
                 if let tag = addAndReturn(tag: tagString) {
                     //Удаляем тег из строки
-                    str = str.replacingCharacters(in: tagRange, with: tag.isOpen ? tag.tagType.replaced(data: tag.data) : "") as NSString
-                    attrStr.replaceCharacters(in: tagRange, with: tag.isOpen ? tag.tagType.replaced(data: tag.data) : "")
-                    if tag.tagType == .button {
+                    let replaceString = tag.isOpen ? tag.tagType.replaced(data: tag.data) : ""
+                    str = str.replacingCharacters(in: tagRange, with: replaceString) as NSString
+                    attrStr.replaceCharacters(in: tagRange, with: replaceString)
+                    if tag.tagType.replaceString() {
                         let button = str.substring(with: addAttrRange)
                         if button.count > 0 {
-                            buttons.append(button)
-                            str = str.replacingCharacters(in: addAttrRange, with: "") as NSString
-                            attrStr.replaceCharacters(in: addAttrRange, with: "")
+                            if button.trimmingCharacters(in: .whitespacesAndNewlines).count > 0 {//Добавлеям кнопки только если в них есть текст, иначе удаляем
+                                buttons.append(button)
+                            }
+                            let replaceString = ""
+                            str = str.replacingCharacters(in: addAttrRange, with: replaceString) as NSString
+                            attrStr.replaceCharacters(in: addAttrRange, with: replaceString)
                             removedString = true
                         }
                     }

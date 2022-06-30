@@ -80,6 +80,9 @@ extension Array where Element == [PSDRowMessage]{
     }
     ///Detect if need show avatar. If current user is same as next don't show avatar
     func needShowAvatar(at indexPath: IndexPath)->Bool{
+        if emptyMessage(at: indexPath) {
+            return false
+        }
         if indexPath.row == 0 && indexPath.section == 0 &&  CustomizationHelper.welcomeMessage.count>0 {
             return false//if first message is welcome - dont show avatar
         }
@@ -100,6 +103,9 @@ extension Array where Element == [PSDRowMessage]{
     }
     ///If current user is same as previous don't show name
     func needShowName(at indexPath: IndexPath)->Bool{
+        if emptyMessage(at: indexPath) {
+            return false
+        }
         let previousUser = personForMessage(at: IndexPath.init(row: indexPath.row-1, section: indexPath.section))
         let currentUser = personForMessage(at: IndexPath.init(row: indexPath.row, section: indexPath.section))
         if currentUser as? PSDPlaceholderUser != nil{
@@ -121,6 +127,20 @@ extension Array where Element == [PSDRowMessage]{
         }
         return nil
     }
+    
+    ///Check if row message has empty data (ex.: that can be if support sent only buttons)
+    private func emptyMessage(at indexPath: IndexPath) -> Bool {
+        if
+            indexPath.row >= 0,
+            count > indexPath.section,
+            self[indexPath.section].count > indexPath.row
+        {
+            let rowMessage = self[indexPath.section][indexPath.row]
+            return rowMessage.message.attachments?.count ?? 0 == 0 && rowMessage.attributedText?.string.count ?? 0 == 0
+        }
+        return false
+    }
+    
     ///Returns first date in section
     ///- parameter section: section wich date need to be retrn
     func date(of section:Int)->Date?

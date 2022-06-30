@@ -11,7 +11,7 @@ class PSDObjectsCreator {
     }
     static func createWelcomeMessage()->PSDRowMessage{
         let message = PSDObjectsCreator.createMessage(CustomizationHelper.welcomeMessage, attachments:nil, user: PSDUser(personId: "", name: "", type: .support, imagePath: ""))
-        return PSDRowMessage(message: message, attachment: nil)
+        return PSDRowMessage(message: message, attachment: nil, text: message.text)
     }
     static func createAttachment(_ data: Data, _ url: URL?) -> PSDAttachment {
         return PSDAttachment(localPath: url?.absoluteString, data: data, serverIdentifer:nil)
@@ -20,16 +20,15 @@ class PSDObjectsCreator {
         if let attachments = message.attachments, attachments.count > 0{
             var rowMessages = [PSDRowMessage]()
             for (i,attachment) in attachments.enumerated(){
-                let rowMessage = PSDRowMessage(message: message, attachment: attachment)
+                let rowMessage = PSDRowMessage(message: message, attachment: attachment, text: i > 0 ? "" : message.text)
                 if i > 0{
-                    rowMessage.text = ""
                     rowMessage.rating = nil
                 }
                 rowMessages.append(rowMessage)
             }
             return rowMessages
         }else{
-            return [PSDRowMessage(message: message, attachment: nil)]
+            return [PSDRowMessage(message: message, attachment: nil, text: message.text)]
         }
     }
     ///Returns number of PSDRowMessage after parsing PSDMessage, minimum value is 1
