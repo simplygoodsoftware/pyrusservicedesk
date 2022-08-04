@@ -454,9 +454,9 @@ internal class TicketViewModel(
     // buttons are displayed in other entries, so if comment contains nothing but buttons we don't need it
     private fun removeEmptyComments(entries: List<TicketEntry>): List<TicketEntry> {
         return entries.filterNot {
-            it is CommentEntry && it.comment
-                .body
-                ?.replace(Regex("\\n?$BUTTON_PATTERN\\n?|<br>"), "")
+            it is CommentEntry
+                    && it.comment.attachments.isNullOrEmpty()
+                    && it.comment.body?.replace(Regex("\\n?$BUTTON_PATTERN\\n?|<br>"), "")
                 .isNullOrBlank()
         }
     }
