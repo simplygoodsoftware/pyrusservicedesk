@@ -602,6 +602,12 @@ internal class CommentView @JvmOverloads constructor(
             }
             val source = exif?.thumbnailBitmap
                 ?: BitmapFactory.decodeStream(context.contentResolver.openInputStream(previewUri))
+
+            val maxByteCount = 50e6 // 50 mb
+            if (source.byteCount >= maxByteCount) {
+                onFailed?.invoke()
+                return
+            }
             with(source) {
                 exif?.let {
                     this.rotate(getImageRotation(it).toFloat())

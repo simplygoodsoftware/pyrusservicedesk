@@ -291,8 +291,7 @@ internal class TicketAdapter: AdapterBase<TicketEntry>() {
             getItem().comment.attachments!!.first().let { it ->
                 comment.setFileName(getItem().comment.attachments?.first()?.name ?: "")
                 comment.setFileSize(getItem().comment.attachments?.first()?.bytesSize?.toFloat() ?: 0f)
-                val previewUri = it.localUri ?: Uri.parse(getPreviewUrl(it.id, PyrusServiceDesk.get().domain))
-                comment.setPreview(previewUri)
+                comment.setPreview(it.getPreviewUrl())
                 comment.fileProgressStatus = if (getItem().hasError()) Status.Error else Status.Completed
                 comment.setOnProgressIconClickListener {
                     when (comment.fileProgressStatus) {
