@@ -308,6 +308,7 @@
 		4B1C63EB256EB2BD00902C8E /* PSDViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PSDViewController.swift; sourceTree = "<group>"; };
 		4B1CD38F230BE58000C06F71 /* applicationColors.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = applicationColors.swift; sourceTree = "<group>"; };
 		4B1ED2AB228190BA00B98516 /* PSDMessagesStorage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PSDMessagesStorage.swift; sourceTree = "<group>"; };
+		4B2045FE28D50B0D00944DEA /* ru-RU */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = "ru-RU"; path = "ru-RU.lproj/Localizable.strings"; sourceTree = "<group>"; };
 		4B281EAD2577FBC60042C235 /* clock-light-23@3x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "clock-light-23@3x.png"; sourceTree = "<group>"; };
 		4B281EAE2577FBC60042C235 /* clock-light-34@3x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "clock-light-34@3x.png"; sourceTree = "<group>"; };
 		4B281EAF2577FBC60042C235 /* clock-dark-32@3x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "clock-dark-32@3x.png"; sourceTree = "<group>"; };
@@ -1233,6 +1234,7 @@
 				ru,
 				"en-US",
 				Base,
+				"ru-RU",
 			);
 			mainGroup = 4B7F34C921F85E2A00977C6D;
 			productRefGroup = 4B7F34D421F85E2A00977C6D /* Products */;
@@ -1565,6 +1567,7 @@
 				4BB855AB22086C1900F7CCE5 /* en */,
 				4BB855AD22086C2800F7CCE5 /* ru */,
 				4B90E515221D7B5000A18245 /* en-US */,
+				4B2045FE28D50B0D00944DEA /* ru-RU */,
 			);
 			name = Localizable.strings;
 			sourceTree = "<group>";
