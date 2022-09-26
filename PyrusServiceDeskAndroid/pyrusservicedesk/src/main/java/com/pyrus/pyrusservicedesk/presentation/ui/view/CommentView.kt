@@ -303,7 +303,6 @@ internal class CommentView @JvmOverloads constructor(
      * Works with [ContentType.Text].
      */
     fun setCommentText(text: String) {
-        comment_text.setLinkTextColor(ConfigUtils.getAccentColor(context))
         comment_text.text = replaceLinkTagsWithSpans(text.replace(Regex("\\n?<button>(.*?)</button>|<br>|\\n *?$|^ *?\\n"), ""))
         LinkifyCompat.addLinks(comment_text, Linkify.WEB_URLS or Linkify.PHONE_NUMBERS)
         addDeepLinks(comment_text)
