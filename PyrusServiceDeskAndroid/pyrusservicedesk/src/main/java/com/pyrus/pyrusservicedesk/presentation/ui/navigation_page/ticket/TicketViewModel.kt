@@ -456,7 +456,7 @@ internal class TicketViewModel(
         return entries.filterNot {
             it is CommentEntry
                     && it.comment.attachments.isNullOrEmpty()
-                    && it.comment.body?.replace(Regex("\\n?$BUTTON_PATTERN\\n?|<br>"), "")
+                    && it.comment.body?.replace(Regex("\\n?$BUTTON_PATTERN\\n?|<br>|\n"), "")
                 .isNullOrBlank()
         }
     }
