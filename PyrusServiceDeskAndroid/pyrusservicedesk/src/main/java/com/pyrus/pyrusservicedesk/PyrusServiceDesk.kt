@@ -43,10 +43,9 @@ class PyrusServiceDesk private constructor(
     internal val securityKey: String?,
     internal val domain: String?,
     internal val apiVersion: Int,
-    loggingEnabled: Boolean
+    loggingEnabled: Boolean,
+    internal val authToken: String?,
 ) {
-
-    internal var authToken: String? = null
 
     companion object {
 
@@ -83,6 +82,7 @@ class PyrusServiceDesk private constructor(
          * @param domain Base domain for network requests. If the [domain] is null, the default pyrus.com will be used.
          * @param loggingEnabled If true, then the library will write logs,
          * and they can be sent as a file to chat by clicking the "Send Library Logs" button in the menu under the "+" sign.
+         * @param authorizationToken // TODO sds
          */
         @JvmStatic
         @JvmOverloads
@@ -90,9 +90,19 @@ class PyrusServiceDesk private constructor(
             application: Application,
             appId: String,
             domain: String? = null,
-            loggingEnabled: Boolean = false
+            loggingEnabled: Boolean = false,
+            authorizationToken: String? = null
         ) {
-            initInternal(application, appId, null, null, domain,  API_VERSION_1, loggingEnabled)
+            initInternal(
+                application,
+                appId,
+                null,
+                null,
+                domain,
+                API_VERSION_1,
+                loggingEnabled,
+                authorizationToken
+            )
         }
 
         /**
@@ -109,6 +119,7 @@ class PyrusServiceDesk private constructor(
          * @param domain Base domain for network requests. If the [domain] is null, the default pyrus.com will be used.
          * @param loggingEnabled If true, then the library will write logs,
          * and they can be sent as a file to chat by clicking the "Send Library Logs" button in the menu under the "+" sign.
+         * @param authorizationToken // TODO sds
          */
         @JvmStatic
         @JvmOverloads
@@ -118,9 +129,19 @@ class PyrusServiceDesk private constructor(
             userId: String,
             securityKey: String,
             domain: String? = null,
-            loggingEnabled: Boolean = false
+            loggingEnabled: Boolean = false,
+            authorizationToken: String? = null
         ) {
-            initInternal(application, appId, userId, securityKey, domain, API_VERSION_2, loggingEnabled)
+            initInternal(
+                application,
+                appId,
+                userId,
+                securityKey,
+                domain,
+                API_VERSION_2,
+                loggingEnabled,
+                authorizationToken
+            )
         }
 
         private fun initInternal(
@@ -130,7 +151,8 @@ class PyrusServiceDesk private constructor(
             securityKey: String?,
             domain: String? = null,
             apiVersion: Int = API_VERSION_1,
-            loggingEnabled: Boolean
+            loggingEnabled: Boolean,
+            authorizationToken: String?
         ) {
             PLog.d(TAG, "initInternal, appId: ${appId.getFirstNSymbols(10)}, userId: ${userId?.getFirstNSymbols(10)}, apiVersion: $apiVersion")
             if (INSTANCE != null && get().userId != userId) {
@@ -150,12 +172,13 @@ class PyrusServiceDesk private constructor(
                         securityKey,
                         validDomain,
                         apiVersion,
-                        loggingEnabled
+                        loggingEnabled,
+                        authorizationToken
                     )
                 }
             }
             else {
-                INSTANCE = PyrusServiceDesk(application, appId, userId, securityKey, validDomain, apiVersion, loggingEnabled)
+                INSTANCE = PyrusServiceDesk(application, appId, userId, securityKey, validDomain, apiVersion, loggingEnabled, authorizationToken)
             }
         }
 
@@ -229,12 +252,6 @@ class PyrusServiceDesk private constructor(
         @JvmStatic
         fun onAuthorizationFailed(onAuthorizationFailed: Runnable?) {
             this.onAuthorizationFailed = onAuthorizationFailed
-        }
-
-        // TODO add doc
-        @JvmStatic
-        fun setAuthorizationToken(authToken: String?) {
-            get().authToken = authToken
         }
 
         /**
