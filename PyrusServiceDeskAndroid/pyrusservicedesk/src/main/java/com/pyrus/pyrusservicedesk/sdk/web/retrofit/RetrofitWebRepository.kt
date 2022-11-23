@@ -8,8 +8,8 @@ import com.pyrus.pyrusservicedesk.log.PLog
 import com.pyrus.pyrusservicedesk.sdk.FileResolver
 import com.pyrus.pyrusservicedesk.sdk.data.Attachment
 import com.pyrus.pyrusservicedesk.sdk.data.Comment
-import com.pyrus.pyrusservicedesk.sdk.data.FileManager
 import com.pyrus.pyrusservicedesk.sdk.data.EMPTY_TICKET_ID
+import com.pyrus.pyrusservicedesk.sdk.data.FileManager
 import com.pyrus.pyrusservicedesk.sdk.data.intermediate.AddCommentResponseData
 import com.pyrus.pyrusservicedesk.sdk.data.intermediate.Comments
 import com.pyrus.pyrusservicedesk.sdk.repositories.general.GeneralRepository
@@ -60,6 +60,15 @@ internal class RetrofitWebRepository(
                 .connectTimeout(30, TimeUnit.SECONDS)
                 .readTimeout(30, TimeUnit.SECONDS)
                 .writeTimeout(30, TimeUnit.SECONDS)
+                .addInterceptor { chain ->
+                    val original = chain.request()
+                    val requestBuilder = original.newBuilder()
+                    PyrusServiceDesk.get().authToken?.let { authToken ->
+                        requestBuilder.header(AUTH_TOKEN_NAME, authToken)
+                    }
+
+                    chain.proceed(requestBuilder.build())
+                }
 
         val retrofit = Retrofit.Builder()
                 .baseUrl(getBaseUrl(domain))
@@ -299,6 +308,8 @@ internal class RetrofitWebRepository(
 
     companion object {
         private val TAG = RetrofitWebRepository::class.java.simpleName
+
+        private const val AUTH_TOKEN_NAME = "Authorization"
     }
 
 }

@@ -46,6 +46,8 @@ class PyrusServiceDesk private constructor(
     loggingEnabled: Boolean
 ) {
 
+    internal var authToken: String? = null
+
     companion object {
 
         private val TAG = PyrusServiceDesk::class.java.simpleName
@@ -227,6 +229,12 @@ class PyrusServiceDesk private constructor(
         @JvmStatic
         fun onAuthorizationFailed(onAuthorizationFailed: Runnable?) {
             this.onAuthorizationFailed = onAuthorizationFailed
+        }
+
+        // TODO add doc
+        @JvmStatic
+        fun setAuthorizationToken(authToken: String?) {
+            get().authToken = authToken
         }
 
         /**
