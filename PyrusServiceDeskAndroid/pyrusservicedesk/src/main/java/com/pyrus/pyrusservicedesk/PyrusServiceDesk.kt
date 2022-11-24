@@ -32,9 +32,14 @@ import com.pyrus.pyrusservicedesk.sdk.verify.LocalDataVerifier
 import com.pyrus.pyrusservicedesk.sdk.verify.LocalDataVerifierImpl
 import com.pyrus.pyrusservicedesk.sdk.web.retrofit.RetrofitWebRepository
 import com.pyrus.pyrusservicedesk.utils.*
+import com.squareup.picasso.OkHttp3Downloader
+import com.squareup.picasso.Picasso
 import kotlinx.coroutines.*
+import okhttp3.OkHttpClient
 import java.lang.Runnable
 import java.util.concurrent.Executors
+import java.util.concurrent.TimeUnit
+
 
 class PyrusServiceDesk private constructor(
     internal val application: Application,
@@ -44,7 +49,7 @@ class PyrusServiceDesk private constructor(
     internal val domain: String?,
     internal val apiVersion: Int,
     loggingEnabled: Boolean,
-    internal val authToken: String?,
+    private val authToken: String?
 ) {
 
     companion object {
@@ -437,6 +442,7 @@ class PyrusServiceDesk private constructor(
     }
 
     internal var instanceId: String
+    internal val picasso: Picasso
 
     private val requestFactory: RequestFactory
     private val draftRepository: DraftRepository
@@ -485,8 +491,26 @@ class PyrusServiceDesk private constructor(
                 .addSerializationExclusionStrategy(RemoteGsonExclusionStrategy())
                 .create()
 
+        val okHttpClient = OkHttpClient.Builder()
+            .connectTimeout(30, TimeUnit.SECONDS)
+            .readTimeout(30, TimeUnit.SECONDS)
+            .writeTimeout(30, TimeUnit.SECONDS)
+            .addInterceptor { chain ->
+                val original = chain.request()
+                val requestBuilder = original.newBuilder()
+                authToken?.let { authToken ->
+                    requestBuilder.header("Authorization", authToken)
+                }
+
+                chain.proceed(requestBuilder.build())
+            }.build()
+
+        picasso = Picasso.Builder(application)
+            .downloader(OkHttp3Downloader(okHttpClient))
+            .build()
+
         val centralRepository = CentralRepository(
-            RetrofitWebRepository(appId, instanceId, fileResolver, fileManager, domain, remoteGson),
+            RetrofitWebRepository(appId, instanceId, fileResolver, fileManager, okHttpClient, domain, remoteGson),
             offlineRepository
         )
 

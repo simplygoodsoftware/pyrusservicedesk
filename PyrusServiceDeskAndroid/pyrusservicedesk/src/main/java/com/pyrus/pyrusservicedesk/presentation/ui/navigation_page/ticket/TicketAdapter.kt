@@ -181,7 +181,7 @@ internal class TicketAdapter: AdapterBase<TicketEntry>() {
         private fun setAuthorAvatarVisibility(visible: Boolean) {
             avatar.visibility = if (visible) VISIBLE else INVISIBLE
             if (visible) {
-                Picasso.get()
+                PyrusServiceDesk.get().picasso
                     .load(getAvatarUrl(getItem().comment.author.avatarId, PyrusServiceDesk.get().domain))
                     .placeholder(ConfigUtils.getSupportAvatar(itemView.context))
                     .transform(CIRCLE_TRANSFORMATION)

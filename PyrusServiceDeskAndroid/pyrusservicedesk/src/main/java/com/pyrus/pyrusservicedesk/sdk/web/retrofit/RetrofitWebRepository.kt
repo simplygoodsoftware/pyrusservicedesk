@@ -45,6 +45,7 @@ internal class RetrofitWebRepository(
     private val instanceId: String,
     private val fileResolver: FileResolver,
     private val fileManager: FileManager,
+    client: OkHttpClient,
     domain: String?,
     gson: Gson
 ) : RemoteRepository {
@@ -56,24 +57,10 @@ internal class RetrofitWebRepository(
     private val apiFlag = "AAAAAAAAAAAU"
 
     init {
-        val httpBuilder = OkHttpClient.Builder()
-                .connectTimeout(30, TimeUnit.SECONDS)
-                .readTimeout(30, TimeUnit.SECONDS)
-                .writeTimeout(30, TimeUnit.SECONDS)
-                .addInterceptor { chain ->
-                    val original = chain.request()
-                    val requestBuilder = original.newBuilder()
-                    PyrusServiceDesk.get().authToken?.let { authToken ->
-                        requestBuilder.header(AUTH_TOKEN_NAME, authToken)
-                    }
-
-                    chain.proceed(requestBuilder.build())
-                }
-
         val retrofit = Retrofit.Builder()
                 .baseUrl(getBaseUrl(domain))
                 .addConverterFactory(GsonConverterFactory.create(gson))
-                .client(httpBuilder.build())
+                .client(client)
                 .build()
 
         api = retrofit.create(ServiceDeskApi::class.java)
@@ -308,8 +295,6 @@ internal class RetrofitWebRepository(
 
     companion object {
         private val TAG = RetrofitWebRepository::class.java.simpleName
-
-        private const val AUTH_TOKEN_NAME = "Authorization"
     }
 
 }
