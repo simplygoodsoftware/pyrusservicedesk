@@ -8,8 +8,8 @@ import com.pyrus.pyrusservicedesk.log.PLog
 import com.pyrus.pyrusservicedesk.sdk.FileResolver
 import com.pyrus.pyrusservicedesk.sdk.data.Attachment
 import com.pyrus.pyrusservicedesk.sdk.data.Comment
-import com.pyrus.pyrusservicedesk.sdk.data.FileManager
 import com.pyrus.pyrusservicedesk.sdk.data.EMPTY_TICKET_ID
+import com.pyrus.pyrusservicedesk.sdk.data.FileManager
 import com.pyrus.pyrusservicedesk.sdk.data.intermediate.AddCommentResponseData
 import com.pyrus.pyrusservicedesk.sdk.data.intermediate.Comments
 import com.pyrus.pyrusservicedesk.sdk.repositories.general.GeneralRepository
@@ -45,6 +45,7 @@ internal class RetrofitWebRepository(
     private val instanceId: String,
     private val fileResolver: FileResolver,
     private val fileManager: FileManager,
+    client: OkHttpClient,
     domain: String?,
     gson: Gson
 ) : RemoteRepository {
@@ -56,15 +57,10 @@ internal class RetrofitWebRepository(
     private val apiFlag = "AAAAAAAAAAAU"
 
     init {
-        val httpBuilder = OkHttpClient.Builder()
-                .connectTimeout(30, TimeUnit.SECONDS)
-                .readTimeout(30, TimeUnit.SECONDS)
-                .writeTimeout(30, TimeUnit.SECONDS)
-
         val retrofit = Retrofit.Builder()
                 .baseUrl(getBaseUrl(domain))
                 .addConverterFactory(GsonConverterFactory.create(gson))
-                .client(httpBuilder.build())
+                .client(client)
                 .build()
 
         api = retrofit.create(ServiceDeskApi::class.java)
