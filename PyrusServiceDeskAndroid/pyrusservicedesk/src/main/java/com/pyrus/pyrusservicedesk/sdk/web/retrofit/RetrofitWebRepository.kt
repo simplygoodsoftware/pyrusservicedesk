@@ -53,6 +53,8 @@ internal class RetrofitWebRepository(
 
     private val sequentialRequests = LinkedBlockingQueue<SequentialRequest>()
 
+    private val apiFlag = "AAAAAAAAAAAU"
+
     init {
         val httpBuilder = OkHttpClient.Builder()
                 .connectTimeout(30, TimeUnit.SECONDS)
@@ -77,7 +79,7 @@ internal class RetrofitWebRepository(
         )
         return withContext<Response<Comments>>(Dispatchers.IO){
             try {
-                api.getTicketFeed(GetFeedBody(appId, getUserId(), getSecurityKey(), instanceId, getVersion(), keepUnread)).execute().run {
+                api.getTicketFeed(GetFeedBody(appId, getUserId(), getSecurityKey(), instanceId, getVersion(), keepUnread, apiFlag)).execute().run {
                     PLog.d(TAG, "getFeed, isSuccessful: $isSuccessful, body() != null: ${body() != null}")
                     when {
                         isSuccessful && body() != null -> ResponseImpl.success(body()!!)

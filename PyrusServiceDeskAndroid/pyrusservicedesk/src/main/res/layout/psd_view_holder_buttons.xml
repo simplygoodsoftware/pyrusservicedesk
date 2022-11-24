@@ -1,0 +1,87 @@
+<?xml version="1.0" encoding="utf-8"?>
+<com.google.android.flexbox.FlexboxLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/flButtons"
+    app:flexDirection="row"
+    app:flexWrap="wrap"
+    app:justifyContent="flex_end"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_marginRight="@dimen/psd_offset_default"
+    android:layout_marginEnd="@dimen/psd_offset_default"
+    android:layout_marginLeft="@dimen/psd_preview_mini_width"
+    android:layout_marginStart="@dimen/psd_preview_mini_width">
+
+    <TextView
+        android:id="@+id/btnButton1"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:background="@drawable/chat_button_bg"
+        android:textAllCaps="false"
+        android:layout_margin="@dimen/psd_comments_item_space"
+        android:padding="@dimen/psd_offset_small"
+        android:minWidth="@dimen/psd_avatar_size_default"
+        android:gravity="center"
+        android:visibility="visible" />
+
+    <TextView
+        android:id="@+id/btnButton2"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:background="@drawable/chat_button_bg"
+        android:textAllCaps="false"
+        android:layout_margin="@dimen/psd_comments_item_space"
+        android:padding="@dimen/psd_offset_small"
+        android:minWidth="@dimen/psd_avatar_size_default"
+        android:gravity="center"
+        android:visibility="visible" />
+
+    <TextView
+        android:id="@+id/btnButton3"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:background="@drawable/chat_button_bg"
+        android:textAllCaps="false"
+        android:layout_margin="@dimen/psd_comments_item_space"
+        android:padding="@dimen/psd_offset_small"
+        android:minWidth="@dimen/psd_avatar_size_default"
+        android:gravity="center"
+        android:visibility="visible" />
+
+    <TextView
+        android:id="@+id/btnButton4"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:background="@drawable/chat_button_bg"
+        android:textAllCaps="false"
+        android:layout_margin="@dimen/psd_comments_item_space"
+        android:padding="@dimen/psd_offset_small"
+        android:minWidth="@dimen/psd_avatar_size_default"
+        android:gravity="center"
+        android:visibility="visible" />
+
+    <TextView
+        android:id="@+id/btnButton5"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:background="@drawable/chat_button_bg"
+        android:textAllCaps="false"
+        android:layout_margin="@dimen/psd_comments_item_space"
+        android:padding="@dimen/psd_offset_small"
+        android:minWidth="@dimen/psd_avatar_size_default"
+        android:gravity="center"
+        android:visibility="visible" />
+
+    <TextView
+        android:id="@+id/btnButton6"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:background="@drawable/chat_button_bg"
+        android:textAllCaps="false"
+        android:layout_margin="@dimen/psd_comments_item_space"
+        android:padding="@dimen/psd_offset_small"
+        android:gravity="center"
+        android:minWidth="@dimen/psd_avatar_size_default"
+        android:visibility="visible" />
+
+</com.google.android.flexbox.FlexboxLayout>

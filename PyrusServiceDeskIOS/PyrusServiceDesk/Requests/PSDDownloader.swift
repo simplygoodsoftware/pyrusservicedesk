@@ -29,6 +29,7 @@ class PSDDownloader: NSObject{
     func load(from url: URL)
     {
         var request = URLRequest(url: url, cachePolicy: .reloadIgnoringLocalCacheData, timeoutInterval:PSDDownloader.timeout)
+        request.addCustomHeaders()
         request.httpMethod = "GET"
         if downloadsSession == nil {
             downloadsSession = createSession()

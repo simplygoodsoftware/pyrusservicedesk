@@ -6,8 +6,6 @@ enum urlType : String{
     case chats = "gettickets"
     ///Add GetTicketFeed to baseURLString. Use PSDURL(type:urlType).
     case chatFeed = "GetTicketFeed"
-    ///Add CreateTicket to baseURLString. Use PSDURL(type:urlType).
-    case createNew = "CreateTicket"
     ///Add UpdateTicketFeed to baseURLString. Use PSDURL(type:urlType).
     case updateFeed = "UpdateTicketFeed"
     ///Add UploadFile to baseURLString. Use PSDURL(type:urlType).
@@ -18,8 +16,6 @@ enum urlType : String{
     case avatar = "avatar"
     ///Add SetPushToken to baseURLString. Use PSDURL(type:urlType).
     case token = "SetPushToken"
-    ///Add DownloadFilePriview/{file_id} to baseURLString. Use PSDURL(type:urlType,ticketId:String).
-    case downloadPreview = "DownloadFilePriview"
 }
 
 struct PyrusServiceDeskAPI {
@@ -29,7 +25,7 @@ struct PyrusServiceDeskAPI {
     }
     ///Create URL for urlType in [.chats, .createNew, .upload, .chatFeed, .updateFeed, .token]
     static func PSDURL(type: urlType) -> URL {
-        let validTypes : [urlType] = [.chats, .createNew, .upload, .chatFeed, .updateFeed, .token]
+        let validTypes : [urlType] = [.chats, .upload, .chatFeed, .updateFeed, .token]
         if !(validTypes.contains(type)){
             fatalError("Bad urlType for this function, type = \(urlType.RawValue())")
         }
@@ -42,7 +38,7 @@ struct PyrusServiceDeskAPI {
         }
         var urlString: String = "\(baseURLString)" + type.rawValue
 
-        if type == .download || type == .downloadPreview{
+        if type == .download {
             if let securityKey = PyrusServiceDesk.securityKey, let customUserId = PyrusServiceDesk.customUserId {
                 let userIdEncodeed : String = customUserId.addingPercentEncoding(withAllowedCharacters: CharacterSet.rfc3986Unreserved) ?? customUserId
                 let appIdEncodeed : String = PyrusServiceDesk.clientId?.addingPercentEncoding(withAllowedCharacters: CharacterSet.rfc3986Unreserved) ?? PyrusServiceDesk.clientId ?? ""
