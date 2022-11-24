@@ -1,11 +1,3 @@
-//
-//  AttachmentFileCollectionViewCell.swift
-//  PyrusServiceDesk
-//
-//  Created by Галина  Муравьева on 20.04.2020.
-//  Copyright © 2020  Галина Муравьева. All rights reserved.
-//
-
 import Foundation
 class AttachmentFileCollectionViewCell: AttachmentCollectionViewCell {
     private static let dist : CGFloat = 8.0
