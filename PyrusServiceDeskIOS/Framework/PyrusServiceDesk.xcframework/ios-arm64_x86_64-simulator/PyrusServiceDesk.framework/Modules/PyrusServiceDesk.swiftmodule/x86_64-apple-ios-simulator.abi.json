@@ -3857,7 +3857,7 @@
           {
             "kind": "Function",
             "name": "createWith",
-            "printedName": "createWith(_:domain:loggingEnabled:)",
+            "printedName": "createWith(_:domain:loggingEnabled:authorizationToken:)",
             "children": [
               {
                 "kind": "TypeNominal",
@@ -3899,11 +3899,26 @@
                 "printedName": "Swift.Bool",
                 "hasDefaultArg": true,
                 "usr": "s:Sb"
+              },
+              {
+                "kind": "TypeNominal",
+                "name": "Optional",
+                "printedName": "Swift.String?",
+                "children": [
+                  {
+                    "kind": "TypeNominal",
+                    "name": "String",
+                    "printedName": "Swift.String",
+                    "usr": "s:SS"
+                  }
+                ],
+                "hasDefaultArg": true,
+                "usr": "s:Sq"
               }
             ],
             "declKind": "Func",
-            "usr": "c:@M@PyrusServiceDesk@objc(cs)PyrusServiceDesk(cm)createWith:domain:loggingEnabled:",
-            "mangledName": "$s16PyrusServiceDeskAAC10createWith_6domain14loggingEnabledySSSg_AFSbtFZ",
+            "usr": "c:@M@PyrusServiceDesk@objc(cs)PyrusServiceDesk(cm)createWith:domain:loggingEnabled:authorizationToken:",
+            "mangledName": "$s16PyrusServiceDeskAAC10createWith_6domain14loggingEnabled18authorizationTokenySSSg_AGSbAGtFZ",
             "moduleName": "PyrusServiceDesk",
             "static": true,
             "declAttributes": [
@@ -3917,7 +3932,7 @@
           {
             "kind": "Function",
             "name": "createWith",
-            "printedName": "createWith(_:reset:domain:loggingEnabled:)",
+            "printedName": "createWith(_:reset:domain:loggingEnabled:authorizationToken:)",
             "children": [
               {
                 "kind": "TypeNominal",
@@ -3965,11 +3980,26 @@
                 "printedName": "Swift.Bool",
                 "hasDefaultArg": true,
                 "usr": "s:Sb"
+              },
+              {
+                "kind": "TypeNominal",
+                "name": "Optional",
+                "printedName": "Swift.String?",
+                "children": [
+                  {
+                    "kind": "TypeNominal",
+                    "name": "String",
+                    "printedName": "Swift.String",
+                    "usr": "s:SS"
+                  }
+                ],
+                "hasDefaultArg": true,
+                "usr": "s:Sq"
               }
             ],
             "declKind": "Func",
-            "usr": "c:@M@PyrusServiceDesk@objc(cs)PyrusServiceDesk(cm)createWith:reset:domain:loggingEnabled:",
-            "mangledName": "$s16PyrusServiceDeskAAC10createWith_5reset6domain14loggingEnabledySSSg_SbAGSbtFZ",
+            "usr": "c:@M@PyrusServiceDesk@objc(cs)PyrusServiceDesk(cm)createWith:reset:domain:loggingEnabled:authorizationToken:",
+            "mangledName": "$s16PyrusServiceDeskAAC10createWith_5reset6domain14loggingEnabled18authorizationTokenySSSg_SbAHSbAHtFZ",
             "moduleName": "PyrusServiceDesk",
             "static": true,
             "declAttributes": [
@@ -3983,7 +4013,7 @@
           {
             "kind": "Function",
             "name": "createWith",
-            "printedName": "createWith(_:userId:securityKey:domain:loggingEnabled:)",
+            "printedName": "createWith(_:userId:securityKey:domain:loggingEnabled:authorizationToken:)",
             "children": [
               {
                 "kind": "TypeNominal",
@@ -4053,11 +4083,26 @@
                 "printedName": "Swift.Bool",
                 "hasDefaultArg": true,
                 "usr": "s:Sb"
+              },
+              {
+                "kind": "TypeNominal",
+                "name": "Optional",
+                "printedName": "Swift.String?",
+                "children": [
+                  {
+                    "kind": "TypeNominal",
+                    "name": "String",
+                    "printedName": "Swift.String",
+                    "usr": "s:SS"
+                  }
+                ],
+                "hasDefaultArg": true,
+                "usr": "s:Sq"
               }
             ],
             "declKind": "Func",
-            "usr": "c:@M@PyrusServiceDesk@objc(cs)PyrusServiceDesk(cm)createWith:userId:securityKey:domain:loggingEnabled:",
-            "mangledName": "$s16PyrusServiceDeskAAC10createWith_6userId11securityKey6domain14loggingEnabledySSSg_A3HSbtFZ",
+            "usr": "c:@M@PyrusServiceDesk@objc(cs)PyrusServiceDesk(cm)createWith:userId:securityKey:domain:loggingEnabled:authorizationToken:",
+            "mangledName": "$s16PyrusServiceDeskAAC10createWith_6userId11securityKey6domain14loggingEnabled18authorizationTokenySSSg_A3ISbAItFZ",
             "moduleName": "PyrusServiceDesk",
             "static": true,
             "declAttributes": [
@@ -4839,6 +4884,13 @@
       "offset": 166,
       "length": 33,
       "value": "\"application\/json; charset=utf-8\""
+    },
+    {
+      "filePath": "\/Users\/galinamuraveva\/pyrusservicedesk\/PyrusServiceDeskIOS\/PyrusServiceDesk\/Requests\/PSDCreateRequest.swift",
+      "kind": "StringLiteral",
+      "offset": 227,
+      "length": 15,
+      "value": "\"Authorization\""
     },
     {
       "filePath": "\/Users\/galinamuraveva\/pyrusservicedesk\/PyrusServiceDeskIOS\/PyrusServiceDesk\/Requests\/PSDGetChat.swift",
@@ -7069,49 +7121,49 @@
     {
       "filePath": "\/Users\/galinamuraveva\/pyrusservicedesk\/PyrusServiceDeskIOS\/PyrusServiceDesk\/PyrusServiceDeskCreator.swift",
       "kind": "BooleanLiteral",
-      "offset": 9277,
+      "offset": 9320,
       "length": 5,
       "value": "false"
     },
     {
       "filePath": "\/Users\/galinamuraveva\/pyrusservicedesk\/PyrusServiceDeskIOS\/PyrusServiceDesk\/PyrusServiceDeskCreator.swift",
       "kind": "BooleanLiteral",
-      "offset": 9889,
+      "offset": 9932,
       "length": 5,
       "value": "false"
     },
     {
       "filePath": "\/Users\/galinamuraveva\/pyrusservicedesk\/PyrusServiceDeskIOS\/PyrusServiceDesk\/PyrusServiceDeskCreator.swift",
       "kind": "BooleanLiteral",
-      "offset": 10702,
+      "offset": 10820,
       "length": 5,
       "value": "false"
     },
     {
       "filePath": "\/Users\/galinamuraveva\/pyrusservicedesk\/PyrusServiceDeskIOS\/PyrusServiceDesk\/PyrusServiceDeskCreator.swift",
       "kind": "BooleanLiteral",
-      "offset": 11647,
+      "offset": 11840,
       "length": 5,
       "value": "false"
     },
     {
       "filePath": "\/Users\/galinamuraveva\/pyrusservicedesk\/PyrusServiceDeskIOS\/PyrusServiceDesk\/PyrusServiceDeskCreator.swift",
       "kind": "StringLiteral",
-      "offset": 14610,
+      "offset": 14972,
       "length": 11,
       "value": "\"PSDUserId\""
     },
     {
       "filePath": "\/Users\/galinamuraveva\/pyrusservicedesk\/PyrusServiceDeskIOS\/PyrusServiceDesk\/PyrusServiceDeskCreator.swift",
       "kind": "BooleanLiteral",
-      "offset": 14676,
+      "offset": 15038,
       "length": 5,
       "value": "false"
     },
     {
       "filePath": "\/Users\/galinamuraveva\/pyrusservicedesk\/PyrusServiceDeskIOS\/PyrusServiceDesk\/PyrusServiceDeskCreator.swift",
       "kind": "StringLiteral",
-      "offset": 21435,
+      "offset": 21797,
       "length": 19,
       "value": "\"Default_User_Name\""
     },
@@ -7132,51 +7184,37 @@
     {
       "filePath": "\/Users\/galinamuraveva\/pyrusservicedesk\/PyrusServiceDeskIOS\/PyrusServiceDesk\/Requests\/URLCreator.swift",
       "kind": "StringLiteral",
-      "offset": 375,
-      "length": 14,
-      "value": "\"CreateTicket\""
-    },
-    {
-      "filePath": "\/Users\/galinamuraveva\/pyrusservicedesk\/PyrusServiceDeskIOS\/PyrusServiceDesk\/Requests\/URLCreator.swift",
-      "kind": "StringLiteral",
-      "offset": 484,
+      "offset": 380,
       "length": 18,
       "value": "\"UpdateTicketFeed\""
     },
     {
       "filePath": "\/Users\/galinamuraveva\/pyrusservicedesk\/PyrusServiceDeskIOS\/PyrusServiceDesk\/Requests\/URLCreator.swift",
       "kind": "StringLiteral",
-      "offset": 587,
+      "offset": 483,
       "length": 12,
       "value": "\"UploadFile\""
     },
     {
       "filePath": "\/Users\/galinamuraveva\/pyrusservicedesk\/PyrusServiceDeskIOS\/PyrusServiceDesk\/Requests\/URLCreator.swift",
       "kind": "StringLiteral",
-      "offset": 714,
+      "offset": 610,
       "length": 14,
       "value": "\"DownloadFile\""
     },
     {
       "filePath": "\/Users\/galinamuraveva\/pyrusservicedesk\/PyrusServiceDeskIOS\/PyrusServiceDesk\/Requests\/URLCreator.swift",
       "kind": "StringLiteral",
-      "offset": 914,
+      "offset": 810,
       "length": 8,
       "value": "\"avatar\""
     },
     {
       "filePath": "\/Users\/galinamuraveva\/pyrusservicedesk\/PyrusServiceDeskIOS\/PyrusServiceDesk\/Requests\/URLCreator.swift",
       "kind": "StringLiteral",
-      "offset": 1008,
+      "offset": 904,
       "length": 14,
       "value": "\"SetPushToken\""
-    },
-    {
-      "filePath": "\/Users\/galinamuraveva\/pyrusservicedesk\/PyrusServiceDeskIOS\/PyrusServiceDesk\/Requests\/URLCreator.swift",
-      "kind": "StringLiteral",
-      "offset": 1151,
-      "length": 21,
-      "value": "\"DownloadFilePriview\""
     },
     {
       "filePath": "\/Users\/galinamuraveva\/pyrusservicedesk\/PyrusServiceDeskIOS\/PyrusServiceDesk\/Requests\/URLCreator.swift",
@@ -7195,51 +7233,37 @@
     {
       "filePath": "\/Users\/galinamuraveva\/pyrusservicedesk\/PyrusServiceDeskIOS\/PyrusServiceDesk\/Requests\/URLCreator.swift",
       "kind": "StringLiteral",
-      "offset": 375,
-      "length": 14,
-      "value": "\"CreateTicket\""
-    },
-    {
-      "filePath": "\/Users\/galinamuraveva\/pyrusservicedesk\/PyrusServiceDeskIOS\/PyrusServiceDesk\/Requests\/URLCreator.swift",
-      "kind": "StringLiteral",
-      "offset": 484,
+      "offset": 380,
       "length": 18,
       "value": "\"UpdateTicketFeed\""
     },
     {
       "filePath": "\/Users\/galinamuraveva\/pyrusservicedesk\/PyrusServiceDeskIOS\/PyrusServiceDesk\/Requests\/URLCreator.swift",
       "kind": "StringLiteral",
-      "offset": 587,
+      "offset": 483,
       "length": 12,
       "value": "\"UploadFile\""
     },
     {
       "filePath": "\/Users\/galinamuraveva\/pyrusservicedesk\/PyrusServiceDeskIOS\/PyrusServiceDesk\/Requests\/URLCreator.swift",
       "kind": "StringLiteral",
-      "offset": 714,
+      "offset": 610,
       "length": 14,
       "value": "\"DownloadFile\""
     },
     {
       "filePath": "\/Users\/galinamuraveva\/pyrusservicedesk\/PyrusServiceDeskIOS\/PyrusServiceDesk\/Requests\/URLCreator.swift",
       "kind": "StringLiteral",
-      "offset": 914,
+      "offset": 810,
       "length": 8,
       "value": "\"avatar\""
     },
     {
       "filePath": "\/Users\/galinamuraveva\/pyrusservicedesk\/PyrusServiceDeskIOS\/PyrusServiceDesk\/Requests\/URLCreator.swift",
       "kind": "StringLiteral",
-      "offset": 1008,
+      "offset": 904,
       "length": 14,
       "value": "\"SetPushToken\""
-    },
-    {
-      "filePath": "\/Users\/galinamuraveva\/pyrusservicedesk\/PyrusServiceDeskIOS\/PyrusServiceDesk\/Requests\/URLCreator.swift",
-      "kind": "StringLiteral",
-      "offset": 1151,
-      "length": 21,
-      "value": "\"DownloadFilePriview\""
     },
     {
       "filePath": "\/Users\/galinamuraveva\/pyrusservicedesk\/PyrusServiceDeskIOS\/PyrusServiceDesk\/PSDObjects\/PSDPlaceholderMessage.swift",
