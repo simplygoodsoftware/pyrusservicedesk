@@ -3,6 +3,7 @@ import Foundation
 import MobileCoreServices
 
 let contenttype = "application/json; charset=utf-8"
+private let authTokenKey = "Authorization"
 extension URLRequest {
     /**
      Create URLRequest with RequestType that don't need any id.
@@ -26,6 +27,7 @@ extension URLRequest {
     
     private static func createUploadRequest(url: URL) -> URLRequest {
         var request = URLRequest(url: url, cachePolicy: .reloadIgnoringLocalCacheData, timeoutInterval: PSDDownloader.timeout)
+        request.addCustomHeaders()
         request.httpMethod = "POST"
         request.setValue("Keep-Alive", forHTTPHeaderField: "Connection")
         return request
@@ -38,7 +40,8 @@ extension URLRequest {
         request.httpMethod = "POST"
         request.httpBody = jsonData
         request.addValue(contenttype, forHTTPHeaderField: "content-type")
-        request.addValue("\(jsonData!.count)", forHTTPHeaderField: "Content-Length")       
+        request.addValue("\(jsonData!.count)", forHTTPHeaderField: "Content-Length")
+        request.addCustomHeaders()
         return request
     }
     private static func addStaticKeys(to JSON:[String: Any]) -> [String: Any]
@@ -57,6 +60,13 @@ extension URLRequest {
             fatalError("no client Id")
         }
         return fullJSOn
+    }
+    
+    mutating func addCustomHeaders() {
+        guard let auth = PyrusServiceDesk.authorizationToken else {
+            return
+        }
+        addValue(auth, forHTTPHeaderField: authTokenKey)
     }
 }
 
