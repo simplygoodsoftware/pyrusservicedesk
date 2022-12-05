@@ -65,3 +65,7 @@
 
 "PrepareLog"="Preparing log...";
 "SendLog"="Send library logs";
+
+"ExternalSourceWarning" = "This link leads to a %@\nDo you really want to follow the link?";
+"ShortYes" = "Yes";
+"ShortNo" = "No";

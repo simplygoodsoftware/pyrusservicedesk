@@ -327,6 +327,41 @@ extension PSDChatViewController: PSDChatTableViewDelegate {
     func restartTimer() {
         startGettingInfo()
     }
+    
+    func showLinkOpenAlert(_ linkString: String) {
+        guard
+            let url = URL(string: linkString)
+        else {
+            return
+        }
+        let message = String(format: "ExternalSourceWarning".localizedPSD(), linkString)
+        let alert = UIAlertController(
+            title: nil,
+            message: message,
+            preferredStyle: .alert)
+        alert.addAction(
+            UIAlertAction(
+                title: "ShortNo".localizedPSD(),
+                style: .cancel)
+        )
+        alert.addAction(
+            UIAlertAction(
+                title: "ShortYes".localizedPSD(),
+                style: .default,
+                handler: {
+                    _ in
+                    if #available(iOS 10.0, *) {
+                        UIApplication.shared.open(url)
+                    } else {
+                        UIApplication.shared.openURL(url)
+                    }
+                }
+            )
+        )
+        self.present(alert,
+                animated: true,
+                completion: nil)
+    }
 }
 
 extension PSDChatViewController: UIAdaptivePresentationControllerDelegate {

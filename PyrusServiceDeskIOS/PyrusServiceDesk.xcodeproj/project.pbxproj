@@ -180,6 +180,7 @@
 		4B6D4A42244E2B29007C6082 /* AttachmentCollectionViewCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4B6D4A41244E2B29007C6082 /* AttachmentCollectionViewCell.swift */; };
 		4B6E9DA3225F3B570037462F /* PSDPreviewSetter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4B6E9DA2225F3B570037462F /* PSDPreviewSetter.swift */; };
 		4B6E9DA7225F74E50037462F /* PSDDownloadView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4B6E9DA6225F74E50037462F /* PSDDownloadView.swift */; };
+		4B6EFFC0282440F6004ECA2B /* ApiSignManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4B6EFFBF282440F6004ECA2B /* ApiSignManager.swift */; };
 		4B705DFE2225820C0086C09F /* Refresh.png in Resources */ = {isa = PBXBuildFile; fileRef = 4B705DFB2225820C0086C09F /* Refresh.png */; };
 		4B705DFF2225820C0086C09F /* Refresh@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 4B705DFC2225820C0086C09F /* Refresh@2x.png */; };
 		4B705E002225820C0086C09F /* Refresh@3x.png in Resources */ = {isa = PBXBuildFile; fileRef = 4B705DFD2225820C0086C09F /* Refresh@3x.png */; };
@@ -243,6 +244,7 @@
 		4BAA214F222D60D000B8BED7 /* Dictionary+asString.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4BAA214E222D60D000B8BED7 /* Dictionary+asString.swift */; };
 		4BAA8815221BDD8C00B81B76 /* PSDProgressView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4BAA8814221BDD8C00B81B76 /* PSDProgressView.swift */; };
 		4BAA8817221C57FD00B81B76 /* View+asImage.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4BAA8816221C57FD00B81B76 /* View+asImage.swift */; };
+		4BAF0A422822B767008D5B0F /* XmlHelper.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4BAF0A412822B767008D5B0F /* XmlHelper.swift */; };
 		4BB1A2F3245B8CB800A817C1 /* dotted_line.png in Resources */ = {isa = PBXBuildFile; fileRef = 4BB1A2F0245B8CB700A817C1 /* dotted_line.png */; };
 		4BB1A2F4245B8CB800A817C1 /* dotted_line@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 4BB1A2F1245B8CB700A817C1 /* dotted_line@2x.png */; };
 		4BB1A2F5245B8CB800A817C1 /* dotted_line@3x.png in Resources */ = {isa = PBXBuildFile; fileRef = 4BB1A2F2245B8CB800A817C1 /* dotted_line@3x.png */; };
@@ -461,6 +463,7 @@
 		4B6D4A41244E2B29007C6082 /* AttachmentCollectionViewCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AttachmentCollectionViewCell.swift; sourceTree = "<group>"; };
 		4B6E9DA2225F3B570037462F /* PSDPreviewSetter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PSDPreviewSetter.swift; sourceTree = "<group>"; };
 		4B6E9DA6225F74E50037462F /* PSDDownloadView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PSDDownloadView.swift; sourceTree = "<group>"; };
+		4B6EFFBF282440F6004ECA2B /* ApiSignManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ApiSignManager.swift; sourceTree = "<group>"; };
 		4B705DFB2225820C0086C09F /* Refresh.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = Refresh.png; sourceTree = "<group>"; };
 		4B705DFC2225820C0086C09F /* Refresh@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "Refresh@2x.png"; sourceTree = "<group>"; };
 		4B705DFD2225820C0086C09F /* Refresh@3x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "Refresh@3x.png"; sourceTree = "<group>"; };
@@ -528,6 +531,7 @@
 		4BAA214E222D60D000B8BED7 /* Dictionary+asString.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Dictionary+asString.swift"; sourceTree = "<group>"; };
 		4BAA8814221BDD8C00B81B76 /* PSDProgressView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PSDProgressView.swift; sourceTree = "<group>"; };
 		4BAA8816221C57FD00B81B76 /* View+asImage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "View+asImage.swift"; sourceTree = "<group>"; };
+		4BAF0A412822B767008D5B0F /* XmlHelper.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = XmlHelper.swift; sourceTree = "<group>"; };
 		4BB1A2F0245B8CB700A817C1 /* dotted_line.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = dotted_line.png; sourceTree = "<group>"; };
 		4BB1A2F1245B8CB700A817C1 /* dotted_line@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "dotted_line@2x.png"; sourceTree = "<group>"; };
 		4BB1A2F2245B8CB800A817C1 /* dotted_line@3x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "dotted_line@3x.png"; sourceTree = "<group>"; };
@@ -740,6 +744,7 @@
 				4B64B86F224384F3003116C3 /* String+years.swift */,
 				4B17DD0423E816B1003CF4D9 /* String + uuid.swift */,
 				4B060F292732AD8C002E20A7 /* StringHelper.swift */,
+				4BAF0A412822B767008D5B0F /* XmlHelper.swift */,
 			);
 			path = String;
 			sourceTree = "<group>";
@@ -838,6 +843,7 @@
 				4B66011C223948CE00AA45E6 /* PyrusServiceDeskCustomization.swift */,
 				4B873BB3224B7EE600A96E93 /* PSDNewReplySubscriber.swift */,
 				4BD29A082464B72B000CC420 /* OnStopCallback.swift */,
+				4B6EFFBF282440F6004ECA2B /* ApiSignManager.swift */,
 				4BB6CDC625597E56004C680A /* Logs */,
 				4B2F47AB224A22FF00E3B23A /* PSDChooser.swift */,
 				7B1E8D57250665F800C1E5AC /* PSDInfoView.swift */,
@@ -1445,6 +1451,7 @@
 				4B90E514221D55B800A18245 /* SupportUserImage.swift in Sources */,
 				4B9B0BB82266071100090DB5 /* PSDProgressDownloadView.swift in Sources */,
 				4B81B6FF2220275700EE1253 /* PSDMessageStateButton.swift in Sources */,
+				4BAF0A422822B767008D5B0F /* XmlHelper.swift in Sources */,
 				4B2F47AC224A22FF00E3B23A /* PSDChooser.swift in Sources */,
 				4B90E517221DB21000A18245 /* PSDNoConnectionView.swift in Sources */,
 				4B9FAFA125542FB700FCE51D /* UnreadMessageManager.swift in Sources */,
@@ -1504,6 +1511,7 @@
 				4B6E9DA7225F74E50037462F /* PSDDownloadView.swift in Sources */,
 				4B64B8742243D402003116C3 /* CharacterSet+urlEncode.swift in Sources */,
 				4B2E650E220DE1C300E70A2F /* PSDMessage.swift in Sources */,
+				4B6EFFC0282440F6004ECA2B /* ApiSignManager.swift in Sources */,
 				4B88C6F9221467FF00BDB304 /* PSDChat.swift in Sources */,
 				4BC210D822674A5600CFE255 /* PSDNavigationController.swift in Sources */,
 				4B1CD390230BE58000C06F71 /* applicationColors.swift in Sources */,

@@ -1,11 +1,3 @@
-//
-//  PSDRowMessage.swift
-//  PyrusServiceDesk
-//
-//  Created by Галина  Муравьева on 23.04.2020.
-//  Copyright © 2020  Галина Муравьева. All rights reserved.
-//
-
 import Foundation
 ///The messages to feed in tableView. One PSDMessage can has several PSDRowMessage.
 class PSDRowMessage: NSObject {
@@ -14,9 +6,12 @@ class PSDRowMessage: NSObject {
     var rating : Int?
     var attachment: PSDAttachment?
     var message : PSDMessage
+    var attributedText: NSAttributedString?
     init(message: PSDMessage, attachment: PSDAttachment?){
         self.message = message
         self.text = message.text
+        let color: UIColor = message.owner.personId == PyrusServiceDesk.userId ? CustomizationHelper.userMassageTextColor : CustomizationHelper.supportMassageTextColor
+        attributedText = (text as NSString).parseXMLToAttributedString(fontColor: color)
         self.attachment = attachment
         self.rating = message.rating
         super.init()
