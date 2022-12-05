@@ -5851,21 +5851,21 @@
     {
       "filePath": "\/Users\/galinamuraveva\/pyrusservicedesk\/PyrusServiceDeskIOS\/PyrusServiceDesk\/Helpers\/String\/XmlHelper.swift",
       "kind": "StringLiteral",
-      "offset": 10413,
+      "offset": 10487,
       "length": 51,
       "value": "\"[A-Z0-9a-z._%+-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,64}\""
     },
     {
       "filePath": "\/Users\/galinamuraveva\/pyrusservicedesk\/PyrusServiceDeskIOS\/PyrusServiceDesk\/Helpers\/String\/XmlHelper.swift",
       "kind": "StringLiteral",
-      "offset": 13555,
+      "offset": 13629,
       "length": 9,
       "value": "\"<[^>]*>\""
     },
     {
       "filePath": "\/Users\/galinamuraveva\/pyrusservicedesk\/PyrusServiceDeskIOS\/PyrusServiceDesk\/Helpers\/String\/XmlHelper.swift",
       "kind": "StringLiteral",
-      "offset": 13683,
+      "offset": 13757,
       "length": 16,
       "value": "\"+0(123)456-789\""
     },
