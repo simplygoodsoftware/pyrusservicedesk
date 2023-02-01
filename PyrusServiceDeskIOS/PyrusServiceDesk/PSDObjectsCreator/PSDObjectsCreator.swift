@@ -16,6 +16,13 @@ struct PSDObjectsCreator {
         let message = PSDObjectsCreator.createMessage(CustomizationHelper.welcomeMessage, attachments:nil, user: PSDUser(personId: "", name: "", type: .support, imagePath: ""))
         return PSDRowMessage(message: message, attachment: nil)
     }
+    
+    static func createRatingMessage(_ text: String) -> PSDRowMessage {
+        let message = PSDObjectsCreator.createMessage(text, attachments:nil, user: PSDUser(personId: "", name: "", type: .support, imagePath: ""))
+        message.isRatingMessage = true
+        return PSDRowMessage(message: message, attachment: nil)
+    }
+    
     static func createAttachment(_ data: Data, _ url: URL?) -> PSDAttachment {
         return PSDAttachment(localPath: url?.absoluteString, data: data, serverIdentifer:nil)
     }
