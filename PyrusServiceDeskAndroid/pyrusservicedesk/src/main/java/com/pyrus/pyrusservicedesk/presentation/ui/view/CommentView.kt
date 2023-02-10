@@ -32,11 +32,11 @@ import androidx.appcompat.widget.AppCompatImageView
 import androidx.appcompat.widget.AppCompatTextView
 import androidx.core.app.ActivityCompat
 import androidx.core.text.util.LinkifyCompat
-import androidx.exifinterface.media.ExifInterface
 import com.pyrus.pyrusservicedesk.PyrusServiceDesk
 import com.pyrus.pyrusservicedesk.R
 import com.pyrus.pyrusservicedesk.presentation.ui.view.OutlineImageView.Companion.EDGE_RIGHT
 import com.pyrus.pyrusservicedesk.utils.*
+import com.pyrus.pyrusservicedesk.utils.exif.SelfExifInterface
 import com.squareup.picasso.Picasso
 import com.squareup.picasso.Target
 import kotlinx.android.synthetic.main.psd_comment.view.*
@@ -599,7 +599,7 @@ internal class CommentView @JvmOverloads constructor(
 
         val bitmap = try {
             val exif = context.contentResolver.openInputStream(previewUri)?.use {
-                ExifInterface(it)
+                SelfExifInterface(it)
             }
             val source = exif?.thumbnailBitmap
                 ?: BitmapFactory.decodeStream(context.contentResolver.openInputStream(previewUri))

@@ -192,7 +192,7 @@ internal class RetrofitWebRepository(
             if (cament.hasAttachments()) {
                 val newAttachments =
                     try {
-                        cament.attachments!!.upload(uploadFileHooks)
+                        uploadAttachments(cament.attachments!!, uploadFileHooks)
                     } catch (ex: Exception) {
                         sequentialRequests.poll()
                         return@withContext ResponseImpl.failure(ApiCallError(ex.message ?: "Error while uploading files"))
@@ -237,35 +237,31 @@ internal class RetrofitWebRepository(
     }
 
     @Throws(Exception::class)
-    private suspend fun List<Attachment>.upload(uploadFileHooks: UploadFileHooks?): List<Attachment> {
-        val uploadResponses = fold(ArrayList<UploadFileResponse>(size))
-        { responses, attachment ->
-            if (attachment.localUri == null)
-                throw Exception()
-            with(fileResolver.getUploadFileData(attachment.localUri)) {
-                when (this) {
-                    null -> throw Exception()
-                    else -> responses.add(
-                        uploadFile(
-                            UploadFileRequest(
-                                this,
-                                uploadFileHooks)
-                        )
-                    )
-                }
-            }
-            responses
+    private suspend fun uploadAttachments(
+        attachments: List<Attachment>,
+        uploadFileHooks: UploadFileHooks?
+    ): List<Attachment> {
+        val uploadResponses = ArrayList<UploadFileResponse>(attachments.size)
+
+        for (attachment in attachments) {
+            val localUri = attachment.localUri ?: throw Exception()
+            val uploadData = fileResolver.getUploadFileData(localUri) ?: throw Exception()
+            uploadResponses += uploadFile(UploadFileRequest(uploadData, uploadFileHooks))
         }
-        if(uploadFileHooks?.isCancelled == true)
+        if(uploadFileHooks?.isCancelled == true) {
             throw Exception()
+        }
         val newAttachments = mutableListOf<Attachment>()
-        uploadResponses.forEachIndexed { index, uploadFileResponse ->
+        for (i in uploadResponses.indices) {
+            val response = uploadResponses[i]
+            val oldAttachment = attachments[i]
 
-            if (uploadFileResponse.responseError != null || uploadFileResponse.result == null)
+            if (response.responseError != null || response.result == null) {
                 throw Exception()
+            }
 
-            newAttachments.add(get(index).toRemoteAttachment(uploadFileResponse.result.guid))
-            fileManager.removeFile(get(index).localUri)
+            newAttachments.add(oldAttachment.toRemoteAttachment(response.result.guid))
+            fileManager.removeFile(oldAttachment.localUri)
         }
         return newAttachments
     }
