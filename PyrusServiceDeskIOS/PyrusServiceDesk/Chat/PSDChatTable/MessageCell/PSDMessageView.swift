@@ -27,7 +27,6 @@ class PSDMessageView: PSDView{
         
     }
     private func recolorWithTextColor(_ color: UIColor) {
-        messageTextView.textColor = color
         attachmentView?.color = color
         separatorView.tintColor = color.withAlphaComponent(PSDMessageView.separatorAlpha)
     }
@@ -38,7 +37,7 @@ class PSDMessageView: PSDView{
     private static let separatorAlpha :CGFloat = 0.8
     func draw(message:PSDRowMessage)
     {
-        messageTextView.text = message.text
+        messageTextView.attributedText = message.attributedText
         attachmentView?.removeFromSuperview()
         placeholderImageView.isHidden = message.message as? PSDPlaceholderMessage == nil
         placeholderBottomConstraint?.isActive = message.message as? PSDPlaceholderMessage != nil
@@ -202,7 +201,7 @@ class PSDMessageView: PSDView{
         return CGSize.zero
     }
 }
-private extension UIFont {
+extension UIFont {
     static let ratingLabel = CustomizationHelper.systemFont(ofSize: 40)
     static let messageTextView = CustomizationHelper.systemFont(ofSize: 18.0)
 }

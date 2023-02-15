@@ -26,7 +26,7 @@ struct PSDGetChat {
                 topViewController = UIApplication.topViewController()
             }
         }
-        let parameters = [KEEP_UNREAD_RATING_KEY: keepUnread]
+        let parameters = [KEEP_UNREAD_RATING_KEY: keepUnread, "api_sign":  PyrusServiceDesk.apiSign()] as [String : Any]
         let request = URLRequest.createRequest(type: .chatFeed, parameters: parameters)
     
         let localId = UUID().uuidString
