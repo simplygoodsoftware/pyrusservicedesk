@@ -1,5 +1,5 @@
 // swift-interface-format-version: 1.0
-// swift-compiler-version: Apple Swift version 5.7.1 (swiftlang-5.7.1.135.3 clang-1400.0.29.51)
+// swift-compiler-version: Apple Swift version 5.7 (swiftlang-5.7.0.127.4 clang-1400.0.29.50)
 // swift-module-flags: -target x86_64-apple-ios9.0-simulator -enable-objc-interop -enable-library-evolution -swift-version 5 -enforce-exclusivity=checked -O -module-name PyrusServiceDesk
 // swift-module-flags-ignorable: -enable-bare-slash-regex
 import AVFoundation
@@ -22,56 +22,56 @@ import zlib
   }
   @_inheritsConvenienceInitializers @objc(ServiceDeskConfigurationBuilder) public class Builder : ObjectiveC.NSObject {
     @discardableResult
-    @objc public func setChatTitle(_ chatTitle: Swift.String?) -> ServiceDeskConfiguration.Builder
+    @objc public func setChatTitle(_ chatTitle: Swift.String?) -> PyrusServiceDesk.ServiceDeskConfiguration.Builder
     @discardableResult
-    @objc public func setThemeColor(_ themeColor: UIKit.UIColor?) -> ServiceDeskConfiguration.Builder
+    @objc public func setThemeColor(_ themeColor: UIKit.UIColor?) -> PyrusServiceDesk.ServiceDeskConfiguration.Builder
     @discardableResult
-    @objc public func setWelcomeMessage(_ welcomeMessage: Swift.String?) -> ServiceDeskConfiguration.Builder
+    @objc public func setWelcomeMessage(_ welcomeMessage: Swift.String?) -> PyrusServiceDesk.ServiceDeskConfiguration.Builder
     @discardableResult
-    @objc public func setAvatarForSupport(_ avatarForSupport: UIKit.UIImage?) -> ServiceDeskConfiguration.Builder
+    @objc public func setAvatarForSupport(_ avatarForSupport: UIKit.UIImage?) -> PyrusServiceDesk.ServiceDeskConfiguration.Builder
     @discardableResult
-    @objc public func setUserName(_ userName: Swift.String?) -> ServiceDeskConfiguration.Builder
+    @objc public func setUserName(_ userName: Swift.String?) -> PyrusServiceDesk.ServiceDeskConfiguration.Builder
     @discardableResult
-    @objc public func setChatTitleView(_ chatTitleView: UIKit.UIView?) -> ServiceDeskConfiguration.Builder
+    @objc public func setChatTitleView(_ chatTitleView: UIKit.UIView?) -> PyrusServiceDesk.ServiceDeskConfiguration.Builder
     @discardableResult
-    @objc public func setCustomRightBarButtonItem(_ customRightBarButtonItem: UIKit.UIBarButtonItem?) -> ServiceDeskConfiguration.Builder
+    @objc public func setCustomRightBarButtonItem(_ customRightBarButtonItem: UIKit.UIBarButtonItem?) -> PyrusServiceDesk.ServiceDeskConfiguration.Builder
     @discardableResult
-    @objc public func setCustomLeftBarButtonItem(_ customLeftBarButtonItem: UIKit.UIBarButtonItem?) -> ServiceDeskConfiguration.Builder
+    @objc public func setCustomLeftBarButtonItem(_ customLeftBarButtonItem: UIKit.UIBarButtonItem?) -> PyrusServiceDesk.ServiceDeskConfiguration.Builder
     @discardableResult
-    @objc public func setInfoView(_ infoView: PSDInfoView?) -> ServiceDeskConfiguration.Builder
+    @objc public func setInfoView(_ infoView: PyrusServiceDesk.PSDInfoView?) -> PyrusServiceDesk.ServiceDeskConfiguration.Builder
     @discardableResult
-    @objc(setStatusBarStyle:darkBarStyle:) public func setStatusBarStyle(_ barStyle: UIKit.UIStatusBarStyle, _ darkBarStyle: UIKit.UIStatusBarStyle) -> ServiceDeskConfiguration.Builder
+    @objc(setStatusBarStyle:darkBarStyle:) public func setStatusBarStyle(_ barStyle: UIKit.UIStatusBarStyle, _ darkBarStyle: UIKit.UIStatusBarStyle) -> PyrusServiceDesk.ServiceDeskConfiguration.Builder
     @discardableResult
-    @objc(setKeyboardAppearance:darkKeyboardAppearance:) public func setKeyboardAppearance(_ keyboardAppearance: UIKit.UIKeyboardAppearance, _ darkKeyboardAppearance: UIKit.UIKeyboardAppearance) -> ServiceDeskConfiguration.Builder
+    @objc(setKeyboardAppearance:darkKeyboardAppearance:) public func setKeyboardAppearance(_ keyboardAppearance: UIKit.UIKeyboardAppearance, _ darkKeyboardAppearance: UIKit.UIKeyboardAppearance) -> PyrusServiceDesk.ServiceDeskConfiguration.Builder
     @discardableResult
-    @objc public func setKeyboardColor(_ color: UIKit.UIColor) -> ServiceDeskConfiguration.Builder
+    @objc public func setKeyboardColor(_ color: UIKit.UIColor) -> PyrusServiceDesk.ServiceDeskConfiguration.Builder
     @discardableResult
-    @objc public func setFontName(_ fontName: Swift.String?) -> ServiceDeskConfiguration.Builder
+    @objc public func setFontName(_ fontName: Swift.String?) -> PyrusServiceDesk.ServiceDeskConfiguration.Builder
     @discardableResult
-    @objc public func setUserTextColor(_ color: UIKit.UIColor?) -> ServiceDeskConfiguration.Builder
+    @objc public func setUserTextColor(_ color: UIKit.UIColor?) -> PyrusServiceDesk.ServiceDeskConfiguration.Builder
     @discardableResult
-    @objc public func setUserMessageBackgroundColor(_ color: UIKit.UIColor?) -> ServiceDeskConfiguration.Builder
+    @objc public func setUserMessageBackgroundColor(_ color: UIKit.UIColor?) -> PyrusServiceDesk.ServiceDeskConfiguration.Builder
     @discardableResult
-    @objc public func setSupportTextColor(_ color: UIKit.UIColor?) -> ServiceDeskConfiguration.Builder
+    @objc public func setSupportTextColor(_ color: UIKit.UIColor?) -> PyrusServiceDesk.ServiceDeskConfiguration.Builder
     @discardableResult
-    @objc public func setSupportMessageBackgroundColor(_ color: UIKit.UIColor?) -> ServiceDeskConfiguration.Builder
+    @objc public func setSupportMessageBackgroundColor(_ color: UIKit.UIColor?) -> PyrusServiceDesk.ServiceDeskConfiguration.Builder
     @discardableResult
-    @objc public func setChatTitleColor(_ color: UIKit.UIColor?) -> ServiceDeskConfiguration.Builder
+    @objc public func setChatTitleColor(_ color: UIKit.UIColor?) -> PyrusServiceDesk.ServiceDeskConfiguration.Builder
     @discardableResult
-    @objc(setToolbarStyle:darkBarStyle:) public func setToolbarStyle(_ barStyle: UIKit.UIBarStyle, _ darkBarStyle: UIKit.UIBarStyle) -> ServiceDeskConfiguration.Builder
+    @objc(setToolbarStyle:darkBarStyle:) public func setToolbarStyle(_ barStyle: UIKit.UIBarStyle, _ darkBarStyle: UIKit.UIBarStyle) -> PyrusServiceDesk.ServiceDeskConfiguration.Builder
     @discardableResult
-    @objc public func setToolbarColor(_ color: UIKit.UIColor?) -> ServiceDeskConfiguration.Builder
+    @objc public func setToolbarColor(_ color: UIKit.UIColor?) -> PyrusServiceDesk.ServiceDeskConfiguration.Builder
     @discardableResult
-    @objc public func setToolbarButtonColor(_ color: UIKit.UIColor?) -> ServiceDeskConfiguration.Builder
+    @objc public func setToolbarButtonColor(_ color: UIKit.UIColor?) -> PyrusServiceDesk.ServiceDeskConfiguration.Builder
     @discardableResult
-    @objc public func setBackgroundColor(_ color: UIKit.UIColor?) -> ServiceDeskConfiguration.Builder
+    @objc public func setBackgroundColor(_ color: UIKit.UIColor?) -> PyrusServiceDesk.ServiceDeskConfiguration.Builder
     @discardableResult
-    @objc public func setAttachmentMenuTextColor(_ color: UIKit.UIColor?) -> ServiceDeskConfiguration.Builder
+    @objc public func setAttachmentMenuTextColor(_ color: UIKit.UIColor?) -> PyrusServiceDesk.ServiceDeskConfiguration.Builder
     @discardableResult
-    @objc public func setAttachmentMenuButtonColor(_ color: UIKit.UIColor?) -> ServiceDeskConfiguration.Builder
+    @objc public func setAttachmentMenuButtonColor(_ color: UIKit.UIColor?) -> PyrusServiceDesk.ServiceDeskConfiguration.Builder
     @discardableResult
-    @objc public func setSendButtonColor(_ color: UIKit.UIColor?) -> ServiceDeskConfiguration.Builder
-    @objc public func build() -> ServiceDeskConfiguration
+    @objc public func setSendButtonColor(_ color: UIKit.UIColor?) -> PyrusServiceDesk.ServiceDeskConfiguration.Builder
+    @objc public func build() -> PyrusServiceDesk.ServiceDeskConfiguration
     @objc override dynamic public init()
     @objc deinit
   }
@@ -83,7 +83,7 @@ public enum HorizontalAlignment {
   case leading
   case trailing
   case justified
-  public static func == (a: HorizontalAlignment, b: HorizontalAlignment) -> Swift.Bool
+  public static func == (a: PyrusServiceDesk.HorizontalAlignment, b: PyrusServiceDesk.HorizontalAlignment) -> Swift.Bool
   public func hash(into hasher: inout Swift.Hasher)
   public var hashValue: Swift.Int {
     get
@@ -93,7 +93,7 @@ public enum VerticalAlignment {
   case top
   case center
   case bottom
-  public static func == (a: VerticalAlignment, b: VerticalAlignment) -> Swift.Bool
+  public static func == (a: PyrusServiceDesk.VerticalAlignment, b: PyrusServiceDesk.VerticalAlignment) -> Swift.Bool
   public func hash(into hasher: inout Swift.Hasher)
   public var hashValue: Swift.Int {
     get
@@ -104,7 +104,7 @@ public enum VerticalAlignment {
 }
 @objc public protocol FileChooser {
   @objc var label: Swift.String { get set }
-  @objc weak var chooserDelegate: FileChooserDelegate? { get set }
+  @objc weak var chooserDelegate: PyrusServiceDesk.FileChooserDelegate? { get set }
 }
 @objc public protocol FileChooserDelegate {
   @objc func didEndWithSuccess(_ data: Foundation.Data?, url: Foundation.URL?)
@@ -126,29 +126,29 @@ public enum VerticalAlignment {
   public static var PSD_CLOSED_NOTIFICATION_NAME: Swift.String
   public static var trustedUrls: [Swift.String]?
   @objc public static func setPushToken(_ token: Swift.String?, completion: @escaping (Swift.Error?) -> Swift.Void)
-  @objc public static func start(on viewController: UIKit.UIViewController, onStopCallback: OnStopCallback? = nil)
-  @objc public static func start(on viewController: UIKit.UIViewController, configuration: ServiceDeskConfiguration?, onStopCallback: OnStopCallback? = nil)
-  @objc public static func start(on viewController: UIKit.UIViewController, configuration: ServiceDeskConfiguration?, completion: (() -> Swift.Void)? = nil, onStopCallback: OnStopCallback? = nil)
-  @objc public static func start(with configuration: ServiceDeskConfiguration?) -> UIKit.UINavigationController?
+  @objc public static func start(on viewController: UIKit.UIViewController, onStopCallback: PyrusServiceDesk.OnStopCallback? = nil)
+  @objc public static func start(on viewController: UIKit.UIViewController, configuration: PyrusServiceDesk.ServiceDeskConfiguration?, onStopCallback: PyrusServiceDesk.OnStopCallback? = nil)
+  @objc public static func start(on viewController: UIKit.UIViewController, configuration: PyrusServiceDesk.ServiceDeskConfiguration?, completion: (() -> Swift.Void)? = nil, onStopCallback: PyrusServiceDesk.OnStopCallback? = nil)
+  @objc public static func start(with configuration: PyrusServiceDesk.ServiceDeskConfiguration?) -> UIKit.UINavigationController?
   @objc public static func stop()
   @objc public static var onAuthorizationFailed: (() -> Swift.Void)?
-  @objc public static func subscribeToReplies(_ subscriber: NewReplySubscriber?)
-  @objc public static func unsubscribeFromReplies(_ subscriber: NewReplySubscriber?)
-  @objc public static func subscribeToGogEvents(_ subscriber: LogEvents)
+  @objc public static func subscribeToReplies(_ subscriber: PyrusServiceDesk.NewReplySubscriber?)
+  @objc public static func unsubscribeFromReplies(_ subscriber: PyrusServiceDesk.NewReplySubscriber?)
+  @objc public static func subscribeToGogEvents(_ subscriber: PyrusServiceDesk.LogEvents)
   @objc public static func createWith(_ clientId: Swift.String?, domain: Swift.String? = nil, loggingEnabled: Swift.Bool = false)
   @objc public static func createWith(_ clientId: Swift.String?, reset: Swift.Bool, domain: Swift.String? = nil, loggingEnabled: Swift.Bool = false)
   @objc public static func createWith(_ clientId: Swift.String?, userId: Swift.String?, securityKey: Swift.String?, domain: Swift.String? = nil, loggingEnabled: Swift.Bool = false)
   @objc public static func refresh(onError: ((Swift.Error?) -> Swift.Void)? = nil)
   @objc public static func refreshFromPush(messageId: Swift.Int)
   @objc public static func present(_ viewController: UIKit.UIViewController, animated: Swift.Bool, completion: (() -> Swift.Void)?)
-  @objc public static func registerFileChooser(_ chooser: (UIKit.UIViewController & FileChooser)?)
+  @objc public static func registerFileChooser(_ chooser: (UIKit.UIViewController & PyrusServiceDesk.FileChooser)?)
   @objc override dynamic public init()
   @objc deinit
 }
-extension PyrusServiceDesk {
+extension PyrusServiceDesk.PyrusServiceDesk {
   @objc public static func apiSign() -> Swift.String
 }
-extension HorizontalAlignment : Swift.Equatable {}
-extension HorizontalAlignment : Swift.Hashable {}
-extension VerticalAlignment : Swift.Equatable {}
-extension VerticalAlignment : Swift.Hashable {}
+extension PyrusServiceDesk.HorizontalAlignment : Swift.Equatable {}
+extension PyrusServiceDesk.HorizontalAlignment : Swift.Hashable {}
+extension PyrusServiceDesk.VerticalAlignment : Swift.Equatable {}
+extension PyrusServiceDesk.VerticalAlignment : Swift.Hashable {}
