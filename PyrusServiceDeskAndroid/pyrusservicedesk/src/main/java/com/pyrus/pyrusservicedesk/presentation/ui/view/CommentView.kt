@@ -2,6 +2,7 @@ package com.pyrus.pyrusservicedesk.presentation.ui.view
 
 import android.animation.Animator
 import android.animation.ObjectAnimator
+import android.app.Activity
 import android.content.Context
 import android.content.Intent
 import android.graphics.Bitmap
@@ -12,8 +13,7 @@ import android.graphics.drawable.AnimationDrawable
 import android.graphics.drawable.Drawable
 import android.graphics.drawable.LayerDrawable
 import android.net.Uri
-import android.text.SpannableStringBuilder
-import android.text.TextPaint
+import android.text.*
 import android.text.method.LinkMovementMethod
 import android.text.style.ClickableSpan
 import android.text.util.Linkify
@@ -26,12 +26,14 @@ import android.widget.FrameLayout
 import android.widget.ImageView
 import android.widget.LinearLayout
 import androidx.annotation.ColorInt
+import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.content.res.AppCompatResources
 import androidx.appcompat.widget.AppCompatImageView
 import androidx.appcompat.widget.AppCompatTextView
 import androidx.core.app.ActivityCompat
 import androidx.core.text.util.LinkifyCompat
 import androidx.exifinterface.media.ExifInterface
+import com.pyrus.pyrusservicedesk.PyrusServiceDesk
 import com.pyrus.pyrusservicedesk.R
 import com.pyrus.pyrusservicedesk.presentation.ui.view.OutlineImageView.Companion.EDGE_RIGHT
 import com.pyrus.pyrusservicedesk.utils.*
@@ -297,19 +299,113 @@ internal class CommentView @JvmOverloads constructor(
         }
     }
 
-    override fun onDetachedFromWindow() {
-        clearCurrentPreviewRequest()
-        super.onDetachedFromWindow()
-    }
-
     /**
      * Assigns [text] of the comments.
      * Works with [ContentType.Text].
      */
     fun setCommentText(text: String) {
-        comment_text.text = text
+        val filteredText = text.replace("<br>", "\n").replace(Regex("\\n?<button>(.*?)</button>|\\n *?$|^ *?\\n"), "")
+        comment_text.text = replaceLinkTagsWithSpans(filteredText)
         LinkifyCompat.addLinks(comment_text, Linkify.WEB_URLS or Linkify.PHONE_NUMBERS)
         addDeepLinks(comment_text)
+        comment_text.movementMethod = LinkMovementMethod.getInstance()
+    }
+
+    private fun replaceLinkTagsWithSpans(text: CharSequence): CharSequence {
+        val ranges = mutableListOf<Triple<String, String, IntRange>>()
+
+        var offset = 0
+
+        val res = text.replace(Regex("<a href=\"(.*?)\">(.*?)</a>")) { matchResult ->
+            if (matchResult.groups.size < 3 || matchResult.groups[1] == null || matchResult.groups[2] == null) {
+                return@replace matchResult.value
+            }
+            val link = matchResult.groups[1]!!.value
+            val word = matchResult.groups[2]!!.value
+
+            val visibleStart = matchResult.groups[2]!!.range.first - (matchResult.groups[2]!!.range.first - matchResult.range.first) - offset
+            val visibleLength = matchResult.groups[2]!!.range.last - matchResult.groups[2]!!.range.first
+            val realRange = visibleStart..visibleStart + visibleLength + 1
+
+            ranges.add(Triple(link, word, realRange))
+
+            offset += (matchResult.range.last - matchResult.range.first) - visibleLength
+
+            matchResult.groups[2]!!.value
+        }
+
+        val ssb = SpannableStringBuilder(res)
+
+        ranges.forEach { span ->
+            ssb.setSpan(
+                createClickableSpan(span.first, span.second),
+                span.third.first,
+                span.third.last,
+                Spannable.SPAN_INCLUSIVE_INCLUSIVE
+            )
+        }
+
+        return ssb
+    }
+
+    fun isLinkSafe(url: String, text: String?): Boolean {
+        val urlWithoutProtocol = url
+            .removePrefix("https://")
+            .removePrefix("http://")
+            .removeSuffix("/")
+
+        return text == url
+                || ConfigUtils.getTrustedUrls()?.any { urlWithoutProtocol.startsWith(it) } == true
+                || text == null
+    }
+
+    private fun createClickableSpan(url: String, text: String? = null): ClickableSpan {
+        return object : ClickableSpan() {
+
+            override fun updateDrawState(ds: TextPaint) {
+                super.updateDrawState(ds)
+                ds.isUnderlineText = true
+                ds.color = ConfigUtils.getAccentColor(context)
+            }
+
+            override fun onClick(widget: View) {
+                if (isLinkSafe(url, text)) {
+                    try {
+                        context.startActivity(Intent(Intent.ACTION_VIEW).apply { data = Uri.parse(url) })
+                    }
+                    catch (exception: Exception) {
+                        exception.printStackTrace()
+                    }
+                }
+                else {
+                    showLinkDialog(context as Activity, url) {
+                        try {
+                            context.startActivity(Intent(Intent.ACTION_VIEW).apply { data = Uri.parse(url) })
+                        }
+                        catch (exception: Exception) {
+                            exception.printStackTrace()
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    private fun showLinkDialog(context: Activity, url: String, onClick: ()-> Unit) {
+        val message = SpannableStringBuilder(context.getString(R.string.link_warning, url))
+        val range = Regex(url).find(message)?.range
+        range?.let {
+            if (range.first != -1 && range.last != -1 && range.last > range.first) {
+                message.setSpan(createClickableSpan(url), range.first, range.last + 1, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE)
+            }
+        }
+
+        AlertDialog.Builder(context)
+            .setPositiveButton(R.string.psd_open) { _, _ -> onClick.invoke() }
+            .setNegativeButton(android.R.string.cancel) { _, _ -> }
+            .setMessage(message)
+            .create()
+            .show()
     }
 
     private fun addDeepLinks(textView: AppCompatTextView) {
@@ -318,7 +414,6 @@ internal class CommentView @JvmOverloads constructor(
 
         var anyFound = false
         while (matcher.find()) {
-
             val group = matcher.group(1)
             if (group == "http" || group == "https") {
                 continue
@@ -326,30 +421,7 @@ internal class CommentView @JvmOverloads constructor(
 
             anyFound = true
 
-            val deepLink = matcher.group()
-
-            val clickableSpan = object : ClickableSpan() {
-
-                override fun updateDrawState(ds: TextPaint) {
-                    super.updateDrawState(ds)
-                    ds.isUnderlineText = true
-                }
-
-                override fun onClick(widget: View) {
-
-                    try {
-                        context.startActivity(
-                            Intent(Intent.ACTION_VIEW).apply {
-                                data = Uri.parse(deepLink)
-                            }
-                        )
-                    }
-                    catch (exception: Exception) {
-                        exception.printStackTrace()
-                    }
-                }
-
-            }
+            val clickableSpan = createClickableSpan(matcher.group())
 
             ssb.setSpan(clickableSpan, matcher.start(), matcher.end(), 0)
         }
@@ -503,7 +575,7 @@ internal class CommentView @JvmOverloads constructor(
         clearCurrentPreviewRequest()
         recentPicassoTarget = picassoTarget
         loadPreviewRunnable = Runnable {
-            Picasso.get().load(previewUri).into(picassoTarget)
+            PyrusServiceDesk.get().picasso.load(previewUri).into(picassoTarget)
         }
         postDelayed(loadPreviewRunnable, delayMs)
     }
@@ -513,7 +585,7 @@ internal class CommentView @JvmOverloads constructor(
             removeCallbacks(it)
         }
         recentPicassoTarget?.let {
-            Picasso.get().cancelRequest(it)
+            PyrusServiceDesk.get().picasso.cancelRequest(it)
         }
     }
 
@@ -531,6 +603,12 @@ internal class CommentView @JvmOverloads constructor(
             }
             val source = exif?.thumbnailBitmap
                 ?: BitmapFactory.decodeStream(context.contentResolver.openInputStream(previewUri))
+
+            val maxByteCount = 50e6 // 50 mb
+            if (source.byteCount >= maxByteCount) {
+                onFailed?.invoke()
+                return
+            }
             with(source) {
                 exif?.let {
                     this.rotate(getImageRotation(it).toFloat())

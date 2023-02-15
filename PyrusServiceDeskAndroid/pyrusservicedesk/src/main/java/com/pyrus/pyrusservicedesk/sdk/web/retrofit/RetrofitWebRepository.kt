@@ -8,8 +8,8 @@ import com.pyrus.pyrusservicedesk.log.PLog
 import com.pyrus.pyrusservicedesk.sdk.FileResolver
 import com.pyrus.pyrusservicedesk.sdk.data.Attachment
 import com.pyrus.pyrusservicedesk.sdk.data.Comment
-import com.pyrus.pyrusservicedesk.sdk.data.FileManager
 import com.pyrus.pyrusservicedesk.sdk.data.EMPTY_TICKET_ID
+import com.pyrus.pyrusservicedesk.sdk.data.FileManager
 import com.pyrus.pyrusservicedesk.sdk.data.intermediate.AddCommentResponseData
 import com.pyrus.pyrusservicedesk.sdk.data.intermediate.Comments
 import com.pyrus.pyrusservicedesk.sdk.repositories.general.GeneralRepository
@@ -45,6 +45,7 @@ internal class RetrofitWebRepository(
     private val instanceId: String,
     private val fileResolver: FileResolver,
     private val fileManager: FileManager,
+    client: OkHttpClient,
     domain: String?,
     gson: Gson
 ) : RemoteRepository {
@@ -53,16 +54,13 @@ internal class RetrofitWebRepository(
 
     private val sequentialRequests = LinkedBlockingQueue<SequentialRequest>()
 
-    init {
-        val httpBuilder = OkHttpClient.Builder()
-                .connectTimeout(30, TimeUnit.SECONDS)
-                .readTimeout(30, TimeUnit.SECONDS)
-                .writeTimeout(30, TimeUnit.SECONDS)
+    private val apiFlag = "AAAAAAAAAAAU"
 
+    init {
         val retrofit = Retrofit.Builder()
                 .baseUrl(getBaseUrl(domain))
                 .addConverterFactory(GsonConverterFactory.create(gson))
-                .client(httpBuilder.build())
+                .client(client)
                 .build()
 
         api = retrofit.create(ServiceDeskApi::class.java)
@@ -77,7 +75,7 @@ internal class RetrofitWebRepository(
         )
         return withContext<Response<Comments>>(Dispatchers.IO){
             try {
-                api.getTicketFeed(GetFeedBody(appId, getUserId(), getSecurityKey(), instanceId, getVersion(), keepUnread)).execute().run {
+                api.getTicketFeed(GetFeedBody(appId, getUserId(), getSecurityKey(), instanceId, getVersion(), keepUnread, apiFlag)).execute().run {
                     PLog.d(TAG, "getFeed, isSuccessful: $isSuccessful, body() != null: ${body() != null}")
                     when {
                         isSuccessful && body() != null -> ResponseImpl.success(body()!!)

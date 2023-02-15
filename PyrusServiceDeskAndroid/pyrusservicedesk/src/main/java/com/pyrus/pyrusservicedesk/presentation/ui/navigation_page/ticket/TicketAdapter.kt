@@ -1,8 +1,10 @@
 package com.pyrus.pyrusservicedesk.presentation.ui.navigation_page.ticket
 
 import android.graphics.Canvas
+import android.graphics.PorterDuff
 import android.graphics.drawable.AnimationDrawable
 import android.net.Uri
+import android.view.Gravity
 import android.view.View
 import android.view.View.*
 import android.view.ViewGroup
@@ -25,10 +27,10 @@ import com.pyrus.pyrusservicedesk.sdk.data.Attachment
 import com.pyrus.pyrusservicedesk.utils.CIRCLE_TRANSFORMATION
 import com.pyrus.pyrusservicedesk.utils.ConfigUtils
 import com.pyrus.pyrusservicedesk.utils.RequestUtils.Companion.getAvatarUrl
-import com.pyrus.pyrusservicedesk.utils.RequestUtils.Companion.getPreviewUrl
 import com.pyrus.pyrusservicedesk.utils.getTimeText
 import com.pyrus.pyrusservicedesk.utils.isImage
 import com.squareup.picasso.Picasso
+import kotlinx.android.synthetic.main.psd_view_holder_buttons.view.*
 import kotlinx.android.synthetic.main.psd_view_holder_comment_rating.view.*
 import kotlinx.android.synthetic.main.psd_view_holder_rating.view.*
 import kotlin.math.abs
@@ -40,11 +42,16 @@ private const val VIEW_TYPE_WELCOME_MESSAGE = 2
 private const val VIEW_TYPE_DATE = 3
 private const val VIEW_TYPE_RATING = 4
 private const val VIEW_TYPE_COMMENT_RATING = 5
+private const val VIEW_TYPE_COMMENT_BUTTONS = 6
 
 /**
  * Adapter that is used for rendering comment feed of the ticket screen.
  */
 internal class TicketAdapter: AdapterBase<TicketEntry>() {
+
+    companion object {
+        const val MAX_SYMBOLS_BEFORE_LEFT_ALIGNMENT = 8
+    }
 
     override val itemTouchHelper: ItemTouchHelper = ItemTouchHelper(TouchCallback())
 
@@ -75,6 +82,7 @@ internal class TicketAdapter: AdapterBase<TicketEntry>() {
                 type == Type.Date -> VIEW_TYPE_DATE
                 type == Type.WelcomeMessage -> VIEW_TYPE_WELCOME_MESSAGE
                 type == Type.Rating -> VIEW_TYPE_RATING
+                type == Type.Buttons -> VIEW_TYPE_COMMENT_BUTTONS
                 (this as CommentEntry).comment.rating != null -> VIEW_TYPE_COMMENT_RATING
                 this.comment.isInbound -> VIEW_TYPE_COMMENT_OUTBOUND
                 else -> VIEW_TYPE_COMMENT_INBOUND
@@ -90,6 +98,7 @@ internal class TicketAdapter: AdapterBase<TicketEntry>() {
             VIEW_TYPE_WELCOME_MESSAGE -> WelcomeMessageHolder(parent)
             VIEW_TYPE_RATING -> RatingHolder(parent)
             VIEW_TYPE_COMMENT_RATING -> RatingCommentHolder(parent)
+            VIEW_TYPE_COMMENT_BUTTONS -> ButtonsHolder(parent)
             else -> DateViewHolder(parent)
         } as ViewHolderBase<TicketEntry>
     }
@@ -171,7 +180,7 @@ internal class TicketAdapter: AdapterBase<TicketEntry>() {
         private fun setAuthorAvatarVisibility(visible: Boolean) {
             avatar.visibility = if (visible) VISIBLE else INVISIBLE
             if (visible) {
-                Picasso.get()
+                PyrusServiceDesk.get().picasso
                     .load(getAvatarUrl(getItem().comment.author.avatarId, PyrusServiceDesk.get().domain))
                     .placeholder(ConfigUtils.getSupportAvatar(itemView.context))
                     .transform(CIRCLE_TRANSFORMATION)
@@ -273,11 +282,7 @@ internal class TicketAdapter: AdapterBase<TicketEntry>() {
         }
 
         private fun bindTextView() {
-            var text = getItem().comment.body
-            if (text.isNullOrEmpty()) {
-                val rating = getItem().comment.rating
-                text = comment.context.getString(rating.ratingToEmojiRes())
-            }
+            val text = getItem().comment.body ?: ""
             comment.setCommentText(text)
         }
 
@@ -285,8 +290,7 @@ internal class TicketAdapter: AdapterBase<TicketEntry>() {
             getItem().comment.attachments!!.first().let { it ->
                 comment.setFileName(getItem().comment.attachments?.first()?.name ?: "")
                 comment.setFileSize(getItem().comment.attachments?.first()?.bytesSize?.toFloat() ?: 0f)
-                val previewUri = it.localUri ?: Uri.parse(getPreviewUrl(it.id, PyrusServiceDesk.get().domain))
-                comment.setPreview(previewUri)
+                comment.setPreview(it.getPreviewUrl())
                 comment.fileProgressStatus = if (getItem().hasError()) Status.Error else Status.Completed
                 comment.setOnProgressIconClickListener {
                     when (comment.fileProgressStatus) {
@@ -414,6 +418,39 @@ internal class TicketAdapter: AdapterBase<TicketEntry>() {
             }
         }
 
+    }
+
+    private class ButtonsHolder(parent: ViewGroup): ViewHolderBase<ButtonsEntry>(parent, R.layout.psd_view_holder_buttons) {
+
+        override fun bindItem(item: ButtonsEntry) {
+            super.bindItem(item)
+
+            item.buttons.forEachIndexed { index, buttonText ->
+                (itemView.flButtons.getChildAt(index) as? TextView)?.apply {
+                    text = buttonText
+
+                    if (buttonText.length > MAX_SYMBOLS_BEFORE_LEFT_ALIGNMENT) {
+                        gravity = Gravity.START
+                    }
+                    else {
+                        gravity - Gravity.CENTER
+                    }
+
+                    val frame = background
+                    frame.setColorFilter(ConfigUtils.getAccentColor(itemView.context), PorterDuff.Mode.SRC_ATOP)
+                    setTextColor(ConfigUtils.getAccentColor(itemView.context))
+                    setOnClickListener { item.onButtonClick.invoke(buttonText) }
+                    visibility = VISIBLE
+                }
+            }
+
+            repeat(itemView.flButtons.childCount - item.buttons.size) {
+                itemView.flButtons.getChildAt(itemView.flButtons.childCount - 1 - it).apply {
+                    visibility = GONE
+                    setOnClickListener(null)
+                }
+            }
+        }
     }
 
     private inner class TouchCallback : ItemTouchHelper.Callback() {

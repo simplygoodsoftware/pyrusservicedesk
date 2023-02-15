@@ -1,11 +1,3 @@
-//
-//  PSDRowMessage.swift
-//  PyrusServiceDesk
-//
-//  Created by Галина  Муравьева on 23.04.2020.
-//  Copyright © 2020  Галина Муравьева. All rights reserved.
-//
-
 import Foundation
 ///The messages to feed in tableView. One PSDMessage can has several PSDRowMessage.
 class PSDRowMessage: NSObject {

@@ -1,11 +1,3 @@
-//
-//  ApiSignManager.swift
-//  PyrusServiceDesk
-//
-//  Created by Галина  Муравьева on 05.05.2022.
-//  Copyright © 2022  Галина Муравьева. All rights reserved.
-//
-
 import Foundation
 extension PyrusServiceDesk {
     /// Активирует поддержку фич от бека

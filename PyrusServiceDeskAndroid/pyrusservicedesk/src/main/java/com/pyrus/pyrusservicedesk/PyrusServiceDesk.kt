@@ -32,9 +32,14 @@ import com.pyrus.pyrusservicedesk.sdk.verify.LocalDataVerifier
 import com.pyrus.pyrusservicedesk.sdk.verify.LocalDataVerifierImpl
 import com.pyrus.pyrusservicedesk.sdk.web.retrofit.RetrofitWebRepository
 import com.pyrus.pyrusservicedesk.utils.*
+import com.squareup.picasso.OkHttp3Downloader
+import com.squareup.picasso.Picasso
 import kotlinx.coroutines.*
+import okhttp3.OkHttpClient
 import java.lang.Runnable
 import java.util.concurrent.Executors
+import java.util.concurrent.TimeUnit
+
 
 class PyrusServiceDesk private constructor(
     internal val application: Application,
@@ -43,7 +48,8 @@ class PyrusServiceDesk private constructor(
     internal val securityKey: String?,
     internal val domain: String?,
     internal val apiVersion: Int,
-    loggingEnabled: Boolean
+    loggingEnabled: Boolean,
+    private val authToken: String?
 ) {
 
     companion object {
@@ -81,6 +87,7 @@ class PyrusServiceDesk private constructor(
          * @param domain Base domain for network requests. If the [domain] is null, the default pyrus.com will be used.
          * @param loggingEnabled If true, then the library will write logs,
          * and they can be sent as a file to chat by clicking the "Send Library Logs" button in the menu under the "+" sign.
+         * @param authorizationToken // TODO sds
          */
         @JvmStatic
         @JvmOverloads
@@ -88,9 +95,19 @@ class PyrusServiceDesk private constructor(
             application: Application,
             appId: String,
             domain: String? = null,
-            loggingEnabled: Boolean = false
+            loggingEnabled: Boolean = false,
+            authorizationToken: String? = null
         ) {
-            initInternal(application, appId, null, null, domain,  API_VERSION_1, loggingEnabled)
+            initInternal(
+                application,
+                appId,
+                null,
+                null,
+                domain,
+                API_VERSION_1,
+                loggingEnabled,
+                authorizationToken
+            )
         }
 
         /**
@@ -107,6 +124,7 @@ class PyrusServiceDesk private constructor(
          * @param domain Base domain for network requests. If the [domain] is null, the default pyrus.com will be used.
          * @param loggingEnabled If true, then the library will write logs,
          * and they can be sent as a file to chat by clicking the "Send Library Logs" button in the menu under the "+" sign.
+         * @param authorizationToken // TODO sds
          */
         @JvmStatic
         @JvmOverloads
@@ -116,9 +134,19 @@ class PyrusServiceDesk private constructor(
             userId: String,
             securityKey: String,
             domain: String? = null,
-            loggingEnabled: Boolean = false
+            loggingEnabled: Boolean = false,
+            authorizationToken: String? = null
         ) {
-            initInternal(application, appId, userId, securityKey, domain, API_VERSION_2, loggingEnabled)
+            initInternal(
+                application,
+                appId,
+                userId,
+                securityKey,
+                domain,
+                API_VERSION_2,
+                loggingEnabled,
+                authorizationToken
+            )
         }
 
         private fun initInternal(
@@ -128,7 +156,8 @@ class PyrusServiceDesk private constructor(
             securityKey: String?,
             domain: String? = null,
             apiVersion: Int = API_VERSION_1,
-            loggingEnabled: Boolean
+            loggingEnabled: Boolean,
+            authorizationToken: String?
         ) {
             PLog.d(TAG, "initInternal, appId: ${appId.getFirstNSymbols(10)}, userId: ${userId?.getFirstNSymbols(10)}, apiVersion: $apiVersion")
             if (INSTANCE != null && get().userId != userId) {
@@ -148,12 +177,13 @@ class PyrusServiceDesk private constructor(
                         securityKey,
                         validDomain,
                         apiVersion,
-                        loggingEnabled
+                        loggingEnabled,
+                        authorizationToken
                     )
                 }
             }
             else {
-                INSTANCE = PyrusServiceDesk(application, appId, userId, securityKey, validDomain, apiVersion, loggingEnabled)
+                INSTANCE = PyrusServiceDesk(application, appId, userId, securityKey, validDomain, apiVersion, loggingEnabled, authorizationToken)
             }
         }
 
@@ -412,6 +442,7 @@ class PyrusServiceDesk private constructor(
     }
 
     internal var instanceId: String
+    internal val picasso: Picasso
 
     private val requestFactory: RequestFactory
     private val draftRepository: DraftRepository
@@ -460,8 +491,26 @@ class PyrusServiceDesk private constructor(
                 .addSerializationExclusionStrategy(RemoteGsonExclusionStrategy())
                 .create()
 
+        val okHttpClient = OkHttpClient.Builder()
+            .connectTimeout(30, TimeUnit.SECONDS)
+            .readTimeout(30, TimeUnit.SECONDS)
+            .writeTimeout(30, TimeUnit.SECONDS)
+            .addInterceptor { chain ->
+                val original = chain.request()
+                val requestBuilder = original.newBuilder()
+                authToken?.let { authToken ->
+                    requestBuilder.header("Authorization", authToken)
+                }
+
+                chain.proceed(requestBuilder.build())
+            }.build()
+
+        picasso = Picasso.Builder(application)
+            .downloader(OkHttp3Downloader(okHttpClient))
+            .build()
+
         val centralRepository = CentralRepository(
-            RetrofitWebRepository(appId, instanceId, fileResolver, fileManager, domain, remoteGson),
+            RetrofitWebRepository(appId, instanceId, fileResolver, fileManager, okHttpClient, domain, remoteGson),
             offlineRepository
         )
 
