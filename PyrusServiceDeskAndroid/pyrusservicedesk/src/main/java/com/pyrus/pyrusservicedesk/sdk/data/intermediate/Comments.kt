@@ -13,5 +13,8 @@ internal data class Comments(
     val comments: List<Comment> = emptyList(),
 
     @SerializedName("show_rating")
-    val showRating: Boolean = false
+    val showRating: Boolean = false,
+
+    @SerializedName("show_rating_text")
+    val showRatingText: String = ""
 )
