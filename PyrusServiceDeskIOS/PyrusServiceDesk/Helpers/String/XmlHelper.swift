@@ -91,7 +91,7 @@ extension NSString {
                     if let link = info.data as? URL {
                         dict.updateValue(link, forKey: .link)
                     }
-                case .button, .lineBreak:
+                default:
                     continue
                 }
             }
@@ -102,8 +102,10 @@ extension NSString {
         func addAndReturn(tag str: String) -> (tagType: HTMLTag, isOpen: Bool, data: Any?)? {
             if let tag = str.getHTMLTagForString() {
                 if tag.isOpen {
-                    //place for listItem
-                    tags.updateValue((tags[tag.tagType]?.count ?? 0 + 1, tag.data), forKey: tag.tagType)
+                    if tag.tagType != .lineBreak {
+                        //place for listItem
+                        tags.updateValue((tags[tag.tagType]?.count ?? 0 + 1, tag.data), forKey: tag.tagType)
+                    }
                 } else if let value = tags[tag.tagType]?.count {
                     if value == 1 {
                         tags.removeValue(forKey: tag.tagType)
@@ -138,7 +140,7 @@ extension NSString {
                     let replaceString = tag.isOpen ? tag.tagType.replaced(data: tag.data) : ""
                     str = str.replacingCharacters(in: tagRange, with: replaceString) as NSString
                     attrStr.replaceCharacters(in: tagRange, with: replaceString)
-                    if tag.tagType.replaceString() {
+                    if tag.tagType == .button && !tag.isOpen {
                         let button = str.substring(with: addAttrRange)
                         if button.count > 0 {
                             if button.trimmingCharacters(in: .whitespacesAndNewlines).count > 0 {//Добавлеям кнопки только если в них есть текст, иначе удаляем
