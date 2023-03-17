@@ -342,8 +342,13 @@ internal class TicketViewModel(
                 maybeAddDate(it as CommentEntry, this)
                 add(it)
             }
-            if (freshList.showRating)
+
+            if (freshList.showRatingText.isNotBlank()) {
+                add(WelcomeMessageEntry(freshList.showRatingText))
+            }
+            if (freshList.showRating) {
                 add(RatingEntry())
+            }
         }
         publishEntries(ticketEntries, toPublish)
         if (!arePendingComments)
