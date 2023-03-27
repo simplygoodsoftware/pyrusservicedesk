@@ -79,7 +79,8 @@ class PSDUploader: NSObject {
         tasksMap[task] = taskData
         
         task.resume()
-
+        
+        EventsLogger.logString("Pyrus create upload request with url: \(request.url), all headers = { \(request.allHTTPHeaderFields) }, body = {\(request.httpBody)}")
     }
     var tasksMap : [URLSessionTask : PSDTasksData] = [URLSessionTask : PSDTasksData]()
     func stopAll(){

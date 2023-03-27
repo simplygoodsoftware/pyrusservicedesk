@@ -13,6 +13,10 @@ enum EventsLogger {
     case openPSD
     case tooManyRefresh
     case invalidDomain
+    static func logString(_ string: String) {
+        PyrusServiceDesk.logEvent?.logPyrusServiceDesk(event: string)
+        PyrusLogger.shared.logEvent(string)
+    }
     static func logEvent(_ logCase: EventsLogger, additionalInfo: String? = nil){
         var logString = stringForEvent(logCase)
         if let additionalInfo = additionalInfo{
@@ -21,7 +25,7 @@ enum EventsLogger {
         PyrusServiceDesk.logEvent?.logPyrusServiceDesk(event: logString)
         PyrusLogger.shared.logEvent(logString)
     }
-    static private func stringForEvent(_ logCase: EventsLogger) -> String{
+    static private func stringForEvent(_ logCase: EventsLogger) -> String {
         let defaultString = "PyrusServiceDesk: "
         switch logCase {
         case .didNotFindMessageAfterUpdate:

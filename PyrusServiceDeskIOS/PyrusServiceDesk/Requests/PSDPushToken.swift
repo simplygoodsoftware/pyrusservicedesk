@@ -22,16 +22,19 @@ struct PSDPushToken {
             guard let data = data, error == nil else {
                 // check for fundamental networking error
                 completion(PSDError.init(description: "No internet connection"))
+                EventsLogger.logString("Pyrus error request with url: \(request.url), data = nil, \(error)")
                 return
             }
             
             if let httpStatus = response as? HTTPURLResponse, httpStatus.statusCode != 200 {           // check for http errors
                 completion(PSDError.init(description: "Server error"))
+                EventsLogger.logString("Pyrus error request with url: \(request.url), statusCode = \(httpStatus.statusCode)")
                 
             }
             else{
                 do{
                     let resp = try JSONSerialization.jsonObject(with: data, options: .allowFragments) as? [String : Any] ?? [String: Any]()
+                    EventsLogger.logString("Pyrus request with url: \(request.url), got data = \(resp)")
                     if let error = resp["error"]{
                         completion(PSDError.init(description: "\(error)"))
                     }
@@ -39,6 +42,7 @@ struct PSDPushToken {
                         completion(nil)
                     }
                 }catch{
+                    EventsLogger.logString("Pyrus error request with url: \(request.url), error when convert to dictionary")
                     completion(nil)
                 }
             }

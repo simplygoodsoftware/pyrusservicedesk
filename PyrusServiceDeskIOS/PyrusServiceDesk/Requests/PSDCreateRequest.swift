@@ -33,7 +33,7 @@ extension URLRequest {
         return request
     }
     
-    private static func createRequest(url: URL, json:[String: Any]) -> URLRequest {
+    private static func createRequest(url: URL, json: [String: Any]) -> URLRequest {
         let body = addStaticKeys(to: json)
         let jsonData = try? JSONSerialization.data(withJSONObject: body)
         var request = URLRequest(url: url, cachePolicy: .reloadIgnoringLocalCacheData, timeoutInterval: 60)
@@ -42,6 +42,7 @@ extension URLRequest {
         request.addValue(contenttype, forHTTPHeaderField: "content-type")
         request.addValue("\(jsonData!.count)", forHTTPHeaderField: "Content-Length")
         request.addCustomHeaders()
+        EventsLogger.logString("Pyrus create post request with url: \(url), all headers = { \(request.allHTTPHeaderFields) }, body = {\(body)}")
         return request
     }
     private static func addStaticKeys(to JSON:[String: Any]) -> [String: Any]

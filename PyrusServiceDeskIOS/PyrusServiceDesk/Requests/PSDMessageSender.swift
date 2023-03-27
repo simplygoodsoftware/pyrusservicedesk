@@ -95,6 +95,7 @@ class PSDMessageSender: NSObject {
         
         let task = PyrusServiceDesk.mainSession.dataTask(with: request) { data, response, error in
             guard let data = data, error == nil else {                                                 // check for fundamental networking error
+                EventsLogger.logString("Pyrus error request with url: \(request.url), data = nil, \(error)")
                 completion(nil,nil)
                 return
             }
@@ -110,6 +111,7 @@ class PSDMessageSender: NSObject {
                     }
                 }
                 completion(nil,nil)
+                EventsLogger.logString("Pyrus error request with url: \(request.url), statusCode = \(httpStatus.statusCode)")
             }
             
             if(data.count>0){
@@ -117,7 +119,9 @@ class PSDMessageSender: NSObject {
                 do{
                     let messageData = try JSONSerialization.jsonObject(with: data, options: .allowFragments) as? [String: Any] ?? [String: Any]()
                     completion(messageData.stringOfKey(commentIdParameter), messageData[attachmentsParameter] as? NSArray)
+                    EventsLogger.logString("Pyrus request with url: \(request.url), got data = \(messageData)")
                 }catch{
+                    EventsLogger.logString("Pyrus error request with url: \(request.url), error when convert to dictionary")
                     //print("Pass error when convert to dictionary")
                 }
                 

@@ -36,6 +36,7 @@ class PSDDownloader: NSObject{
         }
         currentTask = downloadsSession!.dataTask(with: request)
         currentTask?.resume()
+        EventsLogger.logString("Pyrus create post request with url: \(url), all headers = { \(request.allHTTPHeaderFields) }, body = {\(request.httpBody)}")
     }
    
     func cancel(){

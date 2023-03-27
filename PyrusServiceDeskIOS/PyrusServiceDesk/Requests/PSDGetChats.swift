@@ -18,6 +18,7 @@ struct PSDGetChats {
         PSDGetChats.sessionTask = PyrusServiceDesk.mainSession.dataTask(with: request) { data, response, error in
             guard let data = data, error == nil else {                                                 // check for fundamental networking error
                 completion(nil)
+                EventsLogger.logString("Pyrus error request with url: \(request.url), data = nil, \(error)")
                 return
             }
             
@@ -31,7 +32,7 @@ struct PSDGetChats {
                         }
                     }
                 }
-
+                EventsLogger.logString("Pyrus error request with url: \(request.url), statusCode = \(httpStatus.statusCode)")
                 completion([])
             }
             do{
@@ -40,7 +41,9 @@ struct PSDGetChats {
                 let chats = generateChats(from:chatsArray)
                 PyrusServiceDesk.chats = chats
                 completion(chats)
+                EventsLogger.logString("Pyrus request with url: \(request.url), got data = \(chats)")
             }catch{
+                EventsLogger.logString("Pyrus error request with url: \(request.url), error when convert to dictionary")
                 //print("PSDGetChats error when convert to dictionary")
             }
             

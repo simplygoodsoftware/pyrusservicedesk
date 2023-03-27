@@ -45,6 +45,7 @@ struct PSDGetChat {
                         }
                     }
                 }
+                EventsLogger.logString("Pyrus error request with url: \(request.url), data = nil, \(error)")
                 completion(nil)
                 return
             }
@@ -63,12 +64,15 @@ struct PSDGetChat {
                 if needShowError {
                     DispatchQueue.main.async {showError(httpStatus.statusCode, on:topViewController)}
                 }
+                EventsLogger.logString("Pyrus error request with url: \(request.url), statusCode = \(httpStatus.statusCode)")
                 
             }
             do{
                 let chatData = try JSONSerialization.jsonObject(with: data, options: .allowFragments) as? [String : Any] ?? [String: Any]()
                 completion(generateChat(from:chatData))
+                EventsLogger.logString("Pyrus request with url: \(request.url), got data = \(chatData)")
             }catch{
+                EventsLogger.logString("Pyrus error request with url: \(request.url), error when convert to dictionary")
                 //print("PSDGetChat error when convert to dictionary")
             }
             
