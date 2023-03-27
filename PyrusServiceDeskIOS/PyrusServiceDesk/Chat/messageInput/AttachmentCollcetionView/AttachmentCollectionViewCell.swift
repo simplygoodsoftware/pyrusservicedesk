@@ -1,11 +1,3 @@
-//
-//  AttachmentCollectionViewCell.swift
-//  PyrusServiceDesk
-//
-//  Created by Галина  Муравьева on 20.04.2020.
-//  Copyright © 2020  Галина Муравьева. All rights reserved.
-//
-
 import Foundation
 protocol AttachmentCollectionViewCellDelegate : NSObjectProtocol{
     func removePressed(for cell:AttachmentCollectionViewCell)

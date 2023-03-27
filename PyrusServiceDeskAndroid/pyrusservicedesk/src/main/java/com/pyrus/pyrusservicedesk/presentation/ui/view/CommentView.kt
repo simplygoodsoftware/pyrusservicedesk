@@ -33,6 +33,7 @@ import androidx.appcompat.widget.AppCompatTextView
 import androidx.core.app.ActivityCompat
 import androidx.core.text.util.LinkifyCompat
 import androidx.exifinterface.media.ExifInterface
+import com.pyrus.pyrusservicedesk.PyrusServiceDesk
 import com.pyrus.pyrusservicedesk.R
 import com.pyrus.pyrusservicedesk.presentation.ui.view.OutlineImageView.Companion.EDGE_RIGHT
 import com.pyrus.pyrusservicedesk.utils.*
@@ -574,7 +575,7 @@ internal class CommentView @JvmOverloads constructor(
         clearCurrentPreviewRequest()
         recentPicassoTarget = picassoTarget
         loadPreviewRunnable = Runnable {
-            Picasso.get().load(previewUri).into(picassoTarget)
+            PyrusServiceDesk.get().picasso.load(previewUri).into(picassoTarget)
         }
         postDelayed(loadPreviewRunnable, delayMs)
     }
@@ -584,7 +585,7 @@ internal class CommentView @JvmOverloads constructor(
             removeCallbacks(it)
         }
         recentPicassoTarget?.let {
-            Picasso.get().cancelRequest(it)
+            PyrusServiceDesk.get().picasso.cancelRequest(it)
         }
     }
 

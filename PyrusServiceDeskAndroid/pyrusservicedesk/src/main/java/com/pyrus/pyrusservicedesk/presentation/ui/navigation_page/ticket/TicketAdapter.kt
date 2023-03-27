@@ -27,7 +27,6 @@ import com.pyrus.pyrusservicedesk.sdk.data.Attachment
 import com.pyrus.pyrusservicedesk.utils.CIRCLE_TRANSFORMATION
 import com.pyrus.pyrusservicedesk.utils.ConfigUtils
 import com.pyrus.pyrusservicedesk.utils.RequestUtils.Companion.getAvatarUrl
-import com.pyrus.pyrusservicedesk.utils.RequestUtils.Companion.getPreviewUrl
 import com.pyrus.pyrusservicedesk.utils.getTimeText
 import com.pyrus.pyrusservicedesk.utils.isImage
 import com.squareup.picasso.Picasso
@@ -181,7 +180,7 @@ internal class TicketAdapter: AdapterBase<TicketEntry>() {
         private fun setAuthorAvatarVisibility(visible: Boolean) {
             avatar.visibility = if (visible) VISIBLE else INVISIBLE
             if (visible) {
-                Picasso.get()
+                PyrusServiceDesk.get().picasso
                     .load(getAvatarUrl(getItem().comment.author.avatarId, PyrusServiceDesk.get().domain))
                     .placeholder(ConfigUtils.getSupportAvatar(itemView.context))
                     .transform(CIRCLE_TRANSFORMATION)
