@@ -4,9 +4,10 @@ extension PyrusServiceDesk {
     ///
     /// Для настройки флагов воспользуйся [ссылкой](https://dev.pyrus.com/admin/api-flags
     @objc public static func apiSign() -> String {
-        return "AAAAAAAAAAAE"
+        return "AAAAAAAAAAAU"
         /*
          LinkInComment
+         ButtonInComment
         */
     }
 }

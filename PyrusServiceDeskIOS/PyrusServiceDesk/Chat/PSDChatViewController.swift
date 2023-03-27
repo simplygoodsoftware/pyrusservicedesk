@@ -24,9 +24,10 @@ class PSDChatViewController: PSDViewController {
             navigationItem.largeTitleDisplayMode = .never
             
         }
+        self.extendedLayoutIncludesOpaqueBars = true
         self.tableView.chatDelegate = self
         self.automaticallyAdjustsScrollViewInsets = false
-        
+
         self.design()
         self.designNavigation()
         self.customiseDesign(color: PyrusServiceDesk.mainController?.customization?.barButtonTintColor ?? UIColor.darkAppColor)

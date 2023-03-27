@@ -1,6 +1,7 @@
 // swift-interface-format-version: 1.0
-// swift-compiler-version: Apple Swift version 5.5.2 (swiftlang-1300.0.47.5 clang-1300.0.29.30)
+// swift-compiler-version: Apple Swift version 5.7.1 (swiftlang-5.7.1.135.3 clang-1400.0.29.51)
 // swift-module-flags: -target arm64-apple-ios9.0-simulator -enable-objc-interop -enable-library-evolution -swift-version 5 -enforce-exclusivity=checked -O -module-name PyrusServiceDesk
+// swift-module-flags-ignorable: -enable-bare-slash-regex
 import AVFoundation
 import AVKit
 import Compression
@@ -13,6 +14,7 @@ import Swift
 import UIKit
 import WebKit
 import _Concurrency
+import _StringProcessing
 import zlib
 @_inheritsConvenienceInitializers @_hasMissingDesignatedInitializers @objc public class ServiceDeskConfiguration : ObjectiveC.NSObject {
   public var welcomeMessage: Swift.String? {
@@ -75,6 +77,28 @@ import zlib
   }
   @objc deinit
 }
+public enum HorizontalAlignment {
+  case left
+  case right
+  case leading
+  case trailing
+  case justified
+  public static func == (a: HorizontalAlignment, b: HorizontalAlignment) -> Swift.Bool
+  public func hash(into hasher: inout Swift.Hasher)
+  public var hashValue: Swift.Int {
+    get
+  }
+}
+public enum VerticalAlignment {
+  case top
+  case center
+  case bottom
+  public static func == (a: VerticalAlignment, b: VerticalAlignment) -> Swift.Bool
+  public func hash(into hasher: inout Swift.Hasher)
+  public var hashValue: Swift.Int {
+    get
+  }
+}
 @objc public protocol OnStopCallback {
   @objc func onStop()
 }
@@ -94,12 +118,13 @@ import zlib
 }
 @objc @_inheritsConvenienceInitializers @_Concurrency.MainActor(unsafe) public class PSDInfoView : UIKit.UIView {
   @_Concurrency.MainActor(unsafe) @objc override dynamic public func removeFromSuperview()
-  @_Concurrency.MainActor(unsafe) @objc override dynamic public init(frame: CoreGraphics.CGRect)
+  @_Concurrency.MainActor(unsafe) @objc override dynamic public init(frame: CoreFoundation.CGRect)
   @_Concurrency.MainActor(unsafe) @objc required dynamic public init?(coder: Foundation.NSCoder)
   @objc deinit
 }
 @_inheritsConvenienceInitializers @objc public class PyrusServiceDesk : ObjectiveC.NSObject {
   public static var PSD_CLOSED_NOTIFICATION_NAME: Swift.String
+  public static var trustedUrls: [Swift.String]?
   @objc public static func setPushToken(_ token: Swift.String?, completion: @escaping (Swift.Error?) -> Swift.Void)
   @objc public static func start(on viewController: UIKit.UIViewController, onStopCallback: OnStopCallback? = nil)
   @objc public static func start(on viewController: UIKit.UIViewController, configuration: ServiceDeskConfiguration?, onStopCallback: OnStopCallback? = nil)
@@ -110,9 +135,9 @@ import zlib
   @objc public static func subscribeToReplies(_ subscriber: NewReplySubscriber?)
   @objc public static func unsubscribeFromReplies(_ subscriber: NewReplySubscriber?)
   @objc public static func subscribeToGogEvents(_ subscriber: LogEvents)
-  @objc public static func createWith(_ clientId: Swift.String?, domain: Swift.String? = nil, loggingEnabled: Swift.Bool = false)
-  @objc public static func createWith(_ clientId: Swift.String?, reset: Swift.Bool, domain: Swift.String? = nil, loggingEnabled: Swift.Bool = false)
-  @objc public static func createWith(_ clientId: Swift.String?, userId: Swift.String?, securityKey: Swift.String?, domain: Swift.String? = nil, loggingEnabled: Swift.Bool = false)
+  @objc public static func createWith(_ clientId: Swift.String?, domain: Swift.String? = nil, loggingEnabled: Swift.Bool = false, authorizationToken: Swift.String? = nil)
+  @objc public static func createWith(_ clientId: Swift.String?, reset: Swift.Bool, domain: Swift.String? = nil, loggingEnabled: Swift.Bool = false, authorizationToken: Swift.String? = nil)
+  @objc public static func createWith(_ clientId: Swift.String?, userId: Swift.String?, securityKey: Swift.String?, domain: Swift.String? = nil, loggingEnabled: Swift.Bool = false, authorizationToken: Swift.String? = nil)
   @objc public static func refresh(onError: ((Swift.Error?) -> Swift.Void)? = nil)
   @objc public static func refreshFromPush(messageId: Swift.Int)
   @objc public static func present(_ viewController: UIKit.UIViewController, animated: Swift.Bool, completion: (() -> Swift.Void)?)
@@ -120,3 +145,10 @@ import zlib
   @objc override dynamic public init()
   @objc deinit
 }
+extension PyrusServiceDesk {
+  @objc public static func apiSign() -> Swift.String
+}
+extension HorizontalAlignment : Swift.Equatable {}
+extension HorizontalAlignment : Swift.Hashable {}
+extension VerticalAlignment : Swift.Equatable {}
+extension VerticalAlignment : Swift.Hashable {}

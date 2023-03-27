@@ -3,6 +3,7 @@ protocol PSDChatTableViewDelegate: NSObjectProtocol {
     func needShowRate(_ showRate: Bool)
     func restartTimer()
     func showLinkOpenAlert(_ linkString: String)
+    func send(_ message:String,_ attachments:[PSDAttachment])
 }
 
 class PSDChatTableView: PSDDetailTableView{
@@ -15,6 +16,14 @@ class PSDChatTableView: PSDDetailTableView{
     private static let supportCellId = "CellSupport"
     private var tableMatrix : [[PSDRowMessage]] = [[PSDRowMessage]()]
     private var heightsMap : [IndexPath : CGFloat] = [IndexPath : CGFloat]()
+    private lazy var buttonsView: ButtonsView = {
+        let view = ButtonsView(frame: .zero)
+        tableFooterView = view
+        view.autoresizingMask = [.flexibleHeight]
+        view.translatesAutoresizingMaskIntoConstraints = true
+        view.tapDelegate = self
+        return view
+    }()
     override init(frame: CGRect, style: UITableView.Style) {
         super.init(frame: frame, style: .grouped)
         self.allowsMultipleSelection = false
@@ -47,6 +56,18 @@ class PSDChatTableView: PSDDetailTableView{
     deinit {
         self.removeRefreshControls()
     }
+    
+    override func layoutSubviews() {
+        super.layoutSubviews()
+        var newFrame = buttonsView.frame
+        if newFrame.size.height != buttonsView.collectionView.contentSize.height {
+            newFrame.size.width = frame.size.width
+            newFrame.size.height = buttonsView.collectionView.contentSize.height
+            buttonsView.frame = newFrame
+            tableFooterView = buttonsView
+        }
+    }
+    
     func forceRefresh(showFakeMessage: Int?) {
         if !PSDGetChat.isActive(){
             if let showFakeMessage = showFakeMessage, showFakeMessage != 0 {
@@ -111,9 +132,9 @@ class PSDChatTableView: PSDDetailTableView{
                     self.isLoading = false
                     if let chat = chat {
                         self.tableMatrix.create(from: chat)
-                        
                         self.lastMessageFromServer = chat.messages.last
                         self.setLastActivityDate()
+                        self.buttonsView.updateWithButtons(PSDChat.draftAnswers(self.tableMatrix))
                         self.reloadData()
                         
                         self.removeNoConnectionView()
@@ -126,6 +147,8 @@ class PSDChatTableView: PSDDetailTableView{
                             self.layoutIfNeeded()
                             self.scrollsToBottom(animated: false)
                         UIView.setAnimationsEnabled(true)
+                    } else {
+                        self.buttonsView.updateWithButtons(nil)
                     }
                     self.addRefreshControls()
                 }
@@ -247,6 +270,7 @@ class PSDChatTableView: PSDDetailTableView{
                                         self.reloadSections(reloadSections, with: .none)
                                     }
                                     self.endUpdates()
+                                    self.buttonsView.updateWithButtons(PSDChat.draftAnswers(self.tableMatrix))
                                     self.scrollToBottomAfterRefresh(with: oldContentOffset, oldContentSize: oldContentSize)
                                 }
                             }
@@ -255,8 +279,11 @@ class PSDChatTableView: PSDDetailTableView{
                     }
                 }
                 DispatchQueue.main.async  {
-                    self?.customRefresh.endRefreshing()
-                    self?.bottomRefresh.endRefreshing()
+                    if let self = self {
+                        self.buttonsView.updateWithButtons(PSDChat.draftAnswers(self.tableMatrix))
+                        self.customRefresh.endRefreshing()
+                        self.bottomRefresh.endRefreshing()
+                    }
                 }
             }
     }
@@ -300,18 +327,28 @@ class PSDChatTableView: PSDDetailTableView{
             self.refresh(message: message, changedToSent: changedToSent)
         }
     }
-    private static let delayBeforeUpdates : Int = 20//milliseconds
+    private static let delayBeforeUpdates: Int = 20//milliseconds
+    
     ///Scroll tableview to its bottom position without animation
-    private func scrollsToBottom(animated: Bool){
-        self.layoutIfNeeded()
-
-        let lastRow = self.lastIndexPath()
-        if(lastRow.row>=0 || lastRow.section>=0){
-            if !(lastRow.row == 0 && lastRow.section==0 ){
-                self.scrollToRow(at: lastRow, at: .bottom, animated: animated)
-            }
+    private func scrollsToBottom(animated: Bool) {
+        layoutIfNeeded()
+        let lastRow = lastIndexPath()
+        if
+            lastRow.row >= 0 || lastRow.section >= 0,
+            !(lastRow.row == 0 && lastRow.section == 0)
+        {
+            scrollToRow(at: lastRow, at: .bottom, animated: animated)
+        }
+        if
+            let tableFooterView = tableFooterView,
+            tableFooterView.frame.size.height > 0
+        {
+            var frameFooter = tableFooterView.frame
+            frameFooter.size.height += 20
+            scrollRectToVisible(frameFooter, animated: animated)
         }
     }
+
     ///Adds new row to table view to last index.
     ///- parameter message: PSDMessage object that need to be added.
     func addNewRow(message: PSDMessage)
@@ -338,6 +375,10 @@ class PSDChatTableView: PSDDetailTableView{
                 self.addRow(at: lastSection, dataForRow: rowMessage)
             }
         }
+        buttonsView.updateWithButtons(PSDChat.draftAnswers(tableMatrix))
+        UIView.animate(withDuration: 0.1, animations: {
+            self.layoutIfNeeded()
+        })
         
     }
     ///Returns last PSDChatMessageCell in tableView
@@ -468,6 +509,7 @@ extension PSDChatTableView : UITableViewDelegate,UITableViewDataSource{
             
         }
         cell.needShowName = self.tableMatrix.needShowName(at: indexPath)
+        cell.drawEmpty = self.tableMatrix.emptyMessage(at: indexPath)
         cell.firstMessageInDate = indexPath.row == 0
         cell.draw(message:message)
         PSDPreviewSetter.setPreview(of: message.attachment, in: cell.cloudView.attachmentView, delegate: self, animated: false)
@@ -736,5 +778,11 @@ private extension UIFont {
 extension PSDChatTableView: LinkDelegate {
     func showLinkOpenAlert(_ linkString: String) {
         chatDelegate?.showLinkOpenAlert(linkString)
+    }
+}
+
+extension PSDChatTableView: ButtonsCollectionDelegate {
+    func didTapOnButton(_ text: String) {
+        chatDelegate?.send(text, [])
     }
 }

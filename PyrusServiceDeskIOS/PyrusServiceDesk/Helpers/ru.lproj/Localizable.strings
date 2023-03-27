@@ -26,7 +26,7 @@
 "Camera" = "Снять фото или видео";
 "Camera_Access_Error" = "Нет доступа к камере или микрофону";
 "Phone_Gallery" = "Галерея";
-"Phone_Gallery_Access_Error" = "Нет доступа к галлерее";
+"Phone_Gallery_Access_Error" = "Нет доступа к галерее";
 "Access_Error" = "Ошибка доступа";
 "Size_Error" = "Размер файла не должен привышать 200 МБ.";
 "No_File_Error"="Файл не найден";

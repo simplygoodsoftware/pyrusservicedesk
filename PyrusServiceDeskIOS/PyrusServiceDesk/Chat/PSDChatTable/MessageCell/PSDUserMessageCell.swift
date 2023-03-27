@@ -89,7 +89,11 @@ class PSDUserMessageCell: PSDChatMessageCell {
             constant:AVATAR_SIZE+(TO_BOARD_DISTANCE*2)))
     }
     private func updateTopMessageConstrint(){
-         self.topMessageConstraint?.constant = needShowName && !firstMessageInDate ? PSDChatMessageCell.nameTopDistance : bottomDistance
+        guard !drawEmpty else {
+            self.topMessageConstraint?.constant = 0
+            return
+        }
+        self.topMessageConstraint?.constant = needShowName && !firstMessageInDate ? PSDChatMessageCell.nameTopDistance : bottomDistance
     }
     
     override func awakeFromNib() {

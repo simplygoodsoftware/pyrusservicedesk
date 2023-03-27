@@ -55,6 +55,7 @@ class PSDSupportMessageCell: PSDChatMessageCell {
         self.updateTopMessageConstrint()
         
         self.layoutIfNeeded()
+        cloudView.alpha = drawEmpty ? 0.0 : 1.0
     }
     private func addConstraints()
     {
@@ -124,6 +125,10 @@ class PSDSupportMessageCell: PSDChatMessageCell {
     }
     
     private func updateTopMessageConstrint(){
+        guard !drawEmpty else {
+            self.topMessageConstraint?.constant = 0
+            return
+        }
         let topDistanse = firstMessageInDate ? 0 : PSDChatMessageCell.nameTopDistance
         self.topMessageConstraint?.constant = needShowName ? self.nameLabel.frame.size.height + topDistanse : bottomDistance
        

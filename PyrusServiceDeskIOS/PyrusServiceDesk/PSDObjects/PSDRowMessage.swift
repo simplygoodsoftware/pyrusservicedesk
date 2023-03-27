@@ -7,11 +7,11 @@ class PSDRowMessage: NSObject {
     var attachment: PSDAttachment?
     var message : PSDMessage
     var attributedText: NSAttributedString?
-    init(message: PSDMessage, attachment: PSDAttachment?){
+    init(message: PSDMessage, attachment: PSDAttachment?, text: String){
         self.message = message
-        self.text = message.text
+        self.text = text
         let color: UIColor = message.owner.personId == PyrusServiceDesk.userId ? CustomizationHelper.userMassageTextColor : CustomizationHelper.supportMassageTextColor
-        attributedText = (text as NSString).parseXMLToAttributedString(fontColor: color)
+        attributedText = (text as NSString).parseXMLToAttributedString(fontColor: color).0
         self.attachment = attachment
         self.rating = message.rating
         super.init()
