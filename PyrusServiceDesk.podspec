@@ -1,7 +1,7 @@
 Pod::Spec.new do |spec|
 
 spec.name         = 'PyrusServiceDesk'
-spec.version      = '3.0.21'
+spec.version      = '2.1.16'
 spec.summary      = "Create a service with chat with support."
 spec.homepage     = 'https://pyrus.com'
 spec.license      = { :type => "MIT", :file => "LICENSE.txt" }
