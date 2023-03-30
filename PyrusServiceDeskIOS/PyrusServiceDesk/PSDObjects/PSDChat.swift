@@ -4,6 +4,7 @@ class PSDChat: NSObject {
     var messages: [PSDMessage]
     var isRead = true
     var showRating = false
+    var showRatingText: String?
     init(date: Date, messages: [PSDMessage]) {
         self.date = date
         self.messages = messages

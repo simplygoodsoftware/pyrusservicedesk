@@ -76,6 +76,12 @@ extension Array where Element == [PSDRowMessage]{
         if(comp){
             self.completeWithUnsentMessages()///if user has unsent messages add them to bottom
         }
+        if
+            chat.showRating,
+            let ratingText = chat.showRatingText
+        {
+            _ = addRatingMessage(ratingText)
+        }
         
     }
     ///Detect if need show avatar. If current user is same as next don't show avatar
@@ -187,6 +193,18 @@ extension Array where Element == [PSDRowMessage]{
             }
         }
         return nil
+    }
+    
+    func lastMessage() -> PSDMessage? {
+        let lastSection = count - 1
+        guard lastSection >= 0 else {
+            return nil
+        }
+        let lastRow = self[lastSection].count - 1
+        guard lastRow >= 0 else {
+            return nil
+        }
+        return self[lastSection][lastRow].message
     }
 }
 

@@ -80,6 +80,31 @@ extension Array where Element == [PSDRowMessage]{
         }
         return (indexPaths, IndexSet(reloadSections))
     }
+    
+    mutating func addRatingMessage(_ text: String) -> ([IndexPath],IndexSet) {
+        let ratingMessage = PSDObjectsCreator.createRatingMessage(text)
+        let lastSection = self.count > 0 ? self.count - 1 : 0
+        let lastMessage = self[lastSection].last
+        let _ = completeWithMessages([ratingMessage])
+        var indexPaths =  [IndexPath]()
+        var addSections = [Int]()
+        if
+            let lastMessage = lastMessage,
+            ratingMessage.message.date.compareWithoutTime(with: lastMessage.message.date) == .equal
+        {
+            indexPaths.append(IndexPath(row: self[lastSection].count, section: lastSection))
+        } else{
+            addSections.append(lastSection + 1)
+        }
+        return (indexPaths, IndexSet(addSections))
+    }
+    
+    mutating func removeRatingMessage() -> ([IndexPath],IndexSet) {
+        var indexPaths =  [IndexPath]()
+        var reloadSections = [Int]()
+        return (indexPaths, IndexSet(reloadSections))
+    }
+    
     ///Complete array with messages. Messages always add to last section, and checked for duplication by localId
     ///- parameter messages: messages to add
     mutating func completeWithMessages(_ messages: [PSDRowMessage])->Bool{
@@ -117,7 +142,16 @@ extension Array where Element == [PSDRowMessage]{
      - sections: IndexSet need to be inserted
      */
      mutating func complete(from chat:PSDChat, startMessage: PSDMessage?, completion: @escaping (_ indexPaths: [IndexPath], _ sections:IndexSet, _ messages: [PSDMessage]) -> Void){
-        complete(with: chat.messages, startMessage: startMessage, completion: completion)
+         var messages = chat.messages
+         if
+            !(lastMessage()?.isRatingMessage ?? false),
+            chat.showRating,
+            let ratingText = chat.showRatingText
+         {
+             let ratingMessage = PSDObjectsCreator.createRatingMessage(ratingText).message
+             messages.append(ratingMessage)
+         }
+         complete(with: messages, startMessage: startMessage, completion: completion)
     }
     mutating private func complete(with messages:[PSDMessage], startMessage: PSDMessage?, completion: ( (_ indexPaths: [IndexPath], _ sections:IndexSet, _ messages: [PSDMessage]) -> Void)?){
         let startMessageIndexPath = self.index(of: startMessage)
