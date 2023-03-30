@@ -152,15 +152,7 @@ internal class TicketViewModel(
            }
            withContext(Dispatchers.Main) {
                val localComment = localDataProvider.createLocalComment(fileUri = fileUri)
-               val fileHooks = UploadFileHooks()
-               fileHooks.subscribeOnCancel(object : OnCancelListener {
-                   override fun onCancel() {
-                       return applyCommentUpdate(
-                           CommentEntry(localComment), ChangeType.Cancelled
-                       )
-                   }
-               })
-               sendAddComment(localComment, fileHooks)
+               sendAddComment(localComment)
            }
        }
     }
@@ -257,11 +249,30 @@ internal class TicketViewModel(
 
     private fun sendAddComment(
         localComment: Comment,
-        uploadFileHooks: UploadFileHooks? = null
+        uploadHooks: UploadFileHooks? = null
     ) {
 
-        if (commentContainsError(localComment))
+        if (commentContainsError(localComment)) {
             return
+        }
+
+        val uploadFileHooks: UploadFileHooks?
+        if (uploadHooks != null) {
+            uploadFileHooks = uploadHooks
+        }
+        else if (!localComment.hasAttachments()) {
+            uploadFileHooks = null
+        }
+        else {
+            uploadFileHooks = UploadFileHooks()
+            uploadFileHooks.subscribeOnCancel(object : OnCancelListener {
+                override fun onCancel() {
+                    return applyCommentUpdate(
+                        CommentEntry(localComment), ChangeType.Cancelled
+                    )
+                }
+            })
+        }
 
         applyCommentUpdate(
             CommentEntry(localComment, uploadFileHooks = uploadFileHooks),
@@ -331,8 +342,13 @@ internal class TicketViewModel(
                 maybeAddDate(it as CommentEntry, this)
                 add(it)
             }
-            if (freshList.showRating)
+
+            if (freshList.showRatingText.isNotBlank()) {
+                add(WelcomeMessageEntry(freshList.showRatingText))
+            }
+            if (freshList.showRating) {
                 add(RatingEntry())
+            }
         }
         publishEntries(ticketEntries, toPublish)
         if (!arePendingComments)

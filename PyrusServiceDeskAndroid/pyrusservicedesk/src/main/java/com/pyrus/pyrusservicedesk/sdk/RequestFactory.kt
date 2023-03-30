@@ -13,8 +13,10 @@ internal class RequestFactory(private val repository: GeneralRepository) {
     fun getFeedRequest(keepUnread: Boolean = false): Request<Comments> = GetFeedRequest(repository, true, keepUnread)
     fun getTicketsRequest(): RequestBase<List<TicketShortDescription>> = GetTicketsRequest(repository)
 
-    fun getAddFeedCommentRequest(comment: Comment,
-                                 uploadFileHooks: UploadFileHooks? = null): RequestBase<AddCommentResponseData> {
+    fun getAddFeedCommentRequest(
+        comment: Comment,
+        uploadFileHooks: UploadFileHooks? = null
+    ): RequestBase<AddCommentResponseData> {
         return AddFeedCommentRequest(repository, comment, uploadFileHooks)
     }
 
