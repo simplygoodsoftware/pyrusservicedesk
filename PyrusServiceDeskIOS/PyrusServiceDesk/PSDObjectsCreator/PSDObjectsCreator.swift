@@ -17,7 +17,7 @@ class PSDObjectsCreator {
     static func createRatingMessage(_ text: String) -> PSDRowMessage {
         let message = PSDObjectsCreator.createMessage(text, attachments:nil, user: PSDUser(personId: "", name: "", type: .support, imagePath: ""))
         message.isRatingMessage = true
-        return PSDRowMessage(message: message, attachment: nil)
+        return PSDRowMessage(message: message, attachment: nil, text: message.text)
     }
     
     static func createAttachment(_ data: Data, _ url: URL?) -> PSDAttachment {
