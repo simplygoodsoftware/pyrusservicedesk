@@ -114,6 +114,13 @@ extension Array where Element == [PSDRowMessage]{
         }
         let previousUser = personForMessage(at: previousNotEmpty(indexPath))
         let currentUser = personForMessage(at: IndexPath.init(row: indexPath.row, section: indexPath.section))
+        if
+            let currentUser = currentUser,
+            let name = currentUser.name,
+            String.exceptionSupportName(name)
+        {
+            return false
+        }
         if currentUser as? PSDPlaceholderUser != nil{
             if let previousUser = previousUser, previousUser.personId != PyrusServiceDesk.userId{
                 return false
