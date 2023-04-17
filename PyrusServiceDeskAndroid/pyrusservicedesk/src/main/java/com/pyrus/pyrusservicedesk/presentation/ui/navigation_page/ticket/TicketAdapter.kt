@@ -3,7 +3,6 @@ package com.pyrus.pyrusservicedesk.presentation.ui.navigation_page.ticket
 import android.graphics.Canvas
 import android.graphics.PorterDuff
 import android.graphics.drawable.AnimationDrawable
-import android.net.Uri
 import android.view.Gravity
 import android.view.View
 import android.view.View.*
@@ -29,7 +28,6 @@ import com.pyrus.pyrusservicedesk.utils.ConfigUtils
 import com.pyrus.pyrusservicedesk.utils.RequestUtils.Companion.getAvatarUrl
 import com.pyrus.pyrusservicedesk.utils.getTimeText
 import com.pyrus.pyrusservicedesk.utils.isImage
-import com.squareup.picasso.Picasso
 import kotlinx.android.synthetic.main.psd_view_holder_buttons.view.*
 import kotlinx.android.synthetic.main.psd_view_holder_comment_rating.view.*
 import kotlinx.android.synthetic.main.psd_view_holder_rating.view.*
@@ -51,6 +49,7 @@ internal class TicketAdapter: AdapterBase<TicketEntry>() {
 
     companion object {
         const val MAX_SYMBOLS_BEFORE_LEFT_ALIGNMENT = 8
+        const val PYRUS_SYSTEM_AUTHOR_NAME = "Pyrus System"
     }
 
     override val itemTouchHelper: ItemTouchHelper = ItemTouchHelper(TouchCallback())
@@ -164,13 +163,13 @@ internal class TicketAdapter: AdapterBase<TicketEntry>() {
                 if (this && shouldRedrawRecentCommentWithAvatar()) {
                     val toRedraw = recentInboundCommentPositionWithAvatar
                     itemView.post { notifyItemChanged(toRedraw) }
-                    recentInboundCommentPositionWithAvatar = adapterPosition
+                    recentInboundCommentPositionWithAvatar = absoluteAdapterPosition
                 }
             }
         }
 
         private fun shouldRedrawRecentCommentWithAvatar(): Boolean =
-            adapterPosition == itemsList.lastIndex && recentInboundCommentPositionWithAvatar != adapterPosition
+            absoluteAdapterPosition == itemsList.lastIndex && recentInboundCommentPositionWithAvatar != absoluteAdapterPosition
 
         private fun setAuthorNameAndVisibility(visible: Boolean) {
             authorName.visibility = if (visible) VISIBLE else GONE
@@ -189,17 +188,18 @@ internal class TicketAdapter: AdapterBase<TicketEntry>() {
         }
 
         private fun shouldShowAuthorName(): Boolean {
-            return adapterPosition == 0
-                    || with(itemsList[adapterPosition - 1]) {
+            return absoluteAdapterPosition == 0
+                    || with(itemsList[absoluteAdapterPosition - 1]) {
                 when {
                     this.type != Type.Comment -> true
+                    getItem().comment.author.name == PYRUS_SYSTEM_AUTHOR_NAME -> false
                     else -> getItem().comment.author != (this as CommentEntry).comment.author
                 }
             }
         }
 
         private fun shouldShowAuthorAvatar(): Boolean {
-            return with(itemsList.getOrNull(adapterPosition + 1)) {
+            return with(itemsList.getOrNull(absoluteAdapterPosition + 1)) {
                 when {
                     this?.type != Type.Comment -> true
                     else -> getItem().comment.author != (this as CommentEntry).comment.author
@@ -490,7 +490,7 @@ internal class TicketAdapter: AdapterBase<TicketEntry>() {
                                  actionState: Int,
                                  isCurrentlyActive: Boolean) {
 
-            if (viewHolder.adapterPosition == -1 || itemsList[viewHolder.adapterPosition].isNonShiftable())
+            if (viewHolder.absoluteAdapterPosition == -1 || itemsList[viewHolder.absoluteAdapterPosition].isNonShiftable())
                 return
             val maxItemViewShift = recyclerView.resources.getDimensionPixelSize(R.dimen.psd_comment_creation_time_width)
             val minInboundOffset =  recyclerView.resources.getDimensionPixelSize(R.dimen.psd_offset_default)
@@ -499,10 +499,10 @@ internal class TicketAdapter: AdapterBase<TicketEntry>() {
                 x = -maxItemViewShift.toFloat()
             for (position in 0 until recyclerView.childCount) {
                 recyclerView.findContainingViewHolder(recyclerView.getChildAt(position))?.let {
-                    if (it.adapterPosition == - 1 || itemsList[it.adapterPosition].isNonShiftable())
+                    if (it.absoluteAdapterPosition == - 1 || itemsList[it.absoluteAdapterPosition].isNonShiftable())
                         return@let
                     it.itemView.translationX = x
-                    if (itemsList[it.adapterPosition].isConsideredInbound()) {
+                    if (itemsList[it.absoluteAdapterPosition].isConsideredInbound()) {
                         it.itemView.findViewById<View>(R.id.author_and_comment)?.let { author_and_comment ->
                             if(abs(x) > author_and_comment.left - minInboundOffset)
                                 author_and_comment.translationX = abs(x) - author_and_comment.left + minInboundOffset
