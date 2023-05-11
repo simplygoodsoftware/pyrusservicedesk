@@ -29,7 +29,6 @@ import okhttp3.OkHttpClient
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 import java.util.concurrent.LinkedBlockingQueue
-import java.util.concurrent.TimeUnit
 import kotlin.coroutines.coroutineContext
 
 /**
@@ -115,13 +114,14 @@ internal class RetrofitWebRepository(
         return addComment(EMPTY_TICKET_ID, comment, uploadFileHooks)
     }
 
-    override suspend fun setPushToken(token: String?): SetPushTokenResponse {
+    override suspend fun setPushToken(token: String?, tokenType: String): SetPushTokenResponse {
         PLog.d(TAG, "setPushToken, " +
                 "appId: ${appId.getFirstNSymbols(10)}, " +
                 "userId: ${getUserId().getFirstNSymbols(10)}, " +
                 "instanceId: ${getInstanceId()?.getFirstNSymbols(10)}, " +
                 "apiVersion: ${getVersion()}, " +
-                "token: $token"
+                "token: $token, " +
+                "tokenType: $tokenType"
         )
         return withContext(Dispatchers.IO){
             try {
@@ -132,7 +132,8 @@ internal class RetrofitWebRepository(
                         getSecurityKey(),
                         getInstanceId(),
                         getVersion(),
-                        token
+                        token,
+                        tokenType
                     )
                 ).execute().run {
                     PLog.d(TAG, "setPushToken, isSuccessful: $isSuccessful, body() != null: ${body() != null}")

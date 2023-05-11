@@ -22,9 +22,10 @@ internal class RequestFactory(private val repository: GeneralRepository) {
 
     /**
      * @param token can be null. Push Notifications will stop then.
+     * @param tokenType cloud messaging type.
      */
-    fun getSetPushTokenRequest(token: String?): RequestBase<Unit> {
-        return SetPushTokenRequest(repository, token)
+    fun getSetPushTokenRequest(token: String?, tokenType: String): RequestBase<Unit> {
+        return SetPushTokenRequest(repository, token, tokenType)
     }
 
     fun getPendingFeedCommentsRequest(): Request<Comments> = GetFeedRequest(repository, false, false)
