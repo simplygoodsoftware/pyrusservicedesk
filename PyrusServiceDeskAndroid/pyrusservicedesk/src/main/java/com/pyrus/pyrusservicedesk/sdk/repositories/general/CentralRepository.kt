@@ -28,7 +28,8 @@ internal class CentralRepository(private val webRepository: RemoteRepository,
         return response
     }
 
-    override suspend fun setPushToken(token: String?): SetPushTokenResponse = webRepository.setPushToken(token)
+    override suspend fun setPushToken(token: String?, tokenType: String): SetPushTokenResponse =
+        webRepository.setPushToken(token, tokenType)
 
     override suspend fun addPendingFeedComment(comment: Comment) = offlineRepository.addPendingFeedComment(comment)
 

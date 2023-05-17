@@ -27,6 +27,7 @@ internal interface RemoteRepository {
     /**
      * Registers the given push [token].
      * @param token if null push notifications stop.
+     * @param tokenType cloud messaging type.
      */
-    suspend fun setPushToken(token: String?): SetPushTokenResponse
+    suspend fun setPushToken(token: String?, tokenType: String): SetPushTokenResponse
 }

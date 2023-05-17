@@ -73,6 +73,8 @@ class PyrusServiceDesk private constructor(
         internal const val API_VERSION_1: Int = 0
         internal const val API_VERSION_2: Int = 2
 
+        private const val DEFAULT_TOKEN_TYPE: String = "android"
+
         internal var logging = false
             private set
 
@@ -267,9 +269,15 @@ class PyrusServiceDesk private constructor(
          * @param token string token to be registered. If null then push notifications stop.
          * @param callback callback that is invoked when result of registering of the token is received.
          *  This is invoked without error when token is successfully registered.
+         * @param tokenType cloud messaging type. "android" by default.
          */
         @JvmStatic
-        fun setPushToken(token: String?, callback: SetPushTokenCallback) {
+        @JvmOverloads
+        fun setPushToken(
+            token: String?,
+            callback: SetPushTokenCallback,
+            tokenType: String = DEFAULT_TOKEN_TYPE
+        ) {
             PLog.d(TAG, "setPushToken, token: $token")
             val serviceDesk = get()
 
@@ -284,7 +292,7 @@ class PyrusServiceDesk private constructor(
                     GlobalScope.launch {
                         serviceDesk
                             .requestFactory
-                            .getSetPushTokenRequest(token)
+                            .getSetPushTokenRequest(token, tokenType)
                             .execute(object : ResponseCallback<Unit> {
                                 override fun onSuccess(data: Unit) {
                                     callback.onResult(null)
