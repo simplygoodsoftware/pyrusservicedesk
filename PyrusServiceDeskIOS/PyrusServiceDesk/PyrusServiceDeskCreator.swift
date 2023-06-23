@@ -117,8 +117,9 @@ import UIKit
     
     ///Show chat
     ///- parameter configuration: ServiceDeskConfiguration object or nil. ServiceDeskConfiguration is object that create custom interface: theme color,welcome message, image for support's avatar and chat title for navigation bar title. If nil, the default design will be used.
-    @objc public static func start(with configuration:ServiceDeskConfiguration?) -> UINavigationController? {
-        return psdStart(on: nil, configuration: configuration, completion: nil, onStopCallback: nil)
+    ///- parameter onStopCallback: OnStopCallback object or nil. OnStopCallback is object for getting a notification that PyrusServiceDesk was closed.
+    @objc public static func start(with configuration:ServiceDeskConfiguration?, onStopCallback: OnStopCallback? = nil) -> UINavigationController? {
+        return psdStart(on: nil, configuration: configuration, completion: nil, onStopCallback: onStopCallback)
     }
     
     ///The private function to show chat, all public calles this one.
