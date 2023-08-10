@@ -452,3 +452,16 @@ private extension URL {
     }
 }
 
+extension String {
+    private static let exceptionSupportNames: [String] = ["Pyrus System"]
+    static func exceptionSupportName(_ name: String) -> Bool {
+        for exName in exceptionSupportNames {
+            guard exName.caseInsensitiveCompare(name) == .orderedSame else {
+                continue
+            }
+            return true
+        }
+        return false
+    }
+}
+
