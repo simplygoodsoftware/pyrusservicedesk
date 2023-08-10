@@ -15,7 +15,7 @@ class PSDChatViewController: PSDViewController {
         self.tableView.isLoading = false
         self.tableView.reloadChat()
     }
-    
+    private var tableViewTopConstant: NSLayoutConstraint?
     override func viewDidLoad() {
         super.viewDidLoad()
         presentationController?.delegate = self
@@ -53,20 +53,11 @@ class PSDChatViewController: PSDViewController {
         recolorTextInput(messageInputView)
     }
     func resizeTable(){
-        var fr = self.view.bounds
-        fr.origin.y = (self.navigationController?.navigationBar.frame.size.height ?? 0) +  UIApplication.shared.statusBarFrame.height
-        fr.size.height =  fr.size.height - fr.origin.y 
-        if #available(iOS 11.0, *) {
-            fr.origin.x = self.view.safeAreaInsets.left
-            fr.size.width = fr.size.width - (fr.origin.x*2)
-        }
         if let infoView = PyrusServiceDesk.mainController?.customization?.infoView, !(PSDMessagesStorage.pyrusUserDefaults()?.bool(forKey: PSD_WAS_CLOSE_INFO_KEY) ?? true){
-            fr.origin.y += infoView.frame.size.height
-            fr.size.height -= infoView.frame.size.height
+            tableViewTopConstant?.constant = infoView.frame.size.height
+        } else {
+            tableViewTopConstant?.constant = 0
         }
-
-        self.tableView.frame = fr
-        
     }
     
     override func viewWillTransition(to size: CGSize, with coordinator: UIViewControllerTransitionCoordinator) {
@@ -156,9 +147,24 @@ class PSDChatViewController: PSDViewController {
     }
     /**Setting design To PyrusSupportChatViewController view, add subviews*/
     private func design() {
-        self.view.backgroundColor = PyrusServiceDesk.mainController?.customization?.customBackgroundColor ?? .psdBackground
-        self.view.addSubview(self.tableView)
-        self.tableView.addActivityView()
+        view.backgroundColor = PyrusServiceDesk.mainController?.customization?.customBackgroundColor ?? .psdBackground
+        view.addSubview(tableView)
+        tableView.translatesAutoresizingMaskIntoConstraints = false
+        if #available(iOS 11.0, *) {
+            tableViewTopConstant = tableView.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor)
+            tableView.leadingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.leadingAnchor).isActive = true
+            tableView.trailingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.trailingAnchor).isActive = true
+        } else {
+            tableViewTopConstant = tableView.topAnchor.constraint(equalTo: view.layoutMarginsGuide.topAnchor)
+            tableView.leadingAnchor.constraint(equalTo: view.layoutMarginsGuide.leadingAnchor).isActive = true
+            tableView.trailingAnchor.constraint(equalTo: view.layoutMarginsGuide.trailingAnchor).isActive = true
+        }
+        tableViewTopConstant?.isActive = true
+        tableView.bottomAnchor.constraint(equalTo: view.bottomAnchor).isActive = true
+        
+        
+        
+        tableView.addActivityView()
     }
     
     //MARK : Navigation
