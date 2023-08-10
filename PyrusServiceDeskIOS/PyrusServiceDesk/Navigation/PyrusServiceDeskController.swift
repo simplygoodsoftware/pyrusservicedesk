@@ -59,7 +59,6 @@ class PyrusServiceDeskController: PSDNavigationController {
         //remove all info about attachment preview download
         PSDPreviewSetter.clean()
         //stop all loading exept chat list
-        PSDMessageSend.stopAll()
         PSDGetChat.remove()
     }
     
