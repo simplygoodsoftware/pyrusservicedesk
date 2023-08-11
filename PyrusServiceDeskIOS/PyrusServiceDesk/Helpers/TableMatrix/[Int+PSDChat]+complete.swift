@@ -185,7 +185,7 @@ extension Array where Element == [PSDRowMessage]{
                 //detect this section exist
                 if self.count > section{
                     //if section is exist check if this is correct date or need to move indexes down
-                    if self[section].count > 0 && self[section][0].message.date.compareWithoutTime(with: message.date) == .equal{
+                    if self[section].count == 0 || self[section].count > 0 && self[section][0].message.date.compareWithoutTime(with: message.date) == .equal{
                         //has some messages with same date add new
                         let row = self.row(forMessage: message, section: section)
                         self[section].insert(contentsOf:PSDObjectsCreator.parseMessageToRowMessage(message), at: row)
