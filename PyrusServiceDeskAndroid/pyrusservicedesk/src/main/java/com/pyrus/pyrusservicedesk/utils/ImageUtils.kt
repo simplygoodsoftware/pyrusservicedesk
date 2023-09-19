@@ -5,7 +5,7 @@ import android.graphics.*
 import android.graphics.drawable.BitmapDrawable
 import android.graphics.drawable.Drawable
 import android.media.ThumbnailUtils
-import com.pyrus.pyrusservicedesk.utils.exif.SelfExifInterface
+import androidx.exifinterface.media.ExifInterface
 import com.squareup.picasso.Transformation
 
 /**
@@ -68,11 +68,11 @@ internal fun Bitmap.rotate(rotationDegrees: Float): Bitmap {
         true)
 }
 
-internal fun getImageRotation(exifInterface: SelfExifInterface): Int {
-    return when (exifInterface.getAttribute(SelfExifInterface.TAG_ORIENTATION)?.toInt()) {
-        SelfExifInterface.ORIENTATION_ROTATE_270 -> 270
-        SelfExifInterface.ORIENTATION_ROTATE_180 -> 180
-        SelfExifInterface.ORIENTATION_ROTATE_90 -> 90
+internal fun getImageRotation(exifInterface: ExifInterface): Int {
+    return when (exifInterface.getAttribute(ExifInterface.TAG_ORIENTATION)?.toInt()) {
+        ExifInterface.ORIENTATION_ROTATE_270 -> 270
+        ExifInterface.ORIENTATION_ROTATE_180 -> 180
+        ExifInterface.ORIENTATION_ROTATE_90 -> 90
         else -> 0
     }
 }
