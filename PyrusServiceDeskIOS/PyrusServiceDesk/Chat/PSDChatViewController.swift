@@ -95,11 +95,8 @@ class PSDChatViewController: PSDViewController {
         UIView.performWithoutAnimation {
              self.becomeFirstResponder()
         }
-        if firstLoad {
-            self.messageInputView.inputTextView.becomeFirstResponder()
-            firstLoad = false
-        }
     }
+    
     @objc private func appEnteredForeground(){
         self.tableView.addKeyboardListeners()
     }
@@ -244,7 +241,7 @@ class PSDChatViewController: PSDViewController {
     }
     override var inputAccessoryView: UIView?
     {
-        return messageInputView;
+        return messageInputView
     }
   
     //MARK: get user info automatic
@@ -368,6 +365,13 @@ extension PSDChatViewController: PSDChatTableViewDelegate {
         self.present(alert,
                 animated: true,
                 completion: nil)
+    }
+    
+    func dataIsShown() {
+        if firstLoad {
+            self.messageInputView.inputTextView.becomeFirstResponder()
+            firstLoad = false
+        }
     }
 }
 
