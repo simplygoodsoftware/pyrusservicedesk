@@ -148,6 +148,7 @@ class PSDChatTableView: PSDDetailTableView{
     }
     
     private func drawTableWithData() {
+        chatDelegate?.dataIsShown()
         needShowRating = storeChat?.showRating ?? false
         showRateIfNeed()
         
@@ -170,7 +171,6 @@ class PSDChatTableView: PSDDetailTableView{
             self.layoutIfNeeded()
             self.scrollsToBottom(animated: false)
         UIView.setAnimationsEnabled(true)
-        chatDelegate?.dataIsShown()
         addRefreshControls()
     }
     
