@@ -212,13 +212,18 @@ class PSDChatViewController: PSDViewController {
         self.navigationItem.rightBarButtonItem?.tintColor = color
     }
     @objc private func closeButtonAction(){
-        if(PyrusServiceDesk.mainController != nil){
+        if let mainController = PyrusServiceDesk.mainController {
             PyrusServiceDesk.mainController?.remove()//with quick opening - closing can be nil
-        }
-        else{
-            if let navigationController = self.navigationController as? PyrusServiceDeskController{
-                navigationController.remove()
-            }
+        } else if let navigationController = self.navigationController as? PyrusServiceDeskController {
+            navigationController.remove()
+        } else {
+            CATransaction.begin()
+            CATransaction.setCompletionBlock({
+                PyrusServiceDesk.stopCallback?.onStop()
+                PyrusServiceDeskController.clean()
+            })
+            navigationController?.popViewController(animated: true)
+            CATransaction.commit()
         }
         EventsLogger.logEvent(.resignFirstResponder, additionalInfo: "hideAllKeyboard() called after press on back button")
         UIView.performWithoutAnimation {
