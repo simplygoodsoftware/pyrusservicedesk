@@ -18,6 +18,7 @@ class PSDChatTableView: PSDDetailTableView{
     private var tableMatrix : [[PSDRowMessage]] = [[PSDRowMessage]()]
     private var heightsMap : [IndexPath : CGFloat] = [IndexPath : CGFloat]()
     private var storeChat: PSDChat?
+    private var gotData: Bool
     private var loadingTimer: Timer?
     private lazy var buttonsView: ButtonsView = {
         let view = ButtonsView(frame: .zero)
@@ -131,6 +132,7 @@ class PSDChatTableView: PSDDetailTableView{
                     guard let self = self else {
                         return
                     }
+                    self.gotData = true
                     if let chat = chat {
                         self.storeChat = chat
                         if !(self.loadingTimer?.isValid ?? false) {
@@ -148,6 +150,9 @@ class PSDChatTableView: PSDDetailTableView{
     }
     
     private func drawTableWithData() {
+        guard gotData else {
+            return
+        }
         chatDelegate?.dataIsShown()
         needShowRating = storeChat?.showRating ?? false
         showRateIfNeed()
