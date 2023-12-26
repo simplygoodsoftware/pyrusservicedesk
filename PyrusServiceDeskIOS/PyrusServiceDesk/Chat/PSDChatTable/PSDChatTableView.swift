@@ -18,7 +18,7 @@ class PSDChatTableView: PSDDetailTableView{
     private var tableMatrix : [[PSDRowMessage]] = [[PSDRowMessage]()]
     private var heightsMap : [IndexPath : CGFloat] = [IndexPath : CGFloat]()
     private var storeChat: PSDChat?
-    private var gotData: Bool
+    private var gotData: Bool = false
     private var loadingTimer: Timer?
     private lazy var buttonsView: ButtonsView = {
         let view = ButtonsView(frame: .zero)
