@@ -4,6 +4,7 @@ protocol PSDChatTableViewDelegate: NSObjectProtocol {
     func restartTimer()
     func showLinkOpenAlert(_ linkString: String)
     func send(_ message:String,_ attachments:[PSDAttachment])
+    func dataIsShown()
 }
 
 class PSDChatTableView: PSDDetailTableView{
@@ -16,6 +17,9 @@ class PSDChatTableView: PSDDetailTableView{
     private static let supportCellId = "CellSupport"
     private var tableMatrix : [[PSDRowMessage]] = [[PSDRowMessage]()]
     private var heightsMap : [IndexPath : CGFloat] = [IndexPath : CGFloat]()
+    private var storeChat: PSDChat?
+    private var gotData: Bool = false
+    private var loadingTimer: Timer?
     private lazy var buttonsView: ButtonsView = {
         let view = ButtonsView(frame: .zero)
         tableFooterView = view
@@ -54,7 +58,8 @@ class PSDChatTableView: PSDDetailTableView{
         
     }
     deinit {
-        self.removeRefreshControls()
+        removeRefreshControls()
+        clearTimer()
     }
     
     override func layoutSubviews() {
@@ -111,6 +116,7 @@ class PSDChatTableView: PSDDetailTableView{
         self.removeRefreshControls()
         heightsMap = [IndexPath : CGFloat]()
         tableMatrix = [[PSDRowMessage]()] // clean old chat
+        beginTimer()
         DispatchQueue.main.async {
             self.reloadData()
             self.isLoading = true
@@ -126,35 +132,53 @@ class PSDChatTableView: PSDDetailTableView{
                     guard let self = self else {
                         return
                     }
-                    self.needShowRating = chat?.showRating ?? false
-                    self.showRateIfNeed()
-                    
-                    self.isLoading = false
+                    self.gotData = true
                     if let chat = chat {
-                        self.tableMatrix.create(from: chat)
-                        self.lastMessageFromServer = chat.messages.last
-                        self.setLastActivityDate()
-                        self.buttonsView.updateWithButtons(PSDChat.draftAnswers(self.tableMatrix))
-                        self.reloadData()
-                        
-                        self.removeNoConnectionView()
-                        
-                        UIView.setAnimationsEnabled(false)
-                            self.scrollsToBottom(animated: false)
-                            self.setNeedsLayout()
-                            self.layoutIfNeeded()
-                            self.scrollsToBottom(animated: false)
-                            self.layoutIfNeeded()
-                            self.scrollsToBottom(animated: false)
-                        UIView.setAnimationsEnabled(true)
+                        self.storeChat = chat
+                        if !(self.loadingTimer?.isValid ?? false) {
+                            self.drawTableWithData()
+                        }
                     } else {
+                        self.needShowRating = chat?.showRating ?? false
+                        self.showRateIfNeed()
+                        self.isLoading = false
                         self.buttonsView.updateWithButtons(nil)
                     }
-                    self.addRefreshControls()
                 }
             }
         }
     }
+    
+    private func drawTableWithData() {
+        guard gotData else {
+            return
+        }
+        chatDelegate?.dataIsShown()
+        needShowRating = storeChat?.showRating ?? false
+        showRateIfNeed()
+        
+        isLoading = false
+        if let chat = storeChat {
+            tableMatrix.create(from: chat)
+            lastMessageFromServer = chat.messages.last
+        }
+        setLastActivityDate()
+        buttonsView.updateWithButtons(PSDChat.draftAnswers(tableMatrix))
+        reloadData()
+        
+        removeNoConnectionView()
+        
+        UIView.setAnimationsEnabled(false)
+            self.scrollsToBottom(animated: false)
+            self.setNeedsLayout()
+            self.layoutIfNeeded()
+            self.scrollsToBottom(animated: false)
+            self.layoutIfNeeded()
+            self.scrollsToBottom(animated: false)
+        UIView.setAnimationsEnabled(true)
+        addRefreshControls()
+    }
+    
     private func setLastActivityDate(){
         var lastDate: Date?
         if let lastMessage = self.lastMessageFromServer, lastMessage.owner.personId == PyrusServiceDesk.userId {
@@ -771,6 +795,27 @@ extension PSDChatTableView : PSDMessageSendDelegate{
     }
     
 }
+
+private extension PSDChatTableView {
+    private func clearTimer() {
+        loadingTimer?.invalidate()
+        loadingTimer = nil
+    }
+    
+    private func beginTimer() {
+        guard loadingTimer == nil else {
+            return
+        }
+        loadingTimer = Timer.scheduledTimer(timeInterval: LOADING_INTERVAL, target: self, selector: #selector(stopLoading), userInfo: nil, repeats: false)
+    }
+    
+    @objc func stopLoading(sender: Timer) {
+        clearTimer()
+        drawTableWithData()
+    }
+    var LOADING_INTERVAL: Double { 1 }
+}
+
 private extension UIFont {
     static let dateLabel = CustomizationHelper.systemFont(ofSize: 16.0)
 }

@@ -95,11 +95,8 @@ class PSDChatViewController: PSDViewController {
         UIView.performWithoutAnimation {
              self.becomeFirstResponder()
         }
-        if firstLoad {
-            self.messageInputView.inputTextView.becomeFirstResponder()
-            firstLoad = false
-        }
     }
+    
     @objc private func appEnteredForeground(){
         self.tableView.addKeyboardListeners()
     }
@@ -215,13 +212,18 @@ class PSDChatViewController: PSDViewController {
         self.navigationItem.rightBarButtonItem?.tintColor = color
     }
     @objc private func closeButtonAction(){
-        if(PyrusServiceDesk.mainController != nil){
+        if let mainController = PyrusServiceDesk.mainController {
             PyrusServiceDesk.mainController?.remove()//with quick opening - closing can be nil
-        }
-        else{
-            if let navigationController = self.navigationController as? PyrusServiceDeskController{
-                navigationController.remove()
-            }
+        } else if let navigationController = self.navigationController as? PyrusServiceDeskController {
+            navigationController.remove()
+        } else {
+            CATransaction.begin()
+            CATransaction.setCompletionBlock({
+                PyrusServiceDesk.stopCallback?.onStop()
+                PyrusServiceDeskController.clean()
+            })
+            navigationController?.popViewController(animated: true)
+            CATransaction.commit()
         }
         EventsLogger.logEvent(.resignFirstResponder, additionalInfo: "hideAllKeyboard() called after press on back button")
         UIView.performWithoutAnimation {
@@ -244,7 +246,7 @@ class PSDChatViewController: PSDViewController {
     }
     override var inputAccessoryView: UIView?
     {
-        return messageInputView;
+        return messageInputView
     }
   
     //MARK: get user info automatic
@@ -368,6 +370,13 @@ extension PSDChatViewController: PSDChatTableViewDelegate {
         self.present(alert,
                 animated: true,
                 completion: nil)
+    }
+    
+    func dataIsShown() {
+        if firstLoad {
+            self.messageInputView.inputTextView.becomeFirstResponder()
+            firstLoad = false
+        }
     }
 }
 

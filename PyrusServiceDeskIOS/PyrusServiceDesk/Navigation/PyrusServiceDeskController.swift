@@ -49,7 +49,7 @@ class PyrusServiceDeskController: PSDNavigationController {
         }
     }
     ///Clean all saved data
-    private func clean(){
+    static func clean(){
         //clean main controller
         PyrusServiceDesk.mainController = nil
         //remove all saved users, exept owner
@@ -96,7 +96,7 @@ class PyrusServiceDeskController: PSDNavigationController {
         if self.parent == nil{
             self.dismiss(animated: animated, completion: {
                 PyrusServiceDesk.stopCallback?.onStop()
-                self.clean()
+                PyrusServiceDeskController.clean()
             })
             
         }
@@ -104,7 +104,7 @@ class PyrusServiceDeskController: PSDNavigationController {
             let fake = self.parent
             fake?.dismiss(animated: animated, completion: {
                 PyrusServiceDesk.stopCallback?.onStop()
-                self.clean()
+                PyrusServiceDeskController.clean()
             })
             
         }
