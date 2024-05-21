@@ -72,7 +72,8 @@ extension AttachmentCollectionViewCell: Recolorable {
     }
     func recolor() {
         removeButton.setTitleColor(CustomizationHelper.textColorForInput.withAlphaComponent(CROSS_ALPHA), for: .normal)
-        removeButtonBack.backgroundColor = CustomizationHelper.grayInputColor.withAlphaComponent(BUTTON_ALPHA)
+        removeButtonBack.backgroundColor = .psdBackground
+        removeButton.backgroundColor = CustomizationHelper.grayInputColor.withAlphaComponent(BUTTON_ALPHA)
         holderView.layer.borderColor = CustomizationHelper.lightGrayInputColor.cgColor
     }
 }
