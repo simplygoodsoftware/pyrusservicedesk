@@ -1,7 +1,6 @@
 import Foundation
 extension PSDTableView   {
     func addKeyboardListeners(){
-        NotificationCenter.default.addObserver(self, selector:  #selector(keyboardWillHide(_:)), name: UIResponder.keyboardWillHideNotification, object: nil)
         NotificationCenter.default.addObserver(self, selector:  #selector(keyboardWillShow(_:)), name: UIResponder.keyboardWillShowNotification, object: nil)
     }
     func removeListeners(){
@@ -25,13 +24,6 @@ extension PSDTableView   {
         return 0
     }
     
-    @objc private func keyboardWillHide(_ notification: NSNotification) {
-        if let infoEndKey: NSValue = notification.userInfo?[UIResponder.keyboardFrameEndUserInfoKey] as? NSValue{
-            let keyboardEndFrame = infoEndKey.cgRectValue
-            
-            animateInset(keyboardEndFrame.height, notification: notification)
-        }
-    }
     @objc private func keyboardWillShow(_ notification: NSNotification) {
         if let infoEndKey: NSValue = notification.userInfo?[UIResponder.keyboardFrameEndUserInfoKey] as? NSValue {
             let keyboardEndFrame = infoEndKey.cgRectValue
@@ -39,10 +31,12 @@ extension PSDTableView   {
         }
     }
     private func animateInset(_ keyboardHeight:CGFloat, notification: NSNotification){
-       
+        guard self.findViewController()?.presentedViewController == nil else {
+            return
+        }
+        
         let duration = keyboardAnimationDuration(notification)
         let animationOption = animationOptions(notification)
-    
         
         let safeArea : CGFloat =  self.bottomPSDRefreshControl.insetHeight
         let bottomUnvisibleHeight = keyboardHeight + safeArea
@@ -86,6 +80,5 @@ extension PSDTableView   {
         return false
     
     }
-   
 }
 
