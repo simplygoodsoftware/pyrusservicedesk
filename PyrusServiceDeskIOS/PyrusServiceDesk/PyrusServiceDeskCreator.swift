@@ -22,7 +22,7 @@ import UIKit
     ///UserId needed for request
     static private(set) var userId: String = "" {
         didSet(oldUserId){
-            if userId.count>0 && userId != oldUserId{
+            if userId.count > 0 && userId != oldUserId {
                 let user = PSDUser.init(personId: userId, name: PyrusServiceDesk.userName, type: .user, imagePath: "")
                 PSDUsers.add(user: user)
             }

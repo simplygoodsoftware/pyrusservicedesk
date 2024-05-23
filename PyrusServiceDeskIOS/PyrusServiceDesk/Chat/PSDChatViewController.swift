@@ -24,10 +24,12 @@ class PSDChatViewController: PSDViewController {
             navigationItem.largeTitleDisplayMode = .never
             
         }
-        self.extendedLayoutIncludesOpaqueBars = true
-        self.tableView.chatDelegate = self
-        self.automaticallyAdjustsScrollViewInsets = false
-
+        extendedLayoutIncludesOpaqueBars = true
+        tableView.chatDelegate = self
+        automaticallyAdjustsScrollViewInsets = false
+        if #available(iOS 13.0, *) {
+            tableView.automaticallyAdjustsScrollIndicatorInsets = false
+        }
         self.design()
         self.designNavigation()
         self.customiseDesign(color: PyrusServiceDesk.mainController?.customization?.barButtonTintColor ?? UIColor.darkAppColor)
@@ -158,8 +160,6 @@ class PSDChatViewController: PSDViewController {
         }
         tableViewTopConstant?.isActive = true
         tableView.bottomAnchor.constraint(equalTo: view.bottomAnchor).isActive = true
-        
-        
         
         tableView.addActivityView()
     }

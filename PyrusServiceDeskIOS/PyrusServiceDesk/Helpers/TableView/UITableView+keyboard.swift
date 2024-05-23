@@ -13,16 +13,6 @@ extension PSDTableView   {
         }
         return 0
     }
-    private func animationOptions(_ notification: NSNotification)->AnimationOptions{
-        let curve : UInt = keyboardAnimationCurve(notification)
-        return UIView.AnimationOptions(rawValue: curve << 16)
-    }
-    private func keyboardAnimationCurve(_ notification: NSNotification) -> UInt{
-        if let animationCurveInt = (notification.userInfo?[UIResponder.keyboardAnimationCurveUserInfoKey] as? NSNumber)?.uintValue{
-            return animationCurveInt
-        }
-        return 0
-    }
     
     @objc private func keyboardWillShow(_ notification: NSNotification) {
         if let infoEndKey: NSValue = notification.userInfo?[UIResponder.keyboardFrameEndUserInfoKey] as? NSValue {
@@ -31,47 +21,42 @@ extension PSDTableView   {
         }
     }
     private func animateInset(_ keyboardHeight:CGFloat, notification: NSNotification){
-        guard self.findViewController()?.presentedViewController == nil else {
+        let duration = keyboardAnimationDuration(notification)
+        let safeArea =  self.bottomPSDRefreshControl.insetHeight
+        let bottomUnvisibleHeight = keyboardHeight + safeArea
+        var offsetDelta : CGFloat = 0
+        guard needChangeInset(bottomUnvisibleHeight) else {
             return
         }
-        
-        let duration = keyboardAnimationDuration(notification)
-        let animationOption = animationOptions(notification)
-        
-        let safeArea : CGFloat =  self.bottomPSDRefreshControl.insetHeight
-        let bottomUnvisibleHeight = keyboardHeight + safeArea
-        
-        var offsetDelta : CGFloat = 0
-        
-        if(needChangeOffset( keyboardHeight: bottomUnvisibleHeight )){
+        if(needChangeOffset(keyboardHeight: bottomUnvisibleHeight )){
             offsetDelta = bottomUnvisibleHeight - self.contentInset.bottom
             offsetDelta = min(offsetDelta,  self.contentSize.height - (self.frame.size.height-bottomUnvisibleHeight))
             offsetDelta = offsetDelta - self.bottomPSDRefreshControl.insetHeight
         }
-       
-        UIView.performWithoutAnimation {
+        let newOffset = newOffset(delta: offsetDelta, bottomInset: bottomUnvisibleHeight)
+        UIView.animate(withDuration: duration, delay: 0, animations: {
             self.contentInset.bottom = bottomUnvisibleHeight
             self.scrollIndicatorInsets.bottom = bottomUnvisibleHeight
-        }
-        DispatchQueue.main.async {
-            UIView.animate(withDuration: duration, delay: 0, options: [animationOption ,.beginFromCurrentState], animations: {
-                
-                self.changeContentOffset(changeOffset: offsetDelta)
-                
-            }, completion:{ (comletion : Bool) in
-            })
-        }
+            self.contentOffset.y = newOffset
+        }, completion: nil)
     }
-    private func changeContentOffset(changeOffset:CGFloat){
-        if changeOffset>0{
-            self.changeOffset(delta: changeOffset)
+    
+    private func needChangeInset(_ newInset: CGFloat) -> Bool {
+        if
+            let presentedViewController = findViewController()?.presentedViewController,
+            presentedViewController.isBeingDismissed
+        {
+            return contentInset.bottom <= newInset
         }
+        return true
     }
-    func changeOffset(delta:CGFloat){
+    
+    private func newOffset(delta: CGFloat, bottomInset: CGFloat) -> CGFloat {
         var newOffsetY = max(0,self.contentOffset.y + delta)//block  too little offset
-        newOffsetY = min(self.contentSize.height - (self.frame.size.height - self.contentInset.bottom),newOffsetY)//block  too big offset
-        self.contentOffset = CGPoint(x:0, y:newOffsetY)
+        newOffsetY = min(self.contentSize.height - (self.frame.size.height - bottomInset),newOffsetY)//block  too big offset
+        return newOffsetY
     }
+    
     private func needChangeOffset(keyboardHeight:CGFloat)->Bool{
         if(self.contentSize.height > (self.frame.size.height-keyboardHeight) && !self.isDragging){
             

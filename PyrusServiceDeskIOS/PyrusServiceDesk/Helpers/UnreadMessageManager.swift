@@ -83,7 +83,9 @@ class UnreadMessageManager {
     private static func checkLastComment(_ lastComment: PSDLastUnreadMessage) {
         guard let subscriber = PyrusServiceDesk.subscriber,
               !PyrusServiceDeskController.PSDIsOpen(),
-              !lastComment.isShown else {
+              !lastComment.isShown,
+              !lastComment.owner.equalTo(user: PSDUsers.user)
+        else {
             return
         }
         subscriber.onNewReply(hasUnreadComments: true, lastCommentText: lastComment.text, lastCommentAttachmentsCount: lastComment.attchmentsCount, lastCommentAttachments: lastComment.attachments, utcTime: lastComment.utcTime)

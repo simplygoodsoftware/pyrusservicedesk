@@ -90,7 +90,7 @@ class PSDRefreshControl : UIControl{
                 activity.addConstraint([.top], constant: REFRESH_CONTROL_DISTANCE)
             }
             else{
-                activity.addConstraint([.bottom], constant: REFRESH_CONTROL_DISTANCE)
+                activity.addConstraint([.bottom], constant: -REFRESH_CONTROL_DISTANCE)
             }
             
         }
@@ -119,8 +119,6 @@ class PSDRefreshControl : UIControl{
                     self.updateRefreshingState()
                 }
             }
-            
-            
         }
         else{
             super.observeValue(forKeyPath: keyPath, of: object, change: change, context: context)
@@ -146,7 +144,7 @@ class PSDRefreshControl : UIControl{
             self.insetHeight = REFRESH_CONTROL_HEIGHT
             self.changeState(true)
             self.activityScale(scale:MAXIMUM_ACTIVITY_SCALE)
-            })
+        })
     }
     ///Set frame to refresh.
     ///- parameter automatic: Is need automatic calculation of y position. If true refresh is show according to superview contentOffset, else it show on its visible position (0 from top or bottom).
