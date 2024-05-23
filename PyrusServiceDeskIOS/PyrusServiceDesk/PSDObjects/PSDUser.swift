@@ -1,6 +1,6 @@
 import UIKit
 
-enum userType : String{
+enum userType: String {
     case user
     case support
 }
@@ -29,7 +29,7 @@ class PSDUsers: NSObject {
 }
 ///
 let DEFAULT_SUPPORT_IMAGE = PSDSupportImageSetter.defaultSupportImage()
-class PSDUser: NSObject {
+class PSDUser: NSObject, Codable {
     //user saved in PyrusServiceDeskCreator is not denited
     ///Has only not support user
     var personId: String?
@@ -60,5 +60,25 @@ class PSDUser: NSObject {
         }
         
         return false
+    }
+    
+    private enum CodingKeys: String, CodingKey {
+        case personId, name, type, imagePath
+    }
+    
+    required public init(from decoder: Decoder) throws {
+        let values = try decoder.container(keyedBy: CodingKeys.self)
+        personId = try values.decode(String.self, forKey: .personId)
+        name = try values.decode(String.self, forKey: .name)
+        imagePath = try values.decode(String.self, forKey: .imagePath)
+        let typeString = try values.decode(String.self, forKey: .type)
+        type = userType(rawValue: typeString)
+    }
+    func encode(to encoder: Encoder) throws {
+        var values = encoder.container(keyedBy: CodingKeys.self)
+        try values.encode(personId, forKey: .personId)
+        try values.encode(name, forKey: .name)
+        try values.encode(imagePath, forKey: .imagePath)
+        try values.encode(type?.rawValue, forKey: .type)
     }
 }
