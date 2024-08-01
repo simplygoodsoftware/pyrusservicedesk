@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <com.google.android.flexbox.FlexboxLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/flButtons"
     app:flexDirection="row"
     app:flexWrap="wrap"
@@ -84,4 +85,48 @@
         android:minWidth="@dimen/psd_avatar_size_default"
         android:visibility="visible" />
 
+    <TextView
+        android:id="@+id/btnButton7"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:background="@drawable/chat_button_bg"
+        android:textAllCaps="false"
+        android:layout_margin="@dimen/psd_comments_item_space"
+        android:padding="@dimen/psd_offset_small"
+        android:gravity="center"
+        android:minWidth="@dimen/psd_avatar_size_default"
+        android:visibility="visible" />
+    <TextView
+        android:id="@+id/btnButton8"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:background="@drawable/chat_button_bg"
+        android:textAllCaps="false"
+        android:layout_margin="@dimen/psd_comments_item_space"
+        android:padding="@dimen/psd_offset_small"
+        android:gravity="center"
+        android:minWidth="@dimen/psd_avatar_size_default"
+        android:visibility="visible" />
+    <TextView
+        android:id="@+id/btnButton9"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:background="@drawable/chat_button_bg"
+        android:textAllCaps="false"
+        android:layout_margin="@dimen/psd_comments_item_space"
+        android:padding="@dimen/psd_offset_small"
+        android:gravity="center"
+        android:minWidth="@dimen/psd_avatar_size_default"
+        android:visibility="visible" />
+    <TextView
+        android:id="@+id/btnButton10"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:background="@drawable/chat_button_bg"
+        android:textAllCaps="false"
+        android:layout_margin="@dimen/psd_comments_item_space"
+        android:padding="@dimen/psd_offset_small"
+        android:gravity="center"
+        android:minWidth="@dimen/psd_avatar_size_default"
+        android:visibility="visible" />
 </com.google.android.flexbox.FlexboxLayout>
