@@ -64,6 +64,7 @@ class ButtonViewCell: UICollectionViewCell {
         maxWidthConstraint = backView.widthAnchor.constraint(lessThanOrEqualToConstant: maxWidth)
         maxWidthConstraint?.priority = UILayoutPriority(rawValue: 999)
         maxWidthConstraint?.isActive = true
+        label.setContentCompressionResistancePriority(.defaultHigh, for: .vertical)
     }
     
     required init?(coder: NSCoder) {
