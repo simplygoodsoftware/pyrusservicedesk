@@ -24,7 +24,10 @@ class PSDChat: NSObject {
         else {
             return nil
         }
+        if links.count > MAX_LINKS_COUNT {
+            return Array(links[..<MAX_LINKS_COUNT]) as [String]
+        }
         return links
     }
 }
-private let MAX_LINKS_COUNT: Int = 6
+private let MAX_LINKS_COUNT: Int = 10
