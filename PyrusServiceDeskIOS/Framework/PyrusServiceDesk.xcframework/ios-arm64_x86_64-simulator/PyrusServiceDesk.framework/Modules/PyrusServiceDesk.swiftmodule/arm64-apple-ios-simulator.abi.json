@@ -5204,35 +5204,28 @@
     {
       "filePath": "\/Users\/galinamuraveva\/pyrusservicedesk\/PyrusServiceDeskIOS\/PyrusServiceDesk\/Chat\/PSDChatTable\/PSDChatTableView.swift",
       "kind": "BooleanLiteral",
-      "offset": 873,
+      "offset": 870,
       "length": 5,
       "value": "false"
     },
     {
       "filePath": "\/Users\/galinamuraveva\/pyrusservicedesk\/PyrusServiceDeskIOS\/PyrusServiceDesk\/Chat\/PSDChatTable\/PSDChatTableView.swift",
       "kind": "BooleanLiteral",
-      "offset": 1149,
-      "length": 4,
-      "value": "true"
-    },
-    {
-      "filePath": "\/Users\/galinamuraveva\/pyrusservicedesk\/PyrusServiceDeskIOS\/PyrusServiceDesk\/Chat\/PSDChatTable\/PSDChatTableView.swift",
-      "kind": "BooleanLiteral",
-      "offset": 16206,
+      "offset": 16364,
       "length": 5,
       "value": "false"
     },
     {
       "filePath": "\/Users\/galinamuraveva\/pyrusservicedesk\/PyrusServiceDeskIOS\/PyrusServiceDesk\/Chat\/PSDChatTable\/PSDChatTableView.swift",
       "kind": "IntegerLiteral",
-      "offset": 16604,
+      "offset": 16762,
       "length": 2,
       "value": "20"
     },
     {
       "filePath": "\/Users\/galinamuraveva\/pyrusservicedesk\/PyrusServiceDeskIOS\/PyrusServiceDesk\/Chat\/PSDChatTable\/PSDChatTableView.swift",
       "kind": "FloatLiteral",
-      "offset": 37767,
+      "offset": 37962,
       "length": 4,
       "value": "16.0"
     },
@@ -5946,21 +5939,21 @@
     {
       "filePath": "\/Users\/galinamuraveva\/pyrusservicedesk\/PyrusServiceDeskIOS\/PyrusServiceDesk\/Helpers\/String\/XmlHelper.swift",
       "kind": "StringLiteral",
-      "offset": 10487,
+      "offset": 10491,
       "length": 51,
       "value": "\"[A-Z0-9a-z._%+-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,64}\""
     },
     {
       "filePath": "\/Users\/galinamuraveva\/pyrusservicedesk\/PyrusServiceDeskIOS\/PyrusServiceDesk\/Helpers\/String\/XmlHelper.swift",
       "kind": "StringLiteral",
-      "offset": 13629,
+      "offset": 13633,
       "length": 9,
       "value": "\"<[^>]*>\""
     },
     {
       "filePath": "\/Users\/galinamuraveva\/pyrusservicedesk\/PyrusServiceDeskIOS\/PyrusServiceDesk\/Helpers\/String\/XmlHelper.swift",
       "kind": "StringLiteral",
-      "offset": 13757,
+      "offset": 13761,
       "length": 16,
       "value": "\"+0(123)456-789\""
     },
