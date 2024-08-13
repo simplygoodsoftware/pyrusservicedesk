@@ -15,8 +15,8 @@ class PSDChatTableView: PSDDetailTableView{
     private var needShowRating : Bool = false
     private static let userCellId = "CellUser"
     private static let supportCellId = "CellSupport"
-    private var tableMatrix : [[PSDRowMessage]] = [[PSDRowMessage]()]
-    private var heightsMap : [IndexPath : CGFloat] = [IndexPath : CGFloat]()
+    private var tableMatrix: [[PSDRowMessage]] = [[PSDRowMessage]()]
+    private var heightsMap: [IndexPath: CGFloat] = [IndexPath : CGFloat]()
     private var storeChat: PSDChat?
     private var gotData: Bool = false
     private var loadingTimer: Timer?
@@ -294,6 +294,7 @@ class PSDChatTableView: PSDDetailTableView{
                                     }
                                     self.endUpdates()
                                     self.buttonsView.updateWithButtons(PSDChat.draftAnswers(self.tableMatrix), width: self.frame.size.width)
+                                    self.buttonsView.collectionView.collectionViewLayout.invalidateLayout()
                                     self.scrollToBottomAfterRefresh(with: oldContentOffset, oldContentSize: oldContentSize)
                                 }
                             }
@@ -356,18 +357,18 @@ class PSDChatTableView: PSDDetailTableView{
     private func scrollsToBottom(animated: Bool) {
         layoutIfNeeded()
         let lastRow = lastIndexPath()
+        let hasFooter = tableFooterView?.frame.size.height ?? 0 > 0
         if
             lastRow.row >= 0 || lastRow.section >= 0,
             !(lastRow.row == 0 && lastRow.section == 0)
         {
-            scrollToRow(at: lastRow, at: .bottom, animated: animated)
+            scrollToRow(at: lastRow, at: .bottom, animated: !hasFooter && animated)
         }
         if
             let tableFooterView = tableFooterView,
-            tableFooterView.frame.size.height > 0
+            hasFooter
         {
-            var frameFooter = tableFooterView.frame
-            frameFooter.size.height += 20
+            let frameFooter = tableFooterView.frame
             scrollRectToVisible(frameFooter, animated: animated)
         }
     }
