@@ -39,17 +39,23 @@ class ButtonsView: UIView {
         fatalError("init(coder:) has not been implemented")
     }
     
-    func updateWithButtons(_ buttons: [String]?) {
+    func updateWithButtons(_ buttons: [String]?, width: CGFloat) {
+        var newFrame = frame
+        newFrame.size.width = width
+        frame = newFrame
         self.buttons = buttons
         collectionView.reloadData()
+        setNeedsLayout()
         layoutIfNeeded()
+        collectionView.collectionViewLayout.invalidateLayout()
+        superview?.setNeedsLayout()
         superview?.layoutIfNeeded()
     }
 }
 
 extension ButtonsView: UICollectionViewDelegate, UICollectionViewDataSource {
     func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
-        buttons?.count ?? 0
+        return buttons?.count ?? 0
     }
     
     func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
