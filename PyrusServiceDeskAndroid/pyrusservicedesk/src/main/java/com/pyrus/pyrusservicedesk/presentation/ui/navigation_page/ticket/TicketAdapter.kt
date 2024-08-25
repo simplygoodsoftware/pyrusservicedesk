@@ -15,6 +15,9 @@ import androidx.recyclerview.widget.ItemTouchHelper.ACTION_STATE_SWIPE
 import androidx.recyclerview.widget.RecyclerView
 import com.pyrus.pyrusservicedesk.PyrusServiceDesk
 import com.pyrus.pyrusservicedesk.R
+import com.pyrus.pyrusservicedesk.databinding.PsdViewHolderButtonsBinding
+import com.pyrus.pyrusservicedesk.databinding.PsdViewHolderCommentRatingBinding
+import com.pyrus.pyrusservicedesk.databinding.PsdViewHolderRatingBinding
 import com.pyrus.pyrusservicedesk.presentation.ui.navigation_page.ticket.entries.*
 import com.pyrus.pyrusservicedesk.presentation.ui.view.CommentView
 import com.pyrus.pyrusservicedesk.presentation.ui.view.ContentType
@@ -28,9 +31,6 @@ import com.pyrus.pyrusservicedesk.utils.ConfigUtils
 import com.pyrus.pyrusservicedesk.utils.RequestUtils.Companion.getAvatarUrl
 import com.pyrus.pyrusservicedesk.utils.getTimeText
 import com.pyrus.pyrusservicedesk.utils.isImage
-import kotlinx.android.synthetic.main.psd_view_holder_buttons.view.*
-import kotlinx.android.synthetic.main.psd_view_holder_comment_rating.view.*
-import kotlinx.android.synthetic.main.psd_view_holder_rating.view.*
 import kotlin.math.abs
 
 
@@ -356,20 +356,21 @@ internal class TicketAdapter: AdapterBase<TicketEntry>() {
 
     private inner class RatingHolder(parent: ViewGroup) :
         ViewHolderBase<RatingEntry>(parent, R.layout.psd_view_holder_rating) {
+        private val binding: PsdViewHolderRatingBinding = PsdViewHolderRatingBinding.bind(itemView)
 
         init {
             ConfigUtils.getSecondaryColorOnMainBackground(itemView.context).apply {
-                itemView.rating1.setBackgroundColor(this)
-                itemView.rating2.setBackgroundColor(this)
-                itemView.rating3.setBackgroundColor(this)
-                itemView.rating4.setBackgroundColor(this)
-                itemView.rating5.setBackgroundColor(this)
+                binding.rating1.setBackgroundColor(this)
+                binding.rating2.setBackgroundColor(this)
+                binding.rating3.setBackgroundColor(this)
+                binding.rating4.setBackgroundColor(this)
+                binding.rating5.setBackgroundColor(this)
             }
         }
 
         override fun bindItem(item: RatingEntry) {
             super.bindItem(item)
-            with(itemView) {
+            with(binding) {
                 rating1.setOnClickListener { onRatingClickListener?.invoke(1)}
                 rating2.setOnClickListener { onRatingClickListener?.invoke(2)}
                 rating3.setOnClickListener { onRatingClickListener?.invoke(3)}
@@ -392,10 +393,11 @@ internal class TicketAdapter: AdapterBase<TicketEntry>() {
 
     private inner class RatingCommentHolder(parent: ViewGroup) :
         ViewHolderBase<CommentEntry>(parent, R.layout.psd_view_holder_comment_rating) {
+            private val binding = PsdViewHolderCommentRatingBinding.bind(itemView)
 
         override fun bindItem(item: CommentEntry) {
             super.bindItem(item)
-            with(itemView) {
+            with(binding) {
                 ratingImage.setImageResource(item.comment.rating?.ratingToEmojiRes() ?: R.drawable.ic_emoji_rating_3)
                 when {
                     getItem().hasError() -> {
@@ -411,7 +413,7 @@ internal class TicketAdapter: AdapterBase<TicketEntry>() {
                         statusIcon.visibility = GONE
                     }
                 }
-                setOnClickListener {
+                root.setOnClickListener {
                     if (getItem().hasError())
                         onErrorCommentEntryClickListener?.invoke(getItem())
                 }
@@ -422,11 +424,13 @@ internal class TicketAdapter: AdapterBase<TicketEntry>() {
 
     private class ButtonsHolder(parent: ViewGroup): ViewHolderBase<ButtonsEntry>(parent, R.layout.psd_view_holder_buttons) {
 
+        private val binding = PsdViewHolderButtonsBinding.bind(itemView)
+
         override fun bindItem(item: ButtonsEntry) {
             super.bindItem(item)
 
             item.buttons.forEachIndexed { index, buttonText ->
-                (itemView.flButtons.getChildAt(index) as? TextView)?.apply {
+                (binding.flButtons.getChildAt(index) as? TextView)?.apply {
                     text = buttonText
 
                     if (buttonText.length > MAX_SYMBOLS_BEFORE_LEFT_ALIGNMENT) {
@@ -444,8 +448,8 @@ internal class TicketAdapter: AdapterBase<TicketEntry>() {
                 }
             }
 
-            repeat(itemView.flButtons.childCount - item.buttons.size) {
-                itemView.flButtons.getChildAt(itemView.flButtons.childCount - 1 - it).apply {
+            repeat(binding.flButtons.childCount - item.buttons.size) {
+                binding.flButtons.getChildAt(binding.flButtons.childCount - 1 - it).apply {
                     visibility = GONE
                     setOnClickListener(null)
                 }

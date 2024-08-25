@@ -3,16 +3,16 @@ package com.pyrus.pyrusservicedesk.presentation
 import androidx.lifecycle.Observer
 import android.graphics.PorterDuff
 import android.os.Bundle
+import android.view.View
 import android.view.View.GONE
 import android.view.View.VISIBLE
+import android.widget.Button
 import android.widget.ProgressBar
 import com.pyrus.pyrusservicedesk.R
 import com.pyrus.pyrusservicedesk.presentation.viewmodel.ConnectionViewModelBase
 import com.pyrus.pyrusservicedesk.utils.ConfigUtils
 import com.pyrus.pyrusservicedesk.utils.getColorByAttrId
 import com.pyrus.pyrusservicedesk.utils.getViewModel
-import kotlinx.android.synthetic.main.psd_activity_ticket.*
-import kotlinx.android.synthetic.main.psd_no_connection.*
 
 private const val ANIMATION_DURATION = 200L
 
@@ -43,8 +43,8 @@ internal abstract class ConnectionActivityBase<T: ConnectionViewModelBase>(viewM
         progressBar?.progressDrawable?.setColorFilter(
                 getColorByAttrId(this, R.attr.colorAccentSecondary),
                 PorterDuff.Mode.SRC_IN)
-        reconnectButton.setOnClickListener { reconnect() }
-        reconnectButton.setTextColor(ConfigUtils.getAccentColor(this))
+        findViewById<Button>(R.id.reconnectButton).setOnClickListener { reconnect() }
+        findViewById<Button>(R.id.reconnectButton).setTextColor(ConfigUtils.getAccentColor(this))
         refresher = findViewById(refresherViewId)
         refresher?.setOnRefreshListener { viewModel.loadData() }
     }
@@ -52,25 +52,18 @@ internal abstract class ConnectionActivityBase<T: ConnectionViewModelBase>(viewM
     override fun startObserveData() {
         super.startObserveData()
         viewModel.getIsNetworkConnectedLiveData().observe(
-            this,
-            { isConnected ->
-                isConnected?.let {
-                    no_connection.visibility = if (it) GONE else VISIBLE
-                }
+            this
+        ) { isConnected ->
+            isConnected?.let {
+                findViewById<View>(R.id.no_connection).visibility = if (it) GONE else VISIBLE
             }
-        )
-        viewModel.getLoadingProgressLiveData().observe(
-            this,
-            { progress ->
-                progress?.let { updateProgress(it) }
-            }
-        )
-        sharedViewModel.getUpdateServiceDeskLiveData().observe(
-            this,
-            {
-                viewModel.loadData()
-            }
-        )
+        }
+        viewModel.getLoadingProgressLiveData().observe(this) { progress ->
+            progress?.let { updateProgress(it) }
+        }
+        sharedViewModel.getUpdateServiceDeskLiveData().observe(this) {
+            viewModel.loadData()
+        }
     }
 
     /**
