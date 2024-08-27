@@ -19,7 +19,7 @@ import java.util.*
 internal class LocalDataProvider(offlineRepository: OfflineRepository,
                                  private val fileResolver: FileResolver) {
 
-    private var lastLocalCommentId: Int = 0
+    private var lastLocalCommentId: Long = 0
 
     init {
         runBlocking {
@@ -30,7 +30,7 @@ internal class LocalDataProvider(offlineRepository: OfflineRepository,
                 ?.comments
                 ?.lastOrNull()
                 ?.localId
-                ?: 0
+                ?: 0L
         }
     }
 
@@ -64,7 +64,7 @@ internal class LocalDataProvider(offlineRepository: OfflineRepository,
      *
      * @return comment instance with the substituted [serverCommentId]
      */
-    fun convertLocalCommentToServer(localComment: Comment, serverCommentId: Int, attachments: List<Attachment>?): Comment {
+    fun convertLocalCommentToServer(localComment: Comment, serverCommentId: Long, attachments: List<Attachment>?): Comment {
         return Comment(
             serverCommentId,
             localComment.body,
