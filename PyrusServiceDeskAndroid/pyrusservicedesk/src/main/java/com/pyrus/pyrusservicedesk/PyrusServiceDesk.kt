@@ -4,6 +4,7 @@ import android.app.Activity
 import android.app.Application
 import android.content.Context
 import android.net.Uri
+import android.os.Build
 import androidx.annotation.MainThread
 import com.google.gson.GsonBuilder
 import com.pyrus.pyrusservicedesk.log.PLog
@@ -510,6 +511,13 @@ class PyrusServiceDesk private constructor(
                     requestBuilder.header("Authorization", authToken)
                 }
 
+                val userAgent = "ServicedeskClient/android/" +
+                    Build.MANUFACTURER + "/" +
+                    Build.MODEL + "/" +
+                    Build.VERSION.SDK_INT + "/" +
+                    BuildConfig.VERSION_NAME
+
+                requestBuilder.header("User-Agent", userAgent)
                 chain.proceed(requestBuilder.build())
             }.build()
 
