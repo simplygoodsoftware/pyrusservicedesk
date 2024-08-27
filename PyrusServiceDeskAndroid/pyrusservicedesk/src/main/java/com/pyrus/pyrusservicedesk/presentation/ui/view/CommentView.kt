@@ -19,6 +19,7 @@ import android.text.style.ClickableSpan
 import android.text.util.Linkify
 import android.util.AttributeSet
 import android.view.Gravity
+import android.view.LayoutInflater
 import android.view.View
 import android.view.View.OnClickListener
 import android.view.animation.DecelerateInterpolator
@@ -35,11 +36,11 @@ import androidx.core.text.util.LinkifyCompat
 import androidx.exifinterface.media.ExifInterface
 import com.pyrus.pyrusservicedesk.PyrusServiceDesk
 import com.pyrus.pyrusservicedesk.R
+import com.pyrus.pyrusservicedesk.databinding.PsdCommentBinding
 import com.pyrus.pyrusservicedesk.presentation.ui.view.OutlineImageView.Companion.EDGE_RIGHT
 import com.pyrus.pyrusservicedesk.utils.*
 import com.squareup.picasso.Picasso
 import com.squareup.picasso.Target
-import kotlinx.android.synthetic.main.psd_comment.view.*
 import java.util.regex.Matcher
 import java.util.regex.Pattern
 
@@ -108,21 +109,21 @@ internal class CommentView @JvmOverloads constructor(
         set(value) {
             when (value) {
                 ContentType.Text -> {
-                    comment_text.visibility = View.VISIBLE
-                    attachment_layout.visibility = View.GONE
-                    preview_layout.visibility = GONE
+                    binding.commentText.visibility = View.VISIBLE
+                    binding.attachmentLayout.visibility = View.GONE
+                    binding.previewLayout.visibility = GONE
                 }
                 ContentType.Attachment -> {
                     recentProgress = 0
-                    comment_text.visibility = View.GONE
-                    attachment_layout.visibility = View.VISIBLE
-                    preview_layout.visibility = View.GONE
+                    binding.commentText.visibility = View.GONE
+                    binding.attachmentLayout.visibility = View.VISIBLE
+                    binding.previewLayout.visibility = View.GONE
                 }
                 ContentType.PreviewableAttachment -> {
                     recentProgress = 0
-                    comment_text.visibility = GONE
-                    attachment_layout.visibility = GONE
-                    preview_layout.visibility = View.VISIBLE
+                    binding.commentText.visibility = GONE
+                    binding.attachmentLayout.visibility = GONE
+                    binding.previewLayout.visibility = View.VISIBLE
                 }
             }
             field = value
@@ -211,19 +212,20 @@ internal class CommentView @JvmOverloads constructor(
     private var loadPreviewRunnable: Runnable? = null
     private var previewCallId = 0
 
+    private val binding: PsdCommentBinding = PsdCommentBinding.inflate(LayoutInflater.from(context), this, true)
+
     init {
-        View.inflate(context, R.layout.psd_comment, this)
 
         type = with(getContext().obtainStyledAttributes(attrs, R.styleable.CommentView)){
             getInt(R.styleable.CommentView_type, TYPE_INBOUND).also { recycle() }
         }
 
-        preview_passive_progress.indeterminateDrawable.setColorFilter(Color.BLACK, PorterDuff.Mode.SRC_IN)
+        binding.previewPassiveProgress.indeterminateDrawable.setColorFilter(Color.BLACK, PorterDuff.Mode.SRC_IN)
 
         ConfigUtils.getMainFontTypeface()?.let {
-            file_name.typeface = it
-            file_size.typeface = it
-            comment_text.typeface = it
+            binding.fileName.typeface = it
+            binding.fileSize.typeface = it
+            binding.commentText.typeface = it
         }
         val backgroundColor = when (type){
             TYPE_INBOUND -> ConfigUtils.getSupportMessageTextBackgroundColor(context)
@@ -233,37 +235,37 @@ internal class CommentView @JvmOverloads constructor(
         primaryColor = getTextColorOnBackground(context, backgroundColor)
         val secondaryColor = adjustColorChannel(primaryColor, ColorChannel.Alpha, SECONDARY_TEXT_COLOR_MULTIPLIER)
 
-        background_parent.setCardBackgroundColor(backgroundColor)
+        binding.backgroundParent.setCardBackgroundColor(backgroundColor)
 
-        comment_text.setTextColor(when(type) {
+        binding.commentText.setTextColor(when(type) {
             TYPE_INBOUND -> ConfigUtils.getSupportMessageTextColor(context, backgroundColor)
             else -> ConfigUtils.getUserMessageTextColor(context, backgroundColor)
         })
-        comment_text.setLinkTextColor(primaryColor)
-        file_name.setTextColor(primaryColor)
-        file_size.setTextColor(secondaryColor)
+        binding.commentText.setLinkTextColor(primaryColor)
+        binding.fileName.setTextColor(primaryColor)
+        binding.fileSize.setTextColor(secondaryColor)
 
-        fileDownloadDrawable = attachment_progress.progressDrawable as LayerDrawable
+        fileDownloadDrawable = binding.attachmentProgress.progressDrawable as LayerDrawable
         fileDownloadDrawable.adjustSettingsForProgress(primaryColor, secondaryColor)
-        previewDownloadDrawable = preview_progress.progressDrawable as LayerDrawable
+        previewDownloadDrawable = binding.previewProgress.progressDrawable as LayerDrawable
         previewDownloadDrawable.adjustSettingsForProgress(primaryColor, secondaryColor)
 
-        preview_full.outlineColor = ActivityCompat.getColor(context, R.color.psd_comment_preview_outline)
-        preview_full.outlineRadius = resources.getDimensionPixelSize(R.dimen.psd_comment_radius)
-        preview_full.outlineWidth = resources.getDimensionPixelSize(R.dimen.psd_comment_preview_outline_radius)
+        binding.previewFull.outlineColor = ActivityCompat.getColor(context, R.color.psd_comment_preview_outline)
+        binding.previewFull.outlineRadius = resources.getDimensionPixelSize(R.dimen.psd_comment_radius)
+        binding.previewFull.outlineWidth = resources.getDimensionPixelSize(R.dimen.psd_comment_preview_outline_radius)
 
-        preview_mini.outlineColor = backgroundColor
-        preview_mini.outlineRadius = resources.getDimensionPixelSize(R.dimen.psd_comment_radius)
-        preview_mini.outlineWidth = resources.getDimensionPixelSize(R.dimen.psd_comment_preview_outline_radius)
-        preview_mini.edges = preview_mini.edges and EDGE_RIGHT.inv()
+        binding.previewMini.outlineColor = backgroundColor
+        binding.previewMini.outlineRadius = resources.getDimensionPixelSize(R.dimen.psd_comment_radius)
+        binding.previewMini.outlineWidth = resources.getDimensionPixelSize(R.dimen.psd_comment_preview_outline_radius)
+        binding.previewMini.edges = binding.previewMini.edges and EDGE_RIGHT.inv()
 
-        root.gravity = Gravity.BOTTOM or when(type){
+        binding.root.gravity = Gravity.BOTTOM or when(type){
             TYPE_INBOUND -> Gravity.START
             else -> Gravity.END
         }
 
-        preview_progress.setOnClickListener(progressClickListener)
-        attachment_progress.setOnClickListener(progressClickListener)
+        binding.previewProgress.setOnClickListener(progressClickListener)
+        binding.attachmentProgress.setOnClickListener(progressClickListener)
         statusView = AppCompatImageView(context).apply {
             layoutParams = LinearLayout.LayoutParams(
                     resources.getDimension(R.dimen.psd_comment_error_width).toInt(),
@@ -274,26 +276,26 @@ internal class CommentView @JvmOverloads constructor(
     }
 
     override fun setOnClickListener(l: OnClickListener?) {
-        background_parent.setOnClickListener(l)
+        binding.backgroundParent.setOnClickListener(l)
     }
 
     override fun setOnLongClickListener(l: OnLongClickListener?) {
-        background_parent.setOnLongClickListener(l)
+        binding.backgroundParent.setOnLongClickListener(l)
     }
 
     override fun onAttachedToWindow() {
         super.onAttachedToWindow()
-        root.removeView(statusView)
+        binding.root.removeView(statusView)
         (layoutParams as MarginLayoutParams).apply {
             val margin = -statusView.layoutParams.width
             when (type) {
                 TYPE_INBOUND -> {
                     rightMargin = margin
-                    root.addView(statusView)
+                    binding.root.addView(statusView)
                 }
                 else -> {
                     leftMargin = margin
-                    root.addView(statusView, 0)
+                    binding.root.addView(statusView, 0)
                 }
             }
         }
@@ -305,10 +307,10 @@ internal class CommentView @JvmOverloads constructor(
      */
     fun setCommentText(text: String) {
         val filteredText = text.replace("<br>", "\n").replace(Regex("\\n?<button>(.*?)</button>|\\n *?$|^ *?\\n"), "")
-        comment_text.text = replaceLinkTagsWithSpans(filteredText)
-        LinkifyCompat.addLinks(comment_text, Linkify.WEB_URLS or Linkify.PHONE_NUMBERS)
-        addDeepLinks(comment_text)
-        comment_text.movementMethod = LinkMovementMethod.getInstance()
+        binding.commentText.text = replaceLinkTagsWithSpans(filteredText)
+        LinkifyCompat.addLinks(binding.commentText, Linkify.WEB_URLS or Linkify.PHONE_NUMBERS)
+        addDeepLinks(binding.commentText)
+        binding.commentText.movementMethod = LinkMovementMethod.getInstance()
     }
 
     private fun replaceLinkTagsWithSpans(text: CharSequence): CharSequence {
@@ -437,7 +439,7 @@ internal class CommentView @JvmOverloads constructor(
      * Works with [ContentType.Attachment].
      */
     fun setFileName(fileName: String) {
-        file_name.text = fileName
+        binding.fileName.text = fileName
     }
 
     /**
@@ -455,7 +457,7 @@ internal class CommentView @JvmOverloads constructor(
             isMegabytes -> R.string.psd_file_size_mb
             else -> R.string.psd_file_size_kb
         }
-        file_size.text = context.getString(textResId, toShow)
+        binding.fileSize.text = context.getString(textResId, toShow)
     }
 
     /**
@@ -465,8 +467,8 @@ internal class CommentView @JvmOverloads constructor(
     fun setProgress(progress: Int) {
         recentProgress = progress
         val progressBar = when(contentType){
-            ContentType.Attachment -> attachment_progress
-            ContentType.PreviewableAttachment -> preview_progress
+            ContentType.Attachment -> binding.attachmentProgress
+            ContentType.PreviewableAttachment -> binding.previewProgress
             else -> null
         }
         progressBar?.let {
@@ -501,25 +503,25 @@ internal class CommentView @JvmOverloads constructor(
     }
 
     private fun setMiniPreview(previewUri: Uri) {
-        preview_mini.setImageBitmap(null)
-        preview_mini.visibility = GONE
+        binding.previewMini.setImageBitmap(null)
+        binding.previewMini.visibility = GONE
         when {
-            previewUri.isRemote() -> setNetworkPreview(previewUri, preview_mini, false)
+            previewUri.isRemote() -> setNetworkPreview(previewUri, binding.previewMini, false)
         }
     }
 
     private fun setFullSizePreview(previewUri: Uri) {
         val isRemote = previewUri.isRemote()
-        preview_progress.visibility = if (isRemote) GONE else View.VISIBLE
-        preview_full.setImageBitmap(null)
+        binding.previewProgress.visibility = if (isRemote) GONE else View.VISIBLE
+        binding.previewFull.setImageBitmap(null)
         when {
-            isRemote -> setNetworkPreview(previewUri, preview_full, true)
-            else -> setLocalPreview(preview_full, previewUri, true)
+            isRemote -> setNetworkPreview(previewUri, binding.previewFull, true)
+            else -> setLocalPreview(binding.previewFull, previewUri, true)
         }
     }
 
     private fun applyProgressStatusToPreview(status: Status) {
-        preview_progress.visibility = when(status){
+        binding.previewProgress.visibility = when(status){
             Status.Completed -> GONE
             else -> View.VISIBLE
         }
@@ -529,7 +531,7 @@ internal class CommentView @JvmOverloads constructor(
         if (status != Status.Processing)
             setFileSize(recentFileSize)
         else
-            file_size.setText(R.string.psd_uploading)
+            binding.fileSize.setText(R.string.psd_uploading)
     }
 
     private fun setNetworkPreview(previewUri: Uri,

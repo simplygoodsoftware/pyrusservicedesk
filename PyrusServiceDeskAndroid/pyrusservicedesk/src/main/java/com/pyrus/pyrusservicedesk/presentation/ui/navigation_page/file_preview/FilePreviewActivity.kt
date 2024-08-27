@@ -12,17 +12,27 @@ import android.view.Menu
 import android.view.MenuInflater
 import android.view.MenuItem
 import android.view.MenuItem.SHOW_AS_ACTION_ALWAYS
-import android.view.View.*
+import android.view.View.GONE
+import android.view.View.NO_ID
+import android.view.View.VISIBLE
+import android.view.ViewGroup
 import android.view.WindowManager
 import android.view.animation.LinearInterpolator
-import android.webkit.*
+import android.webkit.WebChromeClient
+import android.webkit.WebResourceError
+import android.webkit.WebResourceRequest
+import android.webkit.WebView
+import android.webkit.WebViewClient
 import com.pyrus.pyrusservicedesk.PyrusServiceDesk
 import com.pyrus.pyrusservicedesk.R
+import com.pyrus.pyrusservicedesk.databinding.PsdActivityFilePreviewBinding
 import com.pyrus.pyrusservicedesk.presentation.ConnectionActivityBase
 import com.pyrus.pyrusservicedesk.sdk.data.intermediate.FileData
-import com.pyrus.pyrusservicedesk.utils.*
-import kotlinx.android.synthetic.main.psd_activity_file_preview.*
-import kotlinx.android.synthetic.main.psd_no_connection.*
+import com.pyrus.pyrusservicedesk.utils.ConfigUtils
+import com.pyrus.pyrusservicedesk.utils.animateInfinite
+import com.pyrus.pyrusservicedesk.utils.getColorOnBackground
+import com.pyrus.pyrusservicedesk.utils.getSecondaryColorOnBackground
+import com.pyrus.pyrusservicedesk.utils.getTextColorOnBackground
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
@@ -32,6 +42,8 @@ import kotlinx.coroutines.launch
  */
 internal class FilePreviewActivity: ConnectionActivityBase<FilePreviewViewModel>(
     FilePreviewViewModel::class.java) {
+
+    private lateinit var binding: PsdActivityFilePreviewBinding
 
     companion object {
 
@@ -71,40 +83,42 @@ internal class FilePreviewActivity: ConnectionActivityBase<FilePreviewViewModel>
         supportActionBar?.apply {
             title = ""
         }
-        toolbar_title.text = viewModel.getFileName()
-        toolbar_title.setTextColor(getTextColorOnBackground(this, ConfigUtils.getHeaderBackgroundColor(this)))
-        file_preview_toolbar.setNavigationIcon(R.drawable.psd_arrow_back)
-        file_preview_toolbar.setNavigationOnClickListener { finish() }
-        file_preview_toolbar.navigationIcon?.setColorFilter(
+
+        binding = PsdActivityFilePreviewBinding.bind(this.findViewById<ViewGroup>(android.R.id.content).getChildAt(0))
+        binding.toolbarTitle.text = viewModel.getFileName()
+        binding.toolbarTitle.setTextColor(getTextColorOnBackground(this, ConfigUtils.getHeaderBackgroundColor(this)))
+        binding.filePreviewToolbar.setNavigationIcon(R.drawable.psd_arrow_back)
+        binding.filePreviewToolbar.setNavigationOnClickListener { finish() }
+        binding.filePreviewToolbar.navigationIcon?.setColorFilter(
             ConfigUtils.getToolbarButtonColor(this),
             PorterDuff.Mode.SRC_ATOP
         )
-        file_preview_toolbar.setOnMenuItemClickListener { onMenuItemClicked(it) }
-        file_extension.text = viewModel.getExtension()
+        binding.filePreviewToolbar.setOnMenuItemClickListener { onMenuItemClicked(it) }
+        binding.fileExtension.text = viewModel.getExtension()
 
         ConfigUtils.getMainFontTypeface()?.let {
-            file_extension.typeface = it
-            download_button.typeface = it
-            no_preview_text.typeface = it
+            binding.fileExtension.typeface = it
+            binding.downloadButton.typeface = it
+            binding.noPreviewText.typeface = it
         }
         ConfigUtils.getMainBoldFontTypeface()?.let {
-            toolbar_title.typeface = it
+            binding.toolbarTitle.typeface = it
         }
         val secondaryColor = getSecondaryColorOnBackground(ConfigUtils.getNoPreviewBackgroundColor(this))
-        file_extension.setTextColor(getColorOnBackground(ConfigUtils.getNoPreviewBackgroundColor(this), 40))
-        no_preview_text.setTextColor(secondaryColor)
+        binding.fileExtension.setTextColor(getColorOnBackground(ConfigUtils.getNoPreviewBackgroundColor(this), 40))
+        binding.noPreviewText.setTextColor(secondaryColor)
 
-        download_button.setTextColor(ConfigUtils.getAccentColor(this))
+        binding.downloadButton.setTextColor(ConfigUtils.getAccentColor(this))
 
-        file_preview_toolbar.setBackgroundColor(ConfigUtils.getHeaderBackgroundColor(this))
+        binding.filePreviewToolbar.setBackgroundColor(ConfigUtils.getHeaderBackgroundColor(this))
 
 
-        noConnectionImageView.setColorFilter(secondaryColor)
-        noConnectionTextView.setTextColor(secondaryColor)
-        reconnectButton.setTextColor(ConfigUtils.getAccentColor(this))
-        no_connection.setBackgroundColor(ConfigUtils.getNoConnectionBackgroundColor(this))
+        binding.noConnection.noConnectionImageView.setColorFilter(secondaryColor)
+        binding.noConnection.noConnectionTextView.setTextColor(secondaryColor)
+        binding.noConnection.reconnectButton.setTextColor(ConfigUtils.getAccentColor(this))
+        binding.noConnection.root.setBackgroundColor(ConfigUtils.getNoConnectionBackgroundColor(this))
 
-        web_view.apply{
+        binding.webView.apply{
             settings.apply {
                 builtInZoomControls = true
                 setSupportZoom(true)
@@ -130,7 +144,7 @@ internal class FilePreviewActivity: ConnectionActivityBase<FilePreviewViewModel>
         }
 
         if (savedInstanceState != null) {
-            web_view.restoreState(savedInstanceState)
+            binding.webView.restoreState(savedInstanceState)
             pageFinishedSuccessfully = savedInstanceState.getBoolean(STATE_FINISHED_SUCCESSFULLY)
         }
 
@@ -140,12 +154,12 @@ internal class FilePreviewActivity: ConnectionActivityBase<FilePreviewViewModel>
             window.statusBarColor = ConfigUtils.getStatusBarColor(this)?: window.statusBarColor
         }
 
-        no_preview.setBackgroundColor(ConfigUtils.getNoPreviewBackgroundColor(this))
+        binding.noPreview.setBackgroundColor(ConfigUtils.getNoPreviewBackgroundColor(this))
     }
 
     override fun onSaveInstanceState(outState: Bundle) {
         super.onSaveInstanceState(outState)
-        web_view.saveState(outState)
+        binding.webView.saveState(outState)
         outState.putBoolean(STATE_FINISHED_SUCCESSFULLY, pageFinishedSuccessfully)
     }
 
@@ -183,7 +197,7 @@ internal class FilePreviewActivity: ConnectionActivityBase<FilePreviewViewModel>
     override fun updateProgress(newProgress: Int) {
         super.updateProgress(newProgress)
         if (newProgress == resources.getInteger(R.integer.psd_progress_max_value))
-            while (web_view.zoomOut()){}
+            while (binding.webView.zoomOut()){}
     }
 
     override fun isValidPermissionRequestCode(requestCode: Int)
@@ -196,14 +210,14 @@ internal class FilePreviewActivity: ConnectionActivityBase<FilePreviewViewModel>
     }
 
     private fun applyNonPreviewableViewModel(model: FileViewModel) {
-        web_view.visibility = GONE
-        progress_bar.visibility = GONE
-        no_preview.visibility = VISIBLE
+        binding.webView.visibility = GONE
+        binding.progressBar.visibility = GONE
+        binding.noPreview.visibility = VISIBLE
         setActionBarItemVisibility(R.id.loading, model.isDownloading)
         setActionBarItemVisibility(R.id.download, !model.hasError && !model.isLocal && !model.isDownloading)
         setActionBarItemVisibility(R.id.share, model.isLocal)
 
-        download_button.setOnClickListener{
+        binding.downloadButton.setOnClickListener{
             when {
                 model.isLocal -> dispatchLocalFileAction(model.fileUri, ACTION_VIEW)
                 else -> startDownloadFile()
@@ -212,59 +226,59 @@ internal class FilePreviewActivity: ConnectionActivityBase<FilePreviewViewModel>
 
         when {
             model.isDownloading -> {
-                download_button.text = resources.getString(R.string.psd_downloading)
-                download_button.isEnabled = false
-                download_button.visibility = VISIBLE
-                no_preview_text.visibility = GONE
+                binding.downloadButton.text = resources.getString(R.string.psd_downloading)
+                binding.downloadButton.isEnabled = false
+                binding.downloadButton.visibility = VISIBLE
+                binding.noPreviewText.visibility = GONE
             }
             model.isLocal -> {
                 if (canBePreviewedInOtherApp(model.fileUri)) {
-                    download_button.visibility = VISIBLE
-                    no_preview_text.visibility = GONE
-                    download_button.isEnabled = true
-                    download_button.text = resources.getString(R.string.psd_open)
+                    binding.downloadButton.visibility = VISIBLE
+                    binding.noPreviewText.visibility = GONE
+                    binding.downloadButton.isEnabled = true
+                    binding.downloadButton.text = resources.getString(R.string.psd_open)
                 }
                 else{
-                    download_button.visibility = GONE
-                    no_preview_text.visibility = VISIBLE
+                    binding.downloadButton.visibility = GONE
+                    binding.noPreviewText.visibility = VISIBLE
                 }
             }
             else -> {
-                download_button.visibility = VISIBLE
-                download_button.text = resources.getString(R.string.psd_download)
-                download_button.isEnabled = true
-                no_preview_text.visibility = GONE
+                binding.downloadButton.visibility = VISIBLE
+                binding.downloadButton.text = resources.getString(R.string.psd_download)
+                binding.downloadButton.isEnabled = true
+                binding.noPreviewText.visibility = GONE
             }
         }
 
     }
 
     private fun applyPreviewableViewModel(model: FileViewModel) {
-        progress_bar.visibility = VISIBLE
-        no_preview.visibility = GONE
+        binding.progressBar.visibility = VISIBLE
+        binding.noPreview.visibility = GONE
         setActionBarItemVisibility(R.id.loading, model.isDownloading)
         setActionBarItemVisibility(R.id.download,!model.hasError && !model.isLocal && !model.isDownloading)
         setActionBarItemVisibility(R.id.share, model.isLocal)
 
         when {
             model.hasError -> {
-                no_connection.visibility = VISIBLE
-                web_view.visibility = GONE
+                binding.noConnection.root.visibility = VISIBLE
+                binding.webView.visibility = GONE
             }
             else -> {
-                web_view.visibility = VISIBLE
-                no_connection.visibility = GONE
+                binding.webView.visibility = VISIBLE
+                binding.noConnection.root.visibility = GONE
                 if (!pageFinishedSuccessfully)
-                    web_view.loadUrl(model.fileUri.toString())
+                    binding.webView.loadUrl(model.fileUri.toString())
             }
         }
     }
 
     private fun setActionBarItemVisibility(itemId: Int, isVisible: Boolean) {
         launch {
-            while (file_preview_toolbar.menu.findItem(itemId) == null)
+            while (binding.filePreviewToolbar.menu.findItem(itemId) == null)
                 delay(CHECK_MENU_INFLATED_DELAY_MS)
-            file_preview_toolbar.menu.findItem(itemId)?.isVisible = isVisible
+            binding.filePreviewToolbar.menu.findItem(itemId)?.isVisible = isVisible
         }
     }
 

@@ -313,6 +313,8 @@ internal class TicketViewModel(
                 }
                 return true
             }
+
+            else -> {}
         }
         return false
     }
