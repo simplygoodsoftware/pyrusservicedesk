@@ -12,9 +12,7 @@ public class SampleApp extends Application {
         super.onCreate();
         PyrusServiceDesk.init(
             this,
-            "GJv5lsZnNQM8jDwppzj8Ciuwm5MiuQsF41nXoUkNut2qETsjtJz0F271-~M6WFfukoW6YJeiMZAjKzAiehLIFkklDpQ1Spap0Yd9csgIdVJTAdCL0ZF~bPl6qLvH0UfnFY-Z8A==",
-            null,
-            true
+            "GJv5lsZnNQM8jDwppzj8Ciuwm5MiuQsF41nXoUkNut2qETsjtJz0F271-~M6WFfukoW6YJeiMZAjKzAiehLIFkklDpQ1Spap0Yd9csgIdVJTAdCL0ZF~bPl6qLvH0UfnFY-Z8A=="
         );
 
 //        PyrusServiceDesk.setPushToken(
