@@ -3,4 +3,9 @@
     <color name="colorPrimary">#008577</color>
     <color name="colorPrimaryDark">#00574B</color>
     <color name="colorAccent">#D81B60</color>
+
+    <color name="dodo_1">#F2F3F7</color>
+    <color name="dodo_2">#E3EBF6</color>
+    <color name="white">#fff</color>
+    <color name="gray">#7F7F7F</color>
 </resources>

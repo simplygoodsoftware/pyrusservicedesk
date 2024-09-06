@@ -23,19 +23,7 @@ public class SampleActivity extends Activity implements NewReplySubscriber {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_sample);
-        findViewById(R.id.support).setOnClickListener(
-                view -> PyrusServiceDesk.start(
-                        this,
-                        new ServiceDeskConfiguration.Builder()
-                                .setUserName("Ivan Ivanov")
-                                .setThemeColor(Color.parseColor("#FF8300"))
-                                .setChatTitle("Sample Support")
-                                .setWelcomeMessage("How can I help you?")
-                                .setAvatarForSupport(R.drawable.psd_download_file)
-                                .setChatMenuDelegate(new ChatMenuDelegate())
-                                .setTrustedUrls(Collections.singletonList("pyrus.com"))
-                                .build())
-        );
+        findViewById(R.id.support).setOnClickListener(view -> startSd());
 
         PyrusServiceDesk.onAuthorizationFailed(
                 () -> {
@@ -60,6 +48,22 @@ public class SampleActivity extends Activity implements NewReplySubscriber {
                     dialog.show();
                 }
         );
+    }
+
+    private void startSd() {
+        ServiceDeskConfiguration.Builder builder = new ServiceDeskConfiguration.Builder()
+            .setUserName("Григорий Лапиков")
+            .setChatTitle("Додо чат")
+            .setWelcomeMessage("Приветствую 👋\n\nЧем могу помочь?")
+            .setAvatarForSupport(R.drawable.dodo)
+            .setBackgroundColor(R.color.dodo_1)
+            .setUserMessageBackgroundColor(R.color.dodo_2)
+            .setSupportMessageBackgroundColor(R.color.white)
+//            builder.setCustomLeftBarButtonItem(leftButton)
+//            builder.setCustomRightBarButtonItem(rightButton)
+            .setThemeColor(getResources().getColor(R.color.gray));
+
+        PyrusServiceDesk.start(this, builder.build());
     }
 
     @Override
