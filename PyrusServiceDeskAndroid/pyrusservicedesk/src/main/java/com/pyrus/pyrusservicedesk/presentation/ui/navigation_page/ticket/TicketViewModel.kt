@@ -337,8 +337,6 @@ internal class TicketViewModel(
             }
         }
         val toPublish = mutableListOf<TicketEntry>().apply {
-//            ConfigUtils.getWelcomeMessage()?.let { add(0, WelcomeMessageEntry(it)) }
-
             val freshComments = ArrayList<Comment>()
             val welcomeMessage = ConfigUtils.getWelcomeMessage()
             if (welcomeMessage != null) {
