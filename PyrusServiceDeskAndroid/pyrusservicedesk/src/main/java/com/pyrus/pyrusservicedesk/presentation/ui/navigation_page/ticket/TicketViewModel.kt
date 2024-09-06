@@ -18,6 +18,7 @@ import com.pyrus.pyrusservicedesk.presentation.ui.navigation_page.ticket.entries
 import com.pyrus.pyrusservicedesk.presentation.ui.view.recyclerview.DiffResultWithNewItems
 import com.pyrus.pyrusservicedesk.presentation.viewmodel.ConnectionViewModelBase
 import com.pyrus.pyrusservicedesk.sdk.data.Attachment
+import com.pyrus.pyrusservicedesk.sdk.data.Author
 import com.pyrus.pyrusservicedesk.sdk.data.Comment
 import com.pyrus.pyrusservicedesk.sdk.data.FileManager
 import com.pyrus.pyrusservicedesk.sdk.data.LocalDataProvider
@@ -336,8 +337,23 @@ internal class TicketViewModel(
             }
         }
         val toPublish = mutableListOf<TicketEntry>().apply {
-            ConfigUtils.getWelcomeMessage()?.let { add(0, WelcomeMessageEntry(it)) }
-            addAll(freshList.comments.toTicketEntries())
+//            ConfigUtils.getWelcomeMessage()?.let { add(0, WelcomeMessageEntry(it)) }
+
+            val freshComments = ArrayList<Comment>()
+            val welcomeMessage = ConfigUtils.getWelcomeMessage()
+            if (welcomeMessage != null) {
+                val firstComment = freshList.comments.firstOrNull()
+                val welcomeCommentDate = firstComment?.creationDate ?: Date().apply { time = System.currentTimeMillis() }
+                val welcomeComment = Comment(
+                    body = welcomeMessage,
+                    creationDate = welcomeCommentDate,
+                    author = Author("")
+                )
+                freshComments += welcomeComment
+            }
+            freshComments += freshList.comments
+
+            addAll(freshComments.toTicketEntries())
             listOfLocalEntries.forEach {
                 maybeAddDate(it as CommentEntry, this)
                 add(it)

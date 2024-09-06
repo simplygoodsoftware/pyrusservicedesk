@@ -32,7 +32,7 @@ ext {
     IS_SNAPSHOT = false
 
     PUBLISH_GROUP_ID = 'com.pyrus'
-    VERSION = '1.5.21'
+    VERSION = '0.0.12'
     PUBLISH_VERSION = IS_SNAPSHOT ? VERSION + "-SNAPSHOT" : VERSION
     PUBLISH_ARTIFACT_ID = 'servicedesk'
 }
