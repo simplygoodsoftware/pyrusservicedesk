@@ -8,7 +8,7 @@ let createdAtParameter = "created_at"
 let attachmentsParameter = "attachments"
 let guidParameter = "guid"
 let CLIENT_ID_KEY = "client_id"
-
+let EXTRA_FIELDS_KEY = "ExtraFields"
 
 class PSDMessageSender: NSObject {
     /**
@@ -90,6 +90,9 @@ class PSDMessageSender: NSObject {
         parameters[userNameParameter] = PyrusServiceDesk.userName
         if let attachments = attachments, attachments.count > 0{
             parameters[attachmentsParameter] = generateAttacments(attachments)
+        }
+        if let fieldsData = PyrusServiceDesk.fieldsData {
+            parameters[EXTRA_FIELDS_KEY] = fieldsData
         }
         let request = URLRequest.createRequest(type:.updateFeed, parameters: parameters)
         
