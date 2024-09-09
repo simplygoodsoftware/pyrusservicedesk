@@ -51,7 +51,7 @@ class PyrusServiceDesk private constructor(
     internal val apiVersion: Int,
     loggingEnabled: Boolean,
     private val authToken: String?,
-    internal val extraFields: String?,
+    internal val extraFields: Map<String, String>?,
 ) {
 
     companion object {
@@ -101,7 +101,7 @@ class PyrusServiceDesk private constructor(
             domain: String? = null,
             loggingEnabled: Boolean = false,
             authorizationToken: String? = null,
-            extraFields: String? = null,
+            extraFields: Map<String, String>? = null,
         ) {
             initInternal(
                 application,
@@ -142,7 +142,7 @@ class PyrusServiceDesk private constructor(
             domain: String? = null,
             loggingEnabled: Boolean = false,
             authorizationToken: String? = null,
-            extraFields: String? = null,
+            extraFields: Map<String, String>? = null,
         ) {
             initInternal(
                 application,
@@ -166,7 +166,7 @@ class PyrusServiceDesk private constructor(
             apiVersion: Int = API_VERSION_1,
             loggingEnabled: Boolean,
             authorizationToken: String?,
-            extraFields: String?,
+            extraFields: Map<String, String>?,
         ) {
             PLog.d(TAG, "initInternal, appId: ${appId.getFirstNSymbols(10)}, userId: ${userId?.getFirstNSymbols(10)}, apiVersion: $apiVersion")
             if (INSTANCE != null && get().userId != userId) {
