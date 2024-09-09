@@ -171,7 +171,7 @@ internal class RetrofitWebRepository(
         return null
     }
 
-    private fun getExtraFields(): String? {
+    private fun getExtraFields(): Map<String, String>? {
         return PyrusServiceDesk.get().extraFields
     }
 
