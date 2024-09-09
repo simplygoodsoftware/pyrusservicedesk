@@ -254,8 +254,29 @@ internal class FilePreviewActivity: ConnectionActivityBase<FilePreviewViewModel>
             else -> {
                 web_view.visibility = VISIBLE
                 no_connection.visibility = GONE
-                if (!pageFinishedSuccessfully)
-                    web_view.loadUrl(model.fileUri.toString())
+                if (!pageFinishedSuccessfully) {
+                    web_view.loadDataWithBaseURL(
+                        null,
+                        """
+                          <!DOCTYPE html>
+                          <html>
+                              <head></head>
+                              <body>
+                                <table style="width:100%; height:100%;">
+                                  <tr>
+                                    <td style="vertical-align:middle;">
+                                      <img src="${model.fileUri}">
+                                    </td>
+                                  </tr>
+                                </table>
+                              </body>
+                            </html>
+                        """.trimIndent(),
+                        "text/html",
+                        "UTF-8",
+                        null,
+                    )
+                }
             }
         }
     }
