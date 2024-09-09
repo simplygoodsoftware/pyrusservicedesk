@@ -107,8 +107,10 @@ internal class FilePreviewActivity: ConnectionActivityBase<FilePreviewViewModel>
         web_view.apply{
             settings.apply {
                 builtInZoomControls = true
+                useWideViewPort = true
                 setSupportZoom(true)
                 useWideViewPort = true
+                loadWithOverviewMode = true
                 javaScriptEnabled = true
             }
             webViewClient = object: WebViewClient(){
@@ -178,12 +180,6 @@ internal class FilePreviewActivity: ConnectionActivityBase<FilePreviewViewModel>
             }
         }
 
-    }
-
-    override fun updateProgress(newProgress: Int) {
-        super.updateProgress(newProgress)
-        if (newProgress == resources.getInteger(R.integer.psd_progress_max_value))
-            while (web_view.zoomOut()){}
     }
 
     override fun isValidPermissionRequestCode(requestCode: Int)
