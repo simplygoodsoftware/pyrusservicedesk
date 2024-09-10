@@ -8,7 +8,7 @@ let createdAtParameter = "created_at"
 let attachmentsParameter = "attachments"
 let guidParameter = "guid"
 let CLIENT_ID_KEY = "client_id"
-let EXTRA_FIELDS_KEY = "ExtraFields"
+let EXTRA_FIELDS_KEY = "extra_fields"
 
 class PSDMessageSender: NSObject {
     /**
