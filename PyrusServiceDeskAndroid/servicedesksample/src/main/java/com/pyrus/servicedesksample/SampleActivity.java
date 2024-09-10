@@ -12,7 +12,6 @@ import com.pyrus.pyrusservicedesk.PyrusServiceDesk;
 import com.pyrus.pyrusservicedesk.ServiceDeskConfiguration;
 import com.pyrus.pyrusservicedesk.sdk.updates.NewReplySubscriber;
 
-import java.util.Collections;
 import java.util.List;
 
 public class SampleActivity extends Activity implements NewReplySubscriber {
