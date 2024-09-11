@@ -15,8 +15,8 @@ class PSDChatTableView: PSDDetailTableView{
     private var needShowRating : Bool = false
     private static let userCellId = "CellUser"
     private static let supportCellId = "CellSupport"
-    private var tableMatrix : [[PSDRowMessage]] = [[PSDRowMessage]()]
-    private var heightsMap : [IndexPath : CGFloat] = [IndexPath : CGFloat]()
+    private var tableMatrix: [[PSDRowMessage]] = [[PSDRowMessage]()]
+    private var heightsMap: [IndexPath: CGFloat] = [IndexPath : CGFloat]()
     private var storeChat: PSDChat?
     private var gotData: Bool = false
     private var loadingTimer: Timer?
@@ -24,7 +24,6 @@ class PSDChatTableView: PSDDetailTableView{
         let view = ButtonsView(frame: .zero)
         tableFooterView = view
         view.autoresizingMask = [.flexibleHeight]
-        view.translatesAutoresizingMaskIntoConstraints = true
         view.tapDelegate = self
         return view
     }()
@@ -142,7 +141,7 @@ class PSDChatTableView: PSDDetailTableView{
                         self.needShowRating = chat?.showRating ?? false
                         self.showRateIfNeed()
                         self.isLoading = false
-                        self.buttonsView.updateWithButtons(nil)
+                        self.buttonsView.updateWithButtons(nil, width: self.frame.size.width)
                     }
                 }
             }
@@ -163,7 +162,7 @@ class PSDChatTableView: PSDDetailTableView{
             lastMessageFromServer = chat.messages.last
         }
         setLastActivityDate()
-        buttonsView.updateWithButtons(PSDChat.draftAnswers(tableMatrix))
+        buttonsView.updateWithButtons(PSDChat.draftAnswers(tableMatrix), width: frame.size.width)
         reloadData()
         
         removeNoConnectionView()
@@ -294,7 +293,8 @@ class PSDChatTableView: PSDDetailTableView{
                                         self.reloadSections(reloadSections, with: .none)
                                     }
                                     self.endUpdates()
-                                    self.buttonsView.updateWithButtons(PSDChat.draftAnswers(self.tableMatrix))
+                                    self.buttonsView.updateWithButtons(PSDChat.draftAnswers(self.tableMatrix), width: self.frame.size.width)
+                                    self.buttonsView.collectionView.collectionViewLayout.invalidateLayout()
                                     self.scrollToBottomAfterRefresh(with: oldContentOffset, oldContentSize: oldContentSize)
                                 }
                             }
@@ -304,7 +304,7 @@ class PSDChatTableView: PSDDetailTableView{
                 }
                 DispatchQueue.main.async  {
                     if let self = self {
-                        self.buttonsView.updateWithButtons(PSDChat.draftAnswers(self.tableMatrix))
+                        self.buttonsView.updateWithButtons(PSDChat.draftAnswers(self.tableMatrix), width: self.frame.size.width)
                         self.customRefresh.endRefreshing()
                         self.bottomRefresh.endRefreshing()
                     }
@@ -357,18 +357,18 @@ class PSDChatTableView: PSDDetailTableView{
     private func scrollsToBottom(animated: Bool) {
         layoutIfNeeded()
         let lastRow = lastIndexPath()
+        let hasFooter = tableFooterView?.frame.size.height ?? 0 > 0
         if
             lastRow.row >= 0 || lastRow.section >= 0,
             !(lastRow.row == 0 && lastRow.section == 0)
         {
-            scrollToRow(at: lastRow, at: .bottom, animated: animated)
+            scrollToRow(at: lastRow, at: .bottom, animated: !hasFooter && animated)
         }
         if
             let tableFooterView = tableFooterView,
-            tableFooterView.frame.size.height > 0
+            hasFooter
         {
-            var frameFooter = tableFooterView.frame
-            frameFooter.size.height += 20
+            let frameFooter = tableFooterView.frame
             scrollRectToVisible(frameFooter, animated: animated)
         }
     }
@@ -399,7 +399,7 @@ class PSDChatTableView: PSDDetailTableView{
                 self.addRow(at: lastSection, dataForRow: rowMessage)
             }
         }
-        buttonsView.updateWithButtons(PSDChat.draftAnswers(tableMatrix))
+        buttonsView.updateWithButtons(PSDChat.draftAnswers(tableMatrix), width: frame.size.width)
         UIView.animate(withDuration: 0.1, animations: {
             self.layoutIfNeeded()
         })

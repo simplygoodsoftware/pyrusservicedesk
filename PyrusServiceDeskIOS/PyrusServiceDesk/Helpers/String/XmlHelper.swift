@@ -186,7 +186,7 @@ extension NSString {
                  return (HelpersStrings.attributedString(byDecodingHTMLEntities: attrSubStr), buttons)
              }
         }
-        return (nil, nil)
+        return (nil, buttons)
     }
     
     ///Поиск электронной почты

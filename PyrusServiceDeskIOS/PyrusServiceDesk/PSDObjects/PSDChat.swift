@@ -30,4 +30,4 @@ class PSDChat: NSObject {
         return links
     }
 }
-private let MAX_LINKS_COUNT: Int = 6
+private let MAX_LINKS_COUNT: Int = 10

@@ -4,6 +4,7 @@ import android.app.Activity
 import android.app.Application
 import android.content.Context
 import android.net.Uri
+import android.os.Build
 import androidx.annotation.MainThread
 import com.google.gson.GsonBuilder
 import com.pyrus.pyrusservicedesk.log.PLog
@@ -49,7 +50,7 @@ class PyrusServiceDesk private constructor(
     internal val domain: String?,
     internal val apiVersion: Int,
     loggingEnabled: Boolean,
-    private val authToken: String?
+    private val authToken: String?,
 ) {
 
     companion object {
@@ -59,6 +60,7 @@ class PyrusServiceDesk private constructor(
         internal val DISPATCHER_IO_SINGLE =
             Executors.newSingleThreadExecutor().asCoroutineDispatcher()
         internal var FILE_CHOOSER: FileChooser? = null
+        internal var EXTRA_FIELDS: Map<String, String>? = null
         internal var onAuthorizationFailed: Runnable? = Runnable {
             stop()
         }
@@ -98,7 +100,7 @@ class PyrusServiceDesk private constructor(
             appId: String,
             domain: String? = null,
             loggingEnabled: Boolean = false,
-            authorizationToken: String? = null
+            authorizationToken: String? = null,
         ) {
             initInternal(
                 application,
@@ -108,7 +110,7 @@ class PyrusServiceDesk private constructor(
                 domain,
                 API_VERSION_1,
                 loggingEnabled,
-                authorizationToken
+                authorizationToken,
             )
         }
 
@@ -137,7 +139,7 @@ class PyrusServiceDesk private constructor(
             securityKey: String,
             domain: String? = null,
             loggingEnabled: Boolean = false,
-            authorizationToken: String? = null
+            authorizationToken: String? = null,
         ) {
             initInternal(
                 application,
@@ -147,7 +149,7 @@ class PyrusServiceDesk private constructor(
                 domain,
                 API_VERSION_2,
                 loggingEnabled,
-                authorizationToken
+                authorizationToken,
             )
         }
 
@@ -156,10 +158,10 @@ class PyrusServiceDesk private constructor(
             appId: String,
             userId: String?,
             securityKey: String?,
-            domain: String? = null,
+            domain: String?,
             apiVersion: Int = API_VERSION_1,
             loggingEnabled: Boolean,
-            authorizationToken: String?
+            authorizationToken: String?,
         ) {
             PLog.d(TAG, "initInternal, appId: ${appId.getFirstNSymbols(10)}, userId: ${userId?.getFirstNSymbols(10)}, apiVersion: $apiVersion")
             if (INSTANCE != null && get().userId != userId) {
@@ -180,12 +182,21 @@ class PyrusServiceDesk private constructor(
                         validDomain,
                         apiVersion,
                         loggingEnabled,
-                        authorizationToken
+                        authorizationToken,
                     )
                 }
             }
             else {
-                INSTANCE = PyrusServiceDesk(application, appId, userId, securityKey, validDomain, apiVersion, loggingEnabled, authorizationToken)
+                INSTANCE = PyrusServiceDesk(
+                    application,
+                    appId,
+                    userId,
+                    securityKey,
+                    validDomain,
+                    apiVersion,
+                    loggingEnabled,
+                    authorizationToken,
+                )
             }
         }
 
@@ -333,6 +344,15 @@ class PyrusServiceDesk private constructor(
                 lastRefreshes.removeAt(0)
 
             get().sharedViewModel.triggerUpdate()
+        }
+
+        /**
+         * Sets form field data used for autocompletion of task form fields when creating a ticket.
+         * Map<field code, field value>
+         */
+        @JvmStatic
+        fun setFieldsData(extraFields: Map<String, String>?) {
+            EXTRA_FIELDS = extraFields
         }
 
         /**
@@ -510,6 +530,13 @@ class PyrusServiceDesk private constructor(
                     requestBuilder.header("Authorization", authToken)
                 }
 
+                val userAgent = "ServicedeskClient/android/" +
+                    Build.MANUFACTURER + "/" +
+                    Build.MODEL + "/" +
+                    Build.VERSION.SDK_INT + "/" +
+                    BuildConfig.VERSION_NAME
+
+                requestBuilder.header("User-Agent", userAgent)
                 chain.proceed(requestBuilder.build())
             }.build()
 

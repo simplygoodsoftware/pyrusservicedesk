@@ -4,7 +4,7 @@ import com.pyrus.pyrusservicedesk.sdk.data.Comment
 import com.pyrus.pyrusservicedesk.utils.getFirstNSymbols
 
 internal data class LastComment(
-    val id: Int,
+    val id: Long,
     val isRead: Boolean,
     val isShown: Boolean,
     val text: String?,

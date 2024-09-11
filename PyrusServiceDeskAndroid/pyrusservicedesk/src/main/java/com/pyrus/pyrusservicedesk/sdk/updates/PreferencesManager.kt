@@ -14,7 +14,7 @@ internal class PreferencesManager(private val preferences: SharedPreferences): P
 
     override fun saveLastComment(comment: LastComment) {
         preferences.edit()
-            .putInt(LAST_COMMENT_ID, comment.id)
+            .putLong(LAST_COMMENT_ID, comment.id)
             .putBoolean(LAST_COMMENT_IS_READ, comment.isRead)
             .putBoolean(LAST_COMMENT_IS_SHOWN, comment.isShown)
             .putString(LAST_COMMENT_TEXT, comment.text)
@@ -25,7 +25,7 @@ internal class PreferencesManager(private val preferences: SharedPreferences): P
     }
 
     override fun getLastComment(): LastComment? {
-        val id = preferences.getInt(LAST_COMMENT_ID, NO_ID)
+        val id = preferences.getLong(LAST_COMMENT_ID, NO_ID)
         if (id == NO_ID)
             return null
         return LastComment(
@@ -40,7 +40,7 @@ internal class PreferencesManager(private val preferences: SharedPreferences): P
     }
 
     override fun removeLastComment() {
-        preferences.edit().putInt(LAST_COMMENT_ID, NO_ID).commit()
+        preferences.edit().putLong(LAST_COMMENT_ID, NO_ID).commit()
     }
 
     override fun saveLastActiveTime(time: Long) {
@@ -112,11 +112,11 @@ internal class PreferencesManager(private val preferences: SharedPreferences): P
     }
 
     companion object {
-        private const val NO_ID = -1
+        private const val NO_ID = -1L
         const val S_NO_ID = "NO_ID"
         private const val SEPARATOR = '⋮'
 
-        private const val LAST_COMMENT_ID = "LAST_COMMENT_ID"
+        private const val LAST_COMMENT_ID = "LAST_COMMENT_ID_L"
         private const val LAST_COMMENT_IS_READ = "LAST_COMMENT_IS_READ"
         private const val LAST_COMMENT_IS_SHOWN = "LAST_COMMENT_IS_SHOWN"
         private const val LAST_COMMENT_TEXT = "LAST_COMMENT_TEXT"
