@@ -107,8 +107,10 @@ internal class FilePreviewActivity: ConnectionActivityBase<FilePreviewViewModel>
         web_view.apply{
             settings.apply {
                 builtInZoomControls = true
+                useWideViewPort = true
                 setSupportZoom(true)
                 useWideViewPort = true
+                loadWithOverviewMode = true
                 javaScriptEnabled = true
             }
             webViewClient = object: WebViewClient(){
@@ -180,12 +182,6 @@ internal class FilePreviewActivity: ConnectionActivityBase<FilePreviewViewModel>
 
     }
 
-    override fun updateProgress(newProgress: Int) {
-        super.updateProgress(newProgress)
-        if (newProgress == resources.getInteger(R.integer.psd_progress_max_value))
-            while (web_view.zoomOut()){}
-    }
-
     override fun isValidPermissionRequestCode(requestCode: Int)
             = requestCode == REQUEST_PERMISSION_WRITE_EXTERNAL_STORAGE
 
@@ -254,8 +250,29 @@ internal class FilePreviewActivity: ConnectionActivityBase<FilePreviewViewModel>
             else -> {
                 web_view.visibility = VISIBLE
                 no_connection.visibility = GONE
-                if (!pageFinishedSuccessfully)
-                    web_view.loadUrl(model.fileUri.toString())
+                if (!pageFinishedSuccessfully) {
+                    web_view.loadDataWithBaseURL(
+                        null,
+                        """
+                          <!DOCTYPE html>
+                          <html>
+                              <head></head>
+                              <body>
+                                <table style="width:100%; height:100%;">
+                                  <tr>
+                                    <td style="vertical-align:middle;">
+                                      <img src="${model.fileUri}">
+                                    </td>
+                                  </tr>
+                                </table>
+                              </body>
+                            </html>
+                        """.trimIndent(),
+                        "text/html",
+                        "UTF-8",
+                        null,
+                    )
+                }
             }
         }
     }

@@ -171,6 +171,10 @@ internal class RetrofitWebRepository(
         return null
     }
 
+    private fun getExtraFields(): Map<String, String>? {
+        return PyrusServiceDesk.EXTRA_FIELDS
+    }
+
     private suspend fun addComment(
         ticketId: Int,
         comment: Comment,
@@ -201,16 +205,20 @@ internal class RetrofitWebRepository(
                 cament = cament.applyNewAttachments(newAttachments)
             }
 
-            val call = api.addFeedComment(AddCommentRequestBody(
-                appId,
-                getUserId(),
-                getSecurityKey(),
-                getInstanceId(),
-                getVersion(),
-                cament.body,
-                cament.attachments,
-                ConfigUtils.getUserName(),
-                cament.rating))
+            val call = api.addFeedComment(
+                AddCommentRequestBody(
+                    appId,
+                    getUserId(),
+                    getSecurityKey(),
+                    getInstanceId(),
+                    getVersion(),
+                    cament.body,
+                    cament.attachments,
+                    ConfigUtils.getUserName(),
+                    cament.rating,
+                    getExtraFields()
+                )
+            )
             return@withContext try {
                 call
                     .execute()
