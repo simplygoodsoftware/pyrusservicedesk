@@ -172,7 +172,7 @@ internal class RetrofitWebRepository(
     }
 
     private fun getExtraFields(): Map<String, String>? {
-        return PyrusServiceDesk.get().extraFields
+        return PyrusServiceDesk.EXTRA_FIELDS
     }
 
     private suspend fun addComment(
