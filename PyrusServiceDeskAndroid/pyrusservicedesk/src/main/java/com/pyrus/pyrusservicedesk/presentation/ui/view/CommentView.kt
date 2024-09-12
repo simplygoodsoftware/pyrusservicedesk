@@ -2,9 +2,7 @@ package com.pyrus.pyrusservicedesk.presentation.ui.view
 
 import android.animation.Animator
 import android.animation.ObjectAnimator
-import android.app.Activity
 import android.content.Context
-import android.content.Intent
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.graphics.Color
@@ -15,7 +13,6 @@ import android.graphics.drawable.LayerDrawable
 import android.net.Uri
 import android.text.*
 import android.text.method.LinkMovementMethod
-import android.text.style.ClickableSpan
 import android.text.util.Linkify
 import android.util.AttributeSet
 import android.view.Gravity
@@ -26,7 +23,6 @@ import android.widget.FrameLayout
 import android.widget.ImageView
 import android.widget.LinearLayout
 import androidx.annotation.ColorInt
-import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.content.res.AppCompatResources
 import androidx.appcompat.widget.AppCompatImageView
 import androidx.appcompat.widget.AppCompatTextView
@@ -35,6 +31,7 @@ import androidx.core.text.util.LinkifyCompat
 import androidx.exifinterface.media.ExifInterface
 import com.pyrus.pyrusservicedesk.PyrusServiceDesk
 import com.pyrus.pyrusservicedesk.R
+import com.pyrus.pyrusservicedesk.presentation.ui.navigation_page.ticket.HtmlTagUtils
 import com.pyrus.pyrusservicedesk.presentation.ui.view.OutlineImageView.Companion.EDGE_RIGHT
 import com.pyrus.pyrusservicedesk.utils.*
 import com.squareup.picasso.Picasso
@@ -311,7 +308,7 @@ internal class CommentView @JvmOverloads constructor(
      * Works with [ContentType.Text].
      */
     fun setCommentText(text: String) {
-        val filteredText = text.replace("<br>", "\n").replace(Regex("\\n?<button>(.*?)</button>|\\n *?$|^ *?\\n"), "")
+        val filteredText = HtmlTagUtils.cleanTags(text)
         comment_text.text = replaceLinkTagsWithSpans(filteredText)
         LinkifyCompat.addLinks(comment_text, Linkify.WEB_URLS or Linkify.PHONE_NUMBERS)
         addDeepLinks(comment_text)
@@ -351,7 +348,7 @@ internal class CommentView @JvmOverloads constructor(
 
         ranges.forEach { span ->
             ssb.setSpan(
-                createClickableSpan(span.first, span.second),
+                LinkUtils.createClickableSpan(span.first, context, span.second),
                 span.third.first,
                 span.third.last,
                 Spannable.SPAN_INCLUSIVE_INCLUSIVE
@@ -359,66 +356,6 @@ internal class CommentView @JvmOverloads constructor(
         }
 
         return ssb
-    }
-
-    fun isLinkSafe(url: String, text: String?): Boolean {
-        val urlWithoutProtocol = url
-            .removePrefix("https://")
-            .removePrefix("http://")
-            .removeSuffix("/")
-
-        return text == url
-                || ConfigUtils.getTrustedUrls()?.any { urlWithoutProtocol.startsWith(it) } == true
-                || text == null
-    }
-
-    private fun createClickableSpan(url: String, text: String? = null): ClickableSpan {
-        return object : ClickableSpan() {
-
-            override fun updateDrawState(ds: TextPaint) {
-                super.updateDrawState(ds)
-                ds.isUnderlineText = true
-                ds.color = ConfigUtils.getAccentColor(context)
-            }
-
-            override fun onClick(widget: View) {
-                if (isLinkSafe(url, text)) {
-                    try {
-                        context.startActivity(Intent(Intent.ACTION_VIEW).apply { data = Uri.parse(url) })
-                    }
-                    catch (exception: Exception) {
-                        exception.printStackTrace()
-                    }
-                }
-                else {
-                    showLinkDialog(context as Activity, url) {
-                        try {
-                            context.startActivity(Intent(Intent.ACTION_VIEW).apply { data = Uri.parse(url) })
-                        }
-                        catch (exception: Exception) {
-                            exception.printStackTrace()
-                        }
-                    }
-                }
-            }
-        }
-    }
-
-    private fun showLinkDialog(context: Activity, url: String, onClick: ()-> Unit) {
-        val message = SpannableStringBuilder(context.getString(R.string.link_warning, url))
-        val range = Regex(url).find(message)?.range
-        range?.let {
-            if (range.first != -1 && range.last != -1 && range.last > range.first) {
-                message.setSpan(createClickableSpan(url), range.first, range.last + 1, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE)
-            }
-        }
-
-        AlertDialog.Builder(context)
-            .setPositiveButton(R.string.psd_open) { _, _ -> onClick.invoke() }
-            .setNegativeButton(android.R.string.cancel) { _, _ -> }
-            .setMessage(message)
-            .create()
-            .show()
     }
 
     private fun addDeepLinks(textView: AppCompatTextView) {
@@ -434,7 +371,7 @@ internal class CommentView @JvmOverloads constructor(
 
             anyFound = true
 
-            val clickableSpan = createClickableSpan(matcher.group())
+            val clickableSpan = LinkUtils.createClickableSpan(matcher.group(), context)
 
             ssb.setSpan(clickableSpan, matcher.start(), matcher.end(), 0)
         }

@@ -1,3 +1,10 @@
 <resources>
     <string name="app_name">ServiceDeskSample</string>
+    <string name="welcome_message">Hello 👋\n\nHow can I help you?</string>
+    <string name="button_1">Question about the order, on its way</string>
+    <string name="button_2">Question about the delivered order</string>
+    <string name="button_3">Feedback on order and service</string>
+    <string name="button_4">Other</string>
+    <string name="button_5">Promotions</string>
+    <string name="chat_title">Dodo chat</string>
 </resources>

@@ -468,26 +468,12 @@ internal class TicketViewModel(
         } ?: -1
     }
 
-    private fun CommentEntry.containsButtons(): Boolean {
-        if (this.comment.body == null) { return false }
-        return Regex(BUTTON_PATTERN).containsMatchIn(this.comment.body)
-    }
-
-    private fun extractButtons(comment: Comment): List<String> {
-        if (comment.body == null) {
-            return emptyList()
-        }
-
-        return Regex(BUTTON_PATTERN).findAll(comment.body).map { it.groupValues[1] }.toList()
-    }
-
     // buttons are displayed in other entries, so if comment contains nothing but buttons we don't need it
     private fun removeEmptyComments(entries: List<TicketEntry>): List<TicketEntry> {
         return entries.filterNot {
             it is CommentEntry
                     && it.comment.attachments.isNullOrEmpty()
-                    && it.comment.body?.replace(Regex("\\n?$BUTTON_PATTERN\\n?|<br>|\n"), "")
-                .isNullOrBlank()
+                    && HtmlTagUtils.cleanTags(it.comment.body ?: "").isBlank()
         }
     }
 
@@ -498,11 +484,16 @@ internal class TicketViewModel(
 
         val commentWithButtons = newEntries.last()
 
-        if (commentWithButtons !is CommentEntry || !commentWithButtons.containsButtons()) {
+        if (commentWithButtons !is CommentEntry) {
             return newEntries
         }
 
-        return newEntries + ButtonsEntry(extractButtons(commentWithButtons.comment)) {
+        val buttons = HtmlTagUtils.extractButtons(commentWithButtons.comment)
+        if (buttons.isEmpty()) {
+            return newEntries
+        }
+
+        return newEntries + ButtonsEntry(buttons) {
             onSendClicked(it)
         }
     }
@@ -537,35 +528,40 @@ internal class TicketViewModel(
         if (!this.hasAttachments())
             return listOf(CommentEntry(this, error = pendingError))
         val result = mutableListOf<CommentEntry>()
-        if (body?.isBlank() == false)
+        val commentBody = body ?: ""
+        if (commentBody.isNotBlank()) {
             result.add(
+                CommentEntry(
+                    Comment(
+                        this.commentId,
+                        commentBody,
+                        this.isInbound,
+                        null,
+                        this.creationDate,
+                        this.author,
+                        this.localId
+                    ),
+                    error = pendingError
+                )
+            )
+        }
+        return this.attachments!!.fold(result) { entriesList, attachment ->
+            entriesList.add(
                 CommentEntry(
                     Comment(
                         this.commentId,
                         this.body,
                         this.isInbound,
-                        null,
+                        listOf(attachment),
                         this.creationDate,
                         this.author,
-                        this.localId),
-                    error = pendingError)
-            )
-        return this.attachments!!
-            .fold(result){ entriesList, attachment ->
-                entriesList.add(
-                    CommentEntry(
-                        Comment(
-                            this.commentId,
-                            this.body,
-                            this.isInbound,
-                            listOf(attachment),
-                            this.creationDate,
-                            this.author,
-                            this.localId),
-                        error = pendingError)
+                        this.localId
+                    ),
+                    error = pendingError
                 )
-                entriesList
-            }
+            )
+            entriesList
+        }
     }
 
     fun onRatingClick(rating: Int) =

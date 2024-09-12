@@ -12,6 +12,7 @@ import com.pyrus.pyrusservicedesk.PyrusServiceDesk;
 import com.pyrus.pyrusservicedesk.ServiceDeskConfiguration;
 import com.pyrus.pyrusservicedesk.sdk.updates.NewReplySubscriber;
 
+import java.util.Collections;
 import java.util.List;
 
 public class SampleActivity extends Activity implements NewReplySubscriber {
@@ -20,18 +21,28 @@ public class SampleActivity extends Activity implements NewReplySubscriber {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_sample);
+
+        String fullWelcomeMessage = getResources().getString(R.string.welcome_message) +
+            "<button>" + getResources().getString(R.string.button_1) + "</button>" +
+            "<button>" + getResources().getString(R.string.button_2) + "</button>" +
+            "<button>" + getResources().getString(R.string.button_3) + "</button>" +
+            "<button>" + getResources().getString(R.string.button_4) + "</button>" +
+            "<a data-type=\"button\" href=\"https://dodopizza.ru/moscow/bonusactions\">" + getResources().getString(R.string.button_5) + "</a>";
+
+
         findViewById(R.id.support).setOnClickListener(
             view -> PyrusServiceDesk.start(
                 this,
                 new ServiceDeskConfiguration.Builder()
                     .setUserName("Григорий Лапиков")
-                    .setChatTitle("Додо чат")
-                    .setWelcomeMessage("Приветствую 👋\n\nЧем могу помочь?")
+                    .setChatTitle(getResources().getString(R.string.chat_title))
+                    .setWelcomeMessage(fullWelcomeMessage)
                     .setAvatarForSupport(R.drawable.dodo)
                     .setBackgroundColor(R.color.dodo_1)
                     .setUserMessageBackgroundColor(R.color.dodo_2)
                     .setSupportMessageBackgroundColor(R.color.white)
                     .setThemeColor(Color.GRAY)
+                    .setTrustedUrls(Collections.singletonList("https://dodopizza.ru"))
                     .build()
             )
         );

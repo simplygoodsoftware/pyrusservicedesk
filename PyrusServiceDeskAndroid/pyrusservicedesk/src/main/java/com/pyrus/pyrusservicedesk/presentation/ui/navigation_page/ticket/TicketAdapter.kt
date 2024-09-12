@@ -1,23 +1,34 @@
 package com.pyrus.pyrusservicedesk.presentation.ui.navigation_page.ticket
 
-import android.graphics.Canvas
 import android.graphics.PorterDuff
 import android.graphics.drawable.AnimationDrawable
+import android.text.Spannable.SPAN_INCLUSIVE_INCLUSIVE
+import android.text.SpannableStringBuilder
+import android.text.method.LinkMovementMethod
 import android.view.Gravity
 import android.view.View
-import android.view.View.*
+import android.view.View.GONE
+import android.view.View.INVISIBLE
+import android.view.View.OnClickListener
+import android.view.View.OnLongClickListener
+import android.view.View.VISIBLE
 import android.view.ViewGroup
 import android.widget.ImageView
 import android.widget.TextView
 import androidx.annotation.LayoutRes
-import androidx.recyclerview.widget.ItemTouchHelper
-import androidx.recyclerview.widget.ItemTouchHelper.ACTION_STATE_SWIPE
-import androidx.recyclerview.widget.RecyclerView
 import com.pyrus.pyrusservicedesk.PyrusServiceDesk
 import com.pyrus.pyrusservicedesk.R
-import com.pyrus.pyrusservicedesk.presentation.ui.navigation_page.ticket.entries.*
+import com.pyrus.pyrusservicedesk.presentation.ui.navigation_page.ticket.entries.ButtonEntry
+import com.pyrus.pyrusservicedesk.presentation.ui.navigation_page.ticket.entries.ButtonsEntry
+import com.pyrus.pyrusservicedesk.presentation.ui.navigation_page.ticket.entries.CommentEntry
+import com.pyrus.pyrusservicedesk.presentation.ui.navigation_page.ticket.entries.DateEntry
+import com.pyrus.pyrusservicedesk.presentation.ui.navigation_page.ticket.entries.RatingEntry
+import com.pyrus.pyrusservicedesk.presentation.ui.navigation_page.ticket.entries.TicketEntry
+import com.pyrus.pyrusservicedesk.presentation.ui.navigation_page.ticket.entries.Type
+import com.pyrus.pyrusservicedesk.presentation.ui.navigation_page.ticket.entries.WelcomeMessageEntry
 import com.pyrus.pyrusservicedesk.presentation.ui.view.CommentView
 import com.pyrus.pyrusservicedesk.presentation.ui.view.ContentType
+import com.pyrus.pyrusservicedesk.presentation.ui.view.LinkUtils
 import com.pyrus.pyrusservicedesk.presentation.ui.view.Status
 import com.pyrus.pyrusservicedesk.presentation.ui.view.recyclerview.AdapterBase
 import com.pyrus.pyrusservicedesk.presentation.ui.view.recyclerview.ViewHolderBase
@@ -28,10 +39,14 @@ import com.pyrus.pyrusservicedesk.utils.ConfigUtils
 import com.pyrus.pyrusservicedesk.utils.RequestUtils.Companion.getAvatarUrl
 import com.pyrus.pyrusservicedesk.utils.getTimeText
 import com.pyrus.pyrusservicedesk.utils.isImage
-import kotlinx.android.synthetic.main.psd_view_holder_buttons.view.*
-import kotlinx.android.synthetic.main.psd_view_holder_comment_rating.view.*
-import kotlinx.android.synthetic.main.psd_view_holder_rating.view.*
-import kotlin.math.abs
+import kotlinx.android.synthetic.main.psd_view_holder_buttons.view.flButtons
+import kotlinx.android.synthetic.main.psd_view_holder_comment_rating.view.ratingImage
+import kotlinx.android.synthetic.main.psd_view_holder_comment_rating.view.statusIcon
+import kotlinx.android.synthetic.main.psd_view_holder_rating.view.rating1
+import kotlinx.android.synthetic.main.psd_view_holder_rating.view.rating2
+import kotlinx.android.synthetic.main.psd_view_holder_rating.view.rating3
+import kotlinx.android.synthetic.main.psd_view_holder_rating.view.rating4
+import kotlinx.android.synthetic.main.psd_view_holder_rating.view.rating5
 
 
 private const val VIEW_TYPE_COMMENT_INBOUND = 0
@@ -413,9 +428,10 @@ internal class TicketAdapter: AdapterBase<TicketEntry>() {
         override fun bindItem(item: ButtonsEntry) {
             super.bindItem(item)
 
-            item.buttons.forEachIndexed { index, buttonText ->
+            item.buttons.forEachIndexed { index, buttonEntry ->
                 (itemView.flButtons.getChildAt(index) as? TextView)?.apply {
-                    text = buttonText
+                    val buttonText = buttonEntry.text
+
 
                     if (buttonText.length > MAX_SYMBOLS_BEFORE_LEFT_ALIGNMENT) {
                         gravity = Gravity.START
@@ -427,7 +443,24 @@ internal class TicketAdapter: AdapterBase<TicketEntry>() {
                     val frame = background
                     frame.setColorFilter(ConfigUtils.getAccentColor(itemView.context), PorterDuff.Mode.SRC_ATOP)
                     setTextColor(ConfigUtils.getAccentColor(itemView.context))
-                    setOnClickListener { item.onButtonClick.invoke(buttonText) }
+
+                    when(buttonEntry) {
+                        is ButtonEntry.Link -> {
+                            val spanBuilder = SpannableStringBuilder(buttonText)
+                            val linkSpan = LinkUtils.createClickableSpan(buttonEntry.link, context, buttonText)
+                            spanBuilder.setSpan(linkSpan, 0, spanBuilder.length, SPAN_INCLUSIVE_INCLUSIVE)
+                            movementMethod = LinkMovementMethod.getInstance()
+                            text = spanBuilder
+                            setOnClickListener(null)
+                        }
+
+                        is ButtonEntry.Simple -> {
+                            movementMethod = null
+                            text = buttonText
+                            setOnClickListener { item.onButtonClick.invoke(buttonText) }
+                        }
+                    }
+
                     visibility = VISIBLE
                 }
             }
