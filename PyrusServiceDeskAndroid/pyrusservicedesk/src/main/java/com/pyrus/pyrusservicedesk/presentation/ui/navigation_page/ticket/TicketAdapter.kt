@@ -52,8 +52,6 @@ internal class TicketAdapter: AdapterBase<TicketEntry>() {
         const val PYRUS_SYSTEM_AUTHOR_NAME = "Pyrus System"
     }
 
-    override val itemTouchHelper: ItemTouchHelper = ItemTouchHelper(TouchCallback())
-
     /**
      * [SpaceMultiplier] implementation for customizing spaces between items fot the feed.
      */
@@ -142,17 +140,14 @@ internal class TicketAdapter: AdapterBase<TicketEntry>() {
         CommentHolder(parent, R.layout.psd_view_holder_comment_inbound) {
 
         override val comment: CommentView = itemView.findViewById(R.id.comment)
-        override val creationTime: TextView = itemView.findViewById(R.id.creation_time)
         private val avatar = itemView.findViewById<ImageView>(R.id.avatar)
         private val authorName = itemView.findViewById<TextView>(R.id.author_name)
 
         init {
             ConfigUtils.getMainFontTypeface()?.let {
-                creationTime.typeface = it
                 authorName.typeface = it
             }
             authorName.setTextColor(ConfigUtils.getSecondaryColorOnMainBackground(parent.context))
-            creationTime.setTextColor(ConfigUtils.getSecondaryColorOnMainBackground(parent.context))
         }
 
         override fun bindItem(item: CommentEntry) {
@@ -212,13 +207,7 @@ internal class TicketAdapter: AdapterBase<TicketEntry>() {
         : CommentHolder(parent, R.layout.psd_view_holder_comment_outbound) {
 
         override val comment: CommentView = itemView.findViewById(R.id.comment)
-        override val creationTime: TextView = itemView.findViewById(R.id.creation_time)
 
-        init {
-            ConfigUtils.getMainFontTypeface()?.let {
-                creationTime.typeface = it
-            }
-        }
     }
 
     private abstract inner class CommentHolder(
@@ -227,7 +216,6 @@ internal class TicketAdapter: AdapterBase<TicketEntry>() {
         : ViewHolderBase<CommentEntry>(parent, layoutRes){
 
         abstract val comment: CommentView
-        abstract val creationTime: TextView
 
         val onCommentClickListener = OnClickListener {
             when {
@@ -273,7 +261,7 @@ internal class TicketAdapter: AdapterBase<TicketEntry>() {
                 ContentType.Text -> bindTextView()
                 else -> bindAttachmentView()
             }
-            creationTime.text = getItem().comment.creationDate.getTimeText(itemView.context)
+            comment.setCreationTime(getItem().comment.creationDate.getTimeText(itemView.context))
         }
 
         override fun onDetachedFromWindow() {
@@ -453,72 +441,4 @@ internal class TicketAdapter: AdapterBase<TicketEntry>() {
         }
     }
 
-    private inner class TouchCallback : ItemTouchHelper.Callback() {
-
-        override fun getMovementFlags(recyclerView: RecyclerView,
-                                      viewHolder: RecyclerView.ViewHolder): Int {
-
-            return makeFlag(ACTION_STATE_SWIPE,  ItemTouchHelper.LEFT)
-        }
-
-        override fun onMove(recyclerView: RecyclerView,
-                            viewHolder: RecyclerView.ViewHolder,
-                            target: RecyclerView.ViewHolder): Boolean {
-            return false
-        }
-
-        override fun isLongPressDragEnabled(): Boolean {
-            return false
-        }
-
-        override fun onSwiped(viewHolder: RecyclerView.ViewHolder, direction: Int) {
-        }
-
-        override fun getSwipeEscapeVelocity(defaultValue: Float): Float {
-            return Float.MAX_VALUE
-        }
-
-        override fun getSwipeThreshold(viewHolder: RecyclerView.ViewHolder): Float {
-            return Float.MAX_VALUE
-        }
-
-        override fun onChildDraw(c: Canvas,
-                                 recyclerView: RecyclerView,
-                                 viewHolder: RecyclerView.ViewHolder,
-                                 dX: Float,
-                                 dY: Float,
-                                 actionState: Int,
-                                 isCurrentlyActive: Boolean) {
-
-            if (viewHolder.absoluteAdapterPosition == -1 || itemsList[viewHolder.absoluteAdapterPosition].isNonShiftable())
-                return
-            val maxItemViewShift = recyclerView.resources.getDimensionPixelSize(R.dimen.psd_comment_creation_time_width)
-            val minInboundOffset =  recyclerView.resources.getDimensionPixelSize(R.dimen.psd_offset_default)
-            var x = dX
-            if (x < -maxItemViewShift)
-                x = -maxItemViewShift.toFloat()
-            for (position in 0 until recyclerView.childCount) {
-                recyclerView.findContainingViewHolder(recyclerView.getChildAt(position))?.let {
-                    if (it.absoluteAdapterPosition == - 1 || itemsList[it.absoluteAdapterPosition].isNonShiftable())
-                        return@let
-                    it.itemView.translationX = x
-                    if (itemsList[it.absoluteAdapterPosition].isConsideredInbound()) {
-                        it.itemView.findViewById<View>(R.id.author_and_comment)?.let { author_and_comment ->
-                            if(abs(x) > author_and_comment.left - minInboundOffset)
-                                author_and_comment.translationX = abs(x) - author_and_comment.left + minInboundOffset
-                            else
-                                author_and_comment.translationX = 0f
-                        }
-                    }
-                }
-            }
-        }
-    }
 }
-
-private fun TicketEntry.isConsideredInbound(): Boolean {
-    return type == Type.WelcomeMessage
-            || type == Type.Comment && !(this as CommentEntry).comment.isInbound
-}
-
-private fun TicketEntry.isNonShiftable(): Boolean = type == Type.Date || type == Type.Rating
