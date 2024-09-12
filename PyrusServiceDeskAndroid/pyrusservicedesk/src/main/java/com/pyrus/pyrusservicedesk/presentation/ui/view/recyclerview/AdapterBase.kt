@@ -13,10 +13,6 @@ internal abstract class AdapterBase<Item> : RecyclerView.Adapter<ViewHolderBase<
      * List of items that are rendered by adapter.
      */
     protected var itemsList: MutableList<Item> = mutableListOf()
-    /**
-     * [ItemTouchHelper] implementation that can be provided by the extender.
-     */
-    open val itemTouchHelper: ItemTouchHelper? = null
 
     override fun getItemCount(): Int {
         return itemsList.size

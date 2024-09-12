@@ -42,6 +42,7 @@ import com.squareup.picasso.Target
 import kotlinx.android.synthetic.main.psd_comment.view.*
 import java.util.regex.Matcher
 import java.util.regex.Pattern
+import kotlin.math.max
 
 private const val TYPE_INBOUND = 0
 private const val TYPE_OUTBOUND = 1
@@ -59,10 +60,10 @@ private const val PROGRESS_CHANGE_ANIMATION_DURATION = 100L
  * xml declaration of the view. By default [TYPE_INBOUND] is used.
  */
 internal class CommentView @JvmOverloads constructor(
-        context: Context,
-        attrs: AttributeSet? = null,
-        defStyleAttr: Int = 0)
-    : FrameLayout(context, attrs, defStyleAttr) {
+    context: Context,
+    attrs: AttributeSet? = null,
+    defStyleAttr: Int = 0,
+) : FrameLayout(context, attrs, defStyleAttr) {
 
     companion object {
         private const val PREVIEW_RETRY_STEP_MS = 10 * 1000L
@@ -108,19 +109,19 @@ internal class CommentView @JvmOverloads constructor(
         set(value) {
             when (value) {
                 ContentType.Text -> {
-                    comment_text.visibility = View.VISIBLE
+                    comment_text_layout.visibility = View.VISIBLE
                     attachment_layout.visibility = View.GONE
                     preview_layout.visibility = GONE
                 }
                 ContentType.Attachment -> {
                     recentProgress = 0
-                    comment_text.visibility = View.GONE
+                    comment_text_layout.visibility = View.GONE
                     attachment_layout.visibility = View.VISIBLE
                     preview_layout.visibility = View.GONE
                 }
                 ContentType.PreviewableAttachment -> {
                     recentProgress = 0
-                    comment_text.visibility = GONE
+                    comment_text_layout.visibility = GONE
                     attachment_layout.visibility = GONE
                     preview_layout.visibility = View.VISIBLE
                 }
@@ -224,24 +225,35 @@ internal class CommentView @JvmOverloads constructor(
             file_name.typeface = it
             file_size.typeface = it
             comment_text.typeface = it
+            text_time.typeface = it
+            preview_time.typeface = it
+            preview_mini_time.typeface = it
         }
-        val backgroundColor = when (type){
+        val backgroundColor = when (type) {
             TYPE_INBOUND -> ConfigUtils.getSupportMessageTextBackgroundColor(context)
             else -> ConfigUtils.getUserMessageTextBackgroundColor(context)
-
         }
         primaryColor = getTextColorOnBackground(context, backgroundColor)
         val secondaryColor = adjustColorChannel(primaryColor, ColorChannel.Alpha, SECONDARY_TEXT_COLOR_MULTIPLIER)
 
         background_parent.setCardBackgroundColor(backgroundColor)
 
-        comment_text.setTextColor(when(type) {
+        val textColor = when (type) {
             TYPE_INBOUND -> ConfigUtils.getSupportMessageTextColor(context, backgroundColor)
             else -> ConfigUtils.getUserMessageTextColor(context, backgroundColor)
-        })
+        }
+        comment_text.setTextColor(textColor)
         comment_text.setLinkTextColor(primaryColor)
+        text_time.setTextColor(textColor)
         file_name.setTextColor(primaryColor)
         file_size.setTextColor(secondaryColor)
+        preview_mini_time.setTextColor(secondaryColor)
+        preview_time.setTextColor(
+            ConfigUtils.getUserMessageTextColor(
+                context,
+                ConfigUtils.getUserMessageTextBackgroundColor(context)
+            )
+        )
 
         fileDownloadDrawable = attachment_progress.progressDrawable as LayerDrawable
         fileDownloadDrawable.adjustSettingsForProgress(primaryColor, secondaryColor)
@@ -309,6 +321,12 @@ internal class CommentView @JvmOverloads constructor(
         LinkifyCompat.addLinks(comment_text, Linkify.WEB_URLS or Linkify.PHONE_NUMBERS)
         addDeepLinks(comment_text)
         comment_text.movementMethod = LinkMovementMethod.getInstance()
+    }
+
+    fun setCreationTime(time: String) {
+        text_time.text = time
+        preview_time.text = time
+        preview_mini_time.text = time
     }
 
     private fun replaceLinkTagsWithSpans(text: CharSequence): CharSequence {
@@ -532,17 +550,21 @@ internal class CommentView @JvmOverloads constructor(
             file_size.setText(R.string.psd_uploading)
     }
 
-    private fun setNetworkPreview(previewUri: Uri,
-                                  target: ImageView,
-                                  adjustTargetDimensions: Boolean) {
+    private fun setNetworkPreview(
+        previewUri: Uri,
+        target: ImageView,
+        adjustTargetDimensions: Boolean,
+    ) {
 
         setNetworkPreviewDelayed(previewUri, target, adjustTargetDimensions, 0)
     }
 
-    private fun setNetworkPreviewDelayed(previewUri: Uri,
-                                         target: ImageView,
-                                         adjustTargetDimensions: Boolean,
-                                         delayMs: Long) {
+    private fun setNetworkPreviewDelayed(
+        previewUri: Uri,
+        target: ImageView,
+        adjustTargetDimensions: Boolean,
+        delayMs: Long,
+    ) {
 
         val allowApplyResult: (Int) -> Boolean = {
             it == previewCallId
@@ -561,7 +583,7 @@ internal class CommentView @JvmOverloads constructor(
             }
         }
 
-        val picassoTarget = when{
+        val picassoTarget = when {
             adjustTargetDimensions -> ChangingSizeTarget(
                 target,
                 previewUri,
@@ -569,8 +591,16 @@ internal class CommentView @JvmOverloads constructor(
                 resources.getDimensionPixelSize(R.dimen.psd_recyclerview_item_height_default),
                 previewRatioMap,
                 allowApplyResult,
-                onFailed)
-            else -> SimpleTarget(target, previewUri, ++previewCallId, allowApplyResult, onFailed) { target.visibility = View.VISIBLE }
+                onFailed
+            )
+
+            else -> SimpleTarget(
+                target,
+                previewUri,
+                ++previewCallId,
+                allowApplyResult,
+                onFailed
+            ) { target.visibility = View.VISIBLE }
         }
         clearCurrentPreviewRequest()
         recentPicassoTarget = picassoTarget
@@ -592,10 +622,12 @@ internal class CommentView @JvmOverloads constructor(
     /**
      * There is a problem with [Picasso] that doesn't allow to use [ChangingSizeTarget] with local files.
      */
-    private fun setLocalPreview(target: ImageView,
-                                previewUri: Uri,
-                                adjustTargetDimension: Boolean,
-                                onFailed: (() -> Unit)? = null) {
+    private fun setLocalPreview(
+        target: ImageView,
+        previewUri: Uri,
+        adjustTargetDimension: Boolean,
+        onFailed: (() -> Unit)? = null,
+    ) {
 
         val bitmap = try {
             val exif = context.contentResolver.openInputStream(previewUri)?.use {
@@ -614,16 +646,20 @@ internal class CommentView @JvmOverloads constructor(
                     this.rotate(getImageRotation(it).toFloat())
                 } ?: this
             }
-        } catch (ex: java.lang.Exception) {
+        }
+        catch (ex: java.lang.Exception) {
             onFailed?.invoke()
             return
         }
 
         if (adjustTargetDimension) {
-            val ratio  = bitmap.width.toFloat() / bitmap.height
+            val ratio = bitmap.width.toFloat() / bitmap.height
             if (!previewRatioMap.containsKey(previewUri))
                 previewRatioMap += previewUri to ratio
-            target.layoutParams.width = getFullSizePreviewWidth(previewUri, target.layoutParams.height)
+            target.layoutParams.width = getFullSizePreviewWidth(
+                previewUri,
+                target.layoutParams.height
+            )
             target.requestLayout()
         }
         target.setImageBitmap(bitmap)
@@ -633,13 +669,15 @@ internal class CommentView @JvmOverloads constructor(
 /**
  * [hashCode] and [equals] are required by [Target] description
  */
-private open class SimpleTarget(protected val targetView: ImageView,
-                                protected val uri: Uri,
-                                val callId: Int,
-                                protected val canApplyResult: (Int) -> Boolean,
-                                protected val onFailed: (Int) -> Unit,
-                                protected val onSuccess: (() -> Unit)? = null)
-    : Target{
+private open class SimpleTarget
+    (
+    protected val targetView: ImageView,
+    protected val uri: Uri,
+    val callId: Int,
+    protected val canApplyResult: (Int) -> Boolean,
+    protected val onFailed: (Int) -> Unit,
+    protected val onSuccess: (() -> Unit)? = null,
+) : Target {
 
     /**
      * [Picasso] stores targets in weak references, which can lead to missing of calling the callbacks as
@@ -659,7 +697,7 @@ private open class SimpleTarget(protected val targetView: ImageView,
     }
 
     override fun onBitmapLoaded(bitmap: Bitmap?, from: Picasso.LoadedFrom?) {
-        if(!canApplyResult.invoke(callId))
+        if (!canApplyResult.invoke(callId))
             return
         targetView.setImageBitmap(bitmap)
         targetView.tag = null
@@ -679,23 +717,25 @@ private open class SimpleTarget(protected val targetView: ImageView,
     }
 }
 
-private class ChangingSizeTarget(targetView: ImageView,
-                                 uri: Uri,
-                                 callId: Int,
-                                 private val minWidth: Int,
-                                 val ratioMap: MutableMap<Uri, Float>,
-                                 canApplyResult: (Int) -> Boolean,
-                                 onFailed: (Int) -> Unit)
-    : SimpleTarget(targetView, uri, callId, canApplyResult, onFailed) {
+private class ChangingSizeTarget(
+    targetView: ImageView,
+    uri: Uri,
+    callId: Int,
+    private val minWidth: Int,
+    val ratioMap: MutableMap<Uri, Float>,
+    canApplyResult: (Int) -> Boolean,
+    onFailed: (Int) -> Unit,
+) : SimpleTarget(targetView, uri, callId, canApplyResult, onFailed) {
 
     private companion object {
         const val CHANGING_SIZE_ANIMATION_DURATION_MS = 150L
     }
 
     init {
-        targetView.layoutParams.width = Math.max(
+        targetView.layoutParams.width = max(
             CommentView.getFullSizePreviewWidth(uri, targetView.layoutParams.height),
-            minWidth)
+            minWidth
+        )
     }
 
     override fun onBitmapLoaded(bitmap: Bitmap?, from: Picasso.LoadedFrom?) {
@@ -711,9 +751,10 @@ private class ChangingSizeTarget(targetView: ImageView,
         val animator = ObjectAnimator.ofFloat(1f, ratio)
         animator.duration = CHANGING_SIZE_ANIMATION_DURATION_MS
         animator.addUpdateListener {
-            targetView.layoutParams.width = Math.max(
+            targetView.layoutParams.width = max(
                 (targetView.layoutParams.height * it.animatedValue as Float).toInt(),
-                minWidth)
+                minWidth
+            )
             targetView.requestLayout()
         }
         fun onAnimationEnd() {
