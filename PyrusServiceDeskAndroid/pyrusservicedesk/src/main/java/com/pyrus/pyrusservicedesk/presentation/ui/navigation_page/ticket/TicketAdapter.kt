@@ -276,7 +276,12 @@ internal class TicketAdapter: AdapterBase<TicketEntry>() {
                 ContentType.Text -> bindTextView()
                 else -> bindAttachmentView()
             }
-            comment.setCreationTime(getItem().comment.creationDate.getTimeText(itemView.context))
+
+            val creationTime =
+                if (getItem().comment.isWelcomeMessage) ""
+                else getItem().comment.creationDate.getTimeText(itemView.context)
+
+            comment.setCreationTime(creationTime)
         }
 
         override fun onDetachedFromWindow() {
