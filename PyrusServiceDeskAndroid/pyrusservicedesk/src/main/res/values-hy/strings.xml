@@ -1,2 +1,40 @@
 <?xml version="1.0" encoding="utf-8"?>
-<resources></resources>
+<resources>
+    <string name="psd_retry">Կրկին փորձել</string>
+    <string name="psd_no_connection">Ինտերնետ կապ չկա</string>
+    <string name="psd_uploading">Վերբեռնվում է…</string>
+    <string name="psd_file_size_mb" formatted="false">%.1f ՄԲ</string>
+    <string name="psd_file_size_kb" formatted="false">%.1f ԿԲ</string>
+    <string name="psd_time_format">ժժ։րր աա</string>
+    <string name="psd_organization_support">Աջակցություն</string>
+    <string name="psd_today">Այսօր</string>
+    <string name="psd_yesterday">Երեկ</string>
+    <string name="psd_date_format_d_m_y">ԱԱԱԱ օ, տտտտ</string>
+    <string name="psd_date_format_d_m">ԱԱԱԱ օ</string>
+    <string name="psd_photo">Նկար</string>
+    <plurals name="psd_years_ago">
+        <item quantity="one">%d տարի առաջ</item>
+        <item quantity="other">%d տարի առաջ</item>
+    </plurals>
+    <string name="psd_months_ago" formatted="false">%d ր առաջ</string>
+    <string name="psd_weeks_ago" formatted="false">%d շ առաջ</string>
+    <string name="psd_days_ago" formatted="false">%d օ առաջ</string>
+    <string name="psd_recent">թարմ</string>
+    <string name="psd_guest">Հյուր</string>
+    <string name="psd_copied_to_clipboard">Պատճենվել է սեղմատախտակում</string>
+    <string name="psd_download">Բեռնել</string>
+    <string name="psd_downloading">Բեռնում…</string>
+    <string name="psd_open">Բացել</string>
+    <string name="psd_no_preview_available">Նախադիտման հնարավորություն չկա</string>
+    <string name="psd_share">Կիսվել</string>
+    <string name="psd_delete">Ջնջել</string>
+    <string name="send_library_logs">Ուղարկել գրադարանի մատյանները</string>
+    <string name="psd_send">Ուղարկել</string>
+    <string name="psd_comment_input_hint">Ավելացնել մեկնաբանություն</string>
+    <string name="psd_gallery">Պատկերասրահ</string>
+    <string name="psd_hours_ago" formatted="false">%d ժ առաջ</string>
+    <string name="psd_minutes_ago" formatted="false">%d ր առաջ</string>
+    <string name="psd_file_size_exceeded_message" formatted="false">Ֆայլի չափը չպետք է գերազանցի %d ՄԲ-ը:</string>
+    <string name="link_warning">Այս հղումը տանում է դեպի %s
+\nԻսկապե՞ս ուզում եք անցնել հղումով:</string>
+</resources>
