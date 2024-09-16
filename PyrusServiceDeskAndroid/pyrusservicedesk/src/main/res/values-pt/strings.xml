@@ -1,2 +1,27 @@
 <?xml version="1.0" encoding="utf-8"?>
-<resources></resources>
+<resources>
+    <string name="psd_send">Enviar</string>
+    <string name="psd_comment_input_hint">Adicionar comentário</string>
+    <string name="psd_file_size_mb" formatted="false">%.1fMB</string>
+    <string name="psd_file_size_kb" formatted="false">%.1fKB</string>
+    <string name="psd_time_format">hh:mm aa</string>
+    <string name="psd_organization_support">Apoiar</string>
+    <string name="psd_today">Hoje</string>
+    <string name="psd_yesterday">Ontem</string>
+    <string name="psd_date_format_d_m_y">MMMM d, aaaa</string>
+    <string name="psd_date_format_d_m">MMMM d</string>
+    <string name="psd_photo">Foto</string>
+    <string name="psd_gallery">Galeria</string>
+    <string name="psd_weeks_ago" formatted="false">%d semanas atrás</string>
+    <string name="psd_months_ago" formatted="false">%d mês atrás</string>
+    <string name="psd_days_ago" formatted="false">%d dias atrás</string>
+    <string name="psd_hours_ago" formatted="false">%d h atrás</string>
+    <string name="psd_retry">Tentar novamente</string>
+    <string name="psd_no_connection">Sem conexão com a Internet</string>
+    <string name="psd_uploading">Enviando…</string>
+    <plurals name="psd_years_ago">
+        <item quantity="one">%d ano atrás</item>
+        <item quantity="many">%d anos atrás</item>
+        <item quantity="other"></item>
+    </plurals>
+</resources>
