@@ -258,11 +258,13 @@ internal class TicketActivity : ConnectionActivityBase<TicketViewModel>(TicketVi
             if (adapter.itemCount > 0 && atEnd) {
                 if (isEmpty)
                     comments.scrollToPosition(adapter.itemCount - 1)
-                else if (!comments.isAtEnd())
+                else if (!comments.isAtEnd()) {
                     comments.smoothScrollToPosition(adapter.itemCount - 1)
+                }
                 launch {
-                    while (!comments.isAtEnd())
+                    while (!comments.isAtEnd()) {
                         delay(CHECK_IS_AT_BOTTOM_DELAY_MS)
+                    }
                     val offset = when {
                         comments.childCount > 0 -> comments.getChildAt(comments.childCount - 1).height
                         else -> 0

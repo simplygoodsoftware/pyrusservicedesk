@@ -104,35 +104,35 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             app:viewPartMain="@+id/comment_text"
-            android:padding="@dimen/psd_offset_small"
-            app:viewPartSlave="@+id/time_layout">
+            android:paddingStart="12dp"
+            android:paddingLeft="12dp"
+            android:paddingEnd="12dp"
+            android:paddingRight="12dp"
+            android:paddingTop="8dp"
+            android:paddingBottom="8dp"
+            app:viewPartSlave="@+id/text_time"
+            tools:visibility="gone">
 
             <androidx.appcompat.widget.AppCompatTextView
                 android:id="@+id/comment_text"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:textAppearance="?attr/textAppearanceListItem"
-                tools:text="@tools:sample/lorem"
-                tools:visibility="gone"/>
+                android:textSize="17sp"
+                tools:text="@tools:sample/lorem" />
 
-            <FrameLayout
-                android:id="@+id/time_layout"
+            <androidx.appcompat.widget.AppCompatTextView
+                android:id="@+id/text_time"
                 android:layout_width="wrap_content"
-                android:layout_height="wrap_content">
-
-                <androidx.appcompat.widget.AppCompatTextView
-                    android:id="@+id/text_time"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:textAppearance="?attr/textAppearanceListItem"
-                    android:textSize="12sp"
-                    android:maxLines="1"
-                    android:layout_marginLeft="4dp"
-                    android:layout_marginBottom="-2dp"
-                    tools:text="@tools:sample/date/hhmm"/>
-
-            </FrameLayout>
-
+                android:layout_height="wrap_content"
+                android:textAppearance="?attr/textAppearanceListItem"
+                android:textSize="13sp"
+                android:maxLines="1"
+                android:translationY="5dp"
+                android:paddingBottom="2dp"
+                android:paddingStart="8dp"
+                android:paddingLeft="8dp"
+                tools:text="@tools:sample/date/hhmm"/>
 
 
         </com.pyrus.pyrusservicedesk.presentation.ui.view.ImFlexboxLayout>
@@ -164,15 +164,16 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_gravity="right|bottom"
-                android:layout_margin="4dp"
+                android:layout_margin="8dp"
                 android:background="@drawable/psd_bg_time"
                 android:maxLines="1"
-                android:paddingLeft="4dp"
-                android:paddingTop="2dp"
-                android:paddingRight="4dp"
-                android:paddingBottom="2dp"
+                android:paddingLeft="8dp"
+                android:paddingTop="1dp"
+                android:paddingRight="8dp"
+                android:paddingBottom="1dp"
+                android:textColor="@color/psd_white"
                 android:textAppearance="?attr/textAppearanceListItemSecondary"
-                android:textSize="11dp"
+                android:textSize="13dp"
                 tools:text="@tools:sample/date/hhmm" />
 
             <ProgressBar

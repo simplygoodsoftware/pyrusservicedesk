@@ -241,11 +241,10 @@ internal class CommentView @JvmOverloads constructor(
         }
         comment_text.setTextColor(textColor)
         comment_text.setLinkTextColor(primaryColor)
-        text_time.setTextColor(textColor)
+        text_time.setTextColor(secondaryColor)
         file_name.setTextColor(primaryColor)
         file_size.setTextColor(secondaryColor)
         preview_mini_time.setTextColor(secondaryColor)
-        preview_time.setTextColor(context.resources.getColor(R.color.psd_text_color_primary_inverse))
 
         fileDownloadDrawable = attachment_progress.progressDrawable as LayerDrawable
         fileDownloadDrawable.adjustSettingsForProgress(primaryColor, secondaryColor)
