@@ -14,24 +14,14 @@ class PSDChatMessageCell: UITableViewCell {
         let view = PSDMessageView()
         return view;
     }()
-    ///A label with time when message was sent.
-    let timeLabel : UILabel =
-    {
-        let label = UILabel()
-        label.textColor = CustomizationHelper.textColorForTable.withAlphaComponent(timeAlpha)
-        label.font = DETAIL_FONT
-        label.frame = CGRect(x: 0, y: 0, width: OFFSET_FOR_DETAIL, height: 30)
-        return label;
-    }()
+    
     override init(style: UITableViewCell.CellStyle, reuseIdentifier: String?) {
         super.init(style: style, reuseIdentifier: reuseIdentifier)
         self.backgroundColor = .clear
         self.contentView.translatesAutoresizingMaskIntoConstraints = true
         self.selectionStyle = .none
         cloudView.maxWidth = maxMessageWidth()
-
-        self.contentView.addSubview(timeLabel)
-        self.contentView.addSubview(cloudView)
+        contentView.addSubview(cloudView)
         self.addConstraints()
         
     }
@@ -46,7 +36,6 @@ class PSDChatMessageCell: UITableViewCell {
     }
     func draw(message:PSDRowMessage)
     {
-        timeLabel.text = message.message.date.timeAsString()
         cloudView.draw(message: message)
     }
     
@@ -60,7 +49,6 @@ class PSDChatMessageCell: UITableViewCell {
     }
     private func addConstraints()
     {
-        timeConstraints()
         sameConstraints()
     }
     var firstMessageInDate : Bool = false
@@ -94,13 +82,6 @@ class PSDChatMessageCell: UITableViewCell {
         
         
     }
-    private func timeConstraints()
-    {
-        self.timeLabel.translatesAutoresizingMaskIntoConstraints = false
-        timeLabel.addSizeConstraint([.width], constant: OFFSET_FOR_DETAIL)
-        timeLabel.addConstraint([.trailing], constant: OFFSET_FOR_DETAIL)
-        timeLabel.addConstraint([.bottom], constant: -bottomDistance)
-    }
     
    
    
@@ -118,7 +99,6 @@ extension PSDChatMessageCell: Recolorable {
         }
         recolor()
     }
-    @objc func recolor() {
-        timeLabel.textColor = CustomizationHelper.textColorForTable.withAlphaComponent(PSDChatMessageCell.timeAlpha)
-    }
+    
+    @objc func recolor(){}
 }

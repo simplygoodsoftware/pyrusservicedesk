@@ -7,7 +7,7 @@ protocol PSDChatTableViewDelegate: NSObjectProtocol {
     func dataIsShown()
 }
 
-class PSDChatTableView: PSDDetailTableView{
+class PSDChatTableView: PSDTableView {
     ///The id of chat that is shown in table view
     weak var chatDelegate: PSDChatTableViewDelegate?
     private let footerHeight : CGFloat = 10.0
