@@ -1,10 +1,10 @@
 package com.pyrus.pyrusservicedesk.presentation.ui.navigation_page.ticket
 
+import android.content.Intent
+import android.content.res.ColorStateList
 import android.graphics.PorterDuff
 import android.graphics.drawable.AnimationDrawable
-import android.text.Spannable.SPAN_INCLUSIVE_INCLUSIVE
-import android.text.SpannableStringBuilder
-import android.text.method.LinkMovementMethod
+import android.net.Uri
 import android.view.Gravity
 import android.view.View
 import android.view.View.GONE
@@ -16,6 +16,8 @@ import android.view.ViewGroup
 import android.widget.ImageView
 import android.widget.TextView
 import androidx.annotation.LayoutRes
+import androidx.appcompat.content.res.AppCompatResources
+import androidx.core.content.ContextCompat
 import com.pyrus.pyrusservicedesk.PyrusServiceDesk
 import com.pyrus.pyrusservicedesk.R
 import com.pyrus.pyrusservicedesk.presentation.ui.navigation_page.ticket.entries.ButtonEntry
@@ -28,7 +30,6 @@ import com.pyrus.pyrusservicedesk.presentation.ui.navigation_page.ticket.entries
 import com.pyrus.pyrusservicedesk.presentation.ui.navigation_page.ticket.entries.WelcomeMessageEntry
 import com.pyrus.pyrusservicedesk.presentation.ui.view.CommentView
 import com.pyrus.pyrusservicedesk.presentation.ui.view.ContentType
-import com.pyrus.pyrusservicedesk.presentation.ui.view.LinkUtils
 import com.pyrus.pyrusservicedesk.presentation.ui.view.Status
 import com.pyrus.pyrusservicedesk.presentation.ui.view.recyclerview.AdapterBase
 import com.pyrus.pyrusservicedesk.presentation.ui.view.recyclerview.ViewHolderBase
@@ -226,8 +227,9 @@ internal class TicketAdapter: AdapterBase<TicketEntry>() {
     }
 
     private abstract inner class CommentHolder(
-            parent: ViewGroup,
-            @LayoutRes layoutRes: Int)
+        parent: ViewGroup,
+        @LayoutRes layoutRes: Int,
+    )
         : ViewHolderBase<CommentEntry>(parent, layoutRes){
 
         abstract val comment: CommentView
@@ -446,22 +448,31 @@ internal class TicketAdapter: AdapterBase<TicketEntry>() {
                     }
 
                     val frame = background
-                    frame.setColorFilter(ConfigUtils.getAccentColor(itemView.context), PorterDuff.Mode.SRC_ATOP)
+                    val tint = ConfigUtils.getAccentColor(itemView.context)
+                    frame.setColorFilter(tint, PorterDuff.Mode.SRC_ATOP)
                     setTextColor(ConfigUtils.getAccentColor(itemView.context))
+
 
                     when(buttonEntry) {
                         is ButtonEntry.Link -> {
-                            val spanBuilder = SpannableStringBuilder(buttonText)
-                            val linkSpan = LinkUtils.createClickableSpan(buttonEntry.link, context, buttonText)
-                            spanBuilder.setSpan(linkSpan, 0, spanBuilder.length, SPAN_INCLUSIVE_INCLUSIVE)
-                            movementMethod = LinkMovementMethod.getInstance()
-                            text = spanBuilder
-                            setOnClickListener(null)
+                            text = "$buttonText   "
+                            val shareDrawable = AppCompatResources.getDrawable(context, R.drawable.ic_share)!!
+                            shareDrawable.setColorFilter(tint, PorterDuff.Mode.SRC_ATOP)
+                            setCompoundDrawablesWithIntrinsicBounds(null, null, shareDrawable, null)
+                            setOnClickListener {
+                                try {
+                                    context.startActivity(Intent(Intent.ACTION_VIEW).apply { data = Uri.parse(buttonEntry.link) })
+                                }
+                                catch (exception: Exception) {
+                                    exception.printStackTrace()
+                                }
+                            }
+
                         }
 
                         is ButtonEntry.Simple -> {
-                            movementMethod = null
                             text = buttonText
+                            setCompoundDrawablesWithIntrinsicBounds(0, 0, 0, 0)
                             setOnClickListener { item.onButtonClick.invoke(buttonText) }
                         }
                     }
