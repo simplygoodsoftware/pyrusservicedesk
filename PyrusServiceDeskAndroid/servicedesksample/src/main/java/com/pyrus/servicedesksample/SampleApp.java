@@ -20,7 +20,6 @@ public class SampleApp extends Application {
         map.put("language", lang);
         PyrusServiceDesk.setFieldsData(map);
 
-//        dodo sample
         String dodoAppId = "GJv5lsZnNQM8jDwppzj8Ciuwm5MiuQsF41nXoUkNut2qETsjtJz0F271-~M6WFfukoW6YJeiMZAjKzAiehLIFkklDpQ1Spap0Yd9csgIdVJTAdCL0ZF~bPl6qLvH0UfnFY-Z8A==";
         String testAppId = "0HUi7grFuWVFHqWtL3f5YD-4PYJXiOEoLfCDb2yhTthkHBpedNbNU4O01YD2OnsSpvbMiXmweUF8akomZZIW1Ilb-W9mOPuK70L4lCI1mK0dJqXYUp0l-MJlsUv9tr8dSmKCSw==";
         PyrusServiceDesk.init(
