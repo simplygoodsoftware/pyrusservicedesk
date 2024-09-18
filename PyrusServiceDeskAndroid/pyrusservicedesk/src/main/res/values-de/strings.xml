@@ -1,2 +1,40 @@
 <?xml version="1.0" encoding="utf-8"?>
-<resources></resources>
+<resources>
+    <string name="psd_retry">Wiederholen</string>
+    <string name="psd_no_connection">Keine Internetverbindung</string>
+    <string name="psd_uploading">Hochladen…</string>
+    <string name="psd_file_size_mb" formatted="false">%.1f MB</string>
+    <string name="psd_file_size_kb" formatted="false">%.1f KB</string>
+    <string name="psd_time_format">hh:mm aa</string>
+    <string name="psd_organization_support">Unterstützung</string>
+    <string name="psd_today">Heute</string>
+    <string name="psd_yesterday">Gestern</string>
+    <string name="psd_date_format_d_m_y">MMMM d, yyyy</string>
+    <string name="psd_date_format_d_m">MMMM d</string>
+    <string name="psd_photo">Foto</string>
+    <string name="psd_gallery">Galerie</string>
+    <plurals name="psd_years_ago">
+        <item quantity="one">vor %d Jahr</item>
+        <item quantity="other">vor %d Jahren</item>
+    </plurals>
+    <string name="psd_months_ago" formatted="false">vor %d Monate</string>
+    <string name="psd_weeks_ago" formatted="false">Vor %d Wochen</string>
+    <string name="psd_days_ago" formatted="false">vor %d Tagen</string>
+    <string name="psd_hours_ago" formatted="false">vor %d Stunden</string>
+    <string name="psd_minutes_ago" formatted="false">vor %d m</string>
+    <string name="psd_recent">aktuell</string>
+    <string name="psd_guest">Gast</string>
+    <string name="psd_file_size_exceeded_message" formatted="false">Die Dateigröße sollte %d MB nicht überschreiten.</string>
+    <string name="psd_copied_to_clipboard">In die Zwischenablage kopiert</string>
+    <string name="psd_download">Herunterladen</string>
+    <string name="psd_downloading">Laden…</string>
+    <string name="psd_open">Offen</string>
+    <string name="psd_no_preview_available">Keine Vorschau verfügbar</string>
+    <string name="psd_share">Freigeben</string>
+    <string name="psd_delete">Löschen</string>
+    <string name="send_library_logs">Senden von library logs</string>
+    <string name="psd_send">Senden</string>
+    <string name="psd_comment_input_hint">Kommentar hinzufügen</string>
+    <string name="link_warning">Dieser Link führt zu einem %s
+\nMöchten Sie wirklich dem Link folgen\?</string>
+</resources>
