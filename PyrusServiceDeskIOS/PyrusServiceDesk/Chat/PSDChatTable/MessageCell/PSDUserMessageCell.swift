@@ -30,9 +30,9 @@ class PSDUserMessageCell: PSDChatMessageCell {
     required init?(coder aDecoder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
     }
-    override func draw(message:PSDRowMessage)
+    override func draw(message:PSDRowMessage, width: CGFloat)
     {
-        super.draw(message: message)
+        super.draw(message: message, width: width)
         self.message = message
         messageStateView._messageState = (message.text.count > 0 || message.rating != nil) ? message.message.state : .sent
         updateTopMessageConstrint()

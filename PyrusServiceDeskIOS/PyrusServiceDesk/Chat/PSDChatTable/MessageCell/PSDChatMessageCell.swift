@@ -20,7 +20,6 @@ class PSDChatMessageCell: UITableViewCell {
         self.backgroundColor = .clear
         self.contentView.translatesAutoresizingMaskIntoConstraints = true
         self.selectionStyle = .none
-        cloudView.maxWidth = maxMessageWidth()
         contentView.addSubview(cloudView)
         self.addConstraints()
         
@@ -34,18 +33,16 @@ class PSDChatMessageCell: UITableViewCell {
             self.contentView.backgroundColor = .clear
         }
     }
-    func draw(message:PSDRowMessage)
+    func draw(message:PSDRowMessage, width: CGFloat)
     {
+        cloudView.maxWidth =  maxMessageWidth(width)
         cloudView.draw(message: message)
     }
     
     //MARK: constraints block
-    override func layoutSubviews() {
-        super.layoutSubviews()
-        cloudView.maxWidth = maxMessageWidth()
-    }
-    private func maxMessageWidth() -> CGFloat {
-        return self.frame.size.width - (TO_BOARD_DISTANCE*3) - (AVATAR_SIZE*2)
+    
+    private func maxMessageWidth(_ width: CGFloat) -> CGFloat {
+        return width - (TO_BOARD_DISTANCE*3) - (AVATAR_SIZE*2)
     }
     private func addConstraints()
     {
