@@ -58,7 +58,7 @@ extension NSString {
     /// - Parameter needMention: Хак для черновика и редактирования комментария, по дефолту true, можно не заполнять
     func parseXMLToAttributedString(needDetectLink: Bool = true,
                                     needMention: Bool = true,
-                                    fontColor: UIColor) -> (NSAttributedString?, [String]?) {
+                                    fontColor: UIColor) -> (NSAttributedString?, [ButtonData]?) {
         return parseXMLToAttributedString(needDetectLink: needDetectLink, needMention: needMention, font: .messageTextView, fontColor: fontColor)
     }
     
@@ -68,9 +68,9 @@ extension NSString {
     func parseXMLToAttributedString(needDetectLink: Bool = true,
                                     needMention: Bool = true,
                                     font: UIFont,
-                                    fontColor: UIColor) -> (NSAttributedString?, [String]?) {
+                                    fontColor: UIColor) -> (NSAttributedString?, [ButtonData]?) {
         ///Массив кнопок из тегов
-        var buttons = [String]()
+        var buttons = [ButtonData]()
         ///Массив наших тегов.
         var tags = [HTMLTag: (count: Int, data: Any?)]()
         ///Откуда начинается наш AttributedString при смене типа текста.
@@ -87,7 +87,7 @@ extension NSString {
             //В зависимости от тега лежащего в нашем массиве мы добавляем аттрибуты
             for (tag, info) in tags {
                 switch tag {
-                case .a:
+                case .a, .button:
                     if let link = info.data as? URL {
                         dict.updateValue(link, forKey: .link)
                     }
@@ -101,6 +101,12 @@ extension NSString {
         ///Добавляем тег в наш массив (или удаляем)
         func addAndReturn(tag str: String) -> (tagType: HTMLTag, isOpen: Bool, data: Any?)? {
             if let tag = str.getHTMLTagForString() {
+                if 
+                    !tag.isOpen,
+                    tags[tag.tagType]?.data is ButtonData
+                {
+                    return tag
+                }
                 if tag.isOpen {
                     if tag.tagType != .lineBreak {
                         //place for listItem
@@ -140,11 +146,19 @@ extension NSString {
                     let replaceString = tag.isOpen ? tag.tagType.replaced(data: tag.data) : ""
                     str = str.replacingCharacters(in: tagRange, with: replaceString) as NSString
                     attrStr.replaceCharacters(in: tagRange, with: replaceString)
-                    if tag.tagType == .button && !tag.isOpen {
+                    let tagButtonData = tags[tag.tagType]?.data as? ButtonData
+                    if !tag.isOpen && (tag.tagType == .button || tagButtonData != nil) {
+                        if 
+                            tag.tagType == .a,
+                            tagButtonData != nil
+                        {
+                            tags.removeValue(forKey: tag.tagType)
+                        }
                         let button = str.substring(with: addAttrRange)
                         if button.count > 0 {
                             if button.trimmingCharacters(in: .whitespacesAndNewlines).count > 0 {//Добавлеям кнопки только если в них есть текст, иначе удаляем
-                                buttons.append(button)
+                                let buttonData = ButtonData(string: button, url: tagButtonData?.url)
+                                buttons.append(buttonData)
                             }
                             let replaceString = ""
                             str = str.replacingCharacters(in: addAttrRange, with: replaceString) as NSString
@@ -194,11 +208,14 @@ extension NSString {
 }
 
 ///Перечесление для тегов с параметрами
-enum HardTagType: CaseIterable {
+enum HardTagType: String, CaseIterable {
+    case dataType = "data-type"
     case href
     ///Строка для идентефикации типа тега с параметрами
     var pattern: String {
         switch self {
+        case .dataType:
+            return "data-type=\""
         case .href:
             return "href=\""
         }
@@ -206,6 +223,15 @@ enum HardTagType: CaseIterable {
     var parametr: String {
         return ""
     }
+}
+
+struct ButtonData {
+    var string: String?
+    var url: URL?
+}
+
+enum DataType: String {
+    case button = "button"
 }
 
 extension String {
@@ -224,10 +250,40 @@ extension String {
                 switch type {
                 case .href:
                     return (HTMLTag.a, true, searchURLParam(type.parametr))
+                case .dataType:
+                    guard
+                        let dataType = searchDataType(type.parametr)
+                    else {
+                        continue
+                    }
+                    switch dataType {
+                    case .button:
+                        for type in HardTagType.allCases {
+                            if self.contains(type.pattern) {
+                                switch type {
+                                case .href:
+                                    let urlParam = searchURLParam(type.rawValue)
+                                    return (HTMLTag.a, true, ButtonData(string: nil, url: urlParam))
+                                default:
+                                    break
+                                }
+                            }
+                        }
+                        return (HTMLTag.a, true, ButtonData(string: nil, url: nil))
+                    }
                 }
             }
         }
         return nil
+    }
+    
+    func searchDataType(_ name: String) -> DataType? {
+        guard
+            let param = searchStringParam(name: name)
+        else {
+            return nil
+        }
+        return DataType(rawValue: param)
     }
     
     ///Ищем в строке тега параметр типа String
