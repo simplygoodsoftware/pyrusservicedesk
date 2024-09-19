@@ -1,11 +1,11 @@
 package com.pyrus.servicedesksample;
 
 import android.app.Application;
+import android.util.Log;
 
 import com.pyrus.pyrusservicedesk.PyrusServiceDesk;
 
 import java.util.HashMap;
-import java.util.Locale;
 import java.util.Map;
 
 public class SampleApp extends Application {
@@ -13,22 +13,26 @@ public class SampleApp extends Application {
     @Override
     public void onCreate() {
         super.onCreate();
+        PyrusServiceDesk.init(
+                this,
+                "my_app_id",
+                "user_id",
+                "security_key",
+                null,
+                true
+        );
 
         Map<String, String> map = new HashMap<>();
-
-        String lang = Locale.getDefault().getLanguage();
-        map.put("language", lang);
+        map.put("test_text", "test some text");
+        map.put("test_number", "999");
+        map.put("test_money", "555");
+        map.put("test_phone", "79778888888");
+        map.put("test_email", "sample@email.com");
         PyrusServiceDesk.setFieldsData(map);
 
-        String dodoAppId = "GJv5lsZnNQM8jDwppzj8Ciuwm5MiuQsF41nXoUkNut2qETsjtJz0F271-~M6WFfukoW6YJeiMZAjKzAiehLIFkklDpQ1Spap0Yd9csgIdVJTAdCL0ZF~bPl6qLvH0UfnFY-Z8A==";
-        String testAppId = "0HUi7grFuWVFHqWtL3f5YD-4PYJXiOEoLfCDb2yhTthkHBpedNbNU4O01YD2OnsSpvbMiXmweUF8akomZZIW1Ilb-W9mOPuK70L4lCI1mK0dJqXYUp0l-MJlsUv9tr8dSmKCSw==";
-        PyrusServiceDesk.init(
-            this,
-            dodoAppId,
-            "dev.pyrus.com",
-            true,
-            null
-        );
+        PyrusServiceDesk.setPushToken(
+                "my_push_token",
+                exception -> Log.w("SAMPLE_APP", exception));
 
         PyrusServiceDesk.onAuthorizationFailed(null);
     }
