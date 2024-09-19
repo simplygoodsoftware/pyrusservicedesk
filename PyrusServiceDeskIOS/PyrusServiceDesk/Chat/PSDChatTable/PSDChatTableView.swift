@@ -7,7 +7,7 @@ protocol PSDChatTableViewDelegate: NSObjectProtocol {
     func dataIsShown()
 }
 
-class PSDChatTableView: PSDDetailTableView{
+class PSDChatTableView: PSDTableView {
     ///The id of chat that is shown in table view
     weak var chatDelegate: PSDChatTableViewDelegate?
     private let footerHeight : CGFloat = 10.0
@@ -471,7 +471,8 @@ class PSDChatTableView: PSDDetailTableView{
         if needReload{
             if(cellOnScrean){
                 if let cell = self.cellForRow(at: indexPath) as? PSDChatMessageCell{
-                    cell.draw(message:message)
+                    cell.draw(message: message,
+                              width: frame.size.width)
                     PSDPreviewSetter.setPreview(of: message.attachment, in: cell.cloudView.attachmentView, delegate:self, animated: false)
                 }
             }
@@ -535,7 +536,7 @@ extension PSDChatTableView : UITableViewDelegate,UITableViewDataSource{
         cell.needShowName = self.tableMatrix.needShowName(at: indexPath)
         cell.drawEmpty = self.tableMatrix.emptyMessage(at: indexPath)
         cell.firstMessageInDate = indexPath.row == 0
-        cell.draw(message:message)
+        cell.draw(message:message, width: frame.size.width)
         PSDPreviewSetter.setPreview(of: message.attachment, in: cell.cloudView.attachmentView, delegate: self, animated: false)
         self.redrawSendingAttachmentCell(at: indexPath, with: message)
         cell.cloudView.messageTextView.linkDelegate = self
