@@ -1,2 +1,40 @@
 <?xml version="1.0" encoding="utf-8"?>
-<resources></resources>
+<resources>
+    <string name="psd_send">Жіберу</string>
+    <string name="psd_comment_input_hint">Пікір қосу</string>
+    <string name="psd_retry">Қайталап көріңіу</string>
+    <string name="psd_no_connection">Интернет қосылымы жоқ</string>
+    <string name="psd_uploading">Жүктеп салынуда…</string>
+    <string name="psd_file_size_mb" formatted="false">%.1f MB</string>
+    <string name="psd_file_size_kb" formatted="false">%.1f KB</string>
+    <string name="psd_time_format">сс:мм аа</string>
+    <string name="psd_organization_support">Қолдау</string>
+    <string name="psd_today">Бүгін</string>
+    <string name="psd_yesterday">Кеше</string>
+    <string name="psd_date_format_d_m">MMMM d</string>
+    <string name="psd_photo">Фото</string>
+    <string name="psd_gallery">Галерея</string>
+    <plurals name="psd_years_ago">
+        <item quantity="one">%d жыл бұрын</item>
+        <item quantity="other">%d жыл бұрын</item>
+    </plurals>
+    <string name="psd_months_ago" formatted="false">%d мин бұрын</string>
+    <string name="psd_weeks_ago" formatted="false">%d апта бұрын</string>
+    <string name="psd_days_ago" formatted="false">%d күн бұрын</string>
+    <string name="psd_hours_ago" formatted="false">%d сағ бұрын</string>
+    <string name="psd_minutes_ago" formatted="false">%d мин бұрын</string>
+    <string name="psd_guest">Қонақ</string>
+    <string name="psd_file_size_exceeded_message" formatted="false">Файл өлшемі %d МБ аспауы керек.</string>
+    <string name="psd_copied_to_clipboard">Буферге көшірілді</string>
+    <string name="psd_download">Жүктеп алу</string>
+    <string name="psd_open">Ашыу</string>
+    <string name="psd_no_preview_available">Алдын ала қарау қолжетімді емес</string>
+    <string name="psd_share">Бөлісу</string>
+    <string name="psd_delete">Жою</string>
+    <string name="send_library_logs">Кітапхана журналдарын жіберу</string>
+    <string name="link_warning">Бұл сілтеме %s әкеледі
+\nСіз шынымен сілтемені орындағыңыз келе ме\?</string>
+    <string name="psd_date_format_d_m_y">АААА күн, жжж</string>
+    <string name="psd_recent">жақында</string>
+    <string name="psd_downloading">Жүктеп алынуда…</string>
+</resources>
