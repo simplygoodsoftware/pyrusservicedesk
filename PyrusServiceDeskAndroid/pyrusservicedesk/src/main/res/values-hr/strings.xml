@@ -1,2 +1,41 @@
 <?xml version="1.0" encoding="utf-8"?>
-<resources></resources>
+<resources>
+    <string name="psd_comment_input_hint">Dodaj Komentar</string>
+    <string name="psd_retry">Pokušaj ponovo</string>
+    <string name="psd_send">Pošalji</string>
+    <string name="psd_no_connection">Nema internetske veze</string>
+    <string name="psd_uploading">Učitavanje…</string>
+    <string name="psd_file_size_exceeded_message" formatted="false">Veličina datoteke ne smije premašiti %d MB.</string>
+    <string name="psd_copied_to_clipboard">Kopirano u međuspremnik</string>
+    <string name="psd_delete">Izbriši</string>
+    <string name="psd_yesterday">Jučer</string>
+    <string name="psd_date_format_d_m">d MMMM</string>
+    <string name="psd_photo">Fotografija</string>
+    <string name="psd_gallery">Galerija</string>
+    <string name="psd_recent">nedavno</string>
+    <string name="psd_guest">Gost</string>
+    <string name="send_library_logs">Pošalji zapisnike knjižnice</string>
+    <string name="link_warning">Ova poveznica vodi do %s
+\nŽeliš li stvarno slijediti poveznicu\?</string>
+    <string name="psd_file_size_mb" formatted="false">%.1f MB</string>
+    <string name="psd_file_size_kb" formatted="false">%.1f KB</string>
+    <string name="psd_time_format">HH:mm</string>
+    <string name="psd_organization_support">Podrška</string>
+    <string name="psd_today">Danas</string>
+    <string name="psd_date_format_d_m_y">d MMMM yyyy</string>
+    <plurals name="psd_years_ago">
+        <item quantity="one">Prije %d godinu</item>
+        <item quantity="few">Prije %d godine</item>
+        <item quantity="other">Prije %d godina</item>
+    </plurals>
+    <string name="psd_months_ago" formatted="false">Prije %d m</string>
+    <string name="psd_weeks_ago" formatted="false">prije %d nedelju</string>
+    <string name="psd_days_ago" formatted="false">prije %d dana</string>
+    <string name="psd_hours_ago" formatted="false">prije %d sata</string>
+    <string name="psd_minutes_ago" formatted="false">prije %d mjesec</string>
+    <string name="psd_download">Preuzmi</string>
+    <string name="psd_downloading">Preuzimanje…</string>
+    <string name="psd_open">Otvori</string>
+    <string name="psd_no_preview_available">Pregled nije dostupan</string>
+    <string name="psd_share">Podijeli</string>
+</resources>
