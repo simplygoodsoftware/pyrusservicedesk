@@ -22,6 +22,20 @@
     <plurals name="psd_years_ago">
         <item quantity="one">%d ano atrás</item>
         <item quantity="many">%d anos atrás</item>
-        <item quantity="other"></item>
+        <item quantity="other"/>
     </plurals>
+    <string name="psd_minutes_ago" formatted="false">%d meses atrás</string>
+    <string name="psd_recent">recente</string>
+    <string name="psd_guest">convidado</string>
+    <string name="psd_file_size_exceeded_message" formatted="false">O tamanho do arquivo não deve exceder %d MB.</string>
+    <string name="psd_copied_to_clipboard">Copiado para a área de transferência</string>
+    <string name="psd_download">Download</string>
+    <string name="psd_downloading">Baixando…</string>
+    <string name="psd_open">Abrir</string>
+    <string name="psd_no_preview_available">Nenhuma pré-visualização disponível</string>
+    <string name="psd_share">Compartilhar</string>
+    <string name="psd_delete">Excluir</string>
+    <string name="send_library_logs">Enviar logs da biblioteca</string>
+    <string name="link_warning">Este link leva a um(a) %s
+\nVocê realmente quer seguir o link\?</string>
 </resources>
