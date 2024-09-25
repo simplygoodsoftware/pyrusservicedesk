@@ -339,6 +339,7 @@ SWIFT_PROTOCOL("_TtP16PyrusServiceDesk9LogEvents_")
 
 
 
+
 /// The protocol for sending a notification that a new message has arrived
 SWIFT_PROTOCOL("_TtP16PyrusServiceDesk18NewReplySubscriber_")
 @protocol NewReplySubscriber
@@ -433,7 +434,7 @@ SWIFT_CLASS_PROPERTY(@property (nonatomic, class, copy) void (^ _Nullable onAuth
 ///
 /// \param loggingEnabled If true, then the library will write logs, and they can be sent as a file to chat by clicking the “Send Library Logs” button in the menu under the “+” sign. 
 ///
-+ (void)createWith:(NSString * _Nullable)clientId domain:(NSString * _Nullable)domain loggingEnabled:(BOOL)loggingEnabled authorizationToken:(NSString * _Nullable)authorizationToken fieldsData:(NSDictionary<NSString *, NSString *> * _Nullable)fieldsData;
++ (void)createWith:(NSString * _Nullable)clientId domain:(NSString * _Nullable)domain loggingEnabled:(BOOL)loggingEnabled authorizationToken:(NSString * _Nullable)authorizationToken;
 /// Init PyrusServiceDesk with new clientId.
 /// \param clientId clientId using for all requests. If clientId not setted PyrusServiceDesk Controller will not be created
 ///
@@ -443,7 +444,7 @@ SWIFT_CLASS_PROPERTY(@property (nonatomic, class, copy) void (^ _Nullable onAuth
 ///
 /// \param loggingEnabled If true, then the library will write logs, and they can be sent as a file to chat by clicking the “Send Library Logs” button in the menu under the “+” sign. 
 ///
-+ (void)createWith:(NSString * _Nullable)clientId reset:(BOOL)reset domain:(NSString * _Nullable)domain loggingEnabled:(BOOL)loggingEnabled authorizationToken:(NSString * _Nullable)authorizationToken fieldsData:(NSDictionary<NSString *, NSString *> * _Nullable)fieldsData;
++ (void)createWith:(NSString * _Nullable)clientId reset:(BOOL)reset domain:(NSString * _Nullable)domain loggingEnabled:(BOOL)loggingEnabled authorizationToken:(NSString * _Nullable)authorizationToken;
 /// Init PyrusServiceDesk with new clientId.
 /// \param clientId clientId using for all requests. If clientId not setted PyrusServiceDesk Controller will not be created
 ///
@@ -454,7 +455,7 @@ SWIFT_CLASS_PROPERTY(@property (nonatomic, class, copy) void (^ _Nullable onAuth
 ///
 /// \param loggingEnabled If true, then the library will write logs, and they can be sent as a file to chat by clicking the “Send Library Logs” button in the menu under the “+” sign. 
 ///
-+ (void)createWith:(NSString * _Nullable)clientId userId:(NSString * _Nullable)userId securityKey:(NSString * _Nullable)securityKey domain:(NSString * _Nullable)domain loggingEnabled:(BOOL)loggingEnabled authorizationToken:(NSString * _Nullable)authorizationToken fieldsData:(NSDictionary<NSString *, NSString *> * _Nullable)fieldsData;
++ (void)createWith:(NSString * _Nullable)clientId userId:(NSString * _Nullable)userId securityKey:(NSString * _Nullable)securityKey domain:(NSString * _Nullable)domain loggingEnabled:(BOOL)loggingEnabled authorizationToken:(NSString * _Nullable)authorizationToken;
 + (void)refreshOnError:(void (^ _Nullable)(NSError * _Nullable))onError;
 /// Scrolls chat to bottom, starts refreshing chat and shows fake message from support is psd is open.
 + (void)refreshFromPushWithMessageId:(NSInteger)messageId;
@@ -514,6 +515,7 @@ SWIFT_CLASS_NAMED("Builder")
 - (ServiceDeskConfiguration * _Nonnull)build SWIFT_WARN_UNUSED_RESULT;
 - (nonnull instancetype)init OBJC_DESIGNATED_INITIALIZER;
 @end
+
 
 
 
@@ -897,6 +899,7 @@ SWIFT_PROTOCOL("_TtP16PyrusServiceDesk9LogEvents_")
 
 
 
+
 /// The protocol for sending a notification that a new message has arrived
 SWIFT_PROTOCOL("_TtP16PyrusServiceDesk18NewReplySubscriber_")
 @protocol NewReplySubscriber
@@ -991,7 +994,7 @@ SWIFT_CLASS_PROPERTY(@property (nonatomic, class, copy) void (^ _Nullable onAuth
 ///
 /// \param loggingEnabled If true, then the library will write logs, and they can be sent as a file to chat by clicking the “Send Library Logs” button in the menu under the “+” sign. 
 ///
-+ (void)createWith:(NSString * _Nullable)clientId domain:(NSString * _Nullable)domain loggingEnabled:(BOOL)loggingEnabled authorizationToken:(NSString * _Nullable)authorizationToken fieldsData:(NSDictionary<NSString *, NSString *> * _Nullable)fieldsData;
++ (void)createWith:(NSString * _Nullable)clientId domain:(NSString * _Nullable)domain loggingEnabled:(BOOL)loggingEnabled authorizationToken:(NSString * _Nullable)authorizationToken;
 /// Init PyrusServiceDesk with new clientId.
 /// \param clientId clientId using for all requests. If clientId not setted PyrusServiceDesk Controller will not be created
 ///
@@ -1001,7 +1004,7 @@ SWIFT_CLASS_PROPERTY(@property (nonatomic, class, copy) void (^ _Nullable onAuth
 ///
 /// \param loggingEnabled If true, then the library will write logs, and they can be sent as a file to chat by clicking the “Send Library Logs” button in the menu under the “+” sign. 
 ///
-+ (void)createWith:(NSString * _Nullable)clientId reset:(BOOL)reset domain:(NSString * _Nullable)domain loggingEnabled:(BOOL)loggingEnabled authorizationToken:(NSString * _Nullable)authorizationToken fieldsData:(NSDictionary<NSString *, NSString *> * _Nullable)fieldsData;
++ (void)createWith:(NSString * _Nullable)clientId reset:(BOOL)reset domain:(NSString * _Nullable)domain loggingEnabled:(BOOL)loggingEnabled authorizationToken:(NSString * _Nullable)authorizationToken;
 /// Init PyrusServiceDesk with new clientId.
 /// \param clientId clientId using for all requests. If clientId not setted PyrusServiceDesk Controller will not be created
 ///
@@ -1012,7 +1015,7 @@ SWIFT_CLASS_PROPERTY(@property (nonatomic, class, copy) void (^ _Nullable onAuth
 ///
 /// \param loggingEnabled If true, then the library will write logs, and they can be sent as a file to chat by clicking the “Send Library Logs” button in the menu under the “+” sign. 
 ///
-+ (void)createWith:(NSString * _Nullable)clientId userId:(NSString * _Nullable)userId securityKey:(NSString * _Nullable)securityKey domain:(NSString * _Nullable)domain loggingEnabled:(BOOL)loggingEnabled authorizationToken:(NSString * _Nullable)authorizationToken fieldsData:(NSDictionary<NSString *, NSString *> * _Nullable)fieldsData;
++ (void)createWith:(NSString * _Nullable)clientId userId:(NSString * _Nullable)userId securityKey:(NSString * _Nullable)securityKey domain:(NSString * _Nullable)domain loggingEnabled:(BOOL)loggingEnabled authorizationToken:(NSString * _Nullable)authorizationToken;
 + (void)refreshOnError:(void (^ _Nullable)(NSError * _Nullable))onError;
 /// Scrolls chat to bottom, starts refreshing chat and shows fake message from support is psd is open.
 + (void)refreshFromPushWithMessageId:(NSInteger)messageId;
@@ -1072,6 +1075,7 @@ SWIFT_CLASS_NAMED("Builder")
 - (ServiceDeskConfiguration * _Nonnull)build SWIFT_WARN_UNUSED_RESULT;
 - (nonnull instancetype)init OBJC_DESIGNATED_INITIALIZER;
 @end
+
 
 
 
