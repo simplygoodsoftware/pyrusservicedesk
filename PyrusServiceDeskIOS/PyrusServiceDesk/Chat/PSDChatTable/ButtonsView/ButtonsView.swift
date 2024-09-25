@@ -1,12 +1,12 @@
 import Foundation
 
 protocol ButtonsCollectionDelegate: NSObjectProtocol {
-    func didTapOnButton(_ text: String)
+    func didTapOnButton(_ text: ButtonData)
 }
 
 class ButtonsView: UIView {
     weak var tapDelegate: ButtonsCollectionDelegate?
-    private var buttons: [String]?
+    private var buttons: [ButtonData]?
     lazy var collectionView: UICollectionView = {
         let layout = AlignedCollectionViewFlowLayout()
         layout.horizontalAlignment = .right
@@ -39,7 +39,7 @@ class ButtonsView: UIView {
         fatalError("init(coder:) has not been implemented")
     }
     
-    func updateWithButtons(_ buttons: [String]?, width: CGFloat) {
+    func updateWithButtons(_ buttons: [ButtonData]?, width: CGFloat) {
         var newFrame = frame
         newFrame.size.width = width
         frame = newFrame
@@ -70,7 +70,8 @@ extension ButtonsView: UICollectionViewDelegate, UICollectionViewDataSource {
         else {
             return cell
         }
-        cell.text = buttons[indexPath.row]
+        cell.text = buttons[indexPath.row].string ?? ""
+        cell.showLinkIcon = buttons[indexPath.row].url != nil
         cell.maxWidth = collectionView.frame.size.width
         return cell
     }

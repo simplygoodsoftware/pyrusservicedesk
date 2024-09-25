@@ -12,6 +12,20 @@ class ButtonViewCell: UICollectionViewCell {
         return label
     }()
     
+    private var linkIconWidthConstraint: NSLayoutConstraint?
+    private var linkIconLeadingConstraint: NSLayoutConstraint?
+    private lazy var linkIcon: UIImageView = {
+        let linkIcon = UIImageView()
+        let image = UIImage.PSDImage(name: "linkIcon")?.withRenderingMode(.alwaysTemplate)
+        linkIcon.image = image
+        linkIcon.tintColor = color
+        linkIcon.translatesAutoresizingMaskIntoConstraints = false
+        linkIcon.heightAnchor.constraint(equalToConstant: LINK_ICON_SIZE.height).isActive = true
+        linkIconWidthConstraint = linkIcon.widthAnchor.constraint(equalToConstant: LINK_ICON_SIZE.width)
+        linkIconWidthConstraint?.isActive = true
+        return linkIcon
+    }()
+    
     private lazy var backView: UIView = {
         let view = UIView()
         view.translatesAutoresizingMaskIntoConstraints = false
@@ -28,6 +42,14 @@ class ButtonViewCell: UICollectionViewCell {
         }
     }
     
+    var showLinkIcon: Bool = false {
+        didSet {
+            linkIcon.isHidden = !showLinkIcon
+            linkIconWidthConstraint?.constant = showLinkIcon ? LINK_ICON_SIZE.width : 0
+            linkIconLeadingConstraint?.constant = showLinkIcon ? -DIST : 0
+        }
+    }
+    
     var maxWidth: CGFloat = 0 {
         didSet {
             maxWidthConstraint?.constant = maxWidth
@@ -37,10 +59,16 @@ class ButtonViewCell: UICollectionViewCell {
         super.init(frame: frame)
         contentView.addSubview(backView)
         backView.addSubview(label)
+        backView.addSubview(linkIcon)
+        
         backView.leadingAnchor.constraint(equalTo: contentView.leadingAnchor).isActive = true
         backView.topAnchor.constraint(equalTo: contentView.topAnchor).isActive = true
         backView.bottomAnchor.constraint(equalTo: contentView.bottomAnchor).isActive = true
         backView.trailingAnchor.constraint(equalTo: contentView.trailingAnchor).isActive = true
+        
+        linkIcon.centerYAnchor.constraint(equalTo: backView.centerYAnchor).isActive = true
+        linkIcon.trailingAnchor.constraint(equalTo: backView.trailingAnchor, constant: -DIST).isActive = true
+        
         let heightConstant = backView.heightAnchor.constraint(greaterThanOrEqualToConstant: MIN_HEIGHT)
         heightConstant.priority = UILayoutPriority(rawValue: 999)
         heightConstant.isActive = true
@@ -57,9 +85,9 @@ class ButtonViewCell: UICollectionViewCell {
         bottomConstant.priority = UILayoutPriority(rawValue: 999)
         bottomConstant.isActive = true
         
-        let trailingConstant = label.trailingAnchor.constraint(equalTo: backView.trailingAnchor, constant: -DIST)
-        trailingConstant.priority = UILayoutPriority(rawValue: 999)
-        trailingConstant.isActive = true
+        linkIconLeadingConstraint = label.trailingAnchor.constraint(equalTo: linkIcon.leadingAnchor, constant: -DIST)
+        linkIconLeadingConstraint?.priority = UILayoutPriority(rawValue: 999)
+        linkIconLeadingConstraint?.isActive = true
         
         maxWidthConstraint = backView.widthAnchor.constraint(lessThanOrEqualToConstant: maxWidth)
         maxWidthConstraint?.priority = UILayoutPriority(rawValue: 999)
@@ -78,6 +106,7 @@ private extension ButtonViewCell {
     var BORDER_RADIUS: CGFloat { 5 }
     var DIST: CGFloat { 8 }
     var MIN_HEIGHT: CGFloat { 40 }
+    var LINK_ICON_SIZE: CGSize { CGSize(width: 20, height: 20) }
 }
 
 private extension UIFont {

@@ -827,7 +827,11 @@ extension PSDChatTableView: LinkDelegate {
 }
 
 extension PSDChatTableView: ButtonsCollectionDelegate {
-    func didTapOnButton(_ text: String) {
-        chatDelegate?.send(text, [])
+    func didTapOnButton(_ text: ButtonData) {
+        if let url = text.url?.absoluteString {
+            chatDelegate?.showLinkOpenAlert(url)
+        } else if let text = text.string {
+            chatDelegate?.send(text, [])
+        }
     }
 }
