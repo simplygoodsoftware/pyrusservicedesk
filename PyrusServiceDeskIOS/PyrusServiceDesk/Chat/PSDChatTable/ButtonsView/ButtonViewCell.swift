@@ -81,5 +81,5 @@ private extension ButtonViewCell {
 }
 
 private extension UIFont {
-    static let label = UIFont.systemFont(ofSize: 16)
+    static let label = CustomizationHelper.systemFont(ofSize: 16)
 }

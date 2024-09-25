@@ -60,7 +60,7 @@ private extension UIColor {
     static let prepareViewColor = #colorLiteral(red: 0.07843137255, green: 0.07843137255, blue: 0.07843137255, alpha: 0.9)
 }
 private extension UIFont {
-    static let label = UIFont.systemFont(ofSize: 16)
+    static let label = CustomizationHelper.systemFont(ofSize: 16)
 }
 private let PREPARE_HEIGHT: CGFloat = 45.0
 private let PREPARE_CORNER_RADIUS: CGFloat = 10.0
