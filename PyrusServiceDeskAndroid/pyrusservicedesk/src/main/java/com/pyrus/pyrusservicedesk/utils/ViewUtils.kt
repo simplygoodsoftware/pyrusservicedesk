@@ -1,6 +1,7 @@
 package com.pyrus.pyrusservicedesk.utils
 
 import android.graphics.PorterDuff
+import android.os.Build
 import androidx.annotation.ColorInt
 import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -24,6 +25,9 @@ internal fun RecyclerView.isAtEnd(): Boolean {
  * Assigns [EditText]'s cursor color to [color]
  */
 internal fun EditText.setCursorColor(@ColorInt color: Int) {
+    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+        return
+    }
     try {
         // Get the cursor resource id
         var field = TextView::class.java.getDeclaredField("mCursorDrawableRes")

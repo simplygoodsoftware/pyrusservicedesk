@@ -28,7 +28,9 @@ internal data class Comment(
         @SerializedName("local_comment_id")
         val localId: Long = COMMENT_ID_EMPTY,
         @SerializedName("rating")
-        val rating: Int? = null) {
+        val rating: Int? = null,
+        @Transient val isWelcomeMessage: Boolean = false,
+) {
 
     /**
      * @return TRUE when comment contains attachments

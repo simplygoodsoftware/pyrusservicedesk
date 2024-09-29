@@ -24,40 +24,39 @@
             android:minHeight="@dimen/psd_attachment_layout_min_height"
             android:gravity="center_vertical"
             android:orientation="horizontal"
-            tools:visibility="visible">
+            tools:visibility="gone">
 
             <FrameLayout
                 android:layout_width="wrap_content"
                 android:layout_height="match_parent">
 
-            <ProgressBar
-                android:id="@+id/attachment_progress"
-                style="?android:attr/progressBarStyleHorizontal"
-                android:layout_width="@dimen/psd_recyclerview_item_height_default"
-                android:layout_height="@dimen/psd_recyclerview_item_height_default"
-                android:layout_marginTop="@dimen/psd_offset_small"
-                android:layout_marginLeft="@dimen/psd_offset_small"
-                android:layout_marginStart="@dimen/psd_offset_small"
-                android:layout_marginBottom="@dimen/psd_offset_small"
-                android:layout_gravity="center_vertical"
-                android:progressDrawable="@drawable/psd_file_progress"
-                android:indeterminate="false"/>
+                <ProgressBar
+                    android:id="@+id/attachment_progress"
+                    style="?android:attr/progressBarStyleHorizontal"
+                    android:layout_width="@dimen/psd_recyclerview_item_height_default"
+                    android:layout_height="@dimen/psd_recyclerview_item_height_default"
+                    android:layout_marginTop="@dimen/psd_offset_small"
+                    android:layout_marginLeft="@dimen/psd_offset_small"
+                    android:layout_marginStart="@dimen/psd_offset_small"
+                    android:layout_marginBottom="@dimen/psd_offset_small"
+                    android:layout_gravity="center_vertical"
+                    android:progressDrawable="@drawable/psd_file_progress"
+                    android:indeterminate="false"/>
 
-            <com.pyrus.pyrusservicedesk.presentation.ui.view.OutlineImageView
-                android:id="@+id/preview_mini"
-                android:layout_width="@dimen/psd_preview_mini_width"
-                android:layout_height="match_parent"
-                android:scaleType="centerCrop"
-                android:visibility="gone"/>
+                <com.pyrus.pyrusservicedesk.presentation.ui.view.OutlineImageView
+                    android:id="@+id/preview_mini"
+                    android:layout_width="@dimen/psd_preview_mini_width"
+                    android:layout_height="match_parent"
+                    android:scaleType="centerCrop"
+                    android:visibility="gone"/>
 
             </FrameLayout>
 
-            <LinearLayout
+            <androidx.constraintlayout.widget.ConstraintLayout
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:gravity="center_vertical"
-                android:padding="@dimen/psd_offset_small"
-                android:orientation="vertical">
+                android:padding="@dimen/psd_offset_small">
 
                 <androidx.appcompat.widget.AppCompatTextView
                     android:id="@+id/file_name"
@@ -66,6 +65,9 @@
                     android:textAppearance="?attr/textAppearanceListItem"
                     android:maxLines="2"
                     tools:text="filename.jpeg"
+                    app:layout_constraintTop_toTopOf="parent"
+                    app:layout_constraintRight_toRightOf="parent"
+                    app:layout_constraintLeft_toLeftOf="parent"
                     android:ellipsize="end"/>
 
                 <androidx.appcompat.widget.AppCompatTextView
@@ -74,38 +76,105 @@
                     android:layout_height="wrap_content"
                     android:text="@string/psd_uploading"
                     android:ellipsize="end"
+                    app:layout_constraintTop_toBottomOf="@id/file_name"
+                    app:layout_constraintLeft_toLeftOf="parent"
+                    app:layout_constraintHorizontal_bias="0"
+                    app:layout_constraintRight_toLeftOf="@id/preview_mini_time"
+                    tools:text="25 Kb"
                     android:textAppearance="?attr/textAppearanceListItemSecondary"/>
-            </LinearLayout>
+
+                <androidx.appcompat.widget.AppCompatTextView
+                    android:id="@+id/preview_mini_time"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginLeft="2dp"
+                    android:maxLines="1"
+                    android:textAppearance="?attr/textAppearanceListItemSecondary"
+                    app:layout_constraintRight_toRightOf="parent"
+                    app:layout_constraintTop_toBottomOf="@id/file_name"
+                    tools:text="@tools:sample/date/hhmm" />
+
+
+            </androidx.constraintlayout.widget.ConstraintLayout>
 
         </LinearLayout>
 
-        <androidx.appcompat.widget.AppCompatTextView
-            android:id="@+id/comment_text"
+        <com.pyrus.pyrusservicedesk.presentation.ui.view.ImFlexboxLayout
+            android:id="@+id/comment_text_layout"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:textAppearance="?attr/textAppearanceListItem"
-            android:padding="@dimen/psd_offset_small"
-            tools:text="@tools:sample/lorem"
-            tools:visibility="gone"/>
+            app:viewPartMain="@+id/comment_text"
+            android:paddingStart="12dp"
+            android:paddingLeft="12dp"
+            android:paddingEnd="12dp"
+            android:paddingRight="12dp"
+            android:paddingTop="8dp"
+            android:paddingBottom="8dp"
+            app:viewPartSlave="@+id/text_time"
+            tools:visibility="gone">
+
+            <androidx.appcompat.widget.AppCompatTextView
+                android:id="@+id/comment_text"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textAppearance="?attr/textAppearanceListItem"
+                android:textSize="16sp"
+                tools:text="@tools:sample/lorem" />
+
+            <androidx.appcompat.widget.AppCompatTextView
+                android:id="@+id/text_time"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textAppearance="?attr/textAppearanceListItem"
+                android:textSize="13sp"
+                android:maxLines="1"
+                android:translationY="5dp"
+                android:paddingBottom="2dp"
+                android:paddingStart="8dp"
+                android:paddingLeft="8dp"
+                tools:text="@tools:sample/date/hhmm"/>
+
+
+        </com.pyrus.pyrusservicedesk.presentation.ui.view.ImFlexboxLayout>
 
         <FrameLayout
             android:id="@+id/preview_layout"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:background="@color/psd_comment_inbound_background"
-            android:visibility="gone">
+            android:visibility="gone"
+            tools:visibility="visible">
 
             <ProgressBar
                 android:id="@+id/preview_passive_progress"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_gravity="center"/>
+                android:layout_gravity="center"
+                tools:visibility="gone"/>
 
             <com.pyrus.pyrusservicedesk.presentation.ui.view.OutlineImageView
                 android:id="@+id/preview_full"
                 android:scaleType="centerCrop"
                 android:layout_width="wrap_content"
+                android:layout_gravity="center_horizontal"
                 android:layout_height="@dimen/psd_preview_default_size"/>
+
+            <androidx.appcompat.widget.AppCompatTextView
+                android:id="@+id/preview_time"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="right|bottom"
+                android:layout_margin="8dp"
+                android:background="@drawable/psd_bg_time"
+                android:maxLines="1"
+                android:paddingLeft="8dp"
+                android:paddingTop="1dp"
+                android:paddingRight="8dp"
+                android:paddingBottom="1dp"
+                android:textColor="@color/psd_white"
+                android:textAppearance="?attr/textAppearanceListItemSecondary"
+                android:textSize="13dp"
+                tools:text="@tools:sample/date/hhmm" />
 
             <ProgressBar
                 android:id="@+id/preview_progress"
@@ -117,6 +186,7 @@
                 android:indeterminate="false"/>
 
         </FrameLayout>
+
     </androidx.cardview.widget.CardView>
 
 </LinearLayout>

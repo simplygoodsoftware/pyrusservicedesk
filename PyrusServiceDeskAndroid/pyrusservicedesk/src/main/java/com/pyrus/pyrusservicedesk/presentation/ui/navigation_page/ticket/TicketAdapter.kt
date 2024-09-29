@@ -1,21 +1,33 @@
 package com.pyrus.pyrusservicedesk.presentation.ui.navigation_page.ticket
 
-import android.graphics.Canvas
+import android.content.Intent
+import android.content.res.ColorStateList
 import android.graphics.PorterDuff
 import android.graphics.drawable.AnimationDrawable
+import android.net.Uri
 import android.view.Gravity
 import android.view.View
-import android.view.View.*
+import android.view.View.GONE
+import android.view.View.INVISIBLE
+import android.view.View.OnClickListener
+import android.view.View.OnLongClickListener
+import android.view.View.VISIBLE
 import android.view.ViewGroup
 import android.widget.ImageView
 import android.widget.TextView
 import androidx.annotation.LayoutRes
-import androidx.recyclerview.widget.ItemTouchHelper
-import androidx.recyclerview.widget.ItemTouchHelper.ACTION_STATE_SWIPE
-import androidx.recyclerview.widget.RecyclerView
+import androidx.appcompat.content.res.AppCompatResources
+import androidx.core.content.ContextCompat
 import com.pyrus.pyrusservicedesk.PyrusServiceDesk
 import com.pyrus.pyrusservicedesk.R
-import com.pyrus.pyrusservicedesk.presentation.ui.navigation_page.ticket.entries.*
+import com.pyrus.pyrusservicedesk.presentation.ui.navigation_page.ticket.entries.ButtonEntry
+import com.pyrus.pyrusservicedesk.presentation.ui.navigation_page.ticket.entries.ButtonsEntry
+import com.pyrus.pyrusservicedesk.presentation.ui.navigation_page.ticket.entries.CommentEntry
+import com.pyrus.pyrusservicedesk.presentation.ui.navigation_page.ticket.entries.DateEntry
+import com.pyrus.pyrusservicedesk.presentation.ui.navigation_page.ticket.entries.RatingEntry
+import com.pyrus.pyrusservicedesk.presentation.ui.navigation_page.ticket.entries.TicketEntry
+import com.pyrus.pyrusservicedesk.presentation.ui.navigation_page.ticket.entries.Type
+import com.pyrus.pyrusservicedesk.presentation.ui.navigation_page.ticket.entries.WelcomeMessageEntry
 import com.pyrus.pyrusservicedesk.presentation.ui.view.CommentView
 import com.pyrus.pyrusservicedesk.presentation.ui.view.ContentType
 import com.pyrus.pyrusservicedesk.presentation.ui.view.Status
@@ -28,10 +40,14 @@ import com.pyrus.pyrusservicedesk.utils.ConfigUtils
 import com.pyrus.pyrusservicedesk.utils.RequestUtils.Companion.getAvatarUrl
 import com.pyrus.pyrusservicedesk.utils.getTimeText
 import com.pyrus.pyrusservicedesk.utils.isImage
-import kotlinx.android.synthetic.main.psd_view_holder_buttons.view.*
-import kotlinx.android.synthetic.main.psd_view_holder_comment_rating.view.*
-import kotlinx.android.synthetic.main.psd_view_holder_rating.view.*
-import kotlin.math.abs
+import kotlinx.android.synthetic.main.psd_view_holder_buttons.view.flButtons
+import kotlinx.android.synthetic.main.psd_view_holder_comment_rating.view.ratingImage
+import kotlinx.android.synthetic.main.psd_view_holder_comment_rating.view.statusIcon
+import kotlinx.android.synthetic.main.psd_view_holder_rating.view.rating1
+import kotlinx.android.synthetic.main.psd_view_holder_rating.view.rating2
+import kotlinx.android.synthetic.main.psd_view_holder_rating.view.rating3
+import kotlinx.android.synthetic.main.psd_view_holder_rating.view.rating4
+import kotlinx.android.synthetic.main.psd_view_holder_rating.view.rating5
 
 
 private const val VIEW_TYPE_COMMENT_INBOUND = 0
@@ -51,8 +67,6 @@ internal class TicketAdapter: AdapterBase<TicketEntry>() {
         const val MAX_SYMBOLS_BEFORE_LEFT_ALIGNMENT = 8
         const val PYRUS_SYSTEM_AUTHOR_NAME = "Pyrus System"
     }
-
-    override val itemTouchHelper: ItemTouchHelper = ItemTouchHelper(TouchCallback())
 
     /**
      * [SpaceMultiplier] implementation for customizing spaces between items fot the feed.
@@ -142,17 +156,14 @@ internal class TicketAdapter: AdapterBase<TicketEntry>() {
         CommentHolder(parent, R.layout.psd_view_holder_comment_inbound) {
 
         override val comment: CommentView = itemView.findViewById(R.id.comment)
-        override val creationTime: TextView = itemView.findViewById(R.id.creation_time)
         private val avatar = itemView.findViewById<ImageView>(R.id.avatar)
         private val authorName = itemView.findViewById<TextView>(R.id.author_name)
 
         init {
             ConfigUtils.getMainFontTypeface()?.let {
-                creationTime.typeface = it
                 authorName.typeface = it
             }
             authorName.setTextColor(ConfigUtils.getSecondaryColorOnMainBackground(parent.context))
-            creationTime.setTextColor(ConfigUtils.getSecondaryColorOnMainBackground(parent.context))
         }
 
         override fun bindItem(item: CommentEntry) {
@@ -212,22 +223,16 @@ internal class TicketAdapter: AdapterBase<TicketEntry>() {
         : CommentHolder(parent, R.layout.psd_view_holder_comment_outbound) {
 
         override val comment: CommentView = itemView.findViewById(R.id.comment)
-        override val creationTime: TextView = itemView.findViewById(R.id.creation_time)
 
-        init {
-            ConfigUtils.getMainFontTypeface()?.let {
-                creationTime.typeface = it
-            }
-        }
     }
 
     private abstract inner class CommentHolder(
-            parent: ViewGroup,
-            @LayoutRes layoutRes: Int)
+        parent: ViewGroup,
+        @LayoutRes layoutRes: Int,
+    )
         : ViewHolderBase<CommentEntry>(parent, layoutRes){
 
         abstract val comment: CommentView
-        abstract val creationTime: TextView
 
         val onCommentClickListener = OnClickListener {
             when {
@@ -273,7 +278,12 @@ internal class TicketAdapter: AdapterBase<TicketEntry>() {
                 ContentType.Text -> bindTextView()
                 else -> bindAttachmentView()
             }
-            creationTime.text = getItem().comment.creationDate.getTimeText(itemView.context)
+
+            val creationTime =
+                if (getItem().comment.isWelcomeMessage) ""
+                else getItem().comment.creationDate.getTimeText(itemView.context)
+
+            comment.setCreationTime(creationTime)
         }
 
         override fun onDetachedFromWindow() {
@@ -425,9 +435,10 @@ internal class TicketAdapter: AdapterBase<TicketEntry>() {
         override fun bindItem(item: ButtonsEntry) {
             super.bindItem(item)
 
-            item.buttons.forEachIndexed { index, buttonText ->
+            item.buttons.forEachIndexed { index, buttonEntry ->
                 (itemView.flButtons.getChildAt(index) as? TextView)?.apply {
-                    text = buttonText
+                    val buttonText = buttonEntry.text
+
 
                     if (buttonText.length > MAX_SYMBOLS_BEFORE_LEFT_ALIGNMENT) {
                         gravity = Gravity.START
@@ -437,9 +448,35 @@ internal class TicketAdapter: AdapterBase<TicketEntry>() {
                     }
 
                     val frame = background
-                    frame.setColorFilter(ConfigUtils.getAccentColor(itemView.context), PorterDuff.Mode.SRC_ATOP)
+                    val tint = ConfigUtils.getAccentColor(itemView.context)
+                    frame.setColorFilter(tint, PorterDuff.Mode.SRC_ATOP)
                     setTextColor(ConfigUtils.getAccentColor(itemView.context))
-                    setOnClickListener { item.onButtonClick.invoke(buttonText) }
+
+
+                    when(buttonEntry) {
+                        is ButtonEntry.Link -> {
+                            text = "$buttonText   "
+                            val shareDrawable = AppCompatResources.getDrawable(context, R.drawable.ic_share)!!
+                            shareDrawable.setColorFilter(tint, PorterDuff.Mode.SRC_ATOP)
+                            setCompoundDrawablesWithIntrinsicBounds(null, null, shareDrawable, null)
+                            setOnClickListener {
+                                try {
+                                    context.startActivity(Intent(Intent.ACTION_VIEW).apply { data = Uri.parse(buttonEntry.link) })
+                                }
+                                catch (exception: Exception) {
+                                    exception.printStackTrace()
+                                }
+                            }
+
+                        }
+
+                        is ButtonEntry.Simple -> {
+                            text = buttonText
+                            setCompoundDrawablesWithIntrinsicBounds(0, 0, 0, 0)
+                            setOnClickListener { item.onButtonClick.invoke(buttonText) }
+                        }
+                    }
+
                     visibility = VISIBLE
                 }
             }
@@ -453,72 +490,4 @@ internal class TicketAdapter: AdapterBase<TicketEntry>() {
         }
     }
 
-    private inner class TouchCallback : ItemTouchHelper.Callback() {
-
-        override fun getMovementFlags(recyclerView: RecyclerView,
-                                      viewHolder: RecyclerView.ViewHolder): Int {
-
-            return makeFlag(ACTION_STATE_SWIPE,  ItemTouchHelper.LEFT)
-        }
-
-        override fun onMove(recyclerView: RecyclerView,
-                            viewHolder: RecyclerView.ViewHolder,
-                            target: RecyclerView.ViewHolder): Boolean {
-            return false
-        }
-
-        override fun isLongPressDragEnabled(): Boolean {
-            return false
-        }
-
-        override fun onSwiped(viewHolder: RecyclerView.ViewHolder, direction: Int) {
-        }
-
-        override fun getSwipeEscapeVelocity(defaultValue: Float): Float {
-            return Float.MAX_VALUE
-        }
-
-        override fun getSwipeThreshold(viewHolder: RecyclerView.ViewHolder): Float {
-            return Float.MAX_VALUE
-        }
-
-        override fun onChildDraw(c: Canvas,
-                                 recyclerView: RecyclerView,
-                                 viewHolder: RecyclerView.ViewHolder,
-                                 dX: Float,
-                                 dY: Float,
-                                 actionState: Int,
-                                 isCurrentlyActive: Boolean) {
-
-            if (viewHolder.absoluteAdapterPosition == -1 || itemsList[viewHolder.absoluteAdapterPosition].isNonShiftable())
-                return
-            val maxItemViewShift = recyclerView.resources.getDimensionPixelSize(R.dimen.psd_comment_creation_time_width)
-            val minInboundOffset =  recyclerView.resources.getDimensionPixelSize(R.dimen.psd_offset_default)
-            var x = dX
-            if (x < -maxItemViewShift)
-                x = -maxItemViewShift.toFloat()
-            for (position in 0 until recyclerView.childCount) {
-                recyclerView.findContainingViewHolder(recyclerView.getChildAt(position))?.let {
-                    if (it.absoluteAdapterPosition == - 1 || itemsList[it.absoluteAdapterPosition].isNonShiftable())
-                        return@let
-                    it.itemView.translationX = x
-                    if (itemsList[it.absoluteAdapterPosition].isConsideredInbound()) {
-                        it.itemView.findViewById<View>(R.id.author_and_comment)?.let { author_and_comment ->
-                            if(abs(x) > author_and_comment.left - minInboundOffset)
-                                author_and_comment.translationX = abs(x) - author_and_comment.left + minInboundOffset
-                            else
-                                author_and_comment.translationX = 0f
-                        }
-                    }
-                }
-            }
-        }
-    }
 }
-
-private fun TicketEntry.isConsideredInbound(): Boolean {
-    return type == Type.WelcomeMessage
-            || type == Type.Comment && !(this as CommentEntry).comment.isInbound
-}
-
-private fun TicketEntry.isNonShiftable(): Boolean = type == Type.Date || type == Type.Rating
