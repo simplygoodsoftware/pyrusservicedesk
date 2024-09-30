@@ -17,8 +17,8 @@ class PSDMessageSender: NSObject {
      - parameter delegate: PSDMessageSendDelegate object to receive completion or error.
      - parameter completion: comptetion block. 
      */
-    func pass(_ messageToPass:PSDMessage, delegate:PSDMessageSendDelegate?, completion: @escaping() -> Void) {
-        let task = PSDMessageSender.pass(messageToPass.text, messageToPass.attachments, rating: messageToPass.rating, clientId: messageToPass.clientId) {
+    func pass(_ messageToPass: PSDMessage, ticketId: Int = 0, delegate:PSDMessageSendDelegate?, completion: @escaping() -> Void) {
+        let task = PSDMessageSender.pass(messageToPass.text, messageToPass.attachments, rating: messageToPass.rating, clientId: messageToPass.clientId, ticketId: ticketId) {
             commentId, attachments in
             if let commentId = commentId, commentId.count > 0 {
                 //put attachments id
@@ -79,7 +79,7 @@ class PSDMessageSender: NSObject {
      - completion: Completion of passing message.
      - commentId: Return id of new message as String. If Request end with error return nil or "0" if received bad data from server.
      */
-    private static func pass(_ message: String, _ attachments: [PSDAttachment]?, rating: Int?, clientId: String, completion: @escaping (_ commentId: String?, _ attachments: NSArray?) -> Void) -> URLSessionDataTask {
+    private static func pass(_ message: String, _ attachments: [PSDAttachment]?, rating: Int?, clientId: String, ticketId: Int, completion: @escaping (_ commentId: String?, _ attachments: NSArray?) -> Void) -> URLSessionDataTask {
         //Generate additional parameters for request body
         var parameters = [String: Any]()
         parameters[commentParameter] = message
@@ -94,7 +94,10 @@ class PSDMessageSender: NSObject {
         if let fieldsData = PyrusServiceDesk.fieldsData {
             parameters[EXTRA_FIELDS_KEY] = fieldsData
         }
-        let request = URLRequest.createRequest(type:.updateFeed, parameters: parameters)
+        if ticketId != 0 {
+            parameters["ticket_id"] = ticketId
+        }
+        let request = URLRequest.createRequest(type: .updateFeed, parameters: parameters)
         
         let task = PyrusServiceDesk.mainSession.dataTask(with: request) { data, response, error in
             guard let data = data, error == nil else {                                                 // check for fundamental networking error

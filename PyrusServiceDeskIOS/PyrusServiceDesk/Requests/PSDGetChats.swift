@@ -37,7 +37,7 @@ struct PSDGetChats {
             do{
                 let chatsData = try JSONSerialization.jsonObject(with: data, options: .allowFragments) as? [String : Any] ?? [String: Any]()
                 let chatsArray = chatsData["tickets"] as? NSArray ?? NSArray()
-                let chats = generateChats(from:chatsArray)
+                let chats = generateChats(from: chatsArray)
                 PyrusServiceDesk.chats = chats
                 completion(chats)
             }catch{
@@ -72,7 +72,9 @@ struct PSDGetChats {
                 let lastMessage :PSDMessage = PSDMessage.init(text: lastComment.stringOfKey("body"), attachments:nil, messageId: lastComment.stringOfKey(commentIdParameter), owner: nil, date: nil)
                 messages.append(lastMessage)
             }
-            let chat = PSDChat.init(date: date, messages: messages)
+            let ticketId = dic["ticket_id"] as? Int
+            let chat = PSDChat.init(chatId: ticketId, date: date, messages: messages)
+            chat.subject = dic["subject"] as? String
             chat.isRead = dic["is_read"] as? Bool ??  true
             chats.append(chat)
         }
