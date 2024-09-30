@@ -1,11 +1,15 @@
 import UIKit
 class PSDChat: NSObject {
+    var chatId: Int?
     var date: Date?
     var messages: [PSDMessage]
     var isRead = true
     var showRating = false
     var showRatingText: String?
-    init(date: Date, messages: [PSDMessage]) {
+    var subject: String?
+    
+    init(chatId: Int?, date: Date, messages: [PSDMessage]) {
+        self.chatId = chatId
         self.date = date
         self.messages = messages
     }

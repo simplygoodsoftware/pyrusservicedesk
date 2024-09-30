@@ -76,7 +76,7 @@ struct PSDMessageSend {
      - parameter messageToPass: PSDMessage need to be passed.
      - parameter delegate: PSDMessageSendDelegate object to receive completion or error.
      */
-    static func pass(_ messageToPass: PSDMessage, delegate: PSDMessageSendDelegate?) {
+    static func pass(_ messageToPass: PSDMessage, delegate: PSDMessageSendDelegate?, ticketId: Int = 0) {
         if let attachments = messageToPass.attachments {
             for attachment in attachments{
                 guard attachment.emptyId() else {
@@ -109,7 +109,7 @@ struct PSDMessageSend {
         }
         if !hasUnsendAttachments{
             let sender = PSDMessageSender()
-                sender.pass(messageToPass, delegate: delegate, completion: {
+            sender.pass(messageToPass, ticketId: ticketId, delegate: delegate, completion: {
                     didEndPassMessage(messageToPass, delegate: delegate)
                 })
             messageSenders.append(sender)

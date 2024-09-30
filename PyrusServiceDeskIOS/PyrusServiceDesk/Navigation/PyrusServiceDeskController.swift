@@ -3,13 +3,15 @@ import UIKit
 
 ///The main service desk controller.
 class PyrusServiceDeskController: PSDNavigationController {
-    let customization: ServiceDeskConfiguration?
+    var customization: ServiceDeskConfiguration?
     required init(_ customization: ServiceDeskConfiguration?, customPresent: Bool) {
         self.customization = customization
-        if(PyrusServiceDesk.clientId != nil){
-            let pyrusChat = PSDChatViewController()
+        if(PyrusServiceDesk.clientId != nil) {
             super.init(nibName: nil, bundle: nil)
-            pushViewController(pyrusChat, animated: false)
+            let controller = PyrusServiceDesk.multichats 
+                ? PSDChatsViewController()
+                :  PSDChatViewController()
+            pushViewController(controller, animated: true)
             if !customPresent {
                 self.transitioningDelegate  = self
                 self.isModalInPopover = true

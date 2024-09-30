@@ -8,6 +8,7 @@ protocol PSDUpdateInfo{
 }
 
 class PSDChatViewController: PSDViewController {
+    var ticketId = 0
     private var firstLoad: Bool = true
     public func updateTitle(){
         designNavigation()
@@ -16,6 +17,7 @@ class PSDChatViewController: PSDViewController {
         self.tableView.reloadChat()
     }
     private var tableViewTopConstant: NSLayoutConstraint?
+    
     override func viewDidLoad() {
         super.viewDidLoad()
         presentationController?.delegate = self
@@ -133,6 +135,7 @@ class PSDChatViewController: PSDViewController {
     }()
     lazy var tableView: PSDChatTableView = {
         let table = PSDChatTableView(frame: self.view.bounds)
+        table.ticketId = ticketId
         table.setupTableView()
         return table
     }()
@@ -211,7 +214,15 @@ class PSDChatViewController: PSDViewController {
         self.navigationItem.leftBarButtonItem?.tintColor = color
         self.navigationItem.rightBarButtonItem?.tintColor = color
     }
-    @objc private func closeButtonAction(){
+    @objc private func closeButtonAction() {
+        guard !PyrusServiceDesk.multichats else {
+            navigationController?.popViewController(animated: true)
+            EventsLogger.logEvent(.resignFirstResponder, additionalInfo: "hideAllKeyboard() called after press on back button")
+            UIView.performWithoutAnimation {
+                hideAllKeyboard()
+            }
+            return
+        }
         if let mainController = PyrusServiceDesk.mainController {
             PyrusServiceDesk.mainController?.remove()//with quick opening - closing can be nil
         } else if let navigationController = self.navigationController as? PyrusServiceDeskController {
@@ -269,19 +280,33 @@ class PSDChatViewController: PSDViewController {
         
     }
 }
-extension PSDChatViewController : PSDMessageInputViewDelegate{
-    func send(_ message:String,_ attachments:[PSDAttachment]){
-        let newMessage = PSDObjectsCreator.createMessage(message, attachments: attachments)
-        prepareMessageForDrawing(newMessage)
-        tableView.addNewRow(message: newMessage)
-        PSDMessageSend.pass(newMessage, delegate: self.tableView)
+extension PSDChatViewController: PSDMessageInputViewDelegate {
+    func send(_ message:String, _ attachments: [PSDAttachment]) {
+        if PyrusServiceDesk.multichats && ticketId == 0 {
+            PSDCreateChat.create(subject: message, description: message) { [weak self] id in
+                if let id {
+                    self?.ticketId = id
+                    self?.tableView.ticketId = id
+                    DispatchQueue.main.async {
+                        self?.tableView.reload()
+                    }
+                }
+            }
+        } else {
+            let newMessage = PSDObjectsCreator.createMessage(message, attachments: attachments)
+            prepareMessageForDrawing(newMessage)
+            tableView.addNewRow(message: newMessage)
+            PSDMessageSend.pass(newMessage, delegate: self.tableView, ticketId: ticketId)
+        }
     }
+    
     func sendRate(_ rateValue: Int) {
         let newMessage = PSDObjectsCreator.createMessage(rating: rateValue)
         prepareMessageForDrawing(newMessage)
         tableView.addNewRow(message: newMessage)
-        PSDMessageSend.pass(newMessage, delegate: self.tableView)
+        PSDMessageSend.pass(newMessage, delegate: self.tableView, ticketId: ticketId)
     }
+    
     private func prepareMessageForDrawing(_ newMessage: PSDMessage) {
         newMessage.state = .sending
         if let attachments = newMessage.attachments {

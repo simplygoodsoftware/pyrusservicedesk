@@ -9,6 +9,7 @@ struct PSDGetChat {
     private static let SHOW_RATING_KEY = "show_rating"
     private static let SHOW_RATING_TEXT_KEY = "show_rating_text"
     private static let KEEP_UNREAD_RATING_KEY = "keep_unread"
+    private static let TICKET_ID_KEY = "ticket_id"
     private static var chatGetters : [Int: ChatGetter] = [Int: ChatGetter]()
   //  private static var sessionTask : URLSessionDataTask? = nil
     /**
@@ -17,9 +18,14 @@ struct PSDGetChat {
      - parameter delegate: PSDGetDelegate. Works only if showError is true. If not equal to nil - calls showNoConnectionView(), when no internet connection. Else remembers the current ViewController. And if it has not changed when response receive, on it displays an error.
      On completion returns PSDChat object if it was received.
      */
-    static func get(needShowError: Bool, delegate: PSDGetDelegate?, keepUnread: Bool = false, completion: @escaping (_ chat: PSDChat?) -> Void) {
+    static func get(needShowError: Bool, delegate: PSDGetDelegate?, keepUnread: Bool = false, ticketId: Int = 0, completion: @escaping (_ chat: PSDChat?) -> Void) {
         //remove old session if it is
         remove()
+        if PyrusServiceDesk.multichats && ticketId == 0 {
+            let chat = PSDChat(chatId: nil, date: Date(), messages: [])
+            completion(chat)
+            return
+        }
         var topViewController : UIViewController? = nil
         DispatchQueue.main.async {
             //if need show error - remember current top UIViewController
@@ -27,7 +33,10 @@ struct PSDGetChat {
                 topViewController = UIApplication.topViewController()
             }
         }
-        let parameters = [KEEP_UNREAD_RATING_KEY: keepUnread, "api_sign":  PyrusServiceDesk.apiSign()] as [String : Any]
+        var parameters = [KEEP_UNREAD_RATING_KEY: keepUnread, "api_sign":  PyrusServiceDesk.apiSign()] as [String : Any]
+        if ticketId != 0 {
+            parameters[TICKET_ID_KEY] = ticketId
+        }
         let request = URLRequest.createRequest(type: .chatFeed, parameters: parameters)
     
         let localId = UUID().uuidString
@@ -103,7 +112,8 @@ struct PSDGetChat {
     {
         var massages : [PSDMessage] = [PSDMessage]()
         massages = PSDGetChat.generateMessages(from: response["comments"] as? NSArray ?? NSArray())
-        let chat = PSDChat(date: Date(), messages: massages)
+        let ticketId = response[PSDGetChat.TICKET_ID_KEY] as? Int
+        let chat = PSDChat(chatId: ticketId, date: Date(), messages: massages)
         chat.showRating = (response[PSDGetChat.SHOW_RATING_KEY] as? Bool) ?? false
         chat.showRatingText = response[PSDGetChat.SHOW_RATING_TEXT_KEY] as? String
         return chat

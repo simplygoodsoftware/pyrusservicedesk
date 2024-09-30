@@ -7,6 +7,9 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		1E1275C12CAA8DDB0080CB19 /* PSDChatsTableView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1E1275C02CAA8DDB0080CB19 /* PSDChatsTableView.swift */; };
+		1E1275C32CAA8DEC0080CB19 /* PSDChatsViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1E1275C22CAA8DEC0080CB19 /* PSDChatsViewController.swift */; };
+		1E1275C52CAA8E100080CB19 /* PSDCreateChat.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1E1275C42CAA8E100080CB19 /* PSDCreateChat.swift */; };
 		4B060F2A2732AD8C002E20A7 /* StringHelper.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4B060F292732AD8C002E20A7 /* StringHelper.swift */; };
 		4B062A832518A8D100B317D3 /* PSDPlaceholderMessage.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4B062A822518A8D100B317D3 /* PSDPlaceholderMessage.swift */; };
 		4B062A882518AC9500B317D3 /* messagePlaceholder@3x.png in Resources */ = {isa = PBXBuildFile; fileRef = 4B062A872518AC9500B317D3 /* messagePlaceholder@3x.png */; };
@@ -296,6 +299,9 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		1E1275C02CAA8DDB0080CB19 /* PSDChatsTableView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PSDChatsTableView.swift; sourceTree = "<group>"; };
+		1E1275C22CAA8DEC0080CB19 /* PSDChatsViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PSDChatsViewController.swift; sourceTree = "<group>"; };
+		1E1275C42CAA8E100080CB19 /* PSDCreateChat.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PSDCreateChat.swift; sourceTree = "<group>"; };
 		4B060F292732AD8C002E20A7 /* StringHelper.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StringHelper.swift; sourceTree = "<group>"; };
 		4B062A822518A8D100B317D3 /* PSDPlaceholderMessage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PSDPlaceholderMessage.swift; sourceTree = "<group>"; };
 		4B062A872518AC9500B317D3 /* messagePlaceholder@3x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "messagePlaceholder@3x.png"; sourceTree = "<group>"; };
@@ -1137,6 +1143,7 @@
 		4BB8559E2208559200F7CCE5 /* Requests */ = {
 			isa = PBXGroup;
 			children = (
+				1E1275C42CAA8E100080CB19 /* PSDCreateChat.swift */,
 				4B5533722264C07B00353941 /* PSDDownloader.swift */,
 				4B56BE482216CC0E004E6685 /* PSDUploader.swift */,
 				4BB8559F2208593200F7CCE5 /* URLCreator.swift */,
@@ -1156,6 +1163,8 @@
 		4BB855A1220865D500F7CCE5 /* chats */ = {
 			isa = PBXGroup;
 			children = (
+				1E1275C22CAA8DEC0080CB19 /* PSDChatsViewController.swift */,
+				1E1275C02CAA8DDB0080CB19 /* PSDChatsTableView.swift */,
 				4BB855B02208741600F7CCE5 /* PSDChatInfoTableViewCell.swift */,
 			);
 			path = chats;
@@ -1475,6 +1484,7 @@
 				4B9C205D2451904E004DEF7A /* PSDRowMessage.swift in Sources */,
 				4B873BB6224BCA8100A96E93 /* PSDPushToken.swift in Sources */,
 				4B7F139022155F62007C6358 /* String+Date.swift in Sources */,
+				1E1275C32CAA8DEC0080CB19 /* PSDChatsViewController.swift in Sources */,
 				4B66011D223948CE00AA45E6 /* PyrusServiceDeskCustomization.swift in Sources */,
 				4B9BF878224CBCBC006AD05C /* PSDCopyLabel.swift in Sources */,
 				4B88C6F722145ACA00BDB304 /* PSDGetChats.swift in Sources */,
@@ -1511,6 +1521,7 @@
 				7B1E8D58250665F800C1E5AC /* PSDInfoView.swift in Sources */,
 				4BB6CDC325597E4C004C680A /* PyrusLogger.swift in Sources */,
 				4B7F350A21F8900A00977C6D /* PSDChatViewController.swift in Sources */,
+				1E1275C52CAA8E100080CB19 /* PSDCreateChat.swift in Sources */,
 				4B6D4A39244E1B6A007C6082 /* AttachmentCollectionView.swift in Sources */,
 				4B659AFE223FA9E400D79489 /* PSDSpinerTableView.swift in Sources */,
 				4B82A49A2268B57B00654CE0 /* PSDAttachmentLoadViewControllerInterface.swift in Sources */,
@@ -1544,6 +1555,7 @@
 				4B7AD4D6250A06C9004E9C48 /* PSDFilesManager.swift in Sources */,
 				4B7EA884221EB01B009C9B41 /* PSDErrorParser.swift in Sources */,
 				4BA3FF4022116C1100CE497A /* AttachmentHandler.swift in Sources */,
+				1E1275C12CAA8DDB0080CB19 /* PSDChatsTableView.swift in Sources */,
 				4B56BE4B2216CCC0004E6685 /* PSDAttachment.swift in Sources */,
 				4B060F2A2732AD8C002E20A7 /* StringHelper.swift in Sources */,
 				4B6E9DA3225F3B570037462F /* PSDPreviewSetter.swift in Sources */,
