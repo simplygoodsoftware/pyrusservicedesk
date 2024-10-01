@@ -1,2 +1,40 @@
 <?xml version="1.0" encoding="utf-8"?>
-<resources></resources>
+<resources>
+    <string name="psd_send">Αποστολή</string>
+    <string name="psd_comment_input_hint">Προσθήκη σχολίου</string>
+    <string name="psd_retry">Δοκιμάστε ξανά</string>
+    <string name="psd_no_connection">Χωρίς σύνδεση στο Διαδίκτυο</string>
+    <string name="psd_uploading">Μεταφόρτωση…</string>
+    <string name="psd_file_size_mb" formatted="false">%.1f MB</string>
+    <string name="psd_file_size_kb" formatted="false">%.1f KB</string>
+    <string name="psd_time_format">ωω:μμ</string>
+    <string name="psd_organization_support">Υποστήριξη</string>
+    <string name="psd_today">Σήμερα</string>
+    <string name="psd_yesterday">Χθές</string>
+    <string name="psd_date_format_d_m_y">ΜΜΜΜ η, εεεε</string>
+    <string name="psd_date_format_d_m">ΜΜΜΜ η</string>
+    <string name="psd_photo">Φωτογραφία</string>
+    <string name="psd_gallery">Συλλογή φωτογραφιών</string>
+    <plurals name="psd_years_ago">
+        <item quantity="one">πριν από %d χρόνο</item>
+        <item quantity="other">πριν από %d χρόνια</item>
+    </plurals>
+    <string name="psd_months_ago" formatted="false">πρίν από %d μ</string>
+    <string name="psd_weeks_ago" formatted="false">πριν από %d εβδομάδες</string>
+    <string name="psd_days_ago" formatted="false">πριν από %d μέρες</string>
+    <string name="psd_hours_ago" formatted="false">πριν από %d ώρες</string>
+    <string name="psd_minutes_ago" formatted="false">πριν από %d λεπτά</string>
+    <string name="psd_recent">μόλις τώρα</string>
+    <string name="psd_guest">Επισκέπτης</string>
+    <string name="psd_file_size_exceeded_message" formatted="false">Το μέγεθος του αρχείου δεν πρέπει να υπερβαίνει %d ΜΒ.</string>
+    <string name="psd_copied_to_clipboard">Αντιγράφηκε στο πρόχειρο</string>
+    <string name="psd_download">Λήψη</string>
+    <string name="psd_downloading">Λήψη…</string>
+    <string name="psd_open">Άνοιξε</string>
+    <string name="psd_no_preview_available">Προεπισκόπηση μη διαθέσιμη</string>
+    <string name="psd_share">Μοιραστείτε</string>
+    <string name="psd_delete">Διαγραφή</string>
+    <string name="send_library_logs">Αποστολή αρχείων καταγραφής βιβλιοθήκης</string>
+    <string name="link_warning">Ο σύνδεσμος αυτή οδηγεί σε %s
+\nΕπιθυμείτε να ακολουθήσετε τον σύνδεσμο;</string>
+</resources>
