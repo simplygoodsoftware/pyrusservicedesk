@@ -112,6 +112,7 @@ class PSDMessageView: PSDView{
             if(message.attachment == nil && message.text.count == 0){
                 self.backgroundColor = .clear
             }
+            timeLabel.text = nil
         }else{
             ratingLabel.text = nil
         }
