@@ -3981,6 +3981,59 @@
           },
           {
             "kind": "Function",
+            "name": "setFieldsData",
+            "printedName": "setFieldsData(fieldsData:)",
+            "children": [
+              {
+                "kind": "TypeNominal",
+                "name": "Void",
+                "printedName": "()"
+              },
+              {
+                "kind": "TypeNominal",
+                "name": "Optional",
+                "printedName": "[Swift.String : Swift.String]?",
+                "children": [
+                  {
+                    "kind": "TypeNominal",
+                    "name": "Dictionary",
+                    "printedName": "[Swift.String : Swift.String]",
+                    "children": [
+                      {
+                        "kind": "TypeNominal",
+                        "name": "String",
+                        "printedName": "Swift.String",
+                        "usr": "s:SS"
+                      },
+                      {
+                        "kind": "TypeNominal",
+                        "name": "String",
+                        "printedName": "Swift.String",
+                        "usr": "s:SS"
+                      }
+                    ],
+                    "usr": "s:SD"
+                  }
+                ],
+                "hasDefaultArg": true,
+                "usr": "s:Sq"
+              }
+            ],
+            "declKind": "Func",
+            "usr": "c:@M@PyrusServiceDesk@objc(cs)PyrusServiceDesk(cm)setFieldsDataWithFieldsData:",
+            "mangledName": "$s16PyrusServiceDeskAAC13setFieldsData06fieldsF0ySDyS2SGSg_tFZ",
+            "moduleName": "PyrusServiceDesk",
+            "static": true,
+            "objc_name": "setFieldsDataWithFieldsData:",
+            "declAttributes": [
+              "Final",
+              "AccessControl",
+              "ObjC"
+            ],
+            "funcSelfKind": "NonMutating"
+          },
+          {
+            "kind": "Function",
             "name": "createWith",
             "printedName": "createWith(_:reset:domain:loggingEnabled:authorizationToken:)",
             "children": [
@@ -7385,35 +7438,35 @@
     {
       "filePath": "\/Users\/galinamuraveva\/pyrusservicedesk\/PyrusServiceDeskIOS\/PyrusServiceDesk\/PyrusServiceDeskCreator.swift",
       "kind": "BooleanLiteral",
-      "offset": 11204,
+      "offset": 11211,
       "length": 5,
       "value": "false"
     },
     {
       "filePath": "\/Users\/galinamuraveva\/pyrusservicedesk\/PyrusServiceDeskIOS\/PyrusServiceDesk\/PyrusServiceDeskCreator.swift",
       "kind": "BooleanLiteral",
-      "offset": 12224,
+      "offset": 12231,
       "length": 5,
       "value": "false"
     },
     {
       "filePath": "\/Users\/galinamuraveva\/pyrusservicedesk\/PyrusServiceDeskIOS\/PyrusServiceDesk\/PyrusServiceDeskCreator.swift",
       "kind": "StringLiteral",
-      "offset": 15356,
+      "offset": 15363,
       "length": 11,
       "value": "\"PSDUserId\""
     },
     {
       "filePath": "\/Users\/galinamuraveva\/pyrusservicedesk\/PyrusServiceDeskIOS\/PyrusServiceDesk\/PyrusServiceDeskCreator.swift",
       "kind": "BooleanLiteral",
-      "offset": 15422,
+      "offset": 15429,
       "length": 5,
       "value": "false"
     },
     {
       "filePath": "\/Users\/galinamuraveva\/pyrusservicedesk\/PyrusServiceDeskIOS\/PyrusServiceDesk\/PyrusServiceDeskCreator.swift",
       "kind": "StringLiteral",
-      "offset": 22181,
+      "offset": 22188,
       "length": 19,
       "value": "\"Default_User_Name\""
     },

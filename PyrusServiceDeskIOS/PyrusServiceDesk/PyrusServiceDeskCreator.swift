@@ -188,7 +188,7 @@ import UIKit
         createWith(clientId, userId: nil, securityKey: nil, reset: false, domain: domain, loggingEnabled: loggingEnabled, authorizationToken: authorizationToken)
     }
     
-    @objc static func setFieldsData(fieldsData: [String: String]? = nil) {
+    @objc static public func setFieldsData(fieldsData: [String: String]? = nil) {
         PyrusServiceDesk.fieldsData = fieldsData
     }
     
