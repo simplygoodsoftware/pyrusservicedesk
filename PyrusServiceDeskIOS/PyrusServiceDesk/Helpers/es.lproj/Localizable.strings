@@ -1,1 +1,68 @@
 
+
+
+//Buttons' Title
+"New_Conversation" = "Conversación nueva";
+"NoPreviewAvailable" = "Vista previa no disponible";
+"Interval_Years_234" = "hace %% años";
+
+//For requests
+"No_Connection" = "Sin conexión a Internet";
+"ShortNo" = "No";
+"Comment" = "Comentario...";
+"Default_User_Name" = "Invitado";
+"Uploading" = "Cargando...";
+"Empty_Description" = "Vacío";
+"All_Conversations" = "Todas las conversaciones";
+"Support_Default_Name" = "Soporte";
+"New_Conversation_Short" = "Nueva";
+"Cancel" = "Cancelar";
+"Settings" = "Ajustes";
+"Send" = "Enviar";
+"Back" = "Volver";
+"Done" = "Hecho";
+"CancelDownload" = "Cancelar descarga";
+"FileLoadError" = "No se pudo cargar la vista previa del archivo";
+"OpenWith" = "Abrir con";
+"RetryButton" = "Reintentar";
+"DeleteButton" = "Eliminar";
+
+//For attachments
+"Camera" = "Tomar una fotografía o vídeo";
+"Camera_Access_Error" = "Sin acceso a la cámara o al micrófono";
+"Phone_Gallery" = "Galería";
+"Access_Error" = "Error de acceso";
+"Size_Error" = "El archivo no debe superar los 200 MB.";
+"No_File_Error" = "El archivo no existe";
+
+
+//Append time from data
+"Interval_Recent" = "recientes";
+"Interval_Minute" = "hace %% min";
+"Interval_Hour" = "hace %% h";
+"Interval_Day" = "hace %% días";
+"Interval_Week" = "hace %% semanas";
+"Interval_Mounth" = "hace %% meses";
+"Interval_One_Year" = "hace %% año";
+"Interval_One_End_Year" = "hace %% años";
+"Interval_Years" = "hace %% años";
+
+//Date as string
+"Today" = "Hoy";
+"Yesterday" = "Ayer";
+"Date_Format" = "EE, dd MMM";
+"Date_Format_Year" = "EE, dd MMM, yyyy";
+"Time_Format" = "hh:mm a";
+"Numbers_Date_Format" = "yyyyMMddHHmmss";
+"Retry" = "REINTENTAR";
+"Error" = "Error";
+"ErrorServerError" = "Conexión interrumpida al servidor";
+"AcсessDenied" = "Acceso denegado";
+"OK" = "Aceptar";
+"PrepareLog" = "Preparando registro...";
+"SendLog" = "Enviar registros de biblioteca";
+"ShortYes" = "Sí";
+"Last_Message" = "Este es el último mensaje de esa conversación";
+"Phone_Gallery_Access_Error" = "Sin acceso a la galería del teléfono";
+"AttachmentLoadError" = "No se pudo cargar este archivo adjunto";
+"ExternalSourceWarning" = "Este enlace lo dirige a %@\n¿Está seguro de que desea seguir el enlace?";
