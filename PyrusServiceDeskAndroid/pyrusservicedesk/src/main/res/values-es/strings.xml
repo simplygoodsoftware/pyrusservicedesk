@@ -1,2 +1,41 @@
 <?xml version="1.0" encoding="utf-8"?>
-<resources></resources>
+<resources>
+    <string name="psd_no_preview_available">No hay vista previa disponible</string>
+    <string name="psd_send">Enviar</string>
+    <string name="psd_comment_input_hint">Agregar comentario</string>
+    <string name="psd_retry">Reintentar</string>
+    <string name="psd_no_connection">Sin conexión a Internet</string>
+    <string name="psd_uploading">Cargando…</string>
+    <string name="psd_file_size_mb" formatted="false">%.1f MB</string>
+    <string name="psd_file_size_kb" formatted="false">%.1f KB</string>
+    <string name="psd_time_format">hh:mm aa</string>
+    <string name="psd_organization_support">Soporte</string>
+    <string name="psd_today">Hoy</string>
+    <string name="psd_yesterday">Ayer</string>
+    <string name="psd_date_format_d_m_y">MMMM d, yyyy</string>
+    <string name="psd_date_format_d_m">MMMM d</string>
+    <string name="psd_photo">Fotografía</string>
+    <string name="psd_gallery">Galería</string>
+    <string name="psd_months_ago" formatted="false">hace %d meses</string>
+    <string name="psd_weeks_ago" formatted="false">hace %d semanas</string>
+    <string name="psd_days_ago" formatted="false">hace %d días</string>
+    <string name="psd_hours_ago" formatted="false">hace %d horas</string>
+    <string name="psd_minutes_ago" formatted="false">hace %d minutos</string>
+    <string name="psd_recent">reciente</string>
+    <string name="psd_guest">Invitado</string>
+    <string name="psd_file_size_exceeded_message" formatted="false">El archivo no debe superar los %d MB.</string>
+    <string name="psd_copied_to_clipboard">Copiado al portapapeles</string>
+    <string name="psd_download">Descargar</string>
+    <string name="psd_downloading">Descargando…</string>
+    <string name="psd_open">Abrir</string>
+    <string name="psd_share">Compartir</string>
+    <string name="psd_delete">Eliminar</string>
+    <string name="send_library_logs">Enviar registros de la biblioteca</string>
+    <string name="link_warning">Este enlace lo dirige a %s
+\n¿Está seguro de que desea seguir el enlace\?</string>
+    <plurals name="psd_years_ago">
+        <item quantity="one">hace %d año</item>
+        <item quantity="many">hace %d años</item>
+        <item quantity="other">hace %d años</item>
+    </plurals>
+</resources>
