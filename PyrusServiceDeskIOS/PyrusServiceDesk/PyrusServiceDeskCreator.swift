@@ -22,7 +22,7 @@ import UIKit
     ///UserId needed for request
     static private(set) var userId: String = "" {
         didSet(oldUserId){
-            if userId.count>0 && userId != oldUserId{
+            if userId.count > 0 && userId != oldUserId {
                 let user = PSDUser.init(personId: userId, name: PyrusServiceDesk.userName, type: .user, imagePath: "")
                 PSDUsers.add(user: user)
             }
@@ -188,7 +188,7 @@ import UIKit
         createWith(clientId, userId: nil, securityKey: nil, reset: false, domain: domain, loggingEnabled: loggingEnabled, authorizationToken: authorizationToken)
     }
     
-    @objc static func setFieldsData(fieldsData: [String: String]? = nil) {
+    @objc static public func setFieldsData(fieldsData: [String: String]? = nil) {
         PyrusServiceDesk.fieldsData = fieldsData
     }
     

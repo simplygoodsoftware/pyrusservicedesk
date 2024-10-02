@@ -99,9 +99,6 @@ extension PSDUserMessageCell: PSDRetryActionDelegate {
             UIAlertAction(title: "RetryButton".localizedPSD(), style: .default, handler: { (action) -> Void in self.retryMessage()}),
             UIAlertAction(title: "DeleteButton".localizedPSD(), style: .destructive, handler: { (action) -> Void in self.cancelMessage()}),
         ]
-        if let vc  =  UIApplication.topViewController() as? PSDChatViewController{
-            (vc.inputAccessoryView as? PSDMessageInputView)?.prepairToShowAlert()
-        }
         showMenuAlert(actions, on: viewController, sourseView: nil)
     }
 }

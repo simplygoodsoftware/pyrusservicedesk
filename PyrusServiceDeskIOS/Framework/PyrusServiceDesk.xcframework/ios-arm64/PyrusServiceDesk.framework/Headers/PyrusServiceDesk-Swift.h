@@ -435,6 +435,7 @@ SWIFT_CLASS_PROPERTY(@property (nonatomic, class, copy) void (^ _Nullable onAuth
 /// \param loggingEnabled If true, then the library will write logs, and they can be sent as a file to chat by clicking the “Send Library Logs” button in the menu under the “+” sign. 
 ///
 + (void)createWith:(NSString * _Nullable)clientId domain:(NSString * _Nullable)domain loggingEnabled:(BOOL)loggingEnabled authorizationToken:(NSString * _Nullable)authorizationToken;
++ (void)setFieldsDataWithFieldsData:(NSDictionary<NSString *, NSString *> * _Nullable)fieldsData;
 /// Init PyrusServiceDesk with new clientId.
 /// \param clientId clientId using for all requests. If clientId not setted PyrusServiceDesk Controller will not be created
 ///
@@ -491,6 +492,7 @@ SWIFT_CLASS_NAMED("Builder")
 - (ServiceDeskConfigurationBuilder * _Nonnull)setThemeColor:(UIColor * _Nullable)themeColor;
 - (ServiceDeskConfigurationBuilder * _Nonnull)setWelcomeMessage:(NSString * _Nullable)welcomeMessage;
 - (ServiceDeskConfigurationBuilder * _Nonnull)setAvatarForSupport:(UIImage * _Nullable)avatarForSupport;
+- (ServiceDeskConfigurationBuilder * _Nonnull)setLocale:(NSString * _Nullable)locale;
 - (ServiceDeskConfigurationBuilder * _Nonnull)setUserName:(NSString * _Nullable)userName;
 - (ServiceDeskConfigurationBuilder * _Nonnull)setChatTitleView:(UIView * _Nullable)chatTitleView;
 - (ServiceDeskConfigurationBuilder * _Nonnull)setCustomRightBarButtonItem:(UIBarButtonItem * _Nullable)customRightBarButtonItem;

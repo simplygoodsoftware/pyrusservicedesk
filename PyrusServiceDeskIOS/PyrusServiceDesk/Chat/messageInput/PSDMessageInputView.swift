@@ -33,9 +33,10 @@ class PSDMessageInputView: UIView, PSDMessageTextViewDelegate,PSDMessageSendButt
     let distToAdd : CGFloat = 21
     let distToSend : CGFloat = 15
     private static let attachmentsHeight : CGFloat = 80
-    var showRate = false{
-        didSet(oldValue) {
-            guard oldValue != showRate else{
+    var showRate = false {
+        didSet {
+            guard oldValue != showRate 
+            else {
                 return
             }
             rateHeightConstraint?.constant = showRate ? RATE_HEIGHT : 0
@@ -310,19 +311,9 @@ extension PSDMessageInputView : AttachmentCollectionViewDelegateProtocol{
     }
 }
 extension PSDMessageInputView: AttachmentsAddButtonDelegate{
-    func showInput(){
-        if let vc  =  UIApplication.topViewController() as? PSDChatViewController{
-            vc.becomeFirstResponder()
-        }
-    }
-    func prepairToShowAlert(){
-        EventsLogger.logEvent(.resignFirstResponder, additionalInfo: "prepair to show alert")
-        self.inputTextView.resignFirstResponder()
-    }
     func attachmentChoosed(_ data:Data, _ url:URL?)
     {
-        showInput()
-        let attachment : PSDAttachment = PSDObjectsCreator.createAttachment(data,url)
+        let attachment = PSDObjectsCreator.createAttachment(data,url)
         addAttachment(attachment)
     }
 }

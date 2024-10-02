@@ -24,10 +24,12 @@ class PSDChatViewController: PSDViewController {
             navigationItem.largeTitleDisplayMode = .never
             
         }
-        self.extendedLayoutIncludesOpaqueBars = true
-        self.tableView.chatDelegate = self
-        self.automaticallyAdjustsScrollViewInsets = false
-
+        extendedLayoutIncludesOpaqueBars = true
+        tableView.chatDelegate = self
+        automaticallyAdjustsScrollViewInsets = false
+        if #available(iOS 13.0, *) {
+            tableView.automaticallyAdjustsScrollIndicatorInsets = false
+        }
         self.design()
         self.designNavigation()
         self.customiseDesign(color: PyrusServiceDesk.mainController?.customization?.barButtonTintColor ?? UIColor.darkAppColor)
@@ -159,8 +161,6 @@ class PSDChatViewController: PSDViewController {
         tableViewTopConstant?.isActive = true
         tableView.bottomAnchor.constraint(equalTo: view.bottomAnchor).isActive = true
         
-        
-        
         tableView.addActivityView()
     }
     
@@ -233,10 +233,13 @@ class PSDChatViewController: PSDViewController {
     //MARK: KeyBoard hiding and moving
     override var canBecomeFirstResponder: Bool
     {
-        if self.tableView.window != nil && !hasNoConnection() {
-            return true;
+        guard
+            self.tableView.window != nil,
+            !hasNoConnection(),
+            self.presentedViewController == nil else {
+            return false
         }
-        return false;
+        return true
     }
     private func hasNoConnection()->Bool{
         if self.view.subviews.contains(self.tableView.noConnectionView){
@@ -382,7 +385,6 @@ extension PSDChatViewController: PSDChatTableViewDelegate {
 
 extension PSDChatViewController: UIAdaptivePresentationControllerDelegate {
     override func present(_ viewControllerToPresent: UIViewController, animated flag: Bool, completion: (() -> Void)? = nil) {
-        self.messageInputView.inputTextView.resignFirstResponder()
         super.present(viewControllerToPresent, animated: flag, completion: completion)
     }
 }
