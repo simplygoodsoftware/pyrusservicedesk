@@ -10,7 +10,7 @@ internal const val BYTES_IN_KILOBYTE = 1000
 /**
  * @return TRUE if preview for the file format is supported.
  */
-internal fun String.canBePreviewed() = isImage() || hasFormat(TXT)
+internal fun String.canBePreviewed() = isImage()
 
 /**
  * return TRUE if the file is image

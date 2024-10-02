@@ -288,7 +288,7 @@ internal class TicketViewModel(
         updateFeedIntervalIfNeeded()
     }
 
-    private fun hasComment(commentId: Int): Boolean {
+    private fun hasComment(commentId: Long): Boolean {
         return ticketEntries.findLast {
             it.type == Type.Comment && (it as CommentEntry).comment.commentId == commentId
         } != null
@@ -574,7 +574,7 @@ internal class TicketViewModel(
     ) {
         override fun getAttachments(data: AddCommentResponseData) = data.sentAttachments
 
-        override fun getCommentId(data: AddCommentResponseData): Int = data.commentId
+        override fun getCommentId(data: AddCommentResponseData): Long = data.commentId
 
         override fun onSuccess(data: AddCommentResponseData) {
             liveUpdates.subscribeOnUnreadTicketCountChanged(this@TicketViewModel)
@@ -615,7 +615,7 @@ internal class TicketViewModel(
 
         abstract fun getAttachments(data: U): List<Attachment>?
 
-        abstract fun getCommentId(data: U): Int
+        abstract fun getCommentId(data: U): Long
 
         abstract fun onSuccess(data: U)
 

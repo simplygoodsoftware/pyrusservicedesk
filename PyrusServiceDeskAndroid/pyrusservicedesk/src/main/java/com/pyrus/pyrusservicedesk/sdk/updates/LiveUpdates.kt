@@ -40,7 +40,7 @@ internal class LiveUpdates(
 
     private var lastActiveTime: Long = preferencesManager.getLastActiveTime()
     private var activeScreenCount = 0
-    private var lastCommentId = 0
+    private var lastCommentId = 0L
 
     // notified in UI thread
     private val dataSubscribers = mutableSetOf<LiveUpdateSubscriber>()

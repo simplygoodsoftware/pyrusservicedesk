@@ -24,5 +24,7 @@ internal class AddCommentRequestBody(
         @SerializedName("user_name")
         val userName: String,
         @SerializedName("rating")
-        val rating: Int? = null
+        val rating: Int? = null,
+        @SerializedName("extra_fields")
+        val extraFields: Map<String, String>?,
 ) : RequestBodyBase(appId, userId, securityKey, instanceId, version)

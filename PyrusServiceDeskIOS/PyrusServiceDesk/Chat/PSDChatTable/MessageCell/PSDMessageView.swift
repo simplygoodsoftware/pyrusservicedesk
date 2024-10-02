@@ -2,12 +2,36 @@
 import UIKit
 let MESSAGE_CORNER_RADIUS : CGFloat = 15.0
 class PSDMessageView: PSDView{
-    
     weak var delegate: PSDRetryActionDelegate?
     enum colorType {
         case brightColor
         case defaultColor
     }
+    
+    private lazy var timeView: UIView = {
+        let view = UIView()
+        view.addSubview(timeLabel)
+        timeLabel.translatesAutoresizingMaskIntoConstraints = false 
+        timeLabel.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: TIME_BORDER).isActive = true
+        timeLabel.topAnchor.constraint(equalTo: view.topAnchor, constant: TIME_BORDER).isActive = true
+        timeLabel.bottomAnchor.constraint(equalTo: view.bottomAnchor, constant: -TIME_BORDER).isActive = true
+        timeLabel.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -TIME_BORDER).isActive = true
+        let heightConstraint = view.heightAnchor.constraint(equalToConstant: TIME_HEIGHT)
+        heightConstraint.isActive = true
+        heightConstraint.priority = UILayoutPriority(rawValue: 999)
+        view.layer.cornerRadius = TIME_HEIGHT / 2
+        return view
+    }()
+    
+    ///A label with time when message was sent.
+    private lazy var timeLabel: UILabel =
+    {
+        let label = UILabel()
+        label.textColor = CustomizationHelper.textColorForTable.withAlphaComponent(TIME_ALPHA)
+        label.font = DETAIL_FONT
+        return label;
+    }()
+    
     var color : colorType = .brightColor
     {
         didSet{
@@ -24,8 +48,26 @@ class PSDMessageView: PSDView{
             self.backgroundColor = CustomizationHelper.supportMassageBackgroundColor
             recolorWithTextColor(CustomizationHelper.supportMassageTextColor)
         }
-        
+        setColorToTimeView()
     }
+    
+    private func setColorToTimeView() {
+        let hasText = messageTextView.attributedText.string.count > 0
+        let hasImageAttachment = (attachmentView is PSDImageAttachmentView) && attachmentView?.superview != nil
+        if !hasText && hasImageAttachment {
+            timeView.backgroundColor = .black.withAlphaComponent(TIME_VIEW_ALPHA)
+            timeLabel.textColor = .white
+        } else {
+            timeView.backgroundColor = .clear
+            switch (color) {
+            case .brightColor:
+                timeLabel.textColor = CustomizationHelper.userMassageTextColor.withAlphaComponent(TIME_ALPHA)
+            case .defaultColor:
+                timeLabel.textColor = CustomizationHelper.supportMassageTextColor.withAlphaComponent(TIME_ALPHA)
+            }
+        }
+    }
+    
     private func recolorWithTextColor(_ color: UIColor) {
         attachmentView?.color = color
         separatorView.tintColor = color.withAlphaComponent(PSDMessageView.separatorAlpha)
@@ -33,10 +75,11 @@ class PSDMessageView: PSDView{
     private static let distToBoard : CGFloat = 10.0
     private let PLACEHOLDER_HEIGHT: CGFloat = 20
     private let PLACEHOLDER_WIDTH: CGFloat = 50
-    var maxWidth : CGFloat = 50
+    var maxWidth: CGFloat = 50
     private static let separatorAlpha :CGFloat = 0.8
     func draw(message:PSDRowMessage)
     {
+        timeLabel.text = message.message.date.timeAsString()
         messageTextView.attributedText = message.attributedText
         attachmentView?.removeFromSuperview()
         placeholderImageView.isHidden = message.message as? PSDPlaceholderMessage == nil
@@ -69,14 +112,18 @@ class PSDMessageView: PSDView{
             if(message.attachment == nil && message.text.count == 0){
                 self.backgroundColor = .clear
             }
+            timeLabel.text = nil
         }else{
             ratingLabel.text = nil
         }
+        
+        setColorToTimeView()
         
         attachmentHolderRightConstraint?.isActive = !hasImageAttachment
         attachmentHolderImageRightConstraint?.isActive = hasImageAttachment
         separatorHeightConstraint?.constant = (messageTextView.text.count == 0 || attachmentView == nil) ? 0 : PSDMessageView.separatorHeight //show separatoe only is has both text and image
         messageEmptyHeightConstraint?.isActive = messageTextView.text.count == 0
+        updateTimeLayout()
     }
     lazy private var tapGesture : UITapGestureRecognizer = {
         let gesture = UITapGestureRecognizer(target: self, action: #selector(handleTap))
@@ -138,6 +185,7 @@ class PSDMessageView: PSDView{
         self.addGestureRecognizer(tapGesture)
         self.addSubview(ratingLabel)
         addSubview(placeholderImageView)
+        addSubview(timeView)
         addConstraints()
     }
     required init?(coder aDecoder: NSCoder) {
@@ -150,9 +198,13 @@ class PSDMessageView: PSDView{
     private var messageEmptyHeightConstraint: NSLayoutConstraint?
     private var attachmentHolderRightConstraint: NSLayoutConstraint?//the cosntaint to right side with "lessThanOrEqualTo"
     private var attachmentHolderImageRightConstraint: NSLayoutConstraint?//the cosntaint to right side with "EqualTo""
+    private var timeInBottomConstraints = [NSLayoutConstraint]()
+    private var timeInBottomAndLineConstraints = [NSLayoutConstraint]()
+    private var timeInLineConstraints = [NSLayoutConstraint]()
     
     private func addConstraints()
     {
+        timeConstraints()
         messageTextView.translatesAutoresizingMaskIntoConstraints = false
         attachmentHolderView.translatesAutoresizingMaskIntoConstraints = false
         separatorView.translatesAutoresizingMaskIntoConstraints = false
@@ -188,20 +240,123 @@ class PSDMessageView: PSDView{
         separatorView.bottomAnchor.constraint(equalTo: messageTextView.topAnchor, constant: 0).isActive = true
         separatorView.addConstraint([.leading], constant: PSDMessageView.distToBoard)
         
-        messageTextView.addConstraint([.bottom], constant: 0)
-        messageTextView.leftAnchor.constraint(equalTo: leftAnchor, constant: 0).isActive = true
-        messageTextView.rightAnchor.constraint(lessThanOrEqualTo: rightAnchor, constant: 0).isActive = true
+       // messageTextView.addConstraint([.bottom], constant: 0)
+        messageTextView.leadingAnchor.constraint(equalTo: leadingAnchor, constant: 0).isActive = true
+        
+        let bTrailingConstraint = messageTextView.trailingAnchor.constraint(lessThanOrEqualTo: trailingAnchor, constant: 0)
+        bTrailingConstraint.isActive = true
+        let bBottomConstraint = messageTextView.bottomAnchor.constraint(equalTo: timeView.topAnchor)
+        bBottomConstraint.isActive = true
+        timeInBottomConstraints.append(bTrailingConstraint)
+        timeInBottomConstraints.append(bBottomConstraint)
+        timeInBottomAndLineConstraints.append(bTrailingConstraint)
+        
+        let lTrailingConstraint = messageTextView.trailingAnchor.constraint(lessThanOrEqualTo: timeView.leadingAnchor, constant: 0)
+        lTrailingConstraint.isActive = false
+        let lBottomConstaint = messageTextView.bottomAnchor.constraint(equalTo: bottomAnchor)
+        lBottomConstaint.isActive = false
+        timeInLineConstraints.append(lBottomConstaint)
+        timeInLineConstraints.append(lTrailingConstraint)
+        timeInBottomAndLineConstraints.append(lBottomConstaint)
+        
         messageEmptyHeightConstraint = messageTextView.heightAnchor.constraint(equalToConstant: 0)
-       
     }
+    
+    private func timeConstraints()
+    {
+        timeView.translatesAutoresizingMaskIntoConstraints = false
+        timeView.trailingAnchor.constraint(equalTo: trailingAnchor, constant: -TIME_LEFT_OFFSET).isActive = true
+        timeView.bottomAnchor.constraint(equalTo: bottomAnchor, constant: -TIME_LEFT_OFFSET).isActive = true
+    }
+    
+    private func updateTimeLayout() {
+        let maxWidth = self.maxWidth - TEXT_SAFE_AREA
+        let layoutData = messageTextView.attributedText.lastCharacterMaxX(self.maxWidth)//300.6932925581932 for maxWidth = 276.0,
+        let maxX = layoutData.maxX + (TEXT_SAFE_AREA / 2)
+        let numLines = layoutData.numberOfLines
+        let expectedTimeSize = OFFSET_FOR_DETAIL + TIME_BORDER + TIME_BORDER + TIME_LEFT_OFFSET + TIME_LEFT_OFFSET + TIME_LEFT_OFFSET
+        let size = messageTextView.attributedText.boundingRect(with: CGSize(width: maxWidth, height: CGFloat.greatestFiniteMagnitude),
+                                                               options: [.usesLineFragmentOrigin, .usesFontLeading],
+                                                               context: nil)
+        let canBeInLine = maxX < maxWidth - expectedTimeSize
+        let growWidth = canBeInLine && (size.width + expectedTimeSize < maxWidth)
+        if messageTextView.attributedText.string.count == 0 || (canBeInLine && numLines > 1 && !growWidth) {
+            activate(false, constraintsIn: timeInBottomConstraints)
+            activate(false, constraintsIn: timeInLineConstraints)
+            activate(true, constraintsIn: timeInBottomAndLineConstraints)
+        }
+        else if canBeInLine && growWidth {
+            activate(false, constraintsIn: timeInBottomAndLineConstraints)
+            activate(false, constraintsIn: timeInBottomConstraints)
+            activate(true, constraintsIn: timeInLineConstraints)
+        } else {
+            activate(false, constraintsIn: timeInBottomAndLineConstraints)
+            activate(false, constraintsIn: timeInLineConstraints)
+            activate(true, constraintsIn: timeInBottomConstraints)
+        }
+        setNeedsLayout()
+        layoutIfNeeded()
+    }
+    
+    private func activate(_ activate: Bool, constraintsIn constraintsArray: [NSLayoutConstraint]) {
+        for con in constraintsArray {
+            con.isActive = activate
+        }
+    }
+    
     override func layoutSubviews() {
-        separatorWidthConstraint?.constant = self.frame.size.width - (PSDMessageView.distToBoard*2)//change separator width, or it will resize its parent view
+        let width = self.frame.size.width - (PSDMessageView.distToBoard*2)
+        separatorWidthConstraint?.constant = width > 0 ? width : 0//change separator width, or it will resize its parent view
     }
     override var intrinsicContentSize: CGSize{
         return CGSize.zero
     }
 }
+
 extension UIFont {
     static let ratingLabel = CustomizationHelper.systemFont(ofSize: 40)
     static let messageTextView = CustomizationHelper.systemFont(ofSize: 18.0)
+}
+
+private extension PSDMessageView {
+    var TIME_ALPHA: CGFloat { 0.4 }
+    var TIME_VIEW_ALPHA: CGFloat { 0.5 }
+    var TIME_HEIGHT: CGFloat { 20 }
+    var TIME_LEFT_OFFSET: CGFloat { 8 }
+    var TIME_BORDER: CGFloat { 4 }
+    var TEXT_SAFE_AREA: CGFloat { 32 }
+}
+
+private extension UITextView {
+    var numberOfLines: Int {
+        var count = 0
+        layoutManager.enumerateLineFragments(forGlyphRange: NSMakeRange(0, layoutManager.numberOfGlyphs)) { _, _, _, _, _ in
+            count += 1
+        }
+        return count
+    }
+}
+
+public extension NSAttributedString {
+    
+    func lastCharacterMaxX(_ w: CGFloat) -> (maxX: CGFloat, numberOfLines: Int) {
+        let textStorage = NSTextStorage(attributedString: self)
+        let size = CGSize(width: w, height: CGFloat.greatestFiniteMagnitude)
+        
+        let textContainer = NSTextContainer(size: size)
+        //        textContainer.lineFragmentPadding = 0
+        
+        let layoutManager = NSLayoutManager()
+        layoutManager.addTextContainer(textContainer)
+        
+        textStorage.addLayoutManager(layoutManager)
+        
+        var count = 0
+        var lastLineRect = CGRect.zero
+        layoutManager.enumerateLineFragments(forGlyphRange: NSMakeRange(0, layoutManager.numberOfGlyphs)) { _, usedRect, _, _, _ in
+            count += 1
+            lastLineRect = usedRect
+        }
+        return (lastLineRect.maxX, count)
+    }
 }

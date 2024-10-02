@@ -10,7 +10,7 @@ class PSDChat: NSObject {
         self.messages = messages
     }
     
-    static func draftAnswers(_ tableMatrix: [[PSDRowMessage]]) -> [String]? {
+    static func draftAnswers(_ tableMatrix: [[PSDRowMessage]]) -> [ButtonData]? {
         guard
             let messages = tableMatrix.last,
             let message = messages.last?.message
@@ -25,9 +25,9 @@ class PSDChat: NSObject {
             return nil
         }
         if links.count > MAX_LINKS_COUNT {
-            return Array(links[..<MAX_LINKS_COUNT]) as [String]
+            return Array(links[..<MAX_LINKS_COUNT]) as [ButtonData]
         }
         return links
     }
 }
-private let MAX_LINKS_COUNT: Int = 6
+private let MAX_LINKS_COUNT: Int = 10

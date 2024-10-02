@@ -56,6 +56,12 @@ extension Date {
         else{
             dateFormatter.dateFormat = "Date_Format_Year".localizedPSD()
         }
+        if
+            let languageCode = CustomizationHelper.customLocale
+        {
+            dateFormatter.locale = Locale(identifier: languageCode)
+        }
+        
         return dateFormatter.string(from: self)
     }
     /**

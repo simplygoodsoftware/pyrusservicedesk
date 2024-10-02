@@ -4,7 +4,7 @@ import com.google.gson.annotations.SerializedName
 import com.pyrus.pyrusservicedesk.sdk.data.gson.Local
 import java.util.*
 
-private const val COMMENT_ID_EMPTY = 0
+private const val COMMENT_ID_EMPTY = 0L
 
 /**
  * Represents single comment.
@@ -13,7 +13,7 @@ private const val COMMENT_ID_EMPTY = 0
  */
 internal data class Comment(
         @SerializedName("comment_id")
-        val commentId: Int = COMMENT_ID_EMPTY,
+        val commentId: Long = COMMENT_ID_EMPTY,
         @SerializedName("body")
         val body: String? = "",
         @SerializedName("is_inbound")
@@ -26,7 +26,7 @@ internal data class Comment(
         val author: Author,
         @Local
         @SerializedName("local_comment_id")
-        val localId: Int = COMMENT_ID_EMPTY,
+        val localId: Long = COMMENT_ID_EMPTY,
         @SerializedName("rating")
         val rating: Int? = null) {
 

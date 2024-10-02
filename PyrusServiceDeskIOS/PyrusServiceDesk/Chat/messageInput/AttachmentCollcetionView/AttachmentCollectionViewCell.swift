@@ -80,5 +80,5 @@ extension AttachmentCollectionViewCell: Recolorable {
 let BUTTON_ALPHA: CGFloat = 0.3
 let CROSS_ALPHA: CGFloat = 0.8
 private extension UIFont {
-    static let removeButton = UIFont.boldSystemFont(ofSize: 13)
+    static let removeButton = CustomizationHelper.systemBoldFont(ofSize: 13)
 }

@@ -7,7 +7,7 @@ protocol PSDChatTableViewDelegate: NSObjectProtocol {
     func dataIsShown()
 }
 
-class PSDChatTableView: PSDDetailTableView{
+class PSDChatTableView: PSDTableView {
     ///The id of chat that is shown in table view
     weak var chatDelegate: PSDChatTableViewDelegate?
     private let footerHeight : CGFloat = 10.0
@@ -15,8 +15,8 @@ class PSDChatTableView: PSDDetailTableView{
     private var needShowRating : Bool = false
     private static let userCellId = "CellUser"
     private static let supportCellId = "CellSupport"
-    private var tableMatrix : [[PSDRowMessage]] = [[PSDRowMessage]()]
-    private var heightsMap : [IndexPath : CGFloat] = [IndexPath : CGFloat]()
+    private var tableMatrix: [[PSDRowMessage]] = [[PSDRowMessage]()]
+    private var heightsMap: [IndexPath: CGFloat] = [IndexPath : CGFloat]()
     private var storeChat: PSDChat?
     private var gotData: Bool = false
     private var loadingTimer: Timer?
@@ -24,7 +24,6 @@ class PSDChatTableView: PSDDetailTableView{
         let view = ButtonsView(frame: .zero)
         tableFooterView = view
         view.autoresizingMask = [.flexibleHeight]
-        view.translatesAutoresizingMaskIntoConstraints = true
         view.tapDelegate = self
         return view
     }()
@@ -142,7 +141,7 @@ class PSDChatTableView: PSDDetailTableView{
                         self.needShowRating = chat?.showRating ?? false
                         self.showRateIfNeed()
                         self.isLoading = false
-                        self.buttonsView.updateWithButtons(nil)
+                        self.buttonsView.updateWithButtons(nil, width: self.frame.size.width)
                     }
                 }
             }
@@ -163,7 +162,7 @@ class PSDChatTableView: PSDDetailTableView{
             lastMessageFromServer = chat.messages.last
         }
         setLastActivityDate()
-        buttonsView.updateWithButtons(PSDChat.draftAnswers(tableMatrix))
+        buttonsView.updateWithButtons(PSDChat.draftAnswers(tableMatrix), width: frame.size.width)
         reloadData()
         
         removeNoConnectionView()
@@ -294,7 +293,8 @@ class PSDChatTableView: PSDDetailTableView{
                                         self.reloadSections(reloadSections, with: .none)
                                     }
                                     self.endUpdates()
-                                    self.buttonsView.updateWithButtons(PSDChat.draftAnswers(self.tableMatrix))
+                                    self.buttonsView.updateWithButtons(PSDChat.draftAnswers(self.tableMatrix), width: self.frame.size.width)
+                                    self.buttonsView.collectionView.collectionViewLayout.invalidateLayout()
                                     self.scrollToBottomAfterRefresh(with: oldContentOffset, oldContentSize: oldContentSize)
                                 }
                             }
@@ -304,7 +304,7 @@ class PSDChatTableView: PSDDetailTableView{
                 }
                 DispatchQueue.main.async  {
                     if let self = self {
-                        self.buttonsView.updateWithButtons(PSDChat.draftAnswers(self.tableMatrix))
+                        self.buttonsView.updateWithButtons(PSDChat.draftAnswers(self.tableMatrix), width: self.frame.size.width)
                         self.customRefresh.endRefreshing()
                         self.bottomRefresh.endRefreshing()
                     }
@@ -357,18 +357,18 @@ class PSDChatTableView: PSDDetailTableView{
     private func scrollsToBottom(animated: Bool) {
         layoutIfNeeded()
         let lastRow = lastIndexPath()
+        let hasFooter = tableFooterView?.frame.size.height ?? 0 > 0
         if
             lastRow.row >= 0 || lastRow.section >= 0,
             !(lastRow.row == 0 && lastRow.section == 0)
         {
-            scrollToRow(at: lastRow, at: .bottom, animated: animated)
+            scrollToRow(at: lastRow, at: .bottom, animated: !hasFooter && animated)
         }
         if
             let tableFooterView = tableFooterView,
-            tableFooterView.frame.size.height > 0
+            hasFooter
         {
-            var frameFooter = tableFooterView.frame
-            frameFooter.size.height += 20
+            let frameFooter = tableFooterView.frame
             scrollRectToVisible(frameFooter, animated: animated)
         }
     }
@@ -399,7 +399,7 @@ class PSDChatTableView: PSDDetailTableView{
                 self.addRow(at: lastSection, dataForRow: rowMessage)
             }
         }
-        buttonsView.updateWithButtons(PSDChat.draftAnswers(tableMatrix))
+        buttonsView.updateWithButtons(PSDChat.draftAnswers(tableMatrix), width: frame.size.width)
         UIView.animate(withDuration: 0.1, animations: {
             self.layoutIfNeeded()
         })
@@ -471,7 +471,8 @@ class PSDChatTableView: PSDDetailTableView{
         if needReload{
             if(cellOnScrean){
                 if let cell = self.cellForRow(at: indexPath) as? PSDChatMessageCell{
-                    cell.draw(message:message)
+                    cell.draw(message: message,
+                              width: frame.size.width)
                     PSDPreviewSetter.setPreview(of: message.attachment, in: cell.cloudView.attachmentView, delegate:self, animated: false)
                 }
             }
@@ -535,7 +536,7 @@ extension PSDChatTableView : UITableViewDelegate,UITableViewDataSource{
         cell.needShowName = self.tableMatrix.needShowName(at: indexPath)
         cell.drawEmpty = self.tableMatrix.emptyMessage(at: indexPath)
         cell.firstMessageInDate = indexPath.row == 0
-        cell.draw(message:message)
+        cell.draw(message:message, width: frame.size.width)
         PSDPreviewSetter.setPreview(of: message.attachment, in: cell.cloudView.attachmentView, delegate: self, animated: false)
         self.redrawSendingAttachmentCell(at: indexPath, with: message)
         cell.cloudView.messageTextView.linkDelegate = self
@@ -827,7 +828,11 @@ extension PSDChatTableView: LinkDelegate {
 }
 
 extension PSDChatTableView: ButtonsCollectionDelegate {
-    func didTapOnButton(_ text: String) {
-        chatDelegate?.send(text, [])
+    func didTapOnButton(_ text: ButtonData) {
+        if let url = text.url?.absoluteString {
+            chatDelegate?.showLinkOpenAlert(url)
+        } else if let text = text.string {
+            chatDelegate?.send(text, [])
+        }
     }
 }

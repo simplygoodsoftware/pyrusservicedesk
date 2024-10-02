@@ -179,12 +179,17 @@ import UIKit
     static var securityKey: String?
     static var loggingEnabled: Bool = false
     
+    static var fieldsData: [String: String]?
     ///Init PyrusServiceDesk with new clientId.
     ///- parameter clientId: clientId using for all requests. If clientId not setted PyrusServiceDesk Controller will not be created
     ///- parameter domain: Base domain for network requests. If the [domain] is null, the default pyrus.com will be used.
     ///- parameter loggingEnabled If true, then the library will write logs, and they can be sent as a file to chat by clicking the "Send Library Logs" button in the menu under the "+" sign.
     @objc static public func createWith(_ clientId: String?, domain: String? = nil, loggingEnabled: Bool = false, authorizationToken: String? = nil)  {
         createWith(clientId, userId: nil, securityKey: nil, reset: false, domain: domain, loggingEnabled: loggingEnabled, authorizationToken: authorizationToken)
+    }
+    
+    @objc static func setFieldsData(fieldsData: [String: String]? = nil) {
+        PyrusServiceDesk.fieldsData = fieldsData
     }
     
     ///Init PyrusServiceDesk with new clientId.
