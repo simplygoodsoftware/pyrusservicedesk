@@ -32,6 +32,8 @@ import zlib
     @discardableResult
     @objc public func setAvatarForSupport(_ avatarForSupport: UIKit.UIImage?) -> ServiceDeskConfiguration.Builder
     @discardableResult
+    @objc public func setLocale(_ locale: Swift.String?) -> ServiceDeskConfiguration.Builder
+    @discardableResult
     @objc public func setUserName(_ userName: Swift.String?) -> ServiceDeskConfiguration.Builder
     @discardableResult
     @objc public func setChatTitleView(_ chatTitleView: UIKit.UIView?) -> ServiceDeskConfiguration.Builder

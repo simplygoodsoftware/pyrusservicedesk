@@ -491,6 +491,7 @@ SWIFT_CLASS_NAMED("Builder")
 - (ServiceDeskConfigurationBuilder * _Nonnull)setThemeColor:(UIColor * _Nullable)themeColor;
 - (ServiceDeskConfigurationBuilder * _Nonnull)setWelcomeMessage:(NSString * _Nullable)welcomeMessage;
 - (ServiceDeskConfigurationBuilder * _Nonnull)setAvatarForSupport:(UIImage * _Nullable)avatarForSupport;
+- (ServiceDeskConfigurationBuilder * _Nonnull)setLocale:(NSString * _Nullable)locale;
 - (ServiceDeskConfigurationBuilder * _Nonnull)setUserName:(NSString * _Nullable)userName;
 - (ServiceDeskConfigurationBuilder * _Nonnull)setChatTitleView:(UIView * _Nullable)chatTitleView;
 - (ServiceDeskConfigurationBuilder * _Nonnull)setCustomRightBarButtonItem:(UIBarButtonItem * _Nullable)customRightBarButtonItem;
@@ -1051,6 +1052,7 @@ SWIFT_CLASS_NAMED("Builder")
 - (ServiceDeskConfigurationBuilder * _Nonnull)setThemeColor:(UIColor * _Nullable)themeColor;
 - (ServiceDeskConfigurationBuilder * _Nonnull)setWelcomeMessage:(NSString * _Nullable)welcomeMessage;
 - (ServiceDeskConfigurationBuilder * _Nonnull)setAvatarForSupport:(UIImage * _Nullable)avatarForSupport;
+- (ServiceDeskConfigurationBuilder * _Nonnull)setLocale:(NSString * _Nullable)locale;
 - (ServiceDeskConfigurationBuilder * _Nonnull)setUserName:(NSString * _Nullable)userName;
 - (ServiceDeskConfigurationBuilder * _Nonnull)setChatTitleView:(UIView * _Nullable)chatTitleView;
 - (ServiceDeskConfigurationBuilder * _Nonnull)setCustomRightBarButtonItem:(UIBarButtonItem * _Nullable)customRightBarButtonItem;
