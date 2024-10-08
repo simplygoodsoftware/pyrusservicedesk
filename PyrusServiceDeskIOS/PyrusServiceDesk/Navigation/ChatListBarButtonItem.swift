@@ -9,7 +9,7 @@ let MESSAGES_NUMBER_NOTIFICATION_NAME = Notification.Name.init("PSDMessagesNumbe
 
 ///UIBarButtonItem, that observers number of chats and new messages, and change self view according to its data. If no messages and chats this button is not enabled.
 class ChatListBarButtonItem: UIBarButtonItem {
-    private var chatsCount : Int = PyrusServiceDesk.chatsCount
+    private var chatsCount : Int = 0//PyrusServiceDesk.chatsCount
     {
         didSet (oldValue){
             if oldValue != chatsCount{
@@ -18,7 +18,7 @@ class ChatListBarButtonItem: UIBarButtonItem {
            
         }
     }
-    private var newMessagesCount : Int = PyrusServiceDesk.newMessagesCount
+    private var newMessagesCount : Int = 0//PyrusServiceDesk.newMessagesCount
     {
         didSet (oldValue){
             if oldValue != newMessagesCount{
@@ -173,10 +173,10 @@ class ChatListBarButtonItem: UIBarButtonItem {
             object: nil)
     }
     private func checkAvailability()->Bool{
-        if(PyrusServiceDesk.newMessagesCount == 0 && PyrusServiceDesk.chatsCount==0 && !PyrusServiceDesk.hasInfo){
+        //if(PyrusServiceDesk.newMessagesCount == 0 && PyrusServiceDesk.chatsCount==0 && !PyrusServiceDesk.hasInfo){
             return false
-        }
-        return true
+//        }
+//        return true
     }
     
     required init?(coder aDecoder: NSCoder) {

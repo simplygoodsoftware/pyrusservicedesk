@@ -19,6 +19,8 @@ import UIKit
     ///An array with domains. Used to determine if an alert should be shown when a link is clicked. If the user clicked on a link with a domain from the array, then the application will immediately navigate.
     public static var trustedUrls: [String]?
     
+    public static var multichats = false
+    
     ///UserId needed for request
     static private(set) var userId: String = "" {
         didSet(oldUserId){
@@ -184,8 +186,8 @@ import UIKit
     ///- parameter clientId: clientId using for all requests. If clientId not setted PyrusServiceDesk Controller will not be created
     ///- parameter domain: Base domain for network requests. If the [domain] is null, the default pyrus.com will be used.
     ///- parameter loggingEnabled If true, then the library will write logs, and they can be sent as a file to chat by clicking the "Send Library Logs" button in the menu under the "+" sign.
-    @objc static public func createWith(_ clientId: String?, domain: String? = nil, loggingEnabled: Bool = false, authorizationToken: String? = nil)  {
-        createWith(clientId, userId: nil, securityKey: nil, reset: false, domain: domain, loggingEnabled: loggingEnabled, authorizationToken: authorizationToken)
+    @objc static public func createWith(_ clientId: String?, multichats: Bool = false, domain: String? = nil, loggingEnabled: Bool = false, authorizationToken: String? = nil)  {
+        createWith(clientId, userId: nil, securityKey: nil, reset: false, domain: domain, loggingEnabled: loggingEnabled, authorizationToken: authorizationToken, multichats: multichats)
     }
     
     @objc static public func setFieldsData(fieldsData: [String: String]? = nil) {
@@ -207,10 +209,11 @@ import UIKit
     ///- parameter securityKey: security key of the user for safe initialization
     //////- parameter domain: Base domain for network requests. If the [domain] is null, the default pyrus.com will be used.
     ///- parameter loggingEnabled If true, then the library will write logs, and they can be sent as a file to chat by clicking the "Send Library Logs" button in the menu under the "+" sign.
-    @objc static public func createWith(_ clientId: String?, userId: String?, securityKey: String?, domain: String? = nil, loggingEnabled: Bool = false, authorizationToken: String? = nil) {
-        createWith(clientId, userId: userId, securityKey: securityKey, reset: false, domain: domain, loggingEnabled: loggingEnabled, authorizationToken: authorizationToken)
+    @objc static public func createWith(_ clientId: String?, userId: String?, securityKey: String?, multichats: Bool = false, domain: String? = nil, loggingEnabled: Bool = false, authorizationToken: String? = nil) {
+        createWith(clientId, userId: userId, securityKey: securityKey, reset: false, domain: domain, loggingEnabled: loggingEnabled, authorizationToken: authorizationToken, multichats: multichats)
     }
-    private static func createWith(_ clientId: String?, userId: String?, securityKey: String?, reset: Bool, domain: String?, loggingEnabled: Bool, authorizationToken: String?) {
+    private static func createWith(_ clientId: String?, userId: String?, securityKey: String?, reset: Bool, domain: String?, loggingEnabled: Bool, authorizationToken: String?, multichats: Bool = false) {
+        PyrusServiceDesk.multichats = multichats
         PyrusServiceDesk.loggingEnabled = loggingEnabled
         guard let clientId = clientId, clientId.count > 0 else {
             EventsLogger.logEvent(.emptyClientId)
