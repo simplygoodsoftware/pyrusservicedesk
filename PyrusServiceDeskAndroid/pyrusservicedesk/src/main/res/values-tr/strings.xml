@@ -1,2 +1,40 @@
 <?xml version="1.0" encoding="utf-8"?>
-<resources></resources>
+<resources>
+    <string name="psd_comment_input_hint">Yorum ekle</string>
+    <string name="psd_retry">Yeniden dene</string>
+    <string name="psd_uploading">Yukleniyor…</string>
+    <string name="psd_file_size_mb" formatted="false">%.1f MB</string>
+    <string name="psd_file_size_kb" formatted="false">%.1f KB</string>
+    <string name="psd_time_format">saat saat: dakika dakika</string>
+    <string name="psd_organization_support">Destek</string>
+    <string name="psd_today">Bugün</string>
+    <string name="psd_yesterday">Dün</string>
+    <string name="psd_date_format_d_m_y">d MMMM yyyy</string>
+    <string name="psd_date_format_d_m">d MMMM</string>
+    <string name="psd_photo">Resim</string>
+    <string name="psd_gallery">Galeri</string>
+    <plurals name="psd_years_ago">
+        <item quantity="one">%d yıl önce</item>
+        <item quantity="other">%d yıl önce</item>
+    </plurals>
+    <string name="psd_months_ago" formatted="false">%d ay önce</string>
+    <string name="psd_weeks_ago" formatted="false">%d hafta önce</string>
+    <string name="psd_hours_ago" formatted="false">%d saat önce</string>
+    <string name="psd_minutes_ago" formatted="false">%d ay önce</string>
+    <string name="psd_recent">en son</string>
+    <string name="psd_guest">Misafir</string>
+    <string name="psd_file_size_exceeded_message" formatted="false">Dosya boyutu %d MB\'ı geçmemelidir.</string>
+    <string name="psd_copied_to_clipboard">Panoya kopyalandı</string>
+    <string name="psd_download">İndir</string>
+    <string name="psd_downloading">İndiriliyor…</string>
+    <string name="psd_open">Aç</string>
+    <string name="psd_share">Paylaş</string>
+    <string name="psd_delete">Sil</string>
+    <string name="send_library_logs">Kütüphane günlüklerini gönder</string>
+    <string name="psd_send">Gönder</string>
+    <string name="psd_days_ago" formatted="false">%d gün önce</string>
+    <string name="psd_no_connection">Internet bağlantısı yok</string>
+    <string name="psd_no_preview_available">Önizleme imkansız</string>
+    <string name="link_warning">Bu bağlantı %s\'ye yönlendiriyor
+\nBağlantıyı gerçekten takip etmek istiyor musunuz\?</string>
+</resources>
