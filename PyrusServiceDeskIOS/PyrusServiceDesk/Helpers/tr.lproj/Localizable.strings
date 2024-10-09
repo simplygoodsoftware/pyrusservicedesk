@@ -1,1 +1,68 @@
 
+
+"ErrorServerError" = "Serber bağlantısı kesildi";
+"Date_Format" = "EE, dd MMM";
+"Retry" = "YENİDEN DENE";
+"Error" = "Hata";
+"AcсessDenied" = "Erişim engellendi";
+"OK" = "Tamam";
+"Last_Message" = "Bu, konuşmanın son mesajdır";
+"Comment" = "Yorum...";
+"Default_User_Name" = "Misafir";
+"Uploading" = "Yükleniyor...";
+"Empty_Description" = "Boş";
+"All_Conversations" = "Tüm konuşmalar";
+"Support_Default_Name" = "Destek";
+
+//Buttons' Title
+"New_Conversation" = "Yeni konuşma";
+"New_Conversation_Short" = "Yeni";
+"Cancel" = "İptal";
+"Settings" = "Ayarlar";
+"Send" = "Gönder";
+"Back" = "Geri";
+"Done" = "Yapıldı";
+"CancelDownload" = "İndirmeyi iptal et";
+"FileLoadError" = "Dosya önizlemesi yüklenemiyor";
+"NoPreviewAvailable" = "Önizleme yok";
+"OpenWith" = "Şununla aç";
+"RetryButton" = "Yeniden dene";
+"DeleteButton" = "Sil";
+
+//For attachments
+"Camera" = "Resim veya foto yap";
+"Camera_Access_Error" = "Kameraya veya mikrofona erişim yok";
+"Phone_Gallery" = "Galeri";
+"Phone_Gallery_Access_Error" = "Telefon galerisine erişim yok";
+"Access_Error" = "Erişim hatası";
+"No_File_Error" = "Dosya yok";
+
+
+//Append time from data
+"Interval_Recent" = "en son";
+"Interval_Minute" = "%% dk önce";
+"Interval_Hour" = "%% saat önce";
+"Interval_Day" = "%% gün önce";
+"Interval_Week" = "%% hafta önce";
+"Interval_Mounth" = "%% ay önce";
+"Interval_One_Year" = "%% yıl önce";
+"Interval_One_End_Year" = "%% yıl önce";
+"Interval_Years_234" = "%% yıl önce";
+"Interval_Years" = "%% yıl önce";
+"Yesterday" = "Dün";
+"Date_Format_Year" = "EE, dd MMM, yyyy";
+"Time_Format" = "hh:mm";
+"Numbers_Date_Format" = "yyyyMMddHHmmss";
+
+//For requests
+"No_Connection" = "Internet bağlantısı yok";
+
+//Date as string
+"Today" = "Bugün";
+"Size_Error" = "Dosya boyutu 200 MB'ı geçmemelidir.";
+"AttachmentLoadError" = "Bu ek indirelimez";
+"PrepareLog" = "Günlük hazırlanıyor...";
+"SendLog" = "Kütüphane günlüklerini gönder";
+"ExternalSourceWarning" = "Bu bağlantı %@'a yönlendiriyor\nBağlantıyı gerçekten takip etmek istiyor musunuz?";
+"ShortYes" = "Evet";
+"ShortNo" = "Hayır";
