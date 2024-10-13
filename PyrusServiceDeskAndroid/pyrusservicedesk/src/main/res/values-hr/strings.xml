@@ -4,7 +4,7 @@
     <string name="psd_retry">Pokušaj ponovo</string>
     <string name="psd_send">Pošalji</string>
     <string name="psd_no_connection">Nema internetske veze</string>
-    <string name="psd_uploading">Učitavanje…</string>
+    <string name="psd_uploading">Prijenos…</string>
     <string name="psd_file_size_exceeded_message" formatted="false">Veličina datoteke ne smije premašiti %d MB.</string>
     <string name="psd_copied_to_clipboard">Kopirano u međuspremnik</string>
     <string name="psd_delete">Izbriši</string>
