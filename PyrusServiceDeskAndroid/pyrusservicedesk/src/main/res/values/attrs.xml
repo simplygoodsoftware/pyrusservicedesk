@@ -20,4 +20,10 @@
         <attr name="allowChildHasOwnDimensions" format="boolean"/>
     </declare-styleable>
 
+
+    <declare-styleable name="ImFlexboxLayout">
+        <attr name="viewPartMain" format="reference"/>
+        <attr name="viewPartSlave" format="reference"/>
+    </declare-styleable>
+
 </resources>
