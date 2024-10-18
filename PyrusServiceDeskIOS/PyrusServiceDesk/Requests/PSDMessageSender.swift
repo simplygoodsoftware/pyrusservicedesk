@@ -17,9 +17,9 @@ class PSDMessageSender: NSObject {
      - parameter delegate: PSDMessageSendDelegate object to receive completion or error.
      - parameter completion: comptetion block. 
      */
-    func pass(_ messageToPass: PSDMessage, ticketId: Int = 0, delegate:PSDMessageSendDelegate?, completion: @escaping() -> Void) {
-        let task = PSDMessageSender.pass(messageToPass.text, messageToPass.attachments, rating: messageToPass.rating, clientId: messageToPass.clientId, ticketId: ticketId) {
-            commentId, attachments in
+    func pass(_ messageToPass: PSDMessage, delegate:PSDMessageSendDelegate?, completion: @escaping() -> Void) {
+        let task = PSDMessageSender.pass(messageToPass.text, messageToPass.attachments, rating: messageToPass.rating, clientId: messageToPass.clientId, ticketId: messageToPass.ticketId, userId: messageToPass.userId ?? PyrusServiceDesk.customUserId ?? PyrusServiceDesk.userId) {
+            commentId, attachments, ticketId in
             if let commentId = commentId, commentId.count > 0 {
                 //put attachments id
                 if let attachments = attachments {
@@ -32,6 +32,9 @@ class PSDMessageSender: NSObject {
                 }
                 messageToPass.messageId = commentId
                 PSDMessageSender.showResult(of: messageToPass, success: true, delegate: delegate)
+                if let ticketId {
+                    delegate?.updateTicketId(ticketId)
+                }
             } else {
                 PSDMessageSender.showResult(of: messageToPass, success: false, delegate: delegate)
             }
@@ -67,6 +70,7 @@ class PSDMessageSender: NSObject {
         delegate?.refresh(message:messageToPass, changedToSent: success)
     }
     private static let commentParameter = "comment"
+    private static let authorIdParameter = "author_id"
     private static let userNameParameter = "user_name"
     private static let ticketParameter = "ticket"
     private static let descriptionParameter = "description"
@@ -79,15 +83,20 @@ class PSDMessageSender: NSObject {
      - completion: Completion of passing message.
      - commentId: Return id of new message as String. If Request end with error return nil or "0" if received bad data from server.
      */
-    private static func pass(_ message: String, _ attachments: [PSDAttachment]?, rating: Int?, clientId: String, ticketId: Int, completion: @escaping (_ commentId: String?, _ attachments: NSArray?) -> Void) -> URLSessionDataTask {
+    private static func pass(_ message: String, _ attachments: [PSDAttachment]?, rating: Int?, clientId: String, ticketId: Int, userId: String, completion: @escaping (_ commentId: String?, _ attachments: NSArray?, _ ticketId: Int?) -> Void) -> URLSessionDataTask {
         //Generate additional parameters for request body
         var parameters = [String: Any]()
+        if PyrusServiceDesk.multichats {
+           parameters["user_id"] = userId
+        }
+        parameters["request_new_ticket"] = PyrusServiceDesk.multichats && ticketId == 0
         parameters[commentParameter] = message
         parameters[CLIENT_ID_KEY] = clientId
         if let rating = rating{
             parameters[ratingParameter] = rating
         }
-        parameters[userNameParameter] = PyrusServiceDesk.userName
+        parameters[userNameParameter] = PyrusServiceDesk.authorName
+        parameters[authorIdParameter] = PyrusServiceDesk.authorId
         if let attachments = attachments, attachments.count > 0{
             parameters[attachmentsParameter] = generateAttacments(attachments)
         }
@@ -101,7 +110,7 @@ class PSDMessageSender: NSObject {
         
         let task = PyrusServiceDesk.mainSession.dataTask(with: request) { data, response, error in
             guard let data = data, error == nil else {                                                 // check for fundamental networking error
-                completion(nil,nil)
+                completion(nil, nil, nil)
                 return
             }
             
@@ -115,14 +124,15 @@ class PSDMessageSender: NSObject {
                         }
                     }
                 }
-                completion(nil,nil)
+                completion(nil, nil, nil)
             }
             
             if(data.count>0){
                 
                 do{
                     let messageData = try JSONSerialization.jsonObject(with: data, options: .allowFragments) as? [String: Any] ?? [String: Any]()
-                    completion(messageData.stringOfKey(commentIdParameter), messageData[attachmentsParameter] as? NSArray)
+                    completion(messageData.stringOfKey(commentIdParameter), messageData[attachmentsParameter] as? NSArray, messageData[ticketIdParameter] as? Int)
+                    PSDGetChats.get() { _ in }
                 }catch{
                     //print("Pass error when convert to dictionary")
                 }
@@ -130,7 +140,7 @@ class PSDMessageSender: NSObject {
                 
             }
             else{
-                completion(nil,nil)
+                completion(nil, nil, nil)
             }
         }
         task.resume()
@@ -167,7 +177,7 @@ class PSDMessageSender: NSObject {
     /**
      Create additional [key:value] of attachment for request body.
      */
-    private static func generateAttacments(_ attachments: [PSDAttachment])-> NSArray{
+    static func generateAttacments(_ attachments: [PSDAttachment])-> NSArray{
         let arrayWithAttach = NSMutableArray()
         for attachment in attachments{
             var guidArray : [String : Any] = [String : Any]()

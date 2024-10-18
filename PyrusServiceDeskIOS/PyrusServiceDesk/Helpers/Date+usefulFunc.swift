@@ -122,6 +122,30 @@ extension Date {
         return Calendar.current.component(.second, from: self)
     }
     
+    func messageTime() -> String {
+        let calendar = NSCalendar.autoupdatingCurrent
+        let components = calendar.dateComponents([.minute,.hour,.day,.month,.year], from: self, to: Date())
+        let minutes :Int = components.minute ?? 0
+        let hours :Int = components.hour ?? 0
+        let days :Int = components.day ?? 0
+        let months :Int = components.month ?? 0
+        let years :Int = components.year ?? 0
+        
+        let dateFormatter = DateFormatter()
+
+        if years > 0 {
+            dateFormatter.dateFormat = "dd.MM.YYYY"
+        } else if days >= 7 {
+            dateFormatter.dateFormat = "dd:MM"
+        } else if days > 0 {
+            dateFormatter.dateFormat = "EEE"
+        } else {
+            dateFormatter.dateFormat = "HH:mm"
+        }
+        
+        return dateFormatter.string(from: self)
+    }
+    
    /* func compareWithoutTime(with date:Date)->Bool
     {
         if date.year() == self.year() &&  date.month() == self.month() && date.day() == self.day(){

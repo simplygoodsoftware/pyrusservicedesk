@@ -12,8 +12,26 @@ struct PSDGetChats {
     {
         //remove old session if it is
         remove()
+        var parameters = [String: Any]()
+        if PyrusServiceDesk.multichats {
+            parameters["user_id"] = PyrusServiceDesk.customUserId ?? PyrusServiceDesk.userId
+            parameters["security_key"] = PyrusServiceDesk.securityKey
+        }
+        parameters["need_full_info"] = PyrusServiceDesk.multichats
+      //  parameters["author_id"] = PyrusServiceDesk.authorId
+        if PyrusServiceDesk.additionalUsers.count > 0 {
+            var additional_users = [[String: Any]]()
+            for user in PyrusServiceDesk.additionalUsers {
+                var  additional_user = [String: Any]()
+                additional_user["app_id"] = user.clientId
+                additional_user["user_id"] = user.userId
+                additional_user["security_key"] = user.secretKey
+                additional_users.append(additional_user)
+            }
+            parameters["additional_users"] = additional_users
+        }
         
-        let  request : URLRequest = URLRequest.createRequest(type:.chats, parameters: [String: Any]())
+        let  request : URLRequest = URLRequest.createRequest(type:.chats, parameters: parameters)
         
         PSDGetChats.sessionTask = PyrusServiceDesk.mainSession.dataTask(with: request) { data, response, error in
             guard let data = data, error == nil else {                                                 // check for fundamental networking error
@@ -27,11 +45,15 @@ struct PSDGetChats {
                         if let onFailed = PyrusServiceDesk.onAuthorizationFailed {
                             onFailed()
                         } else {
-                            PyrusServiceDesk.mainController?.closeServiceDesk()
+                            if !PyrusServiceDesk.multichats {
+                                PyrusServiceDesk.mainController?.closeServiceDesk()
+                            }
                         }
                     }
                 }
-
+                if PyrusServiceDesk.chats.count == 0 {
+                    PyrusServiceDesk.chats = []
+                }
                 completion([])
             }
             do{
@@ -55,33 +77,38 @@ struct PSDGetChats {
             PSDGetChats.sessionTask?.cancel()
             PSDGetChats.sessionTask = nil
         }
-        
     }
-    private static func generateChats(from response:NSArray)->[PSDChat]
-    {
+    
+    private static func generateChats(from response:NSArray) -> [PSDChat] {
         var chats : [PSDChat] = []
-        for i in 0..<response.count{
+        for i in 0..<response.count {
             let dic :[String:Any] = response[i] as! [String : Any]
-            var messages : [PSDMessage] = [PSDMessage]()
             var date : Date = Date()
-            
-            let firstMessage :PSDMessage = PSDMessage.init(text: dic.stringOfKey(subjectParameter), attachments:nil, messageId: nil, owner: nil, date: nil)
-            messages.append(firstMessage)
-            if let lastComment = dic["last_comment"] as? [String : Any]{
+            var lastMessage: PSDMessage?
+//            var messages : [PSDMessage] = [PSDMessage]()
+//            let firstMessage :PSDMessage = PSDMessage.init(text: dic.stringOfKey(subjectParameter), attachments:nil, messageId: nil, owner: nil, date: nil)
+//            messages.append(firstMessage)
+            if let lastComment = dic["last_comment"] as? [String : Any] {
                 date =  lastComment.stringOfKey(createdAtParameter).dateFromString(format: "yyyy-MM-dd'T'HH:mm:ss'Z'")
-                let lastMessage :PSDMessage = PSDMessage.init(text: lastComment.stringOfKey("body"), attachments:nil, messageId: lastComment.stringOfKey(commentIdParameter), owner: nil, date: nil)
-                messages.append(lastMessage)
+                lastMessage = PSDMessage.init(text: lastComment.stringOfKey("body"), attachments:nil, messageId: lastComment.stringOfKey(commentIdParameter), owner: nil, date: nil)
+//                messages.append(lastMessage)
             }
+//            
             let ticketId = dic["ticket_id"] as? Int
+            var messages : [PSDMessage] = [PSDMessage]()
+            messages = PSDGetChat.generateMessages(from: dic["comments"] as? NSArray ?? NSArray())
             let chat = PSDChat.init(chatId: ticketId, date: date, messages: messages)
             chat.subject = dic["subject"] as? String
             chat.isRead = dic["is_read"] as? Bool ??  true
+            chat.userId = dic["user_id"] as? String ?? ""
+            chat.lastComment = lastMessage
             chats.append(chat)
         }
+        
         return sortByLastMessage(chats)
     }
-    private static func sortByLastMessage(_ chats:[PSDChat])->[PSDChat]{
-        
-        return chats.sorted(by: { $0.date ?? Date() > $1.date ?? Date()})
+    
+    private static func sortByLastMessage(_ chats: [PSDChat]) -> [PSDChat] {
+        return chats.sorted(by: { $0.date ?? Date() > $1.date ?? Date() })
     }
 }

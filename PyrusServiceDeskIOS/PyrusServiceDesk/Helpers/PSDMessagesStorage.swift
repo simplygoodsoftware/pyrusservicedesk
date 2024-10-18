@@ -18,6 +18,10 @@ struct PSDMessagesStorage{
     private static let MESSAGE_LOCAL_ID_KEY = "localId"
     ///The key to store text of message
     private static let MESSAGE_TEXT_KEY = "messageText"
+    ///The key to store text of message
+    private static let MESSAGE_TICKET_ID_KEY = "messageTicketId"
+    ///The key to store text of message
+    private static let MESSAGE_AUTHOR_ID_KEY = "messageAuthorId"
     ///The key to store rating of message
     private static let MESSAGE_RATING_KEY = "messageRating"
     ///The key to store name of message's attachment - need for drawing, and to create file where is attachment's data is in
@@ -28,6 +32,8 @@ struct PSDMessagesStorage{
     private static let MESSAGE_DATE_KEY = "messageDate"
     ///The key to store size of message's attachment - need for drawing
     private static let ATTACHMENT_SIZE_KEY = "attachmentSize"
+    
+    
     ///Seve message in storage - if message has text - save its text, if has attachment - save attachment to file
     static func saveInStorage(message : PSDMessage){
         var hasSomeAttachment = false
@@ -49,6 +55,8 @@ struct PSDMessagesStorage{
         messageDict[MESSAGE_TEXT_KEY] = message.text
         messageDict[MESSAGE_DATE_KEY] = message.date
         messageDict[MESSAGE_RATING_KEY] = message.rating
+        messageDict[MESSAGE_TICKET_ID_KEY] = message.ticketId
+        messageDict[MESSAGE_AUTHOR_ID_KEY] = message.owner.authorId
         DispatchQueue.global().async {
             
             if hasSomeAttachment, let attachments = message.attachments, attachments.count > 0{
@@ -163,10 +171,14 @@ struct PSDMessagesStorage{
     }
     
     ///Returns [PSDMessage] in storage
-    static func messagesFromStorage() -> [PSDMessage] {
+    static func messagesFromStorage(for ticketId: Int = 0) -> [PSDMessage] {
         var arrayWithMessages = [PSDMessage]()
         let messagesStorage = getMessagesStorage()
         for dict in messagesStorage {
+            if PyrusServiceDesk.multichats,
+               dict[MESSAGE_AUTHOR_ID_KEY] as? String != PyrusServiceDesk.authorId {
+                continue
+            }
             let message = PSDMessage(text: dict[MESSAGE_TEXT_KEY] as? String ?? "", attachments: nil, messageId: nil, owner: PSDUsers.user, date: nil)
             if let rating = dict[MESSAGE_RATING_KEY] as? Int {
                 message.rating = rating
@@ -175,6 +187,8 @@ struct PSDMessagesStorage{
             message.state = .cantSend
             message.date = dict[MESSAGE_DATE_KEY] as? Date ?? Date()
             message.fromStrorage = true
+            message.isInbound = true
+            message.ticketId = dict[MESSAGE_TICKET_ID_KEY] as? Int ?? 0
             var attachments = [PSDAttachment]()
             if let attachmetsArray = dict[ATTACHMENT_ARRAY_KEY] as? [[String: Any]], attachmetsArray.count > 0 {
                 for attachmentDict in attachmetsArray {
@@ -195,6 +209,11 @@ struct PSDMessagesStorage{
                 removeFromStorage(messageId: message.messageId)
             }
            
+        }
+        if PyrusServiceDesk.multichats {
+            return ticketId == 0 
+                ? []
+                : arrayWithMessages.filter({ $0.ticketId == ticketId })
         }
         return arrayWithMessages
     }

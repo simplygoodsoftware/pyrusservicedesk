@@ -18,7 +18,7 @@ struct PSDGetChat {
      - parameter delegate: PSDGetDelegate. Works only if showError is true. If not equal to nil - calls showNoConnectionView(), when no internet connection. Else remembers the current ViewController. And if it has not changed when response receive, on it displays an error.
      On completion returns PSDChat object if it was received.
      */
-    static func get(needShowError: Bool, delegate: PSDGetDelegate?, keepUnread: Bool = false, ticketId: Int = 0, completion: @escaping (_ chat: PSDChat?) -> Void) {
+    static func get(needShowError: Bool, delegate: PSDGetDelegate?, keepUnread: Bool = false, ticketId: Int = 0, userId: String? = nil, completion: @escaping (_ chat: PSDChat?) -> Void) {
         //remove old session if it is
         remove()
         if PyrusServiceDesk.multichats && ticketId == 0 {
@@ -36,6 +36,10 @@ struct PSDGetChat {
         var parameters = [KEEP_UNREAD_RATING_KEY: keepUnread, "api_sign":  PyrusServiceDesk.apiSign()] as [String : Any]
         if ticketId != 0 {
             parameters[TICKET_ID_KEY] = ticketId
+        }
+        if PyrusServiceDesk.multichats {
+            parameters["user_id"] = userId ?? PyrusServiceDesk.customUserId ?? PyrusServiceDesk.userId
+           // parameters["author_id"] = PyrusServiceDesk.authorId
         }
         let request = URLRequest.createRequest(type: .chatFeed, parameters: parameters)
     
@@ -118,7 +122,7 @@ struct PSDGetChat {
         chat.showRatingText = response[PSDGetChat.SHOW_RATING_TEXT_KEY] as? String
         return chat
     }
-    private static func generateMessages(from array:NSArray) -> [PSDMessage]
+    static func generateMessages(from array:NSArray) -> [PSDMessage]
     {
         var messages : [PSDMessage] = []
         if(array.count == 0){
@@ -129,14 +133,21 @@ struct PSDGetChat {
                 continue
             }
             let date : Date =  (dic[createdAtParameter] as? String)?.dateFromString(format: "yyyy-MM-dd'T'HH:mm:ss'Z'") ?? Date()
-            let IsInbound : Bool = dic["is_inbound"] as? Bool ??  true
+            var IsInbound : Bool = dic["is_inbound"] as? Bool ??  true
             let user :PSDUser
+            if PyrusServiceDesk.multichats {
+                if let author = dic["author"] as? [String : Any],
+                let authorId = author["author_id"] as? String {
+                    IsInbound = authorId == PyrusServiceDesk.authorId
+                }
+            }
+            
             if IsInbound{
                 user = PSDUsers.user
             }else{
                 user = createUser(from: dic)
-                
             }
+            
             var textForMessage: String? = nil
             var attachmentsForMessage: [PSDAttachment]? = nil
             var rating: Int? = nil
@@ -159,9 +170,16 @@ struct PSDGetChat {
                     attachmentsForMessage?.append(attachment)
                 }
             }
+            
+            if let author = dic["author"] as? [String : Any],
+            let authorId = author["author_id"] as? String {
+                IsInbound = authorId == PyrusServiceDesk.authorId
+            }
+            
             if (attachmentsForMessage?.count ?? 0) > 0 || (textForMessage?.count ?? 0) > 0 || rating != nil{
                 let message = PSDMessage(text: textForMessage, attachments:attachmentsForMessage, messageId: dic.stringOfKey(commentIdParameter), owner: user, date: date)
                 message.rating = rating
+                message.isInbound = IsInbound
                 let clientId = dic.stringOfKey(CLIENT_ID_KEY)
                 if clientId.count > 0 {
                     message.clientId = clientId
@@ -182,7 +200,11 @@ struct PSDGetChat {
         let response = dic["author"] as? [String : Any]
         
         if(response != nil){
-            let user : PSDUser = PSDUsers.supportUsersContain(name: response!.stringOfKey("name"), imagePath: response!.stringOfKey("avatar_id"))
+            let user : PSDUser = PSDUsers.supportUsersContain(
+                name: response!.stringOfKey("name"),
+                imagePath: response!.stringOfKey("avatar_id"),
+                authorId: response?.stringOfKey("author_id")
+            )
             return user
         }
         else{

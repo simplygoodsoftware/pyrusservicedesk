@@ -106,7 +106,7 @@ class PSDUploader: NSObject {
         let infoDict = Bundle.main.infoDictionary
         let appVersion :String = infoDict?["CFBundleVersion"] as! String
         
-        return "\(CustomizationHelper.chatTitle)/\(appVersion)/\(PyrusServiceDesk.userName)/\(device.systemVersion)"
+        return "\(CustomizationHelper.chatTitle)/\(appVersion)/\(PyrusServiceDesk.authorName)/\(device.systemVersion)"
         
     }
     ///Header for Data

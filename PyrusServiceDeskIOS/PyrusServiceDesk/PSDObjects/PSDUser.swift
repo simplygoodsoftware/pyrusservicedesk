@@ -9,20 +9,24 @@ class PSDUsers: NSObject {
     static var user : PSDUser!
     static func add(user:PSDUser)
     {
-        if user.personId == PyrusServiceDesk.userId{
+        let isSupport = PyrusServiceDesk.multichats
+        ? user.authorId != PyrusServiceDesk.authorId
+        : user.personId != PyrusServiceDesk.userId
+        
+        if !isSupport {
             PSDUsers.user = user
-        }else{
+        } else{
             PSDUsers.supportUsers.append(user)
         }
     }
     ///Chek if PSDUsers contain user with same data, if true - return it,if not - create new, add it to exist and return.
-    static func supportUsersContain(name:String, imagePath: String)->PSDUser {
+    static func supportUsersContain(name:String, imagePath: String, authorId: String?)->PSDUser {
         for support in supportUsers{
-            if support.name == name && support.imagePath == imagePath{
+            if support.name == name && support.imagePath == imagePath && support.authorId == authorId {
                 return support
             }
         }
-        let newUser = PSDUser(personId: "0", name: name, type: .support, imagePath: imagePath)
+        let newUser = PSDUser(personId: "0", name: name, type: .support, imagePath: imagePath, authorId: authorId)
         add(user: newUser)
         return newUser
     }
@@ -33,7 +37,7 @@ class PSDUser: NSObject, Codable {
     //user saved in PyrusServiceDeskCreator is not denited
     ///Has only not support user
     var personId: String?
-    
+    var authorId: String?
     var name: String?
     var type: userType?
     
@@ -42,16 +46,22 @@ class PSDUser: NSObject, Codable {
     ///Has only support users
     var image: UIImage?
     
-    init(personId: String, name:String, type:userType, imagePath:String)  {
+    init(personId: String, name:String, type:userType, imagePath:String, authorId: String? = nil)  {
         self.personId = personId
         self.name = name
         self.type = type
         self.imagePath = imagePath
+        self.authorId = authorId
     }
     func equalTo(user:PSDUser?)->Bool{
         guard let user = user else{
             return false
         }
+        
+        guard !PyrusServiceDesk.multichats else {
+            return user.authorId == authorId
+        }
+        
         if PyrusServiceDesk.userId == user.personId && user.personId == self.personId {
             return true
         }

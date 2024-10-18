@@ -15,6 +15,9 @@ class PSDTableView : UITableView{
             }
         }
     }
+    
+    var isVisible: Bool = false
+    
     ///Comparing rows and sections to remove with rows and section to add
     ///returs removeIndexPaths, addIndexPaths, reloadIndexPaths, removeSections, addSections, reloadSections
     static func compareAddAndRemoveRows(removeIndexPaths: [IndexPath], addIndexPaths: [IndexPath], removeSections: IndexSet, addSections: IndexSet) -> ([IndexPath], [IndexPath], [IndexPath], IndexSet, IndexSet, IndexSet){

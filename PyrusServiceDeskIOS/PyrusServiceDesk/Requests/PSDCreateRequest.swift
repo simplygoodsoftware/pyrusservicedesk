@@ -47,6 +47,14 @@ extension URLRequest {
     private static func addStaticKeys(to JSON:[String: Any]) -> [String: Any]
     {
         var fullJSOn = JSON
+        guard !PyrusServiceDesk.multichats else {
+            fullJSOn["app_id"] = PyrusServiceDesk.clientId
+            fullJSOn["instance_id"] = PyrusServiceDesk.userId
+            fullJSOn["version"] = 2
+            
+            return fullJSOn
+        }
+        
         fullJSOn["app_id"] = PyrusServiceDesk.clientId
         if let securityKey = PyrusServiceDesk.securityKey, let customUserId = PyrusServiceDesk.customUserId {
             fullJSOn["user_id"] = customUserId
@@ -55,6 +63,8 @@ extension URLRequest {
             fullJSOn["version"] = 2
         } else {
             fullJSOn["user_id"] = PyrusServiceDesk.userId
+            fullJSOn["instance_id"] = PyrusServiceDesk.userId
+            fullJSOn["version"] = 2
         }
         if((PyrusServiceDesk.clientId) == nil){
             fatalError("no client Id")

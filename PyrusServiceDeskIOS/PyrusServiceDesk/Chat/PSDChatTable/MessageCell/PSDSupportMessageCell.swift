@@ -44,7 +44,11 @@ class PSDSupportMessageCell: PSDChatMessageCell {
     override func draw(message: PSDRowMessage, width: CGFloat)
     {
         super.draw(message: message, width: width)
-        let name = message.message.owner.name?.count ?? 0 > 0 ? message.message.owner.name : (message.message.owner as? PSDPlaceholderUser == nil ? "" : " ")
+        var name = message.message.owner.name?.count ?? 0 > 0 ? message.message.owner.name ?? "" : (message.message.owner as? PSDPlaceholderUser == nil ? "" : " ")
+        if message.message.owner.authorId == "" && PyrusServiceDesk.multichats {
+            name += " (поддержка)"
+            nameLabel.font = .supportNameLabel
+        }
         self.nameLabel.text = needShowName ? name :  ""
         self.avatarView.isHidden = !needShowAvatar
         
@@ -138,7 +142,12 @@ class PSDSupportMessageCell: PSDChatMessageCell {
         super.awakeFromNib()
         // Initialization code
     }
+    
+    override func prepareForReuse() {
+        nameLabel.font = .nameLabel
+    }
 }
 private extension UIFont {
     static let nameLabel = CustomizationHelper.systemFont(ofSize: 14)
+    static let supportNameLabel = CustomizationHelper.systemBoldFont(ofSize: 14)
 }

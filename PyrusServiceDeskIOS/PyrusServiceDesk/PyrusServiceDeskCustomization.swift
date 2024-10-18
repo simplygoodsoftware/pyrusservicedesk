@@ -30,6 +30,10 @@ import Foundation
     ///View to show in  chat navigation bar
     private(set) var chatTitleView: UIView?
     
+    func setChatTitileView(_ title: UIView?) {
+        chatTitleView = title
+    }
+    
     ///Custom UIBarButtonItem to show in right side of navigationBar. Default is nil.
     private(set) var customRightBarButtonItem: UIBarButtonItem?
     
@@ -41,6 +45,10 @@ import Foundation
     }
     
     private(set) var chatsLeftBarButtonItem: UIBarButtonItem?
+    
+    private(set) var chatsRightBarButtonItem: UIBarButtonItem?
+    
+    private(set) var titleHandler: (() -> Void)?
     
     ///The view to show additional information under chat
     private(set) var infoView: PSDInfoView?
@@ -171,6 +179,20 @@ import Foundation
 
         @objc public func setChatsLeftBarButtonItem(_ customLeftBarButtonItem: UIBarButtonItem?) -> Builder {
             configuration.chatsLeftBarButtonItem = customLeftBarButtonItem
+            return self
+        }
+        
+        @discardableResult
+
+        @objc public func setChatsRightBarButtonItem(_ customRightBarButtonItem: UIBarButtonItem?) -> Builder {
+            configuration.chatsRightBarButtonItem = customRightBarButtonItem
+            return self
+        }
+        
+        @discardableResult
+
+        @objc public func setTitleHandler(_ titleHandler: (() -> Void)?) -> Builder {
+            configuration.titleHandler = titleHandler
             return self
         }
         

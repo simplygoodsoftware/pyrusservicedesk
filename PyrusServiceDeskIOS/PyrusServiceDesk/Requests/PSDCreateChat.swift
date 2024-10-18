@@ -13,18 +13,20 @@ struct PSDCreateChat {
      Create new chat.
      On completion returns Int if it was received, or empty nil, if no connection.
      */
-    static func create(subject: String, description: String, completion: @escaping (_ chatId: Int?) -> Void)
+    static func create(subject: String, description: String, attachments: [PSDAttachment]? = [], completion: @escaping (_ chatId: Int?) -> Void)
     {
         //remove old session if it is
         remove()
         
         var ticket = [String: Any]()
-        ticket[ATTACHMENTS_KEY] = []
+        if let attachments = attachments, attachments.count > 0 {
+            ticket[ATTACHMENTS_KEY] = PSDMessageSender.generateAttacments(attachments)
+        }
         ticket[SUBJECT_KEY] = subject
         ticket[DESCRIPTION_KEY] = description
         var parameters = [String: Any]()
         parameters[TICKET_KEY] = ticket
-        parameters[USER_NAME_KEY] = PyrusServiceDesk.userName
+        parameters[USER_NAME_KEY] = PyrusServiceDesk.authorName
         let request: URLRequest = URLRequest.createRequest(type: .createChat, parameters: parameters)
         
         PSDCreateChat.sessionTask = PyrusServiceDesk.mainSession.dataTask(with: request) { data, response, error in

@@ -6,6 +6,7 @@ class PSDAttachment: NSObject {
         didSet{
             self.canOpen = name.isSupportedFileFormat()
             self.isImage = name.isImageFileFormat()
+            self.isVideo = name.isVideoFormat()
         }
     }
     ///Size of attachment to show in attachment view
@@ -18,6 +19,8 @@ class PSDAttachment: NSObject {
     var canOpen : Bool = false
     ///Is attachment has image format
     var isImage : Bool = false
+    ///Is attachment has video format
+    var isVideo : Bool = false
     ///uploading of file progrees to server
     var uploadingProgress : CGFloat = 1.0
     ///The preview image of attacment

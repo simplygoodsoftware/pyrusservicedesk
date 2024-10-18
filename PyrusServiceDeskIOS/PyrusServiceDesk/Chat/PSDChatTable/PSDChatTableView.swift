@@ -5,6 +5,7 @@ protocol PSDChatTableViewDelegate: NSObjectProtocol {
     func showLinkOpenAlert(_ linkString: String)
     func send(_ message:String,_ attachments:[PSDAttachment])
     func dataIsShown()
+    func updateTicketId(_ ticketId: Int)
 }
 
 class PSDChatTableView: PSDTableView {
@@ -116,25 +117,27 @@ class PSDChatTableView: PSDTableView {
             [weak self] in
             PSDGetChat.get(needShowError: true, delegate: self, ticketId: ticketId) {
                 chat in
+                PSDGetChats.get() { _ in }
                 DispatchQueue.main.async {
-                    if chat != nil {
-                        UnreadMessageManager.removeLastComment()
-                    }
-                    guard let self = self else {
-                        return
-                    }
-                    self.gotData = true
-                    if let chat = chat {
-                        self.storeChat = chat
-                        if !(self.loadingTimer?.isValid ?? false) {
-                            self.drawTableWithData()
-                        }
-                    } else {
-                        self.needShowRating = chat?.showRating ?? false
-                        self.showRateIfNeed()
-                        self.isLoading = false
-                        self.buttonsView.updateWithButtons(nil, width: self.frame.size.width)
-                    }
+                    self?.updateTable(chat: chat)
+//                    if chat != nil {
+//                        UnreadMessageManager.removeLastComment()
+//                    }
+//                    guard let self = self else {
+//                        return
+//                    }
+//                    self.gotData = true
+//                    if let chat = chat {
+//                        self.storeChat = chat
+//                        if !(self.loadingTimer?.isValid ?? false) {
+//                            self.drawTableWithData()
+//                        }
+//                    } else {
+//                        self.needShowRating = chat?.showRating ?? false
+//                        self.showRateIfNeed()
+//                        self.isLoading = false
+//                        self.buttonsView.updateWithButtons(nil, width: self.frame.size.width)
+//                    }
                 }
             }
         }
@@ -159,25 +162,56 @@ class PSDChatTableView: PSDTableView {
             PSDGetChat.get(needShowError: true, delegate: self, ticketId: ticketId) {
                 chat in
                 DispatchQueue.main.async {
-                    if chat != nil {
-                        UnreadMessageManager.removeLastComment()
-                    }
-                    guard let self = self else {
-                        return
-                    }
-                    self.gotData = true
-                    if let chat = chat {
-                        self.storeChat = chat
-                        if !(self.loadingTimer?.isValid ?? false) {
-                            self.drawTableWithData()
-                        }
-                    } else {
-                        self.needShowRating = chat?.showRating ?? false
-                        self.showRateIfNeed()
-                        self.isLoading = false
-                        self.buttonsView.updateWithButtons(nil, width: self.frame.size.width)
-                    }
+                    self?.updateTable(chat: chat)
+//                    if chat != nil {
+//                        UnreadMessageManager.removeLastComment()
+//                    }
+//                    guard let self = self else {
+//                        return
+//                    }
+//                    self.gotData = true
+//                    if let chat = chat {
+//                        self.storeChat = chat
+//                        if !(self.loadingTimer?.isValid ?? false) {
+//                            self.drawTableWithData()
+//                        }
+//                    } else {
+//                        self.needShowRating = chat?.showRating ?? false
+//                        self.showRateIfNeed()
+//                        self.isLoading = false
+//                        self.buttonsView.updateWithButtons(nil, width: self.frame.size.width)
+//                    }
                 }
+            }
+        }
+    }
+    
+    func updateTable(chat: PSDChat?) {
+        //beginTimer()
+        if chat != nil {
+            UnreadMessageManager.removeLastComment()
+        }
+        
+        self.gotData = true
+        if let chat = chat {
+            storeChat = chat
+            if !(loadingTimer?.isValid ?? false) {
+                drawTableWithData()
+            }
+        } else {
+            needShowRating = chat?.showRating ?? false
+            showRateIfNeed()
+            isLoading = false
+            buttonsView.updateWithButtons(nil, width: self.frame.size.width)
+        }
+        scrollsToBottom(animated: true)
+    }
+    
+    func readChat(userId: String) {
+        let ticketId = ticketId
+        DispatchQueue.global().async { [weak self] in
+            PSDGetChat.get(needShowError: true, delegate: self, ticketId: ticketId, userId: userId) { _ in
+                PSDGetChats.get() { _ in }
             }
         }
     }
@@ -200,7 +234,6 @@ class PSDChatTableView: PSDTableView {
         reloadData()
         
         removeNoConnectionView()
-        
         UIView.setAnimationsEnabled(false)
             self.scrollsToBottom(animated: false)
             self.setNeedsLayout()
@@ -388,7 +421,7 @@ class PSDChatTableView: PSDTableView {
     private static let delayBeforeUpdates: Int = 20//milliseconds
     
     ///Scroll tableview to its bottom position without animation
-    private func scrollsToBottom(animated: Bool) {
+    func scrollsToBottom(animated: Bool) {
         layoutIfNeeded()
         let lastRow = lastIndexPath()
         let hasFooter = tableFooterView?.frame.size.height ?? 0 > 0
@@ -554,7 +587,7 @@ extension PSDChatTableView : UITableViewDelegate,UITableViewDataSource{
             message = PSDObjectsCreator.createWelcomeMessage()
         }
         let cell : PSDChatMessageCell
-        if (message.rating ?? 0) != 0 || (message.message.owner.personId == PyrusServiceDesk.userId){
+        if (message.rating ?? 0) != 0 || (message.message.owner.personId == PyrusServiceDesk.userId) && !(PyrusServiceDesk.multichats && !message.message.isInbound) {
             cell = self.dequeueReusableCell(withIdentifier: PSDChatTableView.userCellId, for: indexPath) as! PSDUserMessageCell
             (cell as! PSDUserMessageCell).delegate = self
             
@@ -574,6 +607,7 @@ extension PSDChatTableView : UITableViewDelegate,UITableViewDataSource{
         PSDPreviewSetter.setPreview(of: message.attachment, in: cell.cloudView.attachmentView, delegate: self, animated: false)
         self.redrawSendingAttachmentCell(at: indexPath, with: message)
         cell.cloudView.messageTextView.linkDelegate = self
+        //cell.transform = CGAffineTransform(rotationAngle: CGFloat.pi)
         return cell
     }
     func tableView(_ tableView: UITableView, willDisplay cell: UITableViewCell, forRowAt indexPath: IndexPath) {
@@ -667,8 +701,9 @@ extension PSDChatTableView : PSDChatMessageCellDelegate{
                 cell.messageStateView._messageState = .sending
             }
             if let message = self.getMessage(at: indexPath){
+                message.ticketId = ticketId
                 message.state = .sending
-                PSDMessageSend.pass(message, delegate: self, ticketId: ticketId)
+                PSDMessageSend.pass(message, delegate: self)
             }
         }
         else{
@@ -718,7 +753,12 @@ extension PSDChatTableView : PSDSupportImageSetterDelegate{
     }
 }
 //MARK: PSDMessageSendDelegate
-extension PSDChatTableView : PSDMessageSendDelegate{
+extension PSDChatTableView : PSDMessageSendDelegate {
+    func updateTicketId(_ ticketId: Int) {
+        self.ticketId = ticketId
+        chatDelegate?.updateTicketId(ticketId)
+    }
+    
     func remove(message:PSDMessage){
         let indexPathsAndRows = self.tableMatrix.findIndexPath(ofMessage: message.clientId).keys.sorted(by:{$0 > $1})
         var indexPaths = [IndexPath]()
