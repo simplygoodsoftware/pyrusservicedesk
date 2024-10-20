@@ -7,7 +7,6 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		1E1275C52CAA8E100080CB19 /* PSDCreateChat.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1E1275C42CAA8E100080CB19 /* PSDCreateChat.swift */; };
 		1E1279BF2CC271440080CB19 /* PSDUserInfo.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1E1279BD2CC271430080CB19 /* PSDUserInfo.swift */; };
 		1E1279CB2CC271C00080CB19 /* ChatViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1E1279C02CC271C00080CB19 /* ChatViewModel.swift */; };
 		1E1279CC2CC271C00080CB19 /* PSDChatInfoTableViewCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1E1279C22CC271C00080CB19 /* PSDChatInfoTableViewCell.swift */; };
@@ -15,7 +14,6 @@
 		1E1279CE2CC271C00080CB19 /* PSDChatsCellConfigurator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1E1279C52CC271C00080CB19 /* PSDChatsCellConfigurator.swift */; };
 		1E1279CF2CC271C00080CB19 /* PSDChatsDiffableDataSource.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1E1279C62CC271C00080CB19 /* PSDChatsDiffableDataSource.swift */; };
 		1E1279D02CC271C00080CB19 /* PSDChatsSectionModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1E1279C72CC271C00080CB19 /* PSDChatsSectionModel.swift */; };
-		1E1279D12CC271C00080CB19 /* PSDChatsTableView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1E1279C82CC271C00080CB19 /* PSDChatsTableView.swift */; };
 		1E1279D22CC271C00080CB19 /* PSDChatsViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1E1279C92CC271C00080CB19 /* PSDChatsViewController.swift */; };
 		1E1279D62CC271C90080CB19 /* ChatsRouter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1E1279D32CC271C90080CB19 /* ChatsRouter.swift */; };
 		1E1279D72CC271C90080CB19 /* ChatsRouterProtocol.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1E1279D42CC271C90080CB19 /* ChatsRouterProtocol.swift */; };
@@ -315,7 +313,6 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
-		1E1275C42CAA8E100080CB19 /* PSDCreateChat.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PSDCreateChat.swift; sourceTree = "<group>"; };
 		1E1279BD2CC271430080CB19 /* PSDUserInfo.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PSDUserInfo.swift; sourceTree = "<group>"; };
 		1E1279C02CC271C00080CB19 /* ChatViewModel.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ChatViewModel.swift; sourceTree = "<group>"; };
 		1E1279C22CC271C00080CB19 /* PSDChatInfoTableViewCell.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PSDChatInfoTableViewCell.swift; sourceTree = "<group>"; };
@@ -323,7 +320,6 @@
 		1E1279C52CC271C00080CB19 /* PSDChatsCellConfigurator.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PSDChatsCellConfigurator.swift; sourceTree = "<group>"; };
 		1E1279C62CC271C00080CB19 /* PSDChatsDiffableDataSource.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PSDChatsDiffableDataSource.swift; sourceTree = "<group>"; };
 		1E1279C72CC271C00080CB19 /* PSDChatsSectionModel.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PSDChatsSectionModel.swift; sourceTree = "<group>"; };
-		1E1279C82CC271C00080CB19 /* PSDChatsTableView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PSDChatsTableView.swift; sourceTree = "<group>"; };
 		1E1279C92CC271C00080CB19 /* PSDChatsViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PSDChatsViewController.swift; sourceTree = "<group>"; };
 		1E1279D32CC271C90080CB19 /* ChatsRouter.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ChatsRouter.swift; sourceTree = "<group>"; };
 		1E1279D42CC271C90080CB19 /* ChatsRouterProtocol.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ChatsRouterProtocol.swift; sourceTree = "<group>"; };
@@ -669,7 +665,6 @@
 				1E1279C52CC271C00080CB19 /* PSDChatsCellConfigurator.swift */,
 				1E1279C62CC271C00080CB19 /* PSDChatsDiffableDataSource.swift */,
 				1E1279C72CC271C00080CB19 /* PSDChatsSectionModel.swift */,
-				1E1279C82CC271C00080CB19 /* PSDChatsTableView.swift */,
 				1E1279C92CC271C00080CB19 /* PSDChatsViewController.swift */,
 			);
 			path = View;
@@ -1262,7 +1257,6 @@
 		4BB8559E2208559200F7CCE5 /* Requests */ = {
 			isa = PBXGroup;
 			children = (
-				1E1275C42CAA8E100080CB19 /* PSDCreateChat.swift */,
 				4B5533722264C07B00353941 /* PSDDownloader.swift */,
 				4B56BE482216CC0E004E6685 /* PSDUploader.swift */,
 				4BB8559F2208593200F7CCE5 /* URLCreator.swift */,
@@ -1642,7 +1636,6 @@
 				4BC210D622671EC000CFE255 /* PSDAttachmentPreviewView.swift in Sources */,
 				4B873BB4224B7EE600A96E93 /* PSDNewReplySubscriber.swift in Sources */,
 				4B6D4A3F244E2326007C6082 /* AttachmentFileCollectionViewCell.swift in Sources */,
-				1E1279D12CC271C00080CB19 /* PSDChatsTableView.swift in Sources */,
 				4BD7DE68223680A600ED2557 /* UIButton+backgroundColor.swift in Sources */,
 				4BBB9B06249D152900059A23 /* LogEvents.swift in Sources */,
 				4B5AFEAB21FB0A7B00AAF233 /* PSDMessageSendButton.swift in Sources */,
@@ -1653,7 +1646,6 @@
 				1E1279D62CC271C90080CB19 /* ChatsRouter.swift in Sources */,
 				4BB6CDC325597E4C004C680A /* PyrusLogger.swift in Sources */,
 				4B7F350A21F8900A00977C6D /* PSDChatViewController.swift in Sources */,
-				1E1275C52CAA8E100080CB19 /* PSDCreateChat.swift in Sources */,
 				4B6D4A39244E1B6A007C6082 /* AttachmentCollectionView.swift in Sources */,
 				4B659AFE223FA9E400D79489 /* PSDSpinerTableView.swift in Sources */,
 				4B82A49A2268B57B00654CE0 /* PSDAttachmentLoadViewControllerInterface.swift in Sources */,

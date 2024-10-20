@@ -99,7 +99,6 @@ class PSDChatViewController: PSDViewController {
     
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
-//        self.navigationController?.navigationBar.isHidden = false
         startGettingInfo()
         resizeTable()
         NotificationCenter.default.addObserver(self, selector: #selector(appEnteredBackground), name: UIApplication.didEnterBackgroundNotification, object: nil)
@@ -317,22 +316,10 @@ class PSDChatViewController: PSDViewController {
 }
 extension PSDChatViewController: PSDMessageInputViewDelegate {
     func send(_ message:String, _ attachments: [PSDAttachment]) {
-//        if PyrusServiceDesk.multichats && ticketId == 0 {
-//            PSDCreateChat.create(subject: message, description: message, attachments: attachments) { [weak self] id in
-//                if let id {
-//                    self?.ticketId = id
-//                    self?.tableView.ticketId = id
-//                    DispatchQueue.main.async {
-//                        self?.tableView.reload()
-//                    }
-//                }
-//            }
-//        } else {
         let newMessage = PSDObjectsCreator.createMessage(message, attachments: attachments, ticketId: ticketId, userId: chat?.userId ?? PyrusServiceDesk.customUserId ?? PyrusServiceDesk.userId)
-            prepareMessageForDrawing(newMessage)
-            tableView.addNewRow(message: newMessage)
-            PSDMessageSend.pass(newMessage, delegate: self.tableView)
-  //      }
+        prepareMessageForDrawing(newMessage)
+        tableView.addNewRow(message: newMessage)
+        PSDMessageSend.pass(newMessage, delegate: self.tableView)
     }
     
     func sendRate(_ rateValue: Int) {

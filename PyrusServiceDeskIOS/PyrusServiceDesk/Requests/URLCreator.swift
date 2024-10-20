@@ -16,8 +16,6 @@ enum urlType : String{
     case avatar = "avatar"
     ///Add SetPushToken to baseURLString. Use PSDURL(type:urlType).
     case token = "SetPushToken"
-    
-    case createChat = "CreateTicket"
 }
 
 struct PyrusServiceDeskAPI {
@@ -27,7 +25,7 @@ struct PyrusServiceDeskAPI {
     }
     ///Create URL for urlType in [.chats, .createNew, .upload, .chatFeed, .updateFeed, .token]
     static func PSDURL(type: urlType) -> URL {
-        let validTypes : [urlType] = [.chats, .upload, .chatFeed, .updateFeed, .token, .createChat]
+        let validTypes : [urlType] = [.chats, .upload, .chatFeed, .updateFeed, .token]
         if !(validTypes.contains(type)){
             fatalError("Bad urlType for this function, type = \(urlType.RawValue())")
         }

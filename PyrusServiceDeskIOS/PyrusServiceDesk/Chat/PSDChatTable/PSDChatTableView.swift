@@ -120,24 +120,6 @@ class PSDChatTableView: PSDTableView {
                 PSDGetChats.get() { _ in }
                 DispatchQueue.main.async {
                     self?.updateTable(chat: chat)
-//                    if chat != nil {
-//                        UnreadMessageManager.removeLastComment()
-//                    }
-//                    guard let self = self else {
-//                        return
-//                    }
-//                    self.gotData = true
-//                    if let chat = chat {
-//                        self.storeChat = chat
-//                        if !(self.loadingTimer?.isValid ?? false) {
-//                            self.drawTableWithData()
-//                        }
-//                    } else {
-//                        self.needShowRating = chat?.showRating ?? false
-//                        self.showRateIfNeed()
-//                        self.isLoading = false
-//                        self.buttonsView.updateWithButtons(nil, width: self.frame.size.width)
-//                    }
                 }
             }
         }
@@ -163,31 +145,12 @@ class PSDChatTableView: PSDTableView {
                 chat in
                 DispatchQueue.main.async {
                     self?.updateTable(chat: chat)
-//                    if chat != nil {
-//                        UnreadMessageManager.removeLastComment()
-//                    }
-//                    guard let self = self else {
-//                        return
-//                    }
-//                    self.gotData = true
-//                    if let chat = chat {
-//                        self.storeChat = chat
-//                        if !(self.loadingTimer?.isValid ?? false) {
-//                            self.drawTableWithData()
-//                        }
-//                    } else {
-//                        self.needShowRating = chat?.showRating ?? false
-//                        self.showRateIfNeed()
-//                        self.isLoading = false
-//                        self.buttonsView.updateWithButtons(nil, width: self.frame.size.width)
-//                    }
                 }
             }
         }
     }
     
     func updateTable(chat: PSDChat?) {
-        //beginTimer()
         if chat != nil {
             UnreadMessageManager.removeLastComment()
         }
