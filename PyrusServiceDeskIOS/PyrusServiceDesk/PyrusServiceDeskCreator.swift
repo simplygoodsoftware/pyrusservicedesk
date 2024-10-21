@@ -44,11 +44,7 @@ import UIKit
     }
     
     static let usersUpdateNotification = Notification.Name("USERS_UPDATE")
-    static private(set) var additionalUsers = [PSDUserInfo]() {
-        didSet {
-            NotificationCenter.default.post(name: usersUpdateNotification, object: nil)
-        }
-    }
+    static private(set) var additionalUsers = [PSDUserInfo]()
     
     static var currentUserId: String?
     
