@@ -2,8 +2,8 @@
 import Foundation
 extension Array where Element == [PSDRowMessage]{
     ///complete array with unsent messages from storage
-    mutating func completeWithUnsentMessages(){
-        let messagesFromStorage = PSDMessagesStorage.messagesFromStorage()
+    mutating func completeWithUnsentMessages(for ticketId: Int) {
+        let messagesFromStorage = PSDMessagesStorage.messagesFromStorage(for: ticketId)
         let sortedMessages = messagesFromStorage.sorted(by: {$0.date > $1.date})
         complete(with: sortedMessages, startMessage: nil, completion: { _,_, messages in
             let res = messagesFromStorage.filter { !messages.contains($0)}

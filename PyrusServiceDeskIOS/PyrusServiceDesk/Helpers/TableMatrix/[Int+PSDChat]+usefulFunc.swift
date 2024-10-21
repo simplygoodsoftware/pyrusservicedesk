@@ -74,7 +74,7 @@ extension Array where Element == [PSDRowMessage]{
         }
         let comp = self.completeWithMessages(unsentMessages[0])//if user has had time to type new messages - add them to bottom
         if(comp){
-            self.completeWithUnsentMessages()///if user has unsent messages add them to bottom
+            self.completeWithUnsentMessages(for: chat.chatId ?? 0)///if user has unsent messages add them to bottom
         }
         if
             chat.showRating,

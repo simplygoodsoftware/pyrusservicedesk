@@ -3,13 +3,26 @@ import UIKit
 
 ///The main service desk controller.
 class PyrusServiceDeskController: PSDNavigationController {
-    let customization: ServiceDeskConfiguration?
+    var customization: ServiceDeskConfiguration?
     required init(_ customization: ServiceDeskConfiguration?, customPresent: Bool) {
         self.customization = customization
-        if(PyrusServiceDesk.clientId != nil){
-            let pyrusChat = PSDChatViewController()
+        if(PyrusServiceDesk.clientId != nil) {
             super.init(nibName: nil, bundle: nil)
-            pushViewController(pyrusChat, animated: false)
+            if PyrusServiceDesk.multichats {
+                if #available(iOS 13.0, *) {
+                    let presenter = ChatsPresenter()
+                    let interactor = ChatsInteractor(presenter: presenter)
+                    let router = ChatsRouter()
+                    let controller = PSDChatsViewController(interactor: interactor, router: router)
+                    router.controller = controller
+                    presenter.view = controller
+                    pushViewController(controller, animated: true)
+                }
+            } else {
+                let controller = PSDChatViewController()
+                pushViewController(controller, animated: true)
+            }
+            
             if !customPresent {
                 self.transitioningDelegate  = self
                 self.isModalInPopover = true
@@ -31,6 +44,7 @@ class PyrusServiceDeskController: PSDNavigationController {
     }
     override public func viewDidLoad() {
         super.viewDidLoad()
+        view.backgroundColor = .white
         PyrusServiceDesk.mainController = self
         recolor()
     }

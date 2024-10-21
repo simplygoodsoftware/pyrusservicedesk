@@ -83,6 +83,7 @@ class PSDMessageInputView: UIView, PSDMessageTextViewDelegate,PSDMessageSendButt
         rateView = PSDRateView()
         rateView.delegate = self
     
+        setupBottomView()
         self.addSubview(backgroundView)
         backgroundView.addSubview(topGrayLine)
         backgroundView.addSubview(attachmentsAddButton)
@@ -94,6 +95,22 @@ class PSDMessageInputView: UIView, PSDMessageTextViewDelegate,PSDMessageSendButt
         
         addConstraints()
     }
+    
+    func setupBottomView() {
+        let bottomView = UIView()
+        bottomView.backgroundColor = .white
+        bottomView.translatesAutoresizingMaskIntoConstraints = false
+        addSubview(bottomView)
+        bottomView.topAnchor.constraint(equalTo: topAnchor).isActive = true
+        if #available(iOS 15.0, *) {
+            bottomView.bottomAnchor.constraint(equalTo: keyboardLayoutGuide.bottomAnchor).isActive = true
+        } else {
+            bottomView.bottomAnchor.constraint(equalTo: bottomAnchor).isActive = true
+        }
+        bottomView.widthAnchor.constraint(equalTo: widthAnchor).isActive = true
+        bottomView.centerXAnchor.constraint(equalTo: centerXAnchor).isActive = true
+    }
+    
     ///In current version this function replase added to message attachments
     func addAttachment(_ attachment : PSDAttachment){
         attachmentsHeightConstraint?.constant = PSDMessageInputView.attachmentsHeight

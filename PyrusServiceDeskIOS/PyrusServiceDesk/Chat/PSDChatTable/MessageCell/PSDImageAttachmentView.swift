@@ -49,7 +49,7 @@ class PSDImageAttachmentView: PSDAttachmentView {
             var width = previewImage.size.width/scale
             width = min(width, maxWidth)
             width = max(width, minWidth)
-            return width
+            return PREVIEW_ATTACHMENT_HEIGHT//width
         }
         return PREVIEW_ATTACHMENT_HEIGHT
     }

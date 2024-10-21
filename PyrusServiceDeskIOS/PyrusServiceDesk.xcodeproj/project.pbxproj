@@ -7,6 +7,24 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		1E1279BF2CC271440080CB19 /* PSDUserInfo.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1E1279BD2CC271430080CB19 /* PSDUserInfo.swift */; };
+		1E1279CB2CC271C00080CB19 /* ChatViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1E1279C02CC271C00080CB19 /* ChatViewModel.swift */; };
+		1E1279CC2CC271C00080CB19 /* PSDChatInfoTableViewCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1E1279C22CC271C00080CB19 /* PSDChatInfoTableViewCell.swift */; };
+		1E1279CD2CC271C00080CB19 /* ChatsViewProtocol.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1E1279C42CC271C00080CB19 /* ChatsViewProtocol.swift */; };
+		1E1279CE2CC271C00080CB19 /* PSDChatsCellConfigurator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1E1279C52CC271C00080CB19 /* PSDChatsCellConfigurator.swift */; };
+		1E1279CF2CC271C00080CB19 /* PSDChatsDiffableDataSource.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1E1279C62CC271C00080CB19 /* PSDChatsDiffableDataSource.swift */; };
+		1E1279D02CC271C00080CB19 /* PSDChatsSectionModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1E1279C72CC271C00080CB19 /* PSDChatsSectionModel.swift */; };
+		1E1279D22CC271C00080CB19 /* PSDChatsViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1E1279C92CC271C00080CB19 /* PSDChatsViewController.swift */; };
+		1E1279D62CC271C90080CB19 /* ChatsRouter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1E1279D32CC271C90080CB19 /* ChatsRouter.swift */; };
+		1E1279D72CC271C90080CB19 /* ChatsRouterProtocol.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1E1279D42CC271C90080CB19 /* ChatsRouterProtocol.swift */; };
+		1E1279DD2CC271DC0080CB19 /* ChatPresenterModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1E1279D82CC271DC0080CB19 /* ChatPresenterModel.swift */; };
+		1E1279DE2CC271DC0080CB19 /* ChatsPresenter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1E1279DA2CC271DC0080CB19 /* ChatsPresenter.swift */; };
+		1E1279DF2CC271DC0080CB19 /* ChatsPresenterProtocol.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1E1279DB2CC271DC0080CB19 /* ChatsPresenterProtocol.swift */; };
+		1E1279E42CC271E80080CB19 /* ChatsInteractor.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1E1279E12CC271E80080CB19 /* ChatsInteractor.swift */; };
+		1E1279E52CC271E80080CB19 /* ChatsInteractorProtocol.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1E1279E22CC271E80080CB19 /* ChatsInteractorProtocol.swift */; };
+		1E1279EA2CC273130080CB19 /* ColorHexInit.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1E1279E92CC273120080CB19 /* ColorHexInit.swift */; };
+		1E1279EC2CC2737E0080CB19 /* TableViewCellConfiguratorProtocol.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1E1279EB2CC2737E0080CB19 /* TableViewCellConfiguratorProtocol.swift */; };
+		1E1279EE2CC283A50080CB19 /* images.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 1E1279ED2CC283A50080CB19 /* images.xcassets */; };
 		4B060F2A2732AD8C002E20A7 /* StringHelper.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4B060F292732AD8C002E20A7 /* StringHelper.swift */; };
 		4B062A832518A8D100B317D3 /* PSDPlaceholderMessage.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4B062A822518A8D100B317D3 /* PSDPlaceholderMessage.swift */; };
 		4B062A882518AC9500B317D3 /* messagePlaceholder@3x.png in Resources */ = {isa = PBXBuildFile; fileRef = 4B062A872518AC9500B317D3 /* messagePlaceholder@3x.png */; };
@@ -264,7 +282,6 @@
 		4BB855A02208593200F7CCE5 /* URLCreator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4BB8559F2208593200F7CCE5 /* URLCreator.swift */; };
 		4BB855A52208681400F7CCE5 /* LocalizationString.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4BB855A42208681400F7CCE5 /* LocalizationString.swift */; };
 		4BB855AA22086C1900F7CCE5 /* Localizable.strings in Resources */ = {isa = PBXBuildFile; fileRef = 4BB855AC22086C1900F7CCE5 /* Localizable.strings */; };
-		4BB855B12208741600F7CCE5 /* PSDChatInfoTableViewCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4BB855B02208741600F7CCE5 /* PSDChatInfoTableViewCell.swift */; };
 		4BBB9B06249D152900059A23 /* LogEvents.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4BBB9B05249D152900059A23 /* LogEvents.swift */; };
 		4BC210D622671EC000CFE255 /* PSDAttachmentPreviewView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4BC210D522671EC000CFE255 /* PSDAttachmentPreviewView.swift */; };
 		4BC210D822674A5600CFE255 /* PSDNavigationController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4BC210D722674A5600CFE255 /* PSDNavigationController.swift */; };
@@ -296,6 +313,24 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		1E1279BD2CC271430080CB19 /* PSDUserInfo.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PSDUserInfo.swift; sourceTree = "<group>"; };
+		1E1279C02CC271C00080CB19 /* ChatViewModel.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ChatViewModel.swift; sourceTree = "<group>"; };
+		1E1279C22CC271C00080CB19 /* PSDChatInfoTableViewCell.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PSDChatInfoTableViewCell.swift; sourceTree = "<group>"; };
+		1E1279C42CC271C00080CB19 /* ChatsViewProtocol.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ChatsViewProtocol.swift; sourceTree = "<group>"; };
+		1E1279C52CC271C00080CB19 /* PSDChatsCellConfigurator.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PSDChatsCellConfigurator.swift; sourceTree = "<group>"; };
+		1E1279C62CC271C00080CB19 /* PSDChatsDiffableDataSource.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PSDChatsDiffableDataSource.swift; sourceTree = "<group>"; };
+		1E1279C72CC271C00080CB19 /* PSDChatsSectionModel.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PSDChatsSectionModel.swift; sourceTree = "<group>"; };
+		1E1279C92CC271C00080CB19 /* PSDChatsViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PSDChatsViewController.swift; sourceTree = "<group>"; };
+		1E1279D32CC271C90080CB19 /* ChatsRouter.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ChatsRouter.swift; sourceTree = "<group>"; };
+		1E1279D42CC271C90080CB19 /* ChatsRouterProtocol.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ChatsRouterProtocol.swift; sourceTree = "<group>"; };
+		1E1279D82CC271DC0080CB19 /* ChatPresenterModel.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ChatPresenterModel.swift; sourceTree = "<group>"; };
+		1E1279DA2CC271DC0080CB19 /* ChatsPresenter.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ChatsPresenter.swift; sourceTree = "<group>"; };
+		1E1279DB2CC271DC0080CB19 /* ChatsPresenterProtocol.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ChatsPresenterProtocol.swift; sourceTree = "<group>"; };
+		1E1279E12CC271E80080CB19 /* ChatsInteractor.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ChatsInteractor.swift; sourceTree = "<group>"; };
+		1E1279E22CC271E80080CB19 /* ChatsInteractorProtocol.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ChatsInteractorProtocol.swift; sourceTree = "<group>"; };
+		1E1279E92CC273120080CB19 /* ColorHexInit.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ColorHexInit.swift; sourceTree = "<group>"; };
+		1E1279EB2CC2737E0080CB19 /* TableViewCellConfiguratorProtocol.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = TableViewCellConfiguratorProtocol.swift; sourceTree = "<group>"; };
+		1E1279ED2CC283A50080CB19 /* images.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = images.xcassets; sourceTree = "<group>"; };
 		4B060F292732AD8C002E20A7 /* StringHelper.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StringHelper.swift; sourceTree = "<group>"; };
 		4B062A822518A8D100B317D3 /* PSDPlaceholderMessage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PSDPlaceholderMessage.swift; sourceTree = "<group>"; };
 		4B062A872518AC9500B317D3 /* messagePlaceholder@3x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "messagePlaceholder@3x.png"; sourceTree = "<group>"; };
@@ -558,7 +593,6 @@
 		4BB855A42208681400F7CCE5 /* LocalizationString.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LocalizationString.swift; sourceTree = "<group>"; };
 		4BB855AB22086C1900F7CCE5 /* en */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = en; path = en.lproj/Localizable.strings; sourceTree = "<group>"; };
 		4BB855AD22086C2800F7CCE5 /* ru */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = ru; path = ru.lproj/Localizable.strings; sourceTree = "<group>"; };
-		4BB855B02208741600F7CCE5 /* PSDChatInfoTableViewCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PSDChatInfoTableViewCell.swift; sourceTree = "<group>"; };
 		4BBB9B05249D152900059A23 /* LogEvents.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LogEvents.swift; sourceTree = "<group>"; };
 		4BC210D522671EC000CFE255 /* PSDAttachmentPreviewView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PSDAttachmentPreviewView.swift; sourceTree = "<group>"; };
 		4BC210D722674A5600CFE255 /* PSDNavigationController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PSDNavigationController.swift; sourceTree = "<group>"; };
@@ -598,6 +632,88 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		1E1279BE2CC271430080CB19 /* MultiChats */ = {
+			isa = PBXGroup;
+			children = (
+				1E1279BD2CC271430080CB19 /* PSDUserInfo.swift */,
+			);
+			path = MultiChats;
+			sourceTree = "<group>";
+		};
+		1E1279C12CC271C00080CB19 /* Model */ = {
+			isa = PBXGroup;
+			children = (
+				1E1279C02CC271C00080CB19 /* ChatViewModel.swift */,
+			);
+			path = Model;
+			sourceTree = "<group>";
+		};
+		1E1279C32CC271C00080CB19 /* Cell */ = {
+			isa = PBXGroup;
+			children = (
+				1E1279C12CC271C00080CB19 /* Model */,
+				1E1279C22CC271C00080CB19 /* PSDChatInfoTableViewCell.swift */,
+			);
+			path = Cell;
+			sourceTree = "<group>";
+		};
+		1E1279CA2CC271C00080CB19 /* View */ = {
+			isa = PBXGroup;
+			children = (
+				1E1279C32CC271C00080CB19 /* Cell */,
+				1E1279C42CC271C00080CB19 /* ChatsViewProtocol.swift */,
+				1E1279C52CC271C00080CB19 /* PSDChatsCellConfigurator.swift */,
+				1E1279C62CC271C00080CB19 /* PSDChatsDiffableDataSource.swift */,
+				1E1279C72CC271C00080CB19 /* PSDChatsSectionModel.swift */,
+				1E1279C92CC271C00080CB19 /* PSDChatsViewController.swift */,
+			);
+			path = View;
+			sourceTree = "<group>";
+		};
+		1E1279D52CC271C90080CB19 /* Router */ = {
+			isa = PBXGroup;
+			children = (
+				1E1279D32CC271C90080CB19 /* ChatsRouter.swift */,
+				1E1279D42CC271C90080CB19 /* ChatsRouterProtocol.swift */,
+			);
+			path = Router;
+			sourceTree = "<group>";
+		};
+		1E1279D92CC271DC0080CB19 /* Model */ = {
+			isa = PBXGroup;
+			children = (
+				1E1279D82CC271DC0080CB19 /* ChatPresenterModel.swift */,
+			);
+			path = Model;
+			sourceTree = "<group>";
+		};
+		1E1279DC2CC271DC0080CB19 /* Presenter */ = {
+			isa = PBXGroup;
+			children = (
+				1E1279D92CC271DC0080CB19 /* Model */,
+				1E1279DA2CC271DC0080CB19 /* ChatsPresenter.swift */,
+				1E1279DB2CC271DC0080CB19 /* ChatsPresenterProtocol.swift */,
+			);
+			path = Presenter;
+			sourceTree = "<group>";
+		};
+		1E1279E02CC271E80080CB19 /* Model */ = {
+			isa = PBXGroup;
+			children = (
+			);
+			path = Model;
+			sourceTree = "<group>";
+		};
+		1E1279E32CC271E80080CB19 /* Interactor */ = {
+			isa = PBXGroup;
+			children = (
+				1E1279E02CC271E80080CB19 /* Model */,
+				1E1279E12CC271E80080CB19 /* ChatsInteractor.swift */,
+				1E1279E22CC271E80080CB19 /* ChatsInteractorProtocol.swift */,
+			);
+			path = Interactor;
+			sourceTree = "<group>";
+		};
 		4B062A862518AC7C00B317D3 /* messagePlaceholder */ = {
 			isa = PBXGroup;
 			children = (
@@ -631,6 +747,7 @@
 		4B2E650F220DE1E000E70A2F /* PSDObjects */ = {
 			isa = PBXGroup;
 			children = (
+				1E1279BE2CC271430080CB19 /* MultiChats */,
 				4B2E650D220DE1C300E70A2F /* PSDMessage.swift */,
 				4B2E6510220DE20400E70A2F /* PSDUser.swift */,
 				4B062A952518BFFC00B317D3 /* PSDPlaceholderUser.swift */,
@@ -654,6 +771,7 @@
 		4B59AD7C2248C6D900110320 /* TableView */ = {
 			isa = PBXGroup;
 			children = (
+				1E1279EB2CC2737E0080CB19 /* TableViewCellConfiguratorProtocol.swift */,
 				4B81B6FC221FF7FB00EE1253 /* UITableView + swipeForDetail.swift */,
 				4B659AFD223FA9E400D79489 /* PSDSpinerTableView.swift */,
 				4B7918E12237A00D0071CA72 /* UITableView+keyboard.swift */,
@@ -701,6 +819,7 @@
 		4B63393221FA0EC300A154B5 /* Helpers */ = {
 			isa = PBXGroup;
 			children = (
+				1E1279E92CC273120080CB19 /* ColorHexInit.swift */,
 				4B59AD7C2248C6D900110320 /* TableView */,
 				4B6B904B223A59BC0003D7F9 /* TableMatrix */,
 				4B64B86E224382C8003116C3 /* String */,
@@ -907,6 +1026,7 @@
 		4B7F350F21F8A77900977C6D /* images */ = {
 			isa = PBXGroup;
 			children = (
+				1E1279ED2CC283A50080CB19 /* images.xcassets */,
 				4B2C91232C9B5CF6008CF6B1 /* LinkIcon */,
 				4B062A862518AC7C00B317D3 /* messagePlaceholder */,
 				7B9545F524D07EE2006F6AED /* icn_cross.png */,
@@ -1156,7 +1276,10 @@
 		4BB855A1220865D500F7CCE5 /* chats */ = {
 			isa = PBXGroup;
 			children = (
-				4BB855B02208741600F7CCE5 /* PSDChatInfoTableViewCell.swift */,
+				1E1279E32CC271E80080CB19 /* Interactor */,
+				1E1279DC2CC271DC0080CB19 /* Presenter */,
+				1E1279D52CC271C90080CB19 /* Router */,
+				1E1279CA2CC271C00080CB19 /* View */,
 			);
 			path = chats;
 			sourceTree = "<group>";
@@ -1407,6 +1530,7 @@
 				4B281F9425781CE10042C235 /* landscape_dark@2x.png in Resources */,
 				4B281F222577FBCF0042C235 /* clock-light-18@3x.png in Resources */,
 				4B281F7C2577FBCF0042C235 /* clock-light-35@3x.png in Resources */,
+				1E1279EE2CC283A50080CB19 /* images.xcassets in Resources */,
 				4B281F7D2577FBCF0042C235 /* clock-dark-14@3x.png in Resources */,
 				4B281F782577FBCF0042C235 /* clock-light-55@3x.png in Resources */,
 				4BA85A172224183600B48CA6 /* icn_error.png in Resources */,
@@ -1446,6 +1570,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				4B56BE4F2216E639004E6685 /* PSDUploadView.swift in Sources */,
+				1E1279D72CC271C90080CB19 /* ChatsRouterProtocol.swift in Sources */,
 				4BA3FF4222117E1600CE497A /* UIView+findViewController.swift in Sources */,
 				4B56BE4D2216E608004E6685 /* PSDAttachmentView.swift in Sources */,
 				4B5AFEA921FB039000AAF233 /* AttachmentsAddButton.swift in Sources */,
@@ -1457,10 +1582,12 @@
 				4B6B904A223A59A50003D7F9 /* [Int+PSDChat]+complete.swift in Sources */,
 				4B88C6F522145AB000BDB304 /* PSDGetChat.swift in Sources */,
 				4B56BE492216CC0E004E6685 /* PSDUploader.swift in Sources */,
+				1E1279CE2CC271C00080CB19 /* PSDChatsCellConfigurator.swift in Sources */,
 				4BB7DADF225E280800F6D1F0 /* PSDFileAttachmentView.swift in Sources */,
 				4B82A49C2268C29700654CE0 /* PSDCoverHorizontalAnimator.swift in Sources */,
 				4B13E839286A46BB00E2428F /* ButtonViewCell.swift in Sources */,
 				4B17DD0523E816B1003CF4D9 /* String + uuid.swift in Sources */,
+				1E1279DF2CC271DC0080CB19 /* ChatsPresenterProtocol.swift in Sources */,
 				4B63393421FA0F2C00A154B5 /* PSDChatTableView.swift in Sources */,
 				4B5533732264C07B00353941 /* PSDDownloader.swift in Sources */,
 				4B88C6FB221482AC00BDB304 /* Date+usefulFunc.swift in Sources */,
@@ -1468,6 +1595,7 @@
 				4B9FAFA5255435CA00FCE51D /* PSDLastUnreadMessage.swift in Sources */,
 				4BE3450E225F9684009E2135 /* PSDDownloadImage.swift in Sources */,
 				4B63393621FA106400A154B5 /* PSDChatMessageCell.swift in Sources */,
+				1E1279D02CC271C00080CB19 /* PSDChatsSectionModel.swift in Sources */,
 				4B10E5F0222844EA00CF118B /* PSDAttachmentLoadViewController.swift in Sources */,
 				4B5AFEA621FB00B700AAF233 /* PSDMessageInputView.swift in Sources */,
 				4B7EA888221EF61F009C9B41 /* UIApplication+topViewController.swift in Sources */,
@@ -1475,10 +1603,14 @@
 				4B9C205D2451904E004DEF7A /* PSDRowMessage.swift in Sources */,
 				4B873BB6224BCA8100A96E93 /* PSDPushToken.swift in Sources */,
 				4B7F139022155F62007C6358 /* String+Date.swift in Sources */,
+				1E1279BF2CC271440080CB19 /* PSDUserInfo.swift in Sources */,
+				1E1279CF2CC271C00080CB19 /* PSDChatsDiffableDataSource.swift in Sources */,
 				4B66011D223948CE00AA45E6 /* PyrusServiceDeskCustomization.swift in Sources */,
 				4B9BF878224CBCBC006AD05C /* PSDCopyLabel.swift in Sources */,
 				4B88C6F722145ACA00BDB304 /* PSDGetChats.swift in Sources */,
+				1E1279CD2CC271C00080CB19 /* ChatsViewProtocol.swift in Sources */,
 				4BE97A12286BB5310027D5AC /* AlignedCollectionViewFlowLayout.swift in Sources */,
+				1E1279DD2CC271DC0080CB19 /* ChatPresenterModel.swift in Sources */,
 				4BCEB439220C5FF2008B29B6 /* PSDMessageTextView.swift in Sources */,
 				4BD29A092464B72B000CC420 /* OnStopCallback.swift in Sources */,
 				4B8EE7CD255AE4170068B266 /* LogsSendController.swift in Sources */,
@@ -1487,6 +1619,7 @@
 				4BAA214D222D202900B8BED7 /* UIView+constraints.swift in Sources */,
 				4B2E6511220DE20400E70A2F /* PSDUser.swift in Sources */,
 				4BDDE42B257F70C800DF40B2 /* Recolorable.swift in Sources */,
+				1E1279EA2CC273130080CB19 /* ColorHexInit.swift in Sources */,
 				4B90E514221D55B800A18245 /* SupportUserImage.swift in Sources */,
 				4B9B0BB82266071100090DB5 /* PSDProgressDownloadView.swift in Sources */,
 				4B81B6FF2220275700EE1253 /* PSDMessageStateButton.swift in Sources */,
@@ -1506,9 +1639,11 @@
 				4BD7DE68223680A600ED2557 /* UIButton+backgroundColor.swift in Sources */,
 				4BBB9B06249D152900059A23 /* LogEvents.swift in Sources */,
 				4B5AFEAB21FB0A7B00AAF233 /* PSDMessageSendButton.swift in Sources */,
+				1E1279EC2CC2737E0080CB19 /* TableViewCellConfiguratorProtocol.swift in Sources */,
 				4B9B0BBB2266344200090DB5 /* PSDAttachmentPreviewErrorView.swift in Sources */,
 				4BCEB433220C150C008B29B6 /* UIImage+color.swift in Sources */,
 				7B1E8D58250665F800C1E5AC /* PSDInfoView.swift in Sources */,
+				1E1279D62CC271C90080CB19 /* ChatsRouter.swift in Sources */,
 				4BB6CDC325597E4C004C680A /* PyrusLogger.swift in Sources */,
 				4B7F350A21F8900A00977C6D /* PSDChatViewController.swift in Sources */,
 				4B6D4A39244E1B6A007C6082 /* AttachmentCollectionView.swift in Sources */,
@@ -1520,7 +1655,9 @@
 				4BAA8817221C57FD00B81B76 /* View+asImage.swift in Sources */,
 				4B7918E42237E24B0071CA72 /* CloseButtonItem.swift in Sources */,
 				4B062A962518BFFC00B317D3 /* PSDPlaceholderUser.swift in Sources */,
+				1E1279E42CC271E80080CB19 /* ChatsInteractor.swift in Sources */,
 				4BB855A52208681400F7CCE5 /* LocalizationString.swift in Sources */,
+				1E1279E52CC271E80080CB19 /* ChatsInteractorProtocol.swift in Sources */,
 				4B7EA886221EB0B3009C9B41 /* PSDAlertDisplay.swift in Sources */,
 				4BAA214F222D60D000B8BED7 /* Dictionary+asString.swift in Sources */,
 				4B1ED2AC228190BA00B98516 /* PSDMessagesStorage.swift in Sources */,
@@ -1534,7 +1671,6 @@
 				4B2E6515220DE4AE00E70A2F /* PSDObjectsCreator.swift in Sources */,
 				4B6D4A3D244E22C9007C6082 /* AttachmentPreviewCollectionViewCell.swift in Sources */,
 				4B7F34F221F861FD00977C6D /* PyrusServiceDeskController.swift in Sources */,
-				4BB855B12208741600F7CCE5 /* PSDChatInfoTableViewCell.swift in Sources */,
 				4B6D4A3B244E1CF3007C6082 /* AttachmentCollectionViewPresenter.swift in Sources */,
 				4B64B870224384F3003116C3 /* String+years.swift in Sources */,
 				4B6D4A42244E2B29007C6082 /* AttachmentCollectionViewCell.swift in Sources */,
@@ -1547,9 +1683,13 @@
 				4B56BE4B2216CCC0004E6685 /* PSDAttachment.swift in Sources */,
 				4B060F2A2732AD8C002E20A7 /* StringHelper.swift in Sources */,
 				4B6E9DA3225F3B570037462F /* PSDPreviewSetter.swift in Sources */,
+				1E1279CC2CC271C00080CB19 /* PSDChatInfoTableViewCell.swift in Sources */,
 				4B6E9DA7225F74E50037462F /* PSDDownloadView.swift in Sources */,
 				4B64B8742243D402003116C3 /* CharacterSet+urlEncode.swift in Sources */,
+				1E1279D22CC271C00080CB19 /* PSDChatsViewController.swift in Sources */,
 				4B2E650E220DE1C300E70A2F /* PSDMessage.swift in Sources */,
+				1E1279DE2CC271DC0080CB19 /* ChatsPresenter.swift in Sources */,
+				1E1279CB2CC271C00080CB19 /* ChatViewModel.swift in Sources */,
 				4B6EFFC0282440F6004ECA2B /* ApiSignManager.swift in Sources */,
 				4B13E836286A2BC900E2428F /* ButtonsView.swift in Sources */,
 				4B88C6F9221467FF00BDB304 /* PSDChat.swift in Sources */,
