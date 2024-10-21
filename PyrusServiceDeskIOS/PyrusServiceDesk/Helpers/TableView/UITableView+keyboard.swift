@@ -28,7 +28,8 @@ extension PSDTableView   {
         guard needChangeInset(bottomUnvisibleHeight) else {
             return
         }
-        if(needChangeOffset(keyboardHeight: bottomUnvisibleHeight )){
+        let needChangeOffset = needChangeOffset(keyboardHeight: bottomUnvisibleHeight )
+        if needChangeOffset {
             offsetDelta = bottomUnvisibleHeight - self.contentInset.bottom
             offsetDelta = min(offsetDelta,  self.contentSize.height - (self.frame.size.height-bottomUnvisibleHeight))
             offsetDelta = offsetDelta - self.bottomPSDRefreshControl.insetHeight
@@ -37,7 +38,9 @@ extension PSDTableView   {
         UIView.animate(withDuration: duration, delay: 0, animations: {
             self.contentInset.bottom = bottomUnvisibleHeight
             self.scrollIndicatorInsets.bottom = bottomUnvisibleHeight
-            self.contentOffset.y = newOffset
+            if needChangeOffset {
+                self.contentOffset.y = newOffset
+            }
         }, completion: nil)
     }
     
@@ -59,7 +62,6 @@ extension PSDTableView   {
     
     private func needChangeOffset(keyboardHeight:CGFloat)->Bool{
         if(self.contentSize.height > (self.frame.size.height-keyboardHeight) && !self.isDragging){
-            
             return true
         }
         return false
