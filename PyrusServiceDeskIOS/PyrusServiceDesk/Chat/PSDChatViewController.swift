@@ -41,6 +41,7 @@ class PSDChatViewController: PSDViewController {
         
         self.openChat()
         self.startGettingInfo()
+        
         if let infoView = PyrusServiceDesk.mainController?.customization?.infoView, !(PSDMessagesStorage.pyrusUserDefaults()?.bool(forKey: PSD_WAS_CLOSE_INFO_KEY) ?? true) {
             view.addSubview(infoView)
             infoView.widthAnchor.constraint(equalTo: view.widthAnchor).isActive = true

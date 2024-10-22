@@ -78,6 +78,14 @@ private extension ChatsPresenter {
             })
             actions.append(action)
         }
+        
+        if isFilter {
+            let image = PyrusServiceDesk.currentUserId == nil ? UIImage(named: "checkmark") : nil
+            let action = UIAction(title: "Все", image: image, handler: { [weak self] _ in
+                self?.view?.show(.deleteFilter)
+            })
+            actions.append(action)
+        }
         return actions
     }
 }

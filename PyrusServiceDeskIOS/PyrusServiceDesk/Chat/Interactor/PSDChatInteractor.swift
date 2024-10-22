@@ -1,13 +1,6 @@
 import Foundation
 
-struct MenuAction {
-    let title: String
-    let isSelect: Bool
-    let filterAction: () -> Void
-    let newChatAction: () -> Void
-}
-
-class ChatsInteractor: NSObject {
+class PSDChatInteractor: NSObject {
     private let presenter: ChatsPresenterProtocol
     
     private var chats = [PSDChat]() {
@@ -28,7 +21,7 @@ class ChatsInteractor: NSObject {
     }
 }
 
-extension ChatsInteractor: ChatsInteractorProtocol {
+extension PSDChatInteractor: ChatsInteractorProtocol {
     func doInteraction(_ action: ChatsInteractorCommand) {
         switch action {
         case .viewDidload:
@@ -50,7 +43,7 @@ extension ChatsInteractor: ChatsInteractorProtocol {
     }
 }
 
-private extension ChatsInteractor {
+private extension PSDChatInteractor {
     
     func deleteFilter() {
         PyrusServiceDesk.currentUserId = nil

@@ -185,7 +185,7 @@ private extension PSDChatsViewController {
             
             filterLabel.centerYAnchor.constraint(equalTo: filterInfoView.centerYAnchor),
             filterLabel.leadingAnchor.constraint(equalTo: filterInfoView.leadingAnchor, constant: 16),
-            filterLabel.trailingAnchor.constraint(lessThanOrEqualTo: filterCross.leadingAnchor, constant: -16),
+            filterLabel.trailingAnchor.constraint(lessThanOrEqualTo: filterInfoView.trailingAnchor, constant: -60),
             
             filterCross.heightAnchor.constraint(lessThanOrEqualToConstant: 40),
             filterLabel.heightAnchor.constraint(lessThanOrEqualToConstant: 40)
