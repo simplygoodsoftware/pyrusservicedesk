@@ -20,7 +20,10 @@ extension ChatsRouter: ChatsRouterProtocol {
 @available(iOS 13.0, *)
 private extension ChatsRouter {
     func openChat(chat: PSDChat) {
-        let pyrusChat = PSDChatViewController()
+        let presenter = PSDChatPresenter()
+        let interactor = PSDChatInteractor(presenter: presenter, chat: chat)
+        let pyrusChat = PSDChatViewController(interactor: interactor)
+        presenter.view = pyrusChat
         pyrusChat.chat = chat
         pyrusChat.ticketId = chat.chatId ?? 0
         controller?.navigationController?.pushViewController(pyrusChat, animated: true)

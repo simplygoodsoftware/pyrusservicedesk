@@ -20,7 +20,7 @@ class PSDTableView : UITableView{
     
     ///Comparing rows and sections to remove with rows and section to add
     ///returs removeIndexPaths, addIndexPaths, reloadIndexPaths, removeSections, addSections, reloadSections
-    static func compareAddAndRemoveRows(removeIndexPaths: [IndexPath], addIndexPaths: [IndexPath], removeSections: IndexSet, addSections: IndexSet) -> ([IndexPath], [IndexPath], [IndexPath], IndexSet, IndexSet, IndexSet){
+    static func compareAddAndRemoveRows(removeIndexPaths: [IndexPath], addIndexPaths: [IndexPath], removeSections: IndexSet, addSections: IndexSet) -> IndexPaths {
         var newRemoveIndexPaths = removeIndexPaths
         var newAddIndexPaths = addIndexPaths
         var reloadIndexPaths = [IndexPath]()
@@ -52,8 +52,18 @@ class PSDTableView : UITableView{
             }
         }
         
-        return (newRemoveIndexPaths, newAddIndexPaths, reloadIndexPaths, newRemoveSections, newAddsections, IndexSet(reloadSections))
+        let indexPaths = IndexPaths(
+            newRemoveIndexPaths: newRemoveIndexPaths,
+            addIndexPaths: newAddIndexPaths,
+            reloadIndexPaths: reloadIndexPaths,
+            newRemoveSections: newRemoveSections,
+            addSections: newAddsections,
+            reloadSections: IndexSet(reloadSections)
+        )
+        
+        return indexPaths
     }
+    
     private lazy var activity : UIActivityIndicatorView = {
         let activity = UIActivityIndicatorView()
         activity.style = UIActivityIndicatorView.Style.whiteLarge

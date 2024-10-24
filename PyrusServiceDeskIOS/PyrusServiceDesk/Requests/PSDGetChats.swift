@@ -18,6 +18,7 @@ struct PSDGetChats {
             parameters["security_key"] = PyrusServiceDesk.securityKey
         }
         parameters["need_full_info"] = PyrusServiceDesk.multichats
+        parameters["api_sign"] = PyrusServiceDesk.apiSign()
       //  parameters["author_id"] = PyrusServiceDesk.authorId
         if PyrusServiceDesk.additionalUsers.count > 0 {
             var additional_users = [[String: Any]]()

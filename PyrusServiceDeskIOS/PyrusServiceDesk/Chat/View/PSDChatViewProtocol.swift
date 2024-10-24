@@ -1,6 +1,6 @@
 import Foundation
 
-enum PSDChatPresenterCommand {
+enum PSDChatSearchViewCommand {
     case addFakeMessage(messageId: Int)
     case updateTable(chat: PSDChat?)
     case updateButtons(buttons: [ButtonData]?)
@@ -24,7 +24,6 @@ enum PSDChatPresenterCommand {
     case deleteRows(indexPaths: [IndexPath], section: Int)
 }
 
-protocol PSDChatPresenterProtocol {
-    func doWork(_ action: PSDChatPresenterCommand)
+protocol PSDChatViewProtocol: NSObjectProtocol {
+    func show(_ action: PSDChatSearchViewCommand)
 }
-

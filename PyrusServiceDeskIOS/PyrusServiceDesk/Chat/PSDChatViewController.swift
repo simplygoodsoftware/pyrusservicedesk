@@ -8,6 +8,17 @@ protocol PSDUpdateInfo{
 }
 
 class PSDChatViewController: PSDViewController {
+    private let interactor: PSDChatInteractorProtocol
+    
+    required init(interactor: PSDChatInteractorProtocol) {
+        self.interactor = interactor
+        super.init(nibName: nil, bundle: nil)
+    }
+    
+    required init?(coder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
+    }
+    
     var ticketId = 0
     var chat: PSDChat?
     private var firstLoad: Bool = true
@@ -39,8 +50,9 @@ class PSDChatViewController: PSDViewController {
         self.designNavigation()
         self.customiseDesign(color: PyrusServiceDesk.mainController?.customization?.barButtonTintColor ?? UIColor.darkAppColor)
         
-        self.openChat()
-        self.startGettingInfo()
+//        self.openChat()
+//        self.startGettingInfo()
+        interactor.doInteraction(.viewDidload)
         
         if let infoView = PyrusServiceDesk.mainController?.customization?.infoView, !(PSDMessagesStorage.pyrusUserDefaults()?.bool(forKey: PSD_WAS_CLOSE_INFO_KEY) ?? true) {
             view.addSubview(infoView)
@@ -302,32 +314,95 @@ class PSDChatViewController: PSDViewController {
     private let reloadInterval = 30.0 //seconds
     private var timer: Timer?
     private func stopGettingInfo() {
-        if((timer) != nil){
+        if timer != nil {
             timer!.invalidate()
             timer=nil
         }
     }
-    @objc private func updateTable(){
+    
+    @objc private func updateTable() {
         startGettingInfo()
         if !hasNoConnection() && !PSDGetChat.isActive() {
-           self.tableView.updateChat(needProgress:false)
+          // self.tableView.updateChat(needProgress:false)
         }
         
     }
 }
+
+private extension PSDChatViewController {
+    
+}
+
+extension PSDChatViewController: PSDChatViewProtocol {
+    func show(_ action: PSDChatSearchViewCommand) {
+        switch action {
+        case .addFakeMessage(let messageId):
+            tableView.addFakeMessage(messageId: messageId)
+        case .updateTable(chat: let chat):
+            tableView.updateTable(chat: chat)
+        case .updateButtons(buttons: let buttons):
+            tableView.updateButtonsView(buttons: buttons)
+        case .updateRows(indexPaths: let indexPaths):
+            tableView.updateRows(indexPaths: indexPaths)
+        case .removeNoConnectionView:
+            tableView.removeNoConnectionView()
+        case .endRefreshing:
+            tableView.endRefreshing()
+        case .reloadChat:
+            tableView.reloadChat()
+        case .needShowRate(showRate: let showRate):
+            needShowRate(showRate)
+        case .showNoConnectionView:
+            tableView.showNoConnectionView()
+        case .scrollsToBottom(animated: let animated):
+            tableView.scrollsToBottom(animated: animated)
+        case .endLoading:
+            tableView.isLoading = false
+        case .dataIsShown:
+            dataIsShown()
+        case .drawTableWithData:
+            tableView.drawTableWithData()
+        case .updateTableMatrix(matrix: let matrix):
+            tableView.tableMatrix = matrix
+        case .addRow(index: let index, lastIndexPath: let lastIndexPath, insertSections: let insertSections, scrollsToBottom: let scrollsToBottom):
+            tableView.addRow(at: index, lastIndexPath: lastIndexPath, insertSections: insertSections, scrollsToBottom: scrollsToBottom)
+        case .addNewRow:
+            if(tableView.numberOfRows(inSection: 0) == 0) {
+                tableView.addNewRow() { [weak self] in
+                    self?.interactor.doInteraction(.addNewRow)
+                }
+            } else {
+                interactor.doInteraction(.addNewRow)
+            }
+        case .redrawCell(indexPath: let indexPath, message: let message):
+            tableView.redrawCell(at: indexPath, with: message)
+        case .insertSections(sections: let sections):
+            tableView.insertSections(sections: sections)
+        case .deleteSections(sections: let sections):
+            tableView.deleteSections(sections: sections)
+        case .moveRow(movedIndexPath: let movedIndexPath, newIndexPath: let newIndexPath):
+            tableView.moveRow(movedIndexPath: movedIndexPath, newIndexPath: newIndexPath)
+        case .deleteRows(indexPaths: let indexPaths, section: let section):
+            tableView.deleteRows(indexPaths: indexPaths, section: section)
+        }
+    }
+}
+
 extension PSDChatViewController: PSDMessageInputViewDelegate {
     func send(_ message:String, _ attachments: [PSDAttachment]) {
-        let newMessage = PSDObjectsCreator.createMessage(message, attachments: attachments, ticketId: ticketId, userId: chat?.userId ?? PyrusServiceDesk.customUserId ?? PyrusServiceDesk.userId)
-        prepareMessageForDrawing(newMessage)
-        tableView.addNewRow(message: newMessage)
-        PSDMessageSend.pass(newMessage, delegate: self.tableView)
+//        let newMessage = PSDObjectsCreator.createMessage(message, attachments: attachments, ticketId: ticketId, userId: chat?.userId ?? PyrusServiceDesk.customUserId ?? PyrusServiceDesk.userId)
+//        prepareMessageForDrawing(newMessage)
+//        tableView.addNewRow(message: newMessage)
+//        PSDMessageSend.pass(newMessage, delegate: self.tableView)
+        interactor.doInteraction(.send(message: message, attachments: attachments))
     }
     
     func sendRate(_ rateValue: Int) {
-        let newMessage = PSDObjectsCreator.createMessage(rating: rateValue, ticketId: ticketId, userId: chat?.userId ?? PyrusServiceDesk.customUserId ?? PyrusServiceDesk.userId)
-        prepareMessageForDrawing(newMessage)
-        tableView.addNewRow(message: newMessage)
-        PSDMessageSend.pass(newMessage, delegate: self.tableView)
+//        let newMessage = PSDObjectsCreator.createMessage(rating: rateValue, ticketId: ticketId, userId: chat?.userId ?? PyrusServiceDesk.customUserId ?? PyrusServiceDesk.userId)
+//        prepareMessageForDrawing(newMessage)
+//        tableView.addNewRow(message: newMessage)
+//        PSDMessageSend.pass(newMessage, delegate: self.tableView)
+        interactor.doInteraction(.sendRate(rateValue: rateValue))
     }
     
     private func prepareMessageForDrawing(_ newMessage: PSDMessage) {
@@ -424,9 +499,7 @@ extension PSDChatViewController: PSDChatTableViewDelegate {
                 }
             )
         )
-        self.present(alert,
-                animated: true,
-                completion: nil)
+        self.present(alert, animated: true, completion: nil)
     }
     
     func dataIsShown() {
