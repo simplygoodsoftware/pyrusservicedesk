@@ -77,7 +77,20 @@ internal class RetrofitWebRepository(
                 api.getTicketFeed(GetFeedBody(appId, getUserId(), getSecurityKey(), instanceId, getVersion(), keepUnread, apiFlag)).execute().run {
                     PLog.d(TAG, "getFeed, isSuccessful: $isSuccessful, body() != null: ${body() != null}")
                     when {
-                        isSuccessful && body() != null -> ResponseImpl.success(body()!!)
+                        isSuccessful && body() != null -> {
+                            val body = body()!!
+                            val newComments: Comments = body.copy(
+                                comments = body.comments.map {
+                                    it.copy(
+                                        creationDate = java.util.Calendar.getInstance().apply {
+                                            timeInMillis = it.creationDate.time + timeZone.rawOffset
+                                        }.time
+                                    )
+                                }
+                            )
+
+                            ResponseImpl.success(newComments)
+                        }
                         else -> ResponseImpl.failure(createError(this))
                     }
                 }
@@ -100,7 +113,20 @@ internal class RetrofitWebRepository(
                 api.getTickets(RequestBodyBase(appId, getUserId(), getSecurityKey(), getInstanceId(), getVersion())).execute().run {
                     PLog.d(TAG, "getTickets, isSuccessful: $isSuccessful, body() != null: ${body() != null}")
                     when {
-                        isSuccessful && body() != null -> GetTicketsResponse(tickets = body()!!.tickets)
+                        isSuccessful && body() != null -> {
+                            val tickets = body()!!.tickets.map { ticket ->
+                                ticket.copy(
+                                    lastComment = ticket.lastComment?.let {
+                                        it.copy(
+                                            creationDate = java.util.Calendar.getInstance().apply {
+                                                timeInMillis = it.creationDate.time + timeZone.rawOffset
+                                            }.time
+                                        )
+                                    }
+                                )
+                            }
+                            GetTicketsResponse(tickets = tickets)
+                        }
                         else -> GetTicketsResponse(createError(this))
                     }
                 }
