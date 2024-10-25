@@ -7,6 +7,7 @@ import android.content.Intent
 import android.content.res.ColorStateList
 import android.graphics.PorterDuff
 import android.net.Uri
+import android.os.Build
 import android.os.Bundle
 import android.text.Editable
 import android.text.TextWatcher
@@ -34,7 +35,6 @@ import com.pyrus.pyrusservicedesk.utils.RequestUtils.Companion.getFileUrl
 import kotlinx.android.synthetic.main.psd_activity_ticket.*
 import kotlinx.android.synthetic.main.psd_activity_ticket.root
 import kotlinx.android.synthetic.main.psd_activity_ticket.view.*
-import kotlinx.android.synthetic.main.psd_comment.*
 import kotlinx.android.synthetic.main.psd_no_connection.*
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
@@ -161,9 +161,8 @@ internal class TicketActivity : ConnectionActivityBase<TicketViewModel>(TicketVi
                     this@TicketActivity.adapter.itemSpaceMultiplier)
             )
             itemAnimator = null
-            this@TicketActivity.adapter.itemTouchHelper.attachToRecyclerView(this)
         }
-        send.setOnClickListener { sendComment() }
+        send.setOnClickListener { onSendCommentClick() }
         val stateList = ColorStateList(
             arrayOf(
                 intArrayOf(android.R.attr.state_enabled),
@@ -187,6 +186,9 @@ internal class TicketActivity : ConnectionActivityBase<TicketViewModel>(TicketVi
         input.apply {
             highlightColor = accentColor
             setCursorColor(accentColor)
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+                textCursorDrawable = null
+            }
             setHintTextColor(ConfigUtils.getSecondaryColorOnMainBackground(this@TicketActivity))
             setTextColor(ConfigUtils.getInputTextColor(this@TicketActivity))
             addTextChangedListener(inputTextWatcher)
@@ -196,7 +198,7 @@ internal class TicketActivity : ConnectionActivityBase<TicketViewModel>(TicketVi
         refresh.setProgressBackgroundColor(ConfigUtils.getMainBackgroundColor(this))
         refresh.setColorSchemeColors(ConfigUtils.getAccentColor(this))
 
-        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.LOLLIPOP) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
             window.clearFlags(WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS)
             window.addFlags(WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS)
             window.statusBarColor = ConfigUtils.getStatusBarColor(this)?: window.statusBarColor
@@ -245,33 +247,32 @@ internal class TicketActivity : ConnectionActivityBase<TicketViewModel>(TicketVi
 
     override fun startObserveData() {
         super.startObserveData()
-        viewModel.getCommentDiffLiveData().observe(
-            this,
-            { result ->
-                val atEnd = comments.isAtEnd()
-                val isEmpty = comments.adapter?.itemCount == 0
-                result?.let{
-                    refresh.isRefreshing = false
-                    adapter.setItems(it.newItems)
-                    it.diffResult.dispatchUpdatesTo(adapter)
+        viewModel.getCommentDiffLiveData().observe(this) { result ->
+            val atEnd = comments.isAtEnd()
+            val isEmpty = comments.adapter?.itemCount == 0
+            result?.let {
+                refresh.isRefreshing = false
+                adapter.setItems(it.newItems)
+                it.diffResult.dispatchUpdatesTo(adapter)
+            }
+            if (adapter.itemCount > 0 && atEnd) {
+                if (isEmpty)
+                    comments.scrollToPosition(adapter.itemCount - 1)
+                else if (!comments.isAtEnd()) {
+                    comments.smoothScrollToPosition(adapter.itemCount - 1)
                 }
-                if (adapter.itemCount > 0 && atEnd){
-                    if (isEmpty)
-                        comments.scrollToPosition(adapter.itemCount - 1)
-                    else if (!comments.isAtEnd())
-                        comments.smoothScrollToPosition(adapter.itemCount - 1)
-                    launch {
-                        while(!comments.isAtEnd())
-                            delay(CHECK_IS_AT_BOTTOM_DELAY_MS)
-                        val offset = when {
-                            comments.childCount > 0 -> comments.getChildAt(comments.childCount - 1).height
-                            else -> 0
-                        }
-                        comments.smoothScrollBy(0, offset)
+                launch {
+                    while (!comments.isAtEnd()) {
+                        delay(CHECK_IS_AT_BOTTOM_DELAY_MS)
                     }
+                    val offset = when {
+                        comments.childCount > 0 -> comments.getChildAt(comments.childCount - 1).height
+                        else -> 0
+                    }
+                    comments.smoothScrollBy(0, offset)
                 }
             }
-        )
+        }
         attachFileSharedViewModel.getFilePickedLiveData().observe(this) { fileUri ->
             fileUri?.let {
                 viewModel.onAttachmentSelected(it)
@@ -322,7 +323,7 @@ internal class TicketActivity : ConnectionActivityBase<TicketViewModel>(TicketVi
         } ?: false
     }
 
-    private fun sendComment() {
+    private fun onSendCommentClick() {
         viewModel.onSendClicked(input.text.toString())
         input.text = null
     }
