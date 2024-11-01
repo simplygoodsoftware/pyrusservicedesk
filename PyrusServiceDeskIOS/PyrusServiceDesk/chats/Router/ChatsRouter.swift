@@ -22,10 +22,10 @@ private extension ChatsRouter {
     func openChat(chat: PSDChat) {
         let presenter = PSDChatPresenter()
         let interactor = PSDChatInteractor(presenter: presenter, chat: chat)
-        let pyrusChat = PSDChatViewController(interactor: interactor)
+        let router = PSDChatRouter()
+        let pyrusChat = PSDChatViewController(interactor: interactor, router: router)
         presenter.view = pyrusChat
-        pyrusChat.chat = chat
-        pyrusChat.ticketId = chat.chatId ?? 0
+        router.controller = pyrusChat
         controller?.navigationController?.pushViewController(pyrusChat, animated: true)
     }
 }

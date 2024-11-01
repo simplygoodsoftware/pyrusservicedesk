@@ -2,6 +2,7 @@
 import UIKit
 
 class PSDSupportMessageCell: PSDChatMessageCell {
+    static var identifier = "CellSupport"
     private static let personNameAlpha : CGFloat = 0.6
     
     ///Is nameLabel need to be shown. (Show only next to first user's message)
@@ -61,11 +62,12 @@ class PSDSupportMessageCell: PSDChatMessageCell {
         self.layoutIfNeeded()
         cloudView.alpha = drawEmpty ? 0.0 : 1.0
     }
-    private func addConstraints()
-    {
+    
+    private func addConstraints() {
         supportMessageConstraints()
         nameConstraints()
     }
+    
     private let nameLeftSpace : CGFloat = 10.0
     private func nameConstraints(){
         nameLabel.translatesAutoresizingMaskIntoConstraints = false

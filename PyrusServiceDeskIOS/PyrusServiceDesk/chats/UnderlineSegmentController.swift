@@ -12,7 +12,6 @@ class UnderlineSegmentController: UIView {
     var selectedIndex: Int = 0
     override func layoutSubviews() {
         super.layoutSubviews()
-        selectionView.roundCorners(corners: [.topLeft, .topRight], radius: 2)
         if (scrollView.contentSize.width + scrollView.contentInset.left + scrollView.contentInset.right) > scrollView.frame.size.width {
             scrollView.isScrollEnabled = true
         } else {
@@ -27,12 +26,20 @@ class UnderlineSegmentController: UIView {
         changeSelection(sender)
     }
     
+    func updateBadge(index: Int, badgeValue: Int?) {
+        guard let button = stackView.arrangedSubviews[index] as? ButtonSegmentView else {
+            return
+        }
+        button.updateBadge(badgeValue)
+    }
+    
     public func updateTitle(titles: [TitleWithBadge], selectIndex: Int) {
         stackView.removeAllArrangedSubviews()
         for (i,titleWithBadge) in titles.enumerated() {
             let btn = ButtonSegmentView()
             btn.delegate = self
             btn.updateTitle(titleWithBadge.title)
+            btn.updateBadge(titleWithBadge.badge)
             stackView.addArrangedSubview(btn)
             btn.heightAnchor.constraint(equalTo: stackView.heightAnchor).isActive = true
             
@@ -42,7 +49,7 @@ class UnderlineSegmentController: UIView {
         }
         setNeedsLayout()
         layoutIfNeeded()
-        scrollView.contentOffset = CGPoint(x: -21, y: 0)
+        scrollView.contentOffset = CGPoint(x: -16, y: 0)
     }
     
     public weak var delegate: UnderlineSegmentControllerDelegate?
@@ -54,7 +61,7 @@ class UnderlineSegmentController: UIView {
         scrollView.showsHorizontalScrollIndicator = false
         scrollView.translatesAutoresizingMaskIntoConstraints = false
         scrollView.backgroundColor = .clear
-        scrollView.contentInset = UIEdgeInsets(top: 0, left: 21, bottom: 0, right: 5)
+        scrollView.contentInset = UIEdgeInsets(top: 0, left: 16, bottom: 0, right: 5)
         return scrollView
     }()
     
@@ -63,11 +70,7 @@ class UnderlineSegmentController: UIView {
         stackV.axis = .horizontal
         stackV.alignment = .leading
         stackV.distribution = .fill
-        if Locale.current.languageCode == "en" {
-            stackV.spacing = 26
-        } else {
-            stackV.spacing = 20
-        }
+        stackV.spacing = 24
         stackV.translatesAutoresizingMaskIntoConstraints = false
         return stackV
     }()
@@ -78,6 +81,7 @@ class UnderlineSegmentController: UIView {
         selectionV.translatesAutoresizingMaskIntoConstraints = false
         return selectionV
     }()
+    
     override init(frame: CGRect) {
         super.init(frame: frame)
         backgroundColor = UIColor(hex: "#F9F9F9F0")
@@ -95,9 +99,8 @@ class UnderlineSegmentController: UIView {
         stackView.topAnchor.constraint(equalTo: scrollView.topAnchor).isActive = true
         stackView.heightAnchor.constraint(equalToConstant: 32).isActive = true
         
-        selectionView.bottomAnchor.constraint(equalTo: bottomAnchor).isActive = true
-        selectionView.heightAnchor.constraint(equalToConstant: 2).isActive = true
-        
+        selectionView.bottomAnchor.constraint(equalTo: bottomAnchor, constant: 0.5).isActive = true
+        selectionView.heightAnchor.constraint(equalToConstant: 1.5).isActive = true
     }
     
     required init?(coder: NSCoder) {
@@ -126,11 +129,12 @@ extension UnderlineSegmentController: ButtonSegmentViewDelegate {
                } else {
                    isSelected = false
                }
+               
                if let button = btn as? UIButton {
-                   button.setTitleColor(isSelected ? .mainTintColor : .psdGray, for: .normal)
+                   button.setTitleColor(isSelected ? .mainTintColor : .secondTintColor, for: .normal)
                }
                if let button = btn as? ButtonSegmentView {
-                   button.titleView.textColor = isSelected ? .mainTintColor : .psdGray
+                   button.titleView.textColor = isSelected ? .mainTintColor : .secondTintColor
                }
            }
        UIView.animate(withDuration: 0.2, delay: 0, options: .curveEaseInOut) {
@@ -143,23 +147,8 @@ extension UnderlineSegmentController: ButtonSegmentViewDelegate {
 }
 
 extension UIColor {
-    static let mainTintColor = UIColor(red: 58.0 / 255.0, green: 160.0 / 255.0, blue: 162.0 / 255.0, alpha: 1)
-}
-
-@objc extension UIView {
-    func roundCorners(corners: UIRectCorner, radius: CGFloat) {
-        let path = UIBezierPath(roundedRect: bounds,
-                                byRoundingCorners: corners,
-                                cornerRadii: CGSize(width: radius, height: radius))
-        // Create the shape layer and set its path
-        let maskLayer = CAShapeLayer()
-        maskLayer.frame = bounds
-        maskLayer.path = path.cgPath
-        
-        // Set the newly created shape layer as the mask for the view's layer
-        self.layer.mask = maskLayer
-    }
-    
+    static let mainTintColor = UIColor(hex: "#3580CC")
+    static let secondTintColor = UIColor(hex: "#858C93")
 }
 
 extension UIStackView {

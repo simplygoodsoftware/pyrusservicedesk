@@ -37,7 +37,7 @@ import UIKit
                     startGettingInfo(rightNow: true)
                 }
             }
-            else{
+            else {
                 stopGettingInfo()
             }
         }
@@ -46,11 +46,20 @@ import UIKit
     static let usersUpdateNotification = Notification.Name("USERS_UPDATE")
     static private(set) var additionalUsers = [PSDUserInfo]()
     
+    static let clientsUpdateNotification = Notification.Name("CLIENTS_UPDATE")
+    static var clients = [PSDClientInfo]() {
+        didSet {
+            NotificationCenter.default.post(name: clientsUpdateNotification, object: nil)
+        }
+    }
+    
     static var currentUserId: String?
+    static var currentClientId: String?
     
     public static func addUser(appId: String, clientName: String, userId: String, userName: String, secretKey: String? = nil) {
         let user = PSDUserInfo(appId: appId, clientName: clientName, userId: userId, userName: userName, secretKey: secretKey)
         currentUserId = user.userId
+        currentClientId = user.clientId
         if !additionalUsers.contains(user) && user.userId != customUserId {
             additionalUsers.append(user)
         } else {
@@ -260,6 +269,7 @@ import UIKit
         PyrusServiceDesk.createUserId(reset)
         PyrusServiceDesk.authorizationToken = authorizationToken
         PyrusServiceDesk.additionalUsers = additionalUsers
+        PyrusServiceDesk.clients = []
         lastSetPushToken = nil
         if needReloadUI {
             PyrusServiceDesk.mainController?.updateTitleChat()
@@ -361,36 +371,37 @@ import UIKit
             }
         }
     }
-    private static func getTimerInerval() -> TimeInterval?{
+    
+    private static func getTimerInerval() -> TimeInterval? {
         PyrusLogger.shared.logEvent("getTimerInerval started")
-        if let pyrusUserDefaults = PSDMessagesStorage.pyrusUserDefaults(), let date = pyrusUserDefaults.object(forKey: PSDChatViewController.userLastActivityKey()) as? Date{
+        if let pyrusUserDefaults = PSDMessagesStorage.pyrusUserDefaults(), let date = pyrusUserDefaults.object(forKey: PSDChatInteractor.userLastActivityKey()) as? Date{
             let difference = Date().timeIntervalSince(date)
             var timeInterval: TimeInterval? = nil
-            if difference <= PSDChatViewController.PSD_LAST_ACTIVITY_INTEVAL_MINUTE{
-                timeInterval = PSDChatViewController.REFRESH_TIME_INTEVAL_5_SECONDS
-            } else if difference <=  PSDChatViewController.PSD_LAST_ACTIVITY_INTEVAL_5_MINUTES{
-                timeInterval =  PSDChatViewController.REFRESH_TIME_INTEVAL_15_SECONDS
-            } else if difference <=  PSDChatViewController.PSD_LAST_ACTIVITY_INTEVAL_HOUR{
-                timeInterval =  PSDChatViewController.REFRESH_TIME_INTEVAL_1_MINUTE
-            } else if difference <=  PSDChatViewController.PSD_LAST_ACTIVITY_INTEVAL_3_DAYS{
-                timeInterval =  PSDChatViewController.REFRESH_TIME_INTEVAL_3_MINUTES
+            if difference <= PSDChatInteractor.PSD_LAST_ACTIVITY_INTEVAL_MINUTE{
+                timeInterval = PSDChatInteractor.REFRESH_TIME_INTEVAL_5_SECONDS
+            } else if difference <=  PSDChatInteractor.PSD_LAST_ACTIVITY_INTEVAL_5_MINUTES{
+                timeInterval =  PSDChatInteractor.REFRESH_TIME_INTEVAL_15_SECONDS
+            } else if difference <=  PSDChatInteractor.PSD_LAST_ACTIVITY_INTEVAL_HOUR{
+                timeInterval =  PSDChatInteractor.REFRESH_TIME_INTEVAL_1_MINUTE
+            } else if difference <=  PSDChatInteractor.PSD_LAST_ACTIVITY_INTEVAL_3_DAYS{
+                timeInterval =  PSDChatInteractor.REFRESH_TIME_INTEVAL_3_MINUTES
             }
             PyrusLogger.shared.logEvent("getTimerInerval ended with time: \(String(describing: timeInterval))")
             return timeInterval
         }
-        PyrusLogger.shared.logEvent("getTimerInerval ended with nil, last activity = \(PSDMessagesStorage.pyrusUserDefaults()?.object(forKey: PSDChatViewController.userLastActivityKey()) ?? "nil")")
+        PyrusLogger.shared.logEvent("getTimerInerval ended with nil, last activity = \(PSDMessagesStorage.pyrusUserDefaults()?.object(forKey: PSDChatInteractor.userLastActivityKey()) ?? "nil")")
         return nil
     }
     
     ///Set last user acivity date to NOW if date paramemeter is nil, returns true if setted
     static func setLastActivityDate(_ date: Date? = nil) -> Bool{
         if let pyrusUserDefaults = PSDMessagesStorage.pyrusUserDefaults(){
-            if let newDate = date, let oldDate = pyrusUserDefaults.object(forKey: PSDChatViewController.userLastActivityKey()) as? Date{
+            if let newDate = date, let oldDate = pyrusUserDefaults.object(forKey: PSDChatInteractor.userLastActivityKey()) as? Date{
                 if oldDate.compare(newDate) == .orderedDescending || oldDate.compare(newDate) == .orderedSame{
                     return false
                 }
             }
-            pyrusUserDefaults.set(date ?? Date(), forKey: PSDChatViewController.userLastActivityKey())
+            pyrusUserDefaults.set(date ?? Date(), forKey: PSDChatInteractor.userLastActivityKey())
             pyrusUserDefaults.synchronize()
             return true
         }

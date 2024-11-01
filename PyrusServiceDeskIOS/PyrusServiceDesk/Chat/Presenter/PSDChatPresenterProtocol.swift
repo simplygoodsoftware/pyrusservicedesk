@@ -2,7 +2,6 @@ import Foundation
 
 enum PSDChatPresenterCommand {
     case addFakeMessage(messageId: Int)
-    case updateTable(chat: PSDChat?)
     case updateButtons(buttons: [ButtonData]?)
     case updateRows(indexPaths: IndexPaths)
     case removeNoConnectionView
@@ -22,6 +21,7 @@ enum PSDChatPresenterCommand {
     case deleteSections(sections: IndexSet)
     case moveRow(movedIndexPath: IndexPath, newIndexPath: IndexPath)
     case deleteRows(indexPaths: [IndexPath], section: Int)
+    case showKeyBoard
 }
 
 protocol PSDChatPresenterProtocol {

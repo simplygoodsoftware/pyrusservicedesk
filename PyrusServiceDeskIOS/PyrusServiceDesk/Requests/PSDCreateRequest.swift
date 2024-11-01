@@ -48,7 +48,7 @@ extension URLRequest {
     {
         var fullJSOn = JSON
         guard !PyrusServiceDesk.multichats else {
-            fullJSOn["app_id"] = PyrusServiceDesk.clientId
+           // fullJSOn["app_id"] = PyrusServiceDesk.clientId
             fullJSOn["instance_id"] = PyrusServiceDesk.userId
             fullJSOn["version"] = 2
             

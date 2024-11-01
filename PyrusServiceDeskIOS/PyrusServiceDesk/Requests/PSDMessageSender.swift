@@ -87,7 +87,8 @@ class PSDMessageSender: NSObject {
         //Generate additional parameters for request body
         var parameters = [String: Any]()
         if PyrusServiceDesk.multichats {
-           parameters["user_id"] = userId
+            parameters["user_id"] = PyrusServiceDesk.currentUserId ?? PyrusServiceDesk.customUserId ?? PyrusServiceDesk.userId
+            parameters["app_id"] = PyrusServiceDesk.currentClientId ?? PyrusServiceDesk.clientId
         }
         parameters["request_new_ticket"] = PyrusServiceDesk.multichats && ticketId == 0
         parameters[commentParameter] = message
@@ -120,7 +121,9 @@ class PSDMessageSender: NSObject {
                         if let onFailed = PyrusServiceDesk.onAuthorizationFailed {
                             onFailed()
                         } else {
-                            PyrusServiceDesk.mainController?.closeServiceDesk()
+                            if !PyrusServiceDesk.multichats {
+                                PyrusServiceDesk.mainController?.closeServiceDesk()
+                            }
                         }
                     }
                 }

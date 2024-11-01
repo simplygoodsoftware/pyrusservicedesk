@@ -32,6 +32,10 @@ class PSDChatInteractor: NSObject {
         self.chat = chat
         super.init()
     }
+    
+    deinit {
+        clearTimer()
+    }
 }
 
 extension PSDChatInteractor: PSDChatInteractorProtocol {
@@ -42,19 +46,41 @@ extension PSDChatInteractor: PSDChatInteractorProtocol {
                 reloadChat()
             } else {
                 beginTimer()
-                startGettingInfo()
                 updateChat(chat: chat)
                 readChat()
             }
+            startGettingInfo()
         case .send(message: let message, attachments: let attachments):
             send(message, attachments)
         case .sendRate(rateValue: let rateValue):
             sendRate(rateValue)
         case .refresh:
-            break
+            if !PSDGetChat.isActive() {
+                updateChat(needProgress: true)
+            }
         case .addNewRow:
             if let messageToSent {
                 addNewRow(message: messageToSent)
+            }
+        case .sendAgainMessage(indexPath: let indexPath):
+            sendAgainMessage(indexPath: indexPath)
+        case .deleteMessage(indexPath: let indexPath):
+            deleteMessage(indexPath: indexPath)
+        case .forceRefresh(showFakeMessage: let showFakeMessage):
+            forceRefresh(showFakeMessage: showFakeMessage)
+        case .reloadChat:
+            reloadChat()
+        case .updateNoConnectionVisible(visible: let visible):
+            hasNoConnection = visible
+        case .startGettingInfo:
+            startGettingInfo()
+        case .viewWillDisappear:
+            if !PyrusServiceDesk.multichats {
+                stopGettingInfo()
+            }
+        case .viewDidAppear:
+            if PyrusServiceDesk.multichats && chat?.chatId ?? 0 == 0 {
+                presenter.doWork(.showKeyBoard)
             }
         }
     }
@@ -213,7 +239,6 @@ private extension PSDChatInteractor {
                             PyrusLogger.shared.logEvent("При добавленни нового сообщения: ячейки = \(indexPaths), секции \(sections)")
                         }
                                         
-                        self.hasNoConnection = false
                         self.presenter.doWork(.removeNoConnectionView)
                         self.lastMessageFromServer = chat.messages.last
                         self.setLastActivityDate()
@@ -271,6 +296,7 @@ private extension PSDChatInteractor {
             }
         }
     }
+    
     ///Adds new row to table view to last index.
     ///- parameter message: PSDMessage object that need to be added.
     func addNewRow(message: PSDMessage) {
@@ -310,6 +336,30 @@ private extension PSDChatInteractor {
         let section = tableMatrix.count > 0 ? tableMatrix.count - 1 : 0
         let index = IndexPath(row: row > 0 ? row - 1 : 0, section: section)
         return index
+    }
+    
+    
+    
+    private func getMessage(at indexPath:IndexPath) -> PSDMessage? {
+        if tableMatrix.count > indexPath.section && tableMatrix[indexPath.section].count>indexPath.row {
+            let rowMessage = tableMatrix[indexPath.section][indexPath.row]
+            return rowMessage.message
+        }
+        return nil
+    }
+    
+    func sendAgainMessage(indexPath: IndexPath) {
+        if let message = self.getMessage(at: indexPath) {
+            message.ticketId = chat?.chatId ?? 0
+            message.state = .sending
+            PSDMessageSend.pass(message, delegate: self)
+        }
+    }
+    ///Delete message from self and from storage
+    func deleteMessage(indexPath: IndexPath) {
+        if let message = self.getMessage(at: indexPath) {
+            remove(message: message)
+        }
     }
 }
 
@@ -394,6 +444,7 @@ extension PSDChatInteractor: PSDMessageSendDelegate {
     
     func updateTicketId(_ ticketId: Int) {
         chat?.chatId = ticketId
+        readChat()
     }
 }
 
@@ -440,11 +491,11 @@ extension PSDChatInteractor {
     }
     
     private static func getTimerInerval() -> TimeInterval {
-        if let pyrusUserDefaults = PSDMessagesStorage.pyrusUserDefaults(), let date = pyrusUserDefaults.object(forKey: PSDChatViewController.userLastActivityKey()) as? Date{
+        if let pyrusUserDefaults = PSDMessagesStorage.pyrusUserDefaults(), let date = pyrusUserDefaults.object(forKey: PSDChatInteractor.userLastActivityKey()) as? Date{
             let difference = Date().timeIntervalSince(date)
-            if difference <= PSD_LAST_ACTIVITY_INTEVAL_MINUTE{
+            if difference <= PSD_LAST_ACTIVITY_INTEVAL_MINUTE {
                 return REFRESH_TIME_INTEVAL_5_SECONDS
-            } else if difference <= PSD_LAST_ACTIVITY_INTEVAL_5_MINUTES{
+            } else if difference <= PSD_LAST_ACTIVITY_INTEVAL_5_MINUTES {
                 return REFRESH_TIME_INTEVAL_15_SECONDS
             }
         }
@@ -459,14 +510,15 @@ extension PSDChatInteractor {
     @objc private func updateTable() {
         startGettingInfo()
         if !hasNoConnection && !PSDGetChat.isActive() {
-           updateChat(needProgress:false)
+           updateChat(needProgress: false)
         }
     }
 }
 
 extension PSDChatInteractor: PSDGetDelegate {
     func showNoConnectionView() {
-        hasNoConnection = true
-        presenter.doWork(.showNoConnectionView)
+        DispatchQueue.main.async { [weak self] in
+            self?.presenter.doWork(.showNoConnectionView)
+        }
     }
 }

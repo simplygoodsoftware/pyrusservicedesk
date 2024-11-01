@@ -24,6 +24,14 @@ extension ChatsPresenter: ChatsPresenterProtocol {
             ))
         case .endRefresh:
             view?.show(.endRefresh)
+        case .updateTitle(title: let title):
+            view?.show(.updateTitle(title: title ?? "Обращения"))
+        case .updateTitles(titles: let titles, selectedIndex: let selectedIndex):
+            let titles = titles.map({ TitleWithBadge(title: $0) })
+            view?.show(.updateTitle(title: "Обращения"))
+            view?.show(.updateTitles(titles: titles, selectedIndex: selectedIndex))
+        case .updateSelected(index: let index):
+            view?.show(.updateSelected(index: index))
         }
     }
 }
@@ -67,6 +75,14 @@ private extension ChatsPresenter {
     @available(iOS 13.0, *)
     func prepareActions(menuActions: [MenuAction], isFilter: Bool) -> [UIAction] {
         var actions = [UIAction]()
+        if isFilter {
+            let image = PyrusServiceDesk.currentUserId == nil ? UIImage(named: "checkmark") : nil
+            let action = UIAction(title: "Все", image: image, handler: { [weak self] _ in
+                self?.view?.show(.deleteFilter)
+            })
+            actions.append(action)
+        }
+        
         for menuAction in menuActions {
             let image = menuAction.isSelect && isFilter ? UIImage(named: "checkmark") : nil
             let action = UIAction(title: menuAction.title, image: image, handler: { _ in
@@ -79,13 +95,6 @@ private extension ChatsPresenter {
             actions.append(action)
         }
         
-        if isFilter {
-            let image = PyrusServiceDesk.currentUserId == nil ? UIImage(named: "checkmark") : nil
-            let action = UIAction(title: "Все", image: image, handler: { [weak self] _ in
-                self?.view?.show(.deleteFilter)
-            })
-            actions.append(action)
-        }
         return actions
     }
 }

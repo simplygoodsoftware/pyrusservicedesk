@@ -46,7 +46,7 @@ import Foundation
     
     private(set) var chatsLeftBarButtonItem: UIBarButtonItem?
     
-    private(set) var chatsRightBarButtonItem: UIBarButtonItem?
+    private(set) var chatsRightBarButtonItem: UIView?
     
     private(set) var titleHandler: (() -> Void)?
     
@@ -184,7 +184,7 @@ import Foundation
         
         @discardableResult
 
-        @objc public func setChatsRightBarButtonItem(_ customRightBarButtonItem: UIBarButtonItem?) -> Builder {
+        @objc public func setChatsRightBarButtonItem(_ customRightBarButtonItem: UIView?) -> Builder {
             configuration.chatsRightBarButtonItem = customRightBarButtonItem
             return self
         }

@@ -38,7 +38,8 @@ struct PSDGetChat {
             parameters[TICKET_ID_KEY] = ticketId
         }
         if PyrusServiceDesk.multichats {
-            parameters["user_id"] = userId ?? PyrusServiceDesk.customUserId ?? PyrusServiceDesk.userId
+            parameters["user_id"] = userId ?? PyrusServiceDesk.currentUserId ?? PyrusServiceDesk.customUserId ?? PyrusServiceDesk.userId
+            parameters["app_id"] = PyrusServiceDesk.currentClientId ?? PyrusServiceDesk.clientId
            // parameters["author_id"] = PyrusServiceDesk.authorId
         }
         let request = URLRequest.createRequest(type: .chatFeed, parameters: parameters)

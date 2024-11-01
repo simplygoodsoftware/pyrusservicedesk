@@ -21,8 +21,10 @@ class PyrusServiceDeskController: PSDNavigationController {
             } else {
                 let presenter = PSDChatPresenter()
                 let interactor = PSDChatInteractor(presenter: presenter)
-                let controller = PSDChatViewController(interactor: interactor)
+                let router = PSDChatRouter()
+                let controller = PSDChatViewController(interactor: interactor, router: router)
                 presenter.view = controller
+                router.controller = controller
                 pushViewController(controller, animated: true)
             }
             

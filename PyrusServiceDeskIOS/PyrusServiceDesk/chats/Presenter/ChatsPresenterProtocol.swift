@@ -5,6 +5,9 @@ enum ChatsPresenterCommand {
     case setFilter(userName: String)
     case updateMenu(actions: [MenuAction], menuVisible: Bool)
     case endRefresh
+    case updateTitle(title: String?)
+    case updateTitles(titles: [String], selectedIndex: Int)
+    case updateSelected(index: Int)
 }
 
 protocol ChatsPresenterProtocol {

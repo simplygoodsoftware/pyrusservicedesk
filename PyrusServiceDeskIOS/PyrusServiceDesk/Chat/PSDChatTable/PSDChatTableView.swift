@@ -1,27 +1,25 @@
 import UIKit
 protocol PSDChatTableViewDelegate: NSObjectProtocol {
-    func needShowRate(_ showRate: Bool)
-    func restartTimer()
     func showLinkOpenAlert(_ linkString: String)
     func send(_ message:String,_ attachments:[PSDAttachment])
-    func dataIsShown()
-    func updateTicketId(_ ticketId: Int)
+    func sendAgainMessage(indexPath: IndexPath)
+    func deleteMessage(indexPath: IndexPath)
+    func refresh()
+    func reloadChat()
+    func updateNoConnectionVisible(visible: Bool)
 }
 
 class PSDChatTableView: PSDTableView {
     ///The id of chat that is shown in table view
     weak var chatDelegate: PSDChatTableViewDelegate?
-    var ticketId = 0
     private let footerHeight : CGFloat = 10.0
     private let BOTTOM_INFELICITY : CGFloat = 30.0
-    private var needShowRating : Bool = false
     private static let userCellId = "CellUser"
     private static let supportCellId = "CellSupport"
     var tableMatrix: [[PSDRowMessage]] = [[PSDRowMessage]()]
     private var heightsMap: [IndexPath: CGFloat] = [IndexPath : CGFloat]()
-    private var storeChat: PSDChat?
-    private var gotData: Bool = false
-    private var loadingTimer: Timer?
+    private var cellConfigurator: PSDChatCellConfigurator?
+    
     private lazy var buttonsView: ButtonsView = {
         let view = ButtonsView(frame: .zero)
         tableFooterView = view
@@ -29,15 +27,7 @@ class PSDChatTableView: PSDTableView {
         view.tapDelegate = self
         return view
     }()
-    override init(frame: CGRect, style: UITableView.Style) {
-        super.init(frame: frame, style: .grouped)
-        self.allowsMultipleSelection = false
-        self.allowsSelection = false
-    }
-    private var lastMessageFromServer:PSDMessage?
-    required init?(coder aDecoder: NSCoder) {
-        fatalError("init(coder:) has not been implemented")
-    }
+    
     private lazy var customRefresh: PSDRefreshControl = {
         let refreshControl = PSDRefreshControl.init(frame: self.bounds)
         refreshControl.position = .top
@@ -45,6 +35,7 @@ class PSDChatTableView: PSDTableView {
         refreshControl.addTarget(self, action: #selector(refreshChat), for: .valueChanged)
         return refreshControl
     }()
+    
     private lazy var bottomRefresh : PSDRefreshControl = {
         let refreshControl = PSDRefreshControl.init(frame: self.bounds)
         refreshControl.position = .bottom
@@ -52,15 +43,31 @@ class PSDChatTableView: PSDTableView {
         refreshControl.addTarget(self, action: #selector(refreshChat), for: .valueChanged)
         return refreshControl
     }()
-    @objc private func refreshChat(sender: PSDRefreshControl) {
-        if !(self.superview?.subviews.contains(self.noConnectionView) ?? false) && !PSDGetChat.isActive() && sender.isRefreshing{
-          //  updateChat(needProgress: true)
-        }
-        
+    
+    lazy var noConnectionView: PSDNoConnectionView = {
+        let view = PSDNoConnectionView.init(frame: self.frame)
+        view.delegate = self
+        return view
+    }()
+    
+    override init(frame: CGRect, style: UITableView.Style) {
+        super.init(frame: frame, style: .grouped)
+        self.allowsMultipleSelection = false
+        self.allowsSelection = false
     }
+    
+    required init?(coder aDecoder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
+    }
+    
     deinit {
         removeRefreshControls()
-        clearTimer()
+    }
+    
+    @objc private func refreshChat(sender: PSDRefreshControl) {
+        if !(self.superview?.subviews.contains(self.noConnectionView) ?? false) && sender.isRefreshing {
+            chatDelegate?.refresh()
+        }
     }
     
     override func layoutSubviews() {
@@ -74,45 +81,20 @@ class PSDChatTableView: PSDTableView {
         }
     }
     
-    func forceRefresh(showFakeMessage: Int?) {
-        if !PSDGetChat.isActive(){
-            if let showFakeMessage = showFakeMessage, showFakeMessage != 0 {
-                let (addIndexPaths, addSections) =  tableMatrix.addFakeMessagge(messageId: showFakeMessage)
-                if addIndexPaths.count>0 || addSections.count>0{
-                    self.beginUpdates()
-                    if(addIndexPaths.count>0){
-                        self.insertRows(at: addIndexPaths, with: .none)
-                    }
-                    if(addSections.count>0){
-                        self.insertSections(addSections, with: .none)
-                    }
-                    self.endUpdates()
-                    self.scrollsToBottom(animated: false)
-                }
-            }
-           // updateChat(needProgress: true)
-            
-        }
+    override func recolor() {
+        customRefresh.tintColor = CustomizationHelper.textColorForTable
+        bottomRefresh.tintColor = CustomizationHelper.textColorForTable
+        reloadData()
     }
     
-    func addFakeMessage(messageId: Int) {
-        let (addIndexPaths, addSections) =  tableMatrix.addFakeMessagge(messageId: messageId)
-        if addIndexPaths.count > 0 || addSections.count > 0 {
-            self.beginUpdates()
-            if addIndexPaths.count > 0 {
-                self.insertRows(at: addIndexPaths, with: .none)
-            }
-            if addSections.count > 0 {
-                self.insertSections(addSections, with: .none)
-            }
-            self.endUpdates()
-            self.scrollsToBottom(animated: false)
-        }
-    }
-    
-    func updateButtonsView(buttons: [ButtonData]?) {
-        buttonsView.updateWithButtons(buttons, width: self.frame.size.width)
-        buttonsView.collectionView.collectionViewLayout.invalidateLayout()
+    ///Setups needed properties to table view
+    func setupTableView() {
+        delegate = self
+        dataSource = self
+        backgroundColor = .clear
+        cellConfigurator = PSDChatCellConfigurator(tableView: self)
+        keyboardDismissMode = .interactive
+        separatorColor = .clear
     }
     
     func updateRows(indexPaths: IndexPaths) {
@@ -139,35 +121,8 @@ class PSDChatTableView: PSDTableView {
             self.reloadSections(indexPaths.reloadSections, with: .none)
         }
         endUpdates()
-
+        
         self.scrollToBottomAfterRefresh(with: oldContentOffset, oldContentSize: oldContentSize)
-    }
-    
-    func endRefreshing() {
-        customRefresh.endRefreshing()
-        bottomRefresh.endRefreshing()
-    }
-    
-    func reloadChat()  {
-        self.bottomPSDRefreshControl.insetHeight = 0.0
-        self.removeRefreshControls()
-        heightsMap = [IndexPath : CGFloat]()
-        tableMatrix = [[PSDRowMessage]()] // clean old chat
-        beginTimer()
-        DispatchQueue.main.async {
-            self.reloadData()
-            self.isLoading = true
-        }
-//        let ticketId = ticketId
-//        DispatchQueue.global().async {
-//            [weak self] in
-//            PSDGetChat.get(needShowError: true, delegate: self, ticketId: ticketId) {
-//                chat in
-//                DispatchQueue.main.async {
-//                    self?.updateTable(chat: chat)
-//                }
-//            }
-//        }
     }
     
     func addRow(at index: Int, lastIndexPath: IndexPath, insertSections: Bool, scrollsToBottom: Bool) {
@@ -234,278 +189,76 @@ class PSDChatTableView: PSDTableView {
         }
     }
     
-    override func recolor() {
-        customRefresh.tintColor = CustomizationHelper.textColorForTable
-        bottomRefresh.tintColor = CustomizationHelper.textColorForTable
-        reloadData()
-    }
-    
-    ///Setups needed properties to table view
-    func setupTableView() {
-        self.delegate=self
-        self.dataSource=self
-        self.backgroundColor = .clear
-        self.register(PSDUserMessageCell.self, forCellReuseIdentifier: PSDChatTableView.userCellId)
-        self.register(PSDSupportMessageCell.self, forCellReuseIdentifier: PSDChatTableView.supportCellId)
-        self.keyboardDismissMode = .interactive
-        self.separatorColor = .clear
-    }
-    
-    func reload() {
-        tableMatrix = [[PSDRowMessage]()]
-        let ticketId = ticketId
-        DispatchQueue.global().async {
-            [weak self] in
-            PSDGetChat.get(needShowError: true, delegate: self, ticketId: ticketId) {
-                chat in
-                PSDGetChats.get() { _ in }
-                DispatchQueue.main.async {
-                    self?.updateTable(chat: chat)
-                }
+    func addFakeMessage(messageId: Int) {
+        let (addIndexPaths, addSections) =  tableMatrix.addFakeMessagge(messageId: messageId)
+        if addIndexPaths.count > 0 || addSections.count > 0 {
+            self.beginUpdates()
+            if addIndexPaths.count > 0 {
+                self.insertRows(at: addIndexPaths, with: .none)
             }
+            if addSections.count > 0 {
+                self.insertSections(addSections, with: .none)
+            }
+            self.endUpdates()
+            self.scrollsToBottom(animated: false)
         }
     }
     
-    func updateTable(chat: PSDChat?) {
-        if chat != nil {
-            UnreadMessageManager.removeLastComment()
-        }
-        
-        self.gotData = true
-        if let chat = chat {
-            storeChat = chat
-            if !(loadingTimer?.isValid ?? false) {
-                drawTableWithData()
-            }
-        } else {
-            needShowRating = chat?.showRating ?? false
-            showRateIfNeed()
-            isLoading = false
-            buttonsView.updateWithButtons(nil, width: self.frame.size.width)
-        }
-        scrollsToBottom(animated: true)
-    }
-    
-    func readChat(userId: String) {
-        let ticketId = ticketId
-        DispatchQueue.global().async { [weak self] in
-            PSDGetChat.get(needShowError: true, delegate: self, ticketId: ticketId, userId: userId) { _ in
-                PSDGetChats.get() { _ in }
-            }
+    func reloadChat()  {
+        self.bottomPSDRefreshControl.insetHeight = 0.0
+        self.removeRefreshControls()
+        heightsMap = [IndexPath : CGFloat]()
+        tableMatrix = [[PSDRowMessage]()] // clean old chat
+        DispatchQueue.main.async {
+            self.reloadData()
+            self.isLoading = true
         }
     }
     
     func drawTableWithData() {
-//        guard gotData else {
-//            return
-//        }
-//        chatDelegate?.dataIsShown()
-//        needShowRating = storeChat?.showRating ?? false
-//        showRateIfNeed()
-//        
-//        if let chat = storeChat {
-//            tableMatrix.create(from: chat)
-//            lastMessageFromServer = chat.messages.last
-//        }
-//        setLastActivityDate()
-//        buttonsView.updateWithButtons(PSDChat.draftAnswers(tableMatrix), width: frame.size.width)
-//        
         isLoading = false
         reloadData()
         removeNoConnectionView()
         UIView.setAnimationsEnabled(false)
-            self.scrollsToBottom(animated: false)
-            self.setNeedsLayout()
-            self.layoutIfNeeded()
-            self.scrollsToBottom(animated: false)
-            self.layoutIfNeeded()
-            self.scrollsToBottom(animated: false)
+        self.scrollsToBottom(animated: false)
+        self.setNeedsLayout()
+        self.layoutIfNeeded()
+        self.scrollsToBottom(animated: false)
+        self.layoutIfNeeded()
+        self.scrollsToBottom(animated: false)
         UIView.setAnimationsEnabled(true)
         addRefreshControls()
     }
     
-    private func setLastActivityDate(){
-        var lastDate: Date?
-        if let lastMessage = self.lastMessageFromServer, lastMessage.owner.personId == PyrusServiceDesk.userId {
-            lastDate = lastMessage.date
-        } else{
-            lastDate = self.tableMatrix.lastUserMessageDate()
-        }
-        guard let date = lastDate else {
-            return
-        }
-        if PyrusServiceDesk.setLastActivityDate(date){
-            PyrusServiceDesk.restartTimer()
-            self.chatDelegate?.restartTimer()
+    func endRefreshing() {
+        customRefresh.endRefreshing()
+        bottomRefresh.endRefreshing()
+    }
+    
+    func updateButtonsView(buttons: [ButtonData]?) {
+        buttonsView.updateWithButtons(buttons, width: self.frame.size.width)
+        buttonsView.collectionView.collectionViewLayout.invalidateLayout()
+    }
+    
+    func showNoConnectionView() {
+        EventsLogger.logEvent(.resignFirstResponder, additionalInfo: "while show noConnectionView")
+        if !(superview?.subviews.contains(noConnectionView) ?? false),
+           lastRow() == nil {
+            superview?.addSubview(noConnectionView)
+            chatDelegate?.updateNoConnectionVisible(visible: true)
+            (findViewController()?.inputAccessoryView as? PSDMessageInputView)?.inputTextView.resignFirstResponder()
+            findViewController()?.resignFirstResponder()
         }
     }
     
-    private func showRateIfNeed() {
-        let needShow = needShowRating && !PSDMessagesStorage.hasRatingInStorage()
-        self.chatDelegate?.needShowRate(needShow)
-    }
-    private func addRefreshControls(){
-        if !(self.superview?.subviews.contains(self.noConnectionView) ?? false){
-            let deadlineTime = DispatchTime.now() + .seconds(1)
-            DispatchQueue.main.asyncAfter(deadline: deadlineTime) {
-                self.bottomPSDRefreshControl = self.bottomRefresh
-                self.insertSubview(self.bottomRefresh, at: 0)
-                self.insertSubview(self.customRefresh, at: 0)
-            }
-        }
-    }
-    
-    private func removeRefreshControls(){
-        removeTopRefreshControl()
-        removeBottomRefreshControl()
-    }
-    
-    private func removeBottomRefreshControl(){
-        self.bottomRefresh.endRefreshing()
-        self.bottomRefresh.removeFromSuperview()
-    }
-    
-    private func removeTopRefreshControl(){
-        self.customRefresh.endRefreshing()
-        self.customRefresh.removeFromSuperview()
-    }
-    
-    ///update taable matrix
-    ///- parameter needProgress: Determines whether the view should respond to updating(need to show error) 
-    func updateChat(needProgress:Bool) {
-        PSDGetChat.get(needShowError: needProgress, delegate: nil, ticketId: ticketId) { [weak self]
-            (chat : PSDChat?) in
-            DispatchQueue.main.async  {
-                if let chat = chat{
-                    UnreadMessageManager.removeLastComment()
-                    self?.needShowRating = chat.showRating
-                    self?.showRateIfNeed()
-                    //compare number of messages it two last sections
-                    guard let self = self else{
-                        return
-                    }
-                    var hasChanges = false
-                    let (removeIndexPaths, removeSections) = self.tableMatrix.removeFakeMessages()
-                    if removeIndexPaths.count > 0
-                        || removeSections.count > 0,
-                       self.tableMatrix.count > 0
-                    {
-                        if !hasChanges {
-                            hasChanges = true
-                            PyrusLogger.shared.logEvent("Колличество ячеек до удаления: \(self.tableMatrix[self.tableMatrix.count-1].count)")
-                            PyrusLogger.shared.logEvent("Колличество ячеек после удаления: \(self.tableMatrix[self.tableMatrix.count-1].count)")
-                        }
-                    }
-                    self.tableMatrix.complete(from: chat, startMessage:self.lastMessageFromServer){
-                        (indexPaths: [IndexPath], sections:IndexSet, _) in
-                        DispatchQueue.main.async  {
-                            if indexPaths.count > 0 ||
-                                sections.count > 0,
-                               self.tableMatrix.count > 0
-                            {
-                                if !hasChanges {
-                                    hasChanges = true
-                                    PyrusLogger.shared.logEvent("Колличество ячеек до удаления: \(self.tableMatrix[self.tableMatrix.count-1].count)")
-                                }
-                                PyrusLogger.shared.logEvent("Колличество ячеек после добавления: \(self.tableMatrix[self.tableMatrix.count-1].count)")
-                                PyrusLogger.shared.logEvent("При удалении фейка: ячейки = \(removeIndexPaths), секции \(removeSections)")
-                                PyrusLogger.shared.logEvent("При добавленни нового сообщения: ячейки = \(indexPaths), секции \(sections)")
-                            }
-                            let oldContentOffset = self.contentOffset
-                            let oldContentSize = self.contentSize
-                            self.removeNoConnectionView()
-                            self.lastMessageFromServer = chat.messages.last
-                            self.setLastActivityDate()
-                            if indexPaths.count > 0
-                                || sections.count > 0
-                                || removeIndexPaths.count > 0
-                                || removeSections.count > 0
-                            {
-                                let indexPaths = PSDTableView.compareAddAndRemoveRows(removeIndexPaths: removeIndexPaths, addIndexPaths: indexPaths, removeSections: removeSections, addSections: sections)
-                                
-                                PyrusLogger.shared.logEvent("Результат после сопоставления: удалять = \(indexPaths.newRemoveIndexPaths), \(indexPaths.newRemoveSections); \n добавлять = \(indexPaths.addIndexPaths), \(indexPaths.addSections); \n Обновлять = \(indexPaths.reloadIndexPaths), \(indexPaths.reloadSections)")
-                                
-                                self.beginUpdates()
-                                if indexPaths.newRemoveIndexPaths.count > 0 {
-                                    self.deleteRows(at: indexPaths.newRemoveIndexPaths, with: .none)
-                                }
-                                if indexPaths.newRemoveSections.count > 0 {
-                                    self.deleteSections(indexPaths.newRemoveSections, with: .none)
-                                }
-                                if indexPaths.addIndexPaths.count > 0{
-                                    self.insertRows(at: indexPaths.addIndexPaths, with: .none)
-                                }
-                                if indexPaths.addSections.count > 0 {
-                                    self.insertSections(indexPaths.addSections, with: .none)
-                                }
-                                if indexPaths.reloadIndexPaths.count > 0 {
-                                    self.reloadRows(at: indexPaths.reloadIndexPaths, with: .none)
-                                }
-                                if indexPaths.reloadSections.count > 0 {
-                                    self.reloadSections(indexPaths.reloadSections, with: .none)
-                                }
-                                self.endUpdates()
-                                
-                                self.scrollToBottomAfterRefresh(with: oldContentOffset, oldContentSize: oldContentSize)
-                                self.buttonsView.updateWithButtons(PSDChat.draftAnswers(self.tableMatrix), width: self.frame.size.width)
-                                self.buttonsView.collectionView.collectionViewLayout.invalidateLayout()
-                            }
-                        }
-                    }
-                    
-                }
-            }
-            DispatchQueue.main.async  {
-                if let self = self {
-                    self.buttonsView.updateWithButtons(PSDChat.draftAnswers(self.tableMatrix), width: self.frame.size.width)
-                    self.customRefresh.endRefreshing()
-                    self.bottomRefresh.endRefreshing()
-                }
-            }
-        }
-    }
-    ///Scrolls table to bottom after refresh, if table view was in bottom scroll position and new messages received
-    private func scrollToBottomAfterRefresh(with oldOffset: CGPoint?, oldContentSize: CGSize?) {
-        guard let oldOffset = oldOffset, let oldContentSize = oldContentSize else {
-            return
-        }
-        self.setNeedsLayout()
-        self.layoutIfNeeded()
-        let expectedBottomOffset = oldContentSize.height - (self.frame.size.height - contentInset.top - contentInset.bottom)
-        let hasChanges = oldContentSize != self.contentSize
-        if expectedBottomOffset - BOTTOM_INFELICITY < oldOffset.y && hasChanges{
-            self.scrollsToBottom(animated: true)
-        }
-    }
-    lazy var noConnectionView : PSDNoConnectionView  = {
-        let view = PSDNoConnectionView.init(frame: self.frame)
-        view.delegate = self
-        return view
-    }()
-    func removeNoConnectionView(){
-        if (self.superview?.subviews.contains(self.noConnectionView) ?? false){
+    func removeNoConnectionView() {
+        if self.superview?.subviews.contains(self.noConnectionView) ?? false {
             self.noConnectionView.removeFromSuperview()
             self.findViewController()?.becomeFirstResponder()
+            chatDelegate?.updateNoConnectionVisible(visible: false)
         }
     }
-    
-    ///the list off messages that wait to end scrollsToBottom animation
-    private var waitingMessagesList : [PSDMessage: Bool] = [PSDMessage: Bool]()
-    ///Boll to check if noew performing scrollsToBottom animation
-    private var scrollAnimationPerform : Bool = false{
-        didSet{
-            if(!scrollAnimationPerform){
-                self.performUpdatesFromMessagesList()
-            }
-        }
-    }
-    private func performUpdatesFromMessagesList(){
-        for (message,changedToSent)  in waitingMessagesList{
-            self.refresh(message: message, changedToSent: changedToSent)
-        }
-    }
-    private static let delayBeforeUpdates: Int = 20//milliseconds
-    
+        
     ///Scroll tableview to its bottom position without animation
     func scrollsToBottom(animated: Bool) {
         layoutIfNeeded()
@@ -525,86 +278,6 @@ class PSDChatTableView: PSDTableView {
             scrollRectToVisible(frameFooter, animated: animated)
         }
     }
-
-    ///Adds new row to table view to last index.
-    ///- parameter message: PSDMessage object that need to be added.
-    func addNewRow(message: PSDMessage)
-    {
-        if(self.numberOfRows(inSection: 0) == 0){
-            self.addNewRow(){
-                var lastSection = self.tableMatrix.count-1
-                let lastRowDate = self.tableMatrix.date(of:lastSection)
-                if(lastRowDate != nil && message.date.compareWithoutTime(with:lastRowDate!)  != .equal){//if massage has other date create new section
-                    lastSection = lastSection + 1
-                }
-                for rowMessage in PSDObjectsCreator.parseMessageToRowMessage(message){
-                    self.addRow(at: lastSection, dataForRow: rowMessage)
-                }
-            }
-        }
-        else{
-            var lastSection = self.tableMatrix.count-1
-            let lastRowDate = self.tableMatrix.date(of:lastSection)
-            if(lastRowDate != nil && message.date.compareWithoutTime(with:lastRowDate!)  != .equal){//if massage has other date create new section
-                lastSection = lastSection + 1
-            }
-            for rowMessage in PSDObjectsCreator.parseMessageToRowMessage(message){
-                self.addRow(at: lastSection, dataForRow: rowMessage)
-            }
-        }
-        buttonsView.updateWithButtons(PSDChat.draftAnswers(tableMatrix), width: frame.size.width)
-        UIView.animate(withDuration: 0.1, animations: {
-            self.layoutIfNeeded()
-        })
-        
-    }
-    ///Returns last PSDChatMessageCell in tableView
-    private func lastRow() -> PSDChatMessageCell?{
-        return self.cellForRow(at: lastIndexPath()) as? PSDChatMessageCell
-    }
-    ///Add new row to tableMatrix and insert row to tableView, than scrolls it to bottom position
-    ///- parameter index: section where row will be inserted and added new element to tableMatrix
-    ///- parameter dataForRow:PSDMessage object for draw in cell.
-    private func addRow(at index:Int, dataForRow: PSDRowMessage) {
-        UIView.animate(withDuration: 0.0, delay: 0, usingSpringWithDamping: 0.0, initialSpringVelocity: 0.0, options: [], animations: {
-            //add new section if need
-            if self.tableMatrix.count-1 < index {
-                self.tableMatrix.append([PSDRowMessage]())
-                self.tableMatrix[index].append(dataForRow)
-                self.insertSections([index], with: .none)
-            }
-            else{
-                //add row to last section
-                self.tableMatrix[index].append(dataForRow)
-                self.beginUpdates()
-                self.insertRows(at: [self.lastIndexPath()], with: .none)
-                self.endUpdates()
-                if(self.tableMatrix[index].count==1){
-                    self.reloadSections([index], with: .none)//to change header( draw date)
-                }
-            }
-         }, completion: { complete in
-            if dataForRow.message.owner.personId == PyrusServiceDesk.userId {
-                    self.scrollsToBottom(animated: true)
-            }
-        })
-    }
-    
-    ///Returns last IndexPath in tableView
-    private func lastIndexPath()->IndexPath
-    {
-        let row : Int = tableMatrix.last?.count ?? 1
-        let section = tableMatrix.count>0 ? tableMatrix.count-1 : 0
-        let index = IndexPath(row: row>0 ? row - 1 : 0, section: section)
-        return index
-    }
-    private func getMessage(at indexPath:IndexPath)->PSDMessage?{
-        if tableMatrix.count > indexPath.section && tableMatrix[indexPath.section].count>indexPath.row{
-            let rowMessage = tableMatrix[indexPath.section][indexPath.row]
-            return rowMessage.message
-        }
-        return nil
-    }
     
     func redrawCell(at indexPath: IndexPath, with message: PSDRowMessage) {
         //If cell is on the screen and this is attachments cell, we should not reload it because it will restart all animation (bad looking), so just pass progress
@@ -619,27 +292,79 @@ class PSDChatTableView: PSDTableView {
             
         }
         //Redraw cell with new Data
-        if needReload{
-            if(cellOnScrean){
-                if let cell = self.cellForRow(at: indexPath) as? PSDChatMessageCell{
-                    cell.draw(message: message,
-                              width: frame.size.width)
+        if needReload {
+            if cellOnScrean {
+                if let cell = self.cellForRow(at: indexPath) as? PSDChatMessageCell {
+                    cell.draw(message: message, width: frame.size.width)
                     PSDPreviewSetter.setPreview(of: message.attachment, in: cell.cloudView.attachmentView, delegate:self, animated: false)
                 }
             }
         }
     }
-    ///Redraw cell with sending attachment - pass progress and download state, hide stateView
-    private func redrawSendingAttachmentCell(at indexPath: IndexPath,with message:PSDRowMessage){
-        let cellOnScreen = self.indexPathsForVisibleRows?.contains(indexPath) ?? false
-        guard
-            cellOnScreen,
-            let attachment = message.attachment
-        else {
+    
+}
+
+private extension PSDChatTableView {
+    func addRefreshControls() {
+        if !(self.superview?.subviews.contains(self.noConnectionView) ?? false) {
+            let deadlineTime = DispatchTime.now() + .seconds(1)
+            DispatchQueue.main.asyncAfter(deadline: deadlineTime) {
+                self.bottomPSDRefreshControl = self.bottomRefresh
+                self.insertSubview(self.bottomRefresh, at: 0)
+                self.insertSubview(self.customRefresh, at: 0)
+            }
+        }
+    }
+    
+    func removeRefreshControls() {
+        removeTopRefreshControl()
+        removeBottomRefreshControl()
+    }
+    
+    func removeBottomRefreshControl() {
+        self.bottomRefresh.endRefreshing()
+        self.bottomRefresh.removeFromSuperview()
+    }
+    
+    func removeTopRefreshControl() {
+        self.customRefresh.endRefreshing()
+        self.customRefresh.removeFromSuperview()
+    }
+    
+    ///Scrolls table to bottom after refresh, if table view was in bottom scroll position and new messages received
+    func scrollToBottomAfterRefresh(with oldOffset: CGPoint?, oldContentSize: CGSize?) {
+        guard let oldOffset = oldOffset, let oldContentSize = oldContentSize else {
             return
         }
-        guard
-            let attachmentView = (self.cellForRow(at: indexPath) as? PSDChatMessageCell)?.cloudView.attachmentView,
+        self.setNeedsLayout()
+        self.layoutIfNeeded()
+        let expectedBottomOffset = oldContentSize.height - (self.frame.size.height - contentInset.top - contentInset.bottom)
+        let hasChanges = oldContentSize != self.contentSize
+        if expectedBottomOffset - BOTTOM_INFELICITY < oldOffset.y && hasChanges{
+            self.scrollsToBottom(animated: true)
+        }
+    }
+
+    ///Returns last PSDChatMessageCell in tableView
+    func lastRow() -> PSDChatMessageCell? {
+        return self.cellForRow(at: lastIndexPath()) as? PSDChatMessageCell
+    }
+    
+    ///Returns last IndexPath in tableView
+    func lastIndexPath() -> IndexPath {
+        let row: Int = tableMatrix.last?.count ?? 1
+        let section = tableMatrix.count > 0 ? tableMatrix.count - 1 : 0
+        let index = IndexPath(row: row > 0 ? row - 1 : 0, section: section)
+        return index
+    }
+    
+    ///Redraw cell with sending attachment - pass progress and download state, hide stateView
+    func redrawSendingAttachmentCell(at indexPath: IndexPath, with message: PSDRowMessage) {
+        let cellOnScreen = self.indexPathsForVisibleRows?.contains(indexPath) ?? false
+        guard cellOnScreen, let attachment = message.attachment
+        else { return }
+        
+        guard let attachmentView = (self.cellForRow(at: indexPath) as? PSDChatMessageCell)?.cloudView.attachmentView,
             message.message.state == .sending
         else {
             return
@@ -654,46 +379,40 @@ class PSDChatTableView: PSDTableView {
     }
 }
 
-extension PSDChatTableView : UITableViewDelegate, UITableViewDataSource{
+extension PSDChatTableView: UITableViewDelegate, UITableViewDataSource {
     //MARK: table delegate and dataSourse
     func numberOfSections(in tableView: UITableView) -> Int {
         return tableMatrix.count
     }
+    
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
         return tableMatrix.count > section ? tableMatrix[section].count : 0
     }
+    
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-        let message : PSDRowMessage
-        if (tableMatrix.count > indexPath.section && tableMatrix[indexPath.section].count > indexPath.row){
+        let message: PSDRowMessage
+        if tableMatrix.count > indexPath.section && tableMatrix[indexPath.section].count > indexPath.row {
             message = tableMatrix[indexPath.section][indexPath.row]
-        }
-        else{
+        } else {
             message = PSDObjectsCreator.createWelcomeMessage()
         }
-        let cell : PSDChatMessageCell
-        if (message.rating ?? 0) != 0 || (message.message.owner.personId == PyrusServiceDesk.userId) && !(PyrusServiceDesk.multichats && !message.message.isInbound) {
-            cell = self.dequeueReusableCell(withIdentifier: PSDChatTableView.userCellId, for: indexPath) as! PSDUserMessageCell
-            (cell as! PSDUserMessageCell).delegate = self
-            
-        }  else{
-            cell = self.dequeueReusableCell(withIdentifier: PSDChatTableView.supportCellId, for: indexPath) as! PSDSupportMessageCell
-            (cell as! PSDSupportMessageCell).needShowAvatar = self.tableMatrix.needShowAvatar(at: indexPath)
-            if((cell as! PSDSupportMessageCell).needShowAvatar){
-                (cell as! PSDSupportMessageCell).avatarView.owner = message.message.owner
-                PSDSupportImageSetter.setImage(for:message.message.owner, in:(cell as! PSDSupportMessageCell).avatarView ,delagate: self)
-            }
-            
+        
+        let cell = cellConfigurator?.getCell(model: tableMatrix, indexPath: indexPath) ?? PSDChatMessageCell()
+        if let userCell = cell as? PSDUserMessageCell {
+            userCell.delegate = self
+        } else if let supportCell = cell as? PSDSupportMessageCell, supportCell.needShowAvatar {
+            supportCell.avatarView.owner = message.message.owner
+            PSDSupportImageSetter.setImage(for: message.message.owner, in: supportCell.avatarView, delagate: self)
         }
-        cell.needShowName = self.tableMatrix.needShowName(at: indexPath)
-        cell.drawEmpty = self.tableMatrix.emptyMessage(at: indexPath)
-        cell.firstMessageInDate = indexPath.row == 0
-        cell.draw(message:message, width: frame.size.width)
+        
+        cell.draw(message: message, width: frame.size.width)
         PSDPreviewSetter.setPreview(of: message.attachment, in: cell.cloudView.attachmentView, delegate: self, animated: false)
         self.redrawSendingAttachmentCell(at: indexPath, with: message)
         cell.cloudView.messageTextView.linkDelegate = self
-        //cell.transform = CGAffineTransform(rotationAngle: CGFloat.pi)
+        
         return cell
     }
+    
     func tableView(_ tableView: UITableView, willDisplay cell: UITableViewCell, forRowAt indexPath: IndexPath) {
         heightsMap[indexPath] = cell.frame.size.height
     }
@@ -716,6 +435,7 @@ extension PSDChatTableView : UITableViewDelegate, UITableViewDataSource{
         dateLabel.autoresizingMask = [.flexibleWidth,.flexibleHeight]
         return view
     }
+    
     func tableView(_ tableView: UITableView, heightForHeaderInSection section: Int) -> CGFloat {
         return headerHeight
     }
@@ -723,12 +443,15 @@ extension PSDChatTableView : UITableViewDelegate, UITableViewDataSource{
     func tableView(_ tableView: UITableView, viewForFooterInSection section: Int) -> UIView? {
         return UIView.init(frame: CGRect(x: 0, y: 0, width: frame.size.width, height: footerHeight))
     }
+    
     func tableView(_ tableView: UITableView, heightForFooterInSection section: Int) -> CGFloat {
         return footerHeight
     }
+    
     func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {
         return  UITableView.automaticDimension
     }
+    
     func tableView(_ tableView: UITableView, estimatedHeightForRowAt indexPath: IndexPath) -> CGFloat {
         return heightsMap[indexPath] ?? UITableView.automaticDimension
     }
@@ -757,223 +480,64 @@ extension PSDChatTableView : UITableViewDelegate, UITableViewDataSource{
 }
 
 //MARK: PSDNoConnectionViewDelegate
-extension PSDChatTableView : PSDNoConnectionViewDelegate{
-    func retryPressed(){
+extension PSDChatTableView: PSDNoConnectionViewDelegate{
+    func retryPressed() {
         removeNoConnectionView()
-        reloadChat()
+        chatDelegate?.reloadChat()
     }
 }
-//MARK: PSDGetDelegate
-extension PSDChatTableView : PSDGetDelegate{
-    func showNoConnectionView(){
-        DispatchQueue.main.async {
-            EventsLogger.logEvent(.resignFirstResponder, additionalInfo: "while show noConnectionView")
-            if !(self.superview?.subviews.contains(self.noConnectionView) ?? false) && self.lastRow() == nil{
-                self.superview?.addSubview(self.noConnectionView)
-                (self.findViewController()?.inputAccessoryView as? PSDMessageInputView)?.inputTextView.resignFirstResponder()
-                self.findViewController()?.resignFirstResponder()
-            }
-        }
-    }
-}
+
 //MARK: PSDChatMessageCellDelegate
-extension PSDChatTableView: PSDChatMessageCellDelegate{
+extension PSDChatTableView: PSDChatMessageCellDelegate {
     ///Send message one more time.
-    func sendAgainMessage(from cell:PSDChatMessageCell){
-        if let indexPath = self.indexPath(for: cell){
-            if let cell = cell as? PSDUserMessageCell{
+    func sendAgainMessage(from cell: PSDChatMessageCell) {
+        if let indexPath = self.indexPath(for: cell) {
+            if let cell = cell as? PSDUserMessageCell {
                 cell.messageStateView._messageState = .sending
             }
-            if let message = self.getMessage(at: indexPath){
-                message.ticketId = ticketId
-                message.state = .sending
-                PSDMessageSend.pass(message, delegate: self)
-            }
-        }
-        else{
-            // print("error sendAgainMessage, no cell")
+            chatDelegate?.sendAgainMessage(indexPath: indexPath)
         }
     }
+    
     ///Delete message from self and from storage
-    func deleteMessage(from cell:PSDChatMessageCell)
-    {
-        if let indexPath = self.indexPath(for: cell), let message = self.getMessage(at: indexPath){
-            remove(message: message)
+    func deleteMessage(from cell:PSDChatMessageCell) {
+        if let indexPath = self.indexPath(for: cell) {
+            chatDelegate?.deleteMessage(indexPath: indexPath)
         }
     }
 }
+
 //MARK: PSDPreviewSetterDelegate
-extension PSDChatTableView : PSDPreviewSetterDelegate{
+extension PSDChatTableView: PSDPreviewSetterDelegate {
     ///Change message local id - redraw it if it's visible. Didn't call reloadCell - so can't change cell height, or break animation.
-    func reloadCells(with attachmentId: String)
-    {
-        for cell in self.visibleCells{
-            if let cell = cell as? PSDChatMessageCell{
-                if let indexPath = self.indexPath(for: cell){
-                    if tableMatrix.has(indexPath:indexPath){
-                         let message : PSDRowMessage = tableMatrix[indexPath.section][indexPath.row]
-                        if(message.attachment?.localId == attachmentId){
+    func reloadCells(with attachmentId: String) {
+        for cell in self.visibleCells {
+            if let cell = cell as? PSDChatMessageCell {
+                if let indexPath = self.indexPath(for: cell) {
+                    if tableMatrix.has(indexPath:indexPath) {
+                        let message: PSDRowMessage = tableMatrix[indexPath.section][indexPath.row]
+                        if message.attachment?.localId == attachmentId {
                             PSDPreviewSetter.setPreview(of: message.attachment, in: cell.cloudView.attachmentView, delegate: nil, animated: true)
                         }
                     }
                 }
-                
             }
         }
     }
 }
+
 //MARK: PSDSupportImageSetterDelegate
-extension PSDChatTableView : PSDSupportImageSetterDelegate{
+extension PSDChatTableView: PSDSupportImageSetterDelegate {
     ///Change message's user's avatar - redraw it if it's visible. Didn't call reloadCell - so can't change cell height, or break animation.
-    func reloadCells(with owner:PSDUser)
-    {
+    func reloadCells(with owner:PSDUser) {
         for cell in self.visibleCells{
-            if let cell = cell as? PSDSupportMessageCell{
+            if let cell = cell as? PSDSupportMessageCell {
                 if cell.avatarView.owner == owner && cell.avatarView.owner != nil{
                     PSDSupportImageSetter.setImage(for: cell.avatarView.owner!, in: cell.avatarView, delagate: nil)
                 }
             }
         }
     }
-}
-//MARK: PSDMessageSendDelegate
-extension PSDChatTableView : PSDMessageSendDelegate {
-    func updateTicketId(_ ticketId: Int) {
-        self.ticketId = ticketId
-        chatDelegate?.updateTicketId(ticketId)
-    }
-    
-    func remove(message:PSDMessage){
-        let indexPathsAndRows = self.tableMatrix.findIndexPath(ofMessage: message.clientId).keys.sorted(by:{$0 > $1})
-        var indexPaths = [IndexPath]()
-        for indexPath in indexPathsAndRows{
-            if tableMatrix.has(indexPath: indexPath){
-                tableMatrix[indexPath.section].remove(at: indexPath.row)
-                indexPaths.append( indexPath)
-            }
-        }
-        DispatchQueue.main.async {
-            PSDMessagesStorage.removeFromStorage(messageId: message.clientId)
-            DispatchQueue.main.async {
-                 self.showRateIfNeed()
-            }
-        }
-        if indexPaths.count > 0{
-            let section = indexPaths[0].section
-            self.deleteRows(at: indexPaths, with: .none)
-            if tableView(self, numberOfRowsInSection: section) == 0{
-                self.reloadSections([section], with: .none)
-            }
-        }
-    }
-    
-    ///Change massage in tableMatrix and redraw Cell with new message data if it's visible.
-    ///Didn't call reloadCell - so can't change cell height, or break animation.
-    func refresh(message:PSDMessage, changedToSent: Bool){
-        DispatchQueue.main.async{
-            [weak self] in
-            self?.chatDelegate?.restartTimer()
-            if !(self?.scrollAnimationPerform ?? false){
-                guard let self = self else{
-                    return
-                }
-                let indexPathsAndMessages = self.tableMatrix.findIndexPath(ofMessage: message.clientId)
-                guard  indexPathsAndMessages.count > 0 else{
-                    EventsLogger.logEvent(.didNotFindMessageAfterUpdate)
-                    return
-                }
-                var lastIndexPath: [IndexPath]? = nil
-                
-                if changedToSent && message.fromStrorage {
-                    //is state was changed need to move sendded message up to sent block
-                    lastIndexPath = self.tableMatrix.indexPathsAfterSent(for: message)
-                    if let lastIndexPath = lastIndexPath, lastIndexPath.count > 0{
-                        let newSection = lastIndexPath[0].section
-                        if self.tableMatrix.count-1 < newSection {
-                            self.tableMatrix.append([PSDRowMessage]())
-                            if #available(iOS 11.0, *) {
-                                self.performBatchUpdates({
-                                    self.insertSections(IndexSet(arrayLiteral: newSection), with: .none)
-                                }, completion: nil)
-                            } else {
-                                self.beginUpdates()
-                                self.insertSections(IndexSet(arrayLiteral: newSection), with: .none)
-                                self.endUpdates()
-                            }
-                        }
-                    }
-                }
-                var oldSection = 0
-                let indexPaths = indexPathsAndMessages.keys.sorted(by: {$0 < $1})
-                var movedRows = 0
-                for (i,indexPath) in indexPaths.enumerated(){
-                    oldSection = indexPath.section
-                    let movedIndexPath = IndexPath(row: indexPath.row - movedRows, section: indexPath.section)
-                    guard self.tableMatrix.has(indexPath: movedIndexPath), let rowMessage = indexPathsAndMessages[indexPath] else{
-                        continue
-                    }
-                    rowMessage.updateWith(message: message)
-                    self.redrawCell(at:movedIndexPath,with: rowMessage)
-                    if let lastIndexPath = lastIndexPath, lastIndexPath.count > i{
-                        let newIndexPath = lastIndexPath[i]
-                        if newIndexPath != indexPath{
-                            movedRows = movedRows + 1
-                            self.tableMatrix[movedIndexPath.section].remove(at: movedIndexPath.row)
-                            self.tableMatrix[newIndexPath.section].insert(rowMessage, at:newIndexPath.row)
-                            if #available(iOS 11.0, *) {
-                                self.performBatchUpdates({
-                                    self.moveRow(at: movedIndexPath, to: newIndexPath)
-                                }, completion: nil)
-                            } else {
-                                self.beginUpdates()
-                                self.moveRow(at: movedIndexPath, to: newIndexPath)
-                                self.endUpdates()
-                            }
-                        }
-                    }
-                }
-                if self.tableMatrix[oldSection].count == 0{
-                    self.tableMatrix.remove(at: oldSection)
-                    if #available(iOS 11.0, *) {
-                        self.performBatchUpdates({
-                            self.deleteSections(IndexSet(arrayLiteral: oldSection), with: .none)
-                        }, completion: nil)
-                    } else {
-                        self.beginUpdates()
-                        self.deleteSections(IndexSet(arrayLiteral: oldSection), with: .none)
-                        self.endUpdates()
-                    }
-                }
-                if let index = self.waitingMessagesList.index(forKey: message){
-                    self.waitingMessagesList.remove(at: index )
-                }
-            }
-            else{
-                self?.waitingMessagesList[message] = changedToSent
-            }
-        }
-    }
-    
-}
-
-private extension PSDChatTableView {
-    private func clearTimer() {
-        loadingTimer?.invalidate()
-        loadingTimer = nil
-    }
-    
-    private func beginTimer() {
-        guard loadingTimer == nil else {
-            return
-        }
-        loadingTimer = Timer.scheduledTimer(timeInterval: LOADING_INTERVAL, target: self, selector: #selector(stopLoading), userInfo: nil, repeats: false)
-    }
-    
-    @objc func stopLoading(sender: Timer) {
-        clearTimer()
-        drawTableWithData()
-    }
-    var LOADING_INTERVAL: Double { 1 }
 }
 
 private extension UIFont {

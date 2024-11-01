@@ -29,7 +29,7 @@ class PSDMessage: NSObject {
     var ticketId: Int = 0
     var userId: String?
     
-    init(text: String?, attachments: [PSDAttachment]? ,messageId:String? , owner:PSDUser?, date: Date?){
+    init(text: String?, attachments: [PSDAttachment]?, messageId: String?, owner: PSDUser?, date: Date?) {
         self.text = text ?? ""        
         self.attachments = attachments
 

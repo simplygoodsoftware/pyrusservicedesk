@@ -3,7 +3,7 @@ import UIKit
 @available(iOS 13.0, *)
 class PSDChatsViewController: UIViewController {
     private let interactor: ChatsInteractorProtocol
-    private let  router: ChatsRouterProtocol?
+    private let router: ChatsRouterProtocol?
     
     required init(interactor: ChatsInteractorProtocol, router: ChatsRouterProtocol) {
         self.interactor = interactor
@@ -18,6 +18,23 @@ class PSDChatsViewController: UIViewController {
     private lazy var tableView: UITableView = {
         let table = UITableView()
         return table
+    }()
+    
+    private lazy var navigationView: UIView = {
+        let view = UIView()
+//        view.translatesAutoresizingMaskIntoConstraints = false
+        view.backgroundColor = UIColor(hex: "#F9F9F9F0")
+        view.layer.borderColor = UIColor.black.withAlphaComponent(0.3).cgColor
+        view.layer.borderWidth = 0.5
+        return view
+    }()
+    
+    private lazy var navTitle = UILabel()
+    
+    private lazy var segmentControl: UnderlineSegmentController = {
+        let segment = UnderlineSegmentController(frame: .zero)
+//        segment.translatesAutoresizingMaskIntoConstraints = false
+        return segment
     }()
     
     private var cellConfigurator: PSDChatsCellConfigurator?
@@ -78,9 +95,10 @@ class PSDChatsViewController: UIViewController {
     
     override func viewDidLoad() {
         super.viewDidLoad()
+        navigationController?.delegate = self
         customization = PyrusServiceDesk.mainController?.customization
-        designNavigation()
         design()
+        designNavigation()
         startGettingInfo()
         interactor.doInteraction(.viewDidload)
     }
@@ -94,7 +112,10 @@ class PSDChatsViewController: UIViewController {
     override func viewWillLayoutSubviews() {
         super.viewWillLayoutSubviews()
         if isFirstLayout {
-            filterInfoView.frame = CGRect(x: 0, y: Int(self.view.safeAreaInsets.top), width: Int(self.view.frame.width), height: 0)
+            //filterInfoView.frame = CGRect(x: 0, y: Int(self.view.safeAreaInsets.top), width: Int(self.view.frame.width), height: 0)
+            filterInfoView.frame = CGRect(x: 0, y: Int(self.view.safeAreaInsets.top + 84.5), width: Int(self.view.frame.width), height: 0)
+            segmentControl.frame = CGRect(x: 0, y: Int(self.view.safeAreaInsets.top + 44), width: Int(self.view.frame.width), height: 0)
+            navigationView.frame = CGRect(x: -1, y: -1, width: Int(self.view.frame.width + 1), height: Int(self.view.safeAreaInsets.top + 44))
             isFirstLayout = false
         }
     }
@@ -106,6 +127,8 @@ private extension PSDChatsViewController {
     func design() {
         view.backgroundColor = UIColor.psdBackground
         view.addSubview(tableView)
+        view.addSubview(navigationView)
+        view.addSubview(segmentControl)
         view.addSubview(emptyChatsView)
         view.addSubview(filterInfoView)
         view.addSubview(plusView)
@@ -133,8 +156,6 @@ private extension PSDChatsViewController {
         openNewButton.translatesAutoresizingMaskIntoConstraints = false
       
         NSLayoutConstraint.activate([
-            chatsImage.heightAnchor.constraint(equalToConstant: 90),
-            chatsImage.widthAnchor.constraint(equalToConstant: 90),
             chatsImage.centerXAnchor.constraint(equalTo: view.centerXAnchor),
             chatsImage.bottomAnchor.constraint(equalTo: openNewButton.topAnchor, constant: -16),
             openNewButton.centerXAnchor.constraint(equalTo: view.centerXAnchor),
@@ -148,7 +169,7 @@ private extension PSDChatsViewController {
     func setupTableView() {
         tableView.translatesAutoresizingMaskIntoConstraints = false
         NSLayoutConstraint.activate([
-            tableView.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor),
+            tableView.topAnchor.constraint(equalTo: navigationView.bottomAnchor),
             tableView.bottomAnchor.constraint(equalTo: view.bottomAnchor),
             tableView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
             tableView.trailingAnchor.constraint(equalTo: view.trailingAnchor)
@@ -257,55 +278,98 @@ private extension PSDChatsViewController {
         bigAppear.backgroundColor = UIColor(hex: "#F9F9F9F0")
         navigationItem.scrollEdgeAppearance = bigAppear
         navigationItem.standardAppearance = bigAppear
-        navigationItem.rightBarButtonItem = customization?.chatsRightBarButtonItem
+        //navigationItem.rightBarButtonItem = customization?.chatsRightBarButtonItem
+                
+//        NSLayoutConstraint.activate([
+//            navigationView.topAnchor.constraint(equalTo: view.topAnchor, constant: -1),
+//            navigationView.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: -1),
+//            navigationView.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: 1),
+//        ])
+        
+        if let button = customization?.chatsRightBarButtonItem {
+            navigationView.addSubview(button)
+            button.isUserInteractionEnabled = true
+            button.translatesAutoresizingMaskIntoConstraints = false
+            NSLayoutConstraint.activate([
+                button.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -16),
+                button.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor, constant: 9),
+                button.heightAnchor.constraint(equalToConstant: 28),
+                button.widthAnchor.constraint(equalToConstant: 28)
+            ])
+        }
+        
         setupNavTitle()
         setupFilterButton()
+        setupSegmentController()
     }
     
     func setupFilterButton() {
         let mainColor = customization?.themeColor ?? .darkAppColor
         filterImage = UIImageView(image: UIImage(named: "filter")?.imageWith(color: mainColor))
         filterButton.addSubview(filterImage)
-        filterButton.bounds = CGRect(x: 0, y: -1, width: 28, height: 28)
-        filterImage.center = filterButton.center
+        navigationView.addSubview(filterButton)
         filterImage.translatesAutoresizingMaskIntoConstraints = false
+        filterButton.translatesAutoresizingMaskIntoConstraints = false
         NSLayoutConstraint.activate([
-            filterImage.heightAnchor.constraint(equalToConstant: 30),
-            filterImage.widthAnchor.constraint(equalToConstant: 30),
+            filterButton.heightAnchor.constraint(equalToConstant: 28),
+            filterButton.widthAnchor.constraint(equalToConstant: 28),
+            filterImage.heightAnchor.constraint(equalToConstant: 28),
+            filterImage.widthAnchor.constraint(equalToConstant: 28),
+            filterImage.centerXAnchor.constraint(equalTo: filterButton.centerXAnchor),
+            filterImage.centerYAnchor.constraint(equalTo: filterButton.centerYAnchor),
         ])
         filterImage.sizeToFit()
-        navigationItem.leftBarButtonItem = UIBarButtonItem(customView: filterButton)
-        filterButton.isHidden = true
+        // navigationItem.leftBarButtonItem = UIBarButtonItem(customView: filterButton)
+       // filterButton.isHidden = true
         if #available(iOS 14.0, *) {
             filterButton.showsMenuAsPrimaryAction = true
         }
+        
+        NSLayoutConstraint.activate([
+            filterButton.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor, constant: 9),
+            filterButton.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 16)
+        ])
+    }
+    
+    func setupSegmentController() {
+        segmentControl.delegate = self
+        
+        NSLayoutConstraint.activate([
+//            segmentControl.topAnchor.constraint(equalTo: filterButton.bottomAnchor, constant: 7),
+//            navigationView.bottomAnchor.constraint(equalTo: segmentControl.bottomAnchor, constant: 0.5),
+//            segmentControl.leadingAnchor.constraint(equalTo: view.leadingAnchor),
+//            segmentControl.trailingAnchor.constraint(equalTo: view.trailingAnchor),
+//            segmentControl.heightAnchor.constraint(equalToConstant: 40)
+        ])
     }
     
     func setupNavTitle() {
         let titleView = UIView()
-        let title = UILabel()
         let icon = UIImageView(image: UIImage(named: "iiko"))
-        titleView.addSubview(title)
+        titleView.addSubview(navTitle)
         titleView.addSubview(icon)
+        navigationView.addSubview(titleView)
         titleView.translatesAutoresizingMaskIntoConstraints = false
-        title.translatesAutoresizingMaskIntoConstraints = false
+        navTitle.translatesAutoresizingMaskIntoConstraints = false
         icon.translatesAutoresizingMaskIntoConstraints = false
         NSLayoutConstraint.activate([
             icon.leadingAnchor.constraint(equalTo: titleView.leadingAnchor),
             icon.heightAnchor.constraint(equalToConstant: 24),
             icon.widthAnchor.constraint(equalToConstant: 24),
-            title.leadingAnchor.constraint(equalTo: icon.trailingAnchor, constant: 6),
-            title.centerYAnchor.constraint(equalTo: icon.centerYAnchor),
-            titleView.heightAnchor.constraint(equalToConstant: 24),
-            titleView.trailingAnchor.constraint(equalTo: title.trailingAnchor)
+            navTitle.leadingAnchor.constraint(equalTo: icon.trailingAnchor, constant: 6),
+            navTitle.centerYAnchor.constraint(equalTo: icon.centerYAnchor),
+            titleView.heightAnchor.constraint(equalToConstant: 28),
+            titleView.trailingAnchor.constraint(equalTo: navTitle.trailingAnchor),
+            titleView.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor, constant: 9),
+            titleView.centerXAnchor.constraint(equalTo: view.centerXAnchor)
         ])
         
-        title.text = PyrusServiceDesk.clientName
-        title.font = CustomizationHelper.systemBoldFont(ofSize: 17)
+        navTitle.text = "Обращения"//PyrusServiceDesk.clientName
+        navTitle.font = CustomizationHelper.systemBoldFont(ofSize: 17)
         icon.layer.cornerRadius = 12
         icon.clipsToBounds = true
         icon.contentMode = .scaleAspectFill
-        navigationItem.titleView = titleView
+        //navigationItem.titleView = titleView
         
         let tapGesture = UITapGestureRecognizer(target: self, action: #selector(titleViewTapped))
         titleView.addGestureRecognizer(tapGesture)
@@ -416,6 +480,17 @@ extension PSDChatsViewController: ChatsViewProtocol {
         case .endRefresh:
             customRefresh.endRefreshing()
             tableView.sendSubviewToBack(customRefresh)
+        case .updateTitle(title: let title):
+            navTitle.text = title
+        case .updateTitles(titles: let titles, selectedIndex: let selectedIndex):
+            UIView.animate(withDuration: 0.3, animations: {
+                self.segmentControl.frame.size.height = 40
+                self.navigationView.frame.size.height += 41.5
+            }, completion: { [weak self] _ in
+                self?.segmentControl.updateTitle(titles: titles, selectIndex: selectedIndex)
+            })
+        case .updateSelected(index: let index):
+            segmentControl.selectIndex(index)
         }
     }
 }
@@ -427,4 +502,20 @@ extension PSDChatsViewController: PSDUpdateInfo {
     }
     
     func refreshChat(showFakeMessage: Int?) { }
+}
+
+extension PSDChatsViewController: UnderlineSegmentControllerDelegate {
+    func didSelectSegment(_ index: Int) {
+        interactor.doInteraction(.updateSelected(index: index))
+    }
+}
+
+extension PSDChatsViewController: UINavigationControllerDelegate {
+    func navigationController(_ navigationController: UINavigationController, willShow viewController: UIViewController, animated: Bool) {
+        if viewController == self {
+            self.navigationController?.setNavigationBarHidden(true, animated: animated)
+        } else {
+            self.navigationController?.setNavigationBarHidden(false, animated: animated)
+        }
+    }
 }

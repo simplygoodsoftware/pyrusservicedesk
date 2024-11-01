@@ -1,11 +1,3 @@
-//
-//  PSDChatPresenter.swift
-//  Helpy
-//
-//  Created by Станислава Бобрускина on 21.10.2024.
-//  Copyright © 2024 Pyrus. All rights reserved.
-//
-
 import Foundation
 
 class PSDChatPresenter {
@@ -17,8 +9,6 @@ extension PSDChatPresenter: PSDChatPresenterProtocol {
         switch action {
         case .addFakeMessage(messageId: let messageId):
             view?.show(.addFakeMessage(messageId: messageId))
-        case .updateTable(chat: let chat):
-            view?.show(.updateTable(chat: chat))
         case .updateButtons(buttons: let buttons):
             view?.show(.updateButtons(buttons: buttons))
         case .updateRows(indexPaths: let indexPaths):
@@ -57,6 +47,8 @@ extension PSDChatPresenter: PSDChatPresenterProtocol {
             view?.show(.moveRow(movedIndexPath: movedIndexPath, newIndexPath: newIndexPath))
         case .deleteRows(indexPaths: let indexPaths, section: let section):
             view?.show(.deleteRows(indexPaths: indexPaths, section: section))
+        case .showKeyBoard:
+            view?.show(.showKeyBoard)
         }
     }
 }

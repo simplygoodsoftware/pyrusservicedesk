@@ -15,6 +15,7 @@ struct PSDGetChats {
         var parameters = [String: Any]()
         if PyrusServiceDesk.multichats {
             parameters["user_id"] = PyrusServiceDesk.customUserId ?? PyrusServiceDesk.userId
+            parameters["app_id"] = PyrusServiceDesk.clientId
             parameters["security_key"] = PyrusServiceDesk.securityKey
         }
         parameters["need_full_info"] = PyrusServiceDesk.multichats
@@ -62,6 +63,9 @@ struct PSDGetChats {
                 let chatsArray = chatsData["tickets"] as? NSArray ?? NSArray()
                 let chats = generateChats(from: chatsArray)
                 PyrusServiceDesk.chats = chats
+                let clientsArray = chatsData["applications"] as? NSArray ?? NSArray()
+                let clients = generateClients(from: clientsArray)
+                PyrusServiceDesk.clients = clients
                 completion(chats)
             }catch{
                 //print("PSDGetChats error when convert to dictionary")
@@ -74,27 +78,41 @@ struct PSDGetChats {
      Cancel session task if its exist
      */
     static func remove(){
-        if(PSDGetChats.sessionTask != nil){
+        if PSDGetChats.sessionTask != nil {
             PSDGetChats.sessionTask?.cancel()
             PSDGetChats.sessionTask = nil
         }
     }
     
+    private static func generateClients(from response: NSArray) -> [PSDClientInfo] {
+        var clients = PyrusServiceDesk.clients
+        for i in 0..<response.count {
+            guard let dic: [String: Any] = response[i] as? [String: Any] else {
+                continue
+            }
+            let clientId = dic["app_id"] as? String ?? ""
+            let clientName = dic["org_name"] as? String ?? "iiko"
+            let clientIcon = dic["org_logo_url"] as? String ?? ""
+            let client = PSDClientInfo(clientId: clientId, clientName: clientName, clientIcon: clientIcon)
+            if !clients.contains(client) {
+                clients.append(client)
+            }
+        }
+        return clients
+    }
+    
     private static func generateChats(from response:NSArray) -> [PSDChat] {
-        var chats : [PSDChat] = []
+        var chats: [PSDChat] = []
         for i in 0..<response.count {
             let dic :[String:Any] = response[i] as! [String : Any]
             var date : Date = Date()
             var lastMessage: PSDMessage?
-//            var messages : [PSDMessage] = [PSDMessage]()
-//            let firstMessage :PSDMessage = PSDMessage.init(text: dic.stringOfKey(subjectParameter), attachments:nil, messageId: nil, owner: nil, date: nil)
-//            messages.append(firstMessage)
+
             if let lastComment = dic["last_comment"] as? [String : Any] {
                 date =  lastComment.stringOfKey(createdAtParameter).dateFromString(format: "yyyy-MM-dd'T'HH:mm:ss'Z'")
                 lastMessage = PSDMessage.init(text: lastComment.stringOfKey("body"), attachments:nil, messageId: lastComment.stringOfKey(commentIdParameter), owner: nil, date: nil)
-//                messages.append(lastMessage)
             }
-//            
+           
             let ticketId = dic["ticket_id"] as? Int
             var messages : [PSDMessage] = [PSDMessage]()
             messages = PSDGetChat.generateMessages(from: dic["comments"] as? NSArray ?? NSArray())

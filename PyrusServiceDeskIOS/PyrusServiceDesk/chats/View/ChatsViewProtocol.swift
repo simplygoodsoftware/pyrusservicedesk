@@ -8,6 +8,9 @@ enum ChatsSearchViewCommand {
     case setFilter(userName: String)
     case updateMenus(filterActions: [UIAction], openNewActions: [UIAction], menuVisible: Bool)
     case endRefresh
+    case updateTitle(title: String)
+    case updateTitles(titles: [TitleWithBadge], selectedIndex: Int)
+    case updateSelected(index: Int)
 }
 
 @available(iOS 13.0, *)
