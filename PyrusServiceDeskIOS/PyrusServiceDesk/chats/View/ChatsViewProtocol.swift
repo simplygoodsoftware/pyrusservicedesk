@@ -11,6 +11,7 @@ enum ChatsSearchViewCommand {
     case updateTitle(title: String)
     case updateTitles(titles: [TitleWithBadge], selectedIndex: Int)
     case updateSelected(index: Int)
+    case updateIcon(image: UIImage?)
 }
 
 @available(iOS 13.0, *)

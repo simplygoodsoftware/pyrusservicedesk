@@ -32,6 +32,8 @@ extension ChatsPresenter: ChatsPresenterProtocol {
             view?.show(.updateTitles(titles: titles, selectedIndex: selectedIndex))
         case .updateSelected(index: let index):
             view?.show(.updateSelected(index: index))
+        case .updateIcon(image: let image):
+            view?.show(.updateIcon(image: image ?? UIImage(named: "iiko")))
         }
     }
 }

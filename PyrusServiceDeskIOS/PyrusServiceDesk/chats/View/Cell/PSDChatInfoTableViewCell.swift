@@ -23,7 +23,7 @@ class PSDChatInfoTableViewCell: UITableViewCell {
     
     private let notificationButton: UIButton = {
         let button = UIButton()
-        button.backgroundColor = .appColor
+        button.backgroundColor = .hRose
         button.setTitleColor(UIColor.appTextColor, for: .normal)
         button.titleLabel?.font = .notificationButton
         button.layer.cornerRadius = 6

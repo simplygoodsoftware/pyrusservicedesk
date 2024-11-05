@@ -38,8 +38,29 @@ struct PSDSupportImageSetter {
         }
         imageView.backgroundColor = defaultBackAvatarColor()
         imageView.image = DEFAULT_SUPPORT_IMAGE
-        if (user.image) != nil{
+        if (user.image) != nil {
             imageView.image = user.image!
+        }
+        else if PyrusServiceDesk.multichats && user.authorId?.count ?? 0 == 0,
+                let clientId = PyrusServiceDesk.currentClientId ?? PyrusServiceDesk.clientId,
+                let client = PyrusServiceDesk.clients.first(where: { $0.clientId == clientId }) {
+            if let image = client.image {
+                user.image = image
+                loadingUsers[user] = false
+                delagate?.reloadCells(with: user)
+            }
+            DispatchQueue.global().async { [weak user, weak delagate] in
+                loadImage(urlString: client.clientIcon) { (image: UIImage?) in
+                    DispatchQueue.main.async {
+                        user?.image = image ?? UIImage(named: "iiko")
+
+                        if user != nil {
+                            loadingUsers[user!] = false
+                            delagate?.reloadCells(with: user!)
+                        }
+                    }
+                }
+            }
         }
         else if user.imagePath != nil && (user.imagePath?.count)!>0 {
             if !(loadingUsers[user] ?? false) {
@@ -87,5 +108,22 @@ struct PSDSupportImageSetter {
                 }
             }.resume()
         }
+    }
+    
+    private static func loadImage(urlString: String, completion: @escaping (_ image: UIImage?) -> Void){
+        let url = PyrusServiceDeskAPI.PSDURL(url: urlString)
+        PyrusServiceDesk.mainSession.dataTask(with: url) { data, response, error in
+            guard let data = data, error == nil else{
+                completion(nil)
+                return
+            }
+            if data.count != 0{
+                let image = UIImage(data: data)
+                completion(image)
+            }
+            else{
+                completion(nil)
+            }
+        }.resume()
     }
 }

@@ -30,6 +30,8 @@ class PSDChatsViewController: UIViewController {
     }()
     
     private lazy var navTitle = UILabel()
+    private lazy var icon = UIImageView()
+
     
     private lazy var segmentControl: UnderlineSegmentController = {
         let segment = UnderlineSegmentController(frame: .zero)
@@ -113,7 +115,7 @@ class PSDChatsViewController: UIViewController {
         super.viewWillLayoutSubviews()
         if isFirstLayout {
             //filterInfoView.frame = CGRect(x: 0, y: Int(self.view.safeAreaInsets.top), width: Int(self.view.frame.width), height: 0)
-            filterInfoView.frame = CGRect(x: 0, y: Int(self.view.safeAreaInsets.top + 84.5), width: Int(self.view.frame.width), height: 0)
+            filterInfoView.frame = CGRect(x: 0, y: Int(self.view.safeAreaInsets.top + 43), width: Int(self.view.frame.width), height: 0)
             segmentControl.frame = CGRect(x: 0, y: Int(self.view.safeAreaInsets.top + 44), width: Int(self.view.frame.width), height: 0)
             navigationView.frame = CGRect(x: -1, y: -1, width: Int(self.view.frame.width + 1), height: Int(self.view.safeAreaInsets.top + 44))
             isFirstLayout = false
@@ -127,9 +129,11 @@ private extension PSDChatsViewController {
     func design() {
         view.backgroundColor = UIColor.psdBackground
         view.addSubview(tableView)
+        //view.addSubview(emptyChatsView)
+        tableView.backgroundView = emptyChatsView
+
         view.addSubview(navigationView)
         view.addSubview(segmentControl)
-        view.addSubview(emptyChatsView)
         view.addSubview(filterInfoView)
         view.addSubview(plusView)
 
@@ -156,10 +160,10 @@ private extension PSDChatsViewController {
         openNewButton.translatesAutoresizingMaskIntoConstraints = false
       
         NSLayoutConstraint.activate([
-            chatsImage.centerXAnchor.constraint(equalTo: view.centerXAnchor),
+            chatsImage.centerXAnchor.constraint(equalTo: tableView.centerXAnchor),
             chatsImage.bottomAnchor.constraint(equalTo: openNewButton.topAnchor, constant: -16),
-            openNewButton.centerXAnchor.constraint(equalTo: view.centerXAnchor),
-            openNewButton.centerYAnchor.constraint(equalTo: view.centerYAnchor),
+            openNewButton.centerXAnchor.constraint(equalTo: tableView.centerXAnchor),
+            openNewButton.centerYAnchor.constraint(equalTo: tableView.centerYAnchor, constant: -100),
         ])
         
         openNewButton.isUserInteractionEnabled = true
@@ -320,7 +324,7 @@ private extension PSDChatsViewController {
         ])
         filterImage.sizeToFit()
         // navigationItem.leftBarButtonItem = UIBarButtonItem(customView: filterButton)
-       // filterButton.isHidden = true
+        filterButton.isHidden = true
         if #available(iOS 14.0, *) {
             filterButton.showsMenuAsPrimaryAction = true
         }
@@ -345,7 +349,6 @@ private extension PSDChatsViewController {
     
     func setupNavTitle() {
         let titleView = UIView()
-        let icon = UIImageView(image: UIImage(named: "iiko"))
         titleView.addSubview(navTitle)
         titleView.addSubview(icon)
         navigationView.addSubview(titleView)
@@ -364,7 +367,7 @@ private extension PSDChatsViewController {
             titleView.centerXAnchor.constraint(equalTo: view.centerXAnchor)
         ])
         
-        navTitle.text = "Обращения"//PyrusServiceDesk.clientName
+        //navTitle.text = "Обращения"//PyrusServiceDesk.clientName
         navTitle.font = CustomizationHelper.systemBoldFont(ofSize: 17)
         icon.layer.cornerRadius = 12
         icon.clipsToBounds = true
@@ -484,13 +487,18 @@ extension PSDChatsViewController: ChatsViewProtocol {
             navTitle.text = title
         case .updateTitles(titles: let titles, selectedIndex: let selectedIndex):
             UIView.animate(withDuration: 0.3, animations: {
-                self.segmentControl.frame.size.height = 40
-                self.navigationView.frame.size.height += 41.5
+                if self.segmentControl.frame.size.height == 0 {
+                    self.segmentControl.frame.size.height = 40
+                    self.navigationView.frame.size.height += 41.5
+                    self.filterInfoView.frame.origin.y += 41.5
+                }
             }, completion: { [weak self] _ in
                 self?.segmentControl.updateTitle(titles: titles, selectIndex: selectedIndex)
             })
         case .updateSelected(index: let index):
             segmentControl.selectIndex(index)
+        case .updateIcon(image: let image):
+            icon.image = image
         }
     }
 }

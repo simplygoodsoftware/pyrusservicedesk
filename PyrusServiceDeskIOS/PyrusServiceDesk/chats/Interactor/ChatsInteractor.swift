@@ -17,6 +17,7 @@ class ChatsInteractor: NSObject {
     }
     
     var selectedIndex = 0
+    var isNewQr = false
     private var clients = [PSDClientInfo]()
     
     private var currentUserId: String? {
@@ -45,7 +46,12 @@ extension ChatsInteractor: ChatsInteractorProtocol {
             PyrusServiceDesk.currentUserId = chats[index].userId
             presenter.doWork(.openChat(chat: chats[index]))
         case .newChat:
-            openNewChat()
+            if let clientId = PyrusServiceDesk.currentClientId,
+               let user = PyrusServiceDesk.additionalUsers.first(where: { $0.clientId == clientId }) {
+                openNewChat(userId: user.userId)
+            } else {
+                openNewChat()
+            }
         case .deleteFilter:
             deleteFilter()
         case .viewWillAppear:
@@ -58,13 +64,44 @@ extension ChatsInteractor: ChatsInteractorProtocol {
 
 private extension ChatsInteractor {
     
+    private func loadImage(urlString: String, completion: @escaping (_ image: UIImage?) -> Void){
+        let url = PyrusServiceDeskAPI.PSDURL(url: urlString)
+        PyrusServiceDesk.mainSession.dataTask(with: url) { data, response, error in
+            guard let data = data, error == nil else{
+                completion(nil)
+                return
+            }
+            if data.count != 0 {
+                let image = UIImage(data: data)
+                completion(image)
+            }
+            else{
+                completion(nil)
+            }
+        }.resume()
+    }
+    
+    func updateIcon(imagePath: String, index: Int) {
+        if let image = clients[index].image {
+            presenter.doWork(.updateIcon(image: image))
+        }
+        loadImage(urlString: imagePath) { [weak self] image in
+            self?.clients[index].image = image ?? UIImage(named: "iiko")
+            PyrusServiceDesk.clients[index].image = image ?? UIImage(named: "iiko")
+            DispatchQueue.main.async { [weak self] in
+                self?.presenter.doWork(.updateIcon(image: image))
+            }
+        }
+    }
+    
     func updateSelected(index: Int) {
         selectedIndex = index
-        deleteFilter()
         presenter.doWork(.deleteFilter)
         PyrusServiceDesk.currentClientId = clients[index].clientId
         createMenuActions()
         updateChats()
+        
+        updateIcon(imagePath: clients[index].clientIcon, index: index)
     }
     
     @objc func updateClients() {
@@ -72,9 +109,11 @@ private extension ChatsInteractor {
         DispatchQueue.main.async { [weak self] in
             if PyrusServiceDesk.clients.count == 1 {
                 self?.presenter.doWork(.updateTitle(title: PyrusServiceDesk.clients[0].clientName))
+                self?.clients = PyrusServiceDesk.clients
+                self?.updateIcon(imagePath: PyrusServiceDesk.clients[0].clientIcon, index: 0)
             } else if PyrusServiceDesk.clients.count > 1 {
                 let selectedIndex = self?.clients.count ?? 0 > 0 ? PyrusServiceDesk.clients.count - 1 : 0
-                var titles: [String] = PyrusServiceDesk.clients.map({ $0.clientName })
+                let titles: [String] = PyrusServiceDesk.clients.map({ $0.clientName })
                 self?.presenter.doWork(.updateTitles(titles: titles, selectedIndex: selectedIndex))
             }
             self?.clients = PyrusServiceDesk.clients
@@ -82,10 +121,13 @@ private extension ChatsInteractor {
     }
     
     func deleteFilter() {
-        PyrusServiceDesk.currentUserId = nil
-        currentUserId = nil
-        updateChats()
-        createMenuActions()
+        if !isNewQr {
+            PyrusServiceDesk.currentUserId = nil
+            currentUserId = nil
+            updateChats()
+            createMenuActions()
+        }
+        isNewQr = false
     }
     
     func reloadChats() {
@@ -103,7 +145,7 @@ private extension ChatsInteractor {
     func openNewChat(userId: String? = nil) {
         let chat = PSDChat(chatId: 0, date: Date(), messages: [])
         chat.subject = "Новое обращение"
-        chat.userId = userId ?? PyrusServiceDesk.currentUserId
+        chat.userId = userId ?? PyrusServiceDesk.currentUserId ?? PyrusServiceDesk.userId
         PyrusServiceDesk.currentUserId = userId
         presenter.doWork(.openChat(chat: chat))
     }
@@ -123,7 +165,6 @@ private extension ChatsInteractor {
         let clientId = PyrusServiceDesk.currentClientId ?? PyrusServiceDesk.clientId
         var filterChats = [PSDChat]()
         for chat in PyrusServiceDesk.chats {
-            let userId = chat.userId
             if currentUserId != nil {
                 if chat.userId == currentUserId {
                     filterChats.append(chat)
@@ -138,10 +179,7 @@ private extension ChatsInteractor {
                 }
             }
         }
-        
-//        let filterChats = currentUserId == nil
-//        ? PyrusServiceDesk.chats
-//        : PyrusServiceDesk.chats.filter({ $0.userId == currentUserId })
+
         if chats != filterChats || filterChats.count == 0 {
             DispatchQueue.main.async {
                 self.chats = filterChats
@@ -150,23 +188,25 @@ private extension ChatsInteractor {
     }
     
     @objc func setFilter() {
-        guard let userId = PyrusServiceDesk.currentUserId,
-              getUsers().count > 0
-        else {
-            createMenuActions()
-            return
-        }
-        
         let clientId = PyrusServiceDesk.currentClientId ?? PyrusServiceDesk.clientId
         if let newSelectedIndex = clients.firstIndex(where: { $0.clientId == clientId }),
            clients.count > 1,
            newSelectedIndex != selectedIndex {
+            isNewQr = true
             DispatchQueue.main.async { [weak self] in
                 self?.presenter.doWork(.updateSelected(index: newSelectedIndex))
             }
         }
         currentUserId = PyrusServiceDesk.currentUserId
         updateChats()
+        
+        guard let userId = PyrusServiceDesk.currentUserId,
+              getUsers().count > 1
+        else {
+            createMenuActions()
+            return
+        }
+        
         let userName = PyrusServiceDesk.additionalUsers
             .first(where: {$0.userId == userId})?.userName ?? PyrusServiceDesk.userName
         DispatchQueue.main.async { [weak self] in
@@ -198,7 +238,9 @@ private extension ChatsInteractor {
             )
             actions.append(menuAction)
         }
-        presenter.doWork(.updateMenu(actions: actions, menuVisible: users.count > 1))
+        DispatchQueue.main.async { [weak self] in
+            self?.presenter.doWork(.updateMenu(actions: actions, menuVisible: users.count > 1))
+        }
     }
     
     func getUsers() -> [PSDUserInfo] {

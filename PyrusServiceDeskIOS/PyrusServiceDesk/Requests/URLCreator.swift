@@ -89,4 +89,11 @@ struct PyrusServiceDeskAPI {
         
     }
     
+    static func PSDURL(url: String)->URL {
+        let domain = PyrusServiceDesk.domain ?? "pyrus.com"
+        var urlString : String = "https://\(domain)"
+        urlString = "\(urlString)\(url)"
+        let components = NSURLComponents(string: urlString)
+        return (components?.url)!
+    }
 }

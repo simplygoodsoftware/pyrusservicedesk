@@ -8,6 +8,7 @@ enum ChatsPresenterCommand {
     case updateTitle(title: String?)
     case updateTitles(titles: [String], selectedIndex: Int)
     case updateSelected(index: Int)
+    case updateIcon(image: UIImage?)
 }
 
 protocol ChatsPresenterProtocol {
