@@ -241,6 +241,7 @@
 		4B9FAFA5255435CA00FCE51D /* PSDLastUnreadMessage.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4B9FAFA4255435CA00FCE51D /* PSDLastUnreadMessage.swift */; };
 		4BA3FF4022116C1100CE497A /* AttachmentHandler.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4BA3FF3F22116C1100CE497A /* AttachmentHandler.swift */; };
 		4BA3FF4222117E1600CE497A /* UIView+findViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4BA3FF4122117E1600CE497A /* UIView+findViewController.swift */; };
+		4BA53D502CDA439C00311BB3 /* TableViewCellConfiguratorProtocol.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4BA53D4F2CDA439C00311BB3 /* TableViewCellConfiguratorProtocol.swift */; };
 		4BA85A172224183600B48CA6 /* icn_error.png in Resources */ = {isa = PBXBuildFile; fileRef = 4BA85A142224183600B48CA6 /* icn_error.png */; };
 		4BA85A182224183600B48CA6 /* icn_error@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 4BA85A152224183600B48CA6 /* icn_error@2x.png */; };
 		4BA85A192224183600B48CA6 /* icn_error@3x.png in Resources */ = {isa = PBXBuildFile; fileRef = 4BA85A162224183600B48CA6 /* icn_error@3x.png */; };
@@ -534,6 +535,7 @@
 		4B9FAFA4255435CA00FCE51D /* PSDLastUnreadMessage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PSDLastUnreadMessage.swift; sourceTree = "<group>"; };
 		4BA3FF3F22116C1100CE497A /* AttachmentHandler.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AttachmentHandler.swift; sourceTree = "<group>"; };
 		4BA3FF4122117E1600CE497A /* UIView+findViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "UIView+findViewController.swift"; sourceTree = "<group>"; };
+		4BA53D4F2CDA439C00311BB3 /* TableViewCellConfiguratorProtocol.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TableViewCellConfiguratorProtocol.swift; sourceTree = "<group>"; };
 		4BA85A142224183600B48CA6 /* icn_error.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = icn_error.png; sourceTree = "<group>"; };
 		4BA85A152224183600B48CA6 /* icn_error@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "icn_error@2x.png"; sourceTree = "<group>"; };
 		4BA85A162224183600B48CA6 /* icn_error@3x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "icn_error@3x.png"; sourceTree = "<group>"; };
@@ -730,6 +732,7 @@
 				4BDDE42A257F70C800DF40B2 /* Recolorable.swift */,
 				4BDDE42E257F7DB900DF40B2 /* PSDVIew.swift */,
 				4B8EE7C8255AAE0A0068B266 /* Data+gZip.swift */,
+				4BA53D4F2CDA439C00311BB3 /* TableViewCellConfiguratorProtocol.swift */,
 			);
 			path = Helpers;
 			sourceTree = "<group>";
@@ -1508,6 +1511,7 @@
 				4B5AFEAB21FB0A7B00AAF233 /* PSDMessageSendButton.swift in Sources */,
 				4B9B0BBB2266344200090DB5 /* PSDAttachmentPreviewErrorView.swift in Sources */,
 				4BCEB433220C150C008B29B6 /* UIImage+color.swift in Sources */,
+				4BA53D502CDA439C00311BB3 /* TableViewCellConfiguratorProtocol.swift in Sources */,
 				7B1E8D58250665F800C1E5AC /* PSDInfoView.swift in Sources */,
 				4BB6CDC325597E4C004C680A /* PyrusLogger.swift in Sources */,
 				4B7F350A21F8900A00977C6D /* PSDChatViewController.swift in Sources */,
