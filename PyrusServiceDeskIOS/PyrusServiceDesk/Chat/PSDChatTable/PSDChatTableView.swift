@@ -11,7 +11,7 @@ class PSDChatTableView: PSDTableView {
     ///The id of chat that is shown in table view
     weak var chatDelegate: PSDChatTableViewDelegate?
     private let footerHeight : CGFloat = 10.0
-    private let BOTTOM_INFELICITY : CGFloat = 10.0
+    private let BOTTOM_INFELICITY : CGFloat = 20.0
     private var needShowRating : Bool = false
     private var customDataSource: Any?
     private static let userCellId = "CellUser"
@@ -353,18 +353,24 @@ class PSDChatTableView: PSDTableView {
     }
     ///Scrolls table to bottom after refresh, if table view was in bottom scroll position and new messages received
     private func scrollToBottomAfterRefresh(with oldOffset: CGPoint?, oldContentSize: CGSize?) {
-        guard let oldOffset = oldOffset, let oldContentSize = oldContentSize else {
+        guard 
+            let oldOffset = oldOffset,
+            let oldContentSize = oldContentSize
+        else {
             return
         }
-        self.setNeedsLayout()
-        self.layoutIfNeeded()
+        setNeedsLayout()
+        layoutIfNeeded()
         let expectedBottomOffset = oldContentSize.height - (self.frame.size.height - contentInset.top - contentInset.bottom)
         let hasChanges = oldContentSize != self.contentSize
-        if expectedBottomOffset - BOTTOM_INFELICITY < oldOffset.y && hasChanges{
-            self.scrollsToBottom(animated: true)
+        if
+            expectedBottomOffset - BOTTOM_INFELICITY < oldOffset.y,
+            hasChanges
+        {
+            scrollsToBottom(animated: true)
         }
     }
-    lazy var noConnectionView : PSDNoConnectionView  = {
+    lazy var noConnectionView: PSDNoConnectionView  = {
         let view = PSDNoConnectionView.init(frame: self.frame)
         view.delegate = self
         return view
@@ -749,10 +755,14 @@ extension PSDChatTableView : PSDMessageSendDelegate{
             }
         }
         if indexPaths.count > 0{
-            let section = indexPaths[0].section
-            self.deleteRows(at: indexPaths, with: .none)
-            if tableView(self, numberOfRowsInSection: section) == 0{
-                self.reloadSections([section], with: .none)
+            if #available(iOS 13.0, *){
+                self.reloadWithDiffableDataSource(data: self.tableMatrix, animated: true)
+            } else {
+                let section = indexPaths[0].section
+                self.deleteRows(at: indexPaths, with: .none)
+                if tableView(self, numberOfRowsInSection: section) == 0{
+                    self.reloadSections([section], with: .none)
+                }
             }
         }
     }
