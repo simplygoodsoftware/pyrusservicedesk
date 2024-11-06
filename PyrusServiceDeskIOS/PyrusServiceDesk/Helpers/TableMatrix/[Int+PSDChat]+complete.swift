@@ -7,7 +7,7 @@ extension Array where Element == [PSDRowMessage]{
         let sortedMessages = messagesFromStorage.sorted(by: {$0.date > $1.date})
         complete(with: sortedMessages, startMessage: nil, completion: { _,_, messages in
             let res = messagesFromStorage.filter { !messages.contains($0)}
-            for message in res{
+            for message in res {
                 PSDMessagesStorage.removeFromStorage(messageId: message.clientId)
             }
         })

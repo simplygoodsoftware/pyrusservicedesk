@@ -500,8 +500,8 @@ class PSDChatTableView: PSDTableView {
         let index = IndexPath(row: row>0 ? row - 1 : 0, section: section)
         return index
     }
-    private func getMessage(at indexPath:IndexPath)->PSDMessage?{
-        if tableMatrix.count > indexPath.section && tableMatrix[indexPath.section].count>indexPath.row{
+    private func getMessage(at indexPath: IndexPath) -> PSDMessage? {
+        if tableMatrix.count > indexPath.section && tableMatrix[indexPath.section].count > indexPath.row {
             let rowMessage = tableMatrix[indexPath.section][indexPath.row]
             return rowMessage.message
         }
@@ -768,7 +768,7 @@ extension PSDChatTableView : PSDMessageSendDelegate{
     }
     ///Change massage in tableMatrix and redraw Cell with new message data if it's visible.
     ///Didn't call reloadCell - so can't change cell height, or break animation.
-    func refresh(message:PSDMessage, changedToSent: Bool){
+    func refresh(message: PSDMessage, changedToSent: Bool){
         DispatchQueue.main.async{
             [weak self] in
             self?.chatDelegate?.restartTimer()
@@ -782,7 +782,6 @@ extension PSDChatTableView : PSDMessageSendDelegate{
                     return
                 }
                 var lastIndexPath: [IndexPath]? = nil
-                
                 if changedToSent && message.fromStrorage {
                     //is state was changed need to move sendded message up to sent block
                     lastIndexPath = self.tableMatrix.indexPathsAfterSent(for: message)
@@ -810,17 +809,23 @@ extension PSDChatTableView : PSDMessageSendDelegate{
                 for (i,indexPath) in indexPaths.enumerated(){
                     oldSection = indexPath.section
                     let movedIndexPath = IndexPath(row: indexPath.row - movedRows, section: indexPath.section)
-                    guard self.tableMatrix.has(indexPath: movedIndexPath), let rowMessage = indexPathsAndMessages[indexPath] else{
+                    guard
+                        self.tableMatrix.has(indexPath: movedIndexPath),
+                        let rowMessage = indexPathsAndMessages[indexPath]
+                    else{
                         continue
                     }
                     rowMessage.updateWith(message: message)
                     self.redrawCell(at:movedIndexPath,with: rowMessage)
-                    if let lastIndexPath = lastIndexPath, lastIndexPath.count > i{
+                    if 
+                        let lastIndexPath = lastIndexPath,
+                        lastIndexPath.count > i
+                    {
                         let newIndexPath = lastIndexPath[i]
-                        if newIndexPath != indexPath{
+                        if newIndexPath != indexPath {
                             movedRows = movedRows + 1
                             self.tableMatrix[movedIndexPath.section].remove(at: movedIndexPath.row)
-                            self.tableMatrix[newIndexPath.section].insert(rowMessage, at:newIndexPath.row)
+                            self.tableMatrix[newIndexPath.section].insert(rowMessage, at: newIndexPath.row)
                             if #available(iOS 13.0, *){
                                 self.reloadWithDiffableDataSource(data: self.tableMatrix, animated: true)
                             } else if #available(iOS 11.0, *) {
