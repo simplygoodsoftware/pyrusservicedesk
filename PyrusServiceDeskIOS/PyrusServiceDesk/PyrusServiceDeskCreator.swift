@@ -10,6 +10,7 @@ import UIKit
     
     ///AppId needed for request
     static var clientId: String?
+    static var clientName: String?
     private static var lastSetPushToken: Date?
     private static var lastSetPushTokens = [Date]()
     private static var lastRefreshes = [Date]()
@@ -19,11 +20,16 @@ import UIKit
     ///An array with domains. Used to determine if an alert should be shown when a link is clicked. If the user clicked on a link with a domain from the array, then the application will immediately navigate.
     public static var trustedUrls: [String]?
     
+    public static var multichats = false
+    
+    static private(set) var authorId: String?
+    
+    static private(set) var userName: String?
     ///UserId needed for request
     static private(set) var userId: String = "" {
         didSet(oldUserId){
-            if userId.count > 0 && userId != oldUserId {
-                let user = PSDUser.init(personId: userId, name: PyrusServiceDesk.userName, type: .user, imagePath: "")
+            if userId.count>0 && userId != oldUserId{
+                let user = PSDUser.init(personId: userId, name: PyrusServiceDesk.authorName, type: .user, imagePath: "", authorId: PyrusServiceDesk.authorId)
                 PSDUsers.add(user: user)
             }
             if(userId.count > 0){
@@ -36,8 +42,27 @@ import UIKit
             }
         }
     }
+    
+    static let usersUpdateNotification = Notification.Name("USERS_UPDATE")
+    static private(set) var additionalUsers = [PSDUserInfo]()
+    
+    static var currentUserId: String?
+    
+    public static func addUser(appId: String, clientName: String, userId: String, userName: String, secretKey: String? = nil) {
+        let user = PSDUserInfo(appId: appId, clientName: clientName, userId: userId, userName: userName, secretKey: secretKey)
+        currentUserId = user.userId
+        if !additionalUsers.contains(user) && user.userId != customUserId {
+            additionalUsers.append(user)
+        } else {
+            NotificationCenter.default.post(name: usersUpdateNotification, object: nil)
+        }
+        PSDGetChats.get() { _ in
+            NotificationCenter.default.post(name: usersUpdateNotification, object: nil)
+        }
+    }
+    
     ///User's name needed for request. If don't set used Default_User_Name
-    @objc static private(set) var userName = DEFAULT_USER_NAME
+    @objc static private(set) var authorName = DEFAULT_USER_NAME
     
       
     @objc static let mainSession : URLSession = {
@@ -184,8 +209,8 @@ import UIKit
     ///- parameter clientId: clientId using for all requests. If clientId not setted PyrusServiceDesk Controller will not be created
     ///- parameter domain: Base domain for network requests. If the [domain] is null, the default pyrus.com will be used.
     ///- parameter loggingEnabled If true, then the library will write logs, and they can be sent as a file to chat by clicking the "Send Library Logs" button in the menu under the "+" sign.
-    @objc static public func createWith(_ clientId: String?, domain: String? = nil, loggingEnabled: Bool = false, authorizationToken: String? = nil)  {
-        createWith(clientId, userId: nil, securityKey: nil, reset: false, domain: domain, loggingEnabled: loggingEnabled, authorizationToken: authorizationToken)
+    @objc static public func createWith(_ clientId: String?, clientName: String? = nil, multichats: Bool = false, authorId: String? = nil, userName: String? = nil, additionalUsers: [PSDUserInfo] = [], domain: String? = nil, loggingEnabled: Bool = false, authorizationToken: String? = nil)  {
+        createWith(clientId, clientName: clientName, userId: nil, securityKey: nil, reset: false, userName: userName, additionalUsers: additionalUsers, authorId: authorId, domain: domain, loggingEnabled: loggingEnabled, authorizationToken: authorizationToken, multichats: multichats)
     }
     
     @objc static public func setFieldsData(fieldsData: [String: String]? = nil) {
@@ -198,7 +223,7 @@ import UIKit
     ///- parameter domain: Base domain for network requests. If the [domain] is null, the default pyrus.com will be used.
     ///- parameter loggingEnabled If true, then the library will write logs, and they can be sent as a file to chat by clicking the "Send Library Logs" button in the menu under the "+" sign.
     @objc static public func createWith(_ clientId: String?, reset: Bool, domain: String? = nil, loggingEnabled: Bool = false, authorizationToken: String? = nil) {
-        createWith(clientId, userId: nil, securityKey: nil, reset: reset, domain: domain, loggingEnabled: loggingEnabled, authorizationToken: authorizationToken)
+        createWith(clientId, clientName: nil, userId: nil, securityKey: nil, reset: reset, userName: "", authorId: nil, domain: domain, loggingEnabled: loggingEnabled, authorizationToken: authorizationToken)
     }
     
     ///Init PyrusServiceDesk with new clientId.
@@ -207,10 +232,12 @@ import UIKit
     ///- parameter securityKey: security key of the user for safe initialization
     //////- parameter domain: Base domain for network requests. If the [domain] is null, the default pyrus.com will be used.
     ///- parameter loggingEnabled If true, then the library will write logs, and they can be sent as a file to chat by clicking the "Send Library Logs" button in the menu under the "+" sign.
-    @objc static public func createWith(_ clientId: String?, userId: String?, securityKey: String?, domain: String? = nil, loggingEnabled: Bool = false, authorizationToken: String? = nil) {
-        createWith(clientId, userId: userId, securityKey: securityKey, reset: false, domain: domain, loggingEnabled: loggingEnabled, authorizationToken: authorizationToken)
+    @objc static public func createWith(_ clientId: String?, clientName: String? = nil, userId: String?, securityKey: String? = nil, userName: String? = nil, multichats: Bool = false, authorId: String? = nil, additionalUsers: [PSDUserInfo] = [], domain: String? = nil, loggingEnabled: Bool = false, authorizationToken: String? = nil) {
+        createWith(clientId, clientName: clientName, userId: userId, securityKey: securityKey, reset: false, userName: userName, additionalUsers: additionalUsers, authorId: authorId, domain: domain, loggingEnabled: loggingEnabled, authorizationToken: authorizationToken, multichats: multichats)
     }
-    private static func createWith(_ clientId: String?, userId: String?, securityKey: String?, reset: Bool, domain: String?, loggingEnabled: Bool, authorizationToken: String?) {
+    private static func createWith(_ clientId: String?, clientName: String?, userId: String?, securityKey: String?, reset: Bool, userName: String?, additionalUsers: [PSDUserInfo] = [], authorId: String?, domain: String?, loggingEnabled: Bool, authorizationToken: String?, multichats: Bool = false) {
+        PyrusServiceDesk.multichats = multichats
+        PyrusServiceDesk.clientName = clientName
         PyrusServiceDesk.loggingEnabled = loggingEnabled
         guard let clientId = clientId, clientId.count > 0 else {
             EventsLogger.logEvent(.emptyClientId)
@@ -228,8 +255,11 @@ import UIKit
         PyrusServiceDesk.securityKey = securityKey
         let needReloadUI = PyrusServiceDesk.customUserId != userId
         PyrusServiceDesk.customUserId = userId
+        PyrusServiceDesk.userName = userName
+        PyrusServiceDesk.authorId = authorId
         PyrusServiceDesk.createUserId(reset)
         PyrusServiceDesk.authorizationToken = authorizationToken
+        PyrusServiceDesk.additionalUsers = additionalUsers
         lastSetPushToken = nil
         if needReloadUI {
             PyrusServiceDesk.mainController?.updateTitleChat()
@@ -292,7 +322,7 @@ import UIKit
     ///Setting name of user. If name is not setted it il be default ("Guest")
     ///- parameter userName: A name to display in pyrus task.
     static func setUser(_ userName: String?) {
-        PyrusServiceDesk.userName = userName ?? DEFAULT_USER_NAME
+        PyrusServiceDesk.authorName = userName ?? DEFAULT_USER_NAME
         if PSDUsers.user != nil{
             PSDUsers.user.name = userName
         }
@@ -379,8 +409,14 @@ import UIKit
             timer=nil
         }
     }
+    
+    static let chatsUpdateNotification = Notification.Name("CHATS_UPDATE")
     ///All of chats
-    static var chats : [PSDChat] = [PSDChat]()
+    static var chats : [PSDChat] = [PSDChat]() {
+        didSet {
+            NotificationCenter.default.post(name: chatsUpdateNotification, object: nil)
+        }
+    }
     ///The main view controller. nil - if chat was closed.
     weak static var mainController : PyrusServiceDeskController?
     ///Updates user info - get chats list from server.

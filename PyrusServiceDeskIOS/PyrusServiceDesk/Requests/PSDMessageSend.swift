@@ -5,6 +5,7 @@ protocol PSDMessageSendDelegate: AnyObject {
     ///- parameter changedToSent: If state of message was changed from !.sent to .sent
     func refresh(message:PSDMessage, changedToSent: Bool)
     func remove(message:PSDMessage)
+    func updateTicketId(_ ticketId: Int)
 }
 
 struct PSDMessageSend {
@@ -109,7 +110,7 @@ struct PSDMessageSend {
         }
         if !hasUnsendAttachments{
             let sender = PSDMessageSender()
-                sender.pass(messageToPass, delegate: delegate, completion: {
+            sender.pass(messageToPass, delegate: delegate, completion: {
                     didEndPassMessage(messageToPass, delegate: delegate)
                 })
             messageSenders.append(sender)

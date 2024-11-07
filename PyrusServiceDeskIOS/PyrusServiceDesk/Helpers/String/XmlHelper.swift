@@ -58,8 +58,9 @@ extension NSString {
     /// - Parameter needMention: Хак для черновика и редактирования комментария, по дефолту true, можно не заполнять
     func parseXMLToAttributedString(needDetectLink: Bool = true,
                                     needMention: Bool = true,
-                                    fontColor: UIColor) -> (NSAttributedString?, [ButtonData]?) {
-        return parseXMLToAttributedString(needDetectLink: needDetectLink, needMention: needMention, font: .messageTextView, fontColor: fontColor)
+                                    fontColor: UIColor,
+                                    font: UIFont = .messageTextView) -> (NSAttributedString?, [ButtonData]?) {
+        return parseXMLToAttributedString(needDetectLink: needDetectLink, needMention: needMention, font: font, fontColor: fontColor)
     }
     
     /// Преобразует текст из **HTML** разметки в массив библиотек, **ключ** в которых - тип текста, а **значение** - сам NSAttrinbutedString

@@ -8,6 +8,8 @@ protocol PSDUpdateInfo{
 }
 
 class PSDChatViewController: PSDViewController {
+    var ticketId = 0
+    var chat: PSDChat?
     private var firstLoad: Bool = true
     public func updateTitle(){
         designNavigation()
@@ -16,8 +18,11 @@ class PSDChatViewController: PSDViewController {
         self.tableView.reloadChat()
     }
     private var tableViewTopConstant: NSLayoutConstraint?
+    
     override func viewDidLoad() {
         super.viewDidLoad()
+        self.tableView.addKeyboardListeners()
+        
         presentationController?.delegate = self
         if #available(iOS 11.0, *) {
             self.tableView.contentInsetAdjustmentBehavior = .never//.automatic
@@ -43,6 +48,14 @@ class PSDChatViewController: PSDViewController {
             infoView.topAnchor.constraint(equalTo: view.topAnchor, constant: (self.navigationController?.navigationBar.frame.size.height ?? 0) +  UIApplication.shared.statusBarFrame.height).isActive = true
         }
         
+    }
+    
+    private var firstLayout: Bool = true
+    override func viewDidLayoutSubviews() {
+        if firstLayout {
+            tableView.scrollsToBottom(animated: false)
+            firstLayout = false
+        }
     }
     
     override func viewWillLayoutSubviews() {
@@ -83,19 +96,24 @@ class PSDChatViewController: PSDViewController {
             self.tableView.addKeyboardListeners()
         })
     }
+    
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
-        self.navigationController?.navigationBar.isHidden = false
         startGettingInfo()
         resizeTable()
         NotificationCenter.default.addObserver(self, selector: #selector(appEnteredBackground), name: UIApplication.didEnterBackgroundNotification, object: nil)
         NotificationCenter.default.addObserver(self, selector: #selector(appEnteredForeground), name: UIApplication.willEnterForegroundNotification, object: nil)
     }
+    
     override func viewDidAppear(_ animated: Bool) {
         super.viewDidAppear(animated)
-        self.tableView.addKeyboardListeners()
+        tableView.isVisible = true
         UIView.performWithoutAnimation {
              self.becomeFirstResponder()
+            
+        }
+        if PyrusServiceDesk.multichats && ticketId == 0 {
+            self.messageInputView.inputTextView.becomeFirstResponder()
         }
     }
     
@@ -114,15 +132,22 @@ class PSDChatViewController: PSDViewController {
         stopGettingInfo()
     }
     ///hide keyboard with inputAccessoryView
-    private func hideAllKeyboard(){
-        self.resignFirstResponder()
-        self.messageInputView.inputTextView.resignFirstResponder()
+    func hideAllKeyboard(){
+        if self.messageInputView.inputTextView.isFirstResponder {
+            self.resignFirstResponder()
+            self.messageInputView.inputTextView.resignFirstResponder()
+        }
     }
     ///Opens chat - full reload existing data in tableView according to chat id
     func openChat(){
         self.messageInputView.setToDefault()
         self.tableView.isLoading = true
-        self.tableView.reloadChat()
+        if !PyrusServiceDesk.multichats {
+            self.tableView.reloadChat()
+        } else {
+            self.tableView.updateTable(chat: chat)
+            self.tableView.readChat(userId: chat?.userId ?? PyrusServiceDesk.customUserId ?? PyrusServiceDesk.userId)
+        }
         
     }
     lazy private var messageInputView : PSDMessageInputView = {
@@ -133,6 +158,7 @@ class PSDChatViewController: PSDViewController {
     }()
     lazy var tableView: PSDChatTableView = {
         let table = PSDChatTableView(frame: self.view.bounds)
+        table.ticketId = ticketId
         table.setupTableView()
         return table
     }()
@@ -168,6 +194,7 @@ class PSDChatViewController: PSDViewController {
     //Setting design to navigation bar, title and buttons
     private func designNavigation()
     {
+        navigationController?.navigationBar.isTranslucent = true
         if let view = PyrusServiceDesk.mainController?.customization?.chatTitleView {
             navigationItem.titleView = view
             view.sizeToFit()
@@ -176,6 +203,16 @@ class PSDChatViewController: PSDViewController {
             title = CustomizationHelper.chatTitle
         }
         
+        if #available(iOS 13.0, *) {
+            let barAppearance = UIBarAppearance()
+            barAppearance.backgroundColor = UIColor(hex: "#F9F9F9F0")
+            let bigAppear = UINavigationBarAppearance(barAppearance: barAppearance)
+            bigAppear.configureWithOpaqueBackground()
+            bigAppear.backgroundColor = UIColor(hex: "#F9F9F9F0")
+            bigAppear.backgroundEffect = nil
+            navigationItem.scrollEdgeAppearance = bigAppear
+            navigationItem.standardAppearance = bigAppear
+        }
         self.setItems()
     }
     ///Set navigation items
@@ -211,7 +248,15 @@ class PSDChatViewController: PSDViewController {
         self.navigationItem.leftBarButtonItem?.tintColor = color
         self.navigationItem.rightBarButtonItem?.tintColor = color
     }
-    @objc private func closeButtonAction(){
+    @objc private func closeButtonAction() {
+        guard !PyrusServiceDesk.multichats else {
+            navigationController?.popViewController(animated: true)
+            EventsLogger.logEvent(.resignFirstResponder, additionalInfo: "hideAllKeyboard() called after press on back button")
+            UIView.performWithoutAnimation {
+                hideAllKeyboard()
+            }
+            return
+        }
         if let mainController = PyrusServiceDesk.mainController {
             PyrusServiceDesk.mainController?.remove()//with quick opening - closing can be nil
         } else if let navigationController = self.navigationController as? PyrusServiceDeskController {
@@ -269,19 +314,21 @@ class PSDChatViewController: PSDViewController {
         
     }
 }
-extension PSDChatViewController : PSDMessageInputViewDelegate{
-    func send(_ message:String,_ attachments:[PSDAttachment]){
-        let newMessage = PSDObjectsCreator.createMessage(message, attachments: attachments)
+extension PSDChatViewController: PSDMessageInputViewDelegate {
+    func send(_ message:String, _ attachments: [PSDAttachment]) {
+        let newMessage = PSDObjectsCreator.createMessage(message, attachments: attachments, ticketId: ticketId, userId: chat?.userId ?? PyrusServiceDesk.customUserId ?? PyrusServiceDesk.userId)
         prepareMessageForDrawing(newMessage)
         tableView.addNewRow(message: newMessage)
         PSDMessageSend.pass(newMessage, delegate: self.tableView)
     }
+    
     func sendRate(_ rateValue: Int) {
-        let newMessage = PSDObjectsCreator.createMessage(rating: rateValue)
+        let newMessage = PSDObjectsCreator.createMessage(rating: rateValue, ticketId: ticketId, userId: chat?.userId ?? PyrusServiceDesk.customUserId ?? PyrusServiceDesk.userId)
         prepareMessageForDrawing(newMessage)
         tableView.addNewRow(message: newMessage)
         PSDMessageSend.pass(newMessage, delegate: self.tableView)
     }
+    
     private func prepareMessageForDrawing(_ newMessage: PSDMessage) {
         newMessage.state = .sending
         if let attachments = newMessage.attachments {
@@ -332,6 +379,12 @@ extension PSDChatViewController : PSDUpdateInfo{
     }
 }
 extension PSDChatViewController: PSDChatTableViewDelegate {
+    func updateTicketId(_ ticketId: Int) {
+        self.ticketId = ticketId
+        self.chat?.chatId = ticketId
+        tableView.readChat(userId: chat?.userId ?? PyrusServiceDesk.customUserId ?? PyrusServiceDesk.userId)
+    }
+    
     func needShowRate(_ showRate: Bool) {
         messageInputView.showRate = showRate
     }
