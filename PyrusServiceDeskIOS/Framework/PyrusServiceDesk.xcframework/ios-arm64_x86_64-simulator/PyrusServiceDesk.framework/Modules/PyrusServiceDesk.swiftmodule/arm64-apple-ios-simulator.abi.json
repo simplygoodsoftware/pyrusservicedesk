@@ -2721,6 +2721,13 @@
         "moduleName": "PyrusServiceDesk"
       },
       {
+        "kind": "Import",
+        "name": "Foundation",
+        "printedName": "Foundation",
+        "declKind": "Import",
+        "moduleName": "PyrusServiceDesk"
+      },
+      {
         "kind": "TypeDecl",
         "name": "PSDInfoView",
         "printedName": "PSDInfoView",
@@ -5438,7 +5445,7 @@
       "kind": "FloatLiteral",
       "offset": 502,
       "length": 4,
-      "value": "10.0"
+      "value": "20.0"
     },
     {
       "filePath": "\/Users\/galinamuraveva\/pyrusservicedesk\/PyrusServiceDeskIOS\/PyrusServiceDesk\/Chat\/PSDChatTable\/PSDChatTableView.swift",
@@ -5450,42 +5457,42 @@
     {
       "filePath": "\/Users\/galinamuraveva\/pyrusservicedesk\/PyrusServiceDeskIOS\/PyrusServiceDesk\/Chat\/PSDChatTable\/PSDChatTableView.swift",
       "kind": "StringLiteral",
-      "offset": 589,
+      "offset": 628,
       "length": 10,
       "value": "\"CellUser\""
     },
     {
       "filePath": "\/Users\/galinamuraveva\/pyrusservicedesk\/PyrusServiceDeskIOS\/PyrusServiceDesk\/Chat\/PSDChatTable\/PSDChatTableView.swift",
       "kind": "StringLiteral",
-      "offset": 639,
+      "offset": 678,
       "length": 13,
       "value": "\"CellSupport\""
     },
     {
       "filePath": "\/Users\/galinamuraveva\/pyrusservicedesk\/PyrusServiceDeskIOS\/PyrusServiceDesk\/Chat\/PSDChatTable\/PSDChatTableView.swift",
       "kind": "BooleanLiteral",
-      "offset": 865,
+      "offset": 904,
       "length": 5,
       "value": "false"
     },
     {
       "filePath": "\/Users\/galinamuraveva\/pyrusservicedesk\/PyrusServiceDeskIOS\/PyrusServiceDesk\/Chat\/PSDChatTable\/PSDChatTableView.swift",
       "kind": "BooleanLiteral",
-      "offset": 16359,
+      "offset": 18128,
       "length": 5,
       "value": "false"
     },
     {
       "filePath": "\/Users\/galinamuraveva\/pyrusservicedesk\/PyrusServiceDeskIOS\/PyrusServiceDesk\/Chat\/PSDChatTable\/PSDChatTableView.swift",
       "kind": "IntegerLiteral",
-      "offset": 16757,
+      "offset": 18526,
       "length": 2,
       "value": "20"
     },
     {
       "filePath": "\/Users\/galinamuraveva\/pyrusservicedesk\/PyrusServiceDeskIOS\/PyrusServiceDesk\/Chat\/PSDChatTable\/PSDChatTableView.swift",
       "kind": "FloatLiteral",
-      "offset": 38038,
+      "offset": 41004,
       "length": 4,
       "value": "16.0"
     },
@@ -7312,21 +7319,28 @@
     {
       "filePath": "\/Users\/galinamuraveva\/pyrusservicedesk\/PyrusServiceDeskIOS\/PyrusServiceDesk\/Helpers\/TableView\/PSDTableView.swift",
       "kind": "IntegerLiteral",
-      "offset": 5440,
+      "offset": 5431,
       "length": 1,
       "value": "0"
     },
     {
       "filePath": "\/Users\/galinamuraveva\/pyrusservicedesk\/PyrusServiceDeskIOS\/PyrusServiceDesk\/Helpers\/TableView\/PSDTableView.swift",
       "kind": "IntegerLiteral",
-      "offset": 5446,
+      "offset": 5460,
       "length": 1,
       "value": "0"
     },
     {
       "filePath": "\/Users\/galinamuraveva\/pyrusservicedesk\/PyrusServiceDeskIOS\/PyrusServiceDesk\/Helpers\/TableView\/PSDTableView.swift",
       "kind": "IntegerLiteral",
-      "offset": 7506,
+      "offset": 5466,
+      "length": 1,
+      "value": "0"
+    },
+    {
+      "filePath": "\/Users\/galinamuraveva\/pyrusservicedesk\/PyrusServiceDeskIOS\/PyrusServiceDesk\/Helpers\/TableView\/PSDTableView.swift",
+      "kind": "IntegerLiteral",
+      "offset": 7526,
       "length": 3,
       "value": "160"
     },
