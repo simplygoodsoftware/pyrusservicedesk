@@ -8,6 +8,7 @@ import com.pyrus.pyrusservicedesk.presentation.ui.navigation_page.file_preview.F
 import com.pyrus.pyrusservicedesk.presentation.ui.navigation_page.ticket.TicketViewModel
 import com.pyrus.pyrusservicedesk.presentation.ui.navigation_page.ticket.dialogs.attach_files.AttachFileSharedViewModel
 import com.pyrus.pyrusservicedesk.presentation.ui.navigation_page.ticket.dialogs.comment_actions.PendingCommentActionSharedViewModel
+import com.pyrus.pyrusservicedesk.presentation.ui.navigation_page.tickets_list.TicketsListViewModel
 
 /**
  * Factory that provides view models.
@@ -21,6 +22,11 @@ internal class ViewModelFactory(private val arguments: Intent): ViewModelProvide
         return when (modelClass) {
             TicketViewModel::class.java ->
                 TicketViewModel(
+                    PyrusServiceDesk.get().serviceDeskProvider,
+                    PyrusServiceDesk.getPreferencesManager()
+                ) as T
+            TicketsListViewModel::class.java ->
+                TicketsListViewModel(
                     PyrusServiceDesk.get().serviceDeskProvider,
                     PyrusServiceDesk.getPreferencesManager()
                 ) as T
