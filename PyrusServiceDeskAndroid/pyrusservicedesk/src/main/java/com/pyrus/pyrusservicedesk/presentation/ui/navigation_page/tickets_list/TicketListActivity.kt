@@ -19,6 +19,7 @@ import com.pyrus.pyrusservicedesk.sdk.data.Comment
 import com.pyrus.pyrusservicedesk.sdk.data.TicketShortDescription
 import kotlinx.android.synthetic.main.psd_activity_ticket.comments
 import kotlinx.android.synthetic.main.psd_activity_ticket.refresh
+import kotlinx.android.synthetic.main.psd_tickets_list.filter_fl
 import kotlinx.android.synthetic.main.psd_tickets_list.tickets_rv
 import kotlinx.android.synthetic.main.psd_toolbar.psd_toolbar_filter_ib
 import kotlinx.android.synthetic.main.psd_toolbar.psd_toolbar_qr_ib
@@ -91,7 +92,8 @@ internal class TicketListActivity : ConnectionActivityBase<TicketsListViewModel>
 
         //supportActionBar?.apply { title = getString(R.string.psd_tickets_activity_title) }
         toolbarFilter.setOnClickListener {
-            //TODO
+            toolbarFilter.setBackgroundResource(if(filter_fl.visibility == View.VISIBLE) R.drawable.ic_filter else R.drawable.ic_selected_filter)
+            filter_fl.visibility = if(filter_fl.visibility == View.VISIBLE) View.GONE else View.VISIBLE
             Toast.makeText(applicationContext, "фильтры", Toast.LENGTH_SHORT).show()
         }
         toolbarQr.setOnClickListener {
@@ -99,9 +101,7 @@ internal class TicketListActivity : ConnectionActivityBase<TicketsListViewModel>
             Toast.makeText(applicationContext, "QR", Toast.LENGTH_SHORT).show()
         }
 
-
-
-        adapter = TicketsListAdapter(provideTickets())
+        adapter = TicketsListAdapter(/*provideTickets()*/emptyList())
             .apply {
                 setOnTicketItemClickListener {
                     it.ticketId.let { ticketId ->

@@ -19,7 +19,49 @@
         <include layout="@layout/psd_toolbar" />
     </androidx.appcompat.widget.Toolbar>
 
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        app:layout_constraintTop_toBottomOf="@+id/toolbar_tickets_list">
+
+        <include layout="@layout/psd_empty_tickets_list" />
+    </LinearLayout>
+
+    <FrameLayout
+        android:id="@+id/filter_fl"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:background="#3C90E5"
+        android:paddingVertical="10dp"
+        android:paddingHorizontal="16dp"
+        android:visibility="gone"
+        app:layout_constraintTop_toBottomOf="@+id/toolbar_tickets_list">
+
+        <TextView
+            android:id="@+id/filter_context_tv"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textColor="@color/psd_text_color_primary"
+            android:textSize="14sp"
+            android:ellipsize="end"
+            android:maxLines="1"
+            android:text="Папа Бургер"
+            android:layout_gravity="center_vertical|start"/>
+
+        <ImageView
+            android:id="@+id/delete_filter_iv"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="16dp"
+            android:background="@drawable/ic_close_big"
+            android:layout_gravity="center_vertical|end"/>
+
+    </FrameLayout>
+
     <View
+        android:id="@+id/view"
         android:layout_width="match_parent"
         android:layout_height="1dp"
         android:background="@color/color_blue_gray_300"
@@ -29,7 +71,7 @@
         android:id="@+id/tickets_rv"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        app:layout_constraintTop_toBottomOf="@+id/toolbar_tickets_list">
+        app:layout_constraintTop_toBottomOf="@+id/filter_fl">
 
     </androidx.recyclerview.widget.RecyclerView>
 
