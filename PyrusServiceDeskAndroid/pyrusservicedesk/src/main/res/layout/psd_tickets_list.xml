@@ -23,6 +23,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical"
+        android:visibility="gone"
         app:layout_constraintTop_toBottomOf="@+id/toolbar_tickets_list">
 
         <include layout="@layout/psd_empty_tickets_list" />
@@ -54,6 +55,7 @@
             android:id="@+id/delete_filter_iv"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:layout_marginLeft="16dp"
             android:layout_marginStart="16dp"
             android:background="@drawable/ic_close_big"
             android:layout_gravity="center_vertical|end"/>
@@ -74,6 +76,21 @@
         app:layout_constraintTop_toBottomOf="@+id/filter_fl">
 
     </androidx.recyclerview.widget.RecyclerView>
+
+    <com.google.android.material.floatingactionbutton.FloatingActionButton
+        android:id="@+id/fabAddTicket"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginRight="16dp"
+        android:src="@drawable/ic_add_big"
+        android:visibility="visible"
+        android:layout_marginEnd="16dp"
+        android:layout_marginBottom="68dp"
+        app:backgroundTint="#3C90E5"
+        app:fabSize="normal"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        tools:ignore="ContentDescription" />
 
     <include
         android:id="@+id/no_connection"
