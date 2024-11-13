@@ -20,13 +20,9 @@ private const val DAYS_IN_WEEK = 7
  */
 @SuppressLint("SimpleDateFormat")
 internal fun Date.getTimeText(context: Context): String {
-    return SimpleDateFormat(context.resources.getString(R.string.psd_time_format))
-        .format(
-            with(TimeZone.getDefault()){
-                Calendar.getInstance(this).apply {
-                    timeInMillis = this@getTimeText.time + rawOffset
-                }.time
-            })
+    val calendar = Calendar.getInstance()
+    calendar.timeInMillis = time
+    return SimpleDateFormat(context.resources.getString(R.string.psd_time_format)).format(calendar.time)
 }
 
 /**
@@ -35,14 +31,12 @@ internal fun Date.getTimeText(context: Context): String {
  */
 @SuppressLint("SimpleDateFormat")
 internal fun Date.getWhen(context: Context, now: Calendar): String {
-    val zone = TimeZone.getDefault()
-    val date = Calendar.getInstance(zone).apply {
-        timeInMillis = this@getWhen.time + zone.rawOffset
-    }
+    val calendar = Calendar.getInstance()
+    calendar.timeInMillis = time
     return when {
-        date.isSameDay(now) -> context.getString(R.string.psd_today)
-        date.isOneDayBefore(now) -> context.getString(R.string.psd_yesterday)
-        date.isSameYear(now) -> SimpleDateFormat(context.getString(R.string.psd_date_format_d_m)).format(this)
+        calendar.isSameDay(now) -> context.getString(R.string.psd_today)
+        calendar.isOneDayBefore(now) -> context.getString(R.string.psd_yesterday)
+        calendar.isSameYear(now) -> SimpleDateFormat(context.getString(R.string.psd_date_format_d_m)).format(this)
         else -> SimpleDateFormat(context.getString(R.string.psd_date_format_d_m_y)).format(this)
     }
 }
