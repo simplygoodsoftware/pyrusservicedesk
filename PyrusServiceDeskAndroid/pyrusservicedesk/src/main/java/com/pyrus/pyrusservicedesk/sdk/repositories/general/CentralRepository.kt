@@ -19,9 +19,11 @@ internal class CentralRepository(private val webRepository: RemoteRepository,
 
     override suspend fun getTickets(): GetTicketsResponse = webRepository.getTickets()
 
-    override suspend fun addFeedComment(comment: Comment, uploadFileHooks: UploadFileHooks?): Response<AddCommentResponseData> {
+    override suspend fun getTicket(ticketId: Int): GetTicketResponse = webRepository.getTicket(ticketId)
+
+    override suspend fun addFeedComment(ticketId: Int, comment: Comment, uploadFileHooks: UploadFileHooks?): Response<AddCommentResponseData> {
         addPendingFeedComment(comment)
-        val response = webRepository.addFeedComment(comment, uploadFileHooks)
+        val response = webRepository.addFeedComment(ticketId, comment, uploadFileHooks)
         if (!response.hasError()) {
             removePendingComment(comment)
         }

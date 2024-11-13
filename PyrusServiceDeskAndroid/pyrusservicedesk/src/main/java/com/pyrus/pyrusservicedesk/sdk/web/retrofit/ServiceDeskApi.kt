@@ -1,6 +1,7 @@
 package com.pyrus.pyrusservicedesk.sdk.web.retrofit
 
 import androidx.annotation.Keep
+import com.pyrus.pyrusservicedesk.sdk.data.Ticket
 import com.pyrus.pyrusservicedesk.sdk.data.intermediate.*
 import com.pyrus.pyrusservicedesk.sdk.web.request_body.*
 import okhttp3.MultipartBody
@@ -26,6 +27,14 @@ internal interface ServiceDeskApi {
     @POST("gettickets")
     fun getTickets(@Body requestBody: RequestBodyBase)
             : Call<Tickets>
+
+    /**
+     * Api call for getting ticket with the given [ticketId].
+     */
+    @POST("getticket/{ticket_id}")
+    fun getTicket(@Body requestBody: RequestBodyBase,
+                  @Path("ticket_id") ticketId: Int)
+            : Call<Ticket>
 
     /**
      * Api call for sending comment to the feed.

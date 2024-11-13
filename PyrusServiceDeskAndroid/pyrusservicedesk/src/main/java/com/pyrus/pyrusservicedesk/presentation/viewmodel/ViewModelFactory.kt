@@ -23,6 +23,8 @@ internal class ViewModelFactory(private val arguments: Intent): ViewModelProvide
             TicketViewModel::class.java ->
                 TicketViewModel(
                     PyrusServiceDesk.get().serviceDeskProvider,
+                    arguments,
+                    isFeed = false,
                     PyrusServiceDesk.getPreferencesManager()
                 ) as T
             TicketsListViewModel::class.java ->

@@ -18,11 +18,16 @@ internal interface RemoteRepository {
     suspend fun getTickets(): GetTicketsResponse
 
     /**
+     * Provides ticket with the given [ticketId].
+     */
+    suspend fun getTicket(ticketId: Int): GetTicketResponse
+
+    /**
      * Appends [comment] to the ticket to comment feed.
      *
      * @param uploadFileHooks is used for posting progress as well as checking cancellation signal.
      */
-    suspend fun addFeedComment(comment: Comment, uploadFileHooks: UploadFileHooks? = null): Response<AddCommentResponseData>
+    suspend fun addFeedComment( ticketId: Int ,comment: Comment, uploadFileHooks: UploadFileHooks? = null): Response<AddCommentResponseData>
 
     /**
      * Registers the given push [token].

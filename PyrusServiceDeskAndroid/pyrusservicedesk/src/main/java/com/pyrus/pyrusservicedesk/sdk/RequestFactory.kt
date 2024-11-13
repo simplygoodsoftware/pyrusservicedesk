@@ -1,6 +1,7 @@
 package com.pyrus.pyrusservicedesk.sdk
 
 import com.pyrus.pyrusservicedesk.sdk.data.Comment
+import com.pyrus.pyrusservicedesk.sdk.data.Ticket
 import com.pyrus.pyrusservicedesk.sdk.data.TicketShortDescription
 import com.pyrus.pyrusservicedesk.sdk.data.intermediate.AddCommentResponseData
 import com.pyrus.pyrusservicedesk.sdk.data.intermediate.Comments
@@ -13,11 +14,14 @@ internal class RequestFactory(private val repository: GeneralRepository) {
     fun getFeedRequest(keepUnread: Boolean = false): Request<Comments> = GetFeedRequest(repository, true, keepUnread)
     fun getTicketsRequest(): RequestBase<List<TicketShortDescription>> = GetTicketsRequest(repository)
 
+    fun getTicketRequest(ticketId: Int): RequestBase<Ticket> = GetTicketRequest(repository, ticketId)
+
     fun getAddFeedCommentRequest(
+        ticketId: Int,
         comment: Comment,
         uploadFileHooks: UploadFileHooks? = null
     ): RequestBase<AddCommentResponseData> {
-        return AddFeedCommentRequest(repository, comment, uploadFileHooks)
+        return AddFeedCommentRequest(repository, ticketId, comment, uploadFileHooks)
     }
 
     /**

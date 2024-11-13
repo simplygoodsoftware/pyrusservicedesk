@@ -5,24 +5,19 @@ import android.os.Bundle
 import android.view.View
 import android.widget.ImageButton
 import android.widget.Toast
-import androidx.lifecycle.Observer
 import androidx.recyclerview.widget.LinearLayoutManager
-import androidx.recyclerview.widget.RecyclerView
 import com.pyrus.pyrusservicedesk.PyrusServiceDesk
 import com.pyrus.pyrusservicedesk.R
 import com.pyrus.pyrusservicedesk.presentation.ConnectionActivityBase
 import com.pyrus.pyrusservicedesk.presentation.ui.navigation_page.ticket.TicketActivity
 import com.pyrus.pyrusservicedesk.presentation.ui.navigation_page.tickets_list.recyclerview_tickets_list.TicketsListAdapter
-import com.pyrus.pyrusservicedesk.presentation.ui.view.recyclerview.item_decorators.SpaceItemDecoration
 import com.pyrus.pyrusservicedesk.sdk.data.Author
 import com.pyrus.pyrusservicedesk.sdk.data.Comment
 import com.pyrus.pyrusservicedesk.sdk.data.TicketShortDescription
-import kotlinx.android.synthetic.main.psd_activity_ticket.comments
-import kotlinx.android.synthetic.main.psd_activity_ticket.refresh
+import kotlinx.android.synthetic.main.psd_empty_tickets_list.createTicketTv
+import kotlinx.android.synthetic.main.psd_tickets_list.fabAddTicket
 import kotlinx.android.synthetic.main.psd_tickets_list.filter_fl
 import kotlinx.android.synthetic.main.psd_tickets_list.tickets_rv
-import kotlinx.android.synthetic.main.psd_toolbar.psd_toolbar_filter_ib
-import kotlinx.android.synthetic.main.psd_toolbar.psd_toolbar_qr_ib
 import java.util.Date
 
 /**
@@ -31,19 +26,9 @@ import java.util.Date
 internal class TicketListActivity : ConnectionActivityBase<TicketsListViewModel>(TicketsListViewModel::class.java) {
 
     companion object {
-        private const val KEY_USER_ID = "KEY_USER_ID"
-        private const val KEY_UNREAD_COUNT = "KEY_UNREAD_COUNT"
-
-        private const val STATE_KEYBOARD_SHOWN = "STATE_KEYBOARD_SHOWN"
-
-        private const val CHECK_IS_AT_BOTTOM_DELAY_MS = 50L
 
         /**
          * Provides intent for launching the screen.
-         *
-         * @param userid id of user e.g. restaurant id to be rendered.
-         * When not, this should be omitted for the new ticket.
-         * @param unreadCount current count of unread tickets.
          */
         fun getLaunchIntent(): Intent {
             return Intent(
@@ -59,28 +44,6 @@ internal class TicketListActivity : ConnectionActivityBase<TicketsListViewModel>
     override val refresherViewId = View.NO_ID
     override val progressBarViewId: Int = View.NO_ID
 
-//
-//    private val attachFileSharedViewModel: AttachFileSharedViewModel by getViewModel(
-//        AttachFileSharedViewModel::class.java)
-//    private val commentActionsSharedViewModel: PendingCommentActionSharedViewModel by getViewModel(
-//        PendingCommentActionSharedViewModel::class.java)
-//
-
-//    private val adapter = TicketsListAdapter().apply {
-//        setOnTicketItemClickListener {
-//            it.ticketId.let { ticketId ->
-//                this@TicketListActivity.startActivity(TicketActivity.getLaunchIntent(
-//                    ticketId,
-//                    when{
-//                        !it.isRead -> viewModel.getUnreadCount() - 1
-//                        else -> viewModel.getUnreadCount()
-//                    }
-//                ))
-//                viewModel.onTicketOpened(it)
-//            }
-//        }
-//    }
-
     private lateinit var adapter: TicketsListAdapter
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -88,7 +51,6 @@ internal class TicketListActivity : ConnectionActivityBase<TicketsListViewModel>
 
         val toolbarFilter = findViewById<ImageButton>(R.id.psd_toolbar_filter_ib)
         val toolbarQr = findViewById<ImageButton>(R.id.psd_toolbar_qr_ib)
-        val ticketsRv = findViewById<RecyclerView>(R.id.tickets_rv)
 
         //supportActionBar?.apply { title = getString(R.string.psd_tickets_activity_title) }
         toolbarFilter.setOnClickListener {
@@ -100,17 +62,21 @@ internal class TicketListActivity : ConnectionActivityBase<TicketsListViewModel>
             //TODO
             Toast.makeText(applicationContext, "QR", Toast.LENGTH_SHORT).show()
         }
+        fabAddTicket.setOnClickListener {
+            //TODO
+            this@TicketListActivity.startActivity(TicketActivity.getLaunchIntent())
+        }
+        createTicketTv.setOnClickListener {
+            //TODO
+            this@TicketListActivity.startActivity(TicketActivity.getLaunchIntent())
+        }
 
-        adapter = TicketsListAdapter(/*provideTickets()*/emptyList())
+        adapter = TicketsListAdapter()
             .apply {
                 setOnTicketItemClickListener {
                     it.ticketId.let { ticketId ->
                         this@TicketListActivity.startActivity(TicketActivity.getLaunchIntent(
-                            ticketId,
-                            when {
-                                !it.isRead -> viewModel.getUnreadCount() - 1
-                                else -> viewModel.getUnreadCount()
-                            }
+                            ticketId
                         )
                         )
                         viewModel.onTicketOpened(it)
@@ -120,7 +86,7 @@ internal class TicketListActivity : ConnectionActivityBase<TicketsListViewModel>
         tickets_rv.adapter  = adapter
         tickets_rv.layoutManager = LinearLayoutManager(this)
 
-        //TODO button New ticket, maybe addItemDecoration
+        //TODO addItemDecoration maybe
         //tickets_rv.addItemDecoration(SpaceItemDecoration(resources.getDimensionPixelSize(R.dimen.psd_tickets_item_space)))
 //        new_conversation.setOnClickListener {
 //            UiNavigator.toNewTicket(this, viewModel.getUnreadCount())
@@ -130,16 +96,13 @@ internal class TicketListActivity : ConnectionActivityBase<TicketsListViewModel>
 
     override fun startObserveData() {
         super.startObserveData()
-        //TODO
-//        viewModel.getTicketsLiveData().observe(
-//            this,
-//            Observer { list ->
-//                refresh.isRefreshing = false
-//                list?.let{ adapter.setItems(it) }
-//            }
-//        )
-//        val list = provideTickets()
-//        list.let{ adapter.setItems(it) }
+        viewModel.getTicketsLiveData().observe(
+            this
+        ) { list ->
+            //TODO
+            //refresh.isRefreshing = false
+            list?.let { adapter.setItems(it) }
+        }
     }
 
     //TODO delete
@@ -157,9 +120,11 @@ internal class TicketListActivity : ConnectionActivityBase<TicketsListViewModel>
         return tasks
     }
 
-    override fun finish() {
-        super.finish()
-        PyrusServiceDesk.onServiceDeskStop()
-    }
+
+    //TODO надо ли?
+//    override fun finish() {
+//        super.finish()
+//        PyrusServiceDesk.onServiceDeskStop()
+//    }
 
 }

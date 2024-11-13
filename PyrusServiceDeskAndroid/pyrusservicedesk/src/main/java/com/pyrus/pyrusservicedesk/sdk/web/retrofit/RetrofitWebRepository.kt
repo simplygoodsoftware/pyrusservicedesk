@@ -110,8 +110,8 @@ internal class RetrofitWebRepository(
         }
     }
 
-    override suspend fun addFeedComment(comment: Comment, uploadFileHooks: UploadFileHooks?): Response<AddCommentResponseData> {
-        return addComment(EMPTY_TICKET_ID, comment, uploadFileHooks)
+    override suspend fun addFeedComment(ticketId: Int, comment: Comment, uploadFileHooks: UploadFileHooks?): Response<AddCommentResponseData> {
+        return addComment(ticketId, comment, uploadFileHooks)
     }
 
     override suspend fun setPushToken(token: String?, tokenType: String): SetPushTokenResponse {
@@ -216,7 +216,8 @@ internal class RetrofitWebRepository(
                     cament.attachments,
                     ConfigUtils.getUserName(),
                     cament.rating,
-                    getExtraFields()
+                    getExtraFields(),
+                    ticketId == EMPTY_TICKET_ID
                 )
             )
             return@withContext try {
@@ -241,6 +242,29 @@ internal class RetrofitWebRepository(
             }
             finally {
                 sequentialRequests.poll()
+            }
+        }
+    }
+
+    override suspend fun getTicket(ticketId: Int): GetTicketResponse {
+        PLog.d(TAG, "getTicket, " +
+                "appId: ${appId.getFirstNSymbols(10)}, " +
+                "userId: ${getUserId().getFirstNSymbols(10)}, " +
+                "instanceId: ${getInstanceId()?.getFirstNSymbols(10)}, " +
+                "apiVersion: ${getVersion()}, " +
+                "ticketId: $ticketId"
+        )
+        return withContext(Dispatchers.IO){
+            try {
+                api.getTicket(RequestBodyBase(appId, getUserId(), getSecurityKey(), getInstanceId(), getVersion()), ticketId).execute().run {
+                    PLog.d(TAG, "getTicket, isSuccessful: $isSuccessful, body() != null: ${body() != null}")
+                    when {
+                        isSuccessful && body() != null -> GetTicketResponse(ticket = body())
+                        else -> GetTicketResponse(createError(this))
+                    }
+                }
+            } catch (ex: Exception) {
+                GetTicketResponse(NoInternetConnection("No internet connection"))
             }
         }
     }

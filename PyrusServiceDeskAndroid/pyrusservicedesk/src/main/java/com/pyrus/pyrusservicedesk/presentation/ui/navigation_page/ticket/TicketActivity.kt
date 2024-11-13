@@ -21,6 +21,7 @@ import android.widget.Toast
 import com.pyrus.pyrusservicedesk.PyrusServiceDesk
 import com.pyrus.pyrusservicedesk.R
 import com.pyrus.pyrusservicedesk.ServiceDeskConfiguration
+import com.pyrus.pyrusservicedesk.log.PLog
 import com.pyrus.pyrusservicedesk.presentation.ConnectionActivityBase
 import com.pyrus.pyrusservicedesk.presentation.ui.navigation_page.file_preview.FilePreviewActivity
 import com.pyrus.pyrusservicedesk.presentation.ui.navigation_page.ticket.dialogs.attach_files.AttachFileSharedViewModel
@@ -29,6 +30,7 @@ import com.pyrus.pyrusservicedesk.presentation.ui.navigation_page.ticket.dialogs
 import com.pyrus.pyrusservicedesk.presentation.ui.navigation_page.ticket.dialogs.comment_actions.PendingCommentActionsDialog
 import com.pyrus.pyrusservicedesk.presentation.ui.view.recyclerview.item_decorators.SpaceItemDecoration
 import com.pyrus.pyrusservicedesk.sdk.data.Attachment
+import com.pyrus.pyrusservicedesk.sdk.data.EMPTY_TICKET_ID
 import com.pyrus.pyrusservicedesk.sdk.data.intermediate.FileData
 import com.pyrus.pyrusservicedesk.utils.*
 import com.pyrus.pyrusservicedesk.utils.RequestUtils.Companion.getFileUrl
@@ -67,6 +69,18 @@ internal class TicketActivity : ConnectionActivityBase<TicketViewModel>(TicketVi
                 ticketId?.let { intent.putExtra(KEY_TICKET_ID, it) }
                 intent.putExtra(KEY_UNREAD_COUNT, unreadCount)
             }
+        }
+
+
+        /**
+         * Extracts ticket id from the given [arguments].
+         * Expected that [arguments] are made by [getLaunchIntent].
+         *
+         * @return id of the ticket stored in [arguments] or [EMPTY_TICKET_ID] if
+         * [arguments] doesn't contain it
+         */
+        fun getTicketId(arguments: Intent): Int {
+            return arguments.getIntExtra(KEY_TICKET_ID, EMPTY_TICKET_ID)
         }
 
     }

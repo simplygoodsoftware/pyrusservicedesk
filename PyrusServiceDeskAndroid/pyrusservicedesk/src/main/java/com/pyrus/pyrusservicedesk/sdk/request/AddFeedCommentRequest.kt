@@ -13,12 +13,13 @@ import com.pyrus.pyrusservicedesk.sdk.web.UploadFileHooks
  * @param uploadFileHooks hooks for handling file uploading/downloading progress and cancellation.
  */
 internal class AddFeedCommentRequest(repository: GeneralRepository,
+                                     val ticketId: Int,
                                      val comment: Comment,
                                      val uploadFileHooks: UploadFileHooks? = null)
     : RequestBase<AddCommentResponseData>(repository) {
 
     override suspend fun run(repository: GeneralRepository): Response<AddCommentResponseData> {
-        return repository.addFeedComment(comment, uploadFileHooks)
+        return repository.addFeedComment(ticketId, comment, uploadFileHooks)
     }
 
 }

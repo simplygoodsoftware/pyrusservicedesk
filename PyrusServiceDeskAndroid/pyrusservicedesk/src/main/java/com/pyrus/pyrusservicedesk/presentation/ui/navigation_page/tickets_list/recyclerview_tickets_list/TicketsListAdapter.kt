@@ -1,27 +1,20 @@
 package com.pyrus.pyrusservicedesk.presentation.ui.navigation_page.tickets_list.recyclerview_tickets_list
 
-import android.annotation.SuppressLint
 import android.view.View.GONE
 import android.view.View.VISIBLE
 import android.view.ViewGroup
 import android.widget.ImageView
 import android.widget.TextView
 import com.pyrus.pyrusservicedesk.R
-import com.pyrus.pyrusservicedesk.presentation.ui.navigation_page.ticket.entries.TicketEntry
 import com.pyrus.pyrusservicedesk.presentation.ui.view.recyclerview.AdapterBase
 import com.pyrus.pyrusservicedesk.presentation.ui.view.recyclerview.ViewHolderBase
 import com.pyrus.pyrusservicedesk.sdk.data.TicketShortDescription
-import com.pyrus.pyrusservicedesk.utils.getTimePassedFrom
-import java.util.Calendar
 
 /**
  * Adapter that is used for rendering comment feed of the ticket screen.
  */
-internal class TicketsListAdapter(itemsList: List<TicketShortDescription>): AdapterBase<TicketShortDescription>() {
+internal class TicketsListAdapter: AdapterBase<TicketShortDescription>() {
 
-    init {
-        this.itemsList = itemsList.toMutableList()
-    }
     private var onTicketItemClickListener: ((ticket: TicketShortDescription) -> Unit)? = null
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolderBase<TicketShortDescription> {
