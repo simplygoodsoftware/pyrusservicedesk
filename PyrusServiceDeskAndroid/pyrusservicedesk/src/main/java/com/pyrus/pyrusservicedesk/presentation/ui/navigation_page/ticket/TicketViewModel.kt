@@ -1,6 +1,7 @@
 package com.pyrus.pyrusservicedesk.presentation.ui.navigation_page.ticket
 
 import android.content.Context
+import android.content.Intent
 import android.net.Uri
 import android.os.Handler
 import android.os.Looper
@@ -37,16 +38,15 @@ import com.pyrus.pyrusservicedesk.utils.RequestUtils.Companion.MAX_FILE_SIZE_BYT
 import com.pyrus.pyrusservicedesk.utils.RequestUtils.Companion.MAX_FILE_SIZE_MEGABYTES
 import com.pyrus.pyrusservicedesk.utils.getWhen
 import kotlinx.coroutines.*
-import java.lang.Exception
-import java.lang.Runnable
 import java.util.*
-import kotlin.collections.ArrayList
 
 /**
  * ViewModel for the ticket screen.
  */
 internal class TicketViewModel(
     serviceDeskProvider: ServiceDeskProvider,
+    arguments: Intent,
+    val isFeed: Boolean,
     private val preferencesManager: PreferencesManager
 ) : ConnectionViewModelBase(serviceDeskProvider), OnUnreadTicketCountChangedSubscriber {
 
@@ -66,6 +66,9 @@ internal class TicketViewModel(
      * Drafted text. Assigned once when view model is created.
      */
     val draft: String
+
+    private var ticketId: Int = TicketActivity.getTicketId(arguments)
+
 
     private val draftRepository = serviceDeskProvider.getDraftRepository()
     private val localDataProvider: LocalDataProvider = serviceDeskProvider.getLocalDataProvider()
@@ -214,7 +217,10 @@ internal class TicketViewModel(
     }
 
     private fun update() {
-        val call = GetFeedCall(this@TicketViewModel, requests).execute()
+        val call = when {
+            isFeed -> GetFeedCall(this@TicketViewModel, requests).execute()
+            else -> GetTicketCall(this@TicketViewModel, requests, ticketId).execute()
+        }
         val observer = Observer<CallResult<Comments>> { result ->
             if (result == null)
                 return@Observer
@@ -279,7 +285,7 @@ internal class TicketViewModel(
             CommentEntry(localComment, uploadFileHooks = uploadFileHooks),
             ChangeType.Added
         )
-        AddFeedCommentCall(this, requests, localComment, uploadFileHooks)
+        AddFeedCommentCall(this, requests, ticketId, localComment, uploadFileHooks)
             .execute()
             .observeForever(AddCommentObserver(uploadFileHooks, localComment))
 

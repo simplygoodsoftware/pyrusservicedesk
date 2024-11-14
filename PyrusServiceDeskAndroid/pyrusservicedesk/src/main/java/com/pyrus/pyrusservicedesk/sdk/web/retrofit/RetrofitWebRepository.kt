@@ -10,6 +10,7 @@ import com.pyrus.pyrusservicedesk.sdk.data.Attachment
 import com.pyrus.pyrusservicedesk.sdk.data.Comment
 import com.pyrus.pyrusservicedesk.sdk.data.EMPTY_TICKET_ID
 import com.pyrus.pyrusservicedesk.sdk.data.FileManager
+import com.pyrus.pyrusservicedesk.sdk.data.UserData
 import com.pyrus.pyrusservicedesk.sdk.data.intermediate.AddCommentResponseData
 import com.pyrus.pyrusservicedesk.sdk.data.intermediate.Comments
 import com.pyrus.pyrusservicedesk.sdk.repositories.general.GeneralRepository
@@ -88,6 +89,10 @@ internal class RetrofitWebRepository(
         }
     }
 
+    //TODO delete
+    val additionalUsers = listOf(UserData(appId, "251380446", ""))
+
+
     override suspend fun getTickets(): GetTicketsResponse {
         PLog.d(TAG, "getTickets, " +
                 "appId: ${appId.getFirstNSymbols(10)}, " +
@@ -97,7 +102,7 @@ internal class RetrofitWebRepository(
         )
         return withContext(Dispatchers.IO){
             try {
-                api.getTickets(RequestBodyBase(appId, getUserId(), getSecurityKey(), getInstanceId(), getVersion())).execute().run {
+                api.getTickets(RequestBodyBase(false, additionalUsers ,appId, getUserId(), getSecurityKey(), getInstanceId(), getVersion())).execute().run {
                     PLog.d(TAG, "getTickets, isSuccessful: $isSuccessful, body() != null: ${body() != null}")
                     when {
                         isSuccessful && body() != null -> GetTicketsResponse(tickets = body()!!.tickets)
@@ -110,8 +115,8 @@ internal class RetrofitWebRepository(
         }
     }
 
-    override suspend fun addFeedComment(comment: Comment, uploadFileHooks: UploadFileHooks?): Response<AddCommentResponseData> {
-        return addComment(EMPTY_TICKET_ID, comment, uploadFileHooks)
+    override suspend fun addFeedComment(ticketId: Int, comment: Comment, uploadFileHooks: UploadFileHooks?): Response<AddCommentResponseData> {
+        return addComment(ticketId, comment, uploadFileHooks)
     }
 
     override suspend fun setPushToken(token: String?, tokenType: String): SetPushTokenResponse {
@@ -149,10 +154,11 @@ internal class RetrofitWebRepository(
     }
 
     private fun getUserId(): String {
-        if (getVersion() == API_VERSION_2) {
-            return PyrusServiceDesk.get().userId ?: instanceId
-        }
-        return instanceId
+//        if (getVersion() == API_VERSION_2) {
+//            return PyrusServiceDesk.get().userId ?: instanceId
+//        }
+//        return instanceId
+        return "251380469"
     }
 
     private fun getVersion(): Int {
@@ -216,7 +222,8 @@ internal class RetrofitWebRepository(
                     cament.attachments,
                     ConfigUtils.getUserName(),
                     cament.rating,
-                    getExtraFields()
+                    getExtraFields(),
+                    ticketId == EMPTY_TICKET_ID
                 )
             )
             return@withContext try {
@@ -241,6 +248,29 @@ internal class RetrofitWebRepository(
             }
             finally {
                 sequentialRequests.poll()
+            }
+        }
+    }
+
+    override suspend fun getTicket(ticketId: Int): GetTicketResponse {
+        PLog.d(TAG, "getTicket, " +
+                "appId: ${appId.getFirstNSymbols(10)}, " +
+                "userId: ${getUserId().getFirstNSymbols(10)}, " +
+                "instanceId: ${getInstanceId()?.getFirstNSymbols(10)}, " +
+                "apiVersion: ${getVersion()}, " +
+                "ticketId: $ticketId"
+        )
+        return withContext(Dispatchers.IO){
+            try {
+                api.getTicket(RequestBodyBase(false, additionalUsers, appId, getUserId(), getSecurityKey(), getInstanceId(), getVersion()), ticketId).execute().run {
+                    PLog.d(TAG, "getTicket, isSuccessful: $isSuccessful, body() != null: ${body() != null}")
+                    when {
+                        isSuccessful && body() != null -> GetTicketResponse(ticket = body())
+                        else -> GetTicketResponse(createError(this))
+                    }
+                }
+            } catch (ex: Exception) {
+                GetTicketResponse(NoInternetConnection("No internet connection"))
             }
         }
     }

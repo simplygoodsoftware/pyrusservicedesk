@@ -19,6 +19,7 @@ import kotlinx.coroutines.CoroutineScope
 internal class AddFeedCommentCall(
         scope: CoroutineScope,
         private val requests: RequestFactory,
+        private val ticketId: Int,
         private val comment: Comment,
         private val uploadFileHooks: UploadFileHooks? = null)
     : BaseCall<AddCommentResponseData>(scope) {
@@ -26,7 +27,7 @@ internal class AddFeedCommentCall(
     override suspend fun run(): CallResult<AddCommentResponseData> {
         var result: AddCommentResponseData? = null
         var error: ResponseError? = null
-        requests.getAddFeedCommentRequest(comment, uploadFileHooks).execute(
+        requests.getAddFeedCommentRequest(ticketId, comment, uploadFileHooks).execute(
             object: ResponseCallback<AddCommentResponseData> {
                 override fun onSuccess(data: AddCommentResponseData) {
                     result = data
