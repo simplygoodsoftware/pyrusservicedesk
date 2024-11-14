@@ -16,12 +16,12 @@ internal open class RequestBodyBase(
         val needFullInfo: Boolean? = false,
         @SerializedName("additional_users")
         val additionalUsers: List<UserData>? = null,
-////        @SerializedName("commands") //TODO
-////        val commands: String?,
-//        @SerializedName("author_id")
-//        val authorId: String?,
-//        @SerializedName("author_name")
-//        val authorName: String?,
+//        @SerializedName("commands") //TODO
+//        val commands: String?,
+        @SerializedName("author_id")
+        val authorId: String?,
+        @SerializedName("author_name")
+        val authorName: String?,
         @SerializedName("app_id")
         val appId: String,
         @SerializedName("user_id")
@@ -32,6 +32,6 @@ internal open class RequestBodyBase(
         val instanceId: String?,
         @SerializedName("version")
         val version: Int,
-//        @SerializedName("api_sign")
-//        val apiSign: String?,
+        @SerializedName("api_sign")
+        val apiSign: String?,
 )

@@ -6,7 +6,7 @@ import androidx.annotation.MainThread
 import com.pyrus.pyrusservicedesk.PyrusServiceDesk
 import com.pyrus.pyrusservicedesk.log.PLog
 import com.pyrus.pyrusservicedesk.sdk.RequestFactory
-import com.pyrus.pyrusservicedesk.sdk.data.TicketShortDescription
+import com.pyrus.pyrusservicedesk.sdk.data.Ticket
 import com.pyrus.pyrusservicedesk.sdk.response.ResponseCallback
 import com.pyrus.pyrusservicedesk.sdk.response.ResponseError
 import com.pyrus.pyrusservicedesk.utils.MILLISECONDS_IN_DAY
@@ -58,9 +58,9 @@ internal class LiveUpdates(
             val requestUserId = userId
             GlobalScope.launch(ioDispatcher) {
                 requests.getTicketsRequest().execute(
-                    object : ResponseCallback<List<TicketShortDescription>> {
-                        override fun onSuccess(data: List<TicketShortDescription>) {
-                            val newUnread = data.count { !it.isRead }
+                    object : ResponseCallback<List<Ticket>> {
+                        override fun onSuccess(data: List<Ticket>) {
+                            val newUnread = data.count { !it.isRead!! } //TODO
                             this@launch.launch(mainDispatcher) {
                                 val userId = PyrusServiceDesk.get().userId
                                 if (data.isEmpty())
@@ -250,7 +250,7 @@ internal class LiveUpdates(
     }
 
     @MainThread
-    private fun processGetTicketsSuccess(data: List<TicketShortDescription>, newUnreadCount: Int) {
+    private fun processGetTicketsSuccess(data: List<Ticket>, newUnreadCount: Int) {
         val isChanged = recentUnreadCounter != newUnreadCount
         PLog.d(TAG, "processSuccess, isChanged: $isChanged, recentUnreadCounter: $recentUnreadCounter, newUnreadCount: $newUnreadCount")
         notifyDataSubscribers(data, isChanged, newUnreadCount)
@@ -327,7 +327,7 @@ internal class LiveUpdates(
         }
     }
 
-    private fun notifyDataSubscribers(data: List<TicketShortDescription>, isChanged: Boolean, newUnreadCount: Int) {
+    private fun notifyDataSubscribers(data: List<Ticket>, isChanged: Boolean, newUnreadCount: Int) {
         dataSubscribers.forEach {
             it.onNewData(data)
             if (isChanged)
@@ -367,7 +367,7 @@ internal interface LiveUpdateSubscriber: OnUnreadTicketCountChangedSubscriber {
     /**
      * Invoked when new portion of [tickets] data is received.
      */
-    fun onNewData(tickets: List<TicketShortDescription>)
+    fun onNewData(tickets: List<Ticket>)
 }
 
 /**

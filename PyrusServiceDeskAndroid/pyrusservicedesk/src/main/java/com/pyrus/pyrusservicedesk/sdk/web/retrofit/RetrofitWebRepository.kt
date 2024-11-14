@@ -102,7 +102,7 @@ internal class RetrofitWebRepository(
         )
         return withContext(Dispatchers.IO){
             try {
-                api.getTickets(RequestBodyBase(false, additionalUsers ,appId, getUserId(), getSecurityKey(), getInstanceId(), getVersion())).execute().run {
+                api.getTickets(RequestBodyBase(false, additionalUsers, "10", "Kate Test", appId, getUserId(),  getSecurityKey(), getInstanceId(), getVersion(), apiFlag)).execute().run {
                     PLog.d(TAG, "getTickets, isSuccessful: $isSuccessful, body() != null: ${body() != null}")
                     when {
                         isSuccessful && body() != null -> GetTicketsResponse(tickets = body()!!.tickets)
@@ -154,6 +154,7 @@ internal class RetrofitWebRepository(
     }
 
     private fun getUserId(): String {
+        //TODO
 //        if (getVersion() == API_VERSION_2) {
 //            return PyrusServiceDesk.get().userId ?: instanceId
 //        }
@@ -262,7 +263,7 @@ internal class RetrofitWebRepository(
         )
         return withContext(Dispatchers.IO){
             try {
-                api.getTicket(RequestBodyBase(false, additionalUsers, appId, getUserId(), getSecurityKey(), getInstanceId(), getVersion()), ticketId).execute().run {
+                api.getTicket(RequestBodyBase(false, additionalUsers, "10", "Kate Test", appId, getUserId(), getSecurityKey(), getInstanceId(), getVersion(), apiFlag), ticketId).execute().run {
                     PLog.d(TAG, "getTicket, isSuccessful: $isSuccessful, body() != null: ${body() != null}")
                     when {
                         isSuccessful && body() != null -> GetTicketResponse(ticket = body())

@@ -106,19 +106,19 @@ internal class TicketListActivity : ConnectionActivityBase<TicketsListViewModel>
     }
 
     //TODO delete
-    private fun provideTickets(): List<TicketShortDescription> {
-        val tasks = listOf(
-            TicketShortDescription(0, "Ошибка в счете", false,  Comment(
-                0, "iiko: Мы рады, что смогли Вам помочь решить проблему ☺", creationDate = Date(1731074815), author = Author("Autor"))),
-            TicketShortDescription(0, "Проблемы с авторизацией в учетной зписи long", true,  Comment(
-                0, "Вы: После обновления страницы ничего не происходит. Как перевести в режим прос", creationDate = Date(1730815615000), author = Author("Autor"))),
-            TicketShortDescription(0, "Ошибка в счете", true,  Comment(
-                0, "печатает", creationDate = Date(1731074815), author = Author("Autor"))),
-            TicketShortDescription(0, "Ошибка в счете", true,  Comment(
-                0, "iiko: Мы рады, что смогли Вам помочь решить проблему ☺", creationDate = Date(1728137215000), author = Author("Autor"))),
-        )
-        return tasks
-    }
+//    private fun provideTickets(): List<TicketShortDescription> {
+//        val tasks = listOf(
+//            TicketShortDescription(0, "Ошибка в счете", false,  Comment(
+//                0, "iiko: Мы рады, что смогли Вам помочь решить проблему ☺", creationDate = Date(1731074815), author = Author("Autor"))),
+//            TicketShortDescription(0, "Проблемы с авторизацией в учетной зписи long", true,  Comment(
+//                0, "Вы: После обновления страницы ничего не происходит. Как перевести в режим прос", creationDate = Date(1730815615000), author = Author("Autor"))),
+//            TicketShortDescription(0, "Ошибка в счете", true,  Comment(
+//                0, "печатает", creationDate = Date(1731074815), author = Author("Autor"))),
+//            TicketShortDescription(0, "Ошибка в счете", true,  Comment(
+//                0, "iiko: Мы рады, что смогли Вам помочь решить проблему ☺", creationDate = Date(1728137215000), author = Author("Autor"))),
+//        )
+//        return tasks
+//    }
 
 
     //TODO надо ли?

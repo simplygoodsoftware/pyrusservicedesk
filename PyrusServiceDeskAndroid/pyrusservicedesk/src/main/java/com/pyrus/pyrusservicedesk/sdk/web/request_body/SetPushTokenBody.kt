@@ -19,4 +19,4 @@ internal class SetPushTokenBody(
     private val token: String?,
     @SerializedName("type")
     private val tokenType: String
-) : RequestBodyBase(false,null, appId, userId, securityKey, instanceId, version) //TODO check
+) : RequestBodyBase(false,null, null, null, appId, userId, securityKey, instanceId, version, null) //TODO check

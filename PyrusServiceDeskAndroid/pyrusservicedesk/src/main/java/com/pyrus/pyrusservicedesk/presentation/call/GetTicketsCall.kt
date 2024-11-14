@@ -2,6 +2,7 @@ package com.pyrus.pyrusservicedesk.presentation.call
 
 import kotlinx.coroutines.CoroutineScope
 import com.pyrus.pyrusservicedesk.sdk.RequestFactory
+import com.pyrus.pyrusservicedesk.sdk.data.Ticket
 import com.pyrus.pyrusservicedesk.sdk.data.TicketShortDescription
 import com.pyrus.pyrusservicedesk.sdk.response.ResponseCallback
 import com.pyrus.pyrusservicedesk.sdk.response.ResponseError
@@ -13,14 +14,14 @@ import com.pyrus.pyrusservicedesk.sdk.response.ResponseError
 internal class GetTicketsCall(
     scope: CoroutineScope,
     private val requests: RequestFactory)
-    : BaseCall<List<TicketShortDescription>>(scope) {
+    : BaseCall<List<Ticket>>(scope) {
 
-    override suspend fun run(): CallResult<List<TicketShortDescription>> {
-        var tickets: List<TicketShortDescription>? = null
+    override suspend fun run(): CallResult<List<Ticket>> {
+        var tickets: List<Ticket>? = null
         var error: ResponseError? = null
         requests.getTicketsRequest().execute(
-            object: ResponseCallback<List<TicketShortDescription>> {
-                override fun onSuccess(data: List<TicketShortDescription>) {
+            object: ResponseCallback<List<Ticket>> {
+                override fun onSuccess(data: List<Ticket>) {
                     tickets = data
                 }
 

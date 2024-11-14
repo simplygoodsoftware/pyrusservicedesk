@@ -44,7 +44,7 @@ internal class LocalDataProvider(offlineRepository: OfflineRepository,
         return Comment(
             body = text,
             isInbound = true,
-            author = Author(ConfigUtils.getUserName()),
+            author = Author(ConfigUtils.getUserName(), "10"), //TODO
             attachments = fileResolver.getFileData(fileUri)?.let {
                 listOf(createLocalAttachment(it))
             },

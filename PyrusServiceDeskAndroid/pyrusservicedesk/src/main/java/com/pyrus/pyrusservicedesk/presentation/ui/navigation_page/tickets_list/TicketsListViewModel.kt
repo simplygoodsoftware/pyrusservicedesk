@@ -7,7 +7,7 @@ import com.pyrus.pyrusservicedesk.presentation.call.GetTicketsCall
 import com.pyrus.pyrusservicedesk.presentation.viewmodel.ConnectionViewModelBase
 import com.pyrus.pyrusservicedesk.sdk.data.Attachment
 import com.pyrus.pyrusservicedesk.sdk.data.Comment
-import com.pyrus.pyrusservicedesk.sdk.data.TicketShortDescription
+import com.pyrus.pyrusservicedesk.sdk.data.Ticket
 import com.pyrus.pyrusservicedesk.sdk.updates.LiveUpdateSubscriber
 import com.pyrus.pyrusservicedesk.sdk.updates.PreferencesManager
 import com.pyrus.pyrusservicedesk.utils.RequestUtils.Companion.MAX_FILE_SIZE_BYTES
@@ -21,7 +21,7 @@ internal class TicketsListViewModel(
 ) : ConnectionViewModelBase(serviceDeskProvider), LiveUpdateSubscriber {
 
 
-    private val tickets = MediatorLiveData<List<TicketShortDescription>>()
+    private val tickets = MediatorLiveData<List<Ticket>>()
 
     private var unreadCount = 0
 
@@ -49,9 +49,9 @@ internal class TicketsListViewModel(
         update()
     }
 
-    override fun onNewData(tickets: List<TicketShortDescription>) {
-        this.tickets.value = tickets.sortedWith(TicketShortDescriptionComparator())
-        unreadCount = tickets.count{ description -> !description.isRead }
+    override fun onNewData(tickets: List<Ticket>) {
+        this.tickets.value = tickets.sortedWith(TicketComparator())
+        unreadCount = tickets.count{ description -> !description.isRead!! }
     }
 
     override fun onUnreadTicketCountChanged(unreadTicketCount: Int) {
@@ -59,9 +59,9 @@ internal class TicketsListViewModel(
     }
 
     /**
-     * Provides live data that delivers list of [TicketShortDescription] to be rendered.
+     * Provides live data that delivers list of [Ticket] to be rendered.
      */
-    fun getTicketsLiveData(): LiveData<List<TicketShortDescription>> = tickets
+    fun getTicketsLiveData(): LiveData<List<Ticket>> = tickets
 
     private fun update() {
         GetTicketsCall(this@TicketsListViewModel, requests)
@@ -79,9 +79,9 @@ internal class TicketsListViewModel(
             }
     }
 
-    private class TicketShortDescriptionComparator : Comparator<TicketShortDescription> {
+    private class TicketComparator : Comparator<Ticket> {
 
-        override fun compare(o1: TicketShortDescription, o2: TicketShortDescription): Int {
+        override fun compare(o1: Ticket, o2: Ticket): Int {
             return when {
                 o1.lastComment == null -> return when {
                     o2.lastComment == null -> o1.ticketId - o2.ticketId
@@ -95,9 +95,9 @@ internal class TicketsListViewModel(
         }
     }
 
-    private fun TicketShortDescription.read(): TicketShortDescription {
-        return TicketShortDescription(ticketId, subject, true, lastComment)
-    }
+//    private fun Ticket.read(): Ticket {
+//        return Ticket(ticketId, userId, subject, author, true, lastComment, null, null, null)
+//    }
 
 
     /**
@@ -111,8 +111,8 @@ internal class TicketsListViewModel(
      * Callback to be invoked when user opens [ticket] in UI
      */
     //TODO delete?
-    fun onTicketOpened(ticket: TicketShortDescription) {
-        if (!ticket.isRead) {
+    fun onTicketOpened(ticket: Ticket) {
+        if (!ticket.isRead!!) {
             unreadCount--
             val ticketsMutable = tickets.value!!.toMutableList()
             //ticketsMutable[ticketsMutable.indexOf(ticket)].isRead = ticket.isRead

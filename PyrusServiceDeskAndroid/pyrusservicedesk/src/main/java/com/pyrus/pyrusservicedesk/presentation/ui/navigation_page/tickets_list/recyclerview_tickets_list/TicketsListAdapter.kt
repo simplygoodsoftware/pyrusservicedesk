@@ -8,16 +8,16 @@ import android.widget.TextView
 import com.pyrus.pyrusservicedesk.R
 import com.pyrus.pyrusservicedesk.presentation.ui.view.recyclerview.AdapterBase
 import com.pyrus.pyrusservicedesk.presentation.ui.view.recyclerview.ViewHolderBase
-import com.pyrus.pyrusservicedesk.sdk.data.TicketShortDescription
+import com.pyrus.pyrusservicedesk.sdk.data.Ticket
 
 /**
  * Adapter that is used for rendering comment feed of the ticket screen.
  */
-internal class TicketsListAdapter: AdapterBase<TicketShortDescription>() {
+internal class TicketsListAdapter: AdapterBase<Ticket>() {
 
-    private var onTicketItemClickListener: ((ticket: TicketShortDescription) -> Unit)? = null
+    private var onTicketItemClickListener: ((ticket: Ticket) -> Unit)? = null
 
-    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolderBase<TicketShortDescription> {
+    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolderBase<Ticket> {
         return TicketsListViewHolder(parent)
     }
 
@@ -25,12 +25,12 @@ internal class TicketsListAdapter: AdapterBase<TicketShortDescription>() {
      * Assigns [listener] ths is invoked when comment with the file that is
      * ready to be previewed was clicked.
      */
-    fun setOnTicketItemClickListener(listener: (ticket: TicketShortDescription) -> Unit) {
+    fun setOnTicketItemClickListener(listener: (ticket: Ticket) -> Unit) {
         onTicketItemClickListener = listener
     }
 
     inner class TicketsListViewHolder(parent: ViewGroup)
-        : ViewHolderBase<TicketShortDescription>(parent, R.layout.psd_tickets_list_item) {
+        : ViewHolderBase<Ticket>(parent, R.layout.psd_tickets_list_item) {
 
         private val ticketName = itemView.findViewById<TextView>(R.id.ticket_name_tv)
         private val isUnread = itemView.findViewById<ImageView>(R.id.ticket_unread_iv)
@@ -41,12 +41,12 @@ internal class TicketsListAdapter: AdapterBase<TicketShortDescription>() {
             itemView.setOnClickListener{ onTicketItemClickListener?.invoke(getItem()) }
         }
 
-        override fun bindItem(item: TicketShortDescription) {
+        override fun bindItem(item: Ticket) {
             super.bindItem(item)
             ticketName.text = getItem().subject
             lastComment.text = getItem().lastComment?.body
             date.text = "20.09"
-            isUnread.visibility = if (!getItem().isRead) VISIBLE else GONE
+            isUnread.visibility = if (!getItem().isRead!!) VISIBLE else GONE //TODO !!
         }
     }
 }

@@ -351,7 +351,7 @@ internal class TicketViewModel(
                 val welcomeComment = Comment(
                     body = welcomeMessage,
                     creationDate = welcomeCommentDate,
-                    author = Author(""),
+                    author = Author("", ""), //TODO
                     isWelcomeMessage = true,
                 )
                 freshComments += welcomeComment

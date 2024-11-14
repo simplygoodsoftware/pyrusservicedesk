@@ -27,7 +27,7 @@ public class SampleActivity extends Activity implements NewReplySubscriber {
                 view -> PyrusServiceDesk.start(
                         this,
                         new ServiceDeskConfiguration.Builder()
-                                .setUserName("Ivan Ivanov")
+                                .setUserName("Kate Test")
                                 .setThemeColor(Color.parseColor("#FF8300"))
                                 .setChatTitle("Sample Support")
                                 .setWelcomeMessage("How can I help you?")

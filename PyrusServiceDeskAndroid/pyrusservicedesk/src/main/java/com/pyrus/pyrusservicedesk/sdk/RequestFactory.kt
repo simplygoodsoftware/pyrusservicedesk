@@ -12,7 +12,7 @@ import com.pyrus.pyrusservicedesk.sdk.web.UploadFileHooks
 internal class RequestFactory(private val repository: GeneralRepository) {
 
     fun getFeedRequest(keepUnread: Boolean = false): Request<Comments> = GetFeedRequest(repository, true, keepUnread)
-    fun getTicketsRequest(): RequestBase<List<TicketShortDescription>> = GetTicketsRequest(repository)
+    fun getTicketsRequest(): RequestBase<List<Ticket>> = GetTicketsRequest(repository)
 
     fun getTicketRequest(ticketId: Int): RequestBase<Ticket> = GetTicketRequest(repository, ticketId)
 
