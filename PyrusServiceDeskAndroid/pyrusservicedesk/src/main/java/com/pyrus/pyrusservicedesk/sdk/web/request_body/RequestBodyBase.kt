@@ -2,6 +2,7 @@ package com.pyrus.pyrusservicedesk.sdk.web.request_body
 
 import androidx.annotation.Keep
 import com.google.gson.annotations.SerializedName
+import com.pyrus.pyrusservicedesk.sdk.data.UserData
 
 /**
  * Base request body for sending to the server. Contains fields that are required for almost every request.
@@ -11,6 +12,16 @@ import com.google.gson.annotations.SerializedName
  */
 @Keep
 internal open class RequestBodyBase(
+        @SerializedName("need_full_info")
+        val needFullInfo: Boolean? = false,
+        @SerializedName("additional_users")
+        val additionalUsers: List<UserData>? = null,
+////        @SerializedName("commands") //TODO
+////        val commands: String?,
+//        @SerializedName("author_id")
+//        val authorId: String?,
+//        @SerializedName("author_name")
+//        val authorName: String?,
         @SerializedName("app_id")
         val appId: String,
         @SerializedName("user_id")
@@ -20,5 +31,7 @@ internal open class RequestBodyBase(
         @SerializedName("instance_id")
         val instanceId: String?,
         @SerializedName("version")
-        val version: Int
+        val version: Int,
+//        @SerializedName("api_sign")
+//        val apiSign: String?,
 )

@@ -10,6 +10,7 @@ import com.pyrus.pyrusservicedesk.sdk.data.Attachment
 import com.pyrus.pyrusservicedesk.sdk.data.Comment
 import com.pyrus.pyrusservicedesk.sdk.data.EMPTY_TICKET_ID
 import com.pyrus.pyrusservicedesk.sdk.data.FileManager
+import com.pyrus.pyrusservicedesk.sdk.data.UserData
 import com.pyrus.pyrusservicedesk.sdk.data.intermediate.AddCommentResponseData
 import com.pyrus.pyrusservicedesk.sdk.data.intermediate.Comments
 import com.pyrus.pyrusservicedesk.sdk.repositories.general.GeneralRepository
@@ -88,6 +89,10 @@ internal class RetrofitWebRepository(
         }
     }
 
+    //TODO delete
+    val additionalUsers = listOf(UserData(appId, "251380446", ""))
+
+
     override suspend fun getTickets(): GetTicketsResponse {
         PLog.d(TAG, "getTickets, " +
                 "appId: ${appId.getFirstNSymbols(10)}, " +
@@ -97,7 +102,7 @@ internal class RetrofitWebRepository(
         )
         return withContext(Dispatchers.IO){
             try {
-                api.getTickets(RequestBodyBase(appId, getUserId(), getSecurityKey(), getInstanceId(), getVersion())).execute().run {
+                api.getTickets(RequestBodyBase(false, additionalUsers ,appId, getUserId(), getSecurityKey(), getInstanceId(), getVersion())).execute().run {
                     PLog.d(TAG, "getTickets, isSuccessful: $isSuccessful, body() != null: ${body() != null}")
                     when {
                         isSuccessful && body() != null -> GetTicketsResponse(tickets = body()!!.tickets)
@@ -149,10 +154,11 @@ internal class RetrofitWebRepository(
     }
 
     private fun getUserId(): String {
-        if (getVersion() == API_VERSION_2) {
-            return PyrusServiceDesk.get().userId ?: instanceId
-        }
-        return instanceId
+//        if (getVersion() == API_VERSION_2) {
+//            return PyrusServiceDesk.get().userId ?: instanceId
+//        }
+//        return instanceId
+        return "251380469"
     }
 
     private fun getVersion(): Int {
@@ -256,7 +262,7 @@ internal class RetrofitWebRepository(
         )
         return withContext(Dispatchers.IO){
             try {
-                api.getTicket(RequestBodyBase(appId, getUserId(), getSecurityKey(), getInstanceId(), getVersion()), ticketId).execute().run {
+                api.getTicket(RequestBodyBase(false, additionalUsers, appId, getUserId(), getSecurityKey(), getInstanceId(), getVersion()), ticketId).execute().run {
                     PLog.d(TAG, "getTicket, isSuccessful: $isSuccessful, body() != null: ${body() != null}")
                     when {
                         isSuccessful && body() != null -> GetTicketResponse(ticket = body())

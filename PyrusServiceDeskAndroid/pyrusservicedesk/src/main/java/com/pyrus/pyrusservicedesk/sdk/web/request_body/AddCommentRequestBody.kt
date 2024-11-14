@@ -29,4 +29,4 @@ internal class AddCommentRequestBody(
         val extraFields: Map<String, String>?,
         @SerializedName("request_new_ticket")
         val requestNewTicket: Boolean,
-) : RequestBodyBase(appId, userId, securityKey, instanceId, version)
+) : RequestBodyBase(false, null, appId, userId, securityKey, instanceId, version) //TODO check
