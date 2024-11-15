@@ -1,2 +1,41 @@
 <?xml version="1.0" encoding="utf-8"?>
-<resources></resources>
+<resources>
+    <string name="psd_send">Envoyer</string>
+    <string name="psd_comment_input_hint">Ajouter un commentaire</string>
+    <string name="psd_retry">Réessayer</string>
+    <string name="psd_no_connection">Pas de connexion Internet</string>
+    <string name="psd_uploading">Téléchargement en cours…</string>
+    <string name="psd_file_size_mb" formatted="false">%.1f Mo</string>
+    <string name="psd_file_size_kb" formatted="false">%.1f Ko</string>
+    <string name="psd_time_format">hh:mm aa</string>
+    <string name="psd_organization_support">Soutien</string>
+    <string name="psd_today">Aujourd\'hui</string>
+    <string name="psd_yesterday">Hier</string>
+    <string name="psd_date_format_d_m_y">d MMMM yyyy</string>
+    <string name="psd_date_format_d_m">d MMMM</string>
+    <string name="psd_photo">Photo</string>
+    <string name="psd_gallery">Galerie</string>
+    <plurals name="psd_years_ago">
+        <item quantity="one">il y a %d an</item>
+        <item quantity="many">il y a %d ans</item>
+        <item quantity="other">il y a %d ans</item>
+    </plurals>
+    <string name="psd_weeks_ago" formatted="false">il y a %d s</string>
+    <string name="psd_months_ago" formatted="false">il y a %d m</string>
+    <string name="psd_days_ago" formatted="false">il y a %d j</string>
+    <string name="psd_hours_ago" formatted="false">il y a %d h</string>
+    <string name="psd_minutes_ago" formatted="false">il y a %d m</string>
+    <string name="psd_recent">récemment</string>
+    <string name="psd_guest">Invité</string>
+    <string name="psd_file_size_exceeded_message" formatted="false">La taille du fichier ne doit pas dépasser %d Mo.</string>
+    <string name="psd_copied_to_clipboard">Copié dans le presse-papiers</string>
+    <string name="psd_download">Télécharger</string>
+    <string name="psd_downloading">Téléchargement…</string>
+    <string name="psd_open">Ouvrir</string>
+    <string name="psd_no_preview_available">Aucun aperçu disponible</string>
+    <string name="psd_share">Partager</string>
+    <string name="psd_delete">Supprimer</string>
+    <string name="send_library_logs">Envoyer les journaux de la bibliothèque</string>
+    <string name="link_warning">Ce lien mène à un %s
+\nVoulez-vous vraiment suivre le lien \?</string>
+</resources>
