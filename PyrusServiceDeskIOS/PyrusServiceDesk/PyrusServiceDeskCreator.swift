@@ -24,7 +24,7 @@ import UIKit
     
     static private(set) var authorId: String?
     
-    static private(set) var userName: String?
+    static var userName: String?
     ///UserId needed for request
     static private(set) var userId: String = "" {
         didSet(oldUserId){
@@ -44,7 +44,7 @@ import UIKit
     }
     
     static let usersUpdateNotification = Notification.Name("USERS_UPDATE")
-    static private(set) var additionalUsers = [PSDUserInfo]()
+    static var additionalUsers = [PSDUserInfo]()
     
     static let clientsUpdateNotification = Notification.Name("CLIENTS_UPDATE")
     static var clients = [PSDClientInfo]() {
@@ -56,6 +56,9 @@ import UIKit
     static var currentUserId: String?
     static var currentClientId: String?
     
+    static let repository = TicketCommandRepository()
+    static let syncManager = SyncManager()
+    
     public static func addUser(appId: String, clientName: String, userId: String, userName: String, secretKey: String? = nil) {
         let user = PSDUserInfo(appId: appId, clientName: clientName, userId: userId, userName: userName, secretKey: secretKey)
         currentUserId = user.userId
@@ -65,14 +68,15 @@ import UIKit
         } else {
             NotificationCenter.default.post(name: usersUpdateNotification, object: nil)
         }
-        PSDGetChats.get() { _ in
-            NotificationCenter.default.post(name: usersUpdateNotification, object: nil)
-        }
+        syncManager.syncGetTickets(isFilter: true)
+//        PSDGetChats.get() { _,_  in
+//            NotificationCenter.default.post(name: usersUpdateNotification, object: nil)
+//        }
     }
     
     ///User's name needed for request. If don't set used Default_User_Name
     @objc static private(set) var authorName = DEFAULT_USER_NAME
-    
+    static var accessDeniedIds = [String]()
       
     @objc static let mainSession : URLSession = {
         let config = URLSessionConfiguration.default
@@ -137,8 +141,8 @@ import UIKit
     ///- parameter viewController: ViewController that must present chat
     ///- parameter configuration: ServiceDeskConfiguration object or nil. ServiceDeskConfiguration is object that create custom interface: theme color,welcome message, image for support's avatar and chat title for navigation bar title. If nil, the default design will be used.
     ///- parameter onStopCallback: OnStopCallback object or nil. OnStopCallback is object for getting a notification that PyrusServiceDesk was closed.
-    @objc public static func start(on viewController:UIViewController, configuration:ServiceDeskConfiguration?, onStopCallback: OnStopCallback? = nil){
-        let _ = psdStart(on: viewController, configuration: configuration, completion: nil, onStopCallback: onStopCallback)
+    @objc public static func start(on viewController:UIViewController, configuration:ServiceDeskConfiguration?, onStopCallback: OnStopCallback? = nil, deniedAccessCallback: DeniedAccessCallBack? = nil) { 
+        let _ = psdStart(on: viewController, configuration: configuration, completion: nil, onStopCallback: onStopCallback, deniedAccessCallback: deniedAccessCallback)
     }
     ///Show chat
     ///- parameter viewController: ViewController that must present chat
@@ -161,9 +165,10 @@ import UIKit
     ///- parameter configuration: ServiceDeskConfiguration object or nil. ServiceDeskConfiguration is object that create custom interface: theme color,welcome message, image for support's avatar and chat title for navigation bar title. If nil, the default design will be used.
     ///- parameter completion: The block to execute after the presentation finishes. This block has no return value and takes no parameters. You may specify nil for this parameter.
     ///- parameter onStopCallback: OnStopCallback object or nil. OnStopCallback is object for getting a notification that PyrusServiceDesk was closed.
-    private static func psdStart(on viewController: UIViewController?, configuration: ServiceDeskConfiguration?, completion:(() -> Void)?, onStopCallback: OnStopCallback?) -> UINavigationController? {
+    private static func psdStart(on viewController: UIViewController?, configuration: ServiceDeskConfiguration?, completion:(() -> Void)?, onStopCallback: OnStopCallback?, deniedAccessCallback: DeniedAccessCallBack? = nil) -> UINavigationController? {
         stopCallback = onStopCallback
-        if !PyrusServiceDeskController.PSDIsOpen(){
+        self.deniedAccessCallback = deniedAccessCallback
+        if !PyrusServiceDeskController.PSDIsOpen() {
             EventsLogger.logEvent(.openPSD)
             let psd : PyrusServiceDeskController = PyrusServiceDeskController.init(configuration, customPresent: viewController == nil)
             if let viewController = viewController {
@@ -192,7 +197,9 @@ import UIKit
         }
     }
     ///The subscriber for PyrusSecviceDeskClose.
-    weak static  private(set) var stopCallback : OnStopCallback?
+    weak static  private(set) var stopCallback: OnStopCallback?
+    weak static  private(set) var deniedAccessCallback: DeniedAccessCallBack?
+    
     weak static private(set) var logEvent: LogEvents?
     ///Subscribe [subscriber] for notifications that new messages from support have appeared in the chat.
     @objc public static func subscribeToReplies(_ subscriber: NewReplySubscriber?){
@@ -271,6 +278,7 @@ import UIKit
         PyrusServiceDesk.additionalUsers = additionalUsers
         PyrusServiceDesk.clients = []
         PyrusServiceDesk.currentClientId = clientId
+        PyrusServiceDesk.accessDeniedIds = []
         lastSetPushToken = nil
         if needReloadUI {
             PyrusServiceDesk.mainController?.updateTitleChat()
@@ -436,27 +444,30 @@ import UIKit
         if(userId.count > 0){
             restartTimer()
             PyrusLogger.shared.logEvent("PSDGetChats did begin.")
-            DispatchQueue.global().async {
-                PSDGetChats.get(){
-                    (chats:[PSDChat]?) in
-                    DispatchQueue.main.async {
-                        PyrusLogger.shared.logEvent("PSDGetChats did end with chats count: \(chats?.count ?? 0).")
-                        guard let chats = chats else{
-                            return
-                        }
-                        var unreadChats = 0
-                        var lasMessage: PSDMessage?
-                        for chat in chats {
-                            lasMessage = chat.messages.last
-                            guard !chat.isRead else{
-                                continue
-                            }
-                            unreadChats = unreadChats + 1
-                        }
-                        UnreadMessageManager.refreshNewMessagesCount(unreadChats > 0, lastMessage: lasMessage)
-                    }
-                }
-            }
+            syncManager.syncGetTickets()
+//            repository.load { commands in
+//                DispatchQueue.global().async {
+////                    PSDGetChats.get(){
+////                        chats, commands  in
+////                        DispatchQueue.main.async {
+////                            PyrusLogger.shared.logEvent("PSDGetChats did end with chats count: \(chats?.count ?? 0).")
+////                            guard let chats = chats else{
+////                                return
+////                            }
+////                            var unreadChats = 0
+////                            var lasMessage: PSDMessage?
+////                            for chat in chats {
+////                                lasMessage = chat.messages.last
+////                                guard !chat.isRead else{
+////                                    continue
+////                                }
+////                                unreadChats = unreadChats + 1
+////                            }
+////                            UnreadMessageManager.refreshNewMessagesCount(unreadChats > 0, lastMessage: lasMessage)
+////                        }
+////                    }
+//                }
+//            }
            
         }
         else{

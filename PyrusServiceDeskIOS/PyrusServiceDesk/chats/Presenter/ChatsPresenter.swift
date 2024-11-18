@@ -34,6 +34,15 @@ extension ChatsPresenter: ChatsPresenterProtocol {
             view?.show(.updateSelected(index: index))
         case .updateIcon(image: let image):
             view?.show(.updateIcon(image: image ?? UIImage(named: "iiko")))
+        case .showAccessDeniedAlert(userNames: let userNames, doExit: let doExit):
+            let okAction = UIAlertAction(title: "Ок", style: .default, handler: {_ in 
+                if doExit {
+                    PyrusServiceDesk.mainController?.closeServiceDesk()
+                }
+            })
+            view?.show(.showAccessDeniedAlert(userNames: userNames, okAction: okAction))
+        case .deleteSegmentControl:
+            view?.show(.deleteSegmentControl)
         }
     }
 }

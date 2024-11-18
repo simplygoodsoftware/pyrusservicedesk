@@ -18,36 +18,57 @@ class PSDMessageSender: NSObject {
      - parameter completion: comptetion block. 
      */
     func pass(_ messageToPass: PSDMessage, delegate:PSDMessageSendDelegate?, completion: @escaping() -> Void) {
-        let task = PSDMessageSender.pass(messageToPass.text, messageToPass.attachments, rating: messageToPass.rating, clientId: messageToPass.clientId, ticketId: messageToPass.ticketId, userId: messageToPass.userId ?? PyrusServiceDesk.customUserId ?? PyrusServiceDesk.userId) {
-            commentId, attachments, ticketId in
-            if let commentId = commentId, commentId.count > 0 {
-                //put attachments id
-                if let attachments = attachments {
-                    for (i,attachmentId) in attachments.enumerated() {
-                        guard let attArr = messageToPass.attachments, attArr.count > 0 else {
-                            continue
-                        }
-                        messageToPass.attachments?[i].serverIdentifer = "\(attachmentId)"
-                    }
-                }
-                messageToPass.messageId = commentId
-                PSDMessageSender.showResult(of: messageToPass, success: true, delegate: delegate)
-                if let ticketId {
-                    delegate?.updateTicketId(ticketId)
-                }
-            } else {
-                PSDMessageSender.showResult(of: messageToPass, success: false, delegate: delegate)
+        let requestNewTicket = PyrusServiceDesk.multichats && messageToPass.ticketId == 0
+        let userId = PyrusServiceDesk.currentUserId ?? PyrusServiceDesk.customUserId ?? PyrusServiceDesk.userId
+        var attachmentsData: [AttachmentData]?
+        if let attachments = messageToPass.attachments {
+            attachmentsData = []
+            for attachment in attachments {
+                let attach = AttachmentData(type: 0, name: attachment.name, guid: attachment.serverIdentifer)
+                attachmentsData?.append(attach)
             }
-            completion()
         }
-        PSDMessageSend.taskArray.append(task)
         
-        //messages to exist chat no need to be in queue, so we can remove it
+        let params = TicketCommandParams(ticketId: messageToPass.ticketId, appId:  PyrusServiceDesk.currentClientId ?? PyrusServiceDesk.clientId, requestNewTicket: requestNewTicket, userId: PyrusServiceDesk.currentUserId ?? PyrusServiceDesk.customUserId ?? PyrusServiceDesk.userId, message: messageToPass.text, attachments: attachmentsData)
+        let command = TicketCommand(type: .createComment, appId: PyrusServiceDesk.currentClientId ?? PyrusServiceDesk.clientId, userId:  PyrusServiceDesk.currentUserId ?? PyrusServiceDesk.customUserId ?? PyrusServiceDesk.userId, params: params)
+        PSDMessagesStorage.saveInStorage(message: messageToPass, commandId: command.commandId)
+        PyrusServiceDesk.syncManager.sendingMessages.append(MessageToPass(message: messageToPass, commandId: command.commandId))
+        delegate?.addMessageToPass(message: messageToPass, commandId: command.commandId)
+        PyrusServiceDesk.repository.add(command: command) { _ in
+            PyrusServiceDesk.syncManager.syncGetTickets()
+        }
+        
+        
+//        let task = PSDMessageSender.pass(messageToPass.text, messageToPass.attachments, rating: messageToPass.rating, clientId: messageToPass.clientId, ticketId: messageToPass.ticketId, userId: messageToPass.userId ?? PyrusServiceDesk.customUserId ?? PyrusServiceDesk.userId) {
+//            commentId, attachments, ticketId in
+//            if let commentId = commentId, commentId.count > 0 {
+//                //put attachments id
+//                if let attachments = attachments {
+//                    for (i,attachmentId) in attachments.enumerated() {
+//                        guard let attArr = messageToPass.attachments, attArr.count > 0 else {
+//                            continue
+//                        }
+//                        messageToPass.attachments?[i].serverIdentifer = "\(attachmentId)"
+//                    }
+//                }
+//                messageToPass.messageId = commentId
+//                PSDMessageSender.showResult(of: messageToPass, success: true, delegate: delegate)
+//                if let ticketId {
+//                    delegate?.updateTicketId(ticketId)
+//                }
+//            } else {
+//                PSDMessageSender.showResult(of: messageToPass, success: false, delegate: delegate)
+//            }
+//            completion()
+//        }
+//        PSDMessageSend.taskArray.append(task)
+//        
+//        //messages to exist chat no need to be in queue, so we can remove it
         PSDMessageSend.clearAndRemove(sender:self)
     }
     ///Show result
     ///
-    static func showResult(of messageToPass:PSDMessage, success:Bool, delegate:PSDMessageSendDelegate?){
+    static func showResult(of messageToPass: PSDMessage, success: Bool, delegate: PSDMessageSendDelegate?){
         if(success){
             PSDMessagesStorage.removeFromStorage(messageId: messageToPass.clientId)
             let _ = PyrusServiceDesk.setLastActivityDate()
@@ -67,7 +88,7 @@ class PSDMessageSender: NSObject {
         if messageToPass.fromStrorage{
             messageToPass.date = Date()//mesages from the storage can have old date - change it to the current, to avoid diffrent drawing after second enter into chat
         }
-        delegate?.refresh(message:messageToPass, changedToSent: success)
+        delegate?.refresh(message: messageToPass, changedToSent: success)
     }
     private static let commentParameter = "comment"
     private static let authorIdParameter = "author_id"
@@ -135,7 +156,8 @@ class PSDMessageSender: NSObject {
                 do{
                     let messageData = try JSONSerialization.jsonObject(with: data, options: .allowFragments) as? [String: Any] ?? [String: Any]()
                     completion(messageData.stringOfKey(commentIdParameter), messageData[attachmentsParameter] as? NSArray, messageData[ticketIdParameter] as? Int)
-                    PSDGetChats.get() { _ in }
+                    PyrusServiceDesk.syncManager.syncGetTickets()
+                    //PSDGetChats.get() { _,_  in }
                 }catch{
                     //print("Pass error when convert to dictionary")
                 }

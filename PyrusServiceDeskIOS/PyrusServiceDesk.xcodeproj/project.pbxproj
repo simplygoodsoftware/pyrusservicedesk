@@ -25,6 +25,22 @@
 		1E1279EA2CC273130080CB19 /* ColorHexInit.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1E1279E92CC273120080CB19 /* ColorHexInit.swift */; };
 		1E1279EC2CC2737E0080CB19 /* TableViewCellConfiguratorProtocol.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1E1279EB2CC2737E0080CB19 /* TableViewCellConfiguratorProtocol.swift */; };
 		1E1279EE2CC283A50080CB19 /* images.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 1E1279ED2CC283A50080CB19 /* images.xcassets */; };
+		1E50689A2CEB1457001A9E2D /* PSDChatInteractor.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1E5068972CEB1457001A9E2D /* PSDChatInteractor.swift */; };
+		1E50689B2CEB1457001A9E2D /* PSDChatInteractorProtocol.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1E5068982CEB1457001A9E2D /* PSDChatInteractorProtocol.swift */; };
+		1E50689F2CEB146F001A9E2D /* PSDChatPresenter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1E50689C2CEB146F001A9E2D /* PSDChatPresenter.swift */; };
+		1E5068A02CEB146F001A9E2D /* PSDChatPresenterProtocol.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1E50689D2CEB146F001A9E2D /* PSDChatPresenterProtocol.swift */; };
+		1E5068A42CEB148E001A9E2D /* PSDChatRouter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1E5068A12CEB148E001A9E2D /* PSDChatRouter.swift */; };
+		1E5068A52CEB148E001A9E2D /* PSDChatRouterProtocol.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1E5068A22CEB148E001A9E2D /* PSDChatRouterProtocol.swift */; };
+		1E5068A72CEB14AE001A9E2D /* PSDChatCellConfigurator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1E5068A62CEB14AE001A9E2D /* PSDChatCellConfigurator.swift */; };
+		1E5068AB2CEB14C4001A9E2D /* PSDChatViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1E5068A82CEB14C4001A9E2D /* PSDChatViewController.swift */; };
+		1E5068AC2CEB14C4001A9E2D /* PSDChatViewProtocol.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1E5068A92CEB14C4001A9E2D /* PSDChatViewProtocol.swift */; };
+		1E5068AF2CEB1523001A9E2D /* SyncManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1E5068AD2CEB1523001A9E2D /* SyncManager.swift */; };
+		1E5068B12CEB1533001A9E2D /* PSDClientInfo.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1E5068B02CEB1533001A9E2D /* PSDClientInfo.swift */; };
+		1E5068B32CEB153C001A9E2D /* TicketCommand.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1E5068B22CEB153C001A9E2D /* TicketCommand.swift */; };
+		1E5068B62CEB154B001A9E2D /* TicketCommandRepository.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1E5068B42CEB154B001A9E2D /* TicketCommandRepository.swift */; };
+		1E5068B82CEB15C4001A9E2D /* ButtonSegmentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1E5068B72CEB15C4001A9E2D /* ButtonSegmentView.swift */; };
+		1E5068BA2CEB15CB001A9E2D /* UnderlineSegmentController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1E5068B92CEB15CB001A9E2D /* UnderlineSegmentController.swift */; };
+		1E5068BC2CEB15DA001A9E2D /* DeniedAccessCallBack.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1E5068BB2CEB15DA001A9E2D /* DeniedAccessCallBack.swift */; };
 		4B060F2A2732AD8C002E20A7 /* StringHelper.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4B060F292732AD8C002E20A7 /* StringHelper.swift */; };
 		4B062A832518A8D100B317D3 /* PSDPlaceholderMessage.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4B062A822518A8D100B317D3 /* PSDPlaceholderMessage.swift */; };
 		4B062A882518AC9500B317D3 /* messagePlaceholder@3x.png in Resources */ = {isa = PBXBuildFile; fileRef = 4B062A872518AC9500B317D3 /* messagePlaceholder@3x.png */; };
@@ -224,7 +240,6 @@
 		4B7F34E421F85E2A00977C6D /* PyrusServiceDesk.h in Headers */ = {isa = PBXBuildFile; fileRef = 4B7F34D621F85E2A00977C6D /* PyrusServiceDesk.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		4B7F34F221F861FD00977C6D /* PyrusServiceDeskController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4B7F34F121F861FD00977C6D /* PyrusServiceDeskController.swift */; };
 		4B7F350621F8687000977C6D /* PyrusServiceDeskCreator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4B7F350521F8687000977C6D /* PyrusServiceDeskCreator.swift */; };
-		4B7F350A21F8900A00977C6D /* PSDChatViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4B7F350921F8900A00977C6D /* PSDChatViewController.swift */; };
 		4B7F350C21F8949700977C6D /* customColor.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4B7F350B21F8949700977C6D /* customColor.swift */; };
 		4B7F350E21F8A76D00977C6D /* ic_menu_close_clear_cancel.png in Resources */ = {isa = PBXBuildFile; fileRef = 4B7F350D21F8A76D00977C6D /* ic_menu_close_clear_cancel.png */; };
 		4B7F351321F8AC3300977C6D /* PSDBundleImage.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4B7F351221F8AC3300977C6D /* PSDBundleImage.swift */; };
@@ -331,6 +346,22 @@
 		1E1279E92CC273120080CB19 /* ColorHexInit.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ColorHexInit.swift; sourceTree = "<group>"; };
 		1E1279EB2CC2737E0080CB19 /* TableViewCellConfiguratorProtocol.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = TableViewCellConfiguratorProtocol.swift; sourceTree = "<group>"; };
 		1E1279ED2CC283A50080CB19 /* images.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = images.xcassets; sourceTree = "<group>"; };
+		1E5068972CEB1457001A9E2D /* PSDChatInteractor.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PSDChatInteractor.swift; sourceTree = "<group>"; };
+		1E5068982CEB1457001A9E2D /* PSDChatInteractorProtocol.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PSDChatInteractorProtocol.swift; sourceTree = "<group>"; };
+		1E50689C2CEB146F001A9E2D /* PSDChatPresenter.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PSDChatPresenter.swift; sourceTree = "<group>"; };
+		1E50689D2CEB146F001A9E2D /* PSDChatPresenterProtocol.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PSDChatPresenterProtocol.swift; sourceTree = "<group>"; };
+		1E5068A12CEB148E001A9E2D /* PSDChatRouter.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PSDChatRouter.swift; sourceTree = "<group>"; };
+		1E5068A22CEB148E001A9E2D /* PSDChatRouterProtocol.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PSDChatRouterProtocol.swift; sourceTree = "<group>"; };
+		1E5068A62CEB14AE001A9E2D /* PSDChatCellConfigurator.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PSDChatCellConfigurator.swift; sourceTree = "<group>"; };
+		1E5068A82CEB14C4001A9E2D /* PSDChatViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PSDChatViewController.swift; sourceTree = "<group>"; };
+		1E5068A92CEB14C4001A9E2D /* PSDChatViewProtocol.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PSDChatViewProtocol.swift; sourceTree = "<group>"; };
+		1E5068AD2CEB1523001A9E2D /* SyncManager.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SyncManager.swift; sourceTree = "<group>"; };
+		1E5068B02CEB1533001A9E2D /* PSDClientInfo.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PSDClientInfo.swift; sourceTree = "<group>"; };
+		1E5068B22CEB153C001A9E2D /* TicketCommand.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = TicketCommand.swift; sourceTree = "<group>"; };
+		1E5068B42CEB154B001A9E2D /* TicketCommandRepository.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = TicketCommandRepository.swift; sourceTree = "<group>"; };
+		1E5068B72CEB15C4001A9E2D /* ButtonSegmentView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = ButtonSegmentView.swift; path = PyrusServiceDesk/chats/ButtonSegmentView.swift; sourceTree = SOURCE_ROOT; };
+		1E5068B92CEB15CB001A9E2D /* UnderlineSegmentController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = UnderlineSegmentController.swift; path = PyrusServiceDesk/chats/UnderlineSegmentController.swift; sourceTree = SOURCE_ROOT; };
+		1E5068BB2CEB15DA001A9E2D /* DeniedAccessCallBack.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = DeniedAccessCallBack.swift; sourceTree = "<group>"; };
 		4B060F292732AD8C002E20A7 /* StringHelper.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StringHelper.swift; sourceTree = "<group>"; };
 		4B062A822518A8D100B317D3 /* PSDPlaceholderMessage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PSDPlaceholderMessage.swift; sourceTree = "<group>"; };
 		4B062A872518AC9500B317D3 /* messagePlaceholder@3x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "messagePlaceholder@3x.png"; sourceTree = "<group>"; };
@@ -533,7 +564,6 @@
 		4B7F34E321F85E2A00977C6D /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		4B7F34F121F861FD00977C6D /* PyrusServiceDeskController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PyrusServiceDeskController.swift; sourceTree = "<group>"; };
 		4B7F350521F8687000977C6D /* PyrusServiceDeskCreator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PyrusServiceDeskCreator.swift; sourceTree = "<group>"; };
-		4B7F350921F8900A00977C6D /* PSDChatViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PSDChatViewController.swift; sourceTree = "<group>"; };
 		4B7F350B21F8949700977C6D /* customColor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = customColor.swift; sourceTree = "<group>"; };
 		4B7F350D21F8A76D00977C6D /* ic_menu_close_clear_cancel.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = ic_menu_close_clear_cancel.png; sourceTree = "<group>"; };
 		4B7F351221F8AC3300977C6D /* PSDBundleImage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PSDBundleImage.swift; sourceTree = "<group>"; };
@@ -635,6 +665,7 @@
 		1E1279BE2CC271430080CB19 /* MultiChats */ = {
 			isa = PBXGroup;
 			children = (
+				1E5068B02CEB1533001A9E2D /* PSDClientInfo.swift */,
 				1E1279BD2CC271430080CB19 /* PSDUserInfo.swift */,
 			);
 			path = MultiChats;
@@ -660,6 +691,8 @@
 		1E1279CA2CC271C00080CB19 /* View */ = {
 			isa = PBXGroup;
 			children = (
+				1E5068B92CEB15CB001A9E2D /* UnderlineSegmentController.swift */,
+				1E5068B72CEB15C4001A9E2D /* ButtonSegmentView.swift */,
 				1E1279C32CC271C00080CB19 /* Cell */,
 				1E1279C42CC271C00080CB19 /* ChatsViewProtocol.swift */,
 				1E1279C52CC271C00080CB19 /* PSDChatsCellConfigurator.swift */,
@@ -714,6 +747,58 @@
 			path = Interactor;
 			sourceTree = "<group>";
 		};
+		1E5068992CEB1457001A9E2D /* Interactor */ = {
+			isa = PBXGroup;
+			children = (
+				1E5068972CEB1457001A9E2D /* PSDChatInteractor.swift */,
+				1E5068982CEB1457001A9E2D /* PSDChatInteractorProtocol.swift */,
+			);
+			path = Interactor;
+			sourceTree = "<group>";
+		};
+		1E50689E2CEB146F001A9E2D /* Presenter */ = {
+			isa = PBXGroup;
+			children = (
+				1E50689C2CEB146F001A9E2D /* PSDChatPresenter.swift */,
+				1E50689D2CEB146F001A9E2D /* PSDChatPresenterProtocol.swift */,
+			);
+			path = Presenter;
+			sourceTree = "<group>";
+		};
+		1E5068A32CEB148E001A9E2D /* Router */ = {
+			isa = PBXGroup;
+			children = (
+				1E5068A12CEB148E001A9E2D /* PSDChatRouter.swift */,
+				1E5068A22CEB148E001A9E2D /* PSDChatRouterProtocol.swift */,
+			);
+			path = Router;
+			sourceTree = "<group>";
+		};
+		1E5068AA2CEB14C4001A9E2D /* View */ = {
+			isa = PBXGroup;
+			children = (
+				1E5068A82CEB14C4001A9E2D /* PSDChatViewController.swift */,
+				1E5068A92CEB14C4001A9E2D /* PSDChatViewProtocol.swift */,
+			);
+			path = View;
+			sourceTree = "<group>";
+		};
+		1E5068AE2CEB1523001A9E2D /* Managers */ = {
+			isa = PBXGroup;
+			children = (
+				1E5068AD2CEB1523001A9E2D /* SyncManager.swift */,
+			);
+			path = Managers;
+			sourceTree = "<group>";
+		};
+		1E5068B52CEB154B001A9E2D /* Repositories */ = {
+			isa = PBXGroup;
+			children = (
+				1E5068B42CEB154B001A9E2D /* TicketCommandRepository.swift */,
+			);
+			path = Repositories;
+			sourceTree = "<group>";
+		};
 		4B062A862518AC7C00B317D3 /* messagePlaceholder */ = {
 			isa = PBXGroup;
 			children = (
@@ -747,6 +832,7 @@
 		4B2E650F220DE1E000E70A2F /* PSDObjects */ = {
 			isa = PBXGroup;
 			children = (
+				1E5068B22CEB153C001A9E2D /* TicketCommand.swift */,
 				1E1279BE2CC271430080CB19 /* MultiChats */,
 				4B2E650D220DE1C300E70A2F /* PSDMessage.swift */,
 				4B2E6510220DE20400E70A2F /* PSDUser.swift */,
@@ -808,7 +894,10 @@
 		4B63393121FA0EAB00A154B5 /* Chat */ = {
 			isa = PBXGroup;
 			children = (
-				4B7F350921F8900A00977C6D /* PSDChatViewController.swift */,
+				1E5068AA2CEB14C4001A9E2D /* View */,
+				1E5068A32CEB148E001A9E2D /* Router */,
+				1E50689E2CEB146F001A9E2D /* Presenter */,
+				1E5068992CEB1457001A9E2D /* Interactor */,
 				4B6B9044223A55A30003D7F9 /* PSDChatTable */,
 				4B9B0BB922662E8200090DB5 /* LoadAttachments */,
 				4B5AFEA721FB034F00AAF233 /* messageInput */,
@@ -921,6 +1010,7 @@
 		4B6B9044223A55A30003D7F9 /* PSDChatTable */ = {
 			isa = PBXGroup;
 			children = (
+				1E5068A62CEB14AE001A9E2D /* PSDChatCellConfigurator.swift */,
 				4B63393321FA0F2C00A154B5 /* PSDChatTableView.swift */,
 				4B13E837286A2BCD00E2428F /* ButtonsView */,
 				4B697CC82254AD7C002B0A10 /* MessageCell */,
@@ -990,6 +1080,9 @@
 		4B7F34D521F85E2A00977C6D /* PyrusServiceDesk */ = {
 			isa = PBXGroup;
 			children = (
+				1E5068BB2CEB15DA001A9E2D /* DeniedAccessCallBack.swift */,
+				1E5068B52CEB154B001A9E2D /* Repositories */,
+				1E5068AE2CEB1523001A9E2D /* Managers */,
 				4B7F34D621F85E2A00977C6D /* PyrusServiceDesk.h */,
 				4B7F350521F8687000977C6D /* PyrusServiceDeskCreator.swift */,
 				4B66011C223948CE00AA45E6 /* PyrusServiceDeskCustomization.swift */,
@@ -1582,6 +1675,7 @@
 				4B6B904A223A59A50003D7F9 /* [Int+PSDChat]+complete.swift in Sources */,
 				4B88C6F522145AB000BDB304 /* PSDGetChat.swift in Sources */,
 				4B56BE492216CC0E004E6685 /* PSDUploader.swift in Sources */,
+				1E5068B82CEB15C4001A9E2D /* ButtonSegmentView.swift in Sources */,
 				1E1279CE2CC271C00080CB19 /* PSDChatsCellConfigurator.swift in Sources */,
 				4BB7DADF225E280800F6D1F0 /* PSDFileAttachmentView.swift in Sources */,
 				4B82A49C2268C29700654CE0 /* PSDCoverHorizontalAnimator.swift in Sources */,
@@ -1594,7 +1688,9 @@
 				4B7F351321F8AC3300977C6D /* PSDBundleImage.swift in Sources */,
 				4B9FAFA5255435CA00FCE51D /* PSDLastUnreadMessage.swift in Sources */,
 				4BE3450E225F9684009E2135 /* PSDDownloadImage.swift in Sources */,
+				1E5068AC2CEB14C4001A9E2D /* PSDChatViewProtocol.swift in Sources */,
 				4B63393621FA106400A154B5 /* PSDChatMessageCell.swift in Sources */,
+				1E5068B32CEB153C001A9E2D /* TicketCommand.swift in Sources */,
 				1E1279D02CC271C00080CB19 /* PSDChatsSectionModel.swift in Sources */,
 				4B10E5F0222844EA00CF118B /* PSDAttachmentLoadViewController.swift in Sources */,
 				4B5AFEA621FB00B700AAF233 /* PSDMessageInputView.swift in Sources */,
@@ -1613,12 +1709,15 @@
 				1E1279DD2CC271DC0080CB19 /* ChatPresenterModel.swift in Sources */,
 				4BCEB439220C5FF2008B29B6 /* PSDMessageTextView.swift in Sources */,
 				4BD29A092464B72B000CC420 /* OnStopCallback.swift in Sources */,
+				1E5068BC2CEB15DA001A9E2D /* DeniedAccessCallBack.swift in Sources */,
 				4B8EE7CD255AE4170068B266 /* LogsSendController.swift in Sources */,
+				1E5068B62CEB154B001A9E2D /* TicketCommandRepository.swift in Sources */,
 				4B697CCC2254AF6B002B0A10 /* PSDSupportMessageCell.swift in Sources */,
 				4B3F72E12498C01600318F1F /* PSDRateView.swift in Sources */,
 				4BAA214D222D202900B8BED7 /* UIView+constraints.swift in Sources */,
 				4B2E6511220DE20400E70A2F /* PSDUser.swift in Sources */,
 				4BDDE42B257F70C800DF40B2 /* Recolorable.swift in Sources */,
+				1E50689A2CEB1457001A9E2D /* PSDChatInteractor.swift in Sources */,
 				1E1279EA2CC273130080CB19 /* ColorHexInit.swift in Sources */,
 				4B90E514221D55B800A18245 /* SupportUserImage.swift in Sources */,
 				4B9B0BB82266071100090DB5 /* PSDProgressDownloadView.swift in Sources */,
@@ -1628,27 +1727,32 @@
 				4B90E517221DB21000A18245 /* PSDNoConnectionView.swift in Sources */,
 				4B9FAFA125542FB700FCE51D /* UnreadMessageManager.swift in Sources */,
 				4B2F47B8224A679A00E3B23A /* String + FilesSupportedExtension.swift in Sources */,
+				1E50689B2CEB1457001A9E2D /* PSDChatInteractorProtocol.swift in Sources */,
 				4B81B6FD221FF7FB00EE1253 /* UITableView + swipeForDetail.swift in Sources */,
+				1E5068A52CEB148E001A9E2D /* PSDChatRouterProtocol.swift in Sources */,
 				4B7F350C21F8949700977C6D /* customColor.swift in Sources */,
 				4B7F13992215C494007C6358 /* Data+append.swift in Sources */,
 				4B1C63E6256D8D6500902C8E /* CustomFontHelper.swift in Sources */,
 				4BAA8815221BDD8C00B81B76 /* PSDProgressView.swift in Sources */,
 				4BC210D622671EC000CFE255 /* PSDAttachmentPreviewView.swift in Sources */,
 				4B873BB4224B7EE600A96E93 /* PSDNewReplySubscriber.swift in Sources */,
+				1E5068AF2CEB1523001A9E2D /* SyncManager.swift in Sources */,
 				4B6D4A3F244E2326007C6082 /* AttachmentFileCollectionViewCell.swift in Sources */,
 				4BD7DE68223680A600ED2557 /* UIButton+backgroundColor.swift in Sources */,
 				4BBB9B06249D152900059A23 /* LogEvents.swift in Sources */,
 				4B5AFEAB21FB0A7B00AAF233 /* PSDMessageSendButton.swift in Sources */,
 				1E1279EC2CC2737E0080CB19 /* TableViewCellConfiguratorProtocol.swift in Sources */,
 				4B9B0BBB2266344200090DB5 /* PSDAttachmentPreviewErrorView.swift in Sources */,
+				1E5068A02CEB146F001A9E2D /* PSDChatPresenterProtocol.swift in Sources */,
 				4BCEB433220C150C008B29B6 /* UIImage+color.swift in Sources */,
 				7B1E8D58250665F800C1E5AC /* PSDInfoView.swift in Sources */,
 				1E1279D62CC271C90080CB19 /* ChatsRouter.swift in Sources */,
 				4BB6CDC325597E4C004C680A /* PyrusLogger.swift in Sources */,
-				4B7F350A21F8900A00977C6D /* PSDChatViewController.swift in Sources */,
 				4B6D4A39244E1B6A007C6082 /* AttachmentCollectionView.swift in Sources */,
 				4B659AFE223FA9E400D79489 /* PSDSpinerTableView.swift in Sources */,
 				4B82A49A2268B57B00654CE0 /* PSDAttachmentLoadViewControllerInterface.swift in Sources */,
+				1E5068A42CEB148E001A9E2D /* PSDChatRouter.swift in Sources */,
+				1E5068A72CEB14AE001A9E2D /* PSDChatCellConfigurator.swift in Sources */,
 				4BB6CDCA2559B242004C680A /* UIDevice + modelName.swift in Sources */,
 				4B7918E22237A00D0071CA72 /* UITableView+keyboard.swift in Sources */,
 				4BB68608221AAAC600E9EC07 /* Image+compress.swift in Sources */,
@@ -1659,6 +1763,7 @@
 				4BB855A52208681400F7CCE5 /* LocalizationString.swift in Sources */,
 				1E1279E52CC271E80080CB19 /* ChatsInteractorProtocol.swift in Sources */,
 				4B7EA886221EB0B3009C9B41 /* PSDAlertDisplay.swift in Sources */,
+				1E50689F2CEB146F001A9E2D /* PSDChatPresenter.swift in Sources */,
 				4BAA214F222D60D000B8BED7 /* Dictionary+asString.swift in Sources */,
 				4B1ED2AC228190BA00B98516 /* PSDMessagesStorage.swift in Sources */,
 				4BDDE42F257F7DB900DF40B2 /* PSDVIew.swift in Sources */,
@@ -1691,9 +1796,12 @@
 				1E1279DE2CC271DC0080CB19 /* ChatsPresenter.swift in Sources */,
 				1E1279CB2CC271C00080CB19 /* ChatViewModel.swift in Sources */,
 				4B6EFFC0282440F6004ECA2B /* ApiSignManager.swift in Sources */,
+				1E5068B12CEB1533001A9E2D /* PSDClientInfo.swift in Sources */,
 				4B13E836286A2BC900E2428F /* ButtonsView.swift in Sources */,
 				4B88C6F9221467FF00BDB304 /* PSDChat.swift in Sources */,
+				1E5068BA2CEB15CB001A9E2D /* UnderlineSegmentController.swift in Sources */,
 				4BC210D822674A5600CFE255 /* PSDNavigationController.swift in Sources */,
+				1E5068AB2CEB14C4001A9E2D /* PSDChatViewController.swift in Sources */,
 				4B1CD390230BE58000C06F71 /* applicationColors.swift in Sources */,
 				4BA96C3E222EA7BB00F7F9AE /* PSDAvatarImageView.swift in Sources */,
 				4BB7DADD225E1BC300F6D1F0 /* PSDImageAttachmentView.swift in Sources */,

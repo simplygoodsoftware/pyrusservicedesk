@@ -18,9 +18,9 @@ struct PSDMessagesStorage{
     private static let MESSAGE_LOCAL_ID_KEY = "localId"
     ///The key to store text of message
     private static let MESSAGE_TEXT_KEY = "messageText"
-    ///The key to store text of message
+    ///The key to store ticket id of message
     private static let MESSAGE_TICKET_ID_KEY = "messageTicketId"
-    ///The key to store text of message
+    ///The key to store author id of message
     private static let MESSAGE_AUTHOR_ID_KEY = "messageAuthorId"
     ///The key to store rating of message
     private static let MESSAGE_RATING_KEY = "messageRating"
@@ -32,10 +32,14 @@ struct PSDMessagesStorage{
     private static let MESSAGE_DATE_KEY = "messageDate"
     ///The key to store size of message's attachment - need for drawing
     private static let ATTACHMENT_SIZE_KEY = "attachmentSize"
+    ///The key to store state of message
+    private static let MESSAGE_STATE_KEY = "isSending"
+    ///The key to store commandId
+    private static let COMMAND_ID_KEY = "commandId"
     
     
     ///Seve message in storage - if message has text - save its text, if has attachment - save attachment to file
-    static func saveInStorage(message : PSDMessage){
+    static func saveInStorage(message: PSDMessage, commandId: String? = nil) {
         var hasSomeAttachment = false
         if let attachments = message.attachments, attachments.count > 0{
             for attachment in attachments{
@@ -46,7 +50,7 @@ struct PSDMessagesStorage{
             }
         }
         
-        if message.text.count == 0 && !hasSomeAttachment && message.rating == nil{
+        if message.text.count == 0 && !hasSomeAttachment && message.rating == nil {
             return
         }
         
@@ -57,9 +61,11 @@ struct PSDMessagesStorage{
         messageDict[MESSAGE_RATING_KEY] = message.rating
         messageDict[MESSAGE_TICKET_ID_KEY] = message.ticketId
         messageDict[MESSAGE_AUTHOR_ID_KEY] = message.owner.authorId
+        messageDict[MESSAGE_STATE_KEY] = message.state == .sending
+        messageDict[COMMAND_ID_KEY] = commandId
         DispatchQueue.global().async {
             
-            if hasSomeAttachment, let attachments = message.attachments, attachments.count > 0{
+            if hasSomeAttachment, let attachments = message.attachments, attachments.count > 0 {
                 var attachmentsArray = [[String:Any]]()
                 for attachment in attachments{
                     if saveToFileAttachment(attachment, messageLocalId: message.clientId){//if has attachment and it was written to disk - save message to storage
@@ -179,32 +185,13 @@ struct PSDMessagesStorage{
                dict[MESSAGE_AUTHOR_ID_KEY] as? String != PyrusServiceDesk.authorId {
                 continue
             }
-            let message = PSDMessage(text: dict[MESSAGE_TEXT_KEY] as? String ?? "", attachments: nil, messageId: nil, owner: PSDUsers.user, date: nil)
-            if let rating = dict[MESSAGE_RATING_KEY] as? Int {
-                message.rating = rating
-            }
-            message.clientId = (dict[MESSAGE_LOCAL_ID_KEY] as? String) ?? message.clientId
-            message.state = .cantSend
-            message.date = dict[MESSAGE_DATE_KEY] as? Date ?? Date()
-            message.fromStrorage = true
-            message.isInbound = true
-            message.ticketId = dict[MESSAGE_TICKET_ID_KEY] as? Int ?? 0
-            var attachments = [PSDAttachment]()
-            if let attachmetsArray = dict[ATTACHMENT_ARRAY_KEY] as? [[String: Any]], attachmetsArray.count > 0 {
-                for attachmentDict in attachmetsArray {
-                    guard let attName = attachmentDict[ATTACHMENT_NAME_KEY] as? String, attName.count > 0, let attachment = PSDFilesManager.getAtttachment(attName, messageLocalId: message.clientId) else {
-                        continue
-                    }
-                    attachments.append(attachment)
-                }
-            }
-            message.attachments = attachments
+            let message = createMessage(from: dict)
             if message.attachments?.count ?? 0 > 0 || message.text.count > 0 || message.rating != nil {
                 if dict[MESSAGE_DATE_KEY] as? Date == nil {
                     resaveInStorageMessage(message)//resave massage with date to avoid nil next time
                 }
                 arrayWithMessages.append(message)
-            }else{
+            } else {
                 ///this is break data - remove it from storage
                 removeFromStorage(messageId: message.messageId)
             }
@@ -217,6 +204,61 @@ struct PSDMessagesStorage{
         }
         return arrayWithMessages
     }
+    
+    static func getSendingMessagesFromStorage(for ticketId: Int? = nil) -> [MessageToPass] {
+        var arrayWithMessages = [MessageToPass]()
+        let messagesStorage = getMessagesStorage()
+        for dict in messagesStorage {
+            if PyrusServiceDesk.multichats,
+               dict[MESSAGE_AUTHOR_ID_KEY] as? String != PyrusServiceDesk.authorId {
+                continue
+            }
+            let message = createMessage(from: dict)
+            if (message.attachments?.count ?? 0 > 0 || message.text.count > 0 || message.rating != nil) {
+                if dict[MESSAGE_DATE_KEY] as? Date == nil {
+                    resaveInStorageMessage(message)//resave massage with date to avoid nil next time
+                }
+                if (ticketId == nil || message.ticketId == ticketId) && message.state == .sending {
+                    let messageToPass = MessageToPass(
+                        message: message,
+                        commandId: (dict[COMMAND_ID_KEY] as? String) ?? ""
+                    )
+                    arrayWithMessages.append(messageToPass)
+                }
+            } else {
+                ///this is break data - remove it from storage
+                removeFromStorage(messageId: message.messageId)
+            }
+           
+        }
+        
+        return arrayWithMessages
+    }
+    
+    static private func createMessage(from dict: [String: Any]) -> PSDMessage {
+        let message = PSDMessage(text: dict[MESSAGE_TEXT_KEY] as? String ?? "", attachments: nil, messageId: nil, owner: PSDUsers.user, date: nil)
+        if let rating = dict[MESSAGE_RATING_KEY] as? Int {
+            message.rating = rating
+        }
+        message.clientId = (dict[MESSAGE_LOCAL_ID_KEY] as? String) ?? message.clientId
+        message.state = (dict[MESSAGE_STATE_KEY] as? Bool ?? false) ? .sending : .cantSend//.cantSend
+        message.date = dict[MESSAGE_DATE_KEY] as? Date ?? Date()
+        message.fromStrorage = true
+        message.isInbound = true
+        message.ticketId = dict[MESSAGE_TICKET_ID_KEY] as? Int ?? 0
+        var attachments = [PSDAttachment]()
+        if let attachmetsArray = dict[ATTACHMENT_ARRAY_KEY] as? [[String: Any]], attachmetsArray.count > 0 {
+            for attachmentDict in attachmetsArray {
+                guard let attName = attachmentDict[ATTACHMENT_NAME_KEY] as? String, attName.count > 0, let attachment = PSDFilesManager.getAtttachment(attName, messageLocalId: message.clientId) else {
+                    continue
+                }
+                attachments.append(attachment)
+            }
+        }
+        message.attachments = attachments
+        return message
+    }
+    
     ///Returns true, if there is some messages in storage to set rating
     static func hasRatingInStorage() -> Bool {
         let messages = messagesFromStorage()

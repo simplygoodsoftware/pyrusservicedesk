@@ -266,7 +266,7 @@ private extension PSDChatsViewController {
             plusView.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -16),
             plusView.bottomAnchor.constraint(equalTo: view.bottomAnchor, constant: -68)
         ])
-        
+        plusView.isUserInteractionEnabled = true
         plusView.addTarget(self, action: #selector(openNewChat), for: .touchUpInside)
     }
     
@@ -432,6 +432,12 @@ private extension PSDChatsViewController {
         diffabledDataSource.apply(snapshot, animatingDifferences: animated)
         self.diffabledDataSource = diffabledDataSource
     }
+    
+    func showAccessDeniedAlert(userNames: String, okAction: UIAlertAction) {
+        let alert = UIAlertController(title: "Ошибка доступа", message: "У вас больше нет доступа к \(userNames)", preferredStyle: .alert)
+        alert.addAction(okAction)
+        present(alert, animated: true)
+    }
 }
 
 @available(iOS 13.0, *)
@@ -489,8 +495,8 @@ extension PSDChatsViewController: ChatsViewProtocol {
             UIView.animate(withDuration: 0.3, animations: {
                 if self.segmentControl.frame.size.height == 0 {
                     self.segmentControl.frame.size.height = 40
-                    self.navigationView.frame.size.height += 41.5
-                    self.filterInfoView.frame.origin.y += 41.5
+                    self.navigationView.frame.size.height = self.view.safeAreaInsets.top + 85.5//41.5
+                    self.filterInfoView.frame.origin.y = self.view.safeAreaInsets.top + 84.5//41.5
                 }
             }, completion: { [weak self] _ in
                 self?.segmentControl.updateTitle(titles: titles, selectIndex: selectedIndex)
@@ -499,6 +505,16 @@ extension PSDChatsViewController: ChatsViewProtocol {
             segmentControl.selectIndex(index)
         case .updateIcon(image: let image):
             icon.image = image
+        case .showAccessDeniedAlert(userNames: let userNames, okAction: let okAction):
+            showAccessDeniedAlert(userNames: userNames, okAction: okAction)
+        case .deleteSegmentControl:
+            UIView.animate(withDuration: 0, animations: {
+                self.filterInfoView.frame = CGRect(x: 0, y: Int(self.view.safeAreaInsets.top + 43), width: Int(self.view.frame.width), height: 0)
+                self.segmentControl.frame = CGRect(x: 0, y: Int(self.view.safeAreaInsets.top + 44), width: Int(self.view.frame.width), height: 0)
+                self.navigationView.frame = CGRect(x: -1, y: -1, width: Int(self.view.frame.width + 1), height: Int(self.view.safeAreaInsets.top + 44))
+            }, completion: { [weak self] _ in
+                self?.segmentControl.updateTitle(titles: [], selectIndex: 0)
+            })
         }
     }
 }
@@ -512,12 +528,14 @@ extension PSDChatsViewController: PSDUpdateInfo {
     func refreshChat(showFakeMessage: Int?) { }
 }
 
+@available(iOS 13.0, *)
 extension PSDChatsViewController: UnderlineSegmentControllerDelegate {
     func didSelectSegment(_ index: Int) {
         interactor.doInteraction(.updateSelected(index: index))
     }
 }
 
+@available(iOS 13.0, *)
 extension PSDChatsViewController: UINavigationControllerDelegate {
     func navigationController(_ navigationController: UINavigationController, willShow viewController: UIViewController, animated: Bool) {
         if viewController == self {

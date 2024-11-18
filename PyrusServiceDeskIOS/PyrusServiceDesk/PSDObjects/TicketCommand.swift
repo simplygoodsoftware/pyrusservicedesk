@@ -1,97 +1,99 @@
 import Foundation
 
-enum TicketCommandType: String {
+enum TicketCommandType: Int {
     case createComment
     case readTicket
-}
-
-protocol TicketCommandParamsProtocol: Codable {
-    var ticketId: Int { get }
-    var authorId: String? { get }
-}
-
-struct MarkTicketAsReadTicketCommand: TicketCommandParamsProtocol {
-    var ticketId: Int
-    var authorId: String?
-    
-    enum CodingKeys: String, CodingKey {
-        case ticketId = "ticket_id"
-        case authorId = "author_id"
-    }
-}
-
-struct CreateCommentTicketCommand: TicketCommandParamsProtocol {
-    var ticketId: Int
-    var authorId: String?
-    var requestNewTicket: Bool?
-    var userId: String?
-    var message: String
-    var attachments: [AttachmentData]?
-    var authorName: String?
-    
-    enum CodingKeys: String, CodingKey {
-        case ticketId = "ticket_id"
-        case authorId = "author_id"
-        case requestNewTicket = "request_new_ticket"
-        case userId = "user_id"
-        case message = "message"
-        case attachments = "attachments"
-        case authorName = "author_name"
-    }
 }
 
 struct AttachmentData: Codable {
     let type: Int
     let name: String
-    let guid: String
+    let guid: String?
 }
 
-enum TicketCommandParams: Codable {
-    case markAsRead(MarkTicketAsReadTicketCommand)
-    case createComment(CreateCommentTicketCommand)
-
+class TicketCommandParams: Codable {
+    let ticketId: Int?
+    let appId: String?
+    let requestNewTicket: Bool?
+    let userId: String?
+    let message: String?
+    let attachments: [AttachmentData]?
+    
+    init(ticketId: Int?, appId: String?, requestNewTicket: Bool? = nil, userId: String?, message: String? = nil, attachments: [AttachmentData]? = nil, authorId: String? = nil) {
+        self.ticketId = ticketId
+        self.appId = appId
+        self.requestNewTicket = requestNewTicket
+        self.userId = userId
+        self.message = message
+        self.attachments = attachments
+    }
+    
     enum CodingKeys: String, CodingKey {
-        case type
-        case data
-    }
-
-    func encode(to encoder: Encoder) throws {
-        var container = encoder.container(keyedBy: CodingKeys.self)
-        switch self {
-        case .markAsRead(let params):
-            try container.encode(TicketCommandType.readTicket.rawValue, forKey: .type)
-            try container.encode(params, forKey: .data)
-        case .createComment(let params):
-            try container.encode(TicketCommandType.createComment.rawValue, forKey: .type)
-            try container.encode(params, forKey: .data)
-        }
-    }
-
-    init(from decoder: Decoder) throws {
-        let container = try decoder.container(keyedBy: CodingKeys.self)
-        let type = try container.decode(String.self, forKey: .type)
-        
-        switch type {
-        case TicketCommandType.readTicket.rawValue:
-            let params = try container.decode(MarkTicketAsReadTicketCommand.self, forKey: .data)
-            self = .markAsRead(params)
-        case TicketCommandType.createComment.rawValue:
-            let params = try container.decode(CreateCommentTicketCommand.self, forKey: .data)
-            self = .createComment(params)
-        default:
-            throw DecodingError.dataCorruptedError(forKey: .type, in: container, debugDescription: "Unknown type")
-        }
+        case ticketId = "ticket_id"
+        case appId = "app_id"
+        case requestNewTicket = "request_new_ticket"
+        case userId = "user_id"
+        case message = "comment"
+        case attachments = "attachments"
     }
 }
 
 class TicketCommand: NSObject, Codable {
     let commandId: String
-    let type: String
+    let type: Int
+    let appId: String?
+    let userId: String?
     let params: TicketCommandParams
 
-    init(type: TicketCommandType, params: TicketCommandParams) {
+    init(type: TicketCommandType, appId: String?, userId: String?, params: TicketCommandParams) {
         self.commandId = UUID().uuidString
         self.type = type.rawValue
         self.params = params
+        self.appId = appId
+        self.userId = userId
+    }
+    
+    enum CodingKeys: String, CodingKey {
+        case commandId = "command_id"
+        case type = "type"
+        case appId = "app_id"
+        case userId = "user_id"
+        case params = "params"
+    }
+}
+
+class TicketCommandResult: Codable {
+    let commandId: String
+    let commentId: Int?
+    let ticketId: Int?
+    let error: ServiceError?
+    
+    enum CodingKeys: String, CodingKey {
+        case commandId = "command_id"
+        case commentId = "comment_id"
+        case ticketId = "ticket_id"
+        case error = "error"
+    }
+}
+
+struct ServiceError: Codable {
+    let text: String?
+    let code: Int?
+}
+
+
+extension Encodable {
+    func toDictionary() -> [String: Any?]? {
+        do {
+            let data = try JSONEncoder().encode(self)
+            
+            if let jsonObject = try JSONSerialization.jsonObject(with: data, options: []) as? [String: Any] {
+                return jsonObject
+            } else {
+                return nil
+            }
+        } catch {
+            return nil
+        }
     }
 }

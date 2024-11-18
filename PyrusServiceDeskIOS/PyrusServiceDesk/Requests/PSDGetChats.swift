@@ -8,8 +8,7 @@ struct PSDGetChats {
      Get chats from server.
      On completion returns [PSDChat] if it was received, or empty nil, if no connection.
      */
-    static func get(completion: @escaping (_ chatsArray: [PSDChat]?) -> Void)
-    {
+    static func get(commands: [[String: Any?]?] = [], completion: @escaping (_ chatsArray: [PSDChat]?, _ commandsResults: [TicketCommandResult]?, _ authorAccessDenied: [String]?) -> Void) {
         //remove old session if it is
         remove()
         var parameters = [String: Any]()
@@ -20,7 +19,8 @@ struct PSDGetChats {
         }
         parameters["need_full_info"] = PyrusServiceDesk.multichats
         parameters["api_sign"] = PyrusServiceDesk.apiSign()
-      //  parameters["author_id"] = PyrusServiceDesk.authorId
+        parameters["author_id"] = PyrusServiceDesk.authorId
+        parameters["author_name"] = PyrusServiceDesk.authorName
         if PyrusServiceDesk.additionalUsers.count > 0 {
             var additional_users = [[String: Any]]()
             for user in PyrusServiceDesk.additionalUsers {
@@ -33,11 +33,13 @@ struct PSDGetChats {
             parameters["additional_users"] = additional_users
         }
         
-        let  request : URLRequest = URLRequest.createRequest(type:.chats, parameters: parameters)
+        parameters["commands"] = commands
+        
+        let request: URLRequest = URLRequest.createRequest(type:.chats, parameters: parameters)
         
         PSDGetChats.sessionTask = PyrusServiceDesk.mainSession.dataTask(with: request) { data, response, error in
             guard let data = data, error == nil else {                                                 // check for fundamental networking error
-                completion(nil)
+                completion(nil, nil, nil)
                 return
             }
             
@@ -56,7 +58,7 @@ struct PSDGetChats {
                 if PyrusServiceDesk.chats.count == 0 {
                     PyrusServiceDesk.chats = []
                 }
-                completion([])
+                completion([], nil, nil)
             }
             do{
                 let chatsData = try JSONSerialization.jsonObject(with: data, options: .allowFragments) as? [String : Any] ?? [String: Any]()
@@ -66,8 +68,19 @@ struct PSDGetChats {
                 let clientsArray = chatsData["applications"] as? NSArray ?? NSArray()
                 let clients = generateClients(from: clientsArray)
                 PyrusServiceDesk.clients = clients
-                completion(chats)
-            }catch{
+                let authorAccessDenied = chatsData["author_access_denied"] as? [String]
+                
+                do {
+                    let commandsArray = chatsData["commands_result"] as? NSArray ?? NSArray()
+                    let jsonData = try JSONSerialization.data(withJSONObject: commandsArray, options: [])
+                    let decoder = JSONDecoder()
+                    let commands = try decoder.decode([TicketCommandResult].self, from: jsonData)
+                    completion(chats, commands, authorAccessDenied)
+                } catch {
+                    completion(chats, nil, authorAccessDenied)
+                }
+                PyrusServiceDesk.chats = chats
+            } catch { 
                 //print("PSDGetChats error when convert to dictionary")
             }
             
@@ -86,6 +99,7 @@ struct PSDGetChats {
     
     private static func generateClients(from response: NSArray) -> [PSDClientInfo] {
         var clients = PyrusServiceDesk.clients
+        var serverClients = [PSDClientInfo]()
         for i in 0..<response.count {
             guard let dic: [String: Any] = response[i] as? [String: Any] else {
                 continue
@@ -97,7 +111,19 @@ struct PSDGetChats {
             if !clients.contains(client) {
                 clients.append(client)
             }
+            if !serverClients.contains(client) {
+                serverClients.append(client)
+            }
         }
+        
+        if serverClients.count != clients.count {
+            for client in clients {
+                if !serverClients.contains(client) {
+                    clients.removeAll(where: { $0.clientId == client.clientId })
+                }
+            }
+        }
+        
         return clients
     }
     

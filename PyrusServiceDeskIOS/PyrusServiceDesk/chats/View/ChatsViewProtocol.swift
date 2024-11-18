@@ -12,6 +12,8 @@ enum ChatsSearchViewCommand {
     case updateTitles(titles: [TitleWithBadge], selectedIndex: Int)
     case updateSelected(index: Int)
     case updateIcon(image: UIImage?)
+    case showAccessDeniedAlert(userNames: String, okAction: UIAlertAction)
+    case deleteSegmentControl
 }
 
 @available(iOS 13.0, *)

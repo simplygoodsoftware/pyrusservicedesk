@@ -92,6 +92,10 @@ class PyrusServiceDeskController: PSDNavigationController {
     }
     
     func closeServiceDesk() {
+        if PyrusServiceDesk.multichats {
+            remove(animated: false)
+            return
+        }
         if PyrusServiceDeskController.PSDIsOpen() {
             let alertAuthorized = UIAlertController(title: nil, message: "AcсessDenied".localizedPSD(), preferredStyle: .alert)
             alertAuthorized.addAction(UIAlertAction(title: "OK".localizedPSD(), style: .default, handler: { (_) in
@@ -112,7 +116,7 @@ class PyrusServiceDeskController: PSDNavigationController {
  */
     func remove(animated: Bool = true){
         PyrusLogger.shared.saveLocalLogToDisk()
-        if self.parent == nil{
+        if self.parent == nil {
             self.dismiss(animated: animated, completion: {
                 PyrusServiceDesk.stopCallback?.onStop()
                 PyrusServiceDeskController.clean()

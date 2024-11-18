@@ -9,6 +9,8 @@ enum ChatsPresenterCommand {
     case updateTitles(titles: [String], selectedIndex: Int)
     case updateSelected(index: Int)
     case updateIcon(image: UIImage?)
+    case showAccessDeniedAlert(userNames: String, doExit: Bool)
+    case deleteSegmentControl
 }
 
 protocol ChatsPresenterProtocol {

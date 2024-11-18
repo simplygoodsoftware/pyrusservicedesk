@@ -9,6 +9,11 @@ struct IndexPaths {
     let reloadSections: IndexSet
 }
 
+struct MessageToPass {
+    let message: PSDMessage
+    let commandId: String
+}
+
 class PSDChatInteractor: NSObject {
     private let presenter: PSDChatPresenterProtocol
     
@@ -26,6 +31,10 @@ class PSDChatInteractor: NSObject {
     private var hasNoConnection: Bool = false
     private var gotData: Bool = false
     private var messageToSent: PSDMessage?
+    private var messagesToPass = [MessageToPass]()
+    private var firstLoad = true
+    
+    var isRefresh = false
     
     init(presenter: PSDChatPresenterProtocol, chat: PSDChat? = nil) {
         self.presenter = presenter
@@ -42,12 +51,17 @@ extension PSDChatInteractor: PSDChatInteractorProtocol {
     func doInteraction(_ action: PSDChatInteractorCommand) {
         switch action {
         case .viewDidload:
+            if let chat, let chatId = chat.chatId, chatId != 0 {
+                messagesToPass = PSDMessagesStorage.getSendingMessagesFromStorage(for: chatId)
+            }
+            NotificationCenter.default.addObserver(self, selector: #selector(updateChats), name: PyrusServiceDesk.chatsUpdateNotification, object: nil)
+            NotificationCenter.default.addObserver(self, selector: #selector(updateMessages), name: SyncManager.commandsResultNotification, object: nil)
             if !PyrusServiceDesk.multichats {
                 reloadChat()
             } else {
                 beginTimer()
                 updateChat(chat: chat)
-                readChat()
+             //   readChat()
             }
             startGettingInfo()
         case .send(message: let message, attachments: let attachments):
@@ -56,7 +70,8 @@ extension PSDChatInteractor: PSDChatInteractorProtocol {
             sendRate(rateValue)
         case .refresh:
             if !PSDGetChat.isActive() {
-                updateChat(needProgress: true)
+                PyrusServiceDesk.syncManager.syncGetTickets()
+                //updateChat(needProgress: true)
             }
         case .addNewRow:
             if let messageToSent {
@@ -87,27 +102,75 @@ extension PSDChatInteractor: PSDChatInteractorProtocol {
 }
 
 private extension PSDChatInteractor {
+    @objc func updateChats() {
+        let chat = PyrusServiceDesk.chats.first(where: { $0.chatId == self.chat?.chatId })
+        if let chat {
+            self.chat = chat
+        }
+        if firstLoad && !PyrusServiceDesk.multichats {
+            updateChat(chat: chat)
+            firstLoad = false
+        } else {
+            if messagesToPass.count == 0 && !isRefresh {
+                redrawChat(chat: chat)
+            }
+        }
+        
+    }
+    
+    
+    @objc func updateMessages() {
+        for commandResult in PyrusServiceDesk.syncManager.commandsResult {
+            if let messageToPass = messagesToPass.first(where: { $0.commandId.lowercased() == commandResult.commandId.lowercased() })?.message {
+                isRefresh = true
+                messageToPass.messageId = String(commandResult.commentId ?? 0)
+                if let ticketId = commandResult.ticketId {
+                    chat?.chatId = ticketId
+                    readChat()
+                }
+                showSendMessageResult(messageToPass: messageToPass, success: commandResult.error == nil)
+                messagesToPass.removeAll(where: { $0.commandId.lowercased() == commandResult.commandId.lowercased() })
+            }
+        }
+    }
+    
+    func showSendMessageResult(messageToPass: PSDMessage, success: Bool) {
+       // PSDMessagesStorage.removeFromStorage(messageId: messageToPass.clientId)
+        if(success){
+            let _ = PyrusServiceDesk.setLastActivityDate()
+            PyrusServiceDesk.restartTimer()
+        } 
+//        else {
+//            messageToPass.state = .cantSend
+//            PSDMessagesStorage.saveInStorage(message: messageToPass)
+//        }
+        
+        
+        let newState: messageState = success ? .sent : .cantSend
+        let newProgress: CGFloat = success ? 1.0 : 0.0
+        
+        messageToPass.state = newState
+        for attachment in (messageToPass.attachments ?? [PSDAttachment]()){
+            attachment.uploadingProgress = newProgress
+            attachment.size = attachment.data.count
+            attachment.data = Data()//clear saved data
+        }
+        if messageToPass.fromStrorage {
+            messageToPass.date = Date()//mesages from the storage can have old date - change it to the current, to avoid diffrent drawing after second enter into chat
+        }
+        
+        DispatchQueue.main.async { [weak self] in
+            self?.refresh(message: messageToPass, changedToSent: success)
+        }
+    }
+    
     func forceRefresh(showFakeMessage: Int?) {
         if !PSDGetChat.isActive() {
             if let showFakeMessage, showFakeMessage != 0 {
                 presenter.doWork(.addFakeMessage(messageId: showFakeMessage))
             }
-            updateChat(needProgress: true)
-        }
-    }
-    
-    func reload() {
-        tableMatrix = [[PSDRowMessage]()]
-        presenter.doWork(.updateTableMatrix(matrix: tableMatrix))
-        let ticketId = chat?.chatId ?? 0
-        DispatchQueue.global().async { [weak self] in
-            PSDGetChat.get(needShowError: true, delegate: self, ticketId: ticketId) {
-                chat in
-                PSDGetChats.get() { _ in }
-                DispatchQueue.main.async { [weak self] in
-                    self?.updateChat(chat: chat)
-                }
-            }
+            PyrusServiceDesk.syncManager.syncGetTickets()
+            //updateChat(needProgress: true)
         }
     }
     
@@ -120,15 +183,16 @@ private extension PSDChatInteractor {
         }
         tableMatrix = [[PSDRowMessage]()] // clean old chat
         beginTimer()
-        let ticketId = chat?.chatId ?? 0
-        DispatchQueue.global().async { [weak self] in
-            PSDGetChat.get(needShowError: true, delegate: self, ticketId: ticketId) {
-                chat in
-                DispatchQueue.main.async {
-                    self?.updateChat(chat: chat)
-                }
-            }
-        }
+        PyrusServiceDesk.syncManager.syncGetTickets()
+//        let ticketId = chat?.chatId ?? 0
+//        DispatchQueue.global().async { [weak self] in
+//            PSDGetChat.get(needShowError: true, delegate: self, ticketId: ticketId) {
+//                chat in
+//                DispatchQueue.main.async {
+//                    self?.updateChat(chat: chat)
+//                }
+//            }
+//        }
     }
     
     func updateChat(chat: PSDChat?) {
@@ -171,12 +235,10 @@ private extension PSDChatInteractor {
     
     func readChat() {
         let ticketId = chat?.chatId ?? 0
-        let userId = chat?.userId ?? PyrusServiceDesk.customUserId ?? PyrusServiceDesk.userId
-        DispatchQueue.global().async { [weak self] in
-            PSDGetChat.get(needShowError: true, delegate: self, ticketId: ticketId, userId: userId) { _ in
-                PSDGetChats.get() { _ in }
-            }
-        }
+        let params = TicketCommandParams(ticketId: ticketId, appId: PyrusServiceDesk.currentClientId ?? PyrusServiceDesk.clientId, userId: PyrusServiceDesk.currentUserId ?? PyrusServiceDesk.customUserId ?? PyrusServiceDesk.userId)
+        let command = TicketCommand(type: .readTicket,  appId: PyrusServiceDesk.currentClientId ?? PyrusServiceDesk.clientId, userId:  PyrusServiceDesk.currentUserId ?? PyrusServiceDesk.customUserId ?? PyrusServiceDesk.userId, params: params)
+        PyrusServiceDesk.repository.add(command: command)
+        PyrusServiceDesk.syncManager.syncGetTickets()
     }
     
     private func setLastActivityDate(){
@@ -202,55 +264,49 @@ private extension PSDChatInteractor {
         }
     }
     
-    func updateChat(needProgress:Bool) {
-        PSDGetChat.get(needShowError: needProgress, delegate: nil, ticketId: chat?.chatId ?? 0) {
-            [weak self] (chat : PSDChat?) in
-            if let chat = chat {
-                UnreadMessageManager.removeLastComment()
-                self?.needShowRating = chat.showRating
-                self?.showRateIfNeed()
-                //compare number of messages it two last sections
-                guard let self = self else{
-                    return
+    func redrawChat(chat: PSDChat?) {
+        if let chat = chat {
+            UnreadMessageManager.removeLastComment()
+            needShowRating = chat.showRating
+            showRateIfNeed()
+            
+            //compare number of messages it two last sections
+            var hasChanges = false
+            let (removeIndexPaths, removeSections) = self.tableMatrix.removeFakeMessages()
+            if removeIndexPaths.count > 0 || removeSections.count > 0,
+               self.tableMatrix.count > 0 {
+                if !hasChanges {
+                    hasChanges = true
+                    PyrusLogger.shared.logEvent("Колличество ячеек до удаления: \(tableMatrix[tableMatrix.count - 1].count)")
+                    PyrusLogger.shared.logEvent("Колличество ячеек после удаления: \(tableMatrix[tableMatrix.count - 1].count)")
                 }
-                var hasChanges = false
-                let (removeIndexPaths, removeSections) = self.tableMatrix.removeFakeMessages()
-                if removeIndexPaths.count > 0 || removeSections.count > 0,
-                   self.tableMatrix.count > 0 {
-                    if !hasChanges {
-                        hasChanges = true
-                        PyrusLogger.shared.logEvent("Колличество ячеек до удаления: \(self.tableMatrix[self.tableMatrix.count-1].count)")
-                        PyrusLogger.shared.logEvent("Колличество ячеек после удаления: \(self.tableMatrix[self.tableMatrix.count-1].count)")
+            }
+            
+            self.tableMatrix.complete(from: chat, startMessage: lastMessageFromServer) { (indexPaths: [IndexPath], sections: IndexSet, _) in
+                DispatchQueue.main.async {
+                    if indexPaths.count > 0 || sections.count > 0,
+                       self.tableMatrix.count > 0
+                    {
+                        if !hasChanges {
+                            hasChanges = true
+                            PyrusLogger.shared.logEvent("Колличество ячеек до удаления: \(self.tableMatrix[self.tableMatrix.count-1].count)")
+                        }
+                        PyrusLogger.shared.logEvent("Колличество ячеек после добавления: \(self.tableMatrix[self.tableMatrix.count-1].count)")
+                        PyrusLogger.shared.logEvent("При удалении фейка: ячейки = \(removeIndexPaths), секции \(removeSections)")
+                        PyrusLogger.shared.logEvent("При добавленни нового сообщения: ячейки = \(indexPaths), секции \(sections)")
                     }
-                }
-                
-                self.tableMatrix.complete(from: chat, startMessage:self.lastMessageFromServer) { (indexPaths: [IndexPath], sections: IndexSet, _) in
-                    DispatchQueue.main.async {
-                        if indexPaths.count > 0 ||
-                            sections.count > 0,
-                           self.tableMatrix.count > 0
-                        {
-                            if !hasChanges {
-                                hasChanges = true
-                                PyrusLogger.shared.logEvent("Колличество ячеек до удаления: \(self.tableMatrix[self.tableMatrix.count-1].count)")
-                            }
-                            PyrusLogger.shared.logEvent("Колличество ячеек после добавления: \(self.tableMatrix[self.tableMatrix.count-1].count)")
-                            PyrusLogger.shared.logEvent("При удалении фейка: ячейки = \(removeIndexPaths), секции \(removeSections)")
-                            PyrusLogger.shared.logEvent("При добавленни нового сообщения: ячейки = \(indexPaths), секции \(sections)")
-                        }
-                                        
-                        self.presenter.doWork(.removeNoConnectionView)
-                        self.lastMessageFromServer = chat.messages.last
-                        self.setLastActivityDate()
+                    
+                    self.presenter.doWork(.removeNoConnectionView)
+                    self.lastMessageFromServer = chat.messages.last
+                    self.setLastActivityDate()
+                    
+                    if indexPaths.count > 0 || sections.count > 0
+                        || removeIndexPaths.count > 0 || removeSections.count > 0 {
+                        let indexPaths = PSDTableView.compareAddAndRemoveRows(removeIndexPaths: removeIndexPaths, addIndexPaths: indexPaths, removeSections: removeSections, addSections: sections)
+                        PyrusLogger.shared.logEvent("Результат после сопоставления: удалять = \(indexPaths.newRemoveIndexPaths), \(indexPaths.newRemoveSections); \n добавлять = \(indexPaths.addIndexPaths), \(indexPaths.addSections); \n Обновлять = \(indexPaths.reloadIndexPaths), \(indexPaths.reloadSections)")
                         
-                        if indexPaths.count > 0 || sections.count > 0
-                            || removeIndexPaths.count > 0 || removeSections.count > 0 {
-                            let indexPaths = PSDTableView.compareAddAndRemoveRows(removeIndexPaths: removeIndexPaths, addIndexPaths: indexPaths, removeSections: removeSections, addSections: sections)
-                            PyrusLogger.shared.logEvent("Результат после сопоставления: удалять = \(indexPaths.newRemoveIndexPaths), \(indexPaths.newRemoveSections); \n добавлять = \(indexPaths.addIndexPaths), \(indexPaths.addSections); \n Обновлять = \(indexPaths.reloadIndexPaths), \(indexPaths.reloadSections)")
-                            
-                            self.presenter.doWork(.updateRows(indexPaths: indexPaths))
-                            self.updateButtons()
-                        }
+                        self.presenter.doWork(.updateRows(indexPaths: indexPaths))
+                        self.updateButtons()
                     }
                 }
             }
@@ -262,6 +318,66 @@ private extension PSDChatInteractor {
         }
     }
     
+//    func updateChat(needProgress:Bool) {
+//        PSDGetChat.get(needShowError: needProgress, delegate: nil, ticketId: chat?.chatId ?? 0) {
+//            [weak self] (chat : PSDChat?) in
+//            if let chat = chat {
+//                UnreadMessageManager.removeLastComment()
+//                self?.needShowRating = chat.showRating
+//                self?.showRateIfNeed()
+//                //compare number of messages it two last sections
+//                guard let self = self else{
+//                    return
+//                }
+//                var hasChanges = false
+//                let (removeIndexPaths, removeSections) = self.tableMatrix.removeFakeMessages()
+//                if removeIndexPaths.count > 0 || removeSections.count > 0,
+//                   self.tableMatrix.count > 0 {
+//                    if !hasChanges {
+//                        hasChanges = true
+//                        PyrusLogger.shared.logEvent("Колличество ячеек до удаления: \(self.tableMatrix[self.tableMatrix.count-1].count)")
+//                        PyrusLogger.shared.logEvent("Колличество ячеек после удаления: \(self.tableMatrix[self.tableMatrix.count-1].count)")
+//                    }
+//                }
+//                
+//                self.tableMatrix.complete(from: chat, startMessage:self.lastMessageFromServer) { (indexPaths: [IndexPath], sections: IndexSet, _) in
+//                    DispatchQueue.main.async {
+//                        if indexPaths.count > 0 ||
+//                            sections.count > 0,
+//                           self.tableMatrix.count > 0
+//                        {
+//                            if !hasChanges {
+//                                hasChanges = true
+//                                PyrusLogger.shared.logEvent("Колличество ячеек до удаления: \(self.tableMatrix[self.tableMatrix.count-1].count)")
+//                            }
+//                            PyrusLogger.shared.logEvent("Колличество ячеек после добавления: \(self.tableMatrix[self.tableMatrix.count-1].count)")
+//                            PyrusLogger.shared.logEvent("При удалении фейка: ячейки = \(removeIndexPaths), секции \(removeSections)")
+//                            PyrusLogger.shared.logEvent("При добавленни нового сообщения: ячейки = \(indexPaths), секции \(sections)")
+//                        }
+//                                        
+//                        self.presenter.doWork(.removeNoConnectionView)
+//                        self.lastMessageFromServer = chat.messages.last
+//                        self.setLastActivityDate()
+//                        
+//                        if indexPaths.count > 0 || sections.count > 0
+//                            || removeIndexPaths.count > 0 || removeSections.count > 0 {
+//                            let indexPaths = PSDTableView.compareAddAndRemoveRows(removeIndexPaths: removeIndexPaths, addIndexPaths: indexPaths, removeSections: removeSections, addSections: sections)
+//                            PyrusLogger.shared.logEvent("Результат после сопоставления: удалять = \(indexPaths.newRemoveIndexPaths), \(indexPaths.newRemoveSections); \n добавлять = \(indexPaths.addIndexPaths), \(indexPaths.addSections); \n Обновлять = \(indexPaths.reloadIndexPaths), \(indexPaths.reloadSections)")
+//                            
+//                            self.presenter.doWork(.updateRows(indexPaths: indexPaths))
+//                            self.updateButtons()
+//                        }
+//                    }
+//                }
+//            }
+//            
+//            DispatchQueue.main.async { [weak self] in
+//                self?.updateButtons()
+//                self?.presenter.doWork(.endRefreshing)
+//            }
+//        }
+//    }
+    
     func updateButtons() {
         presenter.doWork(.updateButtons(buttons: PSDChat.draftAnswers(tableMatrix)))
     }
@@ -269,7 +385,7 @@ private extension PSDChatInteractor {
 }
 
 private extension PSDChatInteractor {
-    func send(_ message:String, _ attachments: [PSDAttachment]) {
+    func send(_ message: String, _ attachments: [PSDAttachment]) {
         let newMessage = PSDObjectsCreator.createMessage(message, attachments: attachments, ticketId: chat?.chatId ?? 0, userId: chat?.userId ?? PyrusServiceDesk.customUserId ?? PyrusServiceDesk.userId)
         prepareMessageForDrawing(newMessage)
         messageToSent = newMessage
@@ -365,6 +481,10 @@ private extension PSDChatInteractor {
 
 
 extension PSDChatInteractor: PSDMessageSendDelegate {
+    func addMessageToPass(message: PSDMessage, commandId: String) {
+        messagesToPass.append(MessageToPass(message: message, commandId: commandId))
+    }
+    
     func refresh(message: PSDMessage, changedToSent: Bool) {
         DispatchQueue.main.async { [weak self] in
             self?.startGettingInfo()
@@ -417,6 +537,7 @@ extension PSDChatInteractor: PSDMessageSendDelegate {
                 presenter.doWork(.updateTableMatrix(matrix: tableMatrix))
                 presenter.doWork(.deleteSections(sections: IndexSet(arrayLiteral: oldSection)))
             }
+            self.isRefresh = false
         }
     }
     
@@ -509,9 +630,12 @@ extension PSDChatInteractor {
     
     @objc private func updateTable() {
         startGettingInfo()
-        if !hasNoConnection && !PSDGetChat.isActive() {
-           updateChat(needProgress: false)
+        if !hasNoConnection {
+            PyrusServiceDesk.syncManager.syncGetTickets()
         }
+//        if !hasNoConnection && !PSDGetChat.isActive() {
+//           updateChat(needProgress: false)
+//        }
     }
 }
 

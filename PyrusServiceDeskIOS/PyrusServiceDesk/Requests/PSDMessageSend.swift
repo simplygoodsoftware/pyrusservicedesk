@@ -6,6 +6,7 @@ protocol PSDMessageSendDelegate: AnyObject {
     func refresh(message:PSDMessage, changedToSent: Bool)
     func remove(message:PSDMessage)
     func updateTicketId(_ ticketId: Int)
+    func addMessageToPass(message: PSDMessage, commandId: String)
 }
 
 struct PSDMessageSend {
@@ -44,6 +45,8 @@ struct PSDMessageSend {
         
     }
     static func fileSendingEndWithError(_ messageToPass: PSDMessage, delegate: PSDMessageSendDelegate?) {
+        messageToPass.state = .cantSend
+        PSDMessagesStorage.saveInStorage(message: messageToPass)
         didEndPassMessage(messageToPass, delegate: delegate)
     }
     /**
@@ -86,35 +89,35 @@ struct PSDMessageSend {
                 attachment.uploadingProgress = 0
             }
         }
-        PSDMessagesStorage.saveInStorage(message:messageToPass)
-        dispatchQueue.async {
-            if PSDMessageSend.passingMessagesIds.contains(messageToPass.clientId) {
-                //при отпрвке атачей эта же функция вызывается снова, продолжаем отправку не блокируя очередь
-            }
-            else{
-                PSDMessageSend.passingMessagesIds.append(messageToPass.clientId)
-                _ = PSDMessageSend.semaphore.wait(timeout: DispatchTime.distantFuture)
-            }
         
-        var hasUnsendAttachments = false
-        if let attachments = messageToPass.attachments, attachments.count > 0{
-            for (i,attachment) in attachments.enumerated(){
-                if attachment.emptyId(){
-                    PSDMessageSend.passFile(messageToPass, attachmentIdex: i, delegate: delegate)
-                    hasUnsendAttachments = true
-                    break
+        dispatchQueue.async {
+//            if PSDMessageSend.passingMessagesIds.contains(messageToPass.clientId) {
+//                //при отпрвке атачей эта же функция вызывается снова, продолжаем отправку не блокируя очередь
+//            }
+//            else{
+//                PSDMessageSend.passingMessagesIds.append(messageToPass.clientId)
+//                _ = PSDMessageSend.semaphore.wait(timeout: DispatchTime.distantFuture)
+//            }
+//            
+            var hasUnsendAttachments = false
+            if let attachments = messageToPass.attachments, attachments.count > 0{
+                for (i,attachment) in attachments.enumerated(){
+                    if attachment.emptyId(){
+                        PSDMessageSend.passFile(messageToPass, attachmentIdex: i, delegate: delegate)
+                        hasUnsendAttachments = true
+                        break
+                    }
+                    
                 }
                 
             }
-            
-        }
-        if !hasUnsendAttachments{
-            let sender = PSDMessageSender()
-            sender.pass(messageToPass, delegate: delegate, completion: {
+            if !hasUnsendAttachments{
+                let sender = PSDMessageSender()
+                sender.pass(messageToPass, delegate: delegate, completion: {
                     didEndPassMessage(messageToPass, delegate: delegate)
                 })
-            messageSenders.append(sender)
-        }
+                messageSenders.append(sender)
+            }
         }
         
     }
@@ -127,5 +130,4 @@ struct PSDMessageSend {
             messageSenders.remove(at: index)
         }
     }
-    
 }
