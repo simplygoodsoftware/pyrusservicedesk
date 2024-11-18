@@ -33,6 +33,7 @@ class PSDChatInteractor: NSObject {
     private var messageToSent: PSDMessage?
     private var messagesToPass = [MessageToPass]()
     private var firstLoad = true
+    private var isRefreshing = false
     
     var isRefresh = false
     
@@ -68,9 +69,8 @@ extension PSDChatInteractor: PSDChatInteractorProtocol {
         case .sendRate(rateValue: let rateValue):
             sendRate(rateValue)
         case .refresh:
-            if !PSDGetChat.isActive() {
-                PyrusServiceDesk.syncManager.syncGetTickets()
-            }
+            isRefreshing = true
+            PyrusServiceDesk.syncManager.syncGetTickets()
         case .addNewRow:
             if let messageToSent {
                 addNewRow(message: messageToSent)
@@ -296,7 +296,10 @@ private extension PSDChatInteractor {
             
             DispatchQueue.main.async { [weak self] in
                 self?.updateButtons()
-                self?.presenter.doWork(.endRefreshing)
+                if self?.isRefreshing ?? false {
+                    self?.presenter.doWork(.endRefreshing)
+                    self?.isRefreshing = false
+                }
             }
         }
     }
