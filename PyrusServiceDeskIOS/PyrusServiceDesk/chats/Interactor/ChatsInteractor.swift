@@ -133,8 +133,8 @@ private extension ChatsInteractor {
             presenter.doWork(.updateIcon(image: image))
         }
         loadImage(urlString: imagePath) { [weak self] image in
-            self?.clients[index].image = image ?? UIImage(named: "iiko")
-            PyrusServiceDesk.clients[index].image = image ?? UIImage(named: "iiko")
+            self?.clients[index].image = image ?? UIImage.PSDImage(name: "iiko")
+            PyrusServiceDesk.clients[index].image = image ?? UIImage.PSDImage(name: "iiko")
             DispatchQueue.main.async { [weak self] in
                 self?.presenter.doWork(.updateIcon(image: image))
             }

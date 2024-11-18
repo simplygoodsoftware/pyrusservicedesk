@@ -52,7 +52,7 @@ struct PSDSupportImageSetter {
             DispatchQueue.global().async { [weak user, weak delagate] in
                 loadImage(urlString: client.clientIcon) { (image: UIImage?) in
                     DispatchQueue.main.async {
-                        user?.image = image ?? UIImage(named: "iiko")
+                        user?.image = image ?? UIImage.PSDImage(name: "iiko")
 
                         if user != nil {
                             loadingUsers[user!] = false

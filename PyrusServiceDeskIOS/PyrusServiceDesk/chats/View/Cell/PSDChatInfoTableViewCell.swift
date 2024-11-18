@@ -44,7 +44,7 @@ class PSDChatInfoTableViewCell: UITableViewCell {
     }()
     
     private lazy var attachmentIcon: UIImageView = {
-        let image = UIImage(named: "paperclip")
+        let image = UIImage.PSDImage(name: "paperclip")
         let imageView = UIImageView(image: image?.imageWith(color: .lastMessageInfo))
         imageView.isHidden = true
         return imageView

@@ -33,7 +33,7 @@ extension ChatsPresenter: ChatsPresenterProtocol {
         case .updateSelected(index: let index):
             view?.show(.updateSelected(index: index))
         case .updateIcon(image: let image):
-            view?.show(.updateIcon(image: image ?? UIImage(named: "iiko")))
+            view?.show(.updateIcon(image: image ?? UIImage.PSDImage(name: "iiko")))
         case .showAccessDeniedAlert(userNames: let userNames, doExit: let doExit):
             let okAction = UIAlertAction(title: "Ок", style: .default, handler: {_ in 
                 if doExit {
@@ -87,7 +87,7 @@ private extension ChatsPresenter {
     func prepareActions(menuActions: [MenuAction], isFilter: Bool) -> [UIAction] {
         var actions = [UIAction]()
         if isFilter {
-            let image = PyrusServiceDesk.currentUserId == nil ? UIImage(named: "checkmark") : nil
+            let image = PyrusServiceDesk.currentUserId == nil ? UIImage(systemName: "checkmark") : nil
             let action = UIAction(title: "Все", image: image, handler: { [weak self] _ in
                 self?.view?.show(.deleteFilter)
             })
@@ -95,7 +95,7 @@ private extension ChatsPresenter {
         }
         
         for menuAction in menuActions {
-            let image = menuAction.isSelect && isFilter ? UIImage(named: "checkmark") : nil
+            let image = menuAction.isSelect && isFilter ? UIImage(systemName: "checkmark") : nil
             let action = UIAction(title: menuAction.title, image: image, handler: { _ in
                 if isFilter {
                     menuAction.filterAction()

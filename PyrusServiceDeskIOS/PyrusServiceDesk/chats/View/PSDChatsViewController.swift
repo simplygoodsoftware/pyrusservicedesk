@@ -57,7 +57,7 @@ class PSDChatsViewController: UIViewController {
     
     private var isFiltered = false {
         didSet {
-            let image = isFiltered ? UIImage(named: "fillFilter") : UIImage(named: "filter")
+            let image = isFiltered ? UIImage.PSDImage(name: "fillFilter") : UIImage.PSDImage(name: "filter")
             filterImage.image = image?.imageWith(color: customization?.themeColor ?? .darkAppColor)
         }
     }
@@ -73,7 +73,7 @@ class PSDChatsViewController: UIViewController {
     
     private lazy var filterCross: UIButton = {
         let button = UIButton()
-        let crossImage = UIImage(named: "Close")?.imageWith(color: .white)
+        let crossImage = UIImage.PSDImage(name: "Close")?.imageWith(color: .white)
         button.setImage(crossImage, for: .normal)
         button.setImage(crossImage?.imageWith(color: .white.withAlphaComponent(0.2)), for: .highlighted)
         button.isHidden = true
@@ -140,7 +140,7 @@ private extension PSDChatsViewController {
     }
     
     func setupEmptyChats() {
-        let chatsImage = UIImageView(image: UIImage(named: "chats"))
+        let chatsImage = UIImageView(image: UIImage.PSDImage(name: "chats"))
         let openNewButton = UIButton(type: .system)
         emptyChatsView.isHidden = true
         let mainColor = customization?.barButtonTintColor ?? .darkAppColor
@@ -298,7 +298,7 @@ private extension PSDChatsViewController {
     
     func setupFilterButton() {
         let mainColor = customization?.themeColor ?? .darkAppColor
-        filterImage = UIImageView(image: UIImage(named: "filter")?.imageWith(color: mainColor))
+        filterImage = UIImageView(image: UIImage.PSDImage(name: "filter")?.imageWith(color: mainColor))
         filterButton.addSubview(filterImage)
         navigationView.addSubview(filterButton)
         filterImage.translatesAutoresizingMaskIntoConstraints = false
