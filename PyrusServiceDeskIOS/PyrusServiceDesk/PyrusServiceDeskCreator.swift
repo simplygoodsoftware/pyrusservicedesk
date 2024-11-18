@@ -340,7 +340,7 @@ import UIKit
     
     ///Setting name of user. If name is not setted it il be default ("Guest")
     ///- parameter userName: A name to display in pyrus task.
-    static func setUser(_ userName: String?) {
+    @objc public static func setUser(_ userName: String?) {
         PyrusServiceDesk.authorName = userName ?? DEFAULT_USER_NAME
         if PSDUsers.user != nil{
             PSDUsers.user.name = userName

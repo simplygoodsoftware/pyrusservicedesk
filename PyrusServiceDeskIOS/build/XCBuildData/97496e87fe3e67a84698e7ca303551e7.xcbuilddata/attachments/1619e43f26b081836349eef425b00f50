@@ -1,0 +1,10 @@
+framework module PyrusServiceDesk {
+  umbrella header "PyrusServiceDesk.h"
+  export *
+
+  module * { export * }
+}
+
+module PyrusServiceDesk.__Swift {
+  exclude header "PyrusServiceDesk-Swift.h"
+}

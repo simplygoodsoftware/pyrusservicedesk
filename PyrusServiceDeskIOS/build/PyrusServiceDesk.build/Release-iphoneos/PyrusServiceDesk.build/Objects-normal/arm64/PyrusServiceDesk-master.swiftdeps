@@ -1,0 +1,181 @@
+version: "Apple Swift version 5.10 (swiftlang-5.10.0.13 clang-1500.3.9.4)"
+options: "13d58c3fb34f4cb7b4f2bba20b26f1ed42790a4c878eda846b35bd2998924a38"
+build_start_time: [1731921707, 846366000]
+build_end_time: [1731921718, 922559000]
+inputs:
+  "/Users/stanislavabobruskina/pyrusservicedesk/PyrusServiceDeskIOS/PyrusServiceDesk/ApiSignManager.swift": [1727186641, 385265485]
+  "/Users/stanislavabobruskina/pyrusservicedesk/PyrusServiceDeskIOS/PyrusServiceDesk/Chat/Interactor/PSDChatInteractor.swift": [1731912790, 239238813]
+  ? "/Users/stanislavabobruskina/pyrusservicedesk/PyrusServiceDeskIOS/PyrusServiceDesk/Chat/Interactor/PSDChatInteractorProtocol.swift"
+  : [1729777762, 384437511]
+  ? "/Users/stanislavabobruskina/pyrusservicedesk/PyrusServiceDeskIOS/PyrusServiceDesk/Chat/LoadAttachments/PSDAttachmentLoadViewController.swift"
+  : [1727186641, 385485111]
+  ? "/Users/stanislavabobruskina/pyrusservicedesk/PyrusServiceDeskIOS/PyrusServiceDesk/Chat/LoadAttachments/PSDAttachmentLoadViewControllerInterface.swift"
+  : [1727186641, 385557070]
+  ? "/Users/stanislavabobruskina/pyrusservicedesk/PyrusServiceDeskIOS/PyrusServiceDesk/Chat/LoadAttachments/PSDAttachmentPreviewErrorView.swift"
+  : [1727186641, 385695904]
+  ? "/Users/stanislavabobruskina/pyrusservicedesk/PyrusServiceDeskIOS/PyrusServiceDesk/Chat/LoadAttachments/PSDAttachmentPreviewView.swift"
+  : [1727186641, 385772155]
+  ? "/Users/stanislavabobruskina/pyrusservicedesk/PyrusServiceDeskIOS/PyrusServiceDesk/Chat/LoadAttachments/PSDProgressDownloadView.swift"
+  : [1727186641, 385912530]
+  "/Users/stanislavabobruskina/pyrusservicedesk/PyrusServiceDeskIOS/PyrusServiceDesk/Chat/LoadAttachments/PSDShareBarItemView.swift": [1727186641, 385986822]
+  ? "/Users/stanislavabobruskina/pyrusservicedesk/PyrusServiceDeskIOS/PyrusServiceDesk/Chat/PSDChatTable/ButtonsView/AlignedCollectionViewFlowLayout.swift"
+  : [1727186641, 386394992]
+  ? "/Users/stanislavabobruskina/pyrusservicedesk/PyrusServiceDeskIOS/PyrusServiceDesk/Chat/PSDChatTable/ButtonsView/ButtonViewCell.swift"
+  : [1727684766, 294766618]
+  ? "/Users/stanislavabobruskina/pyrusservicedesk/PyrusServiceDeskIOS/PyrusServiceDesk/Chat/PSDChatTable/ButtonsView/ButtonsView.swift"
+  : [1727684766, 295099790]
+  ? "/Users/stanislavabobruskina/pyrusservicedesk/PyrusServiceDeskIOS/PyrusServiceDesk/Chat/PSDChatTable/MessageCell/PSDAttachmentView.swift"
+  : [1729590121, 109356320]
+  ? "/Users/stanislavabobruskina/pyrusservicedesk/PyrusServiceDeskIOS/PyrusServiceDesk/Chat/PSDChatTable/MessageCell/PSDAvatarImageView.swift"
+  : [1727186641, 386875536]
+  ? "/Users/stanislavabobruskina/pyrusservicedesk/PyrusServiceDeskIOS/PyrusServiceDesk/Chat/PSDChatTable/MessageCell/PSDChatMessageCell.swift"
+  : [1729846521, 484297033]
+  ? "/Users/stanislavabobruskina/pyrusservicedesk/PyrusServiceDeskIOS/PyrusServiceDesk/Chat/PSDChatTable/MessageCell/PSDCopyLabel.swift"
+  : [1727186641, 387091204]
+  ? "/Users/stanislavabobruskina/pyrusservicedesk/PyrusServiceDeskIOS/PyrusServiceDesk/Chat/PSDChatTable/MessageCell/PSDFileAttachmentView.swift"
+  : [1727186641, 387191788]
+  ? "/Users/stanislavabobruskina/pyrusservicedesk/PyrusServiceDeskIOS/PyrusServiceDesk/Chat/PSDChatTable/MessageCell/PSDImageAttachmentView.swift"
+  : [1729590121, 109698573]
+  ? "/Users/stanislavabobruskina/pyrusservicedesk/PyrusServiceDeskIOS/PyrusServiceDesk/Chat/PSDChatTable/MessageCell/PSDMessageStateButton.swift"
+  : [1727186641, 387424789]
+  ? "/Users/stanislavabobruskina/pyrusservicedesk/PyrusServiceDeskIOS/PyrusServiceDesk/Chat/PSDChatTable/MessageCell/PSDMessageView.swift"
+  : [1729846521, 566757919]
+  ? "/Users/stanislavabobruskina/pyrusservicedesk/PyrusServiceDeskIOS/PyrusServiceDesk/Chat/PSDChatTable/MessageCell/PSDSupportMessageCell.swift"
+  : [1729846521, 603137051]
+  ? "/Users/stanislavabobruskina/pyrusservicedesk/PyrusServiceDeskIOS/PyrusServiceDesk/Chat/PSDChatTable/MessageCell/PSDUploadView.swift"
+  : [1727186641, 387781166]
+  ? "/Users/stanislavabobruskina/pyrusservicedesk/PyrusServiceDeskIOS/PyrusServiceDesk/Chat/PSDChatTable/MessageCell/PSDUserMessageCell.swift"
+  : [1729846521, 530785870]
+  ? "/Users/stanislavabobruskina/pyrusservicedesk/PyrusServiceDeskIOS/PyrusServiceDesk/Chat/PSDChatTable/PSDChatCellConfigurator.swift"
+  : [1729783624, 934179874]
+  "/Users/stanislavabobruskina/pyrusservicedesk/PyrusServiceDeskIOS/PyrusServiceDesk/Chat/PSDChatTable/PSDChatTableView.swift": [1729846521, 596449497]
+  "/Users/stanislavabobruskina/pyrusservicedesk/PyrusServiceDeskIOS/PyrusServiceDesk/Chat/Presenter/PSDChatPresenter.swift": [1729777762, 344842435]
+  "/Users/stanislavabobruskina/pyrusservicedesk/PyrusServiceDeskIOS/PyrusServiceDesk/Chat/Presenter/PSDChatPresenterProtocol.swift": [1729777762, 357970168]
+  "/Users/stanislavabobruskina/pyrusservicedesk/PyrusServiceDeskIOS/PyrusServiceDesk/Chat/Router/PSDChatRouter.swift": [1729783624, 925998390]
+  "/Users/stanislavabobruskina/pyrusservicedesk/PyrusServiceDeskIOS/PyrusServiceDesk/Chat/Router/PSDChatRouterProtocol.swift": [1729783624, 911730763]
+  "/Users/stanislavabobruskina/pyrusservicedesk/PyrusServiceDeskIOS/PyrusServiceDesk/Chat/View/PSDChatViewController.swift": [1729846521, 581429771]
+  "/Users/stanislavabobruskina/pyrusservicedesk/PyrusServiceDeskIOS/PyrusServiceDesk/Chat/View/PSDChatViewProtocol.swift": [1729777762, 366349654]
+  ? "/Users/stanislavabobruskina/pyrusservicedesk/PyrusServiceDeskIOS/PyrusServiceDesk/Chat/messageInput/AttachmentCollcetionView/AttachmentCollectionView.swift"
+  : [1727186641, 388310420]
+  ? "/Users/stanislavabobruskina/pyrusservicedesk/PyrusServiceDeskIOS/PyrusServiceDesk/Chat/messageInput/AttachmentCollcetionView/AttachmentCollectionViewCell.swift"
+  : [1729590587, 56115455]
+  ? "/Users/stanislavabobruskina/pyrusservicedesk/PyrusServiceDeskIOS/PyrusServiceDesk/Chat/messageInput/AttachmentCollcetionView/AttachmentCollectionViewPresenter.swift"
+  : [1727186641, 388454004]
+  ? "/Users/stanislavabobruskina/pyrusservicedesk/PyrusServiceDeskIOS/PyrusServiceDesk/Chat/messageInput/AttachmentCollcetionView/AttachmentFileCollectionViewCell.swift"
+  : [1727186641, 388516129]
+  ? "/Users/stanislavabobruskina/pyrusservicedesk/PyrusServiceDeskIOS/PyrusServiceDesk/Chat/messageInput/AttachmentCollcetionView/AttachmentPreviewCollectionViewCell.swift"
+  : [1727186641, 388589838]
+  "/Users/stanislavabobruskina/pyrusservicedesk/PyrusServiceDeskIOS/PyrusServiceDesk/Chat/messageInput/AttachmentHandler.swift": [1727186641, 388857256]
+  "/Users/stanislavabobruskina/pyrusservicedesk/PyrusServiceDeskIOS/PyrusServiceDesk/Chat/messageInput/AttachmentsAddButton.swift": [1729590587, 56495291]
+  "/Users/stanislavabobruskina/pyrusservicedesk/PyrusServiceDeskIOS/PyrusServiceDesk/Chat/messageInput/PSDMessageInputView.swift": [1729766395, 23060162]
+  "/Users/stanislavabobruskina/pyrusservicedesk/PyrusServiceDeskIOS/PyrusServiceDesk/Chat/messageInput/PSDMessageSendButton.swift": [1727186641, 389235175]
+  "/Users/stanislavabobruskina/pyrusservicedesk/PyrusServiceDeskIOS/PyrusServiceDesk/Chat/messageInput/PSDMessageTextView.swift": [1727186641, 389308384]
+  "/Users/stanislavabobruskina/pyrusservicedesk/PyrusServiceDeskIOS/PyrusServiceDesk/Chat/messageInput/PSDRateView.swift": [1727186641, 389375301]
+  "/Users/stanislavabobruskina/pyrusservicedesk/PyrusServiceDeskIOS/PyrusServiceDesk/DeniedAccessCallBack.swift": [1731589033, 925725794]
+  "/Users/stanislavabobruskina/pyrusservicedesk/PyrusServiceDeskIOS/PyrusServiceDesk/Helpers/CharacterSet+urlEncode.swift": [1727186641, 389460468]
+  "/Users/stanislavabobruskina/pyrusservicedesk/PyrusServiceDeskIOS/PyrusServiceDesk/Helpers/CloseButtonItem.swift": [1727186641, 389515343]
+  "/Users/stanislavabobruskina/pyrusservicedesk/PyrusServiceDeskIOS/PyrusServiceDesk/Helpers/ColorHexInit.swift": [1729590121, 112182385]
+  "/Users/stanislavabobruskina/pyrusservicedesk/PyrusServiceDeskIOS/PyrusServiceDesk/Helpers/CustomFontHelper.swift": [1727186641, 389564135]
+  "/Users/stanislavabobruskina/pyrusservicedesk/PyrusServiceDeskIOS/PyrusServiceDesk/Helpers/CustomizationHelper.swift": [1729590587, 57153422]
+  "/Users/stanislavabobruskina/pyrusservicedesk/PyrusServiceDeskIOS/PyrusServiceDesk/Helpers/Data+append.swift": [1727186641, 389753387]
+  "/Users/stanislavabobruskina/pyrusservicedesk/PyrusServiceDeskIOS/PyrusServiceDesk/Helpers/Data+gZip.swift": [1727186641, 389820679]
+  "/Users/stanislavabobruskina/pyrusservicedesk/PyrusServiceDeskIOS/PyrusServiceDesk/Helpers/Date+usefulFunc.swift": [1729590587, 57535759]
+  "/Users/stanislavabobruskina/pyrusservicedesk/PyrusServiceDeskIOS/PyrusServiceDesk/Helpers/Dictionary+asString.swift": [1727186641, 390007346]
+  "/Users/stanislavabobruskina/pyrusservicedesk/PyrusServiceDeskIOS/PyrusServiceDesk/Helpers/PSDAlertDisplay.swift": [1727186641, 390070097]
+  "/Users/stanislavabobruskina/pyrusservicedesk/PyrusServiceDeskIOS/PyrusServiceDesk/Helpers/PSDDownloadView.swift": [1727186641, 390131889]
+  "/Users/stanislavabobruskina/pyrusservicedesk/PyrusServiceDeskIOS/PyrusServiceDesk/Helpers/PSDFilesManager.swift": [1727186641, 390193264]
+  "/Users/stanislavabobruskina/pyrusservicedesk/PyrusServiceDeskIOS/PyrusServiceDesk/Helpers/PSDMessagesStorage.swift": [1731504443, 124954367]
+  "/Users/stanislavabobruskina/pyrusservicedesk/PyrusServiceDeskIOS/PyrusServiceDesk/Helpers/PSDProgressView.swift": [1727186641, 390393890]
+  "/Users/stanislavabobruskina/pyrusservicedesk/PyrusServiceDeskIOS/PyrusServiceDesk/Helpers/PSDVIew.swift": [1727186641, 390464433]
+  "/Users/stanislavabobruskina/pyrusservicedesk/PyrusServiceDeskIOS/PyrusServiceDesk/Helpers/Recolorable.swift": [1727186641, 390524058]
+  "/Users/stanislavabobruskina/pyrusservicedesk/PyrusServiceDeskIOS/PyrusServiceDesk/Helpers/String/LocalizationString.swift": [1729590587, 57986638]
+  ? "/Users/stanislavabobruskina/pyrusservicedesk/PyrusServiceDeskIOS/PyrusServiceDesk/Helpers/String/String + FilesSupportedExtension.swift"
+  : [1727186641, 390765226]
+  "/Users/stanislavabobruskina/pyrusservicedesk/PyrusServiceDeskIOS/PyrusServiceDesk/Helpers/String/String + uuid.swift": [1727186641, 390859018]
+  "/Users/stanislavabobruskina/pyrusservicedesk/PyrusServiceDeskIOS/PyrusServiceDesk/Helpers/String/String+Date.swift": [1727186641, 390942102]
+  "/Users/stanislavabobruskina/pyrusservicedesk/PyrusServiceDeskIOS/PyrusServiceDesk/Helpers/String/String+years.swift": [1727186641, 391015686]
+  "/Users/stanislavabobruskina/pyrusservicedesk/PyrusServiceDeskIOS/PyrusServiceDesk/Helpers/String/StringHelper.swift": [1727186641, 391116436]
+  "/Users/stanislavabobruskina/pyrusservicedesk/PyrusServiceDeskIOS/PyrusServiceDesk/Helpers/String/XmlHelper.swift": [1729590121, 113295352]
+  ? "/Users/stanislavabobruskina/pyrusservicedesk/PyrusServiceDeskIOS/PyrusServiceDesk/Helpers/TableMatrix/[Int+PSDChat]+complete.swift"
+  : [1729590121, 113669021]
+  ? "/Users/stanislavabobruskina/pyrusservicedesk/PyrusServiceDeskIOS/PyrusServiceDesk/Helpers/TableMatrix/[Int+PSDChat]+usefulFunc.swift"
+  : [1731325049, 210047815]
+  "/Users/stanislavabobruskina/pyrusservicedesk/PyrusServiceDeskIOS/PyrusServiceDesk/Helpers/TableView/PSDSpinerTableView.swift": [1729590587, 58170598]
+  "/Users/stanislavabobruskina/pyrusservicedesk/PyrusServiceDeskIOS/PyrusServiceDesk/Helpers/TableView/PSDTableView.swift": [1729765667, 992519701]
+  ? "/Users/stanislavabobruskina/pyrusservicedesk/PyrusServiceDeskIOS/PyrusServiceDesk/Helpers/TableView/TableViewCellConfiguratorProtocol.swift"
+  : [1729590121, 114781947]
+  ? "/Users/stanislavabobruskina/pyrusservicedesk/PyrusServiceDeskIOS/PyrusServiceDesk/Helpers/TableView/UITableView + swipeForDetail.swift"
+  : [1727186641, 391957025]
+  "/Users/stanislavabobruskina/pyrusservicedesk/PyrusServiceDeskIOS/PyrusServiceDesk/Helpers/TableView/UITableView+keyboard.swift": [1729599139, 810205368]
+  "/Users/stanislavabobruskina/pyrusservicedesk/PyrusServiceDeskIOS/PyrusServiceDesk/Helpers/UIApplication+topViewController.swift": [1727186641, 392099150]
+  "/Users/stanislavabobruskina/pyrusservicedesk/PyrusServiceDeskIOS/PyrusServiceDesk/Helpers/UIButton+backgroundColor.swift": [1727186641, 392158609]
+  "/Users/stanislavabobruskina/pyrusservicedesk/PyrusServiceDeskIOS/PyrusServiceDesk/Helpers/UIDevice + modelName.swift": [1727186641, 392222360]
+  "/Users/stanislavabobruskina/pyrusservicedesk/PyrusServiceDeskIOS/PyrusServiceDesk/Helpers/UIView+constraints.swift": [1727186641, 392282860]
+  "/Users/stanislavabobruskina/pyrusservicedesk/PyrusServiceDeskIOS/PyrusServiceDesk/Helpers/UIView+findViewController.swift": [1727186641, 392344735]
+  "/Users/stanislavabobruskina/pyrusservicedesk/PyrusServiceDeskIOS/PyrusServiceDesk/Helpers/UnreadMessageManager.swift": [1729590587, 58721145]
+  "/Users/stanislavabobruskina/pyrusservicedesk/PyrusServiceDeskIOS/PyrusServiceDesk/Helpers/View+asImage.swift": [1727186641, 392465403]
+  "/Users/stanislavabobruskina/pyrusservicedesk/PyrusServiceDeskIOS/PyrusServiceDesk/Helpers/applicationColors.swift": [1727973072, 755340203]
+  "/Users/stanislavabobruskina/pyrusservicedesk/PyrusServiceDeskIOS/PyrusServiceDesk/Helpers/customColor.swift": [1727186641, 392578612]
+  "/Users/stanislavabobruskina/pyrusservicedesk/PyrusServiceDeskIOS/PyrusServiceDesk/Helpers/for images/Image+compress.swift": [1727186641, 392836113]
+  "/Users/stanislavabobruskina/pyrusservicedesk/PyrusServiceDeskIOS/PyrusServiceDesk/Helpers/for images/PSDBundleImage.swift": [1727448842, 232505921]
+  "/Users/stanislavabobruskina/pyrusservicedesk/PyrusServiceDeskIOS/PyrusServiceDesk/Helpers/for images/PSDDownloadImage.swift": [1727186641, 392963739]
+  "/Users/stanislavabobruskina/pyrusservicedesk/PyrusServiceDeskIOS/PyrusServiceDesk/Helpers/for images/PSDPreviewSetter.swift": [1727186641, 393080156]
+  "/Users/stanislavabobruskina/pyrusservicedesk/PyrusServiceDeskIOS/PyrusServiceDesk/Helpers/for images/SupportUserImage.swift": [1730805273, 271892488]
+  "/Users/stanislavabobruskina/pyrusservicedesk/PyrusServiceDeskIOS/PyrusServiceDesk/Helpers/for images/UIImage+color.swift": [1727186641, 393206407]
+  "/Users/stanislavabobruskina/pyrusservicedesk/PyrusServiceDeskIOS/PyrusServiceDesk/Logs/LogEvents.swift": [1727186641, 393438825]
+  "/Users/stanislavabobruskina/pyrusservicedesk/PyrusServiceDeskIOS/PyrusServiceDesk/Logs/PyrusLogger.swift": [1727186641, 393560909]
+  "/Users/stanislavabobruskina/pyrusservicedesk/PyrusServiceDeskIOS/PyrusServiceDesk/LogsSendController.swift": [1727684766, 297472326]
+  "/Users/stanislavabobruskina/pyrusservicedesk/PyrusServiceDeskIOS/PyrusServiceDesk/Managers/SyncManager.swift": [1731919713, 232137026]
+  "/Users/stanislavabobruskina/pyrusservicedesk/PyrusServiceDeskIOS/PyrusServiceDesk/Navigation/PSDCoverHorizontalAnimator.swift": [1727186641, 393866578]
+  "/Users/stanislavabobruskina/pyrusservicedesk/PyrusServiceDeskIOS/PyrusServiceDesk/Navigation/PSDNavigationController.swift": [1727186641, 393933661]
+  "/Users/stanislavabobruskina/pyrusservicedesk/PyrusServiceDeskIOS/PyrusServiceDesk/Navigation/PSDViewController.swift": [1727186641, 393996412]
+  "/Users/stanislavabobruskina/pyrusservicedesk/PyrusServiceDeskIOS/PyrusServiceDesk/Navigation/PyrusServiceDeskController.swift": [1731584293, 551676370]
+  "/Users/stanislavabobruskina/pyrusservicedesk/PyrusServiceDeskIOS/PyrusServiceDesk/OnStopCallback.swift": [1727186641, 394199830]
+  "/Users/stanislavabobruskina/pyrusservicedesk/PyrusServiceDeskIOS/PyrusServiceDesk/PSDChooser.swift": [1727186641, 394267247]
+  "/Users/stanislavabobruskina/pyrusservicedesk/PyrusServiceDeskIOS/PyrusServiceDesk/PSDInfoView.swift": [1727186641, 394340914]
+  "/Users/stanislavabobruskina/pyrusservicedesk/PyrusServiceDeskIOS/PyrusServiceDesk/PSDNewReplySubscriber.swift": [1727186641, 394417706]
+  "/Users/stanislavabobruskina/pyrusservicedesk/PyrusServiceDeskIOS/PyrusServiceDesk/PSDObjects/MultiChats/PSDClientInfo.swift": [1730805374, 283276887]
+  "/Users/stanislavabobruskina/pyrusservicedesk/PyrusServiceDeskIOS/PyrusServiceDesk/PSDObjects/MultiChats/PSDUserInfo.swift": [1729590121, 115569995]
+  "/Users/stanislavabobruskina/pyrusservicedesk/PyrusServiceDeskIOS/PyrusServiceDesk/PSDObjects/PSDAttachment.swift": [1729590121, 115756080]
+  "/Users/stanislavabobruskina/pyrusservicedesk/PyrusServiceDeskIOS/PyrusServiceDesk/PSDObjects/PSDChat.swift": [1729689583, 748915173]
+  "/Users/stanislavabobruskina/pyrusservicedesk/PyrusServiceDeskIOS/PyrusServiceDesk/PSDObjects/PSDLastUnreadMessage.swift": [1729590587, 58862396]
+  "/Users/stanislavabobruskina/pyrusservicedesk/PyrusServiceDeskIOS/PyrusServiceDesk/PSDObjects/PSDMessage.swift": [1729779507, 29604508]
+  "/Users/stanislavabobruskina/pyrusservicedesk/PyrusServiceDeskIOS/PyrusServiceDesk/PSDObjects/PSDPlaceholderMessage.swift": [1727186641, 394761041]
+  "/Users/stanislavabobruskina/pyrusservicedesk/PyrusServiceDeskIOS/PyrusServiceDesk/PSDObjects/PSDPlaceholderUser.swift": [1729590587, 59009606]
+  "/Users/stanislavabobruskina/pyrusservicedesk/PyrusServiceDeskIOS/PyrusServiceDesk/PSDObjects/PSDRowMessage.swift": [1729779506, 992789996]
+  "/Users/stanislavabobruskina/pyrusservicedesk/PyrusServiceDeskIOS/PyrusServiceDesk/PSDObjects/PSDUser.swift": [1729590587, 59211649]
+  "/Users/stanislavabobruskina/pyrusservicedesk/PyrusServiceDeskIOS/PyrusServiceDesk/PSDObjects/TicketCommand.swift": [1731910577, 688227689]
+  "/Users/stanislavabobruskina/pyrusservicedesk/PyrusServiceDeskIOS/PyrusServiceDesk/PSDObjectsCreator/PSDObjectsCreator.swift": [1729590121, 116930714]
+  "/Users/stanislavabobruskina/pyrusservicedesk/PyrusServiceDeskIOS/PyrusServiceDesk/PyrusServiceDeskCreator.swift": [1731912790, 190711245]
+  "/Users/stanislavabobruskina/pyrusservicedesk/PyrusServiceDeskIOS/PyrusServiceDesk/PyrusServiceDeskCustomization.swift": [1730289144, 720912737]
+  "/Users/stanislavabobruskina/pyrusservicedesk/PyrusServiceDeskIOS/PyrusServiceDesk/Repositories/TicketCommandRepository.swift": [1730985558, 100038380]
+  "/Users/stanislavabobruskina/pyrusservicedesk/PyrusServiceDeskIOS/PyrusServiceDesk/Requests/PSDCreateRequest.swift": [1730385271, 36094935]
+  "/Users/stanislavabobruskina/pyrusservicedesk/PyrusServiceDeskIOS/PyrusServiceDesk/Requests/PSDDownloader.swift": [1727186641, 395622505]
+  "/Users/stanislavabobruskina/pyrusservicedesk/PyrusServiceDeskIOS/PyrusServiceDesk/Requests/PSDError.swift": [1727186641, 395681338]
+  "/Users/stanislavabobruskina/pyrusservicedesk/PyrusServiceDeskIOS/PyrusServiceDesk/Requests/PSDErrorParser.swift": [1727186641, 395746214]
+  "/Users/stanislavabobruskina/pyrusservicedesk/PyrusServiceDeskIOS/PyrusServiceDesk/Requests/PSDGetChat.swift": [1730385084, 997520373]
+  "/Users/stanislavabobruskina/pyrusservicedesk/PyrusServiceDeskIOS/PyrusServiceDesk/Requests/PSDGetChats.swift": [1731914843, 818735852]
+  "/Users/stanislavabobruskina/pyrusservicedesk/PyrusServiceDeskIOS/PyrusServiceDesk/Requests/PSDMessageSend.swift": [1731910534, 368791082]
+  "/Users/stanislavabobruskina/pyrusservicedesk/PyrusServiceDeskIOS/PyrusServiceDesk/Requests/PSDMessageSender.swift": [1731910534, 385330584]
+  "/Users/stanislavabobruskina/pyrusservicedesk/PyrusServiceDeskIOS/PyrusServiceDesk/Requests/PSDNoConnectionView.swift": [1727186641, 396230592]
+  "/Users/stanislavabobruskina/pyrusservicedesk/PyrusServiceDeskIOS/PyrusServiceDesk/Requests/PSDPushToken.swift": [1727186641, 396326801]
+  "/Users/stanislavabobruskina/pyrusservicedesk/PyrusServiceDeskIOS/PyrusServiceDesk/Requests/PSDUploader.swift": [1729590121, 119564236]
+  "/Users/stanislavabobruskina/pyrusservicedesk/PyrusServiceDeskIOS/PyrusServiceDesk/Requests/URLCreator.swift": [1730789652, 538518440]
+  "/Users/stanislavabobruskina/pyrusservicedesk/PyrusServiceDeskIOS/PyrusServiceDesk/chats/ButtonSegmentView.swift": [1730292547, 72354886]
+  "/Users/stanislavabobruskina/pyrusservicedesk/PyrusServiceDeskIOS/PyrusServiceDesk/chats/Interactor/ChatsInteractor.swift": [1731913118, 337802469]
+  "/Users/stanislavabobruskina/pyrusservicedesk/PyrusServiceDeskIOS/PyrusServiceDesk/chats/Interactor/ChatsInteractorProtocol.swift": [1730382015, 358652457]
+  "/Users/stanislavabobruskina/pyrusservicedesk/PyrusServiceDeskIOS/PyrusServiceDesk/chats/Presenter/ChatsPresenter.swift": [1731663005, 934592845]
+  "/Users/stanislavabobruskina/pyrusservicedesk/PyrusServiceDeskIOS/PyrusServiceDesk/chats/Presenter/ChatsPresenterProtocol.swift": [1731663005, 891024923]
+  "/Users/stanislavabobruskina/pyrusservicedesk/PyrusServiceDeskIOS/PyrusServiceDesk/chats/Presenter/Model/ChatPresenterModel.swift": [1729590121, 121391917]
+  "/Users/stanislavabobruskina/pyrusservicedesk/PyrusServiceDeskIOS/PyrusServiceDesk/chats/Router/ChatsRouter.swift": [1729783676, 297207718]
+  "/Users/stanislavabobruskina/pyrusservicedesk/PyrusServiceDeskIOS/PyrusServiceDesk/chats/Router/ChatsRouterProtocol.swift": [1729862297, 850608212]
+  "/Users/stanislavabobruskina/pyrusservicedesk/PyrusServiceDeskIOS/PyrusServiceDesk/chats/UnderlineSegmentController.swift": [1731916458, 105541074]
+  "/Users/stanislavabobruskina/pyrusservicedesk/PyrusServiceDeskIOS/PyrusServiceDesk/chats/View/Cell/Model/ChatViewModel.swift": [1729590121, 122775845]
+  "/Users/stanislavabobruskina/pyrusservicedesk/PyrusServiceDeskIOS/PyrusServiceDesk/chats/View/Cell/PSDChatInfoTableViewCell.swift": [1731916498, 951891904]
+  "/Users/stanislavabobruskina/pyrusservicedesk/PyrusServiceDeskIOS/PyrusServiceDesk/chats/View/ChatsViewProtocol.swift": [1731663005, 918508152]
+  "/Users/stanislavabobruskina/pyrusservicedesk/PyrusServiceDeskIOS/PyrusServiceDesk/chats/View/PSDChatsCellConfigurator.swift": [1729590121, 123778061]
+  "/Users/stanislavabobruskina/pyrusservicedesk/PyrusServiceDeskIOS/PyrusServiceDesk/chats/View/PSDChatsDiffableDataSource.swift": [1729590121, 124032063]
+  "/Users/stanislavabobruskina/pyrusservicedesk/PyrusServiceDeskIOS/PyrusServiceDesk/chats/View/PSDChatsSectionModel.swift": [1729590121, 124294065]
+  "/Users/stanislavabobruskina/pyrusservicedesk/PyrusServiceDeskIOS/PyrusServiceDesk/chats/View/PSDChatsViewController.swift": [1731917932, 364887563]
+  ? "/Users/stanislavabobruskina/pyrusservicedesk/PyrusServiceDeskIOS/build/PyrusServiceDesk.build/Release-iphoneos/PyrusServiceDesk.build/DerivedSources/GeneratedAssetSymbols.swift"
+  : [1731921707, 326630642]

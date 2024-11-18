@@ -1,0 +1,730 @@
+{
+  "" : {
+    "const-values" : "/Users/stanislavabobruskina/pyrusservicedesk/PyrusServiceDeskIOS/build/PyrusServiceDesk.build/Release-iphoneos/PyrusServiceDesk.build/Objects-normal/arm64/PyrusServiceDesk-master.swiftconstvalues",
+    "dependencies" : "/Users/stanislavabobruskina/pyrusservicedesk/PyrusServiceDeskIOS/build/PyrusServiceDesk.build/Release-iphoneos/PyrusServiceDesk.build/Objects-normal/arm64/PyrusServiceDesk-master.d",
+    "diagnostics" : "/Users/stanislavabobruskina/pyrusservicedesk/PyrusServiceDeskIOS/build/PyrusServiceDesk.build/Release-iphoneos/PyrusServiceDesk.build/Objects-normal/arm64/PyrusServiceDesk-master.dia",
+    "emit-module-dependencies" : "/Users/stanislavabobruskina/pyrusservicedesk/PyrusServiceDeskIOS/build/PyrusServiceDesk.build/Release-iphoneos/PyrusServiceDesk.build/Objects-normal/arm64/PyrusServiceDesk-master-emit-module.d",
+    "emit-module-diagnostics" : "/Users/stanislavabobruskina/pyrusservicedesk/PyrusServiceDeskIOS/build/PyrusServiceDesk.build/Release-iphoneos/PyrusServiceDesk.build/Objects-normal/arm64/PyrusServiceDesk-master-emit-module.dia",
+    "swift-dependencies" : "/Users/stanislavabobruskina/pyrusservicedesk/PyrusServiceDeskIOS/build/PyrusServiceDesk.build/Release-iphoneos/PyrusServiceDesk.build/Objects-normal/arm64/PyrusServiceDesk-master.swiftdeps"
+  },
+  "/Users/stanislavabobruskina/pyrusservicedesk/PyrusServiceDeskIOS/build/PyrusServiceDesk.build/Release-iphoneos/PyrusServiceDesk.build/DerivedSources/GeneratedAssetSymbols.swift" : {
+    "index-unit-output-path" : "/PyrusServiceDesk.build/Release-iphoneos/PyrusServiceDesk.build/Objects-normal/arm64/GeneratedAssetSymbols.o",
+    "llvm-bc" : "/Users/stanislavabobruskina/pyrusservicedesk/PyrusServiceDeskIOS/build/PyrusServiceDesk.build/Release-iphoneos/PyrusServiceDesk.build/Objects-normal/arm64/GeneratedAssetSymbols.bc",
+    "object" : "/Users/stanislavabobruskina/pyrusservicedesk/PyrusServiceDeskIOS/build/PyrusServiceDesk.build/Release-iphoneos/PyrusServiceDesk.build/Objects-normal/arm64/GeneratedAssetSymbols.o"
+  },
+  "/Users/stanislavabobruskina/pyrusservicedesk/PyrusServiceDeskIOS/PyrusServiceDesk/ApiSignManager.swift" : {
+    "index-unit-output-path" : "/PyrusServiceDesk.build/Release-iphoneos/PyrusServiceDesk.build/Objects-normal/arm64/ApiSignManager.o",
+    "llvm-bc" : "/Users/stanislavabobruskina/pyrusservicedesk/PyrusServiceDeskIOS/build/PyrusServiceDesk.build/Release-iphoneos/PyrusServiceDesk.build/Objects-normal/arm64/ApiSignManager.bc",
+    "object" : "/Users/stanislavabobruskina/pyrusservicedesk/PyrusServiceDeskIOS/build/PyrusServiceDesk.build/Release-iphoneos/PyrusServiceDesk.build/Objects-normal/arm64/ApiSignManager.o"
+  },
+  "/Users/stanislavabobruskina/pyrusservicedesk/PyrusServiceDeskIOS/PyrusServiceDesk/Chat/Interactor/PSDChatInteractor.swift" : {
+    "index-unit-output-path" : "/PyrusServiceDesk.build/Release-iphoneos/PyrusServiceDesk.build/Objects-normal/arm64/PSDChatInteractor.o",
+    "llvm-bc" : "/Users/stanislavabobruskina/pyrusservicedesk/PyrusServiceDeskIOS/build/PyrusServiceDesk.build/Release-iphoneos/PyrusServiceDesk.build/Objects-normal/arm64/PSDChatInteractor.bc",
+    "object" : "/Users/stanislavabobruskina/pyrusservicedesk/PyrusServiceDeskIOS/build/PyrusServiceDesk.build/Release-iphoneos/PyrusServiceDesk.build/Objects-normal/arm64/PSDChatInteractor.o"
+  },
+  "/Users/stanislavabobruskina/pyrusservicedesk/PyrusServiceDeskIOS/PyrusServiceDesk/Chat/Interactor/PSDChatInteractorProtocol.swift" : {
+    "index-unit-output-path" : "/PyrusServiceDesk.build/Release-iphoneos/PyrusServiceDesk.build/Objects-normal/arm64/PSDChatInteractorProtocol.o",
+    "llvm-bc" : "/Users/stanislavabobruskina/pyrusservicedesk/PyrusServiceDeskIOS/build/PyrusServiceDesk.build/Release-iphoneos/PyrusServiceDesk.build/Objects-normal/arm64/PSDChatInteractorProtocol.bc",
+    "object" : "/Users/stanislavabobruskina/pyrusservicedesk/PyrusServiceDeskIOS/build/PyrusServiceDesk.build/Release-iphoneos/PyrusServiceDesk.build/Objects-normal/arm64/PSDChatInteractorProtocol.o"
+  },
+  "/Users/stanislavabobruskina/pyrusservicedesk/PyrusServiceDeskIOS/PyrusServiceDesk/Chat/LoadAttachments/PSDAttachmentLoadViewController.swift" : {
+    "index-unit-output-path" : "/PyrusServiceDesk.build/Release-iphoneos/PyrusServiceDesk.build/Objects-normal/arm64/PSDAttachmentLoadViewController.o",
+    "llvm-bc" : "/Users/stanislavabobruskina/pyrusservicedesk/PyrusServiceDeskIOS/build/PyrusServiceDesk.build/Release-iphoneos/PyrusServiceDesk.build/Objects-normal/arm64/PSDAttachmentLoadViewController.bc",
+    "object" : "/Users/stanislavabobruskina/pyrusservicedesk/PyrusServiceDeskIOS/build/PyrusServiceDesk.build/Release-iphoneos/PyrusServiceDesk.build/Objects-normal/arm64/PSDAttachmentLoadViewController.o"
+  },
+  "/Users/stanislavabobruskina/pyrusservicedesk/PyrusServiceDeskIOS/PyrusServiceDesk/Chat/LoadAttachments/PSDAttachmentLoadViewControllerInterface.swift" : {
+    "index-unit-output-path" : "/PyrusServiceDesk.build/Release-iphoneos/PyrusServiceDesk.build/Objects-normal/arm64/PSDAttachmentLoadViewControllerInterface.o",
+    "llvm-bc" : "/Users/stanislavabobruskina/pyrusservicedesk/PyrusServiceDeskIOS/build/PyrusServiceDesk.build/Release-iphoneos/PyrusServiceDesk.build/Objects-normal/arm64/PSDAttachmentLoadViewControllerInterface.bc",
+    "object" : "/Users/stanislavabobruskina/pyrusservicedesk/PyrusServiceDeskIOS/build/PyrusServiceDesk.build/Release-iphoneos/PyrusServiceDesk.build/Objects-normal/arm64/PSDAttachmentLoadViewControllerInterface.o"
+  },
+  "/Users/stanislavabobruskina/pyrusservicedesk/PyrusServiceDeskIOS/PyrusServiceDesk/Chat/LoadAttachments/PSDAttachmentPreviewErrorView.swift" : {
+    "index-unit-output-path" : "/PyrusServiceDesk.build/Release-iphoneos/PyrusServiceDesk.build/Objects-normal/arm64/PSDAttachmentPreviewErrorView.o",
+    "llvm-bc" : "/Users/stanislavabobruskina/pyrusservicedesk/PyrusServiceDeskIOS/build/PyrusServiceDesk.build/Release-iphoneos/PyrusServiceDesk.build/Objects-normal/arm64/PSDAttachmentPreviewErrorView.bc",
+    "object" : "/Users/stanislavabobruskina/pyrusservicedesk/PyrusServiceDeskIOS/build/PyrusServiceDesk.build/Release-iphoneos/PyrusServiceDesk.build/Objects-normal/arm64/PSDAttachmentPreviewErrorView.o"
+  },
+  "/Users/stanislavabobruskina/pyrusservicedesk/PyrusServiceDeskIOS/PyrusServiceDesk/Chat/LoadAttachments/PSDAttachmentPreviewView.swift" : {
+    "index-unit-output-path" : "/PyrusServiceDesk.build/Release-iphoneos/PyrusServiceDesk.build/Objects-normal/arm64/PSDAttachmentPreviewView.o",
+    "llvm-bc" : "/Users/stanislavabobruskina/pyrusservicedesk/PyrusServiceDeskIOS/build/PyrusServiceDesk.build/Release-iphoneos/PyrusServiceDesk.build/Objects-normal/arm64/PSDAttachmentPreviewView.bc",
+    "object" : "/Users/stanislavabobruskina/pyrusservicedesk/PyrusServiceDeskIOS/build/PyrusServiceDesk.build/Release-iphoneos/PyrusServiceDesk.build/Objects-normal/arm64/PSDAttachmentPreviewView.o"
+  },
+  "/Users/stanislavabobruskina/pyrusservicedesk/PyrusServiceDeskIOS/PyrusServiceDesk/Chat/LoadAttachments/PSDProgressDownloadView.swift" : {
+    "index-unit-output-path" : "/PyrusServiceDesk.build/Release-iphoneos/PyrusServiceDesk.build/Objects-normal/arm64/PSDProgressDownloadView.o",
+    "llvm-bc" : "/Users/stanislavabobruskina/pyrusservicedesk/PyrusServiceDeskIOS/build/PyrusServiceDesk.build/Release-iphoneos/PyrusServiceDesk.build/Objects-normal/arm64/PSDProgressDownloadView.bc",
+    "object" : "/Users/stanislavabobruskina/pyrusservicedesk/PyrusServiceDeskIOS/build/PyrusServiceDesk.build/Release-iphoneos/PyrusServiceDesk.build/Objects-normal/arm64/PSDProgressDownloadView.o"
+  },
+  "/Users/stanislavabobruskina/pyrusservicedesk/PyrusServiceDeskIOS/PyrusServiceDesk/Chat/LoadAttachments/PSDShareBarItemView.swift" : {
+    "index-unit-output-path" : "/PyrusServiceDesk.build/Release-iphoneos/PyrusServiceDesk.build/Objects-normal/arm64/PSDShareBarItemView.o",
+    "llvm-bc" : "/Users/stanislavabobruskina/pyrusservicedesk/PyrusServiceDeskIOS/build/PyrusServiceDesk.build/Release-iphoneos/PyrusServiceDesk.build/Objects-normal/arm64/PSDShareBarItemView.bc",
+    "object" : "/Users/stanislavabobruskina/pyrusservicedesk/PyrusServiceDeskIOS/build/PyrusServiceDesk.build/Release-iphoneos/PyrusServiceDesk.build/Objects-normal/arm64/PSDShareBarItemView.o"
+  },
+  "/Users/stanislavabobruskina/pyrusservicedesk/PyrusServiceDeskIOS/PyrusServiceDesk/Chat/messageInput/AttachmentCollcetionView/AttachmentCollectionView.swift" : {
+    "index-unit-output-path" : "/PyrusServiceDesk.build/Release-iphoneos/PyrusServiceDesk.build/Objects-normal/arm64/AttachmentCollectionView.o",
+    "llvm-bc" : "/Users/stanislavabobruskina/pyrusservicedesk/PyrusServiceDeskIOS/build/PyrusServiceDesk.build/Release-iphoneos/PyrusServiceDesk.build/Objects-normal/arm64/AttachmentCollectionView.bc",
+    "object" : "/Users/stanislavabobruskina/pyrusservicedesk/PyrusServiceDeskIOS/build/PyrusServiceDesk.build/Release-iphoneos/PyrusServiceDesk.build/Objects-normal/arm64/AttachmentCollectionView.o"
+  },
+  "/Users/stanislavabobruskina/pyrusservicedesk/PyrusServiceDeskIOS/PyrusServiceDesk/Chat/messageInput/AttachmentCollcetionView/AttachmentCollectionViewCell.swift" : {
+    "index-unit-output-path" : "/PyrusServiceDesk.build/Release-iphoneos/PyrusServiceDesk.build/Objects-normal/arm64/AttachmentCollectionViewCell.o",
+    "llvm-bc" : "/Users/stanislavabobruskina/pyrusservicedesk/PyrusServiceDeskIOS/build/PyrusServiceDesk.build/Release-iphoneos/PyrusServiceDesk.build/Objects-normal/arm64/AttachmentCollectionViewCell.bc",
+    "object" : "/Users/stanislavabobruskina/pyrusservicedesk/PyrusServiceDeskIOS/build/PyrusServiceDesk.build/Release-iphoneos/PyrusServiceDesk.build/Objects-normal/arm64/AttachmentCollectionViewCell.o"
+  },
+  "/Users/stanislavabobruskina/pyrusservicedesk/PyrusServiceDeskIOS/PyrusServiceDesk/Chat/messageInput/AttachmentCollcetionView/AttachmentCollectionViewPresenter.swift" : {
+    "index-unit-output-path" : "/PyrusServiceDesk.build/Release-iphoneos/PyrusServiceDesk.build/Objects-normal/arm64/AttachmentCollectionViewPresenter.o",
+    "llvm-bc" : "/Users/stanislavabobruskina/pyrusservicedesk/PyrusServiceDeskIOS/build/PyrusServiceDesk.build/Release-iphoneos/PyrusServiceDesk.build/Objects-normal/arm64/AttachmentCollectionViewPresenter.bc",
+    "object" : "/Users/stanislavabobruskina/pyrusservicedesk/PyrusServiceDeskIOS/build/PyrusServiceDesk.build/Release-iphoneos/PyrusServiceDesk.build/Objects-normal/arm64/AttachmentCollectionViewPresenter.o"
+  },
+  "/Users/stanislavabobruskina/pyrusservicedesk/PyrusServiceDeskIOS/PyrusServiceDesk/Chat/messageInput/AttachmentCollcetionView/AttachmentFileCollectionViewCell.swift" : {
+    "index-unit-output-path" : "/PyrusServiceDesk.build/Release-iphoneos/PyrusServiceDesk.build/Objects-normal/arm64/AttachmentFileCollectionViewCell.o",
+    "llvm-bc" : "/Users/stanislavabobruskina/pyrusservicedesk/PyrusServiceDeskIOS/build/PyrusServiceDesk.build/Release-iphoneos/PyrusServiceDesk.build/Objects-normal/arm64/AttachmentFileCollectionViewCell.bc",
+    "object" : "/Users/stanislavabobruskina/pyrusservicedesk/PyrusServiceDeskIOS/build/PyrusServiceDesk.build/Release-iphoneos/PyrusServiceDesk.build/Objects-normal/arm64/AttachmentFileCollectionViewCell.o"
+  },
+  "/Users/stanislavabobruskina/pyrusservicedesk/PyrusServiceDeskIOS/PyrusServiceDesk/Chat/messageInput/AttachmentCollcetionView/AttachmentPreviewCollectionViewCell.swift" : {
+    "index-unit-output-path" : "/PyrusServiceDesk.build/Release-iphoneos/PyrusServiceDesk.build/Objects-normal/arm64/AttachmentPreviewCollectionViewCell.o",
+    "llvm-bc" : "/Users/stanislavabobruskina/pyrusservicedesk/PyrusServiceDeskIOS/build/PyrusServiceDesk.build/Release-iphoneos/PyrusServiceDesk.build/Objects-normal/arm64/AttachmentPreviewCollectionViewCell.bc",
+    "object" : "/Users/stanislavabobruskina/pyrusservicedesk/PyrusServiceDeskIOS/build/PyrusServiceDesk.build/Release-iphoneos/PyrusServiceDesk.build/Objects-normal/arm64/AttachmentPreviewCollectionViewCell.o"
+  },
+  "/Users/stanislavabobruskina/pyrusservicedesk/PyrusServiceDeskIOS/PyrusServiceDesk/Chat/messageInput/AttachmentHandler.swift" : {
+    "index-unit-output-path" : "/PyrusServiceDesk.build/Release-iphoneos/PyrusServiceDesk.build/Objects-normal/arm64/AttachmentHandler.o",
+    "llvm-bc" : "/Users/stanislavabobruskina/pyrusservicedesk/PyrusServiceDeskIOS/build/PyrusServiceDesk.build/Release-iphoneos/PyrusServiceDesk.build/Objects-normal/arm64/AttachmentHandler.bc",
+    "object" : "/Users/stanislavabobruskina/pyrusservicedesk/PyrusServiceDeskIOS/build/PyrusServiceDesk.build/Release-iphoneos/PyrusServiceDesk.build/Objects-normal/arm64/AttachmentHandler.o"
+  },
+  "/Users/stanislavabobruskina/pyrusservicedesk/PyrusServiceDeskIOS/PyrusServiceDesk/Chat/messageInput/AttachmentsAddButton.swift" : {
+    "index-unit-output-path" : "/PyrusServiceDesk.build/Release-iphoneos/PyrusServiceDesk.build/Objects-normal/arm64/AttachmentsAddButton.o",
+    "llvm-bc" : "/Users/stanislavabobruskina/pyrusservicedesk/PyrusServiceDeskIOS/build/PyrusServiceDesk.build/Release-iphoneos/PyrusServiceDesk.build/Objects-normal/arm64/AttachmentsAddButton.bc",
+    "object" : "/Users/stanislavabobruskina/pyrusservicedesk/PyrusServiceDeskIOS/build/PyrusServiceDesk.build/Release-iphoneos/PyrusServiceDesk.build/Objects-normal/arm64/AttachmentsAddButton.o"
+  },
+  "/Users/stanislavabobruskina/pyrusservicedesk/PyrusServiceDeskIOS/PyrusServiceDesk/Chat/messageInput/PSDMessageInputView.swift" : {
+    "index-unit-output-path" : "/PyrusServiceDesk.build/Release-iphoneos/PyrusServiceDesk.build/Objects-normal/arm64/PSDMessageInputView.o",
+    "llvm-bc" : "/Users/stanislavabobruskina/pyrusservicedesk/PyrusServiceDeskIOS/build/PyrusServiceDesk.build/Release-iphoneos/PyrusServiceDesk.build/Objects-normal/arm64/PSDMessageInputView.bc",
+    "object" : "/Users/stanislavabobruskina/pyrusservicedesk/PyrusServiceDeskIOS/build/PyrusServiceDesk.build/Release-iphoneos/PyrusServiceDesk.build/Objects-normal/arm64/PSDMessageInputView.o"
+  },
+  "/Users/stanislavabobruskina/pyrusservicedesk/PyrusServiceDeskIOS/PyrusServiceDesk/Chat/messageInput/PSDMessageSendButton.swift" : {
+    "index-unit-output-path" : "/PyrusServiceDesk.build/Release-iphoneos/PyrusServiceDesk.build/Objects-normal/arm64/PSDMessageSendButton.o",
+    "llvm-bc" : "/Users/stanislavabobruskina/pyrusservicedesk/PyrusServiceDeskIOS/build/PyrusServiceDesk.build/Release-iphoneos/PyrusServiceDesk.build/Objects-normal/arm64/PSDMessageSendButton.bc",
+    "object" : "/Users/stanislavabobruskina/pyrusservicedesk/PyrusServiceDeskIOS/build/PyrusServiceDesk.build/Release-iphoneos/PyrusServiceDesk.build/Objects-normal/arm64/PSDMessageSendButton.o"
+  },
+  "/Users/stanislavabobruskina/pyrusservicedesk/PyrusServiceDeskIOS/PyrusServiceDesk/Chat/messageInput/PSDMessageTextView.swift" : {
+    "index-unit-output-path" : "/PyrusServiceDesk.build/Release-iphoneos/PyrusServiceDesk.build/Objects-normal/arm64/PSDMessageTextView.o",
+    "llvm-bc" : "/Users/stanislavabobruskina/pyrusservicedesk/PyrusServiceDeskIOS/build/PyrusServiceDesk.build/Release-iphoneos/PyrusServiceDesk.build/Objects-normal/arm64/PSDMessageTextView.bc",
+    "object" : "/Users/stanislavabobruskina/pyrusservicedesk/PyrusServiceDeskIOS/build/PyrusServiceDesk.build/Release-iphoneos/PyrusServiceDesk.build/Objects-normal/arm64/PSDMessageTextView.o"
+  },
+  "/Users/stanislavabobruskina/pyrusservicedesk/PyrusServiceDeskIOS/PyrusServiceDesk/Chat/messageInput/PSDRateView.swift" : {
+    "index-unit-output-path" : "/PyrusServiceDesk.build/Release-iphoneos/PyrusServiceDesk.build/Objects-normal/arm64/PSDRateView.o",
+    "llvm-bc" : "/Users/stanislavabobruskina/pyrusservicedesk/PyrusServiceDeskIOS/build/PyrusServiceDesk.build/Release-iphoneos/PyrusServiceDesk.build/Objects-normal/arm64/PSDRateView.bc",
+    "object" : "/Users/stanislavabobruskina/pyrusservicedesk/PyrusServiceDeskIOS/build/PyrusServiceDesk.build/Release-iphoneos/PyrusServiceDesk.build/Objects-normal/arm64/PSDRateView.o"
+  },
+  "/Users/stanislavabobruskina/pyrusservicedesk/PyrusServiceDeskIOS/PyrusServiceDesk/Chat/Presenter/PSDChatPresenter.swift" : {
+    "index-unit-output-path" : "/PyrusServiceDesk.build/Release-iphoneos/PyrusServiceDesk.build/Objects-normal/arm64/PSDChatPresenter.o",
+    "llvm-bc" : "/Users/stanislavabobruskina/pyrusservicedesk/PyrusServiceDeskIOS/build/PyrusServiceDesk.build/Release-iphoneos/PyrusServiceDesk.build/Objects-normal/arm64/PSDChatPresenter.bc",
+    "object" : "/Users/stanislavabobruskina/pyrusservicedesk/PyrusServiceDeskIOS/build/PyrusServiceDesk.build/Release-iphoneos/PyrusServiceDesk.build/Objects-normal/arm64/PSDChatPresenter.o"
+  },
+  "/Users/stanislavabobruskina/pyrusservicedesk/PyrusServiceDeskIOS/PyrusServiceDesk/Chat/Presenter/PSDChatPresenterProtocol.swift" : {
+    "index-unit-output-path" : "/PyrusServiceDesk.build/Release-iphoneos/PyrusServiceDesk.build/Objects-normal/arm64/PSDChatPresenterProtocol.o",
+    "llvm-bc" : "/Users/stanislavabobruskina/pyrusservicedesk/PyrusServiceDeskIOS/build/PyrusServiceDesk.build/Release-iphoneos/PyrusServiceDesk.build/Objects-normal/arm64/PSDChatPresenterProtocol.bc",
+    "object" : "/Users/stanislavabobruskina/pyrusservicedesk/PyrusServiceDeskIOS/build/PyrusServiceDesk.build/Release-iphoneos/PyrusServiceDesk.build/Objects-normal/arm64/PSDChatPresenterProtocol.o"
+  },
+  "/Users/stanislavabobruskina/pyrusservicedesk/PyrusServiceDeskIOS/PyrusServiceDesk/Chat/PSDChatTable/ButtonsView/AlignedCollectionViewFlowLayout.swift" : {
+    "index-unit-output-path" : "/PyrusServiceDesk.build/Release-iphoneos/PyrusServiceDesk.build/Objects-normal/arm64/AlignedCollectionViewFlowLayout.o",
+    "llvm-bc" : "/Users/stanislavabobruskina/pyrusservicedesk/PyrusServiceDeskIOS/build/PyrusServiceDesk.build/Release-iphoneos/PyrusServiceDesk.build/Objects-normal/arm64/AlignedCollectionViewFlowLayout.bc",
+    "object" : "/Users/stanislavabobruskina/pyrusservicedesk/PyrusServiceDeskIOS/build/PyrusServiceDesk.build/Release-iphoneos/PyrusServiceDesk.build/Objects-normal/arm64/AlignedCollectionViewFlowLayout.o"
+  },
+  "/Users/stanislavabobruskina/pyrusservicedesk/PyrusServiceDeskIOS/PyrusServiceDesk/Chat/PSDChatTable/ButtonsView/ButtonsView.swift" : {
+    "index-unit-output-path" : "/PyrusServiceDesk.build/Release-iphoneos/PyrusServiceDesk.build/Objects-normal/arm64/ButtonsView.o",
+    "llvm-bc" : "/Users/stanislavabobruskina/pyrusservicedesk/PyrusServiceDeskIOS/build/PyrusServiceDesk.build/Release-iphoneos/PyrusServiceDesk.build/Objects-normal/arm64/ButtonsView.bc",
+    "object" : "/Users/stanislavabobruskina/pyrusservicedesk/PyrusServiceDeskIOS/build/PyrusServiceDesk.build/Release-iphoneos/PyrusServiceDesk.build/Objects-normal/arm64/ButtonsView.o"
+  },
+  "/Users/stanislavabobruskina/pyrusservicedesk/PyrusServiceDeskIOS/PyrusServiceDesk/Chat/PSDChatTable/ButtonsView/ButtonViewCell.swift" : {
+    "index-unit-output-path" : "/PyrusServiceDesk.build/Release-iphoneos/PyrusServiceDesk.build/Objects-normal/arm64/ButtonViewCell.o",
+    "llvm-bc" : "/Users/stanislavabobruskina/pyrusservicedesk/PyrusServiceDeskIOS/build/PyrusServiceDesk.build/Release-iphoneos/PyrusServiceDesk.build/Objects-normal/arm64/ButtonViewCell.bc",
+    "object" : "/Users/stanislavabobruskina/pyrusservicedesk/PyrusServiceDeskIOS/build/PyrusServiceDesk.build/Release-iphoneos/PyrusServiceDesk.build/Objects-normal/arm64/ButtonViewCell.o"
+  },
+  "/Users/stanislavabobruskina/pyrusservicedesk/PyrusServiceDeskIOS/PyrusServiceDesk/Chat/PSDChatTable/MessageCell/PSDAttachmentView.swift" : {
+    "index-unit-output-path" : "/PyrusServiceDesk.build/Release-iphoneos/PyrusServiceDesk.build/Objects-normal/arm64/PSDAttachmentView.o",
+    "llvm-bc" : "/Users/stanislavabobruskina/pyrusservicedesk/PyrusServiceDeskIOS/build/PyrusServiceDesk.build/Release-iphoneos/PyrusServiceDesk.build/Objects-normal/arm64/PSDAttachmentView.bc",
+    "object" : "/Users/stanislavabobruskina/pyrusservicedesk/PyrusServiceDeskIOS/build/PyrusServiceDesk.build/Release-iphoneos/PyrusServiceDesk.build/Objects-normal/arm64/PSDAttachmentView.o"
+  },
+  "/Users/stanislavabobruskina/pyrusservicedesk/PyrusServiceDeskIOS/PyrusServiceDesk/Chat/PSDChatTable/MessageCell/PSDAvatarImageView.swift" : {
+    "index-unit-output-path" : "/PyrusServiceDesk.build/Release-iphoneos/PyrusServiceDesk.build/Objects-normal/arm64/PSDAvatarImageView.o",
+    "llvm-bc" : "/Users/stanislavabobruskina/pyrusservicedesk/PyrusServiceDeskIOS/build/PyrusServiceDesk.build/Release-iphoneos/PyrusServiceDesk.build/Objects-normal/arm64/PSDAvatarImageView.bc",
+    "object" : "/Users/stanislavabobruskina/pyrusservicedesk/PyrusServiceDeskIOS/build/PyrusServiceDesk.build/Release-iphoneos/PyrusServiceDesk.build/Objects-normal/arm64/PSDAvatarImageView.o"
+  },
+  "/Users/stanislavabobruskina/pyrusservicedesk/PyrusServiceDeskIOS/PyrusServiceDesk/Chat/PSDChatTable/MessageCell/PSDChatMessageCell.swift" : {
+    "index-unit-output-path" : "/PyrusServiceDesk.build/Release-iphoneos/PyrusServiceDesk.build/Objects-normal/arm64/PSDChatMessageCell.o",
+    "llvm-bc" : "/Users/stanislavabobruskina/pyrusservicedesk/PyrusServiceDeskIOS/build/PyrusServiceDesk.build/Release-iphoneos/PyrusServiceDesk.build/Objects-normal/arm64/PSDChatMessageCell.bc",
+    "object" : "/Users/stanislavabobruskina/pyrusservicedesk/PyrusServiceDeskIOS/build/PyrusServiceDesk.build/Release-iphoneos/PyrusServiceDesk.build/Objects-normal/arm64/PSDChatMessageCell.o"
+  },
+  "/Users/stanislavabobruskina/pyrusservicedesk/PyrusServiceDeskIOS/PyrusServiceDesk/Chat/PSDChatTable/MessageCell/PSDCopyLabel.swift" : {
+    "index-unit-output-path" : "/PyrusServiceDesk.build/Release-iphoneos/PyrusServiceDesk.build/Objects-normal/arm64/PSDCopyLabel.o",
+    "llvm-bc" : "/Users/stanislavabobruskina/pyrusservicedesk/PyrusServiceDeskIOS/build/PyrusServiceDesk.build/Release-iphoneos/PyrusServiceDesk.build/Objects-normal/arm64/PSDCopyLabel.bc",
+    "object" : "/Users/stanislavabobruskina/pyrusservicedesk/PyrusServiceDeskIOS/build/PyrusServiceDesk.build/Release-iphoneos/PyrusServiceDesk.build/Objects-normal/arm64/PSDCopyLabel.o"
+  },
+  "/Users/stanislavabobruskina/pyrusservicedesk/PyrusServiceDeskIOS/PyrusServiceDesk/Chat/PSDChatTable/MessageCell/PSDFileAttachmentView.swift" : {
+    "index-unit-output-path" : "/PyrusServiceDesk.build/Release-iphoneos/PyrusServiceDesk.build/Objects-normal/arm64/PSDFileAttachmentView.o",
+    "llvm-bc" : "/Users/stanislavabobruskina/pyrusservicedesk/PyrusServiceDeskIOS/build/PyrusServiceDesk.build/Release-iphoneos/PyrusServiceDesk.build/Objects-normal/arm64/PSDFileAttachmentView.bc",
+    "object" : "/Users/stanislavabobruskina/pyrusservicedesk/PyrusServiceDeskIOS/build/PyrusServiceDesk.build/Release-iphoneos/PyrusServiceDesk.build/Objects-normal/arm64/PSDFileAttachmentView.o"
+  },
+  "/Users/stanislavabobruskina/pyrusservicedesk/PyrusServiceDeskIOS/PyrusServiceDesk/Chat/PSDChatTable/MessageCell/PSDImageAttachmentView.swift" : {
+    "index-unit-output-path" : "/PyrusServiceDesk.build/Release-iphoneos/PyrusServiceDesk.build/Objects-normal/arm64/PSDImageAttachmentView.o",
+    "llvm-bc" : "/Users/stanislavabobruskina/pyrusservicedesk/PyrusServiceDeskIOS/build/PyrusServiceDesk.build/Release-iphoneos/PyrusServiceDesk.build/Objects-normal/arm64/PSDImageAttachmentView.bc",
+    "object" : "/Users/stanislavabobruskina/pyrusservicedesk/PyrusServiceDeskIOS/build/PyrusServiceDesk.build/Release-iphoneos/PyrusServiceDesk.build/Objects-normal/arm64/PSDImageAttachmentView.o"
+  },
+  "/Users/stanislavabobruskina/pyrusservicedesk/PyrusServiceDeskIOS/PyrusServiceDesk/Chat/PSDChatTable/MessageCell/PSDMessageStateButton.swift" : {
+    "index-unit-output-path" : "/PyrusServiceDesk.build/Release-iphoneos/PyrusServiceDesk.build/Objects-normal/arm64/PSDMessageStateButton.o",
+    "llvm-bc" : "/Users/stanislavabobruskina/pyrusservicedesk/PyrusServiceDeskIOS/build/PyrusServiceDesk.build/Release-iphoneos/PyrusServiceDesk.build/Objects-normal/arm64/PSDMessageStateButton.bc",
+    "object" : "/Users/stanislavabobruskina/pyrusservicedesk/PyrusServiceDeskIOS/build/PyrusServiceDesk.build/Release-iphoneos/PyrusServiceDesk.build/Objects-normal/arm64/PSDMessageStateButton.o"
+  },
+  "/Users/stanislavabobruskina/pyrusservicedesk/PyrusServiceDeskIOS/PyrusServiceDesk/Chat/PSDChatTable/MessageCell/PSDMessageView.swift" : {
+    "index-unit-output-path" : "/PyrusServiceDesk.build/Release-iphoneos/PyrusServiceDesk.build/Objects-normal/arm64/PSDMessageView.o",
+    "llvm-bc" : "/Users/stanislavabobruskina/pyrusservicedesk/PyrusServiceDeskIOS/build/PyrusServiceDesk.build/Release-iphoneos/PyrusServiceDesk.build/Objects-normal/arm64/PSDMessageView.bc",
+    "object" : "/Users/stanislavabobruskina/pyrusservicedesk/PyrusServiceDeskIOS/build/PyrusServiceDesk.build/Release-iphoneos/PyrusServiceDesk.build/Objects-normal/arm64/PSDMessageView.o"
+  },
+  "/Users/stanislavabobruskina/pyrusservicedesk/PyrusServiceDeskIOS/PyrusServiceDesk/Chat/PSDChatTable/MessageCell/PSDSupportMessageCell.swift" : {
+    "index-unit-output-path" : "/PyrusServiceDesk.build/Release-iphoneos/PyrusServiceDesk.build/Objects-normal/arm64/PSDSupportMessageCell.o",
+    "llvm-bc" : "/Users/stanislavabobruskina/pyrusservicedesk/PyrusServiceDeskIOS/build/PyrusServiceDesk.build/Release-iphoneos/PyrusServiceDesk.build/Objects-normal/arm64/PSDSupportMessageCell.bc",
+    "object" : "/Users/stanislavabobruskina/pyrusservicedesk/PyrusServiceDeskIOS/build/PyrusServiceDesk.build/Release-iphoneos/PyrusServiceDesk.build/Objects-normal/arm64/PSDSupportMessageCell.o"
+  },
+  "/Users/stanislavabobruskina/pyrusservicedesk/PyrusServiceDeskIOS/PyrusServiceDesk/Chat/PSDChatTable/MessageCell/PSDUploadView.swift" : {
+    "index-unit-output-path" : "/PyrusServiceDesk.build/Release-iphoneos/PyrusServiceDesk.build/Objects-normal/arm64/PSDUploadView.o",
+    "llvm-bc" : "/Users/stanislavabobruskina/pyrusservicedesk/PyrusServiceDeskIOS/build/PyrusServiceDesk.build/Release-iphoneos/PyrusServiceDesk.build/Objects-normal/arm64/PSDUploadView.bc",
+    "object" : "/Users/stanislavabobruskina/pyrusservicedesk/PyrusServiceDeskIOS/build/PyrusServiceDesk.build/Release-iphoneos/PyrusServiceDesk.build/Objects-normal/arm64/PSDUploadView.o"
+  },
+  "/Users/stanislavabobruskina/pyrusservicedesk/PyrusServiceDeskIOS/PyrusServiceDesk/Chat/PSDChatTable/MessageCell/PSDUserMessageCell.swift" : {
+    "index-unit-output-path" : "/PyrusServiceDesk.build/Release-iphoneos/PyrusServiceDesk.build/Objects-normal/arm64/PSDUserMessageCell.o",
+    "llvm-bc" : "/Users/stanislavabobruskina/pyrusservicedesk/PyrusServiceDeskIOS/build/PyrusServiceDesk.build/Release-iphoneos/PyrusServiceDesk.build/Objects-normal/arm64/PSDUserMessageCell.bc",
+    "object" : "/Users/stanislavabobruskina/pyrusservicedesk/PyrusServiceDeskIOS/build/PyrusServiceDesk.build/Release-iphoneos/PyrusServiceDesk.build/Objects-normal/arm64/PSDUserMessageCell.o"
+  },
+  "/Users/stanislavabobruskina/pyrusservicedesk/PyrusServiceDeskIOS/PyrusServiceDesk/Chat/PSDChatTable/PSDChatCellConfigurator.swift" : {
+    "index-unit-output-path" : "/PyrusServiceDesk.build/Release-iphoneos/PyrusServiceDesk.build/Objects-normal/arm64/PSDChatCellConfigurator.o",
+    "llvm-bc" : "/Users/stanislavabobruskina/pyrusservicedesk/PyrusServiceDeskIOS/build/PyrusServiceDesk.build/Release-iphoneos/PyrusServiceDesk.build/Objects-normal/arm64/PSDChatCellConfigurator.bc",
+    "object" : "/Users/stanislavabobruskina/pyrusservicedesk/PyrusServiceDeskIOS/build/PyrusServiceDesk.build/Release-iphoneos/PyrusServiceDesk.build/Objects-normal/arm64/PSDChatCellConfigurator.o"
+  },
+  "/Users/stanislavabobruskina/pyrusservicedesk/PyrusServiceDeskIOS/PyrusServiceDesk/Chat/PSDChatTable/PSDChatTableView.swift" : {
+    "index-unit-output-path" : "/PyrusServiceDesk.build/Release-iphoneos/PyrusServiceDesk.build/Objects-normal/arm64/PSDChatTableView.o",
+    "llvm-bc" : "/Users/stanislavabobruskina/pyrusservicedesk/PyrusServiceDeskIOS/build/PyrusServiceDesk.build/Release-iphoneos/PyrusServiceDesk.build/Objects-normal/arm64/PSDChatTableView.bc",
+    "object" : "/Users/stanislavabobruskina/pyrusservicedesk/PyrusServiceDeskIOS/build/PyrusServiceDesk.build/Release-iphoneos/PyrusServiceDesk.build/Objects-normal/arm64/PSDChatTableView.o"
+  },
+  "/Users/stanislavabobruskina/pyrusservicedesk/PyrusServiceDeskIOS/PyrusServiceDesk/Chat/Router/PSDChatRouter.swift" : {
+    "index-unit-output-path" : "/PyrusServiceDesk.build/Release-iphoneos/PyrusServiceDesk.build/Objects-normal/arm64/PSDChatRouter.o",
+    "llvm-bc" : "/Users/stanislavabobruskina/pyrusservicedesk/PyrusServiceDeskIOS/build/PyrusServiceDesk.build/Release-iphoneos/PyrusServiceDesk.build/Objects-normal/arm64/PSDChatRouter.bc",
+    "object" : "/Users/stanislavabobruskina/pyrusservicedesk/PyrusServiceDeskIOS/build/PyrusServiceDesk.build/Release-iphoneos/PyrusServiceDesk.build/Objects-normal/arm64/PSDChatRouter.o"
+  },
+  "/Users/stanislavabobruskina/pyrusservicedesk/PyrusServiceDeskIOS/PyrusServiceDesk/Chat/Router/PSDChatRouterProtocol.swift" : {
+    "index-unit-output-path" : "/PyrusServiceDesk.build/Release-iphoneos/PyrusServiceDesk.build/Objects-normal/arm64/PSDChatRouterProtocol.o",
+    "llvm-bc" : "/Users/stanislavabobruskina/pyrusservicedesk/PyrusServiceDeskIOS/build/PyrusServiceDesk.build/Release-iphoneos/PyrusServiceDesk.build/Objects-normal/arm64/PSDChatRouterProtocol.bc",
+    "object" : "/Users/stanislavabobruskina/pyrusservicedesk/PyrusServiceDeskIOS/build/PyrusServiceDesk.build/Release-iphoneos/PyrusServiceDesk.build/Objects-normal/arm64/PSDChatRouterProtocol.o"
+  },
+  "/Users/stanislavabobruskina/pyrusservicedesk/PyrusServiceDeskIOS/PyrusServiceDesk/Chat/View/PSDChatViewController.swift" : {
+    "index-unit-output-path" : "/PyrusServiceDesk.build/Release-iphoneos/PyrusServiceDesk.build/Objects-normal/arm64/PSDChatViewController.o",
+    "llvm-bc" : "/Users/stanislavabobruskina/pyrusservicedesk/PyrusServiceDeskIOS/build/PyrusServiceDesk.build/Release-iphoneos/PyrusServiceDesk.build/Objects-normal/arm64/PSDChatViewController.bc",
+    "object" : "/Users/stanislavabobruskina/pyrusservicedesk/PyrusServiceDeskIOS/build/PyrusServiceDesk.build/Release-iphoneos/PyrusServiceDesk.build/Objects-normal/arm64/PSDChatViewController.o"
+  },
+  "/Users/stanislavabobruskina/pyrusservicedesk/PyrusServiceDeskIOS/PyrusServiceDesk/Chat/View/PSDChatViewProtocol.swift" : {
+    "index-unit-output-path" : "/PyrusServiceDesk.build/Release-iphoneos/PyrusServiceDesk.build/Objects-normal/arm64/PSDChatViewProtocol.o",
+    "llvm-bc" : "/Users/stanislavabobruskina/pyrusservicedesk/PyrusServiceDeskIOS/build/PyrusServiceDesk.build/Release-iphoneos/PyrusServiceDesk.build/Objects-normal/arm64/PSDChatViewProtocol.bc",
+    "object" : "/Users/stanislavabobruskina/pyrusservicedesk/PyrusServiceDeskIOS/build/PyrusServiceDesk.build/Release-iphoneos/PyrusServiceDesk.build/Objects-normal/arm64/PSDChatViewProtocol.o"
+  },
+  "/Users/stanislavabobruskina/pyrusservicedesk/PyrusServiceDeskIOS/PyrusServiceDesk/chats/ButtonSegmentView.swift" : {
+    "index-unit-output-path" : "/PyrusServiceDesk.build/Release-iphoneos/PyrusServiceDesk.build/Objects-normal/arm64/ButtonSegmentView.o",
+    "llvm-bc" : "/Users/stanislavabobruskina/pyrusservicedesk/PyrusServiceDeskIOS/build/PyrusServiceDesk.build/Release-iphoneos/PyrusServiceDesk.build/Objects-normal/arm64/ButtonSegmentView.bc",
+    "object" : "/Users/stanislavabobruskina/pyrusservicedesk/PyrusServiceDeskIOS/build/PyrusServiceDesk.build/Release-iphoneos/PyrusServiceDesk.build/Objects-normal/arm64/ButtonSegmentView.o"
+  },
+  "/Users/stanislavabobruskina/pyrusservicedesk/PyrusServiceDeskIOS/PyrusServiceDesk/chats/Interactor/ChatsInteractor.swift" : {
+    "index-unit-output-path" : "/PyrusServiceDesk.build/Release-iphoneos/PyrusServiceDesk.build/Objects-normal/arm64/ChatsInteractor.o",
+    "llvm-bc" : "/Users/stanislavabobruskina/pyrusservicedesk/PyrusServiceDeskIOS/build/PyrusServiceDesk.build/Release-iphoneos/PyrusServiceDesk.build/Objects-normal/arm64/ChatsInteractor.bc",
+    "object" : "/Users/stanislavabobruskina/pyrusservicedesk/PyrusServiceDeskIOS/build/PyrusServiceDesk.build/Release-iphoneos/PyrusServiceDesk.build/Objects-normal/arm64/ChatsInteractor.o"
+  },
+  "/Users/stanislavabobruskina/pyrusservicedesk/PyrusServiceDeskIOS/PyrusServiceDesk/chats/Interactor/ChatsInteractorProtocol.swift" : {
+    "index-unit-output-path" : "/PyrusServiceDesk.build/Release-iphoneos/PyrusServiceDesk.build/Objects-normal/arm64/ChatsInteractorProtocol.o",
+    "llvm-bc" : "/Users/stanislavabobruskina/pyrusservicedesk/PyrusServiceDeskIOS/build/PyrusServiceDesk.build/Release-iphoneos/PyrusServiceDesk.build/Objects-normal/arm64/ChatsInteractorProtocol.bc",
+    "object" : "/Users/stanislavabobruskina/pyrusservicedesk/PyrusServiceDeskIOS/build/PyrusServiceDesk.build/Release-iphoneos/PyrusServiceDesk.build/Objects-normal/arm64/ChatsInteractorProtocol.o"
+  },
+  "/Users/stanislavabobruskina/pyrusservicedesk/PyrusServiceDeskIOS/PyrusServiceDesk/chats/Presenter/ChatsPresenter.swift" : {
+    "index-unit-output-path" : "/PyrusServiceDesk.build/Release-iphoneos/PyrusServiceDesk.build/Objects-normal/arm64/ChatsPresenter.o",
+    "llvm-bc" : "/Users/stanislavabobruskina/pyrusservicedesk/PyrusServiceDeskIOS/build/PyrusServiceDesk.build/Release-iphoneos/PyrusServiceDesk.build/Objects-normal/arm64/ChatsPresenter.bc",
+    "object" : "/Users/stanislavabobruskina/pyrusservicedesk/PyrusServiceDeskIOS/build/PyrusServiceDesk.build/Release-iphoneos/PyrusServiceDesk.build/Objects-normal/arm64/ChatsPresenter.o"
+  },
+  "/Users/stanislavabobruskina/pyrusservicedesk/PyrusServiceDeskIOS/PyrusServiceDesk/chats/Presenter/ChatsPresenterProtocol.swift" : {
+    "index-unit-output-path" : "/PyrusServiceDesk.build/Release-iphoneos/PyrusServiceDesk.build/Objects-normal/arm64/ChatsPresenterProtocol.o",
+    "llvm-bc" : "/Users/stanislavabobruskina/pyrusservicedesk/PyrusServiceDeskIOS/build/PyrusServiceDesk.build/Release-iphoneos/PyrusServiceDesk.build/Objects-normal/arm64/ChatsPresenterProtocol.bc",
+    "object" : "/Users/stanislavabobruskina/pyrusservicedesk/PyrusServiceDeskIOS/build/PyrusServiceDesk.build/Release-iphoneos/PyrusServiceDesk.build/Objects-normal/arm64/ChatsPresenterProtocol.o"
+  },
+  "/Users/stanislavabobruskina/pyrusservicedesk/PyrusServiceDeskIOS/PyrusServiceDesk/chats/Presenter/Model/ChatPresenterModel.swift" : {
+    "index-unit-output-path" : "/PyrusServiceDesk.build/Release-iphoneos/PyrusServiceDesk.build/Objects-normal/arm64/ChatPresenterModel.o",
+    "llvm-bc" : "/Users/stanislavabobruskina/pyrusservicedesk/PyrusServiceDeskIOS/build/PyrusServiceDesk.build/Release-iphoneos/PyrusServiceDesk.build/Objects-normal/arm64/ChatPresenterModel.bc",
+    "object" : "/Users/stanislavabobruskina/pyrusservicedesk/PyrusServiceDeskIOS/build/PyrusServiceDesk.build/Release-iphoneos/PyrusServiceDesk.build/Objects-normal/arm64/ChatPresenterModel.o"
+  },
+  "/Users/stanislavabobruskina/pyrusservicedesk/PyrusServiceDeskIOS/PyrusServiceDesk/chats/Router/ChatsRouter.swift" : {
+    "index-unit-output-path" : "/PyrusServiceDesk.build/Release-iphoneos/PyrusServiceDesk.build/Objects-normal/arm64/ChatsRouter.o",
+    "llvm-bc" : "/Users/stanislavabobruskina/pyrusservicedesk/PyrusServiceDeskIOS/build/PyrusServiceDesk.build/Release-iphoneos/PyrusServiceDesk.build/Objects-normal/arm64/ChatsRouter.bc",
+    "object" : "/Users/stanislavabobruskina/pyrusservicedesk/PyrusServiceDeskIOS/build/PyrusServiceDesk.build/Release-iphoneos/PyrusServiceDesk.build/Objects-normal/arm64/ChatsRouter.o"
+  },
+  "/Users/stanislavabobruskina/pyrusservicedesk/PyrusServiceDeskIOS/PyrusServiceDesk/chats/Router/ChatsRouterProtocol.swift" : {
+    "index-unit-output-path" : "/PyrusServiceDesk.build/Release-iphoneos/PyrusServiceDesk.build/Objects-normal/arm64/ChatsRouterProtocol.o",
+    "llvm-bc" : "/Users/stanislavabobruskina/pyrusservicedesk/PyrusServiceDeskIOS/build/PyrusServiceDesk.build/Release-iphoneos/PyrusServiceDesk.build/Objects-normal/arm64/ChatsRouterProtocol.bc",
+    "object" : "/Users/stanislavabobruskina/pyrusservicedesk/PyrusServiceDeskIOS/build/PyrusServiceDesk.build/Release-iphoneos/PyrusServiceDesk.build/Objects-normal/arm64/ChatsRouterProtocol.o"
+  },
+  "/Users/stanislavabobruskina/pyrusservicedesk/PyrusServiceDeskIOS/PyrusServiceDesk/chats/UnderlineSegmentController.swift" : {
+    "index-unit-output-path" : "/PyrusServiceDesk.build/Release-iphoneos/PyrusServiceDesk.build/Objects-normal/arm64/UnderlineSegmentController.o",
+    "llvm-bc" : "/Users/stanislavabobruskina/pyrusservicedesk/PyrusServiceDeskIOS/build/PyrusServiceDesk.build/Release-iphoneos/PyrusServiceDesk.build/Objects-normal/arm64/UnderlineSegmentController.bc",
+    "object" : "/Users/stanislavabobruskina/pyrusservicedesk/PyrusServiceDeskIOS/build/PyrusServiceDesk.build/Release-iphoneos/PyrusServiceDesk.build/Objects-normal/arm64/UnderlineSegmentController.o"
+  },
+  "/Users/stanislavabobruskina/pyrusservicedesk/PyrusServiceDeskIOS/PyrusServiceDesk/chats/View/Cell/Model/ChatViewModel.swift" : {
+    "index-unit-output-path" : "/PyrusServiceDesk.build/Release-iphoneos/PyrusServiceDesk.build/Objects-normal/arm64/ChatViewModel.o",
+    "llvm-bc" : "/Users/stanislavabobruskina/pyrusservicedesk/PyrusServiceDeskIOS/build/PyrusServiceDesk.build/Release-iphoneos/PyrusServiceDesk.build/Objects-normal/arm64/ChatViewModel.bc",
+    "object" : "/Users/stanislavabobruskina/pyrusservicedesk/PyrusServiceDeskIOS/build/PyrusServiceDesk.build/Release-iphoneos/PyrusServiceDesk.build/Objects-normal/arm64/ChatViewModel.o"
+  },
+  "/Users/stanislavabobruskina/pyrusservicedesk/PyrusServiceDeskIOS/PyrusServiceDesk/chats/View/Cell/PSDChatInfoTableViewCell.swift" : {
+    "index-unit-output-path" : "/PyrusServiceDesk.build/Release-iphoneos/PyrusServiceDesk.build/Objects-normal/arm64/PSDChatInfoTableViewCell.o",
+    "llvm-bc" : "/Users/stanislavabobruskina/pyrusservicedesk/PyrusServiceDeskIOS/build/PyrusServiceDesk.build/Release-iphoneos/PyrusServiceDesk.build/Objects-normal/arm64/PSDChatInfoTableViewCell.bc",
+    "object" : "/Users/stanislavabobruskina/pyrusservicedesk/PyrusServiceDeskIOS/build/PyrusServiceDesk.build/Release-iphoneos/PyrusServiceDesk.build/Objects-normal/arm64/PSDChatInfoTableViewCell.o"
+  },
+  "/Users/stanislavabobruskina/pyrusservicedesk/PyrusServiceDeskIOS/PyrusServiceDesk/chats/View/ChatsViewProtocol.swift" : {
+    "index-unit-output-path" : "/PyrusServiceDesk.build/Release-iphoneos/PyrusServiceDesk.build/Objects-normal/arm64/ChatsViewProtocol.o",
+    "llvm-bc" : "/Users/stanislavabobruskina/pyrusservicedesk/PyrusServiceDeskIOS/build/PyrusServiceDesk.build/Release-iphoneos/PyrusServiceDesk.build/Objects-normal/arm64/ChatsViewProtocol.bc",
+    "object" : "/Users/stanislavabobruskina/pyrusservicedesk/PyrusServiceDeskIOS/build/PyrusServiceDesk.build/Release-iphoneos/PyrusServiceDesk.build/Objects-normal/arm64/ChatsViewProtocol.o"
+  },
+  "/Users/stanislavabobruskina/pyrusservicedesk/PyrusServiceDeskIOS/PyrusServiceDesk/chats/View/PSDChatsCellConfigurator.swift" : {
+    "index-unit-output-path" : "/PyrusServiceDesk.build/Release-iphoneos/PyrusServiceDesk.build/Objects-normal/arm64/PSDChatsCellConfigurator.o",
+    "llvm-bc" : "/Users/stanislavabobruskina/pyrusservicedesk/PyrusServiceDeskIOS/build/PyrusServiceDesk.build/Release-iphoneos/PyrusServiceDesk.build/Objects-normal/arm64/PSDChatsCellConfigurator.bc",
+    "object" : "/Users/stanislavabobruskina/pyrusservicedesk/PyrusServiceDeskIOS/build/PyrusServiceDesk.build/Release-iphoneos/PyrusServiceDesk.build/Objects-normal/arm64/PSDChatsCellConfigurator.o"
+  },
+  "/Users/stanislavabobruskina/pyrusservicedesk/PyrusServiceDeskIOS/PyrusServiceDesk/chats/View/PSDChatsDiffableDataSource.swift" : {
+    "index-unit-output-path" : "/PyrusServiceDesk.build/Release-iphoneos/PyrusServiceDesk.build/Objects-normal/arm64/PSDChatsDiffableDataSource.o",
+    "llvm-bc" : "/Users/stanislavabobruskina/pyrusservicedesk/PyrusServiceDeskIOS/build/PyrusServiceDesk.build/Release-iphoneos/PyrusServiceDesk.build/Objects-normal/arm64/PSDChatsDiffableDataSource.bc",
+    "object" : "/Users/stanislavabobruskina/pyrusservicedesk/PyrusServiceDeskIOS/build/PyrusServiceDesk.build/Release-iphoneos/PyrusServiceDesk.build/Objects-normal/arm64/PSDChatsDiffableDataSource.o"
+  },
+  "/Users/stanislavabobruskina/pyrusservicedesk/PyrusServiceDeskIOS/PyrusServiceDesk/chats/View/PSDChatsSectionModel.swift" : {
+    "index-unit-output-path" : "/PyrusServiceDesk.build/Release-iphoneos/PyrusServiceDesk.build/Objects-normal/arm64/PSDChatsSectionModel.o",
+    "llvm-bc" : "/Users/stanislavabobruskina/pyrusservicedesk/PyrusServiceDeskIOS/build/PyrusServiceDesk.build/Release-iphoneos/PyrusServiceDesk.build/Objects-normal/arm64/PSDChatsSectionModel.bc",
+    "object" : "/Users/stanislavabobruskina/pyrusservicedesk/PyrusServiceDeskIOS/build/PyrusServiceDesk.build/Release-iphoneos/PyrusServiceDesk.build/Objects-normal/arm64/PSDChatsSectionModel.o"
+  },
+  "/Users/stanislavabobruskina/pyrusservicedesk/PyrusServiceDeskIOS/PyrusServiceDesk/chats/View/PSDChatsViewController.swift" : {
+    "index-unit-output-path" : "/PyrusServiceDesk.build/Release-iphoneos/PyrusServiceDesk.build/Objects-normal/arm64/PSDChatsViewController.o",
+    "llvm-bc" : "/Users/stanislavabobruskina/pyrusservicedesk/PyrusServiceDeskIOS/build/PyrusServiceDesk.build/Release-iphoneos/PyrusServiceDesk.build/Objects-normal/arm64/PSDChatsViewController.bc",
+    "object" : "/Users/stanislavabobruskina/pyrusservicedesk/PyrusServiceDeskIOS/build/PyrusServiceDesk.build/Release-iphoneos/PyrusServiceDesk.build/Objects-normal/arm64/PSDChatsViewController.o"
+  },
+  "/Users/stanislavabobruskina/pyrusservicedesk/PyrusServiceDeskIOS/PyrusServiceDesk/DeniedAccessCallBack.swift" : {
+    "index-unit-output-path" : "/PyrusServiceDesk.build/Release-iphoneos/PyrusServiceDesk.build/Objects-normal/arm64/DeniedAccessCallBack.o",
+    "llvm-bc" : "/Users/stanislavabobruskina/pyrusservicedesk/PyrusServiceDeskIOS/build/PyrusServiceDesk.build/Release-iphoneos/PyrusServiceDesk.build/Objects-normal/arm64/DeniedAccessCallBack.bc",
+    "object" : "/Users/stanislavabobruskina/pyrusservicedesk/PyrusServiceDeskIOS/build/PyrusServiceDesk.build/Release-iphoneos/PyrusServiceDesk.build/Objects-normal/arm64/DeniedAccessCallBack.o"
+  },
+  "/Users/stanislavabobruskina/pyrusservicedesk/PyrusServiceDeskIOS/PyrusServiceDesk/Helpers/applicationColors.swift" : {
+    "index-unit-output-path" : "/PyrusServiceDesk.build/Release-iphoneos/PyrusServiceDesk.build/Objects-normal/arm64/applicationColors.o",
+    "llvm-bc" : "/Users/stanislavabobruskina/pyrusservicedesk/PyrusServiceDeskIOS/build/PyrusServiceDesk.build/Release-iphoneos/PyrusServiceDesk.build/Objects-normal/arm64/applicationColors.bc",
+    "object" : "/Users/stanislavabobruskina/pyrusservicedesk/PyrusServiceDeskIOS/build/PyrusServiceDesk.build/Release-iphoneos/PyrusServiceDesk.build/Objects-normal/arm64/applicationColors.o"
+  },
+  "/Users/stanislavabobruskina/pyrusservicedesk/PyrusServiceDeskIOS/PyrusServiceDesk/Helpers/CharacterSet+urlEncode.swift" : {
+    "index-unit-output-path" : "/PyrusServiceDesk.build/Release-iphoneos/PyrusServiceDesk.build/Objects-normal/arm64/CharacterSet+urlEncode.o",
+    "llvm-bc" : "/Users/stanislavabobruskina/pyrusservicedesk/PyrusServiceDeskIOS/build/PyrusServiceDesk.build/Release-iphoneos/PyrusServiceDesk.build/Objects-normal/arm64/CharacterSet+urlEncode.bc",
+    "object" : "/Users/stanislavabobruskina/pyrusservicedesk/PyrusServiceDeskIOS/build/PyrusServiceDesk.build/Release-iphoneos/PyrusServiceDesk.build/Objects-normal/arm64/CharacterSet+urlEncode.o"
+  },
+  "/Users/stanislavabobruskina/pyrusservicedesk/PyrusServiceDeskIOS/PyrusServiceDesk/Helpers/CloseButtonItem.swift" : {
+    "index-unit-output-path" : "/PyrusServiceDesk.build/Release-iphoneos/PyrusServiceDesk.build/Objects-normal/arm64/CloseButtonItem.o",
+    "llvm-bc" : "/Users/stanislavabobruskina/pyrusservicedesk/PyrusServiceDeskIOS/build/PyrusServiceDesk.build/Release-iphoneos/PyrusServiceDesk.build/Objects-normal/arm64/CloseButtonItem.bc",
+    "object" : "/Users/stanislavabobruskina/pyrusservicedesk/PyrusServiceDeskIOS/build/PyrusServiceDesk.build/Release-iphoneos/PyrusServiceDesk.build/Objects-normal/arm64/CloseButtonItem.o"
+  },
+  "/Users/stanislavabobruskina/pyrusservicedesk/PyrusServiceDeskIOS/PyrusServiceDesk/Helpers/ColorHexInit.swift" : {
+    "index-unit-output-path" : "/PyrusServiceDesk.build/Release-iphoneos/PyrusServiceDesk.build/Objects-normal/arm64/ColorHexInit.o",
+    "llvm-bc" : "/Users/stanislavabobruskina/pyrusservicedesk/PyrusServiceDeskIOS/build/PyrusServiceDesk.build/Release-iphoneos/PyrusServiceDesk.build/Objects-normal/arm64/ColorHexInit.bc",
+    "object" : "/Users/stanislavabobruskina/pyrusservicedesk/PyrusServiceDeskIOS/build/PyrusServiceDesk.build/Release-iphoneos/PyrusServiceDesk.build/Objects-normal/arm64/ColorHexInit.o"
+  },
+  "/Users/stanislavabobruskina/pyrusservicedesk/PyrusServiceDeskIOS/PyrusServiceDesk/Helpers/customColor.swift" : {
+    "index-unit-output-path" : "/PyrusServiceDesk.build/Release-iphoneos/PyrusServiceDesk.build/Objects-normal/arm64/customColor.o",
+    "llvm-bc" : "/Users/stanislavabobruskina/pyrusservicedesk/PyrusServiceDeskIOS/build/PyrusServiceDesk.build/Release-iphoneos/PyrusServiceDesk.build/Objects-normal/arm64/customColor.bc",
+    "object" : "/Users/stanislavabobruskina/pyrusservicedesk/PyrusServiceDeskIOS/build/PyrusServiceDesk.build/Release-iphoneos/PyrusServiceDesk.build/Objects-normal/arm64/customColor.o"
+  },
+  "/Users/stanislavabobruskina/pyrusservicedesk/PyrusServiceDeskIOS/PyrusServiceDesk/Helpers/CustomFontHelper.swift" : {
+    "index-unit-output-path" : "/PyrusServiceDesk.build/Release-iphoneos/PyrusServiceDesk.build/Objects-normal/arm64/CustomFontHelper.o",
+    "llvm-bc" : "/Users/stanislavabobruskina/pyrusservicedesk/PyrusServiceDeskIOS/build/PyrusServiceDesk.build/Release-iphoneos/PyrusServiceDesk.build/Objects-normal/arm64/CustomFontHelper.bc",
+    "object" : "/Users/stanislavabobruskina/pyrusservicedesk/PyrusServiceDeskIOS/build/PyrusServiceDesk.build/Release-iphoneos/PyrusServiceDesk.build/Objects-normal/arm64/CustomFontHelper.o"
+  },
+  "/Users/stanislavabobruskina/pyrusservicedesk/PyrusServiceDeskIOS/PyrusServiceDesk/Helpers/CustomizationHelper.swift" : {
+    "index-unit-output-path" : "/PyrusServiceDesk.build/Release-iphoneos/PyrusServiceDesk.build/Objects-normal/arm64/CustomizationHelper.o",
+    "llvm-bc" : "/Users/stanislavabobruskina/pyrusservicedesk/PyrusServiceDeskIOS/build/PyrusServiceDesk.build/Release-iphoneos/PyrusServiceDesk.build/Objects-normal/arm64/CustomizationHelper.bc",
+    "object" : "/Users/stanislavabobruskina/pyrusservicedesk/PyrusServiceDeskIOS/build/PyrusServiceDesk.build/Release-iphoneos/PyrusServiceDesk.build/Objects-normal/arm64/CustomizationHelper.o"
+  },
+  "/Users/stanislavabobruskina/pyrusservicedesk/PyrusServiceDeskIOS/PyrusServiceDesk/Helpers/Data+append.swift" : {
+    "index-unit-output-path" : "/PyrusServiceDesk.build/Release-iphoneos/PyrusServiceDesk.build/Objects-normal/arm64/Data+append.o",
+    "llvm-bc" : "/Users/stanislavabobruskina/pyrusservicedesk/PyrusServiceDeskIOS/build/PyrusServiceDesk.build/Release-iphoneos/PyrusServiceDesk.build/Objects-normal/arm64/Data+append.bc",
+    "object" : "/Users/stanislavabobruskina/pyrusservicedesk/PyrusServiceDeskIOS/build/PyrusServiceDesk.build/Release-iphoneos/PyrusServiceDesk.build/Objects-normal/arm64/Data+append.o"
+  },
+  "/Users/stanislavabobruskina/pyrusservicedesk/PyrusServiceDeskIOS/PyrusServiceDesk/Helpers/Data+gZip.swift" : {
+    "index-unit-output-path" : "/PyrusServiceDesk.build/Release-iphoneos/PyrusServiceDesk.build/Objects-normal/arm64/Data+gZip.o",
+    "llvm-bc" : "/Users/stanislavabobruskina/pyrusservicedesk/PyrusServiceDeskIOS/build/PyrusServiceDesk.build/Release-iphoneos/PyrusServiceDesk.build/Objects-normal/arm64/Data+gZip.bc",
+    "object" : "/Users/stanislavabobruskina/pyrusservicedesk/PyrusServiceDeskIOS/build/PyrusServiceDesk.build/Release-iphoneos/PyrusServiceDesk.build/Objects-normal/arm64/Data+gZip.o"
+  },
+  "/Users/stanislavabobruskina/pyrusservicedesk/PyrusServiceDeskIOS/PyrusServiceDesk/Helpers/Date+usefulFunc.swift" : {
+    "index-unit-output-path" : "/PyrusServiceDesk.build/Release-iphoneos/PyrusServiceDesk.build/Objects-normal/arm64/Date+usefulFunc.o",
+    "llvm-bc" : "/Users/stanislavabobruskina/pyrusservicedesk/PyrusServiceDeskIOS/build/PyrusServiceDesk.build/Release-iphoneos/PyrusServiceDesk.build/Objects-normal/arm64/Date+usefulFunc.bc",
+    "object" : "/Users/stanislavabobruskina/pyrusservicedesk/PyrusServiceDeskIOS/build/PyrusServiceDesk.build/Release-iphoneos/PyrusServiceDesk.build/Objects-normal/arm64/Date+usefulFunc.o"
+  },
+  "/Users/stanislavabobruskina/pyrusservicedesk/PyrusServiceDeskIOS/PyrusServiceDesk/Helpers/Dictionary+asString.swift" : {
+    "index-unit-output-path" : "/PyrusServiceDesk.build/Release-iphoneos/PyrusServiceDesk.build/Objects-normal/arm64/Dictionary+asString.o",
+    "llvm-bc" : "/Users/stanislavabobruskina/pyrusservicedesk/PyrusServiceDeskIOS/build/PyrusServiceDesk.build/Release-iphoneos/PyrusServiceDesk.build/Objects-normal/arm64/Dictionary+asString.bc",
+    "object" : "/Users/stanislavabobruskina/pyrusservicedesk/PyrusServiceDeskIOS/build/PyrusServiceDesk.build/Release-iphoneos/PyrusServiceDesk.build/Objects-normal/arm64/Dictionary+asString.o"
+  },
+  "/Users/stanislavabobruskina/pyrusservicedesk/PyrusServiceDeskIOS/PyrusServiceDesk/Helpers/for images/Image+compress.swift" : {
+    "index-unit-output-path" : "/PyrusServiceDesk.build/Release-iphoneos/PyrusServiceDesk.build/Objects-normal/arm64/Image+compress.o",
+    "llvm-bc" : "/Users/stanislavabobruskina/pyrusservicedesk/PyrusServiceDeskIOS/build/PyrusServiceDesk.build/Release-iphoneos/PyrusServiceDesk.build/Objects-normal/arm64/Image+compress.bc",
+    "object" : "/Users/stanislavabobruskina/pyrusservicedesk/PyrusServiceDeskIOS/build/PyrusServiceDesk.build/Release-iphoneos/PyrusServiceDesk.build/Objects-normal/arm64/Image+compress.o"
+  },
+  "/Users/stanislavabobruskina/pyrusservicedesk/PyrusServiceDeskIOS/PyrusServiceDesk/Helpers/for images/PSDBundleImage.swift" : {
+    "index-unit-output-path" : "/PyrusServiceDesk.build/Release-iphoneos/PyrusServiceDesk.build/Objects-normal/arm64/PSDBundleImage.o",
+    "llvm-bc" : "/Users/stanislavabobruskina/pyrusservicedesk/PyrusServiceDeskIOS/build/PyrusServiceDesk.build/Release-iphoneos/PyrusServiceDesk.build/Objects-normal/arm64/PSDBundleImage.bc",
+    "object" : "/Users/stanislavabobruskina/pyrusservicedesk/PyrusServiceDeskIOS/build/PyrusServiceDesk.build/Release-iphoneos/PyrusServiceDesk.build/Objects-normal/arm64/PSDBundleImage.o"
+  },
+  "/Users/stanislavabobruskina/pyrusservicedesk/PyrusServiceDeskIOS/PyrusServiceDesk/Helpers/for images/PSDDownloadImage.swift" : {
+    "index-unit-output-path" : "/PyrusServiceDesk.build/Release-iphoneos/PyrusServiceDesk.build/Objects-normal/arm64/PSDDownloadImage.o",
+    "llvm-bc" : "/Users/stanislavabobruskina/pyrusservicedesk/PyrusServiceDeskIOS/build/PyrusServiceDesk.build/Release-iphoneos/PyrusServiceDesk.build/Objects-normal/arm64/PSDDownloadImage.bc",
+    "object" : "/Users/stanislavabobruskina/pyrusservicedesk/PyrusServiceDeskIOS/build/PyrusServiceDesk.build/Release-iphoneos/PyrusServiceDesk.build/Objects-normal/arm64/PSDDownloadImage.o"
+  },
+  "/Users/stanislavabobruskina/pyrusservicedesk/PyrusServiceDeskIOS/PyrusServiceDesk/Helpers/for images/PSDPreviewSetter.swift" : {
+    "index-unit-output-path" : "/PyrusServiceDesk.build/Release-iphoneos/PyrusServiceDesk.build/Objects-normal/arm64/PSDPreviewSetter.o",
+    "llvm-bc" : "/Users/stanislavabobruskina/pyrusservicedesk/PyrusServiceDeskIOS/build/PyrusServiceDesk.build/Release-iphoneos/PyrusServiceDesk.build/Objects-normal/arm64/PSDPreviewSetter.bc",
+    "object" : "/Users/stanislavabobruskina/pyrusservicedesk/PyrusServiceDeskIOS/build/PyrusServiceDesk.build/Release-iphoneos/PyrusServiceDesk.build/Objects-normal/arm64/PSDPreviewSetter.o"
+  },
+  "/Users/stanislavabobruskina/pyrusservicedesk/PyrusServiceDeskIOS/PyrusServiceDesk/Helpers/for images/SupportUserImage.swift" : {
+    "index-unit-output-path" : "/PyrusServiceDesk.build/Release-iphoneos/PyrusServiceDesk.build/Objects-normal/arm64/SupportUserImage.o",
+    "llvm-bc" : "/Users/stanislavabobruskina/pyrusservicedesk/PyrusServiceDeskIOS/build/PyrusServiceDesk.build/Release-iphoneos/PyrusServiceDesk.build/Objects-normal/arm64/SupportUserImage.bc",
+    "object" : "/Users/stanislavabobruskina/pyrusservicedesk/PyrusServiceDeskIOS/build/PyrusServiceDesk.build/Release-iphoneos/PyrusServiceDesk.build/Objects-normal/arm64/SupportUserImage.o"
+  },
+  "/Users/stanislavabobruskina/pyrusservicedesk/PyrusServiceDeskIOS/PyrusServiceDesk/Helpers/for images/UIImage+color.swift" : {
+    "index-unit-output-path" : "/PyrusServiceDesk.build/Release-iphoneos/PyrusServiceDesk.build/Objects-normal/arm64/UIImage+color.o",
+    "llvm-bc" : "/Users/stanislavabobruskina/pyrusservicedesk/PyrusServiceDeskIOS/build/PyrusServiceDesk.build/Release-iphoneos/PyrusServiceDesk.build/Objects-normal/arm64/UIImage+color.bc",
+    "object" : "/Users/stanislavabobruskina/pyrusservicedesk/PyrusServiceDeskIOS/build/PyrusServiceDesk.build/Release-iphoneos/PyrusServiceDesk.build/Objects-normal/arm64/UIImage+color.o"
+  },
+  "/Users/stanislavabobruskina/pyrusservicedesk/PyrusServiceDeskIOS/PyrusServiceDesk/Helpers/PSDAlertDisplay.swift" : {
+    "index-unit-output-path" : "/PyrusServiceDesk.build/Release-iphoneos/PyrusServiceDesk.build/Objects-normal/arm64/PSDAlertDisplay.o",
+    "llvm-bc" : "/Users/stanislavabobruskina/pyrusservicedesk/PyrusServiceDeskIOS/build/PyrusServiceDesk.build/Release-iphoneos/PyrusServiceDesk.build/Objects-normal/arm64/PSDAlertDisplay.bc",
+    "object" : "/Users/stanislavabobruskina/pyrusservicedesk/PyrusServiceDeskIOS/build/PyrusServiceDesk.build/Release-iphoneos/PyrusServiceDesk.build/Objects-normal/arm64/PSDAlertDisplay.o"
+  },
+  "/Users/stanislavabobruskina/pyrusservicedesk/PyrusServiceDeskIOS/PyrusServiceDesk/Helpers/PSDDownloadView.swift" : {
+    "index-unit-output-path" : "/PyrusServiceDesk.build/Release-iphoneos/PyrusServiceDesk.build/Objects-normal/arm64/PSDDownloadView.o",
+    "llvm-bc" : "/Users/stanislavabobruskina/pyrusservicedesk/PyrusServiceDeskIOS/build/PyrusServiceDesk.build/Release-iphoneos/PyrusServiceDesk.build/Objects-normal/arm64/PSDDownloadView.bc",
+    "object" : "/Users/stanislavabobruskina/pyrusservicedesk/PyrusServiceDeskIOS/build/PyrusServiceDesk.build/Release-iphoneos/PyrusServiceDesk.build/Objects-normal/arm64/PSDDownloadView.o"
+  },
+  "/Users/stanislavabobruskina/pyrusservicedesk/PyrusServiceDeskIOS/PyrusServiceDesk/Helpers/PSDFilesManager.swift" : {
+    "index-unit-output-path" : "/PyrusServiceDesk.build/Release-iphoneos/PyrusServiceDesk.build/Objects-normal/arm64/PSDFilesManager.o",
+    "llvm-bc" : "/Users/stanislavabobruskina/pyrusservicedesk/PyrusServiceDeskIOS/build/PyrusServiceDesk.build/Release-iphoneos/PyrusServiceDesk.build/Objects-normal/arm64/PSDFilesManager.bc",
+    "object" : "/Users/stanislavabobruskina/pyrusservicedesk/PyrusServiceDeskIOS/build/PyrusServiceDesk.build/Release-iphoneos/PyrusServiceDesk.build/Objects-normal/arm64/PSDFilesManager.o"
+  },
+  "/Users/stanislavabobruskina/pyrusservicedesk/PyrusServiceDeskIOS/PyrusServiceDesk/Helpers/PSDMessagesStorage.swift" : {
+    "index-unit-output-path" : "/PyrusServiceDesk.build/Release-iphoneos/PyrusServiceDesk.build/Objects-normal/arm64/PSDMessagesStorage.o",
+    "llvm-bc" : "/Users/stanislavabobruskina/pyrusservicedesk/PyrusServiceDeskIOS/build/PyrusServiceDesk.build/Release-iphoneos/PyrusServiceDesk.build/Objects-normal/arm64/PSDMessagesStorage.bc",
+    "object" : "/Users/stanislavabobruskina/pyrusservicedesk/PyrusServiceDeskIOS/build/PyrusServiceDesk.build/Release-iphoneos/PyrusServiceDesk.build/Objects-normal/arm64/PSDMessagesStorage.o"
+  },
+  "/Users/stanislavabobruskina/pyrusservicedesk/PyrusServiceDeskIOS/PyrusServiceDesk/Helpers/PSDProgressView.swift" : {
+    "index-unit-output-path" : "/PyrusServiceDesk.build/Release-iphoneos/PyrusServiceDesk.build/Objects-normal/arm64/PSDProgressView.o",
+    "llvm-bc" : "/Users/stanislavabobruskina/pyrusservicedesk/PyrusServiceDeskIOS/build/PyrusServiceDesk.build/Release-iphoneos/PyrusServiceDesk.build/Objects-normal/arm64/PSDProgressView.bc",
+    "object" : "/Users/stanislavabobruskina/pyrusservicedesk/PyrusServiceDeskIOS/build/PyrusServiceDesk.build/Release-iphoneos/PyrusServiceDesk.build/Objects-normal/arm64/PSDProgressView.o"
+  },
+  "/Users/stanislavabobruskina/pyrusservicedesk/PyrusServiceDeskIOS/PyrusServiceDesk/Helpers/PSDVIew.swift" : {
+    "index-unit-output-path" : "/PyrusServiceDesk.build/Release-iphoneos/PyrusServiceDesk.build/Objects-normal/arm64/PSDVIew.o",
+    "llvm-bc" : "/Users/stanislavabobruskina/pyrusservicedesk/PyrusServiceDeskIOS/build/PyrusServiceDesk.build/Release-iphoneos/PyrusServiceDesk.build/Objects-normal/arm64/PSDVIew.bc",
+    "object" : "/Users/stanislavabobruskina/pyrusservicedesk/PyrusServiceDeskIOS/build/PyrusServiceDesk.build/Release-iphoneos/PyrusServiceDesk.build/Objects-normal/arm64/PSDVIew.o"
+  },
+  "/Users/stanislavabobruskina/pyrusservicedesk/PyrusServiceDeskIOS/PyrusServiceDesk/Helpers/Recolorable.swift" : {
+    "index-unit-output-path" : "/PyrusServiceDesk.build/Release-iphoneos/PyrusServiceDesk.build/Objects-normal/arm64/Recolorable.o",
+    "llvm-bc" : "/Users/stanislavabobruskina/pyrusservicedesk/PyrusServiceDeskIOS/build/PyrusServiceDesk.build/Release-iphoneos/PyrusServiceDesk.build/Objects-normal/arm64/Recolorable.bc",
+    "object" : "/Users/stanislavabobruskina/pyrusservicedesk/PyrusServiceDeskIOS/build/PyrusServiceDesk.build/Release-iphoneos/PyrusServiceDesk.build/Objects-normal/arm64/Recolorable.o"
+  },
+  "/Users/stanislavabobruskina/pyrusservicedesk/PyrusServiceDeskIOS/PyrusServiceDesk/Helpers/String/LocalizationString.swift" : {
+    "index-unit-output-path" : "/PyrusServiceDesk.build/Release-iphoneos/PyrusServiceDesk.build/Objects-normal/arm64/LocalizationString.o",
+    "llvm-bc" : "/Users/stanislavabobruskina/pyrusservicedesk/PyrusServiceDeskIOS/build/PyrusServiceDesk.build/Release-iphoneos/PyrusServiceDesk.build/Objects-normal/arm64/LocalizationString.bc",
+    "object" : "/Users/stanislavabobruskina/pyrusservicedesk/PyrusServiceDeskIOS/build/PyrusServiceDesk.build/Release-iphoneos/PyrusServiceDesk.build/Objects-normal/arm64/LocalizationString.o"
+  },
+  "/Users/stanislavabobruskina/pyrusservicedesk/PyrusServiceDeskIOS/PyrusServiceDesk/Helpers/String/String + FilesSupportedExtension.swift" : {
+    "index-unit-output-path" : "/PyrusServiceDesk.build/Release-iphoneos/PyrusServiceDesk.build/Objects-normal/arm64/String + FilesSupportedExtension.o",
+    "llvm-bc" : "/Users/stanislavabobruskina/pyrusservicedesk/PyrusServiceDeskIOS/build/PyrusServiceDesk.build/Release-iphoneos/PyrusServiceDesk.build/Objects-normal/arm64/String + FilesSupportedExtension.bc",
+    "object" : "/Users/stanislavabobruskina/pyrusservicedesk/PyrusServiceDeskIOS/build/PyrusServiceDesk.build/Release-iphoneos/PyrusServiceDesk.build/Objects-normal/arm64/String + FilesSupportedExtension.o"
+  },
+  "/Users/stanislavabobruskina/pyrusservicedesk/PyrusServiceDeskIOS/PyrusServiceDesk/Helpers/String/String + uuid.swift" : {
+    "index-unit-output-path" : "/PyrusServiceDesk.build/Release-iphoneos/PyrusServiceDesk.build/Objects-normal/arm64/String + uuid.o",
+    "llvm-bc" : "/Users/stanislavabobruskina/pyrusservicedesk/PyrusServiceDeskIOS/build/PyrusServiceDesk.build/Release-iphoneos/PyrusServiceDesk.build/Objects-normal/arm64/String + uuid.bc",
+    "object" : "/Users/stanislavabobruskina/pyrusservicedesk/PyrusServiceDeskIOS/build/PyrusServiceDesk.build/Release-iphoneos/PyrusServiceDesk.build/Objects-normal/arm64/String + uuid.o"
+  },
+  "/Users/stanislavabobruskina/pyrusservicedesk/PyrusServiceDeskIOS/PyrusServiceDesk/Helpers/String/String+Date.swift" : {
+    "index-unit-output-path" : "/PyrusServiceDesk.build/Release-iphoneos/PyrusServiceDesk.build/Objects-normal/arm64/String+Date.o",
+    "llvm-bc" : "/Users/stanislavabobruskina/pyrusservicedesk/PyrusServiceDeskIOS/build/PyrusServiceDesk.build/Release-iphoneos/PyrusServiceDesk.build/Objects-normal/arm64/String+Date.bc",
+    "object" : "/Users/stanislavabobruskina/pyrusservicedesk/PyrusServiceDeskIOS/build/PyrusServiceDesk.build/Release-iphoneos/PyrusServiceDesk.build/Objects-normal/arm64/String+Date.o"
+  },
+  "/Users/stanislavabobruskina/pyrusservicedesk/PyrusServiceDeskIOS/PyrusServiceDesk/Helpers/String/String+years.swift" : {
+    "index-unit-output-path" : "/PyrusServiceDesk.build/Release-iphoneos/PyrusServiceDesk.build/Objects-normal/arm64/String+years.o",
+    "llvm-bc" : "/Users/stanislavabobruskina/pyrusservicedesk/PyrusServiceDeskIOS/build/PyrusServiceDesk.build/Release-iphoneos/PyrusServiceDesk.build/Objects-normal/arm64/String+years.bc",
+    "object" : "/Users/stanislavabobruskina/pyrusservicedesk/PyrusServiceDeskIOS/build/PyrusServiceDesk.build/Release-iphoneos/PyrusServiceDesk.build/Objects-normal/arm64/String+years.o"
+  },
+  "/Users/stanislavabobruskina/pyrusservicedesk/PyrusServiceDeskIOS/PyrusServiceDesk/Helpers/String/StringHelper.swift" : {
+    "index-unit-output-path" : "/PyrusServiceDesk.build/Release-iphoneos/PyrusServiceDesk.build/Objects-normal/arm64/StringHelper.o",
+    "llvm-bc" : "/Users/stanislavabobruskina/pyrusservicedesk/PyrusServiceDeskIOS/build/PyrusServiceDesk.build/Release-iphoneos/PyrusServiceDesk.build/Objects-normal/arm64/StringHelper.bc",
+    "object" : "/Users/stanislavabobruskina/pyrusservicedesk/PyrusServiceDeskIOS/build/PyrusServiceDesk.build/Release-iphoneos/PyrusServiceDesk.build/Objects-normal/arm64/StringHelper.o"
+  },
+  "/Users/stanislavabobruskina/pyrusservicedesk/PyrusServiceDeskIOS/PyrusServiceDesk/Helpers/String/XmlHelper.swift" : {
+    "index-unit-output-path" : "/PyrusServiceDesk.build/Release-iphoneos/PyrusServiceDesk.build/Objects-normal/arm64/XmlHelper.o",
+    "llvm-bc" : "/Users/stanislavabobruskina/pyrusservicedesk/PyrusServiceDeskIOS/build/PyrusServiceDesk.build/Release-iphoneos/PyrusServiceDesk.build/Objects-normal/arm64/XmlHelper.bc",
+    "object" : "/Users/stanislavabobruskina/pyrusservicedesk/PyrusServiceDeskIOS/build/PyrusServiceDesk.build/Release-iphoneos/PyrusServiceDesk.build/Objects-normal/arm64/XmlHelper.o"
+  },
+  "/Users/stanislavabobruskina/pyrusservicedesk/PyrusServiceDeskIOS/PyrusServiceDesk/Helpers/TableMatrix/[Int+PSDChat]+complete.swift" : {
+    "index-unit-output-path" : "/PyrusServiceDesk.build/Release-iphoneos/PyrusServiceDesk.build/Objects-normal/arm64/[Int+PSDChat]+complete.o",
+    "llvm-bc" : "/Users/stanislavabobruskina/pyrusservicedesk/PyrusServiceDeskIOS/build/PyrusServiceDesk.build/Release-iphoneos/PyrusServiceDesk.build/Objects-normal/arm64/[Int+PSDChat]+complete.bc",
+    "object" : "/Users/stanislavabobruskina/pyrusservicedesk/PyrusServiceDeskIOS/build/PyrusServiceDesk.build/Release-iphoneos/PyrusServiceDesk.build/Objects-normal/arm64/[Int+PSDChat]+complete.o"
+  },
+  "/Users/stanislavabobruskina/pyrusservicedesk/PyrusServiceDeskIOS/PyrusServiceDesk/Helpers/TableMatrix/[Int+PSDChat]+usefulFunc.swift" : {
+    "index-unit-output-path" : "/PyrusServiceDesk.build/Release-iphoneos/PyrusServiceDesk.build/Objects-normal/arm64/[Int+PSDChat]+usefulFunc.o",
+    "llvm-bc" : "/Users/stanislavabobruskina/pyrusservicedesk/PyrusServiceDeskIOS/build/PyrusServiceDesk.build/Release-iphoneos/PyrusServiceDesk.build/Objects-normal/arm64/[Int+PSDChat]+usefulFunc.bc",
+    "object" : "/Users/stanislavabobruskina/pyrusservicedesk/PyrusServiceDeskIOS/build/PyrusServiceDesk.build/Release-iphoneos/PyrusServiceDesk.build/Objects-normal/arm64/[Int+PSDChat]+usefulFunc.o"
+  },
+  "/Users/stanislavabobruskina/pyrusservicedesk/PyrusServiceDeskIOS/PyrusServiceDesk/Helpers/TableView/PSDSpinerTableView.swift" : {
+    "index-unit-output-path" : "/PyrusServiceDesk.build/Release-iphoneos/PyrusServiceDesk.build/Objects-normal/arm64/PSDSpinerTableView.o",
+    "llvm-bc" : "/Users/stanislavabobruskina/pyrusservicedesk/PyrusServiceDeskIOS/build/PyrusServiceDesk.build/Release-iphoneos/PyrusServiceDesk.build/Objects-normal/arm64/PSDSpinerTableView.bc",
+    "object" : "/Users/stanislavabobruskina/pyrusservicedesk/PyrusServiceDeskIOS/build/PyrusServiceDesk.build/Release-iphoneos/PyrusServiceDesk.build/Objects-normal/arm64/PSDSpinerTableView.o"
+  },
+  "/Users/stanislavabobruskina/pyrusservicedesk/PyrusServiceDeskIOS/PyrusServiceDesk/Helpers/TableView/PSDTableView.swift" : {
+    "index-unit-output-path" : "/PyrusServiceDesk.build/Release-iphoneos/PyrusServiceDesk.build/Objects-normal/arm64/PSDTableView.o",
+    "llvm-bc" : "/Users/stanislavabobruskina/pyrusservicedesk/PyrusServiceDeskIOS/build/PyrusServiceDesk.build/Release-iphoneos/PyrusServiceDesk.build/Objects-normal/arm64/PSDTableView.bc",
+    "object" : "/Users/stanislavabobruskina/pyrusservicedesk/PyrusServiceDeskIOS/build/PyrusServiceDesk.build/Release-iphoneos/PyrusServiceDesk.build/Objects-normal/arm64/PSDTableView.o"
+  },
+  "/Users/stanislavabobruskina/pyrusservicedesk/PyrusServiceDeskIOS/PyrusServiceDesk/Helpers/TableView/TableViewCellConfiguratorProtocol.swift" : {
+    "index-unit-output-path" : "/PyrusServiceDesk.build/Release-iphoneos/PyrusServiceDesk.build/Objects-normal/arm64/TableViewCellConfiguratorProtocol.o",
+    "llvm-bc" : "/Users/stanislavabobruskina/pyrusservicedesk/PyrusServiceDeskIOS/build/PyrusServiceDesk.build/Release-iphoneos/PyrusServiceDesk.build/Objects-normal/arm64/TableViewCellConfiguratorProtocol.bc",
+    "object" : "/Users/stanislavabobruskina/pyrusservicedesk/PyrusServiceDeskIOS/build/PyrusServiceDesk.build/Release-iphoneos/PyrusServiceDesk.build/Objects-normal/arm64/TableViewCellConfiguratorProtocol.o"
+  },
+  "/Users/stanislavabobruskina/pyrusservicedesk/PyrusServiceDeskIOS/PyrusServiceDesk/Helpers/TableView/UITableView + swipeForDetail.swift" : {
+    "index-unit-output-path" : "/PyrusServiceDesk.build/Release-iphoneos/PyrusServiceDesk.build/Objects-normal/arm64/UITableView + swipeForDetail.o",
+    "llvm-bc" : "/Users/stanislavabobruskina/pyrusservicedesk/PyrusServiceDeskIOS/build/PyrusServiceDesk.build/Release-iphoneos/PyrusServiceDesk.build/Objects-normal/arm64/UITableView + swipeForDetail.bc",
+    "object" : "/Users/stanislavabobruskina/pyrusservicedesk/PyrusServiceDeskIOS/build/PyrusServiceDesk.build/Release-iphoneos/PyrusServiceDesk.build/Objects-normal/arm64/UITableView + swipeForDetail.o"
+  },
+  "/Users/stanislavabobruskina/pyrusservicedesk/PyrusServiceDeskIOS/PyrusServiceDesk/Helpers/TableView/UITableView+keyboard.swift" : {
+    "index-unit-output-path" : "/PyrusServiceDesk.build/Release-iphoneos/PyrusServiceDesk.build/Objects-normal/arm64/UITableView+keyboard.o",
+    "llvm-bc" : "/Users/stanislavabobruskina/pyrusservicedesk/PyrusServiceDeskIOS/build/PyrusServiceDesk.build/Release-iphoneos/PyrusServiceDesk.build/Objects-normal/arm64/UITableView+keyboard.bc",
+    "object" : "/Users/stanislavabobruskina/pyrusservicedesk/PyrusServiceDeskIOS/build/PyrusServiceDesk.build/Release-iphoneos/PyrusServiceDesk.build/Objects-normal/arm64/UITableView+keyboard.o"
+  },
+  "/Users/stanislavabobruskina/pyrusservicedesk/PyrusServiceDeskIOS/PyrusServiceDesk/Helpers/UIApplication+topViewController.swift" : {
+    "index-unit-output-path" : "/PyrusServiceDesk.build/Release-iphoneos/PyrusServiceDesk.build/Objects-normal/arm64/UIApplication+topViewController.o",
+    "llvm-bc" : "/Users/stanislavabobruskina/pyrusservicedesk/PyrusServiceDeskIOS/build/PyrusServiceDesk.build/Release-iphoneos/PyrusServiceDesk.build/Objects-normal/arm64/UIApplication+topViewController.bc",
+    "object" : "/Users/stanislavabobruskina/pyrusservicedesk/PyrusServiceDeskIOS/build/PyrusServiceDesk.build/Release-iphoneos/PyrusServiceDesk.build/Objects-normal/arm64/UIApplication+topViewController.o"
+  },
+  "/Users/stanislavabobruskina/pyrusservicedesk/PyrusServiceDeskIOS/PyrusServiceDesk/Helpers/UIButton+backgroundColor.swift" : {
+    "index-unit-output-path" : "/PyrusServiceDesk.build/Release-iphoneos/PyrusServiceDesk.build/Objects-normal/arm64/UIButton+backgroundColor.o",
+    "llvm-bc" : "/Users/stanislavabobruskina/pyrusservicedesk/PyrusServiceDeskIOS/build/PyrusServiceDesk.build/Release-iphoneos/PyrusServiceDesk.build/Objects-normal/arm64/UIButton+backgroundColor.bc",
+    "object" : "/Users/stanislavabobruskina/pyrusservicedesk/PyrusServiceDeskIOS/build/PyrusServiceDesk.build/Release-iphoneos/PyrusServiceDesk.build/Objects-normal/arm64/UIButton+backgroundColor.o"
+  },
+  "/Users/stanislavabobruskina/pyrusservicedesk/PyrusServiceDeskIOS/PyrusServiceDesk/Helpers/UIDevice + modelName.swift" : {
+    "index-unit-output-path" : "/PyrusServiceDesk.build/Release-iphoneos/PyrusServiceDesk.build/Objects-normal/arm64/UIDevice + modelName.o",
+    "llvm-bc" : "/Users/stanislavabobruskina/pyrusservicedesk/PyrusServiceDeskIOS/build/PyrusServiceDesk.build/Release-iphoneos/PyrusServiceDesk.build/Objects-normal/arm64/UIDevice + modelName.bc",
+    "object" : "/Users/stanislavabobruskina/pyrusservicedesk/PyrusServiceDeskIOS/build/PyrusServiceDesk.build/Release-iphoneos/PyrusServiceDesk.build/Objects-normal/arm64/UIDevice + modelName.o"
+  },
+  "/Users/stanislavabobruskina/pyrusservicedesk/PyrusServiceDeskIOS/PyrusServiceDesk/Helpers/UIView+constraints.swift" : {
+    "index-unit-output-path" : "/PyrusServiceDesk.build/Release-iphoneos/PyrusServiceDesk.build/Objects-normal/arm64/UIView+constraints.o",
+    "llvm-bc" : "/Users/stanislavabobruskina/pyrusservicedesk/PyrusServiceDeskIOS/build/PyrusServiceDesk.build/Release-iphoneos/PyrusServiceDesk.build/Objects-normal/arm64/UIView+constraints.bc",
+    "object" : "/Users/stanislavabobruskina/pyrusservicedesk/PyrusServiceDeskIOS/build/PyrusServiceDesk.build/Release-iphoneos/PyrusServiceDesk.build/Objects-normal/arm64/UIView+constraints.o"
+  },
+  "/Users/stanislavabobruskina/pyrusservicedesk/PyrusServiceDeskIOS/PyrusServiceDesk/Helpers/UIView+findViewController.swift" : {
+    "index-unit-output-path" : "/PyrusServiceDesk.build/Release-iphoneos/PyrusServiceDesk.build/Objects-normal/arm64/UIView+findViewController.o",
+    "llvm-bc" : "/Users/stanislavabobruskina/pyrusservicedesk/PyrusServiceDeskIOS/build/PyrusServiceDesk.build/Release-iphoneos/PyrusServiceDesk.build/Objects-normal/arm64/UIView+findViewController.bc",
+    "object" : "/Users/stanislavabobruskina/pyrusservicedesk/PyrusServiceDeskIOS/build/PyrusServiceDesk.build/Release-iphoneos/PyrusServiceDesk.build/Objects-normal/arm64/UIView+findViewController.o"
+  },
+  "/Users/stanislavabobruskina/pyrusservicedesk/PyrusServiceDeskIOS/PyrusServiceDesk/Helpers/UnreadMessageManager.swift" : {
+    "index-unit-output-path" : "/PyrusServiceDesk.build/Release-iphoneos/PyrusServiceDesk.build/Objects-normal/arm64/UnreadMessageManager.o",
+    "llvm-bc" : "/Users/stanislavabobruskina/pyrusservicedesk/PyrusServiceDeskIOS/build/PyrusServiceDesk.build/Release-iphoneos/PyrusServiceDesk.build/Objects-normal/arm64/UnreadMessageManager.bc",
+    "object" : "/Users/stanislavabobruskina/pyrusservicedesk/PyrusServiceDeskIOS/build/PyrusServiceDesk.build/Release-iphoneos/PyrusServiceDesk.build/Objects-normal/arm64/UnreadMessageManager.o"
+  },
+  "/Users/stanislavabobruskina/pyrusservicedesk/PyrusServiceDeskIOS/PyrusServiceDesk/Helpers/View+asImage.swift" : {
+    "index-unit-output-path" : "/PyrusServiceDesk.build/Release-iphoneos/PyrusServiceDesk.build/Objects-normal/arm64/View+asImage.o",
+    "llvm-bc" : "/Users/stanislavabobruskina/pyrusservicedesk/PyrusServiceDeskIOS/build/PyrusServiceDesk.build/Release-iphoneos/PyrusServiceDesk.build/Objects-normal/arm64/View+asImage.bc",
+    "object" : "/Users/stanislavabobruskina/pyrusservicedesk/PyrusServiceDeskIOS/build/PyrusServiceDesk.build/Release-iphoneos/PyrusServiceDesk.build/Objects-normal/arm64/View+asImage.o"
+  },
+  "/Users/stanislavabobruskina/pyrusservicedesk/PyrusServiceDeskIOS/PyrusServiceDesk/Logs/LogEvents.swift" : {
+    "index-unit-output-path" : "/PyrusServiceDesk.build/Release-iphoneos/PyrusServiceDesk.build/Objects-normal/arm64/LogEvents.o",
+    "llvm-bc" : "/Users/stanislavabobruskina/pyrusservicedesk/PyrusServiceDeskIOS/build/PyrusServiceDesk.build/Release-iphoneos/PyrusServiceDesk.build/Objects-normal/arm64/LogEvents.bc",
+    "object" : "/Users/stanislavabobruskina/pyrusservicedesk/PyrusServiceDeskIOS/build/PyrusServiceDesk.build/Release-iphoneos/PyrusServiceDesk.build/Objects-normal/arm64/LogEvents.o"
+  },
+  "/Users/stanislavabobruskina/pyrusservicedesk/PyrusServiceDeskIOS/PyrusServiceDesk/Logs/PyrusLogger.swift" : {
+    "index-unit-output-path" : "/PyrusServiceDesk.build/Release-iphoneos/PyrusServiceDesk.build/Objects-normal/arm64/PyrusLogger.o",
+    "llvm-bc" : "/Users/stanislavabobruskina/pyrusservicedesk/PyrusServiceDeskIOS/build/PyrusServiceDesk.build/Release-iphoneos/PyrusServiceDesk.build/Objects-normal/arm64/PyrusLogger.bc",
+    "object" : "/Users/stanislavabobruskina/pyrusservicedesk/PyrusServiceDeskIOS/build/PyrusServiceDesk.build/Release-iphoneos/PyrusServiceDesk.build/Objects-normal/arm64/PyrusLogger.o"
+  },
+  "/Users/stanislavabobruskina/pyrusservicedesk/PyrusServiceDeskIOS/PyrusServiceDesk/LogsSendController.swift" : {
+    "index-unit-output-path" : "/PyrusServiceDesk.build/Release-iphoneos/PyrusServiceDesk.build/Objects-normal/arm64/LogsSendController.o",
+    "llvm-bc" : "/Users/stanislavabobruskina/pyrusservicedesk/PyrusServiceDeskIOS/build/PyrusServiceDesk.build/Release-iphoneos/PyrusServiceDesk.build/Objects-normal/arm64/LogsSendController.bc",
+    "object" : "/Users/stanislavabobruskina/pyrusservicedesk/PyrusServiceDeskIOS/build/PyrusServiceDesk.build/Release-iphoneos/PyrusServiceDesk.build/Objects-normal/arm64/LogsSendController.o"
+  },
+  "/Users/stanislavabobruskina/pyrusservicedesk/PyrusServiceDeskIOS/PyrusServiceDesk/Managers/SyncManager.swift" : {
+    "index-unit-output-path" : "/PyrusServiceDesk.build/Release-iphoneos/PyrusServiceDesk.build/Objects-normal/arm64/SyncManager.o",
+    "llvm-bc" : "/Users/stanislavabobruskina/pyrusservicedesk/PyrusServiceDeskIOS/build/PyrusServiceDesk.build/Release-iphoneos/PyrusServiceDesk.build/Objects-normal/arm64/SyncManager.bc",
+    "object" : "/Users/stanislavabobruskina/pyrusservicedesk/PyrusServiceDeskIOS/build/PyrusServiceDesk.build/Release-iphoneos/PyrusServiceDesk.build/Objects-normal/arm64/SyncManager.o"
+  },
+  "/Users/stanislavabobruskina/pyrusservicedesk/PyrusServiceDeskIOS/PyrusServiceDesk/Navigation/PSDCoverHorizontalAnimator.swift" : {
+    "index-unit-output-path" : "/PyrusServiceDesk.build/Release-iphoneos/PyrusServiceDesk.build/Objects-normal/arm64/PSDCoverHorizontalAnimator.o",
+    "llvm-bc" : "/Users/stanislavabobruskina/pyrusservicedesk/PyrusServiceDeskIOS/build/PyrusServiceDesk.build/Release-iphoneos/PyrusServiceDesk.build/Objects-normal/arm64/PSDCoverHorizontalAnimator.bc",
+    "object" : "/Users/stanislavabobruskina/pyrusservicedesk/PyrusServiceDeskIOS/build/PyrusServiceDesk.build/Release-iphoneos/PyrusServiceDesk.build/Objects-normal/arm64/PSDCoverHorizontalAnimator.o"
+  },
+  "/Users/stanislavabobruskina/pyrusservicedesk/PyrusServiceDeskIOS/PyrusServiceDesk/Navigation/PSDNavigationController.swift" : {
+    "index-unit-output-path" : "/PyrusServiceDesk.build/Release-iphoneos/PyrusServiceDesk.build/Objects-normal/arm64/PSDNavigationController.o",
+    "llvm-bc" : "/Users/stanislavabobruskina/pyrusservicedesk/PyrusServiceDeskIOS/build/PyrusServiceDesk.build/Release-iphoneos/PyrusServiceDesk.build/Objects-normal/arm64/PSDNavigationController.bc",
+    "object" : "/Users/stanislavabobruskina/pyrusservicedesk/PyrusServiceDeskIOS/build/PyrusServiceDesk.build/Release-iphoneos/PyrusServiceDesk.build/Objects-normal/arm64/PSDNavigationController.o"
+  },
+  "/Users/stanislavabobruskina/pyrusservicedesk/PyrusServiceDeskIOS/PyrusServiceDesk/Navigation/PSDViewController.swift" : {
+    "index-unit-output-path" : "/PyrusServiceDesk.build/Release-iphoneos/PyrusServiceDesk.build/Objects-normal/arm64/PSDViewController.o",
+    "llvm-bc" : "/Users/stanislavabobruskina/pyrusservicedesk/PyrusServiceDeskIOS/build/PyrusServiceDesk.build/Release-iphoneos/PyrusServiceDesk.build/Objects-normal/arm64/PSDViewController.bc",
+    "object" : "/Users/stanislavabobruskina/pyrusservicedesk/PyrusServiceDeskIOS/build/PyrusServiceDesk.build/Release-iphoneos/PyrusServiceDesk.build/Objects-normal/arm64/PSDViewController.o"
+  },
+  "/Users/stanislavabobruskina/pyrusservicedesk/PyrusServiceDeskIOS/PyrusServiceDesk/Navigation/PyrusServiceDeskController.swift" : {
+    "index-unit-output-path" : "/PyrusServiceDesk.build/Release-iphoneos/PyrusServiceDesk.build/Objects-normal/arm64/PyrusServiceDeskController.o",
+    "llvm-bc" : "/Users/stanislavabobruskina/pyrusservicedesk/PyrusServiceDeskIOS/build/PyrusServiceDesk.build/Release-iphoneos/PyrusServiceDesk.build/Objects-normal/arm64/PyrusServiceDeskController.bc",
+    "object" : "/Users/stanislavabobruskina/pyrusservicedesk/PyrusServiceDeskIOS/build/PyrusServiceDesk.build/Release-iphoneos/PyrusServiceDesk.build/Objects-normal/arm64/PyrusServiceDeskController.o"
+  },
+  "/Users/stanislavabobruskina/pyrusservicedesk/PyrusServiceDeskIOS/PyrusServiceDesk/OnStopCallback.swift" : {
+    "index-unit-output-path" : "/PyrusServiceDesk.build/Release-iphoneos/PyrusServiceDesk.build/Objects-normal/arm64/OnStopCallback.o",
+    "llvm-bc" : "/Users/stanislavabobruskina/pyrusservicedesk/PyrusServiceDeskIOS/build/PyrusServiceDesk.build/Release-iphoneos/PyrusServiceDesk.build/Objects-normal/arm64/OnStopCallback.bc",
+    "object" : "/Users/stanislavabobruskina/pyrusservicedesk/PyrusServiceDeskIOS/build/PyrusServiceDesk.build/Release-iphoneos/PyrusServiceDesk.build/Objects-normal/arm64/OnStopCallback.o"
+  },
+  "/Users/stanislavabobruskina/pyrusservicedesk/PyrusServiceDeskIOS/PyrusServiceDesk/PSDChooser.swift" : {
+    "index-unit-output-path" : "/PyrusServiceDesk.build/Release-iphoneos/PyrusServiceDesk.build/Objects-normal/arm64/PSDChooser.o",
+    "llvm-bc" : "/Users/stanislavabobruskina/pyrusservicedesk/PyrusServiceDeskIOS/build/PyrusServiceDesk.build/Release-iphoneos/PyrusServiceDesk.build/Objects-normal/arm64/PSDChooser.bc",
+    "object" : "/Users/stanislavabobruskina/pyrusservicedesk/PyrusServiceDeskIOS/build/PyrusServiceDesk.build/Release-iphoneos/PyrusServiceDesk.build/Objects-normal/arm64/PSDChooser.o"
+  },
+  "/Users/stanislavabobruskina/pyrusservicedesk/PyrusServiceDeskIOS/PyrusServiceDesk/PSDInfoView.swift" : {
+    "index-unit-output-path" : "/PyrusServiceDesk.build/Release-iphoneos/PyrusServiceDesk.build/Objects-normal/arm64/PSDInfoView.o",
+    "llvm-bc" : "/Users/stanislavabobruskina/pyrusservicedesk/PyrusServiceDeskIOS/build/PyrusServiceDesk.build/Release-iphoneos/PyrusServiceDesk.build/Objects-normal/arm64/PSDInfoView.bc",
+    "object" : "/Users/stanislavabobruskina/pyrusservicedesk/PyrusServiceDeskIOS/build/PyrusServiceDesk.build/Release-iphoneos/PyrusServiceDesk.build/Objects-normal/arm64/PSDInfoView.o"
+  },
+  "/Users/stanislavabobruskina/pyrusservicedesk/PyrusServiceDeskIOS/PyrusServiceDesk/PSDNewReplySubscriber.swift" : {
+    "index-unit-output-path" : "/PyrusServiceDesk.build/Release-iphoneos/PyrusServiceDesk.build/Objects-normal/arm64/PSDNewReplySubscriber.o",
+    "llvm-bc" : "/Users/stanislavabobruskina/pyrusservicedesk/PyrusServiceDeskIOS/build/PyrusServiceDesk.build/Release-iphoneos/PyrusServiceDesk.build/Objects-normal/arm64/PSDNewReplySubscriber.bc",
+    "object" : "/Users/stanislavabobruskina/pyrusservicedesk/PyrusServiceDeskIOS/build/PyrusServiceDesk.build/Release-iphoneos/PyrusServiceDesk.build/Objects-normal/arm64/PSDNewReplySubscriber.o"
+  },
+  "/Users/stanislavabobruskina/pyrusservicedesk/PyrusServiceDeskIOS/PyrusServiceDesk/PSDObjects/MultiChats/PSDClientInfo.swift" : {
+    "index-unit-output-path" : "/PyrusServiceDesk.build/Release-iphoneos/PyrusServiceDesk.build/Objects-normal/arm64/PSDClientInfo.o",
+    "llvm-bc" : "/Users/stanislavabobruskina/pyrusservicedesk/PyrusServiceDeskIOS/build/PyrusServiceDesk.build/Release-iphoneos/PyrusServiceDesk.build/Objects-normal/arm64/PSDClientInfo.bc",
+    "object" : "/Users/stanislavabobruskina/pyrusservicedesk/PyrusServiceDeskIOS/build/PyrusServiceDesk.build/Release-iphoneos/PyrusServiceDesk.build/Objects-normal/arm64/PSDClientInfo.o"
+  },
+  "/Users/stanislavabobruskina/pyrusservicedesk/PyrusServiceDeskIOS/PyrusServiceDesk/PSDObjects/MultiChats/PSDUserInfo.swift" : {
+    "index-unit-output-path" : "/PyrusServiceDesk.build/Release-iphoneos/PyrusServiceDesk.build/Objects-normal/arm64/PSDUserInfo.o",
+    "llvm-bc" : "/Users/stanislavabobruskina/pyrusservicedesk/PyrusServiceDeskIOS/build/PyrusServiceDesk.build/Release-iphoneos/PyrusServiceDesk.build/Objects-normal/arm64/PSDUserInfo.bc",
+    "object" : "/Users/stanislavabobruskina/pyrusservicedesk/PyrusServiceDeskIOS/build/PyrusServiceDesk.build/Release-iphoneos/PyrusServiceDesk.build/Objects-normal/arm64/PSDUserInfo.o"
+  },
+  "/Users/stanislavabobruskina/pyrusservicedesk/PyrusServiceDeskIOS/PyrusServiceDesk/PSDObjects/PSDAttachment.swift" : {
+    "index-unit-output-path" : "/PyrusServiceDesk.build/Release-iphoneos/PyrusServiceDesk.build/Objects-normal/arm64/PSDAttachment.o",
+    "llvm-bc" : "/Users/stanislavabobruskina/pyrusservicedesk/PyrusServiceDeskIOS/build/PyrusServiceDesk.build/Release-iphoneos/PyrusServiceDesk.build/Objects-normal/arm64/PSDAttachment.bc",
+    "object" : "/Users/stanislavabobruskina/pyrusservicedesk/PyrusServiceDeskIOS/build/PyrusServiceDesk.build/Release-iphoneos/PyrusServiceDesk.build/Objects-normal/arm64/PSDAttachment.o"
+  },
+  "/Users/stanislavabobruskina/pyrusservicedesk/PyrusServiceDeskIOS/PyrusServiceDesk/PSDObjects/PSDChat.swift" : {
+    "index-unit-output-path" : "/PyrusServiceDesk.build/Release-iphoneos/PyrusServiceDesk.build/Objects-normal/arm64/PSDChat.o",
+    "llvm-bc" : "/Users/stanislavabobruskina/pyrusservicedesk/PyrusServiceDeskIOS/build/PyrusServiceDesk.build/Release-iphoneos/PyrusServiceDesk.build/Objects-normal/arm64/PSDChat.bc",
+    "object" : "/Users/stanislavabobruskina/pyrusservicedesk/PyrusServiceDeskIOS/build/PyrusServiceDesk.build/Release-iphoneos/PyrusServiceDesk.build/Objects-normal/arm64/PSDChat.o"
+  },
+  "/Users/stanislavabobruskina/pyrusservicedesk/PyrusServiceDeskIOS/PyrusServiceDesk/PSDObjects/PSDLastUnreadMessage.swift" : {
+    "index-unit-output-path" : "/PyrusServiceDesk.build/Release-iphoneos/PyrusServiceDesk.build/Objects-normal/arm64/PSDLastUnreadMessage.o",
+    "llvm-bc" : "/Users/stanislavabobruskina/pyrusservicedesk/PyrusServiceDeskIOS/build/PyrusServiceDesk.build/Release-iphoneos/PyrusServiceDesk.build/Objects-normal/arm64/PSDLastUnreadMessage.bc",
+    "object" : "/Users/stanislavabobruskina/pyrusservicedesk/PyrusServiceDeskIOS/build/PyrusServiceDesk.build/Release-iphoneos/PyrusServiceDesk.build/Objects-normal/arm64/PSDLastUnreadMessage.o"
+  },
+  "/Users/stanislavabobruskina/pyrusservicedesk/PyrusServiceDeskIOS/PyrusServiceDesk/PSDObjects/PSDMessage.swift" : {
+    "index-unit-output-path" : "/PyrusServiceDesk.build/Release-iphoneos/PyrusServiceDesk.build/Objects-normal/arm64/PSDMessage.o",
+    "llvm-bc" : "/Users/stanislavabobruskina/pyrusservicedesk/PyrusServiceDeskIOS/build/PyrusServiceDesk.build/Release-iphoneos/PyrusServiceDesk.build/Objects-normal/arm64/PSDMessage.bc",
+    "object" : "/Users/stanislavabobruskina/pyrusservicedesk/PyrusServiceDeskIOS/build/PyrusServiceDesk.build/Release-iphoneos/PyrusServiceDesk.build/Objects-normal/arm64/PSDMessage.o"
+  },
+  "/Users/stanislavabobruskina/pyrusservicedesk/PyrusServiceDeskIOS/PyrusServiceDesk/PSDObjects/PSDPlaceholderMessage.swift" : {
+    "index-unit-output-path" : "/PyrusServiceDesk.build/Release-iphoneos/PyrusServiceDesk.build/Objects-normal/arm64/PSDPlaceholderMessage.o",
+    "llvm-bc" : "/Users/stanislavabobruskina/pyrusservicedesk/PyrusServiceDeskIOS/build/PyrusServiceDesk.build/Release-iphoneos/PyrusServiceDesk.build/Objects-normal/arm64/PSDPlaceholderMessage.bc",
+    "object" : "/Users/stanislavabobruskina/pyrusservicedesk/PyrusServiceDeskIOS/build/PyrusServiceDesk.build/Release-iphoneos/PyrusServiceDesk.build/Objects-normal/arm64/PSDPlaceholderMessage.o"
+  },
+  "/Users/stanislavabobruskina/pyrusservicedesk/PyrusServiceDeskIOS/PyrusServiceDesk/PSDObjects/PSDPlaceholderUser.swift" : {
+    "index-unit-output-path" : "/PyrusServiceDesk.build/Release-iphoneos/PyrusServiceDesk.build/Objects-normal/arm64/PSDPlaceholderUser.o",
+    "llvm-bc" : "/Users/stanislavabobruskina/pyrusservicedesk/PyrusServiceDeskIOS/build/PyrusServiceDesk.build/Release-iphoneos/PyrusServiceDesk.build/Objects-normal/arm64/PSDPlaceholderUser.bc",
+    "object" : "/Users/stanislavabobruskina/pyrusservicedesk/PyrusServiceDeskIOS/build/PyrusServiceDesk.build/Release-iphoneos/PyrusServiceDesk.build/Objects-normal/arm64/PSDPlaceholderUser.o"
+  },
+  "/Users/stanislavabobruskina/pyrusservicedesk/PyrusServiceDeskIOS/PyrusServiceDesk/PSDObjects/PSDRowMessage.swift" : {
+    "index-unit-output-path" : "/PyrusServiceDesk.build/Release-iphoneos/PyrusServiceDesk.build/Objects-normal/arm64/PSDRowMessage.o",
+    "llvm-bc" : "/Users/stanislavabobruskina/pyrusservicedesk/PyrusServiceDeskIOS/build/PyrusServiceDesk.build/Release-iphoneos/PyrusServiceDesk.build/Objects-normal/arm64/PSDRowMessage.bc",
+    "object" : "/Users/stanislavabobruskina/pyrusservicedesk/PyrusServiceDeskIOS/build/PyrusServiceDesk.build/Release-iphoneos/PyrusServiceDesk.build/Objects-normal/arm64/PSDRowMessage.o"
+  },
+  "/Users/stanislavabobruskina/pyrusservicedesk/PyrusServiceDeskIOS/PyrusServiceDesk/PSDObjects/PSDUser.swift" : {
+    "index-unit-output-path" : "/PyrusServiceDesk.build/Release-iphoneos/PyrusServiceDesk.build/Objects-normal/arm64/PSDUser.o",
+    "llvm-bc" : "/Users/stanislavabobruskina/pyrusservicedesk/PyrusServiceDeskIOS/build/PyrusServiceDesk.build/Release-iphoneos/PyrusServiceDesk.build/Objects-normal/arm64/PSDUser.bc",
+    "object" : "/Users/stanislavabobruskina/pyrusservicedesk/PyrusServiceDeskIOS/build/PyrusServiceDesk.build/Release-iphoneos/PyrusServiceDesk.build/Objects-normal/arm64/PSDUser.o"
+  },
+  "/Users/stanislavabobruskina/pyrusservicedesk/PyrusServiceDeskIOS/PyrusServiceDesk/PSDObjects/TicketCommand.swift" : {
+    "index-unit-output-path" : "/PyrusServiceDesk.build/Release-iphoneos/PyrusServiceDesk.build/Objects-normal/arm64/TicketCommand.o",
+    "llvm-bc" : "/Users/stanislavabobruskina/pyrusservicedesk/PyrusServiceDeskIOS/build/PyrusServiceDesk.build/Release-iphoneos/PyrusServiceDesk.build/Objects-normal/arm64/TicketCommand.bc",
+    "object" : "/Users/stanislavabobruskina/pyrusservicedesk/PyrusServiceDeskIOS/build/PyrusServiceDesk.build/Release-iphoneos/PyrusServiceDesk.build/Objects-normal/arm64/TicketCommand.o"
+  },
+  "/Users/stanislavabobruskina/pyrusservicedesk/PyrusServiceDeskIOS/PyrusServiceDesk/PSDObjectsCreator/PSDObjectsCreator.swift" : {
+    "index-unit-output-path" : "/PyrusServiceDesk.build/Release-iphoneos/PyrusServiceDesk.build/Objects-normal/arm64/PSDObjectsCreator.o",
+    "llvm-bc" : "/Users/stanislavabobruskina/pyrusservicedesk/PyrusServiceDeskIOS/build/PyrusServiceDesk.build/Release-iphoneos/PyrusServiceDesk.build/Objects-normal/arm64/PSDObjectsCreator.bc",
+    "object" : "/Users/stanislavabobruskina/pyrusservicedesk/PyrusServiceDeskIOS/build/PyrusServiceDesk.build/Release-iphoneos/PyrusServiceDesk.build/Objects-normal/arm64/PSDObjectsCreator.o"
+  },
+  "/Users/stanislavabobruskina/pyrusservicedesk/PyrusServiceDeskIOS/PyrusServiceDesk/PyrusServiceDeskCreator.swift" : {
+    "index-unit-output-path" : "/PyrusServiceDesk.build/Release-iphoneos/PyrusServiceDesk.build/Objects-normal/arm64/PyrusServiceDeskCreator.o",
+    "llvm-bc" : "/Users/stanislavabobruskina/pyrusservicedesk/PyrusServiceDeskIOS/build/PyrusServiceDesk.build/Release-iphoneos/PyrusServiceDesk.build/Objects-normal/arm64/PyrusServiceDeskCreator.bc",
+    "object" : "/Users/stanislavabobruskina/pyrusservicedesk/PyrusServiceDeskIOS/build/PyrusServiceDesk.build/Release-iphoneos/PyrusServiceDesk.build/Objects-normal/arm64/PyrusServiceDeskCreator.o"
+  },
+  "/Users/stanislavabobruskina/pyrusservicedesk/PyrusServiceDeskIOS/PyrusServiceDesk/PyrusServiceDeskCustomization.swift" : {
+    "index-unit-output-path" : "/PyrusServiceDesk.build/Release-iphoneos/PyrusServiceDesk.build/Objects-normal/arm64/PyrusServiceDeskCustomization.o",
+    "llvm-bc" : "/Users/stanislavabobruskina/pyrusservicedesk/PyrusServiceDeskIOS/build/PyrusServiceDesk.build/Release-iphoneos/PyrusServiceDesk.build/Objects-normal/arm64/PyrusServiceDeskCustomization.bc",
+    "object" : "/Users/stanislavabobruskina/pyrusservicedesk/PyrusServiceDeskIOS/build/PyrusServiceDesk.build/Release-iphoneos/PyrusServiceDesk.build/Objects-normal/arm64/PyrusServiceDeskCustomization.o"
+  },
+  "/Users/stanislavabobruskina/pyrusservicedesk/PyrusServiceDeskIOS/PyrusServiceDesk/Repositories/TicketCommandRepository.swift" : {
+    "index-unit-output-path" : "/PyrusServiceDesk.build/Release-iphoneos/PyrusServiceDesk.build/Objects-normal/arm64/TicketCommandRepository.o",
+    "llvm-bc" : "/Users/stanislavabobruskina/pyrusservicedesk/PyrusServiceDeskIOS/build/PyrusServiceDesk.build/Release-iphoneos/PyrusServiceDesk.build/Objects-normal/arm64/TicketCommandRepository.bc",
+    "object" : "/Users/stanislavabobruskina/pyrusservicedesk/PyrusServiceDeskIOS/build/PyrusServiceDesk.build/Release-iphoneos/PyrusServiceDesk.build/Objects-normal/arm64/TicketCommandRepository.o"
+  },
+  "/Users/stanislavabobruskina/pyrusservicedesk/PyrusServiceDeskIOS/PyrusServiceDesk/Requests/PSDCreateRequest.swift" : {
+    "index-unit-output-path" : "/PyrusServiceDesk.build/Release-iphoneos/PyrusServiceDesk.build/Objects-normal/arm64/PSDCreateRequest.o",
+    "llvm-bc" : "/Users/stanislavabobruskina/pyrusservicedesk/PyrusServiceDeskIOS/build/PyrusServiceDesk.build/Release-iphoneos/PyrusServiceDesk.build/Objects-normal/arm64/PSDCreateRequest.bc",
+    "object" : "/Users/stanislavabobruskina/pyrusservicedesk/PyrusServiceDeskIOS/build/PyrusServiceDesk.build/Release-iphoneos/PyrusServiceDesk.build/Objects-normal/arm64/PSDCreateRequest.o"
+  },
+  "/Users/stanislavabobruskina/pyrusservicedesk/PyrusServiceDeskIOS/PyrusServiceDesk/Requests/PSDDownloader.swift" : {
+    "index-unit-output-path" : "/PyrusServiceDesk.build/Release-iphoneos/PyrusServiceDesk.build/Objects-normal/arm64/PSDDownloader.o",
+    "llvm-bc" : "/Users/stanislavabobruskina/pyrusservicedesk/PyrusServiceDeskIOS/build/PyrusServiceDesk.build/Release-iphoneos/PyrusServiceDesk.build/Objects-normal/arm64/PSDDownloader.bc",
+    "object" : "/Users/stanislavabobruskina/pyrusservicedesk/PyrusServiceDeskIOS/build/PyrusServiceDesk.build/Release-iphoneos/PyrusServiceDesk.build/Objects-normal/arm64/PSDDownloader.o"
+  },
+  "/Users/stanislavabobruskina/pyrusservicedesk/PyrusServiceDeskIOS/PyrusServiceDesk/Requests/PSDError.swift" : {
+    "index-unit-output-path" : "/PyrusServiceDesk.build/Release-iphoneos/PyrusServiceDesk.build/Objects-normal/arm64/PSDError.o",
+    "llvm-bc" : "/Users/stanislavabobruskina/pyrusservicedesk/PyrusServiceDeskIOS/build/PyrusServiceDesk.build/Release-iphoneos/PyrusServiceDesk.build/Objects-normal/arm64/PSDError.bc",
+    "object" : "/Users/stanislavabobruskina/pyrusservicedesk/PyrusServiceDeskIOS/build/PyrusServiceDesk.build/Release-iphoneos/PyrusServiceDesk.build/Objects-normal/arm64/PSDError.o"
+  },
+  "/Users/stanislavabobruskina/pyrusservicedesk/PyrusServiceDeskIOS/PyrusServiceDesk/Requests/PSDErrorParser.swift" : {
+    "index-unit-output-path" : "/PyrusServiceDesk.build/Release-iphoneos/PyrusServiceDesk.build/Objects-normal/arm64/PSDErrorParser.o",
+    "llvm-bc" : "/Users/stanislavabobruskina/pyrusservicedesk/PyrusServiceDeskIOS/build/PyrusServiceDesk.build/Release-iphoneos/PyrusServiceDesk.build/Objects-normal/arm64/PSDErrorParser.bc",
+    "object" : "/Users/stanislavabobruskina/pyrusservicedesk/PyrusServiceDeskIOS/build/PyrusServiceDesk.build/Release-iphoneos/PyrusServiceDesk.build/Objects-normal/arm64/PSDErrorParser.o"
+  },
+  "/Users/stanislavabobruskina/pyrusservicedesk/PyrusServiceDeskIOS/PyrusServiceDesk/Requests/PSDGetChat.swift" : {
+    "index-unit-output-path" : "/PyrusServiceDesk.build/Release-iphoneos/PyrusServiceDesk.build/Objects-normal/arm64/PSDGetChat.o",
+    "llvm-bc" : "/Users/stanislavabobruskina/pyrusservicedesk/PyrusServiceDeskIOS/build/PyrusServiceDesk.build/Release-iphoneos/PyrusServiceDesk.build/Objects-normal/arm64/PSDGetChat.bc",
+    "object" : "/Users/stanislavabobruskina/pyrusservicedesk/PyrusServiceDeskIOS/build/PyrusServiceDesk.build/Release-iphoneos/PyrusServiceDesk.build/Objects-normal/arm64/PSDGetChat.o"
+  },
+  "/Users/stanislavabobruskina/pyrusservicedesk/PyrusServiceDeskIOS/PyrusServiceDesk/Requests/PSDGetChats.swift" : {
+    "index-unit-output-path" : "/PyrusServiceDesk.build/Release-iphoneos/PyrusServiceDesk.build/Objects-normal/arm64/PSDGetChats.o",
+    "llvm-bc" : "/Users/stanislavabobruskina/pyrusservicedesk/PyrusServiceDeskIOS/build/PyrusServiceDesk.build/Release-iphoneos/PyrusServiceDesk.build/Objects-normal/arm64/PSDGetChats.bc",
+    "object" : "/Users/stanislavabobruskina/pyrusservicedesk/PyrusServiceDeskIOS/build/PyrusServiceDesk.build/Release-iphoneos/PyrusServiceDesk.build/Objects-normal/arm64/PSDGetChats.o"
+  },
+  "/Users/stanislavabobruskina/pyrusservicedesk/PyrusServiceDeskIOS/PyrusServiceDesk/Requests/PSDMessageSend.swift" : {
+    "index-unit-output-path" : "/PyrusServiceDesk.build/Release-iphoneos/PyrusServiceDesk.build/Objects-normal/arm64/PSDMessageSend.o",
+    "llvm-bc" : "/Users/stanislavabobruskina/pyrusservicedesk/PyrusServiceDeskIOS/build/PyrusServiceDesk.build/Release-iphoneos/PyrusServiceDesk.build/Objects-normal/arm64/PSDMessageSend.bc",
+    "object" : "/Users/stanislavabobruskina/pyrusservicedesk/PyrusServiceDeskIOS/build/PyrusServiceDesk.build/Release-iphoneos/PyrusServiceDesk.build/Objects-normal/arm64/PSDMessageSend.o"
+  },
+  "/Users/stanislavabobruskina/pyrusservicedesk/PyrusServiceDeskIOS/PyrusServiceDesk/Requests/PSDMessageSender.swift" : {
+    "index-unit-output-path" : "/PyrusServiceDesk.build/Release-iphoneos/PyrusServiceDesk.build/Objects-normal/arm64/PSDMessageSender.o",
+    "llvm-bc" : "/Users/stanislavabobruskina/pyrusservicedesk/PyrusServiceDeskIOS/build/PyrusServiceDesk.build/Release-iphoneos/PyrusServiceDesk.build/Objects-normal/arm64/PSDMessageSender.bc",
+    "object" : "/Users/stanislavabobruskina/pyrusservicedesk/PyrusServiceDeskIOS/build/PyrusServiceDesk.build/Release-iphoneos/PyrusServiceDesk.build/Objects-normal/arm64/PSDMessageSender.o"
+  },
+  "/Users/stanislavabobruskina/pyrusservicedesk/PyrusServiceDeskIOS/PyrusServiceDesk/Requests/PSDNoConnectionView.swift" : {
+    "index-unit-output-path" : "/PyrusServiceDesk.build/Release-iphoneos/PyrusServiceDesk.build/Objects-normal/arm64/PSDNoConnectionView.o",
+    "llvm-bc" : "/Users/stanislavabobruskina/pyrusservicedesk/PyrusServiceDeskIOS/build/PyrusServiceDesk.build/Release-iphoneos/PyrusServiceDesk.build/Objects-normal/arm64/PSDNoConnectionView.bc",
+    "object" : "/Users/stanislavabobruskina/pyrusservicedesk/PyrusServiceDeskIOS/build/PyrusServiceDesk.build/Release-iphoneos/PyrusServiceDesk.build/Objects-normal/arm64/PSDNoConnectionView.o"
+  },
+  "/Users/stanislavabobruskina/pyrusservicedesk/PyrusServiceDeskIOS/PyrusServiceDesk/Requests/PSDPushToken.swift" : {
+    "index-unit-output-path" : "/PyrusServiceDesk.build/Release-iphoneos/PyrusServiceDesk.build/Objects-normal/arm64/PSDPushToken.o",
+    "llvm-bc" : "/Users/stanislavabobruskina/pyrusservicedesk/PyrusServiceDeskIOS/build/PyrusServiceDesk.build/Release-iphoneos/PyrusServiceDesk.build/Objects-normal/arm64/PSDPushToken.bc",
+    "object" : "/Users/stanislavabobruskina/pyrusservicedesk/PyrusServiceDeskIOS/build/PyrusServiceDesk.build/Release-iphoneos/PyrusServiceDesk.build/Objects-normal/arm64/PSDPushToken.o"
+  },
+  "/Users/stanislavabobruskina/pyrusservicedesk/PyrusServiceDeskIOS/PyrusServiceDesk/Requests/PSDUploader.swift" : {
+    "index-unit-output-path" : "/PyrusServiceDesk.build/Release-iphoneos/PyrusServiceDesk.build/Objects-normal/arm64/PSDUploader.o",
+    "llvm-bc" : "/Users/stanislavabobruskina/pyrusservicedesk/PyrusServiceDeskIOS/build/PyrusServiceDesk.build/Release-iphoneos/PyrusServiceDesk.build/Objects-normal/arm64/PSDUploader.bc",
+    "object" : "/Users/stanislavabobruskina/pyrusservicedesk/PyrusServiceDeskIOS/build/PyrusServiceDesk.build/Release-iphoneos/PyrusServiceDesk.build/Objects-normal/arm64/PSDUploader.o"
+  },
+  "/Users/stanislavabobruskina/pyrusservicedesk/PyrusServiceDeskIOS/PyrusServiceDesk/Requests/URLCreator.swift" : {
+    "index-unit-output-path" : "/PyrusServiceDesk.build/Release-iphoneos/PyrusServiceDesk.build/Objects-normal/arm64/URLCreator.o",
+    "llvm-bc" : "/Users/stanislavabobruskina/pyrusservicedesk/PyrusServiceDeskIOS/build/PyrusServiceDesk.build/Release-iphoneos/PyrusServiceDesk.build/Objects-normal/arm64/URLCreator.bc",
+    "object" : "/Users/stanislavabobruskina/pyrusservicedesk/PyrusServiceDeskIOS/build/PyrusServiceDesk.build/Release-iphoneos/PyrusServiceDesk.build/Objects-normal/arm64/URLCreator.o"
+  }
+}
