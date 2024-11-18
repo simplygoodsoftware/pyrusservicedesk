@@ -8,7 +8,7 @@ struct PSDGetChats {
      Get chats from server.
      On completion returns [PSDChat] if it was received, or empty nil, if no connection.
      */
-    static func get(commands: [[String: Any?]?] = [], completion: @escaping (_ chatsArray: [PSDChat]?, _ commandsResults: [TicketCommandResult]?, _ authorAccessDenied: [String]?) -> Void) {
+    static func get(commands: [[String: Any?]?] = [], completion: @escaping (_ chatsArray: [PSDChat]?, _ commandsResults: [TicketCommandResult]?, _ authorAccessDenied: [String]?, _ clients: [PSDClientInfo]?) -> Void) {
         //remove old session if it is
         remove()
         var parameters = [String: Any]()
@@ -39,7 +39,7 @@ struct PSDGetChats {
         
         PSDGetChats.sessionTask = PyrusServiceDesk.mainSession.dataTask(with: request) { data, response, error in
             guard let data = data, error == nil else {                                                 // check for fundamental networking error
-                completion(nil, nil, nil)
+                completion(nil, nil, nil, nil)
                 return
             }
             
@@ -58,7 +58,7 @@ struct PSDGetChats {
                 if PyrusServiceDesk.chats.count == 0 {
                     PyrusServiceDesk.chats = []
                 }
-                completion([], nil, nil)
+                completion([], nil, nil, nil)
             }
             do{
                 let chatsData = try JSONSerialization.jsonObject(with: data, options: .allowFragments) as? [String : Any] ?? [String: Any]()
@@ -67,7 +67,7 @@ struct PSDGetChats {
                 PyrusServiceDesk.chats = chats
                 let clientsArray = chatsData["applications"] as? NSArray ?? NSArray()
                 let clients = generateClients(from: clientsArray)
-                PyrusServiceDesk.clients = clients
+                //PyrusServiceDesk.clients = clients
                 let authorAccessDenied = chatsData["author_access_denied"] as? [String]
                 
                 do {
@@ -75,9 +75,9 @@ struct PSDGetChats {
                     let jsonData = try JSONSerialization.data(withJSONObject: commandsArray, options: [])
                     let decoder = JSONDecoder()
                     let commands = try decoder.decode([TicketCommandResult].self, from: jsonData)
-                    completion(chats, commands, authorAccessDenied)
+                    completion(chats, commands, authorAccessDenied, clients)
                 } catch {
-                    completion(chats, nil, authorAccessDenied)
+                    completion(chats, nil, authorAccessDenied, clients)
                 }
                 PyrusServiceDesk.chats = chats
             } catch { 

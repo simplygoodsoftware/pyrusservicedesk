@@ -147,7 +147,7 @@ extension UnderlineSegmentController: ButtonSegmentViewDelegate {
 }
 
 extension UIColor {
-    static let mainTintColor = UIColor(hex: "#8663FD")
+    static let mainTintColor = UIColor(hex: "#354DF2")
     static let secondTintColor = UIColor(hex: "#858C93")
 }
 

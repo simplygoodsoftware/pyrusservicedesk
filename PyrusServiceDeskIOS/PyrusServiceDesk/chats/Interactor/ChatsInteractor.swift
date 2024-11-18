@@ -142,13 +142,15 @@ private extension ChatsInteractor {
     }
     
     func updateSelected(index: Int) {
-        selectedIndex = index
-        presenter.doWork(.deleteFilter)
-        PyrusServiceDesk.currentClientId = clients[index].clientId
-        createMenuActions()
-        updateChats()
-        
-        updateIcon(imagePath: clients[index].clientIcon, index: index)
+        if index < clients.count {
+            selectedIndex = index
+            presenter.doWork(.deleteFilter)
+            PyrusServiceDesk.currentClientId = clients[index].clientId
+            createMenuActions()
+            updateChats()
+            
+            updateIcon(imagePath: clients[index].clientIcon, index: index)
+        }
     }
     
     @objc func updateClients() {
@@ -184,13 +186,6 @@ private extension ChatsInteractor {
     func reloadChats() {
         PyrusServiceDesk.restartTimer()
         PyrusServiceDesk.syncManager.syncGetTickets()
-//        DispatchQueue.global().async { [weak self] in
-//            PSDGetChats.get() { [weak self] chats, _, _   in
-//                DispatchQueue.main.async {
-//                    self?.presenter.doWork(.endRefresh)
-//                }
-//            }
-//        }
     }
     
     func openNewChat(userId: String? = nil) {

@@ -22,7 +22,6 @@ class PSDChatsViewController: UIViewController {
     
     private lazy var navigationView: UIView = {
         let view = UIView()
-//        view.translatesAutoresizingMaskIntoConstraints = false
         view.backgroundColor = UIColor(hex: "#F9F9F9F0")
         view.layer.borderColor = UIColor.black.withAlphaComponent(0.3).cgColor
         view.layer.borderWidth = 0.5
@@ -35,7 +34,6 @@ class PSDChatsViewController: UIViewController {
     
     private lazy var segmentControl: UnderlineSegmentController = {
         let segment = UnderlineSegmentController(frame: .zero)
-//        segment.translatesAutoresizingMaskIntoConstraints = false
         return segment
     }()
     
@@ -114,7 +112,6 @@ class PSDChatsViewController: UIViewController {
     override func viewWillLayoutSubviews() {
         super.viewWillLayoutSubviews()
         if isFirstLayout {
-            //filterInfoView.frame = CGRect(x: 0, y: Int(self.view.safeAreaInsets.top), width: Int(self.view.frame.width), height: 0)
             filterInfoView.frame = CGRect(x: 0, y: Int(self.view.safeAreaInsets.top + 43), width: Int(self.view.frame.width), height: 0)
             segmentControl.frame = CGRect(x: 0, y: Int(self.view.safeAreaInsets.top + 44), width: Int(self.view.frame.width), height: 0)
             navigationView.frame = CGRect(x: -1, y: -1, width: Int(self.view.frame.width + 1), height: Int(self.view.safeAreaInsets.top + 44))
@@ -129,7 +126,6 @@ private extension PSDChatsViewController {
     func design() {
         view.backgroundColor = UIColor.psdBackground
         view.addSubview(tableView)
-        //view.addSubview(emptyChatsView)
         tableView.backgroundView = emptyChatsView
 
         view.addSubview(navigationView)
@@ -282,13 +278,6 @@ private extension PSDChatsViewController {
         bigAppear.backgroundColor = UIColor(hex: "#F9F9F9F0")
         navigationItem.scrollEdgeAppearance = bigAppear
         navigationItem.standardAppearance = bigAppear
-        //navigationItem.rightBarButtonItem = customization?.chatsRightBarButtonItem
-                
-//        NSLayoutConstraint.activate([
-//            navigationView.topAnchor.constraint(equalTo: view.topAnchor, constant: -1),
-//            navigationView.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: -1),
-//            navigationView.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: 1),
-//        ])
         
         if let button = customization?.chatsRightBarButtonItem {
             navigationView.addSubview(button)
@@ -304,7 +293,7 @@ private extension PSDChatsViewController {
         
         setupNavTitle()
         setupFilterButton()
-        setupSegmentController()
+        segmentControl.delegate = self
     }
     
     func setupFilterButton() {
@@ -323,7 +312,6 @@ private extension PSDChatsViewController {
             filterImage.centerYAnchor.constraint(equalTo: filterButton.centerYAnchor),
         ])
         filterImage.sizeToFit()
-        // navigationItem.leftBarButtonItem = UIBarButtonItem(customView: filterButton)
         filterButton.isHidden = true
         if #available(iOS 14.0, *) {
             filterButton.showsMenuAsPrimaryAction = true
@@ -332,18 +320,6 @@ private extension PSDChatsViewController {
         NSLayoutConstraint.activate([
             filterButton.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor, constant: 9),
             filterButton.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 16)
-        ])
-    }
-    
-    func setupSegmentController() {
-        segmentControl.delegate = self
-        
-        NSLayoutConstraint.activate([
-//            segmentControl.topAnchor.constraint(equalTo: filterButton.bottomAnchor, constant: 7),
-//            navigationView.bottomAnchor.constraint(equalTo: segmentControl.bottomAnchor, constant: 0.5),
-//            segmentControl.leadingAnchor.constraint(equalTo: view.leadingAnchor),
-//            segmentControl.trailingAnchor.constraint(equalTo: view.trailingAnchor),
-//            segmentControl.heightAnchor.constraint(equalToConstant: 40)
         ])
     }
     
@@ -367,12 +343,11 @@ private extension PSDChatsViewController {
             titleView.centerXAnchor.constraint(equalTo: view.centerXAnchor)
         ])
         
-        //navTitle.text = "Обращения"//PyrusServiceDesk.clientName
+        //navTitle.text = "Обращения"
         navTitle.font = CustomizationHelper.systemBoldFont(ofSize: 17)
         icon.layer.cornerRadius = 12
         icon.clipsToBounds = true
         icon.contentMode = .scaleAspectFill
-        //navigationItem.titleView = titleView
         
         let tapGesture = UITapGestureRecognizer(target: self, action: #selector(titleViewTapped))
         titleView.addGestureRecognizer(tapGesture)
@@ -484,7 +459,7 @@ extension PSDChatsViewController: ChatsViewProtocol {
                 filterButton.menu = UIMenu(children: filterActions)
                 filterButton.isHidden = !menuVisible
                 plusView.menu = UIMenu(children: openNewActions)
-                plusView.showsMenuAsPrimaryAction = menuVisible
+                plusView.showsMenuAsPrimaryAction = menuVisible && !isFiltered
             }
         case .endRefresh:
             customRefresh.endRefreshing()
@@ -495,8 +470,8 @@ extension PSDChatsViewController: ChatsViewProtocol {
             UIView.animate(withDuration: 0.3, animations: {
                 if self.segmentControl.frame.size.height == 0 {
                     self.segmentControl.frame.size.height = 40
-                    self.navigationView.frame.size.height = self.view.safeAreaInsets.top + 85.5//41.5
-                    self.filterInfoView.frame.origin.y = self.view.safeAreaInsets.top + 84.5//41.5
+                    self.navigationView.frame.size.height = self.view.safeAreaInsets.top + 85.5
+                    self.filterInfoView.frame.origin.y = self.view.safeAreaInsets.top + 84.5
                 }
             }, completion: { [weak self] _ in
                 self?.segmentControl.updateTitle(titles: titles, selectIndex: selectedIndex)

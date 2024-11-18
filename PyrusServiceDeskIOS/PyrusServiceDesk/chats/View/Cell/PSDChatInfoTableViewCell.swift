@@ -154,5 +154,5 @@ private extension UIFont {
 private extension UIColor {
     static let lastMessageInfo = UIColor(hex: "#60666C") ?? .systemGray
     static let timeLabel = UIColor(hex: "#9199A1") ?? .systemGray
-    static let secondColor = UIColor(hex: "#FFAA5A")
+    static let secondColor = UIColor(hex: "#FFB049")
 }

@@ -444,31 +444,7 @@ import UIKit
         if(userId.count > 0){
             restartTimer()
             PyrusLogger.shared.logEvent("PSDGetChats did begin.")
-            syncManager.syncGetTickets()
-//            repository.load { commands in
-//                DispatchQueue.global().async {
-////                    PSDGetChats.get(){
-////                        chats, commands  in
-////                        DispatchQueue.main.async {
-////                            PyrusLogger.shared.logEvent("PSDGetChats did end with chats count: \(chats?.count ?? 0).")
-////                            guard let chats = chats else{
-////                                return
-////                            }
-////                            var unreadChats = 0
-////                            var lasMessage: PSDMessage?
-////                            for chat in chats {
-////                                lasMessage = chat.messages.last
-////                                guard !chat.isRead else{
-////                                    continue
-////                                }
-////                                unreadChats = unreadChats + 1
-////                            }
-////                            UnreadMessageManager.refreshNewMessagesCount(unreadChats > 0, lastMessage: lasMessage)
-////                        }
-////                    }
-//                }
-//            }
-           
+            syncManager.syncGetTickets()           
         }
         else{
             PyrusLogger.shared.logEvent("Empty userId, stop requesting PSDGetChats.")
