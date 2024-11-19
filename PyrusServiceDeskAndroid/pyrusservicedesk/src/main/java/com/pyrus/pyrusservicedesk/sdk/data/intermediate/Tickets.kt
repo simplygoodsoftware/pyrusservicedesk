@@ -2,6 +2,7 @@ package com.pyrus.pyrusservicedesk.sdk.data.intermediate
 
 import androidx.annotation.Keep
 import com.google.gson.annotations.SerializedName
+import com.pyrus.pyrusservicedesk.sdk.data.Application
 import com.pyrus.pyrusservicedesk.sdk.data.Ticket
 
 /**
@@ -11,7 +12,9 @@ import com.pyrus.pyrusservicedesk.sdk.data.Ticket
 internal data class Tickets(
         @SerializedName("hasMore")
         val hasMore: Boolean?,
+        @SerializedName("applications")
+        val applications: List<Application>? = emptyList(),
         @SerializedName("tickets")
-        val tickets: List<Ticket> = emptyList())
+        val tickets: List<Ticket>? = emptyList())
 //        @SerializedName("TicketCommandResult")
 //        val additionalUsers: List<TicketCommandResult>?,

@@ -17,6 +17,8 @@ internal class AddCommentRequestBody(
         securityKey: String?,
         instanceId: String?,
         version: Int,
+        authorId: String?,
+        authorName: String?,
         @SerializedName("comment")
         val comment: String? = null,
         @SerializedName("attachments")
@@ -29,4 +31,4 @@ internal class AddCommentRequestBody(
         val extraFields: Map<String, String>?,
         @SerializedName("request_new_ticket")
         val requestNewTicket: Boolean,
-) : RequestBodyBase(false, null, null, null, appId, userId, securityKey, instanceId, version, null) //TODO check
+) : RequestBodyBase(false, null, authorId, authorName, appId, userId, securityKey, instanceId, version, null) //TODO check

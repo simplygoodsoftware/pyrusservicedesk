@@ -2,6 +2,7 @@ package com.pyrus.pyrusservicedesk.sdk.data
 
 import android.net.Uri
 import androidx.annotation.MainThread
+import com.pyrus.pyrusservicedesk.PyrusServiceDesk
 import com.pyrus.pyrusservicedesk.sdk.FileResolver
 import com.pyrus.pyrusservicedesk.sdk.data.intermediate.FileData
 import com.pyrus.pyrusservicedesk.sdk.repositories.offline.OfflineRepository
@@ -44,7 +45,7 @@ internal class LocalDataProvider(offlineRepository: OfflineRepository,
         return Comment(
             body = text,
             isInbound = true,
-            author = Author(ConfigUtils.getUserName(), "10"), //TODO
+            author = Author(ConfigUtils.getUserName(), PyrusServiceDesk.get().authorId),
             attachments = fileResolver.getFileData(fileUri)?.let {
                 listOf(createLocalAttachment(it))
             },

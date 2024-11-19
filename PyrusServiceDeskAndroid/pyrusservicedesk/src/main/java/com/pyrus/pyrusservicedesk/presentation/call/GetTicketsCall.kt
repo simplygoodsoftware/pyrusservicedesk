@@ -1,11 +1,10 @@
 package com.pyrus.pyrusservicedesk.presentation.call
 
-import kotlinx.coroutines.CoroutineScope
 import com.pyrus.pyrusservicedesk.sdk.RequestFactory
-import com.pyrus.pyrusservicedesk.sdk.data.Ticket
-import com.pyrus.pyrusservicedesk.sdk.data.TicketShortDescription
+import com.pyrus.pyrusservicedesk.sdk.data.intermediate.Tickets
 import com.pyrus.pyrusservicedesk.sdk.response.ResponseCallback
 import com.pyrus.pyrusservicedesk.sdk.response.ResponseError
+import kotlinx.coroutines.CoroutineScope
 
 /**
  * Adapter for obtaining list of available tickets.
@@ -14,15 +13,15 @@ import com.pyrus.pyrusservicedesk.sdk.response.ResponseError
 internal class GetTicketsCall(
     scope: CoroutineScope,
     private val requests: RequestFactory)
-    : BaseCall<List<Ticket>>(scope) {
+    : BaseCall<Tickets>(scope) {
 
-    override suspend fun run(): CallResult<List<Ticket>> {
-        var tickets: List<Ticket>? = null
+    override suspend fun run(): CallResult<Tickets> {
+        var getTicketsResult: Tickets? = null
         var error: ResponseError? = null
         requests.getTicketsRequest().execute(
-            object: ResponseCallback<List<Ticket>> {
-                override fun onSuccess(data: List<Ticket>) {
-                    tickets = data
+            object: ResponseCallback<Tickets> {
+                override fun onSuccess(data: Tickets) {
+                    getTicketsResult = data
                 }
 
                 override fun onFailure(responseError: ResponseError) {
@@ -31,6 +30,6 @@ internal class GetTicketsCall(
 
             }
         )
-        return CallResult(tickets, error)
+        return CallResult(getTicketsResult, error)
     }
 }

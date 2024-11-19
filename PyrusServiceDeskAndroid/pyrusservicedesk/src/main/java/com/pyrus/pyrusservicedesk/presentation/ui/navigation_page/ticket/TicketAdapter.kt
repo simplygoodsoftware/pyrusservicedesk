@@ -1,7 +1,6 @@
 package com.pyrus.pyrusservicedesk.presentation.ui.navigation_page.ticket
 
 import android.content.Intent
-import android.content.res.ColorStateList
 import android.graphics.PorterDuff
 import android.graphics.drawable.AnimationDrawable
 import android.net.Uri
@@ -17,7 +16,6 @@ import android.widget.ImageView
 import android.widget.TextView
 import androidx.annotation.LayoutRes
 import androidx.appcompat.content.res.AppCompatResources
-import androidx.core.content.ContextCompat
 import com.pyrus.pyrusservicedesk.PyrusServiceDesk
 import com.pyrus.pyrusservicedesk.R
 import com.pyrus.pyrusservicedesk.presentation.ui.navigation_page.ticket.entries.ButtonEntry
@@ -97,6 +95,7 @@ internal class TicketAdapter: AdapterBase<TicketEntry>() {
                 type == Type.Rating -> VIEW_TYPE_RATING
                 type == Type.Buttons -> VIEW_TYPE_COMMENT_BUTTONS
                 (this as CommentEntry).comment.rating != null -> VIEW_TYPE_COMMENT_RATING
+                this.comment.author.authorId != PyrusServiceDesk.get().authorId -> VIEW_TYPE_COMMENT_INBOUND
                 this.comment.isInbound -> VIEW_TYPE_COMMENT_OUTBOUND
                 else -> VIEW_TYPE_COMMENT_INBOUND
             }

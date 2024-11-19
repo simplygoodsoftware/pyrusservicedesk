@@ -7,6 +7,7 @@ import com.pyrus.pyrusservicedesk.PyrusServiceDesk
 import com.pyrus.pyrusservicedesk.log.PLog
 import com.pyrus.pyrusservicedesk.sdk.RequestFactory
 import com.pyrus.pyrusservicedesk.sdk.data.Ticket
+import com.pyrus.pyrusservicedesk.sdk.data.intermediate.Tickets
 import com.pyrus.pyrusservicedesk.sdk.response.ResponseCallback
 import com.pyrus.pyrusservicedesk.sdk.response.ResponseError
 import com.pyrus.pyrusservicedesk.utils.MILLISECONDS_IN_DAY
@@ -58,12 +59,12 @@ internal class LiveUpdates(
             val requestUserId = userId
             GlobalScope.launch(ioDispatcher) {
                 requests.getTicketsRequest().execute(
-                    object : ResponseCallback<List<Ticket>> {
-                        override fun onSuccess(data: List<Ticket>) {
-                            val newUnread = data.count { !it.isRead!! } //TODO
+                    object : ResponseCallback<Tickets> {
+                        override fun onSuccess(data: Tickets) {
+                            val newUnread = data.tickets?.count { !it.isRead!! } ?: 0 //TODO
                             this@launch.launch(mainDispatcher) {
                                 val userId = PyrusServiceDesk.get().userId
-                                if (data.isEmpty())
+                                if (data.tickets.isNullOrEmpty())
                                     stopUpdates()
                                 else if (requestUserId == userId)
                                     processGetTicketsSuccess(data, newUnread)
@@ -250,7 +251,7 @@ internal class LiveUpdates(
     }
 
     @MainThread
-    private fun processGetTicketsSuccess(data: List<Ticket>, newUnreadCount: Int) {
+    private fun processGetTicketsSuccess(data: Tickets, newUnreadCount: Int) {
         val isChanged = recentUnreadCounter != newUnreadCount
         PLog.d(TAG, "processSuccess, isChanged: $isChanged, recentUnreadCounter: $recentUnreadCounter, newUnreadCount: $newUnreadCount")
         notifyDataSubscribers(data, isChanged, newUnreadCount)
@@ -260,7 +261,7 @@ internal class LiveUpdates(
         val lastSavedComment = preferencesManager.getLastComment()
         val hasUnreadTickets = newUnreadCount > 0
 
-        val lastCommentId = data.firstOrNull()?.lastComment?.commentId ?: return
+        val lastCommentId = data.tickets?.firstOrNull()?.lastComment?.commentId ?: return
 
 
         if (lastSavedComment != null && lastSavedComment.id == lastCommentId && !lastSavedComment.isRead && !hasUnreadTickets) {
@@ -327,7 +328,7 @@ internal class LiveUpdates(
         }
     }
 
-    private fun notifyDataSubscribers(data: List<Ticket>, isChanged: Boolean, newUnreadCount: Int) {
+    private fun notifyDataSubscribers(data: Tickets, isChanged: Boolean, newUnreadCount: Int) {
         dataSubscribers.forEach {
             it.onNewData(data)
             if (isChanged)
@@ -367,7 +368,7 @@ internal interface LiveUpdateSubscriber: OnUnreadTicketCountChangedSubscriber {
     /**
      * Invoked when new portion of [tickets] data is received.
      */
-    fun onNewData(tickets: List<Ticket>)
+    fun onNewData(tickets: Tickets)
 }
 
 /**

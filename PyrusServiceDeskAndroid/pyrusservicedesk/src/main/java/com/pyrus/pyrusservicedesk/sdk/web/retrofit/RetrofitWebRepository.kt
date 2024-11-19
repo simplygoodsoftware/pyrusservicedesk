@@ -89,8 +89,14 @@ internal class RetrofitWebRepository(
         }
     }
 
-    //TODO delete
-    val additionalUsers = listOf(UserData(appId, "251380446", ""))
+    fun getAdditionalUsers(): List<UserData> {
+        val additionalUsers: MutableList<UserData> = mutableListOf()
+        for (id in PyrusServiceDesk.usersId) {
+            additionalUsers.add(UserData(appId, id, ""))
+        }
+        additionalUsers.removeAt(0)
+        return additionalUsers
+    }
 
 
     override suspend fun getTickets(): GetTicketsResponse {
@@ -102,10 +108,11 @@ internal class RetrofitWebRepository(
         )
         return withContext(Dispatchers.IO){
             try {
-                api.getTickets(RequestBodyBase(false, additionalUsers, "10", "Kate Test", appId, getUserId(),  getSecurityKey(), getInstanceId(), getVersion(), apiFlag)).execute().run {
+                //TODO need full info
+                api.getTickets(RequestBodyBase(false, getAdditionalUsers(), PyrusServiceDesk.get().authorId , ConfigUtils.getUserName(), appId, PyrusServiceDesk.usersId[0],  getSecurityKey(), getInstanceId(), getVersion(), apiFlag)).execute().run {
                     PLog.d(TAG, "getTickets, isSuccessful: $isSuccessful, body() != null: ${body() != null}")
                     when {
-                        isSuccessful && body() != null -> GetTicketsResponse(tickets = body()!!.tickets)
+                        isSuccessful && body() != null -> GetTicketsResponse(tickets = body()!!)
                         else -> GetTicketsResponse(createError(this))
                     }
                 }
@@ -154,12 +161,12 @@ internal class RetrofitWebRepository(
     }
 
     private fun getUserId(): String {
-        //TODO
-//        if (getVersion() == API_VERSION_2) {
-//            return PyrusServiceDesk.get().userId ?: instanceId
-//        }
-//        return instanceId
-        return "251380469"
+        //TODO return
+        if (getVersion() == API_VERSION_2) {
+            return PyrusServiceDesk.get().userId ?: instanceId
+        }
+        return PyrusServiceDesk.get().userId ?: instanceId
+        //return "255371017"
     }
 
     private fun getVersion(): Int {
@@ -219,6 +226,8 @@ internal class RetrofitWebRepository(
                     getSecurityKey(),
                     getInstanceId(),
                     getVersion(),
+                    PyrusServiceDesk.get().authorId,
+                    ConfigUtils.getUserName(),
                     cament.body,
                     cament.attachments,
                     ConfigUtils.getUserName(),
@@ -263,7 +272,7 @@ internal class RetrofitWebRepository(
         )
         return withContext(Dispatchers.IO){
             try {
-                api.getTicket(RequestBodyBase(false, additionalUsers, "10", "Kate Test", appId, getUserId(), getSecurityKey(), getInstanceId(), getVersion(), apiFlag), ticketId).execute().run {
+                api.getTicket(RequestBodyBase(false, getAdditionalUsers(), PyrusServiceDesk.get().authorId, ConfigUtils.getUserName(), appId, PyrusServiceDesk.usersId[0], getSecurityKey(), getInstanceId(), getVersion(), apiFlag), ticketId).execute().run {
                     PLog.d(TAG, "getTicket, isSuccessful: $isSuccessful, body() != null: ${body() != null}")
                     when {
                         isSuccessful && body() != null -> GetTicketResponse(ticket = body())
