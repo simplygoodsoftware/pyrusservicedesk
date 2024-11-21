@@ -2,6 +2,7 @@ package com.pyrus.pyrusservicedesk.sdk.web.request_body
 
 import androidx.annotation.Keep
 import com.google.gson.annotations.SerializedName
+import com.pyrus.pyrusservicedesk.sdk.data.Command
 import com.pyrus.pyrusservicedesk.sdk.data.UserData
 
 /**
@@ -16,12 +17,12 @@ internal open class RequestBodyBase(
         val needFullInfo: Boolean? = false,
         @SerializedName("additional_users")
         val additionalUsers: List<UserData>? = null,
-////        @SerializedName("commands") //TODO
-////        val commands: String?,
-//        @SerializedName("author_id")
-//        val authorId: String?,
-//        @SerializedName("author_name")
-//        val authorName: String?,
+        @SerializedName("commands")
+        val commands: List<Command>? = emptyList(),
+        @SerializedName("author_id")
+        val authorId: String?,
+        @SerializedName("author_name")
+        val authorName: String?,
         @SerializedName("app_id")
         val appId: String,
         @SerializedName("user_id")
@@ -32,6 +33,6 @@ internal open class RequestBodyBase(
         val instanceId: String?,
         @SerializedName("version")
         val version: Int,
-//        @SerializedName("api_sign")
-//        val apiSign: String?,
+        @SerializedName("api_sign")
+        val apiSign: String?,
 )

@@ -2,6 +2,7 @@ package com.pyrus.pyrusservicedesk.sdk.data
 
 import android.net.Uri
 import androidx.annotation.MainThread
+import com.pyrus.pyrusservicedesk.PyrusServiceDesk
 import com.pyrus.pyrusservicedesk.sdk.FileResolver
 import com.pyrus.pyrusservicedesk.sdk.data.intermediate.FileData
 import com.pyrus.pyrusservicedesk.sdk.repositories.offline.OfflineRepository
@@ -44,13 +45,32 @@ internal class LocalDataProvider(offlineRepository: OfflineRepository,
         return Comment(
             body = text,
             isInbound = true,
-            author = Author(ConfigUtils.getUserName()),
+            author = Author(ConfigUtils.getUserName(), PyrusServiceDesk.get().authorId),
             attachments = fileResolver.getFileData(fileUri)?.let {
                 listOf(createLocalAttachment(it))
             },
             creationDate = Calendar.getInstance().time,
             localId = --lastLocalCommentId,
             rating = rating
+        )
+    }
+
+    /**
+     * Creates local comment instance using given [text] and [fileUri].
+     *
+     * @return [Comment] instance with [Comment.isLocal] is TRUE.
+     */
+    @MainThread
+    fun createCreateComment(comment: String = "", fileUri: Uri? = null, userId: String, ticketId: Int): CreateComment {
+        return CreateComment(
+            comment = comment,
+            requestNewTicket = ticketId == EMPTY_TICKET_ID,
+            userId = userId,
+            appId = PyrusServiceDesk.get().appId,
+            ticketId = ticketId,
+            attachments = fileResolver.getFileData(fileUri)?.let {
+                listOf(createLocalAttachment(it))
+            } ?: emptyList()
         )
     }
 
@@ -64,6 +84,7 @@ internal class LocalDataProvider(offlineRepository: OfflineRepository,
      *
      * @return comment instance with the substituted [serverCommentId]
      */
+    // TODO delete mb
     fun convertLocalCommentToServer(localComment: Comment, serverCommentId: Long, attachments: List<Attachment>?): Comment {
         return Comment(
             serverCommentId,

@@ -41,17 +41,17 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent">
 
-        <ImageButton
-            android:id="@+id/psd_toolbar_vendor_ib"
+        <ImageView
+            android:id="@+id/psd_toolbar_vendor_iv"
             android:layout_width="24dp"
             android:layout_height="24dp"
             android:layout_gravity="center_vertical"
-            android:background="@drawable/chat_button_bg"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent" />
 
         <TextView
+            android:id="@+id/psd_toolbar_vendor_name_tv"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginStart="@dimen/psd_elevation_default"
@@ -60,7 +60,7 @@
             android:maxLines="1"
             android:textColor="@color/psd_text_color_primary"
             android:textSize="@dimen/psd_text_20"
-            android:text="ikko" />
+            tools:text="ikko" />
 
     </LinearLayout>
 

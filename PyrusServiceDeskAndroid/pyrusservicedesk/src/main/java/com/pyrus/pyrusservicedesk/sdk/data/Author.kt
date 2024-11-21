@@ -9,6 +9,8 @@ import com.google.gson.annotations.SerializedName
 internal data class Author(
     @SerializedName("name")
     val name: String,
+    @SerializedName("author_id")
+    val authorId: String?,
     @SerializedName("avatar_id")
     val avatarId: Int = 0,
     @SerializedName("avatar_color")

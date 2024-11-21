@@ -49,6 +49,7 @@ internal class TicketActivity : ConnectionActivityBase<TicketViewModel>(TicketVi
     companion object {
         private const val KEY_TICKET_ID = "KEY_TICKET_ID"
         private const val KEY_UNREAD_COUNT = "KEY_UNREAD_COUNT"
+        private const val KEY_USER_ID = "KEY_USER_ID"
 
         private const val STATE_KEYBOARD_SHOWN = "STATE_KEYBOARD_SHOWN"
 
@@ -61,16 +62,26 @@ internal class TicketActivity : ConnectionActivityBase<TicketViewModel>(TicketVi
          * When not, this should be omitted for the new ticket.
          * @param unreadCount current count of unread tickets.
          */
-        fun getLaunchIntent(ticketId:Int? = null, unreadCount: Int? = 0): Intent {
+        fun getLaunchIntent(ticketId:Int? = null, unreadCount: Int? = 0, userId: String? = null): Intent {
             return Intent(
                     PyrusServiceDesk.get().application,
                     TicketActivity::class.java).also { intent ->
 
                 ticketId?.let { intent.putExtra(KEY_TICKET_ID, it) }
+                userId?.let { intent.putExtra(KEY_USER_ID, it) }
                 intent.putExtra(KEY_UNREAD_COUNT, unreadCount)
             }
         }
 
+        /**
+         * Extracts user id from the given [arguments].
+         * Expected that [arguments] are made by [getLaunchIntent].
+         *
+         * @return id of the user stored in [arguments]
+         */
+        fun getUserId(arguments: Intent): String? {
+            return arguments.getStringExtra(KEY_USER_ID)
+        }
 
         /**
          * Extracts ticket id from the given [arguments].
@@ -111,7 +122,8 @@ internal class TicketActivity : ConnectionActivityBase<TicketViewModel>(TicketVi
             copyToClipboard(it)
         }
         setOnRatingClickListener { rating ->
-            viewModel.onRatingClick(rating)
+            //TODO
+            //viewModel.onRatingClick(rating)
         }
     }
 

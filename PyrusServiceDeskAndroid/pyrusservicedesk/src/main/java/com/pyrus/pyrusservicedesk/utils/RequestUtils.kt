@@ -17,12 +17,27 @@ class RequestUtils{
         /**
          * Base URL used for api calls
          */
-        private const val PYRUS_BASE_URL = "https://pyrus.com/servicedeskapi/v1/"
+        private const val PYRUS_BASE_URL = "https://dev.pyrus.com/servicedeskapi/v1/"
 
         /**
          * Provides url for getting the avatar.
          */
         internal fun getAvatarUrl(avatarId: Int, domain: String?): String = "${getBaseUrl(domain)}Avatar/$avatarId"
+
+        /**
+         * Provides url for getting the organisation logo.
+         */
+        internal fun getOrganisationLogoUrl(orgLogoUrl: String, domain: String?): String = "${getBaseLogoUrl(domain)}$orgLogoUrl"
+
+        /**
+         * return vase url for org logo
+         */
+        internal fun getBaseLogoUrl(domain: String?): String {
+            if (domain == null) {
+                return "https://dev.pyrus.com"
+            }
+            return "https://$domain"
+        }
 
         /**
          * @return baseU

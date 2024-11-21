@@ -10,7 +10,7 @@
     xmlns:tools="http://schemas.android.com/tools">
 
     <ImageButton
-        android:id="@+id/psd_toolbar_settings_ib"
+        android:id="@+id/psd_empty_list_ib"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="center_vertical"
@@ -32,7 +32,7 @@
         android:textSize="16dp"
         android:text="Создать обращение"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/psd_toolbar_settings_ib"
+        app:layout_constraintTop_toBottomOf="@+id/psd_empty_list_ib"
         app:layout_constraintEnd_toEndOf="parent" />
 
 
