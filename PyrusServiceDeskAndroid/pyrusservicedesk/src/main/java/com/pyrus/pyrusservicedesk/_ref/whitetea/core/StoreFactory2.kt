@@ -1,0 +1,17 @@
+package com.pyrus.pyrusservicedesk._ref.whitetea.core
+
+import com.pyrus.pyrusservicedesk._ref.whitetea.core.logic.L
+
+internal interface StoreFactory2 {
+
+    fun <State : Any, Message : Any, Effect : Any> create(
+        name: String?,
+        autoInit: Boolean = true,
+        initialState: State,
+        initialEffects: List<Effect> = emptyList(),
+        reducer: L<State, Message, Effect>,
+        actors: List<Actor<Effect, Message>>,
+        onCancelCallback: ((state: State) -> Unit)? = null
+    ): Store<State, Message, Effect>
+
+}
