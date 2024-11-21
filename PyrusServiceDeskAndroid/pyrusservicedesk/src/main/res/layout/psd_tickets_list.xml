@@ -30,7 +30,7 @@
         <include layout="@layout/psd_empty_tickets_list" />
     </LinearLayout>
 
-    <FrameLayout
+    <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/filter_fl"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -39,29 +39,36 @@
         android:paddingVertical="10dp"
         android:paddingHorizontal="16dp"
         android:visibility="gone"
-        app:layout_constraintTop_toBottomOf="@+id/toolbar_tickets_list">
+        app:layout_constraintTop_toBottomOf="@+id/toolbar_tickets_list"
+        tools:visibility="visible">
 
         <TextView
             android:id="@+id/filter_context_tv"
-            android:layout_width="wrap_content"
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:textColor="@color/psd_text_color_primary"
-            android:textSize="14sp"
+            android:layout_gravity="center_vertical|start"
             android:ellipsize="end"
             android:maxLines="1"
-            android:text="Папа Бургер"
-            android:layout_gravity="center_vertical|start"/>
+            android:text="Папа Бургер орвлыовм влармишвыщлвт ылвомшвыщшвлтм"
+            android:textColor="@color/psd_text_color_primary"
+            android:textSize="14sp"
+            app:layout_constraintEnd_toStartOf="@+id/delete_filter_iv"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
 
         <ImageView
             android:id="@+id/delete_filter_iv"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginLeft="16dp"
-            android:layout_marginStart="16dp"
+            android:layout_gravity="center_vertical|end"
             android:background="@drawable/ic_close_big"
-            android:layout_gravity="center_vertical|end"/>
+            app:layout_constraintStart_toEndOf="@+id/filter_context_tv"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
 
-    </FrameLayout>
+    </androidx.constraintlayout.widget.ConstraintLayout>
 
     <View
         android:id="@+id/view"

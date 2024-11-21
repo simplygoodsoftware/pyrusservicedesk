@@ -13,7 +13,7 @@
     <string name="psd_yesterday">Вчера</string>
     <string name="psd_date_format_d_m_y">d MMMM yyyy</string>
     <string name="psd_date_format_d_m">d MMMM</string>
-    <string name="psd_date_format_d">ddd</string>
+    <string name="psd_date_format_d">EEE</string>
     <string name="psd_date_format_d_m_short">dd.MM</string>
     <string name="psd_date_format_d_m_y_short">dd.MM.yyyy</string>
     <string name="psd_photo">Сделать фото</string>
