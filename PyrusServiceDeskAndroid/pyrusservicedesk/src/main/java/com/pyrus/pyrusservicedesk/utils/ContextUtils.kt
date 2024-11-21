@@ -76,14 +76,16 @@ private fun Context.createPhotoUriApi16AndAbove(): Uri? {
 
     val mediaStorageDir = getExternalFilesDir(Environment.DIRECTORY_DCIM) ?: return null
 
-    if (!mediaStorageDir.exists())
+    if (!mediaStorageDir.exists()) {
         return null
+    }
 
     // Return the file target for the photo based on filename
     val file = File(mediaStorageDir.path + File.separator + fileName)
 
-    if (!file.createNewFile())
+    if (!file.createNewFile()) {
         return null
+    }
 
     return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N)
         try {
@@ -92,6 +94,7 @@ private fun Context.createPhotoUriApi16AndAbove(): Uri? {
         catch (e: Exception) {
             return null
         }
-    else
+    else {
         Uri.fromFile(file)
+    }
 }
