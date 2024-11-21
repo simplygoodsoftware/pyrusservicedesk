@@ -47,6 +47,8 @@ class PyrusServiceDesk private constructor(
     internal val application: Application,
     internal val appId: String,
     internal val userId: String?,
+    internal val userName: String?,
+    internal val authorId: String?,
     internal val securityKey: String?,
     internal val domain: String?,
     internal val apiVersion: Int,
@@ -78,6 +80,10 @@ class PyrusServiceDesk private constructor(
 
         private const val DEFAULT_TOKEN_TYPE: String = "android"
 
+        internal val usersId: List<String> = listOf("251380375", "251374579")
+
+        internal val usersName: List<String> = listOf("Много Лосося ДК Москва, Большая Филёвская улица, 3", "Старик Хинкалыч - Кострома Коллаж")
+
         internal var logging = false
             private set
 
@@ -106,7 +112,9 @@ class PyrusServiceDesk private constructor(
             initInternal(
                 application,
                 appId,
-                null,
+                "255371017", //TODO
+                "папа джонс",
+                "10",
                 null,
                 domain,
                 API_VERSION_1,
@@ -137,6 +145,8 @@ class PyrusServiceDesk private constructor(
             application: Application,
             appId: String,
             userId: String,
+            userName: String,
+            authorId: String?,
             securityKey: String,
             domain: String? = null,
             loggingEnabled: Boolean = false,
@@ -146,6 +156,8 @@ class PyrusServiceDesk private constructor(
                 application,
                 appId,
                 userId,
+                userName,
+                authorId,
                 securityKey,
                 domain,
                 API_VERSION_2,
@@ -158,6 +170,8 @@ class PyrusServiceDesk private constructor(
             application: Application,
             appId: String,
             userId: String?,
+            userName: String?,
+            authorId: String?,
             securityKey: String?,
             domain: String?,
             apiVersion: Int = API_VERSION_1,
@@ -179,6 +193,8 @@ class PyrusServiceDesk private constructor(
                         application,
                         appId,
                         userId,
+                        userName,
+                        authorId,
                         securityKey,
                         validDomain,
                         apiVersion,
@@ -192,6 +208,8 @@ class PyrusServiceDesk private constructor(
                     application,
                     appId,
                     userId,
+                    userName,
+                    authorId,
                     securityKey,
                     validDomain,
                     apiVersion,

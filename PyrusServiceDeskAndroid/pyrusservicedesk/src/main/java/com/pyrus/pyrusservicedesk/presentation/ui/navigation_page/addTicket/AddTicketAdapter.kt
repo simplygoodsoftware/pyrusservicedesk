@@ -10,7 +10,7 @@ import com.pyrus.pyrusservicedesk.PyrusServiceDesk
 import com.pyrus.pyrusservicedesk.R
 import com.pyrus.pyrusservicedesk.presentation.ui.navigation_page.ticket.TicketActivity
 
-class AddTicketAdapter (users: List<String>) : RecyclerView.Adapter<AddTicketAdapter.AddTicketViewHolder>() {
+class AddTicketAdapter (users: List<String>, val onItemClick: (Int) -> Unit) : RecyclerView.Adapter<AddTicketAdapter.AddTicketViewHolder>() {
 
     private var users: List<String> = emptyList()
     init {
@@ -39,8 +39,7 @@ class AddTicketAdapter (users: List<String>) : RecyclerView.Adapter<AddTicketAda
 
         init {
             itemView.setOnClickListener{
-                Toast.makeText(itemView.context, "user", Toast.LENGTH_SHORT).show()
-                it.context.startActivity(TicketActivity.getLaunchIntent(userId = PyrusServiceDesk.usersId[getBindingAdapterPosition()]))
+                onItemClick(bindingAdapterPosition)
             }
         }
     }

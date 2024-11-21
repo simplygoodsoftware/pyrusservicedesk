@@ -37,12 +37,6 @@ internal interface ServiceDeskApi {
             : Call<Ticket>
 
     /**
-     * Api call for sending comment to the feed.
-     */
-    @POST("UpdateTicketFeed")
-    fun addFeedComment(@Body requestBody: AddCommentRequestBody): Call<AddCommentResponseData>
-
-    /**
      * Api call for uploading files.
      */
     @Multipart

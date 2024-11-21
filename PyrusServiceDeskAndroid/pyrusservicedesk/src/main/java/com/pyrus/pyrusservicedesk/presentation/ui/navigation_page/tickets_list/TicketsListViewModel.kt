@@ -70,6 +70,8 @@ internal class TicketsListViewModel(
 
     fun getUsersId() : List<String>? = usersId
 
+    fun getCurrentUserId(ticketId: Int): String? = tickets.value?.find { it.ticketId == ticketId}?.userId
+
     fun getUsersName() : List<String>? = usersName
 
     /**

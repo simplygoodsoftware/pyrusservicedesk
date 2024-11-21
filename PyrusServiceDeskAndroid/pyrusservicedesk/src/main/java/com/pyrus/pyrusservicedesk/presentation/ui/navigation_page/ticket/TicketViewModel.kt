@@ -14,22 +14,32 @@ import com.pyrus.pyrusservicedesk.PyrusServiceDesk
 import com.pyrus.pyrusservicedesk.R
 import com.pyrus.pyrusservicedesk.ServiceDeskProvider
 import com.pyrus.pyrusservicedesk.log.PLog
-import com.pyrus.pyrusservicedesk.presentation.call.*
-import com.pyrus.pyrusservicedesk.presentation.ui.navigation_page.ticket.entries.*
+import com.pyrus.pyrusservicedesk.presentation.call.CallResult
+import com.pyrus.pyrusservicedesk.presentation.call.GetTicketCall
+import com.pyrus.pyrusservicedesk.presentation.call.GetTicketsCall
+import com.pyrus.pyrusservicedesk.presentation.ui.navigation_page.ticket.entries.ButtonsEntry
+import com.pyrus.pyrusservicedesk.presentation.ui.navigation_page.ticket.entries.CommentEntry
+import com.pyrus.pyrusservicedesk.presentation.ui.navigation_page.ticket.entries.DateEntry
+import com.pyrus.pyrusservicedesk.presentation.ui.navigation_page.ticket.entries.RatingEntry
+import com.pyrus.pyrusservicedesk.presentation.ui.navigation_page.ticket.entries.TicketEntry
+import com.pyrus.pyrusservicedesk.presentation.ui.navigation_page.ticket.entries.Type
+import com.pyrus.pyrusservicedesk.presentation.ui.navigation_page.ticket.entries.WelcomeMessageEntry
 import com.pyrus.pyrusservicedesk.presentation.ui.view.recyclerview.DiffResultWithNewItems
 import com.pyrus.pyrusservicedesk.presentation.viewmodel.ConnectionViewModelBase
 import com.pyrus.pyrusservicedesk.sdk.data.Attachment
 import com.pyrus.pyrusservicedesk.sdk.data.Author
+import com.pyrus.pyrusservicedesk.sdk.data.Command
 import com.pyrus.pyrusservicedesk.sdk.data.Comment
+import com.pyrus.pyrusservicedesk.sdk.data.CreateComment
+import com.pyrus.pyrusservicedesk.sdk.data.EMPTY_TICKET_ID
 import com.pyrus.pyrusservicedesk.sdk.data.FileManager
 import com.pyrus.pyrusservicedesk.sdk.data.LocalDataProvider
-import com.pyrus.pyrusservicedesk.sdk.data.intermediate.AddCommentResponseData
+import com.pyrus.pyrusservicedesk.sdk.data.TicketCommandType
 import com.pyrus.pyrusservicedesk.sdk.data.intermediate.Comments
 import com.pyrus.pyrusservicedesk.sdk.response.PendingDataError
 import com.pyrus.pyrusservicedesk.sdk.updates.OnUnreadTicketCountChangedSubscriber
 import com.pyrus.pyrusservicedesk.sdk.updates.PreferencesManager
 import com.pyrus.pyrusservicedesk.sdk.verify.LocalDataVerifier
-import com.pyrus.pyrusservicedesk.sdk.web.OnCancelListener
 import com.pyrus.pyrusservicedesk.sdk.web.UploadFileHooks
 import com.pyrus.pyrusservicedesk.utils.ConfigUtils
 import com.pyrus.pyrusservicedesk.utils.MILLISECONDS_IN_MINUTE
@@ -56,7 +66,7 @@ internal class TicketViewModel(
 
         private const val BUTTON_PATTERN = "<button>(.*?)</button>"
 
-        fun Comment.hasAttachmentWithExceededSize(): Boolean =
+        fun CreateComment.hasAttachmentWithExceededSize(): Boolean =
             attachments?.let { it.any { attach -> attach.hasExceededFileSize() } } ?: false
 
         fun Attachment.hasExceededFileSize(): Boolean = bytesSize > MAX_FILE_SIZE_BYTES
@@ -68,6 +78,7 @@ internal class TicketViewModel(
     val draft: String
 
     private var ticketId: Int = TicketActivity.getTicketId(arguments)
+    private val currentUserId = TicketActivity.getUserId(arguments)
 
 
     private val draftRepository = serviceDeskProvider.getDraftRepository()
@@ -134,12 +145,13 @@ internal class TicketViewModel(
      * @param text text that is entered in an input field
      */
     fun onSendClicked(text: String) {
-        if (text.isBlank()) {
+        if (text.isBlank() || currentUserId.isNullOrEmpty()) {
             return
         }
         update()
-        val localComment = localDataProvider.createLocalComment(text.trim())
-        sendAddComment(localComment)
+
+        val localCreateComment = localDataProvider.createCreateComment(text.trim(), userId = currentUserId, ticketId = ticketId)
+        sendAddComment(getCommands(localCreateComment))
     }
 
     /**
@@ -155,8 +167,14 @@ internal class TicketViewModel(
                return@launch
            }
            withContext(Dispatchers.Main) {
-               val localComment = localDataProvider.createLocalComment(fileUri = fileUri)
-               sendAddComment(localComment)
+               if (!currentUserId.isNullOrEmpty()) {
+                   val localComment = localDataProvider.createCreateComment(
+                       fileUri = fileUri,
+                       userId = currentUserId,
+                       ticketId = ticketId
+                   )
+                   sendAddComment(getCommands(localComment))
+               }
            }
        }
     }
@@ -167,6 +185,16 @@ internal class TicketViewModel(
      * changes to UI.
      */
     fun getCommentDiffLiveData(): LiveData<DiffResultWithNewItems<TicketEntry>> = commentDiff
+
+    fun getUUID(): String {
+        val uuid: UUID = UUID.randomUUID()
+        return uuid.toString()
+    }
+
+    fun getCommands(localCreateComment: CreateComment): List<Command> {
+        val list = listOf(Command(getUUID(), TicketCommandType.CreateComment, PyrusServiceDesk.get().appId, currentUserId!!,  localCreateComment))
+        return list
+    }
 
     /**
      * Callback to be invoked when user input changed.
@@ -179,18 +207,18 @@ internal class TicketViewModel(
      * Callback to be invoked when user chooses to retry sending pending comment
      */
     fun onPendingCommentRetried() {
-        pendingCommentUnderAction?.let { comment ->
-            applyCommentUpdate(comment, ChangeType.Cancelled)
-            sendAddComment(comment.comment, comment.uploadFileHooks.also { it?.resetProgress() })
-        }
-        pendingCommentUnderAction = null
+//        pendingCommentUnderAction?.let { comment ->
+//            applyCommentUpdate(comment, ChangeType.Cancelled)
+//            sendAddComment(comment.comment, comment.uploadFileHooks.also { it?.resetProgress() })
+//        }
+//        pendingCommentUnderAction = null
     }
 
     /**
      * Callback to be invoked when user chooses to delete pending comment
      */
     fun onPendingCommentDeleted() {
-        pendingCommentUnderAction?.let {
+        /*pendingCommentUnderAction?.let {
             launch {
                 if (!requests.getRemovePendingCommentRequest(it.comment).execute().hasError()) {
                     withContext(Dispatchers.Main) {
@@ -199,7 +227,7 @@ internal class TicketViewModel(
                     }
                 }
             }
-        }
+        }*/
     }
 
     /**
@@ -218,7 +246,8 @@ internal class TicketViewModel(
 
     private fun update() {
         val call = when {
-            isFeed -> GetFeedCall(this@TicketViewModel, requests).execute()
+            //isFeed -> GetFeedCall(this@TicketViewModel, requests).execute() //TODO remove
+            ticketId == EMPTY_TICKET_ID -> null
             else -> GetTicketCall(this@TicketViewModel, requests, ticketId).execute()
         }
         val observer = Observer<CallResult<Comments>> { result ->
@@ -230,7 +259,7 @@ internal class TicketViewModel(
                 else -> applyTicketUpdate(result.data!!, false)
             }
         }
-        call.observeForever(observer)
+        call?.observeForever(observer)
     }
 
     private fun maybeStartAutoRefresh() {
@@ -255,55 +284,73 @@ internal class TicketViewModel(
     }
 
     private fun sendAddComment(
-        localComment: Comment,
+        commands: List<Command>,
         uploadHooks: UploadFileHooks? = null
     ) {
 
-        if (commentContainsError(localComment)) {
-            return
-        }
+//        for (command in commands) {
+//            if (commentContainsError()) {
+//                return
+//            }
+//
+//            val uploadFileHooks: UploadFileHooks?
+//            if (uploadHooks != null) {
+//                uploadFileHooks = uploadHooks
+//            } else if (commands.attachments.isEmpty()) {
+//                uploadFileHooks = null
+//            } else {
+//                uploadFileHooks = UploadFileHooks()
+//                uploadFileHooks.subscribeOnCancel(object : OnCancelListener {
+//                    override fun onCancel() {
+//                        return applyCommentUpdate(
+//                            CommentEntry(commands), ChangeType.Cancelled
+//                        )
+//                    }
+//                })
+//            }
+//        }
 
-        val uploadFileHooks: UploadFileHooks?
-        if (uploadHooks != null) {
-            uploadFileHooks = uploadHooks
-        }
-        else if (!localComment.hasAttachments()) {
-            uploadFileHooks = null
-        }
-        else {
-            uploadFileHooks = UploadFileHooks()
-            uploadFileHooks.subscribeOnCancel(object : OnCancelListener {
-                override fun onCancel() {
-                    return applyCommentUpdate(
-                        CommentEntry(localComment), ChangeType.Cancelled
-                    )
-                }
-            })
-        }
+//        applyCommentUpdate(
+//            CommentEntry(commands, uploadFileHooks = uploadFileHooks),
+//            ChangeType.Added
+//        )
 
-        applyCommentUpdate(
-            CommentEntry(localComment, uploadFileHooks = uploadFileHooks),
-            ChangeType.Added
-        )
-        AddFeedCommentCall(this, requests, ticketId, localComment, uploadFileHooks)
+        val creationDate = Calendar.getInstance().time
+        GetTicketsCall(this@TicketViewModel, requests, commands)
             .execute()
-            .observeForever(AddCommentObserver(uploadFileHooks, localComment))
+            .observeForever { result ->
+                if (result == null)
+                    return@observeForever
+                when {
+                    result.hasError() -> {  }
+                    else ->{
+                        //onNewData(result.data!!)
+                        onDataLoaded()
+                    }
+                }
+            }
+//        AddFeedCommentCall(this, requests, ticketId, localComment, uploadFileHooks)
+//            .execute()
+//            .observeForever(AddCommentObserver(uploadFileHooks, localComment))  //??????????
 
         val lastActiveTime = System.currentTimeMillis()
-        PLog.d(TAG, "sendAddComment, lastActiveTime: $lastActiveTime, commentLocalId: ${localComment.localId}")
+        //PLog.d(TAG, "sendAddComment, lastActiveTime: $lastActiveTime, commentLocalId: ${commands.localId}")
         PyrusServiceDesk.startTicketsUpdatesIfNeeded(lastActiveTime)
         updateFeedIntervalIfNeeded()
     }
 
-    private fun hasComment(commentId: Long): Boolean {
+    private fun hasComment(commentId: Long?): Boolean {
+        if (commentId == null) {
+            return false
+        }
         return ticketEntries.findLast {
             it.type == Type.Comment && (it as CommentEntry).comment.commentId == commentId
         } != null
     }
 
-    private fun commentContainsError(localComment: Comment): Boolean {
+    private fun commentContainsError(localComment: CreateComment): Boolean {
         val commentError = when{
-            localDataVerifier.isLocalCommentEmpty(localComment) -> CheckCommentError.CommentIsEmpty
+            //localDataVerifier.isLocalCommentEmpty(localComment) -> CheckCommentError.CommentIsEmpty
             localComment.hasAttachmentWithExceededSize() -> CheckCommentError.FileSizeExceeded
             else -> null
         }
@@ -324,7 +371,7 @@ internal class TicketViewModel(
         return false
     }
 
-    private fun applyTicketUpdate(freshList: Comments, arePendingComments: Boolean) {
+    private fun applyTicketUpdate(freshList: Comments, arePendingComments: Boolean) { //update
         liveUpdates.onReadComments()
         if (!arePendingComments && !needUpdateCommentsList(freshList.comments)) {
             onDataLoaded()
@@ -351,7 +398,7 @@ internal class TicketViewModel(
                 val welcomeComment = Comment(
                     body = welcomeMessage,
                     creationDate = welcomeCommentDate,
-                    author = Author("", ""), //TODO
+                    author = Author(ConfigUtils.getUserName(), PyrusServiceDesk.get().authorId),
                     isWelcomeMessage = true,
                 )
                 freshComments += welcomeComment
@@ -417,29 +464,29 @@ internal class TicketViewModel(
                 newEntries.add(commentEntry)
             }
             ChangeType.Changed -> {
-                maybeAddDate(commentEntry, newEntries)
-                newEntries.findIndex(commentEntry).let {
-                    when (it) {
-                        -1 -> newEntries.add(commentEntry)
-                        else -> newEntries[it] = commentEntry
-                    }
-                }
+//                maybeAddDate(commentEntry, newEntries)
+//                newEntries.findIndex(commentEntry).let {
+//                    when (it) {
+//                        -1 -> newEntries.add(commentEntry)
+//                        else -> newEntries[it] = commentEntry
+//                    }
+//                }
             }
             ChangeType.Cancelled -> {
-                when (val indexOfComment = newEntries.findIndex(commentEntry)) {
-                    -1 -> return
-                    0 -> newEntries.removeAt(0)
-                    newEntries.lastIndex -> {
-                        newEntries.removeAt(newEntries.lastIndex)
-                        if (newEntries.last() is DateEntry)
-                            newEntries.removeAt(newEntries.lastIndex)
-                    }
-                    else -> {
-                        newEntries.removeAt(indexOfComment)
-                        if (newEntries[indexOfComment].type == Type.Date && newEntries[indexOfComment - 1].type == Type.Date)
-                            newEntries.removeAt(indexOfComment - 1)
-                    }
-                }
+//                when (val indexOfComment = newEntries.findIndex(commentEntry)) {
+//                    -1 -> return
+//                    0 -> newEntries.removeAt(0)
+//                    newEntries.lastIndex -> {
+//                        newEntries.removeAt(newEntries.lastIndex)
+//                        if (newEntries.last() is DateEntry)
+//                            newEntries.removeAt(newEntries.lastIndex)
+//                    }
+//                    else -> {
+//                        newEntries.removeAt(indexOfComment)
+//                        if (newEntries[indexOfComment].type == Type.Date && newEntries[indexOfComment - 1].type == Type.Date)
+//                            newEntries.removeAt(indexOfComment - 1)
+//                    }
+//                }
             }
         }
         newEntries.removeAll { it.type == Type.Rating }
@@ -467,13 +514,13 @@ internal class TicketViewModel(
         }
     }
 
-    private fun List<TicketEntry>.findIndex(commentEntry: CommentEntry): Int {
+   /* private fun List<TicketEntry>.findIndex(commentEntry: CommentEntry): Int {
         return findLast {
             (it.type == Type.Comment) && (it as CommentEntry).comment.localId == commentEntry.comment.localId
         }?.let {
             indexOf(it)
         } ?: -1
-    }
+    }*/
 
     // buttons are displayed in other entries, so if comment contains nothing but buttons we don't need it
     private fun removeEmptyComments(entries: List<TicketEntry>): List<TicketEntry> {
@@ -571,8 +618,8 @@ internal class TicketViewModel(
         }
     }
 
-    fun onRatingClick(rating: Int) =
-        sendAddComment(localDataProvider.createLocalComment(rating = rating))
+//    fun onRatingClick(rating: Int) =
+//        sendAddComment(localDataProvider.createLocalComment(rating = rating))
 
     fun onStart() {
         liveUpdates.increaseActiveScreenCount()
@@ -582,27 +629,34 @@ internal class TicketViewModel(
         liveUpdates.decreaseActiveScreenCount()
     }
 
-    private inner class AddCommentObserver(
+    //TODO need for comment
+    /*private inner class AddCommentObserver( //после getTicketsCall
         uploadFileHooks: UploadFileHooks?,
-        localComment: Comment
-    ) : AddCommentObserverBase<CallResult<AddCommentResponseData>, AddCommentResponseData>(
+        localComment: CreateComment,
+        creationDate: Date,
+    ) : AddCommentObserverBase<CallResult<Tickets>, Tickets>(
         uploadFileHooks,
-        localComment
+        localComment,
+        creationDate
     ) {
-        override fun getAttachments(data: AddCommentResponseData) = data.sentAttachments
 
-        override fun getCommentId(data: AddCommentResponseData): Long = data.commentId
+        override fun getAttachments(data: Tickets): List<Attachment>? = data.tickets?.find { it.ticketId == ticketId }?.lastComment?.attachments
 
-        override fun onSuccess(data: AddCommentResponseData) {
+        override fun getCommentId(data: Tickets): Long = data.commandsResult?.find { it.ticketId == ticketId }?.commentId ?: 0
+
+        override fun onSuccess(data: Tickets) {
             liveUpdates.subscribeOnUnreadTicketCountChanged(this@TicketViewModel)
         }
 
-    }
+        override fun getLastComment(data: Tickets): Comment? = data.tickets?.find { it.ticketId == ticketId }?.lastComment
 
+    }*/
 
-    private abstract inner class AddCommentObserverBase<T : CallResult<U>, U>(
+//TODO need for comment
+    /*private abstract inner class AddCommentObserverBase<T : CallResult<U>, U>(
         val uploadFileHooks: UploadFileHooks?,
-        val localComment: Comment
+        val localComment: CreateComment,
+        val creationDate: Date
     ) : Observer<T> {
         override fun onChanged(t: T?) {
             t?.let { result ->
@@ -611,7 +665,12 @@ internal class TicketViewModel(
                     return@let
                 val entry = when {
                     result.hasError() -> CommentEntry(
-                        localComment,
+                        Comment(
+                            body = localComment.comment,
+                            attachments = localComment.attachments,
+                            creationDate = creationDate,
+                            author = Author(ConfigUtils.getUserName(), PyrusServiceDesk.get().authorId),
+                        ),
                         uploadFileHooks, // for retry purpose
                         error = result.error
                     )
@@ -622,7 +681,7 @@ internal class TicketViewModel(
                         if (hasComment(commentId))
                             return@let
                         CommentEntry(
-                            localDataProvider.convertLocalCommentToServer(localComment, commentId, attachments)
+                            localDataProvider.convertLocalCommentToServer(localComment, commentId, attachments, creationDate)
                         )
                     }
                 }
@@ -636,7 +695,9 @@ internal class TicketViewModel(
 
         abstract fun onSuccess(data: U)
 
-    }
+        abstract fun getLastComment(data: U): Comment?
+
+    }*/
 
     private fun updateFeedIntervalIfNeeded() {
         val interval = getFeedUpdateInterval()

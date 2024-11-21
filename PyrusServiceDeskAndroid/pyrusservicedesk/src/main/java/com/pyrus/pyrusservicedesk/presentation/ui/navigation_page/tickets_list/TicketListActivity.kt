@@ -84,7 +84,8 @@ internal class TicketListActivity : ConnectionActivityBase<TicketsListViewModel>
                 setOnTicketItemClickListener {
                     it.ticketId.let { ticketId ->
                         this@TicketListActivity.startActivity(TicketActivity.getLaunchIntent(
-                            ticketId
+                            ticketId = ticketId,
+                            userId = viewModel.getCurrentUserId(ticketId)
                         )
                         )
                         viewModel.onTicketOpened(it)

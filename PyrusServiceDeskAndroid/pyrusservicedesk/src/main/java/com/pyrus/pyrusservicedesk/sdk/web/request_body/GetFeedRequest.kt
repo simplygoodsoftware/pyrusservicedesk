@@ -21,4 +21,4 @@ internal open class GetFeedBody(
         @SerializedName("keep_unread")
         val keepUnread: Boolean,
         apiSign: String?,
-): RequestBodyBase(false, null, null, null, appId, userId, securityKey, instanceId, version, apiSign) //TODO check
+): RequestBodyBase(false, null, null, null, null, appId, userId, securityKey, instanceId, version, apiSign) //TODO check

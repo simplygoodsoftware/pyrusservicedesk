@@ -7,11 +7,10 @@ import com.pyrus.pyrusservicedesk.PyrusServiceDesk.Companion.API_VERSION_2
 import com.pyrus.pyrusservicedesk.log.PLog
 import com.pyrus.pyrusservicedesk.sdk.FileResolver
 import com.pyrus.pyrusservicedesk.sdk.data.Attachment
+import com.pyrus.pyrusservicedesk.sdk.data.Command
 import com.pyrus.pyrusservicedesk.sdk.data.Comment
-import com.pyrus.pyrusservicedesk.sdk.data.EMPTY_TICKET_ID
 import com.pyrus.pyrusservicedesk.sdk.data.FileManager
 import com.pyrus.pyrusservicedesk.sdk.data.UserData
-import com.pyrus.pyrusservicedesk.sdk.data.intermediate.AddCommentResponseData
 import com.pyrus.pyrusservicedesk.sdk.data.intermediate.Comments
 import com.pyrus.pyrusservicedesk.sdk.repositories.general.GeneralRepository
 import com.pyrus.pyrusservicedesk.sdk.repositories.general.RemoteRepository
@@ -99,7 +98,9 @@ internal class RetrofitWebRepository(
     }
 
 
-    override suspend fun getTickets(): GetTicketsResponse {
+    override suspend fun getTickets(
+        commands: List<Command>
+    ): GetTicketsResponse {
         PLog.d(TAG, "getTickets, " +
                 "appId: ${appId.getFirstNSymbols(10)}, " +
                 "userId: ${getUserId().getFirstNSymbols(10)}, " +
@@ -109,7 +110,7 @@ internal class RetrofitWebRepository(
         return withContext(Dispatchers.IO){
             try {
                 //TODO need full info
-                api.getTickets(RequestBodyBase(false, getAdditionalUsers(), PyrusServiceDesk.get().authorId , ConfigUtils.getUserName(), appId, PyrusServiceDesk.usersId[0],  getSecurityKey(), getInstanceId(), getVersion(), apiFlag)).execute().run {
+                api.getTickets(RequestBodyBase(false, getAdditionalUsers(), commands, PyrusServiceDesk.get().authorId , ConfigUtils.getUserName(), appId, PyrusServiceDesk.usersId[0],  getSecurityKey(), getInstanceId(), getVersion(), apiFlag)).execute().run {
                     PLog.d(TAG, "getTickets, isSuccessful: $isSuccessful, body() != null: ${body() != null}")
                     when {
                         isSuccessful && body() != null -> GetTicketsResponse(tickets = body()!!)
@@ -120,10 +121,6 @@ internal class RetrofitWebRepository(
                 GetTicketsResponse(NoInternetConnection("No internet connection"))
             }
         }
-    }
-
-    override suspend fun addFeedComment(ticketId: Int, comment: Comment, uploadFileHooks: UploadFileHooks?): Response<AddCommentResponseData> {
-        return addComment(ticketId, comment, uploadFileHooks)
     }
 
     override suspend fun setPushToken(token: String?, tokenType: String): SetPushTokenResponse {
@@ -170,7 +167,7 @@ internal class RetrofitWebRepository(
     }
 
     private fun getVersion(): Int {
-        return PyrusServiceDesk.get().apiVersion
+        return API_VERSION_2//PyrusServiceDesk.get().apiVersion //TODO API_VERSION_1 commands don't work
     }
 
     private fun getSecurityKey(): String? {
@@ -189,7 +186,7 @@ internal class RetrofitWebRepository(
         return PyrusServiceDesk.EXTRA_FIELDS
     }
 
-    private suspend fun addComment(
+   /* private suspend fun addComment(
         ticketId: Int,
         comment: Comment,
         uploadFileHooks: UploadFileHooks?
@@ -260,7 +257,7 @@ internal class RetrofitWebRepository(
                 sequentialRequests.poll()
             }
         }
-    }
+    }*/
 
     override suspend fun getTicket(ticketId: Int): GetTicketResponse {
         PLog.d(TAG, "getTicket, " +
@@ -272,7 +269,7 @@ internal class RetrofitWebRepository(
         )
         return withContext(Dispatchers.IO){
             try {
-                api.getTicket(RequestBodyBase(false, getAdditionalUsers(), PyrusServiceDesk.get().authorId, ConfigUtils.getUserName(), appId, PyrusServiceDesk.usersId[0], getSecurityKey(), getInstanceId(), getVersion(), apiFlag), ticketId).execute().run {
+                api.getTicket(RequestBodyBase(false, getAdditionalUsers(), emptyList(), PyrusServiceDesk.get().authorId, ConfigUtils.getUserName(), appId, PyrusServiceDesk.usersId[0], getSecurityKey(), getInstanceId(), getVersion(), apiFlag), ticketId).execute().run {
                     PLog.d(TAG, "getTicket, isSuccessful: $isSuccessful, body() != null: ${body() != null}")
                     when {
                         isSuccessful && body() != null -> GetTicketResponse(ticket = body())
@@ -359,7 +356,7 @@ private fun <T> createError(response: retrofit2.Response<T>): ResponseError {
         else -> ApiCallError(response.message())
     }
 }
-
+/*
 private fun AddCommentResponseData.applyAttachments(attachments: List<Attachment>?): AddCommentResponseData {
     if (!mustBeConvertedToRemoteAttachments(attachments, attachmentIds))
         return this
@@ -372,7 +369,7 @@ private fun applyRemoteIdsToAttachments(sentAttachments: List<Attachment>, remot
         newAttachmentsList.add(attachment.withRemoteId(remoteAttachmentIds[index]))
     }
     return newAttachmentsList
-}
+}*/
 
 private fun mustBeConvertedToRemoteAttachments(sentAttachments: List<Attachment>?,
                                                remoteAttachmentIds: List<Int>?): Boolean {
@@ -391,4 +388,3 @@ private fun Attachment.withRemoteId(remoteId: Int) = Attachment(remoteId, guid, 
 
 
 private interface SequentialRequest
-private class CommentRequest : SequentialRequest

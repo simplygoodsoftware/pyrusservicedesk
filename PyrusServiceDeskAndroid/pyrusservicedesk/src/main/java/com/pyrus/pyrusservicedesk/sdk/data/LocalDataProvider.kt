@@ -56,6 +56,25 @@ internal class LocalDataProvider(offlineRepository: OfflineRepository,
     }
 
     /**
+     * Creates local comment instance using given [text] and [fileUri].
+     *
+     * @return [Comment] instance with [Comment.isLocal] is TRUE.
+     */
+    @MainThread
+    fun createCreateComment(comment: String = "", fileUri: Uri? = null, userId: String, ticketId: Int): CreateComment {
+        return CreateComment(
+            comment = comment,
+            requestNewTicket = ticketId == EMPTY_TICKET_ID,
+            userId = userId,
+            appId = PyrusServiceDesk.get().appId,
+            ticketId = ticketId,
+            attachments = fileResolver.getFileData(fileUri)?.let {
+                listOf(createLocalAttachment(it))
+            } ?: emptyList()
+        )
+    }
+
+    /**
      * Convert given [localComment] to the server one using new [serverCommentId].
      * Caller is responsible for checking the relation between the local comment and the id that is passed to
      * this method.
@@ -65,6 +84,7 @@ internal class LocalDataProvider(offlineRepository: OfflineRepository,
      *
      * @return comment instance with the substituted [serverCommentId]
      */
+    // TODO delete mb
     fun convertLocalCommentToServer(localComment: Comment, serverCommentId: Long, attachments: List<Attachment>?): Comment {
         return Comment(
             serverCommentId,
