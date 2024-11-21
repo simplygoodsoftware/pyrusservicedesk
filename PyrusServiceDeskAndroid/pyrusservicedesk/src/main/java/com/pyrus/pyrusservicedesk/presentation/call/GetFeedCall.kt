@@ -1,6 +1,5 @@
 package com.pyrus.pyrusservicedesk.presentation.call
 
-import com.pyrus.pyrusservicedesk.sdk.RequestFactory
 import com.pyrus.pyrusservicedesk.sdk.data.intermediate.Comments
 import kotlinx.coroutines.CoroutineScope
 
