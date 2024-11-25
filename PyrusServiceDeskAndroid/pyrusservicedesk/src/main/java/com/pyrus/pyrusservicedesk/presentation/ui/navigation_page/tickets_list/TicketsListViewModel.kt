@@ -32,17 +32,6 @@ internal class TicketsListViewModel(
 
     private var unreadCount = 0
 
-    private companion object {
-
-        private val TAG = TicketsListViewModel::class.java.simpleName
-
-        private const val BUTTON_PATTERN = "<button>(.*?)</button>"
-
-        fun Comment.hasAttachmentWithExceededSize(): Boolean =
-            attachments?.let { it.any { attach -> attach.hasExceededFileSize() } } ?: false
-
-        fun Attachment.hasExceededFileSize(): Boolean = bytesSize > MAX_FILE_SIZE_BYTES
-    }
 
     init {
         if (isNetworkConnected.value == true) {

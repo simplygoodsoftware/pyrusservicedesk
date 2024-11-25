@@ -10,6 +10,7 @@ import android.widget.Toast
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.pyrus.pyrusservicedesk.PyrusServiceDesk
 import com.pyrus.pyrusservicedesk.R
+import com.pyrus.pyrusservicedesk.databinding.PsdTicketsListBinding
 import com.pyrus.pyrusservicedesk.presentation.ConnectionActivityBase
 import com.pyrus.pyrusservicedesk.presentation.ui.navigation_page.addTicket.AddTicketFragment
 import com.pyrus.pyrusservicedesk.presentation.ui.navigation_page.filterTicketsList.FilterTicketsFragment
@@ -30,6 +31,8 @@ import kotlinx.android.synthetic.main.psd_toolbar.psd_toolbar_filter_ib
 import kotlinx.android.synthetic.main.psd_toolbar.psd_toolbar_qr_ib
 import kotlinx.android.synthetic.main.psd_toolbar.psd_toolbar_settings_ib
 import kotlinx.android.synthetic.main.psd_toolbar.psd_toolbar_vendor_name_tv
+import kotlinx.android.synthetic.main.psd_toolbar.view.psd_toolbar_filter_ib
+import kotlinx.android.synthetic.main.psd_toolbar.view.psd_toolbar_qr_ib
 
 /**
  * Activity for rendering ticket/feed comments.
@@ -60,9 +63,12 @@ internal class TicketListActivity : ConnectionActivityBase<TicketsListViewModel>
     override val progressBarViewId: Int = View.NO_ID
 
     private lateinit var adapter: TicketsListAdapter
+    private lateinit var binding: PsdTicketsListBinding
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
+        binding = PsdTicketsListBinding.inflate(layoutInflater)
 
         val toolbarFilter = findViewById<ImageButton>(R.id.psd_toolbar_filter_ib)
         val toolbarQr = findViewById<ImageButton>(R.id.psd_toolbar_qr_ib)
@@ -72,8 +78,10 @@ internal class TicketListActivity : ConnectionActivityBase<TicketsListViewModel>
             bottomSheet.show(supportFragmentManager, bottomSheet.tag)
             Toast.makeText(applicationContext, "фильтры", Toast.LENGTH_SHORT).show()
         }
+
         delete_filter_iv.setOnClickListener { onDataSentBack(KEY_DEFAULT_USER_ID, "all") }
-        toolbarQr.setOnClickListener {
+
+        binding.toolbarTicketsList.psd_toolbar_qr_ib.setOnClickListener {
             //TODO
             Toast.makeText(applicationContext, "QR", Toast.LENGTH_SHORT).show()
         }
@@ -101,14 +109,11 @@ internal class TicketListActivity : ConnectionActivityBase<TicketsListViewModel>
                     }
                 }
             }
-        tickets_rv.adapter  = adapter
-        tickets_rv.layoutManager = LinearLayoutManager(this)
+        binding.ticketsRv.adapter  = adapter
+        binding.ticketsRv.layoutManager = LinearLayoutManager(this)
 
         //TODO addItemDecoration maybe
         //tickets_rv.addItemDecoration(SpaceItemDecoration(resources.getDimensionPixelSize(R.dimen.psd_tickets_item_space)))
-//        new_conversation.setOnClickListener {
-//            UiNavigator.toNewTicket(this, viewModel.getUnreadCount())
-//        }
 
     }
 
@@ -146,6 +151,17 @@ internal class TicketListActivity : ConnectionActivityBase<TicketsListViewModel>
             list?.let { adapter.setItems(it) }
         }
 
+    companion object {
+
+        /**
+         * Provides intent for launching the screen.
+         */
+        fun getLaunchIntent(): Intent {
+            return Intent(
+                PyrusServiceDesk.get().application,
+                TicketListActivity::class.java
+            )
+        }
         viewModel.getApplicationsLiveData().observe(
             this
         ) { applications ->
@@ -162,14 +178,5 @@ internal class TicketListActivity : ConnectionActivityBase<TicketsListViewModel>
             applications[0].orgName.let { psd_toolbar_vendor_name_tv.text = it }
         }
     }
-
-
-
-
-    //TODO надо ли?
-//    override fun finish() {
-//        super.finish()
-//        PyrusServiceDesk.onServiceDeskStop()
-//    }
 
 }
