@@ -9,6 +9,7 @@ import androidx.annotation.MainThread
 import com.google.gson.GsonBuilder
 import com.pyrus.pyrusservicedesk.log.PLog
 import com.pyrus.pyrusservicedesk.presentation.ui.navigation_page.ticket.TicketActivity
+import com.pyrus.pyrusservicedesk.presentation.ui.navigation_page.tickets_list.TicketListActivity
 import com.pyrus.pyrusservicedesk.presentation.viewmodel.SharedViewModel
 import com.pyrus.pyrusservicedesk.sdk.FileResolver
 import com.pyrus.pyrusservicedesk.sdk.FileResolverImpl
@@ -399,8 +400,8 @@ class PyrusServiceDesk private constructor(
             get().sharedViewModel.clearQuitServiceDesk()
             get().onStopCallback = onStopCallback
 
-            activity.startActivity(TicketActivity.getLaunchIntent())
-
+            //activity.startActivity(TicketActivity.getLaunchIntent())
+            activity.startActivity(TicketListActivity.getLaunchIntent())
             if (configuration == null)
                 return
             val currentUserId = get().preferences.getString(PREFERENCE_KEY_USER_ID_V2, null)
