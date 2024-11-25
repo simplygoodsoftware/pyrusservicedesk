@@ -59,46 +59,6 @@ internal class TicketsListViewModel(
 
     private var unreadCount = 0
 
-    private companion object {
-
-        private val TAG = TicketsListViewModel::class.java.simpleName
-
-        private const val BUTTON_PATTERN = "<button>(.*?)</button>"
-
-        fun Comment.hasAttachmentWithExceededSize(): Boolean =
-            attachments?.let { it.any { attach -> attach.hasExceededFileSize() } } ?: false
-
-        fun Attachment.hasExceededFileSize(): Boolean = bytesSize > MAX_FILE_SIZE_BYTES
-    }
-
-    /**
-     * Drafted text. Assigned once when view model is created.
-     */
-    //val draft: String
-
-    private val draftRepository = serviceDeskProvider.getDraftRepository()
-    private val localDataProvider: LocalDataProvider = serviceDeskProvider.getLocalDataProvider()
-    private val fileManager: FileManager = serviceDeskProvider.getFileManager()
-    private val localDataVerifier: LocalDataVerifier = serviceDeskProvider.getLocalDataVerifier()
-
-    private var isCreateTicketSent = false
-
-    private val unreadCounter = MutableLiveData<Int>()
-    private val commentDiff = MutableLiveData<DiffResultWithNewItems<TicketEntry>>()
-
-    private var ticketEntries: List<TicketEntry> = emptyList()
-
-    private val mainHandler = Handler(Looper.getMainLooper())
-
-
-    private var pendingCommentUnderAction: CommentEntry? = null
-    private var userId = PyrusServiceDesk.get().userId
-
-    private var currentInterval: Long = 0
-
-    init {
-
-    }
 
     override fun onLoadData() {
         //update()
@@ -110,42 +70,6 @@ internal class TicketsListViewModel(
      * Provides live data that delivers list of [TicketShortDescription] to be rendered.
      */
     fun getTicketsLiveData(): LiveData<List<TicketShortDescription>> = tickets
-
-    //TODO delete
-//    private fun provideTickets(): List<TicketShortDescription> {
-//        val tasks = listOf(
-//            TicketShortDescription(
-//                0, "Ошибка в счете", false, Comment(
-//                    0,
-//                    "iiko: Мы рады, что смогли Вам помочь решить проблему ☺",
-//                    creationDate = Date(1731074815),
-//                    author = Author("Autor")
-//                )
-//            ),
-//            TicketShortDescription(
-//                0, "Проблемы с авторизацией в учетной зписи long", false, Comment(
-//                    0,
-//                    "Вы: После обновления страницы ничего не происходит. Как перевести в режим прос",
-//                    creationDate = Date(1730815615000),
-//                    author = Author("Autor")
-//                )
-//            ),
-//            TicketShortDescription(
-//                0, "Ошибка в счете", false, Comment(
-//                    0, "печатает", creationDate = Date(1731074815), author = Author("Autor")
-//                )
-//            ),
-//            TicketShortDescription(
-//                0, "Ошибка в счете", false, Comment(
-//                    0,
-//                    "iiko: Мы рады, что смогли Вам помочь решить проблему ☺",
-//                    creationDate = Date(1728137215000),
-//                    author = Author("Autor")
-//                )
-//            ),
-//        )
-//        return tasks
-//    }
 
 
     /**
