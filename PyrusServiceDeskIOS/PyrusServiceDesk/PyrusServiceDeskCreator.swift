@@ -23,6 +23,8 @@ import UIKit
     public static var multichats = false
     
     static private(set) var authorId: String?
+    static var lastNoteId: Int?
+    static var storeMessages: [PSDMessage]?
     
     static var userName: String?
     ///UserId needed for request
@@ -84,6 +86,33 @@ import UIKit
         config.urlCache = nil
         return URLSession(configuration: config)
     }()
+    
+    @objc static public func openTicket(ticketId: Int, userId: String, messageId: Int) {
+            guard PyrusServiceDesk.multichats else {
+                return
+            }
+            if let ticketsController = PyrusServiceDesk.mainController {
+                let chat = PyrusServiceDesk.chats.filter { $0.chatId ?? 0 == ticketId }.first
+                ticketsController.popToRootViewController(animated: false)
+                
+                let presenter = PSDChatPresenter()
+                let interactor: PSDChatInteractor
+                if let chat {
+                    interactor = PSDChatInteractor(presenter: presenter, chat: chat)
+                } else {
+                    let chat = PSDChat(chatId: ticketId, date: Date(), messages: [])
+                    PyrusServiceDesk.currentUserId = userId
+                    chat.userId = userId
+                    interactor = PSDChatInteractor(presenter: presenter, chat: chat, fromPush: true)
+                }
+                let router = PSDChatRouter()
+                let pyrusChat = PSDChatViewController(interactor: interactor, router: router)
+                presenter.view = pyrusChat
+                router.controller = pyrusChat
+                ticketsController.pushViewController(pyrusChat, animated: false)
+                self.refreshFromPush(messageId: messageId)
+            }
+        }
     
     /**
      Send device id to server
@@ -283,6 +312,8 @@ import UIKit
         if needReloadUI {
             PyrusServiceDesk.mainController?.updateTitleChat()
         }
+//        PyrusServiceDesk.repository.clear()
+//        PSDMessagesStorage.cleanStorage()
     }
     
     @objc static public func refresh(onError: ((Error?) -> Void)? = nil) {

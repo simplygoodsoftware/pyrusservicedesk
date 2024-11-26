@@ -28,6 +28,8 @@ class PSDMessage: NSObject {
     var isRatingMessage: Bool = false
     var ticketId: Int = 0
     var userId: String?
+    var appId: String?
+    var commandId: String?
     
     init(text: String?, attachments: [PSDAttachment]?, messageId: String?, owner: PSDUser?, date: Date?) {
         self.text = text ?? ""        

@@ -45,8 +45,8 @@ class TicketCommand: NSObject, Codable {
     let userId: String?
     let params: TicketCommandParams
 
-    init(type: TicketCommandType, appId: String?, userId: String?, params: TicketCommandParams) {
-        self.commandId = UUID().uuidString
+    init(commandId: String, type: TicketCommandType, appId: String?, userId: String?, params: TicketCommandParams) {
+        self.commandId = commandId
         self.type = type.rawValue
         self.params = params
         self.appId = appId

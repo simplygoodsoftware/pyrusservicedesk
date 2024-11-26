@@ -49,6 +49,8 @@ extension PSDChatPresenter: PSDChatPresenterProtocol {
             view?.show(.deleteRows(indexPaths: indexPaths, section: section))
         case .showKeyBoard:
             view?.show(.showKeyBoard)
+        case .reloadAll:
+            view?.show(.reloadAll)
         }
     }
 }

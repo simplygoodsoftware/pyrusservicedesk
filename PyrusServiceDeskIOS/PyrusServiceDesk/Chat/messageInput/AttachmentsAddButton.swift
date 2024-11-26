@@ -2,6 +2,7 @@
 import UIKit
 protocol AttachmentsAddButtonDelegate: class {
     func attachmentChoosed(_ data:Data, _ url:URL?)
+    func addButtonPressed()
 }
 class AttachmentsAddButton: UIButton {
     weak var delegate: AttachmentsAddButtonDelegate?
@@ -19,12 +20,14 @@ class AttachmentsAddButton: UIButton {
     }
     @objc func buttonPressed()
     {
-        AttachmentHandler.shared.showAttachmentActionSheet(self.findViewController()!, sourseView:self)
-        AttachmentHandler.shared.attachmentPickedBlock = { (data,url) in
-            DispatchQueue.main.async {
-                self.delegate?.attachmentChoosed(data,url)
+        DispatchQueue.main.asyncAfter(deadline: .now() + .milliseconds(500)) {
+            AttachmentHandler.shared.showAttachmentActionSheet(self.findViewController()!, sourseView:self)
+            AttachmentHandler.shared.attachmentPickedBlock = { (data,url) in
+                DispatchQueue.main.async {
+                    self.delegate?.attachmentChoosed(data,url)
+                }
+                
             }
-            
         }
     }
     required init?(coder aDecoder: NSCoder) {

@@ -34,12 +34,15 @@ class PSDChatInteractor: NSObject {
     private var messagesToPass = [MessageToPass]()
     private var firstLoad = true
     private var isRefreshing = false
+    private var isOpen = false
+    private var fromPush = false
     
     var isRefresh = false
     
-    init(presenter: PSDChatPresenterProtocol, chat: PSDChat? = nil) {
+    init(presenter: PSDChatPresenterProtocol, chat: PSDChat? = nil, fromPush: Bool = false) {
         self.presenter = presenter
         self.chat = chat
+        self.fromPush = fromPush
         super.init()
     }
     
@@ -52,12 +55,31 @@ extension PSDChatInteractor: PSDChatInteractorProtocol {
     func doInteraction(_ action: PSDChatInteractorCommand) {
         switch action {
         case .viewDidload:
+            isOpen = true
             if let chat, let chatId = chat.chatId, chatId != 0 {
-                messagesToPass = PSDMessagesStorage.getSendingMessagesFromStorage(for: chatId)
+                messagesToPass = PSDMessagesStorage.getSendingMessages(for: chatId)
+                for messageToPass in messagesToPass {
+                    messageToPass.message.fromStrorage = true
+                }
             }
             NotificationCenter.default.addObserver(self, selector: #selector(updateChats), name: PyrusServiceDesk.chatsUpdateNotification, object: nil)
             NotificationCenter.default.addObserver(self, selector: #selector(updateMessages), name: SyncManager.commandsResultNotification, object: nil)
-            if !PyrusServiceDesk.multichats {
+            NotificationCenter.default.addObserver(forName: .refreshNotification, object: nil, queue: .main) { [weak self] notification in
+                if let userInfo = notification.userInfo,
+                   let commandId = userInfo["commandId"] as? String,
+                   let message = self?.messagesToPass.first(where: { $0.commandId == commandId })?.message {
+                    self?.refresh(message: message, changedToSent: false)
+                }
+            }
+            NotificationCenter.default.addObserver(forName: .removeMesssageNotification, object: nil, queue: .main) { [weak self] notification in
+                if let userInfo = notification.userInfo,
+                   let commandId = userInfo["commandId"] as? String,
+                   let message = self?.messagesToPass.first(where: { $0.commandId == commandId })?.message {
+                    self?.messagesToPass.removeAll(where: { $0.commandId == commandId })
+                    self?.remove(message: message)
+                }
+            }
+            if !PyrusServiceDesk.multichats || fromPush {
                 reloadChat()
             } else {
                 beginTimer()
@@ -88,6 +110,7 @@ extension PSDChatInteractor: PSDChatInteractorProtocol {
         case .startGettingInfo:
             startGettingInfo()
         case .viewWillDisappear:
+            isOpen = false
             if !PyrusServiceDesk.multichats {
                 stopGettingInfo()
             }
@@ -103,14 +126,23 @@ private extension PSDChatInteractor {
     @objc func updateChats() {
         let chat = PyrusServiceDesk.chats.first(where: { $0.chatId == self.chat?.chatId })
         if let chat {
+            if chat.messages.count > self.chat?.messages.count ?? 0,
+               chat.messages.last?.owner.authorId != PyrusServiceDesk.authorId {
+                readChat()
+            }
             self.chat = chat
         }
-        if firstLoad && !PyrusServiceDesk.multichats {
-            updateChat(chat: chat)
+        if firstLoad && !PyrusServiceDesk.multichats || fromPush {
+            isRefresh = true
+            DispatchQueue.main.async { [weak self] in
+                self?.updateChat(chat: chat)
+                self?.isRefresh = false
+            }
+            fromPush = false
             firstLoad = false
         } else {
             if messagesToPass.count == 0 && !isRefresh {
-                redrawChat(chat: chat)
+               redrawChat(chat: chat)
             }
         }
         
@@ -124,7 +156,6 @@ private extension PSDChatInteractor {
                 messageToPass.messageId = String(commandResult.commentId ?? 0)
                 if let ticketId = commandResult.ticketId {
                     chat?.chatId = ticketId
-                    readChat()
                 }
                 showSendMessageResult(messageToPass: messageToPass, success: commandResult.error == nil)
                 messagesToPass.removeAll(where: { $0.commandId.lowercased() == commandResult.commandId.lowercased() })
@@ -133,14 +164,16 @@ private extension PSDChatInteractor {
     }
     
     func showSendMessageResult(messageToPass: PSDMessage, success: Bool) {
-       // PSDMessagesStorage.removeFromStorage(messageId: messageToPass.clientId)
         if(success){
+            PSDMessagesStorage.remove(messageId: messageToPass.clientId)
             let _ = PyrusServiceDesk.setLastActivityDate()
             PyrusServiceDesk.restartTimer()
+        } else {
+            messageToPass.fromStrorage = true
         }
         
         let newState: messageState = success ? .sent : .cantSend
-        let newProgress: CGFloat = success ? 1.0 : 0.0
+        let newProgress: CGFloat = success ? 1 : 0.0
         
         messageToPass.state = newState
         for attachment in (messageToPass.attachments ?? [PSDAttachment]()){
@@ -172,10 +205,10 @@ private extension PSDChatInteractor {
     func reloadChat() {
         DispatchQueue.main.async { [weak self] in
             self?.presenter.doWork(.reloadChat)
+            PyrusServiceDesk.syncManager.syncGetTickets()
         }
         tableMatrix = [[PSDRowMessage]()] // clean old chat
-        beginTimer()
-        PyrusServiceDesk.syncManager.syncGetTickets()
+        beginTimer()        
     }
     
     func updateChat(chat: PSDChat?) {
@@ -219,7 +252,7 @@ private extension PSDChatInteractor {
     func readChat() {
         let ticketId = chat?.chatId ?? 0
         let params = TicketCommandParams(ticketId: ticketId, appId: PyrusServiceDesk.currentClientId ?? PyrusServiceDesk.clientId, userId: PyrusServiceDesk.currentUserId ?? PyrusServiceDesk.customUserId ?? PyrusServiceDesk.userId)
-        let command = TicketCommand(type: .readTicket,  appId: PyrusServiceDesk.currentClientId ?? PyrusServiceDesk.clientId, userId:  PyrusServiceDesk.currentUserId ?? PyrusServiceDesk.customUserId ?? PyrusServiceDesk.userId, params: params)
+        let command = TicketCommand(commandId: UUID().uuidString, type: .readTicket,  appId: PyrusServiceDesk.currentClientId ?? PyrusServiceDesk.clientId, userId:  PyrusServiceDesk.currentUserId ?? PyrusServiceDesk.customUserId ?? PyrusServiceDesk.userId, params: params)
         PyrusServiceDesk.repository.add(command: command)
         PyrusServiceDesk.syncManager.syncGetTickets()
     }
@@ -288,6 +321,7 @@ private extension PSDChatInteractor {
                         let indexPaths = PSDTableView.compareAddAndRemoveRows(removeIndexPaths: removeIndexPaths, addIndexPaths: indexPaths, removeSections: removeSections, addSections: sections)
                         PyrusLogger.shared.logEvent("Результат после сопоставления: удалять = \(indexPaths.newRemoveIndexPaths), \(indexPaths.newRemoveSections); \n добавлять = \(indexPaths.addIndexPaths), \(indexPaths.addSections); \n Обновлять = \(indexPaths.reloadIndexPaths), \(indexPaths.reloadSections)")
                         
+                        // self.presenter.doWork(.reloadAll)
                         self.presenter.doWork(.updateRows(indexPaths: indexPaths))
                         self.updateButtons()
                     }
@@ -316,6 +350,9 @@ private extension PSDChatInteractor {
         prepareMessageForDrawing(newMessage)
         messageToSent = newMessage
         presenter.doWork(.addNewRow)
+        newMessage.commandId = UUID().uuidString
+        newMessage.userId = PyrusServiceDesk.currentUserId ?? PyrusServiceDesk.customUserId ?? PyrusServiceDesk.userId
+        newMessage.appId = PyrusServiceDesk.currentClientId ?? PyrusServiceDesk.clientId
         PSDMessageSend.pass(newMessage, delegate: self)
     }
     
@@ -323,6 +360,9 @@ private extension PSDChatInteractor {
         let newMessage = PSDObjectsCreator.createMessage(rating: rateValue, ticketId: chat?.chatId ?? 0, userId: chat?.userId ?? PyrusServiceDesk.customUserId ?? PyrusServiceDesk.userId)
         prepareMessageForDrawing(newMessage)
         messageToSent = newMessage
+        newMessage.commandId = UUID().uuidString
+        newMessage.userId = PyrusServiceDesk.currentUserId ?? PyrusServiceDesk.customUserId ?? PyrusServiceDesk.userId
+        newMessage.appId = PyrusServiceDesk.currentClientId ?? PyrusServiceDesk.clientId
         presenter.doWork(.addNewRow)
         PSDMessageSend.pass(newMessage, delegate: self)
     }
@@ -392,8 +432,11 @@ private extension PSDChatInteractor {
     
     func sendAgainMessage(indexPath: IndexPath) {
         if let message = self.getMessage(at: indexPath) {
+            message.userId = PyrusServiceDesk.currentUserId ?? PyrusServiceDesk.customUserId ?? PyrusServiceDesk.userId
+            message.appId = PyrusServiceDesk.currentClientId ?? PyrusServiceDesk.clientId
             message.ticketId = chat?.chatId ?? 0
             message.state = .sending
+            message.commandId = UUID().uuidString
             PSDMessageSend.pass(message, delegate: self)
         }
     }
@@ -424,7 +467,7 @@ extension PSDChatInteractor: PSDMessageSendDelegate {
             }
             var lastIndexPath: [IndexPath]? = nil
             
-            if changedToSent && message.fromStrorage {
+            if changedToSent {
                 //is state was changed need to move sendded message up to sent block
                 lastIndexPath = self.tableMatrix.indexPathsAfterSent(for: message)
                 if let lastIndexPath = lastIndexPath, lastIndexPath.count > 0 {
@@ -479,7 +522,7 @@ extension PSDChatInteractor: PSDMessageSendDelegate {
         }
         
         DispatchQueue.main.async { [weak self] in
-            PSDMessagesStorage.removeFromStorage(messageId: message.clientId)
+            PSDMessagesStorage.remove(messageId: message.clientId)
             self?.showRateIfNeed()
             
             if indexPaths.count > 0 {

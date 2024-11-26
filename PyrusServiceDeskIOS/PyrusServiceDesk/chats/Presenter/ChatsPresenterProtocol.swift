@@ -1,6 +1,6 @@
 enum ChatsPresenterCommand {
     case updateChats(chats: [ChatPresenterModel])
-    case openChat(chat: PSDChat)
+    case openChat(chat: PSDChat, fromPush: Bool)
     case deleteFilter
     case setFilter(userName: String)
     case updateMenu(actions: [MenuAction], menuVisible: Bool)

@@ -21,7 +21,7 @@ class PSDChatViewController: PSDViewController {
         fatalError("init(coder:) has not been implemented")
     }
     
-    lazy private var messageInputView : PSDMessageInputView = {
+    lazy private var messageInputView: PSDMessageInputView = {
         let inputView = PSDMessageInputView.init(
             frame: CGRect(x: 0, y: view.frame.size.height - 70,
                           width: view.frame.size.width, height: 50)
@@ -285,7 +285,8 @@ class PSDChatViewController: PSDViewController {
         guard
             self.tableView.window != nil,
             !hasNoConnection(),
-            self.presentedViewController == nil else {
+            self.presentedViewController == nil
+        else {
             return false
         }
         return true
@@ -367,6 +368,8 @@ extension PSDChatViewController: PSDChatViewProtocol {
             tableView.deleteRows(indexPaths: indexPaths, section: section)
         case .showKeyBoard:
             messageInputView.inputTextView.becomeFirstResponder()
+        case .reloadAll:
+            tableView.reloadAll()
         }
     }
 }

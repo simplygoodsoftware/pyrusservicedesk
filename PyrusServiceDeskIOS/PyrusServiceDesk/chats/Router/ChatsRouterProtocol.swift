@@ -5,6 +5,6 @@ protocol ChatsRouterProtocol: NSObjectProtocol {
 }
 
 enum ChatsRouterDestination {
-    case chat(chat: PSDChat)
+    case chat(chat: PSDChat, fromPush: Bool)
     case goBack
 }

@@ -144,7 +144,7 @@ class PSDTableView : UITableView{
     override var contentInset: UIEdgeInsets{
         didSet{
             if(!self.isDragging){
-                changeConstraints(emptyTable: self.numberOfRows(inSection: 0) == 0){}
+                changeConstraints(emptyTable: numberOfSections == 0 || numberOfRows(inSection: 0) == 0){}
             }
         }
     }

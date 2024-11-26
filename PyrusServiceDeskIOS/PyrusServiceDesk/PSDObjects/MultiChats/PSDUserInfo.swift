@@ -6,6 +6,7 @@ import Foundation
     let userId: String
     let userName: String
     let secretKey: String?
+    var lastNoteId: Int?
 
     public init(appId: String, clientName: String, userId: String, userName: String, secretKey: String?) {
         self.clientId = appId

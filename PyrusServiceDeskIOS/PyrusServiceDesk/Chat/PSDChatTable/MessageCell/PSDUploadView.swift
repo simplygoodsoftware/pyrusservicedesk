@@ -51,15 +51,22 @@ class PSDUploadView: UIButton {
         didSet {
             if color.isDarkColor {
                 self.setImage(self.image(for: .selected)?.imageWith(color: .black), for: .selected)
-                self.setImage(UIImage.PSDImage(name: "DownloadBlack"), for: .normal)
+               // if self.downloadState == .sent {
+                    self.setImage(UIImage.PSDImage(name: "DownloadBlack"), for: .normal)
+              //  }
                 progressLayer.strokeColor = UIColor.black.cgColor
                 shapeLayer.fillColor = UIColor.black.withAlphaComponent(0.1).cgColor
             }
             else {
                 self.setImage(self.image(for: .selected)?.imageWith(color: color), for: .selected)
-                self.setImage(UIImage.PSDImage(name: "DownloadWhite"), for: .normal)
+              //  if self.downloadState == .sent {
+                    self.setImage(UIImage.PSDImage(name: "DownloadWhite"), for: .normal)
+              //  }
                 progressLayer.strokeColor = color.cgColor
                 shapeLayer.fillColor = UIColor.white.withAlphaComponent(0.1).cgColor
+            }
+            if self.downloadState != .sent {
+                drawWithLoad()
             }
         }
     }
@@ -104,7 +111,7 @@ class PSDUploadView: UIButton {
         if downloadState == .cantSend{
             self.progress = 0.0
         }
-        else if progress != 1{
+        else if progress != 1 {
             self.delegate?.stopUpload()
         }
         

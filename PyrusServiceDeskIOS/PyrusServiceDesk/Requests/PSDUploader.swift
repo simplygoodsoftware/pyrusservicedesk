@@ -41,11 +41,11 @@ class PSDUploader: NSObject {
      - parameter messageWithAttachment: PSDMessage object with file that need to be passed to server.
      - parameter delegate: PSDMessageSendDelegate object to receive completion or error. Used in second step.
      */
-    func createUploadTask(from messageWithAttachment: PSDMessage, indexOfAttachment: Int,delegate: PSDMessageSendDelegate?) {
+    func createUploadTask(from messageWithAttachment: PSDMessage, indexOfAttachment: Int, delegate: PSDMessageSendDelegate?) {
         guard let attachments = messageWithAttachment.attachments, attachments.count > indexOfAttachment else{
             return
         }
-        if(attachments[indexOfAttachment].data.count == 0){
+        if(attachments[indexOfAttachment].data.count == 0) {
             return
         }
         let taskData = PSDTasksData.init(messageWithAttachment, delegate: delegate, file: attachments[indexOfAttachment])
@@ -95,7 +95,11 @@ class PSDUploader: NSObject {
         task.cancel()
         if tasksMap[task] != nil{
             tasksMap[task]!.sendingDelegate?.remove(message: tasksMap[task]!.message)
-            PSDMessagesStorage.removeFromStorage(messageId:tasksMap[task]!.message.clientId)
+            let userInfo: [String: Any] = [
+                "commandId": tasksMap[task]?.message.commandId ?? ""
+            ]
+            NotificationCenter.default.post(name: .removeMesssageNotification, object: nil, userInfo: userInfo)
+            PSDMessagesStorage.remove(messageId: tasksMap[task]!.message.clientId)
         }
         
         
@@ -149,20 +153,27 @@ class PSDUploader: NSObject {
     ///End download. If end with some error pass "" as guid.
     ///If end with error pass it to delegate
     ///If end with success send attachment id to server
-    private func endUpload(_ guid:String, task : URLSessionTask)
+    private func endUpload(_ guid:String, task: URLSessionTask)
     {
         if let uploadData  = tasksMap[task]{
-            if guid.count>0{
-                uploadData.file.serverIdentifer = guid
+            if guid.count > 0 {
                 PSDTasksData.updateMessage(uploadData.message, with: uploadData.file, uploadingProgress: 0.95)
-                uploadData.sendingDelegate?.refresh(message: uploadData.message,changedToSent: false)
+                uploadData.file.serverIdentifer = guid
+                let userInfo: [String: Any] = [
+                    "commandId": uploadData.message.commandId ?? ""
+                ]
+                NotificationCenter.default.post(name: .refreshNotification, object: nil, userInfo: userInfo)
+                //        uploadData.sendingDelegate?.refresh(message: uploadData.message,changedToSent: false)
                 PSDMessageSend.pass(uploadData.message, delegate: uploadData.sendingDelegate)
             }
             else{
                 //some error happend
                 PSDTasksData.updateMessage(uploadData.message, with: uploadData.file, uploadingProgress: 0.0)
-                uploadData.message.state = .cantSend
-                uploadData.sendingDelegate?.refresh(message: uploadData.message,changedToSent: false)
+//                DispatchQueue.global().asyncAfter(deadline: DispatchTime(uptimeNanoseconds: 100)) {
+//                    PSDMessageSend.pass(uploadData.message, delegate: uploadData.sendingDelegate)
+//                }
+//                uploadData.message.state = .cantSend
+//                uploadData.sendingDelegate?.refresh(message: uploadData.message,changedToSent: false)
                 PSDMessageSend.fileSendingEndWithError(uploadData.message, delegate: uploadData.sendingDelegate)
             }
             tasksMap.removeValue(forKey: task)
@@ -210,4 +221,9 @@ extension PSDUploader : URLSessionTaskDelegate, URLSessionDelegate, URLSessionDa
     func urlSession(_ session: URLSession, dataTask: URLSessionDataTask, willCacheResponse proposedResponse: CachedURLResponse, completionHandler: @escaping (CachedURLResponse?) -> Void) {
         completionHandler(nil)
     }
+}
+
+extension Notification.Name {
+    static let refreshNotification = Notification.Name("refreshNotification")
+    static let removeMesssageNotification = Notification.Name("removeMesssageNotification")
 }

@@ -30,6 +30,7 @@ class PSDChatsViewController: UIViewController {
     
     private lazy var navTitle = UILabel()
     private lazy var icon = UIImageView()
+    private lazy var activityIndicator = UIActivityIndicatorView()
 
     
     private lazy var segmentControl: UnderlineSegmentController = {
@@ -96,6 +97,7 @@ class PSDChatsViewController: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         navigationController?.delegate = self
+        activityIndicator.startAnimating()
         customization = PyrusServiceDesk.mainController?.customization
         design()
         designNavigation()
@@ -116,6 +118,8 @@ class PSDChatsViewController: UIViewController {
             segmentControl.frame = CGRect(x: 0, y: Int(self.view.safeAreaInsets.top + 44), width: Int(self.view.frame.width), height: 0)
             navigationView.frame = CGRect(x: -1, y: -1, width: Int(self.view.frame.width + 1), height: Int(self.view.safeAreaInsets.top + 44))
             isFirstLayout = false
+            activityIndicator.center = view.center
+            activityIndicator.style = .large
         }
     }
 }
@@ -132,6 +136,7 @@ private extension PSDChatsViewController {
         view.addSubview(segmentControl)
         view.addSubview(filterInfoView)
         view.addSubview(plusView)
+        view.addSubview(activityIndicator)
 
         setupEmptyChats()
         setupTableView()
@@ -337,6 +342,7 @@ private extension PSDChatsViewController {
             icon.widthAnchor.constraint(equalToConstant: 24),
             navTitle.leadingAnchor.constraint(equalTo: icon.trailingAnchor, constant: 6),
             navTitle.centerYAnchor.constraint(equalTo: icon.centerYAnchor),
+            navTitle.widthAnchor.constraint(lessThanOrEqualToConstant: 200),
             titleView.heightAnchor.constraint(equalToConstant: 28),
             titleView.trailingAnchor.constraint(equalTo: navTitle.trailingAnchor),
             titleView.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor, constant: 9),
@@ -378,7 +384,7 @@ private extension PSDChatsViewController {
         router?.route(to: .goBack)
     }
     
-    func openChat(_ chat: PSDChat) {
+    func openChat(_ chat: PSDChat, fromPush: Bool) {
         let label = UILabel()
         label.isUserInteractionEnabled = true
         label.textAlignment = .center
@@ -388,7 +394,7 @@ private extension PSDChatsViewController {
         label.widthAnchor.constraint(equalToConstant: 200).isActive = true
         
         customization?.setChatTitileView(label)
-        router?.route(to: .chat(chat: chat))
+        router?.route(to: .chat(chat: chat, fromPush: fromPush))
     }
 
     func setupDataSource() {
@@ -409,7 +415,7 @@ private extension PSDChatsViewController {
     }
     
     func showAccessDeniedAlert(userNames: String, okAction: UIAlertAction) {
-        let alert = UIAlertController(title: "Ошибка доступа", message: "У вас больше нет доступа к \(userNames)", preferredStyle: .alert)
+        let alert = UIAlertController(title: "Нет доступа", message: "Для получения доступа к \"\(userNames)\" обратитесь к администратору", preferredStyle: .alert)
         alert.addAction(okAction)
         present(alert, animated: true)
     }
@@ -447,8 +453,8 @@ extension PSDChatsViewController: ChatsViewProtocol {
         switch action {
         case .updateChats(let chats):
             self.chats = chats
-        case .openChat(let chat):
-            openChat(chat)
+        case .openChat(let chat, let fromPush):
+            openChat(chat, fromPush: fromPush)
         case .deleteFilter:
             deleteFilter()
         case .setFilter(let userName):
@@ -463,6 +469,7 @@ extension PSDChatsViewController: ChatsViewProtocol {
             }
         case .endRefresh:
             customRefresh.endRefreshing()
+            activityIndicator.stopAnimating()
             tableView.sendSubviewToBack(customRefresh)
         case .updateTitle(title: let title):
             navTitle.text = title

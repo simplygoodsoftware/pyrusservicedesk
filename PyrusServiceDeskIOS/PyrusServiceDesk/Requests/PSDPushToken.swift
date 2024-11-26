@@ -16,6 +16,10 @@ struct PSDPushToken {
             parameters["token"] = NSNull()
         }
         parameters["type"] = "ios"
+        if PyrusServiceDesk.multichats {
+            parameters["app_id"] = PyrusServiceDesk.currentClientId ?? PyrusServiceDesk.clientId
+            parameters["user_id"] = PyrusServiceDesk.currentUserId ?? PyrusServiceDesk.customUserId ?? PyrusServiceDesk.userId
+        }
         request = URLRequest.createRequest(type:.token, parameters: parameters)
         
         let task = PyrusServiceDesk.mainSession.dataTask(with: request) { data, response, error in

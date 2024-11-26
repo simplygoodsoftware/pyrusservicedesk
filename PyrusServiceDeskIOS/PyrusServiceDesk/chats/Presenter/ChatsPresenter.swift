@@ -11,8 +11,8 @@ extension ChatsPresenter: ChatsPresenterProtocol {
         switch action {
         case .updateChats(chats: let chats):
             view?.show(.updateChats(chats: prepareChats(chats: chats)))
-        case .openChat(chat: let chat):
-            view?.show(.openChat(chat: chat))
+        case .openChat(chat: let chat, fromPush: let fromPush):
+            view?.show(.openChat(chat: chat, fromPush: fromPush))
         case .deleteFilter:
             view?.show(.deleteFilter)
         case .setFilter(userName: let userName):

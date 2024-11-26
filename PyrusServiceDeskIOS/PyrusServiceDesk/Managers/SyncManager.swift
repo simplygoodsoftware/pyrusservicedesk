@@ -6,15 +6,21 @@ class SyncManager {
     private var isFilter = false
     var commandsResult = [TicketCommandResult]()
     var sendingMessages = [MessageToPass]()
+    
+    private var timerFosSendSync: Timer?
+    private var repeatTimeInterval: Double? {
+        didSet {
+            print("AAAAAAAAAAAAAAAAAASDFGHJKL:LKJHGFDSASDFGHJKL:")
+        }
+    }
 
     static let commandsResultNotification = Notification.Name("COMMANDS_RESULT")
     static let updateAccessesNotification = Notification.Name("UPDATE_ACCSESSES")
     
-    init() {
-        sendingMessages = PSDMessagesStorage.getSendingMessagesFromStorage()
-    }
-    
     func syncGetTickets(isFilter: Bool = false) {
+//        PyrusServiceDesk.repository.clear()
+//        PSDMessagesStorage.cleanStorage()
+//        return
         self.isFilter = isFilter
         if isRequestInProgress {
             shouldSendAnotherRequest = true
@@ -24,8 +30,9 @@ class SyncManager {
         isRequestInProgress = true
         shouldSendAnotherRequest = false
 
-        PyrusServiceDesk.repository.load { result in
-            let ticketCommands: [TicketCommand]
+        PyrusServiceDesk.repository.load { [weak self] result in
+            self?.sendingMessages = PSDMessagesStorage.getSendingMessages()
+            var ticketCommands: [TicketCommand]
             switch result {
             case .success(let commands):
                 ticketCommands = commands
@@ -33,7 +40,17 @@ class SyncManager {
                 ticketCommands = []
             }
             
-            PSDGetChats.get(commands: ticketCommands.map({ $0.toDictionary() })) { [weak self] chats, commandsResult, authorAccessDenied, clientsArray in
+//            for command in ticketCommands {
+//                if let attachments = command.params.attachments, attachments.count > 0 {
+//                    for attachment in attachments {
+//                        if attachment.guid?.count ?? 0 == 0 {
+//                            ticketCommands.removeAll(where: { $0.commandId == command.commandId })
+//                        }
+//                    }
+//                }
+//            }
+            
+            PSDGetChats.get(commands: ticketCommands.map({ $0.toDictionary() })) { [weak self] chats, commandsResult, authorAccessDenied, clientsArray, complete in
                 guard let self = self else { return }
                 var clients = clientsArray
                 PyrusServiceDesk.accessDeniedIds = authorAccessDenied ?? []
@@ -41,7 +58,9 @@ class SyncManager {
                     DispatchQueue.main.async {
                         PyrusServiceDesk.deniedAccessCallback?.deleteUsers(userIds: authorAccessDenied)
                     }
-                    NotificationCenter.default.post(name: SyncManager.updateAccessesNotification, object: nil)
+                    
+                    let userInfo = ["isFilter": isFilter]
+                    NotificationCenter.default.post(name: SyncManager.updateAccessesNotification, object: nil, userInfo: userInfo)
                     
                     if let clientsArray {
                         for client in clientsArray {
@@ -79,10 +98,10 @@ class SyncManager {
                     for commandResult in commandsResult {
                         PyrusServiceDesk.repository.deleteCommand(withId: commandResult.commandId)
                         if let message = self.sendingMessages.first(where: { $0.commandId.lowercased() == commandResult.commandId.lowercased() })?.message {
-                            PSDMessagesStorage.removeFromStorage(messageId: message.clientId)
+                            PSDMessagesStorage.remove(messageId: message.clientId)
                             if commandResult.error != nil {
                                 message.state = .cantSend
-                                PSDMessagesStorage.saveInStorage(message: message)
+                                PSDMessagesStorage.save(message: message)
                             }
                         }
                     }
@@ -97,7 +116,7 @@ class SyncManager {
                     var lasMessage: PSDMessage?
                     for chat in chats {
                         lasMessage = chat.messages.last
-                        guard !chat.isRead else{
+                        guard !chat.isRead else {
                             continue
                         }
                         unreadChats = unreadChats + 1
@@ -108,10 +127,44 @@ class SyncManager {
 
                 self.isRequestInProgress = false
                 
-                if self.shouldSendAnotherRequest {
-                    self.syncGetTickets()
+                if !complete {
+                    self.updateRepeatSyncTimer()
+                } else {
+                    clearTimer()
                 }
+                
+                if self.shouldSendAnotherRequest {
+                    DispatchQueue.main.async {
+                        self.syncGetTickets()
+                    }
+                }
+                
             }
         }
+    }
+}
+
+private extension SyncManager {
+    func updateRepeatSyncTimer() {
+        DispatchQueue.main.async { [weak self] in
+            guard let self else { return }
+            if timerFosSendSync == nil {
+                repeatTimeInterval = 1
+            } else {
+                let currentRepeatInterval = repeatTimeInterval ?? 0
+                repeatTimeInterval = (currentRepeatInterval >= 120 || (currentRepeatInterval * 2) > 120) ? 120 : currentRepeatInterval * 2
+                clearTimer()
+            }
+            self.timerFosSendSync = Timer.scheduledTimer(timeInterval: repeatTimeInterval ?? 1, target: self, selector: #selector(self.doSync), userInfo: nil, repeats: false)
+        }
+    }
+    
+    func clearTimer() {
+        timerFosSendSync?.invalidate()
+        timerFosSendSync = nil
+    }
+    
+    @objc func doSync() {
+        syncGetTickets()
     }
 }

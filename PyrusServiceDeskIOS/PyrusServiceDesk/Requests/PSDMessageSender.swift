@@ -30,13 +30,13 @@ class PSDMessageSender: NSObject {
         }
         
         let params = TicketCommandParams(ticketId: messageToPass.ticketId, appId:  PyrusServiceDesk.currentClientId ?? PyrusServiceDesk.clientId, requestNewTicket: requestNewTicket, userId: PyrusServiceDesk.currentUserId ?? PyrusServiceDesk.customUserId ?? PyrusServiceDesk.userId, message: messageToPass.text, attachments: attachmentsData)
-        let command = TicketCommand(type: .createComment, appId: PyrusServiceDesk.currentClientId ?? PyrusServiceDesk.clientId, userId:  PyrusServiceDesk.currentUserId ?? PyrusServiceDesk.customUserId ?? PyrusServiceDesk.userId, params: params)
-        PSDMessagesStorage.saveInStorage(message: messageToPass, commandId: command.commandId)
+        let command = TicketCommand(commandId: UUID().uuidString, type: .createComment, appId: PyrusServiceDesk.currentClientId ?? PyrusServiceDesk.clientId, userId:  PyrusServiceDesk.currentUserId ?? PyrusServiceDesk.customUserId ?? PyrusServiceDesk.userId, params: params)
+        // PSDMessagesStorage.saveInStorage(message: messageToPass, commandId: command.commandId)
         PyrusServiceDesk.syncManager.sendingMessages.append(MessageToPass(message: messageToPass, commandId: command.commandId))
         delegate?.addMessageToPass(message: messageToPass, commandId: command.commandId)
-        PyrusServiceDesk.repository.add(command: command) { _ in
-            PyrusServiceDesk.syncManager.syncGetTickets()
-        }
+//        PyrusServiceDesk.repository.add(command: command) { _ in
+//            PyrusServiceDesk.syncManager.syncGetTickets()
+//        }
         
         
 //        let task = PSDMessageSender.pass(messageToPass.text, messageToPass.attachments, rating: messageToPass.rating, clientId: messageToPass.clientId, ticketId: messageToPass.ticketId, userId: messageToPass.userId ?? PyrusServiceDesk.customUserId ?? PyrusServiceDesk.userId) {
@@ -70,7 +70,7 @@ class PSDMessageSender: NSObject {
     ///
     static func showResult(of messageToPass: PSDMessage, success: Bool, delegate: PSDMessageSendDelegate?){
         if(success){
-            PSDMessagesStorage.removeFromStorage(messageId: messageToPass.clientId)
+            PSDMessagesStorage.remove(messageId: messageToPass.clientId)
             let _ = PyrusServiceDesk.setLastActivityDate()
             PyrusServiceDesk.restartTimer()
         }
