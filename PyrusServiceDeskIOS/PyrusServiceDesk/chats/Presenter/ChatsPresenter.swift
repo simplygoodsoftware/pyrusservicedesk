@@ -43,6 +43,10 @@ extension ChatsPresenter: ChatsPresenterProtocol {
             view?.show(.showAccessDeniedAlert(userNames: userNames, okAction: okAction))
         case .deleteSegmentControl:
             view?.show(.deleteSegmentControl)
+        case .startRefresh:
+            view?.show(.startRefresh)
+        case .connectionError:
+            view?.show(.connectionError)
         }
     }
 }

@@ -23,6 +23,7 @@ enum PSDChatSearchViewCommand {
     case deleteRows(indexPaths: [IndexPath], section: Int)
     case showKeyBoard
     case reloadAll
+    case updateTitle(connectionError: Bool)
 }
 
 protocol PSDChatViewProtocol: NSObjectProtocol {

@@ -68,6 +68,9 @@ extension Array where Element == [PSDRowMessage]{
         self.defaultMatrix()
         if !self.isEmpty && self[0].count>0 && chat.messages.count>0{//change date of welcome message. Make it same as first message in chat
             self[0][0].message.date = chat.messages[0].date
+        } else if !self.isEmpty && self[0].count > 0 && chat.chatId == 0
+                  && PSDMessagesStorage.getMessages(for: chat.chatId).count > 0 {
+            self[0][0].message.date = (PSDMessagesStorage.getMessages(for: chat.chatId).first?.date ?? Date()) - TimeInterval(1)
         }
         for message in chat.messages{
             if previousMessage == nil{
@@ -92,6 +95,10 @@ extension Array where Element == [PSDRowMessage]{
             let ratingText = chat.showRatingText
         {
             _ = addRatingMessage(ratingText)
+        }
+        
+        if self.count > 0 && chat.chatId == 0 {
+            self[0].sort(by: { $0.message.date < $1.message.date })
         }
         
     }

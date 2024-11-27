@@ -16,6 +16,7 @@ class SyncManager {
 
     static let commandsResultNotification = Notification.Name("COMMANDS_RESULT")
     static let updateAccessesNotification = Notification.Name("UPDATE_ACCSESSES")
+    static let connectionErrorNotification = Notification.Name("CONNECTION_ERROR")
     
     func syncGetTickets(isFilter: Bool = false) {
 //        PyrusServiceDesk.repository.clear()
@@ -40,26 +41,16 @@ class SyncManager {
                 ticketCommands = []
             }
             
-//            for command in ticketCommands {
-//                if let attachments = command.params.attachments, attachments.count > 0 {
-//                    for attachment in attachments {
-//                        if attachment.guid?.count ?? 0 == 0 {
-//                            ticketCommands.removeAll(where: { $0.commandId == command.commandId })
-//                        }
-//                    }
-//                }
-//            }
-            
             PSDGetChats.get(commands: ticketCommands.map({ $0.toDictionary() })) { [weak self] chats, commandsResult, authorAccessDenied, clientsArray, complete in
                 guard let self = self else { return }
                 var clients = clientsArray
                 PyrusServiceDesk.accessDeniedIds = authorAccessDenied ?? []
+                let userInfo = ["isFilter": self.isFilter]
                 if let authorAccessDenied, authorAccessDenied.count > 0 {
                     DispatchQueue.main.async {
                         PyrusServiceDesk.deniedAccessCallback?.deleteUsers(userIds: authorAccessDenied)
                     }
                     
-                    let userInfo = ["isFilter": isFilter]
                     NotificationCenter.default.post(name: SyncManager.updateAccessesNotification, object: nil, userInfo: userInfo)
                     
                     if let clientsArray {
@@ -87,11 +78,6 @@ class SyncManager {
                     PyrusServiceDesk.clients = clients
                 }
                 
-                if self.isFilter {
-                    NotificationCenter.default.post(name: PyrusServiceDesk.usersUpdateNotification, object: nil)
-                    self.isFilter = false
-                }
-                
                 if let commandsResult {
                     self.commandsResult = commandsResult
                     NotificationCenter.default.post(name: SyncManager.commandsResultNotification, object: nil)
@@ -105,6 +91,11 @@ class SyncManager {
                             }
                         }
                     }
+                }
+                
+                if let chats {
+                    PyrusServiceDesk.chats = chats
+                    NotificationCenter.default.post(name: PyrusServiceDesk.chatsUpdateNotification, object: nil, userInfo: userInfo)
                 }
                             
                 DispatchQueue.main.async {
@@ -126,8 +117,10 @@ class SyncManager {
                 }
 
                 self.isRequestInProgress = false
+                self.isFilter = false
                 
                 if !complete {
+                    NotificationCenter.default.post(name: SyncManager.connectionErrorNotification, object: nil)
                     self.updateRepeatSyncTimer()
                 } else {
                     clearTimer()

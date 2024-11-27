@@ -40,7 +40,7 @@ class ButtonSegmentView: UIButton {
     lazy var titleView: UILabel = {
         let label = UILabel()
         label.tag = 1
-        label.font = UIFont.systemFont(ofSize: 14.0, weight: .medium)
+        label.font = UIFont.systemFont(ofSize: 16.0, weight: .medium)
         label.textColor = .secondTintColor
         label.textAlignment = .center
         label.sizeToFit()
@@ -60,7 +60,7 @@ class ButtonSegmentView: UIButton {
     private func setupUI() {
         addTarget(self, action: #selector(tapOnButton), for: .touchUpInside)
         setTitle("", for: .normal)
-        titleLabel?.font = UIFont.systemFont(ofSize: 14.0, weight: .medium)
+        titleLabel?.font = UIFont.systemFont(ofSize: 16.0, weight: .medium)
         setTitleColor(.secondTintColor, for: .normal)
         translatesAutoresizingMaskIntoConstraints = false
         

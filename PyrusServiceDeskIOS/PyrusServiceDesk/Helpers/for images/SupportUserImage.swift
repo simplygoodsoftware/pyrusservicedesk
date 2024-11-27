@@ -46,17 +46,20 @@ struct PSDSupportImageSetter {
                 let client = PyrusServiceDesk.clients.first(where: { $0.clientId == clientId }) {
             if let image = client.image {
                 user.image = image
+                imageView.image = image
                 loadingUsers[user] = false
                 delagate?.reloadCells(with: user)
             }
             DispatchQueue.global().async { [weak user, weak delagate] in
                 loadImage(urlString: client.clientIcon) { (image: UIImage?) in
                     DispatchQueue.main.async {
-                        user?.image = image ?? UIImage.PSDImage(name: "iiko")
-
-                        if user != nil {
-                            loadingUsers[user!] = false
-                            delagate?.reloadCells(with: user!)
+                        if image != nil || user?.image == nil {
+                            user?.image = image ?? UIImage.PSDImage(name: "iiko")
+                            imageView.image = image
+                            if user != nil {
+                                loadingUsers[user!] = false
+                                delagate?.reloadCells(with: user!)
+                            }
                         }
                     }
                 }

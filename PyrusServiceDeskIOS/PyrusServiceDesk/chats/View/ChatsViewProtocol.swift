@@ -14,6 +14,8 @@ enum ChatsSearchViewCommand {
     case updateIcon(image: UIImage?)
     case showAccessDeniedAlert(userNames: String, okAction: UIAlertAction)
     case deleteSegmentControl
+    case startRefresh
+    case connectionError
 }
 
 @available(iOS 13.0, *)

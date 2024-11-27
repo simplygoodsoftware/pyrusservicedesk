@@ -159,7 +159,8 @@ extension Array where Element == [PSDRowMessage]{
         var index:Int = 0//the index of message in received chat
         if let startMessage = startMessage{
             index = self.index(of:startMessage, in:messages)
-            index = index + 1//start with next message
+            //start with next message
+            index = index + 1
         }
         
         //completion for update table

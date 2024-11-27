@@ -11,6 +11,8 @@ enum ChatsPresenterCommand {
     case updateIcon(image: UIImage?)
     case showAccessDeniedAlert(userNames: String, doExit: Bool)
     case deleteSegmentControl
+    case startRefresh
+    case connectionError
 }
 
 protocol ChatsPresenterProtocol {

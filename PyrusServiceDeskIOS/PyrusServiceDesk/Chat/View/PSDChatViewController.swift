@@ -370,6 +370,12 @@ extension PSDChatViewController: PSDChatViewProtocol {
             messageInputView.inputTextView.becomeFirstResponder()
         case .reloadAll:
             tableView.reloadAll()
+        case .updateTitle(connectionError: let connectionError):
+            let label = UILabel()
+            label.text = "Waiting_For_Network".localizedPSD()
+            label.font = CustomizationHelper.systemBoldFont(ofSize: 17)
+            navigationItem.titleView = connectionError ? label : PyrusServiceDesk.mainController?.customization?.chatTitleView
+            tableView.endRefreshing()
         }
     }
 }

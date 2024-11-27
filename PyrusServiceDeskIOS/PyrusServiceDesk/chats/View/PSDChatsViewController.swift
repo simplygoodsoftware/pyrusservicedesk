@@ -49,10 +49,11 @@ class PSDChatsViewController: UIViewController {
         return refreshControl
     }()
     
+    private var clearTable = false
     private var chats : [ChatViewModel] = [] {
         didSet {
             reloadDiffable(animated: true)
-            emptyChatsView.isHidden = chats.count > 0
+            emptyChatsView.isHidden = chats.count > 0 || clearTable
         }
     }
     
@@ -452,6 +453,7 @@ extension PSDChatsViewController: ChatsViewProtocol {
     func show(_ action: ChatsSearchViewCommand) {
         switch action {
         case .updateChats(let chats):
+            clearTable = false
             self.chats = chats
         case .openChat(let chat, let fromPush):
             openChat(chat, fromPush: fromPush)
@@ -497,6 +499,16 @@ extension PSDChatsViewController: ChatsViewProtocol {
             }, completion: { [weak self] _ in
                 self?.segmentControl.updateTitle(titles: [], selectIndex: 0)
             })
+        case .startRefresh:
+            clearTable = true
+            chats = []
+            activityIndicator.startAnimating()
+        case .connectionError:
+            navTitle.text = "Waiting_For_Network".localizedPSD()
+            if icon.image == nil {
+                icon.image = UIImage(named: "iiko")
+            }
+            customRefresh.endRefreshing()
         }
     }
 }

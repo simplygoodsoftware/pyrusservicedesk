@@ -80,7 +80,7 @@ struct PSDGetChats {
                 } catch {
                     completion(chats, nil, authorAccessDenied, clients, true)
                 }
-                PyrusServiceDesk.chats = chats
+//                PyrusServiceDesk.chats = chats
             } catch { 
                 //print("PSDGetChats error when convert to dictionary")
             }

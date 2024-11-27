@@ -46,6 +46,7 @@ import UIKit
     }
     
     static let usersUpdateNotification = Notification.Name("USERS_UPDATE")
+    static let newUserNotification = Notification.Name("NEW_USER")
     static var additionalUsers = [PSDUserInfo]()
     
     static let clientsUpdateNotification = Notification.Name("CLIENTS_UPDATE")
@@ -67,6 +68,7 @@ import UIKit
         currentClientId = user.clientId
         if !additionalUsers.contains(user) && user.userId != customUserId {
             additionalUsers.append(user)
+            NotificationCenter.default.post(name: newUserNotification, object: nil)
         } else {
             NotificationCenter.default.post(name: usersUpdateNotification, object: nil)
         }
@@ -463,11 +465,12 @@ import UIKit
     
     static let chatsUpdateNotification = Notification.Name("CHATS_UPDATE")
     ///All of chats
-    static var chats : [PSDChat] = [PSDChat]() {
-        didSet {
-            NotificationCenter.default.post(name: chatsUpdateNotification, object: nil)
-        }
-    }
+    static var chats : [PSDChat] = [PSDChat]() 
+//    {
+//        didSet {
+//            NotificationCenter.default.post(name: chatsUpdateNotification, object: nil)
+//        }
+//    }
     ///The main view controller. nil - if chat was closed.
     weak static var mainController : PyrusServiceDeskController?
     ///Updates user info - get chats list from server.

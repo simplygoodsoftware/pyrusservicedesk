@@ -60,15 +60,24 @@ struct PSDMessagesStorage {
     }
     
     static func getMessages(for ticketId: Int? = nil) -> [PSDMessage] {
-        return ticketId == nil
-        ? PyrusServiceDesk.storeMessages ?? []
-        : PyrusServiceDesk.storeMessages?.filter({ $0.ticketId == ticketId }) ?? []
+        if ticketId == nil {
+            return PyrusServiceDesk.storeMessages ?? []
+        } else if ticketId == 0 {
+            return PyrusServiceDesk.storeMessages?.filter({ $0.ticketId == ticketId && $0.userId == PyrusServiceDesk.currentUserId }) ?? []
+        } else {
+            return PyrusServiceDesk.storeMessages?.filter({ $0.ticketId == ticketId }) ?? []
+        }
     }
     
     static func getSendingMessages(for ticketId: Int? = nil) -> [MessageToPass] {
-        let messages = ticketId == nil
-        ? PyrusServiceDesk.storeMessages?.filter({ $0.state == .sending }) ?? []
-        : PyrusServiceDesk.storeMessages?.filter({ $0.state == .sending && $0.ticketId == ticketId }) ?? []
+        let messages: [PSDMessage]
+        if ticketId == nil {
+            messages = PyrusServiceDesk.storeMessages?.filter({ $0.state == .sending }) ?? []
+        } else if ticketId == 0 {
+            messages = PyrusServiceDesk.storeMessages?.filter({ $0.state == .sending && $0.ticketId == ticketId }) ?? []
+        } else {
+            messages = PyrusServiceDesk.storeMessages?.filter({ $0.state == .sending && $0.ticketId == ticketId && $0.userId == PyrusServiceDesk.currentUserId }) ?? []
+        }
         return messages.map({ MessageToPass(message: $0, commandId: $0.commandId ?? "") })
     }
     

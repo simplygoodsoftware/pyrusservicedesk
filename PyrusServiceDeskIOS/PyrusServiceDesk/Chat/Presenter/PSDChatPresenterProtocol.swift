@@ -23,6 +23,7 @@ enum PSDChatPresenterCommand {
     case deleteRows(indexPaths: [IndexPath], section: Int)
     case showKeyBoard
     case reloadAll
+    case updateTitle(connectionError: Bool)
 }
 
 protocol PSDChatPresenterProtocol {

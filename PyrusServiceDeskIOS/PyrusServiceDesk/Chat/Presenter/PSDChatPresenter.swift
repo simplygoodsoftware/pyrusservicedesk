@@ -51,6 +51,8 @@ extension PSDChatPresenter: PSDChatPresenterProtocol {
             view?.show(.showKeyBoard)
         case .reloadAll:
             view?.show(.reloadAll)
+        case .updateTitle(connectionError: let connectionError):
+            view?.show(.updateTitle(connectionError: connectionError))
         }
     }
 }
