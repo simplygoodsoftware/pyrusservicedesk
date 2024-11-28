@@ -53,7 +53,12 @@ class ChatsInteractor: NSObject {
     init(presenter: ChatsPresenterProtocol) {
         self.presenter = presenter
         super.init()
-        NotificationCenter.default.addObserver(self, selector: #selector(updateChats), name: PyrusServiceDesk.chatsUpdateNotification, object: nil)
+        NotificationCenter.default.addObserver(forName: PyrusServiceDesk.chatsUpdateNotification, object: nil, queue: .main) { [weak self] notification in
+            if let userInfo = notification.userInfo,
+               let isFilter = userInfo["isFilter"] as? Bool {
+                self?.updateChats(isFilter: isFilter)
+            }
+        }
         NotificationCenter.default.addObserver(self, selector: #selector(changedClientId), name: PyrusServiceDesk.clientIdChangedNotification, object: nil)
 
     }
@@ -67,6 +72,7 @@ extension ChatsInteractor: ChatsInteractorProtocol {
             NotificationCenter.default.addObserver(self, selector: #selector(showConnectionError), name: SyncManager.connectionErrorNotification, object: nil)
             NotificationCenter.default.addObserver(self, selector: #selector(updateClients), name: PyrusServiceDesk.clientsUpdateNotification, object: nil)
             NotificationCenter.default.addObserver(self, selector: #selector(setFilter), name: PyrusServiceDesk.usersUpdateNotification, object: nil)
+            NotificationCenter.default.addObserver(self, selector: #selector(newUserFilter), name: PyrusServiceDesk.newUserNotification, object: nil)
             NotificationCenter.default.addObserver(forName: SyncManager.updateAccessesNotification, object: nil, queue: .main) { [weak self] notification in
                 if let userInfo = notification.userInfo,
                    let isFilter = userInfo["isFilter"] as? Bool {
@@ -142,9 +148,7 @@ private extension ChatsInteractor {
                     } else {
                         userNames = String(userNames.dropLast(2))
                         DispatchQueue.main.async { [weak self] in
-//                            if isFilter {
-                                self?.presenter.doWork(.showAccessDeniedAlert(userNames: userNames, doExit: true))
-//                            }
+                            self?.presenter.doWork(.showAccessDeniedAlert(userNames: userNames, doExit: true))
                         }
                         return
                     }
@@ -272,10 +276,14 @@ private extension ChatsInteractor {
             guard let self = self else {
                 return
             }
+            presenter.doWork(.updateTitle(title: self.clients.count > 1 ? "All_Conversations".localizedPSD() : clients[0].clientName))
+            if !isFilter && self.isNewUser {
+                return
+            }
             presenter.doWork(.endRefresh)
             
             let filterChats = createChats()
-            if chats != filterChats || filterChats.count == 0 {
+            if chats != filterChats || filterChats.count == 0 || isFilter {
                 chats = filterChats
             }
             
