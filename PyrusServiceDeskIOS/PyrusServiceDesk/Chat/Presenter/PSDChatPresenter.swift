@@ -53,6 +53,8 @@ extension PSDChatPresenter: PSDChatPresenterProtocol {
             view?.show(.reloadAll)
         case .updateTitle(connectionError: let connectionError):
             view?.show(.updateTitle(connectionError: connectionError))
+        case .reloadTitle:
+            view?.show(.reloadTitle)
         }
     }
 }

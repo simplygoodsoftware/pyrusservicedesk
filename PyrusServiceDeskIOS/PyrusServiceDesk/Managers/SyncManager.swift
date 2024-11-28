@@ -10,7 +10,6 @@ class SyncManager {
     private var timerFosSendSync: Timer?
     private var repeatTimeInterval: Double? {
         didSet {
-            print("AAAAAAAAAAAAAAAAAASDFGHJKL:LKJHGFDSASDFGHJKL:")
         }
     }
 

@@ -58,7 +58,7 @@ private extension ChatsPresenter {
         for chat in chats {
             let subject = chat.subject?.count ?? 0 > 0
                 ? chat.subject ?? ""
-                : "Новое обращение"
+                : "NewTicket".localizedPSD()
             
             let lastMessage = chat.messages.last
             let author = lastMessage?.isInbound ?? false ? "Вы" : lastMessage?.owner.name ?? ""

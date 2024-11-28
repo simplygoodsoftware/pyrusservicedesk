@@ -89,21 +89,39 @@ import UIKit
         return URLSession(configuration: config)
     }()
     
-    @objc static public func openTicket(ticketId: Int, userId: String, messageId: Int) {
+    static let clientIdChangedNotification = Notification.Name("APP_ID_CHANGED")
+
+    
+    @objc static public func openTicket(ticketId: Int, userId: String, messageId: Int) -> Bool {
             guard PyrusServiceDesk.multichats else {
-                return
+                return false
             }
-            if let ticketsController = PyrusServiceDesk.mainController {
+        if let ticketsController = PyrusServiceDesk.mainController {
                 let chat = PyrusServiceDesk.chats.filter { $0.chatId ?? 0 == ticketId }.first
                 ticketsController.popToRootViewController(animated: false)
                 
                 let presenter = PSDChatPresenter()
                 let interactor: PSDChatInteractor
+
+            
+            PyrusServiceDesk.currentUserId = userId
+            if PyrusServiceDesk.customUserId == userId {
+                PyrusServiceDesk.currentClientId = PyrusServiceDesk.clientId
+                NotificationCenter.default.post(name: clientIdChangedNotification, object: nil)
+
+            } else {
+                for user in PyrusServiceDesk.additionalUsers {
+                    if user.userId == userId {
+                        PyrusServiceDesk.currentClientId = user.clientId
+                        NotificationCenter.default.post(name: clientIdChangedNotification, object: nil)
+                        break
+                    }
+                }
+            }
                 if let chat {
                     interactor = PSDChatInteractor(presenter: presenter, chat: chat)
                 } else {
                     let chat = PSDChat(chatId: ticketId, date: Date(), messages: [])
-                    PyrusServiceDesk.currentUserId = userId
                     chat.userId = userId
                     interactor = PSDChatInteractor(presenter: presenter, chat: chat, fromPush: true)
                 }
@@ -112,7 +130,10 @@ import UIKit
                 presenter.view = pyrusChat
                 router.controller = pyrusChat
                 ticketsController.pushViewController(pyrusChat, animated: false)
-                self.refreshFromPush(messageId: messageId)
+//                self.refreshFromPush(messageId: messageId)
+                return true
+            } else {
+                return false
             }
         }
     
@@ -172,8 +193,8 @@ import UIKit
     ///- parameter viewController: ViewController that must present chat
     ///- parameter configuration: ServiceDeskConfiguration object or nil. ServiceDeskConfiguration is object that create custom interface: theme color,welcome message, image for support's avatar and chat title for navigation bar title. If nil, the default design will be used.
     ///- parameter onStopCallback: OnStopCallback object or nil. OnStopCallback is object for getting a notification that PyrusServiceDesk was closed.
-    @objc public static func start(on viewController:UIViewController, configuration:ServiceDeskConfiguration?, onStopCallback: OnStopCallback? = nil, deniedAccessCallback: DeniedAccessCallBack? = nil) { 
-        let _ = psdStart(on: viewController, configuration: configuration, completion: nil, onStopCallback: onStopCallback, deniedAccessCallback: deniedAccessCallback)
+    @objc public static func start(on viewController:UIViewController, configuration:ServiceDeskConfiguration?, onStopCallback: OnStopCallback? = nil, deniedAccessCallback: DeniedAccessCallBack? = nil, animated: Bool = true) {
+        let _ = psdStart(on: viewController, configuration: configuration, completion: nil, onStopCallback: onStopCallback, deniedAccessCallback: deniedAccessCallback, animated: animated)
     }
     ///Show chat
     ///- parameter viewController: ViewController that must present chat
@@ -196,14 +217,14 @@ import UIKit
     ///- parameter configuration: ServiceDeskConfiguration object or nil. ServiceDeskConfiguration is object that create custom interface: theme color,welcome message, image for support's avatar and chat title for navigation bar title. If nil, the default design will be used.
     ///- parameter completion: The block to execute after the presentation finishes. This block has no return value and takes no parameters. You may specify nil for this parameter.
     ///- parameter onStopCallback: OnStopCallback object or nil. OnStopCallback is object for getting a notification that PyrusServiceDesk was closed.
-    private static func psdStart(on viewController: UIViewController?, configuration: ServiceDeskConfiguration?, completion:(() -> Void)?, onStopCallback: OnStopCallback?, deniedAccessCallback: DeniedAccessCallBack? = nil) -> UINavigationController? {
+    private static func psdStart(on viewController: UIViewController?, configuration: ServiceDeskConfiguration?, completion:(() -> Void)?, onStopCallback: OnStopCallback?, deniedAccessCallback: DeniedAccessCallBack? = nil, animated: Bool = true) -> UINavigationController? {
         stopCallback = onStopCallback
         self.deniedAccessCallback = deniedAccessCallback
         if !PyrusServiceDeskController.PSDIsOpen() {
             EventsLogger.logEvent(.openPSD)
             let psd : PyrusServiceDeskController = PyrusServiceDeskController.init(configuration, customPresent: viewController == nil)
             if let viewController = viewController {
-                psd.show(on: viewController, completion: completion)
+                psd.show(on: viewController, completion: completion, animated: animated)
             } else {
                 return psd
             }

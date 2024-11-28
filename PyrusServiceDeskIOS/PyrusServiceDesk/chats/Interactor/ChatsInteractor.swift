@@ -18,12 +18,31 @@ class ChatsInteractor: NSObject {
     
     var selectedIndex = 0
     var isNewQr = false
-    var pushTicketId: Int?
-    var pushUserId: String?
-    var isNewUser = false
     var isClear = false
+    var isNewUser = false
     private var connectionError = false
-    private var clients = [PSDClientInfo]()
+
+    private var clients = [PSDClientInfo]() {
+        didSet {
+            updateIfNeedClient()
+        }
+    }
+    
+    private func updateIfNeedClient() {
+        if let clientId = PyrusServiceDesk.currentClientId {
+            for (i,client) in clients.enumerated() {
+                if
+                    client.clientId == clientId,
+                    i != selectedIndex
+                {
+                    DispatchQueue.main.async {
+                        self.updateSelected(index: i)
+                    }
+                    break
+                }
+            }
+        }
+    }
     
     private var currentUserId: String? {
         didSet {
@@ -31,11 +50,12 @@ class ChatsInteractor: NSObject {
         }
     }
     
-    init(presenter: ChatsPresenterProtocol, pushTicketId: Int? = nil, pushUserId: String? = nil) {
+    init(presenter: ChatsPresenterProtocol) {
         self.presenter = presenter
-        self.pushTicketId = pushTicketId//256426849//pushTicketId
-        self.pushUserId = pushUserId//"251380446"//pushUserId
         super.init()
+        NotificationCenter.default.addObserver(self, selector: #selector(updateChats), name: PyrusServiceDesk.chatsUpdateNotification, object: nil)
+        NotificationCenter.default.addObserver(self, selector: #selector(changedClientId), name: PyrusServiceDesk.clientIdChangedNotification, object: nil)
+
     }
 }
 
@@ -43,28 +63,8 @@ extension ChatsInteractor: ChatsInteractorProtocol {
     func doInteraction(_ action: ChatsInteractorCommand) {
         switch action {
         case .viewDidload:
-            if let pushTicketId, let pushUserId,
-               let clientId = getUsers().first(where: { $0.userId == pushUserId })?.clientId {
-                presenter.doWork(.endRefresh)
-                PyrusServiceDesk.currentUserId = pushUserId
-                PyrusServiceDesk.currentClientId = clientId
-                let chat = PSDChat(chatId: pushTicketId, date: Date(), messages: [])
-                openChat(chat: chat, fromPush: true)
-            }
             createMenuActions()
-            NotificationCenter.default.addObserver(forName: PyrusServiceDesk.chatsUpdateNotification, object: nil, queue: .main) { [weak self] notification in
-                DispatchQueue.main.async {
-                    self?.presenter.doWork(.updateTitle(title: self?.clients.count ?? 0 > 1 ? "All_Conversations".localizedPSD() : PyrusServiceDesk.clientName ))
-                }
-                if let userInfo = notification.userInfo,
-                   let isFilter = userInfo["isFilter"] as? Bool {
-                    self?.updateChats(isFilter: isFilter)
-                } else {
-                    self?.updateChats()
-                }
-            }
-            NotificationCenter.default.addObserver(self, selector: #selector(newUserFilter), name: PyrusServiceDesk.newUserNotification, object: nil)
-            NotificationCenter.default.addObserver(self, selector: #selector(showConnectionError), name: SyncManager.connectionErrorNotification, object: nil)
+            
             NotificationCenter.default.addObserver(self, selector: #selector(updateClients), name: PyrusServiceDesk.clientsUpdateNotification, object: nil)
             NotificationCenter.default.addObserver(self, selector: #selector(setFilter), name: PyrusServiceDesk.usersUpdateNotification, object: nil)
             NotificationCenter.default.addObserver(forName: SyncManager.updateAccessesNotification, object: nil, queue: .main) { [weak self] notification in
@@ -142,9 +142,9 @@ private extension ChatsInteractor {
                     } else {
                         userNames = String(userNames.dropLast(2))
                         DispatchQueue.main.async { [weak self] in
-                            if isFilter {
+//                            if isFilter {
                                 self?.presenter.doWork(.showAccessDeniedAlert(userNames: userNames, doExit: true))
-                            }
+//                            }
                         }
                         return
                     }
@@ -228,6 +228,10 @@ private extension ChatsInteractor {
         }
     }
     
+    @objc func changedClientId() {
+        updateIfNeedClient()
+    }
+    
     func deleteFilter() {
         if !isNewQr {
             isNewUser = false
@@ -246,7 +250,7 @@ private extension ChatsInteractor {
     
     func openNewChat(userId: String? = nil) {
         let chat = PSDChat(chatId: 0, date: Date(), messages: [])
-        chat.subject = "Новое обращение"
+        chat.subject = "NewTicket".localizedPSD()
         chat.userId = userId ?? PyrusServiceDesk.currentUserId ?? PyrusServiceDesk.userId
         PyrusServiceDesk.currentUserId = userId
         presenter.doWork(.openChat(chat: chat, fromPush: false))
@@ -265,36 +269,38 @@ private extension ChatsInteractor {
     
     @objc func updateChats(isFilter: Bool = false) {
         DispatchQueue.main.async { [weak self] in
-            self?.connectionError = false
-            if self?.isNewUser ?? false && !isFilter {
+            guard let self = self else {
                 return
             }
-            self?.isNewUser = false
-            self?.presenter.doWork(.endRefresh)
+            presenter.doWork(.endRefresh)
             
-            let clientId = PyrusServiceDesk.currentClientId ?? PyrusServiceDesk.clientId
-            var filterChats = [PSDChat]()
-            for chat in PyrusServiceDesk.chats {
-                if self?.currentUserId != nil {
-                    if chat.userId == self?.currentUserId {
+            let filterChats = createChats()
+            if chats != filterChats || filterChats.count == 0 {
+                chats = filterChats
+            }
+            
+        }
+    }
+    
+    private func createChats() -> [PSDChat] {
+        let clientId = PyrusServiceDesk.currentClientId ?? PyrusServiceDesk.clientId
+        var filterChats = [PSDChat]()
+        for chat in PyrusServiceDesk.chats {
+            if currentUserId != nil {
+                if chat.userId == currentUserId {
+                    filterChats.append(chat)
+                }
+            } else {
+                if let user = PyrusServiceDesk.additionalUsers.first(where: { $0.userId == chat.userId }) {
+                    if user.clientId == clientId {
                         filterChats.append(chat)
                     }
-                } else {
-                    if let user = PyrusServiceDesk.additionalUsers.first(where: { $0.userId == chat.userId }) {
-                        if user.clientId == clientId {
-                            filterChats.append(chat)
-                        }
-                    } else if PyrusServiceDesk.clientId == clientId {
-                        filterChats.append(chat)
-                    }
+                } else if PyrusServiceDesk.clientId == clientId {
+                    filterChats.append(chat)
                 }
             }
-            
-            if self?.chats != filterChats || filterChats.count == 0 || (self?.isClear ?? false) {
-                self?.chats = filterChats
-                self?.isClear = false
-            }
         }
+        return filterChats
     }
     
     @objc func setFilter() {

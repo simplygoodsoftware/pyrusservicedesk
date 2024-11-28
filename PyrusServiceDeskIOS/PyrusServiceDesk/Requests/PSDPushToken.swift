@@ -8,7 +8,6 @@ struct PSDPushToken {
     static func send(_ token:String?, completion: @escaping(Error?) -> Void)
     {
         
-        var  request : URLRequest
         var parameters = [String: Any]()
         if let token = token  {
             parameters["token"] = token
@@ -17,10 +16,22 @@ struct PSDPushToken {
         }
         parameters["type"] = "ios"
         if PyrusServiceDesk.multichats {
-            parameters["app_id"] = PyrusServiceDesk.currentClientId ?? PyrusServiceDesk.clientId
-            parameters["user_id"] = PyrusServiceDesk.currentUserId ?? PyrusServiceDesk.customUserId ?? PyrusServiceDesk.userId
+            parameters["app_id"] = PyrusServiceDesk.clientId ?? PyrusServiceDesk.clientId
+            parameters["user_id"] = PyrusServiceDesk.customUserId ?? PyrusServiceDesk.userId
+            send(parameters: parameters, completion: completion)
+            for user in PyrusServiceDesk.additionalUsers {
+                parameters["app_id"] = user.clientId
+                parameters["user_id"] = user.userId
+                send(parameters: parameters, completion: completion)
+            }
+            
+        } else {
+            send(parameters: parameters, completion: completion)
         }
-        request = URLRequest.createRequest(type:.token, parameters: parameters)
+    }
+    
+    static private func send(parameters: [String: Any], completion: @escaping(Error?) -> Void) {
+        let  request = URLRequest.createRequest(type:.token, parameters: parameters)
         
         let task = PyrusServiceDesk.mainSession.dataTask(with: request) { data, response, error in
             guard let data = data, error == nil else {
@@ -48,5 +59,6 @@ struct PSDPushToken {
             }
         }
         task.resume()
+
     }
 }

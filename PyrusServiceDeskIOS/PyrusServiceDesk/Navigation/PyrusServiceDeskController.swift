@@ -16,7 +16,9 @@ class PyrusServiceDeskController: PSDNavigationController {
                     let controller = PSDChatsViewController(interactor: interactor, router: router)
                     router.controller = controller
                     presenter.view = controller
-                    pushViewController(controller, animated: true)
+                    customization?.setCustomLeftBarButtonItem(backBarButtonItem())
+                    
+                    pushViewController(controller, animated: false)
                 }
             } else {
                 let presenter = PSDChatPresenter()
@@ -25,7 +27,7 @@ class PyrusServiceDeskController: PSDNavigationController {
                 let controller = PSDChatViewController(interactor: interactor, router: router)
                 presenter.view = controller
                 router.controller = controller
-                pushViewController(controller, animated: true)
+                pushViewController(controller, animated: false)
             }
             
             if !customPresent {
@@ -42,9 +44,9 @@ class PyrusServiceDeskController: PSDNavigationController {
     required init?(coder aDecoder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
     }
-    func show(on viewController: UIViewController, completion: (() -> Void)? = nil) {
+    func show(on viewController: UIViewController, completion: (() -> Void)? = nil, animated: Bool) {
         DispatchQueue.main.async  {
-            viewController.present(self, animated:  true, completion: completion)
+            viewController.present(self, animated:  animated, completion: completion)
         }
     }
     override public func viewDidLoad() {
@@ -184,5 +186,24 @@ class PyrusServiceDeskController: PSDNavigationController {
     
     public static func PSDIsOpen() -> Bool {
         return PyrusServiceDesk.mainController != nil
+    }
+    
+    private func backBarButtonItem() -> UIBarButtonItem {
+        let mainColor = customization?.barButtonTintColor ?? .darkAppColor
+        let button = UIButton()
+        button.titleLabel?.font = CustomizationHelper.systemFont(ofSize: 18)
+        button.setTitle(" " + "Back".localizedPSD(), for: .normal)
+        button.setTitleColor(mainColor, for: .normal)
+        button.setTitleColor(mainColor.withAlphaComponent(0.2), for: .highlighted)
+        let backImage = UIImage(systemName: "chevron.left", withConfiguration: UIImage.SymbolConfiguration(pointSize: 18, weight: .semibold, scale: .large))
+        button.setImage(backImage?.imageWith(color: mainColor), for: .normal)
+        button.setImage(backImage?.imageWith(color: mainColor.withAlphaComponent(0.2)), for: .highlighted)
+        button.addTarget(self, action: #selector(goBack), for: .touchUpInside)
+        button.sizeToFit()
+        return UIBarButtonItem(customView: button)
+    }
+    
+    @objc func goBack() {
+        popViewController(animated: true)
     }
 }

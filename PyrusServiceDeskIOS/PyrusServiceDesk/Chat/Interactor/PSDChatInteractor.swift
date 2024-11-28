@@ -84,8 +84,7 @@ extension PSDChatInteractor: PSDChatInteractorProtocol {
                     }
                 }
             }
-            if !PyrusServiceDesk.multichats || fromPush {
-                reloadChat()
+            if !PyrusServiceDesk.multichats || fromPush {                    reloadChat()
             } else {
                 beginTimer()
                 updateChat(chat: chat)
@@ -152,6 +151,21 @@ private extension PSDChatInteractor {
                 isRefresh = true
                 
                 self.updateChat(chat: chat)
+if fromPush {
+if PyrusServiceDesk.multichats {
+let customization = PyrusServiceDesk.mainController?.customization
+let label = UILabel()
+label.isUserInteractionEnabled = true
+label.textAlignment = .center
+label.font = CustomizationHelper.systemBoldFont(ofSize: 17)
+label.text = chat?.subject?.count ?? 0 > 0 ? chat?.subject : "NewTicket".localizedPSD()
+label.translatesAutoresizingMaskIntoConstraints = false
+label.widthAnchor.constraint(equalToConstant: 200).isActive = true
+
+customization?.setChatTitileView(label)
+presenter.doWork(.reloadTitle)
+}
+}
                 self.isRefresh = false
                 fromPush = false
                 firstLoad = false
@@ -162,8 +176,8 @@ private extension PSDChatInteractor {
             }
         }
     }
-    
-    
+
+
     @objc func updateMessages() {
         for commandResult in PyrusServiceDesk.syncManager.commandsResult {
             if let messageToPass = messagesToPass.first(where: { $0.commandId.lowercased() == commandResult.commandId.lowercased() })?.message {

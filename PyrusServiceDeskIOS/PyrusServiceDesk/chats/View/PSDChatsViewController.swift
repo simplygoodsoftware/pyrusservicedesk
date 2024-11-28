@@ -151,7 +151,7 @@ private extension PSDChatsViewController {
         emptyChatsView.isHidden = true
         let mainColor = customization?.barButtonTintColor ?? .darkAppColor
        
-        openNewButton.setTitle("Создать обращение", for: .normal)
+        openNewButton.setTitle("CreatTicket".localizedPSD(), for: .normal)
         openNewButton.titleLabel?.font = CustomizationHelper.systemBoldFont(ofSize: 17)
         openNewButton.setTitleColor(mainColor, for: .normal)
         
@@ -278,7 +278,6 @@ private extension PSDChatsViewController {
 
     //*Setting design to navigation bar, title and buttons*/
     func designNavigation() {
-        customization?.setCustomLeftBarButtonItem(backBarButtonItem())
         let bigAppear = UINavigationBarAppearance(barAppearance: UIBarAppearance())
         bigAppear.configureWithOpaqueBackground()
         bigAppear.backgroundColor = UIColor(hex: "#F9F9F9F0")
@@ -366,31 +365,12 @@ private extension PSDChatsViewController {
         }
     }
     
-    func backBarButtonItem() -> UIBarButtonItem {
-        let mainColor = customization?.barButtonTintColor ?? .darkAppColor
-        let button = UIButton()
-        button.titleLabel?.font = CustomizationHelper.systemFont(ofSize: 18)
-        button.setTitle(" " + "Back".localizedPSD(), for: .normal)
-        button.setTitleColor(mainColor, for: .normal)
-        button.setTitleColor(mainColor.withAlphaComponent(0.2), for: .highlighted)
-        let backImage = UIImage(systemName: "chevron.left", withConfiguration: UIImage.SymbolConfiguration(pointSize: 18, weight: .semibold, scale: .large))
-        button.setImage(backImage?.imageWith(color: mainColor), for: .normal)
-        button.setImage(backImage?.imageWith(color: mainColor.withAlphaComponent(0.2)), for: .highlighted)
-        button.addTarget(self, action: #selector(goBack), for: .touchUpInside)
-        button.sizeToFit()
-        return UIBarButtonItem(customView: button)
-    }
-    
-    @objc func goBack() {
-        router?.route(to: .goBack)
-    }
-    
     func openChat(_ chat: PSDChat, fromPush: Bool) {
         let label = UILabel()
         label.isUserInteractionEnabled = true
         label.textAlignment = .center
         label.font = CustomizationHelper.systemBoldFont(ofSize: 17)
-        label.text = chat.subject?.count ?? 0 > 0 ? chat.subject : "Новое обращение"
+        label.text = chat.subject?.count ?? 0 > 0 ? chat.subject : "NewTicket".localizedPSD()
         label.translatesAutoresizingMaskIntoConstraints = false
         label.widthAnchor.constraint(equalToConstant: 200).isActive = true
         

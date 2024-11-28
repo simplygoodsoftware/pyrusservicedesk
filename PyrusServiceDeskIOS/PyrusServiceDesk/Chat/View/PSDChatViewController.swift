@@ -376,6 +376,8 @@ extension PSDChatViewController: PSDChatViewProtocol {
             label.font = CustomizationHelper.systemBoldFont(ofSize: 17)
             navigationItem.titleView = connectionError ? label : PyrusServiceDesk.mainController?.customization?.chatTitleView
             tableView.endRefreshing()
+        case .reloadTitle:
+            designNavigation()
         }
     }
 }

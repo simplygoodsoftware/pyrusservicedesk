@@ -9,8 +9,6 @@ final class ChatsRouter: NSObject {
 extension ChatsRouter: ChatsRouterProtocol {
     func route(to destination: ChatsRouterDestination) {
         switch destination {
-        case .goBack:
-            controller?.navigationController?.popViewController(animated: true)
         case .chat(chat: let chat, fromPush: let fromPush):
             openChat(chat: chat, fromPush: fromPush)
         }

@@ -24,7 +24,9 @@ enum PSDChatPresenterCommand {
     case showKeyBoard
     case reloadAll
     case updateTitle(connectionError: Bool)
+    case reloadTitle
 }
+
 
 protocol PSDChatPresenterProtocol {
     func doWork(_ action: PSDChatPresenterCommand)
