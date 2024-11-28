@@ -193,8 +193,7 @@ private extension PSDChatInteractor {
     }
     
     func showSendMessageResult(messageToPass: PSDMessage, success: Bool) {
-        if(success){
-            PSDMessagesStorage.remove(messageId: messageToPass.clientId)
+        if success {
             let _ = PyrusServiceDesk.setLastActivityDate()
             PyrusServiceDesk.restartTimer()
         } else {
