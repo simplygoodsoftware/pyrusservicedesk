@@ -64,7 +64,7 @@ extension ChatsInteractor: ChatsInteractorProtocol {
         switch action {
         case .viewDidload:
             createMenuActions()
-            
+            NotificationCenter.default.addObserver(self, selector: #selector(showConnectionError), name: SyncManager.connectionErrorNotification, object: nil)
             NotificationCenter.default.addObserver(self, selector: #selector(updateClients), name: PyrusServiceDesk.clientsUpdateNotification, object: nil)
             NotificationCenter.default.addObserver(self, selector: #selector(setFilter), name: PyrusServiceDesk.usersUpdateNotification, object: nil)
             NotificationCenter.default.addObserver(forName: SyncManager.updateAccessesNotification, object: nil, queue: .main) { [weak self] notification in
@@ -84,10 +84,10 @@ extension ChatsInteractor: ChatsInteractorProtocol {
                 } else if let user = PyrusServiceDesk.additionalUsers.first(where: { $0.clientId == clientId }) {
                     openNewChat(userId: user.userId)
                 } else {
-                    openNewChat()
+                    openNewChat(userId: PyrusServiceDesk.customUserId)
                 }
             } else {
-                openNewChat()
+                openNewChat(userId: PyrusServiceDesk.customUserId)
             }
         case .deleteFilter:
             deleteFilter()
