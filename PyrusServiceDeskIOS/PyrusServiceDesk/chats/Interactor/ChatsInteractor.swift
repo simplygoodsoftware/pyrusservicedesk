@@ -114,7 +114,11 @@ private extension ChatsInteractor {
     
     func updateTitle() {
         if PyrusServiceDesk.syncManager.networkAvailability {
-            presenter.doWork(.updateTitle(title: self.clients.count > 1 ? "All_Conversations".localizedPSD() : clients[0].clientName))
+            if self.clients.count == 0 {
+                presenter.doWork(.updateTitle(title: "All_Conversations".localizedPSD()))
+            } else {
+                presenter.doWork(.updateTitle(title: self.clients.count > 1 ? "All_Conversations".localizedPSD() : clients[0].clientName))
+            }
         } else {
             presenter.doWork(.connectionError)
         }

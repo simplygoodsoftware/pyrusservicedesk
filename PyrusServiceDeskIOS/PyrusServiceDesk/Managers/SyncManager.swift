@@ -27,7 +27,9 @@ class SyncManager {
 //        PyrusServiceDesk.repository.clear()
 //        PSDMessagesStorage.cleanStorage()
 //        return
-        self.isFilter = isFilter
+        if !self.isFilter {
+            self.isFilter = isFilter
+        }
         if isRequestInProgress {
             shouldSendAnotherRequest = true
             return
@@ -50,7 +52,10 @@ class SyncManager {
                 guard let self = self else { return }
                 var clients = clientsArray
                 PyrusServiceDesk.accessDeniedIds = authorAccessDenied ?? []
-                let userInfo = ["isFilter": self.isFilter]
+                if isFilter {
+                    print("qq")
+                }
+                let userInfo = ["isFilter": isFilter]
                 if let authorAccessDenied, authorAccessDenied.count > 0 {
                     DispatchQueue.main.async {
                         PyrusServiceDesk.deniedAccessCallback?.deleteUsers(userIds: authorAccessDenied)
@@ -122,19 +127,21 @@ class SyncManager {
                 }
 
                 self.isRequestInProgress = false
-                self.isFilter = false
                 
                 if !complete {
                     self.updateRepeatSyncTimer()
                     networkAvailability = false
                 } else {
+                    if isFilter {
+                        self.isFilter = false
+                    }
                     clearTimer()
                     networkAvailability = true
                 }
                 
                 if self.shouldSendAnotherRequest {
                     DispatchQueue.main.async {
-                        self.syncGetTickets()
+                        self.syncGetTickets(isFilter: self.isFilter)
                     }
                 }
                 
@@ -164,6 +171,6 @@ private extension SyncManager {
     }
     
     @objc func doSync() {
-        syncGetTickets()
+        syncGetTickets(isFilter: self.isFilter)
     }
 }

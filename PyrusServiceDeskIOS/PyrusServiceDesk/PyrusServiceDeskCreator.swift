@@ -72,10 +72,8 @@ import UIKit
         } else {
             NotificationCenter.default.post(name: usersUpdateNotification, object: nil)
         }
+
         syncManager.syncGetTickets(isFilter: true)
-//        PSDGetChats.get() { _,_  in
-//            NotificationCenter.default.post(name: usersUpdateNotification, object: nil)
-//        }
     }
     
     ///User's name needed for request. If don't set used Default_User_Name
