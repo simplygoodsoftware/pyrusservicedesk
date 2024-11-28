@@ -217,13 +217,6 @@ class PSDChatViewController: PSDViewController {
             
         }
         navigationController?.navigationBar.isTranslucent = true
-        if let view = PyrusServiceDesk.mainController?.customization?.chatTitleView {
-            navigationItem.titleView = view
-            view.sizeToFit()
-            navigationController?.navigationBar.layoutIfNeeded()
-        } else {
-            title = CustomizationHelper.chatTitle
-        }
         
         if #available(iOS 13.0, *) {
             let barAppearance = UIBarAppearance()
@@ -371,11 +364,21 @@ extension PSDChatViewController: PSDChatViewProtocol {
         case .reloadAll:
             tableView.reloadAll()
         case .updateTitle(connectionError: let connectionError):
-            let label = UILabel()
-            label.text = "Waiting_For_Network".localizedPSD()
-            label.font = CustomizationHelper.systemBoldFont(ofSize: 17)
-            navigationItem.titleView = connectionError ? label : PyrusServiceDesk.mainController?.customization?.chatTitleView
-            tableView.endRefreshing()
+            if !connectionError {
+                if let view = PyrusServiceDesk.mainController?.customization?.chatTitleView {
+                    navigationItem.titleView = view
+                    view.sizeToFit()
+                    navigationController?.navigationBar.layoutIfNeeded()
+                } else {
+                    title = CustomizationHelper.chatTitle
+                }
+            } else {
+                let label = UILabel()
+                label.text = "Waiting_For_Network".localizedPSD()
+                label.font = CustomizationHelper.systemBoldFont(ofSize: 17)
+                navigationItem.titleView = label
+                tableView.endRefreshing()
+            }
         case .reloadTitle:
             designNavigation()
         }

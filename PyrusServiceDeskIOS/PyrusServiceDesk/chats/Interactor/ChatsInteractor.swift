@@ -20,7 +20,6 @@ class ChatsInteractor: NSObject {
     var isNewQr = false
     var isClear = false
     var isNewUser = false
-    private var connectionError = false
 
     private var clients = [PSDClientInfo]() {
         didSet {
@@ -109,8 +108,15 @@ private extension ChatsInteractor {
     
     @objc func showConnectionError() {
         DispatchQueue.main.async { [weak self] in
-            self?.connectionError = true
-            self?.presenter.doWork(.connectionError)
+            self?.updateTitle()
+        }
+    }
+    
+    func updateTitle() {
+        if PyrusServiceDesk.syncManager.networkAvailability {
+            presenter.doWork(.updateTitle(title: self.clients.count > 1 ? "All_Conversations".localizedPSD() : clients[0].clientName))
+        } else {
+            presenter.doWork(.connectionError)
         }
     }
     
@@ -276,15 +282,17 @@ private extension ChatsInteractor {
             guard let self = self else {
                 return
             }
-            presenter.doWork(.updateTitle(title: self.clients.count > 1 ? "All_Conversations".localizedPSD() : clients[0].clientName))
+            
             if !isFilter && self.isNewUser {
                 return
             }
+            isNewUser = false
             presenter.doWork(.endRefresh)
             
             let filterChats = createChats()
-            if chats != filterChats || filterChats.count == 0 || isFilter {
+            if chats != filterChats || filterChats.count == 0 || isClear {
                 chats = filterChats
+                isClear = false
             }
             
         }

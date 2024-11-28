@@ -4,8 +4,14 @@ class SyncManager {
     private var isRequestInProgress = false
     private var shouldSendAnotherRequest = false
     private var isFilter = false
+    
     var commandsResult = [TicketCommandResult]()
     var sendingMessages = [MessageToPass]()
+    var networkAvailability = false {
+        didSet {
+            NotificationCenter.default.post(name: SyncManager.connectionErrorNotification, object: nil)
+        }
+    }
     
     private var timerFosSendSync: Timer?
     private var repeatTimeInterval: Double? {
@@ -119,10 +125,11 @@ class SyncManager {
                 self.isFilter = false
                 
                 if !complete {
-                    NotificationCenter.default.post(name: SyncManager.connectionErrorNotification, object: nil)
                     self.updateRepeatSyncTimer()
+                    networkAvailability = false
                 } else {
                     clearTimer()
+                    networkAvailability = true
                 }
                 
                 if self.shouldSendAnotherRequest {

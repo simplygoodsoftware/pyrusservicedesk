@@ -56,6 +56,7 @@ extension PSDChatInteractor: PSDChatInteractorProtocol {
         switch action {
         case .viewDidload:
             isOpen = true
+            presenter.doWork(.updateTitle(connectionError: !PyrusServiceDesk.syncManager.networkAvailability))
             if let chat, let chatId = chat.chatId {
                 messagesToPass = PSDMessagesStorage.getSendingMessages(for: chatId)
                 for messageToPass in messagesToPass {
@@ -130,14 +131,13 @@ private extension PSDChatInteractor {
     
     @objc func showConnectionError() {
         DispatchQueue.main.async { [weak self] in
-            self?.presenter.doWork(.updateTitle(connectionError: true))
+            self?.presenter.doWork(.updateTitle(connectionError: !PyrusServiceDesk.syncManager.networkAvailability))
         }
     }
     
     @objc func updateChats() {
         DispatchQueue.main.async { [weak self] in
             guard let self else { return }
-            self.presenter.doWork(.updateTitle(connectionError: false))
             let chat = PyrusServiceDesk.chats.first(where: { $0.chatId == self.chat?.chatId })
             if let chat {
                 if chat.messages.count > self.chat?.messages.count ?? 0,
@@ -151,21 +151,21 @@ private extension PSDChatInteractor {
                 isRefresh = true
                 
                 self.updateChat(chat: chat)
-if fromPush {
-if PyrusServiceDesk.multichats {
-let customization = PyrusServiceDesk.mainController?.customization
-let label = UILabel()
-label.isUserInteractionEnabled = true
-label.textAlignment = .center
-label.font = CustomizationHelper.systemBoldFont(ofSize: 17)
-label.text = chat?.subject?.count ?? 0 > 0 ? chat?.subject : "NewTicket".localizedPSD()
-label.translatesAutoresizingMaskIntoConstraints = false
-label.widthAnchor.constraint(equalToConstant: 200).isActive = true
-
-customization?.setChatTitileView(label)
-presenter.doWork(.reloadTitle)
-}
-}
+                if fromPush {
+                    if PyrusServiceDesk.multichats {
+                        let customization = PyrusServiceDesk.mainController?.customization
+                        let label = UILabel()
+                        label.isUserInteractionEnabled = true
+                        label.textAlignment = .center
+                        label.font = CustomizationHelper.systemBoldFont(ofSize: 17)
+                        label.text = chat?.subject?.count ?? 0 > 0 ? chat?.subject : "NewTicket".localizedPSD()
+                        label.translatesAutoresizingMaskIntoConstraints = false
+                        label.widthAnchor.constraint(equalToConstant: 200).isActive = true
+                        
+                        customization?.setChatTitileView(label)
+                        presenter.doWork(.reloadTitle)
+                    }
+                }
                 self.isRefresh = false
                 fromPush = false
                 firstLoad = false
