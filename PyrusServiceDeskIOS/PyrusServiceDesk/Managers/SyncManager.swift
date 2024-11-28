@@ -52,9 +52,7 @@ class SyncManager {
                 guard let self = self else { return }
                 var clients = clientsArray
                 PyrusServiceDesk.accessDeniedIds = authorAccessDenied ?? []
-                if isFilter {
-                    print("qq")
-                }
+
                 let userInfo = ["isFilter": isFilter]
                 if let authorAccessDenied, authorAccessDenied.count > 0 {
                     DispatchQueue.main.async {
