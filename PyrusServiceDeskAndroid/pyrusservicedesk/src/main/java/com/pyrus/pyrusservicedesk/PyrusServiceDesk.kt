@@ -6,6 +6,7 @@ import android.content.Context
 import android.net.Uri
 import android.os.Build
 import androidx.annotation.MainThread
+import com.google.gson.Gson
 import com.google.gson.GsonBuilder
 import com.pyrus.pyrusservicedesk.log.PLog
 import com.pyrus.pyrusservicedesk.presentation.ui.navigation_page.ticket.TicketActivity
@@ -512,6 +513,8 @@ class PyrusServiceDesk private constructor(
     private val preferences = application.getSharedPreferences(PREFERENCE_KEY, Context.MODE_PRIVATE)
     private val preferencesManager = PreferencesManager(preferences)
     private val offlineRepository: OfflineRepository
+    val client: OkHttpClient
+    val gson: Gson
 
     private var onStopCallback: OnStopCallback? = null
 
@@ -559,6 +562,8 @@ class PyrusServiceDesk private constructor(
                 chain.proceed(requestBuilder.build())
             }.build()
 
+        client = okHttpClient
+
         picasso = Picasso.Builder(application)
             .downloader(OkHttp3Downloader(okHttpClient))
             .build()
@@ -567,6 +572,7 @@ class PyrusServiceDesk private constructor(
             RetrofitWebRepository(appId, instanceId, fileResolver, fileManager, okHttpClient, domain, remoteGson),
             offlineRepository
         )
+        gson = remoteGson
 
         requestFactory = RequestFactory(centralRepository)
         draftRepository = PreferenceDraftRepository(preferences)

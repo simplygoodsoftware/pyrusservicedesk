@@ -12,7 +12,7 @@ private const val FILE_ID_EMPTY = 0
  * Represents an attachment of the comment.
  * @param localUri transient field that is used only for local comments.
  */
-internal data class Attachment(
+data class Attachment(
     @SerializedName("id")
     val id: Int = FILE_ID_EMPTY,
     @SerializedName("guid")

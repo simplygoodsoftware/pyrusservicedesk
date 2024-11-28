@@ -11,7 +11,7 @@ private const val COMMENT_ID_EMPTY = 0L
  * @param isInbound  TRUE means that comment is inbound for support, not for user of the service desk.
  * @param localId id of local comment. For server comments this is always [COMMENT_ID_EMPTY]
  */
-internal data class Comment(
+data class Comment(
         @SerializedName("comment_id")
         val commentId: Long = COMMENT_ID_EMPTY,
         @SerializedName("body")

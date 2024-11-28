@@ -4,16 +4,14 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MediatorLiveData
 import com.pyrus.pyrusservicedesk.PyrusServiceDesk
 import com.pyrus.pyrusservicedesk.ServiceDeskProvider
-import com.pyrus.pyrusservicedesk.presentation.call.GetTicketsCall
 import com.pyrus.pyrusservicedesk.presentation.viewmodel.ConnectionViewModelBase
 import com.pyrus.pyrusservicedesk.sdk.data.Application
-import com.pyrus.pyrusservicedesk.sdk.data.Attachment
-import com.pyrus.pyrusservicedesk.sdk.data.Comment
 import com.pyrus.pyrusservicedesk.sdk.data.Ticket
 import com.pyrus.pyrusservicedesk.sdk.data.intermediate.Tickets
 import com.pyrus.pyrusservicedesk.sdk.updates.LiveUpdateSubscriber
 import com.pyrus.pyrusservicedesk.sdk.updates.PreferencesManager
-import com.pyrus.pyrusservicedesk.utils.RequestUtils.Companion.MAX_FILE_SIZE_BYTES
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
 
 /**
  * ViewModel for the tickets list screen.
@@ -31,6 +29,12 @@ internal class TicketsListViewModel(
     private var usersName: List<String>? = null
 
     private var unreadCount = 0
+
+    private val _stateFlow = MutableStateFlow("Initial value")
+    val ticketsListStateFlow: StateFlow<String> get() = _stateFlow
+    fun updateValue(newValue: String) {
+        _stateFlow.value = newValue
+    }
 
 
     init {
@@ -74,19 +78,21 @@ internal class TicketsListViewModel(
     fun getApplicationsLiveData(): LiveData<List<Application>> = applications
 
     private fun update() {
-        GetTicketsCall(this@TicketsListViewModel, requests)
-            .execute()
-            .observeForever { result ->
-                if (result == null)
-                    return@observeForever
-                when {
-                    result.hasError() -> {  }
-                    else ->{
-                        onNewData(result.data!!)
-                        onDataLoaded()
-                    }
-                }
-            }
+//        GetTicketsCall(this@TicketsListViewModel, requests)
+//            .execute()
+//            .observeForever { result ->
+//                if (result == null)
+//                    return@observeForever
+//                when {
+//                    result.hasError() -> {  }
+//                    else ->{
+//                        onNewData(result.data!!)
+//                        onDataLoaded()
+//                    }
+//                }
+//            }
+
+//        SyncRepository().startSync()
     }
 
     private class TicketComparator : Comparator<Ticket> {

@@ -5,6 +5,9 @@ import android.os.Bundle
 import android.view.View
 import android.widget.ImageButton
 import android.widget.Toast
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.lifecycleScope
+import androidx.lifecycle.repeatOnLifecycle
 import com.google.android.material.tabs.TabLayoutMediator
 import com.pyrus.pyrusservicedesk.PyrusServiceDesk
 import com.pyrus.pyrusservicedesk.R
@@ -12,7 +15,9 @@ import com.pyrus.pyrusservicedesk.databinding.PsdTicketsListBinding
 import com.pyrus.pyrusservicedesk.presentation.ConnectionActivityBase
 import com.pyrus.pyrusservicedesk.presentation.ui.navigation_page.addTicket.AddTicketFragment
 import com.pyrus.pyrusservicedesk.presentation.ui.navigation_page.filterTicketsList.FilterTicketsFragment
+import com.pyrus.pyrusservicedesk.sdk.data.Application
 import com.pyrus.pyrusservicedesk.sdk.data.Ticket
+import com.pyrus.pyrusservicedesk.sdk.web.retrofit.SyncRepository
 import com.pyrus.pyrusservicedesk.utils.CIRCLE_TRANSFORMATION
 import com.pyrus.pyrusservicedesk.utils.RequestUtils.Companion.getOrganisationLogoUrl
 import kotlinx.android.synthetic.main.psd_empty_tickets_list.view.createTicketTv
@@ -21,6 +26,8 @@ import kotlinx.android.synthetic.main.psd_toolbar.view.psd_toolbar_qr_ib
 import kotlinx.android.synthetic.main.psd_toolbar.view.psd_toolbar_settings_ib
 import kotlinx.android.synthetic.main.psd_toolbar.view.psd_toolbar_vendor_iv
 import kotlinx.android.synthetic.main.psd_toolbar.view.psd_toolbar_vendor_name_tv
+import kotlinx.coroutines.flow.collect
+import kotlinx.coroutines.launch
 
 
 /**
@@ -59,6 +66,61 @@ internal class TicketListActivity :
             //TODO
             AddTicketFragment().show(supportFragmentManager, "")
         }
+
+        val syncRepository = SyncRepository()
+
+
+        lifecycleScope.launch {
+            repeatOnLifecycle(Lifecycle.State.STARTED) {
+                syncRepository.ticketsListStateFlow.collect { value ->
+
+//                    value.let {
+//                        binding.toolbarTicketsList.psd_toolbar_vendor_name_tv.text = it
+//                    }
+                    if (value.tickets.applications?.isEmpty() == false) {
+
+                        value.tickets.applications[0].orgLogoUrl?.let {
+                                PyrusServiceDesk.get().picasso
+                                    .load(
+                                        getOrganisationLogoUrl(
+                                            it, PyrusServiceDesk.get().domain
+                                        )
+                                    )
+                                    .transform(CIRCLE_TRANSFORMATION)
+                                    .into(binding.toolbarTicketsList.psd_toolbar_vendor_iv)
+                            }
+
+
+                        value.tickets.applications[0].orgName.let {
+                            binding.toolbarTicketsList.psd_toolbar_vendor_name_tv.text = it
+                        }
+
+                        //TODO appCount, appName
+                        val appSize = value.tickets.applications.size
+                        viewPagerAdapter = ViewPagerAdapter(appSize, this@TicketListActivity)
+                        binding.viewPager.adapter = viewPagerAdapter
+                        if (appSize > 1) {
+                            binding.tabLayout.visibility = View.VISIBLE
+                            TabLayoutMediator(
+                                binding.tabLayout,
+                                binding.viewPager
+                            ) { tab, position ->
+                                tab.text =
+                                    value.tickets.applications[position].orgName
+                            }.attach()
+                        } else {
+                            binding.tabLayout.visibility = View.GONE
+                        }
+                    }
+                }
+            }
+        }
+
+        SyncRepository().startSync()
+
+        // Пример обновления значения из ViewModel
+        val application: List<Application> = listOf(Application(PyrusServiceDesk.get().appId, "home", null))
+        //syncRepository.updateValue(SyncRes(Tickets(false, application, emptyList(), emptyList())))
     }
 
     private fun getSelectedUserIds(chosenUserId: String): List<Ticket> {
@@ -98,7 +160,7 @@ internal class TicketListActivity :
 
         }
 
-        viewModel.getApplicationsLiveData().observe(
+        /*viewModel.getApplicationsLiveData().observe(
             this
         ) { applications ->
             //TODO several vendors
@@ -124,7 +186,7 @@ internal class TicketListActivity :
             else {
                 binding.tabLayout.visibility = View.GONE
             }
-        }
+        }*/
     }
 
     companion object {

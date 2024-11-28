@@ -88,6 +88,10 @@ internal class RetrofitWebRepository(
         }
     }
 
+    override suspend fun getTickets(commands: List<Command>): GetTicketsResponse {
+        TODO("Not yet implemented")
+    }
+
     fun getAdditionalUsers(): List<UserData> {
         val additionalUsers: MutableList<UserData> = mutableListOf()
         for (id in PyrusServiceDesk.usersId) {
@@ -98,30 +102,30 @@ internal class RetrofitWebRepository(
     }
 
 
-    override suspend fun getTickets(
-        commands: List<Command>
-    ): GetTicketsResponse {
-        PLog.d(TAG, "getTickets, " +
-                "appId: ${appId.getFirstNSymbols(10)}, " +
-                "userId: ${getUserId().getFirstNSymbols(10)}, " +
-                "instanceId: ${getInstanceId()?.getFirstNSymbols(10)}, " +
-                "apiVersion: ${getVersion()}"
-        )
-        return withContext(Dispatchers.IO){
-            try {
-                //TODO need full info
-                api.getTickets(RequestBodyBase(false, getAdditionalUsers(), commands, PyrusServiceDesk.get().authorId , ConfigUtils.getUserName(), appId, PyrusServiceDesk.usersId[0],  getSecurityKey(), getInstanceId(), getVersion(), apiFlag)).execute().run {
-                    PLog.d(TAG, "getTickets, isSuccessful: $isSuccessful, body() != null: ${body() != null}")
-                    when {
-                        isSuccessful && body() != null -> GetTicketsResponse(tickets = body()!!)
-                        else -> GetTicketsResponse(createError(this))
-                    }
-                }
-            } catch (ex: Exception) {
-                GetTicketsResponse(NoInternetConnection("No internet connection"))
-            }
-        }
-    }
+//    override suspend fun getTickets(
+//        commands: List<Command>
+//    ): GetTicketsResponse {
+//        PLog.d(TAG, "getTickets, " +
+//                "appId: ${appId.getFirstNSymbols(10)}, " +
+//                "userId: ${getUserId().getFirstNSymbols(10)}, " +
+//                "instanceId: ${getInstanceId()?.getFirstNSymbols(10)}, " +
+//                "apiVersion: ${getVersion()}"
+//        )
+//        return withContext(Dispatchers.IO){
+//            try {
+//                //TODO need full info
+//                api.getTickets(RequestBodyBase(false, getAdditionalUsers(), commands, PyrusServiceDesk.get().authorId , ConfigUtils.getUserName(), appId, PyrusServiceDesk.usersId[0],  getSecurityKey(), getInstanceId(), getVersion(), apiFlag)).execute().run {
+//                    PLog.d(TAG, "getTickets, isSuccessful: $isSuccessful, body() != null: ${body() != null}")
+//                    when {
+//                        isSuccessful && body() != null -> GetTicketsResponse(tickets = body()!!)
+//                        else -> GetTicketsResponse(createError(this))
+//                    }
+//                }
+//            } catch (ex: Exception) {
+//                GetTicketsResponse(NoInternetConnection("No internet connection"))
+//            }
+//        }
+//    }
 
     override suspend fun setPushToken(token: String?, tokenType: String): SetPushTokenResponse {
         PLog.d(TAG, "setPushToken, " +

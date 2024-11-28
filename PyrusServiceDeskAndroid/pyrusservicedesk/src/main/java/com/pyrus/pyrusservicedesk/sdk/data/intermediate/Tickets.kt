@@ -10,7 +10,7 @@ import com.pyrus.pyrusservicedesk.sdk.data.TicketCommandResult
  * Intermediate data for parsing list of Ticket object
  */
 @Keep
-internal data class Tickets(
+data class Tickets(
         @SerializedName("hasMore")
         val hasMore: Boolean?,
         @SerializedName("applications")

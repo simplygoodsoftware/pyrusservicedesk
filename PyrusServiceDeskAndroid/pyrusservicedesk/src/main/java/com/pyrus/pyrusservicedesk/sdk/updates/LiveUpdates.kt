@@ -54,38 +54,38 @@ internal class LiveUpdates(
     private var isStarted = false
     private var firstReplyIsShown = false
 
-    private val ticketsUpdateRunnable = object : Runnable {
-        override fun run() {
-            val requestUserId = userId
-            GlobalScope.launch(ioDispatcher) {
-                requests.getTicketsRequest().execute(
-                    object : ResponseCallback<Tickets> {
-                        override fun onSuccess(data: Tickets) {
-                            val newUnread = data.tickets?.count { !it.isRead!! } ?: 0 //TODO
-                            this@launch.launch(mainDispatcher) {
-                                val userId = PyrusServiceDesk.get().userId
-                                if (data.tickets.isNullOrEmpty())
-                                    stopUpdates()
-                                else if (requestUserId == userId)
-                                    processGetTicketsSuccess(data, newUnread)
-                            }
-                        }
-
-                        override fun onFailure(responseError: ResponseError) {
-                            PLog.d(TAG, "ticketsUpdateRunnable, onFailure")
-                        }
-                    }
-                )
-            }
-            val interval = getTicketsUpdateInterval(lastActiveTime)
-            PLog.d(TAG, "ticketsUpdateRunnable, interval: $interval")
-            if (interval == -1L) {
-                stopUpdates()
-                return
-            }
-            mainHandler.postDelayed(this, interval)
-        }
-    }
+//    private val ticketsUpdateRunnable = object : Runnable {
+//        override fun run() {
+//            val requestUserId = userId
+//            GlobalScope.launch(ioDispatcher) {
+//                requests.getTicketsRequest().execute(
+//                    object : ResponseCallback<Tickets> {
+//                        override fun onSuccess(data: Tickets) {
+//                            val newUnread = data.tickets?.count { !it.isRead!! } ?: 0 //TODO
+//                            this@launch.launch(mainDispatcher) {
+//                                val userId = PyrusServiceDesk.get().userId
+//                                if (data.tickets.isNullOrEmpty())
+//                                    stopUpdates()
+//                                else if (requestUserId == userId)
+//                                    processGetTicketsSuccess(data, newUnread)
+//                            }
+//                        }
+//
+//                        override fun onFailure(responseError: ResponseError) {
+//                            PLog.d(TAG, "ticketsUpdateRunnable, onFailure")
+//                        }
+//                    }
+//                )
+//            }
+//            val interval = getTicketsUpdateInterval(lastActiveTime)
+//            PLog.d(TAG, "ticketsUpdateRunnable, interval: $interval")
+//            if (interval == -1L) {
+//                stopUpdates()
+//                return
+//            }
+//            mainHandler.postDelayed(this, interval)
+//        }
+//    }
 
     /**
      * Registers [subscriber] to on new reply events
@@ -179,10 +179,10 @@ internal class LiveUpdates(
         if (interval == currentInterval && isStarted)
             return
         PLog.d(TAG, "startUpdatesIfNeeded, change interval, isStarted $isStarted")
-        if (isStarted)
-            stopUpdates()
-        if (interval != -1L || activeScreenCount > 0)
-            startUpdates()
+//        if (isStarted)
+//            stopUpdates()
+        //if (interval != -1L || activeScreenCount > 0)
+            //SyncRepository().startSync()
     }
 
     /**
@@ -220,11 +220,11 @@ internal class LiveUpdates(
         if (!isStarted)
             return
 
-        if (newReplySubscribers.isEmpty()
-            && ticketCountChangedSubscribers.isEmpty()
-            && dataSubscribers.isEmpty()
-        )
-            stopUpdates()
+//        if (newReplySubscribers.isEmpty()
+//            && ticketCountChangedSubscribers.isEmpty()
+//            && dataSubscribers.isEmpty()
+//        )
+//            stopUpdates()
     }
 
     private fun getTicketsUpdateInterval(lastActiveTime: Long): Long {
@@ -238,17 +238,17 @@ internal class LiveUpdates(
         }
     }
 
-    private fun startUpdates() {
-        PLog.d(TAG, "startUpdates")
-        isStarted = true
-        mainHandler.post(ticketsUpdateRunnable)
-    }
-
-    private fun stopUpdates() {
-        PLog.d(TAG, "stopUpdates")
-        isStarted = false
-        mainHandler.removeCallbacks(ticketsUpdateRunnable)
-    }
+//    private fun startUpdates() {
+//        PLog.d(TAG, "startUpdates")
+//        isStarted = true
+//        mainHandler.post(ticketsUpdateRunnable)
+//    }
+//
+//    private fun stopUpdates() {
+//        PLog.d(TAG, "stopUpdates")
+//        isStarted = false
+//        mainHandler.removeCallbacks(ticketsUpdateRunnable)
+//    }
 
     @MainThread
     private fun processGetTicketsSuccess(data: Tickets, newUnreadCount: Int) {

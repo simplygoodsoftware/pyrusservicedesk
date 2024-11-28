@@ -5,7 +5,7 @@ import com.google.gson.annotations.SerializedName
 /**
  * Represents ticket object.
  */
-internal data class Application(
+data class Application(
         @SerializedName("app_id")
         val appId: String? = "",
         @SerializedName("org_name")

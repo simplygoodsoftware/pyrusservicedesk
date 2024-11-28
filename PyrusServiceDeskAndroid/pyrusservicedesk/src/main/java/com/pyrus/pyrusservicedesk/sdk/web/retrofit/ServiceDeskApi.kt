@@ -4,6 +4,7 @@ import androidx.annotation.Keep
 import com.pyrus.pyrusservicedesk.sdk.data.Ticket
 import com.pyrus.pyrusservicedesk.sdk.data.intermediate.*
 import com.pyrus.pyrusservicedesk.sdk.web.request_body.*
+import com.pyrus.pyrusservicedesk.utils.Try
 import okhttp3.MultipartBody
 import okhttp3.ResponseBody
 import retrofit2.Call
@@ -25,8 +26,8 @@ internal interface ServiceDeskApi {
      * Api call for getting tikets.
      */
     @POST("gettickets")
-    fun getTickets(@Body requestBody: RequestBodyBase)
-            : Call<Tickets>
+    suspend fun getTickets(@Body requestBody: RequestBodyBase)
+            : Try<Tickets>
 
     /**
      * Api call for getting ticket with the given [ticketId].

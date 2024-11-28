@@ -5,7 +5,7 @@ import com.google.gson.annotations.SerializedName
 /**
  * Represents an command of the comment.
  */
-internal data class TicketCommandResult(
+data class TicketCommandResult(
     @SerializedName("command_Id")
     val commandId: String,
     @SerializedName("comment_id")
