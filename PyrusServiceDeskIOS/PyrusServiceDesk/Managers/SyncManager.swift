@@ -87,18 +87,19 @@ class SyncManager {
                 }
                 
                 if let commandsResult {
-                    self.commandsResult = commandsResult
+                    self.commandsResult = commandsResult.sorted(by: { $0.commentId ?? 0 < $1.commentId ?? 0 })
                     NotificationCenter.default.post(name: SyncManager.commandsResultNotification, object: nil)
                     for commandResult in commandsResult {
                         PyrusServiceDesk.repository.deleteCommand(withId: commandResult.commandId)
                         if let message = self.sendingMessages.first(where: { $0.commandId.lowercased() == commandResult.commandId.lowercased() })?.message {
-                            PSDMessagesStorage.remove(messageId: message.clientId)
+                            PSDMessagesStorage.remove(messageId: message.clientId, needSafe: false)
                             if commandResult.error != nil {
                                 message.state = .cantSend
                                 PSDMessagesStorage.save(message: message)
                             }
                         }
                     }
+                    PSDMessagesStorage.saveMessagesToFile()
                 }
                 
                 if let chats {

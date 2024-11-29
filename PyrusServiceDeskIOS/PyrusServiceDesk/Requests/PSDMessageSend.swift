@@ -122,7 +122,6 @@ struct PSDMessageSend {
             }
         }
         
-     //   PSDMessagesStorage.removeFromStorage(messageId: messageToPass.clientId)
         let commandId = messageToPass.commandId ?? UUID().uuidString
         delegate?.addMessageToPass(message: messageToPass, commandId: commandId)
         PSDMessagesStorage.save(message: messageToPass)

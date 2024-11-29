@@ -31,39 +31,8 @@ class PSDMessageSender: NSObject {
         
         let params = TicketCommandParams(ticketId: messageToPass.ticketId, appId:  PyrusServiceDesk.currentClientId ?? PyrusServiceDesk.clientId, requestNewTicket: requestNewTicket, userId: PyrusServiceDesk.currentUserId ?? PyrusServiceDesk.customUserId ?? PyrusServiceDesk.userId, message: messageToPass.text, attachments: attachmentsData)
         let command = TicketCommand(commandId: UUID().uuidString, type: .createComment, appId: PyrusServiceDesk.currentClientId ?? PyrusServiceDesk.clientId, userId:  PyrusServiceDesk.currentUserId ?? PyrusServiceDesk.customUserId ?? PyrusServiceDesk.userId, params: params)
-        // PSDMessagesStorage.saveInStorage(message: messageToPass, commandId: command.commandId)
         PyrusServiceDesk.syncManager.sendingMessages.append(MessageToPass(message: messageToPass, commandId: command.commandId))
         delegate?.addMessageToPass(message: messageToPass, commandId: command.commandId)
-//        PyrusServiceDesk.repository.add(command: command) { _ in
-//            PyrusServiceDesk.syncManager.syncGetTickets()
-//        }
-        
-        
-//        let task = PSDMessageSender.pass(messageToPass.text, messageToPass.attachments, rating: messageToPass.rating, clientId: messageToPass.clientId, ticketId: messageToPass.ticketId, userId: messageToPass.userId ?? PyrusServiceDesk.customUserId ?? PyrusServiceDesk.userId) {
-//            commentId, attachments, ticketId in
-//            if let commentId = commentId, commentId.count > 0 {
-//                //put attachments id
-//                if let attachments = attachments {
-//                    for (i,attachmentId) in attachments.enumerated() {
-//                        guard let attArr = messageToPass.attachments, attArr.count > 0 else {
-//                            continue
-//                        }
-//                        messageToPass.attachments?[i].serverIdentifer = "\(attachmentId)"
-//                    }
-//                }
-//                messageToPass.messageId = commentId
-//                PSDMessageSender.showResult(of: messageToPass, success: true, delegate: delegate)
-//                if let ticketId {
-//                    delegate?.updateTicketId(ticketId)
-//                }
-//            } else {
-//                PSDMessageSender.showResult(of: messageToPass, success: false, delegate: delegate)
-//            }
-//            completion()
-//        }
-//        PSDMessageSend.taskArray.append(task)
-//        
-//        //messages to exist chat no need to be in queue, so we can remove it
         PSDMessageSend.clearAndRemove(sender:self)
     }
     ///Show result

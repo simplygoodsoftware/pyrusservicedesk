@@ -54,9 +54,11 @@ struct PSDMessagesStorage {
         saveMessagesToFile()
     }
     
-    static func remove(messageId: String) {
+    static func remove(messageId: String, needSafe: Bool = true) {
         PyrusServiceDesk.storeMessages?.removeAll(where: { $0.clientId == messageId })
-        saveMessagesToFile()
+        if needSafe {
+            saveMessagesToFile()
+        }
     }
     
     static func getMessages(for ticketId: Int? = nil) -> [PSDMessage] {
