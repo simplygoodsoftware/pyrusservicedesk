@@ -249,14 +249,15 @@ class PSDChatViewController: PSDViewController {
 
     private lazy var leftButton: UIButton = {
         let button = UIButton.init(type: .custom)
+        let mainColor = PyrusServiceDesk.mainController?.customization?.barButtonTintColor ?? UIColor.darkAppColor
         button.titleLabel?.font = .backButton
         button.setTitle("Back".localizedPSD(), for: .normal)
-        button.setTitleColor(PyrusServiceDesk.mainController?.customization?.barButtonTintColor ?? UIColor.darkAppColor, for: .normal)
+        button.setTitleColor(mainColor, for: .normal)
         let backImage = UIImage.PSDImage(name: "Back")?.withRenderingMode(.alwaysTemplate)
-        button.setImage(backImage, for: .normal)
+        button.setImage(backImage?.imageWith(color: mainColor), for: .normal)
         button.addTarget(self, action: #selector(closeButtonAction), for: .touchUpInside)
         button.sizeToFit()
-        button.tintColor = PyrusServiceDesk.mainController?.customization?.barButtonTintColor ?? UIColor.darkAppColor
+        button.tintColor = mainColor
         return button
     }()
     

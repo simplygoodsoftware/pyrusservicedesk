@@ -189,7 +189,7 @@ class PyrusServiceDeskController: PSDNavigationController {
     }
     
     private func backBarButtonItem() -> UIBarButtonItem {
-        let mainColor = customization?.barButtonTintColor ?? .darkAppColor
+        let mainColor = customization?.themeColor ?? .darkAppColor
         let button = UIButton()
         button.titleLabel?.font = CustomizationHelper.systemFont(ofSize: 18)
         button.setTitle(" " + "Back".localizedPSD(), for: .normal)
