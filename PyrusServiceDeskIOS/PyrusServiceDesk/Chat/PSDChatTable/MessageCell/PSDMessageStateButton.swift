@@ -23,6 +23,15 @@ class PSDMessageStateButton: UIButton {
         self.addSubview(stateImage)
         self.addTarget(self, action: #selector(stateButtonPressed), for: .touchUpInside)
     }
+    
+    init(size: CGFloat) {
+        super.init(frame: .zero)
+        self.frame = CGRect(x: 0, y: 0, width: size, height: size)
+        stateImage.frame = CGRect(x: 0, y: 0, width: size - 2, height: size - 2)
+        stateImage.center = CGPoint(x: size / 2, y: size / 2)
+        self.addSubview(stateImage)
+    }
+    
     @objc private func stateButtonPressed() {
         self.delegate?.tryShowRetryAction()
     }

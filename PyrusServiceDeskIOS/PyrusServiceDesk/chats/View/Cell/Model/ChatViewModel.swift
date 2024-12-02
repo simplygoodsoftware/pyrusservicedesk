@@ -8,4 +8,5 @@ struct ChatViewModel: Hashable {
     let lastMessageText: String
     let attachmentText: String
     let hasAttachment: Bool
+    let state: messageState
 }

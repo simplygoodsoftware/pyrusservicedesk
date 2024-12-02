@@ -489,6 +489,7 @@ extension PSDChatsViewController: ChatsViewProtocol {
                 icon.image = UIImage(named: "iiko")
             }
             customRefresh.endRefreshing()
+            tableView.sendSubviewToBack(customRefresh)
         }
     }
 }

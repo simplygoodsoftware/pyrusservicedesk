@@ -60,11 +60,14 @@ private extension ChatsPresenter {
                 ? chat.subject ?? ""
                 : "NewTicket".localizedPSD()
             
-            let lastMessage = chat.messages.last
+            var lastMessage = chat.messages.last
+            if let lastStoreMessage = PSDMessagesStorage.getMessages(for: chat.id).last {
+                lastMessage = lastStoreMessage.date > lastMessage?.date ?? Date() ? lastStoreMessage : lastMessage
+            }
             let author = lastMessage?.isInbound ?? false ? "Вы" : lastMessage?.owner.name ?? ""
-            let text = lastMessage?.attachments != nil
+            let text = lastMessage?.attachments?.count ?? 0 > 0
                 ? ""
-                : chat.lastComment?.text ?? "Last_Message".localizedPSD()
+                : lastMessage?.text ?? "Last_Message".localizedPSD()
             
             let model = ChatViewModel(
                 id: chat.id,
@@ -73,7 +76,8 @@ private extension ChatsPresenter {
                 subject: subject,
                 lastMessageText: "\(author): \(text)",
                 attachmentText: getAttachmentString(attachment: lastMessage?.attachments?.last) ?? "",
-                hasAttachment: lastMessage?.attachments?.count ?? 0 > 0
+                hasAttachment: lastMessage?.attachments?.count ?? 0 > 0, 
+                state: lastMessage?.state ?? .sent
             )
             
             models.append(model)

@@ -20,6 +20,7 @@ class ChatsInteractor: NSObject {
     var isNewQr = false
     var isClear = false
     var isNewUser = false
+    var firtLoad = true
 
     private var clients = [PSDClientInfo]() {
         didSet {
@@ -98,6 +99,10 @@ extension ChatsInteractor: ChatsInteractorProtocol {
             deleteFilter()
         case .viewWillAppear:
             PyrusServiceDesk.currentUserId = nil
+            if chats.count > 0 {
+                presenter.doWork(.updateChats(chats: prepareChats()))
+                firtLoad = false
+            }
         case .updateSelected(index: let index):
             updateSelected(index: index)
         }

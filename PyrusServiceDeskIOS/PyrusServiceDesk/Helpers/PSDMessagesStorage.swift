@@ -76,9 +76,9 @@ struct PSDMessagesStorage {
         if ticketId == nil {
             messages = PyrusServiceDesk.storeMessages?.filter({ $0.state == .sending }) ?? []
         } else if ticketId == 0 {
-            messages = PyrusServiceDesk.storeMessages?.filter({ $0.state == .sending && $0.ticketId == ticketId }) ?? []
-        } else {
             messages = PyrusServiceDesk.storeMessages?.filter({ $0.state == .sending && $0.ticketId == ticketId && $0.userId == PyrusServiceDesk.currentUserId }) ?? []
+        } else {
+            messages = PyrusServiceDesk.storeMessages?.filter({ $0.state == .sending && $0.ticketId == ticketId }) ?? []
         }
         return messages.map({ MessageToPass(message: $0, commandId: $0.commandId ?? "") })
     }
