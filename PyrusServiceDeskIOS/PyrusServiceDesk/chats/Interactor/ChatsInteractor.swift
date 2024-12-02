@@ -37,7 +37,9 @@ class ChatsInteractor: NSObject {
                 {
                     DispatchQueue.main.async {
                         self.updateSelected(index: i)
-                        self.presenter.doWork(.updateSelected(index: i))
+                        if self.clients.count > 1 {
+                            self.presenter.doWork(.updateSelected(index: i))
+                        }
                     }
                     break
                 }

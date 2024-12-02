@@ -134,7 +134,7 @@ import UIKit
             label.isUserInteractionEnabled = true
             label.textAlignment = .center
             label.font = CustomizationHelper.systemBoldFont(ofSize: 17)
-            label.text = chat?.subject?.count ?? 0 > 0 ? chat?.subject : "NewTicket".localizedPSD()
+            label.text = chat?.subject?.count ?? 0 > 0 ? chat?.subject : ""
             label.translatesAutoresizingMaskIntoConstraints = false
             label.widthAnchor.constraint(equalToConstant: 200).isActive = true
             
