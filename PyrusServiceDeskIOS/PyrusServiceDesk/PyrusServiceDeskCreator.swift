@@ -91,57 +91,73 @@ import UIKit
 
     
     @objc static public func openTicket(ticketId: Int, userId: String, messageId: Int) -> Bool {
-            guard PyrusServiceDesk.multichats else {
-                return false
-            }
+        guard PyrusServiceDesk.multichats else {
+            return false
+        }
         if let ticketsController = PyrusServiceDesk.mainController {
-                let chat = PyrusServiceDesk.chats.filter { $0.chatId ?? 0 == ticketId }.first
-                ticketsController.popToRootViewController(animated: false)
-                
-                let presenter = PSDChatPresenter()
-                let interactor: PSDChatInteractor
-
+            let chat = PyrusServiceDesk.chats.filter { $0.chatId ?? 0 == ticketId }.first
+            ticketsController.popToRootViewController(animated: false)
             
-            PyrusServiceDesk.currentUserId = userId
-            if PyrusServiceDesk.customUserId == userId {
+            let presenter = PSDChatPresenter()
+            let interactor: PSDChatInteractor
+            
+            
+            let uId: String
+            if let sepRange = userId.range(of: ":") {
+                uId = String(userId[sepRange.upperBound...])
+            } else {
+                uId = userId
+            }
+            PyrusServiceDesk.currentUserId = uId
+            
+            if PyrusServiceDesk.customUserId == uId {
                 PyrusServiceDesk.currentClientId = PyrusServiceDesk.clientId
                 NotificationCenter.default.post(name: clientIdChangedNotification, object: nil)
-
+                
             } else {
                 for user in PyrusServiceDesk.additionalUsers {
-                    if user.userId == userId {
+                    if user.userId == uId {
                         PyrusServiceDesk.currentClientId = user.clientId
                         NotificationCenter.default.post(name: clientIdChangedNotification, object: nil)
                         break
                     }
                 }
             }
-                if let chat {
-                    interactor = PSDChatInteractor(presenter: presenter, chat: chat)
-                } else {
-                    let chat = PSDChat(chatId: ticketId, date: Date(), messages: [])
-                    chat.userId = userId
-                    interactor = PSDChatInteractor(presenter: presenter, chat: chat, fromPush: true)
-                }
-                let router = PSDChatRouter()
-                let pyrusChat = PSDChatViewController(interactor: interactor, router: router)
-                presenter.view = pyrusChat
-                router.controller = pyrusChat
-                ticketsController.pushViewController(pyrusChat, animated: false)
-//                self.refreshFromPush(messageId: messageId)
-                return true
+            if let chat {
+                interactor = PSDChatInteractor(presenter: presenter, chat: chat)
             } else {
-                return false
+                let chat = PSDChat(chatId: ticketId, date: Date(), messages: [])
+                chat.userId = uId
+                interactor = PSDChatInteractor(presenter: presenter, chat: chat, fromPush: true)
             }
+            let label = UILabel()
+            label.isUserInteractionEnabled = true
+            label.textAlignment = .center
+            label.font = CustomizationHelper.systemBoldFont(ofSize: 17)
+            label.text = chat?.subject?.count ?? 0 > 0 ? chat?.subject : "NewTicket".localizedPSD()
+            label.translatesAutoresizingMaskIntoConstraints = false
+            label.widthAnchor.constraint(equalToConstant: 200).isActive = true
+            
+            ticketsController.customization?.setChatTitileView(label)
+            
+            let router = PSDChatRouter()
+            let pyrusChat = PSDChatViewController(interactor: interactor, router: router)
+            presenter.view = pyrusChat
+            router.controller = pyrusChat
+            ticketsController.pushViewController(pyrusChat, animated: false)
+            return true
+        } else {
+            return false
+
         }
+    }
     
     /**
      Send device id to server
      - parameter token: String with device id
      - parameter completion: Error. Not nil if success. See error.localizedDescription to understand why its happened
  */
-    @objc public static func setPushToken(_ token:String?, completion: @escaping(Error?) -> Void){
-        
+    @objc public static func setPushToken(_ token:String?, users: [PSDUserInfo]? = nil, completion: @escaping(Error?) -> Void){
         guard
             let clientId = clientId,
             clientId.count > 0,
@@ -171,14 +187,27 @@ import UIKit
                 return
             }
         }
-        PSDPushToken.send(token, completion: {
-            error in
-            completion(error)
-            lastSetPushTokens.append(Date())
-            if error == nil {
-                lastSetPushToken = Date()
+        if let users = users {
+            for user in users {
+                let userId = user.userId
+                let appId = user.clientId
+                let command = TicketCommand(commandId: UUID().uuidString, type: .setPushToken, appId: appId, userId: userId, params: TicketCommandParams(ticketId: nil, appId: appId, userId: userId, token: token, type: "ios"))
+                PyrusServiceDesk.repository.add(command: command)
+                PyrusServiceDesk.syncManager.syncGetTickets()
+                ///todo - добавить обработку ошибки
+                completion(nil)
             }
-        })
+            
+        } else {
+            PSDPushToken.send(token, completion: {
+                error in
+                completion(error)
+                lastSetPushTokens.append(Date())
+                if error == nil {
+                    lastSetPushToken = Date()
+                }
+            })
+        }
     }
     
     ///Show chat
@@ -352,7 +381,12 @@ import UIKit
         if lastRefreshes.count > REFRESH_MAX_COUNT{
             lastRefreshes.remove(at: 0)
         }
-        PyrusServiceDesk.mainController?.refreshChat(showFakeMessage: 0)
+        if multichats {
+            PyrusServiceDesk.syncManager.syncGetTickets()
+        } else {
+            PyrusServiceDesk.mainController?.refreshChat(showFakeMessage: 0)
+        }
+        
     }
     
     ///Scrolls chat to bottom, starts refreshing chat and shows fake message from support is psd is open.

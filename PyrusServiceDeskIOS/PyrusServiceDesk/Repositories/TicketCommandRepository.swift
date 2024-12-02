@@ -98,29 +98,27 @@ class TicketCommandRepository {
     }
     
     func loadFromFile(completion: @escaping (Result<[TicketCommand], Error>) -> Void) {
-        getCreateCommentCommands() { [weak self] createTicketCommands in
-            if let cachedCommands = self?.commandsCache {
-                completion(.success(cachedCommands))
-                return
-            }
-            
-            DispatchQueue.global(qos: .background).async { [weak self] in
-                guard let self else { return }
-                do {
-                    let data = try Data(contentsOf: self.fileURL)
-                    let decoder = JSONDecoder()
-                    let commands = try decoder.decode([TicketCommand].self, from: data)
-                    
-                    self.commandsCache = commands
-                    
-                    DispatchQueue.main.async {
-                        completion(.success(commands))
-                    }
-                } catch {
-                    self.commandsCache = []
-                    DispatchQueue.main.async {
-                        completion(.failure(error))
-                    }
+        if let cachedCommands = commandsCache {
+            completion(.success(cachedCommands))
+            return
+        }
+        
+        DispatchQueue.global(qos: .background).async { [weak self] in
+            guard let self else { return }
+            do {
+                let data = try Data(contentsOf: self.fileURL)
+                let decoder = JSONDecoder()
+                let commands = try decoder.decode([TicketCommand].self, from: data)
+                
+                self.commandsCache = commands
+                
+                DispatchQueue.main.async {
+                    completion(.success(commands))
+                }
+            } catch {
+                self.commandsCache = []
+                DispatchQueue.main.async {
+                    completion(.failure(error))
                 }
             }
         }

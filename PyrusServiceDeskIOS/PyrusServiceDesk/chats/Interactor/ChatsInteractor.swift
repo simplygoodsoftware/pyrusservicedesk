@@ -37,6 +37,7 @@ class ChatsInteractor: NSObject {
                 {
                     DispatchQueue.main.async {
                         self.updateSelected(index: i)
+                        self.presenter.doWork(.updateSelected(index: i))
                     }
                     break
                 }
@@ -216,6 +217,7 @@ private extension ChatsInteractor {
     }
     
     func updateSelected(index: Int) {
+        
         if index < clients.count {
             selectedIndex = index
             presenter.doWork(.deleteFilter)
@@ -238,12 +240,13 @@ private extension ChatsInteractor {
                 self?.presenter.doWork(.updateTitle(title: PyrusServiceDesk.clients[0].clientName))
                 self?.clients = PyrusServiceDesk.clients
                 self?.updateIcon(imagePath: PyrusServiceDesk.clients[0].clientIcon, index: 0)
+                self?.clients = PyrusServiceDesk.clients
             } else if PyrusServiceDesk.clients.count > 1 {
                 let selectedIndex = self?.clients.count ?? 0 > 0 ? PyrusServiceDesk.clients.count - 1 : 0
                 let titles: [String] = PyrusServiceDesk.clients.map({ $0.clientName })
+                self?.clients = PyrusServiceDesk.clients
                 self?.presenter.doWork(.updateTitles(titles: titles, selectedIndex: selectedIndex))
             }
-            self?.clients = PyrusServiceDesk.clients
         }
     }
     

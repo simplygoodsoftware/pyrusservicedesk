@@ -3,6 +3,7 @@ import Foundation
 enum TicketCommandType: Int {
     case createComment
     case readTicket
+    case setPushToken
 }
 
 struct AttachmentData: Codable {
@@ -18,14 +19,18 @@ class TicketCommandParams: Codable {
     let userId: String?
     let message: String?
     let attachments: [AttachmentData]?
+    let token: String?
+    let type: String?
     
-    init(ticketId: Int?, appId: String?, requestNewTicket: Bool? = nil, userId: String?, message: String? = nil, attachments: [AttachmentData]? = nil, authorId: String? = nil) {
+    init(ticketId: Int?, appId: String?, requestNewTicket: Bool? = nil, userId: String?, message: String? = nil, attachments: [AttachmentData]? = nil, authorId: String? = nil, token: String? = nil, type: String? = nil) {
         self.ticketId = ticketId
         self.appId = appId
         self.requestNewTicket = requestNewTicket
         self.userId = userId
         self.message = message
         self.attachments = attachments
+        self.token = token
+        self.type = type
     }
     
     enum CodingKeys: String, CodingKey {
@@ -35,6 +40,8 @@ class TicketCommandParams: Codable {
         case userId = "user_id"
         case message = "comment"
         case attachments = "attachments"
+        case token = "token"
+        case type = "type"
     }
 }
 

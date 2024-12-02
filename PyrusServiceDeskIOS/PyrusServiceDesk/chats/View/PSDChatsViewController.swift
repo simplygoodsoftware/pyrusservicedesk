@@ -20,11 +20,14 @@ class PSDChatsViewController: UIViewController {
         return table
     }()
     
+    private var bottomNavigationView: NSLayoutConstraint?
+    
     private lazy var navigationView: UIView = {
         let view = UIView()
         view.backgroundColor = UIColor(hex: "#F9F9F9F0")
         view.layer.borderColor = UIColor.black.withAlphaComponent(0.3).cgColor
         view.layer.borderWidth = 0.5
+        view.translatesAutoresizingMaskIntoConstraints = false
         return view
     }()
     
@@ -32,9 +35,11 @@ class PSDChatsViewController: UIViewController {
     private lazy var icon = UIImageView()
     private lazy var activityIndicator = UIActivityIndicatorView()
 
+    private var heightSegmentControl: NSLayoutConstraint?
     
     private lazy var segmentControl: UnderlineSegmentController = {
         let segment = UnderlineSegmentController(frame: .zero)
+        segment.translatesAutoresizingMaskIntoConstraints = false
         return segment
     }()
     
@@ -67,8 +72,12 @@ class PSDChatsViewController: UIViewController {
     private var timer: Timer?
     private var customization: ServiceDeskConfiguration?
     
+    private var originYFilterConstraint: NSLayoutConstraint?
+    private var heightFilterConstraint: NSLayoutConstraint?
+
     private lazy var filterInfoView: UIView = {
         let view = UIView()
+        view.translatesAutoresizingMaskIntoConstraints = false
         view.backgroundColor = customization?.themeColor
         return view
     }()
@@ -110,24 +119,12 @@ class PSDChatsViewController: UIViewController {
         super.viewWillAppear(animated)
         interactor.doInteraction(.viewWillAppear)
     }
-    
-    private var isFirstLayout = true
-    override func viewWillLayoutSubviews() {
-        super.viewWillLayoutSubviews()
-        if isFirstLayout {
-            filterInfoView.frame = CGRect(x: 0, y: Int(self.view.safeAreaInsets.top + 43), width: Int(self.view.frame.width), height: 0)
-            segmentControl.frame = CGRect(x: 0, y: Int(self.view.safeAreaInsets.top + 44), width: Int(self.view.frame.width), height: 0)
-            navigationView.frame = CGRect(x: -1, y: -1, width: Int(self.view.frame.width + 1), height: Int(self.view.safeAreaInsets.top + 44))
-            isFirstLayout = false
-            activityIndicator.center = view.center
-            activityIndicator.style = .large
-        }
-    }
 }
 
 @available(iOS 13.0, *)
 private extension PSDChatsViewController {
     /**Setting design To PSDChatsViewController view, add subviews*/
+    
     func design() {
         view.backgroundColor = UIColor.psdBackground
         view.addSubview(tableView)
@@ -138,10 +135,17 @@ private extension PSDChatsViewController {
         view.addSubview(filterInfoView)
         view.addSubview(plusView)
         view.addSubview(activityIndicator)
+        
+        activityIndicator.translatesAutoresizingMaskIntoConstraints = false
+        activityIndicator.centerYAnchor.constraint(equalTo: view.centerYAnchor).isActive = true
+        activityIndicator.centerXAnchor.constraint(equalTo: view.centerXAnchor).isActive = true
+        activityIndicator.style = .large
 
         setupEmptyChats()
         setupTableView()
         setupFilterInfoView()
+        setupSegmentControl()
+        setupNavigationView()
         setupPlusView()
     }
     
@@ -219,14 +223,22 @@ private extension PSDChatsViewController {
         ])
         
         filterCross.addTarget(self, action: #selector(deleteFilter), for: .touchUpInside)
+        filterInfoView.leadingAnchor.constraint(equalTo: view.leadingAnchor).isActive = true
+        filterInfoView.trailingAnchor.constraint(equalTo: view.trailingAnchor).isActive = true
+        
+        originYFilterConstraint = filterInfoView.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor, constant: 43)
+        originYFilterConstraint?.isActive = true
+        
+        heightFilterConstraint = filterInfoView.heightAnchor.constraint(equalToConstant: 0)
+        heightFilterConstraint?.isActive = true
     }
         
     func setFilter() {
         isFiltered = true
         UIView.animate(withDuration: 0.2, animations: {
             self.tableView.contentInset.top = 50
-            self.filterInfoView.frame.size.height = 50
-            self.view.setNeedsLayout()
+            self.heightFilterConstraint?.constant = 50
+            self.view.layoutIfNeeded()
             self.tableView.layoutIfNeeded()
             self.filterLabel.isHidden = false
             self.filterCross.isHidden = false
@@ -243,8 +255,8 @@ private extension PSDChatsViewController {
         filterCross.isHidden = true
         UIView.animate(withDuration: 0.2, animations: {
             self.tableView.contentInset.top = 0
-            self.filterInfoView.frame.size.height = 0
-            self.view.setNeedsLayout()
+            self.heightFilterConstraint?.constant = 0
+            self.view.layoutIfNeeded()
             self.tableView.layoutIfNeeded()
         })
     }
@@ -270,6 +282,24 @@ private extension PSDChatsViewController {
         ])
         plusView.isUserInteractionEnabled = true
         plusView.addTarget(self, action: #selector(openNewChat), for: .touchUpInside)
+    }
+    
+    func setupSegmentControl() {
+        segmentControl.leadingAnchor.constraint(equalTo: view.leadingAnchor).isActive = true
+        segmentControl.trailingAnchor.constraint(equalTo: view.trailingAnchor).isActive = true
+        segmentControl.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor, constant: 44).isActive = true
+        heightSegmentControl =  segmentControl.heightAnchor.constraint(equalToConstant: 0)
+        heightSegmentControl?.constant = 0
+        heightSegmentControl?.isActive = true
+    }
+    
+    func setupNavigationView() {
+        navigationView.leadingAnchor.constraint(equalTo: view.leadingAnchor,constant: -1).isActive = true
+        navigationView.trailingAnchor.constraint(equalTo: view.trailingAnchor).isActive = true
+        navigationView.topAnchor.constraint(equalTo: view.topAnchor, constant: -1).isActive = true
+        
+        bottomNavigationView = navigationView.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor, constant: 43)
+        bottomNavigationView?.isActive = true
     }
     
     @objc func openNewChat() {
@@ -457,13 +487,11 @@ extension PSDChatsViewController: ChatsViewProtocol {
             navTitle.text = title
         case .updateTitles(titles: let titles, selectedIndex: let selectedIndex):
             UIView.animate(withDuration: 0.3, animations: {
-                if self.segmentControl.frame.size.height == 0 {
-                    self.segmentControl.frame.size.height = 40
-                    self.navigationView.frame.size.height = self.view.safeAreaInsets.top + 85.5
-                    self.filterInfoView.frame.origin.y = self.view.safeAreaInsets.top + 84.5
-                }
-            }, completion: { [weak self] _ in
-                self?.segmentControl.updateTitle(titles: titles, selectIndex: selectedIndex)
+                self.heightSegmentControl?.constant = 40
+                self.bottomNavigationView?.constant = 84.5
+                self.originYFilterConstraint?.constant = 84.5
+                self.view.layoutIfNeeded()
+                self.segmentControl.updateTitle(titles: titles, selectIndex: selectedIndex)
             })
         case .updateSelected(index: let index):
             segmentControl.selectIndex(index)
@@ -472,13 +500,12 @@ extension PSDChatsViewController: ChatsViewProtocol {
         case .showAccessDeniedAlert(userNames: let userNames, okAction: let okAction):
             showAccessDeniedAlert(userNames: userNames, okAction: okAction)
         case .deleteSegmentControl:
-            UIView.animate(withDuration: 0, animations: {
-                self.filterInfoView.frame = CGRect(x: 0, y: Int(self.view.safeAreaInsets.top + 43), width: Int(self.view.frame.width), height: 0)
-                self.segmentControl.frame = CGRect(x: 0, y: Int(self.view.safeAreaInsets.top + 44), width: Int(self.view.frame.width), height: 0)
-                self.navigationView.frame = CGRect(x: -1, y: -1, width: Int(self.view.frame.width + 1), height: Int(self.view.safeAreaInsets.top + 44))
-            }, completion: { [weak self] _ in
-                self?.segmentControl.updateTitle(titles: [], selectIndex: 0)
-            })
+                self.originYFilterConstraint?.constant = 43
+                self.heightFilterConstraint?.constant = 0
+                self.heightSegmentControl?.constant = 0
+                self.bottomNavigationView?.constant = 43
+                self.view.layoutIfNeeded()
+                self.segmentControl.updateTitle(titles: [], selectIndex: 0)
         case .startRefresh:
             clearTable = true
             chats = []
@@ -505,7 +532,7 @@ extension PSDChatsViewController: PSDUpdateInfo {
 
 @available(iOS 13.0, *)
 extension PSDChatsViewController: UnderlineSegmentControllerDelegate {
-    func didSelectSegment(_ index: Int) {
+    func didSelectSegment(_ index: Int) { 
         interactor.doInteraction(.updateSelected(index: index))
     }
 }
