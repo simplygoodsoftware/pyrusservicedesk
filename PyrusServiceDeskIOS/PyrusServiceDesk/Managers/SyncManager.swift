@@ -7,7 +7,7 @@ class SyncManager {
     
     var commandsResult = [TicketCommandResult]()
     var sendingMessages = [MessageToPass]()
-    var networkAvailability = false {
+    var networkAvailability = true {
         didSet {
             NotificationCenter.default.post(name: SyncManager.connectionErrorNotification, object: nil)
         }
