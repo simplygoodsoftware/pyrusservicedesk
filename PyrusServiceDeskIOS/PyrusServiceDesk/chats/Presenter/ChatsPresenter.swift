@@ -25,10 +25,10 @@ extension ChatsPresenter: ChatsPresenterProtocol {
         case .endRefresh:
             view?.show(.endRefresh)
         case .updateTitle(title: let title):
-            view?.show(.updateTitle(title: title ?? "Обращения"))
+            view?.show(.updateTitle(title: title ?? "All_Conversations".localizedPSD()))
         case .updateTitles(titles: let titles, selectedIndex: let selectedIndex):
             let titles = titles.map({ TitleWithBadge(title: $0) })
-            view?.show(.updateTitle(title: "Обращения"))
+            view?.show(.updateTitle(title: "All_Conversations".localizedPSD()))
             view?.show(.updateTitles(titles: titles, selectedIndex: selectedIndex))
         case .updateSelected(index: let index):
             view?.show(.updateSelected(index: index))

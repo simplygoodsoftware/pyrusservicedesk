@@ -1,10 +1,12 @@
 import Foundation
+import Network
 
 class SyncManager {
     private var isRequestInProgress = false
     private var shouldSendAnotherRequest = false
     private var isFilter = false
-    
+    let monitor = NWPathMonitor()
+
     var commandsResult = [TicketCommandResult]()
     var sendingMessages = [MessageToPass]()
     var networkAvailability = true {
@@ -22,6 +24,17 @@ class SyncManager {
     static let commandsResultNotification = Notification.Name("COMMANDS_RESULT")
     static let updateAccessesNotification = Notification.Name("UPDATE_ACCSESSES")
     static let connectionErrorNotification = Notification.Name("CONNECTION_ERROR")
+
+    init() {
+        monitor.pathUpdateHandler = { path in
+            if path.status == .satisfied {
+                self.clearTimer()
+                self.repeatTimeInterval = 1.0
+                self.doSync()
+            }
+        }
+        monitor.start(queue: DispatchQueue.main)
+    }
     
     func syncGetTickets(isFilter: Bool = false) {
 //        PyrusServiceDesk.repository.clear()
