@@ -64,7 +64,17 @@ extension PSDChatInteractor: PSDChatInteractorProtocol {
                 }
             }
             NotificationCenter.default.addObserver(self, selector: #selector(updateChats), name: PyrusServiceDesk.chatsUpdateNotification, object: nil)
-            NotificationCenter.default.addObserver(self, selector: #selector(updateMessages), name: SyncManager.commandsResultNotification, object: nil)
+            NotificationCenter.default.addObserver(forName: SyncManager.commandsResultNotification, object: nil, queue: .main) { [weak self] notification in
+                DispatchQueue.main.async { [weak self] in
+                    if let data = notification.userInfo?["tickets"] as? Data {
+                        do {
+                            let decoder = JSONDecoder()
+                            let ticketResults = try decoder.decode([TicketCommandResult].self, from: data)
+                            self?.updateMessages(commandsResult: ticketResults)
+                        } catch { }
+                    }
+                }
+            }
             NotificationCenter.default.addObserver(self, selector: #selector(showConnectionError), name: SyncManager.connectionErrorNotification, object: nil)
             NotificationCenter.default.addObserver(forName: .refreshNotification, object: nil, queue: .main) { [weak self] notification in
                 DispatchQueue.main.async { [weak self] in
@@ -178,8 +188,8 @@ private extension PSDChatInteractor {
     }
 
 
-    @objc func updateMessages() {
-        for commandResult in PyrusServiceDesk.syncManager.commandsResult {
+    func updateMessages(commandsResult: [TicketCommandResult]) {
+        for commandResult in commandsResult {
             if let messageToPass = messagesToPass.first(where: { $0.commandId.lowercased() == commandResult.commandId.lowercased() })?.message {
                 isRefresh = true
                 messageToPass.messageId = String(commandResult.commentId ?? 0)
