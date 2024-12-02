@@ -56,33 +56,34 @@ struct PSDGetChats {
                         }
                     }
                 }
-                if PyrusServiceDesk.chats.count == 0 {
-                    PyrusServiceDesk.chats = []
+//                if PyrusServiceDesk.chats.count == 0 {
+//                    PyrusServiceDesk.chats = []
+//                }
+                completion(nil, nil, nil, nil, false)
+            } else {
+                do{
+                    let chatsData = try JSONSerialization.jsonObject(with: data, options: .allowFragments) as? [String : Any] ?? [String: Any]()
+                    let chatsArray = chatsData["tickets"] as? NSArray ?? NSArray()
+                    let chats = generateChats(from: chatsArray)
+                    PyrusServiceDesk.chats = chats
+                    let clientsArray = chatsData["applications"] as? NSArray ?? NSArray()
+                    let clients = generateClients(from: clientsArray)
+                    //PyrusServiceDesk.clients = clients
+                    let authorAccessDenied = chatsData["author_access_denied"] as? [String]
+                    
+                    do {
+                        let commandsArray = chatsData["commands_result"] as? NSArray ?? NSArray()
+                        let jsonData = try JSONSerialization.data(withJSONObject: commandsArray, options: [])
+                        let decoder = JSONDecoder()
+                        let commands = try decoder.decode([TicketCommandResult].self, from: jsonData)
+                        completion(chats, commands, authorAccessDenied, clients, true)
+                    } catch {
+                        completion(chats, nil, authorAccessDenied, clients, true)
+                    }
+                    //                PyrusServiceDesk.chats = chats
+                } catch { 
+                    //print("PSDGetChats error when convert to dictionary")
                 }
-                completion([], nil, nil, nil, false)
-            }
-            do{
-                let chatsData = try JSONSerialization.jsonObject(with: data, options: .allowFragments) as? [String : Any] ?? [String: Any]()
-                let chatsArray = chatsData["tickets"] as? NSArray ?? NSArray()
-                let chats = generateChats(from: chatsArray)
-                PyrusServiceDesk.chats = chats
-                let clientsArray = chatsData["applications"] as? NSArray ?? NSArray()
-                let clients = generateClients(from: clientsArray)
-                //PyrusServiceDesk.clients = clients
-                let authorAccessDenied = chatsData["author_access_denied"] as? [String]
-                
-                do {
-                    let commandsArray = chatsData["commands_result"] as? NSArray ?? NSArray()
-                    let jsonData = try JSONSerialization.data(withJSONObject: commandsArray, options: [])
-                    let decoder = JSONDecoder()
-                    let commands = try decoder.decode([TicketCommandResult].self, from: jsonData)
-                    completion(chats, commands, authorAccessDenied, clients, true)
-                } catch {
-                    completion(chats, nil, authorAccessDenied, clients, true)
-                }
-//                PyrusServiceDesk.chats = chats
-            } catch { 
-                //print("PSDGetChats error when convert to dictionary")
             }
             
         }
