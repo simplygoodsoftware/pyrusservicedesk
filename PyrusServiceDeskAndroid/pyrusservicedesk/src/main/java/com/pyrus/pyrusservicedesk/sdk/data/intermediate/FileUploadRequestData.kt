@@ -10,4 +10,5 @@ import java.io.InputStream
 @Keep
 internal class FileUploadRequestData(
     val fileName: String,
-    val fileInputStream: InputStream)
+    val fileInputStream: InputStream,
+)

@@ -12,16 +12,11 @@ import com.pyrus.pyrusservicedesk.presentation.ui.navigation_page.ticket.TicketA
 import com.pyrus.pyrusservicedesk.presentation.viewmodel.SharedViewModel
 import com.pyrus.pyrusservicedesk.sdk.FileResolver
 import com.pyrus.pyrusservicedesk.sdk.FileResolverImpl
-import com.pyrus.pyrusservicedesk.sdk.RequestFactory
 import com.pyrus.pyrusservicedesk.sdk.data.FileManager
 import com.pyrus.pyrusservicedesk.sdk.data.LocalDataProvider
 import com.pyrus.pyrusservicedesk.sdk.data.gson.RemoteGsonExclusionStrategy
 import com.pyrus.pyrusservicedesk.sdk.data.gson.UriGsonAdapter
-import com.pyrus.pyrusservicedesk.sdk.repositories.draft.DraftRepository
-import com.pyrus.pyrusservicedesk.sdk.repositories.draft.PreferenceDraftRepository
-import com.pyrus.pyrusservicedesk.sdk.repositories.general.CentralRepository
-import com.pyrus.pyrusservicedesk.sdk.repositories.offline.OfflineRepository
-import com.pyrus.pyrusservicedesk.sdk.repositories.offline.PreferenceOfflineRepository
+import com.pyrus.pyrusservicedesk.sdk.repositories.DraftRepository
 import com.pyrus.pyrusservicedesk.sdk.response.ResponseCallback
 import com.pyrus.pyrusservicedesk.sdk.response.ResponseError
 import com.pyrus.pyrusservicedesk.sdk.updates.LiveUpdates
@@ -31,7 +26,6 @@ import com.pyrus.pyrusservicedesk.sdk.updates.PreferencesManager
 import com.pyrus.pyrusservicedesk.sdk.updates.PreferencesManager.Companion.S_NO_ID
 import com.pyrus.pyrusservicedesk.sdk.verify.LocalDataVerifier
 import com.pyrus.pyrusservicedesk.sdk.verify.LocalDataVerifierImpl
-import com.pyrus.pyrusservicedesk.sdk.web.retrofit.RetrofitWebRepository
 import com.pyrus.pyrusservicedesk.utils.*
 import com.squareup.picasso.OkHttp3Downloader
 import com.squareup.picasso.Picasso
@@ -460,8 +454,7 @@ class PyrusServiceDesk private constructor(
     internal val serviceDeskProvider: ServiceDeskProvider by lazy {
         object : ServiceDeskProvider {
             override fun getApplication(): Application = application
-            override fun getRequestFactory(): RequestFactory = requestFactory
-            override fun getDraftRepository(): DraftRepository = draftRepository
+            override fun getDraftRepository()= draftRepository
             override fun getLiveUpdates(): LiveUpdates = liveUpdates
             override fun getLocalDataProvider(): LocalDataProvider = localDataProvider
             override fun getFileManager(): FileManager = fileManager
@@ -472,7 +465,6 @@ class PyrusServiceDesk private constructor(
     internal var instanceId: String
     internal val picasso: Picasso
 
-    private val requestFactory: RequestFactory
     private val draftRepository: DraftRepository
     private val liveUpdates: LiveUpdates
 
@@ -492,7 +484,6 @@ class PyrusServiceDesk private constructor(
     private val fileResolver: FileResolver = FileResolverImpl(application.contentResolver)
     private val preferences = application.getSharedPreferences(PREFERENCE_KEY, Context.MODE_PRIVATE)
     private val preferencesManager = PreferencesManager(preferences)
-    private val offlineRepository: OfflineRepository
 
     private var onStopCallback: OnStopCallback? = null
 

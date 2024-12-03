@@ -21,10 +21,11 @@ import kotlin.coroutines.CoroutineContext
  */
 @Keep
 internal class UploadFileRequestBody(
-        private val fileName: String,
-        private val fileStream: InputStream,
-        private val uploadFileHooks: UploadFileHooks?,
-        private val context: CoroutineContext) {
+    private val fileName: String,
+    private val fileStream: InputStream,
+    private val uploadFileHooks: UploadFileHooks?,
+    private val context: CoroutineContext,
+) {
 
     private val fileSize = fileStream.available().toLong()
 
@@ -68,7 +69,8 @@ internal class UploadFileRequestBody(
         return MultipartBody.Part.createFormData(
             "File",
             fileName.replace(Regex("[^\\p{ASCII}]"), "_"), // Only ASCII symbols are allowed
-            requestFileBody)
+            requestFileBody
+        )
     }
 
     private fun Long.toProgress(): Int {

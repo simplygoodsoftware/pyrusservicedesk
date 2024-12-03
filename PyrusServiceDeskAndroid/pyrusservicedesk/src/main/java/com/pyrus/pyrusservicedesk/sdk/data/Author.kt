@@ -7,9 +7,7 @@ import com.google.gson.annotations.SerializedName
  * @param avatarId should be used for get avatar request see [RequestUtils.getAvatarUrl]
  */
 internal data class Author(
-    @SerializedName("name")
-    val name: String,
-    @SerializedName("avatar_id")
-    val avatarId: Int = 0,
-    @SerializedName("avatar_color")
-    val avatarColorString: String = "#fffffff")
+    @SerializedName("name") val name: String,
+    @SerializedName("avatar_id") val avatarId: Int = 0,
+    @SerializedName("avatar_color") val avatarColorString: String = "#fffffff",
+)

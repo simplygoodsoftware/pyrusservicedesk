@@ -5,7 +5,6 @@ import android.os.Looper
 import androidx.annotation.MainThread
 import com.pyrus.pyrusservicedesk.PyrusServiceDesk
 import com.pyrus.pyrusservicedesk.log.PLog
-import com.pyrus.pyrusservicedesk.sdk.RequestFactory
 import com.pyrus.pyrusservicedesk.sdk.data.TicketShortDescription
 import com.pyrus.pyrusservicedesk.sdk.response.ResponseCallback
 import com.pyrus.pyrusservicedesk.sdk.response.ResponseError

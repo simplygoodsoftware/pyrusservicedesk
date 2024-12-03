@@ -5,6 +5,7 @@ import android.view.ViewGroup
 import androidx.annotation.LayoutRes
 import com.pyrus.pyrusservicedesk.R
 import com.pyrus.pyrusservicedesk.presentation.ui.navigation_page.ticket.entries.CommentEntry
+import com.pyrus.pyrusservicedesk.presentation.ui.navigation_page.ticket.entries.hasError
 import com.pyrus.pyrusservicedesk.presentation.ui.view.CommentView
 import com.pyrus.pyrusservicedesk.presentation.ui.view.ContentType
 import com.pyrus.pyrusservicedesk.presentation.ui.view.Status

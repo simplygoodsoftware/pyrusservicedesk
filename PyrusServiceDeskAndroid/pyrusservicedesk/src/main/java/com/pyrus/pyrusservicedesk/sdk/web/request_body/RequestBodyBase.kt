@@ -11,14 +11,9 @@ import com.google.gson.annotations.SerializedName
  */
 @Keep
 internal open class RequestBodyBase(
-        @SerializedName("app_id")
-        val appId: String,
-        @SerializedName("user_id")
-        val userId: String,
-        @SerializedName("security_key")
-        val securityKey: String?,
-        @SerializedName("instance_id")
-        val instanceId: String?,
-        @SerializedName("version")
-        val version: Int
+    @SerializedName("app_id") val appId: String,
+    @SerializedName("user_id") val userId: String,
+    @SerializedName("security_key") val securityKey: String?,
+    @SerializedName("instance_id") val instanceId: String?,
+    @SerializedName("version") val version: Int,
 )

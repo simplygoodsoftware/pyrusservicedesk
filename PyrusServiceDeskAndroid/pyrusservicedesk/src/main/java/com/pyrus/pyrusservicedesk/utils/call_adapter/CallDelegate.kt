@@ -1,4 +1,4 @@
-package com.pyrus.pyrusservicedesk.call_adapter
+package com.pyrus.pyrusservicedesk.utils.call_adapter
 
 import okhttp3.Request
 import retrofit2.Call

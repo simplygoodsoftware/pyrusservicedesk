@@ -14,4 +14,14 @@ internal interface StoreFactory2 {
         onCancelCallback: ((state: State) -> Unit)? = null
     ): Store<State, Message, Effect>
 
+    fun <State : Any, Message : Any, Effect : Any> create(
+        name: String?,
+        autoInit: Boolean = true,
+        initialState: State,
+        initialEffects: List<Effect> = emptyList(),
+        reducer: L<State, Message, Effect>,
+        actor: Actor<Effect, Message>,
+        onCancelCallback: ((state: State) -> Unit)? = null
+    ): Store<State, Message, Effect>
+
 }

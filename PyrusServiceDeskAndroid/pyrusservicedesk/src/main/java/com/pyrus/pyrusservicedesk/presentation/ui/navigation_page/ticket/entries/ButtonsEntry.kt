@@ -11,11 +11,11 @@ internal sealed interface ButtonEntry {
 
     val text: String
 
-    class Simple(
+    data class Simple(
         override val text: String,
     ) : ButtonEntry
 
-    class Link(
+    data class Link(
         override val text: String,
         val link: String,
     ) : ButtonEntry

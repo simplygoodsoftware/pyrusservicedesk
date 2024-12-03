@@ -13,7 +13,6 @@ import com.pyrus.pyrusservicedesk.PyrusServiceDesk
 import com.pyrus.pyrusservicedesk.R
 import com.pyrus.pyrusservicedesk.ServiceDeskProvider
 import com.pyrus.pyrusservicedesk.log.PLog
-import com.pyrus.pyrusservicedesk.presentation.call.*
 import com.pyrus.pyrusservicedesk.presentation.ui.navigation_page.ticket.entries.*
 import com.pyrus.pyrusservicedesk.presentation.ui.view.recyclerview.DiffResultWithNewItems
 import com.pyrus.pyrusservicedesk.presentation.viewmodel.ConnectionViewModelBase

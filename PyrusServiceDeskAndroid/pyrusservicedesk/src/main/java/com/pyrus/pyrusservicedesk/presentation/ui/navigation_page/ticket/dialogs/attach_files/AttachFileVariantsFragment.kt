@@ -19,9 +19,9 @@ import android.view.ViewGroup
 import androidx.core.util.Consumer
 import com.pyrus.pyrusservicedesk.PyrusServiceDesk
 import com.pyrus.pyrusservicedesk.R
+import com.pyrus.pyrusservicedesk.databinding.PsdFragmentAttachFileVariantsBinding
 import com.pyrus.pyrusservicedesk.log.PLog
 import com.pyrus.pyrusservicedesk.utils.*
-import kotlinx.android.synthetic.main.psd_fragment_attach_file_variants.*
 import java.io.File
 
 /**
@@ -50,6 +50,8 @@ internal class AttachFileVariantsFragment: BottomSheetDialogFragment(), View.OnC
         dismiss()
     }
 
+    private lateinit var binding: PsdFragmentAttachFileVariantsBinding
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         capturePhotoUri = savedInstanceState?.getParcelable(STATE_KEY_PHOTO_URI)
@@ -63,34 +65,34 @@ internal class AttachFileVariantsFragment: BottomSheetDialogFragment(), View.OnC
             val bottomSheetInternal = d.findViewById<View>(R.id.design_bottom_sheet)
             BottomSheetBehavior.from(bottomSheetInternal!!).state = BottomSheetBehavior.STATE_EXPANDED
         }
-        val view = inflater.inflate(R.layout.psd_fragment_attach_file_variants, null, false)
-        view.setBackgroundColor(ConfigUtils.getFileMenuBackgroundColor(inflater.context))
-        return view
+        binding = PsdFragmentAttachFileVariantsBinding.inflate(inflater, null, false)
+        binding.root.setBackgroundColor(ConfigUtils.getFileMenuBackgroundColor(inflater.context))
+        return binding.root
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        photo_variant.setOnClickListener(this)
-        photo_variant.visibility = if (isCapturingPhotoSupported()) VISIBLE else GONE
-        gallery_variant.setOnClickListener(this)
-        custom_variant.visibility = if (PyrusServiceDesk.FILE_CHOOSER != null) VISIBLE else GONE
+        binding.photoVariant.setOnClickListener(this)
+        binding.photoVariant.visibility = if (isCapturingPhotoSupported()) VISIBLE else GONE
+        binding.galleryVariant.setOnClickListener(this)
+        binding.customVariant.visibility = if (PyrusServiceDesk.FILE_CHOOSER != null) VISIBLE else GONE
         PyrusServiceDesk.FILE_CHOOSER?.let {
-            custom_variant.setOnClickListener(this)
-            custom_variant.text = it.getLabel()
+            binding.customVariant.setOnClickListener(this)
+            binding.customVariant.text = it.getLabel()
         }
-        send_logs_variant.visibility = if (PyrusServiceDesk.logging) VISIBLE else GONE
+        binding.sendLogsVariant.visibility = if (PyrusServiceDesk.logging) VISIBLE else GONE
         if (PyrusServiceDesk.logging)
-            send_logs_variant.setOnClickListener(this)
+            binding.sendLogsVariant.setOnClickListener(this)
 
         val textColor = ConfigUtils.getFileMenuTextColor(requireContext())
-        photo_variant.setTextColor(textColor)
-        gallery_variant.setTextColor(textColor)
-        send_logs_variant.setTextColor(textColor)
+        binding.photoVariant.setTextColor(textColor)
+        binding.galleryVariant.setTextColor(textColor)
+        binding.sendLogsVariant.setTextColor(textColor)
 
         ConfigUtils.getMainFontTypeface()?.let {
-            photo_variant.typeface = it
-            gallery_variant.typeface = it
-            send_logs_variant.typeface = it
+            binding.photoVariant.typeface = it
+            binding.galleryVariant.typeface = it
+            binding.sendLogsVariant.typeface = it
         }
     }
 
@@ -111,10 +113,10 @@ internal class AttachFileVariantsFragment: BottomSheetDialogFragment(), View.OnC
 
     override fun onClick(view: View) {
         when (view) {
-            photo_variant -> startTakingPhoto()
-            gallery_variant -> startPickingImage()
-            custom_variant -> openCustomChooser()
-            send_logs_variant -> PLog.collectLogs()
+            binding.photoVariant -> startTakingPhoto()
+            binding.galleryVariant -> startPickingImage()
+            binding.customVariant -> openCustomChooser()
+            binding.sendLogsVariant -> PLog.collectLogs()
         }
     }
 

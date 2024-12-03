@@ -15,8 +15,6 @@ internal class SetPushTokenBody(
     securityKey: String?,
     instanceId: String?,
     version: Int,
-    @SerializedName("token")
-    private val token: String?,
-    @SerializedName("type")
-    private val tokenType: String
+    @SerializedName("token") private val token: String?,
+    @SerializedName("type") private val tokenType: String,
 ) : RequestBodyBase(appId, userId, securityKey, instanceId, version)

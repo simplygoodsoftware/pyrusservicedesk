@@ -1,4 +1,4 @@
-package com.pyrus.pyrusservicedesk.call_adapter
+package com.pyrus.pyrusservicedesk.utils.call_adapter
 
 import com.pyrus.pyrusservicedesk.utils.Try
 import retrofit2.Call

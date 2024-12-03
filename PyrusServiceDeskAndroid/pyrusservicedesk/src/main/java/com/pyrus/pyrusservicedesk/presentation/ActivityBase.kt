@@ -60,6 +60,8 @@ internal abstract class ActivityBase: AppCompatActivity(), CoroutineScope {
         setTheme(theme)
         setContentView(layoutResId)
         setSupportActionBar(findViewById(toolbarViewId))
+
+        // TODO sds this broke sometimes
         findViewById<View>(android.R.id.content).apply {
             viewTreeObserver.addOnGlobalLayoutListener {
                 val changedHeight = recentContentHeight - height
@@ -141,15 +143,10 @@ internal abstract class ActivityBase: AppCompatActivity(), CoroutineScope {
      * Extenders can safely start observe view model's data here.
      */
     protected open fun startObserveData() {
-        sharedViewModel.getQuitServiceDeskLiveData().observe(
-            this,
-            { quit ->
-                quit?.let {
-                    if (it)
-                        finish()
-                }
-            }
-        )
+        sharedViewModel.getQuitServiceDeskLiveData().observe(this) { quit ->
+            quit ?: return@observe
+            if (quit) finish()
+        }
     }
 
     private fun overridePendingTransition() {

@@ -28,18 +28,14 @@ internal data class LastComment(
             )
         }
 
-        private fun <E> getFirstTenElements(list: List<E>?): List<E>? {
-            if (list == null)
-                return null
-            if (list.size < 10)
-                return list.toMutableList()
-            return list.subList(0, 10)
+        private fun <E> getFirstTenElements(list: List<E>?): List<E>? = when {
+            list == null -> null
+            list.size < 10 -> list.toMutableList()
+            else -> list.subList(0, 10)
         }
 
         private fun trimCommentText(text: String?): String? {
-            if (text == null)
-                return null
-            return text.getFirstNSymbols(MAX_COMMENT_LENGTH)
+            return text?.getFirstNSymbols(MAX_COMMENT_LENGTH)
         }
 
     }

@@ -10,10 +10,12 @@ import androidx.annotation.Keep
  * @param uri can contain either url of the server attachment or uri of the local file.
  */
 @Keep
-internal data class FileData(val fileName: String,
-                             val bytesSize: Int,
-                             val uri: Uri,
-                             val isLocal: Boolean) : Parcelable {
+internal data class FileData(
+    val fileName: String,
+    val bytesSize: Int,
+    val uri: Uri,
+    val isLocal: Boolean,
+) : Parcelable {
 
     constructor(parcel: Parcel) : this(
         parcel.readString()!!,

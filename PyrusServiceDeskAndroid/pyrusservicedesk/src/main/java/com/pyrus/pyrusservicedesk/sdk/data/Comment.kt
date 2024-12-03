@@ -12,24 +12,15 @@ private const val COMMENT_ID_EMPTY = 0L
  * @param localId id of local comment. For server comments this is always [COMMENT_ID_EMPTY]
  */
 internal data class Comment(
-        @SerializedName("comment_id")
-        val commentId: Long = COMMENT_ID_EMPTY,
-        @SerializedName("body")
-        val body: String? = "",
-        @SerializedName("is_inbound")
-        val isInbound: Boolean = false,
-        @SerializedName("attachments")
-        val attachments: List<Attachment>? = null,
-        @SerializedName("created_at")
-        val creationDate: Date,
-        @SerializedName("author")
-        val author: Author,
-        @Local
-        @SerializedName("local_comment_id")
-        val localId: Long = COMMENT_ID_EMPTY,
-        @SerializedName("rating")
-        val rating: Int? = null,
-        @Transient val isWelcomeMessage: Boolean = false,
+    @SerializedName("comment_id") val commentId: Long = COMMENT_ID_EMPTY,
+    @SerializedName("body") val body: String? = "",
+    @SerializedName("is_inbound") val isInbound: Boolean = false,
+    @SerializedName("attachments") val attachments: List<Attachment>? = null,
+    @SerializedName("created_at") val creationDate: Date,
+    @SerializedName("author") val author: Author,
+    @Local @SerializedName("local_comment_id") val localId: Long = COMMENT_ID_EMPTY,
+    @SerializedName("rating") val rating: Int? = null,
+    @Transient val isWelcomeMessage: Boolean = false,
 ) {
 
     /**

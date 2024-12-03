@@ -9,5 +9,5 @@ import com.pyrus.pyrusservicedesk.sdk.data.TicketShortDescription
  */
 @Keep
 internal data class Tickets(
-        @SerializedName("tickets")
-        val tickets: List<TicketShortDescription> = emptyList())
+    @SerializedName("tickets") val tickets: List<TicketShortDescription> = emptyList(),
+)

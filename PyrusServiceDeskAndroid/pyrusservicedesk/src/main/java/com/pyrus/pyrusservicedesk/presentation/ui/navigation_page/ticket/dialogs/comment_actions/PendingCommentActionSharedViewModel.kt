@@ -9,29 +9,6 @@ import androidx.lifecycle.ViewModel
  */
 internal class PendingCommentActionSharedViewModel: ViewModel() {
 
-    companion object{
-
-        private const val ACTION_NONE = -1
-        private const val ACTION_CANCELLED = 0
-        private const val ACTION_RETRY = 1
-        private const val ACTION_DELETE = 2
-
-        /**
-         * Checks whether choosing was cancelled
-         */
-        fun isCancelled(action: Int) = action == ACTION_CANCELLED
-
-        /**
-         * Checks whether retry was chosen
-         */
-        fun isRetryClicked(action: Int) = action == ACTION_RETRY
-
-        /**
-         * Checks whether delete was chosen
-         */
-        fun isDeleteClicked(action: Int) = action == ACTION_DELETE
-    }
-
     private val selectedActionLiveData = MutableLiveData<Int>()
 
     /**
@@ -62,4 +39,27 @@ internal class PendingCommentActionSharedViewModel: ViewModel() {
      * Provides live data of selected action on pending comment
      */
     fun getSelectedActionLiveData(): LiveData<Int> = selectedActionLiveData
+
+    companion object{
+
+        private const val ACTION_NONE = -1
+        private const val ACTION_CANCELLED = 0
+        private const val ACTION_RETRY = 1
+        private const val ACTION_DELETE = 2
+
+        /**
+         * Checks whether choosing was cancelled
+         */
+        fun isCancelled(action: Int) = action == ACTION_CANCELLED
+
+        /**
+         * Checks whether retry was chosen
+         */
+        fun isRetryClicked(action: Int) = action == ACTION_RETRY
+
+        /**
+         * Checks whether delete was chosen
+         */
+        fun isDeleteClicked(action: Int) = action == ACTION_DELETE
+    }
 }

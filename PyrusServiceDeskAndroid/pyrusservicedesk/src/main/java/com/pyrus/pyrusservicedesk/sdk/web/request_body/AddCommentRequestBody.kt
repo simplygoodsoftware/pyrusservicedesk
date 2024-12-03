@@ -12,19 +12,14 @@ import com.pyrus.pyrusservicedesk.sdk.data.Attachment
  */
 @Keep
 internal class AddCommentRequestBody(
-        appId: String,
-        userId: String,
-        securityKey: String?,
-        instanceId: String?,
-        version: Int,
-        @SerializedName("comment")
-        val comment: String? = null,
-        @SerializedName("attachments")
-        val attachments: List<Attachment>? = null,
-        @SerializedName("user_name")
-        val userName: String,
-        @SerializedName("rating")
-        val rating: Int? = null,
-        @SerializedName("extra_fields")
-        val extraFields: Map<String, String>?,
+    appId: String,
+    userId: String,
+    securityKey: String?,
+    instanceId: String?,
+    version: Int,
+    @SerializedName("comment") val comment: String? = null,
+    @SerializedName("attachments") val attachments: List<Attachment>? = null,
+    @SerializedName("user_name") val userName: String,
+    @SerializedName("rating") val rating: Int? = null,
+    @SerializedName("extra_fields") val extraFields: Map<String, String>?,
 ) : RequestBodyBase(appId, userId, securityKey, instanceId, version)

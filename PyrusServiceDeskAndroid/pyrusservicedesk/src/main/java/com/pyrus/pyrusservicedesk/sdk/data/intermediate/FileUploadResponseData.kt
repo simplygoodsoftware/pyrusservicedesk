@@ -8,7 +8,6 @@ import com.google.gson.annotations.SerializedName
  */
 @Keep
 internal class FileUploadResponseData(
-    @SerializedName("guid")
-    val guid: String,
-    @SerializedName("md5_hash")
-    val hash: String)
+    @SerializedName("guid") val guid: String,
+    @SerializedName("md5_hash") val hash: String,
+)

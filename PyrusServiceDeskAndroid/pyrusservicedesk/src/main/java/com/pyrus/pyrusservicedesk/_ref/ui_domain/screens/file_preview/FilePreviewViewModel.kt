@@ -1,4 +1,4 @@
-package com.pyrus.pyrusservicedesk.presentation.ui.navigation_page.file_preview
+package com.pyrus.pyrusservicedesk._ref.ui_domain.screens.file_preview
 
 import android.app.Application
 import android.app.DownloadManager
@@ -10,7 +10,7 @@ import android.content.Intent
 import android.media.MediaScannerConnection
 import android.net.Uri
 import com.pyrus.pyrusservicedesk.ServiceDeskProvider
-import com.pyrus.pyrusservicedesk.presentation.ui.navigation_page.file_preview.FilePreviewActivity.Companion.KEY_FILE_DATA
+import com.pyrus.pyrusservicedesk._ref.ui_domain.screens.file_preview.FilePreviewActivity.Companion.KEY_FILE_DATA
 import com.pyrus.pyrusservicedesk.presentation.viewmodel.ConnectionViewModelBase
 import com.pyrus.pyrusservicedesk.sdk.data.intermediate.FileData
 import com.pyrus.pyrusservicedesk.utils.canBePreviewed
@@ -21,13 +21,10 @@ import kotlinx.coroutines.launch
 /**
  * ViewModel for the file previews.
  */
-internal class FilePreviewViewModel(serviceDeskProvider: ServiceDeskProvider,
-                                    private val intent: Intent)
-    : ConnectionViewModelBase(serviceDeskProvider) {
-
-    private companion object {
-        const val CHECK_FILE_DOWNLOADED_DELAY_MS = 300L
-    }
+internal class FilePreviewViewModel(
+    serviceDeskProvider: ServiceDeskProvider,
+    private val intent: Intent,
+) : ConnectionViewModelBase(serviceDeskProvider) {
 
     private val fileLiveData = MutableLiveData<FileViewModel>()
 
@@ -42,9 +39,9 @@ internal class FilePreviewViewModel(serviceDeskProvider: ServiceDeskProvider,
 
     override fun onLoadData() {
         fileLiveData.value = FileViewModel(
-            intent.getFileData()!!.uri,
-            fileCanBePreviewed(),
-            isNetworkConnected.value == false,
+            fileUri = intent.getFileData()!!.uri,
+            isPreviewable = fileCanBePreviewed(),
+            hasError = isNetworkConnected.value == false,
             isLocal = isLocalFile())
     }
 
@@ -162,6 +159,10 @@ internal class FilePreviewViewModel(serviceDeskProvider: ServiceDeskProvider,
 
     private fun isLocalFile(): Boolean = intent.getFileData()!!.isLocal
     private fun fileCanBePreviewed(): Boolean = intent.getFileData()!!.fileName.canBePreviewed()
+
+    private companion object {
+        const val CHECK_FILE_DOWNLOADED_DELAY_MS = 300L
+    }
 }
 
 internal fun Intent.getFileData() = getParcelableExtra<FileData>(KEY_FILE_DATA)

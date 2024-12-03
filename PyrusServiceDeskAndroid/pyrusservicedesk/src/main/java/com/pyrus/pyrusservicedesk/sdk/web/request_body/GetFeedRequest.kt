@@ -13,13 +13,11 @@ import com.google.gson.annotations.SerializedName
  */
 @Keep
 internal open class GetFeedBody(
-        appId: String,
-        userId: String,
-        securityKey: String?,
-        instanceId: String?,
-        version: Int,
-        @SerializedName("keep_unread")
-        val keepUnread: Boolean,
-        @SerializedName("api_sign")
-        val apiSign: String?,
-): RequestBodyBase(appId, userId, securityKey, instanceId, version)
+    appId: String,
+    userId: String,
+    securityKey: String?,
+    instanceId: String?,
+    version: Int,
+    @SerializedName("keep_unread") val keepUnread: Boolean,
+    @SerializedName("api_sign") val apiSign: String?,
+) : RequestBodyBase(appId, userId, securityKey, instanceId, version)

@@ -16,8 +16,10 @@ import java.util.*
  *
  * @param fileResolver helper for composing local attachment instances.
  */
-internal class LocalDataProvider(offlineRepository: OfflineRepository,
-                                 private val fileResolver: FileResolver) {
+internal class LocalDataProvider(
+    offlineRepository: OfflineRepository,
+    private val fileResolver: FileResolver,
+) {
 
     private var lastLocalCommentId: Long = 0
 

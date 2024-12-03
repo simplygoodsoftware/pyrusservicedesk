@@ -10,5 +10,6 @@ import com.pyrus.pyrusservicedesk.sdk.web.UploadFileHooks
  * @param uploadFileHooks hooks for cancellation and exposing upload progress.
  */
 internal class UploadFileRequest(
-        val fileUploadRequestData: FileUploadRequestData,
-        val uploadFileHooks: UploadFileHooks?)
+    val fileUploadRequestData: FileUploadRequestData,
+    val uploadFileHooks: UploadFileHooks?,
+)
