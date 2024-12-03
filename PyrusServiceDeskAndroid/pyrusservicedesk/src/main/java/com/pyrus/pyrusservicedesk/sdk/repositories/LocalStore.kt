@@ -6,8 +6,8 @@ import com.google.gson.reflect.TypeToken
 import com.pyrus.pyrusservicedesk.sdk.data.Comment
 import com.pyrus.pyrusservicedesk.sdk.data.intermediate.Comments
 import com.pyrus.pyrusservicedesk.sdk.verify.LocalDataVerifier
-import com.pyrus.pyrusservicedesk.utils.Try
-import com.pyrus.pyrusservicedesk.utils.getOrNull
+import com.pyrus.pyrusservicedesk._ref.utils.Try
+import com.pyrus.pyrusservicedesk._ref.utils.getOrNull
 import java.lang.reflect.Type
 
 /**

@@ -1,6 +1,6 @@
-package com.pyrus.pyrusservicedesk.utils
+package com.pyrus.pyrusservicedesk._ref.utils
 
-import com.pyrus.pyrusservicedesk.utils.FileFormat.*
+import com.pyrus.pyrusservicedesk._ref.utils.FileFormat.*
 
 internal const val MIME_TYPE_IMAGE_ANY = "image/*"
 internal const val MIME_TYPE_IMAGE_JPEG = "image/jpeg"
@@ -20,12 +20,12 @@ internal fun String.isImage() = hasAnyFormatOf(JPEG, JPG, PNG, GIF)
 /**
  * @return TRUE of file has specified [format]
  */
-internal fun String.hasFormat(format: FileFormat) = endsWith(format.extension, true)
+internal fun String.hasFormat(format: com.pyrus.pyrusservicedesk._ref.utils.FileFormat) = endsWith(format.extension, true)
 
 /**
  * @return TRUE of file has any format of [formats]
  */
-internal fun String.hasAnyFormatOf(vararg formats: FileFormat) = formats.any { hasFormat(it) }
+internal fun String.hasAnyFormatOf(vararg formats: com.pyrus.pyrusservicedesk._ref.utils.FileFormat) = formats.any { hasFormat(it) }
 
 /**
  * Provides extension of the file. If filename doesn't contains extension returns empty string.

@@ -1,4 +1,4 @@
-package com.pyrus.pyrusservicedesk.log;
+package com.pyrus.pyrusservicedesk._ref.utils.log;
 
 import androidx.annotation.NonNull;
 import androidx.core.util.Consumer;

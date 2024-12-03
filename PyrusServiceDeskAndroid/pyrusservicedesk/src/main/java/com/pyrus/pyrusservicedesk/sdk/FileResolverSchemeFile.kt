@@ -1,9 +1,9 @@
 package com.pyrus.pyrusservicedesk.sdk
 
 import android.net.Uri
+import com.pyrus.pyrusservicedesk._ref.utils.RequestUtils
 import com.pyrus.pyrusservicedesk.sdk.data.intermediate.FileData
 import com.pyrus.pyrusservicedesk.sdk.data.intermediate.FileUploadRequestData
-import com.pyrus.pyrusservicedesk.utils.RequestUtils
 import java.io.File
 import java.io.InputStream
 

@@ -5,8 +5,8 @@ import com.pyrus.pyrusservicedesk.sdk.data.TicketShortDescription
 import com.pyrus.pyrusservicedesk.sdk.data.intermediate.AddCommentResponseData
 import com.pyrus.pyrusservicedesk.sdk.web.UploadFileHooks
 import com.pyrus.pyrusservicedesk.sdk.web.retrofit.RemoteStore
-import com.pyrus.pyrusservicedesk.utils.Try
-import com.pyrus.pyrusservicedesk.utils.isSuccess
+import com.pyrus.pyrusservicedesk._ref.utils.Try
+import com.pyrus.pyrusservicedesk._ref.utils.isSuccess
 
 /**
  * Created by smokedealer on 26.01.2024.

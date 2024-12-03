@@ -38,7 +38,7 @@ import com.pyrus.pyrusservicedesk.R
 import com.pyrus.pyrusservicedesk.databinding.PsdCommentBinding
 import com.pyrus.pyrusservicedesk.presentation.ui.navigation_page.ticket.HtmlTagUtils
 import com.pyrus.pyrusservicedesk.presentation.ui.view.OutlineImageView.Companion.EDGE_RIGHT
-import com.pyrus.pyrusservicedesk.utils.*
+import com.pyrus.pyrusservicedesk._ref.utils.*
 import com.squareup.picasso.Picasso
 import com.squareup.picasso.Target
 import java.util.regex.Matcher
@@ -402,10 +402,10 @@ internal class CommentView @JvmOverloads constructor(
      */
     fun setFileSize(bytesSize: Float) {
         recentFileSize = bytesSize
-        val isMegabytes = recentFileSize >= BYTES_IN_MEGABYTE / 10
+        val isMegabytes = recentFileSize >= com.pyrus.pyrusservicedesk._ref.utils.BYTES_IN_MEGABYTE / 10
         val toShow = when {
-            isMegabytes -> recentFileSize / BYTES_IN_MEGABYTE
-            else -> recentFileSize / BYTES_IN_KILOBYTE
+            isMegabytes -> recentFileSize / com.pyrus.pyrusservicedesk._ref.utils.BYTES_IN_MEGABYTE
+            else -> recentFileSize / com.pyrus.pyrusservicedesk._ref.utils.BYTES_IN_KILOBYTE
         }
         val textResId = when{
             isMegabytes -> R.string.psd_file_size_mb

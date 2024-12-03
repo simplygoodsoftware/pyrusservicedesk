@@ -8,7 +8,7 @@ import com.pyrus.pyrusservicedesk.sdk.web.request_body.AddCommentRequestBody
 import com.pyrus.pyrusservicedesk.sdk.web.request_body.GetFeedBody
 import com.pyrus.pyrusservicedesk.sdk.web.request_body.RequestBodyBase
 import com.pyrus.pyrusservicedesk.sdk.web.request_body.SetPushTokenBody
-import com.pyrus.pyrusservicedesk.utils.Try
+import com.pyrus.pyrusservicedesk._ref.utils.Try
 import okhttp3.MultipartBody
 import okhttp3.ResponseBody
 import retrofit2.http.Body

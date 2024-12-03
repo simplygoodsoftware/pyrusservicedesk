@@ -9,9 +9,9 @@ import com.pyrus.pyrusservicedesk.R
 import com.pyrus.pyrusservicedesk._ref.ui_domain.screens.ticket.adapter.entries.CommentEntry
 import com.pyrus.pyrusservicedesk.presentation.ui.view.CommentView
 import com.pyrus.pyrusservicedesk.sdk.data.Attachment
-import com.pyrus.pyrusservicedesk.utils.CIRCLE_TRANSFORMATION
-import com.pyrus.pyrusservicedesk.utils.ConfigUtils
-import com.pyrus.pyrusservicedesk.utils.RequestUtils
+import com.pyrus.pyrusservicedesk._ref.utils.CIRCLE_TRANSFORMATION
+import com.pyrus.pyrusservicedesk._ref.utils.ConfigUtils
+import com.pyrus.pyrusservicedesk._ref.utils.RequestUtils
 
 internal class InboundCommentHolder(
     parent: ViewGroup,

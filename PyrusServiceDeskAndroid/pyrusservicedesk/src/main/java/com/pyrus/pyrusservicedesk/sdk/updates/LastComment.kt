@@ -1,7 +1,7 @@
 package com.pyrus.pyrusservicedesk.sdk.updates
 
 import com.pyrus.pyrusservicedesk.sdk.data.Comment
-import com.pyrus.pyrusservicedesk.utils.getFirstNSymbols
+import com.pyrus.pyrusservicedesk._ref.utils.getFirstNSymbols
 
 internal data class LastComment(
     val id: Long,

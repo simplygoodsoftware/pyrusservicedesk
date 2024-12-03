@@ -9,7 +9,7 @@ import com.pyrus.pyrusservicedesk._ref.ui_domain.screens.ticket.adapter.entries.
 import com.pyrus.pyrusservicedesk.presentation.ui.view.CommentView
 import com.pyrus.pyrusservicedesk.presentation.ui.view.ContentType
 import com.pyrus.pyrusservicedesk.presentation.ui.view.recyclerview.ViewHolderBase
-import com.pyrus.pyrusservicedesk.utils.ConfigUtils
+import com.pyrus.pyrusservicedesk._ref.utils.ConfigUtils
 
 internal class WelcomeMessageHolder(parent: ViewGroup) :
     ViewHolderBase<WelcomeMessageEntry>(parent, R.layout.psd_view_holder_comment_inbound) {

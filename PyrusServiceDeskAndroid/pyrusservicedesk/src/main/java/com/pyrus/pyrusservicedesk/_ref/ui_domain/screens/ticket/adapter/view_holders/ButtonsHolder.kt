@@ -14,7 +14,7 @@ import com.pyrus.pyrusservicedesk._ref.ui_domain.screens.ticket.adapter.TicketAd
 import com.pyrus.pyrusservicedesk._ref.ui_domain.screens.ticket.adapter.entries.ButtonEntry
 import com.pyrus.pyrusservicedesk._ref.ui_domain.screens.ticket.adapter.entries.ButtonsEntry
 import com.pyrus.pyrusservicedesk.presentation.ui.view.recyclerview.ViewHolderBase
-import com.pyrus.pyrusservicedesk.utils.ConfigUtils
+import com.pyrus.pyrusservicedesk._ref.utils.ConfigUtils
 
 internal class ButtonsHolder(parent: ViewGroup): ViewHolderBase<ButtonsEntry>(parent,
     R.layout.psd_view_holder_buttons

@@ -1,4 +1,4 @@
-package com.pyrus.pyrusservicedesk.utils
+package com.pyrus.pyrusservicedesk._ref.utils
 
 import kotlin.contracts.ExperimentalContracts
 import kotlin.contracts.contract

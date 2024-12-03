@@ -21,8 +21,8 @@ import com.pyrus.pyrusservicedesk.PyrusServiceDesk
 import com.pyrus.pyrusservicedesk.R
 import com.pyrus.pyrusservicedesk.core.StaticRepository
 import com.pyrus.pyrusservicedesk.databinding.PsdFragmentAttachFileVariantsBinding
-import com.pyrus.pyrusservicedesk.log.PLog
-import com.pyrus.pyrusservicedesk.utils.*
+import com.pyrus.pyrusservicedesk._ref.utils.log.PLog
+import com.pyrus.pyrusservicedesk._ref.utils.*
 import java.io.File
 
 /**
@@ -156,7 +156,7 @@ internal class AttachFileVariantsFragment: BottomSheetDialogFragment(), View.OnC
             else{
                 it.action = Intent.ACTION_GET_CONTENT
             }
-            it.type = MIME_TYPE_IMAGE_ANY
+            it.type = com.pyrus.pyrusservicedesk._ref.utils.MIME_TYPE_IMAGE_ANY
             startActivityForResult(it,
                 REQUEST_CODE_PICK_IMAGE
             )

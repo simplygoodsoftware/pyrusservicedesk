@@ -11,8 +11,8 @@ import com.pyrus.pyrusservicedesk.presentation.ui.view.ContentType
 import com.pyrus.pyrusservicedesk.presentation.ui.view.Status
 import com.pyrus.pyrusservicedesk.presentation.ui.view.recyclerview.ViewHolderBase
 import com.pyrus.pyrusservicedesk.sdk.data.Attachment
-import com.pyrus.pyrusservicedesk.utils.getTimeText
-import com.pyrus.pyrusservicedesk.utils.isImage
+import com.pyrus.pyrusservicedesk._ref.utils.getTimeText
+import com.pyrus.pyrusservicedesk._ref.utils.isImage
 
 internal abstract class CommentHolder(
     parent: ViewGroup,

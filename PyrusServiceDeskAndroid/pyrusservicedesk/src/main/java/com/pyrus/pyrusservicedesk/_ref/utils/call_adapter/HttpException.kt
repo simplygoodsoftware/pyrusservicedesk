@@ -1,4 +1,4 @@
-package com.pyrus.pyrusservicedesk.utils.call_adapter
+package com.pyrus.pyrusservicedesk._ref.utils.call_adapter
 
 class HttpException(
     val statusCode: Int,

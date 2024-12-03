@@ -5,7 +5,7 @@ import com.google.gson.annotations.SerializedName
 import com.pyrus.pyrusservicedesk.PyrusServiceDesk
 import com.pyrus.pyrusservicedesk.core.Account
 import com.pyrus.pyrusservicedesk.sdk.data.gson.Local
-import com.pyrus.pyrusservicedesk.utils.RequestUtils
+import com.pyrus.pyrusservicedesk._ref.utils.RequestUtils
 
 private const val FILE_ID_EMPTY = 0
 

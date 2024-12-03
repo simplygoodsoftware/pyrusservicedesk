@@ -12,8 +12,8 @@ import android.net.Uri
 import com.pyrus.pyrusservicedesk._ref.ui_domain.screens.file_preview.FilePreviewActivity.Companion.KEY_FILE_DATA
 import com.pyrus.pyrusservicedesk.presentation.viewmodel.ConnectionViewModelBase
 import com.pyrus.pyrusservicedesk.sdk.data.intermediate.FileData
-import com.pyrus.pyrusservicedesk.utils.canBePreviewed
-import com.pyrus.pyrusservicedesk.utils.getExtension
+import com.pyrus.pyrusservicedesk._ref.utils.canBePreviewed
+import com.pyrus.pyrusservicedesk._ref.utils.getExtension
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 

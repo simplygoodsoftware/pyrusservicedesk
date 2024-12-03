@@ -22,7 +22,7 @@ import com.pyrus.pyrusservicedesk.R
 import com.pyrus.pyrusservicedesk.databinding.PsdActivityFilePreviewBinding
 import com.pyrus.pyrusservicedesk.presentation.ConnectionActivityBase
 import com.pyrus.pyrusservicedesk.sdk.data.intermediate.FileData
-import com.pyrus.pyrusservicedesk.utils.*
+import com.pyrus.pyrusservicedesk._ref.utils.*
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 

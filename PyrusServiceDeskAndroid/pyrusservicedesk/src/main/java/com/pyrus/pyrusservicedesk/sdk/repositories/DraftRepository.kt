@@ -1,7 +1,7 @@
 package com.pyrus.pyrusservicedesk.sdk.repositories
 
 import android.content.SharedPreferences
-import com.pyrus.pyrusservicedesk.utils.PREFERENCE_KEY_DRAFT
+import com.pyrus.pyrusservicedesk._ref.utils.PREFERENCE_KEY_DRAFT
 
 /**
  * DraftRepository implementation based on usage of [SharedPreferences] as the private storage.

@@ -19,7 +19,7 @@ import com.pyrus.pyrusservicedesk._ref.ui_domain.screens.ticket.adapter.entries.
 import com.pyrus.pyrusservicedesk._ref.ui_domain.screens.ticket.adapter.entries.TicketEntry
 import com.pyrus.pyrusservicedesk._ref.ui_domain.screens.ticket.adapter.entries.Type
 import com.pyrus.pyrusservicedesk._ref.ui_domain.screens.ticket.adapter.entries.WelcomeMessageEntry
-import com.pyrus.pyrusservicedesk.log.PLog
+import com.pyrus.pyrusservicedesk._ref.utils.log.PLog
 import com.pyrus.pyrusservicedesk.presentation.ui.view.recyclerview.DiffResultWithNewItems
 import com.pyrus.pyrusservicedesk.presentation.viewmodel.ConnectionViewModelBase
 import com.pyrus.pyrusservicedesk.sdk.data.Attachment
@@ -35,12 +35,12 @@ import com.pyrus.pyrusservicedesk.sdk.updates.PreferencesManager
 import com.pyrus.pyrusservicedesk.sdk.verify.LocalDataVerifier
 import com.pyrus.pyrusservicedesk.sdk.web.OnCancelListener
 import com.pyrus.pyrusservicedesk.sdk.web.UploadFileHooks
-import com.pyrus.pyrusservicedesk.utils.ConfigUtils
-import com.pyrus.pyrusservicedesk.utils.MILLISECONDS_IN_MINUTE
-import com.pyrus.pyrusservicedesk.utils.MILLISECONDS_IN_SECOND
-import com.pyrus.pyrusservicedesk.utils.RequestUtils.Companion.MAX_FILE_SIZE_BYTES
-import com.pyrus.pyrusservicedesk.utils.RequestUtils.Companion.MAX_FILE_SIZE_MEGABYTES
-import com.pyrus.pyrusservicedesk.utils.getWhen
+import com.pyrus.pyrusservicedesk._ref.utils.ConfigUtils
+import com.pyrus.pyrusservicedesk._ref.utils.MILLISECONDS_IN_MINUTE
+import com.pyrus.pyrusservicedesk._ref.utils.MILLISECONDS_IN_SECOND
+import com.pyrus.pyrusservicedesk._ref.utils.RequestUtils.Companion.MAX_FILE_SIZE_BYTES
+import com.pyrus.pyrusservicedesk._ref.utils.RequestUtils.Companion.MAX_FILE_SIZE_MEGABYTES
+import com.pyrus.pyrusservicedesk._ref.utils.getWhen
 import kotlinx.coroutines.*
 import java.lang.Exception
 import java.lang.Runnable

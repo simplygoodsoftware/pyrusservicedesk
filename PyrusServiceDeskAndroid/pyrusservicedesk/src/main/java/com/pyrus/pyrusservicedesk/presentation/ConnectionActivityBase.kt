@@ -1,16 +1,12 @@
 package com.pyrus.pyrusservicedesk.presentation
 
-import androidx.lifecycle.Observer
 import android.graphics.PorterDuff
 import android.os.Bundle
-import android.view.View.GONE
-import android.view.View.VISIBLE
 import android.widget.ProgressBar
 import com.pyrus.pyrusservicedesk.R
+import com.pyrus.pyrusservicedesk._ref.utils.getColorByAttrId
+import com.pyrus.pyrusservicedesk._ref.utils.getViewModel
 import com.pyrus.pyrusservicedesk.presentation.viewmodel.ConnectionViewModelBase
-import com.pyrus.pyrusservicedesk.utils.ConfigUtils
-import com.pyrus.pyrusservicedesk.utils.getColorByAttrId
-import com.pyrus.pyrusservicedesk.utils.getViewModel
 
 private const val ANIMATION_DURATION = 200L
 

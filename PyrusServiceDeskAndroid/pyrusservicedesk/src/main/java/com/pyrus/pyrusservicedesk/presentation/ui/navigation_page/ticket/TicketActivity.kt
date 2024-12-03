@@ -31,8 +31,8 @@ import com.pyrus.pyrusservicedesk.presentation.ui.navigation_page.ticket.dialogs
 import com.pyrus.pyrusservicedesk.presentation.ui.view.recyclerview.item_decorators.SpaceItemDecoration
 import com.pyrus.pyrusservicedesk.sdk.data.Attachment
 import com.pyrus.pyrusservicedesk.sdk.data.intermediate.FileData
-import com.pyrus.pyrusservicedesk.utils.*
-import com.pyrus.pyrusservicedesk.utils.RequestUtils.Companion.getFileUrl
+import com.pyrus.pyrusservicedesk._ref.utils.*
+import com.pyrus.pyrusservicedesk._ref.utils.RequestUtils.Companion.getFileUrl
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 

@@ -1,8 +1,7 @@
-package com.pyrus.pyrusservicedesk.log
+package com.pyrus.pyrusservicedesk._ref.utils.log
 
 import android.app.Application
 import androidx.core.util.Consumer
-import com.pyrus.pyrusservicedesk.PyrusServiceDesk
 import com.pyrus.pyrusservicedesk.core.StaticRepository
 import java.io.File
 

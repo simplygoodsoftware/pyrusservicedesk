@@ -4,7 +4,7 @@ import androidx.annotation.Keep
 import com.pyrus.pyrusservicedesk.PyrusServiceDesk
 import com.pyrus.pyrusservicedesk.PyrusServiceDesk.Companion.API_VERSION_2
 import com.pyrus.pyrusservicedesk.core.StaticRepository
-import com.pyrus.pyrusservicedesk.log.PLog
+import com.pyrus.pyrusservicedesk._ref.utils.log.PLog
 import com.pyrus.pyrusservicedesk.sdk.FileResolver
 import com.pyrus.pyrusservicedesk.sdk.data.Attachment
 import com.pyrus.pyrusservicedesk.sdk.data.Comment
@@ -18,11 +18,11 @@ import com.pyrus.pyrusservicedesk.sdk.request.UploadFileRequest
 import com.pyrus.pyrusservicedesk.sdk.response.*
 import com.pyrus.pyrusservicedesk.sdk.web.UploadFileHooks
 import com.pyrus.pyrusservicedesk.sdk.web.request_body.*
-import com.pyrus.pyrusservicedesk.utils.ConfigUtils
-import com.pyrus.pyrusservicedesk.utils.Try
-import com.pyrus.pyrusservicedesk.utils.getFirstNSymbols
-import com.pyrus.pyrusservicedesk.utils.isSuccess
-import com.pyrus.pyrusservicedesk.utils.map
+import com.pyrus.pyrusservicedesk._ref.utils.ConfigUtils
+import com.pyrus.pyrusservicedesk._ref.utils.Try
+import com.pyrus.pyrusservicedesk._ref.utils.getFirstNSymbols
+import com.pyrus.pyrusservicedesk._ref.utils.isSuccess
+import com.pyrus.pyrusservicedesk._ref.utils.map
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch

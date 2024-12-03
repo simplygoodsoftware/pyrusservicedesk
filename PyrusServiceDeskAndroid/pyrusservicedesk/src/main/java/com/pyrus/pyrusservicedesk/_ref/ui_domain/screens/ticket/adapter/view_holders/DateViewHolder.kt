@@ -5,7 +5,7 @@ import android.widget.TextView
 import com.pyrus.pyrusservicedesk.R
 import com.pyrus.pyrusservicedesk._ref.ui_domain.screens.ticket.adapter.entries.DateEntry
 import com.pyrus.pyrusservicedesk.presentation.ui.view.recyclerview.ViewHolderBase
-import com.pyrus.pyrusservicedesk.utils.ConfigUtils
+import com.pyrus.pyrusservicedesk._ref.utils.ConfigUtils
 
 internal class DateViewHolder(parent: ViewGroup)
     : ViewHolderBase<DateEntry>(parent, R.layout.psd_view_holder_date) {

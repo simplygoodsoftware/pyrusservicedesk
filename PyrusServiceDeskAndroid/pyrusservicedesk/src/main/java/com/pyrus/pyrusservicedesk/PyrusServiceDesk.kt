@@ -5,14 +5,14 @@ import android.app.Application
 import androidx.annotation.MainThread
 import com.pyrus.pyrusservicedesk.core.DepsInjection
 import com.pyrus.pyrusservicedesk.core.StaticRepository
-import com.pyrus.pyrusservicedesk.log.PLog
+import com.pyrus.pyrusservicedesk._ref.utils.log.PLog
 import com.pyrus.pyrusservicedesk.presentation.ui.navigation_page.ticket.TicketActivity
 import com.pyrus.pyrusservicedesk.presentation.viewmodel.SharedViewModel
 import com.pyrus.pyrusservicedesk.sdk.updates.NewReplySubscriber
 import com.pyrus.pyrusservicedesk.sdk.updates.OnStopCallback
-import com.pyrus.pyrusservicedesk.utils.MILLISECONDS_IN_MINUTE
-import com.pyrus.pyrusservicedesk.utils.RequestUtils
-import com.pyrus.pyrusservicedesk.utils.getFirstNSymbols
+import com.pyrus.pyrusservicedesk._ref.utils.MILLISECONDS_IN_MINUTE
+import com.pyrus.pyrusservicedesk._ref.utils.RequestUtils
+import com.pyrus.pyrusservicedesk._ref.utils.getFirstNSymbols
 
 
 class PyrusServiceDesk private constructor(

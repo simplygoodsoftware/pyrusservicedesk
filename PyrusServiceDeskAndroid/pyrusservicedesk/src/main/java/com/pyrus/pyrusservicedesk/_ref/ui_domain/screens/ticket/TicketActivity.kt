@@ -23,12 +23,12 @@ import com.pyrus.pyrusservicedesk.presentation.ui.navigation_page.ticket.TicketV
 import com.pyrus.pyrusservicedesk.presentation.ui.navigation_page.ticket.dialogs.attach_files.AttachFileSharedViewModel
 import com.pyrus.pyrusservicedesk.presentation.ui.navigation_page.ticket.dialogs.comment_actions.PendingCommentActionSharedViewModel
 import com.pyrus.pyrusservicedesk.presentation.ui.view.recyclerview.item_decorators.SpaceItemDecoration
-import com.pyrus.pyrusservicedesk.utils.ConfigUtils
-import com.pyrus.pyrusservicedesk.utils.getColorOnBackground
-import com.pyrus.pyrusservicedesk.utils.getSecondaryColorOnBackground
-import com.pyrus.pyrusservicedesk.utils.getViewModel
-import com.pyrus.pyrusservicedesk.utils.isAtEnd
-import com.pyrus.pyrusservicedesk.utils.setCursorColor
+import com.pyrus.pyrusservicedesk._ref.utils.ConfigUtils
+import com.pyrus.pyrusservicedesk._ref.utils.getColorOnBackground
+import com.pyrus.pyrusservicedesk._ref.utils.getSecondaryColorOnBackground
+import com.pyrus.pyrusservicedesk._ref.utils.getViewModel
+import com.pyrus.pyrusservicedesk._ref.utils.isAtEnd
+import com.pyrus.pyrusservicedesk._ref.utils.setCursorColor
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
