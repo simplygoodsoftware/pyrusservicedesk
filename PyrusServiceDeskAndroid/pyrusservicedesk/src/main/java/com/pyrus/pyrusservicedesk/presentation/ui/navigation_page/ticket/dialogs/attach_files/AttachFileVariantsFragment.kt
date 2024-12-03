@@ -19,6 +19,7 @@ import android.view.ViewGroup
 import androidx.core.util.Consumer
 import com.pyrus.pyrusservicedesk.PyrusServiceDesk
 import com.pyrus.pyrusservicedesk.R
+import com.pyrus.pyrusservicedesk.core.StaticRepository
 import com.pyrus.pyrusservicedesk.databinding.PsdFragmentAttachFileVariantsBinding
 import com.pyrus.pyrusservicedesk.log.PLog
 import com.pyrus.pyrusservicedesk.utils.*
@@ -28,15 +29,6 @@ import java.io.File
  * UI that is used for attaching files to the comments.
  */
 internal class AttachFileVariantsFragment: BottomSheetDialogFragment(), View.OnClickListener {
-
-    private companion object {
-        const val REQUEST_CODE_PERMISSION = 0
-        const val REQUEST_CODE_CUSTOM_CHOOSER = 1
-        const val REQUEST_CODE_PICK_IMAGE = 2
-        const val REQUEST_CODE_TAKE_PHOTO = 3
-
-        const val STATE_KEY_PHOTO_URI = "STATE_KEY_PHOTO_URI"
-    }
 
     private var capturePhotoUri: Uri? = null
     private val sharedModel: AttachFileSharedViewModel by getViewModelWithActivityScope(
@@ -75,14 +67,15 @@ internal class AttachFileVariantsFragment: BottomSheetDialogFragment(), View.OnC
         binding.photoVariant.setOnClickListener(this)
         binding.photoVariant.visibility = if (isCapturingPhotoSupported()) VISIBLE else GONE
         binding.galleryVariant.setOnClickListener(this)
-        binding.customVariant.visibility = if (PyrusServiceDesk.FILE_CHOOSER != null) VISIBLE else GONE
-        PyrusServiceDesk.FILE_CHOOSER?.let {
+        binding.customVariant.visibility = if (StaticRepository.FILE_CHOOSER != null) VISIBLE else GONE
+        StaticRepository.FILE_CHOOSER?.let {
             binding.customVariant.setOnClickListener(this)
             binding.customVariant.text = it.getLabel()
         }
-        binding.sendLogsVariant.visibility = if (PyrusServiceDesk.logging) VISIBLE else GONE
-        if (PyrusServiceDesk.logging)
-            binding.sendLogsVariant.setOnClickListener(this)
+        // TODO sds
+//        binding.sendLogsVariant.visibility = if (PyrusServiceDesk.logging) VISIBLE else GONE
+//        if (PyrusServiceDesk.logging)
+//            binding.sendLogsVariant.setOnClickListener(this)
 
         val textColor = ConfigUtils.getFileMenuTextColor(requireContext())
         binding.photoVariant.setTextColor(textColor)
@@ -144,7 +137,7 @@ internal class AttachFileVariantsFragment: BottomSheetDialogFragment(), View.OnC
     }
 
     private fun openCustomChooser() {
-        val chooserIntent = PyrusServiceDesk.FILE_CHOOSER?.getIntent() ?: return
+        val chooserIntent = StaticRepository.FILE_CHOOSER?.getIntent() ?: return
         activity?.packageManager?.resolveActivity(chooserIntent, 0) ?: return
         startActivityForResult(chooserIntent,
             REQUEST_CODE_CUSTOM_CHOOSER
@@ -215,4 +208,14 @@ internal class AttachFileVariantsFragment: BottomSheetDialogFragment(), View.OnC
             else -> false
         }
     }
+
+    private companion object {
+        const val REQUEST_CODE_PERMISSION = 0
+        const val REQUEST_CODE_CUSTOM_CHOOSER = 1
+        const val REQUEST_CODE_PICK_IMAGE = 2
+        const val REQUEST_CODE_TAKE_PHOTO = 3
+
+        const val STATE_KEY_PHOTO_URI = "STATE_KEY_PHOTO_URI"
+    }
+
 }

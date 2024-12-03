@@ -1,5 +1,6 @@
 package com.pyrus.pyrusservicedesk.presentation.ui.navigation_page.ticket
 
+import android.app.Application
 import android.content.Context
 import android.net.Uri
 import android.os.Handler
@@ -11,7 +12,6 @@ import androidx.lifecycle.Observer
 import androidx.recyclerview.widget.DiffUtil
 import com.pyrus.pyrusservicedesk.PyrusServiceDesk
 import com.pyrus.pyrusservicedesk.R
-import com.pyrus.pyrusservicedesk.ServiceDeskProvider
 import com.pyrus.pyrusservicedesk.log.PLog
 import com.pyrus.pyrusservicedesk.presentation.ui.navigation_page.ticket.entries.*
 import com.pyrus.pyrusservicedesk.presentation.ui.view.recyclerview.DiffResultWithNewItems
@@ -45,9 +45,9 @@ import kotlin.collections.ArrayList
  * ViewModel for the ticket screen.
  */
 internal class TicketViewModel(
-    serviceDeskProvider: ServiceDeskProvider,
+    application: Application,
     private val preferencesManager: PreferencesManager
-) : ConnectionViewModelBase(serviceDeskProvider), OnUnreadTicketCountChangedSubscriber {
+) : ConnectionViewModelBase(application), OnUnreadTicketCountChangedSubscriber {
 
     private companion object {
 

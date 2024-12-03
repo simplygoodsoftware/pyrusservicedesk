@@ -51,7 +51,7 @@ internal class InboundCommentHolder(
     private fun setAuthorAvatarVisibility(visible: Boolean) {
         avatar.visibility = if (visible) View.VISIBLE else View.INVISIBLE
         if (visible) {
-            PyrusServiceDesk.get().picasso
+            PyrusServiceDesk.injector().picasso
                 .load(
                     RequestUtils.getAvatarUrl(
                         getItem().comment.author.avatarId,

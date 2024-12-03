@@ -81,26 +81,26 @@ internal class TicketActivity : ConnectionActivityBase<TicketViewModel>(TicketVi
         AttachFileSharedViewModel::class.java)
     private val commentActionsSharedViewModel: PendingCommentActionSharedViewModel by getViewModel(
         PendingCommentActionSharedViewModel::class.java)
-
-    private val adapter = TicketAdapter().apply {
-        setOnFileReadyForPreviewClickListener { attachment ->
-            val fileData = attachment.toFileData()
-            if (fileData.isLocal) {
-                return@setOnFileReadyForPreviewClickListener
-            }
-            startActivity(FilePreviewActivity.getLaunchIntent(fileData))
-        }
-        setOnErrorCommentEntryClickListener {
-            viewModel.onUserStartChoosingCommentAction(it)
-            PendingCommentActionsDialog().show(supportFragmentManager, "")
-        }
-        setOnTextCommentLongClicked {
-            copyToClipboard(it)
-        }
-        setOnRatingClickListener { rating ->
-            viewModel.onRatingClick(rating)
-        }
-    }
+    private val adapter: TicketAdapter = TODO()
+//    private val adapter = TicketAdapter().apply {
+//        setOnFileReadyForPreviewClickListener { attachment ->
+//            val fileData = attachment.toFileData()
+//            if (fileData.isLocal) {
+//                return@setOnFileReadyForPreviewClickListener
+//            }
+//            startActivity(FilePreviewActivity.getLaunchIntent(fileData))
+//        }
+//        setOnErrorCommentEntryClickListener {
+//            viewModel.onUserStartChoosingCommentAction(it)
+//            PendingCommentActionsDialog().show(supportFragmentManager, "")
+//        }
+//        setOnTextCommentLongClicked {
+//            copyToClipboard(it)
+//        }
+//        setOnRatingClickListener { rating ->
+//            viewModel.onRatingClick(rating)
+//        }
+//    }
 
     private val inputTextWatcher = object : TextWatcher {
         override fun afterTextChanged(s: Editable?) {

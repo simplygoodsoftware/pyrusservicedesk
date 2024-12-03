@@ -89,10 +89,10 @@ internal abstract class CommentHolder(
     }
 
     private fun bindAttachmentView() {
-        getItem().comment.attachments!!.first().let { it ->
+        getItem().comment.attachments!!.first().let { attachment ->
             comment.setFileName(getItem().comment.attachments?.first()?.name ?: "")
             comment.setFileSize(getItem().comment.attachments?.first()?.bytesSize?.toFloat() ?: 0f)
-            comment.setPreview(it.getPreviewUrl())
+            comment.setPreview(attachment.getPreviewUrl())
             comment.fileProgressStatus = if (getItem().hasError()) Status.Error else Status.Completed
             comment.setOnProgressIconClickListener {
                 when (comment.fileProgressStatus) {

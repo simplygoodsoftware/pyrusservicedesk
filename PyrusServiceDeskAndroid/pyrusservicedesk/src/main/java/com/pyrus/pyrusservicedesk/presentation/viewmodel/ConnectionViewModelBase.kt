@@ -2,6 +2,7 @@ package com.pyrus.pyrusservicedesk.presentation.viewmodel
 
 import android.animation.Animator
 import android.animation.ValueAnimator
+import android.app.Application
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
@@ -11,7 +12,6 @@ import android.os.Handler
 import android.view.animation.AccelerateInterpolator
 import com.pyrus.pyrusservicedesk.PyrusServiceDesk
 import com.pyrus.pyrusservicedesk.R
-import com.pyrus.pyrusservicedesk.ServiceDeskProvider
 import kotlinx.coroutines.*
 
 private const val PROGRESS_START_VALUE = 40
@@ -26,33 +26,33 @@ private const val PROGRESS_ANIMATION_DURATION_MS_QUICK = 400L
  *
  * @param serviceDesk current [PyrusServiceDesk] implementation.
  */
-internal abstract class ConnectionViewModelBase(serviceDeskProvider: ServiceDeskProvider)
-    : AndroidViewModel(serviceDeskProvider.getApplication()),
+internal abstract class ConnectionViewModelBase(application: Application)
+    : AndroidViewModel(application = application),
         CoroutineScope {
 
     // request factory that can be used for making requests to a repository.
-    protected val requests = serviceDeskProvider.getRequestFactory()
+//    protected val requests = serviceDeskProvider.getRequestFactory()
     // updates that can be observed by extenders.
-    protected val liveUpdates = serviceDeskProvider.getLiveUpdates()
+//    protected val liveUpdates = serviceDeskProvider.getLiveUpdates()
     // live data that exposes state of the network.
     // The state is not completely fair, because it is assigned when instance is created and it explicitly cleared
     // when successful data loading has been performed.
     protected val isNetworkConnected = MutableLiveData<Boolean>()
 
-    private val connectivity: ConnectivityManager =
-        serviceDeskProvider.getApplication().getSystemService(Context.CONNECTIVITY_SERVICE)
-                as ConnectivityManager
+//    private val connectivity: ConnectivityManager =
+//        serviceDeskProvider.getApplication().getSystemService(Context.CONNECTIVITY_SERVICE)
+//                as ConnectivityManager
 
-    private val MAX_PROGRESS = serviceDeskProvider.getApplication().resources.getInteger(R.integer.psd_progress_max_value)
+//    private val MAX_PROGRESS = serviceDeskProvider.getApplication().resources.getInteger(R.integer.psd_progress_max_value)
     private val loadingProgress = MutableLiveData<Int>()
-    private val mainHandler = Handler(serviceDeskProvider.getApplication().mainLooper)
+//    private val mainHandler = Handler(serviceDeskProvider.getApplication().mainLooper)
 
     private var recentPublishedProgress = 0
 
     private val publishProgressRunnable = Runnable {
         val onCompleted = object: Runnable {
             override fun run() {
-                if (recentPublishedProgress < MAX_PROGRESS - PROGRESS_INCREMENT_VALUE)
+                if (recentPublishedProgress < 100 - PROGRESS_INCREMENT_VALUE)
                     publishProgress(
                         recentPublishedProgress + PROGRESS_INCREMENT_VALUE,
                         PROGRESS_ANIMATION_DURATION_MS_DEFAULT,
@@ -65,12 +65,12 @@ internal abstract class ConnectionViewModelBase(serviceDeskProvider: ServiceDesk
     override val coroutineContext = Dispatchers.IO + Job()
 
     init {
-        isNetworkConnected.value = connectivity.activeNetworkInfo?.isConnected ?: false
+//        isNetworkConnected.value = connectivity.activeNetworkInfo?.isConnected ?: false
     }
 
     override fun onCleared() {
         super.onCleared()
-        mainHandler.removeCallbacks(publishProgressRunnable)
+//        mainHandler.removeCallbacks(publishProgressRunnable)
         coroutineContext.cancel()
     }
 
@@ -105,7 +105,7 @@ internal abstract class ConnectionViewModelBase(serviceDeskProvider: ServiceDesk
      */
     protected fun onDataLoaded() {
         isNetworkConnected.value = true
-        publishProgress(MAX_PROGRESS, PROGRESS_ANIMATION_DURATION_MS_QUICK, null)
+        publishProgress(100, PROGRESS_ANIMATION_DURATION_MS_QUICK, null)
     }
 
     /**
@@ -113,7 +113,7 @@ internal abstract class ConnectionViewModelBase(serviceDeskProvider: ServiceDesk
      */
     protected fun publishProgress(progress: Int) {
         when (progress) {
-            MAX_PROGRESS -> onDataLoaded()
+            100 -> onDataLoaded()
             else -> publishProgress(progress, PROGRESS_ANIMATION_DURATION_MS_DEFAULT, null)
         }
     }
@@ -121,7 +121,7 @@ internal abstract class ConnectionViewModelBase(serviceDeskProvider: ServiceDesk
     private fun replayProgress() {
         loadingProgress.value = 0
         recentPublishedProgress = 0
-        mainHandler.post(publishProgressRunnable)
+//        mainHandler.post(publishProgressRunnable)
     }
 
     private fun publishProgress(progress: Int, durationMs: Long, onCompleted: Runnable?) {

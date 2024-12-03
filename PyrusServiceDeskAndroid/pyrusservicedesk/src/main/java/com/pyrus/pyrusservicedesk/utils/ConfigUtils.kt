@@ -12,6 +12,7 @@ import androidx.core.content.ContextCompat.getColor
 import com.pyrus.pyrusservicedesk.MainMenuDelegate
 import com.pyrus.pyrusservicedesk.PyrusServiceDesk
 import com.pyrus.pyrusservicedesk.R
+import com.pyrus.pyrusservicedesk.core.StaticRepository
 import java.security.SecureRandom
 
 internal class ConfigUtils{
@@ -21,50 +22,50 @@ internal class ConfigUtils{
         private const val SCALE_SUPPORT_ICON_DEFAULT = .5f
 
         /**
-         * Provides accent color taking [PyrusServiceDesk.CONFIGURATION] into account.
+         * Provides accent color taking [StaticRepository.CONFIGURATION] into account.
          * @param context Activity context.
          */
         @ColorInt
         fun getAccentColor(context: Context): Int {
             return when {
-                PyrusServiceDesk.getConfiguration().themeColor != null -> PyrusServiceDesk.getConfiguration().themeColor!!
+                StaticRepository.getConfiguration().themeColor != null -> StaticRepository.getConfiguration().themeColor!!
                 else -> getColorByAttrId(context, R.attr.colorAccent)
             }
         }
 
         /**
-         * Provides main font Typeface taking [PyrusServiceDesk.CONFIGURATION] into account.
+         * Provides main font Typeface taking [StaticRepository.CONFIGURATION] into account.
          */
         fun getMainFontTypeface(): Typeface? {
-            PyrusServiceDesk.getConfiguration().mainFontName?.let {
+            StaticRepository.getConfiguration().mainFontName?.let {
                 return Typeface.create(it, Typeface.NORMAL)
             }
             return null
         }
 
         /**
-         * Provides main bold font Typeface taking [PyrusServiceDesk.CONFIGURATION] into account.
+         * Provides main bold font Typeface taking [StaticRepository.CONFIGURATION] into account.
          */
         fun getMainBoldFontTypeface(): Typeface? {
-            PyrusServiceDesk.getConfiguration().mainFontName?.let {
+            StaticRepository.getConfiguration().mainFontName?.let {
                 return Typeface.create(it, Typeface.BOLD)
             }
             return null
         }
 
         /**
-         * Provides user message text background color taking [PyrusServiceDesk.CONFIGURATION] into account.
+         * Provides user message text background color taking [StaticRepository.CONFIGURATION] into account.
          * @param context Activity context.
          */
         @ColorInt
         fun getUserMessageTextBackgroundColor(context: Context): Int {
-            val colorRes = PyrusServiceDesk.getConfiguration().userMessageTextBackgroundColor
+            val colorRes = StaticRepository.getConfiguration().userMessageTextBackgroundColor
                 ?:                return getAccentColor(context)
             return getColor(context.applicationContext, colorRes)
         }
 
         /**
-         * Provides user message text color taking [PyrusServiceDesk.CONFIGURATION] into account.
+         * Provides user message text color taking [StaticRepository.CONFIGURATION] into account.
          * @param context Activity context.
          * @param backgroundColor Background color of text.
          *
@@ -73,24 +74,24 @@ internal class ConfigUtils{
          */
         @ColorInt
         fun getUserMessageTextColor(context: Context, @ColorInt backgroundColor: Int): Int {
-            val colorRes = PyrusServiceDesk.getConfiguration().userMessageTextColor
+            val colorRes = StaticRepository.getConfiguration().userMessageTextColor
                 ?:                return getTextColorOnBackground(context, backgroundColor)
             return getColor(context.applicationContext, colorRes)
         }
 
         /**
-         * Provides support message text background color taking [PyrusServiceDesk.CONFIGURATION] into account.
+         * Provides support message text background color taking [StaticRepository.CONFIGURATION] into account.
          * @param context Activity context.
          */
         @ColorInt
         fun getSupportMessageTextBackgroundColor(context: Context): Int {
-            val colorRes = PyrusServiceDesk.getConfiguration().supportMessageTextBackgroundColor
+            val colorRes = StaticRepository.getConfiguration().supportMessageTextBackgroundColor
                 ?: return getColor(context, R.color.psd_comment_inbound_background)
             return getColor(context.applicationContext, colorRes)
         }
 
         /**
-         * Provides support message text color taking [PyrusServiceDesk.CONFIGURATION] into account.
+         * Provides support message text color taking [StaticRepository.CONFIGURATION] into account.
          * @param context Activity context.
          * @param backgroundColor Background color of text.
          *
@@ -99,128 +100,128 @@ internal class ConfigUtils{
          */
         @ColorInt
         fun getSupportMessageTextColor(context: Context, @ColorInt backgroundColor: Int): Int {
-            val colorRes = PyrusServiceDesk.getConfiguration().supportMessageTextColor
+            val colorRes = StaticRepository.getConfiguration().supportMessageTextColor
                 ?: return getTextColorOnBackground(context, backgroundColor)
             return getColor(context.applicationContext, colorRes)
         }
 
         /**
-         * Provides chat title text color taking [PyrusServiceDesk.CONFIGURATION] into account.
+         * Provides chat title text color taking [StaticRepository.CONFIGURATION] into account.
          * @param context Activity context.
          */
         @ColorInt
         fun getChatTitleTextColor(context: Context): Int {
-            val colorRes = PyrusServiceDesk.getConfiguration().chatTitleTextColor
+            val colorRes = StaticRepository.getConfiguration().chatTitleTextColor
                 ?: return getTextColorOnBackground(context, getHeaderBackgroundColor(context))
             return getColor(context.applicationContext, colorRes)
         }
 
         /**
-         * Provides header background color taking [PyrusServiceDesk.CONFIGURATION] into account.
+         * Provides header background color taking [StaticRepository.CONFIGURATION] into account.
          * @param context Activity context.
          */
         @ColorInt
         fun getHeaderBackgroundColor(context: Context): Int {
-            val colorRes = PyrusServiceDesk.getConfiguration().headerBackgroundColor
+            val colorRes = StaticRepository.getConfiguration().headerBackgroundColor
                 ?: return getColorByAttrId(context, R.attr.colorPrimary)
             return getColor(context.applicationContext, colorRes)
         }
 
         /**
-         * Provides back button color taking [PyrusServiceDesk.CONFIGURATION] into account.
+         * Provides back button color taking [StaticRepository.CONFIGURATION] into account.
          * @param context Activity context.
          */
         @ColorInt
         fun getToolbarButtonColor(context: Context): Int {
-            val colorRes = PyrusServiceDesk.getConfiguration().backButtonColor
+            val colorRes = StaticRepository.getConfiguration().backButtonColor
                 ?: return getTextColorOnBackground(context, getHeaderBackgroundColor(context))
             return getColor(context.applicationContext, colorRes)
         }
 
         /**
-         * Provides main background color taking [PyrusServiceDesk.CONFIGURATION] into account.
+         * Provides main background color taking [StaticRepository.CONFIGURATION] into account.
          * @param context Activity context.
          */
         @ColorInt
         fun getMainBackgroundColor(context: Context): Int {
-            val colorRes = PyrusServiceDesk.getConfiguration().mainBackgroundColor
+            val colorRes = StaticRepository.getConfiguration().mainBackgroundColor
                 ?: return getColorByAttrId(context, R.attr.colorOnBackground)
             return getColor(context.applicationContext, colorRes)
         }
 
         /**
-         * Provides no file preview background color taking [PyrusServiceDesk.CONFIGURATION] into account.
+         * Provides no file preview background color taking [StaticRepository.CONFIGURATION] into account.
          * @param context Activity context.
          */
         @ColorInt
         fun getNoPreviewBackgroundColor(context: Context): Int {
-            val colorRes = PyrusServiceDesk.getConfiguration().mainBackgroundColor
+            val colorRes = StaticRepository.getConfiguration().mainBackgroundColor
                 ?: return getColor(context, R.color.psd_no_file_preview_background)
             return getColor(context.applicationContext, colorRes)
         }
 
         /**
-         * Provides no connection background color taking [PyrusServiceDesk.CONFIGURATION] into account.
+         * Provides no connection background color taking [StaticRepository.CONFIGURATION] into account.
          * @param context Activity context.
          */
         @ColorInt
         fun getNoConnectionBackgroundColor(context: Context): Int {
-            val colorRes = PyrusServiceDesk.getConfiguration().mainBackgroundColor
+            val colorRes = StaticRepository.getConfiguration().mainBackgroundColor
                 ?: return getColor(context, R.color.psd_error_background)
             return getColor(context.applicationContext, colorRes)
         }
 
         /**
-         * Provides file menu background color taking [PyrusServiceDesk.CONFIGURATION] into account.
+         * Provides file menu background color taking [StaticRepository.CONFIGURATION] into account.
          * @param context Activity context.
          */
         @ColorInt
         fun getFileMenuBackgroundColor(context: Context): Int {
-            val colorRes = PyrusServiceDesk.getConfiguration().fileMenuBackgroundColor
+            val colorRes = StaticRepository.getConfiguration().fileMenuBackgroundColor
                 ?: return getColorByAttrId(context, R.attr.colorOnBackground)
             return getColor(context.applicationContext, colorRes)
         }
 
         /**
-         * Provides file menu button color taking [PyrusServiceDesk.CONFIGURATION] into account.
+         * Provides file menu button color taking [StaticRepository.CONFIGURATION] into account.
          * @param context Activity context.
          */
         @ColorInt
         fun getFileMenuButtonColor(context: Context): Int {
-            val colorRes = PyrusServiceDesk.getConfiguration().fileMenuButtonColor
+            val colorRes = StaticRepository.getConfiguration().fileMenuButtonColor
                 ?: return getAccentColor(context)
             return getColor(context.applicationContext, colorRes)
         }
 
         /**
-         * Provides status bar color taking [PyrusServiceDesk.CONFIGURATION] into account.
+         * Provides status bar color taking [StaticRepository.CONFIGURATION] into account.
          * @param context Activity context.
          */
         @ColorInt
         fun getStatusBarColor(context: Context): Int? {
-            val colorRes = PyrusServiceDesk.getConfiguration().statusBarColor ?: return null
+            val colorRes = StaticRepository.getConfiguration().statusBarColor ?: return null
             return getColor(context.applicationContext, colorRes)
 
         }
 
         /**
-         * Provides file menu text color taking [PyrusServiceDesk.CONFIGURATION] into account.
+         * Provides file menu text color taking [StaticRepository.CONFIGURATION] into account.
          * @param context Activity context.
          */
         @ColorInt
         fun getFileMenuTextColor(context: Context): Int {
-            val colorRes = PyrusServiceDesk.getConfiguration().fileMenuTextColor
+            val colorRes = StaticRepository.getConfiguration().fileMenuTextColor
                 ?: return getTextColorOnBackground(context, getFileMenuBackgroundColor(context))
             return getColor(context.applicationContext, colorRes)
         }
 
         /**
-         * Provides send button color taking [PyrusServiceDesk.CONFIGURATION] into account.
+         * Provides send button color taking [StaticRepository.CONFIGURATION] into account.
          * @param context Activity context.
          */
         @ColorInt
         fun getSendButtonColor(context: Context): Int {
-            val colorRes = PyrusServiceDesk.getConfiguration().sendButtonColor
+            val colorRes = StaticRepository.getConfiguration().sendButtonColor
                 ?: return getAccentColor(context)
             return getColor(context.applicationContext, colorRes)
         }
@@ -244,30 +245,30 @@ internal class ConfigUtils{
         }
 
         /**
-         * Provides chat title taking [PyrusServiceDesk.CONFIGURATION] into account
+         * Provides chat title taking [StaticRepository.CONFIGURATION] into account
          */
         fun getTitle(context: Context): String {
             return when{
-                !PyrusServiceDesk.getConfiguration().title.isNullOrEmpty() -> PyrusServiceDesk.getConfiguration().title!!
+                !StaticRepository.getConfiguration().title.isNullOrEmpty() -> StaticRepository.getConfiguration().title!!
                 else -> context.resources.getString(R.string.psd_organization_support)
             }
         }
 
         /**
-         * Provides chat welcome message taking [PyrusServiceDesk.CONFIGURATION] into account
+         * Provides chat welcome message taking [StaticRepository.CONFIGURATION] into account
          */
-        fun getWelcomeMessage(): String? = PyrusServiceDesk.getConfiguration().welcomeMessage
+        fun getWelcomeMessage(): String? = StaticRepository.getConfiguration().welcomeMessage
 
-        fun getTrustedUrls() = PyrusServiceDesk.getConfiguration().trustedUrls
+        fun getTrustedUrls() = StaticRepository.getConfiguration().trustedUrls
 
         /**
-         * Provides avatar placeholder taking [PyrusServiceDesk.CONFIGURATION] into account
+         * Provides avatar placeholder taking [StaticRepository.CONFIGURATION] into account
          */
         fun getSupportAvatar(context: Context): Drawable {
             return when {
-                PyrusServiceDesk.getConfiguration().supportAvatar != null ->
+                StaticRepository.getConfiguration().supportAvatar != null ->
                     try {
-                        AppCompatResources.getDrawable(context, PyrusServiceDesk.getConfiguration().supportAvatar!!)!!.circle(context)
+                        AppCompatResources.getDrawable(context, StaticRepository.getConfiguration().supportAvatar!!)!!.circle(context)
                     }
                     catch (ex: Exception) {
                         makeSupportAvatar(
@@ -280,12 +281,12 @@ internal class ConfigUtils{
         }
 
         /**
-         * Provides user name taking [PyrusServiceDesk.CONFIGURATION] into account
+         * Provides user name taking [StaticRepository.CONFIGURATION] into account
          */
         fun getUserName(): String {
             return when {
-                !PyrusServiceDesk.getConfiguration().userName.isNullOrBlank() ->
-                    PyrusServiceDesk.getConfiguration().userName!!
+                !StaticRepository.getConfiguration().userName.isNullOrBlank() ->
+                    StaticRepository.getConfiguration().userName!!
                 else -> PyrusServiceDesk.get().application.getString(R.string.psd_guest)
             }
         }
@@ -313,7 +314,7 @@ internal class ConfigUtils{
          * @return Menu delegate interface.
          */
         internal fun getMainMenuDelegate(): MainMenuDelegate? {
-            return PyrusServiceDesk.getConfiguration().mainMenuDelegate
+            return StaticRepository.getConfiguration().mainMenuDelegate
         }
 
         private fun makeSupportAvatar(context: Context, drawable: Drawable): Drawable {

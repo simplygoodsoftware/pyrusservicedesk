@@ -4,7 +4,10 @@ import android.app.Application
 import android.content.Context
 import android.content.SharedPreferences
 import android.net.Uri
+import android.os.Build
 import com.google.gson.GsonBuilder
+import com.pyrus.pyrusservicedesk.BuildConfig
+import com.pyrus.pyrusservicedesk._ref.ui_domain.screens.ticket.TicketFeature
 import com.pyrus.pyrusservicedesk.sdk.FileResolver
 import com.pyrus.pyrusservicedesk.sdk.FileResolverImpl
 import com.pyrus.pyrusservicedesk.sdk.data.FileManager
@@ -12,26 +15,53 @@ import com.pyrus.pyrusservicedesk.sdk.data.gson.RemoteGsonExclusionStrategy
 import com.pyrus.pyrusservicedesk.sdk.data.gson.UriGsonAdapter
 import com.pyrus.pyrusservicedesk.sdk.repositories.LocalStore
 import com.pyrus.pyrusservicedesk.sdk.repositories.Repository
+import com.pyrus.pyrusservicedesk.sdk.updates.LiveUpdates
+import com.pyrus.pyrusservicedesk.sdk.updates.PreferencesManager
 import com.pyrus.pyrusservicedesk.sdk.verify.LocalDataVerifier
 import com.pyrus.pyrusservicedesk.sdk.verify.LocalDataVerifierImpl
 import com.pyrus.pyrusservicedesk.sdk.web.retrofit.RemoteStore
 import com.pyrus.pyrusservicedesk.sdk.web.retrofit.ServiceDeskApi
+import com.pyrus.pyrusservicedesk.utils.ConfigUtils
 import com.pyrus.pyrusservicedesk.utils.ISO_DATE_PATTERN
 import com.pyrus.pyrusservicedesk.utils.PREFERENCE_KEY
+import com.pyrus.pyrusservicedesk.utils.RequestUtils.Companion.getBaseUrl
+import com.squareup.picasso.OkHttp3Downloader
+import com.squareup.picasso.Picasso
 import kotlinx.coroutines.CoroutineScope
+import okhttp3.OkHttpClient
 import retrofit2.Retrofit
+import retrofit2.converter.gson.GsonConverterFactory
+import java.util.concurrent.TimeUnit
 
 internal class ServiceDeskCore(
     internal val depsInjection: DepsInjection,
 )
 
+internal sealed interface Account {
+
+    val instanceId: String
+    val appId: String
+    val domain: String
+
+    data class V1(
+        override val instanceId: String,
+        override val appId: String,
+        override val domain: String,
+    ) : Account
+
+    data class V2(
+        override val instanceId: String,
+        override val appId: String,
+        override val domain: String,
+        val userId: String,
+        val securityKey: String,
+    ): Account
+
+}
+
 internal class DepsInjection(
-    internal val application: Application,
-    private val appId: String,
-    private val userId: String?,
-    private val securityKey: String?,
-    private val domain: String?,
-    private val apiVersion: Int,
+    private val application: Application,
+    private val account: Account,
     private val loggingEnabled: Boolean,
     private val authToken: String?,
     private val coreScope: CoroutineScope,
@@ -56,15 +86,40 @@ internal class DepsInjection(
 
     private val localStore: LocalStore = LocalStore(preferences, localDataVerifier, offlineGson)
 
-    private val retrofit: Retrofit = TODO()
+    private val okHttpClient = OkHttpClient.Builder()
+        .connectTimeout(30, TimeUnit.SECONDS)
+        .readTimeout(30, TimeUnit.SECONDS)
+        .writeTimeout(30, TimeUnit.SECONDS)
+        .addInterceptor { chain ->
+            val original = chain.request()
+            val requestBuilder = original.newBuilder()
+            authToken?.let { authToken ->
+                requestBuilder.header("Authorization", authToken)
+            }
+
+            val userAgent = "ServicedeskClient/android/" +
+                Build.MANUFACTURER + "/" +
+                Build.MODEL + "/" +
+                Build.VERSION.SDK_INT + "/" +
+                BuildConfig.VERSION_NAME
+
+            requestBuilder.header("User-Agent", userAgent)
+            chain.proceed(requestBuilder.build())
+        }.build()
+
+    private val retrofit: Retrofit = Retrofit.Builder()
+        .baseUrl(getBaseUrl(account.domain))
+        .addConverterFactory(GsonConverterFactory.create(remoteGson))
+        .client(okHttpClient)
+        .build()
 
     private val api: ServiceDeskApi = retrofit.create(ServiceDeskApi::class.java)
 
     private val fileManager: FileManager = FileManager(application, fileResolver)
 
     private val remoteStore: RemoteStore = RemoteStore(
-        appId = appId,
-        instanceId = null,
+        appId = account.appId,
+        instanceId = ConfigUtils.getInstanceId(preferences),
         fileResolver = fileResolver,
         fileManager = fileManager,
         api = api,
@@ -72,6 +127,22 @@ internal class DepsInjection(
 
     private val repository: Repository = Repository(localStore, remoteStore)
 
+    private val preferencesManager = PreferencesManager(preferences)
 
+    fun ticketFeature(): TicketFeature {
+        TODO()
+    }
+
+    val liveUpdates = LiveUpdates(
+        requests = null,
+        preferencesManager = preferencesManager,
+        userId = account.instanceId
+    )
+
+    val picasso = Picasso.Builder(application)
+        .downloader(OkHttp3Downloader(okHttpClient))
+        .build()
+
+    val setPushTokenUseCase = SetPushTokenUseCase(account, coreScope)
 
 }

@@ -3,6 +3,7 @@ package com.pyrus.pyrusservicedesk.log
 import android.app.Application
 import androidx.core.util.Consumer
 import com.pyrus.pyrusservicedesk.PyrusServiceDesk
+import com.pyrus.pyrusservicedesk.core.StaticRepository
 import java.io.File
 
 internal object PLog {
@@ -11,22 +12,22 @@ internal object PLog {
     internal var initialized = false
 
     fun i(TAG: String?, msg: String?, vararg params: Any?) {
-        if (PyrusServiceDesk.logging)
+        if (StaticRepository.logging)
             _L.i(TAG, msg, *params)
     }
 
     fun d(TAG: String?, msg: String?, vararg params: Any?) {
-        if (PyrusServiceDesk.logging)
+        if (StaticRepository.logging)
             _L.d(TAG, msg, *params)
     }
 
     fun w(TAG: String?, msg: String?, vararg params: Any?) {
-        if (PyrusServiceDesk.logging)
+        if (StaticRepository.logging)
             _L.w(TAG, msg, *params)
     }
 
     fun e(TAG: String?, msg: String?, vararg params: Any?) {
-        if (PyrusServiceDesk.logging)
+        if (StaticRepository.logging)
             _L.e(TAG, msg, *params)
     }
 

@@ -3,6 +3,7 @@ package com.pyrus.pyrusservicedesk.sdk.web.retrofit
 import androidx.annotation.Keep
 import com.pyrus.pyrusservicedesk.PyrusServiceDesk
 import com.pyrus.pyrusservicedesk.PyrusServiceDesk.Companion.API_VERSION_2
+import com.pyrus.pyrusservicedesk.core.StaticRepository
 import com.pyrus.pyrusservicedesk.log.PLog
 import com.pyrus.pyrusservicedesk.sdk.FileResolver
 import com.pyrus.pyrusservicedesk.sdk.data.Attachment
@@ -181,7 +182,8 @@ internal class RemoteStore(
                 cament.body,
                 cament.attachments,
                 ConfigUtils.getUserName(),
-                cament.rating
+                cament.rating,
+                StaticRepository.EXTRA_FIELDS
             )
         )
         PLog.d(TAG, "addComment, isSuccessful: ${addFeedCommentTry.isSuccess()}}")

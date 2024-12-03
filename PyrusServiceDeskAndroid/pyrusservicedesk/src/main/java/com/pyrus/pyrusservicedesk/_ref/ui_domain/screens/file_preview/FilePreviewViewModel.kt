@@ -9,7 +9,6 @@ import android.content.Context
 import android.content.Intent
 import android.media.MediaScannerConnection
 import android.net.Uri
-import com.pyrus.pyrusservicedesk.ServiceDeskProvider
 import com.pyrus.pyrusservicedesk._ref.ui_domain.screens.file_preview.FilePreviewActivity.Companion.KEY_FILE_DATA
 import com.pyrus.pyrusservicedesk.presentation.viewmodel.ConnectionViewModelBase
 import com.pyrus.pyrusservicedesk.sdk.data.intermediate.FileData
@@ -22,9 +21,9 @@ import kotlinx.coroutines.launch
  * ViewModel for the file previews.
  */
 internal class FilePreviewViewModel(
-    serviceDeskProvider: ServiceDeskProvider,
+    application: Application,
     private val intent: Intent,
-) : ConnectionViewModelBase(serviceDeskProvider) {
+) : ConnectionViewModelBase(application) {
 
     private val fileLiveData = MutableLiveData<FileViewModel>()
 

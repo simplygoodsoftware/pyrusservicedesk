@@ -3,6 +3,7 @@ package com.pyrus.pyrusservicedesk.utils
 import androidx.annotation.Keep
 import com.pyrus.pyrusservicedesk.PyrusServiceDesk
 import com.pyrus.pyrusservicedesk.PyrusServiceDesk.Companion.API_VERSION_2
+import com.pyrus.pyrusservicedesk.core.Account
 import java.net.URLEncoder
 
 @Keep
@@ -37,33 +38,32 @@ class RequestUtils{
         /**
          * Provides url for getting the file.
          */
-        internal fun getFileUrl(fileId: Int, domain: String?): String {
-            return "${getBaseUrl(domain)}DownloadFile/$fileId" + getPathParams()
+        internal fun getFileUrl(fileId: Int, domain: String?, account: Account): String {
+            return "${getBaseUrl(domain)}DownloadFile/$fileId" + getPathParams(account)
         }
 
-        internal fun getPreviewUrl(fileId: Int, domain: String?): String {
-            return "${getBaseUrl(domain)}DownloadFilePreview/$fileId" + getPathParams()
+        internal fun getPreviewUrl(fileId: Int, account: Account): String {
+            return "${getBaseUrl(account.domain)}DownloadFilePreview/$fileId" + getPathParams(account)
         }
 
-        private fun getPathParams(): String {
-            val version = PyrusServiceDesk.get().apiVersion
-            return with(PyrusServiceDesk.get()) {
-                if (version == API_VERSION_2)
-                    "?user_id=" +
-                            URLEncoder.encode(userId, "UTF-8") +
-                            "&security_key=" +
-                            URLEncoder.encode(PyrusServiceDesk.get().securityKey, "UTF-8") +
-                            "&instance_id=" +
-                            URLEncoder.encode(instanceId, "UTF-8") +
-                            "&version=" +
-                            URLEncoder.encode(version.toString(), "UTF-8") +
-                            "&app_id=" +
-                            URLEncoder.encode(appId, "UTF-8")
-                else
-                    "?user_id=" +
-                            URLEncoder.encode(instanceId, "UTF-8") +
-                            "&app_id=" +
-                            URLEncoder.encode(appId, "UTF-8")
+        private fun getPathParams(account: Account): String = when(account) {
+            is Account.V1 -> {
+                "?user_id=" +
+                    URLEncoder.encode(account.instanceId, "UTF-8") +
+                    "&app_id=" +
+                    URLEncoder.encode(account.appId, "UTF-8")
+            }
+            is Account.V2 -> {
+                "?user_id=" +
+                    URLEncoder.encode(account.userId, "UTF-8") +
+                    "&security_key=" +
+                    URLEncoder.encode(account.securityKey, "UTF-8") +
+                    "&instance_id=" +
+                    URLEncoder.encode(account.instanceId, "UTF-8") +
+                    "&version=" +
+                    URLEncoder.encode("2", "UTF-8") +
+                    "&app_id=" +
+                    URLEncoder.encode(account.appId, "UTF-8")
             }
         }
     }

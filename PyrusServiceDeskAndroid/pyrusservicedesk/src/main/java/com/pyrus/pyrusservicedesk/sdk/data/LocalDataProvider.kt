@@ -4,7 +4,6 @@ import android.net.Uri
 import androidx.annotation.MainThread
 import com.pyrus.pyrusservicedesk.sdk.FileResolver
 import com.pyrus.pyrusservicedesk.sdk.data.intermediate.FileData
-import com.pyrus.pyrusservicedesk.sdk.repositories.offline.OfflineRepository
 import com.pyrus.pyrusservicedesk.utils.ConfigUtils
 import kotlinx.coroutines.runBlocking
 import java.util.*

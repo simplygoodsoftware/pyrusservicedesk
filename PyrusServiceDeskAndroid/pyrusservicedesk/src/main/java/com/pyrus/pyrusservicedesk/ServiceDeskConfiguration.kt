@@ -5,6 +5,7 @@ import androidx.annotation.ColorInt
 import androidx.annotation.ColorRes
 import androidx.annotation.DrawableRes
 import com.pyrus.pyrusservicedesk.ServiceDeskConfiguration.Builder
+import com.pyrus.pyrusservicedesk.core.StaticRepository
 import com.pyrus.pyrusservicedesk.utils.isTablet
 
 /**
@@ -65,7 +66,7 @@ class ServiceDeskConfiguration internal constructor() {
         private const val KEY_TRUSTED_URLS = "ServiceDeskConfiguration_KEY_TRUSTED_URLS"
 
         fun save(bundle: Bundle) {
-            with(PyrusServiceDesk.getConfiguration()) {
+            with(StaticRepository.getConfiguration()) {
                 bundle.apply {
                     putString(KEY_USER_NAME, userName)
                     putString(KEY_TITLE, title)
@@ -98,7 +99,7 @@ class ServiceDeskConfiguration internal constructor() {
         fun restore(bundle: Bundle) {
             if (!bundle.containsKey(KEY_USER_NAME))
                 return
-            PyrusServiceDesk.setConfiguration(
+            StaticRepository.setConfiguration(
                 ServiceDeskConfiguration().apply {
                     userName = bundle.getString(KEY_USER_NAME)
                     title = bundle.getString(KEY_TITLE)

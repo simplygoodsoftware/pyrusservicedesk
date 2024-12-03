@@ -2,37 +2,17 @@ package com.pyrus.pyrusservicedesk
 
 import android.app.Activity
 import android.app.Application
-import android.content.Context
-import android.net.Uri
-import android.os.Build
 import androidx.annotation.MainThread
-import com.google.gson.GsonBuilder
+import com.pyrus.pyrusservicedesk.core.DepsInjection
+import com.pyrus.pyrusservicedesk.core.StaticRepository
 import com.pyrus.pyrusservicedesk.log.PLog
 import com.pyrus.pyrusservicedesk.presentation.ui.navigation_page.ticket.TicketActivity
 import com.pyrus.pyrusservicedesk.presentation.viewmodel.SharedViewModel
-import com.pyrus.pyrusservicedesk.sdk.FileResolver
-import com.pyrus.pyrusservicedesk.sdk.FileResolverImpl
-import com.pyrus.pyrusservicedesk.sdk.data.FileManager
-import com.pyrus.pyrusservicedesk.sdk.data.LocalDataProvider
-import com.pyrus.pyrusservicedesk.sdk.data.gson.RemoteGsonExclusionStrategy
-import com.pyrus.pyrusservicedesk.sdk.data.gson.UriGsonAdapter
-import com.pyrus.pyrusservicedesk.sdk.repositories.DraftRepository
-import com.pyrus.pyrusservicedesk.sdk.response.ResponseCallback
-import com.pyrus.pyrusservicedesk.sdk.response.ResponseError
-import com.pyrus.pyrusservicedesk.sdk.updates.LiveUpdates
 import com.pyrus.pyrusservicedesk.sdk.updates.NewReplySubscriber
 import com.pyrus.pyrusservicedesk.sdk.updates.OnStopCallback
-import com.pyrus.pyrusservicedesk.sdk.updates.PreferencesManager
-import com.pyrus.pyrusservicedesk.sdk.updates.PreferencesManager.Companion.S_NO_ID
-import com.pyrus.pyrusservicedesk.sdk.verify.LocalDataVerifier
-import com.pyrus.pyrusservicedesk.sdk.verify.LocalDataVerifierImpl
-import com.pyrus.pyrusservicedesk.utils.*
-import com.squareup.picasso.OkHttp3Downloader
-import com.squareup.picasso.Picasso
-import kotlinx.coroutines.*
-import okhttp3.OkHttpClient
-import java.lang.Runnable
-import java.util.concurrent.TimeUnit
+import com.pyrus.pyrusservicedesk.utils.MILLISECONDS_IN_MINUTE
+import com.pyrus.pyrusservicedesk.utils.RequestUtils
+import com.pyrus.pyrusservicedesk.utils.getFirstNSymbols
 
 
 class PyrusServiceDesk private constructor(
@@ -50,26 +30,18 @@ class PyrusServiceDesk private constructor(
 
         private val TAG = PyrusServiceDesk::class.java.simpleName
 
-        internal var FILE_CHOOSER: FileChooser? = null
-        internal var EXTRA_FIELDS: Map<String, String>? = null
         internal var onAuthorizationFailed: Runnable? = Runnable {
             stop()
         }
         private var INSTANCE: PyrusServiceDesk? = null
-        private var CONFIGURATION: ServiceDeskConfiguration? = null
         private var lastRefreshes = ArrayList<Long>()
 
-        private const val SET_PUSH_TOKEN_TIMEOUT = 5 // Minutes
-        private const val SET_PUSH_TOKEN_TIMES_WITHIN_TIMEOUT = 5 // in minute
         private const val REFRESH_MAX_COUNT = 20 // in minute
 
         internal const val API_VERSION_1: Int = 0
         internal const val API_VERSION_2: Int = 2
 
         private const val DEFAULT_TOKEN_TYPE: String = "android"
-
-        internal var logging = false
-            private set
 
         /**
          * Initializes PyrusServiceDesk embeddable module.
@@ -155,40 +127,43 @@ class PyrusServiceDesk private constructor(
             authorizationToken: String?,
         ) {
             PLog.d(TAG, "initInternal, appId: ${appId.getFirstNSymbols(10)}, userId: ${userId?.getFirstNSymbols(10)}, apiVersion: $apiVersion")
-            if (INSTANCE != null && get().userId != userId) {
-                INSTANCE?.liveUpdates?.reset(userId)
-            }
+
+            // TODO sds
+//            if (INSTANCE != null && get().userId != userId) {
+//                INSTANCE?.liveUpdates?.reset(userId)
+//            }
 
             val validDomain = if (validateDomain(domain)) domain else null
 
-            if (CONFIGURATION != null || INSTANCE != null && get().userId != userId) {
-                clearLocalData {
-                    if (CONFIGURATION != null)
-                        stop()
-                    INSTANCE = PyrusServiceDesk(
-                        application,
-                        appId,
-                        userId,
-                        securityKey,
-                        validDomain,
-                        apiVersion,
-                        loggingEnabled,
-                        authorizationToken,
-                    )
-                }
-            }
-            else {
-                INSTANCE = PyrusServiceDesk(
-                    application,
-                    appId,
-                    userId,
-                    securityKey,
-                    validDomain,
-                    apiVersion,
-                    loggingEnabled,
-                    authorizationToken,
-                )
-            }
+            // TODO sds
+//            if (INSTANCE != null && get().userId != userId) {
+//                clearLocalData {
+//                    if (CONFIGURATION != null)
+//                        stop()
+//                    INSTANCE = PyrusServiceDesk(
+//                        application,
+//                        appId,
+//                        userId,
+//                        securityKey,
+//                        validDomain,
+//                        apiVersion,
+//                        loggingEnabled,
+//                        authorizationToken,
+//                    )
+//                }
+//            }
+//            else {
+//                INSTANCE = PyrusServiceDesk(
+//                    application,
+//                    appId,
+//                    userId,
+//                    securityKey,
+//                    validDomain,
+//                    apiVersion,
+//                    loggingEnabled,
+//                    authorizationToken,
+//                )
+//            }
         }
 
         private fun validateDomain(domain: String?): Boolean {
@@ -225,7 +200,7 @@ class PyrusServiceDesk private constructor(
         @MainThread
         fun subscribeToReplies(subscriber: NewReplySubscriber) {
             PLog.d(TAG, "subscribeToReplies")
-            get().liveUpdates.subscribeOnReply(subscriber)
+            injector().liveUpdates.subscribeOnReply(subscriber)
         }
 
         /**
@@ -235,7 +210,7 @@ class PyrusServiceDesk private constructor(
         @MainThread
         fun unsubscribeFromReplies(subscriber: NewReplySubscriber) {
             PLog.d(TAG, "unsubscribeFromReplies")
-            get().liveUpdates.unsubscribeFromReplies(subscriber)
+            injector().liveUpdates.unsubscribeFromReplies(subscriber)
         }
 
         /**
@@ -249,7 +224,7 @@ class PyrusServiceDesk private constructor(
         @JvmStatic
         fun registerFileChooser(fileChooser: FileChooser?) {
             PLog.d(TAG, "registerFileChooser, fileChooser == null ${fileChooser == null}")
-            FILE_CHOOSER = fileChooser
+            StaticRepository.FILE_CHOOSER = fileChooser
         }
 
         /**
@@ -281,32 +256,7 @@ class PyrusServiceDesk private constructor(
             tokenType: String = DEFAULT_TOKEN_TYPE
         ) {
             PLog.d(TAG, "setPushToken, token: $token")
-            val serviceDesk = get()
-
-           val userId = serviceDesk.userId
-
-            when {
-                calculateSkipTokenRegister(userId) -> callback.onResult(Exception("Too many requests. Maximum once every $SET_PUSH_TOKEN_TIMEOUT minutes."))
-                serviceDesk.appId.isBlank() -> callback.onResult(Exception("AppId is not assigned"))
-                serviceDesk.instanceId.isBlank() -> callback.onResult(Exception("UserId is not assigned"))
-                else -> {
-                    updateTokenTime(userId, System.currentTimeMillis())
-                    GlobalScope.launch {
-                        serviceDesk
-                            .requestFactory
-                            .getSetPushTokenRequest(token, tokenType)
-                            .execute(object : ResponseCallback<Unit> {
-                                override fun onSuccess(data: Unit) {
-                                    callback.onResult(null)
-                                }
-
-                                override fun onFailure(responseError: ResponseError) {
-                                    callback.onResult(responseError)
-                                }
-                            })
-                    }
-                }
-            }
+            injector().setPushTokenUseCase.invoke(token, callback, tokenType)
         }
 
         /**
@@ -343,7 +293,7 @@ class PyrusServiceDesk private constructor(
          */
         @JvmStatic
         fun setFieldsData(extraFields: Map<String, String>?) {
-            EXTRA_FIELDS = extraFields
+            StaticRepository.EXTRA_FIELDS = extraFields
         }
 
         /**
@@ -352,7 +302,7 @@ class PyrusServiceDesk private constructor(
          * @param lastActiveTime Time of last user activity in unit millisecond
          */
         internal fun startTicketsUpdatesIfNeeded(lastActiveTime: Long) {
-            get().liveUpdates.updateGetTicketsIntervalIfNeeded(lastActiveTime)
+            injector().liveUpdates.updateGetTicketsIntervalIfNeeded(lastActiveTime)
         }
 
         internal fun onServiceDeskStop() {
@@ -364,182 +314,62 @@ class PyrusServiceDesk private constructor(
             return checkNotNull(INSTANCE) { "Instantiate PyrusServiceDesk first" }
         }
 
-        internal fun getConfiguration(): ServiceDeskConfiguration {
-            if (CONFIGURATION == null)
-                CONFIGURATION = ServiceDeskConfiguration()
-            return CONFIGURATION!!
-        }
-
-        internal fun setConfiguration(config: ServiceDeskConfiguration) {
-            CONFIGURATION = config
-        }
-
-        /**
-         * @return Service desk shared preferences.
-         */
-        internal fun getPreferencesManager(): PreferencesManager {
-            return get().preferencesManager
-        }
+        internal fun injector(): DepsInjection = TODO()
 
         private fun startImpl(
             activity: Activity,
             configuration: ServiceDeskConfiguration? = null,
             onStopCallback: OnStopCallback? = null
         ) {
-            CONFIGURATION = configuration
+            if (configuration != null) {
+                StaticRepository.setConfiguration(configuration)
+            }
             get().sharedViewModel.clearQuitServiceDesk()
             get().onStopCallback = onStopCallback
 
             activity.startActivity(TicketActivity.getLaunchIntent())
 
+            // TODO sds
             if (configuration == null)
                 return
-            val currentUserId = get().preferences.getString(PREFERENCE_KEY_USER_ID_V2, null)
-            if (currentUserId != get().userId)
-                refresh()
-            get().preferences.edit().putString(PREFERENCE_KEY_USER_ID_V2, get().userId).apply()
+
+            // TODO sds добавить логику обновления аккаунта в sp
+//            val currentUserId = get().preferences.getString(PREFERENCE_KEY_USER_ID_V2, null)
+//            if (currentUserId != get().userId)
+//                refresh()
+//            get().preferences.edit().putString(PREFERENCE_KEY_USER_ID_V2, get().userId).apply()
         }
 
         private fun clearLocalData(doOnCleared : () -> Unit) {
-            GlobalScope.launch {
-                if (get().serviceDeskProvider.getRequestFactory().getRemoveAllPendingCommentsRequest().execute().hasError().not()) {
-
-                    get().fileManager.clearTempDir()
-
-                    withContext(Dispatchers.Main) {
-                        get().draftRepository.saveDraft("")
-                        refresh()
-                        doOnCleared.invoke()
-                    }
-                }
-            }
+            // TODO sds
+//            GlobalScope.launch {
+//                if (get().serviceDeskProvider.getRequestFactory().getRemoveAllPendingCommentsRequest().execute().hasError().not()) {
+//
+//                    get().fileManager.clearTempDir()
+//
+//                    withContext(Dispatchers.Main) {
+//                        get().draftRepository.saveDraft("")
+//                        refresh()
+//                        doOnCleared.invoke()
+//                    }
+//                }
+//            }
         }
 
-        private fun updateTokenTime(userId: String?, time: Long) {
-            val pm = getPreferencesManager()
-            val timeMap = HashMap(pm.getLastTokenRegisterMap())
-            val timeList = ArrayList<Long>(pm.getTokenRegisterTimeList())
 
-            timeMap[userId?: S_NO_ID] = time
-
-            while (timeList.size >= SET_PUSH_TOKEN_TIMES_WITHIN_TIMEOUT) {
-                timeList.removeAt(0)
-            }
-            timeList.add(time)
-
-            pm.setLastTokenRegisterMap(timeMap)
-            pm.setTokenRegisterTimeList(timeList)
-        }
-
-        private fun calculateSkipTokenRegister(userId: String?): Boolean {
-            val currentTime = System.currentTimeMillis()
-
-            val lastUserTime = getPreferencesManager().getLastTokenRegisterMap()[userId?: S_NO_ID]
-            if (lastUserTime != null) {
-                return currentTime - lastUserTime < SET_PUSH_TOKEN_TIMEOUT * MILLISECONDS_IN_MINUTE
-            }
-
-            val tokenTimeList = getPreferencesManager().getTokenRegisterTimeList()
-
-            val nWithinFiveMin: Int = tokenTimeList.count { time ->
-                currentTime - time < SET_PUSH_TOKEN_TIMEOUT * MILLISECONDS_IN_MINUTE
-            }
-            return nWithinFiveMin >= SET_PUSH_TOKEN_TIMES_WITHIN_TIMEOUT
-        }
     }
-
-    internal val serviceDeskProvider: ServiceDeskProvider by lazy {
-        object : ServiceDeskProvider {
-            override fun getApplication(): Application = application
-            override fun getDraftRepository()= draftRepository
-            override fun getLiveUpdates(): LiveUpdates = liveUpdates
-            override fun getLocalDataProvider(): LocalDataProvider = localDataProvider
-            override fun getFileManager(): FileManager = fileManager
-            override fun getLocalDataVerifier(): LocalDataVerifier = localDataVerifier
-        }
-    }
-
-    internal var instanceId: String
-    internal val picasso: Picasso
-
-    private val draftRepository: DraftRepository
-    private val liveUpdates: LiveUpdates
-
-    private val localDataProvider: LocalDataProvider by lazy {
-        LocalDataProvider(
-            offlineRepository,
-            fileResolver
-        )
-    }
-    private val fileManager: FileManager by lazy {
-        FileManager(application, fileResolver)
-    }
-    private val localDataVerifier: LocalDataVerifier
 
     private var sharedViewModel = SharedViewModel()
-
-    private val fileResolver: FileResolver = FileResolverImpl(application.contentResolver)
-    private val preferences = application.getSharedPreferences(PREFERENCE_KEY, Context.MODE_PRIVATE)
-    private val preferencesManager = PreferencesManager(preferences)
 
     private var onStopCallback: OnStopCallback? = null
 
     init {
-        migratePreferences(application, preferences)
-        logging = loggingEnabled
-        if (logging)
-            PLog.instantiate(application)
+        // // TODO sds изменить место инициализации логов, добавить отдельную логику для включения и выключения логов
+//        migratePreferences(application, preferences)
 
-        instanceId = ConfigUtils.getInstanceId(preferences)
+        // TODO sds
+        if (loggingEnabled) PLog.instantiate(application)
 
-        localDataVerifier = LocalDataVerifierImpl(fileResolver)
-
-        val offlineGson =
-            GsonBuilder()
-                .setDateFormat(ISO_DATE_PATTERN)
-                .registerTypeAdapter(Uri::class.java, UriGsonAdapter())
-                .create()
-        offlineRepository = PreferenceOfflineRepository(preferences, localDataVerifier, offlineGson)
-
-        val remoteGson =
-            GsonBuilder()
-                .setDateFormat(ISO_DATE_PATTERN)
-                .addSerializationExclusionStrategy(RemoteGsonExclusionStrategy())
-                .create()
-
-        val okHttpClient = OkHttpClient.Builder()
-            .connectTimeout(30, TimeUnit.SECONDS)
-            .readTimeout(30, TimeUnit.SECONDS)
-            .writeTimeout(30, TimeUnit.SECONDS)
-            .addInterceptor { chain ->
-                val original = chain.request()
-                val requestBuilder = original.newBuilder()
-                authToken?.let { authToken ->
-                    requestBuilder.header("Authorization", authToken)
-                }
-
-                val userAgent = "ServicedeskClient/android/" +
-                    Build.MANUFACTURER + "/" +
-                    Build.MODEL + "/" +
-                    Build.VERSION.SDK_INT + "/" +
-                    BuildConfig.VERSION_NAME
-
-                requestBuilder.header("User-Agent", userAgent)
-                chain.proceed(requestBuilder.build())
-            }.build()
-
-        picasso = Picasso.Builder(application)
-            .downloader(OkHttp3Downloader(okHttpClient))
-            .build()
-
-        val centralRepository = CentralRepository(
-            RetrofitWebRepository(appId, instanceId, fileResolver, fileManager, okHttpClient, domain, remoteGson),
-            offlineRepository
-        )
-
-        requestFactory = RequestFactory(centralRepository)
-        draftRepository = PreferenceDraftRepository(preferences)
-        liveUpdates = LiveUpdates(requestFactory, preferencesManager, userId)
     }
 
     internal fun getSharedViewModel() = sharedViewModel

@@ -41,8 +41,11 @@ private class FeatureReducer: L<State, Message, Effect>  {
         Outer.OnShowAttachVariantsClick -> TODO("open attach variants dialog screen")
     }
 
-    private fun handleInner(message: Inner): Update<State, Effect> = when(message) {
+    private fun handleInner(message: Inner): Update<State, Effect> {
         TODO()
+//        when (message) {
+//
+//        }
     }
 
 }

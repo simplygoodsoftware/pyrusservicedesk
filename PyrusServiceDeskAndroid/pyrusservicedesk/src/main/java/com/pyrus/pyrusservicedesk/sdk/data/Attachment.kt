@@ -3,6 +3,7 @@ package com.pyrus.pyrusservicedesk.sdk.data
 import android.net.Uri
 import com.google.gson.annotations.SerializedName
 import com.pyrus.pyrusservicedesk.PyrusServiceDesk
+import com.pyrus.pyrusservicedesk.core.Account
 import com.pyrus.pyrusservicedesk.sdk.data.gson.Local
 import com.pyrus.pyrusservicedesk.utils.RequestUtils
 
@@ -25,8 +26,8 @@ internal data class Attachment(
 
     fun isLocal() = id == FILE_ID_EMPTY
 
-    fun getPreviewUrl(): Uri {
-        val serverUrl = Uri.parse(RequestUtils.getPreviewUrl(id, PyrusServiceDesk.get().domain))
+    fun getPreviewUrl(account: Account): Uri {
+        val serverUrl = Uri.parse(RequestUtils.getPreviewUrl(id, account))
         val previewUri = if (isLocal()) localUri else serverUrl
         return previewUri ?: serverUrl
     }
