@@ -11,7 +11,7 @@ import android.net.Uri
  */
 internal class AttachFileSharedViewModel: ViewModel() {
 
-    private val filePickedData = MutableLiveData<Uri>()
+    private val filePickedData = MutableLiveData<Uri?>()
 
     /**
      * Callback to be invoked when user picked a file in UI that is responsible for file picking.
@@ -31,5 +31,5 @@ internal class AttachFileSharedViewModel: ViewModel() {
      * Result can contain null value that is used for cancelling the current data that is stored in
      * the live data. This provides one-shot behaviour.
      */
-    fun getFilePickedLiveData(): LiveData<Uri> = filePickedData
+    fun getFilePickedLiveData(): LiveData<Uri?> = filePickedData
 }

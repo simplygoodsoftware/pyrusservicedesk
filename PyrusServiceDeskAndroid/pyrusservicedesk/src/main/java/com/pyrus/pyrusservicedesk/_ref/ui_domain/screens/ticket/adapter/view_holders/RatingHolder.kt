@@ -3,7 +3,7 @@ package com.pyrus.pyrusservicedesk._ref.ui_domain.screens.ticket.adapter.view_ho
 import android.view.ViewGroup
 import com.pyrus.pyrusservicedesk.R
 import com.pyrus.pyrusservicedesk.databinding.PsdViewHolderRatingBinding
-import com.pyrus.pyrusservicedesk.presentation.ui.navigation_page.ticket.entries.RatingEntry
+import com.pyrus.pyrusservicedesk._ref.ui_domain.screens.ticket.adapter.entries.RatingEntry
 import com.pyrus.pyrusservicedesk.presentation.ui.view.recyclerview.ViewHolderBase
 import com.pyrus.pyrusservicedesk.utils.ConfigUtils
 

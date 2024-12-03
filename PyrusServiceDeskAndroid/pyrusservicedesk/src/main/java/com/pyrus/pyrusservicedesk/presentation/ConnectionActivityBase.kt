@@ -11,8 +11,6 @@ import com.pyrus.pyrusservicedesk.presentation.viewmodel.ConnectionViewModelBase
 import com.pyrus.pyrusservicedesk.utils.ConfigUtils
 import com.pyrus.pyrusservicedesk.utils.getColorByAttrId
 import com.pyrus.pyrusservicedesk.utils.getViewModel
-import kotlinx.android.synthetic.main.psd_activity_ticket.*
-import kotlinx.android.synthetic.main.psd_no_connection.*
 
 private const val ANIMATION_DURATION = 200L
 
@@ -45,8 +43,8 @@ internal abstract class ConnectionActivityBase<T: ConnectionViewModelBase>(viewM
         progressBar?.progressDrawable?.setColorFilter(
                 getColorByAttrId(this, R.attr.colorAccentSecondary),
                 PorterDuff.Mode.SRC_IN)
-        reconnectButton.setOnClickListener { reconnect() }
-        reconnectButton.setTextColor(ConfigUtils.getAccentColor(this))
+//        reconnectButton.setOnClickListener { reconnect() }
+//        reconnectButton.setTextColor(ConfigUtils.getAccentColor(this))
         refresher = findViewById(refresherViewId)
         refresher?.setOnRefreshListener { viewModel.loadData() }
     }
@@ -57,7 +55,7 @@ internal abstract class ConnectionActivityBase<T: ConnectionViewModelBase>(viewM
             this,
             { isConnected ->
                 isConnected?.let {
-                    no_connection.visibility = if (it) GONE else VISIBLE
+//                    no_connection.visibility = if (it) GONE else VISIBLE
                 }
             }
         )

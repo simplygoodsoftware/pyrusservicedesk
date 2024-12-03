@@ -1,10 +1,10 @@
 package com.pyrus.pyrusservicedesk.presentation.ui.navigation_page.ticket
 
 import androidx.recyclerview.widget.DiffUtil
-import com.pyrus.pyrusservicedesk.presentation.ui.navigation_page.ticket.entries.CommentEntry
-import com.pyrus.pyrusservicedesk.presentation.ui.navigation_page.ticket.entries.DateEntry
-import com.pyrus.pyrusservicedesk.presentation.ui.navigation_page.ticket.entries.TicketEntry
-import com.pyrus.pyrusservicedesk.presentation.ui.navigation_page.ticket.entries.WelcomeMessageEntry
+import com.pyrus.pyrusservicedesk._ref.ui_domain.screens.ticket.adapter.entries.CommentEntry
+import com.pyrus.pyrusservicedesk._ref.ui_domain.screens.ticket.adapter.entries.DateEntry
+import com.pyrus.pyrusservicedesk._ref.ui_domain.screens.ticket.adapter.entries.TicketEntry
+import com.pyrus.pyrusservicedesk._ref.ui_domain.screens.ticket.adapter.entries.WelcomeMessageEntry
 import com.pyrus.pyrusservicedesk.sdk.data.Comment
 
 /**

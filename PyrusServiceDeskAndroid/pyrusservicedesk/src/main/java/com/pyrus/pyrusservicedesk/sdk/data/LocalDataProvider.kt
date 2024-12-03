@@ -4,7 +4,9 @@ import android.net.Uri
 import androidx.annotation.MainThread
 import com.pyrus.pyrusservicedesk.sdk.FileResolver
 import com.pyrus.pyrusservicedesk.sdk.data.intermediate.FileData
+import com.pyrus.pyrusservicedesk.sdk.repositories.LocalStore
 import com.pyrus.pyrusservicedesk.utils.ConfigUtils
+import com.pyrus.pyrusservicedesk.utils.getOrNull
 import kotlinx.coroutines.runBlocking
 import java.util.*
 
@@ -16,7 +18,7 @@ import java.util.*
  * @param fileResolver helper for composing local attachment instances.
  */
 internal class LocalDataProvider(
-    offlineRepository: OfflineRepository,
+    offlineRepository: LocalStore,
     private val fileResolver: FileResolver,
 ) {
 
@@ -25,9 +27,8 @@ internal class LocalDataProvider(
     init {
         runBlocking {
             // assigns last pending comment id as last local
-            lastLocalCommentId = offlineRepository
-                .getPendingFeedComments()
-                .getData()
+            lastLocalCommentId = offlineRepository.getPendingFeedComments()
+                .getOrNull()
                 ?.comments
                 ?.lastOrNull()
                 ?.localId

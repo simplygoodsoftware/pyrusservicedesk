@@ -10,9 +10,9 @@ import com.pyrus.pyrusservicedesk._ref.ui_domain.screens.ticket.adapter.view_hol
 import com.pyrus.pyrusservicedesk._ref.ui_domain.screens.ticket.adapter.view_holders.RatingCommentHolder
 import com.pyrus.pyrusservicedesk._ref.ui_domain.screens.ticket.adapter.view_holders.RatingHolder
 import com.pyrus.pyrusservicedesk._ref.ui_domain.screens.ticket.adapter.view_holders.WelcomeMessageHolder
-import com.pyrus.pyrusservicedesk.presentation.ui.navigation_page.ticket.entries.CommentEntry
-import com.pyrus.pyrusservicedesk.presentation.ui.navigation_page.ticket.entries.TicketEntry
-import com.pyrus.pyrusservicedesk.presentation.ui.navigation_page.ticket.entries.Type
+import com.pyrus.pyrusservicedesk._ref.ui_domain.screens.ticket.adapter.entries.CommentEntry
+import com.pyrus.pyrusservicedesk._ref.ui_domain.screens.ticket.adapter.entries.TicketEntry
+import com.pyrus.pyrusservicedesk._ref.ui_domain.screens.ticket.adapter.entries.Type
 import com.pyrus.pyrusservicedesk.presentation.ui.view.recyclerview.AdapterBase
 import com.pyrus.pyrusservicedesk.presentation.ui.view.recyclerview.ViewHolderBase
 import com.pyrus.pyrusservicedesk.presentation.ui.view.recyclerview.item_decorators.SpaceMultiplier

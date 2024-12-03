@@ -4,8 +4,8 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.annotation.LayoutRes
 import com.pyrus.pyrusservicedesk.R
-import com.pyrus.pyrusservicedesk.presentation.ui.navigation_page.ticket.entries.CommentEntry
-import com.pyrus.pyrusservicedesk.presentation.ui.navigation_page.ticket.entries.hasError
+import com.pyrus.pyrusservicedesk._ref.ui_domain.screens.ticket.adapter.entries.CommentEntry
+import com.pyrus.pyrusservicedesk._ref.ui_domain.screens.ticket.adapter.entries.hasError
 import com.pyrus.pyrusservicedesk.presentation.ui.view.CommentView
 import com.pyrus.pyrusservicedesk.presentation.ui.view.ContentType
 import com.pyrus.pyrusservicedesk.presentation.ui.view.Status
@@ -92,7 +92,8 @@ internal abstract class CommentHolder(
         getItem().comment.attachments!!.first().let { attachment ->
             comment.setFileName(getItem().comment.attachments?.first()?.name ?: "")
             comment.setFileSize(getItem().comment.attachments?.first()?.bytesSize?.toFloat() ?: 0f)
-            comment.setPreview(attachment.getPreviewUrl())
+            // TODO sds
+//            comment.setPreview(attachment.getPreviewUrl())
             comment.fileProgressStatus = if (getItem().hasError()) Status.Error else Status.Completed
             comment.setOnProgressIconClickListener {
                 when (comment.fileProgressStatus) {

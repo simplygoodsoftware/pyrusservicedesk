@@ -91,12 +91,12 @@ internal class TicketActivity : ConnectionActivityBase<TicketViewModel>(TicketVi
 
     override fun onStart() {
         super.onStart()
-        viewModel.onStart()
+//        viewModel.onStart()
     }
 
     override fun onStop() {
         super.onStop()
-        viewModel.onStop()
+//        viewModel.onStop()
     }
 
     override fun onRestoreInstanceState(savedInstanceState: Bundle) {

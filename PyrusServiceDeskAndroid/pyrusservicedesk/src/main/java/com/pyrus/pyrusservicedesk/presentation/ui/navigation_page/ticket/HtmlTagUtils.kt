@@ -1,6 +1,6 @@
 package com.pyrus.pyrusservicedesk.presentation.ui.navigation_page.ticket
 
-import com.pyrus.pyrusservicedesk.presentation.ui.navigation_page.ticket.entries.ButtonEntry
+import com.pyrus.pyrusservicedesk._ref.ui_domain.screens.ticket.adapter.entries.ButtonEntry
 import com.pyrus.pyrusservicedesk.sdk.data.Comment
 import org.jsoup.Jsoup
 import org.jsoup.nodes.Element

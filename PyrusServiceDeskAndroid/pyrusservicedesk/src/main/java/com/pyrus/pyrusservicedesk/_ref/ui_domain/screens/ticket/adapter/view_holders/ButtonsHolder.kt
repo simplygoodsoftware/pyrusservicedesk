@@ -11,8 +11,8 @@ import androidx.appcompat.content.res.AppCompatResources
 import com.pyrus.pyrusservicedesk.R
 import com.pyrus.pyrusservicedesk.databinding.PsdViewHolderButtonsBinding
 import com.pyrus.pyrusservicedesk._ref.ui_domain.screens.ticket.adapter.TicketAdapter
-import com.pyrus.pyrusservicedesk.presentation.ui.navigation_page.ticket.entries.ButtonEntry
-import com.pyrus.pyrusservicedesk.presentation.ui.navigation_page.ticket.entries.ButtonsEntry
+import com.pyrus.pyrusservicedesk._ref.ui_domain.screens.ticket.adapter.entries.ButtonEntry
+import com.pyrus.pyrusservicedesk._ref.ui_domain.screens.ticket.adapter.entries.ButtonsEntry
 import com.pyrus.pyrusservicedesk.presentation.ui.view.recyclerview.ViewHolderBase
 import com.pyrus.pyrusservicedesk.utils.ConfigUtils
 

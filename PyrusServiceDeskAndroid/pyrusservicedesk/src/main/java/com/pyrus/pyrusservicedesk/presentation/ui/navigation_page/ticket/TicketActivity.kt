@@ -33,10 +33,6 @@ import com.pyrus.pyrusservicedesk.sdk.data.Attachment
 import com.pyrus.pyrusservicedesk.sdk.data.intermediate.FileData
 import com.pyrus.pyrusservicedesk.utils.*
 import com.pyrus.pyrusservicedesk.utils.RequestUtils.Companion.getFileUrl
-import kotlinx.android.synthetic.main.psd_activity_ticket.*
-import kotlinx.android.synthetic.main.psd_activity_ticket.root
-import kotlinx.android.synthetic.main.psd_activity_ticket.view.*
-import kotlinx.android.synthetic.main.psd_no_connection.*
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
@@ -110,7 +106,7 @@ internal class TicketActivity : ConnectionActivityBase<TicketViewModel>(TicketVi
         }
 
         override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
-            send.isEnabled = !s.isNullOrBlank()
+//            send.isEnabled = !s.isNullOrBlank()
             viewModel.onInputTextChanged(s.toString())
         }
     }
@@ -124,46 +120,46 @@ internal class TicketActivity : ConnectionActivityBase<TicketViewModel>(TicketVi
 
         // if you don't set empty text, Android will set the app name
         supportActionBar?.apply { title = "" }
-        ticket_toolbar.toolbar_title.text = ConfigUtils.getTitle(this@TicketActivity)
+//        ticket_toolbar.toolbar_title.text = ConfigUtils.getTitle(this@TicketActivity)
 
-        root.setBackgroundColor(ConfigUtils.getMainBackgroundColor(this))
+//        root.setBackgroundColor(ConfigUtils.getMainBackgroundColor(this))
 
         val toolbarColor = ConfigUtils.getHeaderBackgroundColor(this)
-        ticket_toolbar.toolbar_title.setTextColor(
-            ConfigUtils.getChatTitleTextColor(
-                this
-            )
-        )
-        ticket_toolbar.setBackgroundColor(toolbarColor)
+//        ticket_toolbar.toolbar_title.setTextColor(
+//            ConfigUtils.getChatTitleTextColor(
+//                this
+//            )
+//        )
+//        ticket_toolbar.setBackgroundColor(toolbarColor)
 
-        ConfigUtils.getMainFontTypeface()?.let {
-            send.typeface = it
-            input.typeface = it
-            noConnectionTextView.typeface = it
-            reconnectButton.typeface = it
-        }
+//        ConfigUtils.getMainFontTypeface()?.let {
+//            send.typeface = it
+//            input.typeface = it
+//            noConnectionTextView.typeface = it
+//            reconnectButton.typeface = it
+//        }
 
         val secondaryColor = getSecondaryColorOnBackground(ConfigUtils.getNoPreviewBackgroundColor(this))
-        noConnectionImageView.setColorFilter(secondaryColor)
-        noConnectionTextView.setTextColor(secondaryColor)
-        reconnectButton.setTextColor(ConfigUtils.getAccentColor(this))
-        no_connection.setBackgroundColor(ConfigUtils.getNoConnectionBackgroundColor(this))
+//        noConnectionImageView.setColorFilter(secondaryColor)
+//        noConnectionTextView.setTextColor(secondaryColor)
+//        reconnectButton.setTextColor(ConfigUtils.getAccentColor(this))
+//        no_connection.setBackgroundColor(ConfigUtils.getNoConnectionBackgroundColor(this))
 
         ConfigUtils.getMainBoldFontTypeface()?.let {
-            ticket_toolbar.toolbar_title.typeface = it
+//            ticket_toolbar.toolbar_title.typeface = it
         }
 
-        ticket_toolbar.setOnMenuItemClickListener{ onMenuItemClicked(it) }
-        comments.apply {
-            adapter = this@TicketActivity.adapter
-            addItemDecoration(
-                SpaceItemDecoration(
-                    resources.getDimensionPixelSize(R.dimen.psd_comments_item_space),
-                    this@TicketActivity.adapter.itemSpaceMultiplier)
-            )
-            itemAnimator = null
-        }
-        send.setOnClickListener { onSendCommentClick() }
+//        ticket_toolbar.setOnMenuItemClickListener{ onMenuItemClicked(it) }
+//        comments.apply {
+//            adapter = this@TicketActivity.adapter
+//            addItemDecoration(
+//                SpaceItemDecoration(
+//                    resources.getDimensionPixelSize(R.dimen.psd_comments_item_space),
+//                    this@TicketActivity.adapter.itemSpaceMultiplier)
+//            )
+//            itemAnimator = null
+//        }
+//        send.setOnClickListener { onSendCommentClick() }
         val stateList = ColorStateList(
             arrayOf(
                 intArrayOf(android.R.attr.state_enabled),
@@ -175,29 +171,29 @@ internal class TicketActivity : ConnectionActivityBase<TicketViewModel>(TicketVi
             )
 
         )
-        send.setTextColor(stateList)
-        attach.setOnClickListener { showAttachFileVariants() }
-        attach.setColorFilter(ConfigUtils.getFileMenuButtonColor(this))
+//        send.setTextColor(stateList)
+//        attach.setOnClickListener { showAttachFileVariants() }
+//        attach.setColorFilter(ConfigUtils.getFileMenuButtonColor(this))
         if(savedInstanceState == null) {
-            input.setText(viewModel.draft)
-            showKeyboardOn(input){
-                input.setSelection(input.length())
-            }
+//            input.setText(viewModel.draft)
+//            showKeyboardOn(input){
+//                input.setSelection(input.length())
+//            }
         }
-        input.apply {
-            highlightColor = accentColor
-            setCursorColor(accentColor)
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-                textCursorDrawable = null
-            }
-            setHintTextColor(ConfigUtils.getSecondaryColorOnMainBackground(this@TicketActivity))
-            setTextColor(ConfigUtils.getInputTextColor(this@TicketActivity))
-            addTextChangedListener(inputTextWatcher)
-        }
-        send.isEnabled = !input.text.isNullOrBlank()
-        divider.setBackgroundColor(getColorOnBackground(ConfigUtils.getMainBackgroundColor(this), 30))
-        refresh.setProgressBackgroundColor(ConfigUtils.getMainBackgroundColor(this))
-        refresh.setColorSchemeColors(ConfigUtils.getAccentColor(this))
+//        input.apply {
+//            highlightColor = accentColor
+//            setCursorColor(accentColor)
+//            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+//                textCursorDrawable = null
+//            }
+//            setHintTextColor(ConfigUtils.getSecondaryColorOnMainBackground(this@TicketActivity))
+//            setTextColor(ConfigUtils.getInputTextColor(this@TicketActivity))
+//            addTextChangedListener(inputTextWatcher)
+//        }
+//        send.isEnabled = !input.text.isNullOrBlank()
+//        divider.setBackgroundColor(getColorOnBackground(ConfigUtils.getMainBackgroundColor(this), 30))
+//        refresh.setProgressBackgroundColor(ConfigUtils.getMainBackgroundColor(this))
+//        refresh.setColorSchemeColors(ConfigUtils.getAccentColor(this))
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
             window.clearFlags(WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS)
@@ -208,19 +204,20 @@ internal class TicketActivity : ConnectionActivityBase<TicketViewModel>(TicketVi
 
     override fun onStart() {
         super.onStart()
-        viewModel.onStart()
+//        viewModel.onStart()
     }
 
     override fun onStop() {
         super.onStop()
-        viewModel.onStop()
+//        viewModel.onStop()
     }
 
     override fun onRestoreInstanceState(savedInstanceState: Bundle) {
         super.onRestoreInstanceState(savedInstanceState)
         savedInstanceState.let {
-            if (it.getBoolean(STATE_KEYBOARD_SHOWN))
-                showKeyboardOn(input)
+            if (it.getBoolean(STATE_KEYBOARD_SHOWN)) {
+//                showKeyboardOn(input)
+            }
         }
     }
 
@@ -228,7 +225,7 @@ internal class TicketActivity : ConnectionActivityBase<TicketViewModel>(TicketVi
         super.onSaveInstanceState(outState)
         outState.let {
             ServiceDeskConfiguration.save(it)
-            it.putBoolean(STATE_KEYBOARD_SHOWN, input.hasFocus())
+//            it.putBoolean(STATE_KEYBOARD_SHOWN, input.hasFocus())
         }
     }
 
@@ -249,30 +246,30 @@ internal class TicketActivity : ConnectionActivityBase<TicketViewModel>(TicketVi
     override fun startObserveData() {
         super.startObserveData()
         viewModel.getCommentDiffLiveData().observe(this) { result ->
-            val atEnd = comments.isAtEnd()
-            val isEmpty = comments.adapter?.itemCount == 0
+//            val atEnd = comments.isAtEnd()
+//            val isEmpty = comments.adapter?.itemCount == 0
             result?.let {
-                refresh.isRefreshing = false
+//                refresh.isRefreshing = false
                 adapter.setItems(it.newItems)
                 it.diffResult.dispatchUpdatesTo(adapter)
             }
-            if (adapter.itemCount > 0 && atEnd) {
-                if (isEmpty)
-                    comments.scrollToPosition(adapter.itemCount - 1)
-                else if (!comments.isAtEnd()) {
-                    comments.smoothScrollToPosition(adapter.itemCount - 1)
-                }
-                launch {
-                    while (!comments.isAtEnd()) {
-                        delay(CHECK_IS_AT_BOTTOM_DELAY_MS)
-                    }
-                    val offset = when {
-                        comments.childCount > 0 -> comments.getChildAt(comments.childCount - 1).height
-                        else -> 0
-                    }
-                    comments.smoothScrollBy(0, offset)
-                }
-            }
+//            if (adapter.itemCount > 0 && atEnd) {
+//                if (isEmpty)
+//                    comments.scrollToPosition(adapter.itemCount - 1)
+//                else if (!comments.isAtEnd()) {
+//                    comments.smoothScrollToPosition(adapter.itemCount - 1)
+//                }
+//                launch {
+//                    while (!comments.isAtEnd()) {
+//                        delay(CHECK_IS_AT_BOTTOM_DELAY_MS)
+//                    }
+//                    val offset = when {
+//                        comments.childCount > 0 -> comments.getChildAt(comments.childCount - 1).height
+//                        else -> 0
+//                    }
+//                    comments.smoothScrollBy(0, offset)
+//                }
+//            }
         }
         attachFileSharedViewModel.getFilePickedLiveData().observe(this) { fileUri ->
             fileUri?.let {
@@ -294,16 +291,16 @@ internal class TicketActivity : ConnectionActivityBase<TicketViewModel>(TicketVi
 
     override fun onViewHeightChanged(changedBy: Int) {
         super.onViewHeightChanged(changedBy)
-        when {
-            changedBy == 0 -> return
-            changedBy > 0 -> comments.scrollBy(0, changedBy)
-            else -> {
-                input.clearFocus()
-                if (!comments.isAtEnd())
-                    comments.scrollBy(0, changedBy)
-            }
-
-        }
+//        when {
+//            changedBy == 0 -> return
+////            changedBy > 0 -> comments.scrollBy(0, changedBy)
+//            else -> {
+//                input.clearFocus()
+//                if (!comments.isAtEnd())
+//                    comments.scrollBy(0, changedBy)
+//            }
+//
+//        }
     }
 
     override fun finish() {
@@ -325,8 +322,8 @@ internal class TicketActivity : ConnectionActivityBase<TicketViewModel>(TicketVi
     }
 
     private fun onSendCommentClick() {
-        viewModel.onSendClicked(input.text.toString())
-        input.text = null
+//        viewModel.onSendClicked(input.text.toString())
+//        input.text = null
     }
 
     private fun showAttachFileVariants() {
@@ -343,10 +340,11 @@ internal class TicketActivity : ConnectionActivityBase<TicketViewModel>(TicketVi
 }
 
 private fun Attachment.toFileData(): FileData {
-    return FileData(
-        name,
-        bytesSize,
-        if (isLocal() && localUri != null) localUri else Uri.parse(getFileUrl(id, PyrusServiceDesk.get().domain)),
-        isLocal()
-    )
+    TODO()
+//    return FileData(
+//        name,
+//        bytesSize,
+//        if (isLocal() && localUri != null) localUri else Uri.parse(getFileUrl(id, PyrusServiceDesk.get().domain)),
+//        isLocal()
+//    )
 }

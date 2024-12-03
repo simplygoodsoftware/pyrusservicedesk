@@ -1,7 +1,7 @@
 package com.pyrus.pyrusservicedesk._ref.ui_domain.screens.ticket
 
 import android.net.Uri
-import com.pyrus.pyrusservicedesk.presentation.ui.navigation_page.ticket.entries.TicketEntry
+import com.pyrus.pyrusservicedesk._ref.ui_domain.screens.ticket.adapter.entries.TicketEntry
 
 internal interface TicketView {
 

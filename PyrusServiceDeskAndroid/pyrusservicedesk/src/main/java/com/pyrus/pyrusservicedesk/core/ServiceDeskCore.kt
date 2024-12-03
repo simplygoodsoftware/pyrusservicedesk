@@ -100,8 +100,7 @@ internal class DepsInjection(
             val userAgent = "ServicedeskClient/android/" +
                 Build.MANUFACTURER + "/" +
                 Build.MODEL + "/" +
-                Build.VERSION.SDK_INT + "/" +
-                BuildConfig.VERSION_NAME
+                Build.VERSION.SDK_INT
 
             requestBuilder.header("User-Agent", userAgent)
             chain.proceed(requestBuilder.build())
@@ -134,15 +133,16 @@ internal class DepsInjection(
     }
 
     val liveUpdates = LiveUpdates(
-        requests = null,
+        repository = repository,
         preferencesManager = preferencesManager,
-        userId = account.instanceId
+        userId = account.instanceId,
+        coreScope = coreScope,
     )
 
     val picasso = Picasso.Builder(application)
         .downloader(OkHttp3Downloader(okHttpClient))
         .build()
 
-    val setPushTokenUseCase = SetPushTokenUseCase(account, coreScope)
+    val setPushTokenUseCase = SetPushTokenUseCase(account, coreScope, preferencesManager)
 
 }

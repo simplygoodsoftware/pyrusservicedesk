@@ -12,8 +12,14 @@ import androidx.lifecycle.Observer
 import androidx.recyclerview.widget.DiffUtil
 import com.pyrus.pyrusservicedesk.PyrusServiceDesk
 import com.pyrus.pyrusservicedesk.R
+import com.pyrus.pyrusservicedesk._ref.ui_domain.screens.ticket.adapter.entries.ButtonsEntry
+import com.pyrus.pyrusservicedesk._ref.ui_domain.screens.ticket.adapter.entries.CommentEntry
+import com.pyrus.pyrusservicedesk._ref.ui_domain.screens.ticket.adapter.entries.DateEntry
+import com.pyrus.pyrusservicedesk._ref.ui_domain.screens.ticket.adapter.entries.RatingEntry
+import com.pyrus.pyrusservicedesk._ref.ui_domain.screens.ticket.adapter.entries.TicketEntry
+import com.pyrus.pyrusservicedesk._ref.ui_domain.screens.ticket.adapter.entries.Type
+import com.pyrus.pyrusservicedesk._ref.ui_domain.screens.ticket.adapter.entries.WelcomeMessageEntry
 import com.pyrus.pyrusservicedesk.log.PLog
-import com.pyrus.pyrusservicedesk.presentation.ui.navigation_page.ticket.entries.*
 import com.pyrus.pyrusservicedesk.presentation.ui.view.recyclerview.DiffResultWithNewItems
 import com.pyrus.pyrusservicedesk.presentation.viewmodel.ConnectionViewModelBase
 import com.pyrus.pyrusservicedesk.sdk.data.Attachment
@@ -64,12 +70,12 @@ internal class TicketViewModel(
     /**
      * Drafted text. Assigned once when view model is created.
      */
-    val draft: String
+//    val draft: String
 
-    private val draftRepository = serviceDeskProvider.getDraftRepository()
-    private val localDataProvider: LocalDataProvider = serviceDeskProvider.getLocalDataProvider()
-    private val fileManager: FileManager = serviceDeskProvider.getFileManager()
-    private val localDataVerifier: LocalDataVerifier = serviceDeskProvider.getLocalDataVerifier()
+//    private val draftRepository = serviceDeskProvider.getDraftRepository()
+//    private val localDataProvider: LocalDataProvider = serviceDeskProvider.getLocalDataProvider()
+//    private val fileManager: FileManager = serviceDeskProvider.getFileManager()
+//    private val localDataVerifier: LocalDataVerifier = serviceDeskProvider.getLocalDataVerifier()
 
     private var isCreateTicketSent = false
 
@@ -94,20 +100,20 @@ internal class TicketViewModel(
     private var currentInterval: Long = 0
 
     init {
-        draft = draftRepository.getDraft()
+//        draft = draftRepository.getDraft()
 
         runBlocking {
-            val response = requests.getPendingFeedCommentsRequest().execute()
-            if (!response.hasError() && !response.getData()?.comments.isNullOrEmpty()) {
-                applyTicketUpdate(response.getData()!!, true)
-            }
+//            val response = requests.getPendingFeedCommentsRequest().execute()
+//            if (!response.hasError() && !response.getData()?.comments.isNullOrEmpty()) {
+//                applyTicketUpdate(response.getData()!!, true)
+//            }
         }
 
         if (isNetworkConnected.value == true) {
             loadData()
         }
         maybeStartAutoRefresh()
-        liveUpdates.subscribeOnUnreadTicketCountChanged(this)
+//        liveUpdates.subscribeOnUnreadTicketCountChanged(this)
     }
 
     override fun onLoadData() {
@@ -121,7 +127,7 @@ internal class TicketViewModel(
     override fun onCleared() {
         super.onCleared()
         mainHandler.removeCallbacks(updateRunnable)
-        liveUpdates.unsubscribeFromTicketCountChanged(this)
+//        liveUpdates.unsubscribeFromTicketCountChanged(this)
     }
 
     /**
@@ -134,8 +140,8 @@ internal class TicketViewModel(
             return
         }
         update()
-        val localComment = localDataProvider.createLocalComment(text.trim())
-        sendAddComment(localComment)
+//        val localComment = localDataProvider.createLocalComment(text.trim())
+//        sendAddComment(localComment)
     }
 
     /**
@@ -145,15 +151,15 @@ internal class TicketViewModel(
      */
     fun onAttachmentSelected(attachmentUri: Uri) {
        launch {
-           val fileUri = try {
-               fileManager.copyFile(attachmentUri)
-           } catch (e: Exception) {
-               return@launch
-           }
-           withContext(Dispatchers.Main) {
-               val localComment = localDataProvider.createLocalComment(fileUri = fileUri)
-               sendAddComment(localComment)
-           }
+//           val fileUri = try {
+//               fileManager.copyFile(attachmentUri)
+//           } catch (e: Exception) {
+//               return@launch
+//           }
+//           withContext(Dispatchers.Main) {
+//               val localComment = localDataProvider.createLocalComment(fileUri = fileUri)
+//               sendAddComment(localComment)
+//           }
        }
     }
 
@@ -168,7 +174,7 @@ internal class TicketViewModel(
      * Callback to be invoked when user input changed.
      */
     fun onInputTextChanged(text: String) {
-        draftRepository.saveDraft(text)
+//        draftRepository.saveDraft(text)
     }
 
     /**
@@ -188,12 +194,12 @@ internal class TicketViewModel(
     fun onPendingCommentDeleted() {
         pendingCommentUnderAction?.let {
             launch {
-                if (!requests.getRemovePendingCommentRequest(it.comment).execute().hasError()) {
-                    withContext(Dispatchers.Main) {
-                        applyCommentUpdate(it, ChangeType.Cancelled)
-                        pendingCommentUnderAction = null
-                    }
-                }
+//                if (!requests.getRemovePendingCommentRequest(it.comment).execute().hasError()) {
+//                    withContext(Dispatchers.Main) {
+//                        applyCommentUpdate(it, ChangeType.Cancelled)
+//                        pendingCommentUnderAction = null
+//                    }
+//                }
             }
         }
     }
@@ -213,17 +219,17 @@ internal class TicketViewModel(
     }
 
     private fun update() {
-        val call = GetFeedCall(this@TicketViewModel, requests).execute()
-        val observer = Observer<CallResult<Comments>> { result ->
-            if (result == null)
-                return@Observer
-            when {
-                result.hasError() -> {
-                }
-                else -> applyTicketUpdate(result.data!!, false)
-            }
-        }
-        call.observeForever(observer)
+//        val call = GetFeedCall(this@TicketViewModel, requests).execute()
+//        val observer = Observer<CallResult<Comments>> { result ->
+//            if (result == null)
+//                return@Observer
+//            when {
+//                result.hasError() -> {
+//                }
+//                else -> applyTicketUpdate(result.data!!, false)
+//            }
+//        }
+//        call.observeForever(observer)
     }
 
     private fun maybeStartAutoRefresh() {
@@ -278,9 +284,9 @@ internal class TicketViewModel(
             CommentEntry(localComment, uploadFileHooks = uploadFileHooks),
             ChangeType.Added
         )
-        AddFeedCommentCall(this, requests, localComment, uploadFileHooks)
-            .execute()
-            .observeForever(AddCommentObserver(uploadFileHooks, localComment))
+//        AddFeedCommentCall(this, requests, localComment, uploadFileHooks)
+//            .execute()
+//            .observeForever(AddCommentObserver(uploadFileHooks, localComment))
 
         val lastActiveTime = System.currentTimeMillis()
         PLog.d(TAG, "sendAddComment, lastActiveTime: $lastActiveTime, commentLocalId: ${localComment.localId}")
@@ -296,29 +302,29 @@ internal class TicketViewModel(
 
     private fun commentContainsError(localComment: Comment): Boolean {
         val commentError = when{
-            localDataVerifier.isLocalCommentEmpty(localComment) -> CheckCommentError.CommentIsEmpty
+//            localDataVerifier.isLocalCommentEmpty(localComment) -> CheckCommentError.CommentIsEmpty
             localComment.hasAttachmentWithExceededSize() -> CheckCommentError.FileSizeExceeded
             else -> null
         }
-        when (commentError) {
-            CheckCommentError.CommentIsEmpty -> return true
-            CheckCommentError.FileSizeExceeded -> {
-                (getApplication() as Context).run {
-                    Toast.makeText(
-                        this,
-                        this.getString(R.string.psd_file_size_exceeded_message, MAX_FILE_SIZE_MEGABYTES),
-                        Toast.LENGTH_SHORT
-                    )
-                        .show()
-                }
-                return true
-            }
-        }
+//        when (commentError) {
+//            CheckCommentError.CommentIsEmpty -> return true
+//            CheckCommentError.FileSizeExceeded -> {
+//                (getApplication() as Context).run {
+//                    Toast.makeText(
+//                        this,
+//                        this.getString(R.string.psd_file_size_exceeded_message, MAX_FILE_SIZE_MEGABYTES),
+//                        Toast.LENGTH_SHORT
+//                    )
+//                        .show()
+//                }
+//                return true
+//            }
+//        }
         return false
     }
 
     private fun applyTicketUpdate(freshList: Comments, arePendingComments: Boolean) {
-        liveUpdates.onReadComments()
+//        liveUpdates.onReadComments()
         if (!arePendingComments && !needUpdateCommentsList(freshList.comments)) {
             onDataLoaded()
             return
@@ -564,72 +570,72 @@ internal class TicketViewModel(
         }
     }
 
-    fun onRatingClick(rating: Int) =
-        sendAddComment(localDataProvider.createLocalComment(rating = rating))
+//    fun onRatingClick(rating: Int) =
+//        sendAddComment(localDataProvider.createLocalComment(rating = rating))
 
-    fun onStart() {
-        liveUpdates.increaseActiveScreenCount()
-    }
+//    fun onStart() {
+//        liveUpdates.increaseActiveScreenCount()
+//    }
 
-    fun onStop() {
-        liveUpdates.decreaseActiveScreenCount()
-    }
+//    fun onStop() {
+//        liveUpdates.decreaseActiveScreenCount()
+//    }
 
-    private inner class AddCommentObserver(
-        uploadFileHooks: UploadFileHooks?,
-        localComment: Comment
-    ) : AddCommentObserverBase<CallResult<AddCommentResponseData>, AddCommentResponseData>(
-        uploadFileHooks,
-        localComment
-    ) {
-        override fun getAttachments(data: AddCommentResponseData) = data.sentAttachments
+//    private inner class AddCommentObserver(
+//        uploadFileHooks: UploadFileHooks?,
+//        localComment: Comment
+//    ) : AddCommentObserverBase<CallResult<AddCommentResponseData>, AddCommentResponseData>(
+//        uploadFileHooks,
+//        localComment
+//    ) {
+//        override fun getAttachments(data: AddCommentResponseData) = data.sentAttachments
+//
+//        override fun getCommentId(data: AddCommentResponseData): Long = data.commentId
+//
+//        override fun onSuccess(data: AddCommentResponseData) {
+////            liveUpdates.subscribeOnUnreadTicketCountChanged(this@TicketViewModel)
+//        }
+//
+//    }
 
-        override fun getCommentId(data: AddCommentResponseData): Long = data.commentId
 
-        override fun onSuccess(data: AddCommentResponseData) {
-            liveUpdates.subscribeOnUnreadTicketCountChanged(this@TicketViewModel)
-        }
-
-    }
-
-
-    private abstract inner class AddCommentObserverBase<T : CallResult<U>, U>(
-        val uploadFileHooks: UploadFileHooks?,
-        val localComment: Comment
-    ) : Observer<T> {
-        override fun onChanged(t: T?) {
-            t?.let { result ->
-                isCreateTicketSent = false
-                if (uploadFileHooks?.isCancelled == true)
-                    return@let
-                val entry = when {
-                    result.hasError() -> CommentEntry(
-                        localComment,
-                        uploadFileHooks, // for retry purpose
-                        error = result.error
-                    )
-                    else -> {
-                        onSuccess(result.data!!)
-                        val commentId = getCommentId(result.data)
-                        val attachments = getAttachments(result.data)
-                        if (hasComment(commentId))
-                            return@let
-                        CommentEntry(
-                            localDataProvider.convertLocalCommentToServer(localComment, commentId, attachments)
-                        )
-                    }
-                }
-                applyCommentUpdate(entry, ChangeType.Changed)
-            }
-        }
-
-        abstract fun getAttachments(data: U): List<Attachment>?
-
-        abstract fun getCommentId(data: U): Long
-
-        abstract fun onSuccess(data: U)
-
-    }
+//    private abstract inner class AddCommentObserverBase<T : CallResult<U>, U>(
+//        val uploadFileHooks: UploadFileHooks?,
+//        val localComment: Comment
+//    ) : Observer<T> {
+//        override fun onChanged(t: T?) {
+//            t?.let { result ->
+//                isCreateTicketSent = false
+//                if (uploadFileHooks?.isCancelled == true)
+//                    return@let
+//                val entry = when {
+//                    result.hasError() -> CommentEntry(
+//                        localComment,
+//                        uploadFileHooks, // for retry purpose
+//                        error = result.error
+//                    )
+//                    else -> {
+//                        onSuccess(result.data!!)
+//                        val commentId = getCommentId(result.data)
+//                        val attachments = getAttachments(result.data)
+//                        if (hasComment(commentId))
+//                            return@let
+//                        CommentEntry(
+//                            localDataProvider.convertLocalCommentToServer(localComment, commentId, attachments)
+//                        )
+//                    }
+//                }
+//                applyCommentUpdate(entry, ChangeType.Changed)
+//            }
+//        }
+//
+//        abstract fun getAttachments(data: U): List<Attachment>?
+//
+//        abstract fun getCommentId(data: U): Long
+//
+//        abstract fun onSuccess(data: U)
+//
+//    }
 
     private fun updateFeedIntervalIfNeeded() {
         val interval = getFeedUpdateInterval()

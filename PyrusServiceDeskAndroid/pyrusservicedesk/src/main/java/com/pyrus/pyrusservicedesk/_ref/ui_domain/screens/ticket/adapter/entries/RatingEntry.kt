@@ -1,4 +1,4 @@
-package com.pyrus.pyrusservicedesk.presentation.ui.navigation_page.ticket.entries
+package com.pyrus.pyrusservicedesk._ref.ui_domain.screens.ticket.adapter.entries
 
 internal class RatingEntry : TicketEntry(){
     override val type: Type = Type.Rating

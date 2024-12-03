@@ -5,7 +5,7 @@ import android.view.ViewGroup
 import android.widget.ImageView
 import android.widget.TextView
 import com.pyrus.pyrusservicedesk.R
-import com.pyrus.pyrusservicedesk.presentation.ui.navigation_page.ticket.entries.WelcomeMessageEntry
+import com.pyrus.pyrusservicedesk._ref.ui_domain.screens.ticket.adapter.entries.WelcomeMessageEntry
 import com.pyrus.pyrusservicedesk.presentation.ui.view.CommentView
 import com.pyrus.pyrusservicedesk.presentation.ui.view.ContentType
 import com.pyrus.pyrusservicedesk.presentation.ui.view.recyclerview.ViewHolderBase

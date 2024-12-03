@@ -5,8 +5,8 @@ import android.view.View
 import android.view.ViewGroup
 import com.pyrus.pyrusservicedesk.R
 import com.pyrus.pyrusservicedesk.databinding.PsdViewHolderCommentRatingBinding
-import com.pyrus.pyrusservicedesk.presentation.ui.navigation_page.ticket.entries.CommentEntry
-import com.pyrus.pyrusservicedesk.presentation.ui.navigation_page.ticket.entries.hasError
+import com.pyrus.pyrusservicedesk._ref.ui_domain.screens.ticket.adapter.entries.CommentEntry
+import com.pyrus.pyrusservicedesk._ref.ui_domain.screens.ticket.adapter.entries.hasError
 import com.pyrus.pyrusservicedesk.presentation.ui.view.recyclerview.ViewHolderBase
 
 internal class RatingCommentHolder(
