@@ -1,17 +1,24 @@
 package com.pyrus.pyrusservicedesk.sdk.web.retrofit
 
-import androidx.annotation.Keep
-import com.pyrus.pyrusservicedesk.sdk.data.intermediate.*
-import com.pyrus.pyrusservicedesk.sdk.web.request_body.*
+import com.pyrus.pyrusservicedesk.sdk.data.intermediate.AddCommentResponseData
+import com.pyrus.pyrusservicedesk.sdk.data.intermediate.Comments
+import com.pyrus.pyrusservicedesk.sdk.data.intermediate.FileUploadResponseData
+import com.pyrus.pyrusservicedesk.sdk.data.intermediate.Tickets
+import com.pyrus.pyrusservicedesk.sdk.web.request_body.AddCommentRequestBody
+import com.pyrus.pyrusservicedesk.sdk.web.request_body.GetFeedBody
+import com.pyrus.pyrusservicedesk.sdk.web.request_body.RequestBodyBase
+import com.pyrus.pyrusservicedesk.sdk.web.request_body.SetPushTokenBody
 import com.pyrus.pyrusservicedesk.utils.Try
 import okhttp3.MultipartBody
 import okhttp3.ResponseBody
-import retrofit2.http.*
+import retrofit2.http.Body
+import retrofit2.http.Multipart
+import retrofit2.http.POST
+import retrofit2.http.Part
 
 /**
  * Interface that is used for making api calls using [RemoteStore].
  */
-@Keep
 internal interface ServiceDeskApi {
 
     /**

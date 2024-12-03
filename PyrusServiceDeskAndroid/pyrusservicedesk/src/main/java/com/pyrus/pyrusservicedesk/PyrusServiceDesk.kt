@@ -32,7 +32,6 @@ import com.squareup.picasso.Picasso
 import kotlinx.coroutines.*
 import okhttp3.OkHttpClient
 import java.lang.Runnable
-import java.util.concurrent.Executors
 import java.util.concurrent.TimeUnit
 
 
@@ -51,8 +50,6 @@ class PyrusServiceDesk private constructor(
 
         private val TAG = PyrusServiceDesk::class.java.simpleName
 
-        internal val DISPATCHER_IO_SINGLE =
-            Executors.newSingleThreadExecutor().asCoroutineDispatcher()
         internal var FILE_CHOOSER: FileChooser? = null
         internal var EXTRA_FIELDS: Map<String, String>? = null
         internal var onAuthorizationFailed: Runnable? = Runnable {
