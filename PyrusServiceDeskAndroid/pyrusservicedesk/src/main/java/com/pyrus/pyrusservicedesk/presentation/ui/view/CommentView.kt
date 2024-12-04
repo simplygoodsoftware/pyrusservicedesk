@@ -698,12 +698,12 @@ private class ChangingSizeTarget(
         fun onAnimationEnd() {
             super.onBitmapLoaded(bitmap, from)
         }
-        animator.addListener(object : Animator.AnimatorListener {
-            override fun onAnimationRepeat(animation: Animator?) {}
-            override fun onAnimationEnd(animation: Animator?) = onAnimationEnd()
-            override fun onAnimationCancel(animation: Animator?) {}
-            override fun onAnimationStart(animation: Animator?) {}
 
+        animator.addListener(object : Animator.AnimatorListener {
+            override fun onAnimationStart(p0: Animator) {}
+            override fun onAnimationEnd(p0: Animator) { onAnimationEnd() }
+            override fun onAnimationCancel(p0: Animator) {}
+            override fun onAnimationRepeat(p0: Animator) {}
         })
         animator.start()
     }

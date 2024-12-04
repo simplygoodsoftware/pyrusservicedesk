@@ -33,7 +33,7 @@ internal class OutlineImageView @JvmOverloads constructor(context: Context,
         xfermode = PorterDuffXfermode(PorterDuff.Mode.SRC_ATOP)
     }
 
-    override fun onDraw(canvas: Canvas?) {
+    override fun onDraw(canvas: Canvas) {
         super.onDraw(canvas)
         onDrawForegroundCompat(canvas) // api >= 23 is required for [onDrawForeground]
     }
