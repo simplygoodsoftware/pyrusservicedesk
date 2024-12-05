@@ -1,5 +1,7 @@
 package com.pyrus.pyrusservicedesk._ref.ui_domain.screens.ticket
 
+import android.app.Activity
+import android.content.Intent
 import android.graphics.PorterDuff
 import android.os.Bundle
 import android.view.LayoutInflater
@@ -15,9 +17,7 @@ import com.pyrus.pyrusservicedesk._ref.utils.ConfigUtils
 import com.pyrus.pyrusservicedesk._ref.utils.setupWindowInsets
 import com.pyrus.pyrusservicedesk.databinding.PsdActivityMainBinding
 
-/**
- * Activity for rendering ticket/feed comments.
- */
+
 internal class MainActivity : FragmentActivity() {
 
     private lateinit var binding: PsdActivityMainBinding
@@ -77,6 +77,12 @@ internal class MainActivity : FragmentActivity() {
     override fun finish() {
         super.finish()
         PyrusServiceDesk.onServiceDeskStop()
+    }
+
+    companion object {
+        fun getLaunchIntent(activity: Activity): Intent {
+            return Intent(activity, MainActivity::class.java)
+        }
     }
 
 }

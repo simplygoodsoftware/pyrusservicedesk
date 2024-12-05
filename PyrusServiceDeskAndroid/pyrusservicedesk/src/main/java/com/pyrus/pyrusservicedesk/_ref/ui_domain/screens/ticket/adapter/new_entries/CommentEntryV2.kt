@@ -15,7 +15,7 @@ internal sealed interface CommentEntryV2 {
         val status: Status,
         val contentType: ContentType,
         val authorName: String,
-        val avatarId: Int,
+        val avatarUrl: String,
 
         val text: String,
 

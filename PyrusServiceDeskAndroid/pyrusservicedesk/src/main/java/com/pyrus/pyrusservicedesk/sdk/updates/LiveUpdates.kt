@@ -63,7 +63,9 @@ internal class LiveUpdates(
                     val data = ticketsTry.value
                     val newUnread = data.count { !it.isRead }
                     this@launch.launch(mainDispatcher) {
-                        val userId = PyrusServiceDesk.get().userId
+                        // TODO
+                        if (true) return@launch
+//                        val userId = PyrusServiceDesk.get().userId
                         if (data.isEmpty())
                             stopUpdates()
                         else if (requestUserId == userId)

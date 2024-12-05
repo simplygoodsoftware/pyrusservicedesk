@@ -52,12 +52,7 @@ internal class InboundCommentHolder(
         avatar.visibility = if (visible) View.VISIBLE else View.INVISIBLE
         if (visible) {
             PyrusServiceDesk.injector().picasso
-                .load(
-                    RequestUtils.getAvatarUrl(
-                        item.avatarId,
-                        PyrusServiceDesk.get().domain
-                    )
-                )
+                .load(item.avatarUrl)
                 .placeholder(ConfigUtils.getSupportAvatar(itemView.context))
                 .transform(CIRCLE_TRANSFORMATION)
                 .into(avatar)

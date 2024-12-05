@@ -287,7 +287,11 @@ internal class ConfigUtils{
             return when {
                 !StaticRepository.getConfiguration().userName.isNullOrBlank() ->
                     StaticRepository.getConfiguration().userName!!
-                else -> PyrusServiceDesk.get().application.getString(R.string.psd_guest)
+                else -> {
+                    // TODO sds
+                    "ssss"
+//                    PyrusServiceDesk.get().application.getString(R.string.psd_guest)
+                }
             }
         }
 

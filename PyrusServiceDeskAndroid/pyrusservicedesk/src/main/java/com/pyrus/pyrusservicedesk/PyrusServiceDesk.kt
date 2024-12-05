@@ -3,7 +3,8 @@ package com.pyrus.pyrusservicedesk
 import android.app.Activity
 import android.app.Application
 import androidx.annotation.MainThread
-import com.pyrus.pyrusservicedesk.core.DepsInjection
+import com.pyrus.pyrusservicedesk._ref.ui_domain.screens.ticket.MainActivity
+import com.pyrus.pyrusservicedesk.core.DiInjector
 import com.pyrus.pyrusservicedesk.core.StaticRepository
 import com.pyrus.pyrusservicedesk._ref.utils.log.PLog
 import com.pyrus.pyrusservicedesk.presentation.ui.navigation_page.ticket.TicketActivity
@@ -13,6 +14,9 @@ import com.pyrus.pyrusservicedesk.sdk.updates.OnStopCallback
 import com.pyrus.pyrusservicedesk._ref.utils.MILLISECONDS_IN_MINUTE
 import com.pyrus.pyrusservicedesk._ref.utils.RequestUtils
 import com.pyrus.pyrusservicedesk._ref.utils.getFirstNSymbols
+import com.pyrus.pyrusservicedesk.core.Account
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
 
 
 class PyrusServiceDesk private constructor(
@@ -34,6 +38,7 @@ class PyrusServiceDesk private constructor(
             stop()
         }
         private var INSTANCE: PyrusServiceDesk? = null
+        private var INJECTOR: DiInjector? = null
         private var lastRefreshes = ArrayList<Long>()
 
         private const val REFRESH_MAX_COUNT = 20 // in minute
@@ -128,12 +133,35 @@ class PyrusServiceDesk private constructor(
         ) {
             PLog.d(TAG, "initInternal, appId: ${appId.getFirstNSymbols(10)}, userId: ${userId?.getFirstNSymbols(10)}, apiVersion: $apiVersion")
 
+            val apiDomain =  domain ?: "pyrus.com"
+            val newAccount = if (userId == null || securityKey == null) Account.V1(
+                "aaaa", // TODO sds
+                appId,
+                apiDomain
+            )
+            else Account.V2(
+                "aaaa", // TODO sds
+                appId,
+                apiDomain,
+                userId,
+                securityKey
+            )
+
+            INJECTOR = DiInjector(
+                application,
+                newAccount,
+                loggingEnabled,
+                authorizationToken,
+                CoroutineScope(Dispatchers.Main)
+            )
+
+
             // TODO sds
 //            if (INSTANCE != null && get().userId != userId) {
 //                INSTANCE?.liveUpdates?.reset(userId)
 //            }
 
-            val validDomain = if (validateDomain(domain)) domain else null
+            val validDomain = if (validateDomain(apiDomain)) apiDomain else null
 
             // TODO sds
 //            if (INSTANCE != null && get().userId != userId) {
@@ -265,7 +293,8 @@ class PyrusServiceDesk private constructor(
         @JvmStatic
         fun stop() {
             PLog.d(TAG, "stop")
-            get().sharedViewModel.quitServiceDesk()
+            // TODO
+//            get().sharedViewModel.quitServiceDesk()
         }
 
         /**
@@ -283,8 +312,8 @@ class PyrusServiceDesk private constructor(
             lastRefreshes.add(System.currentTimeMillis())
             if (lastRefreshes.size > REFRESH_MAX_COUNT)
                 lastRefreshes.removeAt(0)
-
-            get().sharedViewModel.triggerUpdate()
+            // TODO
+//            get().sharedViewModel.triggerUpdate()
         }
 
         /**
@@ -306,15 +335,16 @@ class PyrusServiceDesk private constructor(
         }
 
         internal fun onServiceDeskStop() {
-            get().onStopCallback?.onServiceDeskStop()
-            get().onStopCallback = null
+            // TODO
+//            get().onStopCallback?.onServiceDeskStop()
+//            get().onStopCallback = null
         }
 
         internal fun get(): PyrusServiceDesk {
             return checkNotNull(INSTANCE) { "Instantiate PyrusServiceDesk first" }
         }
 
-        internal fun injector(): DepsInjection = TODO()
+        internal fun injector(): DiInjector = checkNotNull(INJECTOR)
 
         private fun startImpl(
             activity: Activity,
@@ -324,10 +354,11 @@ class PyrusServiceDesk private constructor(
             if (configuration != null) {
                 StaticRepository.setConfiguration(configuration)
             }
-            get().sharedViewModel.clearQuitServiceDesk()
-            get().onStopCallback = onStopCallback
+            // TODO
+//            get().sharedViewModel.clearQuitServiceDesk()
+//            get().onStopCallback = onStopCallback
 
-            activity.startActivity(TicketActivity.getLaunchIntent())
+            activity.startActivity(MainActivity.getLaunchIntent(activity))
 
             // TODO sds
             if (configuration == null)

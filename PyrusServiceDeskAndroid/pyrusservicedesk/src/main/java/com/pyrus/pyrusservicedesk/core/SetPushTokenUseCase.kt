@@ -18,6 +18,8 @@ internal class SetPushTokenUseCase(
         callback: SetPushTokenCallback,
         tokenType: String,
     ) {
+        // TODO
+        if (true) return
         val userId = (account as? Account.V2)?.userId
         when {
             calculateSkipTokenRegister(userId) -> callback.onResult(Exception("Too many requests. Maximum once every $SET_PUSH_TOKEN_TIMEOUT minutes."))

@@ -14,12 +14,12 @@ public class SampleApp extends Application {
     public void onCreate() {
         super.onCreate();
         PyrusServiceDesk.init(
-                this,
-                "my_app_id",
-                "user_id",
-                "security_key",
-                null,
-                true
+            this,
+            "my_app_id",
+            "user_id",
+            "security_key",
+            null,
+            true
         );
 
         Map<String, String> map = new HashMap<>();
@@ -30,9 +30,11 @@ public class SampleApp extends Application {
         map.put("test_email", "sample@email.com");
         PyrusServiceDesk.setFieldsData(map);
 
-        PyrusServiceDesk.setPushToken(
-                "my_push_token",
-                exception -> Log.w("SAMPLE_APP", exception));
+        // TODO
+//        PyrusServiceDesk.setPushToken(
+//            "my_push_token",
+//            exception -> Log.w("SAMPLE_APP", exception)
+//        );
 
         PyrusServiceDesk.onAuthorizationFailed(null);
     }

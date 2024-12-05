@@ -23,18 +23,17 @@ public class SampleActivity extends Activity implements NewReplySubscriber {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_sample);
-        findViewById(R.id.support).setOnClickListener(
-                view -> PyrusServiceDesk.start(
-                        this,
-                        new ServiceDeskConfiguration.Builder()
-                                .setUserName("Ivan Ivanov")
-                                .setThemeColor(Color.parseColor("#FF8300"))
-                                .setChatTitle("Sample Support")
-                                .setWelcomeMessage("How can I help you?")
-                                .setAvatarForSupport(R.drawable.psd_download_file)
-                                .setChatMenuDelegate(new ChatMenuDelegate())
-                                .setTrustedUrls(Collections.singletonList("pyrus.com"))
-                                .build())
+        findViewById(R.id.support).setOnClickListener(view -> PyrusServiceDesk.start(
+            this,
+            new ServiceDeskConfiguration.Builder()
+                .setUserName("Ivan Ivanov")
+                .setThemeColor(Color.parseColor("#FF8300"))
+                .setChatTitle("Sample Support")
+                .setWelcomeMessage("How can I help you?")
+                .setAvatarForSupport(R.drawable.psd_download_file)
+                .setChatMenuDelegate(new ChatMenuDelegate())
+                .setTrustedUrls(Collections.singletonList("pyrus.com"))
+                .build())
         );
 
         PyrusServiceDesk.onAuthorizationFailed(
@@ -65,23 +64,23 @@ public class SampleActivity extends Activity implements NewReplySubscriber {
     @Override
     protected void onStart() {
         super.onStart();
-        PyrusServiceDesk.subscribeToReplies(this);
+//        PyrusServiceDesk.subscribeToReplies(this);
     }
 
     @Override
     protected void onStop() {
-        PyrusServiceDesk.unsubscribeFromReplies(this);
+//        PyrusServiceDesk.unsubscribeFromReplies(this);
         super.onStop();
     }
 
     @SuppressLint("SetTextI18n")
     @Override
     public void onNewReply(
-            boolean hasUnreadComments,
-            @Nullable String lastCommentText,
-            int lastCommentAttachmentsCount,
-            @Nullable List<String> lastCommentAttachments,
-            long utcTime
+        boolean hasUnreadComments,
+        @Nullable String lastCommentText,
+        int lastCommentAttachmentsCount,
+        @Nullable List<String> lastCommentAttachments,
+        long utcTime
     ) {
 
         String text;

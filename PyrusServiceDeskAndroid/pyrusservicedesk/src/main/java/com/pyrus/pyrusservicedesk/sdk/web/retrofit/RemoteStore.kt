@@ -2,6 +2,7 @@ package com.pyrus.pyrusservicedesk.sdk.web.retrofit
 
 import androidx.annotation.Keep
 import com.pyrus.pyrusservicedesk.PyrusServiceDesk
+import com.pyrus.pyrusservicedesk.PyrusServiceDesk.Companion.API_VERSION_1
 import com.pyrus.pyrusservicedesk.PyrusServiceDesk.Companion.API_VERSION_2
 import com.pyrus.pyrusservicedesk.core.StaticRepository
 import com.pyrus.pyrusservicedesk._ref.utils.log.PLog
@@ -23,6 +24,7 @@ import com.pyrus.pyrusservicedesk._ref.utils.Try
 import com.pyrus.pyrusservicedesk._ref.utils.getFirstNSymbols
 import com.pyrus.pyrusservicedesk._ref.utils.isSuccess
 import com.pyrus.pyrusservicedesk._ref.utils.map
+import com.pyrus.pyrusservicedesk.core.Account
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
@@ -36,17 +38,16 @@ private const val FAILED_AUTHORIZATION_ERROR_CODE = 403
 /**
  * Web Repository implementation based on [Retrofit] library.
  *
- * @param appId id of the app that obtained through special Pyrus form.
  * @param instanceId UID of app instance. Generated installation id is used by default.
  * @param fileResolver helper for making upload file requests.
  */
 @Keep
 internal class RemoteStore(
-    private val appId: String,
     private val instanceId: String,
     private val fileResolver: FileResolver,
     private val fileManager: FileManager,
     private val api: ServiceDeskApi,
+    private val account: Account,
 ) {
 
     private val sequentialRequests = LinkedBlockingQueue<SequentialRequest>()
@@ -59,14 +60,14 @@ internal class RemoteStore(
     suspend fun getFeed(keepUnread: Boolean): Try<Comments> {
         PLog.d(
             TAG, "getFeed, " +
-                "appId: ${appId.getFirstNSymbols(10)}, " +
+                "appId: ${account.appId.getFirstNSymbols(10)}, " +
                 "userId: ${getUserId().getFirstNSymbols(10)}, " +
                 "instanceId: ${getInstanceId()?.getFirstNSymbols(10)}, " +
                 "apiVersion: ${getVersion()}"
         )
         val commentsTry = api.getTicketFeed(
             GetFeedBody(
-                appId,
+                account.appId,
                 getUserId(),
                 getSecurityKey(),
                 instanceId,
@@ -85,14 +86,14 @@ internal class RemoteStore(
     suspend fun getTickets(): Try<List<TicketShortDescription>> {
         PLog.d(
             TAG, "getTickets, " +
-                "appId: ${appId.getFirstNSymbols(10)}, " +
+                "appId: ${account.appId.getFirstNSymbols(10)}, " +
                 "userId: ${getUserId().getFirstNSymbols(10)}, " +
                 "instanceId: ${getInstanceId()?.getFirstNSymbols(10)}, " +
                 "apiVersion: ${getVersion()}"
         )
         val ticketsTry = api.getTickets(
             RequestBodyBase(
-                appId,
+                account.appId,
                 getUserId(),
                 getSecurityKey(),
                 getInstanceId(),
@@ -123,7 +124,7 @@ internal class RemoteStore(
     suspend fun setPushToken(token: String?, tokenType: String): Try<Unit> {
         PLog.d(
             TAG, "setPushToken, " +
-                "appId: ${appId.getFirstNSymbols(10)}, " +
+                "appId: ${account.appId.getFirstNSymbols(10)}, " +
                 "userId: ${getUserId().getFirstNSymbols(10)}, " +
                 "instanceId: ${getInstanceId()?.getFirstNSymbols(10)}, " +
                 "apiVersion: ${getVersion()}, " +
@@ -133,7 +134,7 @@ internal class RemoteStore(
 
         val setPushTokenTry = api.setPushToken(
             SetPushTokenBody(
-                appId,
+                account.appId,
                 getUserId(),
                 getSecurityKey(),
                 getInstanceId(),
@@ -154,7 +155,7 @@ internal class RemoteStore(
 
         PLog.d(
             TAG, "addComment, " +
-                "appId: ${appId.getFirstNSymbols(10)}, " +
+                "appId: ${account.appId.getFirstNSymbols(10)}, " +
                 "userId: ${getUserId().getFirstNSymbols(10)}, " +
                 "instanceId: ${getInstanceId()?.getFirstNSymbols(10)}, " +
                 "apiVersion: ${getVersion()}, " +
@@ -174,7 +175,7 @@ internal class RemoteStore(
         }
         val addFeedCommentTry = api.addFeedComment(
             AddCommentRequestBody(
-                appId,
+                account.appId,
                 getUserId(),
                 getSecurityKey(),
                 getInstanceId(),
@@ -239,27 +240,24 @@ internal class RemoteStore(
         return uploadFileTry
     }
 
-    private fun getUserId(): String {
-        if (getVersion() == API_VERSION_2) {
-            return PyrusServiceDesk.get().userId ?: instanceId
-        }
-        return instanceId
+    private fun getUserId() = when(account) {
+        is Account.V1 -> instanceId
+        is Account.V2 -> account.userId
     }
 
-    private fun getVersion(): Int {
-        return PyrusServiceDesk.get().apiVersion
+    private fun getVersion(): Int = when (account) {
+        is Account.V1 -> API_VERSION_1
+        is Account.V2 -> API_VERSION_2
     }
 
-    private fun getSecurityKey(): String? {
-        if (getVersion() == API_VERSION_2)
-            return PyrusServiceDesk.get().securityKey
-        return null
+    private fun getSecurityKey() = when (account) {
+        is Account.V1 -> null
+        is Account.V2 -> account.securityKey
     }
 
-    private fun getInstanceId(): String? {
-        if (getVersion() == API_VERSION_2)
-            return instanceId
-        return null
+    private fun getInstanceId() = when (API_VERSION_2) {
+        getVersion() -> instanceId
+        else -> null
     }
 
     private fun Attachment.toRemoteAttachment(guid: String) = Attachment(

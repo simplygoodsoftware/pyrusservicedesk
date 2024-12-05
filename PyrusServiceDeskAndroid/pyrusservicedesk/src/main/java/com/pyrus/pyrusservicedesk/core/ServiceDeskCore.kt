@@ -6,7 +6,6 @@ import android.content.SharedPreferences
 import android.net.Uri
 import android.os.Build
 import com.google.gson.GsonBuilder
-import com.pyrus.pyrusservicedesk.BuildConfig
 import com.pyrus.pyrusservicedesk._ref.ui_domain.screens.ticket.TicketFeature
 import com.pyrus.pyrusservicedesk.sdk.FileResolver
 import com.pyrus.pyrusservicedesk.sdk.FileResolverImpl
@@ -34,7 +33,7 @@ import retrofit2.converter.gson.GsonConverterFactory
 import java.util.concurrent.TimeUnit
 
 internal class ServiceDeskCore(
-    internal val depsInjection: DepsInjection,
+    internal val diInjector: DiInjector,
 )
 
 internal sealed interface Account {
@@ -59,7 +58,7 @@ internal sealed interface Account {
 
 }
 
-internal class DepsInjection(
+internal class DiInjector(
     private val application: Application,
     private val account: Account,
     private val loggingEnabled: Boolean,
@@ -117,11 +116,11 @@ internal class DepsInjection(
     private val fileManager: FileManager = FileManager(application, fileResolver)
 
     private val remoteStore: RemoteStore = RemoteStore(
-        appId = account.appId,
         instanceId = ConfigUtils.getInstanceId(preferences),
         fileResolver = fileResolver,
         fileManager = fileManager,
         api = api,
+        account = account
     )
 
     private val repository: Repository = Repository(localStore, remoteStore)
