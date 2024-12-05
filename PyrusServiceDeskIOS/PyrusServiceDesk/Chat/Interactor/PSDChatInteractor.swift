@@ -168,13 +168,14 @@ private extension PSDChatInteractor {
                         label.isUserInteractionEnabled = true
                         label.textAlignment = .center
                         label.font = CustomizationHelper.systemBoldFont(ofSize: 17)
-                        label.text = chat?.subject?.count ?? 0 > 0 ? chat?.subject : "NewTicket".localizedPSD()
+                        label.text = chat?.subject?.count ?? 0 > 0 ? chat?.subject : ""
                         label.translatesAutoresizingMaskIntoConstraints = false
                         label.widthAnchor.constraint(equalToConstant: 200).isActive = true
                         
                         customization?.setChatTitileView(label)
                         presenter.doWork(.reloadTitle)
                     }
+                    readChat()
                 }
                 self.isRefresh = false
                 fromPush = false
@@ -291,10 +292,14 @@ private extension PSDChatInteractor {
     
     func readChat() {
         let ticketId = chat?.chatId ?? 0
-        let params = TicketCommandParams(ticketId: ticketId, appId: PyrusServiceDesk.currentClientId ?? PyrusServiceDesk.clientId, userId: PyrusServiceDesk.currentUserId ?? PyrusServiceDesk.customUserId ?? PyrusServiceDesk.userId)
-        let command = TicketCommand(commandId: UUID().uuidString, type: .readTicket,  appId: PyrusServiceDesk.currentClientId ?? PyrusServiceDesk.clientId, userId:  PyrusServiceDesk.currentUserId ?? PyrusServiceDesk.customUserId ?? PyrusServiceDesk.userId, params: params)
-        PyrusServiceDesk.repository.add(command: command)
-        PyrusServiceDesk.syncManager.syncGetTickets()
+        let lastReadedLocalId = max(chat?.lastReadedCommentId ?? 0, PyrusServiceDesk.repository.lastLocalReadCommentId(ticketId: chat?.chatId) ?? 0)
+
+        if lastReadedLocalId < Int(chat?.lastComment?.messageId ?? "") ?? 0 {
+            let params = TicketCommandParams(ticketId: ticketId, appId: PyrusServiceDesk.currentClientId ?? PyrusServiceDesk.clientId, userId: PyrusServiceDesk.currentUserId ?? PyrusServiceDesk.customUserId ?? PyrusServiceDesk.userId, messageId: Int(chat?.lastComment?.messageId ?? ""))
+            let command = TicketCommand(commandId: UUID().uuidString, type: .readTicket, appId: PyrusServiceDesk.currentClientId ?? PyrusServiceDesk.clientId, userId:  PyrusServiceDesk.currentUserId ?? PyrusServiceDesk.customUserId ?? PyrusServiceDesk.userId, params: params)
+            PyrusServiceDesk.repository.add(command: command)
+            PyrusServiceDesk.syncManager.syncGetTickets()
+        }
     }
     
     private func setLastActivityDate(){

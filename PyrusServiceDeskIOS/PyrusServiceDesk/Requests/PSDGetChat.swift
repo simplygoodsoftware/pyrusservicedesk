@@ -121,6 +121,7 @@ struct PSDGetChat {
         let chat = PSDChat(chatId: ticketId, date: Date(), messages: massages)
         chat.showRating = (response[PSDGetChat.SHOW_RATING_KEY] as? Bool) ?? false
         chat.showRatingText = response[PSDGetChat.SHOW_RATING_TEXT_KEY] as? String
+        chat.lastReadedCommentId = response["last_read_comment_id"] as? Int
         return chat
     }
     static func generateMessages(from array:NSArray) -> [PSDMessage]

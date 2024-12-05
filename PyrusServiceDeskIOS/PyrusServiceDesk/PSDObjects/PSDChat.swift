@@ -9,6 +9,7 @@ class PSDChat: Hashable {
     var subject: String?
     var lastComment: PSDMessage?
     var userId: String?
+    var lastReadedCommentId: Int?
     
     init(chatId: Int?, date: Date, messages: [PSDMessage]) {
         self.chatId = chatId
@@ -17,7 +18,7 @@ class PSDChat: Hashable {
     }
     
     static func == (lhs: PSDChat, rhs: PSDChat) -> Bool {
-        return lhs.chatId == rhs.chatId && lhs.date == rhs.date && lhs.isRead == rhs.isRead && lhs.showRating == rhs.showRating && lhs.showRatingText == rhs.showRatingText
+        return lhs.chatId == rhs.chatId && lhs.date == rhs.date && lhs.isRead == rhs.isRead && lhs.showRating == rhs.showRating && lhs.showRatingText == rhs.showRatingText && lhs.lastReadedCommentId == rhs.lastReadedCommentId
     }
     
     func hash(into hasher: inout Hasher) {
@@ -27,6 +28,7 @@ class PSDChat: Hashable {
         hasher.combine(showRating)
         hasher.combine(showRatingText)
         hasher.combine(subject)
+        hasher.combine(lastReadedCommentId)
     }
     
     static func draftAnswers(_ tableMatrix: [[PSDRowMessage]]) -> [ButtonData]? {

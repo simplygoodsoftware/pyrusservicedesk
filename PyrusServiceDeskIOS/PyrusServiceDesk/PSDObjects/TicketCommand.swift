@@ -21,8 +21,9 @@ class TicketCommandParams: Codable {
     let attachments: [AttachmentData]?
     let token: String?
     let type: String?
+    let messageId: Int?
     
-    init(ticketId: Int?, appId: String?, requestNewTicket: Bool? = nil, userId: String?, message: String? = nil, attachments: [AttachmentData]? = nil, authorId: String? = nil, token: String? = nil, type: String? = nil) {
+    init(ticketId: Int?, appId: String?, requestNewTicket: Bool? = nil, userId: String?, message: String? = nil, attachments: [AttachmentData]? = nil, authorId: String? = nil, token: String? = nil, type: String? = nil, messageId: Int? = nil) {
         self.ticketId = ticketId
         self.appId = appId
         self.requestNewTicket = requestNewTicket
@@ -31,6 +32,7 @@ class TicketCommandParams: Codable {
         self.attachments = attachments
         self.token = token
         self.type = type
+        self.messageId = messageId
     }
     
     enum CodingKeys: String, CodingKey {
@@ -42,6 +44,7 @@ class TicketCommandParams: Codable {
         case attachments = "attachments"
         case token = "token"
         case type = "type"
+        case messageId = "comment_id"
     }
 }
 

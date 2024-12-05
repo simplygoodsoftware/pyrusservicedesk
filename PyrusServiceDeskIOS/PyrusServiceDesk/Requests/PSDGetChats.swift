@@ -34,7 +34,7 @@ struct PSDGetChats {
             }
             parameters["additional_users"] = additional_users
         }
-        parameters["commands"] = commands
+//        parameters["commands"] = commands
         
         let request: URLRequest = URLRequest.createRequest(type:.chats, parameters: parameters)
         
@@ -161,6 +161,7 @@ struct PSDGetChats {
             chat.isRead = dic["is_read"] as? Bool ??  true
             chat.userId = userId
             chat.lastComment = lastMessage
+            chat.lastReadedCommentId = dic["last_read_comment_id"] as? Int
             chats.append(chat)
         }
         

@@ -143,10 +143,14 @@ private extension ChatsInteractor {
     
     func openChat(chat: PSDChat, fromPush: Bool) {
         PyrusServiceDesk.currentUserId = chat.userId
-        let params = TicketCommandParams(ticketId: chat.chatId ?? 0, appId: PyrusServiceDesk.currentClientId ?? PyrusServiceDesk.clientId, userId: PyrusServiceDesk.currentUserId ?? PyrusServiceDesk.customUserId ?? PyrusServiceDesk.userId)
-        let command = TicketCommand(commandId: UUID().uuidString, type: .readTicket, appId: PyrusServiceDesk.currentClientId ?? PyrusServiceDesk.clientId, userId:  PyrusServiceDesk.currentUserId ?? PyrusServiceDesk.customUserId ?? PyrusServiceDesk.userId, params: params)
-        PyrusServiceDesk.repository.add(command: command)
-        PyrusServiceDesk.syncManager.syncGetTickets()
+        let lastReadedLocalId = max(chat.lastReadedCommentId ?? 0, PyrusServiceDesk.repository.lastLocalReadCommentId(ticketId: chat.chatId) ?? 0)
+        if lastReadedLocalId < Int(chat.lastComment?.messageId ?? "") ?? 0 {
+            let params = TicketCommandParams(ticketId: chat.chatId ?? 0, appId: PyrusServiceDesk.currentClientId ?? PyrusServiceDesk.clientId, userId: PyrusServiceDesk.currentUserId ?? PyrusServiceDesk.customUserId ?? PyrusServiceDesk.userId, messageId: Int(chat.lastComment?.messageId ?? ""))
+            let command = TicketCommand(commandId: UUID().uuidString, type: .readTicket, appId: PyrusServiceDesk.currentClientId ?? PyrusServiceDesk.clientId, userId:  PyrusServiceDesk.currentUserId ?? PyrusServiceDesk.customUserId ?? PyrusServiceDesk.userId, params: params)
+            PyrusServiceDesk.repository.add(command: command)
+            PyrusServiceDesk.syncManager.syncGetTickets()
+        }
+
         presenter.doWork(.openChat(chat: chat, fromPush: fromPush))
     }
     
@@ -281,10 +285,19 @@ private extension ChatsInteractor {
     }
     
     func prepareChats() -> [ChatPresenterModel] {
-        return chats.map({ ChatPresenterModel(
+        return chats.map({
+            var isRead = $0.isRead
+            if
+                !isRead,
+                let lastLocalReadedId = PyrusServiceDesk.repository.lastLocalReadCommentId(ticketId: $0.chatId),
+                lastLocalReadedId > (Int($0.lastComment?.messageId ?? "") ?? 0)
+            {
+                isRead = true
+            }
+            return ChatPresenterModel(
             id: $0.chatId ?? 0,
             date: $0.date,
-            isRead: $0.isRead,
+            isRead: isRead,
             subject: $0.subject,
             lastComment: $0.lastComment,
             messages: $0.messages

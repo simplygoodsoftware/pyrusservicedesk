@@ -151,4 +151,11 @@ class TicketCommandRepository {
         commandsCache = []
         save(commands: [], completion: completion)
     }
+    
+    func lastLocalReadCommentId(ticketId: Int?) -> Int? {
+        guard let ticketId = ticketId else {
+            return nil
+        }
+        return commandsCache?.filter{ $0.type == TicketCommandType.readTicket.rawValue && $0.params.ticketId == ticketId }.last?.params.messageId
+    }
 }

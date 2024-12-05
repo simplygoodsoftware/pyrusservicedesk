@@ -123,6 +123,10 @@ import UIKit
                     }
                 }
             }
+            let params = TicketCommandParams(ticketId: ticketId, appId: PyrusServiceDesk.currentClientId ?? PyrusServiceDesk.clientId, userId: uId, messageId: messageId)
+            let command = TicketCommand(commandId: UUID().uuidString, type: .readTicket, appId: PyrusServiceDesk.currentClientId ?? PyrusServiceDesk.clientId, userId:  uId, params: params)
+            PyrusServiceDesk.repository.add(command: command)
+
             if let chat {
                 interactor = PSDChatInteractor(presenter: presenter, chat: chat)
             } else {
@@ -130,6 +134,7 @@ import UIKit
                 chat.userId = uId
                 interactor = PSDChatInteractor(presenter: presenter, chat: chat, fromPush: true)
             }
+            
             let label = UILabel()
             label.isUserInteractionEnabled = true
             label.textAlignment = .center
