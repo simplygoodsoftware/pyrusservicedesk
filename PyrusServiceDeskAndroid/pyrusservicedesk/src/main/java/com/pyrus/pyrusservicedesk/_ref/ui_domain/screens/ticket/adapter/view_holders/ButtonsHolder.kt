@@ -11,21 +11,20 @@ import androidx.appcompat.content.res.AppCompatResources
 import com.pyrus.pyrusservicedesk.R
 import com.pyrus.pyrusservicedesk.databinding.PsdViewHolderButtonsBinding
 import com.pyrus.pyrusservicedesk._ref.ui_domain.screens.ticket.adapter.TicketAdapter
-import com.pyrus.pyrusservicedesk._ref.ui_domain.screens.ticket.adapter.entries.ButtonEntry
-import com.pyrus.pyrusservicedesk._ref.ui_domain.screens.ticket.adapter.entries.ButtonsEntry
+import com.pyrus.pyrusservicedesk._ref.ui_domain.screens.ticket.adapter.new_entries.CommentEntryV2
 import com.pyrus.pyrusservicedesk.presentation.ui.view.recyclerview.ViewHolderBase
 import com.pyrus.pyrusservicedesk._ref.utils.ConfigUtils
 
-internal class ButtonsHolder(parent: ViewGroup): ViewHolderBase<ButtonsEntry>(parent,
+internal class ButtonsHolder(parent: ViewGroup): ViewHolderBase<CommentEntryV2.Buttons>(parent,
     R.layout.psd_view_holder_buttons
 ) {
 
     private val binding = PsdViewHolderButtonsBinding.bind(itemView)
 
-    override fun bindItem(item: ButtonsEntry) {
-        super.bindItem(item)
+    override fun bindItem(entry: CommentEntryV2.Buttons) {
+        super.bindItem(entry)
 
-        item.buttons.forEachIndexed { index, buttonEntry ->
+        entry.buttons.forEachIndexed { index, buttonEntry ->
             (binding.flButtons.getChildAt(index) as? TextView)?.apply {
                 val buttonText = buttonEntry.text
 
@@ -44,7 +43,7 @@ internal class ButtonsHolder(parent: ViewGroup): ViewHolderBase<ButtonsEntry>(pa
 
 
                 when(buttonEntry) {
-                    is ButtonEntry.Link -> {
+                    is CommentEntryV2.ButtonEntry.Link -> {
                         text = "$buttonText   "
                         val shareDrawable = AppCompatResources.getDrawable(
                             context,
@@ -65,10 +64,10 @@ internal class ButtonsHolder(parent: ViewGroup): ViewHolderBase<ButtonsEntry>(pa
 
                     }
 
-                    is ButtonEntry.Simple -> {
+                    is CommentEntryV2.ButtonEntry.Simple -> {
                         text = buttonText
                         setCompoundDrawablesWithIntrinsicBounds(0, 0, 0, 0)
-                        setOnClickListener { item.onButtonClick.invoke(buttonText) }
+                        setOnClickListener { entry.onButtonClick.invoke(buttonText) }
                     }
                 }
 
@@ -76,7 +75,7 @@ internal class ButtonsHolder(parent: ViewGroup): ViewHolderBase<ButtonsEntry>(pa
             }
         }
 
-        repeat(binding.flButtons.childCount - item.buttons.size) {
+        repeat(binding.flButtons.childCount - entry.buttons.size) {
             binding.flButtons.getChildAt(binding.flButtons.childCount - 1 - it).apply {
                 visibility = View.GONE
                 setOnClickListener(null)

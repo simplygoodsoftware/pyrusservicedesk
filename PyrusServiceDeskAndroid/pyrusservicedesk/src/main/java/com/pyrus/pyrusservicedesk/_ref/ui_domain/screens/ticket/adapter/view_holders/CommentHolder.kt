@@ -3,116 +3,84 @@ package com.pyrus.pyrusservicedesk._ref.ui_domain.screens.ticket.adapter.view_ho
 import android.view.View
 import android.view.ViewGroup
 import androidx.annotation.LayoutRes
-import com.pyrus.pyrusservicedesk.R
-import com.pyrus.pyrusservicedesk._ref.ui_domain.screens.ticket.adapter.entries.CommentEntry
-import com.pyrus.pyrusservicedesk._ref.ui_domain.screens.ticket.adapter.entries.hasError
+import com.pyrus.pyrusservicedesk._ref.ui_domain.screens.ticket.adapter.new_entries.CommentEntryV2
 import com.pyrus.pyrusservicedesk.presentation.ui.view.CommentView
 import com.pyrus.pyrusservicedesk.presentation.ui.view.ContentType
 import com.pyrus.pyrusservicedesk.presentation.ui.view.Status
 import com.pyrus.pyrusservicedesk.presentation.ui.view.recyclerview.ViewHolderBase
 import com.pyrus.pyrusservicedesk.sdk.data.Attachment
 import com.pyrus.pyrusservicedesk._ref.utils.getTimeText
-import com.pyrus.pyrusservicedesk._ref.utils.isImage
 
 internal abstract class CommentHolder(
     parent: ViewGroup,
     @LayoutRes layoutRes: Int,
-    private val onErrorCommentEntryClickListener: (entry: CommentEntry) -> Unit,
+    private val onErrorCommentEntryClickListener: (entry: CommentEntryV2.Comment) -> Unit,
     private val onFileReadyToPreviewClickListener: (attachment: Attachment) -> Unit,
     private val onTextCommentLongClicked: (String) -> Unit,
-) : ViewHolderBase<CommentEntry>(parent, layoutRes) {
+) : ViewHolderBase<CommentEntryV2.Comment>(parent, layoutRes) {
 
     abstract val comment: CommentView
 
     private val onCommentClickListener = View.OnClickListener {
         when {
-            getItem().hasError() -> onErrorCommentEntryClickListener.invoke(getItem())
+            getItem().hasError -> onErrorCommentEntryClickListener.invoke(getItem())
             (comment.contentType == ContentType.Attachment
                 || comment.contentType == ContentType.PreviewableAttachment)
                 && comment.fileProgressStatus == Status.Completed -> {
-
-                onFileReadyToPreviewClickListener.invoke(getItem().comment.attachments!!.first())
+                    TODO()
+//                onFileReadyToPreviewClickListener.invoke(getItem().comment.attachments!!.first())
             }
         }
     }
 
     private val onCommentLongClickListener = View.OnLongClickListener {
-        return@OnLongClickListener when {
-            !getItem().comment.hasAttachments() -> {
-                onTextCommentLongClicked.invoke(getItem().comment.body ?: "")
-                true
-            }
-
-            else -> false
-        }
+        TODO()
+//        return@OnLongClickListener when {
+//            !getItem().comment.hasAttachments() -> {
+//                onTextCommentLongClicked.invoke(getItem().comment.body ?: "")
+//                true
+//            }
+//
+//            else -> false
+//        }
     }
 
-    override fun bindItem(item: CommentEntry) {
-        super.bindItem(item)
-        itemView.setOnClickListener {
-            if (getItem().hasError()) {
-                onErrorCommentEntryClickListener.invoke(getItem())
-            }
-        }
+    override fun bindItem(entry: CommentEntryV2.Comment) {
+        super.bindItem(entry)
+
         comment.setOnLongClickListener(onCommentLongClickListener)
         comment.setOnClickListener(onCommentClickListener)
-        comment.status = when {
-            getItem().hasError() -> Status.Error
-            getItem().comment.isLocal() -> Status.Processing
-            else -> Status.Completed
-        }
-        comment.contentType = when {
-            !item.comment.hasAttachments() -> ContentType.Text
-            item.comment.attachments!!.first().name.isImage() -> ContentType.PreviewableAttachment
-            else -> ContentType.Attachment
-        }
-        when (comment.contentType){
-            ContentType.Text -> bindTextView()
-            else -> bindAttachmentView()
-        }
+        comment.status = entry.status
+        comment.contentType = entry.contentType
 
-        val creationTime =
-            if (getItem().comment.isWelcomeMessage) ""
-            else getItem().comment.creationDate.getTimeText(itemView.context)
+        comment.setCreationTime(entry.timeText)
 
-        comment.setCreationTime(creationTime)
-    }
 
-    override fun onDetachedFromWindow() {
-        super.onDetachedFromWindow()
-        getItem().uploadFileHooks?.unsubscribeFromProgress()
-    }
-
-    private fun bindTextView() {
-        val text = getItem().comment.body ?: ""
-        comment.setCommentText(text)
-    }
-
-    private fun bindAttachmentView() {
-        getItem().comment.attachments!!.first().let { attachment ->
-            comment.setFileName(getItem().comment.attachments?.first()?.name ?: "")
-            comment.setFileSize(getItem().comment.attachments?.first()?.bytesSize?.toFloat() ?: 0f)
-            // TODO sds
-//            comment.setPreview(attachment.getPreviewUrl())
-            comment.fileProgressStatus = if (getItem().hasError()) Status.Error else Status.Completed
-            comment.setOnProgressIconClickListener {
-                when (comment.fileProgressStatus) {
-                    Status.Processing -> getItem().uploadFileHooks?.cancelUploading()
-                    Status.Completed -> onFileReadyToPreviewClickListener.invoke(getItem().comment.attachments!![0])
-                    Status.Error -> onCommentClickListener.onClick(comment)
-                }
+        itemView.setOnClickListener {
+            if (entry.hasError) {
+                onErrorCommentEntryClickListener.invoke(entry)
             }
-            if (!getItem().hasError()) {
-                getItem().uploadFileHooks?.subscribeOnProgress {
-                    comment.setProgress(it)
-                    when {
-                        it == itemView.resources.getInteger(R.integer.psd_progress_max_value) ->
-                            comment.fileProgressStatus = Status.Completed
-                        comment.fileProgressStatus != Status.Processing ->
-                            comment.fileProgressStatus = Status.Processing
-                    }
-                }
-            }
+        }
+
+        when (entry.contentType) {
+            ContentType.Text -> bindTextView(entry)
+            else -> bindAttachmentView(entry)
+        }
+    }
+
+    private fun bindTextView(entry: CommentEntryV2.Comment) {
+        comment.setCommentText(entry.text)
+    }
+
+    private fun bindAttachmentView(entry: CommentEntryV2.Comment) {
+        val fileUrl = entry.attachUrl ?: return
+
+        comment.setFileName(entry.attachmentName)
+        comment.setFileSize(entry.fileSize)
+        comment.setPreview(fileUrl)
+        comment.fileProgressStatus = entry.fileProgressStatus
+        comment.setOnProgressIconClickListener {
+            TODO()
         }
     }
 }

@@ -4,13 +4,14 @@ import android.view.ViewGroup
 import com.pyrus.pyrusservicedesk.R
 import com.pyrus.pyrusservicedesk.databinding.PsdViewHolderRatingBinding
 import com.pyrus.pyrusservicedesk._ref.ui_domain.screens.ticket.adapter.entries.RatingEntry
+import com.pyrus.pyrusservicedesk._ref.ui_domain.screens.ticket.adapter.new_entries.CommentEntryV2
 import com.pyrus.pyrusservicedesk.presentation.ui.view.recyclerview.ViewHolderBase
 import com.pyrus.pyrusservicedesk._ref.utils.ConfigUtils
 
 internal class RatingHolder(
     parent: ViewGroup,
     private val onRatingClickListener: (Int) -> Unit,
-) : ViewHolderBase<RatingEntry>(parent, R.layout.psd_view_holder_rating) {
+) : ViewHolderBase<CommentEntryV2.SelectRating>(parent, R.layout.psd_view_holder_rating) {
 
     private val binding = PsdViewHolderRatingBinding.bind(itemView)
 
@@ -24,8 +25,8 @@ internal class RatingHolder(
         }
     }
 
-    override fun bindItem(item: RatingEntry) {
-        super.bindItem(item)
+    override fun bindItem(entry: CommentEntryV2.SelectRating) {
+        super.bindItem(entry)
 
         binding.rating1.setOnClickListener { onRatingClickListener.invoke(1) }
         binding.rating2.setOnClickListener { onRatingClickListener.invoke(2) }

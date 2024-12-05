@@ -113,7 +113,7 @@ internal class TicketActivity : ConnectionActivityBase<TicketViewModel>(TicketVi
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setupWindowInsets(root)
+//        setupWindowInsets(root)
 
         savedInstanceState?.let { ServiceDeskConfiguration.restore(it) }
 
@@ -251,7 +251,7 @@ internal class TicketActivity : ConnectionActivityBase<TicketViewModel>(TicketVi
 //            val isEmpty = comments.adapter?.itemCount == 0
             result?.let {
 //                refresh.isRefreshing = false
-                adapter.setItems(it.newItems)
+//                adapter.setItems(it.newItems)
                 it.diffResult.dispatchUpdatesTo(adapter)
             }
 //            if (adapter.itemCount > 0 && atEnd) {

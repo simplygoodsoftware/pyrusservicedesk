@@ -12,20 +12,20 @@ import android.view.ViewGroup
  * @param layoutId id of the layout of view holder's view
  */
 internal abstract class ViewHolderBase<T>(
-        parent: ViewGroup,
-        @LayoutRes layoutId: Int)
-    : RecyclerView.ViewHolder(
-        LayoutInflater.from(parent.context)
-                .inflate(layoutId, parent, false)){
+    parent: ViewGroup,
+    @LayoutRes layoutId: Int,
+) : RecyclerView.ViewHolder(
+    LayoutInflater.from(parent.context).inflate(layoutId, parent, false)
+) {
 
-    private var item: T? = null
+    private var entry: T? = null
 
     /**
      * Here implementations can bind data into its view.
-     * NB: if implementation omits call of the super.bindItem hte actual [item] is not available then.
+     * NB: if implementation omits call of the super.bindItem hte actual [entry] is not available then.
      */
-    open fun bindItem(item: T) {
-        this.item = item
+    open fun bindItem(entry: T) {
+        this.entry = entry
     }
 
     /**
@@ -39,5 +39,5 @@ internal abstract class ViewHolderBase<T>(
      * Provides an item that was bound to a view holder in [bindItem].
      * NB: this call is safe only after super.bindItem is called by an implementation.
      */
-    protected fun getItem() = item!!
+    protected fun getItem() = entry!!
 }

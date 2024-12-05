@@ -13,6 +13,7 @@ import com.pyrus.pyrusservicedesk._ref.ui_domain.screens.ticket.adapter.view_hol
 import com.pyrus.pyrusservicedesk._ref.ui_domain.screens.ticket.adapter.entries.CommentEntry
 import com.pyrus.pyrusservicedesk._ref.ui_domain.screens.ticket.adapter.entries.TicketEntry
 import com.pyrus.pyrusservicedesk._ref.ui_domain.screens.ticket.adapter.entries.Type
+import com.pyrus.pyrusservicedesk._ref.ui_domain.screens.ticket.adapter.new_entries.CommentEntryV2
 import com.pyrus.pyrusservicedesk.presentation.ui.view.recyclerview.AdapterBase
 import com.pyrus.pyrusservicedesk.presentation.ui.view.recyclerview.ViewHolderBase
 import com.pyrus.pyrusservicedesk.presentation.ui.view.recyclerview.item_decorators.SpaceMultiplier
@@ -22,11 +23,11 @@ import com.pyrus.pyrusservicedesk.sdk.data.Attachment
  * Adapter that is used for rendering comment feed of the ticket screen.
  */
 internal class TicketAdapter(
-    private val onErrorCommentEntryClickListener: (entry: CommentEntry) -> Unit,
+    private val onErrorCommentEntryClickListener: (entry: CommentEntryV2) -> Unit,
     private val onFileReadyToPreviewClickListener: (attachment: Attachment) -> Unit,
     private val onTextCommentLongClicked: (String) -> Unit,
     private val onRatingClickListener: (Int) -> Unit,
-): AdapterBase<TicketEntry>() {
+): AdapterBase<CommentEntryV2>() {
 
     /**
      * [SpaceMultiplier] implementation for customizing spaces between items fot the feed.
@@ -35,31 +36,28 @@ internal class TicketAdapter(
         override fun getMultiplier(adapterPosition: Int): Float {
             return when {
                 adapterPosition <= 0 -> 1f
-                itemsList[adapterPosition].type == Type.Comment
-                        && itemsList[adapterPosition -1].type == Type.Comment
-                        && (itemsList[adapterPosition] as CommentEntry).comment.isInbound !=
-                            (itemsList[adapterPosition - 1] as CommentEntry).comment.isInbound -> 2f
+                itemsList[adapterPosition] is CommentEntryV2.Comment
+                        && itemsList[adapterPosition -1] is CommentEntryV2.Comment
+                        && (itemsList[adapterPosition] as CommentEntryV2.Comment).isInbound !=
+                            (itemsList[adapterPosition - 1] as CommentEntryV2.Comment).isInbound -> 2f
                 else -> 1f
             }
         }
     }
 
     override fun getItemViewType(position: Int): Int {
-        return with(itemsList[position]) {
-            return@with when {
-                type == Type.Date -> VIEW_TYPE_DATE
-                type == Type.WelcomeMessage -> VIEW_TYPE_WELCOME_MESSAGE
-                type == Type.Rating -> VIEW_TYPE_RATING
-                type == Type.Buttons -> VIEW_TYPE_COMMENT_BUTTONS
-                (this as CommentEntry).comment.rating != null -> VIEW_TYPE_COMMENT_RATING
-                this.comment.isInbound -> VIEW_TYPE_COMMENT_OUTBOUND
-                else -> VIEW_TYPE_COMMENT_INBOUND
-            }
+        return when(val entry = itemsList[position]) {
+            is CommentEntryV2.Buttons -> VIEW_TYPE_COMMENT_BUTTONS
+            is CommentEntryV2.Comment -> if (entry.isInbound) VIEW_TYPE_COMMENT_OUTBOUND else  VIEW_TYPE_COMMENT_INBOUND
+            is CommentEntryV2.Date -> VIEW_TYPE_DATE
+            is CommentEntryV2.Rating -> VIEW_TYPE_COMMENT_RATING
+            CommentEntryV2.SelectRating -> VIEW_TYPE_RATING
+            is CommentEntryV2.WelcomeMessage -> VIEW_TYPE_WELCOME_MESSAGE
         }
     }
 
     @Suppress("UNCHECKED_CAST")
-    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolderBase<TicketEntry> {
+    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolderBase<CommentEntryV2> {
         return when(viewType){
             VIEW_TYPE_COMMENT_INBOUND -> InboundCommentHolder(
                 parent,
@@ -78,16 +76,16 @@ internal class TicketAdapter(
             VIEW_TYPE_COMMENT_RATING -> RatingCommentHolder(parent, onErrorCommentEntryClickListener)
             VIEW_TYPE_COMMENT_BUTTONS -> ButtonsHolder(parent)
             else -> DateViewHolder(parent)
-        } as ViewHolderBase<TicketEntry>
+        } as ViewHolderBase<CommentEntryV2>
     }
 
-    override fun onViewAttachedToWindow(holder: ViewHolderBase<TicketEntry>) {
+    override fun onViewAttachedToWindow(holder: ViewHolderBase<CommentEntryV2>) {
         super.onViewAttachedToWindow(holder)
         holder.itemView.translationX = 0f
         holder.itemView.findViewById<View>(R.id.author_and_comment)?.let { it.translationX = 0f }
     }
 
-    override fun setItems(items: List<TicketEntry>) {
+    override fun setItems(items: List<CommentEntryV2>) {
         this.itemsList = items.toMutableList()
     }
 

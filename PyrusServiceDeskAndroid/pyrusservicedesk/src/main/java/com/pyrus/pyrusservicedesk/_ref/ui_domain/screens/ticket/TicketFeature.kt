@@ -13,19 +13,19 @@ internal interface TicketContract {
 
         sealed interface Outer : Message {
 
-            object OnPreviewClick : Outer
+            data object OnPreviewClick : Outer
 
-            object OnRetryClick : Outer
+            data object OnRetryClick : Outer
 
             data class OnCopyClick(val text: String) : Outer
 
             data class OnRatingClick(val rating: Int) : Outer
 
-            object OnShowAttachVariantsClick : Outer
+            data object OnShowAttachVariantsClick : Outer
 
-            object OnSendClick : Outer
+            data object OnSendClick : Outer
 
-            object OnCloseClick : Outer
+            data object OnCloseClick : Outer
 
             data class OnMessageChanged(val text: String) : Outer
 

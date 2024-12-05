@@ -5,27 +5,26 @@ import android.view.View
 import android.view.ViewGroup
 import com.pyrus.pyrusservicedesk.R
 import com.pyrus.pyrusservicedesk.databinding.PsdViewHolderCommentRatingBinding
-import com.pyrus.pyrusservicedesk._ref.ui_domain.screens.ticket.adapter.entries.CommentEntry
-import com.pyrus.pyrusservicedesk._ref.ui_domain.screens.ticket.adapter.entries.hasError
+import com.pyrus.pyrusservicedesk._ref.ui_domain.screens.ticket.adapter.new_entries.CommentEntryV2
 import com.pyrus.pyrusservicedesk.presentation.ui.view.recyclerview.ViewHolderBase
 
 internal class RatingCommentHolder(
     parent: ViewGroup,
-    private val onErrorCommentEntryClickListener: (entry: CommentEntry) -> Unit,
-) : ViewHolderBase<CommentEntry>(parent, R.layout.psd_view_holder_comment_rating) {
+    private val onErrorCommentEntryClickListener: (entry: CommentEntryV2.Rating) -> Unit,
+) : ViewHolderBase<CommentEntryV2.Rating>(parent, R.layout.psd_view_holder_comment_rating) {
 
     private val binding = PsdViewHolderCommentRatingBinding.bind(itemView)
 
-    override fun bindItem(item: CommentEntry) {
-        super.bindItem(item)
+    override fun bindItem(entry: CommentEntryV2.Rating) {
+        super.bindItem(entry)
         with(binding) {
-            ratingImage.setImageResource(item.comment.rating?.ratingToEmojiRes() ?: R.drawable.ic_emoji_rating_3)
+            ratingImage.setImageResource(entry.rating.ratingToEmojiRes())
             when {
-                getItem().hasError() -> {
+                entry.hasError -> {
                     statusIcon.setImageResource(R.drawable.psd_error)
                     statusIcon.visibility = View.VISIBLE
                 }
-                getItem().comment.isLocal() -> {
+                entry.isLocal -> {
                     statusIcon.setImageResource(R.drawable.psd_sync_clock)
                     statusIcon.visibility = View.VISIBLE
                     (statusIcon.drawable as AnimationDrawable).start()
@@ -35,8 +34,8 @@ internal class RatingCommentHolder(
                 }
             }
             root.setOnClickListener {
-                if (getItem().hasError())
-                    onErrorCommentEntryClickListener.invoke(getItem())
+                if (entry.hasError)
+                    onErrorCommentEntryClickListener.invoke(entry)
             }
         }
     }

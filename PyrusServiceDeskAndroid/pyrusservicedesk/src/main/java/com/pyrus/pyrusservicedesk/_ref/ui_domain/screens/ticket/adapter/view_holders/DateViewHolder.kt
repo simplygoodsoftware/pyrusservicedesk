@@ -4,11 +4,12 @@ import android.view.ViewGroup
 import android.widget.TextView
 import com.pyrus.pyrusservicedesk.R
 import com.pyrus.pyrusservicedesk._ref.ui_domain.screens.ticket.adapter.entries.DateEntry
+import com.pyrus.pyrusservicedesk._ref.ui_domain.screens.ticket.adapter.new_entries.CommentEntryV2
 import com.pyrus.pyrusservicedesk.presentation.ui.view.recyclerview.ViewHolderBase
 import com.pyrus.pyrusservicedesk._ref.utils.ConfigUtils
 
 internal class DateViewHolder(parent: ViewGroup)
-    : ViewHolderBase<DateEntry>(parent, R.layout.psd_view_holder_date) {
+    : ViewHolderBase<CommentEntryV2.Date>(parent, R.layout.psd_view_holder_date) {
 
     private val date = itemView.findViewById<TextView>(R.id.date)
 
@@ -19,8 +20,8 @@ internal class DateViewHolder(parent: ViewGroup)
         date.setTextColor(ConfigUtils.getSecondaryColorOnMainBackground(itemView.context))
     }
 
-    override fun bindItem(item: DateEntry) {
-        super.bindItem(item)
-        date.text = item.date
+    override fun bindItem(entry: CommentEntryV2.Date) {
+        super.bindItem(entry)
+        date.text = entry.date
     }
 }

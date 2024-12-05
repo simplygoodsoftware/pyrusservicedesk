@@ -6,7 +6,7 @@ import android.widget.ImageView
 import android.widget.TextView
 import com.pyrus.pyrusservicedesk.PyrusServiceDesk
 import com.pyrus.pyrusservicedesk.R
-import com.pyrus.pyrusservicedesk._ref.ui_domain.screens.ticket.adapter.entries.CommentEntry
+import com.pyrus.pyrusservicedesk._ref.ui_domain.screens.ticket.adapter.new_entries.CommentEntryV2
 import com.pyrus.pyrusservicedesk.presentation.ui.view.CommentView
 import com.pyrus.pyrusservicedesk.sdk.data.Attachment
 import com.pyrus.pyrusservicedesk._ref.utils.CIRCLE_TRANSFORMATION
@@ -15,7 +15,7 @@ import com.pyrus.pyrusservicedesk._ref.utils.RequestUtils
 
 internal class InboundCommentHolder(
     parent: ViewGroup,
-    onErrorCommentEntryClickListener: (entry: CommentEntry) -> Unit,
+    onErrorCommentEntryClickListener: (entry: CommentEntryV2.Comment) -> Unit,
     onFileReadyToPreviewClickListener: (attachment: Attachment) -> Unit,
     onTextCommentLongClicked: (String) -> Unit,
 ) : CommentHolder(
@@ -37,24 +37,24 @@ internal class InboundCommentHolder(
         authorName.setTextColor(ConfigUtils.getSecondaryColorOnMainBackground(parent.context))
     }
 
-    override fun bindItem(item: CommentEntry) {
-        super.bindItem(item)
-        setAuthorNameAndVisibility(true)
-        setAuthorAvatarVisibility(true)
+    override fun bindItem(entry: CommentEntryV2.Comment) {
+        super.bindItem(entry)
+        setAuthorNameAndVisibility(entry, true)
+        setAuthorAvatarVisibility(entry, true)
     }
 
-    private fun setAuthorNameAndVisibility(visible: Boolean) {
+    private fun setAuthorNameAndVisibility(item: CommentEntryV2.Comment, visible: Boolean) {
         authorName.visibility = if (visible) View.VISIBLE else View.GONE
-        authorName.text = getItem().comment.author.name
+        authorName.text = item.authorName
     }
 
-    private fun setAuthorAvatarVisibility(visible: Boolean) {
+    private fun setAuthorAvatarVisibility(item: CommentEntryV2.Comment, visible: Boolean) {
         avatar.visibility = if (visible) View.VISIBLE else View.INVISIBLE
         if (visible) {
             PyrusServiceDesk.injector().picasso
                 .load(
                     RequestUtils.getAvatarUrl(
-                        getItem().comment.author.avatarId,
+                        item.avatarId,
                         PyrusServiceDesk.get().domain
                     )
                 )

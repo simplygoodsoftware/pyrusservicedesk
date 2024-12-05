@@ -29,6 +29,7 @@ import com.pyrus.pyrusservicedesk._ref.utils.getSecondaryColorOnBackground
 import com.pyrus.pyrusservicedesk._ref.utils.getViewModel
 import com.pyrus.pyrusservicedesk._ref.utils.isAtEnd
 import com.pyrus.pyrusservicedesk._ref.utils.setCursorColor
+import com.pyrus.pyrusservicedesk._ref.utils.setupWindowInsets
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
@@ -76,6 +77,8 @@ internal class TicketActivity : ConnectionActivityBase<TicketViewModel>(TicketVi
 
         binding = PsdActivityTicketBinding.inflate(LayoutInflater.from(this))
         setContentView(binding.root)
+
+        setupWindowInsets(binding.root)
 
         savedInstanceState?.let { ServiceDeskConfiguration.restore(it) }
 
@@ -139,7 +142,8 @@ internal class TicketActivity : ConnectionActivityBase<TicketViewModel>(TicketVi
             val isEmpty = binding.comments.adapter?.itemCount == 0
             result?.let {
                 binding.refresh.isRefreshing = false
-                adapter.setItems(it.newItems)
+                TODO()
+//                adapter.setItems(it.newItems)
                 it.diffResult.dispatchUpdatesTo(adapter)
             }
             if (adapter.itemCount > 0 && atEnd) {

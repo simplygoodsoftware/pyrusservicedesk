@@ -3,12 +3,13 @@ package com.pyrus.pyrusservicedesk._ref.ui_domain.screens.ticket.adapter.view_ho
 import android.view.ViewGroup
 import com.pyrus.pyrusservicedesk.R
 import com.pyrus.pyrusservicedesk._ref.ui_domain.screens.ticket.adapter.entries.CommentEntry
+import com.pyrus.pyrusservicedesk._ref.ui_domain.screens.ticket.adapter.new_entries.CommentEntryV2
 import com.pyrus.pyrusservicedesk.presentation.ui.view.CommentView
 import com.pyrus.pyrusservicedesk.sdk.data.Attachment
 
 internal class OutboundCommentHolder(
     parent: ViewGroup,
-    onErrorCommentEntryClickListener: (entry: CommentEntry) -> Unit,
+    onErrorCommentEntryClickListener: (entry: CommentEntryV2.Comment) -> Unit,
     onFileReadyToPreviewClickListener: (attachment: Attachment) -> Unit,
     onTextCommentLongClicked: (String) -> Unit,
 ) : CommentHolder(

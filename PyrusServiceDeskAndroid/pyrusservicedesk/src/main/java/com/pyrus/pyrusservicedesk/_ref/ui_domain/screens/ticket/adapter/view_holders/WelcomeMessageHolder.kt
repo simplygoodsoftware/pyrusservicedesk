@@ -6,29 +6,31 @@ import android.widget.ImageView
 import android.widget.TextView
 import com.pyrus.pyrusservicedesk.R
 import com.pyrus.pyrusservicedesk._ref.ui_domain.screens.ticket.adapter.entries.WelcomeMessageEntry
+import com.pyrus.pyrusservicedesk._ref.ui_domain.screens.ticket.adapter.new_entries.CommentEntryV2
 import com.pyrus.pyrusservicedesk.presentation.ui.view.CommentView
 import com.pyrus.pyrusservicedesk.presentation.ui.view.ContentType
 import com.pyrus.pyrusservicedesk.presentation.ui.view.recyclerview.ViewHolderBase
 import com.pyrus.pyrusservicedesk._ref.utils.ConfigUtils
+import com.pyrus.pyrusservicedesk.databinding.PsdViewHolderCommentInboundBinding
+import com.pyrus.pyrusservicedesk.databinding.PsdViewHolderRatingBinding
 
 internal class WelcomeMessageHolder(parent: ViewGroup) :
-    ViewHolderBase<WelcomeMessageEntry>(parent, R.layout.psd_view_holder_comment_inbound) {
+    ViewHolderBase<CommentEntryV2.WelcomeMessage>(parent, R.layout.psd_view_holder_comment_inbound) {
 
-    private val comment: CommentView = itemView.findViewById(R.id.comment)
-    private val avatar = itemView.findViewById<ImageView>(R.id.avatar)
-    private val authorName = itemView.findViewById<TextView>(R.id.author_name)
+    private val binding = PsdViewHolderCommentInboundBinding.bind(itemView)
 
     init {
         ConfigUtils.getMainFontTypeface()?.let {
-            authorName.typeface = it
+            binding.authorName.typeface = it
         }
+        binding.authorName.visibility = View.GONE
+        binding.avatar.visibility = View.INVISIBLE
+        binding.comment.contentType = ContentType.Text
     }
 
-    override fun bindItem(item: WelcomeMessageEntry) {
-        super.bindItem(item)
-        authorName.visibility = View.GONE
-        avatar.visibility = View.INVISIBLE
-        comment.contentType = ContentType.Text
-        comment.setCommentText(item.message)
+    override fun bindItem(entry: CommentEntryV2.WelcomeMessage) {
+        super.bindItem(entry)
+
+        binding.comment.setCommentText(entry.message)
     }
 }
