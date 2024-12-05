@@ -6,7 +6,6 @@ import android.content.Context
 import android.content.Intent
 import android.content.res.ColorStateList
 import android.graphics.PorterDuff
-import android.net.Uri
 import android.os.Build
 import android.os.Bundle
 import android.text.Editable
@@ -22,19 +21,13 @@ import com.pyrus.pyrusservicedesk.PyrusServiceDesk
 import com.pyrus.pyrusservicedesk.R
 import com.pyrus.pyrusservicedesk.ServiceDeskConfiguration
 import com.pyrus.pyrusservicedesk.presentation.ConnectionActivityBase
-import com.pyrus.pyrusservicedesk._ref.ui_domain.screens.file_preview.FilePreviewActivity
 import com.pyrus.pyrusservicedesk._ref.ui_domain.screens.ticket.adapter.TicketAdapter
 import com.pyrus.pyrusservicedesk.presentation.ui.navigation_page.ticket.dialogs.attach_files.AttachFileSharedViewModel
 import com.pyrus.pyrusservicedesk.presentation.ui.navigation_page.ticket.dialogs.attach_files.AttachFileVariantsFragment
 import com.pyrus.pyrusservicedesk.presentation.ui.navigation_page.ticket.dialogs.comment_actions.PendingCommentActionSharedViewModel
-import com.pyrus.pyrusservicedesk.presentation.ui.navigation_page.ticket.dialogs.comment_actions.PendingCommentActionsDialog
-import com.pyrus.pyrusservicedesk.presentation.ui.view.recyclerview.item_decorators.SpaceItemDecoration
 import com.pyrus.pyrusservicedesk.sdk.data.Attachment
 import com.pyrus.pyrusservicedesk.sdk.data.intermediate.FileData
 import com.pyrus.pyrusservicedesk._ref.utils.*
-import com.pyrus.pyrusservicedesk._ref.utils.RequestUtils.Companion.getFileUrl
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.launch
 
 /**
  * Activity for rendering ticket/feed comments.
@@ -68,7 +61,7 @@ internal class TicketActivity : ConnectionActivityBase<TicketViewModel>(TicketVi
 
     }
 
-    override val layoutResId = R.layout.psd_activity_ticket
+    override val layoutResId = R.layout.psd_fragment_ticket
     override val toolbarViewId = R.id.ticket_toolbar
     override val refresherViewId = R.id.refresh
     override val progressBarViewId: Int = NO_ID

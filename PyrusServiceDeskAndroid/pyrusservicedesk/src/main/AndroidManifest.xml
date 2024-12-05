@@ -28,6 +28,13 @@
             android:windowSoftInputMode="adjustResize"
             android:theme="@style/PyrusServiceDesk.Dialog"/>
 
+
+        <activity
+            android:name="com.pyrus.pyrusservicedesk._ref.ui_domain.screens.ticket.MainActivity"
+            android:launchMode="singleTask"
+            android:windowSoftInputMode="adjustResize"
+            android:theme="@style/PyrusServiceDesk.Dialog"/>
+
         <activity
             android:name="com.pyrus.pyrusservicedesk._ref.ui_domain.screens.file_preview.FilePreviewActivity"
             android:theme="@style/PyrusServiceDesk.Dialog"/>

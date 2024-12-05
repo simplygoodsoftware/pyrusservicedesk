@@ -1,19 +1,28 @@
 package com.pyrus.pyrusservicedesk._ref.utils
 
 import android.app.Activity
+import android.content.Context
 import android.graphics.PorterDuff
 import android.os.Build
 import android.view.View
+import android.view.inputmethod.InputMethodManager
 import androidx.annotation.ColorInt
 import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import android.widget.EditText
 import android.widget.TextView
+import androidx.core.content.ContextCompat.getSystemService
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowCompat
 import androidx.core.view.WindowInsetsCompat
+import androidx.fragment.app.Fragment
+import androidx.lifecycle.lifecycleScope
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 import kotlin.math.max
+
+private const val SHOW_KEYBOARD_RETRY_DELAY_MS = 100L
 
 /**
  * Checks whether given recyclerview is at end.
@@ -77,4 +86,21 @@ internal fun EditText.setCursorColor(@ColorInt color: Int) {
     } catch (ignored: Exception) {
     }
 
+}
+
+/**
+ * Captures focus on the [view] and shows the keyboard
+ */
+internal fun Fragment.showKeyboardOn(view: View, onKeyboardShown: (() -> Unit)? = null) {
+    lifecycleScope.launch {
+        while(!ViewCompat.isLaidOut(view))
+            delay(SHOW_KEYBOARD_RETRY_DELAY_MS)
+        view.requestFocus()
+        (getSystemService(
+            requireContext(),
+            InputMethodManager::class.java
+        ) as InputMethodManager).showSoftInput(view, 0)
+
+        onKeyboardShown?.invoke()
+    }
 }
