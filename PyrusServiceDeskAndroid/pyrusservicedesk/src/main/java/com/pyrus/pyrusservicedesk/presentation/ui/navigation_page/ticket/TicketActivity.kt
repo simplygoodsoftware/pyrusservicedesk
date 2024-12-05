@@ -113,6 +113,7 @@ internal class TicketActivity : ConnectionActivityBase<TicketViewModel>(TicketVi
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        setupWindowInsets(root)
 
         savedInstanceState?.let { ServiceDeskConfiguration.restore(it) }
 
