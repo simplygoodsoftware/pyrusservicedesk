@@ -156,6 +156,16 @@ class TicketCommandRepository {
         guard let ticketId = ticketId else {
             return nil
         }
-        return commandsCache?.filter{ $0.type == TicketCommandType.readTicket.rawValue && $0.params.ticketId == ticketId }.last?.params.messageId
+        var lastLocalId: Int? = nil
+        commandsCache?.forEach{
+            if
+                $0.type == TicketCommandType.readTicket.rawValue,
+                $0.params.ticketId == ticketId,
+                lastLocalId ?? 0 < $0.params.messageId ?? 0
+            {
+                lastLocalId = $0.params.messageId
+            }
+        }
+        return lastLocalId
     }
 }

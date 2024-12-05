@@ -34,7 +34,7 @@ struct PSDGetChats {
             }
             parameters["additional_users"] = additional_users
         }
-//        parameters["commands"] = commands
+        parameters["commands"] = commands
         
         let request: URLRequest = URLRequest.createRequest(type:.chats, parameters: parameters)
         

@@ -290,7 +290,7 @@ private extension ChatsInteractor {
             if
                 !isRead,
                 let lastLocalReadedId = PyrusServiceDesk.repository.lastLocalReadCommentId(ticketId: $0.chatId),
-                lastLocalReadedId > (Int($0.lastComment?.messageId ?? "") ?? 0)
+                lastLocalReadedId >= (Int($0.lastComment?.messageId ?? "") ?? 0)
             {
                 isRead = true
             }
