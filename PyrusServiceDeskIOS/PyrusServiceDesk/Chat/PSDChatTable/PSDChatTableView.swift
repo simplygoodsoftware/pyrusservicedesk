@@ -314,7 +314,7 @@ class PSDChatTableView: PSDTableView {
     
     func redrawCell(at indexPath: IndexPath, with message: PSDRowMessage) {
         //If cell is on the screen and this is attachments cell, we should not reload it because it will restart all animation (bad looking), so just pass progress
-        let cellOnScrean = self.indexPathsForVisibleRows?.contains(indexPath) ?? false
+        let cellOnScrean = true //self.indexPathsForVisibleRows?.contains(indexPath) ?? false
         var needReload = true
         if cellOnScrean && message.attachment != nil {
             let attachmentView = (self.cellForRow(at: indexPath) as? PSDChatMessageCell)?.cloudView.attachmentView

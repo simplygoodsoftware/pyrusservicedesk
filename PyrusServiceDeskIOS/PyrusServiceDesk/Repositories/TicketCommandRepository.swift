@@ -42,7 +42,6 @@ class TicketCommandRepository {
                         if attachment.emptyId() {
                             PSDMessageSend.passFile(message.message, attachmentIdex: i, delegate: nil)
                             hasUnsendAttachments = true
-                            break
                         }
                         
                     }

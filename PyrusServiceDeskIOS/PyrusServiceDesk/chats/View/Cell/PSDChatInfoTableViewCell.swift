@@ -124,7 +124,7 @@ class PSDChatInfoTableViewCell: UITableViewCell {
             notificationButton.trailingAnchor.constraint(equalTo: timeLabel.trailingAnchor),
             notificationButton.topAnchor.constraint(equalTo: contentView.topAnchor, constant: 46),
             
-            messageStateView.bottomAnchor.constraint(equalTo: timeLabel.bottomAnchor, constant: 17),
+            messageStateView.bottomAnchor.constraint(equalTo: timeLabel.bottomAnchor, constant: 19),
             messageStateView.trailingAnchor.constraint(equalTo: timeLabel.leadingAnchor, constant: 6),
 //            messageStateView.widthAnchor.constraint(equalToConstant: 8),
 //            messageStateView.heightAnchor.constraint(equalToConstant: 8),

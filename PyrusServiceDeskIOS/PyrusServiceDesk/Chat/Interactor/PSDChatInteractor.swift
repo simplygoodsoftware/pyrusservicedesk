@@ -59,9 +59,9 @@ extension PSDChatInteractor: PSDChatInteractorProtocol {
             presenter.doWork(.updateTitle(connectionError: !PyrusServiceDesk.syncManager.networkAvailability))
             if let chat, let chatId = chat.chatId {
                 messagesToPass = PSDMessagesStorage.getSendingMessages(for: chatId)
-                for messageToPass in messagesToPass {
-                    messageToPass.message.fromStrorage = true
-                }
+//                for messageToPass in messagesToPass {
+//                    messageToPass.message.fromStrorage = true
+//                }
             }
             NotificationCenter.default.addObserver(self, selector: #selector(updateChats), name: PyrusServiceDesk.chatsUpdateNotification, object: nil)
             NotificationCenter.default.addObserver(forName: SyncManager.commandsResultNotification, object: nil, queue: .main) { [weak self] notification in
@@ -200,15 +200,17 @@ private extension PSDChatInteractor {
                 messagesToPass.removeAll(where: { $0.commandId.lowercased() == commandResult.commandId.lowercased() })
             }
         }
+        presenter.doWork(.reloadAll)
     }
     
     func showSendMessageResult(messageToPass: PSDMessage, success: Bool) {
         if success {
             let _ = PyrusServiceDesk.setLastActivityDate()
             PyrusServiceDesk.restartTimer()
-        } else {
-            messageToPass.fromStrorage = true
-        }
+        } 
+//        else {
+//            messageToPass.fromStrorage = true
+//        }
         
         let newState: messageState = success ? .sent : .cantSend
         let newProgress: CGFloat = success ? 1 : 0.0
@@ -219,9 +221,9 @@ private extension PSDChatInteractor {
             attachment.size = attachment.data.count
             attachment.data = Data()//clear saved data
         }
-        if messageToPass.fromStrorage {
+      //  if messageToPass.fromStrorage {
             messageToPass.date = Date()//mesages from the storage can have old date - change it to the current, to avoid diffrent drawing after second enter into chat
-        }
+     //   }
         
         DispatchQueue.main.async { [weak self] in
             self?.refresh(message: messageToPass, changedToSent: success)
@@ -504,9 +506,13 @@ extension PSDChatInteractor: PSDMessageSendDelegate {
             }
             var lastIndexPath: [IndexPath]? = nil
             
-            if changedToSent {
+            if changedToSent && message.attachments?.count ?? 0 > 0 || message.fromStrorage {
                 //is state was changed need to move sendded message up to sent block
-                lastIndexPath = self.tableMatrix.indexPathsAfterSent(for: message)
+                if message.fromStrorage {
+                    lastIndexPath = self.tableMatrix.indexPathsAfterSentStoreMessage(for: message)
+                } else {
+                    lastIndexPath = self.tableMatrix.indexPathsAfterSent(for: message)
+                }
                 if let lastIndexPath = lastIndexPath, lastIndexPath.count > 0 {
                     let newSection = lastIndexPath[0].section
                     if self.tableMatrix.count - 1 < newSection {
@@ -526,10 +532,13 @@ extension PSDChatInteractor: PSDMessageSendDelegate {
                     continue
                 }
                 rowMessage.updateWith(message: message)
+//                tableMatrix[movedIndexPath.section][movedIndexPath.row] = rowMessage
+//                presenter.doWork(.reloadAll)
                 presenter.doWork(.redrawCell(indexPath: movedIndexPath, message: rowMessage))
+                presenter.doWork(.reloadAll)
                 if let lastIndexPath = lastIndexPath, lastIndexPath.count > i {
                     let newIndexPath = lastIndexPath[i]
-                    if newIndexPath != indexPath {
+                    if newIndexPath != indexPath && newIndexPath.row >= movedIndexPath.row {
                         movedRows = movedRows + 1
                         self.tableMatrix[movedIndexPath.section].remove(at: movedIndexPath.row)
                         self.tableMatrix[newIndexPath.section].insert(rowMessage, at:newIndexPath.row)
