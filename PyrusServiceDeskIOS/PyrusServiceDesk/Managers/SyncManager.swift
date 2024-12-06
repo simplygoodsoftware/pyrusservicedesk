@@ -50,7 +50,6 @@ class SyncManager {
 
         isRequestInProgress = true
         shouldSendAnotherRequest = false
-
         PyrusServiceDesk.repository.load { [weak self] result in
             self?.sendingMessages = PSDMessagesStorage.getSendingMessages()
             var ticketCommands: [TicketCommand]
@@ -109,7 +108,7 @@ class SyncManager {
                     for commandResult in commandsResult {
                         PyrusServiceDesk.repository.deleteCommand(withId: commandResult.commandId)
                         if let message = self.sendingMessages.first(where: { $0.commandId.lowercased() == commandResult.commandId.lowercased() })?.message {
-                            PSDMessagesStorage.remove(messageId: message.clientId, needSafe: false)
+                            PSDMessagesStorage.remove(messageId: message.clientId, needSafe: false, serverTicketId: commandResult.ticketId)
                             if commandResult.error != nil {
                                 message.state = .cantSend
                                 PSDMessagesStorage.save(message: message)
@@ -120,7 +119,9 @@ class SyncManager {
                 }
                 
                 if let chats {
-                    PyrusServiceDesk.chats = chats
+                    let createMessages = PSDMessagesStorage.getNewCreateTicketMessages()
+                    let localChats = PSDGetChats.getSortedChatForMessages(createMessages)
+                    PyrusServiceDesk.chats = localChats + chats
                     NotificationCenter.default.post(name: PyrusServiceDesk.chatsUpdateNotification, object: nil, userInfo: userInfo)
                 }
                             

@@ -47,7 +47,7 @@ class TicketCommandRepository {
                     }
                 }
                 let messageToPass = message.message
-                let requestNewTicket = PyrusServiceDesk.multichats && messageToPass.ticketId == 0
+                let requestNewTicket = PyrusServiceDesk.multichats && (messageToPass.ticketId == 0 || messageToPass.requestNewTicket)
                 var attachmentsData: [AttachmentData]?
                 if let attachments = messageToPass.attachments {
                     attachmentsData = []

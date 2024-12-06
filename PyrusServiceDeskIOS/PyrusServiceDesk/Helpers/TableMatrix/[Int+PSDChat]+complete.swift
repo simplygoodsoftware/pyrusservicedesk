@@ -245,7 +245,8 @@ extension Array where Element == [PSDRowMessage]{
     ///return row for message according to its time
     private func row(forMessage: PSDMessage, section: Int)->Int{
         for (row,message) in self[section].enumerated().reversed(){
-            if message.message.state == .sending{
+            ///todo check
+            if message.message.state == .sending, !message.message.isWelcomeMessage {
                 continue
             }
             if message.message.date.compareTime(with: forMessage.date) == .more || message.message.date.compareTime(with: forMessage.date) == .equal{

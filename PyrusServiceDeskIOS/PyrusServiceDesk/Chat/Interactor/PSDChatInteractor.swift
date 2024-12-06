@@ -95,7 +95,8 @@ extension PSDChatInteractor: PSDChatInteractorProtocol {
                     }
                 }
             }
-            if !PyrusServiceDesk.multichats || fromPush {                    reloadChat()
+            if !PyrusServiceDesk.multichats || fromPush {
+                reloadChat()
             } else {
                 beginTimer()
                 updateChat(chat: chat)
@@ -175,8 +176,8 @@ private extension PSDChatInteractor {
                         customization?.setChatTitileView(label)
                         presenter.doWork(.reloadTitle)
                     }
-                    readChat()
                 }
+                readChat()
                 self.isRefresh = false
                 fromPush = false
                 firstLoad = false
@@ -391,6 +392,16 @@ private extension PSDChatInteractor {
 private extension PSDChatInteractor {
     func send(_ message: String, _ attachments: [PSDAttachment]) {
         let newMessage = PSDObjectsCreator.createMessage(message, attachments: attachments, ticketId: chat?.chatId ?? 0, userId: chat?.userId ?? PyrusServiceDesk.customUserId ?? PyrusServiceDesk.userId)
+        if PyrusServiceDesk.multichats {
+            if chat?.chatId ?? 0 == 0 {
+                let nextId = PSDObjectsCreator.getNextLocalId()
+                newMessage.requestNewTicket = true
+                chat?.chatId = nextId
+            }
+            if let ticketId = chat?.chatId {
+                newMessage.ticketId = ticketId
+            }
+        }
         prepareMessageForDrawing(newMessage)
         messageToSent = newMessage
         presenter.doWork(.addNewRow)

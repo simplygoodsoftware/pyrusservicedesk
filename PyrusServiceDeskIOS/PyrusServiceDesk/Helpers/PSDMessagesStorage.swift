@@ -42,6 +42,8 @@ struct PSDMessagesStorage {
     private static let USER_ID_KEY = "userId"
     ///The key to store commandId
     private static let APP_ID_KEY = "appId"
+    ///The key to request_new_ticket
+    private static let REQUEST_NEW_TICKET = "requestNewTicket"
     
     private static let fileURL: URL = {
         let paths = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask)
@@ -54,8 +56,28 @@ struct PSDMessagesStorage {
         saveMessagesToFile()
     }
     
-    static func remove(messageId: String, needSafe: Bool = true) {
-        PyrusServiceDesk.storeMessages?.removeAll(where: { $0.clientId == messageId })
+    static func remove(messageId: String, needSafe: Bool = true, serverTicketId: Int? = nil) {
+        var newId: (Int, Int)? = nil
+        PyrusServiceDesk.storeMessages?.removeAll(where: {
+            if $0.clientId == messageId {
+                if
+                    $0.requestNewTicket,
+                    $0.ticketId < 0,
+                    let serverTicketId = serverTicketId
+                {
+                    newId = ($0.ticketId, serverTicketId)
+                }
+                return true
+            }
+            return false
+        })
+        if let newId = newId {
+            PyrusServiceDesk.storeMessages?.forEach({ message in
+                if message.ticketId == newId.0 {
+                    message.ticketId = newId.1
+                }
+            })
+        }
         if needSafe {
             saveMessagesToFile()
         }
@@ -81,6 +103,10 @@ struct PSDMessagesStorage {
             messages = PyrusServiceDesk.storeMessages?.filter({ $0.state == .sending && $0.ticketId == ticketId }) ?? []
         }
         return messages.map({ MessageToPass(message: $0, commandId: $0.commandId ?? "") })
+    }
+    
+    static func getNewCreateTicketMessages() -> [PSDMessage] {
+        return PyrusServiceDesk.storeMessages?.filter({ $0.requestNewTicket }) ?? [PSDMessage]()
     }
     
     static func loadMessages(completion: @escaping ([PSDMessage]) -> Void) {
@@ -148,6 +174,7 @@ struct PSDMessagesStorage {
         messageDict[COMMAND_ID_KEY] = message.commandId
         messageDict[USER_ID_KEY] = message.userId
         messageDict[APP_ID_KEY] = message.appId
+        messageDict[REQUEST_NEW_TICKET] = message.requestNewTicket
         if hasSomeAttachment, let attachments = message.attachments, attachments.count > 0 {
             var attachmentsArray = [[String:Any]]()
             for attachment in attachments{
@@ -393,6 +420,7 @@ struct PSDMessagesStorage {
         message.userId = dict[USER_ID_KEY] as? String ?? ""
         message.appId = dict[APP_ID_KEY] as? String ?? ""
         message.commandId = dict[COMMAND_ID_KEY] as? String
+        message.requestNewTicket = dict[REQUEST_NEW_TICKET] as? Bool ?? false
         var attachments = [PSDAttachment]()
         if let attachmetsArray = dict[ATTACHMENT_ARRAY_KEY] as? [[String: Any]], attachmetsArray.count > 0 {
             for attachmentDict in attachmetsArray {
