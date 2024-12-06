@@ -5,8 +5,11 @@ import android.content.Intent
 import android.os.Bundle
 import android.view.LayoutInflater
 import androidx.fragment.app.FragmentActivity
+import com.pyrus.pyrusservicedesk.R
 import com.pyrus.pyrusservicedesk.ServiceDeskConfiguration
+import com.pyrus.pyrusservicedesk._ref.ui_domain.screens.ticket.adapter.TicketFragment
 import com.pyrus.pyrusservicedesk._ref.utils.setupWindowInsets
+import com.pyrus.pyrusservicedesk.core.StaticRepository
 import com.pyrus.pyrusservicedesk.databinding.PsdActivityMainBinding
 
 
@@ -17,18 +20,25 @@ internal class MainActivity : FragmentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        binding = PsdActivityMainBinding.inflate(LayoutInflater.from(this))
+        val theme = when{
+            StaticRepository.getConfiguration().isDialogTheme -> R.style.PyrusServiceDesk_Dialog
+            StaticRepository.getConfiguration().forceDarkAllowed -> R.style.PyrusServiceDesk
+            else -> R.style.BasePyrusServiceDesk
+        }
+        setTheme(theme)
+
+        binding = PsdActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
         setupWindowInsets(binding.root)
 
         savedInstanceState?.let { ServiceDeskConfiguration.restore(it) }
 
-//        if (savedInstanceState == null) {
-//            supportFragmentManager.beginTransaction()
-//                .add(R.id.fragment_container, TicketFragment.newInstance(), "TicketFragment")
-//                .commit()
-//        }
+        if (savedInstanceState == null) {
+            supportFragmentManager.beginTransaction()
+                .add(R.id.fragment_container, TicketFragment.newInstance(), "TicketFragment")
+                .commit()
+        }
     }
 
     override fun onStart() {

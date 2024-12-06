@@ -357,7 +357,7 @@ class PyrusServiceDesk private constructor(
 //            get().sharedViewModel.clearQuitServiceDesk()
 //            get().onStopCallback = onStopCallback
 
-            activity.startActivity(TicketActivity.getLaunchIntent(activity))
+            activity.startActivity(MainActivity.createLaunchIntent(activity))
 
             // TODO sds
             if (configuration == null)

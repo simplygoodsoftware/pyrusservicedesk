@@ -62,14 +62,14 @@ internal abstract class ActivityBase: AppCompatActivity(), CoroutineScope {
         setSupportActionBar(findViewById(toolbarViewId))
 
         // TODO sds this broke sometimes
-        findViewById<View>(android.R.id.content).apply {
-            viewTreeObserver.addOnGlobalLayoutListener {
-                val changedHeight = recentContentHeight - height
-                if (changedHeight != 0)
-                    onViewHeightChanged(changedHeight)
-                recentContentHeight = height
-            }
-        }
+//        findViewById<View>(android.R.id.content).apply {
+//            viewTreeObserver.addOnGlobalLayoutListener {
+//                val changedHeight = recentContentHeight - height
+//                if (changedHeight != 0)
+//                    onViewHeightChanged(changedHeight)
+//                recentContentHeight = height
+//            }
+//        }
 
 //        if (sharedViewModel.getQuitServiceDeskLiveData().value == true)
 //            finish()
