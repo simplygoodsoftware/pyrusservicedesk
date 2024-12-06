@@ -1,19 +1,11 @@
 package com.pyrus.pyrusservicedesk._ref.ui_domain.screens.ticket
 
-import android.app.Activity
+import android.content.Context
 import android.content.Intent
-import android.graphics.PorterDuff
 import android.os.Bundle
 import android.view.LayoutInflater
-import android.view.Menu
-import android.view.MenuInflater
-import android.view.MenuItem
 import androidx.fragment.app.FragmentActivity
-import com.pyrus.pyrusservicedesk.PyrusServiceDesk
-import com.pyrus.pyrusservicedesk.R
 import com.pyrus.pyrusservicedesk.ServiceDeskConfiguration
-import com.pyrus.pyrusservicedesk._ref.ui_domain.screens.ticket.adapter.TicketFragment
-import com.pyrus.pyrusservicedesk._ref.utils.ConfigUtils
 import com.pyrus.pyrusservicedesk._ref.utils.setupWindowInsets
 import com.pyrus.pyrusservicedesk.databinding.PsdActivityMainBinding
 
@@ -32,11 +24,11 @@ internal class MainActivity : FragmentActivity() {
 
         savedInstanceState?.let { ServiceDeskConfiguration.restore(it) }
 
-        if (savedInstanceState == null) {
-            supportFragmentManager.beginTransaction()
-                .replace(R.id.fragment_container, TicketFragment.newInstance())
-                .commit()
-        }
+//        if (savedInstanceState == null) {
+//            supportFragmentManager.beginTransaction()
+//                .add(R.id.fragment_container, TicketFragment.newInstance(), "TicketFragment")
+//                .commit()
+//        }
     }
 
     override fun onStart() {
@@ -57,31 +49,33 @@ internal class MainActivity : FragmentActivity() {
         ServiceDeskConfiguration.save(outState)
     }
 
-    override fun onCreateOptionsMenu(menu: Menu?): Boolean {
-        val menuDelegate = ConfigUtils.getMainMenuDelegate()
-        if (menuDelegate != null && menu != null)
-            return menuDelegate.onCreateOptionsMenu(menu, this)
-
-        return menu?.let{
-            MenuInflater(this).inflate(R.menu.psd_main_menu, menu)
-            val closeItem = menu.findItem(R.id.psd_main_menu_close)
-            closeItem.setShowAsAction(MenuItem.SHOW_AS_ACTION_ALWAYS)
-            closeItem.icon?.setColorFilter(
-                ConfigUtils.getToolbarButtonColor(this),
-                PorterDuff.Mode.SRC_ATOP
-            )
-            true
-        } ?: false
-    }
+    // TODO
+//    override fun onCreateOptionsMenu(menu: Menu?): Boolean {
+//        val menuDelegate = ConfigUtils.getMainMenuDelegate()
+//        if (menuDelegate != null && menu != null)
+//            return menuDelegate.onCreateOptionsMenu(menu, this)
+//
+//        return menu?.let{
+//            MenuInflater(this).inflate(R.menu.psd_main_menu, menu)
+//            val closeItem = menu.findItem(R.id.psd_main_menu_close)
+//            closeItem.setShowAsAction(MenuItem.SHOW_AS_ACTION_ALWAYS)
+//            closeItem.icon?.setColorFilter(
+//                ConfigUtils.getToolbarButtonColor(this),
+//                PorterDuff.Mode.SRC_ATOP
+//            )
+//            true
+//        } ?: false
+//    }
 
     override fun finish() {
         super.finish()
-        PyrusServiceDesk.onServiceDeskStop()
+        // TODO
+//        PyrusServiceDesk.onServiceDeskStop()
     }
 
     companion object {
-        fun getLaunchIntent(activity: Activity): Intent {
-            return Intent(activity, MainActivity::class.java)
+        fun createLaunchIntent(context: Context): Intent {
+            return Intent(context, MainActivity::class.java)
         }
     }
 

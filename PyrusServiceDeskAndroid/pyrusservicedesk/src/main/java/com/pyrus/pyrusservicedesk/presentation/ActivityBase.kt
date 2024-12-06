@@ -41,7 +41,7 @@ internal abstract class ActivityBase: AppCompatActivity(), CoroutineScope {
      * All activities share the same model to be able to trigger "rage" quit event that will close
      * all service desk activities of the current task.
      */
-    protected val sharedViewModel: SharedViewModel by getViewModel(SharedViewModel::class.java)
+//    protected val sharedViewModel: SharedViewModel by getViewModel(SharedViewModel::class.java)
 
     private var recentContentHeight = 0
 
@@ -71,8 +71,8 @@ internal abstract class ActivityBase: AppCompatActivity(), CoroutineScope {
             }
         }
 
-        if (sharedViewModel.getQuitServiceDeskLiveData().value == true)
-            finish()
+//        if (sharedViewModel.getQuitServiceDeskLiveData().value == true)
+//            finish()
     }
 
     override fun onDestroy() {
@@ -143,10 +143,10 @@ internal abstract class ActivityBase: AppCompatActivity(), CoroutineScope {
      * Extenders can safely start observe view model's data here.
      */
     protected open fun startObserveData() {
-        sharedViewModel.getQuitServiceDeskLiveData().observe(this) { quit ->
-            quit ?: return@observe
-            if (quit) finish()
-        }
+//        sharedViewModel.getQuitServiceDeskLiveData().observe(this) { quit ->
+//            quit ?: return@observe
+//            if (quit) finish()
+//        }
     }
 
     private fun overridePendingTransition() {

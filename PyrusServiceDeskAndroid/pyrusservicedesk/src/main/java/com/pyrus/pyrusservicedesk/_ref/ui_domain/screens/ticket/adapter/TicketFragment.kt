@@ -10,7 +10,6 @@ import android.view.MenuItem
 import android.view.View
 import android.view.ViewGroup
 import android.view.WindowManager
-import androidx.core.os.bundleOf
 import com.pyrus.pyrusservicedesk.R
 import com.pyrus.pyrusservicedesk._ref.ui_domain.screens.ticket.TicketContract
 import com.pyrus.pyrusservicedesk._ref.ui_domain.screens.ticket.TicketView
@@ -50,9 +49,6 @@ internal class TicketFragment: TeaFragment<TicketView.TicketModel, TicketView.Ev
         savedInstanceState: Bundle?,
     ): View {
         binding = PsdFragmentTicketBinding.inflate(inflater, container, false)
-
-
-
 
         return binding.root
     }
@@ -191,12 +187,9 @@ internal class TicketFragment: TeaFragment<TicketView.TicketModel, TicketView.Ev
 
     companion object {
         private const val STATE_KEYBOARD_SHOWN = "STATE_KEYBOARD_SHOWN"
-        private const val KEY_TICKET_ID = "KEY_TICKET_ID"
 
-        fun newInstance(ticketId:Int? = null): TicketFragment {
-            val fragment = TicketFragment()
-            fragment.arguments = bundleOf(KEY_TICKET_ID to ticketId)
-            return fragment
+        fun newInstance(): TicketFragment {
+            return TicketFragment()
         }
     }
 

@@ -23,42 +23,40 @@ public class SampleActivity extends Activity implements NewReplySubscriber {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_sample);
-        findViewById(R.id.support).setOnClickListener(view -> PyrusServiceDesk.start(
-            this,
-            new ServiceDeskConfiguration.Builder()
-                .setUserName("Ivan Ivanov")
-                .setThemeColor(Color.parseColor("#FF8300"))
-                .setChatTitle("Sample Support")
-                .setWelcomeMessage("How can I help you?")
-                .setAvatarForSupport(R.drawable.psd_download_file)
-                .setChatMenuDelegate(new ChatMenuDelegate())
-                .setTrustedUrls(Collections.singletonList("pyrus.com"))
-                .build())
-        );
+        findViewById(R.id.support).setOnClickListener(view -> PyrusServiceDesk.start(this));
+//            this,
+//            new ServiceDeskConfiguration.Builder()
+//                .setUserName("Ivan Ivanov")
+//                .setThemeColor(Color.parseColor("#FF8300"))
+//                .setChatTitle("Sample Support")
+//                .setWelcomeMessage("How can I help you?")
+//                .setAvatarForSupport(R.drawable.psd_download_file)
+//                .setChatMenuDelegate(new ChatMenuDelegate())
+//                .setTrustedUrls(Collections.singletonList("pyrus.com"))
+//                .build())
+//        );
 
-        PyrusServiceDesk.onAuthorizationFailed(
-                () -> {
-                    AlertDialog dialog = new AlertDialog
-                            .Builder(this)
-                            .create();
+        PyrusServiceDesk.onAuthorizationFailed(() -> {
+            AlertDialog dialog = new AlertDialog
+                .Builder(this)
+                .create();
 
-                    dialog.setTitle("Authorization Error.");
-                    dialog.setMessage("Failed to authorize with the provided credentials.");
-                    dialog.setButton(
-                            DialogInterface.BUTTON_POSITIVE,
-                            "OK",
-                            (dialog1, which) -> {
-                                PyrusServiceDesk.init(
-                                        getApplication(),
-                                        "my_app_id"
-                                );
-                                dialog1.cancel();
-                            }
+            dialog.setTitle("Authorization Error.");
+            dialog.setMessage("Failed to authorize with the provided credentials.");
+            dialog.setButton(
+                DialogInterface.BUTTON_POSITIVE,
+                "OK",
+                (dialog1, which) -> {
+                    PyrusServiceDesk.init(
+                        getApplication(),
+                        "my_app_id"
                     );
-
-                    dialog.show();
+                    dialog1.cancel();
                 }
-        );
+            );
+
+            dialog.show();
+        });
     }
 
     @Override

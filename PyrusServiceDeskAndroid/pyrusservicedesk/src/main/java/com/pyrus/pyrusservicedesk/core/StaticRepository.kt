@@ -17,8 +17,8 @@ internal object StaticRepository {
         return CONFIGURATION
     }
 
-    fun setConfiguration(configuration: ServiceDeskConfiguration) {
-        CONFIGURATION = configuration
+    fun setConfiguration(configuration: ServiceDeskConfiguration?) {
+        CONFIGURATION = configuration ?: ServiceDeskConfiguration()
     }
 
 

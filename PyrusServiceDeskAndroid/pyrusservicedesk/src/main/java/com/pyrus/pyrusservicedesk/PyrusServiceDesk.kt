@@ -7,7 +7,6 @@ import com.pyrus.pyrusservicedesk._ref.ui_domain.screens.ticket.MainActivity
 import com.pyrus.pyrusservicedesk.core.DiInjector
 import com.pyrus.pyrusservicedesk.core.StaticRepository
 import com.pyrus.pyrusservicedesk._ref.utils.log.PLog
-import com.pyrus.pyrusservicedesk.presentation.ui.navigation_page.ticket.TicketActivity
 import com.pyrus.pyrusservicedesk.presentation.viewmodel.SharedViewModel
 import com.pyrus.pyrusservicedesk.sdk.updates.NewReplySubscriber
 import com.pyrus.pyrusservicedesk.sdk.updates.OnStopCallback
@@ -15,6 +14,7 @@ import com.pyrus.pyrusservicedesk._ref.utils.MILLISECONDS_IN_MINUTE
 import com.pyrus.pyrusservicedesk._ref.utils.RequestUtils
 import com.pyrus.pyrusservicedesk._ref.utils.getFirstNSymbols
 import com.pyrus.pyrusservicedesk.core.Account
+import com.pyrus.pyrusservicedesk.presentation.ui.navigation_page.ticket.TicketActivity
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 
@@ -351,14 +351,13 @@ class PyrusServiceDesk private constructor(
             configuration: ServiceDeskConfiguration? = null,
             onStopCallback: OnStopCallback? = null
         ) {
-            if (configuration != null) {
-                StaticRepository.setConfiguration(configuration)
-            }
+            StaticRepository.setConfiguration(configuration)
+
             // TODO
 //            get().sharedViewModel.clearQuitServiceDesk()
 //            get().onStopCallback = onStopCallback
 
-            activity.startActivity(MainActivity.getLaunchIntent(activity))
+            activity.startActivity(TicketActivity.getLaunchIntent(activity))
 
             // TODO sds
             if (configuration == null)

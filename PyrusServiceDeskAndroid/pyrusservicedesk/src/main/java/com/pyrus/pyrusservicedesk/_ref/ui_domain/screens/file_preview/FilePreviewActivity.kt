@@ -55,8 +55,8 @@ internal class FilePreviewActivity: ConnectionActivityBase<FilePreviewViewModel>
         applyStyle()
         initListeners()
 
-        binding.toolbarTitle.text = viewModel.getFileName()
-        binding.fileExtension.text = viewModel.getExtension()
+//        binding.toolbarTitle.text = viewModel.getFileName()
+//        binding.fileExtension.text = viewModel.getExtension()
 
         binding.webView.apply{
             settings.apply {
@@ -72,7 +72,7 @@ internal class FilePreviewActivity: ConnectionActivityBase<FilePreviewViewModel>
                     super.onReceivedError(view, request, error)
                     dispatch(FilePreviewView.Event.OnWebViewError(error))
                     // TODO
-                    viewModel.onErrorReceived()
+//                    viewModel.onErrorReceived()
                 }
 
                 override fun onPageFinished(view: WebView?, url: String?) {
@@ -84,7 +84,7 @@ internal class FilePreviewActivity: ConnectionActivityBase<FilePreviewViewModel>
                 override fun onProgressChanged(view: WebView?, newProgress: Int) {
                     dispatch(FilePreviewView.Event.OnLoadProgressChanged(newProgress))
                     // TODO
-                    viewModel.onProgressChanged(newProgress)
+//                    viewModel.onProgressChanged(newProgress)
                 }
             }
         }
@@ -121,14 +121,14 @@ internal class FilePreviewActivity: ConnectionActivityBase<FilePreviewViewModel>
 
     override fun startObserveData() {
         super.startObserveData()
-        viewModel.getFileLiveData().observe(this) {
-            it?.let { model ->
-                when {
-                    model.isPreviewable -> applyPreviewableViewModel(model)
-                    else -> applyNonPreviewableViewModel(model)
-                }
-            }
-        }
+//        viewModel.getFileLiveData().observe(this) {
+//            it?.let { model ->
+//                when {
+//                    model.isPreviewable -> applyPreviewableViewModel(model)
+//                    else -> applyNonPreviewableViewModel(model)
+//                }
+//            }
+//        }
 
     }
 
@@ -267,9 +267,9 @@ internal class FilePreviewActivity: ConnectionActivityBase<FilePreviewViewModel>
             R.id.share -> {
                 dispatch(FilePreviewView.Event.OnShareClick)
                 // TODO
-                viewModel.getFileLiveData().value?.let {
-                    dispatchLocalFileAction(it.fileUri, ACTION_SEND)
-                }
+//                viewModel.getFileLiveData().value?.let {
+//                    dispatchLocalFileAction(it.fileUri, ACTION_SEND)
+//                }
             }
         }
 
@@ -277,7 +277,7 @@ internal class FilePreviewActivity: ConnectionActivityBase<FilePreviewViewModel>
     }
 
     private fun startDownloadFile() {
-        viewModel.onDownloadFileClicked()
+//        viewModel.onDownloadFileClicked()
     }
 
     private fun initListeners() {

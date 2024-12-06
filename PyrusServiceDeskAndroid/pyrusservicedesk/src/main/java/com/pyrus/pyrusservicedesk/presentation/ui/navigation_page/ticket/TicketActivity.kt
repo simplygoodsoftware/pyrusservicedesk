@@ -49,11 +49,8 @@ internal class TicketActivity : ConnectionActivityBase<TicketViewModel>(TicketVi
          * When not, this should be omitted for the new ticket.
          * @param unreadCount current count of unread tickets.
          */
-        fun getLaunchIntent(ticketId:Int? = null, unreadCount: Int? = 0): Intent {
-            return Intent(
-                    PyrusServiceDesk.get().application,
-                    TicketActivity::class.java).also { intent ->
-
+        fun getLaunchIntent(context: Context, ticketId:Int? = null, unreadCount: Int? = 0): Intent {
+            return Intent(context, TicketActivity::class.java).also { intent ->
                 ticketId?.let { intent.putExtra(KEY_TICKET_ID, it) }
                 intent.putExtra(KEY_UNREAD_COUNT, unreadCount)
             }
@@ -70,7 +67,7 @@ internal class TicketActivity : ConnectionActivityBase<TicketViewModel>(TicketVi
         AttachFileSharedViewModel::class.java)
     private val commentActionsSharedViewModel: PendingCommentActionSharedViewModel by getViewModel(
         PendingCommentActionSharedViewModel::class.java)
-    private val adapter: TicketAdapter = TODO()
+//    private val adapter: TicketAdapter = TODO()
 //    private val adapter = TicketAdapter().apply {
 //        setOnFileReadyForPreviewClickListener { attachment ->
 //            val fileData = attachment.toFileData()
@@ -100,7 +97,7 @@ internal class TicketActivity : ConnectionActivityBase<TicketViewModel>(TicketVi
 
         override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
 //            send.isEnabled = !s.isNullOrBlank()
-            viewModel.onInputTextChanged(s.toString())
+//            viewModel.onInputTextChanged(s.toString())
         }
     }
 
@@ -239,45 +236,45 @@ internal class TicketActivity : ConnectionActivityBase<TicketViewModel>(TicketVi
 
     override fun startObserveData() {
         super.startObserveData()
-        viewModel.getCommentDiffLiveData().observe(this) { result ->
-//            val atEnd = comments.isAtEnd()
-//            val isEmpty = comments.adapter?.itemCount == 0
-            result?.let {
-//                refresh.isRefreshing = false
-//                adapter.setItems(it.newItems)
-                it.diffResult.dispatchUpdatesTo(adapter)
-            }
-//            if (adapter.itemCount > 0 && atEnd) {
-//                if (isEmpty)
-//                    comments.scrollToPosition(adapter.itemCount - 1)
-//                else if (!comments.isAtEnd()) {
-//                    comments.smoothScrollToPosition(adapter.itemCount - 1)
-//                }
-//                launch {
-//                    while (!comments.isAtEnd()) {
-//                        delay(CHECK_IS_AT_BOTTOM_DELAY_MS)
-//                    }
-//                    val offset = when {
-//                        comments.childCount > 0 -> comments.getChildAt(comments.childCount - 1).height
-//                        else -> 0
-//                    }
-//                    comments.smoothScrollBy(0, offset)
-//                }
+//        viewModel.getCommentDiffLiveData().observe(this) { result ->
+////            val atEnd = comments.isAtEnd()
+////            val isEmpty = comments.adapter?.itemCount == 0
+//            result?.let {
+////                refresh.isRefreshing = false
+////                adapter.setItems(it.newItems)
+////                it.diffResult.dispatchUpdatesTo(adapter)
 //            }
-        }
+////            if (adapter.itemCount > 0 && atEnd) {
+////                if (isEmpty)
+////                    comments.scrollToPosition(adapter.itemCount - 1)
+////                else if (!comments.isAtEnd()) {
+////                    comments.smoothScrollToPosition(adapter.itemCount - 1)
+////                }
+////                launch {
+////                    while (!comments.isAtEnd()) {
+////                        delay(CHECK_IS_AT_BOTTOM_DELAY_MS)
+////                    }
+////                    val offset = when {
+////                        comments.childCount > 0 -> comments.getChildAt(comments.childCount - 1).height
+////                        else -> 0
+////                    }
+////                    comments.smoothScrollBy(0, offset)
+////                }
+////            }
+//        }
         attachFileSharedViewModel.getFilePickedLiveData().observe(this) { fileUri ->
             fileUri?.let {
-                viewModel.onAttachmentSelected(it)
+//                viewModel.onAttachmentSelected(it)
             }
         }
 
         commentActionsSharedViewModel.getSelectedActionLiveData().observe(this) { action ->
             action?.let {
-                when {
-                    PendingCommentActionSharedViewModel.isRetryClicked(it) -> viewModel.onPendingCommentRetried()
-                    PendingCommentActionSharedViewModel.isDeleteClicked(it) -> viewModel.onPendingCommentDeleted()
-                    PendingCommentActionSharedViewModel.isCancelled(it) -> viewModel.onChoosingCommentActionCancelled()
-                }
+//                when {
+//                    PendingCommentActionSharedViewModel.isRetryClicked(it) -> viewModel.onPendingCommentRetried()
+//                    PendingCommentActionSharedViewModel.isDeleteClicked(it) -> viewModel.onPendingCommentDeleted()
+//                    PendingCommentActionSharedViewModel.isCancelled(it) -> viewModel.onChoosingCommentActionCancelled()
+//                }
             }
         }
 
@@ -307,12 +304,13 @@ internal class TicketActivity : ConnectionActivityBase<TicketViewModel>(TicketVi
         if (menuDelegate != null && menuItem != null)
             return menuDelegate.onOptionsItemSelected(menuItem, this)
 
-        return menuItem?.let {
-            when (it.itemId) {
-                R.id.psd_main_menu_close -> sharedViewModel.quitServiceDesk()
-            }
-            true
-        } ?: false
+//        return menuItem?.let {
+//            when (it.itemId) {
+//                R.id.psd_main_menu_close -> sharedViewModel.quitServiceDesk()
+//            }
+//            true
+//        } ?: false
+        return false
     }
 
     private fun onSendCommentClick() {

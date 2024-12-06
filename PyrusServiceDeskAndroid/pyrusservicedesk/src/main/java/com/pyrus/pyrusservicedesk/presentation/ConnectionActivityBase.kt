@@ -22,7 +22,7 @@ internal abstract class ConnectionActivityBase<T: ConnectionViewModelBase>(viewM
     /**
      * Instance of the view model that is defined by the particular type of the activity.
      */
-    protected val viewModel: T by getViewModel(viewModelClass)
+//    protected val viewModel: T by getViewModel(viewModelClass)
 
     /**
      * Optional id of the swiperefreshlayout that is used for launch loading the data from [viewModel]
@@ -42,31 +42,31 @@ internal abstract class ConnectionActivityBase<T: ConnectionViewModelBase>(viewM
 //        reconnectButton.setOnClickListener { reconnect() }
 //        reconnectButton.setTextColor(ConfigUtils.getAccentColor(this))
         refresher = findViewById(refresherViewId)
-        refresher?.setOnRefreshListener { viewModel.loadData() }
+//        refresher?.setOnRefreshListener { viewModel.loadData() }
     }
 
     override fun startObserveData() {
         super.startObserveData()
-        viewModel.getIsNetworkConnectedLiveData().observe(
-            this,
-            { isConnected ->
-                isConnected?.let {
-//                    no_connection.visibility = if (it) GONE else VISIBLE
-                }
-            }
-        )
-        viewModel.getLoadingProgressLiveData().observe(
-            this,
-            { progress ->
-                progress?.let { updateProgress(it) }
-            }
-        )
-        sharedViewModel.getUpdateServiceDeskLiveData().observe(
-            this,
-            {
-                viewModel.loadData()
-            }
-        )
+//        viewModel.getIsNetworkConnectedLiveData().observe(
+//            this,
+//            { isConnected ->
+//                isConnected?.let {
+////                    no_connection.visibility = if (it) GONE else VISIBLE
+//                }
+//            }
+//        )
+//        viewModel.getLoadingProgressLiveData().observe(
+//            this,
+//            { progress ->
+//                progress?.let { updateProgress(it) }
+//            }
+//        )
+//        sharedViewModel.getUpdateServiceDeskLiveData().observe(
+//            this,
+//            {
+//                viewModel.loadData()
+//            }
+//        )
     }
 
     /**
@@ -94,6 +94,6 @@ internal abstract class ConnectionActivityBase<T: ConnectionViewModelBase>(viewM
      * Called when user tries to reconnect to the network.
      */
     protected open fun reconnect() {
-        viewModel.loadData()
+//        viewModel.loadData()
     }
 }
