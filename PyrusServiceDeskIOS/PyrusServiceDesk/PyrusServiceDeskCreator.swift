@@ -305,7 +305,7 @@ import UIKit
     ///- parameter domain: Base domain for network requests. If the [domain] is null, the default pyrus.com will be used.
     ///- parameter loggingEnabled If true, then the library will write logs, and they can be sent as a file to chat by clicking the "Send Library Logs" button in the menu under the "+" sign.
     @objc static public func createWith(_ clientId: String?, clientName: String? = nil, multichats: Bool = false, authorId: String? = nil, userName: String? = nil, additionalUsers: [PSDUserInfo] = [], domain: String? = nil, loggingEnabled: Bool = false, authorizationToken: String? = nil)  {
-        createWith(clientId, clientName: clientName, userId: nil, securityKey: nil, reset: false, userName: userName, additionalUsers: additionalUsers, authorId: authorId, domain: domain, loggingEnabled: loggingEnabled, authorizationToken: authorizationToken, multichats: multichats)
+        createWith(clientId, userId: nil, securityKey: nil, reset: false, userName: userName, additionalUsers: additionalUsers, authorId: authorId, domain: domain, loggingEnabled: loggingEnabled, authorizationToken: authorizationToken, multichats: multichats)
     }
     
     @objc static public func setFieldsData(fieldsData: [String: String]? = nil) {
@@ -318,7 +318,7 @@ import UIKit
     ///- parameter domain: Base domain for network requests. If the [domain] is null, the default pyrus.com will be used.
     ///- parameter loggingEnabled If true, then the library will write logs, and they can be sent as a file to chat by clicking the "Send Library Logs" button in the menu under the "+" sign.
     @objc static public func createWith(_ clientId: String?, reset: Bool, domain: String? = nil, loggingEnabled: Bool = false, authorizationToken: String? = nil) {
-        createWith(clientId, clientName: nil, userId: nil, securityKey: nil, reset: reset, userName: "", authorId: nil, domain: domain, loggingEnabled: loggingEnabled, authorizationToken: authorizationToken)
+        createWith(clientId, userId: nil, securityKey: nil, reset: reset, userName: "", authorId: nil, domain: domain, loggingEnabled: loggingEnabled, authorizationToken: authorizationToken)
     }
     
     ///Init PyrusServiceDesk with new clientId.
@@ -327,12 +327,11 @@ import UIKit
     ///- parameter securityKey: security key of the user for safe initialization
     //////- parameter domain: Base domain for network requests. If the [domain] is null, the default pyrus.com will be used.
     ///- parameter loggingEnabled If true, then the library will write logs, and they can be sent as a file to chat by clicking the "Send Library Logs" button in the menu under the "+" sign.
-    @objc static public func createWith(_ clientId: String?, clientName: String? = nil, userId: String?, securityKey: String? = nil, userName: String? = nil, multichats: Bool = false, authorId: String? = nil, additionalUsers: [PSDUserInfo] = [], domain: String? = nil, loggingEnabled: Bool = false, authorizationToken: String? = nil) {
-        createWith(clientId, clientName: clientName, userId: userId, securityKey: securityKey, reset: false, userName: userName, additionalUsers: additionalUsers, authorId: authorId, domain: domain, loggingEnabled: loggingEnabled, authorizationToken: authorizationToken, multichats: multichats)
+    @objc static public func createWith(_ clientId: String?, userId: String?, securityKey: String? = nil, userName: String? = nil, multichats: Bool = false, authorId: String? = nil, additionalUsers: [PSDUserInfo] = [], domain: String? = nil, loggingEnabled: Bool = false, authorizationToken: String? = nil) {
+        createWith(clientId, userId: userId, securityKey: securityKey, reset: false, userName: userName, additionalUsers: additionalUsers, authorId: authorId, domain: domain, loggingEnabled: loggingEnabled, authorizationToken: authorizationToken, multichats: multichats)
     }
-    private static func createWith(_ clientId: String?, clientName: String?, userId: String?, securityKey: String?, reset: Bool, userName: String?, additionalUsers: [PSDUserInfo] = [], authorId: String?, domain: String?, loggingEnabled: Bool, authorizationToken: String?, multichats: Bool = false) {
+    private static func createWith(_ clientId: String?, userId: String?, securityKey: String?, reset: Bool, userName: String?, additionalUsers: [PSDUserInfo] = [], authorId: String?, domain: String?, loggingEnabled: Bool, authorizationToken: String?, multichats: Bool = false) {
         PyrusServiceDesk.multichats = multichats
-        PyrusServiceDesk.clientName = clientName
         PyrusServiceDesk.loggingEnabled = loggingEnabled
         guard let clientId = clientId, clientId.count > 0 else {
             EventsLogger.logEvent(.emptyClientId)

@@ -64,7 +64,9 @@ class SyncManager {
             PSDGetChats.get(commands: ticketCommands.map({ $0.toDictionary() })) { [weak self] chats, commandsResult, authorAccessDenied, clientsArray, complete in
                 guard let self = self else { return }
                 var clients = clientsArray
-                PyrusServiceDesk.accessDeniedIds = authorAccessDenied ?? []
+                DispatchQueue.main.async {
+                    PyrusServiceDesk.accessDeniedIds = authorAccessDenied ?? []
+                }
 
                 let userInfo = ["isFilter": isFilter]
                 if let authorAccessDenied, authorAccessDenied.count > 0 {
@@ -95,8 +97,10 @@ class SyncManager {
                         }
                     }
                 }
-                if let clients, clients.count > 0 {
-                    PyrusServiceDesk.clients = clients
+                DispatchQueue.main.async {
+                    if let clients, clients.count > 0 {
+                        PyrusServiceDesk.clients = clients
+                    }
                 }
                 
                 if let commandsResult {
@@ -119,9 +123,11 @@ class SyncManager {
                     PSDMessagesStorage.saveMessagesToFile()
                 }
                 
-                if let chats {
-                    PyrusServiceDesk.chats = chats
-                    NotificationCenter.default.post(name: PyrusServiceDesk.chatsUpdateNotification, object: nil, userInfo: userInfo)
+                DispatchQueue.main.async {
+                    if let chats {
+                        PyrusServiceDesk.chats = chats
+                        NotificationCenter.default.post(name: PyrusServiceDesk.chatsUpdateNotification, object: nil, userInfo: userInfo)
+                    }
                 }
                             
                 DispatchQueue.main.async {
