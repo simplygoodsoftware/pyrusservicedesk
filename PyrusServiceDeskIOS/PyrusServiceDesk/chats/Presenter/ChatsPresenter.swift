@@ -1,8 +1,10 @@
 import UIKit
 
 @available(iOS 13.0, *)
-class ChatsPresenter {
+class ChatsPresenter: NSObject {
     weak var view: ChatsViewProtocol?
+    private var isClosedTicketsOpened: Bool = false
+    private var chats = [ChatPresenterModel]()
 }
 
 @available(iOS 13.0, *)
@@ -10,7 +12,8 @@ extension ChatsPresenter: ChatsPresenterProtocol {
     func doWork(_ action: ChatsPresenterCommand) {
         switch action {
         case .updateChats(chats: let chats):
-            view?.show(.updateChats(chats: prepareChats(chats: chats)))
+            self.chats = chats
+            updateChats()
         case .openChat(chat: let chat, fromPush: let fromPush):
             view?.show(.openChat(chat: chat, fromPush: fromPush))
         case .deleteFilter:
@@ -53,8 +56,14 @@ extension ChatsPresenter: ChatsPresenterProtocol {
 
 @available(iOS 13.0, *)
 private extension ChatsPresenter {
-    func prepareChats(chats: [ChatPresenterModel]) -> [ChatViewModel] {
-        var models = [ChatViewModel]()
+    func updateChats() {
+        view?.show(.updateChats(chats: prepareChats(chats: chats)))
+    }
+    
+    func prepareChats(chats: [ChatPresenterModel]) -> [[PSDChatsViewModelProtocol]] {
+        var activeChats = [PSDChatsViewModelProtocol]()
+        var closeChats = [ChatViewModel]()
+        
         for chat in chats {
             let subject = chat.subject?.count ?? 0 > 0
                 ? chat.subject ?? ""
@@ -79,10 +88,22 @@ private extension ChatsPresenter {
                 state: lastMessage?.state ?? .sent
             )
             
-            models.append(model)
+            if chat.isActive {
+                activeChats.append(model)
+            } else {
+                closeChats.append(model)
+            }
         }
         
-        return models
+        if closeChats.count > 0 {
+            activeChats.append(ClosedTicketsCellModel(count: closeChats.count, isOpen: isClosedTicketsOpened, delegate: self))
+        }
+        
+        if isClosedTicketsOpened {
+            return [activeChats, closeChats]
+        } else {
+            return [activeChats, []]
+        }
     }
     
     func getAttachmentString(attachment: PSDAttachment?) -> String? {
@@ -114,5 +135,12 @@ private extension ChatsPresenter {
         }
         
         return actions
+    }
+}
+
+extension ChatsPresenter: ClosedTicketsCellDelegate {
+    func redrawChats(open: Bool) {
+        isClosedTicketsOpened = open
+        updateChats()
     }
 }

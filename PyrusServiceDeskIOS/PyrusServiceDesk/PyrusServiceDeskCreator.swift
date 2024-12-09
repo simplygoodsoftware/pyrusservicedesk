@@ -76,6 +76,20 @@ import UIKit
         syncManager.syncGetTickets(isFilter: true)
     }
     
+    public static var newUser: PSDUserInfo?
+    public static func addUserFromDiplink(appId: String, userId: String, userName: String) {
+        guard let _ = PyrusServiceDesk.mainController else {
+            let user = PSDUserInfo(appId: appId, clientName: "", userId: userId, userName: userName, secretKey: nil)
+            newUser = user
+            if !additionalUsers.contains(user) && user.userId != customUserId {
+                additionalUsers.append(user)
+            }
+            return
+        }
+        newUser = PSDUserInfo(appId: appId, clientName: "", userId: userId, userName: userName, secretKey: nil)
+        addUser(appId: appId, clientName: "", userId: userId, userName: userName)
+    }
+    
     ///User's name needed for request. If don't set used Default_User_Name
     @objc static private(set) var authorName = DEFAULT_USER_NAME
     static var accessDeniedIds = [String]()

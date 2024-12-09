@@ -5,6 +5,11 @@ class PSDChatsViewController: UIViewController {
     private let interactor: ChatsInteractorProtocol
     private let router: ChatsRouterProtocol?
     
+    let section1 = PSDChatsSectionModel()
+    let section2 = PSDChatsSectionModel()
+    
+    private var isClosedTicketsOpened: Bool = false
+    
     required init(interactor: ChatsInteractorProtocol, router: ChatsRouterProtocol) {
         self.interactor = interactor
         self.router = router
@@ -55,10 +60,10 @@ class PSDChatsViewController: UIViewController {
     }()
     
     private var clearTable = false
-    private var chats : [ChatViewModel] = [] {
+    private var chats: [[PSDChatsViewModelProtocol]] = [[], []] {
         didSet {
             reloadDiffable(animated: true)
-            emptyChatsView.isHidden = chats.count > 0 || clearTable
+            emptyChatsView.isHidden = !(chats[0].count == 0 && chats[1].count == 0) || clearTable
         }
     }
     
@@ -193,7 +198,6 @@ private extension PSDChatsViewController {
         tableView.keyboardDismissMode = .onDrag
         tableView.contentInset = UIEdgeInsets(top: 0, left: 0, bottom: 100, right: 0)
         tableView.contentInsetAdjustmentBehavior = .automatic
-
         
         tableView.addSubview(customRefresh)
         
@@ -242,7 +246,7 @@ private extension PSDChatsViewController {
             self.tableView.layoutIfNeeded()
             self.filterLabel.isHidden = false
             self.filterCross.isHidden = false
-            if self.chats.count > 0 {
+            if self.chats[0].count > 0 || self.chats[1].count > 0 {
                 self.tableView.scrollToRow(at: IndexPath(row: 0, section: 0), at: .top, animated: false)
             }
         })
@@ -417,11 +421,23 @@ private extension PSDChatsViewController {
     func reloadDiffable(animated: Bool) {
         guard let diffabledDataSource = diffabledDataSource else { return }
         var snapshot = NSDiffableDataSourceSnapshot<PSDChatsSectionModel, AnyHashable>()
-        let section = PSDChatsSectionModel()
-        snapshot.appendSections([section])
-        snapshot.appendItems(chats, toSection: section)
+//        for (index, items) in chats.enumerated() {
+//            let section = PSDChatsSectionModel(id: index)
+//            snapshot.appendSections([section])
+//            snapshot.appendItems(items, toSection: section)
+//        }
+//        let section1 = PSDChatsSectionModel()
+//        let section2 = PSDChatsSectionModel(title: "Закрытые обращения")
+        snapshot.appendSections([section1, section2])
         
-        diffabledDataSource.apply(snapshot, animatingDifferences: animated)
+        snapshot.appendItems(chats[0], toSection: section1)
+        snapshot.appendItems(chats[1], toSection: section2)
+        
+//        let contentOffset = tableView.contentOffset
+        diffabledDataSource.apply(snapshot, animatingDifferences: animated) 
+//        { [weak self] in
+//            self?.tableView.contentOffset = contentOffset
+//        }
         self.diffabledDataSource = diffabledDataSource
     }
     
@@ -435,25 +451,33 @@ private extension PSDChatsViewController {
 @available(iOS 13.0, *)
 extension PSDChatsViewController: UITableViewDelegate, UITableViewDataSource {
     func numberOfSectionsInTableView(tableView: UITableView) -> Int {
-        return 1
+        return chats.count
     }
     
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        return chats.count;
+        return chats[section].count
     }
     
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-        let cell = cellConfigurator?.getCell(model: chats[indexPath.row], indexPath: indexPath) ?? PSDChatInfoTableViewCell()
+        let cell = cellConfigurator?.getCell(model: chats[indexPath.section][indexPath.row], indexPath: indexPath) ?? PSDChatInfoTableViewCell()
         return cell
     }
     
     func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {
-        return 80
+        switch chats[indexPath.section][indexPath.row].type {
+        case .chat:
+            return 80
+        case .header:
+            return 48
+        }
     }
     
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
-        tableView.deselectRow(at: indexPath, animated: true)
-        interactor.doInteraction(.selectChat(index: indexPath.row))
+        if chats[indexPath.section][indexPath.row].type == .chat {
+            tableView.deselectRow(at: indexPath, animated: true)
+            let index = indexPath.section == 0 ? indexPath.row : indexPath.row + chats[0].count - 1
+            interactor.doInteraction(.selectChat(index: index))
+        }
 
     }
 }
@@ -508,7 +532,7 @@ extension PSDChatsViewController: ChatsViewProtocol {
                 self.segmentControl.updateTitle(titles: [], selectIndex: 0)
         case .startRefresh:
             clearTable = true
-            chats = []
+            chats = [[], []]
             activityIndicator.startAnimating()
         case .connectionError:
             navTitle.text = "Waiting_For_Network".localizedPSD()

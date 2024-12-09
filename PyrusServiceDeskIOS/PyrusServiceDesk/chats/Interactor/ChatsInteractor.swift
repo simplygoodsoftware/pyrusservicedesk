@@ -16,7 +16,7 @@ class ChatsInteractor: NSObject {
         }
     }
     
-    var selectedIndex = 0
+    var selectedIndex: Int? = nil
     var isNewQr = false
     var isClear = false
     var isNewUser = false
@@ -223,15 +223,20 @@ private extension ChatsInteractor {
     }
     
     func updateSelected(index: Int) {
-        
         if index < clients.count {
+            if selectedIndex != nil && index != selectedIndex {
+                presenter.doWork(.deleteFilter)
+            }
             selectedIndex = index
-            presenter.doWork(.deleteFilter)
             PyrusServiceDesk.currentClientId = clients[index].clientId
             createMenuActions()
             updateChats()
             
             updateIcon(imagePath: clients[index].clientIcon, index: index)
+        }
+        if let newUser = PyrusServiceDesk.newUser {
+            let _ = PyrusServiceDesk.addUser(appId: newUser.clientId, clientName: "", userId: newUser.userId, userName: newUser.userName)
+            PyrusServiceDesk.newUser = nil
         }
     }
     
@@ -298,6 +303,7 @@ private extension ChatsInteractor {
             id: $0.chatId ?? 0,
             date: $0.date,
             isRead: isRead,
+            isActive: $0.isActive,
             subject: $0.subject,
             lastComment: $0.lastComment,
             messages: $0.messages
@@ -305,6 +311,10 @@ private extension ChatsInteractor {
     }
     
     @objc func updateChats(isFilter: Bool = false) {
+        if let newUser = PyrusServiceDesk.newUser {
+            let _ = PyrusServiceDesk.addUser(appId: newUser.clientId, clientName: "", userId: newUser.userId, userName: newUser.userName)
+            PyrusServiceDesk.newUser = nil
+        }
         DispatchQueue.main.async { [weak self] in
             guard let self = self else {
                 return

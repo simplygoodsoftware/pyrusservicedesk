@@ -6,6 +6,7 @@ protocol PSDChatsSectionModelProtocol: Hashable {
 }
 
 struct PSDChatsSectionModel: PSDChatsSectionModelProtocol {
+    let id = UUID()
     var title: String = ""
     var isOpen: Bool = false
 }
