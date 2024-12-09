@@ -14,19 +14,19 @@ internal interface TicketView {
 
     sealed interface Event {
 
-        object OnPreviewClick : Event
+        data object OnPreviewClick : Event
 
-        object OnRetryClick : Event
+        data object OnRetryClick : Event
 
         data class OnCopyClick(val text: String) : Event
 
         data class OnRatingClick(val rating: Int) : Event
 
-        object OnShowAttachVariantsClick : Event
+        data object OnShowAttachVariantsClick : Event
 
-        object OnSendClick : Event
+        data object OnSendClick : Event
 
-        object OnCloseClick : Event
+        data object OnCloseClick : Event
 
         data class OnMessageChanged(val text: String) : Event
 
