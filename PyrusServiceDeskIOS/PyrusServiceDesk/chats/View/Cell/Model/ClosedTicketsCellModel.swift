@@ -1,6 +1,7 @@
 import Foundation
 
-class ClosedTicketsCellModel: PSDChatsViewModelProtocol {
+struct ClosedTicketsCellModel: Hashable {
+    
     let title = "Закрытые обращения"
     let count: Int
     let isOpen: Bool
@@ -10,14 +11,13 @@ class ClosedTicketsCellModel: PSDChatsViewModelProtocol {
         self.count = count
         self.isOpen = isOpen
         self.delegate = delegate
-        super.init(type: .header)
     }
     
     static func == (lhs: ClosedTicketsCellModel, rhs: ClosedTicketsCellModel) -> Bool {
         return lhs.count == rhs.count
     }
     
-    override func hash(into hasher: inout Hasher) {
+    func hash(into hasher: inout Hasher) {
         hasher.combine(count)
     }
 }

@@ -1,6 +1,6 @@
 import Foundation
 
-class ChatViewModel: PSDChatsViewModelProtocol {
+struct ChatViewModel: Hashable {
     let id: Int
     let date: String
     let isRead: Bool
@@ -19,14 +19,13 @@ class ChatViewModel: PSDChatsViewModelProtocol {
         self.attachmentText = attachmentText
         self.hasAttachment = hasAttachment
         self.state = state
-        super.init(type: type)
     }
     
     static func == (lhs: ChatViewModel, rhs: ChatViewModel) -> Bool {
-        return lhs.id == rhs.id && lhs.date == rhs.date && lhs.isRead == rhs.isRead && lhs.subject == rhs.subject && lhs.lastMessageText == rhs.lastMessageText && lhs.attachmentText == rhs.attachmentText && lhs.hasAttachment == rhs.hasAttachment && lhs.state == rhs.state
+        return lhs.id == rhs.id && lhs.isRead == rhs.isRead && lhs.subject == rhs.subject && lhs.lastMessageText == rhs.lastMessageText && lhs.attachmentText == rhs.attachmentText && lhs.hasAttachment == rhs.hasAttachment && lhs.state == rhs.state
     }
     
-    override func hash(into hasher: inout Hasher) {
+    func hash(into hasher: inout Hasher) {
         hasher.combine(id)
         hasher.combine(date)
         hasher.combine(isRead)

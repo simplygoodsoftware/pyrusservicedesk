@@ -60,7 +60,7 @@ class PSDChatsViewController: UIViewController {
     }()
     
     private var clearTable = false
-    private var chats: [[PSDChatsViewModelProtocol]] = [[], []] {
+    private var chats: [[PSDChatsViewModel]] = [[], []] {
         didSet {
             reloadDiffable(animated: true)
             emptyChatsView.isHidden = !(chats[0].count == 0 && chats[1].count == 0) || clearTable
@@ -421,6 +421,7 @@ private extension PSDChatsViewController {
     func reloadDiffable(animated: Bool) {
         guard let diffabledDataSource = diffabledDataSource else { return }
         var snapshot = NSDiffableDataSourceSnapshot<PSDChatsSectionModel, AnyHashable>()
+        snapshot.deleteAllItems()
 //        for (index, items) in chats.enumerated() {
 //            let section = PSDChatsSectionModel(id: index)
 //            snapshot.appendSections([section])

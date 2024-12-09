@@ -60,9 +60,9 @@ private extension ChatsPresenter {
         view?.show(.updateChats(chats: prepareChats(chats: chats)))
     }
     
-    func prepareChats(chats: [ChatPresenterModel]) -> [[PSDChatsViewModelProtocol]] {
-        var activeChats = [PSDChatsViewModelProtocol]()
-        var closeChats = [ChatViewModel]()
+    func prepareChats(chats: [ChatPresenterModel]) -> [[PSDChatsViewModel]] {
+        var activeChats = [PSDChatsViewModel]()
+        var closeChats = [PSDChatsViewModel]()
         
         for chat in chats {
             let subject = chat.subject?.count ?? 0 > 0
@@ -89,14 +89,14 @@ private extension ChatsPresenter {
             )
             
             if chat.isActive {
-                activeChats.append(model)
+                activeChats.append(PSDChatsViewModel(data: model, type: .chat))
             } else {
-                closeChats.append(model)
+                closeChats.append(PSDChatsViewModel(data: model, type: .chat))
             }
         }
         
         if closeChats.count > 0 {
-            activeChats.append(ClosedTicketsCellModel(count: closeChats.count, isOpen: isClosedTicketsOpened, delegate: self))
+            activeChats.append(PSDChatsViewModel(data: ClosedTicketsCellModel(count: closeChats.count, isOpen: isClosedTicketsOpened, delegate: self), type: .header) )
         }
         
         if isClosedTicketsOpened {

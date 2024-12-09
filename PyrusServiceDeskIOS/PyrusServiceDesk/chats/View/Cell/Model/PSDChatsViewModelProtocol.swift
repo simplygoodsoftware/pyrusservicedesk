@@ -5,18 +5,15 @@ enum PSDChatsCellType {
     case header
 }
 
-class PSDChatsViewModelProtocol: Hashable {
-    static func == (lhs: PSDChatsViewModelProtocol, rhs: PSDChatsViewModelProtocol) -> Bool {
-        return true
+struct PSDChatsViewModel: Hashable {
+    static func == (lhs: PSDChatsViewModel, rhs: PSDChatsViewModel) -> Bool {
+        return lhs.type == rhs.type && lhs.data == rhs.data
     }
     
     func hash(into hasher: inout Hasher) {
-        hasher.combine(1)
+        hasher.combine(type)
+        hasher.combine(data)
     }
-    
+    let data: AnyHashable
     let type: PSDChatsCellType
-    
-    init(type: PSDChatsCellType) {
-        self.type = type
-    }
 }

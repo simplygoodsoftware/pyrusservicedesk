@@ -2,7 +2,7 @@ import UIKit
 
 @available(iOS 13.0, *)
 enum ChatsSearchViewCommand {
-    case updateChats(chats: [[PSDChatsViewModelProtocol]])
+    case updateChats(chats: [[PSDChatsViewModel]])
     case openChat(chat: PSDChat, fromPush: Bool)
     case deleteFilter
     case setFilter(userName: String)

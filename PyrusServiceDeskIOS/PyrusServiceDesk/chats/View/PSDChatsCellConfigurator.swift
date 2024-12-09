@@ -15,16 +15,16 @@ final class PSDChatsCellConfigurator: TableViewCellConfiguratorProtocol {
 
     }
 
-    func getCell(model: PSDChatsViewModelProtocol, indexPath: IndexPath) -> UITableViewCell {
+    func getCell(model: PSDChatsViewModel, indexPath: IndexPath) -> UITableViewCell {
         switch model.type {
         case .chat:
-            if let chatModel = model as? ChatViewModel {
+            if let chatModel = model.data as? ChatViewModel {
                 let cell = getCell(reuseIdentifier: psdChatInfoCellIdentifier, indexPath: indexPath)
                 cell.configure(with: chatModel)
                 return cell
             }
         case .header:
-            if let headerModel = model as? ClosedTicketsCellModel {
+            if let headerModel = model.data as? ClosedTicketsCellModel {
                 let cell = getCell(reuseIdentifier: psdClosedTicketsCellIdentifier, indexPath: indexPath)
                 cell.configure(with: headerModel)
                 cell.selectionStyle = .none
