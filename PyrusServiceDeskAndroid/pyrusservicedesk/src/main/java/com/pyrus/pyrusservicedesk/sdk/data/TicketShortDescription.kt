@@ -9,7 +9,7 @@ import com.google.gson.annotations.SerializedName
  * @param isRead FALSE is there are pending comments from support that are not seen yet.
  * @param lastComment last comment of the ticket.
  */
-internal class TicketShortDescription(
+internal data class TicketShortDescription(
     @SerializedName("ticket_id")
     val ticketId: Int,
     @SerializedName("subject")
