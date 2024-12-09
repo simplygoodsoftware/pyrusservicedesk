@@ -4,6 +4,7 @@ protocol ClosedTicketsCellDelegate: NSObject {
     func redrawChats(open: Bool)
 }
 
+@available(iOS 13.0, *)
 class ClosedTicketsCell: UITableViewCell {
     static var identifier = "ClosedTicketsCell"
     
@@ -11,7 +12,7 @@ class ClosedTicketsCell: UITableViewCell {
     
     private var isOpen: Bool = false {
         didSet {
-            openButton.setImage(UIImage(systemName: isOpen ? "chevron.up" : "chevron.down"), for: .normal)
+            openButton.setImage(UIImage(systemName: isOpen ? "chevron.up" : "chevron.down")?.imageWith(color: PyrusServiceDesk.mainController?.customization?.themeColor ?? .blue), for: .normal)
         }
     }
     
@@ -33,7 +34,7 @@ class ClosedTicketsCell: UITableViewCell {
     
     private let openButton: UIButton = {
         let button = UIButton()
-        button.setImage(UIImage(systemName: "chevron.down")?.imageWith(color: .mainColorApp), for: .normal)
+        button.setImage(UIImage(systemName: "chevron.down")?.imageWith(color: PyrusServiceDesk.mainController?.customization?.themeColor ?? .blue), for: .normal)
         return button;
     }()
     

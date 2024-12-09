@@ -138,6 +138,7 @@ private extension ChatsPresenter {
     }
 }
 
+@available(iOS 13.0, *)
 extension ChatsPresenter: ClosedTicketsCellDelegate {
     func redrawChats(open: Bool) {
         isClosedTicketsOpened = open

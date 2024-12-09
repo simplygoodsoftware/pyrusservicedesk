@@ -1,9 +1,10 @@
 import UIKit
 
+@available(iOS 13.0, *)
 final class PSDChatsCellConfigurator: TableViewCellConfiguratorProtocol {
 
     private let psdChatInfoCellIdentifier = ReuseIdentifier<PSDChatInfoTableViewCell>(identifier:  PSDChatInfoTableViewCell.identifier)
-    private let psdClosedTicketsCellIdentifier = ReuseIdentifier<ClosedTicketsCell>(identifier:  ClosedTicketsCell.identifier)
+    private let psdClosedTicketsCellIdentifier = ReuseIdentifier<ClosedTicketsCell>(identifier: ClosedTicketsCell.identifier)
 
     let tableView: UITableView
 

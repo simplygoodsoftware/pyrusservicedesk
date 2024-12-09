@@ -195,9 +195,12 @@ class PyrusServiceDeskController: PSDNavigationController {
         button.setTitle(" " + "Back".localizedPSD(), for: .normal)
         button.setTitleColor(mainColor, for: .normal)
         button.setTitleColor(mainColor.withAlphaComponent(0.2), for: .highlighted)
-        let backImage = UIImage(systemName: "chevron.left", withConfiguration: UIImage.SymbolConfiguration(pointSize: 18, weight: .semibold, scale: .large))
-        button.setImage(backImage?.imageWith(color: mainColor), for: .normal)
-        button.setImage(backImage?.imageWith(color: mainColor.withAlphaComponent(0.2)), for: .highlighted)
+        if #available(iOS 13.0, *) {
+            let backImage = UIImage(systemName: "chevron.left", withConfiguration: UIImage.SymbolConfiguration(pointSize: 18, weight: .semibold, scale: .large))
+            button.setImage(backImage?.imageWith(color: mainColor), for: .normal)
+            button.setImage(backImage?.imageWith(color: mainColor.withAlphaComponent(0.2)), for: .highlighted)
+        }
+        
         button.addTarget(self, action: #selector(goBack), for: .touchUpInside)
         button.sizeToFit()
         return UIBarButtonItem(customView: button)

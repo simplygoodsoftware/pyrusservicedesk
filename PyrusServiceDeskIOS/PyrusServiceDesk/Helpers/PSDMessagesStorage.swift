@@ -166,7 +166,9 @@ struct PSDMessagesStorage {
         var messageDict: [String:Any] = [String:Any]()
         messageDict[MESSAGE_LOCAL_ID_KEY] = message.clientId
         messageDict[MESSAGE_TEXT_KEY] = message.text
-        messageDict[MESSAGE_DATE_KEY] = ISO8601DateFormatter().string(from: message.date)
+        if #available(iOS 10.0, *) {
+            messageDict[MESSAGE_DATE_KEY] = ISO8601DateFormatter().string(from: message.date)
+        }
         messageDict[MESSAGE_RATING_KEY] = message.rating
         messageDict[MESSAGE_TICKET_ID_KEY] = message.ticketId
         messageDict[MESSAGE_AUTHOR_ID_KEY] = message.owner.authorId
@@ -408,11 +410,13 @@ struct PSDMessagesStorage {
         }
         message.clientId = (dict[MESSAGE_LOCAL_ID_KEY] as? String) ?? message.clientId
         message.state = (dict[MESSAGE_STATE_KEY] as? Bool ?? false) ? .sending : .cantSend//.cantSend
-        if let dateString = dict[MESSAGE_DATE_KEY] as? String,
-           let date = ISO8601DateFormatter().date(from: dateString) {
-            message.date = date
-        } else {
-            message.date = Date()
+        if #available(iOS 10.0, *) {
+            if let dateString = dict[MESSAGE_DATE_KEY] as? String,
+               let date = ISO8601DateFormatter().date(from: dateString) {
+                message.date = date
+            } else {
+                message.date = Date()
+            }
         }
         message.fromStrorage = message.state == .cantSend
         message.isInbound = true

@@ -56,6 +56,9 @@
 		1E5068F12CEB6151001A9E2D /* iiko.png in Resources */ = {isa = PBXBuildFile; fileRef = 1E5068ED2CEB6151001A9E2D /* iiko.png */; };
 		1E5068F22CEB6151001A9E2D /* iiko@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 1E5068EE2CEB6151001A9E2D /* iiko@2x.png */; };
 		1E5068F32CEB6151001A9E2D /* iiko@3x.png in Resources */ = {isa = PBXBuildFile; fileRef = 1E5068EF2CEB6151001A9E2D /* iiko@3x.png */; };
+		1E50691B2D074591001A9E2D /* ClosedTicketsCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1E50691A2D074590001A9E2D /* ClosedTicketsCell.swift */; };
+		1E50691D2D07459C001A9E2D /* ClosedTicketsCellModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1E50691C2D07459C001A9E2D /* ClosedTicketsCellModel.swift */; };
+		1E50691F2D0745A5001A9E2D /* PSDChatsViewModelProtocol.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1E50691E2D0745A5001A9E2D /* PSDChatsViewModelProtocol.swift */; };
 		4B060F2A2732AD8C002E20A7 /* StringHelper.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4B060F292732AD8C002E20A7 /* StringHelper.swift */; };
 		4B062A832518A8D100B317D3 /* PSDPlaceholderMessage.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4B062A822518A8D100B317D3 /* PSDPlaceholderMessage.swift */; };
 		4B062A882518AC9500B317D3 /* messagePlaceholder@3x.png in Resources */ = {isa = PBXBuildFile; fileRef = 4B062A872518AC9500B317D3 /* messagePlaceholder@3x.png */; };
@@ -392,6 +395,9 @@
 		1E5068ED2CEB6151001A9E2D /* iiko.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = iiko.png; sourceTree = "<group>"; };
 		1E5068EE2CEB6151001A9E2D /* iiko@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "iiko@2x.png"; sourceTree = "<group>"; };
 		1E5068EF2CEB6151001A9E2D /* iiko@3x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "iiko@3x.png"; sourceTree = "<group>"; };
+		1E50691A2D074590001A9E2D /* ClosedTicketsCell.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ClosedTicketsCell.swift; sourceTree = "<group>"; };
+		1E50691C2D07459C001A9E2D /* ClosedTicketsCellModel.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ClosedTicketsCellModel.swift; sourceTree = "<group>"; };
+		1E50691E2D0745A5001A9E2D /* PSDChatsViewModelProtocol.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PSDChatsViewModelProtocol.swift; sourceTree = "<group>"; };
 		4B060F292732AD8C002E20A7 /* StringHelper.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StringHelper.swift; sourceTree = "<group>"; };
 		4B062A822518A8D100B317D3 /* PSDPlaceholderMessage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PSDPlaceholderMessage.swift; sourceTree = "<group>"; };
 		4B062A872518AC9500B317D3 /* messagePlaceholder@3x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "messagePlaceholder@3x.png"; sourceTree = "<group>"; };
@@ -704,6 +710,8 @@
 		1E1279C12CC271C00080CB19 /* Model */ = {
 			isa = PBXGroup;
 			children = (
+				1E50691E2D0745A5001A9E2D /* PSDChatsViewModelProtocol.swift */,
+				1E50691C2D07459C001A9E2D /* ClosedTicketsCellModel.swift */,
 				1E1279C02CC271C00080CB19 /* ChatViewModel.swift */,
 			);
 			path = Model;
@@ -712,6 +720,7 @@
 		1E1279C32CC271C00080CB19 /* Cell */ = {
 			isa = PBXGroup;
 			children = (
+				1E50691A2D074590001A9E2D /* ClosedTicketsCell.swift */,
 				1E1279C12CC271C00080CB19 /* Model */,
 				1E1279C22CC271C00080CB19 /* PSDChatInfoTableViewCell.swift */,
 			);
@@ -1792,6 +1801,7 @@
 				4B63393621FA106400A154B5 /* PSDChatMessageCell.swift in Sources */,
 				1E5068B32CEB153C001A9E2D /* TicketCommand.swift in Sources */,
 				1E1279D02CC271C00080CB19 /* PSDChatsSectionModel.swift in Sources */,
+				1E50691F2D0745A5001A9E2D /* PSDChatsViewModelProtocol.swift in Sources */,
 				4B10E5F0222844EA00CF118B /* PSDAttachmentLoadViewController.swift in Sources */,
 				4B5AFEA621FB00B700AAF233 /* PSDMessageInputView.swift in Sources */,
 				4B7EA888221EF61F009C9B41 /* UIApplication+topViewController.swift in Sources */,
@@ -1834,6 +1844,7 @@
 				4B7F13992215C494007C6358 /* Data+append.swift in Sources */,
 				4B1C63E6256D8D6500902C8E /* CustomFontHelper.swift in Sources */,
 				4BAA8815221BDD8C00B81B76 /* PSDProgressView.swift in Sources */,
+				1E50691D2D07459C001A9E2D /* ClosedTicketsCellModel.swift in Sources */,
 				4BC210D622671EC000CFE255 /* PSDAttachmentPreviewView.swift in Sources */,
 				4B873BB4224B7EE600A96E93 /* PSDNewReplySubscriber.swift in Sources */,
 				1E5068AF2CEB1523001A9E2D /* SyncManager.swift in Sources */,
@@ -1877,6 +1888,7 @@
 				4B6D4A3D244E22C9007C6082 /* AttachmentPreviewCollectionViewCell.swift in Sources */,
 				4B7F34F221F861FD00977C6D /* PyrusServiceDeskController.swift in Sources */,
 				4B6D4A3B244E1CF3007C6082 /* AttachmentCollectionViewPresenter.swift in Sources */,
+				1E50691B2D074591001A9E2D /* ClosedTicketsCell.swift in Sources */,
 				4B64B870224384F3003116C3 /* String+years.swift in Sources */,
 				4B6D4A42244E2B29007C6082 /* AttachmentCollectionViewCell.swift in Sources */,
 				4B7DAE4F2226DE3E002A35FC /* [Int+PSDChat]+usefulFunc.swift in Sources */,
