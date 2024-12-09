@@ -2,7 +2,7 @@ import Foundation
 
 struct ClosedTicketsCellModel: Hashable {
     
-    let title = "Закрытые обращения"
+    let title = "ClosedTickets".localizedPSD()
     let count: Int
     let isOpen: Bool
     weak var delegate: ClosedTicketsCellDelegate?
