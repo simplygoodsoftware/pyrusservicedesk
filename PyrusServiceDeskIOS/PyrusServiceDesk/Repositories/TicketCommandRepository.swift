@@ -47,7 +47,7 @@ class TicketCommandRepository {
                     }
                 }
                 let messageToPass = message.message
-                let requestNewTicket = PyrusServiceDesk.multichats && messageToPass.ticketId == 0
+                let requestNewTicket = PyrusServiceDesk.multichats && (messageToPass.ticketId == 0 || messageToPass.requestNewTicket)
                 var attachmentsData: [AttachmentData]?
                 if let attachments = messageToPass.attachments {
                     attachmentsData = []
@@ -150,5 +150,22 @@ class TicketCommandRepository {
     func clear(completion: ((Error?) -> Void)? = nil) {
         commandsCache = []
         save(commands: [], completion: completion)
+    }
+    
+    func lastLocalReadCommentId(ticketId: Int?) -> Int? {
+        guard let ticketId = ticketId else {
+            return nil
+        }
+        var lastLocalId: Int? = nil
+        commandsCache?.forEach{
+            if
+                $0.type == TicketCommandType.readTicket.rawValue,
+                $0.params.ticketId == ticketId,
+                lastLocalId ?? 0 < $0.params.messageId ?? 0
+            {
+                lastLocalId = $0.params.messageId
+            }
+        }
+        return lastLocalId
     }
 }

@@ -34,7 +34,7 @@ struct PSDGetChats {
             }
             parameters["additional_users"] = additional_users
         }
-        parameters["commands"] = commands
+//        parameters["commands"] = commands
         
         let request: URLRequest = URLRequest.createRequest(type:.chats, parameters: parameters)
         
@@ -68,7 +68,6 @@ struct PSDGetChats {
                     PyrusServiceDesk.chats = chats
                     let clientsArray = chatsData["applications"] as? NSArray ?? NSArray()
                     let clients = generateClients(from: clientsArray)
-                    //PyrusServiceDesk.clients = clients
                     let authorAccessDenied = chatsData["author_access_denied"] as? [String]
                     
                     do {
@@ -137,7 +136,7 @@ struct PSDGetChats {
             var lastMessage: PSDMessage?
             if let lastComment = dic["last_comment"] as? [String: Any] {
                 date = lastComment.stringOfKey(createdAtParameter).dateFromString(format: "yyyy-MM-dd'T'HH:mm:ss'Z'")
-                lastMessage = PSDMessage.init(text: lastComment.stringOfKey("body"), attachments:nil, messageId: lastComment.stringOfKey(commentIdParameter), owner: nil, date: nil)
+                lastMessage = PSDMessage.init(text: lastComment.stringOfKey("body"), attachments:nil, messageId: lastComment.stringOfKey(commentIdParameter), owner: nil, date: date)
             }
             let userId = dic["user_id"] as? String ?? ""
             if PyrusServiceDesk.customUserId ?? PyrusServiceDesk.userId == userId,
@@ -161,13 +160,35 @@ struct PSDGetChats {
             chat.isRead = dic["is_read"] as? Bool ??  true
             chat.userId = userId
             chat.lastComment = lastMessage
+            chat.lastReadedCommentId = dic["last_read_comment_id"] as? Int
+            chat.isActive = dic["is_active"] as? Bool ?? true
             chats.append(chat)
         }
-        
         return sortByLastMessage(chats)
     }
     
     private static func sortByLastMessage(_ chats: [PSDChat]) -> [PSDChat] {
-        return chats.sorted(by: { $0.date ?? Date() > $1.date ?? Date() })
+        return chats.sorted(by: {
+            if $0.isActive, !$1.isActive {
+                return true
+            }
+            if !$0.isActive, $1.isActive {
+                return false
+            }
+            return $0.date ?? Date() > $1.date ?? Date()
+        })
+    }
+    
+    static func getSortedChatForMessages(_ messages: [PSDMessage]) -> [PSDChat] {
+        var chats = [PSDChat]()
+        messages.forEach {
+            let chat = PSDChat(chatId: $0.ticketId, date: $0.date, messages: [])
+            chat.subject = $0.text
+            chat.lastComment = $0
+            chat.lastComment?.isInbound = true
+            chats.append(chat)
+        }
+        return sortByLastMessage(chats)
+
     }
 }

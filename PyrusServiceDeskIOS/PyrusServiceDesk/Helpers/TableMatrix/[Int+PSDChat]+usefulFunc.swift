@@ -93,7 +93,7 @@ extension Array where Element == [PSDRowMessage]{
         self.defaultMatrix()
         if !self.isEmpty && self[0].count>0 && chat.messages.count>0{//change date of welcome message. Make it same as first message in chat
             self[0][0].message.date = chat.messages[0].date
-        } else if !self.isEmpty && self[0].count > 0 && chat.chatId == 0
+        } else if !self.isEmpty && self[0].count > 0 && chat.chatId ?? 1 <= 0
                   && PSDMessagesStorage.getMessages(for: chat.chatId).count > 0 {
             self[0][0].message.date = (PSDMessagesStorage.getMessages(for: chat.chatId).first?.date ?? Date()) - TimeInterval(1)
         }

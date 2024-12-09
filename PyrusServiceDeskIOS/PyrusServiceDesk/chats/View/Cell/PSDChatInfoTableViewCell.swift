@@ -40,7 +40,7 @@ class PSDChatInfoTableViewCell: UITableViewCell {
         label.font = .lastMessageInfo
         label.numberOfLines = lastMessageLines
         label.lineBreakMode = .byTruncatingTail
-        label.text = "Last_Message".localizedPSD()
+        label.text = ""//"Last_Message".localizedPSD()
         return label;
     }()
     
