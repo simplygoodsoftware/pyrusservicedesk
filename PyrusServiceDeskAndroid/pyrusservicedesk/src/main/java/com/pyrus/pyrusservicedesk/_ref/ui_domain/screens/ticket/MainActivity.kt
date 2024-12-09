@@ -3,7 +3,6 @@ package com.pyrus.pyrusservicedesk._ref.ui_domain.screens.ticket
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
-import android.view.LayoutInflater
 import androidx.fragment.app.FragmentActivity
 import com.pyrus.pyrusservicedesk.R
 import com.pyrus.pyrusservicedesk.ServiceDeskConfiguration

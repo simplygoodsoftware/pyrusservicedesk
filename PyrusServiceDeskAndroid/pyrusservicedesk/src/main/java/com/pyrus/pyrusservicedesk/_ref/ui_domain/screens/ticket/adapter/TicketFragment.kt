@@ -50,6 +50,9 @@ internal class TicketFragment: TeaFragment<TicketView.TicketModel, TicketView.Ev
     ): View {
         binding = PsdFragmentTicketBinding.inflate(inflater, container, false)
 
+        initUi()
+        initListeners()
+
         return binding.root
     }
 
@@ -57,9 +60,6 @@ internal class TicketFragment: TeaFragment<TicketView.TicketModel, TicketView.Ev
         super.onViewCreated(view, savedInstanceState)
 
 
-
-        initUi()
-        initListeners()
 
         // TODO Model.titleText
         binding.toolbarTitle.text = ConfigUtils.getTitle(requireContext())
@@ -90,10 +90,6 @@ internal class TicketFragment: TeaFragment<TicketView.TicketModel, TicketView.Ev
     }
 
     private fun initUi() {
-        // if you don't set empty text, Android will set the app name
-        // TODO()
-//        supportActionBar?.apply { title = "" }
-
         binding.comments.apply {
             adapter = this@TicketFragment.adapter
             addItemDecoration(

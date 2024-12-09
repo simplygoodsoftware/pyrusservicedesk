@@ -7,6 +7,8 @@ import com.pyrus.pyrusservicedesk.sdk.web.UploadFileHooks
 import com.pyrus.pyrusservicedesk.sdk.web.retrofit.RemoteStore
 import com.pyrus.pyrusservicedesk._ref.utils.Try
 import com.pyrus.pyrusservicedesk._ref.utils.isSuccess
+import com.pyrus.pyrusservicedesk.sdk.data.intermediate.Comments
+import kotlinx.coroutines.flow.Flow
 
 /**
  * Created by smokedealer on 26.01.2024.
@@ -16,6 +18,10 @@ internal class Repository(
     private val localStore: LocalStore,
     private val remoteStore: RemoteStore,
 ) {
+
+    fun getFeedFlow(): Flow<Comments> {
+        TODO()
+    }
 
     /**
      * Provides tickets in single feed representation.
