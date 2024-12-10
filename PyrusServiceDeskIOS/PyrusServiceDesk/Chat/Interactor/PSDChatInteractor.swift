@@ -154,9 +154,11 @@ private extension PSDChatInteractor {
                 if chat.messages.count > self.chat?.messages.count ?? 0,
                    chat.messages.last?.owner.authorId != PyrusServiceDesk.authorId,
                    isOpen {
+                    self.chat = chat
                     readChat()
+                } else {
+                    self.chat = chat
                 }
-                self.chat = chat
             }
             if firstLoad && !PyrusServiceDesk.multichats || fromPush {
                 isRefresh = true

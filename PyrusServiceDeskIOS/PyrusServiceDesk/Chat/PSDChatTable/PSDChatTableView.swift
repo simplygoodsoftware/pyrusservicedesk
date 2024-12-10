@@ -140,28 +140,36 @@ class PSDChatTableView: PSDTableView {
     }
     
     func addRow(at index: Int, lastIndexPath: IndexPath, insertSections: Bool, scrollsToBottom: Bool) {
-        UIView.animate(withDuration: 0.0, delay: 0, usingSpringWithDamping: 0.0, initialSpringVelocity: 0.0, options: [], animations: {
-            if #available(iOS 13.0, *) {
-                self.reloadWithDiffableDataSource(animated: true)
-            } else {
-                //add new section if need
-                if insertSections {
-                    self.insertSections([index], with: .none)
+        
+            UIView.animate(withDuration: 0.0, delay: 0, usingSpringWithDamping: 0.0, initialSpringVelocity: 0.0, options: [], animations: {
+                if #available(iOS 13.0, *) {
+                    self.reloadWithDiffableDataSource(animated: true) {
+                        if scrollsToBottom {
+                            self.scrollsToBottom(animated: true)
+                        }
+                    }
+                    
                 } else {
-                    //add row to last section
-                    self.beginUpdates()
-                    self.insertRows(at: [lastIndexPath], with: .none)
-                    self.endUpdates()
-                    if(self.tableMatrix[index].count == 1) {
-                        self.reloadSections([index], with: .none)//to change header( draw date)
+                    //add new section if need
+                    if insertSections {
+                        self.insertSections([index], with: .none)
+                    } else {
+                        //add row to last section
+                        self.beginUpdates()
+                        self.insertRows(at: [lastIndexPath], with: .none)
+                        self.endUpdates()
+                        if(self.tableMatrix[index].count == 1) {
+                            self.reloadSections([index], with: .none)//to change header( draw date)
+                        }
                     }
                 }
-            }
-        }, completion: { complete in
-            if scrollsToBottom {
-                self.scrollsToBottom(animated: true)
-            }
-        })
+            }, completion: { complete in
+                if scrollsToBottom {
+                    self.scrollsToBottom(animated: true)
+                }
+            })
+//        }
+        
     }
     
     func insertSections(sections: IndexSet) {
@@ -346,7 +354,7 @@ class PSDChatTableView: PSDTableView {
 
 private extension PSDChatTableView {
     @available(iOS 13.0, *)
-    func reloadWithDiffableDataSource(animated: Bool) {
+    func reloadWithDiffableDataSource(animated: Bool, completion: (() -> Void)? = nil) {
         guard
             let dataSource = self.customDataSource as? KBDiffableDataSource
         else {
@@ -359,8 +367,7 @@ private extension PSDChatTableView {
             snapshot.appendSections([section])
             snapshot.appendItems(sectionData, toSection: section)
         }
-        
-        dataSource.apply(snapshot, animatingDifferences: animated)
+        dataSource.apply(snapshot, animatingDifferences: animated, completion: completion)
         self.dataSource = dataSource
     }
     

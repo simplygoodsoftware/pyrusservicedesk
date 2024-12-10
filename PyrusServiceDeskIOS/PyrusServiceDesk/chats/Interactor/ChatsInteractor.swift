@@ -103,9 +103,20 @@ extension ChatsInteractor: ChatsInteractorProtocol {
         case .viewWillAppear:
             PyrusServiceDesk.syncManager.syncGetTickets()
             PyrusServiceDesk.currentUserId = nil
+            let createMessages = PSDMessagesStorage.getNewCreateTicketMessages()
+            var localChats = PSDGetChats.getSortedChatForMessages(createMessages)
+            if localChats.count > 0 {
+                let newChats = chats.filter { chat in
+                    chat.chatId ?? 0 > 0
+                }
+                localChats += newChats
+                PyrusServiceDesk.chats = localChats
+                chats = localChats
+            }
             if chats.count > 0 {
                 presenter.doWork(.updateChats(chats: prepareChats()))
                 firtLoad = false
+                presenter.doWork(.endRefresh)
             }
         case .updateSelected(index: let index):
             updateSelected(index: index)
