@@ -72,13 +72,15 @@ class FilterTicketsFragment: BottomSheetDialogFragment() {
     }
 
     companion object {
-        private const val KEY_CHOSEN_USER_ID = "KEY_CHOSEN_USER_ID"
+        const val KEY_CHOSEN_USER_ID = "KEY_CHOSEN_USER_ID"
+        private const val KEY_USERS = "KEY_USERS"
         private const val KEY_DEFAULT_USER_ID = "0"
 
-        fun newInstance(data: String): FilterTicketsFragment {
+        fun newInstance(users: HashMap<String, String> , selectedUserId: String): FilterTicketsFragment {
             val fragment = FilterTicketsFragment()
             val args = Bundle()
-            args.putString(KEY_CHOSEN_USER_ID, data)
+            args.putString(KEY_CHOSEN_USER_ID, selectedUserId)
+            args.putSerializable(KEY_USERS, users)
             fragment.arguments = args
             return fragment
         }

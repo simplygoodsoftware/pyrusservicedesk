@@ -40,4 +40,17 @@ class AddTicketFragment: BottomSheetDialogFragment() {
     private fun getUsersName(): List<String> {
         return viewModel.getUsersName() ?: emptyList()
     }
+
+    companion object {
+        private const val KEY_CHOSEN_USER_ID = "KEY_CHOSEN_USER_ID"
+        private const val KEY_DEFAULT_USER_ID = "0"
+
+        fun newInstance(data: String): AddTicketFragment {
+            val fragment = AddTicketFragment()
+            val args = Bundle()
+            args.putString(KEY_CHOSEN_USER_ID, data)
+            fragment.arguments = args
+            return fragment
+        }
+    }
 }

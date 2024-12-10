@@ -1,4 +1,4 @@
-package com.pyrus.pyrusservicedesk.presentation.ui.navigation_page.tickets_list
+package com.pyrus.pyrusservicedesk.presentation.ui.navigation_page.tickets_list.ticketsList
 
 import android.content.Intent
 import android.os.Bundle
@@ -10,13 +10,16 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import com.pyrus.pyrusservicedesk.PyrusServiceDesk
 import com.pyrus.pyrusservicedesk.databinding.TicketsListFragmentBinding
 import com.pyrus.pyrusservicedesk.presentation.ui.navigation_page.ticket.TicketActivity
-import com.pyrus.pyrusservicedesk.presentation.ui.navigation_page.tickets_list.recyclerview_tickets_list.TicketsListAdapter
+import com.pyrus.pyrusservicedesk.presentation.ui.navigation_page.tickets_list.TicketListActivity
+import com.pyrus.pyrusservicedesk.presentation.ui.navigation_page.tickets_list.TicketsListViewModel
+import com.pyrus.pyrusservicedesk.presentation.ui.navigation_page.tickets_list.adapters.TicketsListAdapter
 import com.pyrus.pyrusservicedesk.sdk.data.Ticket
 import com.pyrus.pyrusservicedesk.utils.getViewModelWithActivityScope
 
 class TicketsListFragment: Fragment() {
 
-    private val viewModel: TicketsListViewModel by getViewModelWithActivityScope(TicketsListViewModel::class.java)
+    private val viewModel: TicketsListViewModel by getViewModelWithActivityScope(
+        TicketsListViewModel::class.java)
 
     private lateinit var binding: TicketsListFragmentBinding
     private lateinit var adapter: TicketsListAdapter

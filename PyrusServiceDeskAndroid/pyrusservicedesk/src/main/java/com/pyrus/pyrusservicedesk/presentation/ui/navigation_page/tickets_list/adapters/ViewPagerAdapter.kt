@@ -1,9 +1,10 @@
-package com.pyrus.pyrusservicedesk.presentation.ui.navigation_page.tickets_list
+package com.pyrus.pyrusservicedesk.presentation.ui.navigation_page.tickets_list.adapters
 
 import android.os.Bundle
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentActivity
 import androidx.viewpager2.adapter.FragmentStateAdapter
+import com.pyrus.pyrusservicedesk.presentation.ui.navigation_page.tickets_list.ticketsList.TicketsListFragment
 
 class ViewPagerAdapter(private val appCount: Int, fragmentActivity: FragmentActivity) : FragmentStateAdapter(fragmentActivity) {
 

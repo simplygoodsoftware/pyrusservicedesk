@@ -1,4 +1,4 @@
-package com.pyrus.pyrusservicedesk.presentation.ui.navigation_page.tickets_list.recyclerview_tickets_list
+package com.pyrus.pyrusservicedesk.presentation.ui.navigation_page.tickets_list.adapters
 
 import android.view.View.GONE
 import android.view.View.VISIBLE

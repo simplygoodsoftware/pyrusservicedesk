@@ -15,6 +15,7 @@ import com.pyrus.pyrusservicedesk.databinding.PsdTicketsListBinding
 import com.pyrus.pyrusservicedesk.presentation.ConnectionActivityBase
 import com.pyrus.pyrusservicedesk.presentation.ui.navigation_page.addTicket.AddTicketFragment
 import com.pyrus.pyrusservicedesk.presentation.ui.navigation_page.filterTicketsList.FilterTicketsFragment
+import com.pyrus.pyrusservicedesk.presentation.ui.navigation_page.tickets_list.adapters.ViewPagerAdapter
 import com.pyrus.pyrusservicedesk.sdk.data.Application
 import com.pyrus.pyrusservicedesk.sdk.data.Ticket
 import com.pyrus.pyrusservicedesk.sdk.web.retrofit.SyncRepository
@@ -54,8 +55,8 @@ internal class TicketListActivity :
         setContentView(binding.root)
 
         binding.toolbarTicketsList.psd_toolbar_filter_ib .setOnClickListener {
-            val bottomSheet = FilterTicketsFragment.newInstance(selectedUserIdFilter)
-            bottomSheet.show(supportFragmentManager, bottomSheet.tag)
+            //val bottomSheet = FilterTicketsFragment.newInstance(selectedUserIdFilter)
+            //bottomSheet.show(supportFragmentManager, bottomSheet.tag)
             Toast.makeText(applicationContext, "фильтры", Toast.LENGTH_SHORT).show()
         }
 
