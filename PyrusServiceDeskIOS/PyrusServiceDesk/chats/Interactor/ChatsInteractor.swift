@@ -101,6 +101,7 @@ extension ChatsInteractor: ChatsInteractorProtocol {
         case .deleteFilter:
             deleteFilter()
         case .viewWillAppear:
+            PyrusServiceDesk.syncManager.syncGetTickets()
             PyrusServiceDesk.currentUserId = nil
             if chats.count > 0 {
                 presenter.doWork(.updateChats(chats: prepareChats()))

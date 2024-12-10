@@ -69,7 +69,7 @@ class PSDObjectsCreator {
         let message = PSDMessage(text:text , attachments:attachments, messageId: messageId, owner:user, date:date)
         message.state = .sending
         message.ticketId = ticketId
-        message.isInbound = PyrusServiceDesk.authorId == user.authorId
+        message.isOutgoing = PyrusServiceDesk.authorId == user.authorId
         message.userId = userId
         message.isWelcomeMessage = true
         return message

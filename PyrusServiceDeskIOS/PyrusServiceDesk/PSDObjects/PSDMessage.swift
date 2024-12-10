@@ -23,7 +23,7 @@ class PSDMessage: NSObject {
     var date = Date()
     var state: messageState
     var rating: Int?
-    var isInbound: Bool = false
+    var isOutgoing: Bool = true
     var fromStrorage: Bool = false
     var isRatingMessage: Bool = false
     var ticketId: Int = 0

@@ -22,7 +22,7 @@ final class PSDChatCellConfigurator: TableViewCellConfiguratorProtocol {
         }
         
         let cell: PSDChatMessageCell
-        if (message.rating ?? 0) != 0 || (message.message.owner.personId == PyrusServiceDesk.userId) && !(PyrusServiceDesk.multichats && !message.message.isInbound) {
+        if (message.rating ?? 0) != 0 || (message.message.owner.personId == PyrusServiceDesk.userId) && !(PyrusServiceDesk.multichats && !message.message.isOutgoing) {
             cell = getPSDUserMessageCell(model: model, indexPath: indexPath)
         } else {
             let needShowAvatar = model.needShowAvatar(at: indexPath)

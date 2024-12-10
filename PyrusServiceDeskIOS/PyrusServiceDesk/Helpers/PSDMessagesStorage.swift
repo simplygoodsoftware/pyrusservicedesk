@@ -419,7 +419,7 @@ struct PSDMessagesStorage {
             }
         }
         message.fromStrorage = message.state == .cantSend
-        message.isInbound = true
+        message.isOutgoing = true
         message.ticketId = dict[MESSAGE_TICKET_ID_KEY] as? Int ?? 0
         message.userId = dict[USER_ID_KEY] as? String ?? ""
         message.appId = dict[APP_ID_KEY] as? String ?? ""

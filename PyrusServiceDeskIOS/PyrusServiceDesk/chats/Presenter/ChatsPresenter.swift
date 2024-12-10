@@ -70,9 +70,9 @@ private extension ChatsPresenter {
                 : "NewTicket".localizedPSD()
             var lastMessage = chat.lastComment
             if let lastStoreMessage = PSDMessagesStorage.getMessages(for: chat.id).last {
-                lastMessage = lastStoreMessage.date > lastMessage?.date ?? Date() ? lastStoreMessage : lastMessage
+                lastMessage = lastStoreMessage.date >= lastMessage?.date ?? Date() ? lastStoreMessage : lastMessage
             }
-            let author = lastMessage?.isInbound ?? false ? "Вы".localizedPSD() : lastMessage?.owner.name ?? ""
+            let author = lastMessage?.isOutgoing ?? false ? "You".localizedPSD() : lastMessage?.owner.name ?? ""
             let text = lastMessage?.attachments?.count ?? 0 > 0
                 ? ""
             : lastMessage?.text ?? ""//"Last_Message".localizedPSD()

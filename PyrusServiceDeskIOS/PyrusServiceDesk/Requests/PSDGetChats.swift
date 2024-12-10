@@ -155,6 +155,12 @@ struct PSDGetChats {
             } else {
                 messages = newMessages
             }
+            
+            if let message = messages.last {
+                lastMessage?.attachments = message.attachments
+                lastMessage?.owner = message.owner
+                lastMessage?.isOutgoing = message.isOutgoing
+            }
             let chat = PSDChat.init(chatId: ticketId, date: date, messages: messages)
             chat.subject = dic["subject"] as? String
             chat.isRead = dic["is_read"] as? Bool ??  true
@@ -185,7 +191,7 @@ struct PSDGetChats {
             let chat = PSDChat(chatId: $0.ticketId, date: $0.date, messages: [])
             chat.subject = $0.text
             chat.lastComment = $0
-            chat.lastComment?.isInbound = true
+            chat.lastComment?.isOutgoing = true
             chats.append(chat)
         }
         return sortByLastMessage(chats)
