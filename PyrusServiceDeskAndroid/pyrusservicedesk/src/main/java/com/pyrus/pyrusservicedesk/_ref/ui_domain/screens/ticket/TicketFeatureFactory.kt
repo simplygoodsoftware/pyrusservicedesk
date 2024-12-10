@@ -11,6 +11,7 @@ import com.pyrus.pyrusservicedesk._ref.whitetea.core.StoreFactory2
 import com.pyrus.pyrusservicedesk._ref.whitetea.core.adaptCast
 import com.pyrus.pyrusservicedesk._ref.whitetea.core.logic.Logic
 import com.pyrus.pyrusservicedesk.sdk.data.intermediate.Comments
+import com.pyrus.pyrusservicedesk.sdk.repositories.DraftRepository
 import com.pyrus.pyrusservicedesk.sdk.repositories.Repository
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
@@ -18,7 +19,9 @@ import kotlinx.coroutines.flow.map
 
 internal class TicketFeatureFactory(
     private val storeFactory: StoreFactory2,
-    private val actor: TicketActor,
+    private val repository: Repository,
+    private val draftRepository: DraftRepository,
+    private val welcomeMessage: String,
 ) {
 
     fun create(): TicketFeature = storeFactory.create(
@@ -27,10 +30,12 @@ internal class TicketFeatureFactory(
             comments = null,
             isLoading = true,
             sendEnabled = false,
-            inputText = "",
+            inputText = draftRepository.getDraft(),
+            showError = false,
+            titleText = "", // TODO
         ),
         reducer = FeatureReducer(),
-        actor = actor.adaptCast(),
+        actor = TicketActor(welcomeMessage, repository).adaptCast(),
     )
 
 }
@@ -76,10 +81,7 @@ internal class TicketActor(
 
     override fun handleEffect(effect: Effect.Inner): Flow<Message.Inner> = when(effect) {
         Effect.Inner.UpdateComments -> singleFlow {
-            val commentsTry: Try<Comments> = repository.getFeed(
-                keepUnread = false,
-                requestsRemoteComments = true
-            )
+            val commentsTry: Try<Comments> = repository.getFeed(keepUnread = false)
             when {
                 commentsTry.isSuccess() -> Message.Inner.UpdateCommentsCompleted
                 else -> Message.Inner.UpdateCommentsFailed
@@ -94,7 +96,7 @@ internal class TicketActor(
         }
         Effect.Inner.CommentsAutoUpdate -> flow {
             // TODO
-            repository.getFeed(keepUnread = false, requestsRemoteComments = false)
+            repository.getFeed(keepUnread = false)
 
         }
     }

@@ -351,7 +351,7 @@ internal class TicketViewModel(
                     body = welcomeMessage,
                     creationDate = welcomeCommentDate,
                     author = Author(""),
-                    isWelcomeMessage = true,
+//                    isWelcomeMessage = true,
                 )
                 freshComments += welcomeComment
             }

@@ -13,6 +13,8 @@ internal interface TicketContract {
         val isLoading: Boolean,
         val sendEnabled: Boolean,
         val inputText: String,
+        val titleText: String,
+        val showError: Boolean,
     )
 
     sealed interface Message {

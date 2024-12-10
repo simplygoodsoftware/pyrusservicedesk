@@ -19,8 +19,7 @@ internal data class Comment(
     @SerializedName("created_at") val creationDate: Date,
     @SerializedName("author") val author: Author,
     @Local @SerializedName("local_comment_id") val localId: Long = COMMENT_ID_EMPTY,
-    @SerializedName("rating") val rating: Int? = null,
-    @Transient val isWelcomeMessage: Boolean = false,
+    @SerializedName("rating") val rating: Int? = null
 ) {
 
     /**

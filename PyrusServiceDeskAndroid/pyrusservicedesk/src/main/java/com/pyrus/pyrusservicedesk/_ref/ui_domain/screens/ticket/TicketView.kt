@@ -1,15 +1,17 @@
 package com.pyrus.pyrusservicedesk._ref.ui_domain.screens.ticket
 
 import android.net.Uri
-import com.pyrus.pyrusservicedesk._ref.ui_domain.screens.ticket.adapter.entries.TicketEntry
+import com.pyrus.pyrusservicedesk._ref.ui_domain.screens.ticket.adapter.new_entries.CommentEntryV2
 
 internal interface TicketView {
 
-    data class TicketModel(
+    data class Model(
         val titleText: String,
         val inputText: String,
         val sendEnabled: Boolean,
-        val comments: List<TicketEntry>,
+        val comments: List<CommentEntryV2>?,
+        val isLoading: Boolean,
+        val showNoConnectionError: Boolean,
     )
 
     sealed interface Event {
@@ -30,7 +32,7 @@ internal interface TicketView {
 
         data class OnMessageChanged(val text: String) : Event
 
-        data class OnAttachmentClick(val fileUri: Uri?) : Event
+        data class OnAttachmentSelected(val fileUri: Uri?) : Event
 
     }
 }

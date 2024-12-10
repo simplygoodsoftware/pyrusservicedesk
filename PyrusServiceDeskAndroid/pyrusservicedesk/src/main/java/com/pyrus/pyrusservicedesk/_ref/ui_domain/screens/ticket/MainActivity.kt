@@ -6,7 +6,6 @@ import android.os.Bundle
 import androidx.fragment.app.FragmentActivity
 import com.pyrus.pyrusservicedesk.R
 import com.pyrus.pyrusservicedesk.ServiceDeskConfiguration
-import com.pyrus.pyrusservicedesk._ref.ui_domain.screens.ticket.adapter.TicketFragment
 import com.pyrus.pyrusservicedesk._ref.utils.setupWindowInsets
 import com.pyrus.pyrusservicedesk.core.StaticRepository
 import com.pyrus.pyrusservicedesk.databinding.PsdActivityMainBinding

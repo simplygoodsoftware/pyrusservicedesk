@@ -8,6 +8,9 @@ import com.pyrus.pyrusservicedesk.sdk.data.intermediate.Comments
 import com.pyrus.pyrusservicedesk.sdk.verify.LocalDataVerifier
 import com.pyrus.pyrusservicedesk._ref.utils.Try
 import com.pyrus.pyrusservicedesk._ref.utils.getOrNull
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.map
 import java.lang.reflect.Type
 
 /**
@@ -19,17 +22,15 @@ internal class LocalStore(
     private val gson: Gson,
 ) {
 
-    private companion object{
-        const val PREFERENCE_KEY_OFFLINE_COMMENTS = "PREFERENCE_KEY_OFFLINE_COMMENTS"
-        const val MAX_PENDING_COMMENTS_SIZE = 20
-        val commentListTokenType: Type = object : TypeToken<List<Comment>>(){}.type
-    }
+    private val localCommentsStateFlow = MutableStateFlow(getPendingFeedComments())
+
+    fun commentsFlow(): Flow<List<Comment>> = localCommentsStateFlow
 
     /**
      * Adds pending feed comment
      */
-    suspend fun addPendingFeedComment(comment: Comment): Try<Boolean> {
-        var comments = getPendingFeedComments().getOrNull()?.comments?.toMutableList() ?: mutableListOf()
+    fun addPendingFeedComment(comment: Comment) {
+        var comments = getPendingFeedComments().toMutableList()
         comments.let { list ->
             val existingIndex = list.indexOfFirst { it.localId == comment.localId }
             if (existingIndex >= 0) {
@@ -41,32 +42,30 @@ internal class LocalStore(
             comments = comments.subList(comments.size - MAX_PENDING_COMMENTS_SIZE, comments.size)
         }
         writeComments(comments)
-        return Try.Success(true)
     }
 
     /**
      * Provides all pending feed comments
      */
-    suspend fun getPendingFeedComments(): Try<Comments> {
+    fun getPendingFeedComments(): List<Comment> {
         val rawJson = preferences.getString(PREFERENCE_KEY_OFFLINE_COMMENTS, "[]")
         val commentsList = gson.fromJson<List<Comment>>(rawJson, commentListTokenType).toMutableList()
 
         if (commentsList.removeAll { localDataVerifier.isLocalCommentEmpty(it) }) {
             writeComments(commentsList)
         }
-        return Try.Success(Comments(commentsList))
+        return commentsList
     }
 
     /**
      * Removes pending comment from offline repository
      */
-    suspend fun removePendingComment(comment: Comment): Try<Boolean> {
-        val comments = getPendingFeedComments().getOrNull()?.comments?.toMutableList()
-        val removed = comments?.removeAll { it.localId == comment.localId } ?: false
-        if (removed && comments != null) {
+    fun removePendingComment(comment: Comment) {
+        val comments = getPendingFeedComments().toMutableList()
+        val removed = comments.removeAll { it.localId == comment.localId }
+        if (removed) {
             writeComments(comments)
         }
-        return Try.Success(removed)
     }
 
     /**
@@ -79,5 +78,12 @@ internal class LocalStore(
     private fun writeComments(comments: List<Comment>) {
         val rawJson = gson.toJson(comments, commentListTokenType)
         preferences.edit().putString(PREFERENCE_KEY_OFFLINE_COMMENTS, rawJson).apply()
+        localCommentsStateFlow.value = comments
+    }
+
+    private companion object{
+        const val PREFERENCE_KEY_OFFLINE_COMMENTS = "PREFERENCE_KEY_OFFLINE_COMMENTS"
+        const val MAX_PENDING_COMMENTS_SIZE = 20
+        val commentListTokenType: Type = object : TypeToken<List<Comment>>(){}.type
     }
 }

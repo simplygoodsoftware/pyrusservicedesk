@@ -9,6 +9,9 @@ import com.pyrus.pyrusservicedesk._ref.utils.Try
 import com.pyrus.pyrusservicedesk._ref.utils.isSuccess
 import com.pyrus.pyrusservicedesk.sdk.data.intermediate.Comments
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.merge
 
 /**
  * Created by smokedealer on 26.01.2024.
@@ -19,16 +22,27 @@ internal class Repository(
     private val remoteStore: RemoteStore,
 ) {
 
-    fun getFeedFlow(): Flow<Comments> {
-        TODO()
+    private val remoteFeedStateFlow: MutableStateFlow<Comments?> = MutableStateFlow(null)
+
+    fun getFeedFlow() = combine(localStore.commentsFlow(), remoteFeedStateFlow) { local, remote ->
+        when (remote) {
+            null -> Comments(local)
+            else -> {
+                val comments = ArrayList<Comment>(local)
+                comments.addAll(remote.comments)
+                comments.sortBy { it.creationDate.time }
+                remote.copy(comments = comments)
+            }
+        }
     }
 
     /**
      * Provides tickets in single feed representation.
      */
-    suspend fun getFeed(keepUnread: Boolean, requestsRemoteComments: Boolean) = when {
-        requestsRemoteComments -> remoteStore.getFeed(keepUnread)
-        else -> localStore.getPendingFeedComments()
+    suspend fun getFeed(keepUnread: Boolean): Try<Comments> {
+        val feedTry = remoteStore.getFeed(keepUnread)
+        if (feedTry.isSuccess()) remoteFeedStateFlow.value = feedTry.value
+        return feedTry
     }
 
     /**
@@ -64,7 +78,7 @@ internal class Repository(
         return remoteStore.setPushToken(token, tokenType)
     }
 
-    suspend fun removePendingComment(comment: Comment): Try<Boolean> {
+    fun removePendingComment(comment: Comment) {
         return localStore.removePendingComment(comment)
     }
 

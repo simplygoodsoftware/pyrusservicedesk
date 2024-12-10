@@ -1,28 +1,37 @@
-package com.pyrus.pyrusservicedesk._ref.ui_domain.screens.ticket.adapter
+package com.pyrus.pyrusservicedesk._ref.ui_domain.screens.ticket
 
 import android.content.res.ColorStateList
 import android.os.Build
 import android.os.Bundle
 import android.text.Editable
 import android.text.TextWatcher
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.MenuItem
 import android.view.View
 import android.view.ViewGroup
 import android.view.WindowManager
+import androidx.core.view.isVisible
+import com.pyrus.pyrusservicedesk.PyrusServiceDesk.Companion.injector
 import com.pyrus.pyrusservicedesk.R
-import com.pyrus.pyrusservicedesk._ref.ui_domain.screens.ticket.TicketContract
-import com.pyrus.pyrusservicedesk._ref.ui_domain.screens.ticket.TicketView
+import com.pyrus.pyrusservicedesk._ref.ui_domain.screens.ticket.TicketView.Model
+import com.pyrus.pyrusservicedesk._ref.ui_domain.screens.ticket.adapter.TicketAdapter
 import com.pyrus.pyrusservicedesk._ref.utils.ConfigUtils
 import com.pyrus.pyrusservicedesk._ref.utils.getColorOnBackground
 import com.pyrus.pyrusservicedesk._ref.utils.getSecondaryColorOnBackground
 import com.pyrus.pyrusservicedesk._ref.utils.setCursorColor
 import com.pyrus.pyrusservicedesk._ref.utils.showKeyboardOn
 import com.pyrus.pyrusservicedesk._ref.whitetea.android.TeaFragment
+import com.pyrus.pyrusservicedesk._ref.whitetea.androidutils.bind
+import com.pyrus.pyrusservicedesk._ref.whitetea.androidutils.getStore
+import com.pyrus.pyrusservicedesk._ref.whitetea.bind.BinderLifecycleMode
+import com.pyrus.pyrusservicedesk._ref.whitetea.core.ViewRenderer
+import com.pyrus.pyrusservicedesk._ref.whitetea.utils.diff
 import com.pyrus.pyrusservicedesk.databinding.PsdFragmentTicketBinding
 import com.pyrus.pyrusservicedesk.presentation.ui.view.recyclerview.item_decorators.SpaceItemDecoration
+import kotlinx.coroutines.flow.map
 
-internal class TicketFragment: TeaFragment<TicketView.TicketModel, TicketView.Event, TicketContract.Effect>() {
+internal class TicketFragment: TeaFragment<Model, TicketView.Event, TicketContract.Effect>() {
 
     private lateinit var binding: PsdFragmentTicketBinding
 
@@ -43,6 +52,21 @@ internal class TicketFragment: TeaFragment<TicketView.TicketModel, TicketView.Ev
         }
     }
 
+    override val renderer: ViewRenderer<Model> = diff {
+        diff(Model::titleText) { title -> binding.toolbarTitle.text = title }
+        diff(Model::inputText) { text -> if (!binding.input.hasFocus()) binding.input.setText(text) }
+        diff(Model::sendEnabled) { sendEnabled -> binding.send.isEnabled = sendEnabled }
+        diff(Model::comments, { new, old -> new === old }) { comments ->
+            Log.d("SDS", "comments: $comments")
+//            adapter.setItems(it) TODO
+        }
+        diff(Model::showNoConnectionError) { showError -> binding.noConnection.root.isVisible = showError }
+        diff(Model::isLoading) { isLoading ->
+            binding.refresh.isVisible = !isLoading
+            binding.progressBar.isVisible = isLoading
+        }
+    }
+
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
@@ -59,18 +83,11 @@ internal class TicketFragment: TeaFragment<TicketView.TicketModel, TicketView.Ev
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-
-
-        // TODO Model.titleText
-        binding.toolbarTitle.text = ConfigUtils.getTitle(requireContext())
-
-        // TODO Model.sendEnabled
-        binding.send.isEnabled = !binding.input.text.isNullOrBlank()
-
-        savedInstanceState?.let {
-            if (it.getBoolean(STATE_KEYBOARD_SHOWN))
-                showKeyboardOn(binding.input)
+        if (savedInstanceState?.getBoolean(STATE_KEYBOARD_SHOWN) == true) {
+            showKeyboardOn(binding.input)
         }
+
+        bindFeature()
     }
 
     override fun onSaveInstanceState(outState: Bundle) {
@@ -78,8 +95,14 @@ internal class TicketFragment: TeaFragment<TicketView.TicketModel, TicketView.Ev
         outState.putBoolean(STATE_KEYBOARD_SHOWN, binding.input.hasFocus())
     }
 
-    override fun render(model: TicketView.TicketModel) {
-        TODO("Not yet implemented")
+    private fun bindFeature() {
+        val feature = getStore { injector().ticketFeatureFactory("welcome").create() }
+        bind {
+            feature.states().map(TicketMapper::map) bindTo this@TicketFragment
+        }
+        bind(BinderLifecycleMode.START_STOP) {
+            this@TicketFragment.messages.map(TicketMapper::map) bindTo feature
+        }
     }
 
     private fun initListeners() {

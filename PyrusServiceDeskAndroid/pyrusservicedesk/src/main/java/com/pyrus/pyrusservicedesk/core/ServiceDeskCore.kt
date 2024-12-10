@@ -7,6 +7,7 @@ import android.net.Uri
 import android.os.Build
 import com.google.gson.GsonBuilder
 import com.pyrus.pyrusservicedesk._ref.ui_domain.screens.ticket.TicketFeature
+import com.pyrus.pyrusservicedesk._ref.ui_domain.screens.ticket.TicketFeatureFactory
 import com.pyrus.pyrusservicedesk.sdk.FileResolver
 import com.pyrus.pyrusservicedesk.sdk.FileResolverImpl
 import com.pyrus.pyrusservicedesk.sdk.data.FileManager
@@ -24,6 +25,8 @@ import com.pyrus.pyrusservicedesk._ref.utils.ConfigUtils
 import com.pyrus.pyrusservicedesk._ref.utils.ISO_DATE_PATTERN
 import com.pyrus.pyrusservicedesk._ref.utils.PREFERENCE_KEY
 import com.pyrus.pyrusservicedesk._ref.utils.RequestUtils.Companion.getBaseUrl
+import com.pyrus.pyrusservicedesk._ref.whitetea.core.DefaultStoreFactory2
+import com.pyrus.pyrusservicedesk._ref.whitetea.core.StoreFactory2
 import com.squareup.picasso.OkHttp3Downloader
 import com.squareup.picasso.Picasso
 import kotlinx.coroutines.CoroutineScope
@@ -127,8 +130,10 @@ internal class DiInjector(
 
     private val preferencesManager = PreferencesManager(preferences)
 
-    fun ticketFeature(): TicketFeature {
-        TODO()
+    private val storeFactory: StoreFactory2 = DefaultStoreFactory2()
+
+    fun ticketFeatureFactory(welcomeMessage: String): TicketFeatureFactory {
+        return TicketFeatureFactory(storeFactory, repository, welcomeMessage)
     }
 
     val liveUpdates = LiveUpdates(
