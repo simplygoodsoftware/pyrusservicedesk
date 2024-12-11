@@ -1,5 +1,6 @@
 package com.pyrus.pyrusservicedesk.presentation.ui.navigation_page.tickets_list.tickets
 
+import androidx.fragment.app.FragmentManager
 import com.pyrus.pyrusservicedesk._ref.whitetea.core.Store
 import com.pyrus.pyrusservicedesk.presentation.ui.navigation_page.tickets_list.tickets.TicketsContract.Effect
 import com.pyrus.pyrusservicedesk.presentation.ui.navigation_page.tickets_list.tickets.TicketsContract.Message
@@ -11,6 +12,12 @@ internal typealias TicketsFeature = Store<State, Message, Effect>
 internal interface TicketsContract {
 
     data class State(
+        val appId: String,
+        val titleText: String,
+        val titleImageUrl: String,
+        val filterName: String,
+        val ticketsIsEmpty: Boolean,
+        val filterEnabled: Boolean,
         val tickets: Tickets,
         val isLoading: Boolean,
     )
@@ -19,29 +26,23 @@ internal interface TicketsContract {
 
         sealed interface Outer : Message {
 
-            object OnTitleClick : Outer
-
             data class OnFilterClick(
                 val users: HashMap<String, String>,
                 val selectedUserId: String
             ) : Outer
 
-            object OnDeleteFilterClick : Outer
+            object OnScanClick : Outer
 
-            data class OnScanClick(val text: String) : Outer
-
-            data class OnSettingsClick(val rating: Int) : Outer
+            object OnSettingsClick : Outer
 
             data class OnFabItemClick(val users: HashMap<String, String>) : Outer
-
-            data class OnTicketsClick(val userId: String, val ticketId: Int) : Outer
 
         }
 
         sealed interface Inner : Message {
 
             data class TicketsUpdated(val tickets: Tickets) : Inner
-            data class UserIdSelected(val userId: String) : Inner
+            data class UserIdSelected(val userId: String, val fm: FragmentManager) : Inner
             object UpdateTicketsFailed : Inner
             object UpdateTicketsCompleted : Inner
         }
@@ -52,11 +53,13 @@ internal interface TicketsContract {
 
         sealed interface Outer : Effect {
             class ShowFilterMenu(
-                val users: HashMap<String, String>,
+                val appId: String,
                 val selectedUserId: String
             ) : Outer
 
-            class ShowAddTicketMenu(val users: HashMap<String, String>) : Outer
+            class ShowAddTicketMenu(val appId: String) : Outer
+
+            class ShowFilterSelected(val filterName: String) : Outer
 
             class ShowTicket(val ticketId: Int = 0, val userId: String? = null) : Outer
         }

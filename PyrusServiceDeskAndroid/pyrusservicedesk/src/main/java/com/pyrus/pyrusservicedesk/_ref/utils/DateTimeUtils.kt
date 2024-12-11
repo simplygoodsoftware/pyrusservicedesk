@@ -1,4 +1,4 @@
-package com.pyrus.pyrusservicedesk.utils
+package com.pyrus.pyrusservicedesk._ref.utils
 
 import android.annotation.SuppressLint
 import android.content.Context
@@ -48,24 +48,6 @@ internal fun Date.getWhen(context: Context, now: Calendar): String {
 }
 
 /**
- * Provides localized date in a "when" manner, like "today" or "20th of march". [now] is used as reference values
- * to calculate the result.
- */
-@SuppressLint("SimpleDateFormat")
-internal fun Date.getTimeWhen(context: Context, now: Calendar): String {
-    val zone = TimeZone.getDefault()
-    val date = Calendar.getInstance(zone).apply {
-        timeInMillis = this@getTimeWhen.time + zone.rawOffset
-    }
-    return when {
-        date.isSameDay(now) -> SimpleDateFormat(context.getString(R.string.psd_time_format)).format(this)
-        date.isSameWeek(now) -> SimpleDateFormat(context.getString(R.string.psd_date_format_d)).format(this)
-        date.isSameYear(now) -> SimpleDateFormat(context.getString(R.string.psd_date_format_d_m_short)).format(this)
-        else -> SimpleDateFormat(context.getString(R.string.psd_date_format_d_m_y_short)).format(this)
-    }
-}
-
-/**
  * Provides localized date in a "how much passed" manner like "1 day ago" of "5 years ago". [from] is used as
  * reference value to calculate the result.
  */
@@ -98,8 +80,6 @@ private fun Calendar.isSameDay(another: Calendar): Boolean = daysFrom(another) =
 private fun Calendar.isOneDayBefore(another: Calendar): Boolean = daysFrom(another) == -1
 
 private fun Calendar.isSameYear(another: Calendar) = get(Calendar.YEAR) == another.get(Calendar.YEAR)
-
-private fun Calendar.isSameWeek(another: Calendar): Boolean = get(Calendar.WEEK_OF_YEAR) == another.get(Calendar.WEEK_OF_YEAR)
 
 private fun Calendar.minutesFrom(another: Calendar): Int {
     val millisecondsInMinute = MILLISECONDS_IN_MINUTE.toDouble()

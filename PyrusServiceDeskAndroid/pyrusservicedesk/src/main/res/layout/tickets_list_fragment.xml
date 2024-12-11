@@ -14,4 +14,8 @@
 
     </androidx.recyclerview.widget.RecyclerView>
 
+    <include
+        android:id="@+id/empty_tickets_list_ll"
+        layout="@layout/psd_empty_tickets_list" />
+
 </androidx.constraintlayout.widget.ConstraintLayout>

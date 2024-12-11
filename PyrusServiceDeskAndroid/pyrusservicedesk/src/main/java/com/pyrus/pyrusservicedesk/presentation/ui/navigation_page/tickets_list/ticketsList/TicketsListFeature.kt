@@ -4,14 +4,22 @@ import com.pyrus.pyrusservicedesk._ref.whitetea.core.Store
 import com.pyrus.pyrusservicedesk.presentation.ui.navigation_page.tickets_list.ticketsList.TicketsListContract.Effect
 import com.pyrus.pyrusservicedesk.presentation.ui.navigation_page.tickets_list.ticketsList.TicketsListContract.Message
 import com.pyrus.pyrusservicedesk.presentation.ui.navigation_page.tickets_list.ticketsList.TicketsListContract.State
+import com.pyrus.pyrusservicedesk.sdk.data.Ticket
 import com.pyrus.pyrusservicedesk.sdk.data.intermediate.Tickets
 
 internal typealias TicketsListFeature = Store<State, Message, Effect>
 
 internal interface TicketsListContract {
 
+    /**
+     * tickets - список тикетов для конкретного вендора
+     */
     data class State(
-        val tickets: Tickets,
+        val allTickets: List<Ticket>,
+        val tickets: List<Ticket>,
+        val appId: String,
+        val users: HashMap<String, String>,
+        val selectedUser: String,
         val isLoading: Boolean,
     )
 
@@ -19,23 +27,9 @@ internal interface TicketsListContract {
 
         sealed interface Outer : Message {
 
-            object OnTitleClick : Outer
+            object OnCreateTicketClick : Outer
 
-            data class OnFilterClick(
-                val users: HashMap<String, String>,
-                val selectedUserId: String
-            ) : Outer
-
-            object OnDeleteFilterClick : Outer
-
-            data class OnScanClick(val text: String) : Outer
-
-            data class OnSettingsClick(val rating: Int) : Outer
-
-            data class OnFabItemClick(val users: HashMap<String, String>) : Outer
-
-            data class OnTicketsClick(val userId: String, val ticketId: Int) : Outer
-
+            data class OnTicketClick(val ticketId: Int) : Outer
         }
 
         sealed interface Inner : Message {
@@ -51,13 +45,7 @@ internal interface TicketsListContract {
     sealed interface Effect {
 
         sealed interface Outer : Effect {
-            class ShowFilterMenu(
-                val users: HashMap<String, String>,
-                val selectedUserId: String
-            ) : Outer
-
-            class ShowAddTicketMenu(val users: HashMap<String, String>) : Outer
-
+            class ShowAddTicketMenu(val appId: String) : Outer
             class ShowTicket(val ticketId: Int = 0, val userId: String? = null) : Outer
         }
 

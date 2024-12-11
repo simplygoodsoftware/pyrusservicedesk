@@ -6,11 +6,9 @@ internal interface  TicketsView {
     data class TicketListModel(
         val titleText: String,
         val titleImageUrl: String,
+        val filterName: String,
         val ticketsIsEmpty: Boolean,
         val filterEnabled: Boolean,
-        val scanQrVisibility: Boolean,
-        val settingsVisibility: Boolean,
-        val tickets: Tickets,
     )
 
     sealed interface Event {

@@ -2,6 +2,9 @@ package com.pyrus.pyrusservicedesk.sdk.web.retrofit
 
 import com.pyrus.pyrusservicedesk.PyrusServiceDesk
 import com.pyrus.pyrusservicedesk.PyrusServiceDesk.Companion.API_VERSION_2
+import com.pyrus.pyrusservicedesk._ref.utils.Try
+import com.pyrus.pyrusservicedesk._ref.utils.call_adapter.TryCallAdapterFactory
+import com.pyrus.pyrusservicedesk._ref.utils.log.PLog
 import com.pyrus.pyrusservicedesk.call_adapter.TryCallAdapterFactory
 import com.pyrus.pyrusservicedesk.log.PLog
 import com.pyrus.pyrusservicedesk.sdk.data.intermediate.Tickets
@@ -30,7 +33,7 @@ import kotlin.random.Random
 
 private typealias SyncLoopRequest = Continuation<Try<Int>>
 
-class SyncRepository : CoroutineScope {
+class SyncRepository(val retrofit: Retrofit) : CoroutineScope {
 
     override val coroutineContext: CoroutineContext = newSingleThreadContext("Synchronizer") +
             SupervisorJob() +
@@ -61,13 +64,6 @@ class SyncRepository : CoroutineScope {
     }
 
     init {
-        val retrofit = Retrofit.Builder()
-            .baseUrl(getBaseUrl(PyrusServiceDesk.get().domain))
-            .addConverterFactory(GsonConverterFactory.create(PyrusServiceDesk.get().gson))
-            .addCallAdapterFactory(TryCallAdapterFactory())
-            .client(PyrusServiceDesk.get().client)
-            .build()
-
         api = retrofit.create(ServiceDeskApi::class.java)
     }
 
@@ -195,7 +191,7 @@ class SyncRepository : CoroutineScope {
 //        }
 
         val responseData = when (responseTry) {
-            is Try.Success -> responseTry.value
+            is Try.Success<*> -> responseTry.value
             is Try.Failure -> {
                 PLog.d(TAG, "sync server error: ${responseTry.error}")
                 return Try.Failure(responseTry.error)
