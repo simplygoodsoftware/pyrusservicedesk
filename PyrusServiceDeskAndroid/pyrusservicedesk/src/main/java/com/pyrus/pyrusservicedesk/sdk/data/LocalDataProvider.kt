@@ -27,12 +27,7 @@ internal class LocalDataProvider(
     init {
         runBlocking {
             // assigns last pending comment id as last local
-            lastLocalCommentId = offlineRepository.getPendingFeedComments()
-                .getOrNull()
-                ?.comments
-                ?.lastOrNull()
-                ?.localId
-                ?: 0L
+            lastLocalCommentId = offlineRepository.getPendingFeedComments().lastOrNull()?.localId ?: 0L
         }
     }
 

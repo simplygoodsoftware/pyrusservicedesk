@@ -2,6 +2,7 @@ package com.pyrus.pyrusservicedesk._ref.ui_domain.screens.ticket.adapter
 
 import android.view.View
 import android.view.ViewGroup
+import androidx.recyclerview.widget.ListAdapter
 import com.pyrus.pyrusservicedesk.R
 import com.pyrus.pyrusservicedesk._ref.ui_domain.screens.ticket.adapter.view_holders.ButtonsHolder
 import com.pyrus.pyrusservicedesk._ref.ui_domain.screens.ticket.adapter.view_holders.DateViewHolder
@@ -10,11 +11,7 @@ import com.pyrus.pyrusservicedesk._ref.ui_domain.screens.ticket.adapter.view_hol
 import com.pyrus.pyrusservicedesk._ref.ui_domain.screens.ticket.adapter.view_holders.RatingCommentHolder
 import com.pyrus.pyrusservicedesk._ref.ui_domain.screens.ticket.adapter.view_holders.RatingHolder
 import com.pyrus.pyrusservicedesk._ref.ui_domain.screens.ticket.adapter.view_holders.WelcomeMessageHolder
-import com.pyrus.pyrusservicedesk._ref.ui_domain.screens.ticket.adapter.entries.CommentEntry
-import com.pyrus.pyrusservicedesk._ref.ui_domain.screens.ticket.adapter.entries.TicketEntry
-import com.pyrus.pyrusservicedesk._ref.ui_domain.screens.ticket.adapter.entries.Type
 import com.pyrus.pyrusservicedesk._ref.ui_domain.screens.ticket.adapter.new_entries.CommentEntryV2
-import com.pyrus.pyrusservicedesk.presentation.ui.view.recyclerview.AdapterBase
 import com.pyrus.pyrusservicedesk.presentation.ui.view.recyclerview.ViewHolderBase
 import com.pyrus.pyrusservicedesk.presentation.ui.view.recyclerview.item_decorators.SpaceMultiplier
 import com.pyrus.pyrusservicedesk.sdk.data.Attachment
@@ -27,7 +24,7 @@ internal class TicketAdapter(
     private val onFileReadyToPreviewClickListener: (attachment: Attachment) -> Unit,
     private val onTextCommentLongClicked: (String) -> Unit,
     private val onRatingClickListener: (Int) -> Unit,
-): AdapterBase<CommentEntryV2>() {
+): ListAdapter<CommentEntryV2, ViewHolderBase<CommentEntryV2>>(CommentsItemCallback()) {
 
     /**
      * [SpaceMultiplier] implementation for customizing spaces between items fot the feed.
@@ -36,17 +33,17 @@ internal class TicketAdapter(
         override fun getMultiplier(adapterPosition: Int): Float {
             return when {
                 adapterPosition <= 0 -> 1f
-                itemsList[adapterPosition] is CommentEntryV2.Comment
-                        && itemsList[adapterPosition -1] is CommentEntryV2.Comment
-                        && (itemsList[adapterPosition] as CommentEntryV2.Comment).isInbound !=
-                            (itemsList[adapterPosition - 1] as CommentEntryV2.Comment).isInbound -> 2f
+                getItem(adapterPosition) is CommentEntryV2.Comment
+                        && getItem(adapterPosition -1) is CommentEntryV2.Comment
+                        && (getItem(adapterPosition) as CommentEntryV2.Comment).isInbound !=
+                            (getItem(adapterPosition - 1) as CommentEntryV2.Comment).isInbound -> 2f
                 else -> 1f
             }
         }
     }
 
     override fun getItemViewType(position: Int): Int {
-        return when(val entry = itemsList[position]) {
+        return when(val entry = getItem(position)) {
             is CommentEntryV2.Buttons -> VIEW_TYPE_COMMENT_BUTTONS
             is CommentEntryV2.Comment -> if (entry.isInbound) VIEW_TYPE_COMMENT_OUTBOUND else  VIEW_TYPE_COMMENT_INBOUND
             is CommentEntryV2.Date -> VIEW_TYPE_DATE
@@ -79,14 +76,14 @@ internal class TicketAdapter(
         } as ViewHolderBase<CommentEntryV2>
     }
 
+    override fun onBindViewHolder(holder: ViewHolderBase<CommentEntryV2>, position: Int) {
+        holder.bindItem(getItem(position))
+    }
+
     override fun onViewAttachedToWindow(holder: ViewHolderBase<CommentEntryV2>) {
         super.onViewAttachedToWindow(holder)
         holder.itemView.translationX = 0f
         holder.itemView.findViewById<View>(R.id.author_and_comment)?.let { it.translationX = 0f }
-    }
-
-    override fun setItems(items: List<CommentEntryV2>) {
-        this.itemsList = items.toMutableList()
     }
 
     companion object {

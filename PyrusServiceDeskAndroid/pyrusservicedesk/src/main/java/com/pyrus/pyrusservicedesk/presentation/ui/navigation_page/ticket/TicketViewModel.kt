@@ -1,17 +1,13 @@
 package com.pyrus.pyrusservicedesk.presentation.ui.navigation_page.ticket
 
 import android.app.Application
-import android.content.Context
 import android.net.Uri
 import android.os.Handler
 import android.os.Looper
-import android.widget.Toast
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
-import androidx.lifecycle.Observer
 import androidx.recyclerview.widget.DiffUtil
 import com.pyrus.pyrusservicedesk.PyrusServiceDesk
-import com.pyrus.pyrusservicedesk.R
 import com.pyrus.pyrusservicedesk._ref.ui_domain.screens.ticket.adapter.entries.ButtonsEntry
 import com.pyrus.pyrusservicedesk._ref.ui_domain.screens.ticket.adapter.entries.CommentEntry
 import com.pyrus.pyrusservicedesk._ref.ui_domain.screens.ticket.adapter.entries.DateEntry
@@ -25,24 +21,18 @@ import com.pyrus.pyrusservicedesk.presentation.viewmodel.ConnectionViewModelBase
 import com.pyrus.pyrusservicedesk.sdk.data.Attachment
 import com.pyrus.pyrusservicedesk.sdk.data.Author
 import com.pyrus.pyrusservicedesk.sdk.data.Comment
-import com.pyrus.pyrusservicedesk.sdk.data.FileManager
-import com.pyrus.pyrusservicedesk.sdk.data.LocalDataProvider
-import com.pyrus.pyrusservicedesk.sdk.data.intermediate.AddCommentResponseData
 import com.pyrus.pyrusservicedesk.sdk.data.intermediate.Comments
 import com.pyrus.pyrusservicedesk.sdk.response.PendingDataError
 import com.pyrus.pyrusservicedesk.sdk.updates.OnUnreadTicketCountChangedSubscriber
 import com.pyrus.pyrusservicedesk.sdk.updates.PreferencesManager
-import com.pyrus.pyrusservicedesk.sdk.verify.LocalDataVerifier
 import com.pyrus.pyrusservicedesk.sdk.web.OnCancelListener
 import com.pyrus.pyrusservicedesk.sdk.web.UploadFileHooks
 import com.pyrus.pyrusservicedesk._ref.utils.ConfigUtils
 import com.pyrus.pyrusservicedesk._ref.utils.MILLISECONDS_IN_MINUTE
 import com.pyrus.pyrusservicedesk._ref.utils.MILLISECONDS_IN_SECOND
 import com.pyrus.pyrusservicedesk._ref.utils.RequestUtils.Companion.MAX_FILE_SIZE_BYTES
-import com.pyrus.pyrusservicedesk._ref.utils.RequestUtils.Companion.MAX_FILE_SIZE_MEGABYTES
 import com.pyrus.pyrusservicedesk._ref.utils.getWhen
 import kotlinx.coroutines.*
-import java.lang.Exception
 import java.lang.Runnable
 import java.util.*
 import kotlin.collections.ArrayList
@@ -518,12 +508,12 @@ internal class TicketViewModel(
         PyrusServiceDesk.startTicketsUpdatesIfNeeded(lastActiveTime)
         updateFeedIntervalIfNeeded()
 
-        commentDiff.value = DiffResultWithNewItems(
-            DiffUtil.calculateDiff(
-                CommentsDiffCallback(oldEntries, ticketEntries), false
-            ),
-            ticketEntries
-        )
+//        commentDiff.value = DiffResultWithNewItems(
+//            DiffUtil.calculateDiff(
+//                CommentsItemCallback(oldEntries, ticketEntries), false
+//            ),
+//            ticketEntries
+//        )
     }
 
     private fun Comment.splitToEntries(): Collection<TicketEntry> {

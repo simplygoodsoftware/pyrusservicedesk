@@ -56,10 +56,7 @@ internal class TicketFragment: TeaFragment<Model, TicketView.Event, TicketContra
         diff(Model::titleText) { title -> binding.toolbarTitle.text = title }
         diff(Model::inputText) { text -> if (!binding.input.hasFocus()) binding.input.setText(text) }
         diff(Model::sendEnabled) { sendEnabled -> binding.send.isEnabled = sendEnabled }
-        diff(Model::comments, { new, old -> new === old }) { comments ->
-            Log.d("SDS", "comments: $comments")
-//            adapter.setItems(it) TODO
-        }
+        diff(Model::comments, { new, old -> new === old }, adapter::submitList)
         diff(Model::showNoConnectionError) { showError -> binding.noConnection.root.isVisible = showError }
         diff(Model::isLoading) { isLoading ->
             binding.refresh.isVisible = !isLoading

@@ -21,9 +21,9 @@ internal interface TicketContract {
 
         sealed interface Outer : Message {
 
-            data object OnPreviewClick : Outer
+            data class OnPreviewClick(val uri: Uri) : Outer
 
-            data object OnRetryClick : Outer
+            data class OnRetryClick(val id: Long) : Outer
 
             data class OnCopyClick(val text: String) : Outer
 
@@ -58,6 +58,10 @@ internal interface TicketContract {
             data object UpdateComments : Inner
             data object FeedFlow : Inner
             data object CommentsAutoUpdate : Inner
+            data object Close : Inner
+            data class CopyToClipboard(val text: String) : Inner
+            data class SendComment(val text: String) : Inner
+            data class OpenPreview(val uri: Uri) : Inner
         }
     }
 

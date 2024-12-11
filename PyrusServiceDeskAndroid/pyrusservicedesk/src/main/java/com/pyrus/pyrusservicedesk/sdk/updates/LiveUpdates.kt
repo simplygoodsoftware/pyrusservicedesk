@@ -281,7 +281,7 @@ internal class LiveUpdates(
             val responseUserId = userId
             PLog.d(TAG, "getTicketRequest")
             coreScope.launch(ioDispatcher) {
-                val feedTry = repository.getFeed(true, false)
+                val feedTry = repository.getFeed(true)
 
                 withContext(mainDispatcher) {
                     if (responseUserId != userId) {

@@ -7,6 +7,7 @@ import com.pyrus.pyrusservicedesk.presentation.ui.view.Status
 internal sealed interface CommentEntryV2 {
 
     data class Comment(
+        val id: Long,
         val isInbound: Boolean,
         val hasError: Boolean,
         val isLocal: Boolean,
@@ -27,6 +28,7 @@ internal sealed interface CommentEntryV2 {
     ) : CommentEntryV2
 
     data class Buttons(
+        val id: Long,
         val buttons: List<ButtonEntry>,
         val onButtonClick: (text: String) -> Unit,
     ) : CommentEntryV2

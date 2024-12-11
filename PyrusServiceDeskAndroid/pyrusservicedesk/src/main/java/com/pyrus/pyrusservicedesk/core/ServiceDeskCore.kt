@@ -5,8 +5,9 @@ import android.content.Context
 import android.content.SharedPreferences
 import android.net.Uri
 import android.os.Build
+import com.github.terrakok.cicerone.Cicerone
+import com.github.terrakok.cicerone.NavigatorHolder
 import com.google.gson.GsonBuilder
-import com.pyrus.pyrusservicedesk._ref.ui_domain.screens.ticket.TicketFeature
 import com.pyrus.pyrusservicedesk._ref.ui_domain.screens.ticket.TicketFeatureFactory
 import com.pyrus.pyrusservicedesk.sdk.FileResolver
 import com.pyrus.pyrusservicedesk.sdk.FileResolverImpl
@@ -25,11 +26,14 @@ import com.pyrus.pyrusservicedesk._ref.utils.ConfigUtils
 import com.pyrus.pyrusservicedesk._ref.utils.ISO_DATE_PATTERN
 import com.pyrus.pyrusservicedesk._ref.utils.PREFERENCE_KEY
 import com.pyrus.pyrusservicedesk._ref.utils.RequestUtils.Companion.getBaseUrl
+import com.pyrus.pyrusservicedesk._ref.utils.call_adapter.TryCallAdapterFactory
 import com.pyrus.pyrusservicedesk._ref.whitetea.core.DefaultStoreFactory2
 import com.pyrus.pyrusservicedesk._ref.whitetea.core.StoreFactory2
+import com.pyrus.pyrusservicedesk.sdk.repositories.DraftRepository
 import com.squareup.picasso.OkHttp3Downloader
 import com.squareup.picasso.Picasso
 import kotlinx.coroutines.CoroutineScope
+import com.pyrus.pyrusservicedesk._ref.utils.navigation.PyrusRouterImpl
 import okhttp3.OkHttpClient
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
@@ -111,6 +115,7 @@ internal class DiInjector(
     private val retrofit: Retrofit = Retrofit.Builder()
         .baseUrl(getBaseUrl(account.domain))
         .addConverterFactory(GsonConverterFactory.create(remoteGson))
+        .addCallAdapterFactory(TryCallAdapterFactory())
         .client(okHttpClient)
         .build()
 
@@ -132,9 +137,17 @@ internal class DiInjector(
 
     private val storeFactory: StoreFactory2 = DefaultStoreFactory2()
 
+    private val draftRepository = DraftRepository(preferences)
+
     fun ticketFeatureFactory(welcomeMessage: String): TicketFeatureFactory {
-        return TicketFeatureFactory(storeFactory, repository, welcomeMessage)
+        return TicketFeatureFactory(storeFactory, repository, draftRepository, welcomeMessage)
     }
+
+    private val cicerone: Cicerone<PyrusRouterImpl> = Cicerone.create(PyrusRouterImpl())
+
+    val router = cicerone.router
+
+    val navHolder: NavigatorHolder = cicerone.getNavigatorHolder()
 
     val liveUpdates = LiveUpdates(
         repository = repository,
