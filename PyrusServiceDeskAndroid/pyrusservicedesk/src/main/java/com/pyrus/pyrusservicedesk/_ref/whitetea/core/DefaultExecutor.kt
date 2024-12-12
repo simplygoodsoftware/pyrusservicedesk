@@ -1,5 +1,6 @@
 package com.pyrus.pyrusservicedesk._ref.whitetea.core
 
+import android.util.Log
 import kotlinx.coroutines.CoroutineExceptionHandler
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -53,6 +54,8 @@ internal open class DefaultExecutor<State : Any, Message : Any, Effect : Any>(
     }
 
     private fun step(next: Update<State, Effect>) {
+        Log.d("SDS", "state: ${next.state}")
+
         val renderState = next.state
 
         val effects = next.effects

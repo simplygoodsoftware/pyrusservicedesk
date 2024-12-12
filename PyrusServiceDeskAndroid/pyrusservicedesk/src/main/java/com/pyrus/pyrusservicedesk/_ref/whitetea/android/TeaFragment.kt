@@ -1,5 +1,6 @@
 package com.pyrus.pyrusservicedesk._ref.whitetea.android
 
+import android.util.Log
 import androidx.fragment.app.Fragment
 import com.pyrus.pyrusservicedesk._ref.whitetea.core.ViewRenderer
 import kotlinx.coroutines.channels.BufferOverflow
@@ -19,6 +20,7 @@ internal abstract class TeaFragment<Model : Any, Event : Any, Effect : Any> : Fr
     }
 
     override fun render(model: Model) {
+        Log.d("SDS", "model: $model")
         renderer?.render(model)
     }
 

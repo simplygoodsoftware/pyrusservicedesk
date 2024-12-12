@@ -2,10 +2,12 @@ package com.pyrus.pyrusservicedesk._ref.whitetea.core
 
 import com.pyrus.pyrusservicedesk._ref.whitetea.core.logic.L
 
-internal class DefaultStoreFactory2 : StoreFactory2 {
+internal class DefaultStoreFactory2(
+    private val executorFactory: ExecutorFactory
+) : StoreFactory2 {
 
     override fun <State : Any, Message : Any, Effect : Any> create(
-        name: String?,
+        name: String,
         autoInit: Boolean,
         initialState: State,
         initialEffects: List<Effect>,
@@ -16,7 +18,7 @@ internal class DefaultStoreFactory2 : StoreFactory2 {
         return DefaultStore(
             initialState = initialState,
             initialEffects = initialEffects,
-            executor = DefaultExecutor(actors),
+            executor = executorFactory.create(name, actors),
             updateLogic = reducer,
             onCancelCallback = onCancelCallback
         ).apply {
@@ -27,7 +29,7 @@ internal class DefaultStoreFactory2 : StoreFactory2 {
     }
 
     override fun <State : Any, Message : Any, Effect : Any> create(
-        name: String?,
+        name: String,
         autoInit: Boolean,
         initialState: State,
         initialEffects: List<Effect>,

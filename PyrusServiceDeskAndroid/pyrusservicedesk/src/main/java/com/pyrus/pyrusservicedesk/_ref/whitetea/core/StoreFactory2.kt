@@ -5,7 +5,7 @@ import com.pyrus.pyrusservicedesk._ref.whitetea.core.logic.L
 internal interface StoreFactory2 {
 
     fun <State : Any, Message : Any, Effect : Any> create(
-        name: String?,
+        name: String,
         autoInit: Boolean = true,
         initialState: State,
         initialEffects: List<Effect> = emptyList(),
@@ -15,7 +15,7 @@ internal interface StoreFactory2 {
     ): Store<State, Message, Effect>
 
     fun <State : Any, Message : Any, Effect : Any> create(
-        name: String?,
+        name: String,
         autoInit: Boolean = true,
         initialState: State,
         initialEffects: List<Effect> = emptyList(),

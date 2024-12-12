@@ -34,10 +34,15 @@ import com.squareup.picasso.OkHttp3Downloader
 import com.squareup.picasso.Picasso
 import kotlinx.coroutines.CoroutineScope
 import com.pyrus.pyrusservicedesk._ref.utils.navigation.PyrusRouterImpl
+import com.pyrus.pyrusservicedesk._ref.whitetea.core.Actor
+import com.pyrus.pyrusservicedesk._ref.whitetea.core.DefaultExecutor
+import com.pyrus.pyrusservicedesk._ref.whitetea.core.Executor
+import com.pyrus.pyrusservicedesk._ref.whitetea.core.ExecutorFactory
 import okhttp3.OkHttpClient
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 import java.util.concurrent.TimeUnit
+import java.util.logging.Logger
 
 internal class ServiceDeskCore(
     internal val diInjector: DiInjector,
@@ -135,7 +140,16 @@ internal class DiInjector(
 
     private val preferencesManager = PreferencesManager(preferences)
 
-    private val storeFactory: StoreFactory2 = DefaultStoreFactory2()
+    private val executorFactory = object : ExecutorFactory {
+        override fun <State : Any, Message : Any, Effect : Any> create(
+            name: String,
+            actors: List<Actor<Effect, Message>>,
+        ): Executor<State, Message, Effect> {
+            return DefaultExecutor(actors)
+        }
+
+    }
+    private val storeFactory: StoreFactory2 = DefaultStoreFactory2(executorFactory)
 
     private val draftRepository = DraftRepository(preferences)
 
