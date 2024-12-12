@@ -314,7 +314,8 @@ private extension PSDChatsViewController {
     func designNavigation() {
         let bigAppear = UINavigationBarAppearance(barAppearance: UIBarAppearance())
         bigAppear.configureWithOpaqueBackground()
-        bigAppear.backgroundColor = UIColor(hex: "#F9F9F9F0")
+        bigAppear.backgroundColor = .hLightGray
+        
         navigationItem.scrollEdgeAppearance = bigAppear
         navigationItem.standardAppearance = bigAppear
         
@@ -571,4 +572,8 @@ extension PSDChatsViewController: UINavigationControllerDelegate {
             self.navigationController?.setNavigationBarHidden(false, animated: animated)
         }
     }
+}
+
+extension UIColor {
+    static let hLightGray = UIColor(hex: "#F9F9F9F0") ?? .systemGray5
 }

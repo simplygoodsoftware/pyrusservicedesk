@@ -68,6 +68,7 @@ class ClosedTicketsCell: UITableViewCell {
     }()
     
     private func addConstraints() {
+        contentView.backgroundColor = .hLightGray
         countLabel.translatesAutoresizingMaskIntoConstraints = false
         titleLabel.translatesAutoresizingMaskIntoConstraints = false
         openButton.translatesAutoresizingMaskIntoConstraints = false
@@ -85,6 +86,9 @@ class ClosedTicketsCell: UITableViewCell {
             openButton.centerYAnchor.constraint(equalTo: contentView.centerYAnchor),
         ])
         
+        let tapGestureRecognizer = UITapGestureRecognizer(target: self, action: #selector(openButtonTapped))
+        contentView.addGestureRecognizer(tapGestureRecognizer)
+        contentView.isUserInteractionEnabled = true
         openButton.addTarget(self, action: #selector(openButtonTapped), for: .touchUpInside)
 
     }

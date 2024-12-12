@@ -16,7 +16,7 @@ class PSDMessageStateButton: UIButton {
             redraw()
         }
     }
-    let stateSize :CGFloat = 20.0
+    let stateSize: CGFloat = 15.0
     override init(frame: CGRect) {
         super.init(frame: frame)
         self.frame=CGRect(x: 0, y: 0, width: stateSize, height: stateSize)

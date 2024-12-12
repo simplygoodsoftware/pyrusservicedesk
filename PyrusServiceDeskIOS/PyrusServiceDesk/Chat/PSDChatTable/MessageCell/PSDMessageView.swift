@@ -260,7 +260,7 @@ class PSDMessageView: PSDView {
         timeInBottomConstraints.append(bBottomConstraint)
         timeInBottomAndLineConstraints.append(bTrailingConstraint)
         
-        let lTrailingConstraint = messageTextView.trailingAnchor.constraint(lessThanOrEqualTo: timeView.leadingAnchor, constant: 0)
+        let lTrailingConstraint = messageTextView.trailingAnchor.constraint(lessThanOrEqualTo: timeView.leadingAnchor, constant: 8)
         lTrailingConstraint.isActive = false
         let lBottomConstaint = messageTextView.bottomAnchor.constraint(equalTo: bottomAnchor)
         lBottomConstaint.isActive = false
