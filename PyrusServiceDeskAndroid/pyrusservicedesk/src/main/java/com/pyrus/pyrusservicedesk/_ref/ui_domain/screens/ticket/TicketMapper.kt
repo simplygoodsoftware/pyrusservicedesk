@@ -21,7 +21,6 @@ internal object TicketMapper {
     private const val RATING_TEXT_ID = -3L
 
     fun map(state: State) = Model(
-        titleText = state.titleText,
         inputText = state.inputText,
         sendEnabled = state.sendEnabled,
         comments = state.comments?.let { mapComments(it, state.welcomeMessage) },

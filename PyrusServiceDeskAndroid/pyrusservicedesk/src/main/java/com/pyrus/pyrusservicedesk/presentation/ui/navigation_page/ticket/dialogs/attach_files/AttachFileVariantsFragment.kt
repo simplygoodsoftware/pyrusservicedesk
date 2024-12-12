@@ -124,7 +124,7 @@ internal class AttachFileVariantsFragment: BottomSheetDialogFragment(), View.OnC
         location?.let {
             if (!isPhoto
                 && requestCode != REQUEST_CODE_CUSTOM_CHOOSER
-                && Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
+            ) {
 
                 context?.contentResolver?.takePersistableUriPermission(
                     it,

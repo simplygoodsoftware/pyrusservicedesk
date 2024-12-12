@@ -6,7 +6,6 @@ import com.pyrus.pyrusservicedesk._ref.ui_domain.screens.ticket.adapter.new_entr
 internal interface TicketView {
 
     data class Model(
-        val titleText: String,
         val inputText: String,
         val sendEnabled: Boolean,
         val comments: List<CommentEntryV2>?,

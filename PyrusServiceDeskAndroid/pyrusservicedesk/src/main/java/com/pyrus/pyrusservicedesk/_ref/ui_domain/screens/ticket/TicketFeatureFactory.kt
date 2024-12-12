@@ -43,7 +43,6 @@ internal class TicketFeatureFactory(
             sendEnabled = false,
             inputText = draftRepository.getDraft(),
             showError = false,
-            titleText = "", // TODO
             welcomeMessage = welcomeMessage
         ),
         reducer = FeatureReducer(),
@@ -64,7 +63,7 @@ private class FeatureReducer: Logic<State, Message, Effect>() {
             is Message.Outer -> handleOuter(message)
             is Message.Inner -> handleInner(message)
         }
-        state { state.copy(sendEnabled = state.inputText.isNotBlank() && !state.isLoading) }
+        state { state.copy(sendEnabled = state.inputText.isNotBlank()) }
     }
 
     private fun Result.handleOuter(message: Message.Outer) {

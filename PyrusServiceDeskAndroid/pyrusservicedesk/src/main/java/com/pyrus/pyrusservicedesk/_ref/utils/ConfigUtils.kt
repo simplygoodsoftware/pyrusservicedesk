@@ -248,8 +248,9 @@ internal class ConfigUtils{
          * Provides chat title taking [StaticRepository.CONFIGURATION] into account
          */
         fun getTitle(context: Context): String {
+            val title = StaticRepository.getConfiguration().title
             return when{
-                !StaticRepository.getConfiguration().title.isNullOrEmpty() -> StaticRepository.getConfiguration().title!!
+                !title.isNullOrEmpty() -> title
                 else -> context.resources.getString(R.string.psd_organization_support)
             }
         }
