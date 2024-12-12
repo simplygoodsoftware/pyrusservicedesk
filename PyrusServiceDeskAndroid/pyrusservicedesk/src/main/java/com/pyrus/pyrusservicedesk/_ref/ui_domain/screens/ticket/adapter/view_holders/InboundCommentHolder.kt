@@ -1,5 +1,6 @@
 package com.pyrus.pyrusservicedesk._ref.ui_domain.screens.ticket.adapter.view_holders
 
+import android.net.Uri
 import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageView
@@ -16,7 +17,7 @@ import com.pyrus.pyrusservicedesk._ref.utils.RequestUtils
 internal class InboundCommentHolder(
     parent: ViewGroup,
     onErrorCommentEntryClickListener: (entry: CommentEntryV2.Comment) -> Unit,
-    onFileReadyToPreviewClickListener: (attachment: Attachment) -> Unit,
+    onFileReadyToPreviewClickListener: (uri: Uri) -> Unit,
     onTextCommentLongClicked: (String) -> Unit,
 ) : CommentHolder(
     parent,

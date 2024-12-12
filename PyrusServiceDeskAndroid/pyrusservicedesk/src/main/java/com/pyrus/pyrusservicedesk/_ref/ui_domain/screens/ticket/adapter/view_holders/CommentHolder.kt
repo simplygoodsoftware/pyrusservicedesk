@@ -1,5 +1,6 @@
 package com.pyrus.pyrusservicedesk._ref.ui_domain.screens.ticket.adapter.view_holders
 
+import android.net.Uri
 import android.view.View
 import android.view.ViewGroup
 import androidx.annotation.LayoutRes
@@ -8,14 +9,12 @@ import com.pyrus.pyrusservicedesk.presentation.ui.view.CommentView
 import com.pyrus.pyrusservicedesk.presentation.ui.view.ContentType
 import com.pyrus.pyrusservicedesk.presentation.ui.view.Status
 import com.pyrus.pyrusservicedesk.presentation.ui.view.recyclerview.ViewHolderBase
-import com.pyrus.pyrusservicedesk.sdk.data.Attachment
-import com.pyrus.pyrusservicedesk._ref.utils.getTimeText
 
 internal abstract class CommentHolder(
     parent: ViewGroup,
     @LayoutRes layoutRes: Int,
     private val onErrorCommentEntryClickListener: (entry: CommentEntryV2.Comment) -> Unit,
-    private val onFileReadyToPreviewClickListener: (attachment: Attachment) -> Unit,
+    private val onFileReadyToPreviewClickListener: (uri: Uri) -> Unit,
     private val onTextCommentLongClicked: (String) -> Unit,
 ) : ViewHolderBase<CommentEntryV2.Comment>(parent, layoutRes) {
 
@@ -62,23 +61,21 @@ internal abstract class CommentHolder(
             }
         }
 
-        when (entry.contentType) {
-            ContentType.Text -> bindTextView(entry)
-            else -> bindAttachmentView(entry)
+        when (val content = entry.content) {
+            is CommentEntryV2.CommentContent.Image -> bindAttachmentView(content)
+            is CommentEntryV2.CommentContent.Text ->  bindTextView(content)
         }
     }
 
-    private fun bindTextView(entry: CommentEntryV2.Comment) {
-        comment.setCommentText(entry.text)
+    private fun bindTextView(content: CommentEntryV2.CommentContent.Text) {
+        comment.setCommentText(content.text)
     }
 
-    private fun bindAttachmentView(entry: CommentEntryV2.Comment) {
-        val fileUrl = entry.attachUrl ?: return
-
-        comment.setFileName(entry.attachmentName)
-        comment.setFileSize(entry.fileSize)
-        comment.setPreview(fileUrl)
-        comment.fileProgressStatus = entry.fileProgressStatus
+    private fun bindAttachmentView(content: CommentEntryV2.CommentContent.Image) {
+        comment.setFileName(content.attachmentName)
+        comment.setFileSize(content.fileSize)
+        comment.setPreview(content.attachUrl)
+        comment.fileProgressStatus = content.fileProgressStatus
         comment.setOnProgressIconClickListener {
             TODO()
         }

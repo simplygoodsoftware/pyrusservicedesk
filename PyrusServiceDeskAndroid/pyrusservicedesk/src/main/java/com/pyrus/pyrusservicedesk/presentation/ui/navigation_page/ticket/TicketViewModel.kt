@@ -489,9 +489,7 @@ internal class TicketViewModel(
             return newEntries
         }
 
-        return newEntries + ButtonsEntry(buttons) {
-            onSendClicked(it)
-        }
+        return newEntries
     }
 
     private fun removeOldButtons(newEntries: List<TicketEntry>): List<TicketEntry> {

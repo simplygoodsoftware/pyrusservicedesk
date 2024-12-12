@@ -1,5 +1,6 @@
 package com.pyrus.pyrusservicedesk._ref.ui_domain.screens.ticket.adapter
 
+import android.net.Uri
 import android.view.View
 import android.view.ViewGroup
 import androidx.recyclerview.widget.ListAdapter
@@ -20,8 +21,8 @@ import com.pyrus.pyrusservicedesk.sdk.data.Attachment
  * Adapter that is used for rendering comment feed of the ticket screen.
  */
 internal class TicketAdapter(
-    private val onErrorCommentEntryClickListener: (entry: CommentEntryV2) -> Unit,
-    private val onFileReadyToPreviewClickListener: (attachment: Attachment) -> Unit,
+    private val onErrorCommentEntryClickListener: (id: CommentEntryV2) -> Unit,
+    private val onFileReadyToPreviewClickListener: (uri: Uri) -> Unit,
     private val onTextCommentLongClicked: (String) -> Unit,
     private val onRatingClickListener: (Int) -> Unit,
 ): ListAdapter<CommentEntryV2, ViewHolderBase<CommentEntryV2>>(CommentsItemCallback()) {
@@ -48,8 +49,8 @@ internal class TicketAdapter(
             is CommentEntryV2.Comment -> if (entry.isInbound) VIEW_TYPE_COMMENT_OUTBOUND else  VIEW_TYPE_COMMENT_INBOUND
             is CommentEntryV2.Date -> VIEW_TYPE_DATE
             is CommentEntryV2.Rating -> VIEW_TYPE_COMMENT_RATING
-            CommentEntryV2.SelectRating -> VIEW_TYPE_RATING
-            is CommentEntryV2.WelcomeMessage -> VIEW_TYPE_WELCOME_MESSAGE
+            CommentEntryV2.RatingSelector -> VIEW_TYPE_RATING
+            is CommentEntryV2.SimpleText -> VIEW_TYPE_WELCOME_MESSAGE
         }
     }
 

@@ -16,9 +16,9 @@ internal interface TicketView {
 
     sealed interface Event {
 
-        data object OnPreviewClick : Event
+        data class OnPreviewClick(val uri: Uri) : Event
 
-        data object OnRetryClick : Event
+        data class OnRetryClick(val id: Long) : Event
 
         data class OnCopyClick(val text: String) : Event
 

@@ -140,7 +140,13 @@ internal class DiInjector(
     private val draftRepository = DraftRepository(preferences)
 
     fun ticketFeatureFactory(welcomeMessage: String): TicketFeatureFactory {
-        return TicketFeatureFactory(storeFactory, repository, draftRepository, welcomeMessage)
+        return TicketFeatureFactory(
+            storeFactory = storeFactory,
+            repository = repository,
+            draftRepository = draftRepository,
+            welcomeMessage = welcomeMessage,
+            router = router
+        )
     }
 
     private val cicerone: Cicerone<PyrusRouterImpl> = Cicerone.create(PyrusRouterImpl())

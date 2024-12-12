@@ -4,7 +4,6 @@ import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentFactory
 import com.github.terrakok.cicerone.androidx.Creator
 import com.github.terrakok.cicerone.androidx.FragmentScreen
-import net.papirus.resources.R
 
 
 interface AnimatedFragmentScreen: FragmentScreen {
@@ -85,16 +84,18 @@ fun FragmentScreen.setAnimation(enter: Int, exit: Int, popEnter: Int, popExit: I
  */
 fun FragmentScreen.setAnimation(enter: Int, exit: Int) = setAnimation(enter, exit, 0, 0)
 
-fun FragmentScreen.setSlideRightAnimation() = setAnimation(
-    enter = R.anim.slide_in_right,
-    exit = R.anim.fade_out_with_scale,
-    popEnter = R.anim.fade_in_with_scale,
-    popExit = R.anim.slide_out_right
-)
+// TODO
+//fun FragmentScreen.setSlideRightAnimation() = setAnimation(
+//    enter = R.anim.slide_in_right,
+//    exit = R.anim.fade_out_with_scale,
+//    popEnter = R.anim.fade_in_with_scale,
+//    popExit = R.anim.slide_out_right
+//)
 
-fun FragmentScreen.setFadeAnimation() = setAnimation(
-    enter = R.anim.fade_in,
-    exit = R.anim.fade_out_with_scale,
-    popEnter = R.anim.fade_in_with_scale,
-    popExit = R.anim.fade_out
-)
+// TODO
+//fun FragmentScreen.setFadeAnimation() = setAnimation(
+//    enter = R.anim.fade_in,
+//    exit = R.anim.fade_out_with_scale,
+//    popEnter = R.anim.fade_in_with_scale,
+//    popExit = R.anim.fade_out
+//)

@@ -14,23 +14,27 @@ internal sealed interface CommentEntryV2 {
         val isWelcomeMessage: Boolean,
         val timeText: String,
         val status: Status,
-        val contentType: ContentType,
         val authorName: String,
-        val avatarUrl: String,
+        val avatarUrl: String?,
 
-        val text: String,
-
-        val attachUrl: Uri?,
-        val attachmentName: String,
-        val isImage: Boolean,
-        val fileSize: Float,
-        val fileProgressStatus: Status,
+        val contentType: ContentType,
+        val content: CommentContent,
     ) : CommentEntryV2
+
+    sealed interface CommentContent {
+        data class Text(val text: String) : CommentContent
+        data class Image(
+            val attachUrl: Uri,
+            val attachmentName: String,
+            val isImage: Boolean,
+            val fileSize: Float,
+            val fileProgressStatus: Status,
+        ) : CommentContent
+    }
 
     data class Buttons(
         val id: Long,
         val buttons: List<ButtonEntry>,
-        val onButtonClick: (text: String) -> Unit,
     ) : CommentEntryV2
 
     sealed interface ButtonEntry {
@@ -56,8 +60,8 @@ internal sealed interface CommentEntryV2 {
         val rating: Int,
     ) : CommentEntryV2
 
-    data class WelcomeMessage(val message: String) : CommentEntryV2
+    data class SimpleText(val id: Long, val message: String) : CommentEntryV2
 
-    data object SelectRating : CommentEntryV2
+    data object RatingSelector : CommentEntryV2
 
 }

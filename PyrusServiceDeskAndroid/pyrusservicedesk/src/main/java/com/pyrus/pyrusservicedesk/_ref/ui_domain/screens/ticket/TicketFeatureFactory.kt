@@ -3,6 +3,8 @@ package com.pyrus.pyrusservicedesk._ref.ui_domain.screens.ticket
 import com.pyrus.pyrusservicedesk._ref.ui_domain.screens.ticket.TicketContract.Effect
 import com.pyrus.pyrusservicedesk._ref.ui_domain.screens.ticket.TicketContract.Message
 import com.pyrus.pyrusservicedesk._ref.ui_domain.screens.ticket.TicketContract.State
+import com.pyrus.pyrusservicedesk._ref.ui_domain.screens.ticket.adapter.entries.RatingEntry
+import com.pyrus.pyrusservicedesk._ref.ui_domain.screens.ticket.adapter.entries.WelcomeMessageEntry
 import com.pyrus.pyrusservicedesk._ref.ui_domain.screens.ticket.adapter.new_entries.CommentEntryV2
 import com.pyrus.pyrusservicedesk._ref.utils.Try
 import com.pyrus.pyrusservicedesk._ref.utils.isSuccess
@@ -14,12 +16,16 @@ import com.pyrus.pyrusservicedesk._ref.whitetea.core.StoreFactory2
 import com.pyrus.pyrusservicedesk._ref.whitetea.core.adaptCast
 import com.pyrus.pyrusservicedesk._ref.whitetea.core.logic.Logic
 import com.pyrus.pyrusservicedesk._ref.whitetea.utils.plus
+import com.pyrus.pyrusservicedesk.presentation.ui.view.ContentType
+import com.pyrus.pyrusservicedesk.presentation.ui.view.Status
+import com.pyrus.pyrusservicedesk.sdk.data.Comment
 import com.pyrus.pyrusservicedesk.sdk.data.intermediate.Comments
 import com.pyrus.pyrusservicedesk.sdk.repositories.DraftRepository
 import com.pyrus.pyrusservicedesk.sdk.repositories.Repository
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.map
+import java.util.Date
 
 internal class TicketFeatureFactory(
     private val storeFactory: StoreFactory2,
@@ -38,9 +44,10 @@ internal class TicketFeatureFactory(
             inputText = draftRepository.getDraft(),
             showError = false,
             titleText = "", // TODO
+            welcomeMessage = welcomeMessage
         ),
         reducer = FeatureReducer(),
-        actor = TicketActor(welcomeMessage, repository, router).adaptCast(),
+        actor = TicketActor(repository, router).adaptCast(),
         initialEffects = listOf(
             Effect.Inner.FeedFlow,
             Effect.Inner.CommentsAutoUpdate,
@@ -71,11 +78,12 @@ private class FeatureReducer: Logic<State, Message, Effect>() {
 
             }
             is Message.Outer.OnRetryClick -> {
-                val entry = state.comments?.find {
-                    (it as? CommentEntryV2.Comment)?.id == message.id
-                } as? CommentEntryV2.Comment ?: return
+                val comment = state.comments?.comments?.find {
+                    it.commentId == message.id
+                } ?: return
 
-                if (entry.attachUrl != null) {
+                val attachment = comment.attachments?.firstOrNull()
+                if (attachment != null) {
                     // todo send attachment
                 }
                 else {
@@ -102,7 +110,6 @@ private class FeatureReducer: Logic<State, Message, Effect>() {
 }
 
 internal class TicketActor(
-    private val welcomeMessage: String,
     private val repository: Repository,
     private val router: PyrusRouter
 ): Actor<Effect.Inner, Message.Inner> {
@@ -115,12 +122,8 @@ internal class TicketActor(
                 else -> Message.Inner.UpdateCommentsFailed
             }
         }
-        Effect.Inner.FeedFlow -> flow {
-//            repository.getFeedFlow().map {
-//
-//            }
-            val list = listOf(CommentEntryV2.WelcomeMessage(welcomeMessage))
-            emit(Message.Inner.CommentsUpdated(list))
+        Effect.Inner.FeedFlow -> {
+            repository.getFeedFlow().map { Message.Inner.CommentsUpdated(it) }
         }
         Effect.Inner.CommentsAutoUpdate -> flow {
 //            // TODO
@@ -134,6 +137,7 @@ internal class TicketActor(
 
         is Effect.Inner.CopyToClipboard -> TODO()
         is Effect.Inner.SendComment -> TODO()
+        is Effect.Inner.OpenPreview -> TODO()
     }
 
 }

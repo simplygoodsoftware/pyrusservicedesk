@@ -3,18 +3,20 @@ package com.pyrus.pyrusservicedesk._ref.ui_domain.screens.ticket
 import android.net.Uri
 import com.pyrus.pyrusservicedesk._ref.ui_domain.screens.ticket.adapter.new_entries.CommentEntryV2
 import com.pyrus.pyrusservicedesk._ref.whitetea.core.Store
+import com.pyrus.pyrusservicedesk.sdk.data.intermediate.Comments
 
 internal typealias TicketFeature = Store<TicketContract.State, TicketContract.Message, TicketContract.Effect>
 
 internal interface TicketContract {
 
     data class State(
-        val comments: List<CommentEntryV2>?,
+        val comments: Comments?,
         val isLoading: Boolean,
         val sendEnabled: Boolean,
         val inputText: String,
         val titleText: String,
         val showError: Boolean,
+        val welcomeMessage: String?,
     )
 
     sealed interface Message {
@@ -42,7 +44,7 @@ internal interface TicketContract {
         }
 
         sealed interface Inner : Message {
-            data class CommentsUpdated(val comments: List<CommentEntryV2>?) : Inner
+            data class CommentsUpdated(val comments: Comments?) : Inner
 
             data object UpdateCommentsFailed : Inner
             data object UpdateCommentsCompleted : Inner

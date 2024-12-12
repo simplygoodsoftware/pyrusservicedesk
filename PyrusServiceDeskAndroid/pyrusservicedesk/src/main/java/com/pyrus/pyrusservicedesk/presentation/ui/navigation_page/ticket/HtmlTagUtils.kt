@@ -1,6 +1,7 @@
 package com.pyrus.pyrusservicedesk.presentation.ui.navigation_page.ticket
 
 import com.pyrus.pyrusservicedesk._ref.ui_domain.screens.ticket.adapter.entries.ButtonEntry
+import com.pyrus.pyrusservicedesk._ref.ui_domain.screens.ticket.adapter.new_entries.CommentEntryV2
 import com.pyrus.pyrusservicedesk.sdk.data.Comment
 import org.jsoup.Jsoup
 import org.jsoup.nodes.Element
@@ -8,13 +9,13 @@ import org.jsoup.nodes.TextNode
 
 internal object HtmlTagUtils {
 
-    fun extractButtons(comment: Comment): List<ButtonEntry> {
+    fun extractButtons(comment: Comment): List<CommentEntryV2.ButtonEntry> {
         if (comment.body == null) {
             return emptyList()
         }
 
         val doc = Jsoup.parse(comment.body)
-        val res = ArrayList<ButtonEntry>()
+        val res = ArrayList<CommentEntryV2.ButtonEntry>()
         for (child in doc.body().children()) {
             val tagName = child.tagName()
             if (tagName == "a") {
@@ -26,11 +27,11 @@ internal object HtmlTagUtils {
                 val dataType = attr.get("data-type")
 
                 if (dataType == "button") {
-                    res +=  ButtonEntry.Link(child.text(), href)
+                    res +=  CommentEntryV2.ButtonEntry.Link(child.text(), href)
                 }
             }
             else if (tagName == "button") {
-                res += ButtonEntry.Simple(child.text())
+                res += CommentEntryV2.ButtonEntry.Simple(child.text())
             }
         }
 

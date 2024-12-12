@@ -402,10 +402,10 @@ internal class CommentView @JvmOverloads constructor(
      */
     fun setFileSize(bytesSize: Float) {
         recentFileSize = bytesSize
-        val isMegabytes = recentFileSize >= com.pyrus.pyrusservicedesk._ref.utils.BYTES_IN_MEGABYTE / 10
+        val isMegabytes = recentFileSize >= BYTES_IN_MEGABYTE / 10
         val toShow = when {
-            isMegabytes -> recentFileSize / com.pyrus.pyrusservicedesk._ref.utils.BYTES_IN_MEGABYTE
-            else -> recentFileSize / com.pyrus.pyrusservicedesk._ref.utils.BYTES_IN_KILOBYTE
+            isMegabytes -> recentFileSize / BYTES_IN_MEGABYTE
+            else -> recentFileSize / BYTES_IN_KILOBYTE
         }
         val textResId = when{
             isMegabytes -> R.string.psd_file_size_mb
