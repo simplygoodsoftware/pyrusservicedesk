@@ -1,7 +1,6 @@
 package com.pyrus.pyrusservicedesk._ref.ui_domain.screens.ticket
 
 import android.net.Uri
-import com.pyrus.pyrusservicedesk._ref.ui_domain.screens.ticket.adapter.new_entries.CommentEntryV2
 import com.pyrus.pyrusservicedesk._ref.whitetea.core.Store
 import com.pyrus.pyrusservicedesk.sdk.data.intermediate.Comments
 
@@ -70,8 +69,10 @@ internal interface TicketContract {
             data object CommentsAutoUpdate : Inner
             data object Close : Inner
             data class CopyToClipboard(val text: String) : Inner
-            data class SendComment(val text: String) : Inner
+            data class SendTextComment(val text: String) : Inner
+            data class SendAttachComment(val uri: Uri) : Inner
             data class OpenPreview(val uri: Uri) : Inner
+            data class SaveDraft(val draft: String) : Inner
         }
     }
 

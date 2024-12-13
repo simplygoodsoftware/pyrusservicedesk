@@ -1,6 +1,5 @@
 package com.pyrus.pyrusservicedesk._ref.ui_domain.screens.ticket
 
-import android.util.Log
 import com.pyrus.pyrusservicedesk._ref.ui_domain.screens.ticket.TicketContract.Effect
 import com.pyrus.pyrusservicedesk._ref.ui_domain.screens.ticket.TicketContract.Message
 import com.pyrus.pyrusservicedesk._ref.ui_domain.screens.ticket.TicketContract.State
@@ -56,15 +55,20 @@ private class FeatureReducer: Logic<State, Message, Effect>() {
 
     private fun Result.handleOuter(message: Message.Outer) {
         when (message) {
-            is Message.Outer.OnAttachmentSelected -> TODO("send comment with attachment")
+            is Message.Outer.OnAttachmentSelected -> {
+                val currentState = state as? State.Content ?: return
+                TODO("send comment with attachment")
+            }
             Message.Outer.OnCloseClick -> effects { +Effect.Inner.Close }
             is Message.Outer.OnCopyClick -> effects { +Effect.Inner.CopyToClipboard(message.text) }
             is Message.Outer.OnMessageChanged -> {
                 val currentState = state as? State.Content ?: return
                 state { currentState.copy(inputText = message.text) }
+                effects { Effect.Inner.SaveDraft(message.text) }
             }
             is Message.Outer.OnPreviewClick -> effects { +Effect.Inner.OpenPreview(message.uri) }
             is Message.Outer.OnRatingClick -> {
+                val currentState = state as? State.Content ?: return
                 TODO()
             }
             is Message.Outer.OnRetryClick -> {
@@ -85,7 +89,7 @@ private class FeatureReducer: Logic<State, Message, Effect>() {
                 val currentState = state as? State.Content ?: return
                 val comment = currentState.inputText
                 if (comment.isBlank()) return
-                effects { +Effect.Inner.SendComment(comment) }
+                effects { +Effect.Inner.SendTextComment(comment) }
             }
             Message.Outer.OnShowAttachVariantsClick -> TODO("open attach variants dialog screen")
         }
@@ -154,8 +158,12 @@ internal class TicketActor(
         }
 
         is Effect.Inner.CopyToClipboard -> TODO()
-        is Effect.Inner.SendComment -> TODO()
+        is Effect.Inner.SendTextComment -> TODO()
+        is Effect.Inner.SendAttachComment -> TODO()
         is Effect.Inner.OpenPreview -> TODO()
+        is Effect.Inner.SaveDraft -> flow {
+            draftRepository.saveDraft(effect.draft)
+        }
     }
 
 }
