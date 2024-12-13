@@ -16,7 +16,12 @@ internal interface TicketContract {
         val inputText: String,
         val showError: Boolean,
         val welcomeMessage: String?,
-    )
+        val version: Int,
+    ) {
+        override fun toString(): String {
+            return "State(v=${version}, c=${comments?.comments?.size}, l=$isLoading)"
+        }
+    }
 
     sealed interface Message {
 

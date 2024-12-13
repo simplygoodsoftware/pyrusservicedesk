@@ -11,7 +11,11 @@ internal interface TicketView {
         val comments: List<CommentEntryV2>?,
         val isLoading: Boolean,
         val showNoConnectionError: Boolean,
-    )
+    ) {
+        override fun toString(): String {
+            return "Model(inputText='$inputText', sendEnabled=$sendEnabled, comments=${comments?.size}, isLoading=$isLoading, showNoConnectionError=$showNoConnectionError)"
+        }
+    }
 
     sealed interface Event {
 

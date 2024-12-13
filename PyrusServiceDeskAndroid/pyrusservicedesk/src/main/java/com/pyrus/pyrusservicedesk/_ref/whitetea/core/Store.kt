@@ -6,11 +6,11 @@ import kotlinx.coroutines.flow.StateFlow
 
 internal interface Store<State : Any, Message : Any, Effect : Any>: Cancelable {
 
+    val state: StateFlow<State>
+
+    val effects: Flow<Effect>
+
     fun init()
-
-    fun states(): StateFlow<State>
-
-    fun effects(): Flow<Effect>
 
     fun dispatch(message: Message)
 

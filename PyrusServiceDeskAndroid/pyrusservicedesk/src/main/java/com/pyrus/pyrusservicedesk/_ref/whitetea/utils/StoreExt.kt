@@ -1,13 +1,7 @@
 package com.pyrus.pyrusservicedesk._ref.whitetea.utils
 
-import kotlinx.coroutines.flow.Flow
 import com.pyrus.pyrusservicedesk._ref.whitetea.core.Store
 
-internal val <Effect : Any> Store<*, *, Effect>.effects: Flow<Effect>
-    get() = effects()
-
-internal val <State : Any> Store<State, *, *>.states: Flow<State>
-    get() = states()
 
 internal fun <State1 : Any, Message1 : Any, Effect1 : Any, State2 : Any, Message2 : Any, Effect2 : Any> Store<State1, Message1, Effect1>.adapt(
     stateMapper: (State1) -> State2,

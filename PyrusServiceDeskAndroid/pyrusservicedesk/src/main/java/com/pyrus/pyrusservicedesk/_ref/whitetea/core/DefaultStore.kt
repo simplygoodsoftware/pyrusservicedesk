@@ -1,56 +1,81 @@
 package com.pyrus.pyrusservicedesk._ref.whitetea.core
 
+import android.util.Log
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import com.pyrus.pyrusservicedesk._ref.whitetea.core.logic.L
+import kotlinx.coroutines.CoroutineExceptionHandler
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.cancel
+import kotlinx.coroutines.isActive
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
+import kotlin.coroutines.CoroutineContext
 
 
 internal open class DefaultStore<State : Any, Message : Any, Effect : Any>(
     initialState: State,
     private val initialEffects: List<Effect>,
-    private val updateLogic: L<State, Message, Effect>,
-    private val executor: Executor<State, Message, Effect>,
-    private val onCancelCallback: ((state: State) -> Unit)?
+    private val reducer: L<State, Message, Effect>,
+    private val actors: List<Actor<Effect, Message>>,
+    private val runtimeContext: CoroutineContext,
+    private val actorContext: CoroutineContext,
+    private val onCancelCallback: ((state: State) -> Unit)?,
+    exceptionHandler: CoroutineExceptionHandler,
 ): Store<State, Message, Effect> {
 
-    private val states = MutableStateFlow(initialState)
-    private val effects = MutableSharedFlow<Effect>()
+    private val mutableState = MutableStateFlow(initialState)
+    override val state: StateFlow<State> = mutableState
+
+    private val mutableEffects = MutableSharedFlow<Effect>()
+    override val effects: Flow<Effect> = mutableEffects
+
+    private val coroutinesScope = CoroutineScope(runtimeContext + SupervisorJob() + exceptionHandler)
+
+    private val stateUpdateMutex = Mutex()
 
     override fun init() {
-        executor.init(object : Executor.Callbacks<State, Message, Effect> {
-
-            override fun onCreateUpdate(message: Message): Update<State, Effect> {
-                return updateLogic.update(message, states.value)
-            }
-
-            override suspend fun onEffect(effect: Effect) {
-                effects.emit(effect)
-            }
-
-            override fun onState(state: State) {
-                states.value = state
-            }
-
-        })
-        initialEffects.forEach(executor::handleEffect)
-    }
-
-    override fun states(): StateFlow<State> {
-        return states
-    }
-
-    override fun effects(): Flow<Effect> {
-        return effects
+        initialEffects.forEach(::handleEff)
     }
 
     override fun dispatch(message: Message) {
-        executor.executeMessage(message)
+        if (!coroutinesScope.isActive) {
+            return
+        }
+        coroutinesScope.launch(runtimeContext) {
+            val reducerUpdate = stateUpdateMutex.withLock {
+                if (isActive) {
+                    val oldState = state.value
+                    Log.d("SDS3", "1 $oldState")
+                    val update = reducer.update(message, oldState)
+                    Log.d("SDS3", "2 ${update.state}")
+                    mutableState.value = update.state
+                    update
+                } else null
+            }
+            reducerUpdate?.effects?.forEach { eff ->
+                launch {
+                    mutableEffects.emit(eff)
+                    handleEff(eff)
+                }
+            }
+        }
     }
 
     override fun cancel() {
-        onCancelCallback?.invoke(states.value)
-        executor.cancel()
+        onCancelCallback?.invoke(mutableState.value)
+        coroutinesScope.cancel()
+    }
+
+    private fun handleEff(effect: Effect) {
+        actors.forEach { actor ->
+            coroutinesScope.launch(actorContext) {
+                actor.handleEffect(effect).collect { dispatch(it) }
+            }
+        }
     }
 }

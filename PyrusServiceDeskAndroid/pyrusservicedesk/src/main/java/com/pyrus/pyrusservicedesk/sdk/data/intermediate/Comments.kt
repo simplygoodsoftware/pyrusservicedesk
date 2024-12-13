@@ -17,4 +17,8 @@ internal data class Comments(
 
     @SerializedName("show_rating_text")
     val showRatingText: String = ""
-)
+) {
+    override fun toString(): String {
+        return "Comments(comments=${comments.size}, showRating=$showRating, showRatingText='$showRatingText')"
+    }
+}

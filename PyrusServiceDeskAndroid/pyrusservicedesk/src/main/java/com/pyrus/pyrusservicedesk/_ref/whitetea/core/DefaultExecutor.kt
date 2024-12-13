@@ -9,6 +9,9 @@ import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 import com.pyrus.pyrusservicedesk._ref.whitetea.core.Executor.Callbacks
+import kotlinx.coroutines.async
+import kotlinx.coroutines.flow.MutableSharedFlow
+import kotlinx.coroutines.runBlocking
 import java.util.concurrent.atomic.AtomicReference
 import kotlin.coroutines.CoroutineContext
 
@@ -66,7 +69,6 @@ internal open class DefaultExecutor<State : Any, Message : Any, Effect : Any>(
                 callbacks.get().onEffect(effect)
             }
         }
-
         effects.forEach(::handleEffect)
     }
 

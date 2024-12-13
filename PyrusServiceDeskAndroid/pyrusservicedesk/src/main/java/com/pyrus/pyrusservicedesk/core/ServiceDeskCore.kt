@@ -27,22 +27,17 @@ import com.pyrus.pyrusservicedesk._ref.utils.ISO_DATE_PATTERN
 import com.pyrus.pyrusservicedesk._ref.utils.PREFERENCE_KEY
 import com.pyrus.pyrusservicedesk._ref.utils.RequestUtils.Companion.getBaseUrl
 import com.pyrus.pyrusservicedesk._ref.utils.call_adapter.TryCallAdapterFactory
-import com.pyrus.pyrusservicedesk._ref.whitetea.core.DefaultStoreFactory2
-import com.pyrus.pyrusservicedesk._ref.whitetea.core.StoreFactory2
+import com.pyrus.pyrusservicedesk._ref.whitetea.core.DefaultStoreFactory
+import com.pyrus.pyrusservicedesk._ref.whitetea.core.StoreFactory
 import com.pyrus.pyrusservicedesk.sdk.repositories.DraftRepository
 import com.squareup.picasso.OkHttp3Downloader
 import com.squareup.picasso.Picasso
 import kotlinx.coroutines.CoroutineScope
 import com.pyrus.pyrusservicedesk._ref.utils.navigation.PyrusRouterImpl
-import com.pyrus.pyrusservicedesk._ref.whitetea.core.Actor
-import com.pyrus.pyrusservicedesk._ref.whitetea.core.DefaultExecutor
-import com.pyrus.pyrusservicedesk._ref.whitetea.core.Executor
-import com.pyrus.pyrusservicedesk._ref.whitetea.core.ExecutorFactory
 import okhttp3.OkHttpClient
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 import java.util.concurrent.TimeUnit
-import java.util.logging.Logger
 
 internal class ServiceDeskCore(
     internal val diInjector: DiInjector,
@@ -140,16 +135,7 @@ internal class DiInjector(
 
     private val preferencesManager = PreferencesManager(preferences)
 
-    private val executorFactory = object : ExecutorFactory {
-        override fun <State : Any, Message : Any, Effect : Any> create(
-            name: String,
-            actors: List<Actor<Effect, Message>>,
-        ): Executor<State, Message, Effect> {
-            return DefaultExecutor(actors)
-        }
-
-    }
-    private val storeFactory: StoreFactory2 = DefaultStoreFactory2(executorFactory)
+    private val storeFactory: StoreFactory = DefaultStoreFactory()
 
     private val draftRepository = DraftRepository(preferences)
 

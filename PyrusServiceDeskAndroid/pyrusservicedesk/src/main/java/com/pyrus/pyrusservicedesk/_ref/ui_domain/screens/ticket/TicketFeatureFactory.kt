@@ -1,34 +1,26 @@
 package com.pyrus.pyrusservicedesk._ref.ui_domain.screens.ticket
 
+import android.util.Log
 import com.pyrus.pyrusservicedesk._ref.ui_domain.screens.ticket.TicketContract.Effect
 import com.pyrus.pyrusservicedesk._ref.ui_domain.screens.ticket.TicketContract.Message
 import com.pyrus.pyrusservicedesk._ref.ui_domain.screens.ticket.TicketContract.State
-import com.pyrus.pyrusservicedesk._ref.ui_domain.screens.ticket.adapter.entries.RatingEntry
-import com.pyrus.pyrusservicedesk._ref.ui_domain.screens.ticket.adapter.entries.WelcomeMessageEntry
-import com.pyrus.pyrusservicedesk._ref.ui_domain.screens.ticket.adapter.new_entries.CommentEntryV2
 import com.pyrus.pyrusservicedesk._ref.utils.Try
 import com.pyrus.pyrusservicedesk._ref.utils.isSuccess
 import com.pyrus.pyrusservicedesk._ref.utils.navigation.PyrusRouter
-import com.pyrus.pyrusservicedesk._ref.utils.navigation.PyrusRouterImpl
 import com.pyrus.pyrusservicedesk._ref.utils.singleFlow
 import com.pyrus.pyrusservicedesk._ref.whitetea.core.Actor
-import com.pyrus.pyrusservicedesk._ref.whitetea.core.StoreFactory2
+import com.pyrus.pyrusservicedesk._ref.whitetea.core.StoreFactory
 import com.pyrus.pyrusservicedesk._ref.whitetea.core.adaptCast
 import com.pyrus.pyrusservicedesk._ref.whitetea.core.logic.Logic
-import com.pyrus.pyrusservicedesk._ref.whitetea.utils.plus
-import com.pyrus.pyrusservicedesk.presentation.ui.view.ContentType
-import com.pyrus.pyrusservicedesk.presentation.ui.view.Status
-import com.pyrus.pyrusservicedesk.sdk.data.Comment
 import com.pyrus.pyrusservicedesk.sdk.data.intermediate.Comments
 import com.pyrus.pyrusservicedesk.sdk.repositories.DraftRepository
 import com.pyrus.pyrusservicedesk.sdk.repositories.Repository
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.map
-import java.util.Date
 
 internal class TicketFeatureFactory(
-    private val storeFactory: StoreFactory2,
+    private val storeFactory: StoreFactory,
     private val repository: Repository,
     private val draftRepository: DraftRepository,
     private val welcomeMessage: String,
@@ -43,7 +35,8 @@ internal class TicketFeatureFactory(
             sendEnabled = false,
             inputText = draftRepository.getDraft(),
             showError = false,
-            welcomeMessage = welcomeMessage
+            welcomeMessage = welcomeMessage,
+            version = 0
         ),
         reducer = FeatureReducer(),
         actor = TicketActor(repository, router).adaptCast(),
@@ -63,7 +56,7 @@ private class FeatureReducer: Logic<State, Message, Effect>() {
             is Message.Outer -> handleOuter(message)
             is Message.Inner -> handleInner(message)
         }
-        state { state.copy(sendEnabled = state.inputText.isNotBlank()) }
+        state { state.copy(sendEnabled = state.inputText.isNotBlank(), version = state.version + 1) }
     }
 
     private fun Result.handleOuter(message: Message.Outer) {
@@ -100,9 +93,18 @@ private class FeatureReducer: Logic<State, Message, Effect>() {
 
     private fun Result.handleInner(message: Message.Inner) {
         when (message) {
-            Message.Inner.UpdateCommentsFailed -> state { state.copy(isLoading = false) }
-            Message.Inner.UpdateCommentsCompleted -> state { state.copy(isLoading = false) }
-            is Message.Inner.CommentsUpdated -> state { state.copy(comments = message.comments) }
+            Message.Inner.UpdateCommentsFailed -> state {
+                Log.d("SDS2", "1 state: $state")
+                state.copy(isLoading = false)
+            }
+            Message.Inner.UpdateCommentsCompleted -> state {
+                Log.d("SDS2", "2 state: $state")
+                state.copy(isLoading = false)
+            }
+            is Message.Inner.CommentsUpdated -> state {
+                Log.d("SDS2", "3 state: $state")
+                state.copy(comments = message.comments)
+            }
         }
     }
 

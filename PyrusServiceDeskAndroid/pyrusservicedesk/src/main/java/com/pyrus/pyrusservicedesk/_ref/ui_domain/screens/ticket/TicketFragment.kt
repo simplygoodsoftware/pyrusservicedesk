@@ -94,7 +94,7 @@ internal class TicketFragment: TeaFragment<Model, TicketView.Event, TicketContra
     private fun bindFeature() {
         val feature = getStore { injector().ticketFeatureFactory("welcome").create() }
         bind {
-            feature.states().map(TicketMapper::map) bindTo this@TicketFragment
+            feature.state.map(TicketMapper::map) bindTo this@TicketFragment
         }
         bind(BinderLifecycleMode.START_STOP) {
             this@TicketFragment.messages.map(TicketMapper::map) bindTo feature
