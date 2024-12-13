@@ -124,9 +124,7 @@ class SyncManager {
                 
                 DispatchQueue.main.async {
                     if let chats {
-                        let createMessages = PSDMessagesStorage.getNewCreateTicketMessages()
-                        let localChats = PSDGetChats.getSortedChatForMessages(createMessages)
-                        PyrusServiceDesk.chats = localChats + chats
+                        PyrusServiceDesk.chats = chats
                         NotificationCenter.default.post(name: PyrusServiceDesk.chatsUpdateNotification, object: nil, userInfo: userInfo)
                     }
                     

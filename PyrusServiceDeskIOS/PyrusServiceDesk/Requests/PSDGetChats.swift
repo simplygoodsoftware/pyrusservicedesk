@@ -173,7 +173,7 @@ struct PSDGetChats {
         return sortByLastMessage(chats)
     }
     
-    private static func sortByLastMessage(_ chats: [PSDChat]) -> [PSDChat] {
+    static func sortByLastMessage(_ chats: [PSDChat]) -> [PSDChat] {
         return chats.sorted(by: {
             if $0.isActive, !$1.isActive {
                 return true
@@ -192,9 +192,10 @@ struct PSDGetChats {
             chat.subject = $0.text
             chat.lastComment = $0
             chat.lastComment?.isOutgoing = true
+            chat.userId = $0.userId
             chats.append(chat)
         }
-        return sortByLastMessage(chats)
+        return chats
 
     }
 }

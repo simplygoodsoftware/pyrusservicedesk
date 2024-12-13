@@ -105,8 +105,12 @@ struct PSDMessagesStorage {
         return messages.map({ MessageToPass(message: $0, commandId: $0.commandId ?? "") })
     }
     
-    static func getNewCreateTicketMessages() -> [PSDMessage] {
-        return PyrusServiceDesk.storeMessages?.filter({ $0.requestNewTicket }) ?? [PSDMessage]()
+    static func getNewCreateTicketMessages(_ userId: String? = nil) -> [PSDMessage] {
+        if let userId = userId {
+            return PyrusServiceDesk.storeMessages?.filter({ $0.requestNewTicket && $0.userId == userId }) ?? [PSDMessage]()
+        } else {
+            return PyrusServiceDesk.storeMessages?.filter({ $0.requestNewTicket }) ?? [PSDMessage]()
+        }
     }
     
     static func loadMessages(completion: @escaping ([PSDMessage]) -> Void) {

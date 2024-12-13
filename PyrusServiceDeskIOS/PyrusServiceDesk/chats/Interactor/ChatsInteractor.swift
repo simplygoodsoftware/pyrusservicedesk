@@ -103,15 +103,9 @@ extension ChatsInteractor: ChatsInteractorProtocol {
         case .viewWillAppear:
             PyrusServiceDesk.syncManager.syncGetTickets()
             PyrusServiceDesk.currentUserId = nil
-            let createMessages = PSDMessagesStorage.getNewCreateTicketMessages()
-            var localChats = PSDGetChats.getSortedChatForMessages(createMessages)
-            if localChats.count > 0 {
-                let newChats = chats.filter { chat in
-                    chat.chatId ?? 0 > 0
-                }
-                localChats += newChats
-                PyrusServiceDesk.chats = localChats
-                chats = localChats
+            let filterChats = createChats()
+            if filterChats != chats {
+                chats = filterChats
             }
             if chats.count > 0 {
                 presenter.doWork(.updateChats(chats: prepareChats()))
@@ -338,19 +332,35 @@ private extension ChatsInteractor {
             isNewUser = false
             presenter.doWork(.endRefresh)
             
+//            updateLocalChats()
+
             let filterChats = createChats()
             if chats != filterChats || filterChats.count == 0 || isClear {
                 chats = filterChats
                 isClear = false
             }
-            
+
+        }
+    }
+    
+    private func updateLocalChats() {
+        let filterChats = createChats()
+        if chats != filterChats || filterChats.count == 0 || isClear {
+            chats = filterChats
+            isClear = false
         }
     }
     
     private func createChats() -> [PSDChat] {
         let clientId = PyrusServiceDesk.currentClientId ?? PyrusServiceDesk.clientId
         var filterChats = [PSDChat]()
-        for chat in PyrusServiceDesk.chats {
+        
+        let createMessages = PSDMessagesStorage.getNewCreateTicketMessages(currentUserId)
+        var localChats = PSDGetChats.getSortedChatForMessages(createMessages)
+        var allChats = PyrusServiceDesk.chats
+        allChats = localChats + allChats
+        
+        for chat in allChats {
             if currentUserId != nil {
                 if chat.userId == currentUserId {
                     filterChats.append(chat)
@@ -365,6 +375,18 @@ private extension ChatsInteractor {
                 }
             }
         }
+        for chat in filterChats {
+            guard let lastMessage = PSDMessagesStorage.getMessages(for: chat.chatId).last else {
+                continue
+            }
+            if let date = chat.date {
+                chat.date = lastMessage.date > date ? lastMessage.date : date
+            } else {
+                chat.date = lastMessage.date
+            }
+            chat.isActive = true
+        }
+        filterChats = PSDGetChats.sortByLastMessage(filterChats)
         return filterChats
     }
     
