@@ -1,7 +1,9 @@
 package com.pyrus.pyrusservicedesk._ref.ui_domain.screens.ticket
 
 import android.net.Uri
+import com.pyrus.pyrusservicedesk._ref.ui_domain.screens.ticket.TicketContract.Effect.Outer
 import com.pyrus.pyrusservicedesk._ref.ui_domain.screens.ticket.adapter.new_entries.CommentEntryV2
+import com.pyrus.pyrusservicedesk._ref.utils.TextProvider
 
 internal interface TicketView {
 
@@ -37,5 +39,10 @@ internal interface TicketView {
 
         data class OnAttachmentSelected(val fileUri: Uri?) : Event
 
+    }
+
+    sealed interface Effect {
+        data class CopyToClipboard(val text: String) : Effect
+        data class MakeToast(val text: TextProvider) : Effect
     }
 }

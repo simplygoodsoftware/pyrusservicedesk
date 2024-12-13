@@ -1,5 +1,6 @@
 package com.pyrus.pyrusservicedesk._ref.ui_domain.screens.ticket
 
+import com.pyrus.pyrusservicedesk.R
 import com.pyrus.pyrusservicedesk._ref.ui_domain.screens.ticket.TicketContract.Effect
 import com.pyrus.pyrusservicedesk._ref.ui_domain.screens.ticket.TicketContract.Message
 import com.pyrus.pyrusservicedesk._ref.ui_domain.screens.ticket.TicketContract.State
@@ -7,10 +8,12 @@ import com.pyrus.pyrusservicedesk._ref.utils.Try
 import com.pyrus.pyrusservicedesk._ref.utils.isSuccess
 import com.pyrus.pyrusservicedesk._ref.utils.navigation.PyrusRouter
 import com.pyrus.pyrusservicedesk._ref.utils.singleFlow
+import com.pyrus.pyrusservicedesk._ref.utils.textRes
 import com.pyrus.pyrusservicedesk._ref.whitetea.core.Actor
 import com.pyrus.pyrusservicedesk._ref.whitetea.core.StoreFactory
 import com.pyrus.pyrusservicedesk._ref.whitetea.core.adaptCast
 import com.pyrus.pyrusservicedesk._ref.whitetea.core.logic.Logic
+import com.pyrus.pyrusservicedesk._ref.whitetea.utils.adapt
 import com.pyrus.pyrusservicedesk.sdk.data.intermediate.Comments
 import com.pyrus.pyrusservicedesk.sdk.repositories.DraftRepository
 import com.pyrus.pyrusservicedesk.sdk.repositories.Repository
@@ -36,7 +39,7 @@ internal class TicketFeatureFactory(
             Effect.Inner.CommentsAutoUpdate,
             Effect.Inner.UpdateComments,
         ),
-    )
+    ).adapt { it as? Effect.Outer }
 
 }
 
@@ -60,11 +63,14 @@ private class FeatureReducer: Logic<State, Message, Effect>() {
                 TODO("send comment with attachment")
             }
             Message.Outer.OnCloseClick -> effects { +Effect.Inner.Close }
-            is Message.Outer.OnCopyClick -> effects { +Effect.Inner.CopyToClipboard(message.text) }
+            is Message.Outer.OnCopyClick -> effects {
+                +Effect.Outer.CopyToClipboard(message.text)
+                +Effect.Outer.MakeToast(R.string.psd_copied_to_clipboard.textRes())
+            }
             is Message.Outer.OnMessageChanged -> {
                 val currentState = state as? State.Content ?: return
                 state { currentState.copy(inputText = message.text) }
-                effects { Effect.Inner.SaveDraft(message.text) }
+                effects { +Effect.Inner.SaveDraft(message.text) }
             }
             is Message.Outer.OnPreviewClick -> effects { +Effect.Inner.OpenPreview(message.uri) }
             is Message.Outer.OnRatingClick -> {
@@ -152,12 +158,9 @@ internal class TicketActor(
 //            repository.getFeed(keepUnread = false)
 
         }
-
         Effect.Inner.Close -> flow {
             router.exit()
         }
-
-        is Effect.Inner.CopyToClipboard -> TODO()
         is Effect.Inner.SendTextComment -> TODO()
         is Effect.Inner.SendAttachComment -> TODO()
         is Effect.Inner.OpenPreview -> TODO()

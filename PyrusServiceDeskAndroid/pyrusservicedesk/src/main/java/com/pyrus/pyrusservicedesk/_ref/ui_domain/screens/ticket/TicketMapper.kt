@@ -1,6 +1,7 @@
 package com.pyrus.pyrusservicedesk._ref.ui_domain.screens.ticket
 
 import com.pyrus.pyrusservicedesk.R
+import com.pyrus.pyrusservicedesk._ref.ui_domain.screens.ticket.TicketContract.Effect
 import com.pyrus.pyrusservicedesk._ref.ui_domain.screens.ticket.TicketContract.Message
 import com.pyrus.pyrusservicedesk._ref.ui_domain.screens.ticket.TicketContract.State
 import com.pyrus.pyrusservicedesk._ref.ui_domain.screens.ticket.TicketView.Event
@@ -54,6 +55,11 @@ internal object TicketMapper {
         is Event.OnRetryClick -> Message.Outer.OnRetryClick(event.id)
         Event.OnSendClick -> Message.Outer.OnSendClick
         Event.OnShowAttachVariantsClick -> Message.Outer.OnShowAttachVariantsClick
+    }
+
+    fun map(effect: Effect.Outer) = when(effect) {
+        is Effect.Outer.CopyToClipboard -> TicketView.Effect.CopyToClipboard(effect.text)
+        is Effect.Outer.MakeToast -> TicketView.Effect.MakeToast(effect.text)
     }
 
     private fun mapComments(

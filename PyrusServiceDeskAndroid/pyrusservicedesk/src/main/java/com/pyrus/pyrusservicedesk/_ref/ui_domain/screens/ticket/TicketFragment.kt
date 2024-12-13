@@ -1,5 +1,8 @@
 package com.pyrus.pyrusservicedesk._ref.ui_domain.screens.ticket
 
+import android.content.ClipData
+import android.content.ClipboardManager
+import android.content.Context
 import android.content.res.ColorStateList
 import android.os.Build
 import android.os.Bundle
@@ -11,6 +14,8 @@ import android.view.MenuItem
 import android.view.View
 import android.view.ViewGroup
 import android.view.WindowManager
+import android.widget.Toast
+import androidx.core.content.ContextCompat.getSystemService
 import androidx.core.view.isVisible
 import com.pyrus.pyrusservicedesk.PyrusServiceDesk.Companion.injector
 import com.pyrus.pyrusservicedesk.R
@@ -21,6 +26,7 @@ import com.pyrus.pyrusservicedesk._ref.utils.getColorOnBackground
 import com.pyrus.pyrusservicedesk._ref.utils.getSecondaryColorOnBackground
 import com.pyrus.pyrusservicedesk._ref.utils.setCursorColor
 import com.pyrus.pyrusservicedesk._ref.utils.showKeyboardOn
+import com.pyrus.pyrusservicedesk._ref.utils.text
 import com.pyrus.pyrusservicedesk._ref.whitetea.android.TeaFragment
 import com.pyrus.pyrusservicedesk._ref.whitetea.androidutils.bind
 import com.pyrus.pyrusservicedesk._ref.whitetea.androidutils.getStore
@@ -29,9 +35,11 @@ import com.pyrus.pyrusservicedesk._ref.whitetea.core.ViewRenderer
 import com.pyrus.pyrusservicedesk._ref.whitetea.utils.diff
 import com.pyrus.pyrusservicedesk.databinding.PsdFragmentTicketBinding
 import com.pyrus.pyrusservicedesk.presentation.ui.view.recyclerview.item_decorators.SpaceItemDecoration
+import kotlinx.coroutines.flow.filterIsInstance
+import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.map
 
-internal class TicketFragment: TeaFragment<Model, TicketView.Event, TicketContract.Effect>() {
+internal class TicketFragment: TeaFragment<Model, TicketView.Event, TicketView.Effect>() {
 
     private lateinit var binding: PsdFragmentTicketBinding
 
@@ -60,6 +68,19 @@ internal class TicketFragment: TeaFragment<Model, TicketView.Event, TicketContra
         diff(Model::isLoading) { isLoading ->
             binding.ticketContent.isVisible = !isLoading
             binding.progressBar.isVisible = isLoading
+        }
+    }
+
+    override fun handleEffect(effect: TicketView.Effect) {
+        when(effect) {
+            is TicketView.Effect.CopyToClipboard -> {
+                val clipboard = getSystemService(requireContext(), ClipboardManager::class.java) as ClipboardManager
+                clipboard.setPrimaryClip(ClipData.newPlainText("Copied text", effect.text))
+            }
+
+            is TicketView.Effect.MakeToast -> {
+                Toast.makeText(requireContext(), effect.text.text(requireContext()), Toast.LENGTH_SHORT).show()
+            }
         }
     }
 
@@ -93,12 +114,14 @@ internal class TicketFragment: TeaFragment<Model, TicketView.Event, TicketContra
 
     private fun bindFeature() {
         val feature = getStore { injector().ticketFeatureFactory("welcome").create() }
-        bind {
-            feature.state.map(TicketMapper::map) bindTo this@TicketFragment
-        }
-        bind(BinderLifecycleMode.START_STOP) {
+        bind(BinderLifecycleMode.CREATE_DESTROY) {
             this@TicketFragment.messages.map(TicketMapper::map) bindTo feature
         }
+        bind {
+            feature.state.map(TicketMapper::map) bindTo this@TicketFragment
+            feature.effects.map(TicketMapper::map) bindTo this@TicketFragment
+        }
+
     }
 
     private fun initListeners() {

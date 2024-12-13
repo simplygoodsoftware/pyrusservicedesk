@@ -1,10 +1,11 @@
 package com.pyrus.pyrusservicedesk._ref.ui_domain.screens.ticket
 
 import android.net.Uri
+import com.pyrus.pyrusservicedesk._ref.utils.TextProvider
 import com.pyrus.pyrusservicedesk._ref.whitetea.core.Store
 import com.pyrus.pyrusservicedesk.sdk.data.intermediate.Comments
 
-internal typealias TicketFeature = Store<TicketContract.State, TicketContract.Message, TicketContract.Effect>
+internal typealias TicketFeature = Store<TicketContract.State, TicketContract.Message, TicketContract.Effect.Outer>
 
 internal interface TicketContract {
 
@@ -61,14 +62,16 @@ internal interface TicketContract {
 
     sealed interface Effect {
 
-        sealed interface Outer : Effect
+        sealed interface Outer : Effect {
+            data class CopyToClipboard(val text: String) : Outer
+            data class MakeToast(val text: TextProvider) : Outer
+        }
 
         sealed interface Inner : Effect {
             data object UpdateComments : Inner
             data object FeedFlow : Inner
             data object CommentsAutoUpdate : Inner
             data object Close : Inner
-            data class CopyToClipboard(val text: String) : Inner
             data class SendTextComment(val text: String) : Inner
             data class SendAttachComment(val uri: Uri) : Inner
             data class OpenPreview(val uri: Uri) : Inner
