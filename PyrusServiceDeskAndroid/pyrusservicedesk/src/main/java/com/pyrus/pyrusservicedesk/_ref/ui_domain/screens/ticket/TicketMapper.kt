@@ -20,13 +20,29 @@ internal object TicketMapper {
     private const val WELCOME_MESSAGE_ID = -2L
     private const val RATING_TEXT_ID = -3L
 
-    fun map(state: State) = Model(
-        inputText = state.inputText,
-        sendEnabled = state.sendEnabled,
-        comments = state.comments?.let { mapComments(it, state.welcomeMessage) },
-        isLoading = state.isLoading,
-        showNoConnectionError =  state.showError,
-    )
+    fun map(state: State): Model = when(state) {
+        is State.Content -> Model(
+            inputText = state.inputText,
+            sendEnabled = state.sendEnabled,
+            comments = state.comments?.let { mapComments(it, state.welcomeMessage) },
+            isLoading = false,
+            showNoConnectionError = false,
+        )
+        State.Loading -> Model(
+            inputText = "",
+            sendEnabled = false,
+            comments = null,
+            isLoading = true,
+            showNoConnectionError = false,
+        )
+        State.Error -> Model(
+            inputText = "",
+            sendEnabled = false,
+            comments = null,
+            isLoading = false,
+            showNoConnectionError = true,
+        )
+    }
 
     fun map(event: Event): Message.Outer = when(event) {
         is Event.OnAttachmentSelected -> Message.Outer.OnAttachmentSelected(event.fileUri)

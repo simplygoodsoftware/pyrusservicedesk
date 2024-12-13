@@ -7,15 +7,13 @@ import com.pyrus.pyrusservicedesk.sdk.web.UploadFileHooks
 import com.pyrus.pyrusservicedesk.sdk.web.retrofit.RemoteStore
 import com.pyrus.pyrusservicedesk._ref.utils.Try
 import com.pyrus.pyrusservicedesk._ref.utils.isSuccess
+import com.pyrus.pyrusservicedesk._ref.utils.map
 import com.pyrus.pyrusservicedesk.sdk.data.intermediate.Comments
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.merge
 
-/**
- * Created by smokedealer on 26.01.2024.
- */
 
 internal class Repository(
     private val localStore: LocalStore,
@@ -24,24 +22,23 @@ internal class Repository(
 
     private val remoteFeedStateFlow: MutableStateFlow<Comments?> = MutableStateFlow(null)
 
-    fun getFeedFlow() = combine(localStore.commentsFlow(), remoteFeedStateFlow) { local, remote ->
+    fun getFeedFlow(): Flow<Comments?> = combine(localStore.commentsFlow(), remoteFeedStateFlow) { local, remote ->
         when (remote) {
             null -> Comments(local)
-            else -> {
-                val comments = ArrayList<Comment>(local)
-                comments.addAll(remote.comments)
-                comments.sortBy { it.creationDate.time }
-                remote.copy(comments = comments)
-            }
+            else -> mergeComments(local, remote)
         }
     }
 
     /**
      * Provides tickets in single feed representation.
      */
-    suspend fun getFeed(keepUnread: Boolean): Try<Comments> {
+    suspend fun getFeed(keepUnread: Boolean, includePendingComments: Boolean = false): Try<Comments> {
         val feedTry = remoteStore.getFeed(keepUnread)
         if (feedTry.isSuccess()) remoteFeedStateFlow.value = feedTry.value
+
+        if (includePendingComments) {
+            return feedTry.map { mergeComments(localStore.getPendingFeedComments(), it) }
+        }
         return feedTry
     }
 
@@ -83,4 +80,10 @@ internal class Repository(
     }
 
 
+    private fun mergeComments(local: List<Comment>, remote: Comments): Comments {
+        val comments = ArrayList<Comment>(local)
+        comments.addAll(remote.comments)
+        comments.sortBy { it.creationDate.time }
+        return remote.copy(comments = comments)
+    }
 }

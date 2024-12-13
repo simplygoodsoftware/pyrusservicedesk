@@ -29,17 +29,9 @@ internal class TicketFeatureFactory(
 
     fun create(): TicketFeature = storeFactory.create(
         name = "TicketFeature",
-        initialState = State(
-            comments = null,
-            isLoading = true,
-            sendEnabled = false,
-            inputText = draftRepository.getDraft(),
-            showError = false,
-            welcomeMessage = welcomeMessage,
-            version = 0
-        ),
+        initialState = State.Loading,
         reducer = FeatureReducer(),
-        actor = TicketActor(repository, router).adaptCast(),
+        actor = TicketActor(repository, router, welcomeMessage, draftRepository).adaptCast(),
         initialEffects = listOf(
             Effect.Inner.FeedFlow,
             Effect.Inner.CommentsAutoUpdate,
@@ -56,7 +48,10 @@ private class FeatureReducer: Logic<State, Message, Effect>() {
             is Message.Outer -> handleOuter(message)
             is Message.Inner -> handleInner(message)
         }
-        state { state.copy(sendEnabled = state.inputText.isNotBlank(), version = state.version + 1) }
+        val currentState = state
+        if (currentState is State.Content) {
+            state { currentState.copy(sendEnabled = currentState.inputText.isNotBlank()) }
+        }
     }
 
     private fun Result.handleOuter(message: Message.Outer) {
@@ -64,13 +59,17 @@ private class FeatureReducer: Logic<State, Message, Effect>() {
             is Message.Outer.OnAttachmentSelected -> TODO("send comment with attachment")
             Message.Outer.OnCloseClick -> effects { +Effect.Inner.Close }
             is Message.Outer.OnCopyClick -> effects { +Effect.Inner.CopyToClipboard(message.text) }
-            is Message.Outer.OnMessageChanged -> state { state.copy(inputText = message.text) }
+            is Message.Outer.OnMessageChanged -> {
+                val currentState = state as? State.Content ?: return
+                state { currentState.copy(inputText = message.text) }
+            }
             is Message.Outer.OnPreviewClick -> effects { +Effect.Inner.OpenPreview(message.uri) }
             is Message.Outer.OnRatingClick -> {
-
+                TODO()
             }
             is Message.Outer.OnRetryClick -> {
-                val comment = state.comments?.comments?.find {
+                val currentState = state as? State.Content ?: return
+                val comment = currentState.comments?.comments?.find {
                     it.commentId == message.id
                 } ?: return
 
@@ -83,7 +82,8 @@ private class FeatureReducer: Logic<State, Message, Effect>() {
                 }
             }
             Message.Outer.OnSendClick -> {
-                val comment = state.inputText
+                val currentState = state as? State.Content ?: return
+                val comment = currentState.inputText
                 if (comment.isBlank()) return
                 effects { +Effect.Inner.SendComment(comment) }
             }
@@ -93,17 +93,25 @@ private class FeatureReducer: Logic<State, Message, Effect>() {
 
     private fun Result.handleInner(message: Message.Inner) {
         when (message) {
-            Message.Inner.UpdateCommentsFailed -> state {
-                Log.d("SDS2", "1 state: $state")
-                state.copy(isLoading = false)
+            Message.Inner.UpdateCommentsFailed -> {
+                if (state !is State.Loading) return
+                state { State.Error }
             }
-            Message.Inner.UpdateCommentsCompleted -> state {
-                Log.d("SDS2", "2 state: $state")
-                state.copy(isLoading = false)
+            is Message.Inner.UpdateCommentsCompleted -> {
+                when(val currentState = state) {
+                    is State.Content -> state { currentState.copy(comments = message.comments) }
+                    State.Error,
+                    State.Loading -> state { State.Content(
+                        comments = message.comments,
+                        sendEnabled = true,
+                        inputText = message.draft,
+                        welcomeMessage = message.welcomeMessage,
+                    ) }
+                }
             }
-            is Message.Inner.CommentsUpdated -> state {
-                Log.d("SDS2", "3 state: $state")
-                state.copy(comments = message.comments)
+            is Message.Inner.CommentsUpdated -> {
+                val currentState = state as? State.Content ?: return
+                state { currentState.copy(comments = message.comments) }
             }
         }
     }
@@ -112,14 +120,23 @@ private class FeatureReducer: Logic<State, Message, Effect>() {
 
 internal class TicketActor(
     private val repository: Repository,
-    private val router: PyrusRouter
+    private val router: PyrusRouter,
+    private val welcomeMessage: String?,
+    private val draftRepository: DraftRepository
 ): Actor<Effect.Inner, Message.Inner> {
 
     override fun handleEffect(effect: Effect.Inner): Flow<Message.Inner> = when(effect) {
         Effect.Inner.UpdateComments -> singleFlow {
-            val commentsTry: Try<Comments> = repository.getFeed(keepUnread = false)
+            val commentsTry: Try<Comments> = repository.getFeed(
+                keepUnread = false,
+                includePendingComments = true
+            )
             when {
-                commentsTry.isSuccess() -> Message.Inner.UpdateCommentsCompleted
+                commentsTry.isSuccess() -> Message.Inner.UpdateCommentsCompleted(
+                    comments = commentsTry.value,
+                    draft = draftRepository.getDraft(),
+                    welcomeMessage = welcomeMessage,
+                )
                 else -> Message.Inner.UpdateCommentsFailed
             }
         }

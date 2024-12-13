@@ -9,17 +9,18 @@ internal typealias TicketFeature = Store<TicketContract.State, TicketContract.Me
 
 internal interface TicketContract {
 
-    data class State(
-        val comments: Comments?,
-        val isLoading: Boolean,
-        val sendEnabled: Boolean,
-        val inputText: String,
-        val showError: Boolean,
-        val welcomeMessage: String?,
-        val version: Int,
-    ) {
-        override fun toString(): String {
-            return "State(v=${version}, c=${comments?.comments?.size}, l=$isLoading)"
+    sealed interface State {
+        data object Loading : State
+        data object Error : State
+        data class Content(
+            val comments: Comments?,
+            val sendEnabled: Boolean,
+            val inputText: String,
+            val welcomeMessage: String?,
+        ) : State {
+            override fun toString(): String {
+                return "State(c=${comments?.comments?.size})"
+            }
         }
     }
 
@@ -49,9 +50,12 @@ internal interface TicketContract {
 
         sealed interface Inner : Message {
             data class CommentsUpdated(val comments: Comments?) : Inner
-
             data object UpdateCommentsFailed : Inner
-            data object UpdateCommentsCompleted : Inner
+            data class UpdateCommentsCompleted(
+                val comments: Comments,
+                val draft: String,
+                val welcomeMessage: String?,
+            ) : Inner
         }
 
     }
