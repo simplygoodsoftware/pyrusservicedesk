@@ -143,5 +143,8 @@ extension ChatsPresenter: ClosedTicketsCellDelegate {
     func redrawChats(open: Bool) {
         isClosedTicketsOpened = open
         updateChats()
+        if open {
+            view?.show(.scrollToClosedTickets)
+        }
     }
 }

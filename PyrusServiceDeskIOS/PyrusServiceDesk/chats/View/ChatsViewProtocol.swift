@@ -16,6 +16,7 @@ enum ChatsSearchViewCommand {
     case deleteSegmentControl
     case startRefresh
     case connectionError
+    case scrollToClosedTickets
 }
 
 @available(iOS 13.0, *)

@@ -55,6 +55,8 @@ extension PSDChatPresenter: PSDChatPresenterProtocol {
             view?.show(.updateTitle(connectionError: connectionError))
         case .reloadTitle:
             view?.show(.reloadTitle)
+        case .updateBadge(messagesCount: let messagesCount):
+            view?.show(.updateBadge(messagesCount: messagesCount))
         }
     }
 }

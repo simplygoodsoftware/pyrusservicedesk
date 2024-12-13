@@ -36,6 +36,14 @@ class PSDChatInteractor: NSObject {
     private var isRefreshing = false
     private var isOpen = false
     private var fromPush = false
+    private var isScrollButtonHiden = true
+    private var newMessagesCount = 0 {
+        didSet {
+            if newMessagesCount > 0 {
+                presenter.doWork(.updateBadge(messagesCount: newMessagesCount))
+            }
+        }
+    }
     
     var isRefresh = false
     
@@ -59,9 +67,6 @@ extension PSDChatInteractor: PSDChatInteractorProtocol {
             presenter.doWork(.updateTitle(connectionError: !PyrusServiceDesk.syncManager.networkAvailability))
             if let chat, let chatId = chat.chatId {
                 messagesToPass = PSDMessagesStorage.getSendingMessages(for: chatId)
-//                for messageToPass in messagesToPass {
-//                    messageToPass.message.fromStrorage = true
-//                }
             }
             NotificationCenter.default.addObserver(self, selector: #selector(updateChats), name: PyrusServiceDesk.chatsUpdateNotification, object: nil)
             NotificationCenter.default.addObserver(forName: SyncManager.commandsResultNotification, object: nil, queue: .main) { [weak self] notification in
@@ -134,6 +139,12 @@ extension PSDChatInteractor: PSDChatInteractorProtocol {
             if PyrusServiceDesk.multichats && chat?.chatId ?? 0 == 0 {
                 presenter.doWork(.showKeyBoard)
             }
+        case .scrollButtonVisibleUpdated(isHidden: let isHidden):
+            isScrollButtonHiden = isHidden
+            if isHidden {
+                newMessagesCount = 0
+                readChat()
+            }
         }
     }
 }
@@ -156,6 +167,9 @@ private extension PSDChatInteractor {
                    isOpen {
                     self.chat = chat
                     readChat()
+                    if !isScrollButtonHiden {
+                        newMessagesCount += 1
+                    }
                 } else {
                     self.chat = chat
                 }

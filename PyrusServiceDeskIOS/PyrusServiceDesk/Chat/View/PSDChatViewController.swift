@@ -21,6 +21,32 @@ class PSDChatViewController: PSDViewController {
         fatalError("init(coder:) has not been implemented")
     }
     
+    private var bottomScrollButton: NSLayoutConstraint?
+    private lazy var scrollButton: UIButton = {
+        let button = UIButton()
+        button.backgroundColor = .white
+        button.layer.cornerRadius = 20
+        button.translatesAutoresizingMaskIntoConstraints = false
+        return button
+    }()
+    
+    private lazy var badgeView: UIView = {
+        let view = UIView()
+        view.layer.cornerRadius = 8
+        view.backgroundColor = .hRose
+        view.translatesAutoresizingMaskIntoConstraints = false
+        return view
+    }()
+    
+    private lazy var newMessageCount: UILabel = {
+        let label = UILabel()
+        label.font = CustomizationHelper.systemBoldFont(ofSize: 10)
+        label.textColor = .white
+        label.textAlignment = .center
+        label.translatesAutoresizingMaskIntoConstraints = false
+        return label
+    }()
+    
     lazy private var messageInputView: PSDMessageInputView = {
         let inputView = PSDMessageInputView.init(
             frame: CGRect(x: 0, y: view.frame.size.height - 70,
@@ -53,11 +79,53 @@ class PSDChatViewController: PSDViewController {
         self.messageInputView.setToDefault()
         self.tableView.isLoading = true
         interactor.doInteraction(.viewDidload)
+        
+        NotificationCenter.default.addObserver(self, selector:  #selector(keyboardWillShow(_:)), name: UIResponder.keyboardWillShowNotification, object: nil)
+        NotificationCenter.default.addObserver(self, selector:  #selector(keyboardWillHide(_:)), name: UIResponder.keyboardWillHideNotification, object: nil)
+    }
+    
+    private func keyboardAnimationDuration(_ notification: NSNotification) -> TimeInterval{
+        if let  duration = notification.userInfo?[UIResponder.keyboardAnimationDurationUserInfoKey] as? NSValue{
+            return duration as? TimeInterval ?? 0
+        }
+        return 0
+    }
+    
+    @objc private func keyboardWillShow(_ notification: NSNotification) {
+        if let infoEndKey: NSValue = notification.userInfo?[UIResponder.keyboardFrameEndUserInfoKey] as? NSValue {
+            let keyboardEndFrame = infoEndKey.cgRectValue
+            let duration = keyboardAnimationDuration(notification)
+            if !isHide {
+                UIView.animate(withDuration: duration, animations: {
+                    self.bottomScrollButton?.constant = -38 - keyboardEndFrame.height
+                    self.view.layoutIfNeeded()
+                })
+            }
+            isHide = false
+        }
+    }
+    
+    private var isHide = false
+    @objc private func keyboardWillHide(_ notification: NSNotification) {
+        isHide = true
+        if let infoEndKey: NSValue = notification.userInfo?[UIResponder.keyboardFrameEndUserInfoKey] as? NSValue {
+            let keyboardEndFrame = infoEndKey.cgRectValue
+            let duration = keyboardAnimationDuration(notification)
+            UIView.animate(withDuration: duration, animations: {
+                self.bottomScrollButton?.constant = -120
+                self.view.setNeedsLayout()
+            })
+        }
     }
     
     override func viewWillLayoutSubviews() {
         super.viewWillLayoutSubviews()
         resizeTable()
+        scrollButton.layer.shadowColor = UIColor.black.cgColor
+        scrollButton.layer.shadowOffset = CGSize(width: 0, height: 4)
+        scrollButton.layer.shadowRadius = 4
+        scrollButton.layer.shadowOpacity = 0.2
+        scrollButton.layer.masksToBounds = false
     }
 
     private var firstLayout: Bool = true
@@ -170,6 +238,7 @@ class PSDChatViewController: PSDViewController {
         setupTableView()
         setupInfoView()
         customiseDesign(color: PyrusServiceDesk.mainController?.customization?.barButtonTintColor ?? UIColor.darkAppColor)
+        setupScrollButton()
     }
     
     func setupTableView() {
@@ -198,6 +267,40 @@ class PSDChatViewController: PSDViewController {
         tableView.bottomAnchor.constraint(equalTo: view.bottomAnchor).isActive = true
         
         tableView.addActivityView()
+    }
+    
+    func setupScrollButton() {
+        view.addSubview(scrollButton)
+        let image = UIImageView(image: UIImage.PSDImage(name: "down"))
+        image.translatesAutoresizingMaskIntoConstraints = false
+        scrollButton.addSubview(image)
+        badgeView.addSubview(newMessageCount)
+        scrollButton.addSubview(badgeView)
+        
+        NSLayoutConstraint.activate([
+            scrollButton.heightAnchor.constraint(equalToConstant: 40),
+            scrollButton.widthAnchor.constraint(equalToConstant: 40),
+            scrollButton.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -10),
+           // scrollButton.bottomAnchor.constraint(equalTo: view.bottomAnchor, constant: -400),
+            image.centerXAnchor.constraint(equalTo: scrollButton.centerXAnchor),
+            image.centerYAnchor.constraint(equalTo: scrollButton.centerYAnchor),
+            badgeView.bottomAnchor.constraint(equalTo: scrollButton.bottomAnchor, constant: -28),
+            badgeView.trailingAnchor.constraint(equalTo: scrollButton.trailingAnchor, constant: 4),
+            badgeView.heightAnchor.constraint(equalToConstant: 16),
+            badgeView.widthAnchor.constraint(greaterThanOrEqualToConstant: 16),
+            newMessageCount.trailingAnchor.constraint(equalTo: badgeView.trailingAnchor, constant: -4),
+            newMessageCount.widthAnchor.constraint(greaterThanOrEqualToConstant: 8),
+            newMessageCount.centerYAnchor.constraint(equalTo: badgeView.centerYAnchor),
+            badgeView.leadingAnchor.constraint(equalTo: newMessageCount.leadingAnchor, constant: -4)
+        ])
+        bottomScrollButton = scrollButton.bottomAnchor.constraint(equalTo: view.bottomAnchor, constant: -120)
+        bottomScrollButton?.isActive = true
+        
+        scrollButton.addTarget(self, action: #selector(scrollToBottom), for: .touchUpInside)
+    }
+    
+    @objc func scrollToBottom() {
+        tableView.scrollsToBottom(animated: true)
     }
     
     func setupInfoView() {
@@ -382,6 +485,9 @@ extension PSDChatViewController: PSDChatViewProtocol {
             }
         case .reloadTitle:
             designNavigation()
+        case .updateBadge(messagesCount: let messagesCount):
+            newMessageCount.text = "\(messagesCount)"
+            badgeView.isHidden = false
         }
     }
 }
@@ -407,6 +513,14 @@ extension PSDChatViewController: PSDUpdateInfo {
 }
 
 extension PSDChatViewController: PSDChatTableViewDelegate {
+    func updateScrollButton(isHidden: Bool) {
+        scrollButton.isHidden = isHidden
+        if isHidden {
+            badgeView.isHidden = true
+        }
+        interactor.doInteraction(.scrollButtonVisibleUpdated(isHidden: isHidden))
+    }
+    
     func updateNoConnectionVisible(visible: Bool) {
         interactor.doInteraction(.updateNoConnectionVisible(visible: visible))
     }

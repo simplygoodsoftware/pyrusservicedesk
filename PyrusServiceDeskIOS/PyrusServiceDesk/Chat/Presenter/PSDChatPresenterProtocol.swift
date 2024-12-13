@@ -25,6 +25,7 @@ enum PSDChatPresenterCommand {
     case reloadAll
     case updateTitle(connectionError: Bool)
     case reloadTitle
+    case updateBadge(messagesCount: Int)
 }
 
 

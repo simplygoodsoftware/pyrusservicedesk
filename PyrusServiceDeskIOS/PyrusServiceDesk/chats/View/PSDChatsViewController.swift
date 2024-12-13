@@ -448,6 +448,11 @@ private extension PSDChatsViewController {
         alert.addAction(okAction)
         present(alert, animated: true)
     }
+    
+    func scrollToClosedTickets() {
+        let indexPath = IndexPath(row: chats[0].count - 1, section: 0)
+        tableView.scrollToRow(at: indexPath, at: .top, animated: true)
+    }
 }
 
 @available(iOS 13.0, *)
@@ -543,6 +548,8 @@ extension PSDChatsViewController: ChatsViewProtocol {
             }
             customRefresh.endRefreshing()
             tableView.sendSubviewToBack(customRefresh)
+        case .scrollToClosedTickets:
+            scrollToClosedTickets()
         }
     }
 }
