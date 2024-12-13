@@ -181,7 +181,30 @@ struct PSDGetChats {
             if !$0.isActive, $1.isActive {
                 return false
             }
-            return $0.date ?? Date() > $1.date ?? Date()
+            if
+                let date1 = $0.date,
+                let date2 = $1.date
+            {
+                if date1 != date2 {
+                    return date1 > date2
+                }
+            } else if let _ = $0.date {
+                return true
+            } else if let _ = $1.date {
+                return false
+            }
+            if let mesId1 = $0.lastComment?.messageId as? Int,
+               let mesId2 = $1.lastComment?.messageId as? Int
+            {
+                return mesId1 > mesId2
+            }
+            if let _ = $0.lastComment?.messageId as? Int {
+                return false
+            }
+            if let _ = $1.lastComment?.messageId as? Int {
+                return false
+            }
+            return $0.chatId ?? 0 > $1.chatId ?? 0
         })
     }
     
