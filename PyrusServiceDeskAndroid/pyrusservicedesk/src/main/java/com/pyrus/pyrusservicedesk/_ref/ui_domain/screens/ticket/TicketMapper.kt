@@ -76,7 +76,7 @@ internal object TicketMapper {
 
         if (freshList.showRating) {
             if (freshList.showRatingText.isNotBlank()) entriesWithDates += CommentEntryV2.SimpleText(
-                id = RATING_TEXT_ID,
+                entryId = RATING_TEXT_ID,
                 message = freshList.showRatingText
             )
             entriesWithDates += CommentEntryV2.RatingSelector
@@ -99,6 +99,7 @@ internal object TicketMapper {
         val welcomeCreationTime = firstComment?.creationDate?.time ?: System.currentTimeMillis()
 
         val welcomeEntry = CommentEntryV2.Comment(
+            WELCOME_MESSAGE_ID.toString(),
             WELCOME_MESSAGE_ID,
             isInbound = false,
             hasError = false,
@@ -153,6 +154,7 @@ internal object TicketMapper {
     private fun toTextEntry(commentBody: String, comment: Comment, avatarUrl: String?): CommentEntryV2.Comment {
         val isLocal = comment.isLocal()
         return CommentEntryV2.Comment(
+            entryId = "${comment.commentId}",
             id = comment.commentId,
             isInbound = comment.isInbound,
             hasError = false, // TODO
@@ -184,6 +186,7 @@ internal object TicketMapper {
         TODO()
 
 //        return CommentEntryV2.Comment(
+//            entryId = "${comment.commentId}_${attach.id}",
 //            id = comment.commentId,
 //            isInbound = comment.isInbound,
 //            hasError = false, // TODO
