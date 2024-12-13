@@ -11,7 +11,7 @@ import android.text.style.ClickableSpan
 import android.view.View
 import androidx.appcompat.app.AlertDialog
 import com.pyrus.pyrusservicedesk.R
-import com.pyrus.pyrusservicedesk.utils.ConfigUtils
+import com.pyrus.pyrusservicedesk._ref.utils.ConfigUtils
 
 internal object LinkUtils {
 

@@ -13,7 +13,11 @@ import androidx.recyclerview.widget.DiffUtil
 import com.pyrus.pyrusservicedesk.PyrusServiceDesk
 import com.pyrus.pyrusservicedesk.R
 import com.pyrus.pyrusservicedesk.ServiceDeskProvider
-import com.pyrus.pyrusservicedesk.log.PLog
+import com.pyrus.pyrusservicedesk._ref.utils.ConfigUtils
+import com.pyrus.pyrusservicedesk._ref.utils.MILLISECONDS_IN_MINUTE
+import com.pyrus.pyrusservicedesk._ref.utils.MILLISECONDS_IN_SECOND
+import com.pyrus.pyrusservicedesk._ref.utils.getWhen
+import com.pyrus.pyrusservicedesk._ref.utils.log.PLog
 import com.pyrus.pyrusservicedesk.presentation.call.CallResult
 import com.pyrus.pyrusservicedesk.presentation.call.GetTicketCall
 import com.pyrus.pyrusservicedesk.presentation.call.GetTicketsCall
@@ -41,12 +45,8 @@ import com.pyrus.pyrusservicedesk.sdk.updates.OnUnreadTicketCountChangedSubscrib
 import com.pyrus.pyrusservicedesk.sdk.updates.PreferencesManager
 import com.pyrus.pyrusservicedesk.sdk.verify.LocalDataVerifier
 import com.pyrus.pyrusservicedesk.sdk.web.UploadFileHooks
-import com.pyrus.pyrusservicedesk.utils.ConfigUtils
-import com.pyrus.pyrusservicedesk.utils.MILLISECONDS_IN_MINUTE
-import com.pyrus.pyrusservicedesk.utils.MILLISECONDS_IN_SECOND
 import com.pyrus.pyrusservicedesk.utils.RequestUtils.Companion.MAX_FILE_SIZE_BYTES
 import com.pyrus.pyrusservicedesk.utils.RequestUtils.Companion.MAX_FILE_SIZE_MEGABYTES
-import com.pyrus.pyrusservicedesk.utils.getWhen
 import kotlinx.coroutines.*
 import java.util.*
 
@@ -111,7 +111,7 @@ internal class TicketViewModel(
     init {
         draft = draftRepository.getDraft()
 
-        runBlocking {
+       /* runBlocking {
             val response = requests.getPendingFeedCommentsRequest().execute()
             if (!response.hasError() && !response.getData()?.comments.isNullOrEmpty()) {
                 applyTicketUpdate(response.getData()!!, true)
@@ -122,7 +122,7 @@ internal class TicketViewModel(
             loadData()
         }
         maybeStartAutoRefresh()
-        liveUpdates.subscribeOnUnreadTicketCountChanged(this)
+        liveUpdates.subscribeOnUnreadTicketCountChanged(this)*/
     }
 
     override fun onLoadData() {
@@ -136,7 +136,7 @@ internal class TicketViewModel(
     override fun onCleared() {
         super.onCleared()
         mainHandler.removeCallbacks(updateRunnable)
-        liveUpdates.unsubscribeFromTicketCountChanged(this)
+        //liveUpdates.unsubscribeFromTicketCountChanged(this)
     }
 
     /**
@@ -245,11 +245,11 @@ internal class TicketViewModel(
     }
 
     private fun update() {
-        val call = when {
+        /*val call = when {
             //isFeed -> GetFeedCall(this@TicketViewModel, requests).execute() //TODO remove
             ticketId == EMPTY_TICKET_ID -> null
             else -> GetTicketCall(this@TicketViewModel, requests, ticketId).execute()
-        }
+        }*/
         val observer = Observer<CallResult<Comments>> { result ->
             if (result == null)
                 return@Observer
@@ -259,7 +259,7 @@ internal class TicketViewModel(
                 else -> applyTicketUpdate(result.data!!, false)
             }
         }
-        call?.observeForever(observer)
+        //call?.observeForever(observer)
     }
 
     private fun maybeStartAutoRefresh() {
@@ -316,7 +316,7 @@ internal class TicketViewModel(
 //        )
 
         val creationDate = Calendar.getInstance().time
-        GetTicketsCall(this@TicketViewModel, requests, commands)
+        /*GetTicketsCall(this@TicketViewModel, requests, commands)
             .execute()
             .observeForever { result ->
                 if (result == null)
@@ -328,7 +328,7 @@ internal class TicketViewModel(
                         onDataLoaded()
                     }
                 }
-            }
+            }*/
 //        AddFeedCommentCall(this, requests, ticketId, localComment, uploadFileHooks)
 //            .execute()
 //            .observeForever(AddCommentObserver(uploadFileHooks, localComment))  //??????????
@@ -367,12 +367,14 @@ internal class TicketViewModel(
                 }
                 return true
             }
+
+            null -> TODO()
         }
         return false
     }
 
     private fun applyTicketUpdate(freshList: Comments, arePendingComments: Boolean) { //update
-        liveUpdates.onReadComments()
+        //liveUpdates.onReadComments()
         if (!arePendingComments && !needUpdateCommentsList(freshList.comments)) {
             onDataLoaded()
             return
@@ -622,11 +624,11 @@ internal class TicketViewModel(
 //        sendAddComment(localDataProvider.createLocalComment(rating = rating))
 
     fun onStart() {
-        liveUpdates.increaseActiveScreenCount()
+        //liveUpdates.increaseActiveScreenCount()
     }
 
     fun onStop() {
-        liveUpdates.decreaseActiveScreenCount()
+        //liveUpdates.decreaseActiveScreenCount()
     }
 
     //TODO need for comment

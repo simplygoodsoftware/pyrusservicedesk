@@ -31,12 +31,17 @@ import androidx.core.text.util.LinkifyCompat
 import androidx.exifinterface.media.ExifInterface
 import com.pyrus.pyrusservicedesk.PyrusServiceDesk
 import com.pyrus.pyrusservicedesk.R
+import com.pyrus.pyrusservicedesk._ref.utils.BYTES_IN_KILOBYTE
+import com.pyrus.pyrusservicedesk._ref.utils.BYTES_IN_MEGABYTE
+import com.pyrus.pyrusservicedesk._ref.utils.ColorChannel
+import com.pyrus.pyrusservicedesk._ref.utils.ConfigUtils
+import com.pyrus.pyrusservicedesk._ref.utils.adjustColorChannel
+import com.pyrus.pyrusservicedesk._ref.utils.getTextColorOnBackground
 import com.pyrus.pyrusservicedesk.presentation.ui.navigation_page.ticket.HtmlTagUtils
 import com.pyrus.pyrusservicedesk.presentation.ui.view.OutlineImageView.Companion.EDGE_RIGHT
 import com.pyrus.pyrusservicedesk.utils.*
 import com.squareup.picasso.Picasso
 import com.squareup.picasso.Target
-import kotlinx.android.synthetic.main.psd_comment.view.*
 import java.util.regex.Matcher
 import java.util.regex.Pattern
 import kotlin.math.max
@@ -104,7 +109,7 @@ internal class CommentView @JvmOverloads constructor(
      */
     var contentType: ContentType = ContentType.Text
         set(value) {
-            when (value) {
+            /*when (value) {
                 ContentType.Text -> {
                     comment_text_layout.visibility = View.VISIBLE
                     attachment_layout.visibility = View.GONE
@@ -122,7 +127,7 @@ internal class CommentView @JvmOverloads constructor(
                     attachment_layout.visibility = GONE
                     preview_layout.visibility = View.VISIBLE
                 }
-            }
+            }*/
             field = value
         }
 
@@ -141,15 +146,15 @@ internal class CommentView @JvmOverloads constructor(
                     })
             icon?.let {
                 val drawable = when (contentType) {
-                    ContentType.Attachment -> fileDownloadDrawable
-                    ContentType.PreviewableAttachment -> previewDownloadDrawable
+//                    ContentType.Attachment -> fileDownloadDrawable
+//                    ContentType.PreviewableAttachment -> previewDownloadDrawable
                     else -> null
                 }
                 drawable?.let { draw ->
-                    draw.setDrawableByLayerId(
+                    /*draw.setDrawableByLayerId(
                         R.id.progress_icon,
                         it.mutate().apply { setColorFilter(primaryColor, PorterDuff.Mode.SRC_IN) })
-                    draw.invalidateSelf()
+                    draw.invalidateSelf()*/
                 }
             }
             if (value != Status.Processing)
@@ -169,7 +174,7 @@ internal class CommentView @JvmOverloads constructor(
      * User for rendering of the comments states, like indicating progress and errors.
      */
     var status = Status.Completed
-        set(value) {
+        /*set(value) {
             var visibility = View.VISIBLE
             var iconResId: Int? = null
             when (value) {
@@ -190,18 +195,18 @@ internal class CommentView @JvmOverloads constructor(
                 statusView.colorFilter = null
 
             field = value
-        }
+        }*/
 
 
     private var onDownloadIconClickListener: (() -> Unit)? = null
     private var recentFileSize: Float = 0f
     private var recentProgress: Int = 0
-    @ColorInt
-    private val primaryColor: Int
-    private val fileDownloadDrawable: LayerDrawable
+   /* @ColorInt
+    private val primaryColor: Int*/
+    /*private val fileDownloadDrawable: LayerDrawable
     private val previewDownloadDrawable: LayerDrawable
     private val type: Int
-    private val statusView:AppCompatImageView
+    private val statusView:AppCompatImageView*/
 
     private val progressClickListener = OnClickListener { onDownloadIconClickListener?.invoke() }
 
@@ -212,11 +217,11 @@ internal class CommentView @JvmOverloads constructor(
     init {
         View.inflate(context, R.layout.psd_comment, this)
 
-        type = with(getContext().obtainStyledAttributes(attrs, R.styleable.CommentView)){
+        /*type = with(getContext().obtainStyledAttributes(attrs, R.styleable.CommentView)){
             getInt(R.styleable.CommentView_type, TYPE_INBOUND).also { recycle() }
-        }
+        }*/
 
-        preview_passive_progress.indeterminateDrawable.setColorFilter(Color.BLACK, PorterDuff.Mode.SRC_IN)
+        /*preview_passive_progress.indeterminateDrawable.setColorFilter(Color.BLACK, PorterDuff.Mode.SRC_IN)
 
         ConfigUtils.getMainFontTypeface()?.let {
             file_name.typeface = it
@@ -225,15 +230,15 @@ internal class CommentView @JvmOverloads constructor(
             text_time.typeface = it
             preview_time.typeface = it
             preview_mini_time.typeface = it
-        }
-        val backgroundColor = when (type) {
+        }*/
+        /*val backgroundColor = when (type) {
             TYPE_INBOUND -> ConfigUtils.getSupportMessageTextBackgroundColor(context)
             else -> ConfigUtils.getUserMessageTextBackgroundColor(context)
-        }
-        primaryColor = getTextColorOnBackground(context, backgroundColor)
-        val secondaryColor = adjustColorChannel(primaryColor, ColorChannel.Alpha, SECONDARY_TEXT_COLOR_MULTIPLIER)
+        }*/
+        //primaryColor = getTextColorOnBackground(context, backgroundColor)
+        //val secondaryColor = adjustColorChannel(primaryColor, ColorChannel.Alpha, SECONDARY_TEXT_COLOR_MULTIPLIER)
 
-        background_parent.setCardBackgroundColor(backgroundColor)
+        /*background_parent.setCardBackgroundColor(backgroundColor)
 
         val textColor = when (type) {
             TYPE_INBOUND -> ConfigUtils.getSupportMessageTextColor(context, backgroundColor)
@@ -272,21 +277,21 @@ internal class CommentView @JvmOverloads constructor(
                     resources.getDimension(R.dimen.psd_comment_error_width).toInt(),
                     LayoutParams.WRAP_CONTENT)
                     .apply { gravity = Gravity.CENTER_VERTICAL }
-        }
+        }*/
         status = Status.Completed
     }
 
     override fun setOnClickListener(l: OnClickListener?) {
-        background_parent.setOnClickListener(l)
+        //background_parent.setOnClickListener(l)
     }
 
     override fun setOnLongClickListener(l: OnLongClickListener?) {
-        background_parent.setOnLongClickListener(l)
+        //background_parent.setOnLongClickListener(l)
     }
 
     override fun onAttachedToWindow() {
         super.onAttachedToWindow()
-        root.removeView(statusView)
+        /*root.removeView(statusView)
         (layoutParams as MarginLayoutParams).apply {
             val margin = -statusView.layoutParams.width
             when (type) {
@@ -299,7 +304,7 @@ internal class CommentView @JvmOverloads constructor(
                     root.addView(statusView, 0)
                 }
             }
-        }
+        }*/
     }
 
     /**
@@ -308,16 +313,16 @@ internal class CommentView @JvmOverloads constructor(
      */
     fun setCommentText(text: String) {
         val filteredText = HtmlTagUtils.cleanTags(text)
-        comment_text.text = replaceLinkTagsWithSpans(filteredText)
+        /*comment_text.text = replaceLinkTagsWithSpans(filteredText)
         LinkifyCompat.addLinks(comment_text, Linkify.WEB_URLS or Linkify.PHONE_NUMBERS)
         addDeepLinks(comment_text)
-        comment_text.movementMethod = LinkMovementMethod.getInstance()
+        comment_text.movementMethod = LinkMovementMethod.getInstance()*/
     }
 
     fun setCreationTime(time: String) {
-        text_time.text = time
+        /*text_time.text = time
         preview_time.text = time
-        preview_mini_time.text = time
+        preview_mini_time.text = time*/
     }
 
     private fun replaceLinkTagsWithSpans(text: CharSequence): CharSequence {
@@ -386,7 +391,7 @@ internal class CommentView @JvmOverloads constructor(
      * Works with [ContentType.Attachment].
      */
     fun setFileName(fileName: String) {
-        file_name.text = fileName
+        //file_name.text = fileName
     }
 
     /**
@@ -404,14 +409,14 @@ internal class CommentView @JvmOverloads constructor(
             isMegabytes -> R.string.psd_file_size_mb
             else -> R.string.psd_file_size_kb
         }
-        file_size.text = context.getString(textResId, toShow)
+        //file_size.text = context.getString(textResId, toShow)
     }
 
     /**
      * Assigns [progress] that should shown on progress icon.
      * Works with [ContentType.Attachment].
      */
-    fun setProgress(progress: Int) {
+    fun setProgress(progress: Int) {}/*{
         recentProgress = progress
         val progressBar = when(contentType){
             ContentType.Attachment -> attachment_progress
@@ -429,7 +434,7 @@ internal class CommentView @JvmOverloads constructor(
                 }
                 .start()
         }
-    }
+    }*/
 
     /**
      * Assigns [listener] that is invoked when progress icon was clicked by user.
@@ -450,35 +455,35 @@ internal class CommentView @JvmOverloads constructor(
     }
 
     private fun setMiniPreview(previewUri: Uri) {
-        preview_mini.setImageBitmap(null)
+        /*preview_mini.setImageBitmap(null)
         preview_mini.visibility = GONE
         when {
             previewUri.isRemote() -> setNetworkPreview(previewUri, preview_mini, false)
-        }
+        }*/
     }
 
     private fun setFullSizePreview(previewUri: Uri) {
-        val isRemote = previewUri.isRemote()
+        /*val isRemote = previewUri.isRemote()
         preview_progress.visibility = if (isRemote) GONE else View.VISIBLE
         preview_full.setImageBitmap(null)
         when {
             isRemote -> setNetworkPreview(previewUri, preview_full, true)
             else -> setLocalPreview(preview_full, previewUri, true)
-        }
+        }*/
     }
 
     private fun applyProgressStatusToPreview(status: Status) {
-        preview_progress.visibility = when(status){
+        /*preview_progress.visibility = when(status){
             Status.Completed -> GONE
             else -> View.VISIBLE
-        }
+        }*/
     }
 
     private fun applyProgressStatusToAttachmentView(status: Status) {
-        if (status != Status.Processing)
+        /*if (status != Status.Processing)
             setFileSize(recentFileSize)
         else
-            file_size.setText(R.string.psd_uploading)
+            file_size.setText(R.string.psd_uploading)*/
     }
 
     private fun setNetworkPreview(
@@ -536,7 +541,7 @@ internal class CommentView @JvmOverloads constructor(
         clearCurrentPreviewRequest()
         recentPicassoTarget = picassoTarget
         loadPreviewRunnable = Runnable {
-            PyrusServiceDesk.get().picasso.load(previewUri).into(picassoTarget)
+            //PyrusServiceDesk.get().picasso.load(previewUri).into(picassoTarget)
         }
         postDelayed(loadPreviewRunnable, delayMs)
     }
@@ -546,7 +551,7 @@ internal class CommentView @JvmOverloads constructor(
             removeCallbacks(it)
         }
         recentPicassoTarget?.let {
-            PyrusServiceDesk.get().picasso.cancelRequest(it)
+            //PyrusServiceDesk.get().picasso.cancelRequest(it)
         }
     }
 
@@ -574,7 +579,7 @@ internal class CommentView @JvmOverloads constructor(
             }
             with(source) {
                 exif?.let {
-                    this.rotate(getImageRotation(it).toFloat())
+                    //this.rotate(getImageRotation(it).toFloat())
                 } ?: this
             }
         }
@@ -583,7 +588,7 @@ internal class CommentView @JvmOverloads constructor(
             return
         }
 
-        if (adjustTargetDimension) {
+        /*if (adjustTargetDimension) {
             val ratio = bitmap.width.toFloat() / bitmap.height
             if (!previewRatioMap.containsKey(previewUri))
                 previewRatioMap += previewUri to ratio
@@ -592,8 +597,8 @@ internal class CommentView @JvmOverloads constructor(
                 target.layoutParams.height
             )
             target.requestLayout()
-        }
-        target.setImageBitmap(bitmap)
+        }*/
+        //target.setImageBitmap(bitmap)
     }
 }
 
@@ -692,10 +697,21 @@ private class ChangingSizeTarget(
             super.onBitmapLoaded(bitmap, from)
         }
         animator.addListener(object : Animator.AnimatorListener {
-            override fun onAnimationRepeat(animation: Animator?) {}
-            override fun onAnimationEnd(animation: Animator?) = onAnimationEnd()
-            override fun onAnimationCancel(animation: Animator?) {}
-            override fun onAnimationStart(animation: Animator?) {}
+            override fun onAnimationStart(p0: Animator) {
+                TODO("Not yet implemented")
+            }
+
+            override fun onAnimationEnd(p0: Animator) {
+                TODO("Not yet implemented")
+            }
+
+            override fun onAnimationCancel(p0: Animator) {
+                TODO("Not yet implemented")
+            }
+
+            override fun onAnimationRepeat(p0: Animator) {
+                TODO("Not yet implemented")
+            }
 
         })
         animator.start()

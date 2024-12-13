@@ -4,7 +4,6 @@ import android.content.ClipData
 import android.content.ClipboardManager
 import android.content.Context
 import android.content.Intent
-import android.content.res.ColorStateList
 import android.graphics.PorterDuff
 import android.net.Uri
 import android.os.Build
@@ -21,25 +20,18 @@ import android.widget.Toast
 import com.pyrus.pyrusservicedesk.PyrusServiceDesk
 import com.pyrus.pyrusservicedesk.R
 import com.pyrus.pyrusservicedesk.ServiceDeskConfiguration
-import com.pyrus.pyrusservicedesk.log.PLog
-import com.pyrus.pyrusservicedesk.presentation.ConnectionActivityBase
 import com.pyrus.pyrusservicedesk.presentation.ui.navigation_page.file_preview.FilePreviewActivity
+import com.pyrus.pyrusservicedesk._ref.utils.ConfigUtils
+import com.pyrus.pyrusservicedesk._ref.utils.getViewModel
+import com.pyrus.pyrusservicedesk.presentation.ConnectionActivityBase
 import com.pyrus.pyrusservicedesk.presentation.ui.navigation_page.ticket.dialogs.attach_files.AttachFileSharedViewModel
 import com.pyrus.pyrusservicedesk.presentation.ui.navigation_page.ticket.dialogs.attach_files.AttachFileVariantsFragment
 import com.pyrus.pyrusservicedesk.presentation.ui.navigation_page.ticket.dialogs.comment_actions.PendingCommentActionSharedViewModel
 import com.pyrus.pyrusservicedesk.presentation.ui.navigation_page.ticket.dialogs.comment_actions.PendingCommentActionsDialog
-import com.pyrus.pyrusservicedesk.presentation.ui.view.recyclerview.item_decorators.SpaceItemDecoration
 import com.pyrus.pyrusservicedesk.sdk.data.Attachment
 import com.pyrus.pyrusservicedesk.sdk.data.EMPTY_TICKET_ID
 import com.pyrus.pyrusservicedesk.sdk.data.intermediate.FileData
-import com.pyrus.pyrusservicedesk.utils.*
 import com.pyrus.pyrusservicedesk.utils.RequestUtils.Companion.getFileUrl
-import kotlinx.android.synthetic.main.psd_activity_ticket.*
-import kotlinx.android.synthetic.main.psd_activity_ticket.root
-import kotlinx.android.synthetic.main.psd_activity_ticket.view.*
-import kotlinx.android.synthetic.main.psd_no_connection.*
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.launch
 
 /**
  * Activity for rendering ticket/feed comments.
@@ -115,7 +107,7 @@ internal class TicketActivity : ConnectionActivityBase<TicketViewModel>(TicketVi
             startActivity(FilePreviewActivity.getLaunchIntent(fileData))
         }
         setOnErrorCommentEntryClickListener {
-            viewModel.onUserStartChoosingCommentAction(it)
+            //viewModel.onUserStartChoosingCommentAction(it)
             PendingCommentActionsDialog().show(supportFragmentManager, "")
         }
         setOnTextCommentLongClicked {
@@ -135,8 +127,8 @@ internal class TicketActivity : ConnectionActivityBase<TicketViewModel>(TicketVi
         }
 
         override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
-            send.isEnabled = !s.isNullOrBlank()
-            viewModel.onInputTextChanged(s.toString())
+//            send.isEnabled = !s.isNullOrBlank()
+//            viewModel.onInputTextChanged(s.toString())
         }
     }
 
@@ -149,7 +141,7 @@ internal class TicketActivity : ConnectionActivityBase<TicketViewModel>(TicketVi
 
         // if you don't set empty text, Android will set the app name
         supportActionBar?.apply { title = "" }
-        ticket_toolbar.toolbar_title.text = ConfigUtils.getTitle(this@TicketActivity)
+        /*ticket_toolbar.toolbar_title.text = ConfigUtils.getTitle(this@TicketActivity)
 
         root.setBackgroundColor(ConfigUtils.getMainBackgroundColor(this))
 
@@ -223,7 +215,7 @@ internal class TicketActivity : ConnectionActivityBase<TicketViewModel>(TicketVi
         divider.setBackgroundColor(getColorOnBackground(ConfigUtils.getMainBackgroundColor(this), 30))
         refresh.setProgressBackgroundColor(ConfigUtils.getMainBackgroundColor(this))
         refresh.setColorSchemeColors(ConfigUtils.getAccentColor(this))
-
+*/
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
             window.clearFlags(WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS)
             window.addFlags(WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS)
@@ -233,19 +225,19 @@ internal class TicketActivity : ConnectionActivityBase<TicketViewModel>(TicketVi
 
     override fun onStart() {
         super.onStart()
-        viewModel.onStart()
+        //viewModel.onStart()
     }
 
     override fun onStop() {
         super.onStop()
-        viewModel.onStop()
+        //viewModel.onStop()
     }
 
     override fun onRestoreInstanceState(savedInstanceState: Bundle) {
         super.onRestoreInstanceState(savedInstanceState)
         savedInstanceState.let {
-            if (it.getBoolean(STATE_KEYBOARD_SHOWN))
-                showKeyboardOn(input)
+//            if (it.getBoolean(STATE_KEYBOARD_SHOWN))
+//                showKeyboardOn(input)
         }
     }
 
@@ -253,7 +245,7 @@ internal class TicketActivity : ConnectionActivityBase<TicketViewModel>(TicketVi
         super.onSaveInstanceState(outState)
         outState.let {
             ServiceDeskConfiguration.save(it)
-            it.putBoolean(STATE_KEYBOARD_SHOWN, input.hasFocus())
+            //it.putBoolean(STATE_KEYBOARD_SHOWN, input.hasFocus())
         }
     }
 
@@ -273,7 +265,7 @@ internal class TicketActivity : ConnectionActivityBase<TicketViewModel>(TicketVi
 
     override fun startObserveData() {
         super.startObserveData()
-        viewModel.getCommentDiffLiveData().observe(this) { result ->
+        /*viewModel.getCommentDiffLiveData().observe(this) { result ->
             val atEnd = comments.isAtEnd()
             val isEmpty = comments.adapter?.itemCount == 0
             result?.let {
@@ -303,9 +295,9 @@ internal class TicketActivity : ConnectionActivityBase<TicketViewModel>(TicketVi
             fileUri?.let {
                 viewModel.onAttachmentSelected(it)
             }
-        }
+        }*/
 
-        commentActionsSharedViewModel.getSelectedActionLiveData().observe(this) { action ->
+        /*commentActionsSharedViewModel.getSelectedActionLiveData().observe(this) { action ->
             action?.let {
                 when {
                     PendingCommentActionSharedViewModel.isRetryClicked(it) -> viewModel.onPendingCommentRetried()
@@ -313,13 +305,13 @@ internal class TicketActivity : ConnectionActivityBase<TicketViewModel>(TicketVi
                     PendingCommentActionSharedViewModel.isCancelled(it) -> viewModel.onChoosingCommentActionCancelled()
                 }
             }
-        }
+        }*/
 
     }
 
     override fun onViewHeightChanged(changedBy: Int) {
         super.onViewHeightChanged(changedBy)
-        when {
+        /*when {
             changedBy == 0 -> return
             changedBy > 0 -> comments.scrollBy(0, changedBy)
             else -> {
@@ -328,7 +320,7 @@ internal class TicketActivity : ConnectionActivityBase<TicketViewModel>(TicketVi
                     comments.scrollBy(0, changedBy)
             }
 
-        }
+        }*/
     }
 
     override fun finish() {
@@ -350,8 +342,8 @@ internal class TicketActivity : ConnectionActivityBase<TicketViewModel>(TicketVi
     }
 
     private fun onSendCommentClick() {
-        viewModel.onSendClicked(input.text.toString())
-        input.text = null
+//        viewModel.onSendClicked(input.text.toString())
+//        input.text = null
     }
 
     private fun showAttachFileVariants() {

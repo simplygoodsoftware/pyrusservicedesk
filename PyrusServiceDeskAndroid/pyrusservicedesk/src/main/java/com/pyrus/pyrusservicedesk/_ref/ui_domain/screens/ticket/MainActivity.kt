@@ -4,18 +4,23 @@ import android.content.Context
 import android.content.Intent
 import android.os.Bundle
 import androidx.fragment.app.FragmentActivity
+import com.github.terrakok.cicerone.Navigator
+import com.pyrus.pyrusservicedesk.PyrusServiceDesk.Companion.injector
 import com.pyrus.pyrusservicedesk.R
 import com.pyrus.pyrusservicedesk.ServiceDeskConfiguration
+import com.pyrus.pyrusservicedesk._ref.Screens
+import com.pyrus.pyrusservicedesk._ref.utils.navigation.PyrusNavigator
 import com.pyrus.pyrusservicedesk._ref.utils.setupWindowInsets
 import com.pyrus.pyrusservicedesk.core.StaticRepository
 import com.pyrus.pyrusservicedesk.databinding.PsdActivityMainBinding
+import com.pyrus.pyrusservicedesk.presentation.ui.navigation_page.tickets_list.tickets.TicketsFragment
 
 
 internal class MainActivity : FragmentActivity() {
 
     private lateinit var binding: PsdActivityMainBinding
 
-    //private val navigator: Navigator = PyrusNavigator(this, R.id.fragment_container)
+    private val navigator: Navigator = PyrusNavigator(this, R.id.fragment_container)
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -35,8 +40,10 @@ internal class MainActivity : FragmentActivity() {
         savedInstanceState?.let { ServiceDeskConfiguration.restore(it) }
 
         if (savedInstanceState == null) {
-
-            //injector().router.newRootScreen(Screens.TicketScreen())
+            supportFragmentManager.beginTransaction()
+                .replace(R.id.fragment_container, TicketsFragment())
+                .commit()
+            //injector().router.newRootScreen(Screens.TicketsScreen())
         }
     }
 

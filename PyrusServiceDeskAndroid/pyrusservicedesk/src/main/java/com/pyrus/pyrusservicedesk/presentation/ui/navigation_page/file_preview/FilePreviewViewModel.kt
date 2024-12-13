@@ -2,19 +2,16 @@ package com.pyrus.pyrusservicedesk.presentation.ui.navigation_page.file_preview
 
 import android.app.Application
 import android.app.DownloadManager
-import androidx.lifecycle.LiveData
-import androidx.lifecycle.MutableLiveData
 import android.content.ContentResolver
 import android.content.Context
 import android.content.Intent
 import android.media.MediaScannerConnection
 import android.net.Uri
+import androidx.lifecycle.LiveData
+import androidx.lifecycle.MutableLiveData
 import com.pyrus.pyrusservicedesk.ServiceDeskProvider
-import com.pyrus.pyrusservicedesk.presentation.ui.navigation_page.file_preview.FilePreviewActivity.Companion.KEY_FILE_DATA
 import com.pyrus.pyrusservicedesk.presentation.viewmodel.ConnectionViewModelBase
 import com.pyrus.pyrusservicedesk.sdk.data.intermediate.FileData
-import com.pyrus.pyrusservicedesk.utils.canBePreviewed
-import com.pyrus.pyrusservicedesk.utils.getExtension
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
@@ -41,11 +38,11 @@ internal class FilePreviewViewModel(serviceDeskProvider: ServiceDeskProvider,
     }
 
     override fun onLoadData() {
-        fileLiveData.value = FileViewModel(
+        /*fileLiveData.value = FileViewModel(
             intent.getFileData()!!.uri,
             fileCanBePreviewed(),
             isNetworkConnected.value == false,
-            isLocal = isLocalFile())
+            isLocal = isLocalFile())*/
     }
 
     /**
@@ -81,36 +78,36 @@ internal class FilePreviewViewModel(serviceDeskProvider: ServiceDeskProvider,
         fileLiveData.value = with(fileLiveData.value!!) {
             FileViewModel(fileUri, isPreviewable, hasError, isDownloading = true)
         }
-        val fileData = intent.getFileData()
+        /*val fileData = intent.getFileData()
         val request = DownloadManager.Request(fileData!!.uri).apply {
             setTitle(fileData.fileName)
             setNotificationVisibility(DownloadManager.Request.VISIBILITY_VISIBLE_NOTIFY_COMPLETED)
         }
-        downloadRequestId = downloadManager.enqueue(request)
+        downloadRequestId = downloadManager.enqueue(request)*/
         observeProgress()
     }
 
     /**
      * Provides file extension
      */
-    fun getExtension(): String = intent.getFileData()!!.fileName.getExtension()
+    //fun getExtension(): String = intent.getFileData()!!.fileName.getExtension()
 
     /**
      * Provides file name without path
      */
-    fun getFileName(): CharSequence = intent.getFileData()!!.fileName
+    //fun getFileName(): CharSequence = intent.getFileData()!!.fileName
 
     private fun observeProgress() {
         launch {
             var isCompleted = false
             while (!isCompleted) {
-                delay(CHECK_FILE_DOWNLOADED_DELAY_MS)
+                //delay(CHECK_FILE_DOWNLOADED_DELAY_MS)
                 val cursor = downloadManager.query(DownloadManager.Query().setFilterById(downloadRequestId))
                 if (cursor == null || !cursor.moveToFirst()) {
                     processDownloadingFailedAsync()
                     break
                 }
-                when (cursor.getInt(cursor.getColumnIndex(DownloadManager.COLUMN_STATUS))) {
+                /*when (cursor.getInt(cursor.getColumnIndex(DownloadManager.COLUMN_STATUS))) {
                     DownloadManager.STATUS_SUCCESSFUL -> {
                         processDownloadedFileUriAsync(downloadManager.getUriForDownloadedFile(downloadRequestId))
                         isCompleted = true
@@ -119,7 +116,7 @@ internal class FilePreviewViewModel(serviceDeskProvider: ServiceDeskProvider,
                         processDownloadingFailedAsync()
                         isCompleted = true
                     }
-                }
+                }*/
             }
         }
     }
@@ -160,8 +157,8 @@ internal class FilePreviewViewModel(serviceDeskProvider: ServiceDeskProvider,
 
     }
 
-    private fun isLocalFile(): Boolean = intent.getFileData()!!.isLocal
-    private fun fileCanBePreviewed(): Boolean = intent.getFileData()!!.fileName.canBePreviewed()
+    //private fun isLocalFile(): Boolean = intent.getFileData()!!.isLocal
+    //private fun fileCanBePreviewed(): Boolean = intent.getFileData()!!.fileName.canBePreviewed()
 }
 
-internal fun Intent.getFileData() = getParcelableExtra<FileData>(KEY_FILE_DATA)
+//internal fun Intent.getFileData() = getParcelableExtra<FileData>(KEY_FILE_DATA)

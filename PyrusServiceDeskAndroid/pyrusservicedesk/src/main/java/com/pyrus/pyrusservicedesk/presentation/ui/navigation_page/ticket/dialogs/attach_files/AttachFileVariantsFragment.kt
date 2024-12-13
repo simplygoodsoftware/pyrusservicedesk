@@ -19,9 +19,14 @@ import android.view.ViewGroup
 import androidx.core.util.Consumer
 import com.pyrus.pyrusservicedesk.PyrusServiceDesk
 import com.pyrus.pyrusservicedesk.R
-import com.pyrus.pyrusservicedesk.log.PLog
+import com.pyrus.pyrusservicedesk._ref.utils.ConfigUtils
+import com.pyrus.pyrusservicedesk._ref.utils.dispatchTakePhotoIntent
+import com.pyrus.pyrusservicedesk._ref.utils.getViewModelWithActivityScope
+import com.pyrus.pyrusservicedesk._ref.utils.hasPermission
+import com.pyrus.pyrusservicedesk._ref.utils.hasPermissionInManifeset
+import com.pyrus.pyrusservicedesk._ref.utils.isCapturingPhotoSupported
+import com.pyrus.pyrusservicedesk._ref.utils.log.PLog
 import com.pyrus.pyrusservicedesk.utils.*
-import kotlinx.android.synthetic.main.psd_fragment_attach_file_variants.*
 import java.io.File
 
 /**
@@ -70,7 +75,7 @@ internal class AttachFileVariantsFragment: BottomSheetDialogFragment(), View.OnC
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        photo_variant.setOnClickListener(this)
+        /*photo_variant.setOnClickListener(this)
         photo_variant.visibility = if (isCapturingPhotoSupported()) VISIBLE else GONE
         gallery_variant.setOnClickListener(this)
         custom_variant.visibility = if (PyrusServiceDesk.FILE_CHOOSER != null) VISIBLE else GONE
@@ -91,7 +96,7 @@ internal class AttachFileVariantsFragment: BottomSheetDialogFragment(), View.OnC
             photo_variant.typeface = it
             gallery_variant.typeface = it
             send_logs_variant.typeface = it
-        }
+        }*/
     }
 
     override fun onStart() {
@@ -110,12 +115,12 @@ internal class AttachFileVariantsFragment: BottomSheetDialogFragment(), View.OnC
     }
 
     override fun onClick(view: View) {
-        when (view) {
+        /*when (view) {
             photo_variant -> startTakingPhoto()
             gallery_variant -> startPickingImage()
             custom_variant -> openCustomChooser()
             send_logs_variant -> PLog.collectLogs()
-        }
+        }*/
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
@@ -142,11 +147,11 @@ internal class AttachFileVariantsFragment: BottomSheetDialogFragment(), View.OnC
     }
 
     private fun openCustomChooser() {
-        val chooserIntent = PyrusServiceDesk.FILE_CHOOSER?.getIntent() ?: return
+        /*val chooserIntent = PyrusServiceDesk.FILE_CHOOSER?.getIntent() ?: return
         activity?.packageManager?.resolveActivity(chooserIntent, 0) ?: return
         startActivityForResult(chooserIntent,
             REQUEST_CODE_CUSTOM_CHOOSER
-        )
+        )*/
     }
 
     private fun startPickingImage() {
@@ -161,7 +166,7 @@ internal class AttachFileVariantsFragment: BottomSheetDialogFragment(), View.OnC
             else{
                 it.action = Intent.ACTION_GET_CONTENT
             }
-            it.type = MIME_TYPE_IMAGE_ANY
+            //it.type = MIME_TYPE_IMAGE_ANY
             startActivityForResult(it,
                 REQUEST_CODE_PICK_IMAGE
             )

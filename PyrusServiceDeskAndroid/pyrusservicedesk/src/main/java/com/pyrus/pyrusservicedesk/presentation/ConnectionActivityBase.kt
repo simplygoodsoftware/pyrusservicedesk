@@ -1,18 +1,10 @@
 package com.pyrus.pyrusservicedesk.presentation
 
-import androidx.lifecycle.Observer
 import android.graphics.PorterDuff
 import android.os.Bundle
-import android.view.View.GONE
-import android.view.View.VISIBLE
 import android.widget.ProgressBar
 import com.pyrus.pyrusservicedesk.R
 import com.pyrus.pyrusservicedesk.presentation.viewmodel.ConnectionViewModelBase
-import com.pyrus.pyrusservicedesk.utils.ConfigUtils
-import com.pyrus.pyrusservicedesk.utils.getColorByAttrId
-import com.pyrus.pyrusservicedesk.utils.getViewModel
-import kotlinx.android.synthetic.main.psd_activity_ticket.*
-import kotlinx.android.synthetic.main.psd_no_connection.*
 
 private const val ANIMATION_DURATION = 200L
 
@@ -26,7 +18,7 @@ internal abstract class ConnectionActivityBase<T: ConnectionViewModelBase>(viewM
     /**
      * Instance of the view model that is defined by the particular type of the activity.
      */
-    protected val viewModel: T by getViewModel(viewModelClass)
+    //protected val viewModel: T by getViewModel(viewModelClass)
 
     /**
      * Optional id of the swiperefreshlayout that is used for launch loading the data from [viewModel]
@@ -40,22 +32,22 @@ internal abstract class ConnectionActivityBase<T: ConnectionViewModelBase>(viewM
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         progressBar = findViewById(progressBarViewId)
-        progressBar?.progressDrawable?.setColorFilter(
-                getColorByAttrId(this, R.attr.colorAccentSecondary),
-                PorterDuff.Mode.SRC_IN)
-        reconnectButton.setOnClickListener { reconnect() }
-        reconnectButton.setTextColor(ConfigUtils.getAccentColor(this))
+//        progressBar?.progressDrawable?.setColorFilter(
+//                getColorByAttrId(this, R.attr.colorAccentSecondary),
+//                PorterDuff.Mode.SRC_IN)
+//        reconnectButton.setOnClickListener { reconnect() }
+//        reconnectButton.setTextColor(ConfigUtils.getAccentColor(this))
         refresher = findViewById(refresherViewId)
-        refresher?.setOnRefreshListener { viewModel.loadData() }
+        //refresher?.setOnRefreshListener { viewModel.loadData() }
     }
 
     override fun startObserveData() {
         super.startObserveData()
-        viewModel.getIsNetworkConnectedLiveData().observe(
+        /*viewModel.getIsNetworkConnectedLiveData().observe(
             this,
             { isConnected ->
                 isConnected?.let {
-                    no_connection.visibility = if (it) GONE else VISIBLE
+                    //no_connection.visibility = if (it) GONE else VISIBLE
                 }
             }
         )
@@ -70,7 +62,7 @@ internal abstract class ConnectionActivityBase<T: ConnectionViewModelBase>(viewM
             {
                 viewModel.loadData()
             }
-        )
+        )*/
     }
 
     /**
@@ -98,6 +90,6 @@ internal abstract class ConnectionActivityBase<T: ConnectionViewModelBase>(viewM
      * Called when user tries to reconnect to the network.
      */
     protected open fun reconnect() {
-        viewModel.loadData()
+        //viewModel.loadData()
     }
 }

@@ -28,9 +28,11 @@ public class SampleApp extends Application {
         map.put("test_email", "sample@email.com");
         PyrusServiceDesk.setFieldsData(map);
 
-        PyrusServiceDesk.setPushToken(
-                "my_push_token",
-                exception -> Log.w("SAMPLE_APP", exception));
+        // TODO
+//        PyrusServiceDesk.setPushToken(
+//            "my_push_token",
+//            exception -> Log.w("SAMPLE_APP", exception)
+//        );
 
         PyrusServiceDesk.onAuthorizationFailed(null);
     }

@@ -5,11 +5,14 @@ import android.content.Context
 import android.content.SharedPreferences
 import android.net.Uri
 import android.os.Build
+import com.github.terrakok.cicerone.Cicerone
+import com.github.terrakok.cicerone.NavigatorHolder
 import com.google.gson.GsonBuilder
 import com.pyrus.pyrusservicedesk._ref.utils.ISO_DATE_PATTERN
 import com.pyrus.pyrusservicedesk._ref.utils.PREFERENCE_KEY
 import com.pyrus.pyrusservicedesk._ref.utils.RequestUtils.Companion.getBaseUrl
 import com.pyrus.pyrusservicedesk._ref.utils.call_adapter.TryCallAdapterFactory
+import com.pyrus.pyrusservicedesk._ref.utils.navigation.PyrusRouterImpl
 import com.pyrus.pyrusservicedesk._ref.whitetea.core.DefaultStoreFactory2
 import com.pyrus.pyrusservicedesk._ref.whitetea.core.StoreFactory2
 import com.pyrus.pyrusservicedesk.presentation.ui.navigation_page.tickets_list.tickets.TicketsFeatureFactory
@@ -19,6 +22,7 @@ import com.pyrus.pyrusservicedesk.sdk.FileResolverImpl
 import com.pyrus.pyrusservicedesk.sdk.data.FileManager
 import com.pyrus.pyrusservicedesk.sdk.data.gson.RemoteGsonExclusionStrategy
 import com.pyrus.pyrusservicedesk.sdk.data.gson.UriGsonAdapter
+import com.pyrus.pyrusservicedesk.sdk.updates.LiveUpdates
 import com.pyrus.pyrusservicedesk.sdk.updates.PreferencesManager
 import com.pyrus.pyrusservicedesk.sdk.verify.LocalDataVerifier
 import com.pyrus.pyrusservicedesk.sdk.verify.LocalDataVerifierImpl
@@ -112,8 +116,6 @@ internal class DiInjector(
         .client(okHttpClient)
         .build()
 
-
-
     private val api: ServiceDeskApi = retrofit.create(ServiceDeskApi::class.java)
 
     private val fileManager: FileManager = FileManager(application, fileResolver)
@@ -141,6 +143,10 @@ internal class DiInjector(
     fun ticketsListFeatureFactory(appId: String): TicketsListFeatureFactory {
         return TicketsListFeatureFactory(storeFactory, syncRepository, appId)
     }
+
+    private val cicerone: Cicerone<PyrusRouterImpl> = Cicerone.create(PyrusRouterImpl())
+
+    val router = cicerone.router
 
 //    val liveUpdates = LiveUpdates(
 //        repository = repository,

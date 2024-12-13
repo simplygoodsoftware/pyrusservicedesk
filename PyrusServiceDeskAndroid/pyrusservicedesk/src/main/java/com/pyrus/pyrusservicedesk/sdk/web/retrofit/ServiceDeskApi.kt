@@ -1,10 +1,10 @@
 package com.pyrus.pyrusservicedesk.sdk.web.retrofit
 
 import androidx.annotation.Keep
+import com.pyrus.pyrusservicedesk._ref.utils.Try
 import com.pyrus.pyrusservicedesk.sdk.data.Ticket
 import com.pyrus.pyrusservicedesk.sdk.data.intermediate.*
 import com.pyrus.pyrusservicedesk.sdk.web.request_body.*
-import com.pyrus.pyrusservicedesk.utils.Try
 import okhttp3.MultipartBody
 import okhttp3.ResponseBody
 import retrofit2.Call

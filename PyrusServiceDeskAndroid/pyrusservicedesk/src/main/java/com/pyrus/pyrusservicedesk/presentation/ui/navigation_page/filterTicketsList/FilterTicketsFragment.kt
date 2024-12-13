@@ -23,7 +23,7 @@ class FilterTicketsFragment: BottomSheetDialogFragment() {
     override fun getTheme() = R.style.PsdAppBottomSheetDialogTheme
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
-        val binding = AddTicketFragmentBinding.inflate(inflater, container, false)
+        binding = AddTicketFragmentBinding.inflate(inflater, container, false)
         return binding.root
     }
 
@@ -37,8 +37,7 @@ class FilterTicketsFragment: BottomSheetDialogFragment() {
         val title: TextView = view.findViewById(R.id.titleTextView)
         title.text = "Фильтры"
         //val recyclerview: RecyclerView = view.findViewById(R.id.usersRv)
-        binding.usersRv.layoutManager = LinearLayoutManager(view.context)
-
+        binding.usersRv.layoutManager = LinearLayoutManager(context)
         val adapter = FilterTicketsAdapter(
             users = selectedUserNames,
             userIds = selectedUserIds,

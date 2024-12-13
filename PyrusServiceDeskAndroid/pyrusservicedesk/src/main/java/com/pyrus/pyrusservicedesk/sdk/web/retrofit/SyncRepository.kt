@@ -5,12 +5,9 @@ import com.pyrus.pyrusservicedesk.PyrusServiceDesk.Companion.API_VERSION_2
 import com.pyrus.pyrusservicedesk._ref.utils.Try
 import com.pyrus.pyrusservicedesk._ref.utils.call_adapter.TryCallAdapterFactory
 import com.pyrus.pyrusservicedesk._ref.utils.log.PLog
-import com.pyrus.pyrusservicedesk.call_adapter.TryCallAdapterFactory
-import com.pyrus.pyrusservicedesk.log.PLog
+import com.pyrus.pyrusservicedesk.sdk.data.UserData
 import com.pyrus.pyrusservicedesk.sdk.data.intermediate.Tickets
 import com.pyrus.pyrusservicedesk.sdk.web.request_body.RequestBodyBase
-import com.pyrus.pyrusservicedesk.utils.RequestUtils.Companion.getBaseUrl
-import com.pyrus.pyrusservicedesk.utils.Try
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineExceptionHandler
 import kotlinx.coroutines.CoroutineScope
@@ -66,6 +63,10 @@ class SyncRepository(val retrofit: Retrofit) : CoroutineScope {
     init {
         api = retrofit.create(ServiceDeskApi::class.java)
     }
+
+    class SyncTryRes(
+        val tryRes: Try<Tickets>
+    )
 
     class SyncRes(
         val tickets: Tickets,
@@ -170,11 +171,11 @@ class SyncRepository(val retrofit: Retrofit) : CoroutineScope {
         sendSyncComplete(syncRes)
     }
 
-    private suspend fun sync(
+    internal suspend fun sync(
         request: RequestBodyBase,
     ): Try<SyncRes> {
 
-        val responseTry = try {
+        val responseTry: Try<Tickets> = try {
                 api.getTickets(request)
             } catch (e: Exception) {
                 e.printStackTrace()
@@ -191,7 +192,7 @@ class SyncRepository(val retrofit: Retrofit) : CoroutineScope {
 //        }
 
         val responseData = when (responseTry) {
-            is Try.Success<*> -> responseTry.value
+            is Try.Success -> responseTry.value
             is Try.Failure -> {
                 PLog.d(TAG, "sync server error: ${responseTry.error}")
                 return Try.Failure(responseTry.error)
@@ -220,17 +221,23 @@ class SyncRepository(val retrofit: Retrofit) : CoroutineScope {
         }
     }
 
-    private fun createSyncRequest(): RequestBodyBase {
+    internal fun createSyncRequest(): RequestBodyBase {
         return RequestBodyBase(
+            additionalUsers = getAdditionalUsers(),
             authorId = PyrusServiceDesk.get().authorId,
-            authorName = PyrusServiceDesk.get().userName,
-            appId = PyrusServiceDesk.get().appId,
-            userId = PyrusServiceDesk.get().userId ?: "0",
-            instanceId = PyrusServiceDesk.get().instanceId,
+            authorName = "Kate Test",
+            appId = PyrusServiceDesk.users[0].appId,
+            userId = PyrusServiceDesk.users[0].userId,
+            instanceId = "4F71E6BA-55F8-46EE-B281-C9E18C42224F",
             version = getVersion(),
             apiSign = apiFlag,
             securityKey = getSecurityKey()
         )
+    }
+
+    private fun getAdditionalUsers(): List<UserData> {
+        val list = PyrusServiceDesk.users.map { UserData(it.appId, it.userId, getSecurityKey()?:"") }
+        return list
     }
 
     private fun getVersion(): Int {

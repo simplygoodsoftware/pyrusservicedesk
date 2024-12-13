@@ -20,7 +20,7 @@ class AddTicketFragment: BottomSheetDialogFragment() {
     override fun getTheme() = R.style.PsdAppBottomSheetDialogTheme
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
-        val binding = AddTicketFragmentBinding.inflate(inflater, container, false)
+        binding = AddTicketFragmentBinding.inflate(inflater, container, false)
         return binding.root
     }
 

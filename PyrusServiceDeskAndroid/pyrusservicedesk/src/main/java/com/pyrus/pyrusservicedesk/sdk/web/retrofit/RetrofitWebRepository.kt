@@ -4,7 +4,9 @@ import androidx.annotation.Keep
 import com.google.gson.Gson
 import com.pyrus.pyrusservicedesk.PyrusServiceDesk
 import com.pyrus.pyrusservicedesk.PyrusServiceDesk.Companion.API_VERSION_2
-import com.pyrus.pyrusservicedesk.log.PLog
+import com.pyrus.pyrusservicedesk._ref.utils.ConfigUtils
+import com.pyrus.pyrusservicedesk._ref.utils.getFirstNSymbols
+import com.pyrus.pyrusservicedesk._ref.utils.log.PLog
 import com.pyrus.pyrusservicedesk.sdk.FileResolver
 import com.pyrus.pyrusservicedesk.sdk.data.Attachment
 import com.pyrus.pyrusservicedesk.sdk.data.Command
@@ -18,9 +20,7 @@ import com.pyrus.pyrusservicedesk.sdk.request.UploadFileRequest
 import com.pyrus.pyrusservicedesk.sdk.response.*
 import com.pyrus.pyrusservicedesk.sdk.web.UploadFileHooks
 import com.pyrus.pyrusservicedesk.sdk.web.request_body.*
-import com.pyrus.pyrusservicedesk.utils.ConfigUtils
 import com.pyrus.pyrusservicedesk.utils.RequestUtils.Companion.getBaseUrl
-import com.pyrus.pyrusservicedesk.utils.getFirstNSymbols
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
@@ -186,9 +186,9 @@ internal class RetrofitWebRepository(
         return null
     }
 
-    private fun getExtraFields(): Map<String, String>? {
+    /*private fun getExtraFields(): Map<String, String>? {
         return PyrusServiceDesk.EXTRA_FIELDS
-    }
+    }*/
 
    /* private suspend fun addComment(
         ticketId: Int,

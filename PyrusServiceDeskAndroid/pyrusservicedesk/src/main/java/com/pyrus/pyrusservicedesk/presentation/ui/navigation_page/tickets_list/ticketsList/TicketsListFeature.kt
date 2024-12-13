@@ -18,7 +18,6 @@ internal interface TicketsListContract {
         val allTickets: List<Ticket>,
         val tickets: List<Ticket>,
         val appId: String,
-        val users: HashMap<String, String>,
         val selectedUser: String,
         val isLoading: Boolean,
     )
@@ -27,7 +26,7 @@ internal interface TicketsListContract {
 
         sealed interface Outer : Message {
 
-            object OnCreateTicketClick : Outer
+            data object OnCreateTicketClick : Outer
 
             data class OnTicketClick(val ticketId: Int) : Outer
         }
@@ -36,8 +35,8 @@ internal interface TicketsListContract {
 
             data class TicketsUpdated(val tickets: Tickets) : Inner
             data class UserIdSelected(val userId: String) : Inner
-            object UpdateTicketsFailed : Inner
-            object UpdateTicketsCompleted : Inner
+            data object UpdateTicketsFailed : Inner
+            data class UpdateTicketsCompleted(val tickets: Tickets) : Inner
         }
 
     }

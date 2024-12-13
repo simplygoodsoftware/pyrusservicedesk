@@ -37,7 +37,7 @@ internal class TicketsListViewModel(
     }
 
 
-    init {
+    /*init {
         if (isNetworkConnected.value == true) {
             loadData()
         }
@@ -47,7 +47,7 @@ internal class TicketsListViewModel(
 
     override fun onLoadData() {
         update()
-    }
+    }*/
 
     override fun onNewData(tickets: Tickets) {
         this.tickets.value = tickets.tickets?.sortedWith(TicketComparator())
@@ -134,6 +134,10 @@ internal class TicketsListViewModel(
             //ticketsMutable[ticketsMutable.indexOf(ticket)].isRead = ticket.isRead
             tickets.value = ticketsMutable
         }
+    }
+
+    override fun onLoadData() {
+        TODO("Not yet implemented")
     }
 
 }

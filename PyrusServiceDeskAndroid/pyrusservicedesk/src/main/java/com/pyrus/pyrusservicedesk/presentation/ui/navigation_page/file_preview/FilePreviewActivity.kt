@@ -1,30 +1,19 @@
 package com.pyrus.pyrusservicedesk.presentation.ui.navigation_page.file_preview
 
-import android.Manifest
 import android.content.Intent
 import android.content.Intent.ACTION_SEND
 import android.content.Intent.ACTION_VIEW
-import android.graphics.PorterDuff
-import android.graphics.drawable.RotateDrawable
 import android.net.Uri
 import android.os.Bundle
 import android.view.Menu
 import android.view.MenuInflater
 import android.view.MenuItem
 import android.view.MenuItem.SHOW_AS_ACTION_ALWAYS
-import android.view.View.*
-import android.view.WindowManager
-import android.view.animation.LinearInterpolator
-import android.webkit.*
+import android.view.View.NO_ID
 import com.pyrus.pyrusservicedesk.PyrusServiceDesk
 import com.pyrus.pyrusservicedesk.R
 import com.pyrus.pyrusservicedesk.presentation.ConnectionActivityBase
 import com.pyrus.pyrusservicedesk.sdk.data.intermediate.FileData
-import com.pyrus.pyrusservicedesk.utils.*
-import kotlinx.android.synthetic.main.psd_activity_file_preview.*
-import kotlinx.android.synthetic.main.psd_no_connection.*
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.launch
 
 
 /**
@@ -71,8 +60,8 @@ internal class FilePreviewActivity: ConnectionActivityBase<FilePreviewViewModel>
         supportActionBar?.apply {
             title = ""
         }
-        toolbar_title.text = viewModel.getFileName()
-        toolbar_title.setTextColor(getTextColorOnBackground(this, ConfigUtils.getHeaderBackgroundColor(this)))
+        //toolbar_title.text = viewModel.getFileName()
+        /*toolbar_title.setTextColor(getTextColorOnBackground(this, ConfigUtils.getHeaderBackgroundColor(this)))
         file_preview_toolbar.setNavigationIcon(R.drawable.psd_arrow_back)
         file_preview_toolbar.setNavigationOnClickListener { finish() }
         file_preview_toolbar.navigationIcon?.setColorFilter(
@@ -103,8 +92,8 @@ internal class FilePreviewActivity: ConnectionActivityBase<FilePreviewViewModel>
         noConnectionTextView.setTextColor(secondaryColor)
         reconnectButton.setTextColor(ConfigUtils.getAccentColor(this))
         no_connection.setBackgroundColor(ConfigUtils.getNoConnectionBackgroundColor(this))
-
-        web_view.apply{
+*/
+        /*web_view.apply{
             settings.apply {
                 builtInZoomControls = true
                 useWideViewPort = true
@@ -134,20 +123,20 @@ internal class FilePreviewActivity: ConnectionActivityBase<FilePreviewViewModel>
         if (savedInstanceState != null) {
             web_view.restoreState(savedInstanceState)
             pageFinishedSuccessfully = savedInstanceState.getBoolean(STATE_FINISHED_SUCCESSFULLY)
-        }
+        }*/
 
-        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.LOLLIPOP) {
+       /* if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.LOLLIPOP) {
             window.clearFlags(WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS)
             window.addFlags(WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS)
             window.statusBarColor = ConfigUtils.getStatusBarColor(this)?: window.statusBarColor
         }
 
-        no_preview.setBackgroundColor(ConfigUtils.getNoPreviewBackgroundColor(this))
+        no_preview.setBackgroundColor(ConfigUtils.getNoPreviewBackgroundColor(this))*/
     }
 
     override fun onSaveInstanceState(outState: Bundle) {
         super.onSaveInstanceState(outState)
-        web_view.saveState(outState)
+        //web_view.saveState(outState)
         outState.putBoolean(STATE_FINISHED_SUCCESSFULLY, pageFinishedSuccessfully)
     }
 
@@ -158,27 +147,27 @@ internal class FilePreviewActivity: ConnectionActivityBase<FilePreviewViewModel>
         MenuInflater(this).inflate(R.menu.psd_file_preview_menu, menu)
         menu.findItem(R.id.download).setShowAsAction(SHOW_AS_ACTION_ALWAYS)
         menu.findItem(R.id.share).setShowAsAction(SHOW_AS_ACTION_ALWAYS)
-        menu.findItem(R.id.loading)?.let {
+        /*menu.findItem(R.id.loading)?.let {
             it.setShowAsAction(SHOW_AS_ACTION_ALWAYS)
             (it.icon as? RotateDrawable)?.animateInfinite(LOADING_ICON_ANIMATION_DURATION_MS, LinearInterpolator())
         }
         val iconColor = ConfigUtils.getToolbarButtonColor(this)
         menu.findItem(R.id.download).icon?.setColorFilter(iconColor, PorterDuff.Mode.SRC_ATOP)
         menu.findItem(R.id.share).icon?.setColorFilter(iconColor, PorterDuff.Mode.SRC_ATOP)
-        menu.findItem(R.id.loading)?.icon?.setColorFilter(iconColor, PorterDuff.Mode.SRC_ATOP)
+        menu.findItem(R.id.loading)?.icon?.setColorFilter(iconColor, PorterDuff.Mode.SRC_ATOP)*/
         return true
     }
 
     override fun startObserveData() {
         super.startObserveData()
-        viewModel.getFileLiveData().observe(this) {
+       /* viewModel.getFileLiveData().observe(this) {
             it?.let { model ->
                 when {
                     model.isPreviewable -> applyPreviewableViewModel(model)
                     else -> applyNonPreviewableViewModel(model)
                 }
             }
-        }
+        }*/
 
     }
 
@@ -187,11 +176,11 @@ internal class FilePreviewActivity: ConnectionActivityBase<FilePreviewViewModel>
 
     override fun onPermissionsGranted(permissions: Array<String>) {
         super.onPermissionsGranted(permissions)
-        if (permissions.contains(Manifest.permission.WRITE_EXTERNAL_STORAGE))
-            startDownloadFile()
+        //if (permissions.contains(Manifest.permission.WRITE_EXTERNAL_STORAGE))
+            //startDownloadFile()
     }
 
-    private fun applyNonPreviewableViewModel(model: FileViewModel) {
+    /*private fun applyNonPreviewableViewModel(model: FileViewModel) {
         web_view.visibility = GONE
         progress_bar.visibility = GONE
         no_preview.visibility = VISIBLE
@@ -283,7 +272,7 @@ internal class FilePreviewActivity: ConnectionActivityBase<FilePreviewViewModel>
                 delay(CHECK_MENU_INFLATED_DELAY_MS)
             file_preview_toolbar.menu.findItem(itemId)?.isVisible = isVisible
         }
-    }
+    }*/
 
     private fun canBePreviewedInOtherApp(fileUri: Uri): Boolean {
         return Intent(ACTION_VIEW)
@@ -307,17 +296,17 @@ internal class FilePreviewActivity: ConnectionActivityBase<FilePreviewViewModel>
         if (item == null)
             return false
         when (item.itemId) {
-            R.id.download -> startDownloadFile()
+            /*R.id.download -> startDownloadFile()
             R.id.share -> {
                 viewModel.getFileLiveData().value?.let {
                     dispatchLocalFileAction(it.fileUri, ACTION_SEND)
                 }
-            }
+            }*/
         }
         return true
     }
 
-    private fun startDownloadFile() {
+    /*private fun startDownloadFile() {
         viewModel.onDownloadFileClicked()
-    }
+    }*/
 }

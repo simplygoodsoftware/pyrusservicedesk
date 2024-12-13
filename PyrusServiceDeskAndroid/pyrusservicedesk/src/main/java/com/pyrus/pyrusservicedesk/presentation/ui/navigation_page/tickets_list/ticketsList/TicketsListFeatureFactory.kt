@@ -1,10 +1,15 @@
 package com.pyrus.pyrusservicedesk.presentation.ui.navigation_page.tickets_list.ticketsList
 
 import com.pyrus.pyrusservicedesk.PyrusServiceDesk
+import com.pyrus.pyrusservicedesk._ref.utils.Try
+import com.pyrus.pyrusservicedesk._ref.utils.isSuccess
+import com.pyrus.pyrusservicedesk._ref.utils.log.PLog
+import com.pyrus.pyrusservicedesk._ref.utils.singleFlow
 import com.pyrus.pyrusservicedesk._ref.whitetea.core.Actor
 import com.pyrus.pyrusservicedesk._ref.whitetea.core.StoreFactory2
 import com.pyrus.pyrusservicedesk._ref.whitetea.core.adaptCast
 import com.pyrus.pyrusservicedesk._ref.whitetea.core.logic.Logic
+import com.pyrus.pyrusservicedesk.presentation.ui.navigation_page.tickets_list.tickets.TicketsContract
 import com.pyrus.pyrusservicedesk.presentation.ui.navigation_page.tickets_list.ticketsList.TicketsListContract.Effect
 import com.pyrus.pyrusservicedesk.presentation.ui.navigation_page.tickets_list.ticketsList.TicketsListContract.Message
 import com.pyrus.pyrusservicedesk.presentation.ui.navigation_page.tickets_list.ticketsList.TicketsListContract.State
@@ -27,12 +32,14 @@ internal class TicketsListFeatureFactory(
             allTickets = emptyList(),
             tickets = emptyList(),
             appId = appId,
-            users = hashMapOf(),
             selectedUser = "",
             isLoading = true
         ),
         reducer = FeatureReducer(),
         actor = TicketsListActor(syncRepository).adaptCast(),
+        initialEffects = listOf(
+            Effect.Inner.UpdateTickets,
+        ),
     )
 
 }
@@ -70,27 +77,36 @@ private class FeatureReducer : Logic<State, Message, Effect>() {
 
     private fun Result.handleInner(message: Message.Inner) {
         when (message) {
-            Message.Inner.UpdateTicketsFailed -> TODO()
-            Message.Inner.UpdateTicketsCompleted -> TODO()
-            is Message.Inner.TicketsUpdated -> TODO()
+            //Message.Inner.UpdateTicketsFailed -> TODO()
+            is Message.Inner.UpdateTicketsCompleted -> {
+
+                val usersId = PyrusServiceDesk.users.filter { it.appId == state.appId }.map { it.userId }
+                val filteredTickets = message.tickets.tickets?.filter {
+                    usersId.any { userId -> userId == it.userId }
+                }
+
+                state {
+                    State(
+                        allTickets = filteredTickets ?: emptyList(),
+                        tickets = filteredTickets ?: emptyList(),
+                        appId = state.appId,
+                        selectedUser = "",
+                        isLoading = false
+                    )
+                }
+            }
+            //is Message.Inner.TicketsUpdated -> TODO()
             is Message.Inner.UserIdSelected -> {
                 val tickets = if (message.userId.isNotEmpty()) {
                     state.allTickets.filter { it.userId == message.userId }
                 } else {
                     state.allTickets
                 }
-                state {
-                    State(
-                        allTickets = state.allTickets,
-                        tickets = tickets,
-                        appId = state.appId,
-                        users = state.users,
-                        selectedUser = message.userId,
-                        isLoading = state.isLoading
-                    )
-                }
+                state.copy(tickets = tickets)
 
             }
+
+            else -> {PLog.d("EP ", "message")}
         }
     }
 
@@ -115,17 +131,15 @@ internal class TicketsListActor(
 ) : Actor<Effect.Inner, Message.Inner> {
 
     override fun handleEffect(effect: Effect.Inner): Flow<Message.Inner> = when (effect) {
-        Effect.Inner.UpdateTickets -> TODO()/*singleFlow {
-            val ticketsTry: Try<Comments> = repository.startSync() getFeed(
-                keepUnread = false,
-                requestsRemoteComments = true
-            )
+        Effect.Inner.UpdateTickets -> singleFlow {
+            //repository.startSync()
+            val ticketsTry: Try<SyncRepository.SyncRes> = repository.sync(repository.createSyncRequest())
             when {
-                commentsTry.isSuccess() -> Message.Inner.UpdateCommentsCompleted
-                else -> Message.Inner.UpdateCommentsFailed
+                ticketsTry.isSuccess() -> Message.Inner.UpdateTicketsCompleted(ticketsTry.value.tickets)
+                else -> Message.Inner.UpdateTicketsFailed
             }
 
-        }*/
+        }
         Effect.Inner.TicketsAutoUpdate -> flow {
             // TODO
 

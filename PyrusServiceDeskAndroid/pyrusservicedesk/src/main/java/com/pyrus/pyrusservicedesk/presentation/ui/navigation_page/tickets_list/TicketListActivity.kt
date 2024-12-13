@@ -5,6 +5,7 @@ import android.os.Bundle
 import android.view.View
 import android.widget.ImageButton
 import android.widget.Toast
+import androidx.core.view.get
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
@@ -19,14 +20,7 @@ import com.pyrus.pyrusservicedesk.presentation.ui.navigation_page.tickets_list.a
 import com.pyrus.pyrusservicedesk.sdk.data.Application
 import com.pyrus.pyrusservicedesk.sdk.data.Ticket
 import com.pyrus.pyrusservicedesk.sdk.web.retrofit.SyncRepository
-import com.pyrus.pyrusservicedesk.utils.CIRCLE_TRANSFORMATION
 import com.pyrus.pyrusservicedesk.utils.RequestUtils.Companion.getOrganisationLogoUrl
-import kotlinx.android.synthetic.main.psd_empty_tickets_list.view.createTicketTv
-import kotlinx.android.synthetic.main.psd_toolbar.view.psd_toolbar_filter_ib
-import kotlinx.android.synthetic.main.psd_toolbar.view.psd_toolbar_qr_ib
-import kotlinx.android.synthetic.main.psd_toolbar.view.psd_toolbar_settings_ib
-import kotlinx.android.synthetic.main.psd_toolbar.view.psd_toolbar_vendor_iv
-import kotlinx.android.synthetic.main.psd_toolbar.view.psd_toolbar_vendor_name_tv
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
 
@@ -35,8 +29,7 @@ import kotlinx.coroutines.launch
  * Activity for rendering ticket/feed comments.
  */
 internal class TicketListActivity :
-    ConnectionActivityBase<TicketsListViewModel>(TicketsListViewModel::class.java),
-    FilterTicketsFragment.CallbackForFilter {
+    ConnectionActivityBase<TicketsListViewModel>(TicketsListViewModel::class.java) {
 
     private var selectedUserIdFilter: String = KEY_DEFAULT_USER_ID
 
@@ -54,7 +47,7 @@ internal class TicketListActivity :
         binding = PsdTicketsListBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
-        binding.toolbarTicketsList.psd_toolbar_filter_ib .setOnClickListener {
+        /*binding.toolbarTicketsList.psd_toolbar_filter_ib .setOnClickListener {
             //val bottomSheet = FilterTicketsFragment.newInstance(selectedUserIdFilter)
             //bottomSheet.show(supportFragmentManager, bottomSheet.tag)
             Toast.makeText(applicationContext, "фильтры", Toast.LENGTH_SHORT).show()
@@ -63,7 +56,7 @@ internal class TicketListActivity :
         binding.deleteFilterIv.setOnClickListener { onDataSentBack(KEY_DEFAULT_USER_ID, "all") }
 
 
-        binding.psdEmptyTicketsListLl.createTicketTv.setOnClickListener {
+        binding. psdEmptyTicketsListLl.createTicketTv.setOnClickListener {
             //TODO
             AddTicketFragment().show(supportFragmentManager, "")
         }
@@ -118,21 +111,21 @@ internal class TicketListActivity :
         }
 
         SyncRepository().startSync()
-
+*/
         // Пример обновления значения из ViewModel
-        val application: List<Application> = listOf(Application(PyrusServiceDesk.get().appId, "home", null))
+        //val application: List<Application> = listOf(Application(PyrusServiceDesk.get().appId, "home", null))
         //syncRepository.updateValue(SyncRes(Tickets(false, application, emptyList(), emptyList())))
     }
 
-    private fun getSelectedUserIds(chosenUserId: String): List<Ticket> {
+    /*private fun getSelectedUserIds(chosenUserId: String): List<Ticket> {
         val allUsersName = viewModel.getTicketsLiveData().value ?: emptyList()
         if (chosenUserId == KEY_DEFAULT_USER_ID)
             return allUsersName
 
         return allUsersName.filter { it.userId == chosenUserId }
-    }
+    }*/
 
-    override fun onDataSentBack(userId: String, userName: String) {
+    /*override fun onDataSentBack(userId: String, userName: String) {
         //adapter.setItems(getSelectedUserIds(userId))
         // TODO
         selectedUserIdFilter = userId
@@ -141,9 +134,9 @@ internal class TicketListActivity :
         binding.filterContextTv.text = userName
         binding.filterFl.visibility = if (userId == KEY_DEFAULT_USER_ID) View.GONE else View.VISIBLE
 
-    }
+    }*/
 
-    override fun startObserveData() {
+    /*override fun startObserveData() {
         super.startObserveData()
         viewModel.getTicketsLiveData().observe(
             this
@@ -161,7 +154,7 @@ internal class TicketListActivity :
 
         }
 
-        /*viewModel.getApplicationsLiveData().observe(
+        *//*viewModel.getApplicationsLiveData().observe(
             this
         ) { applications ->
             //TODO several vendors
@@ -187,8 +180,8 @@ internal class TicketListActivity :
             else {
                 binding.tabLayout.visibility = View.GONE
             }
-        }*/
-    }
+        }*//*
+    }*/
 
     companion object {
 

@@ -10,10 +10,10 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.app.AppCompatDelegate
 import android.view.View
 import android.view.inputmethod.InputMethodManager
-import com.pyrus.pyrusservicedesk.PyrusServiceDesk
 import com.pyrus.pyrusservicedesk.R
+import com.pyrus.pyrusservicedesk.core.StaticRepository
 import com.pyrus.pyrusservicedesk.presentation.viewmodel.SharedViewModel
-import com.pyrus.pyrusservicedesk.utils.getViewModel
+import com.pyrus.pyrusservicedesk._ref.utils.getViewModel
 import kotlinx.coroutines.*
 import kotlin.coroutines.CoroutineContext
 
@@ -53,8 +53,8 @@ internal abstract class ActivityBase: AppCompatActivity(), CoroutineScope {
         AppCompatDelegate.setCompatVectorFromResourcesEnabled(true)
         overridePendingTransition()
         val theme = when{
-            PyrusServiceDesk.getConfiguration().isDialogTheme -> R.style.PyrusServiceDesk_Dialog
-            PyrusServiceDesk.getConfiguration().forceDarkAllowed -> R.style.PyrusServiceDesk
+            StaticRepository.getConfiguration().isDialogTheme -> R.style.PyrusServiceDesk_Dialog
+            StaticRepository.getConfiguration().forceDarkAllowed -> R.style.PyrusServiceDesk
             else -> R.style.BasePyrusServiceDesk
         }
         setTheme(theme)

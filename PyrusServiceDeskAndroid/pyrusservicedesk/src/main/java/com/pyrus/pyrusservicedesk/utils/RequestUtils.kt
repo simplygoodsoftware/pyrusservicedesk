@@ -60,6 +60,7 @@ class RequestUtils{
             return "${getBaseUrl(domain)}DownloadFilePreview/$fileId" + getPathParams()
         }
 
+        //TODO ""
         private fun getPathParams(): String {
             val version = PyrusServiceDesk.get().apiVersion
             return with(PyrusServiceDesk.get()) {
@@ -69,14 +70,14 @@ class RequestUtils{
                             "&security_key=" +
                             URLEncoder.encode(PyrusServiceDesk.get().securityKey, "UTF-8") +
                             "&instance_id=" +
-                            URLEncoder.encode(instanceId, "UTF-8") +
+                            URLEncoder.encode("", "UTF-8") +
                             "&version=" +
                             URLEncoder.encode(version.toString(), "UTF-8") +
                             "&app_id=" +
                             URLEncoder.encode(appId, "UTF-8")
                 else
                     "?user_id=" +
-                            URLEncoder.encode(instanceId, "UTF-8") +
+                            URLEncoder.encode("", "UTF-8") +
                             "&app_id=" +
                             URLEncoder.encode(appId, "UTF-8")
             }

@@ -1,6 +1,6 @@
 package com.pyrus.pyrusservicedesk.presentation.ui.navigation_page.tickets_list.tickets
 
-import com.pyrus.pyrusservicedesk.sdk.data.intermediate.Tickets
+import com.pyrus.pyrusservicedesk.sdk.data.Application
 
 internal interface  TicketsView {
     data class TicketListModel(
@@ -9,21 +9,23 @@ internal interface  TicketsView {
         val filterName: String,
         val ticketsIsEmpty: Boolean,
         val filterEnabled: Boolean,
+        val tabLayoutVisibility: Boolean,
+        val applications: HashSet<Application>
     )
 
     sealed interface Event {
 
-        object OnTitleClick : Event
+        data object OnTitleClick : Event
 
-        object OnFilterClick : Event
+        data object OnFilterClick : Event
 
         data class OnScanClick(val text: String) : Event
 
         data class OnSettingsClick(val rating: Int) : Event
 
-        object OnFabItemClick : Event
+        data object OnFabItemClick : Event
 
-        object OnTicketsClick : Event
+        data object OnTicketsClick : Event
 
     }
 }

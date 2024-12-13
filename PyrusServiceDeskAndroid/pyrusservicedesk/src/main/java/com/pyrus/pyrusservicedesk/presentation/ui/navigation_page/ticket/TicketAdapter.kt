@@ -18,6 +18,9 @@ import androidx.annotation.LayoutRes
 import androidx.appcompat.content.res.AppCompatResources
 import com.pyrus.pyrusservicedesk.PyrusServiceDesk
 import com.pyrus.pyrusservicedesk.R
+import com.pyrus.pyrusservicedesk._ref.utils.ConfigUtils
+import com.pyrus.pyrusservicedesk._ref.utils.getTimeText
+import com.pyrus.pyrusservicedesk._ref.utils.isImage
 import com.pyrus.pyrusservicedesk.presentation.ui.navigation_page.ticket.entries.ButtonEntry
 import com.pyrus.pyrusservicedesk.presentation.ui.navigation_page.ticket.entries.ButtonsEntry
 import com.pyrus.pyrusservicedesk.presentation.ui.navigation_page.ticket.entries.CommentEntry
@@ -33,19 +36,7 @@ import com.pyrus.pyrusservicedesk.presentation.ui.view.recyclerview.AdapterBase
 import com.pyrus.pyrusservicedesk.presentation.ui.view.recyclerview.ViewHolderBase
 import com.pyrus.pyrusservicedesk.presentation.ui.view.recyclerview.item_decorators.SpaceMultiplier
 import com.pyrus.pyrusservicedesk.sdk.data.Attachment
-import com.pyrus.pyrusservicedesk.utils.CIRCLE_TRANSFORMATION
-import com.pyrus.pyrusservicedesk.utils.ConfigUtils
 import com.pyrus.pyrusservicedesk.utils.RequestUtils.Companion.getAvatarUrl
-import com.pyrus.pyrusservicedesk.utils.getTimeText
-import com.pyrus.pyrusservicedesk.utils.isImage
-import kotlinx.android.synthetic.main.psd_view_holder_buttons.view.flButtons
-import kotlinx.android.synthetic.main.psd_view_holder_comment_rating.view.ratingImage
-import kotlinx.android.synthetic.main.psd_view_holder_comment_rating.view.statusIcon
-import kotlinx.android.synthetic.main.psd_view_holder_rating.view.rating1
-import kotlinx.android.synthetic.main.psd_view_holder_rating.view.rating2
-import kotlinx.android.synthetic.main.psd_view_holder_rating.view.rating3
-import kotlinx.android.synthetic.main.psd_view_holder_rating.view.rating4
-import kotlinx.android.synthetic.main.psd_view_holder_rating.view.rating5
 
 
 private const val VIEW_TYPE_COMMENT_INBOUND = 0
@@ -189,11 +180,11 @@ internal class TicketAdapter: AdapterBase<TicketEntry>() {
         private fun setAuthorAvatarVisibility(visible: Boolean) {
             avatar.visibility = if (visible) VISIBLE else INVISIBLE
             if (visible) {
-                PyrusServiceDesk.get().picasso
-                    .load(getAvatarUrl(getItem().comment.author.avatarId, PyrusServiceDesk.get().domain))
-                    .placeholder(ConfigUtils.getSupportAvatar(itemView.context))
-                    .transform(CIRCLE_TRANSFORMATION)
-                    .into(avatar)
+//                PyrusServiceDesk.get().picasso
+//                    .load(getAvatarUrl(getItem().comment.author.avatarId, PyrusServiceDesk.get().domain))
+//                    .placeholder(ConfigUtils.getSupportAvatar(itemView.context))
+//                    .transform(CIRCLE_TRANSFORMATION)
+//                    .into(avatar)
             }
         }
 
@@ -368,22 +359,22 @@ internal class TicketAdapter: AdapterBase<TicketEntry>() {
 
         init {
             ConfigUtils.getSecondaryColorOnMainBackground(itemView.context).apply {
-                itemView.rating1.setBackgroundColor(this)
-                itemView.rating2.setBackgroundColor(this)
-                itemView.rating3.setBackgroundColor(this)
-                itemView.rating4.setBackgroundColor(this)
-                itemView.rating5.setBackgroundColor(this)
+//                itemView.rating1.setBackgroundColor(this)
+//                itemView.rating2.setBackgroundColor(this)
+//                itemView.rating3.setBackgroundColor(this)
+//                itemView.rating4.setBackgroundColor(this)
+//                itemView.rating5.setBackgroundColor(this)
             }
         }
 
         override fun bindItem(item: RatingEntry) {
             super.bindItem(item)
             with(itemView) {
-                rating1.setOnClickListener { onRatingClickListener?.invoke(1)}
+                /*rating1.setOnClickListener { onRatingClickListener?.invoke(1)}
                 rating2.setOnClickListener { onRatingClickListener?.invoke(2)}
                 rating3.setOnClickListener { onRatingClickListener?.invoke(3)}
                 rating4.setOnClickListener { onRatingClickListener?.invoke(4)}
-                rating5.setOnClickListener { onRatingClickListener?.invoke(5)}
+                rating5.setOnClickListener { onRatingClickListener?.invoke(5)}*/
             }
         }
     }
@@ -404,7 +395,7 @@ internal class TicketAdapter: AdapterBase<TicketEntry>() {
 
         override fun bindItem(item: CommentEntry) {
             super.bindItem(item)
-            with(itemView) {
+            /*with(itemView) {
                 ratingImage.setImageResource(item.comment.rating?.ratingToEmojiRes() ?: R.drawable.ic_emoji_rating_3)
                 when {
                     getItem().hasError() -> {
@@ -424,7 +415,7 @@ internal class TicketAdapter: AdapterBase<TicketEntry>() {
                     if (getItem().hasError())
                         onErrorCommentEntryClickListener?.invoke(getItem())
                 }
-            }
+            }*/
         }
 
     }
@@ -434,7 +425,7 @@ internal class TicketAdapter: AdapterBase<TicketEntry>() {
         override fun bindItem(item: ButtonsEntry) {
             super.bindItem(item)
 
-            item.buttons.forEachIndexed { index, buttonEntry ->
+           /* item.buttons.forEachIndexed { index, buttonEntry ->
                 (itemView.flButtons.getChildAt(index) as? TextView)?.apply {
                     val buttonText = buttonEntry.text
 
@@ -478,14 +469,14 @@ internal class TicketAdapter: AdapterBase<TicketEntry>() {
 
                     visibility = VISIBLE
                 }
-            }
+            }*/
 
-            repeat(itemView.flButtons.childCount - item.buttons.size) {
+            /*repeat(itemView.flButtons.childCount - item.buttons.size) {
                 itemView.flButtons.getChildAt(itemView.flButtons.childCount - 1 - it).apply {
                     visibility = GONE
                     setOnClickListener(null)
                 }
-            }
+            }*/
         }
     }
 

@@ -9,7 +9,6 @@ import com.pyrus.pyrusservicedesk.R
 import com.pyrus.pyrusservicedesk.presentation.ui.view.recyclerview.AdapterBase
 import com.pyrus.pyrusservicedesk.presentation.ui.view.recyclerview.ViewHolderBase
 import com.pyrus.pyrusservicedesk.sdk.data.Ticket
-import com.pyrus.pyrusservicedesk.utils.getTimeWhen
 import java.util.Calendar
 
 /**
@@ -47,7 +46,7 @@ internal class TicketsListAdapter: AdapterBase<Ticket>() {
             super.bindItem(item)
             ticketName.text = getItem().subject
             lastComment.text = getItem().lastComment?.body
-            date.text = getItem().lastComment?.creationDate?.getTimeWhen(itemView.context, Calendar.getInstance())
+            date.text = "09.02"//getItem().lastComment?.creationDate?.getTimeWhen(itemView.context, Calendar.getInstance())
             isUnread.visibility = if (!getItem().isRead!!) VISIBLE else GONE //TODO !!
         }
     }

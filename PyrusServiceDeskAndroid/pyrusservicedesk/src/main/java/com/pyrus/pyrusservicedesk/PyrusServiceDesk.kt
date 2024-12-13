@@ -4,6 +4,7 @@ import android.app.Activity
 import android.app.Application
 import androidx.annotation.MainThread
 import com.pyrus.pyrusservicedesk._ref.ui_domain.screens.ticket.MainActivity
+import com.pyrus.pyrusservicedesk._ref.utils.ConfigUtils
 import com.pyrus.pyrusservicedesk._ref.utils.MILLISECONDS_IN_MINUTE
 import com.pyrus.pyrusservicedesk._ref.utils.RequestUtils
 import com.pyrus.pyrusservicedesk._ref.utils.getFirstNSymbols
@@ -189,34 +190,36 @@ class PyrusServiceDesk private constructor(
             val validDomain = if (validateDomain(apiDomain)) apiDomain else null
 
             // TODO sds
-//            if (INSTANCE != null && get().userId != userId) {
-//                clearLocalData {
-//                    if (CONFIGURATION != null)
-//                        stop()
-//                    INSTANCE = PyrusServiceDesk(
-//                        application,
-//                        appId,
-//                        userId,
-//                        securityKey,
-//                        validDomain,
-//                        apiVersion,
-//                        loggingEnabled,
-//                        authorizationToken,
-//                    )
-//                }
-//            }
-//            else {
-//                INSTANCE = PyrusServiceDesk(
-//                    application,
-//                    appId,
-//                    userId,
-//                    securityKey,
-//                    validDomain,
-//                    apiVersion,
-//                    loggingEnabled,
-//                    authorizationToken,
-//                )
-//            }
+            if (INSTANCE != null && get().userId != userId) {
+                clearLocalData {
+                    INSTANCE = PyrusServiceDesk(
+                        application,
+                        appId,
+                        userId,
+                        userName,
+                        authorId,
+                        securityKey,
+                        validDomain,
+                        apiVersion,
+                        loggingEnabled,
+                        authorizationToken,
+                    )
+                }
+            }
+            else {
+                INSTANCE = PyrusServiceDesk(
+                    application,
+                    appId,
+                    userId,
+                    userName,
+                    authorId,
+                    securityKey,
+                    validDomain,
+                    apiVersion,
+                    loggingEnabled,
+                    authorizationToken,
+                )
+            }
         }
 
         private fun validateDomain(domain: String?): Boolean {
