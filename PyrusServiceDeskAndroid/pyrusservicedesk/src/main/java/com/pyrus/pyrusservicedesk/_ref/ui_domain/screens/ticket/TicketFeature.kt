@@ -3,7 +3,7 @@ package com.pyrus.pyrusservicedesk._ref.ui_domain.screens.ticket
 import android.net.Uri
 import com.pyrus.pyrusservicedesk._ref.utils.TextProvider
 import com.pyrus.pyrusservicedesk._ref.whitetea.core.Store
-import com.pyrus.pyrusservicedesk.sdk.data.intermediate.Comments
+import com.pyrus.pyrusservicedesk.sdk.data.Ticket
 
 internal typealias TicketFeature = Store<TicketContract.State, TicketContract.Message, TicketContract.Effect.Outer>
 
@@ -13,13 +13,13 @@ internal interface TicketContract {
         data object Loading : State
         data object Error : State
         data class Content(
-            val comments: Comments?,
+            val ticket: Ticket?,
             val sendEnabled: Boolean,
             val inputText: String,
             val welcomeMessage: String?,
         ) : State {
             override fun toString(): String {
-                return "State(c=${comments?.comments?.size})"
+                return "State(c=${ticket?.comments?.size})"
             }
         }
     }
@@ -42,6 +42,8 @@ internal interface TicketContract {
 
             data object OnCloseClick : Outer
 
+            data object OnBackClick : Outer
+
             data class OnMessageChanged(val text: String) : Outer
 
             data class OnAttachmentSelected(val fileUri: Uri?) : Outer
@@ -49,10 +51,10 @@ internal interface TicketContract {
         }
 
         sealed interface Inner : Message {
-            data class CommentsUpdated(val comments: Comments?) : Inner
+            data class CommentsUpdated(val ticket: Ticket?) : Inner
             data object UpdateCommentsFailed : Inner
             data class UpdateCommentsCompleted(
-                val comments: Comments,
+                val ticket: Ticket?,
                 val draft: String,
                 val welcomeMessage: String?,
             ) : Inner
@@ -68,7 +70,7 @@ internal interface TicketContract {
         }
 
         sealed interface Inner : Effect {
-            data object UpdateComments : Inner
+            data class UpdateComments(val ticketId: Int = 0) : Inner
             data object FeedFlow : Inner
             data object CommentsAutoUpdate : Inner
             data object Close : Inner

@@ -26,6 +26,21 @@ class RequestUtils{
         internal fun getAvatarUrl(avatarId: Int, domain: String?): String = "${getBaseUrl(domain)}Avatar/$avatarId"
 
         /**
+         * Provides url for getting the organisation logo.
+         */
+        internal fun getOrganisationLogoUrl(orgLogoUrl: String, domain: String?): String = "${getBaseLogoUrl(domain)}$orgLogoUrl"
+
+        /**
+         * return vase url for org logo
+         */
+        internal fun getBaseLogoUrl(domain: String?): String {
+            if (domain == null) {
+                return "https://dev.pyrus.com"
+            }
+            return "https://$domain"
+        }
+
+        /**
          * @return baseU
          */
         internal fun getBaseUrl(domain: String?): String {

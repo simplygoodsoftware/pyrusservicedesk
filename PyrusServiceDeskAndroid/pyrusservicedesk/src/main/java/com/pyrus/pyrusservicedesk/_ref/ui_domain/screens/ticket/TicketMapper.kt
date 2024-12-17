@@ -14,6 +14,7 @@ import com.pyrus.pyrusservicedesk.presentation.ui.view.ContentType
 import com.pyrus.pyrusservicedesk.presentation.ui.view.Status
 import com.pyrus.pyrusservicedesk.sdk.data.Attachment
 import com.pyrus.pyrusservicedesk.sdk.data.Comment
+import com.pyrus.pyrusservicedesk.sdk.data.Ticket
 import com.pyrus.pyrusservicedesk.sdk.data.intermediate.Comments
 
 internal object TicketMapper {
@@ -25,9 +26,10 @@ internal object TicketMapper {
         is State.Content -> Model(
             inputText = state.inputText,
             sendEnabled = state.sendEnabled,
-            comments = state.comments?.let { mapComments(it, state.welcomeMessage) },
+            comments = state.ticket?.let { mapComments(it, state.welcomeMessage) },
             isLoading = false,
             showNoConnectionError = false,
+            toolbarTitleText = state.ticket?.subject,
         )
         State.Loading -> Model(
             inputText = "",
@@ -35,6 +37,7 @@ internal object TicketMapper {
             comments = null,
             isLoading = true,
             showNoConnectionError = false,
+            toolbarTitleText = null,
         )
         State.Error -> Model(
             inputText = "",
@@ -42,6 +45,7 @@ internal object TicketMapper {
             comments = null,
             isLoading = false,
             showNoConnectionError = true,
+            toolbarTitleText = null,
         )
     }
 
@@ -55,6 +59,7 @@ internal object TicketMapper {
         is Event.OnRetryClick -> Message.Outer.OnRetryClick(event.id)
         Event.OnSendClick -> Message.Outer.OnSendClick
         Event.OnShowAttachVariantsClick -> Message.Outer.OnShowAttachVariantsClick
+        Event.OnBackClick -> Message.Outer.OnBackClick
     }
 
     fun map(effect: Effect.Outer) = when(effect) {
@@ -63,10 +68,11 @@ internal object TicketMapper {
     }
 
     private fun mapComments(
-        freshList: Comments,
+        ticket: Ticket,
         welcomeMessage: String?,
     ): List<CommentEntryV2> {
         val entries = ArrayList<CommentEntryV2>()
+        val freshList = ticket.comments ?: emptyList()
 
         if (welcomeMessage != null) addWelcomeEntries(entries, welcomeMessage, freshList)
 
@@ -74,16 +80,16 @@ internal object TicketMapper {
 
         val entriesWithDates = toListWithDates(entries).toMutableList()
 
-        if (freshList.showRating) {
-            if (freshList.showRatingText.isNotBlank()) entriesWithDates += CommentEntryV2.SimpleText(
+        if (ticket.showRating) {
+            if (!ticket.showRatingText.isNullOrBlank()) entriesWithDates += CommentEntryV2.SimpleText(
                 entryId = RATING_TEXT_ID,
-                message = freshList.showRatingText
+                message = ticket.showRatingText
             )
             entriesWithDates += CommentEntryV2.RatingSelector
         }
 
-        if (!freshList.showRating) {
-            val buttonEntry = freshList.comments.lastOrNull()?.let { extractButtons(it) }
+        if (!ticket.showRating) {
+            val buttonEntry = ticket.comments?.lastOrNull()?.let { extractButtons(it) }
             if (buttonEntry != null) entriesWithDates += buttonEntry
         }
 
@@ -93,9 +99,9 @@ internal object TicketMapper {
     private fun addWelcomeEntries(
         entries: ArrayList<CommentEntryV2>,
         welcomeMessage: String,
-        freshList: Comments
+        freshList: List<Comment>
     ) {
-        val firstComment = freshList.comments.firstOrNull()
+        val firstComment = freshList.firstOrNull()
         val welcomeCreationTime = firstComment?.creationDate?.time ?: System.currentTimeMillis()
 
         val welcomeEntry = CommentEntryV2.Comment(
@@ -117,9 +123,9 @@ internal object TicketMapper {
 
     private fun addCommentEntries(
         entries: ArrayList<CommentEntryV2>,
-        freshList: Comments,
+        freshList: List<Comment>,
     ) {
-        for (comment in freshList.comments) {
+        for (comment in freshList) {
             addCommentEntries(entries, comment, "") // TODO
         }
     }

@@ -9,6 +9,7 @@ import android.os.Bundle
 import android.text.Editable
 import android.text.TextWatcher
 import android.util.Log
+import android.view.Display.Mode
 import android.view.LayoutInflater
 import android.view.MenuItem
 import android.view.View
@@ -65,6 +66,7 @@ internal class TicketFragment: TeaFragment<Model, TicketView.Event, TicketView.E
         diff(Model::sendEnabled) { sendEnabled -> binding.send.isEnabled = sendEnabled }
         diff(Model::comments, { new, old -> new === old }, adapter::submitList)
         diff(Model::showNoConnectionError) { showError -> binding.noConnection.root.isVisible = showError }
+        diff(Model::toolbarTitleText) { text -> binding.toolbarTitle.text = ConfigUtils.getTitle(requireContext(), text) }
         diff(Model::isLoading) { isLoading ->
             binding.ticketContent.isVisible = !isLoading
             binding.progressBar.isVisible = isLoading
@@ -113,7 +115,9 @@ internal class TicketFragment: TeaFragment<Model, TicketView.Event, TicketView.E
     }
 
     private fun bindFeature() {
-        val feature = getStore { injector().ticketFeatureFactory("welcome").create() }
+        val userId = arguments?.getString(KEY_USER_ID) ?: KEY_DEFAULT_USER_ID
+        val ticketId = arguments?.getInt(KEY_TICKET_ID) ?: KEY_DEFAULT_TICKET_ID
+        val feature = getStore { injector().ticketFeatureFactory("welcome", userId, ticketId).create() }
         bind(BinderLifecycleMode.CREATE_DESTROY) {
             this@TicketFragment.messages.map(TicketMapper::map) bindTo feature
         }
@@ -129,6 +133,7 @@ internal class TicketFragment: TeaFragment<Model, TicketView.Event, TicketView.E
         binding.send.setOnClickListener { dispatch(TicketView.Event.OnSendClick) }
         binding.attach.setOnClickListener { dispatch(TicketView.Event.OnShowAttachVariantsClick) }
         binding.input.addTextChangedListener(inputTextWatcher)
+        binding.toolbarBack.setOnClickListener { dispatch(TicketView.Event.OnBackClick) }
     }
 
     private fun initUi() {
@@ -226,9 +231,19 @@ internal class TicketFragment: TeaFragment<Model, TicketView.Event, TicketView.E
 
     companion object {
         private const val STATE_KEYBOARD_SHOWN = "STATE_KEYBOARD_SHOWN"
+        private const val KEY_TICKET_ID = "KEY_TICKET_ID"
+        private const val KEY_USER_ID = "KEY_USER_ID"
+        const val KEY_DEFAULT_USER_ID = "0"
+        const val KEY_DEFAULT_TICKET_ID = 0
 
-        fun newInstance(): TicketFragment {
-            return TicketFragment()
+        fun newInstance(ticketId: Int, userId: String): TicketFragment {
+            val fragment = TicketFragment()
+            val args = Bundle().apply {
+                putString(KEY_USER_ID, userId)
+                putInt(KEY_TICKET_ID, ticketId)
+            }
+            fragment.arguments = args
+            return fragment
         }
     }
 

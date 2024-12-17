@@ -13,6 +13,7 @@ internal interface TicketView {
         val comments: List<CommentEntryV2>?,
         val isLoading: Boolean,
         val showNoConnectionError: Boolean,
+        val toolbarTitleText: String?,
     ) {
         override fun toString(): String {
             return "Model(inputText='$inputText', sendEnabled=$sendEnabled, comments=${comments?.size}, isLoading=$isLoading, showNoConnectionError=$showNoConnectionError)"
@@ -34,6 +35,8 @@ internal interface TicketView {
         data object OnSendClick : Event
 
         data object OnCloseClick : Event
+
+        data object OnBackClick : Event
 
         data class OnMessageChanged(val text: String) : Event
 

@@ -1,18 +1,18 @@
 package com.pyrus.pyrusservicedesk.sdk.repositories
 
 import com.pyrus.pyrusservicedesk.sdk.data.Comment
-import com.pyrus.pyrusservicedesk.sdk.data.TicketShortDescription
 import com.pyrus.pyrusservicedesk.sdk.data.intermediate.AddCommentResponseData
 import com.pyrus.pyrusservicedesk.sdk.web.UploadFileHooks
 import com.pyrus.pyrusservicedesk.sdk.web.retrofit.RemoteStore
 import com.pyrus.pyrusservicedesk._ref.utils.Try
 import com.pyrus.pyrusservicedesk._ref.utils.isSuccess
 import com.pyrus.pyrusservicedesk._ref.utils.map
+import com.pyrus.pyrusservicedesk.sdk.data.Ticket
 import com.pyrus.pyrusservicedesk.sdk.data.intermediate.Comments
+import com.pyrus.pyrusservicedesk.sdk.data.intermediate.Tickets
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.combine
-import kotlinx.coroutines.flow.merge
 
 
 internal class Repository(
@@ -20,11 +20,17 @@ internal class Repository(
     private val remoteStore: RemoteStore,
 ) {
 
-    private val remoteFeedStateFlow: MutableStateFlow<Comments?> = MutableStateFlow(null)
+    private val remoteTicketStateFlow: MutableStateFlow<Ticket?> = MutableStateFlow(null)
 
-    fun getFeedFlow(): Flow<Comments?> = combine(localStore.commentsFlow(), remoteFeedStateFlow) { local, remote ->
+    fun getFeedFlow(): Flow<Ticket?> = combine(localStore.commentsFlow(), remoteTicketStateFlow) { local, remote ->
         when (remote) {
-            null -> Comments(local)
+            null -> Ticket(
+                comments = local,
+                isRead = true, //TODO
+                lastComment = null,
+                isActive = null,
+                createdAt = null,
+            )
             else -> mergeComments(local, remote)
         }
     }
@@ -32,21 +38,28 @@ internal class Repository(
     /**
      * Provides tickets in single feed representation.
      */
-    suspend fun getFeed(keepUnread: Boolean, includePendingComments: Boolean = false): Try<Comments> {
-        val feedTry = remoteStore.getFeed(keepUnread)
-        if (feedTry.isSuccess()) remoteFeedStateFlow.value = feedTry.value
+    suspend fun getFeed(keepUnread: Boolean, ticketId: Int = 0, includePendingComments: Boolean = false): Try<Ticket?> {
+        val dataTry = remoteStore.getAllData() // Feed(keepUnread)
+        if (dataTry.isSuccess()) remoteTicketStateFlow.value = dataTry.value.tickets?.find { it.ticketId == ticketId }
 
         if (includePendingComments) {
-            return feedTry.map { mergeComments(localStore.getPendingFeedComments(), it) }
+            //return dataTry.map { mergeComments(localStore.getPendingFeedComments(), remoteTicketStateFlow) }
         }
-        return feedTry
+        return when (dataTry) {
+            is Try.Success -> Try.Success(remoteTicketStateFlow.value)
+            is Try.Failure -> Try.Failure(dataTry.error)
+        }
     }
 
     /**
      * Provides available tickets.
      */
-    suspend fun getTickets(): Try<List<TicketShortDescription>> {
+    suspend fun getTickets(): Try<List<Ticket>> {
         return remoteStore.getTickets()
+    }
+
+    suspend fun getAllData(): Try<Tickets> {
+        return remoteStore.getAllData()
     }
 
     /**
@@ -80,10 +93,12 @@ internal class Repository(
     }
 
 
-    private fun mergeComments(local: List<Comment>, remote: Comments): Comments {
+    private fun mergeComments(local: List<Comment>, remote: Ticket): Ticket {
         val comments = ArrayList<Comment>(local)
-        comments.addAll(remote.comments)
-        comments.sortBy { it.creationDate.time }
+        if (remote.comments != null) {
+            comments.addAll(remote.comments)
+            comments.sortBy { it.creationDate.time }
+        }
         return remote.copy(comments = comments)
     }
 }

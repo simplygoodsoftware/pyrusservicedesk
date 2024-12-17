@@ -15,6 +15,7 @@ import com.pyrus.pyrusservicedesk._ref.utils.RequestUtils
 import com.pyrus.pyrusservicedesk._ref.utils.getFirstNSymbols
 import com.pyrus.pyrusservicedesk.core.Account
 import com.pyrus.pyrusservicedesk.presentation.ui.navigation_page.ticket.TicketActivity
+import com.pyrus.pyrusservicedesk.sdk.data.User
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 
@@ -48,6 +49,18 @@ class PyrusServiceDesk private constructor(
 
         private const val DEFAULT_TOKEN_TYPE: String = "android"
 
+        internal val users: List<User> = listOf(
+            User("255371017", "xZlr1Zf0pZZE43NfjXfY10OvEKwkKLRCO~PYF7SjID-Tp-7sK5EAuWqgOfrCQNOdDUHrZhHlBaqcdzj2ULgf9e~ciFudXo9ff1Y9cx0oXaTGziZKANoCLbWceaF-5g1VAQpfcg==", "Ресторан 1"),
+            User("251380375", "n4Mxu60kICP-XtZkGm2zCRlDtRRBi76h1w7FMx~f2F~z3d~Ayz7~Z7Gfxg7q2dI~sNVS965oM44Buy8uX2ngWib4BIIaf~6uIT6KaRzyGn2N6O2zdj-lufplexg1TvYLTviMSw==", "Много Лосося ДК Москва, Большая Филёвская улица, 3"),
+            User("251374579", "n4Mxu60kICP-XtZkGm2zCRlDtRRBi76h1w7FMx~f2F~z3d~Ayz7~Z7Gfxg7q2dI~sNVS965oM44Buy8uX2ngWib4BIIaf~6uIT6KaRzyGn2N6O2zdj-lufplexg1TvYLTviMSw==", "Старик Хинкалыч - Кострома Коллаж")
+        )
+        internal val usersId: List<String> = listOf("251380375", "251374579")
+
+        internal val usersName: List<String> = listOf("Много Лосося ДК Москва, Большая Филёвская улица, 3", "Старик Хинкалыч - Кострома Коллаж")
+
+        internal var logging = false
+            private set
+
         /**
          * Initializes PyrusServiceDesk embeddable module.
          * The best approach is to call this in [Application.onCreate]
@@ -73,7 +86,9 @@ class PyrusServiceDesk private constructor(
             initInternal(
                 application,
                 appId,
-                null,
+                "255371017", //TODO
+                "папа джонс",
+                "10",
                 null,
                 domain,
                 API_VERSION_1,
@@ -104,6 +119,8 @@ class PyrusServiceDesk private constructor(
             application: Application,
             appId: String,
             userId: String,
+            userName: String,
+            authorId: String?,
             securityKey: String,
             domain: String? = null,
             loggingEnabled: Boolean = false,
@@ -113,6 +130,8 @@ class PyrusServiceDesk private constructor(
                 application,
                 appId,
                 userId,
+                userName,
+                authorId,
                 securityKey,
                 domain,
                 API_VERSION_2,
@@ -125,6 +144,8 @@ class PyrusServiceDesk private constructor(
             application: Application,
             appId: String,
             userId: String?,
+            userName: String?,
+            authorId: String?,
             securityKey: String?,
             domain: String?,
             apiVersion: Int = API_VERSION_1,
@@ -134,7 +155,7 @@ class PyrusServiceDesk private constructor(
             PLog.d(TAG, "initInternal, appId: ${appId.getFirstNSymbols(10)}, userId: ${userId?.getFirstNSymbols(10)}, apiVersion: $apiVersion")
 
             val apiDomain =  domain ?: "pyrus.com"
-            val newAccount = if (userId == null || securityKey == null) Account.V1(
+            val newAccount = if (userId == null || securityKey == null || authorId == null) Account.V1(
                 "aaaa", // TODO sds
                 appId,
                 apiDomain
@@ -144,7 +165,8 @@ class PyrusServiceDesk private constructor(
                 appId,
                 apiDomain,
                 userId,
-                securityKey
+                securityKey,
+                authorId,
             )
 
             INJECTOR = DiInjector(
@@ -164,34 +186,34 @@ class PyrusServiceDesk private constructor(
             val validDomain = if (validateDomain(apiDomain)) apiDomain else null
 
             // TODO sds
-//            if (INSTANCE != null && get().userId != userId) {
-//                clearLocalData {
+            if (INSTANCE != null && get().userId != userId) {
+                clearLocalData {
 //                    if (CONFIGURATION != null)
 //                        stop()
-//                    INSTANCE = PyrusServiceDesk(
-//                        application,
-//                        appId,
-//                        userId,
-//                        securityKey,
-//                        validDomain,
-//                        apiVersion,
-//                        loggingEnabled,
-//                        authorizationToken,
-//                    )
-//                }
-//            }
-//            else {
-//                INSTANCE = PyrusServiceDesk(
-//                    application,
-//                    appId,
-//                    userId,
-//                    securityKey,
-//                    validDomain,
-//                    apiVersion,
-//                    loggingEnabled,
-//                    authorizationToken,
-//                )
-//            }
+                    INSTANCE = PyrusServiceDesk(
+                        application,
+                        appId,
+                        userId,
+                        securityKey,
+                        validDomain,
+                        apiVersion,
+                        loggingEnabled,
+                        authorizationToken,
+                    )
+                }
+            }
+            else {
+                INSTANCE = PyrusServiceDesk(
+                    application,
+                    appId,
+                    userId,
+                    securityKey,
+                    validDomain,
+                    apiVersion,
+                    loggingEnabled,
+                    authorizationToken,
+                )
+            }
         }
 
         private fun validateDomain(domain: String?): Boolean {

@@ -32,6 +32,7 @@ import com.pyrus.pyrusservicedesk._ref.utils.MILLISECONDS_IN_MINUTE
 import com.pyrus.pyrusservicedesk._ref.utils.MILLISECONDS_IN_SECOND
 import com.pyrus.pyrusservicedesk._ref.utils.RequestUtils.Companion.MAX_FILE_SIZE_BYTES
 import com.pyrus.pyrusservicedesk._ref.utils.getWhen
+import com.pyrus.pyrusservicedesk.core.ServiceDeskCore
 import kotlinx.coroutines.*
 import java.lang.Runnable
 import java.util.*
@@ -340,7 +341,7 @@ internal class TicketViewModel(
                 val welcomeComment = Comment(
                     body = welcomeMessage,
                     creationDate = welcomeCommentDate,
-                    author = Author(""),
+                    author = Author(ConfigUtils.getUserName(), "10"), //TODO
 //                    isWelcomeMessage = true,
                 )
                 freshComments += welcomeComment

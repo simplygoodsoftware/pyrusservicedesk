@@ -14,6 +14,7 @@ import com.pyrus.pyrusservicedesk.PyrusServiceDesk
 import com.pyrus.pyrusservicedesk.R
 import com.pyrus.pyrusservicedesk.core.StaticRepository
 import java.security.SecureRandom
+import javax.security.auth.Subject
 
 internal class ConfigUtils{
 
@@ -247,10 +248,11 @@ internal class ConfigUtils{
         /**
          * Provides chat title taking [StaticRepository.CONFIGURATION] into account
          */
-        fun getTitle(context: Context): String {
+        fun getTitle(context: Context, subject: String? = null): String {
             val title = StaticRepository.getConfiguration().title
             return when{
                 !title.isNullOrEmpty() -> title
+                !subject.isNullOrBlank() -> subject
                 else -> context.resources.getString(R.string.psd_organization_support)
             }
         }

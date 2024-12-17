@@ -39,7 +39,11 @@ internal class MainActivity : FragmentActivity() {
         savedInstanceState?.let { ServiceDeskConfiguration.restore(it) }
 
         if (savedInstanceState == null) {
-            injector().router.newRootScreen(Screens.TicketScreen())
+//            supportFragmentManager.beginTransaction()
+//                .replace(R.id.fragment_container, TicketsFragment())
+//                .commit()
+            //injector().router.newRootScreen(Screens.TicketScreen())
+            injector().router.newRootScreen(Screens.TicketsScreen())
         }
     }
 

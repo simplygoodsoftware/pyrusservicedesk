@@ -9,6 +9,8 @@ import com.github.terrakok.cicerone.Cicerone
 import com.github.terrakok.cicerone.NavigatorHolder
 import com.google.gson.GsonBuilder
 import com.pyrus.pyrusservicedesk._ref.ui_domain.screens.ticket.TicketFeatureFactory
+import com.pyrus.pyrusservicedesk._ref.ui_domain.screens.tickets_list.tickets.TicketsFeatureFactory
+import com.pyrus.pyrusservicedesk._ref.ui_domain.screens.tickets_list.ticketsList.TicketsListFeatureFactory
 import com.pyrus.pyrusservicedesk.sdk.FileResolver
 import com.pyrus.pyrusservicedesk.sdk.FileResolverImpl
 import com.pyrus.pyrusservicedesk.sdk.data.FileManager
@@ -34,6 +36,7 @@ import com.squareup.picasso.OkHttp3Downloader
 import com.squareup.picasso.Picasso
 import kotlinx.coroutines.CoroutineScope
 import com.pyrus.pyrusservicedesk._ref.utils.navigation.PyrusRouterImpl
+import com.pyrus.pyrusservicedesk.sdk.web.retrofit.SyncRepository
 import okhttp3.OkHttpClient
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
@@ -61,6 +64,7 @@ internal sealed interface Account {
         override val domain: String,
         val userId: String,
         val securityKey: String,
+        val authorId: String
     ): Account
 
 }
@@ -139,14 +143,26 @@ internal class DiInjector(
 
     private val draftRepository = DraftRepository(preferences)
 
-    fun ticketFeatureFactory(welcomeMessage: String): TicketFeatureFactory {
+    private val syncRepository = SyncRepository(retrofit)
+
+    fun ticketFeatureFactory(welcomeMessage: String, userId: String, ticketId: Int): TicketFeatureFactory {
         return TicketFeatureFactory(
             storeFactory = storeFactory,
             repository = repository,
             draftRepository = draftRepository,
             welcomeMessage = welcomeMessage,
-            router = router
+            router = router,
+            userId = userId,
+            ticketId = ticketId
         )
+    }
+
+    fun ticketsFeatureFactory(): TicketsFeatureFactory {
+        return TicketsFeatureFactory(storeFactory, repository)
+    }
+
+    fun ticketsListFeatureFactory(appId: String): TicketsListFeatureFactory {
+        return TicketsListFeatureFactory(storeFactory, syncRepository, appId)
     }
 
     private val cicerone: Cicerone<PyrusRouterImpl> = Cicerone.create(PyrusRouterImpl())
