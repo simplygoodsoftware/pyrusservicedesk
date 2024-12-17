@@ -85,6 +85,30 @@ internal class Repository(
 //        }
     }
 
+    suspend fun addRatingComment(rating: Int) {
+        val comment = createLocalRatingComment(rating)
+        localStore.addPendingFeedComment(comment)
+        val response = remoteStore.addRatingComment(rating)
+
+        if (response.isSuccess()) {
+            localStore.removePendingComment(comment)
+            addNewCommentToState(response.value.commentId, comment)
+        }
+        else {
+            localStore.addPendingFeedComment(comment.copy(isSending = false))
+        }
+    }
+
+    suspend fun retryAddComment(localId: Long) {
+        val localComment = localStore.getComment(localId) ?: return
+        when {
+            !localComment.attachments.isNullOrEmpty() -> TODO()
+            !localComment.body.isNullOrBlank() -> addTextComment(localComment.body)
+            localComment.rating != null -> addRatingComment(localComment.rating)
+            else -> localStore.removePendingComment(localComment)
+        }
+    }
+
     /**
      * Appends [comment] to the ticket to comment feed.
      *
@@ -135,12 +159,24 @@ internal class Repository(
     private fun createLocalTextComment(text: String) = Comment(
         body = text,
         isInbound = true,
-        author = Author(ConfigUtils.getUserName(), null, "#fffffff"),
+        author = Author(ConfigUtils.getUserName(), null, null),
         attachments = null,
         creationTime = System.currentTimeMillis(),
         id = createLocalCommentId(),
         isLocal = true,
         rating = null,
+        isSending = true
+    )
+
+    private fun createLocalRatingComment(rating: Int) = Comment(
+        body = null,
+        isInbound = true,
+        author = Author(ConfigUtils.getUserName(), null, null),
+        attachments = null,
+        creationTime = System.currentTimeMillis(),
+        id = createLocalCommentId(),
+        isLocal = true,
+        rating = rating,
         isSending = true
     )
 

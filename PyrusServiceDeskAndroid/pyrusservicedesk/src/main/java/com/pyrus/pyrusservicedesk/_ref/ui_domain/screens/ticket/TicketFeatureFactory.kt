@@ -59,8 +59,9 @@ private class FeatureReducer: Logic<State, Message, Effect>() {
     private fun Result.handleOuter(message: Message.Outer) {
         when (message) {
             is Message.Outer.OnAttachmentSelected -> {
-                val currentState = state as? State.Content ?: return
-                TODO("send comment with attachment")
+                if (state !is State.Content) return
+                message.fileUri ?: return // TODO Show toast
+                effects { +Effect.Inner.SendAttachComment(message.fileUri) }
             }
             Message.Outer.OnCloseClick -> effects { +Effect.Inner.Close }
             is Message.Outer.OnCopyClick -> effects {
@@ -78,18 +79,8 @@ private class FeatureReducer: Logic<State, Message, Effect>() {
                 effects { +Effect.Inner.SendRatingComment(message.rating) }
             }
             is Message.Outer.OnRetryClick -> {
-                val currentState = state as? State.Content ?: return
-                val comment = currentState.ticket?.comments?.find {
-                    it.id == message.id
-                } ?: return
-
-                val attachment = comment.attachments?.firstOrNull()
-                if (attachment != null) {
-                    // todo send attachment
-                }
-                else {
-                    // todo send comment
-                }
+                if (state !is State.Content) return
+                effects { +Effect.Inner.RetryAddComment(message.id) }
             }
             Message.Outer.OnSendClick -> {
                 val currentState = state as? State.Content ?: return
@@ -166,26 +157,19 @@ internal class TicketActor(
                 else -> Message.Inner.UpdateCommentsFailed
             }
         }
-        Effect.Inner.FeedFlow -> {
-            repository.getFeedFlow().map { Message.Inner.CommentsUpdated(it) }
-        }
+        Effect.Inner.FeedFlow -> repository.getFeedFlow().map { Message.Inner.CommentsUpdated(it) }
         Effect.Inner.CommentsAutoUpdate -> flow {
 //            // TODO
 //            repository.getFeed(keepUnread = false)
 
         }
-        Effect.Inner.Close -> flow {
-            router.exit()
-        }
-        is Effect.Inner.SendTextComment -> flow {
-            repository.addTextComment(effect.text)
-        }
-        is Effect.Inner.SendRatingComment -> TODO()
+        Effect.Inner.Close -> flow { router.exit() }
+        is Effect.Inner.SendTextComment -> flow { repository.addTextComment(effect.text) }
+        is Effect.Inner.SendRatingComment -> flow { repository.addRatingComment(effect.rating) }
         is Effect.Inner.SendAttachComment -> TODO()
+        is Effect.Inner.RetryAddComment -> flow { repository.retryAddComment(effect.id) }
         is Effect.Inner.OpenPreview -> TODO()
-        is Effect.Inner.SaveDraft -> flow {
-            draftRepository.saveDraft(effect.draft)
-        }
+        is Effect.Inner.SaveDraft -> flow { draftRepository.saveDraft(effect.draft) }
     }
 
 }

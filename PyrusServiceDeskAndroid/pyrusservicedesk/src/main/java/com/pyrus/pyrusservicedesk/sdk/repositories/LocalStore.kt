@@ -54,6 +54,10 @@ internal class LocalStore(
         return commentsList
     }
 
+    fun getComment(id: Long): Comment? {
+        return getPendingFeedComments().find { comment -> comment.id == id }
+    }
+
     /**
      * Removes pending comment from offline repository
      */

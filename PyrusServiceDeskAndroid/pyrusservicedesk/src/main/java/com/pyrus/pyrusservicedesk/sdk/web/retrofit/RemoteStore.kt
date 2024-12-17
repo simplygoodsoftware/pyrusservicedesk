@@ -130,6 +130,23 @@ internal class RemoteStore(
         )
     }
 
+    suspend fun addRatingComment(rating: Int): Try<AddCommentResponseData> {
+        return api.addFeedComment(
+            AddCommentRequestBody(
+                account.appId,
+                getUserId(),
+                getSecurityKey(),
+                getInstanceId(),
+                getVersion(),
+                null,
+                null,
+                ConfigUtils.getUserName(),
+                rating,
+                StaticRepository.EXTRA_FIELDS
+            )
+        )
+    }
+
     /**
      * Registers the given push [token].
      * @param token if null push notifications stop.

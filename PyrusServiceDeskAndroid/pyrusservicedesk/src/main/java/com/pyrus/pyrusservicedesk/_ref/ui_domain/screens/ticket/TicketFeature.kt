@@ -78,6 +78,7 @@ internal interface TicketContract {
             data class SendTextComment(val text: String) : Inner
             data class SendRatingComment(val rating: Int) : Inner
             data class SendAttachComment(val uri: Uri) : Inner
+            data class RetryAddComment(val id: Long) : Inner
             data class OpenPreview(val uri: Uri) : Inner
             data class SaveDraft(val draft: String) : Inner
         }
