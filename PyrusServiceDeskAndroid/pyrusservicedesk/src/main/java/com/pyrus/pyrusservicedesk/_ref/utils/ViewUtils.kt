@@ -1,23 +1,25 @@
 package com.pyrus.pyrusservicedesk._ref.utils
 
 import android.app.Activity
-import android.content.Context
 import android.graphics.PorterDuff
 import android.os.Build
 import android.view.View
+import android.view.ViewGroup
 import android.view.inputmethod.InputMethodManager
+import android.widget.EditText
+import android.widget.FrameLayout
+import android.widget.TextView
 import androidx.annotation.ColorInt
 import androidx.core.content.ContextCompat
-import androidx.recyclerview.widget.LinearLayoutManager
-import androidx.recyclerview.widget.RecyclerView
-import android.widget.EditText
-import android.widget.TextView
 import androidx.core.content.ContextCompat.getSystemService
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowCompat
 import androidx.core.view.WindowInsetsCompat
+import androidx.core.view.updateLayoutParams
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
+import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlin.math.max
@@ -36,7 +38,7 @@ internal fun RecyclerView.isAtEnd(): Boolean {
             || (layoutManager as LinearLayoutManager).findLastVisibleItemPosition() == adapter!!.itemCount - 1
 }
 
-internal fun Activity.setupWindowInsets(rootView: View) {
+internal fun Activity.setupWindowInsets(rootView: FrameLayout) {
     WindowCompat.setDecorFitsSystemWindows(window, false)
     ViewCompat.setOnApplyWindowInsetsListener(rootView) { view, insets ->
         val systemInsets = insets.getInsets(WindowInsetsCompat.Type.systemBars())
@@ -45,14 +47,30 @@ internal fun Activity.setupWindowInsets(rootView: View) {
         val systemBarInsets = insets.getInsets(WindowInsetsCompat.Type.systemBars())
         val imeHeight = max(keyboardInsets.bottom - systemBarInsets.bottom, 0)
 
-        view.setPadding(
-            systemInsets.left,
-            systemInsets.top,
-            systemInsets.right,
-            systemInsets.bottom + imeHeight
-        )
+//        view.setPadding(
+//            systemInsets.left,
+//            systemInsets.top,
+//            systemInsets.right,
+//            systemInsets.bottom + imeHeight
+//        )
 
-        insets
+        rootView.updateLayoutParams<FrameLayout.LayoutParams> {
+            leftMargin = systemInsets.left
+            topMargin = systemInsets.top
+            rightMargin = systemInsets.right
+            bottomMargin = systemInsets.bottom + imeHeight
+        }
+//        val params = FrameLayout.LayoutParams(view.layoutParams)
+//        params.setMargins(
+//            systemInsets.left,
+//            systemInsets.top,
+//            systemInsets.right,
+//            systemInsets.bottom + imeHeight
+//        )
+//        view.layoutParams = params
+
+        WindowInsetsCompat.CONSUMED
+//        insets
     }
 }
 

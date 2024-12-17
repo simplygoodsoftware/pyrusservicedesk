@@ -16,6 +16,9 @@ import android.view.ViewGroup
 import android.view.WindowManager
 import android.widget.Toast
 import androidx.core.content.ContextCompat.getSystemService
+import androidx.core.view.ViewCompat
+import androidx.core.view.WindowInsetsAnimationCompat
+import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.isVisible
 import com.pyrus.pyrusservicedesk.PyrusServiceDesk.Companion.injector
 import com.pyrus.pyrusservicedesk.R
@@ -24,6 +27,7 @@ import com.pyrus.pyrusservicedesk._ref.ui_domain.screens.ticket.adapter.TicketAd
 import com.pyrus.pyrusservicedesk._ref.utils.ConfigUtils
 import com.pyrus.pyrusservicedesk._ref.utils.getColorOnBackground
 import com.pyrus.pyrusservicedesk._ref.utils.getSecondaryColorOnBackground
+import com.pyrus.pyrusservicedesk._ref.utils.insets.RootViewDeferringInsetsCallback
 import com.pyrus.pyrusservicedesk._ref.utils.setCursorColor
 import com.pyrus.pyrusservicedesk._ref.utils.showKeyboardOn
 import com.pyrus.pyrusservicedesk._ref.utils.text
@@ -35,8 +39,6 @@ import com.pyrus.pyrusservicedesk._ref.whitetea.core.ViewRenderer
 import com.pyrus.pyrusservicedesk._ref.whitetea.utils.diff
 import com.pyrus.pyrusservicedesk.databinding.PsdFragmentTicketBinding
 import com.pyrus.pyrusservicedesk.presentation.ui.view.recyclerview.item_decorators.SpaceItemDecoration
-import kotlinx.coroutines.flow.filterIsInstance
-import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.map
 
 internal class TicketFragment: TeaFragment<Model, TicketView.Event, TicketView.Effect>() {
@@ -103,6 +105,12 @@ internal class TicketFragment: TeaFragment<Model, TicketView.Event, TicketView.E
         if (savedInstanceState?.getBoolean(STATE_KEYBOARD_SHOWN) == true) {
             showKeyboardOn(binding.input)
         }
+
+        val deferringInsetsListener = RootViewDeferringInsetsCallback(
+            persistentInsetTypes = WindowInsetsCompat.Type.systemBars(),
+            deferredInsetTypes = WindowInsetsCompat.Type.ime()
+        )
+        ViewCompat.setOnApplyWindowInsetsListener(binding.root, deferringInsetsListener)
 
         bindFeature()
     }
