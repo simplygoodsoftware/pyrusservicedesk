@@ -161,7 +161,9 @@ internal class TicketActor(
         Effect.Inner.Close -> flow {
             router.exit()
         }
-        is Effect.Inner.SendTextComment -> TODO()
+        is Effect.Inner.SendTextComment -> flow {
+            repository.addTextComment(effect.text)
+        }
         is Effect.Inner.SendAttachComment -> TODO()
         is Effect.Inner.OpenPreview -> TODO()
         is Effect.Inner.SaveDraft -> flow {

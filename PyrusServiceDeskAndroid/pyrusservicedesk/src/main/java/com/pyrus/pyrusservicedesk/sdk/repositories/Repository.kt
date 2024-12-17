@@ -1,5 +1,6 @@
 package com.pyrus.pyrusservicedesk.sdk.repositories
 
+import com.pyrus.pyrusservicedesk._ref.utils.ConfigUtils
 import com.pyrus.pyrusservicedesk.sdk.data.Comment
 import com.pyrus.pyrusservicedesk.sdk.data.TicketShortDescription
 import com.pyrus.pyrusservicedesk.sdk.data.intermediate.AddCommentResponseData
@@ -8,11 +9,16 @@ import com.pyrus.pyrusservicedesk.sdk.web.retrofit.RemoteStore
 import com.pyrus.pyrusservicedesk._ref.utils.Try
 import com.pyrus.pyrusservicedesk._ref.utils.isSuccess
 import com.pyrus.pyrusservicedesk._ref.utils.map
+import com.pyrus.pyrusservicedesk.sdk.data.Author
+import com.pyrus.pyrusservicedesk.sdk.data.COMMENT_ID_EMPTY
 import com.pyrus.pyrusservicedesk.sdk.data.intermediate.Comments
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.combine
-import kotlinx.coroutines.flow.merge
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
+import java.util.Calendar
+import java.util.concurrent.atomic.AtomicLong
 
 
 internal class Repository(
@@ -20,7 +26,10 @@ internal class Repository(
     private val remoteStore: RemoteStore,
 ) {
 
+    private val lastLocalCommentId = AtomicLong(localStore.getPendingFeedComments().lastOrNull()?.localId ?: 0L)
+
     private val remoteFeedStateFlow: MutableStateFlow<Comments?> = MutableStateFlow(null)
+    private val remoteFeedMutex = Mutex()
 
     fun getFeedFlow(): Flow<Comments?> = combine(localStore.commentsFlow(), remoteFeedStateFlow) { local, remote ->
         when (remote) {
@@ -34,7 +43,9 @@ internal class Repository(
      */
     suspend fun getFeed(keepUnread: Boolean, includePendingComments: Boolean = false): Try<Comments> {
         val feedTry = remoteStore.getFeed(keepUnread)
-        if (feedTry.isSuccess()) remoteFeedStateFlow.value = feedTry.value
+        if (feedTry.isSuccess()) remoteFeedMutex.withLock {
+            remoteFeedStateFlow.value = feedTry.value
+        }
 
         if (includePendingComments) {
             return feedTry.map { mergeComments(localStore.getPendingFeedComments(), it) }
@@ -47,6 +58,20 @@ internal class Repository(
      */
     suspend fun getTickets(): Try<List<TicketShortDescription>> {
         return remoteStore.getTickets()
+    }
+
+    suspend fun addTextComment(textBody: String): Try<Unit> {
+        val comment = createLocalTextComment(textBody).copy(isSending = true)
+        localStore.addPendingFeedComment(comment)
+        val response = remoteStore.addTextComment(textBody)
+        localStore.removePendingComment(comment)
+
+        if (response.isSuccess()) {
+            localStore.removePendingComment(comment)
+            addNewCommentToState(response.value.commentId, comment)
+        }
+
+        return response.map {  }
     }
 
     /**
@@ -79,6 +104,13 @@ internal class Repository(
         return localStore.removePendingComment(comment)
     }
 
+    private suspend fun addNewCommentToState(remoteId: Long, localComment: Comment) {
+        remoteFeedMutex.withLock {
+            val remoteComment = localComment.copy(commentId = remoteId, localId = COMMENT_ID_EMPTY, isSending = false)
+            val comments = remoteFeedStateFlow.value ?: Comments()
+            remoteFeedStateFlow.value = comments.copy(comments = comments.comments + remoteComment)
+        }
+    }
 
     private fun mergeComments(local: List<Comment>, remote: Comments): Comments {
         val comments = ArrayList<Comment>(local)
@@ -86,4 +118,17 @@ internal class Repository(
         comments.sortBy { it.creationDate.time }
         return remote.copy(comments = comments)
     }
+
+    private fun createLocalCommentId(): Long = lastLocalCommentId.getAndDecrement()
+
+    private fun createLocalTextComment(text: String) = Comment(
+        body = text,
+        isInbound = true,
+        author = Author(ConfigUtils.getUserName()),
+        attachments = null,
+        creationDate = Calendar.getInstance().time,
+        localId = createLocalCommentId(),
+        rating = null
+    )
+
 }

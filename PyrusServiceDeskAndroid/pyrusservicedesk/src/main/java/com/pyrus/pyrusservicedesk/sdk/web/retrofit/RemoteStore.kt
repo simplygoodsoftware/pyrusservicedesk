@@ -50,8 +50,6 @@ internal class RemoteStore(
     private val account: Account,
 ) {
 
-    private val sequentialRequests = LinkedBlockingQueue<SequentialRequest>()
-
     private val apiFlag = "AAAAAAAAAAAU"
 
     /**
@@ -116,6 +114,23 @@ internal class RemoteStore(
         return addComment(EMPTY_TICKET_ID, comment, uploadFileHooks)
     }
 
+    suspend fun addTextComment(textBody: String): Try<AddCommentResponseData> {
+        return api.addFeedComment(
+            AddCommentRequestBody(
+                account.appId,
+                getUserId(),
+                getSecurityKey(),
+                getInstanceId(),
+                getVersion(),
+                textBody,
+                null,
+                ConfigUtils.getUserName(),
+                null,
+                StaticRepository.EXTRA_FIELDS
+            )
+        )
+    }
+
     /**
      * Registers the given push [token].
      * @param token if null push notifications stop.
@@ -161,9 +176,6 @@ internal class RemoteStore(
                 "apiVersion: ${getVersion()}, " +
                 "ticketId: $ticketId"
         )
-
-        val request = CommentRequest()
-        sequentialRequests.offer(request)
 
         var cament = comment
         if (cament.hasAttachments()) {
@@ -341,9 +353,3 @@ internal class RemoteStore(
     }
 
 }
-
-
-private interface SequentialRequest
-
-
-private class CommentRequest : SequentialRequest

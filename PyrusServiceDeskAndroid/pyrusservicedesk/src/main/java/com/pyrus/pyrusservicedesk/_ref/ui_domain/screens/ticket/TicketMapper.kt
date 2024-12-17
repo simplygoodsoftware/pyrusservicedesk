@@ -136,22 +136,37 @@ internal object TicketMapper {
 //
 //        }
 //        val avatarUrl = "${baseUrl}Avatar/${comment.author.avatarId}"
+
+
+        val status = when {
+            comment.isLocal() -> {
+                if (comment.isSending) Status.Processing
+                else Status.Error
+            }
+            else -> Status.Completed
+        }
+
         val avatarUrl: String? = null
 
         val commentBody = comment.body
         if (!commentBody.isNullOrBlank()) {
-            entries += toTextEntry(commentBody, comment, avatarUrl)
+            entries += toTextEntry(commentBody, comment, avatarUrl, status)
         }
 
         val attachments = comment.attachments
         if (!attachments.isNullOrEmpty()) {
             for (attach in attachments) {
-                entries += toAttachEntry(comment, attach, avatarUrl)
+                entries += toAttachEntry(comment, attach, avatarUrl, status)
             }
         }
     }
 
-    private fun toTextEntry(commentBody: String, comment: Comment, avatarUrl: String?): CommentEntryV2.Comment {
+    private fun toTextEntry(
+        commentBody: String,
+        comment: Comment,
+        avatarUrl: String?,
+        status: Status
+    ): CommentEntryV2.Comment {
         val isLocal = comment.isLocal()
         return CommentEntryV2.Comment(
             entryId = "${comment.commentId}",
@@ -161,7 +176,7 @@ internal object TicketMapper {
             isLocal = isLocal,
             isWelcomeMessage = false,
             timeText = "time ", // TODO
-            status = Status.Completed, // TODO
+            status = status,
             contentType = ContentType.Text,
             authorName = comment.author.name,
             avatarUrl = avatarUrl,
@@ -169,7 +184,12 @@ internal object TicketMapper {
         )
     }
 
-    private fun toAttachEntry(comment: Comment, attach: Attachment, avatarUrl: String?): CommentEntryV2.Comment {
+    private fun toAttachEntry(
+        comment: Comment,
+        attach: Attachment,
+        avatarUrl: String?,
+        status: Status
+    ): CommentEntryV2.Comment {
 
         val bytesSize = attach.bytesSize
         val isMegabytes = bytesSize >= BYTES_IN_MEGABYTE / 10
@@ -193,7 +213,7 @@ internal object TicketMapper {
 //            isLocal = comment.isLocal(),
 //            isWelcomeMessage = false,
 //            timeText = "time", // TODO
-//            status = Status.Completed,
+//            status = status,
 //            authorName = null,
 //            avatarUrl = comment.author.name,
 //            contentType = ContentType.Attachment, // TODO
