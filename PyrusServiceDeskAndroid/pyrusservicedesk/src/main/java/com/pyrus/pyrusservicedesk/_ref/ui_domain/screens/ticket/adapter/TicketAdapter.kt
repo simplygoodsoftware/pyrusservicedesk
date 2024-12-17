@@ -15,7 +15,6 @@ import com.pyrus.pyrusservicedesk._ref.ui_domain.screens.ticket.adapter.view_hol
 import com.pyrus.pyrusservicedesk._ref.ui_domain.screens.ticket.adapter.new_entries.CommentEntryV2
 import com.pyrus.pyrusservicedesk.presentation.ui.view.recyclerview.ViewHolderBase
 import com.pyrus.pyrusservicedesk.presentation.ui.view.recyclerview.item_decorators.SpaceMultiplier
-import com.pyrus.pyrusservicedesk.sdk.data.Attachment
 
 /**
  * Adapter that is used for rendering comment feed of the ticket screen.

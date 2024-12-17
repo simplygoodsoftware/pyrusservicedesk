@@ -1,7 +1,7 @@
 package com.pyrus.pyrusservicedesk.sdk.repositories
 
 import com.pyrus.pyrusservicedesk._ref.utils.ConfigUtils
-import com.pyrus.pyrusservicedesk.sdk.data.Comment
+import com.pyrus.pyrusservicedesk.sdk.data.CommentDto
 import com.pyrus.pyrusservicedesk.sdk.data.TicketShortDescription
 import com.pyrus.pyrusservicedesk.sdk.data.intermediate.AddCommentResponseData
 import com.pyrus.pyrusservicedesk.sdk.web.UploadFileHooks
@@ -60,18 +60,33 @@ internal class Repository(
         return remoteStore.getTickets()
     }
 
-    suspend fun addTextComment(textBody: String): Try<Unit> {
+    suspend fun addTextComment(textBody: String) {
         val comment = createLocalTextComment(textBody).copy(isSending = true)
         localStore.addPendingFeedComment(comment)
         val response = remoteStore.addTextComment(textBody)
-        localStore.removePendingComment(comment)
 
         if (response.isSuccess()) {
             localStore.removePendingComment(comment)
             addNewCommentToState(response.value.commentId, comment)
         }
+        else {
+            localStore.addPendingFeedComment(comment.copy(isSending = false))
+        }
+    }
 
-        return response.map {  }
+    suspend fun addAttachComment() {
+//        val comment = createLocalAttachComment().compy(isSending = true)
+//        localStore.addPendingFeedComment(comment)
+//        val response = remoteStore.addAttachComment()
+//
+//
+//        if (response.isSuccess()) {
+//            localStore.removePendingComment(comment)
+//            addNewCommentToState(response.value.commentId, comment)
+//        }
+//        else {
+//            localStore.addPendingFeedComment(comment.copy(isSending = false))
+//        }
     }
 
     /**
@@ -80,7 +95,7 @@ internal class Repository(
      * @param uploadFileHooks is used for posting progress as well as checking cancellation signal.
      */
     suspend fun addFeedComment(
-        comment: Comment,
+        comment: CommentDto,
         uploadFileHooks: UploadFileHooks?
     ): Try<AddCommentResponseData> {
         localStore.addPendingFeedComment(comment)
@@ -100,11 +115,11 @@ internal class Repository(
         return remoteStore.setPushToken(token, tokenType)
     }
 
-    fun removePendingComment(comment: Comment) {
+    fun removePendingComment(comment: CommentDto) {
         return localStore.removePendingComment(comment)
     }
 
-    private suspend fun addNewCommentToState(remoteId: Long, localComment: Comment) {
+    private suspend fun addNewCommentToState(remoteId: Long, localComment: CommentDto) {
         remoteFeedMutex.withLock {
             val remoteComment = localComment.copy(commentId = remoteId, localId = COMMENT_ID_EMPTY, isSending = false)
             val comments = remoteFeedStateFlow.value ?: Comments()
@@ -112,8 +127,8 @@ internal class Repository(
         }
     }
 
-    private fun mergeComments(local: List<Comment>, remote: Comments): Comments {
-        val comments = ArrayList<Comment>(local)
+    private fun mergeComments(local: List<CommentDto>, remote: Comments): Comments {
+        val comments = ArrayList<CommentDto>(local)
         comments.addAll(remote.comments)
         comments.sortBy { it.creationDate.time }
         return remote.copy(comments = comments)
@@ -121,14 +136,27 @@ internal class Repository(
 
     private fun createLocalCommentId(): Long = lastLocalCommentId.getAndDecrement()
 
-    private fun createLocalTextComment(text: String) = Comment(
+    private fun createLocalTextComment(text: String) = CommentDto(
         body = text,
         isInbound = true,
         author = Author(ConfigUtils.getUserName()),
         attachments = null,
-        creationDate = Calendar.getInstance().time,
+        creationDate = Calendar.getInstance().time, // TODO
         localId = createLocalCommentId(),
         rating = null
     )
+
+    private fun createLocalAttachComment(): CommentDto {
+        return CommentDto(
+            body = null,
+            isInbound = true,
+            attachments = TODO(),
+            creationDate = Calendar.getInstance().time, // TODO
+            author = Author(ConfigUtils.getUserName()),
+            localId = createLocalCommentId(),
+            rating = null,
+        )
+
+    }
 
 }

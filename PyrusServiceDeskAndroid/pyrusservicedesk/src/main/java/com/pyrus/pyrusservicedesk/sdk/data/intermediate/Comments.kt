@@ -2,7 +2,7 @@ package com.pyrus.pyrusservicedesk.sdk.data.intermediate
 
 import androidx.annotation.Keep
 import com.google.gson.annotations.SerializedName
-import com.pyrus.pyrusservicedesk.sdk.data.Comment
+import com.pyrus.pyrusservicedesk.sdk.data.CommentDto
 
 /**
  * Intermediate data for parsing list of comments object
@@ -10,7 +10,7 @@ import com.pyrus.pyrusservicedesk.sdk.data.Comment
 @Keep
 internal data class Comments(
     @SerializedName("comments")
-    val comments: List<Comment> = emptyList(),
+    val comments: List<CommentDto> = emptyList(),
 
     @SerializedName("show_rating")
     val showRating: Boolean = false,

@@ -1,19 +1,19 @@
 package com.pyrus.pyrusservicedesk._ref.ui_domain.screens.ticket
 
-import com.pyrus.pyrusservicedesk.R
+import android.net.Uri
 import com.pyrus.pyrusservicedesk._ref.ui_domain.screens.ticket.TicketContract.Effect
 import com.pyrus.pyrusservicedesk._ref.ui_domain.screens.ticket.TicketContract.Message
 import com.pyrus.pyrusservicedesk._ref.ui_domain.screens.ticket.TicketContract.State
 import com.pyrus.pyrusservicedesk._ref.ui_domain.screens.ticket.TicketView.Event
 import com.pyrus.pyrusservicedesk._ref.ui_domain.screens.ticket.TicketView.Model
 import com.pyrus.pyrusservicedesk._ref.ui_domain.screens.ticket.adapter.new_entries.CommentEntryV2
-import com.pyrus.pyrusservicedesk._ref.utils.BYTES_IN_KILOBYTE
-import com.pyrus.pyrusservicedesk._ref.utils.BYTES_IN_MEGABYTE
+import com.pyrus.pyrusservicedesk._ref.utils.RequestUtils
+import com.pyrus.pyrusservicedesk._ref.utils.isImage
 import com.pyrus.pyrusservicedesk.presentation.ui.navigation_page.ticket.HtmlTagUtils
 import com.pyrus.pyrusservicedesk.presentation.ui.view.ContentType
 import com.pyrus.pyrusservicedesk.presentation.ui.view.Status
-import com.pyrus.pyrusservicedesk.sdk.data.Attachment
-import com.pyrus.pyrusservicedesk.sdk.data.Comment
+import com.pyrus.pyrusservicedesk.sdk.data.AttachmentDto
+import com.pyrus.pyrusservicedesk.sdk.data.CommentDto
 import com.pyrus.pyrusservicedesk.sdk.data.intermediate.Comments
 
 internal object TicketMapper {
@@ -99,8 +99,8 @@ internal object TicketMapper {
         val welcomeCreationTime = firstComment?.creationDate?.time ?: System.currentTimeMillis()
 
         val welcomeEntry = CommentEntryV2.Comment(
-            WELCOME_MESSAGE_ID.toString(),
-            WELCOME_MESSAGE_ID,
+            entryId = WELCOME_MESSAGE_ID.toString(),
+            id = WELCOME_MESSAGE_ID,
             isInbound = false,
             hasError = false,
             isLocal = false,
@@ -126,7 +126,7 @@ internal object TicketMapper {
 
     private fun addCommentEntries(
         entries: ArrayList<CommentEntryV2>,
-        comment: Comment,
+        comment: CommentDto,
         baseUrl: String,
     ) {
 
@@ -153,17 +153,14 @@ internal object TicketMapper {
             entries += toTextEntry(commentBody, comment, avatarUrl, status)
         }
 
-        val attachments = comment.attachments
-        if (!attachments.isNullOrEmpty()) {
-            for (attach in attachments) {
-                entries += toAttachEntry(comment, attach, avatarUrl, status)
-            }
+        comment.attachments?.forEach { attach ->
+            entries += toAttachEntry(comment, attach, avatarUrl, status)
         }
     }
 
     private fun toTextEntry(
         commentBody: String,
-        comment: Comment,
+        comment: CommentDto,
         avatarUrl: String?,
         status: Status
     ): CommentEntryV2.Comment {
@@ -185,49 +182,42 @@ internal object TicketMapper {
     }
 
     private fun toAttachEntry(
-        comment: Comment,
-        attach: Attachment,
+        comment: CommentDto,
+        attach: AttachmentDto,
         avatarUrl: String?,
-        status: Status
+        status: Status,
     ): CommentEntryV2.Comment {
 
-        val bytesSize = attach.bytesSize
-        val isMegabytes = bytesSize >= BYTES_IN_MEGABYTE / 10
-        val toShow = when {
-            isMegabytes -> bytesSize / BYTES_IN_MEGABYTE
-            else -> bytesSize / BYTES_IN_KILOBYTE
-        }
-        val textResId = when{
-            isMegabytes -> R.string.psd_file_size_mb
-            else -> R.string.psd_file_size_kb
+        val contentType = when {
+            attach.name.isImage() -> ContentType.PreviewableAttachment
+            else -> ContentType.Attachment
         }
 
-        val size = "getString(textResId, toShow)"
-        TODO()
+        val attachUri = attach.localUri ?: Uri.parse(RequestUtils.getPreviewUrl(attach.id, account))
 
-//        return CommentEntryV2.Comment(
-//            entryId = "${comment.commentId}_${attach.id}",
-//            id = comment.commentId,
-//            isInbound = comment.isInbound,
-//            hasError = false, // TODO
-//            isLocal = comment.isLocal(),
-//            isWelcomeMessage = false,
-//            timeText = "time", // TODO
-//            status = status,
-//            authorName = null,
-//            avatarUrl = comment.author.name,
-//            contentType = ContentType.Attachment, // TODO
-//            content = CommentEntryV2.CommentContent.Image(
-//                null, // TODO
-//                attach.name,
-//                null,
-//                size,
-//                null,
-//            ),
-//        )
+        return CommentEntryV2.Comment(
+            entryId = "${comment.commentId}_${attach.id}",
+            id = comment.commentId,
+            isInbound = comment.isInbound,
+            hasError = false, // TODO
+            isLocal = comment.isLocal(),
+            isWelcomeMessage = false,
+            timeText = "time", // TODO
+            status = status,
+            authorName = comment.author.name,
+            avatarUrl = avatarUrl,
+            contentType = contentType,
+            content = CommentEntryV2.CommentContent.Image(
+                attachUri,
+                attach.name,
+                attach.name.isImage(),
+                attach.bytesSize.toFloat(),
+                attach.status,
+            ),
+        )
     }
 
-    private fun extractButtons(lastComment: Comment): CommentEntryV2.Buttons? {
+    private fun extractButtons(lastComment: CommentDto): CommentEntryV2.Buttons? {
         val buttons = HtmlTagUtils.extractButtons(lastComment)
         if (buttons.isEmpty()) {
             return null

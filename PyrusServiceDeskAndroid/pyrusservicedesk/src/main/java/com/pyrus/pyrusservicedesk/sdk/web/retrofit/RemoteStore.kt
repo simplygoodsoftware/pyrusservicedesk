@@ -7,8 +7,8 @@ import com.pyrus.pyrusservicedesk.PyrusServiceDesk.Companion.API_VERSION_2
 import com.pyrus.pyrusservicedesk.core.StaticRepository
 import com.pyrus.pyrusservicedesk._ref.utils.log.PLog
 import com.pyrus.pyrusservicedesk.sdk.FileResolver
-import com.pyrus.pyrusservicedesk.sdk.data.Attachment
-import com.pyrus.pyrusservicedesk.sdk.data.Comment
+import com.pyrus.pyrusservicedesk.sdk.data.AttachmentDto
+import com.pyrus.pyrusservicedesk.sdk.data.CommentDto
 import com.pyrus.pyrusservicedesk.sdk.data.EMPTY_TICKET_ID
 import com.pyrus.pyrusservicedesk.sdk.data.FileManager
 import com.pyrus.pyrusservicedesk.sdk.data.TicketShortDescription
@@ -30,7 +30,6 @@ import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import retrofit2.Retrofit
-import java.util.concurrent.LinkedBlockingQueue
 import kotlin.coroutines.coroutineContext
 
 private const val FAILED_AUTHORIZATION_ERROR_CODE = 403
@@ -108,7 +107,7 @@ internal class RemoteStore(
      * @param uploadFileHooks is used for posting progress as well as checking cancellation signal.
      */
     suspend fun addFeedComment(
-        comment: Comment,
+        comment: CommentDto,
         uploadFileHooks: UploadFileHooks?
     ): Try<AddCommentResponseData> {
         return addComment(EMPTY_TICKET_ID, comment, uploadFileHooks)
@@ -164,7 +163,7 @@ internal class RemoteStore(
 
     private suspend fun addComment(
         ticketId: Int,
-        comment: Comment,
+        comment: CommentDto,
         uploadFileHooks: UploadFileHooks?,
     ): Try<AddCommentResponseData> {
 
@@ -205,9 +204,9 @@ internal class RemoteStore(
 
     @Throws(Exception::class)
     private suspend fun uploadAttachments(
-        attachments: List<Attachment>,
+        attachments: List<AttachmentDto>,
         uploadFileHooks: UploadFileHooks?
-    ): Try<List<Attachment>> {
+    ): Try<List<AttachmentDto>> {
         val uploadResponses = ArrayList<FileUploadResponseData>(attachments.size)
 
         for (attachment in attachments) {
@@ -222,7 +221,7 @@ internal class RemoteStore(
         if (uploadFileHooks?.isCancelled == true) {
             throw Exception()
         }
-        val newAttachments = mutableListOf<Attachment>()
+        val newAttachments = mutableListOf<AttachmentDto>()
         for (i in uploadResponses.indices) {
             val response = uploadResponses[i]
             val oldAttachment = attachments[i]
@@ -272,7 +271,7 @@ internal class RemoteStore(
         else -> null
     }
 
-    private fun Attachment.toRemoteAttachment(guid: String) = Attachment(
+    private fun AttachmentDto.toRemoteAttachment(guid: String) = AttachmentDto(
         id,
         guid,
         type,
@@ -284,7 +283,7 @@ internal class RemoteStore(
     )
 
     private fun AddCommentResponseData.applyAttachments(
-        attachments: List<Attachment>?
+        attachments: List<AttachmentDto>?
     ): AddCommentResponseData {
 
         if (!mustBeConvertedToRemoteAttachments(attachments, attachmentIds)) {
@@ -298,17 +297,17 @@ internal class RemoteStore(
     }
 
     private fun applyRemoteIdsToAttachments(
-        sentAttachments: List<Attachment>,
+        sentAttachments: List<AttachmentDto>,
         remoteAttachmentIds: List<Int>,
-    ): List<Attachment> {
-        val newAttachmentsList = mutableListOf<Attachment>()
+    ): List<AttachmentDto> {
+        val newAttachmentsList = mutableListOf<AttachmentDto>()
         sentAttachments.forEachIndexed { index, attachment ->
             newAttachmentsList.add(attachment.withRemoteId(remoteAttachmentIds[index]))
         }
         return newAttachmentsList
     }
 
-    private fun Attachment.withRemoteId(remoteId: Int) = Attachment(
+    private fun AttachmentDto.withRemoteId(remoteId: Int) = AttachmentDto(
         remoteId,
         guid,
         type,
@@ -320,7 +319,7 @@ internal class RemoteStore(
     )
 
     private fun mustBeConvertedToRemoteAttachments(
-        sentAttachments: List<Attachment>?,
+        sentAttachments: List<AttachmentDto>?,
         remoteAttachmentIds: List<Int>?,
     ): Boolean {
 
@@ -329,8 +328,8 @@ internal class RemoteStore(
             && sentAttachments.size == remoteAttachmentIds.size
     }
 
-    private fun Comment.applyNewAttachments(newAttachments: List<Attachment>): Comment {
-        return Comment(commentId, body, isInbound, newAttachments, creationDate, author, localId)
+    private fun CommentDto.applyNewAttachments(newAttachments: List<AttachmentDto>): CommentDto {
+        return CommentDto(commentId, body, isInbound, newAttachments, creationDate, author, localId)
     }
 
     private fun <T> createError(response: retrofit2.Response<T>): ResponseError {

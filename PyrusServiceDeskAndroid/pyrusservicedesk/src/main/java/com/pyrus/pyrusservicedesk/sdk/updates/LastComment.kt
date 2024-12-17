@@ -1,6 +1,6 @@
 package com.pyrus.pyrusservicedesk.sdk.updates
 
-import com.pyrus.pyrusservicedesk.sdk.data.Comment
+import com.pyrus.pyrusservicedesk.sdk.data.CommentDto
 import com.pyrus.pyrusservicedesk._ref.utils.getFirstNSymbols
 
 internal data class LastComment(
@@ -16,7 +16,7 @@ internal data class LastComment(
 
         private const val MAX_COMMENT_LENGTH = 500
 
-        internal fun mapFromComment(isShown: Boolean, isRead: Boolean, comment: Comment): LastComment {
+        internal fun mapFromComment(isShown: Boolean, isRead: Boolean, comment: CommentDto): LastComment {
             return LastComment(
                 comment.commentId,
                 isRead,

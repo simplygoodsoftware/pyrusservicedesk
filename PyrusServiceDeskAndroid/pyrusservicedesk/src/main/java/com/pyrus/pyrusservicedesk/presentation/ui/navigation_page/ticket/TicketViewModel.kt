@@ -8,7 +8,6 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.recyclerview.widget.DiffUtil
 import com.pyrus.pyrusservicedesk.PyrusServiceDesk
-import com.pyrus.pyrusservicedesk._ref.ui_domain.screens.ticket.adapter.entries.ButtonsEntry
 import com.pyrus.pyrusservicedesk._ref.ui_domain.screens.ticket.adapter.entries.CommentEntry
 import com.pyrus.pyrusservicedesk._ref.ui_domain.screens.ticket.adapter.entries.DateEntry
 import com.pyrus.pyrusservicedesk._ref.ui_domain.screens.ticket.adapter.entries.RatingEntry
@@ -18,9 +17,9 @@ import com.pyrus.pyrusservicedesk._ref.ui_domain.screens.ticket.adapter.entries.
 import com.pyrus.pyrusservicedesk._ref.utils.log.PLog
 import com.pyrus.pyrusservicedesk.presentation.ui.view.recyclerview.DiffResultWithNewItems
 import com.pyrus.pyrusservicedesk.presentation.viewmodel.ConnectionViewModelBase
-import com.pyrus.pyrusservicedesk.sdk.data.Attachment
+import com.pyrus.pyrusservicedesk.sdk.data.AttachmentDto
 import com.pyrus.pyrusservicedesk.sdk.data.Author
-import com.pyrus.pyrusservicedesk.sdk.data.Comment
+import com.pyrus.pyrusservicedesk.sdk.data.CommentDto
 import com.pyrus.pyrusservicedesk.sdk.data.intermediate.Comments
 import com.pyrus.pyrusservicedesk.sdk.response.PendingDataError
 import com.pyrus.pyrusservicedesk.sdk.updates.OnUnreadTicketCountChangedSubscriber
@@ -51,10 +50,10 @@ internal class TicketViewModel(
 
         private const val BUTTON_PATTERN = "<button>(.*?)</button>"
 
-        fun Comment.hasAttachmentWithExceededSize(): Boolean =
+        fun CommentDto.hasAttachmentWithExceededSize(): Boolean =
             attachments?.let { it.any { attach -> attach.hasExceededFileSize() } } ?: false
 
-        fun Attachment.hasExceededFileSize(): Boolean = bytesSize > MAX_FILE_SIZE_BYTES
+        fun AttachmentDto.hasExceededFileSize(): Boolean = bytesSize > MAX_FILE_SIZE_BYTES
     }
 
     /**
@@ -226,7 +225,7 @@ internal class TicketViewModel(
         mainHandler.post(updateRunnable)
     }
 
-    private fun List<Comment>.toTicketEntries(): MutableList<TicketEntry> {
+    private fun List<CommentDto>.toTicketEntries(): MutableList<TicketEntry> {
         val now = Calendar.getInstance()
         var prevDateGroup: String? = null
         return foldIndexed(ArrayList(size)) { index, acc, comment ->
@@ -244,7 +243,7 @@ internal class TicketViewModel(
     }
 
     private fun sendAddComment(
-        localComment: Comment,
+        localComment: CommentDto,
         uploadHooks: UploadFileHooks? = null
     ) {
 
@@ -290,7 +289,7 @@ internal class TicketViewModel(
         } != null
     }
 
-    private fun commentContainsError(localComment: Comment): Boolean {
+    private fun commentContainsError(localComment: CommentDto): Boolean {
         val commentError = when{
 //            localDataVerifier.isLocalCommentEmpty(localComment) -> CheckCommentError.CommentIsEmpty
             localComment.hasAttachmentWithExceededSize() -> CheckCommentError.FileSizeExceeded
@@ -332,12 +331,12 @@ internal class TicketViewModel(
             }
         }
         val toPublish = mutableListOf<TicketEntry>().apply {
-            val freshComments = ArrayList<Comment>()
+            val freshComments = ArrayList<CommentDto>()
             val welcomeMessage = ConfigUtils.getWelcomeMessage()
             if (welcomeMessage != null) {
                 val firstComment = freshList.comments.firstOrNull()
                 val welcomeCommentDate = firstComment?.creationDate ?: Date().apply { time = System.currentTimeMillis() }
-                val welcomeComment = Comment(
+                val welcomeComment = CommentDto(
                     body = welcomeMessage,
                     creationDate = welcomeCommentDate,
                     author = Author(""),
@@ -365,7 +364,7 @@ internal class TicketViewModel(
             onDataLoaded()
     }
 
-    private fun needUpdateCommentsList(freshList: List<Comment>): Boolean {
+    private fun needUpdateCommentsList(freshList: List<CommentDto>): Boolean {
         if (userId != PyrusServiceDesk.get().userId) {
             userId = PyrusServiceDesk.get().userId
             return true
@@ -514,7 +513,7 @@ internal class TicketViewModel(
 //        )
     }
 
-    private fun Comment.splitToEntries(): Collection<TicketEntry> {
+    private fun CommentDto.splitToEntries(): Collection<TicketEntry> {
         val pendingError = when{
             isLocal() -> PendingDataError()
             else -> null
@@ -526,7 +525,7 @@ internal class TicketViewModel(
         if (commentBody.isNotBlank()) {
             result.add(
                 CommentEntry(
-                    Comment(
+                    CommentDto(
                         this.commentId,
                         commentBody,
                         this.isInbound,
@@ -542,7 +541,7 @@ internal class TicketViewModel(
         return this.attachments!!.fold(result) { entriesList, attachment ->
             entriesList.add(
                 CommentEntry(
-                    Comment(
+                    CommentDto(
                         this.commentId,
                         this.body,
                         this.isInbound,

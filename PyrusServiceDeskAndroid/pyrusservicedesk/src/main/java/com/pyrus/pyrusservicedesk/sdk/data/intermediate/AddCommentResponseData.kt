@@ -2,7 +2,7 @@ package com.pyrus.pyrusservicedesk.sdk.data.intermediate
 
 import androidx.annotation.Keep
 import com.google.gson.annotations.SerializedName
-import com.pyrus.pyrusservicedesk.sdk.data.Attachment
+import com.pyrus.pyrusservicedesk.sdk.data.AttachmentDto
 
 /**
  * Response data of add comment request
@@ -13,4 +13,4 @@ internal data class AddCommentResponseData(
     val commentId: Long,
     @SerializedName("attachments")
     val attachmentIds: List<Int>?,
-    val sentAttachments: List<Attachment>?)
+    val sentAttachments: List<AttachmentDto>?)
