@@ -98,24 +98,40 @@ private class FeatureReducer: Logic<State, Message, Effect>() {
                 effects { +Effect.Inner.SendTextComment(comment) }
             }
             Message.Outer.OnShowAttachVariantsClick -> TODO("open attach variants dialog screen")
+            Message.Outer.OnRefresh -> {
+                val currentState = state as? State.Content ?: return
+                if (currentState.isLoading) return
+                state { currentState.copy(isLoading = true) }
+                effects { +Effect.Inner.UpdateComments }
+            }
         }
     }
 
     private fun Result.handleInner(message: Message.Inner) {
         when (message) {
             Message.Inner.UpdateCommentsFailed -> {
-                if (state !is State.Loading) return
-                state { State.Error }
+                when (val currentState = state) {
+                    is State.Content -> {
+                        state { currentState.copy(isLoading = false) }
+                        // TODO show toast
+                    }
+                    is State.Loading -> state { State.Error }
+                    State.Error -> {}
+                }
             }
             is Message.Inner.UpdateCommentsCompleted -> {
                 when(val currentState = state) {
-                    is State.Content -> state { currentState.copy(ticket = message.ticket) }
+                    is State.Content -> state { currentState.copy(
+                        ticket = message.ticket,
+                        isLoading = false
+                    ) }
                     State.Error,
                     State.Loading -> state { State.Content(
                         ticket = message.ticket,
                         sendEnabled = true,
                         inputText = message.draft,
                         welcomeMessage = message.welcomeMessage,
+                        isLoading = false,
                     ) }
                 }
             }

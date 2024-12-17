@@ -2,13 +2,11 @@ package com.pyrus.pyrusservicedesk._ref.ui_domain.screens.ticket
 
 import android.content.ClipData
 import android.content.ClipboardManager
-import android.content.Context
 import android.content.res.ColorStateList
 import android.os.Build
 import android.os.Bundle
 import android.text.Editable
 import android.text.TextWatcher
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.MenuItem
 import android.view.View
@@ -17,7 +15,6 @@ import android.view.WindowManager
 import android.widget.Toast
 import androidx.core.content.ContextCompat.getSystemService
 import androidx.core.view.ViewCompat
-import androidx.core.view.WindowInsetsAnimationCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.isVisible
 import com.pyrus.pyrusservicedesk.PyrusServiceDesk.Companion.injector
@@ -70,6 +67,9 @@ internal class TicketFragment: TeaFragment<Model, TicketView.Event, TicketView.E
         diff(Model::isLoading) { isLoading ->
             binding.ticketContent.isVisible = !isLoading
             binding.progressBar.isVisible = isLoading
+        }
+        diff(Model::isRefreshing) {
+            isRefreshing -> binding.refresh.isRefreshing = isRefreshing
         }
     }
 
@@ -137,6 +137,7 @@ internal class TicketFragment: TeaFragment<Model, TicketView.Event, TicketView.E
         binding.send.setOnClickListener { dispatch(TicketView.Event.OnSendClick) }
         binding.attach.setOnClickListener { dispatch(TicketView.Event.OnShowAttachVariantsClick) }
         binding.input.addTextChangedListener(inputTextWatcher)
+        binding.refresh.setOnRefreshListener { dispatch(TicketView.Event.OnRefresh) }
     }
 
     private fun initUi() {

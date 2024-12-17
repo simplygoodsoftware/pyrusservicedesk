@@ -26,6 +26,7 @@ internal object TicketMapper {
             comments = state.ticket?.let { mapComments(it, state.welcomeMessage) },
             isLoading = false,
             showNoConnectionError = false,
+            isRefreshing = state.isLoading,
         )
         State.Loading -> Model(
             inputText = "",
@@ -33,6 +34,7 @@ internal object TicketMapper {
             comments = null,
             isLoading = true,
             showNoConnectionError = false,
+            isRefreshing = false,
         )
         State.Error -> Model(
             inputText = "",
@@ -40,6 +42,7 @@ internal object TicketMapper {
             comments = null,
             isLoading = false,
             showNoConnectionError = true,
+            isRefreshing = false,
         )
     }
 
@@ -53,6 +56,7 @@ internal object TicketMapper {
         is Event.OnRetryClick -> Message.Outer.OnRetryClick(event.id)
         Event.OnSendClick -> Message.Outer.OnSendClick
         Event.OnShowAttachVariantsClick -> Message.Outer.OnShowAttachVariantsClick
+        Event.OnRefresh -> Message.Outer.OnRefresh
     }
 
     fun map(effect: Effect.Outer) = when(effect) {

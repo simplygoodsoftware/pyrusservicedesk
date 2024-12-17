@@ -17,6 +17,7 @@ internal interface TicketContract {
             val sendEnabled: Boolean,
             val inputText: String,
             val welcomeMessage: String?,
+            val isLoading: Boolean,
         ) : State {
             override fun toString(): String {
                 return "State(c=${ticket?.comments?.size})"
@@ -45,6 +46,8 @@ internal interface TicketContract {
             data class OnMessageChanged(val text: String) : Outer
 
             data class OnAttachmentSelected(val fileUri: Uri?) : Outer
+
+            data object OnRefresh : Outer
 
         }
 
