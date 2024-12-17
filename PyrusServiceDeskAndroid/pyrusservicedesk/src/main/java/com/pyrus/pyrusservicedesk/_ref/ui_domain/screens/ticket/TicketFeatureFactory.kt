@@ -74,8 +74,8 @@ private class FeatureReducer: Logic<State, Message, Effect>() {
             }
             is Message.Outer.OnPreviewClick -> effects { +Effect.Inner.OpenPreview(message.uri) }
             is Message.Outer.OnRatingClick -> {
-                val currentState = state as? State.Content ?: return
-                TODO()
+                if (state !is State.Content) return
+                effects { +Effect.Inner.SendRatingComment(message.rating) }
             }
             is Message.Outer.OnRetryClick -> {
                 val currentState = state as? State.Content ?: return
@@ -180,6 +180,7 @@ internal class TicketActor(
         is Effect.Inner.SendTextComment -> flow {
             repository.addTextComment(effect.text)
         }
+        is Effect.Inner.SendRatingComment -> TODO()
         is Effect.Inner.SendAttachComment -> TODO()
         is Effect.Inner.OpenPreview -> TODO()
         is Effect.Inner.SaveDraft -> flow {
