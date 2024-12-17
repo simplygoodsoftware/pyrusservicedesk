@@ -1,20 +1,18 @@
 package com.pyrus.pyrusservicedesk._ref.ui_domain.screens.ticket
 
-import android.net.Uri
+import com.pyrus.pyrusservicedesk._ref.data.Attachment
+import com.pyrus.pyrusservicedesk._ref.data.Comment
+import com.pyrus.pyrusservicedesk._ref.data.FullTicket
 import com.pyrus.pyrusservicedesk._ref.ui_domain.screens.ticket.TicketContract.Effect
 import com.pyrus.pyrusservicedesk._ref.ui_domain.screens.ticket.TicketContract.Message
 import com.pyrus.pyrusservicedesk._ref.ui_domain.screens.ticket.TicketContract.State
 import com.pyrus.pyrusservicedesk._ref.ui_domain.screens.ticket.TicketView.Event
 import com.pyrus.pyrusservicedesk._ref.ui_domain.screens.ticket.TicketView.Model
 import com.pyrus.pyrusservicedesk._ref.ui_domain.screens.ticket.adapter.new_entries.CommentEntryV2
-import com.pyrus.pyrusservicedesk._ref.utils.RequestUtils
 import com.pyrus.pyrusservicedesk._ref.utils.isImage
 import com.pyrus.pyrusservicedesk.presentation.ui.navigation_page.ticket.HtmlTagUtils
 import com.pyrus.pyrusservicedesk.presentation.ui.view.ContentType
 import com.pyrus.pyrusservicedesk.presentation.ui.view.Status
-import com.pyrus.pyrusservicedesk.sdk.data.AttachmentDto
-import com.pyrus.pyrusservicedesk.sdk.data.CommentDto
-import com.pyrus.pyrusservicedesk.sdk.data.intermediate.Comments
 
 internal object TicketMapper {
 
@@ -25,7 +23,7 @@ internal object TicketMapper {
         is State.Content -> Model(
             inputText = state.inputText,
             sendEnabled = state.sendEnabled,
-            comments = state.comments?.let { mapComments(it, state.welcomeMessage) },
+            comments = state.ticket?.let { mapComments(it, state.welcomeMessage) },
             isLoading = false,
             showNoConnectionError = false,
         )
@@ -63,7 +61,7 @@ internal object TicketMapper {
     }
 
     private fun mapComments(
-        freshList: Comments,
+        freshList: FullTicket,
         welcomeMessage: String?,
     ): List<CommentEntryV2> {
         val entries = ArrayList<CommentEntryV2>()
@@ -75,7 +73,7 @@ internal object TicketMapper {
         val entriesWithDates = toListWithDates(entries).toMutableList()
 
         if (freshList.showRating) {
-            if (freshList.showRatingText.isNotBlank()) entriesWithDates += CommentEntryV2.SimpleText(
+            if (!freshList.showRatingText.isNullOrBlank()) entriesWithDates += CommentEntryV2.SimpleText(
                 entryId = RATING_TEXT_ID,
                 message = freshList.showRatingText
             )
@@ -93,10 +91,10 @@ internal object TicketMapper {
     private fun addWelcomeEntries(
         entries: ArrayList<CommentEntryV2>,
         welcomeMessage: String,
-        freshList: Comments
+        freshList: FullTicket
     ) {
         val firstComment = freshList.comments.firstOrNull()
-        val welcomeCreationTime = firstComment?.creationDate?.time ?: System.currentTimeMillis()
+        val welcomeCreationTime = firstComment?.creationTime
 
         val welcomeEntry = CommentEntryV2.Comment(
             entryId = WELCOME_MESSAGE_ID.toString(),
@@ -117,29 +115,20 @@ internal object TicketMapper {
 
     private fun addCommentEntries(
         entries: ArrayList<CommentEntryV2>,
-        freshList: Comments,
+        freshList: FullTicket,
     ) {
         for (comment in freshList.comments) {
-            addCommentEntries(entries, comment, "") // TODO
+            addCommentEntries(entries, comment)
         }
     }
 
     private fun addCommentEntries(
         entries: ArrayList<CommentEntryV2>,
-        comment: CommentDto,
-        baseUrl: String,
+        comment: Comment,
     ) {
 
-        // TODO
-//        val avatarId = comment.author.avatarId
-//        if (avatarId == 0) {
-//
-//        }
-//        val avatarUrl = "${baseUrl}Avatar/${comment.author.avatarId}"
-
-
         val status = when {
-            comment.isLocal() -> {
+            comment.isLocal -> {
                 if (comment.isSending) Status.Processing
                 else Status.Error
             }
@@ -160,14 +149,14 @@ internal object TicketMapper {
 
     private fun toTextEntry(
         commentBody: String,
-        comment: CommentDto,
+        comment: Comment,
         avatarUrl: String?,
         status: Status
     ): CommentEntryV2.Comment {
-        val isLocal = comment.isLocal()
+        val isLocal = comment.isLocal
         return CommentEntryV2.Comment(
-            entryId = "${comment.commentId}",
-            id = comment.commentId,
+            entryId = "${comment.id}",
+            id = comment.id,
             isInbound = comment.isInbound,
             hasError = false, // TODO
             isLocal = isLocal,
@@ -182,8 +171,8 @@ internal object TicketMapper {
     }
 
     private fun toAttachEntry(
-        comment: CommentDto,
-        attach: AttachmentDto,
+        comment: Comment,
+        attach: Attachment,
         avatarUrl: String?,
         status: Status,
     ): CommentEntryV2.Comment {
@@ -193,14 +182,12 @@ internal object TicketMapper {
             else -> ContentType.Attachment
         }
 
-        val attachUri = attach.localUri ?: Uri.parse(RequestUtils.getPreviewUrl(attach.id, account))
-
         return CommentEntryV2.Comment(
-            entryId = "${comment.commentId}_${attach.id}",
-            id = comment.commentId,
+            entryId = "${comment.id}_${attach.id}",
+            id = comment.id,
             isInbound = comment.isInbound,
             hasError = false, // TODO
-            isLocal = comment.isLocal(),
+            isLocal = comment.isLocal,
             isWelcomeMessage = false,
             timeText = "time", // TODO
             status = status,
@@ -208,7 +195,7 @@ internal object TicketMapper {
             avatarUrl = avatarUrl,
             contentType = contentType,
             content = CommentEntryV2.CommentContent.Image(
-                attachUri,
+                attach.uri,
                 attach.name,
                 attach.name.isImage(),
                 attach.bytesSize.toFloat(),
@@ -217,13 +204,13 @@ internal object TicketMapper {
         )
     }
 
-    private fun extractButtons(lastComment: CommentDto): CommentEntryV2.Buttons? {
+    private fun extractButtons(lastComment: Comment): CommentEntryV2.Buttons? {
         val buttons = HtmlTagUtils.extractButtons(lastComment)
         if (buttons.isEmpty()) {
             return null
         }
 
-        return CommentEntryV2.Buttons(lastComment.commentId, buttons)
+        return CommentEntryV2.Buttons(lastComment.id, buttons)
     }
 
     private fun toListWithDates(entries: List<CommentEntryV2>): List<CommentEntryV2> {

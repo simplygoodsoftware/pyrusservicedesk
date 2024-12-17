@@ -13,7 +13,7 @@ import com.pyrus.pyrusservicedesk.sdk.data.EMPTY_TICKET_ID
 import com.pyrus.pyrusservicedesk.sdk.data.FileManager
 import com.pyrus.pyrusservicedesk.sdk.data.TicketShortDescription
 import com.pyrus.pyrusservicedesk.sdk.data.intermediate.AddCommentResponseData
-import com.pyrus.pyrusservicedesk.sdk.data.intermediate.Comments
+import com.pyrus.pyrusservicedesk.sdk.data.intermediate.CommentsDto
 import com.pyrus.pyrusservicedesk.sdk.data.intermediate.FileUploadResponseData
 import com.pyrus.pyrusservicedesk.sdk.request.UploadFileRequest
 import com.pyrus.pyrusservicedesk.sdk.response.*
@@ -54,7 +54,7 @@ internal class RemoteStore(
     /**
      * Provides tickets in single feed representation.
      */
-    suspend fun getFeed(keepUnread: Boolean): Try<Comments> {
+    suspend fun getFeed(keepUnread: Boolean): Try<CommentsDto> {
         PLog.d(
             TAG, "getFeed, " +
                 "appId: ${account.appId.getFirstNSymbols(10)}, " +
@@ -329,7 +329,7 @@ internal class RemoteStore(
     }
 
     private fun CommentDto.applyNewAttachments(newAttachments: List<AttachmentDto>): CommentDto {
-        return CommentDto(commentId, body, isInbound, newAttachments, creationDate, author, localId)
+        return CommentDto(commentId, body, isInbound, newAttachments, creationDate, author)
     }
 
     private fun <T> createError(response: retrofit2.Response<T>): ResponseError {

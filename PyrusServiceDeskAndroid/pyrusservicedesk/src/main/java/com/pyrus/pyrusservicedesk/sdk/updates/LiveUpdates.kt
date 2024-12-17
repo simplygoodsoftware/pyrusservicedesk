@@ -297,12 +297,12 @@ internal class LiveUpdates(
                     val comments = feedTry.value.comments
                     val lastSavedCommentInMainScope = this@LiveUpdates.preferencesManager.getLastComment()
                     val lastServerComment = comments.findLast { !it.isInbound } ?: return@withContext
-                    if (lastServerComment.commentId <= (lastSavedCommentInMainScope?.id ?: 0))
+                    if (lastServerComment.id <= (lastSavedCommentInMainScope?.id ?: 0))
                         return@withContext
 
                     val lastUserComment = comments.findLast { it.isInbound } ?: return@withContext
 
-                    updateGetTicketsIntervalIfNeeded(lastUserComment.creationDate.time)
+                    updateGetTicketsIntervalIfNeeded(lastUserComment.creationTime)
 
                     val chatIsShown = activeScreenCount > 0
                     val lastComment = LastComment.mapFromComment(

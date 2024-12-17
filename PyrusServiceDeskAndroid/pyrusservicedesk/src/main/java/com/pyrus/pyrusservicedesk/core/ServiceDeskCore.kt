@@ -34,6 +34,7 @@ import com.squareup.picasso.OkHttp3Downloader
 import com.squareup.picasso.Picasso
 import kotlinx.coroutines.CoroutineScope
 import com.pyrus.pyrusservicedesk._ref.utils.navigation.PyrusRouterImpl
+import com.pyrus.pyrusservicedesk.sdk.repositories.RepositoryMapper
 import okhttp3.OkHttpClient
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
@@ -71,10 +72,8 @@ internal class DiInjector(
     private val loggingEnabled: Boolean,
     private val authToken: String?,
     private val coreScope: CoroutineScope,
+    private val preferences: SharedPreferences,
 ) {
-
-    private val preferences: SharedPreferences = application
-        .getSharedPreferences(PREFERENCE_KEY, Context.MODE_PRIVATE)
 
     private val fileResolver: FileResolver = FileResolverImpl(application.contentResolver)
 
@@ -131,7 +130,9 @@ internal class DiInjector(
         account = account
     )
 
-    private val repository: Repository = Repository(localStore, remoteStore)
+    private val repositoryMapper = RepositoryMapper(account)
+
+    private val repository: Repository = Repository(localStore, remoteStore, repositoryMapper)
 
     private val preferencesManager = PreferencesManager(preferences)
 

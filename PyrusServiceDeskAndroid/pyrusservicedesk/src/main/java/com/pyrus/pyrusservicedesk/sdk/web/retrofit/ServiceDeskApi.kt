@@ -1,7 +1,7 @@
 package com.pyrus.pyrusservicedesk.sdk.web.retrofit
 
 import com.pyrus.pyrusservicedesk.sdk.data.intermediate.AddCommentResponseData
-import com.pyrus.pyrusservicedesk.sdk.data.intermediate.Comments
+import com.pyrus.pyrusservicedesk.sdk.data.intermediate.CommentsDto
 import com.pyrus.pyrusservicedesk.sdk.data.intermediate.FileUploadResponseData
 import com.pyrus.pyrusservicedesk.sdk.data.intermediate.Tickets
 import com.pyrus.pyrusservicedesk.sdk.web.request_body.AddCommentRequestBody
@@ -25,7 +25,7 @@ internal interface ServiceDeskApi {
      * Api call for getting ticket feed.
      */
     @POST("GetTicketFeed")
-    suspend fun getTicketFeed(@Body requestBody: GetFeedBody): Try<Comments>
+    suspend fun getTicketFeed(@Body requestBody: GetFeedBody): Try<CommentsDto>
 
     /**
      * Api call for getting tikets.

@@ -26,7 +26,7 @@ internal class LocalDataProvider(
     init {
         runBlocking {
             // assigns last pending comment id as last local
-            lastLocalCommentId = offlineRepository.getPendingFeedComments().lastOrNull()?.localId ?: 0L
+            lastLocalCommentId = offlineRepository.getPendingFeedComments().lastOrNull()?.id ?: 0L
         }
     }
 
@@ -40,12 +40,12 @@ internal class LocalDataProvider(
         return CommentDto(
             body = text,
             isInbound = true,
-            author = Author(ConfigUtils.getUserName()),
+            author = AuthorDto(ConfigUtils.getUserName(), null, null),
             attachments = fileResolver.getFileData(fileUri)?.let { fileData ->
                 listOf(createLocalAttachment(fileData))
             },
             creationDate = Calendar.getInstance().time,
-            localId = --lastLocalCommentId,
+//            localId = --lastLocalCommentId,
             rating = rating
         )
     }
@@ -68,7 +68,7 @@ internal class LocalDataProvider(
             attachments,
             localComment.creationDate,
             localComment.author,
-            localComment.localId,
+//            localComment.localId,
             localComment.rating
         )
     }

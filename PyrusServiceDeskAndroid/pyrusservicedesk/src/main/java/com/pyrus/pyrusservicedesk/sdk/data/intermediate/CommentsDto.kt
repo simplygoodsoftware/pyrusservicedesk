@@ -8,7 +8,7 @@ import com.pyrus.pyrusservicedesk.sdk.data.CommentDto
  * Intermediate data for parsing list of comments object
  */
 @Keep
-internal data class Comments(
+internal data class CommentsDto(
     @SerializedName("comments")
     val comments: List<CommentDto> = emptyList(),
 

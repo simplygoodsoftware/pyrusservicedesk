@@ -18,9 +18,9 @@ import com.pyrus.pyrusservicedesk._ref.utils.log.PLog
 import com.pyrus.pyrusservicedesk.presentation.ui.view.recyclerview.DiffResultWithNewItems
 import com.pyrus.pyrusservicedesk.presentation.viewmodel.ConnectionViewModelBase
 import com.pyrus.pyrusservicedesk.sdk.data.AttachmentDto
-import com.pyrus.pyrusservicedesk.sdk.data.Author
+import com.pyrus.pyrusservicedesk.sdk.data.AuthorDto
 import com.pyrus.pyrusservicedesk.sdk.data.CommentDto
-import com.pyrus.pyrusservicedesk.sdk.data.intermediate.Comments
+import com.pyrus.pyrusservicedesk.sdk.data.intermediate.CommentsDto
 import com.pyrus.pyrusservicedesk.sdk.response.PendingDataError
 import com.pyrus.pyrusservicedesk.sdk.updates.OnUnreadTicketCountChangedSubscriber
 import com.pyrus.pyrusservicedesk.sdk.updates.PreferencesManager
@@ -278,7 +278,6 @@ internal class TicketViewModel(
 //            .observeForever(AddCommentObserver(uploadFileHooks, localComment))
 
         val lastActiveTime = System.currentTimeMillis()
-        PLog.d(TAG, "sendAddComment, lastActiveTime: $lastActiveTime, commentLocalId: ${localComment.localId}")
         PyrusServiceDesk.startTicketsUpdatesIfNeeded(lastActiveTime)
         updateFeedIntervalIfNeeded()
     }
@@ -312,7 +311,7 @@ internal class TicketViewModel(
         return false
     }
 
-    private fun applyTicketUpdate(freshList: Comments, arePendingComments: Boolean) {
+    private fun applyTicketUpdate(freshList: CommentsDto, arePendingComments: Boolean) {
 //        liveUpdates.onReadComments()
         if (!arePendingComments && !needUpdateCommentsList(freshList.comments)) {
             onDataLoaded()
@@ -339,8 +338,7 @@ internal class TicketViewModel(
                 val welcomeComment = CommentDto(
                     body = welcomeMessage,
                     creationDate = welcomeCommentDate,
-                    author = Author(""),
-//                    isWelcomeMessage = true,
+                    author = AuthorDto("", null, "#fffffff"),
                 )
                 freshComments += welcomeComment
             }
@@ -456,11 +454,12 @@ internal class TicketViewModel(
     }
 
     private fun List<TicketEntry>.findIndex(commentEntry: CommentEntry): Int {
-        return findLast {
-            (it.type == Type.Comment) && (it as CommentEntry).comment.localId == commentEntry.comment.localId
-        }?.let {
-            indexOf(it)
-        } ?: -1
+//        return findLast {
+//            (it.type == Type.Comment) && (it as CommentEntry).comment.localId == commentEntry.comment.localId
+//        }?.let {
+//            indexOf(it)
+//        } ?: -1
+        return -1
     }
 
     // buttons are displayed in other entries, so if comment contains nothing but buttons we don't need it
@@ -483,10 +482,10 @@ internal class TicketViewModel(
             return newEntries
         }
 
-        val buttons = HtmlTagUtils.extractButtons(commentWithButtons.comment)
-        if (buttons.isEmpty()) {
-            return newEntries
-        }
+//        val buttons = HtmlTagUtils.extractButtons(commentWithButtons.comment)
+//        if (buttons.isEmpty()) {
+//            return newEntries
+//        }
 
         return newEntries
     }
@@ -532,7 +531,7 @@ internal class TicketViewModel(
                         null,
                         this.creationDate,
                         this.author,
-                        this.localId
+//                        this.localId
                     ),
                     error = pendingError
                 )
@@ -548,7 +547,7 @@ internal class TicketViewModel(
                         listOf(attachment),
                         this.creationDate,
                         this.author,
-                        this.localId
+//                        this.localId
                     ),
                     error = pendingError
                 )

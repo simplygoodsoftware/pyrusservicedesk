@@ -1,6 +1,7 @@
 package com.pyrus.pyrusservicedesk._ref.ui_domain.screens.ticket
 
 import com.pyrus.pyrusservicedesk.R
+import com.pyrus.pyrusservicedesk._ref.data.FullTicket
 import com.pyrus.pyrusservicedesk._ref.ui_domain.screens.ticket.TicketContract.Effect
 import com.pyrus.pyrusservicedesk._ref.ui_domain.screens.ticket.TicketContract.Message
 import com.pyrus.pyrusservicedesk._ref.ui_domain.screens.ticket.TicketContract.State
@@ -14,7 +15,6 @@ import com.pyrus.pyrusservicedesk._ref.whitetea.core.StoreFactory
 import com.pyrus.pyrusservicedesk._ref.whitetea.core.adaptCast
 import com.pyrus.pyrusservicedesk._ref.whitetea.core.logic.Logic
 import com.pyrus.pyrusservicedesk._ref.whitetea.utils.adapt
-import com.pyrus.pyrusservicedesk.sdk.data.intermediate.Comments
 import com.pyrus.pyrusservicedesk.sdk.repositories.DraftRepository
 import com.pyrus.pyrusservicedesk.sdk.repositories.Repository
 import kotlinx.coroutines.flow.Flow
@@ -79,8 +79,8 @@ private class FeatureReducer: Logic<State, Message, Effect>() {
             }
             is Message.Outer.OnRetryClick -> {
                 val currentState = state as? State.Content ?: return
-                val comment = currentState.comments?.comments?.find {
-                    it.commentId == message.id
+                val comment = currentState.ticket?.comments?.find {
+                    it.id == message.id
                 } ?: return
 
                 val attachment = comment.attachments?.firstOrNull()
@@ -109,10 +109,10 @@ private class FeatureReducer: Logic<State, Message, Effect>() {
             }
             is Message.Inner.UpdateCommentsCompleted -> {
                 when(val currentState = state) {
-                    is State.Content -> state { currentState.copy(comments = message.comments) }
+                    is State.Content -> state { currentState.copy(ticket = message.ticket) }
                     State.Error,
                     State.Loading -> state { State.Content(
-                        comments = message.comments,
+                        ticket = message.ticket,
                         sendEnabled = true,
                         inputText = message.draft,
                         welcomeMessage = message.welcomeMessage,
@@ -121,7 +121,7 @@ private class FeatureReducer: Logic<State, Message, Effect>() {
             }
             is Message.Inner.CommentsUpdated -> {
                 val currentState = state as? State.Content ?: return
-                state { currentState.copy(comments = message.comments) }
+                state { currentState.copy(ticket = message.ticket) }
             }
         }
     }
@@ -137,13 +137,13 @@ internal class TicketActor(
 
     override fun handleEffect(effect: Effect.Inner): Flow<Message.Inner> = when(effect) {
         Effect.Inner.UpdateComments -> singleFlow {
-            val commentsTry: Try<Comments> = repository.getFeed(
+            val commentsTry: Try<FullTicket> = repository.getFeed(
                 keepUnread = false,
                 includePendingComments = true
             )
             when {
                 commentsTry.isSuccess() -> Message.Inner.UpdateCommentsCompleted(
-                    comments = commentsTry.value,
+                    ticket = commentsTry.value,
                     draft = draftRepository.getDraft(),
                     welcomeMessage = welcomeMessage,
                 )

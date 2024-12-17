@@ -1,5 +1,6 @@
 package com.pyrus.pyrusservicedesk.presentation.ui.navigation_page.ticket
 
+import com.pyrus.pyrusservicedesk._ref.data.Comment
 import com.pyrus.pyrusservicedesk._ref.ui_domain.screens.ticket.adapter.new_entries.CommentEntryV2
 import com.pyrus.pyrusservicedesk.sdk.data.CommentDto
 import org.jsoup.Jsoup
@@ -8,7 +9,7 @@ import org.jsoup.nodes.TextNode
 
 internal object HtmlTagUtils {
 
-    fun extractButtons(comment: CommentDto): List<CommentEntryV2.ButtonEntry> {
+    fun extractButtons(comment: Comment): List<CommentEntryV2.ButtonEntry> {
         if (comment.body == null) {
             return emptyList()
         }
