@@ -15,6 +15,7 @@ import com.pyrus.pyrusservicedesk.sdk.FileResolver
 import com.pyrus.pyrusservicedesk.sdk.data.TicketShortDescription
 import com.pyrus.pyrusservicedesk.sdk.data.intermediate.AddCommentResponseData
 import com.pyrus.pyrusservicedesk.sdk.data.intermediate.FileData
+import com.pyrus.pyrusservicedesk.sdk.web.retrofit.RemoteFileStore
 import com.pyrus.pyrusservicedesk.sdk.web.retrofit.RemoteStore
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -31,6 +32,7 @@ internal class Repository(
     private val remoteStore: RemoteStore,
     private val repositoryMapper: RepositoryMapper,
     private val fileResolver: FileResolver,
+    private val remoteFileStore: RemoteFileStore,
 ) {
 
     private val lastLocalCommentId: AtomicLong
@@ -100,6 +102,8 @@ internal class Repository(
         val comment = createLocalAttachComment(fileData)
 
         localStore.addPendingFeedComment(comment)
+
+        remoteFileStore.uploadFile()
 
         // TODO sds
         // upload attachment

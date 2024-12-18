@@ -106,10 +106,11 @@ internal class FileResolver(private val contentResolver: ContentResolver) : Loca
             if (file.exists().not() || size > RequestUtils.MAX_FILE_SIZE_BYTES)
                 return null
             return FileData(
-                file.name,
-                size.toInt(),
-                fileUri,
-                true)
+                fileName = file.name,
+                bytesSize = size.toInt(),
+                uri = fileUri,
+                isLocal = true,
+            )
         }
 
     }
