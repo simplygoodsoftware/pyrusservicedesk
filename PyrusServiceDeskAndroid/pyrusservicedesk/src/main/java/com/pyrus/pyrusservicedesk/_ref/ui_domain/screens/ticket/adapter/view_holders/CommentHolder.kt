@@ -5,6 +5,8 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.annotation.LayoutRes
 import com.pyrus.pyrusservicedesk._ref.ui_domain.screens.ticket.adapter.new_entries.CommentEntryV2
+import com.pyrus.pyrusservicedesk._ref.ui_domain.screens.ticket.adapter.new_entries.CommentEntryV2.CommentContent
+import com.pyrus.pyrusservicedesk._ref.utils.text
 import com.pyrus.pyrusservicedesk.presentation.ui.view.CommentView
 import com.pyrus.pyrusservicedesk.presentation.ui.view.ContentType
 import com.pyrus.pyrusservicedesk.presentation.ui.view.Status
@@ -13,7 +15,7 @@ import com.pyrus.pyrusservicedesk.presentation.ui.view.recyclerview.ViewHolderBa
 internal abstract class CommentHolder(
     parent: ViewGroup,
     @LayoutRes layoutRes: Int,
-    private val onErrorCommentEntryClickListener: (entry: CommentEntryV2.Comment) -> Unit,
+    private val onErrorCommentEntryClickListener: (id: Long) -> Unit,
     private val onFileReadyToPreviewClickListener: (uri: Uri) -> Unit,
     private val onTextCommentLongClicked: (String) -> Unit,
 ) : ViewHolderBase<CommentEntryV2.Comment>(parent, layoutRes) {
@@ -22,7 +24,7 @@ internal abstract class CommentHolder(
 
     private val onCommentClickListener = View.OnClickListener {
         when {
-            getItem().hasError -> onErrorCommentEntryClickListener.invoke(getItem())
+            getItem().hasError -> onErrorCommentEntryClickListener.invoke(getItem().id)
             (comment.contentType == ContentType.Attachment
                 || comment.contentType == ContentType.PreviewableAttachment)
                 && comment.fileProgressStatus == Status.Completed -> {
@@ -33,15 +35,14 @@ internal abstract class CommentHolder(
     }
 
     private val onCommentLongClickListener = View.OnLongClickListener {
-        TODO()
-//        return@OnLongClickListener when {
-//            !getItem().comment.hasAttachments() -> {
-//                onTextCommentLongClicked.invoke(getItem().comment.body ?: "")
-//                true
-//            }
-//
-//            else -> false
-//        }
+        val content = getItem().content
+        return@OnLongClickListener when {
+            content is CommentContent.Text -> {
+                onTextCommentLongClicked.invoke(content.text)
+                true
+            }
+            else -> false
+        }
     }
 
     override fun bindItem(entry: CommentEntryV2.Comment) {
@@ -52,26 +53,25 @@ internal abstract class CommentHolder(
         comment.status = entry.status
         comment.contentType = entry.contentType
 
-        comment.setCreationTime(entry.timeText)
-
+        comment.setCreationTime(entry.timeText?.text(comment.context))
 
         itemView.setOnClickListener {
             if (entry.hasError) {
-                onErrorCommentEntryClickListener.invoke(entry)
+                onErrorCommentEntryClickListener.invoke(entry.id)
             }
         }
 
         when (val content = entry.content) {
-            is CommentEntryV2.CommentContent.Image -> bindAttachmentView(content)
-            is CommentEntryV2.CommentContent.Text ->  bindTextView(content)
+            is CommentContent.Image -> bindAttachmentView(content)
+            is CommentContent.Text -> bindTextView(content)
         }
     }
 
-    private fun bindTextView(content: CommentEntryV2.CommentContent.Text) {
+    private fun bindTextView(content: CommentContent.Text) {
         comment.setCommentText(content.text)
     }
 
-    private fun bindAttachmentView(content: CommentEntryV2.CommentContent.Image) {
+    private fun bindAttachmentView(content: CommentContent.Image) {
         comment.setFileName(content.attachmentName)
         comment.setFileSize(content.fileSize)
         comment.setPreview(content.attachUrl)

@@ -1,5 +1,6 @@
 package com.pyrus.pyrusservicedesk._ref.ui_domain.screens.ticket
 
+import com.pyrus.pyrusservicedesk.R
 import com.pyrus.pyrusservicedesk._ref.data.Attachment
 import com.pyrus.pyrusservicedesk._ref.data.Comment
 import com.pyrus.pyrusservicedesk._ref.data.FullTicket
@@ -9,6 +10,7 @@ import com.pyrus.pyrusservicedesk._ref.ui_domain.screens.ticket.TicketContract.S
 import com.pyrus.pyrusservicedesk._ref.ui_domain.screens.ticket.TicketView.Event
 import com.pyrus.pyrusservicedesk._ref.ui_domain.screens.ticket.TicketView.Model
 import com.pyrus.pyrusservicedesk._ref.ui_domain.screens.ticket.adapter.new_entries.CommentEntryV2
+import com.pyrus.pyrusservicedesk._ref.utils.TextProvider
 import com.pyrus.pyrusservicedesk._ref.utils.isImage
 import com.pyrus.pyrusservicedesk.presentation.ui.navigation_page.ticket.HtmlTagUtils
 import com.pyrus.pyrusservicedesk.presentation.ui.view.ContentType
@@ -53,15 +55,16 @@ internal object TicketMapper {
         is Event.OnMessageChanged -> Message.Outer.OnMessageChanged(event.text)
         is Event.OnPreviewClick -> Message.Outer.OnPreviewClick(event.uri)
         is Event.OnRatingClick -> Message.Outer.OnRatingClick(event.rating)
-        is Event.OnRetryClick -> Message.Outer.OnRetryClick(event.id)
+        is Event.OnRetryClick -> Message.Outer.OnRetryAddCommentClick(event.id)
         Event.OnSendClick -> Message.Outer.OnSendClick
         Event.OnShowAttachVariantsClick -> Message.Outer.OnShowAttachVariantsClick
         Event.OnRefresh -> Message.Outer.OnRefresh
     }
 
-    fun map(effect: Effect.Outer) = when(effect) {
+    fun map(effect: Effect.Outer): TicketView.Effect = when(effect) {
         is Effect.Outer.CopyToClipboard -> TicketView.Effect.CopyToClipboard(effect.text)
         is Effect.Outer.MakeToast -> TicketView.Effect.MakeToast(effect.text)
+        Effect.Outer.ShowAttachVariants -> TicketView.Effect.ShowAttachVariants
     }
 
     private fun mapComments(
@@ -98,7 +101,7 @@ internal object TicketMapper {
         freshList: FullTicket
     ) {
         val firstComment = freshList.comments.firstOrNull()
-        val welcomeCreationTime = firstComment?.creationTime
+        val creationTime = firstComment?.creationTime ?: System.currentTimeMillis() // TODO
 
         val welcomeEntry = CommentEntryV2.Comment(
             entryId = WELCOME_MESSAGE_ID.toString(),
@@ -107,7 +110,7 @@ internal object TicketMapper {
             hasError = false,
             isLocal = false,
             isWelcomeMessage = true,
-            timeText = "Time ", // TODO sds
+            timeText = null,
             status = Status.Completed,
             contentType = ContentType.Text,
             authorName = "",
@@ -157,15 +160,14 @@ internal object TicketMapper {
         avatarUrl: String?,
         status: Status
     ): CommentEntryV2.Comment {
-        val isLocal = comment.isLocal
         return CommentEntryV2.Comment(
             entryId = "${comment.id}",
             id = comment.id,
             isInbound = comment.isInbound,
             hasError = false, // TODO
-            isLocal = isLocal,
+            isLocal = comment.isLocal,
             isWelcomeMessage = false,
-            timeText = "time ", // TODO
+            timeText = TextProvider.Date(comment.creationTime, R.string.psd_time_format),
             status = status,
             contentType = ContentType.Text,
             authorName = comment.author.name,
@@ -193,7 +195,7 @@ internal object TicketMapper {
             hasError = false, // TODO
             isLocal = comment.isLocal,
             isWelcomeMessage = false,
-            timeText = "time", // TODO
+            timeText = TextProvider.Date(comment.creationTime, R.string.psd_time_format),
             status = status,
             authorName = comment.author.name,
             avatarUrl = avatarUrl,

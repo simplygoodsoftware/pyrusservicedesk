@@ -14,7 +14,7 @@ import com.pyrus.pyrusservicedesk._ref.utils.ConfigUtils
 
 internal class InboundCommentHolder(
     parent: ViewGroup,
-    onErrorCommentEntryClickListener: (entry: CommentEntryV2.Comment) -> Unit,
+    onErrorCommentEntryClickListener: (id: Long) -> Unit,
     onFileReadyToPreviewClickListener: (uri: Uri) -> Unit,
     onTextCommentLongClicked: (String) -> Unit,
 ) : CommentHolder(

@@ -321,7 +321,7 @@ internal class CommentView @JvmOverloads constructor(
         binding.commentText.movementMethod = LinkMovementMethod.getInstance()
     }
 
-    fun setCreationTime(time: String) {
+    fun setCreationTime(time: String?) {
         binding.textTime.text = time
         binding.previewTime.text = time
         binding.previewMiniTime.text = time

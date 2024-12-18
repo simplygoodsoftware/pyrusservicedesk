@@ -31,7 +31,7 @@ internal interface TicketContract {
 
             data class OnPreviewClick(val uri: Uri) : Outer
 
-            data class OnRetryClick(val id: Long) : Outer
+            data class OnRetryAddCommentClick(val id: Long) : Outer
 
             data class OnCopyClick(val text: String) : Outer
 
@@ -68,6 +68,7 @@ internal interface TicketContract {
         sealed interface Outer : Effect {
             data class CopyToClipboard(val text: String) : Outer
             data class MakeToast(val text: TextProvider) : Outer
+            data object ShowAttachVariants : Outer
         }
 
         sealed interface Inner : Effect {

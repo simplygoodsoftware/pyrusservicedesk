@@ -1,6 +1,7 @@
 package com.pyrus.pyrusservicedesk._ref.ui_domain.screens.ticket
 
 import com.pyrus.pyrusservicedesk.R
+import com.pyrus.pyrusservicedesk._ref.Screens
 import com.pyrus.pyrusservicedesk._ref.data.FullTicket
 import com.pyrus.pyrusservicedesk._ref.ui_domain.screens.ticket.TicketContract.Effect
 import com.pyrus.pyrusservicedesk._ref.ui_domain.screens.ticket.TicketContract.Message
@@ -78,7 +79,7 @@ private class FeatureReducer: Logic<State, Message, Effect>() {
                 if (state !is State.Content) return
                 effects { +Effect.Inner.SendRatingComment(message.rating) }
             }
-            is Message.Outer.OnRetryClick -> {
+            is Message.Outer.OnRetryAddCommentClick -> {
                 if (state !is State.Content) return
                 effects { +Effect.Inner.RetryAddComment(message.id) }
             }
@@ -88,7 +89,10 @@ private class FeatureReducer: Logic<State, Message, Effect>() {
                 if (comment.isBlank()) return
                 effects { +Effect.Inner.SendTextComment(comment) }
             }
-            Message.Outer.OnShowAttachVariantsClick -> TODO("open attach variants dialog screen")
+            Message.Outer.OnShowAttachVariantsClick -> {
+                if(state !is State.Content) return
+                effects { +Effect.Outer.ShowAttachVariants }
+            }
             Message.Outer.OnRefresh -> {
                 val currentState = state as? State.Content ?: return
                 if (currentState.isLoading) return
@@ -168,7 +172,7 @@ internal class TicketActor(
         is Effect.Inner.SendRatingComment -> flow { repository.addRatingComment(effect.rating) }
         is Effect.Inner.SendAttachComment -> TODO()
         is Effect.Inner.RetryAddComment -> flow { repository.retryAddComment(effect.id) }
-        is Effect.Inner.OpenPreview -> TODO()
+        is Effect.Inner.OpenPreview -> flow { router.navigateTo(Screens.ImageScreen()) }
         is Effect.Inner.SaveDraft -> flow { draftRepository.saveDraft(effect.draft) }
     }
 

@@ -83,6 +83,8 @@ internal class TicketFragment: TeaFragment<Model, TicketView.Event, TicketView.E
             is TicketView.Effect.MakeToast -> {
                 Toast.makeText(requireContext(), effect.text.text(requireContext()), Toast.LENGTH_SHORT).show()
             }
+
+            TicketView.Effect.ShowAttachVariants -> TODO()
         }
     }
 
