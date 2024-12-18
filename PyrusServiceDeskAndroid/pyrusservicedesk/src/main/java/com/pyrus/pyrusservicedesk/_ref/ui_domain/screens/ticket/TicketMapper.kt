@@ -1,13 +1,11 @@
 package com.pyrus.pyrusservicedesk._ref.ui_domain.screens.ticket
 
-import com.pyrus.pyrusservicedesk.R
 import com.pyrus.pyrusservicedesk._ref.ui_domain.screens.ticket.TicketContract.Effect
 import com.pyrus.pyrusservicedesk._ref.ui_domain.screens.ticket.TicketContract.Message
 import com.pyrus.pyrusservicedesk._ref.ui_domain.screens.ticket.TicketContract.State
 import com.pyrus.pyrusservicedesk._ref.ui_domain.screens.ticket.TicketView.Event
 import com.pyrus.pyrusservicedesk._ref.ui_domain.screens.ticket.TicketView.Model
 import com.pyrus.pyrusservicedesk._ref.ui_domain.screens.ticket.adapter.new_entries.CommentEntryV2
-import com.pyrus.pyrusservicedesk._ref.utils.BYTES_IN_KILOBYTE
 import com.pyrus.pyrusservicedesk._ref.utils.BYTES_IN_MEGABYTE
 import com.pyrus.pyrusservicedesk.presentation.ui.navigation_page.ticket.HtmlTagUtils
 import com.pyrus.pyrusservicedesk.presentation.ui.view.ContentType
@@ -15,7 +13,6 @@ import com.pyrus.pyrusservicedesk.presentation.ui.view.Status
 import com.pyrus.pyrusservicedesk.sdk.data.Attachment
 import com.pyrus.pyrusservicedesk.sdk.data.Comment
 import com.pyrus.pyrusservicedesk.sdk.data.Ticket
-import com.pyrus.pyrusservicedesk.sdk.data.intermediate.Comments
 
 internal object TicketMapper {
 
@@ -179,14 +176,14 @@ internal object TicketMapper {
 
         val bytesSize = attach.bytesSize
         val isMegabytes = bytesSize >= BYTES_IN_MEGABYTE / 10
-        val toShow = when {
-            isMegabytes -> bytesSize / BYTES_IN_MEGABYTE
-            else -> bytesSize / BYTES_IN_KILOBYTE
-        }
-        val textResId = when{
-            isMegabytes -> R.string.psd_file_size_mb
-            else -> R.string.psd_file_size_kb
-        }
+//        val toShow = when {
+//            isMegabytes -> bytesSize / BYTES_IN_MEGABYTE
+//            else -> bytesSize / BYTES_IN_KILOBYTE
+//        }
+//        val textResId = when{
+//            isMegabytes -> com.pyrus.pyrusservicedesk.R.string.psd_file_size_mb
+//            else -> R.string.psd_file_size_kb
+//        }
 
         val size = "getString(textResId, toShow)"
         TODO()

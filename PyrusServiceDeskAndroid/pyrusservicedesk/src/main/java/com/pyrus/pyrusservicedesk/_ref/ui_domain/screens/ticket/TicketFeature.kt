@@ -41,11 +41,7 @@ internal interface TicketContract {
 
             data object OnShowAttachVariantsClick : Outer
 
-            data class OnSendClick(
-                val ticketId: Int,
-                val appId: String,
-                val userId: String
-            ) : Outer
+            data object OnSendClick : Outer
 
             data object OnCloseClick : Outer
 
