@@ -36,6 +36,7 @@ import com.squareup.picasso.OkHttp3Downloader
 import com.squareup.picasso.Picasso
 import kotlinx.coroutines.CoroutineScope
 import com.pyrus.pyrusservicedesk._ref.utils.navigation.PyrusRouterImpl
+import com.pyrus.pyrusservicedesk.sdk.data.LocalDataProvider
 import com.pyrus.pyrusservicedesk.sdk.web.retrofit.SyncRepository
 import okhttp3.OkHttpClient
 import retrofit2.Retrofit
@@ -166,6 +167,8 @@ internal class DiInjector(
     }
 
     private val cicerone: Cicerone<PyrusRouterImpl> = Cicerone.create(PyrusRouterImpl())
+
+    val localDataProvider = LocalDataProvider(localStore, fileResolver)
 
     val router = cicerone.router
 

@@ -1,6 +1,8 @@
 package com.pyrus.pyrusservicedesk._ref.ui_domain.screens.ticket
 
+import com.pyrus.pyrusservicedesk.PyrusServiceDesk
 import com.pyrus.pyrusservicedesk.PyrusServiceDesk.Companion.injector
+import com.pyrus.pyrusservicedesk.PyrusServiceDesk.Companion.users
 import com.pyrus.pyrusservicedesk.R
 import com.pyrus.pyrusservicedesk._ref.ui_domain.screens.ticket.TicketContract.Effect
 import com.pyrus.pyrusservicedesk._ref.ui_domain.screens.ticket.TicketContract.Message
@@ -15,12 +17,18 @@ import com.pyrus.pyrusservicedesk._ref.whitetea.core.StoreFactory
 import com.pyrus.pyrusservicedesk._ref.whitetea.core.adaptCast
 import com.pyrus.pyrusservicedesk._ref.whitetea.core.logic.Logic
 import com.pyrus.pyrusservicedesk._ref.whitetea.utils.adapt
+import com.pyrus.pyrusservicedesk.sdk.data.Command
+import com.pyrus.pyrusservicedesk.sdk.data.CreateComment
+import com.pyrus.pyrusservicedesk.sdk.data.LocalDataProvider
+import com.pyrus.pyrusservicedesk.sdk.data.MarkTicketAsRead
 import com.pyrus.pyrusservicedesk.sdk.data.Ticket
+import com.pyrus.pyrusservicedesk.sdk.data.TicketCommandType
 import com.pyrus.pyrusservicedesk.sdk.repositories.DraftRepository
 import com.pyrus.pyrusservicedesk.sdk.repositories.Repository
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.map
+import java.util.UUID
 
 internal class TicketFeatureFactory(
     private val storeFactory: StoreFactory,
@@ -94,11 +102,11 @@ private class FeatureReducer: Logic<State, Message, Effect>() {
                     // todo send comment
                 }
             }
-            Message.Outer.OnSendClick -> {
+            is Message.Outer.OnSendClick -> {
                 val currentState = state as? State.Content ?: return
                 val comment = currentState.inputText
                 if (comment.isBlank()) return
-                effects { +Effect.Inner.SendTextComment(comment) }
+                effects { +Effect.Inner.SendTextComment(comment, currentState.ticketId, currentState.appId, currentState.userId) }
             }
             Message.Outer.OnShowAttachVariantsClick -> TODO("open attach variants dialog screen")
             Message.Outer.OnBackClick -> injector().router.exit()
@@ -113,13 +121,23 @@ private class FeatureReducer: Logic<State, Message, Effect>() {
             }
             is Message.Inner.UpdateCommentsCompleted -> {
                 when(val currentState = state) {
-                    is State.Content -> state { currentState.copy(ticket = message.ticket) }
+                    is State.Content -> state {
+                        currentState.copy(
+                            ticket = message.ticket,
+                            appId = users.find { it.userId == message.ticket?.userId }?.appId ?: "",
+                            userId = message.ticket?.userId ?: "",
+                            ticketId = message.ticket?.ticketId ?: 0
+                        )
+                    }
                     State.Error,
                     State.Loading -> state { State.Content(
                         ticket = message.ticket,
                         sendEnabled = true,
                         inputText = message.draft,
                         welcomeMessage = message.welcomeMessage,
+                        appId = users.find { it.userId == message.ticket?.userId }?.appId ?: "",
+                        userId = message.ticket?.userId ?: "",
+                        ticketId = message.ticket?.ticketId ?: 0
                     ) }
                 }
             }
@@ -166,12 +184,44 @@ internal class TicketActor(
         Effect.Inner.Close -> flow {
             router.exit()
         }
-        is Effect.Inner.SendTextComment -> TODO()
+        is Effect.Inner.SendTextComment -> flow {
+            val comment =  injector().localDataProvider.createLocalComment(effect.text)
+            val commandsResultTry = repository.addFeedComment(
+                    commands = getSendTextCommentCommands(effect.text, effect.appId, effect.userId, effect.ticketId),
+                    comment = comment,
+                    uploadFileHooks = null
+                )
+        }
         is Effect.Inner.SendAttachComment -> TODO()
         is Effect.Inner.OpenPreview -> TODO()
         is Effect.Inner.SaveDraft -> flow {
             draftRepository.saveDraft(effect.draft)
         }
+    }
+
+    private fun getUUID(): String {
+        val uuid: UUID = UUID.randomUUID()
+        return uuid.toString()
+    }
+
+    fun getSendTextCommentCommands(text: String, appId: String, userId: String, ticketId: Int): List<Command> {
+        val localCreateComment = CreateComment(
+            comment = text,
+            requestNewTicket = ticketId == 0,
+            userId = userId,
+            appId = appId,
+            ticketId = ticketId,
+            attachments = emptyList(),
+        )
+        val localTicketIsRead = MarkTicketAsRead(
+            ticketId = ticketId.toString(),//TODO check why String
+            userId = userId,
+            appId = appId
+        )
+        val list = listOf(
+            Command(getUUID(), TicketCommandType.CreateComment, appId, userId,  localCreateComment),
+            Command(getUUID(), TicketCommandType.MarkTicketAsRead, appId, userId,  localTicketIsRead))
+        return list
     }
 
 }

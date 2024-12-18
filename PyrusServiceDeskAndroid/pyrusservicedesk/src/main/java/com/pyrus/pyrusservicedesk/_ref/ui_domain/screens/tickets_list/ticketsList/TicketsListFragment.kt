@@ -96,7 +96,7 @@ internal class TicketsListFragment: TeaFragment<State, Message, Effect>()  {
                 bottomSheet.show(parentFragmentManager, bottomSheet.tag)
             }
 
-            is Effect.Outer.ShowTicket -> injector().router.newRootScreen(Screens.TicketScreen(effect.ticketId, effect.userId ?: DEFAULT_USER_ID))
+            is Effect.Outer.ShowTicket -> injector().router.navigateTo(Screens.TicketScreen(effect.ticketId, effect.userId ?: DEFAULT_USER_ID))
                 /*startActivity(
                 TicketActivity.getLaunchIntent(
                     ticketId = effect.ticketId,

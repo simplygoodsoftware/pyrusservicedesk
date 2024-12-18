@@ -89,18 +89,6 @@ internal class TicketsFragment: TeaFragment<TicketListModel, Message, Effect>() 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        //TODO синк и  подписка на синк, будет в actor
-        /*lifecycleScope.launch {
-            repeatOnLifecycle(Lifecycle.State.STARTED) {
-                syncRepository.ticketsListStateFlow.collect { value ->
-                    viewModel.onNewData(value.tickets)
-                }
-            }
-        }
-
-        syncRepository.startSync()*/
-
-        //  todo
         viewPagerAdapter = ViewPagerAdapter(childFragmentManager, lifecycle)
 
         binding.viewPager.registerOnPageChangeCallback(object : ViewPager2.OnPageChangeCallback() {
@@ -122,32 +110,17 @@ internal class TicketsFragment: TeaFragment<TicketListModel, Message, Effect>() 
         val feature = getStore { injector().ticketsFeatureFactory().create() }
 
         bind(BinderLifecycleMode.CREATE_DESTROY) {
-            //feature.messages bindTo this@TicketsFragment
             this@TicketsFragment.messages.map { it } bindTo feature
-        //messages bindTo feature
         }
         bind {
-            //feature.state.map { TicketsMapper::map } bindTo this@TicketsFragment
             feature.state.map(TicketsMapper::map) bindTo this@TicketsFragment
             feature.effects bindTo this@TicketsFragment
         }
     }
 
-    private fun transform(state: TicketsContract.State): TicketListModel {
-        return TicketListModel(
-            titleText = state.titleText,
-            titleImageUrl = state.titleImageUrl,
-            filterName = state.filterName,
-            ticketsIsEmpty = state.ticketsIsEmpty,
-            filterEnabled = state.filterEnabled,
-            tabLayoutVisibility = state.tabLayoutVisibility,
-            applications = state.applications,
-        )
-    }
-
-    /*fun render(): ViewRenderer<TicketListModel> {
+    override fun render(model: TicketListModel) {
         //set title (vendor name) and vendor image
-        binding.toolbarTicketsList.psdToolbarVendorNameTv.text = model.titleText
+        binding.toolbarTicketsList.psdToolbarVendorNameTv.text =  model.titleText
         PyrusServiceDesk.injector().picasso
             .load(getOrganisationLogoUrl(model.titleImageUrl, PyrusServiceDesk.get().domain))
             .transform(CIRCLE_TRANSFORMATION)
@@ -174,14 +147,15 @@ internal class TicketsFragment: TeaFragment<TicketListModel, Message, Effect>() 
         //tabLayout and viewPager
         binding.tabLayout.visibility = if (model.tabLayoutVisibility ) View.VISIBLE else View.GONE
         viewPagerAdapter.setItems(model.applications)
-    }*/
+    }
 
     override val renderer: ViewRenderer<TicketListModel> = diff {
         diff(TicketListModel::titleText) { title -> binding.toolbarTicketsList.psdToolbarVendorNameTv.text = title }
-        diff(TicketListModel::titleImageUrl) { url -> PyrusServiceDesk.injector().picasso
-            .load(getOrganisationLogoUrl(url, PyrusServiceDesk.get().domain))
-            .transform(CIRCLE_TRANSFORMATION)
-            .into(binding.toolbarTicketsList.psdToolbarVendorIv)
+        diff(TicketListModel::titleImageUrl) { url ->
+            injector().picasso
+                .load(getOrganisationLogoUrl(url, PyrusServiceDesk.get().domain))
+                .transform(CIRCLE_TRANSFORMATION)
+                .into(binding.toolbarTicketsList.psdToolbarVendorIv)
         }
         diff(TicketListModel::ticketsIsEmpty) { isEmpty ->
 

@@ -7,7 +7,9 @@ import com.pyrus.pyrusservicedesk.sdk.web.retrofit.RemoteStore
 import com.pyrus.pyrusservicedesk._ref.utils.Try
 import com.pyrus.pyrusservicedesk._ref.utils.isSuccess
 import com.pyrus.pyrusservicedesk._ref.utils.map
+import com.pyrus.pyrusservicedesk.sdk.data.Command
 import com.pyrus.pyrusservicedesk.sdk.data.Ticket
+import com.pyrus.pyrusservicedesk.sdk.data.TicketCommandResult
 import com.pyrus.pyrusservicedesk.sdk.data.intermediate.Comments
 import com.pyrus.pyrusservicedesk.sdk.data.intermediate.Tickets
 import kotlinx.coroutines.flow.Flow
@@ -68,11 +70,12 @@ internal class Repository(
      * @param uploadFileHooks is used for posting progress as well as checking cancellation signal.
      */
     suspend fun addFeedComment(
+        commands: List<Command>,
         comment: Comment,
         uploadFileHooks: UploadFileHooks?
-    ): Try<AddCommentResponseData> {
+    ): Try<Tickets> {
         localStore.addPendingFeedComment(comment)
-        val response = remoteStore.addFeedComment(comment, uploadFileHooks)
+        val response = remoteStore.getAllData(commands)//addFeedComment(comment, uploadFileHooks)
         if (response.isSuccess()) {
             localStore.removePendingComment(comment)
         }

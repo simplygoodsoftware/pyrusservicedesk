@@ -35,7 +35,7 @@ class AddTicketFragment: BottomSheetDialogFragment() {
         updateSelectedUsers(appId)
         val adapter = AddTicketAdapter(users = selectedUserNames,
             onItemClick = { position ->
-                injector().router.newRootScreen(Screens.TicketScreen(userId = selectedUsers[position].userId))
+                injector().router.navigateTo(Screens.TicketScreen(userId = selectedUsers[position].userId))
                 //startActivity(TicketActivity.getLaunchIntent(userId = selectedUsers[position].userId))
                 dismiss()
             })

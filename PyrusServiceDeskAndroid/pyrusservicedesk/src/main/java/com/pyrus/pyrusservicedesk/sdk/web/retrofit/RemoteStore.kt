@@ -25,6 +25,7 @@ import com.pyrus.pyrusservicedesk._ref.utils.getFirstNSymbols
 import com.pyrus.pyrusservicedesk._ref.utils.isSuccess
 import com.pyrus.pyrusservicedesk._ref.utils.map
 import com.pyrus.pyrusservicedesk.core.Account
+import com.pyrus.pyrusservicedesk.sdk.data.Command
 import com.pyrus.pyrusservicedesk.sdk.data.Ticket
 import com.pyrus.pyrusservicedesk.sdk.data.UserData
 import com.pyrus.pyrusservicedesk.sdk.data.intermediate.Tickets
@@ -115,7 +116,7 @@ internal class RemoteStore(
         return ticketsTry.map { it.tickets ?: emptyList() }
     }
 
-    suspend fun getAllData(): Try<Tickets> {
+    suspend fun getAllData(commands: List<Command>? = null): Try<Tickets> {
         PLog.d(
             TAG, "getAllData, " +
                     "appId: ${account.appId.getFirstNSymbols(10)}, " +
@@ -127,6 +128,7 @@ internal class RemoteStore(
             RequestBodyBase(
                 needFullInfo = true,
                 additionalUsers = getAdditionalUsers(),
+                commands = commands,
                 authorId = "10",
                 authorName = "Kate Test",
                 appId = PyrusServiceDesk.users[0].appId,
@@ -195,7 +197,7 @@ internal class RemoteStore(
         comment: Comment,
         uploadFileHooks: UploadFileHooks?,
     ): Try<AddCommentResponseData> {
-
+//
         PLog.d(
             TAG, "addComment, " +
                 "appId: ${account.appId.getFirstNSymbols(10)}, " +
@@ -204,6 +206,8 @@ internal class RemoteStore(
                 "apiVersion: ${getVersion()}, " +
                 "ticketId: $ticketId"
         )
+
+
 
         val request = CommentRequest()
         sequentialRequests.offer(request)

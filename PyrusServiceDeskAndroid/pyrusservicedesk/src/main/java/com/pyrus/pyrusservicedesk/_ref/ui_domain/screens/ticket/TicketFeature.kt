@@ -14,6 +14,9 @@ internal interface TicketContract {
         data object Error : State
         data class Content(
             val ticket: Ticket?,
+            val appId: String,
+            val userId: String,
+            val ticketId: Int,
             val sendEnabled: Boolean,
             val inputText: String,
             val welcomeMessage: String?,
@@ -38,7 +41,11 @@ internal interface TicketContract {
 
             data object OnShowAttachVariantsClick : Outer
 
-            data object OnSendClick : Outer
+            data class OnSendClick(
+                val ticketId: Int,
+                val appId: String,
+                val userId: String
+            ) : Outer
 
             data object OnCloseClick : Outer
 
@@ -74,7 +81,12 @@ internal interface TicketContract {
             data object FeedFlow : Inner
             data object CommentsAutoUpdate : Inner
             data object Close : Inner
-            data class SendTextComment(val text: String) : Inner
+            data class SendTextComment(
+                val text: String,
+                val ticketId: Int,
+                val appId: String,
+                val userId: String
+            ) : Inner
             data class SendAttachComment(val uri: Uri) : Inner
             data class OpenPreview(val uri: Uri) : Inner
             data class SaveDraft(val draft: String) : Inner
