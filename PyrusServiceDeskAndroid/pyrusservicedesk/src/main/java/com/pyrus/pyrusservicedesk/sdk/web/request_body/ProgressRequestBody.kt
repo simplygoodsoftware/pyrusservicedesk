@@ -31,7 +31,7 @@ class ProgressRequestBody(
             while ((stream.read(buffer).also { read = it }) != -1) {
                 uploaded += read.toLong()
                 sink.write(buffer, 0, read)
-                val progress = (uploaded.toDouble()/fileLength * 100).toInt()
+                val progress = (uploaded.toDouble() / fileLength * 100).toInt()
                 progressListener(progress)
             }
         }
