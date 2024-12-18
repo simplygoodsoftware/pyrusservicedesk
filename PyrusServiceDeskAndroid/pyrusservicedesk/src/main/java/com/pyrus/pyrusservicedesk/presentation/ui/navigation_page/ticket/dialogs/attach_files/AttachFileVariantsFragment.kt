@@ -6,7 +6,6 @@ import android.app.Activity.RESULT_OK
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.net.Uri
-import android.os.Build
 import android.os.Bundle
 import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.google.android.material.bottomsheet.BottomSheetDialog
@@ -17,7 +16,6 @@ import android.view.View.GONE
 import android.view.View.VISIBLE
 import android.view.ViewGroup
 import androidx.core.util.Consumer
-import com.pyrus.pyrusservicedesk.PyrusServiceDesk
 import com.pyrus.pyrusservicedesk.R
 import com.pyrus.pyrusservicedesk.core.StaticRepository
 import com.pyrus.pyrusservicedesk.databinding.PsdFragmentAttachFileVariantsBinding
@@ -35,8 +33,6 @@ internal class AttachFileVariantsFragment: BottomSheetDialogFragment(), View.OnC
         AttachFileSharedViewModel::class.java)
 
     private val logSubscriber: Consumer<File> = Consumer {
-        if (it == null)
-            return@Consumer
         val uri = Uri.fromFile(it)
         sharedModel.onFilePicked(uri)
         dismiss()
@@ -50,7 +46,7 @@ internal class AttachFileVariantsFragment: BottomSheetDialogFragment(), View.OnC
     }
 
     @SuppressLint("InflateParams")
-    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
+    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
         super.onCreateView(inflater, container, savedInstanceState)
         dialog?.setOnShowListener { dialog ->
             val d = dialog as BottomSheetDialog
@@ -72,10 +68,10 @@ internal class AttachFileVariantsFragment: BottomSheetDialogFragment(), View.OnC
             binding.customVariant.setOnClickListener(this)
             binding.customVariant.text = it.getLabel()
         }
-        // TODO sds
-//        binding.sendLogsVariant.visibility = if (PyrusServiceDesk.logging) VISIBLE else GONE
-//        if (PyrusServiceDesk.logging)
-//            binding.sendLogsVariant.setOnClickListener(this)
+
+        binding.sendLogsVariant.visibility = if (StaticRepository.logging) VISIBLE else GONE
+        if (StaticRepository.logging) binding.sendLogsVariant.setOnClickListener(this)
+        else binding.sendLogsVariant.setOnClickListener(null)
 
         val textColor = ConfigUtils.getFileMenuTextColor(requireContext())
         binding.photoVariant.setTextColor(textColor)
@@ -113,6 +109,7 @@ internal class AttachFileVariantsFragment: BottomSheetDialogFragment(), View.OnC
         }
     }
 
+    @Deprecated("Deprecated in Java")
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
         if (!isExpectedResult(requestCode) || resultCode != RESULT_OK) {
@@ -121,16 +118,14 @@ internal class AttachFileVariantsFragment: BottomSheetDialogFragment(), View.OnC
         }
         val isPhoto = requestCode == REQUEST_CODE_TAKE_PHOTO
         val location: Uri? = if (isPhoto) capturePhotoUri else data?.data
-        location?.let {
-            if (!isPhoto
-                && requestCode != REQUEST_CODE_CUSTOM_CHOOSER
-            ) {
-
+        if (location != null) {
+            if (!isPhoto && requestCode != REQUEST_CODE_CUSTOM_CHOOSER) {
                 context?.contentResolver?.takePersistableUriPermission(
-                    it,
-                    Intent.FLAG_GRANT_READ_URI_PERMISSION)
+                    location,
+                    Intent.FLAG_GRANT_READ_URI_PERMISSION
+                )
             }
-            sharedModel.onFilePicked(it)
+            sharedModel.onFilePicked(location)
             dismiss()
         }
         capturePhotoUri = null
@@ -147,22 +142,16 @@ internal class AttachFileVariantsFragment: BottomSheetDialogFragment(), View.OnC
     private fun startPickingImage() {
         Intent().also{
             it.flags = Intent.FLAG_GRANT_READ_URI_PERMISSION
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
-                // We forced to use Intent.ACTION_OPEN_DOCUMENT to save uri access when the application
-                // is restarted
-                it.action = Intent.ACTION_OPEN_DOCUMENT
-                it.flags = it.flags or Intent.FLAG_GRANT_PERSISTABLE_URI_PERMISSION
-            }
-            else{
-                it.action = Intent.ACTION_GET_CONTENT
-            }
-            it.type = com.pyrus.pyrusservicedesk._ref.utils.MIME_TYPE_IMAGE_ANY
-            startActivityForResult(it,
-                REQUEST_CODE_PICK_IMAGE
-            )
+            // We forced to use Intent.ACTION_OPEN_DOCUMENT to save uri access when the application
+            // is restarted
+            it.action = Intent.ACTION_OPEN_DOCUMENT
+            it.flags = it.flags or Intent.FLAG_GRANT_PERSISTABLE_URI_PERMISSION
+            it.type = MIME_TYPE_IMAGE_ANY
+            startActivityForResult(it, REQUEST_CODE_PICK_IMAGE)
         }
     }
 
+    @Deprecated("Deprecated in Java")
     override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<out String>, grantResults: IntArray) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults)
         if (requestCode != REQUEST_CODE_PERMISSION)
@@ -174,7 +163,7 @@ internal class AttachFileVariantsFragment: BottomSheetDialogFragment(), View.OnC
                 granted.add(permission)
         }
         if (granted.isNotEmpty())
-            onPermissionsGranted(granted.toTypedArray())
+            onPermissionsGranted()
     }
 
     private fun startTakingPhoto() {
@@ -193,7 +182,7 @@ internal class AttachFileVariantsFragment: BottomSheetDialogFragment(), View.OnC
         }
     }
 
-    private fun onPermissionsGranted(permissions: Array<String>) {
+    private fun onPermissionsGranted() {
         activity?.let {
             if (it.hasPermission(CAMERA))
                 startTakingPhoto()

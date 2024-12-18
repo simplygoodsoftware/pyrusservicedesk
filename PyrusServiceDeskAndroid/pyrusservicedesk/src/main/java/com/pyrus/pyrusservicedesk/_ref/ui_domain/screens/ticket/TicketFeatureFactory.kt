@@ -16,11 +16,13 @@ import com.pyrus.pyrusservicedesk._ref.whitetea.core.StoreFactory
 import com.pyrus.pyrusservicedesk._ref.whitetea.core.adaptCast
 import com.pyrus.pyrusservicedesk._ref.whitetea.core.logic.Logic
 import com.pyrus.pyrusservicedesk._ref.whitetea.utils.adapt
+import com.pyrus.pyrusservicedesk.sdk.data.FileManager
 import com.pyrus.pyrusservicedesk.sdk.repositories.DraftRepository
 import com.pyrus.pyrusservicedesk.sdk.repositories.Repository
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.map
+import java.lang.Exception
 
 internal class TicketFeatureFactory(
     private val storeFactory: StoreFactory,
@@ -28,13 +30,14 @@ internal class TicketFeatureFactory(
     private val draftRepository: DraftRepository,
     private val welcomeMessage: String,
     private val router: PyrusRouter,
+    private val fileManager: FileManager,
 ) {
 
     fun create(): TicketFeature = storeFactory.create(
         name = "TicketFeature",
         initialState = State.Loading,
         reducer = FeatureReducer(),
-        actor = TicketActor(repository, router, welcomeMessage, draftRepository).adaptCast(),
+        actor = TicketActor(repository, router, welcomeMessage, draftRepository, fileManager).adaptCast(),
         initialEffects = listOf(
             Effect.Inner.FeedFlow,
             Effect.Inner.CommentsAutoUpdate,
@@ -143,7 +146,8 @@ internal class TicketActor(
     private val repository: Repository,
     private val router: PyrusRouter,
     private val welcomeMessage: String?,
-    private val draftRepository: DraftRepository
+    private val draftRepository: DraftRepository,
+    private val fileManager: FileManager,
 ): Actor<Effect.Inner, Message.Inner> {
 
     override fun handleEffect(effect: Effect.Inner): Flow<Message.Inner> = when(effect) {
@@ -170,7 +174,14 @@ internal class TicketActor(
         Effect.Inner.Close -> flow { router.exit() }
         is Effect.Inner.SendTextComment -> flow { repository.addTextComment(effect.text) }
         is Effect.Inner.SendRatingComment -> flow { repository.addRatingComment(effect.rating) }
-        is Effect.Inner.SendAttachComment -> TODO()
+        is Effect.Inner.SendAttachComment -> flow {
+            val fileUri = try {
+                fileManager.copyFile(effect.uri)
+            } catch (e: Exception) {
+                return@flow
+            } ?: return@flow
+            repository.addAttachComment(fileUri)
+        }
         is Effect.Inner.RetryAddComment -> flow { repository.retryAddComment(effect.id) }
         is Effect.Inner.OpenPreview -> flow { router.navigateTo(Screens.ImageScreen()) }
         is Effect.Inner.SaveDraft -> flow { draftRepository.saveDraft(effect.draft) }

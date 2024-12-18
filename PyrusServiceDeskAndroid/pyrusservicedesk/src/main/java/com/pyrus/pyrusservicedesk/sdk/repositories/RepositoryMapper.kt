@@ -7,7 +7,6 @@ import com.pyrus.pyrusservicedesk._ref.data.Comment
 import com.pyrus.pyrusservicedesk._ref.data.FullTicket
 import com.pyrus.pyrusservicedesk._ref.utils.RequestUtils
 import com.pyrus.pyrusservicedesk._ref.utils.RequestUtils.Companion.getAvatarUrl
-import com.pyrus.pyrusservicedesk._ref.utils.RequestUtils.Companion.getBaseUrl
 import com.pyrus.pyrusservicedesk._ref.utils.isImage
 import com.pyrus.pyrusservicedesk.core.Account
 import com.pyrus.pyrusservicedesk.presentation.ui.view.Status

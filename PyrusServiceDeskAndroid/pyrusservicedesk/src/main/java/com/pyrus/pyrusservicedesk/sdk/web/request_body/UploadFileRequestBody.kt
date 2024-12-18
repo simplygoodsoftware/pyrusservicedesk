@@ -1,7 +1,7 @@
 package com.pyrus.pyrusservicedesk.sdk.web.request_body
 
 import androidx.annotation.Keep
-import com.pyrus.pyrusservicedesk.sdk.web.UploadFileHooks
+import com.pyrus.pyrusservicedesk.sdk.web.UploadFileHook
 import kotlinx.coroutines.isActive
 import okhttp3.MediaType
 import okhttp3.MultipartBody
@@ -16,21 +16,21 @@ import kotlin.coroutines.CoroutineContext
  *
  * @param fileName name of the file to be sent.
  * @param fileStream file stream to read data from for sending.
- * @param uploadFileHooks hooks for publishing progress and for checking cancellation signal.
+ * @param uploadFileHook hooks for publishing progress and for checking cancellation signal.
  * @param context current coroutine context. Used for checking if it is alive while file uploading.
  */
 @Keep
 internal class UploadFileRequestBody(
     private val fileName: String,
     private val fileStream: InputStream,
-    private val uploadFileHooks: UploadFileHooks?,
+    private val uploadFileHook: UploadFileHook?,
     private val context: CoroutineContext,
 ) {
 
     private val fileSize = fileStream.available().toLong()
 
     init {
-        uploadFileHooks?.onProgressPercentChanged(0)
+        uploadFileHook?.onProgressPercentChanged(0)
     }
 
     /**
@@ -46,20 +46,21 @@ internal class UploadFileRequestBody(
                 return fileStream.available().toLong()
             }
 
+            // TODO check this solution
             override fun writeTo(sink: BufferedSink) {
                 val buffer = ByteArray(BUFFER_SIZE)
                 var uploaded = 0L
                 fileStream.use { fileStream ->
                     var read: Int = fileStream.read(buffer)
                     while (read != -1) {
-                        if (uploadFileHooks?.isCancelled == true)
+                        if (uploadFileHook?.isCancelled == true)
                             break
                         if (!context.isActive) {
                             throw IOException("Scope is no longer active")
                         }
                         uploaded += read
                         sink.write(buffer, 0, read)
-                        uploadFileHooks?.onProgressPercentChanged(uploaded.toProgress())
+                        uploadFileHook?.onProgressPercentChanged(uploaded.toProgress())
                         read = fileStream.read(buffer)
                     }
                 }

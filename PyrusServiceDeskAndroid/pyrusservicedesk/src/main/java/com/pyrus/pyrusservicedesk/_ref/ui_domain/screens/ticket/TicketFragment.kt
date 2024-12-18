@@ -24,6 +24,7 @@ import com.pyrus.pyrusservicedesk._ref.ui_domain.screens.ticket.adapter.TicketAd
 import com.pyrus.pyrusservicedesk._ref.utils.ConfigUtils
 import com.pyrus.pyrusservicedesk._ref.utils.getColorOnBackground
 import com.pyrus.pyrusservicedesk._ref.utils.getSecondaryColorOnBackground
+import com.pyrus.pyrusservicedesk._ref.utils.getViewModelWithActivityScope
 import com.pyrus.pyrusservicedesk._ref.utils.insets.RootViewDeferringInsetsCallback
 import com.pyrus.pyrusservicedesk._ref.utils.setCursorColor
 import com.pyrus.pyrusservicedesk._ref.utils.showKeyboardOn
@@ -35,6 +36,8 @@ import com.pyrus.pyrusservicedesk._ref.whitetea.bind.BinderLifecycleMode
 import com.pyrus.pyrusservicedesk._ref.whitetea.core.ViewRenderer
 import com.pyrus.pyrusservicedesk._ref.whitetea.utils.diff
 import com.pyrus.pyrusservicedesk.databinding.PsdFragmentTicketBinding
+import com.pyrus.pyrusservicedesk.presentation.ui.navigation_page.ticket.dialogs.attach_files.AttachFileSharedViewModel
+import com.pyrus.pyrusservicedesk.presentation.ui.navigation_page.ticket.dialogs.attach_files.AttachFileVariantsFragment
 import com.pyrus.pyrusservicedesk.presentation.ui.view.recyclerview.item_decorators.SpaceItemDecoration
 import kotlinx.coroutines.flow.map
 
@@ -44,7 +47,7 @@ internal class TicketFragment: TeaFragment<Model, TicketView.Event, TicketView.E
 
     private val adapter: TicketAdapter by lazy {
         TicketAdapter(
-            { dispatch(TicketView.Event.OnRetryClick(0)) }, // TODO
+            { dispatch(TicketView.Event.OnRetryClick(it)) },
             { dispatch(TicketView.Event.OnPreviewClick(it)) },
             { text -> dispatch(TicketView.Event.OnCopyClick(text)) },
             { rating -> dispatch(TicketView.Event.OnRatingClick(rating)) }
@@ -58,6 +61,10 @@ internal class TicketFragment: TeaFragment<Model, TicketView.Event, TicketView.E
             dispatch(TicketView.Event.OnMessageChanged(s.toString()))
         }
     }
+
+    private val attachFileSharedViewModel: AttachFileSharedViewModel by getViewModelWithActivityScope(
+        AttachFileSharedViewModel::class.java
+    )
 
     override val renderer: ViewRenderer<Model> = diff {
         diff(Model::inputText) { text -> if (!binding.input.hasFocus()) binding.input.setText(text) }
@@ -81,10 +88,16 @@ internal class TicketFragment: TeaFragment<Model, TicketView.Event, TicketView.E
             }
 
             is TicketView.Effect.MakeToast -> {
-                Toast.makeText(requireContext(), effect.text.text(requireContext()), Toast.LENGTH_SHORT).show()
+                Toast.makeText(
+                    requireContext(),
+                    effect.text.text(requireContext()),
+                    Toast.LENGTH_SHORT
+                ).show()
             }
 
-            TicketView.Effect.ShowAttachVariants -> TODO()
+            TicketView.Effect.ShowAttachVariants -> {
+                AttachFileVariantsFragment().show(parentFragmentManager, "")
+            }
         }
     }
 
@@ -115,6 +128,10 @@ internal class TicketFragment: TeaFragment<Model, TicketView.Event, TicketView.E
         ViewCompat.setOnApplyWindowInsetsListener(binding.root, deferringInsetsListener)
 
         bindFeature()
+
+        attachFileSharedViewModel.getFilePickedLiveData().observe(viewLifecycleOwner) { fileUri ->
+            dispatch(TicketView.Event.OnAttachmentSelected(fileUri))
+        }
     }
 
     override fun onSaveInstanceState(outState: Bundle) {

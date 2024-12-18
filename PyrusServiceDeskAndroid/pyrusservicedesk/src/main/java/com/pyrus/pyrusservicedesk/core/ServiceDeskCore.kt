@@ -1,7 +1,6 @@
 package com.pyrus.pyrusservicedesk.core
 
 import android.app.Application
-import android.content.Context
 import android.content.SharedPreferences
 import android.net.Uri
 import android.os.Build
@@ -10,7 +9,6 @@ import com.github.terrakok.cicerone.NavigatorHolder
 import com.google.gson.GsonBuilder
 import com.pyrus.pyrusservicedesk._ref.ui_domain.screens.ticket.TicketFeatureFactory
 import com.pyrus.pyrusservicedesk.sdk.FileResolver
-import com.pyrus.pyrusservicedesk.sdk.FileResolverImpl
 import com.pyrus.pyrusservicedesk.sdk.data.FileManager
 import com.pyrus.pyrusservicedesk.sdk.data.gson.RemoteGsonExclusionStrategy
 import com.pyrus.pyrusservicedesk.sdk.data.gson.UriGsonAdapter
@@ -24,7 +22,6 @@ import com.pyrus.pyrusservicedesk.sdk.web.retrofit.RemoteStore
 import com.pyrus.pyrusservicedesk.sdk.web.retrofit.ServiceDeskApi
 import com.pyrus.pyrusservicedesk._ref.utils.ConfigUtils
 import com.pyrus.pyrusservicedesk._ref.utils.ISO_DATE_PATTERN
-import com.pyrus.pyrusservicedesk._ref.utils.PREFERENCE_KEY
 import com.pyrus.pyrusservicedesk._ref.utils.RequestUtils.Companion.getBaseUrl
 import com.pyrus.pyrusservicedesk._ref.utils.call_adapter.TryCallAdapterFactory
 import com.pyrus.pyrusservicedesk._ref.whitetea.core.DefaultStoreFactory
@@ -75,7 +72,7 @@ internal class DiInjector(
     private val preferences: SharedPreferences,
 ) {
 
-    private val fileResolver: FileResolver = FileResolverImpl(application.contentResolver)
+    private val fileResolver: FileResolver = FileResolver(application.contentResolver)
 
     private val localDataVerifier: LocalDataVerifier = LocalDataVerifierImpl(fileResolver)
 
@@ -132,7 +129,7 @@ internal class DiInjector(
 
     private val repositoryMapper = RepositoryMapper(account)
 
-    private val repository: Repository = Repository(localStore, remoteStore, repositoryMapper)
+    private val repository: Repository = Repository(localStore, remoteStore, repositoryMapper, fileResolver)
 
     private val preferencesManager = PreferencesManager(preferences)
 
@@ -146,7 +143,8 @@ internal class DiInjector(
             repository = repository,
             draftRepository = draftRepository,
             welcomeMessage = welcomeMessage,
-            router = router
+            router = router,
+            fileManager = fileManager
         )
     }
 

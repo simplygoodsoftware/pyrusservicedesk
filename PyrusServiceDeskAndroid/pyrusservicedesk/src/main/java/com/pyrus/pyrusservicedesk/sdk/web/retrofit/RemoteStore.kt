@@ -14,10 +14,8 @@ import com.pyrus.pyrusservicedesk.sdk.data.FileManager
 import com.pyrus.pyrusservicedesk.sdk.data.TicketShortDescription
 import com.pyrus.pyrusservicedesk.sdk.data.intermediate.AddCommentResponseData
 import com.pyrus.pyrusservicedesk.sdk.data.intermediate.CommentsDto
-import com.pyrus.pyrusservicedesk.sdk.data.intermediate.FileUploadResponseData
-import com.pyrus.pyrusservicedesk.sdk.request.UploadFileRequest
 import com.pyrus.pyrusservicedesk.sdk.response.*
-import com.pyrus.pyrusservicedesk.sdk.web.UploadFileHooks
+import com.pyrus.pyrusservicedesk.sdk.web.UploadFileHook
 import com.pyrus.pyrusservicedesk.sdk.web.request_body.*
 import com.pyrus.pyrusservicedesk._ref.utils.ConfigUtils
 import com.pyrus.pyrusservicedesk._ref.utils.Try
@@ -30,7 +28,6 @@ import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import retrofit2.Retrofit
-import kotlin.coroutines.coroutineContext
 
 private const val FAILED_AUTHORIZATION_ERROR_CODE = 403
 
@@ -104,13 +101,13 @@ internal class RemoteStore(
     /**
      * Appends [comment] to the ticket to comment feed.
      *
-     * @param uploadFileHooks is used for posting progress as well as checking cancellation signal.
+     * @param uploadFileHook is used for posting progress as well as checking cancellation signal.
      */
     suspend fun addFeedComment(
         comment: CommentDto,
-        uploadFileHooks: UploadFileHooks?
+        uploadFileHook: UploadFileHook?
     ): Try<AddCommentResponseData> {
-        return addComment(EMPTY_TICKET_ID, comment, uploadFileHooks)
+        return addComment(EMPTY_TICKET_ID, comment, uploadFileHook)
     }
 
     suspend fun addTextComment(textBody: String): Try<AddCommentResponseData> {
@@ -181,7 +178,7 @@ internal class RemoteStore(
     private suspend fun addComment(
         ticketId: Int,
         comment: CommentDto,
-        uploadFileHooks: UploadFileHooks?,
+        uploadFileHook: UploadFileHook?,
     ): Try<AddCommentResponseData> {
 
         PLog.d(
@@ -195,11 +192,12 @@ internal class RemoteStore(
 
         var cament = comment
         if (cament.hasAttachments()) {
-            val uploadAttachmentsTry = uploadAttachments(cament.attachments!!, uploadFileHooks)
-            if (!uploadAttachmentsTry.isSuccess()) {
-                return uploadAttachmentsTry
-            }
-            cament = cament.applyNewAttachments(uploadAttachmentsTry.value)
+            // TODO reuse it
+//            val uploadAttachmentsTry = uploadAttachments(cament.attachments!!, uploadFileHook)
+//            if (!uploadAttachmentsTry.isSuccess()) {
+//                return uploadAttachmentsTry
+//            }
+//            cament = cament.applyNewAttachments(uploadAttachmentsTry.value)
         }
         val addFeedCommentTry = api.addFeedComment(
             AddCommentRequestBody(
@@ -217,55 +215,6 @@ internal class RemoteStore(
         )
         PLog.d(TAG, "addComment, isSuccessful: ${addFeedCommentTry.isSuccess()}}")
         return addFeedCommentTry
-    }
-
-    @Throws(Exception::class)
-    private suspend fun uploadAttachments(
-        attachments: List<AttachmentDto>,
-        uploadFileHooks: UploadFileHooks?
-    ): Try<List<AttachmentDto>> {
-        val uploadResponses = ArrayList<FileUploadResponseData>(attachments.size)
-
-        for (attachment in attachments) {
-            val localUri = attachment.localUri ?: throw Exception()
-            val uploadData = fileResolver.getUploadFileData(localUri) ?: throw Exception()
-            val uploadFileTry = uploadFile(UploadFileRequest(uploadData, uploadFileHooks))
-            if (!uploadFileTry.isSuccess()) {
-                return uploadFileTry
-            }
-//            uploadResponses += uploadFile(UploadFileRequest(uploadData, uploadFileHooks))
-        }
-        if (uploadFileHooks?.isCancelled == true) {
-            throw Exception()
-        }
-        val newAttachments = mutableListOf<AttachmentDto>()
-        for (i in uploadResponses.indices) {
-            val response = uploadResponses[i]
-            val oldAttachment = attachments[i]
-
-//            if (response.responseError != null || response.result == null) {
-//                throw Exception()
-//            }
-
-//            newAttachments.add(oldAttachment.toRemoteAttachment(response.result.guid))
-            fileManager.removeFile(oldAttachment.localUri)
-        }
-//        return newAttachments
-        return TODO()
-    }
-
-    private suspend fun uploadFile(request: UploadFileRequest): Try<FileUploadResponseData> {
-
-        val uploadFileTry = api.uploadFile(
-            UploadFileRequestBody(
-                request.fileUploadRequestData.fileName,
-                request.fileUploadRequestData.fileInputStream,
-                request.uploadFileHooks,
-                coroutineContext
-            ).toMultipartBody()
-        )
-
-        return uploadFileTry
     }
 
     private fun getUserId() = when(account) {

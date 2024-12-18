@@ -24,8 +24,7 @@ import com.pyrus.pyrusservicedesk.sdk.data.intermediate.CommentsDto
 import com.pyrus.pyrusservicedesk.sdk.response.PendingDataError
 import com.pyrus.pyrusservicedesk.sdk.updates.OnUnreadTicketCountChangedSubscriber
 import com.pyrus.pyrusservicedesk.sdk.updates.PreferencesManager
-import com.pyrus.pyrusservicedesk.sdk.web.OnCancelListener
-import com.pyrus.pyrusservicedesk.sdk.web.UploadFileHooks
+import com.pyrus.pyrusservicedesk.sdk.web.UploadFileHook
 import com.pyrus.pyrusservicedesk._ref.utils.ConfigUtils
 import com.pyrus.pyrusservicedesk._ref.utils.MILLISECONDS_IN_MINUTE
 import com.pyrus.pyrusservicedesk._ref.utils.MILLISECONDS_IN_SECOND
@@ -172,7 +171,7 @@ internal class TicketViewModel(
     fun onPendingCommentRetried() {
         pendingCommentUnderAction?.let { comment ->
             applyCommentUpdate(comment, ChangeType.Cancelled)
-            sendAddComment(comment.comment, comment.uploadFileHooks.also { it?.resetProgress() })
+            sendAddComment(comment.comment, comment.uploadFileHook.also { it?.resetProgress() })
         }
         pendingCommentUnderAction = null
     }
@@ -244,33 +243,31 @@ internal class TicketViewModel(
 
     private fun sendAddComment(
         localComment: CommentDto,
-        uploadHooks: UploadFileHooks? = null
+        uploadHooks: UploadFileHook? = null
     ) {
 
         if (commentContainsError(localComment)) {
             return
         }
 
-        val uploadFileHooks: UploadFileHooks?
+        val uploadFileHook: UploadFileHook?
         if (uploadHooks != null) {
-            uploadFileHooks = uploadHooks
+            uploadFileHook = uploadHooks
         }
         else if (!localComment.hasAttachments()) {
-            uploadFileHooks = null
+            uploadFileHook = null
         }
         else {
-            uploadFileHooks = UploadFileHooks()
-            uploadFileHooks.subscribeOnCancel(object : OnCancelListener {
-                override fun onCancel() {
-                    return applyCommentUpdate(
-                        CommentEntry(localComment), ChangeType.Cancelled
-                    )
-                }
-            })
+            uploadFileHook = UploadFileHook()
+            uploadFileHook.setCancelListener {
+                applyCommentUpdate(
+                    CommentEntry(localComment), ChangeType.Cancelled
+                )
+            }
         }
 
         applyCommentUpdate(
-            CommentEntry(localComment, uploadFileHooks = uploadFileHooks),
+            CommentEntry(localComment, uploadFileHook = uploadFileHook),
             ChangeType.Added
         )
 //        AddFeedCommentCall(this, requests, localComment, uploadFileHooks)
