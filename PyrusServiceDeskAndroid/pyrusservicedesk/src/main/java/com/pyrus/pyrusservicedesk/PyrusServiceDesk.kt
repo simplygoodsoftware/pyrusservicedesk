@@ -2,8 +2,11 @@ package com.pyrus.pyrusservicedesk
 
 import android.app.Activity
 import android.app.Application
+import android.content.Context
+import android.content.SharedPreferences
 import androidx.annotation.MainThread
 import com.pyrus.pyrusservicedesk._ref.ui_domain.screens.ticket.MainActivity
+import com.pyrus.pyrusservicedesk._ref.utils.ConfigUtils
 import com.pyrus.pyrusservicedesk.core.DiInjector
 import com.pyrus.pyrusservicedesk.core.StaticRepository
 import com.pyrus.pyrusservicedesk._ref.utils.log.PLog
@@ -11,6 +14,7 @@ import com.pyrus.pyrusservicedesk.presentation.viewmodel.SharedViewModel
 import com.pyrus.pyrusservicedesk.sdk.updates.NewReplySubscriber
 import com.pyrus.pyrusservicedesk.sdk.updates.OnStopCallback
 import com.pyrus.pyrusservicedesk._ref.utils.MILLISECONDS_IN_MINUTE
+import com.pyrus.pyrusservicedesk._ref.utils.PREFERENCE_KEY
 import com.pyrus.pyrusservicedesk._ref.utils.RequestUtils
 import com.pyrus.pyrusservicedesk._ref.utils.getFirstNSymbols
 import com.pyrus.pyrusservicedesk.core.Account
@@ -154,14 +158,18 @@ class PyrusServiceDesk private constructor(
         ) {
             PLog.d(TAG, "initInternal, appId: ${appId.getFirstNSymbols(10)}, userId: ${userId?.getFirstNSymbols(10)}, apiVersion: $apiVersion")
 
+            val preferences: SharedPreferences = application.getSharedPreferences(PREFERENCE_KEY, Context.MODE_PRIVATE)
+            val instanceId = ConfigUtils.getInstanceId(preferences)
+
             val apiDomain =  domain ?: "pyrus.com"
-            val newAccount = if (userId == null || securityKey == null || authorId == null) Account.V1(
-                "aaaa", // TODO sds
+
+            val newAccount = if (userId == null || securityKey == null) Account.V1(
+                instanceId,
                 appId,
                 apiDomain
             )
             else Account.V2(
-                "aaaa", // TODO sds
+                instanceId,
                 appId,
                 apiDomain,
                 userId,
@@ -174,7 +182,8 @@ class PyrusServiceDesk private constructor(
                 newAccount,
                 loggingEnabled,
                 authorizationToken,
-                CoroutineScope(Dispatchers.Main)
+                CoroutineScope(Dispatchers.Main),
+                preferences
             )
 
 

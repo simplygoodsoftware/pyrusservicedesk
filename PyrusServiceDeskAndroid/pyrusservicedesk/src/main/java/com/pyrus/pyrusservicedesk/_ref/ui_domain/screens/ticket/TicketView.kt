@@ -1,7 +1,6 @@
 package com.pyrus.pyrusservicedesk._ref.ui_domain.screens.ticket
 
 import android.net.Uri
-import com.pyrus.pyrusservicedesk._ref.ui_domain.screens.ticket.TicketContract.Effect.Outer
 import com.pyrus.pyrusservicedesk._ref.ui_domain.screens.ticket.adapter.new_entries.CommentEntryV2
 import com.pyrus.pyrusservicedesk._ref.utils.TextProvider
 
@@ -13,7 +12,7 @@ internal interface TicketView {
         val comments: List<CommentEntryV2>?,
         val isLoading: Boolean,
         val showNoConnectionError: Boolean,
-        val toolbarTitleText: String?,
+        val isRefreshing: Boolean,
     ) {
         override fun toString(): String {
             return "Model(inputText='$inputText', sendEnabled=$sendEnabled, comments=${comments?.size}, isLoading=$isLoading, showNoConnectionError=$showNoConnectionError)"
@@ -42,10 +41,13 @@ internal interface TicketView {
 
         data class OnAttachmentSelected(val fileUri: Uri?) : Event
 
+        data object OnRefresh : Event
+
     }
 
     sealed interface Effect {
         data class CopyToClipboard(val text: String) : Effect
         data class MakeToast(val text: TextProvider) : Effect
+        data object ShowAttachVariants : Effect
     }
 }

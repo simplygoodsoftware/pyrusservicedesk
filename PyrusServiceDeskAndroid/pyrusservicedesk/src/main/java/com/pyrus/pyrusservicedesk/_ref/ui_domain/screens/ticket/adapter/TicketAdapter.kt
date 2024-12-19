@@ -15,13 +15,12 @@ import com.pyrus.pyrusservicedesk._ref.ui_domain.screens.ticket.adapter.view_hol
 import com.pyrus.pyrusservicedesk._ref.ui_domain.screens.ticket.adapter.new_entries.CommentEntryV2
 import com.pyrus.pyrusservicedesk.presentation.ui.view.recyclerview.ViewHolderBase
 import com.pyrus.pyrusservicedesk.presentation.ui.view.recyclerview.item_decorators.SpaceMultiplier
-import com.pyrus.pyrusservicedesk.sdk.data.Attachment
 
 /**
  * Adapter that is used for rendering comment feed of the ticket screen.
  */
 internal class TicketAdapter(
-    private val onErrorCommentEntryClickListener: (id: CommentEntryV2) -> Unit,
+    private val onErrorCommentEntryClickListener: (id: Long) -> Unit,
     private val onFileReadyToPreviewClickListener: (uri: Uri) -> Unit,
     private val onTextCommentLongClicked: (String) -> Unit,
     private val onRatingClickListener: (Int) -> Unit,
@@ -31,27 +30,23 @@ internal class TicketAdapter(
      * [SpaceMultiplier] implementation for customizing spaces between items fot the feed.
      */
     val itemSpaceMultiplier = object: SpaceMultiplier {
-        override fun getMultiplier(adapterPosition: Int): Float {
-            return when {
-                adapterPosition <= 0 -> 1f
-                getItem(adapterPosition) is CommentEntryV2.Comment
-                        && getItem(adapterPosition -1) is CommentEntryV2.Comment
-                        && (getItem(adapterPosition) as CommentEntryV2.Comment).isInbound !=
-                            (getItem(adapterPosition - 1) as CommentEntryV2.Comment).isInbound -> 2f
-                else -> 1f
-            }
+        override fun getMultiplier(adapterPosition: Int): Float = when {
+            adapterPosition <= 0 -> 1f
+            getItem(adapterPosition) is CommentEntryV2.Comment
+                    && getItem(adapterPosition -1) is CommentEntryV2.Comment
+                    && (getItem(adapterPosition) as CommentEntryV2.Comment).isInbound !=
+                        (getItem(adapterPosition - 1) as CommentEntryV2.Comment).isInbound -> 2f
+            else -> 1f
         }
     }
 
-    override fun getItemViewType(position: Int): Int {
-        return when(val entry = getItem(position)) {
-            is CommentEntryV2.Buttons -> VIEW_TYPE_COMMENT_BUTTONS
-            is CommentEntryV2.Comment -> if (entry.isInbound) VIEW_TYPE_COMMENT_OUTBOUND else  VIEW_TYPE_COMMENT_INBOUND
-            is CommentEntryV2.Date -> VIEW_TYPE_DATE
-            is CommentEntryV2.Rating -> VIEW_TYPE_COMMENT_RATING
-            CommentEntryV2.RatingSelector -> VIEW_TYPE_RATING
-            is CommentEntryV2.SimpleText -> VIEW_TYPE_WELCOME_MESSAGE
-        }
+    override fun getItemViewType(position: Int): Int = when(val entry = getItem(position)) {
+        is CommentEntryV2.Buttons -> VIEW_TYPE_COMMENT_BUTTONS
+        is CommentEntryV2.Comment -> if (entry.isInbound) VIEW_TYPE_COMMENT_OUTBOUND else VIEW_TYPE_COMMENT_INBOUND
+        is CommentEntryV2.Date -> VIEW_TYPE_DATE
+        is CommentEntryV2.Rating -> VIEW_TYPE_COMMENT_RATING
+        CommentEntryV2.RatingSelector -> VIEW_TYPE_RATING
+        is CommentEntryV2.SimpleText -> VIEW_TYPE_WELCOME_MESSAGE
     }
 
     @Suppress("UNCHECKED_CAST")
@@ -95,7 +90,6 @@ internal class TicketAdapter(
         private const val VIEW_TYPE_RATING = 4
         private const val VIEW_TYPE_COMMENT_RATING = 5
         private const val VIEW_TYPE_COMMENT_BUTTONS = 6
-
 
         const val MAX_SYMBOLS_BEFORE_LEFT_ALIGNMENT = 8
     }

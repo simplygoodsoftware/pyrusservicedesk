@@ -3,14 +3,11 @@ package com.pyrus.pyrusservicedesk.sdk.repositories
 import android.content.SharedPreferences
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
-import com.pyrus.pyrusservicedesk.sdk.data.Comment
-import com.pyrus.pyrusservicedesk.sdk.data.intermediate.Comments
+import com.pyrus.pyrusservicedesk._ref.data.Comment
+import com.pyrus.pyrusservicedesk.sdk.data.CommentDto
 import com.pyrus.pyrusservicedesk.sdk.verify.LocalDataVerifier
-import com.pyrus.pyrusservicedesk._ref.utils.Try
-import com.pyrus.pyrusservicedesk._ref.utils.getOrNull
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.map
 import java.lang.reflect.Type
 
 /**
@@ -32,7 +29,7 @@ internal class LocalStore(
     fun addPendingFeedComment(comment: Comment) {
         var comments = getPendingFeedComments().toMutableList()
         comments.let { list ->
-            val existingIndex = list.indexOfFirst { it.localId == comment.localId }
+            val existingIndex = list.indexOfFirst { it.id == comment.id }
             if (existingIndex >= 0) {
                 list.removeAt(existingIndex)
             }
@@ -57,12 +54,16 @@ internal class LocalStore(
         return commentsList
     }
 
+    fun getComment(id: Long): Comment? {
+        return getPendingFeedComments().find { comment -> comment.id == id }
+    }
+
     /**
      * Removes pending comment from offline repository
      */
     fun removePendingComment(comment: Comment) {
         val comments = getPendingFeedComments().toMutableList()
-        val removed = comments.removeAll { it.localId == comment.localId }
+        val removed = comments.removeAll { it.id == comment.id }
         if (removed) {
             writeComments(comments)
         }

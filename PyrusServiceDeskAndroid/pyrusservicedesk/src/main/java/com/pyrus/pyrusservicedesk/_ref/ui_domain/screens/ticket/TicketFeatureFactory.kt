@@ -1,9 +1,10 @@
 package com.pyrus.pyrusservicedesk._ref.ui_domain.screens.ticket
 
 import com.pyrus.pyrusservicedesk.PyrusServiceDesk
-import com.pyrus.pyrusservicedesk.PyrusServiceDesk.Companion.injector
 import com.pyrus.pyrusservicedesk.PyrusServiceDesk.Companion.users
 import com.pyrus.pyrusservicedesk.R
+import com.pyrus.pyrusservicedesk._ref.Screens
+import com.pyrus.pyrusservicedesk._ref.data.FullTicket
 import com.pyrus.pyrusservicedesk._ref.ui_domain.screens.ticket.TicketContract.Effect
 import com.pyrus.pyrusservicedesk._ref.ui_domain.screens.ticket.TicketContract.Message
 import com.pyrus.pyrusservicedesk._ref.ui_domain.screens.ticket.TicketContract.State
@@ -17,17 +18,13 @@ import com.pyrus.pyrusservicedesk._ref.whitetea.core.StoreFactory
 import com.pyrus.pyrusservicedesk._ref.whitetea.core.adaptCast
 import com.pyrus.pyrusservicedesk._ref.whitetea.core.logic.Logic
 import com.pyrus.pyrusservicedesk._ref.whitetea.utils.adapt
-import com.pyrus.pyrusservicedesk.sdk.data.Command
-import com.pyrus.pyrusservicedesk.sdk.data.CreateComment
-import com.pyrus.pyrusservicedesk.sdk.data.LocalDataProvider
-import com.pyrus.pyrusservicedesk.sdk.data.MarkTicketAsRead
-import com.pyrus.pyrusservicedesk.sdk.data.Ticket
-import com.pyrus.pyrusservicedesk.sdk.data.TicketCommandType
+import com.pyrus.pyrusservicedesk.sdk.data.FileManager
 import com.pyrus.pyrusservicedesk.sdk.repositories.DraftRepository
 import com.pyrus.pyrusservicedesk.sdk.repositories.Repository
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.map
+import java.lang.Exception
 import java.util.UUID
 
 internal class TicketFeatureFactory(
@@ -36,6 +33,7 @@ internal class TicketFeatureFactory(
     private val draftRepository: DraftRepository,
     private val welcomeMessage: String,
     private val router: PyrusRouter,
+    private val fileManager: FileManager,
     private val userId: String,
     private val ticketId: Int,
 ) {
@@ -44,7 +42,7 @@ internal class TicketFeatureFactory(
         name = "TicketFeature",
         initialState = State.Loading,
         reducer = FeatureReducer(),
-        actor = TicketActor(repository, router, welcomeMessage, draftRepository).adaptCast(),
+        actor = TicketActor(repository, router, welcomeMessage, draftRepository, fileManager).adaptCast(),
         initialEffects = listOf(
             Effect.Inner.FeedFlow,
             Effect.Inner.CommentsAutoUpdate,
@@ -70,8 +68,9 @@ private class FeatureReducer: Logic<State, Message, Effect>() {
     private fun Result.handleOuter(message: Message.Outer) {
         when (message) {
             is Message.Outer.OnAttachmentSelected -> {
-                val currentState = state as? State.Content ?: return
-                TODO("send comment with attachment")
+                if (state !is State.Content) return
+                message.fileUri ?: return // TODO Show toast
+                effects { +Effect.Inner.SendAttachComment(message.fileUri) }
             }
             Message.Outer.OnCloseClick -> effects { +Effect.Inner.Close }
             is Message.Outer.OnCopyClick -> effects {
@@ -85,22 +84,12 @@ private class FeatureReducer: Logic<State, Message, Effect>() {
             }
             is Message.Outer.OnPreviewClick -> effects { +Effect.Inner.OpenPreview(message.uri) }
             is Message.Outer.OnRatingClick -> {
-                val currentState = state as? State.Content ?: return
-                TODO()
+                if (state !is State.Content) return
+                effects { +Effect.Inner.SendRatingComment(message.rating) }
             }
-            is Message.Outer.OnRetryClick -> {
-                val currentState = state as? State.Content ?: return
-                val comment = currentState.ticket?.comments?.find {
-                    it.commentId == message.id
-                } ?: return
-
-                val attachment = comment.attachments?.firstOrNull()
-                if (attachment != null) {
-                    // todo send attachment
-                }
-                else {
-                    // todo send comment
-                }
+            is Message.Outer.OnRetryAddCommentClick -> {
+                if (state !is State.Content) return
+                effects { +Effect.Inner.RetryAddComment(message.id) }
             }
             is Message.Outer.OnSendClick -> {
                 val currentState = state as? State.Content ?: return
@@ -108,36 +97,51 @@ private class FeatureReducer: Logic<State, Message, Effect>() {
                 if (comment.isBlank()) return
                 effects { +Effect.Inner.SendTextComment(comment, currentState.ticketId, currentState.appId, currentState.userId) }
             }
-            Message.Outer.OnShowAttachVariantsClick -> TODO("open attach variants dialog screen")
-            Message.Outer.OnBackClick -> injector().router.exit()
+            Message.Outer.OnShowAttachVariantsClick -> {
+                if(state !is State.Content) return
+                effects { +Effect.Outer.ShowAttachVariants }
+            }
+            Message.Outer.OnRefresh -> {
+                val currentState = state as? State.Content ?: return
+                if (currentState.isLoading) return
+                state { currentState.copy(isLoading = true) }
+                effects { +Effect.Inner.UpdateComments }
+            }
         }
     }
 
     private fun Result.handleInner(message: Message.Inner) {
         when (message) {
             Message.Inner.UpdateCommentsFailed -> {
-                if (state !is State.Loading) return
-                state { State.Error }
+                when (val currentState = state) {
+                    is State.Content -> {
+                        state { currentState.copy(isLoading = false) }
+                        // TODO show toast
+                    }
+                    is State.Loading -> state { State.Error }
+                    State.Error -> {}
+                }
             }
             is Message.Inner.UpdateCommentsCompleted -> {
                 when(val currentState = state) {
-                    is State.Content -> state {
-                        currentState.copy(
-                            ticket = message.ticket,
-                            appId = users.find { it.userId == message.ticket?.userId }?.appId ?: "",
-                            userId = message.ticket?.userId ?: "",
-                            ticketId = message.ticket?.ticketId ?: 0
-                        )
-                    }
+                    is State.Content -> state { currentState.copy(
+                        ticket = message.ticket,
+                        isLoading = false,
+                        appId = users.find { it.userId == message.ticket?.userId }?.appId ?: "",
+                        userId = message.ticket?.userId ?: "",
+                        ticketId = message.ticket?.ticketId ?: 0
+                    ) }
                     State.Error,
                     State.Loading -> state { State.Content(
                         ticket = message.ticket,
                         sendEnabled = true,
                         inputText = message.draft,
                         welcomeMessage = message.welcomeMessage,
+                        isLoading = false,
                         appId = users.find { it.userId == message.ticket?.userId }?.appId ?: "",
                         userId = message.ticket?.userId ?: "",
                         ticketId = message.ticket?.ticketId ?: 0
+
                     ) }
                 }
             }
@@ -154,12 +158,13 @@ internal class TicketActor(
     private val repository: Repository,
     private val router: PyrusRouter,
     private val welcomeMessage: String?,
-    private val draftRepository: DraftRepository
+    private val draftRepository: DraftRepository,
+    private val fileManager: FileManager,
 ): Actor<Effect.Inner, Message.Inner> {
 
     override fun handleEffect(effect: Effect.Inner): Flow<Message.Inner> = when(effect) {
-        is Effect.Inner.UpdateComments -> singleFlow {
-            val commentsTry: Try<Ticket?> = repository.getFeed(
+        Effect.Inner.UpdateComments -> singleFlow {
+            val commentsTry: Try<FullTicket> = repository.getFeed(
                 keepUnread = false,
                 includePendingComments = true,
                 ticketId = effect.ticketId
@@ -173,30 +178,26 @@ internal class TicketActor(
                 else -> Message.Inner.UpdateCommentsFailed
             }
         }
-        Effect.Inner.FeedFlow -> {
-            repository.getFeedFlow().map { Message.Inner.CommentsUpdated(it) }
-        }
+        Effect.Inner.FeedFlow -> repository.getFeedFlow().map { Message.Inner.CommentsUpdated(it) }
         Effect.Inner.CommentsAutoUpdate -> flow {
 //            // TODO
 //            repository.getFeed(keepUnread = false)
 
         }
-        Effect.Inner.Close -> flow {
-            router.exit()
+        Effect.Inner.Close -> flow { router.exit() }
+        is Effect.Inner.SendTextComment -> flow { repository.addTextComment(effect.text) }
+        is Effect.Inner.SendRatingComment -> flow { repository.addRatingComment(effect.rating) }
+        is Effect.Inner.SendAttachComment -> flow {
+            val fileUri = try {
+                fileManager.copyFile(effect.uri)
+            } catch (e: Exception) {
+                return@flow
+            } ?: return@flow
+            repository.addAttachComment(fileUri)
         }
-        is Effect.Inner.SendTextComment -> flow {
-            val comment =  injector().localDataProvider.createLocalComment(effect.text)
-            val commandsResultTry = repository.addFeedComment(
-                    commands = getSendTextCommentCommands(effect.text, effect.appId, effect.userId, effect.ticketId),
-                    comment = comment,
-                    uploadFileHooks = null
-                )
-        }
-        is Effect.Inner.SendAttachComment -> TODO()
-        is Effect.Inner.OpenPreview -> TODO()
-        is Effect.Inner.SaveDraft -> flow {
-            draftRepository.saveDraft(effect.draft)
-        }
+        is Effect.Inner.RetryAddComment -> flow { repository.retryAddComment(effect.id) }
+        is Effect.Inner.OpenPreview -> flow { router.navigateTo(Screens.ImageScreen()) }
+        is Effect.Inner.SaveDraft -> flow { draftRepository.saveDraft(effect.draft) }
     }
 
     private fun getUUID(): String {

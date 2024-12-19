@@ -1,6 +1,7 @@
 package com.pyrus.pyrusservicedesk._ref.ui_domain.screens.ticket.adapter.new_entries
 
 import android.net.Uri
+import com.pyrus.pyrusservicedesk._ref.utils.TextProvider
 import com.pyrus.pyrusservicedesk.presentation.ui.view.ContentType
 import com.pyrus.pyrusservicedesk.presentation.ui.view.Status
 
@@ -13,7 +14,7 @@ internal sealed interface CommentEntryV2 {
         val hasError: Boolean,
         val isLocal: Boolean,
         val isWelcomeMessage: Boolean,
-        val timeText: String,
+        val timeText: TextProvider?,
         val status: Status,
         val authorName: String,
         val avatarUrl: String?,
@@ -56,6 +57,7 @@ internal sealed interface CommentEntryV2 {
     data class Date(val date: String) : CommentEntryV2
 
     data class Rating(
+        val id: Long,
         val hasError: Boolean,
         val isLocal: Boolean,
         val rating: Int,

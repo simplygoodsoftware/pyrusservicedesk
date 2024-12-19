@@ -17,5 +17,9 @@ object Screens {
         TicketsFragment.newInstance()
     }
 
+    fun ImageScreen() = FragmentScreen {
+        TODO()
+    }
+
 
 }

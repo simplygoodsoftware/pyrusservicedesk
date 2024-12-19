@@ -3,6 +3,8 @@ package com.pyrus.pyrusservicedesk._ref.ui_domain.screens.ticket
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
+import androidx.core.view.ViewCompat
+import androidx.core.view.WindowCompat
 import androidx.fragment.app.FragmentActivity
 import com.github.terrakok.cicerone.Navigator
 import com.pyrus.pyrusservicedesk.PyrusServiceDesk.Companion.injector
@@ -34,7 +36,8 @@ internal class MainActivity : FragmentActivity() {
         binding = PsdActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
-        setupWindowInsets(binding.root)
+//        setupWindowInsets(binding.root)
+        WindowCompat.setDecorFitsSystemWindows(window, false)
 
         savedInstanceState?.let { ServiceDeskConfiguration.restore(it) }
 

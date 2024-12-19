@@ -2,7 +2,6 @@ package com.pyrus.pyrusservicedesk._ref.ui_domain.screens.ticket
 
 import android.content.ClipData
 import android.content.ClipboardManager
-import android.content.Context
 import android.content.res.ColorStateList
 import android.os.Build
 import android.os.Bundle
@@ -17,6 +16,8 @@ import android.view.ViewGroup
 import android.view.WindowManager
 import android.widget.Toast
 import androidx.core.content.ContextCompat.getSystemService
+import androidx.core.view.ViewCompat
+import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.isVisible
 import com.pyrus.pyrusservicedesk.PyrusServiceDesk.Companion.injector
 import com.pyrus.pyrusservicedesk.R
@@ -25,6 +26,8 @@ import com.pyrus.pyrusservicedesk._ref.ui_domain.screens.ticket.adapter.TicketAd
 import com.pyrus.pyrusservicedesk._ref.utils.ConfigUtils
 import com.pyrus.pyrusservicedesk._ref.utils.getColorOnBackground
 import com.pyrus.pyrusservicedesk._ref.utils.getSecondaryColorOnBackground
+import com.pyrus.pyrusservicedesk._ref.utils.getViewModelWithActivityScope
+import com.pyrus.pyrusservicedesk._ref.utils.insets.RootViewDeferringInsetsCallback
 import com.pyrus.pyrusservicedesk._ref.utils.setCursorColor
 import com.pyrus.pyrusservicedesk._ref.utils.showKeyboardOn
 import com.pyrus.pyrusservicedesk._ref.utils.text
@@ -35,9 +38,9 @@ import com.pyrus.pyrusservicedesk._ref.whitetea.bind.BinderLifecycleMode
 import com.pyrus.pyrusservicedesk._ref.whitetea.core.ViewRenderer
 import com.pyrus.pyrusservicedesk._ref.whitetea.utils.diff
 import com.pyrus.pyrusservicedesk.databinding.PsdFragmentTicketBinding
+import com.pyrus.pyrusservicedesk.presentation.ui.navigation_page.ticket.dialogs.attach_files.AttachFileSharedViewModel
+import com.pyrus.pyrusservicedesk.presentation.ui.navigation_page.ticket.dialogs.attach_files.AttachFileVariantsFragment
 import com.pyrus.pyrusservicedesk.presentation.ui.view.recyclerview.item_decorators.SpaceItemDecoration
-import kotlinx.coroutines.flow.filterIsInstance
-import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.map
 
 internal class TicketFragment: TeaFragment<Model, TicketView.Event, TicketView.Effect>() {
@@ -46,7 +49,7 @@ internal class TicketFragment: TeaFragment<Model, TicketView.Event, TicketView.E
 
     private val adapter: TicketAdapter by lazy {
         TicketAdapter(
-            { dispatch(TicketView.Event.OnRetryClick(0)) }, // TODO
+            { dispatch(TicketView.Event.OnRetryClick(it)) },
             { dispatch(TicketView.Event.OnPreviewClick(it)) },
             { text -> dispatch(TicketView.Event.OnCopyClick(text)) },
             { rating -> dispatch(TicketView.Event.OnRatingClick(rating)) }
@@ -61,15 +64,21 @@ internal class TicketFragment: TeaFragment<Model, TicketView.Event, TicketView.E
         }
     }
 
+    private val attachFileSharedViewModel: AttachFileSharedViewModel by getViewModelWithActivityScope(
+        AttachFileSharedViewModel::class.java
+    )
+
     override val renderer: ViewRenderer<Model> = diff {
         diff(Model::inputText) { text -> if (!binding.input.hasFocus()) binding.input.setText(text) }
         diff(Model::sendEnabled) { sendEnabled -> binding.send.isEnabled = sendEnabled }
         diff(Model::comments, { new, old -> new === old }, adapter::submitList)
         diff(Model::showNoConnectionError) { showError -> binding.noConnection.root.isVisible = showError }
-        diff(Model::toolbarTitleText) { text -> binding.toolbarTitle.text = ConfigUtils.getTitle(requireContext(), text) }
         diff(Model::isLoading) { isLoading ->
             binding.ticketContent.isVisible = !isLoading
             binding.progressBar.isVisible = isLoading
+        }
+        diff(Model::isRefreshing) {
+            isRefreshing -> binding.refresh.isRefreshing = isRefreshing
         }
     }
 
@@ -81,7 +90,15 @@ internal class TicketFragment: TeaFragment<Model, TicketView.Event, TicketView.E
             }
 
             is TicketView.Effect.MakeToast -> {
-                Toast.makeText(requireContext(), effect.text.text(requireContext()), Toast.LENGTH_SHORT).show()
+                Toast.makeText(
+                    requireContext(),
+                    effect.text.text(requireContext()),
+                    Toast.LENGTH_SHORT
+                ).show()
+            }
+
+            TicketView.Effect.ShowAttachVariants -> {
+                AttachFileVariantsFragment().show(parentFragmentManager, "")
             }
         }
     }
@@ -106,7 +123,17 @@ internal class TicketFragment: TeaFragment<Model, TicketView.Event, TicketView.E
             showKeyboardOn(binding.input)
         }
 
+        val deferringInsetsListener = RootViewDeferringInsetsCallback(
+            persistentInsetTypes = WindowInsetsCompat.Type.systemBars(),
+            deferredInsetTypes = WindowInsetsCompat.Type.ime()
+        )
+        ViewCompat.setOnApplyWindowInsetsListener(binding.root, deferringInsetsListener)
+
         bindFeature()
+
+        attachFileSharedViewModel.getFilePickedLiveData().observe(viewLifecycleOwner) { fileUri ->
+            dispatch(TicketView.Event.OnAttachmentSelected(fileUri))
+        }
     }
 
     override fun onSaveInstanceState(outState: Bundle) {
@@ -133,7 +160,8 @@ internal class TicketFragment: TeaFragment<Model, TicketView.Event, TicketView.E
         binding.send.setOnClickListener { dispatch(TicketView.Event.OnSendClick) }
         binding.attach.setOnClickListener { dispatch(TicketView.Event.OnShowAttachVariantsClick) }
         binding.input.addTextChangedListener(inputTextWatcher)
-        binding.toolbarBack.setOnClickListener { dispatch(TicketView.Event.OnBackClick) }
+        binding.refresh.setOnRefreshListener { dispatch(TicketView.Event.OnRefresh) }
+        binding.toolbarBack.setOnClickListener { dispatch(TicketView.Event.OnCloseClick) }
     }
 
     private fun initUi() {

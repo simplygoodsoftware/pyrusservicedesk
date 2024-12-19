@@ -2,7 +2,7 @@ package com.pyrus.pyrusservicedesk.sdk.web.request_body
 
 import androidx.annotation.Keep
 import com.google.gson.annotations.SerializedName
-import com.pyrus.pyrusservicedesk.sdk.data.Attachment
+import com.pyrus.pyrusservicedesk.sdk.data.AttachmentDto
 
 /**
  * Body for sending add comment request to the server. Should contain either [comment] or [attachments]
@@ -18,7 +18,7 @@ internal class AddCommentRequestBody(
     instanceId: String?,
     version: Int,
     @SerializedName("comment") val comment: String? = null,
-    @SerializedName("attachments") val attachments: List<Attachment>? = null,
+    @SerializedName("attachments") val attachments: List<AttachmentDto>? = null,
     @SerializedName("user_name") val userName: String,
     @SerializedName("rating") val rating: Int? = null,
     @SerializedName("extra_fields") val extraFields: Map<String, String>?,

@@ -1,9 +1,9 @@
 package com.pyrus.pyrusservicedesk._ref.ui_domain.screens.ticket
 
 import android.net.Uri
+import com.pyrus.pyrusservicedesk._ref.data.FullTicket
 import com.pyrus.pyrusservicedesk._ref.utils.TextProvider
 import com.pyrus.pyrusservicedesk._ref.whitetea.core.Store
-import com.pyrus.pyrusservicedesk.sdk.data.Ticket
 
 internal typealias TicketFeature = Store<TicketContract.State, TicketContract.Message, TicketContract.Effect.Outer>
 
@@ -13,13 +13,14 @@ internal interface TicketContract {
         data object Loading : State
         data object Error : State
         data class Content(
-            val ticket: Ticket?,
+            val ticket: FullTicket?,
             val appId: String,
             val userId: String,
             val ticketId: Int,
             val sendEnabled: Boolean,
             val inputText: String,
             val welcomeMessage: String?,
+            val isLoading: Boolean,
         ) : State {
             override fun toString(): String {
                 return "State(c=${ticket?.comments?.size})"
@@ -33,7 +34,7 @@ internal interface TicketContract {
 
             data class OnPreviewClick(val uri: Uri) : Outer
 
-            data class OnRetryClick(val id: Long) : Outer
+            data class OnRetryAddCommentClick(val id: Long) : Outer
 
             data class OnCopyClick(val text: String) : Outer
 
@@ -45,19 +46,19 @@ internal interface TicketContract {
 
             data object OnCloseClick : Outer
 
-            data object OnBackClick : Outer
-
             data class OnMessageChanged(val text: String) : Outer
 
             data class OnAttachmentSelected(val fileUri: Uri?) : Outer
 
+            data object OnRefresh : Outer
+
         }
 
         sealed interface Inner : Message {
-            data class CommentsUpdated(val ticket: Ticket?) : Inner
+            data class CommentsUpdated(val ticket: FullTicket?) : Inner
             data object UpdateCommentsFailed : Inner
             data class UpdateCommentsCompleted(
-                val ticket: Ticket?,
+                val ticket: FullTicket,
                 val draft: String,
                 val welcomeMessage: String?,
             ) : Inner
@@ -70,10 +71,13 @@ internal interface TicketContract {
         sealed interface Outer : Effect {
             data class CopyToClipboard(val text: String) : Outer
             data class MakeToast(val text: TextProvider) : Outer
+            data object ShowAttachVariants : Outer
         }
 
         sealed interface Inner : Effect {
-            data class UpdateComments(val ticketId: Int = 0) : Inner
+            data class UpdateComments(
+                val ticketId: Int,
+            ) : Inner
             data object FeedFlow : Inner
             data object CommentsAutoUpdate : Inner
             data object Close : Inner
@@ -83,7 +87,19 @@ internal interface TicketContract {
                 val appId: String,
                 val userId: String
             ) : Inner
-            data class SendAttachComment(val uri: Uri) : Inner
+            data class SendRatingComment(
+                val rating: Int,
+                val ticketId: Int,
+                val appId: String,
+                val userId: String
+            ) : Inner
+            data class SendAttachComment(
+                val uri: Uri,
+                val ticketId: Int,
+                val appId: String,
+                val userId: String
+            ) : Inner
+            data class RetryAddComment(val id: Long) : Inner
             data class OpenPreview(val uri: Uri) : Inner
             data class SaveDraft(val draft: String) : Inner
         }

@@ -12,11 +12,11 @@ import androidx.annotation.Keep
  * All method invocations are thread safe.
  */
 @Keep
-internal class UploadFileHooks {
+internal class UploadFileHook {
 
     private var recentProgress = 0
-    private val cancellationSubscribers = mutableSetOf<OnCancelListener>()
-    private var progressSubscription: ((Int) -> Unit)? = null
+    private var cancellationListener: (() -> Unit)? = null
+    private var progressListener: ((Int) -> Unit)? = null
     private val uiHandler = Handler(Looper.getMainLooper())
 
     /**
@@ -32,20 +32,20 @@ internal class UploadFileHooks {
     }
 
     /**
-     * Append [subscription] on uploading cancellation.
+     * Append [onCancel] on uploading cancellation.
      */
     @Synchronized
-    fun subscribeOnCancel(subscription: OnCancelListener) {
-        cancellationSubscribers.add(subscription)
+    fun setCancelListener(onCancel: () -> Unit) {
+        this.cancellationListener = onCancel
     }
 
     /**
-     * Assigns [subscription] on progress and automatically delivers recent stored progress.
+     * Assigns [listener] on progress and automatically delivers recent stored progress.
      */
     @Synchronized
-    fun subscribeOnProgress(subscription: (progress: Int) -> Unit) {
-        this.progressSubscription = subscription
-        subscription.invoke(recentProgress)
+    fun setProgressListener(listener: (progress: Int) -> Unit) {
+        this.progressListener = listener
+        listener.invoke(recentProgress)
     }
 
     /**
@@ -53,7 +53,7 @@ internal class UploadFileHooks {
      */
     @Synchronized
     fun unsubscribeFromProgress() {
-        progressSubscription = null
+        progressListener = null
     }
 
     /**
@@ -62,7 +62,7 @@ internal class UploadFileHooks {
     @Synchronized
     fun cancelUploading() {
         isCancelled = true
-        cancellationSubscribers.forEach{ it.onCancel() }
+        cancellationListener?.invoke()
         destroy()
     }
 
@@ -72,23 +72,13 @@ internal class UploadFileHooks {
     @Synchronized
     fun onProgressPercentChanged(newProgressPercent: Int){
         recentProgress = newProgressPercent
-        val progressSubscriber = progressSubscription
+        val progressSubscriber = progressListener
         uiHandler.post{ progressSubscriber?.invoke(recentProgress) }
     }
 
     @Synchronized
     private fun destroy() {
-        cancellationSubscribers.clear()
-        progressSubscription = null
+        cancellationListener = null
+        progressListener = null
     }
-}
-
-/**
- * Listens for cancellation.
- */
-internal interface OnCancelListener {
-    /**
-     * Called when [UploadFileHooks.cancel] is invoked.
-     */
-    fun onCancel()
 }

@@ -13,5 +13,5 @@ internal class TicketShortDescription(
     @SerializedName("ticket_id") val ticketId: Int,
     @SerializedName("subject") val subject: String,
     @SerializedName("is_read") val isRead: Boolean = true,
-    @SerializedName("last_comment") val lastComment: Comment?,
+    @SerializedName("last_comment") val lastComment: CommentDto?,
 )

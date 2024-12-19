@@ -10,7 +10,7 @@ import com.pyrus.pyrusservicedesk.presentation.ui.view.recyclerview.ViewHolderBa
 
 internal class RatingCommentHolder(
     parent: ViewGroup,
-    private val onErrorCommentEntryClickListener: (entry: CommentEntryV2.Rating) -> Unit,
+    private val onErrorCommentEntryClickListener: (id: Long) -> Unit,
 ) : ViewHolderBase<CommentEntryV2.Rating>(parent, R.layout.psd_view_holder_comment_rating) {
 
     private val binding = PsdViewHolderCommentRatingBinding.bind(itemView)
@@ -35,7 +35,7 @@ internal class RatingCommentHolder(
             }
             root.setOnClickListener {
                 if (entry.hasError)
-                    onErrorCommentEntryClickListener.invoke(entry)
+                    onErrorCommentEntryClickListener.invoke(entry.id)
             }
         }
     }

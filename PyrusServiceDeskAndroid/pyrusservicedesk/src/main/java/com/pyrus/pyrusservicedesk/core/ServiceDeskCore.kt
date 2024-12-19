@@ -1,7 +1,6 @@
 package com.pyrus.pyrusservicedesk.core
 
 import android.app.Application
-import android.content.Context
 import android.content.SharedPreferences
 import android.net.Uri
 import android.os.Build
@@ -12,7 +11,6 @@ import com.pyrus.pyrusservicedesk._ref.ui_domain.screens.ticket.TicketFeatureFac
 import com.pyrus.pyrusservicedesk._ref.ui_domain.screens.tickets_list.tickets.TicketsFeatureFactory
 import com.pyrus.pyrusservicedesk._ref.ui_domain.screens.tickets_list.ticketsList.TicketsListFeatureFactory
 import com.pyrus.pyrusservicedesk.sdk.FileResolver
-import com.pyrus.pyrusservicedesk.sdk.FileResolverImpl
 import com.pyrus.pyrusservicedesk.sdk.data.FileManager
 import com.pyrus.pyrusservicedesk.sdk.data.gson.RemoteGsonExclusionStrategy
 import com.pyrus.pyrusservicedesk.sdk.data.gson.UriGsonAdapter
@@ -26,7 +24,6 @@ import com.pyrus.pyrusservicedesk.sdk.web.retrofit.RemoteStore
 import com.pyrus.pyrusservicedesk.sdk.web.retrofit.ServiceDeskApi
 import com.pyrus.pyrusservicedesk._ref.utils.ConfigUtils
 import com.pyrus.pyrusservicedesk._ref.utils.ISO_DATE_PATTERN
-import com.pyrus.pyrusservicedesk._ref.utils.PREFERENCE_KEY
 import com.pyrus.pyrusservicedesk._ref.utils.RequestUtils.Companion.getBaseUrl
 import com.pyrus.pyrusservicedesk._ref.utils.call_adapter.TryCallAdapterFactory
 import com.pyrus.pyrusservicedesk._ref.whitetea.core.DefaultStoreFactory
@@ -36,8 +33,8 @@ import com.squareup.picasso.OkHttp3Downloader
 import com.squareup.picasso.Picasso
 import kotlinx.coroutines.CoroutineScope
 import com.pyrus.pyrusservicedesk._ref.utils.navigation.PyrusRouterImpl
-import com.pyrus.pyrusservicedesk.sdk.data.LocalDataProvider
-import com.pyrus.pyrusservicedesk.sdk.web.retrofit.SyncRepository
+import com.pyrus.pyrusservicedesk.sdk.repositories.RepositoryMapper
+import com.pyrus.pyrusservicedesk.sdk.web.retrofit.RemoteFileStore
 import okhttp3.OkHttpClient
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
@@ -65,7 +62,6 @@ internal sealed interface Account {
         override val domain: String,
         val userId: String,
         val securityKey: String,
-        val authorId: String
     ): Account
 
 }
@@ -76,12 +72,10 @@ internal class DiInjector(
     private val loggingEnabled: Boolean,
     private val authToken: String?,
     private val coreScope: CoroutineScope,
+    private val preferences: SharedPreferences,
 ) {
 
-    private val preferences: SharedPreferences = application
-        .getSharedPreferences(PREFERENCE_KEY, Context.MODE_PRIVATE)
-
-    private val fileResolver: FileResolver = FileResolverImpl(application.contentResolver)
+    private val fileResolver: FileResolver = FileResolver(application.contentResolver)
 
     private val localDataVerifier: LocalDataVerifier = LocalDataVerifierImpl(fileResolver)
 
@@ -136,7 +130,11 @@ internal class DiInjector(
         account = account
     )
 
-    private val repository: Repository = Repository(localStore, remoteStore)
+    private val repositoryMapper = RepositoryMapper(account)
+
+    private val remoteFileStore = RemoteFileStore(api) // TODO use different api
+
+    private val repository: Repository = Repository(localStore, remoteStore, repositoryMapper, fileResolver, remoteFileStore)
 
     private val preferencesManager = PreferencesManager(preferences)
 
@@ -153,6 +151,7 @@ internal class DiInjector(
             draftRepository = draftRepository,
             welcomeMessage = welcomeMessage,
             router = router,
+            fileManager = fileManager,
             userId = userId,
             ticketId = ticketId
         )

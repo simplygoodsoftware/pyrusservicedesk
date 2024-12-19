@@ -4,20 +4,19 @@ import androidx.annotation.Keep
 import com.pyrus.pyrusservicedesk.PyrusServiceDesk
 import com.pyrus.pyrusservicedesk.PyrusServiceDesk.Companion.API_VERSION_1
 import com.pyrus.pyrusservicedesk.PyrusServiceDesk.Companion.API_VERSION_2
+import com.pyrus.pyrusservicedesk._ref.data.Attachment
 import com.pyrus.pyrusservicedesk.core.StaticRepository
 import com.pyrus.pyrusservicedesk._ref.utils.log.PLog
 import com.pyrus.pyrusservicedesk.sdk.FileResolver
-import com.pyrus.pyrusservicedesk.sdk.data.Attachment
-import com.pyrus.pyrusservicedesk.sdk.data.Comment
+import com.pyrus.pyrusservicedesk.sdk.data.AttachmentDto
+import com.pyrus.pyrusservicedesk.sdk.data.CommentDto
 import com.pyrus.pyrusservicedesk.sdk.data.EMPTY_TICKET_ID
 import com.pyrus.pyrusservicedesk.sdk.data.FileManager
 import com.pyrus.pyrusservicedesk.sdk.data.TicketShortDescription
 import com.pyrus.pyrusservicedesk.sdk.data.intermediate.AddCommentResponseData
-import com.pyrus.pyrusservicedesk.sdk.data.intermediate.Comments
-import com.pyrus.pyrusservicedesk.sdk.data.intermediate.FileUploadResponseData
-import com.pyrus.pyrusservicedesk.sdk.request.UploadFileRequest
+import com.pyrus.pyrusservicedesk.sdk.data.intermediate.CommentsDto
 import com.pyrus.pyrusservicedesk.sdk.response.*
-import com.pyrus.pyrusservicedesk.sdk.web.UploadFileHooks
+import com.pyrus.pyrusservicedesk.sdk.web.UploadFileHook
 import com.pyrus.pyrusservicedesk.sdk.web.request_body.*
 import com.pyrus.pyrusservicedesk._ref.utils.ConfigUtils
 import com.pyrus.pyrusservicedesk._ref.utils.Try
@@ -36,8 +35,6 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import retrofit2.Response
 import retrofit2.Retrofit
-import java.util.concurrent.LinkedBlockingQueue
-import kotlin.coroutines.coroutineContext
 
 private const val FAILED_AUTHORIZATION_ERROR_CODE = 403
 
@@ -56,14 +53,12 @@ internal class RemoteStore(
     private val account: Account,
 ) {
 
-    private val sequentialRequests = LinkedBlockingQueue<SequentialRequest>()
-
     private val apiFlag = "AAAAAAAAAAAU"
 
     /**
      * Provides tickets in single feed representation.
      */
-    suspend fun getFeed(keepUnread: Boolean): Try<Comments> {
+    suspend fun getFeed(keepUnread: Boolean): Try<CommentsDto> {
         PLog.d(
             TAG, "getFeed, " +
                 "appId: ${account.appId.getFirstNSymbols(10)}, " +
@@ -152,13 +147,64 @@ internal class RemoteStore(
     /**
      * Appends [comment] to the ticket to comment feed.
      *
-     * @param uploadFileHooks is used for posting progress as well as checking cancellation signal.
+     * @param uploadFileHook is used for posting progress as well as checking cancellation signal.
      */
     suspend fun addFeedComment(
-        comment: Comment,
-        uploadFileHooks: UploadFileHooks?
+        comment: CommentDto,
+        uploadFileHook: UploadFileHook?
     ): Try<AddCommentResponseData> {
-        return addComment(EMPTY_TICKET_ID, comment, uploadFileHooks)
+        return addComment(EMPTY_TICKET_ID, comment, uploadFileHook)
+    }
+
+    suspend fun addTextComment(textBody: String): Try<AddCommentResponseData> {
+        return api.addFeedComment(
+            AddCommentRequestBody(
+                account.appId,
+                getUserId(),
+                getSecurityKey(),
+                getInstanceId(),
+                getVersion(),
+                textBody,
+                null,
+                ConfigUtils.getUserName(),
+                null,
+                StaticRepository.EXTRA_FIELDS
+            )
+        )
+    }
+
+    suspend fun addRatingComment(rating: Int): Try<AddCommentResponseData> {
+        return api.addFeedComment(
+            AddCommentRequestBody(
+                account.appId,
+                getUserId(),
+                getSecurityKey(),
+                getInstanceId(),
+                getVersion(),
+                null,
+                null,
+                ConfigUtils.getUserName(),
+                rating,
+                StaticRepository.EXTRA_FIELDS
+            )
+        )
+    }
+
+    suspend fun addAttachComment(attachment: AttachmentDto): Try<AddCommentResponseData> {
+        return api.addFeedComment(
+            AddCommentRequestBody(
+                account.appId,
+                getUserId(),
+                getSecurityKey(),
+                getInstanceId(),
+                getVersion(),
+                null,
+                listOf(attachment),
+                ConfigUtils.getUserName(),
+                null,
+                StaticRepository.EXTRA_FIELDS
+            )
+        )
     }
 
     /**
@@ -194,8 +240,8 @@ internal class RemoteStore(
 
     private suspend fun addComment(
         ticketId: Int,
-        comment: Comment,
-        uploadFileHooks: UploadFileHooks?,
+        comment: CommentDto,
+        uploadFileHook: UploadFileHook?,
     ): Try<AddCommentResponseData> {
 //
         PLog.d(
@@ -207,18 +253,14 @@ internal class RemoteStore(
                 "ticketId: $ticketId"
         )
 
-
-
-        val request = CommentRequest()
-        sequentialRequests.offer(request)
-
         var cament = comment
         if (cament.hasAttachments()) {
-            val uploadAttachmentsTry = uploadAttachments(cament.attachments!!, uploadFileHooks)
-            if (!uploadAttachmentsTry.isSuccess()) {
-                return uploadAttachmentsTry
-            }
-            cament = cament.applyNewAttachments(uploadAttachmentsTry.value)
+            // TODO reuse it
+//            val uploadAttachmentsTry = uploadAttachments(cament.attachments!!, uploadFileHook)
+//            if (!uploadAttachmentsTry.isSuccess()) {
+//                return uploadAttachmentsTry
+//            }
+//            cament = cament.applyNewAttachments(uploadAttachmentsTry.value)
         }
         val addFeedCommentTry = api.addFeedComment(
             AddCommentRequestBody(
@@ -236,55 +278,6 @@ internal class RemoteStore(
         )
         PLog.d(TAG, "addComment, isSuccessful: ${addFeedCommentTry.isSuccess()}}")
         return addFeedCommentTry
-    }
-
-    @Throws(Exception::class)
-    private suspend fun uploadAttachments(
-        attachments: List<Attachment>,
-        uploadFileHooks: UploadFileHooks?
-    ): Try<List<Attachment>> {
-        val uploadResponses = ArrayList<FileUploadResponseData>(attachments.size)
-
-        for (attachment in attachments) {
-            val localUri = attachment.localUri ?: throw Exception()
-            val uploadData = fileResolver.getUploadFileData(localUri) ?: throw Exception()
-            val uploadFileTry = uploadFile(UploadFileRequest(uploadData, uploadFileHooks))
-            if (!uploadFileTry.isSuccess()) {
-                return uploadFileTry
-            }
-//            uploadResponses += uploadFile(UploadFileRequest(uploadData, uploadFileHooks))
-        }
-        if (uploadFileHooks?.isCancelled == true) {
-            throw Exception()
-        }
-        val newAttachments = mutableListOf<Attachment>()
-        for (i in uploadResponses.indices) {
-            val response = uploadResponses[i]
-            val oldAttachment = attachments[i]
-
-//            if (response.responseError != null || response.result == null) {
-//                throw Exception()
-//            }
-
-//            newAttachments.add(oldAttachment.toRemoteAttachment(response.result.guid))
-            fileManager.removeFile(oldAttachment.localUri)
-        }
-//        return newAttachments
-        return TODO()
-    }
-
-    private suspend fun uploadFile(request: UploadFileRequest): Try<FileUploadResponseData> {
-
-        val uploadFileTry = api.uploadFile(
-            UploadFileRequestBody(
-                request.fileUploadRequestData.fileName,
-                request.fileUploadRequestData.fileInputStream,
-                request.uploadFileHooks,
-                coroutineContext
-            ).toMultipartBody()
-        )
-
-        return uploadFileTry
     }
 
     private fun getUserId() = when(account) {
@@ -307,7 +300,7 @@ internal class RemoteStore(
         else -> null
     }
 
-    private fun Attachment.toRemoteAttachment(guid: String) = Attachment(
+    private fun AttachmentDto.toRemoteAttachment(guid: String) = AttachmentDto(
         id,
         guid,
         type,
@@ -319,7 +312,7 @@ internal class RemoteStore(
     )
 
     private fun AddCommentResponseData.applyAttachments(
-        attachments: List<Attachment>?
+        attachments: List<AttachmentDto>?
     ): AddCommentResponseData {
 
         if (!mustBeConvertedToRemoteAttachments(attachments, attachmentIds)) {
@@ -333,17 +326,17 @@ internal class RemoteStore(
     }
 
     private fun applyRemoteIdsToAttachments(
-        sentAttachments: List<Attachment>,
+        sentAttachments: List<AttachmentDto>,
         remoteAttachmentIds: List<Int>,
-    ): List<Attachment> {
-        val newAttachmentsList = mutableListOf<Attachment>()
+    ): List<AttachmentDto> {
+        val newAttachmentsList = mutableListOf<AttachmentDto>()
         sentAttachments.forEachIndexed { index, attachment ->
             newAttachmentsList.add(attachment.withRemoteId(remoteAttachmentIds[index]))
         }
         return newAttachmentsList
     }
 
-    private fun Attachment.withRemoteId(remoteId: Int) = Attachment(
+    private fun AttachmentDto.withRemoteId(remoteId: Int) = AttachmentDto(
         remoteId,
         guid,
         type,
@@ -355,7 +348,7 @@ internal class RemoteStore(
     )
 
     private fun mustBeConvertedToRemoteAttachments(
-        sentAttachments: List<Attachment>?,
+        sentAttachments: List<AttachmentDto>?,
         remoteAttachmentIds: List<Int>?,
     ): Boolean {
 
@@ -364,8 +357,8 @@ internal class RemoteStore(
             && sentAttachments.size == remoteAttachmentIds.size
     }
 
-    private fun Comment.applyNewAttachments(newAttachments: List<Attachment>): Comment {
-        return Comment(commentId, body, isInbound, newAttachments, creationDate, author, localId)
+    private fun CommentDto.applyNewAttachments(newAttachments: List<AttachmentDto>): CommentDto {
+        return CommentDto(commentId, body, isInbound, newAttachments, creationDate, author)
     }
 
     private fun <T> createError(response: Response<T>): ResponseError {
@@ -388,9 +381,3 @@ internal class RemoteStore(
     }
 
 }
-
-
-private interface SequentialRequest
-
-
-private class CommentRequest : SequentialRequest
