@@ -61,6 +61,7 @@ internal class TicketActivity : ConnectionActivityBase<TicketViewModel>(TicketVi
     override val toolbarViewId = R.id.ticket_toolbar
     override val refresherViewId = R.id.refresh
     override val progressBarViewId: Int = NO_ID
+    override val noConnectionViewId: Int = R.id.no_connection
 
     private val attachFileSharedViewModel: AttachFileSharedViewModel by getViewModel(
         AttachFileSharedViewModel::class.java)

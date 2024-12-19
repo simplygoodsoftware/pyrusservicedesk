@@ -31,6 +31,7 @@ import com.squareup.picasso.OkHttp3Downloader
 import com.squareup.picasso.Picasso
 import kotlinx.coroutines.CoroutineScope
 import com.pyrus.pyrusservicedesk._ref.utils.navigation.PyrusRouterImpl
+import com.pyrus.pyrusservicedesk.presentation.viewmodel.SharedViewModel
 import com.pyrus.pyrusservicedesk.sdk.repositories.RepositoryMapper
 import com.pyrus.pyrusservicedesk.sdk.web.retrofit.RemoteFileStore
 import okhttp3.OkHttpClient
@@ -152,6 +153,8 @@ internal class DiInjector(
     }
 
     private val cicerone: Cicerone<PyrusRouterImpl> = Cicerone.create(PyrusRouterImpl())
+
+    val sharedViewModel = SharedViewModel()
 
     val router = cicerone.router
 

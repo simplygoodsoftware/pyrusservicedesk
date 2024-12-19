@@ -11,11 +11,12 @@ import com.pyrus.pyrusservicedesk._ref.ui_domain.screens.ticket.adapter.new_entr
 import com.pyrus.pyrusservicedesk.presentation.ui.view.CommentView
 import com.pyrus.pyrusservicedesk._ref.utils.CIRCLE_TRANSFORMATION
 import com.pyrus.pyrusservicedesk._ref.utils.ConfigUtils
+import com.pyrus.pyrusservicedesk.sdk.data.intermediate.FileData
 
 internal class InboundCommentHolder(
     parent: ViewGroup,
     onErrorCommentEntryClickListener: (id: Long) -> Unit,
-    onFileReadyToPreviewClickListener: (uri: Uri) -> Unit,
+    onFileReadyToPreviewClickListener: (fileData: FileData) -> Unit,
     onTextCommentLongClicked: (String) -> Unit,
 ) : CommentHolder(
     parent,

@@ -5,6 +5,7 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.recyclerview.widget.ListAdapter
 import com.pyrus.pyrusservicedesk.R
+import com.pyrus.pyrusservicedesk._ref.data.Attachment
 import com.pyrus.pyrusservicedesk._ref.ui_domain.screens.ticket.adapter.view_holders.ButtonsHolder
 import com.pyrus.pyrusservicedesk._ref.ui_domain.screens.ticket.adapter.view_holders.DateViewHolder
 import com.pyrus.pyrusservicedesk._ref.ui_domain.screens.ticket.adapter.view_holders.InboundCommentHolder
@@ -14,13 +15,14 @@ import com.pyrus.pyrusservicedesk._ref.ui_domain.screens.ticket.adapter.view_hol
 import com.pyrus.pyrusservicedesk._ref.ui_domain.screens.ticket.adapter.view_holders.WelcomeMessageHolder
 import com.pyrus.pyrusservicedesk._ref.ui_domain.screens.ticket.adapter.new_entries.CommentEntryV2
 import com.pyrus.pyrusservicedesk.presentation.ui.view.recyclerview.ViewHolderBase
+import com.pyrus.pyrusservicedesk.sdk.data.intermediate.FileData
 
 /**
  * Adapter that is used for rendering comment feed of the ticket screen.
  */
 internal class TicketAdapter(
     private val onErrorCommentEntryClickListener: (id: Long) -> Unit,
-    private val onFileReadyToPreviewClickListener: (uri: Uri) -> Unit,
+    private val onFileReadyToPreviewClickListener: (fileData: FileData) -> Unit,
     private val onTextCommentLongClicked: (String) -> Unit,
     private val onRatingClickListener: (Int) -> Unit,
 ): ListAdapter<CommentEntryV2, ViewHolderBase<CommentEntryV2>>(CommentsItemCallback()) {

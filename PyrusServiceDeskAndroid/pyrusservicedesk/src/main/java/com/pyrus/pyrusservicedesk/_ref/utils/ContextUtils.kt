@@ -25,10 +25,7 @@ private const val DATE_FORMAT_CAPTURE_IMAGES = "yyyyMMdd_HHmmss"
 internal fun <T : ViewModel> FragmentActivity.getViewModel(viewModelClass: Class<T>): Lazy<T> {
 
     return lazy(LazyThreadSafetyMode.NONE) {
-        ViewModelProvider(
-            this,
-            ViewModelFactory(intent)
-        ).get(viewModelClass)
+        ViewModelProvider(this, ViewModelFactory(intent, application))[viewModelClass]
     }
 }
 

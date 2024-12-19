@@ -17,6 +17,7 @@ import com.pyrus.pyrusservicedesk._ref.whitetea.core.adaptCast
 import com.pyrus.pyrusservicedesk._ref.whitetea.core.logic.Logic
 import com.pyrus.pyrusservicedesk._ref.whitetea.utils.adapt
 import com.pyrus.pyrusservicedesk.sdk.data.FileManager
+import com.pyrus.pyrusservicedesk.sdk.data.intermediate.FileData
 import com.pyrus.pyrusservicedesk.sdk.repositories.DraftRepository
 import com.pyrus.pyrusservicedesk.sdk.repositories.Repository
 import kotlinx.coroutines.flow.Flow
@@ -77,7 +78,7 @@ private class FeatureReducer: Logic<State, Message, Effect>() {
                 state { currentState.copy(inputText = message.text) }
                 effects { +Effect.Inner.SaveDraft(message.text) }
             }
-            is Message.Outer.OnPreviewClick -> effects { +Effect.Inner.OpenPreview(message.uri) }
+            is Message.Outer.OnPreviewClick -> effects { +Effect.Inner.OpenPreview(message.fileData) }
             is Message.Outer.OnRatingClick -> {
                 if (state !is State.Content) return
                 effects { +Effect.Inner.SendRatingComment(message.rating) }
@@ -175,16 +176,16 @@ internal class TicketActor(
         is Effect.Inner.SendTextComment -> flow { repository.addTextComment(effect.text) }
         is Effect.Inner.SendRatingComment -> flow { repository.addRatingComment(effect.rating) }
         is Effect.Inner.SendAttachComment -> flow {
-            val fileUri = try {
-                fileManager.copyFile(effect.uri)
-            } catch (e: Exception) {
-                return@flow
-            } ?: return@flow
+            val fileUri = try { fileManager.copyFile(effect.uri) } catch (e: Exception) { null } ?: return@flow
             repository.addAttachComment(fileUri)
         }
         is Effect.Inner.RetryAddComment -> flow { repository.retryAddComment(effect.id) }
-        is Effect.Inner.OpenPreview -> flow { router.navigateTo(Screens.ImageScreen()) }
+        is Effect.Inner.OpenPreview -> flow {
+            router.navigateTo(Screens.ImageScreen(effect.fileData))
+        }
         is Effect.Inner.SaveDraft -> flow { draftRepository.saveDraft(effect.draft) }
     }
+
+
 
 }

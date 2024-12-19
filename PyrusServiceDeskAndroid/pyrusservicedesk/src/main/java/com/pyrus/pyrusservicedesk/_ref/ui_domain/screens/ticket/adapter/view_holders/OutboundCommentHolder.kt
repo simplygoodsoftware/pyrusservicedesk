@@ -4,11 +4,12 @@ import android.net.Uri
 import android.view.ViewGroup
 import com.pyrus.pyrusservicedesk.R
 import com.pyrus.pyrusservicedesk.presentation.ui.view.CommentView
+import com.pyrus.pyrusservicedesk.sdk.data.intermediate.FileData
 
 internal class OutboundCommentHolder(
     parent: ViewGroup,
     onErrorCommentEntryClickListener: (id: Long) -> Unit,
-    onFileReadyToPreviewClickListener: (uri: Uri) -> Unit,
+    onFileReadyToPreviewClickListener: (fileData: FileData) -> Unit,
     onTextCommentLongClicked: (String) -> Unit,
 ) : CommentHolder(
     parent,
