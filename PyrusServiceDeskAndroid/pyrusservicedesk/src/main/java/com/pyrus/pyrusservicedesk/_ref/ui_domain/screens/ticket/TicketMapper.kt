@@ -203,11 +203,12 @@ internal object TicketMapper {
             avatarUrl = avatarUrl,
             contentType = contentType,
             content = CommentEntryV2.CommentContent.Image(
-                attach.uri,
-                attach.name,
-                attach.name.isImage(),
-                attach.bytesSize.toFloat(),
-                attach.status,
+                attachUrl = attach.uri,
+                attachmentName = attach.name,
+                isImage = attach.name.isImage(),
+                fileSize = attach.bytesSize.toFloat(),
+                fileProgressStatus = attach.status,
+                uploadProgress = attach.progress
             ),
         )
     }

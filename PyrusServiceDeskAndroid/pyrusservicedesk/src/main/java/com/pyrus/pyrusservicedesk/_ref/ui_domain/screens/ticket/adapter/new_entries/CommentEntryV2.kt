@@ -31,6 +31,7 @@ internal sealed interface CommentEntryV2 {
             val isImage: Boolean,
             val fileSize: Float,
             val fileProgressStatus: Status,
+            val uploadProgress: Int?, // 0 - 100
         ) : CommentContent
     }
 

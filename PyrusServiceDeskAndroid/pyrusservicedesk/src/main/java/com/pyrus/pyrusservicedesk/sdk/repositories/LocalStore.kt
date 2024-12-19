@@ -27,7 +27,8 @@ internal class LocalStore(
      * Adds pending feed comment
      */
     fun addPendingFeedComment(comment: Comment) {
-        var comments = getPendingFeedComments().toMutableList()
+        var comments = localCommentsStateFlow.value.toMutableList()
+
         comments.let { list ->
             val existingIndex = list.indexOfFirst { it.id == comment.id }
             if (existingIndex >= 0) {

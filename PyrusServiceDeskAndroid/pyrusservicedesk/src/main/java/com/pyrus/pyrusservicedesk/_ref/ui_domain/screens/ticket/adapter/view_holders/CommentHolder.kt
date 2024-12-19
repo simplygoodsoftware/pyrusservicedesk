@@ -76,6 +76,7 @@ internal abstract class CommentHolder(
         comment.setFileSize(content.fileSize)
         comment.setPreview(content.attachUrl)
         comment.fileProgressStatus = content.fileProgressStatus
+        comment.setProgress(content.uploadProgress ?: 0)
         comment.setOnProgressIconClickListener {
             TODO()
         }
