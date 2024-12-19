@@ -9,29 +9,24 @@ internal class GroupVerticalItemDecoration(
     private val innerDivider: Int,
     private val outerDivider: Int,
     private val invert: Boolean = false,
-    private val excludeTypes: Set<Int> = emptySet()
+    private val excludeTypes: Set<Int> = emptySet() // works with any
 ) : RecyclerView.ItemDecoration() {
 
     override fun getItemOffsets(outRect: Rect, view: View, parent: RecyclerView, state: RecyclerView.State) {
         super.getItemOffsets(outRect, view, parent, state)
 
         val viewHolder = parent.getChildViewHolder(view)
+        val itemViewType = viewHolder.itemViewType
 
-        if (viewHolder.itemViewType in excludeTypes) return
+        if (itemViewType in excludeTypes) return
 
-        if (viewType == TYPE_ANY) {
-            outRect.top = innerDivider / 2
-            outRect.bottom = innerDivider / 2
-            return
-        }
-
-        if (viewHolder.itemViewType != viewType) return
+        if (viewType != TYPE_ANY && viewType != itemViewType) return
 
         val adapter = parent.adapter ?: return
         val currentPosition = parent.getChildAdapterPosition(view).takeIf { it != RecyclerView.NO_POSITION } ?: viewHolder.oldPosition
 
-        val isPrevTargetView = adapter.isPrevTargetView(currentPosition, viewType)
-        val isNextTargetView = adapter.isNextTargetView(currentPosition, viewType)
+        val isPrevTargetView = adapter.isPrevTargetView(currentPosition, itemViewType)
+        val isNextTargetView = adapter.isNextTargetView(currentPosition, itemViewType)
 
         val oneSideInnerDivider = innerDivider / 2
         if (invert) with(outRect) {

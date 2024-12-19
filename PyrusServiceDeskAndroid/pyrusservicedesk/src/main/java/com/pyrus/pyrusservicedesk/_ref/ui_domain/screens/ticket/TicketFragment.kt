@@ -71,7 +71,7 @@ internal class TicketFragment: TeaFragment<Model, TicketView.Event, TicketView.E
         AttachFileSharedViewModel::class.java
     )
 
-    override val renderer: ViewRenderer<Model> = diff {
+    override fun createRenderer(): ViewRenderer<Model> = diff {
         diff(Model::inputText) { text -> if (!binding.input.hasFocus()) binding.input.setText(text) }
         diff(Model::sendEnabled) { sendEnabled -> binding.send.isEnabled = sendEnabled }
         diff(Model::comments, { new, old -> new === old }) { adapter.submitList(it?.reversed()) }
@@ -81,7 +81,7 @@ internal class TicketFragment: TeaFragment<Model, TicketView.Event, TicketView.E
             binding.progressBar.isVisible = isLoading
         }
         diff(Model::isRefreshing) {
-            isRefreshing -> binding.refresh.isRefreshing = isRefreshing
+                isRefreshing -> binding.refresh.isRefreshing = isRefreshing
         }
     }
 
