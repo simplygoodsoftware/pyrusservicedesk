@@ -61,6 +61,7 @@ internal object TicketMapper {
         Event.OnSendClick -> Message.Outer.OnSendClick
         Event.OnShowAttachVariantsClick -> Message.Outer.OnShowAttachVariantsClick
         Event.OnRefresh -> Message.Outer.OnRefresh
+        Event.OnBackClick -> Message.Outer.OnBackClick
     }
 
     fun map(effect: Effect.Outer): TicketView.Effect = when(effect) {

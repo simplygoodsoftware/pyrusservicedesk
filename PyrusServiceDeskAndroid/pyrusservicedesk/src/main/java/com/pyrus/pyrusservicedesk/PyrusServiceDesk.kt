@@ -174,7 +174,6 @@ class PyrusServiceDesk private constructor(
                 apiDomain,
                 userId,
                 securityKey,
-                authorId,
             )
 
             INJECTOR = DiInjector(

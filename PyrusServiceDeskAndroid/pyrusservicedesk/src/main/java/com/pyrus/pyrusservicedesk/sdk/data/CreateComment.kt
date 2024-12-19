@@ -14,5 +14,5 @@ internal data class CreateComment(
     @SerializedName("ticket_id")
     val ticketId: Int?,
     @SerializedName("attachments")
-    val attachments: List<Attachment>,
+    val attachments: List<AttachmentDto>,
 )

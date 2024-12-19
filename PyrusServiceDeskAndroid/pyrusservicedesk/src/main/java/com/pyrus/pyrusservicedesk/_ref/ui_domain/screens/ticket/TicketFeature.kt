@@ -52,6 +52,8 @@ internal interface TicketContract {
 
             data object OnRefresh : Outer
 
+            data object OnBackClick : Outer
+
         }
 
         sealed interface Inner : Message {

@@ -3,7 +3,7 @@ package com.pyrus.pyrusservicedesk.sdk.verify
 import android.net.Uri
 import com.pyrus.pyrusservicedesk._ref.data.Comment
 import com.pyrus.pyrusservicedesk.sdk.FileResolver
-import com.pyrus.pyrusservicedesk.sdk.data.CommentDto
+import com.pyrus.pyrusservicedesk.sdk.data.Command
 
 internal class LocalDataVerifierImpl(private val fileResolver: FileResolver) : LocalDataVerifier {
 
@@ -12,6 +12,11 @@ internal class LocalDataVerifierImpl(private val fileResolver: FileResolver) : L
                 && (localComment.attachments.isNullOrEmpty()
                 || !localComment.attachments.any { isLocalFileExists(it.uri) })
                 && localComment.rating == null
+    }
+
+    override fun isLocalCommandEmpty(localCommand: Command): Boolean {
+        return localCommand.commandId.isNotEmpty()
+                && localCommand.appId.isNotEmpty()
     }
 
     override fun isLocalFileExists(localFileUri: Uri?): Boolean {

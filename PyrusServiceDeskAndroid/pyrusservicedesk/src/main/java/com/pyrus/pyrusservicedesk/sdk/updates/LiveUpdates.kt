@@ -12,6 +12,7 @@ import com.pyrus.pyrusservicedesk._ref.utils.MILLISECONDS_IN_HOUR
 import com.pyrus.pyrusservicedesk._ref.utils.MILLISECONDS_IN_MINUTE
 import com.pyrus.pyrusservicedesk._ref.utils.MILLISECONDS_IN_SECOND
 import com.pyrus.pyrusservicedesk._ref.utils.isSuccess
+import com.pyrus.pyrusservicedesk.sdk.data.Ticket
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -281,41 +282,48 @@ internal class LiveUpdates(
 
             val responseUserId = userId
             PLog.d(TAG, "getTicketRequest")
-            coreScope.launch(ioDispatcher) {
-                val feedTry = repository.getFeed(true)
+            for (ticket in data) {
 
-                withContext(mainDispatcher) {
-                    if (responseUserId != userId) {
-                        return@withContext
+                coreScope.launch(ioDispatcher) {
+                    val feedTry = repository.getFeed(ticket.ticketId, true)
+
+                    withContext(mainDispatcher) {
+                        if (responseUserId != userId) {
+                            return@withContext
+                        }
+
+                        if (!feedTry.isSuccess()) {
+                            this@LiveUpdates.lastCommentId = 0
+                            PLog.d(TAG, "response.hasError, error: ${feedTry.error}")
+                            return@withContext
+                        }
+
+                        val comments = feedTry.value.comments
+                        val lastSavedCommentInMainScope =
+                            this@LiveUpdates.preferencesManager.getLastComment()
+                        val lastServerComment =
+                            comments.findLast { !it.isInbound } ?: return@withContext
+                        if (lastServerComment.id <= (lastSavedCommentInMainScope?.id ?: 0))
+                            return@withContext
+
+                        val lastUserComment =
+                            comments.findLast { it.isInbound } ?: return@withContext
+
+                        updateGetTicketsIntervalIfNeeded(lastUserComment.creationTime)
+
+                        val chatIsShown = activeScreenCount > 0
+                        val lastComment = LastComment.mapFromComment(
+                            newReplySubscribers.isNotEmpty() || chatIsShown,
+                            !hasUnreadTickets,
+                            lastServerComment
+                        )
+
+                        this@LiveUpdates.preferencesManager.saveLastComment(lastComment)
+                        if (!chatIsShown)
+                            notifyNewReplySubscribers(lastComment)
                     }
-
-                    if (!feedTry.isSuccess()) {
-                        this@LiveUpdates.lastCommentId = 0
-                        PLog.d(TAG, "response.hasError, error: ${feedTry.error}")
-                        return@withContext
-                    }
-
-                    val comments = feedTry.value?.comments
-                    val lastSavedCommentInMainScope = this@LiveUpdates.preferencesManager.getLastComment()
-                    val lastServerComment = comments?.findLast { !it.isInbound } ?: return@withContext
-                    if (lastServerComment.id <= (lastSavedCommentInMainScope?.id ?: 0))
-                        return@withContext
-
-                    val lastUserComment = comments.findLast { it.isInbound } ?: return@withContext
-
-                    updateGetTicketsIntervalIfNeeded(lastUserComment.creationTime)
-
-                    val chatIsShown = activeScreenCount > 0
-                    val lastComment = LastComment.mapFromComment(
-                        newReplySubscribers.isNotEmpty() || chatIsShown,
-                        !hasUnreadTickets,
-                        lastServerComment
-                    )
-
-                    this@LiveUpdates.preferencesManager.saveLastComment(lastComment)
-                    if (!chatIsShown)
-                        notifyNewReplySubscribers(lastComment)
                 }
+
             }
         }
     }

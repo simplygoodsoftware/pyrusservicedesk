@@ -4,7 +4,9 @@ import android.content.SharedPreferences
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
 import com.pyrus.pyrusservicedesk._ref.data.Comment
+import com.pyrus.pyrusservicedesk.sdk.data.Command
 import com.pyrus.pyrusservicedesk.sdk.data.CommentDto
+import com.pyrus.pyrusservicedesk.sdk.data.Ticket
 import com.pyrus.pyrusservicedesk.sdk.verify.LocalDataVerifier
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -20,6 +22,7 @@ internal class LocalStore(
 ) {
 
     private val localCommentsStateFlow = MutableStateFlow(getPendingFeedComments())
+    private val localCommandsStateFlow = MutableStateFlow(getPendingFeedCommands())
 
     fun commentsFlow(): Flow<List<Comment>> = localCommentsStateFlow
 
@@ -54,8 +57,25 @@ internal class LocalStore(
         return commentsList
     }
 
+    /**
+     * Provides all pending feed commands
+     */
+    fun getPendingFeedCommands(): List<Command> {
+        val rawJson = preferences.getString(PREFERENCE_KEY_OFFLINE_COMMANDS, "[]")
+        val commandsList = gson.fromJson<List<Command>>(rawJson, commandListTokenType).toMutableList()
+
+        if (commandsList.removeAll { localDataVerifier.isLocalCommandEmpty(it) }) {
+            writeCommands(commandsList)
+        }
+        return commandsList
+    }
+
     fun getComment(id: Long): Comment? {
         return getPendingFeedComments().find { comment -> comment.id == id }
+    }
+
+    fun getCommand(id: String): Command? {
+        return getPendingFeedCommands().find { command -> command.commandId == id }
     }
 
     /**
@@ -66,6 +86,17 @@ internal class LocalStore(
         val removed = comments.removeAll { it.id == comment.id }
         if (removed) {
             writeComments(comments)
+        }
+    }
+
+    /**
+     * Removes pending command from offline repository
+     */
+    fun removePendingCommand(command: Command) {
+        val commands = getPendingFeedCommands().toMutableList()
+        val removed = commands.removeAll { it.commandId == command.commandId }
+        if (removed) {
+            writeCommands(commands)
         }
     }
 
@@ -82,9 +113,19 @@ internal class LocalStore(
         localCommentsStateFlow.value = comments
     }
 
+    private fun writeCommands(commands: List<Command>) {
+        val rawJson = gson.toJson(commands, commandListTokenType)
+        preferences.edit().putString(PREFERENCE_KEY_OFFLINE_COMMANDS, rawJson).apply()
+        localCommandsStateFlow .value = commands
+    }
+
     private companion object{
         const val PREFERENCE_KEY_OFFLINE_COMMENTS = "PREFERENCE_KEY_OFFLINE_COMMENTS"
+        const val PREFERENCE_KEY_OFFLINE_COMMANDS = "PREFERENCE_KEY_OFFLINE_COMMANDS"
+        const val PREFERENCE_KEY_OFFLINE = "PREFERENCE_KEY_OFFLINE"
         const val MAX_PENDING_COMMENTS_SIZE = 20
         val commentListTokenType: Type = object : TypeToken<List<Comment>>(){}.type
+        val commandListTokenType: Type = object : TypeToken<List<Command>>(){}.type
+        val mapTokenType: Type = object : TypeToken<Map<Ticket, List<Command>>>(){}.type
     }
 }

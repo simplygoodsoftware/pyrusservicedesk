@@ -142,8 +142,6 @@ internal class DiInjector(
 
     private val draftRepository = DraftRepository(preferences)
 
-    private val syncRepository = SyncRepository(retrofit)
-
     fun ticketFeatureFactory(welcomeMessage: String, userId: String, ticketId: Int): TicketFeatureFactory {
         return TicketFeatureFactory(
             storeFactory = storeFactory,
@@ -162,12 +160,10 @@ internal class DiInjector(
     }
 
     fun ticketsListFeatureFactory(appId: String): TicketsListFeatureFactory {
-        return TicketsListFeatureFactory(storeFactory, syncRepository, appId)
+        return TicketsListFeatureFactory(storeFactory, repository, appId)
     }
 
     private val cicerone: Cicerone<PyrusRouterImpl> = Cicerone.create(PyrusRouterImpl())
-
-    val localDataProvider = LocalDataProvider(localStore, fileResolver)
 
     val router = cicerone.router
 

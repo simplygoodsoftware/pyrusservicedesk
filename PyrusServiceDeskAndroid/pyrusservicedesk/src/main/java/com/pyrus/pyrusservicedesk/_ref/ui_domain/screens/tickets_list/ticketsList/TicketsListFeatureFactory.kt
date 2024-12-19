@@ -14,6 +14,8 @@ import com.pyrus.pyrusservicedesk._ref.whitetea.core.StoreFactory
 import com.pyrus.pyrusservicedesk._ref.whitetea.core.adaptCast
 import com.pyrus.pyrusservicedesk._ref.whitetea.core.logic.Logic
 import com.pyrus.pyrusservicedesk.sdk.data.Ticket
+import com.pyrus.pyrusservicedesk.sdk.data.intermediate.Tickets
+import com.pyrus.pyrusservicedesk.sdk.repositories.Repository
 import com.pyrus.pyrusservicedesk.sdk.web.retrofit.SyncRepository
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
@@ -22,7 +24,7 @@ private const val TAG = "TicketsListFeature"
 
 internal class TicketsListFeatureFactory(
     private val storeFactory: StoreFactory,
-    private val syncRepository: SyncRepository,
+    private val repository: Repository,
     private val appId: String,
 ) {
 
@@ -36,7 +38,7 @@ internal class TicketsListFeatureFactory(
             isLoading = true
         ),
         reducer = FeatureReducer(),
-        actor = TicketsListActor(syncRepository).adaptCast(),
+        actor = TicketsListActor(repository).adaptCast(),
         initialEffects = listOf(
             Effect.Inner.UpdateTickets,
         ),
@@ -144,15 +146,15 @@ private class FeatureReducer : Logic<State, Message, Effect>() {
 }
 
 internal class TicketsListActor(
-    private val repository: SyncRepository,
+    private val repository: Repository,
 ) : Actor<Effect.Inner, Message.Inner> {
 
     override fun handleEffect(effect: Effect.Inner): Flow<Message.Inner> = when (effect) {
         Effect.Inner.UpdateTickets -> singleFlow {
             //repository.startSync()
-            val ticketsTry: Try<SyncRepository.SyncRes> = repository.sync(repository.createSyncRequest())
+            val ticketsTry: Try<Tickets> = repository.getAllData()// sync(repository.createSyncRequest())
             when {
-                ticketsTry.isSuccess() -> Message.Inner.UpdateTicketsCompleted(ticketsTry.value.tickets)
+                ticketsTry.isSuccess() -> Message.Inner.UpdateTicketsCompleted(ticketsTry.value)
                 else -> Message.Inner.UpdateTicketsFailed
             }
 

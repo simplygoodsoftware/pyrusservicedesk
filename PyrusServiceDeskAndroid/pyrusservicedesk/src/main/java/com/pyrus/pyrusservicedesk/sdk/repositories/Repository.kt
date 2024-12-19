@@ -15,13 +15,15 @@ import com.pyrus.pyrusservicedesk._ref.utils.map
 import com.pyrus.pyrusservicedesk.presentation.ui.view.Status
 import com.pyrus.pyrusservicedesk.sdk.FileResolver
 import com.pyrus.pyrusservicedesk.sdk.data.AttachmentDto
-import com.pyrus.pyrusservicedesk.sdk.data.TicketShortDescription
+import com.pyrus.pyrusservicedesk.sdk.data.Command
+import com.pyrus.pyrusservicedesk.sdk.data.Ticket
+import com.pyrus.pyrusservicedesk.sdk.data.TicketCommandResult
 import com.pyrus.pyrusservicedesk.sdk.data.intermediate.AddCommentResponseData
 import com.pyrus.pyrusservicedesk.sdk.data.intermediate.FileData
+import com.pyrus.pyrusservicedesk.sdk.data.intermediate.Tickets
 import com.pyrus.pyrusservicedesk.sdk.web.UploadFileHook
 import com.pyrus.pyrusservicedesk.sdk.web.retrofit.RemoteFileStore
 import com.pyrus.pyrusservicedesk.sdk.web.retrofit.RemoteStore
-import com.pyrus.pyrusservicedesk.sdk.web.retrofit.UploadFileResult
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.combine
@@ -64,7 +66,7 @@ internal class Repository(
 
     fun getFeedFlow(): Flow<FullTicket?> = combine(localStore.commentsFlow(), remoteFeedStateFlow) { local, remote ->
         when (remote) {
-            null -> FullTicket(local, false, null)
+            null -> FullTicket(local, false, null, null, null)
             else -> mergeComments(local, remote)
         }
     }
@@ -72,8 +74,22 @@ internal class Repository(
     /**
      * Provides tickets in single feed representation.
      */
-    suspend fun getFeed(keepUnread: Boolean, includePendingComments: Boolean = false): Try<FullTicket> {
-        val feedTry = remoteStore.getFeed(keepUnread).map(repositoryMapper::map)
+//    suspend fun getFeed(keepUnread: Boolean, includePendingComments: Boolean = false): Try<FullTicket> {
+//        val feedTry = remoteStore.getFeed(keepUnread).map(repositoryMapper::map)
+//        if (feedTry.isSuccess()) remoteFeedMutex.withLock {
+//            remoteFeedStateFlow.value = feedTry.value
+//        }
+//
+//        if (includePendingComments) {
+//            return feedTry.map { mergeComments(localStore.getPendingFeedComments(), it) }
+//        }
+//        return feedTry
+//    }
+
+    //TODO what we need to do when we haven't fount ticket (feedTry.value == null, but feedTry.isSuccess())
+    suspend fun getFeed(ticketId: Int, keepUnread: Boolean, includePendingComments: Boolean = false): Try<FullTicket> {
+        val feedTry = remoteStore.getTicket(ticketId).map(repositoryMapper::map)
+
         if (feedTry.isSuccess()) remoteFeedMutex.withLock {
             remoteFeedStateFlow.value = feedTry.value
         }
@@ -95,18 +111,25 @@ internal class Repository(
         return remoteStore.getAllData()
     }
 
-    suspend fun addTextComment(textBody: String) {
-        val comment = createLocalTextComment(textBody)
+    suspend fun addTextComment(textBody: String, command: Command) {
+        val comment = createLocalTextComment(textBody, "10")
         localStore.addPendingFeedComment(comment)
-        val response = remoteStore.addTextComment(textBody)
 
-        if (response.isSuccess()) {
+        val response = remoteStore.addTextComment(command)
+
+        if (response.isSuccess() && !response.value.isNullOrEmpty()) {
             localStore.removePendingComment(comment)
-            addNewCommentToState(response.value, comment)
-        }
-        else {
+            val res = response.value.find { it.commandId == command.commandId }
+            if (res != null) {
+                addNewCommentToState(toAddCommentResponseData(res), comment)
+            }
+        } else {
             localStore.addPendingFeedComment(comment.copy(isSending = false))
         }
+    }
+
+    private fun toAddCommentResponseData(ticketCommandResult: TicketCommandResult): AddCommentResponseData {
+        return AddCommentResponseData(ticketCommandResult.commentId, null, null)
     }
 
     suspend fun addAttachComment(fileUri: Uri) {
@@ -184,7 +207,7 @@ internal class Repository(
         val localComment = localStore.getComment(localId) ?: return
         when {
             !localComment.attachments.isNullOrEmpty() -> addAttachComment(localComment.attachments.first().uri)
-            !localComment.body.isNullOrBlank() -> addTextComment(localComment.body)
+            //!localComment.body.isNullOrBlank() -> addTextComment(localComment.body) //TODO
             localComment.rating != null -> addRatingComment(localComment.rating)
             else -> localStore.removePendingComment(localComment)
         }
@@ -221,7 +244,7 @@ internal class Repository(
                 isSending = false,
                 attachments = if (newAttachments.isEmpty()) null else newAttachments
             )
-            val ticket = remoteFeedStateFlow.value ?: FullTicket(emptyList(), false, null)
+            val ticket = remoteFeedStateFlow.value ?: FullTicket(emptyList(), false, null, null, null)
             remoteFeedStateFlow.value = ticket.copy(comments = ticket.comments + remoteComment)
         }
     }
@@ -237,10 +260,10 @@ internal class Repository(
 
     private fun createLocalAttachmentId(): Int = lastLocalAttachmentId.decrementAndGet()
 
-    private fun createLocalTextComment(text: String) = Comment(
+    private fun createLocalTextComment(text: String, authorId: String) = Comment(
         body = text,
         isInbound = true,
-        author = Author(ConfigUtils.getUserName(), null, null),
+        author = Author(ConfigUtils.getUserName(), authorId, null, null),
         attachments = null,
         creationTime = System.currentTimeMillis(),
         id = createLocalCommentId(),
@@ -252,7 +275,7 @@ internal class Repository(
     private fun createLocalRatingComment(rating: Int) = Comment(
         body = null,
         isInbound = true,
-        author = Author(ConfigUtils.getUserName(), null, null),
+        author = Author(ConfigUtils.getUserName(), null, null, null),
         attachments = null,
         creationTime = System.currentTimeMillis(),
         id = createLocalCommentId(),
@@ -267,7 +290,7 @@ internal class Repository(
         isInbound = true,
         attachments = listOf(attachment),
         creationTime = System.currentTimeMillis(),
-        author = Author(ConfigUtils.getUserName(), null, "#fffffff"),
+        author = Author(ConfigUtils.getUserName(), "10", null, "#fffffff"),
         rating = null,
         isLocal = true,
         isSending = true

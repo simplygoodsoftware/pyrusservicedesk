@@ -1,6 +1,6 @@
 package com.pyrus.pyrusservicedesk._ref.ui_domain.screens.ticket
 
-import com.pyrus.pyrusservicedesk.PyrusServiceDesk
+import com.pyrus.pyrusservicedesk.PyrusServiceDesk.Companion.injector
 import com.pyrus.pyrusservicedesk.PyrusServiceDesk.Companion.users
 import com.pyrus.pyrusservicedesk.R
 import com.pyrus.pyrusservicedesk._ref.Screens
@@ -18,13 +18,15 @@ import com.pyrus.pyrusservicedesk._ref.whitetea.core.StoreFactory
 import com.pyrus.pyrusservicedesk._ref.whitetea.core.adaptCast
 import com.pyrus.pyrusservicedesk._ref.whitetea.core.logic.Logic
 import com.pyrus.pyrusservicedesk._ref.whitetea.utils.adapt
+import com.pyrus.pyrusservicedesk.sdk.data.Command
+import com.pyrus.pyrusservicedesk.sdk.data.CreateComment
 import com.pyrus.pyrusservicedesk.sdk.data.FileManager
+import com.pyrus.pyrusservicedesk.sdk.data.TicketCommandType
 import com.pyrus.pyrusservicedesk.sdk.repositories.DraftRepository
 import com.pyrus.pyrusservicedesk.sdk.repositories.Repository
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.map
-import java.lang.Exception
 import java.util.UUID
 
 internal class TicketFeatureFactory(
@@ -70,7 +72,12 @@ private class FeatureReducer: Logic<State, Message, Effect>() {
             is Message.Outer.OnAttachmentSelected -> {
                 if (state !is State.Content) return
                 message.fileUri ?: return // TODO Show toast
-                effects { +Effect.Inner.SendAttachComment(message.fileUri) }
+                effects { +Effect.Inner.SendAttachComment(
+                    message.fileUri,
+                    ticketId = (state as State.Content).ticketId,
+                    appId = (state as State.Content).appId,
+                    userId = (state as State.Content).userId
+                ) }
             }
             Message.Outer.OnCloseClick -> effects { +Effect.Inner.Close }
             is Message.Outer.OnCopyClick -> effects {
@@ -85,7 +92,12 @@ private class FeatureReducer: Logic<State, Message, Effect>() {
             is Message.Outer.OnPreviewClick -> effects { +Effect.Inner.OpenPreview(message.uri) }
             is Message.Outer.OnRatingClick -> {
                 if (state !is State.Content) return
-                effects { +Effect.Inner.SendRatingComment(message.rating) }
+                effects { +Effect.Inner.SendRatingComment(
+                    message.rating,
+                    ticketId = (state as State.Content).ticketId,
+                    appId = (state as State.Content).appId,
+                    userId = (state as State.Content).userId
+                ) }
             }
             is Message.Outer.OnRetryAddCommentClick -> {
                 if (state !is State.Content) return
@@ -105,8 +117,10 @@ private class FeatureReducer: Logic<State, Message, Effect>() {
                 val currentState = state as? State.Content ?: return
                 if (currentState.isLoading) return
                 state { currentState.copy(isLoading = true) }
-                effects { +Effect.Inner.UpdateComments }
+                effects { +Effect.Inner.UpdateComments(currentState.ticketId) }
             }
+
+            Message.Outer.OnBackClick -> injector().router.exit()
         }
     }
 
@@ -127,9 +141,9 @@ private class FeatureReducer: Logic<State, Message, Effect>() {
                     is State.Content -> state { currentState.copy(
                         ticket = message.ticket,
                         isLoading = false,
-                        appId = users.find { it.userId == message.ticket?.userId }?.appId ?: "",
-                        userId = message.ticket?.userId ?: "",
-                        ticketId = message.ticket?.ticketId ?: 0
+                        appId = users.find { it.userId == message.ticket.userId }?.appId ?: "",
+                        userId = message.ticket.userId ?: "",
+                        ticketId = message.ticket.ticketId ?: 0
                     ) }
                     State.Error,
                     State.Loading -> state { State.Content(
@@ -138,9 +152,9 @@ private class FeatureReducer: Logic<State, Message, Effect>() {
                         inputText = message.draft,
                         welcomeMessage = message.welcomeMessage,
                         isLoading = false,
-                        appId = users.find { it.userId == message.ticket?.userId }?.appId ?: "",
-                        userId = message.ticket?.userId ?: "",
-                        ticketId = message.ticket?.ticketId ?: 0
+                        appId = users.find { it.userId == message.ticket.userId }?.appId ?: "",
+                        userId = message.ticket.userId ?: "",
+                        ticketId = message.ticket.ticketId ?: 0
 
                     ) }
                 }
@@ -163,7 +177,7 @@ internal class TicketActor(
 ): Actor<Effect.Inner, Message.Inner> {
 
     override fun handleEffect(effect: Effect.Inner): Flow<Message.Inner> = when(effect) {
-        Effect.Inner.UpdateComments -> singleFlow {
+        is Effect.Inner.UpdateComments -> singleFlow {
             val commentsTry: Try<FullTicket> = repository.getFeed(
                 keepUnread = false,
                 includePendingComments = true,
@@ -185,7 +199,7 @@ internal class TicketActor(
 
         }
         Effect.Inner.Close -> flow { router.exit() }
-        is Effect.Inner.SendTextComment -> flow { repository.addTextComment(effect.text) }
+        is Effect.Inner.SendTextComment -> flow { repository.addTextComment(effect.text, getSendTextCommentCommand(effect.text, effect.appId, effect.userId, effect.ticketId)) }
         is Effect.Inner.SendRatingComment -> flow { repository.addRatingComment(effect.rating) }
         is Effect.Inner.SendAttachComment -> flow {
             val fileUri = try {
@@ -205,7 +219,7 @@ internal class TicketActor(
         return uuid.toString()
     }
 
-    fun getSendTextCommentCommands(text: String, appId: String, userId: String, ticketId: Int): List<Command> {
+    private fun getSendTextCommentCommand(text: String, appId: String, userId: String, ticketId: Int): Command {
         val localCreateComment = CreateComment(
             comment = text,
             requestNewTicket = ticketId == 0,
@@ -214,15 +228,15 @@ internal class TicketActor(
             ticketId = ticketId,
             attachments = emptyList(),
         )
-        val localTicketIsRead = MarkTicketAsRead(
-            ticketId = ticketId.toString(),//TODO check why String
-            userId = userId,
-            appId = appId
-        )
-        val list = listOf(
-            Command(getUUID(), TicketCommandType.CreateComment, appId, userId,  localCreateComment),
-            Command(getUUID(), TicketCommandType.MarkTicketAsRead, appId, userId,  localTicketIsRead))
-        return list
+//        val localTicketIsRead = MarkTicketAsRead(
+//            ticketId = ticketId.toString(),//TODO check why String
+//            userId = userId,
+//            appId = appId
+//        )
+//        val list = listOf(
+//            Command(getUUID(), TicketCommandType.CreateComment, appId, userId,  localCreateComment),
+//            Command(getUUID(), TicketCommandType.MarkTicketAsRead, appId, userId,  localTicketIsRead))
+        return Command(getUUID(), TicketCommandType.CreateComment, appId, userId,  localCreateComment)
     }
 
 }

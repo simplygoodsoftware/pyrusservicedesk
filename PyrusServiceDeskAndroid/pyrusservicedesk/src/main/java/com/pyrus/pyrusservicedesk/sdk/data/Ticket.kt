@@ -18,7 +18,7 @@ internal data class Ticket(
     @SerializedName("subject") val subject: String = "",
     @SerializedName("author") val author: String? = "",
     @SerializedName("is_read") val isRead: Boolean?,
-    @SerializedName("last_comment") val lastComment: Comment?,
+    @SerializedName("last_comment") val lastComment: CommentDto?,
     @SerializedName("comments") val comments: List<CommentDto>? = null,
     @SerializedName("is_active") val isActive: Boolean?,
     @SerializedName("created_at") val createdAt: Date?, //TODO check it
