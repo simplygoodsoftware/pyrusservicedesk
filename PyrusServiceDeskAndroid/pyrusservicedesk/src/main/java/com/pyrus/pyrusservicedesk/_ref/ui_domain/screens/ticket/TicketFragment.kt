@@ -158,7 +158,10 @@ internal class TicketFragment: TeaFragment<Model, TicketView.Event, TicketView.E
 
     private fun initListeners() {
         binding.ticketToolbar.setOnMenuItemClickListener { onMenuItemClicked(it) }
-        binding.send.setOnClickListener { dispatch(TicketView.Event.OnSendClick) }
+        binding.send.setOnClickListener {
+            binding.input.text = null
+            dispatch(TicketView.Event.OnSendClick)
+        }
         binding.attach.setOnClickListener { dispatch(TicketView.Event.OnShowAttachVariantsClick) }
         binding.input.addTextChangedListener(inputTextWatcher)
         binding.refresh.setOnRefreshListener { dispatch(TicketView.Event.OnRefresh) }
