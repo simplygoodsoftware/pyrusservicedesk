@@ -200,12 +200,22 @@ internal class Repository(
     }
 
     private suspend fun addNewCommentToState(response: AddCommentResponseData, localComment: Comment) {
+
+        val newAttachments = ArrayList<Attachment>()
+        val attachmentIds = response.attachmentIds ?: emptyList()
+        val localAttachments = localComment.attachments ?: emptyList()
+        if (attachmentIds.size == localAttachments.size) {
+            for (i in localAttachments.indices) {
+                newAttachments += localAttachments[i].copy(id = attachmentIds[i])
+            }
+        }
+
         remoteFeedMutex.withLock {
             val remoteComment = localComment.copy(
                 id = response.commentId,
                 isLocal = false,
                 isSending = false,
-                attachments = response.sentAttachments?.map(repositoryMapper::map)
+                attachments = if (newAttachments.isEmpty()) null else newAttachments
             )
             val ticket = remoteFeedStateFlow.value ?: FullTicket(emptyList(), false, null)
             remoteFeedStateFlow.value = ticket.copy(comments = ticket.comments + remoteComment)
