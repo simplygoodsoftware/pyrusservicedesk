@@ -38,8 +38,8 @@ internal class InboundCommentHolder(
 
     override fun bindItem(entry: CommentEntryV2.Comment) {
         super.bindItem(entry)
-        setAuthorNameAndVisibility(entry, true)
-        setAuthorAvatarVisibility(entry, true)
+        setAuthorNameAndVisibility(entry, entry.showAuthorName)
+        setAuthorAvatarVisibility(entry, entry.showAvatar)
     }
 
     private fun setAuthorNameAndVisibility(item: CommentEntryV2.Comment, visible: Boolean) {

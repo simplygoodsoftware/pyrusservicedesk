@@ -57,7 +57,6 @@
                 android:clipToPadding="false"
                 android:paddingTop="@dimen/psd_comments_item_space_double"
                 android:paddingBottom="@dimen/psd_comments_item_space_double"
-                app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
                 tools:listitem="@layout/psd_view_holder_comment_inbound" />
 
         </com.pyrus.pyrusservicedesk.presentation.ui.view.swiperefresh.DirectedSwipeRefresh>

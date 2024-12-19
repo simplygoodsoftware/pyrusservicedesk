@@ -17,10 +17,14 @@ import androidx.core.content.ContextCompat.getSystemService
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.isVisible
+import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
 import com.pyrus.pyrusservicedesk.PyrusServiceDesk.Companion.injector
 import com.pyrus.pyrusservicedesk.R
 import com.pyrus.pyrusservicedesk._ref.ui_domain.screens.ticket.TicketView.Model
 import com.pyrus.pyrusservicedesk._ref.ui_domain.screens.ticket.adapter.TicketAdapter
+import com.pyrus.pyrusservicedesk._ref.ui_domain.screens.ticket.adapter.TicketAdapter.Companion.VIEW_TYPE_COMMENT_INBOUND
+import com.pyrus.pyrusservicedesk._ref.ui_domain.screens.ticket.adapter.TicketAdapter.Companion.VIEW_TYPE_COMMENT_OUTBOUND
 import com.pyrus.pyrusservicedesk._ref.utils.ConfigUtils
 import com.pyrus.pyrusservicedesk._ref.utils.getColorOnBackground
 import com.pyrus.pyrusservicedesk._ref.utils.getSecondaryColorOnBackground
@@ -38,6 +42,7 @@ import com.pyrus.pyrusservicedesk._ref.whitetea.utils.diff
 import com.pyrus.pyrusservicedesk.databinding.PsdFragmentTicketBinding
 import com.pyrus.pyrusservicedesk.presentation.ui.navigation_page.ticket.dialogs.attach_files.AttachFileSharedViewModel
 import com.pyrus.pyrusservicedesk.presentation.ui.navigation_page.ticket.dialogs.attach_files.AttachFileVariantsFragment
+import com.pyrus.pyrusservicedesk.presentation.ui.view.recyclerview.item_decorators.GroupVerticalItemDecoration
 import com.pyrus.pyrusservicedesk.presentation.ui.view.recyclerview.item_decorators.SpaceItemDecoration
 import kotlinx.coroutines.flow.map
 
@@ -69,7 +74,7 @@ internal class TicketFragment: TeaFragment<Model, TicketView.Event, TicketView.E
     override val renderer: ViewRenderer<Model> = diff {
         diff(Model::inputText) { text -> if (!binding.input.hasFocus()) binding.input.setText(text) }
         diff(Model::sendEnabled) { sendEnabled -> binding.send.isEnabled = sendEnabled }
-        diff(Model::comments, { new, old -> new === old }, adapter::submitList)
+        diff(Model::comments, { new, old -> new === old }) { adapter.submitList(it?.reversed()) }
         diff(Model::showNoConnectionError) { showError -> binding.noConnection.root.isVisible = showError }
         diff(Model::isLoading) { isLoading ->
             binding.ticketContent.isVisible = !isLoading
@@ -160,19 +165,57 @@ internal class TicketFragment: TeaFragment<Model, TicketView.Event, TicketView.E
     }
 
     private fun initUi() {
-        binding.comments.apply {
-            adapter = this@TicketFragment.adapter
-            addItemDecoration(
-                SpaceItemDecoration(
-                    resources.getDimensionPixelSize(R.dimen.psd_comments_item_space),
-                    this@TicketFragment.adapter.itemSpaceMultiplier
-                )
-            )
-            itemAnimator = null
-        }
+        initCommentsRecyclerView()
+
         binding.toolbarTitle.text = ConfigUtils.getTitle(requireContext())
 
         applyStyle()
+    }
+
+    private fun initCommentsRecyclerView() {
+        val recyclerView = binding.comments
+
+        recyclerView.adapter = adapter
+
+        recyclerView.layoutManager = LinearLayoutManager(
+            requireContext(),
+            LinearLayoutManager.VERTICAL,
+            true
+        )
+
+        val defaultDivider = resources.getDimensionPixelSize(R.dimen.psd_comments_item_space)
+        recyclerView.addItemDecoration(
+            GroupVerticalItemDecoration(
+                viewType = VIEW_TYPE_COMMENT_INBOUND,
+                innerDivider = defaultDivider,
+                outerDivider = defaultDivider * 2,
+                invert = true,
+            )
+        )
+        recyclerView.addItemDecoration(
+            GroupVerticalItemDecoration(
+                viewType = VIEW_TYPE_COMMENT_OUTBOUND,
+                innerDivider = defaultDivider,
+                outerDivider = defaultDivider * 2,
+                invert = true,
+            )
+        )
+        recyclerView.addItemDecoration(
+            GroupVerticalItemDecoration(
+                viewType = GroupVerticalItemDecoration.TYPE_ANY,
+                innerDivider = defaultDivider,
+                outerDivider = defaultDivider,
+                invert = true,
+                excludeTypes = setOf(VIEW_TYPE_COMMENT_INBOUND, VIEW_TYPE_COMMENT_OUTBOUND)
+            )
+        )
+
+        val pool = RecyclerView.RecycledViewPool()
+        pool.setMaxRecycledViews(VIEW_TYPE_COMMENT_OUTBOUND, 10)
+        pool.setMaxRecycledViews(VIEW_TYPE_COMMENT_INBOUND, 10)
+        recyclerView.setRecycledViewPool(pool)
+
+        recyclerView.itemAnimator = null
     }
 
     private fun applyStyle() {

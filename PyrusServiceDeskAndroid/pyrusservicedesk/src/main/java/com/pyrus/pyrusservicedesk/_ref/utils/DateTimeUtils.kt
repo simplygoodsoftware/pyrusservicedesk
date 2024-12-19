@@ -47,6 +47,14 @@ internal fun Date.getWhen(context: Context, now: Calendar): String {
     }
 }
 
+internal fun getDateText(date: Calendar, now: Calendar): TextProvider = when {
+    date.isSameDay(now) -> R.string.psd_today.textRes()
+    date.isOneDayBefore(now) -> R.string.psd_yesterday.textRes()
+    date.isSameYear(now) -> TextProvider.Date(date.timeInMillis, R.string.psd_date_format_d_m)
+    else -> TextProvider.Date(date.timeInMillis, R.string.psd_date_format_d_m_y)
+}
+
+
 /**
  * Provides localized date in a "how much passed" manner like "1 day ago" of "5 years ago". [from] is used as
  * reference value to calculate the result.

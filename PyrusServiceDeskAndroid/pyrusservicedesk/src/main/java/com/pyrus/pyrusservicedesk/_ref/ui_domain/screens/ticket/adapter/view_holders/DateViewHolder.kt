@@ -7,6 +7,7 @@ import com.pyrus.pyrusservicedesk._ref.ui_domain.screens.ticket.adapter.entries.
 import com.pyrus.pyrusservicedesk._ref.ui_domain.screens.ticket.adapter.new_entries.CommentEntryV2
 import com.pyrus.pyrusservicedesk.presentation.ui.view.recyclerview.ViewHolderBase
 import com.pyrus.pyrusservicedesk._ref.utils.ConfigUtils
+import com.pyrus.pyrusservicedesk._ref.utils.text
 
 internal class DateViewHolder(parent: ViewGroup)
     : ViewHolderBase<CommentEntryV2.Date>(parent, R.layout.psd_view_holder_date) {
@@ -22,6 +23,6 @@ internal class DateViewHolder(parent: ViewGroup)
 
     override fun bindItem(entry: CommentEntryV2.Date) {
         super.bindItem(entry)
-        date.text = entry.date
+        date.text = entry.date.text(date.context)
     }
 }
