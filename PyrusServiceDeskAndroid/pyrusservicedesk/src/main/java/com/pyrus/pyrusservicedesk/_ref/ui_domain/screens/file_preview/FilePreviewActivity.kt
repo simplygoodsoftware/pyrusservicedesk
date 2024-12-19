@@ -315,11 +315,9 @@ internal class FilePreviewActivity: ConnectionActivityBase<FilePreviewViewModel>
         binding.noConnection.reconnectButton.setTextColor(ConfigUtils.getAccentColor(this))
         binding.noConnection.root.setBackgroundColor(ConfigUtils.getNoConnectionBackgroundColor(this))
 
-        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.LOLLIPOP) {
-            window.clearFlags(WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS)
-            window.addFlags(WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS)
-            window.statusBarColor = ConfigUtils.getStatusBarColor(this)?: window.statusBarColor
-        }
+        window.clearFlags(WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS)
+        window.addFlags(WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS)
+        window.statusBarColor = ConfigUtils.getStatusBarColor(this)?: window.statusBarColor
 
         binding.noPreview.setBackgroundColor(ConfigUtils.getNoPreviewBackgroundColor(this))
     }
@@ -344,8 +342,7 @@ internal class FilePreviewActivity: ConnectionActivityBase<FilePreviewViewModel>
             return Intent(
                 PyrusServiceDesk.get().application,
                 FilePreviewActivity::class.java
-            )
-                .putExtra(KEY_FILE_DATA, fileData)
+            ).putExtra(KEY_FILE_DATA, fileData)
         }
     }
 }

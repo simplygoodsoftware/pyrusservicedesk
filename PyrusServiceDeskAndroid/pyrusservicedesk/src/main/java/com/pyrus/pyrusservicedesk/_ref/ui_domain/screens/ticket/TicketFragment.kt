@@ -11,6 +11,7 @@ import android.view.LayoutInflater
 import android.view.MenuItem
 import android.view.View
 import android.view.ViewGroup
+import android.view.WindowInsetsController.APPEARANCE_LIGHT_STATUS_BARS
 import android.view.WindowManager
 import android.widget.Toast
 import androidx.core.content.ContextCompat.getSystemService
@@ -43,8 +44,8 @@ import com.pyrus.pyrusservicedesk.databinding.PsdFragmentTicketBinding
 import com.pyrus.pyrusservicedesk.presentation.ui.navigation_page.ticket.dialogs.attach_files.AttachFileSharedViewModel
 import com.pyrus.pyrusservicedesk.presentation.ui.navigation_page.ticket.dialogs.attach_files.AttachFileVariantsFragment
 import com.pyrus.pyrusservicedesk.presentation.ui.view.recyclerview.item_decorators.GroupVerticalItemDecoration
-import com.pyrus.pyrusservicedesk.presentation.ui.view.recyclerview.item_decorators.SpaceItemDecoration
 import kotlinx.coroutines.flow.map
+
 
 internal class TicketFragment: TeaFragment<Model, TicketView.Event, TicketView.Effect>() {
 
@@ -280,9 +281,9 @@ internal class TicketFragment: TeaFragment<Model, TicketView.Event, TicketView.E
         binding.refresh.setColorSchemeColors(ConfigUtils.getAccentColor(requireContext()))
 
         with(requireActivity().window) {
-           clearFlags(WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS)
-           addFlags(WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS)
-           statusBarColor = ConfigUtils.getStatusBarColor(requireContext()) ?: statusBarColor
+            clearFlags(WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS)
+            addFlags(WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS)
+            statusBarColor = ConfigUtils.getStatusBarColor(requireContext()) ?: statusBarColor
         }
 
     }
