@@ -32,6 +32,7 @@ import com.squareup.picasso.Picasso
 import kotlinx.coroutines.CoroutineScope
 import com.pyrus.pyrusservicedesk._ref.utils.navigation.PyrusRouterImpl
 import com.pyrus.pyrusservicedesk.sdk.repositories.RepositoryMapper
+import com.pyrus.pyrusservicedesk.sdk.web.retrofit.RemoteFileStore
 import okhttp3.OkHttpClient
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
@@ -129,7 +130,9 @@ internal class DiInjector(
 
     private val repositoryMapper = RepositoryMapper(account)
 
-    private val repository: Repository = Repository(localStore, remoteStore, repositoryMapper, fileResolver)
+    private val remoteFileStore = RemoteFileStore(api) // TODO use different api
+
+    private val repository: Repository = Repository(localStore, remoteStore, repositoryMapper, fileResolver, remoteFileStore)
 
     private val preferencesManager = PreferencesManager(preferences)
 

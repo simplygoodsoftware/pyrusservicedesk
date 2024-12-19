@@ -4,6 +4,7 @@ import androidx.annotation.Keep
 import com.pyrus.pyrusservicedesk.PyrusServiceDesk
 import com.pyrus.pyrusservicedesk.PyrusServiceDesk.Companion.API_VERSION_1
 import com.pyrus.pyrusservicedesk.PyrusServiceDesk.Companion.API_VERSION_2
+import com.pyrus.pyrusservicedesk._ref.data.Attachment
 import com.pyrus.pyrusservicedesk.core.StaticRepository
 import com.pyrus.pyrusservicedesk._ref.utils.log.PLog
 import com.pyrus.pyrusservicedesk.sdk.FileResolver
@@ -139,6 +140,23 @@ internal class RemoteStore(
                 null,
                 ConfigUtils.getUserName(),
                 rating,
+                StaticRepository.EXTRA_FIELDS
+            )
+        )
+    }
+
+    suspend fun addAttachComment(attachment: AttachmentDto): Try<AddCommentResponseData> {
+        return api.addFeedComment(
+            AddCommentRequestBody(
+                account.appId,
+                getUserId(),
+                getSecurityKey(),
+                getInstanceId(),
+                getVersion(),
+                null,
+                listOf(attachment),
+                ConfigUtils.getUserName(),
+                null,
                 StaticRepository.EXTRA_FIELDS
             )
         )

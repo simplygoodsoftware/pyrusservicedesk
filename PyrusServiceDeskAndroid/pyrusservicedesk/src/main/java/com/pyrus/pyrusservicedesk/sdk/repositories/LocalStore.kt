@@ -85,6 +85,6 @@ internal class LocalStore(
     private companion object{
         const val PREFERENCE_KEY_OFFLINE_COMMENTS = "PREFERENCE_KEY_OFFLINE_COMMENTS"
         const val MAX_PENDING_COMMENTS_SIZE = 20
-        val commentListTokenType: Type = object : TypeToken<List<CommentDto>>(){}.type
+        val commentListTokenType: Type = object : TypeToken<List<Comment>>(){}.type
     }
 }

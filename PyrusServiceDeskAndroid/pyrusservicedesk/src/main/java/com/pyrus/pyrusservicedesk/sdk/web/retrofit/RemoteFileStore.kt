@@ -1,53 +1,27 @@
 package com.pyrus.pyrusservicedesk.sdk.web.retrofit
 
-import android.net.Uri
 import com.pyrus.pyrusservicedesk._ref.utils.Try
-import com.pyrus.pyrusservicedesk.sdk.FileResolver
 import com.pyrus.pyrusservicedesk.sdk.data.intermediate.FileUploadResponseData
-import com.pyrus.pyrusservicedesk.sdk.web.request_body.UploadFileRequestBody
-import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.flow
+import com.pyrus.pyrusservicedesk.sdk.web.UploadFileHook
+import com.pyrus.pyrusservicedesk.sdk.web.request_body.ProgressRequestBody
+import okhttp3.MultipartBody
 import java.io.File
 
 internal class RemoteFileStore(
     private val api: ServiceDeskApi,
-    private val fileResolver: FileResolver,
-//    private val fileManager: FileManager,
 ) {
 
-    private val sendingAttachment = MutableStateFlow<List<Uri>>(emptyList())
+    suspend fun uploadFile(file: File, cancelHook: UploadFileHook, progressListener: (Int) -> Unit): Try<FileUploadResponseData> {
 
+        val requestBody = ProgressRequestBody(file, cancelHook, progressListener)
 
-    suspend fun uploadFile(file: File): Flow<UploadResult> {
-        TODO()
-        api.uploadFile(file)
+        val filePart = MultipartBody.Part.createFormData(
+            "File",
+            file.name.replace(Regex("[^\\p{ASCII}]"), "_"), // Only ASCII symbols are allowed
+            requestBody
+        )
 
-//        val uploadFileTry = api.uploadFile(
-            UploadFileRequestBody(
-                request.fileUploadRequestData.fileName,
-                request.fileUploadRequestData.fileInputStream,
-                request.uploadFileHooks,
-                coroutineContext
-            ).toMultipartBody()
-//        )
-//
-//        return uploadFileTry
+        return api.uploadFile(filePart)
     }
-
-    fun cancelSending(uri: Uri) {
-
-    }
-
-    sealed interface UploadResult {
-
-        data class Progress(val progress: Int) : UploadResult
-
-        data class Success(val response: FileUploadResponseData) : UploadResult
-
-        data object Failed : UploadResult
-
-    }
-
 
 }

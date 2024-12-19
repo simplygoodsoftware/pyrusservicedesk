@@ -38,7 +38,7 @@ internal class RepositoryMapper(
     )
 
 
-    private fun map(attachmentDto: AttachmentDto): Attachment = Attachment(
+    fun map(attachmentDto: AttachmentDto): Attachment = Attachment(
         id = attachmentDto.id,
         name = attachmentDto.name,
         isImage = attachmentDto.name.isImage(),
@@ -47,6 +47,8 @@ internal class RepositoryMapper(
         isVideo = attachmentDto.isVideo,
         uri =  Uri.parse(RequestUtils.getPreviewUrl(attachmentDto.id, account)),
         status = Status.Completed,
+        progress = null,
+        guid = attachmentDto.guid,
     )
 
     private fun map(authorDto: AuthorDto) = Author(

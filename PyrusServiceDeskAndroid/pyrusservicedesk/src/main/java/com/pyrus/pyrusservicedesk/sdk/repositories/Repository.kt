@@ -1,6 +1,8 @@
 package com.pyrus.pyrusservicedesk.sdk.repositories
 
 import android.net.Uri
+import android.util.Log
+import androidx.core.net.toFile
 import com.pyrus.pyrusservicedesk._ref.data.Attachment
 import com.pyrus.pyrusservicedesk._ref.data.Author
 import com.pyrus.pyrusservicedesk._ref.data.Comment
@@ -12,16 +14,20 @@ import com.pyrus.pyrusservicedesk._ref.utils.isSuccess
 import com.pyrus.pyrusservicedesk._ref.utils.map
 import com.pyrus.pyrusservicedesk.presentation.ui.view.Status
 import com.pyrus.pyrusservicedesk.sdk.FileResolver
+import com.pyrus.pyrusservicedesk.sdk.data.AttachmentDto
 import com.pyrus.pyrusservicedesk.sdk.data.TicketShortDescription
 import com.pyrus.pyrusservicedesk.sdk.data.intermediate.AddCommentResponseData
 import com.pyrus.pyrusservicedesk.sdk.data.intermediate.FileData
+import com.pyrus.pyrusservicedesk.sdk.web.UploadFileHook
 import com.pyrus.pyrusservicedesk.sdk.web.retrofit.RemoteFileStore
 import com.pyrus.pyrusservicedesk.sdk.web.retrofit.RemoteStore
+import com.pyrus.pyrusservicedesk.sdk.web.retrofit.UploadFileResult
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
+import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.atomic.AtomicInteger
 import java.util.concurrent.atomic.AtomicLong
 import kotlin.math.max
@@ -40,6 +46,8 @@ internal class Repository(
 
     private val remoteFeedStateFlow: MutableStateFlow<FullTicket?> = MutableStateFlow(null)
     private val remoteFeedMutex = Mutex()
+
+    private val fileHooks = ConcurrentHashMap<Int, UploadFileHook>()
 
     init {
         val pendingComments = localStore.getPendingFeedComments()
@@ -99,25 +107,59 @@ internal class Repository(
 
     suspend fun addAttachComment(fileUri: Uri) {
         val fileData = fileResolver.getFileData(fileUri) ?: return
-        val comment = createLocalAttachComment(fileData)
+        val localAttachment = createLocalAttachment(fileData)
+        val comment = createLocalAttachComment(localAttachment)
 
         localStore.addPendingFeedComment(comment)
 
-        remoteFileStore.uploadFile()
+        val file = fileData.uri.toFile()
 
-        // TODO sds
-        // upload attachment
-//        remoteStore.upda
-//
-//        val response = remoteStore.addAttachComment()
+        val hook = UploadFileHook()
+        fileHooks[localAttachment.id] = hook
 
-//        if (response.isSuccess()) {
-//            localStore.removePendingComment(comment)
-//            addNewCommentToState(response.value.commentId, comment)
-//        }
-//        else {
-//            localStore.addPendingFeedComment(comment.copy(isSending = false))
-//        }
+        val responseTry = remoteFileStore.uploadFile(file, hook) { progress ->
+            Log.d("SDS", "progress: $progress")
+            val newLocalAttachment = localAttachment.copy(progress = progress)
+            val newLocalComment = comment.copy(attachments = listOf(newLocalAttachment))
+            localStore.addPendingFeedComment(newLocalComment)
+        }
+        Log.d("SDS", "responseTry: $responseTry")
+
+        val newLocalAttachment = if (responseTry.isSuccess()) {
+            localAttachment.copy(
+                guid = responseTry.value.guid,
+                status = Status.Completed,
+                progress = null,
+            )
+        }
+        else {
+            localAttachment.copy(
+                status = Status.Error
+            )
+        }
+        val newLocalComment = comment.copy(attachments = listOf(newLocalAttachment))
+        localStore.addPendingFeedComment(newLocalComment)
+        fileHooks.remove(localAttachment.id)
+
+        val guid = newLocalAttachment.guid ?: return
+
+        val attachmentDto = AttachmentDto(
+            guid = guid,
+            name = newLocalAttachment.name,
+            bytesSize = newLocalAttachment.bytesSize,
+            isText = newLocalAttachment.isText,
+            isVideo = newLocalAttachment.isVideo,
+        )
+
+        val response = remoteStore.addAttachComment(attachmentDto)
+
+        if (response.isSuccess()) {
+            localStore.removePendingComment(comment)
+            addNewCommentToState(response.value, comment)
+        }
+        else {
+            localStore.addPendingFeedComment(comment.copy(isSending = false))
+        }
     }
 
     suspend fun addRatingComment(rating: Int) {
@@ -159,7 +201,12 @@ internal class Repository(
 
     private suspend fun addNewCommentToState(response: AddCommentResponseData, localComment: Comment) {
         remoteFeedMutex.withLock {
-            val remoteComment = localComment.copy(id = response.commentId, isLocal = false, isSending = false)
+            val remoteComment = localComment.copy(
+                id = response.commentId,
+                isLocal = false,
+                isSending = false,
+                attachments = response.sentAttachments?.map(repositoryMapper::map)
+            )
             val ticket = remoteFeedStateFlow.value ?: FullTicket(emptyList(), false, null)
             remoteFeedStateFlow.value = ticket.copy(comments = ticket.comments + remoteComment)
         }
@@ -200,11 +247,11 @@ internal class Repository(
         isSending = true
     )
 
-    private fun createLocalAttachComment(fileData: FileData): Comment = Comment(
+    private fun createLocalAttachComment(attachment: Attachment): Comment = Comment(
         id = createLocalCommentId(),
         body = null,
         isInbound = true,
-        attachments = listOf(createLocalAttachment(fileData)),
+        attachments = listOf(attachment),
         creationTime = System.currentTimeMillis(),
         author = Author(ConfigUtils.getUserName(), null, "#fffffff"),
         rating = null,
@@ -221,6 +268,8 @@ internal class Repository(
         isVideo = false,
         uri = fileData.uri,
         status = Status.Processing,
+        progress = null,
+        guid = null,
     )
 
 }

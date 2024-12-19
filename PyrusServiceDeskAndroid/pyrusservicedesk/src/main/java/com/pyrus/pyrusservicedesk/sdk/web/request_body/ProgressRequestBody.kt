@@ -1,5 +1,6 @@
 package com.pyrus.pyrusservicedesk.sdk.web.request_body
 
+import com.pyrus.pyrusservicedesk.sdk.web.UploadFileHook
 import okhttp3.MediaType
 import okhttp3.RequestBody
 import okio.BufferedSink
@@ -7,8 +8,9 @@ import java.io.File
 import java.io.FileInputStream
 import java.io.IOException
 
-class ProgressRequestBody(
+internal class ProgressRequestBody(
     private val file: File,
+    private val cancelHook: UploadFileHook,
     private val progressListener: (Int) -> Unit
 ) : RequestBody() {
 
@@ -29,6 +31,7 @@ class ProgressRequestBody(
         FileInputStream(file).use { stream ->
             var read: Int
             while ((stream.read(buffer).also { read = it }) != -1) {
+                if (cancelHook.isCancelled) throw IOException("Upload file canceled")
                 uploaded += read.toLong()
                 sink.write(buffer, 0, read)
                 val progress = (uploaded.toDouble() / fileLength * 100).toInt()
