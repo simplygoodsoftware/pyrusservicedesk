@@ -87,8 +87,12 @@ internal class Repository(
     /**
      * Provides available tickets.
      */
-    suspend fun getTickets(): Try<List<TicketShortDescription>> {
+    suspend fun getTickets(): Try<List<Ticket>> {
         return remoteStore.getTickets()
+    }
+
+    suspend fun getAllData(): Try<Tickets> {
+        return remoteStore.getAllData()
     }
 
     suspend fun addTextComment(textBody: String) {

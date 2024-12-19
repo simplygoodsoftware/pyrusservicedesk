@@ -8,6 +8,8 @@ import com.github.terrakok.cicerone.Cicerone
 import com.github.terrakok.cicerone.NavigatorHolder
 import com.google.gson.GsonBuilder
 import com.pyrus.pyrusservicedesk._ref.ui_domain.screens.ticket.TicketFeatureFactory
+import com.pyrus.pyrusservicedesk._ref.ui_domain.screens.tickets_list.tickets.TicketsFeatureFactory
+import com.pyrus.pyrusservicedesk._ref.ui_domain.screens.tickets_list.ticketsList.TicketsListFeatureFactory
 import com.pyrus.pyrusservicedesk.sdk.FileResolver
 import com.pyrus.pyrusservicedesk.sdk.data.FileManager
 import com.pyrus.pyrusservicedesk.sdk.data.gson.RemoteGsonExclusionStrategy
@@ -140,18 +142,32 @@ internal class DiInjector(
 
     private val draftRepository = DraftRepository(preferences)
 
-    fun ticketFeatureFactory(welcomeMessage: String): TicketFeatureFactory {
+    private val syncRepository = SyncRepository(retrofit)
+
+    fun ticketFeatureFactory(welcomeMessage: String, userId: String, ticketId: Int): TicketFeatureFactory {
         return TicketFeatureFactory(
             storeFactory = storeFactory,
             repository = repository,
             draftRepository = draftRepository,
             welcomeMessage = welcomeMessage,
             router = router,
-            fileManager = fileManager
+            fileManager = fileManager,
+            userId = userId,
+            ticketId = ticketId
         )
     }
 
+    fun ticketsFeatureFactory(): TicketsFeatureFactory {
+        return TicketsFeatureFactory(storeFactory, repository)
+    }
+
+    fun ticketsListFeatureFactory(appId: String): TicketsListFeatureFactory {
+        return TicketsListFeatureFactory(storeFactory, syncRepository, appId)
+    }
+
     private val cicerone: Cicerone<PyrusRouterImpl> = Cicerone.create(PyrusRouterImpl())
+
+    val localDataProvider = LocalDataProvider(localStore, fileResolver)
 
     val router = cicerone.router
 

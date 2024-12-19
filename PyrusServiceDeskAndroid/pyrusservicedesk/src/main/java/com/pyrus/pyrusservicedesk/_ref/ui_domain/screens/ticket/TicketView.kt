@@ -35,6 +35,8 @@ internal interface TicketView {
 
         data object OnCloseClick : Event
 
+        data object OnBackClick : Event
+
         data class OnMessageChanged(val text: String) : Event
 
         data class OnAttachmentSelected(val fileUri: Uri?) : Event

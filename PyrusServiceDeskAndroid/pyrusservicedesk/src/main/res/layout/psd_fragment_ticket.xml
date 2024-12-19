@@ -12,22 +12,41 @@
     <androidx.appcompat.widget.Toolbar
         android:id="@+id/ticket_toolbar"
         android:layout_width="0dp"
-        android:layout_height="wrap_content"
+        android:layout_height="52sp"
+        android:paddingHorizontal="21dp"
         style="?attr/actionBarStyle"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
         app:titleTextAppearance="@style/PsdToolbarTitleTextAppearance">
 
+        <ImageButton
+            android:id="@+id/toolbar_back"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:background="@drawable/ic_back_24"/>
+
         <TextView
             android:id="@+id/toolbar_title"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:textSize="@dimen/psd_toolbar_title_text_size"
+            android:layout_marginHorizontal="18dp"
+            android:maxLines="1"
+            android:ellipsize="end"
+            android:textSize="@dimen/psd_text_20"
             android:textStyle="bold"
-            tools:text="Toolbar Title" />
+            android:layout_gravity="center"
+            android:textColor="@color/psd_text_color_primary"
+            tools:text="Toolbar Title Toolbar Title Toolbar Title" />
 
     </androidx.appcompat.widget.Toolbar>
+
+    <View
+        android:id="@+id/view"
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:background="@color/color_blue_gray_300"
+        app:layout_constraintTop_toBottomOf="@+id/ticket_toolbar" />
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/ticket_content"

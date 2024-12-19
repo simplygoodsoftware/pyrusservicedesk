@@ -8,6 +8,7 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.recyclerview.widget.DiffUtil
 import com.pyrus.pyrusservicedesk.PyrusServiceDesk
+import com.pyrus.pyrusservicedesk._ref.ui_domain.screens.ticket.adapter.entries.ButtonsEntry
 import com.pyrus.pyrusservicedesk._ref.ui_domain.screens.ticket.adapter.entries.CommentEntry
 import com.pyrus.pyrusservicedesk._ref.ui_domain.screens.ticket.adapter.entries.DateEntry
 import com.pyrus.pyrusservicedesk._ref.ui_domain.screens.ticket.adapter.entries.RatingEntry
@@ -17,19 +18,21 @@ import com.pyrus.pyrusservicedesk._ref.ui_domain.screens.ticket.adapter.entries.
 import com.pyrus.pyrusservicedesk._ref.utils.log.PLog
 import com.pyrus.pyrusservicedesk.presentation.ui.view.recyclerview.DiffResultWithNewItems
 import com.pyrus.pyrusservicedesk.presentation.viewmodel.ConnectionViewModelBase
-import com.pyrus.pyrusservicedesk.sdk.data.AttachmentDto
-import com.pyrus.pyrusservicedesk.sdk.data.AuthorDto
-import com.pyrus.pyrusservicedesk.sdk.data.CommentDto
-import com.pyrus.pyrusservicedesk.sdk.data.intermediate.CommentsDto
+import com.pyrus.pyrusservicedesk.sdk.data.Attachment
+import com.pyrus.pyrusservicedesk.sdk.data.Author
+import com.pyrus.pyrusservicedesk.sdk.data.Comment
+import com.pyrus.pyrusservicedesk.sdk.data.intermediate.Comments
 import com.pyrus.pyrusservicedesk.sdk.response.PendingDataError
 import com.pyrus.pyrusservicedesk.sdk.updates.OnUnreadTicketCountChangedSubscriber
 import com.pyrus.pyrusservicedesk.sdk.updates.PreferencesManager
-import com.pyrus.pyrusservicedesk.sdk.web.UploadFileHook
+import com.pyrus.pyrusservicedesk.sdk.web.OnCancelListener
+import com.pyrus.pyrusservicedesk.sdk.web.UploadFileHooks
 import com.pyrus.pyrusservicedesk._ref.utils.ConfigUtils
 import com.pyrus.pyrusservicedesk._ref.utils.MILLISECONDS_IN_MINUTE
 import com.pyrus.pyrusservicedesk._ref.utils.MILLISECONDS_IN_SECOND
 import com.pyrus.pyrusservicedesk._ref.utils.RequestUtils.Companion.MAX_FILE_SIZE_BYTES
 import com.pyrus.pyrusservicedesk._ref.utils.getWhen
+import com.pyrus.pyrusservicedesk.core.ServiceDeskCore
 import kotlinx.coroutines.*
 import java.lang.Runnable
 import java.util.*
@@ -49,10 +52,10 @@ internal class TicketViewModel(
 
         private const val BUTTON_PATTERN = "<button>(.*?)</button>"
 
-        fun CommentDto.hasAttachmentWithExceededSize(): Boolean =
+        fun Comment.hasAttachmentWithExceededSize(): Boolean =
             attachments?.let { it.any { attach -> attach.hasExceededFileSize() } } ?: false
 
-        fun AttachmentDto.hasExceededFileSize(): Boolean = bytesSize > MAX_FILE_SIZE_BYTES
+        fun Attachment.hasExceededFileSize(): Boolean = bytesSize > MAX_FILE_SIZE_BYTES
     }
 
     /**
@@ -171,7 +174,7 @@ internal class TicketViewModel(
     fun onPendingCommentRetried() {
         pendingCommentUnderAction?.let { comment ->
             applyCommentUpdate(comment, ChangeType.Cancelled)
-            sendAddComment(comment.comment, comment.uploadFileHook.also { it?.resetProgress() })
+            sendAddComment(comment.comment, comment.uploadFileHooks.also { it?.resetProgress() })
         }
         pendingCommentUnderAction = null
     }
@@ -224,7 +227,7 @@ internal class TicketViewModel(
         mainHandler.post(updateRunnable)
     }
 
-    private fun List<CommentDto>.toTicketEntries(): MutableList<TicketEntry> {
+    private fun List<Comment>.toTicketEntries(): MutableList<TicketEntry> {
         val now = Calendar.getInstance()
         var prevDateGroup: String? = null
         return foldIndexed(ArrayList(size)) { index, acc, comment ->
@@ -242,32 +245,34 @@ internal class TicketViewModel(
     }
 
     private fun sendAddComment(
-        localComment: CommentDto,
-        uploadHooks: UploadFileHook? = null
+        localComment: Comment,
+        uploadHooks: UploadFileHooks? = null
     ) {
 
         if (commentContainsError(localComment)) {
             return
         }
 
-        val uploadFileHook: UploadFileHook?
+        val uploadFileHooks: UploadFileHooks?
         if (uploadHooks != null) {
-            uploadFileHook = uploadHooks
+            uploadFileHooks = uploadHooks
         }
         else if (!localComment.hasAttachments()) {
-            uploadFileHook = null
+            uploadFileHooks = null
         }
         else {
-            uploadFileHook = UploadFileHook()
-            uploadFileHook.setCancelListener {
-                applyCommentUpdate(
-                    CommentEntry(localComment), ChangeType.Cancelled
-                )
-            }
+            uploadFileHooks = UploadFileHooks()
+            uploadFileHooks.subscribeOnCancel(object : OnCancelListener {
+                override fun onCancel() {
+                    return applyCommentUpdate(
+                        CommentEntry(localComment), ChangeType.Cancelled
+                    )
+                }
+            })
         }
 
         applyCommentUpdate(
-            CommentEntry(localComment, uploadFileHook = uploadFileHook),
+            CommentEntry(localComment, uploadFileHooks = uploadFileHooks),
             ChangeType.Added
         )
 //        AddFeedCommentCall(this, requests, localComment, uploadFileHooks)
@@ -275,6 +280,7 @@ internal class TicketViewModel(
 //            .observeForever(AddCommentObserver(uploadFileHooks, localComment))
 
         val lastActiveTime = System.currentTimeMillis()
+        PLog.d(TAG, "sendAddComment, lastActiveTime: $lastActiveTime, commentLocalId: ${localComment.localId}")
         PyrusServiceDesk.startTicketsUpdatesIfNeeded(lastActiveTime)
         updateFeedIntervalIfNeeded()
     }
@@ -285,7 +291,7 @@ internal class TicketViewModel(
         } != null
     }
 
-    private fun commentContainsError(localComment: CommentDto): Boolean {
+    private fun commentContainsError(localComment: Comment): Boolean {
         val commentError = when{
 //            localDataVerifier.isLocalCommentEmpty(localComment) -> CheckCommentError.CommentIsEmpty
             localComment.hasAttachmentWithExceededSize() -> CheckCommentError.FileSizeExceeded
@@ -308,7 +314,7 @@ internal class TicketViewModel(
         return false
     }
 
-    private fun applyTicketUpdate(freshList: CommentsDto, arePendingComments: Boolean) {
+    private fun applyTicketUpdate(freshList: Comments, arePendingComments: Boolean) {
 //        liveUpdates.onReadComments()
         if (!arePendingComments && !needUpdateCommentsList(freshList.comments)) {
             onDataLoaded()
@@ -327,15 +333,16 @@ internal class TicketViewModel(
             }
         }
         val toPublish = mutableListOf<TicketEntry>().apply {
-            val freshComments = ArrayList<CommentDto>()
+            val freshComments = ArrayList<Comment>()
             val welcomeMessage = ConfigUtils.getWelcomeMessage()
             if (welcomeMessage != null) {
                 val firstComment = freshList.comments.firstOrNull()
                 val welcomeCommentDate = firstComment?.creationDate ?: Date().apply { time = System.currentTimeMillis() }
-                val welcomeComment = CommentDto(
+                val welcomeComment = Comment(
                     body = welcomeMessage,
                     creationDate = welcomeCommentDate,
-                    author = AuthorDto("", null, "#fffffff"),
+                    author = Author(ConfigUtils.getUserName(), "10"), //TODO
+//                    isWelcomeMessage = true,
                 )
                 freshComments += welcomeComment
             }
@@ -359,7 +366,7 @@ internal class TicketViewModel(
             onDataLoaded()
     }
 
-    private fun needUpdateCommentsList(freshList: List<CommentDto>): Boolean {
+    private fun needUpdateCommentsList(freshList: List<Comment>): Boolean {
         if (userId != PyrusServiceDesk.get().userId) {
             userId = PyrusServiceDesk.get().userId
             return true
@@ -451,12 +458,11 @@ internal class TicketViewModel(
     }
 
     private fun List<TicketEntry>.findIndex(commentEntry: CommentEntry): Int {
-//        return findLast {
-//            (it.type == Type.Comment) && (it as CommentEntry).comment.localId == commentEntry.comment.localId
-//        }?.let {
-//            indexOf(it)
-//        } ?: -1
-        return -1
+        return findLast {
+            (it.type == Type.Comment) && (it as CommentEntry).comment.localId == commentEntry.comment.localId
+        }?.let {
+            indexOf(it)
+        } ?: -1
     }
 
     // buttons are displayed in other entries, so if comment contains nothing but buttons we don't need it
@@ -479,10 +485,10 @@ internal class TicketViewModel(
             return newEntries
         }
 
-//        val buttons = HtmlTagUtils.extractButtons(commentWithButtons.comment)
-//        if (buttons.isEmpty()) {
-//            return newEntries
-//        }
+        val buttons = HtmlTagUtils.extractButtons(commentWithButtons.comment)
+        if (buttons.isEmpty()) {
+            return newEntries
+        }
 
         return newEntries
     }
@@ -509,7 +515,7 @@ internal class TicketViewModel(
 //        )
     }
 
-    private fun CommentDto.splitToEntries(): Collection<TicketEntry> {
+    private fun Comment.splitToEntries(): Collection<TicketEntry> {
         val pendingError = when{
             isLocal() -> PendingDataError()
             else -> null
@@ -521,14 +527,14 @@ internal class TicketViewModel(
         if (commentBody.isNotBlank()) {
             result.add(
                 CommentEntry(
-                    CommentDto(
+                    Comment(
                         this.commentId,
                         commentBody,
                         this.isInbound,
                         null,
                         this.creationDate,
                         this.author,
-//                        this.localId
+                        this.localId
                     ),
                     error = pendingError
                 )
@@ -537,14 +543,14 @@ internal class TicketViewModel(
         return this.attachments!!.fold(result) { entriesList, attachment ->
             entriesList.add(
                 CommentEntry(
-                    CommentDto(
+                    Comment(
                         this.commentId,
                         this.body,
                         this.isInbound,
                         listOf(attachment),
                         this.creationDate,
                         this.author,
-//                        this.localId
+                        this.localId
                     ),
                     error = pendingError
                 )

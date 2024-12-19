@@ -1,5 +1,7 @@
 package com.pyrus.pyrusservicedesk._ref.ui_domain.screens.ticket
 
+import com.pyrus.pyrusservicedesk.PyrusServiceDesk
+import com.pyrus.pyrusservicedesk.PyrusServiceDesk.Companion.users
 import com.pyrus.pyrusservicedesk.R
 import com.pyrus.pyrusservicedesk._ref.Screens
 import com.pyrus.pyrusservicedesk._ref.data.FullTicket
@@ -23,6 +25,7 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.map
 import java.lang.Exception
+import java.util.UUID
 
 internal class TicketFeatureFactory(
     private val storeFactory: StoreFactory,
@@ -31,6 +34,8 @@ internal class TicketFeatureFactory(
     private val welcomeMessage: String,
     private val router: PyrusRouter,
     private val fileManager: FileManager,
+    private val userId: String,
+    private val ticketId: Int,
 ) {
 
     fun create(): TicketFeature = storeFactory.create(
@@ -41,7 +46,7 @@ internal class TicketFeatureFactory(
         initialEffects = listOf(
             Effect.Inner.FeedFlow,
             Effect.Inner.CommentsAutoUpdate,
-            Effect.Inner.UpdateComments,
+            Effect.Inner.UpdateComments(ticketId),
         ),
     ).adapt { it as? Effect.Outer }
 
@@ -86,11 +91,11 @@ private class FeatureReducer: Logic<State, Message, Effect>() {
                 if (state !is State.Content) return
                 effects { +Effect.Inner.RetryAddComment(message.id) }
             }
-            Message.Outer.OnSendClick -> {
+            is Message.Outer.OnSendClick -> {
                 val currentState = state as? State.Content ?: return
                 val comment = currentState.inputText
                 if (comment.isBlank()) return
-                effects { +Effect.Inner.SendTextComment(comment) }
+                effects { +Effect.Inner.SendTextComment(comment, currentState.ticketId, currentState.appId, currentState.userId) }
             }
             Message.Outer.OnShowAttachVariantsClick -> {
                 if(state !is State.Content) return
@@ -121,7 +126,10 @@ private class FeatureReducer: Logic<State, Message, Effect>() {
                 when(val currentState = state) {
                     is State.Content -> state { currentState.copy(
                         ticket = message.ticket,
-                        isLoading = false
+                        isLoading = false,
+                        appId = users.find { it.userId == message.ticket?.userId }?.appId ?: "",
+                        userId = message.ticket?.userId ?: "",
+                        ticketId = message.ticket?.ticketId ?: 0
                     ) }
                     State.Error,
                     State.Loading -> state { State.Content(
@@ -130,6 +138,10 @@ private class FeatureReducer: Logic<State, Message, Effect>() {
                         inputText = message.draft,
                         welcomeMessage = message.welcomeMessage,
                         isLoading = false,
+                        appId = users.find { it.userId == message.ticket?.userId }?.appId ?: "",
+                        userId = message.ticket?.userId ?: "",
+                        ticketId = message.ticket?.ticketId ?: 0
+
                     ) }
                 }
             }
@@ -154,7 +166,8 @@ internal class TicketActor(
         Effect.Inner.UpdateComments -> singleFlow {
             val commentsTry: Try<FullTicket> = repository.getFeed(
                 keepUnread = false,
-                includePendingComments = true
+                includePendingComments = true,
+                ticketId = effect.ticketId
             )
             when {
                 commentsTry.isSuccess() -> Message.Inner.UpdateCommentsCompleted(
@@ -185,6 +198,31 @@ internal class TicketActor(
         is Effect.Inner.RetryAddComment -> flow { repository.retryAddComment(effect.id) }
         is Effect.Inner.OpenPreview -> flow { router.navigateTo(Screens.ImageScreen()) }
         is Effect.Inner.SaveDraft -> flow { draftRepository.saveDraft(effect.draft) }
+    }
+
+    private fun getUUID(): String {
+        val uuid: UUID = UUID.randomUUID()
+        return uuid.toString()
+    }
+
+    fun getSendTextCommentCommands(text: String, appId: String, userId: String, ticketId: Int): List<Command> {
+        val localCreateComment = CreateComment(
+            comment = text,
+            requestNewTicket = ticketId == 0,
+            userId = userId,
+            appId = appId,
+            ticketId = ticketId,
+            attachments = emptyList(),
+        )
+        val localTicketIsRead = MarkTicketAsRead(
+            ticketId = ticketId.toString(),//TODO check why String
+            userId = userId,
+            appId = appId
+        )
+        val list = listOf(
+            Command(getUUID(), TicketCommandType.CreateComment, appId, userId,  localCreateComment),
+            Command(getUUID(), TicketCommandType.MarkTicketAsRead, appId, userId,  localTicketIsRead))
+        return list
     }
 
 }
