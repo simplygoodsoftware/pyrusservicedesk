@@ -8,10 +8,12 @@
 
     <!-- THEME -->
     <dimen name="psd_theme_text_size_default">14sp</dimen>
+    <dimen name="psd_text_20">20sp</dimen>
 
     <dimen name="psd_toolbar_title_text_size">18sp</dimen>
 
     <dimen name="psd_recyclerview_item_height_default">56dp</dimen>
+    <dimen name="psd_toolbar_height">52sp</dimen>
 
     <dimen name="psd_comment_radius">8dp</dimen>
 

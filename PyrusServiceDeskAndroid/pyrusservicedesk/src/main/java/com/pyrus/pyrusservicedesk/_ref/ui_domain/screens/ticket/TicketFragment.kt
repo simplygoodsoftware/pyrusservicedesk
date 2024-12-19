@@ -7,6 +7,8 @@ import android.os.Build
 import android.os.Bundle
 import android.text.Editable
 import android.text.TextWatcher
+import android.util.Log
+import android.view.Display.Mode
 import android.view.LayoutInflater
 import android.view.MenuItem
 import android.view.View
@@ -145,7 +147,9 @@ internal class TicketFragment: TeaFragment<Model, TicketView.Event, TicketView.E
     }
 
     private fun bindFeature() {
-        val feature = getStore { injector().ticketFeatureFactory("welcome").create() }
+        val userId = arguments?.getString(KEY_USER_ID) ?: KEY_DEFAULT_USER_ID
+        val ticketId = arguments?.getInt(KEY_TICKET_ID) ?: KEY_DEFAULT_TICKET_ID
+        val feature = getStore { injector().ticketFeatureFactory("welcome", userId, ticketId).create() }
         bind(BinderLifecycleMode.CREATE_DESTROY) {
             this@TicketFragment.messages.map(TicketMapper::map) bindTo feature
         }
@@ -162,6 +166,7 @@ internal class TicketFragment: TeaFragment<Model, TicketView.Event, TicketView.E
         binding.attach.setOnClickListener { dispatch(TicketView.Event.OnShowAttachVariantsClick) }
         binding.input.addTextChangedListener(inputTextWatcher)
         binding.refresh.setOnRefreshListener { dispatch(TicketView.Event.OnRefresh) }
+        binding.toolbarBack.setOnClickListener { dispatch(TicketView.Event.OnCloseClick) }
     }
 
     private fun initUi() {
@@ -297,9 +302,19 @@ internal class TicketFragment: TeaFragment<Model, TicketView.Event, TicketView.E
 
     companion object {
         private const val STATE_KEYBOARD_SHOWN = "STATE_KEYBOARD_SHOWN"
+        private const val KEY_TICKET_ID = "KEY_TICKET_ID"
+        private const val KEY_USER_ID = "KEY_USER_ID"
+        const val KEY_DEFAULT_USER_ID = "0"
+        const val KEY_DEFAULT_TICKET_ID = 0
 
-        fun newInstance(): TicketFragment {
-            return TicketFragment()
+        fun newInstance(ticketId: Int, userId: String): TicketFragment {
+            val fragment = TicketFragment()
+            val args = Bundle().apply {
+                putString(KEY_USER_ID, userId)
+                putInt(KEY_TICKET_ID, ticketId)
+            }
+            fragment.arguments = args
+            return fragment
         }
     }
 

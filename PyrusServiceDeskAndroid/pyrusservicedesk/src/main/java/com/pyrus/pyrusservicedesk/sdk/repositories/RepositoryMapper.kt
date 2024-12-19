@@ -13,6 +13,9 @@ import com.pyrus.pyrusservicedesk.presentation.ui.view.Status
 import com.pyrus.pyrusservicedesk.sdk.data.AttachmentDto
 import com.pyrus.pyrusservicedesk.sdk.data.AuthorDto
 import com.pyrus.pyrusservicedesk.sdk.data.CommentDto
+import com.pyrus.pyrusservicedesk.sdk.data.Ticket
+import com.pyrus.pyrusservicedesk.sdk.data.TicketCommandResult
+import com.pyrus.pyrusservicedesk.sdk.data.intermediate.AddCommentResponseData
 import com.pyrus.pyrusservicedesk.sdk.data.intermediate.CommentsDto
 
 internal class RepositoryMapper(
@@ -23,7 +26,27 @@ internal class RepositoryMapper(
         comments = commentsDto.comments.map(::map),
         showRating = commentsDto.showRating,
         showRatingText = commentsDto.showRatingText,
+        userId = TODO(),
+        ticketId = TODO(),
     )
+
+    fun map(ticket: Ticket?): FullTicket {
+        return FullTicket(
+            comments = ticket?.comments?.map(::map) ?: emptyList(),
+            showRating = ticket?.showRating ?: false,
+            showRatingText = ticket?.showRatingText,
+            userId = ticket?.userId,
+            ticketId = ticket?.ticketId,
+        )
+    }
+
+    fun map(commandResult: TicketCommandResult): AddCommentResponseData {
+        return AddCommentResponseData(
+            commentId = commandResult.commentId,
+            attachmentIds = TODO(),
+            sentAttachments = TODO()
+        )
+    }
 
     private fun map(commentDto: CommentDto): Comment = Comment(
         id = commentDto.commentId,
@@ -53,6 +76,7 @@ internal class RepositoryMapper(
 
     private fun map(authorDto: AuthorDto) = Author(
         name = authorDto.name,
+        authorId = authorDto.authorId,
         avatarUrl = when (authorDto.avatarId) {
             null,
             0 -> null
