@@ -179,7 +179,7 @@ internal class Repository(
     suspend fun retryAddComment(localId: Long) {
         val localComment = localStore.getComment(localId) ?: return
         when {
-            !localComment.attachments.isNullOrEmpty() -> TODO()
+            !localComment.attachments.isNullOrEmpty() -> addAttachComment(localComment.attachments.first().uri)
             !localComment.body.isNullOrBlank() -> addTextComment(localComment.body)
             localComment.rating != null -> addRatingComment(localComment.rating)
             else -> localStore.removePendingComment(localComment)
@@ -206,7 +206,7 @@ internal class Repository(
         val localAttachments = localComment.attachments ?: emptyList()
         if (attachmentIds.size == localAttachments.size) {
             for (i in localAttachments.indices) {
-                newAttachments += localAttachments[i].copy(id = attachmentIds[i])
+                newAttachments += localAttachments[i].copy(id = attachmentIds[i], status = Status.Completed)
             }
         }
 
