@@ -142,7 +142,7 @@ class PSDChatTableView: PSDTableView {
     
     func addRow(at index: Int, lastIndexPath: IndexPath, insertSections: Bool, scrollsToBottom: Bool) {
         
-            UIView.animate(withDuration: 0.0, delay: 0, usingSpringWithDamping: 0.0, initialSpringVelocity: 0.0, options: [], animations: {
+//            UIView.animate(withDuration: 0.0, delay: 0, usingSpringWithDamping: 0.0, initialSpringVelocity: 0.0, options: [], animations: {
                 if #available(iOS 13.0, *) {
                     self.reloadWithDiffableDataSource(animated: true) {
                         if scrollsToBottom {
@@ -164,11 +164,11 @@ class PSDChatTableView: PSDTableView {
                         }
                     }
                 }
-            }, completion: { complete in
-                if scrollsToBottom {
-                    self.scrollsToBottom(animated: true)
-                }
-            })
+//            }, completion: { complete in
+//                if scrollsToBottom {
+//                    self.scrollsToBottom(animated: true)
+//                }
+//            })
 //        }
         
     }
@@ -303,22 +303,24 @@ class PSDChatTableView: PSDTableView {
         
     ///Scroll tableview to its bottom position without animation
     func scrollsToBottom(animated: Bool) {
-        layoutIfNeeded()
-        let lastRow = lastIndexPath()
-        let hasFooter = tableFooterView?.frame.size.height ?? 0 > 0
-        if
-            lastRow.row >= 0 || lastRow.section >= 0,
-            !(lastRow.row == 0 && lastRow.section == 0)
-        {
-            scrollToRow(at: lastRow, at: .bottom, animated: !hasFooter && animated)
-        }
-        if
-            let tableFooterView = tableFooterView,
-            hasFooter
-        {
-            let frameFooter = tableFooterView.frame
-            scrollRectToVisible(frameFooter, animated: animated)
-        }
+        scrollToRow(at: IndexPath(row: 0, section: 0), at: .bottom, animated: true)
+
+//        layoutIfNeeded()
+//        let lastRow = lastIndexPath()
+//        let hasFooter = tableFooterView?.frame.size.height ?? 0 > 0
+//        if
+//            lastRow.row >= 0 || lastRow.section >= 0,
+//            !(lastRow.row == 0 && lastRow.section == 0)
+//        {
+//            scrollToRow(at: lastRow, at: .bottom, animated: !hasFooter && animated)
+//        }
+//        if
+//            let tableFooterView = tableFooterView,
+//            hasFooter
+//        {
+//            let frameFooter = tableFooterView.frame
+//            scrollRectToVisible(frameFooter, animated: animated)
+//        }
     }
     
     func redrawCell(at indexPath: IndexPath, with message: PSDRowMessage) {
@@ -361,12 +363,13 @@ private extension PSDChatTableView {
         else {
             return
         }
-        var snapshot = NSDiffableDataSourceSnapshot<Int, PSDRowMessage>()
+        var snapshot = NSDiffableDataSourceSnapshot<PSDChatSectionModel, PSDRowMessage>()
         snapshot.deleteAllItems()
         
         for (section, sectionData) in tableMatrix.enumerated() {
-            snapshot.appendSections([section])
-            snapshot.appendItems(sectionData, toSection: section)
+            let newSection = PSDChatSectionModel(title: tableMatrix.date(of: section)?.asString() ?? "")
+            snapshot.appendSections([newSection])
+            snapshot.appendItems(sectionData, toSection: newSection)
         }
         dataSource.apply(snapshot, animatingDifferences: animated, completion: completion)
         self.dataSource = dataSource
@@ -378,7 +381,7 @@ private extension PSDChatTableView {
             DispatchQueue.main.asyncAfter(deadline: deadlineTime) {
 //                self.bottomPSDRefreshControl = self.bottomRefresh
                // self.insertSubview(self.bottomRefresh, at: 0)
-                self.insertSubview(self.customRefresh, at: 0)
+//                self.insertSubview(self.customRefresh, at: 0)
             }
         }
     }
@@ -460,7 +463,8 @@ extension PSDChatTableView: UITableViewDelegate, UITableViewDataSource {
         let message: PSDRowMessage
         if tableMatrix.count > indexPath.section && tableMatrix[indexPath.section].count > indexPath.row {
             message = tableMatrix[indexPath.section][indexPath.row]
-        } else {
+        }
+        else {
             message = PSDObjectsCreator.createWelcomeMessage()
         }
         
@@ -476,6 +480,7 @@ extension PSDChatTableView: UITableViewDelegate, UITableViewDataSource {
         PSDPreviewSetter.setPreview(of: message.attachment, in: cell.cloudView.attachmentView, delegate: self, animated: false)
         self.redrawSendingAttachmentCell(at: indexPath, with: message)
         cell.cloudView.messageTextView.linkDelegate = self
+        cell.transform = CGAffineTransform(rotationAngle: CGFloat.pi)
         
         return cell
     }
@@ -484,7 +489,7 @@ extension PSDChatTableView: UITableViewDelegate, UITableViewDataSource {
         heightsMap[indexPath] = cell.frame.size.height
     }
     
-    func tableView(_ tableView: UITableView, viewForHeaderInSection section: Int) -> UIView? {
+    func tableView(_ tableView: UITableView, viewForFooterInSection section: Int) -> UIView? {
         let view = UIView()
         view.frame = CGRect(x: 0, y: 0, width: self.frame.size.width, height: headerHeight)
         let dateLabel = UILabel()
@@ -500,18 +505,19 @@ extension PSDChatTableView: UITableViewDelegate, UITableViewDataSource {
         }
         view.addSubview(dateLabel)
         dateLabel.autoresizingMask = [.flexibleWidth,.flexibleHeight]
+        view.transform = CGAffineTransform(rotationAngle: .pi)
         return view
     }
     
-    func tableView(_ tableView: UITableView, heightForHeaderInSection section: Int) -> CGFloat {
+    func tableView(_ tableView: UITableView, heightForFooterInSection section: Int) -> CGFloat {
         return headerHeight
     }
     
-    func tableView(_ tableView: UITableView, viewForFooterInSection section: Int) -> UIView? {
+    func tableView(_ tableView: UITableView, viewForHeaderInSection section: Int) -> UIView? {
         return UIView.init(frame: CGRect(x: 0, y: 0, width: frame.size.width, height: footerHeight))
     }
     
-    func tableView(_ tableView: UITableView, heightForFooterInSection section: Int) -> CGFloat {
+    func tableView(_ tableView: UITableView, heightForHeaderInSection section: Int) -> CGFloat {
         return footerHeight
     }
     
@@ -537,7 +543,7 @@ extension PSDChatTableView: UITableViewDelegate, UITableViewDataSource {
         let scrollViewHeight = scrollView.frame.size.height
         let contentOffsetY = scrollView.contentOffset.y
         let inset = contentInset.top + contentInset.bottom - 90
-        chatDelegate?.updateScrollButton(isHidden: contentOffsetY + scrollViewHeight - inset >= contentHeight)
+        chatDelegate?.updateScrollButton(isHidden: contentOffset.y <= -adjustedContentInset.top)
     }
     
     func tableView(_ tableView: UITableView, canPerformAction action: Selector, forRowAt indexPath: IndexPath, withSender sender: Any?) -> Bool {

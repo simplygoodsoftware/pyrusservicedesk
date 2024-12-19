@@ -1,10 +1,10 @@
 import Foundation
 
 @available(iOS 13.0, *)
-class KBDiffableDataSource: UITableViewDiffableDataSource<Int, PSDRowMessage> {
+class KBDiffableDataSource: UITableViewDiffableDataSource<PSDChatSectionModel, PSDRowMessage> {
     private weak var cellProvider: UITableViewDataSource?
 
-    static func createDataSource(for table: UITableView, cellCreator: UITableViewDataSource) -> UITableViewDiffableDataSource<Int, PSDRowMessage> {
+    static func createDataSource(for table: UITableView, cellCreator: UITableViewDataSource) -> UITableViewDiffableDataSource<PSDChatSectionModel, PSDRowMessage> {
         let data = KBDiffableDataSource(
             tableView: table,
             cellProvider: {[weak cellCreator]  table, indexPath, _ in
@@ -12,7 +12,7 @@ class KBDiffableDataSource: UITableViewDiffableDataSource<Int, PSDRowMessage> {
             }
         )
         data.cellProvider = cellCreator
-        data.defaultRowAnimation = .fade
+        data.defaultRowAnimation = .top
         return data
     }
 }

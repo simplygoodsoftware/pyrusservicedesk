@@ -25,7 +25,11 @@ class PSDChatInteractor: NSObject {
     private var lastMessageFromServer:PSDMessage?
     private var needShowRating : Bool = false
     private var loadingTimer: Timer?
-    private var chat: PSDChat?
+    private var chat: PSDChat? {
+        didSet {
+           // chat?.messages = chat?.messages.reversed() ?? []
+        }
+    }
     private let reloadInterval = 30.0 //seconds
     private var timer: Timer?
     private var hasNoConnection: Bool = false
@@ -299,7 +303,7 @@ private extension PSDChatInteractor {
         
         if let chat {
             tableMatrix.create(from: chat)
-            presenter.doWork(.updateTableMatrix(matrix: tableMatrix))
+           // presenter.doWork(.updateTableMatrix(matrix: tableMatrix))
             lastMessageFromServer = chat.messages.last
         }
         setLastActivityDate()
@@ -480,7 +484,7 @@ private extension PSDChatInteractor {
         }
         let scrollToBottom = dataForRow.message.owner.personId == PyrusServiceDesk.userId
         
-        presenter.doWork(.updateTableMatrix(matrix: tableMatrix))
+       // presenter.doWork(.updateTableMatrix(matrix: tableMatrix))
         presenter.doWork(.addRow(index: index, lastIndexPath: lastIndexPath(), insertSections: insertSections, scrollsToBottom: scrollToBottom))
     }
     
@@ -549,7 +553,7 @@ extension PSDChatInteractor: PSDMessageSendDelegate {
                     let newSection = lastIndexPath[0].section
                     if self.tableMatrix.count - 1 < newSection {
                         self.tableMatrix.append([PSDRowMessage]())
-                        presenter.doWork(.updateTableMatrix(matrix: tableMatrix))
+                      //  presenter.doWork(.updateTableMatrix(matrix: tableMatrix))
                         presenter.doWork(.insertSections(sections: IndexSet(arrayLiteral: newSection)))
                     }
                 }
@@ -566,7 +570,8 @@ extension PSDChatInteractor: PSDMessageSendDelegate {
                 rowMessage.updateWith(message: message)
 //                tableMatrix[movedIndexPath.section][movedIndexPath.row] = rowMessage
 //                presenter.doWork(.reloadAll)
-                presenter.doWork(.redrawCell(indexPath: movedIndexPath, message: rowMessage))
+                let reversedIndexPath = IndexPath(row: tableMatrix[movedIndexPath.section].count - 1 - movedIndexPath.row, section: tableMatrix.count - 1 - movedIndexPath.section)
+                presenter.doWork(.redrawCell(indexPath: reversedIndexPath, message: rowMessage))
                 presenter.doWork(.reloadAll)
                 if let lastIndexPath = lastIndexPath, lastIndexPath.count > i {
                     let newIndexPath = lastIndexPath[i]
@@ -574,14 +579,14 @@ extension PSDChatInteractor: PSDMessageSendDelegate {
                         movedRows = movedRows + 1
                         self.tableMatrix[movedIndexPath.section].remove(at: movedIndexPath.row)
                         self.tableMatrix[newIndexPath.section].insert(rowMessage, at:newIndexPath.row)
-                        presenter.doWork(.updateTableMatrix(matrix: tableMatrix))
+                       // presenter.doWork(.updateTableMatrix(matrix: tableMatrix))
                         presenter.doWork(.moveRow(movedIndexPath: movedIndexPath, newIndexPath: newIndexPath))
                     }
                 }
             }
             if self.tableMatrix[oldSection].count == 0 {
                 self.tableMatrix.remove(at: oldSection)
-                presenter.doWork(.updateTableMatrix(matrix: tableMatrix))
+             //   presenter.doWork(.updateTableMatrix(matrix: tableMatrix))
                 presenter.doWork(.deleteSections(sections: IndexSet(arrayLiteral: oldSection)))
             }
             self.isRefresh = false
@@ -594,7 +599,7 @@ extension PSDChatInteractor: PSDMessageSendDelegate {
         for indexPath in indexPathsAndRows {
             if tableMatrix.has(indexPath: indexPath){
                 tableMatrix[indexPath.section].remove(at: indexPath.row)
-                presenter.doWork(.updateTableMatrix(matrix: tableMatrix))
+               // presenter.doWork(.updateTableMatrix(matrix: tableMatrix))
                 indexPaths.append( indexPath)
             }
         }

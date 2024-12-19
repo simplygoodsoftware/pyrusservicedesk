@@ -4,6 +4,7 @@ import UIKit
 protocol PSDMessageInputViewDelegate: class {
     func send(_ message:String,_ attachments:[PSDAttachment])
     func sendRate(_ rateValue:Int)
+    func addButtonTapped()
 }
 let DEFAULT_LAYOUT_MARGINS : CGFloat = 8
 let BUTTONS_CORNER_RADIUS : CGFloat = 8
@@ -329,8 +330,9 @@ extension PSDMessageInputView : AttachmentCollectionViewDelegateProtocol{
 }
 extension PSDMessageInputView: AttachmentsAddButtonDelegate{
     func addButtonPressed() {
-        self.becomeFirstResponder()
-        inputTextView.becomeFirstResponder()
+        delegate?.addButtonTapped()
+//        self.becomeFirstResponder()
+//        inputTextView.becomeFirstResponder()
     }
     
     func attachmentChoosed(_ data:Data, _ url:URL?)

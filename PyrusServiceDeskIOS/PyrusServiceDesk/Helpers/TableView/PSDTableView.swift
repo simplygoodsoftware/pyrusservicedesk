@@ -193,12 +193,12 @@ class PSDTableView : UITableView{
     }
     private func changeInset(){
         var oldInset : UIEdgeInsets  = self.contentInset
-        oldInset.top = isLoading ?  REFRESH_CONTROL_HEIGHT : 0.0
+        oldInset.bottom = isLoading ?  REFRESH_CONTROL_HEIGHT : 0.0
         self.contentInset = oldInset
     }
     private static let MAX_LOADER_Y : CGFloat = 160
     private func visibleAreaCenter()->CGFloat{
-        return min(PSDTableView.MAX_LOADER_Y,(self.bounds.size.height - self.contentInset.bottom)/2)
+        return min(PSDTableView.MAX_LOADER_Y,(self.bounds.size.height - self.contentInset.top)/2)
     }
     private func topActivityPosition()->CGFloat{
         return REFRESH_CONTROL_DISTANCE

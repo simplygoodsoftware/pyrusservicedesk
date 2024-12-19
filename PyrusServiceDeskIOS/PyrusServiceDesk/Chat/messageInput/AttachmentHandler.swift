@@ -33,7 +33,7 @@ class AttachmentHandler: NSObject,UIImagePickerControllerDelegate, UINavigationC
         if PyrusServiceDesk.loggingEnabled {
             if logsSendController == nil {
                 logsSendController = LogsSendController()
-                logsSendController?.modalPresentationStyle = .fullScreen
+                logsSendController?.modalPresentationStyle = .overFullScreen
                 logsSendController?.chooserDelegate = self
             }
             actions.append(UIAlertAction(title: logsSendController?.label, style: .default, handler: { (action) -> Void in
@@ -142,7 +142,7 @@ class AttachmentHandler: NSObject,UIImagePickerControllerDelegate, UINavigationC
             if UIImagePickerController.isSourceTypeAvailable(.camera){
                 let cameraController = UIImagePickerController()
                 cameraController.delegate = self
-                cameraController.modalPresentationStyle = .overFullScreen
+                cameraController.modalPresentationStyle = .fullScreen
                 cameraController.sourceType = .camera
                 cameraController.mediaTypes = [kUTTypeImage as String, kUTTypeMovie as String, kUTTypeVideo as String]
                 viewController.present(cameraController, animated: true, completion: nil)

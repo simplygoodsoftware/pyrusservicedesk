@@ -32,7 +32,7 @@ extension PSDChatPresenter: PSDChatPresenterProtocol {
         case .drawTableWithData:
             view?.show(.drawTableWithData)
         case .updateTableMatrix(matrix: let matrix):
-            view?.show(.updateTableMatrix(matrix: matrix))
+            view?.show(.updateTableMatrix(matrix: matrix.reversed().map { $0.reversed() }))
         case .addRow(index: let index, lastIndexPath: let lastIndexPath, insertSections: let insertSections, scrollsToBottom: let scrollsToBottom):
             view?.show(.addRow(index: index, lastIndexPath: lastIndexPath, insertSections: insertSections, scrollsToBottom: scrollsToBottom))
         case .addNewRow:

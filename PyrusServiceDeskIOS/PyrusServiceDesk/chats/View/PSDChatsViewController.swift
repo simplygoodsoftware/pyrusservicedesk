@@ -406,8 +406,8 @@ private extension PSDChatsViewController {
         label.textAlignment = .center
         label.font = CustomizationHelper.systemBoldFont(ofSize: 17)
         label.text = chat.subject?.count ?? 0 > 0 ? chat.subject : "NewTicket".localizedPSD()
-        label.translatesAutoresizingMaskIntoConstraints = false
-        label.widthAnchor.constraint(equalToConstant: 200).isActive = true
+//        label.translatesAutoresizingMaskIntoConstraints = false
+//        label.widthAnchor.constraint(greaterThanOrEqualToConstant: 50).isActive = true
         
         customization?.setChatTitileView(label)
         router?.route(to: .chat(chat: chat, fromPush: fromPush))

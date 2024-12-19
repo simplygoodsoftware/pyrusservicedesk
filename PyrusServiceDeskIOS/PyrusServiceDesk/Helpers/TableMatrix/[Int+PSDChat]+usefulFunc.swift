@@ -126,6 +126,14 @@ extension Array where Element == [PSDRowMessage]{
             self[0].sort(by: { $0.message.date < $1.message.date })
         }
         
+//        if CustomizationHelper.welcomeMessage.count > 0 {
+//            if self.count > 0 {
+//                self[self.count - 1].append(PSDObjectsCreator.createWelcomeMessage())
+//            } else {
+//                self = [[PSDObjectsCreator.createWelcomeMessage()]]
+//            }
+//        }
+        
     }
     ///Detect if need show avatar. If current user is same as next don't show avatar
     func needShowAvatar(at indexPath: IndexPath)->Bool{

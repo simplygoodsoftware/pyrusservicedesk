@@ -17,7 +17,7 @@ extension PSDTableView {
     @objc private func keyboardWillShow(_ notification: NSNotification) {
         if let infoEndKey: NSValue = notification.userInfo?[UIResponder.keyboardFrameEndUserInfoKey] as? NSValue {
             let keyboardEndFrame = infoEndKey.cgRectValue
-            animateInset(keyboardEndFrame.height, notification: notification)
+         //   animateInset(keyboardEndFrame.height, notification: notification)
         }
     }
     private func animateInset(_ keyboardHeight:CGFloat, notification: NSNotification){
@@ -68,4 +68,3 @@ extension PSDTableView {
     
     }
 }
-
