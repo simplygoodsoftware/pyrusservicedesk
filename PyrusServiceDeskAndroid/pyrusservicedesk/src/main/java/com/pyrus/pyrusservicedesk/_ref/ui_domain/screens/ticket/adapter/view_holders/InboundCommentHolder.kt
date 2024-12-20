@@ -1,28 +1,27 @@
 package com.pyrus.pyrusservicedesk._ref.ui_domain.screens.ticket.adapter.view_holders
 
-import android.net.Uri
 import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageView
 import android.widget.TextView
 import com.pyrus.pyrusservicedesk.PyrusServiceDesk
 import com.pyrus.pyrusservicedesk.R
+import com.pyrus.pyrusservicedesk._ref.ui_domain.screens.ticket.TicketView
 import com.pyrus.pyrusservicedesk._ref.ui_domain.screens.ticket.adapter.new_entries.CommentEntryV2
-import com.pyrus.pyrusservicedesk.presentation.ui.view.CommentView
 import com.pyrus.pyrusservicedesk._ref.utils.CIRCLE_TRANSFORMATION
 import com.pyrus.pyrusservicedesk._ref.utils.ConfigUtils
-import com.pyrus.pyrusservicedesk.sdk.data.intermediate.FileData
+import com.pyrus.pyrusservicedesk.presentation.ui.view.CommentView
 
 internal class InboundCommentHolder(
     parent: ViewGroup,
     onErrorCommentEntryClickListener: (id: Long) -> Unit,
-    onFileReadyToPreviewClickListener: (fileData: FileData) -> Unit,
+    onEvent: (event: TicketView.Event) -> Unit,
     onTextCommentLongClicked: (String) -> Unit,
 ) : CommentHolder(
     parent,
     R.layout.psd_view_holder_comment_inbound,
     onErrorCommentEntryClickListener,
-    onFileReadyToPreviewClickListener,
+    onEvent,
     onTextCommentLongClicked
 ) {
 

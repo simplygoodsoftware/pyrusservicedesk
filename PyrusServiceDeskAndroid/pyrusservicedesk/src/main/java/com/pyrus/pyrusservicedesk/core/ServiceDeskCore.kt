@@ -143,6 +143,7 @@ internal class DiInjector(
 
     fun ticketFeatureFactory(welcomeMessage: String): TicketFeatureFactory {
         return TicketFeatureFactory(
+            account = account,
             storeFactory = storeFactory,
             repository = repository,
             draftRepository = draftRepository,

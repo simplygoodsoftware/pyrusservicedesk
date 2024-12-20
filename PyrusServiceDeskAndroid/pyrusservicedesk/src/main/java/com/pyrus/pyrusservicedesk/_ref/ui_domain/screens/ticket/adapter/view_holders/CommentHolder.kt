@@ -3,6 +3,7 @@ package com.pyrus.pyrusservicedesk._ref.ui_domain.screens.ticket.adapter.view_ho
 import android.view.View
 import android.view.ViewGroup
 import androidx.annotation.LayoutRes
+import com.pyrus.pyrusservicedesk._ref.ui_domain.screens.ticket.TicketView
 import com.pyrus.pyrusservicedesk._ref.ui_domain.screens.ticket.adapter.new_entries.CommentEntryV2
 import com.pyrus.pyrusservicedesk._ref.ui_domain.screens.ticket.adapter.new_entries.CommentEntryV2.CommentContent
 import com.pyrus.pyrusservicedesk._ref.utils.text
@@ -16,7 +17,7 @@ internal abstract class CommentHolder(
     parent: ViewGroup,
     @LayoutRes layoutRes: Int,
     private val onErrorCommentEntryClickListener: (id: Long) -> Unit,
-    private val onFileReadyToPreviewClickListener: (fileData: FileData) -> Unit,
+    private val onEvent: (event: TicketView.Event) -> Unit,
     private val onTextCommentLongClicked: (String) -> Unit,
 ) : ViewHolderBase<CommentEntryV2.Comment>(parent, layoutRes) {
 
@@ -30,13 +31,7 @@ internal abstract class CommentHolder(
                 && comment.fileProgressStatus == Status.Completed -> {
                 val content = getItem().content
                 if (content is CommentContent.Image) {
-                    val fileData = FileData(
-                        content.attachmentName,
-                        content.fileSize.toInt(),
-                        content.attachUrl,
-                        false,
-                    )
-                    onFileReadyToPreviewClickListener.invoke(fileData)
+                    onEvent(TicketView.Event.OnPreviewClick(getItem().id, content.attachId))
                 }
 
             }

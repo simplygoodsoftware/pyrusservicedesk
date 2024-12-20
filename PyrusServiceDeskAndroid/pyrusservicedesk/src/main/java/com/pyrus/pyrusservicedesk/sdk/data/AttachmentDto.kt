@@ -27,9 +27,4 @@ internal data class AttachmentDto(
 
     fun isLocal() = id == FILE_ID_EMPTY
 
-    fun getPreviewUrl(account: Account): Uri {
-        val serverUrl = Uri.parse(RequestUtils.getPreviewUrl(id, account))
-        val previewUri = if (isLocal()) localUri else serverUrl
-        return previewUri ?: serverUrl
-    }
 }

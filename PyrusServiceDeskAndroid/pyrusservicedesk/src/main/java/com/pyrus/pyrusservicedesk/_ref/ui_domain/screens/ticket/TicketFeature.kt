@@ -31,7 +31,7 @@ internal interface TicketContract {
 
         sealed interface Outer : Message {
 
-            data class OnPreviewClick(val fileData: FileData) : Outer
+            data class OnPreviewClick(val commentId: Long, val attachmentId: Int) : Outer
 
             data class OnRetryAddCommentClick(val id: Long) : Outer
 
@@ -82,7 +82,7 @@ internal interface TicketContract {
             data class SendRatingComment(val rating: Int) : Inner
             data class SendAttachComment(val uri: Uri) : Inner
             data class RetryAddComment(val id: Long) : Inner
-            data class OpenPreview(val fileData: FileData) : Inner
+            data class OpenPreview(val attachment: Attachment) : Inner
             data class SaveDraft(val draft: String) : Inner
         }
     }

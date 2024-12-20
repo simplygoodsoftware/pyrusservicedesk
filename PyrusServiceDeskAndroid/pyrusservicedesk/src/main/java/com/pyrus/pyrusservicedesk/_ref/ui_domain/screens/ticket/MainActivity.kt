@@ -74,24 +74,6 @@ internal class MainActivity : FragmentActivity() {
         ServiceDeskConfiguration.save(outState)
     }
 
-    // TODO
-//    override fun onCreateOptionsMenu(menu: Menu?): Boolean {
-//        val menuDelegate = ConfigUtils.getMainMenuDelegate()
-//        if (menuDelegate != null && menu != null)
-//            return menuDelegate.onCreateOptionsMenu(menu, this)
-//
-//        return menu?.let{
-//            MenuInflater(this).inflate(R.menu.psd_main_menu, menu)
-//            val closeItem = menu.findItem(R.id.psd_main_menu_close)
-//            closeItem.setShowAsAction(MenuItem.SHOW_AS_ACTION_ALWAYS)
-//            closeItem.icon?.setColorFilter(
-//                ConfigUtils.getToolbarButtonColor(this),
-//                PorterDuff.Mode.SRC_ATOP
-//            )
-//            true
-//        } ?: false
-//    }
-
     override fun finish() {
         super.finish()
         // TODO

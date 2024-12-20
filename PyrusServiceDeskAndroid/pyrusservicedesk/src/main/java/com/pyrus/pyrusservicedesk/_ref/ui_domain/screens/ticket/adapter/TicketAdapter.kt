@@ -6,6 +6,7 @@ import android.view.ViewGroup
 import androidx.recyclerview.widget.ListAdapter
 import com.pyrus.pyrusservicedesk.R
 import com.pyrus.pyrusservicedesk._ref.data.Attachment
+import com.pyrus.pyrusservicedesk._ref.ui_domain.screens.ticket.TicketView
 import com.pyrus.pyrusservicedesk._ref.ui_domain.screens.ticket.adapter.view_holders.ButtonsHolder
 import com.pyrus.pyrusservicedesk._ref.ui_domain.screens.ticket.adapter.view_holders.DateViewHolder
 import com.pyrus.pyrusservicedesk._ref.ui_domain.screens.ticket.adapter.view_holders.InboundCommentHolder
@@ -22,7 +23,7 @@ import com.pyrus.pyrusservicedesk.sdk.data.intermediate.FileData
  */
 internal class TicketAdapter(
     private val onErrorCommentEntryClickListener: (id: Long) -> Unit,
-    private val onFileReadyToPreviewClickListener: (fileData: FileData) -> Unit,
+    private val onEvent: (event: TicketView.Event) -> Unit,
     private val onTextCommentLongClicked: (String) -> Unit,
     private val onRatingClickListener: (Int) -> Unit,
 ): ListAdapter<CommentEntryV2, ViewHolderBase<CommentEntryV2>>(CommentsItemCallback()) {
@@ -42,13 +43,13 @@ internal class TicketAdapter(
             VIEW_TYPE_COMMENT_INBOUND -> InboundCommentHolder(
                 parent,
                 onErrorCommentEntryClickListener,
-                onFileReadyToPreviewClickListener,
+                onEvent,
                 onTextCommentLongClicked,
             )
             VIEW_TYPE_COMMENT_OUTBOUND -> OutboundCommentHolder(
                 parent,
                 onErrorCommentEntryClickListener,
-                onFileReadyToPreviewClickListener,
+                onEvent,
                 onTextCommentLongClicked,
             )
             VIEW_TYPE_WELCOME_MESSAGE -> WelcomeMessageHolder(parent)

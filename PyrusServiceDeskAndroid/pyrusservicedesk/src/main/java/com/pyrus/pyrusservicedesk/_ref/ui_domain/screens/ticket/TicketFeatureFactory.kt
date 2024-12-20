@@ -1,11 +1,13 @@
 package com.pyrus.pyrusservicedesk._ref.ui_domain.screens.ticket
 
+import android.net.Uri
 import com.pyrus.pyrusservicedesk.R
 import com.pyrus.pyrusservicedesk._ref.Screens
 import com.pyrus.pyrusservicedesk._ref.data.FullTicket
 import com.pyrus.pyrusservicedesk._ref.ui_domain.screens.ticket.TicketContract.Effect
 import com.pyrus.pyrusservicedesk._ref.ui_domain.screens.ticket.TicketContract.Message
 import com.pyrus.pyrusservicedesk._ref.ui_domain.screens.ticket.TicketContract.State
+import com.pyrus.pyrusservicedesk._ref.utils.RequestUtils.Companion.getFileUrl
 import com.pyrus.pyrusservicedesk._ref.utils.Try
 import com.pyrus.pyrusservicedesk._ref.utils.isSuccess
 import com.pyrus.pyrusservicedesk._ref.utils.navigation.PyrusRouter
@@ -16,6 +18,7 @@ import com.pyrus.pyrusservicedesk._ref.whitetea.core.StoreFactory
 import com.pyrus.pyrusservicedesk._ref.whitetea.core.adaptCast
 import com.pyrus.pyrusservicedesk._ref.whitetea.core.logic.Logic
 import com.pyrus.pyrusservicedesk._ref.whitetea.utils.adapt
+import com.pyrus.pyrusservicedesk.core.Account
 import com.pyrus.pyrusservicedesk.sdk.data.FileManager
 import com.pyrus.pyrusservicedesk.sdk.data.intermediate.FileData
 import com.pyrus.pyrusservicedesk.sdk.repositories.DraftRepository
@@ -26,6 +29,7 @@ import kotlinx.coroutines.flow.map
 import java.lang.Exception
 
 internal class TicketFeatureFactory(
+    private val account: Account,
     private val storeFactory: StoreFactory,
     private val repository: Repository,
     private val draftRepository: DraftRepository,
@@ -38,7 +42,7 @@ internal class TicketFeatureFactory(
         name = "TicketFeature",
         initialState = State.Loading,
         reducer = FeatureReducer(),
-        actor = TicketActor(repository, router, welcomeMessage, draftRepository, fileManager).adaptCast(),
+        actor = TicketActor(account, repository, router, welcomeMessage, draftRepository, fileManager).adaptCast(),
         initialEffects = listOf(
             Effect.Inner.FeedFlow,
             Effect.Inner.CommentsAutoUpdate,
@@ -78,7 +82,14 @@ private class FeatureReducer: Logic<State, Message, Effect>() {
                 state { currentState.copy(inputText = message.text) }
                 effects { +Effect.Inner.SaveDraft(message.text) }
             }
-            is Message.Outer.OnPreviewClick -> effects { +Effect.Inner.OpenPreview(message.fileData) }
+            is Message.Outer.OnPreviewClick -> {
+                val currentState = state as? State.Content ?: return
+                val attach = currentState.ticket?.comments
+                    ?.find { it.id == message.commentId }?.attachments
+                    ?.find { it.id == message.attachmentId } ?: return
+
+                effects { +Effect.Inner.OpenPreview(attach) }
+            }
             is Message.Outer.OnRatingClick -> {
                 if (state !is State.Content) return
                 effects { +Effect.Inner.SendRatingComment(message.rating) }
@@ -144,6 +155,7 @@ private class FeatureReducer: Logic<State, Message, Effect>() {
 }
 
 internal class TicketActor(
+    private val account: Account,
     private val repository: Repository,
     private val router: PyrusRouter,
     private val welcomeMessage: String?,
@@ -181,7 +193,13 @@ internal class TicketActor(
         }
         is Effect.Inner.RetryAddComment -> flow { repository.retryAddComment(effect.id) }
         is Effect.Inner.OpenPreview -> flow {
-            router.navigateTo(Screens.ImageScreen(effect.fileData))
+            val fileDate = FileData(
+                effect.attachment.name,
+                effect.attachment.bytesSize,
+                Uri.parse(getFileUrl(effect.attachment.id, account)),
+                false,
+            )
+            router.navigateTo(Screens.ImageScreen(fileDate))
         }
         is Effect.Inner.SaveDraft -> flow { draftRepository.saveDraft(effect.draft) }
     }

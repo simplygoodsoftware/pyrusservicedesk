@@ -21,7 +21,6 @@ import com.pyrus.pyrusservicedesk.sdk.data.intermediate.FileData
 import com.pyrus.pyrusservicedesk.sdk.web.UploadFileHook
 import com.pyrus.pyrusservicedesk.sdk.web.retrofit.RemoteFileStore
 import com.pyrus.pyrusservicedesk.sdk.web.retrofit.RemoteStore
-import com.pyrus.pyrusservicedesk.sdk.web.retrofit.UploadFileResult
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.combine

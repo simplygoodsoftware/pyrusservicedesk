@@ -29,6 +29,7 @@ internal sealed interface CommentEntryV2 {
     sealed interface CommentContent {
         data class Text(val text: String) : CommentContent
         data class Image(
+            val attachId: Int,
             val attachUrl: Uri,
             val attachmentName: String,
             val isImage: Boolean,

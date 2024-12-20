@@ -17,12 +17,16 @@ import android.view.View.*
 import android.view.WindowManager
 import android.view.animation.LinearInterpolator
 import android.webkit.*
+import androidx.core.view.ViewCompat
+import androidx.core.view.WindowCompat
+import androidx.core.view.WindowInsetsCompat
 import com.pyrus.pyrusservicedesk.R
 import com.pyrus.pyrusservicedesk._ref.utils.ConfigUtils
 import com.pyrus.pyrusservicedesk._ref.utils.animateInfinite
 import com.pyrus.pyrusservicedesk._ref.utils.getColorOnBackground
 import com.pyrus.pyrusservicedesk._ref.utils.getSecondaryColorOnBackground
 import com.pyrus.pyrusservicedesk._ref.utils.getTextColorOnBackground
+import com.pyrus.pyrusservicedesk._ref.utils.insets.RootViewDeferringInsetsCallback
 import com.pyrus.pyrusservicedesk.databinding.PsdActivityFilePreviewBinding
 import com.pyrus.pyrusservicedesk.presentation.ConnectionActivityBase
 import com.pyrus.pyrusservicedesk.sdk.data.intermediate.FileData
@@ -52,9 +56,17 @@ internal class FilePreviewActivity: ConnectionActivityBase<FilePreviewViewModel>
         // if you don't set empty text, Android will set the app name
         supportActionBar?.title = ""
 
+        WindowCompat.setDecorFitsSystemWindows(window, false)
+
         binding = PsdActivityFilePreviewBinding.bind(findViewById(R.id.file_preview_root))
         applyStyle()
         initListeners()
+
+        val deferringInsetsListener = RootViewDeferringInsetsCallback(
+            persistentInsetTypes = WindowInsetsCompat.Type.systemBars(),
+            deferredInsetTypes = WindowInsetsCompat.Type.ime()
+        )
+        ViewCompat.setOnApplyWindowInsetsListener(binding.root, deferringInsetsListener)
 
         binding.toolbarTitle.text = viewModel.getFileName()
         binding.fileExtension.text = viewModel.getExtension()

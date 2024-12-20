@@ -54,7 +54,7 @@ internal class TicketFragment: TeaFragment<Model, TicketView.Event, TicketView.E
     private val adapter: TicketAdapter by lazy {
         TicketAdapter(
             { dispatch(TicketView.Event.OnRetryClick(it)) },
-            { dispatch(TicketView.Event.OnPreviewClick(it)) },
+            ::dispatch,
             { text -> dispatch(TicketView.Event.OnCopyClick(text)) },
             { rating -> dispatch(TicketView.Event.OnRatingClick(rating)) }
         )

@@ -3,7 +3,6 @@ package com.pyrus.pyrusservicedesk.sdk.verify
 import android.net.Uri
 import com.pyrus.pyrusservicedesk._ref.data.Comment
 import com.pyrus.pyrusservicedesk.sdk.FileResolver
-import com.pyrus.pyrusservicedesk.sdk.data.CommentDto
 
 internal class LocalDataVerifierImpl(private val fileResolver: FileResolver) : LocalDataVerifier {
 

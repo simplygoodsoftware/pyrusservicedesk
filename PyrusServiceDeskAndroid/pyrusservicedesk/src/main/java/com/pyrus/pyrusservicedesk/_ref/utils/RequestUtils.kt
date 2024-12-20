@@ -1,8 +1,6 @@
 package com.pyrus.pyrusservicedesk._ref.utils
 
 import androidx.annotation.Keep
-import com.pyrus.pyrusservicedesk.PyrusServiceDesk
-import com.pyrus.pyrusservicedesk.PyrusServiceDesk.Companion.API_VERSION_2
 import com.pyrus.pyrusservicedesk.core.Account
 import java.net.URLEncoder
 
@@ -38,8 +36,8 @@ class RequestUtils{
         /**
          * Provides url for getting the file.
          */
-        internal fun getFileUrl(fileId: Int, domain: String?, account: Account): String {
-            return "${getBaseUrl(domain)}DownloadFile/$fileId" + getPathParams(account)
+        internal fun getFileUrl(fileId: Int, account: Account): String {
+            return "${getBaseUrl(account.domain)}DownloadFile/$fileId" + getPathParams(account)
         }
 
         internal fun getPreviewUrl(fileId: Int, account: Account): String {
