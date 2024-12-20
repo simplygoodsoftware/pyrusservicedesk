@@ -63,7 +63,7 @@ internal interface TicketsContract {
 
             class ShowAddTicketMenu(val appId: String) : Outer
 
-            class ShowTicket(val ticketId: Int = 0, val userId: String? = null) : Outer
+            class ShowTicket(val ticketId: Int?, val userId: String? = null) : Outer
         }
 
         sealed interface Inner : Effect {

@@ -198,15 +198,8 @@ internal class TicketsFragment: TeaFragment<TicketListModel, Message, Effect>() 
             }
 
             is Effect.Outer.ShowTicket -> {
-                injector().router.navigateTo(Screens.TicketScreen(effect.ticketId, effect.userId ?: KEY_DEFAULT_USER_ID))
-                //injector().router.newRootScreen(Screens.TicketScreen(effect.ticketId, effect.userId ?: KEY_DEFAULT_USER_ID))
+                injector().router.navigateTo(Screens.TicketScreen(effect.ticketId, effect.userId))
             }
-                /*startActivity(
-                TicketActivity.getLaunchIntent(
-                    ticketId = effect.ticketId,
-                    userId = effect.userId
-                )
-            )*/
 
             Effect.Inner.TicketsAutoUpdate -> TODO()
             Effect.Inner.UpdateTickets -> TODO()

@@ -6,10 +6,7 @@ import com.pyrus.pyrusservicedesk._ref.ui_domain.screens.tickets_list.tickets.Ti
 
 object Screens {
 
-    const val KEY_DEFAULT_USER_ID = "0"
-    const val KEY_DEFAULT_TICKET_ID = 0
-
-    fun TicketScreen(ticketId: Int = KEY_DEFAULT_TICKET_ID, userId: String = KEY_DEFAULT_USER_ID) = FragmentScreen {
+    fun TicketScreen(ticketId: Int?, userId: String?) = FragmentScreen {
         TicketFragment.newInstance(ticketId, userId)
     }
 

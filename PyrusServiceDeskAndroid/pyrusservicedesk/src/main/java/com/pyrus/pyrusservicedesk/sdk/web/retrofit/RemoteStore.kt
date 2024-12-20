@@ -3,6 +3,7 @@ package com.pyrus.pyrusservicedesk.sdk.web.retrofit
 import androidx.annotation.Keep
 import com.pyrus.pyrusservicedesk.PyrusServiceDesk
 import com.pyrus.pyrusservicedesk.PyrusServiceDesk.Companion.API_VERSION_2
+import com.pyrus.pyrusservicedesk.PyrusServiceDesk.Companion.injector
 import com.pyrus.pyrusservicedesk._ref.utils.ConfigUtils
 import com.pyrus.pyrusservicedesk._ref.utils.Try
 import com.pyrus.pyrusservicedesk._ref.utils.getFirstNSymbols
@@ -15,7 +16,6 @@ import com.pyrus.pyrusservicedesk.sdk.FileResolver
 import com.pyrus.pyrusservicedesk.sdk.data.AttachmentDto
 import com.pyrus.pyrusservicedesk.sdk.data.Command
 import com.pyrus.pyrusservicedesk.sdk.data.CommentDto
-import com.pyrus.pyrusservicedesk.sdk.data.EMPTY_TICKET_ID
 import com.pyrus.pyrusservicedesk.sdk.data.FileManager
 import com.pyrus.pyrusservicedesk.sdk.data.Ticket
 import com.pyrus.pyrusservicedesk.sdk.data.TicketCommandResult
@@ -180,7 +180,7 @@ internal class RemoteStore(
         comment: CommentDto,
         uploadFileHook: UploadFileHook?
     ): Try<AddCommentResponseData> {
-        return addComment(EMPTY_TICKET_ID, comment, uploadFileHook)
+        return addComment(injector().localStore.getLastTicketId(), comment, uploadFileHook)
     }
 
     suspend fun addTextComment(command: Command): Try<List<TicketCommandResult>?> {

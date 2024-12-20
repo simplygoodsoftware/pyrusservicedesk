@@ -79,6 +79,7 @@ internal interface TicketContract {
         sealed interface Inner : Effect {
             data class UpdateComments(
                 val ticketId: Int,
+                val userId: String,
             ) : Inner
             data object FeedFlow : Inner
             data object CommentsAutoUpdate : Inner

@@ -143,7 +143,7 @@ internal class TicketFragment: TeaFragment<Model, TicketView.Event, TicketView.E
 
     private fun bindFeature() {
         val userId = arguments?.getString(KEY_USER_ID) ?: KEY_DEFAULT_USER_ID
-        val ticketId = arguments?.getInt(KEY_TICKET_ID) ?: KEY_DEFAULT_TICKET_ID
+        val ticketId = arguments?.getInt(KEY_TICKET_ID, injector().localStore.getLastTicketId()) ?: injector().localStore.getLastTicketId() //TODO если открыть файл и вернуться в задачу скорее всего id обновится
         val feature = getStore { injector().ticketFeatureFactory("welcome", userId, ticketId).create() }
         bind(BinderLifecycleMode.CREATE_DESTROY) {
             this@TicketFragment.messages.map(TicketMapper::map) bindTo feature
@@ -264,11 +264,11 @@ internal class TicketFragment: TeaFragment<Model, TicketView.Event, TicketView.E
         const val KEY_DEFAULT_USER_ID = "0"
         const val KEY_DEFAULT_TICKET_ID = 0
 
-        fun newInstance(ticketId: Int, userId: String): TicketFragment {
+        fun newInstance(ticketId: Int?, userId: String?): TicketFragment {
             val fragment = TicketFragment()
             val args = Bundle().apply {
                 putString(KEY_USER_ID, userId)
-                putInt(KEY_TICKET_ID, ticketId)
+                ticketId?.let { putInt(KEY_TICKET_ID, it) }
             }
             fragment.arguments = args
             return fragment

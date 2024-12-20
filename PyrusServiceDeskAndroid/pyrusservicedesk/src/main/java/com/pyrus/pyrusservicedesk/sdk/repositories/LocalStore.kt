@@ -23,8 +23,11 @@ internal class LocalStore(
 
     private val localCommentsStateFlow = MutableStateFlow(getPendingFeedComments())
     private val localCommandsStateFlow = MutableStateFlow(getPendingFeedCommands())
+    private var lastTicketId = MutableStateFlow(-1)
 
     fun commentsFlow(): Flow<List<Comment>> = localCommentsStateFlow
+
+    fun getLastTicketId() = --lastTicketId.value
 
     /**
      * Adds pending feed comment

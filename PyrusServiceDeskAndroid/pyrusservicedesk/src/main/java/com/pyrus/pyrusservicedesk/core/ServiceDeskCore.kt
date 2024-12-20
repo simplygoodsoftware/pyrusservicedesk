@@ -89,7 +89,7 @@ internal class DiInjector(
         .addSerializationExclusionStrategy(RemoteGsonExclusionStrategy())
         .create()
 
-    private val localStore: LocalStore = LocalStore(preferences, localDataVerifier, offlineGson)
+    val localStore: LocalStore = LocalStore(preferences, localDataVerifier, offlineGson) //TODO обязательно приватный?
 
     private val okHttpClient = OkHttpClient.Builder()
         .connectTimeout(30, TimeUnit.SECONDS)

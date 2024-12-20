@@ -7,13 +7,12 @@ import java.util.Date
 /**
  * Default value for [Ticket.ticketId]
  */
-internal const val EMPTY_TICKET_ID = 0
 
 /**
  * Represents ticket object.
  */
 internal data class Ticket(
-    @SerializedName("ticket_id") val ticketId: Int = EMPTY_TICKET_ID,
+    @SerializedName("ticket_id") val ticketId: Int,
     @SerializedName("user_id") val userId: String? = "",
     @SerializedName("subject") val subject: String = "",
     @SerializedName("author") val author: String? = "",

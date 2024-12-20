@@ -2,24 +2,25 @@ package com.pyrus.pyrusservicedesk._ref.ui_domain.screens.tickets_list.tickets
 
 import androidx.core.os.bundleOf
 import com.pyrus.pyrusservicedesk.PyrusServiceDesk
-import com.pyrus.pyrusservicedesk._ref.utils.Try
-import com.pyrus.pyrusservicedesk._ref.utils.isSuccess
-import com.pyrus.pyrusservicedesk._ref.utils.log.PLog
-import com.pyrus.pyrusservicedesk._ref.utils.singleFlow
-import com.pyrus.pyrusservicedesk._ref.whitetea.core.Actor
-import com.pyrus.pyrusservicedesk._ref.whitetea.core.adaptCast
-import com.pyrus.pyrusservicedesk._ref.whitetea.core.logic.Logic
+import com.pyrus.pyrusservicedesk.PyrusServiceDesk.Companion.injector
+import com.pyrus.pyrusservicedesk._ref.Screens
 import com.pyrus.pyrusservicedesk._ref.ui_domain.screens.tickets_list.tickets.TicketsContract.Effect
 import com.pyrus.pyrusservicedesk._ref.ui_domain.screens.tickets_list.tickets.TicketsContract.Message
 import com.pyrus.pyrusservicedesk._ref.ui_domain.screens.tickets_list.tickets.TicketsContract.State
 import com.pyrus.pyrusservicedesk._ref.ui_domain.screens.tickets_list.tickets.TicketsFragment.Companion.KEY_DEFAULT_USER_ID
 import com.pyrus.pyrusservicedesk._ref.ui_domain.screens.tickets_list.ticketsList.TicketsListFragment.Companion.KEY_USER_ID
+import com.pyrus.pyrusservicedesk._ref.utils.Try
+import com.pyrus.pyrusservicedesk._ref.utils.isSuccess
+import com.pyrus.pyrusservicedesk._ref.utils.log.PLog
+import com.pyrus.pyrusservicedesk._ref.utils.singleFlow
+import com.pyrus.pyrusservicedesk._ref.whitetea.core.Actor
 import com.pyrus.pyrusservicedesk._ref.whitetea.core.StoreFactory
-import com.pyrus.pyrusservicedesk.sdk.data.Application
+import com.pyrus.pyrusservicedesk._ref.whitetea.core.adaptCast
+import com.pyrus.pyrusservicedesk._ref.whitetea.core.logic.Logic
 import com.pyrus.pyrusservicedesk.sdk.data.User
 import com.pyrus.pyrusservicedesk.sdk.data.intermediate.Tickets
+import com.pyrus.pyrusservicedesk.sdk.repositories.LocalStore
 import com.pyrus.pyrusservicedesk.sdk.repositories.Repository
-import com.pyrus.pyrusservicedesk.sdk.web.retrofit.SyncRepository
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 
@@ -27,7 +28,7 @@ private const val TAG = "TicketsListFeature"
 
 internal class TicketsFeatureFactory(
     private val storeFactory: StoreFactory,
-    private val syncRepository: Repository
+    private val syncRepository: Repository,
 ) {
 
     fun create(): TicketsFeature = storeFactory.create(
@@ -75,15 +76,14 @@ private class FeatureReducer: Logic<State, Message, Effect>() {
                         +Effect.Outer.ShowAddTicketMenu(state.appId)
                     }
                 }
-                else if (users.isEmpty()){
-                    effects {
-                        +Effect.Outer.ShowTicket()
-                    }
-                }
+//                else if (users.isEmpty()){
+//                    injector().ticketFeatureFactory("welcom")
+//                    effects {
+//                        +Effect.Outer.ShowTicket()
+//                    }
+//                }
                 else {
-                    effects {
-                        +Effect.Outer.ShowTicket(userId = users.first().userId)
-                    }
+                    injector().router.navigateTo(Screens.TicketScreen(null, users.first().userId))
                 }
             }
 

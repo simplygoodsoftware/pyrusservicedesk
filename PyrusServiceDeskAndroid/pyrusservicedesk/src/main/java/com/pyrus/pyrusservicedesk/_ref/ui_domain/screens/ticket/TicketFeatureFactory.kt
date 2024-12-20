@@ -48,7 +48,7 @@ internal class TicketFeatureFactory(
         initialEffects = listOf(
             Effect.Inner.FeedFlow,
             Effect.Inner.CommentsAutoUpdate,
-            Effect.Inner.UpdateComments(ticketId),
+            Effect.Inner.UpdateComments(ticketId, userId),
         ),
     ).adapt { it as? Effect.Outer }
 
@@ -117,7 +117,7 @@ private class FeatureReducer: Logic<State, Message, Effect>() {
                 val currentState = state as? State.Content ?: return
                 if (currentState.isLoading) return
                 state { currentState.copy(isLoading = true) }
-                effects { +Effect.Inner.UpdateComments(currentState.ticketId) }
+                effects { +Effect.Inner.UpdateComments(currentState.ticketId, currentState.userId) }
             }
 
             Message.Outer.OnBackClick -> injector().router.exit()
@@ -176,7 +176,7 @@ internal class TicketActor(
     private val fileManager: FileManager,
 ): Actor<Effect.Inner, Message.Inner> {
 
-    override fun handleEffect(effect: Effect.Inner): Flow<Message.Inner> = when(effect) {
+    override fun handleEffect(effect: Effect.Inner): Flow<Message.Inner> = when (effect) {
         is Effect.Inner.UpdateComments -> singleFlow {
             val commentsTry: Try<FullTicket> = repository.getFeed(
                 keepUnread = false,
@@ -184,11 +184,28 @@ internal class TicketActor(
                 ticketId = effect.ticketId
             )
             when {
-                commentsTry.isSuccess() -> Message.Inner.UpdateCommentsCompleted(
-                    ticket = commentsTry.value,
-                    draft = draftRepository.getDraft(),
-                    welcomeMessage = welcomeMessage,
-                )
+                commentsTry.isSuccess() -> {
+                    if (commentsTry.value.ticketId == null) {
+                        Message.Inner.UpdateCommentsCompleted(
+                            ticket = FullTicket(
+                                comments = emptyList(),
+                                showRating = false,
+                                showRatingText = null,
+                                userId = effect.userId,
+                                ticketId = effect.ticketId
+                            ),
+                            draft = draftRepository.getDraft(),
+                            welcomeMessage = welcomeMessage,
+                        )
+                    } else {
+                        Message.Inner.UpdateCommentsCompleted(
+                            ticket = commentsTry.value,
+                            draft = draftRepository.getDraft(),
+                            welcomeMessage = welcomeMessage,
+                        )
+                    }
+                }
+
                 else -> Message.Inner.UpdateCommentsFailed
             }
         }
@@ -222,7 +239,7 @@ internal class TicketActor(
     private fun getSendTextCommentCommand(text: String, appId: String, userId: String, ticketId: Int): Command {
         val localCreateComment = CreateComment(
             comment = text,
-            requestNewTicket = ticketId == 0,
+            requestNewTicket = ticketId < 0,
             userId = userId,
             appId = appId,
             ticketId = ticketId,

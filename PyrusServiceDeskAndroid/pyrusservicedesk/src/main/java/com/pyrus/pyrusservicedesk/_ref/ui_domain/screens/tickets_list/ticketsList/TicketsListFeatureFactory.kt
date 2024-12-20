@@ -76,7 +76,7 @@ private class FeatureReducer : Logic<State, Message, Effect>() {
                     }
                 } else {
                     effects {
-                        +Effect.Outer.ShowTicket(userId = users[users.keys.first()])
+                        +Effect.Outer.ShowTicket(null, userId = users[users.keys.first()])
                     }
                 }
             }
