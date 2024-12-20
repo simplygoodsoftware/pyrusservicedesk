@@ -31,7 +31,7 @@ final class PSDChatCellConfigurator: TableViewCellConfiguratorProtocol {
         
         cell.needShowName = model.needShowName(at: indexPath)
         cell.drawEmpty = model.emptyMessage(at: indexPath)
-        cell.firstMessageInDate = indexPath.row == 0
+        cell.firstMessageInDate = indexPath.row == model[indexPath.section].count - 1
         
         return cell
     }

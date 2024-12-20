@@ -59,6 +59,7 @@
 		1E50691B2D074591001A9E2D /* ClosedTicketsCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1E50691A2D074590001A9E2D /* ClosedTicketsCell.swift */; };
 		1E50691D2D07459C001A9E2D /* ClosedTicketsCellModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1E50691C2D07459C001A9E2D /* ClosedTicketsCellModel.swift */; };
 		1E50691F2D0745A5001A9E2D /* PSDChatsViewModelProtocol.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1E50691E2D0745A5001A9E2D /* PSDChatsViewModelProtocol.swift */; };
+		1E5069252D15AFE9001A9E2D /* PSDChatSectionModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1E5069232D15AFE9001A9E2D /* PSDChatSectionModel.swift */; };
 		4B060F2A2732AD8C002E20A7 /* StringHelper.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4B060F292732AD8C002E20A7 /* StringHelper.swift */; };
 		4B062A832518A8D100B317D3 /* PSDPlaceholderMessage.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4B062A822518A8D100B317D3 /* PSDPlaceholderMessage.swift */; };
 		4B062A882518AC9500B317D3 /* messagePlaceholder@3x.png in Resources */ = {isa = PBXBuildFile; fileRef = 4B062A872518AC9500B317D3 /* messagePlaceholder@3x.png */; };
@@ -398,6 +399,7 @@
 		1E50691A2D074590001A9E2D /* ClosedTicketsCell.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ClosedTicketsCell.swift; sourceTree = "<group>"; };
 		1E50691C2D07459C001A9E2D /* ClosedTicketsCellModel.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ClosedTicketsCellModel.swift; sourceTree = "<group>"; };
 		1E50691E2D0745A5001A9E2D /* PSDChatsViewModelProtocol.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PSDChatsViewModelProtocol.swift; sourceTree = "<group>"; };
+		1E5069232D15AFE9001A9E2D /* PSDChatSectionModel.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PSDChatSectionModel.swift; sourceTree = "<group>"; };
 		4B060F292732AD8C002E20A7 /* StringHelper.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StringHelper.swift; sourceTree = "<group>"; };
 		4B062A822518A8D100B317D3 /* PSDPlaceholderMessage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PSDPlaceholderMessage.swift; sourceTree = "<group>"; };
 		4B062A872518AC9500B317D3 /* messagePlaceholder@3x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "messagePlaceholder@3x.png"; sourceTree = "<group>"; };
@@ -888,6 +890,14 @@
 			path = Iiko;
 			sourceTree = "<group>";
 		};
+		1E5069242D15AFE9001A9E2D /* Model */ = {
+			isa = PBXGroup;
+			children = (
+				1E5069232D15AFE9001A9E2D /* PSDChatSectionModel.swift */,
+			);
+			path = Model;
+			sourceTree = "<group>";
+		};
 		4B062A862518AC7C00B317D3 /* messagePlaceholder */ = {
 			isa = PBXGroup;
 			children = (
@@ -1099,6 +1109,7 @@
 		4B6B9044223A55A30003D7F9 /* PSDChatTable */ = {
 			isa = PBXGroup;
 			children = (
+				1E5069242D15AFE9001A9E2D /* Model */,
 				1E5068A62CEB14AE001A9E2D /* PSDChatCellConfigurator.swift */,
 				4B63393321FA0F2C00A154B5 /* PSDChatTableView.swift */,
 				4B13E837286A2BCD00E2428F /* ButtonsView */,
@@ -1854,6 +1865,7 @@
 				4B5AFEAB21FB0A7B00AAF233 /* PSDMessageSendButton.swift in Sources */,
 				1E1279EC2CC2737E0080CB19 /* TableViewCellConfiguratorProtocol.swift in Sources */,
 				4B9B0BBB2266344200090DB5 /* PSDAttachmentPreviewErrorView.swift in Sources */,
+				1E5069252D15AFE9001A9E2D /* PSDChatSectionModel.swift in Sources */,
 				1E5068A02CEB146F001A9E2D /* PSDChatPresenterProtocol.swift in Sources */,
 				4BCEB433220C150C008B29B6 /* UIImage+color.swift in Sources */,
 				7B1E8D58250665F800C1E5AC /* PSDInfoView.swift in Sources */,

@@ -189,7 +189,7 @@ class PSDChatViewController: PSDViewController {
             let keyboardEndFrame = infoEndKey.cgRectValue
             let duration = keyboardAnimationDuration(notification)
             let keyboardHeight = keyboardEndFrame.height
-            print("keyboardWillShow: duration: \(duration), keyboardHeight: \(keyboardHeight)")
+            print("keyboardWillShow: duration: \(duration), keyboardHeight: \(keyboardHeight), insets: \(view.safeAreaInsets.bottom)")
             UIView.animate(withDuration: duration, delay: 0, animations: {
                 let oldInset = self.tableView.contentInset.top
                 self.tableView.contentInset.top = keyboardHeight
@@ -205,7 +205,7 @@ class PSDChatViewController: PSDViewController {
             let keyboardEndFrame = infoEndKey.cgRectValue
             let duration = keyboardAnimationDuration(notification)
             let keyboardHeight = keyboardEndFrame.height
-            print("keyboardWillHide: duration: \(duration), keyboardHeight: \(keyboardHeight)")
+            print("keyboardWillHide: duration: \(duration), keyboardHeight: \(keyboardHeight), insets: \(view.safeAreaInsets.bottom)")
             UIView.animate(withDuration: duration, delay: 0, animations: {
                 let oldInset = self.tableView.contentInset.top
                 self.tableView.contentInset.top = keyboardHeight

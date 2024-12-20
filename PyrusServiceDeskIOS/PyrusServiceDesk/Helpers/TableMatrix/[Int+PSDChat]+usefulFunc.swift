@@ -144,9 +144,9 @@ extension Array where Element == [PSDRowMessage]{
             return true//if first message is welcome - do show avatar
         }
         let currentUser = personForMessage(at: IndexPath.init(row: indexPath.row, section: indexPath.section))
-        let nextUser = personForMessage(at: nextNotEmpty(indexPath))
+        let nextUser = personForMessage(at: previousNotEmpty(indexPath))
         if currentUser as? PSDPlaceholderUser != nil{
-            let previousUser = personForMessage(at: previousNotEmpty(indexPath))
+            let previousUser = personForMessage(at: nextNotEmpty(indexPath))
             if let previousUser = previousUser, previousUser.personId != PyrusServiceDesk.userId{
                 return false
             }else{
@@ -163,7 +163,7 @@ extension Array where Element == [PSDRowMessage]{
         if emptyMessage(at: indexPath) {
             return false
         }
-        let previousUser = personForMessage(at: previousNotEmpty(indexPath))
+        let previousUser = personForMessage(at: nextNotEmpty(indexPath))
         let currentUser = personForMessage(at: IndexPath.init(row: indexPath.row, section: indexPath.section))
         if
             let currentUser = currentUser,
