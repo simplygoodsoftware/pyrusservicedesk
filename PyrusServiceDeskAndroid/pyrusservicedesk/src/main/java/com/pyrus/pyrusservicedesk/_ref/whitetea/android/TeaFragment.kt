@@ -4,14 +4,15 @@ import android.os.Bundle
 import android.util.Log
 import android.view.View
 import androidx.fragment.app.Fragment
+import androidx.lifecycle.lifecycleScope
 import com.pyrus.pyrusservicedesk._ref.whitetea.core.ViewRenderer
-import kotlinx.coroutines.channels.BufferOverflow
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableSharedFlow
+import kotlinx.coroutines.launch
 
 internal abstract class TeaFragment<Model : Any, Event : Any, Effect : Any> : Fragment(), TeaView<Model, Event, Effect> {
 
-    private val messagesFlow = MutableSharedFlow<Event>(0, 1, BufferOverflow.DROP_OLDEST)
+    private val messagesFlow = MutableSharedFlow<Event>()
 
     private var renderer: ViewRenderer<Model>? = null
 
@@ -22,7 +23,7 @@ internal abstract class TeaFragment<Model : Any, Event : Any, Effect : Any> : Fr
     }
 
     fun dispatch(message: Event) {
-        messagesFlow.tryEmit(message)
+        lifecycleScope.launch { messagesFlow.emit(message) }
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {

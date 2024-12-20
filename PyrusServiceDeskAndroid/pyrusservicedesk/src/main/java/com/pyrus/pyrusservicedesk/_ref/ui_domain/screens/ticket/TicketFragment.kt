@@ -25,6 +25,7 @@ import com.pyrus.pyrusservicedesk._ref.ui_domain.screens.ticket.TicketView.Model
 import com.pyrus.pyrusservicedesk._ref.ui_domain.screens.ticket.adapter.TicketAdapter
 import com.pyrus.pyrusservicedesk._ref.ui_domain.screens.ticket.adapter.TicketAdapter.Companion.VIEW_TYPE_COMMENT_INBOUND
 import com.pyrus.pyrusservicedesk._ref.ui_domain.screens.ticket.adapter.TicketAdapter.Companion.VIEW_TYPE_COMMENT_OUTBOUND
+import com.pyrus.pyrusservicedesk._ref.ui_domain.screens.ticket.adapter.new_entries.CommentEntryV2
 import com.pyrus.pyrusservicedesk._ref.utils.ConfigUtils
 import com.pyrus.pyrusservicedesk._ref.utils.getColorOnBackground
 import com.pyrus.pyrusservicedesk._ref.utils.getSecondaryColorOnBackground
@@ -74,15 +75,13 @@ internal class TicketFragment: TeaFragment<Model, TicketView.Event, TicketView.E
     override fun createRenderer(): ViewRenderer<Model> = diff {
         diff(Model::inputText) { text -> if (!binding.input.hasFocus()) binding.input.setText(text) }
         diff(Model::sendEnabled) { sendEnabled -> binding.send.isEnabled = sendEnabled }
-        diff(Model::comments, { new, old -> new === old }) { adapter.submitList(it?.reversed()) }
+        diff(Model::comments, { new, old -> new === old }, ::updateComments)
         diff(Model::showNoConnectionError) { showError -> binding.noConnection.root.isVisible = showError }
         diff(Model::isLoading) { isLoading ->
             binding.ticketContent.isVisible = !isLoading
             binding.progressBar.isVisible = isLoading
         }
-        diff(Model::isRefreshing) {
-                isRefreshing -> binding.refresh.isRefreshing = isRefreshing
-        }
+        diff(Model::isRefreshing) { isRefreshing -> binding.refresh.isRefreshing = isRefreshing }
     }
 
     override fun handleEffect(effect: TicketView.Effect) {
@@ -159,8 +158,9 @@ internal class TicketFragment: TeaFragment<Model, TicketView.Event, TicketView.E
     private fun initListeners() {
         binding.ticketToolbar.setOnMenuItemClickListener { onMenuItemClicked(it) }
         binding.send.setOnClickListener {
-            binding.input.text = null
             dispatch(TicketView.Event.OnSendClick)
+            binding.input.text = null
+            binding.comments.scrollToPosition(0)
         }
         binding.attach.setOnClickListener { dispatch(TicketView.Event.OnShowAttachVariantsClick) }
         binding.input.addTextChangedListener(inputTextWatcher)
@@ -296,6 +296,16 @@ internal class TicketFragment: TeaFragment<Model, TicketView.Event, TicketView.E
             dispatch(TicketView.Event.OnCloseClick)
         }
         return true
+    }
+
+    private fun updateComments(comments: List<CommentEntryV2>?) {
+        adapter.submitList(comments?.reversed()) {
+            val layoutManager = (binding.comments.layoutManager as? LinearLayoutManager) ?: return@submitList
+            val firstVisiblePosition = layoutManager.findFirstVisibleItemPosition()
+            if (firstVisiblePosition == 0) {
+                layoutManager.scrollToPosition(0)
+            }
+        }
     }
 
     companion object {

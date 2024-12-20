@@ -87,17 +87,17 @@ private class FeatureReducer: Logic<State, Message, Effect>() {
                 if (state !is State.Content) return
                 effects { +Effect.Inner.RetryAddComment(message.id) }
             }
-            Message.Outer.OnSendClick -> {
+            is Message.Outer.OnSendClick -> {
                 val currentState = state as? State.Content ?: return
                 val comment = currentState.inputText
                 if (comment.isBlank()) return
                 effects { +Effect.Inner.SendTextComment(comment) }
             }
-            Message.Outer.OnShowAttachVariantsClick -> {
+            is Message.Outer.OnShowAttachVariantsClick -> {
                 if(state !is State.Content) return
                 effects { +Effect.Outer.ShowAttachVariants }
             }
-            Message.Outer.OnRefresh -> {
+            is Message.Outer.OnRefresh -> {
                 val currentState = state as? State.Content ?: return
                 if (currentState.isLoading) return
                 state { currentState.copy(isLoading = true) }
