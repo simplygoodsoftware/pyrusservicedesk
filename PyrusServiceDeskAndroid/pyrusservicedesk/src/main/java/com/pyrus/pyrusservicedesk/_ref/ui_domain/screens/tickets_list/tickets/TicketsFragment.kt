@@ -121,8 +121,8 @@ internal class TicketsFragment: TeaFragment<TicketListModel, Message, Effect>() 
     override fun render(model: TicketListModel) {
         //set title (vendor name) and vendor image
         binding.toolbarTicketsList.psdToolbarVendorNameTv.text =  model.titleText
-        PyrusServiceDesk.injector().picasso
-            .load(getOrganisationLogoUrl(model.titleImageUrl, PyrusServiceDesk.get().domain))
+        injector().picasso
+            .load(getOrganisationLogoUrl(model.titleImageUrl, null)) // TODO domain from account
             .transform(CIRCLE_TRANSFORMATION)
             .into(binding.toolbarTicketsList.psdToolbarVendorIv)
 

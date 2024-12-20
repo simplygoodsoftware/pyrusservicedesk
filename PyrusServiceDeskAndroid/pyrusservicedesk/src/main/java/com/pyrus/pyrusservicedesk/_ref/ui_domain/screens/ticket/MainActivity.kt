@@ -42,11 +42,12 @@ internal class MainActivity : FragmentActivity() {
         savedInstanceState?.let { ServiceDeskConfiguration.restore(it) }
 
         if (savedInstanceState == null) {
-//            supportFragmentManager.beginTransaction()
-//                .replace(R.id.fragment_container, TicketsFragment())
-//                .commit()
-            //injector().router.newRootScreen(Screens.TicketScreen())
-            injector().router.newRootScreen(Screens.TicketsScreen())
+            if (injector().isMultiChat) {
+                injector().router.newRootScreen(Screens.TicketsScreen())
+            }
+            else {
+                injector().router.newRootScreen(Screens.TicketScreen(null, null)) //TODO
+            }
         }
     }
 

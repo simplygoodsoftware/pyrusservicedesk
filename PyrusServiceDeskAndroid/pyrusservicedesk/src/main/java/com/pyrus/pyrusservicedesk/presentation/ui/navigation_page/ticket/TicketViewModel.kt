@@ -8,6 +8,7 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.recyclerview.widget.DiffUtil
 import com.pyrus.pyrusservicedesk.PyrusServiceDesk
+import com.pyrus.pyrusservicedesk.PyrusServiceDesk.Companion.injector
 import com.pyrus.pyrusservicedesk._ref.ui_domain.screens.ticket.adapter.entries.CommentEntry
 import com.pyrus.pyrusservicedesk._ref.ui_domain.screens.ticket.adapter.entries.DateEntry
 import com.pyrus.pyrusservicedesk._ref.ui_domain.screens.ticket.adapter.entries.RatingEntry
@@ -333,7 +334,7 @@ internal class TicketViewModel(
                 val welcomeComment = CommentDto(
                     body = welcomeMessage,
                     creationDate = welcomeCommentDate,
-                    author = AuthorDto(ConfigUtils.getUserName(), "10", null, null), //TODO
+                    author = AuthorDto(ConfigUtils.getUserName(), (injector().usersAccount)?.authorId, null, null), //TODO
 //                    isWelcomeMessage = true,
                 )
                 freshComments += welcomeComment

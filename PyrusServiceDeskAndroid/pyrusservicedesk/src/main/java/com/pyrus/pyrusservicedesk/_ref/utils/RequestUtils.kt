@@ -80,6 +80,13 @@ class RequestUtils{
                     "&app_id=" +
                     URLEncoder.encode(account.appId, "UTF-8")
             }
+
+            is Account.V3 -> { //TODO что за параметры
+                "?user_id=" +
+                        URLEncoder.encode(account.users.first().userId, "UTF-8") +
+                        "&app_id=" +
+                        URLEncoder.encode(account.appId, "UTF-8")
+            }
         }
     }
 }

@@ -70,7 +70,7 @@ private class FeatureReducer: Logic<State, Message, Effect>() {
     private fun Result.handleOuter(message: Message.Outer) {
         when (message) {
             Message.Outer.OnFabItemClick -> {
-                val users = getSelectedUsers(state.appId)
+                val users = getSelectedUsers(state.appId) ?: emptyList()
                 if (users.size > 1) {
                     effects {
                         +Effect.Outer.ShowAddTicketMenu(state.appId)
@@ -117,7 +117,7 @@ private class FeatureReducer: Logic<State, Message, Effect>() {
             is Message.Inner.UserIdSelected -> {
                 state {
                     state.copy(
-                        filterName = PyrusServiceDesk.users.find { it.userId == message.userId }?.userName
+                        filterName = injector().usersAccount?.users?.find { it.userId == message.userId }?.userName
                             ?: "",
                         filterEnabled = message.userId != KEY_DEFAULT_USER_ID,
                     )
@@ -129,11 +129,11 @@ private class FeatureReducer: Logic<State, Message, Effect>() {
         }
     }
 
-    private fun getSelectedUsers(appId: String?): List<User> {
+    private fun getSelectedUsers(appId: String?): List<User>? {
         if (appId == null)
             return emptyList()
 
-        return PyrusServiceDesk.users.filter { it.appId == appId }
+        return injector().usersAccount?.users?.filter { it.appId == appId }
     }
 
     private fun setTicketsState(tickets: Tickets) : State {

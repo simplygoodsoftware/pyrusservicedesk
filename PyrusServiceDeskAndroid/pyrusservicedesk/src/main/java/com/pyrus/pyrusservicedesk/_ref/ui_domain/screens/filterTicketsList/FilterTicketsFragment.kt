@@ -1,6 +1,5 @@
 package com.pyrus.pyrusservicedesk._ref.ui_domain.screens.filterTicketsList
 
-import android.content.Context
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -9,7 +8,7 @@ import android.widget.TextView
 import androidx.core.os.bundleOf
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment
-import com.pyrus.pyrusservicedesk.PyrusServiceDesk
+import com.pyrus.pyrusservicedesk.PyrusServiceDesk.Companion.injector
 import com.pyrus.pyrusservicedesk.R
 import com.pyrus.pyrusservicedesk.databinding.AddTicketFragmentBinding
 
@@ -55,9 +54,9 @@ class FilterTicketsFragment: BottomSheetDialogFragment() {
         if (appId == null)
             return
 
-        val selectedUsers = PyrusServiceDesk.users.filter { it.appId == appId }
-        selectedUserIds = selectedUsers.map { it.userId }
-        selectedUserNames = selectedUsers.map { it.userName }
+        val selectedUsers = injector().usersAccount?.users?.filter { it.appId == appId }
+        selectedUserIds = selectedUsers?.map { it.userId } ?: emptyList()
+        selectedUserNames = selectedUsers?.map { it.userName } ?: emptyList()
     }
 
     companion object {

@@ -4,7 +4,6 @@ import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.DialogInterface;
-import android.graphics.Color;
 import android.os.Bundle;
 import android.widget.TextView;
 
@@ -14,7 +13,6 @@ import com.pyrus.pyrusservicedesk.PyrusServiceDesk;
 import com.pyrus.pyrusservicedesk.ServiceDeskConfiguration;
 import com.pyrus.pyrusservicedesk.sdk.updates.NewReplySubscriber;
 
-import java.util.Collections;
 import java.util.List;
 
 public class SampleActivity extends Activity implements NewReplySubscriber {
@@ -45,12 +43,13 @@ public class SampleActivity extends Activity implements NewReplySubscriber {
             dialog.setMessage("Failed to authorize with the provided credentials.");
             dialog.setButton(
                 DialogInterface.BUTTON_POSITIVE,
-                "OK",
-                (dialog1, which) -> {
-                    PyrusServiceDesk.init(
-                        getApplication(),
-                        "my_app_id"
-                    );
+                    "OK",
+                    (dialog1, which) -> {
+                        PyrusServiceDesk.init(
+                                getApplication(),
+                                "my_app_id",
+                                true
+                        );
                     dialog1.cancel();
                 }
             );

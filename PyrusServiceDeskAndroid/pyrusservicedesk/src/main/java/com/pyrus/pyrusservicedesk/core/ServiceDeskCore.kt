@@ -33,6 +33,7 @@ import com.squareup.picasso.OkHttp3Downloader
 import com.squareup.picasso.Picasso
 import kotlinx.coroutines.CoroutineScope
 import com.pyrus.pyrusservicedesk._ref.utils.navigation.PyrusRouterImpl
+import com.pyrus.pyrusservicedesk.sdk.data.User
 import com.pyrus.pyrusservicedesk.sdk.repositories.RepositoryMapper
 import com.pyrus.pyrusservicedesk.sdk.web.retrofit.RemoteFileStore
 import okhttp3.OkHttpClient
@@ -49,20 +50,34 @@ internal sealed interface Account {
     val instanceId: String
     val appId: String
     val domain: String
+    val isMultiChat: Boolean
 
     data class V1(
         override val instanceId: String,
         override val appId: String,
         override val domain: String,
+        override val isMultiChat: Boolean,
     ) : Account
 
     data class V2(
         override val instanceId: String,
         override val appId: String,
         override val domain: String,
+        override val isMultiChat: Boolean,
         val userId: String,
         val securityKey: String,
     ): Account
+
+    data class V3(
+        override val instanceId: String,
+        override val appId: String,
+        override val domain: String,
+        override val isMultiChat: Boolean,
+        val users: List<User>, //users have userId, userName, authorId
+        val authorId: String,
+    ): Account
+
+
 
 }
 
@@ -165,6 +180,8 @@ internal class DiInjector(
 
     private val cicerone: Cicerone<PyrusRouterImpl> = Cicerone.create(PyrusRouterImpl())
 
+    val isMultiChat = account.isMultiChat
+
     val router = cicerone.router
 
     val navHolder: NavigatorHolder = cicerone.getNavigatorHolder()
@@ -181,5 +198,7 @@ internal class DiInjector(
         .build()
 
     val setPushTokenUseCase = SetPushTokenUseCase(account, coreScope, preferencesManager)
+
+    val usersAccount = (account as? Account.V3)
 
 }

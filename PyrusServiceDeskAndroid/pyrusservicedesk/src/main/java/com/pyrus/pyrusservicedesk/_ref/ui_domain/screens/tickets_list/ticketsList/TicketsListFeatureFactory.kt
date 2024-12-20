@@ -1,6 +1,6 @@
 package com.pyrus.pyrusservicedesk._ref.ui_domain.screens.tickets_list.ticketsList
 
-import com.pyrus.pyrusservicedesk.PyrusServiceDesk
+import com.pyrus.pyrusservicedesk.PyrusServiceDesk.Companion.injector
 import com.pyrus.pyrusservicedesk._ref.ui_domain.screens.tickets_list.tickets.TicketsFragment.Companion.KEY_DEFAULT_USER_ID
 import com.pyrus.pyrusservicedesk._ref.ui_domain.screens.tickets_list.ticketsList.TicketsListContract.Effect
 import com.pyrus.pyrusservicedesk._ref.ui_domain.screens.tickets_list.ticketsList.TicketsListContract.Message
@@ -99,7 +99,7 @@ private class FeatureReducer : Logic<State, Message, Effect>() {
             //Message.Inner.UpdateTicketsFailed -> TODO()
             is Message.Inner.UpdateTicketsCompleted -> {
 
-                val usersId = PyrusServiceDesk.users.filter { it.appId == state.appId }.map { it -> it.userId }
+                val usersId = injector().usersAccount?.users?.filter { it.appId == state.appId }?.map { it.userId } ?: emptyList()
                 val filteredTickets = message.tickets.tickets?.filter {
                     usersId.any { userId -> userId == it.userId }
                 }
@@ -131,7 +131,9 @@ private class FeatureReducer : Logic<State, Message, Effect>() {
 
     private fun getSelectedUsers(appId: String): HashMap<String, String> {
         val hashMap = hashMapOf<String, String>()
-        for (user in PyrusServiceDesk.users) {
+        val users = injector().usersAccount?.users ?: return hashMap
+
+        for (user in users) {
             if (user.appId == appId) {
                 hashMap[user.userId] = user.userName
             }

@@ -9,22 +9,29 @@
     android:background="@color/psd_white"
     xmlns:tools="http://schemas.android.com/tools">
 
+    <androidx.appcompat.widget.Toolbar
+        android:id="@+id/ticket_toolbar"
+        android:layout_width="0dp"
+        android:layout_height="52sp"
+        style="?attr/actionBarStyle"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:titleTextAppearance="@style/PsdToolbarTitleTextAppearance">
+
     <ImageButton
         android:id="@+id/psd_toolbar_settings_ib"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_gravity="center_vertical"
+        android:layout_gravity="center_vertical|start"
         android:background="@drawable/ic_settings"
-        android:backgroundTint="@color/design_default_color_error"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+        android:backgroundTint="@color/design_default_color_error" />
 
     <ImageButton
         android:id="@+id/psd_toolbar_filter_ib"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_gravity="center_vertical"
+        android:layout_gravity="center_vertical|start"
         android:background="@drawable/ic_filter"
         android:visibility="gone"
         app:layout_constraintBottom_toBottomOf="parent"
@@ -36,6 +43,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:orientation="horizontal"
+        android:layout_gravity="center"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
@@ -68,12 +76,14 @@
         android:id="@+id/psd_toolbar_qr_ib"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_gravity="center_vertical"
+        android:layout_gravity="center_vertical|end"
         android:background="@drawable/ic_qr"
         android:visibility="gone"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
+
+    </androidx.appcompat.widget.Toolbar>
 
 
 </androidx.constraintlayout.widget.ConstraintLayout>

@@ -3,6 +3,7 @@ package com.pyrus.pyrusservicedesk.sdk.repositories
 import android.net.Uri
 import android.util.Log
 import androidx.core.net.toFile
+import com.pyrus.pyrusservicedesk.PyrusServiceDesk.Companion.injector
 import com.pyrus.pyrusservicedesk._ref.data.Attachment
 import com.pyrus.pyrusservicedesk._ref.data.Author
 import com.pyrus.pyrusservicedesk._ref.data.Comment
@@ -112,7 +113,7 @@ internal class Repository(
     }
 
     suspend fun addTextComment(textBody: String, command: Command) {
-        val comment = createLocalTextComment(textBody, "10")
+        val comment = createLocalTextComment(textBody, injector().usersAccount?.authorId)
         localStore.addPendingFeedComment(comment)
 
         val response = remoteStore.addTextComment(command)
@@ -260,7 +261,7 @@ internal class Repository(
 
     private fun createLocalAttachmentId(): Int = lastLocalAttachmentId.decrementAndGet()
 
-    private fun createLocalTextComment(text: String, authorId: String) = Comment(
+    private fun createLocalTextComment(text: String, authorId: String?) = Comment(
         body = text,
         isInbound = true,
         author = Author(ConfigUtils.getUserName(), authorId, null, null),
@@ -290,7 +291,7 @@ internal class Repository(
         isInbound = true,
         attachments = listOf(attachment),
         creationTime = System.currentTimeMillis(),
-        author = Author(ConfigUtils.getUserName(), "10", null, "#fffffff"),
+        author = Author(ConfigUtils.getUserName(), injector().usersAccount?.authorId, null, "#fffffff"),
         rating = null,
         isLocal = true,
         isSending = true

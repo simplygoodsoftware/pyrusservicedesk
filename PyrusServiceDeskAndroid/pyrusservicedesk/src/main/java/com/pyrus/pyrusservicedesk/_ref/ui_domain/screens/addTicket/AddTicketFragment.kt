@@ -45,7 +45,7 @@ class AddTicketFragment: BottomSheetDialogFragment() {
     private fun updateSelectedUsers(appId: String?) {
         if (appId == null)
             return
-        selectedUsers = PyrusServiceDesk.users.filter { it.appId == appId }
+        selectedUsers = injector().usersAccount?.users?.filter { it.appId == appId } ?: emptyList()
         selectedUserNames = selectedUsers.map { it.userName }
     }
 

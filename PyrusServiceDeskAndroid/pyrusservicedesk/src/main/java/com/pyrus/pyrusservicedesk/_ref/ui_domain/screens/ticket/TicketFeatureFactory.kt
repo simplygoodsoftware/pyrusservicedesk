@@ -1,7 +1,6 @@
 package com.pyrus.pyrusservicedesk._ref.ui_domain.screens.ticket
 
 import com.pyrus.pyrusservicedesk.PyrusServiceDesk.Companion.injector
-import com.pyrus.pyrusservicedesk.PyrusServiceDesk.Companion.users
 import com.pyrus.pyrusservicedesk.R
 import com.pyrus.pyrusservicedesk._ref.Screens
 import com.pyrus.pyrusservicedesk._ref.data.FullTicket
@@ -141,7 +140,7 @@ private class FeatureReducer: Logic<State, Message, Effect>() {
                     is State.Content -> state { currentState.copy(
                         ticket = message.ticket,
                         isLoading = false,
-                        appId = users.find { it.userId == message.ticket.userId }?.appId ?: "",
+                        appId = injector().usersAccount?.users?.find { it.userId == message.ticket.userId }?.appId ?: "",
                         userId = message.ticket.userId ?: "",
                         ticketId = message.ticket.ticketId ?: 0
                     ) }
@@ -152,7 +151,7 @@ private class FeatureReducer: Logic<State, Message, Effect>() {
                         inputText = message.draft,
                         welcomeMessage = message.welcomeMessage,
                         isLoading = false,
-                        appId = users.find { it.userId == message.ticket.userId }?.appId ?: "",
+                        appId = injector().usersAccount?.users?.find { it.userId == message.ticket.userId }?.appId ?: "",
                         userId = message.ticket.userId ?: "",
                         ticketId = message.ticket.ticketId ?: 0
 

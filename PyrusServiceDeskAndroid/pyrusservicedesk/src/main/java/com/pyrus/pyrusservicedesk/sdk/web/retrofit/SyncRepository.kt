@@ -227,8 +227,8 @@ internal class SyncRepository(val retrofit: Retrofit) : CoroutineScope {
             additionalUsers = getAdditionalUsers(),
             authorId = "10",
             authorName = "Kate Test",
-            appId = PyrusServiceDesk.users[0].appId,
-            userId = PyrusServiceDesk.users[0].userId,
+            appId = "",//PyrusServiceDesk.users[0].appId,
+            userId = "",//PyrusServiceDesk.users[0].userId,
             instanceId = "4F71E6BA-55F8-46EE-B281-C9E18C42224F",
             version = getVersion(),
             apiSign = apiFlag,
@@ -237,8 +237,9 @@ internal class SyncRepository(val retrofit: Retrofit) : CoroutineScope {
     }
 
     private fun getAdditionalUsers(): List<UserData> {
-        val list = PyrusServiceDesk.users.map { UserData(it.appId, it.userId, getSecurityKey()?:"") }
-        return list
+//        val list = PyrusServiceDesk.users.map { UserData(it.appId, it.userId, getSecurityKey()?:"") }
+//        return list
+        return emptyList()
     }
 
     private fun getVersion(): Int {
@@ -246,8 +247,8 @@ internal class SyncRepository(val retrofit: Retrofit) : CoroutineScope {
     }
 
     private fun getSecurityKey(): String? {
-        if (getVersion() == API_VERSION_2)
-            return PyrusServiceDesk.get().securityKey
+        //if (getVersion() == API_VERSION_2)
+            //return PyrusServiceDesk.get().securityKey
         return null
     }
 

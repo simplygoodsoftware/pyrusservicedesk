@@ -18,7 +18,6 @@ import com.pyrus.pyrusservicedesk._ref.utils.PREFERENCE_KEY
 import com.pyrus.pyrusservicedesk._ref.utils.RequestUtils
 import com.pyrus.pyrusservicedesk._ref.utils.getFirstNSymbols
 import com.pyrus.pyrusservicedesk.core.Account
-import com.pyrus.pyrusservicedesk.presentation.ui.navigation_page.ticket.TicketActivity
 import com.pyrus.pyrusservicedesk.sdk.data.User
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -50,17 +49,15 @@ class PyrusServiceDesk private constructor(
 
         internal const val API_VERSION_1: Int = 0
         internal const val API_VERSION_2: Int = 2
+        internal const val API_VERSION_3: Int = 4
 
         private const val DEFAULT_TOKEN_TYPE: String = "android"
-
-        internal val users: List<User> = listOf(
-            User("255371017", "xZlr1Zf0pZZE43NfjXfY10OvEKwkKLRCO~PYF7SjID-Tp-7sK5EAuWqgOfrCQNOdDUHrZhHlBaqcdzj2ULgf9e~ciFudXo9ff1Y9cx0oXaTGziZKANoCLbWceaF-5g1VAQpfcg==", "Ресторан 1"),
-            User("251380375", "n4Mxu60kICP-XtZkGm2zCRlDtRRBi76h1w7FMx~f2F~z3d~Ayz7~Z7Gfxg7q2dI~sNVS965oM44Buy8uX2ngWib4BIIaf~6uIT6KaRzyGn2N6O2zdj-lufplexg1TvYLTviMSw==", "Много Лосося ДК Москва, Большая Филёвская улица, 3"),
-            User("251374579", "n4Mxu60kICP-XtZkGm2zCRlDtRRBi76h1w7FMx~f2F~z3d~Ayz7~Z7Gfxg7q2dI~sNVS965oM44Buy8uX2ngWib4BIIaf~6uIT6KaRzyGn2N6O2zdj-lufplexg1TvYLTviMSw==", "Старик Хинкалыч - Кострома Коллаж")
-        )
-        internal val usersId: List<String> = listOf("251380375", "251374579")
-
-        internal val usersName: List<String> = listOf("Много Лосося ДК Москва, Большая Филёвская улица, 3", "Старик Хинкалыч - Кострома Коллаж")
+//TODO delete
+//        internal val users: List<User> = listOf(
+//            User("255371017", "xZlr1Zf0pZZE43NfjXfY10OvEKwkKLRCO~PYF7SjID-Tp-7sK5EAuWqgOfrCQNOdDUHrZhHlBaqcdzj2ULgf9e~ciFudXo9ff1Y9cx0oXaTGziZKANoCLbWceaF-5g1VAQpfcg==", "Ресторан 1"),
+//            User("251380375", "n4Mxu60kICP-XtZkGm2zCRlDtRRBi76h1w7FMx~f2F~z3d~Ayz7~Z7Gfxg7q2dI~sNVS965oM44Buy8uX2ngWib4BIIaf~6uIT6KaRzyGn2N6O2zdj-lufplexg1TvYLTviMSw==", "Много Лосося ДК Москва, Большая Филёвская улица, 3"),
+//            User("251374579", "n4Mxu60kICP-XtZkGm2zCRlDtRRBi76h1w7FMx~f2F~z3d~Ayz7~Z7Gfxg7q2dI~sNVS965oM44Buy8uX2ngWib4BIIaf~6uIT6KaRzyGn2N6O2zdj-lufplexg1TvYLTviMSw==", "Старик Хинкалыч - Кострома Коллаж")
+//        )
 
         internal var logging = false
             private set
@@ -84,15 +81,17 @@ class PyrusServiceDesk private constructor(
             application: Application,
             appId: String,
             domain: String? = null,
+            isMultiChat: Boolean,
             loggingEnabled: Boolean = false,
             authorizationToken: String? = null,
         ) {
             initInternal(
                 application,
+                null,
                 appId,
-                "255371017", //TODO
-                "папа джонс",
-                "10",
+                null,
+                null,
+                isMultiChat,
                 null,
                 domain,
                 API_VERSION_1,
@@ -123,8 +122,7 @@ class PyrusServiceDesk private constructor(
             application: Application,
             appId: String,
             userId: String,
-            userName: String,
-            authorId: String?,
+            isMultiChat: Boolean,
             securityKey: String,
             domain: String? = null,
             loggingEnabled: Boolean = false,
@@ -132,10 +130,11 @@ class PyrusServiceDesk private constructor(
         ) {
             initInternal(
                 application,
+                null,
                 appId,
                 userId,
-                userName,
-                authorId,
+                null,
+                isMultiChat,
                 securityKey,
                 domain,
                 API_VERSION_2,
@@ -144,12 +143,52 @@ class PyrusServiceDesk private constructor(
             )
         }
 
+        /**
+         * Initializes PyrusServiceDesk embeddable module.
+         * This init is used for authorized users with device independent sessions.
+         * The best approach is to call this in [Application.onCreate]
+         * ***PS***: Should be done before other public methods are is called.
+         * Unhandled IllegalStateException is thrown otherwise.
+         *
+         * @param application instance of the enclosing application
+         * @param appId id of a client
+         * @param userId of the user who is initializing service desk
+         * @param securityKey of the user far safe initialization
+         * @param domain Base domain for network requests. If the [domain] is null, the default pyrus.com will be used.
+         * @param loggingEnabled If true, then the library will write logs,
+         * and they can be sent as a file to chat by clicking the "Send Library Logs" button in the menu under the "+" sign.
+         * @param authorizationToken // TODO sds
+         */
+        @JvmStatic
+        @JvmOverloads
+        fun init(
+            application: Application,
+            listUser: List<User>,
+            authorId: String,
+            isMultiChat: Boolean,
+        ) {
+            initInternal(
+                application,
+                listUser,
+                listUser.first().appId,
+                null,
+                authorId,
+                isMultiChat,
+                null,
+                null,
+                API_VERSION_3,
+                false,
+                null,
+            )
+        }
+
         private fun initInternal(
             application: Application,
+            listUser: List<User>?,
             appId: String,
             userId: String?,
-            userName: String?,
             authorId: String?,
+            isMultiChat: Boolean,
             securityKey: String?,
             domain: String?,
             apiVersion: Int = API_VERSION_1,
@@ -163,15 +202,26 @@ class PyrusServiceDesk private constructor(
 
             val apiDomain =  domain ?: "pyrus.com"
 
-            val newAccount = if (userId == null || securityKey == null) Account.V1(
+            val newAccount = if (listUser != null && authorId != null)
+                Account.V3(
+                    instanceId,
+                    appId,
+                    apiDomain,
+                    isMultiChat,
+                    listUser,
+                    authorId,
+                )
+            else if (userId == null || securityKey == null) Account.V1(
                 instanceId,
                 appId,
-                apiDomain
+                apiDomain,
+                isMultiChat
             )
             else Account.V2(
                 instanceId,
                 appId,
                 apiDomain,
+                isMultiChat,
                 userId,
                 securityKey,
             )
@@ -194,34 +244,34 @@ class PyrusServiceDesk private constructor(
             val validDomain = if (validateDomain(apiDomain)) apiDomain else null
 
             // TODO sds
-            if (INSTANCE != null && get().userId != userId) {
-                clearLocalData {
-//                    if (CONFIGURATION != null)
-//                        stop()
-                    INSTANCE = PyrusServiceDesk(
-                        application,
-                        appId,
-                        userId,
-                        securityKey,
-                        validDomain,
-                        apiVersion,
-                        loggingEnabled,
-                        authorizationToken,
-                    )
-                }
-            }
-            else {
-                INSTANCE = PyrusServiceDesk(
-                    application,
-                    appId,
-                    userId,
-                    securityKey,
-                    validDomain,
-                    apiVersion,
-                    loggingEnabled,
-                    authorizationToken,
-                )
-            }
+//            if (INSTANCE != null && get().userId != userId) {
+//                clearLocalData {
+////                    if (CONFIGURATION != null)
+////                        stop()
+//                    INSTANCE = PyrusServiceDesk(
+//                        application,
+//                        appId,
+//                        userId,
+//                        securityKey,
+//                        validDomain,
+//                        apiVersion,
+//                        loggingEnabled,
+//                        authorizationToken,
+//                    )
+//                }
+//            }
+//            else {
+//                INSTANCE = PyrusServiceDesk(
+//                    application,
+//                    appId,
+//                    userId,
+//                    securityKey,
+//                    validDomain,
+//                    apiVersion,
+//                    loggingEnabled,
+//                    authorizationToken,
+//                )
+//            }
         }
 
         private fun validateDomain(domain: String?): Boolean {

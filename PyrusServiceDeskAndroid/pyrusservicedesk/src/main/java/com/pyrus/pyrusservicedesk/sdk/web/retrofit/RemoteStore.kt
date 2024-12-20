@@ -2,7 +2,9 @@ package com.pyrus.pyrusservicedesk.sdk.web.retrofit
 
 import androidx.annotation.Keep
 import com.pyrus.pyrusservicedesk.PyrusServiceDesk
+import com.pyrus.pyrusservicedesk.PyrusServiceDesk.Companion.API_VERSION_1
 import com.pyrus.pyrusservicedesk.PyrusServiceDesk.Companion.API_VERSION_2
+import com.pyrus.pyrusservicedesk.PyrusServiceDesk.Companion.API_VERSION_3
 import com.pyrus.pyrusservicedesk.PyrusServiceDesk.Companion.injector
 import com.pyrus.pyrusservicedesk._ref.utils.ConfigUtils
 import com.pyrus.pyrusservicedesk._ref.utils.Try
@@ -95,11 +97,11 @@ internal class RemoteStore(
             RequestBodyBase(
                 needFullInfo = true,
                 additionalUsers = getAdditionalUsers(),
-                authorId = "10",
+                authorId = getAuthorId(),
                 authorName = "Kate Test",
-                appId = PyrusServiceDesk.users[0].appId,
-                userId = PyrusServiceDesk.users[0].userId,
-                instanceId = "4F71E6BA-55F8-46EE-B281-C9E18C42224F",
+                appId =  account.appId,
+                userId = getUserId(),
+                instanceId = getInstanceId(),
                 version = getVersion(),
                 apiSign = apiFlag,
                 securityKey = getSecurityKey(),
@@ -124,11 +126,11 @@ internal class RemoteStore(
             RequestBodyBase(
                 needFullInfo = true,
                 additionalUsers = getAdditionalUsers(),
-                authorId = "10",
+                authorId = getAuthorId(),
                 authorName = "Kate Test",
-                appId = PyrusServiceDesk.users[0].appId,
-                userId = PyrusServiceDesk.users[0].userId,
-                instanceId = "4F71E6BA-55F8-46EE-B281-C9E18C42224F",
+                appId = account.appId,
+                userId = getUserId(),
+                instanceId = getInstanceId(),
                 version = getVersion(),
                 apiSign = apiFlag,
                 securityKey = getSecurityKey(),
@@ -151,11 +153,11 @@ internal class RemoteStore(
                 needFullInfo = true,
                 additionalUsers = getAdditionalUsers(),
                 commands = commands,
-                authorId = "10",
+                authorId = getAuthorId(),
                 authorName = "Kate Test",
-                appId = PyrusServiceDesk.users[0].appId,
-                userId = PyrusServiceDesk.users[0].userId,
-                instanceId = "4F71E6BA-55F8-46EE-B281-C9E18C42224F",
+                appId = account.appId,
+                userId = getUserId(),
+                instanceId = getInstanceId(),
                 version = getVersion(),
                 apiSign = apiFlag,
                 securityKey = getSecurityKey(),
@@ -165,8 +167,8 @@ internal class RemoteStore(
         return ticketsTry.map { it }
     }
 
-    private fun getAdditionalUsers(): List<UserData> {
-        val list = PyrusServiceDesk.users.map { UserData(it.appId, it.userId, getSecurityKey()?:"") }
+    private fun getAdditionalUsers(): List<UserData>? {
+        val list = (account as? Account.V3)?.users?.map { UserData(it.appId, it.userId, getSecurityKey()?:"") }
         return list
     }
 
@@ -186,18 +188,19 @@ internal class RemoteStore(
     suspend fun addTextComment(command: Command): Try<List<TicketCommandResult>?> {
         val commandsResultTry = api.getTickets(
             RequestBodyBase(
-            needFullInfo = false,
-            additionalUsers = getAdditionalUsers(),
-            commands = listOf(command),
-            authorId = "10",
-            authorName = "Kate Test",
-            appId = PyrusServiceDesk.users[0].appId,
-            userId = PyrusServiceDesk.users[0].userId,
-            instanceId = "4F71E6BA-55F8-46EE-B281-C9E18C42224F",
-            version = getVersion(),
-            apiSign = apiFlag,
-            securityKey = getSecurityKey(),
-        ))
+                needFullInfo = false,
+                additionalUsers = getAdditionalUsers(),
+                commands = listOf(command),
+                authorId = getAuthorId(),
+                authorName = "Kate Test",
+                appId = account.appId,
+                userId = getUserId(),
+                instanceId = getInstanceId(),
+                version = getVersion(),
+                apiSign = apiFlag,
+                securityKey = getSecurityKey(),
+            )
+        )
 
         return when {
             commandsResultTry.isSuccess() -> Try.Success(commandsResultTry.value.commandsResult)
@@ -332,20 +335,29 @@ internal class RemoteStore(
     private fun getUserId() = when(account) {
         is Account.V1 -> instanceId
         is Account.V2 -> account.userId
+        is Account.V3 -> account.users.first().userId
     }
 
     private fun getVersion(): Int = when (account) {
-        is Account.V1 -> API_VERSION_2 //TODO
+        is Account.V1 -> API_VERSION_1
         is Account.V2 -> API_VERSION_2
+        is Account.V3 -> API_VERSION_3
     }
 
     private fun getSecurityKey() = when (account) {
         is Account.V1 -> null
         is Account.V2 -> account.securityKey
+        is Account.V3 -> null
     }
 
-    private fun getInstanceId() = when (API_VERSION_2) {
-        getVersion() -> instanceId
+    private fun getInstanceId() = when (getVersion()) {
+        API_VERSION_2 -> instanceId
+        API_VERSION_3 -> instanceId
+        else -> null
+    }
+
+    private fun getAuthorId() = when (account) {
+        is Account.V3 -> account.authorId
         else -> null
     }
 
