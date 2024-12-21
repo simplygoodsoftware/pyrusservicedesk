@@ -47,6 +47,7 @@ internal class TicketsFeatureFactory(
             ticketsIsEmpty = true,
             filterEnabled = false,
             tabLayoutVisibility = false,
+            showNoConnectionError = false,
         ),
         reducer = FeatureReducer(),
         actor = TicketsActor(syncRepository).adaptCast(),
@@ -91,7 +92,7 @@ private class FeatureReducer: Logic<State, Message, Effect>() {
                 +Effect.Outer.ShowFilterMenu(state.appId, message.selectedUserId)
             }
 
-            //is Message.Outer.OnScanClick -> TODO()
+            Message.Outer.OnScanClick -> injector().router.exit() //TODO
 
             //is Message.Outer.OnSettingsClick -> TODO()
 
@@ -104,12 +105,11 @@ private class FeatureReducer: Logic<State, Message, Effect>() {
 
     private fun Result.handleInner(message: Message.Inner) {
         when (message) {
-            //Message.Inner.UpdateTicketsFailed -> TODO()
+            Message.Inner.UpdateTicketsFailed -> {
+                state { state.copy(isLoading = false, showNoConnectionError = true) }
+            }
             is Message.Inner.UpdateTicketsCompleted -> {
-                //state.copy(isLoading = false)
                 state { setTicketsState(message.tickets) }
-                //setTicketsState(message.tickets)
-                //Message.Inner.TicketsUpdated(message.tickets)
             }
             is Message.Inner.TicketsUpdated -> {
                 setTicketsState(message.tickets)
@@ -124,8 +124,6 @@ private class FeatureReducer: Logic<State, Message, Effect>() {
                 }
                 message.fm.setFragmentResult(KEY_USER_ID, bundleOf(KEY_USER_ID to message.userId))
             }
-
-            else -> {PLog.d(TAG, "UpdateTicketsFailed")}
         }
     }
 
@@ -149,6 +147,7 @@ private class FeatureReducer: Logic<State, Message, Effect>() {
             tabLayoutVisibility = if (applications != null) applications.size > 1 else false,
             tickets = tickets,
             isLoading = false,
+            showNoConnectionError = false,
         )
     }
 

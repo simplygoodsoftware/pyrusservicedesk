@@ -10,6 +10,8 @@ internal interface  TicketsView {
         val ticketsIsEmpty: Boolean,
         val filterEnabled: Boolean,
         val tabLayoutVisibility: Boolean,
-        val applications: HashSet<Application>
+        val applications: HashSet<Application>,
+        val showNoConnectionError: Boolean,
+        val isLoading: Boolean,
     )
 }

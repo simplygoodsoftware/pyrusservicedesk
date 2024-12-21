@@ -23,6 +23,7 @@ internal interface TicketsContract {
         val tabLayoutVisibility: Boolean,
         val tickets: Tickets,
         val isLoading: Boolean,
+        val showNoConnectionError: Boolean,
     )
 
     sealed interface Message {

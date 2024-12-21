@@ -1,26 +1,23 @@
 package com.pyrus.pyrusservicedesk._ref.ui_domain.screens.tickets_list.ticketsList
 
-import android.content.Intent
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.core.view.isVisible
 import androidx.recyclerview.widget.LinearLayoutManager
-import com.pyrus.pyrusservicedesk.PyrusServiceDesk
 import com.pyrus.pyrusservicedesk.PyrusServiceDesk.Companion.injector
 import com.pyrus.pyrusservicedesk._ref.Screens
+import com.pyrus.pyrusservicedesk._ref.ui_domain.screens.addTicket.AddTicketFragment
+import com.pyrus.pyrusservicedesk._ref.ui_domain.screens.tickets_list.adapters.TicketsListAdapter
+import com.pyrus.pyrusservicedesk._ref.ui_domain.screens.tickets_list.ticketsList.TicketsListContract.Effect
+import com.pyrus.pyrusservicedesk._ref.ui_domain.screens.tickets_list.ticketsList.TicketsListContract.Message
+import com.pyrus.pyrusservicedesk._ref.ui_domain.screens.tickets_list.ticketsList.TicketsListContract.State
 import com.pyrus.pyrusservicedesk._ref.whitetea.android.TeaFragment
 import com.pyrus.pyrusservicedesk._ref.whitetea.androidutils.bind
 import com.pyrus.pyrusservicedesk._ref.whitetea.androidutils.getStore
 import com.pyrus.pyrusservicedesk._ref.whitetea.bind.BinderLifecycleMode
 import com.pyrus.pyrusservicedesk.databinding.TicketsListFragmentBinding
-import com.pyrus.pyrusservicedesk._ref.ui_domain.screens.addTicket.AddTicketFragment
-import com.pyrus.pyrusservicedesk._ref.ui_domain.screens.ticket.TicketMapper
-import com.pyrus.pyrusservicedesk.presentation.ui.navigation_page.ticket.TicketActivity
-import com.pyrus.pyrusservicedesk._ref.ui_domain.screens.tickets_list.adapters.TicketsListAdapter
-import com.pyrus.pyrusservicedesk._ref.ui_domain.screens.tickets_list.ticketsList.TicketsListContract.Effect
-import com.pyrus.pyrusservicedesk._ref.ui_domain.screens.tickets_list.ticketsList.TicketsListContract.Message
-import com.pyrus.pyrusservicedesk._ref.ui_domain.screens.tickets_list.ticketsList.TicketsListContract.State
 import kotlinx.coroutines.flow.debounce
 import kotlinx.coroutines.flow.map
 
@@ -38,7 +35,7 @@ internal class TicketsListFragment: TeaFragment<State, Message, Effect>()  {
 
         binding = TicketsListFragmentBinding.inflate(layoutInflater)
 
-        binding.emptyTicketsListLl.createTicketTv.setOnClickListener {
+        binding.createTicketTv.setOnClickListener {
             dispatch(Message.Outer.OnCreateTicketClick)
         }
 
@@ -81,10 +78,11 @@ internal class TicketsListFragment: TeaFragment<State, Message, Effect>()  {
     }
 
     override fun render(model: State) {
-        binding.emptyTicketsListLl.psdEmptyTicketsList.visibility =
-            if (model.tickets.isEmpty()) View.VISIBLE else View.GONE
+        binding.emptyTicketsListLl.isVisible = model.tickets.isEmpty() && !model.isLoading
 
         adapter.setItems(model.tickets)
+
+        binding.progressBar.isVisible = model.isLoading
 
     }
 

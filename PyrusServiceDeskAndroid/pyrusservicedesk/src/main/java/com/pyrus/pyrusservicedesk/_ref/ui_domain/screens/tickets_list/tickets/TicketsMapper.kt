@@ -13,5 +13,7 @@ internal object TicketsMapper {
         filterEnabled = state.filterEnabled,
         tabLayoutVisibility = state.tabLayoutVisibility,
         applications = state.applications,
+        showNoConnectionError = state.showNoConnectionError,
+        isLoading = state.isLoading,
     )
 }

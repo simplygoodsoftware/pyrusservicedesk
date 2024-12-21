@@ -1,10 +1,11 @@
 package com.pyrus.pyrusservicedesk._ref.ui_domain.screens.tickets_list.tickets
 
-import android.content.Intent
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.core.view.ViewCompat
+import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.isVisible
 import androidx.viewpager2.widget.ViewPager2
 import com.google.android.material.tabs.TabLayoutMediator
@@ -15,9 +16,14 @@ import com.pyrus.pyrusservicedesk._ref.Screens
 import com.pyrus.pyrusservicedesk._ref.ui_domain.screens.addTicket.AddTicketFragment
 import com.pyrus.pyrusservicedesk._ref.ui_domain.screens.filterTicketsList.FilterTicketsFragment
 import com.pyrus.pyrusservicedesk._ref.ui_domain.screens.filterTicketsList.FilterTicketsFragment.Companion.KEY_SELECTED_USER_ID
-import com.pyrus.pyrusservicedesk._ref.ui_domain.screens.ticket.TicketFragment
-import com.pyrus.pyrusservicedesk._ref.ui_domain.screens.ticket.TicketMapper
+import com.pyrus.pyrusservicedesk._ref.ui_domain.screens.ticket.TicketView.Model
+import com.pyrus.pyrusservicedesk._ref.ui_domain.screens.tickets_list.adapters.ViewPagerAdapter
+import com.pyrus.pyrusservicedesk._ref.ui_domain.screens.tickets_list.tickets.TicketsContract.Effect
+import com.pyrus.pyrusservicedesk._ref.ui_domain.screens.tickets_list.tickets.TicketsContract.Message
+import com.pyrus.pyrusservicedesk._ref.ui_domain.screens.tickets_list.tickets.TicketsView.TicketListModel
 import com.pyrus.pyrusservicedesk._ref.utils.CIRCLE_TRANSFORMATION
+import com.pyrus.pyrusservicedesk._ref.utils.RequestUtils.Companion.getOrganisationLogoUrl
+import com.pyrus.pyrusservicedesk._ref.utils.insets.RootViewDeferringInsetsCallback
 import com.pyrus.pyrusservicedesk._ref.whitetea.android.TeaFragment
 import com.pyrus.pyrusservicedesk._ref.whitetea.androidutils.bind
 import com.pyrus.pyrusservicedesk._ref.whitetea.androidutils.getStore
@@ -25,12 +31,6 @@ import com.pyrus.pyrusservicedesk._ref.whitetea.bind.BinderLifecycleMode
 import com.pyrus.pyrusservicedesk._ref.whitetea.core.ViewRenderer
 import com.pyrus.pyrusservicedesk._ref.whitetea.utils.diff
 import com.pyrus.pyrusservicedesk.databinding.PsdTicketsListBinding
-import com.pyrus.pyrusservicedesk.presentation.ui.navigation_page.ticket.TicketActivity
-import com.pyrus.pyrusservicedesk._ref.ui_domain.screens.tickets_list.adapters.ViewPagerAdapter
-import com.pyrus.pyrusservicedesk._ref.ui_domain.screens.tickets_list.tickets.TicketsContract.Effect
-import com.pyrus.pyrusservicedesk._ref.ui_domain.screens.tickets_list.tickets.TicketsContract.Message
-import com.pyrus.pyrusservicedesk._ref.ui_domain.screens.tickets_list.tickets.TicketsView.TicketListModel
-import com.pyrus.pyrusservicedesk._ref.utils.RequestUtils.Companion.getOrganisationLogoUrl
 import kotlinx.coroutines.flow.map
 
 internal class TicketsFragment: TeaFragment<TicketListModel, Message, Effect>() {
@@ -88,6 +88,12 @@ internal class TicketsFragment: TeaFragment<TicketListModel, Message, Effect>() 
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+
+        val deferringInsetsListener = RootViewDeferringInsetsCallback(
+            persistentInsetTypes = WindowInsetsCompat.Type.systemBars(),
+            deferredInsetTypes = WindowInsetsCompat.Type.ime()
+        )
+        ViewCompat.setOnApplyWindowInsetsListener(binding.root, deferringInsetsListener)
 
         viewPagerAdapter = ViewPagerAdapter(childFragmentManager, lifecycle)
 
@@ -147,6 +153,12 @@ internal class TicketsFragment: TeaFragment<TicketListModel, Message, Effect>() 
         //tabLayout and viewPager
         binding.tabLayout.visibility = if (model.tabLayoutVisibility ) View.VISIBLE else View.GONE
         viewPagerAdapter.setItems(model.applications)
+
+        binding.tabLayout.isVisible = !model.isLoading
+        binding.progressBar.isVisible = model.isLoading
+
+        binding.noConnection.root.isVisible = model.showNoConnectionError
+
     }
 
     override val renderer: ViewRenderer<TicketListModel> = diff {
@@ -178,10 +190,11 @@ internal class TicketsFragment: TeaFragment<TicketListModel, Message, Effect>() 
         diff(TicketListModel::applications) { applications ->
             viewPagerAdapter.setItems(applications)
         }
-        /*diff(TicketListModel::isLoading) { isLoading ->
-            binding.refresh.isVisible = !isLoading
+        diff(TicketListModel::showNoConnectionError) { showError -> binding.noConnection.root.isVisible = showError }
+        diff(TicketListModel::isLoading) { isLoading ->
+            binding.tabLayout.isVisible = !isLoading
             binding.progressBar.isVisible = isLoading
-        }*/
+        }
     }
 
     override fun handleEffect(effect: Effect) {

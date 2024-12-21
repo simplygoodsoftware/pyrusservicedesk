@@ -14,12 +14,55 @@
 
     </androidx.recyclerview.widget.RecyclerView>
 
-    <include
+    <LinearLayout
         android:id="@+id/empty_tickets_list_ll"
-        layout="@layout/psd_empty_tickets_list"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
         app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintTop_toTopOf="@+id/tickets_rv">
+
+        <ImageButton
+            android:id="@+id/psd_empty_list_ib"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_horizontal"
+            android:background="@drawable/ic_chat" />
+
+
+        <TextView
+            android:id="@+id/createTicketTv"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_horizontal"
+            android:layout_marginTop="24dp"
+            android:ellipsize="end"
+            android:maxLines="1"
+            android:text="Создать обращение"
+            android:textColor="#4494E6"
+            android:textSize="16dp" />
+
+    </LinearLayout>
+
+    <include
+        android:id="@+id/no_connection"
+        layout="@layout/psd_no_connection"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent" />
+        app:layout_constraintTop_toTopOf="parent"
+        android:visibility="gone"/>
+
+    <ProgressBar
+        android:id="@+id/progress_bar"
+        android:layout_width="@dimen/psd_recyclerview_item_height_default"
+        android:layout_height="@dimen/psd_recyclerview_item_height_default"
+        android:visibility="visible"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="@+id/tickets_rv" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>
