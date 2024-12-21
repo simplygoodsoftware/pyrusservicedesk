@@ -1,25 +1,29 @@
 package com.pyrus.pyrusservicedesk.presentation
 
-import androidx.lifecycle.Observer
 import android.content.Context
 import android.content.pm.PackageManager
 import android.os.Bundle
-import androidx.core.app.ActivityCompat
-import androidx.core.view.ViewCompat
-import androidx.appcompat.app.AppCompatActivity
-import androidx.appcompat.app.AppCompatDelegate
 import android.view.View
 import android.view.inputmethod.InputMethodManager
+import androidx.appcompat.app.AppCompatActivity
+import androidx.appcompat.app.AppCompatDelegate
+import androidx.core.app.ActivityCompat
+import androidx.core.view.ViewCompat
 import com.pyrus.pyrusservicedesk.R
+import com.pyrus.pyrusservicedesk._ref.utils.getViewModel
 import com.pyrus.pyrusservicedesk.core.StaticRepository
 import com.pyrus.pyrusservicedesk.presentation.viewmodel.SharedViewModel
-import com.pyrus.pyrusservicedesk._ref.utils.getViewModel
-import kotlinx.coroutines.*
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.cancel
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 import kotlin.coroutines.CoroutineContext
 
 
 /**
- * Base class for service desk activities.
+ * Old base class for service desk activities.
  */
 internal abstract class ActivityBase: AppCompatActivity(), CoroutineScope {
 
@@ -41,9 +45,7 @@ internal abstract class ActivityBase: AppCompatActivity(), CoroutineScope {
      * All activities share the same model to be able to trigger "rage" quit event that will close
      * all service desk activities of the current task.
      */
-//    protected val sharedViewModel: SharedViewModel by getViewModel(SharedViewModel::class.java)
-
-    private var recentContentHeight = 0
+    protected val sharedViewModel: SharedViewModel by getViewModel(SharedViewModel::class.java)
 
     override val coroutineContext: CoroutineContext = Dispatchers.Main + Job()
 
@@ -61,18 +63,8 @@ internal abstract class ActivityBase: AppCompatActivity(), CoroutineScope {
         setContentView(layoutResId)
         setSupportActionBar(findViewById(toolbarViewId))
 
-        // TODO sds this broke sometimes
-//        findViewById<View>(android.R.id.content).apply {
-//            viewTreeObserver.addOnGlobalLayoutListener {
-//                val changedHeight = recentContentHeight - height
-//                if (changedHeight != 0)
-//                    onViewHeightChanged(changedHeight)
-//                recentContentHeight = height
-//            }
-//        }
-
-//        if (sharedViewModel.getQuitServiceDeskLiveData().value == true)
-//            finish()
+        if (sharedViewModel.getQuitServiceDeskLiveData().value == true)
+            finish()
     }
 
     override fun onDestroy() {
@@ -143,10 +135,12 @@ internal abstract class ActivityBase: AppCompatActivity(), CoroutineScope {
      * Extenders can safely start observe view model's data here.
      */
     protected open fun startObserveData() {
-//        sharedViewModel.getQuitServiceDeskLiveData().observe(this) { quit ->
-//            quit ?: return@observe
-//            if (quit) finish()
-//        }
+        sharedViewModel.getQuitServiceDeskLiveData().observe(this) { quit ->
+            quit?.let {
+                if (it)
+                    finish()
+            }
+        }
     }
 
     private fun overridePendingTransition() {

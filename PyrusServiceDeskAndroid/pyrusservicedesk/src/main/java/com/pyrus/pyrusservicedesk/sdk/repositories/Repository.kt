@@ -153,17 +153,13 @@ internal class Repository(
         }
         Log.d("SDS", "responseTry: $responseTry")
 
-        val newLocalAttachment = if (responseTry.isSuccess()) {
-            localAttachment.copy(
+        val newLocalAttachment = when {
+            responseTry.isSuccess() -> localAttachment.copy(
                 guid = responseTry.value.guid,
                 status = Status.Completed,
                 progress = null,
             )
-        }
-        else {
-            localAttachment.copy(
-                status = Status.Error
-            )
+            else -> localAttachment.copy(status = Status.Error, progress = null)
         }
         val newLocalComment = comment.copy(attachments = listOf(newLocalAttachment))
         localStore.addPendingFeedComment(newLocalComment)

@@ -1,9 +1,11 @@
 package com.pyrus.pyrusservicedesk._ref.ui_domain.screens.ticket
 
 import android.net.Uri
+import com.pyrus.pyrusservicedesk._ref.data.Attachment
 import com.pyrus.pyrusservicedesk._ref.data.FullTicket
 import com.pyrus.pyrusservicedesk._ref.utils.TextProvider
 import com.pyrus.pyrusservicedesk._ref.whitetea.core.Store
+import com.pyrus.pyrusservicedesk.sdk.data.intermediate.FileData
 
 internal typealias TicketFeature = Store<TicketContract.State, TicketContract.Message, TicketContract.Effect.Outer>
 
@@ -32,7 +34,7 @@ internal interface TicketContract {
 
         sealed interface Outer : Message {
 
-            data class OnPreviewClick(val uri: Uri) : Outer
+            data class OnPreviewClick(val commentId: Long, val attachmentId: Int) : Outer
 
             data class OnRetryAddCommentClick(val id: Long) : Outer
 
@@ -103,7 +105,7 @@ internal interface TicketContract {
                 val userId: String
             ) : Inner
             data class RetryAddComment(val id: Long) : Inner
-            data class OpenPreview(val uri: Uri) : Inner
+            data class OpenPreview(val attachment: Attachment) : Inner
             data class SaveDraft(val draft: String) : Inner
         }
     }

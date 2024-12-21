@@ -1,6 +1,7 @@
 package com.pyrus.pyrusservicedesk._ref.ui_domain.screens.file_preview
 
 import android.Manifest
+import android.content.Context
 import android.content.Intent
 import android.content.Intent.ACTION_SEND
 import android.content.Intent.ACTION_VIEW
@@ -12,17 +13,23 @@ import android.view.Menu
 import android.view.MenuInflater
 import android.view.MenuItem
 import android.view.MenuItem.SHOW_AS_ACTION_ALWAYS
-import android.view.View
 import android.view.View.*
 import android.view.WindowManager
 import android.view.animation.LinearInterpolator
 import android.webkit.*
-import com.pyrus.pyrusservicedesk.PyrusServiceDesk
+import androidx.core.view.ViewCompat
+import androidx.core.view.WindowCompat
+import androidx.core.view.WindowInsetsCompat
 import com.pyrus.pyrusservicedesk.R
+import com.pyrus.pyrusservicedesk._ref.utils.ConfigUtils
+import com.pyrus.pyrusservicedesk._ref.utils.animateInfinite
+import com.pyrus.pyrusservicedesk._ref.utils.getColorOnBackground
+import com.pyrus.pyrusservicedesk._ref.utils.getSecondaryColorOnBackground
+import com.pyrus.pyrusservicedesk._ref.utils.getTextColorOnBackground
+import com.pyrus.pyrusservicedesk._ref.utils.insets.RootViewDeferringInsetsCallback
 import com.pyrus.pyrusservicedesk.databinding.PsdActivityFilePreviewBinding
 import com.pyrus.pyrusservicedesk.presentation.ConnectionActivityBase
 import com.pyrus.pyrusservicedesk.sdk.data.intermediate.FileData
-import com.pyrus.pyrusservicedesk._ref.utils.*
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
@@ -37,26 +44,32 @@ internal class FilePreviewActivity: ConnectionActivityBase<FilePreviewViewModel>
     override val toolbarViewId: Int = R.id.file_preview_toolbar
     override val refresherViewId: Int = NO_ID
     override val progressBarViewId: Int = R.id.progress_bar
+    override val noConnectionViewId: Int = R.id.no_connection
+
 
     private var pageFinishedSuccessfully = false
 
     private lateinit var binding: PsdActivityFilePreviewBinding
-
-    private fun dispatch(event: FilePreviewView.Event) {
-
-    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         // if you don't set empty text, Android will set the app name
         supportActionBar?.title = ""
 
-        binding = PsdActivityFilePreviewBinding.bind(findViewById<View>(android.R.id.content).rootView)
+        WindowCompat.setDecorFitsSystemWindows(window, false)
+
+        binding = PsdActivityFilePreviewBinding.bind(findViewById(R.id.file_preview_root))
         applyStyle()
         initListeners()
 
-//        binding.toolbarTitle.text = viewModel.getFileName()
-//        binding.fileExtension.text = viewModel.getExtension()
+        val deferringInsetsListener = RootViewDeferringInsetsCallback(
+            persistentInsetTypes = WindowInsetsCompat.Type.systemBars(),
+            deferredInsetTypes = WindowInsetsCompat.Type.ime()
+        )
+        ViewCompat.setOnApplyWindowInsetsListener(binding.root, deferringInsetsListener)
+
+        binding.toolbarTitle.text = viewModel.getFileName()
+        binding.fileExtension.text = viewModel.getExtension()
 
         binding.webView.apply{
             settings.apply {
@@ -70,9 +83,7 @@ internal class FilePreviewActivity: ConnectionActivityBase<FilePreviewViewModel>
             webViewClient = object: WebViewClient(){
                 override fun onReceivedError(view: WebView?, request: WebResourceRequest?, error: WebResourceError?) {
                     super.onReceivedError(view, request, error)
-                    dispatch(FilePreviewView.Event.OnWebViewError(error))
-                    // TODO
-//                    viewModel.onErrorReceived()
+                    viewModel.onErrorReceived()
                 }
 
                 override fun onPageFinished(view: WebView?, url: String?) {
@@ -82,9 +93,7 @@ internal class FilePreviewActivity: ConnectionActivityBase<FilePreviewViewModel>
             }
             webChromeClient = object: WebChromeClient() {
                 override fun onProgressChanged(view: WebView?, newProgress: Int) {
-                    dispatch(FilePreviewView.Event.OnLoadProgressChanged(newProgress))
-                    // TODO
-//                    viewModel.onProgressChanged(newProgress)
+                    viewModel.onProgressChanged(newProgress)
                 }
             }
         }
@@ -121,14 +130,14 @@ internal class FilePreviewActivity: ConnectionActivityBase<FilePreviewViewModel>
 
     override fun startObserveData() {
         super.startObserveData()
-//        viewModel.getFileLiveData().observe(this) {
-//            it?.let { model ->
-//                when {
-//                    model.isPreviewable -> applyPreviewableViewModel(model)
-//                    else -> applyNonPreviewableViewModel(model)
-//                }
-//            }
-//        }
+        viewModel.getFileLiveData().observe(this) {
+            it?.let { model ->
+                when {
+                    model.isPreviewable -> applyPreviewableViewModel(model)
+                    else -> applyNonPreviewableViewModel(model)
+                }
+            }
+        }
 
     }
 
@@ -259,25 +268,18 @@ internal class FilePreviewActivity: ConnectionActivityBase<FilePreviewViewModel>
         item ?: return false
 
         when (item.itemId) {
-            R.id.download -> {
-                dispatch(FilePreviewView.Event.OnDownloadClick)
-                // TODO
-                startDownloadFile()
-            }
+            R.id.download -> startDownloadFile()
             R.id.share -> {
-                dispatch(FilePreviewView.Event.OnShareClick)
-                // TODO
-//                viewModel.getFileLiveData().value?.let {
-//                    dispatchLocalFileAction(it.fileUri, ACTION_SEND)
-//                }
+                viewModel.getFileLiveData().value?.let {
+                    dispatchLocalFileAction(it.fileUri, ACTION_SEND)
+                }
             }
         }
-
         return true
     }
 
     private fun startDownloadFile() {
-//        viewModel.onDownloadFileClicked()
+        viewModel.onDownloadFileClicked()
     }
 
     private fun initListeners() {
@@ -315,11 +317,9 @@ internal class FilePreviewActivity: ConnectionActivityBase<FilePreviewViewModel>
         binding.noConnection.reconnectButton.setTextColor(ConfigUtils.getAccentColor(this))
         binding.noConnection.root.setBackgroundColor(ConfigUtils.getNoConnectionBackgroundColor(this))
 
-        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.LOLLIPOP) {
-            window.clearFlags(WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS)
-            window.addFlags(WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS)
-            window.statusBarColor = ConfigUtils.getStatusBarColor(this)?: window.statusBarColor
-        }
+        window.clearFlags(WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS)
+        window.addFlags(WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS)
+        window.statusBarColor = ConfigUtils.getStatusBarColor(this)?: window.statusBarColor
 
         binding.noPreview.setBackgroundColor(ConfigUtils.getNoPreviewBackgroundColor(this))
     }
@@ -340,12 +340,8 @@ internal class FilePreviewActivity: ConnectionActivityBase<FilePreviewViewModel>
          * @param fileData data of the attachment to be reviewed.
          * @return intent to be used for launching the preview.
          */
-        fun getLaunchIntent(fileData: FileData): Intent {
-            return Intent(
-                PyrusServiceDesk.get().application,
-                FilePreviewActivity::class.java
-            )
-                .putExtra(KEY_FILE_DATA, fileData)
+        fun getLaunchIntent(context: Context, fileData: FileData): Intent {
+            return Intent(context, FilePreviewActivity::class.java).putExtra(KEY_FILE_DATA, fileData)
         }
     }
 }

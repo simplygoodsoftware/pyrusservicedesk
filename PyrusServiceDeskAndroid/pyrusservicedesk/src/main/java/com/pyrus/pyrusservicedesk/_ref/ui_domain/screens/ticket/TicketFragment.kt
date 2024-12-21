@@ -19,10 +19,15 @@ import androidx.core.content.ContextCompat.getSystemService
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.isVisible
+import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
 import com.pyrus.pyrusservicedesk.PyrusServiceDesk.Companion.injector
 import com.pyrus.pyrusservicedesk.R
 import com.pyrus.pyrusservicedesk._ref.ui_domain.screens.ticket.TicketView.Model
 import com.pyrus.pyrusservicedesk._ref.ui_domain.screens.ticket.adapter.TicketAdapter
+import com.pyrus.pyrusservicedesk._ref.ui_domain.screens.ticket.adapter.TicketAdapter.Companion.VIEW_TYPE_COMMENT_INBOUND
+import com.pyrus.pyrusservicedesk._ref.ui_domain.screens.ticket.adapter.TicketAdapter.Companion.VIEW_TYPE_COMMENT_OUTBOUND
+import com.pyrus.pyrusservicedesk._ref.ui_domain.screens.ticket.adapter.new_entries.CommentEntryV2
 import com.pyrus.pyrusservicedesk._ref.utils.ConfigUtils
 import com.pyrus.pyrusservicedesk._ref.utils.getColorOnBackground
 import com.pyrus.pyrusservicedesk._ref.utils.getSecondaryColorOnBackground
@@ -40,8 +45,9 @@ import com.pyrus.pyrusservicedesk._ref.whitetea.utils.diff
 import com.pyrus.pyrusservicedesk.databinding.PsdFragmentTicketBinding
 import com.pyrus.pyrusservicedesk.presentation.ui.navigation_page.ticket.dialogs.attach_files.AttachFileSharedViewModel
 import com.pyrus.pyrusservicedesk.presentation.ui.navigation_page.ticket.dialogs.attach_files.AttachFileVariantsFragment
-import com.pyrus.pyrusservicedesk.presentation.ui.view.recyclerview.item_decorators.SpaceItemDecoration
+import com.pyrus.pyrusservicedesk.presentation.ui.view.recyclerview.item_decorators.GroupVerticalItemDecoration
 import kotlinx.coroutines.flow.map
+
 
 internal class TicketFragment: TeaFragment<Model, TicketView.Event, TicketView.Effect>() {
 
@@ -50,7 +56,7 @@ internal class TicketFragment: TeaFragment<Model, TicketView.Event, TicketView.E
     private val adapter: TicketAdapter by lazy {
         TicketAdapter(
             { dispatch(TicketView.Event.OnRetryClick(it)) },
-            { dispatch(TicketView.Event.OnPreviewClick(it)) },
+            ::dispatch,
             { text -> dispatch(TicketView.Event.OnCopyClick(text)) },
             { rating -> dispatch(TicketView.Event.OnRatingClick(rating)) }
         )
@@ -68,18 +74,16 @@ internal class TicketFragment: TeaFragment<Model, TicketView.Event, TicketView.E
         AttachFileSharedViewModel::class.java
     )
 
-    override val renderer: ViewRenderer<Model> = diff {
+    override fun createRenderer(): ViewRenderer<Model> = diff {
         diff(Model::inputText) { text -> if (!binding.input.hasFocus()) binding.input.setText(text) }
         diff(Model::sendEnabled) { sendEnabled -> binding.send.isEnabled = sendEnabled }
-        diff(Model::comments, { new, old -> new === old }, adapter::submitList)
+        diff(Model::comments, { new, old -> new === old }, ::updateComments)
         diff(Model::showNoConnectionError) { showError -> binding.noConnection.root.isVisible = showError }
         diff(Model::isLoading) { isLoading ->
             binding.ticketContent.isVisible = !isLoading
             binding.progressBar.isVisible = isLoading
         }
-        diff(Model::isRefreshing) {
-            isRefreshing -> binding.refresh.isRefreshing = isRefreshing
-        }
+        diff(Model::isRefreshing) { isRefreshing -> binding.refresh.isRefreshing = isRefreshing }
     }
 
     override fun handleEffect(effect: TicketView.Effect) {
@@ -157,7 +161,11 @@ internal class TicketFragment: TeaFragment<Model, TicketView.Event, TicketView.E
 
     private fun initListeners() {
         binding.ticketToolbar.setOnMenuItemClickListener { onMenuItemClicked(it) }
-        binding.send.setOnClickListener { dispatch(TicketView.Event.OnSendClick) }
+        binding.send.setOnClickListener {
+            dispatch(TicketView.Event.OnSendClick)
+            binding.input.text = null
+            binding.comments.scrollToPosition(0)
+        }
         binding.attach.setOnClickListener { dispatch(TicketView.Event.OnShowAttachVariantsClick) }
         binding.input.addTextChangedListener(inputTextWatcher)
         binding.refresh.setOnRefreshListener { dispatch(TicketView.Event.OnRefresh) }
@@ -165,19 +173,57 @@ internal class TicketFragment: TeaFragment<Model, TicketView.Event, TicketView.E
     }
 
     private fun initUi() {
-        binding.comments.apply {
-            adapter = this@TicketFragment.adapter
-            addItemDecoration(
-                SpaceItemDecoration(
-                    resources.getDimensionPixelSize(R.dimen.psd_comments_item_space),
-                    this@TicketFragment.adapter.itemSpaceMultiplier
-                )
-            )
-            itemAnimator = null
-        }
+        initCommentsRecyclerView()
+
         binding.toolbarTitle.text = ConfigUtils.getTitle(requireContext())
 
         applyStyle()
+    }
+
+    private fun initCommentsRecyclerView() {
+        val recyclerView = binding.comments
+
+        recyclerView.adapter = adapter
+
+        recyclerView.layoutManager = LinearLayoutManager(
+            requireContext(),
+            LinearLayoutManager.VERTICAL,
+            true
+        )
+
+        val defaultDivider = resources.getDimensionPixelSize(R.dimen.psd_comments_item_space)
+        recyclerView.addItemDecoration(
+            GroupVerticalItemDecoration(
+                viewType = VIEW_TYPE_COMMENT_INBOUND,
+                innerDivider = defaultDivider,
+                outerDivider = defaultDivider * 2,
+                invert = true,
+            )
+        )
+        recyclerView.addItemDecoration(
+            GroupVerticalItemDecoration(
+                viewType = VIEW_TYPE_COMMENT_OUTBOUND,
+                innerDivider = defaultDivider,
+                outerDivider = defaultDivider * 2,
+                invert = true,
+            )
+        )
+        recyclerView.addItemDecoration(
+            GroupVerticalItemDecoration(
+                viewType = GroupVerticalItemDecoration.TYPE_ANY,
+                innerDivider = defaultDivider,
+                outerDivider = defaultDivider,
+                invert = true,
+                excludeTypes = setOf(VIEW_TYPE_COMMENT_INBOUND, VIEW_TYPE_COMMENT_OUTBOUND)
+            )
+        )
+
+        val pool = RecyclerView.RecycledViewPool()
+        pool.setMaxRecycledViews(VIEW_TYPE_COMMENT_OUTBOUND, 10)
+        pool.setMaxRecycledViews(VIEW_TYPE_COMMENT_INBOUND, 10)
+        recyclerView.setRecycledViewPool(pool)
+
+        recyclerView.itemAnimator = null
     }
 
     private fun applyStyle() {
@@ -242,9 +288,9 @@ internal class TicketFragment: TeaFragment<Model, TicketView.Event, TicketView.E
         binding.refresh.setColorSchemeColors(ConfigUtils.getAccentColor(requireContext()))
 
         with(requireActivity().window) {
-           clearFlags(WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS)
-           addFlags(WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS)
-           statusBarColor = ConfigUtils.getStatusBarColor(requireContext()) ?: statusBarColor
+            clearFlags(WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS)
+            addFlags(WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS)
+            statusBarColor = ConfigUtils.getStatusBarColor(requireContext()) ?: statusBarColor
         }
 
     }
@@ -255,6 +301,16 @@ internal class TicketFragment: TeaFragment<Model, TicketView.Event, TicketView.E
             dispatch(TicketView.Event.OnCloseClick)
         }
         return true
+    }
+
+    private fun updateComments(comments: List<CommentEntryV2>?) {
+        adapter.submitList(comments?.reversed()) {
+            val layoutManager = (binding.comments.layoutManager as? LinearLayoutManager) ?: return@submitList
+            val firstVisiblePosition = layoutManager.findFirstVisibleItemPosition()
+            if (firstVisiblePosition == 0) {
+                layoutManager.scrollToPosition(0)
+            }
+        }
     }
 
     companion object {

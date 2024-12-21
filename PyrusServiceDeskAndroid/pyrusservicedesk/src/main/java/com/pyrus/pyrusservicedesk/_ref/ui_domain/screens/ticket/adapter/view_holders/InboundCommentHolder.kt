@@ -1,27 +1,27 @@
 package com.pyrus.pyrusservicedesk._ref.ui_domain.screens.ticket.adapter.view_holders
 
-import android.net.Uri
 import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageView
 import android.widget.TextView
 import com.pyrus.pyrusservicedesk.PyrusServiceDesk
 import com.pyrus.pyrusservicedesk.R
+import com.pyrus.pyrusservicedesk._ref.ui_domain.screens.ticket.TicketView
 import com.pyrus.pyrusservicedesk._ref.ui_domain.screens.ticket.adapter.new_entries.CommentEntryV2
-import com.pyrus.pyrusservicedesk.presentation.ui.view.CommentView
 import com.pyrus.pyrusservicedesk._ref.utils.CIRCLE_TRANSFORMATION
 import com.pyrus.pyrusservicedesk._ref.utils.ConfigUtils
+import com.pyrus.pyrusservicedesk.presentation.ui.view.CommentView
 
 internal class InboundCommentHolder(
     parent: ViewGroup,
     onErrorCommentEntryClickListener: (id: Long) -> Unit,
-    onFileReadyToPreviewClickListener: (uri: Uri) -> Unit,
+    onEvent: (event: TicketView.Event) -> Unit,
     onTextCommentLongClicked: (String) -> Unit,
 ) : CommentHolder(
     parent,
     R.layout.psd_view_holder_comment_inbound,
     onErrorCommentEntryClickListener,
-    onFileReadyToPreviewClickListener,
+    onEvent,
     onTextCommentLongClicked
 ) {
 
@@ -38,8 +38,8 @@ internal class InboundCommentHolder(
 
     override fun bindItem(entry: CommentEntryV2.Comment) {
         super.bindItem(entry)
-        setAuthorNameAndVisibility(entry, true)
-        setAuthorAvatarVisibility(entry, true)
+        setAuthorNameAndVisibility(entry, entry.showAuthorName)
+        setAuthorAvatarVisibility(entry, entry.showAvatar)
     }
 
     private fun setAuthorNameAndVisibility(item: CommentEntryV2.Comment, visible: Boolean) {

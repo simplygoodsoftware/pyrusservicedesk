@@ -15,8 +15,10 @@ import android.view.View
  * @param itemSpaceMultiplier [SpaceMultiplier] implementation that is allowed to adjust default [itemSpace]
  * between items
  */
-internal class SpaceItemDecoration(@Px val itemSpace: Int,
-                                   private val itemSpaceMultiplier: SpaceMultiplier? = null)
+internal class SpaceItemDecoration(
+    @Px val itemSpace: Int,
+    private val itemSpaceMultiplier: SpaceMultiplier? = null,
+)
     : RecyclerView.ItemDecoration() {
 
     override fun getItemOffsets(outRect: Rect,
