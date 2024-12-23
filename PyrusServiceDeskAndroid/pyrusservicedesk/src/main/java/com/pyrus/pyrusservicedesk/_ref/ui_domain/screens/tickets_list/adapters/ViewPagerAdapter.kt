@@ -5,7 +5,7 @@ import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentManager
 import androidx.lifecycle.Lifecycle
 import androidx.viewpager2.adapter.FragmentStateAdapter
-import com.pyrus.pyrusservicedesk._ref.ui_domain.screens.tickets_list.ticketsList.TicketsListFragment
+import com.pyrus.pyrusservicedesk._ref.ui_domain.screens.tickets_list.ticketList.TicketsListFragment
 import com.pyrus.pyrusservicedesk.sdk.data.Application
 
 class ViewPagerAdapter(fm: FragmentManager, lf: Lifecycle) : FragmentStateAdapter(fm, lf) {

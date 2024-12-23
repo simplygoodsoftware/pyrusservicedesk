@@ -105,12 +105,9 @@ internal class TicketsFragment: TeaFragment<TicketListModel, Message, Effect.Out
         })
 
         binding.viewPager.adapter = viewPagerAdapter
-        TabLayoutMediator(
-                binding.tabLayout,
-                binding.viewPager
-            ) { tab, position ->
-                tab.text = viewPagerAdapter.getTitle(position)
-            }.attach()
+        TabLayoutMediator(binding.tabLayout, binding.viewPager) { tab, position ->
+            tab.text = viewPagerAdapter.getTitle(position)
+        }.attach()
 
 
         val feature = getStore { injector().ticketsFeatureFactory().create() }

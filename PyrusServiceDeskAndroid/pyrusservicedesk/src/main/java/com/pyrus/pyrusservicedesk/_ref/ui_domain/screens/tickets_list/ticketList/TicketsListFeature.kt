@@ -1,9 +1,9 @@
-package com.pyrus.pyrusservicedesk._ref.ui_domain.screens.tickets_list.ticketsList
+package com.pyrus.pyrusservicedesk._ref.ui_domain.screens.tickets_list.ticketList
 
 import com.pyrus.pyrusservicedesk._ref.whitetea.core.Store
-import com.pyrus.pyrusservicedesk._ref.ui_domain.screens.tickets_list.ticketsList.TicketsListContract.Effect
-import com.pyrus.pyrusservicedesk._ref.ui_domain.screens.tickets_list.ticketsList.TicketsListContract.Message
-import com.pyrus.pyrusservicedesk._ref.ui_domain.screens.tickets_list.ticketsList.TicketsListContract.State
+import com.pyrus.pyrusservicedesk._ref.ui_domain.screens.tickets_list.ticketList.TicketsListContract.Effect
+import com.pyrus.pyrusservicedesk._ref.ui_domain.screens.tickets_list.ticketList.TicketsListContract.Message
+import com.pyrus.pyrusservicedesk._ref.ui_domain.screens.tickets_list.ticketList.TicketsListContract.State
 import com.pyrus.pyrusservicedesk.sdk.data.Ticket
 import com.pyrus.pyrusservicedesk.sdk.data.intermediate.Tickets
 
