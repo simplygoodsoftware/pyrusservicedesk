@@ -5,6 +5,7 @@ import com.pyrus.pyrusservicedesk._ref.whitetea.core.Store
 import com.pyrus.pyrusservicedesk._ref.ui_domain.screens.tickets_list.tickets.TicketsContract.Effect
 import com.pyrus.pyrusservicedesk._ref.ui_domain.screens.tickets_list.tickets.TicketsContract.Message
 import com.pyrus.pyrusservicedesk._ref.ui_domain.screens.tickets_list.tickets.TicketsContract.State
+import com.pyrus.pyrusservicedesk._ref.ui_domain.screens.tickets_list.tickets_list.TicketsListContract.Message.Outer
 import com.pyrus.pyrusservicedesk.sdk.data.Application
 import com.pyrus.pyrusservicedesk.sdk.data.intermediate.TicketsDto
 
@@ -41,6 +42,12 @@ internal interface TicketsContract {
             data object OnFabItemClick : Outer
 
             data class OnChangeApp(val appId: String) : Outer
+
+            data object OnCreateTicketClick : Outer
+
+            data class OnTicketClick(val ticketId: Int) : Outer
+
+            data class OnUserIdSelect(val userId: String) : Outer
 
         }
 

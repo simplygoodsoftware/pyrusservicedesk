@@ -13,6 +13,7 @@ import com.pyrus.pyrusservicedesk._ref.whitetea.core.Actor
 import com.pyrus.pyrusservicedesk._ref.whitetea.core.StoreFactory
 import com.pyrus.pyrusservicedesk._ref.whitetea.core.adaptCast
 import com.pyrus.pyrusservicedesk._ref.whitetea.core.logic.Logic
+import com.pyrus.pyrusservicedesk._ref.whitetea.utils.adapt
 import com.pyrus.pyrusservicedesk.sdk.data.Ticket
 import com.pyrus.pyrusservicedesk.sdk.data.intermediate.TicketsDto
 import com.pyrus.pyrusservicedesk.sdk.repositories.Repository
@@ -40,7 +41,7 @@ internal class TicketsListFeatureFactory(
         initialEffects = listOf(
             Effect.Inner.UpdateTickets,
         ),
-    )
+    ).adapt { it as? Effect.Outer }
 
 }
 

@@ -7,7 +7,7 @@ import com.pyrus.pyrusservicedesk._ref.ui_domain.screens.tickets_list.tickets_li
 import com.pyrus.pyrusservicedesk.sdk.data.Ticket
 import com.pyrus.pyrusservicedesk.sdk.data.intermediate.TicketsDto
 
-internal typealias TicketsListFeature = Store<State, Message, Effect>
+internal typealias TicketsListFeature = Store<State, Message, Effect.Outer>
 
 internal interface TicketsListContract {
 

@@ -21,7 +21,7 @@ import com.pyrus.pyrusservicedesk.databinding.TicketsListFragmentBinding
 import kotlinx.coroutines.flow.debounce
 import kotlinx.coroutines.flow.map
 
-internal class TicketsListFragment: TeaFragment<State, Message, Effect>()  {
+internal class TicketsListFragment: TeaFragment<State, Message, Effect.Outer>()  {
 
     private lateinit var binding: TicketsListFragmentBinding
     private lateinit var adapter: TicketsListAdapter
@@ -85,7 +85,7 @@ internal class TicketsListFragment: TeaFragment<State, Message, Effect>()  {
 
     }
 
-    override fun handleEffect(effect: Effect) {
+    override fun handleEffect(effect: Effect.Outer) {
         when(effect) {
 
             is Effect.Outer.ShowAddTicketMenu -> {
@@ -94,9 +94,6 @@ internal class TicketsListFragment: TeaFragment<State, Message, Effect>()  {
             }
 
             is Effect.Outer.ShowTicket -> injector().router.navigateTo(Screens.TicketScreen(effect.ticketId, effect.userId))
-
-            Effect.Inner.TicketsAutoUpdate -> TODO()
-            Effect.Inner.UpdateTickets -> TODO()
         }
     }
 
