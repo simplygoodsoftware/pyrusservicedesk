@@ -33,7 +33,7 @@ import com.pyrus.pyrusservicedesk._ref.whitetea.utils.diff
 import com.pyrus.pyrusservicedesk.databinding.PsdTicketsListBinding
 import kotlinx.coroutines.flow.map
 
-internal class TicketsFragment: TeaFragment<TicketListModel, Message, Effect>() {
+internal class TicketsFragment: TeaFragment<TicketListModel, Message, Effect.Outer>() {
 
     private lateinit var binding: PsdTicketsListBinding
     private var selectedUserIdFilter: String = KEY_DEFAULT_USER_ID
@@ -197,7 +197,7 @@ internal class TicketsFragment: TeaFragment<TicketListModel, Message, Effect>() 
         }
     }
 
-    override fun handleEffect(effect: Effect) {
+    override fun handleEffect(effect: Effect.Outer) {
         when(effect) {
 
             is Effect.Outer.ShowFilterMenu -> {
@@ -213,9 +213,6 @@ internal class TicketsFragment: TeaFragment<TicketListModel, Message, Effect>() 
             is Effect.Outer.ShowTicket -> {
                 injector().router.navigateTo(Screens.TicketScreen(effect.ticketId, effect.userId))
             }
-
-            Effect.Inner.TicketsAutoUpdate -> TODO()
-            Effect.Inner.UpdateTickets -> TODO()
         }
     }
 

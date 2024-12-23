@@ -25,7 +25,6 @@ internal class TicketsListFragment: TeaFragment<State, Message, Effect>()  {
 
     private lateinit var binding: TicketsListFragmentBinding
     private lateinit var adapter: TicketsListAdapter
-    private val hashMap: HashMap<String, String> = hashMapOf() //TODO sd start data
     private var appId: String = DEFAULT_APP_ID
 
     override fun onCreateView(

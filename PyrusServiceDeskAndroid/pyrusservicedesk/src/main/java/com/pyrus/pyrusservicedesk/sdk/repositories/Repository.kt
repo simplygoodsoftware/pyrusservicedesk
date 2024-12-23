@@ -89,7 +89,11 @@ internal class Repository(
 //    }
 
     //TODO what we need to do when we haven't fount ticket (feedTry.value == null, but feedTry.isSuccess())
-    suspend fun getFeed(ticketId: Int, keepUnread: Boolean, includePendingComments: Boolean = false): Try<FullTicket> {
+    suspend fun getFeed(
+        ticketId: Int,
+        keepUnread: Boolean,
+        includePendingComments: Boolean = false,
+    ): Try<FullTicket> {
         val feedTry = remoteStore.getTicket(ticketId).map(repositoryMapper::map)
 
         if (feedTry.isSuccess()) remoteFeedMutex.withLock {
