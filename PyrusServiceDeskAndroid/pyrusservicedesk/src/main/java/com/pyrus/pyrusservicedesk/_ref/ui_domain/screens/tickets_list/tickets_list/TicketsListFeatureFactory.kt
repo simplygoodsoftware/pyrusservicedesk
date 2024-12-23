@@ -14,7 +14,7 @@ import com.pyrus.pyrusservicedesk._ref.whitetea.core.StoreFactory
 import com.pyrus.pyrusservicedesk._ref.whitetea.core.adaptCast
 import com.pyrus.pyrusservicedesk._ref.whitetea.core.logic.Logic
 import com.pyrus.pyrusservicedesk._ref.whitetea.utils.adapt
-import com.pyrus.pyrusservicedesk.sdk.data.Ticket
+import com.pyrus.pyrusservicedesk.sdk.data.TicketDto
 import com.pyrus.pyrusservicedesk.sdk.data.intermediate.TicketsDto
 import com.pyrus.pyrusservicedesk.sdk.repositories.Repository
 import kotlinx.coroutines.flow.Flow
@@ -115,7 +115,7 @@ private class FeatureReducer : Logic<State, Message, Effect>() {
                 } else {
                     state.allTickets
                 }
-                state.copy(tickets = tickets)
+                state { state.copy(tickets = tickets) }
 
             }
 
@@ -136,7 +136,7 @@ private class FeatureReducer : Logic<State, Message, Effect>() {
         return hashMap
     }
 
-    private fun getUserId(ticketId: Int, tickets: List<Ticket>): String {
+    private fun getUserId(ticketId: Int, tickets: List<TicketDto>): String {
         return tickets.find { it.ticketId == ticketId }?.userId ?: ""
     }
 
@@ -148,12 +148,13 @@ internal class TicketsListActor(
 
     override fun handleEffect(effect: Effect.Inner): Flow<Message.Inner> = when (effect) {
         Effect.Inner.UpdateTickets -> singleFlow {
-            val ticketsTry: Try<TicketsDto> = repository.getAllData()
-            // sync(repository.createSyncRequest())
-            when {
-                ticketsTry.isSuccess() -> Message.Inner.UpdateTicketsCompleted(ticketsTry.value)
-                else -> Message.Inner.UpdateTicketsFailed
-            }
+            Message.Inner.UpdateTicketsFailed
+//            val ticketsTry: Try<TicketsDto> = repository.getAllData()
+//            // sync(repository.createSyncRequest())
+//            when {
+//                ticketsTry.isSuccess() -> Message.Inner.UpdateTicketsCompleted(ticketsTry.value)
+//                else -> Message.Inner.UpdateTicketsFailed
+//            }
 
         }
     }

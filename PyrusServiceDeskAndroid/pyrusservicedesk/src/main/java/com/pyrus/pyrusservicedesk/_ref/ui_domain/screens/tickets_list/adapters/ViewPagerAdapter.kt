@@ -6,9 +6,9 @@ import androidx.fragment.app.FragmentManager
 import androidx.lifecycle.Lifecycle
 import androidx.viewpager2.adapter.FragmentStateAdapter
 import com.pyrus.pyrusservicedesk._ref.ui_domain.screens.tickets_list.tickets_list.TicketsListFragment
-import com.pyrus.pyrusservicedesk.sdk.data.Application
+import com.pyrus.pyrusservicedesk.sdk.data.ApplicationDto
 
-class ViewPagerAdapter(fm: FragmentManager, lf: Lifecycle) : FragmentStateAdapter(fm, lf) {
+internal class ViewPagerAdapter(fm: FragmentManager, lf: Lifecycle) : FragmentStateAdapter(fm, lf) {
 
     private var appIds = listOf<String>()
     private var titleList = listOf<String>()
@@ -23,7 +23,7 @@ class ViewPagerAdapter(fm: FragmentManager, lf: Lifecycle) : FragmentStateAdapte
         return fragment
     }
 
-    fun setItems(applications: HashSet<Application>) {
+    fun setItems(applications: HashSet<ApplicationDto>) {
         this.appIds = applications.map { it.appId ?: "" }
         this.titleList = applications.map { it.orgName ?: "" }
         notifyDataSetChanged()

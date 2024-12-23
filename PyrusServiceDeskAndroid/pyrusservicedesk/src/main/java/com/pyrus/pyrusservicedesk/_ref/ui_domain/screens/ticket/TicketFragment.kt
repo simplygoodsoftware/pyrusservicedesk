@@ -7,8 +7,6 @@ import android.os.Build
 import android.os.Bundle
 import android.text.Editable
 import android.text.TextWatcher
-import android.util.Log
-import android.view.Display.Mode
 import android.view.LayoutInflater
 import android.view.MenuItem
 import android.view.View
@@ -149,7 +147,7 @@ internal class TicketFragment: TeaFragment<Model, TicketView.Event, TicketView.E
         val userId = arguments?.getString(KEY_USER_ID) ?: KEY_DEFAULT_USER_ID
         //TODO если открыть файл и вернуться в задачу скорее всего id обновится
         val ticketId = arguments?.getInt(KEY_TICKET_ID, injector().localStore.getLastTicketId()) ?: injector().localStore.getLastTicketId()
-        val feature = getStore { injector().ticketFeatureFactory("welcome", userId, ticketId).create() }
+        val feature = getStore { injector().ticketFeatureFactory("welcome").create(userId, ticketId) }
         bind(BinderLifecycleMode.CREATE_DESTROY) {
             this@TicketFragment.messages.map(TicketMapper::map) bindTo feature
         }

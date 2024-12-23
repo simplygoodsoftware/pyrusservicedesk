@@ -3,7 +3,7 @@ package com.pyrus.pyrusservicedesk.sdk.web.retrofit
 import com.pyrus.pyrusservicedesk.PyrusServiceDesk.Companion.API_VERSION_2
 import com.pyrus.pyrusservicedesk._ref.utils.Try
 import com.pyrus.pyrusservicedesk._ref.utils.log.PLog
-import com.pyrus.pyrusservicedesk.sdk.data.UserData
+import com.pyrus.pyrusservicedesk.sdk.data.UserDataDto
 import com.pyrus.pyrusservicedesk.sdk.data.intermediate.TicketsDto
 import com.pyrus.pyrusservicedesk.sdk.web.request_body.RequestBodyBase
 import kotlinx.coroutines.CoroutineDispatcher
@@ -232,7 +232,7 @@ internal class SyncRepository(val retrofit: Retrofit) : CoroutineScope {
         )
     }
 
-    private fun getAdditionalUsers(): List<UserData> {
+    private fun getAdditionalUsers(): List<UserDataDto> {
 //        val list = PyrusServiceDesk.users.map { UserData(it.appId, it.userId, getSecurityKey()?:"") }
 //        return list
         return emptyList()

@@ -10,11 +10,8 @@ import com.google.gson.annotations.SerializedName
  * @param securityKey used as key for external authorization.
  */
 @Keep
-class UserData(
-    @SerializedName("app_id")
-    val appId: String,
-    @SerializedName("user_id")
-    val userId: String?,
-    @SerializedName("security_key")
-    val securityKey: String,
+class UserDataDto(
+    @SerializedName("app_id") val appId: String,
+    @SerializedName("user_id") val userId: String?,
+    @SerializedName("security_key") val securityKey: String,
 )

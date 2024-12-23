@@ -18,7 +18,6 @@ import com.pyrus.pyrusservicedesk._ref.utils.PREFERENCE_KEY
 import com.pyrus.pyrusservicedesk._ref.utils.RequestUtils
 import com.pyrus.pyrusservicedesk._ref.utils.getFirstNSymbols
 import com.pyrus.pyrusservicedesk.core.Account
-import com.pyrus.pyrusservicedesk.sdk.data.User
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 
@@ -151,9 +150,9 @@ class PyrusServiceDesk private constructor(
          * Unhandled IllegalStateException is thrown otherwise.
          *
          * @param application instance of the enclosing application
-         * @param appId id of a client
-         * @param userId of the user who is initializing service desk
-         * @param securityKey of the user far safe initialization
+         * @param appId id of a client // TODO
+         * @param userId of the user who is initializing service desk // TODO
+         * @param securityKey of the user far safe initialization // TODO
          * @param domain Base domain for network requests. If the [domain] is null, the default pyrus.com will be used.
          * @param loggingEnabled If true, then the library will write logs,
          * and they can be sent as a file to chat by clicking the "Send Library Logs" button in the menu under the "+" sign.
@@ -166,7 +165,12 @@ class PyrusServiceDesk private constructor(
             listUser: List<User>,
             authorId: String,
             isMultiChat: Boolean,
+            domain: String? = null,
+            loggingEnabled: Boolean = false,
+            authorizationToken: String? = null,
         ) {
+            if (listUser.isEmpty()) throw Exception("user list is empty")
+
             initInternal(
                 application,
                 listUser,
@@ -175,10 +179,10 @@ class PyrusServiceDesk private constructor(
                 authorId,
                 isMultiChat,
                 null,
-                null,
+                domain,
                 API_VERSION_3,
-                false,
-                null,
+                loggingEnabled,
+                authorizationToken,
             )
         }
 
@@ -208,6 +212,7 @@ class PyrusServiceDesk private constructor(
                     appId,
                     apiDomain,
                     isMultiChat,
+                    listUser.first().userId,
                     listUser,
                     authorId,
                 )

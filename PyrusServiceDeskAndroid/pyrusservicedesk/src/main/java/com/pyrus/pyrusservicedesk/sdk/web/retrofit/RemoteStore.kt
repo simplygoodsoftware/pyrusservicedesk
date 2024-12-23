@@ -6,6 +6,9 @@ import com.pyrus.pyrusservicedesk.PyrusServiceDesk.Companion.API_VERSION_1
 import com.pyrus.pyrusservicedesk.PyrusServiceDesk.Companion.API_VERSION_2
 import com.pyrus.pyrusservicedesk.PyrusServiceDesk.Companion.API_VERSION_3
 import com.pyrus.pyrusservicedesk.PyrusServiceDesk.Companion.injector
+import com.pyrus.pyrusservicedesk._ref.data.FullTicket
+import com.pyrus.pyrusservicedesk._ref.data.multy_chat.TicketSetInfo
+import com.pyrus.pyrusservicedesk._ref.data.multy_chat.TicketsInfo
 import com.pyrus.pyrusservicedesk._ref.utils.ConfigUtils
 import com.pyrus.pyrusservicedesk._ref.utils.Try
 import com.pyrus.pyrusservicedesk._ref.utils.getFirstNSymbols
@@ -16,15 +19,16 @@ import com.pyrus.pyrusservicedesk.core.Account
 import com.pyrus.pyrusservicedesk.core.StaticRepository
 import com.pyrus.pyrusservicedesk.sdk.FileResolver
 import com.pyrus.pyrusservicedesk.sdk.data.AttachmentDto
-import com.pyrus.pyrusservicedesk.sdk.data.Command
+import com.pyrus.pyrusservicedesk.sdk.data.CommandDto
 import com.pyrus.pyrusservicedesk.sdk.data.CommentDto
 import com.pyrus.pyrusservicedesk.sdk.data.FileManager
-import com.pyrus.pyrusservicedesk.sdk.data.Ticket
-import com.pyrus.pyrusservicedesk.sdk.data.TicketCommandResult
-import com.pyrus.pyrusservicedesk.sdk.data.UserData
+import com.pyrus.pyrusservicedesk.sdk.data.TicketDto
+import com.pyrus.pyrusservicedesk.sdk.data.TicketCommandResultDto
+import com.pyrus.pyrusservicedesk.sdk.data.UserDataDto
 import com.pyrus.pyrusservicedesk.sdk.data.intermediate.AddCommentResponseData
 import com.pyrus.pyrusservicedesk.sdk.data.intermediate.CommentsDto
 import com.pyrus.pyrusservicedesk.sdk.data.intermediate.TicketsDto
+import com.pyrus.pyrusservicedesk.sdk.repositories.RepositoryMapper
 import com.pyrus.pyrusservicedesk.sdk.response.ApiCallError
 import com.pyrus.pyrusservicedesk.sdk.response.AuthorizationError
 import com.pyrus.pyrusservicedesk.sdk.response.ResponseError
@@ -85,7 +89,7 @@ internal class RemoteStore(
         return commentsTry
     }
 
-    suspend fun getTicket(ticketId: Int): Try<Ticket?> {
+    suspend fun getTicket(ticketId: Int): Try<TicketDto> {
         PLog.d(
             TAG, "getTickets, " +
                     "appId: ${account.appId.getFirstNSymbols(10)}, " +
@@ -108,13 +112,19 @@ internal class RemoteStore(
             )
         )
         PLog.d(TAG, "getTickets, isSuccessful: ${ticketsTry.isSuccess()}")
-        return ticketsTry.map { it.tickets?.find { it.ticketId == ticketId } ?: null }
+        if (ticketsTry.isSuccess()) {
+            val ticket = ticketsTry.value.tickets
+                ?.find { it.ticketId == ticketId } ?: return Try.Failure(Exception("Ticket not found in response"))
+            return Try.Success(ticket)
+        }
+
+        return ticketsTry
     }
 
     /**
      * Provides available tickets.
      */
-    suspend fun getTickets(): Try<List<Ticket>> {
+    suspend fun getTickets(): Try<List<TicketDto>> {
         PLog.d(
             TAG, "getTickets, " +
                 "appId: ${account.appId.getFirstNSymbols(10)}, " +
@@ -140,10 +150,11 @@ internal class RemoteStore(
         return ticketsTry.map { it.tickets ?: emptyList() }
     }
 
-    suspend fun getAllData(commands: List<Command>? = null): Try<TicketsDto> {
+    suspend fun getAllData(commands: List<CommandDto>? = null): Try<TicketsInfo> {
+        val v3 = account as Account.V3 // TODO
         PLog.d(
             TAG, "getAllData, " +
-                    "appId: ${account.appId.getFirstNSymbols(10)}, " +
+                    "appId: ${v3.appId.getFirstNSymbols(10)}, " +
                     "userId: ${getUserId().getFirstNSymbols(10)}, " +
                     "instanceId: ${getInstanceId()?.getFirstNSymbols(10)}, " +
                     "apiVersion: ${getVersion()}"
@@ -155,7 +166,7 @@ internal class RemoteStore(
                 commands = commands,
                 authorId = getAuthorId(),
                 authorName = "Kate Test",
-                appId = account.appId,
+                appId = v3.appId,
                 userId = getUserId(),
                 instanceId = getInstanceId(),
                 version = getVersion(),
@@ -164,11 +175,40 @@ internal class RemoteStore(
             )
         )
         PLog.d(TAG, "getTickets, isSuccessful: ${ticketsTry.isSuccess()}")
-        return ticketsTry.map { it }
+        return ticketsTry.map { mapTickets(v3, it) }
     }
 
-    private fun getAdditionalUsers(): List<UserData>? {
-        val list = (account as? Account.V3)?.users?.map { UserData(it.appId, it.userId, getSecurityKey()?:"") }
+
+    private fun mapTickets(accountV3: Account.V3, ticketsDto: TicketsDto): TicketsInfo {
+        val mapper = RepositoryMapper(account)
+        val usersByAppId = accountV3.users.groupBy { it.appId }
+
+        val ticketsByUserId = ticketsDto.tickets
+            ?.map(mapper::map)
+            ?.associateBy { it.userId } ?: error("tickets is null")
+
+        val applications = ticketsDto.applications ?: error("applications is null")
+
+        val ticketSetInfoList = applications.map {
+            val appId = it.appId ?: error("appId is null")
+            val users = usersByAppId[appId] ?: error("user with appId: $appId not exist")
+            val tickets = ArrayList<FullTicket>()
+            for (user in users) {
+                tickets += ticketsByUserId[user.userId] ?: error("user with appId: ${it.appId} not exist")
+            }
+            TicketSetInfo(
+                appId = appId,
+                orgName = it.orgName ?: "",
+                orgLogoUrl = it.orgLogoUrl,
+                tickets = tickets,
+            )
+        }
+
+        return TicketsInfo(ticketSetInfoList)
+    }
+
+    private fun getAdditionalUsers(): List<UserDataDto>? {
+        val list = (account as? Account.V3)?.users?.map { UserDataDto(it.appId, it.userId, "") }
         return list
     }
 
@@ -185,7 +225,7 @@ internal class RemoteStore(
         return addComment(injector().localStore.getLastTicketId(), comment, uploadFileHook)
     }
 
-    suspend fun addTextComment(command: Command): Try<List<TicketCommandResult>?> {
+    suspend fun addTextComment(command: CommandDto): Try<List<TicketCommandResultDto>?> {
         val commandsResultTry = api.getTickets(
             RequestBodyBase(
                 needFullInfo = false,

@@ -17,8 +17,8 @@ import com.pyrus.pyrusservicedesk._ref.whitetea.core.StoreFactory
 import com.pyrus.pyrusservicedesk._ref.whitetea.core.adaptCast
 import com.pyrus.pyrusservicedesk._ref.whitetea.core.logic.Logic
 import com.pyrus.pyrusservicedesk._ref.whitetea.utils.adapt
-import com.pyrus.pyrusservicedesk.sdk.data.User
-import com.pyrus.pyrusservicedesk.sdk.data.intermediate.TicketsDto
+import com.pyrus.pyrusservicedesk.User
+import com.pyrus.pyrusservicedesk._ref.data.multy_chat.TicketsInfo
 import com.pyrus.pyrusservicedesk.sdk.repositories.Repository
 import kotlinx.coroutines.flow.Flow
 
@@ -33,18 +33,12 @@ internal class TicketsFeatureFactory(
         name = TAG,
         initialState = State(
             appId = "",
-            applications = hashSetOf(),
-            tickets = TicketsDto(
-                hasMore = null,
-                commandsResult = emptyList()
-            ),
+            tickets = null,
             isLoading = true,
             titleText = "",
             titleImageUrl = "",
             filterName = "",
-            ticketsIsEmpty = true,
             filterEnabled = false,
-            tabLayoutVisibility = false,
             showNoConnectionError = false,
         ),
         reducer = FeatureReducer(),
@@ -71,9 +65,8 @@ private class FeatureReducer: Logic<State, Message, Effect>() {
             Message.Outer.OnFabItemClick -> {
                 val users = getSelectedUsers(state.appId) ?: emptyList()
                 if (users.size > 1) {
-                    effects {
-                        +Effect.Outer.ShowAddTicketMenu(state.appId)
-                    }
+                    val selectedAppId = state.appId ?: return
+                    effects { +Effect.Outer.ShowAddTicketMenu(selectedAppId) }
                 }
 //                else if (users.isEmpty()) {
 //                    injector().ticketFeatureFactory("welcom")
@@ -86,8 +79,9 @@ private class FeatureReducer: Logic<State, Message, Effect>() {
                 }
             }
 
-            is Message.Outer.OnFilterClick -> effects {
-                +Effect.Outer.ShowFilterMenu(state.appId, message.selectedUserId)
+            is Message.Outer.OnFilterClick -> {
+                val selectedAppId = state.appId ?: return
+                effects { +Effect.Outer.ShowFilterMenu(selectedAppId, message.selectedUserId) }
             }
 
             Message.Outer.OnScanClick -> injector().router.exit() // TODO
@@ -95,7 +89,7 @@ private class FeatureReducer: Logic<State, Message, Effect>() {
             Message.Outer.OnSettingsClick -> Log.d(TAG, "OnScanClick, OnSettingsClick")
 
             is Message.Outer.OnChangeApp -> state {
-                updateTicketsState(state, message.appId)
+                updateTicketsFilterState(state, message.appId)
             }
 
             Message.Outer.OnCreateTicketClick -> {
@@ -149,29 +143,27 @@ private class FeatureReducer: Logic<State, Message, Effect>() {
         else injector().usersAccount?.users?.filter { it.appId == appId }
     }
 
-    private fun setTicketsState(tickets: TicketsDto) : State {
-        val applications = tickets.applications?.let { HashSet(it) }
+    private fun setTicketsState(tickets: TicketsInfo) : State {
+
         return State(
-            appId = applications?.first()?.appId ?: "",
-            applications = applications ?: hashSetOf(),
-            titleText = applications?.first()?.orgName ?: "",
-            titleImageUrl = applications?.first()?.orgLogoUrl ?: "",
-            filterName = "",
-            ticketsIsEmpty = tickets.tickets?.isEmpty() ?: true,
+            appId = tickets.ticketSetInfoList.firstOrNull()?.appId,
+            titleText = tickets.ticketSetInfoList.firstOrNull()?.orgName,
+            titleImageUrl = tickets.ticketSetInfoList.firstOrNull()?.orgLogoUrl,
+            filterName = null,
             filterEnabled = false,
-            tabLayoutVisibility = if (applications != null) applications.size > 1 else false,
-            tickets = tickets,
+            tickets = tickets.ticketSetInfoList,
             isLoading = false,
             showNoConnectionError = false,
         )
     }
 
-    private fun updateTicketsState(state: State, appId: String) : State {
+    private fun updateTicketsFilterState(state: State, appId: String) : State {
+        val ticketsSetByAppName = state.tickets?.associateBy { it.appId }
         return state.copy(
             appId = appId,
-            titleText = state.applications.find { it.appId == appId }?.orgName ?: "",
-            titleImageUrl = state.applications.find { it.appId == appId }?.orgLogoUrl ?: "",
-            filterName = "",
+            titleText = ticketsSetByAppName?.get(appId)?.orgName,
+            titleImageUrl = ticketsSetByAppName?.get(appId)?.orgLogoUrl,
+            filterName = null,
             filterEnabled = false,
         )
     }
@@ -185,7 +177,7 @@ internal class TicketsActor(
     override fun handleEffect(effect: Effect.Inner): Flow<Message.Inner> = when(effect) {
 
         Effect.Inner.UpdateTickets -> singleFlow {
-            val ticketsTry: Try<TicketsDto> = repository.getAllData()
+            val ticketsTry: Try<TicketsInfo> = repository.getAllData()
             when {
                 ticketsTry.isSuccess() -> Message.Inner.UpdateTicketsCompleted(ticketsTry.value)
                 else -> Message.Inner.UpdateTicketsFailed

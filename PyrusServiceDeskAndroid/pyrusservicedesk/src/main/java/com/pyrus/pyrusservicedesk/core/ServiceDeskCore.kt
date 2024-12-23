@@ -34,7 +34,7 @@ import com.squareup.picasso.Picasso
 import kotlinx.coroutines.CoroutineScope
 import com.pyrus.pyrusservicedesk._ref.utils.navigation.PyrusRouterImpl
 import com.pyrus.pyrusservicedesk.presentation.viewmodel.SharedViewModel
-import com.pyrus.pyrusservicedesk.sdk.data.User
+import com.pyrus.pyrusservicedesk.User
 import com.pyrus.pyrusservicedesk.sdk.repositories.RepositoryMapper
 import com.pyrus.pyrusservicedesk.sdk.web.retrofit.RemoteFileStore
 import okhttp3.OkHttpClient
@@ -74,6 +74,7 @@ internal sealed interface Account {
         override val appId: String,
         override val domain: String,
         override val isMultiChat: Boolean,
+        val firstUserId: String,
         val users: List<User>, //users have userId, userName, authorId
         val authorId: String,
     ): Account
@@ -158,7 +159,7 @@ internal class DiInjector(
 
     private val draftRepository = DraftRepository(preferences)
 
-    fun ticketFeatureFactory(welcomeMessage: String, userId: String, ticketId: Int): TicketFeatureFactory {
+    fun ticketFeatureFactory(welcomeMessage: String): TicketFeatureFactory {
         return TicketFeatureFactory(
             account = account,
             storeFactory = storeFactory,
@@ -167,8 +168,6 @@ internal class DiInjector(
             welcomeMessage = welcomeMessage,
             router = router,
             fileManager = fileManager,
-            userId = userId,
-            ticketId = ticketId
         )
     }
 

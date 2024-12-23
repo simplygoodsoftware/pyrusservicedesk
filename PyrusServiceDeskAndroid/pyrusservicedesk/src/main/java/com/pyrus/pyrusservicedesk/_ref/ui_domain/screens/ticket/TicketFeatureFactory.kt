@@ -19,8 +19,8 @@ import com.pyrus.pyrusservicedesk._ref.whitetea.core.StoreFactory
 import com.pyrus.pyrusservicedesk._ref.whitetea.core.adaptCast
 import com.pyrus.pyrusservicedesk._ref.whitetea.core.logic.Logic
 import com.pyrus.pyrusservicedesk._ref.whitetea.utils.adapt
-import com.pyrus.pyrusservicedesk.sdk.data.Command
-import com.pyrus.pyrusservicedesk.sdk.data.CreateComment
+import com.pyrus.pyrusservicedesk.sdk.data.CommandDto
+import com.pyrus.pyrusservicedesk.sdk.data.CreateCommentDto
 import com.pyrus.pyrusservicedesk.core.Account
 import com.pyrus.pyrusservicedesk.sdk.data.FileManager
 import com.pyrus.pyrusservicedesk.sdk.data.TicketCommandType
@@ -40,15 +40,16 @@ internal class TicketFeatureFactory(
     private val welcomeMessage: String,
     private val router: PyrusRouter,
     private val fileManager: FileManager,
-    private val userId: String,
-    private val ticketId: Int,
 ) {
 
-    fun create(): TicketFeature = storeFactory.create(
+    fun create(
+        userId: String,
+        ticketId: Int,
+    ): TicketFeature = storeFactory.create(
         name = "TicketFeature",
         initialState = State.Loading,
         reducer = FeatureReducer(),
-        actor = TicketActor(account, repository, router, welcomeMessage, draftRepository, fileManager).adaptCast(),
+        actor = TicketActor(ticketId, account, repository, router, welcomeMessage, draftRepository, fileManager).adaptCast(),
         initialEffects = listOf(
             Effect.Inner.FeedFlow,
             Effect.Inner.CommentsAutoUpdate,
@@ -180,6 +181,7 @@ private class FeatureReducer: Logic<State, Message, Effect>() {
 }
 
 internal class TicketActor(
+    private val ticketId: Int,
     private val account: Account,
     private val repository: Repository,
     private val router: PyrusRouter,
@@ -204,7 +206,10 @@ internal class TicketActor(
                                 showRating = false,
                                 showRatingText = null,
                                 userId = effect.userId,
-                                ticketId = effect.ticketId
+                                ticketId = effect.ticketId,
+                                subject = null,
+                                isRead = true,
+                                lastComment = null,
                             ),
                             draft = draftRepository.getDraft(),
                             welcomeMessage = welcomeMessage,
@@ -221,20 +226,20 @@ internal class TicketActor(
                 else -> Message.Inner.UpdateCommentsFailed
             }
         }
-        Effect.Inner.FeedFlow -> repository.getFeedFlow().map { Message.Inner.CommentsUpdated(it) }
+        Effect.Inner.FeedFlow -> repository.getFeedFlow(ticketId).map { Message.Inner.CommentsUpdated(it) }
         Effect.Inner.CommentsAutoUpdate -> flow {
 //            // TODO
 //            repository.getFeed(keepUnread = false)
 
         }
         Effect.Inner.Close -> flow { router.exit() }
-        is Effect.Inner.SendTextComment -> flow { repository.addTextComment(effect.text, getSendTextCommentCommand(effect.text, effect.appId, effect.userId, effect.ticketId)) }
-        is Effect.Inner.SendRatingComment -> flow { repository.addRatingComment(effect.rating) }
+        is Effect.Inner.SendTextComment -> flow { repository.addTextComment(ticketId, effect.text, getSendTextCommentCommand(effect.text, effect.appId, effect.userId, effect.ticketId)) }
+        is Effect.Inner.SendRatingComment -> flow { repository.addRatingComment(ticketId, effect.rating) }
         is Effect.Inner.SendAttachComment -> flow {
             val fileUri = try { fileManager.copyFile(effect.uri) } catch (e: Exception) { null } ?: return@flow
-            repository.addAttachComment(fileUri)
+            repository.addAttachComment(ticketId, fileUri)
         }
-        is Effect.Inner.RetryAddComment -> flow { repository.retryAddComment(effect.id) }
+        is Effect.Inner.RetryAddComment -> flow { repository.retryAddComment(ticketId, effect.id) }
         is Effect.Inner.OpenPreview -> flow {
             val fileDate = FileData(
                 effect.attachment.name,
@@ -253,8 +258,8 @@ internal class TicketActor(
         return "commentId=$commentId;${uuid}"
     }
 
-    private fun getSendTextCommentCommand(text: String, appId: String, userId: String, ticketId: Int): Command {
-        val localCreateComment = CreateComment(
+    private fun getSendTextCommentCommand(text: String, appId: String, userId: String, ticketId: Int): CommandDto {
+        val localCreateComment = CreateCommentDto(
             comment = text,
             requestNewTicket = ticketId < 0,
             userId = userId,
@@ -270,7 +275,7 @@ internal class TicketActor(
 //        val list = listOf(
 //            Command(getUUID(), TicketCommandType.CreateComment, appId, userId,  localCreateComment),
 //            Command(getUUID(), TicketCommandType.MarkTicketAsRead, appId, userId,  localTicketIsRead))
-        return Command(getUUID(), TicketCommandType.CreateComment, appId, userId,  localCreateComment)
+        return CommandDto(getUUID(), TicketCommandType.CreateComment, appId, userId,  localCreateComment)
     }
 
 }

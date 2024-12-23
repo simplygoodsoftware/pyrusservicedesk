@@ -13,8 +13,8 @@ import com.pyrus.pyrusservicedesk.presentation.ui.view.Status
 import com.pyrus.pyrusservicedesk.sdk.data.AttachmentDto
 import com.pyrus.pyrusservicedesk.sdk.data.AuthorDto
 import com.pyrus.pyrusservicedesk.sdk.data.CommentDto
-import com.pyrus.pyrusservicedesk.sdk.data.Ticket
-import com.pyrus.pyrusservicedesk.sdk.data.TicketCommandResult
+import com.pyrus.pyrusservicedesk.sdk.data.TicketDto
+import com.pyrus.pyrusservicedesk.sdk.data.TicketCommandResultDto
 import com.pyrus.pyrusservicedesk.sdk.data.intermediate.AddCommentResponseData
 import com.pyrus.pyrusservicedesk.sdk.data.intermediate.CommentsDto
 
@@ -26,21 +26,27 @@ internal class RepositoryMapper(
         comments = commentsDto.comments.map(::map),
         showRating = commentsDto.showRating,
         showRatingText = commentsDto.showRatingText,
-        userId = TODO(),
+        userId = commentsDto.showRatingText,
         ticketId = TODO(),
+        subject = TODO(),
+        isRead = TODO(),
+        lastComment = TODO(),
     )
 
-    fun map(ticket: Ticket?): FullTicket {
+    fun map(ticket: TicketDto): FullTicket {
         return FullTicket(
-            comments = ticket?.comments?.map(::map) ?: emptyList(),
-            showRating = ticket?.showRating ?: false,
-            showRatingText = ticket?.showRatingText,
-            userId = ticket?.userId,
-            ticketId = ticket?.ticketId,
+            comments = ticket.comments?.map(::map) ?: emptyList(),
+            showRating = ticket.showRating ?: false,
+            showRatingText = ticket.showRatingText,
+            userId = ticket.userId,
+            ticketId = ticket.ticketId,
+            subject = ticket.subject,
+            isRead = ticket.isRead ?: true,
+            lastComment = ticket.lastComment?.let { map(it) },
         )
     }
 
-    fun map(commandResult: TicketCommandResult): AddCommentResponseData {
+    fun map(commandResult: TicketCommandResultDto): AddCommentResponseData {
         return AddCommentResponseData(
             commentId = commandResult.commentId,
             attachmentIds = TODO(),
@@ -56,7 +62,7 @@ internal class RepositoryMapper(
         attachments = commentDto.attachments?.map(::map),
         creationTime = commentDto.creationDate.time,
         rating = commentDto.rating,
-        author = map(commentDto.author),
+        author = commentDto.author?.let { map(it) },
         isSending = false,
     )
 

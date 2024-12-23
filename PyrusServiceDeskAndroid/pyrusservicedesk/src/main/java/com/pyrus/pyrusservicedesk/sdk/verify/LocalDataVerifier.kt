@@ -1,7 +1,7 @@
 package com.pyrus.pyrusservicedesk.sdk.verify
 
 import com.pyrus.pyrusservicedesk._ref.data.Comment
-import com.pyrus.pyrusservicedesk.sdk.data.Command
+import com.pyrus.pyrusservicedesk.sdk.data.CommandDto
 
 /**
  * Checks local data validness
@@ -15,5 +15,5 @@ internal interface LocalDataVerifier : LocalFileVerifier {
     /**
      * Checks whether [localCommand] is considered empty
      */
-    fun isLocalCommandEmpty(localComment: Command): Boolean
+    fun isLocalCommandEmpty(localComment: CommandDto): Boolean
 }

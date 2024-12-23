@@ -3,7 +3,7 @@ package com.pyrus.pyrusservicedesk.sdk.verify
 import android.net.Uri
 import com.pyrus.pyrusservicedesk._ref.data.Comment
 import com.pyrus.pyrusservicedesk.sdk.FileResolver
-import com.pyrus.pyrusservicedesk.sdk.data.Command
+import com.pyrus.pyrusservicedesk.sdk.data.CommandDto
 
 internal class LocalDataVerifierImpl(private val fileResolver: FileResolver) : LocalDataVerifier {
 
@@ -14,7 +14,7 @@ internal class LocalDataVerifierImpl(private val fileResolver: FileResolver) : L
                 && localComment.rating == null
     }
 
-    override fun isLocalCommandEmpty(localCommand: Command): Boolean {
+    override fun isLocalCommandEmpty(localCommand: CommandDto): Boolean {
         return localCommand.commandId.isNotEmpty()
                 && localCommand.appId.isNotEmpty()
     }

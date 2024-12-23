@@ -10,8 +10,7 @@ import android.widget.TextView;
 import androidx.annotation.Nullable;
 
 import com.pyrus.pyrusservicedesk.PyrusServiceDesk;
-import com.pyrus.pyrusservicedesk.ServiceDeskConfiguration;
-import com.pyrus.pyrusservicedesk.sdk.data.User;
+import com.pyrus.pyrusservicedesk.User;
 import com.pyrus.pyrusservicedesk.sdk.updates.NewReplySubscriber;
 
 import java.util.ArrayList;

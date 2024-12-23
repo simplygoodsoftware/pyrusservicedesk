@@ -15,10 +15,11 @@ import com.pyrus.pyrusservicedesk._ref.Screens
 import com.pyrus.pyrusservicedesk._ref.ui_domain.screens.add_ticket.AddTicketFragment
 import com.pyrus.pyrusservicedesk._ref.ui_domain.screens.filter_tickets_list.FilterTicketsFragment
 import com.pyrus.pyrusservicedesk._ref.ui_domain.screens.filter_tickets_list.FilterTicketsFragment.Companion.KEY_SELECTED_USER_ID
+import com.pyrus.pyrusservicedesk._ref.ui_domain.screens.tickets_list.adapters.TicketSetAdapter
 import com.pyrus.pyrusservicedesk._ref.ui_domain.screens.tickets_list.adapters.ViewPagerAdapter
 import com.pyrus.pyrusservicedesk._ref.ui_domain.screens.tickets_list.tickets.TicketsContract.Effect
 import com.pyrus.pyrusservicedesk._ref.ui_domain.screens.tickets_list.tickets.TicketsContract.Message
-import com.pyrus.pyrusservicedesk._ref.ui_domain.screens.tickets_list.tickets.TicketsView.TicketListModel
+import com.pyrus.pyrusservicedesk._ref.ui_domain.screens.tickets_list.tickets.TicketsView.Model
 import com.pyrus.pyrusservicedesk._ref.utils.CIRCLE_TRANSFORMATION
 import com.pyrus.pyrusservicedesk._ref.utils.RequestUtils.Companion.getOrganisationLogoUrl
 import com.pyrus.pyrusservicedesk._ref.utils.insets.RootViewDeferringInsetsCallback
@@ -31,12 +32,15 @@ import com.pyrus.pyrusservicedesk._ref.whitetea.utils.diff
 import com.pyrus.pyrusservicedesk.databinding.PsdTicketsListBinding
 import kotlinx.coroutines.flow.map
 
-internal class TicketsFragment: TeaFragment<TicketListModel, Message, Effect.Outer>() {
+internal class TicketsFragment: TeaFragment<Model, Message, Effect.Outer>() {
 
     private lateinit var binding: PsdTicketsListBinding
     private var selectedUserIdFilter: String = KEY_DEFAULT_USER_ID
     private var currentVendor = ""
     private var currentUserId = KEY_DEFAULT_USER_ID
+    private val adapter: TicketSetAdapter by lazy {
+        TicketSetAdapter(::dispatch)
+    }
     private lateinit var viewPagerAdapter: ViewPagerAdapter
     //private val hashMap: HashMap<String, String> = hashMapOf() //TODO
 
@@ -156,15 +160,16 @@ internal class TicketsFragment: TeaFragment<TicketListModel, Message, Effect.Out
 
     }*/
 
-    override fun createRenderer(): ViewRenderer<TicketListModel> = diff {
-        diff(TicketListModel::titleText) { title -> binding.toolbarTicketsList.psdToolbarVendorNameTv.text = title }
-        diff(TicketListModel::titleImageUrl) { url ->
+    override fun createRenderer(): ViewRenderer<Model> = diff {
+        diff(Model::titleText) { title -> binding.toolbarTicketsList.psdToolbarVendorNameTv.text = title }
+        diff(Model::titleImageUrl) { url ->
+            val logoUrl = url?.let { getOrganisationLogoUrl(url, null) } //TODO
             injector().picasso
-                .load(getOrganisationLogoUrl(url, null))//TODO
+                .load(logoUrl)
                 .transform(CIRCLE_TRANSFORMATION)
                 .into(binding.toolbarTicketsList.psdToolbarVendorIv)
         }
-        diff(TicketListModel::ticketsIsEmpty) { isEmpty ->
+        diff(Model::ticketsIsEmpty) { isEmpty ->
 
             binding.toolbarTicketsList.psdToolbarFilterIb.isVisible = !isEmpty
             binding.toolbarTicketsList.psdToolbarQrIb.isVisible = !isEmpty
@@ -172,21 +177,21 @@ internal class TicketsFragment: TeaFragment<TicketListModel, Message, Effect.Out
             binding.fabAddTicket.isVisible = !isEmpty
 
         }
-        diff(TicketListModel::filterEnabled) { filterEnabled ->
+        diff(Model::filterEnabled) { filterEnabled ->
             binding.toolbarTicketsList.psdToolbarFilterIb.setBackgroundResource(if (!filterEnabled) R.drawable.ic_filter else R.drawable.ic_selected_filter)
             binding.filterFl.isVisible = filterEnabled
         }
-        diff(TicketListModel::filterName) { filterName ->
+        diff(Model::filterName) { filterName ->
             binding.filterContextTv.text = filterName
         }
-        diff(TicketListModel::tabLayoutVisibility) { tabLayoutVisibility ->
+        diff(Model::tabLayoutVisibility) { tabLayoutVisibility ->
             binding.tabLayout.isVisible = tabLayoutVisibility
         }
-        diff(TicketListModel::applications) { applications ->
-            viewPagerAdapter.setItems(applications)
+        diff(Model::applications) { applications ->
+            adapter.submitList(applications)
         }
-        diff(TicketListModel::showNoConnectionError) { showError -> binding.noConnection.root.isVisible = showError }
-        diff(TicketListModel::isLoading) { isLoading ->
+        diff(Model::showNoConnectionError) { showError -> binding.noConnection.root.isVisible = showError }
+        diff(Model::isLoading) { isLoading ->
             binding.tabLayout.isVisible = !isLoading
             binding.progressBar.isVisible = isLoading
         }

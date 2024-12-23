@@ -3,16 +3,14 @@ package com.pyrus.pyrusservicedesk.sdk.updates
 import android.os.Handler
 import android.os.Looper
 import androidx.annotation.MainThread
-import com.pyrus.pyrusservicedesk.PyrusServiceDesk
 import com.pyrus.pyrusservicedesk._ref.utils.log.PLog
-import com.pyrus.pyrusservicedesk.sdk.data.TicketShortDescription
 import com.pyrus.pyrusservicedesk.sdk.repositories.Repository
 import com.pyrus.pyrusservicedesk._ref.utils.MILLISECONDS_IN_DAY
 import com.pyrus.pyrusservicedesk._ref.utils.MILLISECONDS_IN_HOUR
 import com.pyrus.pyrusservicedesk._ref.utils.MILLISECONDS_IN_MINUTE
 import com.pyrus.pyrusservicedesk._ref.utils.MILLISECONDS_IN_SECOND
 import com.pyrus.pyrusservicedesk._ref.utils.isSuccess
-import com.pyrus.pyrusservicedesk.sdk.data.Ticket
+import com.pyrus.pyrusservicedesk.sdk.data.TicketDto
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -252,7 +250,7 @@ internal class LiveUpdates(
     }
 
     @MainThread
-    private fun processGetTicketsSuccess(data: List<Ticket>, newUnreadCount: Int) {
+    private fun processGetTicketsSuccess(data: List<TicketDto>, newUnreadCount: Int) {
         val isChanged = recentUnreadCounter != newUnreadCount
         PLog.d(TAG, "processSuccess, isChanged: $isChanged, recentUnreadCounter: $recentUnreadCounter, newUnreadCount: $newUnreadCount")
         notifyDataSubscribers(data, isChanged, newUnreadCount)
@@ -336,7 +334,7 @@ internal class LiveUpdates(
         }
     }
 
-    private fun notifyDataSubscribers(data: List<Ticket>, isChanged: Boolean, newUnreadCount: Int) {
+    private fun notifyDataSubscribers(data: List<TicketDto>, isChanged: Boolean, newUnreadCount: Int) {
         dataSubscribers.forEach {
             it.onNewData(data)
             if (isChanged)
@@ -376,7 +374,7 @@ internal interface LiveUpdateSubscriber: OnUnreadTicketCountChangedSubscriber {
     /**
      * Invoked when new portion of [tickets] data is received.
      */
-    fun onNewData(tickets: List<Ticket>)
+    fun onNewData(tickets: List<TicketDto>)
 }
 
 /**

@@ -3,7 +3,7 @@ package com.pyrus.servicedesksample;
 import android.app.Application;
 
 import com.pyrus.pyrusservicedesk.PyrusServiceDesk;
-import com.pyrus.pyrusservicedesk.sdk.data.User;
+import com.pyrus.pyrusservicedesk.User;
 
 import java.util.ArrayList;
 import java.util.HashMap;

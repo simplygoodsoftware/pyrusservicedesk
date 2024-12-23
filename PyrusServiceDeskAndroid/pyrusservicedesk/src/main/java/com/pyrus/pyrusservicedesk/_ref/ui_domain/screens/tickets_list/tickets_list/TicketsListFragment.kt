@@ -43,12 +43,9 @@ internal class TicketsListFragment: TeaFragment<State, Message, Effect.Outer>() 
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
 
-        adapter = TicketsListAdapter()
-            .apply {
-                setOnTicketItemClickListener {
-                    dispatch(Message.Outer.OnTicketClick(it.ticketId))
-                }
-            }
+        adapter = TicketsListAdapter {
+            dispatch(Message.Outer.OnTicketClick(it.ticketId))
+        }
         binding.ticketsRv.adapter = adapter
         binding.ticketsRv.layoutManager = LinearLayoutManager(context)
         arguments?.takeIf { it.containsKey(KEY_APP_ID) }?.apply {
@@ -79,7 +76,7 @@ internal class TicketsListFragment: TeaFragment<State, Message, Effect.Outer>() 
     override fun render(model: State) {
         binding.emptyTicketsListLl.isVisible = model.tickets.isEmpty() && !model.isLoading
 
-        adapter.setItems(model.tickets)
+//        adapter.setItems(model.tickets)
 
         binding.progressBar.isVisible = model.isLoading
 
