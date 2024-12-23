@@ -22,7 +22,7 @@ import com.pyrus.pyrusservicedesk.sdk.data.Ticket
 import com.pyrus.pyrusservicedesk.sdk.data.TicketCommandResult
 import com.pyrus.pyrusservicedesk.sdk.data.intermediate.AddCommentResponseData
 import com.pyrus.pyrusservicedesk.sdk.data.intermediate.FileData
-import com.pyrus.pyrusservicedesk.sdk.data.intermediate.Tickets
+import com.pyrus.pyrusservicedesk.sdk.data.intermediate.TicketsDto
 import com.pyrus.pyrusservicedesk.sdk.web.UploadFileHook
 import com.pyrus.pyrusservicedesk.sdk.web.retrofit.RemoteFileStore
 import com.pyrus.pyrusservicedesk.sdk.web.retrofit.RemoteStore
@@ -113,7 +113,7 @@ internal class Repository(
         return remoteStore.getTickets()
     }
 
-    suspend fun getAllData(): Try<Tickets> {
+    suspend fun getAllData(): Try<TicketsDto> {
         return remoteStore.getAllData()
     }
 

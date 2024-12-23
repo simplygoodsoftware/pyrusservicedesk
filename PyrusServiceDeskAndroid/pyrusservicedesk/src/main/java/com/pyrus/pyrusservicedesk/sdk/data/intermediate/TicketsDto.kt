@@ -10,9 +10,9 @@ import com.pyrus.pyrusservicedesk.sdk.data.TicketCommandResult
  * Intermediate data for parsing list of Ticket object
  */
 @Keep
-internal data class Tickets(
-        @SerializedName("hasMore") val hasMore: Boolean?,
-        @SerializedName("applications") val applications: List<Application>? = emptyList(),
-        @SerializedName("tickets") val tickets: List<Ticket>? = emptyList(),
-        @SerializedName("commands_result") val commandsResult: List<TicketCommandResult>?,
+internal data class TicketsDto(
+    @SerializedName("hasMore") val hasMore: Boolean?,
+    @SerializedName("applications") val applications: List<Application>? = emptyList(),
+    @SerializedName("tickets") val tickets: List<Ticket>? = emptyList(),
+    @SerializedName("commands_result") val commandsResult: List<TicketCommandResult>?,
 )

@@ -1,12 +1,10 @@
 package com.pyrus.pyrusservicedesk.sdk.web.retrofit
 
-import com.pyrus.pyrusservicedesk.PyrusServiceDesk
 import com.pyrus.pyrusservicedesk.PyrusServiceDesk.Companion.API_VERSION_2
 import com.pyrus.pyrusservicedesk._ref.utils.Try
-import com.pyrus.pyrusservicedesk._ref.utils.call_adapter.TryCallAdapterFactory
 import com.pyrus.pyrusservicedesk._ref.utils.log.PLog
 import com.pyrus.pyrusservicedesk.sdk.data.UserData
-import com.pyrus.pyrusservicedesk.sdk.data.intermediate.Tickets
+import com.pyrus.pyrusservicedesk.sdk.data.intermediate.TicketsDto
 import com.pyrus.pyrusservicedesk.sdk.web.request_body.RequestBodyBase
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineExceptionHandler
@@ -18,7 +16,6 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.newSingleThreadContext
 import retrofit2.Retrofit
-import retrofit2.converter.gson.GsonConverterFactory
 import java.util.concurrent.BlockingQueue
 import java.util.concurrent.LinkedBlockingQueue
 import java.util.concurrent.atomic.AtomicBoolean
@@ -26,7 +23,6 @@ import kotlin.coroutines.Continuation
 import kotlin.coroutines.CoroutineContext
 import kotlin.coroutines.resume
 import kotlin.coroutines.suspendCoroutine
-import kotlin.random.Random
 
 private typealias SyncLoopRequest = Continuation<Try<Int>>
 
@@ -51,7 +47,7 @@ internal class SyncRepository(val retrofit: Retrofit) : CoroutineScope {
 //
     private val _ticketsListStateFlow = MutableStateFlow(
         SyncRes(
-            Tickets(false, emptyList(), emptyList(), emptyList())
+            TicketsDto(false, emptyList(), emptyList(), emptyList())
         )
     )
     val ticketsListStateFlow: StateFlow<SyncRes> get() = _ticketsListStateFlow
@@ -65,11 +61,11 @@ internal class SyncRepository(val retrofit: Retrofit) : CoroutineScope {
     }
 
     class SyncTryRes(
-        val tryRes: Try<Tickets>
+        val tryRes: Try<TicketsDto>
     )
 
     class SyncRes(
-        val tickets: Tickets,
+        val tickets: TicketsDto,
     )
 
     private val syncLoopRequestQueue = LinkedBlockingQueue<SyncLoopRequest>()
@@ -175,7 +171,7 @@ internal class SyncRepository(val retrofit: Retrofit) : CoroutineScope {
         request: RequestBodyBase,
     ): Try<SyncRes> {
 
-        val responseTry: Try<Tickets> = try {
+        val responseTry: Try<TicketsDto> = try {
                 api.getTickets(request)
             } catch (e: Exception) {
                 e.printStackTrace()

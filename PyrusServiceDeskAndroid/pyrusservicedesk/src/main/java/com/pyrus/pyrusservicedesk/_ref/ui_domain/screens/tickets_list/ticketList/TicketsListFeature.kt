@@ -5,7 +5,7 @@ import com.pyrus.pyrusservicedesk._ref.ui_domain.screens.tickets_list.ticketList
 import com.pyrus.pyrusservicedesk._ref.ui_domain.screens.tickets_list.ticketList.TicketsListContract.Message
 import com.pyrus.pyrusservicedesk._ref.ui_domain.screens.tickets_list.ticketList.TicketsListContract.State
 import com.pyrus.pyrusservicedesk.sdk.data.Ticket
-import com.pyrus.pyrusservicedesk.sdk.data.intermediate.Tickets
+import com.pyrus.pyrusservicedesk.sdk.data.intermediate.TicketsDto
 
 internal typealias TicketsListFeature = Store<State, Message, Effect>
 
@@ -35,10 +35,10 @@ internal interface TicketsListContract {
 
         sealed interface Inner : Message {
 
-            data class TicketsUpdated(val tickets: Tickets) : Inner
+            data class TicketsUpdated(val tickets: TicketsDto) : Inner
             data class UserIdSelected(val userId: String) : Inner
             data object UpdateTicketsFailed : Inner
-            data class UpdateTicketsCompleted(val tickets: Tickets) : Inner
+            data class UpdateTicketsCompleted(val tickets: TicketsDto) : Inner
         }
 
     }

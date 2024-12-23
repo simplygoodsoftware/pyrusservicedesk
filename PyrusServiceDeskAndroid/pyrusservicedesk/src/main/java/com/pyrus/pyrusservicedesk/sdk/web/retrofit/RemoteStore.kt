@@ -24,7 +24,7 @@ import com.pyrus.pyrusservicedesk.sdk.data.TicketCommandResult
 import com.pyrus.pyrusservicedesk.sdk.data.UserData
 import com.pyrus.pyrusservicedesk.sdk.data.intermediate.AddCommentResponseData
 import com.pyrus.pyrusservicedesk.sdk.data.intermediate.CommentsDto
-import com.pyrus.pyrusservicedesk.sdk.data.intermediate.Tickets
+import com.pyrus.pyrusservicedesk.sdk.data.intermediate.TicketsDto
 import com.pyrus.pyrusservicedesk.sdk.response.ApiCallError
 import com.pyrus.pyrusservicedesk.sdk.response.AuthorizationError
 import com.pyrus.pyrusservicedesk.sdk.response.ResponseError
@@ -140,7 +140,7 @@ internal class RemoteStore(
         return ticketsTry.map { it.tickets ?: emptyList() }
     }
 
-    suspend fun getAllData(commands: List<Command>? = null): Try<Tickets> {
+    suspend fun getAllData(commands: List<Command>? = null): Try<TicketsDto> {
         PLog.d(
             TAG, "getAllData, " +
                     "appId: ${account.appId.getFirstNSymbols(10)}, " +

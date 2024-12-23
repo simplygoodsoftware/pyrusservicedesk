@@ -6,7 +6,7 @@ import com.pyrus.pyrusservicedesk._ref.ui_domain.screens.tickets_list.tickets.Ti
 import com.pyrus.pyrusservicedesk._ref.ui_domain.screens.tickets_list.tickets.TicketsContract.Message
 import com.pyrus.pyrusservicedesk._ref.ui_domain.screens.tickets_list.tickets.TicketsContract.State
 import com.pyrus.pyrusservicedesk.sdk.data.Application
-import com.pyrus.pyrusservicedesk.sdk.data.intermediate.Tickets
+import com.pyrus.pyrusservicedesk.sdk.data.intermediate.TicketsDto
 
 internal typealias TicketsFeature = Store<State, Message, Effect.Outer>
 
@@ -21,7 +21,7 @@ internal interface TicketsContract {
         val ticketsIsEmpty: Boolean,
         val filterEnabled: Boolean,
         val tabLayoutVisibility: Boolean,
-        val tickets: Tickets,
+        val tickets: TicketsDto,
         val isLoading: Boolean,
         val showNoConnectionError: Boolean,
     )
@@ -46,10 +46,10 @@ internal interface TicketsContract {
 
         sealed interface Inner : Message {
 
-            data class TicketsUpdated(val tickets: Tickets) : Inner
+            data class TicketsUpdated(val tickets: TicketsDto) : Inner
             data class UserIdSelected(val userId: String, val fm: FragmentManager) : Inner
             data object UpdateTicketsFailed : Inner
-            data class UpdateTicketsCompleted(val tickets: Tickets) : Inner
+            data class UpdateTicketsCompleted(val tickets: TicketsDto) : Inner
         }
 
     }
@@ -69,8 +69,6 @@ internal interface TicketsContract {
 
         sealed interface Inner : Effect {
             data object UpdateTickets : Inner
-            //object FeedFlow : Inner
-            data object TicketsAutoUpdate : Inner
         }
     }
 

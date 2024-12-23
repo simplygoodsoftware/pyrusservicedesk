@@ -14,7 +14,7 @@ import com.pyrus.pyrusservicedesk._ref.whitetea.core.StoreFactory
 import com.pyrus.pyrusservicedesk._ref.whitetea.core.adaptCast
 import com.pyrus.pyrusservicedesk._ref.whitetea.core.logic.Logic
 import com.pyrus.pyrusservicedesk.sdk.data.Ticket
-import com.pyrus.pyrusservicedesk.sdk.data.intermediate.Tickets
+import com.pyrus.pyrusservicedesk.sdk.data.intermediate.TicketsDto
 import com.pyrus.pyrusservicedesk.sdk.repositories.Repository
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
@@ -153,7 +153,7 @@ internal class TicketsListActor(
     override fun handleEffect(effect: Effect.Inner): Flow<Message.Inner> = when (effect) {
         Effect.Inner.UpdateTickets -> singleFlow {
             //repository.startSync()
-            val ticketsTry: Try<Tickets> = repository.getAllData()// sync(repository.createSyncRequest())
+            val ticketsTry: Try<TicketsDto> = repository.getAllData()// sync(repository.createSyncRequest())
             when {
                 ticketsTry.isSuccess() -> Message.Inner.UpdateTicketsCompleted(ticketsTry.value)
                 else -> Message.Inner.UpdateTicketsFailed

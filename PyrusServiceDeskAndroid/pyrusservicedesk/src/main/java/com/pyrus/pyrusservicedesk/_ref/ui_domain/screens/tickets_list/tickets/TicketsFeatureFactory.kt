@@ -1,5 +1,6 @@
 package com.pyrus.pyrusservicedesk._ref.ui_domain.screens.tickets_list.tickets
 
+import android.util.Log
 import androidx.core.os.bundleOf
 import com.pyrus.pyrusservicedesk.PyrusServiceDesk.Companion.injector
 import com.pyrus.pyrusservicedesk._ref.Screens
@@ -10,7 +11,6 @@ import com.pyrus.pyrusservicedesk._ref.ui_domain.screens.tickets_list.tickets.Ti
 import com.pyrus.pyrusservicedesk._ref.ui_domain.screens.tickets_list.ticketList.TicketsListFragment.Companion.KEY_USER_ID
 import com.pyrus.pyrusservicedesk._ref.utils.Try
 import com.pyrus.pyrusservicedesk._ref.utils.isSuccess
-import com.pyrus.pyrusservicedesk._ref.utils.log.PLog
 import com.pyrus.pyrusservicedesk._ref.utils.singleFlow
 import com.pyrus.pyrusservicedesk._ref.whitetea.core.Actor
 import com.pyrus.pyrusservicedesk._ref.whitetea.core.StoreFactory
@@ -18,10 +18,9 @@ import com.pyrus.pyrusservicedesk._ref.whitetea.core.adaptCast
 import com.pyrus.pyrusservicedesk._ref.whitetea.core.logic.Logic
 import com.pyrus.pyrusservicedesk._ref.whitetea.utils.adapt
 import com.pyrus.pyrusservicedesk.sdk.data.User
-import com.pyrus.pyrusservicedesk.sdk.data.intermediate.Tickets
+import com.pyrus.pyrusservicedesk.sdk.data.intermediate.TicketsDto
 import com.pyrus.pyrusservicedesk.sdk.repositories.Repository
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.flow
 
 private const val TAG = "TicketsListFeature"
 
@@ -35,8 +34,8 @@ internal class TicketsFeatureFactory(
         initialState = State(
             appId = "",
             applications = hashSetOf(),
-            tickets = Tickets(
-                null,
+            tickets = TicketsDto(
+                hasMore = null,
                 commandsResult = emptyList()
             ),
             isLoading = true,
@@ -64,7 +63,7 @@ private class FeatureReducer: Logic<State, Message, Effect>() {
             is Message.Outer -> handleOuter(message)
             is Message.Inner -> handleInner(message)
         }
-        //state { state.copy() }
+        // state { state.copy() }
     }
 
     private fun Result.handleOuter(message: Message.Outer) {
@@ -91,14 +90,14 @@ private class FeatureReducer: Logic<State, Message, Effect>() {
                 +Effect.Outer.ShowFilterMenu(state.appId, message.selectedUserId)
             }
 
-            Message.Outer.OnScanClick -> injector().router.exit() //TODO
+            Message.Outer.OnScanClick -> injector().router.exit() // TODO
 
-            //is Message.Outer.OnSettingsClick -> TODO()
+            Message.Outer.OnSettingsClick -> Log.d(TAG, "OnScanClick, OnSettingsClick")
 
             is Message.Outer.OnChangeApp -> state {
                 updateTicketsState(state, message.appId)
             }
-            else -> { PLog.d(TAG, "OnScanClick, OnSettingsClick")}
+
         }
     }
 
@@ -111,11 +110,12 @@ private class FeatureReducer: Logic<State, Message, Effect>() {
                 state { setTicketsState(message.tickets) }
             }
             is Message.Inner.TicketsUpdated -> {
-                setTicketsState(message.tickets)
+               state { setTicketsState(message.tickets) }
             }
             is Message.Inner.UserIdSelected -> {
                 state {
                     state.copy(
+                        // TODO AccountRepository
                         filterName = injector().usersAccount?.users?.find { it.userId == message.userId }?.userName
                             ?: "",
                         filterEnabled = message.userId != KEY_DEFAULT_USER_ID,
@@ -127,13 +127,11 @@ private class FeatureReducer: Logic<State, Message, Effect>() {
     }
 
     private fun getSelectedUsers(appId: String?): List<User>? {
-        if (appId == null)
-            return emptyList()
-
-        return injector().usersAccount?.users?.filter { it.appId == appId }
+        return if (appId == null) emptyList()
+        else injector().usersAccount?.users?.filter { it.appId == appId }
     }
 
-    private fun setTicketsState(tickets: Tickets) : State {
+    private fun setTicketsState(tickets: TicketsDto) : State {
         val applications = tickets.applications?.let { HashSet(it) }
         return State(
             appId = applications?.first()?.appId ?: "",
@@ -167,16 +165,14 @@ internal class TicketsActor(
 ): Actor<Effect.Inner, Message.Inner> {
 
     override fun handleEffect(effect: Effect.Inner): Flow<Message.Inner> = when(effect) {
+
         Effect.Inner.UpdateTickets -> singleFlow {
-            //repository.startSync()
-            val ticketsTry: Try<Tickets> = repository.getAllData()
+            val ticketsTry: Try<TicketsDto> = repository.getAllData()
             when {
                 ticketsTry.isSuccess() -> Message.Inner.UpdateTicketsCompleted(ticketsTry.value)
                 else -> Message.Inner.UpdateTicketsFailed
             }
-
         }
-        Effect.Inner.TicketsAutoUpdate -> flow {}
     }
 
 }
