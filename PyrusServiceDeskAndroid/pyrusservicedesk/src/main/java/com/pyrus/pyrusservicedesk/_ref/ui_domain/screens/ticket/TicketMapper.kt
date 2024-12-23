@@ -211,7 +211,7 @@ internal object TicketMapper {
             entryId = "${comment.id}",
             id = comment.id,
             isInbound = comment.isInbound,
-            hasError = false, // TODO
+            hasError = true, // TODO
             isLocal = comment.isLocal,
             isWelcomeMessage = false,
             timeText = TextProvider.Date(comment.creationTime, R.string.psd_time_format),

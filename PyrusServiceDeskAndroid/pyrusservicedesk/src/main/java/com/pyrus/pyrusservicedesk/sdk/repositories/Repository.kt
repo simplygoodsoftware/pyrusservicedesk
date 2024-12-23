@@ -17,6 +17,7 @@ import com.pyrus.pyrusservicedesk.presentation.ui.view.Status
 import com.pyrus.pyrusservicedesk.sdk.FileResolver
 import com.pyrus.pyrusservicedesk.sdk.data.AttachmentDto
 import com.pyrus.pyrusservicedesk.sdk.data.Command
+import com.pyrus.pyrusservicedesk.sdk.data.CreateComment
 import com.pyrus.pyrusservicedesk.sdk.data.Ticket
 import com.pyrus.pyrusservicedesk.sdk.data.TicketCommandResult
 import com.pyrus.pyrusservicedesk.sdk.data.intermediate.AddCommentResponseData
@@ -113,12 +114,14 @@ internal class Repository(
     }
 
     suspend fun addTextComment(textBody: String, command: Command) {
-        val comment = createLocalTextComment(textBody, injector().usersAccount?.authorId)
+        val comment = createLocalTextComment(textBody, command.commandId.substringAfter("commentId=").substringBefore(";").toLong(), injector().usersAccount?.authorId)
         localStore.addPendingFeedComment(comment)
+        localStore.addPendingFeedCommand(command)
 
         val response = remoteStore.addTextComment(command)
 
         if (response.isSuccess() && !response.value.isNullOrEmpty()) {
+            localStore.removePendingCommand(command)
             localStore.removePendingComment(comment)
             val res = response.value.find { it.commandId == command.commandId }
             if (res != null) {
@@ -126,6 +129,7 @@ internal class Repository(
             }
         } else {
             localStore.addPendingFeedComment(comment.copy(isSending = false))
+            localStore.addPendingFeedCommand(command)
         }
     }
 
@@ -201,12 +205,13 @@ internal class Repository(
     }
 
     suspend fun retryAddComment(localId: Long) {
-        val localComment = localStore.getComment(localId) ?: return
+        val command = localStore.getCommand(localId) ?: return
+        val text = (command.params as? CreateComment)?.comment
         when {
-            !localComment.attachments.isNullOrEmpty() -> addAttachComment(localComment.attachments.first().uri)
-            //!localComment.body.isNullOrBlank() -> addTextComment(localComment.body) //TODO
-            localComment.rating != null -> addRatingComment(localComment.rating)
-            else -> localStore.removePendingComment(localComment)
+            //!localComment.attachments.isNullOrEmpty() -> addAttachComment(localComment.attachments.first().uri)//TODO
+            !text.isNullOrBlank() -> addTextComment(text, command)
+            //localComment.rating != null -> addRatingComment(localComment.rating)//TODO
+            else -> localStore.removePendingCommand(command)
         }
     }
 
@@ -253,17 +258,17 @@ internal class Repository(
         return remote.copy(comments = comments)
     }
 
-    private fun createLocalCommentId(): Long = lastLocalCommentId.decrementAndGet()
+    fun createLocalCommentId(): Long = lastLocalCommentId.decrementAndGet()
 
     private fun createLocalAttachmentId(): Int = lastLocalAttachmentId.decrementAndGet()
 
-    private fun createLocalTextComment(text: String, authorId: String?) = Comment(
+    private fun createLocalTextComment(text: String, localId: Long, authorId: String?) = Comment(
         body = text,
         isInbound = true,
         author = Author(ConfigUtils.getUserName(), authorId, null, null),
         attachments = null,
         creationTime = System.currentTimeMillis(),
-        id = createLocalCommentId(),
+        id = localId,
         isLocal = true,
         rating = null,
         isSending = true

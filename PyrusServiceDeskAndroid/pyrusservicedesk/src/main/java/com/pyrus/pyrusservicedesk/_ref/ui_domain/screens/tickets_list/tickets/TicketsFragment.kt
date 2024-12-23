@@ -124,7 +124,7 @@ internal class TicketsFragment: TeaFragment<TicketListModel, Message, Effect>() 
         }
     }
 
-    override fun render(model: TicketListModel) {
+    /*override fun render(model: TicketListModel) {
         //set title (vendor name) and vendor image
         binding.toolbarTicketsList.psdToolbarVendorNameTv.text =  model.titleText
         injector().picasso
@@ -159,13 +159,13 @@ internal class TicketsFragment: TeaFragment<TicketListModel, Message, Effect>() 
 
         binding.noConnection.root.isVisible = model.showNoConnectionError
 
-    }
+    }*/
 
-    override val renderer: ViewRenderer<TicketListModel> = diff {
+    override fun createRenderer(): ViewRenderer<TicketListModel> = diff {
         diff(TicketListModel::titleText) { title -> binding.toolbarTicketsList.psdToolbarVendorNameTv.text = title }
         diff(TicketListModel::titleImageUrl) { url ->
             injector().picasso
-                .load(getOrganisationLogoUrl(url, PyrusServiceDesk.get().domain))
+                .load(getOrganisationLogoUrl(url, null))//TODO
                 .transform(CIRCLE_TRANSFORMATION)
                 .into(binding.toolbarTicketsList.psdToolbarVendorIv)
         }

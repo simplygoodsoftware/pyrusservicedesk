@@ -249,7 +249,8 @@ internal class TicketActor(
 
     private fun getUUID(): String {
         val uuid: UUID = UUID.randomUUID()
-        return uuid.toString()
+        val commentId = repository.createLocalCommentId()
+        return "commentId=$commentId;${uuid}"
     }
 
     private fun getSendTextCommentCommand(text: String, appId: String, userId: String, ticketId: Int): Command {

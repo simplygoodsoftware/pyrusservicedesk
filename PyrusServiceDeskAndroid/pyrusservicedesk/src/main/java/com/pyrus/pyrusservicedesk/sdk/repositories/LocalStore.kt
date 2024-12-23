@@ -5,7 +5,6 @@ import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
 import com.pyrus.pyrusservicedesk._ref.data.Comment
 import com.pyrus.pyrusservicedesk.sdk.data.Command
-import com.pyrus.pyrusservicedesk.sdk.data.CommentDto
 import com.pyrus.pyrusservicedesk.sdk.data.Ticket
 import com.pyrus.pyrusservicedesk.sdk.verify.LocalDataVerifier
 import kotlinx.coroutines.flow.Flow
@@ -49,6 +48,25 @@ internal class LocalStore(
     }
 
     /**
+     * Adds pending feed comment
+     */
+    fun addPendingFeedCommand(command: Command) {
+        var commands = localCommandsStateFlow.value.toMutableList()
+
+        commands.let { list ->
+            val existingIndex = list.indexOfFirst { it.commandId == command.commandId }
+            if (existingIndex >= 0) {
+                list.removeAt(existingIndex)
+            }
+            list.add(command)
+        }
+        if (commands.size > MAX_PENDING_COMMENTS_SIZE) {
+            commands = commands.subList(commands.size - MAX_PENDING_COMMENTS_SIZE, commands.size)
+        }
+        writeCommands(commands)
+    }
+
+    /**
      * Provides all pending feed comments
      */
     fun getPendingFeedComments(): List<Comment> {
@@ -68,9 +86,9 @@ internal class LocalStore(
         val rawJson = preferences.getString(PREFERENCE_KEY_OFFLINE_COMMANDS, "[]")
         val commandsList = gson.fromJson<List<Command>>(rawJson, commandListTokenType).toMutableList()
 
-        if (commandsList.removeAll { localDataVerifier.isLocalCommandEmpty(it) }) {
-            writeCommands(commandsList)
-        }
+//        if (commandsList.removeAll { localDataVerifier.isLocalCommandEmpty(it) }) {
+//            writeCommands(commandsList)
+//        }
         return commandsList
     }
 
@@ -78,8 +96,12 @@ internal class LocalStore(
         return getPendingFeedComments().find { comment -> comment.id == id }
     }
 
-    fun getCommand(id: String): Command? {
-        return getPendingFeedCommands().find { command -> command.commandId == id }
+    fun getCommand(id: Long): Command? {
+        return getPendingFeedCommands().find { command -> getCommentId(command.commandId) == id }
+    }
+
+    private fun getCommentId(uuid: String): Long {
+        return uuid.substringAfter("commentId=").substringBefore(";").toLong()
     }
 
     /**
