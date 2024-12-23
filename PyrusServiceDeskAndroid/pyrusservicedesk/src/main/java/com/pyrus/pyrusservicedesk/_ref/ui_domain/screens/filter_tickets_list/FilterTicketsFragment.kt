@@ -1,4 +1,4 @@
-package com.pyrus.pyrusservicedesk._ref.ui_domain.screens.filterTicketsList
+package com.pyrus.pyrusservicedesk._ref.ui_domain.screens.filter_tickets_list
 
 import android.os.Bundle
 import android.view.LayoutInflater

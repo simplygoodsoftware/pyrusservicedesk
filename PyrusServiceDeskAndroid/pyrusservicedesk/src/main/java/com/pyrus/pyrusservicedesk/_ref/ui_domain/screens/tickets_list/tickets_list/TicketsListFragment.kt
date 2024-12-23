@@ -8,7 +8,7 @@ import androidx.core.view.isVisible
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.pyrus.pyrusservicedesk.PyrusServiceDesk.Companion.injector
 import com.pyrus.pyrusservicedesk._ref.Screens
-import com.pyrus.pyrusservicedesk._ref.ui_domain.screens.addTicket.AddTicketFragment
+import com.pyrus.pyrusservicedesk._ref.ui_domain.screens.add_ticket.AddTicketFragment
 import com.pyrus.pyrusservicedesk._ref.ui_domain.screens.tickets_list.adapters.TicketsListAdapter
 import com.pyrus.pyrusservicedesk._ref.ui_domain.screens.tickets_list.tickets_list.TicketsListContract.Effect
 import com.pyrus.pyrusservicedesk._ref.ui_domain.screens.tickets_list.tickets_list.TicketsListContract.Message
