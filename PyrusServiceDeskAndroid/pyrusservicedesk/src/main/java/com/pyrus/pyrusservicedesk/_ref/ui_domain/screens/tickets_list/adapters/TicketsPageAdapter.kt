@@ -2,6 +2,7 @@ package com.pyrus.pyrusservicedesk._ref.ui_domain.screens.tickets_list.adapters
 
 import android.view.LayoutInflater
 import android.view.ViewGroup
+import androidx.core.view.isVisible
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.ListAdapter
@@ -37,7 +38,7 @@ internal class TicketsPageAdapter(
     }
 
     internal class TicketsPageViewHolder(
-        binding: PsdTicketsListPageBinding,
+        private val binding: PsdTicketsListPageBinding,
         private val onEvent: (TicketsContract.Message.Outer) -> Unit
     ) : RecyclerView.ViewHolder(binding.root) {
 
@@ -52,6 +53,8 @@ internal class TicketsPageAdapter(
 
         fun bind(entry: TicketSetInfoEntry) {
             adapter.setItems(entry.tickets)
+            binding.emptyTicketsListLl.isVisible = entry.tickets.isEmpty()
+            binding.ticketsRv.isVisible = entry.tickets.isNotEmpty()
         }
 
     }

@@ -5,13 +5,13 @@ import com.pyrus.pyrusservicedesk._ref.data.FullTicket
 internal interface TicketsView {
 
     data class Model(
-        val titleText: String,
+        val titleText: String?,
         val titleImageUrl: String?,
         val filterName: String?,
         val ticketsIsEmpty: Boolean,
         val filterEnabled: Boolean,
         val tabLayoutVisibility: Boolean,
-        val applications: List<TicketSetInfoEntry>,
+        val applications: List<TicketSetInfoEntry>?,
         val showNoConnectionError: Boolean,
         val isLoading: Boolean,
     ) {

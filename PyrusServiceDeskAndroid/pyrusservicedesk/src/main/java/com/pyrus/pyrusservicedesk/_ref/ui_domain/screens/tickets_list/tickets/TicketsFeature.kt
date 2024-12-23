@@ -3,6 +3,7 @@ package com.pyrus.pyrusservicedesk._ref.ui_domain.screens.tickets_list.tickets
 import androidx.fragment.app.FragmentManager
 import com.pyrus.pyrusservicedesk._ref.data.multy_chat.TicketSetInfo
 import com.pyrus.pyrusservicedesk._ref.data.multy_chat.TicketsInfo
+import com.pyrus.pyrusservicedesk._ref.ui_domain.screens.ticket.TicketContract
 import com.pyrus.pyrusservicedesk._ref.whitetea.core.Store
 import com.pyrus.pyrusservicedesk._ref.ui_domain.screens.tickets_list.tickets.TicketsContract.Effect
 import com.pyrus.pyrusservicedesk._ref.ui_domain.screens.tickets_list.tickets.TicketsContract.Message
@@ -12,16 +13,21 @@ internal typealias TicketsFeature = Store<State, Message, Effect.Outer>
 
 internal interface TicketsContract {
 
-    data class State(
-        val appId: String?,
-        val titleText: String?,
-        val titleImageUrl: String?,
-        val filterName: String?,
-        val filterEnabled: Boolean,
-        val tickets: List<TicketSetInfo>?,
-        val isLoading: Boolean,
-        val showNoConnectionError: Boolean,
-    )
+    sealed interface State {
+
+        data object Loading : State
+
+        data object Error : State
+
+        data class Content(
+            val appId: String?,
+            val titleText: String?,
+            val titleImageUrl: String?,
+            val filterName: String?,
+            val filterEnabled: Boolean,
+            val tickets: List<TicketSetInfo>?,
+        ) : State
+    }
 
     sealed interface Message {
 

@@ -7,8 +7,8 @@ import com.pyrus.pyrusservicedesk._ref.ui_domain.screens.tickets_list.tickets.Ti
 
 internal object TicketsMapper {
 
-    fun map(state: State): Model {
-        return Model(
+    fun map(state: State): Model = when(state) {
+        is State.Content -> Model(
             titleText = state.titleText ?: "",
             titleImageUrl = state.titleImageUrl,
             filterName = state.filterName,
@@ -16,14 +16,36 @@ internal object TicketsMapper {
             filterEnabled = state.filterEnabled,
             tabLayoutVisibility = if (state.tickets != null) state.tickets.size > 1 else false,
             applications = state.tickets?.map(::map) ?: emptyList(),
-            showNoConnectionError = state.showNoConnectionError,
-            isLoading = state.isLoading,
+            showNoConnectionError = false,
+            isLoading = false,
+        )
+        State.Error -> Model(
+            titleText = null,
+            titleImageUrl = null,
+            filterName = null,
+            ticketsIsEmpty = true,
+            filterEnabled = false,
+            tabLayoutVisibility = false,
+            applications = null,
+            showNoConnectionError = true,
+            isLoading = false,
+        )
+        State.Loading -> Model(
+            titleText = null,
+            titleImageUrl = null,
+            filterName = null,
+            ticketsIsEmpty = true,
+            filterEnabled = false,
+            tabLayoutVisibility = false,
+            applications = null,
+            showNoConnectionError = false,
+            isLoading = true,
         )
     }
 
     private fun map(ticketSetInfo: TicketSetInfo): TicketSetInfoEntry = TicketSetInfoEntry(
         appId = ticketSetInfo.appId,
         titleText = ticketSetInfo.orgName,
-        tickets = ticketSetInfo.tickets, // TODO map
+        tickets = ticketSetInfo.tickets, // TODO map to entry
     )
 }

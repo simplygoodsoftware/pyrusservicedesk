@@ -95,7 +95,6 @@
         android:id="@+id/fabAddTicket"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginRight="16dp"
         android:src="@drawable/ic_add_big"
         android:visibility="visible"
         android:layout_marginEnd="16dp"

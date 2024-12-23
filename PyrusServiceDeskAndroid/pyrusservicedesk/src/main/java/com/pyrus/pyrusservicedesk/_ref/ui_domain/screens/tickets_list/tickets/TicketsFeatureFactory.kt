@@ -31,16 +31,7 @@ internal class TicketsFeatureFactory(
 
     fun create(): TicketsFeature = storeFactory.create(
         name = TAG,
-        initialState = State(
-            appId = "",
-            tickets = null,
-            isLoading = true,
-            titleText = "",
-            titleImageUrl = "",
-            filterName = "",
-            filterEnabled = false,
-            showNoConnectionError = false,
-        ),
+        initialState = State.Loading,
         reducer = FeatureReducer(),
         actor = TicketsActor(syncRepository).adaptCast(),
         initialEffects = listOf(
@@ -63,9 +54,11 @@ private class FeatureReducer: Logic<State, Message, Effect>() {
     private fun Result.handleOuter(message: Message.Outer) {
         when (message) {
             Message.Outer.OnFabItemClick -> {
-                val users = getSelectedUsers(state.appId) ?: emptyList()
+                val currentState = state as? State.Content ?: return
+                val selectedAppId = currentState.appId ?: return
+                val users = getSelectedUsers(currentState.appId) ?: emptyList()
+
                 if (users.size > 1) {
-                    val selectedAppId = state.appId ?: return
                     effects { +Effect.Outer.ShowAddTicketMenu(selectedAppId) }
                 }
 //                else if (users.isEmpty()) {
@@ -80,7 +73,8 @@ private class FeatureReducer: Logic<State, Message, Effect>() {
             }
 
             is Message.Outer.OnFilterClick -> {
-                val selectedAppId = state.appId ?: return
+                val currentState = state as? State.Content ?: return
+                val selectedAppId = currentState.appId ?: return
                 effects { +Effect.Outer.ShowFilterMenu(selectedAppId, message.selectedUserId) }
             }
 
@@ -88,8 +82,9 @@ private class FeatureReducer: Logic<State, Message, Effect>() {
 
             Message.Outer.OnSettingsClick -> Log.d(TAG, "OnScanClick, OnSettingsClick")
 
-            is Message.Outer.OnChangePage -> state {
-                updateTicketsFilterState(state, message.appId)
+            is Message.Outer.OnChangePage -> {
+                val currentState = state as? State.Content ?: return
+                state { updateTicketsFilterState(currentState, message.appId) }
             }
 
             Message.Outer.OnCreateTicketClick -> {
@@ -116,7 +111,12 @@ private class FeatureReducer: Logic<State, Message, Effect>() {
     private fun Result.handleInner(message: Message.Inner) {
         when (message) {
             Message.Inner.UpdateTicketsFailed -> {
-                state { state.copy(isLoading = false, showNoConnectionError = true) }
+                val currentState = state
+                when(currentState) {
+                    is State.Content -> {}
+                    State.Error -> {}
+                    State.Loading -> state { State.Error }
+                }
             }
             is Message.Inner.UpdateTicketsCompleted -> {
                 state { setTicketsState(message.tickets) }
@@ -125,14 +125,18 @@ private class FeatureReducer: Logic<State, Message, Effect>() {
                 state { setTicketsState(message.tickets) }
             }
             is Message.Inner.UserIdSelected -> {
+                val currentState = state as? State.Content ?: return
+
                 state {
-                    state.copy(
+                    currentState.copy(
                         // TODO AccountRepository
                         filterName = injector().usersAccount?.users?.find { it.userId == message.userId }?.userName
                             ?: "",
                         filterEnabled = message.userId != KEY_DEFAULT_USER_ID,
                     )
                 }
+
+                // TODO WTF!!!!
                 message.fm.setFragmentResult(KEY_USER_ID, bundleOf(KEY_USER_ID to message.userId))
             }
         }
@@ -145,19 +149,17 @@ private class FeatureReducer: Logic<State, Message, Effect>() {
 
     private fun setTicketsState(tickets: TicketsInfo) : State {
 
-        return State(
+        return State.Content(
             appId = tickets.ticketSetInfoList.firstOrNull()?.appId,
             titleText = tickets.ticketSetInfoList.firstOrNull()?.orgName,
             titleImageUrl = tickets.ticketSetInfoList.firstOrNull()?.orgLogoUrl,
             filterName = null,
             filterEnabled = false,
             tickets = tickets.ticketSetInfoList,
-            isLoading = false,
-            showNoConnectionError = false,
         )
     }
 
-    private fun updateTicketsFilterState(state: State, appId: String) : State {
+    private fun updateTicketsFilterState(state: State.Content, appId: String) : State {
         val ticketsSetByAppName = state.tickets?.associateBy { it.appId }
         return state.copy(
             appId = appId,

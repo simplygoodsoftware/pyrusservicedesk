@@ -1,12 +1,14 @@
 package com.pyrus.pyrusservicedesk._ref.ui_domain.screens.tickets_list.tickets
 
 import android.os.Bundle
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.isVisible
+import androidx.recyclerview.widget.RecyclerView
 import androidx.viewpager2.widget.ViewPager2
 import com.google.android.material.tabs.TabLayoutMediator
 import com.pyrus.pyrusservicedesk.PyrusServiceDesk.Companion.injector
@@ -146,25 +148,18 @@ internal class TicketsFragment: TeaFragment<Model, Message, Effect.Outer>() {
         //tabLayout and viewPager
         binding.tabLayout.visibility = if (model.tabLayoutVisibility ) View.VISIBLE else View.GONE
         viewPagerAdapter.setItems(model.applications)
-
-        binding.tabLayout.isVisible = !model.isLoading
-        binding.progressBar.isVisible = model.isLoading
-
-        binding.noConnection.root.isVisible = model.showNoConnectionError
-
     }*/
 
     override fun createRenderer(): ViewRenderer<Model> = diff {
         diff(Model::titleText) { title -> binding.toolbarTicketsList.psdToolbarVendorNameTv.text = title }
         diff(Model::titleImageUrl) { url ->
-            val logoUrl = url?.let { getOrganisationLogoUrl(url, null) } //TODO
+            val logoUrl = url?.let { getOrganisationLogoUrl(url, null) } // TODO
             injector().picasso
                 .load(logoUrl)
                 .transform(CIRCLE_TRANSFORMATION)
                 .into(binding.toolbarTicketsList.psdToolbarVendorIv)
         }
         diff(Model::ticketsIsEmpty) { isEmpty ->
-
             binding.toolbarTicketsList.psdToolbarFilterIb.isVisible = !isEmpty
             binding.toolbarTicketsList.psdToolbarQrIb.isVisible = !isEmpty
             binding.toolbarTicketsList.psdToolbarSettingsIb.isVisible = isEmpty
@@ -172,7 +167,10 @@ internal class TicketsFragment: TeaFragment<Model, Message, Effect.Outer>() {
 
         }
         diff(Model::filterEnabled) { filterEnabled ->
-            binding.toolbarTicketsList.psdToolbarFilterIb.setBackgroundResource(if (!filterEnabled) R.drawable.ic_filter else R.drawable.ic_selected_filter)
+            binding.toolbarTicketsList.psdToolbarFilterIb.setBackgroundResource(
+                if (!filterEnabled) R.drawable.ic_filter
+                else R.drawable.ic_selected_filter
+            )
             binding.filterFl.isVisible = filterEnabled
         }
         diff(Model::filterName) { filterName ->
@@ -184,8 +182,11 @@ internal class TicketsFragment: TeaFragment<Model, Message, Effect.Outer>() {
         diff(Model::applications) { ticketSetInfoList ->
             adapter.submitList(ticketSetInfoList)
         }
-        diff(Model::showNoConnectionError) { showError -> binding.noConnection.root.isVisible = showError }
+        diff(Model::showNoConnectionError) { showError ->
+            binding.noConnection.root.isVisible = showError
+        }
         diff(Model::isLoading) { isLoading ->
+            Log.d("SDS", "isLoading: ${isLoading}")
             binding.tabLayout.isVisible = !isLoading
             binding.progressBar.isVisible = isLoading
         }
