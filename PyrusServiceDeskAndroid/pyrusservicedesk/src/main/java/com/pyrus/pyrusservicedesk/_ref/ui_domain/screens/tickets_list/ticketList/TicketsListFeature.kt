@@ -51,9 +51,7 @@ internal interface TicketsListContract {
         }
 
         sealed interface Inner : Effect {
-            object UpdateTickets : Inner
-            //object FeedFlow : Inner
-            object TicketsAutoUpdate : Inner
+            data object UpdateTickets : Inner
         }
     }
 

@@ -69,14 +69,11 @@ private class FeatureReducer : Logic<State, Message, Effect>() {
 
             Message.Outer.OnCreateTicketClick -> {
                 val users = getSelectedUsers(state.appId)
-                if (users.size > 1) {
-                    effects {
-                        +Effect.Outer.ShowAddTicketMenu(state.appId)
-                    }
-                } else {
-                    effects {
-                        +Effect.Outer.ShowTicket(null, userId = users[users.keys.first()])
-                    }
+                if (users.size > 1) effects {
+                    +Effect.Outer.ShowAddTicketMenu(state.appId)
+                }
+                else effects {
+                    +Effect.Outer.ShowTicket(null, userId = users[users.keys.first()])
                 }
             }
 
@@ -95,7 +92,6 @@ private class FeatureReducer : Logic<State, Message, Effect>() {
 
     private fun Result.handleInner(message: Message.Inner) {
         when (message) {
-            //Message.Inner.UpdateTicketsFailed -> TODO()
             is Message.Inner.UpdateTicketsCompleted -> {
 
                 val usersId = injector().usersAccount?.users?.filter { it.appId == state.appId }?.map { it.userId } ?: emptyList()
@@ -113,7 +109,6 @@ private class FeatureReducer : Logic<State, Message, Effect>() {
                     )
                 }
             }
-            //is Message.Inner.TicketsUpdated -> TODO()
             is Message.Inner.UserIdSelected -> {
                 val tickets = if (message.userId.isNotEmpty()) {
                     state.allTickets.filter { it.userId == message.userId }
@@ -124,7 +119,8 @@ private class FeatureReducer : Logic<State, Message, Effect>() {
 
             }
 
-            else -> {PLog.d("EP ", "message")}
+            is Message.Inner.TicketsUpdated -> {PLog.d("EP ", "message")}
+            Message.Inner.UpdateTicketsFailed -> {PLog.d("EP ", "message")}
         }
     }
 
@@ -152,16 +148,12 @@ internal class TicketsListActor(
 
     override fun handleEffect(effect: Effect.Inner): Flow<Message.Inner> = when (effect) {
         Effect.Inner.UpdateTickets -> singleFlow {
-            //repository.startSync()
-            val ticketsTry: Try<TicketsDto> = repository.getAllData()// sync(repository.createSyncRequest())
+            val ticketsTry: Try<TicketsDto> = repository.getAllData()
+            // sync(repository.createSyncRequest())
             when {
                 ticketsTry.isSuccess() -> Message.Inner.UpdateTicketsCompleted(ticketsTry.value)
                 else -> Message.Inner.UpdateTicketsFailed
             }
-
-        }
-        Effect.Inner.TicketsAutoUpdate -> flow {
-            // TODO
 
         }
     }
