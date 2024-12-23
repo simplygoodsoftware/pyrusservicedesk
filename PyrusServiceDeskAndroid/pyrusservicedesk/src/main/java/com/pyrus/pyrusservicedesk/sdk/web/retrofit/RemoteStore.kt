@@ -102,7 +102,7 @@ internal class RemoteStore(
                 needFullInfo = true,
                 additionalUsers = getAdditionalUsers(),
                 authorId = getAuthorId(),
-                authorName = "Kate Test",
+                authorName = "Kate Test", // TODO
                 appId =  account.appId,
                 userId = getUserId(),
                 instanceId = getInstanceId(),
@@ -137,7 +137,7 @@ internal class RemoteStore(
                 needFullInfo = true,
                 additionalUsers = getAdditionalUsers(),
                 authorId = getAuthorId(),
-                authorName = "Kate Test",
+                authorName = "Kate Test", // TODO
                 appId = account.appId,
                 userId = getUserId(),
                 instanceId = getInstanceId(),
@@ -165,7 +165,7 @@ internal class RemoteStore(
                 additionalUsers = getAdditionalUsers(),
                 commands = commands,
                 authorId = getAuthorId(),
-                authorName = "Kate Test",
+                authorName = "Kate Test", // TODO
                 appId = v3.appId,
                 userId = getUserId(),
                 instanceId = getInstanceId(),
@@ -185,21 +185,24 @@ internal class RemoteStore(
 
         val ticketsByUserId = ticketsDto.tickets
             ?.map(mapper::map)
-            ?.associateBy { it.userId } ?: error("tickets is null")
+            ?.groupBy { it.userId } ?: error("tickets is null")
 
-        val applications = ticketsDto.applications ?: error("applications is null")
+        val applications = ticketsDto.applications?.associateBy { it.appId } ?: error("applications is null")
 
-        val ticketSetInfoList = applications.map {
-            val appId = it.appId ?: error("appId is null")
-            val users = usersByAppId[appId] ?: error("user with appId: $appId not exist")
+        val ticketSetInfoList = usersByAppId.keys.map { appId ->
+            val users = usersByAppId[appId] ?: emptyList()
             val tickets = ArrayList<FullTicket>()
             for (user in users) {
-                tickets += ticketsByUserId[user.userId] ?: error("user with appId: ${it.appId} not exist")
+                val userTickets = ticketsByUserId[user.userId] ?: continue
+                tickets += userTickets
             }
+            val application = applications[appId]
+            val orgName = application?.orgName
+            val orgLogoUrl = application?.orgLogoUrl
             TicketSetInfo(
                 appId = appId,
-                orgName = it.orgName ?: "",
-                orgLogoUrl = it.orgLogoUrl,
+                orgName = orgName ?: "",
+                orgLogoUrl = orgLogoUrl,
                 tickets = tickets,
             )
         }

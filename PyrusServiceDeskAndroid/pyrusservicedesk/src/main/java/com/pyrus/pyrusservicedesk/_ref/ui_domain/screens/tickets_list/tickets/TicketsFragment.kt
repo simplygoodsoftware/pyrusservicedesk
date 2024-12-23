@@ -15,8 +15,7 @@ import com.pyrus.pyrusservicedesk._ref.Screens
 import com.pyrus.pyrusservicedesk._ref.ui_domain.screens.add_ticket.AddTicketFragment
 import com.pyrus.pyrusservicedesk._ref.ui_domain.screens.filter_tickets_list.FilterTicketsFragment
 import com.pyrus.pyrusservicedesk._ref.ui_domain.screens.filter_tickets_list.FilterTicketsFragment.Companion.KEY_SELECTED_USER_ID
-import com.pyrus.pyrusservicedesk._ref.ui_domain.screens.tickets_list.adapters.TicketSetAdapter
-import com.pyrus.pyrusservicedesk._ref.ui_domain.screens.tickets_list.adapters.ViewPagerAdapter
+import com.pyrus.pyrusservicedesk._ref.ui_domain.screens.tickets_list.adapters.TicketsPageAdapter
 import com.pyrus.pyrusservicedesk._ref.ui_domain.screens.tickets_list.tickets.TicketsContract.Effect
 import com.pyrus.pyrusservicedesk._ref.ui_domain.screens.tickets_list.tickets.TicketsContract.Message
 import com.pyrus.pyrusservicedesk._ref.ui_domain.screens.tickets_list.tickets.TicketsView.Model
@@ -35,14 +34,10 @@ import kotlinx.coroutines.flow.map
 internal class TicketsFragment: TeaFragment<Model, Message, Effect.Outer>() {
 
     private lateinit var binding: PsdTicketsListBinding
-    private var selectedUserIdFilter: String = KEY_DEFAULT_USER_ID
-    private var currentVendor = ""
     private var currentUserId = KEY_DEFAULT_USER_ID
-    private val adapter: TicketSetAdapter by lazy {
-        TicketSetAdapter(::dispatch)
+    private val adapter: TicketsPageAdapter by lazy {
+        TicketsPageAdapter(::dispatch)
     }
-    private lateinit var viewPagerAdapter: ViewPagerAdapter
-    //private val hashMap: HashMap<String, String> = hashMapOf() //TODO
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
         binding = PsdTicketsListBinding.inflate(inflater, container, false)
@@ -57,7 +52,8 @@ internal class TicketsFragment: TeaFragment<Model, Message, Effect.Outer>() {
             currentUserId = bundle.getString(KEY_SELECTED_USER_ID) ?: KEY_DEFAULT_USER_ID
             dispatch(Message.Inner.UserIdSelected(currentUserId, childFragmentManager))
         }
-//todo
+
+        //todo
         /*//get information about selected vendor and process it
         parentFragmentManager.setFragmentResultListener(
             FilterTicketsFragment.KEY_FILTER_RESULT,
@@ -97,18 +93,16 @@ internal class TicketsFragment: TeaFragment<Model, Message, Effect.Outer>() {
         )
         ViewCompat.setOnApplyWindowInsetsListener(binding.root, deferringInsetsListener)
 
-        viewPagerAdapter = ViewPagerAdapter(childFragmentManager, lifecycle)
-
         binding.viewPager.registerOnPageChangeCallback(object : ViewPager2.OnPageChangeCallback() {
             override fun onPageSelected(position: Int) {
                 super.onPageSelected(position)
-                dispatch(Message.Outer.OnChangeApp(viewPagerAdapter.getAppId(position)))
+                dispatch(Message.Outer.OnChangePage(adapter.getAppId(position)))
             }
         })
 
-        binding.viewPager.adapter = viewPagerAdapter
+        binding.viewPager.adapter = adapter
         TabLayoutMediator(binding.tabLayout, binding.viewPager) { tab, position ->
-            tab.text = viewPagerAdapter.getTitle(position)
+            tab.text = adapter.getTitle(position)
         }.attach()
 
 
@@ -187,8 +181,8 @@ internal class TicketsFragment: TeaFragment<Model, Message, Effect.Outer>() {
         diff(Model::tabLayoutVisibility) { tabLayoutVisibility ->
             binding.tabLayout.isVisible = tabLayoutVisibility
         }
-        diff(Model::applications) { applications ->
-            adapter.submitList(applications)
+        diff(Model::applications) { ticketSetInfoList ->
+            adapter.submitList(ticketSetInfoList)
         }
         diff(Model::showNoConnectionError) { showError -> binding.noConnection.root.isVisible = showError }
         diff(Model::isLoading) { isLoading ->
@@ -216,12 +210,11 @@ internal class TicketsFragment: TeaFragment<Model, Message, Effect.Outer>() {
         }
     }
 
-    companion object {
-
-        private val TAG = TicketsFragment::class.java.simpleName
+    internal companion object {
 
         const val KEY_DEFAULT_USER_ID = "0"
         const val KEY_APP_ID_RESULT = "KEY_APP_ID_RESULT"
+        const val KEY_USER_ID = "KEY_USER_ID"
 
         fun newInstance(): TicketsFragment {
             return TicketsFragment()

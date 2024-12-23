@@ -9,7 +9,6 @@ import com.github.terrakok.cicerone.NavigatorHolder
 import com.google.gson.GsonBuilder
 import com.pyrus.pyrusservicedesk._ref.ui_domain.screens.ticket.TicketFeatureFactory
 import com.pyrus.pyrusservicedesk._ref.ui_domain.screens.tickets_list.tickets.TicketsFeatureFactory
-import com.pyrus.pyrusservicedesk._ref.ui_domain.screens.tickets_list.tickets_list.TicketsListFeatureFactory
 import com.pyrus.pyrusservicedesk.sdk.FileResolver
 import com.pyrus.pyrusservicedesk.sdk.data.FileManager
 import com.pyrus.pyrusservicedesk.sdk.data.gson.RemoteGsonExclusionStrategy
@@ -173,10 +172,6 @@ internal class DiInjector(
 
     fun ticketsFeatureFactory(): TicketsFeatureFactory {
         return TicketsFeatureFactory(storeFactory, repository)
-    }
-
-    fun ticketsListFeatureFactory(appId: String): TicketsListFeatureFactory {
-        return TicketsListFeatureFactory(storeFactory, repository, appId)
     }
 
     private val cicerone: Cicerone<PyrusRouterImpl> = Cicerone.create(PyrusRouterImpl())

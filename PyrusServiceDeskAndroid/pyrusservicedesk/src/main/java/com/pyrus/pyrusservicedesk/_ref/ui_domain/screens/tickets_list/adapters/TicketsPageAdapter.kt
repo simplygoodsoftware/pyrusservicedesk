@@ -8,29 +8,36 @@ import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
 import com.pyrus.pyrusservicedesk._ref.ui_domain.screens.tickets_list.tickets.TicketsContract
 import com.pyrus.pyrusservicedesk._ref.ui_domain.screens.tickets_list.tickets.TicketsView.Model.TicketSetInfoEntry
-import com.pyrus.pyrusservicedesk.databinding.TicketsListFragmentBinding
+import com.pyrus.pyrusservicedesk.databinding.PsdTicketsListPageBinding
 
-internal class TicketSetAdapter(
+internal class TicketsPageAdapter(
     private val onEvent: (TicketsContract.Message.Outer) -> Unit
-): ListAdapter<TicketSetInfoEntry, TicketSetAdapter.TicketSetViewHolder>(ItemCallback()) {
+): ListAdapter<TicketSetInfoEntry, TicketsPageAdapter.TicketsPageViewHolder>(ItemCallback()) {
 
 
-    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): TicketSetViewHolder {
-        val binding = TicketsListFragmentBinding.inflate(
+    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): TicketsPageViewHolder {
+        val binding = PsdTicketsListPageBinding.inflate(
             LayoutInflater.from(parent.context),
             parent,
             false
         )
-        return TicketSetViewHolder(binding, onEvent)
+        return TicketsPageViewHolder(binding, onEvent)
     }
 
-    override fun onBindViewHolder(holder: TicketSetViewHolder, position: Int) {
+    override fun onBindViewHolder(holder: TicketsPageViewHolder, position: Int) {
         holder.bind(getItem(position))
     }
 
+    fun getTitle(position: Int): String {
+        return getItem(position).titleText
+    }
 
-    internal class TicketSetViewHolder(
-        private val binding: TicketsListFragmentBinding,
+    fun getAppId(position: Int): String {
+        return getItem(position).appId
+    }
+
+    internal class TicketsPageViewHolder(
+        binding: PsdTicketsListPageBinding,
         private val onEvent: (TicketsContract.Message.Outer) -> Unit
     ) : RecyclerView.ViewHolder(binding.root) {
 

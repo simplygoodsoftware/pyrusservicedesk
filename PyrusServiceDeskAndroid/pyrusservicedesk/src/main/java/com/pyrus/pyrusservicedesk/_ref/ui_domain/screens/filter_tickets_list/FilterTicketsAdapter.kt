@@ -23,7 +23,7 @@ class FilterTicketsAdapter (users: List<String>, userIds: List<String>, userId: 
         parent: ViewGroup,
         viewType: Int
     ): AddTicketViewHolder {
-        return AddTicketViewHolder(LayoutInflater.from(parent.context).inflate(R.layout.filter_tickets_item, parent, false))
+        return AddTicketViewHolder(LayoutInflater.from(parent.context).inflate(R.layout.psd_filter_tickets_item, parent, false))
     }
 
     override fun onBindViewHolder(holder: AddTicketViewHolder, position: Int) {

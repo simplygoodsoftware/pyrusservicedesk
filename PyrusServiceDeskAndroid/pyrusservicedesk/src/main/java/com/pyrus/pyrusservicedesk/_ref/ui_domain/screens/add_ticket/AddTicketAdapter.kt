@@ -18,7 +18,7 @@ class AddTicketAdapter (users: List<String>, val onItemClick: (Int) -> Unit) : R
         parent: ViewGroup,
         viewType: Int
     ): AddTicketViewHolder {
-        return AddTicketViewHolder(LayoutInflater.from(parent.context).inflate(R.layout.add_ticket_item, parent, false))
+        return AddTicketViewHolder(LayoutInflater.from(parent.context).inflate(R.layout.psd_add_ticket_item, parent, false))
     }
 
     override fun onBindViewHolder(holder: AddTicketViewHolder, position: Int) {
