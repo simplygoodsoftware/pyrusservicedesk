@@ -79,7 +79,7 @@ private class FeatureReducer: Logic<State, Message, Effect>() {
                 effects { +Effect.Outer.ShowFilterMenu(selectedAppId, message.selectedUserId) }
             }
 
-            // TODO
+            // TODO wtf
             Message.Outer.OnScanClick -> injector().router.exit()
 
             // TODO

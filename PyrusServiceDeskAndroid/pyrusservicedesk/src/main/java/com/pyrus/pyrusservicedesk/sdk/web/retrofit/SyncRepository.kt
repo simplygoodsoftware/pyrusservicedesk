@@ -15,7 +15,6 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.newSingleThreadContext
-import retrofit2.Retrofit
 import java.util.concurrent.BlockingQueue
 import java.util.concurrent.LinkedBlockingQueue
 import java.util.concurrent.atomic.AtomicBoolean
@@ -26,43 +25,29 @@ import kotlin.coroutines.suspendCoroutine
 
 private typealias SyncLoopRequest = Continuation<Try<Int>>
 
-internal class SyncRepository(val retrofit: Retrofit) : CoroutineScope {
+internal class SyncRepository : CoroutineScope {
 
     override val coroutineContext: CoroutineContext = newSingleThreadContext("Synchronizer") +
             SupervisorJob() +
             CoroutineExceptionHandler { _, throwable ->
-                PLog.e(TAG, "syncV2 global error: ${throwable.message}")
+                PLog.e(TAG, "sync global error: ${throwable.message}")
             }
 
     private val dispatcher: CoroutineDispatcher = Dispatchers.Default
 
 
-
-    private val api: ServiceDeskApi
 //    private val _stateFlow = MutableStateFlow("Initial value")
 //    val ticketsListStateFlow: StateFlow<String> get() = _stateFlow
 //    fun updateValue(newValue: String) {
 //        _stateFlow.value = newValue
 //    }
 //
-    private val _ticketsListStateFlow = MutableStateFlow(
-        SyncRes(
-            TicketsDto(false, emptyList(), emptyList(), emptyList())
-        )
-    )
-    val ticketsListStateFlow: StateFlow<SyncRes> get() = _ticketsListStateFlow
+    private val ticketsMutableStateFlow = MutableStateFlow<SyncRes?>(null)
+    val ticketsFlow: StateFlow<SyncRes?> = ticketsMutableStateFlow
 
-    fun updateValue(res: SyncRes) {
-        _ticketsListStateFlow.value = res
+    private fun updateValue(res: SyncRes) {
+        ticketsMutableStateFlow.value = res
     }
-
-    init {
-        api = retrofit.create(ServiceDeskApi::class.java)
-    }
-
-    class SyncTryRes(
-        val tryRes: Try<TicketsDto>
-    )
 
     class SyncRes(
         val tickets: TicketsDto,
@@ -167,39 +152,35 @@ internal class SyncRepository(val retrofit: Retrofit) : CoroutineScope {
         sendSyncComplete(syncRes)
     }
 
-    internal suspend fun sync(
-        request: RequestBodyBase,
-    ): Try<SyncRes> {
+    internal suspend fun sync(request: RequestBodyBase): Try<SyncRes> {
+        TODO()
 
-        val responseTry: Try<TicketsDto> = try {
-                api.getTickets(request)
-            } catch (e: Exception) {
-                e.printStackTrace()
-                return Try.Failure(e)
-            }
-
-
-//        val responseTry = try {
+//        val responseTry: Try<TicketsDto> = try {
 //            api.getTickets(request)
 //        }
 //        catch (e: Exception) {
-//            //e.logAsNetwork(TAG, "sync error: $e")
+//            e.printStackTrace()
 //            return Try.Failure(e)
 //        }
-
-        val responseData = when (responseTry) {
-            is Try.Success -> responseTry.value
-            is Try.Failure -> {
-                PLog.d(TAG, "sync server error: ${responseTry.error}")
-                return Try.Failure(responseTry.error)
-            }
-        }
-
-        return Try.Success(
-            SyncRes(
-                responseData,
-            )
-        )
+//
+//
+////        val responseTry = try {
+////            api.getTickets(request)
+////        }
+////        catch (e: Exception) {
+////            //e.logAsNetwork(TAG, "sync error: $e")
+////            return Try.Failure(e)
+////        }
+//
+//        val responseData = when (responseTry) {
+//            is Try.Success -> responseTry.value
+//            is Try.Failure -> {
+//                PLog.d(TAG, "sync server error: ${responseTry.error}")
+//                return Try.Failure(responseTry.error)
+//            }
+//        }
+//
+//        return Try.Success(SyncRes(responseData))
     }
 
     private fun sendSyncComplete(syncTry: Try<SyncRes>) {
