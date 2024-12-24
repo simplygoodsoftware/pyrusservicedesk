@@ -1,5 +1,6 @@
 package com.pyrus.pyrusservicedesk.sdk.web.retrofit
 
+import com.pyrus.pyrusservicedesk._ref.utils.Try
 import com.pyrus.pyrusservicedesk.sdk.data.intermediate.AddCommentResponseData
 import com.pyrus.pyrusservicedesk.sdk.data.intermediate.CommentsDto
 import com.pyrus.pyrusservicedesk.sdk.data.intermediate.FileUploadResponseData
@@ -8,7 +9,6 @@ import com.pyrus.pyrusservicedesk.sdk.web.request_body.AddCommentRequestBody
 import com.pyrus.pyrusservicedesk.sdk.web.request_body.GetFeedBody
 import com.pyrus.pyrusservicedesk.sdk.web.request_body.RequestBodyBase
 import com.pyrus.pyrusservicedesk.sdk.web.request_body.SetPushTokenBody
-import com.pyrus.pyrusservicedesk._ref.utils.Try
 import okhttp3.MultipartBody
 import okhttp3.ResponseBody
 import retrofit2.http.Body

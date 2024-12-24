@@ -3,12 +3,10 @@ package com.pyrus.pyrusservicedesk._ref.ui_domain.screens.tickets_list.tickets
 import androidx.fragment.app.FragmentManager
 import com.pyrus.pyrusservicedesk._ref.data.multy_chat.TicketSetInfo
 import com.pyrus.pyrusservicedesk._ref.data.multy_chat.TicketsInfo
-import com.pyrus.pyrusservicedesk._ref.ui_domain.screens.ticket.TicketContract
-import com.pyrus.pyrusservicedesk._ref.whitetea.core.Store
 import com.pyrus.pyrusservicedesk._ref.ui_domain.screens.tickets_list.tickets.TicketsContract.Effect
 import com.pyrus.pyrusservicedesk._ref.ui_domain.screens.tickets_list.tickets.TicketsContract.Message
-import com.pyrus.pyrusservicedesk._ref.ui_domain.screens.tickets_list.tickets.TicketsContract.Message.Inner
 import com.pyrus.pyrusservicedesk._ref.ui_domain.screens.tickets_list.tickets.TicketsContract.State
+import com.pyrus.pyrusservicedesk._ref.whitetea.core.Store
 
 internal typealias TicketsFeature = Store<State, Message, Effect.Outer>
 
@@ -65,8 +63,9 @@ internal interface TicketsContract {
         }
 
         sealed interface Inner : Effect {
+            data object TicketsSetFlow : Inner
             data object UpdateTickets : Inner
-            data class OpenTicketScreen(val ticketId: Int, val userId: String?) : Inner
+            data class OpenTicketScreen(val ticketId: Int?, val userId: String?) : Inner
         }
     }
 

@@ -4,10 +4,10 @@ import android.view.View
 import android.view.ViewGroup
 import com.pyrus.pyrusservicedesk.R
 import com.pyrus.pyrusservicedesk._ref.ui_domain.screens.ticket.adapter.new_entries.CommentEntryV2
-import com.pyrus.pyrusservicedesk.presentation.ui.view.ContentType
-import com.pyrus.pyrusservicedesk.presentation.ui.view.recyclerview.ViewHolderBase
 import com.pyrus.pyrusservicedesk._ref.utils.ConfigUtils
 import com.pyrus.pyrusservicedesk.databinding.PsdViewHolderCommentInboundBinding
+import com.pyrus.pyrusservicedesk.presentation.ui.view.ContentType
+import com.pyrus.pyrusservicedesk.presentation.ui.view.recyclerview.ViewHolderBase
 
 internal class WelcomeMessageHolder(parent: ViewGroup) :
     ViewHolderBase<CommentEntryV2.SimpleText>(parent, R.layout.psd_view_holder_comment_inbound) {

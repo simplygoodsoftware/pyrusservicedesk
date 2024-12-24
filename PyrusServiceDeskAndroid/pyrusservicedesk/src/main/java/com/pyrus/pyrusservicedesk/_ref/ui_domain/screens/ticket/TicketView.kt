@@ -3,7 +3,6 @@ package com.pyrus.pyrusservicedesk._ref.ui_domain.screens.ticket
 import android.net.Uri
 import com.pyrus.pyrusservicedesk._ref.ui_domain.screens.ticket.adapter.new_entries.CommentEntryV2
 import com.pyrus.pyrusservicedesk._ref.utils.TextProvider
-import com.pyrus.pyrusservicedesk.sdk.data.intermediate.FileData
 
 internal interface TicketView {
 

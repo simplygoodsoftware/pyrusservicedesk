@@ -7,20 +7,26 @@ import android.content.Intent
 import android.content.pm.PackageManager
 import android.net.Uri
 import android.os.Bundle
-import com.google.android.material.bottomsheet.BottomSheetBehavior
-import com.google.android.material.bottomsheet.BottomSheetDialog
-import com.google.android.material.bottomsheet.BottomSheetDialogFragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.View.GONE
 import android.view.View.VISIBLE
 import android.view.ViewGroup
 import androidx.core.util.Consumer
+import com.google.android.material.bottomsheet.BottomSheetBehavior
+import com.google.android.material.bottomsheet.BottomSheetDialog
+import com.google.android.material.bottomsheet.BottomSheetDialogFragment
 import com.pyrus.pyrusservicedesk.R
+import com.pyrus.pyrusservicedesk._ref.utils.ConfigUtils
+import com.pyrus.pyrusservicedesk._ref.utils.MIME_TYPE_IMAGE_ANY
+import com.pyrus.pyrusservicedesk._ref.utils.dispatchTakePhotoIntent
+import com.pyrus.pyrusservicedesk._ref.utils.getViewModelWithActivityScope
+import com.pyrus.pyrusservicedesk._ref.utils.hasPermission
+import com.pyrus.pyrusservicedesk._ref.utils.hasPermissionInManifeset
+import com.pyrus.pyrusservicedesk._ref.utils.isCapturingPhotoSupported
+import com.pyrus.pyrusservicedesk._ref.utils.log.PLog
 import com.pyrus.pyrusservicedesk.core.StaticRepository
 import com.pyrus.pyrusservicedesk.databinding.PsdFragmentAttachFileVariantsBinding
-import com.pyrus.pyrusservicedesk._ref.utils.log.PLog
-import com.pyrus.pyrusservicedesk._ref.utils.*
 import java.io.File
 
 /**

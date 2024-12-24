@@ -4,11 +4,14 @@ import android.util.Log
 import androidx.core.os.bundleOf
 import com.github.terrakok.cicerone.Router
 import com.pyrus.pyrusservicedesk.PyrusServiceDesk.Companion.injector
+import com.pyrus.pyrusservicedesk.User
 import com.pyrus.pyrusservicedesk._ref.Screens
+import com.pyrus.pyrusservicedesk._ref.data.multy_chat.TicketsInfo
 import com.pyrus.pyrusservicedesk._ref.ui_domain.screens.tickets_list.tickets.TicketsContract.Effect
 import com.pyrus.pyrusservicedesk._ref.ui_domain.screens.tickets_list.tickets.TicketsContract.Message
 import com.pyrus.pyrusservicedesk._ref.ui_domain.screens.tickets_list.tickets.TicketsContract.State
 import com.pyrus.pyrusservicedesk._ref.ui_domain.screens.tickets_list.tickets.TicketsFragment.Companion.KEY_DEFAULT_USER_ID
+import com.pyrus.pyrusservicedesk._ref.ui_domain.screens.tickets_list.tickets.TicketsFragment.Companion.KEY_USER_ID
 import com.pyrus.pyrusservicedesk._ref.utils.Try
 import com.pyrus.pyrusservicedesk._ref.utils.isSuccess
 import com.pyrus.pyrusservicedesk._ref.utils.singleFlow
@@ -17,9 +20,6 @@ import com.pyrus.pyrusservicedesk._ref.whitetea.core.StoreFactory
 import com.pyrus.pyrusservicedesk._ref.whitetea.core.adaptCast
 import com.pyrus.pyrusservicedesk._ref.whitetea.core.logic.Logic
 import com.pyrus.pyrusservicedesk._ref.whitetea.utils.adapt
-import com.pyrus.pyrusservicedesk.User
-import com.pyrus.pyrusservicedesk._ref.data.multy_chat.TicketsInfo
-import com.pyrus.pyrusservicedesk._ref.ui_domain.screens.tickets_list.tickets.TicketsFragment.Companion.KEY_USER_ID
 import com.pyrus.pyrusservicedesk.sdk.repositories.Repository
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
@@ -38,7 +38,7 @@ internal class TicketsFeatureFactory(
         reducer = FeatureReducer(),
         actor = TicketsActor(syncRepository, router).adaptCast(),
         initialEffects = listOf(
-            Effect.Inner.UpdateTickets,
+            Effect.Inner.UpdateTickets, Effect.Inner.TicketsSetFlow
         ),
     ).adapt { it as? Effect.Outer }
 
@@ -64,14 +64,12 @@ private class FeatureReducer: Logic<State, Message, Effect>() {
                 if (users.size > 1) {
                     effects { +Effect.Outer.ShowAddTicketMenu(selectedAppId) }
                 }
-//                else if (users.isEmpty()) {
-//                    effects {
-//                        +Effect.Outer.ShowTicket()
-//                    }
-//                }
+                else if (users.isEmpty()) {
+                    effects { +Effect.Inner.OpenTicketScreen(null, null) }
+                }
                 else {
-                    // TODO wtf
-                    injector().router.navigateTo(Screens.TicketScreen(null, users.first().userId))
+                    // TODO looks strange
+                    effects { +Effect.Inner.OpenTicketScreen(null, users.first().userId) }
                 }
             }
 
@@ -81,9 +79,10 @@ private class FeatureReducer: Logic<State, Message, Effect>() {
                 effects { +Effect.Outer.ShowFilterMenu(selectedAppId, message.selectedUserId) }
             }
 
-            // TODO wtf
+            // TODO
             Message.Outer.OnScanClick -> injector().router.exit()
 
+            // TODO
             Message.Outer.OnSettingsClick -> Log.d(TAG, "OnScanClick, OnSettingsClick")
 
             is Message.Outer.OnChangePage -> {
@@ -104,7 +103,7 @@ private class FeatureReducer: Logic<State, Message, Effect>() {
             is Message.Outer.OnTicketClick -> {
                 effects { +Effect.Inner.OpenTicketScreen(message.ticketId, message.userId) }
             }
-            is Message.Outer.OnUserIdSelect -> TODO()
+            is Message.Outer.OnUserIdSelect -> TODO("why")
         }
     }
 
@@ -190,6 +189,11 @@ internal class TicketsActor(
 
         is Effect.Inner.OpenTicketScreen -> flow {
             router.navigateTo(Screens.TicketScreen(effect.ticketId, effect.userId))
+        }
+
+        Effect.Inner.TicketsSetFlow -> flow {
+
+            repository // TODO
         }
     }
 

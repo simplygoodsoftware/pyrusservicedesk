@@ -1,9 +1,15 @@
 package com.pyrus.pyrusservicedesk.presentation.ui.view
 
 import android.content.Context
-import android.graphics.*
-import androidx.appcompat.widget.AppCompatImageView
+import android.graphics.Bitmap
+import android.graphics.Canvas
+import android.graphics.Color
+import android.graphics.Paint
+import android.graphics.PorterDuff
+import android.graphics.PorterDuffXfermode
+import android.graphics.RectF
 import android.util.AttributeSet
+import androidx.appcompat.widget.AppCompatImageView
 
 /**
  * [AppCompatImageView] that decorates the view with an outline

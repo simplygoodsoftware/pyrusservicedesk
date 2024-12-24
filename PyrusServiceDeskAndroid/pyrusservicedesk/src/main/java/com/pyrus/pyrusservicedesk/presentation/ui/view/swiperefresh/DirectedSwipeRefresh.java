@@ -3,10 +3,6 @@ package com.pyrus.pyrusservicedesk.presentation.ui.view.swiperefresh;
 import android.content.Context;
 import android.content.res.Resources;
 import android.content.res.TypedArray;
-
-import androidx.annotation.ColorInt;
-import androidx.core.view.MotionEventCompat;
-import androidx.core.view.ViewCompat;
 import android.util.AttributeSet;
 import android.util.DisplayMetrics;
 import android.util.Log;
@@ -18,6 +14,11 @@ import android.view.animation.Animation;
 import android.view.animation.DecelerateInterpolator;
 import android.view.animation.Transformation;
 import android.widget.AbsListView;
+
+import androidx.annotation.ColorInt;
+import androidx.core.view.MotionEventCompat;
+import androidx.core.view.ViewCompat;
+
 import com.pyrus.pyrusservicedesk.R;
 
 

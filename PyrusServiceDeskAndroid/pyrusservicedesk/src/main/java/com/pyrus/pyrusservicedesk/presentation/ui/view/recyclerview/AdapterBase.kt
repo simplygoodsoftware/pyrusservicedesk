@@ -1,7 +1,6 @@
 package com.pyrus.pyrusservicedesk.presentation.ui.view.recyclerview
 
 import androidx.recyclerview.widget.RecyclerView
-import androidx.recyclerview.widget.ItemTouchHelper
 
 
 /**

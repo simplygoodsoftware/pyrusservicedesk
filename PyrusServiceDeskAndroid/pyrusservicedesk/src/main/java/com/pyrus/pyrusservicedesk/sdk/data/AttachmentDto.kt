@@ -2,10 +2,8 @@ package com.pyrus.pyrusservicedesk.sdk.data
 
 import android.net.Uri
 import com.google.gson.annotations.SerializedName
-import com.pyrus.pyrusservicedesk.core.Account
-import com.pyrus.pyrusservicedesk.sdk.data.gson.Local
-import com.pyrus.pyrusservicedesk._ref.utils.RequestUtils
 import com.pyrus.pyrusservicedesk.presentation.ui.view.Status
+import com.pyrus.pyrusservicedesk.sdk.data.gson.Local
 
 private const val FILE_ID_EMPTY = 0
 

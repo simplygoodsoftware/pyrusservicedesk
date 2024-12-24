@@ -1,12 +1,11 @@
 package com.pyrus.pyrusservicedesk.presentation.viewmodel
 
 import android.app.Application
+import android.content.Intent
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
-import android.content.Intent
 import com.pyrus.pyrusservicedesk.PyrusServiceDesk
 import com.pyrus.pyrusservicedesk._ref.ui_domain.screens.file_preview.FilePreviewViewModel
-import com.pyrus.pyrusservicedesk.presentation.ui.navigation_page.ticket.TicketViewModel
 import com.pyrus.pyrusservicedesk.presentation.ui.navigation_page.ticket.dialogs.attach_files.AttachFileSharedViewModel
 import com.pyrus.pyrusservicedesk.presentation.ui.navigation_page.ticket.dialogs.comment_actions.PendingCommentActionSharedViewModel
 
