@@ -3,7 +3,6 @@ package com.pyrus.pyrusservicedesk._ref.ui_domain.screens.ticket
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
-import androidx.core.view.ViewCompat
 import androidx.core.view.WindowCompat
 import androidx.fragment.app.FragmentActivity
 import com.github.terrakok.cicerone.Navigator
@@ -11,7 +10,6 @@ import com.pyrus.pyrusservicedesk.PyrusServiceDesk.Companion.injector
 import com.pyrus.pyrusservicedesk.R
 import com.pyrus.pyrusservicedesk.ServiceDeskConfiguration
 import com.pyrus.pyrusservicedesk._ref.Screens
-import com.pyrus.pyrusservicedesk._ref.utils.setupWindowInsets
 import com.pyrus.pyrusservicedesk.core.StaticRepository
 import com.pyrus.pyrusservicedesk.databinding.PsdActivityMainBinding
 import com.pyrus.pyrusservicedesk._ref.utils.navigation.PyrusNavigator

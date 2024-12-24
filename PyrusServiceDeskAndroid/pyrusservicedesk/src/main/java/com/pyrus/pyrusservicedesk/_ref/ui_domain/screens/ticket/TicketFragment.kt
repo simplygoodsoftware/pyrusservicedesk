@@ -7,8 +7,6 @@ import android.os.Build
 import android.os.Bundle
 import android.text.Editable
 import android.text.TextWatcher
-import android.util.Log
-import android.view.Display.Mode
 import android.view.LayoutInflater
 import android.view.MenuItem
 import android.view.View
@@ -107,6 +105,11 @@ internal class TicketFragment: TeaFragment<Model, TicketView.Event, TicketView.E
         }
     }
 
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        bindFeature()
+    }
+
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
@@ -133,8 +136,6 @@ internal class TicketFragment: TeaFragment<Model, TicketView.Event, TicketView.E
         )
         ViewCompat.setOnApplyWindowInsetsListener(binding.root, deferringInsetsListener)
 
-        bindFeature()
-
         attachFileSharedViewModel.getFilePickedLiveData().observe(viewLifecycleOwner) { fileUri ->
             dispatch(TicketView.Event.OnAttachmentSelected(fileUri))
         }
@@ -147,8 +148,17 @@ internal class TicketFragment: TeaFragment<Model, TicketView.Event, TicketView.E
 
     private fun bindFeature() {
         val userId = arguments?.getString(KEY_USER_ID) ?: KEY_DEFAULT_USER_ID
-        val ticketId = arguments?.getInt(KEY_TICKET_ID, injector().localStore.getLastTicketId()) ?: injector().localStore.getLastTicketId() //TODO если открыть файл и вернуться в задачу скорее всего id обновится
-        val feature = getStore { injector().ticketFeatureFactory("welcome", userId, ticketId).create() }
+        // TODO если открыть файл и вернуться в задачу скорее всего id обновится
+        val ticketId = arguments?.getInt(
+            KEY_TICKET_ID,
+            injector().localStore.getLastTicketId()  // TODO wtf
+        ) ?: injector().localStore.getLastTicketId()
+
+        val feature = getStore { injector().ticketFeatureFactory.create(
+            userId = userId,
+            ticketId = ticketId,
+            welcomeMessage = "welcome"
+        ) }
         bind(BinderLifecycleMode.CREATE_DESTROY) {
             this@TicketFragment.messages.map(TicketMapper::map) bindTo feature
         }

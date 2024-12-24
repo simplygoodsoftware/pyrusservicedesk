@@ -10,6 +10,6 @@ internal data class Comment(
     @SerializedName("attachments") val attachments: List<Attachment>?,
     @SerializedName("creation_time") val creationTime: Long,
     @SerializedName("rating") val rating: Int?,
-    @SerializedName("author") val author: Author,
+    @SerializedName("author") val author: Author?,
     @SerializedName("is_sending") val isSending: Boolean,
 )

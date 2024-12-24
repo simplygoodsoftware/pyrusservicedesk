@@ -1,24 +1,26 @@
 package com.pyrus.pyrusservicedesk._ref.ui_domain.screens.tickets_list.tickets
 
 import android.os.Bundle
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.isVisible
+import androidx.recyclerview.widget.RecyclerView
 import androidx.viewpager2.widget.ViewPager2
 import com.google.android.material.tabs.TabLayoutMediator
 import com.pyrus.pyrusservicedesk.PyrusServiceDesk.Companion.injector
 import com.pyrus.pyrusservicedesk.R
 import com.pyrus.pyrusservicedesk._ref.Screens
-import com.pyrus.pyrusservicedesk._ref.ui_domain.screens.addTicket.AddTicketFragment
-import com.pyrus.pyrusservicedesk._ref.ui_domain.screens.filterTicketsList.FilterTicketsFragment
-import com.pyrus.pyrusservicedesk._ref.ui_domain.screens.filterTicketsList.FilterTicketsFragment.Companion.KEY_SELECTED_USER_ID
-import com.pyrus.pyrusservicedesk._ref.ui_domain.screens.tickets_list.adapters.ViewPagerAdapter
+import com.pyrus.pyrusservicedesk._ref.ui_domain.screens.add_ticket.AddTicketFragment
+import com.pyrus.pyrusservicedesk._ref.ui_domain.screens.filter_tickets_list.FilterTicketsFragment
+import com.pyrus.pyrusservicedesk._ref.ui_domain.screens.filter_tickets_list.FilterTicketsFragment.Companion.KEY_SELECTED_USER_ID
+import com.pyrus.pyrusservicedesk._ref.ui_domain.screens.tickets_list.adapters.TicketsPageAdapter
 import com.pyrus.pyrusservicedesk._ref.ui_domain.screens.tickets_list.tickets.TicketsContract.Effect
 import com.pyrus.pyrusservicedesk._ref.ui_domain.screens.tickets_list.tickets.TicketsContract.Message
-import com.pyrus.pyrusservicedesk._ref.ui_domain.screens.tickets_list.tickets.TicketsView.TicketListModel
+import com.pyrus.pyrusservicedesk._ref.ui_domain.screens.tickets_list.tickets.TicketsView.Model
 import com.pyrus.pyrusservicedesk._ref.utils.CIRCLE_TRANSFORMATION
 import com.pyrus.pyrusservicedesk._ref.utils.RequestUtils.Companion.getOrganisationLogoUrl
 import com.pyrus.pyrusservicedesk._ref.utils.insets.RootViewDeferringInsetsCallback
@@ -31,11 +33,27 @@ import com.pyrus.pyrusservicedesk._ref.whitetea.utils.diff
 import com.pyrus.pyrusservicedesk.databinding.PsdTicketsListBinding
 import kotlinx.coroutines.flow.map
 
-internal class TicketsFragment: TeaFragment<TicketListModel, Message, Effect>() {
+internal class TicketsFragment: TeaFragment<Model, Message, Effect.Outer>() {
 
     private lateinit var binding: PsdTicketsListBinding
     private var currentUserId = KEY_DEFAULT_USER_ID
-    private lateinit var viewPagerAdapter: ViewPagerAdapter
+    private val adapter: TicketsPageAdapter by lazy {
+        TicketsPageAdapter(::dispatch)
+    }
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+
+        val feature = getStore { injector().ticketsFeatureFactory.create() }
+
+        bind(BinderLifecycleMode.CREATE_DESTROY) {
+            this@TicketsFragment.messages.map { it } bindTo feature
+        }
+        bind {
+            feature.state.map(TicketsMapper::map) bindTo this@TicketsFragment
+            feature.effects bindTo this@TicketsFragment
+        }
+    }
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
         binding = PsdTicketsListBinding.inflate(inflater, container, false)
@@ -50,7 +68,8 @@ internal class TicketsFragment: TeaFragment<TicketListModel, Message, Effect>() 
             currentUserId = bundle.getString(KEY_SELECTED_USER_ID) ?: KEY_DEFAULT_USER_ID
             dispatch(Message.Inner.UserIdSelected(currentUserId, childFragmentManager))
         }
-//todo
+
+        //todo
         /*//get information about selected vendor and process it
         parentFragmentManager.setFragmentResultListener(
             FilterTicketsFragment.KEY_FILTER_RESULT,
@@ -90,33 +109,18 @@ internal class TicketsFragment: TeaFragment<TicketListModel, Message, Effect>() 
         )
         ViewCompat.setOnApplyWindowInsetsListener(binding.root, deferringInsetsListener)
 
-        viewPagerAdapter = ViewPagerAdapter(childFragmentManager, lifecycle)
-
         binding.viewPager.registerOnPageChangeCallback(object : ViewPager2.OnPageChangeCallback() {
             override fun onPageSelected(position: Int) {
                 super.onPageSelected(position)
-                dispatch(Message.Outer.OnChangeApp(viewPagerAdapter.getAppId(position)))
+                dispatch(Message.Outer.OnChangePage(adapter.getAppId(position)))
             }
         })
 
-        binding.viewPager.adapter = viewPagerAdapter
-        TabLayoutMediator(
-                binding.tabLayout,
-                binding.viewPager
-            ) { tab, position ->
-                tab.text = viewPagerAdapter.getTitle(position)
-            }.attach()
+        binding.viewPager.adapter = adapter
+        TabLayoutMediator(binding.tabLayout, binding.viewPager) { tab, position ->
+            tab.text = adapter.getTitle(position)
+        }.attach()
 
-
-        val feature = getStore { injector().ticketsFeatureFactory().create() }
-
-        bind(BinderLifecycleMode.CREATE_DESTROY) {
-            this@TicketsFragment.messages.map { it } bindTo feature
-        }
-        bind {
-            feature.state.map(TicketsMapper::map) bindTo this@TicketsFragment
-            feature.effects bindTo this@TicketsFragment
-        }
     }
 
     /*override fun render(model: TicketListModel) {
@@ -148,51 +152,51 @@ internal class TicketsFragment: TeaFragment<TicketListModel, Message, Effect>() 
         //tabLayout and viewPager
         binding.tabLayout.visibility = if (model.tabLayoutVisibility ) View.VISIBLE else View.GONE
         viewPagerAdapter.setItems(model.applications)
-
-        binding.tabLayout.isVisible = !model.isLoading
-        binding.progressBar.isVisible = model.isLoading
-
-        binding.noConnection.root.isVisible = model.showNoConnectionError
-
     }*/
 
-    override fun createRenderer(): ViewRenderer<TicketListModel> = diff {
-        diff(TicketListModel::titleText) { title -> binding.toolbarTicketsList.psdToolbarVendorNameTv.text = title }
-        diff(TicketListModel::titleImageUrl) { url ->
+    override fun createRenderer(): ViewRenderer<Model> = diff {
+        diff(Model::titleText) { title -> binding.toolbarTicketsList.psdToolbarVendorNameTv.text = title }
+        diff(Model::titleImageUrl) { url ->
+            val logoUrl = url?.let { getOrganisationLogoUrl(url, null) } // TODO
             injector().picasso
-                .load(getOrganisationLogoUrl(url, null))//TODO
+                .load(logoUrl)
                 .transform(CIRCLE_TRANSFORMATION)
                 .into(binding.toolbarTicketsList.psdToolbarVendorIv)
         }
-        diff(TicketListModel::ticketsIsEmpty) { isEmpty ->
-
+        diff(Model::ticketsIsEmpty) { isEmpty ->
             binding.toolbarTicketsList.psdToolbarFilterIb.isVisible = !isEmpty
             binding.toolbarTicketsList.psdToolbarQrIb.isVisible = !isEmpty
             binding.toolbarTicketsList.psdToolbarSettingsIb.isVisible = isEmpty
             binding.fabAddTicket.isVisible = !isEmpty
 
         }
-        diff(TicketListModel::filterEnabled) { filterEnabled ->
-            binding.toolbarTicketsList.psdToolbarFilterIb.setBackgroundResource(if (!filterEnabled) R.drawable.ic_filter else R.drawable.ic_selected_filter)
+        diff(Model::filterEnabled) { filterEnabled ->
+            binding.toolbarTicketsList.psdToolbarFilterIb.setBackgroundResource(
+                if (!filterEnabled) R.drawable.ic_filter
+                else R.drawable.ic_selected_filter
+            )
             binding.filterFl.isVisible = filterEnabled
         }
-        diff(TicketListModel::filterName) { filterName ->
+        diff(Model::filterName) { filterName ->
             binding.filterContextTv.text = filterName
         }
-        diff(TicketListModel::tabLayoutVisibility) { tabLayoutVisibility ->
+        diff(Model::tabLayoutVisibility) { tabLayoutVisibility ->
             binding.tabLayout.isVisible = tabLayoutVisibility
         }
-        diff(TicketListModel::applications) { applications ->
-            viewPagerAdapter.setItems(applications)
+        diff(Model::applications) { ticketSetInfoList ->
+            adapter.submitList(ticketSetInfoList)
         }
-        diff(TicketListModel::showNoConnectionError) { showError -> binding.noConnection.root.isVisible = showError }
-        diff(TicketListModel::isLoading) { isLoading ->
+        diff(Model::showNoConnectionError) { showError ->
+            binding.noConnection.root.isVisible = showError
+        }
+        diff(Model::isLoading) { isLoading ->
+            Log.d("SDS", "isLoading: ${isLoading}")
             binding.tabLayout.isVisible = !isLoading
             binding.progressBar.isVisible = isLoading
         }
     }
 
-    override fun handleEffect(effect: Effect) {
+    override fun handleEffect(effect: Effect.Outer) {
         when(effect) {
 
             is Effect.Outer.ShowFilterMenu -> {
@@ -215,21 +219,15 @@ internal class TicketsFragment: TeaFragment<TicketListModel, Message, Effect>() 
                     startActivity(injector().intentSettings)
             }
 
-            is Effect.Outer.ShowTicket -> {
-                injector().router.navigateTo(Screens.TicketScreen(effect.ticketId, effect.userId))
-            }
-
-            Effect.Inner.TicketsAutoUpdate -> TODO()
-            Effect.Inner.UpdateTickets -> TODO()
+            is Effect.Outer.ShowAddTicketMenu -> TODO()
         }
     }
 
-    companion object {
-
-        private val TAG = TicketsFragment::class.java.simpleName
+    internal companion object {
 
         const val KEY_DEFAULT_USER_ID = "0"
         const val KEY_APP_ID_RESULT = "KEY_APP_ID_RESULT"
+        const val KEY_USER_ID = "KEY_USER_ID"
 
         fun newInstance(): TicketsFragment {
             return TicketsFragment()

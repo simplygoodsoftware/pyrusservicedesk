@@ -1,14 +1,11 @@
-package com.pyrus.pyrusservicedesk._ref.ui_domain.screens.addTicket
+package com.pyrus.pyrusservicedesk._ref.ui_domain.screens.add_ticket
 
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
-import android.widget.Toast
 import androidx.recyclerview.widget.RecyclerView
-import com.pyrus.pyrusservicedesk.PyrusServiceDesk
 import com.pyrus.pyrusservicedesk.R
-import com.pyrus.pyrusservicedesk.presentation.ui.navigation_page.ticket.TicketActivity
 
 class AddTicketAdapter (users: List<String>, val onItemClick: (Int) -> Unit) : RecyclerView.Adapter<AddTicketAdapter.AddTicketViewHolder>() {
 
@@ -21,7 +18,7 @@ class AddTicketAdapter (users: List<String>, val onItemClick: (Int) -> Unit) : R
         parent: ViewGroup,
         viewType: Int
     ): AddTicketViewHolder {
-        return AddTicketViewHolder(LayoutInflater.from(parent.context).inflate(R.layout.add_ticket_item, parent, false))
+        return AddTicketViewHolder(LayoutInflater.from(parent.context).inflate(R.layout.psd_add_ticket_item, parent, false))
     }
 
     override fun onBindViewHolder(holder: AddTicketViewHolder, position: Int) {

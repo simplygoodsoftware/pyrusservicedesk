@@ -2,8 +2,8 @@ package com.pyrus.pyrusservicedesk.sdk.web.request_body
 
 import androidx.annotation.Keep
 import com.google.gson.annotations.SerializedName
-import com.pyrus.pyrusservicedesk.sdk.data.Command
-import com.pyrus.pyrusservicedesk.sdk.data.UserData
+import com.pyrus.pyrusservicedesk.sdk.data.CommandDto
+import com.pyrus.pyrusservicedesk.sdk.data.UserDataDto
 
 /**
  * Base request body for sending to the server. Contains fields that are required for almost every request.
@@ -13,15 +13,15 @@ import com.pyrus.pyrusservicedesk.sdk.data.UserData
  */
 @Keep
 internal open class RequestBodyBase(
-        @SerializedName("need_full_info") val needFullInfo: Boolean? = false,
-        @SerializedName("additional_users") val additionalUsers: List<UserData>? = null,
-        @SerializedName("commands") val commands: List<Command>? = emptyList(),
-        @SerializedName("author_id") val authorId: String?,
-        @SerializedName("author_name") val authorName: String?,
-        @SerializedName("app_id") val appId: String,
-        @SerializedName("user_id") val userId: String,
-        @SerializedName("security_key") val securityKey: String?,
-        @SerializedName("instance_id") val instanceId: String?,
-        @SerializedName("version") val version: Int,
-        @SerializedName("api_sign") val apiSign: String?,
+    @SerializedName("need_full_info") val needFullInfo: Boolean? = false,
+    @SerializedName("additional_users") val additionalUsers: List<UserDataDto>? = null,
+    @SerializedName("commands") val commands: List<CommandDto>? = emptyList(),
+    @SerializedName("author_id") val authorId: String?,
+    @SerializedName("author_name") val authorName: String?,
+    @SerializedName("app_id") val appId: String,
+    @SerializedName("user_id") val userId: String,
+    @SerializedName("security_key") val securityKey: String?,
+    @SerializedName("instance_id") val instanceId: String?,
+    @SerializedName("version") val version: Int,
+    @SerializedName("api_sign") val apiSign: String?,
 )

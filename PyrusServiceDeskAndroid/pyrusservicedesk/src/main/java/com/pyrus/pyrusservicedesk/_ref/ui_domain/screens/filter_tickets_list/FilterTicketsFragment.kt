@@ -1,4 +1,4 @@
-package com.pyrus.pyrusservicedesk._ref.ui_domain.screens.filterTicketsList
+package com.pyrus.pyrusservicedesk._ref.ui_domain.screens.filter_tickets_list
 
 import android.os.Bundle
 import android.view.LayoutInflater
@@ -54,6 +54,7 @@ class FilterTicketsFragment: BottomSheetDialogFragment() {
         if (appId == null)
             return
 
+        // TODO wtf
         val selectedUsers = injector().usersAccount?.users?.filter { it.appId == appId }
         selectedUserIds = selectedUsers?.map { it.userId } ?: emptyList()
         selectedUserNames = selectedUsers?.map { it.userName } ?: emptyList()

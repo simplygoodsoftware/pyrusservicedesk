@@ -16,7 +16,7 @@ internal data class CommentDto(
     @SerializedName("is_inbound") val isInbound: Boolean = false,
     @SerializedName("attachments") val attachments: List<AttachmentDto>? = null,
     @SerializedName("created_at") val creationDate: Date,
-    @SerializedName("author") val author: AuthorDto,
+    @SerializedName("author") val author: AuthorDto?,
     @SerializedName("rating") val rating: Int? = null,
 ) {
 

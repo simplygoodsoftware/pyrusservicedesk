@@ -1,4 +1,4 @@
-package com.pyrus.pyrusservicedesk._ref.ui_domain.screens.addTicket
+package com.pyrus.pyrusservicedesk._ref.ui_domain.screens.add_ticket
 
 import android.os.Bundle
 import android.view.LayoutInflater
@@ -6,14 +6,11 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment
-import com.pyrus.pyrusservicedesk.PyrusServiceDesk
 import com.pyrus.pyrusservicedesk.PyrusServiceDesk.Companion.injector
 import com.pyrus.pyrusservicedesk.R
 import com.pyrus.pyrusservicedesk._ref.Screens
-import com.pyrus.pyrusservicedesk._ref.ui_domain.screens.tickets_list.tickets.TicketsFragment.Companion.KEY_DEFAULT_USER_ID
 import com.pyrus.pyrusservicedesk.databinding.AddTicketFragmentBinding
-import com.pyrus.pyrusservicedesk.presentation.ui.navigation_page.ticket.TicketActivity
-import com.pyrus.pyrusservicedesk.sdk.data.User
+import com.pyrus.pyrusservicedesk.User
 
 class AddTicketFragment: BottomSheetDialogFragment() {
 
@@ -45,6 +42,7 @@ class AddTicketFragment: BottomSheetDialogFragment() {
     private fun updateSelectedUsers(appId: String?) {
         if (appId == null)
             return
+        // TODO wtf
         selectedUsers = injector().usersAccount?.users?.filter { it.appId == appId } ?: emptyList()
         selectedUserNames = selectedUsers.map { it.userName }
     }

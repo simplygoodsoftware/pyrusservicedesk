@@ -17,7 +17,7 @@ internal sealed interface CommentEntryV2 {
         val isWelcomeMessage: Boolean,
         val timeText: TextProvider?,
         val status: Status,
-        val authorName: String,
+        val authorName: String?,
         val showAuthorName: Boolean,
         val avatarUrl: String?,
         val showAvatar: Boolean,
