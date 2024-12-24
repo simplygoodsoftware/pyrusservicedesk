@@ -105,6 +105,11 @@ internal class TicketFragment: TeaFragment<Model, TicketView.Event, TicketView.E
         }
     }
 
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        bindFeature()
+    }
+
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
@@ -130,8 +135,6 @@ internal class TicketFragment: TeaFragment<Model, TicketView.Event, TicketView.E
             deferredInsetTypes = WindowInsetsCompat.Type.ime()
         )
         ViewCompat.setOnApplyWindowInsetsListener(binding.root, deferringInsetsListener)
-
-        bindFeature()
 
         attachFileSharedViewModel.getFilePickedLiveData().observe(viewLifecycleOwner) { fileUri ->
             dispatch(TicketView.Event.OnAttachmentSelected(fileUri))

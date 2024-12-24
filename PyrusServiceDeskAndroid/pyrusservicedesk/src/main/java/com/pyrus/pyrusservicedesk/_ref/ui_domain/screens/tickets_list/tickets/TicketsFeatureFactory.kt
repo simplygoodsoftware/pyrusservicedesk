@@ -65,7 +65,6 @@ private class FeatureReducer: Logic<State, Message, Effect>() {
                     effects { +Effect.Outer.ShowAddTicketMenu(selectedAppId) }
                 }
 //                else if (users.isEmpty()) {
-//                    injector().ticketFeatureFactory("welcom")
 //                    effects {
 //                        +Effect.Outer.ShowTicket()
 //                    }
@@ -94,7 +93,7 @@ private class FeatureReducer: Logic<State, Message, Effect>() {
 
             Message.Outer.OnCreateTicketClick -> {
                 // TODO
-                val users = getSelectedUsers(state.appId)
+//                val users = getSelectedUsers(state.appId)
 //                if (users.size > 1) effects {
 //                    +TicketsListContract.Effect.Outer.ShowAddTicketMenu(state.appId)
 //                }

@@ -58,6 +58,7 @@ internal open class DefaultExecutor<State : Any, Message : Any, Effect : Any>(
 
     private fun step(next: Update<State, Effect>) {
         Log.d("SDS", "state: ${next.state}")
+        Log.d("SDS", "effects: ${next.effects}")
 
         val renderState = next.state
 

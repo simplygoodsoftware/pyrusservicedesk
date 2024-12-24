@@ -43,6 +43,7 @@ internal open class DefaultStore<State : Any, Message : Any, Effect : Any>(
     }
 
     override fun dispatch(message: Message) {
+        Log.d("SDS", "message $message")
         if (!coroutinesScope.isActive) {
             return
         }
@@ -50,9 +51,7 @@ internal open class DefaultStore<State : Any, Message : Any, Effect : Any>(
             val reducerUpdate = stateUpdateMutex.withLock {
                 if (isActive) {
                     val oldState = state.value
-                    Log.d("SDS3", "1 $oldState")
                     val update = reducer.update(message, oldState)
-                    Log.d("SDS3", "2 ${update.state}")
                     mutableState.value = update.state
                     update
                 } else null

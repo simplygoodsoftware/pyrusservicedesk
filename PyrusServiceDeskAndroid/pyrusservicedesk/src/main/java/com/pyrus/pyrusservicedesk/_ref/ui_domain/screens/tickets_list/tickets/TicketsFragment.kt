@@ -41,6 +41,20 @@ internal class TicketsFragment: TeaFragment<Model, Message, Effect.Outer>() {
         TicketsPageAdapter(::dispatch)
     }
 
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+
+        val feature = getStore { injector().ticketsFeatureFactory.create() }
+
+        bind(BinderLifecycleMode.CREATE_DESTROY) {
+            this@TicketsFragment.messages.map { it } bindTo feature
+        }
+        bind {
+            feature.state.map(TicketsMapper::map) bindTo this@TicketsFragment
+            feature.effects bindTo this@TicketsFragment
+        }
+    }
+
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
         binding = PsdTicketsListBinding.inflate(inflater, container, false)
 
@@ -107,16 +121,6 @@ internal class TicketsFragment: TeaFragment<Model, Message, Effect.Outer>() {
             tab.text = adapter.getTitle(position)
         }.attach()
 
-
-        val feature = getStore { injector().ticketsFeatureFactory.create() }
-
-        bind(BinderLifecycleMode.CREATE_DESTROY) {
-            this@TicketsFragment.messages.map { it } bindTo feature
-        }
-        bind {
-            feature.state.map(TicketsMapper::map) bindTo this@TicketsFragment
-            feature.effects bindTo this@TicketsFragment
-        }
     }
 
     /*override fun render(model: TicketListModel) {
