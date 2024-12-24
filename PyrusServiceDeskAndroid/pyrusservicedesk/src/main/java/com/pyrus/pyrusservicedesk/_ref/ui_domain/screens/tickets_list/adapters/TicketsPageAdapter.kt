@@ -7,12 +7,12 @@ import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
-import com.pyrus.pyrusservicedesk._ref.ui_domain.screens.tickets_list.tickets.TicketsContract
+import com.pyrus.pyrusservicedesk._ref.ui_domain.screens.tickets_list.tickets.TicketsContract.Message
 import com.pyrus.pyrusservicedesk._ref.ui_domain.screens.tickets_list.tickets.TicketsView.Model.TicketSetInfoEntry
 import com.pyrus.pyrusservicedesk.databinding.PsdTicketsListPageBinding
 
 internal class TicketsPageAdapter(
-    private val onEvent: (TicketsContract.Message.Outer) -> Unit
+    private val onEvent: (Message.Outer) -> Unit
 ): ListAdapter<TicketSetInfoEntry, TicketsPageAdapter.TicketsPageViewHolder>(ItemCallback()) {
 
 
@@ -39,12 +39,10 @@ internal class TicketsPageAdapter(
 
     internal class TicketsPageViewHolder(
         private val binding: PsdTicketsListPageBinding,
-        private val onEvent: (TicketsContract.Message.Outer) -> Unit
+        onEvent: (Message.Outer) -> Unit
     ) : RecyclerView.ViewHolder(binding.root) {
 
-        private val adapter: TicketsListAdapter = TicketsListAdapter {
-            onEvent(TicketsContract.Message.Outer.OnTicketClick(it.ticketId))
-        }
+        private val adapter: TicketsListAdapter = TicketsListAdapter(onEvent)
 
         init {
             binding.ticketsRv.adapter = adapter

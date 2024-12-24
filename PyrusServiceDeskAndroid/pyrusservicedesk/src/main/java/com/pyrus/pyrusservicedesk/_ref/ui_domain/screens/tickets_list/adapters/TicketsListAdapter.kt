@@ -7,19 +7,17 @@ import android.widget.ImageView
 import android.widget.TextView
 import com.pyrus.pyrusservicedesk.R
 import com.pyrus.pyrusservicedesk._ref.data.FullTicket
+import com.pyrus.pyrusservicedesk._ref.ui_domain.screens.tickets_list.tickets.TicketsContract.Message
 import com.pyrus.pyrusservicedesk._ref.utils.TextProvider
-import com.pyrus.pyrusservicedesk._ref.utils.getTimeWhen
 import com.pyrus.pyrusservicedesk._ref.utils.text
 import com.pyrus.pyrusservicedesk.presentation.ui.view.recyclerview.AdapterBase
 import com.pyrus.pyrusservicedesk.presentation.ui.view.recyclerview.ViewHolderBase
-import com.pyrus.pyrusservicedesk.sdk.data.TicketDto
-import java.util.Calendar
 
 /**
  * Adapter that is used for rendering comment feed of the ticket screen.
  */
 internal class TicketsListAdapter(
-    private val onTicketItemClickListener: (ticket: FullTicket) -> Unit
+    private val onEvent: (Message.Outer) -> Unit
 ): AdapterBase<FullTicket>() {
 
 
@@ -36,7 +34,9 @@ internal class TicketsListAdapter(
         private val lastComment = itemView.findViewById<TextView>(R.id.ticket_last_comment_tv)
 
         init {
-            itemView.setOnClickListener{ onTicketItemClickListener.invoke(getItem()) }
+            itemView.setOnClickListener {
+                onEvent.invoke(Message.Outer.OnTicketClick(getItem().ticketId, getItem().userId))
+            }
         }
 
         override fun bindItem(entry: FullTicket) {
@@ -45,8 +45,6 @@ internal class TicketsListAdapter(
             ticketName.text = entry.subject
             // TODO форматированае и спаны
             lastComment.text = entry.lastComment?.body
-
-
 
             val lastCommentCreationTime = entry.lastComment?.creationTime
             val dateText = lastCommentCreationTime?.let { TextProvider.Date(it, R.string.psd_time_format) }

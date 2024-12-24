@@ -33,54 +33,12 @@ import com.squareup.picasso.Picasso
 import kotlinx.coroutines.CoroutineScope
 import com.pyrus.pyrusservicedesk._ref.utils.navigation.PyrusRouterImpl
 import com.pyrus.pyrusservicedesk.presentation.viewmodel.SharedViewModel
-import com.pyrus.pyrusservicedesk.User
 import com.pyrus.pyrusservicedesk.sdk.repositories.RepositoryMapper
 import com.pyrus.pyrusservicedesk.sdk.web.retrofit.RemoteFileStore
 import okhttp3.OkHttpClient
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 import java.util.concurrent.TimeUnit
-
-internal class ServiceDeskCore(
-    internal val diInjector: DiInjector,
-)
-
-internal sealed interface Account {
-
-    val instanceId: String
-    val appId: String
-    val domain: String
-    val isMultiChat: Boolean
-
-    data class V1(
-        override val instanceId: String,
-        override val appId: String,
-        override val domain: String,
-        override val isMultiChat: Boolean,
-    ) : Account
-
-    data class V2(
-        override val instanceId: String,
-        override val appId: String,
-        override val domain: String,
-        override val isMultiChat: Boolean,
-        val userId: String,
-        val securityKey: String,
-    ): Account
-
-    data class V3(
-        override val instanceId: String,
-        override val appId: String,
-        override val domain: String,
-        override val isMultiChat: Boolean,
-        val firstUserId: String,
-        val users: List<User>, //users have userId, userName, authorId
-        val authorId: String,
-    ): Account
-
-
-
-}
 
 internal class DiInjector(
     private val application: Application,
@@ -158,31 +116,26 @@ internal class DiInjector(
 
     private val draftRepository = DraftRepository(preferences)
 
-    fun ticketFeatureFactory(welcomeMessage: String): TicketFeatureFactory {
-        return TicketFeatureFactory(
-            account = account,
-            storeFactory = storeFactory,
-            repository = repository,
-            draftRepository = draftRepository,
-            welcomeMessage = welcomeMessage,
-            router = router,
-            fileManager = fileManager,
-        )
-    }
-
-    fun ticketsFeatureFactory(): TicketsFeatureFactory {
-        return TicketsFeatureFactory(storeFactory, repository)
-    }
-
     private val cicerone: Cicerone<PyrusRouterImpl> = Cicerone.create(PyrusRouterImpl())
-
-    val isMultiChat = account.isMultiChat
-
-    val sharedViewModel = SharedViewModel()
 
     val router = cicerone.router
 
     val navHolder: NavigatorHolder = cicerone.getNavigatorHolder()
+
+    val ticketFeatureFactory = TicketFeatureFactory(
+        account = account,
+        storeFactory = storeFactory,
+        repository = repository,
+        draftRepository = draftRepository,
+        router = router,
+        fileManager = fileManager,
+    )
+
+    val ticketsFeatureFactory = TicketsFeatureFactory(storeFactory, repository, router)
+
+    val isMultiChat = account.isMultiChat // TODO wtf
+
+    val sharedViewModel = SharedViewModel()
 
     val liveUpdates = LiveUpdates(
         repository = repository,

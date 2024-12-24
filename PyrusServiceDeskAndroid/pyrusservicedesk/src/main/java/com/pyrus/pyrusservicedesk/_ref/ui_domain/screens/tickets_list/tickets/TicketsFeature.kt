@@ -7,6 +7,7 @@ import com.pyrus.pyrusservicedesk._ref.ui_domain.screens.ticket.TicketContract
 import com.pyrus.pyrusservicedesk._ref.whitetea.core.Store
 import com.pyrus.pyrusservicedesk._ref.ui_domain.screens.tickets_list.tickets.TicketsContract.Effect
 import com.pyrus.pyrusservicedesk._ref.ui_domain.screens.tickets_list.tickets.TicketsContract.Message
+import com.pyrus.pyrusservicedesk._ref.ui_domain.screens.tickets_list.tickets.TicketsContract.Message.Inner
 import com.pyrus.pyrusservicedesk._ref.ui_domain.screens.tickets_list.tickets.TicketsContract.State
 
 internal typealias TicketsFeature = Store<State, Message, Effect.Outer>
@@ -38,7 +39,7 @@ internal interface TicketsContract {
             data object OnFabItemClick : Outer
             data class OnChangePage(val appId: String) : Outer
             data object OnCreateTicketClick : Outer
-            data class OnTicketClick(val ticketId: Int) : Outer
+            data class OnTicketClick(val ticketId: Int, val userId: String?) : Outer
             data class OnUserIdSelect(val userId: String) : Outer
         }
 
@@ -61,11 +62,11 @@ internal interface TicketsContract {
 
             data class ShowAddTicketMenu(val appId: String) : Outer
 
-            data class ShowTicket(val ticketId: Int?, val userId: String? = null) : Outer
         }
 
         sealed interface Inner : Effect {
             data object UpdateTickets : Inner
+            data class OpenTicketScreen(val ticketId: Int, val userId: String?) : Inner
         }
     }
 

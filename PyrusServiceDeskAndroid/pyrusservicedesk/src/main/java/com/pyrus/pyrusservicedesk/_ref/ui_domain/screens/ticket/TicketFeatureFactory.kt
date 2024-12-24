@@ -37,7 +37,6 @@ internal class TicketFeatureFactory(
     private val storeFactory: StoreFactory,
     private val repository: Repository,
     private val draftRepository: DraftRepository,
-    private val welcomeMessage: String,
     private val router: PyrusRouter,
     private val fileManager: FileManager,
 ) {
@@ -45,6 +44,7 @@ internal class TicketFeatureFactory(
     fun create(
         userId: String,
         ticketId: Int,
+        welcomeMessage: String,
     ): TicketFeature = storeFactory.create(
         name = "TicketFeature",
         initialState = State.Loading,

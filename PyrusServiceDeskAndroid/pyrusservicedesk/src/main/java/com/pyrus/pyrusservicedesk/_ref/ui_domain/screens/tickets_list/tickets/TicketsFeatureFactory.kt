@@ -2,6 +2,7 @@ package com.pyrus.pyrusservicedesk._ref.ui_domain.screens.tickets_list.tickets
 
 import android.util.Log
 import androidx.core.os.bundleOf
+import com.github.terrakok.cicerone.Router
 import com.pyrus.pyrusservicedesk.PyrusServiceDesk.Companion.injector
 import com.pyrus.pyrusservicedesk._ref.Screens
 import com.pyrus.pyrusservicedesk._ref.ui_domain.screens.tickets_list.tickets.TicketsContract.Effect
@@ -21,19 +22,21 @@ import com.pyrus.pyrusservicedesk._ref.data.multy_chat.TicketsInfo
 import com.pyrus.pyrusservicedesk._ref.ui_domain.screens.tickets_list.tickets.TicketsFragment.Companion.KEY_USER_ID
 import com.pyrus.pyrusservicedesk.sdk.repositories.Repository
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.flow
 
 private const val TAG = "TicketsListFeature"
 
 internal class TicketsFeatureFactory(
     private val storeFactory: StoreFactory,
     private val syncRepository: Repository,
+    private val router: Router,
 ) {
 
     fun create(): TicketsFeature = storeFactory.create(
         name = TAG,
         initialState = State.Loading,
         reducer = FeatureReducer(),
-        actor = TicketsActor(syncRepository).adaptCast(),
+        actor = TicketsActor(syncRepository, router).adaptCast(),
         initialEffects = listOf(
             Effect.Inner.UpdateTickets,
         ),
@@ -97,12 +100,8 @@ private class FeatureReducer: Logic<State, Message, Effect>() {
 //                    +TicketsListContract.Effect.Outer.ShowTicket(null, userId = users[users.keys.first()])
 //                }
             }
-            is Message.Outer.OnTicketClick -> effects {
-                // TODO
-//                +Effect.Outer.ShowTicket(
-//                    message.ticketId,
-//                    getUserId(message.ticketId, state.tickets)
-//                )
+            is Message.Outer.OnTicketClick -> {
+                effects { +Effect.Inner.OpenTicketScreen(message.ticketId, message.userId) }
             }
             is Message.Outer.OnUserIdSelect -> TODO()
         }
@@ -174,6 +173,7 @@ private class FeatureReducer: Logic<State, Message, Effect>() {
 
 internal class TicketsActor(
     private val repository: Repository,
+    private val router: Router,
 ): Actor<Effect.Inner, Message.Inner> {
 
     override fun handleEffect(effect: Effect.Inner): Flow<Message.Inner> = when(effect) {
@@ -184,6 +184,10 @@ internal class TicketsActor(
                 ticketsTry.isSuccess() -> Message.Inner.UpdateTicketsCompleted(ticketsTry.value)
                 else -> Message.Inner.UpdateTicketsFailed
             }
+        }
+
+        is Effect.Inner.OpenTicketScreen -> flow {
+            router.navigateTo(Screens.TicketScreen(effect.ticketId, effect.userId))
         }
     }
 

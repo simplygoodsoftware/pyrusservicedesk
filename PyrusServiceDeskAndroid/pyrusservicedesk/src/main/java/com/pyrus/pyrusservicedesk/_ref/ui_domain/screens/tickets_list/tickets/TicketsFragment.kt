@@ -108,7 +108,7 @@ internal class TicketsFragment: TeaFragment<Model, Message, Effect.Outer>() {
         }.attach()
 
 
-        val feature = getStore { injector().ticketsFeatureFactory().create() }
+        val feature = getStore { injector().ticketsFeatureFactory.create() }
 
         bind(BinderLifecycleMode.CREATE_DESTROY) {
             this@TicketsFragment.messages.map { it } bindTo feature
@@ -205,9 +205,6 @@ internal class TicketsFragment: TeaFragment<Model, Message, Effect.Outer>() {
                 bottomSheet.show(parentFragmentManager, bottomSheet.tag)
             }
 
-            is Effect.Outer.ShowTicket -> {
-                injector().router.navigateTo(Screens.TicketScreen(effect.ticketId, effect.userId))
-            }
         }
     }
 
