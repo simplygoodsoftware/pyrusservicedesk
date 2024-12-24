@@ -334,8 +334,12 @@ internal class TicketViewModel(
                 val welcomeComment = CommentDto(
                     body = welcomeMessage,
                     creationDate = welcomeCommentDate,
-                    author = AuthorDto(ConfigUtils.getUserName(), (injector().usersAccount)?.authorId, null, null), //TODO
-//                    isWelcomeMessage = true,
+                    author = AuthorDto(
+                        name = ConfigUtils.getUserName(),
+                        authorId = (injector().usersAccount)?.authorId,  // TODO wtf
+                        avatarId = null,
+                        avatarColorString = null
+                    ),
                 )
                 freshComments += welcomeComment
             }

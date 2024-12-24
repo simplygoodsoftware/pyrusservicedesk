@@ -42,6 +42,7 @@ class AddTicketFragment: BottomSheetDialogFragment() {
     private fun updateSelectedUsers(appId: String?) {
         if (appId == null)
             return
+        // TODO wtf
         selectedUsers = injector().usersAccount?.users?.filter { it.appId == appId } ?: emptyList()
         selectedUserNames = selectedUsers.map { it.userName }
     }

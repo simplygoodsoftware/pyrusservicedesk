@@ -225,6 +225,7 @@ internal class RemoteStore(
         comment: CommentDto,
         uploadFileHook: UploadFileHook?
     ): Try<AddCommentResponseData> {
+        // TODO wtf
         return addComment(injector().localStore.getLastTicketId(), comment, uploadFileHook)
     }
 

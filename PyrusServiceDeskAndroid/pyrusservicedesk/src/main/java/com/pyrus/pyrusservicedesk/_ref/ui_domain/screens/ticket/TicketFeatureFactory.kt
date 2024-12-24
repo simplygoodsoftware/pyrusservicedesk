@@ -132,6 +132,7 @@ private class FeatureReducer: Logic<State, Message, Effect>() {
                 effects { +Effect.Inner.UpdateComments(currentState.ticketId, currentState.userId) }
             }
 
+            // TODO wtf
             Message.Outer.OnBackClick -> injector().router.exit()
         }
     }
@@ -153,6 +154,7 @@ private class FeatureReducer: Logic<State, Message, Effect>() {
                     is State.Content -> state { currentState.copy(
                         ticket = message.ticket,
                         isLoading = false,
+                        // TODO wtf
                         appId = injector().usersAccount?.users?.find { it.userId == message.ticket.userId }?.appId ?: "",
                         userId = message.ticket.userId ?: "",
                         ticketId = message.ticket.ticketId ?: 0
@@ -164,6 +166,7 @@ private class FeatureReducer: Logic<State, Message, Effect>() {
                         inputText = message.draft,
                         welcomeMessage = message.welcomeMessage,
                         isLoading = false,
+                        // TODO wtf
                         appId = injector().usersAccount?.users?.find { it.userId == message.ticket.userId }?.appId ?: "",
                         userId = message.ticket.userId ?: "",
                         ticketId = message.ticket.ticketId ?: 0

@@ -146,7 +146,11 @@ internal class TicketFragment: TeaFragment<Model, TicketView.Event, TicketView.E
     private fun bindFeature() {
         val userId = arguments?.getString(KEY_USER_ID) ?: KEY_DEFAULT_USER_ID
         // TODO если открыть файл и вернуться в задачу скорее всего id обновится
-        val ticketId = arguments?.getInt(KEY_TICKET_ID, injector().localStore.getLastTicketId()) ?: injector().localStore.getLastTicketId()
+        val ticketId = arguments?.getInt(
+            KEY_TICKET_ID,
+            injector().localStore.getLastTicketId()  // TODO wtf
+        ) ?: injector().localStore.getLastTicketId()
+
         val feature = getStore { injector().ticketFeatureFactory.create(
             userId = userId,
             ticketId = ticketId,

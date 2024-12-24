@@ -133,7 +133,16 @@ internal class Repository(
     }
 
     suspend fun addTextComment(ticketId: Int, textBody: String, command: CommandDto) {
-        val comment = createLocalTextComment(textBody, command.commandId.substringAfter("commentId=").substringBefore(";").toLong(), injector().usersAccount?.authorId)
+        val comment = createLocalTextComment(
+            textBody,
+            command.commandId
+                .substringAfter("commentId=")
+                .substringBefore(";")
+                .toLong(),
+            // TODO wtf
+            injector().usersAccount?.authorId
+        )
+
         localStore.addPendingFeedComment(comment)
         localStore.addPendingFeedCommand(command)
 
@@ -324,7 +333,13 @@ internal class Repository(
         isInbound = true,
         attachments = listOf(attachment),
         creationTime = System.currentTimeMillis(),
-        author = Author(ConfigUtils.getUserName(), injector().usersAccount?.authorId, null, "#fffffff"),
+        author = Author(
+            name = ConfigUtils.getUserName(),
+            // TODO wtf
+            authorId = injector().usersAccount?.authorId,
+            avatarUrl = null,
+            avatarColor = "#fffffff"
+        ),
         rating = null,
         isLocal = true,
         isSending = true

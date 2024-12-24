@@ -54,6 +54,7 @@ class FilterTicketsFragment: BottomSheetDialogFragment() {
         if (appId == null)
             return
 
+        // TODO wtf
         val selectedUsers = injector().usersAccount?.users?.filter { it.appId == appId }
         selectedUserIds = selectedUsers?.map { it.userId } ?: emptyList()
         selectedUserNames = selectedUsers?.map { it.userName } ?: emptyList()

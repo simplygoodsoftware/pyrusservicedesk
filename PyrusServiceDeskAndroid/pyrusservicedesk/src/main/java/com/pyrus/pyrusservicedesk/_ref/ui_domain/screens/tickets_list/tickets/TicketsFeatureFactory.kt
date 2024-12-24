@@ -71,6 +71,7 @@ private class FeatureReducer: Logic<State, Message, Effect>() {
 //                    }
 //                }
                 else {
+                    // TODO wtf
                     injector().router.navigateTo(Screens.TicketScreen(null, users.first().userId))
                 }
             }
@@ -81,7 +82,8 @@ private class FeatureReducer: Logic<State, Message, Effect>() {
                 effects { +Effect.Outer.ShowFilterMenu(selectedAppId, message.selectedUserId) }
             }
 
-            Message.Outer.OnScanClick -> injector().router.exit() // TODO
+            // TODO wtf
+            Message.Outer.OnScanClick -> injector().router.exit()
 
             Message.Outer.OnSettingsClick -> Log.d(TAG, "OnScanClick, OnSettingsClick")
 
@@ -92,7 +94,7 @@ private class FeatureReducer: Logic<State, Message, Effect>() {
 
             Message.Outer.OnCreateTicketClick -> {
                 // TODO
-//                val users = getSelectedUsers(state.appId)
+                val users = getSelectedUsers(state.appId)
 //                if (users.size > 1) effects {
 //                    +TicketsListContract.Effect.Outer.ShowAddTicketMenu(state.appId)
 //                }
@@ -129,6 +131,7 @@ private class FeatureReducer: Logic<State, Message, Effect>() {
                 state {
                     currentState.copy(
                         // TODO AccountRepository
+                        // TODO wtf
                         filterName = injector().usersAccount?.users?.find { it.userId == message.userId }?.userName
                             ?: "",
                         filterEnabled = message.userId != KEY_DEFAULT_USER_ID,
@@ -143,7 +146,7 @@ private class FeatureReducer: Logic<State, Message, Effect>() {
 
     private fun getSelectedUsers(appId: String?): List<User>? {
         return if (appId == null) emptyList()
-        else injector().usersAccount?.users?.filter { it.appId == appId }
+        else injector().usersAccount?.users?.filter { it.appId == appId } // TODO wtf
     }
 
     private fun setTicketsState(tickets: TicketsInfo) : State {
