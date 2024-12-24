@@ -5,12 +5,16 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.core.view.isVisible
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.lifecycleScope
+import androidx.lifecycle.repeatOnLifecycle
 import androidx.recyclerview.widget.LinearLayoutManager
+import com.pyrus.pyrusservicedesk.PyrusServiceDesk
 import com.pyrus.pyrusservicedesk.PyrusServiceDesk.Companion.injector
 import com.pyrus.pyrusservicedesk._ref.Screens
 import com.pyrus.pyrusservicedesk._ref.ui_domain.screens.addTicket.AddTicketFragment
 import com.pyrus.pyrusservicedesk._ref.ui_domain.screens.tickets_list.adapters.TicketsListAdapter
-import com.pyrus.pyrusservicedesk._ref.ui_domain.screens.tickets_list.ticketsList.TicketsListContract.Effect
+import com.pyrus.pyrusservicedesk._ref.ui_domain.screens.tickets_list.ticketsList.TicketsListView.Effect
 import com.pyrus.pyrusservicedesk._ref.ui_domain.screens.tickets_list.ticketsList.TicketsListContract.Message
 import com.pyrus.pyrusservicedesk._ref.ui_domain.screens.tickets_list.ticketsList.TicketsListContract.State
 import com.pyrus.pyrusservicedesk._ref.whitetea.android.TeaFragment
@@ -20,6 +24,7 @@ import com.pyrus.pyrusservicedesk._ref.whitetea.bind.BinderLifecycleMode
 import com.pyrus.pyrusservicedesk.databinding.TicketsListFragmentBinding
 import kotlinx.coroutines.flow.debounce
 import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.launch
 
 internal class TicketsListFragment: TeaFragment<State, Message, Effect>()  {
 
@@ -62,7 +67,12 @@ internal class TicketsListFragment: TeaFragment<State, Message, Effect>()  {
             dispatch(Message.Outer.OnUserIdSelect(result))
         }
 
-        //TODO add feature
+        //get information about changed users
+        lifecycleScope.launch {
+            viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
+                PyrusServiceDesk.ticketsListStateFlow.collect { dispatch(Message.Outer.OnUpdateTickets) }
+            }
+        }
         val feature = getStore { injector().ticketsListFeatureFactory(appId).create() }
 
          bind(BinderLifecycleMode.CREATE_DESTROY) {
@@ -73,7 +83,7 @@ internal class TicketsListFragment: TeaFragment<State, Message, Effect>()  {
          }
          bind {
              feature.state.debounce(200) bindTo this@TicketsListFragment
-             feature.effects bindTo this@TicketsListFragment
+             feature.effects.map(TicketsListMapper::map) bindTo this@TicketsListFragment
          }
     }
 
@@ -89,28 +99,15 @@ internal class TicketsListFragment: TeaFragment<State, Message, Effect>()  {
     override fun handleEffect(effect: Effect) {
         when(effect) {
 
-            is Effect.Outer.ShowAddTicketMenu -> {
+            is Effect.ShowAddTicketMenu -> {
                 val bottomSheet = AddTicketFragment.newInstance(effect.appId)
                 bottomSheet.show(parentFragmentManager, bottomSheet.tag)
             }
 
-            is Effect.Outer.ShowTicket -> injector().router.navigateTo(Screens.TicketScreen(effect.ticketId, effect.userId))
+            is Effect.ShowTicket -> injector().router.navigateTo(Screens.TicketScreen(effect.ticketId, effect.userId))
 
-            Effect.Inner.TicketsAutoUpdate -> TODO()
-            Effect.Inner.UpdateTickets -> TODO()
         }
     }
-
-
-    //TODO
-    /*private fun getSelectedUserIds(chosenUserId: String): List<Ticket> {
-        val allUsersName = viewModel.getTicketsLiveData().value ?: emptyList()
-        if (chosenUserId == KEY_DEFAULT_USER_ID)
-            return allUsersName
-
-        return allUsersName.filter { it.userId == chosenUserId }
-    }*/
-
 
 
 

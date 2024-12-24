@@ -3,6 +3,7 @@ package com.pyrus.pyrusservicedesk
 import android.app.Activity
 import android.app.Application
 import android.content.Context
+import android.content.Intent
 import android.content.SharedPreferences
 import androidx.annotation.MainThread
 import com.pyrus.pyrusservicedesk._ref.ui_domain.screens.ticket.MainActivity
@@ -21,6 +22,8 @@ import com.pyrus.pyrusservicedesk.core.Account
 import com.pyrus.pyrusservicedesk.sdk.data.User
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
 
 
 class PyrusServiceDesk private constructor(
@@ -52,15 +55,18 @@ class PyrusServiceDesk private constructor(
         internal const val API_VERSION_3: Int = 4
 
         private const val DEFAULT_TOKEN_TYPE: String = "android"
-//TODO delete
-//        internal val users: List<User> = listOf(
-//            User("255371017", "xZlr1Zf0pZZE43NfjXfY10OvEKwkKLRCO~PYF7SjID-Tp-7sK5EAuWqgOfrCQNOdDUHrZhHlBaqcdzj2ULgf9e~ciFudXo9ff1Y9cx0oXaTGziZKANoCLbWceaF-5g1VAQpfcg==", "Ресторан 1"),
-//            User("251380375", "n4Mxu60kICP-XtZkGm2zCRlDtRRBi76h1w7FMx~f2F~z3d~Ayz7~Z7Gfxg7q2dI~sNVS965oM44Buy8uX2ngWib4BIIaf~6uIT6KaRzyGn2N6O2zdj-lufplexg1TvYLTviMSw==", "Много Лосося ДК Москва, Большая Филёвская улица, 3"),
-//            User("251374579", "n4Mxu60kICP-XtZkGm2zCRlDtRRBi76h1w7FMx~f2F~z3d~Ayz7~Z7Gfxg7q2dI~sNVS965oM44Buy8uX2ngWib4BIIaf~6uIT6KaRzyGn2N6O2zdj-lufplexg1TvYLTviMSw==", "Старик Хинкалыч - Кострома Коллаж")
-//        )
 
         internal var logging = false
             private set
+
+        private val _stateFlow = MutableStateFlow(emptyList<User>())
+        val ticketsListStateFlow: StateFlow<List<User>> get() = _stateFlow
+
+        @JvmStatic
+        @JvmOverloads
+        private fun updateValue(newValue: List<User>) {
+            _stateFlow.value = newValue
+        }
 
         /**
          * Initializes PyrusServiceDesk embeddable module.
@@ -235,6 +241,10 @@ class PyrusServiceDesk private constructor(
                 preferences
             )
 
+            if (newAccount is Account.V3 && listUser != null) {
+                updateValue(listUser)
+            }
+
 
             // TODO sds
 //            if (INSTANCE != null && get().userId != userId) {
@@ -294,11 +304,15 @@ class PyrusServiceDesk private constructor(
         fun start(
             activity: Activity,
             configuration: ServiceDeskConfiguration? = null,
-            onStopCallback: OnStopCallback? = null
+            onStopCallback: OnStopCallback? = null,
+            openQrIntent: Intent? = null,
+            openSettingsIntent: Intent? = null,
         ) = startImpl(
             activity = activity,
             configuration = configuration,
-            onStopCallback = onStopCallback
+            onStopCallback = onStopCallback,
+            openQrIntent = openQrIntent,
+            openSettingsIntent = openSettingsIntent,
         )
 
         /**
@@ -429,9 +443,15 @@ class PyrusServiceDesk private constructor(
         private fun startImpl(
             activity: Activity,
             configuration: ServiceDeskConfiguration? = null,
-            onStopCallback: OnStopCallback? = null
+            onStopCallback: OnStopCallback? = null,
+            openQrIntent: Intent? = null,
+            openSettingsIntent: Intent? = null,
         ) {
             StaticRepository.setConfiguration(configuration)
+
+            if (INJECTOR != null) {
+                injector().setIntent(openQrIntent, openSettingsIntent)
+            }
 
             // TODO
 //            get().sharedViewModel.clearQuitServiceDesk()

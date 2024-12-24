@@ -1,7 +1,6 @@
 package com.pyrus.pyrusservicedesk._ref.ui_domain.screens.tickets_list.tickets
 
 import androidx.core.os.bundleOf
-import com.pyrus.pyrusservicedesk.PyrusServiceDesk
 import com.pyrus.pyrusservicedesk.PyrusServiceDesk.Companion.injector
 import com.pyrus.pyrusservicedesk._ref.Screens
 import com.pyrus.pyrusservicedesk._ref.ui_domain.screens.tickets_list.tickets.TicketsContract.Effect
@@ -11,7 +10,6 @@ import com.pyrus.pyrusservicedesk._ref.ui_domain.screens.tickets_list.tickets.Ti
 import com.pyrus.pyrusservicedesk._ref.ui_domain.screens.tickets_list.ticketsList.TicketsListFragment.Companion.KEY_USER_ID
 import com.pyrus.pyrusservicedesk._ref.utils.Try
 import com.pyrus.pyrusservicedesk._ref.utils.isSuccess
-import com.pyrus.pyrusservicedesk._ref.utils.log.PLog
 import com.pyrus.pyrusservicedesk._ref.utils.singleFlow
 import com.pyrus.pyrusservicedesk._ref.whitetea.core.Actor
 import com.pyrus.pyrusservicedesk._ref.whitetea.core.StoreFactory
@@ -19,7 +17,6 @@ import com.pyrus.pyrusservicedesk._ref.whitetea.core.adaptCast
 import com.pyrus.pyrusservicedesk._ref.whitetea.core.logic.Logic
 import com.pyrus.pyrusservicedesk.sdk.data.User
 import com.pyrus.pyrusservicedesk.sdk.data.intermediate.Tickets
-import com.pyrus.pyrusservicedesk.sdk.repositories.LocalStore
 import com.pyrus.pyrusservicedesk.sdk.repositories.Repository
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
@@ -84,7 +81,7 @@ private class FeatureReducer: Logic<State, Message, Effect>() {
 //                    }
 //                }
                 else {
-                    injector().router.navigateTo(Screens.TicketScreen(null, users.first().userId))
+                    injector().router.navigateTo(Screens.TicketScreen(null, users.first().userId)) //TODO in fragment
                 }
             }
 
@@ -92,14 +89,17 @@ private class FeatureReducer: Logic<State, Message, Effect>() {
                 +Effect.Outer.ShowFilterMenu(state.appId, message.selectedUserId)
             }
 
-            Message.Outer.OnScanClick -> injector().router.exit() //TODO
+            Message.Outer.OnScanClick -> effects {
+                +Effect.Outer.OpenQrFragment
+            }
 
-            //is Message.Outer.OnSettingsClick -> TODO()
+            is Message.Outer.OnSettingsClick -> effects {
+                +Effect.Outer.OpenSettingsFragment
+            }
 
             is Message.Outer.OnChangeApp -> state {
                 updateTicketsState(state, message.appId)
             }
-            else -> { PLog.d(TAG, "OnScanClick, OnSettingsClick")}
         }
     }
 

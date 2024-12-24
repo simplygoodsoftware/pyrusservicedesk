@@ -13,10 +13,10 @@ import com.pyrus.pyrusservicedesk._ref.whitetea.core.Actor
 import com.pyrus.pyrusservicedesk._ref.whitetea.core.StoreFactory
 import com.pyrus.pyrusservicedesk._ref.whitetea.core.adaptCast
 import com.pyrus.pyrusservicedesk._ref.whitetea.core.logic.Logic
+import com.pyrus.pyrusservicedesk._ref.whitetea.utils.adapt
 import com.pyrus.pyrusservicedesk.sdk.data.Ticket
 import com.pyrus.pyrusservicedesk.sdk.data.intermediate.Tickets
 import com.pyrus.pyrusservicedesk.sdk.repositories.Repository
-import com.pyrus.pyrusservicedesk.sdk.web.retrofit.SyncRepository
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 
@@ -42,7 +42,7 @@ internal class TicketsListFeatureFactory(
         initialEffects = listOf(
             Effect.Inner.UpdateTickets,
         ),
-    )
+    ).adapt { it as? Effect.Outer }
 
 }
 
@@ -91,6 +91,8 @@ private class FeatureReducer : Logic<State, Message, Effect>() {
                     state.copy(tickets = tickets)
                 }
             }
+
+            Message.Outer.OnUpdateTickets -> effects { +Effect.Inner.UpdateTickets }
         }
     }
 
@@ -100,14 +102,18 @@ private class FeatureReducer : Logic<State, Message, Effect>() {
             is Message.Inner.UpdateTicketsCompleted -> {
 
                 val usersId = injector().usersAccount?.users?.filter { it.appId == state.appId }?.map { it.userId } ?: emptyList()
-                val filteredTickets = message.tickets.tickets?.filter {
+                val filteredTicketsAppId = message.tickets.tickets?.filter {
                     usersId.any { userId -> userId == it.userId }
                 }
 
+                val filteredTicketsData = filteredTicketsAppId?.sortedWith(TicketComparator())
+                val resultTickets = filteredTicketsData?.filter { it.isActive == true }?.toMutableList()
+                resultTickets?.addAll(filteredTicketsData.filter { it.isActive == false })
+
                 state {
                     State(
-                        allTickets = filteredTickets ?: emptyList(),
-                        tickets = filteredTickets ?: emptyList(),
+                        allTickets = filteredTicketsAppId ?: emptyList(),
+                        tickets = resultTickets ?: emptyList(),
                         appId = state.appId,
                         selectedUser = "",
                         isLoading = false
@@ -167,4 +173,20 @@ internal class TicketsListActor(
         }
     }
 
+}
+
+private class TicketComparator : Comparator<Ticket> {
+
+    override fun compare(o1: Ticket, o2: Ticket): Int {
+        return when {
+            o1.lastComment == null -> return when {
+                o2.lastComment == null -> o1.ticketId - o2.ticketId
+                else -> 1
+            }
+            o2.lastComment == null -> -1
+            o1.lastComment.creationDate.before(o2.lastComment.creationDate) -> 1
+            o1.lastComment.creationDate.after(o2.lastComment.creationDate) -> -1
+            else -> (o1.lastComment.commentId - o2.lastComment.commentId).toInt()
+        }
+    }
 }

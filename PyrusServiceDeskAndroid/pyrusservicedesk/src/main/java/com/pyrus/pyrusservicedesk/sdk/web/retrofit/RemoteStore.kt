@@ -167,8 +167,8 @@ internal class RemoteStore(
         return ticketsTry.map { it }
     }
 
-    private fun getAdditionalUsers(): List<UserData>? {
-        val list = (account as? Account.V3)?.users?.map { UserData(it.appId, it.userId, getSecurityKey()?:"") }
+    private fun getAdditionalUsers(): List<UserData> {
+        val list = PyrusServiceDesk.ticketsListStateFlow.value.map { UserData(it.appId, it.userId, getSecurityKey()?:"") }
         return list
     }
 

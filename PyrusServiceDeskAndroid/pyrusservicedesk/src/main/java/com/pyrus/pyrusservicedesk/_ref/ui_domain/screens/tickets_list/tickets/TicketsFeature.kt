@@ -62,6 +62,10 @@ internal interface TicketsContract {
                 val selectedUserId: String
             ) : Outer
 
+            data object OpenQrFragment : Outer
+
+            data object OpenSettingsFragment : Outer
+
             class ShowAddTicketMenu(val appId: String) : Outer
 
             class ShowTicket(val ticketId: Int?, val userId: String? = null) : Outer

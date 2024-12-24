@@ -28,6 +28,8 @@ internal interface TicketsListContract {
 
             data object OnCreateTicketClick : Outer
 
+            data object OnUpdateTickets : Outer
+
             data class OnTicketClick(val ticketId: Int) : Outer
 
             data class OnUserIdSelect(val userId: String) : Outer
@@ -51,9 +53,8 @@ internal interface TicketsListContract {
         }
 
         sealed interface Inner : Effect {
-            object UpdateTickets : Inner
-            //object FeedFlow : Inner
-            object TicketsAutoUpdate : Inner
+            data object UpdateTickets : Inner
+            data object TicketsAutoUpdate : Inner
         }
     }
 
