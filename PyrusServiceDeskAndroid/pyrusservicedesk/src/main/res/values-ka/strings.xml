@@ -1,2 +1,40 @@
 <?xml version="1.0" encoding="utf-8"?>
-<resources></resources>
+<resources>
+    <string name="psd_comment_input_hint">დაამატეთ კომენტარი</string>
+    <string name="psd_retry">გაიმეორეთ</string>
+    <string name="psd_uploading">ტვირთვა მიმდინარეობს…</string>
+    <string name="psd_file_size_mb" formatted="false">%.1f მბ</string>
+    <string name="psd_file_size_kb" formatted="false">%.1f კბ</string>
+    <string name="psd_time_format">hh:mm aa</string>
+    <string name="psd_organization_support">დახმარება</string>
+    <string name="psd_today">დღეს</string>
+    <string name="psd_yesterday">გუშინ</string>
+    <string name="psd_date_format_d_m">MMMM d</string>
+    <string name="psd_photo">ფოტო</string>
+    <string name="psd_gallery">გალერეა</string>
+    <plurals name="psd_years_ago">
+        <item quantity="one">%d წლის წინ</item>
+        <item quantity="other">%d წლის წინ</item>
+    </plurals>
+    <string name="psd_months_ago" formatted="false">%d წ წინ</string>
+    <string name="psd_weeks_ago" formatted="false">%d კვ წინ</string>
+    <string name="psd_days_ago" formatted="false">%d დ წინ</string>
+    <string name="psd_hours_ago" formatted="false">%d ს წინ</string>
+    <string name="psd_minutes_ago" formatted="false">%d წ წინ</string>
+    <string name="psd_recent">ბოლო</string>
+    <string name="psd_guest">სტუმარი</string>
+    <string name="psd_file_size_exceeded_message" formatted="false">ფაილის ზომა არ უნდა აღემატებოდეს %d მბ-ს.</string>
+    <string name="psd_copied_to_clipboard">ბუფერში გადავიტანე</string>
+    <string name="psd_download">ჩამოტვირთვა</string>
+    <string name="psd_downloading">ჩამოტვირთვა მიმდინარეობს…</string>
+    <string name="psd_open">გახსენით</string>
+    <string name="psd_no_preview_available">წინასწარი ნახვა არ არის ხელმისაწვდომი</string>
+    <string name="psd_share">გააზიარე</string>
+    <string name="psd_delete">წაშალე</string>
+    <string name="send_library_logs">გაგზავნეთ ბიბლიოთეკის ჟურნალები</string>
+    <string name="psd_send">გაგზავნა</string>
+    <string name="psd_no_connection">ინტერნეტ კავშირი არ არის</string>
+    <string name="psd_date_format_d_m_y">MMMM d, yyyy</string>
+    <string name="link_warning">ეს ბმული მიდის %s-ზე.
+\nნამდვილად გსურთ ბმულზე გადასვლა\?</string>
+</resources>
