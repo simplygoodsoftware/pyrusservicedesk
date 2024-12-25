@@ -1,0 +1,64 @@
+package com.pyrus.pyrusservicedesk.sdk.repositories
+
+import com.pyrus.pyrusservicedesk.sdk.data.CommentDto
+import com.pyrus.pyrusservicedesk.sdk.data.TicketDto
+import com.pyrus.pyrusservicedesk.sdk.data.intermediate.TicketsDto
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.MutableStateFlow
+
+internal class LocalTicketsStore {
+
+    private val ticketsInfoState = MutableStateFlow<TicketsDto?>(null)
+
+    fun getTickets(): TicketsDto? {
+        return ticketsInfoState.value
+    }
+
+    fun applyDiff(tickets: TicketsDto): TicketsDto {
+        val localState = getTickets()
+        val mergedState = mergeDiff(localState, tickets)
+        ticketsInfoState.value = mergedState
+        return mergedState
+    }
+
+    fun getTicketInfoFlow(): Flow<TicketsDto?> = ticketsInfoState
+
+    private fun mergeDiff(localState: TicketsDto?, diff: TicketsDto): TicketsDto {
+        if (localState == null) return diff
+
+        val ticketsDiff = diff.tickets ?: emptyList()
+        val ticketsMap = localState.tickets?.associateBy { it.ticketId } ?: emptyMap()
+
+        val mergedTickets = ArrayList<TicketDto>()
+
+        for (ticket in ticketsDiff) {
+            val localTicket = ticketsMap[ticket.ticketId]
+            if (localTicket == null) {
+                mergedTickets.add(ticket)
+                continue
+            }
+            val localComments = localTicket.comments
+            val commentsDiff = ticket.comments
+            val mergedComments: List<CommentDto>? = when {
+                localComments != null && commentsDiff != null -> {
+                    val commentsMap = localComments.associateBy { it.commentId }.toMutableMap()
+                    commentsMap.putAll(commentsDiff.associateBy { it.commentId })
+                    commentsMap.values.toList()
+                }
+                localComments != null -> localComments
+                commentsDiff != null -> commentsDiff
+                else -> null
+            }
+            val mergedTicket = ticket.copy(comments = mergedComments)
+            mergedTickets += mergedTicket
+        }
+
+        return TicketsDto(
+            hasMore = false,
+            applications = diff.applications,
+            tickets = mergedTickets,
+            commandsResult = null,
+        )
+    }
+
+}

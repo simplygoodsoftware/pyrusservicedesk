@@ -1,6 +1,7 @@
 package com.pyrus.pyrusservicedesk.sdk.data
 
 import com.google.gson.annotations.SerializedName
+import com.pyrus.pyrusservicedesk.sdk.sync.TicketCommandType
 
 /**
  * Represents an command of the comment.

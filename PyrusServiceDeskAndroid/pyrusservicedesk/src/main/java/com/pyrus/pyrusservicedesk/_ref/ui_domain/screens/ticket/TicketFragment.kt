@@ -151,8 +151,8 @@ internal class TicketFragment: TeaFragment<Model, TicketView.Event, TicketView.E
         // TODO если открыть файл и вернуться в задачу скорее всего id обновится
         val ticketId = arguments?.getInt(
             KEY_TICKET_ID,
-            injector().localStore.getLastTicketId()  // TODO wtf
-        ) ?: injector().localStore.getLastTicketId()
+            injector().localCommandsStore.getLastTicketId()  // TODO wtf
+        ) ?: injector().localCommandsStore.getLastTicketId()
 
         val feature = getStore { injector().ticketFeatureFactory.create(
             userId = userId,

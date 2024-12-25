@@ -14,7 +14,7 @@ import java.lang.reflect.Type
 /**
  * [SharedPreferences] based offline repository
  */
-internal class LocalStore(
+internal class LocalCommandsStore(
     private val preferences: SharedPreferences,
     private val localDataVerifier: LocalDataVerifier,
     private val gson: Gson,

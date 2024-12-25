@@ -22,7 +22,7 @@ import com.pyrus.pyrusservicedesk.sdk.data.FileManager
 import com.pyrus.pyrusservicedesk.sdk.data.gson.RemoteGsonExclusionStrategy
 import com.pyrus.pyrusservicedesk.sdk.data.gson.UriGsonAdapter
 import com.pyrus.pyrusservicedesk.sdk.repositories.DraftRepository
-import com.pyrus.pyrusservicedesk.sdk.repositories.LocalStore
+import com.pyrus.pyrusservicedesk.sdk.repositories.LocalCommandsStore
 import com.pyrus.pyrusservicedesk.sdk.repositories.Repository
 import com.pyrus.pyrusservicedesk.sdk.repositories.RepositoryMapper
 import com.pyrus.pyrusservicedesk.sdk.updates.LiveUpdates
@@ -63,7 +63,7 @@ internal class DiInjector(
         .addSerializationExclusionStrategy(RemoteGsonExclusionStrategy())
         .create()
 
-    val localStore: LocalStore = LocalStore(preferences, localDataVerifier, offlineGson) //TODO обязательно приватный?
+    val localCommandsStore: LocalCommandsStore = LocalCommandsStore(preferences, localDataVerifier, offlineGson) //TODO обязательно приватный?
 
     private val okHttpClient = OkHttpClient.Builder()
         .connectTimeout(30, TimeUnit.SECONDS)
@@ -108,7 +108,7 @@ internal class DiInjector(
 
     private val remoteFileStore = RemoteFileStore(api) // TODO use different api
 
-    private val repository: Repository = Repository(localStore, remoteStore, repositoryMapper, fileResolver, remoteFileStore)
+    private val repository: Repository = Repository(localCommandsStore, remoteStore, repositoryMapper, fileResolver, remoteFileStore)
 
     private val preferencesManager = PreferencesManager(preferences)
 
