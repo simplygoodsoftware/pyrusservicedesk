@@ -52,7 +52,7 @@ internal class TicketFeatureFactory(
         actor = TicketActor(ticketId, account, repository, router, welcomeMessage, draftRepository, fileManager).adaptCast(),
         initialEffects = listOf(
             Effect.Inner.FeedFlow,
-            Effect.Inner.UpdateComments(ticketId, userId),
+            Effect.Inner.UpdateComments(force = false, ticketId = ticketId, userId = userId),
         ),
     ).adapt { it as? Effect.Outer }
 
@@ -128,7 +128,11 @@ private class FeatureReducer: Logic<State, Message, Effect>() {
                 val currentState = state as? State.Content ?: return
                 if (currentState.isLoading) return
                 state { currentState.copy(isLoading = true) }
-                effects { +Effect.Inner.UpdateComments(currentState.ticketId, currentState.userId) }
+                effects { +Effect.Inner.UpdateComments(
+                    force = true,
+                    ticketId = currentState.ticketId,
+                    userId = currentState.userId
+                ) }
             }
 
             // TODO wtf
@@ -199,9 +203,8 @@ internal class TicketActor(
     override fun handleEffect(effect: Effect.Inner): Flow<Message.Inner> = when (effect) {
         is Effect.Inner.UpdateComments -> singleFlow {
             val commentsTry: Try<FullTicket> = repository.getFeed(
-                keepUnread = false,
-                includePendingComments = true,
-                ticketId = effect.ticketId
+                ticketId = effect.ticketId,
+                force = effect.force
             )
             when {
                 commentsTry.isSuccess() -> {

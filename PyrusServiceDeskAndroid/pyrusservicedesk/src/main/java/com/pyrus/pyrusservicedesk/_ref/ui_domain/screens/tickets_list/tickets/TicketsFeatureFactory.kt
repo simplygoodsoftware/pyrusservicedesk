@@ -36,7 +36,7 @@ internal class TicketsFeatureFactory(
         reducer = FeatureReducer(),
         actor = TicketsActor(repository, router).adaptCast(),
         initialEffects = listOf(
-            Effect.Inner.UpdateTickets, Effect.Inner.TicketsSetFlow
+            Effect.Inner.UpdateTickets(false), Effect.Inner.TicketsSetFlow
         ),
     ).adapt { it as? Effect.Outer }
 
@@ -183,8 +183,8 @@ internal class TicketsActor(
 
     override fun handleEffect(effect: Effect.Inner): Flow<Message.Inner> = when(effect) {
 
-        Effect.Inner.UpdateTickets -> singleFlow {
-            when(val ticketsTry = repository.getAllData()) {
+        is Effect.Inner.UpdateTickets -> singleFlow {
+            when(val ticketsTry = repository.getAllData(effect.force)) {
                 is Try.Success -> Message.Inner.UpdateTicketsCompleted(ticketsTry.value)
                 is Try.Failure -> Message.Inner.UpdateTicketsFailed
             }

@@ -26,7 +26,7 @@ internal class RepositoryMapper(
     private val account: Account
 ) {
 
-    fun mapTickets(ticketsDto: TicketsDto): TicketsInfo {
+    fun map(ticketsDto: TicketsDto): TicketsInfo {
         val smallUsers = mapToSmallAcc(account) // TODO use account provider
 
         val usersByAppId = smallUsers.groupBy { it.appId }

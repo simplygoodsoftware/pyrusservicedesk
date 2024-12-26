@@ -79,6 +79,7 @@ internal interface TicketContract {
 
         sealed interface Inner : Effect {
             data class UpdateComments(
+                val force: Boolean,
                 val ticketId: Int,
                 val userId: String,
             ) : Inner

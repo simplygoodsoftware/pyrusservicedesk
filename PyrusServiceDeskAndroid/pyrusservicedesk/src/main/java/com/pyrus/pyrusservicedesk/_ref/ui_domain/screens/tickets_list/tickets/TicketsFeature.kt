@@ -74,7 +74,7 @@ internal interface TicketsContract {
 
         sealed interface Inner : Effect {
             data object TicketsSetFlow : Inner
-            data object UpdateTickets : Inner
+            data class UpdateTickets(val force: Boolean) : Inner
             data class OpenTicketScreen(val ticketId: Int?, val userId: String?) : Inner
         }
     }

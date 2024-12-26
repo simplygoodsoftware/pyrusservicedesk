@@ -14,8 +14,6 @@ import com.pyrus.pyrusservicedesk._ref.utils.Try
 import com.pyrus.pyrusservicedesk._ref.utils.isImage
 import com.pyrus.pyrusservicedesk._ref.utils.isSuccess
 import com.pyrus.pyrusservicedesk._ref.utils.map
-import com.pyrus.pyrusservicedesk.core.Account
-import com.pyrus.pyrusservicedesk.core.getUserId
 import com.pyrus.pyrusservicedesk.presentation.ui.view.Status
 import com.pyrus.pyrusservicedesk.sdk.FileResolver
 import com.pyrus.pyrusservicedesk.sdk.data.AttachmentDto
@@ -25,14 +23,13 @@ import com.pyrus.pyrusservicedesk.sdk.sync.TicketCommandResultDto
 import com.pyrus.pyrusservicedesk.sdk.data.TicketDto
 import com.pyrus.pyrusservicedesk.sdk.data.intermediate.AddCommentResponseData
 import com.pyrus.pyrusservicedesk.sdk.data.intermediate.FileData
+import com.pyrus.pyrusservicedesk.sdk.data.intermediate.TicketsDto
 import com.pyrus.pyrusservicedesk.sdk.sync.SyncRequest
 import com.pyrus.pyrusservicedesk.sdk.sync.Synchronizer
 import com.pyrus.pyrusservicedesk.sdk.web.UploadFileHook
 import com.pyrus.pyrusservicedesk.sdk.web.retrofit.RemoteFileStore
 import com.pyrus.pyrusservicedesk.sdk.web.retrofit.RemoteStore
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
@@ -55,7 +52,6 @@ internal class Repository(
     private val lastLocalCommentId: AtomicLong
     private val lastLocalAttachmentId: AtomicInteger
 
-    private val remoteFeedStateFlow: MutableStateFlow<FullTicket?> = MutableStateFlow(null)
     private val remoteFeedMutex = Mutex()
 
     private val fileHooks = ConcurrentHashMap<Int, UploadFileHook>()
@@ -73,13 +69,58 @@ internal class Repository(
         lastLocalAttachmentId = AtomicInteger(lastAttachmentId)
     }
 
-    suspend fun getAllData(): Try<TicketsInfo> {
-        return synchronizer.syncData(SyncRequest.Data).map(repositoryMapper::mapTickets)
+    suspend fun getAllData(force: Boolean): Try<TicketsInfo> {
+        // TODO merge with sync command
+        if (!force) {
+            val localTickets: TicketsDto? = localTicketsStore.getTickets()
+            if(localTickets != null) {
+                return Try.Success(repositoryMapper.map(localTickets))
+            }
+        }
+        return synchronizer.syncData(SyncRequest.Data).map(repositoryMapper::map)
     }
 
+    // TODO merge with sync command
     fun getAllDataFlow(): Flow<TicketsInfo?> = localTicketsStore.getTicketInfoFlow().map { dto ->
-        dto?.let(repositoryMapper::mapTickets)
+        dto?.let(repositoryMapper::map)
     }
+
+    //TODO what we need to do when we haven't fount ticket (feedTry.value == null, but feedTry.isSuccess()) (k) sm
+    suspend fun getFeed(ticketId: Int, force: Boolean): Try<FullTicket> {
+
+        if (!force) {
+            val localTickets: TicketsDto? = localTicketsStore.getTickets()
+            val ticket: TicketDto? = localTickets?.tickets?.find { it.ticketId == ticketId }
+            if (ticket != null) {
+                return Try.Success(repositoryMapper.map(ticket))
+            }
+        }
+
+        val syncTry = synchronizer.syncData(SyncRequest.Data)
+        if (!syncTry.isSuccess()) {
+            return syncTry
+        }
+
+        val tickets: TicketsDto = syncTry.value
+        val ticket: TicketDto? = tickets.tickets?.find { it.ticketId == ticketId }
+        if (ticket == null) {
+            // TODO в этом случае нужно показывать пользователю ошибку сервера, а не то что у него нет интернета
+            // этого можно достич заменив Try на Try2 с кастомными ошибками
+            return Try.Failure(Exception("data not found"))
+        }
+
+        return Try.Success(repositoryMapper.map(ticket))
+    }
+
+    // TODO merge with sync command
+    fun getFeedFlow(ticketId: Int): Flow<FullTicket?> = localTicketsStore.getTicketInfoFlow().map { ticketsDto ->
+        ticketsDto?.tickets
+            ?.find { ticketDto -> ticketDto.ticketId == ticketId }
+            ?.let(repositoryMapper::map)
+    }
+
+
+
 
 
 
@@ -88,45 +129,9 @@ internal class Repository(
     /**
      * Provides available tickets.
      */
+    // TODO remove it
     suspend fun getTickets(): Try<List<TicketDto>> {
         return remoteStore.getTickets()
-    }
-
-    // TODO sdssds
-    fun getFeedFlow(ticketId: Int): Flow<FullTicket?> = combine(localCommandsStore.commentsFlow(), remoteFeedStateFlow) { local, remote ->
-        when (remote) {
-            null -> FullTicket(
-                comments = local,
-                showRating = false,
-                showRatingText = null,
-                userId = null,
-                ticketId = ticketId,
-                subject = null,
-                isRead = true,
-                lastComment = local.lastOrNull(),
-            )
-            else -> mergeComments(local, remote)
-        }
-    }
-
-    //TODO what we need to do when we haven't fount ticket (feedTry.value == null, but feedTry.isSuccess())
-    suspend fun getFeed(
-        ticketId: Int,
-        keepUnread: Boolean,
-        includePendingComments: Boolean = false,
-    ): Try<FullTicket> {
-        val feedTry = remoteStore.getTicket(ticketId).map {
-            repositoryMapper.map(it)
-        }
-
-        if (feedTry.isSuccess()) remoteFeedMutex.withLock {
-            remoteFeedStateFlow.value = feedTry.value
-        }
-
-        if (includePendingComments) {
-            return feedTry.map { mergeComments(localCommandsStore.getPendingFeedComments(), it) }
-        }
-        return feedTry
     }
 
 
@@ -277,17 +282,17 @@ internal class Repository(
                 isSending = false,
                 attachments = if (newAttachments.isEmpty()) null else newAttachments
             )
-            val ticket = remoteFeedStateFlow.value ?: FullTicket(
-                comments = emptyList(),
-                showRating = false,
-                showRatingText = null,
-                userId = null,
-                ticketId = ticketId,
-                subject = null,
-                isRead = true,
-                lastComment = null,
-            )
-            remoteFeedStateFlow.value = ticket.copy(comments = ticket.comments + remoteComment)
+//            val ticket = remoteFeedStateFlow.value ?: FullTicket(
+//                comments = emptyList(),
+//                showRating = false,
+//                showRatingText = null,
+//                userId = null,
+//                ticketId = ticketId,
+//                subject = null,
+//                isRead = true,
+//                lastComment = null,
+//            )
+//            remoteFeedStateFlow.value = ticket.copy(comments = ticket.comments + remoteComment)
         }
     }
 

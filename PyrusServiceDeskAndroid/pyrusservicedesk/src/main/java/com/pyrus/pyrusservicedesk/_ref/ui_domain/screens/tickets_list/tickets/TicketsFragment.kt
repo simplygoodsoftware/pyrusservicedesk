@@ -48,7 +48,7 @@ internal class TicketsFragment: TeaFragment<Model, Message, Effect.Outer>() {
             this@TicketsFragment.messages.map { it } bindTo feature
         }
         bind {
-            feature.state.map(TicketsMapper::map) bindTo this@TicketsFragment
+            feature.state.map { TicketsMapper.map(it.contentState) } bindTo this@TicketsFragment
             feature.effects bindTo this@TicketsFragment
         }
     }
