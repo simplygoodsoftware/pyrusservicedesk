@@ -14,6 +14,8 @@ import com.pyrus.pyrusservicedesk._ref.utils.Try
 import com.pyrus.pyrusservicedesk._ref.utils.isImage
 import com.pyrus.pyrusservicedesk._ref.utils.isSuccess
 import com.pyrus.pyrusservicedesk._ref.utils.map
+import com.pyrus.pyrusservicedesk.core.Account
+import com.pyrus.pyrusservicedesk.core.getUserId
 import com.pyrus.pyrusservicedesk.presentation.ui.view.Status
 import com.pyrus.pyrusservicedesk.sdk.FileResolver
 import com.pyrus.pyrusservicedesk.sdk.data.AttachmentDto
@@ -23,6 +25,7 @@ import com.pyrus.pyrusservicedesk.sdk.sync.TicketCommandResultDto
 import com.pyrus.pyrusservicedesk.sdk.data.TicketDto
 import com.pyrus.pyrusservicedesk.sdk.data.intermediate.AddCommentResponseData
 import com.pyrus.pyrusservicedesk.sdk.data.intermediate.FileData
+import com.pyrus.pyrusservicedesk.sdk.sync.SyncRequest
 import com.pyrus.pyrusservicedesk.sdk.sync.Synchronizer
 import com.pyrus.pyrusservicedesk.sdk.web.UploadFileHook
 import com.pyrus.pyrusservicedesk.sdk.web.retrofit.RemoteFileStore
@@ -30,6 +33,7 @@ import com.pyrus.pyrusservicedesk.sdk.web.retrofit.RemoteStore
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import java.util.concurrent.ConcurrentHashMap
@@ -69,6 +73,25 @@ internal class Repository(
         lastLocalAttachmentId = AtomicInteger(lastAttachmentId)
     }
 
+    suspend fun getAllData(): Try<TicketsInfo> {
+        return synchronizer.syncData(SyncRequest.Data).map(repositoryMapper::mapTickets)
+    }
+
+    suspend fun getAllDataFlow(): Flow<TicketsInfo?> = localTicketsStore.getTicketInfoFlow().map { dto ->
+        dto?.let(repositoryMapper::mapTickets)
+    }
+
+
+
+
+
+    /**
+     * Provides available tickets.
+     */
+    suspend fun getTickets(): Try<List<TicketDto>> {
+        return remoteStore.getTickets()
+    }
+
     // TODO sdssds
     fun getFeedFlow(ticketId: Int): Flow<FullTicket?> = combine(localCommandsStore.commentsFlow(), remoteFeedStateFlow) { local, remote ->
         when (remote) {
@@ -106,16 +129,6 @@ internal class Repository(
         return feedTry
     }
 
-    /**
-     * Provides available tickets.
-     */
-    suspend fun getTickets(): Try<List<TicketDto>> {
-        return remoteStore.getTickets()
-    }
-
-    suspend fun getAllData(): Try<TicketsInfo> {
-        return remoteStore.getAllData()
-    }
 
     suspend fun addTextComment(ticketId: Int, textBody: String, command: CommandDto) {
         val comment = createLocalTextComment(

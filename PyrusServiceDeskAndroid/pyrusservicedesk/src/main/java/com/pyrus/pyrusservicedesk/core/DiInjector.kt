@@ -21,10 +21,12 @@ import com.pyrus.pyrusservicedesk.sdk.FileResolver
 import com.pyrus.pyrusservicedesk.sdk.data.FileManager
 import com.pyrus.pyrusservicedesk.sdk.data.gson.RemoteGsonExclusionStrategy
 import com.pyrus.pyrusservicedesk.sdk.data.gson.UriGsonAdapter
+import com.pyrus.pyrusservicedesk.sdk.repositories.AccountStore
 import com.pyrus.pyrusservicedesk.sdk.repositories.DraftRepository
 import com.pyrus.pyrusservicedesk.sdk.repositories.LocalCommandsStore
 import com.pyrus.pyrusservicedesk.sdk.repositories.Repository
 import com.pyrus.pyrusservicedesk.sdk.repositories.RepositoryMapper
+import com.pyrus.pyrusservicedesk.sdk.sync.Synchronizer
 import com.pyrus.pyrusservicedesk.sdk.updates.LiveUpdates
 import com.pyrus.pyrusservicedesk.sdk.updates.PreferencesManager
 import com.pyrus.pyrusservicedesk.sdk.verify.LocalDataVerifier
@@ -48,6 +50,8 @@ internal class DiInjector(
     private val coreScope: CoroutineScope,
     private val preferences: SharedPreferences,
 ) {
+
+    private val accountStore = AccountStore(account)
 
     private val fileResolver: FileResolver = FileResolver(application.contentResolver)
 
@@ -108,7 +112,23 @@ internal class DiInjector(
 
     private val remoteFileStore = RemoteFileStore(api) // TODO use different api
 
-    private val repository: Repository = Repository(localCommandsStore, remoteStore, repositoryMapper, fileResolver, remoteFileStore)
+    private val localTicketsStore = com.pyrus.pyrusservicedesk.sdk.repositories.LocalTicketsStore()
+
+    private val synchronizer = Synchronizer(
+        api = api,
+        localTicketsStore = localTicketsStore,
+        accountStore = accountStore
+    )
+
+    private val repository: Repository = Repository(
+        localCommandsStore = localCommandsStore,
+        remoteStore = remoteStore,
+        repositoryMapper = repositoryMapper,
+        fileResolver = fileResolver,
+        remoteFileStore = remoteFileStore,
+        synchronizer = synchronizer,
+        localTicketsStore = localTicketsStore
+    )
 
     private val preferencesManager = PreferencesManager(preferences)
 
