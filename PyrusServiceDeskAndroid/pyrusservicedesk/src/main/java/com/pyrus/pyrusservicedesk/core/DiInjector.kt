@@ -151,7 +151,8 @@ internal class DiInjector(
         fileManager = fileManager,
     )
 
-    val ticketsFeatureFactory = TicketsFeatureFactory(storeFactory, repository, router)
+    // TODO fix it
+    val ticketsFeatureFactory = TicketsFeatureFactory(account as Account.V3, storeFactory, repository, router)
 
     val isMultiChat = account.isMultiChat // TODO wtf
 
