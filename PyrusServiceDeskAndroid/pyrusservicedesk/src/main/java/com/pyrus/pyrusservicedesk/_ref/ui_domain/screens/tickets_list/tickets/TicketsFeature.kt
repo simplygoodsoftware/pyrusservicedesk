@@ -3,20 +3,27 @@ package com.pyrus.pyrusservicedesk._ref.ui_domain.screens.tickets_list.tickets
 import androidx.fragment.app.FragmentManager
 import com.pyrus.pyrusservicedesk._ref.data.multy_chat.TicketSetInfo
 import com.pyrus.pyrusservicedesk._ref.data.multy_chat.TicketsInfo
+import com.pyrus.pyrusservicedesk._ref.ui_domain.screens.ticket.TicketContract.Effect.Inner
 import com.pyrus.pyrusservicedesk._ref.ui_domain.screens.tickets_list.tickets.TicketsContract.Effect
 import com.pyrus.pyrusservicedesk._ref.ui_domain.screens.tickets_list.tickets.TicketsContract.Message
 import com.pyrus.pyrusservicedesk._ref.ui_domain.screens.tickets_list.tickets.TicketsContract.State
 import com.pyrus.pyrusservicedesk._ref.whitetea.core.Store
+import com.pyrus.pyrusservicedesk.core.Account
 
 internal typealias TicketsFeature = Store<State, Message, Effect.Outer>
 
 internal interface TicketsContract {
 
-    sealed interface State {
+    data class State(
+        val account: Account.V3,
+        val contentState: ContentState,
+    )
 
-        data object Loading : State
+    sealed interface ContentState {
 
-        data object Error : State
+        data object Loading : ContentState
+
+        data object Error : ContentState
 
         data class Content(
             val appId: String?,
@@ -25,7 +32,7 @@ internal interface TicketsContract {
             val filterName: String?,
             val filterEnabled: Boolean,
             val tickets: List<TicketSetInfo>?,
-        ) : State
+        ) : ContentState
     }
 
     sealed interface Message {
@@ -42,7 +49,7 @@ internal interface TicketsContract {
         }
 
         sealed interface Inner : Message {
-            data class TicketsUpdated(val tickets: TicketsInfo) : Inner
+            data class TicketsUpdated(val tickets: TicketsInfo?) : Inner
             data class UserIdSelected(val userId: String, val fm: FragmentManager) : Inner
             data object UpdateTicketsFailed : Inner
             data class UpdateTicketsCompleted(val tickets: TicketsInfo) : Inner

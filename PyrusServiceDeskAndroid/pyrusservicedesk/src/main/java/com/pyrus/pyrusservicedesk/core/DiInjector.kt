@@ -170,6 +170,7 @@ internal class DiInjector(
 
     val setPushTokenUseCase = SetPushTokenUseCase(account, coreScope, preferencesManager)
 
+    // TODO remove it
     val usersAccount = (account as? Account.V3)
 
 }

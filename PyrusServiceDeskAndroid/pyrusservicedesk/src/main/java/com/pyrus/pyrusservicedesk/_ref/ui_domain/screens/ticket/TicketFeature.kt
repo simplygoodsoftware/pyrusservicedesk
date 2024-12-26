@@ -83,7 +83,6 @@ internal interface TicketContract {
                 val userId: String,
             ) : Inner
             data object FeedFlow : Inner
-            data object CommentsAutoUpdate : Inner
             data object Close : Inner
             data class SendTextComment(
                 val text: String,

@@ -77,7 +77,7 @@ internal class Repository(
         return synchronizer.syncData(SyncRequest.Data).map(repositoryMapper::mapTickets)
     }
 
-    suspend fun getAllDataFlow(): Flow<TicketsInfo?> = localTicketsStore.getTicketInfoFlow().map { dto ->
+    fun getAllDataFlow(): Flow<TicketsInfo?> = localTicketsStore.getTicketInfoFlow().map { dto ->
         dto?.let(repositoryMapper::mapTickets)
     }
 

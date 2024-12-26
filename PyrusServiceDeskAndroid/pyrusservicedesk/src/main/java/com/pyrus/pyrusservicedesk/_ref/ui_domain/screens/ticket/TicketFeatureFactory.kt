@@ -52,7 +52,6 @@ internal class TicketFeatureFactory(
         actor = TicketActor(ticketId, account, repository, router, welcomeMessage, draftRepository, fileManager).adaptCast(),
         initialEffects = listOf(
             Effect.Inner.FeedFlow,
-            Effect.Inner.CommentsAutoUpdate,
             Effect.Inner.UpdateComments(ticketId, userId),
         ),
     ).adapt { it as? Effect.Outer }
@@ -155,6 +154,10 @@ private class FeatureReducer: Logic<State, Message, Effect>() {
                         ticket = message.ticket,
                         isLoading = false,
                         // TODO wtf
+                        // appId and userId всегда нам приходят извне (их менять нельзя)
+                        // ticketId может быть всегда (или нет) null при авторизациях типа V1 и V2
+                        // должен ли он быть не null для отправки комментариев в этом случае?
+                        // Если стэйт уже контент нам не нужно обновлять ticketId (не ясно в каких случаях он может измениться)
                         appId = injector().usersAccount?.users?.find { it.userId == message.ticket.userId }?.appId ?: "",
                         userId = message.ticket.userId ?: "",
                         ticketId = message.ticket.ticketId ?: 0
@@ -230,11 +233,6 @@ internal class TicketActor(
             }
         }
         Effect.Inner.FeedFlow -> repository.getFeedFlow(ticketId).map { Message.Inner.CommentsUpdated(it) }
-        Effect.Inner.CommentsAutoUpdate -> flow {
-//            // TODO
-//            repository.getFeed(keepUnread = false)
-
-        }
         Effect.Inner.Close -> flow { router.exit() }
         is Effect.Inner.SendTextComment -> flow { repository.addTextComment(ticketId, effect.text, getSendTextCommentCommand(effect.text, effect.appId, effect.userId, effect.ticketId)) }
         is Effect.Inner.SendRatingComment -> flow { repository.addRatingComment(ticketId, effect.rating) }
