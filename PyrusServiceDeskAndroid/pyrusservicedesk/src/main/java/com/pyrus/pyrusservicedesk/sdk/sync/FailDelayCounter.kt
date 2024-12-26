@@ -10,9 +10,9 @@ internal class FailDelayCounter {
     /**
      * returns delay in milliseconds
      */
-    fun getNextDelay(): Long? {
+    fun getNextDelay(): Long {
         val pov = attemptCount.incrementAndGet().toDouble()
-        if (pov > 8) return null
+        if (pov > 8) return 2.0.pow(8).toLong() * 1000
         return 2.0.pow(pov).toLong() * 1000
     }
 

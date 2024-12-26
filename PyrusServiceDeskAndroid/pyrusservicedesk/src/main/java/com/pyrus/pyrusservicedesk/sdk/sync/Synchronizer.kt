@@ -128,11 +128,6 @@ internal class Synchronizer(
 
     private suspend fun onFailedLoopEnd(commandRequests: List<SyncReqRes.Command>) {
         val delay = failDelayCounter.getNextDelay()
-        if (delay == null) {
-            syncLoopRequestQueue.addAll(commandRequests)
-            isRunning.set(false)
-            return
-        }
         delay(delay)
         val maxElements = max(MAX_COMMANDS_PER_SYNC - commandRequests.size, 0)
         val syncRequests = commandRequests + syncLoopRequestQueue.drain(maxElements)

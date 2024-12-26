@@ -23,6 +23,7 @@ import com.pyrus.pyrusservicedesk.sdk.sync.TicketCommandResultDto
 import com.pyrus.pyrusservicedesk.sdk.data.TicketDto
 import com.pyrus.pyrusservicedesk.sdk.data.intermediate.AddCommentResponseData
 import com.pyrus.pyrusservicedesk.sdk.data.intermediate.FileData
+import com.pyrus.pyrusservicedesk.sdk.sync.Synchronizer
 import com.pyrus.pyrusservicedesk.sdk.web.UploadFileHook
 import com.pyrus.pyrusservicedesk.sdk.web.retrofit.RemoteFileStore
 import com.pyrus.pyrusservicedesk.sdk.web.retrofit.RemoteStore
@@ -43,6 +44,8 @@ internal class Repository(
     private val repositoryMapper: RepositoryMapper,
     private val fileResolver: FileResolver,
     private val remoteFileStore: RemoteFileStore,
+    private val synchronizer: Synchronizer,
+    private val localTicketsStore: LocalTicketsStore,
 ) {
 
     private val lastLocalCommentId: AtomicLong
@@ -82,21 +85,6 @@ internal class Repository(
             else -> mergeComments(local, remote)
         }
     }
-
-    /**
-     * Provides tickets in single feed representation.
-     */
-//    suspend fun getFeed(keepUnread: Boolean, includePendingComments: Boolean = false): Try<FullTicket> {
-//        val feedTry = remoteStore.getFeed(keepUnread).map(repositoryMapper::map)
-//        if (feedTry.isSuccess()) remoteFeedMutex.withLock {
-//            remoteFeedStateFlow.value = feedTry.value
-//        }
-//
-//        if (includePendingComments) {
-//            return feedTry.map { mergeComments(localStore.getPendingFeedComments(), it) }
-//        }
-//        return feedTry
-//    }
 
     //TODO what we need to do when we haven't fount ticket (feedTry.value == null, but feedTry.isSuccess())
     suspend fun getFeed(
