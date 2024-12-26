@@ -3,7 +3,6 @@ package com.pyrus.pyrusservicedesk._ref.ui_domain.screens.tickets_list.tickets
 import androidx.fragment.app.FragmentManager
 import com.pyrus.pyrusservicedesk._ref.data.multy_chat.TicketSetInfo
 import com.pyrus.pyrusservicedesk._ref.data.multy_chat.TicketsInfo
-import com.pyrus.pyrusservicedesk._ref.ui_domain.screens.ticket.TicketContract.Effect.Inner
 import com.pyrus.pyrusservicedesk._ref.ui_domain.screens.tickets_list.tickets.TicketsContract.Effect
 import com.pyrus.pyrusservicedesk._ref.ui_domain.screens.tickets_list.tickets.TicketsContract.Message
 import com.pyrus.pyrusservicedesk._ref.ui_domain.screens.tickets_list.tickets.TicketsContract.State
@@ -44,7 +43,11 @@ internal interface TicketsContract {
             data object OnFabItemClick : Outer
             data class OnChangePage(val appId: String) : Outer
             data object OnCreateTicketClick : Outer
+
+            // TODO почему userId нулабелен
             data class OnTicketClick(val ticketId: Int, val userId: String?) : Outer
+
+            // TODO если не нужно – удалить
             data class OnUserIdSelect(val userId: String) : Outer
         }
 

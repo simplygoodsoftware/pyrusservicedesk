@@ -26,7 +26,7 @@ private const val TAG = "TicketsListFeature"
 internal class TicketsFeatureFactory(
     private val account: Account.V3,
     private val storeFactory: StoreFactory,
-    private val syncRepository: Repository,
+    private val repository: Repository,
     private val router: Router,
 ) {
 
@@ -34,7 +34,7 @@ internal class TicketsFeatureFactory(
         name = TAG,
         initialState = State(account, ContentState.Loading),
         reducer = FeatureReducer(),
-        actor = TicketsActor(syncRepository, router).adaptCast(),
+        actor = TicketsActor(repository, router).adaptCast(),
         initialEffects = listOf(
             Effect.Inner.UpdateTickets, Effect.Inner.TicketsSetFlow
         ),
@@ -75,10 +75,10 @@ private class FeatureReducer: Logic<State, Message, Effect>() {
                 effects { +Effect.Outer.ShowFilterMenu(selectedAppId, message.selectedUserId) }
             }
 
-            // TODO
+            // TODO a нам точно нужно это тут? Sd ничего не должен знать о кнопках
             Message.Outer.OnScanClick -> Log.d(TAG, "OnScanClick")
 
-            // TODO
+            // TODO и это?
             Message.Outer.OnSettingsClick -> Log.d(TAG, "OnSettingsClick")
 
             is Message.Outer.OnChangePage -> {
