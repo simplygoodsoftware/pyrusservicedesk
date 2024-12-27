@@ -141,9 +141,6 @@ internal class DiInjector(
         intentQr = openQrIntent
         intentSettings = openSettingsIntent
     }
-
-    private val cicerone: Cicerone<PyrusRouterImpl> = Cicerone.create(PyrusRouterImpl())
-
     val isMultiChat = account.isMultiChat // TODO wtf
 
     val sharedViewModel = SharedViewModel()

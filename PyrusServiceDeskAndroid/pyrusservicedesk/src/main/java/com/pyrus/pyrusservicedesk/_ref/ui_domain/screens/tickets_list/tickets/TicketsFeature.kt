@@ -66,8 +66,6 @@ internal interface TicketsContract {
 
             data object OpenSettingsFragment : Outer
 
-            class ShowAddTicketMenu(val appId: String) : Outer
-
         }
 
         sealed interface Inner : Effect {

@@ -22,6 +22,7 @@ internal class TicketsPageAdapter(
             parent,
             false
         )
+        //TODO epmty list
         return TicketsPageViewHolder(binding, onEvent)
     }
 

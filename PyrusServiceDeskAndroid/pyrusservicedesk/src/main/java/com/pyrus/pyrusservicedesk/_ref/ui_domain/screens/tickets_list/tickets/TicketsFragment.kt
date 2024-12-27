@@ -69,16 +69,6 @@ internal class TicketsFragment: TeaFragment<Model, Message, Effect.Outer>() {
             dispatch(Message.Inner.UserIdSelected(currentUserId, childFragmentManager))
         }
 
-        //todo
-        /*//get information about selected vendor and process it
-        parentFragmentManager.setFragmentResultListener(
-            FilterTicketsFragment.KEY_FILTER_RESULT,
-            this
-        ) { _, bundle ->
-            val selectedUserId = bundle.getString(KEY_SELECTED_USER_ID) ?: KEY_DEFAULT_USER_ID
-            dispatch(Message.Inner.UserIdSelected(selectedUserId, parentFragmentManager))
-        }*/
-
         return binding.root
     }
 
@@ -122,37 +112,6 @@ internal class TicketsFragment: TeaFragment<Model, Message, Effect.Outer>() {
         }.attach()
 
     }
-
-    /*override fun render(model: TicketListModel) {
-        //set title (vendor name) and vendor image
-        binding.toolbarTicketsList.psdToolbarVendorNameTv.text =  model.titleText
-        injector().picasso
-            .load(getOrganisationLogoUrl(model.titleImageUrl, null)) // TODO domain from account
-            .transform(CIRCLE_TRANSFORMATION)
-            .into(binding.toolbarTicketsList.psdToolbarVendorIv)
-
-        //set visibility buttons in toolbar
-        binding.toolbarTicketsList.psdToolbarFilterIb.visibility =
-            if (!model.ticketsIsEmpty) View.VISIBLE else View.GONE
-
-        binding.toolbarTicketsList.psdToolbarQrIb.visibility =
-            if (!model.ticketsIsEmpty) View.VISIBLE else View.GONE
-
-        binding.toolbarTicketsList.psdToolbarSettingsIb.visibility =
-            if (model.ticketsIsEmpty) View.VISIBLE else View.GONE
-
-
-        binding.fabAddTicket.visibility = if (!model.ticketsIsEmpty) View.VISIBLE else View.GONE
-        binding.toolbarTicketsList.psdToolbarFilterIb.setBackgroundResource(if (!model.filterEnabled) R.drawable.ic_filter else R.drawable.ic_selected_filter)
-
-        //set visibility and text filter ui
-        binding.filterFl.visibility = if (model.filterEnabled) View.VISIBLE else View.GONE
-        binding.filterContextTv.text = model.filterName
-
-        //tabLayout and viewPager
-        binding.tabLayout.visibility = if (model.tabLayoutVisibility ) View.VISIBLE else View.GONE
-        viewPagerAdapter.setItems(model.applications)
-    }*/
 
     override fun createRenderer(): ViewRenderer<Model> = diff {
         diff(Model::titleText) { title -> binding.toolbarTicketsList.psdToolbarVendorNameTv.text = title }
