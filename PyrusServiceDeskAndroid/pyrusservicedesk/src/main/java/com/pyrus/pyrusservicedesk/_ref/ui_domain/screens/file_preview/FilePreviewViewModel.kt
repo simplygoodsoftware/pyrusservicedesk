@@ -2,18 +2,18 @@ package com.pyrus.pyrusservicedesk._ref.ui_domain.screens.file_preview
 
 import android.app.Application
 import android.app.DownloadManager
-import androidx.lifecycle.LiveData
-import androidx.lifecycle.MutableLiveData
 import android.content.ContentResolver
 import android.content.Context
 import android.content.Intent
 import android.media.MediaScannerConnection
 import android.net.Uri
+import androidx.lifecycle.LiveData
+import androidx.lifecycle.MutableLiveData
 import com.pyrus.pyrusservicedesk._ref.ui_domain.screens.file_preview.FilePreviewActivity.Companion.KEY_FILE_DATA
-import com.pyrus.pyrusservicedesk.presentation.viewmodel.ConnectionViewModelBase
-import com.pyrus.pyrusservicedesk.sdk.data.intermediate.FileData
 import com.pyrus.pyrusservicedesk._ref.utils.canBePreviewed
 import com.pyrus.pyrusservicedesk._ref.utils.getExtension
+import com.pyrus.pyrusservicedesk.presentation.viewmodel.ConnectionViewModelBase
+import com.pyrus.pyrusservicedesk.sdk.data.intermediate.FileData
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 

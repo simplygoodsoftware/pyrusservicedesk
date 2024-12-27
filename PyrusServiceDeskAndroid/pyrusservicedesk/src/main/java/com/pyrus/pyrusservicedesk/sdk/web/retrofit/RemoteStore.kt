@@ -22,8 +22,8 @@ import com.pyrus.pyrusservicedesk.sdk.data.AttachmentDto
 import com.pyrus.pyrusservicedesk.sdk.data.CommandDto
 import com.pyrus.pyrusservicedesk.sdk.data.CommentDto
 import com.pyrus.pyrusservicedesk.sdk.data.FileManager
+import com.pyrus.pyrusservicedesk.sdk.sync.TicketCommandResultDto
 import com.pyrus.pyrusservicedesk.sdk.data.TicketDto
-import com.pyrus.pyrusservicedesk.sdk.data.TicketCommandResultDto
 import com.pyrus.pyrusservicedesk.sdk.data.UserDataDto
 import com.pyrus.pyrusservicedesk.sdk.data.intermediate.AddCommentResponseData
 import com.pyrus.pyrusservicedesk.sdk.data.intermediate.CommentsDto
@@ -32,6 +32,7 @@ import com.pyrus.pyrusservicedesk.sdk.repositories.RepositoryMapper
 import com.pyrus.pyrusservicedesk.sdk.response.ApiCallError
 import com.pyrus.pyrusservicedesk.sdk.response.AuthorizationError
 import com.pyrus.pyrusservicedesk.sdk.response.ResponseError
+import com.pyrus.pyrusservicedesk.sdk.sync.TicketCommandDto
 import com.pyrus.pyrusservicedesk.sdk.web.UploadFileHook
 import com.pyrus.pyrusservicedesk.sdk.web.request_body.AddCommentRequestBody
 import com.pyrus.pyrusservicedesk.sdk.web.request_body.GetFeedBody
@@ -103,12 +104,14 @@ internal class RemoteStore(
                 additionalUsers = getAdditionalUsers(),
                 authorId = getAuthorId(),
                 authorName = "Kate Test", // TODO
-                appId =  account.appId,
+                appId = account.appId,
                 userId = getUserId(),
                 instanceId = getInstanceId(),
                 version = getVersion(),
                 apiSign = apiFlag,
                 securityKey = getSecurityKey(),
+                lastNoteId = TODO(),
+                commands = TODO(),
             )
         )
         PLog.d(TAG, "getTickets, isSuccessful: ${ticketsTry.isSuccess()}")
@@ -118,7 +121,8 @@ internal class RemoteStore(
             return Try.Success(ticket)
         }
 
-        return ticketsTry
+//        return ticketsTry
+        TODO()
     }
 
     /**
@@ -144,6 +148,8 @@ internal class RemoteStore(
                 version = getVersion(),
                 apiSign = apiFlag,
                 securityKey = getSecurityKey(),
+                lastNoteId = TODO(),
+                commands = TODO(),
             )
         )
         PLog.d(TAG, "getTickets, isSuccessful: ${ticketsTry.isSuccess()}")
@@ -163,7 +169,7 @@ internal class RemoteStore(
             RequestBodyBase(
                 needFullInfo = true,
                 additionalUsers = getAdditionalUsers(),
-                commands = commands,
+                commands = null,
                 authorId = getAuthorId(),
                 authorName = "Kate Test", // TODO
                 appId = v3.appId,
@@ -172,6 +178,7 @@ internal class RemoteStore(
                 version = getVersion(),
                 apiSign = apiFlag,
                 securityKey = getSecurityKey(),
+                lastNoteId = TODO(),
             )
         )
         PLog.d(TAG, "getTickets, isSuccessful: ${ticketsTry.isSuccess()}")
@@ -211,7 +218,7 @@ internal class RemoteStore(
     }
 
     private fun getAdditionalUsers(): List<UserDataDto>? {
-        val list = PyrusServiceDesk.ticketsListStateFlow.value.map { UserDataDto(it.appId, it.userId, "") }
+        val list = PyrusServiceDesk.ticketsListStateFlow.value.map { UserDataDto(it.appId, it.userId, "", null) }
         return list
     }
 
@@ -226,10 +233,10 @@ internal class RemoteStore(
         uploadFileHook: UploadFileHook?
     ): Try<AddCommentResponseData> {
         // TODO wtf
-        return addComment(injector().localStore.getLastTicketId(), comment, uploadFileHook)
+        return addComment(injector().localCommandsStore.getLastTicketId(), comment, uploadFileHook)
     }
 
-    suspend fun addTextComment(command: CommandDto): Try<List<TicketCommandResultDto>?> {
+    suspend fun addTextComment(command: TicketCommandDto): Try<List<TicketCommandResultDto>?> {
         val commandsResultTry = api.getTickets(
             RequestBodyBase(
                 needFullInfo = false,
@@ -243,6 +250,7 @@ internal class RemoteStore(
                 version = getVersion(),
                 apiSign = apiFlag,
                 securityKey = getSecurityKey(),
+                lastNoteId = TODO(),
             )
         )
 

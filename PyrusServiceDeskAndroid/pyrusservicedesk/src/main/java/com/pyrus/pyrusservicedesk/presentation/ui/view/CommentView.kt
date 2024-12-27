@@ -2,9 +2,7 @@ package com.pyrus.pyrusservicedesk.presentation.ui.view
 
 import android.animation.Animator
 import android.animation.ObjectAnimator
-import android.app.Activity
 import android.content.Context
-import android.content.Intent
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.graphics.Color
@@ -15,7 +13,6 @@ import android.graphics.drawable.LayerDrawable
 import android.net.Uri
 import android.text.*
 import android.text.method.LinkMovementMethod
-import android.text.style.ClickableSpan
 import android.text.util.Linkify
 import android.util.AttributeSet
 import android.view.Gravity
@@ -26,7 +23,6 @@ import android.widget.FrameLayout
 import android.widget.ImageView
 import android.widget.LinearLayout
 import androidx.annotation.ColorInt
-import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.content.res.AppCompatResources
 import androidx.appcompat.widget.AppCompatImageView
 import androidx.appcompat.widget.AppCompatTextView
@@ -35,10 +31,10 @@ import androidx.core.text.util.LinkifyCompat
 import androidx.exifinterface.media.ExifInterface
 import com.pyrus.pyrusservicedesk.PyrusServiceDesk
 import com.pyrus.pyrusservicedesk.R
+import com.pyrus.pyrusservicedesk._ref.utils.*
 import com.pyrus.pyrusservicedesk.databinding.PsdCommentBinding
 import com.pyrus.pyrusservicedesk.presentation.ui.navigation_page.ticket.HtmlTagUtils
 import com.pyrus.pyrusservicedesk.presentation.ui.view.OutlineImageView.Companion.EDGE_RIGHT
-import com.pyrus.pyrusservicedesk._ref.utils.*
 import com.squareup.picasso.Picasso
 import com.squareup.picasso.Target
 import java.util.regex.Matcher

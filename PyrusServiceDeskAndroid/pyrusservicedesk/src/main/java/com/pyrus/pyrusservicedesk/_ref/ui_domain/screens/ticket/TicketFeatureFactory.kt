@@ -1,7 +1,7 @@
 package com.pyrus.pyrusservicedesk._ref.ui_domain.screens.ticket
 
-import com.pyrus.pyrusservicedesk.PyrusServiceDesk.Companion.injector
 import android.net.Uri
+import com.pyrus.pyrusservicedesk.PyrusServiceDesk.Companion.injector
 import com.pyrus.pyrusservicedesk.R
 import com.pyrus.pyrusservicedesk._ref.Screens
 import com.pyrus.pyrusservicedesk._ref.data.FullTicket
@@ -19,11 +19,11 @@ import com.pyrus.pyrusservicedesk._ref.whitetea.core.StoreFactory
 import com.pyrus.pyrusservicedesk._ref.whitetea.core.adaptCast
 import com.pyrus.pyrusservicedesk._ref.whitetea.core.logic.Logic
 import com.pyrus.pyrusservicedesk._ref.whitetea.utils.adapt
+import com.pyrus.pyrusservicedesk.core.Account
 import com.pyrus.pyrusservicedesk.sdk.data.CommandDto
 import com.pyrus.pyrusservicedesk.sdk.data.CreateCommentDto
-import com.pyrus.pyrusservicedesk.core.Account
 import com.pyrus.pyrusservicedesk.sdk.data.FileManager
-import com.pyrus.pyrusservicedesk.sdk.data.TicketCommandType
+import com.pyrus.pyrusservicedesk.sdk.sync.TicketCommandType
 import com.pyrus.pyrusservicedesk.sdk.data.intermediate.FileData
 import com.pyrus.pyrusservicedesk.sdk.repositories.DraftRepository
 import com.pyrus.pyrusservicedesk.sdk.repositories.Repository
@@ -52,8 +52,7 @@ internal class TicketFeatureFactory(
         actor = TicketActor(ticketId, account, repository, router, welcomeMessage, draftRepository, fileManager).adaptCast(),
         initialEffects = listOf(
             Effect.Inner.FeedFlow,
-            Effect.Inner.CommentsAutoUpdate,
-            Effect.Inner.UpdateComments(ticketId, userId),
+            Effect.Inner.UpdateComments(force = false, ticketId = ticketId, userId = userId),
         ),
     ).adapt { it as? Effect.Outer }
 
@@ -129,7 +128,11 @@ private class FeatureReducer: Logic<State, Message, Effect>() {
                 val currentState = state as? State.Content ?: return
                 if (currentState.isLoading) return
                 state { currentState.copy(isLoading = true) }
-                effects { +Effect.Inner.UpdateComments(currentState.ticketId, currentState.userId) }
+                effects { +Effect.Inner.UpdateComments(
+                    force = true,
+                    ticketId = currentState.ticketId,
+                    userId = currentState.userId
+                ) }
             }
 
             // TODO wtf
@@ -155,6 +158,10 @@ private class FeatureReducer: Logic<State, Message, Effect>() {
                         ticket = message.ticket,
                         isLoading = false,
                         // TODO wtf
+                        // appId and userId всегда нам приходят извне (их менять нельзя)
+                        // ticketId может быть всегда (или нет) null при авторизациях типа V1 и V2
+                        // должен ли он быть не null для отправки комментариев в этом случае?
+                        // Если стэйт уже контент нам не нужно обновлять ticketId (не ясно в каких случаях он может измениться)
                         appId = injector().usersAccount?.users?.find { it.userId == message.ticket.userId }?.appId ?: "",
                         userId = message.ticket.userId ?: "",
                         ticketId = message.ticket.ticketId ?: 0
@@ -196,9 +203,8 @@ internal class TicketActor(
     override fun handleEffect(effect: Effect.Inner): Flow<Message.Inner> = when (effect) {
         is Effect.Inner.UpdateComments -> singleFlow {
             val commentsTry: Try<FullTicket> = repository.getFeed(
-                keepUnread = false,
-                includePendingComments = true,
-                ticketId = effect.ticketId
+                ticketId = effect.ticketId,
+                force = effect.force
             )
             when {
                 commentsTry.isSuccess() -> {
@@ -230,11 +236,6 @@ internal class TicketActor(
             }
         }
         Effect.Inner.FeedFlow -> repository.getFeedFlow(ticketId).map { Message.Inner.CommentsUpdated(it) }
-        Effect.Inner.CommentsAutoUpdate -> flow {
-//            // TODO
-//            repository.getFeed(keepUnread = false)
-
-        }
         Effect.Inner.Close -> flow { router.exit() }
         is Effect.Inner.SendTextComment -> flow { repository.addTextComment(ticketId, effect.text, getSendTextCommentCommand(effect.text, effect.appId, effect.userId, effect.ticketId)) }
         is Effect.Inner.SendRatingComment -> flow { repository.addRatingComment(ticketId, effect.rating) }

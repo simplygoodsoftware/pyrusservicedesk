@@ -1,9 +1,9 @@
 package com.pyrus.pyrusservicedesk.core
 
 import com.pyrus.pyrusservicedesk.SetPushTokenCallback
+import com.pyrus.pyrusservicedesk._ref.utils.MILLISECONDS_IN_MINUTE
 import com.pyrus.pyrusservicedesk.sdk.updates.PreferencesManager
 import com.pyrus.pyrusservicedesk.sdk.updates.PreferencesManager.Companion.S_NO_ID
-import com.pyrus.pyrusservicedesk._ref.utils.MILLISECONDS_IN_MINUTE
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 

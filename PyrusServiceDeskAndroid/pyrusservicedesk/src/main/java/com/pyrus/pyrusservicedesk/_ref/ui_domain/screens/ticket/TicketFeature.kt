@@ -5,7 +5,6 @@ import com.pyrus.pyrusservicedesk._ref.data.Attachment
 import com.pyrus.pyrusservicedesk._ref.data.FullTicket
 import com.pyrus.pyrusservicedesk._ref.utils.TextProvider
 import com.pyrus.pyrusservicedesk._ref.whitetea.core.Store
-import com.pyrus.pyrusservicedesk.sdk.data.intermediate.FileData
 
 internal typealias TicketFeature = Store<TicketContract.State, TicketContract.Message, TicketContract.Effect.Outer>
 
@@ -80,11 +79,11 @@ internal interface TicketContract {
 
         sealed interface Inner : Effect {
             data class UpdateComments(
+                val force: Boolean,
                 val ticketId: Int,
                 val userId: String,
             ) : Inner
             data object FeedFlow : Inner
-            data object CommentsAutoUpdate : Inner
             data object Close : Inner
             data class SendTextComment(
                 val text: String,

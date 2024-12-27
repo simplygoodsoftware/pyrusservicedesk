@@ -1,14 +1,14 @@
 package com.pyrus.pyrusservicedesk._ref.ui_domain.screens.tickets_list.tickets
 
 import com.pyrus.pyrusservicedesk._ref.data.multy_chat.TicketSetInfo
-import com.pyrus.pyrusservicedesk._ref.ui_domain.screens.tickets_list.tickets.TicketsContract.State
+import com.pyrus.pyrusservicedesk._ref.ui_domain.screens.tickets_list.tickets.TicketsContract.*
 import com.pyrus.pyrusservicedesk._ref.ui_domain.screens.tickets_list.tickets.TicketsView.Model
 import com.pyrus.pyrusservicedesk._ref.ui_domain.screens.tickets_list.tickets.TicketsView.Model.TicketSetInfoEntry
 
 internal object TicketsMapper {
 
-    fun map(state: State): Model = when(state) {
-        is State.Content -> Model(
+    fun map(state: ContentState): Model = when(state) {
+        is ContentState.Content -> Model(
             titleText = state.titleText ?: "",
             titleImageUrl = state.titleImageUrl,
             filterName = state.filterName,
@@ -19,7 +19,7 @@ internal object TicketsMapper {
             showNoConnectionError = false,
             isLoading = false,
         )
-        State.Error -> Model(
+        ContentState.Error -> Model(
             titleText = null,
             titleImageUrl = null,
             filterName = null,
@@ -30,7 +30,7 @@ internal object TicketsMapper {
             showNoConnectionError = true,
             isLoading = false,
         )
-        State.Loading -> Model(
+        ContentState.Loading -> Model(
             titleText = null,
             titleImageUrl = null,
             filterName = null,

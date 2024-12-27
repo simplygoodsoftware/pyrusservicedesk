@@ -11,7 +11,6 @@ import com.pyrus.pyrusservicedesk.presentation.ui.view.CommentView
 import com.pyrus.pyrusservicedesk.presentation.ui.view.ContentType
 import com.pyrus.pyrusservicedesk.presentation.ui.view.Status
 import com.pyrus.pyrusservicedesk.presentation.ui.view.recyclerview.ViewHolderBase
-import com.pyrus.pyrusservicedesk.sdk.data.intermediate.FileData
 
 internal abstract class CommentHolder(
     parent: ViewGroup,

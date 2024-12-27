@@ -4,7 +4,9 @@ import android.annotation.SuppressLint
 import android.content.Context
 import com.pyrus.pyrusservicedesk.R
 import java.text.SimpleDateFormat
-import java.util.*
+import java.util.Calendar
+import java.util.Date
+import java.util.TimeZone
 import kotlin.math.ceil
 
 internal const val ISO_DATE_PATTERN = "yyyy-MM-dd'T'HH:mm:ss'Z'"

@@ -8,12 +8,10 @@ import android.view.ViewGroup
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.isVisible
-import androidx.recyclerview.widget.RecyclerView
 import androidx.viewpager2.widget.ViewPager2
 import com.google.android.material.tabs.TabLayoutMediator
 import com.pyrus.pyrusservicedesk.PyrusServiceDesk.Companion.injector
 import com.pyrus.pyrusservicedesk.R
-import com.pyrus.pyrusservicedesk._ref.Screens
 import com.pyrus.pyrusservicedesk._ref.ui_domain.screens.add_ticket.AddTicketFragment
 import com.pyrus.pyrusservicedesk._ref.ui_domain.screens.filter_tickets_list.FilterTicketsFragment
 import com.pyrus.pyrusservicedesk._ref.ui_domain.screens.filter_tickets_list.FilterTicketsFragment.Companion.KEY_SELECTED_USER_ID
@@ -50,7 +48,7 @@ internal class TicketsFragment: TeaFragment<Model, Message, Effect.Outer>() {
             this@TicketsFragment.messages.map { it } bindTo feature
         }
         bind {
-            feature.state.map(TicketsMapper::map) bindTo this@TicketsFragment
+            feature.state.map { TicketsMapper.map(it.contentState) } bindTo this@TicketsFragment
             feature.effects bindTo this@TicketsFragment
         }
     }

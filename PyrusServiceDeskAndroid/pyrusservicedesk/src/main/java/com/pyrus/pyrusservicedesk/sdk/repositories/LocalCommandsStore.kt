@@ -14,7 +14,7 @@ import java.lang.reflect.Type
 /**
  * [SharedPreferences] based offline repository
  */
-internal class LocalStore(
+internal class LocalCommandsStore(
     private val preferences: SharedPreferences,
     private val localDataVerifier: LocalDataVerifier,
     private val gson: Gson,
@@ -25,6 +25,8 @@ internal class LocalStore(
     private var lastTicketId = MutableStateFlow(-1)
 
     fun commentsFlow(): Flow<List<Comment>> = localCommentsStateFlow
+
+//    val commandsFlow(): Flow<List<Command>> = localCommandsStateFlow
 
     fun getLastTicketId() = --lastTicketId.value
 

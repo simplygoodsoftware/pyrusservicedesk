@@ -31,8 +31,11 @@ import com.pyrus.pyrusservicedesk.sdk.response.PendingDataError
 import com.pyrus.pyrusservicedesk.sdk.updates.OnUnreadTicketCountChangedSubscriber
 import com.pyrus.pyrusservicedesk.sdk.updates.PreferencesManager
 import com.pyrus.pyrusservicedesk.sdk.web.UploadFileHook
-import kotlinx.coroutines.*
-import java.util.*
+import kotlinx.coroutines.Runnable
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.runBlocking
+import java.util.Calendar
+import java.util.Date
 
 /**
  * ViewModel for the ticket screen.

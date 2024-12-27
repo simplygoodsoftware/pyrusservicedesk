@@ -1,8 +1,7 @@
 package com.pyrus.pyrusservicedesk.sdk.data
 
 import com.google.gson.annotations.SerializedName
-import com.pyrus.pyrusservicedesk.sdk.data.gson.Local
-import java.util.*
+import java.util.Date
 
 internal const val COMMENT_ID_EMPTY = 0L
 

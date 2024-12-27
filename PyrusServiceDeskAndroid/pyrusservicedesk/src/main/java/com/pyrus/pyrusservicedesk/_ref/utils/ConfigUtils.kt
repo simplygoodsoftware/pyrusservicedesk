@@ -2,7 +2,13 @@ package com.pyrus.pyrusservicedesk._ref.utils
 
 import android.content.Context
 import android.content.SharedPreferences
-import android.graphics.*
+import android.graphics.Bitmap
+import android.graphics.Canvas
+import android.graphics.Matrix
+import android.graphics.Paint
+import android.graphics.PorterDuff
+import android.graphics.PorterDuffColorFilter
+import android.graphics.Typeface
 import android.graphics.drawable.BitmapDrawable
 import android.graphics.drawable.Drawable
 import android.util.Base64
@@ -10,11 +16,9 @@ import androidx.annotation.ColorInt
 import androidx.appcompat.content.res.AppCompatResources
 import androidx.core.content.ContextCompat.getColor
 import com.pyrus.pyrusservicedesk.MainMenuDelegate
-import com.pyrus.pyrusservicedesk.PyrusServiceDesk
 import com.pyrus.pyrusservicedesk.R
 import com.pyrus.pyrusservicedesk.core.StaticRepository
 import java.security.SecureRandom
-import javax.security.auth.Subject
 
 internal class ConfigUtils{
 

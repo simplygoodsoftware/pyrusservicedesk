@@ -1,9 +1,9 @@
 package com.pyrus.pyrusservicedesk._ref.whitetea.android
 
+import com.pyrus.pyrusservicedesk._ref.whitetea.core.ViewRenderer
 import kotlinx.coroutines.channels.BufferOverflow
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableSharedFlow
-import com.pyrus.pyrusservicedesk._ref.whitetea.core.ViewRenderer
 
 internal abstract class BaseTeaView<Model : Any, Message : Any, Effect : Any> : TeaView<Model, Message, Effect> {
 

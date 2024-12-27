@@ -3,15 +3,11 @@ package com.pyrus.pyrusservicedesk.presentation.viewmodel
 import android.animation.Animator
 import android.animation.ValueAnimator
 import android.app.Application
+import android.view.animation.AccelerateInterpolator
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
-import android.content.Context
-import android.net.ConnectivityManager
-import android.os.Handler
-import android.view.animation.AccelerateInterpolator
 import com.pyrus.pyrusservicedesk.PyrusServiceDesk
-import com.pyrus.pyrusservicedesk.R
 import kotlinx.coroutines.*
 
 private const val PROGRESS_START_VALUE = 40
