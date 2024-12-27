@@ -63,7 +63,7 @@ class PyrusServiceDesk private constructor(
 
         @JvmStatic
         @JvmOverloads
-        private fun updateValue(newValue: List<User>) {
+        fun updateValue(newValue: List<User>) {
             _stateFlow.value = newValue
         }
 
