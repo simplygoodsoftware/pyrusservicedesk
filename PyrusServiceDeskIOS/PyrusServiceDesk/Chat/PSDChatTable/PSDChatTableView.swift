@@ -141,15 +141,15 @@ class PSDChatTableView: PSDTableView {
     }
     
     func addRow(at index: Int, lastIndexPath: IndexPath, insertSections: Bool, scrollsToBottom: Bool) {
-        
-//            UIView.animate(withDuration: 0.0, delay: 0, usingSpringWithDamping: 0.0, initialSpringVelocity: 0.0, options: [], animations: {
+
                 if #available(iOS 13.0, *) {
-                    self.reloadWithDiffableDataSource(animated: true) {
-                        if scrollsToBottom {
-                            self.scrollsToBottom(animated: true)
-                        }
+                    let inset = contentInset.top - 20
+                    let needAnimate = contentOffset.y <= -inset
+                    if scrollsToBottom {
+                        self.scrollsToBottom(animated: true)
                     }
-                    
+                    self.reloadWithDiffableDataSource(animated: needAnimate) {
+                    }
                 } else {
                     //add new section if need
                     if insertSections {
@@ -303,7 +303,7 @@ class PSDChatTableView: PSDTableView {
         
     ///Scroll tableview to its bottom position without animation
     func scrollsToBottom(animated: Bool) {
-        scrollToRow(at: IndexPath(row: 0, section: 0), at: .bottom, animated: true)
+        scrollToRow(at: IndexPath(row: 0, section: 0), at: .top, animated: animated)
 
 //        layoutIfNeeded()
 //        let lastRow = lastIndexPath()
