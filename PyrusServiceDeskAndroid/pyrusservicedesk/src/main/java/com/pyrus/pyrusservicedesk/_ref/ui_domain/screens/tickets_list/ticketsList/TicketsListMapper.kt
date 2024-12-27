@@ -5,7 +5,7 @@ import com.pyrus.pyrusservicedesk._ref.ui_domain.screens.tickets_list.ticketsLis
 
 internal object TicketsListMapper {
 
-    fun map(effect: Effect): TicketsListView.Effect = when(effect) {
+    /*fun map(effect: Effect): TicketsListView.Effect = when(effect) {
         is Effect.Outer.ShowAddTicketMenu -> ShowAddTicketMenu(effect.appId)
         is Effect.Outer.ShowTicket -> ShowTicket(
             effect.ticketId,
@@ -14,5 +14,5 @@ internal object TicketsListMapper {
 
         Effect.Inner.TicketsAutoUpdate -> TODO()
         Effect.Inner.UpdateTickets -> TODO()
-    }
+    }*/
 }

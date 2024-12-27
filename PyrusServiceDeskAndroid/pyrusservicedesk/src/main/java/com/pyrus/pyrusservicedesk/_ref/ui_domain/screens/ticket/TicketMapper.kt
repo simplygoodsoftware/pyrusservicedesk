@@ -31,6 +31,7 @@ internal object TicketMapper {
             isLoading = false,
             showNoConnectionError = false,
             isRefreshing = state.isLoading,
+            toolbarTitleText = state.ticket?.subject ?: "Новое обращение",
         )
         State.Loading -> Model(
             inputText = "",
@@ -39,6 +40,7 @@ internal object TicketMapper {
             isLoading = true,
             showNoConnectionError = false,
             isRefreshing = false,
+            toolbarTitleText = null,
         )
         State.Error -> Model(
             inputText = "",
@@ -47,6 +49,7 @@ internal object TicketMapper {
             isLoading = false,
             showNoConnectionError = true,
             isRefreshing = false,
+            toolbarTitleText = null,
         )
     }
 

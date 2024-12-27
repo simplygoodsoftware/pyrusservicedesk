@@ -28,7 +28,7 @@ public class SampleActivity extends Activity implements NewReplySubscriber {
 
     private final ArrayList<User> users = new ArrayList<>();
 
-    int count = 0;
+    int count = 2;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -36,12 +36,15 @@ public class SampleActivity extends Activity implements NewReplySubscriber {
         setContentView(R.layout.activity_sample);
         findViewById(R.id.support).setOnClickListener(view -> {
             count++;
-            if (count == 1)
-                users.add(user1);
-            else if (count == 2)
-                users.add(user2);
-            else if (count == 3)
-                users.add(user3);
+//            if (count == 1)
+//                users.add(user1);
+//            else if (count == 2)
+//                users.add(user2);
+//            else if (count == 3)
+//                users.add(user3);
+            users.add(user1);
+            users.add(user2);
+            users.add(user3);
             PyrusServiceDesk.init(getApplication(), users, "10", true);
 
             Map<String, String> map = new HashMap<>();

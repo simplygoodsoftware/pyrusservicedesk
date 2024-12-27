@@ -339,7 +339,7 @@ internal class TicketViewModel(
                     creationDate = welcomeCommentDate,
                     author = AuthorDto(
                         name = ConfigUtils.getUserName(),
-                        authorId = (injector().usersAccount)?.authorId,  // TODO wtf
+                        authorId = "10",  // TODO wtf
                         avatarId = null,
                         avatarColorString = null
                     ),

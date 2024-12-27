@@ -94,7 +94,7 @@ internal class RepositoryMapper(
         id = commentDto.commentId,
         isLocal = false,
         body = commentDto.body,
-        isInbound = commentDto.isInbound,
+        isInbound = commentDto.isInbound && commentDto.author?.authorId == (account as? Account.V3)?.authorId,
         attachments = commentDto.attachments?.map(::map),
         creationTime = commentDto.creationDate.time,
         rating = commentDto.rating,
