@@ -17,15 +17,15 @@ import com.pyrus.pyrusservicedesk._ref.utils.map
 import com.pyrus.pyrusservicedesk.presentation.ui.view.Status
 import com.pyrus.pyrusservicedesk.sdk.FileResolver
 import com.pyrus.pyrusservicedesk.sdk.data.AttachmentDto
-import com.pyrus.pyrusservicedesk.sdk.data.CommandDto
-import com.pyrus.pyrusservicedesk.sdk.data.CreateCommentDto
 import com.pyrus.pyrusservicedesk.sdk.sync.TicketCommandResultDto
 import com.pyrus.pyrusservicedesk.sdk.data.TicketDto
 import com.pyrus.pyrusservicedesk.sdk.data.intermediate.AddCommentResponseData
 import com.pyrus.pyrusservicedesk.sdk.data.intermediate.FileData
 import com.pyrus.pyrusservicedesk.sdk.data.intermediate.TicketsDto
+import com.pyrus.pyrusservicedesk.sdk.sync.CommandParamsDto
 import com.pyrus.pyrusservicedesk.sdk.sync.SyncRequest
 import com.pyrus.pyrusservicedesk.sdk.sync.Synchronizer
+import com.pyrus.pyrusservicedesk.sdk.sync.TicketCommandDto
 import com.pyrus.pyrusservicedesk.sdk.web.UploadFileHook
 import com.pyrus.pyrusservicedesk.sdk.web.retrofit.RemoteFileStore
 import com.pyrus.pyrusservicedesk.sdk.web.retrofit.RemoteStore
@@ -86,7 +86,7 @@ internal class Repository(
     }
 
     //TODO what we need to do when we haven't fount ticket (feedTry.value == null, but feedTry.isSuccess()) (k) sm
-    suspend fun getFeed(ticketId: Int, force: Boolean): Try<FullTicket> {
+    suspend fun getFeed(ticketId: Int, userId: String, force: Boolean): Try<FullTicket> {
 
         if (!force) {
             val localTickets: TicketsDto? = localTicketsStore.getTickets()
@@ -103,6 +103,9 @@ internal class Repository(
 
         val tickets: TicketsDto = syncTry.value
         val ticket: TicketDto? = tickets.tickets?.find { it.ticketId == ticketId }
+        if (ticketId < 0 && ticket == null) {
+            return Try.Success(repositoryMapper.mapEmptyFullTicket(ticketId, userId))
+        }
         if (ticket == null) {
             // TODO в этом случае нужно показывать пользователю ошибку сервера, а не то что у него нет интернета
             // этого можно достич заменив Try на Try2 с кастомными ошибками
@@ -135,13 +138,9 @@ internal class Repository(
     }
 
 
-    suspend fun addTextComment(ticketId: Int, textBody: String, command: CommandDto) {
+    suspend fun addTextComment(ticketId: Int, textBody: String, command: TicketCommandDto) {
         val comment = createLocalTextComment(
             textBody,
-            command.commandId
-                .substringAfter("commentId=")
-                .substringBefore(";")
-                .toLong(),
             // TODO wtf
             injector().usersAccount?.authorId
         )
@@ -149,14 +148,14 @@ internal class Repository(
         localCommandsStore.addPendingFeedComment(comment)
         localCommandsStore.addPendingFeedCommand(command)
 
-        val response = remoteStore.addTextComment(TODO())
+        val response = remoteStore.addTextComment(command)
 
         if (response.isSuccess() && !response.value.isNullOrEmpty()) {
             localCommandsStore.removePendingCommand(command)
             localCommandsStore.removePendingComment(comment)
             val res = response.value.find { it.commandId == command.commandId }
             if (res != null) {
-                addNewCommentToState(ticketId, toAddCommentResponseData(res), comment)
+                //addNewCommentToState(ticketId, toAddCommentResponseData(res), comment)
             }
         } else {
             localCommandsStore.addPendingFeedComment(comment.copy(isSending = false))
@@ -237,7 +236,7 @@ internal class Repository(
 
     suspend fun retryAddComment(ticketId: Int, localId: Long) {
         val command = localCommandsStore.getCommand(localId) ?: return
-        val text = (command.params as? CreateCommentDto)?.comment
+        val text = (command.params as? CommandParamsDto.CreateComment)?.comment
         when {
             //!localComment.attachments.isNullOrEmpty() -> addAttachComment(localComment.attachments.first().uri)//TODO
             !text.isNullOrBlank() -> addTextComment(ticketId, text, command)
@@ -307,13 +306,13 @@ internal class Repository(
 
     private fun createLocalAttachmentId(): Int = lastLocalAttachmentId.decrementAndGet()
 
-    private fun createLocalTextComment(text: String, localId: Long, authorId: String?) = Comment(
+    private fun createLocalTextComment(text: String, authorId: String?) = Comment(
         body = text,
         isInbound = true,
         author = Author(ConfigUtils.getUserName(), authorId, null, null),
         attachments = null,
         creationTime = System.currentTimeMillis(),
-        id = localId,
+        id = createLocalCommentId(),
         isLocal = true,
         rating = null,
         isSending = true

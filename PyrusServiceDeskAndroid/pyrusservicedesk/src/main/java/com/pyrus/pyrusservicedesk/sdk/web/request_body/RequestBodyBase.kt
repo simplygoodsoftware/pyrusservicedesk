@@ -1,8 +1,6 @@
 package com.pyrus.pyrusservicedesk.sdk.web.request_body
 
-import androidx.annotation.Keep
 import com.google.gson.annotations.SerializedName
-import com.pyrus.pyrusservicedesk.sdk.data.CommandDto
 import com.pyrus.pyrusservicedesk.sdk.data.UserDataDto
 import com.pyrus.pyrusservicedesk.sdk.sync.TicketCommandDto
 

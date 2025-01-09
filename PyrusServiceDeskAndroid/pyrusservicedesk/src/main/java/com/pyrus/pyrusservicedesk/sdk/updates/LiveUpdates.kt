@@ -283,7 +283,7 @@ internal class LiveUpdates(
             for (ticket in data) {
 
                 coreScope.launch(ioDispatcher) {
-                    val feedTry = repository.getFeed(ticket.ticketId, true)
+                    val feedTry = repository.getFeed(ticket.ticketId, ticket.userId ?: "", true) //TODO это удалится вообще?
 
                     withContext(mainDispatcher) {
                         if (responseUserId != userId) {

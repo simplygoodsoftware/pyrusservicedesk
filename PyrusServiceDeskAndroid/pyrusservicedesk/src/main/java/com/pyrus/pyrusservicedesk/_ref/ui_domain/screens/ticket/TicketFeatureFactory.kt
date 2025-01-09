@@ -20,13 +20,13 @@ import com.pyrus.pyrusservicedesk._ref.whitetea.core.adaptCast
 import com.pyrus.pyrusservicedesk._ref.whitetea.core.logic.Logic
 import com.pyrus.pyrusservicedesk._ref.whitetea.utils.adapt
 import com.pyrus.pyrusservicedesk.core.Account
-import com.pyrus.pyrusservicedesk.sdk.data.CommandDto
-import com.pyrus.pyrusservicedesk.sdk.data.CreateCommentDto
 import com.pyrus.pyrusservicedesk.sdk.data.FileManager
 import com.pyrus.pyrusservicedesk.sdk.sync.TicketCommandType
 import com.pyrus.pyrusservicedesk.sdk.data.intermediate.FileData
 import com.pyrus.pyrusservicedesk.sdk.repositories.DraftRepository
 import com.pyrus.pyrusservicedesk.sdk.repositories.Repository
+import com.pyrus.pyrusservicedesk.sdk.sync.CommandParamsDto
+import com.pyrus.pyrusservicedesk.sdk.sync.TicketCommandDto
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.map
@@ -204,34 +204,17 @@ internal class TicketActor(
         is Effect.Inner.UpdateComments -> singleFlow {
             val commentsTry: Try<FullTicket> = repository.getFeed(
                 ticketId = effect.ticketId,
+                userId = effect.userId,
                 force = effect.force
             )
             when {
                 commentsTry.isSuccess() -> {
-                    if (commentsTry.value.ticketId == null) {
-                        Message.Inner.UpdateCommentsCompleted(
-                            ticket = FullTicket(
-                                comments = emptyList(),
-                                showRating = false,
-                                showRatingText = null,
-                                userId = effect.userId,
-                                ticketId = effect.ticketId,
-                                subject = null,
-                                isRead = true,
-                                lastComment = null,
-                            ),
-                            draft = draftRepository.getDraft(),
-                            welcomeMessage = welcomeMessage,
-                        )
-                    } else {
-                        Message.Inner.UpdateCommentsCompleted(
-                            ticket = commentsTry.value,
-                            draft = draftRepository.getDraft(),
-                            welcomeMessage = welcomeMessage,
-                        )
-                    }
+                    Message.Inner.UpdateCommentsCompleted(
+                        ticket = commentsTry.value,
+                        draft = draftRepository.getDraft(),
+                        welcomeMessage = welcomeMessage,
+                    )
                 }
-
                 else -> Message.Inner.UpdateCommentsFailed
             }
         }
@@ -259,17 +242,18 @@ internal class TicketActor(
     private fun getUUID(): String {
         val uuid: UUID = UUID.randomUUID()
         val commentId = repository.createLocalCommentId()
-        return "commentId=$commentId;${uuid}"
+        return uuid.toString()//"commentId=$commentId;${uuid}"
     }
 
-    private fun getSendTextCommentCommand(text: String, appId: String, userId: String, ticketId: Int): CommandDto {
-        val localCreateComment = CreateCommentDto(
-            comment = text,
+    private fun getSendTextCommentCommand(text: String, appId: String, userId: String, ticketId: Int): TicketCommandDto {
+        val localCreateComment = CommandParamsDto.CreateComment(
             requestNewTicket = ticketId < 0,
             userId = userId,
             appId = appId,
+            comment = text,
+            attachments = null,
             ticketId = ticketId,
-            attachments = emptyList(),
+            rating = null
         )
 //        val localTicketIsRead = MarkTicketAsRead(
 //            ticketId = ticketId.toString(),//TODO check why String
@@ -279,7 +263,7 @@ internal class TicketActor(
 //        val list = listOf(
 //            Command(getUUID(), TicketCommandType.CreateComment, appId, userId,  localCreateComment),
 //            Command(getUUID(), TicketCommandType.MarkTicketAsRead, appId, userId,  localTicketIsRead))
-        return CommandDto(getUUID(), TicketCommandType.CreateComment, appId, userId,  localCreateComment)
+        return TicketCommandDto(getUUID(), TicketCommandType.CreateComment, localCreateComment)
     }
 
 }

@@ -7,6 +7,7 @@ internal data class FullTicket(
     val comments: List<Comment>,
     val showRating: Boolean,
     val showRatingText: String?,
+    val isActive: Boolean?,
     val userId: String?, // TODO почему userId нулабелен
     val ticketId: Int,
 )

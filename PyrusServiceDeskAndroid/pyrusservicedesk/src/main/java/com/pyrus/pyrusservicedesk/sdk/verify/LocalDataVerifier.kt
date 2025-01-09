@@ -1,7 +1,7 @@
 package com.pyrus.pyrusservicedesk.sdk.verify
 
 import com.pyrus.pyrusservicedesk._ref.data.Comment
-import com.pyrus.pyrusservicedesk.sdk.data.CommandDto
+import com.pyrus.pyrusservicedesk.sdk.sync.TicketCommandDto
 
 /**
  * Checks local data validness
@@ -15,5 +15,5 @@ internal interface LocalDataVerifier : LocalFileVerifier {
     /**
      * Checks whether [localCommand] is considered empty
      */
-    fun isLocalCommandEmpty(localComment: CommandDto): Boolean
+    fun isLocalCommandEmpty(localComment: TicketCommandDto): Boolean
 }

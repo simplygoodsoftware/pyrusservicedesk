@@ -4,8 +4,8 @@ import android.content.SharedPreferences
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
 import com.pyrus.pyrusservicedesk._ref.data.Comment
-import com.pyrus.pyrusservicedesk.sdk.data.CommandDto
 import com.pyrus.pyrusservicedesk.sdk.data.TicketDto
+import com.pyrus.pyrusservicedesk.sdk.sync.TicketCommandDto
 import com.pyrus.pyrusservicedesk.sdk.verify.LocalDataVerifier
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -28,7 +28,9 @@ internal class LocalCommandsStore(
 
 //    val commandsFlow(): Flow<List<Command>> = localCommandsStateFlow
 
-    fun getLastTicketId() = --lastTicketId.value
+    fun getUpdatedLastTicketId() = --lastTicketId.value
+
+    fun getLastTicketId() = lastTicketId.value
 
     /**
      * Adds pending feed comment
@@ -52,7 +54,7 @@ internal class LocalCommandsStore(
     /**
      * Adds pending feed comment
      */
-    fun addPendingFeedCommand(command: CommandDto) {
+    fun addPendingFeedCommand(command: TicketCommandDto) {
         var commands = localCommandsStateFlow.value.toMutableList()
 
         commands.let { list ->
@@ -84,21 +86,21 @@ internal class LocalCommandsStore(
     /**
      * Provides all pending feed commands
      */
-    fun getPendingFeedCommands(): List<CommandDto> {
-        val rawJson = preferences.getString(PREFERENCE_KEY_OFFLINE_COMMANDS, "[]")
-        val commandsList = gson.fromJson<List<CommandDto>>(rawJson, commandListTokenType).toMutableList()
+    fun getPendingFeedCommands(): List<TicketCommandDto> {
+        val rawJson = preferences.getString(PREFERENCE_KEY_OFFLINE_TICKET_COMMANDS, "[]")
+        //val commandsList = gson.fromJson<List<TicketCommandDto>>(rawJson, commandListTokenType).toMutableList()
 
 //        if (commandsList.removeAll { localDataVerifier.isLocalCommandEmpty(it) }) {
 //            writeCommands(commandsList)
 //        }
-        return commandsList
+        return emptyList()//commandsList TODO
     }
 
     fun getComment(id: Long): Comment? {
         return getPendingFeedComments().find { comment -> comment.id == id }
     }
 
-    fun getCommand(id: Long): CommandDto? {
+    fun getCommand(id: Long): TicketCommandDto? {
         return getPendingFeedCommands().find { command -> getCommentId(command.commandId) == id }
     }
 
@@ -120,7 +122,7 @@ internal class LocalCommandsStore(
     /**
      * Removes pending command from offline repository
      */
-    fun removePendingCommand(command: CommandDto) {
+    fun removePendingCommand(command: TicketCommandDto) {
         val commands = getPendingFeedCommands().toMutableList()
         val removed = commands.removeAll { it.commandId == command.commandId }
         if (removed) {
@@ -141,19 +143,18 @@ internal class LocalCommandsStore(
         localCommentsStateFlow.value = comments
     }
 
-    private fun writeCommands(commands: List<CommandDto>) {
+    private fun writeCommands(commands: List<TicketCommandDto>) {
         val rawJson = gson.toJson(commands, commandListTokenType)
-        preferences.edit().putString(PREFERENCE_KEY_OFFLINE_COMMANDS, rawJson).apply()
+        preferences.edit().putString(PREFERENCE_KEY_OFFLINE_TICKET_COMMANDS, rawJson).apply()
         localCommandsStateFlow .value = commands
     }
 
     private companion object{
         const val PREFERENCE_KEY_OFFLINE_COMMENTS = "PREFERENCE_KEY_OFFLINE_COMMENTS"
-        const val PREFERENCE_KEY_OFFLINE_COMMANDS = "PREFERENCE_KEY_OFFLINE_COMMANDS"
+        const val PREFERENCE_KEY_OFFLINE_TICKET_COMMANDS = "PREFERENCE_KEY_OFFLINE_TICKET_COMMANDS"
         const val PREFERENCE_KEY_OFFLINE = "PREFERENCE_KEY_OFFLINE"
         const val MAX_PENDING_COMMENTS_SIZE = 20
         val commentListTokenType: Type = object : TypeToken<List<Comment>>(){}.type
-        val commandListTokenType: Type = object : TypeToken<List<CommandDto>>(){}.type
-        val mapTokenType: Type = object : TypeToken<Map<TicketDto, List<CommandDto>>>(){}.type
+        val commandListTokenType: Type = object : TypeToken<List<TicketCommandDto>>(){}.type
     }
 }

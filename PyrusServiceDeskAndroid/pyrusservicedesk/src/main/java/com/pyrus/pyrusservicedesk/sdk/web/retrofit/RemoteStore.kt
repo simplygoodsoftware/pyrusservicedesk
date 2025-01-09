@@ -70,10 +70,10 @@ internal class RemoteStore(
     suspend fun getFeed(keepUnread: Boolean): Try<CommentsDto> {
         PLog.d(
             TAG, "getFeed, " +
-                "appId: ${account.appId.getFirstNSymbols(10)}, " +
-                "userId: ${getUserId().getFirstNSymbols(10)}, " +
-                "instanceId: ${getInstanceId()?.getFirstNSymbols(10)}, " +
-                "apiVersion: ${getVersion()}"
+                    "appId: ${account.appId.getFirstNSymbols(10)}, " +
+                    "userId: ${getUserId().getFirstNSymbols(10)}, " +
+                    "instanceId: ${getInstanceId()?.getFirstNSymbols(10)}, " +
+                    "apiVersion: ${getVersion()}"
         )
         val commentsTry = api.getTicketFeed(
             GetFeedBody(
@@ -103,7 +103,7 @@ internal class RemoteStore(
                 needFullInfo = true,
                 additionalUsers = getAdditionalUsers(),
                 authorId = getAuthorId(),
-                authorName = "Kate Test", // TODO
+                authorName = ConfigUtils.getUserName(),
                 appId = account.appId,
                 userId = getUserId(),
                 instanceId = getInstanceId(),
@@ -131,17 +131,17 @@ internal class RemoteStore(
     suspend fun getTickets(): Try<List<TicketDto>> {
         PLog.d(
             TAG, "getTickets, " +
-                "appId: ${account.appId.getFirstNSymbols(10)}, " +
-                "userId: ${getUserId().getFirstNSymbols(10)}, " +
-                "instanceId: ${getInstanceId()?.getFirstNSymbols(10)}, " +
-                "apiVersion: ${getVersion()}"
+                    "appId: ${account.appId.getFirstNSymbols(10)}, " +
+                    "userId: ${getUserId().getFirstNSymbols(10)}, " +
+                    "instanceId: ${getInstanceId()?.getFirstNSymbols(10)}, " +
+                    "apiVersion: ${getVersion()}"
         )
         val ticketsTry = api.getTickets(
             RequestBodyBase(
                 needFullInfo = true,
                 additionalUsers = getAdditionalUsers(),
                 authorId = getAuthorId(),
-                authorName = "Kate Test", // TODO
+                authorName = ConfigUtils.getUserName(),
                 appId = account.appId,
                 userId = getUserId(),
                 instanceId = getInstanceId(),
@@ -171,7 +171,7 @@ internal class RemoteStore(
                 additionalUsers = getAdditionalUsers(),
                 commands = null,
                 authorId = getAuthorId(),
-                authorName = "Kate Test", // TODO
+                authorName = ConfigUtils.getUserName(),
                 appId = v3.appId,
                 userId = getUserId(),
                 instanceId = getInstanceId(),
@@ -243,14 +243,14 @@ internal class RemoteStore(
                 additionalUsers = getAdditionalUsers(),
                 commands = listOf(command),
                 authorId = getAuthorId(),
-                authorName = "Kate Test",
+                authorName = ConfigUtils.getUserName(),
                 appId = account.appId,
                 userId = getUserId(),
                 instanceId = getInstanceId(),
                 version = getVersion(),
                 apiSign = apiFlag,
                 securityKey = getSecurityKey(),
-                lastNoteId = TODO(),
+                lastNoteId = null, //TODO
             )
         )
 
@@ -319,12 +319,12 @@ internal class RemoteStore(
     suspend fun setPushToken(token: String?, tokenType: String): Try<Unit> {
         PLog.d(
             TAG, "setPushToken, " +
-                "appId: ${account.appId.getFirstNSymbols(10)}, " +
-                "userId: ${getUserId().getFirstNSymbols(10)}, " +
-                "instanceId: ${getInstanceId()?.getFirstNSymbols(10)}, " +
-                "apiVersion: ${getVersion()}, " +
-                "token: $token, " +
-                "tokenType: $tokenType"
+                    "appId: ${account.appId.getFirstNSymbols(10)}, " +
+                    "userId: ${getUserId().getFirstNSymbols(10)}, " +
+                    "instanceId: ${getInstanceId()?.getFirstNSymbols(10)}, " +
+                    "apiVersion: ${getVersion()}, " +
+                    "token: $token, " +
+                    "tokenType: $tokenType"
         )
 
         val setPushTokenTry = api.setPushToken(
@@ -350,11 +350,11 @@ internal class RemoteStore(
 //
         PLog.d(
             TAG, "addComment, " +
-                "appId: ${account.appId.getFirstNSymbols(10)}, " +
-                "userId: ${getUserId().getFirstNSymbols(10)}, " +
-                "instanceId: ${getInstanceId()?.getFirstNSymbols(10)}, " +
-                "apiVersion: ${getVersion()}, " +
-                "ticketId: $ticketId"
+                    "appId: ${account.appId.getFirstNSymbols(10)}, " +
+                    "userId: ${getUserId().getFirstNSymbols(10)}, " +
+                    "instanceId: ${getInstanceId()?.getFirstNSymbols(10)}, " +
+                    "apiVersion: ${getVersion()}, " +
+                    "ticketId: $ticketId"
         )
 
         var cament = comment
@@ -466,8 +466,8 @@ internal class RemoteStore(
     ): Boolean {
 
         return !sentAttachments.isNullOrEmpty()
-            && !remoteAttachmentIds.isNullOrEmpty()
-            && sentAttachments.size == remoteAttachmentIds.size
+                && !remoteAttachmentIds.isNullOrEmpty()
+                && sentAttachments.size == remoteAttachmentIds.size
     }
 
     private fun CommentDto.applyNewAttachments(newAttachments: List<AttachmentDto>): CommentDto {

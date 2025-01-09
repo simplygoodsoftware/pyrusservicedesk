@@ -44,6 +44,9 @@ internal class RepositoryMapper(
                 val userTickets = ticketsByUserId[user.userId] ?: continue
                 tickets += userTickets
             }
+            val filteredTicketsData = tickets.sortedWith(TicketComparator())
+            val resultTickets = filteredTicketsData.filter { it.isActive == true }.toMutableList()
+            resultTickets.addAll(filteredTicketsData.filter { it.isActive == false })
             val application = applications[appId]
             val orgName = application?.orgName
             val orgLogoUrl = application?.orgLogoUrl
@@ -51,7 +54,7 @@ internal class RepositoryMapper(
                 appId = appId,
                 orgName = orgName ?: "",
                 orgLogoUrl = orgLogoUrl,
-                tickets = tickets,
+                tickets = resultTickets,
             )
         }
 
@@ -67,6 +70,7 @@ internal class RepositoryMapper(
         subject = TODO(),
         isRead = TODO(),
         lastComment = TODO(),
+        isActive = TODO(),
     )
 
     fun map(ticket: TicketDto): FullTicket {
@@ -79,6 +83,21 @@ internal class RepositoryMapper(
             subject = ticket.subject,
             isRead = ticket.isRead ?: true,
             lastComment = ticket.lastComment?.let { map(it) },
+            isActive = ticket.isActive,
+        )
+    }
+
+    fun mapEmptyFullTicket(ticketId: Int, userId: String): FullTicket {
+        return FullTicket(
+            comments = emptyList(),
+            showRating = false,
+            showRatingText = null,
+            userId = userId,
+            ticketId = ticketId,
+            subject = null,
+            isRead = true,
+            lastComment = null,
+            isActive = true,
         )
     }
 
@@ -138,4 +157,20 @@ internal class RepositoryMapper(
         val appId: String,
     )
 
+}
+
+private class TicketComparator : Comparator<FullTicket> {
+
+    override fun compare(o1: FullTicket, o2: FullTicket): Int {
+        return when {
+            o1.lastComment == null -> return when {
+                o2.lastComment == null -> o1.ticketId - o2.ticketId
+                else -> 1
+            }
+            o2.lastComment == null -> -1
+            o1.lastComment.creationTime > o2.lastComment.creationTime -> 1
+            o1.lastComment.creationTime < o2.lastComment.creationTime -> -1
+            else -> (o1.lastComment.id - o2.lastComment.id).toInt()
+        }
+    }
 }
