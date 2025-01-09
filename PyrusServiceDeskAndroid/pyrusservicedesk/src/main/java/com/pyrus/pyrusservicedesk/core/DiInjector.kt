@@ -152,14 +152,16 @@ internal class DiInjector(
         intentQr = openQrIntent
         intentSettings = openSettingsIntent
     }
-    val isMultiChat = account.isMultiChat // TODO wtf
+    val isMultiChat = account is Account.V3
 
     val sharedViewModel = SharedViewModel()
+
 
     val liveUpdates = LiveUpdates(
         repository = repository,
         preferencesManager = preferencesManager,
-        userId = account.instanceId,
+        // TODO sds fix live updates
+        userId = account.getUserId(),
         coreScope = coreScope,
     )
 

@@ -15,8 +15,14 @@ internal fun Account.getAuthorId(): String? = when(this) {
     is Account.V3 -> authorId
 }
 
+internal fun Account.getAppId(): String = when(this) {
+    is Account.V1 -> appId
+    is Account.V2 -> appId
+    is Account.V3 -> firstAppId
+}
+
 internal fun Account.getUserId(): String = when(this) {
-    is Account.V1 -> instanceId
+    is Account.V1 -> userId
     is Account.V2 -> userId
     is Account.V3 -> firstUserId
 }

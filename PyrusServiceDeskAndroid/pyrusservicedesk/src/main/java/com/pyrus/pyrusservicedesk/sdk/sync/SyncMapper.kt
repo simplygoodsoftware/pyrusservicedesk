@@ -3,6 +3,7 @@ package com.pyrus.pyrusservicedesk.sdk.sync
 import com.pyrus.pyrusservicedesk._ref.data.Attachment
 import com.pyrus.pyrusservicedesk.core.Account
 import com.pyrus.pyrusservicedesk.core.getAdditionalUsers
+import com.pyrus.pyrusservicedesk.core.getAppId
 import com.pyrus.pyrusservicedesk.core.getAuthorId
 import com.pyrus.pyrusservicedesk.core.getInstanceId
 import com.pyrus.pyrusservicedesk.core.getSecurityKey
@@ -26,7 +27,7 @@ internal object SyncMapper {
             commands = syncRequests.mapNotNull { mapToCommand(it.request) },
             authorId = account.getAuthorId(),
             authorName = "Kate Test", // TODO
-            appId = account.appId,
+            appId = account.getAppId(),
             userId = account.getUserId(),
             securityKey = account.getSecurityKey(),
             instanceId = account.getInstanceId(),

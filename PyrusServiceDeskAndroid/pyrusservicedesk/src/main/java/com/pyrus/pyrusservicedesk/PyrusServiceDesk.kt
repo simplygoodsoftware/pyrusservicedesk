@@ -62,7 +62,6 @@ class PyrusServiceDesk private constructor(
         val ticketsListStateFlow: StateFlow<List<User>> get() = _stateFlow
 
         @JvmStatic
-        @JvmOverloads
         fun updateValue(newValue: List<User>) {
             _stateFlow.value = newValue
         }
@@ -86,7 +85,6 @@ class PyrusServiceDesk private constructor(
             application: Application,
             appId: String,
             domain: String? = null,
-            isMultiChat: Boolean,
             loggingEnabled: Boolean = false,
             authorizationToken: String? = null,
         ) {
@@ -96,7 +94,6 @@ class PyrusServiceDesk private constructor(
                 appId,
                 null,
                 null,
-                isMultiChat,
                 null,
                 domain,
                 API_VERSION_1,
@@ -127,7 +124,6 @@ class PyrusServiceDesk private constructor(
             application: Application,
             appId: String,
             userId: String,
-            isMultiChat: Boolean,
             securityKey: String,
             domain: String? = null,
             loggingEnabled: Boolean = false,
@@ -139,7 +135,6 @@ class PyrusServiceDesk private constructor(
                 appId,
                 userId,
                 null,
-                isMultiChat,
                 securityKey,
                 domain,
                 API_VERSION_2,
@@ -170,7 +165,6 @@ class PyrusServiceDesk private constructor(
             application: Application,
             listUser: List<User>,
             authorId: String,
-            isMultiChat: Boolean,
             domain: String? = null,
             loggingEnabled: Boolean = false,
             authorizationToken: String? = null,
@@ -183,7 +177,6 @@ class PyrusServiceDesk private constructor(
                 listUser.first().appId,
                 null,
                 authorId,
-                isMultiChat,
                 null,
                 domain,
                 API_VERSION_3,
@@ -198,7 +191,6 @@ class PyrusServiceDesk private constructor(
             appId: String,
             userId: String?,
             authorId: String?,
-            isMultiChat: Boolean,
             securityKey: String?,
             domain: String?,
             apiVersion: Int = API_VERSION_1,
@@ -214,36 +206,33 @@ class PyrusServiceDesk private constructor(
 
             val newAccount = if (listUser != null && authorId != null)
                 Account.V3(
-                    instanceId,
-                    appId,
-                    apiDomain,
-                    isMultiChat,
-                    listUser.first().userId,
-                    listUser,
-                    authorId,
+                    domain = apiDomain,
+                    instanceId = instanceId,
+                    firstAppId = appId,
+                    firstUserId = listUser.first().userId,
+                    users = listUser,
+                    authorId = authorId,
                 )
             else if (userId == null || securityKey == null) Account.V1(
-                instanceId,
-                appId,
-                apiDomain,
-                isMultiChat
+                domain = apiDomain,
+                userId = instanceId,
+                appId = appId,
             )
             else Account.V2(
-                instanceId,
-                appId,
-                apiDomain,
-                isMultiChat,
-                userId,
-                securityKey,
+                domain = apiDomain,
+                instanceId = instanceId,
+                appId = appId,
+                userId = userId,
+                securityKey = securityKey,
             )
 
             INJECTOR = DiInjector(
-                application,
-                newAccount,
-                loggingEnabled,
-                authorizationToken,
-                CoroutineScope(Dispatchers.Main),
-                preferences
+                application = application,
+                account = newAccount,
+                loggingEnabled = loggingEnabled,
+                authToken = authorizationToken,
+                coreScope = CoroutineScope(Dispatchers.Main),
+                preferences = preferences
             )
 
             if (newAccount is Account.V3 && listUser != null) {
