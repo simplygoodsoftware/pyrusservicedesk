@@ -163,6 +163,10 @@ internal class Repository(
         }
     }
 
+    suspend fun readTicket(command: TicketCommandDto) {
+        remoteStore.addTextComment(command)
+    }
+
     private fun toAddCommentResponseData(ticketCommandResult: TicketCommandResultDto): AddCommentResponseData {
         return AddCommentResponseData(ticketCommandResult.commentId, null, null)
     }

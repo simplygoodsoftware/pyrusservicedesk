@@ -17,9 +17,13 @@ import com.pyrus.pyrusservicedesk._ref.whitetea.core.logic.Logic
 import com.pyrus.pyrusservicedesk._ref.whitetea.utils.adapt
 import com.pyrus.pyrusservicedesk.core.Account
 import com.pyrus.pyrusservicedesk.sdk.repositories.Repository
+import com.pyrus.pyrusservicedesk.sdk.sync.CommandParamsDto
+import com.pyrus.pyrusservicedesk.sdk.sync.TicketCommandDto
+import com.pyrus.pyrusservicedesk.sdk.sync.TicketCommandType
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.map
+import java.util.UUID
 
 private const val TAG = "TicketsListFeature"
 
@@ -65,7 +69,7 @@ private class FeatureReducer: Logic<State, Message, Effect>() {
                     effects { +Effect.Outer.ShowAddTicketMenu(selectedAppId) }
                 }
                 else {
-                    effects { +Effect.Inner.OpenTicketScreen(null, firstUser.userId) }
+                    effects { +Effect.Inner.OpenTicketScreen(selectedAppId,null, firstUser.userId) }
                 }
             }
 
@@ -101,11 +105,15 @@ private class FeatureReducer: Logic<State, Message, Effect>() {
                     +Effect.Outer.ShowAddTicketMenu(appId)
                 }
                 else effects {
-                    +Effect.Inner.OpenTicketScreen(ticketId = null, userId = firstUser.userId)
+                    +Effect.Inner.OpenTicketScreen( appId= appId, ticketId = null, userId = firstUser.userId)
                 }
             }
-            is Message.Outer.OnTicketClick -> effects {
-                +Effect.Inner.OpenTicketScreen(message.ticketId, message.userId)
+            is Message.Outer.OnTicketClick -> {
+                val contentState = state.contentState as? ContentState.Content ?: return
+                val appId = contentState.appId ?: return
+                effects {
+                    +Effect.Inner.OpenTicketScreen(appId, message.ticketId, message.userId)
+                }
             }
             is Message.Outer.OnUserIdSelect -> TODO("why")
         }
@@ -142,6 +150,7 @@ private class FeatureReducer: Logic<State, Message, Effect>() {
                     state.copy(contentState = contentState.copy(
                         filterName = filterName,
                         filterEnabled = message.userId != KEY_DEFAULT_USER_ID,
+                        filterId = user?.userId
                     ))
                 }
 
@@ -163,6 +172,7 @@ private class FeatureReducer: Logic<State, Message, Effect>() {
             filterName = null,
             filterEnabled = false,
             tickets = tickets.ticketSetInfoList,
+            filterId = null,
         )
     }
 
@@ -174,6 +184,7 @@ private class FeatureReducer: Logic<State, Message, Effect>() {
             titleImageUrl = ticketsSetByAppName?.get(appId)?.orgLogoUrl,
             filterName = null,
             filterEnabled = false,
+            filterId = null,
         )
     }
 
@@ -196,9 +207,32 @@ internal class TicketsActor(
         Effect.Inner.TicketsSetFlow -> repository.getAllDataFlow().map { Message.Inner.TicketsUpdated(it) }
 
         is Effect.Inner.OpenTicketScreen -> flow {
+            if (effect.userId != null && effect.ticketId != null)
+                repository.readTicket(
+                    getReadTicketCommand(
+                        effect.appId,
+                        effect.userId,
+                        effect.ticketId
+                    )
+                )
             router.navigateTo(Screens.TicketScreen(effect.ticketId, effect.userId))
         }
 
+    }
+
+    private fun getUUID(): String {
+        val uuid: UUID = UUID.randomUUID()
+        return uuid.toString()
+    }
+
+    private fun getReadTicketCommand(appId: String, userId: String, ticketId: Int): TicketCommandDto {
+        val localTicketIsRead = CommandParamsDto.MarkTicketAsRead(
+            ticketId = ticketId,
+            userId = userId,
+            appId = appId,
+            commentId = null,
+        )
+        return TicketCommandDto(getUUID(), TicketCommandType.CreateComment, localTicketIsRead)
     }
 
 }

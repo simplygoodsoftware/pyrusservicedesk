@@ -28,6 +28,7 @@ internal interface TicketsContract {
             val appId: String?,
             val titleText: String?,
             val titleImageUrl: String?,
+            val filterId: String?,
             val filterName: String?,
             val filterEnabled: Boolean,
             val tickets: List<TicketSetInfo>?,
@@ -79,7 +80,7 @@ internal interface TicketsContract {
         sealed interface Inner : Effect {
             data object TicketsSetFlow : Inner
             data class UpdateTickets(val force: Boolean) : Inner
-            data class OpenTicketScreen(val ticketId: Int?, val userId: String?) : Inner
+            data class OpenTicketScreen(val appId: String, val ticketId: Int?, val userId: String?) : Inner
         }
     }
 
