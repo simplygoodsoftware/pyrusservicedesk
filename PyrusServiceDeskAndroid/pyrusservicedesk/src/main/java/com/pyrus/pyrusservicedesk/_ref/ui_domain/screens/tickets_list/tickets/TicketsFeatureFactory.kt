@@ -69,7 +69,11 @@ private class FeatureReducer: Logic<State, Message, Effect>() {
                     effects { +Effect.Outer.ShowAddTicketMenu(selectedAppId) }
                 }
                 else {
-                    effects { +Effect.Inner.OpenTicketScreen(selectedAppId,null, firstUser.userId) }
+                    effects { +Effect.Inner.OpenTicketScreen(
+                        appId = selectedAppId,
+                        ticketId = null,
+                        userId = firstUser.userId
+                    ) }
                 }
             }
 

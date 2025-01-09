@@ -86,7 +86,11 @@ internal class Repository(
     }
 
     //TODO what we need to do when we haven't fount ticket (feedTry.value == null, but feedTry.isSuccess()) (k) sm
-    suspend fun getFeed(ticketId: Int, userId: String, force: Boolean): Try<FullTicket> {
+    suspend fun getFeed(
+        ticketId: Int,
+        userId: String,
+        force: Boolean,
+    ): Try<FullTicket> {
 
         if (!force) {
             val localTickets: TicketsDto? = localTicketsStore.getTickets()
