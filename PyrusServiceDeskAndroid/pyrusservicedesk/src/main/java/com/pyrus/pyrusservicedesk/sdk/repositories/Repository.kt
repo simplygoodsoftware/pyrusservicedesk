@@ -1,8 +1,6 @@
 package com.pyrus.pyrusservicedesk.sdk.repositories
 
 import android.net.Uri
-import android.util.Log
-import androidx.core.net.toFile
 import com.pyrus.pyrusservicedesk.PyrusServiceDesk.Companion.injector
 import com.pyrus.pyrusservicedesk._ref.data.Attachment
 import com.pyrus.pyrusservicedesk._ref.data.Author
@@ -16,7 +14,6 @@ import com.pyrus.pyrusservicedesk._ref.utils.isSuccess
 import com.pyrus.pyrusservicedesk._ref.utils.map
 import com.pyrus.pyrusservicedesk.presentation.ui.view.Status
 import com.pyrus.pyrusservicedesk.sdk.FileResolver
-import com.pyrus.pyrusservicedesk.sdk.data.AttachmentDto
 import com.pyrus.pyrusservicedesk.sdk.sync.TicketCommandResultDto
 import com.pyrus.pyrusservicedesk.sdk.data.TicketDto
 import com.pyrus.pyrusservicedesk.sdk.data.intermediate.AddCommentResponseData
@@ -28,7 +25,6 @@ import com.pyrus.pyrusservicedesk.sdk.sync.Synchronizer
 import com.pyrus.pyrusservicedesk.sdk.sync.TicketCommandDto
 import com.pyrus.pyrusservicedesk.sdk.web.UploadFileHook
 import com.pyrus.pyrusservicedesk.sdk.web.retrofit.RemoteFileStore
-import com.pyrus.pyrusservicedesk.sdk.web.retrofit.RemoteStore
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.sync.Mutex
@@ -41,7 +37,6 @@ import kotlin.math.max
 
 internal class Repository(
     private val localCommandsStore: LocalCommandsStore,
-    private val remoteStore: RemoteStore,
     private val repositoryMapper: RepositoryMapper,
     private val fileResolver: FileResolver,
     private val remoteFileStore: RemoteFileStore,
@@ -57,16 +52,20 @@ internal class Repository(
     private val fileHooks = ConcurrentHashMap<Int, UploadFileHook>()
 
     init {
-        val pendingComments = localCommandsStore.getPendingFeedComments()
-        lastLocalCommentId = AtomicLong(pendingComments.lastOrNull()?.id ?: 0L)
+        // TODO sds
+//        val pendingComments = localCommandsStore.getPendingFeedCommands()
+//        lastLocalCommentId = AtomicLong(pendingComments.lastOrNull()?.id ?: 0L)
+//
+//        var lastAttachmentId = 0
+//        for (comment in pendingComments) {
+//            for (attach in comment.attachments ?: continue) {
+//                lastAttachmentId = max(attach.id, lastAttachmentId)
+//            }
+//        }
+//        lastLocalAttachmentId = AtomicInteger(lastAttachmentId)
 
-        var lastAttachmentId = 0
-        for (comment in pendingComments) {
-            for (attach in comment.attachments ?: continue) {
-                lastAttachmentId = max(attach.id, lastAttachmentId)
-            }
-        }
-        lastLocalAttachmentId = AtomicInteger(lastAttachmentId)
+        lastLocalCommentId = AtomicLong(-1)
+        lastLocalAttachmentId = AtomicInteger(-1)
     }
 
     suspend fun getAllData(force: Boolean): Try<TicketsInfo> {
@@ -133,14 +132,6 @@ internal class Repository(
 
 
 
-    /**
-     * Provides available tickets.
-     */
-    // TODO remove it
-    suspend fun getTickets(): Try<List<TicketDto>> {
-        return remoteStore.getTickets()
-    }
-
 
     suspend fun addTextComment(ticketId: Int, textBody: String, command: TicketCommandDto) {
         val comment = createLocalTextComment(
@@ -149,26 +140,38 @@ internal class Repository(
             injector().usersAccount?.authorId
         )
 
-        localCommandsStore.addPendingFeedComment(comment)
-        localCommandsStore.addPendingFeedCommand(command)
-
-        val response = remoteStore.addTextComment(command)
-
-        if (response.isSuccess() && !response.value.isNullOrEmpty()) {
-            localCommandsStore.removePendingCommand(command)
-            localCommandsStore.removePendingComment(comment)
-            val res = response.value.find { it.commandId == command.commandId }
-            if (res != null) {
-                //addNewCommentToState(ticketId, toAddCommentResponseData(res), comment)
-            }
-        } else {
-            localCommandsStore.addPendingFeedComment(comment.copy(isSending = false))
-            localCommandsStore.addPendingFeedCommand(command)
-        }
+//        localCommandsStore.addPendingFeedComment(comment)
+//        localCommandsStore.addPendingFeedCommand(command)
+//
+//        val response = remoteStore.addTextComment(command)
+//
+//        if (response.isSuccess() && !response.value.isNullOrEmpty()) {
+//            localCommandsStore.removePendingCommand(command)
+//            localCommandsStore.removePendingComment(comment)
+//            val res = response.value.find { it.commandId == command.commandId }
+//            if (res != null) {
+//                //addNewCommentToState(ticketId, toAddCommentResponseData(res), comment)
+//            }
+//        }
+//        else {
+//            localCommandsStore.addPendingFeedComment(comment.copy(isSending = false))
+//            localCommandsStore.addPendingFeedCommand(command)
+//        }
     }
 
-    suspend fun readTicket(command: TicketCommandDto) {
-        remoteStore.addTextComment(command)
+    suspend fun readTicket(
+        userId: String,
+        appId: String,
+        ticketId: Int,
+    ) {
+        // TODO save command to local repo
+        val command =  SyncRequest.Command.MarkTicketAsRead(
+            commandId = "sdsd",
+            userId = userId,
+            appId = appId,
+            ticketId = ticketId
+        )
+        synchronizer.syncCommand(command)
     }
 
     private fun toAddCommentResponseData(ticketCommandResult: TicketCommandResultDto): AddCommentResponseData {
@@ -180,66 +183,66 @@ internal class Repository(
         val localAttachment = createLocalAttachment(fileData)
         val comment = createLocalAttachComment(localAttachment)
 
-        localCommandsStore.addPendingFeedComment(comment)
-
-        val file = fileData.uri.toFile()
-
-        val hook = UploadFileHook()
-        fileHooks[localAttachment.id] = hook
-
-        val responseTry = remoteFileStore.uploadFile(file, hook) { progress ->
-            Log.d("SDS", "progress: $progress")
-            val newLocalAttachment = localAttachment.copy(progress = progress)
-            val newLocalComment = comment.copy(attachments = listOf(newLocalAttachment))
-            localCommandsStore.addPendingFeedComment(newLocalComment)
-        }
-        Log.d("SDS", "responseTry: $responseTry")
-
-        val newLocalAttachment = when {
-            responseTry.isSuccess() -> localAttachment.copy(
-                guid = responseTry.value.guid,
-                status = Status.Completed,
-                progress = null,
-            )
-            else -> localAttachment.copy(status = Status.Error, progress = null)
-        }
-        val newLocalComment = comment.copy(attachments = listOf(newLocalAttachment))
-        localCommandsStore.addPendingFeedComment(newLocalComment)
-        fileHooks.remove(localAttachment.id)
-
-        val guid = newLocalAttachment.guid ?: return
-
-        val attachmentDto = AttachmentDto(
-            guid = guid,
-            name = newLocalAttachment.name,
-            bytesSize = newLocalAttachment.bytesSize,
-            isText = newLocalAttachment.isText,
-            isVideo = newLocalAttachment.isVideo,
-        )
-
-        val response = remoteStore.addAttachComment(attachmentDto)
-
-        if (response.isSuccess()) {
-            localCommandsStore.removePendingComment(comment)
-            addNewCommentToState(ticketId, response.value, comment)
-        }
-        else {
-            localCommandsStore.addPendingFeedComment(comment.copy(isSending = false))
-        }
+//        localCommandsStore.addPendingFeedComment(comment)
+//
+//        val file = fileData.uri.toFile()
+//
+//        val hook = UploadFileHook()
+//        fileHooks[localAttachment.id] = hook
+//
+//        val responseTry = remoteFileStore.uploadFile(file, hook) { progress ->
+//            Log.d("SDS", "progress: $progress")
+//            val newLocalAttachment = localAttachment.copy(progress = progress)
+//            val newLocalComment = comment.copy(attachments = listOf(newLocalAttachment))
+//            localCommandsStore.addPendingFeedComment(newLocalComment)
+//        }
+//        Log.d("SDS", "responseTry: $responseTry")
+//
+//        val newLocalAttachment = when {
+//            responseTry.isSuccess() -> localAttachment.copy(
+//                guid = responseTry.value.guid,
+//                status = Status.Completed,
+//                progress = null,
+//            )
+//            else -> localAttachment.copy(status = Status.Error, progress = null)
+//        }
+//        val newLocalComment = comment.copy(attachments = listOf(newLocalAttachment))
+//        localCommandsStore.addPendingFeedComment(newLocalComment)
+//        fileHooks.remove(localAttachment.id)
+//
+//        val guid = newLocalAttachment.guid ?: return
+//
+//        val attachmentDto = AttachmentDto(
+//            guid = guid,
+//            name = newLocalAttachment.name,
+//            bytesSize = newLocalAttachment.bytesSize,
+//            isText = newLocalAttachment.isText,
+//            isVideo = newLocalAttachment.isVideo,
+//        )
+//
+//        val response = remoteStore.addAttachComment(attachmentDto)
+//
+//        if (response.isSuccess()) {
+//            localCommandsStore.removePendingComment(comment)
+//            addNewCommentToState(ticketId, response.value, comment)
+//        }
+//        else {
+//            localCommandsStore.addPendingFeedComment(comment.copy(isSending = false))
+//        }
     }
 
     suspend fun addRatingComment(ticketId: Int, rating: Int) {
-        val comment = createLocalRatingComment(rating)
-        localCommandsStore.addPendingFeedComment(comment)
-        val response = remoteStore.addRatingComment(rating)
-
-        if (response.isSuccess()) {
-            localCommandsStore.removePendingComment(comment)
-            addNewCommentToState(ticketId, response.value, comment)
-        }
-        else {
-            localCommandsStore.addPendingFeedComment(comment.copy(isSending = false))
-        }
+//        val comment = createLocalRatingComment(rating)
+//        localCommandsStore.addPendingFeedComment(comment)
+//        val response = remoteStore.addRatingComment(rating)
+//
+//        if (response.isSuccess()) {
+//            localCommandsStore.removePendingComment(comment)
+//            addNewCommentToState(ticketId, response.value, comment)
+//        }
+//        else {
+//            localCommandsStore.addPendingFeedComment(comment.copy(isSending = false))
+//        }
     }
 
     suspend fun retryAddComment(ticketId: Int, localId: Long) {
@@ -259,11 +262,13 @@ internal class Repository(
      * @param tokenType cloud messaging type.
      */
     suspend fun setPushToken(token: String?, tokenType: String): Try<Unit> {
-        return remoteStore.setPushToken(token, tokenType)
+//        return remoteStore.setPushToken(token, tokenType)
+        TODO()
     }
 
     fun removePendingComment(comment: Comment) {
-        return localCommandsStore.removePendingComment(comment)
+        TODO()
+//        return localCommandsStore.removePendingComment(comment)
     }
 
     private suspend fun addNewCommentToState(

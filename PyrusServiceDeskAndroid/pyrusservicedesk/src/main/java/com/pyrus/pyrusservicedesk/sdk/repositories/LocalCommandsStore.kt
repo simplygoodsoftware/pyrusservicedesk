@@ -20,39 +20,17 @@ internal class LocalCommandsStore(
     private val gson: Gson,
 ) {
 
-    private val localCommentsStateFlow = MutableStateFlow(getPendingFeedComments())
     private val localCommandsStateFlow = MutableStateFlow(getPendingFeedCommands())
     private var lastTicketId = MutableStateFlow(-1)
 
-    fun commentsFlow(): Flow<List<Comment>> = localCommentsStateFlow
-
-//    val commandsFlow(): Flow<List<Command>> = localCommandsStateFlow
+    val commandsFlow: Flow<List<TicketCommandDto>> = localCommandsStateFlow
 
     fun getUpdatedLastTicketId() = --lastTicketId.value
 
     fun getLastTicketId() = lastTicketId.value
 
     /**
-     * Adds pending feed comment
-     */
-    fun addPendingFeedComment(comment: Comment) {
-        var comments = localCommentsStateFlow.value.toMutableList()
-
-        comments.let { list ->
-            val existingIndex = list.indexOfFirst { it.id == comment.id }
-            if (existingIndex >= 0) {
-                list.removeAt(existingIndex)
-            }
-            list.add(comment)
-        }
-        if (comments.size > MAX_PENDING_COMMENTS_SIZE) {
-            comments = comments.subList(comments.size - MAX_PENDING_COMMENTS_SIZE, comments.size)
-        }
-        writeComments(comments)
-    }
-
-    /**
-     * Adds pending feed comment
+     * Adds command to store
      */
     fun addPendingFeedCommand(command: TicketCommandDto) {
         var commands = localCommandsStateFlow.value.toMutableList()
@@ -71,19 +49,6 @@ internal class LocalCommandsStore(
     }
 
     /**
-     * Provides all pending feed comments
-     */
-    fun getPendingFeedComments(): List<Comment> {
-        val rawJson = preferences.getString(PREFERENCE_KEY_OFFLINE_COMMENTS, "[]")
-        val commentsList = gson.fromJson<List<Comment>>(rawJson, commentListTokenType).toMutableList()
-
-        if (commentsList.removeAll { localDataVerifier.isLocalCommentEmpty(it) }) {
-            writeComments(commentsList)
-        }
-        return commentsList
-    }
-
-    /**
      * Provides all pending feed commands
      */
     fun getPendingFeedCommands(): List<TicketCommandDto> {
@@ -96,27 +61,12 @@ internal class LocalCommandsStore(
         return emptyList()//commandsList TODO
     }
 
-    fun getComment(id: Long): Comment? {
-        return getPendingFeedComments().find { comment -> comment.id == id }
-    }
-
     fun getCommand(id: Long): TicketCommandDto? {
         return getPendingFeedCommands().find { command -> getCommentId(command.commandId) == id }
     }
 
     private fun getCommentId(uuid: String): Long {
         return uuid.substringAfter("commentId=").substringBefore(";").toLong()
-    }
-
-    /**
-     * Removes pending comment from offline repository
-     */
-    fun removePendingComment(comment: Comment) {
-        val comments = getPendingFeedComments().toMutableList()
-        val removed = comments.removeAll { it.id == comment.id }
-        if (removed) {
-            writeComments(comments)
-        }
     }
 
     /**
@@ -131,16 +81,10 @@ internal class LocalCommandsStore(
     }
 
     /**
-     * Removes all pending comments from offline repository
+     * Removes all commands from offline repository
      */
-    fun removeAllPendingComments() {
-        writeComments(emptyList())
-    }
-
-    private fun writeComments(comments: List<Comment>) {
-        val rawJson = gson.toJson(comments, commentListTokenType)
-        preferences.edit().putString(PREFERENCE_KEY_OFFLINE_COMMENTS, rawJson).apply()
-        localCommentsStateFlow.value = comments
+    fun removeAllCommands() {
+        writeCommands(emptyList())
     }
 
     private fun writeCommands(commands: List<TicketCommandDto>) {
@@ -152,7 +96,6 @@ internal class LocalCommandsStore(
     private companion object{
         const val PREFERENCE_KEY_OFFLINE_COMMENTS = "PREFERENCE_KEY_OFFLINE_COMMENTS"
         const val PREFERENCE_KEY_OFFLINE_TICKET_COMMANDS = "PREFERENCE_KEY_OFFLINE_TICKET_COMMANDS"
-        const val PREFERENCE_KEY_OFFLINE = "PREFERENCE_KEY_OFFLINE"
         const val MAX_PENDING_COMMENTS_SIZE = 20
         val commentListTokenType: Type = object : TypeToken<List<Comment>>(){}.type
         val commandListTokenType: Type = object : TypeToken<List<TicketCommandDto>>(){}.type

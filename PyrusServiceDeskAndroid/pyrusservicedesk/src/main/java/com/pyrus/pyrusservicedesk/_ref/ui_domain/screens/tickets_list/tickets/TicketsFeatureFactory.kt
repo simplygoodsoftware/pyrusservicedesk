@@ -1,11 +1,13 @@
 package com.pyrus.pyrusservicedesk._ref.ui_domain.screens.tickets_list.tickets
 
-import android.util.Log
 import androidx.core.os.bundleOf
 import com.github.terrakok.cicerone.Router
 import com.pyrus.pyrusservicedesk._ref.Screens
 import com.pyrus.pyrusservicedesk._ref.data.multy_chat.TicketsInfo
-import com.pyrus.pyrusservicedesk._ref.ui_domain.screens.tickets_list.tickets.TicketsContract.*
+import com.pyrus.pyrusservicedesk._ref.ui_domain.screens.tickets_list.tickets.TicketsContract.ContentState
+import com.pyrus.pyrusservicedesk._ref.ui_domain.screens.tickets_list.tickets.TicketsContract.Effect
+import com.pyrus.pyrusservicedesk._ref.ui_domain.screens.tickets_list.tickets.TicketsContract.Message
+import com.pyrus.pyrusservicedesk._ref.ui_domain.screens.tickets_list.tickets.TicketsContract.State
 import com.pyrus.pyrusservicedesk._ref.ui_domain.screens.tickets_list.tickets.TicketsFragment.Companion.KEY_DEFAULT_USER_ID
 import com.pyrus.pyrusservicedesk._ref.ui_domain.screens.tickets_list.tickets.TicketsFragment.Companion.KEY_USER_ID
 import com.pyrus.pyrusservicedesk._ref.utils.Try
@@ -213,11 +215,9 @@ internal class TicketsActor(
         is Effect.Inner.OpenTicketScreen -> flow {
             if (effect.userId != null && effect.ticketId != null)
                 repository.readTicket(
-                    getReadTicketCommand(
-                        effect.appId,
-                        effect.userId,
-                        effect.ticketId
-                    )
+                    userId = effect.userId,
+                    appId = effect.appId,
+                    ticketId = effect.ticketId
                 )
             router.navigateTo(Screens.TicketScreen(effect.ticketId, effect.userId))
         }

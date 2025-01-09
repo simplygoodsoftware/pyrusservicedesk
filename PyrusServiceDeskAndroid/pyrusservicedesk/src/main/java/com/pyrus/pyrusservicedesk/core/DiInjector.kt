@@ -33,7 +33,6 @@ import com.pyrus.pyrusservicedesk.sdk.updates.PreferencesManager
 import com.pyrus.pyrusservicedesk.sdk.verify.LocalDataVerifier
 import com.pyrus.pyrusservicedesk.sdk.verify.LocalDataVerifierImpl
 import com.pyrus.pyrusservicedesk.sdk.web.retrofit.RemoteFileStore
-import com.pyrus.pyrusservicedesk.sdk.web.retrofit.RemoteStore
 import com.pyrus.pyrusservicedesk.sdk.web.retrofit.ServiceDeskApi
 import com.squareup.picasso.OkHttp3Downloader
 import com.squareup.picasso.Picasso
@@ -101,14 +100,6 @@ internal class DiInjector(
 
     private val fileManager: FileManager = FileManager(application, fileResolver)
 
-    private val remoteStore: RemoteStore = RemoteStore(
-        instanceId = ConfigUtils.getInstanceId(preferences),
-        fileResolver = fileResolver,
-        fileManager = fileManager,
-        api = api,
-        account = account
-    )
-
     private val repositoryMapper = RepositoryMapper(account)
 
     private val remoteFileStore = RemoteFileStore(api) // TODO use different api
@@ -123,7 +114,6 @@ internal class DiInjector(
 
     private val repository: Repository = Repository(
         localCommandsStore = localCommandsStore,
-        remoteStore = remoteStore,
         repositoryMapper = repositoryMapper,
         fileResolver = fileResolver,
         remoteFileStore = remoteFileStore,

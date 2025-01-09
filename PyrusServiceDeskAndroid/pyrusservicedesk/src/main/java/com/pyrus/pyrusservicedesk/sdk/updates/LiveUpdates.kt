@@ -58,23 +58,24 @@ internal class LiveUpdates(
         override fun run() {
             val requestUserId = userId
             coreScope.launch(ioDispatcher) {
-                val ticketsTry = repository.getTickets()
-                if (ticketsTry.isSuccess()) {
-                    val data = ticketsTry.value
-                    val newUnread = data.count()//data.count { !it.isRead } //TODO
-                    this@launch.launch(mainDispatcher) {
-                        // TODO
-                        if (true) return@launch
-//                        val userId = PyrusServiceDesk.get().userId
-                        if (data.isEmpty())
-                            stopUpdates()
-                        else if (requestUserId == userId)
-                            processGetTicketsSuccess(data, newUnread)
-                    }
-                }
-                else {
-                    PLog.d(TAG, "ticketsUpdateRunnable, onFailure")
-                }
+                // TODO
+//                val ticketsTry = repository.getTickets()
+//                if (ticketsTry.isSuccess()) {
+//                    val data = ticketsTry.value
+//                    val newUnread = data.count()//data.count { !it.isRead } //TODO
+//                    this@launch.launch(mainDispatcher) {
+//                        // TODO
+//                        if (true) return@launch
+////                        val userId = PyrusServiceDesk.get().userId
+//                        if (data.isEmpty())
+//                            stopUpdates()
+//                        else if (requestUserId == userId)
+//                            processGetTicketsSuccess(data, newUnread)
+//                    }
+//                }
+//                else {
+//                    PLog.d(TAG, "ticketsUpdateRunnable, onFailure")
+//                }
             }
             val interval = getTicketsUpdateInterval(lastActiveTime)
             PLog.d(TAG, "ticketsUpdateRunnable, interval: $interval")

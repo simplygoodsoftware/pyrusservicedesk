@@ -17,7 +17,7 @@ import retrofit2.http.POST
 import retrofit2.http.Part
 
 /**
- * Interface that is used for making api calls using [RemoteStore].
+ * Interface that is used for making api calls using [Synchronizer] and [RemoteFileStore].
  */
 internal interface ServiceDeskApi {
 
