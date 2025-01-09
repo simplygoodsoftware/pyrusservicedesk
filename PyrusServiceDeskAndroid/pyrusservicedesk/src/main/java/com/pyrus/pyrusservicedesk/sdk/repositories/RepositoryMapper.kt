@@ -44,7 +44,7 @@ internal class RepositoryMapper(
                 val userTickets = ticketsByUserId[user.userId] ?: continue
                 tickets += userTickets
             }
-            val filteredTicketsData = tickets.sortedWith(TicketComparator())
+            val filteredTicketsData = tickets.toHashSet().sortedWith(TicketComparator())
             val resultTickets = filteredTicketsData.filter { it.isActive == true }.toMutableList()
             resultTickets.addAll(filteredTicketsData.filter { it.isActive == false })
             val application = applications[appId]
@@ -168,8 +168,8 @@ private class TicketComparator : Comparator<FullTicket> {
                 else -> 1
             }
             o2.lastComment == null -> -1
-            o1.lastComment.creationTime > o2.lastComment.creationTime -> 1
-            o1.lastComment.creationTime < o2.lastComment.creationTime -> -1
+            o1.lastComment.creationTime < o2.lastComment.creationTime -> 1
+            o1.lastComment.creationTime > o2.lastComment.creationTime -> -1
             else -> (o1.lastComment.id - o2.lastComment.id).toInt()
         }
     }

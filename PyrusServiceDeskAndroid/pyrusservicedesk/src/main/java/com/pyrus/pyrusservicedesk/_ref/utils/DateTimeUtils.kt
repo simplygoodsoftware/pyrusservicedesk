@@ -62,10 +62,10 @@ internal fun getDateText(date: Calendar, now: Calendar): TextProvider = when {
  * to calculate the result.
  */
 @SuppressLint("SimpleDateFormat")
-internal fun Date.getTimeWhen(context: Context, now: Calendar): String {
+internal fun Long.getTimeWhen(context: Context, now: Calendar): String {
     val zone = TimeZone.getDefault()
     val date = Calendar.getInstance(zone).apply {
-        timeInMillis = this@getTimeWhen.time + zone.rawOffset
+        timeInMillis = this@getTimeWhen + zone.rawOffset
     }
     return when {
         date.isSameDay(now) -> SimpleDateFormat(context.getString(R.string.psd_time_format)).format(this)

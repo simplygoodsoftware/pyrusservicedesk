@@ -22,7 +22,6 @@ internal class TicketsPageAdapter(
             parent,
             false
         )
-        //TODO epmty list
         return TicketsPageViewHolder(binding, onEvent)
     }
 
@@ -40,7 +39,7 @@ internal class TicketsPageAdapter(
 
     internal class TicketsPageViewHolder(
         private val binding: PsdTicketsListPageBinding,
-        onEvent: (Message.Outer) -> Unit
+        onEvent: (Message.Outer) -> Unit,
     ) : RecyclerView.ViewHolder(binding.root) {
 
         private val adapter: TicketsListAdapter = TicketsListAdapter(onEvent)
@@ -48,6 +47,9 @@ internal class TicketsPageAdapter(
         init {
             binding.ticketsRv.adapter = adapter
             binding.ticketsRv.layoutManager = LinearLayoutManager(itemView.context)
+            binding.createTicketTv.setOnClickListener {
+                onEvent.invoke(Message.Outer.OnCreateTicketClick)
+            }
         }
 
         fun bind(entry: TicketSetInfoEntry) {
