@@ -1,6 +1,7 @@
 package com.pyrus.pyrusservicedesk.core
 
 import android.app.Application
+import android.content.Intent
 import android.content.SharedPreferences
 import android.net.Uri
 import android.os.Build
@@ -8,62 +9,39 @@ import com.github.terrakok.cicerone.Cicerone
 import com.github.terrakok.cicerone.NavigatorHolder
 import com.google.gson.GsonBuilder
 import com.pyrus.pyrusservicedesk._ref.ui_domain.screens.ticket.TicketFeatureFactory
-import com.pyrus.pyrusservicedesk.sdk.FileResolver
-import com.pyrus.pyrusservicedesk.sdk.data.FileManager
-import com.pyrus.pyrusservicedesk.sdk.data.gson.RemoteGsonExclusionStrategy
-import com.pyrus.pyrusservicedesk.sdk.data.gson.UriGsonAdapter
-import com.pyrus.pyrusservicedesk.sdk.repositories.LocalStore
-import com.pyrus.pyrusservicedesk.sdk.repositories.Repository
-import com.pyrus.pyrusservicedesk.sdk.updates.LiveUpdates
-import com.pyrus.pyrusservicedesk.sdk.updates.PreferencesManager
-import com.pyrus.pyrusservicedesk.sdk.verify.LocalDataVerifier
-import com.pyrus.pyrusservicedesk.sdk.verify.LocalDataVerifierImpl
-import com.pyrus.pyrusservicedesk.sdk.web.retrofit.RemoteStore
-import com.pyrus.pyrusservicedesk.sdk.web.retrofit.ServiceDeskApi
+import com.pyrus.pyrusservicedesk._ref.ui_domain.screens.tickets_list.tickets.TicketsFeatureFactory
 import com.pyrus.pyrusservicedesk._ref.utils.ConfigUtils
 import com.pyrus.pyrusservicedesk._ref.utils.ISO_DATE_PATTERN
 import com.pyrus.pyrusservicedesk._ref.utils.RequestUtils.Companion.getBaseUrl
 import com.pyrus.pyrusservicedesk._ref.utils.call_adapter.TryCallAdapterFactory
+import com.pyrus.pyrusservicedesk._ref.utils.navigation.PyrusRouterImpl
 import com.pyrus.pyrusservicedesk._ref.whitetea.core.DefaultStoreFactory
 import com.pyrus.pyrusservicedesk._ref.whitetea.core.StoreFactory
+import com.pyrus.pyrusservicedesk.presentation.viewmodel.SharedViewModel
+import com.pyrus.pyrusservicedesk.sdk.FileResolver
+import com.pyrus.pyrusservicedesk.sdk.data.FileManager
+import com.pyrus.pyrusservicedesk.sdk.data.gson.RemoteGsonExclusionStrategy
+import com.pyrus.pyrusservicedesk.sdk.data.gson.UriGsonAdapter
+import com.pyrus.pyrusservicedesk.sdk.repositories.AccountStore
 import com.pyrus.pyrusservicedesk.sdk.repositories.DraftRepository
+import com.pyrus.pyrusservicedesk.sdk.repositories.LocalCommandsStore
+import com.pyrus.pyrusservicedesk.sdk.repositories.Repository
+import com.pyrus.pyrusservicedesk.sdk.repositories.RepositoryMapper
+import com.pyrus.pyrusservicedesk.sdk.sync.Synchronizer
+import com.pyrus.pyrusservicedesk.sdk.updates.LiveUpdates
+import com.pyrus.pyrusservicedesk.sdk.updates.PreferencesManager
+import com.pyrus.pyrusservicedesk.sdk.verify.LocalDataVerifier
+import com.pyrus.pyrusservicedesk.sdk.verify.LocalDataVerifierImpl
+import com.pyrus.pyrusservicedesk.sdk.web.retrofit.RemoteFileStore
+import com.pyrus.pyrusservicedesk.sdk.web.retrofit.RemoteStore
+import com.pyrus.pyrusservicedesk.sdk.web.retrofit.ServiceDeskApi
 import com.squareup.picasso.OkHttp3Downloader
 import com.squareup.picasso.Picasso
 import kotlinx.coroutines.CoroutineScope
-import com.pyrus.pyrusservicedesk._ref.utils.navigation.PyrusRouterImpl
-import com.pyrus.pyrusservicedesk.presentation.viewmodel.SharedViewModel
-import com.pyrus.pyrusservicedesk.sdk.repositories.RepositoryMapper
-import com.pyrus.pyrusservicedesk.sdk.web.retrofit.RemoteFileStore
 import okhttp3.OkHttpClient
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 import java.util.concurrent.TimeUnit
-
-internal class ServiceDeskCore(
-    internal val diInjector: DiInjector,
-)
-
-internal sealed interface Account {
-
-    val instanceId: String
-    val appId: String
-    val domain: String
-
-    data class V1(
-        override val instanceId: String,
-        override val appId: String,
-        override val domain: String,
-    ) : Account
-
-    data class V2(
-        override val instanceId: String,
-        override val appId: String,
-        override val domain: String,
-        val userId: String,
-        val securityKey: String,
-    ): Account
-
-}
 
 internal class DiInjector(
     private val application: Application,
@@ -73,6 +51,8 @@ internal class DiInjector(
     private val coreScope: CoroutineScope,
     private val preferences: SharedPreferences,
 ) {
+
+    private val accountStore = AccountStore(account)
 
     private val fileResolver: FileResolver = FileResolver(application.contentResolver)
 
@@ -88,7 +68,7 @@ internal class DiInjector(
         .addSerializationExclusionStrategy(RemoteGsonExclusionStrategy())
         .create()
 
-    private val localStore: LocalStore = LocalStore(preferences, localDataVerifier, offlineGson)
+    val localCommandsStore: LocalCommandsStore = LocalCommandsStore(preferences, localDataVerifier, offlineGson) //TODO обязательно приватный?
 
     private val okHttpClient = OkHttpClient.Builder()
         .connectTimeout(30, TimeUnit.SECONDS)
@@ -133,7 +113,23 @@ internal class DiInjector(
 
     private val remoteFileStore = RemoteFileStore(api) // TODO use different api
 
-    private val repository: Repository = Repository(localStore, remoteStore, repositoryMapper, fileResolver, remoteFileStore)
+    private val localTicketsStore = com.pyrus.pyrusservicedesk.sdk.repositories.LocalTicketsStore()
+
+    private val synchronizer = Synchronizer(
+        api = api,
+        localTicketsStore = localTicketsStore,
+        accountStore = accountStore
+    )
+
+    private val repository: Repository = Repository(
+        localCommandsStore = localCommandsStore,
+        remoteStore = remoteStore,
+        repositoryMapper = repositoryMapper,
+        fileResolver = fileResolver,
+        remoteFileStore = remoteFileStore,
+        synchronizer = synchronizer,
+        localTicketsStore = localTicketsStore
+    )
 
     private val preferencesManager = PreferencesManager(preferences)
 
@@ -141,25 +137,34 @@ internal class DiInjector(
 
     private val draftRepository = DraftRepository(preferences)
 
-    fun ticketFeatureFactory(welcomeMessage: String): TicketFeatureFactory {
-        return TicketFeatureFactory(
-            account = account,
-            storeFactory = storeFactory,
-            repository = repository,
-            draftRepository = draftRepository,
-            welcomeMessage = welcomeMessage,
-            router = router,
-            fileManager = fileManager
-        )
-    }
-
     private val cicerone: Cicerone<PyrusRouterImpl> = Cicerone.create(PyrusRouterImpl())
-
-    val sharedViewModel = SharedViewModel()
 
     val router = cicerone.router
 
     val navHolder: NavigatorHolder = cicerone.getNavigatorHolder()
+
+    val ticketFeatureFactory = TicketFeatureFactory(
+        account = account,
+        storeFactory = storeFactory,
+        repository = repository,
+        draftRepository = draftRepository,
+        router = router,
+        fileManager = fileManager,
+    )
+
+    // TODO fix it
+    val ticketsFeatureFactory = TicketsFeatureFactory(account as Account.V3, storeFactory, repository, router)
+
+    var intentQr: Intent? = null
+    var intentSettings: Intent? = null
+
+    fun setIntent(openQrIntent: Intent?, openSettingsIntent: Intent?) {
+        intentQr = openQrIntent
+        intentSettings = openSettingsIntent
+    }
+    val isMultiChat = account.isMultiChat // TODO wtf
+
+    val sharedViewModel = SharedViewModel()
 
     val liveUpdates = LiveUpdates(
         repository = repository,
@@ -173,5 +178,8 @@ internal class DiInjector(
         .build()
 
     val setPushTokenUseCase = SetPushTokenUseCase(account, coreScope, preferencesManager)
+
+    // TODO remove it
+    val usersAccount = (account as? Account.V3)
 
 }

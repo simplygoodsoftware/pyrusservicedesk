@@ -3,18 +3,21 @@ package com.pyrus.pyrusservicedesk._ref.ui_domain.screens.ticket
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
-import androidx.core.view.ViewCompat
 import androidx.core.view.WindowCompat
 import androidx.fragment.app.FragmentActivity
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.lifecycleScope
+import androidx.lifecycle.repeatOnLifecycle
 import com.github.terrakok.cicerone.Navigator
+import com.pyrus.pyrusservicedesk.PyrusServiceDesk
 import com.pyrus.pyrusservicedesk.PyrusServiceDesk.Companion.injector
 import com.pyrus.pyrusservicedesk.R
 import com.pyrus.pyrusservicedesk.ServiceDeskConfiguration
 import com.pyrus.pyrusservicedesk._ref.Screens
-import com.pyrus.pyrusservicedesk._ref.utils.setupWindowInsets
+import com.pyrus.pyrusservicedesk._ref.utils.navigation.PyrusNavigator
 import com.pyrus.pyrusservicedesk.core.StaticRepository
 import com.pyrus.pyrusservicedesk.databinding.PsdActivityMainBinding
-import com.pyrus.pyrusservicedesk._ref.utils.navigation.PyrusNavigator
+import kotlinx.coroutines.launch
 
 
 internal class MainActivity : FragmentActivity() {
@@ -41,8 +44,21 @@ internal class MainActivity : FragmentActivity() {
 
         savedInstanceState?.let { ServiceDeskConfiguration.restore(it) }
 
+        lifecycleScope.launch {
+            repeatOnLifecycle(Lifecycle.State.STARTED) {
+                PyrusServiceDesk.ticketsListStateFlow.collect {
+                    injector().router.newRootScreen(Screens.TicketsScreen())
+                }
+            }
+        }
+
         if (savedInstanceState == null) {
-            injector().router.newRootScreen(Screens.TicketScreen())
+            if (injector().isMultiChat) {
+                injector().router.newRootScreen(Screens.TicketsScreen())
+            }
+            else {
+                injector().router.newRootScreen(Screens.TicketScreen(null, null)) //TODO
+            }
         }
     }
 

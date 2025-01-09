@@ -1,15 +1,15 @@
 package com.pyrus.pyrusservicedesk._ref.whitetea.core
 
 import android.util.Log
-import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.MutableSharedFlow
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.StateFlow
 import com.pyrus.pyrusservicedesk._ref.whitetea.core.logic.L
 import kotlinx.coroutines.CoroutineExceptionHandler
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.cancel
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.MutableSharedFlow
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.Mutex
@@ -43,6 +43,7 @@ internal open class DefaultStore<State : Any, Message : Any, Effect : Any>(
     }
 
     override fun dispatch(message: Message) {
+        Log.d("SDS", "message $message")
         if (!coroutinesScope.isActive) {
             return
         }
@@ -50,9 +51,7 @@ internal open class DefaultStore<State : Any, Message : Any, Effect : Any>(
             val reducerUpdate = stateUpdateMutex.withLock {
                 if (isActive) {
                     val oldState = state.value
-                    Log.d("SDS3", "1 $oldState")
                     val update = reducer.update(message, oldState)
-                    Log.d("SDS3", "2 ${update.state}")
                     mutableState.value = update.state
                     update
                 } else null

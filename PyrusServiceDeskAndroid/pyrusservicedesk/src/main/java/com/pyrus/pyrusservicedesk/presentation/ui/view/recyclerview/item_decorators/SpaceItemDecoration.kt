@@ -1,9 +1,9 @@
 package com.pyrus.pyrusservicedesk.presentation.ui.view.recyclerview.item_decorators
 
 import android.graphics.Rect
+import android.view.View
 import androidx.annotation.Px
 import androidx.recyclerview.widget.RecyclerView
-import android.view.View
 
 /**
  * [RecyclerView.ItemDecoration] implementation that applies spacing between items in list.

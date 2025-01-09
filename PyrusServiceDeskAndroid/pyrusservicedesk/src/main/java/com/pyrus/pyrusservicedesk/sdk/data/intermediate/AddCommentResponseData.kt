@@ -10,7 +10,8 @@ import com.pyrus.pyrusservicedesk.sdk.data.AttachmentDto
 @Keep
 internal data class AddCommentResponseData(
     @SerializedName("comment_id")
-    val commentId: Long,
+    val commentId: Long?,
     @SerializedName("attachments")
     val attachmentIds: List<Int>?,
-    val sentAttachments: List<AttachmentDto>?)
+    val sentAttachments: List<AttachmentDto>?
+)

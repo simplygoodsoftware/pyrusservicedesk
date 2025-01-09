@@ -8,12 +8,18 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.recyclerview.widget.DiffUtil
 import com.pyrus.pyrusservicedesk.PyrusServiceDesk
+import com.pyrus.pyrusservicedesk.PyrusServiceDesk.Companion.injector
 import com.pyrus.pyrusservicedesk._ref.ui_domain.screens.ticket.adapter.entries.CommentEntry
 import com.pyrus.pyrusservicedesk._ref.ui_domain.screens.ticket.adapter.entries.DateEntry
 import com.pyrus.pyrusservicedesk._ref.ui_domain.screens.ticket.adapter.entries.RatingEntry
 import com.pyrus.pyrusservicedesk._ref.ui_domain.screens.ticket.adapter.entries.TicketEntry
 import com.pyrus.pyrusservicedesk._ref.ui_domain.screens.ticket.adapter.entries.Type
 import com.pyrus.pyrusservicedesk._ref.ui_domain.screens.ticket.adapter.entries.WelcomeMessageEntry
+import com.pyrus.pyrusservicedesk._ref.utils.ConfigUtils
+import com.pyrus.pyrusservicedesk._ref.utils.MILLISECONDS_IN_MINUTE
+import com.pyrus.pyrusservicedesk._ref.utils.MILLISECONDS_IN_SECOND
+import com.pyrus.pyrusservicedesk._ref.utils.RequestUtils.Companion.MAX_FILE_SIZE_BYTES
+import com.pyrus.pyrusservicedesk._ref.utils.getWhen
 import com.pyrus.pyrusservicedesk._ref.utils.log.PLog
 import com.pyrus.pyrusservicedesk.presentation.ui.view.recyclerview.DiffResultWithNewItems
 import com.pyrus.pyrusservicedesk.presentation.viewmodel.ConnectionViewModelBase
@@ -25,15 +31,11 @@ import com.pyrus.pyrusservicedesk.sdk.response.PendingDataError
 import com.pyrus.pyrusservicedesk.sdk.updates.OnUnreadTicketCountChangedSubscriber
 import com.pyrus.pyrusservicedesk.sdk.updates.PreferencesManager
 import com.pyrus.pyrusservicedesk.sdk.web.UploadFileHook
-import com.pyrus.pyrusservicedesk._ref.utils.ConfigUtils
-import com.pyrus.pyrusservicedesk._ref.utils.MILLISECONDS_IN_MINUTE
-import com.pyrus.pyrusservicedesk._ref.utils.MILLISECONDS_IN_SECOND
-import com.pyrus.pyrusservicedesk._ref.utils.RequestUtils.Companion.MAX_FILE_SIZE_BYTES
-import com.pyrus.pyrusservicedesk._ref.utils.getWhen
-import kotlinx.coroutines.*
-import java.lang.Runnable
-import java.util.*
-import kotlin.collections.ArrayList
+import kotlinx.coroutines.Runnable
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.runBlocking
+import java.util.Calendar
+import java.util.Date
 
 /**
  * ViewModel for the ticket screen.
@@ -171,7 +173,7 @@ internal class TicketViewModel(
     fun onPendingCommentRetried() {
         pendingCommentUnderAction?.let { comment ->
             applyCommentUpdate(comment, ChangeType.Cancelled)
-            sendAddComment(comment.comment, comment.uploadFileHook.also { it?.resetProgress() })
+            //sendAddComment(comment.comment, comment.uploadFileHooks.also { it?.resetProgress() })
         }
         pendingCommentUnderAction = null
     }
@@ -335,7 +337,12 @@ internal class TicketViewModel(
                 val welcomeComment = CommentDto(
                     body = welcomeMessage,
                     creationDate = welcomeCommentDate,
-                    author = AuthorDto("", null, "#fffffff"),
+                    author = AuthorDto(
+                        name = ConfigUtils.getUserName(),
+                        authorId = "10",  // TODO wtf
+                        avatarId = null,
+                        avatarColorString = null
+                    ),
                 )
                 freshComments += welcomeComment
             }

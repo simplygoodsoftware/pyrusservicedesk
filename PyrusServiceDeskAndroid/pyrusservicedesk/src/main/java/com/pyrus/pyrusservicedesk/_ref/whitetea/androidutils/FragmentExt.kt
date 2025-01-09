@@ -2,13 +2,13 @@ package com.pyrus.pyrusservicedesk._ref.whitetea.androidutils
 
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
-import kotlinx.coroutines.Dispatchers
 import com.pyrus.pyrusservicedesk._ref.whitetea.bind.Binder
 import com.pyrus.pyrusservicedesk._ref.whitetea.bind.BinderLifecycleMode
 import com.pyrus.pyrusservicedesk._ref.whitetea.bind.BindingsBuilder
 import com.pyrus.pyrusservicedesk._ref.whitetea.core.Store
 import com.pyrus.pyrusservicedesk._ref.whitetea.instance_keeper.getStore
 import com.pyrus.pyrusservicedesk._ref.whitetea.instance_keeper.instanceKeeper
+import kotlinx.coroutines.Dispatchers
 import kotlin.coroutines.CoroutineContext
 import com.pyrus.pyrusservicedesk._ref.whitetea.bind.bind as binder
 

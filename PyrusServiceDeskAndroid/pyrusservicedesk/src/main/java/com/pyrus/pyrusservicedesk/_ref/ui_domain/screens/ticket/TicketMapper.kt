@@ -31,6 +31,7 @@ internal object TicketMapper {
             isLoading = false,
             showNoConnectionError = false,
             isRefreshing = state.isLoading,
+            toolbarTitleText = state.ticket?.subject ?: "Новое обращение",
         )
         State.Loading -> Model(
             inputText = "",
@@ -39,6 +40,7 @@ internal object TicketMapper {
             isLoading = true,
             showNoConnectionError = false,
             isRefreshing = false,
+            toolbarTitleText = null,
         )
         State.Error -> Model(
             inputText = "",
@@ -47,6 +49,7 @@ internal object TicketMapper {
             isLoading = false,
             showNoConnectionError = true,
             isRefreshing = false,
+            toolbarTitleText = null,
         )
     }
 
@@ -63,6 +66,7 @@ internal object TicketMapper {
         Event.OnSendClick -> Message.Outer.OnSendClick
         Event.OnShowAttachVariantsClick -> Message.Outer.OnShowAttachVariantsClick
         Event.OnRefresh -> Message.Outer.OnRefresh
+        Event.OnBackClick -> Message.Outer.OnBackClick
     }
 
     fun map(effect: Effect.Outer): TicketView.Effect = when(effect) {
@@ -147,7 +151,7 @@ internal object TicketMapper {
             timeText = null,
             status = Status.Completed,
             contentType = ContentType.Text,
-            authorName = "",
+            authorName = null,
             showAuthorName = false,
             avatarUrl = null,
             showAvatar = true,
@@ -210,15 +214,15 @@ internal object TicketMapper {
             entryId = "${comment.id}",
             id = comment.id,
             isInbound = comment.isInbound,
-            hasError = false, // TODO
+            hasError = true, // TODO
             isLocal = comment.isLocal,
             isWelcomeMessage = false,
             timeText = TextProvider.Date(comment.creationTime, R.string.psd_time_format),
             status = status,
             contentType = ContentType.Text,
-            authorName = comment.author.name,
+            authorName = comment.author?.name,
             showAuthorName = false,
-            avatarUrl = comment.author.avatarUrl,
+            avatarUrl = comment.author?.avatarUrl,
             showAvatar = false,
             content = CommentEntryV2.CommentContent.Text(commentBody),
         )
@@ -245,9 +249,9 @@ internal object TicketMapper {
             isWelcomeMessage = false,
             timeText = TextProvider.Date(comment.creationTime, R.string.psd_time_format),
             status = status,
-            authorName = comment.author.name,
+            authorName = comment.author?.name,
             showAuthorName = false,
-            avatarUrl = comment.author.avatarUrl,
+            avatarUrl = comment.author?.avatarUrl,
             showAvatar = false,
             contentType = contentType,
             content = CommentEntryV2.CommentContent.Image(

@@ -1,9 +1,9 @@
 package com.pyrus.pyrusservicedesk.presentation.ui.view.recyclerview
 
-import androidx.annotation.LayoutRes
-import androidx.recyclerview.widget.RecyclerView
 import android.view.LayoutInflater
 import android.view.ViewGroup
+import androidx.annotation.LayoutRes
+import androidx.recyclerview.widget.RecyclerView
 
 /**
  * Base implementation of [RecyclerView.ViewHolder]

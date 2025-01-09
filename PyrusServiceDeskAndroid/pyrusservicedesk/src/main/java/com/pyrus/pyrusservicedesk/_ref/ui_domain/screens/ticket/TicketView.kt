@@ -3,7 +3,6 @@ package com.pyrus.pyrusservicedesk._ref.ui_domain.screens.ticket
 import android.net.Uri
 import com.pyrus.pyrusservicedesk._ref.ui_domain.screens.ticket.adapter.new_entries.CommentEntryV2
 import com.pyrus.pyrusservicedesk._ref.utils.TextProvider
-import com.pyrus.pyrusservicedesk.sdk.data.intermediate.FileData
 
 internal interface TicketView {
 
@@ -14,6 +13,7 @@ internal interface TicketView {
         val isLoading: Boolean,
         val showNoConnectionError: Boolean,
         val isRefreshing: Boolean,
+        val toolbarTitleText: String?,
     ) {
         override fun toString(): String {
             return "Model(inputText='$inputText', sendEnabled=$sendEnabled, comments=${comments?.size}, isLoading=$isLoading, showNoConnectionError=$showNoConnectionError)"
@@ -35,6 +35,8 @@ internal interface TicketView {
         data object OnSendClick : Event
 
         data object OnCloseClick : Event
+
+        data object OnBackClick : Event
 
         data class OnMessageChanged(val text: String) : Event
 

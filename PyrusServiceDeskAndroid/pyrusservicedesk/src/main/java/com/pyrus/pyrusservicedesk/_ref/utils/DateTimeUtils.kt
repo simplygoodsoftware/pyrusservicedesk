@@ -4,7 +4,9 @@ import android.annotation.SuppressLint
 import android.content.Context
 import com.pyrus.pyrusservicedesk.R
 import java.text.SimpleDateFormat
-import java.util.*
+import java.util.Calendar
+import java.util.Date
+import java.util.TimeZone
 import kotlin.math.ceil
 
 internal const val ISO_DATE_PATTERN = "yyyy-MM-dd'T'HH:mm:ss'Z'"
@@ -56,6 +58,24 @@ internal fun getDateText(date: Calendar, now: Calendar): TextProvider = when {
 
 
 /**
+ * Provides localized date in a "when" manner, like "today" or "20th of march". [now] is used as reference values
+ * to calculate the result.
+ */
+@SuppressLint("SimpleDateFormat")
+internal fun Long.getTimeWhen(context: Context, now: Calendar): String {
+    val zone = TimeZone.getDefault()
+    val date = Calendar.getInstance(zone).apply {
+        timeInMillis = this@getTimeWhen + zone.rawOffset
+    }
+    return when {
+        date.isSameDay(now) -> SimpleDateFormat(context.getString(R.string.psd_time_format)).format(this)
+        date.isSameWeek(now) -> SimpleDateFormat(context.getString(R.string.psd_date_format_d)).format(this)
+        date.isSameYear(now) -> SimpleDateFormat(context.getString(R.string.psd_date_format_d_m_short)).format(this)
+        else -> SimpleDateFormat(context.getString(R.string.psd_date_format_d_m_y_short)).format(this)
+    }
+}
+
+/**
  * Provides localized date in a "how much passed" manner like "1 day ago" of "5 years ago". [from] is used as
  * reference value to calculate the result.
  */
@@ -86,6 +106,8 @@ internal fun Date.getTimePassedFrom(context: Context, from: Calendar): String {
 private fun Calendar.isSameDay(another: Calendar): Boolean = daysFrom(another) == 0
 
 private fun Calendar.isOneDayBefore(another: Calendar): Boolean = daysFrom(another) == -1
+
+private fun Calendar.isSameWeek(another: Calendar): Boolean = get(Calendar.WEEK_OF_YEAR) == another.get(Calendar.WEEK_OF_YEAR)
 
 private fun Calendar.isSameYear(another: Calendar) = get(Calendar.YEAR) == another.get(Calendar.YEAR)
 

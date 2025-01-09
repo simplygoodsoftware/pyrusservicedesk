@@ -81,6 +81,7 @@ internal class TicketFragment: TeaFragment<Model, TicketView.Event, TicketView.E
             binding.ticketContent.isVisible = !isLoading
             binding.progressBar.isVisible = isLoading
         }
+        diff(Model::toolbarTitleText) { text -> binding.toolbarTitle.text = ConfigUtils.getTitle(requireContext(), text) }
         diff(Model::isRefreshing) { isRefreshing -> binding.refresh.isRefreshing = isRefreshing }
     }
 
@@ -103,6 +104,11 @@ internal class TicketFragment: TeaFragment<Model, TicketView.Event, TicketView.E
                 AttachFileVariantsFragment().show(parentFragmentManager, "")
             }
         }
+    }
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        bindFeature()
     }
 
     override fun onCreateView(
@@ -131,8 +137,6 @@ internal class TicketFragment: TeaFragment<Model, TicketView.Event, TicketView.E
         )
         ViewCompat.setOnApplyWindowInsetsListener(binding.root, deferringInsetsListener)
 
-        bindFeature()
-
         attachFileSharedViewModel.getFilePickedLiveData().observe(viewLifecycleOwner) { fileUri ->
             dispatch(TicketView.Event.OnAttachmentSelected(fileUri))
         }
@@ -144,7 +148,18 @@ internal class TicketFragment: TeaFragment<Model, TicketView.Event, TicketView.E
     }
 
     private fun bindFeature() {
-        val feature = getStore { injector().ticketFeatureFactory("welcome").create() }
+        val userId = arguments?.getString(KEY_USER_ID) ?: KEY_DEFAULT_USER_ID
+        // TODO если открыть файл и вернуться в задачу скорее всего id обновится
+        val ticketId = arguments?.getInt(
+            KEY_TICKET_ID,
+            injector().localCommandsStore.getLastTicketId()  // TODO wtf
+        ) ?: injector().localCommandsStore.getLastTicketId()
+
+        val feature = getStore { injector().ticketFeatureFactory.create(
+            userId = userId,
+            ticketId = ticketId,
+            welcomeMessage = "welcome"
+        ) }
         bind(BinderLifecycleMode.CREATE_DESTROY) {
             this@TicketFragment.messages.map(TicketMapper::map) bindTo feature
         }
@@ -165,6 +180,7 @@ internal class TicketFragment: TeaFragment<Model, TicketView.Event, TicketView.E
         binding.attach.setOnClickListener { dispatch(TicketView.Event.OnShowAttachVariantsClick) }
         binding.input.addTextChangedListener(inputTextWatcher)
         binding.refresh.setOnRefreshListener { dispatch(TicketView.Event.OnRefresh) }
+        binding.toolbarBack.setOnClickListener { dispatch(TicketView.Event.OnCloseClick) }
     }
 
     private fun initUi() {
@@ -310,9 +326,19 @@ internal class TicketFragment: TeaFragment<Model, TicketView.Event, TicketView.E
 
     companion object {
         private const val STATE_KEYBOARD_SHOWN = "STATE_KEYBOARD_SHOWN"
+        private const val KEY_TICKET_ID = "KEY_TICKET_ID"
+        private const val KEY_USER_ID = "KEY_USER_ID"
+        const val KEY_DEFAULT_USER_ID = "0"
+        const val KEY_DEFAULT_TICKET_ID = 0
 
-        fun newInstance(): TicketFragment {
-            return TicketFragment()
+        fun newInstance(ticketId: Int?, userId: String?): TicketFragment {
+            val fragment = TicketFragment()
+            val args = Bundle().apply {
+                putString(KEY_USER_ID, userId)
+                ticketId?.let { putInt(KEY_TICKET_ID, it) }
+            }
+            fragment.arguments = args
+            return fragment
         }
     }
 

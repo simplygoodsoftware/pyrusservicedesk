@@ -1,9 +1,9 @@
 package com.pyrus.pyrusservicedesk._ref.whitetea.utils
 
+import com.pyrus.pyrusservicedesk._ref.whitetea.core.Store
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.mapNotNull
-import com.pyrus.pyrusservicedesk._ref.whitetea.core.Store
 
 internal class StoreProxy<State1 : Any, Message1 : Any, Effect1 : Any, State2 : Any, Message2 : Any, Effect2 : Any>(
     private val store: Store<State1, Message1, Effect1>,

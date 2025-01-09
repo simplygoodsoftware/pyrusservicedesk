@@ -1,8 +1,7 @@
 package com.pyrus.pyrusservicedesk.sdk.data
 
 import com.google.gson.annotations.SerializedName
-import com.pyrus.pyrusservicedesk.sdk.data.gson.Local
-import java.util.*
+import java.util.Date
 
 internal const val COMMENT_ID_EMPTY = 0L
 
@@ -16,7 +15,7 @@ internal data class CommentDto(
     @SerializedName("is_inbound") val isInbound: Boolean = false,
     @SerializedName("attachments") val attachments: List<AttachmentDto>? = null,
     @SerializedName("created_at") val creationDate: Date,
-    @SerializedName("author") val author: AuthorDto,
+    @SerializedName("author") val author: AuthorDto?,
     @SerializedName("rating") val rating: Int? = null,
 ) {
 

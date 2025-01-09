@@ -1,6 +1,9 @@
 package com.pyrus.pyrusservicedesk._ref.utils
 
-import com.pyrus.pyrusservicedesk._ref.utils.FileFormat.*
+import com.pyrus.pyrusservicedesk._ref.utils.FileFormat.GIF
+import com.pyrus.pyrusservicedesk._ref.utils.FileFormat.JPEG
+import com.pyrus.pyrusservicedesk._ref.utils.FileFormat.JPG
+import com.pyrus.pyrusservicedesk._ref.utils.FileFormat.PNG
 
 internal const val MIME_TYPE_IMAGE_ANY = "image/*"
 internal const val MIME_TYPE_IMAGE_JPEG = "image/jpeg"

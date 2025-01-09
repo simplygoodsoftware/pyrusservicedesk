@@ -1,9 +1,9 @@
 package com.pyrus.pyrusservicedesk.presentation.ui.navigation_page.ticket.dialogs.attach_files
 
+import android.net.Uri
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
-import android.net.Uri
 
 /**
  * Shared view model of the ticket activity.

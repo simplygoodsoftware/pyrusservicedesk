@@ -40,9 +40,9 @@ class PyrusNavigator(
     }
 
     override fun applyCommand(command: Command) {
-        super.applyCommand(command)
         when (command) {
             is NewRootOrUpdate -> replaceOrUpdate(command)
+            else -> super.applyCommand(command)
         }
     }
 

@@ -3,15 +3,14 @@ package com.pyrus.pyrusservicedesk.sdk.updates
 import android.os.Handler
 import android.os.Looper
 import androidx.annotation.MainThread
-import com.pyrus.pyrusservicedesk.PyrusServiceDesk
-import com.pyrus.pyrusservicedesk._ref.utils.log.PLog
-import com.pyrus.pyrusservicedesk.sdk.data.TicketShortDescription
-import com.pyrus.pyrusservicedesk.sdk.repositories.Repository
 import com.pyrus.pyrusservicedesk._ref.utils.MILLISECONDS_IN_DAY
 import com.pyrus.pyrusservicedesk._ref.utils.MILLISECONDS_IN_HOUR
 import com.pyrus.pyrusservicedesk._ref.utils.MILLISECONDS_IN_MINUTE
 import com.pyrus.pyrusservicedesk._ref.utils.MILLISECONDS_IN_SECOND
 import com.pyrus.pyrusservicedesk._ref.utils.isSuccess
+import com.pyrus.pyrusservicedesk._ref.utils.log.PLog
+import com.pyrus.pyrusservicedesk.sdk.data.TicketDto
+import com.pyrus.pyrusservicedesk.sdk.repositories.Repository
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -34,6 +33,7 @@ internal class LiveUpdates(
     private val repository: Repository,
     private val preferencesManager: Preferences,
     private var userId: String?,
+    //private var ticketId: Int,
     private val mainDispatcher: CoroutineDispatcher = Dispatchers.Main,
     private val ioDispatcher: CoroutineDispatcher = Dispatchers.IO,
     private val coreScope: CoroutineScope,
@@ -61,7 +61,7 @@ internal class LiveUpdates(
                 val ticketsTry = repository.getTickets()
                 if (ticketsTry.isSuccess()) {
                     val data = ticketsTry.value
-                    val newUnread = data.count { !it.isRead }
+                    val newUnread = data.count()//data.count { !it.isRead } //TODO
                     this@launch.launch(mainDispatcher) {
                         // TODO
                         if (true) return@launch
@@ -250,7 +250,7 @@ internal class LiveUpdates(
     }
 
     @MainThread
-    private fun processGetTicketsSuccess(data: List<TicketShortDescription>, newUnreadCount: Int) {
+    private fun processGetTicketsSuccess(data: List<TicketDto>, newUnreadCount: Int) {
         val isChanged = recentUnreadCounter != newUnreadCount
         PLog.d(TAG, "processSuccess, isChanged: $isChanged, recentUnreadCounter: $recentUnreadCounter, newUnreadCount: $newUnreadCount")
         notifyDataSubscribers(data, isChanged, newUnreadCount)
@@ -280,41 +280,48 @@ internal class LiveUpdates(
 
             val responseUserId = userId
             PLog.d(TAG, "getTicketRequest")
-            coreScope.launch(ioDispatcher) {
-                val feedTry = repository.getFeed(true)
+            for (ticket in data) {
 
-                withContext(mainDispatcher) {
-                    if (responseUserId != userId) {
-                        return@withContext
+                coreScope.launch(ioDispatcher) {
+                    val feedTry = repository.getFeed(ticket.ticketId, ticket.userId ?: "", true) //TODO это удалится вообще?
+
+                    withContext(mainDispatcher) {
+                        if (responseUserId != userId) {
+                            return@withContext
+                        }
+
+                        if (!feedTry.isSuccess()) {
+                            this@LiveUpdates.lastCommentId = 0
+                            PLog.d(TAG, "response.hasError, error: ${feedTry.error}")
+                            return@withContext
+                        }
+
+                        val comments = feedTry.value.comments
+                        val lastSavedCommentInMainScope =
+                            this@LiveUpdates.preferencesManager.getLastComment()
+                        val lastServerComment =
+                            comments.findLast { !it.isInbound } ?: return@withContext
+                        if (lastServerComment.id <= (lastSavedCommentInMainScope?.id ?: 0))
+                            return@withContext
+
+                        val lastUserComment =
+                            comments.findLast { it.isInbound } ?: return@withContext
+
+                        updateGetTicketsIntervalIfNeeded(lastUserComment.creationTime)
+
+                        val chatIsShown = activeScreenCount > 0
+                        val lastComment = LastComment.mapFromComment(
+                            newReplySubscribers.isNotEmpty() || chatIsShown,
+                            !hasUnreadTickets,
+                            lastServerComment
+                        )
+
+                        this@LiveUpdates.preferencesManager.saveLastComment(lastComment)
+                        if (!chatIsShown)
+                            notifyNewReplySubscribers(lastComment)
                     }
-
-                    if (!feedTry.isSuccess()) {
-                        this@LiveUpdates.lastCommentId = 0
-                        PLog.d(TAG, "response.hasError, error: ${feedTry.error}")
-                        return@withContext
-                    }
-
-                    val comments = feedTry.value.comments
-                    val lastSavedCommentInMainScope = this@LiveUpdates.preferencesManager.getLastComment()
-                    val lastServerComment = comments.findLast { !it.isInbound } ?: return@withContext
-                    if (lastServerComment.id <= (lastSavedCommentInMainScope?.id ?: 0))
-                        return@withContext
-
-                    val lastUserComment = comments.findLast { it.isInbound } ?: return@withContext
-
-                    updateGetTicketsIntervalIfNeeded(lastUserComment.creationTime)
-
-                    val chatIsShown = activeScreenCount > 0
-                    val lastComment = LastComment.mapFromComment(
-                        newReplySubscribers.isNotEmpty() || chatIsShown,
-                        !hasUnreadTickets,
-                        lastServerComment
-                    )
-
-                    this@LiveUpdates.preferencesManager.saveLastComment(lastComment)
-                    if (!chatIsShown)
-                        notifyNewReplySubscribers(lastComment)
                 }
+
             }
         }
     }
@@ -327,7 +334,7 @@ internal class LiveUpdates(
         }
     }
 
-    private fun notifyDataSubscribers(data: List<TicketShortDescription>, isChanged: Boolean, newUnreadCount: Int) {
+    private fun notifyDataSubscribers(data: List<TicketDto>, isChanged: Boolean, newUnreadCount: Int) {
         dataSubscribers.forEach {
             it.onNewData(data)
             if (isChanged)
@@ -367,7 +374,7 @@ internal interface LiveUpdateSubscriber: OnUnreadTicketCountChangedSubscriber {
     /**
      * Invoked when new portion of [tickets] data is received.
      */
-    fun onNewData(tickets: List<TicketShortDescription>)
+    fun onNewData(tickets: List<TicketDto>)
 }
 
 /**

@@ -4,8 +4,8 @@ import android.graphics.drawable.AnimationDrawable
 import android.view.View
 import android.view.ViewGroup
 import com.pyrus.pyrusservicedesk.R
-import com.pyrus.pyrusservicedesk.databinding.PsdViewHolderCommentRatingBinding
 import com.pyrus.pyrusservicedesk._ref.ui_domain.screens.ticket.adapter.new_entries.CommentEntryV2
+import com.pyrus.pyrusservicedesk.databinding.PsdViewHolderCommentRatingBinding
 import com.pyrus.pyrusservicedesk.presentation.ui.view.recyclerview.ViewHolderBase
 
 internal class RatingCommentHolder(

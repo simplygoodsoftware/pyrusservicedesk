@@ -4,10 +4,10 @@ import android.content.Context
 import android.content.res.Configuration
 import android.content.res.Resources
 import android.graphics.Color
+import android.util.TypedValue
 import androidx.annotation.AttrRes
 import androidx.annotation.ColorInt
 import androidx.core.content.ContextCompat
-import android.util.TypedValue
 
 /**
  * Extracts color from context theme by attribute id

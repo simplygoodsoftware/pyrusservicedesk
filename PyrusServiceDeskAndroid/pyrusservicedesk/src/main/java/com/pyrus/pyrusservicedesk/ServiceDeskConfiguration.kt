@@ -6,7 +6,6 @@ import androidx.annotation.ColorRes
 import androidx.annotation.DrawableRes
 import com.pyrus.pyrusservicedesk.ServiceDeskConfiguration.Builder
 import com.pyrus.pyrusservicedesk.core.StaticRepository
-import com.pyrus.pyrusservicedesk._ref.utils.isTablet
 
 /**
  * Represents custom settings that can be applied when service desk is started via [PyrusServiceDesk.start]

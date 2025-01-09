@@ -4,7 +4,6 @@ import android.annotation.SuppressLint
 import android.content.SharedPreferences
 import com.google.gson.GsonBuilder
 import com.google.gson.reflect.TypeToken
-import java.lang.Exception
 import java.lang.reflect.Type
 
 @SuppressLint("ApplySharedPref")

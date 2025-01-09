@@ -3,24 +3,26 @@ package com.pyrus.pyrusservicedesk
 import android.app.Activity
 import android.app.Application
 import android.content.Context
+import android.content.Intent
 import android.content.SharedPreferences
 import androidx.annotation.MainThread
 import com.pyrus.pyrusservicedesk._ref.ui_domain.screens.ticket.MainActivity
 import com.pyrus.pyrusservicedesk._ref.utils.ConfigUtils
-import com.pyrus.pyrusservicedesk.core.DiInjector
-import com.pyrus.pyrusservicedesk.core.StaticRepository
-import com.pyrus.pyrusservicedesk._ref.utils.log.PLog
-import com.pyrus.pyrusservicedesk.presentation.viewmodel.SharedViewModel
-import com.pyrus.pyrusservicedesk.sdk.updates.NewReplySubscriber
-import com.pyrus.pyrusservicedesk.sdk.updates.OnStopCallback
 import com.pyrus.pyrusservicedesk._ref.utils.MILLISECONDS_IN_MINUTE
 import com.pyrus.pyrusservicedesk._ref.utils.PREFERENCE_KEY
 import com.pyrus.pyrusservicedesk._ref.utils.RequestUtils
 import com.pyrus.pyrusservicedesk._ref.utils.getFirstNSymbols
+import com.pyrus.pyrusservicedesk._ref.utils.log.PLog
 import com.pyrus.pyrusservicedesk.core.Account
-import com.pyrus.pyrusservicedesk.presentation.ui.navigation_page.ticket.TicketActivity
+import com.pyrus.pyrusservicedesk.core.DiInjector
+import com.pyrus.pyrusservicedesk.core.StaticRepository
+import com.pyrus.pyrusservicedesk.presentation.viewmodel.SharedViewModel
+import com.pyrus.pyrusservicedesk.sdk.updates.NewReplySubscriber
+import com.pyrus.pyrusservicedesk.sdk.updates.OnStopCallback
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
 
 
 class PyrusServiceDesk private constructor(
@@ -49,8 +51,21 @@ class PyrusServiceDesk private constructor(
 
         internal const val API_VERSION_1: Int = 0
         internal const val API_VERSION_2: Int = 2
+        internal const val API_VERSION_3: Int = 4
 
         private const val DEFAULT_TOKEN_TYPE: String = "android"
+
+        internal var logging = false
+            private set
+
+        private val _stateFlow = MutableStateFlow(emptyList<User>())
+        val ticketsListStateFlow: StateFlow<List<User>> get() = _stateFlow
+
+        @JvmStatic
+        @JvmOverloads
+        fun updateValue(newValue: List<User>) {
+            _stateFlow.value = newValue
+        }
 
         /**
          * Initializes PyrusServiceDesk embeddable module.
@@ -71,13 +86,17 @@ class PyrusServiceDesk private constructor(
             application: Application,
             appId: String,
             domain: String? = null,
+            isMultiChat: Boolean,
             loggingEnabled: Boolean = false,
             authorizationToken: String? = null,
         ) {
             initInternal(
                 application,
+                null,
                 appId,
                 null,
+                null,
+                isMultiChat,
                 null,
                 domain,
                 API_VERSION_1,
@@ -108,6 +127,7 @@ class PyrusServiceDesk private constructor(
             application: Application,
             appId: String,
             userId: String,
+            isMultiChat: Boolean,
             securityKey: String,
             domain: String? = null,
             loggingEnabled: Boolean = false,
@@ -115,8 +135,11 @@ class PyrusServiceDesk private constructor(
         ) {
             initInternal(
                 application,
+                null,
                 appId,
                 userId,
+                null,
+                isMultiChat,
                 securityKey,
                 domain,
                 API_VERSION_2,
@@ -125,10 +148,57 @@ class PyrusServiceDesk private constructor(
             )
         }
 
+        /**
+         * Initializes PyrusServiceDesk embeddable module.
+         * This init is used for authorized users with device independent sessions.
+         * The best approach is to call this in [Application.onCreate]
+         * ***PS***: Should be done before other public methods are is called.
+         * Unhandled IllegalStateException is thrown otherwise.
+         *
+         * @param application instance of the enclosing application
+         * @param appId id of a client // TODO
+         * @param userId of the user who is initializing service desk // TODO
+         * @param securityKey of the user far safe initialization // TODO
+         * @param domain Base domain for network requests. If the [domain] is null, the default pyrus.com will be used.
+         * @param loggingEnabled If true, then the library will write logs,
+         * and they can be sent as a file to chat by clicking the "Send Library Logs" button in the menu under the "+" sign.
+         * @param authorizationToken // TODO sds
+         */
+        @JvmStatic
+        @JvmOverloads
+        fun init(
+            application: Application,
+            listUser: List<User>,
+            authorId: String,
+            isMultiChat: Boolean,
+            domain: String? = null,
+            loggingEnabled: Boolean = false,
+            authorizationToken: String? = null,
+        ) {
+            if (listUser.isEmpty()) throw Exception("user list is empty")
+
+            initInternal(
+                application,
+                listUser,
+                listUser.first().appId,
+                null,
+                authorId,
+                isMultiChat,
+                null,
+                domain,
+                API_VERSION_3,
+                loggingEnabled,
+                authorizationToken,
+            )
+        }
+
         private fun initInternal(
             application: Application,
+            listUser: List<User>?,
             appId: String,
             userId: String?,
+            authorId: String?,
+            isMultiChat: Boolean,
             securityKey: String?,
             domain: String?,
             apiVersion: Int = API_VERSION_1,
@@ -142,17 +212,29 @@ class PyrusServiceDesk private constructor(
 
             val apiDomain =  domain ?: "pyrus.com"
 
-            val newAccount = if (userId == null || securityKey == null) Account.V1(
+            val newAccount = if (listUser != null && authorId != null)
+                Account.V3(
+                    instanceId,
+                    appId,
+                    apiDomain,
+                    isMultiChat,
+                    listUser.first().userId,
+                    listUser,
+                    authorId,
+                )
+            else if (userId == null || securityKey == null) Account.V1(
                 instanceId,
                 appId,
-                apiDomain
+                apiDomain,
+                isMultiChat
             )
             else Account.V2(
                 instanceId,
                 appId,
                 apiDomain,
+                isMultiChat,
                 userId,
-                securityKey
+                securityKey,
             )
 
             INJECTOR = DiInjector(
@@ -163,6 +245,10 @@ class PyrusServiceDesk private constructor(
                 CoroutineScope(Dispatchers.Main),
                 preferences
             )
+
+            if (newAccount is Account.V3 && listUser != null) {
+                updateValue(listUser)
+            }
 
 
             // TODO sds
@@ -175,8 +261,8 @@ class PyrusServiceDesk private constructor(
             // TODO sds
 //            if (INSTANCE != null && get().userId != userId) {
 //                clearLocalData {
-//                    if (CONFIGURATION != null)
-//                        stop()
+////                    if (CONFIGURATION != null)
+////                        stop()
 //                    INSTANCE = PyrusServiceDesk(
 //                        application,
 //                        appId,
@@ -223,11 +309,15 @@ class PyrusServiceDesk private constructor(
         fun start(
             activity: Activity,
             configuration: ServiceDeskConfiguration? = null,
-            onStopCallback: OnStopCallback? = null
+            onStopCallback: OnStopCallback? = null,
+            openQrIntent: Intent? = null,
+            openSettingsIntent: Intent? = null,
         ) = startImpl(
             activity = activity,
             configuration = configuration,
-            onStopCallback = onStopCallback
+            onStopCallback = onStopCallback,
+            openQrIntent = openQrIntent,
+            openSettingsIntent = openSettingsIntent,
         )
 
         /**
@@ -358,9 +448,15 @@ class PyrusServiceDesk private constructor(
         private fun startImpl(
             activity: Activity,
             configuration: ServiceDeskConfiguration? = null,
-            onStopCallback: OnStopCallback? = null
+            onStopCallback: OnStopCallback? = null,
+            openQrIntent: Intent? = null,
+            openSettingsIntent: Intent? = null,
         ) {
             StaticRepository.setConfiguration(configuration)
+
+            if (INJECTOR != null) {
+                injector().setIntent(openQrIntent, openSettingsIntent)
+            }
 
             // TODO
 //            get().sharedViewModel.clearQuitServiceDesk()

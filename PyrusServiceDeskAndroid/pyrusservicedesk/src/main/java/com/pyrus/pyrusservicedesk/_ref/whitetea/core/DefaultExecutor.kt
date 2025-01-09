@@ -1,6 +1,7 @@
 package com.pyrus.pyrusservicedesk._ref.whitetea.core
 
 import android.util.Log
+import com.pyrus.pyrusservicedesk._ref.whitetea.core.Executor.Callbacks
 import kotlinx.coroutines.CoroutineExceptionHandler
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -8,10 +9,6 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
-import com.pyrus.pyrusservicedesk._ref.whitetea.core.Executor.Callbacks
-import kotlinx.coroutines.async
-import kotlinx.coroutines.flow.MutableSharedFlow
-import kotlinx.coroutines.runBlocking
 import java.util.concurrent.atomic.AtomicReference
 import kotlin.coroutines.CoroutineContext
 
@@ -58,6 +55,7 @@ internal open class DefaultExecutor<State : Any, Message : Any, Effect : Any>(
 
     private fun step(next: Update<State, Effect>) {
         Log.d("SDS", "state: ${next.state}")
+        Log.d("SDS", "effects: ${next.effects}")
 
         val renderState = next.state
 
