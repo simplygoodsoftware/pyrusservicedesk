@@ -45,7 +45,7 @@ public class SampleActivity extends Activity implements NewReplySubscriber {
             users.add(user1);
             users.add(user2);
             users.add(user3);
-            PyrusServiceDesk.init(getApplication(), users, "10");
+            PyrusServiceDesk.initAsMultichat(getApplication(), users, "10");
 
             Map<String, String> map = new HashMap<>();
             map.put("test_text", "test some text");

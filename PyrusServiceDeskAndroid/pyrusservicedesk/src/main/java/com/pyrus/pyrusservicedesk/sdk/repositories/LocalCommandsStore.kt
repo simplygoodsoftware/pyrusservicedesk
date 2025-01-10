@@ -48,12 +48,12 @@ internal class LocalCommandsStore(
      */
     fun getPendingCommands(): List<CommandEntity> {
         val rawJson = preferences.getString(PREFERENCE_KEY_OFFLINE_TICKET_COMMANDS, "[]")
-        val commandsList = gson.fromJson<List<CommandEntity>>(rawJson, commandListTokenType).toMutableList()
-
-        if (commandsList.removeAll { localDataVerifier.isLocalCommandEmpty(it) }) {
-            writeCommands(commandsList)
-        }
-        return commandsList
+//        val commandsList = gson.fromJson<List<CommandEntity>>(rawJson, commandListTokenType).toMutableList()
+//
+//        if (commandsList.removeAll { localDataVerifier.isLocalCommandEmpty(it) }) {
+//            writeCommands(commandsList)
+//        }
+        return emptyList()
     }
 
     fun getCommand(localId: Long): CommandEntity? {

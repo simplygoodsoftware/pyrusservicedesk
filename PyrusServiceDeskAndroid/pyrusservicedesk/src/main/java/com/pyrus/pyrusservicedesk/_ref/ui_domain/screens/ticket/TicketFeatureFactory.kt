@@ -60,6 +60,7 @@ internal class TicketFeatureFactory(
         initialEffects = listOf(
             Effect.Inner.FeedFlow,
             Effect.Inner.UpdateComments(force = false, ticketId = ticketId),
+            Effect.Inner.ReadTicket(user = user, ticketId = ticketId),
         ),
     ).adapt { it as? Effect.Outer }
 
@@ -235,6 +236,7 @@ internal class TicketActor(
             router.navigateTo(Screens.ImageScreen(fileDate))
         }
         is Effect.Inner.SaveDraft -> flow { draftRepository.saveDraft(effect.draft) }
+        is Effect.Inner.ReadTicket -> flow { repository.readTicket(effect.user, effect.ticketId) }
     }
 
 }

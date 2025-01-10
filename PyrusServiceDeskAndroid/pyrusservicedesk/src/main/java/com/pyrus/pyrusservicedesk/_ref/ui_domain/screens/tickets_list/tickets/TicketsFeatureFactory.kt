@@ -58,13 +58,17 @@ private class FeatureReducer: Logic<State, Message, Effect>() {
             Message.Outer.OnFabItemClick -> {
                 val contentState = state.contentState as? ContentState.Content ?: return
                 val selectedAppId = contentState.appId ?: return
-                val users = state.account.users
+                val users = state.account.users.filter { it.appId == contentState.appId }
 
-                // TODO если выбран фильтр нужно выбирать пользователя по фильтру
                 val firstUser = users.first()
+                val selectedUser = contentState.filterId?.let { id -> users.find { it.userId == id } }
 
-                if (users.size > 1) {
+                if (users.size > 1 && selectedUser == null) {
                     effects { +Effect.Outer.ShowAddTicketMenu(selectedAppId, users) }
+                }
+                else if (users.size > 1 && selectedUser != null) {
+                    val user = UserInternal(selectedUser.userId, selectedAppId)
+                    effects { +Effect.Inner.OpenTicketScreen(user, null) }
                 }
                 else {
                     val user = UserInternal(firstUser.userId, selectedAppId)
@@ -205,12 +209,6 @@ internal class TicketsActor(
         Effect.Inner.TicketsSetFlow -> repository.getAllDataFlow().map { Message.Inner.TicketsUpdated(it) }
 
         is Effect.Inner.OpenTicketScreen -> flow {
-            // TODO readTicket перенести в TicketScreen
-//            if (effect.userId != null && effect.ticketId != null)
-//                repository.readTicket(
-//                    user = effect.userId,
-//                    ticketId = effect.ticketId
-//                )
             router.navigateTo(Screens.TicketScreen(effect.ticketId, effect.user))
         }
 

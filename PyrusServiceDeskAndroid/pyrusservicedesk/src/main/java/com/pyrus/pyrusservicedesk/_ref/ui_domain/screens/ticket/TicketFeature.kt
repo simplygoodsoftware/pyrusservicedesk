@@ -5,6 +5,7 @@ import com.pyrus.pyrusservicedesk._ref.data.Attachment
 import com.pyrus.pyrusservicedesk._ref.data.FullTicket
 import com.pyrus.pyrusservicedesk._ref.utils.TextProvider
 import com.pyrus.pyrusservicedesk._ref.whitetea.core.Store
+import com.pyrus.pyrusservicedesk.sdk.repositories.UserInternal
 
 internal typealias TicketFeature = Store<TicketContract.State, TicketContract.Message, TicketContract.Effect.Outer>
 
@@ -97,6 +98,7 @@ internal interface TicketContract {
             data class RetryAddComment(val id: Long) : Inner
             data class OpenPreview(val attachment: Attachment) : Inner
             data class SaveDraft(val draft: String) : Inner
+            data class ReadTicket(val user: UserInternal, val ticketId: Int) : Inner
         }
     }
 
