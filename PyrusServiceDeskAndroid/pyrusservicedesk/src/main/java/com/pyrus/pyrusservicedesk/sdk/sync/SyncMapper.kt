@@ -58,9 +58,11 @@ internal object SyncMapper {
 
     private fun mapToCommand(request: SyncRequest): TicketCommandDto? = when(request) {
         is SyncRequest.Command.AddComment -> TicketCommandDto(
-            request.commandId,
-            TicketCommandType.CreateComment.ordinal,
-            CommandParamsDto.CreateComment(
+            commandId = request.commandId,
+            type = TicketCommandType.CreateComment.ordinal,
+            appId = request.appId,
+            userId = request.userId,
+            params = CommandParamsDto.CreateComment(
                 requestNewTicket = false,
                 userId = request.userId,
                 appId = request.appId,
@@ -71,9 +73,11 @@ internal object SyncMapper {
             ),
         )
         is SyncRequest.Command.CreateTicket -> TicketCommandDto(
-            request.commandId,
-            TicketCommandType.CreateComment.ordinal,
-            CommandParamsDto.CreateComment(
+            commandId = request.commandId,
+            type = TicketCommandType.CreateComment.ordinal,
+            appId = request.appId,
+            userId = request.userId,
+            params = CommandParamsDto.CreateComment(
                 requestNewTicket = true,
                 userId = request.userId,
                 appId = request.appId,
@@ -84,9 +88,11 @@ internal object SyncMapper {
             ),
         )
         is SyncRequest.Command.MarkTicketAsRead -> TicketCommandDto(
-            request.commandId,
-            TicketCommandType.MarkTicketAsRead.ordinal,
-            CommandParamsDto.MarkTicketAsRead(
+            commandId = request.commandId,
+            type = TicketCommandType.MarkTicketAsRead.ordinal,
+            appId = request.appId,
+            userId = request.userId,
+            params = CommandParamsDto.MarkTicketAsRead(
                 ticketId = request.ticketId,
                 userId = request.userId,
                 appId = request.appId,
@@ -94,9 +100,11 @@ internal object SyncMapper {
             ),
         )
         is SyncRequest.Command.SetPushToken -> TicketCommandDto(
-            request.commandId,
-            TicketCommandType.SetPushToken.ordinal,
-            CommandParamsDto.SetPushToken(
+            commandId = request.commandId,
+            type = TicketCommandType.SetPushToken.ordinal,
+            appId = request.appId,
+            userId = request.userId,
+            params = CommandParamsDto.SetPushToken(
                 userId = request.userId,
                 appId = request.appId,
                 token = request.token,

@@ -17,7 +17,6 @@ import com.pyrus.pyrusservicedesk._ref.utils.map
 import com.pyrus.pyrusservicedesk.core.Account
 import com.pyrus.pyrusservicedesk.sdk.FileResolver
 import com.pyrus.pyrusservicedesk.sdk.data.AttachmentDto
-import com.pyrus.pyrusservicedesk.sdk.data.CommandDto
 import com.pyrus.pyrusservicedesk.sdk.data.CommentDto
 import com.pyrus.pyrusservicedesk.sdk.data.FileManager
 import com.pyrus.pyrusservicedesk.sdk.data.UserDataDto
@@ -139,34 +138,34 @@ internal class RemoteStore(
 //        return ticketsTry.map { it.tickets ?: emptyList() }
 //    }
 
-    suspend fun getAllData(commands: List<CommandDto>? = null): Try<TicketsInfo> {
-        val v3 = account as Account.V3 // TODO
-        PLog.d(
-            TAG, "getAllData, " +
-                    "appId: ${v3.firstAppId.getFirstNSymbols(10)}, " +
-                    "userId: ${getUserId().getFirstNSymbols(10)}, " +
-                    "instanceId: ${getInstanceId()?.getFirstNSymbols(10)}, " +
-                    "apiVersion: ${getVersion()}"
-        )
-        val ticketsTry = api.getTickets(
-            RequestBodyBase(
-                needFullInfo = true,
-                additionalUsers = getAdditionalUsers(),
-                commands = null,
-                authorId = getAuthorId(),
-                authorName = ConfigUtils.getUserName(),
-                appId = v3.firstAppId,
-                userId = getUserId(),
-                instanceId = getInstanceId(),
-                version = getVersion(),
-                apiSign = apiFlag,
-                securityKey = getSecurityKey(),
-                lastNoteId = TODO(),
-            )
-        )
-        PLog.d(TAG, "getTickets, isSuccessful: ${ticketsTry.isSuccess()}")
-        return ticketsTry.map { mapTickets(v3, it) }
-    }
+//    suspend fun getAllData(commands: List<CommandDto>? = null): Try<TicketsInfo> {
+//        val v3 = account as Account.V3 // TODO
+//        PLog.d(
+//            TAG, "getAllData, " +
+//                    "appId: ${v3.firstAppId.getFirstNSymbols(10)}, " +
+//                    "userId: ${getUserId().getFirstNSymbols(10)}, " +
+//                    "instanceId: ${getInstanceId()?.getFirstNSymbols(10)}, " +
+//                    "apiVersion: ${getVersion()}"
+//        )
+//        val ticketsTry = api.getTickets(
+//            RequestBodyBase(
+//                needFullInfo = true,
+//                additionalUsers = getAdditionalUsers(),
+//                commands = null,
+//                authorId = getAuthorId(),
+//                authorName = ConfigUtils.getUserName(),
+//                appId = v3.firstAppId,
+//                userId = getUserId(),
+//                instanceId = getInstanceId(),
+//                version = getVersion(),
+//                apiSign = apiFlag,
+//                securityKey = getSecurityKey(),
+//                lastNoteId = TODO(),
+//            )
+//        )
+//        PLog.d(TAG, "getTickets, isSuccessful: ${ticketsTry.isSuccess()}")
+//        return ticketsTry.map { mapTickets(v3, it) }
+//    }
 
 
     private fun mapTickets(accountV3: Account.V3, ticketsDto: TicketsDto): TicketsInfo {
