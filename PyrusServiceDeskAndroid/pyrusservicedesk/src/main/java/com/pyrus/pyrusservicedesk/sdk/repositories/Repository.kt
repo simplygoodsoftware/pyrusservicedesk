@@ -1,7 +1,6 @@
 package com.pyrus.pyrusservicedesk.sdk.repositories
 
 import android.net.Uri
-import com.pyrus.pyrusservicedesk.PyrusServiceDesk.Companion.injector
 import com.pyrus.pyrusservicedesk._ref.data.Attachment
 import com.pyrus.pyrusservicedesk._ref.data.Author
 import com.pyrus.pyrusservicedesk._ref.data.Comment
@@ -14,7 +13,6 @@ import com.pyrus.pyrusservicedesk._ref.utils.isSuccess
 import com.pyrus.pyrusservicedesk._ref.utils.map
 import com.pyrus.pyrusservicedesk.presentation.ui.view.Status
 import com.pyrus.pyrusservicedesk.sdk.FileResolver
-import com.pyrus.pyrusservicedesk.sdk.sync.TicketCommandResultDto
 import com.pyrus.pyrusservicedesk.sdk.data.TicketDto
 import com.pyrus.pyrusservicedesk.sdk.data.intermediate.AddCommentResponseData
 import com.pyrus.pyrusservicedesk.sdk.data.intermediate.FileData
@@ -22,7 +20,6 @@ import com.pyrus.pyrusservicedesk.sdk.data.intermediate.TicketsDto
 import com.pyrus.pyrusservicedesk.sdk.sync.CommandParamsDto
 import com.pyrus.pyrusservicedesk.sdk.sync.SyncRequest
 import com.pyrus.pyrusservicedesk.sdk.sync.Synchronizer
-import com.pyrus.pyrusservicedesk.sdk.sync.TicketCommandDto
 import com.pyrus.pyrusservicedesk.sdk.web.UploadFileHook
 import com.pyrus.pyrusservicedesk.sdk.web.retrofit.RemoteFileStore
 import kotlinx.coroutines.flow.Flow
@@ -105,7 +102,9 @@ internal class Repository(
 
         val tickets: TicketsDto = syncTry.value
         val ticket: TicketDto? = tickets.tickets?.find { it.ticketId == ticketId }
+
         if (ticketId < 0 && ticket == null) {
+            // TODO Это зачем?
             return Try.Success(repositoryMapper.mapEmptyFullTicket(ticketId, userId))
         }
         if (ticket == null) {
@@ -124,20 +123,27 @@ internal class Repository(
             ?.let(repositoryMapper::map)
     }
 
+    suspend fun addTextComment(user: UserInternal, ticketId: Int, textBody: String) {
 
-
-
-
-
-
-
-
-    suspend fun addTextComment(ticketId: Int, textBody: String, command: TicketCommandDto) {
-        val comment = createLocalTextComment(
-            textBody,
-            // TODO wtf
-            injector().usersAccount?.authorId
+        val command = SyncRequest.Command.AddComment(
+            commandId = createCommandId(user),
+            userId = user.userId,
+            appId = user.appId,
+            ticketId = ticketId,
+            comment = textBody,
+            attachments = null,
+            rating = null,
         )
+        // TODO save to local commands
+        synchronizer.syncCommand(command)
+
+
+
+//        val comment = createLocalTextComment(
+//            textBody,
+//            // TODO wtf
+//            injector().usersAccount?.authorId
+//        )
 
 //        localCommandsStore.addPendingFeedComment(comment)
 //        localCommandsStore.addPendingFeedCommand(command)
@@ -159,28 +165,37 @@ internal class Repository(
     }
 
     suspend fun readTicket(
-        userId: String,
-        appId: String,
+        user: UserInternal,
         ticketId: Int,
     ) {
         // TODO save command to local repo
         val command =  SyncRequest.Command.MarkTicketAsRead(
-            commandId = "sdsd",
-            userId = userId,
-            appId = appId,
+            commandId = createCommandId(user),
+            userId = user.userId,
+            appId = user.appId,
             ticketId = ticketId
         )
         synchronizer.syncCommand(command)
     }
 
-    private fun toAddCommentResponseData(ticketCommandResult: TicketCommandResultDto): AddCommentResponseData {
-        return AddCommentResponseData(ticketCommandResult.commentId, null, null)
-    }
+    suspend fun addAttachComment(user: UserInternal, ticketId: Int, fileUri: Uri) {
+        TODO()
+        val command = SyncRequest.Command.AddComment(
+            commandId = createCommandId(user),
+            userId = user.userId,
+            appId = user.appId,
+            ticketId = ticketId,
+            comment = null,
+            attachments = null,
+            rating = null,
+        )
+        // TODO save to local commands
+        synchronizer.syncCommand(command)
 
-    suspend fun addAttachComment(ticketId: Int, fileUri: Uri) {
-        val fileData = fileResolver.getFileData(fileUri) ?: return
-        val localAttachment = createLocalAttachment(fileData)
-        val comment = createLocalAttachComment(localAttachment)
+
+//        val fileData = fileResolver.getFileData(fileUri) ?: return
+//        val localAttachment = createLocalAttachment(fileData)
+//        val comment = createLocalAttachComment(localAttachment)
 
 //        localCommandsStore.addPendingFeedComment(comment)
 //
@@ -230,7 +245,20 @@ internal class Repository(
 //        }
     }
 
-    suspend fun addRatingComment(ticketId: Int, rating: Int) {
+    suspend fun addRatingComment(user: UserInternal, ticketId: Int, rating: Int) {
+        val command = SyncRequest.Command.AddComment(
+            commandId = createCommandId(user),
+            userId = user.userId,
+            appId = user.appId,
+            ticketId = ticketId,
+            comment = null,
+            attachments = null,
+            rating = rating,
+        )
+        // TODO save to local commands
+        synchronizer.syncCommand(command)
+
+
 //        val comment = createLocalRatingComment(rating)
 //        localCommandsStore.addPendingFeedComment(comment)
 //        val response = remoteStore.addRatingComment(rating)
@@ -244,15 +272,16 @@ internal class Repository(
 //        }
     }
 
-    suspend fun retryAddComment(ticketId: Int, localId: Long) {
-        val command = localCommandsStore.getCommand(localId) ?: return
-        val text = (command.params as? CommandParamsDto.CreateComment)?.comment
-        when {
-            //!localComment.attachments.isNullOrEmpty() -> addAttachComment(localComment.attachments.first().uri)//TODO
-            !text.isNullOrBlank() -> addTextComment(ticketId, text, command)
-            //localComment.rating != null -> addRatingComment(localComment.rating)//TODO
-            else -> localCommandsStore.removePendingCommand(command)
-        }
+    suspend fun retryAddComment(user: UserInternal, ticketId: Int, localId: Long) {
+        // TODO
+//        val command = localCommandsStore.getCommand(localId) ?: return
+//        val text = (command.params as? CommandParamsDto.CreateComment)?.comment
+//        when {
+//            //!localComment.attachments.isNullOrEmpty() -> addAttachComment(localComment.attachments.first().uri) //TODO
+//            !text.isNullOrBlank() -> addTextComment(user, ticketId, text)
+//            localComment.rating != null -> addRatingComment(localComment.rating) //TODO
+//            else -> localCommandsStore.removePendingCommand(command)
+//        }
     }
 
     /**
@@ -342,23 +371,23 @@ internal class Repository(
         isSending = true
     )
 
-    private fun createLocalAttachComment(attachment: Attachment): Comment = Comment(
-        id = createLocalCommentId(),
-        body = null,
-        isInbound = true,
-        attachments = listOf(attachment),
-        creationTime = System.currentTimeMillis(),
-        author = Author(
-            name = ConfigUtils.getUserName(),
-            // TODO wtf
-            authorId = injector().usersAccount?.authorId,
-            avatarUrl = null,
-            avatarColor = "#fffffff"
-        ),
-        rating = null,
-        isLocal = true,
-        isSending = true
-    )
+//    private fun createLocalAttachComment(attachment: Attachment): Comment = Comment(
+//        id = createLocalCommentId(),
+//        body = null,
+//        isInbound = true,
+//        attachments = listOf(attachment),
+//        creationTime = System.currentTimeMillis(),
+//        author = Author(
+//            name = ConfigUtils.getUserName(),
+//            // TODO wtf
+//            authorId = injector().usersAccount?.authorId,
+//            avatarUrl = null,
+//            avatarColor = "#fffffff"
+//        ),
+//        rating = null,
+//        isLocal = true,
+//        isSending = true
+//    )
 
     private fun createLocalAttachment(fileData: FileData): Attachment = Attachment(
         id = createLocalAttachmentId(),
@@ -373,4 +402,7 @@ internal class Repository(
         guid = null,
     )
 
+    private fun createCommandId(user: UserInternal): String {
+        return "${System.currentTimeMillis()}_${user.userId}_${user.appId}"
+    }
 }

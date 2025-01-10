@@ -18,36 +18,36 @@ internal class SetPushTokenUseCase(
         callback: SetPushTokenCallback,
         tokenType: String,
     ) {
-        // TODO
+        // TODO sds
         if (true) return
         val userId = (account as? Account.V2)?.userId
-        when {
-            calculateSkipTokenRegister(userId) -> callback.onResult(Exception("Too many requests. Maximum once every $SET_PUSH_TOKEN_TIMEOUT minutes."))
-            account.appId.isBlank() -> callback.onResult(Exception("AppId is not assigned"))
-            account.instanceId.isBlank() -> callback.onResult(Exception("UserId is not assigned"))
-            else -> {
-                updateTokenTime(userId, System.currentTimeMillis())
-                coreScope.launch {
-
-                }
-
-                TODO()
-//                GlobalScope.launch {
-//                    serviceDesk
-//                        .requestFactory
-//                        .getSetPushTokenRequest(token, tokenType)
-//                        .execute(object : ResponseCallback<Unit> {
-//                            override fun onSuccess(data: Unit) {
-//                                callback.onResult(null)
-//                            }
+//        when {
+//            calculateSkipTokenRegister(userId) -> callback.onResult(Exception("Too many requests. Maximum once every $SET_PUSH_TOKEN_TIMEOUT minutes."))
+//            account.appId.isBlank() -> callback.onResult(Exception("AppId is not assigned"))
+//            account.instanceId.isBlank() -> callback.onResult(Exception("UserId is not assigned"))
+//            else -> {
+//                updateTokenTime(userId, System.currentTimeMillis())
+//                coreScope.launch {
 //
-//                            override fun onFailure(responseError: ResponseError) {
-//                                callback.onResult(responseError)
-//                            }
-//                        })
 //                }
-            }
-        }
+//
+//                TODO()
+////                GlobalScope.launch {
+////                    serviceDesk
+////                        .requestFactory
+////                        .getSetPushTokenRequest(token, tokenType)
+////                        .execute(object : ResponseCallback<Unit> {
+////                            override fun onSuccess(data: Unit) {
+////                                callback.onResult(null)
+////                            }
+////
+////                            override fun onFailure(responseError: ResponseError) {
+////                                callback.onResult(responseError)
+////                            }
+////                        })
+////                }
+//            }
+//        }
     }
 
     private fun calculateSkipTokenRegister(userId: String?): Boolean {

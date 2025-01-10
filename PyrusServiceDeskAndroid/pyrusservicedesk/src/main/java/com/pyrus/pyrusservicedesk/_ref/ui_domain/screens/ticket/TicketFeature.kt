@@ -15,8 +15,6 @@ internal interface TicketContract {
         data object Error : State
         data class Content(
             val ticket: FullTicket?,
-            val appId: String,
-            val userId: String,
             val ticketId: Int,
             val sendEnabled: Boolean,
             val inputText: String,
@@ -81,27 +79,20 @@ internal interface TicketContract {
             data class UpdateComments(
                 val force: Boolean,
                 val ticketId: Int,
-                val userId: String,
             ) : Inner
             data object FeedFlow : Inner
             data object Close : Inner
             data class SendTextComment(
                 val text: String,
                 val ticketId: Int,
-                val appId: String,
-                val userId: String
             ) : Inner
             data class SendRatingComment(
                 val rating: Int,
                 val ticketId: Int,
-                val appId: String,
-                val userId: String
             ) : Inner
             data class SendAttachComment(
                 val uri: Uri,
                 val ticketId: Int,
-                val appId: String,
-                val userId: String
             ) : Inner
             data class RetryAddComment(val id: Long) : Inner
             data class OpenPreview(val attachment: Attachment) : Inner

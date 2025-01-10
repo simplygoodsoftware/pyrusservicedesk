@@ -31,7 +31,6 @@ import com.pyrus.pyrusservicedesk.sdk.sync.Synchronizer
 import com.pyrus.pyrusservicedesk.sdk.updates.LiveUpdates
 import com.pyrus.pyrusservicedesk.sdk.updates.PreferencesManager
 import com.pyrus.pyrusservicedesk.sdk.verify.LocalDataVerifier
-import com.pyrus.pyrusservicedesk.sdk.verify.LocalDataVerifierImpl
 import com.pyrus.pyrusservicedesk.sdk.web.retrofit.RemoteFileStore
 import com.pyrus.pyrusservicedesk.sdk.web.retrofit.ServiceDeskApi
 import com.squareup.picasso.OkHttp3Downloader
@@ -51,11 +50,11 @@ internal class DiInjector(
     private val preferences: SharedPreferences,
 ) {
 
-    private val accountStore = AccountStore(account)
+    val accountStore = AccountStore(account)
 
     private val fileResolver: FileResolver = FileResolver(application.contentResolver)
 
-    private val localDataVerifier: LocalDataVerifier = LocalDataVerifierImpl(fileResolver)
+    private val localDataVerifier: LocalDataVerifier = LocalDataVerifier(fileResolver)
 
     private val offlineGson = GsonBuilder()
         .setDateFormat(ISO_DATE_PATTERN)
@@ -152,14 +151,15 @@ internal class DiInjector(
         intentQr = openQrIntent
         intentSettings = openSettingsIntent
     }
-    val isMultiChat = account.isMultiChat // TODO wtf
 
     val sharedViewModel = SharedViewModel()
+
 
     val liveUpdates = LiveUpdates(
         repository = repository,
         preferencesManager = preferencesManager,
-        userId = account.instanceId,
+        // TODO sds fix live updates
+        userId = account.getUserId(),
         coreScope = coreScope,
     )
 
@@ -168,8 +168,5 @@ internal class DiInjector(
         .build()
 
     val setPushTokenUseCase = SetPushTokenUseCase(account, coreScope, preferencesManager)
-
-    // TODO remove it
-    val usersAccount = (account as? Account.V3)
 
 }

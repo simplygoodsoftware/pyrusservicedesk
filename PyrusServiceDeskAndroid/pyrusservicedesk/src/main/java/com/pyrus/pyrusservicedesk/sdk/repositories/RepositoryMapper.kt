@@ -27,7 +27,7 @@ internal class RepositoryMapper(
 ) {
 
     fun map(ticketsDto: TicketsDto): TicketsInfo {
-        val smallUsers = mapToSmallAcc(account) // TODO use account provider
+        val smallUsers = mapToSmallAcc(account) // TODO use account store
 
         val usersByAppId = smallUsers.groupBy { it.appId }
 
@@ -78,7 +78,7 @@ internal class RepositoryMapper(
             comments = ticket.comments?.map(::map) ?: emptyList(),
             showRating = ticket.showRating ?: false,
             showRatingText = ticket.showRatingText,
-            userId = ticket.userId,
+            userId = ticket.userId!!, // TODO check it
             ticketId = ticket.ticketId,
             subject = ticket.subject,
             isRead = ticket.isRead ?: true,

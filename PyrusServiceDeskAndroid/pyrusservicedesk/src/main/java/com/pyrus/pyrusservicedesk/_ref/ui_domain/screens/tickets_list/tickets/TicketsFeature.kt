@@ -8,6 +8,7 @@ import com.pyrus.pyrusservicedesk._ref.ui_domain.screens.tickets_list.tickets.Ti
 import com.pyrus.pyrusservicedesk._ref.ui_domain.screens.tickets_list.tickets.TicketsContract.State
 import com.pyrus.pyrusservicedesk._ref.whitetea.core.Store
 import com.pyrus.pyrusservicedesk.core.Account
+import com.pyrus.pyrusservicedesk.sdk.repositories.UserInternal
 
 internal typealias TicketsFeature = Store<State, Message, Effect.Outer>
 
@@ -45,8 +46,7 @@ internal interface TicketsContract {
             data class OnChangePage(val appId: String) : Outer
             data object OnCreateTicketClick : Outer
 
-            // TODO почему userId нулабелен
-            data class OnTicketClick(val ticketId: Int, val userId: String?) : Outer
+            data class OnTicketClick(val ticketId: Int, val userId: String) : Outer
 
             data class OnUserIdSelected(val userId: String) : Outer
         }
@@ -79,7 +79,7 @@ internal interface TicketsContract {
         sealed interface Inner : Effect {
             data object TicketsSetFlow : Inner
             data class UpdateTickets(val force: Boolean) : Inner
-            data class OpenTicketScreen(val appId: String, val ticketId: Int?, val userId: String?) : Inner
+            data class OpenTicketScreen(val user: UserInternal, val ticketId: Int?) : Inner
         }
     }
 

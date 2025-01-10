@@ -21,12 +21,10 @@ import com.pyrus.pyrusservicedesk._ref.whitetea.core.logic.Logic
 import com.pyrus.pyrusservicedesk._ref.whitetea.utils.adapt
 import com.pyrus.pyrusservicedesk.core.Account
 import com.pyrus.pyrusservicedesk.sdk.data.FileManager
-import com.pyrus.pyrusservicedesk.sdk.sync.TicketCommandType
 import com.pyrus.pyrusservicedesk.sdk.data.intermediate.FileData
 import com.pyrus.pyrusservicedesk.sdk.repositories.DraftRepository
 import com.pyrus.pyrusservicedesk.sdk.repositories.Repository
-import com.pyrus.pyrusservicedesk.sdk.sync.CommandParamsDto
-import com.pyrus.pyrusservicedesk.sdk.sync.TicketCommandDto
+import com.pyrus.pyrusservicedesk.sdk.repositories.UserInternal
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.map
@@ -42,17 +40,26 @@ internal class TicketFeatureFactory(
 ) {
 
     fun create(
-        userId: String,
+        user: UserInternal,
         ticketId: Int,
         welcomeMessage: String?,
     ): TicketFeature = storeFactory.create(
         name = "TicketFeature",
         initialState = State.Loading,
         reducer = FeatureReducer(),
-        actor = TicketActor(ticketId, account, repository, router, welcomeMessage, draftRepository, fileManager).adaptCast(),
+        actor = TicketActor(
+            account = account,
+            ticketId = ticketId,
+            user = user,
+            repository = repository,
+            router = router,
+            welcomeMessage = welcomeMessage,
+            draftRepository = draftRepository,
+            fileManager = fileManager
+        ).adaptCast(),
         initialEffects = listOf(
             Effect.Inner.FeedFlow,
-            Effect.Inner.UpdateComments(force = false, ticketId = ticketId, userId = userId),
+            Effect.Inner.UpdateComments(force = false, ticketId = ticketId),
         ),
     ).adapt { it as? Effect.Outer }
 
@@ -79,8 +86,6 @@ private class FeatureReducer: Logic<State, Message, Effect>() {
                 effects { +Effect.Inner.SendAttachComment(
                     message.fileUri,
                     ticketId = (state as State.Content).ticketId,
-                    appId = (state as State.Content).appId,
-                    userId = (state as State.Content).userId
                 ) }
             }
             Message.Outer.OnCloseClick -> effects { +Effect.Inner.Close }
@@ -106,8 +111,6 @@ private class FeatureReducer: Logic<State, Message, Effect>() {
                 effects { +Effect.Inner.SendRatingComment(
                     message.rating,
                     ticketId = (state as State.Content).ticketId,
-                    appId = (state as State.Content).appId,
-                    userId = (state as State.Content).userId
                 ) }
             }
             is Message.Outer.OnRetryAddCommentClick -> {
@@ -118,7 +121,7 @@ private class FeatureReducer: Logic<State, Message, Effect>() {
                 val currentState = state as? State.Content ?: return
                 val comment = currentState.inputText
                 if (comment.isBlank()) return
-                effects { +Effect.Inner.SendTextComment(comment, currentState.ticketId, currentState.appId, currentState.userId) }
+                effects { +Effect.Inner.SendTextComment(comment, currentState.ticketId) }
             }
             is Message.Outer.OnShowAttachVariantsClick -> {
                 if(state !is State.Content) return
@@ -131,12 +134,10 @@ private class FeatureReducer: Logic<State, Message, Effect>() {
                 effects { +Effect.Inner.UpdateComments(
                     force = true,
                     ticketId = currentState.ticketId,
-                    userId = currentState.userId
                 ) }
             }
 
-            // TODO wtf
-            Message.Outer.OnBackClick -> injector().router.exit()
+            Message.Outer.OnBackClick -> effects { +Effect.Inner.Close }
         }
     }
 
@@ -149,7 +150,7 @@ private class FeatureReducer: Logic<State, Message, Effect>() {
                         // TODO show toast
                     }
                     is State.Loading -> state { State.Error }
-                    State.Error -> {}
+                    State.Error -> {} // TODO show toast
                 }
             }
             is Message.Inner.UpdateCommentsCompleted -> {
@@ -157,14 +158,7 @@ private class FeatureReducer: Logic<State, Message, Effect>() {
                     is State.Content -> state { currentState.copy(
                         ticket = message.ticket,
                         isLoading = false,
-                        // TODO wtf
-                        // appId and userId всегда нам приходят извне (их менять нельзя)
-                        // ticketId может быть всегда (или нет) null при авторизациях типа V1 и V2
-                        // должен ли он быть не null для отправки комментариев в этом случае?
-                        // Если стэйт уже контент нам не нужно обновлять ticketId (не ясно в каких случаях он может измениться)
-                        appId = injector().usersAccount?.users?.find { it.userId == message.ticket.userId }?.appId ?: "",
-                        userId = message.ticket.userId ?: "",
-                        ticketId = message.ticket.ticketId ?: 0
+                        ticketId = message.ticket.ticketId
                     ) }
                     State.Error,
                     State.Loading -> state { State.Content(
@@ -173,10 +167,7 @@ private class FeatureReducer: Logic<State, Message, Effect>() {
                         inputText = message.draft,
                         welcomeMessage = message.welcomeMessage,
                         isLoading = false,
-                        // TODO wtf
-                        appId = injector().usersAccount?.users?.find { it.userId == message.ticket.userId }?.appId ?: "",
-                        userId = message.ticket.userId ?: "",
-                        ticketId = message.ticket.ticketId ?: 0
+                        ticketId = message.ticket.ticketId
 
                     ) }
                 }
@@ -191,8 +182,9 @@ private class FeatureReducer: Logic<State, Message, Effect>() {
 }
 
 internal class TicketActor(
-    private val ticketId: Int,
     private val account: Account,
+    private val ticketId: Int,
+    private val user: UserInternal,
     private val repository: Repository,
     private val router: PyrusRouter,
     private val welcomeMessage: String?,
@@ -204,7 +196,7 @@ internal class TicketActor(
         is Effect.Inner.UpdateComments -> singleFlow {
             val commentsTry: Try<FullTicket> = repository.getFeed(
                 ticketId = effect.ticketId,
-                userId = effect.userId,
+                userId = user.userId,
                 force = effect.force
             )
             when {
@@ -220,13 +212,19 @@ internal class TicketActor(
         }
         Effect.Inner.FeedFlow -> repository.getFeedFlow(ticketId).map { Message.Inner.CommentsUpdated(it) }
         Effect.Inner.Close -> flow { router.exit() }
-        is Effect.Inner.SendTextComment -> flow { repository.addTextComment(ticketId, effect.text, getSendTextCommentCommand(effect.text, effect.appId, effect.userId, effect.ticketId)) }
-        is Effect.Inner.SendRatingComment -> flow { repository.addRatingComment(ticketId, effect.rating) }
+        is Effect.Inner.SendTextComment -> flow {
+            repository.addTextComment(user, ticketId, effect.text)
+        }
+        is Effect.Inner.SendRatingComment -> flow {
+            repository.addRatingComment(user, ticketId, effect.rating)
+        }
         is Effect.Inner.SendAttachComment -> flow {
             val fileUri = try { fileManager.copyFile(effect.uri) } catch (e: Exception) { null } ?: return@flow
-            repository.addAttachComment(ticketId, fileUri)
+            // TODO check file size
+            // TODO show error
+            repository.addAttachComment(user, ticketId, fileUri)
         }
-        is Effect.Inner.RetryAddComment -> flow { repository.retryAddComment(ticketId, effect.id) }
+        is Effect.Inner.RetryAddComment -> flow { repository.retryAddComment(user, ticketId, effect.id) }
         is Effect.Inner.OpenPreview -> flow {
             val fileDate = FileData(
                 effect.attachment.name,
@@ -237,33 +235,6 @@ internal class TicketActor(
             router.navigateTo(Screens.ImageScreen(fileDate))
         }
         is Effect.Inner.SaveDraft -> flow { draftRepository.saveDraft(effect.draft) }
-    }
-
-    private fun getUUID(): String {
-        val uuid: UUID = UUID.randomUUID()
-        val commentId = repository.createLocalCommentId()
-        return uuid.toString()//"commentId=$commentId;${uuid}"
-    }
-
-    private fun getSendTextCommentCommand(text: String, appId: String, userId: String, ticketId: Int): TicketCommandDto {
-        val localCreateComment = CommandParamsDto.CreateComment(
-            requestNewTicket = ticketId < 0,
-            userId = userId,
-            appId = appId,
-            comment = text,
-            attachments = null,
-            ticketId = ticketId,
-            rating = null
-        )
-//        val localTicketIsRead = MarkTicketAsRead(
-//            ticketId = ticketId.toString(),//TODO check why String
-//            userId = userId,
-//            appId = appId
-//        )
-//        val list = listOf(
-//            Command(getUUID(), TicketCommandType.CreateComment, appId, userId,  localCreateComment),
-//            Command(getUUID(), TicketCommandType.MarkTicketAsRead, appId, userId,  localTicketIsRead))
-        return TicketCommandDto(getUUID(), TicketCommandType.CreateComment, localCreateComment)
     }
 
 }

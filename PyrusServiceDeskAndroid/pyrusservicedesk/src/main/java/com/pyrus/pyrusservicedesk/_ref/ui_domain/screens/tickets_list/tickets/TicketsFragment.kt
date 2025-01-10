@@ -184,6 +184,7 @@ internal class TicketsFragment: TeaFragment<Model, Message, Effect.Outer>() {
                 if (injector().intentSettings != null)
                     startActivity(injector().intentSettings)
             }
+
         }
     }
 

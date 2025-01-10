@@ -15,8 +15,14 @@ internal fun Account.getAuthorId(): String? = when(this) {
     is Account.V3 -> authorId
 }
 
+internal fun Account.getAppId(): String = when(this) {
+    is Account.V1 -> appId
+    is Account.V2 -> appId
+    is Account.V3 -> firstAppId
+}
+
 internal fun Account.getUserId(): String = when(this) {
-    is Account.V1 -> instanceId
+    is Account.V1 -> userId
     is Account.V2 -> userId
     is Account.V3 -> firstUserId
 }
@@ -38,6 +44,8 @@ internal fun Account.getVersion(): Int = when(this) {
     is Account.V2 -> API_VERSION_2
     is Account.V3 -> API_VERSION_3
 }
+
+internal fun Account.isMultiChat() = this is Account.V3
 
 internal fun Account.getAdditionalUsers(localState: TicketsDto?): List<UserDataDto>? = when(this) {
     is Account.V1 -> null

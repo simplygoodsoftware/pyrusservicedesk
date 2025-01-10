@@ -30,7 +30,7 @@ internal class ResultCall<T>(proxy: Call<T>) : CallDelegate<T, Try<T>>(proxy) {
                     HttpException(
                         statusCode = response.code(),
                         statusMessage = response.message(),
-                        url = "call.request().url.toString()", // TODO sds
+                        url = call.request().url().toString(),
                     )
                 )
             }

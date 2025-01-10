@@ -6,11 +6,12 @@ import com.pyrus.pyrusservicedesk._ref.ui_domain.screens.file_preview.FilePrevie
 import com.pyrus.pyrusservicedesk._ref.ui_domain.screens.ticket.TicketFragment
 import com.pyrus.pyrusservicedesk._ref.ui_domain.screens.tickets_list.tickets.TicketsFragment
 import com.pyrus.pyrusservicedesk.sdk.data.intermediate.FileData
+import com.pyrus.pyrusservicedesk.sdk.repositories.UserInternal
 
 internal object Screens {
 
-    fun TicketScreen(ticketId: Int?, userId: String?) = FragmentScreen {
-        TicketFragment.newInstance(ticketId, userId)
+    fun TicketScreen(ticketId: Int?, user: UserInternal) = FragmentScreen {
+        TicketFragment.newInstance(ticketId, user)
     }
 
     fun TicketsScreen() = FragmentScreen {

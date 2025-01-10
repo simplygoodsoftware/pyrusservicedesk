@@ -45,7 +45,7 @@ public class SampleActivity extends Activity implements NewReplySubscriber {
             users.add(user1);
             users.add(user2);
             users.add(user3);
-            PyrusServiceDesk.init(getApplication(), users, "10", true);
+            PyrusServiceDesk.init(getApplication(), users, "10");
 
             Map<String, String> map = new HashMap<>();
             map.put("test_text", "test some text");
@@ -81,8 +81,7 @@ public class SampleActivity extends Activity implements NewReplySubscriber {
                     (dialog1, which) -> {
                         PyrusServiceDesk.init(
                                 getApplication(),
-                                "my_app_id",
-                                true
+                                "my_app_id"
                         );
                     dialog1.cancel();
                 }
