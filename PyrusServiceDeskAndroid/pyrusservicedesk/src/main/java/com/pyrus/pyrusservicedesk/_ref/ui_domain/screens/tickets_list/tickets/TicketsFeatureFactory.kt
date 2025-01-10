@@ -148,7 +148,7 @@ private class FeatureReducer: Logic<State, Message, Effect>() {
                         tickets = message.tickets.ticketSetInfoList,
                     )
                     ContentState.Error,
-                    ContentState.Loading -> createInitialContentState(message.tickets, account.domain)
+                    ContentState.Loading -> createInitialContentState(message.tickets, account)
                 })
             }
             Message.Inner.UpdateTicketsFailed -> {
@@ -165,12 +165,12 @@ private class FeatureReducer: Logic<State, Message, Effect>() {
         }
     }
 
-    private fun createInitialContentState(tickets: TicketsInfo, domain: String?) : ContentState.Content {
+    private fun createInitialContentState(tickets: TicketsInfo, account: Account.V3) : ContentState.Content {
         val firstSet = tickets.ticketSetInfoList.firstOrNull()
         return ContentState.Content(
             appId = firstSet?.appId,
             titleText = firstSet?.orgName,
-            titleImageUrl = firstSet?.orgLogoUrl?.let { getOrganisationLogoUrl(it, domain) },
+            titleImageUrl = firstSet?.orgLogoUrl?.let { getOrganisationLogoUrl(it, account.domain) },
             filterName = null,
             filterEnabled = false,
             tickets = tickets.ticketSetInfoList,
