@@ -1,6 +1,5 @@
 package com.pyrus.pyrusservicedesk._ref.ui_domain.screens.tickets_list.tickets
 
-import androidx.core.os.bundleOf
 import com.github.terrakok.cicerone.Router
 import com.pyrus.pyrusservicedesk._ref.Screens
 import com.pyrus.pyrusservicedesk._ref.data.multy_chat.TicketsInfo
@@ -9,7 +8,7 @@ import com.pyrus.pyrusservicedesk._ref.ui_domain.screens.tickets_list.tickets.Ti
 import com.pyrus.pyrusservicedesk._ref.ui_domain.screens.tickets_list.tickets.TicketsContract.Message
 import com.pyrus.pyrusservicedesk._ref.ui_domain.screens.tickets_list.tickets.TicketsContract.State
 import com.pyrus.pyrusservicedesk._ref.ui_domain.screens.tickets_list.tickets.TicketsFragment.Companion.KEY_DEFAULT_USER_ID
-import com.pyrus.pyrusservicedesk._ref.ui_domain.screens.tickets_list.tickets.TicketsFragment.Companion.KEY_USER_ID
+import com.pyrus.pyrusservicedesk._ref.utils.RequestUtils.Companion.getOrganisationLogoUrl
 import com.pyrus.pyrusservicedesk._ref.utils.Try
 import com.pyrus.pyrusservicedesk._ref.utils.singleFlow
 import com.pyrus.pyrusservicedesk._ref.whitetea.core.Actor
@@ -68,7 +67,7 @@ private class FeatureReducer: Logic<State, Message, Effect>() {
                 val firstUser = users.first()
 
                 if (users.size > 1) {
-                    effects { +Effect.Outer.ShowAddTicketMenu(selectedAppId) }
+                    effects { +Effect.Outer.ShowAddTicketMenu(selectedAppId, users) }
                 }
                 else {
                     effects { +Effect.Inner.OpenTicketScreen(
@@ -82,7 +81,8 @@ private class FeatureReducer: Logic<State, Message, Effect>() {
             is Message.Outer.OnFilterClick -> {
                 val contentState = state.contentState as? ContentState.Content ?: return
                 val selectedAppId = contentState.appId ?: return
-                effects { +Effect.Outer.ShowFilterMenu(selectedAppId, message.selectedUserId) }
+                val users = state.account.users
+                effects { +Effect.Outer.ShowFilterMenu(selectedAppId, message.selectedUserId, users) }
             }
 
             // TODO a нам точно нужно это тут? Sd ничего не должен знать о кнопках
@@ -96,7 +96,7 @@ private class FeatureReducer: Logic<State, Message, Effect>() {
 
             is Message.Outer.OnChangePage -> {
                 val currentState = state.contentState as? ContentState.Content ?: return
-                state { state.copy(contentState = updateTicketsFilterState(currentState, message.appId)) }
+                state { state.copy(contentState = updateTicketsFilterState(currentState, message.appId, account.domain)) }
             }
 
             Message.Outer.OnCreateTicketClick -> {
@@ -108,7 +108,7 @@ private class FeatureReducer: Logic<State, Message, Effect>() {
                 val firstUser = users.first()
 
                 if (users.size > 1) effects {
-                    +Effect.Outer.ShowAddTicketMenu(appId)
+                    +Effect.Outer.ShowAddTicketMenu(appId, users)
                 }
                 else effects {
                     +Effect.Inner.OpenTicketScreen( appId= appId, ticketId = null, userId = firstUser.userId)
@@ -121,7 +121,20 @@ private class FeatureReducer: Logic<State, Message, Effect>() {
                     +Effect.Inner.OpenTicketScreen(appId, message.ticketId, message.userId)
                 }
             }
-            is Message.Outer.OnUserIdSelect -> TODO("why")
+            is Message.Outer.OnUserIdSelected -> {
+
+                val contentState = state.contentState as? ContentState.Content ?: return
+
+                val user = state.account.users.find { it.userId == message.userId }
+                val filterName = user?.userName?: ""
+                state {
+                    state.copy(contentState = contentState.copy(
+                        filterName = filterName,
+                        filterEnabled = message.userId != KEY_DEFAULT_USER_ID,
+                        filterId = user?.userId
+                    ))
+                }
+            }
         }
     }
 
@@ -133,7 +146,7 @@ private class FeatureReducer: Logic<State, Message, Effect>() {
                         tickets = message.tickets.ticketSetInfoList,
                     )
                     ContentState.Error,
-                    ContentState.Loading -> createInitialContentState(message.tickets)
+                    ContentState.Loading -> createInitialContentState(message.tickets, account.domain)
                 })
             }
             Message.Inner.UpdateTicketsFailed -> {
@@ -147,34 +160,15 @@ private class FeatureReducer: Logic<State, Message, Effect>() {
                 val contentState = state.contentState as? ContentState.Content ?: return
                 state { state.copy(contentState = contentState.copy(tickets = message.tickets?.ticketSetInfoList)) }
             }
-            is Message.Inner.UserIdSelected -> {
-                val contentState = state.contentState as? ContentState.Content ?: return
-
-                val user = state.account.users.find { it.userId == message.userId }
-                val filterName = user?.userName?: ""
-                state {
-                    state.copy(contentState = contentState.copy(
-                        filterName = filterName,
-                        filterEnabled = message.userId != KEY_DEFAULT_USER_ID,
-                        filterId = user?.userId
-                    ))
-                }
-
-                // TODO WTF!!!! FragmentManager не должен быть в фиче не в коем случае
-                // фича должна быть составлена так чтобы она не зависила от андроид
-                // FragmentManager в фиче приведет к утечкам памяти
-                // для передачи сообщений между экранами используется router
-                message.fm.setFragmentResult(KEY_USER_ID, bundleOf(KEY_USER_ID to message.userId))
-            }
         }
     }
 
-    private fun createInitialContentState(tickets: TicketsInfo) : ContentState.Content {
+    private fun createInitialContentState(tickets: TicketsInfo, domain: String?) : ContentState.Content {
         val firstSet = tickets.ticketSetInfoList.firstOrNull()
         return ContentState.Content(
             appId = firstSet?.appId,
             titleText = firstSet?.orgName,
-            titleImageUrl = firstSet?.orgLogoUrl,
+            titleImageUrl = firstSet?.orgLogoUrl?.let { getOrganisationLogoUrl(it, domain) },
             filterName = null,
             filterEnabled = false,
             tickets = tickets.ticketSetInfoList,
@@ -182,12 +176,12 @@ private class FeatureReducer: Logic<State, Message, Effect>() {
         )
     }
 
-    private fun updateTicketsFilterState(state: ContentState.Content, appId: String) : ContentState.Content {
+    private fun updateTicketsFilterState(state: ContentState.Content, appId: String, domain: String?) : ContentState.Content {
         val ticketsSetByAppName = state.tickets?.associateBy { it.appId }
         return state.copy(
             appId = appId,
             titleText = ticketsSetByAppName?.get(appId)?.orgName,
-            titleImageUrl = ticketsSetByAppName?.get(appId)?.orgLogoUrl,
+            titleImageUrl = ticketsSetByAppName?.get(appId)?.orgLogoUrl?.let { getOrganisationLogoUrl(it, domain) } ,
             filterName = null,
             filterEnabled = false,
             filterId = null,
@@ -213,12 +207,12 @@ internal class TicketsActor(
         Effect.Inner.TicketsSetFlow -> repository.getAllDataFlow().map { Message.Inner.TicketsUpdated(it) }
 
         is Effect.Inner.OpenTicketScreen -> flow {
-            if (effect.userId != null && effect.ticketId != null)
-                repository.readTicket(
-                    userId = effect.userId,
-                    appId = effect.appId,
-                    ticketId = effect.ticketId
-                )
+//            if (effect.userId != null && effect.ticketId != null)
+//                repository.readTicket(
+//                    userId = effect.userId,
+//                    appId = effect.appId,
+//                    ticketId = effect.ticketId
+//                )
             router.navigateTo(Screens.TicketScreen(effect.ticketId, effect.userId))
         }
 

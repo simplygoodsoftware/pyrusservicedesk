@@ -5,6 +5,7 @@ import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.core.os.bundleOf
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.isVisible
@@ -12,15 +13,14 @@ import androidx.viewpager2.widget.ViewPager2
 import com.google.android.material.tabs.TabLayoutMediator
 import com.pyrus.pyrusservicedesk.PyrusServiceDesk.Companion.injector
 import com.pyrus.pyrusservicedesk.R
-import com.pyrus.pyrusservicedesk._ref.ui_domain.screens.add_ticket.AddTicketFragment
-import com.pyrus.pyrusservicedesk._ref.ui_domain.screens.filter_tickets_list.FilterTicketsFragment
-import com.pyrus.pyrusservicedesk._ref.ui_domain.screens.filter_tickets_list.FilterTicketsFragment.Companion.KEY_SELECTED_USER_ID
+import com.pyrus.pyrusservicedesk._ref.ui_domain.screens.add_ticket.AddTicketBottomSheetFragment
+import com.pyrus.pyrusservicedesk._ref.ui_domain.screens.filter_tickets_list.FilterTicketsBottomSheetFragment
+import com.pyrus.pyrusservicedesk._ref.ui_domain.screens.filter_tickets_list.FilterTicketsBottomSheetFragment.Companion.KEY_SELECTED_USER_ID
 import com.pyrus.pyrusservicedesk._ref.ui_domain.screens.tickets_list.adapters.TicketsPageAdapter
 import com.pyrus.pyrusservicedesk._ref.ui_domain.screens.tickets_list.tickets.TicketsContract.Effect
 import com.pyrus.pyrusservicedesk._ref.ui_domain.screens.tickets_list.tickets.TicketsContract.Message
 import com.pyrus.pyrusservicedesk._ref.ui_domain.screens.tickets_list.tickets.TicketsView.Model
 import com.pyrus.pyrusservicedesk._ref.utils.CIRCLE_TRANSFORMATION
-import com.pyrus.pyrusservicedesk._ref.utils.RequestUtils.Companion.getOrganisationLogoUrl
 import com.pyrus.pyrusservicedesk._ref.utils.insets.RootViewDeferringInsetsCallback
 import com.pyrus.pyrusservicedesk._ref.whitetea.android.TeaFragment
 import com.pyrus.pyrusservicedesk._ref.whitetea.androidutils.bind
@@ -60,11 +60,12 @@ internal class TicketsFragment: TeaFragment<Model, Message, Effect.Outer>() {
 
         //get information about selected filter and process it
         parentFragmentManager.setFragmentResultListener(
-            FilterTicketsFragment.KEY_FILTER_RESULT,
+            FilterTicketsBottomSheetFragment.KEY_FILTER_RESULT,
             this
         ) { _, bundle ->
             currentUserId = bundle.getString(KEY_SELECTED_USER_ID) ?: KEY_DEFAULT_USER_ID
-            dispatch(Message.Inner.UserIdSelected(currentUserId, childFragmentManager))
+            childFragmentManager.setFragmentResult(KEY_USER_ID, bundleOf(KEY_USER_ID to currentUserId))
+            dispatch(Message.Outer.OnUserIdSelected(currentUserId))
         }
 
         return binding.root
@@ -81,8 +82,10 @@ internal class TicketsFragment: TeaFragment<Model, Message, Effect.Outer>() {
 
         binding.toolbarTicketsList.psdToolbarQrIb.setOnClickListener {dispatch(Message.Outer.OnScanClick)}
 
-        binding.deleteFilterIv.setOnClickListener { dispatch(Message.Inner.UserIdSelected(
-            KEY_DEFAULT_USER_ID, childFragmentManager)) }
+        binding.deleteFilterIv.setOnClickListener {
+            childFragmentManager.setFragmentResult(KEY_USER_ID, bundleOf(KEY_USER_ID to KEY_DEFAULT_USER_ID))
+            dispatch(Message.Outer.OnUserIdSelected(KEY_DEFAULT_USER_ID))
+        }
 
         binding.fabAddTicket.setOnClickListener { dispatch(Message.Outer.OnFabItemClick) }
     }
@@ -114,9 +117,8 @@ internal class TicketsFragment: TeaFragment<Model, Message, Effect.Outer>() {
     override fun createRenderer(): ViewRenderer<Model> = diff {
         diff(Model::titleText) { title -> binding.toolbarTicketsList.psdToolbarVendorNameTv.text = title }
         diff(Model::titleImageUrl) { url ->
-            val logoUrl = url?.let { getOrganisationLogoUrl(url, null) } // TODO
             injector().picasso
-                .load(logoUrl)
+                .load(url)
                 .transform(CIRCLE_TRANSFORMATION)
                 .into(binding.toolbarTicketsList.psdToolbarVendorIv)
         }
@@ -157,12 +159,19 @@ internal class TicketsFragment: TeaFragment<Model, Message, Effect.Outer>() {
         when(effect) {
 
             is Effect.Outer.ShowFilterMenu -> {
-                val bottomSheet = FilterTicketsFragment.newInstance(effect.appId, effect.selectedUserId)
+                val bottomSheet = FilterTicketsBottomSheetFragment.newInstance(
+                    effect.appId,
+                    effect.selectedUserId,
+                    effect.users
+                )
                 bottomSheet.show(parentFragmentManager, bottomSheet.tag)
             }
 
             is Effect.Outer.ShowAddTicketMenu -> {
-                val bottomSheet = AddTicketFragment.newInstance(effect.appId)
+                val bottomSheet = AddTicketBottomSheetFragment.newInstance(
+                    effect.appId,
+                    effect.users
+                )
                 bottomSheet.show(parentFragmentManager, bottomSheet.tag)
             }
 
@@ -175,8 +184,6 @@ internal class TicketsFragment: TeaFragment<Model, Message, Effect.Outer>() {
                 if (injector().intentSettings != null)
                     startActivity(injector().intentSettings)
             }
-
-            is Effect.Outer.ShowAddTicketMenu -> TODO()
         }
     }
 

@@ -1,6 +1,6 @@
 package com.pyrus.pyrusservicedesk._ref.ui_domain.screens.tickets_list.tickets
 
-import androidx.fragment.app.FragmentManager
+import com.pyrus.pyrusservicedesk.User
 import com.pyrus.pyrusservicedesk._ref.data.multy_chat.TicketSetInfo
 import com.pyrus.pyrusservicedesk._ref.data.multy_chat.TicketsInfo
 import com.pyrus.pyrusservicedesk._ref.ui_domain.screens.tickets_list.tickets.TicketsContract.Effect
@@ -48,13 +48,11 @@ internal interface TicketsContract {
             // TODO почему userId нулабелен
             data class OnTicketClick(val ticketId: Int, val userId: String?) : Outer
 
-            // TODO если не нужно – удалить
-            data class OnUserIdSelect(val userId: String) : Outer
+            data class OnUserIdSelected(val userId: String) : Outer
         }
 
         sealed interface Inner : Message {
             data class TicketsUpdated(val tickets: TicketsInfo?) : Inner
-            data class UserIdSelected(val userId: String, val fm: FragmentManager) : Inner
             data object UpdateTicketsFailed : Inner
             data class UpdateTicketsCompleted(val tickets: TicketsInfo) : Inner
         }
@@ -66,10 +64,11 @@ internal interface TicketsContract {
         sealed interface Outer : Effect {
             data class ShowFilterMenu(
                 val appId: String,
-                val selectedUserId: String
+                val selectedUserId: String,
+                val users: List<User>
             ) : Outer
 
-            data class ShowAddTicketMenu(val appId: String) : Outer
+            data class ShowAddTicketMenu(val appId: String, val users: List<User>) : Outer
 
             data object OpenQrFragment : Outer
 

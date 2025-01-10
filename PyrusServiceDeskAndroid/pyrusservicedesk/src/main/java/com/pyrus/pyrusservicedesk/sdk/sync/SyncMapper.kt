@@ -1,6 +1,7 @@
 package com.pyrus.pyrusservicedesk.sdk.sync
 
 import com.pyrus.pyrusservicedesk._ref.data.Attachment
+import com.pyrus.pyrusservicedesk._ref.utils.ConfigUtils
 import com.pyrus.pyrusservicedesk.core.Account
 import com.pyrus.pyrusservicedesk.core.getAdditionalUsers
 import com.pyrus.pyrusservicedesk.core.getAuthorId
@@ -25,7 +26,7 @@ internal object SyncMapper {
             lastNoteId = calcLastNoteId(localState, account.getUserId()),
             commands = syncRequests.mapNotNull { mapToCommand(it.request) },
             authorId = account.getAuthorId(),
-            authorName = "Kate Test", // TODO
+            authorName = ConfigUtils.getUserName(),
             appId = account.appId,
             userId = account.getUserId(),
             securityKey = account.getSecurityKey(),

@@ -44,7 +44,7 @@ internal class TicketFeatureFactory(
     fun create(
         userId: String,
         ticketId: Int,
-        welcomeMessage: String,
+        welcomeMessage: String?,
     ): TicketFeature = storeFactory.create(
         name = "TicketFeature",
         initialState = State.Loading,

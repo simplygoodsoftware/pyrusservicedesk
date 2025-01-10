@@ -12,7 +12,7 @@ import com.pyrus.pyrusservicedesk.User
 import com.pyrus.pyrusservicedesk._ref.Screens
 import com.pyrus.pyrusservicedesk.databinding.AddTicketFragmentBinding
 
-class AddTicketFragment: BottomSheetDialogFragment() {
+class AddTicketBottomSheetFragment: BottomSheetDialogFragment() {
 
     private lateinit var binding: AddTicketFragmentBinding
     private var selectedUsers: List<User> = emptyList()
@@ -29,11 +29,11 @@ class AddTicketFragment: BottomSheetDialogFragment() {
         binding.usersRv.layoutManager = LinearLayoutManager(view.context)
 
         val appId = arguments?.getString(KEY_APP_ID)
+        selectedUsers = arguments?.getParcelableArrayList(KEY_USERS) ?: emptyList()
         updateSelectedUsers(appId)
         val adapter = AddTicketAdapter(users = selectedUserNames,
             onItemClick = { position ->
                 injector().router.navigateTo(Screens.TicketScreen(null, selectedUsers[position].userId))
-                //startActivity(TicketActivity.getLaunchIntent(userId = selectedUsers[position].userId))
                 dismiss()
             })
         binding.usersRv.adapter = adapter
@@ -42,18 +42,18 @@ class AddTicketFragment: BottomSheetDialogFragment() {
     private fun updateSelectedUsers(appId: String?) {
         if (appId == null)
             return
-        // TODO wtf
-        selectedUsers = injector().usersAccount?.users?.filter { it.appId == appId } ?: emptyList()
-        selectedUserNames = selectedUsers.map { it.userName }
+        selectedUserNames = selectedUsers.filter { it.appId == appId }.map { it.userName }
     }
 
     companion object {
         private const val KEY_APP_ID = "KEY_APP_ID"
+        private const val KEY_USERS = "KEY_USERS"
 
-        fun newInstance(appId: String): AddTicketFragment {
-            val fragment = AddTicketFragment()
+        fun newInstance(appId: String, users: List<User>): AddTicketBottomSheetFragment {
+            val fragment = AddTicketBottomSheetFragment()
             val args = Bundle()
             args.putString(KEY_APP_ID, appId)
+            args.putParcelableArrayList(KEY_USERS, ArrayList(users))
             fragment.arguments = args
             return fragment
         }

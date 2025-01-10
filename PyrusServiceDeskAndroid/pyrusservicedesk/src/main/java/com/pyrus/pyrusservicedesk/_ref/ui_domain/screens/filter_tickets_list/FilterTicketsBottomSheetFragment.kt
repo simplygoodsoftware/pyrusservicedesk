@@ -8,11 +8,11 @@ import android.widget.TextView
 import androidx.core.os.bundleOf
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment
-import com.pyrus.pyrusservicedesk.PyrusServiceDesk.Companion.injector
 import com.pyrus.pyrusservicedesk.R
+import com.pyrus.pyrusservicedesk.User
 import com.pyrus.pyrusservicedesk.databinding.AddTicketFragmentBinding
 
-class FilterTicketsFragment: BottomSheetDialogFragment() {
+class FilterTicketsBottomSheetFragment: BottomSheetDialogFragment() {
 
     private lateinit var binding: AddTicketFragmentBinding
 
@@ -31,7 +31,8 @@ class FilterTicketsFragment: BottomSheetDialogFragment() {
 
         val chosenUserId = arguments?.getString(KEY_SELECTED_USER_ID, KEY_DEFAULT_USER_ID)
         val appId = arguments?.getString(KEY_APP_ID)
-        updateSelectedUsers(appId)
+        val users: List<User> = arguments?.getParcelableArrayList(KEY_USERS) ?: emptyList()
+        updateSelectedUsers(appId, users)
 
         val title: TextView = view.findViewById(R.id.titleTextView)
         title.text = "Фильтры"
@@ -50,28 +51,30 @@ class FilterTicketsFragment: BottomSheetDialogFragment() {
         binding.usersRv.adapter = adapter
     }
 
-    private fun updateSelectedUsers(appId: String?) {
+    private fun updateSelectedUsers(appId: String?, users: List<User>) {
         if (appId == null)
             return
 
-        // TODO wtf
-        val selectedUsers = injector().usersAccount?.users?.filter { it.appId == appId }
-        selectedUserIds = selectedUsers?.map { it.userId } ?: emptyList()
-        selectedUserNames = selectedUsers?.map { it.userName } ?: emptyList()
+        val selectedUsers = users.filter { it.appId == appId }
+        selectedUserIds = selectedUsers.map { it.userId }
+        selectedUserNames = selectedUsers.map { it.userName }
     }
 
     companion object {
 
+
         const val KEY_SELECTED_USER_ID = "KEY_SELECTED_USER_ID"
         const val KEY_FILTER_RESULT = "KEY_FILTER_RESULT"
+        private const val KEY_USERS = "KEY_USERS"
         private const val KEY_APP_ID = "KEY_APP_ID"
         private const val KEY_DEFAULT_USER_ID = "0"
 
-        fun newInstance(appId: String , selectedUserId: String): FilterTicketsFragment {
-            val fragment = FilterTicketsFragment()
+        fun newInstance(appId: String , selectedUserId: String, users: List<User>): FilterTicketsBottomSheetFragment {
+            val fragment = FilterTicketsBottomSheetFragment()
             val args = Bundle()
             args.putString(KEY_SELECTED_USER_ID, selectedUserId)
             args.putString(KEY_APP_ID, appId)
+            args.putParcelableArrayList(KEY_USERS, ArrayList(users))
             fragment.arguments = args
             return fragment
         }
