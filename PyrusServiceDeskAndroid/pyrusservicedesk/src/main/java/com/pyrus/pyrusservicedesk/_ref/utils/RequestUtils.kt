@@ -79,9 +79,9 @@ class RequestUtils{
                     URLEncoder.encode(account.appId, "UTF-8")
             }
 
-            is Account.V3 -> { //TODO что за параметры
+            is Account.V3 -> {
                 "?user_id=" +
-                        URLEncoder.encode(account.users.first().userId, "UTF-8") +
+                        URLEncoder.encode(account.firstUserId, "UTF-8") +
                         "&app_id=" +
                         URLEncoder.encode(account.firstAppId, "UTF-8")
             }

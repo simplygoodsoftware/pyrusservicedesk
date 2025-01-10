@@ -24,7 +24,7 @@ public class SampleApp extends Application {
         super.onCreate();
 
         users.add(user1);
-        PyrusServiceDesk.init(this, users, "10");
+        PyrusServiceDesk.initAsMultichat(this, users, "10");
 
         Map<String, String> map = new HashMap<>();
         map.put("test_text", "test some text");

@@ -1,5 +1,6 @@
 package com.pyrus.pyrusservicedesk
 
+import android.content.Intent
 import android.os.Bundle
 import androidx.annotation.ColorInt
 import androidx.annotation.ColorRes
@@ -387,9 +388,29 @@ class ServiceDeskConfiguration internal constructor() {
             return this
         }
 
+        fun setMultucahtLeftButton(action: Intent, @DrawableRes iconRes: Int) {
+            data class Button(
+                val intent: Intent,
+                @DrawableRes val iconRes: Int,
+            )
+
+            TODO()
+        }
+
+        fun setMultichatRightButton(action: Intent, @DrawableRes iconRes: Int) {
+            TODO()
+        }
+
+        fun setMultichatHeaderClickAction(action: Intent, @DrawableRes iconRes: Int) {
+            TODO()
+        }
+
         /**
          * Composes [ServiceDeskConfiguration] instance.
          */
         fun build() = configuration
     }
+
+
+
 }

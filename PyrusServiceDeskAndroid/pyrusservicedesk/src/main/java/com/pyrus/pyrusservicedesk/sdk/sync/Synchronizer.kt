@@ -94,8 +94,11 @@ internal class Synchronizer(
             val commandRequests = syncRequests.filterIsInstance<SyncReqRes.Command>()
             for (request in commandRequests) {
                 val commandId = request.request.commandId
-                val result = commandsResultsById[commandId] ?: error("result: $commandId not found")
-                request.continuation.resume(Try.Success(result))
+                val tryResult = when (val result = commandsResultsById[commandId]) {
+                    null -> Try.Failure(Exception("result: $commandId not found"))
+                    else -> Try.Success(result)
+                }
+                request.continuation.resume(tryResult)
             }
 
             val dataRequests = syncRequests.filterIsInstance<SyncReqRes.Data>()

@@ -15,8 +15,13 @@ import com.pyrus.pyrusservicedesk.R
 import com.pyrus.pyrusservicedesk.ServiceDeskConfiguration
 import com.pyrus.pyrusservicedesk._ref.Screens
 import com.pyrus.pyrusservicedesk._ref.utils.navigation.PyrusNavigator
+import com.pyrus.pyrusservicedesk.core.Account
 import com.pyrus.pyrusservicedesk.core.StaticRepository
+import com.pyrus.pyrusservicedesk.core.getAppId
+import com.pyrus.pyrusservicedesk.core.getUserId
+import com.pyrus.pyrusservicedesk.core.isMultiChat
 import com.pyrus.pyrusservicedesk.databinding.PsdActivityMainBinding
+import com.pyrus.pyrusservicedesk.sdk.repositories.UserInternal
 import kotlinx.coroutines.launch
 
 
@@ -44,20 +49,23 @@ internal class MainActivity : FragmentActivity() {
 
         savedInstanceState?.let { ServiceDeskConfiguration.restore(it) }
 
-        lifecycleScope.launch {
-            repeatOnLifecycle(Lifecycle.State.STARTED) {
-                PyrusServiceDesk.ticketsListStateFlow.collect {
-                    injector().router.newRootScreen(Screens.TicketsScreen())
-                }
-            }
-        }
+        // TODO check it
+//        lifecycleScope.launch {
+//            repeatOnLifecycle(Lifecycle.State.STARTED) {
+//                PyrusServiceDesk.ticketsListStateFlow.collect {
+//                    injector().router.newRootScreen(Screens.TicketsScreen())
+//                }
+//            }
+//        }
 
         if (savedInstanceState == null) {
-            if (injector().isMultiChat) {
+            val account = intent.getParcelableExtra<Account>(KEY_ACCOUNT)!!
+            if (account.isMultiChat()) {
                 injector().router.newRootScreen(Screens.TicketsScreen())
             }
             else {
-                injector().router.newRootScreen(Screens.TicketScreen(null, null)) //TODO
+                val user = UserInternal(account.getUserId(), account.getAppId())
+                injector().router.newRootScreen(Screens.TicketScreen(null, user))
             }
         }
     }
@@ -97,8 +105,11 @@ internal class MainActivity : FragmentActivity() {
     }
 
     companion object {
-        fun createLaunchIntent(context: Context): Intent {
-            return Intent(context, MainActivity::class.java)
+
+        private const val KEY_ACCOUNT = "KEY_ACCOUNT"
+
+        fun createLaunchIntent(context: Context, account: Account): Intent {
+            return Intent(context, MainActivity::class.java).putExtra(KEY_ACCOUNT, account)
         }
     }
 

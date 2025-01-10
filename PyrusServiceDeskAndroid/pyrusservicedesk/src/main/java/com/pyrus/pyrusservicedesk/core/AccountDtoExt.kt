@@ -45,6 +45,8 @@ internal fun Account.getVersion(): Int = when(this) {
     is Account.V3 -> API_VERSION_3
 }
 
+internal fun Account.isMultiChat() = this is Account.V3
+
 internal fun Account.getAdditionalUsers(localState: TicketsDto?): List<UserDataDto>? = when(this) {
     is Account.V1 -> null
     is Account.V2 -> null

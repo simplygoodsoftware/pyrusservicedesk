@@ -5,6 +5,7 @@ import android.app.Application
 import android.content.Context
 import android.content.Intent
 import android.content.SharedPreferences
+import androidx.annotation.DrawableRes
 import androidx.annotation.MainThread
 import com.pyrus.pyrusservicedesk._ref.ui_domain.screens.ticket.MainActivity
 import com.pyrus.pyrusservicedesk._ref.utils.ConfigUtils
@@ -64,6 +65,14 @@ class PyrusServiceDesk private constructor(
         @JvmStatic
         fun updateValue(newValue: List<User>) {
             _stateFlow.value = newValue
+        }
+
+        @JvmStatic
+        fun addUser(user: User) {
+            val account = injector().accountStore.getAccount()
+            if (account is Account.V3) {
+                injector().accountStore.setAccount(account.copy(users = account.users.toMutableList().apply { add(user) }))
+            }
         }
 
         /**
@@ -161,7 +170,7 @@ class PyrusServiceDesk private constructor(
          */
         @JvmStatic
         @JvmOverloads
-        fun init(
+        fun initAsMultichat(
             application: Application,
             listUser: List<User>,
             authorId: String,
@@ -301,13 +310,17 @@ class PyrusServiceDesk private constructor(
             onStopCallback: OnStopCallback? = null,
             openQrIntent: Intent? = null,
             openSettingsIntent: Intent? = null,
-        ) = startImpl(
-            activity = activity,
-            configuration = configuration,
-            onStopCallback = onStopCallback,
-            openQrIntent = openQrIntent,
-            openSettingsIntent = openSettingsIntent,
-        )
+        ) {
+            val account = injector().accountStore.getAccount()
+            startImpl(
+                activity = activity,
+                account = account,
+                configuration = configuration,
+                onStopCallback = onStopCallback,
+                openQrIntent = openQrIntent,
+                openSettingsIntent = openSettingsIntent,
+            )
+        }
 
         /**
          * Registers [subscriber] that will be notified when new replies from support are received
@@ -436,14 +449,16 @@ class PyrusServiceDesk private constructor(
 
         private fun startImpl(
             activity: Activity,
-            configuration: ServiceDeskConfiguration? = null,
-            onStopCallback: OnStopCallback? = null,
-            openQrIntent: Intent? = null,
-            openSettingsIntent: Intent? = null,
+            account: Account,
+            configuration: ServiceDeskConfiguration?,
+            onStopCallback: OnStopCallback?,
+            openQrIntent: Intent?,
+            openSettingsIntent: Intent?,
         ) {
             StaticRepository.setConfiguration(configuration)
 
             if (INJECTOR != null) {
+                // TODO не лучшее место для этого
                 injector().setIntent(openQrIntent, openSettingsIntent)
             }
 
@@ -451,7 +466,7 @@ class PyrusServiceDesk private constructor(
 //            get().sharedViewModel.clearQuitServiceDesk()
 //            get().onStopCallback = onStopCallback
 
-            activity.startActivity(MainActivity.createLaunchIntent(activity))
+            activity.startActivity(MainActivity.createLaunchIntent(activity, account))
 
             // TODO sds
             if (configuration == null)

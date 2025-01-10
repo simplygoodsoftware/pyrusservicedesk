@@ -11,6 +11,7 @@ import com.pyrus.pyrusservicedesk.R
 import com.pyrus.pyrusservicedesk.User
 import com.pyrus.pyrusservicedesk._ref.Screens
 import com.pyrus.pyrusservicedesk.databinding.AddTicketFragmentBinding
+import com.pyrus.pyrusservicedesk.sdk.repositories.UserInternal
 
 class AddTicketFragment: BottomSheetDialogFragment() {
 
@@ -32,8 +33,13 @@ class AddTicketFragment: BottomSheetDialogFragment() {
         updateSelectedUsers(appId)
         val adapter = AddTicketAdapter(users = selectedUserNames,
             onItemClick = { position ->
-                injector().router.navigateTo(Screens.TicketScreen(null, selectedUsers[position].userId))
-                //startActivity(TicketActivity.getLaunchIntent(userId = selectedUsers[position].userId))
+                val user = selectedUsers[position]
+                injector().router.navigateTo(
+                    Screens.TicketScreen(
+                        null,
+                        UserInternal(user.userId, user.appId)
+                    )
+                )
                 dismiss()
             })
         binding.usersRv.adapter = adapter
@@ -43,8 +49,9 @@ class AddTicketFragment: BottomSheetDialogFragment() {
         if (appId == null)
             return
         // TODO wtf
-        selectedUsers = injector().usersAccount?.users?.filter { it.appId == appId } ?: emptyList()
-        selectedUserNames = selectedUsers.map { it.userName }
+        // TODO delegate to feature
+//        selectedUsers = injector().usersAccount?.users?.filter { it.appId == appId } ?: emptyList()
+//        selectedUserNames = selectedUsers.map { it.userName }
     }
 
     companion object {

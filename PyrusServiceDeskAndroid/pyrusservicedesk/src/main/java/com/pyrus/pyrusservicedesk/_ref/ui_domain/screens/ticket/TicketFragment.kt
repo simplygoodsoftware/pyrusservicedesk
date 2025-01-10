@@ -44,6 +44,7 @@ import com.pyrus.pyrusservicedesk.databinding.PsdFragmentTicketBinding
 import com.pyrus.pyrusservicedesk.presentation.ui.navigation_page.ticket.dialogs.attach_files.AttachFileSharedViewModel
 import com.pyrus.pyrusservicedesk.presentation.ui.navigation_page.ticket.dialogs.attach_files.AttachFileVariantsFragment
 import com.pyrus.pyrusservicedesk.presentation.ui.view.recyclerview.item_decorators.GroupVerticalItemDecoration
+import com.pyrus.pyrusservicedesk.sdk.repositories.UserInternal
 import kotlinx.coroutines.flow.map
 
 
@@ -148,17 +149,15 @@ internal class TicketFragment: TeaFragment<Model, TicketView.Event, TicketView.E
     }
 
     private fun bindFeature() {
-        val userId = arguments?.getString(KEY_USER_ID) ?: KEY_DEFAULT_USER_ID
+        val user = arguments?.getParcelable<UserInternal>(KEY_USER_INTERNAL)!!
         // TODO если открыть файл и вернуться в задачу скорее всего id обновится
-        val ticketId = arguments?.getInt(
-            KEY_TICKET_ID,
-            injector().localCommandsStore.getLastTicketId()  // TODO wtf
-        ) ?: injector().localCommandsStore.getLastTicketId()
+        // TODO использовать nullable для нового тикета
+        val ticketId = arguments?.getInt(KEY_TICKET_ID)!!
 
         val feature = getStore { injector().ticketFeatureFactory.create(
-            userId = userId,
+            user = user,
             ticketId = ticketId,
-            welcomeMessage = "welcome"
+            welcomeMessage = "welcome" // TODO
         ) }
         bind(BinderLifecycleMode.CREATE_DESTROY) {
             this@TicketFragment.messages.map(TicketMapper::map) bindTo feature
@@ -327,14 +326,12 @@ internal class TicketFragment: TeaFragment<Model, TicketView.Event, TicketView.E
     companion object {
         private const val STATE_KEYBOARD_SHOWN = "STATE_KEYBOARD_SHOWN"
         private const val KEY_TICKET_ID = "KEY_TICKET_ID"
-        private const val KEY_USER_ID = "KEY_USER_ID"
-        const val KEY_DEFAULT_USER_ID = "0"
-        const val KEY_DEFAULT_TICKET_ID = 0
+        private const val KEY_USER_INTERNAL = "KEY_USER_INTERNAL"
 
-        fun newInstance(ticketId: Int?, userId: String?): TicketFragment {
+        fun newInstance(ticketId: Int?, user: UserInternal): TicketFragment {
             val fragment = TicketFragment()
             val args = Bundle().apply {
-                putString(KEY_USER_ID, userId)
+                putParcelable(KEY_USER_INTERNAL, user)
                 ticketId?.let { putInt(KEY_TICKET_ID, it) }
             }
             fragment.arguments = args

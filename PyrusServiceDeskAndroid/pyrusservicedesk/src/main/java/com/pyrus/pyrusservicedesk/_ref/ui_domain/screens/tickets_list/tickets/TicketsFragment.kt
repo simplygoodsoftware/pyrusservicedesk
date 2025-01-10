@@ -176,7 +176,6 @@ internal class TicketsFragment: TeaFragment<Model, Message, Effect.Outer>() {
                     startActivity(injector().intentSettings)
             }
 
-            is Effect.Outer.ShowAddTicketMenu -> TODO()
         }
     }
 

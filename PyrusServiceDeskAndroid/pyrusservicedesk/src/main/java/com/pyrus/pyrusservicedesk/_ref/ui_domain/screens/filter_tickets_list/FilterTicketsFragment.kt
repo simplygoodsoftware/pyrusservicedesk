@@ -34,7 +34,7 @@ class FilterTicketsFragment: BottomSheetDialogFragment() {
         updateSelectedUsers(appId)
 
         val title: TextView = view.findViewById(R.id.titleTextView)
-        title.text = "Фильтры"
+        title.text = "Фильтры" // TODO in res
         //val recyclerview: RecyclerView = view.findViewById(R.id.usersRv)
         binding.usersRv.layoutManager = LinearLayoutManager(context)
         val adapter = FilterTicketsAdapter(
@@ -55,9 +55,10 @@ class FilterTicketsFragment: BottomSheetDialogFragment() {
             return
 
         // TODO wtf
-        val selectedUsers = injector().usersAccount?.users?.filter { it.appId == appId }
-        selectedUserIds = selectedUsers?.map { it.userId } ?: emptyList()
-        selectedUserNames = selectedUsers?.map { it.userName } ?: emptyList()
+        // TODO delegate to feature
+//        val selectedUsers = injector().usersAccount?.users?.filter { it.appId == appId }
+//        selectedUserIds = selectedUsers?.map { it.userId } ?: emptyList()
+//        selectedUserNames = selectedUsers?.map { it.userName } ?: emptyList()
     }
 
     companion object {
