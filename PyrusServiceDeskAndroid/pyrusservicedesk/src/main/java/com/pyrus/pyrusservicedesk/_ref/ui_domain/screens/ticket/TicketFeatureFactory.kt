@@ -1,14 +1,15 @@
 package com.pyrus.pyrusservicedesk._ref.ui_domain.screens.ticket
 
 import android.net.Uri
-import com.pyrus.pyrusservicedesk.PyrusServiceDesk.Companion.injector
 import com.pyrus.pyrusservicedesk.R
 import com.pyrus.pyrusservicedesk._ref.Screens
 import com.pyrus.pyrusservicedesk._ref.data.FullTicket
 import com.pyrus.pyrusservicedesk._ref.ui_domain.screens.ticket.TicketContract.Effect
 import com.pyrus.pyrusservicedesk._ref.ui_domain.screens.ticket.TicketContract.Message
 import com.pyrus.pyrusservicedesk._ref.ui_domain.screens.ticket.TicketContract.State
+import com.pyrus.pyrusservicedesk._ref.utils.RequestUtils.Companion.MAX_FILE_SIZE_BYTES
 import com.pyrus.pyrusservicedesk._ref.utils.RequestUtils.Companion.getFileUrl
+import com.pyrus.pyrusservicedesk._ref.utils.TextProvider
 import com.pyrus.pyrusservicedesk._ref.utils.Try
 import com.pyrus.pyrusservicedesk._ref.utils.isSuccess
 import com.pyrus.pyrusservicedesk._ref.utils.navigation.PyrusRouter
@@ -28,7 +29,6 @@ import com.pyrus.pyrusservicedesk.sdk.repositories.UserInternal
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.map
-import java.util.UUID
 
 internal class TicketFeatureFactory(
     private val account: Account,
@@ -84,6 +84,18 @@ private class FeatureReducer: Logic<State, Message, Effect>() {
             is Message.Outer.OnAttachmentSelected -> {
                 if (state !is State.Content) return
                 message.fileUri ?: return // TODO Show toast
+                if (message.fileSize == null || message.fileSize > MAX_FILE_SIZE_BYTES) {
+                    effects {
+                        +Effect.Outer.MakeToast(
+                            TextProvider.Format(
+                                R.string.psd_file_size_exceeded_message, listOf(
+                                    MAX_FILE_SIZE_BYTES.toString()
+                                )
+                            )
+                        )
+                    }
+                    return
+                }
                 effects { +Effect.Inner.SendAttachComment(
                     message.fileUri,
                     ticketId = (state as State.Content).ticketId,
@@ -144,14 +156,16 @@ private class FeatureReducer: Logic<State, Message, Effect>() {
 
     private fun Result.handleInner(message: Message.Inner) {
         when (message) {
-            Message.Inner.UpdateCommentsFailed -> {
+            is Message.Inner.UpdateCommentsFailed -> {
                 when (val currentState = state) {
                     is State.Content -> {
+//                        if (message.error == Exception("data not found")) {
+//                            effects { +Effect.Inner.Close }
+//                        } //TODO надо как-то обрабатывать разные ошибки Try2?
                         state { currentState.copy(isLoading = false) }
-                        // TODO show toast
                     }
                     is State.Loading -> state { State.Error }
-                    State.Error -> {} // TODO show toast
+                    State.Error -> {}
                 }
             }
             is Message.Inner.UpdateCommentsCompleted -> {
@@ -221,8 +235,6 @@ internal class TicketActor(
         }
         is Effect.Inner.SendAttachComment -> flow {
             val fileUri = try { fileManager.copyFile(effect.uri) } catch (e: Exception) { null } ?: return@flow
-            // TODO check file size
-            // TODO show error
             repository.addAttachComment(user, ticketId, fileUri)
         }
         is Effect.Inner.RetryAddComment -> flow { repository.retryAddComment(user, ticketId, effect.id) }

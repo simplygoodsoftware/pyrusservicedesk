@@ -17,6 +17,7 @@ import androidx.appcompat.content.res.AppCompatResources
 import androidx.core.content.ContextCompat.getColor
 import com.pyrus.pyrusservicedesk.MainMenuDelegate
 import com.pyrus.pyrusservicedesk.R
+import com.pyrus.pyrusservicedesk._ref.data.multy_chat.MultichatButtons
 import com.pyrus.pyrusservicedesk.core.StaticRepository
 import java.security.SecureRandom
 
@@ -300,6 +301,13 @@ internal class ConfigUtils{
 //                    PyrusServiceDesk.get().application.getString(R.string.psd_guest)
                 }
             }
+        }
+
+        /**
+         * Provides multichat buttons taking [StaticRepository.CONFIGURATION] into account
+         */
+        fun getMultichatButtons(): MultichatButtons? {
+            return StaticRepository.getConfiguration().multichatButtons
         }
 
         /**

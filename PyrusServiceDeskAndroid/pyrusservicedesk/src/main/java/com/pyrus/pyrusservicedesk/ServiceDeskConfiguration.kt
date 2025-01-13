@@ -6,6 +6,7 @@ import androidx.annotation.ColorInt
 import androidx.annotation.ColorRes
 import androidx.annotation.DrawableRes
 import com.pyrus.pyrusservicedesk.ServiceDeskConfiguration.Builder
+import com.pyrus.pyrusservicedesk._ref.data.multy_chat.MultichatButtons
 import com.pyrus.pyrusservicedesk.core.StaticRepository
 
 /**
@@ -20,6 +21,7 @@ class ServiceDeskConfiguration internal constructor() {
     @DrawableRes
     internal var supportAvatar: Int? = null
     internal var mainMenuDelegate: MainMenuDelegate? = null
+    internal var multichatButtons: MultichatButtons? = null
 
     internal var mainFontName: String? = null
     internal var userMessageTextBackgroundColor: Int? = null
@@ -66,6 +68,7 @@ class ServiceDeskConfiguration internal constructor() {
         private const val KEY_STATUS_BAR_COLOR = "ServiceDeskConfiguration_KEY_STATUS_BAR_COLOR"
         private const val KEY_FORCE_DARK_ALLOWED = "ServiceDeskConfiguration_KKEY_FORCE_DARK_ALLOWED"
         private const val KEY_TRUSTED_URLS = "ServiceDeskConfiguration_KEY_TRUSTED_URLS"
+        private const val KEY_MULTICHAT_BUTTONS = "ServiceDeskConfiguration_KEY_MULTICHAT_BUTTONS"
 
         fun save(bundle: Bundle) {
             with(StaticRepository.getConfiguration()) {
@@ -93,6 +96,7 @@ class ServiceDeskConfiguration internal constructor() {
                     sendButtonColor?.let { putInt(KEY_SEND_BUTTON_COLOR, it) }
                     statusBarColor?.let { putInt(KEY_STATUS_BAR_COLOR, it) }
                     trustedUrls?.let { putStringArrayList(KEY_TRUSTED_URLS, it) }
+                    multichatButtons?.let {putParcelable(KEY_MULTICHAT_BUTTONS, it)}
                     putBoolean(KEY_FORCE_DARK_ALLOWED, forceDarkAllowed)
                 }
             }
@@ -124,6 +128,7 @@ class ServiceDeskConfiguration internal constructor() {
                     sendButtonColor = bundle.getNullableInt(KEY_SEND_BUTTON_COLOR)
                     statusBarColor = bundle.getNullableInt(KEY_STATUS_BAR_COLOR)
                     forceDarkAllowed = bundle.getBoolean(KEY_FORCE_DARK_ALLOWED, false)
+                    multichatButtons = bundle.getParcelable(KEY_MULTICHAT_BUTTONS)
                 }
             )
         }
@@ -388,21 +393,9 @@ class ServiceDeskConfiguration internal constructor() {
             return this
         }
 
-        fun setMultucahtLeftButton(action: Intent, @DrawableRes iconRes: Int) {
-            data class Button(
-                val intent: Intent,
-                @DrawableRes val iconRes: Int,
-            )
-
-            TODO()
-        }
-
-        fun setMultichatRightButton(action: Intent, @DrawableRes iconRes: Int) {
-            TODO()
-        }
-
-        fun setMultichatHeaderClickAction(action: Intent, @DrawableRes iconRes: Int) {
-            TODO()
+        fun setMultichatButtons(buttons: MultichatButtons): Builder {
+            configuration.multichatButtons = buttons
+            return this
         }
 
         /**

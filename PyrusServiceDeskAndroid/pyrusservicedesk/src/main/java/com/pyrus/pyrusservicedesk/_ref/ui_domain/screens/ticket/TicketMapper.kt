@@ -55,7 +55,7 @@ internal object TicketMapper {
 
     fun map(event: Event): Message.Outer = when(event) {
         is Event.OnAttachmentSelected -> {
-            Message.Outer.OnAttachmentSelected(event.fileUri)
+            Message.Outer.OnAttachmentSelected(event.fileUri, event.fileSize)
         }
         Event.OnCloseClick -> Message.Outer.OnCloseClick
         is Event.OnCopyClick -> Message.Outer.OnCopyClick(event.text)

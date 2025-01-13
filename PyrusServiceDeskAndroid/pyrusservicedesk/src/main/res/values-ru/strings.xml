@@ -18,6 +18,7 @@
     <string name="psd_date_format_d_m_y_short">dd.MM.yyyy</string>
     <string name="psd_photo">Сделать фото</string>
     <string name="psd_gallery">Галерея</string>
+    <string name="filters">Фильтры</string>
 
     <plurals name="psd_years_ago">
         <item quantity="one">%d год назад</item>

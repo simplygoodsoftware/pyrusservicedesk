@@ -40,7 +40,7 @@ internal interface TicketView {
 
         data class OnMessageChanged(val text: String) : Event
 
-        data class OnAttachmentSelected(val fileUri: Uri?) : Event
+        data class OnAttachmentSelected(val fileUri: Uri?, val fileSize: Long?) : Event
 
         data object OnRefresh : Event
 

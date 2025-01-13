@@ -17,6 +17,7 @@
     <string name="psd_date_format_d_m_y_short">MM.dd.yyyy</string>
     <string name="psd_photo">Photo</string>
     <string name="psd_gallery">Gallery</string>
+    <string name="filters">Filters</string>
 
     <plurals name="psd_years_ago">
         <item quantity="one">%d year ago</item>

@@ -48,7 +48,7 @@ internal interface TicketContract {
 
             data class OnMessageChanged(val text: String) : Outer
 
-            data class OnAttachmentSelected(val fileUri: Uri?) : Outer
+            data class OnAttachmentSelected(val fileUri: Uri?, val fileSize: Long?) : Outer
 
             data object OnRefresh : Outer
 

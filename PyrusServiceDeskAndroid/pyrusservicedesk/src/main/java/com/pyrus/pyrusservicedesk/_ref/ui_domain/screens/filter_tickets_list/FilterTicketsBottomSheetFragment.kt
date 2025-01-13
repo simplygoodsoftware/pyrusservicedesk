@@ -34,8 +34,7 @@ class FilterTicketsBottomSheetFragment: BottomSheetDialogFragment() {
         val users: List<User> = arguments?.getParcelableArrayList(KEY_USERS) ?: emptyList()
         updateSelectedUsers(appId, users)
 
-        val title: TextView = view.findViewById(R.id.titleTextView)
-        title.text = "Фильтры" // TODO in res
+        binding.titleTextView.text = resources.getString(R.string.filters)
         //val recyclerview: RecyclerView = view.findViewById(R.id.usersRv)
         binding.usersRv.layoutManager = LinearLayoutManager(context)
         val adapter = FilterTicketsAdapter(

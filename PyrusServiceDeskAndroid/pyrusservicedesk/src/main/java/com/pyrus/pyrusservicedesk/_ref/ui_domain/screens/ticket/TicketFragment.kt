@@ -2,9 +2,11 @@ package com.pyrus.pyrusservicedesk._ref.ui_domain.screens.ticket
 
 import android.content.ClipData
 import android.content.ClipboardManager
+import android.content.ContentResolver
 import android.content.res.ColorStateList
 import android.os.Build
 import android.os.Bundle
+import android.provider.OpenableColumns
 import android.text.Editable
 import android.text.TextWatcher
 import android.view.LayoutInflater
@@ -139,7 +141,17 @@ internal class TicketFragment: TeaFragment<Model, TicketView.Event, TicketView.E
         ViewCompat.setOnApplyWindowInsetsListener(binding.root, deferringInsetsListener)
 
         attachFileSharedViewModel.getFilePickedLiveData().observe(viewLifecycleOwner) { fileUri ->
-            dispatch(TicketView.Event.OnAttachmentSelected(fileUri))
+            val contentResolver: ContentResolver? = context?.contentResolver
+            val cursor = fileUri?.let { contentResolver?.query(it, null, null, null, null) }
+            val fileSize = cursor?.use {
+                if (it.moveToFirst()) {
+                    val sizeIndex = it.getColumnIndex(OpenableColumns.SIZE)
+                    it.getLong(sizeIndex)
+                } else {
+                    null
+                }
+            }
+            dispatch(TicketView.Event.OnAttachmentSelected(fileUri, fileSize))
         }
     }
 

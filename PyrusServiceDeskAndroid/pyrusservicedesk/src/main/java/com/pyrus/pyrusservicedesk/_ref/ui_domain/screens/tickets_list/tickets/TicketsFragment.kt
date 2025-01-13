@@ -21,6 +21,7 @@ import com.pyrus.pyrusservicedesk._ref.ui_domain.screens.tickets_list.tickets.Ti
 import com.pyrus.pyrusservicedesk._ref.ui_domain.screens.tickets_list.tickets.TicketsContract.Message
 import com.pyrus.pyrusservicedesk._ref.ui_domain.screens.tickets_list.tickets.TicketsView.Model
 import com.pyrus.pyrusservicedesk._ref.utils.CIRCLE_TRANSFORMATION
+import com.pyrus.pyrusservicedesk._ref.utils.ConfigUtils
 import com.pyrus.pyrusservicedesk._ref.utils.insets.RootViewDeferringInsetsCallback
 import com.pyrus.pyrusservicedesk._ref.whitetea.android.TeaFragment
 import com.pyrus.pyrusservicedesk._ref.whitetea.androidutils.bind
@@ -76,12 +77,6 @@ internal class TicketsFragment: TeaFragment<Model, Message, Effect.Outer>() {
             dispatch(Message.Outer.OnFilterClick(currentUserId))
         }
 
-        binding.toolbarTicketsList.ticketsTitleLl.setOnClickListener { dispatch(Message.Outer.OnSettingsClick) }
-
-        binding.toolbarTicketsList.psdToolbarSettingsIb.setOnClickListener { dispatch(Message.Outer.OnSettingsClick) }
-
-        binding.toolbarTicketsList.psdToolbarQrIb.setOnClickListener {dispatch(Message.Outer.OnScanClick)}
-
         binding.deleteFilterIv.setOnClickListener {
             childFragmentManager.setFragmentResult(KEY_USER_ID, bundleOf(KEY_USER_ID to KEY_DEFAULT_USER_ID))
             currentUserId = KEY_DEFAULT_USER_ID
@@ -114,6 +109,14 @@ internal class TicketsFragment: TeaFragment<Model, Message, Effect.Outer>() {
             tab.text = adapter.getTitle(position)
         }.attach()
 
+        val multichatButtons = ConfigUtils.getMultichatButtons()
+        if (multichatButtons?.multichatRightButtonRes != null)
+            binding.toolbarTicketsList.psdToolbarQrIb.setBackgroundResource(multichatButtons.multichatRightButtonRes)
+        if (multichatButtons?.multichatRightButtonIntent != null)
+            binding.toolbarTicketsList.psdToolbarQrIb.setOnClickListener { startActivity(multichatButtons.multichatRightButtonIntent) }
+        if (multichatButtons?.multichatCenterIntent != null)
+            binding.toolbarTicketsList.ticketsTitleLl.setOnClickListener { startActivity(multichatButtons.multichatCenterIntent) }
+
     }
 
     override fun createRenderer(): ViewRenderer<Model> = diff {
@@ -126,8 +129,7 @@ internal class TicketsFragment: TeaFragment<Model, Message, Effect.Outer>() {
         }
         diff(Model::ticketsIsEmpty) { isEmpty ->
             binding.toolbarTicketsList.psdToolbarFilterIb.isVisible = !isEmpty
-            binding.toolbarTicketsList.psdToolbarQrIb.isVisible = !isEmpty
-            binding.toolbarTicketsList.psdToolbarSettingsIb.isVisible = isEmpty
+            binding.toolbarTicketsList.psdToolbarQrIb.isVisible = !isEmpty && binding.toolbarTicketsList.psdToolbarQrIb.background != null
             binding.fabAddTicket.isVisible = !isEmpty
 
         }

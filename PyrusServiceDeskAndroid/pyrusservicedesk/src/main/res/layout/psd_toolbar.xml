@@ -16,13 +16,6 @@
         app:layout_constraintTop_toTopOf="parent"
         app:titleTextAppearance="@style/PsdToolbarTitleTextAppearance">
 
-    <ImageButton
-        android:id="@+id/psd_toolbar_settings_ib"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_gravity="center_vertical|start"
-        android:background="@drawable/ic_settings"
-        android:backgroundTint="@color/design_default_color_error" />
 
     <ImageButton
         android:id="@+id/psd_toolbar_filter_ib"
@@ -74,7 +67,6 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="center_vertical|end"
-        android:background="@drawable/ic_qr"
         android:visibility="gone"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"

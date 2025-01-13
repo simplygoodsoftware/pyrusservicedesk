@@ -4,16 +4,20 @@ import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.DialogInterface;
+import android.content.Intent;
 import android.os.Bundle;
 import android.widget.TextView;
 
 import androidx.annotation.Nullable;
 
 import com.pyrus.pyrusservicedesk.PyrusServiceDesk;
+import com.pyrus.pyrusservicedesk.ServiceDeskConfiguration;
 import com.pyrus.pyrusservicedesk.User;
+import com.pyrus.pyrusservicedesk._ref.data.multy_chat.MultichatButtons;
 import com.pyrus.pyrusservicedesk.sdk.updates.NewReplySubscriber;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -54,19 +58,23 @@ public class SampleActivity extends Activity implements NewReplySubscriber {
             map.put("test_phone", "79778888888");
             map.put("test_email", "sample@email.com");
             PyrusServiceDesk.setFieldsData(map);
-            PyrusServiceDesk.start(this);
+
+            Intent intent = new Intent(this, SampleActivity.class);
+            intent.putExtra("FRAGMENT_KEY", "FRAGMENT_QR_KEY");
+            ServiceDeskConfiguration builder =  new ServiceDeskConfiguration.Builder()
+                    .setUserName("ssss")
+                    .setChatTitle("Sample Support")
+                    .setWelcomeMessage("How can I help you?")
+                    .setAvatarForSupport(R.drawable.psd_download_file)
+                    .setChatMenuDelegate(new ChatMenuDelegate())
+                    .setTrustedUrls(Collections.singletonList("pyrus.com"))
+                    .setMultichatButtons(new MultichatButtons(R.drawable.ic_qr, intent, intent))
+                    .build();
+
+            PyrusServiceDesk.start(this, builder);
         });
-//            this,
-//            new ServiceDeskConfiguration.Builder()
-//                .setUserName("Ivan Ivanov")
-//                .setThemeColor(Color.parseColor("#FF8300"))
-//                .setChatTitle("Sample Support")
-//                .setWelcomeMessage("How can I help you?")
-//                .setAvatarForSupport(R.drawable.psd_download_file)
-//                .setChatMenuDelegate(new ChatMenuDelegate())
-//                .setTrustedUrls(Collections.singletonList("pyrus.com"))
-//                .build())
-//        );
+
+
 
         PyrusServiceDesk.onAuthorizationFailed(() -> {
             AlertDialog dialog = new AlertDialog
