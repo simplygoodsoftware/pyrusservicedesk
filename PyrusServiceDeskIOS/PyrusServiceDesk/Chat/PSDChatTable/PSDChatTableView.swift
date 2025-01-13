@@ -144,7 +144,11 @@ class PSDChatTableView: PSDTableView {
         
 //            UIView.animate(withDuration: 0.0, delay: 0, usingSpringWithDamping: 0.0, initialSpringVelocity: 0.0, options: [], animations: {
                 if #available(iOS 13.0, *) {
-                    self.reloadWithDiffableDataSource(animated: true) {
+                    let contentOffsetY = contentOffset.y
+                    let inset = contentInset.top + contentInset.bottom - 20
+
+                    let isAtBottom = contentOffsetY <= -inset
+                    self.reloadWithDiffableDataSource(animated: isAtBottom) {
                         if scrollsToBottom {
                             self.scrollsToBottom(animated: true)
                         }
@@ -542,8 +546,10 @@ extension PSDChatTableView: UITableViewDelegate, UITableViewDataSource {
         let contentHeight = self.contentSize.height
         let scrollViewHeight = scrollView.frame.size.height
         let contentOffsetY = scrollView.contentOffset.y
-        let inset = contentInset.top + contentInset.bottom - 90
-        chatDelegate?.updateScrollButton(isHidden: contentOffset.y <= -adjustedContentInset.top)
+        let inset = contentInset.top + contentInset.bottom - 40
+
+        let isAtBottom = contentOffsetY <= -inset
+        chatDelegate?.updateScrollButton(isHidden: isAtBottom)
     }
     
     func tableView(_ tableView: UITableView, canPerformAction action: Selector, forRowAt indexPath: IndexPath, withSender sender: Any?) -> Bool {

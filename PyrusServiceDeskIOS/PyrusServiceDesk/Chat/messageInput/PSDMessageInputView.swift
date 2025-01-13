@@ -317,11 +317,8 @@ class PSDMessageInputView: UIView, PSDMessageTextViewDelegate,PSDMessageSendButt
         topGrayLine.topAnchor.constraint(equalTo: rateView.bottomAnchor).isActive = true
         
     }
-    
-    
-    
-    
 }
+
 extension PSDMessageInputView : AttachmentCollectionViewDelegateProtocol{
     func attachmentRemoved(){
         checkCollectionHeight()

@@ -89,99 +89,15 @@ class PSDChatViewController: PSDViewController {
         return 0
     }
     
-//    @objc private func keyboardWillShow(_ notification: NSNotification) {
-//        if let infoEndKey: NSValue = notification.userInfo?[UIResponder.keyboardFrameEndUserInfoKey] as? NSValue {
-//            let keyboardEndFrame = infoEndKey.cgRectValue
-//            let duration = keyboardAnimationDuration(notification)
-//            animateInset(keyboardEndFrame.height, notification: notification)
-//            if !isHide {
-//                UIView.animate(withDuration: duration, animations: {
-//                 //   self.bottomTableView?.constant =  -keyboardEndFrame.height
-//                    self.bottomScrollButton?.constant = -38 - keyboardEndFrame.height
-//                    self.view.layoutIfNeeded()
-//                })
-//            }
-//            isHide = false
-//        }
-//    }
-//    
-//    private var isHide = false
-//    @objc private func keyboardWillHide(_ notification: NSNotification) {
-//        isHide = true
-//        if let infoEndKey: NSValue = notification.userInfo?[UIResponder.keyboardFrameEndUserInfoKey] as? NSValue {
-//            let keyboardEndFrame = infoEndKey.cgRectValue
-//            let duration = keyboardAnimationDuration(notification)
-//            UIView.animate(withDuration: duration, animations: {
-//                //self.bottomTableView?.constant = -44
-//             //   self.bottomTableView?.constant =  -86//keyboardEndFrame.height
-//                self.bottomScrollButton?.constant = -120
-//                self.view.setNeedsLayout()
-//            })
-//        }
-//    }
-//    
-//    private func animateInset(_ keyboardHeight:CGFloat, notification: NSNotification){
-//        let duration = keyboardAnimationDuration(notification)
-//        let safeArea =  tableView.bottomPSDRefreshControl.insetHeight
-//        let bottomUnvisibleHeight = keyboardHeight + safeArea
-//        var offsetDelta : CGFloat = 0
-//        guard needChangeInset(bottomUnvisibleHeight) else {
-//            return
-//        }
-//        let needChangeOffset = needChangeOffset(keyboardHeight: bottomUnvisibleHeight )
-//        if needChangeOffset {
-//            offsetDelta = bottomUnvisibleHeight - tableView.contentInset.top
-//            offsetDelta = min(offsetDelta,  tableView.contentSize.height - (tableView.frame.size.height-bottomUnvisibleHeight))
-//            offsetDelta = offsetDelta - tableView.bottomPSDRefreshControl.insetHeight
-//        }
-//        let newOffset = newOffset(delta: offsetDelta, bottomInset: bottomUnvisibleHeight)
-//        UIView.animate(withDuration: duration, delay: 0, animations: {
-//            self.tableView.contentInset.top = bottomUnvisibleHeight
-//            self.tableView.scrollIndicatorInsets.top = bottomUnvisibleHeight
-//            if needChangeOffset {
-//                self.tableView.contentOffset.y = newOffset
-//            }
-//        }, completion: nil)
-//    }
-//    
-    private func needChangeInset(_ newInset: CGFloat) -> Bool {
-        if
-            let presentedViewController = tableView.findViewController()?.presentedViewController,
-            presentedViewController.isBeingDismissed
-        {
-            return tableView.contentInset.bottom <= newInset
-        }
-        return true
-    }
-    
-    private func newOffset(delta: CGFloat, bottomInset: CGFloat) -> CGFloat {
-        var newOffsetY = max(0,tableView.contentOffset.y + delta)//block  too little offset
-        newOffsetY = min(tableView.contentSize.height - (tableView.frame.size.height - bottomInset),newOffsetY)//block  too big offset
-        return newOffsetY
-    }
-    
-    private func needChangeOffset(keyboardHeight:CGFloat)->Bool{
-        if(tableView.contentSize.height > (tableView.frame.size.height-keyboardHeight) && !tableView.isDragging){
-            return true
-        }
-        return false
-    
-    }
-    
-    private var isKeyBoardOpen = false
+    private var keyboardShown = true
+    private var isDragging = false
     @objc private func keyboardDidHide(_ notification: NSNotification) {
-        isKeyBoardOpen = false
+        keyboardShown = false
+        isDragging = false
     }
     
     @objc private func keyboardDidShow(_ notification: NSNotification) {
-        if let infoEndKey: NSValue = notification.userInfo?[UIResponder.keyboardFrameEndUserInfoKey] as? NSValue {
-            let keyboardEndFrame = infoEndKey.cgRectValue
-            let keyboardHeight = keyboardEndFrame.height
-            
-            if keyboardHeight > 200 {
-                isKeyBoardOpen = true
-            }
-        }
+        keyboardShown = true
     }
     
     @objc private func keyboardWillShow(_ notification: NSNotification) {
@@ -189,11 +105,13 @@ class PSDChatViewController: PSDViewController {
             let keyboardEndFrame = infoEndKey.cgRectValue
             let duration = keyboardAnimationDuration(notification)
             let keyboardHeight = keyboardEndFrame.height
-            print("keyboardWillShow: duration: \(duration), keyboardHeight: \(keyboardHeight), insets: \(view.safeAreaInsets.bottom)")
+        //    print("keyboardWillShow: duration: \(duration), keyboardHeight: \(keyboardHeight), insets: \(view.safeAreaInsets.bottom)")
             UIView.animate(withDuration: duration, delay: 0, animations: {
+                self.bottomScrollButton?.constant = -38 - keyboardEndFrame.height
+                self.view.layoutIfNeeded()
                 let oldInset = self.tableView.contentInset.top
                 self.tableView.contentInset.top = keyboardHeight
-                if !self.isKeyBoardOpen {
+                if !self.isDragging && self.keyboardShown {
                     self.tableView.contentOffset.y -= self.tableView.contentInset.top - oldInset
                 }
             })
@@ -205,8 +123,9 @@ class PSDChatViewController: PSDViewController {
             let keyboardEndFrame = infoEndKey.cgRectValue
             let duration = keyboardAnimationDuration(notification)
             let keyboardHeight = keyboardEndFrame.height
-            print("keyboardWillHide: duration: \(duration), keyboardHeight: \(keyboardHeight), insets: \(view.safeAreaInsets.bottom)")
+          //  print("keyboardWillHide: duration: \(duration), keyboardHeight: \(keyboardHeight), insets: \(view.safeAreaInsets.bottom)")
             UIView.animate(withDuration: duration, delay: 0, animations: {
+                self.bottomScrollButton?.constant = -120
                 let oldInset = self.tableView.contentInset.top
                 self.tableView.contentInset.top = keyboardHeight
             })
@@ -263,11 +182,12 @@ class PSDChatViewController: PSDViewController {
         
         NotificationCenter.default.addObserver(self, selector: #selector(appEnteredBackground), name: UIApplication.didEnterBackgroundNotification, object: nil)
         NotificationCenter.default.addObserver(self, selector: #selector(appEnteredForeground), name: UIApplication.willEnterForegroundNotification, object: nil)
+        
         NotificationCenter.default.addObserver(self, selector:  #selector(keyboardWillShow(_:)), name: UIResponder.keyboardWillShowNotification, object: nil)
         NotificationCenter.default.addObserver(self, selector:  #selector(keyboardWillHide(_:)), name: UIResponder.keyboardWillHideNotification, object: nil)
         NotificationCenter.default.addObserver(self, selector:  #selector(keyboardDidShow(_:)), name: UIResponder.keyboardDidShowNotification, object: nil)
         NotificationCenter.default.addObserver(self, selector:  #selector(keyboardDidHide(_:)), name: UIResponder.keyboardDidHideNotification, object: nil)
-//        NotificationCenter.default.addObserver(self, selector:  #selector(keyboardWillShow(_:)), name: UIResponder.keyboardWillChangeFrameNotification, object: nil)
+    //    NotificationCenter.default.addObserver(self, selector:  #selector(keyboardWillShow(_:)), name: UIResponder.keyboardWillChangeFrameNotification, object: nil)
     }
     
     override func viewDidAppear(_ animated: Bool) {
@@ -529,6 +449,42 @@ private extension PSDChatViewController {
             firstLoad = false
         }
     }
+    
+    func updateScrollButtonsVisibility() {
+        var isDraggingKeyboard = false
+//        let needHideBothScrollButtons = tableView.frame.size.height - tableView.contentInset.top - tableView.contentInset.bottom < scrollTaskButtons.bounds.size.height
+//        let isTopScrollActive = tableView.contentOffset.y > 20 &&
+//            buttonMenuSelected != .mention &&
+//            isVisible &&
+//            !needHideBothScrollButtons &&
+//            !isAnimatingScroll &&
+//            !isSendComment &&
+//            !isReloadingData
+        
+        if keyboardShown {
+            if tableView.panGestureRecognizer.state == .changed {
+                let location = tableView.panGestureRecognizer.location(in: self.view)
+                var startPos = view.frame.size.height - tableView.contentInset.top
+                let draftViewHeight: CGFloat = inputAccessoryView?.bounds.size.height ?? 0//editAttachmentMode == .none ? draftView.actualHeight : inputAccessoryView?.bounds.size.height ?? 0
+                var bottomInset = view.frame.size.height - location.y + 5
+                
+                if #available(iOS 11.0, *) {
+                    startPos -= view.safeAreaInsets.bottom
+                    bottomInset -= view.safeAreaInsets.bottom
+                }
+                
+                if location.y >= startPos { // палец доехал до верхней границы draftMoreView, нужно изменить положение draftMoreView
+                    isDragging = true
+                    isDraggingKeyboard = true
+                    if bottomInset < draftViewHeight + 5 {
+                        bottomInset = draftViewHeight + 5
+                    }
+                   // heightUnderFinger = bottomInset
+                }
+            }
+        }
+    }
+
 }
 
 extension PSDChatViewController: PSDChatViewProtocol {
@@ -640,6 +596,7 @@ extension PSDChatViewController: PSDChatTableViewDelegate {
             badgeView.isHidden = true
         }
         interactor.doInteraction(.scrollButtonVisibleUpdated(isHidden: isHidden))
+        updateScrollButtonsVisibility()
     }
     
     func updateNoConnectionVisible(visible: Bool) {
