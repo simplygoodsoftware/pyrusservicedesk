@@ -141,7 +141,7 @@ internal class DiInjector(
         fileManager = fileManager,
     )
 
-    // TODO fix it
+    // TODO fix it use AccountStore
     val ticketsFeatureFactory = TicketsFeatureFactory(account as Account.V3, storeFactory, repository, router)
 
     var intentQr: Intent? = null
