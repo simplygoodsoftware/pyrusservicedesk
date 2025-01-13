@@ -295,7 +295,8 @@ class PSDChatTableView: PSDTableView {
         
     ///Scroll tableview to its bottom position without animation
     func scrollsToBottom(animated: Bool) {
-        scrollToRow(at: IndexPath(row: 0, section: 0), at: .top, animated: animated)
+        scrollToRow(at: IndexPath(row: 0, section: 0), at: .bottom, animated: animated)
+        chatDelegate?.updateScrollButton(isHidden: true)
     }
     
     func redrawCell(at indexPath: IndexPath, with message: PSDRowMessage) {
@@ -410,6 +411,7 @@ private extension PSDChatTableView {
         else { return }
         
         guard let attachmentView = (self.cellForRow(at: indexPath) as? PSDChatMessageCell)?.cloudView.attachmentView,
+              attachmentView.attachment?.localId == attachment.localId,
             message.message.state == .sending
         else {
             return
@@ -514,8 +516,7 @@ extension PSDChatTableView: UITableViewDelegate, UITableViewDataSource {
     }
     
     func scrollViewDidScroll(_ scrollView: UIScrollView) {
-        let contentHeight = self.contentSize.height
-        let scrollViewHeight = scrollView.frame.size.height
+        guard scrollView.isDragging else { return }
         let contentOffsetY = scrollView.contentOffset.y
         let inset = contentInset.top + contentInset.bottom - 40
 

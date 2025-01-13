@@ -89,7 +89,31 @@ class PSDChatViewController: PSDViewController {
         return 0
     }
     
-    private var isKeyBoardOpen = true
+    private func needChangeInset(_ newInset: CGFloat) -> Bool {
+        if
+            let presentedViewController = tableView.findViewController()?.presentedViewController,
+            presentedViewController.isBeingDismissed
+        {
+            return tableView.contentInset.bottom <= newInset
+        }
+        return true
+    }
+    
+    private func newOffset(delta: CGFloat, bottomInset: CGFloat) -> CGFloat {
+        var newOffsetY = max(0,tableView.contentOffset.y + delta)//block  too little offset
+        newOffsetY = min(tableView.contentSize.height - (tableView.frame.size.height - bottomInset),newOffsetY)//block  too big offset
+        return newOffsetY
+    }
+    
+    private func needChangeOffset(keyboardHeight:CGFloat)->Bool{
+        if(tableView.contentSize.height > (tableView.frame.size.height-keyboardHeight) && !tableView.isDragging){
+            return true
+        }
+        return false
+    
+    }
+    
+    private var isKeyBoardOpen = false
     @objc private func keyboardDidHide(_ notification: NSNotification) {
         isKeyBoardOpen = false
     }
@@ -100,11 +124,16 @@ class PSDChatViewController: PSDViewController {
             let duration = keyboardAnimationDuration(notification)
             let keyboardHeight = keyboardEndFrame.height
             UIView.animate(withDuration: duration, delay: 0, animations: {
-                let oldInset = self.tableView.contentInset.top
-                if (self.messageInputView.inputTextView.isFirstResponder || !self.isKeyBoardOpen) {
+                var oldInset = self.tableView.contentInset.top
+                if self.messageInputView.inputTextView.isFirstResponder || !self.isKeyBoardOpen {
+                    if self.messageInputView.inputTextView.isFirstResponder {
+                        self.bottomScrollButton?.constant -= keyboardHeight - oldInset
+                        self.view.layoutIfNeeded()
+                    }
+                    if keyboardHeight < 200 {
+                        oldInset = 0
+                    }
                     self.tableView.contentOffset.y -= keyboardHeight - oldInset
-                    self.bottomScrollButton?.constant -= keyboardHeight - oldInset
-                    self.view.layoutIfNeeded()
                 }
                 self.tableView.contentInset.top = keyboardHeight
                 self.isKeyBoardOpen = self.messageInputView.inputTextView.isFirstResponder
@@ -118,9 +147,9 @@ class PSDChatViewController: PSDViewController {
             let duration = keyboardAnimationDuration(notification)
             let keyboardHeight = keyboardEndFrame.height
             UIView.animate(withDuration: duration, delay: 0, animations: {
-                self.tableView.contentInset.top = self.messageInputView.frame.size.height
                 self.bottomScrollButton?.constant = -120
                 self.view.layoutIfNeeded()
+                self.tableView.contentInset.top = self.messageInputView.frame.size.height
             })
         }
     }
@@ -160,11 +189,11 @@ class PSDChatViewController: PSDViewController {
                self.tableView.numberOfSections > lastVisibleRow.section,
                self.tableView.numberOfRows(inSection: lastVisibleRow.section) > lastVisibleRow.row
             {
-                self.tableView.scrollToRow(at: lastVisibleRow, at: .top, animated: false)
+                self.tableView.scrollToRow(at: lastVisibleRow, at: .bottom, animated: false)
             }
         }, completion: { context in
             self.tableView.bottomPSDRefreshControl.isEnabled = true
-          //  self.tableView.addKeyboardListeners()
+            self.tableView.addKeyboardListeners()
         })
     }
     
@@ -212,7 +241,7 @@ class PSDChatViewController: PSDViewController {
     }
     
     @objc private func appEnteredForeground(){
-        //self.tableView.addKeyboardListeners()
+        self.tableView.addKeyboardListeners()
     }
     @objc private func appEnteredBackground(){
         self.tableView.removeListeners()
@@ -253,7 +282,7 @@ class PSDChatViewController: PSDViewController {
     }
     
     func setupTableView() {
-      //  tableView.addKeyboardListeners()
+        tableView.addKeyboardListeners()
         tableView.chatDelegate = self
         if #available(iOS 11.0, *) {
             self.tableView.contentInsetAdjustmentBehavior = .never//.automatic
@@ -262,7 +291,7 @@ class PSDChatViewController: PSDViewController {
         if #available(iOS 13.0, *) {
             tableView.automaticallyAdjustsScrollIndicatorInsets = false
         }
-//        tableView.semanticContentAttribute = .forceRightToLeft
+        tableView.semanticContentAttribute = .forceRightToLeft
 
         tableView.contentInset.top = 10
         
@@ -279,20 +308,6 @@ class PSDChatViewController: PSDViewController {
         }
         tableViewTopConstant?.isActive = true
         tableView.bottomAnchor.constraint(equalTo: view.bottomAnchor).isActive = true
-//        tableView.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor, constant: -44).isActive = true
-//        bottomTableView = tableView.bottomAnchor.constraint(equalTo: view.bottomAnchor, constant: -86)
-//        if #available(iOS 15.0, *) {
-//            bottomTableView = tableView.bottomAnchor.constraint(equalTo: view.keyboardLayoutGuide.topAnchor, constant: 0)
-//        } else {
-//            // Fallback on earlier versions
-//        }
-//        bottomTableView?.isActive = true
-//        if #available(iOS 15.0, *) {
-//            tableView.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor, constant: -44).isActive = true
-//        } else {
-//            // Fallback on earlier versions
-//        }
-        tableView.contentInset.top = self.messageInputView.frame.size.height
         tableView.addActivityView()
     }
     
@@ -308,7 +323,6 @@ class PSDChatViewController: PSDViewController {
             scrollButton.heightAnchor.constraint(equalToConstant: 40),
             scrollButton.widthAnchor.constraint(equalToConstant: 40),
             scrollButton.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -10),
-           // scrollButton.bottomAnchor.constraint(equalTo: view.bottomAnchor, constant: -400),
             image.centerXAnchor.constraint(equalTo: scrollButton.centerXAnchor),
             image.centerYAnchor.constraint(equalTo: scrollButton.centerYAnchor),
             badgeView.bottomAnchor.constraint(equalTo: scrollButton.bottomAnchor, constant: -28),
@@ -324,6 +338,7 @@ class PSDChatViewController: PSDViewController {
         bottomScrollButton?.isActive = true
         
         scrollButton.addTarget(self, action: #selector(scrollToBottom), for: .touchUpInside)
+        updateScrollButton(isHidden: true)
     }
     
     @objc func scrollToBottom() {

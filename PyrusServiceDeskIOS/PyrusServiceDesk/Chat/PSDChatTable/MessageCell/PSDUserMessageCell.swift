@@ -59,10 +59,10 @@ class PSDUserMessageCell: PSDChatMessageCell {
         self.messageStateView.translatesAutoresizingMaskIntoConstraints = false
         self.contentView.addConstraint(NSLayoutConstraint(
             item: messageStateView,
-            attribute: .trailing,
+            attribute: .right,
             relatedBy: .equal,
             toItem: self.cloudView,
-            attribute: .leading,
+            attribute: .left,
             multiplier: 1,
             constant:-bottomDistance))
         self.contentView.addConstraint(NSLayoutConstraint(
@@ -77,8 +77,8 @@ class PSDUserMessageCell: PSDChatMessageCell {
     }
     
     private func userMessageConstraints() {
-        cloudView.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -TO_BOARD_DISTANCE).isActive = true
-        cloudView.leadingAnchor.constraint(greaterThanOrEqualTo: contentView.leadingAnchor, constant: AVATAR_SIZE + (TO_BOARD_DISTANCE * 2)).isActive = true
+        cloudView.rightAnchor.constraint(equalTo: contentView.rightAnchor, constant: -TO_BOARD_DISTANCE).isActive = true
+        cloudView.leftAnchor.constraint(greaterThanOrEqualTo: contentView.leftAnchor, constant: AVATAR_SIZE + (TO_BOARD_DISTANCE * 2)).isActive = true
     }
     
     private func updateTopMessageConstrint() {
@@ -91,7 +91,7 @@ class PSDUserMessageCell: PSDChatMessageCell {
     
     override func awakeFromNib() {
         super.awakeFromNib()
-    }   
+    }
 }
 
 extension PSDUserMessageCell: PSDRetryActionDelegate {

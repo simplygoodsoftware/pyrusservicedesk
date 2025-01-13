@@ -81,10 +81,10 @@ class PSDSupportMessageCell: PSDChatMessageCell {
             constant:0))
         self.contentView.addConstraint(NSLayoutConstraint(
             item: nameLabel,
-            attribute: .leading,
+            attribute: .left,
             relatedBy: .equal,
             toItem: cloudView,
-            attribute: .leading,
+            attribute: .left,
             multiplier: 1,
             constant:nameLeftSpace))
         nameConstraint = NSLayoutConstraint(
@@ -100,21 +100,21 @@ class PSDSupportMessageCell: PSDChatMessageCell {
     private func supportMessageConstraints()
     {
         avatarView.translatesAutoresizingMaskIntoConstraints = false
-        avatarView.addConstraint([.leading], constant: TO_BOARD_DISTANCE)
+        avatarView.addConstraint([.left], constant: TO_BOARD_DISTANCE)
         avatarView.addSizeConstraint([.height,.width],constant:AVATAR_SIZE)
         avatarView.addConstraint([.bottom], constant: -bottomDistance)
         
         self.contentView.addConstraint(NSLayoutConstraint(
             item: cloudView,
-            attribute: .trailing,
+            attribute: .right,
             relatedBy: .lessThanOrEqual,
             toItem: cloudView.superview!,
-            attribute: .trailing,
+            attribute: .right,
             multiplier: 1,
             constant:-(AVATAR_SIZE+(TO_BOARD_DISTANCE*2))))
         
         
-        cloudView.addConstraint([.leading], constant: AVATAR_SIZE+(TO_BOARD_DISTANCE*2))
+        cloudView.addConstraint([.left], constant: AVATAR_SIZE+(TO_BOARD_DISTANCE*2))
     }
     
     ///Name height constraint
