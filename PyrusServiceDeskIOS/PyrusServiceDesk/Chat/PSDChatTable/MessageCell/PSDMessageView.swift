@@ -254,7 +254,7 @@ class PSDMessageView: PSDView {
         
         let bTrailingConstraint = messageTextView.trailingAnchor.constraint(lessThanOrEqualTo: trailingAnchor, constant: 0)
         bTrailingConstraint.isActive = true
-        let bBottomConstraint = messageTextView.bottomAnchor.constraint(equalTo: timeView.topAnchor)
+        let bBottomConstraint = messageTextView.bottomAnchor.constraint(equalTo: timeView.topAnchor, constant: 12)
         bBottomConstraint.isActive = true
         timeInBottomConstraints.append(bTrailingConstraint)
         timeInBottomConstraints.append(bBottomConstraint)
@@ -274,7 +274,7 @@ class PSDMessageView: PSDView {
     private func timeConstraints() {
         timeView.translatesAutoresizingMaskIntoConstraints = false
         timeView.trailingAnchor.constraint(equalTo: trailingAnchor, constant: -TIME_LEFT_OFFSET).isActive = true
-        timeView.bottomAnchor.constraint(equalTo: bottomAnchor, constant: -TIME_LEFT_OFFSET).isActive = true
+        timeView.bottomAnchor.constraint(equalTo: bottomAnchor, constant: -4).isActive = true
     }
     
     private func updateTimeLayout() {
