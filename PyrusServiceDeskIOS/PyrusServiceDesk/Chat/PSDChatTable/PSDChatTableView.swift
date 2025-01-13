@@ -142,39 +142,27 @@ class PSDChatTableView: PSDTableView {
     
     func addRow(at index: Int, lastIndexPath: IndexPath, insertSections: Bool, scrollsToBottom: Bool) {
         
-//            UIView.animate(withDuration: 0.0, delay: 0, usingSpringWithDamping: 0.0, initialSpringVelocity: 0.0, options: [], animations: {
-                if #available(iOS 13.0, *) {
-                    let contentOffsetY = contentOffset.y
-                    let inset = contentInset.top + contentInset.bottom - 20
-
-                    let isAtBottom = contentOffsetY <= -inset
-                    self.reloadWithDiffableDataSource(animated: isAtBottom) {
-                        if scrollsToBottom {
-                            self.scrollsToBottom(animated: true)
-                        }
-                    }
-                    
-                } else {
-                    //add new section if need
-                    if insertSections {
-                        self.insertSections([index], with: .none)
-                    } else {
-                        //add row to last section
-                        self.beginUpdates()
-                        self.insertRows(at: [lastIndexPath], with: .none)
-                        self.endUpdates()
-                        if(self.tableMatrix[index].count == 1) {
-                            self.reloadSections([index], with: .none)//to change header( draw date)
-                        }
-                    }
+        if #available(iOS 13.0, *) {
+            let inset = contentInset.top - 20
+            let needAnimate = contentOffset.y <= -inset
+            if scrollsToBottom {
+                self.scrollsToBottom(animated: true)
+            }
+            self.reloadWithDiffableDataSource(animated: needAnimate)
+        } else {
+            //add new section if need
+            if insertSections {
+                self.insertSections([index], with: .none)
+            } else {
+                //add row to last section
+                self.beginUpdates()
+                self.insertRows(at: [lastIndexPath], with: .none)
+                self.endUpdates()
+                if(self.tableMatrix[index].count == 1) {
+                    self.reloadSections([index], with: .none)//to change header( draw date)
                 }
-//            }, completion: { complete in
-//                if scrollsToBottom {
-//                    self.scrollsToBottom(animated: true)
-//                }
-//            })
-//        }
-        
+            }
+        }
     }
     
     func insertSections(sections: IndexSet) {
@@ -307,24 +295,7 @@ class PSDChatTableView: PSDTableView {
         
     ///Scroll tableview to its bottom position without animation
     func scrollsToBottom(animated: Bool) {
-        scrollToRow(at: IndexPath(row: 0, section: 0), at: .bottom, animated: true)
-
-//        layoutIfNeeded()
-//        let lastRow = lastIndexPath()
-//        let hasFooter = tableFooterView?.frame.size.height ?? 0 > 0
-//        if
-//            lastRow.row >= 0 || lastRow.section >= 0,
-//            !(lastRow.row == 0 && lastRow.section == 0)
-//        {
-//            scrollToRow(at: lastRow, at: .bottom, animated: !hasFooter && animated)
-//        }
-//        if
-//            let tableFooterView = tableFooterView,
-//            hasFooter
-//        {
-//            let frameFooter = tableFooterView.frame
-//            scrollRectToVisible(frameFooter, animated: animated)
-//        }
+        scrollToRow(at: IndexPath(row: 0, section: 0), at: .top, animated: animated)
     }
     
     func redrawCell(at indexPath: IndexPath, with message: PSDRowMessage) {

@@ -141,13 +141,13 @@ class PSDTableView : UITableView{
     }
     private static let ACTIVITY_MOVE_DURATION : CGFloat = 0.25
     
-    override var contentInset: UIEdgeInsets{
-        didSet{
-            if(!self.isDragging){
-                changeConstraints(emptyTable: numberOfSections == 0 || numberOfRows(inSection: 0) == 0){}
-            }
-        }
-    }
+//    override var contentInset: UIEdgeInsets{
+//        didSet{
+//            if(!self.isDragging){
+//                changeConstraints(emptyTable: numberOfSections == 0 || numberOfRows(inSection: 0) == 0){}
+//            }
+//        }
+//    }
 
     ///Add new row - if tableView is empty - perform animation of moving loader up - and return completion when animation ended, else return completion right now
     func addNewRow(completion: @escaping () -> Void){
