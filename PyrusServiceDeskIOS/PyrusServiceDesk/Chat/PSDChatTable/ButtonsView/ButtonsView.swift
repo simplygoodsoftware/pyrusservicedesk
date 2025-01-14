@@ -23,14 +23,14 @@ class ButtonsView: UIView {
         collectionView.dataSource = self
         collectionView.register(ButtonViewCell.self, forCellWithReuseIdentifier: CELL_IDENT)
         collectionView.isScrollEnabled = false
-        collectionView.semanticContentAttribute = UISemanticContentAttribute.forceRightToLeft
+        collectionView.semanticContentAttribute = UISemanticContentAttribute.forceLeftToRight
         return collectionView
     }()
     override init(frame: CGRect) {
         super.init(frame: frame)
         addSubview(collectionView)
-        collectionView.trailingAnchor.constraint(equalTo: trailingAnchor, constant: -TO_BOARD_DISTANCE).isActive = true
-        collectionView.leadingAnchor.constraint(equalTo: leadingAnchor, constant: LEADING_FOOTER).isActive = true
+        collectionView.rightAnchor.constraint(equalTo: rightAnchor, constant: -LEADING_FOOTER).isActive = true
+        collectionView.leftAnchor.constraint(equalTo: leftAnchor, constant: TO_BOARD_DISTANCE).isActive = true
         collectionView.topAnchor.constraint(equalTo: topAnchor).isActive = true
         collectionView.bottomAnchor.constraint(equalTo: bottomAnchor).isActive = true
     }

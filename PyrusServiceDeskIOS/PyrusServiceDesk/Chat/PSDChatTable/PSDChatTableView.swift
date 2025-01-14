@@ -24,7 +24,7 @@ class PSDChatTableView: PSDTableView {
     
     private lazy var buttonsView: ButtonsView = {
         let view = ButtonsView(frame: .zero)
-        tableFooterView = view
+        tableHeaderView = view
         view.autoresizingMask = [.flexibleHeight]
         view.tapDelegate = self
         return view
@@ -79,7 +79,8 @@ class PSDChatTableView: PSDTableView {
             newFrame.size.width = frame.size.width
             newFrame.size.height = buttonsView.collectionView.contentSize.height
             buttonsView.frame = newFrame
-            tableFooterView = buttonsView
+            tableHeaderView = buttonsView
+            buttonsView.collectionView.transform = CGAffineTransform(rotationAngle: CGFloat.pi)
         }
     }
     
@@ -109,35 +110,38 @@ class PSDChatTableView: PSDTableView {
     }
     
     func updateRows(indexPaths: IndexPaths) {
-        let oldContentOffset = contentOffset
-        let oldContentSize = contentSize
+    //    UIView.performWithoutAnimation {
+            let oldContentOffset = contentOffset
+            let oldContentSize = contentSize
+            
+            if #available(iOS 13.0, *){
+                self.reloadWithDiffableDataSource(animated: true)
+            } else {
+                beginUpdates()
+                if indexPaths.newRemoveIndexPaths.count > 0 {
+                    self.deleteRows(at: indexPaths.newRemoveIndexPaths, with: .none)
+                }
+                if indexPaths.newRemoveSections.count > 0 {
+                    self.deleteSections(indexPaths.newRemoveSections, with: .none)
+                }
+                if indexPaths.addIndexPaths.count > 0 {
+                    self.insertRows(at: indexPaths.addIndexPaths, with: .none)
+                }
+                if indexPaths.addSections.count > 0 {
+                    self.insertSections(indexPaths.addSections, with: .none)
+                }
+                if indexPaths.reloadIndexPaths.count > 0 {
+                    self.reloadRows(at: indexPaths.reloadIndexPaths, with: .none)
+                }
+                if indexPaths.reloadSections.count > 0 {
+                    self.reloadSections(indexPaths.reloadSections, with: .none)
+                }
+                endUpdates()
+            }
+            
+           self.scrollToBottomAfterRefresh(with: oldContentOffset, oldContentSize: oldContentSize)
+   //     }
         
-        if #available(iOS 13.0, *){
-            self.reloadWithDiffableDataSource(animated: true)
-        } else {
-            beginUpdates()
-            if indexPaths.newRemoveIndexPaths.count > 0 {
-                self.deleteRows(at: indexPaths.newRemoveIndexPaths, with: .none)
-            }
-            if indexPaths.newRemoveSections.count > 0 {
-                self.deleteSections(indexPaths.newRemoveSections, with: .none)
-            }
-            if indexPaths.addIndexPaths.count > 0 {
-                self.insertRows(at: indexPaths.addIndexPaths, with: .none)
-            }
-            if indexPaths.addSections.count > 0 {
-                self.insertSections(indexPaths.addSections, with: .none)
-            }
-            if indexPaths.reloadIndexPaths.count > 0 {
-                self.reloadRows(at: indexPaths.reloadIndexPaths, with: .none)
-            }
-            if indexPaths.reloadSections.count > 0 {
-                self.reloadSections(indexPaths.reloadSections, with: .none)
-            }
-            endUpdates()
-        }
-        
-        self.scrollToBottomAfterRefresh(with: oldContentOffset, oldContentSize: oldContentSize)
     }
     
     func addRow(at index: Int, lastIndexPath: IndexPath, insertSections: Bool, scrollsToBottom: Bool) {
@@ -386,7 +390,7 @@ private extension PSDChatTableView {
         self.layoutIfNeeded()
         let expectedBottomOffset = oldContentSize.height - (self.frame.size.height - contentInset.top - contentInset.bottom)
         let hasChanges = oldContentSize != self.contentSize
-        if expectedBottomOffset - BOTTOM_INFELICITY < oldOffset.y && hasChanges{
+        if contentOffset.y <= 0 {//expectedBottomOffset - BOTTOM_INFELICITY < oldOffset.y && hasChanges{
             self.scrollsToBottom(animated: true)
         }
     }
