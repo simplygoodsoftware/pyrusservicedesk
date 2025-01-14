@@ -51,11 +51,11 @@ class RequestUtils{
         /**
          * Provides url for getting the file.
          */
-        internal fun getFileUrl(fileId: Int, account: Account): String {
+        internal fun getFileUrl(fileId: Long, account: Account): String {
             return "${getBaseUrl(account.domain)}DownloadFile/$fileId" + getPathParams(account)
         }
 
-        internal fun getPreviewUrl(fileId: Int, account: Account): String {
+        internal fun getPreviewUrl(fileId: Long, account: Account): String {
             return "${getBaseUrl(account.domain)}DownloadFilePreview/$fileId" + getPathParams(account)
         }
 

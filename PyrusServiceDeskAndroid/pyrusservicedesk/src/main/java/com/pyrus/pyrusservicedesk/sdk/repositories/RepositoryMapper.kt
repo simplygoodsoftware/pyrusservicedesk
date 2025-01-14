@@ -21,6 +21,8 @@ import com.pyrus.pyrusservicedesk.sdk.data.TicketDto
 import com.pyrus.pyrusservicedesk.sdk.data.intermediate.AddCommentResponseData
 import com.pyrus.pyrusservicedesk.sdk.data.intermediate.CommentsDto
 import com.pyrus.pyrusservicedesk.sdk.data.intermediate.TicketsDto
+import com.pyrus.pyrusservicedesk.sdk.sync.SyncRequest
+import com.pyrus.pyrusservicedesk.sdk.sync.TicketCommandType
 
 internal class RepositoryMapper(
     private val account: Account
@@ -87,20 +89,6 @@ internal class RepositoryMapper(
         )
     }
 
-    fun mapEmptyFullTicket(ticketId: Int, userId: String): FullTicket {
-        return FullTicket(
-            comments = emptyList(),
-            showRating = false,
-            showRatingText = null,
-            userId = userId,
-            ticketId = ticketId,
-            subject = null,
-            isRead = true,
-            lastComment = null,
-            isActive = true,
-        )
-    }
-
     fun map(commandResult: TicketCommandResultDto): AddCommentResponseData {
         return AddCommentResponseData(
             commentId = commandResult.commentId,
@@ -121,6 +109,28 @@ internal class RepositoryMapper(
         isSending = false,
     )
 
+    fun map(attachmentEntity: AttachmentEntity) : Attachment = Attachment(
+        id = attachmentEntity.id,
+        name = attachmentEntity.name,
+        isImage = attachmentEntity.name.isImage(),
+        isText = false,
+        bytesSize = attachmentEntity.bytesSize,
+        isVideo = false,
+        uri = attachmentEntity.uri,
+        status = Status.Processing,
+        progress = null,
+        guid = attachmentEntity.guid
+    )
+
+    fun map(attachment: Attachment) : AttachmentEntity = AttachmentEntity(
+        id = attachment.id,
+        name = attachment.name,
+        guid = attachment.guid,
+        bytesSize = attachment.bytesSize,
+        uri = attachment.uri,
+        progress = attachment.progress,
+        status = attachment.progress
+    )
 
     fun map(attachmentDto: AttachmentDto): Attachment = Attachment(
         id = attachmentDto.id,
@@ -146,6 +156,56 @@ internal class RepositoryMapper(
         avatarColor = authorDto.avatarColorString,
     )
 
+    fun mapToCommandErrorEntity(command: SyncRequest.Command) : CommandErrorEntity {
+        return when(command) {
+            is SyncRequest.Command.CreateComment -> CommandErrorEntity(
+                localId = command.localId,
+                commandType = TicketCommandType.CreateComment.ordinal,
+                commandId = command.commandId,
+                userId = command.userId,
+                appId = command.appId,
+                creationTime = command.creationTime,
+                requestNewTicket = command.requestNewTicket,
+                ticketId = command.ticketId,
+                comment = command.comment,
+                attachments = command.attachments?.map(::map),
+                rating = command.rating,
+                token = null,
+                tokenType = null,
+            )
+            is SyncRequest.Command.MarkTicketAsRead -> CommandErrorEntity(
+                localId = command.localId,
+                commandType = TicketCommandType.CreateComment.ordinal,
+                commandId = command.commandId,
+                userId = command.userId,
+                appId = command.appId,
+                creationTime = command.creationTime,
+                requestNewTicket = null,
+                ticketId = command.ticketId,
+                comment = null,
+                attachments = null,
+                rating = null,
+                token = null,
+                tokenType = null,
+            )
+            is SyncRequest.Command.SetPushToken -> CommandErrorEntity(
+                localId = command.localId,
+                commandType = TicketCommandType.CreateComment.ordinal,
+                commandId = command.commandId,
+                userId = command.userId,
+                appId = command.appId,
+                creationTime = command.creationTime,
+                requestNewTicket = null,
+                ticketId = null,
+                comment = null,
+                attachments = null,
+                rating = null,
+                token = command.token,
+                tokenType = command.tokenType,
+            )
+        }
+    }
+
     private fun mapToSmallAcc(account: Account): List<SmallUser> = when(account) {
         is Account.V1 -> listOf(SmallUser(account.getUserId(), account.appId))
         is Account.V2 -> listOf(SmallUser(account.getUserId(), account.appId))
@@ -164,7 +224,7 @@ private class TicketComparator : Comparator<FullTicket> {
     override fun compare(o1: FullTicket, o2: FullTicket): Int {
         return when {
             o1.lastComment == null -> return when {
-                o2.lastComment == null -> o1.ticketId - o2.ticketId
+                o2.lastComment == null -> o1.ticketId.compareTo(o2.ticketId)
                 else -> 1
             }
             o2.lastComment == null -> -1

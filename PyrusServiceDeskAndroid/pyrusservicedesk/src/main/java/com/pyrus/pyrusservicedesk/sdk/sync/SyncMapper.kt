@@ -1,7 +1,6 @@
 package com.pyrus.pyrusservicedesk.sdk.sync
 
 import com.pyrus.pyrusservicedesk.AppResourceManager
-import com.pyrus.pyrusservicedesk._ref.data.Attachment
 import com.pyrus.pyrusservicedesk._ref.utils.ConfigUtils
 import com.pyrus.pyrusservicedesk.core.Account
 import com.pyrus.pyrusservicedesk.core.getAdditionalUsers
@@ -58,32 +57,17 @@ internal object SyncMapper {
     }
 
     private fun mapToCommand(request: SyncRequest): TicketCommandDto? = when(request) {
-        is SyncRequest.Command.AddComment -> TicketCommandDto(
+        is SyncRequest.Command.CreateComment -> TicketCommandDto(
             commandId = request.commandId,
             type = TicketCommandType.CreateComment.ordinal,
             appId = request.appId,
             userId = request.userId,
             params = CommandParamsDto.CreateComment(
-                requestNewTicket = false,
+                requestNewTicket = request.requestNewTicket,
                 userId = request.userId,
                 appId = request.appId,
                 comment = request.comment,
-                attachments = request.attachments?.map(::mapToAttachmentDataDto),
-                ticketId = request.ticketId,
-                rating = request.rating,
-            ),
-        )
-        is SyncRequest.Command.CreateTicket -> TicketCommandDto(
-            commandId = request.commandId,
-            type = TicketCommandType.CreateComment.ordinal,
-            appId = request.appId,
-            userId = request.userId,
-            params = CommandParamsDto.CreateComment(
-                requestNewTicket = true,
-                userId = request.userId,
-                appId = request.appId,
-                comment = request.comment,
-                attachments = request.attachments?.map(::mapToAttachmentDataDto),
+                attachments = request.attachments?.map { AttachmentDataDto(it.guid!!, 0, it.name) },
                 ticketId = request.ticketId,
                 rating = request.rating,
             ),
@@ -114,11 +98,5 @@ internal object SyncMapper {
         )
         is SyncRequest.Data -> null
     }
-
-    private fun mapToAttachmentDataDto(attachment: Attachment) = AttachmentDataDto(
-        guid = attachment.guid!!,
-        type = 0,
-        name = attachment.name,
-    )
 
 }

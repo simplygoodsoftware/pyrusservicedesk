@@ -164,7 +164,7 @@ internal class TicketFragment: TeaFragment<Model, TicketView.Event, TicketView.E
         val user = arguments?.getParcelable<UserInternal>(KEY_USER_INTERNAL)!!
         // TODO если открыть файл и вернуться в задачу скорее всего id обновится
         // TODO использовать nullable для нового тикета
-        val ticketId = arguments?.getInt(KEY_TICKET_ID)!!
+        val ticketId = arguments?.getLong(KEY_TICKET_ID)!!
 
         val feature = getStore { injector().ticketFeatureFactory.create(
             user = user,
@@ -340,11 +340,11 @@ internal class TicketFragment: TeaFragment<Model, TicketView.Event, TicketView.E
         private const val KEY_TICKET_ID = "KEY_TICKET_ID"
         private const val KEY_USER_INTERNAL = "KEY_USER_INTERNAL"
 
-        fun newInstance(ticketId: Int?, user: UserInternal): TicketFragment {
+        fun newInstance(ticketId: Long?, user: UserInternal): TicketFragment {
             val fragment = TicketFragment()
             val args = Bundle().apply {
                 putParcelable(KEY_USER_INTERNAL, user)
-                ticketId?.let { putInt(KEY_TICKET_ID, it) }
+                ticketId?.let { putLong(KEY_TICKET_ID, it) }
             }
             fragment.arguments = args
             return fragment

@@ -44,7 +44,7 @@ internal interface TicketsContract {
             data class OnChangePage(val appId: String) : Outer
             data object OnCreateTicketClick : Outer
 
-            data class OnTicketClick(val ticketId: Int, val userId: String) : Outer
+            data class OnTicketClick(val ticketId: Long, val userId: String) : Outer
 
             data class OnUserIdSelected(val userId: String) : Outer
         }
@@ -77,7 +77,7 @@ internal interface TicketsContract {
         sealed interface Inner : Effect {
             data object TicketsSetFlow : Inner
             data class UpdateTickets(val force: Boolean) : Inner
-            data class OpenTicketScreen(val user: UserInternal, val ticketId: Int?) : Inner
+            data class OpenTicketScreen(val user: UserInternal, val ticketId: Long?) : Inner
         }
     }
 

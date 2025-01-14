@@ -283,45 +283,45 @@ internal class LiveUpdates(
             PLog.d(TAG, "getTicketRequest")
             for (ticket in data) {
 
-                coreScope.launch(ioDispatcher) {
-                    val feedTry = repository.getFeed(ticket.ticketId, ticket.userId ?: "", true) //TODO это удалится вообще?
-
-                    withContext(mainDispatcher) {
-                        if (responseUserId != userId) {
-                            return@withContext
-                        }
-
-                        if (!feedTry.isSuccess()) {
-                            this@LiveUpdates.lastCommentId = 0
-                            PLog.d(TAG, "response.hasError, error: ${feedTry.error}")
-                            return@withContext
-                        }
-
-                        val comments = feedTry.value.comments
-                        val lastSavedCommentInMainScope =
-                            this@LiveUpdates.preferencesManager.getLastComment()
-                        val lastServerComment =
-                            comments.findLast { !it.isInbound } ?: return@withContext
-                        if (lastServerComment.id <= (lastSavedCommentInMainScope?.id ?: 0))
-                            return@withContext
-
-                        val lastUserComment =
-                            comments.findLast { it.isInbound } ?: return@withContext
-
-                        updateGetTicketsIntervalIfNeeded(lastUserComment.creationTime)
-
-                        val chatIsShown = activeScreenCount > 0
-                        val lastComment = LastComment.mapFromComment(
-                            newReplySubscribers.isNotEmpty() || chatIsShown,
-                            !hasUnreadTickets,
-                            lastServerComment
-                        )
-
-                        this@LiveUpdates.preferencesManager.saveLastComment(lastComment)
-                        if (!chatIsShown)
-                            notifyNewReplySubscribers(lastComment)
-                    }
-                }
+//                coreScope.launch(ioDispatcher) {
+//                    val feedTry = repository.getFeed(ticket.ticketId, ticket.userId ?: "", true) //TODO это удалится вообще?
+//
+//                    withContext(mainDispatcher) {
+//                        if (responseUserId != userId) {
+//                            return@withContext
+//                        }
+//
+//                        if (!feedTry.isSuccess()) {
+//                            this@LiveUpdates.lastCommentId = 0
+//                            PLog.d(TAG, "response.hasError, error: ${feedTry.error}")
+//                            return@withContext
+//                        }
+//
+//                        val comments = feedTry.value.comments
+//                        val lastSavedCommentInMainScope =
+//                            this@LiveUpdates.preferencesManager.getLastComment()
+//                        val lastServerComment =
+//                            comments.findLast { !it.isInbound } ?: return@withContext
+//                        if (lastServerComment.id <= (lastSavedCommentInMainScope?.id ?: 0))
+//                            return@withContext
+//
+//                        val lastUserComment =
+//                            comments.findLast { it.isInbound } ?: return@withContext
+//
+//                        updateGetTicketsIntervalIfNeeded(lastUserComment.creationTime)
+//
+//                        val chatIsShown = activeScreenCount > 0
+//                        val lastComment = LastComment.mapFromComment(
+//                            newReplySubscribers.isNotEmpty() || chatIsShown,
+//                            !hasUnreadTickets,
+//                            lastServerComment
+//                        )
+//
+//                        this@LiveUpdates.preferencesManager.saveLastComment(lastComment)
+//                        if (!chatIsShown)
+//                            notifyNewReplySubscribers(lastComment)
+//                    }
+//                }
 
             }
         }

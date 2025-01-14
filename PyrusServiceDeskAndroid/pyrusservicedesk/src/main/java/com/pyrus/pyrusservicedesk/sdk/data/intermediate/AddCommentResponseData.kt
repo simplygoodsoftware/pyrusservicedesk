@@ -12,6 +12,6 @@ internal data class AddCommentResponseData(
     @SerializedName("comment_id")
     val commentId: Long?,
     @SerializedName("attachments")
-    val attachmentIds: List<Int>?,
+    val attachmentIds: List<Long>?,
     val sentAttachments: List<AttachmentDto>?
 )
