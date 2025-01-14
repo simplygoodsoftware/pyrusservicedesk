@@ -117,7 +117,8 @@ internal class DiInjector(
         fileResolver = fileResolver,
         remoteFileStore = remoteFileStore,
         synchronizer = synchronizer,
-        localTicketsStore = localTicketsStore
+        localTicketsStore = localTicketsStore,
+        coroutineScope = coreScope
     )
 
     private val preferencesManager = PreferencesManager(preferences)

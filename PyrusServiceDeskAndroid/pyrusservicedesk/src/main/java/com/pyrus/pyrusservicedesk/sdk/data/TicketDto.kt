@@ -11,7 +11,7 @@ import java.util.Date
  * Represents ticket object.
  */
 internal data class TicketDto(
-    @SerializedName("ticket_id") val ticketId: Int,
+    @SerializedName("ticket_id") val ticketId: Long,
     @SerializedName("user_id") val userId: String?,
     @SerializedName("subject") val subject: String,
     @SerializedName("author") val author: String?,

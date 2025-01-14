@@ -32,7 +32,7 @@ internal class Synchronizer(
 
     @DelicateCoroutinesApi
     @ExperimentalCoroutinesApi
-    override val coroutineContext: CoroutineContext = newSingleThreadContext("Synchronizer") +
+    override val coroutineContext: CoroutineContext = newSingleThreadContext(TAG) +
         SupervisorJob() +
         CoroutineExceptionHandler { _, throwable ->
             PLog.e(TAG, "sync global error: ${throwable.message}")

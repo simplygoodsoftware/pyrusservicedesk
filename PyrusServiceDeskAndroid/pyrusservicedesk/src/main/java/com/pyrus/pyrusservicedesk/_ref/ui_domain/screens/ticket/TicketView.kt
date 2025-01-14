@@ -22,7 +22,7 @@ internal interface TicketView {
 
     sealed interface Event {
 
-        data class OnPreviewClick(val commentId: Long, val attachmentId: Int) : Event
+        data class OnPreviewClick(val commentId: Long, val attachmentId: Long) : Event
 
         data class OnRetryClick(val id: Long) : Event
 

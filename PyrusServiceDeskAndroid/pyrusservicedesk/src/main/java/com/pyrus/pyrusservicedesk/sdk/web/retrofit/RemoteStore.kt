@@ -8,25 +8,16 @@ import com.pyrus.pyrusservicedesk.PyrusServiceDesk.Companion.API_VERSION_3
 import com.pyrus.pyrusservicedesk._ref.data.FullTicket
 import com.pyrus.pyrusservicedesk._ref.data.multy_chat.TicketSetInfo
 import com.pyrus.pyrusservicedesk._ref.data.multy_chat.TicketsInfo
-import com.pyrus.pyrusservicedesk._ref.utils.ConfigUtils
-import com.pyrus.pyrusservicedesk._ref.utils.Try
-import com.pyrus.pyrusservicedesk._ref.utils.getFirstNSymbols
-import com.pyrus.pyrusservicedesk._ref.utils.isSuccess
-import com.pyrus.pyrusservicedesk._ref.utils.log.PLog
-import com.pyrus.pyrusservicedesk._ref.utils.map
 import com.pyrus.pyrusservicedesk.core.Account
 import com.pyrus.pyrusservicedesk.sdk.FileResolver
 import com.pyrus.pyrusservicedesk.sdk.data.AttachmentDto
-import com.pyrus.pyrusservicedesk.sdk.data.CommentDto
 import com.pyrus.pyrusservicedesk.sdk.data.FileManager
 import com.pyrus.pyrusservicedesk.sdk.data.UserDataDto
-import com.pyrus.pyrusservicedesk.sdk.data.intermediate.AddCommentResponseData
 import com.pyrus.pyrusservicedesk.sdk.data.intermediate.TicketsDto
 import com.pyrus.pyrusservicedesk.sdk.repositories.RepositoryMapper
 import com.pyrus.pyrusservicedesk.sdk.response.ApiCallError
 import com.pyrus.pyrusservicedesk.sdk.response.AuthorizationError
 import com.pyrus.pyrusservicedesk.sdk.response.ResponseError
-import com.pyrus.pyrusservicedesk.sdk.web.request_body.RequestBodyBase
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
@@ -290,56 +281,6 @@ internal class RemoteStore(
         isVideo,
         localUri
     )
-
-    private fun AddCommentResponseData.applyAttachments(
-        attachments: List<AttachmentDto>?
-    ): AddCommentResponseData {
-
-        if (!mustBeConvertedToRemoteAttachments(attachments, attachmentIds)) {
-            return this
-        }
-        return AddCommentResponseData(
-            commentId,
-            attachmentIds,
-            applyRemoteIdsToAttachments(attachments!!, attachmentIds!!)
-        )
-    }
-
-    private fun applyRemoteIdsToAttachments(
-        sentAttachments: List<AttachmentDto>,
-        remoteAttachmentIds: List<Int>,
-    ): List<AttachmentDto> {
-        val newAttachmentsList = mutableListOf<AttachmentDto>()
-        sentAttachments.forEachIndexed { index, attachment ->
-            newAttachmentsList.add(attachment.withRemoteId(remoteAttachmentIds[index]))
-        }
-        return newAttachmentsList
-    }
-
-    private fun AttachmentDto.withRemoteId(remoteId: Int) = AttachmentDto(
-        remoteId,
-        guid,
-        type,
-        name,
-        bytesSize,
-        isText,
-        isVideo,
-        localUri
-    )
-
-    private fun mustBeConvertedToRemoteAttachments(
-        sentAttachments: List<AttachmentDto>?,
-        remoteAttachmentIds: List<Int>?,
-    ): Boolean {
-
-        return !sentAttachments.isNullOrEmpty()
-                && !remoteAttachmentIds.isNullOrEmpty()
-                && sentAttachments.size == remoteAttachmentIds.size
-    }
-
-    private fun CommentDto.applyNewAttachments(newAttachments: List<AttachmentDto>): CommentDto {
-        return CommentDto(commentId, body, isInbound, newAttachments, creationDate, author)
-    }
 
     private fun <T> createError(response: Response<T>): ResponseError {
         return when (FAILED_AUTHORIZATION_ERROR_CODE) {

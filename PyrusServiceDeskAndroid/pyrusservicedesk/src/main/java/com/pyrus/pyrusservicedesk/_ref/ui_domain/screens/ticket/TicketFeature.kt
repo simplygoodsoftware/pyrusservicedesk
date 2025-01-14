@@ -17,7 +17,7 @@ internal interface TicketContract {
         data object Error : State
         data class Content(
             val ticket: FullTicket?,
-            val ticketId: Int,
+            val ticketId: Long,
             val sendEnabled: Boolean,
             val inputText: String,
             val welcomeMessage: String?,
@@ -33,7 +33,7 @@ internal interface TicketContract {
 
         sealed interface Outer : Message {
 
-            data class OnPreviewClick(val commentId: Long, val attachmentId: Int) : Outer
+            data class OnPreviewClick(val commentId: Long, val attachmentId: Long) : Outer
 
             data class OnRetryAddCommentClick(val id: Long) : Outer
 
@@ -80,26 +80,26 @@ internal interface TicketContract {
         sealed interface Inner : Effect {
             data class UpdateComments(
                 val force: Boolean,
-                val ticketId: Int,
+                val ticketId: Long,
             ) : Inner
             data object FeedFlow : Inner
             data object Close : Inner
             data class SendTextComment(
                 val text: String,
-                val ticketId: Int,
+                val ticketId: Long,
             ) : Inner
             data class SendRatingComment(
                 val rating: Int,
-                val ticketId: Int,
+                val ticketId: Long,
             ) : Inner
             data class SendAttachComment(
                 val uri: Uri,
-                val ticketId: Int,
+                val ticketId: Long,
             ) : Inner
             data class RetryAddComment(val id: Long) : Inner
             data class OpenPreview(val attachment: Attachment) : Inner
             data class SaveDraft(val draft: String) : Inner
-            data class ReadTicket(val user: UserInternal, val ticketId: Int) : Inner
+            data class ReadTicket(val user: UserInternal, val ticketId: Long) : Inner
         }
     }
 

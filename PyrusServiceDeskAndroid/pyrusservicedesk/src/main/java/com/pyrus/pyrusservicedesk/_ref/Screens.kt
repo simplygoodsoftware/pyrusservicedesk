@@ -10,7 +10,7 @@ import com.pyrus.pyrusservicedesk.sdk.repositories.UserInternal
 
 internal object Screens {
 
-    fun TicketScreen(ticketId: Int?, user: UserInternal) = FragmentScreen {
+    fun TicketScreen(ticketId: Long?, user: UserInternal) = FragmentScreen {
         TicketFragment.newInstance(ticketId, user)
     }
 

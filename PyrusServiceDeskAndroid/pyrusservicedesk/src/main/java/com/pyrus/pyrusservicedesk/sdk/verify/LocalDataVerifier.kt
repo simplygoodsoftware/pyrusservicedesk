@@ -22,6 +22,7 @@ internal class LocalDataVerifier(private val fileResolver: FileResolver) {
      * Checks whether [localCommand] is considered empty
      */
     fun isLocalCommandEmpty(localCommand: CommandEntity): Boolean {
+        // TODO sds
         return localCommand.commandId.isNotEmpty()
     }
 

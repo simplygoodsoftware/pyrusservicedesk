@@ -42,7 +42,7 @@ internal class TicketFeatureFactory(
 
     fun create(
         user: UserInternal,
-        ticketId: Int,
+        ticketId: Long,
         welcomeMessage: String?,
     ): TicketFeature = storeFactory.create(
         name = "TicketFeature",
@@ -199,7 +199,7 @@ private class FeatureReducer: Logic<State, Message, Effect>() {
 
 internal class TicketActor(
     private val account: Account,
-    private val ticketId: Int,
+    private val ticketId: Long,
     private val user: UserInternal,
     private val repository: Repository,
     private val router: PyrusRouter,
@@ -211,8 +211,8 @@ internal class TicketActor(
     override fun handleEffect(effect: Effect.Inner): Flow<Message.Inner> = when (effect) {
         is Effect.Inner.UpdateComments -> singleFlow {
             val commentsTry: Try2<FullTicket, GetTicketsError> = repository.getFeed(
+                user = user,
                 ticketId = effect.ticketId,
-                userId = user.userId,
                 force = effect.force
             )
             when {
@@ -226,7 +226,7 @@ internal class TicketActor(
                 else -> Message.Inner.UpdateCommentsFailed(commentsTry.error)
             }
         }
-        Effect.Inner.FeedFlow -> repository.getFeedFlow(ticketId).map { Message.Inner.CommentsUpdated(it) }
+        Effect.Inner.FeedFlow -> repository.getFeedFlow(user, ticketId).map { Message.Inner.CommentsUpdated(it) }
         Effect.Inner.Close -> flow { router.exit() }
         is Effect.Inner.SendTextComment -> flow {
             repository.addTextComment(user, ticketId, effect.text)
@@ -238,7 +238,9 @@ internal class TicketActor(
             val fileUri = try { fileManager.copyFile(effect.uri) } catch (e: Exception) { null } ?: return@flow
             repository.addAttachComment(user, ticketId, fileUri)
         }
-        is Effect.Inner.RetryAddComment -> flow { repository.retryAddComment(user, ticketId, effect.id) }
+        is Effect.Inner.RetryAddComment -> flow {
+//            repository.retryAddComment(user, ticketId, effect.id)
+        }
         is Effect.Inner.OpenPreview -> flow {
             val fileDate = FileData(
                 effect.attachment.name,

@@ -9,5 +9,5 @@ internal data class FullTicket(
     val showRatingText: String?,
     val isActive: Boolean?,
     val userId: String,
-    val ticketId: Int,
+    val ticketId: Long,
 )
