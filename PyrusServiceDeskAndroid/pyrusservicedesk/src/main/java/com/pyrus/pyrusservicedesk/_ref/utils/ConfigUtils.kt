@@ -15,6 +15,7 @@ import android.util.Base64
 import androidx.annotation.ColorInt
 import androidx.appcompat.content.res.AppCompatResources
 import androidx.core.content.ContextCompat.getColor
+import com.pyrus.pyrusservicedesk.AppResourceManager
 import com.pyrus.pyrusservicedesk.MainMenuDelegate
 import com.pyrus.pyrusservicedesk.R
 import com.pyrus.pyrusservicedesk._ref.data.multy_chat.MultichatButtons
@@ -291,14 +292,12 @@ internal class ConfigUtils{
         /**
          * Provides user name taking [StaticRepository.CONFIGURATION] into account
          */
-        fun getUserName(): String {
+        fun getAuthorName(resourceManager: AppResourceManager): String {
             return when {
                 !StaticRepository.getConfiguration().userName.isNullOrBlank() ->
                     StaticRepository.getConfiguration().userName!!
                 else -> {
-                    // TODO sds
-                    "ssss"
-//                    PyrusServiceDesk.get().application.getString(R.string.psd_guest)
+                    resourceManager.getString(R.string.psd_guest)
                 }
             }
         }

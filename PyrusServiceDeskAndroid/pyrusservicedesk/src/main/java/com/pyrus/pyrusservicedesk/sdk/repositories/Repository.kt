@@ -373,7 +373,7 @@ internal class Repository(
     private fun createLocalTextComment(text: String, authorId: String?) = Comment(
         body = text,
         isInbound = true,
-        author = Author(ConfigUtils.getUserName(), authorId, null, null),
+        author = Author("", authorId, null, null),
         attachments = null,
         creationTime = System.currentTimeMillis(),
         id = createLocalCommentId(),
@@ -385,7 +385,7 @@ internal class Repository(
     private fun createLocalRatingComment(rating: Int) = Comment(
         body = null,
         isInbound = true,
-        author = Author(ConfigUtils.getUserName(), null, null, null),
+        author = Author("", null, null, null),
         attachments = null,
         creationTime = System.currentTimeMillis(),
         id = createLocalCommentId(),

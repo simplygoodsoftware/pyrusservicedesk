@@ -8,9 +8,9 @@ import android.os.Build
 import com.github.terrakok.cicerone.Cicerone
 import com.github.terrakok.cicerone.NavigatorHolder
 import com.google.gson.GsonBuilder
+import com.pyrus.pyrusservicedesk.AppResourceManager
 import com.pyrus.pyrusservicedesk._ref.ui_domain.screens.ticket.TicketFeatureFactory
 import com.pyrus.pyrusservicedesk._ref.ui_domain.screens.tickets_list.tickets.TicketsFeatureFactory
-import com.pyrus.pyrusservicedesk._ref.utils.ConfigUtils
 import com.pyrus.pyrusservicedesk._ref.utils.ISO_DATE_PATTERN
 import com.pyrus.pyrusservicedesk._ref.utils.RequestUtils.Companion.getBaseUrl
 import com.pyrus.pyrusservicedesk._ref.utils.call_adapter.TryCallAdapterFactory
@@ -105,10 +105,13 @@ internal class DiInjector(
 
     private val localTicketsStore = com.pyrus.pyrusservicedesk.sdk.repositories.LocalTicketsStore()
 
+    private val resourceManager = AppResourceManager(application)
+
     private val synchronizer = Synchronizer(
         api = api,
         localTicketsStore = localTicketsStore,
-        accountStore = accountStore
+        accountStore = accountStore,
+        resourceManager = resourceManager,
     )
 
     private val repository: Repository = Repository(

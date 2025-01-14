@@ -1,5 +1,6 @@
 package com.pyrus.pyrusservicedesk.sdk.sync
 
+import com.pyrus.pyrusservicedesk.AppResourceManager
 import com.pyrus.pyrusservicedesk._ref.utils.Try
 import com.pyrus.pyrusservicedesk._ref.utils.drain
 import com.pyrus.pyrusservicedesk._ref.utils.isSuccess
@@ -28,6 +29,7 @@ internal class Synchronizer(
     private val api: ServiceDeskApi,
     private val localTicketsStore: LocalTicketsStore,
     private val accountStore: AccountStore,
+    private val resourceManager: AppResourceManager,
 ) : CoroutineScope {
 
     @DelicateCoroutinesApi
@@ -82,7 +84,7 @@ internal class Synchronizer(
     private fun runLoop(syncRequests: List<SyncReqRes>) = launch {
         
         val account = accountStore.getAccount()
-        val getTicketsRequest = mapToGetFeedRequest(syncRequests, localTicketsStore.getTickets(), account)
+        val getTicketsRequest = mapToGetFeedRequest(syncRequests, localTicketsStore.getTickets(), account, resourceManager)
         val getTicketsTry = api.getTickets(getTicketsRequest)
         
         if (getTicketsTry.isSuccess()) {

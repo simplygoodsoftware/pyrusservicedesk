@@ -1,5 +1,6 @@
 package com.pyrus.pyrusservicedesk.sdk.sync
 
+import com.pyrus.pyrusservicedesk.AppResourceManager
 import com.pyrus.pyrusservicedesk._ref.data.Attachment
 import com.pyrus.pyrusservicedesk._ref.utils.ConfigUtils
 import com.pyrus.pyrusservicedesk.core.Account
@@ -19,7 +20,7 @@ internal object SyncMapper {
 
     private const val API_FLAG = "AAAAAAAAAAAU"
 
-    fun mapToGetFeedRequest(syncRequests: List<SyncReqRes>, localState: TicketsDto?, account: Account): RequestBodyBase {
+    fun mapToGetFeedRequest(syncRequests: List<SyncReqRes>, localState: TicketsDto?, account: Account, resourceManager: AppResourceManager): RequestBodyBase {
 
         val request = RequestBodyBase(
             needFullInfo = true,
@@ -27,7 +28,7 @@ internal object SyncMapper {
             lastNoteId = calcLastNoteId(localState, account.getUserId()),
             commands = syncRequests.mapNotNull { mapToCommand(it.request) },
             authorId = account.getAuthorId(),
-            authorName = ConfigUtils.getUserName(),
+            authorName = ConfigUtils.getAuthorName(resourceManager),
             appId = account.getAppId(),
             userId = account.getUserId(),
             securityKey = account.getSecurityKey(),

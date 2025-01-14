@@ -8,7 +8,6 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.recyclerview.widget.DiffUtil
 import com.pyrus.pyrusservicedesk.PyrusServiceDesk
-import com.pyrus.pyrusservicedesk.PyrusServiceDesk.Companion.injector
 import com.pyrus.pyrusservicedesk._ref.ui_domain.screens.ticket.adapter.entries.CommentEntry
 import com.pyrus.pyrusservicedesk._ref.ui_domain.screens.ticket.adapter.entries.DateEntry
 import com.pyrus.pyrusservicedesk._ref.ui_domain.screens.ticket.adapter.entries.RatingEntry
@@ -338,7 +337,7 @@ internal class TicketViewModel(
                     body = welcomeMessage,
                     creationDate = welcomeCommentDate,
                     author = AuthorDto(
-                        name = ConfigUtils.getUserName(),
+                        name = "",
                         authorId = "10",  // TODO wtf
                         avatarId = null,
                         avatarColorString = null
