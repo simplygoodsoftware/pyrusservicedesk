@@ -3,6 +3,7 @@ package com.pyrus.pyrusservicedesk._ref.ui_domain.screens.ticket
 import android.net.Uri
 import com.pyrus.pyrusservicedesk._ref.data.Attachment
 import com.pyrus.pyrusservicedesk._ref.data.FullTicket
+import com.pyrus.pyrusservicedesk._ref.utils.GetTicketsError
 import com.pyrus.pyrusservicedesk._ref.utils.TextProvider
 import com.pyrus.pyrusservicedesk._ref.whitetea.core.Store
 import com.pyrus.pyrusservicedesk.sdk.repositories.UserInternal
@@ -58,7 +59,7 @@ internal interface TicketContract {
 
         sealed interface Inner : Message {
             data class CommentsUpdated(val ticket: FullTicket?) : Inner
-            data object UpdateCommentsFailed : Inner
+            data class UpdateCommentsFailed(val getTicketsError: GetTicketsError) : Inner
             data class UpdateCommentsCompleted(
                 val ticket: FullTicket,
                 val draft: String,

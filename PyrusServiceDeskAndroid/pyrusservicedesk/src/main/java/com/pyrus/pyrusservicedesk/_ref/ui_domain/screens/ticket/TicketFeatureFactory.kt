@@ -7,10 +7,11 @@ import com.pyrus.pyrusservicedesk._ref.data.FullTicket
 import com.pyrus.pyrusservicedesk._ref.ui_domain.screens.ticket.TicketContract.Effect
 import com.pyrus.pyrusservicedesk._ref.ui_domain.screens.ticket.TicketContract.Message
 import com.pyrus.pyrusservicedesk._ref.ui_domain.screens.ticket.TicketContract.State
+import com.pyrus.pyrusservicedesk._ref.utils.GetTicketsError
 import com.pyrus.pyrusservicedesk._ref.utils.RequestUtils.Companion.MAX_FILE_SIZE_BYTES
 import com.pyrus.pyrusservicedesk._ref.utils.RequestUtils.Companion.getFileUrl
 import com.pyrus.pyrusservicedesk._ref.utils.TextProvider
-import com.pyrus.pyrusservicedesk._ref.utils.Try
+import com.pyrus.pyrusservicedesk._ref.utils.Try2
 import com.pyrus.pyrusservicedesk._ref.utils.isSuccess
 import com.pyrus.pyrusservicedesk._ref.utils.navigation.PyrusRouter
 import com.pyrus.pyrusservicedesk._ref.utils.singleFlow
@@ -159,10 +160,10 @@ private class FeatureReducer: Logic<State, Message, Effect>() {
             is Message.Inner.UpdateCommentsFailed -> {
                 when (val currentState = state) {
                     is State.Content -> {
-//                        if (message.error == Exception("data not found")) {
-//                            effects { +Effect.Inner.Close }
-//                        } //TODO надо как-то обрабатывать разные ошибки Try2?
-                        state { currentState.copy(isLoading = false) }
+                        when {
+                            message.getTicketsError == GetTicketsError.NoDataFound -> effects { +Effect.Inner.Close }
+                            else -> state { currentState.copy(isLoading = false) }
+                        }
                     }
                     is State.Loading -> state { State.Error }
                     State.Error -> {}
@@ -209,7 +210,7 @@ internal class TicketActor(
 
     override fun handleEffect(effect: Effect.Inner): Flow<Message.Inner> = when (effect) {
         is Effect.Inner.UpdateComments -> singleFlow {
-            val commentsTry: Try<FullTicket> = repository.getFeed(
+            val commentsTry: Try2<FullTicket, GetTicketsError> = repository.getFeed(
                 ticketId = effect.ticketId,
                 userId = user.userId,
                 force = effect.force
@@ -222,7 +223,7 @@ internal class TicketActor(
                         welcomeMessage = welcomeMessage,
                     )
                 }
-                else -> Message.Inner.UpdateCommentsFailed
+                else -> Message.Inner.UpdateCommentsFailed(commentsTry.error)
             }
         }
         Effect.Inner.FeedFlow -> repository.getFeedFlow(ticketId).map { Message.Inner.CommentsUpdated(it) }

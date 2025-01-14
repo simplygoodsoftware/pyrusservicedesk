@@ -7,17 +7,19 @@ import com.pyrus.pyrusservicedesk._ref.data.Comment
 import com.pyrus.pyrusservicedesk._ref.data.FullTicket
 import com.pyrus.pyrusservicedesk._ref.data.multy_chat.TicketsInfo
 import com.pyrus.pyrusservicedesk._ref.utils.ConfigUtils
+import com.pyrus.pyrusservicedesk._ref.utils.GetTicketsError
 import com.pyrus.pyrusservicedesk._ref.utils.Try
+import com.pyrus.pyrusservicedesk._ref.utils.Try2
 import com.pyrus.pyrusservicedesk._ref.utils.isImage
 import com.pyrus.pyrusservicedesk._ref.utils.isSuccess
 import com.pyrus.pyrusservicedesk._ref.utils.map
+import com.pyrus.pyrusservicedesk._ref.utils.toTry2
 import com.pyrus.pyrusservicedesk.presentation.ui.view.Status
 import com.pyrus.pyrusservicedesk.sdk.FileResolver
 import com.pyrus.pyrusservicedesk.sdk.data.TicketDto
 import com.pyrus.pyrusservicedesk.sdk.data.intermediate.AddCommentResponseData
 import com.pyrus.pyrusservicedesk.sdk.data.intermediate.FileData
 import com.pyrus.pyrusservicedesk.sdk.data.intermediate.TicketsDto
-import com.pyrus.pyrusservicedesk.sdk.sync.CommandParamsDto
 import com.pyrus.pyrusservicedesk.sdk.sync.SyncRequest
 import com.pyrus.pyrusservicedesk.sdk.sync.Synchronizer
 import com.pyrus.pyrusservicedesk.sdk.web.UploadFileHook
@@ -26,6 +28,9 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
+import retrofit2.HttpException
+import java.io.InterruptedIOException
+import java.net.UnknownHostException
 import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.atomic.AtomicInteger
 import java.util.concurrent.atomic.AtomicLong
@@ -80,40 +85,58 @@ internal class Repository(
         dto?.let(repositoryMapper::map)
     }
 
+    private fun <T : TicketsDto> Try<T>.checkResponse(ticketId: Int, userId: String): Try2<FullTicket, GetTicketsError> {
+        if (!this.isSuccess()) {
+            return this.toTry2 {
+                when (error) {
+                    is UnknownHostException,
+                    is HttpException,
+                    is InterruptedIOException,
+                        -> GetTicketsError.ConnectionError
+                    else -> GetTicketsError.ServiceError(
+                        error.javaClass.simpleName,
+                        error.message ?: "Cannot get stacktrace"
+                    )
+
+                }
+            }
+        }
+
+        val tickets: TicketsDto = this.value
+        val ticket: TicketDto? = tickets.tickets?.find { it.ticketId == ticketId }
+
+        if (ticket == null) {
+            return Try2.Failure(GetTicketsError.NoDataFound)
+        }
+
+        val res = Try.Success(repositoryMapper.map(ticket))
+
+        return res.toTry2()
+
+    }
+
     //TODO what we need to do when we haven't fount ticket (feedTry.value == null, but feedTry.isSuccess()) (k) sm
     suspend fun getFeed(
         ticketId: Int,
         userId: String,
         force: Boolean,
-    ): Try<FullTicket> {
+    ): Try2<FullTicket, GetTicketsError> {
 
         if (!force) {
             val localTickets: TicketsDto? = localTicketsStore.getTickets()
             val ticket: TicketDto? = localTickets?.tickets?.find { it.ticketId == ticketId }
             if (ticket != null) {
-                return Try.Success(repositoryMapper.map(ticket))
+                return Try.Success(repositoryMapper.map(ticket)).toTry2()
             }
         }
 
-        val syncTry = synchronizer.syncData(SyncRequest.Data)
-        if (!syncTry.isSuccess()) {
-            return syncTry
-        }
+        val syncTry = synchronizer.syncData(SyncRequest.Data).checkResponse(ticketId, userId)
 
-        val tickets: TicketsDto = syncTry.value
-        val ticket: TicketDto? = tickets.tickets?.find { it.ticketId == ticketId }
-
-        if (ticketId < 0 && ticket == null) {
-            // TODO Это зачем?
-            return Try.Success(repositoryMapper.mapEmptyFullTicket(ticketId, userId))
-        }
-        if (ticket == null) {
-            // TODO в этом случае нужно показывать пользователю ошибку сервера, а не то что у него нет интернета
-            // этого можно достич заменив Try на Try2 с кастомными ошибками
-            return Try.Failure(Exception("data not found"))
-        }
-
-        return Try.Success(repositoryMapper.map(ticket))
+//        if (ticketId < 0 && ticket == null) {
+//            // TODO Это зачем?
+//            return Try.Success(repositoryMapper.mapEmptyFullTicket(ticketId, userId)).checkResponse(null)
+//        }
+        return syncTry
     }
 
     // TODO merge with sync command

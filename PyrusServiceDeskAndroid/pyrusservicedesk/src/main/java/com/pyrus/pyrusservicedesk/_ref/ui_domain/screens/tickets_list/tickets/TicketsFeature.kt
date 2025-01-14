@@ -40,8 +40,6 @@ internal interface TicketsContract {
 
         sealed interface Outer : Message {
             data class OnFilterClick(val selectedUserId: String) : Outer
-            data object OnScanClick : Outer
-            data object OnSettingsClick : Outer
             data object OnFabItemClick : Outer
             data class OnChangePage(val appId: String) : Outer
             data object OnCreateTicketClick : Outer

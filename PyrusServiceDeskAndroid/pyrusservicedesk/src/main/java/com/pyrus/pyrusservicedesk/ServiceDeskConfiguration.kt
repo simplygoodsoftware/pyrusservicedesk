@@ -1,6 +1,5 @@
 package com.pyrus.pyrusservicedesk
 
-import android.content.Intent
 import android.os.Bundle
 import androidx.annotation.ColorInt
 import androidx.annotation.ColorRes

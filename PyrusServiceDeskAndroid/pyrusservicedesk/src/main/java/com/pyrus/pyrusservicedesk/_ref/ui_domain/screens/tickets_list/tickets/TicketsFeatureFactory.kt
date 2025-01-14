@@ -82,16 +82,6 @@ private class FeatureReducer: Logic<State, Message, Effect>() {
                 val users = state.account.users
                 effects { +Effect.Outer.ShowFilterMenu(selectedAppId, message.selectedUserId, users) }
             }
-
-            // TODO a нам точно нужно это тут? Sd ничего не должен знать о кнопках
-            Message.Outer.OnScanClick -> effects {
-                +Effect.Outer.OpenQrFragment
-            }
-
-            is Message.Outer.OnSettingsClick -> effects {
-                +Effect.Outer.OpenSettingsFragment
-            }
-
             is Message.Outer.OnChangePage -> {
                 val currentState = state.contentState as? ContentState.Content ?: return
                 state { state.copy(contentState = updateTicketsFilterState(currentState, message.appId, account.domain)) }
