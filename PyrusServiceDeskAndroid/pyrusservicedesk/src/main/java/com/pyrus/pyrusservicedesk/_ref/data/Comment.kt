@@ -12,4 +12,5 @@ internal data class Comment(
     @SerializedName("rating") val rating: Int?,
     @SerializedName("author") val author: Author?,
     @SerializedName("is_sending") val isSending: Boolean,
+    // TODO "client_id" ??
 )

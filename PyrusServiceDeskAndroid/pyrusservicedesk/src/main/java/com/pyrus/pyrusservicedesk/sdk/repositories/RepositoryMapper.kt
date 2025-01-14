@@ -1,6 +1,7 @@
 package com.pyrus.pyrusservicedesk.sdk.repositories
 
 import android.net.Uri
+import com.pyrus.pyrusservicedesk.User
 import com.pyrus.pyrusservicedesk._ref.data.Attachment
 import com.pyrus.pyrusservicedesk._ref.data.Author
 import com.pyrus.pyrusservicedesk._ref.data.Comment
@@ -27,6 +28,8 @@ import com.pyrus.pyrusservicedesk.sdk.sync.TicketCommandType
 internal class RepositoryMapper(
     private val account: Account
 ) {
+
+    private var currentUser: User? = null
 
     fun map(ticketsDto: TicketsDto): TicketsInfo {
         val smallUsers = mapToSmallAcc(account) // TODO use account store
@@ -76,6 +79,7 @@ internal class RepositoryMapper(
     )
 
     fun map(ticket: TicketDto): FullTicket {
+        currentUser = (account as? Account.V3)?.users?.find { it.userId == ticket.userId }
         return FullTicket(
             comments = ticket.comments?.map(::map) ?: emptyList(),
             showRating = ticket.showRating ?: false,
@@ -139,7 +143,7 @@ internal class RepositoryMapper(
         isText = attachmentDto.isText,
         bytesSize = attachmentDto.bytesSize,
         isVideo = attachmentDto.isVideo,
-        uri =  Uri.parse(RequestUtils.getPreviewUrl(attachmentDto.id, account)),
+        uri =  Uri.parse(RequestUtils.getPreviewUrl(attachmentDto.id, account, currentUser)),
         status = Status.Completed,
         progress = null,
         guid = attachmentDto.guid,

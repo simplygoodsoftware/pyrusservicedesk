@@ -1,6 +1,7 @@
 package com.pyrus.pyrusservicedesk._ref.utils
 
 import androidx.annotation.Keep
+import com.pyrus.pyrusservicedesk.User
 import com.pyrus.pyrusservicedesk.core.Account
 import java.net.URLEncoder
 
@@ -51,15 +52,15 @@ class RequestUtils{
         /**
          * Provides url for getting the file.
          */
-        internal fun getFileUrl(fileId: Long, account: Account): String {
-            return "${getBaseUrl(account.domain)}DownloadFile/$fileId" + getPathParams(account)
+        internal fun getFileUrl(fileId: Long, account: Account, multichatUser: User?): String {
+            return "${getBaseUrl(account.domain)}DownloadFile/$fileId" + getPathParams(account, multichatUser)
         }
 
-        internal fun getPreviewUrl(fileId: Long, account: Account): String {
-            return "${getBaseUrl(account.domain)}DownloadFilePreview/$fileId" + getPathParams(account)
+        internal fun getPreviewUrl(fileId: Long, account: Account, multichatUser: User?): String {
+            return "${getBaseUrl(account.domain)}DownloadFilePreview/$fileId" + getPathParams(account, multichatUser)
         }
 
-        private fun getPathParams(account: Account): String = when(account) {
+        private fun getPathParams(account: Account, multichatUser: User?): String = when(account) {
             is Account.V1 -> {
                 "?user_id=" +
                     URLEncoder.encode(account.userId, "UTF-8") +
@@ -81,9 +82,9 @@ class RequestUtils{
 
             is Account.V3 -> {
                 "?user_id=" +
-                        URLEncoder.encode(account.firstUserId, "UTF-8") +
+                        URLEncoder.encode(account.users.find { it == multichatUser }?.userId, "UTF-8") +
                         "&app_id=" +
-                        URLEncoder.encode(account.firstAppId, "UTF-8")
+                        URLEncoder.encode(account.users.find { it == multichatUser }?.appId, "UTF-8")
             }
         }
     }

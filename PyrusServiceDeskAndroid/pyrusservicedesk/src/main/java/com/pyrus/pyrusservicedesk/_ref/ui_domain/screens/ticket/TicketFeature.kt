@@ -1,6 +1,7 @@
 package com.pyrus.pyrusservicedesk._ref.ui_domain.screens.ticket
 
 import android.net.Uri
+import com.pyrus.pyrusservicedesk.User
 import com.pyrus.pyrusservicedesk._ref.data.Attachment
 import com.pyrus.pyrusservicedesk._ref.data.FullTicket
 import com.pyrus.pyrusservicedesk._ref.utils.GetTicketsError
@@ -97,7 +98,7 @@ internal interface TicketContract {
                 val ticketId: Long,
             ) : Inner
             data class RetryAddComment(val id: Long) : Inner
-            data class OpenPreview(val attachment: Attachment) : Inner
+            data class OpenPreview(val attachment: Attachment, val userId: String?) : Inner
             data class SaveDraft(val draft: String) : Inner
             data class ReadTicket(val user: UserInternal, val ticketId: Long) : Inner
         }

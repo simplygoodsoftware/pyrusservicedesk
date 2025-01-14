@@ -118,7 +118,7 @@ private class FeatureReducer: Logic<State, Message, Effect>() {
                     ?.find { it.id == message.commentId }?.attachments
                     ?.find { it.id == message.attachmentId } ?: return
 
-                effects { +Effect.Inner.OpenPreview(attach) }
+                effects { +Effect.Inner.OpenPreview(attach, currentState.ticket.userId) }
             }
             is Message.Outer.OnRatingClick -> {
                 if (state !is State.Content) return
@@ -242,10 +242,11 @@ internal class TicketActor(
 //            repository.retryAddComment(user, ticketId, effect.id)
         }
         is Effect.Inner.OpenPreview -> flow {
+            val user = (account as? Account.V3)?.users?.find { it.userId == effect.userId }
             val fileDate = FileData(
                 effect.attachment.name,
                 effect.attachment.bytesSize,
-                Uri.parse(getFileUrl(effect.attachment.id, account)),
+                Uri.parse(getFileUrl(effect.attachment.id, account, user)),
                 false,
             )
             router.navigateTo(Screens.ImageScreen(fileDate))
