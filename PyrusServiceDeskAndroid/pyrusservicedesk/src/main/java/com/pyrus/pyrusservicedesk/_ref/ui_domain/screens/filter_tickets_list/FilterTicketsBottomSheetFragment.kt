@@ -4,7 +4,7 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.TextView
+import android.view.animation.AnimationUtils
 import androidx.core.os.bundleOf
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment
@@ -48,6 +48,9 @@ class FilterTicketsBottomSheetFragment: BottomSheetDialogFragment() {
                 dismiss()
             })
         binding.usersRv.adapter = adapter
+
+        val slideIn = AnimationUtils.loadAnimation(context, R.anim.psd_animation_window_exit)
+        view.startAnimation(slideIn)
     }
 
     private fun updateSelectedUsers(appId: String?, users: List<User>) {
@@ -57,6 +60,12 @@ class FilterTicketsBottomSheetFragment: BottomSheetDialogFragment() {
         val selectedUsers = users.filter { it.appId == appId }
         selectedUserIds = selectedUsers.map { it.userId }
         selectedUserNames = selectedUsers.map { it.userName }
+    }
+
+    override fun onDestroyView() {
+        val slideOut = AnimationUtils.loadAnimation(context, R.anim.psd_animation_window_enter)
+        view?.startAnimation(slideOut)
+        super.onDestroyView()
     }
 
     companion object {

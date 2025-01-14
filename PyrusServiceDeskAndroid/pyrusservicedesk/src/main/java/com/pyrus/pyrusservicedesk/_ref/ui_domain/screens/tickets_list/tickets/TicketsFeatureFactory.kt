@@ -10,6 +10,7 @@ import com.pyrus.pyrusservicedesk._ref.ui_domain.screens.tickets_list.tickets.Ti
 import com.pyrus.pyrusservicedesk._ref.ui_domain.screens.tickets_list.tickets.TicketsFragment.Companion.KEY_DEFAULT_USER_ID
 import com.pyrus.pyrusservicedesk._ref.utils.RequestUtils.Companion.getOrganisationLogoUrl
 import com.pyrus.pyrusservicedesk._ref.utils.Try
+import com.pyrus.pyrusservicedesk._ref.utils.navigation.setSlideRightAnimation
 import com.pyrus.pyrusservicedesk._ref.utils.singleFlow
 import com.pyrus.pyrusservicedesk._ref.whitetea.core.Actor
 import com.pyrus.pyrusservicedesk._ref.whitetea.core.StoreFactory
@@ -199,7 +200,7 @@ internal class TicketsActor(
         Effect.Inner.TicketsSetFlow -> repository.getAllDataFlow().map { Message.Inner.TicketsUpdated(it) }
 
         is Effect.Inner.OpenTicketScreen -> flow {
-            router.navigateTo(Screens.TicketScreen(effect.ticketId, effect.user))
+            router.navigateTo(Screens.TicketScreen(effect.ticketId, effect.user).setSlideRightAnimation())
         }
 
     }

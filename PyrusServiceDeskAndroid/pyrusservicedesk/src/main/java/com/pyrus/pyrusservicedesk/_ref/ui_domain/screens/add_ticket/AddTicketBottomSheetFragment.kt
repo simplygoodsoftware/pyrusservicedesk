@@ -4,12 +4,14 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.view.animation.AnimationUtils
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment
 import com.pyrus.pyrusservicedesk.PyrusServiceDesk.Companion.injector
 import com.pyrus.pyrusservicedesk.R
 import com.pyrus.pyrusservicedesk.User
 import com.pyrus.pyrusservicedesk._ref.Screens
+import com.pyrus.pyrusservicedesk._ref.utils.navigation.setSlideRightAnimation
 import com.pyrus.pyrusservicedesk.databinding.AddTicketFragmentBinding
 import com.pyrus.pyrusservicedesk.sdk.repositories.UserInternal
 
@@ -39,17 +41,26 @@ class AddTicketBottomSheetFragment: BottomSheetDialogFragment() {
                     Screens.TicketScreen(
                         null,
                         UserInternal(user.userId, user.appId)
-                    )
+                    ).setSlideRightAnimation()
                 )
                 dismiss()
             })
         binding.usersRv.adapter = adapter
+
+        val slideIn = AnimationUtils.loadAnimation(context, R.anim.psd_animation_window_exit)
+        view.startAnimation(slideIn)
     }
 
     private fun updateSelectedUsers(appId: String?) {
         if (appId == null)
             return
         selectedUserNames = selectedUsers.filter { it.appId == appId }.map { it.userName }
+    }
+
+    override fun onDestroyView() {
+        val slideOut = AnimationUtils.loadAnimation(context, R.anim.psd_animation_window_enter)
+        view?.startAnimation(slideOut)
+        super.onDestroyView()
     }
 
     companion object {

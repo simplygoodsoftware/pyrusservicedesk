@@ -144,8 +144,8 @@ internal abstract class ActivityBase: AppCompatActivity(), CoroutineScope {
     }
 
     private fun overridePendingTransition() {
-        val enter = R.anim.psd_animation_window_enter
-        val exit = R.anim.psd_animation_window_exit
+        val enter = R.anim.slide_in_right
+        val exit = R.anim.slide_out_right
         super.overridePendingTransition(enter, exit)
     }
 }
