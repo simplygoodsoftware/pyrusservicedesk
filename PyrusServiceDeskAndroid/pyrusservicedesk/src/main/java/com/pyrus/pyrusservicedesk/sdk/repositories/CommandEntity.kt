@@ -3,6 +3,7 @@ package com.pyrus.pyrusservicedesk.sdk.repositories
 import com.google.gson.annotations.SerializedName
 
 internal data class CommandEntity(
+    @SerializedName("is_error") val isError: Boolean,
     @SerializedName("local_id") val localId: Long,
     @SerializedName("command_id") val commandId: String,
     @SerializedName("command_type") val commandType: Int,
@@ -15,4 +16,6 @@ internal data class CommandEntity(
     @SerializedName("ticket_id") val ticketId: Long?,
     @SerializedName("rating") val rating: Int?,
     @SerializedName("comment_id") val commentId: Long?,
+    @SerializedName("token") val token: String?,
+    @SerializedName("token_type") val tokenType: String?,
 )

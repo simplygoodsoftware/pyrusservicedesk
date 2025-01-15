@@ -2,12 +2,13 @@ package com.pyrus.pyrusservicedesk.sdk.repositories
 
 import android.net.Uri
 import androidx.core.net.toFile
-import com.pyrus.pyrusservicedesk._ref.data.Comment
 import com.pyrus.pyrusservicedesk._ref.data.FullTicket
 import com.pyrus.pyrusservicedesk._ref.data.multy_chat.TicketsInfo
 import com.pyrus.pyrusservicedesk._ref.utils.GetTicketsError
 import com.pyrus.pyrusservicedesk._ref.utils.Try
 import com.pyrus.pyrusservicedesk._ref.utils.Try2
+import com.pyrus.pyrusservicedesk._ref.utils.getOrNull
+import com.pyrus.pyrusservicedesk._ref.utils.isFailed
 import com.pyrus.pyrusservicedesk._ref.utils.isSuccess
 import com.pyrus.pyrusservicedesk._ref.utils.map
 import com.pyrus.pyrusservicedesk._ref.utils.toTry2
@@ -21,7 +22,7 @@ import com.pyrus.pyrusservicedesk.sdk.web.UploadFileHook
 import com.pyrus.pyrusservicedesk.sdk.web.retrofit.RemoteFileStore
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.launch
 import retrofit2.HttpException
 import java.io.InterruptedIOException
@@ -37,55 +38,28 @@ internal class Repository(
     private val synchronizer: Synchronizer,
     private val localTicketsStore: LocalTicketsStore,
     private val coroutineScope: CoroutineScope,
+    private val accountStore: AccountStore,
 ) {
 
     private val fileHooks = ConcurrentHashMap<Long, UploadFileHook>()
 
     suspend fun getAllData(force: Boolean): Try<TicketsInfo> {
-        // TODO merge with sync command
         if (!force) {
             val localTickets: TicketsDto? = localTicketsStore.getTickets()
-            if(localTickets != null) {
-                return Try.Success(repositoryMapper.map(localTickets))
+            if (localTickets != null) {
+                return Try.Success(mergeData(localTickets, localCommandsStore.getCommands()))
             }
         }
-        return synchronizer.syncData(SyncRequest.Data).map(repositoryMapper::map)
+        return synchronizer.syncData(SyncRequest.Data).map {
+            mergeData(it, localCommandsStore.getCommands())
+        }
     }
 
-    // TODO merge with sync command and with commandErrors
-    fun getAllDataFlow(): Flow<TicketsInfo?> = localTicketsStore.getTicketInfoFlow().map { dto ->
-        dto?.let(repositoryMapper::map)
-    }
-
-    // TODO check it
-    private fun <T : TicketsDto> Try<T>.checkResponse(ticketId: Long): Try2<FullTicket, GetTicketsError> {
-        if (!this.isSuccess()) {
-            return this.toTry2 {
-                when (error) {
-                    is UnknownHostException,
-                    is HttpException,
-                    is InterruptedIOException,
-                        -> GetTicketsError.ConnectionError
-                    else -> GetTicketsError.ServiceError(
-                        error.javaClass.simpleName,
-                        error.message ?: "Cannot get stacktrace"
-                    )
-
-                }
-            }
-        }
-
-        val tickets: TicketsDto = this.value
-        val ticket: TicketDto? = tickets.tickets?.find { it.ticketId == ticketId }
-
-        if (ticket == null) {
-            return Try2.Failure(GetTicketsError.NoDataFound)
-        }
-
-        val res = Try.Success(repositoryMapper.map(ticket))
-
-        return res.toTry2()
-
+    fun getAllDataFlow(): Flow<TicketsInfo?> = combine(
+        localTicketsStore.getTicketInfoFlow(),
+        localCommandsStore.getCommandsFlow(),
+    ) { dto, commands ->
+        mergeData(dto, commands)
     }
 
     //TODO what we need to do when we haven't fount ticket (feedTry.value == null, but feedTry.isSuccess()) (k) sm
@@ -97,22 +71,43 @@ internal class Repository(
 
         if (!force) {
             val localTickets: TicketsDto? = localTicketsStore.getTickets()
-            val ticket: TicketDto? = localTickets?.tickets?.find { it.ticketId == ticketId }
+            val ticketDto: TicketDto? = localTickets?.tickets?.find { it.ticketId == ticketId }
+            val commands = localCommandsStore.getCommands(ticketId)
+            val ticket = ticketDto?.let {
+                ticketDto.userId?.let { userId ->
+                    repositoryMapper.mergeTicket(userId, ticketDto, commands)
+                }
+            }
             if (ticket != null) {
-                return Try.Success(repositoryMapper.map(ticket)).toTry2()
+                return Try.Success(ticket).toTry2()
             }
         }
 
         val syncTry = synchronizer.syncData(SyncRequest.Data).checkResponse(ticketId)
+        if (syncTry.isFailed()) return syncTry
+        val ticketDto = syncTry.value
+        val userId = ticketDto.userId ?: return Try2.Failure(GetTicketsError.ValidationError)
 
-        return syncTry
+        val commands = localCommandsStore.getCommands(ticketId)
+        val ticket = repositoryMapper.mergeTicket(userId, ticketDto, commands)
+        return Try2.Success(ticket)
     }
 
-    // TODO merge with sync command
-    fun getFeedFlow(user: UserInternal, ticketId: Long): Flow<FullTicket?> = localTicketsStore.getTicketInfoFlow().map { ticketsDto ->
-        ticketsDto?.tickets
-            ?.find { ticketDto -> ticketDto.ticketId == ticketId }
-            ?.let(repositoryMapper::map)
+    fun getFeedFlow(user: UserInternal, ticketId: Long): Flow<FullTicket?> {
+        return combine(
+            localTicketsStore.getTicketInfoFlow(ticketId),
+            localCommandsStore.getCommandsFlow(ticketId),
+        ) { ticketDto, commands ->
+            if (ticketDto != null) {
+                if (ticketDto.userId == null) return@combine null
+                repositoryMapper.mergeTicket(ticketDto.userId, ticketDto, commands)
+            }
+            else {
+                commands.find { it.requestNewTicket == true }?.let {
+                    repositoryMapper.mapToFullTicket(it, commands)
+                }
+            }
+        }
     }
 
     fun addTicket(user: UserInternal, textBody: String) = coroutineScope.launch {
@@ -210,10 +205,6 @@ internal class Repository(
         localCommandsStore.removeCommand(commandId)
     }
 
-    fun removeCommandError(commandId: String) {
-        localCommandsStore.removeCommandError(commandId)
-    }
-
     private suspend fun syncCommand(command: SyncRequest.Command) {
         val syncTry = synchronizer.syncCommand(command)
 
@@ -222,15 +213,43 @@ internal class Repository(
         }
         else {
             val errorEntity = repositoryMapper.mapToCommandErrorEntity(command)
-            localCommandsStore.addCommandError(errorEntity)
+            localCommandsStore.addOrUpdatePendingCommand(errorEntity)
         }
     }
 
-    private fun mergeComments(local: List<Comment>, remote: FullTicket): FullTicket {
-        val comments = ArrayList<Comment>(local)
-        comments.addAll(remote.comments)
-        comments.sortBy { it.creationTime }
-        return remote.copy(comments = comments)
+    private fun mergeData(
+        ticketsDto: TicketsDto?,
+        commands: List<CommandEntity>,
+    ): TicketsInfo {
+        return TicketsInfo(repositoryMapper.mergeTickets(ticketsDto, commands))
     }
+
+    private fun Try<TicketsDto>.checkResponse(ticketId: Long): Try2<TicketDto, GetTicketsError> {
+        if (!this.isSuccess()) {
+            return this.toTry2 {
+                when (error) {
+                    is UnknownHostException,
+                    is HttpException,
+                    is InterruptedIOException,
+                        -> GetTicketsError.ConnectionError
+                    else -> GetTicketsError.ServiceError(
+                        error.javaClass.simpleName,
+                        error.message ?: "Cannot get stacktrace"
+                    )
+
+                }
+            }
+        }
+
+        val tickets: TicketsDto = this.value
+        val ticket: TicketDto? = tickets.tickets?.find { it.ticketId == ticketId }
+        if (ticket == null) {
+            return Try2.Failure(GetTicketsError.NoDataFound)
+        }
+        val res = Try.Success(ticket)
+        return res.toTry2()
+
+    }
+
 
 }

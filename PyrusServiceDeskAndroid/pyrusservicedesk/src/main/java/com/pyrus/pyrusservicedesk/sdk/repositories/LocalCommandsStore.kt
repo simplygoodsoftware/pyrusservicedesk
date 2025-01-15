@@ -3,16 +3,16 @@ package com.pyrus.pyrusservicedesk.sdk.repositories
 import android.content.SharedPreferences
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
-import com.pyrus.pyrusservicedesk._ref.data.Comment
 import com.pyrus.pyrusservicedesk.presentation.ui.view.Status
 import com.pyrus.pyrusservicedesk.sdk.data.intermediate.FileData
 import com.pyrus.pyrusservicedesk.sdk.sync.SyncRequest
-import com.pyrus.pyrusservicedesk.sdk.sync.TicketCommandDto
 import com.pyrus.pyrusservicedesk.sdk.sync.TicketCommandType
 import com.pyrus.pyrusservicedesk.sdk.verify.LocalDataVerifier
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.map
 import java.lang.reflect.Type
+import java.util.UUID
 import java.util.concurrent.atomic.AtomicLong
 import kotlin.math.max
 
@@ -28,12 +28,10 @@ internal class LocalCommandsStore(
     private val lastLocalId: AtomicLong
     private val lastAttachId: AtomicLong
 
-    private val localCommandsStateFlow: MutableStateFlow<List<CommandEntity>>
-    private val commandErrorsStateFlow: MutableStateFlow<List<CommandErrorEntity>>
+    private val commandsStateFlow: MutableStateFlow<List<CommandEntity>>
 
     init {
-        val pendingCommands = readPendingCommands()
-        val commandErrors = readCommandErrors()
+        val pendingCommands = readCommands()
 
         var lastCommandId = 0L
         var lastAttachmentId = 0L
@@ -45,22 +43,22 @@ internal class LocalCommandsStore(
                 }
             }
         }
-        for (commandError in commandErrors) {
-            lastCommandId = max(lastCommandId, commandError.localId)
-            if (commandError.attachments != null) {
-                for (attach in commandError.attachments) {
-                    lastAttachmentId = max(lastAttachmentId, attach.id)
-                }
-            }
-        }
         lastLocalId = AtomicLong(lastCommandId)
         lastAttachId = AtomicLong(lastAttachmentId)
 
-        localCommandsStateFlow = MutableStateFlow(pendingCommands)
-        commandErrorsStateFlow = MutableStateFlow(commandErrors)
+        commandsStateFlow = MutableStateFlow(pendingCommands)
     }
 
-    val commandsFlow: Flow<List<CommandEntity>> = localCommandsStateFlow
+    fun getCommandsFlow(): Flow<List<CommandEntity>> = commandsStateFlow
+
+    fun getCommandsFlow(ticketId: Long): Flow<List<CommandEntity>> = commandsStateFlow.map {
+        it.filter { command -> command.ticketId == ticketId }
+    }
+
+    fun getCommands(): List<CommandEntity> = commandsStateFlow.value
+
+    fun getCommands(ticketId: Long): List<CommandEntity> = commandsStateFlow.value
+        .filter { it.ticketId == ticketId }
 
     fun addCreateTicketCommand(user: UserInternal, comment: String): SyncRequest.Command.CreateComment {
         val entity = createNewTicketCommandEntity(user, comment)
@@ -146,7 +144,7 @@ internal class LocalCommandsStore(
         tokenType: String,
     ) = SyncRequest.Command.SetPushToken(
         localId = getNextLocalId(),
-        commandId = createCommandId(user),
+        commandId = createCommandId(),
         userId = user.userId,
         appId = user.appId,
         creationTime = System.currentTimeMillis(),
@@ -158,7 +156,7 @@ internal class LocalCommandsStore(
      * Adds command to store
      */
     fun addOrUpdatePendingCommand(command: CommandEntity) {
-        var commands = localCommandsStateFlow.value.toMutableList()
+        var commands = commandsStateFlow.value.toMutableList()
 
         commands.let { list ->
             val existingIndex = list.indexOfFirst { it.commandId == command.commandId }
@@ -173,67 +171,31 @@ internal class LocalCommandsStore(
         writeCommands(commands)
     }
 
-    fun addCommandError(commandError: CommandErrorEntity) {
-        var errors = commandErrorsStateFlow.value.toMutableList()
-        errors.let { list ->
-            val existingIndex = list.indexOfFirst { it.commandId == commandError.commandId }
-            if (existingIndex >= 0) {
-                list.removeAt(existingIndex)
-            }
-            list.add(commandError)
-        }
-        if (errors.size > MAX_PENDING_COMMENTS_SIZE) {
-            errors = errors.subList(errors.size - MAX_PENDING_COMMENTS_SIZE, errors.size)
-        }
-        writeCommandErrors(errors)
-    }
-
 
     /**
      * Provides all pending feed commands
      */
-    private fun readPendingCommands(): List<CommandEntity> {
-        val rawJson = preferences.getString(PREFERENCE_KEY_TICKET_COMMANDS, "[]")
-        val commandsList = gson.fromJson<List<CommandEntity>>(rawJson, commandListTokenType).toMutableList()
-
-        if (commandsList.removeAll { localDataVerifier.isLocalCommandEmpty(it) }) {
-            writeCommands(commandsList)
-        }
-        return commandsList
-    }
-
-    private fun readCommandErrors(): List<CommandErrorEntity> {
-        val rawJson = preferences.getString(PREFERENCE_KEY_TICKET_COMMAND_ERRORS, "[]")
-        val commandErrors = gson.fromJson<List<CommandErrorEntity>>(rawJson, commandListTokenType).toMutableList()
-
-        return commandErrors
+    private fun readCommands(): List<CommandEntity> {
+//        val rawJson = preferences.getString(PREFERENCE_KEY_TICKET_COMMANDS, "[]")
+//        val commandsList = gson.fromJson<List<CommandEntity>>(rawJson, commandListTokenType).toMutableList()
+//
+//        if (commandsList.removeAll { localDataVerifier.isLocalCommandEmpty(it) }) {
+//            writeCommands(commandsList)
+//        }
+        // TODO()
+        return emptyList()
     }
 
     fun getCommand(localId: Long): CommandEntity? {
-        return localCommandsStateFlow.value.find { command -> command.localId == localId }
+        return commandsStateFlow.value.find { command -> command.localId == localId }
     }
 
     /**
      * Removes pending command from offline repository
      */
     fun removeCommand(commandId: String) {
-        val commands = readPendingCommands().toMutableList()
+        val commands = readCommands().toMutableList()
         val removed = commands.removeAll { it.commandId == commandId }
-        if (removed) {
-            writeCommands(commands)
-        }
-    }
-
-    fun removeCommandError(commandId: String) {
-
-    }
-
-    /**
-     * Removes pending command from offline repository
-     */
-    fun removeCommand(command: CommandEntity) {
-        val commands = readPendingCommands().toMutableList()
-        val removed = commands.removeAll { it.commandId == command.commandId }
         if (removed) {
             writeCommands(commands)
         }
@@ -244,7 +206,6 @@ internal class LocalCommandsStore(
      */
     fun removeAllCommands() {
         writeCommands(emptyList())
-        writeCommandErrors(emptyList())
     }
 
     private fun createNewTicketCommandEntity(
@@ -253,8 +214,9 @@ internal class LocalCommandsStore(
     ): CommandEntity {
         val localId = getNextLocalId()
         return CommandEntity(
+            isError = false,
             localId = localId,
-            commandId = createCommandId(user),
+            commandId = createCommandId(),
             commandType = TicketCommandType.CreateComment.ordinal,
             userId = user.userId,
             appId = user.appId,
@@ -265,6 +227,8 @@ internal class LocalCommandsStore(
             ticketId = null,
             rating = null,
             commentId = localId,
+            token = null,
+            tokenType = null,
         )
     }
 
@@ -275,8 +239,9 @@ internal class LocalCommandsStore(
     ): CommandEntity {
         val localId = getNextLocalId()
         return CommandEntity(
+            isError = false,
             localId = localId,
-            commandId = createCommandId(user),
+            commandId = createCommandId(),
             commandType = TicketCommandType.CreateComment.ordinal,
             userId = user.userId,
             appId = user.appId,
@@ -287,6 +252,8 @@ internal class LocalCommandsStore(
             ticketId = ticketId,
             rating = null,
             commentId = localId,
+            token = null,
+            tokenType = null,
         )
     }
 
@@ -297,8 +264,9 @@ internal class LocalCommandsStore(
     ): CommandEntity {
         val localId = getNextLocalId()
         return CommandEntity(
+            isError = false,
             localId = localId,
-            commandId = createCommandId(user),
+            commandId = createCommandId(),
             commandType = TicketCommandType.CreateComment.ordinal,
             userId = user.userId,
             appId = user.appId,
@@ -309,6 +277,8 @@ internal class LocalCommandsStore(
             ticketId = ticketId,
             rating = rating,
             commentId = localId,
+            token = null,
+            tokenType = null,
         )
     }
 
@@ -319,8 +289,9 @@ internal class LocalCommandsStore(
     ): CommandEntity {
         val localId = getNextLocalId()
         return CommandEntity(
+            isError = false,
             localId = localId,
-            commandId = createCommandId(user),
+            commandId = createCommandId(),
             commandType = TicketCommandType.CreateComment.ordinal,
             userId = user.userId,
             appId = user.appId,
@@ -330,7 +301,9 @@ internal class LocalCommandsStore(
             attachments = listOf(createAttachment(fileData)),
             ticketId = ticketId,
             rating = null,
-            commentId = localId
+            commentId = localId,
+            token = null,
+            tokenType = null,
         )
     }
 
@@ -349,8 +322,9 @@ internal class LocalCommandsStore(
     private fun createReadCommandEntity(user: UserInternal, ticketId: Long): CommandEntity {
         val localId = getNextLocalId()
         return CommandEntity(
+            isError = false,
             localId = localId,
-            commandId = createCommandId(user),
+            commandId = createCommandId(),
             commandType = TicketCommandType.MarkTicketAsRead.ordinal,
             userId = user.userId,
             appId = user.appId,
@@ -361,6 +335,8 @@ internal class LocalCommandsStore(
             ticketId = ticketId,
             rating = null,
             commentId = null,
+            token = null,
+            tokenType = null,
         )
     }
 
@@ -372,28 +348,19 @@ internal class LocalCommandsStore(
         return lastAttachId.decrementAndGet()
     }
 
-    private fun createCommandId(user: UserInternal): String {
-        return "${System.currentTimeMillis()}_${user.userId}_${user.appId}"
+    private fun createCommandId(): String {
+        return UUID.randomUUID().toString()
     }
 
     private fun writeCommands(commands: List<CommandEntity>) {
-        val rawJson = gson.toJson(commands, commandListTokenType)
-        preferences.edit().putString(PREFERENCE_KEY_TICKET_COMMANDS, rawJson).apply()
-        localCommandsStateFlow.value = commands
-    }
-
-    private fun writeCommandErrors(errors: List<CommandErrorEntity>) {
-        val rawJson = gson.toJson(errors, commandErrorListTokenType)
-        preferences.edit().putString(PREFERENCE_KEY_TICKET_COMMAND_ERRORS, rawJson).apply()
-        commandErrorsStateFlow.value = errors
+//        val rawJson = gson.toJson(commands, commandListTokenType)
+//        preferences.edit().putString(PREFERENCE_KEY_TICKET_COMMANDS, rawJson).apply()
+        commandsStateFlow.value = commands
     }
 
     private companion object{
-        const val PREFERENCE_KEY_OFFLINE_COMMENTS = "PREFERENCE_KEY_OFFLINE_COMMENTS"
         const val PREFERENCE_KEY_TICKET_COMMANDS = "PREFERENCE_KEY_TICKET_COMMANDS"
-        const val PREFERENCE_KEY_TICKET_COMMAND_ERRORS = "PREFERENCE_KEY_TICKET_COMMAND_ERRORS"
         const val MAX_PENDING_COMMENTS_SIZE = 20
         val commandListTokenType: Type = object : TypeToken<List<CommandEntity>>(){}.type
-        val commandErrorListTokenType: Type = object : TypeToken<List<CommandErrorEntity>>(){}.type
     }
 }

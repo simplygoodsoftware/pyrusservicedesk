@@ -7,7 +7,6 @@ import com.pyrus.pyrusservicedesk._ref.data.Author
 import com.pyrus.pyrusservicedesk._ref.data.Comment
 import com.pyrus.pyrusservicedesk._ref.data.FullTicket
 import com.pyrus.pyrusservicedesk._ref.data.multy_chat.TicketSetInfo
-import com.pyrus.pyrusservicedesk._ref.data.multy_chat.TicketsInfo
 import com.pyrus.pyrusservicedesk._ref.utils.RequestUtils
 import com.pyrus.pyrusservicedesk._ref.utils.RequestUtils.Companion.getAvatarUrl
 import com.pyrus.pyrusservicedesk._ref.utils.isImage
@@ -17,42 +16,63 @@ import com.pyrus.pyrusservicedesk.presentation.ui.view.Status
 import com.pyrus.pyrusservicedesk.sdk.data.AttachmentDto
 import com.pyrus.pyrusservicedesk.sdk.data.AuthorDto
 import com.pyrus.pyrusservicedesk.sdk.data.CommentDto
-import com.pyrus.pyrusservicedesk.sdk.sync.TicketCommandResultDto
 import com.pyrus.pyrusservicedesk.sdk.data.TicketDto
-import com.pyrus.pyrusservicedesk.sdk.data.intermediate.AddCommentResponseData
-import com.pyrus.pyrusservicedesk.sdk.data.intermediate.CommentsDto
 import com.pyrus.pyrusservicedesk.sdk.data.intermediate.TicketsDto
 import com.pyrus.pyrusservicedesk.sdk.sync.SyncRequest
-import com.pyrus.pyrusservicedesk.sdk.sync.TicketCommandType
+import com.pyrus.pyrusservicedesk.sdk.sync.TicketCommandType.*
+import java.util.concurrent.ConcurrentHashMap
 
 internal class RepositoryMapper(
     private val account: Account
 ) {
 
-    private var currentUser: User? = null
+    private val ticketIdMap = ConcurrentHashMap<Long, Long>()
 
-    fun map(ticketsDto: TicketsDto): TicketsInfo {
+    fun mergeTickets(ticketsDto: TicketsDto?, commands: List<CommandEntity>): List<TicketSetInfo> {
+
+        val tickets = ArrayList<FullTicket>()
+
+        val commandsById = commands.groupBy { it.ticketId }
+        tickets += ticketsDto?.tickets?.mapNotNull { ticketDto ->
+            val ticketCommands = commandsById[ticketDto.ticketId] ?: emptyList()
+            val commandsWithLocalId = commandsById[ticketIdMap[ticketDto.ticketId]] ?: emptyList()
+            if (ticketDto.userId == null) return@mapNotNull null
+            mergeTicketInternal(
+                userId = ticketDto.userId,
+                ticketDto = ticketDto,
+                commands = ticketCommands + commandsWithLocalId
+            )
+        } ?: emptyList()
+
+        val createTicketCommands = commands.filter {
+            it.commandType == CreateComment.ordinal && it.requestNewTicket == true
+        }
+        tickets += createTicketCommands.map {
+            val ticketCommands = commandsById[it.ticketId] ?: emptyList()
+            mapToFullTicket(it, ticketCommands)
+        }
+
         val smallUsers = mapToSmallAcc(account) // TODO use account store
-
         val usersByAppId = smallUsers.groupBy { it.appId }
 
-        val ticketsByUserId = ticketsDto.tickets
-            ?.map(::map)
-            ?.groupBy { it.userId } ?: error("tickets is null")
+        val ticketsByUserId: Map<String, List<FullTicket>> = tickets.groupBy { it.userId }
 
-        val applications = ticketsDto.applications?.associateBy { it.appId } ?: error("applications is null")
+        val applications = ticketsDto?.applications?.associateBy { it.appId }
 
         val ticketSetInfoList = usersByAppId.keys.map { appId ->
             val users = usersByAppId[appId] ?: emptyList()
-            val tickets = ArrayList<FullTicket>()
+            val setTickets = ArrayList<FullTicket>()
             for (user in users) {
                 val userTickets = ticketsByUserId[user.userId] ?: continue
-                tickets += userTickets
+                setTickets += userTickets
             }
-            val filteredTicketsData = tickets.toHashSet().sortedWith(TicketComparator())
+            val filteredTicketsData = setTickets.toHashSet().sortedWith(TicketComparator())
+
+            // TODO kate это в компаратор
             val resultTickets = filteredTicketsData.filter { it.isActive == true }.toMutableList()
             resultTickets.addAll(filteredTicketsData.filter { it.isActive == false })
-            val application = applications[appId]
+
+            val application = applications?.get(appId)
             val orgName = application?.orgName
             val orgLogoUrl = application?.orgLogoUrl
             TicketSetInfo(
@@ -63,54 +83,72 @@ internal class RepositoryMapper(
             )
         }
 
-        return TicketsInfo(ticketSetInfoList)
+        return ticketSetInfoList
     }
 
-    fun map(commentsDto: CommentsDto): FullTicket = FullTicket(
-        comments = commentsDto.comments.map(::map),
-        showRating = commentsDto.showRating,
-        showRatingText = commentsDto.showRatingText,
-        userId = commentsDto.showRatingText,
-        ticketId = TODO(),
-        subject = TODO(),
-        isRead = TODO(),
-        lastComment = TODO(),
-        isActive = TODO(),
-    )
+    fun mergeTicket(userId: String, ticketDto: TicketDto, commands: List<CommandEntity>): FullTicket {
+        val ticketCommands = commands.filter { it.ticketId == ticketDto.ticketId }
+        return mergeTicketInternal(userId, ticketDto, ticketCommands)
+    }
 
-    fun map(ticket: TicketDto): FullTicket {
-        currentUser = (account as? Account.V3)?.users?.find { it.userId == ticket.userId }
+    private fun mergeTicketInternal(
+        userId: String,
+        ticketDto: TicketDto,
+        commands: List<CommandEntity>,
+    ): FullTicket {
+
+        val comments = (ticketDto.comments?.map { map(userId, it)} ?: emptyList()).toMutableList()
+        val createCommentCommands = commands.filter { it.commandType == CreateComment.ordinal }
+        comments += createCommentCommands.map(::map)
+        comments.sortBy { it.creationTime }
+
+        val hasReadCommands = commands.any { it.commandType == MarkTicketAsRead.ordinal }
+        val isRead = ticketDto.isRead == true || hasReadCommands
+
+        return mapToFullTicket(ticketDto, comments, userId, isRead)
+    }
+
+    fun mapToFullTicket(
+        ticket: TicketDto,
+        comments: List<Comment>,
+        userId: String,
+        isRead: Boolean,
+    ): FullTicket {
         return FullTicket(
-            comments = ticket.comments?.map(::map) ?: emptyList(),
+            comments = comments,
             showRating = ticket.showRating ?: false,
             showRatingText = ticket.showRatingText,
-            userId = ticket.userId!!, // TODO check it
+            userId = userId,
             ticketId = ticket.ticketId,
             subject = ticket.subject,
-            isRead = ticket.isRead ?: true,
-            lastComment = ticket.lastComment?.let { map(it) },
+            isRead = isRead,
+            lastComment = comments.lastOrNull(),
             isActive = ticket.isActive,
         )
     }
 
-    fun map(commandResult: TicketCommandResultDto): AddCommentResponseData {
-        return AddCommentResponseData(
-            commentId = commandResult.commentId,
-            attachmentIds = TODO(),
-            sentAttachments = TODO()
-        )
-    }
-
-    private fun map(commentDto: CommentDto): Comment = Comment(
+    private fun map(userId: String, commentDto: CommentDto): Comment = Comment(
         id = commentDto.commentId,
         isLocal = false,
         body = commentDto.body,
         isInbound = commentDto.isInbound && commentDto.author?.authorId == (account as? Account.V3)?.authorId,
-        attachments = commentDto.attachments?.map(::map),
+        attachments = commentDto.attachments?.map{ map(userId, it)},
         creationTime = commentDto.creationDate.time,
         rating = commentDto.rating,
         author = commentDto.author?.let { map(it) },
         isSending = false,
+    )
+
+    fun map(commandEntity: CommandEntity): Comment = Comment(
+        id = commandEntity.localId,
+        isLocal = true,
+        body = commandEntity.comment,
+        isInbound = true,
+        attachments = commandEntity.attachments?.map(::map),
+        creationTime = commandEntity.creationTime,
+        rating = commandEntity.rating,
+        author = null,
+        isSending = !commandEntity.isError
     )
 
     fun map(attachmentEntity: AttachmentEntity) : Attachment = Attachment(
@@ -136,14 +174,14 @@ internal class RepositoryMapper(
         status = attachment.progress
     )
 
-    fun map(attachmentDto: AttachmentDto): Attachment = Attachment(
+    fun map(userId: String, attachmentDto: AttachmentDto): Attachment = Attachment(
         id = attachmentDto.id,
         name = attachmentDto.name,
         isImage = attachmentDto.name.isImage(),
         isText = attachmentDto.isText,
         bytesSize = attachmentDto.bytesSize,
         isVideo = attachmentDto.isVideo,
-        uri =  Uri.parse(RequestUtils.getPreviewUrl(attachmentDto.id, account, currentUser)),
+        uri =  Uri.parse(RequestUtils.getPreviewUrl(attachmentDto.id, account, findUserV3(userId))),
         status = Status.Completed,
         progress = null,
         guid = attachmentDto.guid,
@@ -160,47 +198,53 @@ internal class RepositoryMapper(
         avatarColor = authorDto.avatarColorString,
     )
 
-    fun mapToCommandErrorEntity(command: SyncRequest.Command) : CommandErrorEntity {
+    fun mapToCommandErrorEntity(command: SyncRequest.Command) : CommandEntity {
         return when(command) {
-            is SyncRequest.Command.CreateComment -> CommandErrorEntity(
+            is SyncRequest.Command.CreateComment -> CommandEntity(
+                isError = true,
                 localId = command.localId,
-                commandType = TicketCommandType.CreateComment.ordinal,
+                commandType = CreateComment.ordinal,
                 commandId = command.commandId,
                 userId = command.userId,
                 appId = command.appId,
                 creationTime = command.creationTime,
                 requestNewTicket = command.requestNewTicket,
                 ticketId = command.ticketId,
+                commentId = command.localId,
                 comment = command.comment,
                 attachments = command.attachments?.map(::map),
                 rating = command.rating,
                 token = null,
                 tokenType = null,
             )
-            is SyncRequest.Command.MarkTicketAsRead -> CommandErrorEntity(
+            is SyncRequest.Command.MarkTicketAsRead -> CommandEntity(
+                isError = true,
                 localId = command.localId,
-                commandType = TicketCommandType.CreateComment.ordinal,
+                commandType = CreateComment.ordinal,
                 commandId = command.commandId,
                 userId = command.userId,
                 appId = command.appId,
                 creationTime = command.creationTime,
                 requestNewTicket = null,
                 ticketId = command.ticketId,
+                commentId = null,
                 comment = null,
                 attachments = null,
                 rating = null,
                 token = null,
                 tokenType = null,
             )
-            is SyncRequest.Command.SetPushToken -> CommandErrorEntity(
+            is SyncRequest.Command.SetPushToken -> CommandEntity(
+                isError = true,
                 localId = command.localId,
-                commandType = TicketCommandType.CreateComment.ordinal,
+                commandType = CreateComment.ordinal,
                 commandId = command.commandId,
                 userId = command.userId,
                 appId = command.appId,
                 creationTime = command.creationTime,
                 requestNewTicket = null,
                 ticketId = null,
+                commentId = null,
                 comment = null,
                 attachments = null,
                 rating = null,
@@ -208,6 +252,48 @@ internal class RepositoryMapper(
                 tokenType = command.tokenType,
             )
         }
+    }
+
+    fun mapToFullTicket(
+        command: CommandEntity,
+        addCommentCommands: List<CommandEntity>,
+    ): FullTicket {
+        val initialComment = map(command)
+        return mapToFullTicket(
+            initialComment = initialComment,
+            ticketId = command.ticketId!!,
+            userId = command.userId,
+            addCommentCommands = addCommentCommands,
+        )
+    }
+
+    private fun mapToFullTicket(
+        initialComment: Comment,
+        ticketId: Long,
+        userId: String,
+        addCommentCommands: List<CommandEntity>,
+    ): FullTicket {
+        val comments = ArrayList<Comment>()
+        comments += initialComment
+        comments += addCommentCommands.map(::map)
+        comments.sortBy { it.creationTime }
+        val lastComment = comments.lastOrNull()
+
+        return FullTicket(
+            subject = initialComment.body,
+            isRead = true,
+            lastComment = lastComment,
+            comments = comments,
+            showRating = false,
+            showRatingText = null,
+            isActive = true,
+            userId = userId,
+            ticketId = ticketId
+        )
+    }
+
+    private fun findUserV3(userId: String): User? {
+        return (account as? Account.V3)?.users?.find { it.userId == userId }
     }
 
     private fun mapToSmallAcc(account: Account): List<SmallUser> = when(account) {

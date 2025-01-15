@@ -9,4 +9,6 @@ internal sealed interface GetTicketsError {
     data object ConnectionError: GetTicketsError
 
     data object NoDataFound: GetTicketsError
+
+    data object ValidationError: GetTicketsError
 }

@@ -4,7 +4,6 @@ import android.net.Uri
 import com.pyrus.pyrusservicedesk._ref.data.Comment
 import com.pyrus.pyrusservicedesk.sdk.FileResolver
 import com.pyrus.pyrusservicedesk.sdk.repositories.CommandEntity
-import com.pyrus.pyrusservicedesk.sdk.sync.TicketCommandDto
 
 internal class LocalDataVerifier(private val fileResolver: FileResolver) {
 
