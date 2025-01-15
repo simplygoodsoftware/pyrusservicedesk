@@ -194,7 +194,7 @@ internal class LocalCommandsStore(
      * Removes pending command from offline repository
      */
     fun removeCommand(commandId: String) {
-        val commands = readCommands().toMutableList()
+        val commands = getCommands().toMutableList()
         val removed = commands.removeAll { it.commandId == commandId }
         if (removed) {
             writeCommands(commands)
