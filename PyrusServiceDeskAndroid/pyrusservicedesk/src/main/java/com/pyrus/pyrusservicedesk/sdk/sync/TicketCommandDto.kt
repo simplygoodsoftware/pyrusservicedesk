@@ -1,11 +1,14 @@
 package com.pyrus.pyrusservicedesk.sdk.sync
 
-import com.google.gson.annotations.SerializedName
+import com.squareup.moshi.Json
+import com.squareup.moshi.JsonClass
 
+
+@JsonClass(generateAdapter = true)
 internal data class TicketCommandDto(
-    @SerializedName("command_id") val commandId: String,
-    @SerializedName("type") val type: Int, // TicketCommandType
-    @SerializedName("app_id") val appId: String,
-    @SerializedName("user_id") val userId: String,
-    @SerializedName("params") val params: CommandParamsDto,
+    @Json(name = "command_id") val commandId: String,
+    @Json(name = "type") val type: Int, // TicketCommandType
+    @Json(name = "app_id") val appId: String,
+    @Json(name = "user_id") val userId: String,
+    @Json(name = "params") val params: CommandParamsDto,
 )

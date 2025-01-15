@@ -1,6 +1,7 @@
 package com.pyrus.pyrusservicedesk.sdk.data
 
-import com.google.gson.annotations.SerializedName
+import com.squareup.moshi.Json
+import com.squareup.moshi.JsonClass
 import java.util.Date
 
 internal const val COMMENT_ID_EMPTY = 0L
@@ -9,14 +10,16 @@ internal const val COMMENT_ID_EMPTY = 0L
  * Represents single comment.
  * @param isInbound  TRUE means that comment is inbound for support, not for user of the service desk.
  */
+
+@JsonClass(generateAdapter = true)
 internal data class CommentDto(
-    @SerializedName("comment_id") val commentId: Long = COMMENT_ID_EMPTY,
-    @SerializedName("body") val body: String? = "",
-    @SerializedName("is_inbound") val isInbound: Boolean = false,
-    @SerializedName("attachments") val attachments: List<AttachmentDto>? = null,
-    @SerializedName("created_at") val creationDate: Date,
-    @SerializedName("author") val author: AuthorDto?,
-    @SerializedName("rating") val rating: Int? = null,
+    @Json(name = "comment_id") val commentId: Long = COMMENT_ID_EMPTY,
+    @Json(name = "body") val body: String? = "",
+    @Json(name = "is_inbound") val isInbound: Boolean = false,
+    @Json(name = "attachments") val attachments: List<AttachmentDto>? = null,
+    @Json(name = "created_at") val creationDate: Date,
+    @Json(name = "author") val author: AuthorDto?,
+    @Json(name = "rating") val rating: Int? = null,
 ) {
 
     /**

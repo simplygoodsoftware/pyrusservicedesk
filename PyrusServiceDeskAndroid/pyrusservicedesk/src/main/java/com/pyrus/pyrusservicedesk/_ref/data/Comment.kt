@@ -1,16 +1,19 @@
 package com.pyrus.pyrusservicedesk._ref.data
 
-import com.google.gson.annotations.SerializedName
+import com.squareup.moshi.Json
+import com.squareup.moshi.JsonClass
 
+
+@JsonClass(generateAdapter = true)
 internal data class Comment(
-    @SerializedName("id") val id: Long,
-    @SerializedName("is_local") val isLocal: Boolean,
-    @SerializedName("body") val body: String?,
-    @SerializedName("is_inbound") val isInbound: Boolean,
-    @SerializedName("attachments") val attachments: List<Attachment>?,
-    @SerializedName("creation_time") val creationTime: Long,
-    @SerializedName("rating") val rating: Int?,
-    @SerializedName("author") val author: Author?,
-    @SerializedName("is_sending") val isSending: Boolean,
+    @Json(name = "id") val id: Long,
+    @Json(name = "is_local") val isLocal: Boolean,
+    @Json(name = "body") val body: String?,
+    @Json(name = "is_inbound") val isInbound: Boolean,
+    @Json(name = "attachments") val attachments: List<Attachment>?,
+    @Json(name = "creation_time") val creationTime: Long,
+    @Json(name = "rating") val rating: Int?,
+    @Json(name = "author") val author: Author?,
+    @Json(name = "is_sending") val isSending: Boolean,
     // TODO "client_id" ??
 )

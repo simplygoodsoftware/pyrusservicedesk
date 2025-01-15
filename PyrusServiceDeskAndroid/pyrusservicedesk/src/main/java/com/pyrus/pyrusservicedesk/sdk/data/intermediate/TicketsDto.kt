@@ -1,18 +1,18 @@
 package com.pyrus.pyrusservicedesk.sdk.data.intermediate
 
-import androidx.annotation.Keep
-import com.google.gson.annotations.SerializedName
 import com.pyrus.pyrusservicedesk.sdk.data.ApplicationDto
-import com.pyrus.pyrusservicedesk.sdk.sync.TicketCommandResultDto
 import com.pyrus.pyrusservicedesk.sdk.data.TicketDto
+import com.pyrus.pyrusservicedesk.sdk.sync.TicketCommandResultDto
+import com.squareup.moshi.Json
+import com.squareup.moshi.JsonClass
 
 /**
  * Intermediate data for parsing list of Ticket object
  */
-@Keep
+@JsonClass(generateAdapter = true)
 internal data class TicketsDto(
-    @SerializedName("hasMore") val hasMore: Boolean?,
-    @SerializedName("applications") val applications: List<ApplicationDto>?,
-    @SerializedName("tickets") val tickets: List<TicketDto>?,
-    @SerializedName("commands_result") val commandsResult: List<TicketCommandResultDto>?,
+    @Json(name = "hasMore") val hasMore: Boolean?,
+    @Json(name = "applications") val applications: List<ApplicationDto>?,
+    @Json(name = "tickets") val tickets: List<TicketDto>?,
+    @Json(name = "commands_result") val commandsResult: List<TicketCommandResultDto>?,
 )

@@ -20,7 +20,6 @@ import com.pyrus.pyrusservicedesk._ref.whitetea.core.StoreFactory
 import com.pyrus.pyrusservicedesk.presentation.viewmodel.SharedViewModel
 import com.pyrus.pyrusservicedesk.sdk.FileResolver
 import com.pyrus.pyrusservicedesk.sdk.data.FileManager
-import com.pyrus.pyrusservicedesk.sdk.data.gson.RemoteGsonExclusionStrategy
 import com.pyrus.pyrusservicedesk.sdk.data.gson.UriGsonAdapter
 import com.pyrus.pyrusservicedesk.sdk.data.json.DateAdapter
 import com.pyrus.pyrusservicedesk.sdk.repositories.AccountStore
@@ -60,22 +59,17 @@ internal class DiInjector(
 
     private val localDataVerifier: LocalDataVerifier = LocalDataVerifier(fileResolver)
 
-    private val offlineGson = GsonBuilder()
-        .setDateFormat(ISO_DATE_PATTERN)
-        .registerTypeAdapter(Uri::class.java, UriGsonAdapter())
-        .create()
-
-    private val remoteGson = GsonBuilder()
-        .setDateFormat(ISO_DATE_PATTERN)
-        .addSerializationExclusionStrategy(RemoteGsonExclusionStrategy())
-        .create()
+//    private val offlineGson = GsonBuilder()
+//        .setDateFormat(ISO_DATE_PATTERN)
+//        .registerTypeAdapter(Uri::class.java, UriGsonAdapter())
+//        .create()
 
     private val moshi = Moshi.Builder()
         .add(DateAdapter())
         .add(KotlinJsonAdapterFactory())
         .build()
 
-    val localCommandsStore: LocalCommandsStore = LocalCommandsStore(preferences, localDataVerifier, offlineGson) //TODO обязательно приватный?
+    val localCommandsStore: LocalCommandsStore = LocalCommandsStore(preferences, localDataVerifier) //TODO обязательно приватный?
 
     private val okHttpClient = OkHttpClient.Builder()
         .connectTimeout(30, TimeUnit.SECONDS)
@@ -99,8 +93,7 @@ internal class DiInjector(
 
     private val retrofit: Retrofit = Retrofit.Builder()
         .baseUrl(getBaseUrl(account.domain))
-        .addConverterFactory(GsonConverterFactory.create(remoteGson))
-        //.addConverterFactory(MoshiConverterFactory.create(moshi)) //TODO moshi
+        .addConverterFactory(MoshiConverterFactory.create(moshi)) //TODO moshi
         .addCallAdapterFactory(TryCallAdapterFactory())
         .client(okHttpClient)
         .build()

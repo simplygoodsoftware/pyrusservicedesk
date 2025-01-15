@@ -22,7 +22,6 @@ import kotlin.math.max
 internal class LocalCommandsStore(
     private val preferences: SharedPreferences,
     private val localDataVerifier: LocalDataVerifier,
-    private val gson: Gson,
 ) {
 
     private val lastLocalId: AtomicLong

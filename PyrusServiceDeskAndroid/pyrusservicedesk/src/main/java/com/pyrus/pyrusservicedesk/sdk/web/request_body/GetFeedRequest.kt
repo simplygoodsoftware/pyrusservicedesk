@@ -1,7 +1,7 @@
 package com.pyrus.pyrusservicedesk.sdk.web.request_body
 
-import androidx.annotation.Keep
-import com.google.gson.annotations.SerializedName
+import com.squareup.moshi.Json
+import com.squareup.moshi.JsonClass
 
 /**
  * @param appId id of the app that obtained through special Pyrus form
@@ -11,13 +11,14 @@ import com.google.gson.annotations.SerializedName
  * @param version API version.
  * @param keepUnread If true, comments remain unread. False - otherwise.
  */
-@Keep
+
+@JsonClass(generateAdapter = true)
 internal open class GetFeedBody(
     appId: String,
     userId: String,
     securityKey: String?,
     instanceId: String?,
     version: Int,
-    @SerializedName("keep_unread") val keepUnread: Boolean,
+    @Json(name = "keep_unread") val keepUnread: Boolean,
     apiSign: String?,
 ) : RequestBodyBase(false, null, null, null, null, null, appId, userId, securityKey, instanceId, version, null)

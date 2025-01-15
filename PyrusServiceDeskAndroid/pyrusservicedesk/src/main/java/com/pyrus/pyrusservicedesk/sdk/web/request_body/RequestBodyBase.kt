@@ -1,8 +1,9 @@
 package com.pyrus.pyrusservicedesk.sdk.web.request_body
 
-import com.google.gson.annotations.SerializedName
 import com.pyrus.pyrusservicedesk.sdk.data.UserDataDto
 import com.pyrus.pyrusservicedesk.sdk.sync.TicketCommandDto
+import com.squareup.moshi.Json
+import com.squareup.moshi.JsonClass
 
 /**
  * Base request body for sending to the server. Contains fields that are required for almost every request.
@@ -11,17 +12,19 @@ import com.pyrus.pyrusservicedesk.sdk.sync.TicketCommandDto
  * @param securityKey used as key for external authorization.
  * // TODO
  */
+
+@JsonClass(generateAdapter = true)
 internal open class RequestBodyBase(
-    @SerializedName("need_full_info") val needFullInfo: Boolean,
-    @SerializedName("additional_users") val additionalUsers: List<UserDataDto>?,
-    @SerializedName("last_note_id") val lastNoteId: Long?,
-    @SerializedName("commands") val commands: List<TicketCommandDto>?,
-    @SerializedName("author_id") val authorId: String?,
-    @SerializedName("author_name") val authorName: String?,
-    @SerializedName("app_id") val appId: String,
-    @SerializedName("user_id") val userId: String,
-    @SerializedName("security_key") val securityKey: String?,
-    @SerializedName("instance_id") val instanceId: String?,
-    @SerializedName("version") val version: Int,
-    @SerializedName("api_sign") val apiSign: String?,
+    @Json(name = "need_full_info") val needFullInfo: Boolean,
+    @Json(name = "additional_users") val additionalUsers: List<UserDataDto>?,
+    @Json(name = "last_note_id") val lastNoteId: Long?,
+    @Json(name = "commands") val commands: List<TicketCommandDto>?,
+    @Json(name = "author_id") val authorId: String?,
+    @Json(name = "author_name") val authorName: String?,
+    @Json(name = "app_id") val appId: String,
+    @Json(name = "user_id") val userId: String,
+    @Json(name = "security_key") val securityKey: String?,
+    @Json(name = "instance_id") val instanceId: String?,
+    @Json(name = "version") val version: Int,
+    @Json(name = "api_sign") val apiSign: String?,
 )

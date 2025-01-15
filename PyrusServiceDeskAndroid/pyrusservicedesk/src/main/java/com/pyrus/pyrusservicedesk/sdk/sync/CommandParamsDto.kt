@@ -1,32 +1,39 @@
 package com.pyrus.pyrusservicedesk.sdk.sync
 
-import com.google.gson.annotations.SerializedName
 import com.pyrus.pyrusservicedesk.sdk.data.AttachmentDataDto
+import com.squareup.moshi.Json
+import com.squareup.moshi.JsonClass
 
 internal sealed interface CommandParamsDto {
 
+
+    @JsonClass(generateAdapter = true)
     data class CreateComment(
-        @SerializedName("request_new_ticket") val requestNewTicket: Boolean,
-        @SerializedName("user_id") val userId: String,
-        @SerializedName("app_id") val appId: String,
-        @SerializedName("comment") val comment: String?,
-        @SerializedName("attachments") val attachments: List<AttachmentDataDto>?,
-        @SerializedName("ticket_id") val ticketId: Long,
-        @SerializedName("rating") val rating: Int?
+        @Json(name = "request_new_ticket") val requestNewTicket: Boolean,
+        @Json(name = "user_id") val userId: String,
+        @Json(name = "app_id") val appId: String,
+        @Json(name = "comment") val comment: String?,
+        @Json(name = "attachments") val attachments: List<AttachmentDataDto>?,
+        @Json(name = "ticket_id") val ticketId: Long,
+        @Json(name = "rating") val rating: Int?
     ) : CommandParamsDto
 
+
+    @JsonClass(generateAdapter = true)
     data class MarkTicketAsRead(
-        @SerializedName("ticket_id") val ticketId: Long,
-        @SerializedName("user_id") val userId: String,
-        @SerializedName("app_id") val appId: String,
-        @SerializedName("comment_id") val commentId: Long?, // readAll if null
+        @Json(name = "ticket_id") val ticketId: Long,
+        @Json(name = "user_id") val userId: String,
+        @Json(name = "app_id") val appId: String,
+        @Json(name = "comment_id") val commentId: Long?, // readAll if null
     ) : CommandParamsDto
 
+
+    @JsonClass(generateAdapter = true)
     data class SetPushToken(
-        @SerializedName("user_id") val userId: String,
-        @SerializedName("app_id") val appId: String,
-        @SerializedName("type") val type: String,
-        @SerializedName("token") val token: String?, // if null back will remove token from bd
+        @Json(name = "user_id") val userId: String,
+        @Json(name = "app_id") val appId: String,
+        @Json(name = "type") val type: String,
+        @Json(name = "token") val token: String?, // if null back will remove token from bd
     ) : CommandParamsDto
 
 

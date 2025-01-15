@@ -1,7 +1,7 @@
 package com.pyrus.pyrusservicedesk.sdk.data
 
-import androidx.annotation.Keep
-import com.google.gson.annotations.SerializedName
+import com.squareup.moshi.Json
+import com.squareup.moshi.JsonClass
 
 /**
  * Information about additional users for whom tickets need to be received.
@@ -10,10 +10,11 @@ import com.google.gson.annotations.SerializedName
  * @param securityKey used as key for external authorization.
  * @param lastNoteId the biggest id of all comments in [userId] scope
  */
-@Keep
+
+@JsonClass(generateAdapter = true)
 class UserDataDto(
-    @SerializedName("app_id") val appId: String,
-    @SerializedName("user_id") val userId: String,
-    @SerializedName("security_key") val securityKey: String?,
-    @SerializedName("last_note_id") val lastNoteId: Long?,
+    @Json(name = "app_id") val appId: String,
+    @Json(name = "user_id") val userId: String,
+    @Json(name = "security_key") val securityKey: String?,
+    @Json(name = "last_note_id") val lastNoteId: Long?,
 )

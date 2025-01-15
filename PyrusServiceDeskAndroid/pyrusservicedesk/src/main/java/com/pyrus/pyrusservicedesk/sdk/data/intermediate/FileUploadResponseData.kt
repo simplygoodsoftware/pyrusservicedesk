@@ -1,13 +1,14 @@
 package com.pyrus.pyrusservicedesk.sdk.data.intermediate
 
-import androidx.annotation.Keep
-import com.google.gson.annotations.SerializedName
+import com.squareup.moshi.Json
+import com.squareup.moshi.JsonClass
 
 /**
  * Intermediate data that is used for parsing response of the upload file request.
  */
-@Keep
+
+@JsonClass(generateAdapter = true)
 internal class FileUploadResponseData(
-    @SerializedName("guid") val guid: String,
-    @SerializedName("md5_hash") val hash: String,
+    @Json(name = "guid") val guid: String,
+    @Json(name = "md5_hash") val hash: String,
 )
