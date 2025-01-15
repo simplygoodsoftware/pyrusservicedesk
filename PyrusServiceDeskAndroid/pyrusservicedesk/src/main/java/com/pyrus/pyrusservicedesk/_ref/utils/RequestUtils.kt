@@ -82,9 +82,9 @@ class RequestUtils{
 
             is Account.V3 -> {
                 "?user_id=" +
-                        URLEncoder.encode(account.users.find { it == multichatUser }?.userId, "UTF-8") +
+                        URLEncoder.encode(account.users.find { it == multichatUser }?.userId ?: "", "UTF-8") +
                         "&app_id=" +
-                        URLEncoder.encode(account.users.find { it == multichatUser }?.appId, "UTF-8")
+                        URLEncoder.encode(account.users.find { it == multichatUser }?.appId ?: "", "UTF-8")
             }
         }
     }

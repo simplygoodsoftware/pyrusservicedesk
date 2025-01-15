@@ -22,6 +22,7 @@ import com.pyrus.pyrusservicedesk.sdk.FileResolver
 import com.pyrus.pyrusservicedesk.sdk.data.FileManager
 import com.pyrus.pyrusservicedesk.sdk.data.gson.RemoteGsonExclusionStrategy
 import com.pyrus.pyrusservicedesk.sdk.data.gson.UriGsonAdapter
+import com.pyrus.pyrusservicedesk.sdk.data.json.DateAdapter
 import com.pyrus.pyrusservicedesk.sdk.repositories.AccountStore
 import com.pyrus.pyrusservicedesk.sdk.repositories.DraftRepository
 import com.pyrus.pyrusservicedesk.sdk.repositories.LocalCommandsStore
@@ -33,12 +34,15 @@ import com.pyrus.pyrusservicedesk.sdk.updates.PreferencesManager
 import com.pyrus.pyrusservicedesk.sdk.verify.LocalDataVerifier
 import com.pyrus.pyrusservicedesk.sdk.web.retrofit.RemoteFileStore
 import com.pyrus.pyrusservicedesk.sdk.web.retrofit.ServiceDeskApi
+import com.squareup.moshi.Moshi
+import com.squareup.moshi.kotlin.reflect.KotlinJsonAdapterFactory
 import com.squareup.picasso.OkHttp3Downloader
 import com.squareup.picasso.Picasso
 import kotlinx.coroutines.CoroutineScope
 import okhttp3.OkHttpClient
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
+import retrofit2.converter.moshi.MoshiConverterFactory
 import java.util.concurrent.TimeUnit
 
 internal class DiInjector(
@@ -66,6 +70,11 @@ internal class DiInjector(
         .addSerializationExclusionStrategy(RemoteGsonExclusionStrategy())
         .create()
 
+    private val moshi = Moshi.Builder()
+        .add(DateAdapter())
+        .add(KotlinJsonAdapterFactory())
+        .build()
+
     val localCommandsStore: LocalCommandsStore = LocalCommandsStore(preferences, localDataVerifier, offlineGson) //TODO обязательно приватный?
 
     private val okHttpClient = OkHttpClient.Builder()
@@ -91,6 +100,7 @@ internal class DiInjector(
     private val retrofit: Retrofit = Retrofit.Builder()
         .baseUrl(getBaseUrl(account.domain))
         .addConverterFactory(GsonConverterFactory.create(remoteGson))
+        //.addConverterFactory(MoshiConverterFactory.create(moshi)) //TODO moshi
         .addCallAdapterFactory(TryCallAdapterFactory())
         .client(okHttpClient)
         .build()

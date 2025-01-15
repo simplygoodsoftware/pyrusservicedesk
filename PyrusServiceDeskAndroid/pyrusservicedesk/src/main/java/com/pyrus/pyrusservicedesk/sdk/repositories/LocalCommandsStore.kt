@@ -193,20 +193,22 @@ internal class LocalCommandsStore(
      * Provides all pending feed commands
      */
     private fun readPendingCommands(): List<CommandEntity> {
-        val rawJson = preferences.getString(PREFERENCE_KEY_TICKET_COMMANDS, "[]")
-        val commandsList = gson.fromJson<List<CommandEntity>>(rawJson, commandListTokenType).toMutableList()
-
-        if (commandsList.removeAll { localDataVerifier.isLocalCommandEmpty(it) }) {
-            writeCommands(commandsList)
-        }
-        return commandsList
+//        val rawJson = preferences.getString(PREFERENCE_KEY_TICKET_COMMANDS, "[]")
+//        val commandsList = gson.fromJson<List<CommandEntity>>(rawJson, commandListTokenType).toMutableList()
+//
+//        if (commandsList.removeAll { localDataVerifier.isLocalCommandEmpty(it) }) {
+//            writeCommands(commandsList)
+//        }
+//        return commandsList
+        return emptyList()
     }
 
     private fun readCommandErrors(): List<CommandErrorEntity> {
         val rawJson = preferences.getString(PREFERENCE_KEY_TICKET_COMMAND_ERRORS, "[]")
-        val commandErrors = gson.fromJson<List<CommandErrorEntity>>(rawJson, commandListTokenType).toMutableList()
-
-        return commandErrors
+//        val commandErrors = gson.fromJson<List<CommandErrorEntity>>(rawJson, commandListTokenType).toMutableList()
+//
+//        return commandErrors
+        return emptyList()
     }
 
     fun getCommand(localId: Long): CommandEntity? {
@@ -377,15 +379,15 @@ internal class LocalCommandsStore(
     }
 
     private fun writeCommands(commands: List<CommandEntity>) {
-        val rawJson = gson.toJson(commands, commandListTokenType)
-        preferences.edit().putString(PREFERENCE_KEY_TICKET_COMMANDS, rawJson).apply()
-        localCommandsStateFlow.value = commands
+//        val rawJson = gson.toJson(commands, commandListTokenType)
+//        preferences.edit().putString(PREFERENCE_KEY_TICKET_COMMANDS, rawJson).apply()
+//        localCommandsStateFlow.value = commands
     }
 
     private fun writeCommandErrors(errors: List<CommandErrorEntity>) {
-        val rawJson = gson.toJson(errors, commandErrorListTokenType)
-        preferences.edit().putString(PREFERENCE_KEY_TICKET_COMMAND_ERRORS, rawJson).apply()
-        commandErrorsStateFlow.value = errors
+//        val rawJson = gson.toJson(errors, commandErrorListTokenType)
+//        preferences.edit().putString(PREFERENCE_KEY_TICKET_COMMAND_ERRORS, rawJson).apply()
+//        commandErrorsStateFlow.value = errors
     }
 
     private companion object{
