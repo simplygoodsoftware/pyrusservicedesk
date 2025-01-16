@@ -1,7 +1,6 @@
 package com.pyrus.pyrusservicedesk.sdk.sync
 
 import com.pyrus.pyrusservicedesk._ref.data.Attachment
-import com.pyrus.pyrusservicedesk.sdk.data.AttachmentDataDto
 
 internal sealed interface SyncRequest {
 

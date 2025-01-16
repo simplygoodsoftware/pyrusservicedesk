@@ -5,7 +5,6 @@ import android.app.Application
 import android.content.Context
 import android.content.Intent
 import android.content.SharedPreferences
-import androidx.annotation.DrawableRes
 import androidx.annotation.MainThread
 import com.pyrus.pyrusservicedesk._ref.ui_domain.screens.ticket.MainActivity
 import com.pyrus.pyrusservicedesk._ref.utils.ConfigUtils

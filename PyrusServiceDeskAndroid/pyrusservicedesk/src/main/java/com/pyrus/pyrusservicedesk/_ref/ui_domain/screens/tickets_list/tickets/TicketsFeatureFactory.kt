@@ -145,7 +145,7 @@ private class FeatureReducer: Logic<State, Message, Effect>() {
             is Message.Inner.UpdateTicketsCompleted -> state {
                 state.copy(contentState = when(val currentDateState = state.contentState) {
                     is ContentState.Content -> currentDateState.copy(
-                        tickets = message.tickets.ticketSetInfoList,
+                        ticketSets = message.tickets.ticketSetInfoList,
                     )
                     ContentState.Error,
                     ContentState.Loading -> createInitialContentState(message.tickets, account)
@@ -160,7 +160,7 @@ private class FeatureReducer: Logic<State, Message, Effect>() {
             }
             is Message.Inner.TicketsUpdated -> {
                 val contentState = state.contentState as? ContentState.Content ?: return
-                state { state.copy(contentState = contentState.copy(tickets = message.tickets?.ticketSetInfoList)) }
+                state { state.copy(contentState = contentState.copy(ticketSets = message.tickets?.ticketSetInfoList)) }
             }
         }
     }
@@ -173,13 +173,13 @@ private class FeatureReducer: Logic<State, Message, Effect>() {
             titleImageUrl = firstSet?.orgLogoUrl?.let { getOrganisationLogoUrl(it, account.domain) },
             filterName = null,
             filterEnabled = false,
-            tickets = tickets.ticketSetInfoList,
+            ticketSets = tickets.ticketSetInfoList,
             filterId = null,
         )
     }
 
     private fun updateTicketsFilterState(state: ContentState.Content, appId: String, domain: String?) : ContentState.Content {
-        val ticketsSetByAppName = state.tickets?.associateBy { it.appId }
+        val ticketsSetByAppName = state.ticketSets?.associateBy { it.appId }
         return state.copy(
             appId = appId,
             titleText = ticketsSetByAppName?.get(appId)?.orgName,

@@ -5,7 +5,6 @@ import com.pyrus.pyrusservicedesk._ref.utils.MILLISECONDS_IN_MINUTE
 import com.pyrus.pyrusservicedesk.sdk.updates.PreferencesManager
 import com.pyrus.pyrusservicedesk.sdk.updates.PreferencesManager.Companion.S_NO_ID
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.launch
 
 internal class SetPushTokenUseCase(
     private val account: Account,

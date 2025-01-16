@@ -20,7 +20,8 @@ import com.pyrus.pyrusservicedesk.sdk.data.CommentDto
 import com.pyrus.pyrusservicedesk.sdk.data.TicketDto
 import com.pyrus.pyrusservicedesk.sdk.data.intermediate.TicketsDto
 import com.pyrus.pyrusservicedesk.sdk.sync.SyncRequest
-import com.pyrus.pyrusservicedesk.sdk.sync.TicketCommandType.*
+import com.pyrus.pyrusservicedesk.sdk.sync.TicketCommandType.CreateComment
+import com.pyrus.pyrusservicedesk.sdk.sync.TicketCommandType.MarkTicketAsRead
 
 internal class RepositoryMapper(
     private val account: Account,

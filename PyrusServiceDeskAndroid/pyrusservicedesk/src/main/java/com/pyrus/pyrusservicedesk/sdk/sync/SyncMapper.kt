@@ -13,9 +13,7 @@ import com.pyrus.pyrusservicedesk.core.getVersion
 import com.pyrus.pyrusservicedesk.sdk.data.AttachmentDataDto
 import com.pyrus.pyrusservicedesk.sdk.data.intermediate.TicketsDto
 import com.pyrus.pyrusservicedesk.sdk.web.request_body.RequestBodyBase
-import java.util.UUID
 import kotlin.math.max
-import kotlin.uuid.Uuid
 
 internal object SyncMapper {
 

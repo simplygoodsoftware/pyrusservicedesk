@@ -17,10 +17,10 @@ internal object TicketsMapper {
                 titleText = state.titleText,
                 titleImageUrl = state.titleImageUrl,
                 filterName = state.filterName,
-                ticketsIsEmpty = state.tickets.isNullOrEmpty(),
+                ticketsIsEmpty = state.ticketSets.isNullOrEmpty(),
                 filterEnabled = state.filterEnabled,
-                tabLayoutIsVisibile = if (state.tickets != null) state.tickets.size > 1 else false,
-                applications = state.tickets?.map(::map) ?: emptyList(),
+                tabLayoutIsVisibile = if (state.ticketSets != null) state.ticketSets.size > 1 else false,
+                ticketSets = state.ticketSets?.map(::map) ?: emptyList(),
                 showNoConnectionError = false,
                 isLoading = false,
             )
@@ -32,7 +32,7 @@ internal object TicketsMapper {
             ticketsIsEmpty = true,
             filterEnabled = false,
             tabLayoutIsVisibile = false,
-            applications = null,
+            ticketSets = null,
             showNoConnectionError = true,
             isLoading = false,
         )
@@ -43,7 +43,7 @@ internal object TicketsMapper {
             ticketsIsEmpty = true,
             filterEnabled = false,
             tabLayoutIsVisibile = false,
-            applications = null,
+            ticketSets = null,
             showNoConnectionError = false,
             isLoading = true,
         )

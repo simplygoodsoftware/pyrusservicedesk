@@ -7,7 +7,6 @@ import com.pyrus.pyrusservicedesk._ref.utils.MILLISECONDS_IN_DAY
 import com.pyrus.pyrusservicedesk._ref.utils.MILLISECONDS_IN_HOUR
 import com.pyrus.pyrusservicedesk._ref.utils.MILLISECONDS_IN_MINUTE
 import com.pyrus.pyrusservicedesk._ref.utils.MILLISECONDS_IN_SECOND
-import com.pyrus.pyrusservicedesk._ref.utils.isSuccess
 import com.pyrus.pyrusservicedesk._ref.utils.log.PLog
 import com.pyrus.pyrusservicedesk.sdk.data.TicketDto
 import com.pyrus.pyrusservicedesk.sdk.repositories.Repository
@@ -15,7 +14,6 @@ import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 import kotlin.math.max
 
 /**

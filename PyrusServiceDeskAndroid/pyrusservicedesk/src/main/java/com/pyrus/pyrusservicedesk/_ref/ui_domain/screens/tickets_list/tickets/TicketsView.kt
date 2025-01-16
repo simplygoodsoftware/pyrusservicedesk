@@ -10,7 +10,7 @@ internal interface TicketsView {
         val ticketsIsEmpty: Boolean,
         val filterEnabled: Boolean,
         val tabLayoutIsVisibile: Boolean,
-        val applications: List<TicketSetInfoEntry>?,
+        val ticketSets: List<TicketSetInfoEntry>?,
         val showNoConnectionError: Boolean,
         val isLoading: Boolean,
     ) {

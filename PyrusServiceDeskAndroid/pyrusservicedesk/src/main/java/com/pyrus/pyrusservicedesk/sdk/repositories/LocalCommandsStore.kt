@@ -1,7 +1,6 @@
 package com.pyrus.pyrusservicedesk.sdk.repositories
 
 import android.content.SharedPreferences
-import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
 import com.pyrus.pyrusservicedesk.presentation.ui.view.Status
 import com.pyrus.pyrusservicedesk.sdk.data.intermediate.FileData
@@ -11,7 +10,6 @@ import com.pyrus.pyrusservicedesk.sdk.verify.LocalDataVerifier
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.map
-import org.jsoup.select.Evaluator.Id
 import java.lang.reflect.Type
 import java.util.UUID
 import java.util.concurrent.atomic.AtomicLong
