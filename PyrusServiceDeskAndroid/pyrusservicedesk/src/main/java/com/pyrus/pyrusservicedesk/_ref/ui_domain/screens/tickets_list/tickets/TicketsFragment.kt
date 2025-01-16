@@ -147,7 +147,7 @@ internal class TicketsFragment: TeaFragment<Model, Message, Effect.Outer>() {
         diff(Model::filterName) { filterName ->
             binding.filterContextTv.text = filterName
         }
-        diff(Model::tabLayoutVisibility) { tabLayoutVisibility ->
+        diff(Model::tabLayoutIsVisibile) { tabLayoutVisibility ->
             binding.tabLayout.isVisible = tabLayoutVisibility
         }
         diff(Model::applications) { ticketSetInfoList ->
