@@ -93,6 +93,8 @@ dependencies {
     implementation 'org.jsoup:jsoup:1.18.1'
     implementation("com.github.terrakok:cicerone:7.1")
 
+    implementation("com.google.code.findbugs:jsr305:3.0.2")
+
     //tests
     testImplementation 'junit:junit:4.13.2'
     testImplementation 'org.mockito:mockito-core:5.3.1'

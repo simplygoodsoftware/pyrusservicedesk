@@ -1,8 +1,8 @@
 package com.pyrus.pyrusservicedesk.sdk.data
 
+import com.pyrus.pyrusservicedesk.sdk.data.json.DateJ
 import com.squareup.moshi.Json
 import com.squareup.moshi.JsonClass
-import java.util.Date
 
 internal const val COMMENT_ID_EMPTY = 0L
 
@@ -17,7 +17,7 @@ internal data class CommentDto(
     @Json(name = "body") val body: String? = "",
     @Json(name = "is_inbound") val isInbound: Boolean = false,
     @Json(name = "attachments") val attachments: List<AttachmentDto>? = null,
-    @Json(name = "created_at") val creationDate: Date,
+    @Json(name = "created_at") @DateJ val creationDate: Long,
     @Json(name = "author") val author: AuthorDto?,
     @Json(name = "rating") val rating: Int? = null,
 ) {

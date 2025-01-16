@@ -34,6 +34,7 @@ internal class RemoteFileStore(
         SupervisorJob() +
         CoroutineExceptionHandler { _, throwable ->
             PLog.e(TAG, "upload file global error: ${throwable.message}")
+            throwable.printStackTrace()
         }
 
     private val failDelayCounter = FailDelayCounter()

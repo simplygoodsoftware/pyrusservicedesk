@@ -229,12 +229,12 @@ internal class TicketViewModel(
         val now = Calendar.getInstance()
         var prevDateGroup: String? = null
         return foldIndexed(ArrayList(size)) { index, acc, comment ->
-            comment.creationDate.getWhen(getApplication(), now).let {
-                if (index == 0 || it != prevDateGroup) {
-                    acc.add(DateEntry(it))
-                    prevDateGroup = it
-                }
-            }
+//            comment.creationDate.getWhen(getApplication(), now).let {
+//                if (index == 0 || it != prevDateGroup) {
+//                    acc.add(DateEntry(it))
+//                    prevDateGroup = it
+//                }
+//            }
             if (comment.isLocal() || !comment.body.isNullOrEmpty() || !comment.attachments.isNullOrEmpty() || comment.rating != null) {
                 acc.addAll(comment.splitToEntries())
             }
@@ -332,7 +332,7 @@ internal class TicketViewModel(
             val welcomeMessage = ConfigUtils.getWelcomeMessage()
             if (welcomeMessage != null) {
                 val firstComment = freshList.comments.firstOrNull()
-                val welcomeCommentDate = firstComment?.creationDate ?: Date().apply { time = System.currentTimeMillis() }
+                val welcomeCommentDate = firstComment?.creationDate ?: System.currentTimeMillis() //TODO UTS?
                 val welcomeComment = CommentDto(
                     body = welcomeMessage,
                     creationDate = welcomeCommentDate,
@@ -436,24 +436,24 @@ internal class TicketViewModel(
     }
 
     private fun maybeAddDate(commentEntry: CommentEntry, newEntries: MutableList<TicketEntry>) {
-        commentEntry.comment.creationDate.getWhen(getApplication(), Calendar.getInstance()).let {
-            if (!hasRealComments()
-                || newEntries.findLast { entry -> entry.type == Type.Date }
-                    ?.let { dateEntry ->
-                        (dateEntry as DateEntry).date == it
-                    } == false
-            ) {
-
-                newEntries.add(
-                    DateEntry(
-                        commentEntry.comment.creationDate.getWhen(
-                            getApplication(),
-                            Calendar.getInstance()
-                        )
-                    )
-                )
-            }
-        }
+//        commentEntry.comment.creationDate.getWhen(getApplication(), Calendar.getInstance()).let {
+//            if (!hasRealComments()
+//                || newEntries.findLast { entry -> entry.type == Type.Date }
+//                    ?.let { dateEntry ->
+//                        (dateEntry as DateEntry).date == it
+//                    } == false
+//            ) {
+//
+//                newEntries.add(
+//                    DateEntry(
+//                        commentEntry.comment.creationDate.getWhen(
+//                            getApplication(),
+//                            Calendar.getInstance()
+//                        )
+//                    )
+//                )
+//            }
+//        }
     }
 
     private fun List<TicketEntry>.findIndex(commentEntry: CommentEntry): Int {
@@ -502,7 +502,7 @@ internal class TicketViewModel(
 
         val lastActiveTime = (newEntries.findLast {
             it is CommentEntry && it.comment.isInbound
-        } as CommentEntry?)?.comment?.creationDate?.time ?: -1
+        } as CommentEntry?)?.comment?.creationDate ?: -1
         PLog.d(TAG, "publishEntries, lastActiveTime: $lastActiveTime, newEntries count: ${newEntries.size}")
         PyrusServiceDesk.startTicketsUpdatesIfNeeded(lastActiveTime)
         updateFeedIntervalIfNeeded()

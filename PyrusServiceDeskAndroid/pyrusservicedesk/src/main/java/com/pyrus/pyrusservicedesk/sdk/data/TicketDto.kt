@@ -1,8 +1,8 @@
 package com.pyrus.pyrusservicedesk.sdk.data
 
+import com.pyrus.pyrusservicedesk.sdk.data.json.DateJ
 import com.squareup.moshi.Json
 import com.squareup.moshi.JsonClass
-import java.util.Date
 
 /**
  * Default value for [Ticket.ticketId]
@@ -22,7 +22,7 @@ internal data class TicketDto(
     @Json(name = "last_comment") val lastComment: CommentDto?,
     @Json(name = "comments") val comments: List<CommentDto>?,
     @Json(name = "is_active") val isActive: Boolean?,
-    @Json(name = "created_at") val createdAt: Date?, //TODO check it
+    @Json(name = "created_at") @DateJ val createdAt: Long?,
     @Json(name = "show_rating") val showRating: Boolean?,
     @Json(name = "show_rating_text") val showRatingText: String?,
 )

@@ -38,6 +38,7 @@ internal class Synchronizer(
         SupervisorJob() +
         CoroutineExceptionHandler { _, throwable ->
             PLog.e(TAG, "sync global error: ${throwable.message}")
+            throwable.printStackTrace()
         }
 
     private val isRunning: AtomicBoolean = AtomicBoolean(false)
