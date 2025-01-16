@@ -10,6 +10,6 @@ import com.squareup.moshi.JsonClass
 internal data class TicketCommandResultDto(
     @Json(name = "command_id") val commandId: String?,
     @Json(name = "comment_id") val commentId: Long?,
-    @Json(name = "ticket_id") val ticketId: Int?,
-    @Json(name = "error") val error: String?,
+    @Json(name = "ticket_id") val ticketId: Long?,
+    @Json(name = "error") val error: ErrorDto?,
 )

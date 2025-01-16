@@ -63,9 +63,9 @@ internal class Repository(
     }
 
     suspend fun getFeed(userId: String, ticketId: Long, force: Boolean): Try2<FullTicket, GetTicketsError> {
-
-        if (ticketId < 0) {
-            val commands = localCommandsStore.getCommands(ticketId)
+        val serverId = idStore.getTicketServerId(ticketId) ?: ticketId
+        if (serverId < 0) {
+            val commands = localCommandsStore.getCommands(serverId)
             val firstCommand = commands.firstOrNull()
             val ticket = if (firstCommand != null) {
                 repositoryMapper.mapToFullTicket(firstCommand.ticketId!!, firstCommand.userId, commands)
@@ -88,19 +88,19 @@ internal class Repository(
 
         if (!force) {
             val localTickets: TicketsDto? = localTicketsStore.getTickets()
-            val ticketDto: TicketDto? = localTickets?.tickets?.find { it.ticketId == ticketId }
-            val commands = localCommandsStore.getCommands(ticketId)
+            val ticketDto: TicketDto? = localTickets?.tickets?.find { it.ticketId == serverId }
+            val commands = localCommandsStore.getCommands(serverId)
             if (ticketDto != null) {
                 val ticket = repositoryMapper.mergeTicket(userId, ticketDto, commands)
                 return Try.Success(ticket).toTry2()
             }
         }
 
-        val syncTry = synchronizer.syncData(SyncRequest.Data).checkResponse(ticketId)
+        val syncTry = synchronizer.syncData(SyncRequest.Data).checkResponse(serverId)
         if (syncTry.isFailed()) return syncTry
         val ticketDto = syncTry.value
 
-        val commands = localCommandsStore.getCommands(ticketId)
+        val commands = localCommandsStore.getCommands(serverId)
         val ticket = repositoryMapper.mergeTicket(userId, ticketDto, commands)
         return Try2.Success(ticket)
     }
@@ -190,6 +190,7 @@ internal class Repository(
     }
 
     fun readTicket(user: UserInternal, ticketId: Long) = coroutineScope.launch {
+        if (ticketId <= 0) return@launch
         val serverTicketId = idStore.getTicketServerId(ticketId) ?: ticketId
         val command = localCommandsStore.addReadCommand(user, serverTicketId)
         val syncTry = synchronizer.syncCommand(command)
@@ -233,6 +234,11 @@ internal class Repository(
         val syncTry = synchronizer.syncCommand(command)
 
         if (syncTry.isSuccess()) {
+            if (command is SyncRequest.Command.CreateComment) {
+                if (command.ticketId <= 0 && syncTry.value.ticketId != null) {
+                    idStore.addTicketIdPair(command.ticketId, syncTry.value.ticketId)
+                }
+            }
             localCommandsStore.removeCommand(command.commandId)
         }
         else {

@@ -98,8 +98,12 @@ internal class Synchronizer(
             val commandRequests = syncRequests.filterIsInstance<SyncReqRes.Command>()
             for (request in commandRequests) {
                 val commandId = request.request.commandId
-                val tryResult = when (val result = commandsResultsById[commandId]) {
-                    null -> Try.Failure(Exception("result: $commandId not found"))
+
+
+                val result = commandsResultsById[commandId]
+                val tryResult = when {
+                    result == null -> Try.Failure(Exception("result: $commandId not found"))
+                    result.error != null -> Try.Failure(Exception("commandId: $commandId, error: ${result.error}"))
                     else -> Try.Success(result)
                 }
                 request.continuation.resume(tryResult)
@@ -113,6 +117,7 @@ internal class Synchronizer(
             onSucceedLoopEnd(hasMore)
         }
         else {
+            getTicketsTry.error.printStackTrace()
             val getRequests = syncRequests.filterIsInstance<SyncReqRes.Data>()
             for (request in getRequests) request.continuation.resume(getTicketsTry)
             

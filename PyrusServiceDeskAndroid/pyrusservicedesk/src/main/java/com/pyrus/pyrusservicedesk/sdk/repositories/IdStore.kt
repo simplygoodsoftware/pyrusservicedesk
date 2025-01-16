@@ -24,11 +24,11 @@ internal class IdStore {
     }
 
     fun getTicketServerId(localId: Long): Long? = ticketIdLock.withLock {
-        return@withLock ticketLocalIdMap[localId]
+        ticketLocalIdMap[localId]
     }
 
     fun getTicketLocalId(serverId: Long): Long? = ticketIdLock.withLock {
-        return@withLock ticketServerIdMap[serverId]
+        ticketServerIdMap[serverId]
     }
 
     fun addCommentIdPair(localId: Long, serverId: Long) = commentIdLock.withLock {
