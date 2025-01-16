@@ -1,8 +1,10 @@
 package com.pyrus.pyrusservicedesk.sdk.sync
 
-import com.google.gson.annotations.SerializedName
+import com.squareup.moshi.Json
+import com.squareup.moshi.JsonClass
 
+@JsonClass(generateAdapter = true)
 internal data class ErrorDto(
-    @SerializedName("text") val text: String?,
-    @SerializedName("code") val code: Int?,
+    @Json(name = "text") val text: String?,
+    @Json(name = "code") val code: Int?,
 )
