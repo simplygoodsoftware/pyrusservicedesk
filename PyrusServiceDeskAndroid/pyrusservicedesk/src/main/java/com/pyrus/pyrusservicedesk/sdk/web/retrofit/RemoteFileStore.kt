@@ -56,7 +56,7 @@ internal class RemoteFileStore(
     private fun tryStartUpload() {
         if (!isUploading.getAndSet(true)) {
             launch {
-                val request = filesQueue.peekFirst()
+                val request = filesQueue.pollFirst()
                 if (request != null) {
                     uploadFileInternal(request)
                 }

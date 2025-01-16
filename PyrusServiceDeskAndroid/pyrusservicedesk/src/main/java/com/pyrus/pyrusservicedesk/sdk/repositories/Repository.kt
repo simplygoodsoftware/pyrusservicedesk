@@ -62,7 +62,6 @@ internal class Repository(
         mergeData(dto, commands)
     }
 
-    //TODO what we need to do when we haven't fount ticket (feedTry.value == null, but feedTry.isSuccess()) (k) sm
     suspend fun getFeed(userId: String, ticketId: Long, force: Boolean): Try2<FullTicket, GetTicketsError> {
 
         if (ticketId < 0) {
@@ -91,12 +90,8 @@ internal class Repository(
             val localTickets: TicketsDto? = localTicketsStore.getTickets()
             val ticketDto: TicketDto? = localTickets?.tickets?.find { it.ticketId == ticketId }
             val commands = localCommandsStore.getCommands(ticketId)
-            val ticket = ticketDto?.let {
-                ticketDto.userId?.let { userId ->
-                    repositoryMapper.mergeTicket(userId, ticketDto, commands)
-                }
-            }
-            if (ticket != null) {
+            if (ticketDto != null) {
+                val ticket = repositoryMapper.mergeTicket(userId, ticketDto, commands)
                 return Try.Success(ticket).toTry2()
             }
         }
@@ -104,7 +99,6 @@ internal class Repository(
         val syncTry = synchronizer.syncData(SyncRequest.Data).checkResponse(ticketId)
         if (syncTry.isFailed()) return syncTry
         val ticketDto = syncTry.value
-        val userId = ticketDto.userId ?: return Try2.Failure(GetTicketsError.ValidationError)
 
         val commands = localCommandsStore.getCommands(ticketId)
         val ticket = repositoryMapper.mergeTicket(userId, ticketDto, commands)
@@ -166,6 +160,8 @@ internal class Repository(
 
         localCommandsStore.addOrUpdatePendingCommand(newCommandEntity)
         fileHooks.remove(attachmentEntity.id)
+
+        // TODO sds check allAttachments
 
         serverTicketId = idStore.getTicketServerId(ticketId) ?: ticketId
         requestNewTicket = needsToRequestNewTicket(serverTicketId)
