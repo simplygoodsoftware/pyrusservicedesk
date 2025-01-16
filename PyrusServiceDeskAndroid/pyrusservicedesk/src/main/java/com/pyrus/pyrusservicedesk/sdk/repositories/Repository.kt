@@ -7,7 +7,6 @@ import com.pyrus.pyrusservicedesk._ref.data.multy_chat.TicketsInfo
 import com.pyrus.pyrusservicedesk._ref.utils.GetTicketsError
 import com.pyrus.pyrusservicedesk._ref.utils.Try
 import com.pyrus.pyrusservicedesk._ref.utils.Try2
-import com.pyrus.pyrusservicedesk._ref.utils.getOrNull
 import com.pyrus.pyrusservicedesk._ref.utils.isFailed
 import com.pyrus.pyrusservicedesk._ref.utils.isSuccess
 import com.pyrus.pyrusservicedesk._ref.utils.map
@@ -64,7 +63,6 @@ internal class Repository(
 
     //TODO what we need to do when we haven't fount ticket (feedTry.value == null, but feedTry.isSuccess()) (k) sm
     suspend fun getFeed(
-        user: UserInternal,
         ticketId: Long,
         force: Boolean,
     ): Try2<FullTicket, GetTicketsError> {
@@ -93,7 +91,7 @@ internal class Repository(
         return Try2.Success(ticket)
     }
 
-    fun getFeedFlow(user: UserInternal, ticketId: Long): Flow<FullTicket?> {
+    fun getFeedFlow(ticketId: Long): Flow<FullTicket?> {
         return combine(
             localTicketsStore.getTicketInfoFlow(ticketId),
             localCommandsStore.getCommandsFlow(ticketId),
@@ -110,13 +108,13 @@ internal class Repository(
         }
     }
 
-    fun addTicket(user: UserInternal, textBody: String) = coroutineScope.launch {
-        val command = localCommandsStore.addCreateTicketCommand(user, textBody)
-        syncCommand(command)
-    }
-
-    fun addTextComment(user: UserInternal, ticketId: Long, textBody: String) = coroutineScope.launch {
-        val command = localCommandsStore.addTextCommand(user, ticketId, textBody)
+    fun addTextComment(
+        user: UserInternal,
+        ticketId: Long,
+        requestNewTicket: Boolean,
+        textBody: String,
+    ) = coroutineScope.launch {
+        val command = localCommandsStore.addTextCommand(user, ticketId, requestNewTicket, textBody)
         syncCommand(command)
     }
 
@@ -128,10 +126,15 @@ internal class Repository(
         }
     }
 
-    fun addAttachComment(user: UserInternal, ticketId: Long, fileUri: Uri) = coroutineScope.launch {
+    fun addAttachComment(
+        user: UserInternal,
+        ticketId: Long,
+        requestNewTicket: Boolean,
+        fileUri: Uri,
+    ) = coroutineScope.launch {
 
         val fileData = fileResolver.getFileData(fileUri) ?: return@launch
-        val commandEntity = localCommandsStore.addAttachmentCommand(user, ticketId, fileData)
+        val commandEntity = localCommandsStore.addAttachmentCommand(user, ticketId, requestNewTicket, fileData)
         val attachmentEntity = commandEntity.attachments!!.first()
 
         val file = fileData.uri.toFile()
@@ -163,7 +166,7 @@ internal class Repository(
             userId = user.userId,
             appId = user.appId,
             creationTime = commandEntity.creationTime,
-            requestNewTicket = false, // TODO to upper level
+            requestNewTicket = requestNewTicket,
             ticketId = ticketId,
             comment = null,
             attachments = listOf(repositoryMapper.map(newLocalAttachment)),
@@ -173,8 +176,13 @@ internal class Repository(
         syncCommand(command)
     }
 
-    fun addRatingComment(user: UserInternal, ticketId: Long, rating: Int) = coroutineScope.launch {
-        val command = localCommandsStore.addRatingCommand(user, ticketId, rating)
+    fun addRatingComment(
+        user: UserInternal,
+        ticketId: Long,
+        requestNewTicket: Boolean,
+        rating: Int,
+    ) = coroutineScope.launch {
+        val command = localCommandsStore.addRatingCommand(user, ticketId, requestNewTicket, rating)
         syncCommand(command)
     }
 

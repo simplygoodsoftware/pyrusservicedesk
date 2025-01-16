@@ -214,7 +214,6 @@ internal class TicketActor(
     override fun handleEffect(effect: Effect.Inner): Flow<Message.Inner> = when (effect) {
         is Effect.Inner.UpdateComments -> singleFlow {
             val commentsTry: Try2<FullTicket, GetTicketsError> = repository.getFeed(
-                user = user,
                 ticketId = effect.ticketId,
                 force = effect.force
             )
@@ -229,7 +228,7 @@ internal class TicketActor(
                 else -> Message.Inner.UpdateCommentsFailed(commentsTry.error)
             }
         }
-        Effect.Inner.FeedFlow -> repository.getFeedFlow(user, ticketId).map { Message.Inner.CommentsUpdated(it) }
+        Effect.Inner.FeedFlow -> repository.getFeedFlow(ticketId).map { Message.Inner.CommentsUpdated(it) }
         Effect.Inner.Close -> flow { router.exit() }
         is Effect.Inner.SendTextComment -> flow {
             repository.addTextComment(user, ticketId, effect.text)

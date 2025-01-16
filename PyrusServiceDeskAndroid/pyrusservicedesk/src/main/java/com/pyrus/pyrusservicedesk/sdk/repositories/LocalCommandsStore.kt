@@ -59,29 +59,13 @@ internal class LocalCommandsStore(
     fun getCommands(ticketId: Long): List<CommandEntity> = commandsStateFlow.value
         .filter { it.ticketId == ticketId }
 
-    fun addCreateTicketCommand(user: UserInternal, comment: String): SyncRequest.Command.CreateComment {
-        val entity = createNewTicketCommandEntity(user, comment)
-        addOrUpdatePendingCommand(entity)
-        return SyncRequest.Command.CreateComment(
-            localId = entity.localId,
-            commandId = entity.commandId,
-            userId = user.userId,
-            appId = user.appId,
-            creationTime = entity.creationTime,
-            requestNewTicket = true, // TODO
-            ticketId = entity.localId,
-            comment = comment,
-            attachments = null,
-            rating = null
-        )
-    }
-
     fun addTextCommand(
         user: UserInternal,
         ticketId: Long,
+        requestNewTicket: Boolean,
         comment: String,
     ): SyncRequest.Command.CreateComment {
-        val entity = createTextCommandEntity(user, ticketId, comment)
+        val entity = createTextCommandEntity(user, ticketId, requestNewTicket, comment)
         addOrUpdatePendingCommand(entity)
         return SyncRequest.Command.CreateComment(
             localId = entity.localId,
@@ -97,8 +81,24 @@ internal class LocalCommandsStore(
         )
     }
 
-    fun addRatingCommand(user: UserInternal, ticketId: Long, rating: Int): SyncRequest.Command.CreateComment {
-        val entity = createRatingCommandEntity(user, ticketId, rating)
+    fun addAttachmentCommand(
+        user: UserInternal,
+        ticketId: Long,
+        requestNewTicket: Boolean,
+        fileData: FileData,
+    ): CommandEntity {
+        val entity = createLocalAttachComment(user, ticketId, requestNewTicket, fileData)
+        addOrUpdatePendingCommand(entity)
+        return entity
+    }
+
+    fun addRatingCommand(
+        user: UserInternal,
+        ticketId: Long,
+        requestNewTicket: Boolean,
+        rating: Int,
+    ): SyncRequest.Command.CreateComment {
+        val entity = createRatingCommandEntity(user, ticketId, requestNewTicket, rating)
         addOrUpdatePendingCommand(entity)
         return SyncRequest.Command.CreateComment(
             localId = entity.localId,
@@ -114,7 +114,10 @@ internal class LocalCommandsStore(
         )
     }
 
-    fun addReadCommand(user: UserInternal, ticketId: Long): SyncRequest.Command.MarkTicketAsRead {
+    fun addReadCommand(
+        user: UserInternal,
+        ticketId: Long,
+    ): SyncRequest.Command.MarkTicketAsRead {
         val entity = createReadCommandEntity(user, ticketId)
         addOrUpdatePendingCommand(entity)
         return SyncRequest.Command.MarkTicketAsRead(
@@ -127,16 +130,8 @@ internal class LocalCommandsStore(
         )
     }
 
-    fun addAttachmentCommand(
-        user: UserInternal,
-        ticketId: Long,
-        fileData: FileData,
-    ): CommandEntity {
-        val entity = createLocalAttachComment(user, ticketId, fileData)
-        addOrUpdatePendingCommand(entity)
-        return entity
-    }
 
+    // TODO
     fun createPushTokenCommand(
         user: UserInternal,
         token: String,
@@ -234,6 +229,7 @@ internal class LocalCommandsStore(
     private fun createTextCommandEntity(
         user: UserInternal,
         ticketId: Long,
+        requestNewTicket: Boolean,
         comment: String,
     ): CommandEntity {
         val localId = getNextLocalId()
@@ -245,7 +241,7 @@ internal class LocalCommandsStore(
             userId = user.userId,
             appId = user.appId,
             creationTime = System.currentTimeMillis(),
-            requestNewTicket = false,
+            requestNewTicket = requestNewTicket,
             comment = comment,
             attachments = null,
             ticketId = ticketId,
@@ -259,6 +255,7 @@ internal class LocalCommandsStore(
     private fun createRatingCommandEntity(
         user: UserInternal,
         ticketId: Long,
+        requestNewTicket: Boolean,
         rating: Int,
     ): CommandEntity {
         val localId = getNextLocalId()
@@ -270,7 +267,7 @@ internal class LocalCommandsStore(
             userId = user.userId,
             appId = user.appId,
             creationTime = System.currentTimeMillis(),
-            requestNewTicket = false,
+            requestNewTicket = requestNewTicket,
             comment = null,
             attachments = null,
             ticketId = ticketId,
@@ -284,6 +281,7 @@ internal class LocalCommandsStore(
     private fun createLocalAttachComment(
         user: UserInternal,
         ticketId: Long,
+        requestNewTicket: Boolean,
         fileData: FileData,
     ): CommandEntity {
         val localId = getNextLocalId()
@@ -295,7 +293,7 @@ internal class LocalCommandsStore(
             userId = user.userId,
             appId = user.appId,
             creationTime = System.currentTimeMillis(),
-            requestNewTicket = false, // TODO
+            requestNewTicket = requestNewTicket,
             comment = null,
             attachments = listOf(createAttachment(fileData)),
             ticketId = ticketId,
