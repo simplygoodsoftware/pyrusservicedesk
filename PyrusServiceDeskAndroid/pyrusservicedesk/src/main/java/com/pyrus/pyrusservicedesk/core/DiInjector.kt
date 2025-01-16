@@ -58,11 +58,6 @@ internal class DiInjector(
 
     private val localDataVerifier: LocalDataVerifier = LocalDataVerifier(fileResolver)
 
-//    private val offlineGson = GsonBuilder()
-//        .setDateFormat(ISO_DATE_PATTERN)
-//        .registerTypeAdapter(Uri::class.java, UriGsonAdapter())
-//        .create()
-
     private val moshi = Moshi.Builder()
         .add(CommandParamsDto.factory)
         .add(DateAdapter())
@@ -75,7 +70,8 @@ internal class DiInjector(
     val localCommandsStore: LocalCommandsStore = LocalCommandsStore(
         preferences = preferences,
         localDataVerifier = localDataVerifier,
-        idStore = idStore
+        idStore = idStore,
+        moshi = moshi,
     )
 
     private val okHttpClient = OkHttpClient.Builder()
@@ -100,7 +96,7 @@ internal class DiInjector(
 
     private val retrofit: Retrofit = Retrofit.Builder()
         .baseUrl(getBaseUrl(account.domain))
-        .addConverterFactory(MoshiConverterFactory.create(moshi)) //TODO moshi
+        .addConverterFactory(MoshiConverterFactory.create(moshi))
         .addCallAdapterFactory(TryCallAdapterFactory())
         .client(okHttpClient)
         .build()
@@ -111,7 +107,7 @@ internal class DiInjector(
 
     private val repositoryMapper = RepositoryMapper(account, idStore)
 
-    private val remoteFileStore = RemoteFileStore(api) // TODO use different api
+    private val remoteFileStore = RemoteFileStore(api)
 
     private val localTicketsStore = LocalTicketsStore(idStore)
 
