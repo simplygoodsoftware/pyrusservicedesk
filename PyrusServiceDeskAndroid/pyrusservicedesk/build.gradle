@@ -70,6 +70,7 @@ dependencies {
 
     implementation 'org.jsoup:jsoup:1.18.1'
     implementation("com.github.terrakok:cicerone:7.1")
+    implementation 'androidx.coordinatorlayout:coordinatorlayout:1.2.0'
 
     //tests
     testImplementation 'junit:junit:4.13.2'

@@ -30,6 +30,9 @@ import com.pyrus.pyrusservicedesk.sdk.repositories.UserInternal
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.map
+import java.util.UUID
+import kotlin.coroutines.resume
+import kotlin.coroutines.suspendCoroutine
 
 internal class TicketFeatureFactory(
     private val account: Account,
@@ -98,7 +101,7 @@ private class FeatureReducer: Logic<State, Message, Effect>() {
                     return
                 }
                 effects { +Effect.Inner.SendAttachComment(
-                    message.fileUri,
+                    uri = message.fileUri,
                     ticketId = (state as State.Content).ticketId,
                 ) }
             }
@@ -139,7 +142,7 @@ private class FeatureReducer: Logic<State, Message, Effect>() {
             }
             is Message.Outer.OnShowAttachVariantsClick -> {
                 if(state !is State.Content) return
-                effects { +Effect.Outer.ShowAttachVariants }
+                effects { +Effect.Inner.ShowAttachVariants }
             }
             is Message.Outer.OnRefresh -> {
                 val currentState = state as? State.Content ?: return
@@ -253,6 +256,29 @@ internal class TicketActor(
         }
         is Effect.Inner.SaveDraft -> flow { draftRepository.saveDraft(effect.draft) }
         is Effect.Inner.ReadTicket -> flow { repository.readTicket(effect.user, effect.ticketId) }
+        Effect.Inner.ShowAttachVariants -> flow {
+            val key = UUID.randomUUID().toString()
+            router.navigateTo(Screens.AttachFileVariantsScreen(key))
+            val uri: Any = suspendCoroutine { continuation ->
+                router.setResultListener(key) {
+                    continuation.resume(it)
+                }
+            }
+            // TODO kate
+//            val contentResolver: ContentResolver? = context?.contentResolver
+//            val cursor = fileUri?.let { contentResolver?.query(it, null, null, null, null) }
+//            val fileSize = cursor?.use {
+//                if (it.moveToFirst()) {
+//                    val sizeIndex = it.getColumnIndex(OpenableColumns.SIZE)
+//                    it.getLong(sizeIndex)
+//                } else {
+//                    null
+//                }
+//            }
+            if (uri !is Uri) return@flow
+            val fileUri = try { fileManager.copyFile(uri) } catch (e: Exception) { null } ?: return@flow
+            repository.addAttachComment(user, ticketId, fileUri)
+        }
     }
 
 }

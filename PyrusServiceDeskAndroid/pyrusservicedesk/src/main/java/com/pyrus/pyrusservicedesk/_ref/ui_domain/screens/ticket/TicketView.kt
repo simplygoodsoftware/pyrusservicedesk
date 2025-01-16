@@ -49,6 +49,5 @@ internal interface TicketView {
     sealed interface Effect {
         data class CopyToClipboard(val text: String) : Effect
         data class MakeToast(val text: TextProvider) : Effect
-        data object ShowAttachVariants : Effect
     }
 }

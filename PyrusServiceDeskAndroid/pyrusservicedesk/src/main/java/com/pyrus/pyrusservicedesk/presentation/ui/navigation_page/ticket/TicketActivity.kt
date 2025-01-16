@@ -24,8 +24,6 @@ import com.pyrus.pyrusservicedesk._ref.utils.ConfigUtils
 import com.pyrus.pyrusservicedesk._ref.utils.getSecondaryColorOnBackground
 import com.pyrus.pyrusservicedesk._ref.utils.getViewModel
 import com.pyrus.pyrusservicedesk.presentation.ConnectionActivityBase
-import com.pyrus.pyrusservicedesk.presentation.ui.navigation_page.ticket.dialogs.attach_files.AttachFileSharedViewModel
-import com.pyrus.pyrusservicedesk.presentation.ui.navigation_page.ticket.dialogs.attach_files.AttachFileVariantsFragment
 import com.pyrus.pyrusservicedesk.presentation.ui.navigation_page.ticket.dialogs.comment_actions.PendingCommentActionSharedViewModel
 import com.pyrus.pyrusservicedesk.sdk.data.AttachmentDto
 import com.pyrus.pyrusservicedesk.sdk.data.intermediate.FileData
@@ -65,8 +63,6 @@ internal class TicketActivity : ConnectionActivityBase<TicketViewModel>(TicketVi
     override val progressBarViewId: Int = NO_ID
     override val noConnectionViewId: Int = R.id.no_connection
 
-    private val attachFileSharedViewModel: AttachFileSharedViewModel by getViewModel(
-        AttachFileSharedViewModel::class.java)
     private val commentActionsSharedViewModel: PendingCommentActionSharedViewModel by getViewModel(
         PendingCommentActionSharedViewModel::class.java)
 //    private val adapter: TicketAdapter = TODO()
@@ -264,11 +260,6 @@ internal class TicketActivity : ConnectionActivityBase<TicketViewModel>(TicketVi
 ////                }
 ////            }
 //        }
-        attachFileSharedViewModel.getFilePickedLiveData().observe(this) { fileUri ->
-            fileUri?.let {
-//                viewModel.onAttachmentSelected(it)
-            }
-        }
 
         commentActionsSharedViewModel.getSelectedActionLiveData().observe(this) { action ->
             action?.let {
@@ -318,10 +309,6 @@ internal class TicketActivity : ConnectionActivityBase<TicketViewModel>(TicketVi
     private fun onSendCommentClick() {
 //        viewModel.onSendClicked(input.text.toString())
 //        input.text = null
-    }
-
-    private fun showAttachFileVariants() {
-        AttachFileVariantsFragment().show(supportFragmentManager, "")
     }
 
     private fun copyToClipboard(text: String) {
