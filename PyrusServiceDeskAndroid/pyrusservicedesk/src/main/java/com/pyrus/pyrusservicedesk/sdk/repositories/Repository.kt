@@ -63,7 +63,29 @@ internal class Repository(
     }
 
     //TODO what we need to do when we haven't fount ticket (feedTry.value == null, but feedTry.isSuccess()) (k) sm
-    suspend fun getFeed(ticketId: Long, force: Boolean): Try2<FullTicket, GetTicketsError> {
+    suspend fun getFeed(userId: String, ticketId: Long, force: Boolean): Try2<FullTicket, GetTicketsError> {
+
+        if (ticketId < 0) {
+            val commands = localCommandsStore.getCommands(ticketId)
+            val firstCommand = commands.firstOrNull()
+            val ticket = if (firstCommand != null) {
+                repositoryMapper.mapToFullTicket(firstCommand.ticketId!!, firstCommand.userId, commands)
+            }
+            else {
+                FullTicket(
+                    subject = "",
+                    isRead = true,
+                    lastComment = null,
+                    comments = emptyList(),
+                    showRating = false,
+                    showRatingText = null,
+                    isActive = true,
+                    userId = userId,
+                    ticketId = ticketId
+                )
+            }
+            return Try2.Success(ticket)
+        }
 
         if (!force) {
             val localTickets: TicketsDto? = localTicketsStore.getTickets()

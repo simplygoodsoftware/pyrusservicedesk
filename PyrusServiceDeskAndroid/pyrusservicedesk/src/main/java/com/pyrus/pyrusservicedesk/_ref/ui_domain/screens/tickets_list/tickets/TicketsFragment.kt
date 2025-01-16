@@ -77,6 +77,10 @@ internal class TicketsFragment: TeaFragment<Model, Message, Effect.Outer>() {
             dispatch(Message.Outer.OnFilterClick(currentUserId))
         }
 
+        binding.noConnection.reconnectButton.setOnClickListener {
+            dispatch(Message.Outer.OnRetryClick)
+        }
+
         binding.deleteFilterIv.setOnClickListener {
             childFragmentManager.setFragmentResult(KEY_USER_ID, bundleOf(KEY_USER_ID to KEY_DEFAULT_USER_ID))
             currentUserId = KEY_DEFAULT_USER_ID

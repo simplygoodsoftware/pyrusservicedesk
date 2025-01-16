@@ -195,6 +195,7 @@ internal class TicketActor(
     override fun handleEffect(effect: Effect.Inner): Flow<Message.Inner> = when (effect) {
         is Effect.Inner.UpdateComments -> singleFlow {
             val commentsTry: Try2<FullTicket, GetTicketsError> = repository.getFeed(
+                userId = user.userId,
                 ticketId = effect.ticketId,
                 force = effect.force
             )

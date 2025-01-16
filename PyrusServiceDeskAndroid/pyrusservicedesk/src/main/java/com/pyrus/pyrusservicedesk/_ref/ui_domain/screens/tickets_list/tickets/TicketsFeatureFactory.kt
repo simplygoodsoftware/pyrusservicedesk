@@ -41,7 +41,8 @@ internal class TicketsFeatureFactory(
         reducer = FeatureReducer(),
         actor = TicketsActor(repository, router, commandsStore).adaptCast(),
         initialEffects = listOf(
-            Effect.Inner.UpdateTickets(false), Effect.Inner.TicketsSetFlow
+            Effect.Inner.UpdateTickets(false),
+            Effect.Inner.TicketsSetFlow,
         ),
     ).adapt { it as? Effect.Outer }
 
@@ -84,6 +85,11 @@ private class FeatureReducer: Logic<State, Message, Effect>() {
                 val selectedAppId = contentState.appId ?: return
                 val users = state.account.users
                 effects { +Effect.Outer.ShowFilterMenu(selectedAppId, message.selectedUserId, users) }
+            }
+            is Message.Outer.OnRetryClick -> {
+                if (state.contentState !is ContentState.Error) return
+                state { state.copy(contentState = ContentState.Loading) }
+                effects { +Effect.Inner.UpdateTickets(force = true) }
             }
             is Message.Outer.OnChangePage -> {
                 val currentState = state.contentState as? ContentState.Content ?: return
@@ -196,7 +202,10 @@ internal class TicketsActor(
         is Effect.Inner.UpdateTickets -> singleFlow {
             when(val ticketsTry = repository.getAllData(effect.force)) {
                 is Try.Success -> Message.Inner.UpdateTicketsCompleted(ticketsTry.value)
-                is Try.Failure -> Message.Inner.UpdateTicketsFailed
+                is Try.Failure -> {
+                    ticketsTry.error.printStackTrace()
+                    Message.Inner.UpdateTicketsFailed
+                }
             }
         }
 

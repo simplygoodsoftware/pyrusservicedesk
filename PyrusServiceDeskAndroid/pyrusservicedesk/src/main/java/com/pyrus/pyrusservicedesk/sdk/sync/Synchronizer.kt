@@ -37,6 +37,7 @@ internal class Synchronizer(
     override val coroutineContext: CoroutineContext = newSingleThreadContext(TAG) +
         SupervisorJob() +
         CoroutineExceptionHandler { _, throwable ->
+            throwable.printStackTrace()
             PLog.e(TAG, "sync global error: ${throwable.message}")
             throwable.printStackTrace()
         }
