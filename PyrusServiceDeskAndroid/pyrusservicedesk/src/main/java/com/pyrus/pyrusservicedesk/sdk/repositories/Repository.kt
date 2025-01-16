@@ -234,11 +234,6 @@ internal class Repository(
         val syncTry = synchronizer.syncCommand(command)
 
         if (syncTry.isSuccess()) {
-            if (command is SyncRequest.Command.CreateComment) {
-                if (command.ticketId <= 0 && syncTry.value.ticketId != null) {
-                    idStore.addTicketIdPair(command.ticketId, syncTry.value.ticketId)
-                }
-            }
             localCommandsStore.removeCommand(command.commandId)
         }
         else {

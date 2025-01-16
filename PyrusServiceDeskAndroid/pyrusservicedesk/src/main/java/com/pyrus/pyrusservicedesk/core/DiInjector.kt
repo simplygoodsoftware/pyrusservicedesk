@@ -122,6 +122,7 @@ internal class DiInjector(
         localTicketsStore = localTicketsStore,
         accountStore = accountStore,
         resourceManager = resourceManager,
+        idStore = idStore,
     )
 
     private val repository: Repository = Repository(

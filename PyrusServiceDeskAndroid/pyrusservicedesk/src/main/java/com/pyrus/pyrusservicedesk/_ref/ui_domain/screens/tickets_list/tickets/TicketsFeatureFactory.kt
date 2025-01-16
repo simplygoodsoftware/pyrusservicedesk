@@ -22,6 +22,7 @@ import com.pyrus.pyrusservicedesk.sdk.repositories.LocalCommandsStore
 import com.pyrus.pyrusservicedesk.sdk.repositories.Repository
 import com.pyrus.pyrusservicedesk.sdk.repositories.UserInternal
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.debounce
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.map
 
@@ -209,7 +210,9 @@ internal class TicketsActor(
             }
         }
 
-        Effect.Inner.TicketsSetFlow -> repository.getAllDataFlow().map { Message.Inner.TicketsUpdated(it) }
+        Effect.Inner.TicketsSetFlow -> repository.getAllDataFlow()
+            .debounce(150)
+            .map { Message.Inner.TicketsUpdated(it) }
 
         is Effect.Inner.OpenTicketScreen -> flow {
             val ticketId = effect.ticketId ?: commandsStore.getNextLocalId()

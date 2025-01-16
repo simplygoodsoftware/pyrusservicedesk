@@ -31,7 +31,7 @@ internal object TicketMapper {
             isLoading = false,
             showNoConnectionError = false,
             isRefreshing = state.isLoading,
-            toolbarTitleText = state.ticket?.subject ?: "Новое обращение",
+            toolbarTitleText = state.ticket?.subject ?: "Новое обращение", // TODO kate
         )
         State.Loading -> Model(
             inputText = "",

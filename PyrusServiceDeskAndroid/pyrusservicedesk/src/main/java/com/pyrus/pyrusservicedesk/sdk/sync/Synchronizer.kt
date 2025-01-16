@@ -7,6 +7,7 @@ import com.pyrus.pyrusservicedesk._ref.utils.isSuccess
 import com.pyrus.pyrusservicedesk._ref.utils.log.PLog
 import com.pyrus.pyrusservicedesk.sdk.data.intermediate.TicketsDto
 import com.pyrus.pyrusservicedesk.sdk.repositories.AccountStore
+import com.pyrus.pyrusservicedesk.sdk.repositories.IdStore
 import com.pyrus.pyrusservicedesk.sdk.repositories.LocalTicketsStore
 import com.pyrus.pyrusservicedesk.sdk.sync.SyncMapper.mapToGetFeedRequest
 import com.pyrus.pyrusservicedesk.sdk.web.retrofit.ServiceDeskApi
@@ -30,6 +31,7 @@ internal class Synchronizer(
     private val localTicketsStore: LocalTicketsStore,
     private val accountStore: AccountStore,
     private val resourceManager: AppResourceManager,
+    private val idStore: IdStore,
 ) : CoroutineScope {
 
     @DelicateCoroutinesApi
@@ -91,14 +93,11 @@ internal class Synchronizer(
         
         if (getTicketsTry.isSuccess()) {
             
-            val newState = localTicketsStore.applyDiff(getTicketsTry.value)
-            
             val commandsResults = getTicketsTry.value.commandsResult ?: emptyList()
             val commandsResultsById = commandsResults.associateBy { it.commandId }
             val commandRequests = syncRequests.filterIsInstance<SyncReqRes.Command>()
             for (request in commandRequests) {
                 val commandId = request.request.commandId
-
 
                 val result = commandsResultsById[commandId]
                 val tryResult = when {
@@ -106,9 +105,20 @@ internal class Synchronizer(
                     result.error != null -> Try.Failure(Exception("commandId: $commandId, error: ${result.error}"))
                     else -> Try.Success(result)
                 }
+
+                if (tryResult.isSuccess() && request.request is SyncRequest.Command.CreateComment) {
+                    if (request.request.ticketId <= 0 && tryResult.value.ticketId != null) {
+                        idStore.addTicketIdPair(request.request.ticketId, tryResult.value.ticketId)
+                    }
+                    if (tryResult.value.commentId != null) {
+                        idStore.addCommentIdPair(request.request.localId, tryResult.value.commentId)
+                    }
+                }
+
                 request.continuation.resume(tryResult)
             }
 
+            val newState = localTicketsStore.applyDiff(getTicketsTry.value)
             val dataRequests = syncRequests.filterIsInstance<SyncReqRes.Data>()
             for (request in dataRequests) {
                 request.continuation.resume(Try.Success(newState))

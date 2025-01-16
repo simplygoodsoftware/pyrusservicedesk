@@ -1,7 +1,5 @@
 package com.pyrus.pyrusservicedesk._ref.ui_domain.screens.ticket
 
-import android.net.Uri
-import com.pyrus.pyrusservicedesk.User
 import com.pyrus.pyrusservicedesk._ref.data.Attachment
 import com.pyrus.pyrusservicedesk._ref.data.FullTicket
 import com.pyrus.pyrusservicedesk._ref.utils.GetTicketsError
