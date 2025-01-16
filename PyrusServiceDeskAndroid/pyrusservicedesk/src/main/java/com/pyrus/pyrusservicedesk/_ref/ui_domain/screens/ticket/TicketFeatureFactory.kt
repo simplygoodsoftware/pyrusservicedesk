@@ -264,17 +264,6 @@ internal class TicketActor(
                     continuation.resume(it)
                 }
             }
-            // TODO kate
-//            val contentResolver: ContentResolver? = context?.contentResolver
-//            val cursor = fileUri?.let { contentResolver?.query(it, null, null, null, null) }
-//            val fileSize = cursor?.use {
-//                if (it.moveToFirst()) {
-//                    val sizeIndex = it.getColumnIndex(OpenableColumns.SIZE)
-//                    it.getLong(sizeIndex)
-//                } else {
-//                    null
-//                }
-//            }
             if (uri !is Uri) return@flow
             val fileUri = try { fileManager.copyFile(uri) } catch (e: Exception) { null } ?: return@flow
             repository.addAttachComment(user, ticketId, fileUri)
