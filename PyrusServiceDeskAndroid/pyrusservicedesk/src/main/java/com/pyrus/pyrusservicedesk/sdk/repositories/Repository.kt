@@ -38,6 +38,7 @@ internal class Repository(
     private val localTicketsStore: LocalTicketsStore,
     private val coroutineScope: CoroutineScope,
     private val accountStore: AccountStore,
+    private val idStore: IdStore,
 ) {
 
     private val fileHooks = ConcurrentHashMap<Long, UploadFileHook>()
@@ -102,7 +103,7 @@ internal class Repository(
             }
             else {
                 commands.find { it.requestNewTicket == true }?.let {
-                    repositoryMapper.mapToFullTicket(it, commands)
+                    repositoryMapper.mapToFullTicket(it.ticketId!!, it.userId, commands)
                 }
             }
         }
@@ -111,29 +112,24 @@ internal class Repository(
     fun addTextComment(
         user: UserInternal,
         ticketId: Long,
-        requestNewTicket: Boolean,
         textBody: String,
     ) = coroutineScope.launch {
-        val command = localCommandsStore.addTextCommand(user, ticketId, requestNewTicket, textBody)
+        val serverTicketId = idStore.getTicketServerId(ticketId) ?: ticketId
+        val requestNewTicket = needsToRequestNewTicket(serverTicketId)
+        val command = localCommandsStore.addTextCommand(user, serverTicketId, requestNewTicket, textBody)
         syncCommand(command)
-    }
-
-    fun readTicket(user: UserInternal, ticketId: Long) = coroutineScope.launch {
-        val command = localCommandsStore.addReadCommand(user, ticketId)
-        val syncTry = synchronizer.syncCommand(command)
-        if (syncTry.isSuccess()) {
-            localCommandsStore.removeCommand(command.commandId)
-        }
     }
 
     fun addAttachComment(
         user: UserInternal,
         ticketId: Long,
-        requestNewTicket: Boolean,
         fileUri: Uri,
     ) = coroutineScope.launch {
-
         val fileData = fileResolver.getFileData(fileUri) ?: return@launch
+
+        var serverTicketId = idStore.getTicketServerId(ticketId) ?: ticketId
+        var requestNewTicket = needsToRequestNewTicket(serverTicketId)
+
         val commandEntity = localCommandsStore.addAttachmentCommand(user, ticketId, requestNewTicket, fileData)
         val attachmentEntity = commandEntity.attachments!!.first()
 
@@ -160,6 +156,9 @@ internal class Repository(
         localCommandsStore.addOrUpdatePendingCommand(newCommandEntity)
         fileHooks.remove(attachmentEntity.id)
 
+        serverTicketId = idStore.getTicketServerId(ticketId) ?: ticketId
+        requestNewTicket = needsToRequestNewTicket(serverTicketId)
+
         val command = SyncRequest.Command.CreateComment(
             localId = commandEntity.localId,
             commandId = commandEntity.commandId,
@@ -167,7 +166,7 @@ internal class Repository(
             appId = user.appId,
             creationTime = commandEntity.creationTime,
             requestNewTicket = requestNewTicket,
-            ticketId = ticketId,
+            ticketId = serverTicketId,
             comment = null,
             attachments = listOf(repositoryMapper.map(newLocalAttachment)),
             rating = null,
@@ -179,11 +178,21 @@ internal class Repository(
     fun addRatingComment(
         user: UserInternal,
         ticketId: Long,
-        requestNewTicket: Boolean,
         rating: Int,
     ) = coroutineScope.launch {
-        val command = localCommandsStore.addRatingCommand(user, ticketId, requestNewTicket, rating)
+        val serverTicketId = idStore.getTicketServerId(ticketId) ?: ticketId
+        val requestNewTicket = needsToRequestNewTicket(serverTicketId)
+        val command = localCommandsStore.addRatingCommand(user, serverTicketId, requestNewTicket, rating)
         syncCommand(command)
+    }
+
+    fun readTicket(user: UserInternal, ticketId: Long) = coroutineScope.launch {
+        val serverTicketId = idStore.getTicketServerId(ticketId) ?: ticketId
+        val command = localCommandsStore.addReadCommand(user, serverTicketId)
+        val syncTry = synchronizer.syncCommand(command)
+        if (syncTry.isSuccess()) {
+            localCommandsStore.removeCommand(command.commandId)
+        }
     }
 
     fun retryAddComment(user: UserInternal, commandId: String) {
@@ -211,6 +220,10 @@ internal class Repository(
 
     fun removeCommand(commandId: String) {
         localCommandsStore.removeCommand(commandId)
+    }
+
+    private fun needsToRequestNewTicket(ticketId: Long): Boolean {
+        return ticketId <= 0
     }
 
     private suspend fun syncCommand(command: SyncRequest.Command) {

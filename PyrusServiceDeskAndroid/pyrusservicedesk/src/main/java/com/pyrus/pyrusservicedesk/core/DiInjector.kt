@@ -21,7 +21,9 @@ import com.pyrus.pyrusservicedesk.sdk.data.json.DateAdapter
 import com.pyrus.pyrusservicedesk.sdk.data.json.UriAdapter
 import com.pyrus.pyrusservicedesk.sdk.repositories.AccountStore
 import com.pyrus.pyrusservicedesk.sdk.repositories.DraftRepository
+import com.pyrus.pyrusservicedesk.sdk.repositories.IdStore
 import com.pyrus.pyrusservicedesk.sdk.repositories.LocalCommandsStore
+import com.pyrus.pyrusservicedesk.sdk.repositories.LocalTicketsStore
 import com.pyrus.pyrusservicedesk.sdk.repositories.Repository
 import com.pyrus.pyrusservicedesk.sdk.repositories.RepositoryMapper
 import com.pyrus.pyrusservicedesk.sdk.sync.CommandParamsDto
@@ -68,7 +70,13 @@ internal class DiInjector(
         .add(KotlinJsonAdapterFactory())
         .build()
 
-    val localCommandsStore: LocalCommandsStore = LocalCommandsStore(preferences, localDataVerifier) //TODO обязательно приватный?
+    private val idStore = IdStore()
+
+    val localCommandsStore: LocalCommandsStore = LocalCommandsStore(
+        preferences = preferences,
+        localDataVerifier = localDataVerifier,
+        idStore = idStore
+    )
 
     private val okHttpClient = OkHttpClient.Builder()
         .connectTimeout(30, TimeUnit.SECONDS)
@@ -101,11 +109,11 @@ internal class DiInjector(
 
     private val fileManager: FileManager = FileManager(application, fileResolver)
 
-    private val repositoryMapper = RepositoryMapper(account)
+    private val repositoryMapper = RepositoryMapper(account, idStore)
 
     private val remoteFileStore = RemoteFileStore(api) // TODO use different api
 
-    private val localTicketsStore = com.pyrus.pyrusservicedesk.sdk.repositories.LocalTicketsStore()
+    private val localTicketsStore = LocalTicketsStore(idStore)
 
     private val resourceManager = AppResourceManager(application)
 
@@ -124,7 +132,8 @@ internal class DiInjector(
         synchronizer = synchronizer,
         localTicketsStore = localTicketsStore,
         coroutineScope = coreScope,
-        accountStore = accountStore
+        accountStore = accountStore,
+        idStore = idStore,
     )
 
     private val preferencesManager = PreferencesManager(preferences)
@@ -149,7 +158,14 @@ internal class DiInjector(
     )
 
     // TODO fix it use AccountStore
-    val ticketsFeatureFactory = TicketsFeatureFactory(account as Account.V3, storeFactory, repository, router)
+    val ticketsFeatureFactory = TicketsFeatureFactory(
+        // TODO FSDS
+        account = account as Account.V3,
+        storeFactory = storeFactory,
+        repository = repository,
+        router = router,
+        commandsStore = localCommandsStore
+    )
 
     var intentQr: Intent? = null
     var intentSettings: Intent? = null

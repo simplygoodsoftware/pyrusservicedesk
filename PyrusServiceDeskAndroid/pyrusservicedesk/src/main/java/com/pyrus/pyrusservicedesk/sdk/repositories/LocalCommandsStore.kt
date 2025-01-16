@@ -11,6 +11,7 @@ import com.pyrus.pyrusservicedesk.sdk.verify.LocalDataVerifier
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.map
+import org.jsoup.select.Evaluator.Id
 import java.lang.reflect.Type
 import java.util.UUID
 import java.util.concurrent.atomic.AtomicLong
@@ -22,6 +23,7 @@ import kotlin.math.max
 internal class LocalCommandsStore(
     private val preferences: SharedPreferences,
     private val localDataVerifier: LocalDataVerifier,
+    private val idStore: IdStore,
 ) {
 
     private val lastLocalId: AtomicLong
@@ -51,13 +53,20 @@ internal class LocalCommandsStore(
     fun getCommandsFlow(): Flow<List<CommandEntity>> = commandsStateFlow
 
     fun getCommandsFlow(ticketId: Long): Flow<List<CommandEntity>> = commandsStateFlow.map {
-        it.filter { command -> command.ticketId == ticketId }
+        val serverTicketId = idStore.getTicketServerId(ticketId) ?: ticketId
+        val localTicketId = idStore.getTicketLocalId(ticketId) ?: ticketId
+        it.filter { command -> command.ticketId == serverTicketId || command.ticketId == localTicketId }
     }
 
     fun getCommands(): List<CommandEntity> = commandsStateFlow.value
 
-    fun getCommands(ticketId: Long): List<CommandEntity> = commandsStateFlow.value
-        .filter { it.ticketId == ticketId }
+    fun getCommands(ticketId: Long): List<CommandEntity> {
+        val serverTicketId = idStore.getTicketServerId(ticketId) ?: ticketId
+        val localTicketId = idStore.getTicketLocalId(ticketId) ?: ticketId
+        return commandsStateFlow.value.filter {
+            it.ticketId == serverTicketId || it.ticketId == localTicketId
+        }
+    }
 
     fun addTextCommand(
         user: UserInternal,
@@ -73,7 +82,7 @@ internal class LocalCommandsStore(
             userId = user.userId,
             appId = user.appId,
             creationTime = entity.creationTime,
-            requestNewTicket = false, // TODO
+            requestNewTicket = requestNewTicket,
             ticketId = ticketId,
             comment = comment,
             attachments = null,
@@ -106,7 +115,7 @@ internal class LocalCommandsStore(
             userId = user.userId,
             appId = user.appId,
             creationTime = entity.creationTime,
-            requestNewTicket = false, // TODO
+            requestNewTicket = requestNewTicket,
             ticketId = ticketId,
             comment = null,
             attachments = null,
@@ -200,6 +209,10 @@ internal class LocalCommandsStore(
      */
     fun removeAllCommands() {
         writeCommands(emptyList())
+    }
+
+    fun getNextLocalId(): Long {
+        return lastLocalId.decrementAndGet()
     }
 
     private fun createNewTicketCommandEntity(
@@ -335,10 +348,6 @@ internal class LocalCommandsStore(
             token = null,
             tokenType = null,
         )
-    }
-
-    private fun getNextLocalId(): Long {
-        return lastLocalId.decrementAndGet()
     }
 
     private fun getNextAttachmentId(): Long {

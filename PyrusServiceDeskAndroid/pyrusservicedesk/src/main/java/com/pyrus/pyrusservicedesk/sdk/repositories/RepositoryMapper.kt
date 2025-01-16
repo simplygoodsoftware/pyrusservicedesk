@@ -20,13 +20,11 @@ import com.pyrus.pyrusservicedesk.sdk.data.TicketDto
 import com.pyrus.pyrusservicedesk.sdk.data.intermediate.TicketsDto
 import com.pyrus.pyrusservicedesk.sdk.sync.SyncRequest
 import com.pyrus.pyrusservicedesk.sdk.sync.TicketCommandType.*
-import java.util.concurrent.ConcurrentHashMap
 
 internal class RepositoryMapper(
-    private val account: Account
+    private val account: Account,
+    private val idStore: IdStore
 ) {
-
-    private val ticketIdMap = ConcurrentHashMap<Long, Long>()
 
     fun mergeTickets(ticketsDto: TicketsDto?, commands: List<CommandEntity>): List<TicketSetInfo> {
 
@@ -35,9 +33,13 @@ internal class RepositoryMapper(
         val commandsById = commands.groupBy { it.ticketId }
         tickets += ticketsDto?.tickets?.mapNotNull { ticketDto ->
             val ticketCommands = commandsById[ticketDto.ticketId] ?: emptyList()
-            val commandsWithLocalId = commandsById[ticketIdMap[ticketDto.ticketId]] ?: emptyList()
+
+            val localId = idStore.getTicketLocalId(ticketDto.ticketId)
+            val commandsWithLocalId = commandsById[localId] ?: emptyList()
+
             if (ticketDto.userId == null) return@mapNotNull null
-            mergeTicketInternal(
+
+            mergeTicket(
                 userId = ticketDto.userId,
                 ticketDto = ticketDto,
                 commands = ticketCommands + commandsWithLocalId
@@ -45,11 +47,15 @@ internal class RepositoryMapper(
         } ?: emptyList()
 
         val createTicketCommands = commands.filter {
-            it.commandType == CreateComment.ordinal && it.requestNewTicket == true
-        }
+            it.ticketId != null
+                && idStore.getTicketServerId(it.ticketId) == null
+                && it.commandType == CreateComment.ordinal
+                && it.requestNewTicket == true
+        }.distinctBy { it.ticketId }
+
         tickets += createTicketCommands.map {
-            val ticketCommands = commandsById[it.ticketId] ?: emptyList()
-            mapToFullTicket(it, ticketCommands)
+            val ticketCommands = commandsById[it.ticketId!!] ?: emptyList()
+            mapToFullTicket(it.ticketId, it.userId, ticketCommands)
         }
 
         val smallUsers = mapToSmallAcc(account) // TODO use account store
@@ -86,12 +92,7 @@ internal class RepositoryMapper(
         return ticketSetInfoList
     }
 
-    fun mergeTicket(userId: String, ticketDto: TicketDto, commands: List<CommandEntity>): FullTicket {
-        val ticketCommands = commands.filter { it.ticketId == ticketDto.ticketId }
-        return mergeTicketInternal(userId, ticketDto, ticketCommands)
-    }
-
-    private fun mergeTicketInternal(
+    fun mergeTicket(
         userId: String,
         ticketDto: TicketDto,
         commands: List<CommandEntity>,
@@ -255,32 +256,18 @@ internal class RepositoryMapper(
     }
 
     fun mapToFullTicket(
-        command: CommandEntity,
-        addCommentCommands: List<CommandEntity>,
-    ): FullTicket {
-        val initialComment = map(command)
-        return mapToFullTicket(
-            initialComment = initialComment,
-            ticketId = command.ticketId!!,
-            userId = command.userId,
-            addCommentCommands = addCommentCommands,
-        )
-    }
-
-    private fun mapToFullTicket(
-        initialComment: Comment,
         ticketId: Long,
         userId: String,
         addCommentCommands: List<CommandEntity>,
     ): FullTicket {
         val comments = ArrayList<Comment>()
-        comments += initialComment
         comments += addCommentCommands.map(::map)
         comments.sortBy { it.creationTime }
         val lastComment = comments.lastOrNull()
+        val firstComment = comments.firstOrNull()
 
         return FullTicket(
-            subject = initialComment.body,
+            subject = firstComment?.body,
             isRead = true,
             lastComment = lastComment,
             comments = comments,

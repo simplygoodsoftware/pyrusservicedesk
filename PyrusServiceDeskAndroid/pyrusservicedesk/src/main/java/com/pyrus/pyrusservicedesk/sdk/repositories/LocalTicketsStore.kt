@@ -8,7 +8,9 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.map
 
-internal class LocalTicketsStore {
+internal class LocalTicketsStore(
+    private val idStore: IdStore,
+) {
 
     private val ticketsInfoState = MutableStateFlow<TicketsDto?>(null)
 
@@ -26,7 +28,8 @@ internal class LocalTicketsStore {
     fun getTicketInfoFlow(): Flow<TicketsDto?> = ticketsInfoState
 
     fun getTicketInfoFlow(ticketId: Long): Flow<TicketDto?> = ticketsInfoState.map { ticketsDto ->
-        ticketsDto?.tickets?.find { it.ticketId == ticketId }
+        val serverTicketId = idStore.getTicketServerId(ticketId) ?: ticketId
+        ticketsDto?.tickets?.find { it.ticketId == serverTicketId }
     }
 
     private fun mergeDiff(localState: TicketsDto?, diff: TicketsDto): TicketsDto {

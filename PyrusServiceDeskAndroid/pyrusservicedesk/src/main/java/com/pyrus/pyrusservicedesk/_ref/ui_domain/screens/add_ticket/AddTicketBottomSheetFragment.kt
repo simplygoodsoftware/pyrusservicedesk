@@ -39,7 +39,7 @@ class AddTicketBottomSheetFragment: BottomSheetDialogFragment() {
                 val user = selectedUsers[position]
                 injector().router.navigateTo(
                     Screens.TicketScreen(
-                        null,
+                        injector().localCommandsStore.getNextLocalId(),
                         UserInternal(user.userId, user.appId)
                     ).setSlideRightAnimation()
                 )

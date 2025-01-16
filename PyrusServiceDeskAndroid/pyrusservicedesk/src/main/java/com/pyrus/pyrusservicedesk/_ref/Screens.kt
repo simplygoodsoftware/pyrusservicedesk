@@ -15,7 +15,7 @@ internal object Screens {
         AttachFileVariantsFragment.newInstance(key)
     }
 
-    fun TicketScreen(ticketId: Long?, user: UserInternal) = FragmentScreen {
+    fun TicketScreen(ticketId: Long, user: UserInternal) = FragmentScreen {
         TicketFragment.newInstance(ticketId, user)
     }
 

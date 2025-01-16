@@ -18,6 +18,7 @@ import com.pyrus.pyrusservicedesk._ref.whitetea.core.adaptCast
 import com.pyrus.pyrusservicedesk._ref.whitetea.core.logic.Logic
 import com.pyrus.pyrusservicedesk._ref.whitetea.utils.adapt
 import com.pyrus.pyrusservicedesk.core.Account
+import com.pyrus.pyrusservicedesk.sdk.repositories.LocalCommandsStore
 import com.pyrus.pyrusservicedesk.sdk.repositories.Repository
 import com.pyrus.pyrusservicedesk.sdk.repositories.UserInternal
 import kotlinx.coroutines.flow.Flow
@@ -31,13 +32,14 @@ internal class TicketsFeatureFactory(
     private val storeFactory: StoreFactory,
     private val repository: Repository,
     private val router: Router,
+    private val commandsStore: LocalCommandsStore,
 ) {
 
     fun create(): TicketsFeature = storeFactory.create(
         name = TAG,
         initialState = State(account, ContentState.Loading),
         reducer = FeatureReducer(),
-        actor = TicketsActor(repository, router).adaptCast(),
+        actor = TicketsActor(repository, router, commandsStore).adaptCast(),
         initialEffects = listOf(
             Effect.Inner.UpdateTickets(false), Effect.Inner.TicketsSetFlow
         ),
@@ -186,6 +188,7 @@ private class FeatureReducer: Logic<State, Message, Effect>() {
 internal class TicketsActor(
     private val repository: Repository,
     private val router: Router,
+    private val commandsStore: LocalCommandsStore,
 ): Actor<Effect.Inner, Message.Inner> {
 
     override fun handleEffect(effect: Effect.Inner): Flow<Message.Inner> = when(effect) {
@@ -200,7 +203,8 @@ internal class TicketsActor(
         Effect.Inner.TicketsSetFlow -> repository.getAllDataFlow().map { Message.Inner.TicketsUpdated(it) }
 
         is Effect.Inner.OpenTicketScreen -> flow {
-            router.navigateTo(Screens.TicketScreen(effect.ticketId, effect.user).setSlideRightAnimation())
+            val ticketId = effect.ticketId ?: commandsStore.getNextLocalId()
+            router.navigateTo(Screens.TicketScreen(ticketId, effect.user).setSlideRightAnimation())
         }
 
     }

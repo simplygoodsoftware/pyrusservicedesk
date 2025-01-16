@@ -61,7 +61,8 @@ internal class MainActivity : FragmentActivity() {
             }
             else {
                 val user = UserInternal(account.getUserId(), account.getAppId())
-                injector().router.newRootScreen(Screens.TicketScreen(null, user).setSlideRightAnimation())
+                val localId = injector().localCommandsStore.getNextLocalId()
+                injector().router.newRootScreen(Screens.TicketScreen(localId, user).setSlideRightAnimation())
             }
         }
     }

@@ -8,9 +8,7 @@ import com.pyrus.pyrusservicedesk._ref.ui_domain.screens.ticket.TicketContract.E
 import com.pyrus.pyrusservicedesk._ref.ui_domain.screens.ticket.TicketContract.Message
 import com.pyrus.pyrusservicedesk._ref.ui_domain.screens.ticket.TicketContract.State
 import com.pyrus.pyrusservicedesk._ref.utils.GetTicketsError
-import com.pyrus.pyrusservicedesk._ref.utils.RequestUtils.Companion.MAX_FILE_SIZE_BYTES
 import com.pyrus.pyrusservicedesk._ref.utils.RequestUtils.Companion.getFileUrl
-import com.pyrus.pyrusservicedesk._ref.utils.TextProvider
 import com.pyrus.pyrusservicedesk._ref.utils.Try2
 import com.pyrus.pyrusservicedesk._ref.utils.isSuccess
 import com.pyrus.pyrusservicedesk._ref.utils.navigation.PyrusRouter
@@ -31,6 +29,7 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.map
 import java.util.UUID
+import java.util.concurrent.atomic.AtomicLong
 import kotlin.coroutines.resume
 import kotlin.coroutines.suspendCoroutine
 
@@ -45,7 +44,7 @@ internal class TicketFeatureFactory(
 
     fun create(
         user: UserInternal,
-        ticketId: Long,
+        initialTicketId: Long,
         welcomeMessage: String?,
     ): TicketFeature = storeFactory.create(
         name = "TicketFeature",
@@ -53,7 +52,7 @@ internal class TicketFeatureFactory(
         reducer = FeatureReducer(),
         actor = TicketActor(
             account = account,
-            ticketId = ticketId,
+            initialTicketId = initialTicketId,
             user = user,
             repository = repository,
             router = router,
@@ -63,8 +62,8 @@ internal class TicketFeatureFactory(
         ).adaptCast(),
         initialEffects = listOf(
             Effect.Inner.FeedFlow,
-            Effect.Inner.UpdateComments(force = false, ticketId = ticketId),
-            Effect.Inner.ReadTicket(user = user, ticketId = ticketId),
+            Effect.Inner.UpdateComments(force = false, ticketId = initialTicketId),
+            Effect.Inner.ReadTicket(user = user, ticketId = initialTicketId),
         ),
     ).adapt { it as? Effect.Outer }
 
@@ -85,26 +84,6 @@ private class FeatureReducer: Logic<State, Message, Effect>() {
 
     private fun Result.handleOuter(message: Message.Outer) {
         when (message) {
-            is Message.Outer.OnAttachmentSelected -> {
-                if (state !is State.Content) return
-                message.fileUri ?: return // TODO Show toast
-                if (message.fileSize == null || message.fileSize > MAX_FILE_SIZE_BYTES) {
-                    effects {
-                        +Effect.Outer.MakeToast(
-                            TextProvider.Format(
-                                R.string.psd_file_size_exceeded_message, listOf(
-                                    MAX_FILE_SIZE_BYTES.toString()
-                                )
-                            )
-                        )
-                    }
-                    return
-                }
-                effects { +Effect.Inner.SendAttachComment(
-                    uri = message.fileUri,
-                    ticketId = (state as State.Content).ticketId,
-                ) }
-            }
             Message.Outer.OnCloseClick -> effects { +Effect.Inner.Close }
             is Message.Outer.OnCopyClick -> effects {
                 +Effect.Outer.CopyToClipboard(message.text)
@@ -202,7 +181,7 @@ private class FeatureReducer: Logic<State, Message, Effect>() {
 
 internal class TicketActor(
     private val account: Account,
-    private val ticketId: Long,
+    initialTicketId: Long,
     private val user: UserInternal,
     private val repository: Repository,
     private val router: PyrusRouter,
@@ -210,6 +189,8 @@ internal class TicketActor(
     private val draftRepository: DraftRepository,
     private val fileManager: FileManager,
 ): Actor<Effect.Inner, Message.Inner> {
+
+    private val currentTicketId: AtomicLong = AtomicLong(initialTicketId)
 
     override fun handleEffect(effect: Effect.Inner): Flow<Message.Inner> = when (effect) {
         is Effect.Inner.UpdateComments -> singleFlow {
@@ -219,6 +200,7 @@ internal class TicketActor(
             )
             when {
                 commentsTry.isSuccess() -> {
+                    currentTicketId.set(commentsTry.value.ticketId)
                     Message.Inner.UpdateCommentsCompleted(
                         ticket = commentsTry.value,
                         draft = draftRepository.getDraft(),
@@ -228,19 +210,21 @@ internal class TicketActor(
                 else -> Message.Inner.UpdateCommentsFailed(commentsTry.error)
             }
         }
-        Effect.Inner.FeedFlow -> repository.getFeedFlow(ticketId).map { Message.Inner.CommentsUpdated(it) }
+        Effect.Inner.FeedFlow -> repository.getFeedFlow(currentTicketId.get()).map {
+            if (it != null) {
+                currentTicketId.set(it.ticketId)
+            }
+            Message.Inner.CommentsUpdated(it)
+        }
         Effect.Inner.Close -> flow { router.exit() }
         is Effect.Inner.SendTextComment -> flow {
-            repository.addTextComment(user, ticketId, effect.text)
+            repository.addTextComment(user, currentTicketId.get(), effect.text)
         }
         is Effect.Inner.SendRatingComment -> flow {
-            repository.addRatingComment(user, ticketId, effect.rating)
-        }
-        is Effect.Inner.SendAttachComment -> flow {
-            val fileUri = try { fileManager.copyFile(effect.uri) } catch (e: Exception) { null } ?: return@flow
-            repository.addAttachComment(user, ticketId, fileUri)
+            repository.addRatingComment(user, currentTicketId.get(), effect.rating)
         }
         is Effect.Inner.RetryAddComment -> flow {
+            // TODO FSDS
 //            repository.retryAddComment(user, ticketId, effect.id)
         }
         is Effect.Inner.OpenPreview -> flow {
@@ -259,13 +243,11 @@ internal class TicketActor(
             val key = UUID.randomUUID().toString()
             router.navigateTo(Screens.AttachFileVariantsScreen(key))
             val uri: Any = suspendCoroutine { continuation ->
-                router.setResultListener(key) {
-                    continuation.resume(it)
-                }
+                router.setResultListener(key) { continuation.resume(it) }
             }
             if (uri !is Uri) return@flow
             val fileUri = try { fileManager.copyFile(uri) } catch (e: Exception) { null } ?: return@flow
-            repository.addAttachComment(user, ticketId, fileUri)
+            repository.addAttachComment(user, currentTicketId.get(), fileUri)
         }
     }
 

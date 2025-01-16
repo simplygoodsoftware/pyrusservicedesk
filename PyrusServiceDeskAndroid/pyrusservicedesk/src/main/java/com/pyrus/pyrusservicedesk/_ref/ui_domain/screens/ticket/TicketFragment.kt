@@ -141,7 +141,7 @@ internal class TicketFragment: TeaFragment<Model, TicketView.Event, TicketView.E
 
         val feature = getStore { injector().ticketFeatureFactory.create(
             user = user,
-            ticketId = ticketId,
+            initialTicketId = ticketId,
             welcomeMessage = ConfigUtils.getWelcomeMessage()
         ) }
         bind(BinderLifecycleMode.CREATE_DESTROY) {
@@ -313,11 +313,11 @@ internal class TicketFragment: TeaFragment<Model, TicketView.Event, TicketView.E
         private const val KEY_TICKET_ID = "KEY_TICKET_ID"
         private const val KEY_USER_INTERNAL = "KEY_USER_INTERNAL"
 
-        fun newInstance(ticketId: Long?, user: UserInternal): TicketFragment {
+        fun newInstance(ticketId: Long, user: UserInternal): TicketFragment {
             val fragment = TicketFragment()
             val args = Bundle().apply {
                 putParcelable(KEY_USER_INTERNAL, user)
-                ticketId?.let { putLong(KEY_TICKET_ID, it) }
+                putLong(KEY_TICKET_ID, ticketId)
             }
             fragment.arguments = args
             return fragment

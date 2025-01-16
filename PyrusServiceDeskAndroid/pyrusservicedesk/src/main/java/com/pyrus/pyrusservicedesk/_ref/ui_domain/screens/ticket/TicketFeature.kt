@@ -50,8 +50,6 @@ internal interface TicketContract {
 
             data class OnMessageChanged(val text: String) : Outer
 
-            data class OnAttachmentSelected(val fileUri: Uri?, val fileSize: Long?) : Outer
-
             data object OnRefresh : Outer
 
             data object OnBackClick : Outer
@@ -90,10 +88,6 @@ internal interface TicketContract {
             ) : Inner
             data class SendRatingComment(
                 val rating: Int,
-                val ticketId: Long,
-            ) : Inner
-            data class SendAttachComment(
-                val uri: Uri,
                 val ticketId: Long,
             ) : Inner
             data class RetryAddComment(val id: Long) : Inner
