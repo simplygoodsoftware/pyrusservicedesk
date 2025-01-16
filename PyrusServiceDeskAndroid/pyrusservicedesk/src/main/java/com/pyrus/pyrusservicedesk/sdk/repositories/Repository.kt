@@ -63,10 +63,7 @@ internal class Repository(
     }
 
     //TODO what we need to do when we haven't fount ticket (feedTry.value == null, but feedTry.isSuccess()) (k) sm
-    suspend fun getFeed(
-        ticketId: Long,
-        force: Boolean,
-    ): Try2<FullTicket, GetTicketsError> {
+    suspend fun getFeed(ticketId: Long, force: Boolean): Try2<FullTicket, GetTicketsError> {
 
         if (!force) {
             val localTickets: TicketsDto? = localTicketsStore.getTickets()
@@ -109,22 +106,14 @@ internal class Repository(
         }
     }
 
-    fun addTextComment(
-        user: UserInternal,
-        ticketId: Long,
-        textBody: String,
-    ) = coroutineScope.launch {
+    fun addTextComment(user: UserInternal, ticketId: Long, textBody: String) = coroutineScope.launch {
         val serverTicketId = idStore.getTicketServerId(ticketId) ?: ticketId
         val requestNewTicket = needsToRequestNewTicket(serverTicketId)
         val command = localCommandsStore.addTextCommand(user, serverTicketId, requestNewTicket, textBody)
         syncCommand(command)
     }
 
-    fun addAttachComment(
-        user: UserInternal,
-        ticketId: Long,
-        fileUri: Uri,
-    ) = coroutineScope.launch {
+    fun addAttachComment(user: UserInternal, ticketId: Long, fileUri: Uri) = coroutineScope.launch {
         val fileData = fileResolver.getFileData(fileUri) ?: return@launch
 
         var serverTicketId = idStore.getTicketServerId(ticketId) ?: ticketId
@@ -175,11 +164,7 @@ internal class Repository(
         syncCommand(command)
     }
 
-    fun addRatingComment(
-        user: UserInternal,
-        ticketId: Long,
-        rating: Int,
-    ) = coroutineScope.launch {
+    fun addRatingComment(user: UserInternal, ticketId: Long, rating: Int) = coroutineScope.launch {
         val serverTicketId = idStore.getTicketServerId(ticketId) ?: ticketId
         val requestNewTicket = needsToRequestNewTicket(serverTicketId)
         val command = localCommandsStore.addRatingCommand(user, serverTicketId, requestNewTicket, rating)
