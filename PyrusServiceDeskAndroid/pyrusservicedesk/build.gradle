@@ -92,6 +92,7 @@ dependencies {
 
     implementation 'org.jsoup:jsoup:1.18.1'
     implementation("com.github.terrakok:cicerone:7.1")
+    implementation 'androidx.coordinatorlayout:coordinatorlayout:1.2.0'
 
     implementation("com.google.code.findbugs:jsr305:3.0.2")
 

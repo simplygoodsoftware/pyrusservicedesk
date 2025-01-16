@@ -5,6 +5,7 @@ import com.squareup.moshi.JsonClass
 
 @JsonClass(generateAdapter = true)
 internal data class CommandEntity(
+    @Json(name = "is_error") val isError: Boolean,
     @Json(name = "local_id") val localId: Long,
     @Json(name = "command_id") val commandId: String,
     @Json(name = "command_type") val commandType: Int,
@@ -17,4 +18,6 @@ internal data class CommandEntity(
     @Json(name = "ticket_id") val ticketId: Long?,
     @Json(name = "rating") val rating: Int?,
     @Json(name = "comment_id") val commentId: Long?,
+    @Json(name = "token") val token: String?,
+    @Json(name = "token_type") val tokenType: String?,
 )

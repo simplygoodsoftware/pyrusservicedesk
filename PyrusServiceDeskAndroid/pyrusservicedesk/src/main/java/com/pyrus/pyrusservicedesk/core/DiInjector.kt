@@ -123,7 +123,8 @@ internal class DiInjector(
         remoteFileStore = remoteFileStore,
         synchronizer = synchronizer,
         localTicketsStore = localTicketsStore,
-        coroutineScope = coreScope
+        coroutineScope = coreScope,
+        accountStore = accountStore
     )
 
     private val preferencesManager = PreferencesManager(preferences)

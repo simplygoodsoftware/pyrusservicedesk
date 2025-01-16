@@ -75,7 +75,6 @@ internal interface TicketContract {
         sealed interface Outer : Effect {
             data class CopyToClipboard(val text: String) : Outer
             data class MakeToast(val text: TextProvider) : Outer
-            data object ShowAttachVariants : Outer
         }
 
         sealed interface Inner : Effect {
@@ -101,6 +100,7 @@ internal interface TicketContract {
             data class OpenPreview(val attachment: Attachment, val userId: String?) : Inner
             data class SaveDraft(val draft: String) : Inner
             data class ReadTicket(val user: UserInternal, val ticketId: Long) : Inner
+            data object ShowAttachVariants : Inner
         }
     }
 

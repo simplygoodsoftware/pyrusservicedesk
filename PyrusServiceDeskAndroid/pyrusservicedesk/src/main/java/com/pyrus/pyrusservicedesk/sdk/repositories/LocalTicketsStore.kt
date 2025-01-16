@@ -5,6 +5,8 @@ import com.pyrus.pyrusservicedesk.sdk.data.TicketDto
 import com.pyrus.pyrusservicedesk.sdk.data.intermediate.TicketsDto
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.filter
+import kotlinx.coroutines.flow.map
 
 internal class LocalTicketsStore {
 
@@ -22,6 +24,10 @@ internal class LocalTicketsStore {
     }
 
     fun getTicketInfoFlow(): Flow<TicketsDto?> = ticketsInfoState
+
+    fun getTicketInfoFlow(ticketId: Long): Flow<TicketDto?> = ticketsInfoState.map { ticketsDto ->
+        ticketsDto?.tickets?.find { it.ticketId == ticketId }
+    }
 
     private fun mergeDiff(localState: TicketsDto?, diff: TicketsDto): TicketsDto {
         if (localState == null) return diff

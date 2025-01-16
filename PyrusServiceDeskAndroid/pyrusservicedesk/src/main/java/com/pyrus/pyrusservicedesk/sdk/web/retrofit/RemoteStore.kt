@@ -159,36 +159,36 @@ internal class RemoteStore(
 //    }
 
 
-    private fun mapTickets(accountV3: Account.V3, ticketsDto: TicketsDto): TicketsInfo {
-        val mapper = RepositoryMapper(account)
-        val usersByAppId = accountV3.users.groupBy { it.appId }
-
-        val ticketsByUserId = ticketsDto.tickets
-            ?.map(mapper::map)
-            ?.groupBy { it.userId } ?: error("tickets is null")
-
-        val applications = ticketsDto.applications?.associateBy { it.appId } ?: error("applications is null")
-
-        val ticketSetInfoList = usersByAppId.keys.map { appId ->
-            val users = usersByAppId[appId] ?: emptyList()
-            val tickets = ArrayList<FullTicket>()
-            for (user in users) {
-                val userTickets = ticketsByUserId[user.userId] ?: continue
-                tickets += userTickets
-            }
-            val application = applications[appId]
-            val orgName = application?.orgName
-            val orgLogoUrl = application?.orgLogoUrl
-            TicketSetInfo(
-                appId = appId,
-                orgName = orgName ?: "",
-                orgLogoUrl = orgLogoUrl,
-                tickets = tickets,
-            )
-        }
-
-        return TicketsInfo(ticketSetInfoList)
-    }
+//    private fun mapTickets(accountV3: Account.V3, ticketsDto: TicketsDto): TicketsInfo {
+//        val mapper = RepositoryMapper(account)
+//        val usersByAppId = accountV3.users.groupBy { it.appId }
+//
+//        val ticketsByUserId = ticketsDto.tickets
+//            ?.map(mapper::mapToFullTicket)
+//            ?.groupBy { it.userId } ?: error("tickets is null")
+//
+//        val applications = ticketsDto.applications?.associateBy { it.appId } ?: error("applications is null")
+//
+//        val ticketSetInfoList = usersByAppId.keys.map { appId ->
+//            val users = usersByAppId[appId] ?: emptyList()
+//            val tickets = ArrayList<FullTicket>()
+//            for (user in users) {
+//                val userTickets = ticketsByUserId[user.userId] ?: continue
+//                tickets += userTickets
+//            }
+//            val application = applications[appId]
+//            val orgName = application?.orgName
+//            val orgLogoUrl = application?.orgLogoUrl
+//            TicketSetInfo(
+//                appId = appId,
+//                orgName = orgName ?: "",
+//                orgLogoUrl = orgLogoUrl,
+//                tickets = tickets,
+//            )
+//        }
+//
+//        return TicketsInfo(ticketSetInfoList)
+//    }
 
     private fun getAdditionalUsers(): List<UserDataDto>? {
         val list = PyrusServiceDesk.ticketsListStateFlow.value.map { UserDataDto(it.appId, it.userId, "", null) }

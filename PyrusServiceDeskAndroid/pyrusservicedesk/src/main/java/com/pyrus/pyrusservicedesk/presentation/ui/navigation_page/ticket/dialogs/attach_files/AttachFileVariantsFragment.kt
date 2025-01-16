@@ -1,7 +1,6 @@
 package com.pyrus.pyrusservicedesk.presentation.ui.navigation_page.ticket.dialogs.attach_files
 
 import android.Manifest.permission.CAMERA
-import android.annotation.SuppressLint
 import android.app.Activity.RESULT_OK
 import android.content.Intent
 import android.content.pm.PackageManager
@@ -12,17 +11,19 @@ import android.view.View
 import android.view.View.GONE
 import android.view.View.VISIBLE
 import android.view.ViewGroup
+import androidx.core.os.bundleOf
 import androidx.core.util.Consumer
-import com.google.android.material.bottomsheet.BottomSheetBehavior
-import com.google.android.material.bottomsheet.BottomSheetDialog
-import com.google.android.material.bottomsheet.BottomSheetDialogFragment
-import com.pyrus.pyrusservicedesk.R
+import androidx.core.view.ViewCompat
+import androidx.core.view.WindowInsetsCompat
+import com.pyrus.pyrusservicedesk.PyrusServiceDesk.Companion.injector
+import com.pyrus.pyrusservicedesk._ref.utils.BottomSheetFragment
 import com.pyrus.pyrusservicedesk._ref.utils.ConfigUtils
 import com.pyrus.pyrusservicedesk._ref.utils.MIME_TYPE_IMAGE_ANY
 import com.pyrus.pyrusservicedesk._ref.utils.dispatchTakePhotoIntent
 import com.pyrus.pyrusservicedesk._ref.utils.getViewModelWithActivityScope
 import com.pyrus.pyrusservicedesk._ref.utils.hasPermission
 import com.pyrus.pyrusservicedesk._ref.utils.hasPermissionInManifeset
+import com.pyrus.pyrusservicedesk._ref.utils.insets.RootViewDeferringInsetsCallback
 import com.pyrus.pyrusservicedesk._ref.utils.isCapturingPhotoSupported
 import com.pyrus.pyrusservicedesk._ref.utils.log.PLog
 import com.pyrus.pyrusservicedesk.core.StaticRepository
@@ -32,16 +33,13 @@ import java.io.File
 /**
  * UI that is used for attaching files to the comments.
  */
-internal class AttachFileVariantsFragment: BottomSheetDialogFragment(), View.OnClickListener {
+internal class AttachFileVariantsFragment: BottomSheetFragment(), View.OnClickListener {
 
     private var capturePhotoUri: Uri? = null
-    private val sharedModel: AttachFileSharedViewModel by getViewModelWithActivityScope(
-        AttachFileSharedViewModel::class.java)
 
     private val logSubscriber: Consumer<File> = Consumer {
         val uri = Uri.fromFile(it)
-        sharedModel.onFilePicked(uri)
-        dismiss()
+        sendResultAndClose(uri)
     }
 
     private lateinit var binding: PsdFragmentAttachFileVariantsBinding
@@ -51,21 +49,25 @@ internal class AttachFileVariantsFragment: BottomSheetDialogFragment(), View.OnC
         capturePhotoUri = savedInstanceState?.getParcelable(STATE_KEY_PHOTO_URI)
     }
 
-    @SuppressLint("InflateParams")
-    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
-        super.onCreateView(inflater, container, savedInstanceState)
-        dialog?.setOnShowListener { dialog ->
-            val d = dialog as BottomSheetDialog
-            val bottomSheetInternal = d.findViewById<View>(R.id.design_bottom_sheet)
-            BottomSheetBehavior.from(bottomSheetInternal!!).state = BottomSheetBehavior.STATE_EXPANDED
-        }
-        binding = PsdFragmentAttachFileVariantsBinding.inflate(inflater, null, false)
-        binding.root.setBackgroundColor(ConfigUtils.getFileMenuBackgroundColor(inflater.context))
+    override fun onCreateBottomSheetView(
+        inflater: LayoutInflater,
+        container: ViewGroup?,
+        savedInstanceState: Bundle?,
+    ): View {
+        binding = PsdFragmentAttachFileVariantsBinding.inflate(inflater, container, false)
+        binding.content.setBackgroundColor(ConfigUtils.getFileMenuBackgroundColor(inflater.context))
         return binding.root
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+
+        val deferringInsetsListener = RootViewDeferringInsetsCallback(
+            persistentInsetTypes = WindowInsetsCompat.Type.systemBars(),
+            deferredInsetTypes = WindowInsetsCompat.Type.ime()
+        )
+        ViewCompat.setOnApplyWindowInsetsListener(binding.root, deferringInsetsListener)
+
         binding.photoVariant.setOnClickListener(this)
         binding.photoVariant.visibility = if (isCapturingPhotoSupported()) VISIBLE else GONE
         binding.galleryVariant.setOnClickListener(this)
@@ -88,6 +90,10 @@ internal class AttachFileVariantsFragment: BottomSheetDialogFragment(), View.OnC
             binding.photoVariant.typeface = it
             binding.galleryVariant.typeface = it
             binding.sendLogsVariant.typeface = it
+        }
+
+        binding.backgroundView.setOnClickListener {
+            closeFragment()
         }
     }
 
@@ -131,10 +137,15 @@ internal class AttachFileVariantsFragment: BottomSheetDialogFragment(), View.OnC
                     Intent.FLAG_GRANT_READ_URI_PERMISSION
                 )
             }
-            sharedModel.onFilePicked(location)
-            dismiss()
+            sendResultAndClose(location)
         }
         capturePhotoUri = null
+    }
+
+    private fun sendResultAndClose(uri: Uri) {
+        val router = injector().router
+        router.sendResult(requireArguments().getString(RESULT_KEY)!!, uri)
+        router.exit()
     }
 
     private fun openCustomChooser() {
@@ -204,13 +215,20 @@ internal class AttachFileVariantsFragment: BottomSheetDialogFragment(), View.OnC
         }
     }
 
-    private companion object {
-        const val REQUEST_CODE_PERMISSION = 0
-        const val REQUEST_CODE_CUSTOM_CHOOSER = 1
-        const val REQUEST_CODE_PICK_IMAGE = 2
-        const val REQUEST_CODE_TAKE_PHOTO = 3
+    internal companion object {
+        private const val REQUEST_CODE_PERMISSION = 0
+        private const val REQUEST_CODE_CUSTOM_CHOOSER = 1
+        private const val REQUEST_CODE_PICK_IMAGE = 2
+        private const val REQUEST_CODE_TAKE_PHOTO = 3
 
-        const val STATE_KEY_PHOTO_URI = "STATE_KEY_PHOTO_URI"
+        private const val STATE_KEY_PHOTO_URI = "STATE_KEY_PHOTO_URI"
+        private const val RESULT_KEY = "RESULT_KEY"
+
+        fun newInstance(key: String): AttachFileVariantsFragment {
+            val fragment = AttachFileVariantsFragment()
+            fragment.arguments = bundleOf(RESULT_KEY to key)
+            return fragment
+        }
     }
 
 }

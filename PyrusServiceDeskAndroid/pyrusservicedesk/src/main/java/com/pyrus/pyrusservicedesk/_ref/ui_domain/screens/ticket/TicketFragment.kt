@@ -2,11 +2,9 @@ package com.pyrus.pyrusservicedesk._ref.ui_domain.screens.ticket
 
 import android.content.ClipData
 import android.content.ClipboardManager
-import android.content.ContentResolver
 import android.content.res.ColorStateList
 import android.os.Build
 import android.os.Bundle
-import android.provider.OpenableColumns
 import android.text.Editable
 import android.text.TextWatcher
 import android.view.LayoutInflater
@@ -31,7 +29,6 @@ import com.pyrus.pyrusservicedesk._ref.ui_domain.screens.ticket.adapter.new_entr
 import com.pyrus.pyrusservicedesk._ref.utils.ConfigUtils
 import com.pyrus.pyrusservicedesk._ref.utils.getColorOnBackground
 import com.pyrus.pyrusservicedesk._ref.utils.getSecondaryColorOnBackground
-import com.pyrus.pyrusservicedesk._ref.utils.getViewModelWithActivityScope
 import com.pyrus.pyrusservicedesk._ref.utils.insets.RootViewDeferringInsetsCallback
 import com.pyrus.pyrusservicedesk._ref.utils.setCursorColor
 import com.pyrus.pyrusservicedesk._ref.utils.showKeyboardOn
@@ -43,8 +40,6 @@ import com.pyrus.pyrusservicedesk._ref.whitetea.bind.BinderLifecycleMode
 import com.pyrus.pyrusservicedesk._ref.whitetea.core.ViewRenderer
 import com.pyrus.pyrusservicedesk._ref.whitetea.utils.diff
 import com.pyrus.pyrusservicedesk.databinding.PsdFragmentTicketBinding
-import com.pyrus.pyrusservicedesk.presentation.ui.navigation_page.ticket.dialogs.attach_files.AttachFileSharedViewModel
-import com.pyrus.pyrusservicedesk.presentation.ui.navigation_page.ticket.dialogs.attach_files.AttachFileVariantsFragment
 import com.pyrus.pyrusservicedesk.presentation.ui.view.recyclerview.item_decorators.GroupVerticalItemDecoration
 import com.pyrus.pyrusservicedesk.sdk.repositories.UserInternal
 import kotlinx.coroutines.flow.map
@@ -70,10 +65,6 @@ internal class TicketFragment: TeaFragment<Model, TicketView.Event, TicketView.E
             dispatch(TicketView.Event.OnMessageChanged(s.toString()))
         }
     }
-
-    private val attachFileSharedViewModel: AttachFileSharedViewModel by getViewModelWithActivityScope(
-        AttachFileSharedViewModel::class.java
-    )
 
     override fun createRenderer(): ViewRenderer<Model> = diff {
         diff(Model::inputText) { text -> if (!binding.input.hasFocus()) binding.input.setText(text) }
@@ -101,10 +92,6 @@ internal class TicketFragment: TeaFragment<Model, TicketView.Event, TicketView.E
                     effect.text.text(requireContext()),
                     Toast.LENGTH_SHORT
                 ).show()
-            }
-
-            TicketView.Effect.ShowAttachVariants -> {
-                AttachFileVariantsFragment().show(parentFragmentManager, "")
             }
         }
     }
@@ -139,20 +126,6 @@ internal class TicketFragment: TeaFragment<Model, TicketView.Event, TicketView.E
             deferredInsetTypes = WindowInsetsCompat.Type.ime()
         )
         ViewCompat.setOnApplyWindowInsetsListener(binding.root, deferringInsetsListener)
-
-        attachFileSharedViewModel.getFilePickedLiveData().observe(viewLifecycleOwner) { fileUri ->
-            val contentResolver: ContentResolver? = context?.contentResolver
-            val cursor = fileUri?.let { contentResolver?.query(it, null, null, null, null) }
-            val fileSize = cursor?.use {
-                if (it.moveToFirst()) {
-                    val sizeIndex = it.getColumnIndex(OpenableColumns.SIZE)
-                    it.getLong(sizeIndex)
-                } else {
-                    null
-                }
-            }
-            dispatch(TicketView.Event.OnAttachmentSelected(fileUri, fileSize))
-        }
     }
 
     override fun onSaveInstanceState(outState: Bundle) {
