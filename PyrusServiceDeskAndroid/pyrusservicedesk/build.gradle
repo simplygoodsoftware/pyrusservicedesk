@@ -38,10 +38,6 @@ android {
     productFlavors {
     }
 
-    lintOptions {
-        abortOnError false
-    }
-
     sourceSets{
         androidTest.java.srcDirs += "src/androidTest/kotlin"
         main.java.srcDirs += "src/main/kotlin"
@@ -56,6 +52,10 @@ android {
         targetCompatibility = JavaVersion.VERSION_17
     }
     namespace 'com.pyrus.pyrusservicedesk'
+
+    lint {
+        abortOnError false
+    }
 }
 
 dependencies {
