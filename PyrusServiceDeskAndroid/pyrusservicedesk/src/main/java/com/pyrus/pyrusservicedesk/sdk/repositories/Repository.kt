@@ -1,6 +1,7 @@
 package com.pyrus.pyrusservicedesk.sdk.repositories
 
 import android.net.Uri
+import android.util.Log
 import androidx.core.net.toFile
 import com.pyrus.pyrusservicedesk._ref.data.FullTicket
 import com.pyrus.pyrusservicedesk._ref.data.multy_chat.TicketsInfo
@@ -96,7 +97,7 @@ internal class Repository(
             }
         }
 
-        val syncTry = synchronizer.syncData(SyncRequest.Data).checkResponse(serverId)
+        val syncTry = synchronizer.syncData(SyncRequest.Data).checkResponse(serverId, userId)
         if (syncTry.isFailed()) return syncTry
         val ticketDto = syncTry.value
 
@@ -249,7 +250,7 @@ internal class Repository(
         return TicketsInfo(repositoryMapper.mergeTickets(ticketsDto, commands))
     }
 
-    private fun Try<TicketsDto>.checkResponse(ticketId: Long): Try2<TicketDto, GetTicketsError> {
+    private fun Try<TicketsDto>.checkResponse(ticketId: Long, userId: String): Try2<TicketDto, GetTicketsError> {
         if (!this.isSuccess()) {
             return this.toTry2 {
                 when (error) {
@@ -268,6 +269,11 @@ internal class Repository(
 
         val tickets: TicketsDto = this.value
         val ticket: TicketDto? = tickets.tickets?.find { it.ticketId == ticketId }
+
+        if (tickets.authorAccessDenied?.find { it == userId } != null) {
+            return Try2.Failure(GetTicketsError.AuthorAccessDenied)
+        }
+
         if (ticket == null) {
             return Try2.Failure(GetTicketsError.NoDataFound)
         }

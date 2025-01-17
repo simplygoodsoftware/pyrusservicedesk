@@ -118,6 +118,9 @@ internal class Synchronizer(
                 request.continuation.resume(tryResult)
             }
 
+            if (getTicketsTry.value.authorAccessDenied != null) {
+                accountStore.removeUsers(getTicketsTry.value.authorAccessDenied)
+            }
             val newState = localTicketsStore.applyDiff(getTicketsTry.value)
             val dataRequests = syncRequests.filterIsInstance<SyncReqRes.Data>()
             for (request in dataRequests) {

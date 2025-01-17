@@ -67,6 +67,7 @@ internal class LocalTicketsStore(
             applications = diff.applications,
             tickets = mergedTickets,
             commandsResult = null,
+            authorAccessDenied = diff.authorAccessDenied,
         )
     }
 

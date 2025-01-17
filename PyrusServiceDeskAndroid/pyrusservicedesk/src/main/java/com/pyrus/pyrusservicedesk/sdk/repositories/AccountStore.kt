@@ -17,4 +17,13 @@ internal class AccountStore(initialAccount: Account) {
     fun getAccount(): Account {
         return accountState.value
     }
+
+    //TODO check it
+    fun removeUsers(users: List<String>) {
+        val account = getAccount()
+        if (account is Account.V3) {
+            val usersToRemove = account.users.filter { users.contains(it.userId) }
+            setAccount(account.copy(users = account.users.toMutableList().apply { removeAll(usersToRemove) }))
+        }
+    }
 }

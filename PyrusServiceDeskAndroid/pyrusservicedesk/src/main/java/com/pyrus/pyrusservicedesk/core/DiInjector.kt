@@ -150,7 +150,7 @@ internal class DiInjector(
     val navHolder: NavigatorHolder = cicerone.getNavigatorHolder()
 
     val ticketFeatureFactory = TicketFeatureFactory(
-        account = account,
+        accountStore = accountStore,
         storeFactory = storeFactory,
         repository = repository,
         draftRepository = draftRepository,

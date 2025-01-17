@@ -10,4 +10,6 @@ internal sealed interface GetTicketsError {
 
     data object NoDataFound: GetTicketsError
 
+    data object AuthorAccessDenied: GetTicketsError
+
 }

@@ -20,8 +20,10 @@ import com.pyrus.pyrusservicedesk._ref.whitetea.core.adaptCast
 import com.pyrus.pyrusservicedesk._ref.whitetea.core.logic.Logic
 import com.pyrus.pyrusservicedesk._ref.whitetea.utils.adapt
 import com.pyrus.pyrusservicedesk.core.Account
+import com.pyrus.pyrusservicedesk.core.getAdditionalUsers
 import com.pyrus.pyrusservicedesk.sdk.data.FileManager
 import com.pyrus.pyrusservicedesk.sdk.data.intermediate.FileData
+import com.pyrus.pyrusservicedesk.sdk.repositories.AccountStore
 import com.pyrus.pyrusservicedesk.sdk.repositories.DraftRepository
 import com.pyrus.pyrusservicedesk.sdk.repositories.Repository
 import com.pyrus.pyrusservicedesk.sdk.repositories.UserInternal
@@ -34,7 +36,7 @@ import kotlin.coroutines.resume
 import kotlin.coroutines.suspendCoroutine
 
 internal class TicketFeatureFactory(
-    private val account: Account,
+    private val accountStore: AccountStore,
     private val storeFactory: StoreFactory,
     private val repository: Repository,
     private val draftRepository: DraftRepository,
@@ -51,7 +53,7 @@ internal class TicketFeatureFactory(
         initialState = State.Loading,
         reducer = FeatureReducer(),
         actor = TicketActor(
-            account = account,
+            accountStore = accountStore,
             ticketId = initialTicketId,
             user = user,
             repository = repository,
@@ -142,8 +144,9 @@ private class FeatureReducer: Logic<State, Message, Effect>() {
             is Message.Inner.UpdateCommentsFailed -> {
                 when (val currentState = state) {
                     is State.Content -> {
-                        when {
-                            message.getTicketsError == GetTicketsError.NoDataFound -> effects { +Effect.Inner.Close }
+                        when (message.getTicketsError) {
+                            GetTicketsError.NoDataFound -> effects { +Effect.Inner.Close }
+                            GetTicketsError.AuthorAccessDenied -> effects { +Effect.Inner.Close }
                             else -> state { currentState.copy(isLoading = false) }
                         }
                     }
@@ -180,7 +183,7 @@ private class FeatureReducer: Logic<State, Message, Effect>() {
 }
 
 internal class TicketActor(
-    private val account: Account,
+    private val accountStore: AccountStore,
     private val ticketId: Long,
     private val user: UserInternal,
     private val repository: Repository,
@@ -210,6 +213,14 @@ internal class TicketActor(
             }
         }
 
+        Effect.Inner.FeedFlow -> flow {
+            accountStore.accountStateFlow().collect {
+                val users = accountStore.getAccount().getAdditionalUsers(null) ?: return@collect
+                if (users.find { it.userId == user.userId } == null)
+                    router.exit()
+            }
+        }
+
         Effect.Inner.FeedFlow -> repository.getFeedFlow(ticketId)
             .debounce(150)
             .map(Message.Inner::CommentsUpdated)
@@ -230,11 +241,11 @@ internal class TicketActor(
         }
 
         is Effect.Inner.OpenPreview -> flow {
-            val user = (account as? Account.V3)?.users?.find { it.userId == effect.userId }
+            val user = (accountStore.getAccount() as? Account.V3)?.users?.find { it.userId == effect.userId }
             val fileDate = FileData(
                 effect.attachment.name,
                 effect.attachment.bytesSize,
-                Uri.parse(getFileUrl(effect.attachment.id, account, user)),
+                Uri.parse(getFileUrl(effect.attachment.id, accountStore.getAccount(), user)),
                 false,
             )
             router.navigateTo(Screens.ImageScreen(fileDate))

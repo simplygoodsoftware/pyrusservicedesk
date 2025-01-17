@@ -15,4 +15,5 @@ internal data class TicketsDto(
     @Json(name = "applications") val applications: List<ApplicationDto>?,
     @Json(name = "tickets") val tickets: List<TicketDto>?,
     @Json(name = "commands_result") val commandsResult: List<TicketCommandResultDto>?,
+    @Json(name = "author_access_denied") val authorAccessDenied: List<String>?,
 )
