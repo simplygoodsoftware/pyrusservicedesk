@@ -144,12 +144,12 @@ internal class RepositoryMapper(
             else -> firstCommand?.comment
         }
         val lastCommentText: String? = when {
-            lastServerComment.olderThan(lastCommand) -> firstServerComment?.body
-            else -> firstCommand?.comment
+            lastServerComment.olderThan(lastCommand) -> lastServerComment?.body
+            else -> lastCommand?.comment
         }
         val lastCommentCreationDate: Long? = when {
-            lastServerComment.olderThan(lastCommand) -> firstServerComment?.creationDate
-            else -> firstCommand?.creationTime
+            lastServerComment.olderThan(lastCommand) -> lastServerComment?.creationDate
+            else -> lastCommand?.creationTime
         }
 
         return TicketHeader(
