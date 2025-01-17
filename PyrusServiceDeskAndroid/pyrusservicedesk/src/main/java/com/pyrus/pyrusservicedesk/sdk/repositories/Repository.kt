@@ -45,6 +45,19 @@ internal class Repository(
 
     private val fileHooks = ConcurrentHashMap<Long, UploadFileHook>()
 
+    init {
+        val initialCommands = localCommandsStore.getCommands()
+            .mapNotNull(repositoryMapper::mapToSyncRequest)
+
+        if (initialCommands.isNotEmpty()) {
+            coroutineScope.launch {
+                for (command in initialCommands) {
+                    sendCommand(command)
+                }
+            }
+        }
+    }
+
     suspend fun getAllData(force: Boolean): Try<TicketsInfo> {
         if (!force) {
             val localTickets: TicketsDto? = localTicketsStore.getTickets()
