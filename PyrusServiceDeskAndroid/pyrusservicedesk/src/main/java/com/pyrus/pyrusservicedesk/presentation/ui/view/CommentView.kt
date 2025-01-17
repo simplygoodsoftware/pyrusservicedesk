@@ -106,19 +106,19 @@ internal class CommentView @JvmOverloads constructor(
         set(value) {
             when (value) {
                 ContentType.Text -> {
-                    binding.commentText.visibility = View.VISIBLE
+                    binding.commentTextLayout.visibility = View.VISIBLE
                     binding.attachmentLayout.visibility = View.GONE
                     binding.previewLayout.visibility = GONE
                 }
                 ContentType.Attachment -> {
                     recentProgress = 0
-                    binding.commentText.visibility = View.GONE
+                    binding.commentTextLayout.visibility = View.GONE
                     binding.attachmentLayout.visibility = View.VISIBLE
                     binding.previewLayout.visibility = View.GONE
                 }
                 ContentType.PreviewableAttachment -> {
                     recentProgress = 0
-                    binding.commentText.visibility = GONE
+                    binding.commentTextLayout.visibility = GONE
                     binding.attachmentLayout.visibility = GONE
                     binding.previewLayout.visibility = View.VISIBLE
                 }
