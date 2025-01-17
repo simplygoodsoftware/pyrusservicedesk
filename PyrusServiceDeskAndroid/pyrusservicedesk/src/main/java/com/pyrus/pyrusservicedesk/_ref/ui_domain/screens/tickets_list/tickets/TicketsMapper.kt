@@ -1,5 +1,6 @@
 package com.pyrus.pyrusservicedesk._ref.ui_domain.screens.tickets_list.tickets
 
+import com.pyrus.pyrusservicedesk._ref.data.TicketHeader
 import com.pyrus.pyrusservicedesk._ref.data.multy_chat.TicketSetInfo
 import com.pyrus.pyrusservicedesk._ref.ui_domain.screens.tickets_list.tickets.TicketsContract.ContentState
 import com.pyrus.pyrusservicedesk._ref.ui_domain.screens.tickets_list.tickets.TicketsView.Model
@@ -13,7 +14,7 @@ internal object TicketsMapper {
         is ContentState.Content -> {
             userId = state.filterId
             Model(
-                titleText = state.titleText ?: "",
+                titleText = state.titleText,
                 titleImageUrl = state.titleImageUrl,
                 filterName = state.filterName,
                 ticketsIsEmpty = state.tickets.isNullOrEmpty(),
@@ -48,9 +49,25 @@ internal object TicketsMapper {
         )
     }
 
-    private fun map(ticketSetInfo: TicketSetInfo): TicketSetInfoEntry = TicketSetInfoEntry(
-        appId = ticketSetInfo.appId,
-        titleText = ticketSetInfo.orgName,
-        tickets = if (userId != null ) ticketSetInfo.tickets.filter { it.userId == userId } else ticketSetInfo.tickets, // TODO map to entry
+    private fun map(ticketSetInfo: TicketSetInfo): TicketSetInfoEntry {
+
+        val filteredTickets =
+            if (userId == null) ticketSetInfo.tickets
+            else ticketSetInfo.tickets.filter { it.userId == userId }
+
+        return TicketSetInfoEntry(
+            appId = ticketSetInfo.appId,
+            titleText = ticketSetInfo.orgName,
+            tickets = filteredTickets.map(::map),
+        )
+    }
+
+    private fun map(header: TicketHeader): Model.TicketHeaderEntry = Model.TicketHeaderEntry(
+        ticketId = header.ticketId,
+        userId = header.userId,
+        title = header.subject,
+        lastCommentText = header.lastCommentText,
+        lastCommentCreationTime = header.lastCommentCreationDate,
+        isRead = header.isRead
     )
 }

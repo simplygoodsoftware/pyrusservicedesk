@@ -26,10 +26,10 @@ import com.pyrus.pyrusservicedesk.sdk.repositories.DraftRepository
 import com.pyrus.pyrusservicedesk.sdk.repositories.Repository
 import com.pyrus.pyrusservicedesk.sdk.repositories.UserInternal
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.debounce
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.map
 import java.util.UUID
-import java.util.concurrent.atomic.AtomicLong
 import kotlin.coroutines.resume
 import kotlin.coroutines.suspendCoroutine
 
@@ -52,7 +52,7 @@ internal class TicketFeatureFactory(
         reducer = FeatureReducer(),
         actor = TicketActor(
             account = account,
-            initialTicketId = initialTicketId,
+            ticketId = initialTicketId,
             user = user,
             repository = repository,
             router = router,
@@ -181,7 +181,7 @@ private class FeatureReducer: Logic<State, Message, Effect>() {
 
 internal class TicketActor(
     private val account: Account,
-    initialTicketId: Long,
+    private val ticketId: Long,
     private val user: UserInternal,
     private val repository: Repository,
     private val router: PyrusRouter,
@@ -190,9 +190,8 @@ internal class TicketActor(
     private val fileManager: FileManager,
 ): Actor<Effect.Inner, Message.Inner> {
 
-    private val currentTicketId: AtomicLong = AtomicLong(initialTicketId)
-
     override fun handleEffect(effect: Effect.Inner): Flow<Message.Inner> = when (effect) {
+
         is Effect.Inner.UpdateComments -> singleFlow {
             val commentsTry: Try2<FullTicket, GetTicketsError> = repository.getFeed(
                 userId = user.userId,
@@ -201,7 +200,6 @@ internal class TicketActor(
             )
             when {
                 commentsTry.isSuccess() -> {
-                    currentTicketId.set(commentsTry.value.ticketId)
                     Message.Inner.UpdateCommentsCompleted(
                         ticket = commentsTry.value,
                         draft = draftRepository.getDraft(),
@@ -211,23 +209,26 @@ internal class TicketActor(
                 else -> Message.Inner.UpdateCommentsFailed(commentsTry.error)
             }
         }
-        Effect.Inner.FeedFlow -> repository.getFeedFlow(currentTicketId.get()).map {
-            if (it != null) {
-                currentTicketId.set(it.ticketId)
-            }
-            Message.Inner.CommentsUpdated(it)
-        }
+
+        Effect.Inner.FeedFlow -> repository.getFeedFlow(ticketId)
+            .debounce(150)
+            .map(Message.Inner::CommentsUpdated)
+
         Effect.Inner.Close -> flow { router.exit() }
+
         is Effect.Inner.SendTextComment -> flow {
-            repository.addTextComment(user, currentTicketId.get(), effect.text)
+            repository.addTextComment(user, ticketId, effect.text)
         }
+
         is Effect.Inner.SendRatingComment -> flow {
-            repository.addRatingComment(user, currentTicketId.get(), effect.rating)
+            repository.addRatingComment(user, ticketId, effect.rating)
         }
+
         is Effect.Inner.RetryAddComment -> flow {
             // TODO FSDS
 //            repository.retryAddComment(user, ticketId, effect.id)
         }
+
         is Effect.Inner.OpenPreview -> flow {
             val user = (account as? Account.V3)?.users?.find { it.userId == effect.userId }
             val fileDate = FileData(
@@ -238,8 +239,11 @@ internal class TicketActor(
             )
             router.navigateTo(Screens.ImageScreen(fileDate))
         }
+
         is Effect.Inner.SaveDraft -> flow { draftRepository.saveDraft(effect.draft) }
+
         is Effect.Inner.ReadTicket -> flow { repository.readTicket(effect.user, effect.ticketId) }
+
         Effect.Inner.ShowAttachVariants -> flow {
             val key = UUID.randomUUID().toString()
             router.navigateTo(Screens.AttachFileVariantsScreen(key))
@@ -248,8 +252,9 @@ internal class TicketActor(
             }
             if (uri !is Uri) return@flow
             val fileUri = try { fileManager.copyFile(uri) } catch (e: Exception) { null } ?: return@flow
-            repository.addAttachComment(user, currentTicketId.get(), fileUri)
+            repository.addAttachComment(user, ticketId, fileUri)
         }
+
     }
 
 }

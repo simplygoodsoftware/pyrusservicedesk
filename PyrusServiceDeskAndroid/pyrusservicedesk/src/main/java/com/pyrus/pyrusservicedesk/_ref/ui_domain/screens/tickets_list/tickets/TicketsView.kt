@@ -1,6 +1,5 @@
 package com.pyrus.pyrusservicedesk._ref.ui_domain.screens.tickets_list.tickets
 
-import com.pyrus.pyrusservicedesk._ref.data.FullTicket
 
 internal interface TicketsView {
 
@@ -18,7 +17,16 @@ internal interface TicketsView {
         data class TicketSetInfoEntry(
             val appId: String,
             val titleText: String,
-            val tickets: List<FullTicket>,
+            val tickets: List<TicketHeaderEntry>,
+        )
+
+        data class TicketHeaderEntry(
+            val ticketId: Long,
+            val userId: String,
+            val title: String?,
+            val lastCommentText: String?,
+            val lastCommentCreationTime: Long?,
+            val isRead: Boolean,
         )
     }
 
