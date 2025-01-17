@@ -3,6 +3,7 @@ package com.pyrus.pyrusservicedesk.sdk.repositories
 import android.net.Uri
 import android.util.Log
 import androidx.core.net.toFile
+import com.pyrus.pyrusservicedesk._ref.data.Attachment
 import com.pyrus.pyrusservicedesk._ref.data.FullTicket
 import com.pyrus.pyrusservicedesk._ref.data.multy_chat.TicketsInfo
 import com.pyrus.pyrusservicedesk._ref.utils.GetTicketsError
@@ -15,6 +16,7 @@ import com.pyrus.pyrusservicedesk._ref.utils.toTry2
 import com.pyrus.pyrusservicedesk.presentation.ui.view.Status
 import com.pyrus.pyrusservicedesk.sdk.FileResolver
 import com.pyrus.pyrusservicedesk.sdk.data.TicketDto
+import com.pyrus.pyrusservicedesk.sdk.data.intermediate.FileUploadResponseData
 import com.pyrus.pyrusservicedesk.sdk.data.intermediate.TicketsDto
 import com.pyrus.pyrusservicedesk.sdk.sync.SyncRequest
 import com.pyrus.pyrusservicedesk.sdk.sync.Synchronizer
@@ -43,6 +45,19 @@ internal class Repository(
 ) {
 
     private val fileHooks = ConcurrentHashMap<Long, UploadFileHook>()
+
+    init {
+        val initialCommands = localCommandsStore.getCommands()
+            .mapNotNull(repositoryMapper::mapToSyncRequest)
+
+        if (initialCommands.isNotEmpty()) {
+            coroutineScope.launch {
+                for (command in initialCommands) {
+                    sendCommand(command)
+                }
+            }
+        }
+    }
 
     suspend fun getAllData(force: Boolean): Try<TicketsInfo> {
         if (!force) {
@@ -127,67 +142,25 @@ internal class Repository(
         val serverTicketId = idStore.getTicketServerId(ticketId) ?: ticketId
         val requestNewTicket = needsToRequestNewTicket(serverTicketId)
         val command = localCommandsStore.addTextCommand(user, serverTicketId, requestNewTicket, textBody)
-        syncCommand(command)
+        sendCommand(command)
     }
 
     fun addAttachComment(user: UserInternal, ticketId: Long, fileUri: Uri) = coroutineScope.launch {
         val fileData = fileResolver.getFileData(fileUri) ?: return@launch
 
-        var serverTicketId = idStore.getTicketServerId(ticketId) ?: ticketId
-        var requestNewTicket = needsToRequestNewTicket(serverTicketId)
-
+        val serverTicketId = idStore.getTicketServerId(ticketId) ?: ticketId
+        val requestNewTicket = needsToRequestNewTicket(serverTicketId)
         val commandEntity = localCommandsStore.addAttachmentCommand(user, ticketId, requestNewTicket, fileData)
-        val attachmentEntity = commandEntity.attachments!!.first()
 
-        val file = fileData.uri.toFile()
-        val hook = UploadFileHook()
-        fileHooks[attachmentEntity.id] = hook
-
-        val uploadTry = remoteFileStore.uploadFile(file, hook) { progress ->
-            val newAttachmentEntity = attachmentEntity.copy(progress = progress)
-            val newCommandEntity = commandEntity.copy(attachments = listOf(newAttachmentEntity))
-            localCommandsStore.addOrUpdatePendingCommand(newCommandEntity)
-        }
-
-        val newLocalAttachment = when {
-            uploadTry.isSuccess() -> attachmentEntity.copy(
-                guid = uploadTry.value.guid,
-                status = Status.Completed.ordinal,
-                progress = null,
-            )
-            else -> attachmentEntity.copy(status = Status.Error.ordinal, progress = null)
-        }
-        val newCommandEntity = commandEntity.copy(attachments = listOf(newLocalAttachment))
-
-        localCommandsStore.addOrUpdatePendingCommand(newCommandEntity)
-        fileHooks.remove(attachmentEntity.id)
-
-        // TODO sds check allAttachments
-
-        serverTicketId = idStore.getTicketServerId(ticketId) ?: ticketId
-        requestNewTicket = needsToRequestNewTicket(serverTicketId)
-
-        val command = SyncRequest.Command.CreateComment(
-            localId = commandEntity.localId,
-            commandId = commandEntity.commandId,
-            userId = user.userId,
-            appId = user.appId,
-            creationTime = commandEntity.creationTime,
-            requestNewTicket = requestNewTicket,
-            ticketId = serverTicketId,
-            comment = null,
-            attachments = listOf(repositoryMapper.map(newLocalAttachment)),
-            rating = null,
-        )
-
-        syncCommand(command)
+        val command = repositoryMapper.mapToSyncRequest(commandEntity) ?: return@launch
+        sendCommand(command)
     }
 
     fun addRatingComment(user: UserInternal, ticketId: Long, rating: Int) = coroutineScope.launch {
         val serverTicketId = idStore.getTicketServerId(ticketId) ?: ticketId
         val requestNewTicket = needsToRequestNewTicket(serverTicketId)
         val command = localCommandsStore.addRatingCommand(user, serverTicketId, requestNewTicket, rating)
-        syncCommand(command)
+        sendCommand(command)
     }
 
     fun readTicket(user: UserInternal, ticketId: Long) = coroutineScope.launch {
@@ -200,17 +173,10 @@ internal class Repository(
         }
     }
 
-    fun retryAddComment(user: UserInternal, commandId: String) {
-
-        // TODO
-//        val command = localCommandsStore.getCommandError(commandId) ?: return
-//        val text = (command.params as? CommandParamsDto.CreateComment)?.comment
-//        when {
-//            //!localComment.attachments.isNullOrEmpty() -> addAttachComment(localComment.attachments.first().uri) //TODO
-//            !text.isNullOrBlank() -> addTextComment(user, ticketId, text)
-//            localComment.rating != null -> addRatingComment(localComment.rating) //TODO
-//            else -> localCommandsStore.removePendingCommand(command)
-//        }
+    fun retryAddComment(user: UserInternal, localId: Long) =coroutineScope.launch {
+        val commandEntity = localCommandsStore.getCommand(localId) ?: return@launch
+        val command = repositoryMapper.mapToSyncRequest(commandEntity) ?: return@launch
+        sendCommand(command)
     }
 
     /**
@@ -231,6 +197,65 @@ internal class Repository(
         return ticketId <= 0
     }
 
+    private suspend fun sendCommand(command: SyncRequest.Command) {
+        val sendFilesTry = sendAttachments(command)
+        if (!sendFilesTry.isSuccess()) return
+        syncCommand(sendFilesTry.value)
+    }
+
+    private suspend fun sendAttachments(command: SyncRequest.Command): Try<SyncRequest.Command> {
+        if (command !is SyncRequest.Command.CreateComment) return Try.Success(command)
+        val attachments = command.attachments?.filter { it.guid == null }
+        if (attachments.isNullOrEmpty()) return Try.Success(command)
+
+        var resultAttachments: List<Attachment> = attachments
+
+        fun updateAttachment(isError: Boolean, attachment: Attachment) {
+            resultAttachments = resultAttachments.map {
+                if (it.id == attachment.id) attachment
+                else it
+            }
+
+            val newCommand = command.copy(attachments = attachments)
+            localCommandsStore.addOrUpdatePendingCommand(repositoryMapper.mapToCommandEntity(isError, newCommand))
+        }
+
+        for (attachment in attachments) {
+            val uploadTry = sendAttachment(attachment) { progress ->
+                val newAttachment = attachment.copy(progress = progress)
+                updateAttachment(isError = false, attachment = newAttachment)
+            }
+            when(uploadTry) {
+                is Try.Failure -> {
+                    val newAttachment = attachment.copy(status = Status.Error, progress = null)
+                    updateAttachment(true, newAttachment)
+                    return uploadTry
+                }
+                is Try.Success -> {
+                    val newAttachment = attachment.copy(
+                        guid = uploadTry.value.guid,
+                        status = Status.Completed,
+                        progress = null,
+                    )
+                    updateAttachment(isError = false, attachment = newAttachment)
+                }
+            }
+        }
+        return Try.Success(command.copy(attachments = resultAttachments))
+    }
+
+    private suspend fun sendAttachment(
+        attachment: Attachment,
+        progressListener: (Int) -> Unit,
+    ): Try<FileUploadResponseData> {
+        val file = attachment.uri.toFile()
+        val hook = UploadFileHook()
+        fileHooks[attachment.id] = hook
+
+        val uploadTry = remoteFileStore.uploadFile(file, hook, progressListener)
+        return uploadTry
+    }
+
     private suspend fun syncCommand(command: SyncRequest.Command) {
         val syncTry = synchronizer.syncCommand(command)
 
@@ -238,7 +263,7 @@ internal class Repository(
             localCommandsStore.removeCommand(command.commandId)
         }
         else {
-            val errorEntity = repositoryMapper.mapToCommandErrorEntity(command)
+            val errorEntity = repositoryMapper.mapToCommandEntity(true, command)
             localCommandsStore.addOrUpdatePendingCommand(errorEntity)
         }
     }

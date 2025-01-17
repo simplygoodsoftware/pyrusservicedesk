@@ -5,16 +5,11 @@ import com.pyrus.pyrusservicedesk.PyrusServiceDesk
 import com.pyrus.pyrusservicedesk.PyrusServiceDesk.Companion.API_VERSION_1
 import com.pyrus.pyrusservicedesk.PyrusServiceDesk.Companion.API_VERSION_2
 import com.pyrus.pyrusservicedesk.PyrusServiceDesk.Companion.API_VERSION_3
-import com.pyrus.pyrusservicedesk._ref.data.FullTicket
-import com.pyrus.pyrusservicedesk._ref.data.multy_chat.TicketSetInfo
-import com.pyrus.pyrusservicedesk._ref.data.multy_chat.TicketsInfo
 import com.pyrus.pyrusservicedesk.core.Account
 import com.pyrus.pyrusservicedesk.sdk.FileResolver
 import com.pyrus.pyrusservicedesk.sdk.data.AttachmentDto
 import com.pyrus.pyrusservicedesk.sdk.data.FileManager
 import com.pyrus.pyrusservicedesk.sdk.data.UserDataDto
-import com.pyrus.pyrusservicedesk.sdk.data.intermediate.TicketsDto
-import com.pyrus.pyrusservicedesk.sdk.repositories.RepositoryMapper
 import com.pyrus.pyrusservicedesk.sdk.response.ApiCallError
 import com.pyrus.pyrusservicedesk.sdk.response.AuthorizationError
 import com.pyrus.pyrusservicedesk.sdk.response.ResponseError

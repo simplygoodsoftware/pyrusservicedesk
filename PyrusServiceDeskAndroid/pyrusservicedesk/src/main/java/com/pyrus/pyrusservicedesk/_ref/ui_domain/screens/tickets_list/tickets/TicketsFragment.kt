@@ -1,7 +1,6 @@
 package com.pyrus.pyrusservicedesk._ref.ui_domain.screens.tickets_list.tickets
 
 import android.os.Bundle
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -147,17 +146,16 @@ internal class TicketsFragment: TeaFragment<Model, Message, Effect.Outer>() {
         diff(Model::filterName) { filterName ->
             binding.filterContextTv.text = filterName
         }
-        diff(Model::tabLayoutVisibility) { tabLayoutVisibility ->
+        diff(Model::tabLayoutIsVisibile) { tabLayoutVisibility ->
             binding.tabLayout.isVisible = tabLayoutVisibility
         }
-        diff(Model::applications) { ticketSetInfoList ->
+        diff(Model::ticketSets) { ticketSetInfoList ->
             adapter.submitList(ticketSetInfoList)
         }
         diff(Model::showNoConnectionError) { showError ->
             binding.noConnection.root.isVisible = showError
         }
         diff(Model::isLoading) { isLoading ->
-            Log.d("SDS", "isLoading: ${isLoading}")
             binding.tabLayout.isVisible = !isLoading
             binding.progressBar.isVisible = isLoading
         }
@@ -199,7 +197,6 @@ internal class TicketsFragment: TeaFragment<Model, Message, Effect.Outer>() {
     internal companion object {
 
         const val KEY_DEFAULT_USER_ID = "0"
-        const val KEY_APP_ID_RESULT = "KEY_APP_ID_RESULT"
         const val KEY_USER_ID = "KEY_USER_ID"
 
         fun newInstance(): TicketsFragment {

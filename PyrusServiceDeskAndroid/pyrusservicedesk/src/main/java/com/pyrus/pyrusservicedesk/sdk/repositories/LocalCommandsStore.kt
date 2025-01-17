@@ -1,17 +1,17 @@
 package com.pyrus.pyrusservicedesk.sdk.repositories
 
 import android.content.SharedPreferences
-import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
+import com.pyrus.pyrusservicedesk._ref.data.Attachment
 import com.pyrus.pyrusservicedesk.presentation.ui.view.Status
 import com.pyrus.pyrusservicedesk.sdk.data.intermediate.FileData
 import com.pyrus.pyrusservicedesk.sdk.sync.SyncRequest
 import com.pyrus.pyrusservicedesk.sdk.sync.TicketCommandType
 import com.pyrus.pyrusservicedesk.sdk.verify.LocalDataVerifier
+import com.squareup.moshi.Moshi
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.map
-import org.jsoup.select.Evaluator.Id
 import java.lang.reflect.Type
 import java.util.UUID
 import java.util.concurrent.atomic.AtomicLong
@@ -24,7 +24,10 @@ internal class LocalCommandsStore(
     private val preferences: SharedPreferences,
     private val localDataVerifier: LocalDataVerifier,
     private val idStore: IdStore,
+    moshi: Moshi,
 ) {
+
+    private val jsonAdapter = moshi.adapter<List<CommandEntity>>(commandListTokenType)
 
     private val lastLocalId: AtomicLong
     private val lastAttachId: AtomicLong
@@ -174,21 +177,6 @@ internal class LocalCommandsStore(
         writeCommands(commands)
     }
 
-
-    /**
-     * Provides all pending feed commands
-     */
-    private fun readCommands(): List<CommandEntity> {
-//        val rawJson = preferences.getString(PREFERENCE_KEY_TICKET_COMMANDS, "[]")
-//        val commandsList = gson.fromJson<List<CommandEntity>>(rawJson, commandListTokenType).toMutableList()
-//
-//        if (commandsList.removeAll { localDataVerifier.isLocalCommandEmpty(it) }) {
-//            writeCommands(commandsList)
-//        }
-        // TODO()
-        return emptyList()
-    }
-
     fun getCommand(localId: Long): CommandEntity? {
         return commandsStateFlow.value.find { command -> command.localId == localId }
     }
@@ -213,30 +201,6 @@ internal class LocalCommandsStore(
 
     fun getNextLocalId(): Long {
         return lastLocalId.decrementAndGet()
-    }
-
-    private fun createNewTicketCommandEntity(
-        user: UserInternal,
-        comment: String,
-    ): CommandEntity {
-        val localId = getNextLocalId()
-        return CommandEntity(
-            isError = false,
-            localId = localId,
-            commandId = createCommandId(),
-            commandType = TicketCommandType.CreateComment.ordinal,
-            userId = user.userId,
-            appId = user.appId,
-            creationTime = System.currentTimeMillis(),
-            requestNewTicket = true,
-            comment = comment,
-            attachments = null,
-            ticketId = null,
-            rating = null,
-            commentId = localId,
-            token = null,
-            tokenType = null,
-        )
     }
 
     private fun createTextCommandEntity(
@@ -358,9 +322,16 @@ internal class LocalCommandsStore(
         return UUID.randomUUID().toString()
     }
 
+    private fun readCommands(): List<CommandEntity> {
+        val rawJson = preferences.getString(PREFERENCE_KEY_TICKET_COMMANDS, "[]")!!
+        val commandsList = (jsonAdapter.fromJson(rawJson)?: emptyList()).toMutableList()
+        commandsList.removeAll { localDataVerifier.isLocalCommandEmpty(it) }
+        return commandsList
+    }
+
     private fun writeCommands(commands: List<CommandEntity>) {
-//        val rawJson = gson.toJson(commands, commandListTokenType)
-//        preferences.edit().putString(PREFERENCE_KEY_TICKET_COMMANDS, rawJson).apply()
+        val rawJson = jsonAdapter.toJson(commands)
+        preferences.edit().putString(PREFERENCE_KEY_TICKET_COMMANDS, rawJson).apply()
         commandsStateFlow.value = commands
     }
 

@@ -20,7 +20,6 @@ import com.pyrus.pyrusservicedesk._ref.utils.BottomSheetFragment
 import com.pyrus.pyrusservicedesk._ref.utils.ConfigUtils
 import com.pyrus.pyrusservicedesk._ref.utils.MIME_TYPE_IMAGE_ANY
 import com.pyrus.pyrusservicedesk._ref.utils.dispatchTakePhotoIntent
-import com.pyrus.pyrusservicedesk._ref.utils.getViewModelWithActivityScope
 import com.pyrus.pyrusservicedesk._ref.utils.hasPermission
 import com.pyrus.pyrusservicedesk._ref.utils.hasPermissionInManifeset
 import com.pyrus.pyrusservicedesk._ref.utils.insets.RootViewDeferringInsetsCallback

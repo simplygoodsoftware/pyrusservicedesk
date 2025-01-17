@@ -32,7 +32,7 @@ internal interface TicketsContract {
             val filterId: String?,
             val filterName: String?,
             val filterEnabled: Boolean,
-            val tickets: List<TicketSetInfo>?,
+            val ticketSets: List<TicketSetInfo>?,
         ) : ContentState
     }
 

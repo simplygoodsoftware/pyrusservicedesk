@@ -19,8 +19,10 @@ import com.pyrus.pyrusservicedesk.sdk.data.AuthorDto
 import com.pyrus.pyrusservicedesk.sdk.data.CommentDto
 import com.pyrus.pyrusservicedesk.sdk.data.TicketDto
 import com.pyrus.pyrusservicedesk.sdk.data.intermediate.TicketsDto
+import com.pyrus.pyrusservicedesk.sdk.sync.CommandParamsDto.CommandsParamsType
 import com.pyrus.pyrusservicedesk.sdk.sync.SyncRequest
-import com.pyrus.pyrusservicedesk.sdk.sync.TicketCommandType.*
+import com.pyrus.pyrusservicedesk.sdk.sync.TicketCommandType.CreateComment
+import com.pyrus.pyrusservicedesk.sdk.sync.TicketCommandType.MarkTicketAsRead
 
 internal class RepositoryMapper(
     private val account: Account,
@@ -142,12 +144,12 @@ internal class RepositoryMapper(
             else -> firstCommand?.comment
         }
         val lastCommentText: String? = when {
-            lastServerComment.olderThan(lastCommand) -> firstServerComment?.body
-            else -> firstCommand?.comment
+            lastServerComment.olderThan(lastCommand) -> lastServerComment?.body
+            else -> lastCommand?.comment
         }
         val lastCommentCreationDate: Long? = when {
-            lastServerComment.olderThan(lastCommand) -> firstServerComment?.creationDate
-            else -> firstCommand?.creationTime
+            lastServerComment.olderThan(lastCommand) -> lastServerComment?.creationDate
+            else -> lastCommand?.creationTime
         }
 
         return TicketHeader(
@@ -251,10 +253,45 @@ internal class RepositoryMapper(
         avatarColor = authorDto.avatarColorString,
     )
 
-    fun mapToCommandErrorEntity(command: SyncRequest.Command): CommandEntity {
+    fun mapToSyncRequest(entity: CommandEntity): SyncRequest.Command? {
+        return when(entity.commandType) {
+            CommandsParamsType.CreateComment.ordinal -> SyncRequest.Command.CreateComment(
+                localId = entity.localId,
+                commandId = entity.commandId,
+                userId = entity.userId,
+                appId = entity.appId,
+                creationTime = entity.creationTime,
+                requestNewTicket = entity.requestNewTicket ?: return null,
+                ticketId = entity.ticketId ?: return null,
+                comment = entity.comment,
+                attachments = entity.attachments?.map(::map),
+                rating = entity.rating
+            )
+            CommandsParamsType.MarkTicketAsRead.ordinal -> SyncRequest.Command.MarkTicketAsRead(
+                localId = entity.localId,
+                commandId = entity.commandId,
+                userId = entity.userId,
+                appId = entity.appId,
+                creationTime = entity.creationTime,
+                ticketId = entity.ticketId ?: return null,
+            )
+            CommandsParamsType.SetPushToken.ordinal -> SyncRequest.Command.SetPushToken(
+                localId = entity.localId,
+                commandId = entity.commandId,
+                userId = entity.userId,
+                appId = entity.appId,
+                creationTime = entity.creationTime,
+                token = entity.token ?: return null,
+                tokenType = entity.tokenType ?: return null,
+            )
+            else -> null
+        }
+    }
+
+    fun mapToCommandEntity(isError: Boolean, command: SyncRequest.Command): CommandEntity {
         return when(command) {
             is SyncRequest.Command.CreateComment -> CommandEntity(
-                isError = true,
+                isError = isError,
                 localId = command.localId,
                 commandType = CreateComment.ordinal,
                 commandId = command.commandId,
@@ -271,7 +308,7 @@ internal class RepositoryMapper(
                 tokenType = null,
             )
             is SyncRequest.Command.MarkTicketAsRead -> CommandEntity(
-                isError = true,
+                isError = isError,
                 localId = command.localId,
                 commandType = CreateComment.ordinal,
                 commandId = command.commandId,
@@ -288,7 +325,7 @@ internal class RepositoryMapper(
                 tokenType = null,
             )
             is SyncRequest.Command.SetPushToken -> CommandEntity(
-                isError = true,
+                isError = isError,
                 localId = command.localId,
                 commandType = CreateComment.ordinal,
                 commandId = command.commandId,

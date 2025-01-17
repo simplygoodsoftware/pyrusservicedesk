@@ -44,24 +44,18 @@ import retrofit2.converter.moshi.MoshiConverterFactory
 import java.util.concurrent.TimeUnit
 
 internal class DiInjector(
-    private val application: Application,
-    private val account: Account,
-    private val loggingEnabled: Boolean,
+    application: Application,
+    initialAccount: Account,
     private val authToken: String?,
-    private val coreScope: CoroutineScope,
-    private val preferences: SharedPreferences,
+    coreScope: CoroutineScope,
+    preferences: SharedPreferences,
 ) {
 
-    val accountStore = AccountStore(account)
+    val accountStore = AccountStore(initialAccount)
 
     private val fileResolver: FileResolver = FileResolver(application.contentResolver)
 
     private val localDataVerifier: LocalDataVerifier = LocalDataVerifier(fileResolver)
-
-//    private val offlineGson = GsonBuilder()
-//        .setDateFormat(ISO_DATE_PATTERN)
-//        .registerTypeAdapter(Uri::class.java, UriGsonAdapter())
-//        .create()
 
     private val moshi = Moshi.Builder()
         .add(CommandParamsDto.factory)
@@ -75,7 +69,8 @@ internal class DiInjector(
     val localCommandsStore: LocalCommandsStore = LocalCommandsStore(
         preferences = preferences,
         localDataVerifier = localDataVerifier,
-        idStore = idStore
+        idStore = idStore,
+        moshi = moshi,
     )
 
     private val okHttpClient = OkHttpClient.Builder()
@@ -99,8 +94,8 @@ internal class DiInjector(
         }.build()
 
     private val retrofit: Retrofit = Retrofit.Builder()
-        .baseUrl(getBaseUrl(account.domain))
-        .addConverterFactory(MoshiConverterFactory.create(moshi)) //TODO moshi
+        .baseUrl(getBaseUrl(initialAccount.domain))
+        .addConverterFactory(MoshiConverterFactory.create(moshi))
         .addCallAdapterFactory(TryCallAdapterFactory())
         .client(okHttpClient)
         .build()
@@ -109,9 +104,9 @@ internal class DiInjector(
 
     private val fileManager: FileManager = FileManager(application, fileResolver)
 
-    private val repositoryMapper = RepositoryMapper(account, idStore)
+    private val repositoryMapper = RepositoryMapper(initialAccount, idStore)
 
-    private val remoteFileStore = RemoteFileStore(api) // TODO use different api
+    private val remoteFileStore = RemoteFileStore(api)
 
     private val localTicketsStore = LocalTicketsStore(idStore)
 
@@ -161,7 +156,7 @@ internal class DiInjector(
     // TODO fix it use AccountStore
     val ticketsFeatureFactory = TicketsFeatureFactory(
         // TODO FSDS
-        account = account as Account.V3,
+        account = initialAccount as Account.V3,
         storeFactory = storeFactory,
         repository = repository,
         router = router,
@@ -183,7 +178,7 @@ internal class DiInjector(
         repository = repository,
         preferencesManager = preferencesManager,
         // TODO sds fix live updates
-        userId = account.getUserId(),
+        userId = initialAccount.getUserId(),
         coreScope = coreScope,
     )
 
@@ -191,6 +186,6 @@ internal class DiInjector(
         .downloader(OkHttp3Downloader(okHttpClient))
         .build()
 
-    val setPushTokenUseCase = SetPushTokenUseCase(account, coreScope, preferencesManager)
+    val setPushTokenUseCase = SetPushTokenUseCase(initialAccount, coreScope, preferencesManager)
 
 }
