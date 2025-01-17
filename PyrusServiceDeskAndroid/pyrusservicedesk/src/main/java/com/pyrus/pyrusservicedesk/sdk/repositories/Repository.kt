@@ -74,9 +74,8 @@ internal class Repository(
     fun getAllDataFlow(): Flow<TicketsInfo?> = combine(
         localTicketsStore.getTicketInfoFlow(),
         localCommandsStore.getCommandsFlow(),
-    ) { dto, commands ->
-        mergeData(dto, commands)
-    }
+        ::mergeData
+    )
 
     suspend fun getFeed(userId: String, ticketId: Long, force: Boolean): Try2<FullTicket, GetTicketsError> {
         val serverId = idStore.getTicketServerId(ticketId) ?: ticketId
@@ -303,7 +302,6 @@ internal class Repository(
                         error.javaClass.simpleName,
                         error.message ?: "Cannot get stacktrace"
                     )
-
                 }
             }
         }
@@ -320,8 +318,6 @@ internal class Repository(
         }
         val res = Try.Success(ticket)
         return res.toTry2()
-
     }
-
 
 }
