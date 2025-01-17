@@ -173,6 +173,16 @@ internal class Repository(
         }
     }
 
+    /**
+     * Registers the given push [token].
+     * @param token if null push notifications stop.
+     * @param tokenType cloud messaging type.
+     */
+    suspend fun setPushToken(user: UserInternal, token: String, tokenType: String): Try<Unit> {
+        val command = localCommandsStore.createPushTokenCommand(user, token, tokenType)
+        return synchronizer.syncCommand(command).map {  }
+    }
+
     fun retryAddComment(user: UserInternal, localId: Long) = coroutineScope.launch {
         val commandEntity = localCommandsStore.getCommand(localId) ?: return@launch
         val command = repositoryMapper.mapToSyncRequest(commandEntity) ?: return@launch
@@ -187,18 +197,14 @@ internal class Repository(
         }
     }
 
-    /**
-     * Registers the given push [token].
-     * @param token if null push notifications stop.
-     * @param tokenType cloud messaging type.
-     */
-    suspend fun setPushToken(user: UserInternal, token: String, tokenType: String): Try<Unit> {
-        val command = localCommandsStore.createPushTokenCommand(user, token, tokenType)
-        return synchronizer.syncCommand(command).map {  }
-    }
-
     fun removeCommand(commandId: String) {
         localCommandsStore.removeCommand(commandId)
+    }
+
+    fun cancelUploadFile(attachmentId: Long) {
+        val hook = fileHooks[attachmentId]
+        hook?.cancelUploading()
+        fileHooks.remove(attachmentId)
     }
 
     private fun needsToRequestNewTicket(ticketId: Long): Boolean {
@@ -261,6 +267,8 @@ internal class Repository(
         fileHooks[attachment.id] = hook
 
         val uploadTry = remoteFileStore.uploadFile(file, hook, progressListener)
+
+        fileHooks.remove(attachment.id)
         return uploadTry
     }
 
