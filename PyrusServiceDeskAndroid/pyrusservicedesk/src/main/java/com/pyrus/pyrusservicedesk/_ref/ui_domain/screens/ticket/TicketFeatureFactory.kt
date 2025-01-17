@@ -205,7 +205,7 @@ internal class TicketActor(
                 commentsTry.isSuccess() -> {
                     Message.Inner.UpdateCommentsCompleted(
                         ticket = commentsTry.value,
-                        draft = draftRepository.getDraft(),
+                        draft = draftRepository.getDraft(ticketId),
                         welcomeMessage = welcomeMessage,
                     )
                 }
@@ -251,7 +251,7 @@ internal class TicketActor(
             router.navigateTo(Screens.ImageScreen(fileDate))
         }
 
-        is Effect.Inner.SaveDraft -> flow { draftRepository.saveDraft(effect.draft) }
+        is Effect.Inner.SaveDraft -> flow { draftRepository.saveDraft(ticketId, effect.draft) }
 
         is Effect.Inner.ReadTicket -> flow { repository.readTicket(effect.user, effect.ticketId) }
 

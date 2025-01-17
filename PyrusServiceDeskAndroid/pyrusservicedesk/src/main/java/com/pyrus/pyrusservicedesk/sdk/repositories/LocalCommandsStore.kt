@@ -27,7 +27,9 @@ internal class LocalCommandsStore(
     moshi: Moshi,
 ) {
 
-    private val jsonAdapter = moshi.adapter<List<CommandEntity>>(commandListTokenType)
+    private val jsonAdapter = moshi.adapter<List<CommandEntity>>(
+        object : TypeToken<List<CommandEntity>>(){}.type
+    )
 
     private val lastLocalId: AtomicLong
     private val lastAttachId: AtomicLong
@@ -338,6 +340,5 @@ internal class LocalCommandsStore(
     private companion object{
         const val PREFERENCE_KEY_TICKET_COMMANDS = "PREFERENCE_KEY_TICKET_COMMANDS"
         const val MAX_PENDING_COMMENTS_SIZE = 20
-        val commandListTokenType: Type = object : TypeToken<List<CommandEntity>>(){}.type
     }
 }
