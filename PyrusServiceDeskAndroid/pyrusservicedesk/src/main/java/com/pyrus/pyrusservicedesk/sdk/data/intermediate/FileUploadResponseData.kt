@@ -10,5 +10,5 @@ import com.squareup.moshi.JsonClass
 @JsonClass(generateAdapter = true)
 internal class FileUploadResponseData(
     @Json(name = "guid") val guid: String,
-    @Json(name = "md5_hash") val hash: String,
+    @Json(name = "md5_hash") val hash: String?,
 )
