@@ -288,10 +288,10 @@ internal class RepositoryMapper(
         }
     }
 
-    fun mapToCommandErrorEntity(command: SyncRequest.Command): CommandEntity {
+    fun mapToCommandEntity(isError: Boolean, command: SyncRequest.Command): CommandEntity {
         return when(command) {
             is SyncRequest.Command.CreateComment -> CommandEntity(
-                isError = true,
+                isError = isError,
                 localId = command.localId,
                 commandType = CreateComment.ordinal,
                 commandId = command.commandId,
@@ -308,7 +308,7 @@ internal class RepositoryMapper(
                 tokenType = null,
             )
             is SyncRequest.Command.MarkTicketAsRead -> CommandEntity(
-                isError = true,
+                isError = isError,
                 localId = command.localId,
                 commandType = CreateComment.ordinal,
                 commandId = command.commandId,
@@ -325,7 +325,7 @@ internal class RepositoryMapper(
                 tokenType = null,
             )
             is SyncRequest.Command.SetPushToken -> CommandEntity(
-                isError = true,
+                isError = isError,
                 localId = command.localId,
                 commandType = CreateComment.ordinal,
                 commandId = command.commandId,

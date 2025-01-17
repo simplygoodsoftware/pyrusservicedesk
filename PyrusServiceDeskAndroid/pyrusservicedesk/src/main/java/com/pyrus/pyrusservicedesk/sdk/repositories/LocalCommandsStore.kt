@@ -2,6 +2,7 @@ package com.pyrus.pyrusservicedesk.sdk.repositories
 
 import android.content.SharedPreferences
 import com.google.gson.reflect.TypeToken
+import com.pyrus.pyrusservicedesk._ref.data.Attachment
 import com.pyrus.pyrusservicedesk.presentation.ui.view.Status
 import com.pyrus.pyrusservicedesk.sdk.data.intermediate.FileData
 import com.pyrus.pyrusservicedesk.sdk.sync.SyncRequest
