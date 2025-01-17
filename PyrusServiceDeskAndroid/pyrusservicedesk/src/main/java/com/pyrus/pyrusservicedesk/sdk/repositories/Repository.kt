@@ -272,7 +272,7 @@ internal class Repository(
         ticketsDto: TicketsDto?,
         commands: List<CommandEntity>,
     ): TicketsInfo {
-        return TicketsInfo(repositoryMapper.mergeTickets(ticketsDto, commands))
+        return TicketsInfo(repositoryMapper.mergeTickets(ticketsDto, accountStore, commands))
     }
 
     private fun Try<TicketsDto>.checkResponse(ticketId: Long, userId: String): Try2<TicketDto, GetTicketsError> {

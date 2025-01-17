@@ -29,7 +29,7 @@ internal class RepositoryMapper(
     private val idStore: IdStore
 ) {
 
-    fun mergeTickets(ticketsDto: TicketsDto?, commands: List<CommandEntity>): List<TicketSetInfo> {
+    fun mergeTickets(ticketsDto: TicketsDto?, accountStore: AccountStore, commands: List<CommandEntity>): List<TicketSetInfo> {
 
         val tickets = ArrayList<TicketHeader>()
 
@@ -61,7 +61,7 @@ internal class RepositoryMapper(
             mapToTicketHeader(it.ticketId, it.userId, ticketCommands)
         }
 
-        val smallUsers = mapToSmallAcc(account) // TODO use account store
+        val smallUsers = mapToSmallAcc(accountStore)
         val usersByAppId = smallUsers.groupBy { it.appId }
 
         val ticketsByUserId: Map<String, List<TicketHeader>> = tickets.groupBy { it.userId }
@@ -393,7 +393,7 @@ internal class RepositoryMapper(
         return (account as? Account.V3)?.users?.find { it.userId == userId }
     }
 
-    private fun mapToSmallAcc(account: Account): List<SmallUser> = when(account) {
+    private fun mapToSmallAcc(accountStore: AccountStore): List<SmallUser> = when(val account = accountStore.getAccount()) {
         is Account.V1 -> listOf(SmallUser(account.getUserId(), account.appId))
         is Account.V2 -> listOf(SmallUser(account.getUserId(), account.appId))
         is Account.V3 -> account.users.map { SmallUser(it.userId, it.appId) }
