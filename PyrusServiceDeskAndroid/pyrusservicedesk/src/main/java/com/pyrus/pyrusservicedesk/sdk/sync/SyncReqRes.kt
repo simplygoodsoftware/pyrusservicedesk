@@ -10,6 +10,10 @@ internal sealed interface SyncReqRes {
 
     data class Command(
         override val request: SyncRequest.Command,
+    ) : SyncReqRes
+
+    data class CommandWithContinuation(
+        override val request: SyncRequest.Command,
         val continuation: Continuation<Try<TicketCommandResultDto>>,
     ) : SyncReqRes
 

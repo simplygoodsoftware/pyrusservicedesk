@@ -19,6 +19,7 @@ import com.pyrus.pyrusservicedesk.sdk.data.AuthorDto
 import com.pyrus.pyrusservicedesk.sdk.data.CommentDto
 import com.pyrus.pyrusservicedesk.sdk.data.TicketDto
 import com.pyrus.pyrusservicedesk.sdk.data.intermediate.TicketsDto
+import com.pyrus.pyrusservicedesk.sdk.sync.CommandParamsDto.CommandsParamsType
 import com.pyrus.pyrusservicedesk.sdk.sync.SyncRequest
 import com.pyrus.pyrusservicedesk.sdk.sync.TicketCommandType.CreateComment
 import com.pyrus.pyrusservicedesk.sdk.sync.TicketCommandType.MarkTicketAsRead
@@ -251,6 +252,41 @@ internal class RepositoryMapper(
         },
         avatarColor = authorDto.avatarColorString,
     )
+
+    fun mapToSyncRequest(entity: CommandEntity): SyncRequest.Command? {
+        return when(entity.commandType) {
+            CommandsParamsType.CreateComment.ordinal -> SyncRequest.Command.CreateComment(
+                localId = entity.localId,
+                commandId = entity.commandId,
+                userId = entity.userId,
+                appId = entity.appId,
+                creationTime = entity.creationTime,
+                requestNewTicket = entity.requestNewTicket ?: return null,
+                ticketId = entity.ticketId ?: return null,
+                comment = entity.comment,
+                attachments = entity.attachments?.map(::map),
+                rating = entity.rating
+            )
+            CommandsParamsType.MarkTicketAsRead.ordinal -> SyncRequest.Command.MarkTicketAsRead(
+                localId = entity.localId,
+                commandId = entity.commandId,
+                userId = entity.userId,
+                appId = entity.appId,
+                creationTime = entity.creationTime,
+                ticketId = entity.ticketId ?: return null,
+            )
+            CommandsParamsType.SetPushToken.ordinal -> SyncRequest.Command.SetPushToken(
+                localId = entity.localId,
+                commandId = entity.commandId,
+                userId = entity.userId,
+                appId = entity.appId,
+                creationTime = entity.creationTime,
+                token = entity.token ?: return null,
+                tokenType = entity.tokenType ?: return null,
+            )
+            else -> null
+        }
+    }
 
     fun mapToCommandErrorEntity(command: SyncRequest.Command): CommandEntity {
         return when(command) {

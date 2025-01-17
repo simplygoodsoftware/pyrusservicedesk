@@ -236,8 +236,7 @@ class PyrusServiceDesk private constructor(
 
             INJECTOR = DiInjector(
                 application = application,
-                account = newAccount,
-                loggingEnabled = loggingEnabled,
+                initialAccount = newAccount,
                 authToken = authorizationToken,
                 coreScope = CoroutineScope(Dispatchers.Main),
                 preferences = preferences

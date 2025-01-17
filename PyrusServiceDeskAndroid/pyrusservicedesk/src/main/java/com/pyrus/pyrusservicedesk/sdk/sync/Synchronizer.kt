@@ -69,7 +69,7 @@ internal class Synchronizer(
     suspend fun syncCommand(
         request: SyncRequest.Command,
     ): Try<TicketCommandResultDto> = suspendCoroutine { continuation ->
-        val syncReqRes = SyncReqRes.Command(request, continuation)
+        val syncReqRes = SyncReqRes.CommandWithContinuation(request, continuation)
         syncLoopRequestQueue.add(syncReqRes)
         tryLoop()
     }
@@ -95,13 +95,13 @@ internal class Synchronizer(
             
             val commandsResults = getTicketsTry.value.commandsResult ?: emptyList()
             val commandsResultsById = commandsResults.associateBy { it.commandId }
-            val commandRequests = syncRequests.filterIsInstance<SyncReqRes.Command>()
+            val commandRequests = syncRequests.filterIsInstance<SyncReqRes.CommandWithContinuation>()
             for (request in commandRequests) {
                 val commandId = request.request.commandId
 
                 val result = commandsResultsById[commandId]
                 val tryResult = when {
-                    result == null -> Try.Failure(Exception("result: $commandId not found"))
+                    result == null -> Try.Failure(Exception("result: $commandId not found")) // TODO needs to crash application
                     result.error != null -> Try.Failure(Exception("commandId: $commandId, error: ${result.error}"))
                     else -> Try.Success(result)
                 }
@@ -131,7 +131,7 @@ internal class Synchronizer(
             val getRequests = syncRequests.filterIsInstance<SyncReqRes.Data>()
             for (request in getRequests) request.continuation.resume(getTicketsTry)
             
-            val commandRequests = syncRequests.filterIsInstance<SyncReqRes.Command>()
+            val commandRequests = syncRequests.filterIsInstance<SyncReqRes.CommandWithContinuation>()
             onFailedLoopEnd(commandRequests)
         }
         
@@ -148,7 +148,7 @@ internal class Synchronizer(
         }
     }
 
-    private suspend fun onFailedLoopEnd(commandRequests: List<SyncReqRes.Command>) {
+    private suspend fun onFailedLoopEnd(commandRequests: List<SyncReqRes.CommandWithContinuation>) {
         val delay = failDelayCounter.getNextDelay()
         delay(delay)
         val maxElements = max(MAX_COMMANDS_PER_SYNC - commandRequests.size, 0)
