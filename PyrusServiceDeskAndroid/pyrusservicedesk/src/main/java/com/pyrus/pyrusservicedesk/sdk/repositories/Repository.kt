@@ -173,10 +173,18 @@ internal class Repository(
         }
     }
 
-    fun retryAddComment(user: UserInternal, localId: Long) =coroutineScope.launch {
+    fun retryAddComment(user: UserInternal, localId: Long) = coroutineScope.launch {
         val commandEntity = localCommandsStore.getCommand(localId) ?: return@launch
         val command = repositoryMapper.mapToSyncRequest(commandEntity) ?: return@launch
-        sendCommand(command)
+
+        if (command is SyncRequest.Command.CreateComment) {
+            val serverTicketId = idStore.getTicketServerId(command.ticketId) ?: command.ticketId
+            val requestNewTicket = needsToRequestNewTicket(serverTicketId)
+            sendCommand(command.copy(ticketId = serverTicketId, requestNewTicket = requestNewTicket))
+        }
+        else {
+            sendCommand(command)
+        }
     }
 
     /**
