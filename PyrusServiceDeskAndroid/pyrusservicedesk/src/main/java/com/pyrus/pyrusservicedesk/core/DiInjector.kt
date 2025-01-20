@@ -136,7 +136,7 @@ internal class DiInjector(
 
     private val storeFactory: StoreFactory = DefaultStoreFactory()
 
-    private val draftRepository = DraftRepository(preferences)
+    private val draftRepository = DraftRepository(preferences, idStore, moshi)
 
     private val cicerone: Cicerone<PyrusRouterImpl> = Cicerone.create(PyrusRouterImpl())
 
