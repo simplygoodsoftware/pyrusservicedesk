@@ -376,6 +376,7 @@ import UIKit
         PyrusServiceDesk.clients = []
         PyrusServiceDesk.currentClientId = clientId
         PyrusServiceDesk.accessDeniedIds = []
+        PyrusServiceDesk.chats = []
         lastSetPushToken = nil
         if needReloadUI {
             PyrusServiceDesk.mainController?.updateTitleChat()

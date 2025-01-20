@@ -87,7 +87,7 @@ class PSDAttachmentView: UIView{
             let web :PSDAttachmentLoadViewController = PSDAttachmentLoadViewController(nibName:nil, bundle:nil)
             web.attachment = self.attachment
             let navCotroller = PSDNavigationController(rootViewController: web)
-                navCotroller.modalPresentationStyle = .overFullScreen
+                navCotroller.modalPresentationStyle = .fullScreen
             (findViewController() as? PSDChatViewController)?.hideAllKeyboard()
         self.findViewController()?.navigationController?.present(navCotroller, animated: true, completion: nil)
         }

@@ -25,7 +25,7 @@ class PSDChatViewController: PSDViewController {
     private var bottomScrollButton: NSLayoutConstraint?
     private lazy var scrollButton: UIButton = {
         let button = UIButton()
-        button.backgroundColor = .white
+        button.backgroundColor = .scrollButtonColor
         button.layer.cornerRadius = 20
         button.translatesAutoresizingMaskIntoConstraints = false
         return button
@@ -365,10 +365,10 @@ class PSDChatViewController: PSDViewController {
         
         if #available(iOS 13.0, *) {
             let barAppearance = UIBarAppearance()
-            barAppearance.backgroundColor = UIColor(hex: "#F9F9F9F0")
+            barAppearance.backgroundColor = .navBarColor
             let bigAppear = UINavigationBarAppearance(barAppearance: barAppearance)
             bigAppear.configureWithOpaqueBackground()
-            bigAppear.backgroundColor = UIColor(hex: "#F9F9F9F0")
+            bigAppear.backgroundColor = .navBarColor
             bigAppear.backgroundEffect = nil
             navigationItem.scrollEdgeAppearance = bigAppear
             navigationItem.standardAppearance = bigAppear

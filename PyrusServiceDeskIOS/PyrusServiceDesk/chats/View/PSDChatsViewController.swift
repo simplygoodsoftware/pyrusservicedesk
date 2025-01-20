@@ -29,7 +29,7 @@ class PSDChatsViewController: UIViewController {
     
     private lazy var navigationView: UIView = {
         let view = UIView()
-        view.backgroundColor = UIColor(hex: "#F9F9F9F0")
+        view.backgroundColor = .navBarColor
         view.layer.borderColor = UIColor.black.withAlphaComponent(0.3).cgColor
         view.layer.borderWidth = 0.5
         view.translatesAutoresizingMaskIntoConstraints = false
@@ -314,7 +314,7 @@ private extension PSDChatsViewController {
     func designNavigation() {
         let bigAppear = UINavigationBarAppearance(barAppearance: UIBarAppearance())
         bigAppear.configureWithOpaqueBackground()
-        bigAppear.backgroundColor = .hLightGray
+        bigAppear.backgroundColor = .navBarColor
         
         navigationItem.scrollEdgeAppearance = bigAppear
         navigationItem.standardAppearance = bigAppear
@@ -579,8 +579,4 @@ extension PSDChatsViewController: UINavigationControllerDelegate {
             self.navigationController?.setNavigationBarHidden(false, animated: animated)
         }
     }
-}
-
-extension UIColor {
-    static let hLightGray = UIColor(hex: "#F9F9F9F0") ?? .systemGray5
 }

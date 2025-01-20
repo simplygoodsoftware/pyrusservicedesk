@@ -68,7 +68,7 @@ class ClosedTicketsCell: UITableViewCell {
     }()
     
     private func addConstraints() {
-        contentView.backgroundColor = .hLightGray
+        contentView.backgroundColor = .navBarColor
         countLabel.translatesAutoresizingMaskIntoConstraints = false
         titleLabel.translatesAutoresizingMaskIntoConstraints = false
         openButton.translatesAutoresizingMaskIntoConstraints = false

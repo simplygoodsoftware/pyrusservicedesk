@@ -99,7 +99,7 @@ class PSDMessageInputView: UIView, PSDMessageTextViewDelegate,PSDMessageSendButt
     
     func setupBottomView() {
         let bottomView = UIView()
-        bottomView.backgroundColor = .white
+        bottomView.backgroundColor = .systemBackground
         bottomView.translatesAutoresizingMaskIntoConstraints = false
         addSubview(bottomView)
         bottomView.topAnchor.constraint(equalTo: topAnchor).isActive = true

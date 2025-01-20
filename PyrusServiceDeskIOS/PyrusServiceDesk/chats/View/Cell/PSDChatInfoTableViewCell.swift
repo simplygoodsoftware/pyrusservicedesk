@@ -171,7 +171,15 @@ private extension UIFont {
 }
 
 private extension UIColor {
-    static let lastMessageInfo = UIColor(hex: "#60666C") ?? .systemGray
     static let timeLabel = UIColor(hex: "#9199A1") ?? .systemGray
     static let secondColor = UIColor(hex: "#FFB049")
+    
+    static let lastMessageInfo = UIColor {
+        switch $0.userInterfaceStyle {
+        case .dark:
+            return UIColor(hex: "#FFFFFFE5") ?? .white
+        default:
+            return UIColor(hex: "#60666C") ?? .systemGray
+        }
+    }
 }

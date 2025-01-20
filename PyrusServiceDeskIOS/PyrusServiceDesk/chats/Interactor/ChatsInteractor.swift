@@ -455,7 +455,7 @@ private extension ChatsInteractor {
             clientName: PyrusServiceDesk.clientName ?? "",
             userId: PyrusServiceDesk.customUserId ?? PyrusServiceDesk.userId,
             userName: PyrusServiceDesk.userName ?? "",
-            secretKey: PyrusServiceDesk.securityKey ?? ""
+            secretKey: PyrusServiceDesk.securityKey
         )
         if !users.contains(user) {
             users.append(user)

@@ -84,7 +84,7 @@ class UnderlineSegmentController: UIView {
     
     override init(frame: CGRect) {
         super.init(frame: frame)
-        backgroundColor = UIColor(hex: "#F9F9F9F0")
+        backgroundColor = .navBarColor
         addSubview(scrollView)
         scrollView.addSubview(stackView)
         addSubview(selectionView)
@@ -149,6 +149,24 @@ extension UnderlineSegmentController: ButtonSegmentViewDelegate {
 extension UIColor {
     static let mainTintColor = UIColor(hex: "#354DF2")
     static let secondTintColor = UIColor(hex: "#858C93")
+    
+    static let navBarColor = UIColor {
+        switch $0.userInterfaceStyle {
+        case .dark:
+            return UIColor(hex: "#26292C") ?? .black
+        default:
+            return UIColor(hex: "#F9F9F9F0") ?? .white
+        }
+    }
+    
+    static let scrollButtonColor = UIColor {
+        switch $0.userInterfaceStyle {
+        case .dark:
+            return UIColor(hex: "#26292C") ?? .black
+        default:
+            return .white
+        }
+    }
 }
 
 extension UIStackView {
