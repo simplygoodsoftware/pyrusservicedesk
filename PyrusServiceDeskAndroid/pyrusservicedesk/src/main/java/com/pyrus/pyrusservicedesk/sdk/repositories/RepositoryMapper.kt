@@ -128,6 +128,7 @@ internal class RepositoryMapper(
 
         val hasReadCommands = commands.any { it.commandType == MarkTicketAsRead.ordinal }
         val isRead = ticketDto.isRead == true || hasReadCommands
+        val isLoading = filteredCommands.isNotEmpty()
 
         val firstCommand: CommandEntity? = filteredCommands.firstOrNull()
         val lastCommand = filteredCommands.lastOrNull()
@@ -160,6 +161,7 @@ internal class RepositoryMapper(
             lastCommentText = lastCommentText,
             lastCommentCreationDate = lastCommentCreationDate,
             isActive = ticketDto.isActive,
+            isLoading = isLoading,
         )
     }
 
@@ -361,7 +363,8 @@ internal class RepositoryMapper(
             lastCommentCreationDate = lastComment?.creationTime,
             isActive = true,
             userId = userId,
-            ticketId = ticketId
+            ticketId = ticketId,
+            isLoading = true,
         )
     }
 

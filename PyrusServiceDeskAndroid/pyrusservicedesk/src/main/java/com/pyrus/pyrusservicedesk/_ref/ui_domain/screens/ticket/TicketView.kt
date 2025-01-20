@@ -12,7 +12,7 @@ internal interface TicketView {
         val isLoading: Boolean,
         val showNoConnectionError: Boolean,
         val isRefreshing: Boolean,
-        val toolbarTitleText: String?,
+        val toolbarTitleText: TextProvider?,
     ) {
         override fun toString(): String {
             return "Model(inputText='$inputText', sendEnabled=$sendEnabled, comments=${comments?.size}, isLoading=$isLoading, showNoConnectionError=$showNoConnectionError)"

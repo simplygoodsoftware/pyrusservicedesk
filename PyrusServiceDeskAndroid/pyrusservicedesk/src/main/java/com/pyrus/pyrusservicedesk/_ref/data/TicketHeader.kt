@@ -8,4 +8,5 @@ internal data class TicketHeader(
     val isActive: Boolean?,
     val userId: String,
     val ticketId: Long,
+    val isLoading: Boolean,
 )

@@ -75,7 +75,7 @@ internal class TicketFragment: TeaFragment<Model, TicketView.Event, TicketView.E
             binding.ticketContent.isVisible = !isLoading
             binding.progressBar.isVisible = isLoading
         }
-        diff(Model::toolbarTitleText) { text -> binding.toolbarTitle.text = ConfigUtils.getTitle(requireContext(), text) }
+        diff(Model::toolbarTitleText) { text -> binding.toolbarTitle.text = ConfigUtils.getTitle(requireContext(), text?.text(requireContext())) }
         diff(Model::isRefreshing) { isRefreshing -> binding.refresh.isRefreshing = isRefreshing }
     }
 

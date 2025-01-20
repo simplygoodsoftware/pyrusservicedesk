@@ -41,4 +41,5 @@
     <string name="psd_delete">Delete</string>
     <string name="send_library_logs">Send library logs</string>
     <string name="link_warning">This link leads to a %s\nDo you really want to follow the link?</string>
+    <string name="new_ticket">New ticket</string>
 </resources>

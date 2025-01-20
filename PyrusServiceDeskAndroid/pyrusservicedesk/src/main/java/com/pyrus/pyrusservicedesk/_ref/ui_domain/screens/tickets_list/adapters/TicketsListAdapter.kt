@@ -1,10 +1,12 @@
 package com.pyrus.pyrusservicedesk._ref.ui_domain.screens.tickets_list.adapters
 
+import android.graphics.drawable.AnimationDrawable
 import android.view.View.GONE
 import android.view.View.VISIBLE
 import android.view.ViewGroup
 import android.widget.ImageView
 import android.widget.TextView
+import androidx.core.view.isVisible
 import com.pyrus.pyrusservicedesk.R
 import com.pyrus.pyrusservicedesk._ref.ui_domain.screens.tickets_list.tickets.TicketsContract.Message
 import com.pyrus.pyrusservicedesk._ref.ui_domain.screens.tickets_list.tickets.TicketsView.Model.TicketHeaderEntry
@@ -32,6 +34,7 @@ internal class TicketsListAdapter(
         private val isUnread = itemView.findViewById<ImageView>(R.id.ticket_unread_iv)
         private val date = itemView.findViewById<TextView>(R.id.ticket_time_tv)
         private val lastComment = itemView.findViewById<TextView>(R.id.ticket_last_comment_tv)
+        private val status = itemView.findViewById<ImageView>(R.id.ticket_status_iv)
 
         init {
             itemView.setOnClickListener {
@@ -50,6 +53,8 @@ internal class TicketsListAdapter(
             val dateText = lastCommentCreationTime?.getTimeWhen(itemView.context, Calendar.getInstance())
             date.text = dateText
             isUnread.visibility = if (!entry.isRead) VISIBLE else GONE
+            status.isVisible = entry.isLoading
+            (status.drawable as AnimationDrawable).start()
         }
     }
 }

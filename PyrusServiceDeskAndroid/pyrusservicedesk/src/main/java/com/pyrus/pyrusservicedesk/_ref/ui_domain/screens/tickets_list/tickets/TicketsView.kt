@@ -27,6 +27,7 @@ internal interface TicketsView {
             val lastCommentText: String?,
             val lastCommentCreationTime: Long?,
             val isRead: Boolean,
+            val isLoading: Boolean,
         )
     }
 

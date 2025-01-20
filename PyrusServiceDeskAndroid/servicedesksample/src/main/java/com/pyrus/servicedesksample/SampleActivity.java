@@ -63,7 +63,6 @@ public class SampleActivity extends Activity implements NewReplySubscriber {
             intent.putExtra("FRAGMENT_KEY", "FRAGMENT_QR_KEY");
             ServiceDeskConfiguration builder =  new ServiceDeskConfiguration.Builder()
                     .setUserName("ssss")
-                    .setChatTitle("Sample Support")
                     .setWelcomeMessage("How can I help you?")
                     .setAvatarForSupport(R.drawable.psd_download_file)
                     .setChatMenuDelegate(new ChatMenuDelegate())

@@ -68,6 +68,7 @@ internal object TicketsMapper {
         title = header.subject,
         lastCommentText = header.lastCommentText,
         lastCommentCreationTime = header.lastCommentCreationDate,
-        isRead = header.isRead
+        isRead = header.isRead,
+        isLoading = header.isLoading,
     )
 }

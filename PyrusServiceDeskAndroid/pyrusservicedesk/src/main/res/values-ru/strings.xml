@@ -44,4 +44,5 @@
     <string name="psd_delete">Удалить</string>
     <string name="send_library_logs">Отправить логи библиотеки</string>
     <string name="link_warning">Эта ссылка ведет на %s\nВы действительно хотите туда перейти?</string>
+    <string name="new_ticket">Новое обращение</string>
 </resources>

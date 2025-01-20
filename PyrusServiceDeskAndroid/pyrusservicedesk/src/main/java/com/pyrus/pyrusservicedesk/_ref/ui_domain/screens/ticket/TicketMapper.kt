@@ -13,6 +13,7 @@ import com.pyrus.pyrusservicedesk._ref.ui_domain.screens.ticket.adapter.new_entr
 import com.pyrus.pyrusservicedesk._ref.utils.TextProvider
 import com.pyrus.pyrusservicedesk._ref.utils.getDateText
 import com.pyrus.pyrusservicedesk._ref.utils.isImage
+import com.pyrus.pyrusservicedesk._ref.utils.textRes
 import com.pyrus.pyrusservicedesk.presentation.ui.navigation_page.ticket.HtmlTagUtils
 import com.pyrus.pyrusservicedesk.presentation.ui.view.ContentType
 import com.pyrus.pyrusservicedesk.presentation.ui.view.Status
@@ -31,7 +32,7 @@ internal object TicketMapper {
             isLoading = false,
             showNoConnectionError = false,
             isRefreshing = state.isLoading,
-            toolbarTitleText = state.ticket?.subject ?: "Новое обращение", // TODO kate
+            toolbarTitleText = state.ticket?.subject?.textRes() ?: (R.string.new_ticket).textRes(),
         )
         State.Loading -> Model(
             inputText = "",
