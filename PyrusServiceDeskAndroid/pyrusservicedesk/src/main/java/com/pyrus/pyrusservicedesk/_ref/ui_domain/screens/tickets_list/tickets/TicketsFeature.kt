@@ -42,7 +42,7 @@ internal interface TicketsContract {
             data class OnFilterClick(val selectedUserId: String) : Outer
             data object OnRetryClick : Outer
             data object OnFabItemClick : Outer
-            data class OnChangePage(val appId: String) : Outer
+            data class OnChangePage(val appId: String, val currentUserId: String) : Outer
             data object OnCreateTicketClick : Outer
 
             data class OnTicketClick(val ticketId: Long, val userId: String) : Outer

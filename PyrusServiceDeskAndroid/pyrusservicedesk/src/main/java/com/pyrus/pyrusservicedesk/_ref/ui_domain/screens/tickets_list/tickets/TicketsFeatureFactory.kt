@@ -1,6 +1,7 @@
 package com.pyrus.pyrusservicedesk._ref.ui_domain.screens.tickets_list.tickets
 
 import com.github.terrakok.cicerone.Router
+import com.pyrus.pyrusservicedesk.User
 import com.pyrus.pyrusservicedesk._ref.Screens
 import com.pyrus.pyrusservicedesk._ref.data.multy_chat.TicketsInfo
 import com.pyrus.pyrusservicedesk._ref.ui_domain.screens.tickets_list.tickets.TicketsContract.ContentState
@@ -94,7 +95,10 @@ private class FeatureReducer: Logic<State, Message, Effect>() {
             }
             is Message.Outer.OnChangePage -> {
                 val currentState = state.contentState as? ContentState.Content ?: return
-                state { state.copy(contentState = updateTicketsFilterState(currentState, message.appId, account.domain)) }
+                val users = state.account.users.filter { it.appId == message.appId }
+                val selectedUser = users.find { it.userId == message.currentUserId }
+
+                state { state.copy(contentState = updateTicketsFilterState(currentState, message.appId, account.domain, selectedUser)) }
             }
 
             Message.Outer.OnCreateTicketClick -> {
@@ -178,15 +182,15 @@ private class FeatureReducer: Logic<State, Message, Effect>() {
         )
     }
 
-    private fun updateTicketsFilterState(state: ContentState.Content, appId: String, domain: String?) : ContentState.Content {
+    private fun updateTicketsFilterState(state: ContentState.Content, appId: String, domain: String?, user: User?) : ContentState.Content {
         val ticketsSetByAppName = state.ticketSets?.associateBy { it.appId }
         return state.copy(
             appId = appId,
             titleText = ticketsSetByAppName?.get(appId)?.orgName,
             titleImageUrl = ticketsSetByAppName?.get(appId)?.orgLogoUrl?.let { getOrganisationLogoUrl(it, domain) } ,
-            filterName = null,
-            filterEnabled = false,
-            filterId = null,
+            filterName = user?.userName,
+            filterEnabled = user != null && user.userId != KEY_DEFAULT_USER_ID,
+            filterId = user?.userId,
         )
     }
 

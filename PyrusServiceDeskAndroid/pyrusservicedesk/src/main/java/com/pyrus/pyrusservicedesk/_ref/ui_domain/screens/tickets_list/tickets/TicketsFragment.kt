@@ -102,8 +102,7 @@ internal class TicketsFragment: TeaFragment<Model, Message, Effect.Outer>() {
         binding.viewPager.registerOnPageChangeCallback(object : ViewPager2.OnPageChangeCallback() {
             override fun onPageSelected(position: Int) {
                 super.onPageSelected(position)
-                currentUserId = KEY_DEFAULT_USER_ID
-                dispatch(Message.Outer.OnChangePage(adapter.getAppId(position)))
+                dispatch(Message.Outer.OnChangePage(adapter.getAppId(position), currentUserId))
             }
         })
 
@@ -142,6 +141,8 @@ internal class TicketsFragment: TeaFragment<Model, Message, Effect.Outer>() {
                 else R.drawable.ic_selected_filter
             )
             binding.filterFl.isVisible = filterEnabled
+            if (!filterEnabled)
+                currentUserId = KEY_DEFAULT_USER_ID
         }
         diff(Model::filterName) { filterName ->
             binding.filterContextTv.text = filterName
