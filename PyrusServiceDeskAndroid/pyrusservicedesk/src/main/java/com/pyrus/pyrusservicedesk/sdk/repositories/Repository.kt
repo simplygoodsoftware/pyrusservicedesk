@@ -13,6 +13,7 @@ import com.pyrus.pyrusservicedesk._ref.utils.isFailed
 import com.pyrus.pyrusservicedesk._ref.utils.isSuccess
 import com.pyrus.pyrusservicedesk._ref.utils.map
 import com.pyrus.pyrusservicedesk._ref.utils.toTry2
+import com.pyrus.pyrusservicedesk.core.Account
 import com.pyrus.pyrusservicedesk.presentation.ui.view.Status
 import com.pyrus.pyrusservicedesk.sdk.FileResolver
 import com.pyrus.pyrusservicedesk.sdk.data.TicketDto
@@ -60,24 +61,27 @@ internal class Repository(
     }
 
     suspend fun getAllData(force: Boolean): Try<TicketsInfo> {
+        val account = accountStore.getAccount()
         if (!force) {
             val localTickets: TicketsDto? = localTicketsStore.getTickets()
             if (localTickets != null) {
-                return Try.Success(mergeData(localTickets, localCommandsStore.getCommands()))
+                return Try.Success(mergeData(account, localTickets, localCommandsStore.getCommands()))
             }
         }
         return synchronizer.syncData(SyncRequest.Data).map {
-            mergeData(it, localCommandsStore.getCommands())
+            mergeData(account, it, localCommandsStore.getCommands())
         }
     }
 
     fun getAllDataFlow(): Flow<TicketsInfo?> = combine(
+        accountStore.accountStateFlow(),
         localTicketsStore.getTicketInfoFlow(),
         localCommandsStore.getCommandsFlow(),
         ::mergeData
     )
 
     suspend fun getFeed(userId: String, ticketId: Long, force: Boolean): Try2<FullTicket, GetTicketsError> {
+        val account = accountStore.getAccount()
         val serverId = idStore.getTicketServerId(ticketId) ?: ticketId
         if (serverId < 0) {
             val commands = localCommandsStore.getCommands(serverId)
@@ -106,7 +110,7 @@ internal class Repository(
             val ticketDto: TicketDto? = localTickets?.tickets?.find { it.ticketId == serverId }
             val commands = localCommandsStore.getCommands(serverId)
             if (ticketDto != null) {
-                val ticket = repositoryMapper.mergeTicket(userId, ticketDto, commands)
+                val ticket = repositoryMapper.mergeTicket(account, userId, ticketDto, commands)
                 return Try.Success(ticket).toTry2()
             }
         }
@@ -116,18 +120,19 @@ internal class Repository(
         val ticketDto = syncTry.value
 
         val commands = localCommandsStore.getCommands(serverId)
-        val ticket = repositoryMapper.mergeTicket(userId, ticketDto, commands)
+        val ticket = repositoryMapper.mergeTicket(account, userId, ticketDto, commands)
         return Try2.Success(ticket)
     }
 
     fun getFeedFlow(ticketId: Long): Flow<FullTicket?> {
         return combine(
+            accountStore.accountStateFlow(),
             localTicketsStore.getTicketInfoFlow(ticketId),
             localCommandsStore.getCommandsFlow(ticketId),
-        ) { ticketDto, commands ->
+        ) { account,  ticketDto, commands ->
             if (ticketDto != null) {
                 if (ticketDto.userId == null) return@combine null
-                repositoryMapper.mergeTicket(ticketDto.userId, ticketDto, commands)
+                repositoryMapper.mergeTicket(account, ticketDto.userId, ticketDto, commands)
             }
             else {
                 commands.find { it.requestNewTicket == true }?.let {
@@ -284,10 +289,11 @@ internal class Repository(
     }
 
     private fun mergeData(
+        account: Account,
         ticketsDto: TicketsDto?,
         commands: List<CommandEntity>,
     ): TicketsInfo {
-        return TicketsInfo(repositoryMapper.mergeTickets(ticketsDto, accountStore, commands))
+        return TicketsInfo(repositoryMapper.mergeTickets(account, ticketsDto, commands))
     }
 
     private fun Try<TicketsDto>.checkResponse(ticketId: Long, userId: String): Try2<TicketDto, GetTicketsError> {

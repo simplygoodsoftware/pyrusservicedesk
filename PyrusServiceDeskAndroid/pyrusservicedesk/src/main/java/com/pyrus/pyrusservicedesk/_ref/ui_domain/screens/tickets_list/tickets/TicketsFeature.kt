@@ -15,7 +15,6 @@ internal typealias TicketsFeature = Store<State, Message, Effect.Outer>
 internal interface TicketsContract {
 
     data class State(
-        val account: Account.V3,
         val contentState: ContentState,
     )
 
@@ -26,6 +25,7 @@ internal interface TicketsContract {
         data object Error : ContentState
 
         data class Content(
+            val account: Account,
             val appId: String?,
             val titleText: String?,
             val titleImageUrl: String?,
@@ -55,7 +55,10 @@ internal interface TicketsContract {
         sealed interface Inner : Message {
             data class TicketsUpdated(val tickets: TicketsInfo?) : Inner
             data object UpdateTicketsFailed : Inner
-            data class UpdateTicketsCompleted(val tickets: TicketsInfo) : Inner
+            data class UpdateTicketsCompleted(
+                val account: Account,
+                val tickets: TicketsInfo,
+            ) : Inner
         }
 
     }
@@ -70,12 +73,6 @@ internal interface TicketsContract {
             ) : Outer
 
             data class ShowAddTicketMenu(val appId: String, val users: List<User>) : Outer
-
-            // TODO kate это убрать
-            data object OpenQrFragment : Outer
-
-            // TODO kate это убрать
-            data object OpenSettingsFragment : Outer
 
         }
 

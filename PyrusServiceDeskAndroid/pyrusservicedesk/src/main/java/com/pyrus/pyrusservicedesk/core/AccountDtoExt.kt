@@ -1,6 +1,7 @@
 package com.pyrus.pyrusservicedesk.core
 
 import com.pyrus.pyrusservicedesk.User
+import com.pyrus.pyrusservicedesk.core.StaticRepository.getConfiguration
 import com.pyrus.pyrusservicedesk.sdk.data.UserDataDto
 import com.pyrus.pyrusservicedesk.sdk.data.intermediate.TicketsDto
 import com.pyrus.pyrusservicedesk.sdk.repositories.UserInternal
@@ -54,10 +55,10 @@ internal fun Account.getAdditionalUsers(localState: TicketsDto?): List<UserDataD
     is Account.V3 -> users.map { user -> mapToUserDataDto(localState, user) }
 }
 
-internal fun Account.getUsers() : List<UserInternal> = when(this) {
-    is Account.V1 -> listOf(UserInternal(userId, appId))
-    is Account.V2 -> listOf(UserInternal(userId, appId))
-    is Account.V3 -> users.map { user -> UserInternal(user.userId, user.appId) }
+internal fun Account.getUsers() : List<User> = when(this) {
+    is Account.V1 -> listOf(User(userId, appId, getConfiguration().userName ?: ""))
+    is Account.V2 -> listOf(User(userId, appId, getConfiguration().userName ?: ""))
+    is Account.V3 -> users
 }
 
 private fun mapToUserDataDto(localState: TicketsDto?, user: User): UserDataDto = UserDataDto(

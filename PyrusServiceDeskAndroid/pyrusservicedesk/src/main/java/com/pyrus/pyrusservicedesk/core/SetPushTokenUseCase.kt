@@ -2,12 +2,13 @@ package com.pyrus.pyrusservicedesk.core
 
 import com.pyrus.pyrusservicedesk.SetPushTokenCallback
 import com.pyrus.pyrusservicedesk._ref.utils.MILLISECONDS_IN_MINUTE
+import com.pyrus.pyrusservicedesk.sdk.repositories.AccountStore
 import com.pyrus.pyrusservicedesk.sdk.updates.PreferencesManager
 import com.pyrus.pyrusservicedesk.sdk.updates.PreferencesManager.Companion.S_NO_ID
 import kotlinx.coroutines.CoroutineScope
 
 internal class SetPushTokenUseCase(
-    private val account: Account,
+    private val accountStore: AccountStore,
     private val coreScope: CoroutineScope,
     private val preferencesManager: PreferencesManager,
 ) {
@@ -19,7 +20,7 @@ internal class SetPushTokenUseCase(
     ) {
         // TODO sds
         if (true) return
-        val userId = (account as? Account.V2)?.userId
+        val userId = (accountStore.getAccount() as? Account.V2)?.userId
 //        when {
 //            calculateSkipTokenRegister(userId) -> callback.onResult(Exception("Too many requests. Maximum once every $SET_PUSH_TOKEN_TIMEOUT minutes."))
 //            account.appId.isBlank() -> callback.onResult(Exception("AppId is not assigned"))

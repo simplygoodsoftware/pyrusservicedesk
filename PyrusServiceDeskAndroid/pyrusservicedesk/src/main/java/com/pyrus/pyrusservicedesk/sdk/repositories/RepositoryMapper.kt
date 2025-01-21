@@ -13,6 +13,7 @@ import com.pyrus.pyrusservicedesk._ref.utils.RequestUtils.Companion.getAvatarUrl
 import com.pyrus.pyrusservicedesk._ref.utils.isImage
 import com.pyrus.pyrusservicedesk.core.Account
 import com.pyrus.pyrusservicedesk.core.getUserId
+import com.pyrus.pyrusservicedesk.core.getUsers
 import com.pyrus.pyrusservicedesk.presentation.ui.view.Status
 import com.pyrus.pyrusservicedesk.sdk.data.AttachmentDto
 import com.pyrus.pyrusservicedesk.sdk.data.AuthorDto
@@ -25,11 +26,14 @@ import com.pyrus.pyrusservicedesk.sdk.sync.TicketCommandType.CreateComment
 import com.pyrus.pyrusservicedesk.sdk.sync.TicketCommandType.MarkTicketAsRead
 
 internal class RepositoryMapper(
-    private val account: Account,
-    private val idStore: IdStore
+    private val idStore: IdStore,
 ) {
 
-    fun mergeTickets(ticketsDto: TicketsDto?, accountStore: AccountStore, commands: List<CommandEntity>): List<TicketSetInfo> {
+    fun mergeTickets(
+        account: Account,
+        ticketsDto: TicketsDto?,
+        commands: List<CommandEntity>,
+    ): List<TicketSetInfo> {
 
         val tickets = ArrayList<TicketHeader>()
 
@@ -61,7 +65,7 @@ internal class RepositoryMapper(
             mapToTicketHeader(it.ticketId, it.userId, ticketCommands)
         }
 
-        val smallUsers = mapToSmallAcc(accountStore)
+        val smallUsers = mapToSmallAcc(account)
         val usersByAppId = smallUsers.groupBy { it.appId }
 
         val ticketsByUserId: Map<String, List<TicketHeader>> = tickets.groupBy { it.userId }
@@ -92,12 +96,13 @@ internal class RepositoryMapper(
     }
 
     fun mergeTicket(
+        account: Account,
         userId: String,
         ticketDto: TicketDto,
         commands: List<CommandEntity>,
     ): FullTicket {
 
-        val comments = (ticketDto.comments?.map { map(userId, it)} ?: emptyList()).toMutableList()
+        val comments = (ticketDto.comments?.map { map(account, userId, it)} ?: emptyList()).toMutableList()
         val serverCommentIds = comments.map { it.id }.toSet()
         val createCommentCommands = commands.filter { it.commandType == CreateComment.ordinal }
         comments += createCommentCommands
@@ -184,15 +189,15 @@ internal class RepositoryMapper(
         )
     }
 
-    private fun map(userId: String, commentDto: CommentDto): Comment = Comment(
+    private fun map(account: Account, userId: String, commentDto: CommentDto): Comment = Comment(
         id = commentDto.commentId,
         isLocal = false,
         body = commentDto.body,
         isInbound = commentDto.isInbound && commentDto.author?.authorId == (account as? Account.V3)?.authorId,
-        attachments = commentDto.attachments?.map{ map(userId, it)},
+        attachments = commentDto.attachments?.map{ map(account, userId, it)},
         creationTime = commentDto.creationDate,
         rating = commentDto.rating,
-        author = commentDto.author?.let { map(it) },
+        author = commentDto.author?.let { map(account, it) },
         isSending = false,
     )
 
@@ -231,20 +236,20 @@ internal class RepositoryMapper(
         status = attachment.progress
     )
 
-    fun map(userId: String, attachmentDto: AttachmentDto): Attachment = Attachment(
+    fun map(account: Account, userId: String, attachmentDto: AttachmentDto): Attachment = Attachment(
         id = attachmentDto.id,
         name = attachmentDto.name,
         isImage = attachmentDto.name.isImage(),
         isText = attachmentDto.isText,
         bytesSize = attachmentDto.bytesSize,
         isVideo = attachmentDto.isVideo,
-        uri =  Uri.parse(RequestUtils.getPreviewUrl(attachmentDto.id, account, findUserV3(userId))),
+        uri =  Uri.parse(RequestUtils.getPreviewUrl(attachmentDto.id, account, findUser(account, userId))),
         status = Status.Completed,
         progress = null,
         guid = attachmentDto.guid,
     )
 
-    private fun map(authorDto: AuthorDto) = Author(
+    private fun map(account: Account, authorDto: AuthorDto) = Author(
         name = authorDto.name,
         authorId = authorDto.authorId,
         avatarUrl = when (authorDto.avatarId) {
@@ -392,11 +397,11 @@ internal class RepositoryMapper(
         )
     }
 
-    private fun findUserV3(userId: String): User? {
-        return (account as? Account.V3)?.users?.find { it.userId == userId }
+    private fun findUser(account: Account, userId: String): User? {
+        return account.getUsers().find { it.userId == userId }
     }
 
-    private fun mapToSmallAcc(accountStore: AccountStore): List<SmallUser> = when(val account = accountStore.getAccount()) {
+    private fun mapToSmallAcc(account: Account): List<SmallUser> = when(account) {
         is Account.V1 -> listOf(SmallUser(account.getUserId(), account.appId))
         is Account.V2 -> listOf(SmallUser(account.getUserId(), account.appId))
         is Account.V3 -> account.users.map { SmallUser(it.userId, it.appId) }

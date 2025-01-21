@@ -228,7 +228,7 @@ internal class TicketActor(
         is Effect.Inner.CheckAccount -> flow {
             accountStore.accountStateFlow().collect { account ->
                 val users = account.getUsers()
-                if (!users.contains(user)) {
+                if (!users.any { user.userId == it.userId && user.appId == it.appId }) {
                     router.exit()
                 }
             }
