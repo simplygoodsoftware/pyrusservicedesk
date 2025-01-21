@@ -120,13 +120,14 @@ internal class TicketsFragment: TeaFragment<Model, Message, Effect.Outer>() {
         }
         if (multichatButtons?.rightButtonAction != null) {
             binding.toolbarTicketsList.psdToolbarQrIb.setOnClickListener {
-                PyrusServiceDesk.addUser(PyrusServiceDesk.user2())
-//                try {
-//                    startActivity(multichatButtons.centerAction)
-//                }
-//                catch (e: Exception) {
-//
-//                }
+                // TODO sds remove it
+//                PyrusServiceDesk.addUser(PyrusServiceDesk.user2())
+                try {
+                    startActivity(multichatButtons.centerAction)
+                }
+                catch (e: Exception) {
+                    // TODO show error ui
+                }
             }
         }
         if (multichatButtons?.centerAction != null) {
@@ -135,7 +136,7 @@ internal class TicketsFragment: TeaFragment<Model, Message, Effect.Outer>() {
                     startActivity(multichatButtons.centerAction)
                 }
                 catch (e: Exception) {
-
+                    // TODO show error ui
                 }
             }
         }
