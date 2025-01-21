@@ -24,12 +24,6 @@ import java.util.Map;
 
 public class SampleActivity extends Activity implements NewReplySubscriber {
 
-    private User user1 = new User("255371017", "xZlr1Zf0pZZE43NfjXfY10OvEKwkKLRCO~PYF7SjID-Tp-7sK5EAuWqgOfrCQNOdDUHrZhHlBaqcdzj2ULgf9e~ciFudXo9ff1Y9cx0oXaTGziZKANoCLbWceaF-5g1VAQpfcg==", "Ресторан 1");
-    private User user2 = new User("251380375", "n4Mxu60kICP-XtZkGm2zCRlDtRRBi76h1w7FMx~f2F~z3d~Ayz7~Z7Gfxg7q2dI~sNVS965oM44Buy8uX2ngWib4BIIaf~6uIT6KaRzyGn2N6O2zdj-lufplexg1TvYLTviMSw==", "Много Лосося ДК Москва, Большая Филёвская улица, 3");
-    private User user3 = new User("251374579", "n4Mxu60kICP-XtZkGm2zCRlDtRRBi76h1w7FMx~f2F~z3d~Ayz7~Z7Gfxg7q2dI~sNVS965oM44Buy8uX2ngWib4BIIaf~6uIT6KaRzyGn2N6O2zdj-lufplexg1TvYLTviMSw==", "Старик Хинкалыч - Кострома Коллаж");
-
-
-
     private final ArrayList<User> users = new ArrayList<>();
 
     int count = 2;
@@ -46,9 +40,7 @@ public class SampleActivity extends Activity implements NewReplySubscriber {
 //                users.add(user2);
 //            else if (count == 3)
 //                users.add(user3);
-            users.add(user1);
-            users.add(user2);
-            users.add(user3);
+            users.add(PyrusServiceDesk.user3());
             PyrusServiceDesk.initAsMultichat(getApplication(), users, "10");
 
             Map<String, String> map = new HashMap<>();

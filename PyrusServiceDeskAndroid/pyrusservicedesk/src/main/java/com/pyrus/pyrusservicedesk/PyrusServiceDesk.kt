@@ -3,7 +3,6 @@ package com.pyrus.pyrusservicedesk
 import android.app.Activity
 import android.app.Application
 import android.content.Context
-import android.content.Intent
 import android.content.SharedPreferences
 import androidx.annotation.MainThread
 import com.pyrus.pyrusservicedesk._ref.ui_domain.screens.ticket.MainActivity
@@ -21,8 +20,6 @@ import com.pyrus.pyrusservicedesk.sdk.updates.NewReplySubscriber
 import com.pyrus.pyrusservicedesk.sdk.updates.OnStopCallback
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.StateFlow
 
 
 class PyrusServiceDesk private constructor(
@@ -58,13 +55,28 @@ class PyrusServiceDesk private constructor(
         internal var logging = false
             private set
 
-        private val _stateFlow = MutableStateFlow(emptyList<User>())
-        val ticketsListStateFlow: StateFlow<List<User>> get() = _stateFlow
+        private val appId1 = "n4Mxu60kICP-XtZkGm2zCRlDtRRBi76h1w7FMx~f2F~z3d~Ayz7~Z7Gfxg7q2dI~sNVS965oM44Buy8uX2ngWib4BIIaf~6uIT6KaRzyGn2N6O2zdj-lufplexg1TvYLTviMSw=="
+        private val appId2 = "xZlr1Zf0pZZE43NfjXfY10OvEKwkKLRCO~PYF7SjID-Tp-7sK5EAuWqgOfrCQNOdDUHrZhHlBaqcdzj2ULgf9e~ciFudXo9ff1Y9cx0oXaTGziZKANoCLbWceaF-5g1VAQpfcg=="
 
         @JvmStatic
-        fun updateValue(newValue: List<User>) {
-            _stateFlow.value = newValue
-        }
+        fun user1() = User(
+            userId = "255371017",
+            appId = appId2,
+            userName = "Ресторан 1"
+        )
+        @JvmStatic
+        fun user2() = User(
+            userId = "251380375",
+            appId = appId1,
+            userName = "Много Лосося ДК Москва, Большая Филёвская улица, 3"
+        )
+        @JvmStatic
+        fun user3() = User(
+            userId = "251374579",
+            appId = appId1,
+            userName = "Старик Хинкалыч - Кострома Коллаж"
+        )
+
 
         @JvmStatic
         fun addUser(user: User) {
@@ -238,11 +250,6 @@ class PyrusServiceDesk private constructor(
                 preferences = preferences
             )
 
-            if (newAccount is Account.V3 && listUser != null) {
-                updateValue(listUser)
-            }
-
-
             // TODO sds
 //            if (INSTANCE != null && get().userId != userId) {
 //                INSTANCE?.liveUpdates?.reset(userId)
@@ -372,7 +379,7 @@ class PyrusServiceDesk private constructor(
         fun setPushToken(
             token: String?,
             callback: SetPushTokenCallback,
-            tokenType: String = DEFAULT_TOKEN_TYPE
+            tokenType: String = DEFAULT_TOKEN_TYPE,
         ) {
             PLog.d(TAG, "setPushToken, token: $token")
             injector().setPushTokenUseCase.invoke(token, callback, tokenType)

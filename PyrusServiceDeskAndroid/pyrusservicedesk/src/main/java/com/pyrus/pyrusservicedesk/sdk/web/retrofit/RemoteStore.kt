@@ -185,12 +185,6 @@ internal class RemoteStore(
 //        return TicketsInfo(ticketSetInfoList)
 //    }
 
-    private fun getAdditionalUsers(): List<UserDataDto>? {
-        val list = PyrusServiceDesk.ticketsListStateFlow.value.map { UserDataDto(it.appId, it.userId, "", null) }
-        return list
-    }
-
-
     /**
      * Appends [comment] to the ticket to comment feed.
      *
