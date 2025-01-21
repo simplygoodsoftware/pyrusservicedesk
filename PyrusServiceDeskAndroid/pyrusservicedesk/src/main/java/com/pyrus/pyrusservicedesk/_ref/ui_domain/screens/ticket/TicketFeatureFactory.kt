@@ -21,6 +21,7 @@ import com.pyrus.pyrusservicedesk._ref.whitetea.core.logic.Logic
 import com.pyrus.pyrusservicedesk._ref.whitetea.utils.adapt
 import com.pyrus.pyrusservicedesk.core.Account
 import com.pyrus.pyrusservicedesk.core.getAdditionalUsers
+import com.pyrus.pyrusservicedesk.core.getUsers
 import com.pyrus.pyrusservicedesk.sdk.data.FileManager
 import com.pyrus.pyrusservicedesk.sdk.data.intermediate.FileData
 import com.pyrus.pyrusservicedesk.sdk.repositories.AccountStore
@@ -219,19 +220,20 @@ internal class TicketActor(
             }
         }
 
-        Effect.Inner.FeedFlow -> flow {
-            accountStore.accountStateFlow().collect {
-                val users = accountStore.getAccount().getAdditionalUsers(null) ?: return@collect
-                if (users.find { it.userId == user.userId } == null)
+        is Effect.Inner.CheckAccount -> flow {
+            accountStore.accountStateFlow().collect { account ->
+                val users = account.getUsers()
+                if (!users.contains(user)) {
                     router.exit()
+                }
             }
         }
 
-        Effect.Inner.FeedFlow -> repository.getFeedFlow(ticketId)
+        is Effect.Inner.FeedFlow -> repository.getFeedFlow(ticketId)
             .debounce(150)
             .map(Message.Inner::CommentsUpdated)
 
-        Effect.Inner.Close -> flow { router.exit() }
+        is Effect.Inner.Close -> flow { router.exit() }
 
         is Effect.Inner.SendTextComment -> flow {
             repository.addTextComment(user, ticketId, effect.text)
@@ -261,7 +263,7 @@ internal class TicketActor(
 
         is Effect.Inner.ReadTicket -> flow { repository.readTicket(effect.user, effect.ticketId) }
 
-        Effect.Inner.ShowAttachVariants -> flow {
+        is Effect.Inner.ShowAttachVariants -> flow {
             val key = UUID.randomUUID().toString()
             router.navigateTo(Screens.AttachFileVariantsScreen(key))
             val uri: Any = suspendCoroutine { continuation ->

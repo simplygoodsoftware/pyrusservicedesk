@@ -3,6 +3,7 @@ package com.pyrus.pyrusservicedesk.core
 import com.pyrus.pyrusservicedesk.User
 import com.pyrus.pyrusservicedesk.sdk.data.UserDataDto
 import com.pyrus.pyrusservicedesk.sdk.data.intermediate.TicketsDto
+import com.pyrus.pyrusservicedesk.sdk.repositories.UserInternal
 import com.pyrus.pyrusservicedesk.sdk.sync.SyncMapper.calcLastNoteId
 
 private const val API_VERSION_1: Int = 0
@@ -51,6 +52,12 @@ internal fun Account.getAdditionalUsers(localState: TicketsDto?): List<UserDataD
     is Account.V1 -> null
     is Account.V2 -> null
     is Account.V3 -> users.map { user -> mapToUserDataDto(localState, user) }
+}
+
+internal fun Account.getUsers() : List<UserInternal> = when(this) {
+    is Account.V1 -> listOf(UserInternal(userId, appId))
+    is Account.V2 -> listOf(UserInternal(userId, appId))
+    is Account.V3 -> users.map { user -> UserInternal(user.userId, user.appId) }
 }
 
 private fun mapToUserDataDto(localState: TicketsDto?, user: User): UserDataDto = UserDataDto(
