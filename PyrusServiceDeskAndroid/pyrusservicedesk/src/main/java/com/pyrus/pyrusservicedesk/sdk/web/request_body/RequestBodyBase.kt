@@ -10,7 +10,15 @@ import com.squareup.moshi.JsonClass
  * @param appId id of the app that obtained through special Pyrus form
  * @param userId UID of user. Generated installation id is used by default.
  * @param securityKey used as key for external authorization.
- * // TODO
+ * @param needFullInfo a flag indicating whether additional information about all tickets should be returned.
+ * @param additionalUsers list of users
+ * @param lastNoteId maximum comment id that is stored on the device for the current userId.
+ * @param commands an array of commands about changing the state of tickets.
+ * @param authorId author phone number hash.
+ * @param authorName author name.
+ * @param instanceId installation id on the device.
+ * @param version version of service desk 1,2,or 3.
+ * @param apiSign api flag.
  */
 
 @JsonClass(generateAdapter = true)

@@ -85,7 +85,7 @@ class PyrusServiceDesk private constructor(
          * @param domain Base domain for network requests. If the [domain] is null, the default pyrus.com will be used.
          * @param loggingEnabled If true, then the library will write logs,
          * and they can be sent as a file to chat by clicking the "Send Library Logs" button in the menu under the "+" sign.
-         * @param authorizationToken // TODO sds
+         * @param authorizationToken authorization token that is sent to the backend.
          */
         @JvmStatic
         @JvmOverloads
@@ -124,7 +124,7 @@ class PyrusServiceDesk private constructor(
          * @param domain Base domain for network requests. If the [domain] is null, the default pyrus.com will be used.
          * @param loggingEnabled If true, then the library will write logs,
          * and they can be sent as a file to chat by clicking the "Send Library Logs" button in the menu under the "+" sign.
-         * @param authorizationToken // TODO sds
+         * @param authorizationToken authorization token that is sent to the backend.
          */
         @JvmStatic
         @JvmOverloads
@@ -159,13 +159,12 @@ class PyrusServiceDesk private constructor(
          * Unhandled IllegalStateException is thrown otherwise.
          *
          * @param application instance of the enclosing application
-         * @param appId id of a client // TODO
-         * @param userId of the user who is initializing service desk // TODO
-         * @param securityKey of the user far safe initialization // TODO
+         * @param listUser list of the users.
+         * @param authorId author phone number hash.
          * @param domain Base domain for network requests. If the [domain] is null, the default pyrus.com will be used.
          * @param loggingEnabled If true, then the library will write logs,
          * and they can be sent as a file to chat by clicking the "Send Library Logs" button in the menu under the "+" sign.
-         * @param authorizationToken // TODO sds
+         * @param authorizationToken authorization token that is sent to the backend.
          */
         @JvmStatic
         @JvmOverloads
@@ -306,17 +305,13 @@ class PyrusServiceDesk private constructor(
             activity: Activity,
             configuration: ServiceDeskConfiguration? = null,
             onStopCallback: OnStopCallback? = null,
-            openQrIntent: Intent? = null,
-            openSettingsIntent: Intent? = null,
         ) {
             val account = injector().accountStore.getAccount()
             startImpl(
                 activity = activity,
                 account = account,
                 configuration = configuration,
-                onStopCallback = onStopCallback,
-                openQrIntent = openQrIntent,
-                openSettingsIntent = openSettingsIntent,
+                onStopCallback = onStopCallback
             )
         }
 
@@ -450,15 +445,8 @@ class PyrusServiceDesk private constructor(
             account: Account,
             configuration: ServiceDeskConfiguration?,
             onStopCallback: OnStopCallback?,
-            openQrIntent: Intent?,
-            openSettingsIntent: Intent?,
         ) {
             StaticRepository.setConfiguration(configuration)
-
-            if (INJECTOR != null) {
-                // TODO не лучшее место для этого
-                injector().setIntent(openQrIntent, openSettingsIntent)
-            }
 
             // TODO
 //            get().sharedViewModel.clearQuitServiceDesk()
