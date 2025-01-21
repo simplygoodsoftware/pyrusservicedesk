@@ -33,6 +33,7 @@ internal interface TicketsContract {
             val filterName: String?,
             val filterEnabled: Boolean,
             val ticketSets: List<TicketSetInfo>?,
+            val isLoading: Boolean,
         ) : ContentState
     }
 
@@ -41,6 +42,7 @@ internal interface TicketsContract {
         sealed interface Outer : Message {
             data class OnFilterClick(val selectedUserId: String) : Outer
             data object OnRetryClick : Outer
+            data object OnRefresh : Outer
             data object OnFabItemClick : Outer
             data class OnChangePage(val appId: String, val currentUserId: String) : Outer
             data object OnCreateTicketClick : Outer

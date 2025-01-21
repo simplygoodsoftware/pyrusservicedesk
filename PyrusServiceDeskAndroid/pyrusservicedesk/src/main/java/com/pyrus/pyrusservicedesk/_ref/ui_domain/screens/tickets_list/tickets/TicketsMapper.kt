@@ -21,7 +21,7 @@ internal object TicketsMapper {
                 ticketsIsEmpty = state.ticketSets.isNullOrEmpty(),
                 filterEnabled = state.filterEnabled,
                 tabLayoutIsVisibile = if (state.ticketSets != null) state.ticketSets.size > 1 else false,
-                ticketSets = state.ticketSets?.map(::map) ?: emptyList(),
+                ticketSets = state.ticketSets?.map { map(it, state.isLoading) } ?: emptyList(),
                 showNoConnectionError = false,
                 isLoading = false,
             )
@@ -50,7 +50,7 @@ internal object TicketsMapper {
         )
     }
 
-    private fun map(ticketSetInfo: TicketSetInfo): TicketSetInfoEntry {
+    private fun map(ticketSetInfo: TicketSetInfo, isLoading: Boolean): TicketSetInfoEntry {
 
         val filteredTickets =
             if (userId == null) ticketSetInfo.tickets
@@ -60,6 +60,7 @@ internal object TicketsMapper {
             appId = ticketSetInfo.appId,
             titleText = ticketSetInfo.orgName,
             tickets = filteredTickets.map(::map),
+            isLoading = isLoading,
         )
     }
 

@@ -48,7 +48,10 @@ internal class TicketsPageAdapter(
             binding.ticketsRv.adapter = adapter
             binding.ticketsRv.layoutManager = LinearLayoutManager(itemView.context)
             binding.createTicketTv.setOnClickListener {
-                onEvent.invoke(Message.Outer.OnCreateTicketClick)
+                onEvent(Message.Outer.OnCreateTicketClick)
+            }
+            binding.refresh.setOnRefreshListener {
+                onEvent(Message.Outer.OnRefresh)
             }
         }
 
@@ -56,6 +59,7 @@ internal class TicketsPageAdapter(
             adapter.setItems(entry.tickets)
             binding.emptyTicketsListLl.isVisible = entry.tickets.isEmpty()
             binding.ticketsRv.isVisible = entry.tickets.isNotEmpty()
+            binding.refresh.isRefreshing = entry.isLoading
         }
 
     }

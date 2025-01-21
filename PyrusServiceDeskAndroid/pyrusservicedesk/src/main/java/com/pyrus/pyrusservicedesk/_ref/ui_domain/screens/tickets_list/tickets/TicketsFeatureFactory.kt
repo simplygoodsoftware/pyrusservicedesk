@@ -93,6 +93,11 @@ private class FeatureReducer: Logic<State, Message, Effect>() {
                 state { state.copy(contentState = ContentState.Loading) }
                 effects { +Effect.Inner.UpdateTickets(force = true) }
             }
+            is Message.Outer.OnRefresh -> {
+                val contentState = state.contentState as? ContentState.Content ?: return
+                state { state.copy(contentState = contentState.copy(isLoading = true)) }
+                effects { +Effect.Inner.UpdateTickets(force = true) }
+            }
             is Message.Outer.OnChangePage -> {
                 val currentState = state.contentState as? ContentState.Content ?: return
                 val users = state.account.users.filter { it.appId == message.appId }
@@ -150,6 +155,7 @@ private class FeatureReducer: Logic<State, Message, Effect>() {
                 state.copy(contentState = when(val currentDateState = state.contentState) {
                     is ContentState.Content -> currentDateState.copy(
                         ticketSets = message.tickets.ticketSetInfoList,
+                        isLoading = false,
                     )
                     ContentState.Error,
                     ContentState.Loading -> createInitialContentState(message.tickets, account)
@@ -164,7 +170,10 @@ private class FeatureReducer: Logic<State, Message, Effect>() {
             }
             is Message.Inner.TicketsUpdated -> {
                 val contentState = state.contentState as? ContentState.Content ?: return
-                state { state.copy(contentState = contentState.copy(ticketSets = message.tickets?.ticketSetInfoList)) }
+                state { state.copy(contentState = contentState.copy(
+                    ticketSets = message.tickets?.ticketSetInfoList,
+                    isLoading = false
+                )) }
             }
         }
     }
@@ -179,6 +188,7 @@ private class FeatureReducer: Logic<State, Message, Effect>() {
             filterEnabled = false,
             ticketSets = tickets.ticketSetInfoList,
             filterId = null,
+            isLoading = false,
         )
     }
 
