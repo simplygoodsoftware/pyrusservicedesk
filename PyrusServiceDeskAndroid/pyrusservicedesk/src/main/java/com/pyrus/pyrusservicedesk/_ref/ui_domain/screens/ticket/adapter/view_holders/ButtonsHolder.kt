@@ -67,7 +67,7 @@ internal class ButtonsHolder(parent: ViewGroup): ViewHolderBase<CommentEntryV2.B
                     is CommentEntryV2.ButtonEntry.Simple -> {
                         text = buttonText
                         setCompoundDrawablesWithIntrinsicBounds(0, 0, 0, 0)
-//                        setOnClickListener { entry.onButtonClick.invoke(buttonText) } // TODO
+//                        setOnClickListener { entry.onButtonClick.invoke(buttonText) } // TODO SDS
                     }
                 }
 
