@@ -73,7 +73,7 @@ internal class Repository(
         }
     }
 
-    fun getAllDataFlow(): Flow<TicketsInfo?> = combine(
+    fun getAllDataFlow(): Flow<TicketsInfo> = combine(
         accountStore.accountStateFlow(),
         localTicketsStore.getTicketInfoFlow(),
         localCommandsStore.getCommandsFlow(),
@@ -293,7 +293,10 @@ internal class Repository(
         ticketsDto: TicketsDto?,
         commands: List<CommandEntity>,
     ): TicketsInfo {
-        return TicketsInfo(repositoryMapper.mergeTickets(account, ticketsDto, commands))
+        return TicketsInfo(
+            account = account,
+            ticketSetInfoList = repositoryMapper.mergeTickets(account, ticketsDto, commands)
+        )
     }
 
     private fun Try<TicketsDto>.checkResponse(ticketId: Long, userId: String): Try2<TicketDto, GetTicketsError> {

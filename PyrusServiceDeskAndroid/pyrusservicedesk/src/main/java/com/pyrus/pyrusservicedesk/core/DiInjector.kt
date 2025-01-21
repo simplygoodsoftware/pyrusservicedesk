@@ -1,7 +1,6 @@
 package com.pyrus.pyrusservicedesk.core
 
 import android.app.Application
-import android.content.Intent
 import android.content.SharedPreferences
 import android.os.Build
 import com.github.terrakok.cicerone.Cicerone
@@ -159,7 +158,6 @@ internal class DiInjector(
         repository = repository,
         router = router,
         commandsStore = localCommandsStore,
-        accountStore = accountStore,
     )
 
     val sharedViewModel = SharedViewModel()

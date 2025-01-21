@@ -18,9 +18,7 @@ import com.pyrus.pyrusservicedesk._ref.whitetea.core.StoreFactory
 import com.pyrus.pyrusservicedesk._ref.whitetea.core.adaptCast
 import com.pyrus.pyrusservicedesk._ref.whitetea.core.logic.Logic
 import com.pyrus.pyrusservicedesk._ref.whitetea.utils.adapt
-import com.pyrus.pyrusservicedesk.core.Account
 import com.pyrus.pyrusservicedesk.core.getUsers
-import com.pyrus.pyrusservicedesk.sdk.repositories.AccountStore
 import com.pyrus.pyrusservicedesk.sdk.repositories.LocalCommandsStore
 import com.pyrus.pyrusservicedesk.sdk.repositories.Repository
 import com.pyrus.pyrusservicedesk.sdk.repositories.UserInternal
@@ -36,14 +34,13 @@ internal class TicketsFeatureFactory(
     private val repository: Repository,
     private val router: Router,
     private val commandsStore: LocalCommandsStore,
-    private val accountStore: AccountStore,
 ) {
 
     fun create(): TicketsFeature = storeFactory.create(
         name = TAG,
         initialState = State(ContentState.Loading),
         reducer = FeatureReducer(),
-        actor = TicketsActor(repository, router, commandsStore, accountStore).adaptCast(),
+        actor = TicketsActor(repository, router, commandsStore).adaptCast(),
         initialEffects = listOf(
             Effect.Inner.UpdateTickets(false),
             Effect.Inner.TicketsSetFlow,
@@ -68,7 +65,6 @@ private class FeatureReducer: Logic<State, Message, Effect>() {
                 val selectedAppId = contentState.appId ?: return
                 val users = contentState.account.getUsers().filter { it.appId == contentState.appId }
 
-                val firstUser = users.first()
                 val selectedUser = contentState.filterId?.let { id -> users.find { it.userId == id } }
 
                 if (users.size > 1 && selectedUser == null) {
@@ -79,6 +75,7 @@ private class FeatureReducer: Logic<State, Message, Effect>() {
                     effects { +Effect.Inner.OpenTicketScreen(user, null) }
                 }
                 else {
+                    val firstUser = users.firstOrNull() ?: return
                     val user = UserInternal(firstUser.userId, selectedAppId)
                     effects { +Effect.Inner.OpenTicketScreen(user, null) }
                 }
@@ -161,11 +158,11 @@ private class FeatureReducer: Logic<State, Message, Effect>() {
             is Message.Inner.UpdateTicketsCompleted -> state {
                 state.copy(contentState = when(val currentDateState = state.contentState) {
                     is ContentState.Content -> currentDateState.copy(
-                        ticketSets = message.tickets.ticketSetInfoList,
+                        ticketSets = message.ticketsInfo.ticketSetInfoList,
                         isLoading = false,
                     )
                     ContentState.Error,
-                    ContentState.Loading -> createInitialContentState(message.tickets, message.account)
+                    ContentState.Loading -> createInitialContentState(message.ticketsInfo)
                 })
             }
             Message.Inner.UpdateTicketsFailed -> {
@@ -178,23 +175,24 @@ private class FeatureReducer: Logic<State, Message, Effect>() {
             is Message.Inner.TicketsUpdated -> {
                 val contentState = state.contentState as? ContentState.Content ?: return
                 state { state.copy(contentState = contentState.copy(
-                    ticketSets = message.tickets?.ticketSetInfoList,
+                    account = message.ticketsInfo.account,
+                    ticketSets = message.ticketsInfo.ticketSetInfoList,
                     isLoading = false
                 )) }
             }
         }
     }
 
-    private fun createInitialContentState(tickets: TicketsInfo, account: Account) : ContentState.Content {
-        val firstSet = tickets.ticketSetInfoList.firstOrNull()
+    private fun createInitialContentState(ticketsInfo: TicketsInfo) : ContentState.Content {
+        val firstSet = ticketsInfo.ticketSetInfoList.firstOrNull()
         return ContentState.Content(
-            account = account,
+            account = ticketsInfo.account,
             appId = firstSet?.appId,
             titleText = firstSet?.orgName,
-            titleImageUrl = firstSet?.orgLogoUrl?.let { getOrganisationLogoUrl(it, account.domain) },
+            titleImageUrl = firstSet?.orgLogoUrl?.let { getOrganisationLogoUrl(it, ticketsInfo.account.domain) },
             filterName = null,
             filterEnabled = false,
-            ticketSets = tickets.ticketSetInfoList,
+            ticketSets = ticketsInfo.ticketSetInfoList,
             filterId = null,
             isLoading = false,
         )
@@ -223,7 +221,6 @@ internal class TicketsActor(
     private val repository: Repository,
     private val router: Router,
     private val commandsStore: LocalCommandsStore,
-    private val accountStore: AccountStore,
 ): Actor<Effect.Inner, Message.Inner> {
 
     override fun handleEffect(effect: Effect.Inner): Flow<Message.Inner> = when(effect) {
@@ -231,8 +228,7 @@ internal class TicketsActor(
         is Effect.Inner.UpdateTickets -> singleFlow {
             when(val ticketsTry = repository.getAllData(effect.force)) {
                 is Try.Success -> {
-                    val account = accountStore.getAccount()
-                    Message.Inner.UpdateTicketsCompleted(account, ticketsTry.value)
+                    Message.Inner.UpdateTicketsCompleted(ticketsTry.value)
                 }
                 is Try.Failure -> {
                     ticketsTry.error.printStackTrace()

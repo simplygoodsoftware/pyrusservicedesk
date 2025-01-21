@@ -53,11 +53,12 @@ internal interface TicketsContract {
         }
 
         sealed interface Inner : Message {
-            data class TicketsUpdated(val tickets: TicketsInfo?) : Inner
+            data class TicketsUpdated(
+                val ticketsInfo: TicketsInfo,
+            ) : Inner
             data object UpdateTicketsFailed : Inner
             data class UpdateTicketsCompleted(
-                val account: Account,
-                val tickets: TicketsInfo,
+                val ticketsInfo: TicketsInfo,
             ) : Inner
         }
 
