@@ -40,6 +40,7 @@ import com.pyrus.pyrusservicedesk._ref.whitetea.bind.BinderLifecycleMode
 import com.pyrus.pyrusservicedesk._ref.whitetea.core.ViewRenderer
 import com.pyrus.pyrusservicedesk._ref.whitetea.utils.diff
 import com.pyrus.pyrusservicedesk.databinding.PsdFragmentTicketBinding
+import com.pyrus.pyrusservicedesk.presentation.ui.navigation_page.ticket.dialogs.attach_files.AttachFileVariantsFragment
 import com.pyrus.pyrusservicedesk.presentation.ui.view.recyclerview.item_decorators.GroupVerticalItemDecoration
 import com.pyrus.pyrusservicedesk.sdk.repositories.UserInternal
 import kotlinx.coroutines.flow.map
@@ -92,6 +93,10 @@ internal class TicketFragment: TeaFragment<Model, TicketView.Event, TicketView.E
                     effect.text.text(requireContext()),
                     Toast.LENGTH_SHORT
                 ).show()
+            }
+
+            is TicketView.Effect.ShowAttachVariants -> {
+                AttachFileVariantsFragment.newInstance(effect.key).show(parentFragmentManager, null)
             }
         }
     }

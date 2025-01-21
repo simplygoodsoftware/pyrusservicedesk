@@ -130,7 +130,11 @@ private class FeatureReducer: Logic<State, Message, Effect>() {
             }
             is Message.Outer.OnShowAttachVariantsClick -> {
                 if(state !is State.Content) return
-                effects { +Effect.Inner.ShowAttachVariants }
+                effects {
+                    val key = UUID.randomUUID().toString()
+                    +Effect.Outer.ShowAttachVariants(key)
+                    +Effect.Inner.ListenAttachVariant(key)
+                }
             }
             is Message.Outer.OnRefresh -> {
                 val currentState = state as? State.Content ?: return
@@ -264,11 +268,9 @@ internal class TicketActor(
 
         is Effect.Inner.ReadTicket -> flow { repository.readTicket(effect.user, effect.ticketId) }
 
-        is Effect.Inner.ShowAttachVariants -> flow {
-            val key = UUID.randomUUID().toString()
-            router.navigateTo(Screens.AttachFileVariantsScreen(key))
+        is Effect.Inner.ListenAttachVariant -> flow {
             val uri: Any = suspendCoroutine { continuation ->
-                router.setResultListener(key) { continuation.resume(it) }
+                router.setResultListener(effect.key) { continuation.resume(it) }
             }
             if (uri !is Uri) return@flow
             val fileUri = try { fileManager.copyFile(uri) } catch (e: Exception) { null } ?: return@flow

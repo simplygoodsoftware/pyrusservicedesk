@@ -72,6 +72,7 @@ internal object TicketMapper {
     fun map(effect: Effect.Outer): TicketView.Effect = when(effect) {
         is Effect.Outer.CopyToClipboard -> TicketView.Effect.CopyToClipboard(effect.text)
         is Effect.Outer.MakeToast -> TicketView.Effect.MakeToast(effect.text)
+        is Effect.Outer.ShowAttachVariants -> TicketView.Effect.ShowAttachVariants(effect.key)
     }
 
     private fun mapComments(
