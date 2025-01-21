@@ -32,7 +32,8 @@ internal object TicketMapper {
             isLoading = false,
             showNoConnectionError = false,
             isRefreshing = state.isLoading,
-            toolbarTitleText = state.ticket?.subject?.textRes() ?: (R.string.new_ticket).textRes(),
+            toolbarTitleText = state.ticket?.subject?.let(HtmlTagUtils::cleanTags)?.textRes()
+                ?: (R.string.new_ticket).textRes(),
         )
         State.Loading -> Model(
             inputText = "",
