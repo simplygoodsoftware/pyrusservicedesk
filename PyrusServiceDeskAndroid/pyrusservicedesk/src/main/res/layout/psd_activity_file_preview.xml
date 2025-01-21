@@ -86,18 +86,6 @@
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 
-
-    <ProgressBar
-        android:id="@+id/progress_bar"
-        style="?android:attr/progressBarStyleHorizontal"
-        android:layout_width="0dp"
-        android:layout_height="?attr/elevationDefault"
-        android:indeterminate="false"
-        android:max="@integer/psd_progress_max_value"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/file_preview_toolbar" />
-
     <include
         android:id="@+id/no_connection"
         layout="@layout/psd_no_connection"

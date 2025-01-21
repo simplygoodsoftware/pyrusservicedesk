@@ -6,7 +6,6 @@ import android.content.Intent
 import android.content.Intent.ACTION_SEND
 import android.content.Intent.ACTION_VIEW
 import android.graphics.PorterDuff
-import android.graphics.drawable.Drawable
 import android.graphics.drawable.RotateDrawable
 import android.net.Uri
 import android.os.Bundle
@@ -19,15 +18,10 @@ import android.view.View.NO_ID
 import android.view.View.VISIBLE
 import android.view.WindowManager
 import android.view.animation.LinearInterpolator
-import android.webkit.WebChromeClient
-import android.webkit.WebResourceError
-import android.webkit.WebResourceRequest
-import android.webkit.WebView
-import android.webkit.WebViewClient
-import android.widget.ImageView
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowCompat
 import androidx.core.view.WindowInsetsCompat
+import com.pyrus.pyrusservicedesk.PyrusServiceDesk
 import com.pyrus.pyrusservicedesk.R
 import com.pyrus.pyrusservicedesk._ref.utils.ConfigUtils
 import com.pyrus.pyrusservicedesk._ref.utils.animateInfinite
@@ -79,35 +73,7 @@ internal class FilePreviewActivity: ConnectionActivityBase<FilePreviewViewModel>
         binding.toolbarTitle.text = viewModel.getFileName()
         binding.fileExtension.text = viewModel.getExtension()
 
-//        binding.webView.apply{
-//            settings.apply {
-//                builtInZoomControls = true
-//                useWideViewPort = true
-//                setSupportZoom(true)
-//                useWideViewPort = true
-//                loadWithOverviewMode = true
-//                javaScriptEnabled = true
-//            }
-//            webViewClient = object: WebViewClient(){
-//                override fun onReceivedError(view: WebView?, request: WebResourceRequest?, error: WebResourceError?) {
-//                    super.onReceivedError(view, request, error)
-//                    viewModel.onErrorReceived()
-//                }
-//
-//                override fun onPageFinished(view: WebView?, url: String?) {
-//                    super.onPageFinished(view, url)
-//                    pageFinishedSuccessfully = true
-//                }
-//            }
-//            webChromeClient = object: WebChromeClient() {
-//                override fun onProgressChanged(view: WebView?, newProgress: Int) {
-//                    viewModel.onProgressChanged(newProgress)
-//                }
-//            }
-//        }
-
         if (savedInstanceState != null) {
-            //binding.webView.restoreState(savedInstanceState)
             pageFinishedSuccessfully = savedInstanceState.getBoolean(STATE_FINISHED_SUCCESSFULLY)
         }
 
@@ -115,7 +81,6 @@ internal class FilePreviewActivity: ConnectionActivityBase<FilePreviewViewModel>
 
     override fun onSaveInstanceState(outState: Bundle) {
         super.onSaveInstanceState(outState)
-        //binding.webView.saveState(outState)
         outState.putBoolean(STATE_FINISHED_SUCCESSFULLY, pageFinishedSuccessfully)
     }
 
@@ -161,7 +126,6 @@ internal class FilePreviewActivity: ConnectionActivityBase<FilePreviewViewModel>
 
     private fun applyNonPreviewableViewModel(model: FileViewModel) {
         binding.pictureView.visibility = GONE
-        binding.progressBar.visibility = GONE
         binding.noPreview.visibility = VISIBLE
         setActionBarItemVisibility(R.id.loading, model.isDownloading)
         setActionBarItemVisibility(R.id.download, !model.hasError && !model.isLocal && !model.isDownloading)
@@ -204,7 +168,6 @@ internal class FilePreviewActivity: ConnectionActivityBase<FilePreviewViewModel>
     }
 
     private fun applyPreviewableViewModel(model: FileViewModel) {
-        binding.progressBar.visibility = VISIBLE
         binding.noPreview.visibility = GONE
         setActionBarItemVisibility(R.id.loading, model.isDownloading)
         setActionBarItemVisibility(R.id.download,!model.hasError && !model.isLocal && !model.isDownloading)
@@ -219,28 +182,9 @@ internal class FilePreviewActivity: ConnectionActivityBase<FilePreviewViewModel>
                 binding.pictureView.visibility = VISIBLE
                 binding.noConnection.root.visibility = GONE
                 if (!pageFinishedSuccessfully) {
-                    binding.pictureView.setImageURI(model.fileUri)
-//                    binding.webView.loadDataWithBaseURL(
-//                        null,
-//                        """
-//                          <!DOCTYPE html>
-//                          <html>
-//                              <head></head>
-//                              <body>
-//                                <table style="width:100%; height:100%;">
-//                                  <tr>
-//                                    <td style="vertical-align:middle;">
-//                                      <img src="${model.fileUri}">
-//                                    </td>
-//                                  </tr>
-//                                </table>
-//                              </body>
-//                            </html>
-//                        """.trimIndent(),
-//                        "text/html",
-//                        "UTF-8",
-//                        null,
-//                    )
+                    PyrusServiceDesk.injector().picasso
+                        .load(model.fileUri)
+                        .into(binding.pictureView)
                 }
             }
         }
