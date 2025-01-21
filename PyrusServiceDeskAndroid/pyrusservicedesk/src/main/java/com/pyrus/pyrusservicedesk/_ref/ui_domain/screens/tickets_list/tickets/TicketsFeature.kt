@@ -71,8 +71,10 @@ internal interface TicketsContract {
 
             data class ShowAddTicketMenu(val appId: String, val users: List<User>) : Outer
 
+            // TODO kate это убрать
             data object OpenQrFragment : Outer
 
+            // TODO kate это убрать
             data object OpenSettingsFragment : Outer
 
         }

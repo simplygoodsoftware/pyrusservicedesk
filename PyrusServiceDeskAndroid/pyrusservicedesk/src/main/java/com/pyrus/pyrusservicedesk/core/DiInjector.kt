@@ -153,9 +153,7 @@ internal class DiInjector(
         fileManager = fileManager,
     )
 
-    // TODO fix it use AccountStore
     val ticketsFeatureFactory = TicketsFeatureFactory(
-        // TODO FSDS
         account = initialAccount as Account.V3,
         storeFactory = storeFactory,
         repository = repository,
@@ -163,9 +161,11 @@ internal class DiInjector(
         commandsStore = localCommandsStore
     )
 
+    // TODO kate это убрать
     var intentQr: Intent? = null
     var intentSettings: Intent? = null
 
+    // TODO kate и это убрать
     fun setIntent(openQrIntent: Intent?, openSettingsIntent: Intent?) {
         intentQr = openQrIntent
         intentSettings = openSettingsIntent

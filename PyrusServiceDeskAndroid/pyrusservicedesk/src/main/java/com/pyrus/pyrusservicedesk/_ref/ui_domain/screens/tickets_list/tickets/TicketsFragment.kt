@@ -182,11 +182,13 @@ internal class TicketsFragment: TeaFragment<Model, Message, Effect.Outer>() {
                 bottomSheet.show(parentFragmentManager, bottomSheet.tag)
             }
 
+            // TODO kate это убрать
             is Effect.Outer.OpenQrFragment -> {
                 if (injector().intentQr != null)
                     startActivity(injector().intentQr)
             }
 
+            // TODO kate это убрать
             is Effect.Outer.OpenSettingsFragment -> {
                 if (injector().intentSettings != null)
                     startActivity(injector().intentSettings)
