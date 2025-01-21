@@ -26,14 +26,14 @@
 
     </androidx.appcompat.widget.Toolbar>
 
-    <WebView
-        android:id="@+id/web_view"
+    <com.github.chrisbanes.photoview.PhotoView
+        android:id="@+id/picture_view"
         android:layout_width="match_parent"
-        android:layout_height="0dp"
+        android:layout_height="match_parent"
+        android:background="@color/psd_no_file_preview_background"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/file_preview_toolbar"
-        tools:visibility="gone">
-    </WebView>
+        android:visibility="gone" />
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/no_preview"

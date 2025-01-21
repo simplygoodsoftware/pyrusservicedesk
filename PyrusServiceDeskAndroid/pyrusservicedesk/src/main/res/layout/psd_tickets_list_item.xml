@@ -15,7 +15,7 @@
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:orientation="vertical"
-            app:layout_constraintEnd_toStartOf="@+id/guideline5"
+            app:layout_constraintEnd_toStartOf="@+id/barrier"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent">
 
@@ -64,17 +64,20 @@
             android:id="@+id/ticket_status_iv"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginTop="16dp"
+            android:layout_marginEnd="6dp"
             android:src="@drawable/psd_sync_clock"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/ticket_time_tv" />
+            app:layout_constraintBottom_toBottomOf="@+id/ticket_time_tv"
+            app:layout_constraintEnd_toStartOf="@+id/ticket_time_tv"
+            app:layout_constraintTop_toTopOf="@+id/ticket_time_tv" />
 
-        <androidx.constraintlayout.widget.Guideline
-            android:id="@+id/guideline5"
+        <androidx.constraintlayout.widget.Barrier
+            android:id="@+id/barrier"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:orientation="vertical"
-            app:layout_constraintGuide_end="58dp" />
+            android:layout_marginStart="12dp"
+            app:barrierDirection="start"
+            app:constraint_referenced_ids="ticket_status_iv,ticket_unread_iv" />
+
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 
