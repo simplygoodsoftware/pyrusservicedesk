@@ -5,6 +5,7 @@ import com.pyrus.pyrusservicedesk._ref.data.multy_chat.TicketSetInfo
 import com.pyrus.pyrusservicedesk._ref.ui_domain.screens.tickets_list.tickets.TicketsContract.ContentState
 import com.pyrus.pyrusservicedesk._ref.ui_domain.screens.tickets_list.tickets.TicketsView.Model
 import com.pyrus.pyrusservicedesk._ref.ui_domain.screens.tickets_list.tickets.TicketsView.Model.TicketSetInfoEntry
+import com.pyrus.pyrusservicedesk.presentation.ui.navigation_page.ticket.HtmlTagUtils
 
 internal object TicketsMapper {
 
@@ -62,13 +63,17 @@ internal object TicketsMapper {
         )
     }
 
-    private fun map(header: TicketHeader): Model.TicketHeaderEntry = Model.TicketHeaderEntry(
-        ticketId = header.ticketId,
-        userId = header.userId,
-        title = header.subject,
-        lastCommentText = header.lastCommentText,
-        lastCommentCreationTime = header.lastCommentCreationDate,
-        isRead = header.isRead,
-        isLoading = header.isLoading,
-    )
+    private fun map(header: TicketHeader): Model.TicketHeaderEntry {
+        val titleText = header.subject?.let(HtmlTagUtils::cleanTags)
+        val lastCommentText = header.lastCommentText?.let(HtmlTagUtils::cleanTags)
+        return Model.TicketHeaderEntry(
+            ticketId = header.ticketId,
+            userId = header.userId,
+            title = titleText,
+            lastCommentText = lastCommentText,
+            lastCommentCreationTime = header.lastCommentCreationDate,
+            isRead = header.isRead,
+            isLoading = header.isLoading,
+        )
+    }
 }

@@ -137,6 +137,7 @@ internal object TicketMapper {
         val firstComment = freshList.comments.firstOrNull()
         val creationTime = firstComment?.creationTime ?: System.currentTimeMillis()
 
+        val entryText = HtmlTagUtils.cleanTags(welcomeMessage)
         val welcomeEntry = CommentEntryV2.Comment(
             creationTime = creationTime,
             entryId = WELCOME_MESSAGE_ID.toString(),
@@ -152,7 +153,7 @@ internal object TicketMapper {
             showAuthorName = false,
             avatarUrl = null,
             showAvatar = true,
-            content = CommentEntryV2.CommentContent.Text(welcomeMessage),
+            content = CommentEntryV2.CommentContent.Text(entryText),
         )
         entries += welcomeEntry
     }
@@ -206,6 +207,7 @@ internal object TicketMapper {
         comment: Comment,
         status: Status,
     ): CommentEntryV2.Comment {
+        val entryText = HtmlTagUtils.cleanTags(commentBody)
         return CommentEntryV2.Comment(
             creationTime = comment.creationTime,
             entryId = "${comment.id}",
@@ -221,7 +223,7 @@ internal object TicketMapper {
             showAuthorName = false,
             avatarUrl = comment.author?.avatarUrl,
             showAvatar = false,
-            content = CommentEntryV2.CommentContent.Text(commentBody),
+            content = CommentEntryV2.CommentContent.Text(entryText),
         )
     }
 
