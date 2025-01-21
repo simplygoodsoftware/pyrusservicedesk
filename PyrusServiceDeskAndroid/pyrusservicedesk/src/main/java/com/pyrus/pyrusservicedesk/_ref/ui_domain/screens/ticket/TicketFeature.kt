@@ -48,6 +48,8 @@ internal interface TicketContract {
 
             data class OnMessageChanged(val text: String) : Outer
 
+            data class OnButtonClick(val text: String) : Outer
+
             data object OnRefresh : Outer
 
             data object OnBackClick : Outer

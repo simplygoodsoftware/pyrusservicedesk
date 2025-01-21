@@ -39,6 +39,8 @@ internal interface TicketView {
 
         data class OnMessageChanged(val text: String) : Event
 
+        data class OnButtonClick(val buttonText: String) : Event
+
         data object OnRefresh : Event
 
     }

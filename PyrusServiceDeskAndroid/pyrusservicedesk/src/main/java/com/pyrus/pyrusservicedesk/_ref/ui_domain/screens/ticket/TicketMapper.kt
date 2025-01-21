@@ -59,6 +59,7 @@ internal object TicketMapper {
         Event.OnCloseClick -> Message.Outer.OnCloseClick
         is Event.OnCopyClick -> Message.Outer.OnCopyClick(event.text)
         is Event.OnMessageChanged -> Message.Outer.OnMessageChanged(event.text)
+        is Event.OnButtonClick -> Message.Outer.OnButtonClick(event.buttonText)
         is Event.OnPreviewClick -> Message.Outer.OnPreviewClick(event.commentId, event.attachmentId)
         is Event.OnRatingClick -> Message.Outer.OnRatingClick(event.rating)
         is Event.OnRetryClick -> Message.Outer.OnRetryAddCommentClick(event.id)

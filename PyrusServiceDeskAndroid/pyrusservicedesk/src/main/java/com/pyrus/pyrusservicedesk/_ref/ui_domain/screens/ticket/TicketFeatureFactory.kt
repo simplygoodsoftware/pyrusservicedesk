@@ -96,6 +96,12 @@ private class FeatureReducer: Logic<State, Message, Effect>() {
                 state { currentState.copy(inputText = message.text) }
                 effects { +Effect.Inner.SaveDraft(message.text) }
             }
+            is Message.Outer.OnButtonClick -> {
+                val currentState = state as? State.Content ?: return
+                val buttonComment = message.text
+                if (buttonComment.isBlank()) return
+                effects { +Effect.Inner.SendTextComment(buttonComment, currentState.ticketId) }
+            }
             is Message.Outer.OnPreviewClick -> {
                 val currentState = state as? State.Content ?: return
                 val attach = currentState.ticket?.comments
