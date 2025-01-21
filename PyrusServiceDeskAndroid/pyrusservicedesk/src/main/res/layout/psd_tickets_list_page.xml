@@ -4,12 +4,19 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
-    <androidx.recyclerview.widget.RecyclerView
-        android:id="@+id/tickets_rv"
+    <androidx.swiperefreshlayout.widget.SwipeRefreshLayout
+        android:id="@+id/refresh"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:paddingBottom="150dp"
-        android:clipToPadding="false"/>
+        android:clipToPadding="false">
+
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/tickets_rv"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent" />
+
+    </androidx.swiperefreshlayout.widget.SwipeRefreshLayout>
 
     <LinearLayout
         android:id="@+id/empty_tickets_list_ll"
@@ -18,7 +25,7 @@
         android:orientation="vertical"
         android:visibility="gone"
         app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintTop_toTopOf="@+id/tickets_rv">
+        app:layout_constraintTop_toTopOf="@+id/refresh">
 
         <ImageButton
             android:id="@+id/psd_empty_list_ib"

@@ -18,6 +18,7 @@ internal interface TicketsView {
             val appId: String,
             val titleText: String,
             val tickets: List<TicketHeaderEntry>,
+            val isLoading: Boolean,
         )
 
         data class TicketHeaderEntry(

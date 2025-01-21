@@ -7,7 +7,7 @@ import kotlinx.parcelize.Parcelize
 
 @Parcelize
 data class MultichatButtons(
-    @DrawableRes val multichatRightButtonRes: Int,
-    val multichatRightButtonIntent: Intent,
-    val multichatCenterIntent: Intent,
+    @DrawableRes val rightButtonRes: Int,
+    val rightButtonAction: Intent,
+    val centerAction: Intent,
 ) : Parcelable

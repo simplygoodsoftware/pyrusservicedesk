@@ -48,6 +48,8 @@ internal interface TicketContract {
 
             data class OnMessageChanged(val text: String) : Outer
 
+            data class OnButtonClick(val text: String) : Outer
+
             data object OnRefresh : Outer
 
             data object OnBackClick : Outer
@@ -71,6 +73,7 @@ internal interface TicketContract {
         sealed interface Outer : Effect {
             data class CopyToClipboard(val text: String) : Outer
             data class MakeToast(val text: TextProvider) : Outer
+            data class ShowAttachVariants(val key: String) : Outer
         }
 
         sealed interface Inner : Effect {
@@ -79,6 +82,7 @@ internal interface TicketContract {
                 val ticketId: Long,
             ) : Inner
             data object FeedFlow : Inner
+            data object CheckAccount : Inner
             data object Close : Inner
             data class SendTextComment(
                 val text: String,
@@ -92,7 +96,7 @@ internal interface TicketContract {
             data class OpenPreview(val attachment: Attachment, val userId: String?) : Inner
             data class SaveDraft(val draft: String) : Inner
             data class ReadTicket(val user: UserInternal, val ticketId: Long) : Inner
-            data object ShowAttachVariants : Inner
+            data class ListenAttachVariant(val key: String) : Inner
         }
     }
 

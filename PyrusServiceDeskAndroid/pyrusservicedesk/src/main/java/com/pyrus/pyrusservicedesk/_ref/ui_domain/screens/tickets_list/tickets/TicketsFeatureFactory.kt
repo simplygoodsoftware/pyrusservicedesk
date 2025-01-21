@@ -19,6 +19,8 @@ import com.pyrus.pyrusservicedesk._ref.whitetea.core.adaptCast
 import com.pyrus.pyrusservicedesk._ref.whitetea.core.logic.Logic
 import com.pyrus.pyrusservicedesk._ref.whitetea.utils.adapt
 import com.pyrus.pyrusservicedesk.core.Account
+import com.pyrus.pyrusservicedesk.core.getUsers
+import com.pyrus.pyrusservicedesk.sdk.repositories.AccountStore
 import com.pyrus.pyrusservicedesk.sdk.repositories.LocalCommandsStore
 import com.pyrus.pyrusservicedesk.sdk.repositories.Repository
 import com.pyrus.pyrusservicedesk.sdk.repositories.UserInternal
@@ -30,18 +32,18 @@ import kotlinx.coroutines.flow.map
 private const val TAG = "TicketsListFeature"
 
 internal class TicketsFeatureFactory(
-    private val account: Account.V3,
     private val storeFactory: StoreFactory,
     private val repository: Repository,
     private val router: Router,
     private val commandsStore: LocalCommandsStore,
+    private val accountStore: AccountStore,
 ) {
 
     fun create(): TicketsFeature = storeFactory.create(
         name = TAG,
-        initialState = State(account, ContentState.Loading),
+        initialState = State(ContentState.Loading),
         reducer = FeatureReducer(),
-        actor = TicketsActor(repository, router, commandsStore).adaptCast(),
+        actor = TicketsActor(repository, router, commandsStore, accountStore).adaptCast(),
         initialEffects = listOf(
             Effect.Inner.UpdateTickets(false),
             Effect.Inner.TicketsSetFlow,
@@ -64,7 +66,7 @@ private class FeatureReducer: Logic<State, Message, Effect>() {
             Message.Outer.OnFabItemClick -> {
                 val contentState = state.contentState as? ContentState.Content ?: return
                 val selectedAppId = contentState.appId ?: return
-                val users = state.account.users.filter { it.appId == contentState.appId }
+                val users = contentState.account.getUsers().filter { it.appId == contentState.appId }
 
                 val firstUser = users.first()
                 val selectedUser = contentState.filterId?.let { id -> users.find { it.userId == id } }
@@ -85,7 +87,7 @@ private class FeatureReducer: Logic<State, Message, Effect>() {
             is Message.Outer.OnFilterClick -> {
                 val contentState = state.contentState as? ContentState.Content ?: return
                 val selectedAppId = contentState.appId ?: return
-                val users = state.account.users
+                val users = contentState.account.getUsers()
                 effects { +Effect.Outer.ShowFilterMenu(selectedAppId, message.selectedUserId, users) }
             }
             is Message.Outer.OnRetryClick -> {
@@ -93,19 +95,29 @@ private class FeatureReducer: Logic<State, Message, Effect>() {
                 state { state.copy(contentState = ContentState.Loading) }
                 effects { +Effect.Inner.UpdateTickets(force = true) }
             }
+            is Message.Outer.OnRefresh -> {
+                val contentState = state.contentState as? ContentState.Content ?: return
+                state { state.copy(contentState = contentState.copy(isLoading = true)) }
+                effects { +Effect.Inner.UpdateTickets(force = true) }
+            }
             is Message.Outer.OnChangePage -> {
-                val currentState = state.contentState as? ContentState.Content ?: return
-                val users = state.account.users.filter { it.appId == message.appId }
+                val contentState = state.contentState as? ContentState.Content ?: return
+                val users = contentState.account.getUsers().filter { it.appId == message.appId }
                 val selectedUser = users.find { it.userId == message.currentUserId }
 
-                state { state.copy(contentState = updateTicketsFilterState(currentState, message.appId, account.domain, selectedUser)) }
+                state { state.copy(contentState = updateTicketsFilterState(
+                    state = contentState,
+                    appId = message.appId,
+                    domain = contentState.account.domain,
+                    user = selectedUser
+                )) }
             }
 
             Message.Outer.OnCreateTicketClick -> {
                 val contentState = state.contentState as? ContentState.Content ?: return
                 val appId = contentState.appId ?: return
 
-                val users = state.account.users
+                val users = contentState.account.getUsers()
 
                 val firstUser = users.first()
 
@@ -131,7 +143,7 @@ private class FeatureReducer: Logic<State, Message, Effect>() {
 
                 val contentState = state.contentState as? ContentState.Content ?: return
 
-                val user = state.account.users.find { it.userId == message.userId }
+                val user = contentState.account.getUsers().find { it.userId == message.userId }
                 val filterName = user?.userName?: ""
                 state {
                     state.copy(contentState = contentState.copy(
@@ -150,9 +162,10 @@ private class FeatureReducer: Logic<State, Message, Effect>() {
                 state.copy(contentState = when(val currentDateState = state.contentState) {
                     is ContentState.Content -> currentDateState.copy(
                         ticketSets = message.tickets.ticketSetInfoList,
+                        isLoading = false,
                     )
                     ContentState.Error,
-                    ContentState.Loading -> createInitialContentState(message.tickets, account)
+                    ContentState.Loading -> createInitialContentState(message.tickets, message.account)
                 })
             }
             Message.Inner.UpdateTicketsFailed -> {
@@ -164,14 +177,18 @@ private class FeatureReducer: Logic<State, Message, Effect>() {
             }
             is Message.Inner.TicketsUpdated -> {
                 val contentState = state.contentState as? ContentState.Content ?: return
-                state { state.copy(contentState = contentState.copy(ticketSets = message.tickets?.ticketSetInfoList)) }
+                state { state.copy(contentState = contentState.copy(
+                    ticketSets = message.tickets?.ticketSetInfoList,
+                    isLoading = false
+                )) }
             }
         }
     }
 
-    private fun createInitialContentState(tickets: TicketsInfo, account: Account.V3) : ContentState.Content {
+    private fun createInitialContentState(tickets: TicketsInfo, account: Account) : ContentState.Content {
         val firstSet = tickets.ticketSetInfoList.firstOrNull()
         return ContentState.Content(
+            account = account,
             appId = firstSet?.appId,
             titleText = firstSet?.orgName,
             titleImageUrl = firstSet?.orgLogoUrl?.let { getOrganisationLogoUrl(it, account.domain) },
@@ -179,10 +196,16 @@ private class FeatureReducer: Logic<State, Message, Effect>() {
             filterEnabled = false,
             ticketSets = tickets.ticketSetInfoList,
             filterId = null,
+            isLoading = false,
         )
     }
 
-    private fun updateTicketsFilterState(state: ContentState.Content, appId: String, domain: String?, user: User?) : ContentState.Content {
+    private fun updateTicketsFilterState(
+        state: ContentState.Content,
+        appId: String,
+        domain: String?,
+        user: User?,
+    ) : ContentState.Content {
         val ticketsSetByAppName = state.ticketSets?.associateBy { it.appId }
         return state.copy(
             appId = appId,
@@ -200,13 +223,17 @@ internal class TicketsActor(
     private val repository: Repository,
     private val router: Router,
     private val commandsStore: LocalCommandsStore,
+    private val accountStore: AccountStore,
 ): Actor<Effect.Inner, Message.Inner> {
 
     override fun handleEffect(effect: Effect.Inner): Flow<Message.Inner> = when(effect) {
 
         is Effect.Inner.UpdateTickets -> singleFlow {
             when(val ticketsTry = repository.getAllData(effect.force)) {
-                is Try.Success -> Message.Inner.UpdateTicketsCompleted(ticketsTry.value)
+                is Try.Success -> {
+                    val account = accountStore.getAccount()
+                    Message.Inner.UpdateTicketsCompleted(account, ticketsTry.value)
+                }
                 is Try.Failure -> {
                     ticketsTry.error.printStackTrace()
                     Message.Inner.UpdateTicketsFailed

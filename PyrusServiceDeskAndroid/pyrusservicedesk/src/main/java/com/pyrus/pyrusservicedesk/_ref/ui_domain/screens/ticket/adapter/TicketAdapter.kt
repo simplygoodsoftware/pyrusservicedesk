@@ -52,7 +52,7 @@ internal class TicketAdapter(
             VIEW_TYPE_WELCOME_MESSAGE -> WelcomeMessageHolder(parent)
             VIEW_TYPE_RATING -> RatingHolder(parent, onRatingClickListener)
             VIEW_TYPE_COMMENT_RATING -> RatingCommentHolder(parent, onErrorCommentEntryClickListener)
-            VIEW_TYPE_COMMENT_BUTTONS -> ButtonsHolder(parent)
+            VIEW_TYPE_COMMENT_BUTTONS -> ButtonsHolder(parent, onEvent)
             else -> DateViewHolder(parent)
         } as ViewHolderBase<CommentEntryV2>
     }

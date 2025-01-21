@@ -93,6 +93,7 @@ internal class DiInjector(
             chain.proceed(requestBuilder.build())
         }.build()
 
+    // TODO sds сделать мультидоменный retrofit
     private val retrofit: Retrofit = Retrofit.Builder()
         .baseUrl(getBaseUrl(initialAccount.domain))
         .addConverterFactory(MoshiConverterFactory.create(moshi))
@@ -104,7 +105,7 @@ internal class DiInjector(
 
     private val fileManager: FileManager = FileManager(application, fileResolver)
 
-    private val repositoryMapper = RepositoryMapper(initialAccount, idStore)
+    private val repositoryMapper = RepositoryMapper(idStore)
 
     private val remoteFileStore = RemoteFileStore(api)
 
@@ -153,26 +154,15 @@ internal class DiInjector(
         fileManager = fileManager,
     )
 
-    // TODO fix it use AccountStore
     val ticketsFeatureFactory = TicketsFeatureFactory(
-        // TODO FSDS
-        account = initialAccount as Account.V3,
         storeFactory = storeFactory,
         repository = repository,
         router = router,
-        commandsStore = localCommandsStore
+        commandsStore = localCommandsStore,
+        accountStore = accountStore,
     )
 
-    var intentQr: Intent? = null
-    var intentSettings: Intent? = null
-
-    fun setIntent(openQrIntent: Intent?, openSettingsIntent: Intent?) {
-        intentQr = openQrIntent
-        intentSettings = openSettingsIntent
-    }
-
     val sharedViewModel = SharedViewModel()
-
 
     val liveUpdates = LiveUpdates(
         repository = repository,
@@ -186,6 +176,8 @@ internal class DiInjector(
         .downloader(OkHttp3Downloader(okHttpClient))
         .build()
 
-    val setPushTokenUseCase = SetPushTokenUseCase(initialAccount, coreScope, preferencesManager)
+    val setPushTokenUseCase = SetPushTokenUseCase(accountStore, coreScope, preferencesManager)
+
+    val addUserUseCase = AddUserUseCase(accountStore, repository, coreScope)
 
 }

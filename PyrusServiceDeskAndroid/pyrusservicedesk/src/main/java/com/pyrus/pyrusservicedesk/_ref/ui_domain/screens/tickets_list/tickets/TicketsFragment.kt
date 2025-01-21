@@ -10,8 +10,10 @@ import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.isVisible
 import androidx.viewpager2.widget.ViewPager2
 import com.google.android.material.tabs.TabLayoutMediator
+import com.pyrus.pyrusservicedesk.PyrusServiceDesk
 import com.pyrus.pyrusservicedesk.PyrusServiceDesk.Companion.injector
 import com.pyrus.pyrusservicedesk.R
+import com.pyrus.pyrusservicedesk.User
 import com.pyrus.pyrusservicedesk._ref.ui_domain.screens.add_ticket.AddTicketBottomSheetFragment
 import com.pyrus.pyrusservicedesk._ref.ui_domain.screens.filter_tickets_list.FilterTicketsBottomSheetFragment
 import com.pyrus.pyrusservicedesk._ref.ui_domain.screens.filter_tickets_list.FilterTicketsBottomSheetFragment.Companion.KEY_SELECTED_USER_ID
@@ -112,12 +114,20 @@ internal class TicketsFragment: TeaFragment<Model, Message, Effect.Outer>() {
         }.attach()
 
         val multichatButtons = ConfigUtils.getMultichatButtons()
-        if (multichatButtons?.multichatRightButtonRes != null)
-            binding.toolbarTicketsList.psdToolbarQrIb.setBackgroundResource(multichatButtons.multichatRightButtonRes)
-        if (multichatButtons?.multichatRightButtonIntent != null)
-            binding.toolbarTicketsList.psdToolbarQrIb.setOnClickListener { startActivity(multichatButtons.multichatRightButtonIntent) }
-        if (multichatButtons?.multichatCenterIntent != null)
-            binding.toolbarTicketsList.ticketsTitleLl.setOnClickListener { startActivity(multichatButtons.multichatCenterIntent) }
+        if (multichatButtons?.rightButtonRes != null) {
+            binding.toolbarTicketsList.psdToolbarQrIb
+                .setBackgroundResource(multichatButtons.rightButtonRes)
+        }
+        if (multichatButtons?.rightButtonAction != null) {
+            binding.toolbarTicketsList.psdToolbarQrIb.setOnClickListener {
+                startActivity(multichatButtons.rightButtonAction)
+            }
+        }
+        if (multichatButtons?.centerAction != null) {
+            binding.toolbarTicketsList.ticketsTitleLl.setOnClickListener {
+                startActivity(multichatButtons.centerAction)
+            }
+        }
 
     }
 
@@ -180,16 +190,6 @@ internal class TicketsFragment: TeaFragment<Model, Message, Effect.Outer>() {
                     effect.users
                 )
                 bottomSheet.show(parentFragmentManager, bottomSheet.tag)
-            }
-
-            is Effect.Outer.OpenQrFragment -> {
-                if (injector().intentQr != null)
-                    startActivity(injector().intentQr)
-            }
-
-            is Effect.Outer.OpenSettingsFragment -> {
-                if (injector().intentSettings != null)
-                    startActivity(injector().intentSettings)
             }
 
         }

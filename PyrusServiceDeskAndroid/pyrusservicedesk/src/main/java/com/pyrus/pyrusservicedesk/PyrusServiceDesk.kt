@@ -68,10 +68,7 @@ class PyrusServiceDesk private constructor(
 
         @JvmStatic
         fun addUser(user: User) {
-            val account = injector().accountStore.getAccount()
-            if (account is Account.V3) {
-                injector().accountStore.setAccount(account.copy(users = account.users.toMutableList().apply { add(user) }))
-            }
+            injector().addUserUseCase.addUser(user)
         }
 
         /**
@@ -220,17 +217,17 @@ class PyrusServiceDesk private constructor(
                     users = listUser,
                     authorId = authorId,
                 )
-            else if (userId == null || securityKey == null) Account.V1(
-                domain = apiDomain,
-                userId = instanceId,
-                appId = appId,
-            )
-            else Account.V2(
+            else if (userId != null && securityKey != null) Account.V2(
                 domain = apiDomain,
                 instanceId = instanceId,
                 appId = appId,
                 userId = userId,
                 securityKey = securityKey,
+            )
+            else Account.V1(
+                domain = apiDomain,
+                userId = instanceId,
+                appId = appId,
             )
 
             INJECTOR = DiInjector(

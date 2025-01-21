@@ -32,7 +32,8 @@ internal object TicketMapper {
             isLoading = false,
             showNoConnectionError = false,
             isRefreshing = state.isLoading,
-            toolbarTitleText = state.ticket?.subject?.textRes() ?: (R.string.new_ticket).textRes(),
+            toolbarTitleText = state.ticket?.subject?.let(HtmlTagUtils::cleanTags)?.textRes()
+                ?: (R.string.new_ticket).textRes(),
         )
         State.Loading -> Model(
             inputText = "",
@@ -58,6 +59,7 @@ internal object TicketMapper {
         Event.OnCloseClick -> Message.Outer.OnCloseClick
         is Event.OnCopyClick -> Message.Outer.OnCopyClick(event.text)
         is Event.OnMessageChanged -> Message.Outer.OnMessageChanged(event.text)
+        is Event.OnButtonClick -> Message.Outer.OnButtonClick(event.buttonText)
         is Event.OnPreviewClick -> Message.Outer.OnPreviewClick(event.commentId, event.attachmentId)
         is Event.OnRatingClick -> Message.Outer.OnRatingClick(event.rating)
         is Event.OnRetryClick -> Message.Outer.OnRetryAddCommentClick(event.id)
@@ -70,6 +72,7 @@ internal object TicketMapper {
     fun map(effect: Effect.Outer): TicketView.Effect = when(effect) {
         is Effect.Outer.CopyToClipboard -> TicketView.Effect.CopyToClipboard(effect.text)
         is Effect.Outer.MakeToast -> TicketView.Effect.MakeToast(effect.text)
+        is Effect.Outer.ShowAttachVariants -> TicketView.Effect.ShowAttachVariants(effect.key)
     }
 
     private fun mapComments(
@@ -137,6 +140,7 @@ internal object TicketMapper {
         val firstComment = freshList.comments.firstOrNull()
         val creationTime = firstComment?.creationTime ?: System.currentTimeMillis()
 
+        val entryText = HtmlTagUtils.cleanTags(welcomeMessage)
         val welcomeEntry = CommentEntryV2.Comment(
             creationTime = creationTime,
             entryId = WELCOME_MESSAGE_ID.toString(),
@@ -152,7 +156,7 @@ internal object TicketMapper {
             showAuthorName = false,
             avatarUrl = null,
             showAvatar = true,
-            content = CommentEntryV2.CommentContent.Text(welcomeMessage),
+            content = CommentEntryV2.CommentContent.Text(entryText),
         )
         entries += welcomeEntry
     }
@@ -206,6 +210,7 @@ internal object TicketMapper {
         comment: Comment,
         status: Status,
     ): CommentEntryV2.Comment {
+        val entryText = HtmlTagUtils.cleanTags(commentBody)
         return CommentEntryV2.Comment(
             creationTime = comment.creationTime,
             entryId = "${comment.id}",
@@ -221,7 +226,7 @@ internal object TicketMapper {
             showAuthorName = false,
             avatarUrl = comment.author?.avatarUrl,
             showAvatar = false,
-            content = CommentEntryV2.CommentContent.Text(commentBody),
+            content = CommentEntryV2.CommentContent.Text(entryText),
         )
     }
 
@@ -264,7 +269,7 @@ internal object TicketMapper {
     }
 
     private fun extractButtons(lastComment: Comment): CommentEntryV2.Buttons? {
-        val buttons = HtmlTagUtils.extractButtons(lastComment)
+        val buttons = HtmlTagUtils.extractButtons(lastComment.body)
         if (buttons.isEmpty()) {
             return null
         }

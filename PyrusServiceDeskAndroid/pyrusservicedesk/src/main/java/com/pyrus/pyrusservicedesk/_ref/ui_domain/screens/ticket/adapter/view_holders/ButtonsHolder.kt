@@ -9,15 +9,17 @@ import android.view.ViewGroup
 import android.widget.TextView
 import androidx.appcompat.content.res.AppCompatResources
 import com.pyrus.pyrusservicedesk.R
+import com.pyrus.pyrusservicedesk._ref.ui_domain.screens.ticket.TicketView
 import com.pyrus.pyrusservicedesk._ref.ui_domain.screens.ticket.adapter.TicketAdapter
 import com.pyrus.pyrusservicedesk._ref.ui_domain.screens.ticket.adapter.new_entries.CommentEntryV2
 import com.pyrus.pyrusservicedesk._ref.utils.ConfigUtils
 import com.pyrus.pyrusservicedesk.databinding.PsdViewHolderButtonsBinding
 import com.pyrus.pyrusservicedesk.presentation.ui.view.recyclerview.ViewHolderBase
 
-internal class ButtonsHolder(parent: ViewGroup): ViewHolderBase<CommentEntryV2.Buttons>(parent,
-    R.layout.psd_view_holder_buttons
-) {
+internal class ButtonsHolder(
+    parent: ViewGroup,
+    private val onEvent: (event: TicketView.Event) -> Unit,
+): ViewHolderBase<CommentEntryV2.Buttons>(parent, R.layout.psd_view_holder_buttons) {
 
     private val binding = PsdViewHolderButtonsBinding.bind(itemView)
 
@@ -67,7 +69,7 @@ internal class ButtonsHolder(parent: ViewGroup): ViewHolderBase<CommentEntryV2.B
                     is CommentEntryV2.ButtonEntry.Simple -> {
                         text = buttonText
                         setCompoundDrawablesWithIntrinsicBounds(0, 0, 0, 0)
-//                        setOnClickListener { entry.onButtonClick.invoke(buttonText) } // TODO
+                        onEvent(TicketView.Event.OnButtonClick(buttonText))
                     }
                 }
 

@@ -1,6 +1,7 @@
 package com.pyrus.pyrusservicedesk.presentation.ui.navigation_page.ticket.dialogs.attach_files
 
 import android.Manifest.permission.CAMERA
+import android.annotation.SuppressLint
 import android.app.Activity.RESULT_OK
 import android.content.Intent
 import android.content.pm.PackageManager
@@ -15,8 +16,11 @@ import androidx.core.os.bundleOf
 import androidx.core.util.Consumer
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
+import com.google.android.material.bottomsheet.BottomSheetBehavior
+import com.google.android.material.bottomsheet.BottomSheetDialog
+import com.google.android.material.bottomsheet.BottomSheetDialogFragment
 import com.pyrus.pyrusservicedesk.PyrusServiceDesk.Companion.injector
-import com.pyrus.pyrusservicedesk._ref.utils.BottomSheetFragment
+import com.pyrus.pyrusservicedesk.R
 import com.pyrus.pyrusservicedesk._ref.utils.ConfigUtils
 import com.pyrus.pyrusservicedesk._ref.utils.MIME_TYPE_IMAGE_ANY
 import com.pyrus.pyrusservicedesk._ref.utils.dispatchTakePhotoIntent
@@ -32,7 +36,7 @@ import java.io.File
 /**
  * UI that is used for attaching files to the comments.
  */
-internal class AttachFileVariantsFragment: BottomSheetFragment(), View.OnClickListener {
+internal class AttachFileVariantsFragment: BottomSheetDialogFragment(), View.OnClickListener {
 
     private var capturePhotoUri: Uri? = null
 
@@ -48,13 +52,16 @@ internal class AttachFileVariantsFragment: BottomSheetFragment(), View.OnClickLi
         capturePhotoUri = savedInstanceState?.getParcelable(STATE_KEY_PHOTO_URI)
     }
 
-    override fun onCreateBottomSheetView(
-        inflater: LayoutInflater,
-        container: ViewGroup?,
-        savedInstanceState: Bundle?,
-    ): View {
-        binding = PsdFragmentAttachFileVariantsBinding.inflate(inflater, container, false)
-        binding.content.setBackgroundColor(ConfigUtils.getFileMenuBackgroundColor(inflater.context))
+    @SuppressLint("InflateParams")
+    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
+        super.onCreateView(inflater, container, savedInstanceState)
+        dialog?.setOnShowListener { dialog ->
+            val d = dialog as BottomSheetDialog
+            val bottomSheetInternal = d.findViewById<View>(R.id.design_bottom_sheet)
+            BottomSheetBehavior.from(bottomSheetInternal!!).state = BottomSheetBehavior.STATE_EXPANDED
+        }
+        binding = PsdFragmentAttachFileVariantsBinding.inflate(inflater)
+        binding.root.setBackgroundColor(ConfigUtils.getFileMenuBackgroundColor(inflater.context))
         return binding.root
     }
 
@@ -92,7 +99,7 @@ internal class AttachFileVariantsFragment: BottomSheetFragment(), View.OnClickLi
         }
 
         binding.backgroundView.setOnClickListener {
-            closeFragment()
+            dismiss()
         }
     }
 
@@ -144,7 +151,7 @@ internal class AttachFileVariantsFragment: BottomSheetFragment(), View.OnClickLi
     private fun sendResultAndClose(uri: Uri) {
         val router = injector().router
         router.sendResult(requireArguments().getString(RESULT_KEY)!!, uri)
-        router.exit()
+        dismiss()
     }
 
     private fun openCustomChooser() {

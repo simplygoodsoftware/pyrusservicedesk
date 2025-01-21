@@ -20,13 +20,14 @@ import com.pyrus.pyrusservicedesk._ref.whitetea.core.adaptCast
 import com.pyrus.pyrusservicedesk._ref.whitetea.core.logic.Logic
 import com.pyrus.pyrusservicedesk._ref.whitetea.utils.adapt
 import com.pyrus.pyrusservicedesk.core.Account
-import com.pyrus.pyrusservicedesk.core.getAdditionalUsers
+import com.pyrus.pyrusservicedesk.core.getUsers
 import com.pyrus.pyrusservicedesk.sdk.data.FileManager
 import com.pyrus.pyrusservicedesk.sdk.data.intermediate.FileData
 import com.pyrus.pyrusservicedesk.sdk.repositories.AccountStore
 import com.pyrus.pyrusservicedesk.sdk.repositories.DraftRepository
 import com.pyrus.pyrusservicedesk.sdk.repositories.Repository
 import com.pyrus.pyrusservicedesk.sdk.repositories.UserInternal
+import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.debounce
 import kotlinx.coroutines.flow.flow
@@ -96,6 +97,12 @@ private class FeatureReducer: Logic<State, Message, Effect>() {
                 state { currentState.copy(inputText = message.text) }
                 effects { +Effect.Inner.SaveDraft(message.text) }
             }
+            is Message.Outer.OnButtonClick -> {
+                val currentState = state as? State.Content ?: return
+                val buttonComment = message.text
+                if (buttonComment.isBlank()) return
+                effects { +Effect.Inner.SendTextComment(buttonComment, currentState.ticketId) }
+            }
             is Message.Outer.OnPreviewClick -> {
                 val currentState = state as? State.Content ?: return
                 val attach = currentState.ticket?.comments
@@ -123,7 +130,11 @@ private class FeatureReducer: Logic<State, Message, Effect>() {
             }
             is Message.Outer.OnShowAttachVariantsClick -> {
                 if(state !is State.Content) return
-                effects { +Effect.Inner.ShowAttachVariants }
+                effects {
+                    val key = UUID.randomUUID().toString()
+                    +Effect.Outer.ShowAttachVariants(key)
+                    +Effect.Inner.ListenAttachVariant(key)
+                }
             }
             is Message.Outer.OnRefresh -> {
                 val currentState = state as? State.Content ?: return
@@ -182,6 +193,7 @@ private class FeatureReducer: Logic<State, Message, Effect>() {
 
 }
 
+@OptIn(FlowPreview::class)
 internal class TicketActor(
     private val accountStore: AccountStore,
     private val ticketId: Long,
@@ -213,19 +225,20 @@ internal class TicketActor(
             }
         }
 
-        Effect.Inner.FeedFlow -> flow {
-            accountStore.accountStateFlow().collect {
-                val users = accountStore.getAccount().getAdditionalUsers(null) ?: return@collect
-                if (users.find { it.userId == user.userId } == null)
+        is Effect.Inner.CheckAccount -> flow {
+            accountStore.accountStateFlow().collect { account ->
+                val users = account.getUsers()
+                if (!users.any { user.userId == it.userId && user.appId == it.appId }) {
                     router.exit()
+                }
             }
         }
 
-        Effect.Inner.FeedFlow -> repository.getFeedFlow(ticketId)
+        is Effect.Inner.FeedFlow -> repository.getFeedFlow(ticketId)
             .debounce(150)
             .map(Message.Inner::CommentsUpdated)
 
-        Effect.Inner.Close -> flow { router.exit() }
+        is Effect.Inner.Close -> flow { router.exit() }
 
         is Effect.Inner.SendTextComment -> flow {
             repository.addTextComment(user, ticketId, effect.text)
@@ -255,11 +268,9 @@ internal class TicketActor(
 
         is Effect.Inner.ReadTicket -> flow { repository.readTicket(effect.user, effect.ticketId) }
 
-        Effect.Inner.ShowAttachVariants -> flow {
-            val key = UUID.randomUUID().toString()
-            router.navigateTo(Screens.AttachFileVariantsScreen(key))
+        is Effect.Inner.ListenAttachVariant -> flow {
             val uri: Any = suspendCoroutine { continuation ->
-                router.setResultListener(key) { continuation.resume(it) }
+                router.setResultListener(effect.key) { continuation.resume(it) }
             }
             if (uri !is Uri) return@flow
             val fileUri = try { fileManager.copyFile(uri) } catch (e: Exception) { null } ?: return@flow

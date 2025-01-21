@@ -39,6 +39,8 @@ internal interface TicketView {
 
         data class OnMessageChanged(val text: String) : Event
 
+        data class OnButtonClick(val buttonText: String) : Event
+
         data object OnRefresh : Event
 
     }
@@ -46,5 +48,6 @@ internal interface TicketView {
     sealed interface Effect {
         data class CopyToClipboard(val text: String) : Effect
         data class MakeToast(val text: TextProvider) : Effect
+        data class ShowAttachVariants(val key: String) : Effect
     }
 }
