@@ -266,7 +266,7 @@ internal object TicketMapper {
     }
 
     private fun extractButtons(lastComment: Comment): CommentEntryV2.Buttons? {
-        val buttons = HtmlTagUtils.extractButtons(lastComment)
+        val buttons = HtmlTagUtils.extractButtons(lastComment.body)
         if (buttons.isEmpty()) {
             return null
         }
