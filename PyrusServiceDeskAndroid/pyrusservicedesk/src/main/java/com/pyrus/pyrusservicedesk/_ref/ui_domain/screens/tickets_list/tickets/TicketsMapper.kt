@@ -66,7 +66,7 @@ internal object TicketsMapper {
 
     private fun map(header: TicketHeader): Model.TicketHeaderEntry {
         val titleText = header.subject?.let(HtmlTagUtils::cleanTags)
-        val lastCommentText = header.lastCommentText?.let(HtmlTagUtils::cleanTags)
+        val lastCommentText = header.lastCommentText
         return Model.TicketHeaderEntry(
             ticketId = header.ticketId,
             userId = header.userId,

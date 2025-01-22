@@ -1,6 +1,7 @@
 package com.pyrus.pyrusservicedesk.sdk.repositories
 
 import android.net.Uri
+import com.pyrus.pyrusservicedesk.R
 import com.pyrus.pyrusservicedesk.User
 import com.pyrus.pyrusservicedesk._ref.data.Attachment
 import com.pyrus.pyrusservicedesk._ref.data.Author
@@ -10,7 +11,10 @@ import com.pyrus.pyrusservicedesk._ref.data.TicketHeader
 import com.pyrus.pyrusservicedesk._ref.data.multy_chat.TicketSetInfo
 import com.pyrus.pyrusservicedesk._ref.utils.RequestUtils
 import com.pyrus.pyrusservicedesk._ref.utils.RequestUtils.Companion.getAvatarUrl
+import com.pyrus.pyrusservicedesk._ref.utils.TextProvider
 import com.pyrus.pyrusservicedesk._ref.utils.isImage
+import com.pyrus.pyrusservicedesk._ref.utils.isVideo
+import com.pyrus.pyrusservicedesk._ref.utils.textRes
 import com.pyrus.pyrusservicedesk.core.Account
 import com.pyrus.pyrusservicedesk.core.getUserId
 import com.pyrus.pyrusservicedesk.core.getUsers
@@ -49,7 +53,8 @@ internal class RepositoryMapper(
             mergeTicketHeader(
                 userId = ticketDto.userId,
                 ticketDto = ticketDto,
-                commands = ticketCommands + commandsWithLocalId
+                commands = ticketCommands + commandsWithLocalId,
+                account = account
             )
         } ?: emptyList()
 
@@ -121,6 +126,7 @@ internal class RepositoryMapper(
         userId: String,
         ticketDto: TicketDto,
         commands: List<CommandEntity>,
+        account: Account,
     ): TicketHeader {
 
         val comments = ticketDto.comments?.sortedBy { it.creationDate } ?: emptyList()
@@ -149,9 +155,9 @@ internal class RepositoryMapper(
             firstServerComment.olderThan(firstCommand) -> firstServerComment?.body
             else -> firstCommand?.comment
         }
-        val lastCommentText: String? = when {
-            lastServerComment.olderThan(lastCommand) -> lastServerComment?.body
-            else -> lastCommand?.comment
+        val lastCommentText: TextProvider? = when {
+            lastServerComment.olderThan(lastCommand) -> lastServerComment?.getLastComment(account as Account.V3)
+            else -> lastCommand?.getLastCommentFromAttachmentEntity()
         }
         val lastCommentCreationDate: Long? = when {
             lastServerComment.olderThan(lastCommand) -> lastServerComment?.creationDate
@@ -168,6 +174,41 @@ internal class RepositoryMapper(
             isActive = ticketDto.isActive,
             isLoading = isLoading,
         )
+    }
+
+    private fun CommentDto.getLastComment(account: Account.V3?): TextProvider {
+        when {
+            !this.body.isNullOrBlank() && isYou(this.author, account) ->
+                return TextProvider.Format(R.string.last_comment_you, listOf(this.body))
+            !this.body.isNullOrBlank() ->
+                return TextProvider.Format(R.string.last_comment, listOf(this.author?.name ?: "", this.body))
+            !this.attachments.isNullOrEmpty() && this.attachments.last().name.isVideo() && isYou(this.author, account) ->
+                return R.string.last_comment_clip_video_y.textRes()
+            !this.attachments.isNullOrEmpty() && this.attachments.last().name.isVideo() ->
+                return TextProvider.Format(R.string.last_comment_clip_video, listOf(this.author?.name ?: ""))
+            !this.attachments.isNullOrEmpty() && this.attachments.last().name.isImage() && isYou(this.author, account)->
+                return R.string.last_comment_clip_photo_y.textRes()
+            !this.attachments.isNullOrEmpty() && this.attachments.last().name.isImage() ->
+                return TextProvider.Format(R.string.last_comment_clip_photo, listOf(this.author?.name ?: ""))
+            !this.attachments.isNullOrEmpty() ->
+                return TextProvider.Format(R.string.last_comment_clip_file, listOf(this.author?.name ?: ""))
+        }
+        return "".textRes()
+    }
+    private fun isYou(author: AuthorDto?, account: Account.V3?): Boolean {
+        return author?.authorId == account?.authorId
+    }
+
+    private fun  CommandEntity.getLastCommentFromAttachmentEntity(): TextProvider {
+        when {
+            !this.comment.isNullOrBlank()  ->
+                return TextProvider.Format(R.string.last_comment_you, listOf(this.comment))
+            !this.attachments.isNullOrEmpty() && this.attachments.last().name.isImage() ->
+                return R.string.last_comment_clip_photo_y.textRes()
+            !this.attachments.isNullOrEmpty() ->
+                return R.string.last_comment_clip_video_y.textRes()
+        }
+        return "".textRes()
     }
 
     private fun mapToFullTicket(
@@ -364,7 +405,7 @@ internal class RepositoryMapper(
         return TicketHeader(
             subject = firstComment?.comment,
             isRead = true,
-            lastCommentText = lastComment?.comment,
+            lastCommentText = lastComment?.comment?.textRes(),
             lastCommentCreationDate = lastComment?.creationTime,
             isActive = true,
             userId = userId,

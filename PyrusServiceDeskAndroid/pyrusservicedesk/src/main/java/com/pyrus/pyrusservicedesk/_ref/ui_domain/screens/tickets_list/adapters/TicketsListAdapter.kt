@@ -11,6 +11,8 @@ import com.pyrus.pyrusservicedesk.R
 import com.pyrus.pyrusservicedesk._ref.ui_domain.screens.tickets_list.tickets.TicketsContract.Message
 import com.pyrus.pyrusservicedesk._ref.ui_domain.screens.tickets_list.tickets.TicketsView.Model.TicketHeaderEntry
 import com.pyrus.pyrusservicedesk._ref.utils.getTimeWhen
+import com.pyrus.pyrusservicedesk._ref.utils.text
+import com.pyrus.pyrusservicedesk.presentation.ui.navigation_page.ticket.HtmlTagUtils
 import com.pyrus.pyrusservicedesk.presentation.ui.view.recyclerview.AdapterBase
 import com.pyrus.pyrusservicedesk.presentation.ui.view.recyclerview.ViewHolderBase
 import java.util.Calendar
@@ -47,7 +49,7 @@ internal class TicketsListAdapter(
             // TODO форматированае и спаны
             ticketName.text = entry.title
             // TODO форматированае и спаны
-            lastComment.text = entry.lastCommentText
+            lastComment.text = entry.lastCommentText?.text(itemView.context)?.let(HtmlTagUtils::cleanTags)
 
             val lastCommentCreationTime = entry.lastCommentCreationTime
             val dateText = lastCommentCreationTime?.getTimeWhen(itemView.context, Calendar.getInstance())

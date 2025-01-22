@@ -3,6 +3,7 @@ package com.pyrus.pyrusservicedesk._ref.utils
 import com.pyrus.pyrusservicedesk._ref.utils.FileFormat.GIF
 import com.pyrus.pyrusservicedesk._ref.utils.FileFormat.JPEG
 import com.pyrus.pyrusservicedesk._ref.utils.FileFormat.JPG
+import com.pyrus.pyrusservicedesk._ref.utils.FileFormat.MP4
 import com.pyrus.pyrusservicedesk._ref.utils.FileFormat.PNG
 
 internal const val MIME_TYPE_IMAGE_ANY = "image/*"
@@ -19,6 +20,11 @@ internal fun String.canBePreviewed() = isImage()
  * return TRUE if the file is image
  */
 internal fun String.isImage() = hasAnyFormatOf(JPEG, JPG, PNG, GIF)
+
+/**
+ * return TRUE if the file is video
+ */
+internal fun String.isVideo() = hasAnyFormatOf(MP4)
 
 /**
  * @return TRUE of file has specified [format]
@@ -45,5 +51,6 @@ internal enum class FileFormat (val extension: String){
     JPG(".jpg"),
     GIF(".gif"),
     PNG(".png"),
-    TXT(".txt")
+    TXT(".txt"),
+    MP4(".mp4")
 }

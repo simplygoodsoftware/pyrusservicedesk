@@ -1,5 +1,7 @@
 package com.pyrus.pyrusservicedesk._ref.ui_domain.screens.tickets_list.tickets
 
+import com.pyrus.pyrusservicedesk._ref.utils.TextProvider
+
 
 internal interface TicketsView {
 
@@ -25,7 +27,7 @@ internal interface TicketsView {
             val ticketId: Long,
             val userId: String,
             val title: String?,
-            val lastCommentText: String?,
+            val lastCommentText: TextProvider?,
             val lastCommentCreationTime: Long?,
             val isRead: Boolean,
             val isLoading: Boolean,
