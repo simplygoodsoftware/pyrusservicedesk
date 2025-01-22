@@ -179,7 +179,6 @@ internal class TicketsFragment: TeaFragment<Model, Message, Effect.Outer>() {
             binding.noConnection.root.isVisible = showError
         }
         diff(Model::isLoading) { isLoading ->
-            binding.tabLayout.isVisible = !isLoading
             binding.progressBar.isVisible = isLoading
         }
     }
