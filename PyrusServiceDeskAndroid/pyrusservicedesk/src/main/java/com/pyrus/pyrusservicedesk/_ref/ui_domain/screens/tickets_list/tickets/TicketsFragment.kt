@@ -44,7 +44,7 @@ internal class TicketsFragment: TeaFragment<Model, Message, Effect.Outer>() {
         val feature = getStore { injector().ticketsFeatureFactory.create() }
 
         bind(BinderLifecycleMode.CREATE_DESTROY) {
-            this@TicketsFragment.messages.map { it } bindTo feature
+            messages.map { it } bindTo feature
         }
         bind {
             feature.state.map { TicketsMapper.map(it.contentState) } bindTo this@TicketsFragment
