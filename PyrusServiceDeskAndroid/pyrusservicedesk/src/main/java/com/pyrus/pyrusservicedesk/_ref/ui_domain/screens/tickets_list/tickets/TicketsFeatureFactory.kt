@@ -1,7 +1,6 @@
 package com.pyrus.pyrusservicedesk._ref.ui_domain.screens.tickets_list.tickets
 
 import com.github.terrakok.cicerone.Router
-import com.pyrus.pyrusservicedesk.User
 import com.pyrus.pyrusservicedesk._ref.Screens
 import com.pyrus.pyrusservicedesk._ref.data.multy_chat.TicketsInfo
 import com.pyrus.pyrusservicedesk._ref.ui_domain.screens.tickets_list.tickets.TicketsContract.ContentState
@@ -21,6 +20,7 @@ import com.pyrus.pyrusservicedesk.core.getUsers
 import com.pyrus.pyrusservicedesk.sdk.repositories.LocalCommandsStore
 import com.pyrus.pyrusservicedesk.sdk.repositories.Repository
 import com.pyrus.pyrusservicedesk.sdk.repositories.UserInternal
+import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.debounce
 import kotlinx.coroutines.flow.flow
@@ -59,7 +59,7 @@ private class FeatureReducer: Logic<State, Message, Effect>() {
 
     private fun Result.handleOuter(message: Message.Outer) {
         when (message) {
-            Message.Outer.OnFabItemClick -> {
+            is Message.Outer.OnFabItemClick -> {
                 val contentState = state.contentState as? ContentState.Content ?: return
                 val selectedAppId = contentState.appId ?: return
                 val users = contentState.account.getUsers().filter { it.appId == contentState.appId }
@@ -79,7 +79,6 @@ private class FeatureReducer: Logic<State, Message, Effect>() {
                     effects { +Effect.Inner.OpenTicketScreen(user, null) }
                 }
             }
-
             is Message.Outer.OnFilterClick -> {
                 val contentState = state.contentState as? ContentState.Content ?: return
                 val selectedAppId = contentState.appId ?: return
@@ -100,15 +99,22 @@ private class FeatureReducer: Logic<State, Message, Effect>() {
                 val contentState = state.contentState as? ContentState.Content ?: return
                 val currentFilter = contentState.filter
 
-                state { state.copy(contentState = updateTicketsFilterState(
-                    state = contentState,
-                    appId = message.appId,
-                    domain = contentState.account.domain,
-                    filter = if (currentFilter?.appId != message.appId) null else currentFilter
-                )) }
-            }
+                val ticketsSetByAppName = contentState.ticketSets?.associateBy { it.appId }
+                val titleUrl = ticketsSetByAppName?.get(message.appId)?.orgLogoUrl?.let {
+                    getOrganisationLogoUrl(it, contentState.account.domain)
+                }
+                val filter = if (currentFilter?.appId != message.appId) null else currentFilter
 
-            Message.Outer.OnCreateTicketClick -> {
+                state {
+                    state.copy(contentState = contentState.copy(
+                        appId = message.appId,
+                        titleText = ticketsSetByAppName?.get(message.appId)?.orgName,
+                        titleImageUrl = titleUrl,
+                        filter = filter,
+                    ))
+                }
+            }
+            is Message.Outer.OnCreateTicketClick -> {
                 val contentState = state.contentState as? ContentState.Content ?: return
                 val appId = contentState.appId ?: return
 
@@ -159,7 +165,7 @@ private class FeatureReducer: Logic<State, Message, Effect>() {
                     ContentState.Loading -> createInitialContentState(message.ticketsInfo)
                 })
             }
-            Message.Inner.UpdateTicketsFailed -> {
+            is Message.Inner.UpdateTicketsFailed -> {
                 when(state.contentState) {
                     is ContentState.Content -> {}
                     ContentState.Error -> {}
@@ -213,23 +219,9 @@ private class FeatureReducer: Logic<State, Message, Effect>() {
         )
     }
 
-    private fun updateTicketsFilterState(
-        state: ContentState.Content,
-        appId: String,
-        domain: String?,
-        filter: User?,
-    ) : ContentState.Content {
-        val ticketsSetByAppName = state.ticketSets?.associateBy { it.appId }
-        return state.copy(
-            appId = appId,
-            titleText = ticketsSetByAppName?.get(appId)?.orgName,
-            titleImageUrl = ticketsSetByAppName?.get(appId)?.orgLogoUrl?.let { getOrganisationLogoUrl(it, domain) } ,
-            filter = filter,
-        )
-    }
-
 }
 
+@OptIn(FlowPreview::class)
 internal class TicketsActor(
     private val repository: Repository,
     private val router: Router,
@@ -250,9 +242,11 @@ internal class TicketsActor(
             }
         }
 
-        Effect.Inner.TicketsSetFlow -> repository.getAllDataFlow()
-            .debounce(150)
-            .map { Message.Inner.TicketsUpdated(it) }
+        is Effect.Inner.TicketsSetFlow -> {
+            repository.getAllDataFlow()
+                .debounce(150)
+                .map { Message.Inner.TicketsUpdated(it) }
+        }
 
         is Effect.Inner.OpenTicketScreen -> flow {
             val ticketId = effect.ticketId ?: commandsStore.getNextLocalId()
