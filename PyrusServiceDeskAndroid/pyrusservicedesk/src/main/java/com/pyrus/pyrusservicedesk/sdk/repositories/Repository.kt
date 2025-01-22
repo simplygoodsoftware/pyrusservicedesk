@@ -1,7 +1,6 @@
 package com.pyrus.pyrusservicedesk.sdk.repositories
 
 import android.net.Uri
-import android.util.Log
 import androidx.core.net.toFile
 import com.pyrus.pyrusservicedesk._ref.data.Attachment
 import com.pyrus.pyrusservicedesk._ref.data.FullTicket
@@ -24,6 +23,7 @@ import com.pyrus.pyrusservicedesk.sdk.sync.Synchronizer
 import com.pyrus.pyrusservicedesk.sdk.web.UploadFileHook
 import com.pyrus.pyrusservicedesk.sdk.web.retrofit.RemoteFileStore
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.launch
@@ -34,12 +34,12 @@ import java.util.concurrent.ConcurrentHashMap
 
 
 internal class Repository(
-    private val localCommandsStore: LocalCommandsStore,
+    private val commandsStore: LocalCommandsStore,
     private val repositoryMapper: RepositoryMapper,
     private val fileResolver: FileResolver,
     private val remoteFileStore: RemoteFileStore,
     private val synchronizer: Synchronizer,
-    private val localTicketsStore: LocalTicketsStore,
+    private val ticketsStore: LocalTicketsStore,
     private val coroutineScope: CoroutineScope,
     private val accountStore: AccountStore,
     private val idStore: IdStore,
@@ -48,7 +48,8 @@ internal class Repository(
     private val fileHooks = ConcurrentHashMap<Long, UploadFileHook>()
 
     init {
-        val initialCommands = localCommandsStore.getCommands()
+        val initialCommands = commandsStore.getCommands()
+            .filter { !it.isError }
             .mapNotNull(repositoryMapper::mapToSyncRequest)
 
         if (initialCommands.isNotEmpty()) {
@@ -63,20 +64,20 @@ internal class Repository(
     suspend fun getAllData(force: Boolean): Try<TicketsInfo> {
         val account = accountStore.getAccount()
         if (!force) {
-            val localTickets: TicketsDto? = localTicketsStore.getTickets()
+            val localTickets: TicketsDto? = ticketsStore.getTickets()
             if (localTickets != null) {
-                return Try.Success(mergeData(account, localTickets, localCommandsStore.getCommands()))
+                return Try.Success(mergeData(account, localTickets, commandsStore.getCommands()))
             }
         }
         return synchronizer.syncData(SyncRequest.Data).map {
-            mergeData(account, it, localCommandsStore.getCommands())
+            mergeData(account, it, commandsStore.getCommands())
         }
     }
 
     fun getAllDataFlow(): Flow<TicketsInfo> = combine(
         accountStore.accountStateFlow(),
-        localTicketsStore.getTicketInfoFlow(),
-        localCommandsStore.getCommandsFlow(),
+        ticketsStore.getTicketInfoFlow(),
+        commandsStore.getCommandsFlow(),
         ::mergeData
     )
 
@@ -84,7 +85,7 @@ internal class Repository(
         val account = accountStore.getAccount()
         val serverId = idStore.getTicketServerId(ticketId) ?: ticketId
         if (serverId < 0) {
-            val commands = localCommandsStore.getCommands(serverId)
+            val commands = commandsStore.getCommands(serverId)
             val firstCommand = commands.firstOrNull()
             val ticket = if (firstCommand != null) {
                 repositoryMapper.mapToFullTicket(firstCommand.ticketId!!, firstCommand.userId, commands)
@@ -106,9 +107,9 @@ internal class Repository(
         }
 
         if (!force) {
-            val localTickets: TicketsDto? = localTicketsStore.getTickets()
+            val localTickets: TicketsDto? = ticketsStore.getTickets()
             val ticketDto: TicketDto? = localTickets?.tickets?.find { it.ticketId == serverId }
-            val commands = localCommandsStore.getCommands(serverId)
+            val commands = commandsStore.getCommands(serverId)
             if (ticketDto != null) {
                 val ticket = repositoryMapper.mergeTicket(account, userId, ticketDto, commands)
                 return Try.Success(ticket).toTry2()
@@ -119,7 +120,7 @@ internal class Repository(
         if (syncTry.isFailed()) return syncTry
         val ticketDto = syncTry.value
 
-        val commands = localCommandsStore.getCommands(serverId)
+        val commands = commandsStore.getCommands(serverId)
         val ticket = repositoryMapper.mergeTicket(account, userId, ticketDto, commands)
         return Try2.Success(ticket)
     }
@@ -127,8 +128,8 @@ internal class Repository(
     fun getFeedFlow(ticketId: Long): Flow<FullTicket?> {
         return combine(
             accountStore.accountStateFlow(),
-            localTicketsStore.getTicketInfoFlow(ticketId),
-            localCommandsStore.getCommandsFlow(ticketId),
+            ticketsStore.getTicketInfoFlow(ticketId),
+            commandsStore.getCommandsFlow(ticketId),
         ) { account,  ticketDto, commands ->
             if (ticketDto != null) {
                 if (ticketDto.userId == null) return@combine null
@@ -145,7 +146,7 @@ internal class Repository(
     fun addTextComment(user: UserInternal, ticketId: Long, textBody: String) = coroutineScope.launch {
         val serverTicketId = idStore.getTicketServerId(ticketId) ?: ticketId
         val requestNewTicket = needsToRequestNewTicket(serverTicketId)
-        val command = localCommandsStore.addTextCommand(user, serverTicketId, requestNewTicket, textBody)
+        val command: SyncRequest.Command.CreateComment = commandsStore.addTextCommand(user, serverTicketId, requestNewTicket, textBody)
         sendCommand(command)
     }
 
@@ -154,7 +155,7 @@ internal class Repository(
 
         val serverTicketId = idStore.getTicketServerId(ticketId) ?: ticketId
         val requestNewTicket = needsToRequestNewTicket(serverTicketId)
-        val commandEntity = localCommandsStore.addAttachmentCommand(user, ticketId, requestNewTicket, fileData)
+        val commandEntity = commandsStore.addAttachmentCommand(user, ticketId, requestNewTicket, fileData)
 
         val command = repositoryMapper.mapToSyncRequest(commandEntity) ?: return@launch
         sendCommand(command)
@@ -163,17 +164,17 @@ internal class Repository(
     fun addRatingComment(user: UserInternal, ticketId: Long, rating: Int) = coroutineScope.launch {
         val serverTicketId = idStore.getTicketServerId(ticketId) ?: ticketId
         val requestNewTicket = needsToRequestNewTicket(serverTicketId)
-        val command = localCommandsStore.addRatingCommand(user, serverTicketId, requestNewTicket, rating)
+        val command = commandsStore.addRatingCommand(user, serverTicketId, requestNewTicket, rating)
         sendCommand(command)
     }
 
     fun readTicket(user: UserInternal, ticketId: Long) = coroutineScope.launch {
         if (ticketId <= 0) return@launch
         val serverTicketId = idStore.getTicketServerId(ticketId) ?: ticketId
-        val command = localCommandsStore.addReadCommand(user, serverTicketId)
+        val command = commandsStore.addReadCommand(user, serverTicketId)
         val syncTry = synchronizer.syncCommand(command)
         if (syncTry.isSuccess()) {
-            localCommandsStore.removeCommand(command.commandId)
+            commandsStore.removeCommand(command.commandId)
         }
     }
 
@@ -183,13 +184,14 @@ internal class Repository(
      * @param tokenType cloud messaging type.
      */
     suspend fun setPushToken(user: UserInternal, token: String, tokenType: String): Try<Unit> {
-        val command = localCommandsStore.createPushTokenCommand(user, token, tokenType)
+        val command = commandsStore.createPushTokenCommand(user, token, tokenType)
         return synchronizer.syncCommand(command).map {  }
     }
 
     fun retryAddComment(user: UserInternal, localId: Long) = coroutineScope.launch {
-        val commandEntity = localCommandsStore.getCommand(localId) ?: return@launch
+        val commandEntity = commandsStore.getCommand(localId) ?: return@launch
         val command = repositoryMapper.mapToSyncRequest(commandEntity) ?: return@launch
+        commandsStore.addOrUpdatePendingCommand(repositoryMapper.mapToCommandEntity(false, command))
 
         if (command is SyncRequest.Command.CreateComment) {
             val serverTicketId = idStore.getTicketServerId(command.ticketId) ?: command.ticketId
@@ -201,8 +203,8 @@ internal class Repository(
         }
     }
 
-    fun removeCommand(commandId: String) {
-        localCommandsStore.removeCommand(commandId)
+    fun removeCommand(localId: Long) {
+        commandsStore.removeCommand(localId)
     }
 
     fun cancelUploadFile(attachmentId: Long) {
@@ -235,7 +237,7 @@ internal class Repository(
             }
 
             val newCommand = command.copy(attachments = attachments)
-            localCommandsStore.addOrUpdatePendingCommand(repositoryMapper.mapToCommandEntity(isError, newCommand))
+            commandsStore.addOrUpdatePendingCommand(repositoryMapper.mapToCommandEntity(isError, newCommand))
         }
 
         for (attachment in attachments) {
@@ -280,11 +282,11 @@ internal class Repository(
         val syncTry = synchronizer.syncCommand(command)
 
         if (syncTry.isSuccess()) {
-            localCommandsStore.removeCommand(command.commandId)
+            commandsStore.removeCommand(command.commandId)
         }
         else {
             val errorEntity = repositoryMapper.mapToCommandEntity(true, command)
-            localCommandsStore.addOrUpdatePendingCommand(errorEntity)
+            commandsStore.addOrUpdatePendingCommand(errorEntity)
         }
     }
 

@@ -6,7 +6,6 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import com.pyrus.pyrusservicedesk.PyrusServiceDesk
 import com.pyrus.pyrusservicedesk._ref.ui_domain.screens.file_preview.FilePreviewViewModel
-import com.pyrus.pyrusservicedesk.presentation.ui.navigation_page.ticket.dialogs.comment_actions.PendingCommentActionSharedViewModel
 
 /**
  * Factory that provides view models.
@@ -20,7 +19,6 @@ internal class ViewModelFactory(private val arguments: Intent, private val appli
         return when (modelClass) {
             SharedViewModel::class.java -> PyrusServiceDesk.injector().sharedViewModel as T
             FilePreviewViewModel::class.java -> FilePreviewViewModel(application, arguments) as T
-            PendingCommentActionSharedViewModel::class.java -> PendingCommentActionSharedViewModel() as T
             else -> throw IllegalStateException("View model for class $modelClass was not found")
         }
     }

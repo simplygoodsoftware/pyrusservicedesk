@@ -21,6 +21,7 @@ import com.pyrus.pyrusservicedesk._ref.whitetea.core.logic.Logic
 import com.pyrus.pyrusservicedesk._ref.whitetea.utils.adapt
 import com.pyrus.pyrusservicedesk.core.Account
 import com.pyrus.pyrusservicedesk.core.getUsers
+import com.pyrus.pyrusservicedesk.presentation.ui.navigation_page.ticket.dialogs.comment_actions.ErrorCommentActionsDialog.Companion.ErrorCommentAction
 import com.pyrus.pyrusservicedesk.sdk.data.FileManager
 import com.pyrus.pyrusservicedesk.sdk.data.intermediate.FileData
 import com.pyrus.pyrusservicedesk.sdk.repositories.AccountStore
@@ -118,9 +119,13 @@ private class FeatureReducer: Logic<State, Message, Effect>() {
                     ticketId = (state as State.Content).ticketId,
                 ) }
             }
-            is Message.Outer.OnRetryAddCommentClick -> {
+            is Message.Outer.OnErrorCommentClick -> {
                 if (state !is State.Content) return
-                effects { +Effect.Inner.RetryAddComment(message.id) }
+                effects {
+                    val key = UUID.randomUUID().toString()
+                    +Effect.Outer.ShowErrorCommentDialog(key)
+                    +Effect.Inner.ListenErrorCommentAction(message.localId, key)
+                }
             }
             is Message.Outer.OnSendClick -> {
                 val currentState = state as? State.Content ?: return
@@ -248,11 +253,6 @@ internal class TicketActor(
             repository.addRatingComment(user, ticketId, effect.rating)
         }
 
-        is Effect.Inner.RetryAddComment -> flow {
-            // TODO FSDS
-//            repository.retryAddComment(user, ticketId, effect.id)
-        }
-
         is Effect.Inner.OpenPreview -> flow {
             val user = (accountStore.getAccount() as? Account.V3)?.users?.find { it.userId == effect.userId }
             val fileDate = FileData(
@@ -275,6 +275,17 @@ internal class TicketActor(
             if (uri !is Uri) return@flow
             val fileUri = try { fileManager.copyFile(uri) } catch (e: Exception) { null } ?: return@flow
             repository.addAttachComment(user, ticketId, fileUri)
+        }
+
+        is Effect.Inner.ListenErrorCommentAction -> flow {
+            val action: Any = suspendCoroutine { continuation ->
+                router.setResultListener(effect.key) { continuation.resume(it) }
+            }
+            if (action !is ErrorCommentAction) return@flow
+            when(action) {
+                ErrorCommentAction.DELETE -> repository.removeCommand(effect.localId)
+                ErrorCommentAction.RETRY -> repository.retryAddComment(user, effect.localId)
+            }
         }
 
     }

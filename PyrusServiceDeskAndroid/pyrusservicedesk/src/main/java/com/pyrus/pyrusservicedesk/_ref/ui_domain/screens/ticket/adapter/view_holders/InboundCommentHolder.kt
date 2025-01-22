@@ -14,15 +14,11 @@ import com.pyrus.pyrusservicedesk.presentation.ui.view.CommentView
 
 internal class InboundCommentHolder(
     parent: ViewGroup,
-    onErrorCommentEntryClickListener: (id: Long) -> Unit,
     onEvent: (event: TicketView.Event) -> Unit,
-    onTextCommentLongClicked: (String) -> Unit,
 ) : CommentHolder(
     parent,
     R.layout.psd_view_holder_comment_inbound,
-    onErrorCommentEntryClickListener,
-    onEvent,
-    onTextCommentLongClicked
+    onEvent
 ) {
 
     override val comment: CommentView = itemView.findViewById(R.id.comment)

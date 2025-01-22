@@ -34,7 +34,7 @@ internal interface TicketContract {
 
             data class OnPreviewClick(val commentId: Long, val attachmentId: Long) : Outer
 
-            data class OnRetryAddCommentClick(val id: Long) : Outer
+            data class OnErrorCommentClick(val localId: Long) : Outer
 
             data class OnCopyClick(val text: String) : Outer
 
@@ -74,6 +74,7 @@ internal interface TicketContract {
             data class CopyToClipboard(val text: String) : Outer
             data class MakeToast(val text: TextProvider) : Outer
             data class ShowAttachVariants(val key: String) : Outer
+            data class ShowErrorCommentDialog(val key: String) : Outer
         }
 
         sealed interface Inner : Effect {
@@ -92,11 +93,11 @@ internal interface TicketContract {
                 val rating: Int,
                 val ticketId: Long,
             ) : Inner
-            data class RetryAddComment(val id: Long) : Inner
             data class OpenPreview(val attachment: Attachment, val userId: String?) : Inner
             data class SaveDraft(val draft: String) : Inner
             data class ReadTicket(val user: UserInternal, val ticketId: Long) : Inner
             data class ListenAttachVariant(val key: String) : Inner
+            data class ListenErrorCommentAction(val localId: Long, val key: String) : Inner
         }
     }
 

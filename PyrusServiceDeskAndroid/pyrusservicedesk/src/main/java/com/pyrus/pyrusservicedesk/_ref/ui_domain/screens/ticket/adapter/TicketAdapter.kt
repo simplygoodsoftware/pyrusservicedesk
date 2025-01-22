@@ -19,10 +19,7 @@ import com.pyrus.pyrusservicedesk.presentation.ui.view.recyclerview.ViewHolderBa
  * Adapter that is used for rendering comment feed of the ticket screen.
  */
 internal class TicketAdapter(
-    private val onErrorCommentEntryClickListener: (id: Long) -> Unit,
     private val onEvent: (event: TicketView.Event) -> Unit,
-    private val onTextCommentLongClicked: (String) -> Unit,
-    private val onRatingClickListener: (Int) -> Unit,
 ): ListAdapter<CommentEntryV2, ViewHolderBase<CommentEntryV2>>(CommentsItemCallback()) {
 
     override fun getItemViewType(position: Int): Int = when(val entry = getItem(position)) {
@@ -39,19 +36,15 @@ internal class TicketAdapter(
         return when(viewType) {
             VIEW_TYPE_COMMENT_INBOUND -> InboundCommentHolder(
                 parent,
-                onErrorCommentEntryClickListener,
                 onEvent,
-                onTextCommentLongClicked,
             )
             VIEW_TYPE_COMMENT_OUTBOUND -> OutboundCommentHolder(
                 parent,
-                onErrorCommentEntryClickListener,
                 onEvent,
-                onTextCommentLongClicked,
             )
             VIEW_TYPE_WELCOME_MESSAGE -> WelcomeMessageHolder(parent)
-            VIEW_TYPE_RATING -> RatingHolder(parent, onRatingClickListener)
-            VIEW_TYPE_COMMENT_RATING -> RatingCommentHolder(parent, onErrorCommentEntryClickListener)
+            VIEW_TYPE_RATING -> RatingHolder(parent, onEvent)
+            VIEW_TYPE_COMMENT_RATING -> RatingCommentHolder(parent, onEvent)
             VIEW_TYPE_COMMENT_BUTTONS -> ButtonsHolder(parent, onEvent)
             else -> DateViewHolder(parent)
         } as ViewHolderBase<CommentEntryV2>
