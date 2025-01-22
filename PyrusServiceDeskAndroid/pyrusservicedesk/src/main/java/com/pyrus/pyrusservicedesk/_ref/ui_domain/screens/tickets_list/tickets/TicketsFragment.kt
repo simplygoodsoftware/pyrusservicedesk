@@ -101,7 +101,7 @@ internal class TicketsFragment: TeaFragment<Model, Message, Effect.Outer>() {
         binding.viewPager.registerOnPageChangeCallback(object : ViewPager2.OnPageChangeCallback() {
             override fun onPageSelected(position: Int) {
                 super.onPageSelected(position)
-                dispatch(Message.Outer.OnChangePage(adapter.getAppId(position), currentUserId))
+                dispatch(Message.Outer.OnChangePage(adapter.getAppId(position)))
             }
         })
 

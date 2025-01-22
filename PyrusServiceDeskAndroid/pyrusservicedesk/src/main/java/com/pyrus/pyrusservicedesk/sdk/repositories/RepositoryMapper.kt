@@ -10,7 +10,7 @@ import com.pyrus.pyrusservicedesk._ref.data.FullTicket
 import com.pyrus.pyrusservicedesk._ref.data.TicketHeader
 import com.pyrus.pyrusservicedesk._ref.data.multy_chat.TicketSetInfo
 import com.pyrus.pyrusservicedesk._ref.utils.RequestUtils
-import com.pyrus.pyrusservicedesk._ref.utils.RequestUtils.Companion.getAvatarUrl
+import com.pyrus.pyrusservicedesk._ref.utils.RequestUtils.getAvatarUrl
 import com.pyrus.pyrusservicedesk._ref.utils.TextProvider
 import com.pyrus.pyrusservicedesk._ref.utils.isImage
 import com.pyrus.pyrusservicedesk._ref.utils.isVideo

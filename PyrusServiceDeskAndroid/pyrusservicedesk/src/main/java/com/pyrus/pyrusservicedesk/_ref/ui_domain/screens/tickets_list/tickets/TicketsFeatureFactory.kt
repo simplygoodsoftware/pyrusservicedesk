@@ -7,7 +7,6 @@ import com.pyrus.pyrusservicedesk._ref.ui_domain.screens.tickets_list.tickets.Ti
 import com.pyrus.pyrusservicedesk._ref.ui_domain.screens.tickets_list.tickets.TicketsContract.Effect
 import com.pyrus.pyrusservicedesk._ref.ui_domain.screens.tickets_list.tickets.TicketsContract.Message
 import com.pyrus.pyrusservicedesk._ref.ui_domain.screens.tickets_list.tickets.TicketsContract.State
-import com.pyrus.pyrusservicedesk._ref.utils.RequestUtils.Companion.getOrganisationLogoUrl
 import com.pyrus.pyrusservicedesk._ref.utils.Try
 import com.pyrus.pyrusservicedesk._ref.utils.navigation.setSlideRightAnimation
 import com.pyrus.pyrusservicedesk._ref.utils.singleFlow
@@ -61,8 +60,8 @@ private class FeatureReducer: Logic<State, Message, Effect>() {
         when (message) {
             is Message.Outer.OnFabItemClick -> {
                 val contentState = state.contentState as? ContentState.Content ?: return
-                val selectedAppId = contentState.appId ?: return
-                val users = contentState.account.getUsers().filter { it.appId == contentState.appId }
+                val selectedAppId = contentState.pageAppId ?: return
+                val users = contentState.account.getUsers().filter { it.appId == contentState.pageAppId }
 
                 val selectedUser = contentState.filter
 
@@ -81,7 +80,7 @@ private class FeatureReducer: Logic<State, Message, Effect>() {
             }
             is Message.Outer.OnFilterClick -> {
                 val contentState = state.contentState as? ContentState.Content ?: return
-                val selectedAppId = contentState.appId ?: return
+                val selectedAppId = contentState.pageAppId ?: return
                 val users = contentState.account.getUsers()
                 effects { +Effect.Outer.ShowFilterMenu(selectedAppId, message.selectedUserId, users) }
             }
@@ -98,25 +97,18 @@ private class FeatureReducer: Logic<State, Message, Effect>() {
             is Message.Outer.OnChangePage -> {
                 val contentState = state.contentState as? ContentState.Content ?: return
                 val currentFilter = contentState.filter
-
-                val ticketsSetByAppName = contentState.ticketSets?.associateBy { it.appId }
-                val titleUrl = ticketsSetByAppName?.get(message.appId)?.orgLogoUrl?.let {
-                    getOrganisationLogoUrl(it, contentState.account.domain)
-                }
                 val filter = if (currentFilter?.appId != message.appId) null else currentFilter
 
                 state {
                     state.copy(contentState = contentState.copy(
-                        appId = message.appId,
-                        titleText = ticketsSetByAppName?.get(message.appId)?.orgName,
-                        titleImageUrl = titleUrl,
+                        pageAppId = message.appId,
                         filter = filter,
                     ))
                 }
             }
             is Message.Outer.OnCreateTicketClick -> {
                 val contentState = state.contentState as? ContentState.Content ?: return
-                val appId = contentState.appId ?: return
+                val appId = contentState.pageAppId ?: return
 
                 val users = contentState.account.getUsers()
 
@@ -134,7 +126,7 @@ private class FeatureReducer: Logic<State, Message, Effect>() {
             }
             is Message.Outer.OnTicketClick -> {
                 val contentState = state.contentState as? ContentState.Content ?: return
-                val appId = contentState.appId ?: return
+                val appId = contentState.pageAppId ?: return
                 effects {
                     val user = UserInternal(message.userId, appId)
                     +Effect.Inner.OpenTicketScreen(user, message.ticketId)
@@ -191,7 +183,7 @@ private class FeatureReducer: Logic<State, Message, Effect>() {
                     ticketSets = message.ticketsInfo.ticketSetInfoList,
                     isUserTriggerLoading = false,
                     filter = filter,
-                    appId = lastNewUser?.appId ?: contentState.appId,
+                    pageAppId = lastNewUser?.appId ?: contentState.pageAppId,
                     loadUserIds = contentState.loadUserIds.toMutableSet()
                         .apply { lastNewUser?.let { add(it.userId) } }
                 )) }
@@ -207,9 +199,7 @@ private class FeatureReducer: Logic<State, Message, Effect>() {
         val firstSet = ticketsInfo.ticketSetInfoList.firstOrNull()
         return ContentState.Content(
             account = ticketsInfo.account,
-            appId = firstSet?.appId,
-            titleText = firstSet?.orgName,
-            titleImageUrl = firstSet?.orgLogoUrl?.let { getOrganisationLogoUrl(it, ticketsInfo.account.domain) },
+            pageAppId = firstSet?.appId,
             filter = null,
             ticketSets = ticketsInfo.ticketSetInfoList,
             isUserTriggerLoading = false,

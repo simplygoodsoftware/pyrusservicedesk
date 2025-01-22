@@ -23,9 +23,7 @@ internal interface TicketsContract {
         data object Error : ContentState
         data class Content(
             val account: Account,
-            val appId: String?,
-            val titleText: String?,
-            val titleImageUrl: String?,
+            val pageAppId: String?,
             val filter: User?,
             val ticketSets: List<TicketSetInfo>?,
             val isUserTriggerLoading: Boolean,
@@ -40,7 +38,7 @@ internal interface TicketsContract {
             data object OnRetryClick : Outer
             data object OnRefresh : Outer
             data object OnFabItemClick : Outer
-            data class OnChangePage(val appId: String, val currentUserId: String) : Outer
+            data class OnChangePage(val appId: String) : Outer
             data object OnCreateTicketClick : Outer
             data class OnTicketClick(val ticketId: Long, val userId: String) : Outer
             data class OnFilterSelected(val userId: String) : Outer

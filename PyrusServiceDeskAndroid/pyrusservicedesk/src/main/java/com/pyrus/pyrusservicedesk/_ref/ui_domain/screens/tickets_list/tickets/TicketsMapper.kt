@@ -6,6 +6,7 @@ import com.pyrus.pyrusservicedesk._ref.data.multy_chat.TicketSetInfo
 import com.pyrus.pyrusservicedesk._ref.ui_domain.screens.tickets_list.tickets.TicketsContract.ContentState
 import com.pyrus.pyrusservicedesk._ref.ui_domain.screens.tickets_list.tickets.TicketsView.Model
 import com.pyrus.pyrusservicedesk._ref.ui_domain.screens.tickets_list.tickets.TicketsView.Model.TicketSetInfoEntry
+import com.pyrus.pyrusservicedesk._ref.utils.RequestUtils.getOrganisationLogoUrl
 import com.pyrus.pyrusservicedesk.core.getUsers
 import com.pyrus.pyrusservicedesk.presentation.ui.navigation_page.ticket.HtmlTagUtils
 
@@ -21,15 +22,21 @@ internal object TicketsMapper {
             var page = 0
             val ticketSets = state.ticketSets ?: emptyList()
             for (i in ticketSets.indices) {
-                if(ticketSets[i].appId == state.appId) {
+                if(ticketSets[i].appId == state.pageAppId) {
                     page = i
                     break
                 }
             }
 
+            val ticketsSetByAppName = state.ticketSets?.associateBy { it.appId }
+            val titleUrl = ticketsSetByAppName?.get(state.pageAppId)?.orgLogoUrl?.let {
+                getOrganisationLogoUrl(it, state.account.domain)
+            }
+            val titleText = ticketsSetByAppName?.get(state.pageAppId)?.orgName
+
             Model(
-                titleText = state.titleText,
-                titleImageUrl = state.titleImageUrl,
+                titleText = titleText,
+                titleImageUrl = titleUrl,
                 filterName = state.filter?.userName,
                 ticketsIsEmpty = state.ticketSets.isNullOrEmpty(),
                 filterEnabled = state.filter != null,
