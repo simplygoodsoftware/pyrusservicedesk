@@ -48,10 +48,10 @@ internal class RepositoryMapper(
             val localId = idStore.getTicketLocalId(ticketDto.ticketId)
             val commandsWithLocalId = commandsById[localId] ?: emptyList()
 
-            if (ticketDto.userId == null) return@mapNotNull null
+            val userId = ticketDto.userId ?: return@mapNotNull null
 
             mergeTicketHeader(
-                userId = ticketDto.userId,
+                userId = userId,
                 ticketDto = ticketDto,
                 commands = ticketCommands + commandsWithLocalId,
                 account = account
@@ -84,16 +84,17 @@ internal class RepositoryMapper(
                 val userTickets = ticketsByUserId[user.userId] ?: continue
                 setTickets += userTickets
             }
-            val filteredTicketsData = setTickets.toHashSet().sortedWith(TicketHeaderComparator())
+            val sortedTicketsData = setTickets.toHashSet().sortedWith(TicketHeaderComparator())
 
             val application = applications?.get(appId)
             val orgName = application?.orgName
             val orgLogoUrl = application?.orgLogoUrl
             TicketSetInfo(
                 appId = appId,
+                userIds = users.map { it.userId }.toSet(),
                 orgName = orgName ?: "",
                 orgLogoUrl = orgLogoUrl,
-                tickets = filteredTicketsData,
+                tickets = sortedTicketsData,
             )
         }
 

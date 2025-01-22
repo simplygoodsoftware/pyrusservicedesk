@@ -1,27 +1,40 @@
 package com.pyrus.pyrusservicedesk._ref.ui_domain.screens.tickets_list.tickets
 
+import com.pyrus.pyrusservicedesk.User
 import com.pyrus.pyrusservicedesk._ref.data.TicketHeader
 import com.pyrus.pyrusservicedesk._ref.data.multy_chat.TicketSetInfo
 import com.pyrus.pyrusservicedesk._ref.ui_domain.screens.tickets_list.tickets.TicketsContract.ContentState
 import com.pyrus.pyrusservicedesk._ref.ui_domain.screens.tickets_list.tickets.TicketsView.Model
 import com.pyrus.pyrusservicedesk._ref.ui_domain.screens.tickets_list.tickets.TicketsView.Model.TicketSetInfoEntry
+import com.pyrus.pyrusservicedesk.core.getUsers
 import com.pyrus.pyrusservicedesk.presentation.ui.navigation_page.ticket.HtmlTagUtils
 
 internal object TicketsMapper {
 
-    var userId: String? = null
-
     fun map(state: ContentState): Model = when(state) {
         is ContentState.Content -> {
-            userId = state.filterId
+
+            val ticketSet = state.ticketSets?.map {
+                map(it, state.isUserTriggerLoading, state.loadUserIds, state.filter)
+            } ?: emptyList()
+
+            var page = 0
+            val ticketSets = state.ticketSets ?: emptyList()
+            for (i in ticketSets.indices) {
+                if(ticketSets[i].appId == state.appId) {
+                    page = i
+                    break
+                }
+            }
+
             Model(
                 titleText = state.titleText,
                 titleImageUrl = state.titleImageUrl,
-                filterName = state.filterName,
+                filterName = state.filter?.userName,
                 ticketsIsEmpty = state.ticketSets.isNullOrEmpty(),
-                filterEnabled = state.filterEnabled,
-                tabLayoutIsVisibile = state.tabLayoutVisibility,
-                ticketSets = state.ticketSets?.map { map(it, state.isLoading) } ?: emptyList(),
+                filterEnabled = state.filter != null,
+                tabLayoutIsVisible = state.account.getUsers().size > 1,
+                ticketSetInfo = Model.TicketSetInfo(page, ticketSet),
                 showNoConnectionError = false,
                 isLoading = false,
             )
@@ -32,8 +45,8 @@ internal object TicketsMapper {
             filterName = null,
             ticketsIsEmpty = true,
             filterEnabled = false,
-            tabLayoutIsVisibile = false,
-            ticketSets = null,
+            tabLayoutIsVisible = false,
+            ticketSetInfo = null,
             showNoConnectionError = true,
             isLoading = false,
         )
@@ -43,24 +56,36 @@ internal object TicketsMapper {
             filterName = null,
             ticketsIsEmpty = true,
             filterEnabled = false,
-            tabLayoutIsVisibile = false,
-            ticketSets = null,
+            tabLayoutIsVisible = false,
+            ticketSetInfo = null,
             showNoConnectionError = false,
             isLoading = true,
         )
     }
 
-    private fun map(ticketSetInfo: TicketSetInfo, isLoading: Boolean): TicketSetInfoEntry {
+    private fun map(
+        ticketSetInfo: TicketSetInfo,
+        isUserTriggerLoading: Boolean,
+        loadUserIds: Set<String>,
+        filter: User?,
+    ): TicketSetInfoEntry {
 
-        val filteredTickets =
-            if (userId == null) ticketSetInfo.tickets
-            else ticketSetInfo.tickets.filter { it.userId == userId }
+        val isLoading =
+            ticketSetInfo.userIds.size == 1 && ticketSetInfo.userIds.first() in loadUserIds
+                || filter != null && filter.appId == ticketSetInfo.appId && filter.userId in loadUserIds
+
+        val filteredTickets = when {
+            isLoading -> emptyList()
+            filter == null || filter.appId != ticketSetInfo.appId -> ticketSetInfo.tickets
+            else -> ticketSetInfo.tickets.filter { it.userId == filter.userId }
+        }
 
         return TicketSetInfoEntry(
             appId = ticketSetInfo.appId,
             titleText = ticketSetInfo.orgName,
             tickets = filteredTickets.map(::map),
-            isLoading = isLoading,
+            isUserTriggerLoading = isUserTriggerLoading,
+            isLoading = isLoading
         )
     }
 

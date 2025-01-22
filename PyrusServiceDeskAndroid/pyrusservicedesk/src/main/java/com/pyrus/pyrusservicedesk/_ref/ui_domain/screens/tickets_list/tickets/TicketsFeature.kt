@@ -3,8 +3,6 @@ package com.pyrus.pyrusservicedesk._ref.ui_domain.screens.tickets_list.tickets
 import com.pyrus.pyrusservicedesk.User
 import com.pyrus.pyrusservicedesk._ref.data.multy_chat.TicketSetInfo
 import com.pyrus.pyrusservicedesk._ref.data.multy_chat.TicketsInfo
-import com.pyrus.pyrusservicedesk._ref.ui_domain.screens.ticket.TicketContract
-import com.pyrus.pyrusservicedesk._ref.ui_domain.screens.ticket.TicketContract.Effect.Inner
 import com.pyrus.pyrusservicedesk._ref.ui_domain.screens.tickets_list.tickets.TicketsContract.Effect
 import com.pyrus.pyrusservicedesk._ref.ui_domain.screens.tickets_list.tickets.TicketsContract.Message
 import com.pyrus.pyrusservicedesk._ref.ui_domain.screens.tickets_list.tickets.TicketsContract.State
@@ -31,13 +29,12 @@ internal interface TicketsContract {
             val appId: String?,
             val titleText: String?,
             val titleImageUrl: String?,
-            val filterId: String?,
-            val filterName: String?,
-            val filterEnabled: Boolean,
+            val filter: User?,
             val ticketSets: List<TicketSetInfo>?,
-            val isLoading: Boolean,
-            val tabLayoutVisibility: Boolean,
+            val isUserTriggerLoading: Boolean,
+            val loadUserIds: Set<String>,
         ) : ContentState
+
     }
 
     sealed interface Message {
@@ -56,14 +53,9 @@ internal interface TicketsContract {
         }
 
         sealed interface Inner : Message {
-            data class TicketsUpdated(
-                val ticketsInfo: TicketsInfo,
-            ) : Inner
+            data class TicketsUpdated(val ticketsInfo: TicketsInfo) : Inner
             data object UpdateTicketsFailed : Inner
-            data class UpdateTicketsCompleted(
-                val ticketsInfo: TicketsInfo,
-            ) : Inner
-            data class UserUpdated(val tabLVisibility: Boolean): Inner
+            data class UpdateTicketsCompleted(val ticketsInfo: TicketsInfo) : Inner
         }
 
     }
@@ -83,7 +75,6 @@ internal interface TicketsContract {
 
         sealed interface Inner : Effect {
             data object TicketsSetFlow : Inner
-            data object CheckAccount : Inner
             data class UpdateTickets(val force: Boolean) : Inner
             data class OpenTicketScreen(val user: UserInternal, val ticketId: Long?) : Inner
         }

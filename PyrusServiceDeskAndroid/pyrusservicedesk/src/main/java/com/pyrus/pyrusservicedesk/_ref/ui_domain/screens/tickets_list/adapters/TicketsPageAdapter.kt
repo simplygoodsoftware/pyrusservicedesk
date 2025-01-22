@@ -57,9 +57,10 @@ internal class TicketsPageAdapter(
 
         fun bind(entry: TicketSetInfoEntry) {
             adapter.setItems(entry.tickets)
-            binding.emptyTicketsListLl.isVisible = entry.tickets.isEmpty()
+            binding.emptyTicketsListLl.isVisible = !entry.isLoading && entry.tickets.isEmpty()
+            binding.progressBar.isVisible = entry.isLoading
             binding.ticketsRv.isVisible = entry.tickets.isNotEmpty()
-            binding.refresh.isRefreshing = entry.isLoading
+            binding.refresh.isRefreshing = entry.isUserTriggerLoading
         }
 
     }

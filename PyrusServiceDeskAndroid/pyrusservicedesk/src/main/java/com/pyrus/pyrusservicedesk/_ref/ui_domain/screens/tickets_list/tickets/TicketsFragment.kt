@@ -13,7 +13,6 @@ import com.google.android.material.tabs.TabLayoutMediator
 import com.pyrus.pyrusservicedesk.PyrusServiceDesk
 import com.pyrus.pyrusservicedesk.PyrusServiceDesk.Companion.injector
 import com.pyrus.pyrusservicedesk.R
-import com.pyrus.pyrusservicedesk.User
 import com.pyrus.pyrusservicedesk._ref.ui_domain.screens.add_ticket.AddTicketBottomSheetFragment
 import com.pyrus.pyrusservicedesk._ref.ui_domain.screens.filter_tickets_list.FilterTicketsBottomSheetFragment
 import com.pyrus.pyrusservicedesk._ref.ui_domain.screens.filter_tickets_list.FilterTicketsBottomSheetFragment.Companion.KEY_SELECTED_USER_ID
@@ -121,13 +120,13 @@ internal class TicketsFragment: TeaFragment<Model, Message, Effect.Outer>() {
         if (multichatButtons?.rightButtonAction != null) {
             binding.toolbarTicketsList.psdToolbarQrIb.setOnClickListener {
                 // TODO sds remove it
-//                PyrusServiceDesk.addUser(PyrusServiceDesk.user2())
-                try {
-                    startActivity(multichatButtons.centerAction)
-                }
-                catch (e: Exception) {
-                    // TODO show error ui
-                }
+                PyrusServiceDesk.addUser(PyrusServiceDesk.user2())
+//                try {
+//                    startActivity(multichatButtons.centerAction)
+//                }
+//                catch (e: Exception) {
+//                    // TODO show error ui
+//                }
             }
         }
         if (multichatButtons?.centerAction != null) {
@@ -169,11 +168,17 @@ internal class TicketsFragment: TeaFragment<Model, Message, Effect.Outer>() {
         diff(Model::filterName) { filterName ->
             binding.filterContextTv.text = filterName
         }
-        diff(Model::tabLayoutIsVisibile) { tabLayoutVisibility ->
+        diff(Model::tabLayoutIsVisible) { tabLayoutVisibility ->
             binding.tabLayout.isVisible = tabLayoutVisibility
         }
-        diff(Model::ticketSets) { ticketSetInfoList ->
-            adapter.submitList(ticketSetInfoList)
+        diff(Model::ticketSetInfo, { n, o -> n === o }) { ticketSetInfo ->
+            adapter.submitList(ticketSetInfo?.ticketSets) {
+                ticketSetInfo?.page?.let { page ->
+                    if (binding.viewPager.currentItem != page) {
+                        binding.viewPager.setCurrentItem(page, true)
+                    }
+                }
+            }
         }
         diff(Model::showNoConnectionError) { showError ->
             binding.noConnection.root.isVisible = showError

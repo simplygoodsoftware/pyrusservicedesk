@@ -4,12 +4,10 @@ import com.github.terrakok.cicerone.Router
 import com.pyrus.pyrusservicedesk.User
 import com.pyrus.pyrusservicedesk._ref.Screens
 import com.pyrus.pyrusservicedesk._ref.data.multy_chat.TicketsInfo
-import com.pyrus.pyrusservicedesk._ref.ui_domain.screens.ticket.TicketContract
 import com.pyrus.pyrusservicedesk._ref.ui_domain.screens.tickets_list.tickets.TicketsContract.ContentState
 import com.pyrus.pyrusservicedesk._ref.ui_domain.screens.tickets_list.tickets.TicketsContract.Effect
 import com.pyrus.pyrusservicedesk._ref.ui_domain.screens.tickets_list.tickets.TicketsContract.Message
 import com.pyrus.pyrusservicedesk._ref.ui_domain.screens.tickets_list.tickets.TicketsContract.State
-import com.pyrus.pyrusservicedesk._ref.ui_domain.screens.tickets_list.tickets.TicketsFragment.Companion.KEY_DEFAULT_USER_ID
 import com.pyrus.pyrusservicedesk._ref.utils.RequestUtils.Companion.getOrganisationLogoUrl
 import com.pyrus.pyrusservicedesk._ref.utils.Try
 import com.pyrus.pyrusservicedesk._ref.utils.navigation.setSlideRightAnimation
@@ -19,9 +17,7 @@ import com.pyrus.pyrusservicedesk._ref.whitetea.core.StoreFactory
 import com.pyrus.pyrusservicedesk._ref.whitetea.core.adaptCast
 import com.pyrus.pyrusservicedesk._ref.whitetea.core.logic.Logic
 import com.pyrus.pyrusservicedesk._ref.whitetea.utils.adapt
-import com.pyrus.pyrusservicedesk.core.Account
 import com.pyrus.pyrusservicedesk.core.getUsers
-import com.pyrus.pyrusservicedesk.sdk.repositories.AccountStore
 import com.pyrus.pyrusservicedesk.sdk.repositories.LocalCommandsStore
 import com.pyrus.pyrusservicedesk.sdk.repositories.Repository
 import com.pyrus.pyrusservicedesk.sdk.repositories.UserInternal
@@ -37,14 +33,13 @@ internal class TicketsFeatureFactory(
     private val repository: Repository,
     private val router: Router,
     private val commandsStore: LocalCommandsStore,
-    private val accountStore: AccountStore,
 ) {
 
     fun create(): TicketsFeature = storeFactory.create(
         name = TAG,
         initialState = State(ContentState.Loading),
         reducer = FeatureReducer(),
-        actor = TicketsActor(repository, router, commandsStore, accountStore).adaptCast(),
+        actor = TicketsActor(repository, router, commandsStore).adaptCast(),
         initialEffects = listOf(
             Effect.Inner.UpdateTickets(false),
             Effect.Inner.TicketsSetFlow,
@@ -69,7 +64,7 @@ private class FeatureReducer: Logic<State, Message, Effect>() {
                 val selectedAppId = contentState.appId ?: return
                 val users = contentState.account.getUsers().filter { it.appId == contentState.appId }
 
-                val selectedUser = contentState.filterId?.let { id -> users.find { it.userId == id } }
+                val selectedUser = contentState.filter
 
                 if (users.size > 1 && selectedUser == null) {
                     effects { +Effect.Outer.ShowAddTicketMenu(selectedAppId, users) }
@@ -98,19 +93,18 @@ private class FeatureReducer: Logic<State, Message, Effect>() {
             }
             is Message.Outer.OnRefresh -> {
                 val contentState = state.contentState as? ContentState.Content ?: return
-                state { state.copy(contentState = contentState.copy(isLoading = true)) }
+                state { state.copy(contentState = contentState.copy(isUserTriggerLoading = true)) }
                 effects { +Effect.Inner.UpdateTickets(force = true) }
             }
             is Message.Outer.OnChangePage -> {
                 val contentState = state.contentState as? ContentState.Content ?: return
-                val users = contentState.account.getUsers().filter { it.appId == message.appId }
-                val selectedUser = users.find { it.userId == message.currentUserId }
+                val currentFilter = contentState.filter
 
                 state { state.copy(contentState = updateTicketsFilterState(
                     state = contentState,
                     appId = message.appId,
                     domain = contentState.account.domain,
-                    user = selectedUser
+                    filter = if (currentFilter?.appId != message.appId) null else currentFilter
                 )) }
             }
 
@@ -145,13 +139,8 @@ private class FeatureReducer: Logic<State, Message, Effect>() {
                 val contentState = state.contentState as? ContentState.Content ?: return
 
                 val user = contentState.account.getUsers().find { it.userId == message.userId }
-                val filterName = user?.userName?: ""
                 state {
-                    state.copy(contentState = contentState.copy(
-                        filterName = filterName,
-                        filterEnabled = message.userId != KEY_DEFAULT_USER_ID,
-                        filterId = user?.userId
-                    ))
+                    state.copy(contentState = contentState.copy(filter = user))
                 }
             }
         }
@@ -163,7 +152,8 @@ private class FeatureReducer: Logic<State, Message, Effect>() {
                 state.copy(contentState = when(val currentDateState = state.contentState) {
                     is ContentState.Content -> currentDateState.copy(
                         ticketSets = message.ticketsInfo.ticketSetInfoList,
-                        isLoading = false,
+                        isUserTriggerLoading = false,
+                        loadUserIds = emptySet()
                     )
                     ContentState.Error,
                     ContentState.Loading -> createInitialContentState(message.ticketsInfo)
@@ -178,35 +168,48 @@ private class FeatureReducer: Logic<State, Message, Effect>() {
             }
             is Message.Inner.TicketsUpdated -> {
                 val contentState = state.contentState as? ContentState.Content ?: return
+
+                val fullUsers = message.ticketsInfo.account.getUsers()
+                val currentUsers = contentState.account.getUsers().map { UserInternal(it.userId, it.appId) }.toSet()
+                val newUsers = fullUsers.map { UserInternal(it.userId, it.appId) }.toSet()
+                val diff = newUsers.minus(currentUsers)
+
+                val lastNewUser = diff.lastOrNull()?.let { fullUsers.find { fu -> fu.userId == it.userId} }
+
+                val filter = when {
+                    lastNewUser == null -> contentState.filter
+                    newUsers.count { it.appId == lastNewUser.appId } > 1 -> lastNewUser
+                    else -> null
+                }
+
                 state { state.copy(contentState = contentState.copy(
                     account = message.ticketsInfo.account,
                     ticketSets = message.ticketsInfo.ticketSetInfoList,
-                    isLoading = false
+                    isUserTriggerLoading = false,
+                    filter = filter,
+                    appId = lastNewUser?.appId ?: contentState.appId,
+                    loadUserIds = contentState.loadUserIds.toMutableSet()
+                        .apply { lastNewUser?.let { add(it.userId) } }
                 )) }
-            }
-            is Message.Inner.UserUpdated -> {
-                val contentState = state.contentState as? ContentState.Content ?: return
-                state { state.copy(contentState = contentState.copy(
-                    tabLayoutVisibility = message.tabLVisibility
-                )) }
+
+                if (diff.isNotEmpty()) {
+                    effects { +Effect.Inner.UpdateTickets(true) }
+                }
             }
         }
     }
 
     private fun createInitialContentState(ticketsInfo: TicketsInfo) : ContentState.Content {
         val firstSet = ticketsInfo.ticketSetInfoList.firstOrNull()
-        val usersSize = (ticketsInfo.account as? Account.V3)?.users?.size ?: 0
         return ContentState.Content(
             account = ticketsInfo.account,
             appId = firstSet?.appId,
             titleText = firstSet?.orgName,
             titleImageUrl = firstSet?.orgLogoUrl?.let { getOrganisationLogoUrl(it, ticketsInfo.account.domain) },
-            filterName = null,
-            filterEnabled = false,
+            filter = null,
             ticketSets = ticketsInfo.ticketSetInfoList,
-            filterId = null,
-            isLoading = false,
-            tabLayoutVisibility = usersSize > 1
+            isUserTriggerLoading = false,
+            loadUserIds = emptySet()
         )
     }
 
@@ -214,16 +217,14 @@ private class FeatureReducer: Logic<State, Message, Effect>() {
         state: ContentState.Content,
         appId: String,
         domain: String?,
-        user: User?,
+        filter: User?,
     ) : ContentState.Content {
         val ticketsSetByAppName = state.ticketSets?.associateBy { it.appId }
         return state.copy(
             appId = appId,
             titleText = ticketsSetByAppName?.get(appId)?.orgName,
             titleImageUrl = ticketsSetByAppName?.get(appId)?.orgLogoUrl?.let { getOrganisationLogoUrl(it, domain) } ,
-            filterName = user?.userName,
-            filterEnabled = user != null && user.userId != KEY_DEFAULT_USER_ID,
-            filterId = user?.userId,
+            filter = filter,
         )
     }
 
@@ -233,7 +234,6 @@ internal class TicketsActor(
     private val repository: Repository,
     private val router: Router,
     private val commandsStore: LocalCommandsStore,
-    private val accountStore: AccountStore,
 ): Actor<Effect.Inner, Message.Inner> {
 
     override fun handleEffect(effect: Effect.Inner): Flow<Message.Inner> = when(effect) {
@@ -257,13 +257,6 @@ internal class TicketsActor(
         is Effect.Inner.OpenTicketScreen -> flow {
             val ticketId = effect.ticketId ?: commandsStore.getNextLocalId()
             router.navigateTo(Screens.TicketScreen(ticketId, effect.user).setSlideRightAnimation())
-        }
-
-        is Effect.Inner.CheckAccount -> flow {
-            accountStore.accountStateFlow().collect { account ->
-                val users = account.getUsers()
-                Message.Inner.UserUpdated(users.size > 1)
-            }
         }
 
     }
