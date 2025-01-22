@@ -49,6 +49,7 @@ internal class Repository(
 
     init {
         val initialCommands = commandsStore.getCommands()
+            .filter { !it.isError }
             .mapNotNull(repositoryMapper::mapToSyncRequest)
 
         if (initialCommands.isNotEmpty()) {
@@ -146,10 +147,7 @@ internal class Repository(
         val serverTicketId = idStore.getTicketServerId(ticketId) ?: ticketId
         val requestNewTicket = needsToRequestNewTicket(serverTicketId)
         val command: SyncRequest.Command.CreateComment = commandsStore.addTextCommand(user, serverTicketId, requestNewTicket, textBody)
-        delay(2000)
-        // TODO sds
-        commandsStore.addOrUpdatePendingCommand(repositoryMapper.mapToCommandEntity(true, command))
-//        sendCommand(command)
+        sendCommand(command)
     }
 
     fun addAttachComment(user: UserInternal, ticketId: Long, fileUri: Uri) = coroutineScope.launch {
@@ -193,6 +191,7 @@ internal class Repository(
     fun retryAddComment(user: UserInternal, localId: Long) = coroutineScope.launch {
         val commandEntity = commandsStore.getCommand(localId) ?: return@launch
         val command = repositoryMapper.mapToSyncRequest(commandEntity) ?: return@launch
+        commandsStore.addOrUpdatePendingCommand(repositoryMapper.mapToCommandEntity(false, command))
 
         if (command is SyncRequest.Command.CreateComment) {
             val serverTicketId = idStore.getTicketServerId(command.ticketId) ?: command.ticketId
@@ -204,8 +203,8 @@ internal class Repository(
         }
     }
 
-    fun removeCommand(commandId: String) {
-        commandsStore.removeCommand(commandId)
+    fun removeCommand(localId: Long) {
+        commandsStore.removeCommand(localId)
     }
 
     fun cancelUploadFile(attachmentId: Long) {

@@ -62,7 +62,7 @@ internal object TicketMapper {
         is Event.OnButtonClick -> Message.Outer.OnButtonClick(event.buttonText)
         is Event.OnPreviewClick -> Message.Outer.OnPreviewClick(event.commentId, event.attachmentId)
         is Event.OnRatingClick -> Message.Outer.OnRatingClick(event.rating)
-        is Event.OnErrorCommentClick -> Message.Outer.OnErrorCommentClick(event.commentId)
+        is Event.OnErrorCommentClick -> Message.Outer.OnErrorCommentClick(event.localId)
         Event.OnSendClick -> Message.Outer.OnSendClick
         Event.OnShowAttachVariantsClick -> Message.Outer.OnShowAttachVariantsClick
         Event.OnRefresh -> Message.Outer.OnRefresh
@@ -73,7 +73,7 @@ internal object TicketMapper {
         is Effect.Outer.CopyToClipboard -> TicketView.Effect.CopyToClipboard(effect.text)
         is Effect.Outer.MakeToast -> TicketView.Effect.MakeToast(effect.text)
         is Effect.Outer.ShowAttachVariants -> TicketView.Effect.ShowAttachVariants(effect.key)
-        is Effect.Outer.ShowErrorCommentDialog -> TicketView.Effect.ShowErrorCommentDialog(effect.commentId)
+        is Effect.Outer.ShowErrorCommentDialog -> TicketView.Effect.ShowErrorCommentDialog(effect.key)
     }
 
     private fun mapComments(
