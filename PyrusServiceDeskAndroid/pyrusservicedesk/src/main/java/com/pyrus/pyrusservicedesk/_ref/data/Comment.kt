@@ -16,16 +16,14 @@ import com.squareup.moshi.JsonClass
  * @param isSending flag indicating whether the comment has already been sent.
  */
 
-@JsonClass(generateAdapter = true)
 internal data class Comment(
-    @Json(name = "id") val id: Long,
-    @Json(name = "is_local") val isLocal: Boolean,
-    @Json(name = "body") val body: String?,
-    @Json(name = "is_inbound") val isInbound: Boolean,
-    @Json(name = "attachments") val attachments: List<Attachment>?,
-    @Json(name = "creation_time") val creationTime: Long,
-    @Json(name = "rating") val rating: Int?,
-    @Json(name = "author") val author: Author?,
-    @Json(name = "is_sending") val isSending: Boolean,
-    // TODO "client_id" ??
+    val id: Long,
+    val isLocal: Boolean,
+    val body: String?,
+    val isInbound: Boolean,
+    val attachments: List<Attachment>?,
+    val creationTime: Long,
+    val rating: Int?,
+    val author: Author?,
+    val isSending: Boolean,
 )
