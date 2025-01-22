@@ -26,6 +26,7 @@ internal data class CommentDto(
     @Json(name = "created_at") @DateJ val creationDate: Long,
     @Json(name = "author") val author: AuthorDto?,
     @Json(name = "rating") val rating: Int? = null,
+    // TODO "client_id" ??
 ) {
 
     /**
@@ -37,7 +38,8 @@ internal data class CommentDto(
      * @return TRUE if this comment is local one.
      */
     fun isLocal(): Boolean {
+        return false
 //        return commentId == COMMENT_ID_EMPTY && localId != COMMENT_ID_EMPTY
-        return commentId == COMMENT_ID_EMPTY
+//        return commentId == COMMENT_ID_EMPTY
     }
 }
