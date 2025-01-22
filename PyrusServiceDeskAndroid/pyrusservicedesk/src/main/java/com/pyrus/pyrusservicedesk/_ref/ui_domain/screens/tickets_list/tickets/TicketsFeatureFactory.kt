@@ -161,15 +161,15 @@ private class FeatureReducer: Logic<State, Message, Effect>() {
                         isUserTriggerLoading = false,
                         loadUserIds = emptySet()
                     )
-                    ContentState.Error,
-                    ContentState.Loading -> createInitialContentState(message.ticketsInfo)
+                    is ContentState.Error,
+                    is ContentState.Loading -> createInitialContentState(message.ticketsInfo)
                 })
             }
             is Message.Inner.UpdateTicketsFailed -> {
                 when(state.contentState) {
                     is ContentState.Content -> {}
-                    ContentState.Error -> {}
-                    ContentState.Loading -> state { state.copy(contentState = ContentState.Error) }
+                    is ContentState.Error -> {}
+                    is ContentState.Loading -> state { state.copy(contentState = ContentState.Error) }
                 }
             }
             is Message.Inner.TicketsUpdated -> {
@@ -229,7 +229,6 @@ internal class TicketsActor(
 ): Actor<Effect.Inner, Message.Inner> {
 
     override fun handleEffect(effect: Effect.Inner): Flow<Message.Inner> = when(effect) {
-
         is Effect.Inner.UpdateTickets -> singleFlow {
             when(val ticketsTry = repository.getAllData(effect.force)) {
                 is Try.Success -> {
@@ -241,18 +240,15 @@ internal class TicketsActor(
                 }
             }
         }
-
         is Effect.Inner.TicketsSetFlow -> {
             repository.getAllDataFlow()
                 .debounce(150)
                 .map { Message.Inner.TicketsUpdated(it) }
         }
-
         is Effect.Inner.OpenTicketScreen -> flow {
             val ticketId = effect.ticketId ?: commandsStore.getNextLocalId()
             router.navigateTo(Screens.TicketScreen(ticketId, effect.user).setSlideRightAnimation())
         }
-
     }
 
 }
