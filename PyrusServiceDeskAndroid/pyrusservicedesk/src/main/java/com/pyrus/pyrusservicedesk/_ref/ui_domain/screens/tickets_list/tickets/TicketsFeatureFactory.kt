@@ -4,6 +4,7 @@ import com.github.terrakok.cicerone.Router
 import com.pyrus.pyrusservicedesk.User
 import com.pyrus.pyrusservicedesk._ref.Screens
 import com.pyrus.pyrusservicedesk._ref.data.multy_chat.TicketsInfo
+import com.pyrus.pyrusservicedesk._ref.ui_domain.screens.ticket.TicketContract
 import com.pyrus.pyrusservicedesk._ref.ui_domain.screens.tickets_list.tickets.TicketsContract.ContentState
 import com.pyrus.pyrusservicedesk._ref.ui_domain.screens.tickets_list.tickets.TicketsContract.Effect
 import com.pyrus.pyrusservicedesk._ref.ui_domain.screens.tickets_list.tickets.TicketsContract.Message
@@ -18,7 +19,9 @@ import com.pyrus.pyrusservicedesk._ref.whitetea.core.StoreFactory
 import com.pyrus.pyrusservicedesk._ref.whitetea.core.adaptCast
 import com.pyrus.pyrusservicedesk._ref.whitetea.core.logic.Logic
 import com.pyrus.pyrusservicedesk._ref.whitetea.utils.adapt
+import com.pyrus.pyrusservicedesk.core.Account
 import com.pyrus.pyrusservicedesk.core.getUsers
+import com.pyrus.pyrusservicedesk.sdk.repositories.AccountStore
 import com.pyrus.pyrusservicedesk.sdk.repositories.LocalCommandsStore
 import com.pyrus.pyrusservicedesk.sdk.repositories.Repository
 import com.pyrus.pyrusservicedesk.sdk.repositories.UserInternal
@@ -34,13 +37,14 @@ internal class TicketsFeatureFactory(
     private val repository: Repository,
     private val router: Router,
     private val commandsStore: LocalCommandsStore,
+    private val accountStore: AccountStore,
 ) {
 
     fun create(): TicketsFeature = storeFactory.create(
         name = TAG,
         initialState = State(ContentState.Loading),
         reducer = FeatureReducer(),
-        actor = TicketsActor(repository, router, commandsStore).adaptCast(),
+        actor = TicketsActor(repository, router, commandsStore, accountStore).adaptCast(),
         initialEffects = listOf(
             Effect.Inner.UpdateTickets(false),
             Effect.Inner.TicketsSetFlow,
@@ -180,11 +184,18 @@ private class FeatureReducer: Logic<State, Message, Effect>() {
                     isLoading = false
                 )) }
             }
+            is Message.Inner.UserUpdated -> {
+                val contentState = state.contentState as? ContentState.Content ?: return
+                state { state.copy(contentState = contentState.copy(
+                    tabLayoutVisibility = message.tabLVisibility
+                )) }
+            }
         }
     }
 
     private fun createInitialContentState(ticketsInfo: TicketsInfo) : ContentState.Content {
         val firstSet = ticketsInfo.ticketSetInfoList.firstOrNull()
+        val usersSize = (ticketsInfo.account as? Account.V3)?.users?.size ?: 0
         return ContentState.Content(
             account = ticketsInfo.account,
             appId = firstSet?.appId,
@@ -195,6 +206,7 @@ private class FeatureReducer: Logic<State, Message, Effect>() {
             ticketSets = ticketsInfo.ticketSetInfoList,
             filterId = null,
             isLoading = false,
+            tabLayoutVisibility = usersSize > 1
         )
     }
 
@@ -221,6 +233,7 @@ internal class TicketsActor(
     private val repository: Repository,
     private val router: Router,
     private val commandsStore: LocalCommandsStore,
+    private val accountStore: AccountStore,
 ): Actor<Effect.Inner, Message.Inner> {
 
     override fun handleEffect(effect: Effect.Inner): Flow<Message.Inner> = when(effect) {
@@ -244,6 +257,13 @@ internal class TicketsActor(
         is Effect.Inner.OpenTicketScreen -> flow {
             val ticketId = effect.ticketId ?: commandsStore.getNextLocalId()
             router.navigateTo(Screens.TicketScreen(ticketId, effect.user).setSlideRightAnimation())
+        }
+
+        is Effect.Inner.CheckAccount -> flow {
+            accountStore.accountStateFlow().collect { account ->
+                val users = account.getUsers()
+                Message.Inner.UserUpdated(users.size > 1)
+            }
         }
 
     }

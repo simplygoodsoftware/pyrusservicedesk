@@ -20,7 +20,7 @@ internal object TicketsMapper {
                 filterName = state.filterName,
                 ticketsIsEmpty = state.ticketSets.isNullOrEmpty(),
                 filterEnabled = state.filterEnabled,
-                tabLayoutIsVisibile = if (state.ticketSets != null) state.ticketSets.size > 1 else false,
+                tabLayoutIsVisibile = state.tabLayoutVisibility,
                 ticketSets = state.ticketSets?.map { map(it, state.isLoading) } ?: emptyList(),
                 showNoConnectionError = false,
                 isLoading = false,

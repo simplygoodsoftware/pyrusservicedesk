@@ -158,6 +158,7 @@ internal class DiInjector(
         repository = repository,
         router = router,
         commandsStore = localCommandsStore,
+        accountStore = accountStore,
     )
 
     val sharedViewModel = SharedViewModel()
