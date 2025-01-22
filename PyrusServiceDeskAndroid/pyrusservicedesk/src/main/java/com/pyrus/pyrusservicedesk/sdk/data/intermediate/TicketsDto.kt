@@ -8,6 +8,11 @@ import com.squareup.moshi.JsonClass
 
 /**
  * Intermediate data for parsing list of Ticket object
+ * @param hasMore true if the backend did not return all tickets, which if the current set has user_id.
+ * @param applications list of applications.
+ * @param tickets list of ticket.
+ * @param commandsResult list of commands result .
+ * @param authorAccessDenied list of blocked users for current author.
  */
 @JsonClass(generateAdapter = true)
 internal data class TicketsDto(

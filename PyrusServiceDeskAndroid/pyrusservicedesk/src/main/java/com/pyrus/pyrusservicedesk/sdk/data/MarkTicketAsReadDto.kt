@@ -3,6 +3,11 @@ package com.pyrus.pyrusservicedesk.sdk.data
 import com.squareup.moshi.Json
 import com.squareup.moshi.JsonClass
 
+/** Command
+ * @param userId user id.
+ * @param appId extension id.
+ * @param ticketId ticket id.
+ */
 
 @JsonClass(generateAdapter = true)
 internal data class MarkTicketAsReadDto(

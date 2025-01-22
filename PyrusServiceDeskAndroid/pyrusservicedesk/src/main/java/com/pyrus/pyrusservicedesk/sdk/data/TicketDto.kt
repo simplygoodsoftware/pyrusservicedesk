@@ -10,6 +10,15 @@ import com.squareup.moshi.JsonClass
 
 /**
  * Represents ticket object.
+ * @param ticketId ticket id.
+ * @param userId user id (restaurants id).
+ * @param subject ticket title.
+ * @param author information about author.
+ * @param isRead flag indicating whether the ticket has been read.
+ * @param lastComment last comment.
+ * @param createdAt ticket creation date.
+ * @param showRating flag indicating whether the rating should be shown.
+ * @param showRatingText rating text if need.
  */
 
 @JsonClass(generateAdapter = true)

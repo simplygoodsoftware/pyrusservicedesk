@@ -9,7 +9,6 @@ internal sealed interface CommandParamsDto {
 
     val commandType: CommandsParamsType
 
-    //TODO default adapter
     companion object {
         val factory: PolymorphicJsonAdapterFactory<CommandParamsDto> = PolymorphicJsonAdapterFactory
             .of(CommandParamsDto::class.java, "__type")
@@ -25,6 +24,16 @@ internal sealed interface CommandParamsDto {
         SetPushToken("SetPushToken"),
     }
 
+    /**
+     * @param requestNewTicket TRUE if need to create new ticket.
+     * @param userId user id.
+     * @param appId extension id.
+     * @param comment comment text.
+     * @param attachments list of attachments in comment.
+     * @param ticketId ticket id.
+     * @param rating rating given by the user in the ticket.
+     */
+
     @JsonClass(generateAdapter = true)
     data class CreateComment(
         @Json(name = "request_new_ticket") val requestNewTicket: Boolean,
@@ -38,7 +47,12 @@ internal sealed interface CommandParamsDto {
         override val commandType = CommandsParamsType.CreateComment
     }
 
-
+    /**
+     * @param commentId id of the last comment read.
+     * @param userId user id.
+     * @param appId extension id.
+     * @param ticketId ticket id.
+     */
     @JsonClass(generateAdapter = true)
     data class MarkTicketAsRead(
         @Json(name = "ticket_id") val ticketId: Long,
@@ -49,7 +63,12 @@ internal sealed interface CommandParamsDto {
         override val commandType = CommandsParamsType.MarkTicketAsRead
     }
 
-
+    /**
+     * @param token if token is null, then we delete the token for the specified user_id in the database.
+     * @param userId user id.
+     * @param appId extension id.
+     * @param type device type (ios or android).
+     */
     @JsonClass(generateAdapter = true)
     data class SetPushToken(
         @Json(name = "user_id") val userId: String,

@@ -6,6 +6,9 @@ import com.squareup.moshi.JsonClass
 
 /**
  * Intermediate data for parsing list of comments object
+ * @param comments list of comments.
+ * @param showRating TRUE if need to show rating.
+ * @param showRatingText rating text if showRating == true.
  */
 
 @JsonClass(generateAdapter = true)

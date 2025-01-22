@@ -4,6 +4,14 @@ import android.net.Uri
 import com.squareup.moshi.Json
 import com.squareup.moshi.JsonClass
 
+/**
+ * @param id attachment id.
+ * @param name attachment name.
+ * @param guid  attachment quid.
+ * @param bytesSize  attachment size in bytes .
+ * @param uri  attachment uri.
+ */
+
 @JsonClass(generateAdapter = true)
 internal data class AttachmentEntity(
     @Json(name = "id") val id: Long,

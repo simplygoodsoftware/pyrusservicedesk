@@ -8,7 +8,13 @@ internal const val COMMENT_ID_EMPTY = 0L
 
 /**
  * Represents single comment.
- * @param isInbound  TRUE means that comment is inbound for support, not for user of the service desk.
+ * @param commentId comment id.
+ * @param body comment text.
+ * @param isInbound TRUE means that comment is inbound for support, not for user of the service desk.
+ * @param attachments list of attachments.
+ * @param creationDate comment creation date.
+ * @param rating rating given by the user in the ticket.
+ * @param author information about author.
  */
 
 @JsonClass(generateAdapter = true)

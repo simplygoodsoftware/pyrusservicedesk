@@ -5,6 +5,9 @@ import com.squareup.moshi.JsonClass
 
 /**
  * Represents ticket object.
+ * @param appId extension id.
+ * @param orgName extension name.
+ * @param orgLogoUrl extension logo url.
  */
 @JsonClass(generateAdapter = true)
 internal data class ApplicationDto(

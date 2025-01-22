@@ -10,6 +10,13 @@ private const val FILE_ID_EMPTY = 0L
 
 /**
  * Represents an attachment of the comment.
+ * @param id attachment id.
+ * @param guid attachment quid.
+ * @param type attachment type.
+ * @param name attachment name.
+ * @param bytesSize attachment size in bytes.
+ * @param isText flag indicating whether attachment is text.
+ * @param isVideo flag indicating whether attachment is is video.
  * @param localUri transient field that is used only for local comments.
  */
 

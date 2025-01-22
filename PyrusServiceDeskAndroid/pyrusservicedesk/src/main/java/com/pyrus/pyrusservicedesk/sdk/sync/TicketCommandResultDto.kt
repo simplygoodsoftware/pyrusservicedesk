@@ -5,6 +5,10 @@ import com.squareup.moshi.JsonClass
 
 /**
  * Represents an command of the comment.
+ * @param commandId command guid.
+ * @param commentId comment id.
+ * @param ticketId ticket id.
+ * @param error error received when trying to use this command.
  */
 @JsonClass(generateAdapter = true)
 internal data class TicketCommandResultDto(

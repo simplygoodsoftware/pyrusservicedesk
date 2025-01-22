@@ -6,6 +6,8 @@ import com.squareup.moshi.JsonClass
 
 /**
  * Response data of add comment request
+ * @param commentId comment id.
+ * @param attachmentIds list of attachment ids.
  */
 
 @JsonClass(generateAdapter = true)
