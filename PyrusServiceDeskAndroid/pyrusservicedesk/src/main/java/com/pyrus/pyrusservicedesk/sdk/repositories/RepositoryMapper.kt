@@ -135,20 +135,13 @@ internal class RepositoryMapper(
         val isRead = ticketDto.isRead == true || hasReadCommands
         val isLoading = filteredCommands.isNotEmpty()
 
-        val firstCommand: CommandEntity? = filteredCommands.firstOrNull()
         val lastCommand = filteredCommands.lastOrNull()
-
-        val firstServerComment: CommentDto? = comments.firstOrNull()
         val lastServerComment = comments.lastOrNull()
 
         fun CommentDto?.olderThan(entity: CommandEntity?): Boolean {
             return (this?.creationDate ?: Long.MIN_VALUE) >= (entity?.creationTime ?: Long.MIN_VALUE)
         }
 
-        val firstCommentText: String? = when {
-            firstServerComment.olderThan(firstCommand) -> firstServerComment?.body
-            else -> firstCommand?.comment
-        }
         val lastCommentText: String? = when {
             lastServerComment.olderThan(lastCommand) -> lastServerComment?.body
             else -> lastCommand?.comment
