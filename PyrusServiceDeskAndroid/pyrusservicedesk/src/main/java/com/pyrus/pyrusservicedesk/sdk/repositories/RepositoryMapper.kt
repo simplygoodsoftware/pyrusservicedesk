@@ -161,7 +161,7 @@ internal class RepositoryMapper(
         return TicketHeader(
             userId = userId,
             ticketId = ticketDto.ticketId,
-            subject = firstCommentText,
+            subject = ticketDto.subject,
             isRead = isRead,
             lastCommentText = lastCommentText,
             lastCommentCreationDate = lastCommentCreationDate,
