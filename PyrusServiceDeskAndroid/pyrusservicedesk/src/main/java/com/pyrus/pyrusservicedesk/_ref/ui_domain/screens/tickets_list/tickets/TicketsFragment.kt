@@ -36,9 +36,7 @@ internal class TicketsFragment: TeaFragment<Model, Message, Effect.Outer>() {
 
     private lateinit var binding: PsdTicketsListBinding
     private var currentUserId = KEY_DEFAULT_USER_ID
-    private val adapter: TicketsPageAdapter by lazy {
-        TicketsPageAdapter(::dispatch)
-    }
+    private val adapter: TicketsPageAdapter by lazy { TicketsPageAdapter(::dispatch) }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -66,7 +64,7 @@ internal class TicketsFragment: TeaFragment<Model, Message, Effect.Outer>() {
         ) { _, bundle ->
             currentUserId = bundle.getString(KEY_SELECTED_USER_ID) ?: KEY_DEFAULT_USER_ID
             childFragmentManager.setFragmentResult(KEY_USER_ID, bundleOf(KEY_USER_ID to currentUserId))
-            dispatch(Message.Outer.OnUserIdSelected(currentUserId))
+            dispatch(Message.Outer.OnFilterSelected(currentUserId))
         }
 
         return binding.root
@@ -84,7 +82,7 @@ internal class TicketsFragment: TeaFragment<Model, Message, Effect.Outer>() {
         binding.deleteFilterIv.setOnClickListener {
             childFragmentManager.setFragmentResult(KEY_USER_ID, bundleOf(KEY_USER_ID to KEY_DEFAULT_USER_ID))
             currentUserId = KEY_DEFAULT_USER_ID
-            dispatch(Message.Outer.OnUserIdSelected(KEY_DEFAULT_USER_ID))
+            dispatch(Message.Outer.OnFilterSelected(KEY_DEFAULT_USER_ID))
         }
 
         binding.fabAddTicket.setOnClickListener { dispatch(Message.Outer.OnFabItemClick) }
@@ -119,14 +117,12 @@ internal class TicketsFragment: TeaFragment<Model, Message, Effect.Outer>() {
         }
         if (multichatButtons?.rightButtonAction != null) {
             binding.toolbarTicketsList.psdToolbarQrIb.setOnClickListener {
-                // TODO sds remove it
-                PyrusServiceDesk.addUser(PyrusServiceDesk.user2())
-//                try {
-//                    startActivity(multichatButtons.centerAction)
-//                }
-//                catch (e: Exception) {
-//                    // TODO show error ui
-//                }
+                try {
+                    startActivity(multichatButtons.centerAction)
+                }
+                catch (e: Exception) {
+                    // TODO show error ui
+                }
             }
         }
         if (multichatButtons?.centerAction != null) {
@@ -216,9 +212,7 @@ internal class TicketsFragment: TeaFragment<Model, Message, Effect.Outer>() {
         const val KEY_DEFAULT_USER_ID = "0"
         const val KEY_USER_ID = "KEY_USER_ID"
 
-        fun newInstance(): TicketsFragment {
-            return TicketsFragment()
-        }
+        fun newInstance(): TicketsFragment = TicketsFragment()
 
     }
 

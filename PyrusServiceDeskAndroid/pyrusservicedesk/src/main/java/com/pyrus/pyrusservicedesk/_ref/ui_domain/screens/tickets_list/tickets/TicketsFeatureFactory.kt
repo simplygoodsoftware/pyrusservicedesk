@@ -140,10 +140,8 @@ private class FeatureReducer: Logic<State, Message, Effect>() {
                     +Effect.Inner.OpenTicketScreen(user, message.ticketId)
                 }
             }
-            is Message.Outer.OnUserIdSelected -> {
-
+            is Message.Outer.OnFilterSelected -> {
                 val contentState = state.contentState as? ContentState.Content ?: return
-
                 val user = contentState.account.getUsers().find { it.userId == message.userId }
                 state {
                     state.copy(contentState = contentState.copy(filter = user))

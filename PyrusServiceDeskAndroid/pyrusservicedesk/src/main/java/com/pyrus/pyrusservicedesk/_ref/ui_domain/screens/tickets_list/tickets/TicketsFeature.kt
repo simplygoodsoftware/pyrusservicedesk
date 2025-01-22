@@ -19,11 +19,8 @@ internal interface TicketsContract {
     )
 
     sealed interface ContentState {
-
         data object Loading : ContentState
-
         data object Error : ContentState
-
         data class Content(
             val account: Account,
             val appId: String?,
@@ -34,7 +31,6 @@ internal interface TicketsContract {
             val isUserTriggerLoading: Boolean,
             val loadUserIds: Set<String>,
         ) : ContentState
-
     }
 
     sealed interface Message {
@@ -46,10 +42,8 @@ internal interface TicketsContract {
             data object OnFabItemClick : Outer
             data class OnChangePage(val appId: String, val currentUserId: String) : Outer
             data object OnCreateTicketClick : Outer
-
             data class OnTicketClick(val ticketId: Long, val userId: String) : Outer
-
-            data class OnUserIdSelected(val userId: String) : Outer
+            data class OnFilterSelected(val userId: String) : Outer
         }
 
         sealed interface Inner : Message {
@@ -68,9 +62,7 @@ internal interface TicketsContract {
                 val selectedUserId: String,
                 val users: List<User>
             ) : Outer
-
             data class ShowAddTicketMenu(val appId: String, val users: List<User>) : Outer
-
         }
 
         sealed interface Inner : Effect {
