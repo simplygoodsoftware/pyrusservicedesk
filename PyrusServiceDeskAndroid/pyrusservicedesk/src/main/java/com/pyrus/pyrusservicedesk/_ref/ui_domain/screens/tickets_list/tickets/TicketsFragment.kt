@@ -35,7 +35,7 @@ import kotlinx.coroutines.flow.map
 internal class TicketsFragment: TeaFragment<Model, Message, Effect.Outer>() {
 
     private lateinit var binding: PsdTicketsListBinding
-    private var currentUserId = KEY_DEFAULT_USER_ID
+    private var currentUserId = KEY_DEFAULT_USER_ID // TODO remove it
     private val adapter: TicketsPageAdapter by lazy { TicketsPageAdapter(::dispatch) }
 
     override fun onCreate(savedInstanceState: Bundle?) {
