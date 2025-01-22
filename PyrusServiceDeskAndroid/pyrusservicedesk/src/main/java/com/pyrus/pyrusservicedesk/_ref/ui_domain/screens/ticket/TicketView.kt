@@ -23,7 +23,7 @@ internal interface TicketView {
 
         data class OnPreviewClick(val commentId: Long, val attachmentId: Long) : Event
 
-        data class OnRetryClick(val id: Long) : Event
+        data class OnErrorCommentClick(val commentId: Long) : Event
 
         data class OnCopyClick(val text: String) : Event
 
@@ -49,5 +49,6 @@ internal interface TicketView {
         data class CopyToClipboard(val text: String) : Effect
         data class MakeToast(val text: TextProvider) : Effect
         data class ShowAttachVariants(val key: String) : Effect
+        data class ShowErrorCommentDialog(val commentId: Long) : Effect
     }
 }

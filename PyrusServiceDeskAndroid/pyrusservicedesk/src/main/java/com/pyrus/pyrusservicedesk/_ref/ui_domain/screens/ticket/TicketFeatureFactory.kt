@@ -118,9 +118,9 @@ private class FeatureReducer: Logic<State, Message, Effect>() {
                     ticketId = (state as State.Content).ticketId,
                 ) }
             }
-            is Message.Outer.OnRetryAddCommentClick -> {
+            is Message.Outer.OnErrorCommentClick -> {
                 if (state !is State.Content) return
-                effects { +Effect.Inner.RetryAddComment(message.id) }
+                effects { +Effect.Outer.ShowErrorCommentDialog(message.commentId) }
             }
             is Message.Outer.OnSendClick -> {
                 val currentState = state as? State.Content ?: return

@@ -50,14 +50,7 @@ internal class TicketFragment: TeaFragment<Model, TicketView.Event, TicketView.E
 
     private lateinit var binding: PsdFragmentTicketBinding
 
-    private val adapter: TicketAdapter by lazy {
-        TicketAdapter(
-            { dispatch(TicketView.Event.OnRetryClick(it)) },
-            ::dispatch,
-            { text -> dispatch(TicketView.Event.OnCopyClick(text)) },
-            { rating -> dispatch(TicketView.Event.OnRatingClick(rating)) }
-        )
-    }
+    private val adapter: TicketAdapter by lazy { TicketAdapter(::dispatch) }
 
     private val inputTextWatcher = object : TextWatcher {
         override fun afterTextChanged(s: Editable?) {}
@@ -98,6 +91,8 @@ internal class TicketFragment: TeaFragment<Model, TicketView.Event, TicketView.E
             is TicketView.Effect.ShowAttachVariants -> {
                 AttachFileVariantsFragment.newInstance(effect.key).show(parentFragmentManager, null)
             }
+
+            is TicketView.Effect.ShowErrorCommentDialog -> TODO()
         }
     }
 
@@ -140,8 +135,6 @@ internal class TicketFragment: TeaFragment<Model, TicketView.Event, TicketView.E
 
     private fun bindFeature() {
         val user = arguments?.getParcelable<UserInternal>(KEY_USER_INTERNAL)!!
-        // TODO если открыть файл и вернуться в задачу скорее всего id обновится
-        // TODO использовать nullable для нового тикета
         val ticketId = arguments?.getLong(KEY_TICKET_ID)!!
 
         val feature = getStore { injector().ticketFeatureFactory.create(

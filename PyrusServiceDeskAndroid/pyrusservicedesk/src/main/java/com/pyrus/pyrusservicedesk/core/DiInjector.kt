@@ -121,12 +121,12 @@ internal class DiInjector(
     )
 
     private val repository: Repository = Repository(
-        localCommandsStore = localCommandsStore,
+        commandsStore = localCommandsStore,
         repositoryMapper = repositoryMapper,
         fileResolver = fileResolver,
         remoteFileStore = remoteFileStore,
         synchronizer = synchronizer,
-        localTicketsStore = localTicketsStore,
+        ticketsStore = localTicketsStore,
         coroutineScope = coreScope,
         accountStore = accountStore,
         idStore = idStore,

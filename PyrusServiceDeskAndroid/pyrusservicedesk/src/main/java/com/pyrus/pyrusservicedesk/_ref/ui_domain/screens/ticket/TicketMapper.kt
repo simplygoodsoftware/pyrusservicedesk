@@ -62,7 +62,7 @@ internal object TicketMapper {
         is Event.OnButtonClick -> Message.Outer.OnButtonClick(event.buttonText)
         is Event.OnPreviewClick -> Message.Outer.OnPreviewClick(event.commentId, event.attachmentId)
         is Event.OnRatingClick -> Message.Outer.OnRatingClick(event.rating)
-        is Event.OnRetryClick -> Message.Outer.OnRetryAddCommentClick(event.id)
+        is Event.OnErrorCommentClick -> Message.Outer.OnErrorCommentClick(event.commentId)
         Event.OnSendClick -> Message.Outer.OnSendClick
         Event.OnShowAttachVariantsClick -> Message.Outer.OnShowAttachVariantsClick
         Event.OnRefresh -> Message.Outer.OnRefresh
@@ -73,6 +73,7 @@ internal object TicketMapper {
         is Effect.Outer.CopyToClipboard -> TicketView.Effect.CopyToClipboard(effect.text)
         is Effect.Outer.MakeToast -> TicketView.Effect.MakeToast(effect.text)
         is Effect.Outer.ShowAttachVariants -> TicketView.Effect.ShowAttachVariants(effect.key)
+        is Effect.Outer.ShowErrorCommentDialog -> TicketView.Effect.ShowErrorCommentDialog(effect.commentId)
     }
 
     private fun mapComments(
@@ -216,7 +217,7 @@ internal object TicketMapper {
             entryId = "${comment.id}",
             id = comment.id,
             isInbound = comment.isInbound,
-            hasError = true, // TODO
+            hasError = status == Status.Error,
             isLocal = comment.isLocal,
             isWelcomeMessage = false,
             timeText = TextProvider.Date(comment.creationTime, R.string.psd_time_format),
@@ -246,7 +247,7 @@ internal object TicketMapper {
             entryId = "${comment.id}_${attach.id}",
             id = comment.id,
             isInbound = comment.isInbound,
-            hasError = false, // TODO
+            hasError = status == Status.Error,
             isLocal = comment.isLocal,
             isWelcomeMessage = false,
             timeText = TextProvider.Date(comment.creationTime, R.string.psd_time_format),

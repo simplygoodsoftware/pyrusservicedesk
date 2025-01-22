@@ -15,16 +15,14 @@ import com.pyrus.pyrusservicedesk.presentation.ui.view.recyclerview.ViewHolderBa
 internal abstract class CommentHolder(
     parent: ViewGroup,
     @LayoutRes layoutRes: Int,
-    private val onErrorCommentEntryClickListener: (id: Long) -> Unit,
     private val onEvent: (event: TicketView.Event) -> Unit,
-    private val onTextCommentLongClicked: (String) -> Unit,
 ) : ViewHolderBase<CommentEntryV2.Comment>(parent, layoutRes) {
 
     abstract val comment: CommentView
 
     private val onCommentClickListener = View.OnClickListener {
         when {
-            getItem().hasError -> onErrorCommentEntryClickListener.invoke(getItem().id)
+            getItem().hasError -> onEvent(TicketView.Event.OnErrorCommentClick(getItem().id))
             (comment.contentType == ContentType.Attachment
                 || comment.contentType == ContentType.PreviewableAttachment)
                 && comment.fileProgressStatus == Status.Completed -> {
@@ -41,7 +39,7 @@ internal abstract class CommentHolder(
         val content = getItem().content
         return@OnLongClickListener when {
             content is CommentContent.Text -> {
-                onTextCommentLongClicked.invoke(content.text)
+                onEvent(TicketView.Event.OnCopyClick(content.text))
                 true
             }
             else -> false
@@ -60,7 +58,7 @@ internal abstract class CommentHolder(
 
         itemView.setOnClickListener {
             if (entry.hasError) {
-                onErrorCommentEntryClickListener.invoke(entry.id)
+                onEvent.invoke(TicketView.Event.OnErrorCommentClick(getItem().id))
             }
         }
 

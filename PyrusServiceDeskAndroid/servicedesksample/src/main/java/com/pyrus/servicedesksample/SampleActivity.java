@@ -40,8 +40,8 @@ public class SampleActivity extends Activity implements NewReplySubscriber {
 //                users.add(user2);
 //            else if (count == 3)
 //                users.add(user3);
-            users.add(PyrusServiceDesk.user3());
-            PyrusServiceDesk.initAsMultichat(getApplication(), users, "10");
+//            users.add(PyrusServiceDesk.user3());
+//            PyrusServiceDesk.initAsMultichat(getApplication(), users, "10");
 
             Map<String, String> map = new HashMap<>();
             map.put("test_text", "test some text");
