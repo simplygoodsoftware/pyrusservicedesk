@@ -147,19 +147,35 @@ extension UnderlineSegmentController: ButtonSegmentViewDelegate {
 }
 
 extension UIColor {
-    static let mainTintColor = UIColor(hex: "#354DF2")
+    static let mainTintColor = UIColor {
+        switch $0.userInterfaceStyle {
+        case .dark:
+            return UIColor(hex: "#6477FF") ?? .blue
+        default:
+            return UIColor(hex: "#354DF2") ?? UIColor(red: 68/255.0, green: 109/255.0, blue: 215/255.0, alpha: 1.0)
+        }
+    }
     static let secondTintColor = UIColor(hex: "#858C93")
     
     static let navBarColor = UIColor {
         switch $0.userInterfaceStyle {
         case .dark:
-            return UIColor(hex: "#26292C") ?? .black
+            return UIColor(hex: "#3D4043") ?? .black
         default:
             return UIColor(hex: "#F9F9F9F0") ?? .white
         }
     }
     
     static let scrollButtonColor = UIColor {
+        switch $0.userInterfaceStyle {
+        case .dark:
+            return UIColor(hex: "#788087") ?? .black
+        default:
+            return .white
+        }
+    }
+    
+    static let psdBackgroundColor = UIColor {
         switch $0.userInterfaceStyle {
         case .dark:
             return UIColor(hex: "#26292C") ?? .black

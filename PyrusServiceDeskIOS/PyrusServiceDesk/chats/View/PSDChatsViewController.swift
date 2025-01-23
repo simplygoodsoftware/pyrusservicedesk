@@ -118,6 +118,7 @@ class PSDChatsViewController: UIViewController {
         designNavigation()
         startGettingInfo()
         interactor.doInteraction(.viewDidload)
+        view.backgroundColor = .psdBackgroundColor
     }
     
     override func viewWillAppear(_ animated: Bool) {
@@ -131,7 +132,7 @@ private extension PSDChatsViewController {
     /**Setting design To PSDChatsViewController view, add subviews*/
     
     func design() {
-        view.backgroundColor = UIColor.psdBackground
+        view.backgroundColor = UIColor.psdBackgroundColor
         view.addSubview(tableView)
         tableView.backgroundView = emptyChatsView
 
@@ -191,7 +192,7 @@ private extension PSDChatsViewController {
         ])
         
         tableView.delegate = self
-        tableView.backgroundColor = .psdBackground
+        tableView.backgroundColor = .psdBackgroundColor
         tableView.estimatedRowHeight = UITableView.automaticDimension
         tableView.rowHeight = UITableView.automaticDimension
         tableView.separatorInset = UIEdgeInsets(top: 0, left: 16, bottom: 0, right: 0)

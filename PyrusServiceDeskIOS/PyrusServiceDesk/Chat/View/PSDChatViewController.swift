@@ -76,7 +76,7 @@ class PSDChatViewController: PSDViewController {
         automaticallyAdjustsScrollViewInsets = false
         
         design()
-        
+        UIColor.psdBackground
         self.messageInputView.setToDefault()
         self.tableView.isLoading = true
         interactor.doInteraction(.viewDidload)
@@ -162,6 +162,7 @@ class PSDChatViewController: PSDViewController {
         scrollButton.layer.shadowRadius = 4
         scrollButton.layer.shadowOpacity = 0.2
         scrollButton.layer.masksToBounds = false
+        messageInputView.backgroundView.backgroundColor = .psdMessageInputColor
     }
 
     private var firstLayout: Bool = true
@@ -273,7 +274,7 @@ class PSDChatViewController: PSDViewController {
     
     /**Setting design To PyrusSupportChatViewController view, add subviews*/
     private func design() {
-        view.backgroundColor = PyrusServiceDesk.mainController?.customization?.customBackgroundColor ?? .psdBackground
+        view.backgroundColor = PyrusServiceDesk.mainController?.customization?.customBackgroundColor ?? .psdBackgroundColor
         designNavigation()
         setupTableView()
         setupInfoView()

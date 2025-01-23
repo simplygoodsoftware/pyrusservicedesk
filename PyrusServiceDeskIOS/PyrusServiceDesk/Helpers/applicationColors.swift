@@ -8,12 +8,27 @@
 
 import Foundation
 extension UIColor{
-    static var psdLightGray : UIColor {
-        if #available(iOS 13, * ) {
-            return .secondarySystemBackground
+    static var psdLightGray = UIColor {
+        switch $0.userInterfaceStyle {
+        case .dark:
+            return UIColor(hex: "#3D4043") ?? .black
+        default:
+            if #available(iOS 13, * ) {
+                return .secondarySystemBackground
+            }
+            return #colorLiteral(red: 0.9490196078, green: 0.9490196078, blue: 0.968627451, alpha: 1)
         }
-        return #colorLiteral(red: 0.9490196078, green: 0.9490196078, blue: 0.968627451, alpha: 1)
     }
+    
+    static var psdMessageInputColor = UIColor {
+        switch $0.userInterfaceStyle {
+        case .dark:
+            return UIColor(hex: "#3D4043") ?? .black
+        default:
+            return .white
+        }
+    }
+    
     static var psdGray : UIColor {
         if #available(iOS 13, *) {
             return .systemGray
@@ -26,6 +41,7 @@ extension UIColor{
         }
         return #colorLiteral(red: 0.2352941176, green: 0.2352941176, blue: 0.262745098, alpha: 0.29)
     }
+    
     static var psdLabel: UIColor {
         if #available(iOS 13, *) {
             return .label
