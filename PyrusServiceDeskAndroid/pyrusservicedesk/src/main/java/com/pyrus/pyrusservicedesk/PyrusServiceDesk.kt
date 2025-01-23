@@ -76,6 +76,12 @@ class PyrusServiceDesk private constructor(
             appId = appId1,
             userName = "Старик Хинкалыч - Кострома Коллаж"
         )
+        @JvmStatic
+        fun user4() = User(
+            userId = "251380421",
+            appId = appId1,
+            userName = "[190-037-001] Папа Джонс №37 Рублевское"
+        )
 
 
         @JvmStatic
