@@ -8,6 +8,7 @@ internal data class FullTicket(
     val showRating: Boolean,
     val showRatingText: String?,
     val isActive: Boolean?,
+    val orgLogoUrl: String?,
     val userId: String,
     val ticketId: Long,
 )

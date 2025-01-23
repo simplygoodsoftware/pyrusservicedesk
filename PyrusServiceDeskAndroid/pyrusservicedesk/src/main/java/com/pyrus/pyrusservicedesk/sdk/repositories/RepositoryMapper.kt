@@ -106,6 +106,7 @@ internal class RepositoryMapper(
         userId: String,
         ticketDto: TicketDto,
         commands: List<CommandEntity>,
+        orgLogoUrl: String?,
     ): FullTicket {
 
         val comments = (ticketDto.comments?.map { map(account, userId, it)} ?: emptyList()).toMutableList()
@@ -120,7 +121,7 @@ internal class RepositoryMapper(
         val hasReadCommands = commands.any { it.commandType == MarkTicketAsRead.ordinal }
         val isRead = ticketDto.isRead == true || hasReadCommands
 
-        return mapToFullTicket(ticketDto, comments, userId, isRead)
+        return mapToFullTicket(ticketDto, comments, userId, isRead, orgLogoUrl)
     }
 
     private fun mergeTicketHeader(
@@ -210,6 +211,7 @@ internal class RepositoryMapper(
         comments: List<Comment>,
         userId: String,
         isRead: Boolean,
+        orgLogoUrl: String?,
     ): FullTicket {
         return FullTicket(
             comments = comments,
@@ -221,6 +223,7 @@ internal class RepositoryMapper(
             isRead = isRead,
             lastComment = comments.lastOrNull(),
             isActive = ticket.isActive,
+            orgLogoUrl = orgLogoUrl
         )
     }
 
@@ -414,6 +417,7 @@ internal class RepositoryMapper(
         ticketId: Long,
         userId: String,
         addCommentCommands: List<CommandEntity>,
+        orgLogoUrl: String?
     ): FullTicket {
         val comments = ArrayList<Comment>()
         comments += addCommentCommands.map(::map)
@@ -430,7 +434,8 @@ internal class RepositoryMapper(
             showRatingText = null,
             isActive = true,
             userId = userId,
-            ticketId = ticketId
+            ticketId = ticketId,
+            orgLogoUrl = orgLogoUrl,
         )
     }
 
