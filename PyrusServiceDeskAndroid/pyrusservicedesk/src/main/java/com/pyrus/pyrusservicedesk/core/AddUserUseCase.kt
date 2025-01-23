@@ -15,7 +15,7 @@ internal class AddUserUseCase(
     fun addUser(user: User) {
         coreScope.launch {
             accountStore.addUser(user)
-            repository.getAllData(true)
+            repository.getTicketsInfo(true)
         }
     }
 

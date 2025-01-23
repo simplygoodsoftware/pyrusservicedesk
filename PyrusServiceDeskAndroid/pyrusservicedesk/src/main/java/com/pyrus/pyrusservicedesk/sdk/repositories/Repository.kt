@@ -62,7 +62,7 @@ internal class Repository(
         }
     }
 
-    suspend fun getAllData(force: Boolean): Try<TicketsInfo> {
+    suspend fun getTicketsInfo(force: Boolean): Try<TicketsInfo> {
         val account = accountStore.getAccount()
         if (!force) {
             val localTickets: TicketsDto? = ticketsStore.getTickets()
@@ -75,7 +75,7 @@ internal class Repository(
         }
     }
 
-    fun getAllDataFlow(): Flow<TicketsInfo> = combine(
+    fun getTicketsInfoFlow(): Flow<TicketsInfo> = combine(
         accountStore.accountStateFlow(),
         ticketsStore.getTicketInfoFlow(),
         commandsStore.getCommandsFlow(),
