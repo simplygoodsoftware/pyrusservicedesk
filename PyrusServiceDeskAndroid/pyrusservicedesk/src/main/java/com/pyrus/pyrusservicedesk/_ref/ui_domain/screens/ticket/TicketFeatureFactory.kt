@@ -68,6 +68,7 @@ internal class TicketFeatureFactory(
             Effect.Inner.FeedFlow,
             Effect.Inner.UpdateComments(force = false, ticketId = initialTicketId),
             Effect.Inner.ReadTicket(user = user, ticketId = initialTicketId),
+            Effect.Inner.CheckAccount
         ),
     ).adapt { it as? Effect.Outer }
 
@@ -228,11 +229,18 @@ internal class TicketActor(
             }
         }
         is Effect.Inner.CheckAccount -> flow {
+            var oldAccount: Account? = null
             accountStore.accountStateFlow().collect { account ->
                 val users = account.getUsers()
                 if (!users.any { user.userId == it.userId && user.appId == it.appId }) {
                     router.exit()
                 }
+                oldAccount?.let {
+                    if (it.getUsers().size < account.getUsers().size) {
+                        router.exit()
+                    }
+                }
+                oldAccount = account
             }
         }
         is Effect.Inner.FeedFlow -> {
