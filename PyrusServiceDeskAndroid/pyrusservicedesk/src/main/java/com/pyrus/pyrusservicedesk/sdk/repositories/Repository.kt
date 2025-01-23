@@ -148,17 +148,16 @@ internal class Repository(
         return Try2.Success(ticket)
     }
 
-    fun getFeedFlow(ticketId: Long): Flow<FullTicket?> {
+    fun getFeedFlow(user: UserInternal, ticketId: Long): Flow<FullTicket?> {
         return combine(
             accountStore.accountStateFlow(),
             ticketsStore.getTicketInfoFlow(ticketId),
             commandsStore.getCommandsFlow(ticketId),
-        ) { account,  ticketDto, commands ->
+        ) { account, ticketDto, commands ->
+
+            val orgLogoUrl = getOrgLogoUrl(user.userId, account)
             if (ticketDto != null) {
                 if (ticketDto.userId == null) return@combine null
-
-                val orgLogoUrl = getOrgLogoUrl(ticketDto.userId, account)
-
                 repositoryMapper.mergeTicket(
                     account,
                     ticketDto.userId,
@@ -168,9 +167,23 @@ internal class Repository(
                 )
             }
             else {
-                commands.find { it.requestNewTicket == true }?.let {command ->
-                    val orgLogoUrl = getOrgLogoUrl(command.userId, account)
-                    repositoryMapper.mapToFullTicket(command.ticketId!!, command.userId, commands, orgLogoUrl)
+                val firstCommand = commands.firstOrNull()
+                if (firstCommand != null) {
+                    repositoryMapper.mapToFullTicket(firstCommand.ticketId!!, firstCommand.userId, commands, orgLogoUrl)
+                }
+                else {
+                    FullTicket(
+                        subject = "",
+                        isRead = true,
+                        lastComment = null,
+                        comments = emptyList(),
+                        showRating = false,
+                        showRatingText = null,
+                        isActive = true,
+                        userId = user.userId,
+                        ticketId = ticketId,
+                        orgLogoUrl = orgLogoUrl
+                    )
                 }
             }
         }
