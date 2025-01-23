@@ -123,7 +123,7 @@ internal class TicketsFragment: TeaFragment<Model, Message, Effect.Outer>() {
                 // TODO sds remove it
 //                PyrusServiceDesk.addUser(PyrusServiceDesk.user2())
                 try {
-                    startActivity(multichatButtons.centerAction)
+                    startActivity(multichatButtons.rightButtonAction)
                 }
                 catch (e: Exception) {
                     // TODO show error ui
