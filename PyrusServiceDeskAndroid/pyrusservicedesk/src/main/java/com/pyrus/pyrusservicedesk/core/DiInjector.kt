@@ -174,7 +174,7 @@ internal class DiInjector(
         .downloader(OkHttp3Downloader(okHttpClient))
         .build()
 
-    val setPushTokenUseCase = SetPushTokenUseCase(accountStore, coreScope, preferencesManager)
+    val setPushTokenUseCase = SetPushTokenUseCase(accountStore, coreScope, preferencesManager, repository)
 
     val addUserUseCase = AddUserUseCase(accountStore, repository, coreScope)
 

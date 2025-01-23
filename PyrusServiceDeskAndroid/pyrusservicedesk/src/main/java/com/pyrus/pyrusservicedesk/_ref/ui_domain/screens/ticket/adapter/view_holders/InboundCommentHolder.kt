@@ -10,6 +10,7 @@ import com.pyrus.pyrusservicedesk._ref.ui_domain.screens.ticket.TicketView
 import com.pyrus.pyrusservicedesk._ref.ui_domain.screens.ticket.adapter.new_entries.CommentEntryV2
 import com.pyrus.pyrusservicedesk._ref.utils.CIRCLE_TRANSFORMATION
 import com.pyrus.pyrusservicedesk._ref.utils.ConfigUtils
+import com.pyrus.pyrusservicedesk._ref.utils.text
 import com.pyrus.pyrusservicedesk.presentation.ui.view.CommentView
 
 internal class InboundCommentHolder(
@@ -40,7 +41,7 @@ internal class InboundCommentHolder(
 
     private fun setAuthorNameAndVisibility(item: CommentEntryV2.Comment, visible: Boolean) {
         authorName.visibility = if (visible) View.VISIBLE else View.GONE
-        authorName.text = item.authorName
+        authorName.text = item.authorName?.text(authorName.context)
     }
 
     private fun setAuthorAvatarVisibility(item: CommentEntryV2.Comment, visible: Boolean) {

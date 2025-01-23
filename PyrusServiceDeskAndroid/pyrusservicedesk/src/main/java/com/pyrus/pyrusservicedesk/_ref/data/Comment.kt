@@ -21,6 +21,7 @@ internal data class Comment(
     val isLocal: Boolean,
     val body: String?,
     val isInbound: Boolean,
+    val isSupport: Boolean,
     val attachments: List<Attachment>?,
     val creationTime: Long,
     val rating: Int?,

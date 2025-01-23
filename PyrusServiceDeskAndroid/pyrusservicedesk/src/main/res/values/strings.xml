@@ -8,6 +8,7 @@
     <string name="psd_file_size_kb" formatted="false">%.1f KB</string>
     <string name="psd_time_format">hh:mm aa</string>
     <string name="psd_organization_support">Support</string>
+    <string name="psd_support">support</string>
     <string name="psd_today">Today</string>
     <string name="psd_yesterday">Yesterday</string>
     <string name="psd_date_format_d_m_y">MMMM d, yyyy</string>

@@ -20,7 +20,7 @@ import com.pyrus.pyrusservicedesk.MainMenuDelegate
 import com.pyrus.pyrusservicedesk.R
 import com.pyrus.pyrusservicedesk._ref.data.multy_chat.MultichatButtons
 import com.pyrus.pyrusservicedesk.core.StaticRepository
-import java.security.SecureRandom
+import java.util.UUID
 
 internal class ConfigUtils{
 
@@ -316,12 +316,7 @@ internal class ConfigUtils{
             return when {
                 preference.contains(PREFERENCE_KEY_USER_ID) -> preference.getString(PREFERENCE_KEY_USER_ID, "")!!
                 else -> {
-                    val userId = Base64.encodeToString(
-                        ByteArray(75).run {
-                            SecureRandom().nextBytes(this)
-                            this
-                        },
-                        Base64.NO_WRAP)
+                    val userId = UUID.randomUUID().toString()
                     preference.edit().putString(PREFERENCE_KEY_USER_ID, userId).apply()
                     userId
                 }
