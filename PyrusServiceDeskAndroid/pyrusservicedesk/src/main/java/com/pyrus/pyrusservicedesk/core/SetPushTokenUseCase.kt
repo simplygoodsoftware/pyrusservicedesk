@@ -23,14 +23,14 @@ internal class SetPushTokenUseCase(
 
     fun invoke(
         token: String?,
-        callback: SetPushTokenCallback,
+        callback: SetPushTokenCallback?,
         tokenType: String,
     ) {
         val account = accountStore.getAccount()
         val firstUserId = account.getUserId()
         when {
-            calculateSkipTokenRegister(firstUserId) -> callback.onResult(Exception("Too many requests. Maximum once every $SET_PUSH_TOKEN_TIMEOUT minutes."))
-            token == null -> callback.onResult(Exception("token is null"))
+            calculateSkipTokenRegister(firstUserId) -> callback?.onResult(Exception("Too many requests. Maximum once every $SET_PUSH_TOKEN_TIMEOUT minutes."))
+            token == null -> callback?.onResult(Exception("token is null"))
             else -> {
                 updateTokenTime(firstUserId, System.currentTimeMillis())
 
@@ -45,7 +45,7 @@ internal class SetPushTokenUseCase(
         user: User,
         token: String,
         tokenType: String,
-        callback: SetPushTokenCallback,
+        callback: SetPushTokenCallback?,
     ) {
         coreScope.launch {
             val setPushTokenTry = repository.setPushToken(
@@ -55,12 +55,12 @@ internal class SetPushTokenUseCase(
             )
             if (!setPushTokenTry.isSuccess()) {
                 withContext(Dispatchers.Main) {
-                    callback.onResult(Exception(setPushTokenTry.error))
+                    callback?.onResult(Exception(setPushTokenTry.error))
                 }
             }
             else {
                 withContext(Dispatchers.Main) {
-                    callback.onResult(null)
+                    callback?.onResult(null)
                 }
             }
         }

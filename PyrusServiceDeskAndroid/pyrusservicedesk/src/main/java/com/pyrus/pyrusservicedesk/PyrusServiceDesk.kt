@@ -378,7 +378,7 @@ class PyrusServiceDesk private constructor(
         @JvmOverloads
         fun setPushToken(
             token: String?,
-            callback: SetPushTokenCallback,
+            callback: SetPushTokenCallback?,
             tokenType: String = DEFAULT_TOKEN_TYPE,
         ) {
             PLog.d(TAG, "setPushToken, token: $token")
