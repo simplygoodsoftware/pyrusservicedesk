@@ -112,11 +112,11 @@ internal class TicketsFragment: TeaFragment<Model, Message, Effect.Outer>() {
 
         val multichatButtons = ConfigUtils.getMultichatButtons()
         if (multichatButtons?.rightButtonRes != null) {
-            binding.toolbarTicketsList.psdToolbarQrIb
+            binding.toolbarTicketsList.psdToolbarRightIb
                 .setBackgroundResource(multichatButtons.rightButtonRes)
         }
         if (multichatButtons?.rightButtonAction != null) {
-            binding.toolbarTicketsList.psdToolbarQrIb.setOnClickListener {
+            binding.toolbarTicketsList.psdToolbarRightIb.setOnClickListener {
                 try {
                     startActivity(multichatButtons.rightButtonAction)
                 }
@@ -148,7 +148,7 @@ internal class TicketsFragment: TeaFragment<Model, Message, Effect.Outer>() {
         }
         diff(Model::ticketsIsEmpty) { isEmpty ->
             binding.toolbarTicketsList.psdToolbarFilterIb.isVisible = !isEmpty
-            binding.toolbarTicketsList.psdToolbarQrIb.isVisible = !isEmpty && binding.toolbarTicketsList.psdToolbarQrIb.background != null
+            binding.toolbarTicketsList.psdToolbarRightIb.isVisible = !isEmpty && binding.toolbarTicketsList.psdToolbarRightIb.background != null
             binding.fabAddTicket.isVisible = !isEmpty
 
         }
