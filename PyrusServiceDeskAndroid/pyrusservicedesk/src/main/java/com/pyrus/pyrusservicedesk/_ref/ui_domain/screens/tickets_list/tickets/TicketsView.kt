@@ -11,15 +11,22 @@ internal interface TicketsView {
         val filterName: String?,
         val ticketsIsEmpty: Boolean,
         val filterEnabled: Boolean,
-        val tabLayoutIsVisibile: Boolean,
-        val ticketSets: List<TicketSetInfoEntry>?,
+        val tabLayoutIsVisible: Boolean,
+        val ticketSetInfo: TicketSetInfo?,
         val showNoConnectionError: Boolean,
         val isLoading: Boolean,
     ) {
+
+        data class TicketSetInfo(
+            val page: Int,
+            val ticketSets: List<TicketSetInfoEntry>?,
+        )
+
         data class TicketSetInfoEntry(
             val appId: String,
             val titleText: String,
             val tickets: List<TicketHeaderEntry>,
+            val isUserTriggerLoading: Boolean,
             val isLoading: Boolean,
         )
 

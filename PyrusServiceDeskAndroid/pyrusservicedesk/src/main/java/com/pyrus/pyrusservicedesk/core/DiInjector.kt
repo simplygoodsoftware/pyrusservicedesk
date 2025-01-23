@@ -8,7 +8,7 @@ import com.github.terrakok.cicerone.NavigatorHolder
 import com.pyrus.pyrusservicedesk.AppResourceManager
 import com.pyrus.pyrusservicedesk._ref.ui_domain.screens.ticket.TicketFeatureFactory
 import com.pyrus.pyrusservicedesk._ref.ui_domain.screens.tickets_list.tickets.TicketsFeatureFactory
-import com.pyrus.pyrusservicedesk._ref.utils.RequestUtils.Companion.getBaseUrl
+import com.pyrus.pyrusservicedesk._ref.utils.RequestUtils.getBaseUrl
 import com.pyrus.pyrusservicedesk._ref.utils.call_adapter.TryCallAdapterFactory
 import com.pyrus.pyrusservicedesk._ref.utils.navigation.PyrusRouterImpl
 import com.pyrus.pyrusservicedesk._ref.whitetea.core.DefaultStoreFactory
@@ -158,7 +158,6 @@ internal class DiInjector(
         repository = repository,
         router = router,
         commandsStore = localCommandsStore,
-        accountStore = accountStore,
     )
 
     val sharedViewModel = SharedViewModel()

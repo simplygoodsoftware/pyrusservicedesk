@@ -8,7 +8,7 @@ import com.pyrus.pyrusservicedesk._ref.ui_domain.screens.ticket.TicketContract.E
 import com.pyrus.pyrusservicedesk._ref.ui_domain.screens.ticket.TicketContract.Message
 import com.pyrus.pyrusservicedesk._ref.ui_domain.screens.ticket.TicketContract.State
 import com.pyrus.pyrusservicedesk._ref.utils.GetTicketsError
-import com.pyrus.pyrusservicedesk._ref.utils.RequestUtils.Companion.getFileUrl
+import com.pyrus.pyrusservicedesk._ref.utils.RequestUtils.getFileUrl
 import com.pyrus.pyrusservicedesk._ref.utils.Try2
 import com.pyrus.pyrusservicedesk._ref.utils.isSuccess
 import com.pyrus.pyrusservicedesk._ref.utils.navigation.PyrusRouter
@@ -88,7 +88,8 @@ private class FeatureReducer: Logic<State, Message, Effect>() {
 
     private fun Result.handleOuter(message: Message.Outer) {
         when (message) {
-            Message.Outer.OnCloseClick -> effects { +Effect.Inner.Close }
+            is Message.Outer.OnCloseClick -> effects { +Effect.Inner.Close }
+            is Message.Outer.OnBackClick -> effects { +Effect.Inner.Close }
             is Message.Outer.OnCopyClick -> effects {
                 +Effect.Outer.CopyToClipboard(message.text)
                 +Effect.Outer.MakeToast(R.string.psd_copied_to_clipboard.textRes())
@@ -150,8 +151,6 @@ private class FeatureReducer: Logic<State, Message, Effect>() {
                     ticketId = currentState.ticketId,
                 ) }
             }
-
-            Message.Outer.OnBackClick -> effects { +Effect.Inner.Close }
         }
     }
 
@@ -211,7 +210,6 @@ internal class TicketActor(
 ): Actor<Effect.Inner, Message.Inner> {
 
     override fun handleEffect(effect: Effect.Inner): Flow<Message.Inner> = when (effect) {
-
         is Effect.Inner.UpdateComments -> singleFlow {
             val commentsTry: Try2<FullTicket, GetTicketsError> = repository.getFeed(
                 userId = user.userId,
@@ -229,7 +227,6 @@ internal class TicketActor(
                 else -> Message.Inner.UpdateCommentsFailed(commentsTry.error)
             }
         }
-
         is Effect.Inner.CheckAccount -> flow {
             accountStore.accountStateFlow().collect { account ->
                 val users = account.getUsers()
@@ -238,21 +235,18 @@ internal class TicketActor(
                 }
             }
         }
-
-        is Effect.Inner.FeedFlow -> repository.getFeedFlow(ticketId)
-            .debounce(150)
-            .map(Message.Inner::CommentsUpdated)
-
+        is Effect.Inner.FeedFlow -> {
+            repository.getFeedFlow(ticketId)
+                .debounce(150)
+                .map(Message.Inner::CommentsUpdated)
+        }
         is Effect.Inner.Close -> flow { router.exit() }
-
         is Effect.Inner.SendTextComment -> flow {
             repository.addTextComment(user, ticketId, effect.text)
         }
-
         is Effect.Inner.SendRatingComment -> flow {
             repository.addRatingComment(user, ticketId, effect.rating)
         }
-
         is Effect.Inner.OpenPreview -> flow {
             val user = (accountStore.getAccount() as? Account.V3)?.users?.find { it.userId == effect.userId }
             val fileDate = FileData(
@@ -263,11 +257,8 @@ internal class TicketActor(
             )
             router.navigateTo(Screens.ImageScreen(fileDate))
         }
-
         is Effect.Inner.SaveDraft -> flow { draftRepository.saveDraft(ticketId, effect.draft) }
-
         is Effect.Inner.ReadTicket -> flow { repository.readTicket(effect.user, effect.ticketId) }
-
         is Effect.Inner.ListenAttachVariant -> flow {
             val uri: Any = suspendCoroutine { continuation ->
                 router.setResultListener(effect.key) { continuation.resume(it) }
@@ -276,7 +267,6 @@ internal class TicketActor(
             val fileUri = try { fileManager.copyFile(uri) } catch (e: Exception) { null } ?: return@flow
             repository.addAttachComment(user, ticketId, fileUri)
         }
-
         is Effect.Inner.ListenErrorCommentAction -> flow {
             val action: Any = suspendCoroutine { continuation ->
                 router.setResultListener(effect.key) { continuation.resume(it) }
@@ -287,7 +277,6 @@ internal class TicketActor(
                 ErrorCommentAction.RETRY -> repository.retryAddComment(user, effect.localId)
             }
         }
-
     }
 
 }
