@@ -49,7 +49,7 @@ internal class SetPushTokenUseCase(
     ) {
         coreScope.launch {
             val setPushTokenTry = repository.setPushToken(
-                user = UserInternal(user.userId, user.userId),
+                user = UserInternal(user.userId, user.appId),
                 token = token,
                 tokenType = tokenType
             )
