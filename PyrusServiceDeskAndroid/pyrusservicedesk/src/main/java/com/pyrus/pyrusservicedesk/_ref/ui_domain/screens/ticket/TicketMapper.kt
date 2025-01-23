@@ -13,6 +13,7 @@ import com.pyrus.pyrusservicedesk._ref.ui_domain.screens.ticket.adapter.new_entr
 import com.pyrus.pyrusservicedesk._ref.utils.TextProvider
 import com.pyrus.pyrusservicedesk._ref.utils.getDateText
 import com.pyrus.pyrusservicedesk._ref.utils.isImage
+import com.pyrus.pyrusservicedesk._ref.utils.plus
 import com.pyrus.pyrusservicedesk._ref.utils.textRes
 import com.pyrus.pyrusservicedesk.presentation.ui.navigation_page.ticket.HtmlTagUtils
 import com.pyrus.pyrusservicedesk.presentation.ui.view.ContentType
@@ -63,10 +64,10 @@ internal object TicketMapper {
         is Event.OnPreviewClick -> Message.Outer.OnPreviewClick(event.commentId, event.attachmentId)
         is Event.OnRatingClick -> Message.Outer.OnRatingClick(event.rating)
         is Event.OnErrorCommentClick -> Message.Outer.OnErrorCommentClick(event.localId)
-        Event.OnSendClick -> Message.Outer.OnSendClick
-        Event.OnShowAttachVariantsClick -> Message.Outer.OnShowAttachVariantsClick
-        Event.OnRefresh -> Message.Outer.OnRefresh
-        Event.OnBackClick -> Message.Outer.OnBackClick
+        is Event.OnSendClick -> Message.Outer.OnSendClick
+        is Event.OnShowAttachVariantsClick -> Message.Outer.OnShowAttachVariantsClick
+        is Event.OnRefresh -> Message.Outer.OnRefresh
+        is Event.OnBackClick -> Message.Outer.OnBackClick
     }
 
     fun map(effect: Effect.Outer): TicketView.Effect = when(effect) {
@@ -106,23 +107,21 @@ internal object TicketMapper {
 
         entriesWithDates.reverse()
         var resentInbound: Boolean? = null
-        var resentAuthorName: String? = null
+        var resentAuthorId: String? = null
         for (i in entriesWithDates.indices) {
             val current = entriesWithDates[i]
             val currentIsInbound = (current as? CommentEntryV2.Comment)?.isInbound
-            val currentAuthorName = (current as? CommentEntryV2.Comment)?.authorName
-            val showAvatar = currentIsInbound != resentInbound || currentAuthorName != resentAuthorName
+            val currentAuthorId = (current as? CommentEntryV2.Comment)?.authorKey
+            val showAvatar = currentIsInbound != resentInbound || currentAuthorId != resentAuthorId
             resentInbound = currentIsInbound
-            resentAuthorName = currentAuthorName
+            resentAuthorId = currentAuthorId
 
             if (current is CommentEntryV2.Comment) {
                 val prev = entriesWithDates.getOrNull(i + 1)
-                val prevIsInbound = (prev as? CommentEntryV2.Comment)?.isInbound
-                val prevAuthorName = (current as? CommentEntryV2.Comment)?.authorName
+                val prevAuthorKey = (prev as? CommentEntryV2.Comment)?.authorKey
                 val showAuthorName = when {
-                    current.authorName == "Pyrus System" -> true
                     prev !is CommentEntryV2.Comment -> true
-                    else -> prevIsInbound != current.isInbound || prevAuthorName != currentAuthorName
+                    else -> prevAuthorKey != currentAuthorId
                 }
 
                 entriesWithDates[i] = current.copy(showAvatar = showAvatar, showAuthorName = showAuthorName)
@@ -156,6 +155,7 @@ internal object TicketMapper {
             authorName = null,
             showAuthorName = false,
             avatarUrl = null,
+            authorKey = null,
             showAvatar = true,
             content = CommentEntryV2.CommentContent.Text(entryText),
         )
@@ -166,13 +166,10 @@ internal object TicketMapper {
         entries: ArrayList<CommentEntryV2>,
         freshList: FullTicket,
     ) {
-
         val commentEntries = ArrayList<CommentEntryV2>()
         for (comment in freshList.comments) {
             addCommentEntries(commentEntries, comment)
         }
-
-
 
         entries += commentEntries
     }
@@ -206,6 +203,10 @@ internal object TicketMapper {
         }
     }
 
+    private fun getAuthorName(comment: Comment): TextProvider? =
+        if (!comment.isSupport) comment.author?.name?.textRes()
+        else "${comment.author?.name} (".textRes() + R.string.psd_support.textRes() + ")"
+
     private fun toTextEntry(
         commentBody: String,
         comment: Comment,
@@ -223,12 +224,17 @@ internal object TicketMapper {
             timeText = TextProvider.Date(comment.creationTime, R.string.psd_time_format),
             status = status,
             contentType = ContentType.Text,
-            authorName = comment.author?.name,
+            authorName = getAuthorName(comment),
+            authorKey = getAuthorKey(comment),
             showAuthorName = false,
             avatarUrl = comment.author?.avatarUrl,
             showAvatar = false,
             content = CommentEntryV2.CommentContent.Text(entryText),
         )
+    }
+
+    private fun getAuthorKey(comment: Comment): String {
+        return "${comment.author?.authorId}${comment.author?.name}${comment.isInbound}"
     }
 
     private fun toAttachEntry(
@@ -252,7 +258,8 @@ internal object TicketMapper {
             isWelcomeMessage = false,
             timeText = TextProvider.Date(comment.creationTime, R.string.psd_time_format),
             status = status,
-            authorName = comment.author?.name,
+            authorName = getAuthorName(comment),
+            authorKey = getAuthorKey(comment),
             showAuthorName = false,
             avatarUrl = comment.author?.avatarUrl,
             showAvatar = false,
@@ -288,7 +295,7 @@ internal object TicketMapper {
             val creationTime = (entry as? CommentEntryV2.WithCreationTime)?.creationTime
             if (creationTime != null) {
                 calendar.timeInMillis = creationTime
-                calendar[Calendar.HOUR] = 0
+                calendar[Calendar.HOUR_OF_DAY] = 0
                 calendar[Calendar.MINUTE] = 0
                 calendar[Calendar.SECOND] = 0
                 calendar[Calendar.MILLISECOND] = 0
