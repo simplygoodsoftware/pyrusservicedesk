@@ -246,7 +246,9 @@ internal class Repository(
     }
 
     private fun needsToRequestNewTicket(ticketId: Long): Boolean {
-        return ticketId <= 0
+        if (ticketId > 0) return false
+        val commands = commandsStore.getCommands(ticketId).filter { it.requestNewTicket == true }
+        return commands.isEmpty()
     }
 
     private suspend fun sendCommand(command: SyncRequest.Command) {
