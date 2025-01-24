@@ -19,13 +19,11 @@
     <string name="psd_date_format_d_m_y_short">dd.MM.yyyy</string>
     <string name="psd_photo">Сделать фото</string>
     <string name="psd_gallery">Галерея</string>
-    <string name="filters">Фильтры</string>
-    <string name="last_comment_clip_photo">%s: 📎 Фото</string>
-    <string name="last_comment_clip_video">%s: 📎 Видео</string>
-    <string name="last_comment_clip_file">%s: 📎 Файл</string>
-    <string name="last_comment_clip_photo_y">Вы: 📎 Photo</string>
-    <string name="last_comment_clip_video_y">Вы: 📎 Video</string>
-    <string name="last_comment_you">Вы: %s</string>
+    <string name="psd_filters">Фильтры</string>
+    <string name="psd_you">Вы</string>
+    <string name="psd_type_photo">Фото</string>
+    <string name="psd_type_video">Видео</string>
+    <string name="psd_type_file">Файл</string>
 
     <plurals name="psd_years_ago">
         <item quantity="one">%d год назад</item>

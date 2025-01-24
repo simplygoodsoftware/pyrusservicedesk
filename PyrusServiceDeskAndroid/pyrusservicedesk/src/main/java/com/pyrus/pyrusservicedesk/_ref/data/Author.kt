@@ -9,6 +9,7 @@ package com.pyrus.pyrusservicedesk._ref.data
  */
 
 internal data class Author(
+    val isUser: Boolean,
     val name: String?,
     val authorId: String?,
     val avatarUrl: String?,

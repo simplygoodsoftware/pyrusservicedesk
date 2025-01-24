@@ -82,20 +82,12 @@ internal class Repository(
         ::mergeData
     )
 
-    private fun getOrgLogoUrl(userId: String, account: Account): String? {
-        val appId = account.getUsers().find { it.userId == userId }?.appId ?: return null
-        val applications = ticketsStore.getTickets()?.applications ?: return null
-        val orgLogoUrl = applications.find { it.appId == appId }?.orgLogoUrl ?: return null
-        return RequestUtils.getOrganisationLogoUrl(orgLogoUrl, account.domain)
-    }
-
     suspend fun getFeed(userId: String, ticketId: Long, force: Boolean): Try2<FullTicket, GetTicketsError> {
         val account = accountStore.getAccount()
         val serverId = idStore.getTicketServerId(ticketId) ?: ticketId
-
         val orgLogoUrl = getOrgLogoUrl(userId, account)
 
-        if (serverId < 0) {
+        if (serverId <= 0) {
             val commands = commandsStore.getCommands(serverId)
             val firstCommand = commands.firstOrNull()
             val ticket = if (firstCommand != null) {
@@ -104,12 +96,9 @@ internal class Repository(
             else {
                 FullTicket(
                     subject = "",
-                    isRead = true,
-                    lastComment = null,
                     comments = emptyList(),
                     showRating = false,
                     showRatingText = null,
-                    isActive = true,
                     userId = userId,
                     ticketId = ticketId,
                     orgLogoUrl = orgLogoUrl
@@ -174,12 +163,9 @@ internal class Repository(
                 else {
                     FullTicket(
                         subject = "",
-                        isRead = true,
-                        lastComment = null,
                         comments = emptyList(),
                         showRating = false,
                         showRatingText = null,
-                        isActive = true,
                         userId = user.userId,
                         ticketId = ticketId,
                         orgLogoUrl = orgLogoUrl
@@ -308,6 +294,13 @@ internal class Repository(
             }
         }
         return Try.Success(command.copy(attachments = resultAttachments))
+    }
+
+    private fun getOrgLogoUrl(userId: String, account: Account): String? {
+        val appId = account.getUsers().find { it.userId == userId }?.appId ?: return null
+        val applications = ticketsStore.getTickets()?.applications ?: return null
+        val orgLogoUrl = applications.find { it.appId == appId }?.orgLogoUrl ?: return null
+        return RequestUtils.getOrganisationLogoUrl(orgLogoUrl, account.domain)
     }
 
     private suspend fun sendAttachment(
