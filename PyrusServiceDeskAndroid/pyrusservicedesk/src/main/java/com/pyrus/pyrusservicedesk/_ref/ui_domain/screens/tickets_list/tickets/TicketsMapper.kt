@@ -40,9 +40,12 @@ internal object TicketsMapper {
             }
             val titleText = ticketsSetByAppName?.get(state.pageAppId)?.orgName
 
+            val showFilter = state.pageAppId != null && state.account.getUsers().filter { it.appId == state.pageAppId }.size > 1
+
             Model(
                 titleText = titleText,
                 titleImageUrl = titleUrl,
+                showFilter = showFilter,
                 filterName = state.filter?.userName,
                 ticketsIsEmpty = state.ticketSets.isNullOrEmpty(),
                 filterEnabled = state.filter != null,
@@ -56,6 +59,7 @@ internal object TicketsMapper {
             titleText = null,
             titleImageUrl = null,
             filterName = null,
+            showFilter = false,
             ticketsIsEmpty = true,
             filterEnabled = false,
             tabLayoutIsVisible = false,
@@ -66,6 +70,7 @@ internal object TicketsMapper {
         ContentState.Loading -> Model(
             titleText = null,
             titleImageUrl = null,
+            showFilter = false,
             filterName = null,
             ticketsIsEmpty = true,
             filterEnabled = false,

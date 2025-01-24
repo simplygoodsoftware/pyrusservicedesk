@@ -8,6 +8,7 @@ internal interface TicketsView {
     data class Model(
         val titleText: String?,
         val titleImageUrl: String?,
+        val showFilter: Boolean,
         val filterName: String?,
         val ticketsIsEmpty: Boolean,
         val filterEnabled: Boolean,
