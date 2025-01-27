@@ -8,6 +8,7 @@ import com.github.terrakok.cicerone.NavigatorHolder
 import com.pyrus.pyrusservicedesk.AppResourceManager
 import com.pyrus.pyrusservicedesk._ref.ui_domain.screens.ticket.TicketFeatureFactory
 import com.pyrus.pyrusservicedesk._ref.ui_domain.screens.tickets_list.tickets.TicketsFeatureFactory
+import com.pyrus.pyrusservicedesk._ref.utils.EventBus
 import com.pyrus.pyrusservicedesk._ref.utils.RequestUtils.getBaseUrl
 import com.pyrus.pyrusservicedesk._ref.utils.call_adapter.TryCallAdapterFactory
 import com.pyrus.pyrusservicedesk._ref.utils.navigation.PyrusRouterImpl
@@ -140,6 +141,8 @@ internal class DiInjector(
 
     private val cicerone: Cicerone<PyrusRouterImpl> = Cicerone.create(PyrusRouterImpl())
 
+    private val eventBus = EventBus()
+
     val router = cicerone.router
 
     val navHolder: NavigatorHolder = cicerone.getNavigatorHolder()
@@ -158,6 +161,7 @@ internal class DiInjector(
         repository = repository,
         router = router,
         commandsStore = localCommandsStore,
+        eventBus = eventBus,
     )
 
     val sharedViewModel = SharedViewModel()
@@ -176,6 +180,6 @@ internal class DiInjector(
 
     val setPushTokenUseCase = SetPushTokenUseCase(accountStore, coreScope, preferencesManager, repository)
 
-    val addUserUseCase = AddUserUseCase(accountStore, repository, coreScope)
+    val addUserUseCase = AddUserUseCase(accountStore, repository, coreScope, eventBus)
 
 }

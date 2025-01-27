@@ -1,6 +1,5 @@
 package com.pyrus.pyrusservicedesk._ref.ui_domain.screens.tickets_list.tickets
 
-import android.util.Log
 import com.github.terrakok.cicerone.Router
 import com.pyrus.pyrusservicedesk.R
 import com.pyrus.pyrusservicedesk._ref.Screens
@@ -9,8 +8,10 @@ import com.pyrus.pyrusservicedesk._ref.ui_domain.screens.tickets_list.tickets.Ti
 import com.pyrus.pyrusservicedesk._ref.ui_domain.screens.tickets_list.tickets.TicketsContract.Effect
 import com.pyrus.pyrusservicedesk._ref.ui_domain.screens.tickets_list.tickets.TicketsContract.Message
 import com.pyrus.pyrusservicedesk._ref.ui_domain.screens.tickets_list.tickets.TicketsContract.State
+import com.pyrus.pyrusservicedesk._ref.utils.EventBus
 import com.pyrus.pyrusservicedesk._ref.utils.TextProvider
 import com.pyrus.pyrusservicedesk._ref.utils.Try
+import com.pyrus.pyrusservicedesk._ref.utils.isSuccess
 import com.pyrus.pyrusservicedesk._ref.utils.navigation.setSlideRightAnimation
 import com.pyrus.pyrusservicedesk._ref.utils.singleFlow
 import com.pyrus.pyrusservicedesk._ref.whitetea.core.Actor
@@ -35,16 +36,18 @@ internal class TicketsFeatureFactory(
     private val repository: Repository,
     private val router: Router,
     private val commandsStore: LocalCommandsStore,
+    private val eventBus: EventBus,
 ) {
 
     fun create(): TicketsFeature = storeFactory.create(
         name = TAG,
         initialState = State(ContentState.Loading),
         reducer = FeatureReducer(),
-        actor = TicketsActor(repository, router, commandsStore).adaptCast(),
+        actor = TicketsActor(repository, router, commandsStore, eventBus).adaptCast(),
         initialEffects = listOf(
             Effect.Inner.UpdateTickets(false),
             Effect.Inner.TicketsSetFlow,
+            Effect.Inner.EventsFlow,
         ),
     ).adapt { it as? Effect.Outer }
 
@@ -142,6 +145,8 @@ private class FeatureReducer: Logic<State, Message, Effect>() {
                     state.copy(contentState = contentState.copy(filter = user))
                 }
             }
+
+            is Message.Outer.OnUsersIsEmpty -> effects { +Effect.Inner.Close }
         }
     }
 
@@ -173,22 +178,6 @@ private class FeatureReducer: Logic<State, Message, Effect>() {
                 val newUsers = fullUsers.map { UserInternal(it.userId, it.appId) }.toSet()
                 val diff = newUsers.minus(currentUsers)
 
-                Log.d("EP ", "fullUsers: ${fullUsers.size}, currentUsers: ${currentUsers.size}")
-                if (fullUsers.size < currentUsers.size) {
-                    val usersIds = currentUsers.minus(newUsers).map { it.userId }
-                    val userNames = contentState.account.getUsers()
-                        .filter { user -> usersIds.find { it == user.userId } != null }
-                        .map { it.userName }
-                    effects {
-                        +Effect.Outer.ShowDialog(
-                            TextProvider.Format(
-                                R.string.psd_no_access_message,
-                                listOf(userNames.joinToString(", "))
-                            )
-                        )
-                    }
-                }
-
                 val lastNewUser = diff.lastOrNull()?.let { fullUsers.find { fu -> fu.userId == it.userId} }
 
                 val filter = when {
@@ -209,6 +198,16 @@ private class FeatureReducer: Logic<State, Message, Effect>() {
 
                 if (diff.isNotEmpty()) {
                     effects { +Effect.Inner.UpdateTickets(true) }
+                }
+            }
+
+            is Message.Inner.OnDialogAccessDenied -> {
+
+                effects {
+                    +Effect.Outer.ShowDialog(
+                        message.message,
+                        message.usersIsEmpty
+                    )
                 }
             }
         }
@@ -233,6 +232,7 @@ internal class TicketsActor(
     private val repository: Repository,
     private val router: Router,
     private val commandsStore: LocalCommandsStore,
+    private val eventBus: EventBus,
 ): Actor<Effect.Inner, Message.Inner> {
 
     override fun handleEffect(effect: Effect.Inner): Flow<Message.Inner> = when(effect) {
@@ -247,6 +247,28 @@ internal class TicketsActor(
                 }
             }
         }
+
+        is Effect.Inner.EventsFlow -> flow<Message.Inner> {
+            eventBus.events().collect { event ->
+                val ticketsTry = repository.getTicketsInfo(true)
+                if (ticketsTry.isSuccess()) {
+                    val userIsAccessDenied = ticketsTry.value.account.getUsers()
+                        .find { it.userId == event.second.userId }
+                    if (userIsAccessDenied == null) {
+                        emit(
+                            Message.Inner.OnDialogAccessDenied(
+                                TextProvider.Format(
+                                    R.string.psd_no_access_message,
+                                    listOf(event.second.userName)
+                                ),
+                                ticketsTry.value.account.getUsers().isEmpty()
+                            )
+                        )
+                    }
+                }
+            }
+        }.map { message -> message }
+
         is Effect.Inner.TicketsSetFlow -> {
             repository.getTicketsInfoFlow()
                 .debounce(150)
@@ -256,6 +278,9 @@ internal class TicketsActor(
             val ticketId = effect.ticketId ?: commandsStore.getNextLocalId()
             router.navigateTo(Screens.TicketScreen(ticketId, effect.user).setSlideRightAnimation())
         }
+
+
+        is Effect.Inner.Close -> flow { router.exit() }
     }
 
 }

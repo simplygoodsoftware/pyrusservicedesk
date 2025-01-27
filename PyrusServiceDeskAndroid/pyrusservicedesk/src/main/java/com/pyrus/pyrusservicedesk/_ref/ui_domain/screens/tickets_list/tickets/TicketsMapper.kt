@@ -49,7 +49,7 @@ internal object TicketsMapper {
                 filterName = state.filter?.userName,
                 ticketsIsEmpty = state.ticketSets.isNullOrEmpty(),
                 filterEnabled = state.filter != null,
-                tabLayoutIsVisible = state.account.getUsers().size > 1,
+                tabLayoutIsVisible = state.account.getUsers().groupBy { it.appId } .size > 1,
                 ticketSetInfo = Model.TicketSetInfo(page, ticketSet),
                 showNoConnectionError = false,
                 isLoading = false,

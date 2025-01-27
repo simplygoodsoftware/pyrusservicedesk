@@ -43,12 +43,14 @@ internal interface TicketsContract {
             data object OnCreateTicketClick : Outer
             data class OnTicketClick(val ticketId: Long, val userId: String) : Outer
             data class OnFilterSelected(val userId: String) : Outer
+            data object OnUsersIsEmpty : Outer
         }
 
         sealed interface Inner : Message {
             data class TicketsUpdated(val ticketsInfo: TicketsInfo) : Inner
             data object UpdateTicketsFailed : Inner
             data class UpdateTicketsCompleted(val ticketsInfo: TicketsInfo) : Inner
+            data class OnDialogAccessDenied(val message: TextProvider, val usersIsEmpty: Boolean) : Inner
         }
 
     }
@@ -62,13 +64,15 @@ internal interface TicketsContract {
                 val users: List<User>
             ) : Outer
             data class ShowAddTicketMenu(val appId: String, val users: List<User>) : Outer
-            data class ShowDialog(val message: TextProvider) : Outer
+            data class ShowDialog(val message: TextProvider, val usersIsEmpty: Boolean) : Outer
         }
 
         sealed interface Inner : Effect {
             data object TicketsSetFlow : Inner
+            data object EventsFlow : Inner
             data class UpdateTickets(val force: Boolean) : Inner
             data class OpenTicketScreen(val user: UserInternal, val ticketId: Long?) : Inner
+            data object Close : Inner
         }
     }
 

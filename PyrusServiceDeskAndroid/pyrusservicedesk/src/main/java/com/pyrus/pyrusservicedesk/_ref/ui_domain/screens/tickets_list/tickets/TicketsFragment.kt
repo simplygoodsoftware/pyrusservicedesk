@@ -141,13 +141,16 @@ internal class TicketsFragment: TeaFragment<Model, Message, Effect.Outer>() {
     }
 
 
-    private fun onCreateDialog(title: String, message: String): Dialog {
+    private fun onCreateDialog(title: String, message: String, usersIsEmpty: Boolean): Dialog {
         val builder: AlertDialog.Builder = AlertDialog.Builder(activity)
         builder.setTitle(title)
             .setMessage(message)
             .setPositiveButton(resources.getString(R.string.ok)
             ) { dialog, id ->
-                dialog.cancel()
+                if (!usersIsEmpty)
+                    dialog.cancel()
+                else
+                    dispatch(Message.Outer.OnUsersIsEmpty)
             }
         return builder.create()
     }
@@ -221,7 +224,7 @@ internal class TicketsFragment: TeaFragment<Model, Message, Effect.Outer>() {
             }
 
             is Effect.Outer.ShowDialog -> {
-                val dialog = onCreateDialog(resources.getString(R.string.psd_no_access), effect.message.text(requireActivity()))
+                val dialog = onCreateDialog(resources.getString(R.string.psd_no_access), effect.message.text(requireActivity()), effect.usersIsEmpty)
                 dialog.show()
             }
 
