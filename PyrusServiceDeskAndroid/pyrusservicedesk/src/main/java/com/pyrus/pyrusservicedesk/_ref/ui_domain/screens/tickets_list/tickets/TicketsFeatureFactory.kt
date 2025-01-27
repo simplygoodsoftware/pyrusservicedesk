@@ -192,17 +192,20 @@ private class FeatureReducer: Logic<State, Message, Effect>() {
                 val lastNewUser = diff.lastOrNull()?.let { fullUsers.find { fu -> fu.userId == it.userId} }
 
                 val filter = when {
+                    newUsers.find { it.userId == contentState.filter?.userId } == null -> null
                     lastNewUser == null -> contentState.filter
                     newUsers.count { it.appId == lastNewUser.appId } > 1 -> lastNewUser
                     else -> null
                 }
+
+                val pageAppId = (newUsers.find { it.appId == contentState.pageAppId } ?: newUsers.firstOrNull())?.appId
 
                 state { state.copy(contentState = contentState.copy(
                     account = message.ticketsInfo.account,
                     ticketSets = message.ticketsInfo.ticketSetInfoList,
                     isUserTriggerLoading = false,
                     filter = filter,
-                    pageAppId = lastNewUser?.appId ?: contentState.pageAppId,
+                    pageAppId = lastNewUser?.appId ?: pageAppId,
                     loadUserIds = contentState.loadUserIds.toMutableSet()
                         .apply { lastNewUser?.let { add(it.userId) } }
                 )) }
