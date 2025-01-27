@@ -6,6 +6,7 @@ import com.pyrus.pyrusservicedesk._ref.data.Attachment
 import com.pyrus.pyrusservicedesk._ref.data.FullTicket
 import com.pyrus.pyrusservicedesk._ref.data.multy_chat.TicketsInfo
 import com.pyrus.pyrusservicedesk._ref.utils.GetTicketsError
+import com.pyrus.pyrusservicedesk._ref.utils.RequestUtils
 import com.pyrus.pyrusservicedesk._ref.utils.Try
 import com.pyrus.pyrusservicedesk._ref.utils.Try2
 import com.pyrus.pyrusservicedesk._ref.utils.isFailed
@@ -13,6 +14,7 @@ import com.pyrus.pyrusservicedesk._ref.utils.isSuccess
 import com.pyrus.pyrusservicedesk._ref.utils.map
 import com.pyrus.pyrusservicedesk._ref.utils.toTry2
 import com.pyrus.pyrusservicedesk.core.Account
+import com.pyrus.pyrusservicedesk.core.getUsers
 import com.pyrus.pyrusservicedesk.presentation.ui.view.Status
 import com.pyrus.pyrusservicedesk.sdk.FileResolver
 import com.pyrus.pyrusservicedesk.sdk.data.TicketDto
@@ -23,7 +25,6 @@ import com.pyrus.pyrusservicedesk.sdk.sync.Synchronizer
 import com.pyrus.pyrusservicedesk.sdk.web.UploadFileHook
 import com.pyrus.pyrusservicedesk.sdk.web.retrofit.RemoteFileStore
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.launch
@@ -61,7 +62,7 @@ internal class Repository(
         }
     }
 
-    suspend fun getAllData(force: Boolean): Try<TicketsInfo> {
+    suspend fun getTicketsInfo(force: Boolean): Try<TicketsInfo> {
         val account = accountStore.getAccount()
         if (!force) {
             val localTickets: TicketsDto? = ticketsStore.getTickets()
@@ -74,7 +75,7 @@ internal class Repository(
         }
     }
 
-    fun getAllDataFlow(): Flow<TicketsInfo> = combine(
+    fun getTicketsInfoFlow(): Flow<TicketsInfo> = combine(
         accountStore.accountStateFlow(),
         ticketsStore.getTicketInfoFlow(),
         commandsStore.getCommandsFlow(),
@@ -84,23 +85,23 @@ internal class Repository(
     suspend fun getFeed(userId: String, ticketId: Long, force: Boolean): Try2<FullTicket, GetTicketsError> {
         val account = accountStore.getAccount()
         val serverId = idStore.getTicketServerId(ticketId) ?: ticketId
-        if (serverId < 0) {
+        val orgLogoUrl = getOrgLogoUrl(userId, account)
+
+        if (serverId <= 0) {
             val commands = commandsStore.getCommands(serverId)
             val firstCommand = commands.firstOrNull()
             val ticket = if (firstCommand != null) {
-                repositoryMapper.mapToFullTicket(firstCommand.ticketId!!, firstCommand.userId, commands)
+                repositoryMapper.mapToFullTicket(firstCommand.ticketId!!, firstCommand.userId, commands, orgLogoUrl)
             }
             else {
                 FullTicket(
                     subject = "",
-                    isRead = true,
-                    lastComment = null,
                     comments = emptyList(),
                     showRating = false,
                     showRatingText = null,
-                    isActive = true,
                     userId = userId,
-                    ticketId = ticketId
+                    ticketId = ticketId,
+                    orgLogoUrl = orgLogoUrl
                 )
             }
             return Try2.Success(ticket)
@@ -111,33 +112,64 @@ internal class Repository(
             val ticketDto: TicketDto? = localTickets?.tickets?.find { it.ticketId == serverId }
             val commands = commandsStore.getCommands(serverId)
             if (ticketDto != null) {
-                val ticket = repositoryMapper.mergeTicket(account, userId, ticketDto, commands)
+                val ticket = repositoryMapper.mergeTicket(
+                    account,
+                    userId,
+                    ticketDto,
+                    commands,
+                    orgLogoUrl
+                )
                 return Try.Success(ticket).toTry2()
             }
         }
 
-        val syncTry = synchronizer.syncData(SyncRequest.Data).checkResponse(serverId, userId)
+        val syncTry = synchronizer.syncData(SyncRequest.Data).checkResponse(userId)
         if (syncTry.isFailed()) return syncTry
-        val ticketDto = syncTry.value
+        val ticketsDto = syncTry.value
+
+        val ticketDto = ticketsDto.tickets?.find { it.ticketId == ticketId } ?: ticketsStore.getTicket(ticketId)
+        if (ticketDto == null) {
+            return Try2.Failure(GetTicketsError.NoDataFound)
+        }
 
         val commands = commandsStore.getCommands(serverId)
-        val ticket = repositoryMapper.mergeTicket(account, userId, ticketDto, commands)
+        val ticket = repositoryMapper.mergeTicket(account, userId, ticketDto, commands, orgLogoUrl)
         return Try2.Success(ticket)
     }
 
-    fun getFeedFlow(ticketId: Long): Flow<FullTicket?> {
+    fun getFeedFlow(user: UserInternal, ticketId: Long): Flow<FullTicket?> {
         return combine(
             accountStore.accountStateFlow(),
             ticketsStore.getTicketInfoFlow(ticketId),
             commandsStore.getCommandsFlow(ticketId),
-        ) { account,  ticketDto, commands ->
+        ) { account, ticketDto, commands ->
+
+            val orgLogoUrl = getOrgLogoUrl(user.userId, account)
             if (ticketDto != null) {
                 if (ticketDto.userId == null) return@combine null
-                repositoryMapper.mergeTicket(account, ticketDto.userId, ticketDto, commands)
+                repositoryMapper.mergeTicket(
+                    account,
+                    ticketDto.userId,
+                    ticketDto,
+                    commands,
+                    orgLogoUrl
+                )
             }
             else {
-                commands.find { it.requestNewTicket == true }?.let {
-                    repositoryMapper.mapToFullTicket(it.ticketId!!, it.userId, commands)
+                val firstCommand = commands.firstOrNull()
+                if (firstCommand != null) {
+                    repositoryMapper.mapToFullTicket(firstCommand.ticketId!!, firstCommand.userId, commands, orgLogoUrl)
+                }
+                else {
+                    FullTicket(
+                        subject = "",
+                        comments = emptyList(),
+                        showRating = false,
+                        showRatingText = null,
+                        userId = user.userId,
+                        ticketId = ticketId,
+                        orgLogoUrl = orgLogoUrl
+                    )
                 }
             }
         }
@@ -214,7 +246,9 @@ internal class Repository(
     }
 
     private fun needsToRequestNewTicket(ticketId: Long): Boolean {
-        return ticketId <= 0
+        if (ticketId > 0) return false
+        val commands = commandsStore.getCommands(ticketId).filter { it.requestNewTicket == true }
+        return commands.isEmpty()
     }
 
     private suspend fun sendCommand(command: SyncRequest.Command) {
@@ -264,6 +298,13 @@ internal class Repository(
         return Try.Success(command.copy(attachments = resultAttachments))
     }
 
+    private fun getOrgLogoUrl(userId: String, account: Account): String? {
+        val appId = account.getUsers().find { it.userId == userId }?.appId ?: return null
+        val applications = ticketsStore.getTickets()?.applications ?: return null
+        val orgLogoUrl = applications.find { it.appId == appId }?.orgLogoUrl ?: return null
+        return RequestUtils.getOrganisationLogoUrl(orgLogoUrl, account.domain)
+    }
+
     private suspend fun sendAttachment(
         attachment: Attachment,
         progressListener: (Int) -> Unit,
@@ -301,7 +342,7 @@ internal class Repository(
         )
     }
 
-    private fun Try<TicketsDto>.checkResponse(ticketId: Long, userId: String): Try2<TicketDto, GetTicketsError> {
+    private fun Try<TicketsDto>.checkResponse(userId: String): Try2<TicketsDto, GetTicketsError> {
         if (!this.isSuccess()) {
             return this.toTry2 {
                 when (error) {
@@ -318,16 +359,12 @@ internal class Repository(
         }
 
         val tickets: TicketsDto = this.value
-        val ticket: TicketDto? = tickets.tickets?.find { it.ticketId == ticketId }
 
         if (tickets.authorAccessDenied?.find { it == userId } != null) {
             return Try2.Failure(GetTicketsError.AuthorAccessDenied)
         }
 
-        if (ticket == null) {
-            return Try2.Failure(GetTicketsError.NoDataFound)
-        }
-        val res = Try.Success(ticket)
+        val res = Try.Success(tickets)
         return res.toTry2()
     }
 

@@ -108,21 +108,21 @@ internal object TicketMapper {
 
         entriesWithDates.reverse()
         var resentInbound: Boolean? = null
-        var resentAuthorId: String? = null
+        var resentAuthorKey: String? = null
         for (i in entriesWithDates.indices) {
             val current = entriesWithDates[i]
             val currentIsInbound = (current as? CommentEntryV2.Comment)?.isInbound
-            val currentAuthorId = (current as? CommentEntryV2.Comment)?.authorKey
-            val showAvatar = currentIsInbound != resentInbound || currentAuthorId != resentAuthorId
+            val currentAuthorKey = (current as? CommentEntryV2.Comment)?.authorKey
+            val showAvatar = currentIsInbound != resentInbound || currentAuthorKey != resentAuthorKey
             resentInbound = currentIsInbound
-            resentAuthorId = currentAuthorId
+            resentAuthorKey = currentAuthorKey
 
             if (current is CommentEntryV2.Comment) {
                 val prev = entriesWithDates.getOrNull(i + 1)
                 val prevAuthorKey = (prev as? CommentEntryV2.Comment)?.authorKey
                 val showAuthorName = when {
                     prev !is CommentEntryV2.Comment -> true
-                    else -> prevAuthorKey != currentAuthorId
+                    else -> prevAuthorKey != currentAuthorKey
                 }
 
                 entriesWithDates[i] = current.copy(showAvatar = showAvatar, showAuthorName = showAuthorName)
@@ -169,7 +169,7 @@ internal object TicketMapper {
     ) {
         val commentEntries = ArrayList<CommentEntryV2>()
         for (comment in freshList.comments) {
-            addCommentEntries(commentEntries, comment)
+            addCommentEntries(commentEntries, comment, freshList.orgLogoUrl)
         }
 
         entries += commentEntries
@@ -178,6 +178,7 @@ internal object TicketMapper {
     private fun addCommentEntries(
         entries: ArrayList<CommentEntryV2>,
         comment: Comment,
+        orgLogoUrl: String?
     ) {
         val body = comment.body
         val attachments = comment.attachments
@@ -195,12 +196,15 @@ internal object TicketMapper {
             else -> Status.Completed
         }
 
+        val avatarUrl = if (comment.isSupport) orgLogoUrl else null
+//        val avatarUrl = comment.author?.avatarUrl ?: if (comment.isSupport) orgLogoUrl else null
+
         if (!body.isNullOrBlank()) {
-            entries += toTextEntry(body, comment, status)
+            entries += toTextEntry(body, comment, status, avatarUrl)
         }
 
         attachments?.forEach { attach ->
-            entries += toAttachEntry(comment, attach, status)
+            entries += toAttachEntry(comment, attach, status, avatarUrl)
         }
     }
 
@@ -212,6 +216,7 @@ internal object TicketMapper {
         commentBody: String,
         comment: Comment,
         status: Status,
+        avatarUrl: String?
     ): CommentEntryV2.Comment {
         val entryText = HtmlTagUtils.cleanTags(commentBody)
         return CommentEntryV2.Comment(
@@ -228,7 +233,7 @@ internal object TicketMapper {
             authorName = getAuthorName(comment),
             authorKey = getAuthorKey(comment),
             showAuthorName = false,
-            avatarUrl = comment.author?.avatarUrl,
+            avatarUrl = avatarUrl,
             showAvatar = false,
             content = CommentEntryV2.CommentContent.Text(entryText),
         )
@@ -242,6 +247,7 @@ internal object TicketMapper {
         comment: Comment,
         attach: Attachment,
         status: Status,
+        avatarUrl: String?
     ): CommentEntryV2.Comment {
 
         val contentType = when {
@@ -262,7 +268,7 @@ internal object TicketMapper {
             authorName = getAuthorName(comment),
             authorKey = getAuthorKey(comment),
             showAuthorName = false,
-            avatarUrl = comment.author?.avatarUrl,
+            avatarUrl = avatarUrl,
             showAvatar = false,
             contentType = contentType,
             content = CommentEntryV2.CommentContent.Image(

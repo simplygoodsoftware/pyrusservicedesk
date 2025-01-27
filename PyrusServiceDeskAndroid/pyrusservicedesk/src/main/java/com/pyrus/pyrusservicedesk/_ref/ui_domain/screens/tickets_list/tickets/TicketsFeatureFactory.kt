@@ -237,7 +237,7 @@ internal class TicketsActor(
 
     override fun handleEffect(effect: Effect.Inner): Flow<Message.Inner> = when(effect) {
         is Effect.Inner.UpdateTickets -> singleFlow {
-            when(val ticketsTry = repository.getAllData(effect.force)) {
+            when(val ticketsTry = repository.getTicketsInfo(effect.force)) {
                 is Try.Success -> {
                     Message.Inner.UpdateTicketsCompleted(ticketsTry.value)
                 }
@@ -248,7 +248,7 @@ internal class TicketsActor(
             }
         }
         is Effect.Inner.TicketsSetFlow -> {
-            repository.getAllDataFlow()
+            repository.getTicketsInfoFlow()
                 .debounce(150)
                 .map { Message.Inner.TicketsUpdated(it) }
         }

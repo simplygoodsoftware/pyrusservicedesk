@@ -161,10 +161,12 @@ internal class TicketsFragment: TeaFragment<Model, Message, Effect.Outer>() {
                 .into(binding.toolbarTicketsList.psdToolbarVendorIv)
         }
         diff(Model::ticketsIsEmpty) { isEmpty ->
-            binding.toolbarTicketsList.psdToolbarFilterIb.isVisible = !isEmpty
             binding.toolbarTicketsList.psdToolbarRightIb.isVisible = !isEmpty && binding.toolbarTicketsList.psdToolbarRightIb.background != null
             binding.fabAddTicket.isVisible = !isEmpty
 
+        }
+        diff(Model::showFilter) { showFilter ->
+            binding.toolbarTicketsList.psdToolbarFilterIb.isVisible = showFilter
         }
         diff(Model::filterEnabled) { filterEnabled ->
             binding.toolbarTicketsList.psdToolbarFilterIb.setBackgroundResource(

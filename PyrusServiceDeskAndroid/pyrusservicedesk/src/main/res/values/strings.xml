@@ -21,14 +21,11 @@
     <string name="psd_date_format_d_m_y_short">MM.dd.yyyy</string>
     <string name="psd_photo">Photo</string>
     <string name="psd_gallery">Gallery</string>
-    <string name="filters">Filters</string>
-    <string name="last_comment_clip_photo">%s: 📎 Photo</string>
-    <string name="last_comment_clip_video">%s: 📎 Video</string>
-    <string name="last_comment_clip_file">%s: 📎 File</string>
-    <string name="last_comment_clip_photo_y">You: 📎 Photo</string>
-    <string name="last_comment_clip_video_y">You: 📎 Video</string>
-    <string name="last_comment" translatable="false">%s: %s</string>
-    <string name="last_comment_you">You: %s</string>
+    <string name="psd_filters">Filters</string>
+    <string name="psd_you">You</string>
+    <string name="psd_type_photo">Photo</string>
+    <string name="psd_type_video">Video</string>
+    <string name="psd_type_file">File</string>
 
     <plurals name="psd_years_ago">
         <item quantity="one">%d year ago</item>

@@ -262,7 +262,7 @@ internal class TicketActor(
             }
         }
         is Effect.Inner.FeedFlow -> {
-            repository.getFeedFlow(ticketId)
+            repository.getFeedFlow(user, ticketId)
                 .debounce(150)
                 .map(Message.Inner::CommentsUpdated)
         }

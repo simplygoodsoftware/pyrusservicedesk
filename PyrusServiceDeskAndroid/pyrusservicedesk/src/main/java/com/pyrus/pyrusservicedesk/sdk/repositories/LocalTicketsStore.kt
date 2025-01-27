@@ -17,6 +17,12 @@ internal class LocalTicketsStore(
         return ticketsInfoState.value
     }
 
+    fun getTicket(ticketId: Long): TicketDto? {
+        val serverTicketId = idStore.getTicketServerId(ticketId) ?: ticketId
+        if (serverTicketId <= 0) return null
+        return ticketsInfoState.value?.tickets?.find { it.ticketId == serverTicketId }
+    }
+
     fun applyDiff(tickets: TicketsDto): TicketsDto {
         val localState = getTickets()
         val mergedState = mergeDiff(localState, tickets)

@@ -1,7 +1,6 @@
 package com.pyrus.pyrusservicedesk.sdk.repositories
 
 import android.net.Uri
-import com.pyrus.pyrusservicedesk.R
 import com.pyrus.pyrusservicedesk.User
 import com.pyrus.pyrusservicedesk._ref.data.Attachment
 import com.pyrus.pyrusservicedesk._ref.data.Author
@@ -11,11 +10,9 @@ import com.pyrus.pyrusservicedesk._ref.data.TicketHeader
 import com.pyrus.pyrusservicedesk._ref.data.multy_chat.TicketSetInfo
 import com.pyrus.pyrusservicedesk._ref.utils.RequestUtils
 import com.pyrus.pyrusservicedesk._ref.utils.RequestUtils.getAvatarUrl
-import com.pyrus.pyrusservicedesk._ref.utils.TextProvider
 import com.pyrus.pyrusservicedesk._ref.utils.isImage
-import com.pyrus.pyrusservicedesk._ref.utils.isVideo
-import com.pyrus.pyrusservicedesk._ref.utils.textRes
 import com.pyrus.pyrusservicedesk.core.Account
+import com.pyrus.pyrusservicedesk.core.getAuthorId
 import com.pyrus.pyrusservicedesk.core.getUserId
 import com.pyrus.pyrusservicedesk.core.getUsers
 import com.pyrus.pyrusservicedesk.presentation.ui.view.Status
@@ -67,7 +64,7 @@ internal class RepositoryMapper(
 
         tickets += createTicketCommands.map {
             val ticketCommands = commandsById[it.ticketId!!] ?: emptyList()
-            mapToTicketHeader(it.ticketId, it.userId, ticketCommands)
+            mapToTicketHeader(account, it.ticketId, it.userId, ticketCommands)
         }
 
         val smallUsers = mapToSmallAcc(account)
@@ -106,6 +103,7 @@ internal class RepositoryMapper(
         userId: String,
         ticketDto: TicketDto,
         commands: List<CommandEntity>,
+        orgLogoUrl: String?,
     ): FullTicket {
 
         val comments = (ticketDto.comments?.map { map(account, userId, it)} ?: emptyList()).toMutableList()
@@ -115,12 +113,9 @@ internal class RepositoryMapper(
             .filter { idStore.getCommentServerId(it.localId) !in serverCommentIds }
             .map(::map)
 
-        comments.sortBy { it.creationTime }
+        comments.sortWith(compareBy({ it.creationTime }, { it.id }))
 
-        val hasReadCommands = commands.any { it.commandType == MarkTicketAsRead.ordinal }
-        val isRead = ticketDto.isRead == true || hasReadCommands
-
-        return mapToFullTicket(ticketDto, comments, userId, isRead)
+        return mapToFullTicket(ticketDto, comments, userId, orgLogoUrl)
     }
 
     private fun mergeTicketHeader(
@@ -130,13 +125,15 @@ internal class RepositoryMapper(
         account: Account,
     ): TicketHeader {
 
-        val comments = ticketDto.comments?.sortedBy { it.creationDate } ?: emptyList()
+        val comments = ticketDto.comments
+            ?.sortedWith(compareBy({ it.creationDate }, { it.commentId }))
+            ?: emptyList()
         val serverCommentIds = comments.map { it.commentId }.toSet()
         val createCommentCommands = commands.filter { it.commandType == CreateComment.ordinal }
 
         val filteredCommands = createCommentCommands
             .filter { idStore.getCommentServerId(it.localId) !in serverCommentIds }
-            .sortedBy { it.creationTime }
+            .sortedWith(compareBy({ it.creationTime }, { -it.localId }))
 
         val hasReadCommands = commands.any { it.commandType == MarkTicketAsRead.ordinal }
         val isRead = ticketDto.isRead == true || hasReadCommands
@@ -149,13 +146,17 @@ internal class RepositoryMapper(
             return (this?.creationDate ?: Long.MIN_VALUE) >= (entity?.creationTime ?: Long.MIN_VALUE)
         }
 
-        val lastCommentText: TextProvider? = when {
-            lastServerComment.olderThan(lastCommand) -> lastServerComment?.getLastComment(account as Account.V3)
-            else -> lastCommand?.getLastCommentFromAttachmentEntity()
-        }
-        val lastCommentCreationDate: Long? = when {
-            lastServerComment.olderThan(lastCommand) -> lastServerComment?.creationDate
-            else -> lastCommand?.creationTime
+        val lastComment = when {
+            lastServerComment.olderThan(lastCommand) -> lastServerComment?.let {
+                TicketHeader.LastComment(
+                    id = it.commentId,
+                    author = it.author?.let { dto -> map(account, dto) },
+                    body = it.body,
+                    lastAttachmentName = it.attachments?.lastOrNull()?.name,
+                    creationDate = it.creationDate
+                )
+            }
+            else -> lastCommand?.let { mapToLastCommand(account, it) }
         }
 
         return TicketHeader(
@@ -163,53 +164,25 @@ internal class RepositoryMapper(
             ticketId = ticketDto.ticketId,
             subject = ticketDto.subject,
             isRead = isRead,
-            lastCommentText = lastCommentText,
-            lastCommentCreationDate = lastCommentCreationDate,
-            isActive = ticketDto.isActive,
+            lastComment = lastComment,
+            isActive = ticketDto.isActive ?: false,
             isLoading = isLoading,
         )
     }
 
-    private fun CommentDto.getLastComment(account: Account.V3?): TextProvider {
-        when {
-            !this.body.isNullOrBlank() && isYou(this.author, account) ->
-                return TextProvider.Format(R.string.last_comment_you, listOf(this.body))
-            !this.body.isNullOrBlank() ->
-                return TextProvider.Format(R.string.last_comment, listOf(this.author?.name ?: "", this.body))
-            !this.attachments.isNullOrEmpty() && this.attachments.last().name.isVideo() && isYou(this.author, account) ->
-                return R.string.last_comment_clip_video_y.textRes()
-            !this.attachments.isNullOrEmpty() && this.attachments.last().name.isVideo() ->
-                return TextProvider.Format(R.string.last_comment_clip_video, listOf(this.author?.name ?: ""))
-            !this.attachments.isNullOrEmpty() && this.attachments.last().name.isImage() && isYou(this.author, account)->
-                return R.string.last_comment_clip_photo_y.textRes()
-            !this.attachments.isNullOrEmpty() && this.attachments.last().name.isImage() ->
-                return TextProvider.Format(R.string.last_comment_clip_photo, listOf(this.author?.name ?: ""))
-            !this.attachments.isNullOrEmpty() ->
-                return TextProvider.Format(R.string.last_comment_clip_file, listOf(this.author?.name ?: ""))
-        }
-        return "".textRes()
-    }
-    private fun isYou(author: AuthorDto?, account: Account.V3?): Boolean {
-        return author?.authorId == account?.authorId
-    }
-
-    private fun  CommandEntity.getLastCommentFromAttachmentEntity(): TextProvider {
-        when {
-            !this.comment.isNullOrBlank()  ->
-                return TextProvider.Format(R.string.last_comment_you, listOf(this.comment))
-            !this.attachments.isNullOrEmpty() && this.attachments.last().name.isImage() ->
-                return R.string.last_comment_clip_photo_y.textRes()
-            !this.attachments.isNullOrEmpty() ->
-                return R.string.last_comment_clip_video_y.textRes()
-        }
-        return "".textRes()
-    }
+    private fun mapToAuthor(account: Account, userId: String?): Author = Author(
+        isUser = true,
+        name = account.getUsers().find { it.userId == userId }?.userName,
+        authorId = (account as? Account.V3)?.authorId,
+        avatarUrl = null,
+        avatarColor = null
+    )
 
     private fun mapToFullTicket(
         ticket: TicketDto,
         comments: List<Comment>,
         userId: String,
-        isRead: Boolean,
+        orgLogoUrl: String?,
     ): FullTicket {
         return FullTicket(
             comments = comments,
@@ -218,9 +191,7 @@ internal class RepositoryMapper(
             userId = userId,
             ticketId = ticket.ticketId,
             subject = ticket.subject,
-            isRead = isRead,
-            lastComment = comments.lastOrNull(),
-            isActive = ticket.isActive,
+            orgLogoUrl = orgLogoUrl
         )
     }
 
@@ -287,6 +258,7 @@ internal class RepositoryMapper(
     )
 
     private fun map(account: Account, authorDto: AuthorDto) = Author(
+        isUser = account.getAuthorId() == authorDto.authorId,
         name = authorDto.name,
         authorId = authorDto.authorId,
         avatarUrl = when (authorDto.avatarId) {
@@ -388,21 +360,32 @@ internal class RepositoryMapper(
         }
     }
 
+    private fun mapToLastCommand(account: Account, command: CommandEntity): TicketHeader.LastComment {
+        return TicketHeader.LastComment(
+            id = command.localId,
+            author = mapToAuthor(account, command.userId),
+            body = command.comment,
+            lastAttachmentName = command.attachments?.lastOrNull()?.name,
+            creationDate = command.creationTime
+        )
+    }
+
     private fun mapToTicketHeader(
+        account: Account,
         ticketId: Long,
         userId: String,
         addCommentCommands: List<CommandEntity>,
     ): TicketHeader {
-        val commands = addCommentCommands.sortedBy { it.creationTime }
+        val commands = addCommentCommands.sortedWith(compareBy({ it.creationTime }, { -it.localId }))
 
-        val lastComment = commands.lastOrNull()
+        val lastCommand = commands.lastOrNull()
         val firstComment = commands.firstOrNull()
+        val lastComment = lastCommand?.let { mapToLastCommand(account, it) }
 
         return TicketHeader(
             subject = firstComment?.comment,
             isRead = true,
-            lastCommentText = lastComment?.comment?.textRes(),
-            lastCommentCreationDate = lastComment?.creationTime,
+            lastComment = lastComment,
             isActive = true,
             userId = userId,
             ticketId = ticketId,
@@ -414,23 +397,22 @@ internal class RepositoryMapper(
         ticketId: Long,
         userId: String,
         addCommentCommands: List<CommandEntity>,
+        orgLogoUrl: String?
     ): FullTicket {
-        val comments = ArrayList<Comment>()
-        comments += addCommentCommands.map(::map)
-        comments.sortBy { it.creationTime }
-        val lastComment = comments.lastOrNull()
+        val comments = addCommentCommands
+            .map(::map)
+            .sortedWith(compareBy({ it.creationTime }, { it.id }))
+
         val firstComment = comments.firstOrNull()
 
         return FullTicket(
             subject = firstComment?.body,
-            isRead = true,
-            lastComment = lastComment,
             comments = comments,
             showRating = false,
             showRatingText = null,
-            isActive = true,
             userId = userId,
-            ticketId = ticketId
+            ticketId = ticketId,
+            orgLogoUrl = orgLogoUrl,
         )
     }
 
@@ -454,18 +436,20 @@ internal class RepositoryMapper(
 private class TicketHeaderComparator : Comparator<TicketHeader> {
 
     override fun compare(o1: TicketHeader, o2: TicketHeader): Int {
-        val o1IsActive = if (o1.isActive == true) 1 else 0
-        val o2IsActive = if (o2.isActive == true) 1 else 0
+        val o1IsActive = if (o1.isActive) 1 else 0
+        val o2IsActive = if (o2.isActive) 1 else 0
         return when {
             o1IsActive < o2IsActive -> 1
             o1IsActive > o2IsActive -> -1
-            o1.lastCommentCreationDate == null -> return when {
-                o2.lastCommentCreationDate == null -> o1.ticketId.compareTo(o2.ticketId)
+            o1.lastComment == null -> return when {
+                o2.lastComment == null -> o1.ticketId.compareTo(o2.ticketId)
                 else -> 1
             }
-            o2.lastCommentCreationDate == null -> -1
-            o1.lastCommentCreationDate < o2.lastCommentCreationDate -> 1
-            o1.lastCommentCreationDate > o2.lastCommentCreationDate -> -1
+            o2.lastComment == null -> -1
+            o1.lastComment.creationDate < o2.lastComment.creationDate -> 1
+            o1.lastComment.creationDate > o2.lastComment.creationDate -> -1
+            o1.lastComment.id < o2.lastComment.id -> 1
+            o1.lastComment.id > o2.lastComment.id -> -1
             else -> 0
         }
     }
