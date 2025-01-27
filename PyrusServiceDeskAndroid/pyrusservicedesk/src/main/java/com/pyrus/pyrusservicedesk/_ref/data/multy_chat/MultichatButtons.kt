@@ -10,4 +10,5 @@ data class MultichatButtons(
     @DrawableRes val rightButtonRes: Int,
     val rightButtonAction: Intent,
     val centerAction: Intent,
+    val backButton: Intent,
 ) : Parcelable

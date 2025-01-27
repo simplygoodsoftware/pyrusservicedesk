@@ -5,4 +5,5 @@ import com.pyrus.pyrusservicedesk.core.Account
 internal data class TicketsInfo(
     val account: Account,
     val ticketSetInfoList: List<TicketSetInfo>,
+    val authorAccessDenied: List<String>?,
 )

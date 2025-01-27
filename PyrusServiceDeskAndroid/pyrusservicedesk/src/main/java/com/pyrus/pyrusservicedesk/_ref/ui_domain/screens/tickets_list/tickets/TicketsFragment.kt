@@ -103,7 +103,8 @@ internal class TicketsFragment: TeaFragment<Model, Message, Effect.Outer>() {
         binding.viewPager.registerOnPageChangeCallback(object : ViewPager2.OnPageChangeCallback() {
             override fun onPageSelected(position: Int) {
                 super.onPageSelected(position)
-                dispatch(Message.Outer.OnChangePage(adapter.getAppId(position)))
+                if (adapter.currentList.isNotEmpty() && position < adapter.currentList.size)
+                    dispatch(Message.Outer.OnChangePage(adapter.getAppId(position)))
             }
         })
 
@@ -149,8 +150,17 @@ internal class TicketsFragment: TeaFragment<Model, Message, Effect.Outer>() {
             ) { dialog, id ->
                 if (!usersIsEmpty)
                     dialog.cancel()
-                else
-                    dispatch(Message.Outer.OnUsersIsEmpty)
+                else {
+                    val multichatButtons = ConfigUtils.getMultichatButtons()
+                    if (multichatButtons?.backButton != null) {
+                        try {
+                            startActivity(multichatButtons.backButton)
+                        } catch (e: Exception) {
+                            // TODO show error ui
+                        }
+                    }
+                    dialog.cancel()
+                }
             }
         return builder.create()
     }

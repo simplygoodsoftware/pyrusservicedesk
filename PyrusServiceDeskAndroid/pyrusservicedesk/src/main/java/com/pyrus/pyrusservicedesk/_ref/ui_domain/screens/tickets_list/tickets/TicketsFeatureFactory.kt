@@ -178,6 +178,17 @@ private class FeatureReducer: Logic<State, Message, Effect>() {
                 val newUsers = fullUsers.map { UserInternal(it.userId, it.appId) }.toSet()
                 val diff = newUsers.minus(currentUsers)
 
+                val authorAccessDenied = message.ticketsInfo.authorAccessDenied
+                val firstCurrentUser = contentState.account.getUsers().firstOrNull()
+                if (currentUsers.size <= 1 && fullUsers.size <= 1 && authorAccessDenied?.find { it == firstCurrentUser?.userId } != null) {
+                    effects { +Effect.Outer.ShowDialog(
+                        TextProvider.Format(
+                            R.string.psd_no_access_message,
+                            listOf(firstCurrentUser?.userName ?: "")
+                        ),
+                        true) }
+                }
+
                 val lastNewUser = diff.lastOrNull()?.let { fullUsers.find { fu -> fu.userId == it.userId} }
 
                 val filter = when {
@@ -202,7 +213,6 @@ private class FeatureReducer: Logic<State, Message, Effect>() {
             }
 
             is Message.Inner.OnDialogAccessDenied -> {
-
                 effects {
                     +Effect.Outer.ShowDialog(
                         message.message,

@@ -338,7 +338,8 @@ internal class Repository(
     ): TicketsInfo {
         return TicketsInfo(
             account = account,
-            ticketSetInfoList = repositoryMapper.mergeTickets(account, ticketsDto, commands)
+            ticketSetInfoList = repositoryMapper.mergeTickets(account, ticketsDto, commands),
+            authorAccessDenied = ticketsDto?.authorAccessDenied,//TODO for not set filter if we haven`t access
         )
     }
 
