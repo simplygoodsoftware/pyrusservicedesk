@@ -54,8 +54,6 @@ internal interface TicketContract {
 
             data object OnBackClick : Outer
 
-            data class OnDialogAccessDenied(val message: TextProvider) : Outer
-
         }
 
         sealed interface Inner : Message {
@@ -77,7 +75,6 @@ internal interface TicketContract {
             data class MakeToast(val text: TextProvider) : Outer
             data class ShowAttachVariants(val key: String) : Outer
             data class ShowErrorCommentDialog(val key: String) : Outer
-            data class ShowDialog(val message: TextProvider) : Outer
         }
 
         sealed interface Inner : Effect {

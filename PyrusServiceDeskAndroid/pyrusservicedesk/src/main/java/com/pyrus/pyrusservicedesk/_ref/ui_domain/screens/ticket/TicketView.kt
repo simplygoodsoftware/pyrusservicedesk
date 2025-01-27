@@ -50,6 +50,5 @@ internal interface TicketView {
         data class MakeToast(val text: TextProvider) : Effect
         data class ShowAttachVariants(val key: String) : Effect
         data class ShowErrorCommentDialog(val key: String) : Effect
-        data class ShowDialog(val message: TextProvider) : Effect
     }
 }

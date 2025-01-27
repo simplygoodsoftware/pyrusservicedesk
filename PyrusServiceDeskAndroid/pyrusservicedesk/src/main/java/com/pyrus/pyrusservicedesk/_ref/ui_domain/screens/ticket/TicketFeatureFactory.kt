@@ -9,7 +9,6 @@ import com.pyrus.pyrusservicedesk._ref.ui_domain.screens.ticket.TicketContract.M
 import com.pyrus.pyrusservicedesk._ref.ui_domain.screens.ticket.TicketContract.State
 import com.pyrus.pyrusservicedesk._ref.utils.GetTicketsError
 import com.pyrus.pyrusservicedesk._ref.utils.RequestUtils.getFileUrl
-import com.pyrus.pyrusservicedesk._ref.utils.TextProvider
 import com.pyrus.pyrusservicedesk._ref.utils.Try2
 import com.pyrus.pyrusservicedesk._ref.utils.isSuccess
 import com.pyrus.pyrusservicedesk._ref.utils.navigation.PyrusRouter
@@ -153,12 +152,6 @@ private class FeatureReducer: Logic<State, Message, Effect>() {
                     ticketId = currentState.ticketId,
                 ) }
             }
-
-            is Message.Outer.OnDialogAccessDenied -> effects {
-                +Effect.Outer.ShowDialog(
-                    message.message
-                )
-            }
         }
     }
 
@@ -238,20 +231,9 @@ internal class TicketActor(
         is Effect.Inner.CheckAccount -> flow {
             var oldAccount: Account? = null
             accountStore.accountStateFlow().collect { account ->
-                val oldUsers = oldAccount?.getUsers()
                 val users = account.getUsers()
                 if (!users.any { user.userId == it.userId && user.appId == it.appId }) {
                     router.exit()
-                }
-                if (oldUsers != null && oldUsers.size > users.size) {
-                    val userNames = oldUsers.minus(users.toSet()).map { it.userName }
-
-                    Message.Outer.OnDialogAccessDenied(
-                        TextProvider.Format(
-                            R.string.psd_no_access_message,
-                            listOf(userNames.joinToString(", "))
-                        )
-                    )
                 }
                 oldAccount?.let {
                     if (it.getUsers().size < account.getUsers().size) {
