@@ -6,6 +6,7 @@ import com.pyrus.pyrusservicedesk._ref.data.multy_chat.TicketsInfo
 import com.pyrus.pyrusservicedesk._ref.ui_domain.screens.tickets_list.tickets.TicketsContract.Effect
 import com.pyrus.pyrusservicedesk._ref.ui_domain.screens.tickets_list.tickets.TicketsContract.Message
 import com.pyrus.pyrusservicedesk._ref.ui_domain.screens.tickets_list.tickets.TicketsContract.State
+import com.pyrus.pyrusservicedesk._ref.utils.TextProvider
 import com.pyrus.pyrusservicedesk._ref.whitetea.core.Store
 import com.pyrus.pyrusservicedesk.core.Account
 import com.pyrus.pyrusservicedesk.sdk.repositories.UserInternal
@@ -61,6 +62,7 @@ internal interface TicketsContract {
                 val users: List<User>
             ) : Outer
             data class ShowAddTicketMenu(val appId: String, val users: List<User>) : Outer
+            data class ShowDialog(val message: TextProvider) : Outer
         }
 
         sealed interface Inner : Effect {

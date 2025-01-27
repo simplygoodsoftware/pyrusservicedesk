@@ -4,6 +4,9 @@
     <string name="psd_comment_input_hint">Новый комментарий</string>
     <string name="psd_retry">Попробовать снова</string>
     <string name="psd_no_connection">Нет связи</string>
+    <string name="psd_no_access">Нет доступа</string>
+    <string name="psd_no_access_message">Для получения доступа к %s обратитесь к администратору</string>
+    <string name="ok">Ок</string>
     <string name="psd_uploading">Загрузка…</string>
     <string name="psd_file_size_mb">%.1f МБ</string>
     <string name="psd_file_size_kb">%.1f КБ</string>

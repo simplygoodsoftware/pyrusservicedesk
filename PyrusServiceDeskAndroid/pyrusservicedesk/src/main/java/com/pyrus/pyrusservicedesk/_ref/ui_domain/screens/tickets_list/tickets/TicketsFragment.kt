@@ -1,5 +1,7 @@
 package com.pyrus.pyrusservicedesk._ref.ui_domain.screens.tickets_list.tickets
 
+import android.app.AlertDialog
+import android.app.Dialog
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -10,7 +12,6 @@ import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.isVisible
 import androidx.viewpager2.widget.ViewPager2
 import com.google.android.material.tabs.TabLayoutMediator
-import com.pyrus.pyrusservicedesk.PyrusServiceDesk
 import com.pyrus.pyrusservicedesk.PyrusServiceDesk.Companion.injector
 import com.pyrus.pyrusservicedesk.R
 import com.pyrus.pyrusservicedesk._ref.ui_domain.screens.add_ticket.AddTicketBottomSheetFragment
@@ -23,6 +24,7 @@ import com.pyrus.pyrusservicedesk._ref.ui_domain.screens.tickets_list.tickets.Ti
 import com.pyrus.pyrusservicedesk._ref.utils.CIRCLE_TRANSFORMATION
 import com.pyrus.pyrusservicedesk._ref.utils.ConfigUtils
 import com.pyrus.pyrusservicedesk._ref.utils.insets.RootViewDeferringInsetsCallback
+import com.pyrus.pyrusservicedesk._ref.utils.text
 import com.pyrus.pyrusservicedesk._ref.whitetea.android.TeaFragment
 import com.pyrus.pyrusservicedesk._ref.whitetea.androidutils.bind
 import com.pyrus.pyrusservicedesk._ref.whitetea.androidutils.getStore
@@ -138,6 +140,18 @@ internal class TicketsFragment: TeaFragment<Model, Message, Effect.Outer>() {
 
     }
 
+
+    private fun onCreateDialog(title: String, message: String): Dialog {
+        val builder: AlertDialog.Builder = AlertDialog.Builder(activity)
+        builder.setTitle(title)
+            .setMessage(message)
+            .setPositiveButton(resources.getString(R.string.ok)
+            ) { dialog, id ->
+                dialog.cancel()
+            }
+        return builder.create()
+    }
+
     override fun createRenderer(): ViewRenderer<Model> = diff {
         diff(Model::titleText) { title -> binding.toolbarTicketsList.psdToolbarVendorNameTv.text = title }
         diff(Model::titleImageUrl) { url ->
@@ -202,6 +216,11 @@ internal class TicketsFragment: TeaFragment<Model, Message, Effect.Outer>() {
                     effect.users
                 )
                 bottomSheet.show(parentFragmentManager, bottomSheet.tag)
+            }
+
+            is Effect.Outer.ShowDialog -> {
+                val dialog = onCreateDialog(resources.getString(R.string.psd_no_access), effect.message.text(requireActivity()))
+                dialog.show()
             }
 
         }

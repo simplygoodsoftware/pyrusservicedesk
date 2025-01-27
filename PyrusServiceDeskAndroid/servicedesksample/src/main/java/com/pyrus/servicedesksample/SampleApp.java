@@ -17,9 +17,9 @@ public class SampleApp extends Application {
     public void onCreate() {
         super.onCreate();
 
-//        users.add(PyrusServiceDesk.user1());
-//        users.add(PyrusServiceDesk.user2());
-//        users.add(PyrusServiceDesk.user3());
+        users.add(PyrusServiceDesk.user1());
+        users.add(PyrusServiceDesk.user2());
+        users.add(PyrusServiceDesk.user3());
         users.add(PyrusServiceDesk.user4());
         PyrusServiceDesk.initAsMultichat(this, users, "10");
 

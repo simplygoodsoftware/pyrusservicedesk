@@ -1,5 +1,7 @@
 package com.pyrus.pyrusservicedesk._ref.ui_domain.screens.ticket
 
+import android.app.AlertDialog
+import android.app.Dialog
 import android.content.ClipData
 import android.content.ClipboardManager
 import android.content.res.ColorStateList
@@ -97,6 +99,11 @@ internal class TicketFragment: TeaFragment<Model, TicketView.Event, TicketView.E
                 ErrorCommentActionsDialog
                     .newInstance(effect.key)
                     .show(parentFragmentManager, "")
+            }
+
+            is TicketView.Effect.ShowDialog -> {
+                val dialog = onCreateDialog(resources.getString(R.string.psd_no_access), effect.message.text(requireActivity()))
+                dialog.show()
             }
         }
     }
@@ -222,6 +229,18 @@ internal class TicketFragment: TeaFragment<Model, TicketView.Event, TicketView.E
         recyclerView.setRecycledViewPool(pool)
 
         recyclerView.itemAnimator = null
+    }
+
+    //TODO fix en string and style
+    private fun onCreateDialog(title: String, message: String): Dialog {
+        val builder: AlertDialog.Builder = AlertDialog.Builder(activity)
+        builder.setTitle(title)
+            .setMessage(message)
+            .setPositiveButton(resources.getString(R.string.ok)
+            ) { dialog, id ->
+                dialog.cancel()
+            }
+        return builder.create()
     }
 
     private fun applyStyle() {

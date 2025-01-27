@@ -1,12 +1,15 @@
 package com.pyrus.pyrusservicedesk._ref.ui_domain.screens.tickets_list.tickets
 
+import android.util.Log
 import com.github.terrakok.cicerone.Router
+import com.pyrus.pyrusservicedesk.R
 import com.pyrus.pyrusservicedesk._ref.Screens
 import com.pyrus.pyrusservicedesk._ref.data.multy_chat.TicketsInfo
 import com.pyrus.pyrusservicedesk._ref.ui_domain.screens.tickets_list.tickets.TicketsContract.ContentState
 import com.pyrus.pyrusservicedesk._ref.ui_domain.screens.tickets_list.tickets.TicketsContract.Effect
 import com.pyrus.pyrusservicedesk._ref.ui_domain.screens.tickets_list.tickets.TicketsContract.Message
 import com.pyrus.pyrusservicedesk._ref.ui_domain.screens.tickets_list.tickets.TicketsContract.State
+import com.pyrus.pyrusservicedesk._ref.utils.TextProvider
 import com.pyrus.pyrusservicedesk._ref.utils.Try
 import com.pyrus.pyrusservicedesk._ref.utils.navigation.setSlideRightAnimation
 import com.pyrus.pyrusservicedesk._ref.utils.singleFlow
@@ -169,6 +172,22 @@ private class FeatureReducer: Logic<State, Message, Effect>() {
                 val currentUsers = contentState.account.getUsers().map { UserInternal(it.userId, it.appId) }.toSet()
                 val newUsers = fullUsers.map { UserInternal(it.userId, it.appId) }.toSet()
                 val diff = newUsers.minus(currentUsers)
+
+                Log.d("EP ", "fullUsers: ${fullUsers.size}, currentUsers: ${currentUsers.size}")
+                if (fullUsers.size < currentUsers.size) {
+                    val usersIds = currentUsers.minus(newUsers).map { it.userId }
+                    val userNames = contentState.account.getUsers()
+                        .filter { user -> usersIds.find { it == user.userId } != null }
+                        .map { it.userName }
+                    effects {
+                        +Effect.Outer.ShowDialog(
+                            TextProvider.Format(
+                                R.string.psd_no_access_message,
+                                listOf(userNames.joinToString(", "))
+                            )
+                        )
+                    }
+                }
 
                 val lastNewUser = diff.lastOrNull()?.let { fullUsers.find { fu -> fu.userId == it.userId} }
 

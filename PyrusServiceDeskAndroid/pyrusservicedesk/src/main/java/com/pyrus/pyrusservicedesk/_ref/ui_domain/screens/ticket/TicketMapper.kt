@@ -75,6 +75,7 @@ internal object TicketMapper {
         is Effect.Outer.MakeToast -> TicketView.Effect.MakeToast(effect.text)
         is Effect.Outer.ShowAttachVariants -> TicketView.Effect.ShowAttachVariants(effect.key)
         is Effect.Outer.ShowErrorCommentDialog -> TicketView.Effect.ShowErrorCommentDialog(effect.key)
+        is Effect.Outer.ShowDialog -> TicketView.Effect.ShowDialog(effect.message)
     }
 
     private fun mapComments(
