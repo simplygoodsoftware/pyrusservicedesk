@@ -8,7 +8,7 @@ import com.pyrus.pyrusservicedesk._ref.ui_domain.screens.tickets_list.tickets.Ti
 import com.pyrus.pyrusservicedesk._ref.ui_domain.screens.tickets_list.tickets.TicketsContract.Effect
 import com.pyrus.pyrusservicedesk._ref.ui_domain.screens.tickets_list.tickets.TicketsContract.Message
 import com.pyrus.pyrusservicedesk._ref.ui_domain.screens.tickets_list.tickets.TicketsContract.State
-import com.pyrus.pyrusservicedesk._ref.utils.EventBus
+import com.pyrus.pyrusservicedesk._ref.utils.AddUserEventBus
 import com.pyrus.pyrusservicedesk._ref.utils.TextProvider
 import com.pyrus.pyrusservicedesk._ref.utils.Try
 import com.pyrus.pyrusservicedesk._ref.utils.isSuccess
@@ -36,14 +36,19 @@ internal class TicketsFeatureFactory(
     private val repository: Repository,
     private val router: Router,
     private val commandsStore: LocalCommandsStore,
-    private val eventBus: EventBus,
+    private val addUserEventBus: AddUserEventBus,
 ) {
 
     fun create(): TicketsFeature = storeFactory.create(
         name = TAG,
         initialState = State(ContentState.Loading),
         reducer = FeatureReducer(),
-        actor = TicketsActor(repository, router, commandsStore, eventBus).adaptCast(),
+        actor = TicketsActor(
+            repository = repository,
+            router = router,
+            commandsStore = commandsStore,
+            addUserEventBus = addUserEventBus
+        ).adaptCast(),
         initialEffects = listOf(
             Effect.Inner.UpdateTickets(false),
             Effect.Inner.TicketsSetFlow,
@@ -245,7 +250,7 @@ internal class TicketsActor(
     private val repository: Repository,
     private val router: Router,
     private val commandsStore: LocalCommandsStore,
-    private val eventBus: EventBus,
+    private val addUserEventBus: AddUserEventBus,
 ): Actor<Effect.Inner, Message.Inner> {
 
     override fun handleEffect(effect: Effect.Inner): Flow<Message.Inner> = when(effect) {
@@ -262,17 +267,17 @@ internal class TicketsActor(
         }
 
         is Effect.Inner.EventsFlow -> flow<Message.Inner> {
-            eventBus.events().collect { event ->
+            addUserEventBus.events().collect { user ->
                 val ticketsTry = repository.getTicketsInfo(true)
                 if (ticketsTry.isSuccess()) {
                     val userIsAccessDenied = ticketsTry.value.account.getUsers()
-                        .find { it.userId == event.second.userId }
+                        .find { it.userId == user.userId }
                     if (userIsAccessDenied == null) {
                         emit(
                             Message.Inner.OnDialogAccessDenied(
                                 TextProvider.Format(
                                     R.string.psd_no_access_message,
-                                    listOf(event.second.userName)
+                                    listOf(user.userName)
                                 ),
                                 ticketsTry.value.account.getUsers().isEmpty()
                             )
