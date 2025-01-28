@@ -186,12 +186,15 @@ private class FeatureReducer: Logic<State, Message, Effect>() {
                 val authorAccessDenied = message.ticketsInfo.authorAccessDenied
                 val firstCurrentUser = contentState.account.getUsers().firstOrNull()
                 if (currentUsers.size <= 1 && fullUsers.size <= 1 && authorAccessDenied?.find { it == firstCurrentUser?.userId } != null) {
-                    effects { +Effect.Outer.ShowDialog(
-                        TextProvider.Format(
-                            R.string.psd_no_access_message,
-                            listOf(firstCurrentUser?.userName ?: "")
-                        ),
-                        true) }
+                    effects {
+                        +Effect.Outer.ShowDialog(
+                            message = TextProvider.Format(
+                                R.string.psd_no_access_message,
+                                listOf(firstCurrentUser?.userName ?: "")
+                            ),
+                            usersIsEmpty = true
+                        )
+                    }
                 }
 
                 val lastNewUser = diff.lastOrNull()?.let { fullUsers.find { fu -> fu.userId == it.userId} }

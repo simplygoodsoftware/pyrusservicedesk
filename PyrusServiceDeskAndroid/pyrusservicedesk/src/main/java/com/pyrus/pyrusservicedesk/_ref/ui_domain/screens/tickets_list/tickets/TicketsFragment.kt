@@ -142,19 +142,21 @@ internal class TicketsFragment: TeaFragment<Model, Message, Effect.Outer>() {
     }
 
 
+    // TODO Kate usersIsEmpty это бизнесс-логика view слой должен быть как можно более тупым
+    // лучше перенести usersIsEmpty в слой с логикой
     private fun onCreateDialog(title: String, message: String, usersIsEmpty: Boolean): Dialog {
         val builder: AlertDialog.Builder = AlertDialog.Builder(activity)
         builder.setTitle(title)
             .setMessage(message)
             .setPositiveButton(resources.getString(R.string.ok)
             ) { dialog, id ->
-                if (!usersIsEmpty)
+                if (!usersIsEmpty) // TODO Kate тут вообще не понял
                     dialog.cancel()
                 else {
                     val multichatButtons = ConfigUtils.getMultichatButtons()
                     if (multichatButtons?.backButton != null) {
                         try {
-                            startActivity(multichatButtons.backButton)
+                            startActivity(multichatButtons.backButton) // TODO Kate почему backButton это intent???
                         } catch (e: Exception) {
                             // TODO show error ui
                         }
