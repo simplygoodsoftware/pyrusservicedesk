@@ -150,13 +150,13 @@ internal class TicketsFragment: TeaFragment<Model, Message, Effect.Outer>() {
             .setMessage(message)
             .setPositiveButton(resources.getString(R.string.ok)
             ) { dialog, id ->
-                if (!usersIsEmpty) // TODO Kate тут вообще не понял
+                if (!usersIsEmpty)
                     dialog.cancel()
                 else {
                     val multichatButtons = ConfigUtils.getMultichatButtons()
                     if (multichatButtons?.backButton != null) {
                         try {
-                            startActivity(multichatButtons.backButton) // TODO Kate почему backButton это intent???
+                            startActivity(multichatButtons.backButton)
                         } catch (e: Exception) {
                             // TODO show error ui
                         }

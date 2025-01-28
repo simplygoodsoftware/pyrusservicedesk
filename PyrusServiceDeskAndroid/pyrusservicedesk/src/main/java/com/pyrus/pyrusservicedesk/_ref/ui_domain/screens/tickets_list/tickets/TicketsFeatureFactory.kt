@@ -1,7 +1,9 @@
 package com.pyrus.pyrusservicedesk._ref.ui_domain.screens.tickets_list.tickets
 
+import androidx.lifecycle.AtomicReference
 import com.github.terrakok.cicerone.Router
 import com.pyrus.pyrusservicedesk.R
+import com.pyrus.pyrusservicedesk.User
 import com.pyrus.pyrusservicedesk._ref.Screens
 import com.pyrus.pyrusservicedesk._ref.data.multy_chat.TicketsInfo
 import com.pyrus.pyrusservicedesk._ref.ui_domain.screens.tickets_list.tickets.TicketsContract.ContentState
@@ -256,6 +258,9 @@ internal class TicketsActor(
     private val addUserEventBus: AddUserEventBus,
 ): Actor<Effect.Inner, Message.Inner> {
 
+    val pendingUser = AtomicReference<User?>()
+
+
     override fun handleEffect(effect: Effect.Inner): Flow<Message.Inner> = when(effect) {
         is Effect.Inner.UpdateTickets -> singleFlow {
             when(val ticketsTry = repository.getTicketsInfo(effect.force)) {
@@ -271,6 +276,7 @@ internal class TicketsActor(
 
         is Effect.Inner.EventsFlow -> flow {
             addUserEventBus.events().collect { user ->
+                pendingUser.set(user)
                 val ticketsTry = repository.getTicketsInfo(true)
                 if (ticketsTry.isSuccess()) {
 
