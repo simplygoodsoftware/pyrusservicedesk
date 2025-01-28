@@ -30,6 +30,7 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.debounce
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.merge
 
 private const val TAG = "TicketsListFeature"
 
@@ -258,25 +259,42 @@ internal class TicketsActor(
     private val addUserEventBus: AddUserEventBus,
 ): Actor<Effect.Inner, Message.Inner> {
 
-    val pendingUser = AtomicReference<User?>()
+    private val pendingUserAtomic = AtomicReference<User?>(null)
+
+    private suspend fun foo(force: Boolean): Message.Inner {
+        return when(val ticketsTry = repository.getTicketsInfo(force)) {
+            is Try.Success -> {
+                val pendingUser = pendingUserAtomic.getAndSet(null)
+                val filter: User?
+                val showAccessDenied: Boolean
+                if (pendingUser != null) {
+
+                }
+                else {
+                    filter = null
+                    showAccessDenied = false
+                }
+                Message.Inner.UpdateTicketsCompleted(ticketsTry.value, filter, showAccessDenied)
+            }
+            is Try.Failure -> {
+                ticketsTry.error.printStackTrace()
+                Message.Inner.UpdateTicketsFailed
+            }
+        }
+    }
 
 
     override fun handleEffect(effect: Effect.Inner): Flow<Message.Inner> = when(effect) {
         is Effect.Inner.UpdateTickets -> singleFlow {
-            when(val ticketsTry = repository.getTicketsInfo(effect.force)) {
-                is Try.Success -> {
-                    Message.Inner.UpdateTicketsCompleted(ticketsTry.value)
-                }
-                is Try.Failure -> {
-                    ticketsTry.error.printStackTrace()
-                    Message.Inner.UpdateTicketsFailed
-                }
-            }
+            foo(effect.force)
         }
 
         is Effect.Inner.EventsFlow -> flow {
             addUserEventBus.events().collect { user ->
-                pendingUser.set(user)
+                pendingUserAtomic.set(user)
+                emit(foo(true))
+
+
                 val ticketsTry = repository.getTicketsInfo(true)
                 if (ticketsTry.isSuccess()) {
 

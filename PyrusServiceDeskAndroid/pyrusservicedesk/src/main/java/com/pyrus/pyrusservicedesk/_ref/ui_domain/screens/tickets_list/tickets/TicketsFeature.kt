@@ -49,7 +49,7 @@ internal interface TicketsContract {
         sealed interface Inner : Message {
             data class TicketsUpdated(val ticketsInfo: TicketsInfo) : Inner
             data object UpdateTicketsFailed : Inner
-            data class UpdateTicketsCompleted(val ticketsInfo: TicketsInfo) : Inner
+            data class UpdateTicketsCompleted(val ticketsInfo: TicketsInfo, val filter: User?, val showAccessDenied: Boolean) : Inner
             data class OnDialogAccessDenied(val message: TextProvider, val usersIsEmpty: Boolean) : Inner
         }
 
