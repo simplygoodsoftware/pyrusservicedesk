@@ -20,29 +20,18 @@ internal interface TicketView {
     }
 
     sealed interface Event {
-
         data class OnPreviewClick(val commentId: Long, val attachmentId: Long) : Event
-
         data class OnErrorCommentClick(val localId: Long) : Event
-
         data class OnCopyClick(val text: String) : Event
-
         data class OnRatingClick(val rating: Int) : Event
-
         data object OnShowAttachVariantsClick : Event
-
         data object OnSendClick : Event
-
         data object OnCloseClick : Event
-
         data object OnBackClick : Event
-
         data class OnMessageChanged(val text: String) : Event
-
         data class OnButtonClick(val buttonText: String) : Event
-
         data object OnRefresh : Event
-
+        data class OnCancelUploadClick(val localId: Long, val attachmentId: Long) : Event
     }
 
     sealed interface Effect {

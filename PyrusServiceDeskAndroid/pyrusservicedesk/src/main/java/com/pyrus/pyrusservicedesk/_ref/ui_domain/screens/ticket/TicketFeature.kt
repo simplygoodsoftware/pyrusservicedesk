@@ -31,29 +31,18 @@ internal interface TicketContract {
     sealed interface Message {
 
         sealed interface Outer : Message {
-
             data class OnPreviewClick(val commentId: Long, val attachmentId: Long) : Outer
-
             data class OnErrorCommentClick(val localId: Long) : Outer
-
             data class OnCopyClick(val text: String) : Outer
-
             data class OnRatingClick(val rating: Int) : Outer
-
             data object OnShowAttachVariantsClick : Outer
-
             data object OnSendClick : Outer
-
             data object OnCloseClick : Outer
-
             data class OnMessageChanged(val text: String) : Outer
-
             data class OnButtonClick(val text: String) : Outer
-
             data object OnRefresh : Outer
-
             data object OnBackClick : Outer
-
+            data class OnCancelUploadClick(val localId: Long, val attachmentId: Long) : Outer
         }
 
         sealed interface Inner : Message {
@@ -98,6 +87,7 @@ internal interface TicketContract {
             data class ReadTicket(val user: UserInternal, val ticketId: Long) : Inner
             data class ListenAttachVariant(val key: String) : Inner
             data class ListenErrorCommentAction(val localId: Long, val key: String) : Inner
+            data class CancelFileUpload(val localId: Long, val attachmentId: Long) : Inner
         }
     }
 

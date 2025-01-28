@@ -152,6 +152,10 @@ private class FeatureReducer: Logic<State, Message, Effect>() {
                     ticketId = currentState.ticketId,
                 ) }
             }
+            is Message.Outer.OnCancelUploadClick -> {
+                if (state !is State.Content) return
+                effects { +Effect.Inner.CancelFileUpload(message.localId, message.attachmentId) }
+            }
         }
     }
 
@@ -284,6 +288,9 @@ internal class TicketActor(
                 ErrorCommentAction.DELETE -> repository.removeCommand(effect.localId)
                 ErrorCommentAction.RETRY -> repository.retryAddComment(user, effect.localId)
             }
+        }
+        is Effect.Inner.CancelFileUpload -> flow {
+            repository.cancelUploadFile(effect.localId, effect.attachmentId)
         }
     }
 

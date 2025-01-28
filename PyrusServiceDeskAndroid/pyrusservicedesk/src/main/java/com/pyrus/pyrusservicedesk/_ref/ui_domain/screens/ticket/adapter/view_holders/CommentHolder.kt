@@ -79,7 +79,8 @@ internal abstract class CommentHolder(
         comment.fileProgressStatus = content.fileProgressStatus
         comment.setProgress(content.uploadProgress ?: 0)
         comment.setOnProgressIconClickListener {
-            TODO()
+            val imageContent = getItem().content as? CommentContent.Image ?: return@setOnProgressIconClickListener
+            onEvent(TicketView.Event.OnCancelUploadClick(getItem().id, imageContent.attachId))
         }
     }
 }

@@ -239,7 +239,8 @@ internal class Repository(
         commandsStore.removeCommand(localId)
     }
 
-    fun cancelUploadFile(attachmentId: Long) {
+    fun cancelUploadFile(commandId: Long, attachmentId: Long) {
+        removeCommand(commandId)
         val hook = fileHooks[attachmentId]
         hook?.cancelUploading()
         fileHooks.remove(attachmentId)
