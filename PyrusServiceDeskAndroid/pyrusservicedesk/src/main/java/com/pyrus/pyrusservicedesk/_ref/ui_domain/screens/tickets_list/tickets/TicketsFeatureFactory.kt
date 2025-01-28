@@ -266,26 +266,34 @@ internal class TicketsActor(
             }
         }
 
-        is Effect.Inner.EventsFlow -> flow<Message.Inner> {
+        is Effect.Inner.EventsFlow -> flow {
             addUserEventBus.events().collect { user ->
                 val ticketsTry = repository.getTicketsInfo(true)
                 if (ticketsTry.isSuccess()) {
+
+                    // TODO kate так себе вариант лучше в ответе добавить список заблокированных пользователей
+                    // А что если ответ !isSuccess? (нужно узнать логику для этого кейса)
                     val userIsAccessDenied = ticketsTry.value.account.getUsers()
                         .find { it.userId == user.userId }
+
                     if (userIsAccessDenied == null) {
+                        // TODO kate логику с фильтром стоит перенести сюда
                         emit(
                             Message.Inner.OnDialogAccessDenied(
-                                TextProvider.Format(
+                                // TODO kate Текст нам тут не нужен (TextProvider лучше вообще как можно меньше хранить на слое логики)
+                                // поведение "если нет пользоваьеля – значит он заблокирован" выглядит неочевидо
+                                message = TextProvider.Format(
                                     R.string.psd_no_access_message,
                                     listOf(user.userName)
                                 ),
-                                ticketsTry.value.account.getUsers().isEmpty()
+                                // тут мы перемещаем логику в reducer (зачем?) можно и тут обработать
+                                usersIsEmpty = ticketsTry.value.account.getUsers().isEmpty()
                             )
                         )
                     }
                 }
             }
-        }.map { message -> message }
+        }
 
         is Effect.Inner.TicketsSetFlow -> {
             repository.getTicketsInfoFlow()
@@ -296,7 +304,6 @@ internal class TicketsActor(
             val ticketId = effect.ticketId ?: commandsStore.getNextLocalId()
             router.navigateTo(Screens.TicketScreen(ticketId, effect.user).setSlideRightAnimation())
         }
-
 
         is Effect.Inner.Close -> flow { router.exit() }
     }
