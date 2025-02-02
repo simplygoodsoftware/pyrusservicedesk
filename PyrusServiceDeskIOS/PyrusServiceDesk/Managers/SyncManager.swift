@@ -4,6 +4,8 @@ import Network
 class SyncManager {
     private var isRequestInProgress = false
     private var shouldSendAnotherRequest = false
+    private let coreDataService: CoreDataServiceProtocol
+    private let chatsDataService: PSDChatsDataServiceProtocol
     private var isFilter = false
     let monitor = NWPathMonitor()
 
@@ -26,6 +28,8 @@ class SyncManager {
     static let connectionErrorNotification = Notification.Name("CONNECTION_ERROR")
 
     init() {
+        coreDataService = CoreDataService()
+        chatsDataService = PSDChatsDataService(coreDataService: coreDataService)
         monitor.pathUpdateHandler = { path in
             if path.status == .satisfied {
                 self.clearTimer()
@@ -65,6 +69,10 @@ class SyncManager {
                 var clients = clientsArray
                 DispatchQueue.main.async {
                     PyrusServiceDesk.accessDeniedIds = authorAccessDenied ?? []
+                }
+                
+                if let chats {
+                    chatsDataService.saveChatModels(with: chats)
                 }
 
                 let userInfo = ["isFilter": isFilter]

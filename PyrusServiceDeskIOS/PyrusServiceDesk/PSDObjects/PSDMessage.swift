@@ -2,7 +2,7 @@ import UIKit
 
 
 ///The state of message.
-enum messageState {
+enum messageState: Int16 {
     ///message now is sending
     case sending
     ///message was sent to server
