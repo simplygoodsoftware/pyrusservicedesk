@@ -385,14 +385,13 @@ private extension PSDChatsViewController {
             titleView.centerXAnchor.constraint(equalTo: view.centerXAnchor)
         ])
         
-        //navTitle.text = "Обращения"
         navTitle.font = CustomizationHelper.systemBoldFont(ofSize: 17)
         icon.layer.cornerRadius = 12
         icon.clipsToBounds = true
         icon.contentMode = .scaleAspectFill
         
         let tapGesture = UITapGestureRecognizer(target: self, action: #selector(titleViewTapped))
-        titleView.addGestureRecognizer(tapGesture)
+      //  titleView.addGestureRecognizer(tapGesture)
     }
     
     @objc func titleViewTapped() {
@@ -407,8 +406,6 @@ private extension PSDChatsViewController {
         label.textAlignment = .center
         label.font = CustomizationHelper.systemBoldFont(ofSize: 17)
         label.text = chat.subject?.count ?? 0 > 0 ? chat.subject : "NewTicket".localizedPSD()
-//        label.translatesAutoresizingMaskIntoConstraints = false
-//        label.widthAnchor.constraint(greaterThanOrEqualToConstant: 50).isActive = true
         
         customization?.setChatTitileView(label)
         router?.route(to: .chat(chat: chat, fromPush: fromPush))
@@ -424,23 +421,12 @@ private extension PSDChatsViewController {
         guard let diffabledDataSource = diffabledDataSource else { return }
         var snapshot = NSDiffableDataSourceSnapshot<PSDChatsSectionModel, AnyHashable>()
         snapshot.deleteAllItems()
-//        for (index, items) in chats.enumerated() {
-//            let section = PSDChatsSectionModel(id: index)
-//            snapshot.appendSections([section])
-//            snapshot.appendItems(items, toSection: section)
-//        }
-//        let section1 = PSDChatsSectionModel()
-//        let section2 = PSDChatsSectionModel(title: "Закрытые обращения")
         snapshot.appendSections([section1, section2])
         
         snapshot.appendItems(chats[0], toSection: section1)
         snapshot.appendItems(chats[1], toSection: section2)
         
-//        let contentOffset = tableView.contentOffset
-        diffabledDataSource.apply(snapshot, animatingDifferences: animated) 
-//        { [weak self] in
-//            self?.tableView.contentOffset = contentOffset
-//        }
+        diffabledDataSource.apply(snapshot, animatingDifferences: animated)
         self.diffabledDataSource = diffabledDataSource
     }
     
