@@ -181,6 +181,9 @@ struct PSDGetChats {
             if !$0.isActive, $1.isActive {
                 return false
             }
+            if $0.date ?? Date() == $1.date ?? Date() {
+                return Int($0.lastComment?.messageId ?? "0") ?? 0 > Int($1.lastComment?.messageId ?? "0") ?? 0
+            }
             return $0.date ?? Date() > $1.date ?? Date()
         })
     }
