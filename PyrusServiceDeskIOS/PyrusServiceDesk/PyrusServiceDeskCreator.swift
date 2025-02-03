@@ -350,6 +350,7 @@ import UIKit
         createWith(clientId, userId: userId, securityKey: securityKey, reset: false, userName: userName, additionalUsers: additionalUsers, authorId: authorId, domain: domain, loggingEnabled: loggingEnabled, authorizationToken: authorizationToken, multichats: multichats)
     }
     private static func createWith(_ clientId: String?, userId: String?, securityKey: String?, reset: Bool, userName: String?, additionalUsers: [PSDUserInfo] = [], authorId: String?, domain: String?, loggingEnabled: Bool, authorizationToken: String?, multichats: Bool = false) {
+        PyrusServiceDesk.chats = []
         PyrusServiceDesk.multichats = multichats
         PyrusServiceDesk.loggingEnabled = loggingEnabled
         guard let clientId = clientId, clientId.count > 0 else {
@@ -376,7 +377,6 @@ import UIKit
         PyrusServiceDesk.clients = []
         PyrusServiceDesk.currentClientId = clientId
         PyrusServiceDesk.accessDeniedIds = []
-        PyrusServiceDesk.chats = []
         PyrusServiceDesk.lastNoteId = 0
         lastSetPushToken = nil
         if needReloadUI {
@@ -538,12 +538,9 @@ import UIKit
     
     static let chatsUpdateNotification = Notification.Name("CHATS_UPDATE")
     ///All of chats
-    static var chats : [PSDChat] = [PSDChat]() 
-//    {
-//        didSet {
-//            NotificationCenter.default.post(name: chatsUpdateNotification, object: nil)
-//        }
-//    }
+    static var chats: [PSDChat] = [PSDChat]() 
+    static var casheChats: [PSDChat] = [PSDChat]()
+
     ///The main view controller. nil - if chat was closed.
     weak static var mainController : PyrusServiceDeskController?
     ///Updates user info - get chats list from server.

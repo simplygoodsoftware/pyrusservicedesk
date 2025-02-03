@@ -153,12 +153,16 @@ extension PSDChatsDataService: PSDChatsDataServiceProtocol {
                 
                 if let dbMessages = dbChat.messages?.array as? [DBMessage] {
                     let messages: [PSDMessage] = dbMessages.compactMap { dbMessage in
-                        //                        guard dbMessage.text != nil || dbMessage.attachments?.count ?? 0 > 0
-                        //                        else {
-                        //                            return nil
-                        //                        }
-                        
-                        let user = PSDUsers.supportUsersContain(name: dbMessage.authorName ?? "", imagePath: dbMessage.authorAvatarId ?? "", authorId: dbMessage.authorId)
+                        guard dbMessage.text != nil || dbMessage.attachments?.count ?? 0 > 0
+                        else {
+                            return nil
+                        }
+                        let user: PSDUser
+                        if dbMessage.isOutgoing {
+                            user = PSDUsers.user
+                        } else {
+                            user = PSDUsers.supportUsersContain(name: dbMessage.authorName ?? "", imagePath: dbMessage.authorAvatarId ?? "", authorId: dbMessage.authorId)
+                        }
                         let message = PSDMessage(text: dbMessage.text, attachments: nil, messageId: dbMessage.messageId, owner: user, date: dbMessage.date)
                         message.messageId = dbMessage.messageId ?? ""
                         message.appId = dbMessage.appId
@@ -199,6 +203,9 @@ extension PSDChatsDataService: PSDChatsDataServiceProtocol {
                         return message
                     }
                     chat.messages = messages
+                    if let message = messages.last {
+                        chat.lastComment = message
+                    }
                 }
                 return chat
             }

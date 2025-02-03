@@ -6,6 +6,7 @@ class SyncManager {
     private var shouldSendAnotherRequest = false
     private let coreDataService: CoreDataServiceProtocol
     private let chatsDataService: PSDChatsDataServiceProtocol
+    private var firstLoad = true
     private var isFilter = false
     let monitor = NWPathMonitor()
 
@@ -44,6 +45,11 @@ class SyncManager {
 //        PyrusServiceDesk.repository.clear()
 //        PSDMessagesStorage.cleanStorage()
 //        return
+        if firstLoad {
+            let cashe = chatsDataService.getAllChats()
+            PyrusServiceDesk.chats = cashe
+            firstLoad = false
+        }
         if !self.isFilter {
             self.isFilter = isFilter
         }
@@ -71,7 +77,7 @@ class SyncManager {
                     PyrusServiceDesk.accessDeniedIds = authorAccessDenied ?? []
                 }
                 
-                if let chats {
+                if let chats, complete {
                     chatsDataService.saveChatModels(with: chats)
                 }
 
@@ -131,7 +137,7 @@ class SyncManager {
                 }
                 
                 DispatchQueue.main.async {
-                    if let chats {
+                    if let chats, complete {
                         PyrusServiceDesk.chats = chats
                         NotificationCenter.default.post(name: PyrusServiceDesk.chatsUpdateNotification, object: nil, userInfo: userInfo)
                     }

@@ -21,6 +21,9 @@ class ChatsInteractor: NSObject {
     var isClear = false
     var isNewUser = false
     var firtLoad = true
+    
+    private let coreDataService: CoreDataServiceProtocol
+    private let chatsDataService: PSDChatsDataServiceProtocol
 
     private var clients = [PSDClientInfo]() {
         didSet {
@@ -55,6 +58,8 @@ class ChatsInteractor: NSObject {
     
     init(presenter: ChatsPresenterProtocol) {
         self.presenter = presenter
+        coreDataService = CoreDataService()
+        chatsDataService = PSDChatsDataService(coreDataService: coreDataService)
         super.init()
         NotificationCenter.default.addObserver(forName: PyrusServiceDesk.chatsUpdateNotification, object: nil, queue: .main) { [weak self] notification in
             if let userInfo = notification.userInfo,
@@ -71,6 +76,11 @@ extension ChatsInteractor: ChatsInteractorProtocol {
     func doInteraction(_ action: ChatsInteractorCommand) {
         switch action {
         case .viewDidload:
+            if PyrusServiceDesk.chats.count > 0 {
+                chats = PyrusServiceDesk.chats
+                presenter.doWork(.endRefresh)
+                isClear = false
+            }
             createMenuActions()
             NotificationCenter.default.addObserver(self, selector: #selector(showConnectionError), name: SyncManager.connectionErrorNotification, object: nil)
             NotificationCenter.default.addObserver(self, selector: #selector(updateClients), name: PyrusServiceDesk.clientsUpdateNotification, object: nil)
@@ -101,6 +111,7 @@ extension ChatsInteractor: ChatsInteractorProtocol {
         case .deleteFilter:
             deleteFilter()
         case .viewWillAppear:
+   //         guard PyrusServiceDesk.chats.count > 0 else { break }
             PyrusServiceDesk.syncManager.syncGetTickets()
             PyrusServiceDesk.currentUserId = nil
             let filterChats = createChats()

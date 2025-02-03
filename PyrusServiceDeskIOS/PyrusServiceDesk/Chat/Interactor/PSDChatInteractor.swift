@@ -49,17 +49,12 @@ class PSDChatInteractor: NSObject {
         }
     }
     
-    private let coreDataService: CoreDataServiceProtocol
-    private let chatsDataService: PSDChatsDataServiceProtocol
-    
     var isRefresh = false
     
     init(presenter: PSDChatPresenterProtocol, chat: PSDChat? = nil, fromPush: Bool = false) {
         self.presenter = presenter
         self.chat = chat
         self.fromPush = fromPush
-        coreDataService = CoreDataService()
-        chatsDataService = PSDChatsDataService(coreDataService: coreDataService)
         super.init()
     }
     
@@ -72,7 +67,6 @@ extension PSDChatInteractor: PSDChatInteractorProtocol {
     func doInteraction(_ action: PSDChatInteractorCommand) {
         switch action {
         case .viewDidload:
-            let cashe = chatsDataService.getAllChats()
             isOpen = true
             presenter.doWork(.updateTitle(connectionError: !PyrusServiceDesk.syncManager.networkAvailability))
             if let chat, let chatId = chat.chatId {
