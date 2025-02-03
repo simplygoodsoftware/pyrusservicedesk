@@ -371,7 +371,6 @@ import UIKit
         PyrusServiceDesk.customUserId = userId
         PyrusServiceDesk.userName = userName
         PyrusServiceDesk.authorId = authorId
-        PyrusServiceDesk.createUserId(reset)
         PyrusServiceDesk.authorizationToken = authorizationToken
         PyrusServiceDesk.additionalUsers = additionalUsers
         PyrusServiceDesk.clients = []
@@ -379,6 +378,7 @@ import UIKit
         PyrusServiceDesk.accessDeniedIds = []
         PyrusServiceDesk.lastNoteId = 0
         lastSetPushToken = nil
+        PyrusServiceDesk.createUserId(reset)
         if needReloadUI {
             PyrusServiceDesk.mainController?.updateTitleChat()
         }

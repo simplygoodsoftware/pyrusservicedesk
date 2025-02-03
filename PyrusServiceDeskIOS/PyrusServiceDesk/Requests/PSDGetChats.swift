@@ -138,15 +138,6 @@ struct PSDGetChats {
                 date = lastComment.stringOfKey(createdAtParameter).dateFromString(format: "yyyy-MM-dd'T'HH:mm:ss'Z'")
                 lastMessage = PSDMessage.init(text: lastComment.stringOfKey("body"), attachments:nil, messageId: lastComment.stringOfKey(commentIdParameter), owner: nil, date: date)
             }
-           
-            let ticketId = dic["ticket_id"] as? Int
-            var messages: [PSDMessage] = [PSDMessage]()
-            let newMessages = PSDGetChat.generateMessages(from: dic["comments"] as? NSArray ?? NSArray())
-            if let storeChat = PyrusServiceDesk.chats.first(where: { $0.chatId == ticketId }), PyrusServiceDesk.lastNoteId != 0 {
-                messages = storeChat.messages + newMessages
-            } else {
-                messages = newMessages
-            }
             
             let userId = dic["user_id"] as? String ?? ""
             if PyrusServiceDesk.customUserId ?? PyrusServiceDesk.userId == userId,
@@ -155,6 +146,15 @@ struct PSDGetChats {
             } else if let user = PyrusServiceDesk.additionalUsers.first(where: { $0.userId == userId }),
                       user.lastNoteId ?? 0 < Int(lastMessage?.messageId ?? "") ?? 0 {
                 user.lastNoteId = Int(lastMessage?.messageId ?? "")
+            }
+           
+            let ticketId = dic["ticket_id"] as? Int
+            var messages: [PSDMessage] = [PSDMessage]()
+            let newMessages = PSDGetChat.generateMessages(from: dic["comments"] as? NSArray ?? NSArray())
+            if let storeChat = PyrusServiceDesk.chats.first(where: { $0.chatId == ticketId }) {
+                messages = storeChat.messages + newMessages
+            } else {
+                messages = newMessages
             }
             
             if let message = messages.last {

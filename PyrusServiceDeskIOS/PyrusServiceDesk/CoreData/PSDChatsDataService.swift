@@ -203,8 +203,15 @@ extension PSDChatsDataService: PSDChatsDataServiceProtocol {
                         return message
                     }
                     chat.messages = messages
-                    if let message = messages.last {
-                        chat.lastComment = message
+                    if let lastMessage = messages.last, let userId = chat.userId {
+                        chat.lastComment = lastMessage
+                        if PyrusServiceDesk.customUserId ?? PyrusServiceDesk.userId == userId,
+                           PyrusServiceDesk.lastNoteId ?? 0 < Int(lastMessage.messageId) ?? 0 {
+                            PyrusServiceDesk.lastNoteId = Int(lastMessage.messageId)
+                        } else if let user = PyrusServiceDesk.additionalUsers.first(where: { $0.userId == userId }),
+                                  user.lastNoteId ?? 0 < Int(lastMessage.messageId) ?? 0 {
+                            user.lastNoteId = Int(lastMessage.messageId)
+                        }
                     }
                 }
                 return chat
