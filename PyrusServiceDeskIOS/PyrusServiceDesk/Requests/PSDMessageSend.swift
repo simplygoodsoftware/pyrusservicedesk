@@ -44,6 +44,7 @@ struct PSDMessageSend {
                         ]
                         NotificationCenter.default.post(name: .removeMesssageNotification, object: nil, userInfo: userInfo)
                         PSDMessagesStorage.remove(messageId: message.message.clientId)
+                        PyrusServiceDesk.repository.deleteCommand(withId: message.commandId)
                     }
                 }
             }
@@ -124,6 +125,28 @@ struct PSDMessageSend {
         
         let commandId = messageToPass.commandId ?? UUID().uuidString
         delegate?.addMessageToPass(message: messageToPass, commandId: commandId)
+        let requestNewTicket = PyrusServiceDesk.multichats && (messageToPass.ticketId == 0 || messageToPass.requestNewTicket)
+        var attachmentsData: [AttachmentData]?
+        
+//        if let attachments = messageToPass.attachments, attachments.count > 0 {
+//            for (i,attachment) in attachments.enumerated(){
+//                if attachment.emptyId() {
+//                    PSDMessageSend.passFile(messageToPass, attachmentIdex: i, delegate: delegate)
+//                    break
+//                }
+//            }
+//        }
+        
+        if let attachments = messageToPass.attachments {
+            attachmentsData = []
+            for attachment in attachments {
+                let attach = AttachmentData(type: 0, name: attachment.name, guid: attachment.serverIdentifer)
+                attachmentsData?.append(attach)
+            }
+        }
+        let params = TicketCommandParams(ticketId: messageToPass.ticketId, appId:  PyrusServiceDesk.currentClientId ?? PyrusServiceDesk.clientId, requestNewTicket: requestNewTicket, userId: PyrusServiceDesk.currentUserId ?? PyrusServiceDesk.customUserId ?? PyrusServiceDesk.userId, message: messageToPass.text, attachments: attachmentsData, rating: messageToPass.rating, date: messageToPass.date, messageClientId: messageToPass.clientId)
+        let command = TicketCommand(commandId: messageToPass.commandId ?? UUID().uuidString, type: .createComment, appId: PyrusServiceDesk.currentClientId ?? PyrusServiceDesk.clientId, userId:  PyrusServiceDesk.currentUserId ?? PyrusServiceDesk.customUserId ?? PyrusServiceDesk.userId, params: params)
+        PyrusServiceDesk.repository.add(command: command)
         PSDMessagesStorage.save(message: messageToPass)
         PyrusServiceDesk.syncManager.syncGetTickets()
         dispatchQueue.async {

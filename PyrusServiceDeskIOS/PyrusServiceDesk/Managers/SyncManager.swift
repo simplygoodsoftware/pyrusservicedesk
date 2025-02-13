@@ -5,7 +5,7 @@ class SyncManager {
     private var isRequestInProgress = false
     private var shouldSendAnotherRequest = false
     private let coreDataService: CoreDataServiceProtocol
-    private let chatsDataService: PSDChatsDataServiceProtocol
+    let chatsDataService: PSDChatsDataServiceProtocol
     private var firstLoad = true
     private var isFilter = false
     let monitor = NWPathMonitor()
@@ -42,12 +42,15 @@ class SyncManager {
     }
     
     func syncGetTickets(isFilter: Bool = false) {
+        PSDMessagesStorage.loadAttachments()
 //        PyrusServiceDesk.repository.clear()
 //        PSDMessagesStorage.cleanStorage()
 //        return
         if firstLoad {
             let cashe = chatsDataService.getAllChats()
             PyrusServiceDesk.chats = cashe
+            PyrusServiceDesk.clients = chatsDataService.getAllClients()
+            PyrusServiceDesk.repository.loadCommands()
             firstLoad = false
         }
         if !self.isFilter {
@@ -60,125 +63,130 @@ class SyncManager {
 
         isRequestInProgress = true
         shouldSendAnotherRequest = false
-        PyrusServiceDesk.repository.load { [weak self] result in
-            self?.sendingMessages = PSDMessagesStorage.getSendingMessages()
-            var ticketCommands: [TicketCommand]
-            switch result {
-            case .success(let commands):
-                ticketCommands = commands
-            case .failure(_):
-                ticketCommands = []
+        sendingMessages = PSDMessagesStorage.getSendingMessages()
+//        PyrusServiceDesk.repository.load { [weak self] result in
+//            self?.sendingMessages = PSDMessagesStorage.getSendingMessages()
+//            var ticketCommands: [TicketCommand]
+//            switch result {
+//            case .success(let commands):
+//                ticketCommands = commands
+//            case .failure(_):
+//                ticketCommands = []
+//            }
+//        }
+        
+        let ticketCommands = PyrusServiceDesk.repository.getCommands()
+        PSDGetChats.get(commands: ticketCommands.map({ $0.toDictionary() })) { [weak self] chats, commandsResult, authorAccessDenied, clientsArray, complete in
+            guard let self = self else { return }
+            var clients = clientsArray
+            DispatchQueue.main.async {
+                PyrusServiceDesk.accessDeniedIds = authorAccessDenied ?? []
             }
             
-            PSDGetChats.get(commands: ticketCommands.map({ $0.toDictionary() })) { [weak self] chats, commandsResult, authorAccessDenied, clientsArray, complete in
-                guard let self = self else { return }
-                var clients = clientsArray
-                DispatchQueue.main.async {
-                    PyrusServiceDesk.accessDeniedIds = authorAccessDenied ?? []
-                }
-                
-                if let chats, complete {
-                    chatsDataService.saveChatModels(with: chats)
-                }
+            if let chats, complete {
+                chatsDataService.saveChatModels(with: chats)
+            }
 
-                let userInfo = ["isFilter": isFilter]
-                if let authorAccessDenied, authorAccessDenied.count > 0 {
-                    DispatchQueue.main.async {
-                        PyrusServiceDesk.deniedAccessCallback?.deleteUsers(userIds: authorAccessDenied)
-                    }
-                    
-                    NotificationCenter.default.post(name: SyncManager.updateAccessesNotification, object: nil, userInfo: userInfo)
-                    
-                    if let clientsArray {
-                        for client in clientsArray {
-                            var removeClient = true
-                            for user in PyrusServiceDesk.additionalUsers {
-                                if user.clientId == client.clientId && !authorAccessDenied.contains(user.userId) {
-                                    removeClient = false
-                                    break
-                                }
-                            }
-                            if client.clientId == PyrusServiceDesk.clientId && !authorAccessDenied.contains(PyrusServiceDesk.customUserId ?? PyrusServiceDesk.userId) {
-                                continue
-                            }
-                            
-                            if !removeClient { continue }
-                            if PyrusServiceDesk.currentClientId == client.clientId {
-                                PyrusServiceDesk.currentClientId = nil
-                            }
-                            clients?.removeAll(where: { $0.clientId == client.clientId })
-                        }
-                    }
-                }
+            let userInfo = ["isFilter": isFilter]
+            if let authorAccessDenied, authorAccessDenied.count > 0 {
                 DispatchQueue.main.async {
-                    if let clients, clients.count > 0 {
-                        PyrusServiceDesk.clients = clients
-                    }
+                    PyrusServiceDesk.deniedAccessCallback?.deleteUsers(userIds: authorAccessDenied)
                 }
                 
-                if let commandsResult {
-                    self.commandsResult = commandsResult.sorted(by: { $0.commentId ?? 0 < $1.commentId ?? 0 })
-                    do {
-                        let jsonData = try JSONEncoder().encode(commandsResult)
-                        NotificationCenter.default.post(name: SyncManager.commandsResultNotification, object: nil, userInfo: ["tickets": jsonData])
-                    } catch { }
-                    
-                    for commandResult in commandsResult {
-                        PyrusServiceDesk.repository.deleteCommand(withId: commandResult.commandId)
-                        if let message = self.sendingMessages.first(where: { $0.commandId.lowercased() == commandResult.commandId.lowercased() })?.message {
-                            PSDMessagesStorage.remove(messageId: message.clientId, needSafe: false, serverTicketId: commandResult.ticketId)
-                            if commandResult.error != nil {
-                                message.state = .cantSend
-                                PSDMessagesStorage.save(message: message)
+                NotificationCenter.default.post(name: SyncManager.updateAccessesNotification, object: nil, userInfo: userInfo)
+                
+                if let clientsArray {
+                    for client in clientsArray {
+                        var removeClient = true
+                        for user in PyrusServiceDesk.additionalUsers {
+                            if user.clientId == client.clientId && !authorAccessDenied.contains(user.userId) {
+                                removeClient = false
+                                break
                             }
                         }
-                    }
-                    PSDMessagesStorage.saveMessagesToFile()
-                }
-                
-                DispatchQueue.main.async {
-                    if let chats, complete {
-                        PyrusServiceDesk.chats = chats
-                        NotificationCenter.default.post(name: PyrusServiceDesk.chatsUpdateNotification, object: nil, userInfo: userInfo)
-                    }
-                    
-                    PyrusLogger.shared.logEvent("PSDGetChats did end with chats count: \(chats?.count ?? 0).")
-                    guard let chats = chats else {
-                        return
-                    }
-                    var unreadChats = 0
-                    var lasMessage: PSDMessage?
-                    for chat in chats {
-                        lasMessage = chat.messages.last
-                        guard !chat.isRead else {
+                        if client.clientId == PyrusServiceDesk.clientId && !authorAccessDenied.contains(PyrusServiceDesk.customUserId ?? PyrusServiceDesk.userId) {
                             continue
                         }
-                        unreadChats = unreadChats + 1
-                    }
-                    
-                    UnreadMessageManager.refreshNewMessagesCount(unreadChats > 0, lastMessage: lasMessage)
-                }
-
-                self.isRequestInProgress = false
-                
-                if !complete {
-                    self.updateRepeatSyncTimer()
-                    networkAvailability = false
-                } else {
-                    if isFilter {
-                        self.isFilter = false
-                    }
-                    clearTimer()
-                    networkAvailability = true
-                }
-                
-                if self.shouldSendAnotherRequest {
-                    DispatchQueue.main.async {
-                        self.syncGetTickets(isFilter: self.isFilter)
+                        
+                        if !removeClient { continue }
+                        if PyrusServiceDesk.currentClientId == client.clientId {
+                            PyrusServiceDesk.currentClientId = nil
+                        }
+                        clients?.removeAll(where: { $0.clientId == client.clientId })
                     }
                 }
-                
             }
+            DispatchQueue.main.async { [weak self] in
+                if let clients, clients.count > 0 {
+                    PyrusServiceDesk.clients = clients
+                    self?.chatsDataService.saveClientModels(with: clients)
+                }
+            }
+            
+            if let commandsResult {
+                self.commandsResult = commandsResult.sorted(by: { $0.commentId ?? 0 < $1.commentId ?? 0 })
+                do {
+                    let jsonData = try JSONEncoder().encode(commandsResult)
+                    NotificationCenter.default.post(name: SyncManager.commandsResultNotification, object: nil, userInfo: ["tickets": jsonData])
+                } catch { }
+                
+                for commandResult in commandsResult {
+                    if let message = self.sendingMessages.first(where: { $0.commandId.lowercased() == commandResult.commandId.lowercased() })?.message {
+                        PyrusServiceDesk.repository.deleteCommand(withId: commandResult.commandId, serverTicketId: commandResult.ticketId)
+                        PSDMessagesStorage.remove(messageId: message.clientId, needSafe: false, serverTicketId: commandResult.ticketId)
+                        if commandResult.error != nil {
+                            message.state = .cantSend
+                            PSDMessagesStorage.save(message: message)
+                        }
+                    } else {
+                        PyrusServiceDesk.repository.deleteCommand(withId: commandResult.commandId)
+                    }
+                }
+                PSDMessagesStorage.saveMessagesToFile()
+            }
+            
+            DispatchQueue.main.async {
+                if let chats, complete {
+                    PyrusServiceDesk.chats = chats
+                    NotificationCenter.default.post(name: PyrusServiceDesk.chatsUpdateNotification, object: nil, userInfo: userInfo)
+                }
+                
+                PyrusLogger.shared.logEvent("PSDGetChats did end with chats count: \(chats?.count ?? 0).")
+                guard let chats = chats else {
+                    return
+                }
+                var unreadChats = 0
+                var lasMessage: PSDMessage?
+                for chat in chats {
+                    lasMessage = chat.messages.last
+                    guard !chat.isRead else {
+                        continue
+                    }
+                    unreadChats = unreadChats + 1
+                }
+                
+                UnreadMessageManager.refreshNewMessagesCount(unreadChats > 0, lastMessage: lasMessage)
+            }
+
+            self.isRequestInProgress = false
+            
+            if !complete {
+                self.updateRepeatSyncTimer()
+                networkAvailability = false
+            } else {
+                if isFilter {
+                    self.isFilter = false
+                }
+                clearTimer()
+                networkAvailability = true
+            }
+            
+            if self.shouldSendAnotherRequest {
+                DispatchQueue.main.async {
+                    self.syncGetTickets(isFilter: self.isFilter)
+                }
+            }
+            
         }
     }
 }

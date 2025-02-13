@@ -24,6 +24,7 @@ class ChatsInteractor: NSObject {
     
     private let coreDataService: CoreDataServiceProtocol
     private let chatsDataService: PSDChatsDataServiceProtocol
+    private let imageRepository: ImageRepositoryProtocol?
 
     private var clients = [PSDClientInfo]() {
         didSet {
@@ -60,6 +61,7 @@ class ChatsInteractor: NSObject {
         self.presenter = presenter
         coreDataService = CoreDataService()
         chatsDataService = PSDChatsDataService(coreDataService: coreDataService)
+        imageRepository = ImageRepository()
         super.init()
         NotificationCenter.default.addObserver(forName: PyrusServiceDesk.chatsUpdateNotification, object: nil, queue: .main) { [weak self] notification in
             if let userInfo = notification.userInfo,
@@ -76,7 +78,8 @@ extension ChatsInteractor: ChatsInteractorProtocol {
     func doInteraction(_ action: ChatsInteractorCommand) {
         switch action {
         case .viewDidload:
-            if PyrusServiceDesk.chats.count > 0 {
+            if PyrusServiceDesk.clients.count > 0 {
+                updateClients()
                 chats = PyrusServiceDesk.chats
                 presenter.doWork(.endRefresh)
                 isClear = false
@@ -227,6 +230,10 @@ private extension ChatsInteractor {
     func updateIcon(imagePath: String, index: Int) {
         if let image = clients[index].image {
             presenter.doWork(.updateIcon(image: image))
+        } else if let image = imageRepository?.loadImage(name: clients[index].clientId, type: .clientIcon) {
+            presenter.doWork(.updateIcon(image: image))
+            clients[index].image = image
+            PyrusServiceDesk.clients[index].image = image
         }
         loadImage(urlString: imagePath) { [weak self] image in
             DispatchQueue.main.async { [weak self] in
@@ -234,6 +241,9 @@ private extension ChatsInteractor {
                     self?.clients[index].image = image ?? UIImage.PSDImage(name: "iiko")
                     PyrusServiceDesk.clients[index].image = image ?? UIImage.PSDImage(name: "iiko")
                     self?.presenter.doWork(.updateIcon(image: image))
+                    if let image, let name = self?.clients[index].clientId {
+                        self?.imageRepository?.saveImage(image, name: name, type: .clientIcon)
+                    }
                 }
             }
         }

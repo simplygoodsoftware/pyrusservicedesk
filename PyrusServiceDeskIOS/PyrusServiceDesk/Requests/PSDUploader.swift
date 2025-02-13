@@ -176,6 +176,7 @@ class PSDUploader: NSObject {
             }
             else{
                 //some error happend
+                uploadData.file.isLoading = false
                 PSDTasksData.updateMessage(uploadData.message, with: uploadData.file, uploadingProgress: 0.0)
 //                DispatchQueue.global().asyncAfter(deadline: DispatchTime(uptimeNanoseconds: 100)) {
 //                    PSDMessageSend.pass(uploadData.message, delegate: uploadData.sendingDelegate)

@@ -18,7 +18,7 @@ struct PSDPreviewSetter {
         setPreview(of: attachment, in: attachmentView, delegate: delegate, animated: animated, startAfter: 0)
     }
     private static func setPreview(of attachment:PSDAttachment?, in attachmentView: PSDAttachmentView?, delegate: PSDPreviewSetterDelegate?, animated: Bool, startAfter:Int){
-         DispatchQueue.main.asyncAfter(deadline: .now() + .seconds(startAfter), execute:{
+         DispatchQueue.main.asyncAfter(deadline: .now() + .seconds(startAfter), execute: {
             guard let attachment = attachment, let attachmentView = attachmentView else{
                 return
             }
@@ -37,7 +37,7 @@ struct PSDPreviewSetter {
                     loadPreview(of: attachment){
                         (image : UIImage?, retryAfter:Bool) in
                         DispatchQueue.main.async {
-                            if image != nil{
+                            if image != nil {
                                 loadingAttachments[attachment.localId] = .loaded
                                 attachment.previewImage = image
                                 attachmentView?.setPreviewImage(image, animated: true)//set image with animation

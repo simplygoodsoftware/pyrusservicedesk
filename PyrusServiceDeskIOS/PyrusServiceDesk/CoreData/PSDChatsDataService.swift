@@ -1,4 +1,5 @@
 import Foundation
+import CoreData
 
 final class PSDChatsDataService {
 
@@ -7,22 +8,71 @@ final class PSDChatsDataService {
     init(coreDataService: CoreDataServiceProtocol) {
         self.coreDataService = coreDataService
     }
+    
+    init() {
+        self.coreDataService = CoreDataService()
+    }
 
 }
 
 extension PSDChatsDataService: PSDChatsDataServiceProtocol {
-
-    func saveChatModels(with chatModels: [PSDChat]) {
+    func deleteAllObjects() {
+        coreDataService.deleteAllObjects(forEntityName: "DBAttachment")
+        coreDataService.deleteAllObjects(forEntityName: "DBMessage")
         coreDataService.deleteAllObjects(forEntityName: "DBChat")
-        for chatModel in chatModels {
-            saveChatModel(with: chatModel)
+        coreDataService.deleteAllObjects(forEntityName: "DBTicketCommand")
+        coreDataService.deleteAllObjects(forEntityName: "DBClient")
+    }
+    
+    func saveClientModels(with clientModels: [PSDClientInfo]) {
+        coreDataService.deleteAllObjects(forEntityName: "DBClient")
+        for clientModel in clientModels {
+            saveClientModel(with: clientModel)
         }
     }
     
-    func saveChatModel(with chatModel: PSDChat) {
+    func saveClientModel(with clientModel: PSDClientInfo) {
         coreDataService.save { context in
+            let dbClient = DBClient(context: context)
+            dbClient.appId = clientModel.clientId
+            dbClient.name = clientModel.clientName
+            dbClient.appIcon = clientModel.clientIcon
+        }
+    }
+    
+    func getAllClients() -> [PSDClientInfo] {
+        do {
+            let dbClients = try coreDataService.fetchClients()
+            let clients: [PSDClientInfo] = dbClients.compactMap { dbClient in
+                let client = PSDClientInfo(
+                    clientId: dbClient.appId ?? "",
+                    clientName: dbClient.name ?? "",
+                    clientIcon: dbClient.appIcon ?? ""
+                )
+                return client
+            }
+            return clients
+        } catch {
+            print("\(error)")
+            return []
+        }
+    }
+
+    func saveChatModels(with chatModels: [PSDChat]) {
+        coreDataService.deleteAllObjects(forEntityName: "DBChat")
+        coreDataService.save { context in
+            self.saveChatModel(with: chatModels, context: context)
+        }
+//        for chatModel in chatModels {
+//            saveChatModel(with: chatModel)
+//        }
+    }
+    
+    func saveChatModel(with chatModels: [PSDChat], context: NSManagedObjectContext) {
+       // coreDataService.save { context in
+        for chatModel in chatModels {
             let dbChat = DBChat(context: context)
-            dbChat.chatId = Int64(chatModel.chatId ?? 0)//chatModel.chatId as? Int64 ?? 0
+            dbChat.chatId = Int64(chatModel.chatId ?? 0)
             dbChat.date = chatModel.date
             dbChat.isActive = chatModel.isActive
             dbChat.isRead = chatModel.isRead
@@ -85,48 +135,56 @@ extension PSDChatsDataService: PSDChatsDataServiceProtocol {
         }
     }
     
-//    func saveMessagesModels(with messageModels: [MessageModel], in channelModel: ChannelModel) {
-//        coreDataService.deleteAllMessages(for: channelModel.id)
-//        coreDataService.save { context in
-//            let fetchRequest = DBChannel.fetchRequest()
-//            fetchRequest.predicate = NSPredicate(format: "id == %@", channelModel.id as CVarArg)
-//            guard let dbChannel = try? context.fetch(fetchRequest).first else {
-//                return
-//            }
-//            
-//            for messageModel in messageModels {
-//                let dbMessage = DBMessage(context: context)
-//                dbMessage.uuid = messageModel.uuid
-//                dbMessage.userName = messageModel.userName
-//                dbMessage.date = messageModel.date
-//                dbMessage.userID = messageModel.userID
-//                dbMessage.text = messageModel.text
-//                dbChannel.addToMessages(dbMessage)
-//            }
-//        }
-//    }
-
-//    func saveMessageModel(with messageModel: MessageModel, in channelModel: ChannelModel) {
-//        coreDataService.save { context in
-//            let fetchRequest = DBChannel.fetchRequest()
-//            fetchRequest.predicate = NSPredicate(format: "id == %@", channelModel.id as CVarArg)
-//            let dbChannel = try context.fetch(fetchRequest).first
-//
-//            guard
-//                let dbChannel
-//            else {
-//                return
-//            }
-//
-//            let dbMessage = DBMessage(context: context)
-//            dbMessage.uuid = messageModel.uuid
-//            dbMessage.userName = messageModel.userName
-//            dbMessage.date = messageModel.date
-//            dbMessage.userID = messageModel.userID
-//            dbMessage.text = messageModel.text
-//            dbChannel.addToMessages(dbMessage)
-//        }
-//    }
+    func saveTicketCommand(with ticketCommand: TicketCommand) {
+        coreDataService.save { context in
+            let fetchRequest = DBTicketCommand.fetchRequest()
+            fetchRequest.predicate = NSPredicate(format: "id == %@", ticketCommand.commandId.lowercased() as CVarArg)
+            if let dbTicketCommand = try? context.fetch(fetchRequest).first {
+                guard let attachments = ticketCommand.params.attachments else { return }
+                dbTicketCommand.attachments = NSOrderedSet()
+                for attachmentData in attachments {
+                    let dbAttachmentData = DBAttachmentData(context: context)
+                    dbAttachmentData.guid = attachmentData.guid
+                    dbAttachmentData.type = Int32(attachmentData.type)
+                    dbAttachmentData.name = attachmentData.name
+                    dbTicketCommand.addToAttachments(dbAttachmentData)
+                }
+                return
+            }
+            
+            let dbTicketCommand = DBTicketCommand(context: context)
+            dbTicketCommand.id = ticketCommand.commandId.lowercased()
+            dbTicketCommand.appId = ticketCommand.appId
+            dbTicketCommand.message = ticketCommand.params.message
+            if let messageId = ticketCommand.params.messageId {
+                dbTicketCommand.messageId = Int64(messageId)
+            }
+            if let requestNewTicket = ticketCommand.params.requestNewTicket {
+                dbTicketCommand.requestNewTicket = requestNewTicket
+            }
+            if let ticketId = ticketCommand.params.ticketId {
+                dbTicketCommand.ticketId = Int64(ticketId)
+            }
+            dbTicketCommand.token = ticketCommand.params.token
+            dbTicketCommand.tokenType = ticketCommand.params.type
+            dbTicketCommand.userId = ticketCommand.userId
+            dbTicketCommand.type = Int32(ticketCommand.type)
+            dbTicketCommand.date = ticketCommand.params.date
+            dbTicketCommand.clientId = ticketCommand.params.messageClientId
+            
+            if dbTicketCommand.attachments == nil {
+                dbTicketCommand.attachments = NSOrderedSet()
+            }
+            
+            for attachmentData in ticketCommand.params.attachments ?? [] {
+                let dbAttachmentData = DBAttachmentData(context: context)
+                dbAttachmentData.guid = attachmentData.guid
+                dbAttachmentData.type = Int32(attachmentData.type)
+                dbAttachmentData.name = attachmentData.name
+                dbTicketCommand.addToAttachments(dbAttachmentData)
+            }            
+        }
+    }
     
     func deleteChats(chatModels: [PSDChat]) {
         for model in chatModels {
@@ -137,11 +195,58 @@ extension PSDChatsDataService: PSDChatsDataServiceProtocol {
             }
         }
     }
+    
+    func getAllCommands() -> [TicketCommand] {
+        do {
+            let dbCommands = try coreDataService.fetchCommands()
+            let commands: [TicketCommand] = dbCommands.compactMap { dbCommand in
+                guard let commandId = dbCommand.id else { return nil }
+                var attachmentsData: [AttachmentData]? = nil
+                if let dbAttachments = dbCommand.attachments?.array as? [DBAttachmentData] {
+                    let attachments: [AttachmentData] = dbAttachments.compactMap { dbAttachment in
+                        let attachment = AttachmentData(
+                            type: Int(dbAttachment.type),
+                            name: dbAttachment.name ?? "",
+                            guid: dbAttachment.guid
+                        )
+                        return attachment
+                    }
+                    attachmentsData = attachments
+                }
+                
+                let command = TicketCommand(
+                    commandId: dbCommand.id ?? "",
+                    type: TicketCommandType(rawValue: Int(dbCommand.type)) ?? .readTicket,
+                    appId: dbCommand.appId,
+                    userId: dbCommand.userId,
+                    params: TicketCommandParams(
+                        ticketId: Int(dbCommand.ticketId),
+                        appId: dbCommand.appId,
+                        requestNewTicket: dbCommand.requestNewTicket,
+                        userId: dbCommand.userId,
+                        message: dbCommand.message,
+                        attachments: attachmentsData,
+                        authorId: dbCommand.authorId,
+                        token: dbCommand.token,
+                        type: dbCommand.tokenType,
+                        messageId: Int(dbCommand.messageId),
+                        date: dbCommand.date,
+                        messageClientId: dbCommand.clientId
+                    )
+                )
+                return command
+            }
+            return commands
+        } catch {
+            print("\(error)")
+            return []
+        }
+    }
 
     func getAllChats() -> [PSDChat] {
         do {
-            let dbChannel = try coreDataService.fetchChats()
-            let chats: [PSDChat] = dbChannel.compactMap { dbChat in
+            let dbChats = try coreDataService.fetchChats()
+            let chats: [PSDChat] = dbChats.compactMap { dbChat in
                 let chat = PSDChat(chatId: Int(dbChat.chatId), date: dbChat.date ?? Date(), messages: [])
                 chat.subject = dbChat.subject
                 chat.isActive = dbChat.isActive
@@ -153,7 +258,7 @@ extension PSDChatsDataService: PSDChatsDataServiceProtocol {
                 
                 if let dbMessages = dbChat.messages?.array as? [DBMessage] {
                     let messages: [PSDMessage] = dbMessages.compactMap { dbMessage in
-                        guard dbMessage.text != nil || dbMessage.attachments?.count ?? 0 > 0
+                        guard dbMessage.text != nil || dbMessage.attachments?.count ?? 0 > 0 || dbMessage.rating != nil
                         else {
                             return nil
                         }
@@ -223,35 +328,34 @@ extension PSDChatsDataService: PSDChatsDataServiceProtocol {
         }
     }
 
-//    func getMessages(for channelUUID: String) -> [MessageModel] {
-//        do {
-//            let dbMessages = try coreDataService.fetchMessages(for: channelUUID)
-//            let messages: [MessageModel] = dbMessages.compactMap { dbMessage in
-//                guard
-//                    let uuid = dbMessage.uuid,
-//                    let text = dbMessage.text,
-//                    let userName = dbMessage.userName,
-//                    let userID = dbMessage.userID,
-//                    let date = dbMessage.date
-//                else {
-//                    return nil
-//                }
-//
-//                return MessageModel(
-//                    uuid: uuid,
-//                    text: text,
-//                    userID: userID,
-//                    userName: userName,
-//                    date: date
-//                )
-//            }
-//
-//            return messages
-//        } catch {
-//            Logger.shared.printLog(log: "\(error)")
-//            return []
-//        }
-//    }
+    func deleteCommand(with id: String, serverTicketId: Int?) {
+        if let serverTicketId {
+            coreDataService.save { context in
+                let fetchRequest = DBTicketCommand.fetchRequest()
+                fetchRequest.predicate = NSPredicate(format: "id == %@", id.lowercased() as CVarArg)
+                if let dbTicketCommand = try? context.fetch(fetchRequest).first,
+                   dbTicketCommand.requestNewTicket,
+                   dbTicketCommand.ticketId < 0 {
+                    let newId = (dbTicketCommand.ticketId, serverTicketId)
+                    let fetchRequest = DBTicketCommand.fetchRequest()
+                    fetchRequest.predicate = NSPredicate(format: "id == %lld", Int64(dbTicketCommand.ticketId))
+                    if let dbCommands = try? context.fetch(fetchRequest) {
+                        for dbCommand in dbCommands {
+                            if dbCommand.ticketId == newId.0 {
+                                dbCommand.ticketId = Int64(newId.1)
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        
+        do {
+            try coreDataService.deleteCommand(id: id)
+        } catch {
+            print("\(error)")
+        }
+    }
     
     func deleteChannel(with chatId: Int) {
         do {

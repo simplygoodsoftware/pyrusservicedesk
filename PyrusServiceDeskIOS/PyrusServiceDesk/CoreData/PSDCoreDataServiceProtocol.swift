@@ -3,9 +3,10 @@ import CoreData
 
 protocol CoreDataServiceProtocol: AnyObject {
     func fetchChats() throws -> [DBChat]
- //   func fetchMessages(for channelUUID: Int) throws -> [DBMessage]
+    func fetchCommands() throws -> [DBTicketCommand]
+    func fetchClients() throws -> [DBClient]
     func save(block: @escaping (NSManagedObjectContext) throws -> Void)
     func deleteAllObjects(forEntityName entityName: String)
- //   func deleteAllMessages(for chatUUID: String)
+    func deleteCommand(id: String) throws
     func deleteChat(id: Int) throws
 }

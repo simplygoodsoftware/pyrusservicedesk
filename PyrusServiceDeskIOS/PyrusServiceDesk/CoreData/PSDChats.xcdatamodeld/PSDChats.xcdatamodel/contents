@@ -13,6 +13,12 @@
         <attribute name="uploadingProgress" optional="YES" attributeType="Float" defaultValueString="0.0" usesScalarValueType="YES"/>
         <relationship name="message" optional="YES" maxCount="1" deletionRule="Nullify" destinationEntity="DBMessage" inverseName="attachments" inverseEntity="DBMessage"/>
     </entity>
+    <entity name="DBAttachmentData" representedClassName="DBAttachmentData" syncable="YES" codeGenerationType="class">
+        <attribute name="guid" optional="YES" attributeType="String"/>
+        <attribute name="name" optional="YES" attributeType="String"/>
+        <attribute name="type" optional="YES" attributeType="Integer 32" defaultValueString="0" usesScalarValueType="YES"/>
+        <relationship name="ticketCommand" optional="YES" maxCount="1" deletionRule="Nullify" destinationEntity="DBTicketCommand" inverseName="attachments" inverseEntity="DBTicketCommand"/>
+    </entity>
     <entity name="DBChat" representedClassName="DBChat" syncable="YES" codeGenerationType="class">
         <attribute name="chatId" optional="YES" attributeType="Integer 64" defaultValueString="0" usesScalarValueType="YES"/>
         <attribute name="date" optional="YES" attributeType="Date" usesScalarValueType="NO"/>
@@ -24,6 +30,11 @@
         <attribute name="subject" optional="YES" attributeType="String"/>
         <attribute name="userId" optional="YES" attributeType="String"/>
         <relationship name="messages" optional="YES" toMany="YES" deletionRule="Nullify" ordered="YES" destinationEntity="DBMessage" inverseName="chat" inverseEntity="DBMessage"/>
+    </entity>
+    <entity name="DBClient" representedClassName="DBClient" syncable="YES" codeGenerationType="class">
+        <attribute name="appIcon" optional="YES" attributeType="String"/>
+        <attribute name="appId" optional="YES" attributeType="String"/>
+        <attribute name="name" optional="YES" attributeType="String"/>
     </entity>
     <entity name="DBMessage" representedClassName="DBMessage" syncable="YES" codeGenerationType="class">
         <attribute name="appId" optional="YES" attributeType="String"/>
@@ -46,5 +57,22 @@
         <attribute name="userId" optional="YES" attributeType="String"/>
         <relationship name="attachments" optional="YES" toMany="YES" deletionRule="Nullify" ordered="YES" destinationEntity="DBAttachment" inverseName="message" inverseEntity="DBAttachment"/>
         <relationship name="chat" optional="YES" maxCount="1" deletionRule="Nullify" destinationEntity="DBChat" inverseName="messages" inverseEntity="DBChat"/>
+    </entity>
+    <entity name="DBTicketCommand" representedClassName="DBTicketCommand" syncable="YES" codeGenerationType="class">
+        <attribute name="appId" optional="YES" attributeType="String"/>
+        <attribute name="authorId" optional="YES" attributeType="String"/>
+        <attribute name="clientId" optional="YES" attributeType="String"/>
+        <attribute name="date" optional="YES" attributeType="Date" usesScalarValueType="NO"/>
+        <attribute name="id" optional="YES" attributeType="String"/>
+        <attribute name="message" optional="YES" attributeType="String"/>
+        <attribute name="messageId" optional="YES" attributeType="Integer 64" defaultValueString="0" usesScalarValueType="YES"/>
+        <attribute name="rating" optional="YES" attributeType="Integer 32" defaultValueString="0" usesScalarValueType="YES"/>
+        <attribute name="requestNewTicket" optional="YES" attributeType="Boolean" usesScalarValueType="YES"/>
+        <attribute name="ticketId" optional="YES" attributeType="Integer 64" defaultValueString="0" usesScalarValueType="YES"/>
+        <attribute name="token" optional="YES" attributeType="String"/>
+        <attribute name="tokenType" optional="YES" attributeType="String"/>
+        <attribute name="type" optional="YES" attributeType="Integer 32" defaultValueString="0" usesScalarValueType="YES"/>
+        <attribute name="userId" optional="YES" attributeType="String"/>
+        <relationship name="attachments" optional="YES" toMany="YES" deletionRule="Nullify" ordered="YES" destinationEntity="DBAttachmentData" inverseName="ticketCommand" inverseEntity="DBAttachmentData"/>
     </entity>
 </model>

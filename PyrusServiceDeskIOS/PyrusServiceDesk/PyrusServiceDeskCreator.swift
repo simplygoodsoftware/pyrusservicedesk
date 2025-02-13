@@ -313,6 +313,12 @@ import UIKit
         PyrusServiceDesk.logEvent = subscriber
     }
     
+    @objc public static func cleanCashe() {
+        DispatchQueue.global().async {
+            syncManager.chatsDataService.deleteAllObjects()
+        }
+    }
+    
     static var customUserId: String?
     static var authorizationToken: String?
     static var securityKey: String?

@@ -1,12 +1,17 @@
 import Foundation
 
 class PSDAttachment: NSObject {
+    let imageRepository: ImageRepositoryProtocol?
     var localPath: String?
-    var name: String = ""{
-        didSet{
+    var name: String = "" {
+        didSet {
             self.canOpen = name.isSupportedFileFormat()
             self.isImage = name.isImageFileFormat()
             self.isVideo = name.isVideoFormat()
+            
+            if let image = imageRepository?.loadImage(name: name, type: .image) {
+                self.previewImage = image
+            }
         }
     }
     ///Size of attachment to show in attachment view
@@ -24,9 +29,19 @@ class PSDAttachment: NSObject {
     ///uploading of file progrees to server
     var uploadingProgress : CGFloat = 1.0
     ///The preview image of attacment
-    var previewImage : UIImage?
+    var previewImage : UIImage? {
+        didSet {
+            if let image = previewImage {
+                imageRepository?.saveImage(image, name: name, type: .image)
+            }
+        }
+    }
+    
     var localId : String
+    var isLoading: Bool = false
+    
     init(localPath: String? , data:Data?, serverIdentifer:String?)  {
+        imageRepository = ImageRepository()
         self.localPath = localPath
         if let localPath = localPath{
             let url = URL.init(string: localPath)

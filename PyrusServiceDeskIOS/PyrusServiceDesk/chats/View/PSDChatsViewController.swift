@@ -431,7 +431,7 @@ private extension PSDChatsViewController {
     }
     
     func showAccessDeniedAlert(userNames: String, okAction: UIAlertAction) {
-        let alert = UIAlertController(title: "Нет доступа", message: "Для получения доступа к \"\(userNames)\" обратитесь к администратору", preferredStyle: .alert)
+        let alert = UIAlertController(title: "AcсessDenied".localizedPSD(), message: String(format: "AccessDeniedInfo".localizedPSD(), userNames), preferredStyle: .alert)
         alert.addAction(okAction)
         present(alert, animated: true)
     }
@@ -519,7 +519,7 @@ extension PSDChatsViewController: ChatsViewProtocol {
             showAccessDeniedAlert(userNames: userNames, okAction: okAction)
         case .deleteSegmentControl:
                 self.originYFilterConstraint?.constant = 43
-                self.heightFilterConstraint?.constant = 0
+               // self.heightFilterConstraint?.constant = 0
                 self.heightSegmentControl?.constant = 0
                 self.bottomNavigationView?.constant = 43
                 self.view.layoutIfNeeded()

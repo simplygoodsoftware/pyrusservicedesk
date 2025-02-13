@@ -89,7 +89,7 @@ extension PSDChatInteractor: PSDChatInteractorProtocol {
                 DispatchQueue.main.async { [weak self] in
                     if let userInfo = notification.userInfo,
                        let commandId = userInfo["commandId"] as? String,
-                       let message = self?.messagesToPass.first(where: { $0.commandId == commandId })?.message {
+                       let message = self?.messagesToPass.first(where: { $0.commandId.lowercased() == commandId.lowercased() })?.message {
                         self?.refresh(message: message, changedToSent: false)
                     }
                 }
@@ -98,8 +98,8 @@ extension PSDChatInteractor: PSDChatInteractorProtocol {
                 DispatchQueue.main.async { [weak self] in
                     if let userInfo = notification.userInfo,
                        let commandId = userInfo["commandId"] as? String,
-                       let message = self?.messagesToPass.first(where: { $0.commandId == commandId })?.message {
-                        self?.messagesToPass.removeAll(where: { $0.commandId == commandId })
+                       let message = self?.messagesToPass.first(where: { $0.commandId.lowercased() == commandId.lowercased() })?.message {
+                        self?.messagesToPass.removeAll(where: { $0.commandId.lowercased() == commandId.lowercased() })
                         self?.remove(message: message)
                     }
                 }

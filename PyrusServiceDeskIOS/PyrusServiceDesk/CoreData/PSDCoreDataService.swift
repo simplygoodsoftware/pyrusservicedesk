@@ -28,22 +28,16 @@ extension CoreDataService: CoreDataServiceProtocol {
         let fetchRequest = DBChat.fetchRequest()
         return try viewContext.fetch(fetchRequest)
     }
+    
+    func fetchCommands() throws -> [DBTicketCommand] {
+        let fetchRequest = DBTicketCommand.fetchRequest()
+        return try viewContext.fetch(fetchRequest)
+    }
 
-//    func fetchMessages(for channelUUID: String) throws -> [DBMessage] {
-//        let fetchRequest = DBChannel.fetchRequest()
-//        fetchRequest.predicate = NSPredicate(format: "id == %@", channelUUID as CVarArg)
-//        let dbChannel = try viewContext.fetch(fetchRequest).first
-//
-//        guard
-//            let dbChannel,
-//            let dbMessages = dbChannel.messages?.array as? [DBMessage]
-//        else {
-//            Logger.shared.printLog(log: "Error fetching messages for channel with UUID: \(channelUUID)")
-//            return []
-//        }
-//
-//        return dbMessages
-//    }
+    func fetchClients() throws -> [DBClient] {
+        let fetchRequest = DBClient.fetchRequest()
+        return try viewContext.fetch(fetchRequest)
+    }
 
     func save(block: @escaping (NSManagedObjectContext) throws -> Void) {
         let backgroundContext = backgroundContext
@@ -60,9 +54,29 @@ extension CoreDataService: CoreDataServiceProtocol {
         }
     }
     
+    func deleteCommand(id: String) throws {
+        let fetchRequest = NSFetchRequest<DBTicketCommand>(entityName: "DBTicketCommand")
+        fetchRequest.predicate = NSPredicate(format: "id == %@", id as CVarArg)
+        
+        do {
+            let privateContext = persistentContainer.newBackgroundContext()
+            let dbTicketCommand = try privateContext.fetch(fetchRequest).first
+            if let dbTicketCommand {
+                privateContext.delete(dbTicketCommand)
+                try privateContext.save()
+                print("Command with ID: \(id) deleted successfully")
+            } else {
+                print("Command with ID: \(id) not found")
+            }
+        } catch {
+            print("Error deleting command with ID: \(id), \(error)")
+            throw error
+        }
+    }
+    
     func deleteChat(id: Int) throws {
         let fetchRequest = NSFetchRequest<DBChat>(entityName: "DBChat")
-        fetchRequest.predicate = NSPredicate(format: "id == %@", id as CVarArg)
+        fetchRequest.predicate = NSPredicate(format: "chatId == %@", id as CVarArg)
         
         do {
             let privateContext = persistentContainer.newBackgroundContext()
@@ -70,12 +84,12 @@ extension CoreDataService: CoreDataServiceProtocol {
             if let dbChannel = dbChannel {
                 privateContext.delete(dbChannel)
                 try privateContext.save()
-                print("Channel with ID: \(id) deleted successfully")
+                print("Chat with ID: \(id) deleted successfully")
             } else {
-                print("Channel with ID: \(id) not found")
+                print("Chat with ID: \(id) not found")
             }
         } catch {
-            print("Error deleting channel with ID: \(id), \(error)")
+            print("Error deleting chat with ID: \(id), \(error)")
             throw error
         }
     }
@@ -92,24 +106,5 @@ extension CoreDataService: CoreDataServiceProtocol {
             print("Error deleting objects: \(error), \(error.userInfo)")
         }
     }
-
-//    func deleteAllMessages(for channelUUID: String) {
-//        let fetchRequest = NSFetchRequest<DBChannel>(entityName: "DBChannel")
-//        fetchRequest.predicate = NSPredicate(format: "id == %@", channelUUID as CVarArg)
-//        
-//        do {
-//            let backgroundContext = persistentContainer.newBackgroundContext()
-//            let dbChannel = try backgroundContext.fetch(fetchRequest).first
-//            if let dbMessages = dbChannel?.messages?.array as? [DBMessage] {
-//                dbMessages.forEach { message in
-//                    backgroundContext.delete(message)
-//                }
-//                try backgroundContext.save()
-//                print("All messages deleted successfully for channel with UUID: \(channelUUID)")
-//            }
-//        } catch {
-//            print("Error deleting messages for channel with UUID: \(channelUUID), \(error)")
-//        }
-//    }
 }
 

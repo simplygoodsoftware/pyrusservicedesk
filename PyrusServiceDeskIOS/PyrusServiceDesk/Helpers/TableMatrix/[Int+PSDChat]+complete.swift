@@ -173,13 +173,22 @@ extension Array where Element == [PSDRowMessage]{
                 //if self have this message ignore it
                 var alreadyHasMessage = false
                 let rowMessages = PSDObjectsCreator.parseMessageToRowMessage(message)
-                for rowMessage in rowMessages{
+                for (i, rowMessage) in rowMessages.enumerated(){
                     if(self.has(findMessage: rowMessage, startFrom: startMessageIndexPath)){
                         alreadyHasMessage = true
                         break
                     }
                 }
                 if alreadyHasMessage {
+                    let indexPaths = findIndexPath(messageId: message.messageId).reversed()
+                    for (i, index) in indexPaths.enumerated() {
+                        let rowMessage = self[index.section][index.row]
+                        if rowMessage.attachment != nil,
+                           let attachment = message.attachments?[i]//message.attachments?.first(where: { $0.name == rowMessage.attachment?.name && $0.size == rowMessage.attachment?.size })
+                        {
+                            rowMessage.attachment?.serverIdentifer = attachment.serverIdentifer
+                        }
+                    }
                     continue
                 }
                 let section = self.section(forMessage: message)
@@ -273,6 +282,9 @@ extension Array where Element == [PSDRowMessage]{
             let end :Int = count - startFrom.section
             for i in 1...end{
                 for (row,message) in self[count-i].enumerated().reversed(){
+                    if message.message.state == .sent && message.attachment?.name == findMessage.attachment?.name {
+                       // message.attachment?.serverIdentifer = findMessage.attachment?.serverIdentifer
+                    }
                     if message.message.state == .sent && !message.hasId() && message.text == findMessage.text && message.attachment?.name == findMessage.attachment?.name && message.rating == findMessage.rating{
                         message.message.messageId = findMessage.message.messageId
                     }
@@ -281,7 +293,9 @@ extension Array where Element == [PSDRowMessage]{
                     }
                     if message.message.messageId == findMessage.message.messageId && findMessage.hasId(){
                         if (message.message.owner.personId == PyrusServiceDesk.userId) || (message.rating ?? 0 != 0){
-                            message.attachment?.serverIdentifer = findMessage.attachment?.serverIdentifer //set new server id that comes from server, because old may be uncorrect
+                            if message.attachment?.name == findMessage.attachment?.name, let _ = Int(findMessage.attachment?.serverIdentifer ?? "") {
+                                message.attachment?.serverIdentifer = findMessage.attachment?.serverIdentifer
+                            }//set new server id that comes from server, because old may be uncorrect
                             return true
                         }else if message.attachment?.serverIdentifer == findMessage.attachment?.serverIdentifer{  //if from server comes many attachments in one message we separate them into different messages. All of them has same ids.
                             return true
