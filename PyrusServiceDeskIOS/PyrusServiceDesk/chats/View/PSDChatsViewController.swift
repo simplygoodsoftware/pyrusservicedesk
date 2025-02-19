@@ -109,6 +109,36 @@ class PSDChatsViewController: UIViewController {
     private lazy var filterImage = UIImageView()
     private lazy var filterButton = UIButton()
     
+    
+    // не забыть добавить Child'a (контроллер)
+    private lazy var searchBar: UISearchBar = {
+        let searchView = UISearchBar()
+        searchView.placeholder = "PSDSearch".localizedPSD()
+        searchView.backgroundColor = .navBarColor
+        searchView.backgroundImage = nil
+         searchView.translatesAutoresizingMaskIntoConstraints = false
+        searchView.barStyle = .default
+        searchView.searchBarStyle = .minimal
+         searchView.showsCancelButton = true
+         return searchView
+     }()
+    
+    private lazy var searchButton: UIButton = {
+        let button = UIButton(type: .system)
+        button.setImage(UIImage(systemName: "magnifyingglass"), for: .normal)
+        button.translatesAutoresizingMaskIntoConstraints = false
+        return button
+    }()
+    
+    private lazy var searchNavigationView: UIView = {
+        let view = UIView()
+        view.backgroundColor = .navBarColor
+        view.layer.borderColor = UIColor.black.withAlphaComponent(0.3).cgColor
+        view.layer.borderWidth = 0.5
+        view.translatesAutoresizingMaskIntoConstraints = false
+        return view
+    }()
+    
     override func viewDidLoad() {
         super.viewDidLoad()
         navigationController?.delegate = self
@@ -137,6 +167,7 @@ private extension PSDChatsViewController {
         tableView.backgroundView = emptyChatsView
 
         view.addSubview(navigationView)
+        view.addSubview(searchBar)
         view.addSubview(segmentControl)
         view.addSubview(filterInfoView)
         view.addSubview(plusView)
@@ -153,6 +184,7 @@ private extension PSDChatsViewController {
         setupSegmentControl()
         setupNavigationView()
         setupPlusView()
+        setupSearchNavigationView()
     }
     
     func setupEmptyChats() {
@@ -305,6 +337,39 @@ private extension PSDChatsViewController {
         
         bottomNavigationView = navigationView.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor, constant: 43)
         bottomNavigationView?.isActive = true
+        
+        navigationView.addSubview(searchButton)
+        searchButton.tintColor = customization?.themeColor
+        NSLayoutConstraint.activate([
+            searchButton.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -54),
+            searchButton.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor, constant: 9)
+        ])
+        searchButton.addTarget(self, action: #selector(openSearch), for: .touchUpInside)
+    }
+    
+    @objc func openSearch() {
+        searchNavigationView.alpha = 1.0
+        searchBar.becomeFirstResponder()
+        segmentControl.alpha = 0.0
+        navigationView.alpha = 0.0
+    }
+    
+    func setupSearchNavigationView() {
+        view.addSubview(searchNavigationView)
+        searchNavigationView.leadingAnchor.constraint(equalTo: view.leadingAnchor,constant: -1).isActive = true
+        searchNavigationView.trailingAnchor.constraint(equalTo: view.trailingAnchor).isActive = true
+        searchNavigationView.topAnchor.constraint(equalTo: view.topAnchor, constant: -1).isActive = true
+        searchNavigationView.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor, constant: 60).isActive = true
+        
+        searchNavigationView.addSubview(searchBar)
+        searchBar.translatesAutoresizingMaskIntoConstraints = false
+        searchBar.tintColor = customization?.themeColor
+        NSLayoutConstraint.activate([
+            searchBar.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 8),
+            searchBar.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -8),
+            searchBar.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor, constant: 0)
+        ])
+        searchNavigationView.alpha = 0.0
     }
     
     @objc func openNewChat() {
@@ -326,7 +391,7 @@ private extension PSDChatsViewController {
             button.translatesAutoresizingMaskIntoConstraints = false
             NSLayoutConstraint.activate([
                 button.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -16),
-                button.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor, constant: 9),
+                button.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor, constant: 7),
                 button.heightAnchor.constraint(equalToConstant: 28),
                 button.widthAnchor.constraint(equalToConstant: 28)
             ])
@@ -359,7 +424,7 @@ private extension PSDChatsViewController {
         }
         
         NSLayoutConstraint.activate([
-            filterButton.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor, constant: 9),
+            filterButton.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor, constant: 7),
             filterButton.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 16)
         ])
     }
