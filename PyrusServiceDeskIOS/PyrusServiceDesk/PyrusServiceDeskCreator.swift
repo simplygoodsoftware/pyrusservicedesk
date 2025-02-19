@@ -72,8 +72,13 @@ import UIKit
         } else {
             NotificationCenter.default.post(name: usersUpdateNotification, object: nil)
         }
-
-        syncManager.syncGetTickets(isFilter: true)
+        DispatchQueue.main.async {
+            syncManager.syncGetTickets(isFilter: true)
+        }
+    }
+    
+    public static func getClients() -> [PSDClientInfo] {
+        return clients
     }
     
     public static var newUser: PSDUserInfo?
@@ -212,7 +217,9 @@ import UIKit
                 let appId = user.clientId
                 let command = TicketCommand(commandId: UUID().uuidString, type: .setPushToken, appId: appId, userId: userId, params: TicketCommandParams(ticketId: nil, appId: appId, userId: userId, token: token, type: "ios"))
                 PyrusServiceDesk.repository.add(command: command)
-                PyrusServiceDesk.syncManager.syncGetTickets()
+                DispatchQueue.main.async {
+                    PyrusServiceDesk.syncManager.syncGetTickets()
+                }
                 ///todo - добавить обработку ошибки
                 completion(nil)
             }
@@ -316,6 +323,8 @@ import UIKit
     @objc public static func cleanCashe() {
         DispatchQueue.global().async {
             syncManager.chatsDataService.deleteAllObjects()
+            let imageRepository = ImageRepository()
+            imageRepository?.clearRepository()
         }
     }
     
@@ -408,7 +417,9 @@ import UIKit
             lastRefreshes.remove(at: 0)
         }
         if multichats {
-            PyrusServiceDesk.syncManager.syncGetTickets()
+            DispatchQueue.main.async {
+                PyrusServiceDesk.syncManager.syncGetTickets()
+            }
         } else {
             PyrusServiceDesk.mainController?.refreshChat(showFakeMessage: 0)
         }
@@ -554,7 +565,9 @@ import UIKit
         if(userId.count > 0){
             restartTimer()
             PyrusLogger.shared.logEvent("PSDGetChats did begin.")
-            syncManager.syncGetTickets()           
+            DispatchQueue.main.async {
+                syncManager.syncGetTickets()
+            }
         }
         else{
             PyrusLogger.shared.logEvent("Empty userId, stop requesting PSDGetChats.")

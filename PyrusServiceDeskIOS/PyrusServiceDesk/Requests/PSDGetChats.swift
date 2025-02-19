@@ -56,6 +56,7 @@ struct PSDGetChats {
                         }
                     }
                 }
+                let chatsData = try? JSONSerialization.jsonObject(with: data, options: .allowFragments) as? [String : Any] ?? [String: Any]()
 //                if PyrusServiceDesk.chats.count == 0 {
 //                    PyrusServiceDesk.chats = []
 //                }
@@ -111,21 +112,29 @@ struct PSDGetChats {
             let client = PSDClientInfo(clientId: clientId, clientName: clientName, clientIcon: clientIcon)
             if !clients.contains(client) {
                 clients.append(client)
+            } else
+            if let storeClient = clients.first(where: { $0.clientId == client.clientId }) {
+                storeClient.clientName = client.clientName
+                if storeClient.clientIcon != client.clientIcon {
+                    storeClient.clientIcon = client.clientIcon
+                }
             }
             if !serverClients.contains(client) {
                 serverClients.append(client)
             }
         }
         
-        if serverClients.count != clients.count {
-            for client in clients {
-                if !serverClients.contains(client) {
-                    clients.removeAll(where: { $0.clientId == client.clientId })
-                }
+        for client in clients {
+            if !serverClients.contains(client) {
+                clients.removeAll(where: { $0.clientId == client.clientId })
             }
         }
         
         return clients
+    }
+    
+    static func updateClientIcon(client: PSDClientInfo) {
+        
     }
     
     private static func generateChats(from response:NSArray) -> [PSDChat] {
@@ -151,11 +160,13 @@ struct PSDGetChats {
             let ticketId = dic["ticket_id"] as? Int
             var messages: [PSDMessage] = [PSDMessage]()
             let newMessages = PSDGetChat.generateMessages(from: dic["comments"] as? NSArray ?? NSArray())
-            if let storeChat = PyrusServiceDesk.chats.first(where: { $0.chatId == ticketId }) {
-                messages = storeChat.messages + newMessages
-            } else {
-                messages = newMessages
-            }
+//            if let storeChat = PyrusServiceDesk.chats.first(where: { $0.chatId == ticketId }) {
+//                messages = storeChat.messages + newMessages
+//            } else {
+//                messages = newMessages
+//            }
+            
+            messages = newMessages
             
             if let message = messages.last {
                 lastMessage?.attachments = message.attachments

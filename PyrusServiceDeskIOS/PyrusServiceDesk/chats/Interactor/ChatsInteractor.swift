@@ -143,7 +143,7 @@ private extension ChatsInteractor {
     func updateTitle() {
         if PyrusServiceDesk.syncManager.networkAvailability {
             if self.clients.count == 0 {
-                presenter.doWork(.updateTitle(title: "All_Conversations".localizedPSD()))
+               // presenter.doWork(.updateTitle(title: "All_Conversations".localizedPSD()))
             } else {
                 presenter.doWork(.updateTitle(title: self.clients.count > 1 ? "All_Conversations".localizedPSD() : clients[0].clientName))
             }
@@ -168,7 +168,9 @@ private extension ChatsInteractor {
             let params = TicketCommandParams(ticketId: chat.chatId ?? 0, appId: PyrusServiceDesk.currentClientId ?? PyrusServiceDesk.clientId, userId: PyrusServiceDesk.currentUserId ?? PyrusServiceDesk.customUserId ?? PyrusServiceDesk.userId, messageId: Int(chat.lastComment?.messageId ?? ""))
             let command = TicketCommand(commandId: UUID().uuidString, type: .readTicket, appId: PyrusServiceDesk.currentClientId ?? PyrusServiceDesk.clientId, userId:  PyrusServiceDesk.currentUserId ?? PyrusServiceDesk.customUserId ?? PyrusServiceDesk.userId, params: params)
             PyrusServiceDesk.repository.add(command: command)
-            PyrusServiceDesk.syncManager.syncGetTickets()
+            DispatchQueue.main.async {
+                PyrusServiceDesk.syncManager.syncGetTickets()
+            }
         }
 
         presenter.doWork(.openChat(chat: chat, fromPush: fromPush))
@@ -230,7 +232,7 @@ private extension ChatsInteractor {
     func updateIcon(imagePath: String, index: Int) {
         if let image = clients[index].image {
             presenter.doWork(.updateIcon(image: image))
-        } else if let image = imageRepository?.loadImage(name: clients[index].clientId, type: .clientIcon) {
+        } else if let image = imageRepository?.loadImage(name: clients[index].clientId, id: nil, type: .clientIcon) {
             presenter.doWork(.updateIcon(image: image))
             clients[index].image = image
             PyrusServiceDesk.clients[index].image = image
@@ -242,7 +244,7 @@ private extension ChatsInteractor {
                     PyrusServiceDesk.clients[index].image = image ?? UIImage.PSDImage(name: "iiko")
                     self?.presenter.doWork(.updateIcon(image: image))
                     if let image, let name = self?.clients[index].clientId {
-                        self?.imageRepository?.saveImage(image, name: name, type: .clientIcon)
+                        self?.imageRepository?.saveImage(image, name: name, id: nil, type: .clientIcon)
                     }
                 }
             }
@@ -305,7 +307,9 @@ private extension ChatsInteractor {
     
     func reloadChats() {
         PyrusServiceDesk.restartTimer()
-        PyrusServiceDesk.syncManager.syncGetTickets()
+        DispatchQueue.main.async {
+            PyrusServiceDesk.syncManager.syncGetTickets()
+        }
     }
     
     func openNewChat(userId: String? = nil) {

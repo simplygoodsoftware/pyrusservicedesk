@@ -148,7 +148,9 @@ struct PSDMessageSend {
         let command = TicketCommand(commandId: messageToPass.commandId ?? UUID().uuidString, type: .createComment, appId: PyrusServiceDesk.currentClientId ?? PyrusServiceDesk.clientId, userId:  PyrusServiceDesk.currentUserId ?? PyrusServiceDesk.customUserId ?? PyrusServiceDesk.userId, params: params)
         PyrusServiceDesk.repository.add(command: command)
         PSDMessagesStorage.save(message: messageToPass)
-        PyrusServiceDesk.syncManager.syncGetTickets()
+        DispatchQueue.main.async {
+            PyrusServiceDesk.syncManager.syncGetTickets()
+        }
         dispatchQueue.async {
             
 //            if PSDMessageSend.passingMessagesIds.contains(messageToPass.clientId) {

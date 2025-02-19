@@ -61,19 +61,10 @@ class SyncManager {
             return
         }
 
+  //      return
         isRequestInProgress = true
         shouldSendAnotherRequest = false
         sendingMessages = PSDMessagesStorage.getSendingMessages()
-//        PyrusServiceDesk.repository.load { [weak self] result in
-//            self?.sendingMessages = PSDMessagesStorage.getSendingMessages()
-//            var ticketCommands: [TicketCommand]
-//            switch result {
-//            case .success(let commands):
-//                ticketCommands = commands
-//            case .failure(_):
-//                ticketCommands = []
-//            }
-//        }
         
         let ticketCommands = PyrusServiceDesk.repository.getCommands()
         PSDGetChats.get(commands: ticketCommands.map({ $0.toDictionary() })) { [weak self] chats, commandsResult, authorAccessDenied, clientsArray, complete in
@@ -81,10 +72,6 @@ class SyncManager {
             var clients = clientsArray
             DispatchQueue.main.async {
                 PyrusServiceDesk.accessDeniedIds = authorAccessDenied ?? []
-            }
-            
-            if let chats, complete {
-                chatsDataService.saveChatModels(with: chats)
             }
 
             let userInfo = ["isFilter": isFilter]
@@ -116,12 +103,12 @@ class SyncManager {
                     }
                 }
             }
-            DispatchQueue.main.async { [weak self] in
-                if let clients, clients.count > 0 {
-                    PyrusServiceDesk.clients = clients
-                    self?.chatsDataService.saveClientModels(with: clients)
-                }
-            }
+//            DispatchQueue.main.async { [weak self] in
+//                if let clients, clients.count > 0 {
+//                    PyrusServiceDesk.clients = clients
+//                    self?.chatsDataService.saveClientModels(with: clients)
+//                }
+//            }
             
             if let commandsResult {
                 self.commandsResult = commandsResult.sorted(by: { $0.commentId ?? 0 < $1.commentId ?? 0 })
@@ -145,10 +132,27 @@ class SyncManager {
                 PSDMessagesStorage.saveMessagesToFile()
             }
             
-            DispatchQueue.main.async {
+            DispatchQueue.main.async { [weak self] in
                 if let chats, complete {
-                    PyrusServiceDesk.chats = chats
-                    NotificationCenter.default.post(name: PyrusServiceDesk.chatsUpdateNotification, object: nil, userInfo: userInfo)
+                    self?.chatsDataService.saveChatModels(with: chats) { [weak self] _ in
+                        DispatchQueue.main.async { [weak self] in
+                            if let clients, clients.count > 0 {
+                                PyrusServiceDesk.clients = clients
+                                self?.chatsDataService.saveClientModels(with: clients)
+//                                DispatchQueue.main.async { [weak self] in
+//                                    self?.chatsDataService.saveClientModels(with: clients) { [weak self] _ in
+//                                        PyrusServiceDesk.clients = self?.chatsDataService.getAllClients() ?? []
+//                                        PyrusServiceDesk.chats = self?.chatsDataService.getAllChats() ?? []
+//                                        NotificationCenter.default.post(name: PyrusServiceDesk.chatsUpdateNotification, object: nil, userInfo: userInfo)
+//                                    }
+//                                }
+//                            } else {
+                                PyrusServiceDesk.chats = self?.chatsDataService.getAllChats() ?? []
+                                NotificationCenter.default.post(name: PyrusServiceDesk.chatsUpdateNotification, object: nil, userInfo: userInfo)
+                            }
+                        }
+                    }
+                    
                 }
                 
                 PyrusLogger.shared.logEvent("PSDGetChats did end with chats count: \(chats?.count ?? 0).")
@@ -167,6 +171,22 @@ class SyncManager {
                 
                 UnreadMessageManager.refreshNewMessagesCount(unreadChats > 0, lastMessage: lasMessage)
             }
+            
+            
+//            DispatchQueue.global().async {
+//                for client in PyrusServiceDesk.clients {
+//                    let url = PyrusServiceDeskAPI.PSDURL(url: client.clientIcon)
+//                    PyrusServiceDesk.mainSession.dataTask(with: url) { data, response, error in
+//                        guard let data = data, error == nil else{
+//                            return
+//                        }
+//                        if data.count != 0,
+//                        let image = UIImage(data: data) {
+//                            client.image = UIImage(data: data)
+//                        }
+//                    }.resume()
+//                }
+//            }
 
             self.isRequestInProgress = false
             
@@ -212,6 +232,8 @@ private extension SyncManager {
     }
     
     @objc func doSync() {
-        syncGetTickets(isFilter: self.isFilter)
+        DispatchQueue.main.async { [weak self] in
+            self?.syncGetTickets(isFilter: self?.isFilter ?? false)
+        }
     }
 }

@@ -25,15 +25,33 @@ extension PSDChatsDataService: PSDChatsDataServiceProtocol {
     }
     
     func saveClientModels(with clientModels: [PSDClientInfo]) {
-        coreDataService.deleteAllObjects(forEntityName: "DBClient")
-        for clientModel in clientModels {
-            saveClientModel(with: clientModel)
+//        coreDataService.deleteAllObjects(forEntityName: "DBClient")
+        let ids = clientModels.compactMap({ $0.clientId })
+        do {
+            if ids.count > 0 {
+                try coreDataService.deleteClients(ids: ids)
+            }
+        } catch {
+            print(error)
+        }
+        
+        coreDataService.save(completion: nil) { [weak self] context in
+            self?.saveClientModel(with: clientModels, context: context)
         }
     }
     
-    func saveClientModel(with clientModel: PSDClientInfo) {
-        coreDataService.save { context in
-            let dbClient = DBClient(context: context)
+    func saveClientModel(with clientModels: [PSDClientInfo], context: NSManagedObjectContext) {
+        for clientModel in clientModels {
+            let fetchRequest = DBClient.fetchRequest()
+            fetchRequest.predicate = NSPredicate(format: "appId == %@", clientModel.clientId as CVarArg)
+            
+            let dbClient: DBClient
+            if let client = try? context.fetch(fetchRequest).first {
+                dbClient = client
+            } else {
+                dbClient = NSEntityDescription.insertNewObject(forEntityName: "DBClient", into: context) as! DBClient
+            }
+            
             dbClient.appId = clientModel.clientId
             dbClient.name = clientModel.clientName
             dbClient.appIcon = clientModel.clientIcon
@@ -58,10 +76,18 @@ extension PSDChatsDataService: PSDChatsDataServiceProtocol {
         }
     }
 
-    func saveChatModels(with chatModels: [PSDChat]) {
-        coreDataService.deleteAllObjects(forEntityName: "DBChat")
-        coreDataService.save { context in
-            self.saveChatModel(with: chatModels, context: context)
+    func saveChatModels(with chatModels: [PSDChat], completion: ((Result<Void, Error>) -> Void)?) {
+        let ids = chatModels.compactMap({ Int64($0.chatId ?? 0) })
+        do {
+            if ids.count > 0 {
+                try coreDataService.deleteChats(ids: ids)
+            }
+        } catch {
+            print(error)
+        }
+      //  coreDataService.deleteAllObjects(forEntityName: "DBChat")
+        coreDataService.save(completion: completion) { [weak self] context in
+            self?.saveChatModel(with: chatModels, context: context)
         }
 //        for chatModel in chatModels {
 //            saveChatModel(with: chatModel)
@@ -71,7 +97,15 @@ extension PSDChatsDataService: PSDChatsDataServiceProtocol {
     func saveChatModel(with chatModels: [PSDChat], context: NSManagedObjectContext) {
        // coreDataService.save { context in
         for chatModel in chatModels {
-            let dbChat = DBChat(context: context)
+            let fetchRequest = DBChat.fetchRequest()
+            fetchRequest.predicate = NSPredicate(format: "chatId == %lld", Int64(chatModel.chatId ?? 0))
+            
+            let dbChat: DBChat
+            if let chat = try? context.fetch(fetchRequest).first {
+                dbChat = chat
+            } else {
+                dbChat = NSEntityDescription.insertNewObject(forEntityName: "DBChat", into: context) as! DBChat
+            }
             dbChat.chatId = Int64(chatModel.chatId ?? 0)
             dbChat.date = chatModel.date
             dbChat.isActive = chatModel.isActive
@@ -81,12 +115,12 @@ extension PSDChatsDataService: PSDChatsDataServiceProtocol {
             dbChat.showRatingText = chatModel.showRatingText
             dbChat.subject = chatModel.subject
             dbChat.userId = chatModel.userId
-            if dbChat.messages == nil {
-                dbChat.messages = NSOrderedSet()
-            }
-            
+//            if dbChat.messages == nil {
+//                dbChat.messages = NSOrderedSet()
+//            }
+           // dbChat.messages = NSOrderedSet()
             for message in chatModel.messages {
-                let dbMessage = DBMessage(context: context)
+                let dbMessage = NSEntityDescription.insertNewObject(forEntityName: "DBMessage", into: context) as! DBMessage
                 dbMessage.messageId = message.messageId
                 dbMessage.appId = message.appId
                 dbMessage.userId = message.userId
@@ -114,7 +148,7 @@ extension PSDChatsDataService: PSDChatsDataServiceProtocol {
                 
                 if let attachments = message.attachments {
                     for attachment in attachments {
-                        let dbAttachment = DBAttachment(context: context)
+                        let dbAttachment = NSEntityDescription.insertNewObject(forEntityName: "DBAttachment", into: context) as! DBAttachment
                         dbAttachment.name = attachment.name
                         dbAttachment.canOpen = attachment.canOpen
                         dbAttachment.data = attachment.data
@@ -135,15 +169,16 @@ extension PSDChatsDataService: PSDChatsDataServiceProtocol {
         }
     }
     
-    func saveTicketCommand(with ticketCommand: TicketCommand) {
-        coreDataService.save { context in
+    func saveTicketCommand(with ticketCommand: TicketCommand, completion: ((Result<Void, Error>) -> Void)?) {
+        print("commandId: \(ticketCommand.commandId), type: \(TicketCommandType(rawValue: ticketCommand.type))")
+        coreDataService.save(completion: completion)  { context in
             let fetchRequest = DBTicketCommand.fetchRequest()
             fetchRequest.predicate = NSPredicate(format: "id == %@", ticketCommand.commandId.lowercased() as CVarArg)
             if let dbTicketCommand = try? context.fetch(fetchRequest).first {
                 guard let attachments = ticketCommand.params.attachments else { return }
                 dbTicketCommand.attachments = NSOrderedSet()
                 for attachmentData in attachments {
-                    let dbAttachmentData = DBAttachmentData(context: context)
+                    let dbAttachmentData = NSEntityDescription.insertNewObject(forEntityName: "DBAttachmentData", into: context) as! DBAttachmentData
                     dbAttachmentData.guid = attachmentData.guid
                     dbAttachmentData.type = Int32(attachmentData.type)
                     dbAttachmentData.name = attachmentData.name
@@ -152,7 +187,7 @@ extension PSDChatsDataService: PSDChatsDataServiceProtocol {
                 return
             }
             
-            let dbTicketCommand = DBTicketCommand(context: context)
+            let dbTicketCommand = NSEntityDescription.insertNewObject(forEntityName: "DBTicketCommand", into: context) as! DBTicketCommand
             dbTicketCommand.id = ticketCommand.commandId.lowercased()
             dbTicketCommand.appId = ticketCommand.appId
             dbTicketCommand.message = ticketCommand.params.message
@@ -177,22 +212,12 @@ extension PSDChatsDataService: PSDChatsDataServiceProtocol {
             }
             
             for attachmentData in ticketCommand.params.attachments ?? [] {
-                let dbAttachmentData = DBAttachmentData(context: context)
+                let dbAttachmentData = NSEntityDescription.insertNewObject(forEntityName: "DBAttachmentData", into: context) as! DBAttachmentData
                 dbAttachmentData.guid = attachmentData.guid
                 dbAttachmentData.type = Int32(attachmentData.type)
                 dbAttachmentData.name = attachmentData.name
                 dbTicketCommand.addToAttachments(dbAttachmentData)
             }            
-        }
-    }
-    
-    func deleteChats(chatModels: [PSDChat]) {
-        for model in chatModels {
-            do {
-                try coreDataService.deleteChat(id: model.chatId ?? 0)
-            } catch {
-                print("Error deleting channel with ID: \(model.chatId), \(error)")
-            }
         }
     }
     
@@ -258,7 +283,7 @@ extension PSDChatsDataService: PSDChatsDataServiceProtocol {
                 
                 if let dbMessages = dbChat.messages?.array as? [DBMessage] {
                     let messages: [PSDMessage] = dbMessages.compactMap { dbMessage in
-                        guard dbMessage.text != nil || dbMessage.attachments?.count ?? 0 > 0 || dbMessage.rating != nil
+                        guard dbMessage.text != nil || dbMessage.attachments?.count ?? 0 > 0 || (dbMessage.rating != 0)
                         else {
                             return nil
                         }
@@ -330,7 +355,7 @@ extension PSDChatsDataService: PSDChatsDataServiceProtocol {
 
     func deleteCommand(with id: String, serverTicketId: Int?) {
         if let serverTicketId {
-            coreDataService.save { context in
+            coreDataService.save(completion: nil) { context in
                 let fetchRequest = DBTicketCommand.fetchRequest()
                 fetchRequest.predicate = NSPredicate(format: "id == %@", id.lowercased() as CVarArg)
                 if let dbTicketCommand = try? context.fetch(fetchRequest).first,
@@ -341,9 +366,7 @@ extension PSDChatsDataService: PSDChatsDataServiceProtocol {
                     fetchRequest.predicate = NSPredicate(format: "id == %lld", Int64(dbTicketCommand.ticketId))
                     if let dbCommands = try? context.fetch(fetchRequest) {
                         for dbCommand in dbCommands {
-                            if dbCommand.ticketId == newId.0 {
-                                dbCommand.ticketId = Int64(newId.1)
-                            }
+                            dbCommand.ticketId = Int64(newId.1)
                         }
                     }
                 }
@@ -352,14 +375,6 @@ extension PSDChatsDataService: PSDChatsDataServiceProtocol {
         
         do {
             try coreDataService.deleteCommand(id: id)
-        } catch {
-            print("\(error)")
-        }
-    }
-    
-    func deleteChannel(with chatId: Int) {
-        do {
-            try coreDataService.deleteChat(id: chatId)
         } catch {
             print("\(error)")
         }

@@ -1,15 +1,14 @@
 import Foundation
+import CoreData
 
 protocol PSDChatsDataServiceProtocol {
-    func saveChatModels(with chatModels: [PSDChat])
-    func deleteChats(chatModels: [PSDChat])
+    func saveChatModels(with chatModels: [PSDChat], completion: ((Result<Void, Error>) -> Void)?)
     func getAllChats() -> [PSDChat]
-    func deleteChannel(with chatId: Int)
     func deleteAllObjects()
     func getAllCommands() -> [TicketCommand] 
-    func saveTicketCommand(with ticketCommand: TicketCommand)
+    func saveTicketCommand(with ticketCommand: TicketCommand, completion: ((Result<Void, Error>) -> Void)?)
     func deleteCommand(with id: String, serverTicketId: Int?)
     func saveClientModels(with clientModels: [PSDClientInfo])
-    func saveClientModel(with clientModel: PSDClientInfo)
+    func saveClientModel(with clientModels: [PSDClientInfo], context: NSManagedObjectContext)
     func getAllClients() -> [PSDClientInfo]
 }

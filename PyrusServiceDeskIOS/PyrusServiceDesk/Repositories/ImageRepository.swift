@@ -7,15 +7,15 @@ enum ImageType {
 }
 
 protocol ImageRepositoryProtocol {
-    func saveImage(_ image: UIImage, name: String, type: ImageType)
-    func loadImage(name: String, type: ImageType) -> UIImage? 
+    func saveImage(_ image: UIImage, name: String, id: String?, type: ImageType)
+    func loadImage(name: String, id: String?, type: ImageType) -> UIImage?
 }
 
 class ImageRepository: ImageRepositoryProtocol {
     private let fileManager = FileManager.default
     private let directoryURL: URL
     private let clientsDirectoryURL: URL
-    private let maxImages = 20
+    private let maxImages = 50
 
     init?() {
         guard let documentsDirectory = fileManager.urls(for: .documentDirectory, in: .userDomainMask).first else {
@@ -43,24 +43,41 @@ class ImageRepository: ImageRepositoryProtocol {
         }
     }
 
-    func saveImage(_ image: UIImage, name: String, type: ImageType) {
+    func saveImage(_ image: UIImage, name: String, id: String?, type: ImageType) {
         let url = type == .image ? directoryURL : clientsDirectoryURL
-        saveImage(image, name: name, directoryURL: url)
+        if type == .image {
+            let imageFolderURL = url.appendingPathComponent(id ?? name)
+            saveImage(image, name: name, directoryURL: imageFolderURL)
+        } else {
+            saveImage(image, name: name, directoryURL: url)
+        }
     }
     
-    func loadImage(name: String, type: ImageType) -> UIImage? {
+    func loadImage(name: String, id: String?, type: ImageType) -> UIImage? {
         let url = type == .image ? directoryURL : clientsDirectoryURL
-        return loadImage(named: name, directoryURL: url)
+        if type == .image {
+            let imageFolderURL = url.appendingPathComponent(id ?? name)
+            return loadImage(named: name, directoryURL: imageFolderURL)
+        } else {
+            return loadImage(named: name, directoryURL: url)
+        }
     }
     
     func saveImage(_ image: UIImage, name: String, directoryURL: URL) {
         DispatchQueue.global().async { [weak self] in
             guard let self else { return }
-            guard let imageData = image.jpegData(compressionQuality: 0.9) else { return }
             
-            let timestamp = Date().timeIntervalSince1970
-            let fileName = name
-            let fileURL = directoryURL.appendingPathComponent(fileName)
+            if !fileManager.fileExists(atPath: directoryURL.path) {
+                do {
+                    try fileManager.createDirectory(at: directoryURL, withIntermediateDirectories: true, attributes: nil)
+                } catch {
+                    print("Ошибка при создании папки для изображения: \(error)")
+                    return
+                }
+            }
+            
+            guard let imageData = image.jpegData(compressionQuality: 0.9) else { return }
+            let fileURL = directoryURL.appendingPathComponent(name)
             
             do {
                 try imageData.write(to: fileURL)
@@ -102,6 +119,25 @@ class ImageRepository: ImageRepositoryProtocol {
                     print("Ошибка при удалении файла \(fileURL): \(error)")
                 }
             }
+        }
+    }
+    
+    func clearRepository() {
+        do {
+            if fileManager.fileExists(atPath: directoryURL.path) {
+                try fileManager.removeItem(at: directoryURL)
+            }
+            
+            if fileManager.fileExists(atPath: clientsDirectoryURL.path) {
+                try fileManager.removeItem(at: clientsDirectoryURL)
+            }
+            
+            try fileManager.createDirectory(at: directoryURL, withIntermediateDirectories: true, attributes: nil)
+            try fileManager.createDirectory(at: clientsDirectoryURL, withIntermediateDirectories: true, attributes: nil)
+            
+            print("Репозиторий успешно очищен")
+        } catch {
+            print("Ошибка при очистке репозитория: \(error)")
         }
     }
 }

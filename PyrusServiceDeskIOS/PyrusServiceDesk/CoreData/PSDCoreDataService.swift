@@ -1,6 +1,10 @@
 import Foundation
 import CoreData
 
+enum EntityType {
+    case chat, command, client
+}
+
 final class CoreDataService {
 
     private lazy var persistentContainer: NSPersistentContainer = {
@@ -39,7 +43,7 @@ extension CoreDataService: CoreDataServiceProtocol {
         return try viewContext.fetch(fetchRequest)
     }
 
-    func save(block: @escaping (NSManagedObjectContext) throws -> Void) {
+    func save(completion: ((Result<Void, Error>) -> Void)?, block: @escaping (NSManagedObjectContext) throws -> Void) {
         let backgroundContext = backgroundContext
         backgroundContext.perform {
             do {
@@ -48,8 +52,10 @@ extension CoreDataService: CoreDataServiceProtocol {
                     try backgroundContext.save()
                     print("Successful save")
                 }
+                completion?(.success(()))
             } catch {
                 print("Save error: \(error)")
+                completion?(.failure(error))
             }
         }
     }
@@ -74,22 +80,36 @@ extension CoreDataService: CoreDataServiceProtocol {
         }
     }
     
-    func deleteChat(id: Int) throws {
-        let fetchRequest = NSFetchRequest<DBChat>(entityName: "DBChat")
-        fetchRequest.predicate = NSPredicate(format: "chatId == %@", id as CVarArg)
+    func deleteChats(ids: [Int64]) throws {
+        let fetchRequest: NSFetchRequest<NSFetchRequestResult> = NSFetchRequest<NSFetchRequestResult>(entityName: "DBChat")
+        fetchRequest.predicate = NSPredicate(format: "NOT(chatId IN %@)", ids)
         
         do {
             let privateContext = persistentContainer.newBackgroundContext()
-            let dbChannel = try privateContext.fetch(fetchRequest).first
-            if let dbChannel = dbChannel {
-                privateContext.delete(dbChannel)
-                try privateContext.save()
-                print("Chat with ID: \(id) deleted successfully")
-            } else {
-                print("Chat with ID: \(id) not found")
-            }
+            let batchDeleteRequest = NSBatchDeleteRequest(fetchRequest: fetchRequest)
+            try privateContext.execute(batchDeleteRequest)
+            try privateContext.save()
+
+            print("chats wdeleted successfully")
         } catch {
-            print("Error deleting chat with ID: \(id), \(error)")
+            print("Error deleting chats, \(error)")
+            throw error
+        }
+    }
+    
+    func deleteClients(ids: [String]) throws {
+        let fetchRequest: NSFetchRequest<NSFetchRequestResult> = NSFetchRequest<NSFetchRequestResult>(entityName: "DBClient")
+        fetchRequest.predicate = NSPredicate(format: "NOT(appId IN %@)", ids)
+        
+        do {
+            let privateContext = persistentContainer.newBackgroundContext()
+            let batchDeleteRequest = NSBatchDeleteRequest(fetchRequest: fetchRequest)
+            try privateContext.execute(batchDeleteRequest)
+            try privateContext.save()
+
+            print("clients wdeleted successfully")
+        } catch {
+            print("Error deleting chats, \(error)")
             throw error
         }
     }

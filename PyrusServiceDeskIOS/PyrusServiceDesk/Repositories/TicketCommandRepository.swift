@@ -179,14 +179,19 @@ class TicketCommandRepository {
     }
     
     func add(command: TicketCommand, completion: ((Error?) -> Void)? = nil) {
-       commandsCache?.removeAll(where: { $0.commandId.lowercased() == command.commandId.lowercased() })
-        if command.params.message == "ааа" {
-            print("фывапролорпавыфывапр")
-            print(command.commandId)
-            print(command.params.attachments?[0].guid)
+//       commandsCache?.removeAll(where: { $0.commandId.lowercased() == command.commandId.lowercased() })
+//        if command.params.message == "ааа" {
+//            print("фывапролорпавыфывапр")
+//            print(command.commandId)
+//            print(command.params.attachments?[0].guid)
+//        }
+//        commandsCache?.append(command)
+        chatsDataService.saveTicketCommand(with: command) { [weak self] _ in
+            DispatchQueue.main.async { [weak self] in
+                self?.commandsCache = self?.chatsDataService.getAllCommands()
+                PyrusServiceDesk.syncManager.syncGetTickets()
+            }
         }
-        commandsCache?.append(command)
-        chatsDataService.saveTicketCommand(with: command)
         
         
 //        let commands = chatsDataService.getAllCommands()

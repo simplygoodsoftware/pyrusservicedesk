@@ -5,8 +5,9 @@ protocol CoreDataServiceProtocol: AnyObject {
     func fetchChats() throws -> [DBChat]
     func fetchCommands() throws -> [DBTicketCommand]
     func fetchClients() throws -> [DBClient]
-    func save(block: @escaping (NSManagedObjectContext) throws -> Void)
+    func save(completion: ((Result<Void, Error>) -> Void)?, block: @escaping (NSManagedObjectContext) throws -> Void)
     func deleteAllObjects(forEntityName entityName: String)
     func deleteCommand(id: String) throws
-    func deleteChat(id: Int) throws
+    func deleteChats(ids: [Int64]) throws
+    func deleteClients(ids: [String]) throws
 }
