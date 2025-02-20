@@ -4,13 +4,13 @@ extension Array where Element == [PSDRowMessage]{
     ///complete array with unsent messages from storage
     mutating func completeWithUnsentMessages(for ticketId: Int) {
         let messagesFromStorage = PSDMessagesStorage.getMessages(for: ticketId)
-        let sortedMessages = messagesFromStorage.sorted(by: {$0.date > $1.date})
-        complete(with: sortedMessages, startMessage: nil, completion: { _,_, messages in
-            let res = messagesFromStorage.filter { !messages.contains($0)}
-            for message in res{
-                PSDMessagesStorage.remove(messageId: message.clientId)
-            }
-        })
+        let sortedMessages = messagesFromStorage.sorted(by: {$0.date < $1.date})
+        complete(with: sortedMessages) //, startMessage: nil, completion: { _,_, messages in
+//            let res = messagesFromStorage.filter { !messages.contains($0)}
+//            for message in res{
+//                PSDMessagesStorage.remove(messageId: message.clientId)
+//            }
+//        })
     }
 
     mutating func addFakeMessagge(messageId: Int) -> ([IndexPath],IndexSet) {
@@ -223,6 +223,20 @@ extension Array where Element == [PSDRowMessage]{
         }
         completion?(indexPaths,IndexSet(reloadSections), adddedMessages)
     }
+    
+    mutating private func complete(with messages:[PSDMessage]){
+        var index:Int = 0//the index of message in received chat
+        var adddedMessages = [PSDRowMessage]()
+        if messages.count > index{
+            for i in index..<messages.count{
+                let message = messages[i]
+                let rowMessages = PSDObjectsCreator.parseMessageToRowMessage(message)
+                adddedMessages += rowMessages
+            }
+        }
+        _ = completeWithMessages(adddedMessages)
+    }
+    
     ///Find indexPath of message by its messageId start from bottom.
     private func index(of searchMessage:PSDMessage?)->IndexPath{
         if searchMessage != nil{

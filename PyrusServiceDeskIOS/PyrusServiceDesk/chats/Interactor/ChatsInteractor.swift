@@ -21,6 +21,7 @@ class ChatsInteractor: NSObject {
     var isClear = false
     var isNewUser = false
     var firtLoad = true
+    var isFiltered = false
     
     private let coreDataService: CoreDataServiceProtocol
     private let chatsDataService: PSDChatsDataServiceProtocol
@@ -101,7 +102,7 @@ extension ChatsInteractor: ChatsInteractorProtocol {
             openChat(chat: chats[index], fromPush: false)
         case .newChat:
             if let clientId = PyrusServiceDesk.currentClientId {
-                if let userId = PyrusServiceDesk.currentUserId {
+                if let userId = currentUserId {
                     openNewChat(userId: userId)
                 } else if let user = PyrusServiceDesk.additionalUsers.first(where: { $0.clientId == clientId }) {
                     openNewChat(userId: user.userId)
@@ -295,6 +296,7 @@ private extension ChatsInteractor {
     }
     
     func deleteFilter() {
+        isFiltered = false
         if !isNewQr {
             isNewUser = false
             PyrusServiceDesk.currentUserId = nil
@@ -416,6 +418,7 @@ private extension ChatsInteractor {
     }
     
     @objc func setFilter() {
+       // isFiltered
         DispatchQueue.main.async { [weak self] in
             let clientId = PyrusServiceDesk.currentClientId ?? PyrusServiceDesk.clientId
             if let newSelectedIndex = self?.clients.firstIndex(where: { $0.clientId == clientId }),

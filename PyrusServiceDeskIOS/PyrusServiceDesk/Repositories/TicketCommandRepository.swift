@@ -190,6 +190,9 @@ class TicketCommandRepository {
             DispatchQueue.main.async { [weak self] in
                 self?.commandsCache = self?.chatsDataService.getAllCommands()
                 PyrusServiceDesk.syncManager.syncGetTickets()
+//                if let commandsCache = self?.commandsCache {
+//                    PSDMessagesStorage.createMessages(from: commandsCache)
+//                }
             }
         }
         
@@ -219,37 +222,41 @@ class TicketCommandRepository {
 //            }
 //            return false
 //        })
-        var newId: (Int, Int)? = nil
-        commandsCache?.removeAll(where: {
-            if $0.commandId.lowercased() == commandId.lowercased() {
-                if
-                    $0.params.requestNewTicket ?? false,
-                    $0.params.ticketId ?? 0 < 0,
-                    let serverTicketId = serverTicketId
-                {
-                    newId = ($0.params.ticketId ?? 0, serverTicketId)
-                }
-                return true
-            }
-            return false
-        })
-        if let newId = newId {
-            commandsCache?.forEach({ command in
-                if command.params.ticketId == newId.0 {
-                    command.params.ticketId = newId.1
-                }
-            })
-        }
-        chatsDataService.deleteCommand(with: commandId.lowercased(), serverTicketId: serverTicketId)
-//        loadFromFile { result in
-//            switch result {
-//            case .success(var commands):
-//                commands.removeAll(where: {$0.commandId.lowercased() == commandId.lowercased()})
-//                self.save(commands: commands, completion: completion)
-//            case .failure(let error):
-//                completion?(error)
+//        var newId: (Int, Int)? = nil
+//        commandsCache?.removeAll(where: {
+//            if $0.commandId.lowercased() == commandId.lowercased() {
+//                if
+//                    $0.params.requestNewTicket ?? false,
+//                    $0.params.ticketId ?? 0 < 0,
+//                    let serverTicketId = serverTicketId
+//                {
+//                    newId = ($0.params.ticketId ?? 0, serverTicketId)
+//                }
+//                return true
 //            }
+//            return false
+//        })
+//        if let newId = newId {
+//            commandsCache?.forEach({ command in
+//                if command.params.ticketId == newId.0 {
+//                    command.params.ticketId = newId.1
+//                }
+//            })
 //        }
+        commandsCache?.removeAll(where: { $0.commandId.lowercased() == commandId.lowercased() })
+        if let serverTicketId {
+            chatsDataService.resaveBeforeDeleteCommand(commanId: commandId.lowercased(), serverTicketId: serverTicketId) { [weak self] _ in
+                DispatchQueue.main.async { [weak self] in
+                    self?.chatsDataService.deleteCommand(with: commandId.lowercased(), serverTicketId: serverTicketId)
+                    let cashe = self?.chatsDataService.getAllCommands()
+                    self?.commandsCache = self?.chatsDataService.getAllCommands() ?? []
+                }
+            }
+        } else {
+            chatsDataService.deleteCommand(with: commandId.lowercased(), serverTicketId: serverTicketId)
+            commandsCache = chatsDataService.getAllCommands()
+        }
+        
     }
     
     func clear(completion: ((Error?) -> Void)? = nil) {

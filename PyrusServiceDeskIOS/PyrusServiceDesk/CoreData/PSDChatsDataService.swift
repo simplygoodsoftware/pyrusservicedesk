@@ -353,17 +353,17 @@ extension PSDChatsDataService: PSDChatsDataServiceProtocol {
         }
     }
 
-    func deleteCommand(with id: String, serverTicketId: Int?) {
+    func resaveBeforeDeleteCommand(commanId: String, serverTicketId: Int?, completion: ((Result<Void, Error>) -> Void)?) {
         if let serverTicketId {
-            coreDataService.save(completion: nil) { context in
+            coreDataService.save(completion: completion) { context in
                 let fetchRequest = DBTicketCommand.fetchRequest()
-                fetchRequest.predicate = NSPredicate(format: "id == %@", id.lowercased() as CVarArg)
+                fetchRequest.predicate = NSPredicate(format: "id == %@", commanId.lowercased() as CVarArg)
                 if let dbTicketCommand = try? context.fetch(fetchRequest).first,
                    dbTicketCommand.requestNewTicket,
                    dbTicketCommand.ticketId < 0 {
                     let newId = (dbTicketCommand.ticketId, serverTicketId)
                     let fetchRequest = DBTicketCommand.fetchRequest()
-                    fetchRequest.predicate = NSPredicate(format: "id == %lld", Int64(dbTicketCommand.ticketId))
+                    fetchRequest.predicate = NSPredicate(format: "ticketId == %lld", Int64(dbTicketCommand.ticketId))
                     if let dbCommands = try? context.fetch(fetchRequest) {
                         for dbCommand in dbCommands {
                             dbCommand.ticketId = Int64(newId.1)
@@ -372,7 +372,9 @@ extension PSDChatsDataService: PSDChatsDataServiceProtocol {
                 }
             }
         }
-        
+    }
+    
+    func deleteCommand(with id: String, serverTicketId: Int?) {
         do {
             try coreDataService.deleteCommand(id: id)
         } catch {

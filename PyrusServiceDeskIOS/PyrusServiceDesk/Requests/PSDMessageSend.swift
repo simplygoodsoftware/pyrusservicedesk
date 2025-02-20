@@ -140,6 +140,7 @@ struct PSDMessageSend {
         if let attachments = messageToPass.attachments {
             attachmentsData = []
             for attachment in attachments {
+ //               _ = PSDMessagesStorage.saveToFileAttachment(attachment, messageLocalId: commandId)
                 let attach = AttachmentData(type: 0, name: attachment.name, guid: attachment.serverIdentifer)
                 attachmentsData?.append(attach)
             }

@@ -55,7 +55,7 @@ struct PSDMessagesStorage {
         PyrusServiceDesk.storeMessages?.append(message)
         if let attachments = message.attachments, attachments.count > 0 {
             for attachment in attachments {
-                _ = saveToFileAttachment(attachment, messageLocalId: message.clientId)
+                _ = saveToFileAttachment(attachment, messageLocalId: message.commandId ?? message.clientId)
             }
         }
       //  saveMessagesToFile()
@@ -164,7 +164,7 @@ struct PSDMessagesStorage {
                 for attachmentData in attachmetsArray {
                     guard attachmentData.name.count > 0,
                           let attachment = PSDFilesManager.getAtttachment(
-                            attachmentData.name, messageLocalId: message.clientId
+                            attachmentData.name, messageLocalId: message.commandId ?? ""
                           ) else {
                         continue
                     }
@@ -275,7 +275,7 @@ struct PSDMessagesStorage {
     
     ///Save message's attachment to local file named same as attachment.
     ///Return status of saving - true if has no attachment or has attachment it was saved successful, of false - if attachment size is too big.
-    private static func saveToFileAttachment(_ attachment : PSDAttachment, messageLocalId: String)->Bool{
+    static func saveToFileAttachment(_ attachment : PSDAttachment, messageLocalId: String)->Bool{
         if attachment.data.count > 0{
             if attachment.data.count > MAX_SAVEDATTACHMENT_SIZE{
                 print("attachment is too big to safe")
