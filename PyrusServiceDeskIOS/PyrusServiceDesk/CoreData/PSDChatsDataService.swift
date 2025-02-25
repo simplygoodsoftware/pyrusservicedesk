@@ -115,12 +115,20 @@ extension PSDChatsDataService: PSDChatsDataServiceProtocol {
             dbChat.showRatingText = chatModel.showRatingText
             dbChat.subject = chatModel.subject
             dbChat.userId = chatModel.userId
-//            if dbChat.messages == nil {
-//                dbChat.messages = NSOrderedSet()
-//            }
-           // dbChat.messages = NSOrderedSet()
+            if dbChat.messages == nil {
+                dbChat.messages = NSOrderedSet()
+            }
+            
             for message in chatModel.messages {
-                let dbMessage = NSEntityDescription.insertNewObject(forEntityName: "DBMessage", into: context) as! DBMessage
+                let mesFetchRequest = DBMessage.fetchRequest()
+                mesFetchRequest.predicate = NSPredicate(format: "messageId == %@", message.messageId as CVarArg)
+                let dbMessage: DBMessage
+                if let comment = try? context.fetch(mesFetchRequest).first {
+                    dbMessage = comment
+                } else {
+                    dbMessage = NSEntityDescription.insertNewObject(forEntityName: "DBMessage", into: context) as! DBMessage
+                }
+                
                 dbMessage.messageId = message.messageId
                 dbMessage.appId = message.appId
                 dbMessage.userId = message.userId
