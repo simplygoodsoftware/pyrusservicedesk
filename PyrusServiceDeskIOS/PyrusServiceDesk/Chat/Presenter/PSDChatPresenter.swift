@@ -57,6 +57,8 @@ extension PSDChatPresenter: PSDChatPresenterProtocol {
             view?.show(.reloadTitle)
         case .updateBadge(messagesCount: let messagesCount):
             view?.show(.updateBadge(messagesCount: messagesCount))
+        case .scrollToRow(indexPath: let indexPath):
+            view?.show(.scrollToRow(indexPath: indexPath))
         }
     }
 }

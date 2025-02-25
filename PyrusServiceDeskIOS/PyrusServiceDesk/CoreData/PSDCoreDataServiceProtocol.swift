@@ -4,6 +4,7 @@ import CoreData
 protocol CoreDataServiceProtocol: AnyObject {
     func fetchChats() throws -> [DBChat]
     func fetchCommands() throws -> [DBTicketCommand]
+    func fetchMessages(searchString: String) throws -> [DBMessage]
     func fetchClients() throws -> [DBClient]
     func save(completion: ((Result<Void, Error>) -> Void)?, block: @escaping (NSManagedObjectContext) throws -> Void)
     func deleteAllObjects(forEntityName entityName: String)

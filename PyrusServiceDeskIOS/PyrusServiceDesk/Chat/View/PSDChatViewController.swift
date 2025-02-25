@@ -168,9 +168,10 @@ class PSDChatViewController: PSDViewController {
     private var firstLayout: Bool = true
     override func viewDidLayoutSubviews() {
         if firstLayout {
-            tableView.scrollsToBottom(animated: false)
+            //tableView.scrollsToBottom(animated: false)
             firstLayout = false
             tableView.transform = CGAffineTransform(rotationAngle: CGFloat.pi)
+            interactor.doInteraction(.viewDidLayoutSubviews)
         }
     }
     
@@ -531,6 +532,10 @@ extension PSDChatViewController: PSDChatViewProtocol {
         case .updateBadge(messagesCount: let messagesCount):
             newMessageCount.text = "\(messagesCount)"
             badgeView.isHidden = false
+        case .scrollToRow(indexPath: let indexPath):
+            tableView.scrollToRow(at: indexPath, at: .middle, animated: false)
+            tableView.setNeedsLayout()
+            tableView.layoutIfNeeded()
         }
     }
 }

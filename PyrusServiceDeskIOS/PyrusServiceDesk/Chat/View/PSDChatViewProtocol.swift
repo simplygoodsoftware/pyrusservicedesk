@@ -26,6 +26,7 @@ enum PSDChatSearchViewCommand {
     case updateTitle(connectionError: Bool)
     case reloadTitle
     case updateBadge(messagesCount: Int)
+    case scrollToRow(indexPath: IndexPath)
 }
 
 protocol PSDChatViewProtocol: NSObjectProtocol {

@@ -33,6 +33,13 @@ extension CoreDataService: CoreDataServiceProtocol {
         return try viewContext.fetch(fetchRequest)
     }
     
+    func fetchMessages(searchString: String) throws -> [DBMessage] {
+        let fetchRequest = DBMessage.fetchRequest()
+        let predicate = NSPredicate(format: "text CONTAINS[cd] %@", searchString)
+        fetchRequest.predicate = predicate
+        return try viewContext.fetch(fetchRequest)
+    }
+    
     func fetchCommands() throws -> [DBTicketCommand] {
         let fetchRequest = DBTicketCommand.fetchRequest()
         return try viewContext.fetch(fetchRequest)

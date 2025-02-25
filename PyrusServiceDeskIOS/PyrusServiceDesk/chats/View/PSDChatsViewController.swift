@@ -79,6 +79,8 @@ class PSDChatsViewController: UIViewController {
     
     private var originYFilterConstraint: NSLayoutConstraint?
     private var heightFilterConstraint: NSLayoutConstraint?
+    
+    private var searchViewController: SearchViewController?
 
     private lazy var filterInfoView: UIView = {
         let view = UIView()
@@ -125,7 +127,7 @@ class PSDChatsViewController: UIViewController {
     
     private lazy var searchButton: UIButton = {
         let button = UIButton(type: .system)
-        button.setImage(UIImage(systemName: "magnifyingglass"), for: .normal)
+        //button.setImage(UIImage(systemName: "magnifyingglass"), for: .normal)
         button.translatesAutoresizingMaskIntoConstraints = false
         return button
     }()
@@ -263,7 +265,7 @@ private extension PSDChatsViewController {
         filterInfoView.leadingAnchor.constraint(equalTo: view.leadingAnchor).isActive = true
         filterInfoView.trailingAnchor.constraint(equalTo: view.trailingAnchor).isActive = true
         
-        originYFilterConstraint = filterInfoView.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor, constant: 43)
+        originYFilterConstraint = filterInfoView.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor, constant: 56)
         originYFilterConstraint?.isActive = true
         
         heightFilterConstraint = filterInfoView.heightAnchor.constraint(equalToConstant: 0)
@@ -335,23 +337,38 @@ private extension PSDChatsViewController {
         navigationView.trailingAnchor.constraint(equalTo: view.trailingAnchor).isActive = true
         navigationView.topAnchor.constraint(equalTo: view.topAnchor, constant: -1).isActive = true
         
-        bottomNavigationView = navigationView.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor, constant: 43)
+        bottomNavigationView = navigationView.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor, constant: 56)
         bottomNavigationView?.isActive = true
         
         navigationView.addSubview(searchButton)
         searchButton.tintColor = customization?.themeColor
+        searchButton.setImage(UIImage.PSDImage(name: "search")?.withTintColor(customization?.themeColor ?? .blue), for: .normal)
+
         NSLayoutConstraint.activate([
             searchButton.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -54),
-            searchButton.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor, constant: 9)
+            searchButton.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor, constant: 13),
+            searchButton.heightAnchor.constraint(equalToConstant: 32),
+            searchButton.widthAnchor.constraint(equalToConstant: 32)
         ])
         searchButton.addTarget(self, action: #selector(openSearch), for: .touchUpInside)
+        
+        let presenter = SearchPresenter()
+        let interactor = SearchInteractor(presenter: presenter)
+        let router = SearchRouter()
+        let controller = SearchViewController(interactor: interactor, router: router)
+        presenter.view = controller
+        router.controller = controller
+        controller.view.alpha = 0.0
+        self.view.addSubview(controller.view)
+        searchViewController = controller
+        addChild(controller)
     }
     
     @objc func openSearch() {
-        searchNavigationView.alpha = 1.0
-        searchBar.becomeFirstResponder()
-        segmentControl.alpha = 0.0
-        navigationView.alpha = 0.0
+        UIView.animate(withDuration: 0.3, animations: {
+            self.searchViewController?.view.alpha = 1.0
+            self.searchViewController?.searchBar.becomeFirstResponder()
+        })
     }
     
     func setupSearchNavigationView() {
@@ -391,7 +408,7 @@ private extension PSDChatsViewController {
             button.translatesAutoresizingMaskIntoConstraints = false
             NSLayoutConstraint.activate([
                 button.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -16),
-                button.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor, constant: 7),
+                button.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor, constant: 14),
                 button.heightAnchor.constraint(equalToConstant: 28),
                 button.widthAnchor.constraint(equalToConstant: 28)
             ])
@@ -424,7 +441,7 @@ private extension PSDChatsViewController {
         }
         
         NSLayoutConstraint.activate([
-            filterButton.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor, constant: 7),
+            filterButton.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor, constant: 15),
             filterButton.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 16)
         ])
     }
@@ -446,7 +463,7 @@ private extension PSDChatsViewController {
             navTitle.widthAnchor.constraint(lessThanOrEqualToConstant: 200),
             titleView.heightAnchor.constraint(equalToConstant: 28),
             titleView.trailingAnchor.constraint(equalTo: navTitle.trailingAnchor),
-            titleView.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor, constant: 9),
+            titleView.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor, constant: 16),
             titleView.centerXAnchor.constraint(equalTo: view.centerXAnchor)
         ])
         
@@ -583,10 +600,10 @@ extension PSDChatsViewController: ChatsViewProtocol {
         case .showAccessDeniedAlert(userNames: let userNames, okAction: let okAction):
             showAccessDeniedAlert(userNames: userNames, okAction: okAction)
         case .deleteSegmentControl:
-                self.originYFilterConstraint?.constant = 43
+                self.originYFilterConstraint?.constant = 56//43
                // self.heightFilterConstraint?.constant = 0
                 self.heightSegmentControl?.constant = 0
-                self.bottomNavigationView?.constant = 43
+                self.bottomNavigationView?.constant = 56
                 self.view.layoutIfNeeded()
                 self.segmentControl.updateTitle(titles: [], selectIndex: 0)
         case .startRefresh:

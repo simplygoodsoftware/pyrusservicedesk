@@ -69,7 +69,11 @@ import UIKit
         if !additionalUsers.contains(user) && user.userId != customUserId {
             additionalUsers.append(user)
             NotificationCenter.default.post(name: newUserNotification, object: nil)
+        } else if user.userId == customUserId {
+            self.userName = user.userName
+            NotificationCenter.default.post(name: usersUpdateNotification, object: nil)
         } else {
+            additionalUsers.first(where: { $0 == user })?.userName = user.userName
             NotificationCenter.default.post(name: usersUpdateNotification, object: nil)
         }
         DispatchQueue.main.async {
@@ -555,7 +559,13 @@ import UIKit
     
     static let chatsUpdateNotification = Notification.Name("CHATS_UPDATE")
     ///All of chats
-    static var chats: [PSDChat] = [PSDChat]() 
+    static var chats: [PSDChat] = [PSDChat]() {
+        didSet {
+            if chats.count == 0 {
+                print(0)
+            }
+        }
+    }
     static var casheChats: [PSDChat] = [PSDChat]()
 
     ///The main view controller. nil - if chat was closed.

@@ -30,6 +30,7 @@ class PSDChatInteractor: NSObject {
            // chat?.messages = chat?.messages.reversed() ?? []
         }
     }
+    private var messageId: String?
     private let reloadInterval = 30.0 //seconds
     private var timer: Timer?
     private var hasNoConnection: Bool = false
@@ -51,10 +52,11 @@ class PSDChatInteractor: NSObject {
     
     var isRefresh = false
     
-    init(presenter: PSDChatPresenterProtocol, chat: PSDChat? = nil, fromPush: Bool = false) {
+    init(presenter: PSDChatPresenterProtocol, chat: PSDChat? = nil, fromPush: Bool = false, messageId: String? = nil) {
         self.presenter = presenter
         self.chat = chat
         self.fromPush = fromPush
+        self.messageId = messageId
         super.init()
     }
     
@@ -109,6 +111,16 @@ extension PSDChatInteractor: PSDChatInteractorProtocol {
             } else {
                 beginTimer()
                 updateChat(chat: chat)
+                
+                if let messageId,
+                   let index = tableMatrix.findIndexPath(messageId: messageId).first {
+                    let reversedIndex =
+                    IndexPath(
+                        row: tableMatrix[index.section].count - index.row - 1,
+                        section: tableMatrix.count - index.section - 1
+                    )
+                    presenter.doWork(.scrollToRow(indexPath: reversedIndex))
+                }
             }
             startGettingInfo()
         case .send(message: let message, attachments: let attachments):
@@ -150,6 +162,16 @@ extension PSDChatInteractor: PSDChatInteractorProtocol {
             if isHidden {
                 newMessagesCount = 0
                 readChat()
+            }
+        case .viewDidLayoutSubviews:
+            if let messageId,
+               let index = tableMatrix.findIndexPath(messageId: messageId).first {
+                let reversedIndex =
+                IndexPath(
+                    row: tableMatrix[index.section].count - index.row - 1,
+                    section: tableMatrix.count - index.section - 1
+                )
+                presenter.doWork(.scrollToRow(indexPath: reversedIndex))
             }
         }
     }
@@ -293,7 +315,9 @@ private extension PSDChatInteractor {
             presenter.doWork(.endLoading)
             updateButtons()
         }
-        presenter.doWork(.scrollsToBottom(animated: true))
+        if messageId == nil {
+            presenter.doWork(.scrollsToBottom(animated: true))
+        }
     }
     
     private func drawTableWithData() {
