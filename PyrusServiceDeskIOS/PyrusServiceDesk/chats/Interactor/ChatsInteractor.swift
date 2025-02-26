@@ -21,6 +21,11 @@ class ChatsInteractor: NSObject {
     var isClear = false
     var isNewUser = false
     var firtLoad = true
+    var isFiltered = false
+    
+    private let coreDataService: CoreDataServiceProtocol
+    private let chatsDataService: PSDChatsDataServiceProtocol
+    private let imageRepository: ImageRepositoryProtocol?
 
     private var clients = [PSDClientInfo]() {
         didSet {
@@ -55,6 +60,9 @@ class ChatsInteractor: NSObject {
     
     init(presenter: ChatsPresenterProtocol) {
         self.presenter = presenter
+        coreDataService = CoreDataService()
+        chatsDataService = PSDChatsDataService(coreDataService: coreDataService)
+        imageRepository = ImageRepository()
         super.init()
         NotificationCenter.default.addObserver(forName: PyrusServiceDesk.chatsUpdateNotification, object: nil, queue: .main) { [weak self] notification in
             if let userInfo = notification.userInfo,
@@ -71,6 +79,12 @@ extension ChatsInteractor: ChatsInteractorProtocol {
     func doInteraction(_ action: ChatsInteractorCommand) {
         switch action {
         case .viewDidload:
+            if PyrusServiceDesk.clients.count > 0 {
+                updateClients()
+                chats = PyrusServiceDesk.chats
+                presenter.doWork(.endRefresh)
+                isClear = false
+            }
             createMenuActions()
             NotificationCenter.default.addObserver(self, selector: #selector(showConnectionError), name: SyncManager.connectionErrorNotification, object: nil)
             NotificationCenter.default.addObserver(self, selector: #selector(updateClients), name: PyrusServiceDesk.clientsUpdateNotification, object: nil)
@@ -88,7 +102,7 @@ extension ChatsInteractor: ChatsInteractorProtocol {
             openChat(chat: chats[index], fromPush: false)
         case .newChat:
             if let clientId = PyrusServiceDesk.currentClientId {
-                if let userId = PyrusServiceDesk.currentUserId {
+                if let userId = currentUserId {
                     openNewChat(userId: userId)
                 } else if let user = PyrusServiceDesk.additionalUsers.first(where: { $0.clientId == clientId }) {
                     openNewChat(userId: user.userId)
@@ -101,6 +115,7 @@ extension ChatsInteractor: ChatsInteractorProtocol {
         case .deleteFilter:
             deleteFilter()
         case .viewWillAppear:
+   //         guard PyrusServiceDesk.chats.count > 0 else { break }
             PyrusServiceDesk.syncManager.syncGetTickets()
             PyrusServiceDesk.currentUserId = nil
             let filterChats = createChats()
@@ -129,7 +144,7 @@ private extension ChatsInteractor {
     func updateTitle() {
         if PyrusServiceDesk.syncManager.networkAvailability {
             if self.clients.count == 0 {
-                presenter.doWork(.updateTitle(title: "All_Conversations".localizedPSD()))
+               // presenter.doWork(.updateTitle(title: "All_Conversations".localizedPSD()))
             } else {
                 presenter.doWork(.updateTitle(title: self.clients.count > 1 ? "All_Conversations".localizedPSD() : clients[0].clientName))
             }
@@ -154,7 +169,9 @@ private extension ChatsInteractor {
             let params = TicketCommandParams(ticketId: chat.chatId ?? 0, appId: PyrusServiceDesk.currentClientId ?? PyrusServiceDesk.clientId, userId: PyrusServiceDesk.currentUserId ?? PyrusServiceDesk.customUserId ?? PyrusServiceDesk.userId, messageId: Int(chat.lastComment?.messageId ?? ""))
             let command = TicketCommand(commandId: UUID().uuidString, type: .readTicket, appId: PyrusServiceDesk.currentClientId ?? PyrusServiceDesk.clientId, userId:  PyrusServiceDesk.currentUserId ?? PyrusServiceDesk.customUserId ?? PyrusServiceDesk.userId, params: params)
             PyrusServiceDesk.repository.add(command: command)
-            PyrusServiceDesk.syncManager.syncGetTickets()
+            DispatchQueue.main.async {
+                PyrusServiceDesk.syncManager.syncGetTickets()
+            }
         }
 
         presenter.doWork(.openChat(chat: chat, fromPush: fromPush))
@@ -216,6 +233,10 @@ private extension ChatsInteractor {
     func updateIcon(imagePath: String, index: Int) {
         if let image = clients[index].image {
             presenter.doWork(.updateIcon(image: image))
+        } else if let image = imageRepository?.loadImage(name: clients[index].clientId, id: nil, type: .clientIcon) {
+            presenter.doWork(.updateIcon(image: image))
+            clients[index].image = image
+            PyrusServiceDesk.clients[index].image = image
         }
         loadImage(urlString: imagePath) { [weak self] image in
             DispatchQueue.main.async { [weak self] in
@@ -223,6 +244,9 @@ private extension ChatsInteractor {
                     self?.clients[index].image = image ?? UIImage.PSDImage(name: "iiko")
                     PyrusServiceDesk.clients[index].image = image ?? UIImage.PSDImage(name: "iiko")
                     self?.presenter.doWork(.updateIcon(image: image))
+                    if let image, let name = self?.clients[index].clientId {
+                        self?.imageRepository?.saveImage(image, name: name, id: nil, type: .clientIcon)
+                    }
                 }
             }
         }
@@ -272,6 +296,7 @@ private extension ChatsInteractor {
     }
     
     func deleteFilter() {
+        isFiltered = false
         if !isNewQr {
             isNewUser = false
             PyrusServiceDesk.currentUserId = nil
@@ -284,7 +309,9 @@ private extension ChatsInteractor {
     
     func reloadChats() {
         PyrusServiceDesk.restartTimer()
-        PyrusServiceDesk.syncManager.syncGetTickets()
+        DispatchQueue.main.async {
+            PyrusServiceDesk.syncManager.syncGetTickets()
+        }
     }
     
     func openNewChat(userId: String? = nil) {
@@ -391,6 +418,7 @@ private extension ChatsInteractor {
     }
     
     @objc func setFilter() {
+       // isFiltered
         DispatchQueue.main.async { [weak self] in
             let clientId = PyrusServiceDesk.currentClientId ?? PyrusServiceDesk.clientId
             if let newSelectedIndex = self?.clients.firstIndex(where: { $0.clientId == clientId }),

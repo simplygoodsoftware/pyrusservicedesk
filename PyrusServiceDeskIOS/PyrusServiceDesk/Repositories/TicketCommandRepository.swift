@@ -3,10 +3,12 @@ import Foundation
 class TicketCommandRepository {
     private let fileURL: URL
     private var commandsCache: [TicketCommand]?
+    private let chatsDataService: PSDChatsDataServiceProtocol
     
     init(filename: String = "ticketCommands.json") {
         let paths = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask)
         self.fileURL = paths[0].appendingPathComponent(filename)
+        chatsDataService = PSDChatsDataService()
     }
     
     func save(commands: [TicketCommand], completion: ((Error?) -> Void)? = nil) {
@@ -67,6 +69,59 @@ class TicketCommandRepository {
         }
     }
     
+    func getCommands() -> [TicketCommand] {
+        if commandsCache == nil {
+            loadCommands()
+        }
+        var commands = [TicketCommand]()
+        if let commandsCache {
+            for command in commandsCache {
+                var hasUnsendAttachments = false
+                if let attachments = command.params.attachments {
+                    for attach in attachments {
+                        if attach.guid?.count ?? 0 == 0 || attach.guid == "0" {
+                            hasUnsendAttachments = true
+                        }
+                    }
+                }
+                
+                if !hasUnsendAttachments, !(command.params.ticketId ?? 0 < 0 && command.params.requestNewTicket == false) {
+                    commands.append(command)
+                }
+            }
+        }
+        
+        var commandsForSync = commands//[TicketCommand]()
+//        for command in commands {
+//            var hasUnsendNewTicketCommand = true
+//            if let ticketId = command.params.ticketId,
+//               ticketId < 0,
+//               !(command.params.requestNewTicket ?? false) {
+//                for newTicketCommand in commands {
+//                    if newTicketCommand.params.ticketId == ticketId && newTicketCommand.params.requestNewTicket ?? false {
+//                        hasUnsendNewTicketCommand = false
+//                    }
+//                }
+//            } else {
+//                hasUnsendNewTicketCommand = false
+//            }
+//            
+//            if !hasUnsendNewTicketCommand {
+//                commandsForSync.append(command)
+//            }
+//        }
+//        
+        if commandsForSync.count > 0 {
+            print(commandsForSync)
+        }
+        return commandsForSync
+    }
+    
+    func loadCommands() {
+        commandsCache = chatsDataService.getAllCommands()
+        PSDMessagesStorage.createMessages(from: commandsCache?.filter({ $0.type == 0 }) ?? [])
+    }
+    
     func load(completion: @escaping (Result<[TicketCommand], Error>) -> Void) {
         getCreateCommentCommands() { [weak self] createTicketCommands in
             if let cachedCommands = self?.commandsCache {
@@ -124,27 +179,84 @@ class TicketCommandRepository {
     }
     
     func add(command: TicketCommand, completion: ((Error?) -> Void)? = nil) {
-        loadFromFile { result in
-            switch result {
-            case .success(var commands):
-                commands.append(command)
-                self.save(commands: commands, completion: completion)
-            case .failure(let error):
-                completion?(error)
+//       commandsCache?.removeAll(where: { $0.commandId.lowercased() == command.commandId.lowercased() })
+//        if command.params.message == "ааа" {
+//            print("фывапролорпавыфывапр")
+//            print(command.commandId)
+//            print(command.params.attachments?[0].guid)
+//        }
+//        commandsCache?.append(command)
+        chatsDataService.saveTicketCommand(with: command) { [weak self] _ in
+            DispatchQueue.main.async { [weak self] in
+                self?.commandsCache = self?.chatsDataService.getAllCommands()
+                PyrusServiceDesk.syncManager.syncGetTickets()
+//                if let commandsCache = self?.commandsCache {
+//                    PSDMessagesStorage.createMessages(from: commandsCache)
+//                }
             }
         }
+        
+        
+//        let commands = chatsDataService.getAllCommands()
+//        PyrusServiceDesk.syncManager.syncGetTickets()
+//        loadFromFile { result in
+//            switch result {
+//            case .success(var commands):
+//                commands.append(command)
+//                self.save(commands: commands, completion: completion)
+//            case .failure(let error):
+//                completion?(error)
+//            }
+//        }
     }
     
-    func deleteCommand(withId commandId: String, completion: ((Error?) -> Void)? = nil) {
-        loadFromFile { result in
-            switch result {
-            case .success(var commands):
-                commands.removeAll(where: {$0.commandId.lowercased() == commandId.lowercased()})
-                self.save(commands: commands, completion: completion)
-            case .failure(let error):
-                completion?(error)
+    func deleteCommand(withId commandId: String, serverTicketId: Int? = nil, completion: ((Error?) -> Void)? = nil) {
+//        commandsCache?.removeAll(where: {
+//            if $0.commandId.lowercased() == commandId.lowercased() {
+//                if $0.params.message == "ааа" {
+//                    print("!!!!!!!!!!!!!!!!!!!!!!!")
+//                    print($0.commandId)
+//                    print($0.params.attachments?[0].guid)
+//                }
+//                return true
+//            }
+//            return false
+//        })
+//        var newId: (Int, Int)? = nil
+//        commandsCache?.removeAll(where: {
+//            if $0.commandId.lowercased() == commandId.lowercased() {
+//                if
+//                    $0.params.requestNewTicket ?? false,
+//                    $0.params.ticketId ?? 0 < 0,
+//                    let serverTicketId = serverTicketId
+//                {
+//                    newId = ($0.params.ticketId ?? 0, serverTicketId)
+//                }
+//                return true
+//            }
+//            return false
+//        })
+//        if let newId = newId {
+//            commandsCache?.forEach({ command in
+//                if command.params.ticketId == newId.0 {
+//                    command.params.ticketId = newId.1
+//                }
+//            })
+//        }
+        commandsCache?.removeAll(where: { $0.commandId.lowercased() == commandId.lowercased() })
+        if let serverTicketId {
+            chatsDataService.resaveBeforeDeleteCommand(commanId: commandId.lowercased(), serverTicketId: serverTicketId) { [weak self] _ in
+                DispatchQueue.main.async { [weak self] in
+                    self?.chatsDataService.deleteCommand(with: commandId.lowercased(), serverTicketId: serverTicketId)
+                    let cashe = self?.chatsDataService.getAllCommands()
+                    self?.commandsCache = self?.chatsDataService.getAllCommands() ?? []
+                }
             }
+        } else {
+            chatsDataService.deleteCommand(with: commandId.lowercased(), serverTicketId: serverTicketId)
+            commandsCache = chatsDataService.getAllCommands()
         }
+        
     }
     
     func clear(completion: ((Error?) -> Void)? = nil) {

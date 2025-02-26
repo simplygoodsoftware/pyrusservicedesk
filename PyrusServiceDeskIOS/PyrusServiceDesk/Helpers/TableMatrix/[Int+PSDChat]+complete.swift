@@ -4,13 +4,13 @@ extension Array where Element == [PSDRowMessage]{
     ///complete array with unsent messages from storage
     mutating func completeWithUnsentMessages(for ticketId: Int) {
         let messagesFromStorage = PSDMessagesStorage.getMessages(for: ticketId)
-        let sortedMessages = messagesFromStorage.sorted(by: {$0.date > $1.date})
-        complete(with: sortedMessages, startMessage: nil, completion: { _,_, messages in
-            let res = messagesFromStorage.filter { !messages.contains($0)}
-            for message in res{
-                PSDMessagesStorage.remove(messageId: message.clientId)
-            }
-        })
+        let sortedMessages = messagesFromStorage.sorted(by: {$0.date < $1.date})
+        complete(with: sortedMessages) //, startMessage: nil, completion: { _,_, messages in
+//            let res = messagesFromStorage.filter { !messages.contains($0)}
+//            for message in res{
+//                PSDMessagesStorage.remove(messageId: message.clientId)
+//            }
+//        })
     }
 
     mutating func addFakeMessagge(messageId: Int) -> ([IndexPath],IndexSet) {
@@ -173,13 +173,22 @@ extension Array where Element == [PSDRowMessage]{
                 //if self have this message ignore it
                 var alreadyHasMessage = false
                 let rowMessages = PSDObjectsCreator.parseMessageToRowMessage(message)
-                for rowMessage in rowMessages{
+                for (i, rowMessage) in rowMessages.enumerated(){
                     if(self.has(findMessage: rowMessage, startFrom: startMessageIndexPath)){
                         alreadyHasMessage = true
                         break
                     }
                 }
                 if alreadyHasMessage {
+                    let indexPaths = findIndexPath(messageId: message.messageId).reversed()
+                    for (i, index) in indexPaths.enumerated() {
+                        let rowMessage = self[index.section][index.row]
+                        if rowMessage.attachment != nil,
+                           let attachment = message.attachments?[i]//message.attachments?.first(where: { $0.name == rowMessage.attachment?.name && $0.size == rowMessage.attachment?.size })
+                        {
+                            rowMessage.attachment?.serverIdentifer = attachment.serverIdentifer
+                        }
+                    }
                     continue
                 }
                 let section = self.section(forMessage: message)
@@ -214,6 +223,20 @@ extension Array where Element == [PSDRowMessage]{
         }
         completion?(indexPaths,IndexSet(reloadSections), adddedMessages)
     }
+    
+    mutating private func complete(with messages:[PSDMessage]){
+        var index:Int = 0//the index of message in received chat
+        var adddedMessages = [PSDRowMessage]()
+        if messages.count > index{
+            for i in index..<messages.count{
+                let message = messages[i]
+                let rowMessages = PSDObjectsCreator.parseMessageToRowMessage(message)
+                adddedMessages += rowMessages
+            }
+        }
+        _ = completeWithMessages(adddedMessages)
+    }
+    
     ///Find indexPath of message by its messageId start from bottom.
     private func index(of searchMessage:PSDMessage?)->IndexPath{
         if searchMessage != nil{
@@ -273,6 +296,9 @@ extension Array where Element == [PSDRowMessage]{
             let end :Int = count - startFrom.section
             for i in 1...end{
                 for (row,message) in self[count-i].enumerated().reversed(){
+                    if message.message.state == .sent && message.attachment?.name == findMessage.attachment?.name {
+                       // message.attachment?.serverIdentifer = findMessage.attachment?.serverIdentifer
+                    }
                     if message.message.state == .sent && !message.hasId() && message.text == findMessage.text && message.attachment?.name == findMessage.attachment?.name && message.rating == findMessage.rating{
                         message.message.messageId = findMessage.message.messageId
                     }
@@ -281,7 +307,9 @@ extension Array where Element == [PSDRowMessage]{
                     }
                     if message.message.messageId == findMessage.message.messageId && findMessage.hasId(){
                         if (message.message.owner.personId == PyrusServiceDesk.userId) || (message.rating ?? 0 != 0){
-                            message.attachment?.serverIdentifer = findMessage.attachment?.serverIdentifer //set new server id that comes from server, because old may be uncorrect
+                            if message.attachment?.name == findMessage.attachment?.name, let _ = Int(findMessage.attachment?.serverIdentifer ?? "") {
+                                message.attachment?.serverIdentifer = findMessage.attachment?.serverIdentifer
+                            }//set new server id that comes from server, because old may be uncorrect
                             return true
                         }else if message.attachment?.serverIdentifer == findMessage.attachment?.serverIdentifer{  //if from server comes many attachments in one message we separate them into different messages. All of them has same ids.
                             return true

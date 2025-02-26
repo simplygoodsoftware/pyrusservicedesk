@@ -2,7 +2,7 @@ import UIKit
 
 
 ///The state of message.
-enum messageState {
+enum messageState: Int16 {
     ///message now is sending
     case sending
     ///message was sent to server
@@ -48,7 +48,13 @@ class PSDMessage: NSObject {
             self.state = .sent
         }
         
-       
+        DispatchQueue.global().async {
+            for attachment in attachments ?? [] {
+                if attachment.isImage, let image = UIImage(data: attachment.data) {
+                    attachment.previewImage = image
+                }
+            }
+        }
     }
     func hasId() -> Bool {
         if(self.messageId != "0" && self.messageId != ""){

@@ -299,7 +299,10 @@ class PSDChatTableView: PSDTableView {
         
     ///Scroll tableview to its bottom position without animation
     func scrollsToBottom(animated: Bool) {
-        scrollToRow(at: IndexPath(row: 0, section: 0), at: .bottom, animated: animated)
+        if tableMatrix.count > 0, tableMatrix[0].count > 0 {
+            scrollToRow(at: IndexPath(row: 0, section: 0), at: .bottom, animated: animated)
+        }
+        
         chatDelegate?.updateScrollButton(isHidden: true)
     }
     

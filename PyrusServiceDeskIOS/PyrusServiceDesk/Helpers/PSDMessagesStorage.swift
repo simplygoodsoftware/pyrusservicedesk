@@ -51,15 +51,20 @@ struct PSDMessagesStorage {
     }()
     
     static func save(message: PSDMessage) {
-        PyrusServiceDesk.storeMessages?.removeAll(where: { $0.clientId == message.clientId })
+        PyrusServiceDesk.storeMessages?.removeAll(where: { $0.clientId.lowercased() == message.clientId.lowercased() })
         PyrusServiceDesk.storeMessages?.append(message)
-        saveMessagesToFile()
+        if let attachments = message.attachments, attachments.count > 0 {
+            for attachment in attachments {
+                _ = saveToFileAttachment(attachment, messageLocalId: message.commandId ?? message.clientId)
+            }
+        }
+      //  saveMessagesToFile()
     }
     
     static func remove(messageId: String, needSafe: Bool = true, serverTicketId: Int? = nil) {
         var newId: (Int, Int)? = nil
         PyrusServiceDesk.storeMessages?.removeAll(where: {
-            if $0.clientId == messageId {
+            if $0.clientId.lowercased() == messageId.lowercased() {
                 if
                     $0.requestNewTicket,
                     $0.ticketId < 0,
@@ -78,9 +83,9 @@ struct PSDMessagesStorage {
                 }
             })
         }
-        if needSafe {
-            saveMessagesToFile()
-        }
+//        if needSafe {
+//            saveMessagesToFile()
+//        }
     }
     
     static func getMessages(for ticketId: Int? = nil) -> [PSDMessage] {
@@ -110,6 +115,75 @@ struct PSDMessagesStorage {
             return PyrusServiceDesk.storeMessages?.filter({ $0.requestNewTicket && $0.userId == userId }) ?? [PSDMessage]()
         } else {
             return PyrusServiceDesk.storeMessages?.filter({ $0.requestNewTicket }) ?? [PSDMessage]()
+        }
+    }
+    
+    static func loadAttachments() {
+        for message in PyrusServiceDesk.storeMessages ?? [] {
+            if let attachments = message.attachments, attachments.count > 0 {
+                for (i,attachment) in attachments.enumerated(){
+                    if attachment.emptyId() && !attachment.isLoading {
+                        attachment.isLoading = true
+                        PSDMessageSend.passFile(message, attachmentIdex: i, delegate: nil)
+                        break
+                    }
+                }
+            }
+        }
+    }
+    
+    static func createMessages(from commands: [TicketCommand]) {
+        guard PyrusServiceDesk.storeMessages == nil else {
+            return
+        }
+        
+        var messages = [PSDMessage]()
+        for command in commands {
+            let message = PSDMessage(
+                text: command.params.message ?? "",
+                attachments: nil,
+                messageId: nil,
+                owner: PSDUsers.user,
+                date: nil
+            )
+//            if let rating = dict[MESSAGE_RATING_KEY] as? Int {
+//                message.rating = rating
+//            }
+            message.clientId = command.params.messageClientId ?? command.commandId
+            message.state = .sending//(dict[MESSAGE_STATE_KEY] as? Bool ?? false) ? .sending : .cantSend//.cantSend
+            message.date = command.params.date ?? Date()
+            message.fromStrorage = false//message.state == .cantSend
+            message.isOutgoing = true
+            message.ticketId = command.params.ticketId ?? 0
+            message.userId = command.userId
+            message.appId = command.appId
+            message.commandId = command.commandId
+            message.requestNewTicket = command.params.requestNewTicket ?? false
+            var attachments = [PSDAttachment]()
+            if let attachmetsArray = command.params.attachments, attachmetsArray.count > 0 {
+                for attachmentData in attachmetsArray {
+                    guard attachmentData.name.count > 0,
+                          let attachment = PSDFilesManager.getAtttachment(
+                            attachmentData.name, messageLocalId: message.commandId ?? ""
+                          ) else {
+                        continue
+                    }
+                    attachment.name = attachmentData.name
+                    attachment.serverIdentifer = attachmentData.guid
+                    attachment.uploadingProgress = 0.0
+                    attachments.append(attachment)
+                }
+            }
+            message.attachments = attachments
+            if message.text.count > 0 || message.attachments?.count ?? 0 > 0 || message.rating != nil {
+                messages.append(message)
+            }
+        }
+        
+        PyrusServiceDesk.storeMessages = messages
+        
+        DispatchQueue.global().async {
+            loadAttachments()
         }
     }
     
@@ -199,60 +273,9 @@ struct PSDMessagesStorage {
         return messageDict
     }
     
-    ///Seve message in storage - if message has text - save its text, if has attachment - save attachment to file
-//    static func saveInStorage(message: PSDMessage, commandId: String? = nil) {
-//        var hasSomeAttachment = false
-//        if let attachments = message.attachments, attachments.count > 0{
-//            for attachment in attachments{
-//                if attachment.localPath?.count != 0{
-//                    hasSomeAttachment = true
-//                    break
-//                }
-//            }
-//        }
-//        
-//        if message.text.count == 0 && !hasSomeAttachment && message.rating == nil {
-//            return
-//        }
-//        
-//        var messageDict: [String:Any] = [String:Any]()
-//        messageDict[MESSAGE_LOCAL_ID_KEY] = message.clientId
-//        messageDict[MESSAGE_TEXT_KEY] = message.text
-//        messageDict[MESSAGE_DATE_KEY] = message.date
-//        messageDict[MESSAGE_RATING_KEY] = message.rating
-//        messageDict[MESSAGE_TICKET_ID_KEY] = message.ticketId
-//        messageDict[MESSAGE_AUTHOR_ID_KEY] = message.owner.authorId
-//        messageDict[MESSAGE_STATE_KEY] = message.state == .sending
-//        messageDict[COMMAND_ID_KEY] = message.commandId
-//        messageDict[USER_ID_KEY] = message.userId
-//        messageDict[APP_ID_KEY] = message.appId
-//        DispatchQueue.global().async {
-//            
-//            if hasSomeAttachment, let attachments = message.attachments, attachments.count > 0 {
-//                var attachmentsArray = [[String:Any]]()
-//                for attachment in attachments{
-//                    if saveToFileAttachment(attachment, messageLocalId: message.clientId){//if has attachment and it was written to disk - save message to storage
-//                        var attachmentDict = [String:Any]()
-//                        attachmentDict[ATTACHMENT_NAME_KEY] = attachment.name
-//                        attachmentDict[ATTACHMENT_SIZE_KEY] = attachment.size
-//                        attachmentDict[ATTACHMENT_GUID_KEY] = attachment.serverIdentifer
-//                        attachmentsArray.append(attachmentDict)
-//                    }
-//                }
-//                if attachmentsArray.count > 0{
-//                    messageDict[ATTACHMENT_ARRAY_KEY] = attachmentsArray
-//                }
-//            }
-//            DispatchQueue.main.async {
-//                saveToStorage(messageDict: messageDict)
-//            }
-//        }
-//        
-//    }
-    
     ///Save message's attachment to local file named same as attachment.
     ///Return status of saving - true if has no attachment or has attachment it was saved successful, of false - if attachment size is too big.
-    private static func saveToFileAttachment(_ attachment : PSDAttachment, messageLocalId: String)->Bool{
+    static func saveToFileAttachment(_ attachment : PSDAttachment, messageLocalId: String)->Bool{
         if attachment.data.count > 0{
             if attachment.data.count > MAX_SAVEDATTACHMENT_SIZE{
                 print("attachment is too big to safe")
@@ -269,7 +292,7 @@ struct PSDMessagesStorage {
     private static func removeFromStorage(messageId:String, needSave: Bool)->[[String:Any]]{
         var messagesStorage = getMessagesStorage()
         for (index, dict) in messagesStorage.enumerated() {
-            guard let localId = dict[MESSAGE_LOCAL_ID_KEY] as? String else{
+            guard let localId = dict[COMMAND_ID_KEY] as? String else{
                 continue
             }
             if (localId == messageId) {
@@ -315,12 +338,6 @@ struct PSDMessagesStorage {
         messagesStorage.append(messageDict)
         saveToStorage(messagesStorage)
     }
-    ///Removes message from storage if its exist by its local Id, save changes in UserDefaults
-//    static func removeFromStorage(messageId:String){
-//        DispatchQueue.main.async {
-//            let _ = removeFromStorage(messageId: messageId, needSave: true)
-//        }
-//    }
     
     ///Return array with saved messages info in storage.
     private static func saveToStorage(_ messagesStorage:[[String:Any]]){
@@ -340,70 +357,7 @@ struct PSDMessagesStorage {
     private static func getMessagesStorage() -> [[String: Any]] {
         return pyrusUserDefaults()?.array(forKey: PSD_MESSAGES_STORAGE_KEY) as? [[String:Any]] ?? [[String:Any]]()
     }
-//    private static func resaveInStorageMessage(_ message: PSDMessage) {
-//        removeFromStorage(messageId: message.messageId)
-//        saveInStorage(message: message)
-//    }
-    
-    ///Returns [PSDMessage] in storage
-//    static func messagesFromStorage(for ticketId: Int = 0) -> [PSDMessage] {
-//        var arrayWithMessages = [PSDMessage]()
-//        let messagesStorage = getMessagesStorage()
-//        for dict in messagesStorage {
-//            if PyrusServiceDesk.multichats,
-//               dict[MESSAGE_AUTHOR_ID_KEY] as? String != PyrusServiceDesk.authorId {
-//                continue
-//            }
-//            let message = createMessage(from: dict)
-//            if message.attachments?.count ?? 0 > 0 || message.text.count > 0 || message.rating != nil {
-//                if dict[MESSAGE_DATE_KEY] as? Date == nil {
-//                    resaveInStorageMessage(message)//resave massage with date to avoid nil next time
-//                }
-//                arrayWithMessages.append(message)
-//            } else {
-//                ///this is break data - remove it from storage
-//                removeFromStorage(messageId: message.messageId)
-//            }
-//           
-//        }
-//        if PyrusServiceDesk.multichats {
-//            return ticketId == 0 
-//                ? []
-//                : arrayWithMessages.filter({ $0.ticketId == ticketId })
-//        }
-//        return arrayWithMessages
-//    }
-    
-//    static func getSendingMessagesFromStorage(for ticketId: Int? = nil) -> [MessageToPass] {
-//        var arrayWithMessages = [MessageToPass]()
-//        let messagesStorage = getMessagesStorage()
-//        for dict in messagesStorage {
-//            if PyrusServiceDesk.multichats,
-//               dict[MESSAGE_AUTHOR_ID_KEY] as? String != PyrusServiceDesk.authorId {
-//                continue
-//            }
-//            let message = createMessage(from: dict)
-//            if (message.attachments?.count ?? 0 > 0 || message.text.count > 0 || message.rating != nil) {
-//                if dict[MESSAGE_DATE_KEY] as? Date == nil {
-//                    resaveInStorageMessage(message)//resave massage with date to avoid nil next time
-//                }
-//                if (ticketId == nil || message.ticketId == ticketId) && message.state == .sending {
-//                    let messageToPass = MessageToPass(
-//                        message: message,
-//                        commandId: (dict[COMMAND_ID_KEY] as? String) ?? ""
-//                    )
-//                    arrayWithMessages.append(messageToPass)
-//                }
-//            } else {
-//                ///this is break data - remove it from storage
-//                removeFromStorage(messageId: message.clientId)
-//            }
-//           
-//        }
-//        
-//        return arrayWithMessages
-//    }
-    
+
     static private func createMessage(from dict: [String: Any]) -> PSDMessage? {
         if PyrusServiceDesk.multichats && dict[MESSAGE_AUTHOR_ID_KEY] as? String != PyrusServiceDesk.authorId {
             return nil

@@ -89,7 +89,7 @@ extension PSDChatInteractor: PSDChatInteractorProtocol {
                 DispatchQueue.main.async { [weak self] in
                     if let userInfo = notification.userInfo,
                        let commandId = userInfo["commandId"] as? String,
-                       let message = self?.messagesToPass.first(where: { $0.commandId == commandId })?.message {
+                       let message = self?.messagesToPass.first(where: { $0.commandId.lowercased() == commandId.lowercased() })?.message {
                         self?.refresh(message: message, changedToSent: false)
                     }
                 }
@@ -98,8 +98,8 @@ extension PSDChatInteractor: PSDChatInteractorProtocol {
                 DispatchQueue.main.async { [weak self] in
                     if let userInfo = notification.userInfo,
                        let commandId = userInfo["commandId"] as? String,
-                       let message = self?.messagesToPass.first(where: { $0.commandId == commandId })?.message {
-                        self?.messagesToPass.removeAll(where: { $0.commandId == commandId })
+                       let message = self?.messagesToPass.first(where: { $0.commandId.lowercased() == commandId.lowercased() })?.message {
+                        self?.messagesToPass.removeAll(where: { $0.commandId.lowercased() == commandId.lowercased() })
                         self?.remove(message: message)
                     }
                 }
@@ -117,7 +117,9 @@ extension PSDChatInteractor: PSDChatInteractorProtocol {
             sendRate(rateValue)
         case .refresh:
             isRefreshing = true
-            PyrusServiceDesk.syncManager.syncGetTickets()
+            DispatchQueue.main.async {
+                PyrusServiceDesk.syncManager.syncGetTickets()
+            }
         case .addNewRow:
             if let messageToSent {
                 addNewRow(message: messageToSent)
@@ -257,7 +259,9 @@ private extension PSDChatInteractor {
             if let showFakeMessage, showFakeMessage != 0 {
                 presenter.doWork(.addFakeMessage(messageId: showFakeMessage))
             }
-            PyrusServiceDesk.syncManager.syncGetTickets()
+            DispatchQueue.main.async {
+                PyrusServiceDesk.syncManager.syncGetTickets()
+            }
         }
     }
     
@@ -319,7 +323,9 @@ private extension PSDChatInteractor {
             let params = TicketCommandParams(ticketId: ticketId, appId: PyrusServiceDesk.currentClientId ?? PyrusServiceDesk.clientId, userId: PyrusServiceDesk.currentUserId ?? PyrusServiceDesk.customUserId ?? PyrusServiceDesk.userId, messageId: Int(chat?.lastComment?.messageId ?? ""))
             let command = TicketCommand(commandId: UUID().uuidString, type: .readTicket, appId: PyrusServiceDesk.currentClientId ?? PyrusServiceDesk.clientId, userId:  PyrusServiceDesk.currentUserId ?? PyrusServiceDesk.customUserId ?? PyrusServiceDesk.userId, params: params)
             PyrusServiceDesk.repository.add(command: command)
-            PyrusServiceDesk.syncManager.syncGetTickets()
+            DispatchQueue.main.async {
+                PyrusServiceDesk.syncManager.syncGetTickets()
+            }
         }
     }
     
@@ -683,7 +689,9 @@ extension PSDChatInteractor {
     @objc private func updateTable() {
         startGettingInfo()
         if !hasNoConnection {
-            PyrusServiceDesk.syncManager.syncGetTickets()
+            DispatchQueue.main.async {
+                PyrusServiceDesk.syncManager.syncGetTickets()
+            }
         }
     }
 }

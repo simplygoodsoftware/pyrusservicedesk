@@ -72,8 +72,13 @@ import UIKit
         } else {
             NotificationCenter.default.post(name: usersUpdateNotification, object: nil)
         }
-
-        syncManager.syncGetTickets(isFilter: true)
+        DispatchQueue.main.async {
+            syncManager.syncGetTickets(isFilter: true)
+        }
+    }
+    
+    public static func getClients() -> [PSDClientInfo] {
+        return clients
     }
     
     public static var newUser: PSDUserInfo?
@@ -212,7 +217,9 @@ import UIKit
                 let appId = user.clientId
                 let command = TicketCommand(commandId: UUID().uuidString, type: .setPushToken, appId: appId, userId: userId, params: TicketCommandParams(ticketId: nil, appId: appId, userId: userId, token: token, type: "ios"))
                 PyrusServiceDesk.repository.add(command: command)
-                PyrusServiceDesk.syncManager.syncGetTickets()
+                DispatchQueue.main.async {
+                    PyrusServiceDesk.syncManager.syncGetTickets()
+                }
                 ///todo - добавить обработку ошибки
                 completion(nil)
             }
@@ -313,6 +320,14 @@ import UIKit
         PyrusServiceDesk.logEvent = subscriber
     }
     
+    @objc public static func cleanCashe() {
+        DispatchQueue.global().async {
+            syncManager.chatsDataService.deleteAllObjects()
+            let imageRepository = ImageRepository()
+            imageRepository?.clearRepository()
+        }
+    }
+    
     static var customUserId: String?
     static var authorizationToken: String?
     static var securityKey: String?
@@ -350,6 +365,7 @@ import UIKit
         createWith(clientId, userId: userId, securityKey: securityKey, reset: false, userName: userName, additionalUsers: additionalUsers, authorId: authorId, domain: domain, loggingEnabled: loggingEnabled, authorizationToken: authorizationToken, multichats: multichats)
     }
     private static func createWith(_ clientId: String?, userId: String?, securityKey: String?, reset: Bool, userName: String?, additionalUsers: [PSDUserInfo] = [], authorId: String?, domain: String?, loggingEnabled: Bool, authorizationToken: String?, multichats: Bool = false) {
+        PyrusServiceDesk.chats = []
         PyrusServiceDesk.multichats = multichats
         PyrusServiceDesk.loggingEnabled = loggingEnabled
         guard let clientId = clientId, clientId.count > 0 else {
@@ -370,15 +386,14 @@ import UIKit
         PyrusServiceDesk.customUserId = userId
         PyrusServiceDesk.userName = userName
         PyrusServiceDesk.authorId = authorId
-        PyrusServiceDesk.createUserId(reset)
         PyrusServiceDesk.authorizationToken = authorizationToken
         PyrusServiceDesk.additionalUsers = additionalUsers
         PyrusServiceDesk.clients = []
         PyrusServiceDesk.currentClientId = clientId
         PyrusServiceDesk.accessDeniedIds = []
-        PyrusServiceDesk.chats = []
         PyrusServiceDesk.lastNoteId = 0
         lastSetPushToken = nil
+        PyrusServiceDesk.createUserId(reset)
         if needReloadUI {
             PyrusServiceDesk.mainController?.updateTitleChat()
         }
@@ -402,7 +417,9 @@ import UIKit
             lastRefreshes.remove(at: 0)
         }
         if multichats {
-            PyrusServiceDesk.syncManager.syncGetTickets()
+            DispatchQueue.main.async {
+                PyrusServiceDesk.syncManager.syncGetTickets()
+            }
         } else {
             PyrusServiceDesk.mainController?.refreshChat(showFakeMessage: 0)
         }
@@ -538,12 +555,9 @@ import UIKit
     
     static let chatsUpdateNotification = Notification.Name("CHATS_UPDATE")
     ///All of chats
-    static var chats : [PSDChat] = [PSDChat]() 
-//    {
-//        didSet {
-//            NotificationCenter.default.post(name: chatsUpdateNotification, object: nil)
-//        }
-//    }
+    static var chats: [PSDChat] = [PSDChat]() 
+    static var casheChats: [PSDChat] = [PSDChat]()
+
     ///The main view controller. nil - if chat was closed.
     weak static var mainController : PyrusServiceDeskController?
     ///Updates user info - get chats list from server.
@@ -551,7 +565,9 @@ import UIKit
         if(userId.count > 0){
             restartTimer()
             PyrusLogger.shared.logEvent("PSDGetChats did begin.")
-            syncManager.syncGetTickets()           
+            DispatchQueue.main.async {
+                syncManager.syncGetTickets()
+            }
         }
         else{
             PyrusLogger.shared.logEvent("Empty userId, stop requesting PSDGetChats.")

@@ -19,7 +19,7 @@ class PSDChat: Hashable {
     }
     
     static func == (lhs: PSDChat, rhs: PSDChat) -> Bool {
-        return lhs.chatId == rhs.chatId && lhs.date == rhs.date && lhs.isRead == rhs.isRead && lhs.showRating == rhs.showRating && lhs.showRatingText == rhs.showRatingText && lhs.lastReadedCommentId == rhs.lastReadedCommentId && lhs.isActive == rhs.isActive
+        return lhs.chatId == rhs.chatId && lhs.date == rhs.date && lhs.isRead == rhs.isRead && lhs.showRating == rhs.showRating && lhs.showRatingText == rhs.showRatingText && lhs.lastReadedCommentId == rhs.lastReadedCommentId && lhs.isActive == rhs.isActive && lhs.lastComment == rhs.lastComment
     }
     
     func hash(into hasher: inout Hasher) {

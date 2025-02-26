@@ -1,12 +1,17 @@
 import Foundation
 
 class PSDAttachment: NSObject {
+    let imageRepository: ImageRepositoryProtocol?
     var localPath: String?
-    var name: String = ""{
-        didSet{
+    var name: String = "" {
+        didSet {
             self.canOpen = name.isSupportedFileFormat()
             self.isImage = name.isImageFileFormat()
             self.isVideo = name.isVideoFormat()
+            
+//            if let image = imageRepository?.loadImage(name: name, type: .image) {
+//                self.previewImage = image
+//            }
         }
     }
     ///Size of attachment to show in attachment view
@@ -14,7 +19,13 @@ class PSDAttachment: NSObject {
     ///Data of attachment
     var data: Data = Data()
     ///Identifer from server - used to open and download attachment.
-    var serverIdentifer : String?
+    var serverIdentifer: String? {
+        didSet {
+            if let image = previewImage {
+                imageRepository?.saveImage(image, name: name, id: serverIdentifer, type: .image)
+            }
+        }
+    }
     ///Is attachment has format that WKWebView can open
     var canOpen : Bool = false
     ///Is attachment has image format
@@ -24,9 +35,19 @@ class PSDAttachment: NSObject {
     ///uploading of file progrees to server
     var uploadingProgress : CGFloat = 1.0
     ///The preview image of attacment
-    var previewImage : UIImage?
+    var previewImage : UIImage? {
+        didSet {
+            if let image = previewImage {
+                imageRepository?.saveImage(image, name: name, id: serverIdentifer, type: .image)
+            }
+        }
+    }
+    
     var localId : String
+    var isLoading: Bool = false
+    
     init(localPath: String? , data:Data?, serverIdentifer:String?)  {
+        imageRepository = ImageRepository()
         self.localPath = localPath
         if let localPath = localPath{
             let url = URL.init(string: localPath)

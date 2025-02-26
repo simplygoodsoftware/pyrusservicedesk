@@ -79,6 +79,9 @@ class PSDMessageView: PSDView {
     private static let separatorAlpha :CGFloat = 0.8
     func draw(message: PSDRowMessage) {
         timeLabel.text = message.message.date.timeAsString()
+        if timeLabel.text?.count ?? 0 == 0 {
+            print("")
+        }
         messageTextView.attributedText = message.attributedText
         attachmentView?.removeFromSuperview()
         placeholderImageView.isHidden = message.message as? PSDPlaceholderMessage == nil
@@ -107,7 +110,7 @@ class PSDMessageView: PSDView {
             attachmentView.addZeroConstraint([.leading,.trailing,.top,.bottom])
             recolor()
         }
-        if let rating = message.rating {
+        if let rating = message.rating, message.message.isRatingMessage {
             ratingLabel.text = rateArray[rating]
             if message.attachment == nil && message.text.count == 0 {
                 self.backgroundColor = .clear

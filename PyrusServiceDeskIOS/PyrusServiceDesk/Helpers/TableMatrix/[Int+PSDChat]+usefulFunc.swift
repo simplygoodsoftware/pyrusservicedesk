@@ -29,6 +29,19 @@ extension Array where Element == [PSDRowMessage]{
         }
         return indexPaths
     }
+    
+    ///Find indexPath of message by its local id start from bottom.
+    func findIndexPath(messageId messageId: String)-> [IndexPath] {
+        var indexPaths = [IndexPath]()
+        for (section,messages) in self.enumerated().reversed() {
+            for (row,message) in messages.enumerated().reversed() {
+                if message.message.messageId == messageId {
+                    indexPaths.append(IndexPath.init(row: row, section: section))
+                }
+            }
+        }
+        return indexPaths
+    }
     ///Return last sent message index path
     func indexPathsAfterSent(for message: PSDMessage) -> [IndexPath]? {
         guard self.count > 0 else {
