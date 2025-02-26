@@ -474,6 +474,7 @@ private extension PSDChatInteractor {
     
     private func prepareMessageForDrawing(_ newMessage: PSDMessage) {
         newMessage.state = .sending
+        newMessage.isOutgoing = true
         if let attachments = newMessage.attachments {
             for attachment in attachments{
                 guard attachment.emptyId() else {

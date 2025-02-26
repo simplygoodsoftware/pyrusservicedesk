@@ -42,6 +42,7 @@ class SyncManager {
     }
     
     func syncGetTickets(isFilter: Bool = false) {
+        guard PyrusServiceDesk.isStarted else { return }
         PSDMessagesStorage.loadAttachments()
 
         if firstLoad {
@@ -71,6 +72,7 @@ class SyncManager {
         
         let ticketCommands = PyrusServiceDesk.repository.getCommands()
         PSDGetChats.get(commands: ticketCommands.map({ $0.toDictionary() })) { [weak self] chats, commandsResult, authorAccessDenied, clientsArray, complete in
+            guard PyrusServiceDesk.isStarted else { return }
             guard let self = self else { return }
             var clients = clientsArray
             DispatchQueue.main.async {
@@ -144,7 +146,7 @@ class SyncManager {
                     
                     self?.chatsDataService.saveChatModels(with: chats) { [weak self] _ in
                         DispatchQueue.main.async { [weak self] in
-                            if let clients, clients.count > 0 {
+                            if let clients, clients.count > 0, PyrusServiceDesk.isStarted {
                                 PyrusServiceDesk.clients = clients
                                 self?.chatsDataService.saveClientModels(with: clients)
                                 PyrusServiceDesk.chats = self?.chatsDataService.getAllChats() ?? []

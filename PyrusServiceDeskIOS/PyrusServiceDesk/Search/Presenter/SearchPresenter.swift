@@ -34,7 +34,7 @@ private extension SearchPresenter {
             let model = SearchChatViewModel(
                 id: chat.id,
                 date: chat.date.messageTime(),
-                subject: subject,
+                subject: subject.count > 0 ? subject : "NewTicket".localizedPSD(),
                 messageText: highlightText(in: message, substring: searchString, with: .secondColor ?? .white),
                 messageId: chat.messageId
             )

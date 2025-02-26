@@ -25,6 +25,7 @@ import UIKit
     static private(set) var authorId: String?
     static var lastNoteId: Int?
     static var storeMessages: [PSDMessage]?
+    static var isStarted: Bool = false
     
     static var userName: String?
     ///UserId needed for request
@@ -325,6 +326,7 @@ import UIKit
     }
     
     @objc public static func cleanCashe() {
+        isStarted = false
         DispatchQueue.global().async {
             syncManager.chatsDataService.deleteAllObjects()
             let imageRepository = ImageRepository()
@@ -369,6 +371,7 @@ import UIKit
         createWith(clientId, userId: userId, securityKey: securityKey, reset: false, userName: userName, additionalUsers: additionalUsers, authorId: authorId, domain: domain, loggingEnabled: loggingEnabled, authorizationToken: authorizationToken, multichats: multichats)
     }
     private static func createWith(_ clientId: String?, userId: String?, securityKey: String?, reset: Bool, userName: String?, additionalUsers: [PSDUserInfo] = [], authorId: String?, domain: String?, loggingEnabled: Bool, authorizationToken: String?, multichats: Bool = false) {
+        isStarted = true
         PyrusServiceDesk.chats = []
         PyrusServiceDesk.multichats = multichats
         PyrusServiceDesk.loggingEnabled = loggingEnabled
