@@ -465,8 +465,8 @@ extension PSDChatViewController: PSDChatViewProtocol {
             tableView.addFakeMessage(messageId: messageId)
         case .updateButtons(buttons: let buttons):
             tableView.updateButtonsView(buttons: buttons)
-        case .updateRows(indexPaths: let indexPaths):
-            tableView.updateRows(indexPaths: indexPaths)
+        case .updateRows:
+            tableView.updateRows()
         case .removeNoConnectionView:
             tableView.removeNoConnectionView()
         case .endRefreshing:

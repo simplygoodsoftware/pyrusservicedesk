@@ -3,7 +3,7 @@ import Foundation
 enum PSDChatSearchViewCommand {
     case addFakeMessage(messageId: Int)
     case updateButtons(buttons: [ButtonData]?)
-    case updateRows(indexPaths: IndexPaths)
+    case updateRows
     case removeNoConnectionView
     case endRefreshing
     case reloadChat

@@ -99,8 +99,7 @@ class PSDChatTableView: PSDTableView {
         keyboardDismissMode = .interactive
         separatorColor = .clear
         
-        if #available(iOS 13.0, *)
-        {
+        if #available(iOS 13.0, *) {
             let newDataSource = KBDiffableDataSource.createDataSource(for: self, cellCreator: self)
             customDataSource = newDataSource
             dataSource = newDataSource
@@ -109,116 +108,74 @@ class PSDChatTableView: PSDTableView {
         }
     }
     
-    func updateRows(indexPaths: IndexPaths) {
-    //    UIView.performWithoutAnimation {
-            let oldContentOffset = contentOffset
-            let oldContentSize = contentSize
-            
-            if #available(iOS 13.0, *){
-                self.reloadWithDiffableDataSource(animated: true)
-            } else {
-                beginUpdates()
-                if indexPaths.newRemoveIndexPaths.count > 0 {
-                    self.deleteRows(at: indexPaths.newRemoveIndexPaths, with: .none)
-                }
-                if indexPaths.newRemoveSections.count > 0 {
-                    self.deleteSections(indexPaths.newRemoveSections, with: .none)
-                }
-                if indexPaths.addIndexPaths.count > 0 {
-                    self.insertRows(at: indexPaths.addIndexPaths, with: .none)
-                }
-                if indexPaths.addSections.count > 0 {
-                    self.insertSections(indexPaths.addSections, with: .none)
-                }
-                if indexPaths.reloadIndexPaths.count > 0 {
-                    self.reloadRows(at: indexPaths.reloadIndexPaths, with: .none)
-                }
-                if indexPaths.reloadSections.count > 0 {
-                    self.reloadSections(indexPaths.reloadSections, with: .none)
-                }
-                endUpdates()
-            }
-            
-           self.scrollToBottomAfterRefresh(with: oldContentOffset, oldContentSize: oldContentSize)
-   //     }
+    func updateRows() {
+        let oldContentOffset = contentOffset
+        let oldContentSize = contentSize
         
+        if #available(iOS 13.0, *) {
+            self.reloadWithDiffableDataSource(animated: true)
+        } else {
+            reloadData()
+        }
+        
+        self.scrollToBottomAfterRefresh(with: oldContentOffset, oldContentSize: oldContentSize)
     }
     
     func addRow(at index: Int, lastIndexPath: IndexPath, insertSections: Bool, scrollsToBottom: Bool) {
-        
+        let inset = contentInset.top - 20
+        let needAnimate = contentOffset.y <= -inset
+        if scrollsToBottom {
+            self.scrollsToBottom(animated: true)
+        }
         if #available(iOS 13.0, *) {
-            let inset = contentInset.top - 20
-            let needAnimate = contentOffset.y <= -inset
-            if scrollsToBottom {
-                self.scrollsToBottom(animated: true)
-            }
             self.reloadWithDiffableDataSource(animated: needAnimate)
         } else {
-            //add new section if need
-            if insertSections {
-                self.insertSections([index], with: .none)
-            } else {
-                //add row to last section
-                self.beginUpdates()
-                self.insertRows(at: [lastIndexPath], with: .none)
-                self.endUpdates()
-                if(self.tableMatrix[index].count == 1) {
-                    self.reloadSections([index], with: .none)//to change header( draw date)
-                }
-            }
+            reloadData()
         }
     }
     
     func insertSections(sections: IndexSet) {
         if #available(iOS 13.0, *) {
             self.reloadWithDiffableDataSource(animated: true)
-        } else if #available(iOS 11.0, *) {
-            self.performBatchUpdates({
-                self.insertSections(sections, with: .none)
-            }, completion: nil)
         } else {
-            self.beginUpdates()
-            self.insertSections(sections, with: .none)
-            self.endUpdates()
+            reloadData()
         }
     }
     
     func deleteSections(sections: IndexSet) {
         if #available(iOS 13.0, *) {
             self.reloadWithDiffableDataSource(animated: true)
-        } else if #available(iOS 11.0, *) {
-            self.performBatchUpdates({
-                self.deleteSections(sections, with: .none)
-            }, completion: nil)
         } else {
-            self.beginUpdates()
-            self.deleteSections(sections, with: .none)
-            self.endUpdates()
+            reloadData()
         }
     }
     
     func moveRow(movedIndexPath: IndexPath, newIndexPath: IndexPath) {
         if #available(iOS 13.0, *) {
             self.reloadWithDiffableDataSource(animated: true)
-        } else if #available(iOS 11.0, *) {
-            self.performBatchUpdates({
-                self.moveRow(at: movedIndexPath, to: newIndexPath)
-            }, completion: nil)
         } else {
-            self.beginUpdates()
-            self.moveRow(at: movedIndexPath, to: newIndexPath)
-            self.endUpdates()
+            reloadData()
         }
+//        else if #available(iOS 11.0, *) {
+//            self.performBatchUpdates({
+//                self.moveRow(at: movedIndexPath, to: newIndexPath)
+//            }, completion: nil)
+//        } else {
+//            self.beginUpdates()
+//            self.moveRow(at: movedIndexPath, to: newIndexPath)
+//            self.endUpdates()
+//        }
     }
     
     func deleteRows(indexPaths: [IndexPath], section: Int) {
         if #available(iOS 13.0, *){
             self.reloadWithDiffableDataSource(animated: true)
         } else {
-            deleteRows(at: indexPaths, with: .none)
-            if tableView(self, numberOfRowsInSection: section) == 0{
-                reloadSections([section], with: .none)
-            }
+            reloadData()
+//            deleteRows(at: indexPaths, with: .none)
+//            if tableView(self, numberOfRowsInSection: section) == 0{
+//                reloadSections([section], with: .none)
+//            }
         }
         removeBottomRefreshControl()
     }
@@ -419,7 +376,7 @@ private extension PSDChatTableView {
         
         guard let attachmentView = (self.cellForRow(at: indexPath) as? PSDChatMessageCell)?.cloudView.attachmentView,
               attachmentView.attachment?.localId == attachment.localId,
-            message.message.state == .sending
+              message.message.state == .sending
         else {
             return
         }
