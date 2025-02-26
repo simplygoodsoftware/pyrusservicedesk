@@ -14,11 +14,11 @@ class PSDMessageInputView: UIView, PSDMessageTextViewDelegate,PSDMessageSendButt
     weak var delegate: PSDMessageInputViewDelegate?
     
     ///Button that open attachment menu
-    var attachmentsAddButton :AttachmentsAddButton!
+    var attachmentsAddButton: AttachmentsAddButton!
     ///Text view that change its height
-    var inputTextView : PSDMessageTextView!
+    var inputTextView: PSDMessageTextView!
     ///Button, if has no text - is not enabled, if has - send input text.
-    var sendButton : PSDMessageSendButton!
+    var sendButton: PSDMessageSendButton!
     ///Top separator
     var topGrayLine : UIView!
     ///Visible part of input
@@ -328,6 +328,11 @@ extension PSDMessageInputView : AttachmentCollectionViewDelegateProtocol{
     }
 }
 extension PSDMessageInputView: AttachmentsAddButtonDelegate{
+    func addButtonPressed() {
+        self.becomeFirstResponder()
+        inputTextView.becomeFirstResponder()
+    }
+    
     func attachmentChoosed(_ data:Data, _ url:URL?)
     {
         let attachment = PSDObjectsCreator.createAttachment(data,url)

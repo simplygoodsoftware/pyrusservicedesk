@@ -1,11 +1,3 @@
-//
-//  ChatsRouterProtocol.swift
-//  Helpy
-//
-//  Created by Станислава Бобрускина on 17.10.2024.
-//  Copyright © 2024 Pyrus. All rights reserved.
-//
-
 import Foundation
 
 protocol ChatsRouterProtocol: NSObjectProtocol {
@@ -13,6 +5,5 @@ protocol ChatsRouterProtocol: NSObjectProtocol {
 }
 
 enum ChatsRouterDestination {
-    case chat(chat: PSDChat)
-    case goBack
+    case chat(chat: PSDChat, fromPush: Bool)
 }

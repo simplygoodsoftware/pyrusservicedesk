@@ -7,10 +7,13 @@ class PSDRowMessage: NSObject {
     var attachment: PSDAttachment?
     var message : PSDMessage
     var attributedText: NSAttributedString?
-    init(message: PSDMessage, attachment: PSDAttachment?, text: String){
+    
+    init(message: PSDMessage, attachment: PSDAttachment?, text: String) {
         self.message = message
         self.text = text
-        let isInbound = PyrusServiceDesk.multichats ? message.isInbound :  message.owner.personId == PyrusServiceDesk.userId
+        let isInbound = PyrusServiceDesk.multichats
+            ? message.isOutgoing :
+            message.owner.personId == PyrusServiceDesk.userId
         let color: UIColor = isInbound
             ? CustomizationHelper.userMassageTextColor
             : CustomizationHelper.supportMassageTextColor
@@ -19,9 +22,11 @@ class PSDRowMessage: NSObject {
         self.rating = message.rating
         super.init()
     }
-    func updateWith(message : PSDMessage){
+    
+    func updateWith(message: PSDMessage) {
         self.message = message
     }
+    
     func hasId() -> Bool {
         if(self.message.messageId != "0" && self.message.messageId != ""){
             return true

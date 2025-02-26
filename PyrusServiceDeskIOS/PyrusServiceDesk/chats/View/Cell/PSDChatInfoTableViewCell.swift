@@ -2,6 +2,7 @@ import UIKit
 
 class PSDChatInfoTableViewCell: UITableViewCell {
     static var identifier = "ChatCell"
+    private let stateSize: CGFloat = 20.0
     
     private let timeLabel: UILabel = {
         let label = UILabel()
@@ -23,7 +24,7 @@ class PSDChatInfoTableViewCell: UITableViewCell {
     
     private let notificationButton: UIButton = {
         let button = UIButton()
-        button.backgroundColor = .appColor
+        button.backgroundColor = .secondColor
         button.setTitleColor(UIColor.appTextColor, for: .normal)
         button.titleLabel?.font = .notificationButton
         button.layer.cornerRadius = 6
@@ -39,12 +40,12 @@ class PSDChatInfoTableViewCell: UITableViewCell {
         label.font = .lastMessageInfo
         label.numberOfLines = lastMessageLines
         label.lineBreakMode = .byTruncatingTail
-        label.text = "Last_Message".localizedPSD()
+        label.text = ""//"Last_Message".localizedPSD()
         return label;
     }()
     
     private lazy var attachmentIcon: UIImageView = {
-        let image = UIImage(named: "paperclip")
+        let image = UIImage.PSDImage(name: "paperclip")
         let imageView = UIImageView(image: image?.imageWith(color: .lastMessageInfo))
         imageView.isHidden = true
         return imageView
@@ -56,6 +57,12 @@ class PSDChatInfoTableViewCell: UITableViewCell {
         label.font = .lastMessageInfo
         label.isHidden = true
         return label
+    }()
+    
+    let messageStateView: PSDMessageStateButton = {
+        let button = PSDMessageStateButton(size: 15)
+        button.translatesAutoresizingMaskIntoConstraints = false
+        return button;
     }()
     
     private static let x : CGFloat = 16.0
@@ -70,6 +77,7 @@ class PSDChatInfoTableViewCell: UITableViewCell {
         attachmentName.text = model.attachmentText
         attachmentIcon.isHidden = !model.hasAttachment
         attachmentName.isHidden = !model.hasAttachment
+        messageStateView._messageState = model.state
     }
     
     override init(style: UITableViewCell.CellStyle, reuseIdentifier: String?) {
@@ -81,6 +89,7 @@ class PSDChatInfoTableViewCell: UITableViewCell {
         contentView.addSubview(messageLabel)
         contentView.addSubview(lastMessageInfo)
         contentView.addSubview(notificationButton)
+        contentView.addSubview(messageStateView)
         
         addConstraints()
     }
@@ -100,7 +109,7 @@ class PSDChatInfoTableViewCell: UITableViewCell {
         NSLayoutConstraint.activate([
             messageLabel.topAnchor.constraint(equalTo: contentView.topAnchor, constant: 8),
             messageLabel.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: 16),
-            messageLabel.trailingAnchor.constraint(lessThanOrEqualTo: timeLabel.leadingAnchor, constant: -8),
+            messageLabel.trailingAnchor.constraint(lessThanOrEqualTo: contentView.trailingAnchor, constant: -100),
             
             timeLabel.bottomAnchor.constraint(equalTo: messageLabel.bottomAnchor),
             timeLabel.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -16),
@@ -113,10 +122,16 @@ class PSDChatInfoTableViewCell: UITableViewCell {
             notificationButton.heightAnchor.constraint(equalToConstant: 12),
             notificationButton.widthAnchor.constraint(equalToConstant: 12),
             notificationButton.trailingAnchor.constraint(equalTo: timeLabel.trailingAnchor),
-            notificationButton.topAnchor.constraint(equalTo: contentView.topAnchor, constant: 46)
+            notificationButton.topAnchor.constraint(equalTo: contentView.topAnchor, constant: 46),
+            
+            messageStateView.bottomAnchor.constraint(equalTo: timeLabel.bottomAnchor, constant: 19),
+            messageStateView.trailingAnchor.constraint(equalTo: timeLabel.leadingAnchor, constant: 6),
+//            messageStateView.widthAnchor.constraint(equalToConstant: 8),
+//            messageStateView.heightAnchor.constraint(equalToConstant: 8),
         ])
         
         lastMessageInfo.setContentCompressionResistancePriority(.defaultLow, for: .horizontal)
+      //  messageStateView.setContentCompressionResistancePriority(.defaultHigh, for: .horizontal)
         timeLabel.setContentCompressionResistancePriority(.defaultHigh, for: .horizontal)
         
         setupAttachment()
@@ -139,6 +154,10 @@ class PSDChatInfoTableViewCell: UITableViewCell {
         ])
     }
     
+    override func prepareForReuse() {
+        messageStateView.restart()
+    }
+    
     required init?(coder aDecoder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
     }
@@ -154,4 +173,5 @@ private extension UIFont {
 private extension UIColor {
     static let lastMessageInfo = UIColor(hex: "#60666C") ?? .systemGray
     static let timeLabel = UIColor(hex: "#9199A1") ?? .systemGray
+    static let secondColor = UIColor(hex: "#FFB049")
 }

@@ -6,6 +6,7 @@ protocol PSDMessageSendDelegate: AnyObject {
     func refresh(message:PSDMessage, changedToSent: Bool)
     func remove(message:PSDMessage)
     func updateTicketId(_ ticketId: Int)
+    func addMessageToPass(message: PSDMessage, commandId: String)
 }
 
 struct PSDMessageSend {
@@ -19,32 +20,66 @@ struct PSDMessageSend {
      - parameter file: PSDAttachment object with data that need to be passed to server.
      - parameter delegate: PSDMessageSendDelegate object to receive completion or error. Used in second step.
      */
-    static private func passFile(_ messageWithAttachment: PSDMessage, attachmentIdex: Int,delegate: PSDMessageSendDelegate?)
+    static func passFile(_ messageWithAttachment: PSDMessage, attachmentIdex: Int, delegate: PSDMessageSendDelegate?)
     {
         if(session == nil){
             session = PSDUploader.init()
         }
         if(messageWithAttachment.attachments != nil){
-            session!.createUploadTask(from: messageWithAttachment,indexOfAttachment:attachmentIdex, delegate: delegate)
+            session!.createUploadTask(from: messageWithAttachment, indexOfAttachment: attachmentIdex, delegate: delegate)
         }
         
     }
     /**
      Stop uploding attachment (if it is)
      */
-    static func stopUpload(_ attachment:PSDAttachment){
-        if session != nil{
-            for (task, data) in session!.tasksMap{
-                if(data.file == attachment){
+    static func stopUpload(_ attachment:PSDAttachment) {
+        let messages = PSDMessagesStorage.getSendingMessages()
+        for message in messages {
+            if message.message.attachments?.count ?? 0 > 0 {
+                for attach in message.message.attachments ?? [] {
+                    if attach.localId == attachment.localId {
+                        let userInfo: [String: Any] = [
+                            "commandId": message.message.commandId ?? ""
+                        ]
+                        NotificationCenter.default.post(name: .removeMesssageNotification, object: nil, userInfo: userInfo)
+                        PSDMessagesStorage.remove(messageId: message.message.clientId)
+                    }
+                }
+            }
+        }
+        if session != nil {
+            for (task, data) in session!.tasksMap {
+                if data.file == attachment {
                     session!.stopUpload(task: task)
                     break
+                }
+            }
+        } else {
+            let messages = PSDMessagesStorage.getSendingMessages()
+            for message in messages {
+                if message.message.attachments?.count ?? 0 > 0 {
+                    for attach in message.message.attachments ?? [] {
+                        if attach.localId == attachment.localId {
+                            let userInfo: [String: Any] = [
+                                "commandId": message.message.commandId ?? ""
+                            ]
+                            NotificationCenter.default.post(name: .removeMesssageNotification, object: nil, userInfo: userInfo)
+                            PSDMessagesStorage.remove(messageId: message.message.clientId)
+                        }
+                    }
                 }
             }
         }
         
     }
     static func fileSendingEndWithError(_ messageToPass: PSDMessage, delegate: PSDMessageSendDelegate?) {
-        didEndPassMessage(messageToPass, delegate: delegate)
+//        PyrusServiceDesk.syncManager.syncGetTickets()
+//        messageToPass.state = .cantSend
+//        messageToPass.fromStrorage = true
+   //     PSDMessagesStorage.saveInStorage(message: messageToPass)
+   //     pass(messageToPass, delegate: delegate)
+//        didEndPassMessage(messageToPass, delegate: delegate)
     }
     /**
      Stops all current session tasks and uploads.
@@ -86,35 +121,40 @@ struct PSDMessageSend {
                 attachment.uploadingProgress = 0
             }
         }
-        PSDMessagesStorage.saveInStorage(message:messageToPass)
-        dispatchQueue.async {
-            if PSDMessageSend.passingMessagesIds.contains(messageToPass.clientId) {
-                //при отпрвке атачей эта же функция вызывается снова, продолжаем отправку не блокируя очередь
-            }
-            else{
-                PSDMessageSend.passingMessagesIds.append(messageToPass.clientId)
-                _ = PSDMessageSend.semaphore.wait(timeout: DispatchTime.distantFuture)
-            }
         
-        var hasUnsendAttachments = false
-        if let attachments = messageToPass.attachments, attachments.count > 0{
-            for (i,attachment) in attachments.enumerated(){
-                if attachment.emptyId(){
-                    PSDMessageSend.passFile(messageToPass, attachmentIdex: i, delegate: delegate)
-                    hasUnsendAttachments = true
-                    break
-                }
-                
-            }
+        let commandId = messageToPass.commandId ?? UUID().uuidString
+        delegate?.addMessageToPass(message: messageToPass, commandId: commandId)
+        PSDMessagesStorage.save(message: messageToPass)
+        PyrusServiceDesk.syncManager.syncGetTickets()
+        dispatchQueue.async {
             
-        }
-        if !hasUnsendAttachments{
-            let sender = PSDMessageSender()
-            sender.pass(messageToPass, delegate: delegate, completion: {
-                    didEndPassMessage(messageToPass, delegate: delegate)
-                })
-            messageSenders.append(sender)
-        }
+//            if PSDMessageSend.passingMessagesIds.contains(messageToPass.clientId) {
+//                //при отпрвке атачей эта же функция вызывается снова, продолжаем отправку не блокируя очередь
+//            }
+//            else{
+//                PSDMessageSend.passingMessagesIds.append(messageToPass.clientId)
+//            }
+//            
+//            var hasUnsendAttachments = false
+//            if let attachments = messageToPass.attachments, attachments.count > 0 {
+//                for (i,attachment) in attachments.enumerated(){
+//                    if attachment.emptyId() {
+//                     //   _ = PSDMessageSend.semaphore.wait(timeout: DispatchTime.distantFuture)
+//                        PSDMessageSend.passFile(messageToPass, attachmentIdex: i, delegate: delegate)
+//                        hasUnsendAttachments = true
+//                        break
+//                    }
+//                    
+//                }
+                
+//            }
+//            if !hasUnsendAttachments{
+//                let sender = PSDMessageSender()
+//                sender.pass(messageToPass, delegate: delegate, completion: {
+//                    didEndPassMessage(messageToPass, delegate: delegate)
+//                })
+//                messageSenders.append(sender)
+//            }
         }
         
     }
@@ -127,5 +167,4 @@ struct PSDMessageSend {
             messageSenders.remove(at: index)
         }
     }
-    
 }

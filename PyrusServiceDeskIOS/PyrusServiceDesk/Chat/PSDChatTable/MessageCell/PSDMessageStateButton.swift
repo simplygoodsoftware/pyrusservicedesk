@@ -16,13 +16,22 @@ class PSDMessageStateButton: UIButton {
             redraw()
         }
     }
-    let stateSize :CGFloat = 20.0
+    let stateSize: CGFloat = 15.0
     override init(frame: CGRect) {
         super.init(frame: frame)
         self.frame=CGRect(x: 0, y: 0, width: stateSize, height: stateSize)
         self.addSubview(stateImage)
         self.addTarget(self, action: #selector(stateButtonPressed), for: .touchUpInside)
     }
+    
+    init(size: CGFloat) {
+        super.init(frame: .zero)
+        self.frame = CGRect(x: 0, y: 0, width: size, height: size)
+        stateImage.frame = CGRect(x: 0, y: 0, width: size - 2, height: size - 2)
+        stateImage.center = CGPoint(x: size / 2, y: size / 2)
+        self.addSubview(stateImage)
+    }
+    
     @objc private func stateButtonPressed() {
         self.delegate?.tryShowRetryAction()
     }

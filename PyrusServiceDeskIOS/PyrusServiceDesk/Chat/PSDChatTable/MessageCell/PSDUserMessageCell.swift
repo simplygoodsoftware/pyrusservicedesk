@@ -7,6 +7,8 @@ protocol PSDChatMessageCellDelegate : class{
     func deleteMessage(from cell:PSDChatMessageCell)
 }
 class PSDUserMessageCell: PSDChatMessageCell {
+    static var identifier = "CellUser"
+    
     weak var delegate: PSDChatMessageCellDelegate?
     private weak var message : PSDRowMessage?
     ///A view that displays the current status of the message (see messageState)
@@ -14,6 +16,7 @@ class PSDUserMessageCell: PSDChatMessageCell {
         let button = PSDMessageStateButton()
         return button;
     }()
+    
     override init(style: UITableViewCell.CellStyle, reuseIdentifier: String?) {
         super.init(style: style, reuseIdentifier: reuseIdentifier)
        
@@ -30,26 +33,28 @@ class PSDUserMessageCell: PSDChatMessageCell {
     required init?(coder aDecoder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
     }
-    override func draw(message:PSDRowMessage, width: CGFloat)
-    {
+    
+    override func draw(message: PSDRowMessage, width: CGFloat) {
         super.draw(message: message, width: width)
         self.message = message
         messageStateView._messageState = (message.text.count > 0 || message.rating != nil) ? message.message.state : .sent
         updateTopMessageConstrint()
     }
-    private func cancelMessage(){
+    
+    private func cancelMessage() {
         self.delegate?.deleteMessage(from: self)
     }
+    
     private func retryMessage(){
         self.delegate?.sendAgainMessage(from:self)
     }
-    
     
     //restart animation
     override func prepareForReuse() {
         super.prepareForReuse()
         messageStateView.restart()
     }
+    
     private func stateConstraints(){
         self.messageStateView.translatesAutoresizingMaskIntoConstraints = false
         self.contentView.addConstraint(NSLayoutConstraint(
@@ -70,11 +75,13 @@ class PSDUserMessageCell: PSDChatMessageCell {
             constant:-bottomDistance))
         messageStateView.addSizeConstraint([.height,.width],constant:messageStateView.stateSize)
     }
-    private func userMessageConstraints(){
+    
+    private func userMessageConstraints() {
         cloudView.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -TO_BOARD_DISTANCE).isActive = true
-        cloudView.leadingAnchor.constraint(greaterThanOrEqualTo: contentView.leadingAnchor, constant: AVATAR_SIZE+(TO_BOARD_DISTANCE*2)).isActive = true
+        cloudView.leadingAnchor.constraint(greaterThanOrEqualTo: contentView.leadingAnchor, constant: AVATAR_SIZE + (TO_BOARD_DISTANCE * 2)).isActive = true
     }
-    private func updateTopMessageConstrint(){
+    
+    private func updateTopMessageConstrint() {
         guard !drawEmpty else {
             self.topMessageConstraint?.constant = 0
             return
@@ -86,6 +93,7 @@ class PSDUserMessageCell: PSDChatMessageCell {
         super.awakeFromNib()
     }   
 }
+
 extension PSDUserMessageCell: PSDRetryActionDelegate {
     ///Sending not passed message, send one more time
     func tryShowRetryAction(){

@@ -38,7 +38,8 @@ struct PSDGetChat {
             parameters[TICKET_ID_KEY] = ticketId
         }
         if PyrusServiceDesk.multichats {
-            parameters["user_id"] = userId ?? PyrusServiceDesk.customUserId ?? PyrusServiceDesk.userId
+            parameters["user_id"] = userId ?? PyrusServiceDesk.currentUserId ?? PyrusServiceDesk.customUserId ?? PyrusServiceDesk.userId
+            parameters["app_id"] = PyrusServiceDesk.currentClientId ?? PyrusServiceDesk.clientId
            // parameters["author_id"] = PyrusServiceDesk.authorId
         }
         let request = URLRequest.createRequest(type: .chatFeed, parameters: parameters)
@@ -120,6 +121,8 @@ struct PSDGetChat {
         let chat = PSDChat(chatId: ticketId, date: Date(), messages: massages)
         chat.showRating = (response[PSDGetChat.SHOW_RATING_KEY] as? Bool) ?? false
         chat.showRatingText = response[PSDGetChat.SHOW_RATING_TEXT_KEY] as? String
+        chat.lastReadedCommentId = response["last_read_comment_id"] as? Int
+        chat.isActive = response["is_active"] as? Bool ?? true
         return chat
     }
     static func generateMessages(from array:NSArray) -> [PSDMessage]
@@ -179,7 +182,7 @@ struct PSDGetChat {
             if (attachmentsForMessage?.count ?? 0) > 0 || (textForMessage?.count ?? 0) > 0 || rating != nil{
                 let message = PSDMessage(text: textForMessage, attachments:attachmentsForMessage, messageId: dic.stringOfKey(commentIdParameter), owner: user, date: date)
                 message.rating = rating
-                message.isInbound = IsInbound
+                message.isOutgoing = IsInbound
                 let clientId = dic.stringOfKey(CLIENT_ID_KEY)
                 if clientId.count > 0 {
                     message.clientId = clientId

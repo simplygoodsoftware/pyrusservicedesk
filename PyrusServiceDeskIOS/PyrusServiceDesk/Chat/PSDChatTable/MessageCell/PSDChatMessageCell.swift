@@ -33,8 +33,7 @@ class PSDChatMessageCell: UITableViewCell {
             self.contentView.backgroundColor = .clear
         }
     }
-    func draw(message:PSDRowMessage, width: CGFloat)
-    {
+    func draw(message: PSDRowMessage, width: CGFloat) {
         cloudView.maxWidth =  maxMessageWidth(width)
         cloudView.draw(message: message)
     }

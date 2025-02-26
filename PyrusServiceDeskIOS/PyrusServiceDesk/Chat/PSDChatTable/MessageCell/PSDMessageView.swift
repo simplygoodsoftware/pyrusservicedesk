@@ -1,7 +1,7 @@
-
 import UIKit
+
 let MESSAGE_CORNER_RADIUS : CGFloat = 15.0
-class PSDMessageView: PSDView{
+class PSDMessageView: PSDView {
     weak var delegate: PSDRetryActionDelegate?
     enum colorType {
         case brightColor
@@ -24,21 +24,20 @@ class PSDMessageView: PSDView{
     }()
     
     ///A label with time when message was sent.
-    private lazy var timeLabel: UILabel =
-    {
+    private lazy var timeLabel: UILabel = {
         let label = UILabel()
         label.textColor = CustomizationHelper.textColorForTable.withAlphaComponent(TIME_ALPHA)
         label.font = DETAIL_FONT
         return label;
     }()
     
-    var color : colorType = .brightColor
-    {
+    var color : colorType = .brightColor {
         didSet{
             recolor()
         }
     }
-    override func recolor(){
+    
+    override func recolor() {
         super.recolor()
         switch (color) {
         case .brightColor:
@@ -72,13 +71,13 @@ class PSDMessageView: PSDView{
         attachmentView?.color = color
         separatorView.tintColor = color.withAlphaComponent(PSDMessageView.separatorAlpha)
     }
+    
     private static let distToBoard : CGFloat = 10.0
     private let PLACEHOLDER_HEIGHT: CGFloat = 20
     private let PLACEHOLDER_WIDTH: CGFloat = 50
     var maxWidth: CGFloat = 50
     private static let separatorAlpha :CGFloat = 0.8
-    func draw(message:PSDRowMessage)
-    {
+    func draw(message: PSDRowMessage) {
         timeLabel.text = message.message.date.timeAsString()
         messageTextView.attributedText = message.attributedText
         attachmentView?.removeFromSuperview()
@@ -86,34 +85,35 @@ class PSDMessageView: PSDView{
         placeholderBottomConstraint?.isActive = message.message as? PSDPlaceholderMessage != nil
         placeholderRightConstraint?.isActive = message.message as? PSDPlaceholderMessage != nil
         attachmentView = nil
-        if(self.backgroundColor == .clear){
+        
+        if backgroundColor == .clear {
             self.recolor()
         }
         var hasImageAttachment = false
-        if let data = message.attachment{
-            if data.isImage{
+        if let data = message.attachment {
+            if data.isImage {
                 hasImageAttachment = true
                 attachmentView = PSDImageAttachmentView.init(frame: CGRect.zero)
-            }
-            else{
+            } else {
                 attachmentView = PSDFileAttachmentView.init(frame: CGRect.zero)
             }
-            guard let attachmentView = attachmentView else{
+            guard let attachmentView = attachmentView else {
                 return
             }
+            
             attachmentHolderView.addSubview(attachmentView)
             attachmentView.maxWidth = maxWidth
             attachmentView.draw(data, state: message.message.state)
             attachmentView.addZeroConstraint([.leading,.trailing,.top,.bottom])
             recolor()
         }
-        if let rating = message.rating{
+        if let rating = message.rating {
             ratingLabel.text = rateArray[rating]
-            if(message.attachment == nil && message.text.count == 0){
+            if message.attachment == nil && message.text.count == 0 {
                 self.backgroundColor = .clear
             }
             timeLabel.text = nil
-        }else{
+        } else {
             ratingLabel.text = nil
         }
         
@@ -125,14 +125,17 @@ class PSDMessageView: PSDView{
         messageEmptyHeightConstraint?.isActive = messageTextView.text.count == 0
         updateTimeLayout()
     }
+    
     lazy private var tapGesture : UITapGestureRecognizer = {
         let gesture = UITapGestureRecognizer(target: self, action: #selector(handleTap))
         gesture.cancelsTouchesInView = false
         return gesture
     }()
+    
     @objc private func handleTap(sender: UITapGestureRecognizer) {
         self.delegate?.tryShowRetryAction()
     }
+    
     private static let messageTextViewFontSize : CGFloat = 18.0
     private static let separatorHeight : CGFloat = 3.0
     private(set) var messageTextView : PSDCopyTextView = {
@@ -152,22 +155,26 @@ class PSDMessageView: PSDView{
         
         return text
     }()
+    
     private let placeholderImageView: UIImageView = {
         let imageView = UIImageView()
         imageView.image = UIImage.PSDImage(name: "messagePlaceholder")
         imageView.contentMode = .scaleAspectFit
         return imageView
     }()
+    
     private var ratingLabel: UILabel = {
         let label = UILabel()
         label.font = .ratingLabel
         return label
     }()
+    
     private lazy var attachmentHolderView : UIView = {
         let view = UIView()
         view.backgroundColor = .clear
         return view
     }()
+    
     private lazy var separatorView : UIImageView = {
         let view = UIImageView()
         let image = UIImage.PSDImage(name: "dotted_line")?.withRenderingMode(.alwaysTemplate)
@@ -175,6 +182,7 @@ class PSDMessageView: PSDView{
         view.contentMode = .scaleAspectFit
         return view
     }()
+    
     var attachmentView : PSDAttachmentView?
     override init(frame: CGRect) {
         super.init(frame: frame)
@@ -188,9 +196,11 @@ class PSDMessageView: PSDView{
         addSubview(timeView)
         addConstraints()
     }
+    
     required init?(coder aDecoder: NSCoder) {
         super.init(coder: aDecoder)
     }
+    
     private var placeholderBottomConstraint: NSLayoutConstraint?
     private var placeholderRightConstraint: NSLayoutConstraint?
     private var separatorWidthConstraint: NSLayoutConstraint?
@@ -202,8 +212,7 @@ class PSDMessageView: PSDView{
     private var timeInBottomAndLineConstraints = [NSLayoutConstraint]()
     private var timeInLineConstraints = [NSLayoutConstraint]()
     
-    private func addConstraints()
-    {
+    private func addConstraints() {
         timeConstraints()
         messageTextView.translatesAutoresizingMaskIntoConstraints = false
         attachmentHolderView.translatesAutoresizingMaskIntoConstraints = false
@@ -251,7 +260,7 @@ class PSDMessageView: PSDView{
         timeInBottomConstraints.append(bBottomConstraint)
         timeInBottomAndLineConstraints.append(bTrailingConstraint)
         
-        let lTrailingConstraint = messageTextView.trailingAnchor.constraint(lessThanOrEqualTo: timeView.leadingAnchor, constant: 0)
+        let lTrailingConstraint = messageTextView.trailingAnchor.constraint(lessThanOrEqualTo: timeView.leadingAnchor, constant: 8)
         lTrailingConstraint.isActive = false
         let lBottomConstaint = messageTextView.bottomAnchor.constraint(equalTo: bottomAnchor)
         lBottomConstaint.isActive = false
@@ -262,8 +271,7 @@ class PSDMessageView: PSDView{
         messageEmptyHeightConstraint = messageTextView.heightAnchor.constraint(equalToConstant: 0)
     }
     
-    private func timeConstraints()
-    {
+    private func timeConstraints() {
         timeView.translatesAutoresizingMaskIntoConstraints = false
         timeView.trailingAnchor.constraint(equalTo: trailingAnchor, constant: -TIME_LEFT_OFFSET).isActive = true
         timeView.bottomAnchor.constraint(equalTo: bottomAnchor, constant: -TIME_LEFT_OFFSET).isActive = true
@@ -308,7 +316,8 @@ class PSDMessageView: PSDView{
         let width = self.frame.size.width - (PSDMessageView.distToBoard*2)
         separatorWidthConstraint?.constant = width > 0 ? width : 0//change separator width, or it will resize its parent view
     }
-    override var intrinsicContentSize: CGSize{
+    
+    override var intrinsicContentSize: CGSize {
         return CGSize.zero
     }
 }

@@ -2,6 +2,7 @@
 import UIKit
 
 class PSDSupportMessageCell: PSDChatMessageCell {
+    static var identifier = "CellSupport"
     private static let personNameAlpha : CGFloat = 0.6
     
     ///Is nameLabel need to be shown. (Show only next to first user's message)
@@ -46,7 +47,7 @@ class PSDSupportMessageCell: PSDChatMessageCell {
         super.draw(message: message, width: width)
         var name = message.message.owner.name?.count ?? 0 > 0 ? message.message.owner.name ?? "" : (message.message.owner as? PSDPlaceholderUser == nil ? "" : " ")
         if message.message.owner.authorId == "" && PyrusServiceDesk.multichats {
-            name += " (поддержка)"
+            name += " (\("SupportDefaultName".localizedPSD()))"
             nameLabel.font = .supportNameLabel
         }
         self.nameLabel.text = needShowName ? name :  ""
@@ -61,11 +62,12 @@ class PSDSupportMessageCell: PSDChatMessageCell {
         self.layoutIfNeeded()
         cloudView.alpha = drawEmpty ? 0.0 : 1.0
     }
-    private func addConstraints()
-    {
+    
+    private func addConstraints() {
         supportMessageConstraints()
         nameConstraints()
     }
+    
     private let nameLeftSpace : CGFloat = 10.0
     private func nameConstraints(){
         nameLabel.translatesAutoresizingMaskIntoConstraints = false

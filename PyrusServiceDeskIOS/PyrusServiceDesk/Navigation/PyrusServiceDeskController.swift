@@ -16,11 +16,18 @@ class PyrusServiceDeskController: PSDNavigationController {
                     let controller = PSDChatsViewController(interactor: interactor, router: router)
                     router.controller = controller
                     presenter.view = controller
-                    pushViewController(controller, animated: true)
+                    customization?.setCustomLeftBarButtonItem(backBarButtonItem())
+                    
+                    pushViewController(controller, animated: false)
                 }
             } else {
-                let controller = PSDChatViewController()
-                pushViewController(controller, animated: true)
+                let presenter = PSDChatPresenter()
+                let interactor = PSDChatInteractor(presenter: presenter)
+                let router = PSDChatRouter()
+                let controller = PSDChatViewController(interactor: interactor, router: router)
+                presenter.view = controller
+                router.controller = controller
+                pushViewController(controller, animated: false)
             }
             
             if !customPresent {
@@ -37,9 +44,9 @@ class PyrusServiceDeskController: PSDNavigationController {
     required init?(coder aDecoder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
     }
-    func show(on viewController: UIViewController, completion: (() -> Void)? = nil) {
+    func show(on viewController: UIViewController, completion: (() -> Void)? = nil, animated: Bool) {
         DispatchQueue.main.async  {
-            viewController.present(self, animated:  true, completion: completion)
+            viewController.present(self, animated:  animated, completion: completion)
         }
     }
     override public func viewDidLoad() {
@@ -87,6 +94,10 @@ class PyrusServiceDeskController: PSDNavigationController {
     }
     
     func closeServiceDesk() {
+        if PyrusServiceDesk.multichats {
+            remove(animated: false)
+            return
+        }
         if PyrusServiceDeskController.PSDIsOpen() {
             let alertAuthorized = UIAlertController(title: nil, message: "AcсessDenied".localizedPSD(), preferredStyle: .alert)
             alertAuthorized.addAction(UIAlertAction(title: "OK".localizedPSD(), style: .default, handler: { (_) in
@@ -107,7 +118,7 @@ class PyrusServiceDeskController: PSDNavigationController {
  */
     func remove(animated: Bool = true){
         PyrusLogger.shared.saveLocalLogToDisk()
-        if self.parent == nil{
+        if self.parent == nil {
             self.dismiss(animated: animated, completion: {
                 PyrusServiceDesk.stopCallback?.onStop()
                 PyrusServiceDeskController.clean()
@@ -175,5 +186,27 @@ class PyrusServiceDeskController: PSDNavigationController {
     
     public static func PSDIsOpen() -> Bool {
         return PyrusServiceDesk.mainController != nil
+    }
+    
+    private func backBarButtonItem() -> UIBarButtonItem {
+        let mainColor = customization?.themeColor ?? .darkAppColor
+        let button = UIButton()
+        button.titleLabel?.font = CustomizationHelper.systemFont(ofSize: 18)
+        button.setTitle(" " + "Back".localizedPSD(), for: .normal)
+        button.setTitleColor(mainColor, for: .normal)
+        button.setTitleColor(mainColor.withAlphaComponent(0.2), for: .highlighted)
+        if #available(iOS 13.0, *) {
+            let backImage = UIImage(systemName: "chevron.left", withConfiguration: UIImage.SymbolConfiguration(pointSize: 18, weight: .semibold, scale: .large))
+            button.setImage(backImage?.imageWith(color: mainColor), for: .normal)
+            button.setImage(backImage?.imageWith(color: mainColor.withAlphaComponent(0.2)), for: .highlighted)
+        }
+        
+        button.addTarget(self, action: #selector(goBack), for: .touchUpInside)
+        button.sizeToFit()
+        return UIBarButtonItem(customView: button)
+    }
+    
+    @objc func goBack() {
+        popViewController(animated: true)
     }
 }

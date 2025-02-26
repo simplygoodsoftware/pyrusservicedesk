@@ -7,6 +7,7 @@ enum ChatsInteractorCommand {
     case selectChat(index: Int)
     case newChat
     case deleteFilter
+    case updateSelected(index: Int)
 }
 
 protocol ChatsInteractorProtocol: NSObjectProtocol {

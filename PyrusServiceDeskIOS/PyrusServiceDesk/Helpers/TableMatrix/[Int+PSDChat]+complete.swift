@@ -3,12 +3,12 @@ import Foundation
 extension Array where Element == [PSDRowMessage]{
     ///complete array with unsent messages from storage
     mutating func completeWithUnsentMessages(for ticketId: Int) {
-        let messagesFromStorage = PSDMessagesStorage.messagesFromStorage(for: ticketId)
+        let messagesFromStorage = PSDMessagesStorage.getMessages(for: ticketId)
         let sortedMessages = messagesFromStorage.sorted(by: {$0.date > $1.date})
         complete(with: sortedMessages, startMessage: nil, completion: { _,_, messages in
             let res = messagesFromStorage.filter { !messages.contains($0)}
             for message in res{
-                PSDMessagesStorage.removeFromStorage(messageId: message.clientId)
+                PSDMessagesStorage.remove(messageId: message.clientId)
             }
         })
     }
@@ -159,7 +159,8 @@ extension Array where Element == [PSDRowMessage]{
         var index:Int = 0//the index of message in received chat
         if let startMessage = startMessage{
             index = self.index(of:startMessage, in:messages)
-            index = index + 1//start with next message
+            //start with next message
+            index = index + 1
         }
         
         //completion for update table
@@ -244,7 +245,8 @@ extension Array where Element == [PSDRowMessage]{
     ///return row for message according to its time
     private func row(forMessage: PSDMessage, section: Int)->Int{
         for (row,message) in self[section].enumerated().reversed(){
-            if message.message.state == .sending{
+            ///todo check
+            if message.message.state == .sending, !message.message.isWelcomeMessage {
                 continue
             }
             if message.message.date.compareTime(with: forMessage.date) == .more || message.message.date.compareTime(with: forMessage.date) == .equal{

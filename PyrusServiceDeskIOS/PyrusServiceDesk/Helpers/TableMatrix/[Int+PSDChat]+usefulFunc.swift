@@ -29,8 +29,43 @@ extension Array where Element == [PSDRowMessage]{
         }
         return indexPaths
     }
+    ///Return last sent message index path
+    func indexPathsAfterSent(for message: PSDMessage) -> [IndexPath]? {
+        guard self.count > 0 else {
+            return nil
+        }
+        var lastSection = count - 1
+        var firstRow = 0
+        
+        var lastSentMessage = message
+        outerLoop: for (sectionIndex, row) in self.enumerated().reversed() {
+            for (itemIndex, message) in row.enumerated().reversed() {
+                if message.message.state == .sent {
+                    lastSection = sectionIndex
+                    firstRow = itemIndex
+                    lastSentMessage = message.message
+                    break outerLoop
+                }
+            }
+        }
+        
+        var indexPaths = [IndexPath]()
+        if lastSentMessage == message {
+            for i in 0...PSDObjectsCreator.rowMessagesCount(for: message) - 1 {
+                indexPaths.append(IndexPath(row: firstRow - i, section: lastSection))
+            }
+            indexPaths = indexPaths.reversed()
+        } else {
+            for i in 0...PSDObjectsCreator.rowMessagesCount(for: message) - 1 {
+                indexPaths.append(IndexPath(row: firstRow, section: lastSection))
+            }
+        }
+        
+        return indexPaths
+    }
+    
     ///Return last index path
-    func indexPathsAfterSent(for message: PSDMessage) -> [IndexPath]?{
+    func indexPathsAfterSentStoreMessage(for message: PSDMessage) -> [IndexPath]? {
         guard self.count > 0 else {
             return nil
         }
@@ -48,6 +83,7 @@ extension Array where Element == [PSDRowMessage]{
         }
         return indexPaths
     }
+    
     ///Creates table matrix in format [[PSDMessage]] where in every index are messages with same date
     mutating func create(from chat : PSDChat)
     {
@@ -57,6 +93,9 @@ extension Array where Element == [PSDRowMessage]{
         self.defaultMatrix()
         if !self.isEmpty && self[0].count>0 && chat.messages.count>0{//change date of welcome message. Make it same as first message in chat
             self[0][0].message.date = chat.messages[0].date
+        } else if !self.isEmpty && self[0].count > 0 && chat.chatId ?? 1 <= 0
+                  && PSDMessagesStorage.getMessages(for: chat.chatId).count > 0 {
+            self[0][0].message.date = (PSDMessagesStorage.getMessages(for: chat.chatId).first?.date ?? Date()) - TimeInterval(1)
         }
         for message in chat.messages{
             if previousMessage == nil{
@@ -81,6 +120,10 @@ extension Array where Element == [PSDRowMessage]{
             let ratingText = chat.showRatingText
         {
             _ = addRatingMessage(ratingText)
+        }
+        
+        if self.count > 0 && chat.chatId == 0 {
+            self[0].sort(by: { $0.message.date < $1.message.date })
         }
         
     }

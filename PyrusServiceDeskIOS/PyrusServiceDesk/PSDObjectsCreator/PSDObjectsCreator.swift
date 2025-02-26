@@ -1,6 +1,15 @@
 import Foundation
 
 class PSDObjectsCreator {
+    static func getNextLocalId() -> Int {
+        let valueKey = "LastLocalId"
+        let pyrusUserDefaults = PSDMessagesStorage.pyrusUserDefaults()
+        let lastLocalId = pyrusUserDefaults?.integer(forKey: valueKey) ?? 0
+        let next = lastLocalId - 1
+        pyrusUserDefaults?.set(next, forKey: valueKey)
+        return next
+    }
+    
     /**
      Create a new message that was not sent. PSDMessage date is always now and owner is current user. TicketId is empty string.
      - parameter comment: A text sending to server.
@@ -60,8 +69,9 @@ class PSDObjectsCreator {
         let message = PSDMessage(text:text , attachments:attachments, messageId: messageId, owner:user, date:date)
         message.state = .sending
         message.ticketId = ticketId
-        message.isInbound = PyrusServiceDesk.authorId == user.authorId
+        message.isOutgoing = PyrusServiceDesk.authorId == user.authorId
         message.userId = userId
+        message.isWelcomeMessage = true
         return message
     }
 }

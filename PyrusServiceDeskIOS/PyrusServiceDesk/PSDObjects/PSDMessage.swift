@@ -23,13 +23,17 @@ class PSDMessage: NSObject {
     var date = Date()
     var state: messageState
     var rating: Int?
-    var isInbound: Bool = false
+    var isOutgoing: Bool = true
     var fromStrorage: Bool = false
     var isRatingMessage: Bool = false
     var ticketId: Int = 0
     var userId: String?
+    var appId: String?
+    var commandId: String?
+    var requestNewTicket = false
+    var isWelcomeMessage = false
     
-    init(text: String?, attachments: [PSDAttachment]? ,messageId:String? , owner:PSDUser?, date: Date?){
+    init(text: String?, attachments: [PSDAttachment]?, messageId: String?, owner: PSDUser?, date: Date?) {
         self.text = text ?? ""        
         self.attachments = attachments
 

@@ -136,7 +136,7 @@ extension Date {
         if years > 0 {
             dateFormatter.dateFormat = "dd.MM.YYYY"
         } else if days >= 7 {
-            dateFormatter.dateFormat = "dd:MM"
+            dateFormatter.dateFormat = "dd.MM"
         } else if days > 0 {
             dateFormatter.dateFormat = "EEE"
         } else {

@@ -47,8 +47,9 @@ struct PyrusServiceDeskAPI {
                 urlString = urlString + "/" + ticketId + "?version=1&user_id=" + userIdEncodeed + "&security_key=" + securityKeyEncodeed + "&instance_id=" + instanceIdEncodeed + "&app_id=" + appIdEncodeed
             } else if PyrusServiceDesk.multichats {
                 let userId = PyrusServiceDesk.currentUserId ?? PyrusServiceDesk.customUserId ?? PyrusServiceDesk.userId
+                let clientId = PyrusServiceDesk.currentClientId ?? PyrusServiceDesk.clientId
                 let userIdEncodeed : String = userId.addingPercentEncoding(withAllowedCharacters: CharacterSet.rfc3986Unreserved) ?? PyrusServiceDesk.userId
-                let appIdEncodeed : String = PyrusServiceDesk.clientId?.addingPercentEncoding(withAllowedCharacters: CharacterSet.rfc3986Unreserved) ?? PyrusServiceDesk.clientId ?? ""
+                let appIdEncodeed : String = clientId?.addingPercentEncoding(withAllowedCharacters: CharacterSet.rfc3986Unreserved) ?? PyrusServiceDesk.clientId ?? ""
                 urlString = urlString + "/" + ticketId + "?user_id=" + userIdEncodeed + "&app_id=" + appIdEncodeed
             } else {
                 let userIdEncodeed : String = PyrusServiceDesk.userId.addingPercentEncoding(withAllowedCharacters: CharacterSet.rfc3986Unreserved) ?? PyrusServiceDesk.userId
@@ -88,4 +89,11 @@ struct PyrusServiceDeskAPI {
         
     }
     
+    static func PSDURL(url: String)->URL {
+        let domain = PyrusServiceDesk.domain ?? "pyrus.com"
+        var urlString : String = "https://\(domain)"
+        urlString = "\(urlString)\(url)"
+        let components = NSURLComponents(string: urlString)
+        return (components?.url)!
+    }
 }
