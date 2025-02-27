@@ -202,25 +202,26 @@ private extension PSDChatInteractor {
                     self.chat = chat
                 }
             }
+          //  if fromPush {
+                if PyrusServiceDesk.multichats {
+                    let customization = PyrusServiceDesk.mainController?.customization
+                    let label = UILabel()
+                    label.isUserInteractionEnabled = true
+                    label.textAlignment = .center
+                    label.font = CustomizationHelper.systemBoldFont(ofSize: 17)
+                    label.text = chat?.subject?.count ?? 0 > 0 ? chat?.subject : "NewTicket".localizedPSD()
+                    label.translatesAutoresizingMaskIntoConstraints = false
+                    label.widthAnchor.constraint(equalToConstant: 200).isActive = true
+                    
+                    customization?.setChatTitileView(label)
+                    presenter.doWork(.reloadTitle)
+                    presenter.doWork(.updateTitle(connectionError: !PyrusServiceDesk.syncManager.networkAvailability))
+                }
+         //   }
             if firstLoad && !PyrusServiceDesk.multichats || fromPush {
                 isRefresh = true
                 
                 self.updateChat(chat: chat)
-                if fromPush {
-                    if PyrusServiceDesk.multichats {
-                        let customization = PyrusServiceDesk.mainController?.customization
-                        let label = UILabel()
-                        label.isUserInteractionEnabled = true
-                        label.textAlignment = .center
-                        label.font = CustomizationHelper.systemBoldFont(ofSize: 17)
-                        label.text = chat?.subject?.count ?? 0 > 0 ? chat?.subject : ""
-                        label.translatesAutoresizingMaskIntoConstraints = false
-                        label.widthAnchor.constraint(equalToConstant: 200).isActive = true
-                        
-                        customization?.setChatTitileView(label)
-                        presenter.doWork(.reloadTitle)
-                    }
-                }
                 readChat()
                 self.isRefresh = false
                 fromPush = false

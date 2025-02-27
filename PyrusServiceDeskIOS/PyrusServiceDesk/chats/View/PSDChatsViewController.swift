@@ -460,7 +460,7 @@ private extension PSDChatsViewController {
             icon.widthAnchor.constraint(equalToConstant: 24),
             navTitle.leadingAnchor.constraint(equalTo: icon.trailingAnchor, constant: 6),
             navTitle.centerYAnchor.constraint(equalTo: icon.centerYAnchor),
-            navTitle.widthAnchor.constraint(lessThanOrEqualToConstant: 200),
+            navTitle.widthAnchor.constraint(lessThanOrEqualToConstant: 130),
             titleView.heightAnchor.constraint(equalToConstant: 28),
             titleView.trailingAnchor.constraint(equalTo: navTitle.trailingAnchor),
             titleView.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor, constant: 16),
