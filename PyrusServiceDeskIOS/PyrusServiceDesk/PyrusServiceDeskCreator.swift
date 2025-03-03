@@ -25,6 +25,7 @@ import UIKit
     static private(set) var authorId: String?
     static var lastNoteId: Int?
     static var storeMessages: [PSDMessage]?
+    static var isStarted: Bool = false
     
     static var userName: String?
     ///UserId needed for request
@@ -69,7 +70,11 @@ import UIKit
         if !additionalUsers.contains(user) && user.userId != customUserId {
             additionalUsers.append(user)
             NotificationCenter.default.post(name: newUserNotification, object: nil)
+        } else if user.userId == customUserId {
+            self.userName = user.userName
+            NotificationCenter.default.post(name: usersUpdateNotification, object: nil)
         } else {
+            additionalUsers.first(where: { $0 == user })?.userName = user.userName
             NotificationCenter.default.post(name: usersUpdateNotification, object: nil)
         }
         DispatchQueue.main.async {
@@ -321,6 +326,7 @@ import UIKit
     }
     
     @objc public static func cleanCashe() {
+        isStarted = false
         DispatchQueue.global().async {
             syncManager.chatsDataService.deleteAllObjects()
             let imageRepository = ImageRepository()
@@ -365,6 +371,7 @@ import UIKit
         createWith(clientId, userId: userId, securityKey: securityKey, reset: false, userName: userName, additionalUsers: additionalUsers, authorId: authorId, domain: domain, loggingEnabled: loggingEnabled, authorizationToken: authorizationToken, multichats: multichats)
     }
     private static func createWith(_ clientId: String?, userId: String?, securityKey: String?, reset: Bool, userName: String?, additionalUsers: [PSDUserInfo] = [], authorId: String?, domain: String?, loggingEnabled: Bool, authorizationToken: String?, multichats: Bool = false) {
+        isStarted = true
         PyrusServiceDesk.chats = []
         PyrusServiceDesk.multichats = multichats
         PyrusServiceDesk.loggingEnabled = loggingEnabled
@@ -555,7 +562,13 @@ import UIKit
     
     static let chatsUpdateNotification = Notification.Name("CHATS_UPDATE")
     ///All of chats
-    static var chats: [PSDChat] = [PSDChat]() 
+    static var chats: [PSDChat] = [PSDChat]() {
+        didSet {
+            if chats.count == 0 {
+                print(0)
+            }
+        }
+    }
     static var casheChats: [PSDChat] = [PSDChat]()
 
     ///The main view controller. nil - if chat was closed.

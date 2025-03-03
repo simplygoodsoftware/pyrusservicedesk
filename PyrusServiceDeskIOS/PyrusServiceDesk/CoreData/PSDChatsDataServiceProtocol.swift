@@ -12,4 +12,5 @@ protocol PSDChatsDataServiceProtocol {
     func saveClientModel(with clientModels: [PSDClientInfo], context: NSManagedObjectContext)
     func getAllClients() -> [PSDClientInfo]
     func resaveBeforeDeleteCommand(commanId: String, serverTicketId: Int?, completion: ((Result<Void, Error>) -> Void)?)
+    func searchMessages(searchString: String) -> [SearchChatModel] 
 }

@@ -49,6 +49,7 @@ private extension PSDChatRouter {
             CATransaction.setCompletionBlock({
                 PyrusServiceDesk.stopCallback?.onStop()
                 PyrusServiceDeskController.clean()
+                PyrusServiceDesk.isStarted = false
             })
             controller?.navigationController?.popViewController(animated: true)
             CATransaction.commit()

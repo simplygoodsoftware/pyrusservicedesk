@@ -75,6 +75,29 @@ extension PSDChatsDataService: PSDChatsDataServiceProtocol {
             return []
         }
     }
+    
+    func searchMessages(searchString: String) -> [SearchChatModel] {
+        do {
+            let dbMessages = try coreDataService.fetchMessages(searchString: searchString)
+            var chatModels = [SearchChatModel]()
+            for dbMessage in dbMessages {
+                if let dbChat = dbMessage.chat {
+                    let model = SearchChatModel(
+                        id: Int(dbChat.chatId),
+                        date: dbMessage.date ?? Date(),
+                        subject: dbChat.subject ?? "",
+                        messageText: dbMessage.text ?? "",
+                        messageId: dbMessage.messageId ?? ""
+                    )
+                    chatModels.append(model)
+                }
+            }
+            return chatModels
+        } catch {
+            print("Ошибка при выполнении запроса: \(error)")
+            return []
+        }
+    }
 
     func saveChatModels(with chatModels: [PSDChat], completion: ((Result<Void, Error>) -> Void)?) {
         let ids = chatModels.compactMap({ Int64($0.chatId ?? 0) })
@@ -85,13 +108,9 @@ extension PSDChatsDataService: PSDChatsDataServiceProtocol {
         } catch {
             print(error)
         }
-      //  coreDataService.deleteAllObjects(forEntityName: "DBChat")
         coreDataService.save(completion: completion) { [weak self] context in
             self?.saveChatModel(with: chatModels, context: context)
         }
-//        for chatModel in chatModels {
-//            saveChatModel(with: chatModel)
-//        }
     }
     
     func saveChatModel(with chatModels: [PSDChat], context: NSManagedObjectContext) {

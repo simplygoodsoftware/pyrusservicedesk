@@ -122,6 +122,7 @@ class PyrusServiceDeskController: PSDNavigationController {
             self.dismiss(animated: animated, completion: {
                 PyrusServiceDesk.stopCallback?.onStop()
                 PyrusServiceDeskController.clean()
+                PyrusServiceDesk.isStarted = false
             })
             
         }
@@ -130,6 +131,7 @@ class PyrusServiceDeskController: PSDNavigationController {
             fake?.dismiss(animated: animated, completion: {
                 PyrusServiceDesk.stopCallback?.onStop()
                 PyrusServiceDeskController.clean()
+                PyrusServiceDesk.isStarted = false
             })
             
         }

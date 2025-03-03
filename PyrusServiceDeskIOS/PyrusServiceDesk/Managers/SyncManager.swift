@@ -42,10 +42,9 @@ class SyncManager {
     }
     
     func syncGetTickets(isFilter: Bool = false) {
+        guard PyrusServiceDesk.isStarted else { return }
         PSDMessagesStorage.loadAttachments()
-//        PyrusServiceDesk.repository.clear()
-//        PSDMessagesStorage.cleanStorage()
-//        return
+
         if firstLoad {
             let cashe = chatsDataService.getAllChats()
             PyrusServiceDesk.chats = cashe
@@ -66,8 +65,14 @@ class SyncManager {
         shouldSendAnotherRequest = false
         sendingMessages = PSDMessagesStorage.getSendingMessages()
         
+        
+//        let params = TicketCommandParams(ticketId: -96, appId:  PyrusServiceDesk.currentClientId ?? PyrusServiceDesk.clientId, requestNewTicket: true, userId: PyrusServiceDesk.currentUserId ?? PyrusServiceDesk.customUserId ?? PyrusServiceDesk.userId, message: "Привет", attachments: [], rating: nil, date: Date(), messageClientId: nil)
+//        let command = TicketCommand(commandId: UUID().uuidString, type: .createComment, appId: PyrusServiceDesk.currentClientId ?? PyrusServiceDesk.clientId, userId:  PyrusServiceDesk.currentUserId ?? PyrusServiceDesk.customUserId ?? PyrusServiceDesk.userId, params: params)
+        
+        
         let ticketCommands = PyrusServiceDesk.repository.getCommands()
         PSDGetChats.get(commands: ticketCommands.map({ $0.toDictionary() })) { [weak self] chats, commandsResult, authorAccessDenied, clientsArray, complete in
+            guard PyrusServiceDesk.isStarted else { return }
             guard let self = self else { return }
             var clients = clientsArray
             DispatchQueue.main.async {
@@ -103,12 +108,6 @@ class SyncManager {
                     }
                 }
             }
-//            DispatchQueue.main.async { [weak self] in
-//                if let clients, clients.count > 0 {
-//                    PyrusServiceDesk.clients = clients
-//                    self?.chatsDataService.saveClientModels(with: clients)
-//                }
-//            }
             
             if let commandsResult {
                 self.commandsResult = commandsResult.sorted(by: { $0.commentId ?? 0 < $1.commentId ?? 0 })
@@ -134,79 +133,47 @@ class SyncManager {
             
             DispatchQueue.main.async { [weak self] in
                 if let chats, complete {
+                    var unreadChats = 0
+                    var lasMessage: PSDMessage?
+                    for chat in chats {
+                        lasMessage = chat.messages.last
+                        guard !chat.isRead else {
+                            continue
+                        }
+                        unreadChats = unreadChats + 1
+                    }
+                    UnreadMessageManager.refreshNewMessagesCount(unreadChats > 0, lastMessage: lasMessage)
+                    
                     self?.chatsDataService.saveChatModels(with: chats) { [weak self] _ in
                         DispatchQueue.main.async { [weak self] in
-                            if let clients, clients.count > 0 {
+                            if let clients, clients.count > 0, PyrusServiceDesk.isStarted {
                                 PyrusServiceDesk.clients = clients
                                 self?.chatsDataService.saveClientModels(with: clients)
-//                                DispatchQueue.main.async { [weak self] in
-//                                    self?.chatsDataService.saveClientModels(with: clients) { [weak self] _ in
-//                                        PyrusServiceDesk.clients = self?.chatsDataService.getAllClients() ?? []
-//                                        PyrusServiceDesk.chats = self?.chatsDataService.getAllChats() ?? []
-//                                        NotificationCenter.default.post(name: PyrusServiceDesk.chatsUpdateNotification, object: nil, userInfo: userInfo)
-//                                    }
-//                                }
-//                            } else {
                                 PyrusServiceDesk.chats = self?.chatsDataService.getAllChats() ?? []
                                 NotificationCenter.default.post(name: PyrusServiceDesk.chatsUpdateNotification, object: nil, userInfo: userInfo)
                             }
+                            
+                            if isFilter {
+                                self?.isFilter = false
+                            }
+                            self?.clearTimer()
+                            self?.networkAvailability = true
+                            self?.isRequestInProgress = false
+                            
+                            if self?.shouldSendAnotherRequest ?? false {
+                                self?.syncGetTickets(isFilter: self?.isFilter ?? false)
+                            }
                         }
                     }
-                    
-                }
-                
-                PyrusLogger.shared.logEvent("PSDGetChats did end with chats count: \(chats?.count ?? 0).")
-                guard let chats = chats else {
-                    return
-                }
-                var unreadChats = 0
-                var lasMessage: PSDMessage?
-                for chat in chats {
-                    lasMessage = chat.messages.last
-                    guard !chat.isRead else {
-                        continue
+                } else if !complete {
+                    self?.updateRepeatSyncTimer()
+                    self?.networkAvailability = false
+                    self?.isRequestInProgress = false
+                    if self?.shouldSendAnotherRequest ?? false {
+                        self?.syncGetTickets(isFilter: self?.isFilter ?? false)
                     }
-                    unreadChats = unreadChats + 1
-                }
-                
-                UnreadMessageManager.refreshNewMessagesCount(unreadChats > 0, lastMessage: lasMessage)
-            }
-            
-            
-//            DispatchQueue.global().async {
-//                for client in PyrusServiceDesk.clients {
-//                    let url = PyrusServiceDeskAPI.PSDURL(url: client.clientIcon)
-//                    PyrusServiceDesk.mainSession.dataTask(with: url) { data, response, error in
-//                        guard let data = data, error == nil else{
-//                            return
-//                        }
-//                        if data.count != 0,
-//                        let image = UIImage(data: data) {
-//                            client.image = UIImage(data: data)
-//                        }
-//                    }.resume()
-//                }
-//            }
-
-            self.isRequestInProgress = false
-            
-            if !complete {
-                self.updateRepeatSyncTimer()
-                networkAvailability = false
-            } else {
-                if isFilter {
-                    self.isFilter = false
-                }
-                clearTimer()
-                networkAvailability = true
-            }
-            
-            if self.shouldSendAnotherRequest {
-                DispatchQueue.main.async {
-                    self.syncGetTickets(isFilter: self.isFilter)
                 }
             }
-            
         }
     }
 }

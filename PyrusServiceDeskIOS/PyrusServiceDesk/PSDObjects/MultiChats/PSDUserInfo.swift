@@ -4,7 +4,7 @@ import Foundation
     let clientId: String
     let clientName: String
     let userId: String
-    let userName: String
+    var userName: String
     let secretKey: String?
     var lastNoteId: Int?
 
@@ -21,10 +21,6 @@ import Foundation
             return false
         }
         
-        return self.clientId == other.clientId &&
-        self.clientName == other.clientName &&
-        self.userId == other.userId &&
-        self.userName == other.userName &&
-        self.secretKey == other.secretKey
+        return self.clientId == other.clientId && self.userId == other.userId
     }
 }
