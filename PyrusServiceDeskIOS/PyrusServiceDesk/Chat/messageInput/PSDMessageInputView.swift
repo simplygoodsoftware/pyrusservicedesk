@@ -178,7 +178,7 @@ class PSDMessageInputView: UIView, PSDMessageTextViewDelegate,PSDMessageSendButt
     
     //MARK: drawing constraints
     
-    let defaultTextHeight : CGFloat = 36.0
+    let defaultTextHeight : CGFloat = 33.0
     
     override func layoutSubviews() {
         super.layoutSubviews()

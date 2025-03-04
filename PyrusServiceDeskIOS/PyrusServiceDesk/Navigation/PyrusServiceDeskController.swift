@@ -44,11 +44,13 @@ class PyrusServiceDeskController: PSDNavigationController {
     required init?(coder aDecoder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
     }
+    
     func show(on viewController: UIViewController, completion: (() -> Void)? = nil, animated: Bool) {
         DispatchQueue.main.async  {
             viewController.present(self, animated:  animated, completion: completion)
         }
     }
+    
     override public func viewDidLoad() {
         super.viewDidLoad()
         view.backgroundColor = .white
