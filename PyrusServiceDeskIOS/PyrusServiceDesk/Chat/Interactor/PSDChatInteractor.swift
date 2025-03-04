@@ -246,17 +246,14 @@ private extension PSDChatInteractor {
                 messagesToPass.removeAll(where: { $0.commandId.lowercased() == commandResult.commandId.lowercased() })
             }
         }
-        presenter.doWork(.reloadAll)
+        presenter.doWork(.reloadAll(animated: false))
     }
     
     func showSendMessageResult(messageToPass: PSDMessage, success: Bool) {
         if success {
             let _ = PyrusServiceDesk.setLastActivityDate()
             PyrusServiceDesk.restartTimer()
-        } 
-//        else {
-//            messageToPass.fromStrorage = true
-//        }
+        }
         
         let newState: messageState = success ? .sent : .cantSend
         let newProgress: CGFloat = success ? 1 : 0.0
@@ -267,9 +264,7 @@ private extension PSDChatInteractor {
             attachment.size = attachment.data.count
             attachment.data = Data()//clear saved data
         }
-      //  if messageToPass.fromStrorage {
-            messageToPass.date = Date()//mesages from the storage can have old date - change it to the current, to avoid diffrent drawing after second enter into chat
-     //   }
+        messageToPass.date = Date()//mesages from the storage can have old date - change it to the current, to avoid diffrent drawing after second enter into chat
         
         DispatchQueue.main.async { [weak self] in
             self?.refresh(message: messageToPass, changedToSent: success)
@@ -277,11 +272,8 @@ private extension PSDChatInteractor {
     }
     
     func forceRefresh(showFakeMessage: Int?) {
-        if !PSDGetChat.isActive() {
-            if let showFakeMessage, showFakeMessage != 0 {
-                presenter.doWork(.addFakeMessage(messageId: showFakeMessage))
-            }
-            DispatchQueue.main.async {
+        DispatchQueue.main.async {
+            if !PSDGetChat.isActive() {
                 PyrusServiceDesk.syncManager.syncGetTickets()
             }
         }
@@ -382,42 +374,14 @@ private extension PSDChatInteractor {
             needShowRating = chat.showRating
             showRateIfNeed()
             
-            //compare number of messages it two last sections
-            var hasChanges = false
-            let (removeIndexPaths, removeSections) = self.tableMatrix.removeFakeMessages()
-            if removeIndexPaths.count > 0 || removeSections.count > 0,
-               self.tableMatrix.count > 0 {
-                if !hasChanges {
-                    hasChanges = true
-                    PyrusLogger.shared.logEvent("Колличество ячеек до удаления: \(tableMatrix[tableMatrix.count - 1].count)")
-                    PyrusLogger.shared.logEvent("Колличество ячеек после удаления: \(tableMatrix[tableMatrix.count - 1].count)")
-                }
-            }
-            
-            self.tableMatrix.complete(from: chat, startMessage: lastMessageFromServer) { (indexPaths: [IndexPath], sections: IndexSet, _) in
+            self.tableMatrix.complete(from: chat, startMessage: lastMessageFromServer) { (hasChanges: Bool) in
                 DispatchQueue.main.async {
-                    if indexPaths.count > 0 || sections.count > 0,
-                       self.tableMatrix.count > 0
-                    {
-                        if !hasChanges {
-                            hasChanges = true
-                            PyrusLogger.shared.logEvent("Колличество ячеек до удаления: \(self.tableMatrix[self.tableMatrix.count-1].count)")
-                        }
-                        PyrusLogger.shared.logEvent("Колличество ячеек после добавления: \(self.tableMatrix[self.tableMatrix.count-1].count)")
-                        PyrusLogger.shared.logEvent("При удалении фейка: ячейки = \(removeIndexPaths), секции \(removeSections)")
-                        PyrusLogger.shared.logEvent("При добавленни нового сообщения: ячейки = \(indexPaths), секции \(sections)")
-                    }
-                    
                     self.presenter.doWork(.removeNoConnectionView)
                     self.lastMessageFromServer = chat.messages.last
                     self.setLastActivityDate()
                     
-                    if indexPaths.count > 0 || sections.count > 0
-                        || removeIndexPaths.count > 0 || removeSections.count > 0 {
-                        let indexPaths = PSDTableView.compareAddAndRemoveRows(removeIndexPaths: removeIndexPaths, addIndexPaths: indexPaths, removeSections: removeSections, addSections: sections)
-                        PyrusLogger.shared.logEvent("Результат после сопоставления: удалять = \(indexPaths.newRemoveIndexPaths), \(indexPaths.newRemoveSections); \n добавлять = \(indexPaths.addIndexPaths), \(indexPaths.addSections); \n Обновлять = \(indexPaths.reloadIndexPaths), \(indexPaths.reloadSections)")
-                        
-                        self.presenter.doWork(.updateRows(indexPaths: indexPaths))
+                    if hasChanges {
+                        self.presenter.doWork(.updateRows)
                         self.updateButtons()
                     }
                 }
@@ -504,32 +468,19 @@ private extension PSDChatInteractor {
     ///Add new row to tableMatrix and insert row to tableView, than scrolls it to bottom position
     ///- parameter index: section where row will be inserted and added new element to tableMatrix
     ///- parameter dataForRow:PSDMessage object for draw in cell.
-    private func addRow(at index:Int, dataForRow: PSDRowMessage) {
-        var insertSections = false
-        if self.tableMatrix.count-1 < index {
+    private func addRow(at index: Int, dataForRow: PSDRowMessage) {
+        if self.tableMatrix.count - 1 < index {
             self.tableMatrix.append([PSDRowMessage]())
             self.tableMatrix[index].append(dataForRow)
-            insertSections = true
         } else {
             self.tableMatrix[index].append(dataForRow)
         }
         let scrollToBottom = dataForRow.message.owner.personId == PyrusServiceDesk.userId
-        
-       // presenter.doWork(.updateTableMatrix(matrix: tableMatrix))
-        presenter.doWork(.addRow(index: index, lastIndexPath: lastIndexPath(), insertSections: insertSections, scrollsToBottom: scrollToBottom))
+        presenter.doWork(.addRow(scrollsToBottom: scrollToBottom))
     }
     
-    private func lastIndexPath() -> IndexPath {
-        let row: Int = tableMatrix.last?.count ?? 1
-        let section = tableMatrix.count > 0 ? tableMatrix.count - 1 : 0
-        let index = IndexPath(row: row > 0 ? row - 1 : 0, section: section)
-        return index
-    }
-    
-    
-    
-    private func getMessage(at indexPath:IndexPath) -> PSDMessage? {
-        if tableMatrix.count > indexPath.section && tableMatrix[indexPath.section].count>indexPath.row {
+    private func getMessage(at indexPath: IndexPath) -> PSDMessage? {
+        if tableMatrix.count > indexPath.section && tableMatrix[indexPath.section].count > indexPath.row {
             let rowMessage = tableMatrix[indexPath.section][indexPath.row]
             return rowMessage.message
         }
@@ -562,87 +513,88 @@ extension PSDChatInteractor: PSDMessageSendDelegate {
     
     func refresh(message: PSDMessage, changedToSent: Bool) {
         DispatchQueue.main.async { [weak self] in
-            self?.startGettingInfo()
-            guard let self = self else {
-                return
-            }
-            let indexPathsAndMessages = self.tableMatrix.findIndexPath(ofMessage: message.clientId)
-            guard  indexPathsAndMessages.count > 0 else {
+            guard let self = self else { return }
+            startGettingInfo()
+            
+            // Находим индексы сообщения
+            let indexPathsAndMessages = tableMatrix.findIndexPath(ofMessage: message.clientId)
+            guard !indexPathsAndMessages.isEmpty else {
                 EventsLogger.logEvent(.didNotFindMessageAfterUpdate)
                 return
             }
-            var lastIndexPath: [IndexPath]? = nil
             
-            if changedToSent && message.attachments?.count ?? 0 > 0 || message.fromStrorage {
-                //is state was changed need to move sendded message up to sent block
-                if message.fromStrorage {
-                    lastIndexPath = self.tableMatrix.indexPathsAfterSentStoreMessage(for: message)
-                } else {
-                    lastIndexPath = self.tableMatrix.indexPathsAfterSent(for: message)
-                }
-                if let lastIndexPath = lastIndexPath, lastIndexPath.count > 0 {
+            // Определяем новые индексы, если сообщение изменило статус на "отправлено"
+            var lastIndexPath: [IndexPath]?
+            if changedToSent && (message.attachments?.isEmpty == false || message.fromStrorage) {
+                lastIndexPath = message.fromStrorage
+                    ? tableMatrix.indexPathsAfterSentStoreMessage(for: message)
+                    : tableMatrix.indexPathsAfterSent(for: message)
+                
+                if let lastIndexPath, !lastIndexPath.isEmpty {
                     let newSection = lastIndexPath[0].section
-                    if self.tableMatrix.count - 1 < newSection {
-                        self.tableMatrix.append([PSDRowMessage]())
-                      //  presenter.doWork(.updateTableMatrix(matrix: tableMatrix))
-                        presenter.doWork(.insertSections(sections: IndexSet(arrayLiteral: newSection)))
+                    if tableMatrix.count <= newSection {
+                        tableMatrix.append([PSDRowMessage]())
+                        presenter.doWork(.reloadAll(animated: true))
                     }
                 }
             }
-            var oldSection = 0
-            let indexPaths = indexPathsAndMessages.keys.sorted(by: {$0 < $1})
+            
+            // Обновляем сообщения и перемещаем их, если необходимо
+            let indexPaths = indexPathsAndMessages.keys.sorted(by: { $0 < $1 })
             var movedRows = 0
-            for (i,indexPath) in indexPaths.enumerated() {
+            var oldSection = 0
+            
+            for (i, indexPath) in indexPaths.enumerated() {
                 oldSection = indexPath.section
                 let movedIndexPath = IndexPath(row: indexPath.row - movedRows, section: indexPath.section)
-                guard self.tableMatrix.has(indexPath: movedIndexPath), let rowMessage = indexPathsAndMessages[indexPath] else {
+                
+                guard self.tableMatrix.has(indexPath: movedIndexPath),
+                      let rowMessage = indexPathsAndMessages[indexPath] else {
                     continue
                 }
+                
+                // Обновляем сообщение
                 rowMessage.updateWith(message: message)
-//                tableMatrix[movedIndexPath.section][movedIndexPath.row] = rowMessage
-//                presenter.doWork(.reloadAll)
-                let reversedIndexPath = IndexPath(row: tableMatrix[movedIndexPath.section].count - 1 - movedIndexPath.row, section: tableMatrix.count - 1 - movedIndexPath.section)
+                let reversedIndexPath = IndexPath(
+                    row: tableMatrix[movedIndexPath.section].count - 1 - movedIndexPath.row,
+                    section: tableMatrix.count - 1 - movedIndexPath.section
+                )
                 presenter.doWork(.redrawCell(indexPath: reversedIndexPath, message: rowMessage))
-                presenter.doWork(.reloadAll)
-                if let lastIndexPath = lastIndexPath, lastIndexPath.count > i {
+                
+                // Перемещаем сообщение, если необходимо
+                if let lastIndexPath, lastIndexPath.count > i {
                     let newIndexPath = lastIndexPath[i]
                     if newIndexPath != indexPath && newIndexPath.row >= movedIndexPath.row {
-                        movedRows = movedRows + 1
-                        self.tableMatrix[movedIndexPath.section].remove(at: movedIndexPath.row)
-                        self.tableMatrix[newIndexPath.section].insert(rowMessage, at:newIndexPath.row)
-                       // presenter.doWork(.updateTableMatrix(matrix: tableMatrix))
-                        presenter.doWork(.moveRow(movedIndexPath: movedIndexPath, newIndexPath: newIndexPath))
+                        movedRows += 1
+                        tableMatrix[movedIndexPath.section].remove(at: movedIndexPath.row)
+                        tableMatrix[newIndexPath.section].insert(rowMessage, at: newIndexPath.row)
+                        presenter.doWork(.reloadAll(animated: true))
                     }
                 }
             }
-            if self.tableMatrix[oldSection].count == 0 {
-                self.tableMatrix.remove(at: oldSection)
-             //   presenter.doWork(.updateTableMatrix(matrix: tableMatrix))
-                presenter.doWork(.deleteSections(sections: IndexSet(arrayLiteral: oldSection)))
+            
+            // Удаляем пустую секцию, если она есть
+            if tableMatrix[oldSection].isEmpty {
+                tableMatrix.remove(at: oldSection)
+                presenter.doWork(.reloadAll(animated: true))
             }
-            self.isRefresh = false
+            
+            isRefresh = false
         }
     }
     
     func remove(message: PSDMessage) {
-        let indexPathsAndRows = self.tableMatrix.findIndexPath(ofMessage: message.clientId).keys.sorted(by:{$0 > $1})
-        var indexPaths = [IndexPath]()
-        for indexPath in indexPathsAndRows {
-            if tableMatrix.has(indexPath: indexPath){
-                tableMatrix[indexPath.section].remove(at: indexPath.row)
-               // presenter.doWork(.updateTableMatrix(matrix: tableMatrix))
-                indexPaths.append( indexPath)
-            }
-        }
-        
         DispatchQueue.main.async { [weak self] in
-            PSDMessagesStorage.remove(messageId: message.clientId)
-            self?.showRateIfNeed()
-            
-            if indexPaths.count > 0 {
-                let section = indexPaths[0].section
-                self?.presenter.doWork(.deleteRows(indexPaths: indexPaths, section: section))
+            guard let self else { return }
+            let indexPathsAndRows = tableMatrix.findIndexPath(ofMessage: message.clientId).keys.sorted(by:{$0 > $1})
+            for indexPath in indexPathsAndRows {
+                if tableMatrix.has(indexPath: indexPath) {
+                    tableMatrix[indexPath.section].remove(at: indexPath.row)
+                }
             }
+            PSDMessagesStorage.remove(messageId: message.clientId)
+            showRateIfNeed()
+            presenter.doWork(.reloadAll(animated: true))
         }
     }
     

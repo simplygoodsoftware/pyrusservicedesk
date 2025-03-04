@@ -18,7 +18,7 @@ final class PSDChatCellConfigurator: TableViewCellConfiguratorProtocol {
         if model.count > indexPath.section && model[indexPath.section].count > indexPath.row {
             message = model[indexPath.section][indexPath.row]
         } else {
-            message = PSDObjectsCreator.createWelcomeMessage()
+            return PSDChatMessageCell()
         }
         
         let cell: PSDChatMessageCell

@@ -1,9 +1,8 @@
 import Foundation
 
 enum PSDChatPresenterCommand {
-    case addFakeMessage(messageId: Int)
     case updateButtons(buttons: [ButtonData]?)
-    case updateRows(indexPaths: IndexPaths)
+    case updateRows
     case removeNoConnectionView
     case endRefreshing
     case reloadChat
@@ -14,15 +13,11 @@ enum PSDChatPresenterCommand {
     case dataIsShown
     case drawTableWithData
     case updateTableMatrix(matrix: [[PSDRowMessage]])
-    case addRow(index: Int, lastIndexPath: IndexPath, insertSections: Bool, scrollsToBottom: Bool)
+    case addRow(scrollsToBottom: Bool)
     case addNewRow
     case redrawCell(indexPath: IndexPath, message: PSDRowMessage)
-    case insertSections(sections: IndexSet)
-    case deleteSections(sections: IndexSet)
-    case moveRow(movedIndexPath: IndexPath, newIndexPath: IndexPath)
-    case deleteRows(indexPaths: [IndexPath], section: Int)
     case showKeyBoard
-    case reloadAll
+    case reloadAll(animated: Bool)
     case updateTitle(connectionError: Bool)
     case reloadTitle
     case updateBadge(messagesCount: Int)

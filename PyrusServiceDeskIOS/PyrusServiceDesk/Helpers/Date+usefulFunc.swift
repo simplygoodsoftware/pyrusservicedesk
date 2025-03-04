@@ -162,19 +162,17 @@ extension Date {
         case more
     }
     ///Compares to date without the time portion. Returns compareType
-    func compareWithoutTime(with date:Date)->compareType
-    {
-        if date.year() == self.year() &&  date.month() == self.month() && date.day() == self.day(){
+    func compareWithoutTime(with date:Date) -> compareType {
+        if date.year() == self.year() &&  date.month() == self.month() && date.day() == self.day() {
             return .equal
         }
-        if date.year() < self.year(){
+        if date.year() < self.year() {
             return .less
-        }
-        else if date.year() == self.year(){
-            if date.month() < self.month(){
+        } else if date.year() == self.year() {
+            if date.month() < self.month() {
                 return .less
-            }else if date.month() == self.month(){
-                if date.day() < self.day(){
+            } else if date.month() == self.month() {
+                if date.day() < self.day() {
                     return .less
                 }
             }

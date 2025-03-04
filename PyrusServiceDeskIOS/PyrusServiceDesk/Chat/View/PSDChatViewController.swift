@@ -461,8 +461,6 @@ private extension PSDChatViewController {
 extension PSDChatViewController: PSDChatViewProtocol {
     func show(_ action: PSDChatSearchViewCommand) {
         switch action {
-        case .addFakeMessage(let messageId):
-            tableView.addFakeMessage(messageId: messageId)
         case .updateButtons(buttons: let buttons):
             tableView.updateButtonsView(buttons: buttons)
         case .updateRows:
@@ -487,8 +485,8 @@ extension PSDChatViewController: PSDChatViewProtocol {
             tableView.drawTableWithData()
         case .updateTableMatrix(matrix: let matrix):
             tableView.tableMatrix = matrix
-        case .addRow(index: let index, lastIndexPath: let lastIndexPath, insertSections: let insertSections, scrollsToBottom: let scrollsToBottom):
-            tableView.addRow(at: index, lastIndexPath: lastIndexPath, insertSections: insertSections, scrollsToBottom: scrollsToBottom)
+        case .addRow(scrollsToBottom: let scrollsToBottom):
+            tableView.addRow(scrollsToBottom: scrollsToBottom)
         case .addNewRow:
             if(tableView.numberOfRows(inSection: 0) == 0) {
                 tableView.addNewRow() { [weak self] in
@@ -499,18 +497,10 @@ extension PSDChatViewController: PSDChatViewProtocol {
             }
         case .redrawCell(indexPath: let indexPath, message: let message):
             tableView.redrawCell(at: indexPath, with: message)
-        case .insertSections(sections: let sections):
-            tableView.insertSections(sections: sections)
-        case .deleteSections(sections: let sections):
-            tableView.deleteSections(sections: sections)
-        case .moveRow(movedIndexPath: let movedIndexPath, newIndexPath: let newIndexPath):
-            tableView.moveRow(movedIndexPath: movedIndexPath, newIndexPath: newIndexPath)
-        case .deleteRows(indexPaths: let indexPaths, section: let section):
-            tableView.deleteRows(indexPaths: indexPaths, section: section)
         case .showKeyBoard:
-            messageInputView.inputTextView.becomeFirstResponder()
-        case .reloadAll:
-            tableView.reloadAll()
+            self.messageInputView.inputTextView.becomeFirstResponder()
+        case .reloadAll(animated: let animated):
+            tableView.reloadAll(animated: animated)
         case .updateTitle(connectionError: let connectionError):
             if !connectionError {
                 if let view = PyrusServiceDesk.mainController?.customization?.chatTitleView {

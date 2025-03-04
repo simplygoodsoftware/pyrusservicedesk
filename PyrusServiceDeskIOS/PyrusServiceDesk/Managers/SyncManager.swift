@@ -65,11 +65,6 @@ class SyncManager {
         shouldSendAnotherRequest = false
         sendingMessages = PSDMessagesStorage.getSendingMessages()
         
-        
-//        let params = TicketCommandParams(ticketId: -96, appId:  PyrusServiceDesk.currentClientId ?? PyrusServiceDesk.clientId, requestNewTicket: true, userId: PyrusServiceDesk.currentUserId ?? PyrusServiceDesk.customUserId ?? PyrusServiceDesk.userId, message: "Привет", attachments: [], rating: nil, date: Date(), messageClientId: nil)
-//        let command = TicketCommand(commandId: UUID().uuidString, type: .createComment, appId: PyrusServiceDesk.currentClientId ?? PyrusServiceDesk.clientId, userId:  PyrusServiceDesk.currentUserId ?? PyrusServiceDesk.customUserId ?? PyrusServiceDesk.userId, params: params)
-        
-        
         let ticketCommands = PyrusServiceDesk.repository.getCommands()
         PSDGetChats.get(commands: ticketCommands.map({ $0.toDictionary() })) { [weak self] chats, commandsResult, authorAccessDenied, clientsArray, complete in
             guard PyrusServiceDesk.isStarted else { return }

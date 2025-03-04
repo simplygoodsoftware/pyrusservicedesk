@@ -7,12 +7,10 @@ class PSDChatPresenter {
 extension PSDChatPresenter: PSDChatPresenterProtocol {
     func doWork(_ action: PSDChatPresenterCommand) {
         switch action {
-        case .addFakeMessage(messageId: let messageId):
-            view?.show(.addFakeMessage(messageId: messageId))
         case .updateButtons(buttons: let buttons):
             view?.show(.updateButtons(buttons: buttons))
-        case .updateRows(indexPaths: let indexPaths):
-            view?.show(.updateRows(indexPaths: indexPaths))
+        case .updateRows:
+            view?.show(.updateRows)
         case .removeNoConnectionView:
             view?.show(.removeNoConnectionView)
         case .endRefreshing:
@@ -33,24 +31,16 @@ extension PSDChatPresenter: PSDChatPresenterProtocol {
             view?.show(.drawTableWithData)
         case .updateTableMatrix(matrix: let matrix):
             view?.show(.updateTableMatrix(matrix: matrix.reversed().map { $0.reversed() }))
-        case .addRow(index: let index, lastIndexPath: let lastIndexPath, insertSections: let insertSections, scrollsToBottom: let scrollsToBottom):
-            view?.show(.addRow(index: index, lastIndexPath: lastIndexPath, insertSections: insertSections, scrollsToBottom: scrollsToBottom))
+        case .addRow(scrollsToBottom: let scrollsToBottom):
+            view?.show(.addRow(scrollsToBottom: scrollsToBottom))
         case .addNewRow:
             view?.show(.addNewRow)
         case .redrawCell(indexPath: let indexPath, message: let message):
             view?.show(.redrawCell(indexPath: indexPath, message: message))
-        case .insertSections(sections: let sections):
-            view?.show(.insertSections(sections: sections))
-        case .deleteSections(sections: let sections):
-            view?.show(.deleteSections(sections: sections))
-        case .moveRow(movedIndexPath: let movedIndexPath, newIndexPath: let newIndexPath):
-            view?.show(.moveRow(movedIndexPath: movedIndexPath, newIndexPath: newIndexPath))
-        case .deleteRows(indexPaths: let indexPaths, section: let section):
-            view?.show(.deleteRows(indexPaths: indexPaths, section: section))
         case .showKeyBoard:
             view?.show(.showKeyBoard)
-        case .reloadAll:
-            view?.show(.reloadAll)
+        case .reloadAll(animated: let animated):
+            view?.show(.reloadAll(animated: animated))
         case .updateTitle(connectionError: let connectionError):
             view?.show(.updateTitle(connectionError: connectionError))
         case .reloadTitle:
