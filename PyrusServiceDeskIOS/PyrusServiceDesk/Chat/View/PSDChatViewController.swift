@@ -64,7 +64,14 @@ class PSDChatViewController: PSDViewController {
         return table
     }()
     
+    private lazy var closedTicketView: UIView = {
+        let view = UIView()
+        view.translatesAutoresizingMaskIntoConstraints = false
+        return view
+    }()
+    
     private var firstLoad: Bool = true
+    private var isActive: Bool = true
     
     private var tableViewTopConstant: NSLayoutConstraint?
     
@@ -168,10 +175,14 @@ class PSDChatViewController: PSDViewController {
     private var firstLayout: Bool = true
     override func viewDidLayoutSubviews() {
         if firstLayout {
-            //tableView.scrollsToBottom(animated: false)
             firstLayout = false
             tableView.transform = CGAffineTransform(rotationAngle: CGFloat.pi)
             interactor.doInteraction(.viewDidLayoutSubviews)
+            let blurEffect = UIBlurEffect(style: .systemChromeMaterial)
+            let blurEffectView = UIVisualEffectView(effect: blurEffect)
+            blurEffectView.frame = closedTicketView.bounds
+            closedTicketView.addSubview(blurEffectView)
+            closedTicketView.sendSubviewToBack(blurEffectView)
         }
     }
     
@@ -281,6 +292,7 @@ class PSDChatViewController: PSDViewController {
         setupInfoView()
         customiseDesign(color: PyrusServiceDesk.mainController?.customization?.barButtonTintColor ?? UIColor.darkAppColor)
         setupScrollButton()
+        setupClosedTicketView()
     }
     
     func setupTableView() {
@@ -341,6 +353,28 @@ class PSDChatViewController: PSDViewController {
         
         scrollButton.addTarget(self, action: #selector(scrollToBottom), for: .touchUpInside)
         updateScrollButton(isHidden: true)
+    }
+    
+    func setupClosedTicketView() {
+        view.addSubview(closedTicketView)
+        
+        let closedTicketLabel = UILabel()
+        closedTicketLabel.text = "ClosedTicketInfo".localizedPSD()
+        closedTicketLabel.translatesAutoresizingMaskIntoConstraints = false
+        closedTicketLabel.textColor = .lastMessageInfo
+        closedTicketLabel.font = .systemFont(ofSize: 16, weight: .regular)
+        closedTicketView.addSubview(closedTicketLabel)
+        
+        NSLayoutConstraint.activate([
+            closedTicketView.bottomAnchor.constraint(equalTo: view.bottomAnchor),
+            closedTicketView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
+            closedTicketView.trailingAnchor.constraint(equalTo: view.trailingAnchor),
+            closedTicketView.heightAnchor.constraint(equalToConstant: 80),
+            closedTicketLabel.topAnchor.constraint(equalTo: closedTicketView.topAnchor, constant: 8),
+            closedTicketLabel.centerXAnchor.constraint(equalTo: closedTicketView.centerXAnchor)
+        ])
+        
+        closedTicketView.isHidden = true
     }
     
     @objc func scrollToBottom() {
@@ -426,7 +460,8 @@ class PSDChatViewController: PSDViewController {
         guard
             self.tableView.window != nil,
             !hasNoConnection(),
-            self.presentedViewController == nil
+            self.presentedViewController == nil,
+            isActive
         else {
             return false
         }
@@ -526,6 +561,12 @@ extension PSDChatViewController: PSDChatViewProtocol {
             tableView.scrollToRow(at: indexPath, at: .middle, animated: false)
             tableView.setNeedsLayout()
             tableView.layoutIfNeeded()
+        case .updateActive(isActive: let isActive):
+            self.isActive = isActive
+            if !isActive {
+                closedTicketView.isHidden = false
+                tableView.contentInset.top = 100
+            }
         }
     }
 }
@@ -595,4 +636,15 @@ extension PSDChatViewController: UIAdaptivePresentationControllerDelegate {
 }
 private extension UIFont {
     static let backButton = CustomizationHelper.systemFont(ofSize: 18)
+}
+
+private extension UIColor {
+    static let lastMessageInfo = UIColor {
+        switch $0.userInterfaceStyle {
+        case .dark:
+            return UIColor(hex: "#FFFFFFE5") ?? .white
+        default:
+            return UIColor(hex: "#60666C") ?? .systemGray
+        }
+    }
 }

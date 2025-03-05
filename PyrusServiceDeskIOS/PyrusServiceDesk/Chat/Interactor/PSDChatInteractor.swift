@@ -27,7 +27,7 @@ class PSDChatInteractor: NSObject {
     private var loadingTimer: Timer?
     private var chat: PSDChat? {
         didSet {
-           // chat?.messages = chat?.messages.reversed() ?? []
+            presenter.doWork(.updateActive(isActive: chat?.isActive ?? true))
         }
     }
     private var messageId: String?
