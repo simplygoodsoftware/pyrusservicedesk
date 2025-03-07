@@ -156,6 +156,13 @@ class PSDChatsViewController: UIViewController {
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
         interactor.doInteraction(.viewWillAppear)
+//        hidesBottomBarWhenPushed = false
+//        tabBarController?.tabBar.isHidden = false
+    }
+    
+    override func viewWillDisappear(_ animated: Bool) {
+        super.viewWillDisappear(animated)
+//        hidesBottomBarWhenPushed = true
     }
 }
 
@@ -317,7 +324,7 @@ private extension PSDChatsViewController {
             plusView.heightAnchor.constraint(equalToConstant: 56),
             plusView.widthAnchor.constraint(equalToConstant: 56),
             plusView.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -16),
-            plusView.bottomAnchor.constraint(equalTo: view.bottomAnchor, constant: -68)
+            plusView.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor, constant: -16)
         ])
         plusView.isUserInteractionEnabled = true
         plusView.addTarget(self, action: #selector(openNewChat), for: .touchUpInside)
@@ -345,7 +352,7 @@ private extension PSDChatsViewController {
         searchButton.setImage(UIImage.PSDImage(name: "search")?.withTintColor(customization?.themeColor ?? .blue), for: .normal)
 
         NSLayoutConstraint.activate([
-            searchButton.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -54),
+            searchButton.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -16),
             searchButton.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor, constant: 13),
             searchButton.heightAnchor.constraint(equalToConstant: 32),
             searchButton.widthAnchor.constraint(equalToConstant: 32)
@@ -402,17 +409,17 @@ private extension PSDChatsViewController {
         navigationItem.scrollEdgeAppearance = bigAppear
         navigationItem.standardAppearance = bigAppear
         
-        if let button = customization?.chatsRightBarButtonItem {
-            navigationView.addSubview(button)
-            button.isUserInteractionEnabled = true
-            button.translatesAutoresizingMaskIntoConstraints = false
-            NSLayoutConstraint.activate([
-                button.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -16),
-                button.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor, constant: 14),
-                button.heightAnchor.constraint(equalToConstant: 28),
-                button.widthAnchor.constraint(equalToConstant: 28)
-            ])
-        }
+//        if let button = customization?.chatsRightBarButtonItem {
+//            navigationView.addSubview(button)
+//            button.isUserInteractionEnabled = true
+//            button.translatesAutoresizingMaskIntoConstraints = false
+//            NSLayoutConstraint.activate([
+//                button.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -16),
+//                button.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor, constant: 14),
+//                button.heightAnchor.constraint(equalToConstant: 28),
+//                button.widthAnchor.constraint(equalToConstant: 28)
+//            ])
+//        }
         
         setupNavTitle()
         setupFilterButton()
@@ -472,9 +479,6 @@ private extension PSDChatsViewController {
         icon.layer.cornerRadius = 12
         icon.clipsToBounds = true
         icon.contentMode = .scaleAspectFill
-        
-        let tapGesture = UITapGestureRecognizer(target: self, action: #selector(titleViewTapped))
-      //  titleView.addGestureRecognizer(tapGesture)
     }
     
     @objc func titleViewTapped() {

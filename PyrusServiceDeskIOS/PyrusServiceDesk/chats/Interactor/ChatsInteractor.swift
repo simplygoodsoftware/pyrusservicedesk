@@ -117,7 +117,9 @@ extension ChatsInteractor: ChatsInteractorProtocol {
         case .viewWillAppear:
    //         guard PyrusServiceDesk.chats.count > 0 else { break }
             PyrusServiceDesk.syncManager.syncGetTickets()
-            PyrusServiceDesk.currentUserId = nil
+            if !isFiltered {
+                PyrusServiceDesk.currentUserId = nil
+            }
             let filterChats = createChats()
             if filterChats != chats {
                 chats = filterChats
@@ -418,7 +420,7 @@ private extension ChatsInteractor {
     }
     
     @objc func setFilter() {
-       // isFiltered
+        isFiltered = true
         DispatchQueue.main.async { [weak self] in
             let clientId = PyrusServiceDesk.currentClientId ?? PyrusServiceDesk.clientId
             if let newSelectedIndex = self?.clients.firstIndex(where: { $0.clientId == clientId }),

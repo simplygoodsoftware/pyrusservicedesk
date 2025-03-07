@@ -57,6 +57,7 @@ class PSDObjectsCreator {
     static func createMessage(rating: Int, ticketId: Int, userId: String? = nil) -> PSDMessage {
         let message = PSDObjectsCreator.createMessage("", attachments: nil, user: PSDUsers.user, ticketId: ticketId, userId: userId)
         message.rating = rating
+        message.isRatingMessage = true
         return message
     }
     /**

@@ -77,11 +77,9 @@ class PSDChatViewController: PSDViewController {
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        
         presentationController?.delegate = self
         extendedLayoutIncludesOpaqueBars = true
         automaticallyAdjustsScrollViewInsets = false
-        
         design()
         UIColor.psdBackground
         self.messageInputView.setToDefault()
@@ -130,7 +128,7 @@ class PSDChatViewController: PSDViewController {
             let keyboardEndFrame = infoEndKey.cgRectValue
             let duration = keyboardAnimationDuration(notification)
             let keyboardHeight = keyboardEndFrame.height
-            UIView.animate(withDuration: duration, delay: 0, animations: {
+           // UIView.animate(withDuration: duration, delay: 0, animations: {
                 var oldInset = self.tableView.contentInset.top
                 if self.messageInputView.inputTextView.isFirstResponder || !self.isKeyBoardOpen {
                     if self.messageInputView.inputTextView.isFirstResponder {
@@ -144,7 +142,7 @@ class PSDChatViewController: PSDViewController {
                 }
                 self.tableView.contentInset.top = keyboardHeight
                 self.isKeyBoardOpen = self.messageInputView.inputTextView.isFirstResponder
-            })
+          //  })
         }
     }
     
@@ -242,6 +240,10 @@ class PSDChatViewController: PSDViewController {
         hideAllKeyboard()
         self.tableView.removeListeners()
         interactor.doInteraction(.viewWillDisappear)
+        
+        UIView.animate(withDuration: 0.2, animations: {
+            self.tabBarController?.tabBar.alpha = 1.0
+        })
     }
     
     override func recolor() {

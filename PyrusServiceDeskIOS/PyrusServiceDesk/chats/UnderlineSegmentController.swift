@@ -162,7 +162,7 @@ extension UIColor {
         case .dark:
             return UIColor(hex: "#3D4043") ?? .black
         default:
-            return UIColor(hex: "#F9F9F9F0") ?? .white
+            return UIColor(hex: "#F5F5F5") ?? .white
         }
     }
     

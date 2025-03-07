@@ -24,7 +24,9 @@ private extension ChatsRouter {
         let pyrusChat = PSDChatViewController(interactor: interactor, router: router)
         presenter.view = pyrusChat
         router.controller = pyrusChat
+        controller?.hidesBottomBarWhenPushed = true
         controller?.navigationController?.pushViewController(pyrusChat, animated: !fromPush)
+        controller?.hidesBottomBarWhenPushed = false
     }
 }
 
