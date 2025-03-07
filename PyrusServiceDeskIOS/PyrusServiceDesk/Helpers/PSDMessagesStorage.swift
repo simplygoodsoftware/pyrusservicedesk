@@ -159,6 +159,8 @@ struct PSDMessagesStorage {
             message.appId = command.appId
             message.commandId = command.commandId
             message.requestNewTicket = command.params.requestNewTicket ?? false
+            message.isRatingMessage = command.params.rating.map({ $0 != 0 }) ?? false
+            message.rating = command.params.rating
             var attachments = [PSDAttachment]()
             if let attachmetsArray = command.params.attachments, attachmetsArray.count > 0 {
                 for attachmentData in attachmetsArray {

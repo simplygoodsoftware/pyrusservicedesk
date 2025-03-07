@@ -22,7 +22,13 @@ class PSDMessage: NSObject {
     var clientId: String
     var date = Date()
     var state: messageState
-    var rating: Int?
+    var rating: Int? {
+        didSet {
+            if rating ?? 0 > 0 {
+                isRatingMessage = true
+            }
+        }
+    }
     var isOutgoing: Bool = true
     var fromStrorage: Bool = false
     var isRatingMessage: Bool = false

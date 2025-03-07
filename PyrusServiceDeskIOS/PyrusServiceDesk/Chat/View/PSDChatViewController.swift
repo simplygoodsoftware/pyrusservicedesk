@@ -156,7 +156,11 @@ class PSDChatViewController: PSDViewController {
             UIView.animate(withDuration: duration, delay: 0, animations: {
                 self.bottomScrollButton?.constant = -120
                 self.view.layoutIfNeeded()
-                self.tableView.contentInset.top = self.messageInputView.frame.size.height
+                if !self.isActive {
+                    self.tableView.contentInset.top = 90
+                } else {
+                    self.tableView.contentInset.top = self.messageInputView.frame.size.height
+                }
             })
         }
     }
@@ -565,7 +569,9 @@ extension PSDChatViewController: PSDChatViewProtocol {
             self.isActive = isActive
             if !isActive {
                 closedTicketView.isHidden = false
-                tableView.contentInset.top = 100
+                tableView.contentInset.top = 90
+                self.resignFirstResponder()
+                self.messageInputView.inputTextView.resignFirstResponder()
             }
         }
     }

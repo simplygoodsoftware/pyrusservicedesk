@@ -179,7 +179,11 @@ struct PSDGetChats {
             chat.userId = userId
             chat.lastComment = lastMessage
             chat.lastReadedCommentId = dic["last_read_comment_id"] as? Int
-            chat.isActive = dic["is_active"] as? Bool ?? true
+            chat.showRating = dic["show_rating"] as? Bool ?? false
+            chat.showRatingText = dic["show_rating_text"] as? String
+            if !chat.showRating {
+                chat.isActive = dic["is_active"] as? Bool ?? true
+            }
             chats.append(chat)
         }
         return sortByLastMessage(chats)

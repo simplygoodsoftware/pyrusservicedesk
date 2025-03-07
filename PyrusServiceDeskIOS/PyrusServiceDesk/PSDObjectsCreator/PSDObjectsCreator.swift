@@ -64,9 +64,9 @@ class PSDObjectsCreator {
      - parameter data: Any object to message. If has string
      */
     private static func createMessage(_ text:String, attachments: [PSDAttachment]?, user:PSDUser, ticketId: Int = 0, userId: String?)->PSDMessage{
-        let messageId : String = ""
-        let date : Date = Date()
-        let message = PSDMessage(text:text , attachments:attachments, messageId: messageId, owner:user, date:date)
+        let messageId: String = ""
+        let date: Date = Date()
+        let message = PSDMessage(text: text, attachments: attachments, messageId: messageId, owner: user, date: date)
         message.state = .sending
         message.ticketId = ticketId
         message.isOutgoing = PyrusServiceDesk.authorId == user.authorId

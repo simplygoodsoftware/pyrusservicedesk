@@ -17,7 +17,7 @@ class TicketCommandParams: Codable {
     let appId: String?
     let requestNewTicket: Bool?
     let userId: String?
-    let message: String?
+    var message: String?
     let attachments: [AttachmentData]?
     let token: String?
     let type: String?

@@ -139,6 +139,9 @@ extension PSDChatsDataService: PSDChatsDataServiceProtocol {
             }
             
             for message in chatModel.messages {
+                if message.rating ?? 0 > 0 {
+                    continue
+                }
                 let mesFetchRequest = DBMessage.fetchRequest()
                 mesFetchRequest.predicate = NSPredicate(format: "messageId == %@", message.messageId as CVarArg)
                 let dbMessage: DBMessage
@@ -227,6 +230,9 @@ extension PSDChatsDataService: PSDChatsDataServiceProtocol {
             if let ticketId = ticketCommand.params.ticketId {
                 dbTicketCommand.ticketId = Int64(ticketId)
             }
+            if let rating = ticketCommand.params.rating {
+                dbTicketCommand.rating = Int32(rating)
+            }
             dbTicketCommand.token = ticketCommand.params.token
             dbTicketCommand.tokenType = ticketCommand.params.type
             dbTicketCommand.userId = ticketCommand.userId
@@ -282,6 +288,7 @@ extension PSDChatsDataService: PSDChatsDataServiceProtocol {
                         token: dbCommand.token,
                         type: dbCommand.tokenType,
                         messageId: Int(dbCommand.messageId),
+                        rating: Int(dbCommand.rating),
                         date: dbCommand.date,
                         messageClientId: dbCommand.clientId
                     )
