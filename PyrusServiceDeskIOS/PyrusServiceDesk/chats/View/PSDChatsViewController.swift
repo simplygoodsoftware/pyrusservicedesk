@@ -151,6 +151,12 @@ class PSDChatsViewController: UIViewController {
         startGettingInfo()
         interactor.doInteraction(.viewDidload)
         view.backgroundColor = .psdBackgroundColor
+        tabBarController?.delegate = self
+    }
+    
+    override func viewDidAppear(_ animated: Bool) {
+        super.viewDidAppear(animated)
+        tabBarController?.delegate = self
     }
     
     override func viewWillAppear(_ animated: Bool) {
@@ -467,8 +473,8 @@ private extension PSDChatsViewController {
             icon.widthAnchor.constraint(equalToConstant: 24),
             navTitle.leadingAnchor.constraint(equalTo: icon.trailingAnchor, constant: 6),
             navTitle.centerYAnchor.constraint(equalTo: icon.centerYAnchor),
-            //navTitle.widthAnchor.constraint(lessThanOrEqualToConstant: 130),
-            navTitle.trailingAnchor.constraint(lessThanOrEqualTo: view.trailingAnchor, constant: -88),
+            //navTitle.widthAnchor.constraint(lessThanOrEqualToConstant: 200),
+            navTitle.trailingAnchor.constraint(lessThanOrEqualTo: view.trailingAnchor, constant: -52),
             titleView.heightAnchor.constraint(equalToConstant: 28),
             titleView.trailingAnchor.constraint(equalTo: navTitle.trailingAnchor),
             titleView.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor, constant: 16),
@@ -651,6 +657,14 @@ extension PSDChatsViewController: UINavigationControllerDelegate {
             self.navigationController?.setNavigationBarHidden(true, animated: animated)
         } else {
             self.navigationController?.setNavigationBarHidden(false, animated: animated)
+        }
+    }
+}
+
+extension PSDChatsViewController: UITabBarControllerDelegate {
+    func tabBarController(_ tabBarController: UITabBarController, didSelect viewController: UIViewController) {
+        if tabBarController.selectedIndex == 1 && self.chats[0].count > 0 || self.chats[1].count > 0 {
+            tableView.scrollToRow(at: IndexPath(row: 0, section: 0), at: .top, animated: true)
         }
     }
 }

@@ -49,16 +49,14 @@ class SearchViewController: UIViewController {
     
     private lazy var emptyChatsView = UIView(frame: self.view.bounds)
     
-    // не забыть добавить Child'a (контроллер)
-   lazy var searchBar: UISearchBar = {
+    lazy var searchBar: UISearchBar = {
         let searchView = UISearchBar()
         searchView.placeholder = "PSDSearch".localizedPSD()
-       searchView.backgroundColor = .clear
+        searchView.backgroundColor = .clear
         searchView.backgroundImage = nil
         searchView.translatesAutoresizingMaskIntoConstraints = false
         searchView.barStyle = .default
         searchView.searchBarStyle = .minimal
-       // searchView.showsCancelButton = true
         return searchView
     }()
     

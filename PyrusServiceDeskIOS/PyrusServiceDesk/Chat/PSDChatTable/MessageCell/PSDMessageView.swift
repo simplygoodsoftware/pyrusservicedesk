@@ -83,6 +83,10 @@ class PSDMessageView: PSDView {
             print("")
         }
         messageTextView.attributedText = message.attributedText
+        messageTextView.linkTextAttributes = [
+            NSAttributedString.Key.underlineStyle: NSUnderlineStyle.single.rawValue,
+            NSAttributedString.Key.foregroundColor: message.message.isOutgoing ? UIColor.white : PyrusServiceDesk.mainController?.customization?.themeColor ?? .systemBlue
+        ]
         attachmentView?.removeFromSuperview()
         placeholderImageView.isHidden = message.message as? PSDPlaceholderMessage == nil
         placeholderBottomConstraint?.isActive = message.message as? PSDPlaceholderMessage != nil
@@ -154,7 +158,7 @@ class PSDMessageView: PSDView {
         text.contentInset = UIEdgeInsets.zero
         
         text.dataDetectorTypes = [.link,.phoneNumber]
-        text.linkTextAttributes = [ NSAttributedString.Key.underlineStyle: NSUnderlineStyle.single.rawValue]
+//        text.linkTextAttributes = [NSAttributedString.Key.underlineStyle: NSUnderlineStyle.single.rawValue]
         
         return text
     }()

@@ -177,7 +177,7 @@ class PSDChatTableView: PSDTableView {
             scrollToRow(at: IndexPath(row: 0, section: 0), at: .bottom, animated: animated)
         }
         
-        chatDelegate?.updateScrollButton(isHidden: true)
+        //chatDelegate?.updateScrollButton(isHidden: true)
     }
     
     func redrawCell(at indexPath: IndexPath, with message: PSDRowMessage) {
@@ -386,7 +386,15 @@ extension PSDChatTableView: UITableViewDelegate, UITableViewDataSource {
     }
     
     func scrollViewDidScroll(_ scrollView: UIScrollView) {
-        guard scrollView.isDragging else { return }
+      //  guard scrollView.isDragging else { return }
+        let contentOffsetY = scrollView.contentOffset.y
+        let inset = contentInset.top + contentInset.bottom - 40
+
+        let isAtBottom = contentOffsetY <= -inset
+        chatDelegate?.updateScrollButton(isHidden: isAtBottom)
+    }
+    
+    func scrollViewDidEndDecelerating(_ scrollView: UIScrollView) {
         let contentOffsetY = scrollView.contentOffset.y
         let inset = contentInset.top + contentInset.bottom - 40
 
@@ -461,7 +469,7 @@ extension PSDChatTableView: PSDSupportImageSetterDelegate {
     func reloadCells(with owner:PSDUser) {
         for cell in self.visibleCells{
             if let cell = cell as? PSDSupportMessageCell {
-                if cell.avatarView.owner == owner && cell.avatarView.owner != nil{
+                if cell.avatarView.owner == owner && cell.avatarView.owner != nil {
                     PSDSupportImageSetter.setImage(for: cell.avatarView.owner!, in: cell.avatarView, delagate: nil)
                 }
             }

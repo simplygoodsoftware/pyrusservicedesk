@@ -28,6 +28,7 @@ class PSDChatViewController: PSDViewController {
         button.backgroundColor = .scrollButtonColor
         button.layer.cornerRadius = 20
         button.translatesAutoresizingMaskIntoConstraints = false
+        button.transform = CGAffineTransform(scaleX: 0, y: 0)
         return button
     }()
     
@@ -124,25 +125,28 @@ class PSDChatViewController: PSDViewController {
     }
     
     @objc private func keyboardWillShow(_ notification: NSNotification) {
-        if let infoEndKey: NSValue = notification.userInfo?[UIResponder.keyboardFrameEndUserInfoKey] as? NSValue {
+        if let infoEndKey: NSValue = notification.userInfo?[UIResponder.keyboardFrameEndUserInfoKey] as? NSValue,
+           let center = (notification.userInfo?["UIKeyboardCenterBeginUserInfoKey"] as? NSValue)?.cgPointValue {
             let keyboardEndFrame = infoEndKey.cgRectValue
             let duration = keyboardAnimationDuration(notification)
             let keyboardHeight = keyboardEndFrame.height
-           // UIView.animate(withDuration: duration, delay: 0, animations: {
-                var oldInset = self.tableView.contentInset.top
-                if self.messageInputView.inputTextView.isFirstResponder || !self.isKeyBoardOpen {
-                    if self.messageInputView.inputTextView.isFirstResponder {
-                        self.bottomScrollButton?.constant -= keyboardHeight - oldInset
-                        self.view.layoutIfNeeded()
-                    }
-                    if keyboardHeight < 200 {
-                        oldInset = 0
-                    }
-                    self.tableView.contentOffset.y -= keyboardHeight - oldInset
+            // UIView.animate(withDuration: duration, delay: 0, animations: {
+            var oldInset = self.tableView.contentInset.top
+            if (self.messageInputView.inputTextView.isFirstResponder || !self.isKeyBoardOpen) && !(center.y > self.view.frame.maxY && self.isKeyBoardOpen) {
+                if self.messageInputView.inputTextView.isFirstResponder {
+                    self.bottomScrollButton?.constant -= keyboardHeight - oldInset
+                    self.view.layoutIfNeeded()
                 }
+                if keyboardHeight < 200 {
+                    //                        oldInset = 0
+                }
+                self.tableView.contentOffset.y -= keyboardHeight - oldInset
+            }
+            if !(center.y > self.view.frame.maxY && self.isKeyBoardOpen) {
                 self.tableView.contentInset.top = keyboardHeight
                 self.isKeyBoardOpen = self.messageInputView.inputTextView.isFirstResponder
-          //  })
+            }
+            //  })
         }
     }
     
@@ -151,7 +155,8 @@ class PSDChatViewController: PSDViewController {
             let keyboardEndFrame = infoEndKey.cgRectValue
             let duration = keyboardAnimationDuration(notification)
             let keyboardHeight = keyboardEndFrame.height
-            UIView.animate(withDuration: duration, delay: 0, animations: {
+            if isKeyBoardOpen {
+                //   UIView.animate(withDuration: duration, delay: 0, animations: {
                 self.bottomScrollButton?.constant = -120
                 self.view.layoutIfNeeded()
                 if !self.isActive {
@@ -159,7 +164,8 @@ class PSDChatViewController: PSDViewController {
                 } else {
                     self.tableView.contentInset.top = self.messageInputView.frame.size.height
                 }
-            })
+                // })
+            }
         }
     }
     
@@ -227,8 +233,8 @@ class PSDChatViewController: PSDViewController {
         super.viewDidAppear(animated)
         tableView.isVisible = true
         UIView.performWithoutAnimation {
-            self.becomeFirstResponder()
-            messageInputView.inputTextView.resignFirstResponder()
+//            self.becomeFirstResponder()
+//            messageInputView.inputTextView.resignFirstResponder()
         }
         interactor.doInteraction(.viewDidAppear)
     }
@@ -237,7 +243,7 @@ class PSDChatViewController: PSDViewController {
         super.viewWillDisappear(animated)
         NotificationCenter.default.removeObserver(self)
         EventsLogger.logEvent(.resignFirstResponder, additionalInfo: "hideAllKeyboard() called in viewWillDisappear")
-        hideAllKeyboard()
+//        hideAllKeyboard()
         self.tableView.removeListeners()
         interactor.doInteraction(.viewWillDisappear)
         
@@ -464,9 +470,9 @@ class PSDChatViewController: PSDViewController {
     //MARK: KeyBoard hiding and moving
     override var canBecomeFirstResponder: Bool {
         guard
-            self.tableView.window != nil,
-            !hasNoConnection(),
-            self.presentedViewController == nil,
+//            self.tableView.window != nil,
+//            !hasNoConnection(),
+//            self.presentedViewController == nil,
             isActive
         else {
             return false
@@ -493,7 +499,7 @@ private extension PSDChatViewController {
     
     func dataIsShown() {
         if firstLoad {
-            self.messageInputView.inputTextView.becomeFirstResponder()
+           // self.messageInputView.inputTextView.becomeFirstResponder()
             firstLoad = false
         }
     }
@@ -581,7 +587,8 @@ extension PSDChatViewController: PSDChatViewProtocol {
 
 extension PSDChatViewController: PSDMessageInputViewDelegate {
     func addButtonTapped() {
-        self.becomeFirstResponder()
+        
+        messageInputView.inputTextView.resignFirstResponder()
     }
     
     func send(_ message:String, _ attachments: [PSDAttachment]) {
@@ -605,10 +612,20 @@ extension PSDChatViewController: PSDUpdateInfo {
 
 extension PSDChatViewController: PSDChatTableViewDelegate {
     func updateScrollButton(isHidden: Bool) {
-        scrollButton.isHidden = isHidden
-        if isHidden {
+        if !isHidden && scrollButton.isHidden == true {
+            UIView.animate(withDuration: 0.2) {
+                self.scrollButton.isHidden = false
+                self.scrollButton.transform = CGAffineTransform(scaleX: 1, y: 1)
+            }
+        } else if isHidden && scrollButton.isHidden == false {
             badgeView.isHidden = true
+            UIView.animate(withDuration: 0.2) {
+                self.scrollButton.transform = CGAffineTransform(scaleX: 0, y: 0)
+            } completion: { _ in
+                self.scrollButton.isHidden = true
+            }
         }
+        
         interactor.doInteraction(.scrollButtonVisibleUpdated(isHidden: isHidden))
     }
     

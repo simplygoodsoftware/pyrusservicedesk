@@ -72,12 +72,30 @@ class PSDChatInfoTableViewCell: UITableViewCell {
     func configure(with model: ChatViewModel) {
         timeLabel.text = model.date
         messageLabel.text = model.subject
-        lastMessageInfo.attributedText = (model.lastMessageText as NSString).parseXMLToAttributedString(fontColor: .lastMessageInfo, font: .lastMessageInfo).0
+        lastMessageInfo.attributedText = removeLinkAttributes(from: (model.lastMessageText as NSString).parseXMLToAttributedString(fontColor: .lastMessageInfo, font: .lastMessageInfo).0)
         notificationButton.isHidden = model.isRead
         attachmentName.text = model.attachmentText
         attachmentIcon.isHidden = !model.hasAttachment
         attachmentName.isHidden = !model.hasAttachment
         messageStateView._messageState = model.state
+    }
+    
+    override func traitCollectionDidChange(_ previousTraitCollection: UITraitCollection?) {
+        attachmentIcon.image = UIImage.PSDImage(name: "paperclip")?.imageWith(color: .lastMessageInfo)
+    }
+    
+    func removeLinkAttributes(from attributedString: NSAttributedString?) -> NSAttributedString? {
+        guard let attributedString else { return nil }
+        let mutableAttributedString = NSMutableAttributedString(attributedString: attributedString)
+        let range = NSRange(location: 0, length: mutableAttributedString.length)
+        
+        mutableAttributedString.enumerateAttribute(.link, in: range, options: []) { value, range, _ in
+            if value != nil {
+                mutableAttributedString.removeAttribute(.link, range: range)
+            }
+        }
+        
+        return mutableAttributedString
     }
     
     override init(style: UITableViewCell.CellStyle, reuseIdentifier: String?) {

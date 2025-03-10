@@ -21,7 +21,9 @@ class AttachmentsAddButton: UIButton {
     @objc func buttonPressed()
     {
         delegate?.addButtonPressed()
-      //  DispatchQueue.main.asyncAfter(deadline: .now() + .milliseconds(500)) {
+        DispatchQueue.main.asyncAfter(deadline: .now() + .milliseconds(500)) {
+      //  DispatchQueue.main.async {
+
             AttachmentHandler.shared.showAttachmentActionSheet(self.findViewController()!, sourseView:self)
             AttachmentHandler.shared.attachmentPickedBlock = { (data,url) in
                 DispatchQueue.main.async {
@@ -29,7 +31,7 @@ class AttachmentsAddButton: UIButton {
                 }
                 
             }
-      //  }
+        }
     }
     required init?(coder aDecoder: NSCoder) {
         super.init(coder: aDecoder)
