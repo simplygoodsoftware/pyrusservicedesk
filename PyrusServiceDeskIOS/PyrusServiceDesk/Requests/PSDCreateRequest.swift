@@ -44,9 +44,9 @@ extension URLRequest {
         request.addCustomHeaders()
         return request
     }
-    private static func addStaticKeys(to JSON:[String: Any]) -> [String: Any]
-    {
+    private static func addStaticKeys(to JSON:[String: Any]) -> [String: Any] {
         var fullJSOn = JSON
+        fullJSOn["locale"] = Locale.current.languageCode ?? "en"
         guard !PyrusServiceDesk.multichats else {
             fullJSOn["instance_id"] = PyrusServiceDesk.userId
             fullJSOn["version"] = 2
@@ -67,6 +67,7 @@ extension URLRequest {
         if((PyrusServiceDesk.clientId) == nil){
             fatalError("no client Id")
         }
+        
         return fullJSOn
     }
     

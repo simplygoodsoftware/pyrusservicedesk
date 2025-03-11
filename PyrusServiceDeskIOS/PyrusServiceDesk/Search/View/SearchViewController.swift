@@ -53,7 +53,7 @@ class SearchViewController: UIViewController {
    lazy var searchBar: UISearchBar = {
         let searchView = UISearchBar()
         searchView.placeholder = "PSDSearch".localizedPSD()
-        searchView.backgroundColor = .navBarColor
+       searchView.backgroundColor = .clear
         searchView.backgroundImage = nil
         searchView.translatesAutoresizingMaskIntoConstraints = false
         searchView.barStyle = .default
