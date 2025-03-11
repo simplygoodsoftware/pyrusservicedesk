@@ -150,22 +150,28 @@ class PSDChatViewController: PSDViewController {
         }
     }
     
+    private var oldHeight: CGFloat = 0
+    private var isAddButtonTapped: Bool = false
     @objc private func keyboardWillHide(_ notification: NSNotification) {
         if let infoEndKey: NSValue = notification.userInfo?[UIResponder.keyboardFrameEndUserInfoKey] as? NSValue {
             let keyboardEndFrame = infoEndKey.cgRectValue
             let duration = keyboardAnimationDuration(notification)
             let keyboardHeight = keyboardEndFrame.height
-            if isKeyBoardOpen {
-                //   UIView.animate(withDuration: duration, delay: 0, animations: {
+         //   if isKeyBoardOpen {
+                   UIView.animate(withDuration: duration, delay: 0, animations: {
                 self.bottomScrollButton?.constant = -120
                 self.view.layoutIfNeeded()
                 if !self.isActive {
                     self.tableView.contentInset.top = 90
-                } else {
+                } else
+                       if !((self.oldHeight - self.messageInputView.frame.size.height).rounded() == self.view.safeAreaInsets.bottom)
+                       {
+                    self.isAddButtonTapped = false
                     self.tableView.contentInset.top = self.messageInputView.frame.size.height
                 }
-                // })
-            }
+                 })
+         //   }
+            oldHeight = self.messageInputView.frame.size.height
         }
     }
     
@@ -494,6 +500,10 @@ class PSDChatViewController: PSDViewController {
 
 private extension PSDChatViewController {
     func needShowRate(_ showRate: Bool) {
+        if showRate && messageInputView.showRate != showRate {
+            tableView.contentInset.top += PSDMessageInputView.RATE_HEIGHT
+            tableView.contentOffset.y -= PSDMessageInputView.RATE_HEIGHT
+        }
         messageInputView.showRate = showRate
     }
     
@@ -586,8 +596,13 @@ extension PSDChatViewController: PSDChatViewProtocol {
 }
 
 extension PSDChatViewController: PSDMessageInputViewDelegate {
+    func addAttachment() {
+        tableView.contentInset.top += PSDMessageInputView.attachmentsHeight
+        tableView.contentOffset.y -= PSDMessageInputView.attachmentsHeight
+    }
+    
     func addButtonTapped() {
-        
+        isAddButtonTapped = true
         messageInputView.inputTextView.resignFirstResponder()
     }
     
@@ -611,6 +626,22 @@ extension PSDChatViewController: PSDUpdateInfo {
 }
 
 extension PSDChatViewController: PSDChatTableViewDelegate {
+    func updateScrollButton(isAtBottom: Bool, isDragging: Bool) {
+        if !isAtBottom && scrollButton.isHidden == true && isDragging {
+            UIView.animate(withDuration: 0.2) {
+                self.scrollButton.isHidden = false
+                self.scrollButton.transform = CGAffineTransform(scaleX: 1, y: 1)
+            }
+        } else if isAtBottom && scrollButton.isHidden == false {
+            badgeView.isHidden = true
+            UIView.animate(withDuration: 0.2) {
+                self.scrollButton.transform = CGAffineTransform(scaleX: 0, y: 0)
+            } completion: { _ in
+                self.scrollButton.isHidden = true
+            }
+        }
+    }
+    
     func updateScrollButton(isHidden: Bool) {
         if !isHidden && scrollButton.isHidden == true {
             UIView.animate(withDuration: 0.2) {

@@ -7,7 +7,7 @@ protocol PSDChatTableViewDelegate: NSObjectProtocol {
     func refresh()
     func reloadChat()
     func updateNoConnectionVisible(visible: Bool)
-    func updateScrollButton(isHidden: Bool)
+    func updateScrollButton(isAtBottom: Bool, isDragging: Bool)
 }
 
 class PSDChatTableView: PSDTableView {
@@ -391,7 +391,7 @@ extension PSDChatTableView: UITableViewDelegate, UITableViewDataSource {
         let inset = contentInset.top + contentInset.bottom - 40
 
         let isAtBottom = contentOffsetY <= -inset
-        chatDelegate?.updateScrollButton(isHidden: isAtBottom)
+        chatDelegate?.updateScrollButton(isAtBottom: isAtBottom, isDragging: scrollView.isDragging)
     }
     
     func scrollViewDidEndDecelerating(_ scrollView: UIScrollView) {
@@ -399,7 +399,7 @@ extension PSDChatTableView: UITableViewDelegate, UITableViewDataSource {
         let inset = contentInset.top + contentInset.bottom - 40
 
         let isAtBottom = contentOffsetY <= -inset
-        chatDelegate?.updateScrollButton(isHidden: isAtBottom)
+        chatDelegate?.updateScrollButton(isAtBottom: isAtBottom, isDragging: true)
     }
     
     func tableView(_ tableView: UITableView, canPerformAction action: Selector, forRowAt indexPath: IndexPath, withSender sender: Any?) -> Bool {

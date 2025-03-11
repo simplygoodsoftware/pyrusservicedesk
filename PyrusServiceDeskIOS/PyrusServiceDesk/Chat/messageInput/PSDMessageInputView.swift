@@ -5,11 +5,12 @@ protocol PSDMessageInputViewDelegate: class {
     func send(_ message:String,_ attachments:[PSDAttachment])
     func sendRate(_ rateValue:Int)
     func addButtonTapped()
+    func addAttachment()
 }
 let DEFAULT_LAYOUT_MARGINS : CGFloat = 8
 let BUTTONS_CORNER_RADIUS : CGFloat = 8
 class PSDMessageInputView: UIView, PSDMessageTextViewDelegate,PSDMessageSendButtonDelegate {
-    private let RATE_HEIGHT : CGFloat = 64
+    static let RATE_HEIGHT : CGFloat = 64
     private static let heightForAttach : CGFloat = 30
     private static let interItemSpaceForAttach : CGFloat = 0.1
     weak var delegate: PSDMessageInputViewDelegate?
@@ -33,14 +34,14 @@ class PSDMessageInputView: UIView, PSDMessageTextViewDelegate,PSDMessageSendButt
     let distTextToSend : CGFloat = 6
     let distToAdd : CGFloat = 21
     let distToSend : CGFloat = 15
-    private static let attachmentsHeight : CGFloat = 80
+    static let attachmentsHeight : CGFloat = 80
     var showRate = false {
         didSet {
             guard oldValue != showRate 
             else {
                 return
             }
-            rateHeightConstraint?.constant = showRate ? RATE_HEIGHT : 0
+            rateHeightConstraint?.constant = showRate ? PSDMessageInputView.RATE_HEIGHT : 0
             rateView.isHidden = !showRate
         }
     }
@@ -204,7 +205,7 @@ class PSDMessageInputView: UIView, PSDMessageTextViewDelegate,PSDMessageSendButt
         
         rateView.translatesAutoresizingMaskIntoConstraints = false
         rateView.addZeroConstraint([.left,.right, .top])
-        rateHeightConstraint = rateView.heightAnchor.constraint(equalToConstant: showRate ? RATE_HEIGHT : 0)
+        rateHeightConstraint = rateView.heightAnchor.constraint(equalToConstant: showRate ? PSDMessageInputView.RATE_HEIGHT : 0)
         rateHeightConstraint?.isActive = true
         
         attachmentsCollection.translatesAutoresizingMaskIntoConstraints = false
@@ -338,6 +339,9 @@ extension PSDMessageInputView: AttachmentsAddButtonDelegate{
     {
         let attachment = PSDObjectsCreator.createAttachment(data,url)
         addAttachment(attachment)
+        if attachmentsPresenter.attachmentsNumber() == 1 {
+            delegate?.addAttachment()
+        }
     }
 }
 extension PSDMessageInputView: PSDRateViewDelegate {
