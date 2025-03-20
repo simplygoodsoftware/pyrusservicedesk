@@ -151,7 +151,7 @@ class PSDChatsViewController: UIViewController {
         startGettingInfo()
         interactor.doInteraction(.viewDidload)
         view.backgroundColor = .psdBackgroundColor
-        tabBarController?.delegate = self
+     //   tabBarController?.delegate = self
     }
     
     override func viewDidAppear(_ animated: Bool) {
@@ -663,7 +663,7 @@ extension PSDChatsViewController: UINavigationControllerDelegate {
 
 extension PSDChatsViewController: UITabBarControllerDelegate {
     func tabBarController(_ tabBarController: UITabBarController, didSelect viewController: UIViewController) {
-        if tabBarController.selectedIndex == 1 && self.chats[0].count > 0 || self.chats[1].count > 0 {
+        if tabBarController.selectedIndex == 1 && (self.chats[0].count > 0 || self.chats[1].count > 0) {
             tableView.scrollToRow(at: IndexPath(row: 0, section: 0), at: .top, animated: true)
         }
     }
