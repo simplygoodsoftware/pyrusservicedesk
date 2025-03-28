@@ -108,7 +108,7 @@ private extension ChatsPresenter {
     
     func getAttachmentString(attachment: PSDAttachment?) -> String? {
         guard let attachment else { return nil }
-        return attachment.isImage ? "Фото" : attachment.isVideo ? "Видео" : "Документ"
+        return attachment.isImage ? "Photo".localizedPSD() : attachment.isVideo ? "Video".localizedPSD() : "File".localizedPSD()
     }
     
     @available(iOS 13.0, *)

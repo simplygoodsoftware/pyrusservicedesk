@@ -51,6 +51,15 @@ extension PSDChatPresenter: PSDChatPresenterProtocol {
             view?.show(.scrollToRow(indexPath: indexPath))
         case .updateActive(isActive: let isActive):
             view?.show(.updateActive(isActive: isActive))
+        case .updateInfo(ticketId: let ticketId, userName: let userName, createdAt: let createdAt):
+            let dateFormatter = DateFormatter()
+            dateFormatter.dateFormat = "dd.MM.yyyy"
+            let createdAt = dateFormatter.string(from: createdAt)
+            view?.show(.updateInfo(
+                ticketId: "TicketNumber".localizedPSD() + ": \(ticketId)",
+                userName: userName,
+                createdAt: "CreatedAt".localizedPSD() + ": \(createdAt)"
+            ))
         }
     }
 }

@@ -21,6 +21,7 @@ class PSDChatViewController: PSDViewController {
         fatalError("init(coder:) has not been implemented")
     }
     
+    private lazy var popoverContentController: PopoverContentController = PopoverContentController(ticketId: "", userName: "", createdAt: "")
     private var bottomTableView: NSLayoutConstraint?
     private var bottomScrollButton: NSLayoutConstraint?
     private lazy var scrollButton: UIButton = {
@@ -67,6 +68,22 @@ class PSDChatViewController: PSDViewController {
     
     private lazy var closedTicketView: UIView = {
         let view = UIView()
+        view.translatesAutoresizingMaskIntoConstraints = false
+        return view
+    }()
+    
+    private lazy var infoButton: UIBarButtonItem? = {
+        if #available(iOS 14.0, *) {
+            let button = UIBarButtonItem(image: UIImage(systemName: "info.circle"), style: .plain, target: self, action: #selector(showPopover))
+            button.tintColor = PyrusServiceDesk.mainController?.customization?.themeColor ?? .systemBlue
+            return button
+        } else {
+            return nil
+        }
+    }()
+    
+    private lazy var chatInfoView: ChatInfoView = {
+        let view = ChatInfoView(frame: .zero)
         view.translatesAutoresizingMaskIntoConstraints = false
         return view
     }()
@@ -124,6 +141,7 @@ class PSDChatViewController: PSDViewController {
         isKeyBoardOpen = false
     }
     
+    private var isFirstKeyboardShow: Bool = true
     @objc private func keyboardWillShow(_ notification: NSNotification) {
         if let infoEndKey: NSValue = notification.userInfo?[UIResponder.keyboardFrameEndUserInfoKey] as? NSValue,
            let center = (notification.userInfo?["UIKeyboardCenterBeginUserInfoKey"] as? NSValue)?.cgPointValue {
@@ -140,7 +158,16 @@ class PSDChatViewController: PSDViewController {
                 if keyboardHeight < 200 {
                     //                        oldInset = 0
                 }
-                self.tableView.contentOffset.y -= keyboardHeight - oldInset
+                
+                if isFirstKeyboardShow {
+                    UIView.performWithoutAnimation {
+                        self.tableView.contentOffset.y -= keyboardHeight - oldInset
+                    }
+                    isFirstKeyboardShow = false
+                } else {
+                    self.tableView.contentOffset.y -= keyboardHeight - oldInset
+                }
+                
             }
             if !(center.y > self.view.frame.maxY && self.isKeyBoardOpen) {
                 self.tableView.contentInset.top = keyboardHeight
@@ -285,6 +312,16 @@ class PSDChatViewController: PSDViewController {
         tableView.reloadChat()
     }
     
+    func setupChatInfoView() {
+        view.addSubview(chatInfoView)
+        NSLayoutConstraint.activate([
+            chatInfoView.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor),
+            chatInfoView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
+            chatInfoView.trailingAnchor.constraint(equalTo: view.trailingAnchor),
+            chatInfoView.heightAnchor.constraint(equalToConstant: 200)
+        ])
+    }
+    
     ///hide keyboard with inputAccessoryView
     func hideAllKeyboard(){
         if self.messageInputView.inputTextView.isFirstResponder {
@@ -311,6 +348,8 @@ class PSDChatViewController: PSDViewController {
         customiseDesign(color: PyrusServiceDesk.mainController?.customization?.barButtonTintColor ?? UIColor.darkAppColor)
         setupScrollButton()
         setupClosedTicketView()
+        setupChatInfoView()
+      //  setupInfoTableView()
     }
     
     func setupTableView() {
@@ -413,7 +452,6 @@ class PSDChatViewController: PSDViewController {
     private func designNavigation() {
         if #available(iOS 11.0, *) {
             navigationItem.largeTitleDisplayMode = .never
-            
         }
         navigationController?.navigationBar.isTranslucent = true
         
@@ -428,6 +466,27 @@ class PSDChatViewController: PSDViewController {
             navigationItem.standardAppearance = bigAppear
         }
         self.setItems()
+    }
+    
+    @objc func showPopover(_ sender: UIBarButtonItem) {
+        messageInputView.inputTextView.resignFirstResponder()
+        if let sheet = popoverContentController.sheetPresentationController {
+            let smallId = UISheetPresentationController.Detent.Identifier("small")
+            if #available(iOS 16.0, *) {
+                let smallDetent = UISheetPresentationController.Detent.custom(identifier: smallId) { context in
+                    return context.maximumDetentValue * 0.24
+                }
+                sheet.detents = [smallDetent]
+            } else {
+                sheet.detents = [.medium()]
+            }
+            
+            sheet.prefersGrabberVisible = true
+            sheet.preferredCornerRadius = 20
+            sheet.prefersEdgeAttachedInCompactHeight = true
+        }
+        
+        present(popoverContentController, animated: true, completion: nil)
     }
     
     ///Set navigation items
@@ -591,6 +650,10 @@ extension PSDChatViewController: PSDChatViewProtocol {
                 self.resignFirstResponder()
                 self.messageInputView.inputTextView.resignFirstResponder()
             }
+        case .updateInfo(ticketId: let ticketId, userName: let userName, createdAt: let createdAt):
+            popoverContentController = PopoverContentController(ticketId: ticketId, userName: userName, createdAt: createdAt)
+        //    chatInfoView.updateItems(items: [ticketId, userName, createdAt])
+            navigationItem.rightBarButtonItem = infoButton//UIBarButtonItem(image: UIImage(systemName: "info.circle")?.imageWith(color: PyrusServiceDesk.mainController?.customization?.themeColor ?? .systemBlue), style: .plain, target: self, action: #selector(showPopover))//infoButton
         }
     }
 }
@@ -690,6 +753,13 @@ extension PSDChatViewController: UIAdaptivePresentationControllerDelegate {
         super.present(viewControllerToPresent, animated: flag, completion: completion)
     }
 }
+
+extension PSDChatViewController: UIPopoverPresentationControllerDelegate {
+    func adaptivePresentationStyle(for controller: UIPresentationController) -> UIModalPresentationStyle {
+        return .none
+    }
+}
+
 private extension UIFont {
     static let backButton = CustomizationHelper.systemFont(ofSize: 18)
 }

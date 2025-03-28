@@ -27,17 +27,53 @@ private extension SearchPresenter {
         var searchChats = [SearchChatViewModel]()
         
         for chat in chats {
-            let subject = chat.subject
             
-            let message = chat.messageText.count > 50 ? shortenString(around: searchString, in:  chat.messageText) : chat.messageText
+            let authorName = NSAttributedString(
+                string: "\(chat.authorName): ",
+                attributes: [.font: UIFont.lastMessageInfo, .foregroundColor: UIColor.lastMessageInfo]
+            )
+            let messageText: NSAttributedString
+            if chat.isMessage {
+                let message = chat.messageText.count > 50 ? shortenString(around: searchString, in:  chat.messageText) : chat.messageText
+                messageText = highlightText(in: message, substring: searchString, highlightColor: .secondColor ?? .white, font: .lastMessageInfo, fontColor: .lastMessageInfo)
+            } else {
+                if chat.messageText.count > 0 {
+                    messageText = NSAttributedString(
+                        string: chat.messageText,
+                        attributes: [.font: UIFont.lastMessageInfo, .foregroundColor: UIColor.lastMessageInfo]
+                    )
+                } else {
+                    messageText = NSAttributedString(string: "")
+                }
+            }
             
-            let model = SearchChatViewModel(
+            let fullMessageText = NSMutableAttributedString()
+            fullMessageText.append(authorName)
+            fullMessageText.append(messageText)
+            
+            let subject: NSAttributedString
+            if chat.isMessage {
+                subject = NSAttributedString(
+                    string: chat.subject.count > 0 ? chat.subject : "NewTicket".localizedPSD(),
+                    attributes: [.font: UIFont.messageLabel, .foregroundColor: UIColor.label]
+                )
+            } else {
+                subject = highlightText(in: chat.subject, substring: searchString, highlightColor: .secondColor ?? .white, font: .messageLabel, fontColor: .label)
+            }
+            
+            var model = SearchChatViewModel(
                 id: chat.id,
                 date: chat.date.messageTime(),
-                subject: subject.count > 0 ? subject : "NewTicket".localizedPSD(),
-                messageText: highlightText(in: message, substring: searchString, with: .secondColor ?? .white),
-                messageId: chat.messageId
+                subject: subject,
+                messageText: fullMessageText,
+                messageId: chat.messageId,
+                isMessage: chat.isMessage
             )
+            
+            if messageText.string.count == 0, let attachment = chat.lastMessage?.attachments?.last {
+                model.hasAttachments = true
+                model.attachmentName = attachment.isImage ? "Photo".localizedPSD() : attachment.isVideo ? "Video".localizedPSD() : "File".localizedPSD()
+            }
             
             searchChats.append(model)
         }
@@ -45,13 +81,13 @@ private extension SearchPresenter {
         return [searchChats]
     }
     
-    func highlightText(in text: String, substring: String, with color: UIColor) -> NSAttributedString {
-        let attributedString = NSMutableAttributedString(attributedString: (text as NSString).parseXMLToAttributedString(fontColor: .lastMessageInfo, font: .lastMessageInfo).0 ?? NSAttributedString(string: ""))
+    func highlightText(in text: String, substring: String, highlightColor: UIColor, font: UIFont, fontColor: UIColor) -> NSAttributedString {
+        let attributedString = NSMutableAttributedString(attributedString: (text as NSString).parseXMLToAttributedString(fontColor: fontColor, font: font).0 ?? NSAttributedString(string: ""))
         
         let range = (attributedString.string as NSString).range(of: substring, options: .caseInsensitive)
         
         if range.location != NSNotFound {
-            attributedString.addAttribute(.backgroundColor, value: color, range: range)
+            attributedString.addAttribute(.backgroundColor, value: highlightColor, range: range)
             attributedString.addAttribute(.foregroundColor, value: UIColor.label, range: range)
         }
         
@@ -93,4 +129,5 @@ private extension UIColor {
 
 private extension UIFont {
     static let lastMessageInfo = CustomizationHelper.systemFont(ofSize: 15.0)
+    static let messageLabel = CustomizationHelper.systemBoldFont(ofSize: 17)
 }

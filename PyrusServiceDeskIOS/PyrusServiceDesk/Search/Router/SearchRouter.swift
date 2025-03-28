@@ -24,6 +24,7 @@ private extension SearchRouter {
         let pyrusChat = PSDChatViewController(interactor: interactor, router: router)
         presenter.view = pyrusChat
         router.controller = pyrusChat
+        controller?.tabBarController?.tabBar.isHidden = true
         controller?.navigationController?.pushViewController(pyrusChat, animated: true)
     }
 }

@@ -78,16 +78,41 @@ extension PSDChatsDataService: PSDChatsDataServiceProtocol {
     
     func searchMessages(searchString: String) -> [SearchChatModel] {
         do {
+            let dbChats = try coreDataService.fetchChats(searchString: searchString)
             let dbMessages = try coreDataService.fetchMessages(searchString: searchString)
             var chatModels = [SearchChatModel]()
+            
+            for dbChat in dbChats {
+                let chat = PyrusServiceDesk.chats.first { $0.chatId == Int(dbChat.chatId) }
+                let authorName = chat?.messages.last?.owner.authorId == PyrusServiceDesk.authorId
+                    ? "Вы"
+                    :  chat?.messages.last?.owner.name ?? ""
+                var model = SearchChatModel(
+                    id: chat?.chatId ?? 0,
+                    date: chat?.lastComment?.date ?? Date(),
+                    subject: chat?.subject ?? "",
+                    messageText: chat?.lastComment?.text ?? "",
+                    messageId: chat?.lastComment?.messageId ?? "",
+                    authorName: authorName,
+                    isMessage: false
+                )
+                model.lastMessage = chat?.messages.last
+                chatModels.append(model)
+            }
+            
             for dbMessage in dbMessages {
                 if let dbChat = dbMessage.chat {
+                    let authorName = dbMessage.authorId == PyrusServiceDesk.authorId
+                        ? "Вы"
+                        : dbMessage.authorName ?? ""
                     let model = SearchChatModel(
                         id: Int(dbChat.chatId),
                         date: dbMessage.date ?? Date(),
                         subject: dbChat.subject ?? "",
                         messageText: dbMessage.text ?? "",
-                        messageId: dbMessage.messageId ?? ""
+                        messageId: dbMessage.messageId ?? "",
+                        authorName: authorName,
+                        isMessage: true
                     )
                     chatModels.append(model)
                 }
@@ -114,7 +139,6 @@ extension PSDChatsDataService: PSDChatsDataServiceProtocol {
     }
     
     func saveChatModel(with chatModels: [PSDChat], context: NSManagedObjectContext) {
-       // coreDataService.save { context in
         for chatModel in chatModels {
             let fetchRequest = DBChat.fetchRequest()
             fetchRequest.predicate = NSPredicate(format: "chatId == %lld", Int64(chatModel.chatId ?? 0))

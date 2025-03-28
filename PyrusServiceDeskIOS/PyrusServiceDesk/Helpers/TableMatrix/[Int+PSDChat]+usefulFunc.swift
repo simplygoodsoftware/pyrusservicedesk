@@ -1,8 +1,8 @@
 import Foundation
 extension Array where Element == [PSDRowMessage] {
     ///Create new matrix with no elements or with welcome message if it was setted.
-    mutating func defaultMatrix() {
-        if CustomizationHelper.welcomeMessage.count > 0 {
+    mutating func defaultMatrix(createWelcome: Bool) {
+        if createWelcome && CustomizationHelper.welcomeMessage.count > 0 {
             self = [[PSDObjectsCreator.createWelcomeMessage()]]
         } else {
             self = [[PSDRowMessage]()]
@@ -95,7 +95,7 @@ extension Array where Element == [PSDRowMessage] {
         let unsentMessages: [[PSDRowMessage]] = self
         var section: Int = 0
         var previousMessage: PSDMessage? = nil
-        self.defaultMatrix()
+        self.defaultMatrix(createWelcome: !(chat.messages.count > 0 && chat.messages[0].owner.authorId?.count ?? 0 == 0))
         
         if !self.isEmpty && self[0].count > 0 && chat.messages.count > 0 {
             //change date of welcome message. Make it same as first message in chat

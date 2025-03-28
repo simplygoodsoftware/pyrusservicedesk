@@ -190,6 +190,7 @@ private extension PSDChatInteractor {
             guard let self else { return }
             let chat = PyrusServiceDesk.chats.first(where: { $0.chatId == self.chat?.chatId })
             if let chat {
+                updateChatInfo()
                 if chat.messages.count > self.chat?.messages.count ?? 0,
                    chat.messages.last?.owner.authorId != PyrusServiceDesk.authorId,
                    isOpen {
@@ -202,25 +203,26 @@ private extension PSDChatInteractor {
                     self.chat = chat
                 }
             }
+            
+            if PyrusServiceDesk.multichats {
+                let customization = PyrusServiceDesk.mainController?.customization
+                let label = UILabel()
+                label.isUserInteractionEnabled = true
+                label.textAlignment = .center
+                label.font = CustomizationHelper.systemBoldFont(ofSize: 17)
+                label.text = chat?.subject?.count ?? 0 > 0 ? chat?.subject : "NewTicket".localizedPSD()
+                label.translatesAutoresizingMaskIntoConstraints = false
+                label.widthAnchor.constraint(equalToConstant: 200).isActive = true
+                
+                customization?.setChatTitileView(label)
+                presenter.doWork(.reloadTitle)
+                presenter.doWork(.updateTitle(connectionError: !PyrusServiceDesk.syncManager.networkAvailability))
+            }
+            
             if firstLoad && !PyrusServiceDesk.multichats || fromPush {
                 isRefresh = true
                 
                 self.updateChat(chat: chat)
-                if fromPush {
-                    if PyrusServiceDesk.multichats {
-                        let customization = PyrusServiceDesk.mainController?.customization
-                        let label = UILabel()
-                        label.isUserInteractionEnabled = true
-                        label.textAlignment = .center
-                        label.font = CustomizationHelper.systemBoldFont(ofSize: 17)
-                        label.text = chat?.subject?.count ?? 0 > 0 ? chat?.subject : ""
-                        label.translatesAutoresizingMaskIntoConstraints = false
-                        label.widthAnchor.constraint(equalToConstant: 200).isActive = true
-                        
-                        customization?.setChatTitileView(label)
-                        presenter.doWork(.reloadTitle)
-                    }
-                }
                 readChat()
                 self.isRefresh = false
                 fromPush = false
@@ -291,6 +293,17 @@ private extension PSDChatInteractor {
         beginTimer()        
     }
     
+    func updateChatInfo() {
+        guard let chat, let ticketId = chat.chatId, ticketId != 0 else { return }
+        let userName: String
+        if PyrusServiceDesk.customUserId == chat.userId {
+            userName = PyrusServiceDesk.userName ?? ""
+        } else {
+            userName = PyrusServiceDesk.additionalUsers.first(where: { $0.userId == chat.userId })?.userName ?? ""
+        }
+        presenter.doWork(.updateInfo(ticketId: ticketId, userName: userName, createdAt: chat.messages.first?.date ?? Date()))
+    }
+    
     func updateChat(chat: PSDChat?) {
         if chat != nil {
             UnreadMessageManager.removeLastComment()
@@ -302,6 +315,9 @@ private extension PSDChatInteractor {
             drawTableWithData()
             if loadingTimer?.isValid ?? false {
                 drawTableWithData()
+            }
+            DispatchQueue.main.async { [weak self] in
+                self?.updateChatInfo()
             }
         } else {
             presenter.doWork(.endLoading)

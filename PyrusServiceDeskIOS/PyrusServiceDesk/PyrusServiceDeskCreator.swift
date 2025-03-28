@@ -64,20 +64,21 @@ import UIKit
     static let syncManager = SyncManager()
     
     public static func addUser(appId: String, clientName: String, userId: String, userName: String, secretKey: String? = nil) {
-        let user = PSDUserInfo(appId: appId, clientName: clientName, userId: userId, userName: userName, secretKey: secretKey)
-        currentUserId = user.userId
-        currentClientId = user.clientId
-        if !additionalUsers.contains(user) && user.userId != customUserId {
-            additionalUsers.append(user)
-            NotificationCenter.default.post(name: newUserNotification, object: nil)
-        } else if user.userId == customUserId {
-            self.userName = user.userName
-            NotificationCenter.default.post(name: usersUpdateNotification, object: nil)
-        } else {
-            additionalUsers.first(where: { $0 == user })?.userName = user.userName
-            NotificationCenter.default.post(name: usersUpdateNotification, object: nil)
-        }
         DispatchQueue.main.async {
+            let user = PSDUserInfo(appId: appId, clientName: clientName, userId: userId, userName: userName, secretKey: secretKey)
+            currentUserId = user.userId
+            currentClientId = user.clientId
+            if !additionalUsers.contains(user) && user.userId != customUserId {
+                additionalUsers.append(user)
+                NotificationCenter.default.post(name: newUserNotification, object: nil)
+            } else if user.userId == customUserId {
+                self.userName = user.userName
+                NotificationCenter.default.post(name: usersUpdateNotification, object: nil)
+            } else {
+                additionalUsers.first(where: { $0 == user })?.userName = user.userName
+                NotificationCenter.default.post(name: usersUpdateNotification, object: nil)
+            }
+            
             syncManager.syncGetTickets(isFilter: true)
         }
     }

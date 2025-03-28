@@ -23,6 +23,7 @@ enum PSDChatPresenterCommand {
     case updateBadge(messagesCount: Int)
     case scrollToRow(indexPath: IndexPath)
     case updateActive(isActive: Bool)
+    case updateInfo(ticketId: Int, userName: String, createdAt: Date)
 }
 
 

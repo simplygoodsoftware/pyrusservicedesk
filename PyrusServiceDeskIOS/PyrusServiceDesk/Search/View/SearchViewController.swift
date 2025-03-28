@@ -83,6 +83,11 @@ class SearchViewController: UIViewController {
         if view.alpha > 0 {
             interactor.doInteraction(.viewWillAppear)
         }
+        tabBarController?.tabBar.isHidden = false
+    }
+    
+    override func viewWillDisappear(_ animated: Bool) {
+        super.viewWillDisappear(animated)
     }
 }
 

@@ -30,18 +30,38 @@ class SearchChatCell: UITableViewCell {
         label.font = .lastMessageInfo
         label.numberOfLines = lastMessageLines
         label.lineBreakMode = .byTruncatingTail
-        label.text = ""//"Last_Message".localizedPSD()
+        label.text = ""
         return label;
     }()
     
-    private static let x : CGFloat = 16.0
+    private lazy var attachmentIcon: UIImageView = {
+        let image = UIImage.PSDImage(name: "paperclip")
+        let imageView = UIImageView(image: image?.imageWith(color: .lastMessageInfo))
+        imageView.isHidden = true
+        return imageView
+    }()
+    
+    private lazy var attachmentName: UILabel = {
+        let label = UILabel()
+        label.textColor = .lastMessageInfo
+        label.font = .lastMessageInfo
+        label.isHidden = true
+        return label
+    }()
+    
+    private static let x: CGFloat = 16.0
     private static let notificationSize : CGFloat = 20.0
     private static let trailing : CGFloat = 16.0
     
     func configure(with model: SearchChatViewModel) {
         timeLabel.text = model.date
-        messageLabel.text = model.subject
-        lastMessageInfo.attributedText = model.messageText
+        messageLabel.attributedText = model.subject.removeLinkAttributes()
+        lastMessageInfo.attributedText = model.messageText.removeLinkAttributes()
+        if model.hasAttachments {
+            attachmentIcon.isHidden = false
+            attachmentName.isHidden = false
+            attachmentName.text = model.attachmentName
+        }
     }
     
     override init(style: UITableViewCell.CellStyle, reuseIdentifier: String?) {
@@ -54,6 +74,10 @@ class SearchChatCell: UITableViewCell {
         contentView.addSubview(lastMessageInfo)
         
         addConstraints()
+    }
+    
+    override func traitCollectionDidChange(_ previousTraitCollection: UITraitCollection?) {
+        attachmentIcon.image = UIImage.PSDImage(name: "paperclip")?.imageWith(color: .lastMessageInfo)
     }
     
     private lazy var selectedBackground : UIView = {
@@ -83,10 +107,30 @@ class SearchChatCell: UITableViewCell {
         
         lastMessageInfo.setContentCompressionResistancePriority(.defaultLow, for: .horizontal)
         timeLabel.setContentCompressionResistancePriority(.defaultHigh, for: .horizontal)
+        
+        setupAttachment()
+    }
+    
+    private func setupAttachment() {
+        contentView.addSubview(attachmentIcon)
+        contentView.addSubview(attachmentName)
+        attachmentIcon.translatesAutoresizingMaskIntoConstraints = false
+        attachmentName.translatesAutoresizingMaskIntoConstraints = false
+        
+        NSLayoutConstraint.activate([
+            attachmentIcon.heightAnchor.constraint(equalToConstant: 20),
+            attachmentIcon.widthAnchor.constraint(equalToConstant: 20),
+            attachmentIcon.leadingAnchor.constraint(equalTo: lastMessageInfo.trailingAnchor, constant: 0),
+            attachmentIcon.centerYAnchor.constraint(equalTo: lastMessageInfo.centerYAnchor),
+            
+            attachmentName.centerYAnchor.constraint(equalTo: lastMessageInfo.centerYAnchor),
+            attachmentName.leadingAnchor.constraint(equalTo: attachmentIcon.trailingAnchor, constant: 0)
+        ])
     }
     
     override func prepareForReuse() {
-        
+        attachmentIcon.isHidden = true
+        attachmentName.isHidden = true
     }
     
     required init?(coder aDecoder: NSCoder) {
@@ -112,5 +156,20 @@ private extension UIColor {
         default:
             return UIColor(hex: "#60666C") ?? .systemGray
         }
+    }
+}
+
+extension NSAttributedString {
+    func removeLinkAttributes() -> NSAttributedString? {
+        let mutableAttributedString = NSMutableAttributedString(attributedString: self)
+        let range = NSRange(location: 0, length: mutableAttributedString.length)
+        
+        mutableAttributedString.enumerateAttribute(.link, in: range, options: []) { value, range, _ in
+            if value != nil {
+                mutableAttributedString.removeAttribute(.link, range: range)
+            }
+        }
+        
+        return mutableAttributedString
     }
 }
