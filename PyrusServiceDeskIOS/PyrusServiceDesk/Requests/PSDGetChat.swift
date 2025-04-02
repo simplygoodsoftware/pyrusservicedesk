@@ -110,15 +110,19 @@ struct PSDGetChat {
     }
     private static func generateMessages(from array:NSArray) -> [PSDMessage]
     {
-        var messages : [PSDMessage] = []
-        if(array.count == 0){
+        var messages = [PSDMessage]()
+        if array.count == 0 {
             return messages
         }
-        for i in 0...array.count-1{
-            guard let dic :[String:Any] = array[i] as? [String : Any] else{
+        for i in 0...array.count-1 {
+            guard let dic = array[i] as? [String: Any] else {
                 continue
             }
-            let date : Date =  (dic[createdAtParameter] as? String)?.dateFromString(format: "yyyy-MM-dd'T'HH:mm:ss'Z'") ?? Date()
+            let serverDate = (dic[createdAtParameter] as? String)?.dateFromString(format: "yyyy-MM-dd'T'HH:mm:ss'Z'")
+            if serverDate == nil  {
+                EventsLogger.logEvent(.invalidDate, additionalInfo: "\(dic[createdAtParameter])")
+            }
+            let date: Date = serverDate ?? Date()
             let IsInbound : Bool = dic["is_inbound"] as? Bool ??  true
             let user :PSDUser
             if IsInbound{

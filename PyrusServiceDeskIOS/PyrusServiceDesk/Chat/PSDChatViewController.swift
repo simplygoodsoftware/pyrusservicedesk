@@ -268,6 +268,16 @@ class PSDChatViewController: PSDViewController {
         }
         
     }
+    
+    private func tryToBecomeFirstResponderIfNeed() {
+        guard
+            !isFirstResponder,
+            !messageInputView.inputTextView.isFirstResponder
+        else {
+            return
+        }
+        becomeFirstResponder()
+    }
 }
 extension PSDChatViewController : PSDMessageInputViewDelegate{
     func send(_ message:String,_ attachments:[PSDAttachment]){
@@ -351,17 +361,23 @@ extension PSDChatViewController: PSDChatTableViewDelegate {
             title: nil,
             message: message,
             preferredStyle: .alert)
+        CustomizationHelper.prepareWithCustomizationAlert(alert)
         alert.addAction(
             UIAlertAction(
                 title: "ShortNo".localizedPSD(),
-                style: .cancel)
+                style: .cancel,
+                handler: {
+                    [weak self] _ in
+                    self?.tryToBecomeFirstResponderIfNeed()
+                })
         )
         alert.addAction(
             UIAlertAction(
                 title: "ShortYes".localizedPSD(),
                 style: .default,
                 handler: {
-                    _ in
+                    [weak self] _ in
+                    self?.tryToBecomeFirstResponderIfNeed()
                     if #available(iOS 10.0, *) {
                         UIApplication.shared.open(url)
                     } else {
