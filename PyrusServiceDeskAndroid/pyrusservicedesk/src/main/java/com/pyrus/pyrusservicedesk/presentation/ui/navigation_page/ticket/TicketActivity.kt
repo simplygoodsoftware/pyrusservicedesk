@@ -76,6 +76,8 @@ internal class TicketActivity : ConnectionActivityBase<TicketViewModel>(TicketVi
     override val refresherViewId = R.id.refresh
     override val progressBarViewId: Int = NO_ID
 
+    private var recentContentHeight = 0
+
     private val attachFileSharedViewModel: AttachFileSharedViewModel by getViewModel(
         AttachFileSharedViewModel::class.java)
     private val commentActionsSharedViewModel: PendingCommentActionSharedViewModel by getViewModel(
@@ -155,6 +157,13 @@ internal class TicketActivity : ConnectionActivityBase<TicketViewModel>(TicketVi
 
         ticket_toolbar.setOnMenuItemClickListener{ onMenuItemClicked(it) }
         comments.apply {
+            viewTreeObserver.addOnGlobalLayoutListener {
+                val changedHeight = recentContentHeight - height
+                if (changedHeight != 0)
+                    onViewHeightChanged(changedHeight)
+                recentContentHeight = height
+            }
+
             adapter = this@TicketActivity.adapter
             addItemDecoration(
                 SpaceItemDecoration(
