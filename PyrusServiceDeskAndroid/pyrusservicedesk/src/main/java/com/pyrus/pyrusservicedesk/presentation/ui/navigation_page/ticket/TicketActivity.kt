@@ -16,6 +16,7 @@ import android.view.MenuInflater
 import android.view.MenuItem
 import android.view.MenuItem.SHOW_AS_ACTION_ALWAYS
 import android.view.View.NO_ID
+import android.view.ViewTreeObserver.OnGlobalLayoutListener
 import android.view.WindowManager
 import android.widget.Toast
 import com.pyrus.pyrusservicedesk.PyrusServiceDesk
@@ -77,6 +78,7 @@ internal class TicketActivity : ConnectionActivityBase<TicketViewModel>(TicketVi
     override val progressBarViewId: Int = NO_ID
 
     private var recentContentHeight = 0
+    private lateinit var globalLayoutListener: OnGlobalLayoutListener
 
     private val attachFileSharedViewModel: AttachFileSharedViewModel by getViewModel(
         AttachFileSharedViewModel::class.java)
@@ -157,12 +159,13 @@ internal class TicketActivity : ConnectionActivityBase<TicketViewModel>(TicketVi
 
         ticket_toolbar.setOnMenuItemClickListener{ onMenuItemClicked(it) }
         comments.apply {
-            viewTreeObserver.addOnGlobalLayoutListener {
+            globalLayoutListener = OnGlobalLayoutListener {
                 val changedHeight = recentContentHeight - height
                 if (changedHeight != 0)
                     onViewHeightChanged(changedHeight)
                 recentContentHeight = height
             }
+            viewTreeObserver.addOnGlobalLayoutListener(globalLayoutListener)
 
             adapter = this@TicketActivity.adapter
             addItemDecoration(
@@ -223,6 +226,13 @@ internal class TicketActivity : ConnectionActivityBase<TicketViewModel>(TicketVi
     override fun onStop() {
         super.onStop()
         viewModel.onStop()
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        if (comments.viewTreeObserver.isAlive && Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN)
+            comments.viewTreeObserver.removeOnGlobalLayoutListener(globalLayoutListener)
+        else comments.viewTreeObserver.removeGlobalOnLayoutListener(globalLayoutListener)
     }
 
     override fun onRestoreInstanceState(savedInstanceState: Bundle) {
