@@ -16,6 +16,7 @@ import android.view.MenuInflater
 import android.view.MenuItem
 import android.view.MenuItem.SHOW_AS_ACTION_ALWAYS
 import android.view.View.NO_ID
+import android.view.ViewTreeObserver.OnGlobalLayoutListener
 import android.view.WindowManager
 import android.widget.Toast
 import com.pyrus.pyrusservicedesk.PyrusServiceDesk
@@ -75,6 +76,16 @@ internal class TicketActivity : ConnectionActivityBase<TicketViewModel>(TicketVi
     override val toolbarViewId = R.id.ticket_toolbar
     override val refresherViewId = R.id.refresh
     override val progressBarViewId: Int = NO_ID
+
+    private var recentContentHeight = 0
+    private val globalLayoutListener by lazy {
+        OnGlobalLayoutListener {
+            val changedHeight = recentContentHeight - comments.height
+            if (changedHeight != 0)
+                onViewHeightChanged(changedHeight)
+            recentContentHeight = comments.height
+        }
+    }
 
     private val attachFileSharedViewModel: AttachFileSharedViewModel by getViewModel(
         AttachFileSharedViewModel::class.java)
@@ -208,11 +219,17 @@ internal class TicketActivity : ConnectionActivityBase<TicketViewModel>(TicketVi
 
     override fun onStart() {
         super.onStart()
+        comments.viewTreeObserver.addOnGlobalLayoutListener(globalLayoutListener)
         viewModel.onStart()
     }
 
     override fun onStop() {
         super.onStop()
+        if(comments.viewTreeObserver.isAlive) {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN)
+                comments.viewTreeObserver.removeOnGlobalLayoutListener(globalLayoutListener)
+            else comments.viewTreeObserver.removeGlobalOnLayoutListener(globalLayoutListener)
+        }
         viewModel.onStop()
     }
 
