@@ -78,7 +78,14 @@ internal class TicketActivity : ConnectionActivityBase<TicketViewModel>(TicketVi
     override val progressBarViewId: Int = NO_ID
 
     private var recentContentHeight = 0
-    private lateinit var globalLayoutListener: OnGlobalLayoutListener
+    private val globalLayoutListener by lazy {
+        OnGlobalLayoutListener {
+            val changedHeight = recentContentHeight - comments.height
+            if (changedHeight != 0)
+                onViewHeightChanged(changedHeight)
+            recentContentHeight = comments.height
+        }
+    }
 
     private val attachFileSharedViewModel: AttachFileSharedViewModel by getViewModel(
         AttachFileSharedViewModel::class.java)
@@ -159,14 +166,6 @@ internal class TicketActivity : ConnectionActivityBase<TicketViewModel>(TicketVi
 
         ticket_toolbar.setOnMenuItemClickListener{ onMenuItemClicked(it) }
         comments.apply {
-            globalLayoutListener = OnGlobalLayoutListener {
-                val changedHeight = recentContentHeight - height
-                if (changedHeight != 0)
-                    onViewHeightChanged(changedHeight)
-                recentContentHeight = height
-            }
-            viewTreeObserver.addOnGlobalLayoutListener(globalLayoutListener)
-
             adapter = this@TicketActivity.adapter
             addItemDecoration(
                 SpaceItemDecoration(
@@ -220,19 +219,18 @@ internal class TicketActivity : ConnectionActivityBase<TicketViewModel>(TicketVi
 
     override fun onStart() {
         super.onStart()
+        comments.viewTreeObserver.addOnGlobalLayoutListener(globalLayoutListener)
         viewModel.onStart()
     }
 
     override fun onStop() {
         super.onStop()
+        if(comments.viewTreeObserver.isAlive) {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN)
+                comments.viewTreeObserver.removeOnGlobalLayoutListener(globalLayoutListener)
+            else comments.viewTreeObserver.removeGlobalOnLayoutListener(globalLayoutListener)
+        }
         viewModel.onStop()
-    }
-
-    override fun onDestroy() {
-        super.onDestroy()
-        if (comments.viewTreeObserver.isAlive && Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN)
-            comments.viewTreeObserver.removeOnGlobalLayoutListener(globalLayoutListener)
-        else comments.viewTreeObserver.removeGlobalOnLayoutListener(globalLayoutListener)
     }
 
     override fun onRestoreInstanceState(savedInstanceState: Bundle) {
