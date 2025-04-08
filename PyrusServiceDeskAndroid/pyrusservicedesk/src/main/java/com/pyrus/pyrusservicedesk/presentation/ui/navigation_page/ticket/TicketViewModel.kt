@@ -40,7 +40,6 @@ import kotlinx.coroutines.*
 import java.lang.Exception
 import java.lang.Runnable
 import java.util.*
-import kotlin.collections.ArrayList
 
 /**
  * ViewModel for the ticket screen.
@@ -440,6 +439,12 @@ internal class TicketViewModel(
         publishEntries(ticketEntries, newEntries)
     }
 
+    private fun removeLocalComment(localId: Long) {
+        val newEntries = ticketEntries.toMutableList()
+        newEntries.removeAll { it is CommentEntry && it.comment.localId == localId }
+        publishEntries(ticketEntries, newEntries)
+    }
+
     private fun maybeAddDate(commentEntry: CommentEntry, newEntries: MutableList<TicketEntry>) {
         commentEntry.comment.creationDate.getWhen(getApplication(), Calendar.getInstance()).let {
             if (!hasRealComments()
@@ -577,28 +582,11 @@ internal class TicketViewModel(
     }
 
     private inner class AddCommentObserver(
-        uploadFileHooks: UploadFileHooks?,
-        localComment: Comment
-    ) : AddCommentObserverBase<CallResult<AddCommentResponseData>, AddCommentResponseData>(
-        uploadFileHooks,
-        localComment
-    ) {
-        override fun getAttachments(data: AddCommentResponseData) = data.sentAttachments
+        private val uploadFileHooks: UploadFileHooks?,
+        private val localComment: Comment
+    ) : Observer<CallResult<AddCommentResponseData>> {
 
-        override fun getCommentId(data: AddCommentResponseData): Long = data.commentId
-
-        override fun onSuccess(data: AddCommentResponseData) {
-            liveUpdates.subscribeOnUnreadTicketCountChanged(this@TicketViewModel)
-        }
-
-    }
-
-
-    private abstract inner class AddCommentObserverBase<T : CallResult<U>, U>(
-        val uploadFileHooks: UploadFileHooks?,
-        val localComment: Comment
-    ) : Observer<T> {
-        override fun onChanged(t: T?) {
+        override fun onChanged(t: CallResult<AddCommentResponseData>?) {
             t?.let { result ->
                 isCreateTicketSent = false
                 if (uploadFileHooks?.isCancelled == true)
@@ -610,27 +598,29 @@ internal class TicketViewModel(
                         error = result.error
                     )
                     else -> {
-                        onSuccess(result.data!!)
-                        val commentId = getCommentId(result.data)
-                        val attachments = getAttachments(result.data)
-                        if (hasComment(commentId))
+                        liveUpdates.subscribeOnUnreadTicketCountChanged(this@TicketViewModel)
+                        val data = result.data!!
+                        if (hasComment(data.commentId)) {
+                            removeLocalComment(localComment.localId)
                             return@let
+                        }
+
                         CommentEntry(
-                            localDataProvider.convertLocalCommentToServer(localComment, commentId, attachments)
+                            localDataProvider.convertLocalCommentToServer(
+                                localComment = localComment,
+                                serverCommentId = data.commentId,
+                                attachments = data.sentAttachments
+                            )
                         )
                     }
                 }
+
                 applyCommentUpdate(entry, ChangeType.Changed)
             }
         }
 
-        abstract fun getAttachments(data: U): List<Attachment>?
-
-        abstract fun getCommentId(data: U): Long
-
-        abstract fun onSuccess(data: U)
-
     }
+
 
     private fun updateFeedIntervalIfNeeded() {
         val interval = getFeedUpdateInterval()
