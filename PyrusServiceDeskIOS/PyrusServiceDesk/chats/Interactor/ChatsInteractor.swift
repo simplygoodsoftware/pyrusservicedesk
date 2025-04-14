@@ -1,4 +1,5 @@
 import Foundation
+import StoreKit
 
 struct MenuAction {
     let title: String
@@ -129,6 +130,20 @@ extension ChatsInteractor: ChatsInteractorProtocol {
                 firtLoad = false
                 presenter.doWork(.endRefresh)
             }
+            
+            if RateManager.isActionPerformed(times: 3) {
+                RateManager.setIfNilDateForNextRate()
+                RateManager.incrementActionCount()
+                if let windowScene = UIApplication.shared.connectedScenes.first as? UIWindowScene {
+                    SKStoreReviewController.requestReview(in: windowScene)
+                }
+            } else if RateManager.isNeedRateCurrentVersion() {
+                RateManager.increaseDateForNextRate()
+                if let windowScene = UIApplication.shared.connectedScenes.first as? UIWindowScene {
+                    SKStoreReviewController.requestReview(in: windowScene)
+                }
+            }
+                      
         case .updateSelected(index: let index):
             updateSelected(index: index)
         }

@@ -427,6 +427,7 @@ private extension PSDChatInteractor {
                 let nextId = PSDObjectsCreator.getNextLocalId()
                 newMessage.requestNewTicket = true
                 chat?.chatId = nextId
+                RateManager.incrementActionCount()
             }
             if let ticketId = chat?.chatId {
                 newMessage.ticketId = ticketId
