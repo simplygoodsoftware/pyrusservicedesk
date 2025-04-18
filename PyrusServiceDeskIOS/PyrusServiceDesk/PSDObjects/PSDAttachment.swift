@@ -8,10 +8,7 @@ class PSDAttachment: NSObject {
             self.canOpen = name.isSupportedFileFormat()
             self.isImage = name.isImageFileFormat()
             self.isVideo = name.isVideoFormat()
-            
-//            if let image = imageRepository?.loadImage(name: name, type: .image) {
-//                self.previewImage = image
-//            }
+            self.isAudio = name.isAudioFormat()
         }
     }
     ///Size of attachment to show in attachment view
@@ -32,6 +29,8 @@ class PSDAttachment: NSObject {
     var isImage : Bool = false
     ///Is attachment has video format
     var isVideo : Bool = false
+    ///Is attachment has audio format
+    var isAudio: Bool = false
     ///uploading of file progrees to server
     var uploadingProgress : CGFloat = 1.0
     ///The preview image of attacment

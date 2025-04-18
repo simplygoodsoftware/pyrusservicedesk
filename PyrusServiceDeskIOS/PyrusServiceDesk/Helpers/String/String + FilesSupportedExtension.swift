@@ -24,6 +24,15 @@ private enum VideoExtension : String,CaseIterable {
     case gpp = ".3gp"
     case gpp2 = ".3g2"
 }
+
+private enum AudioExtension : String, CaseIterable {
+    case mov = ".opus"
+    case gt = ".ogg"
+    case avi = ".oga"
+    case mp4 = ".wav"
+    case m4p = ".mp3"
+}
+
 extension String {
     func isSupportedFileFormat() -> Bool {
         for i in FilesSupportedExtension.allCases{
@@ -41,6 +50,15 @@ extension String {
     }
     func isVideoFormat() -> Bool {
       for i in VideoExtension.allCases{
+          if self.lowercased().hasSuffix(i.rawValue.lowercased()){
+              return true
+          }
+      }
+      return false
+    }
+    
+    func isAudioFormat() -> Bool {
+      for i in AudioExtension.allCases{
           if self.lowercased().hasSuffix(i.rawValue.lowercased()){
               return true
           }

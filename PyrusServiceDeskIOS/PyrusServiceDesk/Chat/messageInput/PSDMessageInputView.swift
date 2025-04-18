@@ -10,6 +10,7 @@ protocol PSDMessageInputViewDelegate: class {
 let DEFAULT_LAYOUT_MARGINS : CGFloat = 8
 let BUTTONS_CORNER_RADIUS : CGFloat = 8
 class PSDMessageInputView: UIView, PSDMessageTextViewDelegate,PSDMessageSendButtonDelegate {
+    
     static let RATE_HEIGHT : CGFloat = 64
     private static let heightForAttach : CGFloat = 30
     private static let interItemSpaceForAttach : CGFloat = 0.1
@@ -35,6 +36,19 @@ class PSDMessageInputView: UIView, PSDMessageTextViewDelegate,PSDMessageSendButt
     let distToAdd : CGFloat = 21
     let distToSend : CGFloat = 15
     static let attachmentsHeight : CGFloat = 80
+    
+    private(set) var recordingObject: AudioRecordingObject?
+    var recordButton: VoiceRecordButton?
+    var voiceRecordView: VoiceRecordView?
+    var recordBuble: BubleTextView?
+    
+    private(set) lazy var addVoiceMessageButton: VoiceRecordButton = {
+        let button = VoiceRecordButton()
+        button.translatesAutoresizingMaskIntoConstraints = false
+//        button.addTarget(self, action: #selector(buttonPressed(_:)), for: .touchUpInside)
+        return button
+    }()
+    
     var showRate = false {
         didSet {
             guard oldValue != showRate 
@@ -75,6 +89,8 @@ class PSDMessageInputView: UIView, PSDMessageTextViewDelegate,PSDMessageSendButt
         attachmentsAddButton.delegate = self
         x = x + attachmentsAddButton.frame.size.width + distAddToText
 
+        recordButton = VoiceRecordButton(frame: CGRect(x: 270, y: -3, width: 60, height: 60))
+        
         
         sendButton = PSDMessageSendButton.init()
         sendButton.frame=CGRect(x: frame.size.width - sendButton.frame.size.width - distToSend , y: 0, width: sendButton.frame.size.width, height: defaultTextHeight)
@@ -98,6 +114,10 @@ class PSDMessageInputView: UIView, PSDMessageTextViewDelegate,PSDMessageSendButt
         rateView.isHidden = !showRate
         
         addConstraints()
+        self.addSubview(recordButton!)
+        
+        self.recordingObject = AudioRecordingObject.init()
+        self.recordingObject?.createWith(self)
     }
     
     func setupBottomView() {
@@ -348,5 +368,32 @@ extension PSDMessageInputView: PSDRateViewDelegate {
     func didTapRate(_ rateValue: Int) {
         showRate = false
         delegate?.sendRate(rateValue)
+    }
+}
+
+extension PSDMessageInputView: RecordableViewProtocol, AudioRecordingObjectDelegate {
+    
+    func didStartRecord() {
+        
+    }
+    
+    func didEndRecord() {
+        
+    }
+    
+    func didCreateFile(attachment: PSDAttachment, url: URL) {
+        addAttachment(attachment)
+    }
+    
+    func lastCellRect() -> CGRect {
+        return CGRect.zero
+    }
+    
+    func setSourseAndShowMicrophoneAlert(_ alert: UIAlertController) {
+        
+    }
+    
+    func getAccountId() -> NSInteger {
+        return 0
     }
 }
