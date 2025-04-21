@@ -76,13 +76,17 @@ private extension ChatsPresenter {
             let text = lastMessage?.attachments?.count ?? 0 > 0
                 ? ""
             : lastMessage?.text ?? ""//"Last_Message".localizedPSD()
-                
+            
+            var lastMessageText =  "\(author): \(text)"
+            if lastMessageText == ": " {
+                lastMessageText = ""
+            }
             let model = ChatViewModel(
                 id: chat.id,
                 date: chat.date?.messageTime() ?? "",
                 isRead: chat.isRead,
                 subject: subject,
-                lastMessageText: "\(author): \(text)",
+                lastMessageText: lastMessageText,
                 attachmentText: getAttachmentString(attachment: lastMessage?.attachments?.last) ?? "",
                 hasAttachment: lastMessage?.attachments?.count ?? 0 > 0, 
                 state: lastMessage?.state ?? .sent

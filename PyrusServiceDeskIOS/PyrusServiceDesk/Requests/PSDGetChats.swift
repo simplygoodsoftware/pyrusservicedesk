@@ -141,7 +141,7 @@ struct PSDGetChats {
         var chats: [PSDChat] = []
         for i in 0..<response.count {
             let dic: [String: Any] = response[i] as! [String: Any]
-            var date: Date = Date()
+            var date: Date = dic.stringOfKey(createdAtParameter).dateFromString(format: "yyyy-MM-dd'T'HH:mm:ss'Z'")
             var lastMessage: PSDMessage?
             if let lastComment = dic["last_comment"] as? [String: Any] {
                 date = lastComment.stringOfKey(createdAtParameter).dateFromString(format: "yyyy-MM-dd'T'HH:mm:ss'Z'")
@@ -173,6 +173,7 @@ struct PSDGetChats {
                 lastMessage?.owner = message.owner
                 lastMessage?.isOutgoing = message.isOutgoing
             }
+            
             let chat = PSDChat.init(chatId: ticketId, date: date, messages: messages)
             chat.subject = dic["subject"] as? String
             chat.isRead = dic["is_read"] as? Bool ??  true

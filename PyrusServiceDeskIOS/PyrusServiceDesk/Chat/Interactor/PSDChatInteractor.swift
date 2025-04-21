@@ -212,7 +212,7 @@ private extension PSDChatInteractor {
                 label.font = CustomizationHelper.systemBoldFont(ofSize: 17)
                 label.text = chat?.subject?.count ?? 0 > 0 ? chat?.subject : "NewTicket".localizedPSD()
                 label.translatesAutoresizingMaskIntoConstraints = false
-                label.widthAnchor.constraint(equalToConstant: 200).isActive = true
+                //label.widthAnchor.constraint(equalToConstant: 200).isActive = true
                 
                 customization?.setChatTitileView(label)
                 presenter.doWork(.reloadTitle)
@@ -301,7 +301,7 @@ private extension PSDChatInteractor {
         } else {
             userName = PyrusServiceDesk.additionalUsers.first(where: { $0.userId == chat.userId })?.userName ?? ""
         }
-        presenter.doWork(.updateInfo(ticketId: ticketId, userName: userName, createdAt: chat.messages.first?.date ?? Date()))
+        presenter.doWork(.updateInfo(ticketId: ticketId, userName: userName, createdAt: chat.messages.first?.date ?? chat.date ?? Date()))
     }
     
     func updateChat(chat: PSDChat?) {

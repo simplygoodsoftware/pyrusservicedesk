@@ -22,7 +22,7 @@ struct ChatViewModel: Hashable {
     }
     
     static func == (lhs: ChatViewModel, rhs: ChatViewModel) -> Bool {
-        return lhs.id == rhs.id && lhs.isRead == rhs.isRead && lhs.subject == rhs.subject && lhs.lastMessageText == rhs.lastMessageText && lhs.attachmentText == rhs.attachmentText && lhs.hasAttachment == rhs.hasAttachment && lhs.state == rhs.state
+        return lhs.id == rhs.id && lhs.date == rhs.date && lhs.isRead == rhs.isRead && lhs.subject == rhs.subject && lhs.lastMessageText == rhs.lastMessageText && lhs.attachmentText == rhs.attachmentText && lhs.hasAttachment == rhs.hasAttachment && lhs.state == rhs.state
     }
     
     func hash(into hasher: inout Hasher) {

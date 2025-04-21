@@ -38,7 +38,7 @@ private extension SearchPresenter {
                 messageText = highlightText(in: message, substring: searchString, highlightColor: .secondColor ?? .white, font: .lastMessageInfo, fontColor: .lastMessageInfo)
             } else {
                 if chat.messageText.count > 0 {
-                    messageText = NSAttributedString(
+                    messageText = chat.messageText.parseXMLToAttributedString(fontColor: .lastMessageInfo, font: .lastMessageInfo).0 ?? NSAttributedString(
                         string: chat.messageText,
                         attributes: [.font: UIFont.lastMessageInfo, .foregroundColor: UIColor.lastMessageInfo]
                     )
@@ -47,7 +47,7 @@ private extension SearchPresenter {
                 }
             }
             
-            let fullMessageText = NSMutableAttributedString()
+            var fullMessageText = NSMutableAttributedString()
             fullMessageText.append(authorName)
             fullMessageText.append(messageText)
             
@@ -61,6 +61,9 @@ private extension SearchPresenter {
                 subject = highlightText(in: chat.subject, substring: searchString, highlightColor: .secondColor ?? .white, font: .messageLabel, fontColor: .label)
             }
             
+            if fullMessageText.string == ": " {
+                fullMessageText = NSMutableAttributedString(string: "")
+            }
             var model = SearchChatViewModel(
                 id: chat.id,
                 date: chat.date.messageTime(),
