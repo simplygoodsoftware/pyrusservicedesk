@@ -89,11 +89,11 @@ class PSDMessageInputView: UIView, PSDMessageTextViewDelegate,PSDMessageSendButt
         attachmentsAddButton.delegate = self
         x = x + attachmentsAddButton.frame.size.width + distAddToText
 
-        recordButton = VoiceRecordButton(frame: CGRect(x: 270, y: -3, width: 60, height: 60))
+        recordButton = VoiceRecordButton(frame: .zero)//CGRect(x: 270, y: -3, width: 60, height: 60))
         
         
         sendButton = PSDMessageSendButton.init()
-        sendButton.frame=CGRect(x: frame.size.width - sendButton.frame.size.width - distToSend , y: 0, width: sendButton.frame.size.width, height: defaultTextHeight)
+        sendButton.frame=CGRect(x: 0, y: 0, width: 44, height: 44)
         sendButton.delegate = self
         
         
@@ -111,10 +111,11 @@ class PSDMessageInputView: UIView, PSDMessageTextViewDelegate,PSDMessageSendButt
         backgroundView.addSubview(sendButton)
         backgroundView.addSubview(attachmentsCollection)
         backgroundView.addSubview(rateView)
+        backgroundView.addSubview(recordButton!)
+
         rateView.isHidden = !showRate
         
         addConstraints()
-        self.addSubview(recordButton!)
         
         self.recordingObject = AudioRecordingObject.init()
         self.recordingObject?.createWith(self)
@@ -212,133 +213,97 @@ class PSDMessageInputView: UIView, PSDMessageTextViewDelegate,PSDMessageSendButt
     }
     
     ///Text field height constraint. Change when isLandscape.
-    var heightConstraint  : NSLayoutConstraint?
-    private var attachmentsHeightConstraint :NSLayoutConstraint?
-    private var rateHeightConstraint :NSLayoutConstraint?
+    private var heightConstraint: NSLayoutConstraint?
+    private var attachmentsHeightConstraint: NSLayoutConstraint?
+    private var rateHeightConstraint: NSLayoutConstraint?
+
     func addConstraints() {
-        guard let inputTextView = inputTextView, let sendButton = sendButton else{
-            return
-        }
+        guard let inputTextView = inputTextView, let sendButton = sendButton else { return }
+        
         self.autoresizingMask = [.flexibleHeight, .flexibleWidth, .flexibleBottomMargin]
         addBackgroundViewConstraints()
         addTopGrayLineConstraints()
         
+        // Устанавливаем constraints для rateView
         rateView.translatesAutoresizingMaskIntoConstraints = false
-        rateView.addZeroConstraint([.left,.right, .top])
+        NSLayoutConstraint.activate([
+            rateView.leadingAnchor.constraint(equalTo: leadingAnchor),
+            rateView.trailingAnchor.constraint(equalTo: trailingAnchor),
+            rateView.topAnchor.constraint(equalTo: topAnchor)
+        ])
+        
         rateHeightConstraint = rateView.heightAnchor.constraint(equalToConstant: showRate ? PSDMessageInputView.RATE_HEIGHT : 0)
         rateHeightConstraint?.isActive = true
         
+        // Устанавливаем constraints для attachmentsCollection
         attachmentsCollection.translatesAutoresizingMaskIntoConstraints = false
-        attachmentsCollection.addZeroConstraint([.left,.right])
-        attachmentsCollection.topAnchor.constraint(equalTo: topGrayLine.bottomAnchor, constant: 0).isActive = true
+        NSLayoutConstraint.activate([
+            attachmentsCollection.leadingAnchor.constraint(equalTo: leadingAnchor),
+            attachmentsCollection.trailingAnchor.constraint(equalTo: trailingAnchor),
+            attachmentsCollection.topAnchor.constraint(equalTo: topGrayLine.bottomAnchor)
+        ])
+        
         attachmentsHeightConstraint = attachmentsCollection.heightAnchor.constraint(equalToConstant: 0)
         attachmentsHeightConstraint?.isActive = true
         
-        let distToText : CGFloat = DEFAULT_LAYOUT_MARGINS
-        
-        
+        // Устанавливаем constraints для остальных элементов
         inputTextView.translatesAutoresizingMaskIntoConstraints = false
         sendButton.translatesAutoresizingMaskIntoConstraints = false
+        recordButton?.translatesAutoresizingMaskIntoConstraints = false
         attachmentsAddButton.translatesAutoresizingMaskIntoConstraints = false
         
+        guard let recordButton else { return }
         
-        backgroundView.addConstraint(NSLayoutConstraint(
-            item: inputTextView,
-            attribute: .top,
-            relatedBy: .equal,
-            toItem: attachmentsCollection,
-            attribute: .bottom,
-            multiplier: 1,
-            constant:distToText))
+        NSLayoutConstraint.activate([
+            // inputTextView
+            inputTextView.topAnchor.constraint(equalTo: attachmentsCollection.bottomAnchor, constant: DEFAULT_LAYOUT_MARGINS),
+            inputTextView.leadingAnchor.constraint(equalTo: recordButton.trailingAnchor, constant: distAddToText),
+            inputTextView.bottomAnchor.constraint(equalTo: backgroundView.layoutMarginsGuide.bottomAnchor),
+            inputTextView.heightAnchor.constraint(greaterThanOrEqualToConstant: defaultTextHeight),
+            inputTextView.trailingAnchor.constraint(equalTo: backgroundView.layoutMarginsGuide.trailingAnchor, constant: -60),
+            // attachmentsAddButton
+            attachmentsAddButton.leadingAnchor.constraint(equalTo: backgroundView.layoutMarginsGuide.leadingAnchor),
+            attachmentsAddButton.bottomAnchor.constraint(equalTo: backgroundView.layoutMarginsGuide.bottomAnchor),
+            attachmentsAddButton.widthAnchor.constraint(equalToConstant: 44),
+            attachmentsAddButton.heightAnchor.constraint(equalToConstant: 44),
+            
+            recordButton.leadingAnchor.constraint(equalTo: attachmentsAddButton.trailingAnchor),
+            recordButton.bottomAnchor.constraint(equalTo: backgroundView.layoutMarginsGuide.bottomAnchor),
+            recordButton.widthAnchor.constraint(equalToConstant: 44),
+            recordButton.heightAnchor.constraint(equalToConstant: 44),
+            
+            
+            // sendButton
+           // sendButton.leadingAnchor.constraint(equalTo: inputTextView.trailingAnchor, constant: distTextToSend),
+            sendButton.trailingAnchor.constraint(equalTo: backgroundView.layoutMarginsGuide.trailingAnchor, constant: 0),
+            sendButton.bottomAnchor.constraint(equalTo: backgroundView.layoutMarginsGuide.bottomAnchor, constant: 1),
+            sendButton.widthAnchor.constraint(equalToConstant: 60),
+            sendButton.heightAnchor.constraint(equalToConstant: 44)
+        ])
         
-        attachmentsAddButton.leftAnchor.constraint(
-            equalTo: backgroundView.layoutMarginsGuide.leftAnchor,
-            constant: 0
-            ).isActive = true
-        attachmentsAddButton.bottomAnchor.constraint(
-            equalTo: backgroundView.layoutMarginsGuide.bottomAnchor,
-            constant: 0
-            ).isActive = true
-        
-        attachmentsAddButton.addSizeConstraint([.width,.height], constant: defaultTextHeight)
-        
-        
-        backgroundView.addConstraint(NSLayoutConstraint(
-            item: inputTextView,
-            attribute: .height,
-            relatedBy: .greaterThanOrEqual,
-            toItem: nil,
-            attribute: .notAnAttribute,
-            multiplier: 1,
-            constant:defaultTextHeight))
-        
-        heightConstraint = NSLayoutConstraint(
-            item: inputTextView,
-            attribute: .height,
-            relatedBy: .lessThanOrEqual,
-            toItem: nil,
-            attribute: .notAnAttribute,
-            multiplier: 1,
-            constant:inputTextView.maxVerticalHeight())
-        backgroundView.addConstraint(heightConstraint!)
-        
-        inputTextView.bottomAnchor.constraint(
-            equalTo: backgroundView.layoutMarginsGuide.bottomAnchor,
-            constant:0
-            ).isActive = true
-        backgroundView.addConstraint(NSLayoutConstraint(
-            item: inputTextView,
-            attribute: .leading,
-            relatedBy: .equal,
-            toItem: attachmentsAddButton,
-            attribute: .trailing,
-            multiplier: 1,
-            constant:distAddToText))
-        backgroundView.addConstraint(NSLayoutConstraint(
-            item: sendButton,
-            attribute: .leading,
-            relatedBy: .equal,
-            toItem: inputTextView,
-            attribute: .trailing,
-            multiplier: 1,
-            constant:distTextToSend))
-        backgroundView.addConstraint(NSLayoutConstraint(
-            item: sendButton,
-            attribute: .height,
-            relatedBy: .equal,
-            toItem: nil,
-            attribute: .notAnAttribute,
-            multiplier: 1,
-            constant:defaultTextHeight))
-        backgroundView.addConstraint(NSLayoutConstraint(
-            item: sendButton,
-            attribute: .width,
-            relatedBy: .equal,
-            toItem: nil,
-            attribute: .notAnAttribute,
-            multiplier: 1,
-            constant:sendButton.frame.size.width))
-        sendButton.rightAnchor.constraint(
-            equalTo: backgroundView.layoutMarginsGuide.rightAnchor,
-            constant: -7.0
-            ).isActive = true
-        sendButton.bottomAnchor.constraint(
-            equalTo: backgroundView.layoutMarginsGuide.bottomAnchor,
-            constant: 0
-            ).isActive = true
-        
+        // Отдельно сохраняем heightConstraint для inputTextView
+        heightConstraint = inputTextView.heightAnchor.constraint(lessThanOrEqualToConstant: inputTextView.maxVerticalHeight())
+        heightConstraint?.isActive = true
     }
-    private func addBackgroundViewConstraints(){
+
+    private func addBackgroundViewConstraints() {
         backgroundView.translatesAutoresizingMaskIntoConstraints = false
-        backgroundView.addZeroConstraint([.top,.bottom])
-        backgroundView.addZeroConstraint([.left,.right])
+        NSLayoutConstraint.activate([
+            backgroundView.topAnchor.constraint(equalTo: topAnchor),
+            backgroundView.bottomAnchor.constraint(equalTo: bottomAnchor),
+            backgroundView.leadingAnchor.constraint(equalTo: leadingAnchor),
+            backgroundView.trailingAnchor.constraint(equalTo: trailingAnchor)
+        ])
     }
-    private func addTopGrayLineConstraints(){
+
+    private func addTopGrayLineConstraints() {
         topGrayLine.translatesAutoresizingMaskIntoConstraints = false
-        topGrayLine.addZeroConstraint([.left,.right])
-        topGrayLine.addSizeConstraint([.height], constant: 0.5)
-        topGrayLine.topAnchor.constraint(equalTo: rateView.bottomAnchor).isActive = true
-        
+        NSLayoutConstraint.activate([
+            topGrayLine.leadingAnchor.constraint(equalTo: leadingAnchor),
+            topGrayLine.trailingAnchor.constraint(equalTo: trailingAnchor),
+            topGrayLine.topAnchor.constraint(equalTo: rateView.bottomAnchor),
+            topGrayLine.heightAnchor.constraint(equalToConstant: 0.5)
+        ])
     }
 }
 

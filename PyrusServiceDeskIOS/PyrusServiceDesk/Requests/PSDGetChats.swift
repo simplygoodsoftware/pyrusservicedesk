@@ -160,11 +160,6 @@ struct PSDGetChats {
             let ticketId = dic["ticket_id"] as? Int
             var messages: [PSDMessage] = [PSDMessage]()
             let newMessages = PSDGetChat.generateMessages(from: dic["comments"] as? NSArray ?? NSArray())
-//            if let storeChat = PyrusServiceDesk.chats.first(where: { $0.chatId == ticketId }) {
-//                messages = storeChat.messages + newMessages
-//            } else {
-//                messages = newMessages
-//            }
             
             messages = newMessages
             

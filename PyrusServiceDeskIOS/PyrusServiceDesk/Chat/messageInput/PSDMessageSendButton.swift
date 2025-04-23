@@ -12,7 +12,9 @@ class PSDMessageSendButton: UIButton {
     static let titleDisabledAlpha: CGFloat = 0.3
     override init(frame: CGRect) {
         super.init(frame: frame)
-        self.setTitle( "Send".localizedPSD() , for:.normal)
+//        self.setTitle( "Send".localizedPSD() , for:.normal)
+        setImage(UIImage.PSDImage(name: "sendFill"), for: .normal)
+        setImage(UIImage.PSDImage(name: "send"), for: .disabled)
         self.titleLabel?.font = .title
         let color = PyrusServiceDesk.mainController?.customization?.sendButtonColor ?? UIColor.darkAppColor
         setTitleColor(color, for: .normal)
@@ -21,7 +23,7 @@ class PSDMessageSendButton: UIButton {
         
         self.addTarget(self, action: #selector(sendPressed), for: .touchUpInside)
         self.layer.cornerRadius = BUTTONS_CORNER_RADIUS
-        recolor()
+       // recolor()
         self.sizeToFit()
     }
     @objc func sendPressed()
@@ -43,7 +45,7 @@ extension PSDMessageSendButton: Recolorable {
             guard self.traitCollection.hasDifferentColorAppearance(comparedTo: previousTraitCollection) else {
                 return
             }
-            recolor()
+           // recolor()
         }
     }
     func recolor() {

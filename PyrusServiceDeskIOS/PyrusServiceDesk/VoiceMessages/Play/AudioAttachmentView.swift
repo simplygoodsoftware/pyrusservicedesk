@@ -24,12 +24,12 @@ AudioAttachmentView is not user interaction enabled to let its holder to control
     static let defaultSize: CGFloat = 45.0
     private var size: CGFloat = AudioAttachmentView.defaultSize
     ///Is need to add timeLabel at bottom
-    @objc var needTime: Bool = true{
+    @objc var needTime: Bool = false{
         didSet{
-            self.addTimeLabel()
-            if !needTime {
-                self.timeLabel.removeFromSuperview()
-            }
+//            self.addTimeLabel()
+//            if !needTime {
+//                self.timeLabel.removeFromSuperview()
+//            }
         }
     }
     ///Is preparing to play attachment and stop other playing
@@ -48,6 +48,10 @@ AudioAttachmentView is not user interaction enabled to let its holder to control
     ///The current display state of audioAttachmentView
     @objc private(set) var state: AudioState = .stopped{
         didSet(oldValue){
+            print("old: \(oldValue), new: \(state)")
+            if (oldValue == .paused && state == .playing) {
+                print("ой ой ой")
+            }
             if state == .stopped{
                 self.changePlayProgress(AudioAttachmentView.minProgress)
                 self.changeLoadProgress(AudioAttachmentView.maxProgress)
@@ -119,12 +123,12 @@ AudioAttachmentView is not user interaction enabled to let its holder to control
     }
     private func changeImage(){
         let imageName = self.state == .playing ? pauseImageName : playImageName
-        let image = UIImage.init(named: imageName)?.withRenderingMode(.alwaysTemplate)
+        let image = UIImage.PSDImage(name: imageName)//init(named: imageName)?.withRenderingMode(.alwaysTemplate)
         self.playerButton.setImage(image, for: .normal)
     }
     private lazy var playerButton: UIButton = {
         let button = UIButton.init(frame: CGRect.zero)
-        button.backgroundColor = .psdBackgroundColor
+        button.backgroundColor = .clear
         button.imageView?.contentMode = .scaleAspectFit
         button.layer.borderColor = lightColor.cgColor
         button.isUserInteractionEnabled = false

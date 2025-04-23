@@ -39,7 +39,7 @@ struct PSDFilesManager {
         return dataFrom(url: url)
     }
     ///Return data from file placed in url
-    private static func dataFrom(url: URL) -> Data? {
+    static func dataFrom(url: URL) -> Data? {
         do {
             let data: Data = try Data(contentsOf: url)
             return data

@@ -108,7 +108,7 @@ import Foundation
                 let p = p,
                 p > 0
             {
-                var dur = getFileTime() ?? 0
+                let dur = getFileTime() ?? 0
                 let progress = getPercentProgress(with: p, totalTime: dur)
                 self.view?.playingProgress(progress)
                 changeTime(p)
@@ -119,7 +119,7 @@ import Foundation
                 let p = p,
                 p > 0
             {
-                var dur = getFileTime() ?? 0
+                let dur = getFileTime() ?? 0
                 let progress = getPercentProgress(with: p, totalTime: dur)
                 self.view?.changeState(.paused)
                 self.view?.playingProgress(progress)

@@ -21,7 +21,7 @@ import Foundation
     private static let shakeAnimationRepeats: Float = 4
     private static let shakeAnimationDeviation: CGFloat = 3
     
-    private static let recordOnImage = UIImage(systemName: "microphone.fill") //UIImage.init(named: "recordLight")
+    private static let recordOnImage = UIImage.PSDImage(name: "fillMicro")
     var customRecordOffImage = VoiceRecordButton.recordOffImage{
         didSet{
             if !self.isRecording{
@@ -30,14 +30,15 @@ import Foundation
             }
         }
     }
-    private static let recordOffImage = UIImage(systemName: "microphone")//UIImage.init(named: "draftViewRecord")
+    private static let recordOffImage = UIImage.PSDImage(name: "micro")
     
     ///The value to detect is recording is perfoms now
     private(set) var isRecording: Bool = false{
         didSet{
-            if self.isRecording{
-                self.setImage(VoiceRecordButton.recordOnImage, for: .normal)
-                self.setImage(VoiceRecordButton.recordOnImage, for: .highlighted)
+            if self.isRecording {
+                let mainColor = PyrusServiceDesk.mainController?.customization?.themeColor ?? .blue
+                self.setImage(VoiceRecordButton.recordOnImage?.imageWith(color: mainColor), for: .normal)
+                self.setImage(VoiceRecordButton.recordOnImage?.imageWith(color: mainColor), for: .highlighted)
             }else{
                 self.setImage(customRecordOffImage, for: .normal)
                 self.setImage(customRecordOffImage, for: .highlighted)

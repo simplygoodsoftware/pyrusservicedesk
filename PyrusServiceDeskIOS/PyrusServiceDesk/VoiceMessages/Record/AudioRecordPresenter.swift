@@ -100,7 +100,7 @@ import AVFAudio
         let tooShortFile = nowTime - (self.startRecordTime?.uptimeNanoseconds ?? nowTime) < AudioRecordPresenter.recordingMinLimit
         if let audioUrl = audioUrl, recorder != nil && !tooShortFile {
             let attachment =
-            PSDAttachment(localPath: audioUrl.path, data: nil, serverIdentifer: audioUrl.path)
+            PSDAttachment(localPath: audioUrl.path, data: PSDFilesManager.dataFrom(url: audioUrl), serverIdentifer: nil)
             attachment.name = audioUrl.lastPathComponent
             attachment.localPath = audioUrl.path
             self.view?.didCreateFile(attachment: attachment, url: audioUrl)

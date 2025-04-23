@@ -95,9 +95,9 @@ private extension UIColor {
         var backgroundColor: UIColor {
             switch self {
             case .dark:
-                return .red//.bubleBackColor
+                return .bubleBackColor
             case.userInterface:
-                return .red//.bubleThemedBackColor
+                return .bubleThemedBackColor
             }
         }
         
@@ -290,4 +290,10 @@ extension BubleView {
         topAnchor.constraint(equalTo: safeAreaLayoutGuide ? other.safeAreaLayoutGuide.topAnchor : other.topAnchor, constant: topOffset).isActive = true
         bottomAnchor.constraint(equalTo: safeAreaLayoutGuide ? other.safeAreaLayoutGuide.bottomAnchor : other.bottomAnchor, constant: bottomOffset).isActive = true
     }
+}
+
+@objc extension UIColor {
+    ///RGB(26,26,26). The color used for BubleView
+    @objc static let bubleBackColor = #colorLiteral(red: 0.1019607843, green: 0.1019607843, blue: 0.1019607843, alpha: 1)
+    @objc static let bubleThemedBackColor = UIColor.themedColor(lightColor: #colorLiteral(red: 1, green: 1, blue: 1, alpha: 1), darkColor: #colorLiteral(red: 0.1019607843, green: 0.1019607843, blue: 0.1019607843, alpha: 1))
 }

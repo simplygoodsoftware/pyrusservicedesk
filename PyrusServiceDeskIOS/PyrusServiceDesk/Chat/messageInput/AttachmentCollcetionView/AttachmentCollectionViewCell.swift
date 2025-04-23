@@ -4,21 +4,22 @@ protocol AttachmentCollectionViewCellDelegate : NSObjectProtocol{
 }
 class AttachmentCollectionViewCell : UICollectionViewCell{
     weak var delegate : AttachmentCollectionViewCellDelegate?
-    private static let buttonSize : CGFloat = 15
+    private static let buttonSize : CGFloat = 18
     static let distToBoard : CGFloat = 7
     private static let holderRadius : CGFloat = 6.0
     private static let holderBorderWidth : CGFloat = 1.0
     private lazy var removeButton : UIButton = {
         let button = UIButton()
-        button.setTitle("✗", for: .normal)
-        button.titleLabel?.font = .removeButton
-        button.layer.cornerRadius = AttachmentCollectionViewCell.buttonSize/2
+//        button.setTitle("✗", for: .normal)
+//        button.titleLabel?.font = .removeButton
+//        button.layer.cornerRadius = AttachmentCollectionViewCell.buttonSize/2
+        button.setImage(UIImage.PSDImage(name: "del"), for: .normal)
         return button
     }()
     private let removeButtonBack = UIView()
     lazy var holderView : UIView = {
         let view = UIView()
-        view.backgroundColor = .clear
+        view.backgroundColor = .holderBackgroundColor
         view.layer.cornerRadius = AttachmentCollectionViewCell.holderRadius
         view.layer.borderWidth = AttachmentCollectionViewCell.holderBorderWidth
         view.clipsToBounds = true
@@ -44,9 +45,9 @@ class AttachmentCollectionViewCell : UICollectionViewCell{
         holderView.leftAnchor.constraint(equalTo: leftAnchor, constant: AttachmentCollectionViewCell.distToBoard).isActive = true
         holderView.rightAnchor.constraint(equalTo: rightAnchor, constant: -AttachmentCollectionViewCell.distToBoard).isActive = true
         holderView.bottomAnchor.constraint(equalTo: bottomAnchor, constant: -AttachmentCollectionViewCell.distToBoard).isActive = true
-        holderView.topAnchor.constraint(equalTo: removeButtonBack.topAnchor, constant: AttachmentCollectionViewCell.distToBoard).isActive = true
+        holderView.topAnchor.constraint(equalTo: removeButtonBack.topAnchor, constant: 4).isActive = true
         
-        removeButtonBack.rightAnchor.constraint(equalTo: rightAnchor, constant: 0).isActive = true
+        removeButtonBack.rightAnchor.constraint(equalTo: rightAnchor, constant: -2).isActive = true
         removeButtonBack.topAnchor.constraint(equalTo: topAnchor, constant: DEFAULT_LAYOUT_MARGINS).isActive = true
         removeButtonBack.widthAnchor.constraint(equalToConstant: AttachmentCollectionViewCell.buttonSize).isActive = true
         removeButtonBack.heightAnchor.constraint(equalToConstant: AttachmentCollectionViewCell.buttonSize).isActive = true
@@ -72,8 +73,8 @@ extension AttachmentCollectionViewCell: Recolorable {
     }
     func recolor() {
         removeButton.setTitleColor(CustomizationHelper.textColorForInput.withAlphaComponent(CROSS_ALPHA), for: .normal)
-        removeButtonBack.backgroundColor = .psdBackground
-        removeButton.backgroundColor = CustomizationHelper.grayInputColor.withAlphaComponent(BUTTON_ALPHA)
+        removeButtonBack.backgroundColor = .clear
+ //       removeButton.backgroundColor = CustomizationHelper.grayInputColor.withAlphaComponent(BUTTON_ALPHA)
         holderView.layer.borderColor = CustomizationHelper.lightGrayInputColor.cgColor
     }
 }
@@ -81,4 +82,15 @@ let BUTTON_ALPHA: CGFloat = 0.3
 let CROSS_ALPHA: CGFloat = 0.8
 private extension UIFont {
     static let removeButton = CustomizationHelper.systemBoldFont(ofSize: 13)
+}
+
+private extension UIColor {
+    static let holderBackgroundColor = UIColor {
+        switch $0.userInterfaceStyle {
+        case .dark:
+            return UIColor(hex: "#575B5E") ?? .clear
+        default:
+            return UIColor(hex: "#F3F2F8") ?? .clear
+        }
+    }
 }
