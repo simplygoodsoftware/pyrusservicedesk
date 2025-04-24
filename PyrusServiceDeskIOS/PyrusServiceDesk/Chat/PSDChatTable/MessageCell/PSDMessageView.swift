@@ -101,6 +101,8 @@ class PSDMessageView: PSDView {
             if data.isImage {
                 hasImageAttachment = true
                 attachmentView = PSDImageAttachmentView.init(frame: CGRect.zero)
+            } else if data.isAudio {
+                attachmentView = PSDAudioAttachmentView.init(frame: CGRect.zero)
             } else {
                 attachmentView = PSDFileAttachmentView.init(frame: CGRect.zero)
             }
