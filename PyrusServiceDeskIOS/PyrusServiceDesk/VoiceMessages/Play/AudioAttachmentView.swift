@@ -49,9 +49,6 @@ AudioAttachmentView is not user interaction enabled to let its holder to control
     @objc private(set) var state: AudioState = .stopped{
         didSet(oldValue){
             print("old: \(oldValue), new: \(state)")
-            if (oldValue == .paused && state == .playing) {
-                print("ой ой ой")
-            }
             if state == .stopped{
                 self.changePlayProgress(AudioAttachmentView.minProgress)
                 self.changeLoadProgress(AudioAttachmentView.maxProgress)
@@ -163,16 +160,16 @@ AudioAttachmentView is not user interaction enabled to let its holder to control
         customDraw()
     }
     ///redraw audioAttachmentView with new data
-    @objc func create(with fileUrl: URL?, attachmentId: NSInteger){
+    @objc func create(with fileUrl: URL?, attachmentId: String){
         self.createPresenter(fileUrl, attachmentId: attachmentId)
     }
     ///redraw audioAttachmentView with new data
-    @objc func updateAttachment(_ fileUrl: URL?, attachmentId: NSInteger){
+    @objc func updateAttachment(_ fileUrl: URL?, attachmentId: String){
         self.presenter?.update(fileUrl: fileUrl, attachmentId: attachmentId)
     }
-    private func createPresenter(_ fileUrl: URL?, attachmentId: NSInteger){
+    private func createPresenter(_ fileUrl: URL?, attachmentId: String){
         if self.presenter == nil {
-            self.presenter = AudioPlayerPresenter.init(view: self,  fileUrl: fileUrl, attachmentId: attachmentId)
+            self.presenter = AudioPlayerPresenter.init(view: self,  fileUrl: fileUrl, attachmentId: attachmentId, attachment: PSDAttachment(localPath: "", data: nil, serverIdentifer: ""))
         }else{
             self.presenter?.update(fileUrl: fileUrl, attachmentId: attachmentId)
         }

@@ -19,7 +19,7 @@ import Foundation
     private var presenter: CustomPlayerCellPresenter = CustomPlayerCellPresenter.init()
     private lazy var viewForAudioAttachment = AudioAttachmentView.init()
     
-    @objc func loadMediaCell(from path: String, attachmentId: NSInteger){
+    @objc func loadMediaCell(from path: String, attachmentId: String){
         let url = URL.init(fileURLWithPath: path)
         presenter.setFileUrl(url: url)
         viewForAudioAttachment.create(with: url, attachmentId: attachmentId)

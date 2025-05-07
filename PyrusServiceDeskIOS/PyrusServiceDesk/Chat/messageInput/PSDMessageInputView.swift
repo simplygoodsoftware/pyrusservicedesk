@@ -2,13 +2,13 @@
 import UIKit
 
 protocol PSDMessageInputViewDelegate: class {
-    func send(_ message:String,_ attachments:[PSDAttachment])
-    func sendRate(_ rateValue:Int)
+    func send(_ message: String, _ attachments: [PSDAttachment])
+    func sendRate(_ rateValue: Int)
     func addButtonTapped()
     func addAttachment()
 }
-let DEFAULT_LAYOUT_MARGINS : CGFloat = 8
-let BUTTONS_CORNER_RADIUS : CGFloat = 8
+let DEFAULT_LAYOUT_MARGINS: CGFloat = 8
+let BUTTONS_CORNER_RADIUS: CGFloat = 8
 class PSDMessageInputView: UIView, PSDMessageTextViewDelegate,PSDMessageSendButtonDelegate {
     
     static let RATE_HEIGHT : CGFloat = 64
@@ -29,12 +29,12 @@ class PSDMessageInputView: UIView, PSDMessageTextViewDelegate,PSDMessageSendButt
     ///The view with rate buttons
     private var rateView: PSDRateView!
     ///Stack with attachments
-    private var attachmentsCollection : AttachmentCollectionView!
-    private var attachmentsPresenter : AttachmentCollectionViewPresenterProtocol!
-    let distAddToText : CGFloat = 6
-    let distTextToSend : CGFloat = 6
-    let distToAdd : CGFloat = 21
-    let distToSend : CGFloat = 15
+    private var attachmentsCollection: AttachmentCollectionView!
+    private var attachmentsPresenter: AttachmentCollectionViewPresenterProtocol!
+    let distAddToText: CGFloat = 6
+    let distTextToSend: CGFloat = 6
+    let distToAdd: CGFloat = 21
+    let distToSend: CGFloat = 15
     static let attachmentsHeight : CGFloat = 80
     
     private(set) var recordingObject: AudioRecordingObject?
@@ -45,13 +45,31 @@ class PSDMessageInputView: UIView, PSDMessageTextViewDelegate,PSDMessageSendButt
     private(set) lazy var addVoiceMessageButton: VoiceRecordButton = {
         let button = VoiceRecordButton()
         button.translatesAutoresizingMaskIntoConstraints = false
-//        button.addTarget(self, action: #selector(buttonPressed(_:)), for: .touchUpInside)
+        //        button.addTarget(self, action: #selector(buttonPressed(_:)), for: .touchUpInside)
+        return button
+    }()
+    
+    private lazy var audioInputView: AudioInputView = {
+        let view = AudioInputView(frame: .zero)
+        view.translatesAutoresizingMaskIntoConstraints = false
+        view.alpha = 0
+        return view
+    }()
+    
+    private var audioLeadingConstraint: NSLayoutConstraint?
+    
+    private lazy var deleteAudioButton: UIButton = {
+        let button = UIButton()
+        button.translatesAutoresizingMaskIntoConstraints = false
+        button.setImage(UIImage.PSDImage(name: "deleteAudio"), for: .normal)
+        button.alpha = 0
+        button.addTarget(self, action: #selector(deleteAudioButtonTapped), for: .touchUpInside)
         return button
     }()
     
     var showRate = false {
         didSet {
-            guard oldValue != showRate 
+            guard oldValue != showRate
             else {
                 return
             }
@@ -68,7 +86,7 @@ class PSDMessageInputView: UIView, PSDMessageTextViewDelegate,PSDMessageSendButt
         self.backgroundView = UIView()
         self.backgroundView.frame = frame
         
-     //   backgroundView.backgroundColor = UIColor(hex: "#3D4043")
+        //   backgroundView.backgroundColor = UIColor(hex: "#3D4043")
         
         topGrayLine = UIView.init(frame: CGRect(x: 0, y: 0, width: frame.size.width, height: 0.5))
         topGrayLine.backgroundColor = UIColor.psdSeparator
@@ -80,6 +98,7 @@ class PSDMessageInputView: UIView, PSDMessageTextViewDelegate,PSDMessageSendButt
         collectionLayoyt.itemSize = CGSize(width: PSDMessageInputView.attachmentsHeight, height: PSDMessageInputView.attachmentsHeight + AttachmentCollectionViewCell.distToBoard)
         collectionLayoyt.minimumInteritemSpacing = PSDMessageInputView.interItemSpaceForAttach
         collectionLayoyt.minimumLineSpacing = PSDMessageInputView.interItemSpaceForAttach
+        
         attachmentsCollection = AttachmentCollectionView.init(frame: CGRect.zero, collectionViewLayout: collectionLayoyt)
         attachmentsCollection.attachmentChangeDelegate = self
         attachmentsPresenter = AttachmentCollectionViewPresenter.init(view: attachmentsCollection)
@@ -88,21 +107,20 @@ class PSDMessageInputView: UIView, PSDMessageTextViewDelegate,PSDMessageSendButt
         attachmentsAddButton = AttachmentsAddButton.init(frame: CGRect(x: x, y: 0, width: defaultTextHeight, height: defaultTextHeight))
         attachmentsAddButton.delegate = self
         x = x + attachmentsAddButton.frame.size.width + distAddToText
-
+        
         recordButton = VoiceRecordButton(frame: .zero)//CGRect(x: 270, y: -3, width: 60, height: 60))
         
         
         sendButton = PSDMessageSendButton.init()
-        sendButton.frame=CGRect(x: 0, y: 0, width: 44, height: 44)
+        sendButton.frame = CGRect(x: 0, y: 0, width: 44, height: 44)
         sendButton.delegate = self
-        
         
         inputTextView = PSDMessageTextView(frame: CGRect(x: x, y: 0, width: sendButton.frame.origin.x - distTextToSend - x, height: defaultTextHeight))
         inputTextView.messageDelegate = self
-       
+        
         rateView = PSDRateView()
         rateView.delegate = self
-    
+        
         setupBottomView()
         self.addSubview(backgroundView)
         backgroundView.addSubview(topGrayLine)
@@ -112,7 +130,9 @@ class PSDMessageInputView: UIView, PSDMessageTextViewDelegate,PSDMessageSendButt
         backgroundView.addSubview(attachmentsCollection)
         backgroundView.addSubview(rateView)
         backgroundView.addSubview(recordButton!)
-
+        backgroundView.addSubview(audioInputView)
+        backgroundView.addSubview(deleteAudioButton)
+        
         rateView.isHidden = !showRate
         
         addConstraints()
@@ -143,57 +163,92 @@ class PSDMessageInputView: UIView, PSDMessageTextViewDelegate,PSDMessageSendButt
         attachmentsPresenter.addAttachment(attachment)
         checkSendButton()
     }
+    
     override func hitTest(_ point: CGPoint, with event: UIEvent?) -> UIView? {
         let view = super.hitTest(point, with: event)
         return view == self ? nil : view
     }
+    
     required init?(coder aDecoder: NSCoder) {
         super.init(coder: aDecoder)
     }
+    
     override var intrinsicContentSize: CGSize {
         return CGSize.zero
     }
-    func setToDefault(){
-        if inputTextView.text.count == 0{
-            sendButton.isEnabled = false
+    
+    func setToDefault() {
+        if inputTextView.text.count == 0 {
+            UIView.animate(withDuration: 0.1, animations: {
+                self.sendButton.alpha = 0
+                self.recordButton?.alpha = 1
+            })
+        } else{
+            UIView.animate(withDuration: 0.1, animations: {
+                self.sendButton.alpha = 1
+                self.recordButton?.alpha = 0
+            })
         }
-        else{
-            sendButton.isEnabled = true
-        }
-        
     }
+    
     ///Clear text.
-    func clearAll(){
+    func clearAll() {
         inputTextView.text = ""
         inputTextView.textViewDidChange(inputTextView)
         attachmentsPresenter?.cleanAll()
         checkCollectionHeight()
         checkSendButton()
+        
+        UIView.animate(withDuration: 0.1, animations: {
+            self.audioInputView.alpha = 0
+            self.deleteAudioButton.alpha = 0
+            self.attachmentsAddButton.alpha = 1
+            self.inputTextView.alpha = 1
+        }, completion: {_ in
+            self.audioLeadingConstraint?.constant = 0
+            OpusPlayer.shared.stopAllPlay()
+            self.audioInputView.state = .stopped
+            self.audioInputView.layoutIfNeeded()
+        })
     }
     
     //MARK: Delegate methods
-    func textViewChanged()
-    {
+    func textViewChanged() {
         checkSendButton()
     }
-    func sendMessage()
-    {
+    
+    func sendMessage() {
         inputTextView.text = inputTextView.text.trimmingCharacters(in: .whitespacesAndNewlines)
         inputTextView.textViewDidChange(inputTextView)
-        if(inputTextView.text.count>0 || attachmentsPresenter.attachmentsNumber() > 0){
+        if(inputTextView.text.count > 0 || attachmentsPresenter.attachmentsNumber() > 0) {
             self.delegate?.send(inputTextView.text, attachmentsPresenter.attachmentsForSend())
             inputTextView.text = ""
             inputTextView.textViewDidChange(inputTextView)
             attachmentsPresenter?.cleanAll()
             checkCollectionHeight()
+            UIView.animate(withDuration: 0.1, animations: {
+                self.audioInputView.alpha = 0
+                self.deleteAudioButton.alpha = 0
+                self.attachmentsAddButton.alpha = 1
+                self.inputTextView.alpha = 1
+            }, completion: {_ in 
+                self.audioLeadingConstraint?.constant = 0
+                OpusPlayer.shared.stopAllPlay()
+                self.audioInputView.state = .stopped
+                self.audioInputView.layoutIfNeeded()
+            })
         }
         checkSendButton()
     }
     ///Check is send button need to enabled or not
-    private func checkSendButton(){
-        sendButton.isEnabled = (inputTextView.text.count != 0 || attachmentsPresenter.attachmentsNumber() > 0)
+    private func checkSendButton() {
+        UIView.animate(withDuration: 0.1, animations: {
+            self.sendButton.alpha = !(self.inputTextView.text.count != 0 || self.attachmentsPresenter.attachmentsNumber() > 0) ? 0 : 1
+            self.recordButton?.alpha = (self.inputTextView.text.count != 0 || self.attachmentsPresenter.attachmentsNumber() > 0) ? 0 : 1
+        })
     }
-    private func checkCollectionHeight(){
+    
+    private func checkCollectionHeight() {
         attachmentsHeightConstraint?.constant = attachmentsPresenter.attachmentsNumber() > 0 ? PSDMessageInputView.attachmentsHeight : 0
     }
     
@@ -216,7 +271,7 @@ class PSDMessageInputView: UIView, PSDMessageTextViewDelegate,PSDMessageSendButt
     private var heightConstraint: NSLayoutConstraint?
     private var attachmentsHeightConstraint: NSLayoutConstraint?
     private var rateHeightConstraint: NSLayoutConstraint?
-
+    
     func addConstraints() {
         guard let inputTextView = inputTextView, let sendButton = sendButton else { return }
         
@@ -254,10 +309,13 @@ class PSDMessageInputView: UIView, PSDMessageTextViewDelegate,PSDMessageSendButt
         
         guard let recordButton else { return }
         
+//        audioLeadingConstraint = audioInputView.leadingAnchor.constraint(equalTo: attachmentsAddButton.trailingAnchor, constant: frame.width - 94)
+        audioLeadingConstraint = audioInputView.widthAnchor.constraint(equalToConstant: 0)
+        audioLeadingConstraint?.isActive = true
         NSLayoutConstraint.activate([
             // inputTextView
             inputTextView.topAnchor.constraint(equalTo: attachmentsCollection.bottomAnchor, constant: DEFAULT_LAYOUT_MARGINS),
-            inputTextView.leadingAnchor.constraint(equalTo: recordButton.trailingAnchor, constant: distAddToText),
+            inputTextView.leadingAnchor.constraint(equalTo: attachmentsAddButton.trailingAnchor, constant: distAddToText),
             inputTextView.bottomAnchor.constraint(equalTo: backgroundView.layoutMarginsGuide.bottomAnchor),
             inputTextView.heightAnchor.constraint(greaterThanOrEqualToConstant: defaultTextHeight),
             inputTextView.trailingAnchor.constraint(equalTo: backgroundView.layoutMarginsGuide.trailingAnchor, constant: -60),
@@ -267,25 +325,38 @@ class PSDMessageInputView: UIView, PSDMessageTextViewDelegate,PSDMessageSendButt
             attachmentsAddButton.widthAnchor.constraint(equalToConstant: 44),
             attachmentsAddButton.heightAnchor.constraint(equalToConstant: 44),
             
-            recordButton.leadingAnchor.constraint(equalTo: attachmentsAddButton.trailingAnchor),
+            deleteAudioButton.leadingAnchor.constraint(equalTo: backgroundView.layoutMarginsGuide.leadingAnchor),
+            deleteAudioButton.bottomAnchor.constraint(equalTo: backgroundView.layoutMarginsGuide.bottomAnchor),
+            deleteAudioButton.widthAnchor.constraint(equalToConstant: 44),
+            deleteAudioButton.heightAnchor.constraint(equalToConstant: 44),
+            
+            //recordButton.leadingAnchor.constraint(equalTo: inputTextView.trailingAnchor),
+            recordButton.trailingAnchor.constraint(equalTo: backgroundView.layoutMarginsGuide.trailingAnchor, constant: 0),
             recordButton.bottomAnchor.constraint(equalTo: backgroundView.layoutMarginsGuide.bottomAnchor),
             recordButton.widthAnchor.constraint(equalToConstant: 44),
             recordButton.heightAnchor.constraint(equalToConstant: 44),
             
-            
             // sendButton
-           // sendButton.leadingAnchor.constraint(equalTo: inputTextView.trailingAnchor, constant: distTextToSend),
-            sendButton.trailingAnchor.constraint(equalTo: backgroundView.layoutMarginsGuide.trailingAnchor, constant: 0),
+            // sendButton.leadingAnchor.constraint(equalTo: inputTextView.trailingAnchor, constant: distTextToSend),
+            sendButton.trailingAnchor.constraint(equalTo: backgroundView.layoutMarginsGuide.trailingAnchor, constant: 5),
             sendButton.bottomAnchor.constraint(equalTo: backgroundView.layoutMarginsGuide.bottomAnchor, constant: 1),
             sendButton.widthAnchor.constraint(equalToConstant: 60),
-            sendButton.heightAnchor.constraint(equalToConstant: 44)
+            sendButton.heightAnchor.constraint(equalToConstant: 44),
+            
+           // audioInputView.leadingAnchor.constraint(equalTo: attachmentsAddButton.trailingAnchor, constant: 6),
+            audioInputView.trailingAnchor.constraint(equalTo: sendButton.leadingAnchor, constant: 0),
+            audioInputView.centerYAnchor.constraint(equalTo: sendButton.centerYAnchor, constant: 0),
         ])
         
         // Отдельно сохраняем heightConstraint для inputTextView
         heightConstraint = inputTextView.heightAnchor.constraint(lessThanOrEqualToConstant: inputTextView.maxVerticalHeight())
         heightConstraint?.isActive = true
     }
-
+    
+    @objc private func deleteAudioButtonTapped() {
+        clearAll()
+    }
+    
     private func addBackgroundViewConstraints() {
         backgroundView.translatesAutoresizingMaskIntoConstraints = false
         NSLayoutConstraint.activate([
@@ -295,7 +366,7 @@ class PSDMessageInputView: UIView, PSDMessageTextViewDelegate,PSDMessageSendButt
             backgroundView.trailingAnchor.constraint(equalTo: trailingAnchor)
         ])
     }
-
+    
     private func addTopGrayLineConstraints() {
         topGrayLine.translatesAutoresizingMaskIntoConstraints = false
         NSLayoutConstraint.activate([
@@ -307,7 +378,7 @@ class PSDMessageInputView: UIView, PSDMessageTextViewDelegate,PSDMessageSendButt
     }
 }
 
-extension PSDMessageInputView : AttachmentCollectionViewDelegateProtocol{
+extension PSDMessageInputView: AttachmentCollectionViewDelegateProtocol {
     func attachmentRemoved(){
         checkCollectionHeight()
         checkSendButton()
@@ -316,8 +387,8 @@ extension PSDMessageInputView : AttachmentCollectionViewDelegateProtocol{
 extension PSDMessageInputView: AttachmentsAddButtonDelegate{
     func addButtonPressed() {
         delegate?.addButtonTapped()
-//        self.becomeFirstResponder()
-//        inputTextView.becomeFirstResponder()
+        //        self.becomeFirstResponder()
+        //        inputTextView.becomeFirstResponder()
     }
     
     func attachmentChoosed(_ data:Data, _ url:URL?)
@@ -347,7 +418,20 @@ extension PSDMessageInputView: RecordableViewProtocol, AudioRecordingObjectDeleg
     }
     
     func didCreateFile(attachment: PSDAttachment, url: URL) {
-        addAttachment(attachment)
+        attachmentsPresenter.addAttachment(attachment)
+        checkSendButton()
+        let audioPlayerPresenter = AudioPlayerPresenter(view: audioInputView, fileUrl: URL(fileURLWithPath: attachment.localPath ?? ""), attachmentId: attachment.localId, attachment: attachment)
+        audioInputView.presenter = audioPlayerPresenter
+
+        UIView.animate(withDuration: 0.2, animations: {
+            self.audioInputView.alpha = 1
+            self.deleteAudioButton.alpha = 1
+            self.attachmentsAddButton.alpha = 0
+            self.inputTextView.alpha = 0
+            self.audioLeadingConstraint?.constant = self.inputTextView.frame.width + 4//self.frame.width - 100
+            self.setNeedsLayout()
+            self.layoutIfNeeded()
+        })
     }
     
     func lastCellRect() -> CGRect {

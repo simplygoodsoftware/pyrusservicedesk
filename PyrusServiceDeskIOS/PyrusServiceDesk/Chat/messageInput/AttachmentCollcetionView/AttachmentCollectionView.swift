@@ -47,7 +47,7 @@ extension AttachmentCollectionView: UICollectionViewDelegate, UICollectionViewDa
             cell = previewCell
         } else if presenter?.canHasPlayerAttachment(at: indexPath.row) ?? false {
             let playerCell = collectionView.dequeueReusableCell(withReuseIdentifier: AttachmentCollectionView.playerCellIdentifier, for: indexPath) as? CustomPlayerCell
-            playerCell?.loadMediaCell(from: presenter?.getAttachmentPath(at: indexPath.row) ?? "", attachmentId: 0)
+            playerCell?.loadMediaCell(from: presenter?.getAttachmentPath(at: indexPath.row) ?? "", attachmentId: "123")
             cell = playerCell
         } else {
             let fileCell = collectionView.dequeueReusableCell(withReuseIdentifier: AttachmentCollectionView.fileCellIdentifier, for: indexPath) as? AttachmentFileCollectionViewCell

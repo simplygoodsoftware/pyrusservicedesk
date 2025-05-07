@@ -1,5 +1,12 @@
+//
+//  AudioPlayerPresenter.swift
+//  Papirus
+//
+//  Created by  Галина Муравьева on 26/06/2019.
+//
+
 import Foundation
-@objc protocol AudioPlayerViewProtocol: AnyObject {
+@objc protocol AudioPlayerViewProtocol: class{
     func changeState(_ state: AudioAttachmentView.AudioState)
     func playingProgress(_ progress: CGFloat)
     func setTime(string: String)
@@ -9,7 +16,7 @@ import Foundation
 @objc class AudioPlayerPresenter: NSObject{
     weak var view: AudioPlayerViewProtocol?
     private var fileUrl: URL?
-    private var attachmentId: NSInteger = 0
+    private var attachmentId: String = ""
     ///The function to pass action. If state is stopped - it's will change to playing and player is starting, else it will be stopped.
     func buttonWasPressed(){
         if view?.state == .playing {
@@ -21,17 +28,18 @@ import Foundation
         }
     }
     ///Change fileUrl
-    func update(fileUrl: URL?, attachmentId: NSInteger){
+    func update(fileUrl: URL?, attachmentId: String){
         self.fileUrl = fileUrl
         self.attachmentId = attachmentId
         self.drawCurrentState()
     }
-    init(view: AudioPlayerViewProtocol?, fileUrl: URL?, attachmentId: NSInteger) {
+    init(view: AudioPlayerViewProtocol?, fileUrl: URL?, attachmentId: String, attachment: PSDAttachment) {
         self.view = view
         self.fileUrl = fileUrl
         self.attachmentId = attachmentId
         super.init()
-        self.drawCurrentState()
+       // self.drawCurrentState()
+        self.changeTime(0)
         
         NotificationCenter.default.addObserver(self, selector: #selector(opusPlayerNotification(notification:)), name: NSNotification.Name(rawValue: OPUS_PLAYER_NOTIFICATION_KEY), object: nil)
         NotificationCenter.default.addObserver(self, selector: #selector(appClosed), name: UIApplication.willResignActiveNotification, object: nil)
@@ -40,9 +48,13 @@ import Foundation
         NotificationCenter.default.addObserver(self, selector: #selector(changeProximityState), name: AVAudioSession.routeChangeNotification, object: nil)*/
     }
     ///Pass to OpusPlayer to start play attachment from url
-    func startPlay(){
+    func startPlay(progress: Float? = nil) {
+        var playingProgress: Int64?
         if self.fileUrl != nil  {
-            OpusPlayer.shared.play(url: self.fileUrl!, attachmentId: attachmentId)
+            if let progress, let dur = getFileTime() {
+                playingProgress = Int64(CGFloat(progress) * dur)
+            }
+            OpusPlayer.shared.play(url: self.fileUrl!, attachmentId: attachmentId, progress: playingProgress)
         }
     }
     ///Pass to OpusPlayer to start play attachment from url
@@ -57,18 +69,21 @@ import Foundation
         return OpusPlayer.shared.isPlaying(fileUrl)
     }
     ///Return current play progress (in milleseconds) or nil if play was not started
-    private func getCurrentPlayProgress() -> Int32? {
-        return OpusPlayer.shared.getProgress(of: fileUrl) / TO_SECONDS
+    private func getCurrentPlayProgress() -> CGFloat?{
+        return OpusPlayer.shared.getProgress(of: fileUrl)
     }
     ///Return full time of audio file if it is playing now
-    private func getFileTime() -> Int32? {
-        return (OpusPlayer.shared.getFileTime(fileUrl) ?? 0) / TO_SECONDS
+    private func getFileTime() -> CGFloat?{
+        return OpusPlayer.shared.getFileTime(fileUrl)
     }
     ///Pass to OpusPlayer to pause play current attachment
     func pausePlay(){
         OpusPlayer.shared.pausePlay(fileUrl)
     }
-    
+    /*
+    @objc private func changeProximityState(){///this is need to lock screen when phone is next to head
+        OpusPlayer.shared.checkSpeaker()
+    }*/
     @objc private func opusPlayerNotification(notification: Notification){
         if let info = notification.userInfo{
             if let urlToStop = info[OpusPlayer.keyStop] as? URL{
@@ -78,55 +93,45 @@ import Foundation
             }
             if let urlToPlay = info[OpusPlayer.keyPlay] as? URL{
                 if urlToPlay == fileUrl{
-                    if
-                        var p = info[OpusPlayer.keyProgress] as? Int32,
-                        var time = info[OpusPlayer.keyTime] as? Int32
-                    {
-                        p = p / TO_SECONDS
-                        time = time / TO_SECONDS
-                        let progress = getPercentProgress(with: p, totalTime: time)
-                        if needChangeState() {
+                    if let progress = info[OpusPlayer.keyProgress] as? CGFloat{
+                        if needChangeState(){
                             drawCurrentState()
                         }
-                        self.view?.playingProgress(progress)
-                        self.changeTime(p)
+                        self.view?.playingProgress(progress / (getFileTime() ?? 0.0))
+                        self.changeTime(progress)
                     }
                 }
             }
         }
     }
+    
     private func needChangeState() -> Bool{
         return (self.view?.state != .playing && self.isPlaying()) || ((self.view?.state != .stopped || self.view?.state != .paused) && !self.isPlaying())
     }
     ///Took Info from OpusPlayer to draw audioAttachmentView state and progress
-    func drawCurrentState(){
+    func drawCurrentState() {
         let p = getCurrentPlayProgress()
         let isPlaying = self.isPlaying()
         if isPlaying{
             self.view?.changeState(.playing)
-            if
-                let p = p,
-                p > 0
-            {
-                let dur = getFileTime() ?? 0
-                let progress = getPercentProgress(with: p, totalTime: dur)
+            if p != nil && p! > 0 {
+                let dur = self.getFileTime() ?? 0
+                let progress = p!/dur
                 self.view?.playingProgress(progress)
-                changeTime(p)
+                changeTime(p!)
             }
         }
         else{
-            if
-                let p = p,
-                p > 0
-            {
+            if p != nil && p! > 0 {
                 let dur = getFileTime() ?? 0
-                let progress = getPercentProgress(with: p, totalTime: dur)
+                let progress = p!/dur
                 self.view?.changeState(.paused)
                 self.view?.playingProgress(progress)
-                changeTime(p)
+                changeTime(p!)
             }
             else{
                 self.view?.changeState(.stopped)
+               // changeTime(0)
             }
         }
     }
@@ -138,39 +143,28 @@ import Foundation
     func cleanUp(){
         OpusPlayer.shared.pauseAllPlay()
     }
-    
-    private func getPercentProgress(with progress: Int32, totalTime: Int32) -> CGFloat {
-        guard totalTime > 0 else {
-            return 0
-        }
-        return CGFloat(progress) / CGFloat(totalTime)
-    }
     ///Change time according to progress(seconds that was played)
-    private func changeTime(_ progress: Int32){
+    func changeTime(_ progress: CGFloat){
         var p = roundf(Float(progress))
         let f = roundf(Float(getFileTime() ?? 0))
         if p > f{
             p = f
         }
-        let progStr = createTimeString(from: Int(p))
-        let fullStr = f > 0 ? createTimeString(from: Int(f)) : DEFAULT_TIME
-        let timeString = "\(progStr)/\(fullStr)"
+        let progStr = createTimeString(from: Int(f - p))
+        let fullStr = createTimeString(from: Int(f))
+        let timeString = "\(progStr)"//\(fullStr)"
         self.view?.setTime(string: timeString)
     }
     
     func createTimeString(from seconds: Int) -> String {
         let secondsPerHour = 3600
         let secondsPerMinute = 60
-
+        
         let hour = seconds / secondsPerHour
         let min = (seconds % secondsPerHour) / secondsPerMinute
         let sec = seconds % secondsPerMinute
-
+        
         let hourString = hour > 0 ? String(format: "%02d:", hour) : ""
         return String(format: "%@%02d:%02d", hourString, min, sec)
     }
 }
-
-private let TO_SECONDS: Int32 = 1000
-private let DEFAULT_TIME: String = "--:--"
-

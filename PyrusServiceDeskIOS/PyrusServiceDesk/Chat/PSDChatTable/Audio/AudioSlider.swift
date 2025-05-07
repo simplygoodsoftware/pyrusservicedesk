@@ -9,8 +9,8 @@
 class AudioCellSlider: UISlider {
     
     enum Constants {
-        static let sliderMinimumTrackColor = UIColor(red: 0, green: 153/255, blue: 153/255, alpha: 1)
-        static let sliderMaximumTrackColor = UIColor(red: 214/255, green: 217/255, blue: 220/255, alpha: 1)
+        static let sliderMinimumTrackColor = UIColor.white//UIColor(red: 0, green: 153/255, blue: 153/255, alpha: 1)
+        static let sliderMaximumTrackColor = UIColor(hex: "#E3E5E84D")?.withAlphaComponent(0.3)//UIColor(red: 214/255, green: 217/255, blue: 220/255, alpha: 1)
         static let sliderThumbSystemImageName = "circle.fill"
         static let expandConstant = 25.0
         static let trackTouchExpansion = 20.0

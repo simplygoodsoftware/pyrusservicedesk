@@ -18,7 +18,9 @@ class PSDMessageSendButton: UIButton {
         self.titleLabel?.font = .title
         let color = PyrusServiceDesk.mainController?.customization?.sendButtonColor ?? UIColor.darkAppColor
         setTitleColor(color, for: .normal)
-        isEnabled = false
+//        isEnabled = false
+        alpha = 0
+        //isHidden = true
         self.contentEdgeInsets = UIEdgeInsets(top: 0.0, left: titleHorizontalInsets, bottom: 0.0, right: titleHorizontalInsets)
         
         self.addTarget(self, action: #selector(sendPressed), for: .touchUpInside)
@@ -26,11 +28,14 @@ class PSDMessageSendButton: UIButton {
        // recolor()
         self.sizeToFit()
     }
-    @objc func sendPressed()
-    {
-        isEnabled = false
+    
+    @objc func sendPressed() {
+        alpha = 0
+        //isHidden = true
+        //isEnabled = false
         self.delegate?.sendMessage()
     }
+    
     required init?(coder aDecoder: NSCoder) {
         super.init(coder: aDecoder)
     }

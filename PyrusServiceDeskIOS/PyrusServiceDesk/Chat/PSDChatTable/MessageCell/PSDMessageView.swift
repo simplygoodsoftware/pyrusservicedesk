@@ -1,12 +1,14 @@
 import UIKit
 
 let MESSAGE_CORNER_RADIUS : CGFloat = 15.0
+
+enum ColorType {
+    case brightColor
+    case defaultColor
+}
+
 class PSDMessageView: PSDView {
     weak var delegate: PSDRetryActionDelegate?
-    enum colorType {
-        case brightColor
-        case defaultColor
-    }
     
     private lazy var timeView: UIView = {
         let view = UIView()
@@ -31,7 +33,7 @@ class PSDMessageView: PSDView {
         return label;
     }()
     
-    var color : colorType = .brightColor {
+    var color : ColorType = .brightColor {
         didSet{
             recolor()
         }
@@ -43,9 +45,15 @@ class PSDMessageView: PSDView {
         case .brightColor:
             self.backgroundColor = CustomizationHelper.userMassageBackgroundColor
             recolorWithTextColor(CustomizationHelper.userMassageTextColor)
+            if let attachmentView = attachmentView as? PSDAudioAttachmentView {
+                attachmentView.sliderColor = .brightColor
+            }
         case .defaultColor:
             self.backgroundColor = CustomizationHelper.supportMassageBackgroundColor
             recolorWithTextColor(CustomizationHelper.supportMassageTextColor)
+            if let attachmentView = attachmentView as? PSDAudioAttachmentView {
+                attachmentView.sliderColor = .defaultColor
+            }
         }
         setColorToTimeView()
     }
@@ -77,6 +85,9 @@ class PSDMessageView: PSDView {
     private let PLACEHOLDER_WIDTH: CGFloat = 50
     var maxWidth: CGFloat = 50
     private static let separatorAlpha :CGFloat = 0.8
+    
+    let audioRepository: AudioRepositoryProtocol? = AudioRepository()
+    
     func draw(message: PSDRowMessage) {
         timeLabel.text = message.message.date.timeAsString()
         if timeLabel.text?.count ?? 0 == 0 {
@@ -102,7 +113,13 @@ class PSDMessageView: PSDView {
                 hasImageAttachment = true
                 attachmentView = PSDImageAttachmentView.init(frame: CGRect.zero)
             } else if data.isAudio {
-                attachmentView = PSDAudioAttachmentView.init(frame: CGRect.zero)
+                let audioAttachmentView = PSDAudioAttachmentView.init(frame: CGRect.zero)
+                if let fileUrl = audioRepository?.getAudioURL(name: data.name, id: data.serverIdentifer) {
+                    let presenter = AudioPlayerPresenter(view: audioAttachmentView, fileUrl: fileUrl, attachmentId: data.serverIdentifer ?? "", attachment: data)
+                    audioAttachmentView.presenter = presenter
+                }
+                audioAttachmentView.changeState(.loading)
+                attachmentView = audioAttachmentView
             } else {
                 attachmentView = PSDFileAttachmentView.init(frame: CGRect.zero)
             }

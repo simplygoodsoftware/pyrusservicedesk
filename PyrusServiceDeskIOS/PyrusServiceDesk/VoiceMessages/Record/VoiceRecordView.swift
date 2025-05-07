@@ -10,7 +10,7 @@ import Foundation
  self.addSubview(view)
  ````
 */
-class VoiceRecordView: UIView, CAAnimationDelegate{
+class VoiceRecordView: UIImageView, CAAnimationDelegate{
     static let linesHeight: CGFloat = 45.0
     static let minLinesHeight: CGFloat = 1.0
     
@@ -67,6 +67,8 @@ class VoiceRecordView: UIView, CAAnimationDelegate{
         self.layer.backgroundColor = PyrusServiceDesk.mainController?.customization?.themeColor?.cgColor//UIColor .requestAcceptBtnBackground.cgColor
         self.layer.cornerRadius = VoiceRecordView.size.height / 2
         self.tintColor = .white
+        clipsToBounds = true
+        self.image = UIImage.PSDImage(name: "recordBackground")
         drawShadow()
         drawDefault()
     }

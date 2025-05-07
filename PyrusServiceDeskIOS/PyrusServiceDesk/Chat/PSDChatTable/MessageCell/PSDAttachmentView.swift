@@ -80,18 +80,18 @@ class PSDAttachmentView: UIView{
     }
     ///Open attachment in PSDAttachmentLoadViewController
     private func openAttachment(){
-        if downloadState != .sent{
+        if downloadState != .sent || attachment?.isAudio ?? false {
             return
         }
-        if (self.attachment?.serverIdentifer?.count ?? 0)>0{
+        if (self.attachment?.serverIdentifer?.count ?? 0) > 0 {
             let web :PSDAttachmentLoadViewController = PSDAttachmentLoadViewController(nibName:nil, bundle:nil)
             web.attachment = self.attachment
             let navCotroller = PSDNavigationController(rootViewController: web)
-                navCotroller.modalPresentationStyle = .fullScreen
+            navCotroller.modalPresentationStyle = .fullScreen
             (findViewController() as? PSDChatViewController)?.hideAllKeyboard()
-        self.findViewController()?.navigationController?.present(navCotroller, animated: true, completion: nil)
+            self.findViewController()?.navigationController?.present(navCotroller, animated: true, completion: nil)
         }
-       
+        
     }
     
     ///Redraw view with attachment

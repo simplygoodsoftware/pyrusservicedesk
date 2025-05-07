@@ -153,6 +153,7 @@ extension PSDChatInteractor: PSDChatInteractorProtocol {
             if !PyrusServiceDesk.multichats {
                 stopGettingInfo()
             }
+            OpusPlayer.shared.stopAllPlay()
         case .viewDidAppear:
             if PyrusServiceDesk.multichats && chat?.chatId ?? 0 == 0 {
                 presenter.doWork(.showKeyBoard)
