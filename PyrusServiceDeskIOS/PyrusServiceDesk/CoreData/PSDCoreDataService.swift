@@ -47,6 +47,69 @@ extension CoreDataService: CoreDataServiceProtocol {
         return try viewContext.fetch(fetchRequest)
     }
     
+    func fetchMessages(searchString: String, completion: @escaping (Result<[DBMessage], Error>) -> Void) {
+        let backgroundContext = backgroundContext
+        backgroundContext.perform {
+            do {
+                let fetchRequest = DBMessage.fetchRequest()
+                let predicate = NSPredicate(format: "text CONTAINS[cd] %@", searchString)
+                fetchRequest.predicate = predicate
+                
+                let results = try backgroundContext.fetch(fetchRequest)
+                completion(.success(results))
+            } catch {
+                print("Fetch error: \(error)")
+                completion(.failure(error))
+            }
+        }
+    }
+    
+    func fetchChats(searchString: String, completion: @escaping (Result<[DBChat], Error>) -> Void) {
+        let backgroundContext = backgroundContext
+        backgroundContext.perform {
+            do {
+                let fetchRequest = DBChat.fetchRequest()
+                let predicate = NSPredicate(format: "subject CONTAINS[cd] %@", searchString)
+                fetchRequest.predicate = predicate
+                
+                let results = try backgroundContext.fetch(fetchRequest)
+                completion(.success(results))
+            } catch {
+                print("Fetch error: \(error)")
+                completion(.failure(error))
+            }
+        }
+    }
+    
+    func fetchChatsAndMessages(searchString: String,
+                               completion: @escaping (Result<([DBMessage], [DBChat]), Error>) -> Void) {
+        let backgroundContext = backgroundContext
+        backgroundContext.perform {
+            do {
+                let mfetchRequest = DBMessage.fetchRequest()
+                let mpredicate = NSPredicate(format: "text CONTAINS[cd] %@", searchString)
+                mfetchRequest.predicate = mpredicate
+                let msortDescriptor = NSSortDescriptor(key: "date", ascending: false)
+                mfetchRequest.sortDescriptors = [msortDescriptor]
+                mfetchRequest.fetchLimit = 50
+                let messages = try backgroundContext.fetch(mfetchRequest)
+                
+                let fetchRequest = DBChat.fetchRequest()
+                let predicate = NSPredicate(format: "subject CONTAINS[cd] %@", searchString)
+                fetchRequest.predicate = predicate
+                let sortDescriptor = NSSortDescriptor(key: "date", ascending: false)
+                fetchRequest.sortDescriptors = [sortDescriptor]
+                fetchRequest.fetchLimit = 50
+                let chats = try backgroundContext.fetch(fetchRequest)
+                
+                completion(.success((messages, chats)))
+            } catch {
+                print("Fetch error: \(error)")
+                completion(.failure(error))
+            }
+        }
+    }
+    
     func fetchCommands() throws -> [DBTicketCommand] {
         let fetchRequest = DBTicketCommand.fetchRequest()
         return try viewContext.fetch(fetchRequest)

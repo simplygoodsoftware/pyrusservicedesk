@@ -123,6 +123,53 @@ extension PSDChatsDataService: PSDChatsDataServiceProtocol {
             return []
         }
     }
+    
+    func searchMessages(searchString: String, completion: @escaping (Result<[SearchChatModel], Error>) -> Void) {
+        coreDataService.fetchChatsAndMessages(searchString: searchString) { result in
+            switch result {
+            case .success(let (dbMessages, dbChats)):
+                var chatModels = [SearchChatModel]()
+                for dbChat in dbChats {
+                    let chat = PyrusServiceDesk.chats.first { $0.chatId == Int(dbChat.chatId) }
+                    let authorName = chat?.messages.last?.owner.authorId == PyrusServiceDesk.authorId
+                    ? "Вы"
+                    :  chat?.messages.last?.owner.name ?? ""
+                    var model = SearchChatModel(
+                        id: chat?.chatId ?? 0,
+                        date: chat?.lastComment?.date ?? Date(),
+                        subject: chat?.subject ?? "",
+                        messageText: chat?.lastComment?.text ?? "",
+                        messageId: chat?.lastComment?.messageId ?? "",
+                        authorName: authorName,
+                        isMessage: false
+                    )
+                    model.lastMessage = chat?.messages.last
+                    chatModels.append(model)
+                }
+                
+                for dbMessage in dbMessages {
+                    if let dbChat = dbMessage.chat {
+                        let authorName = dbMessage.authorId == PyrusServiceDesk.authorId
+                        ? "Вы"
+                        : dbMessage.authorName ?? ""
+                        let model = SearchChatModel(
+                            id: Int(dbChat.chatId),
+                            date: dbMessage.date ?? Date(),
+                            subject: dbChat.subject ?? "",
+                            messageText: dbMessage.text ?? "",
+                            messageId: dbMessage.messageId ?? "",
+                            authorName: authorName,
+                            isMessage: true
+                        )
+                        chatModels.append(model)
+                    }
+                }
+                completion(.success(chatModels))
+            case .failure(let error):
+                completion(.failure(error))
+            }
+        }
+    }
 
     func saveChatModels(with chatModels: [PSDChat], completion: ((Result<Void, Error>) -> Void)?) {
         let ids = chatModels.compactMap({ Int64($0.chatId ?? 0) })

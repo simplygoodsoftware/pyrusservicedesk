@@ -41,9 +41,21 @@ extension SearchInteractor: SearchInteractorProtocol {
             }
             break
         case .search(text: let text):
-            let chats = chatsDataService.searchMessages(searchString: text).sorted(by: { $0.date > $1.date })
-            presenter.doWork(.updateChats(chats: chats, searchString: text))
-            self.chats = chats
+//            let chats = chatsDataService.searchMessages(searchString: text).sorted(by: { $0.date > $1.date })
+//            presenter.doWork(.updateChats(chats: chats, searchString: text))
+//            self.chats = chats
+            chatsDataService.searchMessages(searchString: text) { [weak self] result in
+                switch result {
+                case .success(let chats):
+                    DispatchQueue.main.async { [weak self] in
+                        let sortedChats = chats.sorted(by: { $0.date > $1.date })
+                        self?.chats = sortedChats
+                        self?.presenter.doWork(.updateChats(chats: sortedChats, searchString: text))
+                    }
+                case .failure(let failure):
+                    break
+                }
+            }
         case .viewWillAppear:
             PyrusServiceDesk.currentUserId = nil
             PyrusServiceDesk.currentClientId = oldClientId

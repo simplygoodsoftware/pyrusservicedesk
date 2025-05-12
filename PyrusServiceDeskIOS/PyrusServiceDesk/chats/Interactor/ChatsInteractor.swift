@@ -414,7 +414,7 @@ private extension ChatsInteractor {
                     if user.clientId == clientId {
                         filterChats.append(chat)
                     }
-                } else if PyrusServiceDesk.clientId == clientId {
+                } else if PyrusServiceDesk.clientId == clientId && chat.userId == (PyrusServiceDesk.customUserId ?? PyrusServiceDesk.userId) {
                     filterChats.append(chat)
                 }
             }

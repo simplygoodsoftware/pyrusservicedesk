@@ -348,7 +348,7 @@ class PSDChatViewController: PSDViewController {
         customiseDesign(color: PyrusServiceDesk.mainController?.customization?.barButtonTintColor ?? UIColor.darkAppColor)
         setupScrollButton()
         setupClosedTicketView()
-        setupChatInfoView()
+//        setupChatInfoView()
       //  setupInfoTableView()
     }
     
@@ -474,7 +474,7 @@ class PSDChatViewController: PSDViewController {
             let smallId = UISheetPresentationController.Detent.Identifier("small")
             if #available(iOS 16.0, *) {
                 let smallDetent = UISheetPresentationController.Detent.custom(identifier: smallId) { context in
-                    return context.maximumDetentValue * 0.24
+                    return context.maximumDetentValue * 0.3
                 }
                 sheet.detents = [smallDetent]
             } else {
