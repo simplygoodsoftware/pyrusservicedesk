@@ -16,11 +16,11 @@ class PSDAudioAttachmentView: PSDAttachmentView {
     
     override var color: UIColor {
         didSet {
-            nameLabel.textColor = color
             stateLabel.textColor = color
             previewBorderLayer.strokeColor = color.withAlphaComponent(0.15).cgColor
         }
     }
+    
     var state: AudioAttachmentView.AudioState = .loading {
         didSet {
             DispatchQueue.main.async { [weak self] in
@@ -31,6 +31,7 @@ class PSDAudioAttachmentView: PSDAttachmentView {
                     playImageView.image = UIImage.PSDImage(name: "Close")?.imageWith(color: .white)
                     playView.layer.addLoadingAnimation()
                     slider.isUserInteractionEnabled = false
+                    slider.setValue(0, animated: false)
                 case .playing:
                     playImageView.image = UIImage.PSDImage(name: "pause")?.imageWith(color: .white)
                     playView.layer.removeLoadingAnimation()
@@ -104,21 +105,6 @@ class PSDAudioAttachmentView: PSDAttachmentView {
         return view
     }()
     
-    private lazy var nameLabel: UILabel = {
-        let label = UILabel()
-        label.adjustsFontSizeToFitWidth = true
-        label.minimumScaleFactor = LABEL_MINIMUM_SCALE_FACTOR
-        label.lineBreakMode = .byTruncatingMiddle
-        label.frame = CGRect(
-            x: (Constants.distance * 2) + PSDAttachmentView.uploadSize,
-            y: height - Constants.stateLabelHeight - Constants.distance - Constants.nameLabelHeight,
-            width: 10,
-            height: Constants.nameLabelHeight
-        )
-        label.isHidden = true
-        return label
-    }()
-    
     private lazy var stateLabel: UILabel = {
         let label = UILabel()
         label.alpha = Constants.stateLabelAlpha
@@ -159,14 +145,7 @@ class PSDAudioAttachmentView: PSDAttachmentView {
         previewImageView.isHidden = true
         Constants.sizeString = attachment.dataSize()
         updateStateText(with: state)
-        
         stateLabel.font = .stateFont
-        nameLabel.font = .nameFont
-        nameLabel.text = attachment.name
-        
-        var rect = nameLabel.frame
-        rect.size.width = nameLabelWidth()
-        nameLabel.frame = rect
         updateLabelsConstraints()
     }
     
@@ -187,7 +166,6 @@ class PSDAudioAttachmentView: PSDAttachmentView {
     }
     
     private func setupViews() {
-        addSubview(nameLabel)
         addSubview(stateLabel)
         addSubview(slider)
         addSubview(playView)
@@ -199,7 +177,6 @@ class PSDAudioAttachmentView: PSDAttachmentView {
     private func setupConstraints() {
         uploadView.translatesAutoresizingMaskIntoConstraints = false
         stateLabel.translatesAutoresizingMaskIntoConstraints = false
-        nameLabel.translatesAutoresizingMaskIntoConstraints = false
         previewImageView.translatesAutoresizingMaskIntoConstraints = false
         slider.translatesAutoresizingMaskIntoConstraints = false
         
@@ -276,15 +253,9 @@ class PSDAudioAttachmentView: PSDAttachmentView {
     }
     
     private func getMaxWidth() -> CGFloat {
-        return min(
-            maxWidth - (Constants.distance * 2) - PSDAttachmentView.uploadSize,
-            max(maxStateLabelWidth(), nameLabelWidth())
-        )
+        return 233
     }
-    
-    private func nameLabelWidth() -> CGFloat {
-        return 233//nameLabel.text?.size(withAttributes: [.font: UIFont.nameFont]).width ?? 0
-    }
+
     
     private func maxStateLabelWidth() -> CGFloat {
         let downloadWidth = Constants.uploadString.size(withAttributes: [.font: UIFont.stateFont]).width
@@ -313,7 +284,7 @@ extension PSDAudioAttachmentView: AudioPlayerViewProtocol {
     }
     
     func playingProgress(_ progress: CGFloat) {
-        if !slider.isTracking && state == .playing {// && (Float(progress) >= slider.value || progress == 0) {
+        if !slider.isTracking && state == .playing && downloadState == .sent {// && (Float(progress) >= slider.value || progress == 0) {
             slider.setValue(Float(progress), animated: true)
         }
     }
