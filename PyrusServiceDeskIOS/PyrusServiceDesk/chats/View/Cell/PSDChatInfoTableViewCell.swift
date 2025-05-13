@@ -72,7 +72,7 @@ class PSDChatInfoTableViewCell: UITableViewCell {
     func configure(with model: ChatViewModel) {
         timeLabel.text = model.date
         messageLabel.text = model.subject
-        lastMessageInfo.attributedText = removeLinkAttributes(from: (model.lastMessageText as NSString).parseXMLToAttributedString(fontColor: .lastMessageInfo, font: .lastMessageInfo).0)
+        lastMessageInfo.attributedText = HelpersStrings.decodeHTML(in: removeLinkAttributes(from: (model.lastMessageText as NSString).parseXMLToAttributedString(fontColor: .lastMessageInfo, font: .lastMessageInfo).0) ?? NSAttributedString(string: ""))
         notificationButton.isHidden = model.isRead
         attachmentName.text = model.attachmentText
         attachmentIcon.isHidden = !model.hasAttachment

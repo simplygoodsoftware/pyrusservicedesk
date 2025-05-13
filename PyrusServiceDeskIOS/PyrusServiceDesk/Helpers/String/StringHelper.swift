@@ -328,6 +328,65 @@ class HelpersStrings {
         return domains.contains(host)
     }
     
+    static func decodeHTMLString(_ string: String) -> String? {
+        guard let data = string.data(using: .utf8) else { return nil }
+        
+        let options: [NSAttributedString.DocumentReadingOptionKey: Any] = [
+            .documentType: NSAttributedString.DocumentType.html,
+            .characterEncoding: String.Encoding.utf8.rawValue
+        ]
+        
+        guard let attributedString = try? NSAttributedString(
+            data: data,
+            options: options,
+            documentAttributes: nil
+        ) else { return nil }
+        
+        return attributedString.string
+    }
+    
+    static func decodeHTML(in attributedString: NSAttributedString) -> NSAttributedString {
+        // Создаем мутабельную копию входного attributedString
+        let mutableResult = NSMutableAttributedString(attributedString: attributedString)
+        
+        // Ищем все HTML-сущности в тексте
+        let string = mutableResult.string
+        let pattern = "&(?:[a-z]+|#x?[0-9]+);"
+        
+        guard let regex = try? NSRegularExpression(pattern: pattern, options: .caseInsensitive) else {
+            return attributedString
+        }
+        
+        // Обрабатываем совпадения с конца, чтобы не сбивались индексы при замене
+        let matches = regex.matches(in: string, range: NSRange(location: 0, length: string.utf16.count)).reversed()
+        
+        for match in matches {
+            let entityRange = match.range
+            let entity = (string as NSString).substring(with: entityRange)
+            
+            // Декодируем HTML-сущность
+            if let decodedData = entity.data(using: .utf8),
+               let decodedString = try? NSAttributedString(
+                    data: decodedData,
+                    options: [.documentType: NSAttributedString.DocumentType.html,
+                             .characterEncoding: String.Encoding.utf8.rawValue],
+                    documentAttributes: nil) {
+                
+                // Сохраняем оригинальные атрибуты для этого диапазона
+                let originalAttributes = mutableResult.attributes(at: entityRange.location, effectiveRange: nil)
+                
+                // Заменяем сущность на декодированный символ
+                mutableResult.replaceCharacters(in: entityRange, with: decodedString.string)
+                
+                // Восстанавливаем оригинальные атрибуты
+                let newRange = NSRange(location: entityRange.location, length: decodedString.string.utf16.count)
+                mutableResult.addAttributes(originalAttributes, range: newRange)
+            }
+        }
+        
+        return NSAttributedString(attributedString: mutableResult)
+    }
+    
     static func attributedString(byDecodingHTMLEntities strAttr: NSMutableAttributedString) -> NSMutableAttributedString {
         var range: NSRange = NSRange(location: 0, length: strAttr.length)
         var subrange: NSRange = (strAttr.string as NSString).range(of: "&", options: .backwards, range: range)
