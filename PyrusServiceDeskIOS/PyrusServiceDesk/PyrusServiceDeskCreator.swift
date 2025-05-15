@@ -349,6 +349,8 @@ import UIKit
             syncManager.chatsDataService.deleteAllObjects()
             let imageRepository = ImageRepository()
             imageRepository?.clearRepository()
+            let audioReportRepository = AudioRepository()
+            audioReportRepository?.clearRepository()
         }
     }
     

@@ -35,7 +35,9 @@ class AudioInputView: UIView {
                     playImageView.image = UIImage.PSDImage(name: "playIcon")?.imageWith(color: .white)
                 case .stopped:
                     playImageView.image = UIImage.PSDImage(name: "playIcon")?.imageWith(color: .white)
-                    slider.setValue(0, animated: false)
+                    if !slider.isTracking {
+                        slider.setValue(0, animated: false)
+                    }
                     presenter?.changeTime(0)
                 }
             }
@@ -60,7 +62,7 @@ class AudioInputView: UIView {
         return label
     }()
     
-    private lazy var slider = {
+    var slider: UISlider = {
         let slider = AudioCellSlider()
         slider.minimumTrackTintColor = PyrusServiceDesk.mainController?.customization?.themeColor
         slider.maximumTrackTintColor = .trackColor//UIColor(hex: "#D9D9D9")
@@ -130,7 +132,7 @@ class AudioInputView: UIView {
     }
     
     @objc func endDragging() {
-        presenter?.startPlay(progress: slider.value * Float(OpusPlayer.OpusAudioPlayerSampleRate))
+        presenter?.startPlay(progress: slider.value)
     }
     
     @objc func buttonTapped() {

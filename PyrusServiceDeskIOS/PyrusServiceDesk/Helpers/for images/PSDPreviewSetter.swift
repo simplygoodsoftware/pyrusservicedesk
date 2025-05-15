@@ -36,9 +36,10 @@ struct PSDPreviewSetter {
                          )
                          (attachmentView as? PSDAudioAttachmentView)?.changeLoadingProggress(1)
                              (attachmentView as? PSDAudioAttachmentView)?.changeState(.stopped)
+                         return 
                      }
                      
-                     if !attachment.emptyId(){
+                     if !attachment.emptyId() {
                          let url = PyrusServiceDeskAPI.PSDURL(type: .download, ticketId: attachment.serverIdentifer!)
                          PyrusServiceDesk.mainSession.dataTask(with: url) { data, response, error in
                              if let data, data.count != 0 {

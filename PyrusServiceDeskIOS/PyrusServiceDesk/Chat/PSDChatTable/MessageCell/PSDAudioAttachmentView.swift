@@ -50,7 +50,9 @@ class PSDAudioAttachmentView: PSDAttachmentView {
                    // if oldValue == .loading {
                         presenter?.changeTime(0)
                   //  }
-                    slider.setValue(0, animated: false)
+                    if !slider.isTracking {
+                        slider.setValue(0, animated: false)
+                    }
                 }
             }
         }
@@ -126,7 +128,7 @@ class PSDAudioAttachmentView: PSDAttachmentView {
         return borderLayer
     }()
     
-    private lazy var slider = AudioCellSlider()
+    var slider: UISlider = AudioCellSlider()
     
     private var stateWidthConstraint: NSLayoutConstraint?
     
@@ -236,7 +238,7 @@ class PSDAudioAttachmentView: PSDAttachmentView {
     }
     
     @objc func endDragging() {
-        presenter?.startPlay(progress: slider.value * Float(OpusPlayer.OpusAudioPlayerSampleRate))
+        presenter?.startPlay(progress: slider.value)
     }
     
     @objc func startDragging() {
@@ -284,8 +286,9 @@ extension PSDAudioAttachmentView: AudioPlayerViewProtocol {
     }
     
     func playingProgress(_ progress: CGFloat) {
-        if !slider.isTracking && state == .playing && downloadState == .sent {// && (Float(progress) >= slider.value || progress == 0) {
+        if !slider.isTracking && (state == .playing || state == .paused) && downloadState == .sent {// && (Float(progress) >= slider.value || progress == 0) {
             slider.setValue(Float(progress), animated: true)
+            print(progress)
         }
     }
     

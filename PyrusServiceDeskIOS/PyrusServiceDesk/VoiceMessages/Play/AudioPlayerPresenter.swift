@@ -11,6 +11,7 @@ import Foundation
     func playingProgress(_ progress: CGFloat)
     func setTime(string: String)
     @objc var state: AudioAttachmentView.AudioState { get }
+    var slider: UISlider { get }
 }
 
 @objc class AudioPlayerPresenter: NSObject{
@@ -24,7 +25,7 @@ import Foundation
             self.pausePlay()
         }else{
             view?.changeState(.playing)
-            self.startPlay()
+            self.startPlay(progress: view?.slider.value)
         }
     }
     ///Change fileUrl
@@ -52,7 +53,7 @@ import Foundation
         var playingProgress: Int64?
         if self.fileUrl != nil  {
             if let progress, let dur = getFileTime() {
-                playingProgress = Int64(CGFloat(progress) * dur)
+                playingProgress = Int64(CGFloat(progress) * CGFloat(AudioFormatManager.getPcmTotal(path: fileUrl!.path)))
             }
             OpusPlayer.shared.play(url: self.fileUrl!, attachmentId: attachmentId, progress: playingProgress)
         }
@@ -97,7 +98,7 @@ import Foundation
                         if needChangeState(){
                             drawCurrentState()
                         }
-                        self.view?.playingProgress(progress / (getFileTime() ?? 0.0))
+                        self.view?.playingProgress(progress)// / (getFileTime() ?? 0.0))
                         self.changeTime(progress)
                     }
                 }
@@ -117,7 +118,7 @@ import Foundation
             if p != nil && p! > 0 {
                 let dur = self.getFileTime() ?? 0
                 let progress = p!/dur
-                self.view?.playingProgress(progress)
+                self.view?.playingProgress(p ?? 0)
                 changeTime(p!)
             }
         }
@@ -126,8 +127,8 @@ import Foundation
                 let dur = getFileTime() ?? 0
                 let progress = p!/dur
                 self.view?.changeState(.paused)
-                self.view?.playingProgress(progress)
-                changeTime(p!)
+                //self.view?.playingProgress(p!)
+//                changeTime(p!)
             }
             else{
                 self.view?.changeState(.stopped)
@@ -145,7 +146,7 @@ import Foundation
     }
     ///Change time according to progress(seconds that was played)
     func changeTime(_ progress: CGFloat){
-        var p = roundf(Float(progress))
+        var p = roundf(Float(progress) * Float(getFileTime() ?? 0))
         let f = roundf(Float(getFileTime() ?? 0))
         if p > f{
             p = f

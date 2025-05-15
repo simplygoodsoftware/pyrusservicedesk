@@ -111,10 +111,14 @@ class AudioRepository: AudioRepositoryProtocol {
         }
     }
     
-    func clearRepository() throws {
-        let contents = try fileManager.contentsOfDirectory(at: directoryURL, includingPropertiesForKeys: nil)
-        for url in contents {
-            try fileManager.removeItem(at: url)
+    func clearRepository() {        
+        do {
+            let contents = try fileManager.contentsOfDirectory(at: directoryURL, includingPropertiesForKeys: nil)
+            for url in contents {
+                try fileManager.removeItem(at: url)
+            }
+        } catch {
+            print("failed cleaar audio repository: \(error)")
         }
     }
 }

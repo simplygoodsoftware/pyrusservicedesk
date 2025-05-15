@@ -3,7 +3,7 @@ import AudioToolbox
 import CoreAudioKit
 import libopus
 
-let bufCount: Int = 9
+let bufCount: Int = 2
 let OPUS_PLAYER_NOTIFICATION_KEY = "opusPlayerNotification"
 @objc class OpusPlayer: NSObject {
     ///The key to store attachment id that is stopping
@@ -25,10 +25,14 @@ let OPUS_PLAYER_NOTIFICATION_KEY = "opusPlayerNotification"
     private var mBuffers = [AudioQueueBufferRef?](repeating: nil, count: bufCount)
     private var pUrl: URL?
     private var pId: String = ""//The id of attachment, using to detect local attachments
-    static let OpusAudioPlayerSampleRate = 44100
+    static let OpusAudioPlayerSampleRate = Int(AVAudioSession.sharedInstance().sampleRate)
+    
+    private var isPausedTapped: Bool = false
+    
     private var progressTimer: Timer?
     private static let startPlayLogName: String = "Audio : start play"
     private static let errorPlayLogName: String = "Audio : Error: Can't open OggOpusFile"
+    
     ///Start new AudioQueue and kill old.
     func play(url: URL, attachmentId: String, progress: Int64?) {
       //  if pUrl != url{
@@ -51,6 +55,7 @@ let OPUS_PLAYER_NOTIFICATION_KEY = "opusPlayerNotification"
                 if pQueue != nil{
                     AudioQueuePrime(pQueue!, UInt32(bufCount), nil)
                     startPlay()
+                    passProgress()
                 }
                 else{
                     print("Error create pQueue")
@@ -62,6 +67,7 @@ let OPUS_PLAYER_NOTIFICATION_KEY = "opusPlayerNotification"
             }
         }else{
             startPlay()
+            passProgress()
         }
     }
     ///Kill old play, and remember the new one.
@@ -77,13 +83,14 @@ let OPUS_PLAYER_NOTIFICATION_KEY = "opusPlayerNotification"
         if pQueue != nil {
             paused = false
             checkSpeaker()
-            AudioQueueStart(pQueue!, nil)
-            UIApplication.shared.isIdleTimerDisabled = true
-            //UIDevice.current.isProximityMonitoringEnabled = true//automatically turn screen off when holding against ear
             createTimer()
             if progressTimer != nil {
                 RunLoop.current.add(self.progressTimer!, forMode: .default)
             }
+            AudioQueueStart(pQueue!, nil)
+            UIApplication.shared.isIdleTimerDisabled = true
+            //UIDevice.current.isProximityMonitoringEnabled = true//automatically turn screen off when holding against ear
+
         }
         
     }
@@ -106,13 +113,16 @@ let OPUS_PLAYER_NOTIFICATION_KEY = "opusPlayerNotification"
     func getProgress(of url: URL?) -> CGFloat{
         if pQueue != nil && url == pUrl && self.decoder != nil{
             let psmOffset = self.decoder?.psmOffset() ?? 0
+            let psmTotal = self.decoder?.getPcmTotal() ?? 0
+            print("psmOffset: \(CGFloat(psmOffset)/CGFloat(psmTotal)), psmTotal: \(psmTotal)")
             let curSecProgress = CGFloat(psmOffset) / CGFloat(OpusPlayer.OpusAudioPlayerSampleRate)
            
-            return curSecProgress
+            return CGFloat(psmOffset) / CGFloat(psmTotal)//curSecProgress
         }
         else{
             let savedProgresss = getSavedProgress(url: url)
-            let startedProgress = CGFloat(savedProgresss) / CGFloat(OpusPlayer.OpusAudioPlayerSampleRate)
+            let psmTotal = self.decoder?.getPcmTotal() ?? 0
+            let startedProgress = CGFloat(savedProgresss) / CGFloat(psmTotal)// CGFloat(OpusPlayer.OpusAudioPlayerSampleRate)
              return startedProgress
         }
        
@@ -136,15 +146,16 @@ let OPUS_PLAYER_NOTIFICATION_KEY = "opusPlayerNotification"
     ///Pause all current play(if it play)
     @objc func pauseAllPlay(){
         if pQueue != nil{
+            saveProgress()
+            
             UIApplication.shared.isIdleTimerDisabled = false
             //UIDevice.current.isProximityMonitoringEnabled = false
             AudioQueuePause(pQueue!)
             paused = true
             
-            saveProgress()
-            
             self.progressTimer?.invalidate()
             self.progressTimer = nil
+            passProgress()
         }
     }
     ///Pause play if now playing the same attachment url as in parameter, and clean info about progress if cleanAfter is true.
@@ -154,7 +165,8 @@ let OPUS_PLAYER_NOTIFICATION_KEY = "opusPlayerNotification"
                 stopCurrentPlaying()
                 self.progressesMap[pUrl!] = 0
             }else{
-                pauseAllPlay()
+                //pauseAllPlay()
+                isPausedTapped = true
             }
             passStopped(to: pUrl!)
         }
@@ -169,6 +181,7 @@ let OPUS_PLAYER_NOTIFICATION_KEY = "opusPlayerNotification"
         if pUrl != nil {
             var psmOffset: Int64 = self.decoder?.psmOffset() ?? 0
             let totalPcm = decoder?.getPcmTotal() ?? 0
+            print("opa \(CGFloat(CGFloat(psmOffset)/CGFloat(totalPcm)))")
             if pUrl != nil && psmOffset >= totalPcm {
                 psmOffset = 0
             }
@@ -184,11 +197,12 @@ let OPUS_PLAYER_NOTIFICATION_KEY = "opusPlayerNotification"
     }
     private func createTimer() {
         if progressTimer == nil {
-            progressTimer = Timer.scheduledTimer(timeInterval: 0.1,
+            progressTimer = Timer.scheduledTimer(timeInterval: 0.05,
                                          target: self,
                                          selector: #selector(passProgress),
                                          userInfo: nil,
                                          repeats: true)
+            passProgress()
         }
     }
     ///Post notification with info about changed progress
@@ -252,6 +266,11 @@ let OPUS_PLAYER_NOTIFICATION_KEY = "opusPlayerNotification"
     }
     private func readBuffer(_ buffer: AudioQueueBufferRef){
         if (self.decoder?.read(buffer) ?? false) && self.pQueue != nil{
+            if isPausedTapped {
+                isPausedTapped = false
+                pauseAllPlay()
+                return
+            }
             AudioQueueEnqueueBuffer(self.pQueue!, buffer, 0, nil)
         }else if pUrl != nil{
             stopCurrentPlaying()
@@ -305,6 +324,8 @@ let OPUS_PLAYER_NOTIFICATION_KEY = "opusPlayerNotification"
         
         guard let userData = userData else { return }
         let pl = Unmanaged<OpusPlayer>.fromOpaque(userData).takeUnretainedValue()
+        
+
         
         let buf: AudioQueueBufferRef = inCompleteAQBuffer
         pl.readBuffer(buf)
