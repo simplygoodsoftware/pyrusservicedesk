@@ -288,7 +288,11 @@ private extension PSDChatTableView {
         }
         attachmentView.progress = attachment.uploadingProgress
         attachmentView.downloadState = message.message.state
-        guard message.message.state == .sending else {
+        
+        //Было         guard message.message.state == .sending else {
+        //выглядит как баг, зачем менять с sending на sent???
+
+        guard message.message.state == .sent else {
             return
         }
         let stateView = (self.cellForRow(at: indexPath) as? PSDUserMessageCell)?.messageStateView

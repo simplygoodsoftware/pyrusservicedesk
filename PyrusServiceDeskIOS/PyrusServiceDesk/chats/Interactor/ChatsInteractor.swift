@@ -71,6 +71,9 @@ class ChatsInteractor: NSObject {
                 self?.updateChats(isFilter: isFilter)
             }
         }
+        NotificationCenter.default.addObserver(forName: PSDMessageSend.createNewCommand, object: nil, queue: .main) { _ in
+            self.updateData()
+        }
         NotificationCenter.default.addObserver(self, selector: #selector(changedClientId), name: PyrusServiceDesk.clientIdChangedNotification, object: nil)
 
     }
@@ -118,18 +121,8 @@ extension ChatsInteractor: ChatsInteractorProtocol {
         case .viewWillAppear:
    //         guard PyrusServiceDesk.chats.count > 0 else { break }
             PyrusServiceDesk.syncManager.syncGetTickets()
-            if !isFiltered {
-                PyrusServiceDesk.currentUserId = nil
-            }
-            let filterChats = createChats()
-            if filterChats != chats {
-                chats = filterChats
-            }
-            if chats.count > 0 {
-                presenter.doWork(.updateChats(chats: prepareChats()))
-                firtLoad = false
-                presenter.doWork(.endRefresh)
-            }
+            
+//            updateData()
             
             if RateManager.isActionPerformed(times: 3) {
                 RateManager.setIfNilDateForNextRate()
@@ -146,6 +139,21 @@ extension ChatsInteractor: ChatsInteractorProtocol {
                       
         case .updateSelected(index: let index):
             updateSelected(index: index)
+        }
+    }
+    
+    private func updateData() {
+        if !isFiltered {
+            PyrusServiceDesk.currentUserId = nil
+        }
+        let filterChats = createChats()
+        if filterChats != chats {
+            chats = filterChats
+        }
+        if chats.count > 0 {
+            presenter.doWork(.updateChats(chats: prepareChats()))
+            firtLoad = false
+            presenter.doWork(.endRefresh)
         }
     }
 }
@@ -510,3 +518,4 @@ private extension ChatsInteractor {
         return users
     }
 }
+
