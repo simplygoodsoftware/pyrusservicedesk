@@ -40,6 +40,7 @@ extension RecordableViewProtocol where Self: UIView{
         }
         if let voiceRecordView = self.voiceRecordView{
             self.addSubview(voiceRecordView)
+            self.sendSubviewToBack(voiceRecordView)
             self.changeRecordBottom()
             self.layoutIfNeeded()
             let buttonRect = recordButtonRect()

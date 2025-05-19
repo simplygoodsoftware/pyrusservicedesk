@@ -3,7 +3,7 @@ import AudioToolbox
 import CoreAudioKit
 import libopus
 
-let bufCount: Int = 2
+let bufCount: Int = 3
 let OPUS_PLAYER_NOTIFICATION_KEY = "opusPlayerNotification"
 @objc class OpusPlayer: NSObject {
     ///The key to store attachment id that is stopping

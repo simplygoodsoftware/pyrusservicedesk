@@ -6,6 +6,8 @@ protocol PSDMessageInputViewDelegate: class {
     func sendRate(_ rateValue: Int)
     func addButtonTapped()
     func addAttachment()
+    func recordStart()
+    func recordStop()
 }
 let DEFAULT_LAYOUT_MARGINS: CGFloat = 8
 let BUTTONS_CORNER_RADIUS: CGFloat = 8
@@ -43,6 +45,7 @@ class PSDMessageInputView: UIView, PSDMessageTextViewDelegate,PSDMessageSendButt
     private var centerYConstraint: NSLayoutConstraint!
     var voiceRecordView: VoiceRecordView?
     var recordBuble: BubleTextView?
+    var lockRecordView: LockView?
     
     private(set) lazy var addVoiceMessageButton: VoiceRecordButton = {
         let button = VoiceRecordButton()
@@ -66,6 +69,18 @@ class PSDMessageInputView: UIView, PSDMessageTextViewDelegate,PSDMessageSendButt
         button.setImage(UIImage.PSDImage(name: "deleteAudio"), for: .normal)
         button.alpha = 0
         button.addTarget(self, action: #selector(deleteAudioButtonTapped), for: .touchUpInside)
+        return button
+    }()
+    
+    private lazy var cancelButton: UIButton = {
+        let button = UIButton()
+        button.translatesAutoresizingMaskIntoConstraints = false
+        button.setTitle("  " + "Cancel".localizedPSD(), for: .normal)
+        button.setTitleColor(PyrusServiceDesk.mainController?.customization?.themeColor, for: .normal)
+        button.setImage(UIImage.PSDImage(name: "arrowsLeft"), for: .normal)
+        button.titleLabel?.font = UIFont.systemFont(ofSize: 16)
+        button.alpha = 0
+        button.addTarget(self, action: #selector(cancel), for: .touchUpInside)
         return button
     }()
     
@@ -111,7 +126,7 @@ class PSDMessageInputView: UIView, PSDMessageTextViewDelegate,PSDMessageSendButt
         x = x + attachmentsAddButton.frame.size.width + distAddToText
         
         recordButton = VoiceRecordButton(frame: .zero)//CGRect(x: 270, y: -3, width: 60, height: 60))
-        
+        lockRecordView = LockView(frame: .zero)
         
         sendButton = PSDMessageSendButton.init()
         sendButton.frame = CGRect(x: 0, y: 0, width: 44, height: 44)
@@ -128,12 +143,16 @@ class PSDMessageInputView: UIView, PSDMessageTextViewDelegate,PSDMessageSendButt
         backgroundView.addSubview(topGrayLine)
         backgroundView.addSubview(attachmentsAddButton)
         backgroundView.addSubview(inputTextView)
+        backgroundView.addSubview(cancelButton)
         backgroundView.addSubview(sendButton)
         backgroundView.addSubview(attachmentsCollection)
         backgroundView.addSubview(rateView)
+        backgroundView.addSubview(lockRecordView!)
         backgroundView.addSubview(recordButton!)
         backgroundView.addSubview(audioInputView)
         backgroundView.addSubview(deleteAudioButton)
+        backgroundView.clipsToBounds = false
+        clipsToBounds = false
         
         rateView.isHidden = !showRate
         
@@ -141,6 +160,10 @@ class PSDMessageInputView: UIView, PSDMessageTextViewDelegate,PSDMessageSendButt
         
         self.recordingObject = AudioRecordingObject.init()
         self.recordingObject?.createWith(self)
+        
+        let stopView = UIImageView(image: UIImage.PSDImage(name: "stopRecord"))
+        stopView.backgroundColor = .backgroundColor
+        stopView.layer.cornerRadius = 22
     }
     
     func setupAudioInputView() {
@@ -179,7 +202,7 @@ class PSDMessageInputView: UIView, PSDMessageTextViewDelegate,PSDMessageSendButt
     
     override func hitTest(_ point: CGPoint, with event: UIEvent?) -> UIView? {
         let view = super.hitTest(point, with: event)
-        return view == self ? nil : view
+        return (view == self || view == lockRecordView) ? nil : view
     }
     
     required init?(coder aDecoder: NSCoder) {
@@ -204,6 +227,10 @@ class PSDMessageInputView: UIView, PSDMessageTextViewDelegate,PSDMessageSendButt
         }
     }
     
+    func stopRecord() {
+        recordButton?.stopRecordButtonTapped()
+    }
+    
     ///Clear text.
     func clearAll() {
         inputTextView.text = ""
@@ -217,6 +244,7 @@ class PSDMessageInputView: UIView, PSDMessageTextViewDelegate,PSDMessageSendButt
             self.deleteAudioButton.alpha = 0
             self.attachmentsAddButton.alpha = 1
             self.inputTextView.alpha = 1
+            self.cancelButton.alpha = 0
         }, completion: {_ in
             self.audioLeadingConstraint?.constant = 0
             OpusPlayer.shared.stopAllPlay()
@@ -226,6 +254,7 @@ class PSDMessageInputView: UIView, PSDMessageTextViewDelegate,PSDMessageSendButt
             self.audioInputView.state = .stopped
             self.audioInputView.layoutIfNeeded()
             self.audioInputView.setNeedsLayout()
+            self.cancelButton.setImage(UIImage.PSDImage(name: "arrowsLeft"), for: .normal)
         })
     }
     
@@ -248,7 +277,8 @@ class PSDMessageInputView: UIView, PSDMessageTextViewDelegate,PSDMessageSendButt
                 self.deleteAudioButton.alpha = 0
                 self.attachmentsAddButton.alpha = 1
                 self.inputTextView.alpha = 1
-            }, completion: {_ in 
+                self.cancelButton.alpha = 0
+            }, completion: {_ in
                 self.audioLeadingConstraint?.constant = 0
                 OpusPlayer.shared.stopAllPlay()
                 self.audioInputView.state = .stopped
@@ -257,6 +287,7 @@ class PSDMessageInputView: UIView, PSDMessageTextViewDelegate,PSDMessageSendButt
                 self.audioInputView.state = .stopped
                 self.audioInputView.layoutIfNeeded()
                 self.audioInputView.setNeedsLayout()
+                self.cancelButton.setImage(UIImage.PSDImage(name: "arrowsLeft"), for: .normal)
             })
         }
         checkSendButton()
@@ -326,13 +357,11 @@ class PSDMessageInputView: UIView, PSDMessageTextViewDelegate,PSDMessageSendButt
         inputTextView.translatesAutoresizingMaskIntoConstraints = false
         sendButton.translatesAutoresizingMaskIntoConstraints = false
         recordButton?.translatesAutoresizingMaskIntoConstraints = false
+        lockRecordView?.translatesAutoresizingMaskIntoConstraints = false
         attachmentsAddButton.translatesAutoresizingMaskIntoConstraints = false
         
-        let panGesture = UIPanGestureRecognizer(target: self, action: #selector(handlePanGesture(_:)))
-        recordButton?.addGestureRecognizer(panGesture)
         recordButton?.isUserInteractionEnabled = true
-        recordButton?.addTarget(self, action: #selector(handlePanGesture(_:)), for: .touchDragInside)
-        guard let recordButton else { return }
+        guard let recordButton, let lockRecordView else { return }
         
 //        audioLeadingConstraint = audioInputView.leadingAnchor.constraint(equalTo: attachmentsAddButton.trailingAnchor, constant: frame.width - 94)
         audioLeadingConstraint = audioInputView.widthAnchor.constraint(equalToConstant: 0)
@@ -359,6 +388,12 @@ class PSDMessageInputView: UIView, PSDMessageTextViewDelegate,PSDMessageSendButt
 //            recordButton.trailingAnchor.constraint(equalTo: backgroundView.layoutMarginsGuide.trailingAnchor, constant: 0),
             recordButton.centerXAnchor.constraint(equalTo: sendButton.centerXAnchor),
             recordButton.centerYAnchor.constraint(equalTo: sendButton.centerYAnchor),
+            lockRecordView.centerXAnchor.constraint(equalTo: recordButton.centerXAnchor),
+            lockRecordView.bottomAnchor.constraint(equalTo: recordButton.topAnchor, constant: -10),
+            
+            cancelButton.centerXAnchor.constraint(equalTo: centerXAnchor),
+            cancelButton.centerYAnchor.constraint(equalTo: sendButton.centerYAnchor),
+            
 //            recordButton.bottomAnchor.constraint(equalTo: backgroundView.layoutMarginsGuide.bottomAnchor),
 //            recordButton.widthAnchor.constraint(equalToConstant: 44),
 //            recordButton.heightAnchor.constraint(equalToConstant: 44),
@@ -385,36 +420,12 @@ class PSDMessageInputView: UIView, PSDMessageTextViewDelegate,PSDMessageSendButt
         heightConstraint?.isActive = true
     }
     
-    @objc private func handlePanGesture(_ recognizer: UIPanGestureRecognizer) {
-        let translation = recognizer.translation(in: backgroundView)
-        
-        switch recognizer.state {
-        case .changed:
-            // Обновляем констрейнты в соответствии с перемещением пальца
-            centerXConstraint.constant += translation.x
-            centerYConstraint.constant += translation.y
-            recognizer.setTranslation(.zero, in: backgroundView)
-            
-        case .ended, .cancelled:
-            // Возвращаем кнопку на место с анимацией
-            UIView.animate(withDuration: 0.5,
-                           delay: 0,
-                           usingSpringWithDamping: 0.5,
-                           initialSpringVelocity: 0,
-                           options: .curveEaseOut,
-                           animations: {
-                self.centerXConstraint.constant = 0
-                self.centerYConstraint.constant = 0
-                self.backgroundView.layoutIfNeeded()
-            })
-            
-        default:
-            break
-        }
-    }
-    
     @objc private func deleteAudioButtonTapped() {
         clearAll()
+    }
+    
+    @objc private func cancel() {
+        recordButton?.cancelRecording()
     }
     
     private func addBackgroundViewConstraints() {
@@ -468,13 +479,34 @@ extension PSDMessageInputView: PSDRateViewDelegate {
 }
 
 extension PSDMessageInputView: RecordableViewProtocol, AudioRecordingObjectDelegate {
+    func lockRecord() {
+        UIView.animate(withDuration: 0.2, animations: {
+            self.cancelButton.setImage(nil, for: .normal)
+        })
+    }
+    
+    
+    func cancelRecording() {
+        delegate?.recordStop()
+        clearAll()
+    }
     
     func didStartRecord() {
-        
+        delegate?.recordStart()
+        UIView.animate(withDuration: 0.2, animations: {
+            self.attachmentsAddButton.alpha = 0
+            self.inputTextView.alpha = 0
+            self.cancelButton.alpha = 1
+        })
     }
     
     func didEndRecord() {
-        
+        delegate?.recordStop()
+    }
+    
+    func sendAudio(attachment: PSDAttachment) {
+        attachmentsPresenter.addAttachment(attachment)
+        sendMessage()
     }
     
     func didCreateFile(attachment: PSDAttachment, url: URL) {
@@ -487,16 +519,13 @@ extension PSDMessageInputView: RecordableViewProtocol, AudioRecordingObjectDeleg
         
         let audioPlayerPresenter = AudioPlayerPresenter(view: audioInputView, fileUrl: URL(fileURLWithPath: attachment.localPath ?? ""), attachmentId: attachment.localId, attachment: attachment)
         audioInputView.presenter = audioPlayerPresenter
-
-//        self.audioInputView.state = .stopped
-//        self.audioInputView.layoutIfNeeded()
-//        self.audioInputView.setNeedsLayout()
         
         UIView.animate(withDuration: 0.2, animations: {
             self.audioInputView.alpha = 1
             self.deleteAudioButton.alpha = 1
             self.attachmentsAddButton.alpha = 0
             self.inputTextView.alpha = 0
+            self.cancelButton.alpha = 0
             self.audioLeadingConstraint?.constant = self.inputTextView.frame.width + 4//self.frame.width - 100
             self.setNeedsLayout()
             self.layoutIfNeeded()
@@ -507,9 +536,7 @@ extension PSDMessageInputView: RecordableViewProtocol, AudioRecordingObjectDeleg
         return CGRect.zero
     }
     
-    func setSourseAndShowMicrophoneAlert(_ alert: UIAlertController) {
-        
-    }
+    func setSourseAndShowMicrophoneAlert(_ alert: UIAlertController) { }
     
     func getAccountId() -> NSInteger {
         return 0

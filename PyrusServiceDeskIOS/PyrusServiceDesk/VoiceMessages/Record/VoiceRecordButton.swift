@@ -7,7 +7,9 @@ import Foundation
     ///Tell delegate that user whant to start recording
     func voiceRecordStart()
     ///Tell to delegate that user is stopped record
-    func voiceRecordStop()
+    func voiceRecordStop(needShowAudioView: Bool)
+    func lockRecord()
+    func cancelRecord()
 }
 
 ///The button to for "hold-to-record" action
@@ -25,7 +27,7 @@ import Foundation
     private static let shakeAnimationDeviation: CGFloat = 3
     
     private static let recordOnImage = UIImage.PSDImage(name: "bigMicrophone")
-    var customRecordOffImage = VoiceRecordButton.recordOffImage{
+    var customRecordOffImage = VoiceRecordButton.recordOffImage {
         didSet{
             if !self.isRecording{
                 self.setImage(customRecordOffImage, for: .normal)
@@ -35,6 +37,31 @@ import Foundation
     }
     private static let recordOffImage = UIImage.PSDImage(name: "micro")
     
+    private var lockHeightConstraint: NSLayoutConstraint?
+    private lazy var lockView: UIButton = {
+        let view = UIButton()
+        view.translatesAutoresizingMaskIntoConstraints = false
+        view.backgroundColor = .backgroundColor
+        view.layer.cornerRadius = 22
+        view.alpha = 1
+        view.isUserInteractionEnabled = false
+        return view
+    }()
+    
+    private lazy var lockImageView: UIImageView = {
+        let imageView = UIImageView(image: UIImage.PSDImage(name: "lockAudio"))
+        imageView.translatesAutoresizingMaskIntoConstraints = false
+        imageView.alpha = 0
+        return imageView
+    }()
+    
+    private lazy var stopImageView: UIImageView = {
+        let imageView = UIImageView(image: UIImage.PSDImage(name: "arrows"))
+        imageView.translatesAutoresizingMaskIntoConstraints = false
+        imageView.alpha = 0
+        return imageView
+    }()
+    
     ///The value to detect is recording is perfoms now
     private(set) var isRecording: Bool = false{
         didSet{
@@ -42,9 +69,22 @@ import Foundation
                 let mainColor = PyrusServiceDesk.mainController?.customization?.themeColor ?? .blue
                 self.setImage(VoiceRecordButton.recordOnImage, for: .normal)
                 self.setImage(VoiceRecordButton.recordOnImage, for: .highlighted)
+                UIView.animate(withDuration: 0.2, animations: {
+                    self.lockHeightConstraint?.constant = 88
+                    self.lockImageView.alpha = 1
+                    self.stopImageView.alpha = 1
+                    self.layoutIfNeeded()
+                })
+                lockView.isUserInteractionEnabled = true
             }else{
                 self.setImage(customRecordOffImage, for: .normal)
                 self.setImage(customRecordOffImage, for: .highlighted)
+                stopImageView.image = UIImage.PSDImage(name: "arrows")
+                self.lockHeightConstraint?.constant = 0
+                lockImageView.alpha = 0
+                stopImageView.alpha = 0
+                lockView.isUserInteractionEnabled = false
+                isAutoHoldingRecording = false
             }
         }
     }
@@ -74,6 +114,30 @@ import Foundation
         tapG.minimumPressDuration = 0.0
         tapG.cancelsTouchesInView = true
         self.addGestureRecognizer(tapG)
+        setupLockView()
+    }
+    
+    private func setupLockView() {
+        addSubview(lockView)
+        bringSubviewToFront(lockView)
+        lockHeightConstraint = lockView.heightAnchor.constraint(equalToConstant: 0)
+        lockHeightConstraint?.isActive = true
+        
+        lockView.addSubview(lockImageView)
+        lockView.addSubview(stopImageView)
+        
+        NSLayoutConstraint.activate([
+            lockView.centerXAnchor.constraint(equalTo: centerXAnchor),
+            lockView.widthAnchor.constraint(equalToConstant: 44),
+            lockView.bottomAnchor.constraint(equalTo: topAnchor, constant: -10),
+            
+            lockImageView.centerXAnchor.constraint(equalTo: lockView.centerXAnchor),
+            stopImageView.centerXAnchor.constraint(equalTo: lockView.centerXAnchor),
+            lockImageView.topAnchor.constraint(equalTo: lockView.topAnchor, constant: 10),
+            stopImageView.bottomAnchor.constraint(equalTo: lockView.bottomAnchor, constant: -10),
+        ])
+        
+        lockView.addTarget(self, action: #selector(touchDown), for: .touchUpInside)
     }
     
     override func didMoveToSuperview() {
@@ -96,8 +160,8 @@ import Foundation
                 
                 if !isAutoHoldingRecording {
                     let newCenter = CGPoint(
-                        x: initialButtonCenter.x + deltaX,
-                        y: initialButtonCenter.y + deltaY
+                        x: min(initialButtonCenter.x + deltaX, initialButtonCenter.x),
+                        y: min(initialButtonCenter.y + deltaY, initialButtonCenter.y)
                     )
                     self.center = newCenter
                 }
@@ -106,18 +170,22 @@ import Foundation
                 if deltaY < deltaX { // Движение ВВЕРХ (выше оси y = -x)
                     let distance = sqrt(deltaX * deltaX + deltaY * deltaY)
                     if distance >= gestureThreshold {
-                        print("➡️ Движение вверх на 20+ пикселей")
                         isAutoHoldingRecording = true
+                        lockImageView.alpha = 0
+                        stopImageView.image = UIImage.PSDImage(name: "stopRecord")
+                        lockView.isUserInteractionEnabled = true
                         UIView.animate(withDuration: 0.3) {
                             self.center = self.initialButtonCenter
+                            self.lockHeightConstraint?.constant = 44
+                            self.setImage(UIImage.PSDImage(name: "whiteSend"), for: .normal)
+                            self.layoutIfNeeded()
                         }
+                        delegate?.lockRecord()
                     }
                 } else { // Движение ВЛЕВО (ниже оси y = -x)
                     let distance = sqrt(deltaX * deltaX + deltaY * deltaY)
-                    if distance >= gestureThreshold {
-                        print("⬅️ Движение влево на 20+ пикселей")
-                        // Здесь можно вызвать нужный метод, например:
-                        // delegate?.didDragLeft()
+                    if distance >= 60 {
+                        cancelRecording()
                     }
                 }
             }
@@ -132,6 +200,14 @@ import Foundation
         default:
             break
         }
+    }
+    
+    func cancelRecording() {
+        UIApplication.shared.isIdleTimerDisabled = false
+        fingerDown = false
+        endTimer()
+        self.isRecording = false
+        delegate?.cancelRecord()
     }
     
     @objc private func appClosed() {
@@ -159,6 +235,10 @@ import Foundation
     }
     
     @objc private func touchDown() {
+        if isAutoHoldingRecording {
+            touchUp()
+            return
+        }
         UIApplication.shared.isIdleTimerDisabled = true
         fingerDown = true
         startTimer()
@@ -166,6 +246,14 @@ import Foundation
     
     @objc private func touchUp() {
         touchEnded()
+    }
+    
+    func stopRecordButtonTapped() {
+        UIApplication.shared.isIdleTimerDisabled = false
+        fingerDown = false
+        endTimer()
+        self.isRecording = false
+        self.delegate?.voiceRecordStop(needShowAudioView: true)
     }
     
     private func touchEnded() {
@@ -213,7 +301,7 @@ import Foundation
     
     private func stopRecord() {
         self.isRecording = false
-        self.delegate?.voiceRecordStop()
+        self.delegate?.voiceRecordStop(needShowAudioView: false)
     }
     
     func fingerIsDown() -> Bool {

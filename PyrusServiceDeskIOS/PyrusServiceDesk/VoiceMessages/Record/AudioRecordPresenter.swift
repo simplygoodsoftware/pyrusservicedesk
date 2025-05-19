@@ -114,6 +114,13 @@ import AVFAudio
         cleanUpTimers()
     }
     
+    func stop() {
+        recorder?.stop()
+        self.startRecordTime = nil
+        recorder = nil
+        cleanUpTimers()
+    }
+    
     deinit {
         cleanUpTimers()
     }

@@ -33,6 +33,16 @@ class PSDChatViewController: PSDViewController {
         return button
     }()
     
+    private var bottomStopButton: NSLayoutConstraint?
+    private lazy var stopButton: UIButton = {
+        let button = UIButton()
+        button.backgroundColor = .clear//.scrollButtonColor
+        button.layer.cornerRadius = 22
+        button.translatesAutoresizingMaskIntoConstraints = false
+        button.alpha = 0
+        return button
+    }()
+    
     private lazy var badgeView: UIView = {
         let view = UIView()
         view.layer.cornerRadius = 8
@@ -135,7 +145,7 @@ class PSDChatViewController: PSDViewController {
         return false
     
     }
-    
+       
     private var isKeyBoardOpen = false
     @objc private func keyboardDidHide(_ notification: NSNotification) {
         isKeyBoardOpen = false
@@ -153,6 +163,7 @@ class PSDChatViewController: PSDViewController {
             if (self.messageInputView.inputTextView.isFirstResponder || !self.isKeyBoardOpen) && !(center.y > self.view.frame.maxY && self.isKeyBoardOpen) {
                 if self.messageInputView.inputTextView.isFirstResponder {
                     self.bottomScrollButton?.constant -= keyboardHeight - oldInset
+                    self.bottomStopButton?.constant -= keyboardHeight - oldInset
                     self.view.layoutIfNeeded()
                 }
                 if keyboardHeight < 200 {
@@ -186,7 +197,8 @@ class PSDChatViewController: PSDViewController {
             let keyboardHeight = keyboardEndFrame.height
          //   if isKeyBoardOpen {
                    UIView.animate(withDuration: duration, delay: 0, animations: {
-                self.bottomScrollButton?.constant = -120
+                self.bottomScrollButton?.constant = -110
+                self.bottomStopButton?.constant = -110
                 self.view.layoutIfNeeded()
                 if !self.isActive {
                     self.tableView.contentInset.top = 90
@@ -210,6 +222,13 @@ class PSDChatViewController: PSDViewController {
         scrollButton.layer.shadowRadius = 4
         scrollButton.layer.shadowOpacity = 0.2
         scrollButton.layer.masksToBounds = false
+        
+//        stopButton.layer.shadowColor = UIColor.black.cgColor
+//        stopButton.layer.shadowOffset = CGSize(width: 0, height: 4)
+//        stopButton.layer.shadowRadius = 4
+//        stopButton.layer.shadowOpacity = 0.2
+//        stopButton.layer.masksToBounds = false
+        
         messageInputView.backgroundView.backgroundColor = .psdMessageInputColor
     }
 
@@ -347,6 +366,7 @@ class PSDChatViewController: PSDViewController {
         setupInfoView()
         customiseDesign(color: PyrusServiceDesk.mainController?.customization?.barButtonTintColor ?? UIColor.darkAppColor)
         setupScrollButton()
+        setupStopButton()
         setupClosedTicketView()
 //        setupChatInfoView()
       //  setupInfoTableView()
@@ -393,7 +413,7 @@ class PSDChatViewController: PSDViewController {
         NSLayoutConstraint.activate([
             scrollButton.heightAnchor.constraint(equalToConstant: 40),
             scrollButton.widthAnchor.constraint(equalToConstant: 40),
-            scrollButton.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -10),
+            scrollButton.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -11),
             image.centerXAnchor.constraint(equalTo: scrollButton.centerXAnchor),
             image.centerYAnchor.constraint(equalTo: scrollButton.centerYAnchor),
             badgeView.bottomAnchor.constraint(equalTo: scrollButton.bottomAnchor, constant: -28),
@@ -405,11 +425,29 @@ class PSDChatViewController: PSDViewController {
             newMessageCount.centerYAnchor.constraint(equalTo: badgeView.centerYAnchor),
             badgeView.leadingAnchor.constraint(equalTo: newMessageCount.leadingAnchor, constant: -4)
         ])
-        bottomScrollButton = scrollButton.bottomAnchor.constraint(equalTo: view.bottomAnchor, constant: -120)
+        bottomScrollButton = scrollButton.bottomAnchor.constraint(equalTo: view.bottomAnchor, constant: -110)
         bottomScrollButton?.isActive = true
         
         scrollButton.addTarget(self, action: #selector(scrollToBottom), for: .touchUpInside)
         updateScrollButton(isHidden: true)
+    }
+    
+    func setupStopButton() {
+        view.addSubview(stopButton)
+        
+        NSLayoutConstraint.activate([
+            stopButton.heightAnchor.constraint(equalToConstant: 44),
+            stopButton.widthAnchor.constraint(equalToConstant: 44),
+            stopButton.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -11),
+        ])
+        bottomStopButton = stopButton.bottomAnchor.constraint(equalTo: view.bottomAnchor, constant: -110)
+        bottomStopButton?.isActive = true
+        
+        stopButton.addTarget(self, action: #selector(stopRecording), for: .touchUpInside)
+    }
+    
+    @objc func stopRecording() {
+        messageInputView.stopRecord()
     }
     
     func setupClosedTicketView() {
@@ -659,6 +697,14 @@ extension PSDChatViewController: PSDChatViewProtocol {
 }
 
 extension PSDChatViewController: PSDMessageInputViewDelegate {
+    func recordStop() {
+        stopButton.alpha = 0
+    }
+    
+    func recordStart() {
+        stopButton.alpha = 1
+    }
+    
     func addAttachment() {
         tableView.contentInset.top += PSDMessageInputView.attachmentsHeight
         tableView.contentOffset.y -= PSDMessageInputView.attachmentsHeight
