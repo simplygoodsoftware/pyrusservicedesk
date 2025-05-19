@@ -4,7 +4,7 @@ import UIKit
 class PSDChatsViewController: UIViewController {
     private let interactor: ChatsInteractorProtocol
     private let router: ChatsRouterProtocol?
-    private var isVisible: Bool = false
+    private var isVisible: Bool = true
 
     let section1 = PSDChatsSectionModel()
     let section2 = PSDChatsSectionModel()
