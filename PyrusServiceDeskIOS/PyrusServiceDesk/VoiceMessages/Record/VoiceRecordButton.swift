@@ -41,7 +41,7 @@ import Foundation
     private lazy var lockView: UIButton = {
         let view = UIButton()
         view.translatesAutoresizingMaskIntoConstraints = false
-        view.backgroundColor = .backgroundColor
+        view.backgroundColor = .lockBackgroundColor
         view.layer.cornerRadius = 22
         view.alpha = 1
         view.isUserInteractionEnabled = false
@@ -68,18 +68,21 @@ import Foundation
             if self.isRecording {
                 let mainColor = PyrusServiceDesk.mainController?.customization?.themeColor ?? .blue
                 self.setImage(VoiceRecordButton.recordOnImage, for: .normal)
+                lockView.alpha = 1
                 self.setImage(VoiceRecordButton.recordOnImage, for: .highlighted)
                 UIView.animate(withDuration: 0.2, animations: {
                     self.lockHeightConstraint?.constant = 88
                     self.lockImageView.alpha = 1
                     self.stopImageView.alpha = 1
                     self.layoutIfNeeded()
+                    self.parentView?.layoutIfNeeded()
                 })
                 lockView.isUserInteractionEnabled = true
-            }else{
+            } else {
                 self.setImage(customRecordOffImage, for: .normal)
                 self.setImage(customRecordOffImage, for: .highlighted)
                 stopImageView.image = UIImage.PSDImage(name: "arrows")
+                lockView.alpha = 0
                 self.lockHeightConstraint?.constant = 0
                 lockImageView.alpha = 0
                 stopImageView.alpha = 0
@@ -92,6 +95,7 @@ import Foundation
     // Для перемещения кнопки
     private var initialTouchLocation: CGPoint = .zero
     private var initialButtonCenter: CGPoint = .zero
+    private var initialLockCenter: CGPoint = .zero
     private weak var parentView: UIView?
     
     override init(frame: CGRect) {
@@ -112,14 +116,25 @@ import Foundation
         let tapG = UILongPressGestureRecognizer(target: self, action: #selector(longTap(_:)))
         tapG.allowableMovement = CGFloat.greatestFiniteMagnitude
         tapG.minimumPressDuration = 0.0
-        tapG.cancelsTouchesInView = true
+       // tapG.cancelsTouchesInView = true
         self.addGestureRecognizer(tapG)
-        setupLockView()
+        
+        let tapGestureRecognizer = UITapGestureRecognizer(target: self, action: #selector(sendButtonTapped))
+        self.addGestureRecognizer(tapGestureRecognizer)
+        
+//        setupLockView()
+    }
+    
+    @objc func sendButtonTapped() {
+                if isAutoHoldingRecording {
+                    touchUp()
+                    return
+                }
     }
     
     private func setupLockView() {
-        addSubview(lockView)
-        bringSubviewToFront(lockView)
+        guard parentView != nil else { return }
+        parentView?.addSubview(lockView)
         lockHeightConstraint = lockView.heightAnchor.constraint(equalToConstant: 0)
         lockHeightConstraint?.isActive = true
         
@@ -143,6 +158,7 @@ import Foundation
     override func didMoveToSuperview() {
         super.didMoveToSuperview()
         parentView = self.superview
+        setupLockView()
     }
     
     @objc private func longTap(_ recognizer: UILongPressGestureRecognizer) {
@@ -150,6 +166,7 @@ import Foundation
         case .began:
             initialTouchLocation = recognizer.location(in: parentView)
             initialButtonCenter = self.center
+            initialLockCenter = lockView.center
             self.touchDown()
             
         case .changed:
@@ -163,7 +180,12 @@ import Foundation
                         x: min(initialButtonCenter.x + deltaX, initialButtonCenter.x),
                         y: min(initialButtonCenter.y + deltaY, initialButtonCenter.y)
                     )
+                    let newLockCenter = CGPoint(
+                        x: initialLockCenter.x,
+                        y: min(initialLockCenter.y + deltaY, initialLockCenter.y) - 59
+                    )
                     self.center = newCenter
+                    lockView.center = newLockCenter
                 }
                 
                 // Проверяем направление относительно оси y = -x
@@ -179,12 +201,13 @@ import Foundation
                             self.lockHeightConstraint?.constant = 44
                             self.setImage(UIImage.PSDImage(name: "whiteSend"), for: .normal)
                             self.layoutIfNeeded()
+                            self.parentView?.layoutIfNeeded()
                         }
                         delegate?.lockRecord()
                     }
                 } else { // Движение ВЛЕВО (ниже оси y = -x)
                     let distance = sqrt(deltaX * deltaX + deltaY * deltaY)
-                    if distance >= 60 {
+                    if distance >= 60 && !isAutoHoldingRecording {
                         cancelRecording()
                     }
                 }
@@ -235,10 +258,6 @@ import Foundation
     }
     
     @objc private func touchDown() {
-        if isAutoHoldingRecording {
-            touchUp()
-            return
-        }
         UIApplication.shared.isIdleTimerDisabled = true
         fingerDown = true
         startTimer()
@@ -288,6 +307,12 @@ import Foundation
         if !fingerDown {
             return
         }
+        
+        if isAutoHoldingRecording {
+            touchUp()
+            return
+        }
+        
         let generator = UIImpactFeedbackGenerator(style: .medium)
         generator.prepare()
         generator.impactOccurred()
@@ -306,5 +331,16 @@ import Foundation
     
     func fingerIsDown() -> Bool {
         return fingerDown
+    }
+}
+
+private extension UIColor {
+    static let lockBackgroundColor = UIColor {
+        switch $0.userInterfaceStyle {
+        case .dark:
+            return UIColor(hex: "#3D4043") ?? .black
+        default:
+            return .white
+        }
     }
 }

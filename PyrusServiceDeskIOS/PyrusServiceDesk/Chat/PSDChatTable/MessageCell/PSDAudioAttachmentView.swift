@@ -32,6 +32,7 @@ class PSDAudioAttachmentView: PSDAttachmentView {
                     playView.layer.addLoadingAnimation()
                     slider.isUserInteractionEnabled = false
                     slider.setValue(0, animated: false)
+                    presenter?.changeTime(0)
                 case .playing:
                     playImageView.image = UIImage.PSDImage(name: "pause")?.imageWith(color: .white)
                     playView.layer.removeLoadingAnimation()
@@ -69,7 +70,7 @@ class PSDAudioAttachmentView: PSDAttachmentView {
                 let mainColor = PyrusServiceDesk.mainController?.customization?.themeColor
                 slider.tintColor = mainColor
                 slider.minimumTrackTintColor = mainColor
-                slider.maximumTrackTintColor = UIColor(hex: "#0000001A")?.withAlphaComponent(0.1)
+                slider.maximumTrackTintColor = .trackColor//UIColor(hex: "#0000001A")?.withAlphaComponent(0.1)
             }
         }
     }
@@ -315,6 +316,15 @@ private extension UIColor {
             return UIColor(hex: "#7182FD") ?? .white
         default:
             return UIColor(hex: "#4861F2") ?? .darkAppColor
+        }
+    }
+    
+    static let trackColor = UIColor {
+        switch $0.userInterfaceStyle {
+        case .dark:
+            return UIColor(hex: "#FFFFFF4D")?.withAlphaComponent(0.3) ?? .white
+        default:
+            return UIColor(hex: "#0000001A")?.withAlphaComponent(0.1) ?? .darkAppColor
         }
     }
 }

@@ -290,6 +290,10 @@ class PSDMessageInputView: UIView, PSDMessageTextViewDelegate,PSDMessageSendButt
                 self.cancelButton.setImage(UIImage.PSDImage(name: "arrowsLeft"), for: .normal)
             })
         }
+        
+        if inputTextView.text.count == 0 && attachmentsPresenter.attachmentsNumber() == 1 && attachmentsPresenter.attachmentsForSend().first?.isAudio ?? false {
+            OpusPlayer.shared.stopAllPlay()
+        }
         checkSendButton()
     }
     ///Check is send button need to enabled or not
@@ -492,6 +496,7 @@ extension PSDMessageInputView: RecordableViewProtocol, AudioRecordingObjectDeleg
     }
     
     func didStartRecord() {
+        OpusPlayer.shared.stopAllPlay()
         delegate?.recordStart()
         UIView.animate(withDuration: 0.2, animations: {
             self.attachmentsAddButton.alpha = 0
@@ -502,6 +507,11 @@ extension PSDMessageInputView: RecordableViewProtocol, AudioRecordingObjectDeleg
     
     func didEndRecord() {
         delegate?.recordStop()
+        UIView.animate(withDuration: 0.2, animations: {
+            self.attachmentsAddButton.alpha = 1
+            self.inputTextView.alpha = 1
+            self.cancelButton.alpha = 0
+        })
     }
     
     func sendAudio(attachment: PSDAttachment) {

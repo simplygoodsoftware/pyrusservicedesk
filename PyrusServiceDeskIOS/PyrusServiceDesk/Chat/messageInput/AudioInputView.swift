@@ -25,7 +25,6 @@ class AudioInputView: UIView {
         didSet {
             DispatchQueue.main.async { [weak self] in
                 guard let self else { return }
-                
                 switch state {
                 case .loading:
                     break
@@ -91,7 +90,7 @@ class AudioInputView: UIView {
         addSubview(slider)
         addSubview(playView)
         layer.cornerRadius = 19
-        backgroundColor = CustomizationHelper.supportMassageBackgroundColor
+        backgroundColor = .audioBackgroundColor
     }
     
     private func setupConstraints() {
@@ -190,6 +189,15 @@ private extension UIColor {
             return UIColor(hex: "#BFBFBF")?.withAlphaComponent(0.3) ?? .white
         default:
             return UIColor(hex: "#D9D9D9") ?? .darkAppColor
+        }
+    }
+    
+    static let audioBackgroundColor = UIColor {
+        switch $0.userInterfaceStyle {
+        case .dark:
+            return UIColor(hex: "#515254") ?? .white
+        default:
+            return UIColor(hex: "#F3F2F8") ?? .darkAppColor
         }
     }
 }
