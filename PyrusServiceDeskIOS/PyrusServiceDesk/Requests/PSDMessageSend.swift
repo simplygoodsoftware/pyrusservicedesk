@@ -108,6 +108,10 @@ struct PSDMessageSend {
     static private var passingMessagesIds = [String]()
     
     static private let dispatchQueue = DispatchQueue(label: "PSDSendMesasges", attributes: .concurrent)
+    
+    ///Name for notification when chats' number was received.
+    static let createNewCommand = Notification.Name("NEW_COMMAND_CREATE")
+
     /**
      Pass message to server.
      - parameter messageToPass: PSDMessage need to be passed.
@@ -155,6 +159,8 @@ struct PSDMessageSend {
         DispatchQueue.main.async {
             PyrusServiceDesk.syncManager.syncGetTickets()
         }
+        NotificationCenter.default.post(name: createNewCommand, object: nil, userInfo: nil)
+        
         dispatchQueue.async {
             
 //            if PSDMessageSend.passingMessagesIds.contains(messageToPass.clientId) {

@@ -37,7 +37,7 @@ class PSDUserMessageCell: PSDChatMessageCell {
     override func draw(message: PSDRowMessage, width: CGFloat) {
         super.draw(message: message, width: width)
         self.message = message
-        messageStateView._messageState = (message.text.count > 0 || message.rating != nil) ? message.message.state : .sent
+        messageStateView._messageState = (message.text.count > 0 || message.rating != nil || message.attachment != nil) ? message.message.state : .sent
         updateTopMessageConstrint()
     }
     

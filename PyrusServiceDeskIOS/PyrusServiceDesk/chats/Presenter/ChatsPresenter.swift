@@ -65,7 +65,6 @@ private extension ChatsPresenter {
                 self.view?.show(.updateChats(chats: chatsModel))
             }
         }
-        print ("opa")
     }
     
     func prepareChats(chats: [ChatPresenterModel]) -> [[PSDChatsViewModel]] {
