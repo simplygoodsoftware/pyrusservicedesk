@@ -377,7 +377,6 @@ private extension ChatsInteractor {
             presenter.doWork(.endRefresh)
             
 //            updateLocalChats()
-
             let filterChats = createChats()
             if chats != filterChats || filterChats.count == 0 || isClear {
                 chats = filterChats

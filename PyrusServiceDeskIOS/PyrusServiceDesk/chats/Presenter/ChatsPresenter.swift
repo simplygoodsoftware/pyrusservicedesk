@@ -2,6 +2,8 @@ import UIKit
 
 @available(iOS 13.0, *)
 class ChatsPresenter: NSObject {
+    private let chatsPrepareQueue = DispatchQueue.init(label: "prepareChats")
+
     weak var view: ChatsViewProtocol?
     private var isClosedTicketsOpened: Bool = false
     private var chats = [ChatPresenterModel]()
@@ -57,7 +59,13 @@ extension ChatsPresenter: ChatsPresenterProtocol {
 @available(iOS 13.0, *)
 private extension ChatsPresenter {
     func updateChats() {
-        view?.show(.updateChats(chats: prepareChats(chats: chats)))
+        chatsPrepareQueue.async {
+            let chatsModel = self.prepareChats(chats: self.chats)
+            DispatchQueue.main.async {
+                self.view?.show(.updateChats(chats: chatsModel))
+            }
+        }
+        print ("opa")
     }
     
     func prepareChats(chats: [ChatPresenterModel]) -> [[PSDChatsViewModel]] {
@@ -102,7 +110,6 @@ private extension ChatsPresenter {
         if closeChats.count > 0 {
             activeChats.append(PSDChatsViewModel(data: ClosedTicketsCellModel(count: closeChats.count, isOpen: isClosedTicketsOpened, delegate: self), type: .header) )
         }
-        
         if isClosedTicketsOpened {
             return [activeChats, closeChats]
         } else {

@@ -272,6 +272,7 @@ class PSDMessageInputView: UIView, PSDMessageTextViewDelegate,PSDMessageSendButt
             inputTextView.textViewDidChange(inputTextView)
             attachmentsPresenter?.cleanAll()
             checkCollectionHeight()
+            OpusPlayer.shared.stopAllPlay()
             UIView.animate(withDuration: 0.1, animations: {
                 self.audioInputView.alpha = 0
                 self.deleteAudioButton.alpha = 0
@@ -280,7 +281,6 @@ class PSDMessageInputView: UIView, PSDMessageTextViewDelegate,PSDMessageSendButt
                 self.cancelButton.alpha = 0
             }, completion: {_ in
                 self.audioLeadingConstraint?.constant = 0
-                OpusPlayer.shared.stopAllPlay()
                 self.audioInputView.state = .stopped
                 self.audioInputView.layoutIfNeeded()
                 self.audioInputView.setNeedsLayout()

@@ -4,7 +4,8 @@ import UIKit
 class PSDChatsViewController: UIViewController {
     private let interactor: ChatsInteractorProtocol
     private let router: ChatsRouterProtocol?
-    
+    private var isVisible: Bool = false
+
     let section1 = PSDChatsSectionModel()
     let section2 = PSDChatsSectionModel()
     
@@ -161,6 +162,12 @@ class PSDChatsViewController: UIViewController {
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
         interactor.doInteraction(.viewWillAppear)
+        isVisible = true
+        reloadDiffable(animated: false)
+    }
+    override func viewDidDisappear(_ animated: Bool) {
+        super.viewDidDisappear(animated)
+        isVisible = false
     }
 }
 
@@ -491,6 +498,9 @@ private extension PSDChatsViewController {
     }
 
     func reloadDiffable(animated: Bool) {
+        guard isVisible else {
+            return
+        }
         guard let diffabledDataSource = diffabledDataSource else { return }
         var snapshot = NSDiffableDataSourceSnapshot<PSDChatsSectionModel, AnyHashable>()
         snapshot.deleteAllItems()
