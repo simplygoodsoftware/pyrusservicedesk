@@ -21,7 +21,7 @@ class PSDAudioAttachmentView: PSDAttachmentView {
         }
     }
     
-    var state: AudioAttachmentView.AudioState = .loading {
+    var state: AudioState = .loading {
         didSet {
             DispatchQueue.main.async { [weak self] in
                 guard let self else { return }
@@ -34,26 +34,34 @@ class PSDAudioAttachmentView: PSDAttachmentView {
                     slider.setValue(0, animated: false)
                     presenter?.changeTime(0)
                 case .playing:
+                    hasBeenTracked = false
                     playImageView.image = UIImage.PSDImage(name: "pause")?.imageWith(color: .white)
                     playView.layer.removeLoadingAnimation()
                     slider.isUserInteractionEnabled = true
-//                    if oldValue == .stopped && slider.value == 1 {
-//                        slider.setValue(0, animated: false)
-//                    }
+                    //                    if oldValue == .stopped && slider.value == 1 {
+                    //                        slider.setValue(0, animated: false)
+                    //                    }
                 case .paused:
-                    playImageView.image = UIImage.PSDImage(name: "playIcon")?.imageWith(color: .white)
-                    playView.layer.removeLoadingAnimation()
-                    slider.isUserInteractionEnabled = true
+                    guard oldValue != .loading && oldValue != .needLoad else { return }
+                    if !hasBeenTracked {
+                        playImageView.image = UIImage.PSDImage(name: "playIcon")?.imageWith(color: .white)
+                        playView.layer.removeLoadingAnimation()
+                        slider.isUserInteractionEnabled = true
+                    }
                 case .stopped:
                     playImageView.image = UIImage.PSDImage(name: "playIcon")?.imageWith(color: .white)
                     playView.layer.removeLoadingAnimation()
                     slider.isUserInteractionEnabled = true
-                   // if oldValue == .loading {
-                        presenter?.changeTime(0)
-                  //  }
+                    // if oldValue == .loading {
+                    presenter?.changeTime(0)
+                    //  }
                     if !slider.isTracking {
                         slider.setValue(0, animated: false)
                     }
+                case .needLoad:
+                    playImageView.image = UIImage.PSDImage(name: "download")?.imageWith(color: .white)
+                    playView.layer.removeLoadingAnimation()
+                    slider.isUserInteractionEnabled = true
                 }
             }
         }
@@ -98,7 +106,7 @@ class PSDAudioAttachmentView: PSDAttachmentView {
     }
     
     private lazy var playImageView = UIImageView(image: UIImage.PSDImage(name: "Close")?.imageWith(color: .white))
-
+    
     private lazy var playView: UIView = {
         let view = UIView()
         view.layer.cornerRadius = 25
@@ -165,7 +173,7 @@ class PSDAudioAttachmentView: PSDAttachmentView {
         previewImageView.layer.mask = rectShape
         previewBorderLayer.path = rectShape.path
         previewBorderLayer.frame = previewImageView.bounds
-     //   playView.layer.addLoadingAnimation()
+        //   playView.layer.addLoadingAnimation()
     }
     
     private func setupViews() {
@@ -210,8 +218,6 @@ class PSDAudioAttachmentView: PSDAttachmentView {
             stateLabel.widthAnchor.constraint(equalToConstant: getMaxWidth()),
             
             slider.leadingAnchor.constraint(equalTo: stateLabel.leadingAnchor),
-//            slider.trailingAnchor.constraint(equalTo: stateLabel.trailingAnchor),
-//            slider.widthAnchor.constraint(equalToConstant: 233),
             slider.trailingAnchor.constraint(equalTo: trailingAnchor, constant: -Constants.distance),
             slider.bottomAnchor.constraint(equalTo: stateLabel.topAnchor),
             slider.heightAnchor.constraint(equalToConstant: Constants.nameLabelHeight),
@@ -224,7 +230,7 @@ class PSDAudioAttachmentView: PSDAttachmentView {
         ])
         
         stateWidthConstraint = stateLabel.widthAnchor.constraint(equalToConstant: getMaxWidth())
-//        stateWidthConstraint?.priority = .init(999)
+        //        stateWidthConstraint?.priority = .init(999)
         stateWidthConstraint?.isActive = true
         widthAnchor.constraint(greaterThanOrEqualToConstant: 307).isActive = true
         previewImageView.heightConstraint?.isActive = false
@@ -238,13 +244,22 @@ class PSDAudioAttachmentView: PSDAttachmentView {
         slider.addTarget(self, action: #selector(startDragging), for: .touchDown)
     }
     
+    private var hasBeenTracked: Bool = false
+    
     @objc func endDragging() {
-        presenter?.startPlay(progress: slider.value)
+        if state == .playing {
+            presenter?.startPlay(progress: slider.value)
+        } else {
+            presenter?.changeTime(CGFloat(slider.value))
+        }
+        
     }
     
     @objc func startDragging() {
-       // presenter?.startPlay(progress: slider.value * Float(OpusPlayer.OpusAudioPlayerSampleRate))
-      //  presenter?.pausePlay()
+        hasBeenTracked = true
+
+        // presenter?.startPlay(progress: slider.value * Float(OpusPlayer.OpusAudioPlayerSampleRate))
+        //  presenter?.pausePlay()
     }
     
     @objc func buttonTapped() {
@@ -258,7 +273,6 @@ class PSDAudioAttachmentView: PSDAttachmentView {
     private func getMaxWidth() -> CGFloat {
         return 233
     }
-
     
     private func maxStateLabelWidth() -> CGFloat {
         let downloadWidth = Constants.uploadString.size(withAttributes: [.font: UIFont.stateFont]).width
@@ -273,7 +287,7 @@ class PSDAudioAttachmentView: PSDAttachmentView {
     private func checkUploadView() {
         uploadView.isHidden = downloadState == .sent //&& previewImage != nil)
         playView.isHidden = !uploadView.isHidden
-       // UIImage.PSDImage(name: "playIcon")
+        // UIImage.PSDImage(name: "playIcon")
     }
     
     private func showPreviewImage() {
@@ -282,7 +296,7 @@ class PSDAudioAttachmentView: PSDAttachmentView {
 }
 
 extension PSDAudioAttachmentView: AudioPlayerViewProtocol {
-    func changeState(_ state: AudioAttachmentView.AudioState) {
+    func changeState(_ state: AudioState) {
         self.state = state
     }
     

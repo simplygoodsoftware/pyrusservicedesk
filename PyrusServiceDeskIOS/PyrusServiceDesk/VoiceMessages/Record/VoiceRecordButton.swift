@@ -20,7 +20,7 @@ import Foundation
     private var touchTimer: Timer?//timer to detect long press
     private var fingerDown: Bool = false
     private let gestureThreshold: CGFloat = 50.0
-    private var isAutoHoldingRecording = false
+    var isAutoHoldingRecording = false
     
     private static let shakeAnimationDuration: CGFloat = 0.07
     private static let shakeAnimationRepeats: Float = 4
@@ -207,7 +207,7 @@ import Foundation
                     }
                 } else { // Движение ВЛЕВО (ниже оси y = -x)
                     let distance = sqrt(deltaX * deltaX + deltaY * deltaY)
-                    if distance >= 60 && !isAutoHoldingRecording {
+                    if distance >= 80 && !isAutoHoldingRecording {
                         cancelRecording()
                     }
                 }
@@ -225,6 +225,15 @@ import Foundation
         }
     }
     
+    override func layoutSubviews() {
+        super.layoutSubviews()
+        lockView.layer.shadowColor = UIColor.black.cgColor
+        lockView.layer.shadowOffset = CGSize(width: 0, height: 4)
+        lockView.layer.shadowRadius = 4
+        lockView.layer.shadowOpacity = 0.2
+        lockView.layer.masksToBounds = false
+    }
+    
     func cancelRecording() {
         UIApplication.shared.isIdleTimerDisabled = false
         fingerDown = false
@@ -234,7 +243,7 @@ import Foundation
     }
     
     @objc private func appClosed() {
-        self.touchUp()
+        stopRecordButtonTapped() 
     }
     
     deinit {
@@ -268,11 +277,12 @@ import Foundation
     }
     
     func stopRecordButtonTapped() {
+        alpha = 0
         UIApplication.shared.isIdleTimerDisabled = false
         fingerDown = false
         endTimer()
-        self.isRecording = false
         self.delegate?.voiceRecordStop(needShowAudioView: true)
+        self.isRecording = false
     }
     
     private func touchEnded() {

@@ -517,6 +517,7 @@ extension PSDMessageInputView: RecordableViewProtocol, AudioRecordingObjectDeleg
     func sendAudio(attachment: PSDAttachment) {
         attachmentsPresenter.addAttachment(attachment)
         sendMessage()
+        delegate?.recordStop()
     }
     
     func didCreateFile(attachment: PSDAttachment, url: URL) {

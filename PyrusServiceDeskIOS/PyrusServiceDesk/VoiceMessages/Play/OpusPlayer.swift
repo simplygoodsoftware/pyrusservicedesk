@@ -39,7 +39,7 @@ let OPUS_PLAYER_NOTIFICATION_KEY = "opusPlayerNotification"
             //the new song is start play
             //so stop previous
             if self.pQueue != nil{
-                stopCurrentPlaying()
+                stopCurrentPlaying(needPassStop: pUrl != url)
             }
             //save new attachmentId
             pUrl = url
@@ -197,7 +197,7 @@ let OPUS_PLAYER_NOTIFICATION_KEY = "opusPlayerNotification"
     }
     private func createTimer() {
         if progressTimer == nil {
-            let timer = Timer(timeInterval: 0.05,
+            let timer = Timer(timeInterval: 0.01,
                               target: self,
                               selector: #selector(passProgress),
                               userInfo: nil,
@@ -281,7 +281,7 @@ let OPUS_PLAYER_NOTIFICATION_KEY = "opusPlayerNotification"
             self.progressesMap[pUrl!] = 0
         }
     }
-    private func stopCurrentPlaying(){
+    private func stopCurrentPlaying(needPassStop: Bool = true){
         if self.pQueue != nil && pUrl != nil{
             self.stopping = true
             paused = false
@@ -292,7 +292,9 @@ let OPUS_PLAYER_NOTIFICATION_KEY = "opusPlayerNotification"
             pQueue = nil
             timeLine = nil
             decoder = nil
-            passStopped(to: pUrl!)
+            if needPassStop {
+                passStopped(to: pUrl!)
+            }
         }
         if self.progressTimer != nil {
             self.progressTimer?.invalidate()

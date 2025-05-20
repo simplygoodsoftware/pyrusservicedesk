@@ -21,7 +21,7 @@ class AudioInputView: UIView {
         
     var presenter: AudioPlayerPresenter?
     
-    var state: AudioAttachmentView.AudioState = .stopped {
+    var state: AudioState = .stopped {
         didSet {
             DispatchQueue.main.async { [weak self] in
                 guard let self else { return }
@@ -29,15 +29,20 @@ class AudioInputView: UIView {
                 case .loading:
                     break
                 case .playing:
+                    hasBeenTracked = false
                     playImageView.image = UIImage.PSDImage(name: "pause")?.imageWith(color: .white)
                 case .paused:
-                    playImageView.image = UIImage.PSDImage(name: "playIcon")?.imageWith(color: .white)
+                    if !hasBeenTracked {
+                        playImageView.image = UIImage.PSDImage(name: "playIcon")?.imageWith(color: .white)
+                    }
                 case .stopped:
                     playImageView.image = UIImage.PSDImage(name: "playIcon")?.imageWith(color: .white)
                     if !slider.isTracking {
                         slider.setValue(0, animated: false)
                     }
                     presenter?.changeTime(0)
+                case .needLoad:
+                    break
                 }
             }
         }
@@ -128,12 +133,23 @@ class AudioInputView: UIView {
         
         slider.addTarget(self, action: #selector(endDragging), for: .touchUpInside)
         slider.addTarget(self, action: #selector(endDragging), for: .touchUpOutside)
+        slider.addTarget(self, action: #selector(startDragging), for: .touchDown)
     }
     
     @objc func endDragging() {
-        presenter?.startPlay(progress: slider.value)
+        if state == .playing {
+            presenter?.startPlay(progress: slider.value)
+        } else {
+            presenter?.changeTime(CGFloat(slider.value))
+        }
     }
     
+    private var hasBeenTracked: Bool = false
+    
+    @objc func startDragging() {
+        hasBeenTracked = true
+    }
+        
     @objc func buttonTapped() {
         presenter?.buttonWasPressed()
     }
@@ -147,7 +163,7 @@ class AudioInputView: UIView {
 }
 
 extension AudioInputView: AudioPlayerViewProtocol {
-    func changeState(_ state: AudioAttachmentView.AudioState) {
+    func changeState(_ state: AudioState) {
         self.state = state
     }
     

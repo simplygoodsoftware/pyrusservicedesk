@@ -19,7 +19,6 @@ class AttachmentCollectionView : UICollectionView{
         dataSource = self
         register(AttachmentPreviewCollectionViewCell.self, forCellWithReuseIdentifier: AttachmentCollectionView.previewCellIdentifier)
         register(AttachmentFileCollectionViewCell.self, forCellWithReuseIdentifier: AttachmentCollectionView.fileCellIdentifier)
-        register(CustomPlayerCell.self, forCellWithReuseIdentifier: AttachmentCollectionView.playerCellIdentifier)
     }
     fileprivate static let previewCellIdentifier = "AttachPreviewCell"
     fileprivate static let fileCellIdentifier = "AttachFileCell"
@@ -45,11 +44,13 @@ extension AttachmentCollectionView: UICollectionViewDelegate, UICollectionViewDa
             let previewCell = collectionView.dequeueReusableCell(withReuseIdentifier: AttachmentCollectionView.previewCellIdentifier, for: indexPath) as? AttachmentPreviewCollectionViewCell
             previewCell?.image = presenter?.imageForAttachment(at:indexPath.row)
             cell = previewCell
-        } else if presenter?.canHasPlayerAttachment(at: indexPath.row) ?? false {
-            let playerCell = collectionView.dequeueReusableCell(withReuseIdentifier: AttachmentCollectionView.playerCellIdentifier, for: indexPath) as? CustomPlayerCell
-            playerCell?.loadMediaCell(from: presenter?.getAttachmentPath(at: indexPath.row) ?? "", attachmentId: "123")
-            cell = playerCell
-        } else {
+        }
+//        else if presenter?.canHasPlayerAttachment(at: indexPath.row) ?? false {
+//            let playerCell = collectionView.dequeueReusableCell(withReuseIdentifier: AttachmentCollectionView.playerCellIdentifier, for: indexPath) as? CustomPlayerCell
+//            playerCell?.loadMediaCell(from: presenter?.getAttachmentPath(at: indexPath.row) ?? "", attachmentId: "123")
+//            cell = playerCell
+//        }
+        else {
             let fileCell = collectionView.dequeueReusableCell(withReuseIdentifier: AttachmentCollectionView.fileCellIdentifier, for: indexPath) as? AttachmentFileCollectionViewCell
             fileCell?.fileName = presenter?.nameForAttachment(at: indexPath.row) ?? ""
             cell = fileCell

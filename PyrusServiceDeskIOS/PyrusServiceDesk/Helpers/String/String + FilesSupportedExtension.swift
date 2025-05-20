@@ -28,9 +28,10 @@ private enum VideoExtension : String,CaseIterable {
 private enum AudioExtension : String, CaseIterable {
     case mov = ".opus"
     case gt = ".ogg"
-    case avi = ".oga"
-    case mp4 = ".wav"
-    case m4p = ".mp3"
+//    case m4a = ".m4a"
+//    case avi = ".oga"
+//    case mp4 = ".wav"
+//    case m4p = ".mp3"
 }
 
 extension String {

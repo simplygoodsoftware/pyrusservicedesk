@@ -117,7 +117,7 @@ extension AudioRecordingObject: VoiceRecordButtonDelegate{
 }
 extension AudioRecordingObject: AudioRecordViewProtocol {
     func needRecording() -> Bool{
-        return self.delegate?.recordButton?.fingerIsDown() ?? false
+        return (self.delegate?.recordButton?.fingerIsDown() ?? false) || (self.delegate?.recordButton?.isAutoHoldingRecording ?? false)
     }
     func getAccountId() -> NSInteger{
         return self.delegate?.getAccountId() ?? 0

@@ -6,11 +6,21 @@
 //
 
 import Foundation
-@objc protocol AudioPlayerViewProtocol: class{
-    func changeState(_ state: AudioAttachmentView.AudioState)
+
+@objc enum AudioState: Int{
+    case stopped = 1
+    case playing = 2
+    case loading = 3
+    case paused = 4
+    case needLoad = 5
+}
+
+@objc protocol AudioPlayerViewProtocol: class {
+    func changeState(_ state: AudioState)
     func playingProgress(_ progress: CGFloat)
     func setTime(string: String)
-    @objc var state: AudioAttachmentView.AudioState { get }
+    func changeLoadingProggress(_ progress: Float)
+    @objc var state: AudioState { get }
     var slider: UISlider { get }
 }
 
@@ -18,15 +28,45 @@ import Foundation
     weak var view: AudioPlayerViewProtocol?
     private var fileUrl: URL?
     private var attachmentId: String = ""
+    private var attachmentName: String = ""
+    
+    private let audioRepository = AudioRepository()
+    
     ///The function to pass action. If state is stopped - it's will change to playing and player is starting, else it will be stopped.
-    func buttonWasPressed(){
-        if view?.state == .playing {
+    func buttonWasPressed() {
+        if view?.state == .needLoad {
+            view?.changeState(.loading)
+            loadAudio()
+        } else if view?.state == .loading {
+            view?.changeState(.needLoad)
+        } else if view?.state == .playing {
             view?.changeState(.paused)
             self.pausePlay()
-        }else{
+        } else {
             view?.changeState(.playing)
             self.startPlay(progress: view?.slider.value)
         }
+    }
+    
+    private func loadAudio() {
+        view?.changeLoadingProggress(0.5)
+        let url = PyrusServiceDeskAPI.PSDURL(type: .download, ticketId: attachmentId)
+        PyrusServiceDesk.mainSession.dataTask(with: url) { [weak self] data, response, error in
+            guard let self else { return }
+            if let data, data.count != 0 {
+                do {
+                    try audioRepository?.saveAudio(data, name: attachmentName, id: attachmentId)
+                    view?.changeLoadingProggress(1)
+                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.2) { [weak self] in
+                        self?.view?.changeState(.stopped)
+                    }
+                    
+                } catch {
+                    view?.changeState(.needLoad)
+                }
+                
+            }
+        }.resume()
     }
     ///Change fileUrl
     func update(fileUrl: URL?, attachmentId: String){
@@ -38,6 +78,7 @@ import Foundation
         self.view = view
         self.fileUrl = fileUrl
         self.attachmentId = attachmentId
+        self.attachmentName = attachment.name
         super.init()
        // self.drawCurrentState()
         self.changeTime(0)
@@ -107,7 +148,8 @@ import Foundation
     }
     
     private func needChangeState() -> Bool{
-        return (self.view?.state != .playing && self.isPlaying()) || ((self.view?.state != .stopped || self.view?.state != .paused) && !self.isPlaying())
+        return (self.view?.state != .playing && self.isPlaying()) ||
+        ((self.view?.state != .stopped || self.view?.state != .paused) && !self.isPlaying())
     }
     ///Took Info from OpusPlayer to draw audioAttachmentView state and progress
     func drawCurrentState() {
@@ -131,7 +173,9 @@ import Foundation
 //                changeTime(p!)
             }
             else{
-                self.view?.changeState(.stopped)
+                if self.view?.state != .loading && self.view?.state != .needLoad {
+                    self.view?.changeState(.stopped)
+                }
                // changeTime(0)
             }
         }
