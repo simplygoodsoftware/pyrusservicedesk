@@ -26,7 +26,7 @@
         else if (op_seekable(_oggFile)){
             op_pcm_seek(_oggFile, psmOffset);
         }
-        numberOfChanels = 1;// MAX(MIN_OGGOPUS_CHANELS_COUNT,MIN(MAX_OGGOPUS_CHANELS_COUNT,op_channel_count(_oggFile, -1)));
+        numberOfChanels =  MAX(MIN_OGGOPUS_CHANELS_COUNT,MIN(MAX_OGGOPUS_CHANELS_COUNT,op_channel_count(_oggFile, -1)));
     }
     return self;
 }

@@ -197,7 +197,7 @@ let OPUS_PLAYER_NOTIFICATION_KEY = "opusPlayerNotification"
     }
     private func createTimer() {
         if progressTimer == nil {
-            progressTimer = Timer.scheduledTimer(timeInterval: 0.05,
+            progressTimer = Timer.scheduledTimer(timeInterval: 0.01,
                                          target: self,
                                          selector: #selector(passProgress),
                                          userInfo: nil,
