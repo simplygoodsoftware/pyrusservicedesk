@@ -25,7 +25,7 @@ let OPUS_PLAYER_NOTIFICATION_KEY = "opusPlayerNotification"
     private var mBuffers = [AudioQueueBufferRef?](repeating: nil, count: bufCount)
     private var pUrl: URL?
     private var pId: String = ""//The id of attachment, using to detect local attachments
-    static let OpusAudioPlayerSampleRate = Int(AVAudioSession.sharedInstance().sampleRate)
+    private var opusAudioPlayerSampleRate = Int(48000)
     
     private var isPausedTapped: Bool = false
     
@@ -114,8 +114,8 @@ let OPUS_PLAYER_NOTIFICATION_KEY = "opusPlayerNotification"
         if pQueue != nil && url == pUrl && self.decoder != nil{
             let psmOffset = self.decoder?.psmOffset() ?? 0
             let psmTotal = self.decoder?.getPcmTotal() ?? 0
-            print("psmOffset: \(CGFloat(psmOffset)/CGFloat(psmTotal)), psmTotal: \(psmTotal)")
-            let curSecProgress = CGFloat(psmOffset) / CGFloat(OpusPlayer.OpusAudioPlayerSampleRate)
+//            print("psmOffset: \(CGFloat(psmOffset)/CGFloat(psmTotal)), psmTotal: \(psmTotal)")
+//            let curSecProgress = CGFloat(psmOffset) / CGFloat(OpusPlayer.OpusAudioPlayerSampleRate)
            
             return CGFloat(psmOffset) / CGFloat(psmTotal)//curSecProgress
         }
@@ -215,16 +215,16 @@ let OPUS_PLAYER_NOTIFICATION_KEY = "opusPlayerNotification"
     }
     
     private func timeFile(path: String) -> CGFloat{
-        let pcmTotal: Int = Int(AudioFormatManager.getPcmTotal(path: path))
-        return CGFloat(pcmTotal / OpusPlayer.OpusAudioPlayerSampleRate)
+        return AudioFormatManager.getTotalTime(path: path)
     }
     
     private static let bufferSize: UInt32 = 4096
     private func prepareToPlay(){
+        opusAudioPlayerSampleRate = Int(decoder?.getSampleRate() ?? 48000)
         let numberOfChanels: UInt32 = UInt32(decoder?.chanelsCount() ?? 1)
         let kBitsPerChannel: UInt32 = 16
         var dataFormat = AudioStreamBasicDescription(
-            mSampleRate: Float64(OpusPlayer.OpusAudioPlayerSampleRate),
+            mSampleRate: Float64(opusAudioPlayerSampleRate),
             mFormatID: kAudioFormatLinearPCM,
             mFormatFlags: kLinearPCMFormatFlagIsSignedInteger | kLinearPCMFormatFlagIsPacked,
             mBytesPerPacket: 2 * numberOfChanels,

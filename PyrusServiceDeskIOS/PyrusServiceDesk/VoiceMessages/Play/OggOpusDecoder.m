@@ -6,6 +6,7 @@
 {
 @private
     int numberOfChanels;
+    CGFloat _totalTime;
 }
 
 @end
@@ -27,6 +28,7 @@
             op_pcm_seek(_oggFile, psmOffset);
         }
         numberOfChanels =  MAX(MIN_OGGOPUS_CHANELS_COUNT,MIN(MAX_OGGOPUS_CHANELS_COUNT,op_channel_count(_oggFile, -1)));
+        _totalTime = [self getPcmTotal]/[self getSampleRate];
     }
     return self;
 }
@@ -43,7 +45,7 @@
     UInt32 mBytesPerPacket = 2;
     do
     {
-        if ((nTotalBytesRead + nBytesRead*mBytesPerPacket) > pBuffer->mAudioDataBytesCapacity) {
+        if ((nTotalBytesRead + nBytesRead*mBytesPerPacket*numberOfChanels) > pBuffer->mAudioDataBytesCapacity) {
             break;
         }
         if(numberOfChanels == MAX_OGGOPUS_CHANELS_COUNT){
@@ -54,12 +56,13 @@
                                  (opus_int16*)pBuffer->mAudioData + nTotalBytesRead/mBytesPerPacket,(int)(pBuffer->mAudioDataBytesCapacity - nTotalBytesRead/mBytesPerPacket), nil);
         }
         
-        if(nBytesRead  > 0)
+        if(nBytesRead  > 0) {
             nTotalBytesRead += nBytesRead*mBytesPerPacket*numberOfChanels;
-        else {
+            break;
+        } else {
             break;
         }
-        
+        NSLog(@"nTotalBytesRead = %li", nTotalBytesRead);
     } while(nTotalBytesRead < pBuffer->mAudioDataBytesCapacity);
     if(nTotalBytesRead == 0)
         return NO;
@@ -72,6 +75,15 @@
     return YES;
     
 }
+
+- (CGFloat)getTotalTime {
+    return _totalTime;
+}
+
+- (int64_t)getSampleRate {
+    return 48000;
+}
+
 - (void)dealloc
 {
     op_free(_oggFile);
