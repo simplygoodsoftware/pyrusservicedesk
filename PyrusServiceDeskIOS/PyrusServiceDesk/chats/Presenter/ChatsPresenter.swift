@@ -52,6 +52,9 @@ extension ChatsPresenter: ChatsPresenterProtocol {
             view?.show(.startRefresh)
         case .connectionError:
             view?.show(.connectionError)
+        case .createChatsOnStart(chats: let chats):
+            self.chats = chats
+            loadChatsState()
         }
     }
 }
@@ -64,7 +67,13 @@ private extension ChatsPresenter {
             DispatchQueue.main.async {
                 self.view?.show(.updateChats(chats: chatsModel))
             }
+
         }
+    }
+    
+    private func loadChatsState() {
+        let chatsModel = self.prepareChats(chats: self.chats)
+        self.view?.show(.updateChats(chats: chatsModel))
     }
     
     func prepareChats(chats: [ChatPresenterModel]) -> [[PSDChatsViewModel]] {

@@ -13,6 +13,7 @@ enum ChatsPresenterCommand {
     case deleteSegmentControl
     case startRefresh
     case connectionError
+    case createChatsOnStart (chats: [ChatPresenterModel])
 }
 
 protocol ChatsPresenterProtocol {
