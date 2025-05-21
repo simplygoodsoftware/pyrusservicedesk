@@ -39,6 +39,8 @@ class PSDMessageInputView: UIView, PSDMessageTextViewDelegate,PSDMessageSendButt
     let distToSend: CGFloat = 15
     static let attachmentsHeight : CGFloat = 80
     
+    var isRecording: Bool = false
+    
     private(set) var recordingObject: AudioRecordingObject?
     var recordButton: VoiceRecordButton?
     private var centerXConstraint: NSLayoutConstraint!
@@ -232,8 +234,10 @@ class PSDMessageInputView: UIView, PSDMessageTextViewDelegate,PSDMessageSendButt
     }
     
     ///Clear text.
-    func clearAll() {
-        inputTextView.text = ""
+    func clearAll(clearInput: Bool = true) {
+        if clearInput {
+            inputTextView.text = ""
+        }
         inputTextView.textViewDidChange(inputTextView)
         attachmentsPresenter?.cleanAll()
         checkCollectionHeight()
@@ -260,10 +264,16 @@ class PSDMessageInputView: UIView, PSDMessageTextViewDelegate,PSDMessageSendButt
     
     //MARK: Delegate methods
     func textViewChanged() {
-        checkSendButton()
+        if !isRecording {
+            checkSendButton()
+        }
     }
     
     func sendMessage() {
+        if attachmentsPresenter.attachmentsNumber() == 1 && attachmentsPresenter.attachmentsForSend().first?.isAudio ?? false {
+            sendAudioMessage()
+            return
+        }
         inputTextView.text = inputTextView.text.trimmingCharacters(in: .whitespacesAndNewlines)
         inputTextView.textViewDidChange(inputTextView)
         if(inputTextView.text.count > 0 || attachmentsPresenter.attachmentsNumber() > 0) {
@@ -272,7 +282,6 @@ class PSDMessageInputView: UIView, PSDMessageTextViewDelegate,PSDMessageSendButt
             inputTextView.textViewDidChange(inputTextView)
             attachmentsPresenter?.cleanAll()
             checkCollectionHeight()
-            OpusPlayer.shared.stopAllPlay()
             UIView.animate(withDuration: 0.1, animations: {
                 self.audioInputView.alpha = 0
                 self.deleteAudioButton.alpha = 0
@@ -290,10 +299,31 @@ class PSDMessageInputView: UIView, PSDMessageTextViewDelegate,PSDMessageSendButt
                 self.cancelButton.setImage(UIImage.PSDImage(name: "arrowsLeft"), for: .normal)
             })
         }
+        checkSendButton()
+    }
+    
+    func sendAudioMessage() {
+        self.delegate?.send("", attachmentsPresenter.attachmentsForSend())
+            attachmentsPresenter?.cleanAll()
+            checkCollectionHeight()
+            UIView.animate(withDuration: 0.1, animations: {
+                self.audioInputView.alpha = 0
+                self.deleteAudioButton.alpha = 0
+                self.attachmentsAddButton.alpha = 1
+                self.inputTextView.alpha = 1
+                self.cancelButton.alpha = 0
+            }, completion: {_ in
+                self.audioLeadingConstraint?.constant = 0
+                self.audioInputView.state = .stopped
+                self.audioInputView.layoutIfNeeded()
+                self.audioInputView.setNeedsLayout()
+                self.audioInputView.state = .stopped
+                self.audioInputView.layoutIfNeeded()
+                self.audioInputView.setNeedsLayout()
+                self.cancelButton.setImage(UIImage.PSDImage(name: "arrowsLeft"), for: .normal)
+            })
         
-        if inputTextView.text.count == 0 && attachmentsPresenter.attachmentsNumber() == 1 && attachmentsPresenter.attachmentsForSend().first?.isAudio ?? false {
-            OpusPlayer.shared.stopAllPlay()
-        }
+        OpusPlayer.shared.stopAllPlay()
         checkSendButton()
     }
     ///Check is send button need to enabled or not
@@ -425,7 +455,7 @@ class PSDMessageInputView: UIView, PSDMessageTextViewDelegate,PSDMessageSendButt
     }
     
     @objc private func deleteAudioButtonTapped() {
-        clearAll()
+        clearAll(clearInput: false)
     }
     
     @objc private func cancel() {
@@ -491,11 +521,13 @@ extension PSDMessageInputView: RecordableViewProtocol, AudioRecordingObjectDeleg
     
     
     func cancelRecording() {
+        isRecording = false
         delegate?.recordStop()
-        clearAll()
+        clearAll(clearInput: false)
     }
     
     func didStartRecord() {
+        isRecording = true
         OpusPlayer.shared.stopAllPlay()
         delegate?.recordStart()
         UIView.animate(withDuration: 0.2, animations: {
@@ -506,6 +538,7 @@ extension PSDMessageInputView: RecordableViewProtocol, AudioRecordingObjectDeleg
     }
     
     func didEndRecord() {
+        isRecording = false
         delegate?.recordStop()
         UIView.animate(withDuration: 0.2, animations: {
             self.attachmentsAddButton.alpha = 1
@@ -521,6 +554,7 @@ extension PSDMessageInputView: RecordableViewProtocol, AudioRecordingObjectDeleg
     }
     
     func didCreateFile(attachment: PSDAttachment, url: URL) {
+        inputTextView.resignFirstResponder()
         attachmentsPresenter.addAttachment(attachment)
         checkSendButton()
         audioInputView.removeFromSuperview()

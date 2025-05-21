@@ -163,6 +163,8 @@ class AudioInputView: UIView {
 }
 
 extension AudioInputView: AudioPlayerViewProtocol {
+    func changeProgress(_ progress: CGFloat) { }
+    
     func changeState(_ state: AudioState) {
         self.state = state
     }

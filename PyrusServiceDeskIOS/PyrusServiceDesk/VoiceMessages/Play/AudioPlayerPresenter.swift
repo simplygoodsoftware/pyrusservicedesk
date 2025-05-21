@@ -19,6 +19,7 @@ import Foundation
     func changeState(_ state: AudioState)
     func playingProgress(_ progress: CGFloat)
     func setTime(string: String)
+    func changeProgress(_ progress: CGFloat)
     func changeLoadingProggress(_ progress: Float)
     @objc var state: AudioState { get }
     var slider: UISlider { get }
@@ -27,7 +28,7 @@ import Foundation
 @objc class AudioPlayerPresenter: NSObject{
     weak var view: AudioPlayerViewProtocol?
     private var fileUrl: URL?
-    private var attachmentId: String = ""
+    var attachmentId: String = ""
     private var attachmentName: String = ""
     
     private let audioRepository = AudioRepository()
@@ -82,6 +83,7 @@ import Foundation
         super.init()
        // self.drawCurrentState()
         self.changeTime(0)
+     //   drawCurrentProgress()
         
         NotificationCenter.default.addObserver(self, selector: #selector(opusPlayerNotification(notification:)), name: NSNotification.Name(rawValue: OPUS_PLAYER_NOTIFICATION_KEY), object: nil)
         NotificationCenter.default.addObserver(self, selector: #selector(appClosed), name: UIApplication.willResignActiveNotification, object: nil)
@@ -180,6 +182,15 @@ import Foundation
             }
         }
     }
+    
+    func drawCurrentProgress() {
+        let p = getCurrentPlayProgress()
+        if p != nil && p! > 0 {
+            self.view?.changeProgress(p ?? 0)
+            changeTime(p!)
+        }
+    }
+    
     @objc private func appClosed(){
         OpusPlayer.shared.pauseAllPlay()
         self.drawCurrentState()

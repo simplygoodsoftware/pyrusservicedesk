@@ -54,8 +54,10 @@
                                  (opus_int16*)pBuffer->mAudioData + nTotalBytesRead/mBytesPerPacket,(int)(pBuffer->mAudioDataBytesCapacity - nTotalBytesRead/mBytesPerPacket), nil);
         }
         
-        if(nBytesRead  > 0)
+        if(nBytesRead  > 0) {
             nTotalBytesRead += nBytesRead*mBytesPerPacket*numberOfChanels;
+            break;
+        }
         else {
             break;
         }

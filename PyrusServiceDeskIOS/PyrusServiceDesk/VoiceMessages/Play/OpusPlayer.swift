@@ -121,7 +121,7 @@ let OPUS_PLAYER_NOTIFICATION_KEY = "opusPlayerNotification"
         }
         else{
             let savedProgresss = getSavedProgress(url: url)
-            let psmTotal = self.decoder?.getPcmTotal() ?? 0
+            let psmTotal = AudioFormatManager.getPcmTotal(path: url?.path ?? "")
             let startedProgress = CGFloat(savedProgresss) / CGFloat(psmTotal)// CGFloat(OpusPlayer.OpusAudioPlayerSampleRate)
              return startedProgress
         }

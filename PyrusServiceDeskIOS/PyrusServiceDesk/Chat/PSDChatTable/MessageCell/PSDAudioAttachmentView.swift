@@ -57,6 +57,7 @@ class PSDAudioAttachmentView: PSDAttachmentView {
                     //  }
                     if !slider.isTracking {
                         slider.setValue(0, animated: false)
+                        presenter?.drawCurrentProgress()
                     }
                 case .needLoad:
                     playImageView.image = UIImage.PSDImage(name: "download")?.imageWith(color: .white)
@@ -173,6 +174,7 @@ class PSDAudioAttachmentView: PSDAttachmentView {
         previewImageView.layer.mask = rectShape
         previewBorderLayer.path = rectShape.path
         previewBorderLayer.frame = previewImageView.bounds
+       // presenter?.drawCurrentProgress()
         //   playView.layer.addLoadingAnimation()
     }
     
@@ -305,6 +307,10 @@ extension PSDAudioAttachmentView: AudioPlayerViewProtocol {
             slider.setValue(Float(progress), animated: true)
             print(progress)
         }
+    }
+    
+    func changeProgress(_ progress: CGFloat) {
+        slider.value = Float(progress)
     }
     
     func setTime(string: String) {
