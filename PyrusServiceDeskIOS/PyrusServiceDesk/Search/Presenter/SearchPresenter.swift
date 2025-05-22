@@ -75,7 +75,8 @@ private extension SearchPresenter {
             
             if messageText.string.count == 0, let attachment = chat.lastMessage?.attachments?.last {
                 model.hasAttachments = true
-                model.attachmentName = attachment.isImage ? "Photo".localizedPSD() : attachment.isVideo ? "Video".localizedPSD() : "File".localizedPSD()
+                model.isAudio = attachment.isAudio
+                model.attachmentName = attachment.isImage ? "Photo".localizedPSD() : attachment.isVideo ? "Video".localizedPSD() : attachment.isAudio ?  "Audio".localizedPSD() : "File".localizedPSD()
             }
             
             searchChats.append(model)

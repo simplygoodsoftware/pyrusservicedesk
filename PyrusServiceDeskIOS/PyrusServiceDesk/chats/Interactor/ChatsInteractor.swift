@@ -121,6 +121,9 @@ extension ChatsInteractor: ChatsInteractorProtocol {
         case .viewWillAppear:
    //         guard PyrusServiceDesk.chats.count > 0 else { break }
             PyrusServiceDesk.syncManager.syncGetTickets()
+            if !isFiltered {
+                PyrusServiceDesk.currentUserId = nil
+            }
             if chats.count == 0 {
                 updateData(firstStart: true)
             }
@@ -145,9 +148,6 @@ extension ChatsInteractor: ChatsInteractorProtocol {
     }
     
     private func updateData(firstStart: Bool = false) {
-        if !isFiltered {
-            PyrusServiceDesk.currentUserId = nil
-        }
         let filterChats = createChats()
         if filterChats != chats {
             chats = filterChats

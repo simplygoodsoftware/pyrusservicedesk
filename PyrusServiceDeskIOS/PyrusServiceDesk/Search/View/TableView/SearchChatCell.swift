@@ -61,6 +61,7 @@ class SearchChatCell: UITableViewCell {
             attachmentIcon.isHidden = false
             attachmentName.isHidden = false
             attachmentName.text = model.attachmentName
+            attachmentIcon.image = model.isAudio ? UIImage.PSDImage(name: "audio") : UIImage.PSDImage(name: "paperclip")
         }
     }
     
@@ -76,9 +77,9 @@ class SearchChatCell: UITableViewCell {
         addConstraints()
     }
     
-    override func traitCollectionDidChange(_ previousTraitCollection: UITraitCollection?) {
-        attachmentIcon.image = UIImage.PSDImage(name: "paperclip")?.imageWith(color: .lastMessageInfo)
-    }
+//    override func traitCollectionDidChange(_ previousTraitCollection: UITraitCollection?) {
+//        attachmentIcon.image = UIImage.PSDImage(name: "paperclip")?.imageWith(color: .lastMessageInfo)
+//    }
     
     private lazy var selectedBackground : UIView = {
         let view = UIView()
@@ -124,7 +125,7 @@ class SearchChatCell: UITableViewCell {
             attachmentIcon.centerYAnchor.constraint(equalTo: lastMessageInfo.centerYAnchor),
             
             attachmentName.centerYAnchor.constraint(equalTo: lastMessageInfo.centerYAnchor),
-            attachmentName.leadingAnchor.constraint(equalTo: attachmentIcon.trailingAnchor, constant: 0)
+            attachmentName.leadingAnchor.constraint(equalTo: attachmentIcon.trailingAnchor, constant: 2)
         ])
     }
     

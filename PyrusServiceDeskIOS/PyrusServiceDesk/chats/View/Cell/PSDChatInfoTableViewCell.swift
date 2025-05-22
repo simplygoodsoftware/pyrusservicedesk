@@ -76,13 +76,14 @@ class PSDChatInfoTableViewCell: UITableViewCell {
         notificationButton.isHidden = model.isRead
         attachmentName.text = model.attachmentText
         attachmentIcon.isHidden = !model.hasAttachment
+        attachmentIcon.image = model.isAudio ? UIImage.PSDImage(name: "audio") : UIImage.PSDImage(name: "paperclip")
         attachmentName.isHidden = !model.hasAttachment
         messageStateView._messageState = model.state
     }
     
-    override func traitCollectionDidChange(_ previousTraitCollection: UITraitCollection?) {
-        attachmentIcon.image = UIImage.PSDImage(name: "paperclip")?.imageWith(color: .lastMessageInfo)
-    }
+//    override func traitCollectionDidChange(_ previousTraitCollection: UITraitCollection?) {
+//        attachmentIcon.image = UIImage.PSDImage(name: "paperclip")?.imageWith(color: .lastMessageInfo)
+//    }
     
     func removeLinkAttributes(from attributedString: NSAttributedString?) -> NSAttributedString? {
         guard let attributedString else { return nil }
@@ -168,7 +169,7 @@ class PSDChatInfoTableViewCell: UITableViewCell {
             attachmentIcon.centerYAnchor.constraint(equalTo: lastMessageInfo.centerYAnchor),
             
             attachmentName.centerYAnchor.constraint(equalTo: lastMessageInfo.centerYAnchor),
-            attachmentName.leadingAnchor.constraint(equalTo: attachmentIcon.trailingAnchor, constant: 0)
+            attachmentName.leadingAnchor.constraint(equalTo: attachmentIcon.trailingAnchor, constant: 2)
         ])
     }
     

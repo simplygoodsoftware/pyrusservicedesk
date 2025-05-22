@@ -6,6 +6,7 @@ struct SearchChatViewModel: Hashable {
     let messageText: NSAttributedString
     let messageId: String
     let isMessage: Bool
+    var isAudio: Bool = false
     var hasAttachments: Bool = false
     var attachmentName: String?
     

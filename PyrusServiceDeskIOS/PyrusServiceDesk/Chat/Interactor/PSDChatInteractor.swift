@@ -438,7 +438,7 @@ private extension PSDChatInteractor {
         messageToSent = newMessage
         presenter.doWork(.addNewRow)
         newMessage.commandId = UUID().uuidString
-        newMessage.userId = PyrusServiceDesk.currentUserId ?? PyrusServiceDesk.customUserId ?? PyrusServiceDesk.userId
+        newMessage.userId = chat?.userId ?? PyrusServiceDesk.currentUserId ?? PyrusServiceDesk.customUserId ?? PyrusServiceDesk.userId
         newMessage.appId = PyrusServiceDesk.currentClientId ?? PyrusServiceDesk.clientId
         PSDMessageSend.pass(newMessage, delegate: self)
     }

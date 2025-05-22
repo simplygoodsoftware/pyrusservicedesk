@@ -105,7 +105,8 @@ private extension ChatsPresenter {
                 lastMessageText: lastMessageText,
                 attachmentText: getAttachmentString(attachment: lastMessage?.attachments?.last) ?? "",
                 hasAttachment: lastMessage?.attachments?.count ?? 0 > 0, 
-                state: lastMessage?.state ?? .sent
+                state: lastMessage?.state ?? .sent,
+                isAudio: lastMessage?.attachments?.first?.isAudio ?? false
             )
             
             if chat.isActive {

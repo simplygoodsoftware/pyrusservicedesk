@@ -9,8 +9,9 @@ struct ChatViewModel: Hashable {
     let attachmentText: String
     let hasAttachment: Bool
     let state: messageState
+    let isAudio: Bool
     
-    init(type: PSDChatsCellType = .chat, id: Int, date: String, isRead: Bool, subject: String, lastMessageText: String, attachmentText: String, hasAttachment: Bool, state: messageState) {
+    init(type: PSDChatsCellType = .chat, id: Int, date: String, isRead: Bool, subject: String, lastMessageText: String, attachmentText: String, hasAttachment: Bool, state: messageState, isAudio: Bool) {
         self.id = id
         self.date = date
         self.isRead = isRead
@@ -19,10 +20,11 @@ struct ChatViewModel: Hashable {
         self.attachmentText = attachmentText
         self.hasAttachment = hasAttachment
         self.state = state
+        self.isAudio = isAudio
     }
     
     static func == (lhs: ChatViewModel, rhs: ChatViewModel) -> Bool {
-        return lhs.id == rhs.id && lhs.date == rhs.date && lhs.isRead == rhs.isRead && lhs.subject == rhs.subject && lhs.lastMessageText == rhs.lastMessageText && lhs.attachmentText == rhs.attachmentText && lhs.hasAttachment == rhs.hasAttachment && lhs.state == rhs.state
+        return lhs.id == rhs.id && lhs.date == rhs.date && lhs.isRead == rhs.isRead && lhs.subject == rhs.subject && lhs.lastMessageText == rhs.lastMessageText && lhs.attachmentText == rhs.attachmentText && lhs.hasAttachment == rhs.hasAttachment && lhs.state == rhs.state && lhs.isAudio == rhs.isAudio
     }
     
     func hash(into hasher: inout Hasher) {
@@ -34,5 +36,6 @@ struct ChatViewModel: Hashable {
         hasher.combine(attachmentText)
         hasher.combine(hasAttachment)
         hasher.combine(state)
+        hasher.combine(isAudio)
     }
 }

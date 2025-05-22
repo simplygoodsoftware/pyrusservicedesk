@@ -243,7 +243,12 @@ import Foundation
     }
     
     @objc private func appClosed() {
-        stopRecordButtonTapped() 
+        guard isRecording else { return }
+        UIApplication.shared.isIdleTimerDisabled = false
+        fingerDown = false
+        endTimer()
+        self.delegate?.voiceRecordStop(needShowAudioView: true)
+        self.isRecording = false
     }
     
     deinit {

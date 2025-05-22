@@ -58,6 +58,11 @@ import UIKit
     }
     
     static var currentUserId: String?
+//    {
+//        didSet {
+//            print("каког")
+//        }
+//    }
     static var currentClientId: String?
     
     static let repository = TicketCommandRepository()
