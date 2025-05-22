@@ -121,8 +121,10 @@ extension ChatsInteractor: ChatsInteractorProtocol {
         case .viewWillAppear:
    //         guard PyrusServiceDesk.chats.count > 0 else { break }
             PyrusServiceDesk.syncManager.syncGetTickets()
+            if chats.count == 0 {
+                updateData(firstStart: true)
+            }
             
-//            updateData()
             
             if RateManager.isActionPerformed(times: 3) {
                 RateManager.setIfNilDateForNextRate()
@@ -142,7 +144,7 @@ extension ChatsInteractor: ChatsInteractorProtocol {
         }
     }
     
-    private func updateData() {
+    private func updateData(firstStart: Bool = false) {
         if !isFiltered {
             PyrusServiceDesk.currentUserId = nil
         }
@@ -151,7 +153,12 @@ extension ChatsInteractor: ChatsInteractorProtocol {
             chats = filterChats
         }
         if chats.count > 0 {
-            presenter.doWork(.updateChats(chats: prepareChats()))
+            if firstStart {
+                presenter.doWork(.createChatsOnStart(chats: prepareChats()))
+            } else {
+                presenter.doWork(.updateChats(chats: prepareChats()))
+            }
+            
             firtLoad = false
             presenter.doWork(.endRefresh)
         }
@@ -315,6 +322,8 @@ private extension ChatsInteractor {
             }
         }
     }
+    
+    
     
     @objc func changedClientId() {
         updateIfNeedClient()
