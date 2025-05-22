@@ -5,6 +5,9 @@ import Foundation
     func psmOffset() -> Int64
     func read(_ buffer: AudioQueueBufferRef) -> Bool
     func getPcmTotal() -> Int64
+    
+    func getTotalTime() -> CGFloat
+    func getSampleRate() -> Int64
 }
 
 class AudioFormatManager {
@@ -23,5 +26,13 @@ class AudioFormatManager {
         }
         let decoder = getDecoder(url: url, offSet: 0)
         return decoder?.getPcmTotal() ?? 0
+    }
+    
+    static func getTotalTime(path: String) -> CGFloat {
+        guard let url = URL(string: path) else {
+            return 0
+        }
+        let decoder = getDecoder(url: url, offSet: 0)
+        return decoder?.getTotalTime() ?? 0
     }
 }

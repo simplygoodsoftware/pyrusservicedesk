@@ -9,6 +9,8 @@
 {
 @private
     int numberOfChanels;
+    NSInteger _rate;
+    CGFloat _totalTime;
 }
 
 @end
@@ -28,7 +30,12 @@
         else if (ov_seekable(&_vorbisFile)){
             ov_pcm_seek(&_vorbisFile, psmOffset);
         }
+        _rate = info->rate;
+        if (_rate <= 0) {
+            _rate = 44100;
+        }
         numberOfChanels = info->channels;
+        _totalTime = ov_time_total(&_vorbisFile, -1);
     }
     return self;
 }
@@ -60,6 +67,16 @@
     return YES;
     
 }
+
+- (CGFloat)getTotalTime {
+    return _totalTime;
+}
+
+- (int64_t)getSampleRate {
+    return _rate;
+}
+
+
 - (void)dealloc
 {
 //    ov_fr(vorbisFile);
