@@ -38,9 +38,9 @@ private extension SearchPresenter {
                 messageText = highlightText(in: message, substring: searchString, highlightColor: .secondColor ?? .white, font: .lastMessageInfo, fontColor: .lastMessageInfo)
             } else {
                 if chat.messageText.count > 0 {
-                    messageText = chat.messageText.parseXMLToAttributedString(fontColor: .lastMessageInfo, font: .lastMessageInfo).0 ?? NSAttributedString(
+                    messageText = HelpersStrings.decodeHTML(in: chat.messageText.parseXMLToAttributedString(fontColor: .lastMessageInfo, font: .lastMessageInfo).0 ?? NSAttributedString(
                         string: chat.messageText,
-                        attributes: [.font: UIFont.lastMessageInfo, .foregroundColor: UIColor.lastMessageInfo]
+                        attributes: [.font: UIFont.lastMessageInfo, .foregroundColor: UIColor.lastMessageInfo])
                     )
                 } else {
                     messageText = NSAttributedString(string: "")
@@ -86,7 +86,7 @@ private extension SearchPresenter {
     }
     
     func highlightText(in text: String, substring: String, highlightColor: UIColor, font: UIFont, fontColor: UIColor) -> NSAttributedString {
-        let attributedString = NSMutableAttributedString(attributedString: (text as NSString).parseXMLToAttributedString(fontColor: fontColor, font: font).0 ?? NSAttributedString(string: ""))
+        let attributedString = NSMutableAttributedString(attributedString: HelpersStrings.decodeHTML(in: (text as NSString).parseXMLToAttributedString(fontColor: fontColor, font: font).0 ?? NSAttributedString(string: "")))
         
         let range = (attributedString.string as NSString).range(of: substring, options: .caseInsensitive)
         

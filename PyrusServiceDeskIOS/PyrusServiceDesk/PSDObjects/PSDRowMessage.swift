@@ -17,7 +17,7 @@ class PSDRowMessage: NSObject {
         let color: UIColor = isInbound
             ? CustomizationHelper.userMassageTextColor
             : CustomizationHelper.supportMassageTextColor
-        attributedText = (text as NSString).parseXMLToAttributedString(fontColor: color).0
+        attributedText =  HelpersStrings.decodeHTML(in: (text as NSString).parseXMLToAttributedString(fontColor: color).0 ?? NSAttributedString(string: ""))
         self.attachment = attachment
         self.rating = message.rating
         super.init()
