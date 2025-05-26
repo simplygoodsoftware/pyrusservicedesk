@@ -5,13 +5,13 @@
     <string name="psd_uploading">Yukleniyor…</string>
     <string name="psd_file_size_mb" formatted="false">%.1f MB</string>
     <string name="psd_file_size_kb" formatted="false">%.1f KB</string>
-    <string name="psd_time_format">saat saat: dakika dakika</string>
+    <string name="psd_time_format">hh:mm</string>
     <string name="psd_organization_support">Destek</string>
     <string name="psd_today">Bugün</string>
     <string name="psd_yesterday">Dün</string>
     <string name="psd_date_format_d_m_y">d MMMM yyyy</string>
     <string name="psd_date_format_d_m">d MMMM</string>
-    <string name="psd_photo">Resim</string>
+    <string name="psd_photo">Foto</string>
     <string name="psd_gallery">Galeri</string>
     <plurals name="psd_years_ago">
         <item quantity="one">%d yıl önce</item>
