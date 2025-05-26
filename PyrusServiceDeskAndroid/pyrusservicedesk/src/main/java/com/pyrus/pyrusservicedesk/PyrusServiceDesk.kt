@@ -533,8 +533,7 @@ class PyrusServiceDesk private constructor(
                 val userAgent = "ServicedeskClient/android/" +
                     Build.MANUFACTURER + "/" +
                     Build.MODEL + "/" +
-                    Build.VERSION.SDK_INT + "/" +
-                    BuildConfig.VERSION_NAME
+                    Build.VERSION.SDK_INT
 
                 requestBuilder.header("User-Agent", userAgent)
                 chain.proceed(requestBuilder.build())
