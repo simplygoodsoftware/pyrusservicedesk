@@ -46,7 +46,7 @@ internal class LocalDataProvider(offlineRepository: OfflineRepository,
         //it is strange, but it`s work. It is necessary so that the local time and the time from the server to match
         val data = with(TimeZone.getDefault()) {
             Calendar.getInstance(this).apply {
-                timeInMillis = calendar.timeInMillis - rawOffset
+                timeInMillis = calendar.timeInMillis - getOffset(System.currentTimeMillis())
             }.time
         }
         return Comment(
