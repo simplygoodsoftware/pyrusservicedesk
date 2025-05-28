@@ -5,25 +5,25 @@
     <string name="psd_uploading">Yuklanmoqda…</string>
     <string name="psd_file_size_mb" formatted="false">%.1f MB</string>
     <string name="psd_file_size_kb" formatted="false">%.1f KB</string>
-    <string name="psd_time_format">HH:mm</string>
+    <string name="psd_time_format">hh:mm</string>
     <string name="psd_organization_support">Qo\'llab-quvvatlash</string>
     <string name="psd_today">Bugun</string>
     <string name="psd_yesterday">Kecha</string>
-    <string name="psd_date_format_d_m_y">k,OOOO yyyy</string>
-    <string name="psd_date_format_d_m">k OOOO</string>
+    <string name="psd_date_format_d_m_y">d MMMM yyyy</string>
+    <string name="psd_date_format_d_m">d MMMM</string>
     <string name="psd_photo">Surat</string>
     <string name="psd_gallery">Galereya</string>
-    <string name="psd_months_ago" formatted="false">%d daqiqa oldin</string>
+    <string name="psd_months_ago" formatted="false">%d oy oldin</string>
     <string name="psd_weeks_ago" formatted="false">%d hafta oldin</string>
     <string name="psd_days_ago" formatted="false">%d kun oldin</string>
     <string name="psd_hours_ago" formatted="false">%d soat oldin</string>
     <string name="psd_minutes_ago" formatted="false">%d daqiqa oldin</string>
     <string name="psd_guest">Mehmon</string>
     <string name="psd_copied_to_clipboard">Buferga nusxalandi</string>
-    <string name="psd_download">Yuklab olish</string>
+    <string name="psd_download">Yuklab oling</string>
     <string name="psd_downloading">Yuklab olinmoqda…</string>
     <string name="psd_open">Ochish</string>
-    <string name="psd_no_preview_available">Ko\'rib chiqish mavjud emas</string>
+    <string name="psd_no_preview_available">Ko‘rib chiqish mavjud emas</string>
     <string name="psd_share">Ulashish</string>
     <string name="psd_delete">O\'chirish</string>
     <string name="link_warning">Bu havola %s ga olib keladi
@@ -36,5 +36,5 @@
     </plurals>
     <string name="psd_recent">yaqinda</string>
     <string name="psd_file_size_exceeded_message" formatted="false">Fayl hajmi %d MB dan oshmasligi kerak.</string>
-    <string name="send_library_logs">Kutubxona jurnallarini yuborish</string>
+    <string name="send_library_logs">Kutubxona jurnallarini yuboring</string>
 </resources>
