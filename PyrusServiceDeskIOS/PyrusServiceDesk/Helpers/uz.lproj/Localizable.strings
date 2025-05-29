@@ -1,1 +1,68 @@
 
+
+"Default_User_Name" = "Mehmon";
+"Cancel" = "Bekor qilish";
+"Settings" = "Sozlamalar";
+"Uploading" = "Yuklanmoqda...";
+"Empty_Description" = "Bo'sh";
+"All_Conversations" = "Barcha suhbatlar";
+"Support_Default_Name" = "Qo'llab-quvvatlash";
+
+//Buttons' Title
+"New_Conversation" = "Yangi suhbat";
+"New_Conversation_Short" = "Yangi";
+"Send" = "Yuborish";
+"Back" = "Orqaga";
+"Done" = "Bajarildi";
+"CancelDownload" = "Yuklashni bekor qilish";
+"FileLoadError" = "Faylni yuklab bo'lmadi";
+"NoPreviewAvailable" = "Oldindan ko'rish mavjud emas";
+"OpenWith" = "bilan oching";
+"RetryButton" = "Qayta urinib koring";
+"DeleteButton" = "O'chirish";
+
+//For attachments
+"Camera" = "Surat yoki video suratga oling";
+"Phone_Gallery" = "Galereya";
+"Phone_Gallery_Access_Error" = "Telefon galereyasiga kirish imkoni yo'q";
+"Access_Error" = "Kirish xatosi";
+"Size_Error" = "Fayl hajmi 200 MB dan oshmasligi kerak.";
+"No_File_Error" = "Fayl mavjud emas";
+
+
+//Append time from data
+"Interval_Recent" = "yaqinda";
+"Interval_Minute" = "%% daqiqa oldin";
+"Interval_Hour" = "%% soat oldin";
+"Interval_Day" = "%% kun oldin";
+"Interval_Week" = "%% hafta oldin";
+"Interval_Mounth" = "%% oy oldin";
+"Interval_One_End_Year" = "%% yil avval";
+"Interval_Years_234" = "%% yil avval";
+"Interval_Years" = "%% yil avval";
+
+//Date as string
+"Today" = "Bugun";
+"Yesterday" = "Kecha";
+"Date_Format" = "EE, dd MMM";
+"Date_Format_Year" = "EE, dd MMM, yyyy";
+"Time_Format" = "hh:mm";
+"Numbers_Date_Format" = "yyyyMMddHHmmss";
+"Retry" = "Qayta urinish";
+"Error" = "Xato";
+"AttachmentLoadError" = "Bu biriktirmani yuklab bo‘lmadi";
+"ErrorServerError" = "Server aloqasi uzildi";
+"AcсessDenied" = "Ruxsat berilmadi";
+"PrepareLog" = "Jurnal tayyorlanmoqda...";
+"ExternalSourceWarning" = "Bu havola %@ ga olib keladi\nHaqiqatan ham havolaga amal qilishni xohlaysizmi?";
+"ShortYes" = "Ha";
+"ShortNo" = "Yo'q";
+"OK" = "Kelishdik";
+"Last_Message" = "Bu suhbatning oxirgi xabari";
+"Comment" = "Izoh...";
+"Camera_Access_Error" = "Kamera yoki mikrofonga kirish imkoni yo'q";
+"Interval_One_Year" = "%% yil oldin";
+
+//For requests
+"No_Connection" = "Internetga ulanish yo'q";
+"SendLog" = "Kutubxona jurnallarini yuboring";
