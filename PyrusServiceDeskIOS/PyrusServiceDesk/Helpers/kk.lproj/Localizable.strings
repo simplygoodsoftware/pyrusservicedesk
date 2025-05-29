@@ -1,1 +1,68 @@
 
+
+"Default_User_Name" = "Қонақ";
+"Uploading" = "Жүктеп салынуда...";
+"Empty_Description" = "Бос";
+"All_Conversations" = "Барлық әңгімелер";
+"Support_Default_Name" = "Қолдау";
+
+//Buttons' Title
+"New_Conversation" = "Жаңа әңгіме";
+"New_Conversation_Short" = "Жаңа";
+"Cancel" = "Бас тарту";
+"Settings" = "Параметрлер";
+"Send" = "Жіберу";
+"Done" = "Дайын";
+"CancelDownload" = "Жүктеп алудан бас тарту";
+"FileLoadError" = "Файлды алдын ала қарауды жүктеу мүмкін емес";
+"NoPreviewAvailable" = "Алдын ала қарау қолжетімді емес";
+"OpenWith" = "-мен ашыңыз";
+"Back" = "Артқа";
+"DeleteButton" = "Жою";
+"Phone_Gallery" = "Галерея";
+"Phone_Gallery_Access_Error" = "Телефон галереясына кіру мүмкін емес";
+"Access_Error" = "Қол жеткізу қатесі";
+"Size_Error" = "Файл өлшемі 200 МБ аспауы керек.";
+"No_File_Error" = "Файл жоқ";
+"Interval_Minute" = "%% мин бұрын";
+"Interval_Hour" = "%% сағ бұрын";
+"Interval_Day" = "%% к бұрын";
+"Interval_Week" = "%% х бұрын";
+"Interval_One_Year" = "%% жыл бұрын";
+"Interval_Mounth" = "%% ай бұрын";
+"Interval_One_End_Year" = "%% бірнеше жылдар бұрын";
+"Interval_Years_234" = "%% бірнеше жылдар бұрын";
+"Interval_Years" = "%% бірнеше жылдар бұрын";
+
+//Date as string
+"Today" = "Бүгін";
+"Yesterday" = "Кеше";
+"Date_Format" = "EE, dd MMM";
+"Date_Format_Year" = "EE, dd MMM, yyyy";
+"Time_Format" = "HH:mm";
+"Numbers_Date_Format" = "yyyyMMddHHmmss";
+"OK" = "Жарайды";
+"Retry" = "Қайталап көру";
+"Error" = "Қате";
+"AttachmentLoadError" = "Бұл тіркемені жүктеу мүмкін емес";
+"ErrorServerError" = "Сервер қосылымы үзілді";
+"AcсessDenied" = "Рұқсат жоқ";
+"SendLog" = "Кітапхана журналдарын жіберу";
+"ShortYes" = "Иә";
+"ShortNo" = "Жоқ";
+"Last_Message" = "Бұл әңгіменің соңғы хабарламасы";
+"Comment" = "Пікір...";
+"RetryButton" = "Қайталап көріңіз";
+
+//For attachments
+"Camera" = "Фотоға немесе бейнеге түсіріңіз";
+"Camera_Access_Error" = "Камераға немесе микрофонға кіру мүмкіндігі жоқ";
+
+
+//Append time from data
+"Interval_Recent" = "жақында";
+
+//For requests
+"No_Connection" = "Интернет қосылымы жоқ";
+"PrepareLog" = "Журнал дайындалуда...";
+"ExternalSourceWarning" = "Бұл сілтеме %@\nСіз шынымен сілтемені орындағыңыз келе ме?";
