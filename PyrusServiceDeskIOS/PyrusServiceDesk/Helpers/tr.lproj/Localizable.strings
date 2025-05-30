@@ -1,6 +1,6 @@
 
 
-"ErrorServerError" = "Serber bağlantısı kesildi";
+"ErrorServerError" = "Server bağlantısı kesildi";
 "Date_Format" = "EE, dd MMM";
 "Retry" = "YENİDEN DENE";
 "Error" = "Hata";
@@ -24,7 +24,7 @@
 "Done" = "Yapıldı";
 "CancelDownload" = "İndirmeyi iptal et";
 "FileLoadError" = "Dosya önizlemesi yüklenemiyor";
-"NoPreviewAvailable" = "Önizleme yok";
+"NoPreviewAvailable" = "Önizleme mevcut değil";
 "OpenWith" = "Şununla aç";
 "RetryButton" = "Yeniden dene";
 "DeleteButton" = "Sil";
@@ -41,7 +41,7 @@
 //Append time from data
 "Interval_Recent" = "en son";
 "Interval_Minute" = "%% dk önce";
-"Interval_Hour" = "%% saat önce";
+"Interval_Hour" = "%% s önce";
 "Interval_Day" = "%% gün önce";
 "Interval_Week" = "%% hafta önce";
 "Interval_Mounth" = "%% ay önce";
@@ -52,15 +52,15 @@
 "Yesterday" = "Dün";
 "Date_Format_Year" = "EE, dd MMM, yyyy";
 "Time_Format" = "hh:mm";
-"Numbers_Date_Format" = "yyyyMMddHHmmss";
+"Numbers_Date_Format" = "";
 
 //For requests
-"No_Connection" = "Internet bağlantısı yok";
+"No_Connection" = "İnternet bağlantısı yok";
 
 //Date as string
 "Today" = "Bugün";
 "Size_Error" = "Dosya boyutu 200 MB'ı geçmemelidir.";
-"AttachmentLoadError" = "Bu ek indirelimez";
+"AttachmentLoadError" = "Bu ek indirelemez";
 "PrepareLog" = "Günlük hazırlanıyor...";
 "SendLog" = "Kütüphane günlüklerini gönder";
 "ExternalSourceWarning" = "Bu bağlantı %@'a yönlendiriyor\nBağlantıyı gerçekten takip etmek istiyor musunuz?";
