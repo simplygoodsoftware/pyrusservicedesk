@@ -313,8 +313,9 @@ internal class TicketViewModel(
                 }
                 return true
             }
+
+            null -> return false
         }
-        return false
     }
 
     private fun applyTicketUpdate(freshList: Comments, arePendingComments: Boolean) {
@@ -586,8 +587,8 @@ internal class TicketViewModel(
         private val localComment: Comment
     ) : Observer<CallResult<AddCommentResponseData>> {
 
-        override fun onChanged(t: CallResult<AddCommentResponseData>?) {
-            t?.let { result ->
+        override fun onChanged(t: CallResult<AddCommentResponseData>) {
+            t.let { result ->
                 isCreateTicketSent = false
                 if (uploadFileHooks?.isCancelled == true)
                     return@let

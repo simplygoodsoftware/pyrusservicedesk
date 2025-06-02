@@ -1,7 +1,6 @@
 package com.pyrus.pyrusservicedesk.presentation.ui.navigation_page.ticket
 
 import android.content.Intent
-import android.content.res.ColorStateList
 import android.graphics.PorterDuff
 import android.graphics.drawable.AnimationDrawable
 import android.net.Uri
@@ -17,7 +16,7 @@ import android.widget.ImageView
 import android.widget.TextView
 import androidx.annotation.LayoutRes
 import androidx.appcompat.content.res.AppCompatResources
-import androidx.core.content.ContextCompat
+import com.google.android.flexbox.FlexboxLayout
 import com.pyrus.pyrusservicedesk.PyrusServiceDesk
 import com.pyrus.pyrusservicedesk.R
 import com.pyrus.pyrusservicedesk.presentation.ui.navigation_page.ticket.entries.ButtonEntry
@@ -40,14 +39,6 @@ import com.pyrus.pyrusservicedesk.utils.ConfigUtils
 import com.pyrus.pyrusservicedesk.utils.RequestUtils.Companion.getAvatarUrl
 import com.pyrus.pyrusservicedesk.utils.getTimeText
 import com.pyrus.pyrusservicedesk.utils.isImage
-import kotlinx.android.synthetic.main.psd_view_holder_buttons.view.flButtons
-import kotlinx.android.synthetic.main.psd_view_holder_comment_rating.view.ratingImage
-import kotlinx.android.synthetic.main.psd_view_holder_comment_rating.view.statusIcon
-import kotlinx.android.synthetic.main.psd_view_holder_rating.view.rating1
-import kotlinx.android.synthetic.main.psd_view_holder_rating.view.rating2
-import kotlinx.android.synthetic.main.psd_view_holder_rating.view.rating3
-import kotlinx.android.synthetic.main.psd_view_holder_rating.view.rating4
-import kotlinx.android.synthetic.main.psd_view_holder_rating.view.rating5
 
 
 private const val VIEW_TYPE_COMMENT_INBOUND = 0
@@ -367,25 +358,29 @@ internal class TicketAdapter: AdapterBase<TicketEntry>() {
     private inner class RatingHolder(parent: ViewGroup) :
         ViewHolderBase<RatingEntry>(parent, R.layout.psd_view_holder_rating) {
 
+        private val rating1 = itemView.findViewById<ImageView>(R.id.rating1)
+        private val rating2 = itemView.findViewById<ImageView>(R.id.rating2)
+        private val rating3 = itemView.findViewById<ImageView>(R.id.rating3)
+        private val rating4 = itemView.findViewById<ImageView>(R.id.rating4)
+        private val rating5 = itemView.findViewById<ImageView>(R.id.rating5)
+
         init {
             ConfigUtils.getSecondaryColorOnMainBackground(itemView.context).apply {
-                itemView.rating1.setBackgroundColor(this)
-                itemView.rating2.setBackgroundColor(this)
-                itemView.rating3.setBackgroundColor(this)
-                itemView.rating4.setBackgroundColor(this)
-                itemView.rating5.setBackgroundColor(this)
+                rating1.setBackgroundColor(this)
+                rating2.setBackgroundColor(this)
+                rating3.setBackgroundColor(this)
+                rating4.setBackgroundColor(this)
+                rating5.setBackgroundColor(this)
             }
         }
 
         override fun bindItem(item: RatingEntry) {
             super.bindItem(item)
-            with(itemView) {
-                rating1.setOnClickListener { onRatingClickListener?.invoke(1)}
-                rating2.setOnClickListener { onRatingClickListener?.invoke(2)}
-                rating3.setOnClickListener { onRatingClickListener?.invoke(3)}
-                rating4.setOnClickListener { onRatingClickListener?.invoke(4)}
-                rating5.setOnClickListener { onRatingClickListener?.invoke(5)}
-            }
+            rating1.setOnClickListener { onRatingClickListener?.invoke(1)}
+            rating2.setOnClickListener { onRatingClickListener?.invoke(2)}
+            rating3.setOnClickListener { onRatingClickListener?.invoke(3)}
+            rating4.setOnClickListener { onRatingClickListener?.invoke(4)}
+            rating5.setOnClickListener { onRatingClickListener?.invoke(5)}
         }
     }
 
@@ -403,6 +398,8 @@ internal class TicketAdapter: AdapterBase<TicketEntry>() {
     private inner class RatingCommentHolder(parent: ViewGroup) :
         ViewHolderBase<CommentEntry>(parent, R.layout.psd_view_holder_comment_rating) {
 
+        private val ratingImage = itemView.findViewById<ImageView>(R.id.ratingImage)
+        private val statusIcon = itemView.findViewById<ImageView>(R.id.statusIcon)
         override fun bindItem(item: CommentEntry) {
             super.bindItem(item)
             with(itemView) {
@@ -432,11 +429,12 @@ internal class TicketAdapter: AdapterBase<TicketEntry>() {
 
     private class ButtonsHolder(parent: ViewGroup): ViewHolderBase<ButtonsEntry>(parent, R.layout.psd_view_holder_buttons) {
 
+        private val flButtons = itemView.findViewById<FlexboxLayout>(R.id.flButtons)
         override fun bindItem(item: ButtonsEntry) {
             super.bindItem(item)
 
             item.buttons.forEachIndexed { index, buttonEntry ->
-                (itemView.flButtons.getChildAt(index) as? TextView)?.apply {
+                (flButtons.getChildAt(index) as? TextView)?.apply {
                     val buttonText = buttonEntry.text
 
 
@@ -481,8 +479,8 @@ internal class TicketAdapter: AdapterBase<TicketEntry>() {
                 }
             }
 
-            repeat(itemView.flButtons.childCount - item.buttons.size) {
-                itemView.flButtons.getChildAt(itemView.flButtons.childCount - 1 - it).apply {
+            repeat(flButtons.childCount - item.buttons.size) {
+                flButtons.getChildAt(flButtons.childCount - 1 - it).apply {
                     visibility = GONE
                     setOnClickListener(null)
                 }

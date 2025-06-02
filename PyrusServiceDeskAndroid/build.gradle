@@ -7,7 +7,7 @@ buildscript {
         mavenCentral()
     }
     dependencies {
-        classpath 'com.android.tools.build:gradle:4.0.1'
+        classpath 'com.android.tools.build:gradle:8.9.2'
         classpath 'io.github.gradle-nexus:publish-plugin:1.1.0'
     }
 }
@@ -25,8 +25,8 @@ task clean(type: Delete) {
 
 ext {
     buildTools = '29.0.2'
-    minSdk = 15
-    targetSdk = 30
+    minSdk = 24
+    targetSdk = 35
     compileSdk = targetSdk
 
     IS_SNAPSHOT = false

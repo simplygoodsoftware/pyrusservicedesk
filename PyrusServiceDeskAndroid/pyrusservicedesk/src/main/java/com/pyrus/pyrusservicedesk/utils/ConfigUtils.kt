@@ -28,7 +28,7 @@ internal class ConfigUtils{
         fun getAccentColor(context: Context): Int {
             return when {
                 PyrusServiceDesk.getConfiguration().themeColor != null -> PyrusServiceDesk.getConfiguration().themeColor!!
-                else -> getColorByAttrId(context, R.attr.colorAccent)
+                else -> getColorByAttrId(context, androidx.appcompat.R.attr.colorAccent)
             }
         }
 
@@ -122,7 +122,7 @@ internal class ConfigUtils{
         @ColorInt
         fun getHeaderBackgroundColor(context: Context): Int {
             val colorRes = PyrusServiceDesk.getConfiguration().headerBackgroundColor
-                ?: return getColorByAttrId(context, R.attr.colorPrimary)
+                ?: return getColorByAttrId(context, androidx.appcompat.R.attr.colorPrimary)
             return getColor(context.applicationContext, colorRes)
         }
 
@@ -144,7 +144,7 @@ internal class ConfigUtils{
         @ColorInt
         fun getMainBackgroundColor(context: Context): Int {
             val colorRes = PyrusServiceDesk.getConfiguration().mainBackgroundColor
-                ?: return getColorByAttrId(context, R.attr.colorOnBackground)
+                ?: return getColorByAttrId(context, com.google.android.material.R.attr.colorOnBackground)
             return getColor(context.applicationContext, colorRes)
         }
 
@@ -177,7 +177,7 @@ internal class ConfigUtils{
         @ColorInt
         fun getFileMenuBackgroundColor(context: Context): Int {
             val colorRes = PyrusServiceDesk.getConfiguration().fileMenuBackgroundColor
-                ?: return getColorByAttrId(context, R.attr.colorOnBackground)
+                ?: return getColorByAttrId(context, com.google.android.material.R.attr.colorOnBackground)
             return getColor(context.applicationContext, colorRes)
         }
 

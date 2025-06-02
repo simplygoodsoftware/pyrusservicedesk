@@ -31,7 +31,7 @@ public class SampleActivity extends Activity implements NewReplySubscriber {
                                 .setThemeColor(Color.parseColor("#FF8300"))
                                 .setChatTitle("Sample Support")
                                 .setWelcomeMessage("How can I help you?")
-                                .setAvatarForSupport(R.drawable.psd_download_file)
+                                .setAvatarForSupport(com.pyrus.pyrusservicedesk.R.drawable.psd_download_file)
                                 .setChatMenuDelegate(new ChatMenuDelegate())
                                 .setTrustedUrls(Collections.singletonList("pyrus.com"))
                                 .build())
