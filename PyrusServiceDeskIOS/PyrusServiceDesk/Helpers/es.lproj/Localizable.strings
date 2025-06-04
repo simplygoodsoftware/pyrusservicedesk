@@ -2,47 +2,47 @@
 
 
 //Buttons' Title
-"New_Conversation" = "Conversación nueva";
+"New_Conversation" = "Nueva conversación";
 "NoPreviewAvailable" = "Vista previa no disponible";
 "Interval_Years_234" = "hace %% años";
 
 //For requests
 "No_Connection" = "Sin conexión a Internet";
 "ShortNo" = "No";
-"Comment" = "Comentario...";
+"Comment" = "Comentar...";
 "Default_User_Name" = "Invitado";
 "Uploading" = "Cargando...";
-"Empty_Description" = "Vacío";
+"Empty_Description" = "Vaciar";
 "All_Conversations" = "Todas las conversaciones";
-"Support_Default_Name" = "Soporte";
-"New_Conversation_Short" = "Nueva";
+"Support_Default_Name" = "Soporte técnico";
+"New_Conversation_Short" = "Nuevo";
 "Cancel" = "Cancelar";
-"Settings" = "Ajustes";
+"Settings" = "Configuración";
 "Send" = "Enviar";
 "Back" = "Volver";
-"Done" = "Hecho";
+"Done" = "Listo";
 "CancelDownload" = "Cancelar descarga";
 "FileLoadError" = "No se pudo cargar la vista previa del archivo";
 "OpenWith" = "Abrir con";
-"RetryButton" = "Reintentar";
+"RetryButton" = "Intentar nuevamente";
 "DeleteButton" = "Eliminar";
 
 //For attachments
-"Camera" = "Tomar una fotografía o vídeo";
+"Camera" = "Tomar una fotografía o grabar";
 "Camera_Access_Error" = "Sin acceso a la cámara o al micrófono";
 "Phone_Gallery" = "Galería";
 "Access_Error" = "Error de acceso";
-"Size_Error" = "El archivo no debe superar los 200 MB.";
+"Size_Error" = "El archivo no debe exceder los 200 MB.";
 "No_File_Error" = "El archivo no existe";
 
 
 //Append time from data
-"Interval_Recent" = "recientes";
-"Interval_Minute" = "hace %% min";
-"Interval_Hour" = "hace %% h";
-"Interval_Day" = "hace %% días";
-"Interval_Week" = "hace %% semanas";
-"Interval_Mounth" = "hace %% meses";
+"Interval_Recent" = "reciente";
+"Interval_Minute" = "hace %%min";
+"Interval_Hour" = "hace %%h";
+"Interval_Day" = "hace %%d";
+"Interval_Week" = "hace %%sem";
+"Interval_Mounth" = "hace %%mes";
 "Interval_One_Year" = "hace %% año";
 "Interval_One_End_Year" = "hace %% años";
 "Interval_Years" = "hace %% años";
@@ -51,18 +51,18 @@
 "Today" = "Hoy";
 "Yesterday" = "Ayer";
 "Date_Format" = "EE, dd MMM";
-"Date_Format_Year" = "EE, dd MMM, yyyy";
+"Date_Format_Year" = "EE, dd MMM, aaaa";
 "Time_Format" = "hh:mm a";
 "Numbers_Date_Format" = "yyyyMMddHHmmss";
-"Retry" = "REINTENTAR";
+"Retry" = "INTENTAR NUEVAMENTE";
 "Error" = "Error";
-"ErrorServerError" = "Conexión interrumpida al servidor";
+"ErrorServerError" = "Conexión a servidor interrumpida";
 "AcсessDenied" = "Acceso denegado";
 "OK" = "Aceptar";
 "PrepareLog" = "Preparando registro...";
 "SendLog" = "Enviar registros de biblioteca";
 "ShortYes" = "Sí";
-"Last_Message" = "Este es el último mensaje de esa conversación";
+"Last_Message" = "Este es el último mensaje de la conversación";
 "Phone_Gallery_Access_Error" = "Sin acceso a la galería del teléfono";
 "AttachmentLoadError" = "No se pudo cargar este archivo adjunto";
-"ExternalSourceWarning" = "Este enlace lo dirige a %@\n¿Está seguro de que desea seguir el enlace?";
+"ExternalSourceWarning" = "Este enlace lo dirige a %@\n¿Desea seguir el enlace?";
