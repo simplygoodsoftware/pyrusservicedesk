@@ -1,1 +1,68 @@
 
+
+"Last_Message" = "Սա այդ չատի վերջին հաղորդագրությունն է";
+"Comment" = "Մեկնաբանություն...";
+"Default_User_Name" = "Հյուր";
+"Uploading" = "Բեռնվում է...";
+"Empty_Description" = "Դատարկ";
+"All_Conversations" = "Բոլոր հաղորդակցությունները";
+"Support_Default_Name" = "Աջակցություն";
+
+//Buttons' Title
+"New_Conversation" = "Նոր հաղորդակցություն";
+"Cancel" = "Չեղարկել";
+"Settings" = "Կարգավորումներ";
+"New_Conversation_Short" = "Նոր";
+"Send" = "Ուղարկել";
+"Back" = "Հետ";
+"Done" = "Պատրաստ է";
+"CancelDownload" = "Չեղարկել ներբեռնումը";
+"FileLoadError" = "Հնարավոր չէ բեռնել ֆայլի նախադիտումը";
+"NoPreviewAvailable" = "Նախադիտումը հասանելի չէ";
+"OpenWith" = "Բացել";
+"RetryButton" = "Կրկին փորձել";
+"DeleteButton" = "Ջնջել";
+
+//For attachments
+"Camera" = "Նկարել տեսաձայնագրություն կամ լուսանկար";
+"Camera_Access_Error" = "Տեսախցիկին կամ բարձրախոսին հասանելիություն չկա";
+"Phone_Gallery" = "Պատկերասրահ";
+"Phone_Gallery_Access_Error" = "Հեռախոսի պատկերասրահին հասանելիություն չկա";
+"Access_Error" = "Հասանելիության սխալ";
+"Size_Error" = "Ֆայլի չափը չպետք է գերազանցի 200 ՄԲ-ը։";
+"No_File_Error" = "Ֆայլը գոյություն չունի";
+
+
+//Append time from data
+"Interval_Recent" = "վերջին";
+"Interval_Minute" = "%% րոպե առաջ";
+"Interval_Hour" = "%% ժամ առաջ";
+"Interval_Day" = "%% օր առաջ";
+"Interval_Week" = "%% շաբաթ առաջ";
+"Interval_Mounth" = "%% ամիս առաջ";
+"Interval_One_Year" = "%% տարի առաջ";
+"Interval_One_End_Year" = "%% տարիներ առաջ";
+"Interval_Years_234" = "%% տարիներ առաջ";
+"Interval_Years" = "%% տարիներ առաջ";
+
+//Date as string
+"Today" = "Այսօր";
+"Yesterday" = "Երեկ";
+"Date_Format" = "EE, օ, ԱԱԱ";
+"Date_Format_Year" = "EE, օօ ԱԱԱ, տտտտ";
+"Time_Format" = "ԺԺ:րր";
+"Numbers_Date_Format" = "տտտտԱԱօօԺԺրրվվ";
+
+//For requests
+"No_Connection" = "Ինտերնետ կապ չկա";
+"Retry" = "Կրկին փորձել";
+"Error" = "Սխալ";
+"AttachmentLoadError" = "Հնարավոր չէ բեռնել այս կցորդը";
+"ErrorServerError" = "Սերվերի կապը ընդհատվեց";
+"OK" = "OK";
+"AcсessDenied" = "Մուտքն արգելված է";
+"PrepareLog" = "Գրանցամատյանի պատրաստում...";
+"SendLog" = "Ուղարկել գրադարանի գրանցամատյանները";
+"ExternalSourceWarning" = "Այս հղումը տանում է դեպի %@ \nԻսկապե՞ս ուզում եք անցնել հղումով։";
+"ShortYes" = "Այո";
+"ShortNo" = "Ոչ";
