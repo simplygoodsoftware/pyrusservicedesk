@@ -104,6 +104,9 @@ internal class TicketViewModel(
             if (!response.hasError() && !response.getData()?.comments.isNullOrEmpty()) {
                 applyTicketUpdate(response.getData()!!, true)
             }
+            if (!startMessage.isNullOrBlank()) {
+                onSendClicked(startMessage)
+            }
         }
 
         if (isNetworkConnected.value == true) {
@@ -111,10 +114,6 @@ internal class TicketViewModel(
         }
         maybeStartAutoRefresh()
         liveUpdates.subscribeOnUnreadTicketCountChanged(this)
-
-        if (!startMessage.isNullOrBlank()) {
-            onSendClicked(startMessage)
-        }
     }
 
     override fun onLoadData() {
