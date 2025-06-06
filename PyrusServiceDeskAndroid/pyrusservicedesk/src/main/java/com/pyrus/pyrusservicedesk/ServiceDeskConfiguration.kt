@@ -14,6 +14,7 @@ import com.pyrus.pyrusservicedesk.utils.isTablet
 class ServiceDeskConfiguration internal constructor() {
     internal var userName: String? = null
     internal var title: String? = null
+    internal var startMessage: String? = null
     internal var welcomeMessage: String? = null
     internal var themeColor: Int? = null
     @DrawableRes
@@ -44,6 +45,7 @@ class ServiceDeskConfiguration internal constructor() {
         private const val KEY_USER_NAME = "ServiceDeskConfiguration_KEY_USER_NAME"
         private const val KEY_TITLE = "ServiceDeskConfiguration_KEY_TITLE"
         private const val KEY_WELCOME_MESSAGE = "ServiceDeskConfiguration_KEY_WELCOME_MESSAGE"
+        private const val KEY_START_MESSAGE = "ServiceDeskConfiguration_KEY_START_MESSAGE"
         private const val KEY_THEME_COLOR = "ServiceDeskConfiguration_KEY_THEME_COLOR"
         private const val KEY_SUPPORT_AVATAR = "ServiceDeskConfiguration_KEY_SUPPORT_AVATAR"
 
@@ -70,6 +72,7 @@ class ServiceDeskConfiguration internal constructor() {
                     putString(KEY_USER_NAME, userName)
                     putString(KEY_TITLE, title)
                     putString(KEY_WELCOME_MESSAGE, welcomeMessage)
+                    putString(KEY_START_MESSAGE, startMessage)
                     if (themeColor != null)
                         putInt(KEY_THEME_COLOR, themeColor!!)
                     if (supportAvatar != null)
@@ -103,6 +106,7 @@ class ServiceDeskConfiguration internal constructor() {
                     userName = bundle.getString(KEY_USER_NAME)
                     title = bundle.getString(KEY_TITLE)
                     welcomeMessage = bundle.getString(KEY_WELCOME_MESSAGE)
+                    startMessage = bundle.getString(KEY_START_MESSAGE)
                     themeColor = bundle.getNullableInt(KEY_THEME_COLOR)
                     supportAvatar = bundle.getNullableInt(KEY_SUPPORT_AVATAR)
 
@@ -160,6 +164,11 @@ class ServiceDeskConfiguration internal constructor() {
          */
         fun setWelcomeMessage(message: String): Builder {
             configuration.welcomeMessage = message
+            return this
+        }
+
+        fun setStartMessage(message: String): Builder {
+            configuration.startMessage = message
             return this
         }
 

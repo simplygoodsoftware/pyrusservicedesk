@@ -258,6 +258,8 @@ internal class ConfigUtils{
          */
         fun getWelcomeMessage(): String? = PyrusServiceDesk.getConfiguration().welcomeMessage
 
+        fun getStartMessage(): String? = PyrusServiceDesk.getConfiguration().startMessage
+
         fun getTrustedUrls() = PyrusServiceDesk.getConfiguration().trustedUrls
 
         /**

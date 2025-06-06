@@ -66,6 +66,8 @@ internal class TicketViewModel(
      */
     val draft: String
 
+    private val startMessage: String?
+
     private val draftRepository = serviceDeskProvider.getDraftRepository()
     private val localDataProvider: LocalDataProvider = serviceDeskProvider.getLocalDataProvider()
     private val fileManager: FileManager = serviceDeskProvider.getFileManager()
@@ -95,11 +97,15 @@ internal class TicketViewModel(
 
     init {
         draft = draftRepository.getDraft()
+        startMessage = ConfigUtils.getStartMessage()
 
         runBlocking {
             val response = requests.getPendingFeedCommentsRequest().execute()
             if (!response.hasError() && !response.getData()?.comments.isNullOrEmpty()) {
                 applyTicketUpdate(response.getData()!!, true)
+            }
+            if (!startMessage.isNullOrBlank()) {
+                onSendClicked(startMessage)
             }
         }
 
