@@ -66,6 +66,8 @@ internal class TicketViewModel(
      */
     val draft: String
 
+    private val startMessage: String?
+
     private val draftRepository = serviceDeskProvider.getDraftRepository()
     private val localDataProvider: LocalDataProvider = serviceDeskProvider.getLocalDataProvider()
     private val fileManager: FileManager = serviceDeskProvider.getFileManager()
@@ -95,6 +97,10 @@ internal class TicketViewModel(
 
     init {
         draft = draftRepository.getDraft()
+        startMessage = ConfigUtils.getStartMessage()
+        if (!startMessage.isNullOrBlank()) {
+            onSendClicked(startMessage)
+        }
 
         runBlocking {
             val response = requests.getPendingFeedCommentsRequest().execute()
