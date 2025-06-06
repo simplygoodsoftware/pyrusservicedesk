@@ -98,9 +98,6 @@ internal class TicketViewModel(
     init {
         draft = draftRepository.getDraft()
         startMessage = ConfigUtils.getStartMessage()
-        if (!startMessage.isNullOrBlank()) {
-            onSendClicked(startMessage)
-        }
 
         runBlocking {
             val response = requests.getPendingFeedCommentsRequest().execute()
@@ -114,6 +111,10 @@ internal class TicketViewModel(
         }
         maybeStartAutoRefresh()
         liveUpdates.subscribeOnUnreadTicketCountChanged(this)
+
+        if (!startMessage.isNullOrBlank()) {
+            onSendClicked(startMessage)
+        }
     }
 
     override fun onLoadData() {
