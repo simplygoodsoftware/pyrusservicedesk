@@ -29,8 +29,30 @@ final class CoreDataService {
 extension CoreDataService: CoreDataServiceProtocol {
 
     func fetchChats() throws -> [DBChat] {
-        let fetchRequest = DBChat.fetchRequest()
-        return try viewContext.fetch(fetchRequest)
+         let context = viewContext
+
+            var result: Result<[DBChat], Error> = .success([])
+            
+            let startTime = DispatchTime.now()
+            
+            // Используем performAndWait для синхронного выполнения
+            context.performAndWait {
+                do {
+                    let fetchRequest = DBChat.fetchRequest()
+                    fetchRequest.sortDescriptors = [NSSortDescriptor(key: "date", ascending: false)]
+                    
+                    let fetchedObjects = try context.fetch(fetchRequest)
+                    result = .success(fetchedObjects)
+                } catch {
+                    result = .failure(error)
+                }
+            }
+            
+            let endTime = DispatchTime.now()
+            let nanoseconds = endTime.uptimeNanoseconds - startTime.uptimeNanoseconds
+            print("Fetch executed in: \(Double(nanoseconds)/1_000_000) ms")
+            
+            return try result.get() // Разворачиваем Result
     }
     
     func fetchMessages(searchString: String) throws -> [DBMessage] {

@@ -10,7 +10,19 @@ extension SearchPresenter: SearchPresenterProtocol {
     func doWork(_ action: SearchPresenterCommand) {
         switch action {
         case .updateChats(chats: let chats, searchString: let searchString):
-            view?.show(.updateChats(chats: prepareChats(chats: chats, searchString: searchString)))
+            var startTime = DispatchTime.now()
+            let prepareChars = prepareChats(chats: chats, searchString: searchString)
+            var endTime = DispatchTime.now()
+            var nanoTime = endTime.uptimeNanoseconds - startTime.uptimeNanoseconds
+            var timeInterval = Double(nanoTime) / 1_000_000
+            print("⏱ prepareSearchChats выполнена за \(timeInterval) мс (обработано \(chats.count) чатов)")
+            
+            startTime = DispatchTime.now()
+            view?.show(.updateChats(chats: prepareChars))
+            endTime = DispatchTime.now()
+            nanoTime = endTime.uptimeNanoseconds - startTime.uptimeNanoseconds
+            timeInterval = Double(nanoTime) / 1_000_000
+            print("⏱ showSearchChats выполнена за \(timeInterval) мс (обработано \(chats.count) чатов)")
         case .openChat(chat: let chat, messageId: let messageId):
             view?.show(.openChat(chat: chat, messageId: messageId))
         case .endRefresh:
@@ -32,16 +44,20 @@ private extension SearchPresenter {
                 string: "\(chat.authorName): ",
                 attributes: [.font: UIFont.lastMessageInfo, .foregroundColor: UIColor.lastMessageInfo]
             )
+            
             let messageText: NSAttributedString
             if chat.isMessage {
                 let message = chat.messageText.count > 50 ? shortenString(around: searchString, in:  chat.messageText) : chat.messageText
-                messageText = highlightText(in: message, substring: searchString, highlightColor: .secondColor ?? .white, font: .lastMessageInfo, fontColor: .lastMessageInfo)
+                messageText = highlightText(in: chat.messageAttributedText ?? NSAttributedString(string: ""), substring: searchString, highlightColor: .secondColor ?? .white, font: .lastMessageInfo, fontColor: .lastMessageInfo)
             } else {
                 if chat.messageText.count > 0 {
-                    messageText = HelpersStrings.decodeHTML(in: chat.messageText.parseXMLToAttributedString(fontColor: .lastMessageInfo, font: .lastMessageInfo).0 ?? NSAttributedString(
+                    messageText = chat.messageAttributedText ?? NSAttributedString(
                         string: chat.messageText,
                         attributes: [.font: UIFont.lastMessageInfo, .foregroundColor: UIColor.lastMessageInfo])
-                    )
+//                    HelpersStrings.decodeHTML(in: chat.messageText.parseXMLToAttributedString(fontColor: .lastMessageInfo, font: .lastMessageInfo).0 ?? NSAttributedString(
+//                        string: chat.messageText,
+//                        attributes: [.font: UIFont.lastMessageInfo, .foregroundColor: UIColor.lastMessageInfo])
+//                    )
                 } else {
                     messageText = NSAttributedString(string: "")
                 }
@@ -86,7 +102,24 @@ private extension SearchPresenter {
     }
     
     func highlightText(in text: String, substring: String, highlightColor: UIColor, font: UIFont, fontColor: UIColor) -> NSAttributedString {
-        let attributedString = NSMutableAttributedString(attributedString: HelpersStrings.decodeHTML(in: (text as NSString).parseXMLToAttributedString(fontColor: fontColor, font: font).0 ?? NSAttributedString(string: "")))
+//        let attributedString = NSMutableAttributedString(attributedString: HelpersStrings.decodeHTML(in: (text as NSString).parseXMLToAttributedString(fontColor: fontColor, font: font).0 ?? NSAttributedString(string: "")))
+        
+        let attributedString = NSMutableAttributedString(string: text)
+        
+        let range = (attributedString.string as NSString).range(of: substring, options: .caseInsensitive)
+        
+        if range.location != NSNotFound {
+            attributedString.addAttribute(.backgroundColor, value: highlightColor, range: range)
+            attributedString.addAttribute(.foregroundColor, value: UIColor.label, range: range)
+        }
+        
+        return attributedString
+    }
+    
+    func highlightText(in text: NSAttributedString, substring: String, highlightColor: UIColor, font: UIFont, fontColor: UIColor) -> NSAttributedString {
+//        let attributedString = NSMutableAttributedString(attributedString: HelpersStrings.decodeHTML(in: (text as NSString).parseXMLToAttributedString(fontColor: fontColor, font: font).0 ?? NSAttributedString(string: "")))
+        
+        let attributedString = NSMutableAttributedString(attributedString: text)
         
         let range = (attributedString.string as NSString).range(of: substring, options: .caseInsensitive)
         

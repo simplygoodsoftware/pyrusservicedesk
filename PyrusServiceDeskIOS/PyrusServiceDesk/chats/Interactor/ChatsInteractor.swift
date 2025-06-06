@@ -13,7 +13,11 @@ class ChatsInteractor: NSObject {
     
     private var chats = [PSDChat]() {
         didSet {
-            presenter.doWork(.updateChats(chats: prepareChats()))
+            DispatchQueue.main.async { [weak self] in
+                guard let self else { return }
+                let chats = prepareChats()
+                presenter.doWork(.updateChats(chats: chats))
+            }
         }
     }
     
@@ -72,7 +76,7 @@ class ChatsInteractor: NSObject {
             }
         }
         NotificationCenter.default.addObserver(forName: PSDMessageSend.createNewCommand, object: nil, queue: .main) { _ in
-            self.updateData()
+            //self.updateData()
         }
         NotificationCenter.default.addObserver(self, selector: #selector(changedClientId), name: PyrusServiceDesk.clientIdChangedNotification, object: nil)
 
@@ -121,13 +125,24 @@ extension ChatsInteractor: ChatsInteractorProtocol {
         case .viewWillAppear:
    //         guard PyrusServiceDesk.chats.count > 0 else { break }
             PyrusServiceDesk.syncManager.syncGetTickets()
+//            if !isFiltered {
+//                PyrusServiceDesk.currentUserId = nil
+//            }
+//            if chats.count == 0 {
+//                updateData(firstStart: true)
+//            }
             if !isFiltered {
                 PyrusServiceDesk.currentUserId = nil
             }
-            if chats.count == 0 {
-                updateData(firstStart: true)
+            let filterChats = createChats()
+            if filterChats != chats {
+                chats = filterChats
             }
-            
+            if chats.count > 0 {
+                presenter.doWork(.updateChats(chats: prepareChats()))
+                firtLoad = false
+                presenter.doWork(.endRefresh)
+            }
             
             if RateManager.isActionPerformed(times: 3) {
                 RateManager.setIfNilDateForNextRate()
@@ -153,11 +168,16 @@ extension ChatsInteractor: ChatsInteractorProtocol {
             chats = filterChats
         }
         if chats.count > 0 {
-            if firstStart {
-                presenter.doWork(.createChatsOnStart(chats: prepareChats()))
-            } else {
-                presenter.doWork(.updateChats(chats: prepareChats()))
+            DispatchQueue.main.async { [weak self] in
+                guard let self else { return }
+                let chats = prepareChats()
+                presenter.doWork(.updateChats(chats: chats))
             }
+//            if firstStart {
+//                presenter.doWork(.createChatsOnStart(chats: prepareChats()))
+//            } else {
+//                presenter.doWork(.updateChats(chats: prepareChats()))
+//            }
             
             firtLoad = false
             presenter.doWork(.endRefresh)
@@ -186,6 +206,7 @@ private extension ChatsInteractor {
     }
     
     @objc func newUserFilter() {
+//        isNewQr = true
         isNewUser = true
         isClear = true
         DispatchQueue.main.async { [weak self] in
@@ -368,17 +389,21 @@ private extension ChatsInteractor {
             }
             return ChatPresenterModel(
             id: $0.chatId ?? 0,
-            date: $0.date,
+            date: $0.lastMessageDate ?? $0.date?.messageTime(),
             isRead: isRead,
             isActive: $0.isActive,
             subject: $0.subject,
             lastComment: $0.lastComment,
-            messages: $0.messages
+            messages: $0.messages,
+            lastMessageAttributedText: $0.lastMessageText
         )})
     }
     
     @objc func updateChats(isFilter: Bool = false) {
         if let newUser = PyrusServiceDesk.newUser {
+            if PyrusServiceDesk.chats.first(where: { $0.userId == newUser.userId }) == nil {
+                newUserFilter()
+            }
             let _ = PyrusServiceDesk.addUser(appId: newUser.clientId, clientName: "", userId: newUser.userId, userName: newUser.userName)
             PyrusServiceDesk.newUser = nil
         }
@@ -447,6 +472,9 @@ private extension ChatsInteractor {
             chat.isActive = true
         }
         filterChats = PSDGetChats.sortByLastMessage(filterChats)
+        if filterChats.count == 0 {
+            print("JNrelf")
+        }
         return filterChats
     }
     

@@ -72,7 +72,17 @@ class PSDChatInfoTableViewCell: UITableViewCell {
     func configure(with model: ChatViewModel) {
         timeLabel.text = model.date
         messageLabel.text = model.subject
-        lastMessageInfo.attributedText = HelpersStrings.decodeHTML(in: removeLinkAttributes(from: (model.lastMessageText as NSString).parseXMLToAttributedString(fontColor: .lastMessageInfo, font: .lastMessageInfo).0) ?? NSAttributedString(string: ""))
+//        DispatchQueue.global().async { [weak self] in
+//            guard let self = self else { return }
+//            let attributetText = HelpersStrings.decodeHTML(in: removeLinkAttributes(from: (model.lastMessageText as NSString).parseXMLToAttributedString(fontColor: .lastMessageInfo, font: .lastMessageInfo).0) ?? NSAttributedString(string: ""))
+//            DispatchQueue.main.async { [weak self] in
+//                self?.lastMessageInfo.attributedText = attributetText
+//            }
+//        }
+        if model.lastMessageAuthor != "" {
+            lastMessageInfo.text = "\(model.lastMessageAuthor): \(model.lastMessageText)"
+        }
+        //AttributedStringCache.cachedString(for: model.lastMessageText, fontColor: .lastMessageInfo, font: .lastMessageInfo, key: model.lastMessageId as NSString)//HelpersStrings.decodeHTML(in: removeLinkAttributes(from: (model.lastMessageText as NSString).parseXMLToAttributedString(fontColor: .lastMessageInfo, font: .lastMessageInfo).0) ?? NSAttributedString(string: ""))
         notificationButton.isHidden = model.isRead
         attachmentName.text = model.attachmentText
         attachmentIcon.isHidden = !model.hasAttachment
@@ -174,6 +184,11 @@ class PSDChatInfoTableViewCell: UITableViewCell {
     }
     
     override func prepareForReuse() {
+        attachmentIcon.image = nil
+        timeLabel.text = nil
+        messageLabel.text = nil
+//        lastMessageInfo.attributedText = nil
+        notificationButton.isHidden = true
         messageStateView.restart()
     }
     

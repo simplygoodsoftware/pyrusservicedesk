@@ -1,4 +1,5 @@
 import Foundation
+import UIKit
 import CoreData
 
 final class PSDChatsDataService {
@@ -94,7 +95,7 @@ extension PSDChatsDataService: PSDChatsDataServiceProtocol {
                     messageText: chat?.lastComment?.text ?? "",
                     messageId: chat?.lastComment?.messageId ?? "",
                     authorName: authorName,
-                    isMessage: false
+                    isMessage: false, messageAttributedText: NSAttributedString(string: "")
                 )
                 model.lastMessage = chat?.messages.last
                 chatModels.append(model)
@@ -112,7 +113,7 @@ extension PSDChatsDataService: PSDChatsDataServiceProtocol {
                         messageText: dbMessage.text ?? "",
                         messageId: dbMessage.messageId ?? "",
                         authorName: authorName,
-                        isMessage: true
+                        isMessage: true, messageAttributedText: NSAttributedString(string: "")
                     )
                     chatModels.append(model)
                 }
@@ -141,7 +142,8 @@ extension PSDChatsDataService: PSDChatsDataServiceProtocol {
                         messageText: chat?.lastComment?.text ?? "",
                         messageId: chat?.lastComment?.messageId ?? "",
                         authorName: authorName,
-                        isMessage: false
+                        isMessage: false,
+                        messageAttributedText: chat?.lastMessageAttrText ?? AttributedStringCache.cachedString(for: chat?.lastComment?.text ?? "", fontColor: .lastMessageInfo, font: .lastMessageInfo, key: chat?.lastComment?.messageId ?? "")
                     )
                     model.lastMessage = chat?.messages.last
                     chatModels.append(model)
@@ -159,7 +161,8 @@ extension PSDChatsDataService: PSDChatsDataServiceProtocol {
                             messageText: dbMessage.text ?? "",
                             messageId: dbMessage.messageId ?? "",
                             authorName: authorName,
-                            isMessage: true
+                            isMessage: true,
+                            messageAttributedText: AttributedStringCache.cachedString(for: dbMessage.text ?? "", fontColor: .lastMessageInfo, font: .lastMessageInfo, key: dbMessage.messageId ?? "")
                         )
                         chatModels.append(model)
                     }
@@ -180,8 +183,10 @@ extension PSDChatsDataService: PSDChatsDataServiceProtocol {
         } catch {
             print(error)
         }
-        coreDataService.save(completion: completion) { [weak self] context in
-            self?.saveChatModel(with: chatModels, context: context)
+        DispatchQueue.global().async { [weak self] in
+            self?.coreDataService.save(completion: completion) { [weak self] context in
+                self?.saveChatModel(with: chatModels, context: context)
+            }
         }
     }
     
@@ -372,6 +377,119 @@ extension PSDChatsDataService: PSDChatsDataServiceProtocol {
             return []
         }
     }
+    
+    func getAllChats(completion: @escaping ([PSDChat]) -> Void) {
+        DispatchQueue.global(qos: .userInitiated).async { [weak self] in
+            guard let self else { return }
+            do {
+                let dbChats = try coreDataService.fetchChats()
+                let chats: [PSDChat] = dbChats.compactMap { dbChat in
+                    let chat = PSDChat(chatId: Int(dbChat.chatId),
+                                    date: dbChat.date ?? Date(),
+                                    messages: [])
+                    chat.subject = dbChat.subject
+                    chat.isActive = dbChat.isActive
+                    chat.userId = dbChat.userId
+                    chat.isRead = dbChat.isRead
+                    chat.showRating = dbChat.showRating
+                    chat.showRatingText = dbChat.showRatingText
+                    chat.lastReadedCommentId = Int(dbChat.lastReadedCommentId)
+                    
+                    if let dbMessages = dbChat.messages?.array as? [DBMessage] {
+                        let messages: [PSDMessage] = dbMessages.compactMap { dbMessage in
+                            guard dbMessage.text != nil ||
+                                  dbMessage.attachments?.count ?? 0 > 0 ||
+                                  (dbMessage.rating != 0) else {
+                                return nil
+                            }
+                            
+                            let user: PSDUser = dbMessage.isOutgoing ?
+                                PSDUsers.user :
+                                PSDUsers.supportUsersContain(
+                                    name: dbMessage.authorName ?? "",
+                                    imagePath: dbMessage.authorAvatarId ?? "",
+                                    authorId: dbMessage.authorId
+                                )
+                            
+                            let message = PSDMessage(
+                                text: dbMessage.text,
+                                attachments: nil,
+                                messageId: dbMessage.messageId,
+                                owner: user,
+                                date: dbMessage.date
+                            )
+                            
+                            // Настройка свойств сообщения
+                            message.messageId = dbMessage.messageId ?? ""
+                            message.appId = dbMessage.appId
+                            message.userId = dbMessage.userId
+                            message.clientId = dbMessage.clientId ?? ""
+                            message.commandId = dbMessage.commandId
+                            message.fromStrorage = dbMessage.fromStorage
+                            message.isOutgoing = dbMessage.isOutgoing
+                            message.isRatingMessage = dbMessage.isRatingMessage
+                            message.isWelcomeMessage = dbMessage.isWelcomeMessage
+                            message.requestNewTicket = dbMessage.requestNewTicket
+                            message.ticketId = Int(dbMessage.ticketId)
+                            message.rating = Int(dbMessage.rating)
+                            
+                            // Обработка состояния сообщения
+                            switch dbMessage.state {
+                            case 0: message.state = .sending
+                            case 1: message.state = .sent
+                            default: message.state = .cantSend
+                            }
+                            
+                            // Обработка вложений
+                            if let dbAttachments = dbMessage.attachments?.array as? [DBAttachment] {
+                                let attachments: [PSDAttachment] = dbAttachments.compactMap { dbAttachment in
+                                    let attachment = PSDAttachment(
+                                        localPath: dbAttachment.localPath,
+                                        data: dbAttachment.data,
+                                        serverIdentifer: dbAttachment.serverIdentifier
+                                    )
+                                    attachment.name = dbAttachment.name ?? ""
+                                    attachment.uploadingProgress = CGFloat(dbAttachment.uploadingProgress)
+                                    attachment.isImage = dbAttachment.isImage
+                                    attachment.isVideo = dbAttachment.isVideo
+                                    attachment.size = Int(dbAttachment.size)
+                                    attachment.localId = dbAttachment.localId ?? ""
+                                    return attachment
+                                }
+                                message.attachments = attachments
+                            }
+                            
+                            return message
+                        }
+                        
+                        chat.messages = messages
+                        
+                        if let lastMessage = messages.last, let userId = chat.userId {
+                            chat.lastComment = lastMessage
+                            if PyrusServiceDesk.customUserId ?? PyrusServiceDesk.userId == userId,
+                               PyrusServiceDesk.lastNoteId ?? 0 < Int(lastMessage.messageId) ?? 0 {
+                                PyrusServiceDesk.lastNoteId = Int(lastMessage.messageId)
+                            } else if let user = PyrusServiceDesk.additionalUsers.first(where: { $0.userId == userId }),
+                                      user.lastNoteId ?? 0 < Int(lastMessage.messageId) ?? 0 {
+                                user.lastNoteId = Int(lastMessage.messageId)
+                            }
+                        }
+                    }
+                    return chat
+                }
+                
+                DispatchQueue.main.async {
+                    completion(chats)
+                }
+                
+            } catch {
+                print("Error fetching chats: \(error)")
+                DispatchQueue.main.async {
+                    completion([])
+                }
+            }
+        }
+    }
 
     func getAllChats() -> [PSDChat] {
         do {
@@ -484,6 +602,21 @@ extension PSDChatsDataService: PSDChatsDataServiceProtocol {
             try coreDataService.deleteCommand(id: id)
         } catch {
             print("\(error)")
+        }
+    }
+}
+
+private extension UIFont {
+    static let lastMessageInfo = CustomizationHelper.systemFont(ofSize: 15.0)
+}
+
+private extension UIColor {
+    static let lastMessageInfo = UIColor {
+        switch $0.userInterfaceStyle {
+        case .dark:
+            return UIColor(hex: "#FFFFFFE5") ?? .white
+        default:
+            return UIColor(hex: "#60666C") ?? .systemGray
         }
     }
 }

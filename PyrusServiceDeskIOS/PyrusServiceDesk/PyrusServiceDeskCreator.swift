@@ -97,9 +97,9 @@ import UIKit
         guard let _ = PyrusServiceDesk.mainController else {
             let user = PSDUserInfo(appId: appId, clientName: "", userId: userId, userName: userName, secretKey: nil)
             newUser = user
-            if !additionalUsers.contains(user) && user.userId != customUserId {
-                additionalUsers.append(user)
-            }
+//            if !additionalUsers.contains(user) && user.userId != customUserId {
+//                additionalUsers.append(user)
+//            }
             return
         }
         newUser = PSDUserInfo(appId: appId, clientName: "", userId: userId, userName: userName, secretKey: nil)

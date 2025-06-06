@@ -14,6 +14,7 @@ enum messageState: Int16 {
 class PSDMessage: NSObject {
     //messages saved in PyrusServiceDeskCreator is not denited
     var text: String
+    var attributedText: NSAttributedString?
     var attachments: [PSDAttachment]?
     var owner: PSDUser
     ///The server Id
@@ -48,8 +49,13 @@ class PSDMessage: NSObject {
         self.date = date ?? Date()
         self.state = .sending
         self.clientId = UUID().uuidString
+        
         super.init()
         
+//        DispatchQueue.global().async {
+//            let attributedText = AttributedStringCache.cachedString(for: text ?? "", fontColor: .lastMessageInfo, font: .lastMessageInfo, key: messageId ?? self.commandId ?? "")
+//        }
+        //attributedText =  AttributedStringCache.cachedString(for: text, fontColor: .lastMessageInfo, font: .lastMessageInfo)//HelpersStrings.decodeHTML(in: removeLinkAttributes(from: (text ?? "").parseXMLToAttributedString(fontColor: .lastMessageInfo, font: .lastMessageInfo).0) ?? NSAttributedString(string: ""))
         if self.hasId() || self.owner != PSDUsers.user {
             self.state = .sent
         }
@@ -67,5 +73,107 @@ class PSDMessage: NSObject {
             return true
         }
         return false
+    }
+    
+    func removeLinkAttributes(from attributedString: NSAttributedString?) -> NSAttributedString? {
+        guard let attributedString else { return nil }
+        let mutableAttributedString = NSMutableAttributedString(attributedString: attributedString)
+        let range = NSRange(location: 0, length: mutableAttributedString.length)
+        
+        mutableAttributedString.enumerateAttribute(.link, in: range, options: []) { value, range, _ in
+            if value != nil {
+                mutableAttributedString.removeAttribute(.link, range: range)
+            }
+        }
+        
+        return mutableAttributedString
+    }
+}
+
+private extension UIFont {
+    static let lastMessageInfo = CustomizationHelper.systemFont(ofSize: 15.0)
+}
+
+private extension UIColor {    
+    static let lastMessageInfo = UIColor {
+        switch $0.userInterfaceStyle {
+        case .dark:
+            return UIColor(hex: "#FFFFFFE5") ?? .white
+        default:
+            return UIColor(hex: "#60666C") ?? .systemGray
+        }
+    }
+}
+
+import UIKit
+
+final class AttributedStringCache {
+    private static let memoryCache = NSCache<NSString, NSAttributedString>()
+    private static let cacheDirectory = FileManager.default.urls(for: .cachesDirectory, in: .userDomainMask).first!
+
+    static func cachedString(
+        for text: String,
+        fontColor: UIColor,
+        font: UIFont,
+        key: String?
+    ) -> NSAttributedString {
+        guard let key, key.count > 0, text.count > 0 else {
+            return NSAttributedString(string: text, attributes: [.foregroundColor: fontColor, .font: font])
+        }
+        if let cached = memoryCache.object(forKey: key as NSString) {
+            return cached
+        }
+        
+        if let diskCached = loadFromDiskCache(key: key) {
+            memoryCache.setObject(diskCached, forKey: key as NSString)
+            return diskCached
+        }
+        
+        let newString = generateAttributedString(text, fontColor: fontColor, font: font)
+        
+        memoryCache.setObject(newString, forKey: key as NSString)
+        DispatchQueue.global().async {
+            saveToDiskCache(newString, key: key)
+        }
+        
+        return newString
+    }
+    
+    private static func saveToDiskCache(_ string: NSAttributedString, key: String) {
+        let fileURL = cacheDirectory.appendingPathComponent(key)
+        if let data = try? NSKeyedArchiver.archivedData(withRootObject: string, requiringSecureCoding: false) {
+            try? data.write(to: fileURL)
+        }
+    }
+
+    private static func loadFromDiskCache(key: String) -> NSAttributedString? {
+        let fileURL = cacheDirectory.appendingPathComponent(key)
+        if let data = try? Data(contentsOf: fileURL),
+           let string = try? NSKeyedUnarchiver.unarchiveTopLevelObjectWithData(data) as? NSAttributedString {
+            return string
+        }
+        return nil
+    }
+    
+    private static func generateAttributedString(_ text: String, fontColor: UIColor, font: UIFont) -> NSAttributedString {
+        return HelpersStrings.decodeHTML(
+            in: removeLinkAttributes(
+                from: text.parseXMLToAttributedString(fontColor: fontColor, font: font).0
+            ) ?? NSAttributedString(string: "")
+        )
+    }
+    
+    private static func removeLinkAttributes(from attributedString: NSAttributedString?) -> NSAttributedString? {
+        guard let attributedString else { return nil }
+        let mutableAttributedString = NSMutableAttributedString(attributedString: attributedString)
+        let range = NSRange(location: 0, length: mutableAttributedString.length)
+        
+        mutableAttributedString.enumerateAttribute(.link, in: range, options: []) { value, range, _ in
+            if value != nil {
+                mutableAttributedString.removeAttribute(.link, range: range)
+            }
+        }
+        
+        return mutableAttributedString
     }
 }

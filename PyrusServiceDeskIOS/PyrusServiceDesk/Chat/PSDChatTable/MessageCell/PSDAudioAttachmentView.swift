@@ -32,7 +32,8 @@ class PSDAudioAttachmentView: PSDAttachmentView {
                     playView.layer.addLoadingAnimation()
                     slider.isUserInteractionEnabled = false
                     slider.setValue(0, animated: false)
-                    presenter?.changeTime(0)
+                    setTime(string: "--:--")
+                    //presenter?.changeTime(0)
                 case .playing:
                     hasBeenTracked = false
                     playImageView.image = UIImage.PSDImage(name: "pause")?.imageWith(color: .white)
@@ -72,12 +73,14 @@ class PSDAudioAttachmentView: PSDAttachmentView {
         didSet {
             switch sliderColor {
             case .brightColor:
-                slider.tintColor = .white
+                //slider.tintColor = .white
+                slider.setThumbImage(UIImage.PSDImage(name: "circle"), for: .normal)
                 slider.minimumTrackTintColor = .white
                 slider.maximumTrackTintColor = UIColor(hex: "#E3E5E84D")?.withAlphaComponent(0.3)
             case .defaultColor:
                 let mainColor = PyrusServiceDesk.mainController?.customization?.themeColor
-                slider.tintColor = mainColor
+//                slider.tintColor = mainColor
+                slider.setThumbImage(UIImage.PSDImage(name: "darkCircle"), for: .normal)
                 slider.minimumTrackTintColor = mainColor
                 slider.maximumTrackTintColor = .trackColor//UIColor(hex: "#0000001A")?.withAlphaComponent(0.1)
             }

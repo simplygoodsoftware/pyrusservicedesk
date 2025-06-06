@@ -14,4 +14,5 @@ protocol PSDChatsDataServiceProtocol {
     func resaveBeforeDeleteCommand(commanId: String, serverTicketId: Int?, completion: ((Result<Void, Error>) -> Void)?)
     func searchMessages(searchString: String) -> [SearchChatModel]
     func searchMessages(searchString: String, completion: @escaping (Result<[SearchChatModel], Error>) -> Void)
+    func getAllChats(completion: @escaping ([PSDChat]) -> Void)
 }

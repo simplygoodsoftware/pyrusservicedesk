@@ -201,6 +201,10 @@ import Foundation
     }
     ///Change time according to progress(seconds that was played)
     func changeTime(_ progress: CGFloat){
+        guard let time = getFileTime() else {
+            self.view?.setTime(string: "--:--")
+            return
+        }
         var p = roundf(Float(progress) * Float(getFileTime() ?? 0))
         let f = roundf(Float(getFileTime() ?? 0))
         if p > f{

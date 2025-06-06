@@ -64,6 +64,9 @@ class PSDChatsViewController: UIViewController {
     private var chats: [[PSDChatsViewModel]] = [[], []] {
         didSet {
             reloadDiffable(animated: true)
+//            if (!(chats[0].count == 0 && chats[1].count == 0) || clearTable) == false {
+//                print("откуда?")
+//            }
             emptyChatsView.isHidden = !(chats[0].count == 0 && chats[1].count == 0) || clearTable
         }
     }
@@ -537,6 +540,7 @@ extension PSDChatsViewController: UITableViewDelegate, UITableViewDataSource {
     
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         let cell = cellConfigurator?.getCell(model: chats[indexPath.section][indexPath.row], indexPath: indexPath) ?? PSDChatInfoTableViewCell()
+        cell.isHidden = false
         return cell
     }
     

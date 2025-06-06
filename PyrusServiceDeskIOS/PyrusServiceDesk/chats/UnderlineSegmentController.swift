@@ -169,7 +169,7 @@ extension UIColor {
     static let scrollButtonColor = UIColor {
         switch $0.userInterfaceStyle {
         case .dark:
-            return UIColor(hex: "#788087") ?? .black
+            return UIColor(hex: "#3D4043") ?? .black
         default:
             return .white
         }

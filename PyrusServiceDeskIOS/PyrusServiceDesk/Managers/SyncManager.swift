@@ -142,10 +142,18 @@ class SyncManager {
                     self?.chatsDataService.saveChatModels(with: chats) { [weak self] _ in
                         DispatchQueue.main.async { [weak self] in
                             if let clients, clients.count > 0, PyrusServiceDesk.isStarted {
-                                PyrusServiceDesk.clients = clients
-                                self?.chatsDataService.saveClientModels(with: clients)
-                                PyrusServiceDesk.chats = self?.chatsDataService.getAllChats() ?? []
-                                NotificationCenter.default.post(name: PyrusServiceDesk.chatsUpdateNotification, object: nil, userInfo: userInfo)
+//                                PyrusServiceDesk.clients = clients
+//                                self?.chatsDataService.saveClientModels(with: clients)
+                                self?.chatsDataService.getAllChats() { [userInfo] chats in
+                                    DispatchQueue.main.async {
+                                        PyrusServiceDesk.clients = clients
+                                        self?.chatsDataService.saveClientModels(with: clients)
+                                        PyrusServiceDesk.chats = chats
+                                        NotificationCenter.default.post(name: PyrusServiceDesk.chatsUpdateNotification, object: nil, userInfo: userInfo)
+                                    }
+                                }
+//                                PyrusServiceDesk.chats = self?.chatsDataService.getAllChats() ?? []
+//                                NotificationCenter.default.post(name: PyrusServiceDesk.chatsUpdateNotification, object: nil, userInfo: userInfo)
                             }
                             
                             if isFilter {

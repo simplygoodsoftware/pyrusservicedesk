@@ -70,7 +70,8 @@ class AudioInputView: UIView {
         let slider = AudioCellSlider()
         slider.minimumTrackTintColor = PyrusServiceDesk.mainController?.customization?.themeColor
         slider.maximumTrackTintColor = .trackColor//UIColor(hex: "#D9D9D9")
-        slider.tintColor = PyrusServiceDesk.mainController?.customization?.themeColor
+        slider.setThumbImage(UIImage.PSDImage(name: "darkCircle"), for: .normal)
+        //slider.tintColor = PyrusServiceDesk.mainController?.customization?.themeColor
         return slider
     }()
     

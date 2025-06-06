@@ -8,9 +8,10 @@ struct SearchChatModel {
     let messageId: String
     let authorName: String
     let isMessage: Bool
+    let messageAttributedText: NSAttributedString?
     var lastMessage: PSDMessage?
     
-    init(id: Int, date: Date, subject: String, messageText: String, messageId: String, authorName: String, isMessage: Bool) {
+    init(id: Int, date: Date, subject: String, messageText: String, messageId: String, authorName: String, isMessage: Bool, messageAttributedText: NSAttributedString?) {
         self.id = id
         self.date = date
         self.subject = subject
@@ -18,5 +19,6 @@ struct SearchChatModel {
         self.messageId = messageId
         self.authorName = authorName
         self.isMessage = isMessage
+        self.messageAttributedText = messageAttributedText
     }
 }

@@ -2,6 +2,8 @@
 let REPLACE_STRING = "%%"
 import Foundation
 extension Date {
+    static let dateFormatter: DateFormatter = DateFormatter()
+            
     /**
      Returns string with time that has passed from "now"
      */
@@ -131,21 +133,21 @@ extension Date {
         let months :Int = components.month ?? 0
         let years :Int = components.year ?? 0
         
-        let dateFormatter = DateFormatter()
+//        let dateFormatter = DateFormatter()
 
         if years > 0 {
-            dateFormatter.dateFormat = "dd.MM.YYYY"
+            Date.dateFormatter.dateFormat = "dd.MM.YYYY"
         } else if months > 0 {
-            dateFormatter.dateFormat = "dd.MM"
+            Date.dateFormatter.dateFormat = "dd.MM"
         } else if days >= 7 {
-            dateFormatter.dateFormat = "dd.MM"
+            Date.dateFormatter.dateFormat = "dd.MM"
         } else if days > 0 {
-            dateFormatter.dateFormat = "EEE"
+            Date.dateFormatter.dateFormat = "EEE"
         } else {
-            dateFormatter.dateFormat = "HH:mm"
+            Date.dateFormatter.dateFormat = "HH:mm"
         }
         
-        return dateFormatter.string(from: self)
+        return Date.dateFormatter.string(from: self)
     }
     
    /* func compareWithoutTime(with date:Date)->Bool

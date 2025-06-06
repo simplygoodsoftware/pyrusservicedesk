@@ -1,13 +1,30 @@
 import UIKit
 class PSDChat: Hashable {
     var chatId: Int?
-    var date: Date?
+    var date: Date? {
+        didSet {
+            lastMessageDate = date?.messageTime()
+        }
+    }
+    var lastMessageDate: String?
     var messages: [PSDMessage]
     var isRead = true
     var showRating = false
     var showRatingText: String?
     var subject: String?
-    var lastComment: PSDMessage?
+    var lastComment: PSDMessage? {
+        didSet {
+            if let lastComment {
+                DispatchQueue.global().async { [weak self] in
+                    let attrStr = AttributedStringCache.cachedString(for: lastComment.text, fontColor: .lastMessageInfo, font: .lastMessageInfo, key: lastComment.messageId)
+                    self?.lastMessageText = attrStr.string
+                    self?.lastMessageAttrText = attrStr
+                }
+            }
+        }
+    }
+    var lastMessageText: String?
+    var lastMessageAttrText: NSAttributedString?
     var userId: String?
     var lastReadedCommentId: Int?
     var isActive = true
@@ -55,3 +72,18 @@ class PSDChat: Hashable {
     }
 }
 private let MAX_LINKS_COUNT: Int = 10
+
+private extension UIFont {
+    static let lastMessageInfo = CustomizationHelper.systemFont(ofSize: 15.0)
+}
+
+private extension UIColor {
+    static let lastMessageInfo = UIColor {
+        switch $0.userInterfaceStyle {
+        case .dark:
+            return UIColor(hex: "#FFFFFFE5") ?? .white
+        default:
+            return UIColor(hex: "#60666C") ?? .systemGray
+        }
+    }
+}

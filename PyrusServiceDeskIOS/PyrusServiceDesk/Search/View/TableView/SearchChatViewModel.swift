@@ -26,9 +26,9 @@ struct SearchChatViewModel: Hashable {
     func hash(into hasher: inout Hasher) {
         hasher.combine(id)
         hasher.combine(date)
-        hasher.combine(subject)
-        hasher.combine(messageText)
         hasher.combine(messageId)
         hasher.combine(isMessage)
+        hasher.combine(subject)
+        hasher.combine(messageText)
     }
 }

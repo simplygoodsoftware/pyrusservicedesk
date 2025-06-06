@@ -14,8 +14,13 @@ extension ChatsPresenter: ChatsPresenterProtocol {
     func doWork(_ action: ChatsPresenterCommand) {
         switch action {
         case .updateChats(chats: let chats):
+            let startTime = DispatchTime.now()
             self.chats = chats
             updateChats()
+            let endTime = DispatchTime.now()
+            let nanoTime = endTime.uptimeNanoseconds - startTime.uptimeNanoseconds
+            let timeInterval = Double(nanoTime) / 1_000_000
+            print("⏱ updateChats выполнена за \(timeInterval) мс (обработано \(chats.count) чатов)")
         case .openChat(chat: let chat, fromPush: let fromPush):
             view?.show(.openChat(chat: chat, fromPush: fromPush))
         case .deleteFilter:
@@ -61,14 +66,16 @@ extension ChatsPresenter: ChatsPresenterProtocol {
 
 @available(iOS 13.0, *)
 private extension ChatsPresenter {
-    func updateChats() {
-        chatsPrepareQueue.async {
-            let chatsModel = self.prepareChats(chats: self.chats)
-            DispatchQueue.main.async {
-                self.view?.show(.updateChats(chats: chatsModel))
-            }
-
+    func updateChats(open: Bool = false) {
+        //        chatsPrepareQueue.async {
+        let chatsModel = self.prepareChats(chats: self.chats)
+        //            DispatchQueue.main.async {
+        self.view?.show(.updateChats(chats: chatsModel))
+        if open {
+            self.view?.show(.scrollToClosedTickets)
         }
+        //            }
+        //        }
     }
     
     private func loadChatsState() {
@@ -77,36 +84,66 @@ private extension ChatsPresenter {
     }
     
     func prepareChats(chats: [ChatPresenterModel]) -> [[PSDChatsViewModel]] {
+        let startTime = DispatchTime.now()
+        
         var activeChats = [PSDChatsViewModel]()
         var closeChats = [PSDChatsViewModel]()
         
         for chat in chats {
-            let subject = chat.subject?.count ?? 0 > 0
-                ? chat.subject ?? ""
-                : "NewTicket".localizedPSD()
+            let subject = chat.subject == ""
+            ? "NewTicket".localizedPSD()
+            : chat.subject ?? "NewTicket".localizedPSD()
+                
             var lastMessage = chat.lastComment
-            if let lastStoreMessage = PSDMessagesStorage.getMessages(for: chat.id).last {
-                lastMessage = lastStoreMessage.date >= lastMessage?.date ?? Date() ? lastStoreMessage : lastMessage
-            }
-            let author = lastMessage?.isOutgoing ?? false ? "You".localizedPSD() : lastMessage?.owner.name ?? ""
-            let text = lastMessage?.attachments?.count ?? 0 > 0
-                ? ""
-            : lastMessage?.text ?? ""//"Last_Message".localizedPSD()
             
-            var lastMessageText =  "\(author): \(text)"
-            if lastMessageText == ": " {
-                lastMessageText = ""
+            var text = chat.lastMessageAttributedText ?? AttributedStringCache.cachedString(for: lastMessage?.text ?? "", fontColor: .lastMessageInfo, font: .lastMessageInfo, key: lastMessage?.messageId).string
+            if let lastStoreMessage = PSDMessagesStorage.getMessages(for: chat.id).last {
+                if lastStoreMessage.date >= lastMessage?.date ?? Date() {
+                    lastMessage = lastStoreMessage
+                    text = lastMessage?.text ?? ""
+                }
+//                lastMessage = lastStoreMessage.date >= lastMessage?.date ?? Date() ? lastStoreMessage : lastMessage
             }
+           
+//            let text = lastMessage?.attachments?.count ?? 0 > 0
+//                ? ""
+//            : lastMessage?.text ?? ""//"Last_Message".localizedPSD()
+//
+            let author = lastMessage?.isOutgoing ?? false ? "You".localizedPSD() : lastMessage?.owner.name ?? ""
+            if lastMessage?.attachments?.count ?? 0 > 0 {
+                text = ""
+            }
+//            var lastMessageText =  "\(author): \(text)"
+//            if lastMessageText == ": " {
+//                lastMessageText = ""
+//            }
+            
+//            let attrText = lastMessage?.attachments?.count ?? 0 > 0
+//            ? ""
+//            : chat.lastMessageAttributedText ?? AttributedStringCache.cachedString(for: lastMessage?.text ?? "", fontColor: .lastMessageInfo, font: .lastMessageInfo, key: lastMessage?.messageId).string//"Last_Message".localizedPSD()
+////
+//            var lastMessageAttrText = NSMutableAttributedString(
+//                string: "\(author): ",
+//                attributes: [.font: UIFont.lastMessageInfo, .foregroundColor: UIColor.lastMessageInfo]
+//            )
+//            lastMessageAttrText.append(attrText)
+//            if lastMessageAttrText.string == ": " {
+//                lastMessageAttrText = NSMutableAttributedString(string: "")
+//            }
+            
             let model = ChatViewModel(
                 id: chat.id,
-                date: chat.date?.messageTime() ?? "",
+                date: chat.date ?? "",
                 isRead: chat.isRead,
                 subject: subject,
-                lastMessageText: lastMessageText,
+                lastMessageText: text,
                 attachmentText: getAttachmentString(attachment: lastMessage?.attachments?.last) ?? "",
-                hasAttachment: lastMessage?.attachments?.count ?? 0 > 0, 
+                hasAttachment: lastMessage?.attachments?.count ?? 0 > 0,
                 state: lastMessage?.state ?? .sent,
-                isAudio: lastMessage?.attachments?.first?.isAudio ?? false
+                isAudio: lastMessage?.attachments?.first?.isAudio ?? false,
+                lastMessageId: lastMessage?.messageId,
+                lastMessageCommandId: lastMessage?.commandId,
+                lastMessageAuthor: author//lastMessage?.messageId ?? lastMessage?.commandId ?? "",
             )
             
             if chat.isActive {
@@ -119,11 +156,31 @@ private extension ChatsPresenter {
         if closeChats.count > 0 {
             activeChats.append(PSDChatsViewModel(data: ClosedTicketsCellModel(count: closeChats.count, isOpen: isClosedTicketsOpened, delegate: self), type: .header) )
         }
+        
+        let endTime = DispatchTime.now()
+        let nanoTime = endTime.uptimeNanoseconds - startTime.uptimeNanoseconds
+        let timeInterval = Double(nanoTime) / 1_000_000
+        print("⏱ prepareChats выполнена за \(timeInterval) мс (обработано \(chats.count) чатов)")
+        
         if isClosedTicketsOpened {
             return [activeChats, closeChats]
         } else {
             return [activeChats, []]
         }
+    }
+    
+    func removeLinkAttributes(from attributedString: NSAttributedString?) -> NSAttributedString? {
+        guard let attributedString else { return nil }
+        let mutableAttributedString = NSMutableAttributedString(attributedString: attributedString)
+        let range = NSRange(location: 0, length: mutableAttributedString.length)
+        
+        mutableAttributedString.enumerateAttribute(.link, in: range, options: []) { value, range, _ in
+            if value != nil {
+                mutableAttributedString.removeAttribute(.link, range: range)
+            }
+        }
+        
+        return mutableAttributedString
     }
     
     func getAttachmentString(attachment: PSDAttachment?) -> String? {
@@ -170,9 +227,30 @@ private extension ChatsPresenter {
 extension ChatsPresenter: ClosedTicketsCellDelegate {
     func redrawChats(open: Bool) {
         isClosedTicketsOpened = open
-        updateChats()
-        if open {
-            view?.show(.scrollToClosedTickets)
+        updateChats(open: open)
+//        if open {
+//            view?.show(.scrollToClosedTickets)
+//        }
+    }
+}
+
+private extension UIFont {
+    static let timeLabel = CustomizationHelper.systemFont(ofSize: 13.0)
+    static let messageLabel = CustomizationHelper.systemBoldFont(ofSize: 17)
+    static let notificationButton = CustomizationHelper.systemFont(ofSize: 12.0)
+    static let lastMessageInfo = CustomizationHelper.systemFont(ofSize: 15.0)
+}
+
+private extension UIColor {
+    static let timeLabel = UIColor(hex: "#9199A1") ?? .systemGray
+    static let secondColor = UIColor(hex: "#FFB049")
+    
+    static let lastMessageInfo = UIColor {
+        switch $0.userInterfaceStyle {
+        case .dark:
+            return UIColor(hex: "#FFFFFFE5") ?? .white
+        default:
+            return UIColor(hex: "#60666C") ?? .systemGray
         }
     }
 }
