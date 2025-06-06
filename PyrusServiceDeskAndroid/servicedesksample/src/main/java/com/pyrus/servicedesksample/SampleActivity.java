@@ -28,6 +28,7 @@ public class SampleActivity extends Activity implements NewReplySubscriber {
                         this,
                         new ServiceDeskConfiguration.Builder()
                                 .setUserName("Ivan Ivanov")
+                                .setStartMessage("hello it is test of comment 2")
                                 .setThemeColor(Color.parseColor("#FF8300"))
                                 .setChatTitle("Sample Support")
                                 .setWelcomeMessage("How can I help you?")
