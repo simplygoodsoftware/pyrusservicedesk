@@ -53,7 +53,7 @@
 "Date_Format" = "EE, dd MMM";
 "Date_Format_Year" = "EE, dd MMM, aaaa";
 "Time_Format" = "hh:mm a";
-"Numbers_Date_Format" = "yyyyMMddHHmmss";
+"Numbers_Date_Format" = "aaaaMMddHHmmss";
 "Retry" = "INTENTAR NUEVAMENTE";
 "Error" = "Error";
 "ErrorServerError" = "Conexión a servidor interrumpida";
