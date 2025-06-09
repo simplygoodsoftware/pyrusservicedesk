@@ -1,7 +1,7 @@
 // swift-interface-format-version: 1.0
-// swift-compiler-version: Apple Swift version 6.0.3 effective-5.10 (swiftlang-6.0.3.1.10 clang-1600.0.30.1)
-// swift-module-flags: -target arm64-apple-ios9.0-simulator -enable-objc-interop -enable-library-evolution -swift-version 5 -enforce-exclusivity=checked -O -enable-bare-slash-regex -module-name PyrusServiceDesk
-// swift-module-flags-ignorable: -no-verify-emitted-module-interface
+// swift-compiler-version: Apple Swift version 6.1.2 effective-5.10 (swiftlang-6.1.2.1.2 clang-1700.0.13.5)
+// swift-module-flags: -target arm64-apple-ios9.0-simulator -enable-objc-interop -enable-library-evolution -swift-version 5 -enforce-exclusivity=checked -O -enable-experimental-feature DebugDescriptionMacro -enable-bare-slash-regex -module-name PyrusServiceDesk
+// swift-module-flags-ignorable: -no-verify-emitted-module-interface -interface-compiler-version 6.1.2
 import AVFoundation
 import AVKit
 import Compression
@@ -131,10 +131,10 @@ public enum VerticalAlignment {
   public static var PSD_CLOSED_NOTIFICATION_NAME: Swift.String
   public static var trustedUrls: [Swift.String]?
   @objc public static func setPushToken(_ token: Swift.String?, completion: @escaping ((any Swift.Error)?) -> Swift.Void)
-  @objc public static func start(on viewController: UIKit.UIViewController, onStopCallback: (any OnStopCallback)? = nil)
-  @objc public static func start(on viewController: UIKit.UIViewController, configuration: ServiceDeskConfiguration?, onStopCallback: (any OnStopCallback)? = nil)
-  @objc public static func start(on viewController: UIKit.UIViewController, configuration: ServiceDeskConfiguration?, completion: (() -> Swift.Void)? = nil, onStopCallback: (any OnStopCallback)? = nil)
-  @objc public static func start(with configuration: ServiceDeskConfiguration?, onStopCallback: (any OnStopCallback)? = nil) -> UIKit.UINavigationController?
+  @objc public static func start(on viewController: UIKit.UIViewController, onStopCallback: (any OnStopCallback)? = nil, sendComment: Swift.String? = nil)
+  @objc public static func start(on viewController: UIKit.UIViewController, configuration: ServiceDeskConfiguration?, onStopCallback: (any OnStopCallback)? = nil, sendComment: Swift.String? = nil)
+  @objc public static func start(on viewController: UIKit.UIViewController, configuration: ServiceDeskConfiguration?, completion: (() -> Swift.Void)? = nil, onStopCallback: (any OnStopCallback)? = nil, sendComment: Swift.String? = nil)
+  @objc public static func start(with configuration: ServiceDeskConfiguration?, onStopCallback: (any OnStopCallback)? = nil, sendComment: Swift.String? = nil) -> UIKit.UINavigationController?
   @objc public static func stop()
   @objc public static var onAuthorizationFailed: (() -> Swift.Void)?
   @objc public static func subscribeToReplies(_ subscriber: (any NewReplySubscriber)?)
