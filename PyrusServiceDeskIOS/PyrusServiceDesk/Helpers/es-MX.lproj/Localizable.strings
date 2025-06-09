@@ -1,1 +1,68 @@
 
+
+"Time_Format" = "hh:mm a";
+"Numbers_Date_Format" = "aaaaMMddHHmmss";
+"Comment" = "Comentar...";
+"Last_Message" = "Este es el último mensaje de la conversación";
+"Default_User_Name" = "Invitado";
+"Cancel" = "Cancelar";
+"Settings" = "Configuración";
+"Uploading" = "Cargando...";
+"Empty_Description" = "Vaciar";
+"All_Conversations" = "Todas las conversaciones";
+"Support_Default_Name" = "Soporte técnico";
+
+//Buttons' Title
+"New_Conversation" = "Nueva conversación";
+"New_Conversation_Short" = "Nuevo";
+"Send" = "Enviar";
+"Back" = "Atrás";
+"Done" = "Listo";
+"CancelDownload" = "Cancelar descarga";
+"NoPreviewAvailable" = "Vista previa no disponible";
+"FileLoadError" = "No se pudo cargar la vista previa del archivo";
+"OpenWith" = "Abrir con";
+"RetryButton" = "Intentar nuevamente";
+"DeleteButton" = "Eliminar";
+
+//For attachments
+"Camera" = "Tomar una fotografía o grabar";
+"Camera_Access_Error" = "Sin acceso a la cámara o al micrófono";
+"Phone_Gallery" = "Galería";
+"Phone_Gallery_Access_Error" = "Sin acceso a la galería del teléfono";
+"Access_Error" = "Error de acceso";
+"Size_Error" = "El archivo no debe exceder los 200 MB.";
+"No_File_Error" = "El archivo no existe";
+
+
+//Append time from data
+"Interval_Recent" = "reciente";
+"Interval_Minute" = "hace %%min";
+"Interval_Hour" = "hace %%h";
+"Interval_Day" = "hace %%d";
+"Interval_Week" = "hace %%sem";
+"Interval_Mounth" = "hace %%mes";
+"Interval_One_Year" = "hace %% año";
+"Interval_One_End_Year" = "hace %% años";
+"Interval_Years_234" = "hace %% años";
+"Interval_Years" = "hace %% años";
+
+//Date as string
+"Today" = "Hoy";
+"Yesterday" = "Ayer";
+"Date_Format" = "EE, dd MMM";
+"Date_Format_Year" = "EE, dd MMM, aaaa";
+
+//For requests
+"No_Connection" = "Sin conexión a Internet";
+"Retry" = "INTENTAR NUEVAMENTE";
+"Error" = "Error";
+"AttachmentLoadError" = "No se pudo cargar este archivo adjunto";
+"OK" = "Aceptar";
+"ErrorServerError" = "Conexión a servidor interrumpida";
+"SendLog" = "Enviar registros de biblioteca";
+"AcсessDenied" = "Acceso denegado";
+"PrepareLog" = "Preparando registro...";
+"ExternalSourceWarning" = "Este enlace lo dirige a %@\n¿Desea seguir el enlace?";
+"ShortYes" = "Sí";
+"ShortNo" = "No";
