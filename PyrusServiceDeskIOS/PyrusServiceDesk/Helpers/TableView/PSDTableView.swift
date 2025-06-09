@@ -2,15 +2,19 @@ import Foundation
 class PSDTableView : UITableView{
     let headerHeight :CGFloat = 40
     ///Is table view is loading. Hides or show activity.
-    var isLoading : Bool = false{
-        didSet(oldValue){
-            if oldValue != isLoading{
-                changeInset()
-            }
-            if isLoading{
+    private var isLoading = false
+    
+    func setIsLoading(_ loading: Bool, show: Bool = true) {
+        let oldValue = isLoading
+        isLoading = loading
+        if oldValue != loading {
+            changeInset()
+        }
+        if show {
+            switch loading {
+            case true:
                 activity.startAnimating()
-            }
-            else{
+            case false:
                 activity.stopAnimating()
             }
         }
@@ -58,6 +62,7 @@ class PSDTableView : UITableView{
         activity.color = CustomizationHelper.textColorForTable
         let transform = CATransform3DScale(CATransform3DIdentity, MAXIMUM_ACTIVITY_SCALE, MAXIMUM_ACTIVITY_SCALE, MAXIMUM_ACTIVITY_SCALE)
         activity.layer.transform = transform
+        activity.stopAnimating()
         return activity
     }()
     private lazy var activityView: UIView = {
@@ -137,9 +142,9 @@ class PSDTableView : UITableView{
     }
 
     ///Add new row - if tableView is empty - perform animation of moving loader up - and return completion when animation ended, else return completion right now
-    func addNewRow(completion: @escaping () -> Void){
+    func addNewRow(completion: @escaping () -> Void, animated: Bool = true){
         if(self.numberOfRows(inSection: 0) == 0){
-            self.changeConstraints(emptyTable: false){
+            self.changeConstraints(emptyTable: false, animated: animated){
                 completion()
             }
         }else{
@@ -151,22 +156,28 @@ class PSDTableView : UITableView{
         return emptyTable ?  self.visibleAreaCenter() : self.topActivityPosition()
     }
 
-    private func changeConstraints(emptyTable:Bool, completion: @escaping () -> Void){
+    private func changeConstraints(emptyTable:Bool, animated: Bool = true, completion: @escaping () -> Void){
         if(self.isLoading){
             DispatchQueue.main.async {
                 if(self.topActivityConstraint?.constant != self.calculateConstraint(emptyTable:emptyTable)){
                     
                     var oldFrame = self.activity.frame
                     oldFrame.origin.y = self.calculateConstraint(emptyTable:emptyTable)
-                    let duration = emptyTable ? PSDTableView.ACTIVITY_MOVE_DURATION : 0.1
-                    UIView.animate(withDuration: TimeInterval(duration), delay: 0, options: [ .beginFromCurrentState,.curveLinear], animations: {
+                    if animated {
+                        let duration = emptyTable ? PSDTableView.ACTIVITY_MOVE_DURATION : 0.1
+                        UIView.animate(withDuration: TimeInterval(duration), delay: 0, options: [ .beginFromCurrentState,.curveLinear], animations: {
+                            self.activity.frame = oldFrame
+                        }, completion:{ (comleted : Bool) in
+                            if(comleted){
+                                self.topActivityConstraint?.constant = self.calculateConstraint(emptyTable:emptyTable)
+                            }
+                            completion()
+                        })
+                    } else {
                         self.activity.frame = oldFrame
-                    }, completion:{ (comleted : Bool) in
-                        if(comleted){
-                            self.topActivityConstraint?.constant = self.calculateConstraint(emptyTable:emptyTable)
-                        }
+                        self.topActivityConstraint?.constant = self.calculateConstraint(emptyTable:emptyTable)
                         completion()
-                    })
+                    }
                 }
                 else{
                     completion()
@@ -178,6 +189,7 @@ class PSDTableView : UITableView{
             completion()
         }
     }
+    
     private func changeInset(){
         var oldInset : UIEdgeInsets  = self.contentInset
         oldInset.top = isLoading ?  REFRESH_CONTROL_HEIGHT : 0.0
