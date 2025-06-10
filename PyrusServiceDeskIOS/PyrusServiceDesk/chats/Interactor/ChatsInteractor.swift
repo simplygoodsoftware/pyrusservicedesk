@@ -318,6 +318,9 @@ private extension ChatsInteractor {
             updateIcon(imagePath: clients[index].clientIcon, index: index)
         }
         if let newUser = PyrusServiceDesk.newUser {
+            if PyrusServiceDesk.chats.first(where: { $0.userId == newUser.userId }) == nil {
+                newUserFilter()
+            }
             let _ = PyrusServiceDesk.addUser(appId: newUser.clientId, clientName: "", userId: newUser.userId, userName: newUser.userName)
             PyrusServiceDesk.newUser = nil
         }

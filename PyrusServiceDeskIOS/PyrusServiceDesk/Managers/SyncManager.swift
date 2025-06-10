@@ -51,6 +51,14 @@ class SyncManager {
             PyrusServiceDesk.clients = chatsDataService.getAllClients()
             PyrusServiceDesk.repository.loadCommands()
             firstLoad = false
+//            chatsDataService.getAllChats() { [weak self] chats in
+//                DispatchQueue.main.async { [weak self] in
+//                    guard let self else { return }
+//                    PyrusServiceDesk.clients = chatsDataService.getAllClients()
+//                    PyrusServiceDesk.chats = chats
+//                    PyrusServiceDesk.cacheLoadedCallback?.cacheLoaded()
+//                }
+//            }
         }
         if !self.isFilter {
             self.isFilter = isFilter

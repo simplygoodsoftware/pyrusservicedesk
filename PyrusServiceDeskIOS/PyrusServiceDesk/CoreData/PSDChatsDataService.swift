@@ -18,11 +18,11 @@ final class PSDChatsDataService {
 
 extension PSDChatsDataService: PSDChatsDataServiceProtocol {
     func deleteAllObjects() {
+        coreDataService.deleteAllObjects(forEntityName: "DBClient")
         coreDataService.deleteAllObjects(forEntityName: "DBAttachment")
         coreDataService.deleteAllObjects(forEntityName: "DBMessage")
         coreDataService.deleteAllObjects(forEntityName: "DBChat")
         coreDataService.deleteAllObjects(forEntityName: "DBTicketCommand")
-        coreDataService.deleteAllObjects(forEntityName: "DBClient")
     }
     
     func saveClientModels(with clientModels: [PSDClientInfo]) {

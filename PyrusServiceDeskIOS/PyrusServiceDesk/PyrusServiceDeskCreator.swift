@@ -332,6 +332,7 @@ import UIKit
     ///The subscriber for PyrusSecviceDeskClose.
     weak static  private(set) var stopCallback: OnStopCallback?
     weak static  private(set) var deniedAccessCallback: DeniedAccessCallBack?
+    weak static  private(set) var cacheLoadedCallback: CacheLoadedCallBack?
     
     weak static private(set) var logEvent: LogEvents?
     ///Subscribe [subscriber] for notifications that new messages from support have appeared in the chat.
@@ -398,6 +399,7 @@ import UIKit
     private static func createWith(_ clientId: String?, userId: String?, securityKey: String?, reset: Bool, userName: String?, additionalUsers: [PSDUserInfo] = [], authorId: String?, domain: String?, loggingEnabled: Bool, authorizationToken: String?, multichats: Bool = false) {
         isStarted = true
         PyrusServiceDesk.chats = []
+        PyrusServiceDesk.clients = []
         PyrusServiceDesk.multichats = multichats
         PyrusServiceDesk.loggingEnabled = loggingEnabled
         guard let clientId = clientId, clientId.count > 0 else {
@@ -420,7 +422,6 @@ import UIKit
         PyrusServiceDesk.authorId = authorId
         PyrusServiceDesk.authorizationToken = authorizationToken
         PyrusServiceDesk.additionalUsers = additionalUsers
-        PyrusServiceDesk.clients = []
         PyrusServiceDesk.currentClientId = clientId
         PyrusServiceDesk.accessDeniedIds = []
         PyrusServiceDesk.lastNoteId = 0
