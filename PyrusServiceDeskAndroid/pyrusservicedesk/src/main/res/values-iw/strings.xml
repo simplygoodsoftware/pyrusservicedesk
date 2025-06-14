@@ -1,2 +1,22 @@
 <?xml version="1.0" encoding="utf-8"?>
-<resources></resources>
+<resources>
+    <string name="psd_send">שלח</string>
+    <string name="psd_comment_input_hint">הוסף הערה</string>
+    <string name="psd_retry">נסה שוב</string>
+    <string name="psd_no_connection">אין גישה לאינטרנט</string>
+    <string name="psd_uploading">העלאה…</string>
+    <string name="psd_file_size_mb" formatted="false">%.1f מ״ב</string>
+    <string name="psd_file_size_kb" formatted="false">%.1f ק״ב</string>
+    <string name="psd_time_format">hh:mm aa</string>
+    <string name="psd_today">היום</string>
+    <string name="psd_yesterday">אתמול</string>
+    <string name="psd_date_format_d_m_y">MMMM d, yyyy</string>
+    <string name="psd_date_format_d_m">MMMM d</string>
+    <string name="psd_photo">צילום</string>
+    <string name="psd_gallery">גלריה</string>
+    <string name="psd_no_preview_available">תצוגה מוקדמת אינה זמינה</string>
+    <string name="psd_share">שתף</string>
+    <string name="psd_delete">מחק</string>
+    <string name="psd_organization_support">תמיכה</string>
+    <string name="send_library_logs">שלח קבצי לוג של הספריה</string>
+</resources>
