@@ -222,8 +222,8 @@ class PyrusServiceDesk private constructor(
         fun start(
             activity: Activity,
             configuration: ServiceDeskConfiguration? = null,
+            onStopCallback: OnStopCallback? = null,
             sendComment: String? = null,
-            onStopCallback: OnStopCallback? = null
         ) = startImpl(
             activity = activity,
             configuration = configuration,
@@ -403,8 +403,8 @@ class PyrusServiceDesk private constructor(
         private fun startImpl(
             activity: Activity,
             configuration: ServiceDeskConfiguration? = null,
+            onStopCallback: OnStopCallback? = null,
             sendComment: String? = null,
-            onStopCallback: OnStopCallback? = null
         ) {
             this.sendComment = sendComment
             CONFIGURATION = configuration
