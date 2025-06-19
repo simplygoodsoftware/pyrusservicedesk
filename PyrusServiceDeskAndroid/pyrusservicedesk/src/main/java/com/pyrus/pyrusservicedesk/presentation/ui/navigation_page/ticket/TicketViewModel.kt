@@ -66,6 +66,8 @@ internal class TicketViewModel(
      */
     val draft: String
 
+    private var sendComment: String?
+
     private val draftRepository = serviceDeskProvider.getDraftRepository()
     private val localDataProvider: LocalDataProvider = serviceDeskProvider.getLocalDataProvider()
     private val fileManager: FileManager = serviceDeskProvider.getFileManager()
@@ -95,6 +97,7 @@ internal class TicketViewModel(
 
     init {
         draft = draftRepository.getDraft()
+        sendComment = PyrusServiceDesk.getAndRemoveSendComment()
 
         runBlocking {
             val response = requests.getPendingFeedCommentsRequest().execute()
@@ -313,8 +316,9 @@ internal class TicketViewModel(
                 }
                 return true
             }
+
+            null -> return false
         }
-        return false
     }
 
     private fun applyTicketUpdate(freshList: Comments, arePendingComments: Boolean) {
@@ -367,6 +371,11 @@ internal class TicketViewModel(
         publishEntries(ticketEntries, toPublish)
         if (!arePendingComments)
             onDataLoaded()
+        val message = sendComment
+        if (!message.isNullOrBlank()) {
+            sendComment = null
+            onSendClicked(message)
+        }
     }
 
     private fun needUpdateCommentsList(freshList: List<Comment>): Boolean {
@@ -586,8 +595,8 @@ internal class TicketViewModel(
         private val localComment: Comment
     ) : Observer<CallResult<AddCommentResponseData>> {
 
-        override fun onChanged(t: CallResult<AddCommentResponseData>?) {
-            t?.let { result ->
+        override fun onChanged(t: CallResult<AddCommentResponseData>) {
+            t.let { result ->
                 isCreateTicketSent = false
                 if (uploadFileHooks?.isCancelled == true)
                     return@let

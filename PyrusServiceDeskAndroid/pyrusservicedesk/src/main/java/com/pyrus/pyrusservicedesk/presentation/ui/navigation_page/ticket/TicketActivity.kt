@@ -22,6 +22,7 @@ import android.widget.Toast
 import com.pyrus.pyrusservicedesk.PyrusServiceDesk
 import com.pyrus.pyrusservicedesk.R
 import com.pyrus.pyrusservicedesk.ServiceDeskConfiguration
+import com.pyrus.pyrusservicedesk.databinding.PsdActivityTicketBinding
 import com.pyrus.pyrusservicedesk.presentation.ConnectionActivityBase
 import com.pyrus.pyrusservicedesk.presentation.ui.navigation_page.file_preview.FilePreviewActivity
 import com.pyrus.pyrusservicedesk.presentation.ui.navigation_page.ticket.dialogs.attach_files.AttachFileSharedViewModel
@@ -33,10 +34,6 @@ import com.pyrus.pyrusservicedesk.sdk.data.Attachment
 import com.pyrus.pyrusservicedesk.sdk.data.intermediate.FileData
 import com.pyrus.pyrusservicedesk.utils.*
 import com.pyrus.pyrusservicedesk.utils.RequestUtils.Companion.getFileUrl
-import kotlinx.android.synthetic.main.psd_activity_ticket.*
-import kotlinx.android.synthetic.main.psd_activity_ticket.root
-import kotlinx.android.synthetic.main.psd_activity_ticket.view.*
-import kotlinx.android.synthetic.main.psd_no_connection.*
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
@@ -44,6 +41,8 @@ import kotlinx.coroutines.launch
  * Activity for rendering ticket/feed comments.
  */
 internal class TicketActivity : ConnectionActivityBase<TicketViewModel>(TicketViewModel::class.java) {
+
+    private lateinit var binding: PsdActivityTicketBinding
 
     companion object {
         private const val KEY_TICKET_ID = "KEY_TICKET_ID"
@@ -80,10 +79,10 @@ internal class TicketActivity : ConnectionActivityBase<TicketViewModel>(TicketVi
     private var recentContentHeight = 0
     private val globalLayoutListener by lazy {
         OnGlobalLayoutListener {
-            val changedHeight = recentContentHeight - comments.height
+            val changedHeight = recentContentHeight - binding.comments.height
             if (changedHeight != 0)
                 onViewHeightChanged(changedHeight)
-            recentContentHeight = comments.height
+            recentContentHeight = binding.comments.height
         }
     }
 
@@ -120,52 +119,57 @@ internal class TicketActivity : ConnectionActivityBase<TicketViewModel>(TicketVi
         }
 
         override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
-            send.isEnabled = !s.isNullOrBlank()
+            binding.send.isEnabled = !s.isNullOrBlank()
             viewModel.onInputTextChanged(s.toString())
         }
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setupWindowInsets(root)
+        binding = PsdActivityTicketBinding.inflate(layoutInflater)
+        setContentView(binding.root)
+        setupWindowInsets(binding.root)
 
         savedInstanceState?.let { ServiceDeskConfiguration.restore(it) }
+        setNoConnectionView(binding.noConnection)
+        setSupportActionBar(binding.ticketToolbar)
+        setRefresher(binding.refresh)
 
         val accentColor = ConfigUtils.getAccentColor(this)
 
         // if you don't set empty text, Android will set the app name
         supportActionBar?.apply { title = "" }
-        ticket_toolbar.toolbar_title.text = ConfigUtils.getTitle(this@TicketActivity)
+        binding.toolbarTitle.text = ConfigUtils.getTitle(this@TicketActivity)
 
-        root.setBackgroundColor(ConfigUtils.getMainBackgroundColor(this))
+        binding.root.setBackgroundColor(ConfigUtils.getMainBackgroundColor(this))
 
         val toolbarColor = ConfigUtils.getHeaderBackgroundColor(this)
-        ticket_toolbar.toolbar_title.setTextColor(
+        binding.toolbarTitle.setTextColor(
             ConfigUtils.getChatTitleTextColor(
                 this
             )
         )
-        ticket_toolbar.setBackgroundColor(toolbarColor)
+        binding.ticketToolbar.setBackgroundColor(toolbarColor)
 
         ConfigUtils.getMainFontTypeface()?.let {
-            send.typeface = it
-            input.typeface = it
-            noConnectionTextView.typeface = it
-            reconnectButton.typeface = it
+            binding.send.typeface = it
+            binding.input.typeface = it
+            binding.noConnection.noConnectionTextView.typeface = it
+            binding.noConnection.reconnectButton.typeface = it
         }
 
         val secondaryColor = getSecondaryColorOnBackground(ConfigUtils.getNoPreviewBackgroundColor(this))
-        noConnectionImageView.setColorFilter(secondaryColor)
-        noConnectionTextView.setTextColor(secondaryColor)
-        reconnectButton.setTextColor(ConfigUtils.getAccentColor(this))
-        no_connection.setBackgroundColor(ConfigUtils.getNoConnectionBackgroundColor(this))
+        binding.noConnection.noConnectionImageView.setColorFilter(secondaryColor)
+        binding.noConnection.noConnectionTextView.setTextColor(secondaryColor)
+        binding.noConnection.reconnectButton.setTextColor(ConfigUtils.getAccentColor(this))
+        binding.noConnection.root.setBackgroundColor(ConfigUtils.getNoConnectionBackgroundColor(this))
 
         ConfigUtils.getMainBoldFontTypeface()?.let {
-            ticket_toolbar.toolbar_title.typeface = it
+            binding.toolbarTitle.typeface = it
         }
 
-        ticket_toolbar.setOnMenuItemClickListener{ onMenuItemClicked(it) }
-        comments.apply {
+        binding.ticketToolbar.setOnMenuItemClickListener{ onMenuItemClicked(it) }
+        binding.comments.apply {
             adapter = this@TicketActivity.adapter
             addItemDecoration(
                 SpaceItemDecoration(
@@ -174,7 +178,7 @@ internal class TicketActivity : ConnectionActivityBase<TicketViewModel>(TicketVi
             )
             itemAnimator = null
         }
-        send.setOnClickListener { onSendCommentClick() }
+        binding.send.setOnClickListener { onSendCommentClick() }
         val stateList = ColorStateList(
             arrayOf(
                 intArrayOf(android.R.attr.state_enabled),
@@ -186,16 +190,16 @@ internal class TicketActivity : ConnectionActivityBase<TicketViewModel>(TicketVi
             )
 
         )
-        send.setTextColor(stateList)
-        attach.setOnClickListener { showAttachFileVariants() }
-        attach.setColorFilter(ConfigUtils.getFileMenuButtonColor(this))
+        binding.send.setTextColor(stateList)
+        binding.attach.setOnClickListener { showAttachFileVariants() }
+        binding.attach.setColorFilter(ConfigUtils.getFileMenuButtonColor(this))
         if(savedInstanceState == null) {
-            input.setText(viewModel.draft)
-            showKeyboardOn(input){
-                input.setSelection(input.length())
+            binding.input.setText(viewModel.draft)
+            showKeyboardOn(binding.input){
+                binding.input.setSelection(binding.input.length())
             }
         }
-        input.apply {
+        binding.input.apply {
             highlightColor = accentColor
             setCursorColor(accentColor)
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
@@ -205,30 +209,28 @@ internal class TicketActivity : ConnectionActivityBase<TicketViewModel>(TicketVi
             setTextColor(ConfigUtils.getInputTextColor(this@TicketActivity))
             addTextChangedListener(inputTextWatcher)
         }
-        send.isEnabled = !input.text.isNullOrBlank()
-        divider.setBackgroundColor(getColorOnBackground(ConfigUtils.getMainBackgroundColor(this), 30))
-        refresh.setProgressBackgroundColor(ConfigUtils.getMainBackgroundColor(this))
-        refresh.setColorSchemeColors(ConfigUtils.getAccentColor(this))
+        binding.send.isEnabled = !binding.input.text.isNullOrBlank()
+        binding.divider.setBackgroundColor(getColorOnBackground(ConfigUtils.getMainBackgroundColor(this), 30))
+        binding.refresh.setProgressBackgroundColor(ConfigUtils.getMainBackgroundColor(this))
+        binding.refresh.setColorSchemeColors(ConfigUtils.getAccentColor(this))
 
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-            window.clearFlags(WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS)
-            window.addFlags(WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS)
-            window.statusBarColor = ConfigUtils.getStatusBarColor(this)?: window.statusBarColor
-        }
+        window.clearFlags(WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS)
+        window.addFlags(WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS)
+        window.statusBarColor = ConfigUtils.getStatusBarColor(this)?: window.statusBarColor
     }
 
     override fun onStart() {
         super.onStart()
-        comments.viewTreeObserver.addOnGlobalLayoutListener(globalLayoutListener)
+        binding.comments.viewTreeObserver.addOnGlobalLayoutListener(globalLayoutListener)
         viewModel.onStart()
     }
 
     override fun onStop() {
         super.onStop()
-        if(comments.viewTreeObserver.isAlive) {
+        if(binding.comments.viewTreeObserver.isAlive) {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN)
-                comments.viewTreeObserver.removeOnGlobalLayoutListener(globalLayoutListener)
-            else comments.viewTreeObserver.removeGlobalOnLayoutListener(globalLayoutListener)
+                binding.comments.viewTreeObserver.removeOnGlobalLayoutListener(globalLayoutListener)
+            else binding.comments.viewTreeObserver.removeGlobalOnLayoutListener(globalLayoutListener)
         }
         viewModel.onStop()
     }
@@ -237,7 +239,7 @@ internal class TicketActivity : ConnectionActivityBase<TicketViewModel>(TicketVi
         super.onRestoreInstanceState(savedInstanceState)
         savedInstanceState.let {
             if (it.getBoolean(STATE_KEYBOARD_SHOWN))
-                showKeyboardOn(input)
+                showKeyboardOn(binding.input)
         }
     }
 
@@ -245,7 +247,7 @@ internal class TicketActivity : ConnectionActivityBase<TicketViewModel>(TicketVi
         super.onSaveInstanceState(outState)
         outState.let {
             ServiceDeskConfiguration.save(it)
-            it.putBoolean(STATE_KEYBOARD_SHOWN, input.hasFocus())
+            it.putBoolean(STATE_KEYBOARD_SHOWN, binding.input.hasFocus())
         }
     }
 
@@ -266,28 +268,28 @@ internal class TicketActivity : ConnectionActivityBase<TicketViewModel>(TicketVi
     override fun startObserveData() {
         super.startObserveData()
         viewModel.getCommentDiffLiveData().observe(this) { result ->
-            val atEnd = comments.isAtEnd()
-            val isEmpty = comments.adapter?.itemCount == 0
+            val atEnd = binding.comments.isAtEnd()
+            val isEmpty = binding.comments.adapter?.itemCount == 0
             result?.let {
-                refresh.isRefreshing = false
+                binding.refresh.isRefreshing = false
                 adapter.setItems(it.newItems)
                 it.diffResult.dispatchUpdatesTo(adapter)
             }
             if (adapter.itemCount > 0 && atEnd) {
                 if (isEmpty)
-                    comments.scrollToPosition(adapter.itemCount - 1)
-                else if (!comments.isAtEnd()) {
-                    comments.smoothScrollToPosition(adapter.itemCount - 1)
+                    binding.comments.scrollToPosition(adapter.itemCount - 1)
+                else if (!binding.comments.isAtEnd()) {
+                    binding.comments.smoothScrollToPosition(adapter.itemCount - 1)
                 }
                 launch {
-                    while (!comments.isAtEnd()) {
+                    while (!binding.comments.isAtEnd()) {
                         delay(CHECK_IS_AT_BOTTOM_DELAY_MS)
                     }
                     val offset = when {
-                        comments.childCount > 0 -> comments.getChildAt(comments.childCount - 1).height
+                        binding.comments.childCount > 0 -> binding.comments.getChildAt(binding.comments.childCount - 1).height
                         else -> 0
                     }
-                    comments.smoothScrollBy(0, offset)
+                    binding.comments.smoothScrollBy(0, offset)
                 }
             }
         }
@@ -313,11 +315,11 @@ internal class TicketActivity : ConnectionActivityBase<TicketViewModel>(TicketVi
         super.onViewHeightChanged(changedBy)
         when {
             changedBy == 0 -> return
-            changedBy > 0 -> comments.scrollBy(0, changedBy)
+            changedBy > 0 -> binding.comments.scrollBy(0, changedBy)
             else -> {
-                input.clearFocus()
-                if (!comments.isAtEnd())
-                    comments.scrollBy(0, changedBy)
+                binding.input.clearFocus()
+                if (!binding.comments.isAtEnd())
+                    binding.comments.scrollBy(0, changedBy)
             }
 
         }
@@ -342,8 +344,8 @@ internal class TicketActivity : ConnectionActivityBase<TicketViewModel>(TicketVi
     }
 
     private fun onSendCommentClick() {
-        viewModel.onSendClicked(input.text.toString())
-        input.text = null
+        viewModel.onSendClicked(binding.input.text.toString())
+        binding.input.text = null
     }
 
     private fun showAttachFileVariants() {
