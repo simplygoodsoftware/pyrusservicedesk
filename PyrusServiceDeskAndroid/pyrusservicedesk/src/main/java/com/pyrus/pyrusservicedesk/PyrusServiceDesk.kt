@@ -68,6 +68,8 @@ class PyrusServiceDesk private constructor(
         private var CONFIGURATION: ServiceDeskConfiguration? = null
         private var lastRefreshes = ArrayList<Long>()
 
+        private var sendComment: String? = null
+
         private const val SET_PUSH_TOKEN_TIMEOUT = 5 // Minutes
         private const val SET_PUSH_TOKEN_TIMES_WITHIN_TIMEOUT = 5 // in minute
         private const val REFRESH_MAX_COUNT = 20 // in minute
@@ -220,11 +222,13 @@ class PyrusServiceDesk private constructor(
         fun start(
             activity: Activity,
             configuration: ServiceDeskConfiguration? = null,
-            onStopCallback: OnStopCallback? = null
+            onStopCallback: OnStopCallback? = null,
+            sendComment: String? = null,
         ) = startImpl(
             activity = activity,
             configuration = configuration,
-            onStopCallback = onStopCallback
+            onStopCallback = onStopCallback,
+            sendComment = sendComment,
         )
 
         /**
@@ -373,6 +377,12 @@ class PyrusServiceDesk private constructor(
             return checkNotNull(INSTANCE) { "Instantiate PyrusServiceDesk first" }
         }
 
+        internal fun getAndRemoveSendComment(): String? {
+            val comment = sendComment
+            sendComment = null
+            return comment
+        }
+
         internal fun getConfiguration(): ServiceDeskConfiguration {
             if (CONFIGURATION == null)
                 CONFIGURATION = ServiceDeskConfiguration()
@@ -393,8 +403,10 @@ class PyrusServiceDesk private constructor(
         private fun startImpl(
             activity: Activity,
             configuration: ServiceDeskConfiguration? = null,
-            onStopCallback: OnStopCallback? = null
+            onStopCallback: OnStopCallback? = null,
+            sendComment: String? = null,
         ) {
+            this.sendComment = sendComment
             CONFIGURATION = configuration
             get().sharedViewModel.clearQuitServiceDesk()
             get().onStopCallback = onStopCallback

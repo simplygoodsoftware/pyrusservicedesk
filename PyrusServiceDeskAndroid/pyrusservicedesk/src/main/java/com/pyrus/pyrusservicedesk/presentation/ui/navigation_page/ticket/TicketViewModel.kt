@@ -66,7 +66,7 @@ internal class TicketViewModel(
      */
     val draft: String
 
-    private val startMessage: String?
+    private var sendComment: String?
 
     private val draftRepository = serviceDeskProvider.getDraftRepository()
     private val localDataProvider: LocalDataProvider = serviceDeskProvider.getLocalDataProvider()
@@ -97,15 +97,12 @@ internal class TicketViewModel(
 
     init {
         draft = draftRepository.getDraft()
-        startMessage = ConfigUtils.getStartMessage()
+        sendComment = PyrusServiceDesk.getAndRemoveSendComment()
 
         runBlocking {
             val response = requests.getPendingFeedCommentsRequest().execute()
             if (!response.hasError() && !response.getData()?.comments.isNullOrEmpty()) {
                 applyTicketUpdate(response.getData()!!, true)
-            }
-            if (!startMessage.isNullOrBlank()) {
-                onSendClicked(startMessage)
             }
         }
 
@@ -374,6 +371,11 @@ internal class TicketViewModel(
         publishEntries(ticketEntries, toPublish)
         if (!arePendingComments)
             onDataLoaded()
+        val message = sendComment
+        if (!message.isNullOrBlank()) {
+            sendComment = null
+            onSendClicked(message)
+        }
     }
 
     private fun needUpdateCommentsList(freshList: List<Comment>): Boolean {
