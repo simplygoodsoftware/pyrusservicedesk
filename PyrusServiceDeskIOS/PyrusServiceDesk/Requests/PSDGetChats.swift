@@ -122,6 +122,22 @@ struct PSDGetChats {
             if !serverClients.contains(client) {
                 serverClients.append(client)
             }
+            
+            let extraUsers = dic["extra_users"] as? NSArray ?? []
+            for extraUser in extraUsers {
+                guard let extraUserDic: [String: Any] = extraUser as? [String: Any] else {
+                    continue
+                }
+                let userId = extraUserDic["user_id"] as? String ?? ""
+                let userName = extraUserDic["title"] as? String ?? ""
+                let user = PSDUserInfo(appId: clientId, clientName: clientName, userId: userId, userName: userName, secretKey: nil)
+                PyrusServiceDesk.additionalUsers.append(user)
+                DispatchQueue.main.async {
+                    PyrusServiceDesk.syncManager.syncGetTickets()
+                    PyrusServiceDesk.extraUsersCallback?.addUser(user: user)
+                    NotificationCenter.default.post(name: .createMenuNotification, object: nil)
+                }
+            }
         }
         
         for client in clients {
@@ -213,4 +229,8 @@ struct PSDGetChats {
         return chats
 
     }
+}
+
+extension Notification.Name {
+    static let createMenuNotification = Notification.Name("CreateMenuNotification")
 }

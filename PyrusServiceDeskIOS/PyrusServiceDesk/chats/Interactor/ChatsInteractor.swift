@@ -95,6 +95,7 @@ extension ChatsInteractor: ChatsInteractorProtocol {
             }
             createMenuActions()
             NotificationCenter.default.addObserver(self, selector: #selector(showConnectionError), name: SyncManager.connectionErrorNotification, object: nil)
+            NotificationCenter.default.addObserver(self, selector: #selector(createMenuActions), name: .createMenuNotification, object: nil)
             NotificationCenter.default.addObserver(self, selector: #selector(updateClients), name: PyrusServiceDesk.clientsUpdateNotification, object: nil)
             NotificationCenter.default.addObserver(self, selector: #selector(setFilter), name: PyrusServiceDesk.usersUpdateNotification, object: nil)
             NotificationCenter.default.addObserver(self, selector: #selector(newUserFilter), name: PyrusServiceDesk.newUserNotification, object: nil)
@@ -511,7 +512,7 @@ private extension ChatsInteractor {
         }
     }
     
-    func createMenuActions() {
+    @objc func createMenuActions() {
         DispatchQueue.main.async { [weak self] in
             var actions = [MenuAction]()
             let users =  self?.getUsers() ?? []

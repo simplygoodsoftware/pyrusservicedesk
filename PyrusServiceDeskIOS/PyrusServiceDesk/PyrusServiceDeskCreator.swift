@@ -265,9 +265,10 @@ import UIKit
     ///- parameter viewController: ViewController that must present chat
     ///- parameter configuration: ServiceDeskConfiguration object or nil. ServiceDeskConfiguration is object that create custom interface: theme color,welcome message, image for support's avatar and chat title for navigation bar title. If nil, the default design will be used.
     ///- parameter onStopCallback: OnStopCallback object or nil. OnStopCallback is object for getting a notification that PyrusServiceDesk was closed.
-    @objc public static func getStart(on viewController: UIViewController, configuration:ServiceDeskConfiguration?, onStopCallback: OnStopCallback? = nil, deniedAccessCallback: DeniedAccessCallBack? = nil, animated: Bool = true) -> UINavigationController? {
+    @objc public static func getStart(on viewController: UIViewController, configuration:ServiceDeskConfiguration?, onStopCallback: OnStopCallback? = nil, deniedAccessCallback: DeniedAccessCallBack? = nil, extraUsersCallback: ExtraUsersCallback? = nil, animated: Bool = true) -> UINavigationController? {
         stopCallback = onStopCallback
         self.deniedAccessCallback = deniedAccessCallback
+        self.extraUsersCallback = extraUsersCallback
         if !PyrusServiceDeskController.PSDIsOpen() {
             EventsLogger.logEvent(.openPSD)
             let psd : PyrusServiceDeskController = PyrusServiceDeskController.init(configuration, customPresent: viewController == nil)
@@ -332,6 +333,7 @@ import UIKit
     ///The subscriber for PyrusSecviceDeskClose.
     weak static  private(set) var stopCallback: OnStopCallback?
     weak static  private(set) var deniedAccessCallback: DeniedAccessCallBack?
+    weak static  private(set) var extraUsersCallback: ExtraUsersCallback?
     weak static  private(set) var cacheLoadedCallback: CacheLoadedCallBack?
     
     weak static private(set) var logEvent: LogEvents?
