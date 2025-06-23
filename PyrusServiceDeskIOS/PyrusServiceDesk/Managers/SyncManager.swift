@@ -51,6 +51,12 @@ class SyncManager {
             PyrusServiceDesk.clients = chatsDataService.getAllClients()
             PyrusServiceDesk.repository.loadCommands()
             firstLoad = false
+            if CacheVersionManager.shared.checkAndUpdateIfNeeded() {
+                PyrusServiceDesk.lastNoteId = 0
+                for user in PyrusServiceDesk.additionalUsers {
+                    user.lastNoteId = 0
+                }
+            }
 //            chatsDataService.getAllChats() { [weak self] chats in
 //                DispatchQueue.main.async { [weak self] in
 //                    guard let self else { return }

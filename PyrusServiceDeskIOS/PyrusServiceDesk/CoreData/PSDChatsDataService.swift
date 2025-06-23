@@ -234,7 +234,7 @@ extension PSDChatsDataService: PSDChatsDataServiceProtocol {
                 dbMessage.commandId = message.commandId
                 dbMessage.date = message.date
                 dbMessage.fromStorage = message.fromStrorage
-                dbMessage.isOutgoing = message.isOutgoing
+                dbMessage.isOutgoing = message.isSupportMessage
                 dbMessage.isRatingMessage = message.isRatingMessage
                 dbMessage.isWelcomeMessage = message.isWelcomeMessage
                 dbMessage.requestNewTicket = message.requestNewTicket
@@ -254,7 +254,16 @@ extension PSDChatsDataService: PSDChatsDataServiceProtocol {
                 
                 if let attachments = message.attachments {
                     for attachment in attachments {
-                        let dbAttachment = NSEntityDescription.insertNewObject(forEntityName: "DBAttachment", into: context) as! DBAttachment
+                        let attachFetchRequest = DBAttachment.fetchRequest()
+                        attachFetchRequest.predicate = NSPredicate(format: "serverIdentifier == %@", attachment.serverIdentifer ?? "" as CVarArg)
+                        let dbAttachment: DBAttachment
+                        if attachment.serverIdentifer != nil,
+                            let comment = try? context.fetch(attachFetchRequest).first {
+                            dbAttachment = comment
+                        } else {
+                            dbAttachment = NSEntityDescription.insertNewObject(forEntityName: "DBAttachment", into: context) as! DBAttachment
+                        }
+//                        let dbAttachment = NSEntityDescription.insertNewObject(forEntityName: "DBAttachment", into: context) as! DBAttachment
                         dbAttachment.name = attachment.name
                         dbAttachment.canOpen = attachment.canOpen
                         dbAttachment.data = attachment.data
@@ -403,7 +412,7 @@ extension PSDChatsDataService: PSDChatsDataServiceProtocol {
                                 return nil
                             }
                             
-                            let user: PSDUser = dbMessage.isOutgoing ?
+                            let user: PSDUser = dbMessage.authorId == PyrusServiceDesk.authorId ?
                                 PSDUsers.user :
                                 PSDUsers.supportUsersContain(
                                     name: dbMessage.authorName ?? "",
@@ -426,12 +435,13 @@ extension PSDChatsDataService: PSDChatsDataServiceProtocol {
                             message.clientId = dbMessage.clientId ?? ""
                             message.commandId = dbMessage.commandId
                             message.fromStrorage = dbMessage.fromStorage
-                            message.isOutgoing = dbMessage.isOutgoing
+                            message.isOutgoing = dbMessage.authorId == PyrusServiceDesk.authorId
                             message.isRatingMessage = dbMessage.isRatingMessage
                             message.isWelcomeMessage = dbMessage.isWelcomeMessage
                             message.requestNewTicket = dbMessage.requestNewTicket
                             message.ticketId = Int(dbMessage.ticketId)
                             message.rating = Int(dbMessage.rating)
+                            message.isSupportMessage = !dbMessage.isOutgoing
                             
                             // Обработка состояния сообщения
                             switch dbMessage.state {
@@ -511,7 +521,7 @@ extension PSDChatsDataService: PSDChatsDataServiceProtocol {
                             return nil
                         }
                         let user: PSDUser
-                        if dbMessage.isOutgoing {
+                        if dbMessage.authorId == PyrusServiceDesk.authorId {
                             user = PSDUsers.user
                         } else {
                             user = PSDUsers.supportUsersContain(name: dbMessage.authorName ?? "", imagePath: dbMessage.authorAvatarId ?? "", authorId: dbMessage.authorId)
@@ -523,12 +533,13 @@ extension PSDChatsDataService: PSDChatsDataServiceProtocol {
                         message.clientId = dbMessage.clientId ?? ""
                         message.commandId = dbMessage.commandId
                         message.fromStrorage = dbMessage.fromStorage
-                        message.isOutgoing = dbMessage.isOutgoing
+                        message.isOutgoing = dbMessage.authorId == PyrusServiceDesk.authorId//dbMessage.isOutgoing
                         message.isRatingMessage = dbMessage.isRatingMessage
                         message.isWelcomeMessage = dbMessage.isWelcomeMessage
                         message.requestNewTicket = dbMessage.requestNewTicket
                         message.ticketId = Int(dbMessage.ticketId)
                         message.rating = Int(dbMessage.rating)
+                        message.isSupportMessage = !dbMessage.isOutgoing
                         
                         switch dbMessage.state {
                         case 0:

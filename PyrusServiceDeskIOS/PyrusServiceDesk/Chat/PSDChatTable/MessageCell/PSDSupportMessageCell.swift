@@ -46,7 +46,7 @@ class PSDSupportMessageCell: PSDChatMessageCell {
     {
         super.draw(message: message, width: width)
         var name = message.message.owner.name?.count ?? 0 > 0 ? message.message.owner.name ?? "" : (message.message.owner as? PSDPlaceholderUser == nil ? "" : " ")
-        if message.message.owner.authorId == "" && PyrusServiceDesk.multichats {
+        if message.message.owner.authorId == "" && message.message.isSupportMessage && PyrusServiceDesk.multichats {
             name += " (\("SupportDefaultName".localizedPSD()))"
             nameLabel.font = .supportNameLabel
         }

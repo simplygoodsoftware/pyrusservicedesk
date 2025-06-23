@@ -142,6 +142,8 @@ struct PSDGetChat {
                 if let author = dic["author"] as? [String : Any],
                 let authorId = author["author_id"] as? String {
                     IsInbound = authorId == PyrusServiceDesk.authorId
+                } else {
+                    IsInbound = false
                 }
             }
             
@@ -177,12 +179,15 @@ struct PSDGetChat {
             if let author = dic["author"] as? [String : Any],
             let authorId = author["author_id"] as? String {
                 IsInbound = authorId == PyrusServiceDesk.authorId
+            } else {
+                IsInbound = false
             }
             
             if (attachmentsForMessage?.count ?? 0) > 0 || (textForMessage?.count ?? 0) > 0 || rating != nil{
                 let message = PSDMessage(text: textForMessage, attachments:attachmentsForMessage, messageId: dic.stringOfKey(commentIdParameter), owner: user, date: date)
                 message.rating = rating
                 message.isOutgoing = IsInbound
+                message.isSupportMessage = (dic["is_inbound"] as? Bool ?? false)
                 let clientId = dic.stringOfKey(CLIENT_ID_KEY)
                 if clientId.count > 0 {
                     message.clientId = clientId

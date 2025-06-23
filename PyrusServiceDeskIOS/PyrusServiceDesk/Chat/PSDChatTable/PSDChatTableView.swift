@@ -324,7 +324,7 @@ extension PSDChatTableView: UITableViewDelegate, UITableViewDataSource {
             userCell.delegate = self
         } else if let supportCell = cell as? PSDSupportMessageCell, supportCell.needShowAvatar {
             supportCell.avatarView.owner = message.message.owner
-            PSDSupportImageSetter.setImage(for: message.message.owner, in: supportCell.avatarView, delagate: self)
+            PSDSupportImageSetter.setImage(for: message.message.owner, in: supportCell.avatarView, delagate: self, isSupport: message.message.isSupportMessage)
         }
         
         cell.draw(message: message, width: frame.size.width)
@@ -470,11 +470,11 @@ extension PSDChatTableView: PSDPreviewSetterDelegate {
 //MARK: PSDSupportImageSetterDelegate
 extension PSDChatTableView: PSDSupportImageSetterDelegate {
     ///Change message's user's avatar - redraw it if it's visible. Didn't call reloadCell - so can't change cell height, or break animation.
-    func reloadCells(with owner:PSDUser) {
+    func reloadCells(with owner:PSDUser, isSupport: Bool) {
         for cell in self.visibleCells{
             if let cell = cell as? PSDSupportMessageCell {
                 if cell.avatarView.owner == owner && cell.avatarView.owner != nil {
-                    PSDSupportImageSetter.setImage(for: cell.avatarView.owner!, in: cell.avatarView, delagate: nil)
+                    PSDSupportImageSetter.setImage(for: cell.avatarView.owner!, in: cell.avatarView, delagate: nil, isSupport: isSupport)
                 }
             }
         }

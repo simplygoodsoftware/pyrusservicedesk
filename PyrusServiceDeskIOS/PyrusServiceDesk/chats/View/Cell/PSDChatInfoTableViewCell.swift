@@ -187,7 +187,7 @@ class PSDChatInfoTableViewCell: UITableViewCell {
         attachmentIcon.image = nil
         timeLabel.text = nil
         messageLabel.text = nil
-//        lastMessageInfo.attributedText = nil
+        lastMessageInfo.attributedText = nil
         notificationButton.isHidden = true
         messageStateView.restart()
     }

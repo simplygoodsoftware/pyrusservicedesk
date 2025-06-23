@@ -39,6 +39,7 @@ class PSDMessage: NSObject {
     var commandId: String?
     var requestNewTicket = false
     var isWelcomeMessage = false
+    var isSupportMessage: Bool = false
     
     init(text: String?, attachments: [PSDAttachment]?, messageId: String?, owner: PSDUser?, date: Date?) {
         self.text = text ?? ""        

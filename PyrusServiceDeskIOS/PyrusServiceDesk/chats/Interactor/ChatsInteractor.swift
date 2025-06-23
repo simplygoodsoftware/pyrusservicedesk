@@ -393,7 +393,7 @@ private extension ChatsInteractor {
             return ChatPresenterModel(
             id: $0.chatId ?? 0,
             date: $0.lastMessageDate ?? $0.date?.messageTime(),
-            isRead: isRead,
+            isRead: isRead || $0.messages.count == 0,
             isActive: $0.isActive,
             subject: $0.subject,
             lastComment: $0.lastComment,
