@@ -1,1 +1,68 @@
 
+
+"Settings" = "Configurações";
+"Last_Message" = "Esta é a última mensagem daquela conversa";
+"Comment" = "Comentar...";
+"Empty_Description" = "Vazio";
+"All_Conversations" = "Todas as conversas";
+"Support_Default_Name" = "Suporte";
+
+//Buttons' Title
+"New_Conversation" = "Nova conversa";
+"New_Conversation_Short" = "Novo";
+"Cancel" = "Cancelar";
+"Send" = "Enviar";
+"Back" = "Voltar";
+"Done" = "Feito";
+"CancelDownload" = "Cancelar download";
+"FileLoadError" = "Não é possível carregar a visualização do arquivo";
+"NoPreviewAvailable" = "Nenhuma pré-visualização disponível";
+"OpenWith" = "Abrir com";
+"RetryButton" = "Tentar novamente";
+"DeleteButton" = "Excluir";
+"Default_User_Name" = "Convidado";
+"Uploading" = "Enviando...";
+
+//For attachments
+"Camera" = "Tire uma foto ou grave um vídeo";
+"Camera_Access_Error" = "Sem acesso à câmera ou ao microfone";
+"Phone_Gallery" = "Galeria";
+"Phone_Gallery_Access_Error" = "Sem acesso à galeria do telefone";
+"Access_Error" = "Erro de acesso";
+"Size_Error" = "O tamanho do arquivo não deve exceder 200 MB.";
+"No_File_Error" = "O arquivo não existe";
+
+
+//Append time from data
+"Interval_Recent" = "recente";
+"Interval_Minute" = "%% min atrás";
+"Interval_Hour" = "%% h atrás";
+"Interval_Day" = "%% d atrás";
+"Interval_Week" = "há %% sem";
+"Interval_Mounth" = "%% m atrás";
+"Interval_One_Year" = "%% ano atrás";
+"Interval_One_End_Year" = "%% anos atrás";
+"Interval_Years_234" = "%% anos atrás";
+"Interval_Years" = "%% anos atrás";
+
+//Date as string
+"Today" = "Hoje";
+"Yesterday" = "Ontem";
+"Numbers_Date_Format" = "yyyyMMddHHmmss";
+
+//For requests
+"No_Connection" = "Sem conexão com a Internet";
+"Retry" = "TENTAR NOVAMENTE";
+"Error" = "Erro";
+"Date_Format" = "EE, dd MMM";
+"Date_Format_Year" = "EE, dd MMM, aaaa";
+"Time_Format" = "hh:mm a";
+"AttachmentLoadError" = "Não é possível carregar este anexo";
+"ErrorServerError" = "Conexão do servidor interrompida";
+"AcсessDenied" = "Acesso negado";
+"OK" = "Ok";
+"PrepareLog" = "Preparando log...";
+"SendLog" = "Enviar logs da biblioteca";
+"ExternalSourceWarning" = "Este link leva a um(a) %@\nVocê realmente quer seguir o link?";
+"ShortYes" = "Sim";
+"ShortNo" = "Não";
