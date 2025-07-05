@@ -1,1 +1,68 @@
 
+
+"Last_Message" = "Ово је последња порука из тог разговора";
+"Comment" = "Коментар...";
+"Default_User_Name" = "Гост";
+"Uploading" = "Отпремање...";
+"Empty_Description" = "Празно";
+"All_Conversations" = "Сви разговори";
+"Support_Default_Name" = "Подршка";
+
+//Buttons' Title
+"New_Conversation" = "Нови разговор";
+"New_Conversation_Short" = "Направи";
+"Cancel" = "Откажи";
+"Settings" = "Подешавања";
+"Send" = "Пошаљи";
+"Back" = "Назад";
+"Done" = "Готово";
+"CancelDownload" = "Откажи преузимање";
+"FileLoadError" = "Не могу да учитам преглед датотеке";
+"NoPreviewAvailable" = "Преглед није доступан";
+"OpenWith" = "Отвори са";
+"RetryButton" = "Покушај поново";
+"DeleteButton" = "Обриши";
+
+//For attachments
+"Camera" = "Сними фотографију или видео";
+"Camera_Access_Error" = "Нема приступа камери или микрофону";
+"Phone_Gallery" = "Галерија";
+"Phone_Gallery_Access_Error" = "Нема приступа галерији телефона";
+"Access_Error" = "Грешка у приступу";
+"Size_Error" = "Величина датотеке не сме бити већа од 200 MB.";
+"No_File_Error" = "Датотека не постоји";
+
+
+//Append time from data
+"Interval_Recent" = "недавно";
+"Interval_Minute" = "Пре %% мин";
+"Interval_Hour" = "Пре %% сати";
+"Interval_Day" = "Пре %% дана";
+"Interval_Week" = "Пре %% недеља";
+"Interval_Mounth" = "Пре %% месеци";
+"Interval_One_Year" = "Пре %% година";
+"Interval_One_End_Year" = "Пре %% година";
+"Interval_Years_234" = "Пре %% године";
+"Interval_Years" = "Пре %% година";
+
+//Date as string
+"Today" = "Данас";
+"Yesterday" = "Јуче";
+"Date_Format" = "EE, dd MMM";
+"Date_Format_Year" = "EE, dd MMM, yyyy";
+"Time_Format" = "HH:mm";
+"Numbers_Date_Format" = "yyyyMMddHHmmss";
+
+//For requests
+"No_Connection" = "Нема интернет везе";
+"Retry" = "ПОКУШАЈ ПОНОВО";
+"Error" = "Грешка";
+"AttachmentLoadError" = "Не могу да учитам овај прилог";
+"ErrorServerError" = "Веза са сервером прекинута";
+"AcсessDenied" = "Приступ одбијен";
+"OK" = "OK";
+"PrepareLog" = "Припрема дневника...";
+"SendLog" = "Пошаљи дневнике библиотеке";
+"ExternalSourceWarning" = "Овај линк води до %@\nДа ли заиста желиш да пратиш линк?";
+"ShortYes" = "Да";
+"ShortNo" = "Не";
