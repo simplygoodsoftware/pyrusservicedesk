@@ -1,1 +1,67 @@
 
+
+"OK" = "موافق";
+"Interval_Minute" = "منذ %% دقيقة";
+"AttachmentLoadError" = "لا يمكن تحميل هذا المرفق";
+"ExternalSourceWarning" = "هذا الرابط يؤدي إلى %@\nهل تريد حقًا متابعة هذا الرابط؟";
+"Last_Message" = "هذه هي الرسالة الأخيرة من تلك المحادثة";
+"Cancel" = "إلغاء";
+"Settings" = "إعدادات";
+"Comment" = "تعليق...";
+"Default_User_Name" = "ضيف";
+"Uploading" = "قيد التحميل...";
+"Empty_Description" = "فارغ";
+"All_Conversations" = "جميع المحادثات";
+"Support_Default_Name" = "دعم";
+
+//Buttons' Title
+"New_Conversation" = "محادثة جديدة";
+"New_Conversation_Short" = "جديد";
+"Send" = "إرسال";
+"Done" = "تم";
+"CancelDownload" = "إلغاء التنزيل";
+"FileLoadError" = "تعذر تحميل معاينة الملف";
+"NoPreviewAvailable" = "المعاينة غير متوفرة";
+"OpenWith" = "افتح باستخدام";
+"RetryButton" = "إعادة محاولة";
+"DeleteButton" = "حذف";
+
+//For attachments
+"Camera" = "التقط صورة أو فيديو";
+"Camera_Access_Error" = "لا يوجد إذن للوصول إلى الكاميرا أو الميكروفون";
+"Phone_Gallery" = "المعرض";
+"Phone_Gallery_Access_Error" = "لا يوجد إذن للوصول إلى معرض الهاتف";
+"Access_Error" = "خطأ في الوصول";
+"Size_Error" = "يجب ألا يتجاوز حجم الملف 200 ميغابايت.";
+"No_File_Error" = "الملف غير موجود";
+
+
+//Append time from data
+"Interval_Recent" = "حديث";
+"Interval_Hour" = "منذ %% ساعة";
+"Interval_Day" = "قبل %% يوم";
+"Interval_Week" = "قبل %% أسبوع";
+"Interval_Mounth" = "قبل %% شهر";
+"Interval_One_Year" = "قبل %% سنة";
+"Interval_One_End_Year" = "قبل %% سنةً";
+"Interval_Years_234" = "قبل %% سنة";
+"Interval_Years" = "قبل %% سنةً";
+
+//Date as string
+"Today" = "اليوم";
+"Yesterday" = "الأمس";
+"Date_Format" = "EE, dd MMM";
+"Date_Format_Year" = "EE, dd MMM, yyyy";
+"Time_Format" = "hh:mm a";
+"Numbers_Date_Format" = "yyyyMMddHHmmss";
+
+//For requests
+"No_Connection" = "لا يوجد اتصال بالإنترنت";
+"Retry" = "إعادة محاولة";
+"Error" = "خطأ";
+"ErrorServerError" = "انقطع اتصال الخادم";
+"AcсessDenied" = "تم رفض الوصول";
+"PrepareLog" = "جاري إعداد السجل...";
+"SendLog" = "إرسال سجلات المكتبة";
+"ShortYes" = "نعم";
+"ShortNo" = "لا";
