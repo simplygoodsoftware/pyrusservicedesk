@@ -1,12 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="psd_send">Пошаљи</string>
-    <string name="psd_comment_input_hint">Додај Коментар</string>
+    <string name="psd_comment_input_hint">Додај коментар</string>
     <string name="psd_retry">Покушај поново</string>
-    <string name="psd_no_connection">Нема Интернет везе</string>
+    <string name="psd_no_connection">Нема интернет везе</string>
     <string name="psd_uploading">Отпремање…</string>
-    <string name="psd_file_size_mb" formatted="false">%.1f МБ</string>
-    <string name="psd_file_size_kb" formatted="false">%.1f КБ</string>
+    <string name="psd_file_size_mb" formatted="false">%.1f MБ</string>
+    <string name="psd_file_size_kb" formatted="false">%.1f KБ</string>
     <string name="psd_time_format">HH:mm</string>
     <string name="psd_organization_support">Подршка</string>
     <string name="psd_today">Данас</string>
@@ -16,26 +16,26 @@
     <string name="psd_photo">Фотографија</string>
     <string name="psd_gallery">Галерија</string>
     <plurals name="psd_years_ago">
-        <item quantity="one">пре %d године</item>
-        <item quantity="few">пре %d године</item>
-        <item quantity="other">пре %d година</item>
+        <item quantity="one">Пре %d године</item>
+        <item quantity="few">Пре %d године</item>
+        <item quantity="other">Пре %d година</item>
     </plurals>
-    <string name="psd_months_ago" formatted="false">пре %d м</string>
-    <string name="psd_weeks_ago" formatted="false">пре %d н</string>
-    <string name="psd_days_ago" formatted="false">пре %d д</string>
-    <string name="psd_hours_ago" formatted="false">пре %d с</string>
-    <string name="psd_minutes_ago" formatted="false">пре %d м</string>
+    <string name="psd_months_ago" formatted="false">Пре %d месеца</string>
+    <string name="psd_weeks_ago" formatted="false">пре %d недеља</string>
+    <string name="psd_days_ago" formatted="false">Пре %d дана</string>
+    <string name="psd_hours_ago" formatted="false">Пре %d сата</string>
+    <string name="psd_minutes_ago" formatted="false">пре %d минута</string>
     <string name="psd_recent">недавно</string>
     <string name="psd_guest">Гост</string>
-    <string name="psd_file_size_exceeded_message" formatted="false">Величина датотеке не сме бити већа од %d МБ.</string>
+    <string name="psd_file_size_exceeded_message" formatted="false">Величина фајла не сме бити већа од %d MБ.</string>
     <string name="psd_copied_to_clipboard">Копирано у међуспремник</string>
     <string name="psd_download">Преузми</string>
     <string name="psd_downloading">Преузимање…</string>
     <string name="psd_open">Отвори</string>
-    <string name="psd_no_preview_available">Није доступан преглед</string>
-    <string name="psd_share">Подели</string>
+    <string name="psd_no_preview_available">Преглед није доступан</string>
+    <string name="psd_share">Дели</string>
     <string name="psd_delete">Избриши</string>
-    <string name="send_library_logs">Пошаљи библиотечке дневнике</string>
+    <string name="send_library_logs">Пошаљи дневнике библиотеке</string>
     <string name="link_warning">Ова веза води до %s
 \nДа ли заиста желиш да пратиш везу\?</string>
 </resources>
