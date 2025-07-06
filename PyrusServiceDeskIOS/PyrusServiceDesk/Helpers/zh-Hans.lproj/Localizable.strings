@@ -1,3 +1,64 @@
 
 
 "Settings" = "设置";
+"Last_Message" = "这是该对话的最后一条消息";
+"Interval_One_End_Year" = "%% 年前";
+"Comment" = "你的评论...";
+"Default_User_Name" = "访客";
+"Uploading" = "正在上传…";
+"Empty_Description" = "空";
+"All_Conversations" = "所有对话";
+"Support_Default_Name" = "支持";
+
+//Buttons' Title
+"New_Conversation" = "新对话";
+"New_Conversation_Short" = "新";
+"Cancel" = "取消";
+"Send" = "发送";
+"Back" = "返回";
+"Done" = "完成";
+"CancelDownload" = "取消下载";
+"FileLoadError" = "无法加载文件预览";
+"NoPreviewAvailable" = "无可用预览";
+"OpenWith" = "打开方式";
+"RetryButton" = "重试";
+"DeleteButton" = "删除";
+
+//For attachments
+"Camera" = "拍摄照片或视频";
+"Camera_Access_Error" = "无法访问摄像头或麦克风";
+"Phone_Gallery" = "图库";
+"Phone_Gallery_Access_Error" = "无法访问手机图库";
+"Access_Error" = "访问错误";
+"Size_Error" = "文件大小不得超过 200 MB。";
+"No_File_Error" = "文件不存在";
+
+
+//Append time from data
+"Interval_Recent" = "最近";
+"Interval_Minute" = "%% 分钟前";
+"Interval_Hour" = "%% 小时前";
+"Interval_Day" = "%% 天前";
+"Interval_Week" = "%% 周前";
+"Interval_Mounth" = "%% 周前";
+"Interval_One_Year" = "%% 年前";
+"Interval_Years_234" = "%% 年前";
+"Interval_Years" = "%% 年前";
+
+//Date as string
+"Today" = "今天";
+"Yesterday" = "昨天";
+
+//For requests
+"No_Connection" = "无网络连接";
+"Retry" = "重试";
+"Error" = "错误";
+"AttachmentLoadError" = "无法加载此附件";
+"ErrorServerError" = "服务器连接中断";
+"AcсessDenied" = "访问被拒绝";
+"OK" = "好";
+"PrepareLog" = "正在准备日志…";
+"SendLog" = "发送库日志";
+"ExternalSourceWarning" = "此链接将跳转到 %@\n您确定要打开此链接吗？";
+"ShortYes" = "是";
+"ShortNo" = "否";
