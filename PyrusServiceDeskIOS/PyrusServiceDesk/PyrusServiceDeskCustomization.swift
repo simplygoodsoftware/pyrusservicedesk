@@ -13,6 +13,10 @@ import Foundation
     ///A first message that user see in new chat. If not setted - user will not see welcome message.
     private(set) public var welcomeMessage: String?
     
+    func setWelcomeMessage(_ welcomeMessage: String?) {
+        self.welcomeMessage = welcomeMessage
+    }
+    
     ///A icon for support imageView in chat. Show when support user has no image or for welcome message. The default is DEFAULT_SUPPORT_ICON.
     private(set) var avatarForSupport: UIImage?
     
