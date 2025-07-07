@@ -56,6 +56,7 @@ extension PSDChatsDataService: PSDChatsDataServiceProtocol {
             dbClient.appId = clientModel.clientId
             dbClient.name = clientModel.clientName
             dbClient.appIcon = clientModel.clientIcon
+            dbClient.descr = clientModel.clientDescription
         }
     }
     
@@ -68,6 +69,7 @@ extension PSDChatsDataService: PSDChatsDataServiceProtocol {
                     clientName: dbClient.name ?? "",
                     clientIcon: dbClient.appIcon ?? ""
                 )
+                client.clientDescription = dbClient.descr
                 return client
             }
             return clients

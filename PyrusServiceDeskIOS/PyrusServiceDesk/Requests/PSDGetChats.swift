@@ -109,12 +109,23 @@ struct PSDGetChats {
             let clientId = dic["app_id"] as? String ?? ""
             let clientName = dic["org_name"] as? String ?? "iiko"
             let clientIcon = dic["org_logo_url"] as? String ?? ""
+            let clientDescription = dic["org_description"] as? String
             let client = PSDClientInfo(clientId: clientId, clientName: clientName, clientIcon: clientIcon)
+            client.clientDescription = clientDescription
+//            """
+//            Техническая поддержка iikoService
+//            Наш сайт: https://iikoservice.ru/
+//            email технической поддержки: support@iiko.ru
+//            117587, г. Москва, Варшавское шоссе д. 118 корп.1 Бизнес-центр «Варшавка Sky», 17-й этаж
+//            
+//            Передавая сообщения в чат в данном мобильном приложении, вы соглашаетесь на обработку персональных данных в соответствии
+//            с условиями оферты https://iiko.ru/oferta-porucheniya-obrabotki-personalnyh-dannyh.pdf
+//            """
             if !clients.contains(client) {
                 clients.append(client)
-            } else
-            if let storeClient = clients.first(where: { $0.clientId == client.clientId }) {
+            } else if let storeClient = clients.first(where: { $0.clientId == client.clientId }) {
                 storeClient.clientName = client.clientName
+                storeClient.clientDescription = client.clientDescription
                 if storeClient.clientIcon != client.clientIcon {
                     storeClient.clientIcon = client.clientIcon
                 }
@@ -138,6 +149,30 @@ struct PSDGetChats {
                     NotificationCenter.default.post(name: .createMenuNotification, object: nil)
                 }
             }
+            
+            let authorsInfo = dic["author_info"] as? [String: Any] ?? [:]
+            for userId in authorsInfo.keys {
+                let authors = authorsInfo[userId] as? NSArray ?? []
+                var userAuthors: [PSDUserInfo.AuthorInfo] = []
+                for author in authors {
+                    guard let authorDic: [String: Any] = author as? [String: Any] else {
+                        continue
+                    }
+                    if authorDic["has_access"] as? Bool ?? false {
+                        let name = authorDic["name"] as? String ?? ""
+                        let id = authorDic["author_id"] as? String ?? ""
+                        let phone = authorDic["phone"] as? String ?? ""
+                        let authorInfo = PSDUserInfo.AuthorInfo(id: id, name: name, phone: phone)
+                        userAuthors.append(authorInfo)
+                    }
+                }
+                if PyrusServiceDesk.customUserId == userId {
+                    PyrusServiceDesk.authors = userAuthors
+                } else if let user = PyrusServiceDesk.additionalUsers.first(where: { $0.userId == userId }) {
+                    user.authors = userAuthors
+                }
+            }
+            
         }
         
         for client in clients {

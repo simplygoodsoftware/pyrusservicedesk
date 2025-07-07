@@ -10,6 +10,7 @@ import Foundation
             }
         }
     }
+    var clientDescription: String?
     
     var clientIcon: String {
         didSet {

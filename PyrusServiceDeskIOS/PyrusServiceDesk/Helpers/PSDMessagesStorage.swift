@@ -177,7 +177,7 @@ struct PSDMessagesStorage {
                 }
             }
             message.attachments = attachments
-            if message.text.count > 0 || message.attachments?.count ?? 0 > 0 || message.rating != nil {
+            if message.text.count > 0 || message.attachments?.count ?? 0 > 0 || message.rating ?? 0 > 0 {
                 messages.append(message)
             }
         }

@@ -67,15 +67,11 @@ extension ChatsPresenter: ChatsPresenterProtocol {
 @available(iOS 13.0, *)
 private extension ChatsPresenter {
     func updateChats(open: Bool = false) {
-        //        chatsPrepareQueue.async {
         let chatsModel = self.prepareChats(chats: self.chats)
-        //            DispatchQueue.main.async {
         self.view?.show(.updateChats(chats: chatsModel))
         if open {
             self.view?.show(.scrollToClosedTickets)
         }
-        //            }
-        //        }
     }
     
     private func loadChatsState() {
@@ -102,34 +98,12 @@ private extension ChatsPresenter {
                     lastMessage = lastStoreMessage
                     text = lastMessage?.text ?? ""
                 }
-//                lastMessage = lastStoreMessage.date >= lastMessage?.date ?? Date() ? lastStoreMessage : lastMessage
             }
            
-//            let text = lastMessage?.attachments?.count ?? 0 > 0
-//                ? ""
-//            : lastMessage?.text ?? ""//"Last_Message".localizedPSD()
-//
             let author = lastMessage?.isOutgoing ?? false ? "You".localizedPSD() : lastMessage?.owner.name ?? ""
             if lastMessage?.attachments?.count ?? 0 > 0 {
                 text = ""
             }
-//            var lastMessageText =  "\(author): \(text)"
-//            if lastMessageText == ": " {
-//                lastMessageText = ""
-//            }
-            
-//            let attrText = lastMessage?.attachments?.count ?? 0 > 0
-//            ? ""
-//            : chat.lastMessageAttributedText ?? AttributedStringCache.cachedString(for: lastMessage?.text ?? "", fontColor: .lastMessageInfo, font: .lastMessageInfo, key: lastMessage?.messageId).string//"Last_Message".localizedPSD()
-////
-//            var lastMessageAttrText = NSMutableAttributedString(
-//                string: "\(author): ",
-//                attributes: [.font: UIFont.lastMessageInfo, .foregroundColor: UIColor.lastMessageInfo]
-//            )
-//            lastMessageAttrText.append(attrText)
-//            if lastMessageAttrText.string == ": " {
-//                lastMessageAttrText = NSMutableAttributedString(string: "")
-//            }
             
             let model = ChatViewModel(
                 id: chat.id,

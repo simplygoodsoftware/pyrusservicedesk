@@ -7,6 +7,7 @@ import Foundation
     var userName: String
     let secretKey: String?
     var lastNoteId: Int?
+    var authors: [AuthorInfo] = []
 
     public init(appId: String, clientName: String, userId: String, userName: String, secretKey: String?) {
         self.clientId = appId
@@ -22,5 +23,17 @@ import Foundation
         }
         
         return self.clientId == other.clientId && self.userId == other.userId
+    }
+    
+    @objc public class AuthorInfo: NSObject {
+        let id: String
+        let name: String
+        let phone: String?
+        
+        init(id: String, name: String, phone: String?) {
+            self.id = id
+            self.name = name
+            self.phone = phone
+        }
     }
 }

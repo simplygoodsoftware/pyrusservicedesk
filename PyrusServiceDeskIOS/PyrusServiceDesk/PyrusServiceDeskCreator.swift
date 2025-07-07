@@ -25,6 +25,7 @@ import UIKit
     static private(set) var authorId: String?
     static var lastNoteId: Int?
     static var storeMessages: [PSDMessage]?
+    static var authors: [PSDUserInfo.AuthorInfo] = []
     static var isStarted: Bool = false
     
     static var userName: String?
@@ -351,6 +352,15 @@ import UIKit
         PyrusServiceDesk.logEvent = subscriber
     }
     
+    @objc public static func getAuthors(for userId: String) -> [PSDUserInfo.AuthorInfo] {
+        if userId == PyrusServiceDesk.customUserId {
+            return PyrusServiceDesk.authors
+        } else if let user = PyrusServiceDesk.additionalUsers.first(where: { $0.userId == userId }) {
+            return user.authors
+        }
+        return []
+    }
+    
     @objc public static func cleanCashe() {
         isStarted = false
         DispatchQueue.global().async {
@@ -427,6 +437,7 @@ import UIKit
         PyrusServiceDesk.currentClientId = clientId
         PyrusServiceDesk.accessDeniedIds = []
         PyrusServiceDesk.lastNoteId = 0
+        PyrusServiceDesk.authors = []
         lastSetPushToken = nil
         PyrusServiceDesk.createUserId(reset)
         if needReloadUI {
