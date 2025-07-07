@@ -108,7 +108,7 @@ struct PSDGetChat {
         chat.showRating = (response[PSDGetChat.SHOW_RATING_KEY] as? Bool) ?? false
         chat.showRatingText = response[PSDGetChat.SHOW_RATING_TEXT_KEY] as? String
         if let welcomeMessage = response[PSDGetChat.WELCOME_MESSAGE] as? String {
-            PyrusServiceDesk.mainController?.customization?.welcomeMessage = welcomeMessage
+            PyrusServiceDesk.mainController?.customization?.setWelcomeMessage(welcomeMessage)
         }
         return chat
     }
