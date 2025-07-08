@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
@@ -9,39 +8,128 @@
     android:paddingHorizontal="@dimen/psd_offset_small"
     tools:ignore="ButtonStyle">
 
-    <ImageButton
+<!--        <androidx.recyclerview.widget.RecyclerView-->
+<!--            android:id="@+id/ratingRv"-->
+<!--            android:layout_width="match_parent"-->
+<!--            android:layout_height="50dp"-->
+<!--            android:orientation="horizontal"-->
+<!--            tools:listitem="@layout/psd_view_holder_rating_item"-->
+<!--            tools:itemCount="3"/>-->
+
+    <LinearLayout
         android:id="@+id/rating1"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_weight="1"
-        app:srcCompat="@drawable/ic_emoji_rating_1" />
+        android:gravity="center"
+        android:orientation="vertical">
 
-    <ImageButton
+        <ImageView
+            android:id="@+id/ratingImage1"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:padding="8dp"
+            app:srcCompat="@drawable/ic_emoji_rating_1" />
+
+        <TextView
+            android:id="@+id/ratingText1"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            tools:text="not good" />
+
+    </LinearLayout>
+
+    <LinearLayout
         android:id="@+id/rating2"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_weight="1"
-        app:srcCompat="@drawable/ic_emoji_rating_2" />
+        android:gravity="center"
+        android:orientation="vertical">
 
-    <ImageButton
+        <ImageView
+            android:id="@+id/ratingImage2"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:padding="8dp"
+            app:srcCompat="@drawable/ic_emoji_rating_2" />
+
+        <TextView
+            android:id="@+id/ratingText2"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            tools:text="not good" />
+
+    </LinearLayout>
+
+    <LinearLayout
         android:id="@+id/rating3"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_weight="1"
-        app:srcCompat="@drawable/ic_emoji_rating_3" />
+        android:gravity="center"
+        android:orientation="vertical">
 
-    <ImageButton
+        <ImageView
+            android:id="@+id/ratingImage3"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:padding="8dp"
+            app:srcCompat="@drawable/ic_emoji_rating_3" />
+
+        <TextView
+            android:id="@+id/ratingText3"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            tools:text="not good" />
+
+    </LinearLayout>
+
+    <LinearLayout
         android:id="@+id/rating4"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_weight="1"
-        app:srcCompat="@drawable/ic_emoji_rating_4" />
+        android:gravity="center"
+        android:orientation="vertical">
 
-    <ImageButton
+        <ImageView
+            android:id="@+id/ratingImage4"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:padding="8dp"
+            app:srcCompat="@drawable/ic_emoji_rating_4" />
+
+        <TextView
+            android:id="@+id/ratingText4"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            tools:text="not good" />
+
+    </LinearLayout>
+
+    <LinearLayout
         android:id="@+id/rating5"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_weight="1"
-        app:srcCompat="@drawable/ic_emoji_rating_5" />
+        android:gravity="center"
+        android:orientation="vertical">
+
+        <ImageView
+            android:id="@+id/ratingImage5"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:padding="8dp"
+            app:srcCompat="@drawable/ic_emoji_rating_5" />
+
+        <TextView
+            android:id="@+id/ratingText5"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            tools:text="not good" />
+
+    </LinearLayout>
+
 
 </LinearLayout>

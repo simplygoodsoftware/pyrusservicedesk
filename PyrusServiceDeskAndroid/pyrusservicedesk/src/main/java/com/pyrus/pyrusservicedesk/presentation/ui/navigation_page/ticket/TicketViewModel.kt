@@ -365,7 +365,7 @@ internal class TicketViewModel(
                 add(WelcomeMessageEntry(freshList.showRatingText))
             }
             if (freshList.showRating) {
-                add(RatingEntry())
+                add(RatingEntry(freshList.ratingSettings))
             }
         }
         publishEntries(ticketEntries, toPublish)

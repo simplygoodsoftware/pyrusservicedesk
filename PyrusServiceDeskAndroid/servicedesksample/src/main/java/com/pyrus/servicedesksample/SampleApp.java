@@ -15,9 +15,7 @@ public class SampleApp extends Application {
         super.onCreate();
         PyrusServiceDesk.init(
                 this,
-                "my_app_id",
-                "user_id",
-                "security_key",
+                "xZlr1Zf0pZZE43NfjXfY10OvEKwkKLRCO~PYF7SjID-Tp-7sK5EAuWqgOfrCQNOdDUHrZhHlBaqcdzj2ULgf9e~ciFudXo9ff1Y9cx0oXaTGziZKANoCLbWceaF-5g1VAQpfcg==",
                 null,
                 true
         );

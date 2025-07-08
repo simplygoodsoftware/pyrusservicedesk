@@ -16,6 +16,7 @@ import android.widget.ImageView
 import android.widget.TextView
 import androidx.annotation.LayoutRes
 import androidx.appcompat.content.res.AppCompatResources
+import androidx.core.view.isVisible
 import com.google.android.flexbox.FlexboxLayout
 import com.pyrus.pyrusservicedesk.PyrusServiceDesk
 import com.pyrus.pyrusservicedesk.R
@@ -24,6 +25,7 @@ import com.pyrus.pyrusservicedesk.presentation.ui.navigation_page.ticket.entries
 import com.pyrus.pyrusservicedesk.presentation.ui.navigation_page.ticket.entries.CommentEntry
 import com.pyrus.pyrusservicedesk.presentation.ui.navigation_page.ticket.entries.DateEntry
 import com.pyrus.pyrusservicedesk.presentation.ui.navigation_page.ticket.entries.RatingEntry
+import com.pyrus.pyrusservicedesk.presentation.ui.navigation_page.ticket.entries.SimpleRatingEntry
 import com.pyrus.pyrusservicedesk.presentation.ui.navigation_page.ticket.entries.TicketEntry
 import com.pyrus.pyrusservicedesk.presentation.ui.navigation_page.ticket.entries.Type
 import com.pyrus.pyrusservicedesk.presentation.ui.navigation_page.ticket.entries.WelcomeMessageEntry
@@ -358,31 +360,110 @@ internal class TicketAdapter: AdapterBase<TicketEntry>() {
     private inner class RatingHolder(parent: ViewGroup) :
         ViewHolderBase<RatingEntry>(parent, R.layout.psd_view_holder_rating) {
 
-        private val rating1 = itemView.findViewById<ImageView>(R.id.rating1)
-        private val rating2 = itemView.findViewById<ImageView>(R.id.rating2)
-        private val rating3 = itemView.findViewById<ImageView>(R.id.rating3)
-        private val rating4 = itemView.findViewById<ImageView>(R.id.rating4)
-        private val rating5 = itemView.findViewById<ImageView>(R.id.rating5)
+
+        private var listEntry: List<SimpleRatingEntry> = emptyList()
+        private val adapter = RatingAdapter(listEntry)
+
+        //private val ratingRv = itemView.findViewById<RecyclerView>(R.id.ratingRv)
+
+        private val rating1 = itemView.findViewById<View>(R.id.rating1)
+        private val rating2 = itemView.findViewById<View>(R.id.rating2)
+        private val rating3 = itemView.findViewById<View>(R.id.rating3)
+        private val rating4 = itemView.findViewById<View>(R.id.rating4)
+        private val rating5 = itemView.findViewById<View>(R.id.rating5)
+
+        private val ratingText1 = itemView.findViewById<TextView>(R.id.ratingText1)
+        private val ratingText2 = itemView.findViewById<TextView>(R.id.ratingText2)
+        private val ratingText3 = itemView.findViewById<TextView>(R.id.ratingText3)
+        private val ratingText4 = itemView.findViewById<TextView>(R.id.ratingText4)
+        private val ratingText5 = itemView.findViewById<TextView>(R.id.ratingText5)
 
         init {
-            ConfigUtils.getSecondaryColorOnMainBackground(itemView.context).apply {
-                rating1.setBackgroundColor(this)
-                rating2.setBackgroundColor(this)
-                rating3.setBackgroundColor(this)
-                rating4.setBackgroundColor(this)
-                rating5.setBackgroundColor(this)
-            }
-        }
+//            ConfigUtils.getSecondaryColorOnMainBackground(itemView.context).apply {
+//                rating1.setBackgroundColor(this)
+//                rating2.setBackgroundColor(this)
+//                rating3.setBackgroundColor(this)
+//                rating4.setBackgroundColor(this)
+//                rating5.setBackgroundColor(this)
+//            }
 
-        override fun bindItem(item: RatingEntry) {
-            super.bindItem(item)
             rating1.setOnClickListener { onRatingClickListener?.invoke(1)}
             rating2.setOnClickListener { onRatingClickListener?.invoke(2)}
             rating3.setOnClickListener { onRatingClickListener?.invoke(3)}
             rating4.setOnClickListener { onRatingClickListener?.invoke(4)}
             rating5.setOnClickListener { onRatingClickListener?.invoke(5)}
+
+            adapter.setOnRatingClickListener { onRatingClickListener }
+        }
+
+        override fun bindItem(item: RatingEntry) {
+            super.bindItem(item)
+//            ratingRv.apply {
+//                adapter = adapter
+//                layoutManager = LinearLayoutManager(itemView.context, LinearLayoutManager.HORIZONTAL, false)
+//            }
+//
+//            listEntry = map(item)
+            val listValues = item.ratingSettings?.ratingTextValues
+            if (listValues != null) {
+                rating1.isVisible = listValues.find { it.rating == 1 } != null
+                ratingText1.text = listValues.find { it.rating == 1 }?.text
+                rating2.isVisible = listValues.find { it.rating == 2 } != null
+                ratingText2.text = listValues.find { it.rating == 2 }?.text
+                rating3.isVisible = listValues.find { it.rating == 3 } != null
+                ratingText3.text = listValues.find { it.rating == 3 }?.text
+                rating4.isVisible = listValues.find { it.rating == 4 } != null
+                ratingText4.text = listValues.find { it.rating == 4 }?.text
+                rating5.isVisible = listValues.find { it.rating == 5 } != null
+                ratingText5.text = listValues.find { it.rating == 5 }?.text
+            }
+            ratingText1.isVisible = item.ratingSettings?.type == 3
+            ratingText2.isVisible = item.ratingSettings?.type == 3
+            ratingText3.isVisible = item.ratingSettings?.type == 3
+            ratingText4.isVisible = item.ratingSettings?.type == 3
+            ratingText5.isVisible = item.ratingSettings?.type == 3
+            if (item.ratingSettings?.size != null) {
+                rating2.isVisible = item.ratingSettings.size == 5
+                rating3.isVisible = item.ratingSettings.size >= 3
+                rating4.isVisible = item.ratingSettings.size == 5
+            }
+            rating5.isVisible = true
+
         }
     }
+
+    /*private fun map(ratingEntry: RatingEntry): List<SimpleRatingEntry> {
+        val listEntry: MutableList<SimpleRatingEntry> = mutableListOf()
+        if (ratingEntry.ratingSettings?.ratingTextValues != null) {
+            for (rating in ratingEntry.ratingSettings.ratingTextValues) {
+                rating.rating?.let { listEntry.add(SimpleRatingEntry(it, rating.rating.ratingToEmojiRes(), rating.text)) }
+            }
+            return listEntry
+        }
+        if (ratingEntry.ratingSettings?.type == 1)
+            return ratingEntry.ratingSettings.size?.let { getRatingList(listEntry, it) } ?: emptyList()
+
+        return emptyList()
+    }
+
+    private fun getRatingList(
+        listEntry: MutableList<SimpleRatingEntry>,
+        size: Int,
+    ): List<SimpleRatingEntry> {
+
+        listEntry.add(SimpleRatingEntry(1, 1.ratingToEmojiRes(), null))
+        listEntry.add(SimpleRatingEntry(5, 5.ratingToEmojiRes(), null))
+        if (size == 2)
+            return listEntry
+        listEntry.add(1, SimpleRatingEntry(3, 3.ratingToEmojiRes(), null))
+        if (size == 3)
+            return listEntry
+        listEntry.add(1, SimpleRatingEntry(2, 2.ratingToEmojiRes(), null))
+        listEntry.add(3, SimpleRatingEntry(4, 4.ratingToEmojiRes(), null))
+        return listEntry
+
+    }*/
+
 
     private fun Int?.ratingToEmojiRes(): Int {
         return when (this) {
