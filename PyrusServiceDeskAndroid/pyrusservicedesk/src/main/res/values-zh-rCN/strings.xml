@@ -1,39 +1,39 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="psd_photo">照片</string>
+    <string name="psd_photo">拍照</string>
     <string name="psd_send">发送</string>
     <string name="psd_comment_input_hint">添加评论</string>
     <string name="psd_retry">重试</string>
-    <string name="psd_no_connection">无互联网连接</string>
+    <string name="psd_no_connection">无网络连接</string>
     <string name="psd_uploading">正在上传…</string>
-    <string name="psd_file_size_mb" formatted="false">%.1fMB</string>
-    <string name="psd_file_size_kb" formatted="false">%.1fKB</string>
+    <string name="psd_file_size_mb" formatted="false">%.1f MB</string>
+    <string name="psd_file_size_kb" formatted="false">%.1f KB</string>
     <string name="psd_time_format">hh:mm aa</string>
     <string name="psd_organization_support">支持</string>
     <string name="psd_today">今天</string>
     <string name="psd_yesterday">昨天</string>
     <string name="psd_date_format_d_m_y">MMMM d, yyyy</string>
     <string name="psd_date_format_d_m">MMMM d</string>
-    <string name="psd_gallery">图片库</string>
+    <string name="psd_gallery">图库</string>
     <plurals name="psd_years_ago">
         <item quantity="other">%d 年前</item>
     </plurals>
     <string name="psd_weeks_ago" formatted="false">%d 周前</string>
     <string name="psd_days_ago" formatted="false">%d 天前</string>
     <string name="psd_hours_ago" formatted="false">%d 小时前</string>
-    <string name="psd_months_ago" formatted="false">%d 月前</string>
+    <string name="psd_months_ago" formatted="false">%d 分钟前</string>
     <string name="psd_minutes_ago" formatted="false">%d 分钟前</string>
     <string name="psd_recent">最近</string>
     <string name="psd_guest">访客</string>
     <string name="psd_file_size_exceeded_message" formatted="false">文件大小不得超过 %d MB。</string>
     <string name="psd_copied_to_clipboard">已复制到剪贴板</string>
     <string name="psd_download">下载</string>
-    <string name="psd_downloading">下载…</string>
+    <string name="psd_downloading">正在下载…</string>
     <string name="psd_open">打开</string>
-    <string name="psd_no_preview_available">没有可用的预览</string>
+    <string name="psd_no_preview_available">无可用预览</string>
     <string name="psd_share">分享</string>
     <string name="psd_delete">删除</string>
     <string name="send_library_logs">发送库日志</string>
-    <string name="link_warning">该链接指向一个 %s
-\n您真的想要访问该链接吗？</string>
+    <string name="link_warning">此链接将跳转到 %s
+\n您确定要打开该链接吗？</string>
 </resources>
