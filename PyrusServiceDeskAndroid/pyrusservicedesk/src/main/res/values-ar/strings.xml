@@ -1,44 +1,44 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="psd_hours_ago" formatted="false">منذ %d ساعة</string>
-    <string name="psd_file_size_exceeded_message" formatted="false">يجب ألا يتجاوز حجم الملف %d ميجابايت.</string>
+    <string name="psd_file_size_exceeded_message" formatted="false">يجب ألا يتجاوز حجم الملف %d ميغابايت.</string>
     <string name="psd_send">إرسال</string>
     <string name="psd_comment_input_hint">إضافة تعليق</string>
     <string name="psd_retry">إعادة محاولة</string>
     <string name="psd_no_connection">لا يوجد اتصال بالإنترنت</string>
     <string name="psd_uploading">جارٍ التحميل…</string>
-    <string name="psd_file_size_mb" formatted="false">%.1f ميجابايت</string>
-    <string name="psd_file_size_kb" formatted="false">%.1f كيلوبايت</string>
-    <string name="psd_time_format">س:د</string>
+    <string name="psd_file_size_mb" formatted="false">%.1f ميغابايت</string>
+    <string name="psd_file_size_kb" formatted="false">%.1f ك.ب</string>
+    <string name="psd_time_format">hh:mm aa</string>
     <string name="psd_organization_support">دعم</string>
     <string name="psd_today">اليوم</string>
     <string name="psd_yesterday">الأمس</string>
-    <string name="psd_date_format_d_m_y">d MMMM، yyyy</string>
-    <string name="psd_date_format_d_m">d MMMM</string>
+    <string name="psd_date_format_d_m_y">MMMM d, yyyy</string>
+    <string name="psd_date_format_d_m">MMMM d</string>
     <string name="psd_photo">صورة</string>
     <string name="psd_gallery">معرض</string>
     <plurals name="psd_years_ago">
-        <item quantity="zero">منذ %d عام</item>
-        <item quantity="one">منذ %d عام</item>
-        <item quantity="two">منذ %d عام</item>
-        <item quantity="few">منذ %d عام</item>
-        <item quantity="many">منذ %d عام</item>
-        <item quantity="other">منذ %d عام</item>
+        <item quantity="zero">منذ %d سنة</item>
+        <item quantity="one">منذ %d سنة</item>
+        <item quantity="two">منذ %d سنة</item>
+        <item quantity="few">منذ %d سنوات</item>
+        <item quantity="many">منذ %d سنة</item>
+        <item quantity="other">منذ %d سنة</item>
     </plurals>
     <string name="psd_months_ago" formatted="false">منذ %d دقيقة</string>
     <string name="psd_weeks_ago" formatted="false">منذ %d أسبوع</string>
     <string name="psd_days_ago" formatted="false">منذ %d يوم</string>
     <string name="psd_minutes_ago" formatted="false">منذ %d دقيقة</string>
-    <string name="psd_recent">حديث</string>
+    <string name="psd_recent">مؤخرا</string>
     <string name="psd_guest">ضيف</string>
-    <string name="psd_copied_to_clipboard">تم نسخه إلى الحافظة</string>
+    <string name="psd_copied_to_clipboard">تم النسخ إلى الحافظة</string>
     <string name="psd_download">تنزيل</string>
-    <string name="psd_downloading">جارٍ التنزيل…</string>
+    <string name="psd_downloading">جارٍ التحميل…</string>
     <string name="psd_open">فتح</string>
     <string name="psd_no_preview_available">المعاينة غير متوفرة</string>
-    <string name="psd_share">مشاركة</string>
+    <string name="psd_share">مشاركه</string>
     <string name="psd_delete">حذف</string>
     <string name="send_library_logs">إرسال سجلات المكتبة</string>
-    <string name="link_warning">هذا الرابط يؤدي إلى %s.
-\n هل تريد حقًا متابعة الرابط؟</string>
+    <string name="link_warning">هذا الرابط يؤدي إلى %s
+\nهل ترغب حقًا في متابعة الرابط؟</string>
 </resources>
