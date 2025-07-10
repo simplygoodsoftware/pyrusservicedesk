@@ -60,6 +60,14 @@
 
         </com.pyrus.pyrusservicedesk.presentation.ui.view.swiperefresh.DirectedSwipeRefresh>
 
+        <include
+            android:id="@+id/rating"
+            android:layout_height="wrap_content"
+            android:layout_width="match_parent"
+            layout="@layout/psd_view_holder_rating"
+            android:layout_marginBottom="12dp"
+            app:layout_constraintBottom_toTopOf="@+id/divider" />
+
         <View
             android:id="@+id/divider"
             android:layout_width="match_parent"

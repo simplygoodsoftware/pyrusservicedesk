@@ -29,6 +29,8 @@ internal data class Comment(
         val localId: Long = COMMENT_ID_EMPTY,
         @SerializedName("rating")
         val rating: Int? = null,
+        @SerializedName("rating_comment")
+        val ratingComment: String? = null,
         @Transient val isWelcomeMessage: Boolean = false,
 ) {
 

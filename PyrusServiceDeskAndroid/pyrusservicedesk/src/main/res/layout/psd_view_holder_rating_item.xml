@@ -1,24 +1,22 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
-    android:layout_width="wrap_content"
+    android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:orientation="vertical"
     android:gravity="center"
+    android:layout_gravity="center_horizontal"
     tools:ignore="ButtonStyle">
-
-    <ImageButton
-        android:id="@+id/rating"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        app:srcCompat="@drawable/ic_emoji_rating_1" />
 
     <TextView
         android:id="@+id/ratingText"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:background="@drawable/psd_rounded_rectangle_bg"
+        android:paddingHorizontal="12dp"
+        android:paddingVertical="9dp"
+        android:textColor="@color/psd_text_color_bg950"
         tools:text="not good"/>
 
 </LinearLayout>

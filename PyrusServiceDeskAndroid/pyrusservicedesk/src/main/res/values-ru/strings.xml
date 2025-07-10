@@ -15,6 +15,9 @@
     <string name="psd_date_format_d_m">d MMMM</string>
     <string name="psd_photo">Сделать фото</string>
     <string name="psd_gallery">Галерея</string>
+    <string name="psd_evaluate_the_operators_performance">Оцените работу оператора</string>
+    <string name="psd_close">Закрыть</string>
+    <string name="leave_your_comment">Оставьте свой комментарий</string>
 
     <plurals name="psd_years_ago">
         <item quantity="one">%d год назад</item>

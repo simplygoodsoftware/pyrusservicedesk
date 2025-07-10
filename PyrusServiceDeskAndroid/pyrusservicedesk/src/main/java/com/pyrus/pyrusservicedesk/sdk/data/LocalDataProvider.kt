@@ -41,7 +41,7 @@ internal class LocalDataProvider(offlineRepository: OfflineRepository,
      * @return [Comment] instance with [Comment.isLocal] is TRUE.
      */
     @MainThread
-    fun createLocalComment(text: String = "", fileUri: Uri? = null, rating: Int? = null): Comment {
+    fun createLocalComment(text: String = "", fileUri: Uri? = null, rating: Int? = null, ratingText: String? = null): Comment {
         val calendar = Calendar.getInstance()
         //it is strange, but it`s work. It is necessary so that the local time and the time from the server to match
         val data = with(TimeZone.getDefault()) {
@@ -58,7 +58,8 @@ internal class LocalDataProvider(offlineRepository: OfflineRepository,
             },
             creationDate = data,
             localId = --lastLocalCommentId,
-            rating = rating
+            rating = rating,
+            ratingComment = ratingText,
         )
     }
 

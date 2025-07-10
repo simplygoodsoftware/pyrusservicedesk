@@ -2,66 +2,52 @@ package com.pyrus.pyrusservicedesk.presentation.ui.navigation_page.ticket
 
 import android.view.LayoutInflater
 import android.view.ViewGroup
-import android.widget.ImageButton
-import android.widget.TextView
+import androidx.recyclerview.widget.DiffUtil
+import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
-import com.pyrus.pyrusservicedesk.R
 import com.pyrus.pyrusservicedesk.databinding.PsdViewHolderRatingItemBinding
-import com.pyrus.pyrusservicedesk.presentation.ui.navigation_page.ticket.entries.SimpleRatingEntry
-import com.pyrus.pyrusservicedesk.presentation.ui.view.recyclerview.AdapterBase
-import com.pyrus.pyrusservicedesk.presentation.ui.view.recyclerview.ViewHolderBase
-import com.pyrus.pyrusservicedesk.utils.ConfigUtils
+import com.pyrus.pyrusservicedesk.sdk.data.intermediate.RatingTextValues
 
-internal class RatingAdapter(private val entryList: List<SimpleRatingEntry>): RecyclerView.Adapter<RatingAdapter.SimpleRatingHolder>() {
-
-
-    private var onRatingClickListener: ((Int) -> Unit)? = null
+internal class RatingAdapter(private val onItemClick: (Int) -> Unit) : ListAdapter<RatingTextValues, SimpleRatingHolder>(MyItemDiffCallback()) {
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): SimpleRatingHolder {
-        return SimpleRatingHolder(parent)
-    }
-
-    override fun getItemCount(): Int {
-        return entryList.size
+        val binding = PsdViewHolderRatingItemBinding.inflate(
+            LayoutInflater.from(parent.context),
+            parent,
+            false
+        )
+        return SimpleRatingHolder(binding, onItemClick)
     }
 
     override fun onBindViewHolder(holder: SimpleRatingHolder, position: Int) {
-        holder.bindItem(entryList[position])
+        holder.bind(getItem(position))
     }
+}
 
-    internal inner class SimpleRatingHolder(parent: ViewGroup) :
-        ViewHolderBase<SimpleRatingEntry>(parent, R.layout.psd_view_holder_rating_item) {
-
-//        private val binding: PsdViewHolderRatingItemBinding = PsdViewHolderRatingItemBinding.inflate(
-//            LayoutInflater.from(parent.context))
+class SimpleRatingHolder(
+        private val binding: PsdViewHolderRatingItemBinding,
+        private val onItemClick: (Int) -> Unit
+    ) : RecyclerView.ViewHolder(binding.root) {
 
         private var rating: Int = 0
-
-        private val rating1 = itemView.findViewById<ImageButton>(R.id.rating)
-
-        private val ratingText1 = itemView.findViewById<TextView>(R.id.ratingText)
-
-
         init {
-            ConfigUtils.getSecondaryColorOnMainBackground(itemView.context).apply {
-                itemView.setBackgroundColor(this)
-            }
-            itemView.setOnClickListener {
-                onRatingClickListener?.invoke(
-                    rating
-                )
+            binding.ratingText.setOnClickListener {
+                onItemClick(rating)
             }
         }
 
-        override fun bindItem(item: SimpleRatingEntry) {
-            super.bindItem(item)
-            rating = item.rating
-            rating1.setImageResource(item.iconRes)
-            ratingText1.text = item.ratingText
+        fun bind(item: RatingTextValues) {
+            rating = item.rating ?: 0
+            binding.ratingText.text = item.text
         }
     }
 
-    fun setOnRatingClickListener(listener: ((Int) -> Unit)) {
-        onRatingClickListener = listener
+class MyItemDiffCallback : DiffUtil.ItemCallback<RatingTextValues>() {
+    override fun areItemsTheSame(oldItem: RatingTextValues, newItem: RatingTextValues): Boolean {
+        return oldItem.rating == newItem.rating
+    }
+
+    override fun areContentsTheSame(oldItem: RatingTextValues, newItem: RatingTextValues): Boolean {
+        return oldItem == newItem
     }
 }

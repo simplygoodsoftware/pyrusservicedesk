@@ -29,4 +29,5 @@
     <dimen name="psd_comment_preview_outline_radius">1dp</dimen>
     <dimen name="psd_preview_mini_width">64dp</dimen>
     <dimen name="psd_attachment_layout_min_height">72dp</dimen>
+    <dimen name="_117">117dp</dimen>
 </resources>

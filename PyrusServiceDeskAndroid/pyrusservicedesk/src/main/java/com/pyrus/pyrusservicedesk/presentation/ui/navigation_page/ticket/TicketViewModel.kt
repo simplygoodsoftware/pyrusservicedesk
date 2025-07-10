@@ -95,6 +95,8 @@ internal class TicketViewModel(
 
     private var currentInterval: Long = 0
 
+    private var rateUsText: String? = null
+
     init {
         draft = draftRepository.getDraft()
         sendComment = PyrusServiceDesk.getAndRemoveSendComment()
@@ -361,11 +363,8 @@ internal class TicketViewModel(
                 add(it)
             }
 
-            if (freshList.showRatingText.isNotBlank()) {
-                add(WelcomeMessageEntry(freshList.showRatingText))
-            }
-            if (freshList.showRating) {
-                add(RatingEntry(freshList.ratingSettings))
+            if (freshList.showRating && freshList.showRatingText.isNotBlank()) {
+                add(RatingEntry(freshList.ratingSettings, freshList.showRatingText))
             }
         }
         publishEntries(ticketEntries, toPublish)
@@ -581,6 +580,15 @@ internal class TicketViewModel(
 
     fun onRatingClick(rating: Int) =
         sendAddComment(localDataProvider.createLocalComment(rating = rating))
+
+    fun onRatingCommentSendClick(ratingText: String?) =
+        sendAddComment(localDataProvider.createLocalComment(ratingText = ratingText))
+
+    fun setRateUsText(rateUsText: String?) {
+        this.rateUsText = rateUsText
+    }
+
+    fun getRateUsText() = rateUsText
 
     fun onStart() {
         liveUpdates.increaseActiveScreenCount()

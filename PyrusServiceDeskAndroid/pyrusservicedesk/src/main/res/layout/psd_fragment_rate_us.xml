@@ -1,0 +1,83 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:padding="16dp">
+
+    <TextView
+        android:id="@+id/rateUs"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="@string/psd_evaluate_the_operators_performance"
+        android:gravity="start|center_vertical"
+        android:textSize="24dp"
+        android:textStyle="bold"
+        android:textColor="@color/psd_text_color_bg950"
+        app:layout_constraintTop_toTopOf="parent"/>
+
+    <TextView
+        android:id="@+id/rateUsSubText"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="@string/leave_your_comment"
+        android:gravity="start|center_vertical"
+        android:textSize="14dp"
+        android:textColor="#788087"
+        android:layout_marginTop="24dp"
+        app:layout_constraintTop_toBottomOf="@+id/rateUs"/>
+
+    <androidx.appcompat.widget.AppCompatEditText
+        android:id="@+id/input"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:background="@drawable/psd_outline_bg"
+        android:backgroundTint="#D6D9DC"
+        android:hint="@string/psd_comment_input_hint"
+        android:imeOptions="flagNoExtractUi|flagNoFullscreen"
+        android:inputType="textCapSentences|textMultiLine"
+        android:maxHeight="@dimen/psd_max_input_height"
+        android:minHeight="66dp"
+        android:paddingVertical="@dimen/psd_input_padding"
+        android:paddingHorizontal="8dp"
+        android:scrollbars="vertical"
+        android:layout_marginTop="6dp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/rateUsSubText" />
+
+    <TextView
+        android:id="@+id/closeBtn"
+        android:layout_width="match_parent"
+        android:layout_height="48dp"
+        android:background="@drawable/psd_rounded_rectangle_bg"
+        android:gravity="center"
+        android:text="@string/psd_close"
+        android:visibility="visible"
+        android:textSize="16dp"
+        android:layout_marginTop="24dp"
+        android:textColor="@color/psd_white"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/input"/>
+
+    <TextView
+        android:id="@+id/sendBtn"
+        android:layout_width="match_parent"
+        android:layout_height="48dp"
+        android:background="@drawable/psd_rounded_rectangle_bg"
+        android:gravity="center"
+        android:text="@string/psd_send"
+        android:textSize="16dp"
+        android:layout_marginTop="16dp"
+        android:layout_marginBottom="20dp"
+        android:textColor="@color/psd_white"
+        android:elevation="0dp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/closeBtn"
+        app:layout_constraintBottom_toBottomOf="parent"/>
+
+
+
+</androidx.constraintlayout.widget.ConstraintLayout>
