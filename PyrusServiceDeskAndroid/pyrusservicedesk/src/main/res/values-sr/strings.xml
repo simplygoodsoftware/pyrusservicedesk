@@ -36,6 +36,6 @@
     <string name="psd_share">Дели</string>
     <string name="psd_delete">Избриши</string>
     <string name="send_library_logs">Пошаљи дневнике библиотеке</string>
-    <string name="link_warning">Ова веза води до %s
-\nДа ли заиста желиш да пратиш везу\?</string>
+    <string name="link_warning">Овај линк води до %s
+\nДа ли заиста желиш да пратиш линк\?</string>
 </resources>
