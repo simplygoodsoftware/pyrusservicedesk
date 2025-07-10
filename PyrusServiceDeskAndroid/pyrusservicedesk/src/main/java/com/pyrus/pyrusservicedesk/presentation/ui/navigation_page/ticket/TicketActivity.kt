@@ -105,9 +105,7 @@ internal class TicketActivity : ConnectionActivityBase<TicketViewModel>(TicketVi
         PendingCommentActionSharedViewModel::class.java)
 
     private val ratingAdapter: RatingAdapter = RatingAdapter { rating ->
-        val bottomSheet = RatingBottomSheetDialogFragment.newInstance(viewModel.getRateUsText())
-        bottomSheet.show(supportFragmentManager, bottomSheet.tag)
-        viewModel.onRatingClick(rating)
+        onRatingClickListener(rating)
     }
 
     private val adapter = TicketAdapter().apply {
@@ -126,10 +124,14 @@ internal class TicketActivity : ConnectionActivityBase<TicketViewModel>(TicketVi
             copyToClipboard(it)
         }
         setOnRatingClickListener { rating ->
-            val bottomSheet = RatingBottomSheetDialogFragment.newInstance(viewModel.getRateUsText())
-            bottomSheet.show(supportFragmentManager, bottomSheet.tag)
-            viewModel.onRatingClick(rating)
+            onRatingClickListener(rating)
         }
+    }
+
+    private fun onRatingClickListener(rating: Int) {
+        val bottomSheet = RatingBottomSheetDialogFragment.newInstance(viewModel.getRateUsText())
+        bottomSheet.show(supportFragmentManager, bottomSheet.tag)
+        viewModel.onRatingClick(rating)
     }
 
     private val inputTextWatcher = object : TextWatcher {
@@ -308,18 +310,40 @@ internal class TicketActivity : ConnectionActivityBase<TicketViewModel>(TicketVi
         viewModel.setRateUsText(ratingEntry.ratingText)
         binding.rating.rateUsText.text = ratingEntry.ratingText
         binding.rating.ratingTextRv.isVisible = ratingEntry.ratingSettings?.type == 3 //TODO kate
-        binding.rating.smileLl.isVisible = ratingEntry.ratingSettings?.type == 1 || ratingEntry.ratingSettings?.type == 2
+        binding.rating.smileLl5.isVisible = ratingEntry.ratingSettings?.type == 1 && ratingEntry.ratingSettings.size == 5
+        binding.rating.smileLl.isVisible = getSmileLlVisibility(ratingEntry)
+        binding.rating.likeLl.isVisible = ratingEntry.ratingSettings?.type == 2
 
-        if ((ratingEntry.ratingSettings?.type == 1 || ratingEntry.ratingSettings?.type == 2) && ratingEntry.ratingSettings.size != null) {
-            binding.rating.rating1.isVisible = true
-            binding.rating.rating2.isVisible = ratingEntry.ratingSettings.size == 5
-            binding.rating.rating3.isVisible = ratingEntry.ratingSettings.size >= 3
-            binding.rating.rating4.isVisible = ratingEntry.ratingSettings.size == 5
-            binding.rating.rating5.isVisible = true
+        if (getSmileLlVisibility(ratingEntry)) {
+            binding.rating.rating2Mini.isVisible = ratingEntry.ratingSettings?.size == 3
         }
+
+        setRatingClickListeners()
+
         if (ratingEntry.ratingSettings?.type == 3) {
             ratingAdapter.submitList(ratingEntry.ratingSettings.ratingTextValues)
         }
+    }
+
+    private fun setRatingClickListeners() {
+        binding.rating.rating1.setOnClickListener { onRatingClickListener(1) }
+        binding.rating.rating2.setOnClickListener { onRatingClickListener(2) }
+        binding.rating.rating3.setOnClickListener { onRatingClickListener(3) }
+        binding.rating.rating4.setOnClickListener { onRatingClickListener(4) }
+        binding.rating.rating5.setOnClickListener { onRatingClickListener(5) }
+
+        binding.rating.rating1Mini.setOnClickListener { onRatingClickListener(1) }
+        binding.rating.rating2Mini.setOnClickListener { onRatingClickListener(3) }
+        binding.rating.rating3Mini.setOnClickListener { onRatingClickListener(5) }
+
+        binding.rating.like1.setOnClickListener { onRatingClickListener(1) }
+        binding.rating.like2.setOnClickListener { onRatingClickListener(5) }
+    }
+
+    private fun getSmileLlVisibility(ratingEntry: RatingEntry): Boolean {
+        return ratingEntry.ratingSettings?.type == 1
+            && ratingEntry.ratingSettings.size != null
+            && ratingEntry.ratingSettings.size < 5
     }
 
     override fun startObserveData() {
