@@ -34,8 +34,6 @@ import com.pyrus.pyrusservicedesk.presentation.ui.navigation_page.ticket.dialogs
 import com.pyrus.pyrusservicedesk.presentation.ui.navigation_page.ticket.dialogs.rating.RatingBottomSheetDialogFragment
 import com.pyrus.pyrusservicedesk.presentation.ui.navigation_page.ticket.dialogs.rating.RatingBottomSheetDialogFragment.Companion.RATING_COMMENT_KEY
 import com.pyrus.pyrusservicedesk.presentation.ui.navigation_page.ticket.entries.RatingEntry
-import com.pyrus.pyrusservicedesk.presentation.ui.navigation_page.ticket.entries.TicketEntry
-import com.pyrus.pyrusservicedesk.presentation.ui.navigation_page.ticket.entries.Type
 import com.pyrus.pyrusservicedesk.presentation.ui.view.recyclerview.item_decorators.SpaceItemDecoration
 import com.pyrus.pyrusservicedesk.sdk.data.Attachment
 import com.pyrus.pyrusservicedesk.sdk.data.intermediate.FileData
@@ -105,7 +103,7 @@ internal class TicketActivity : ConnectionActivityBase<TicketViewModel>(TicketVi
         PendingCommentActionSharedViewModel::class.java)
 
     private val ratingAdapter: RatingAdapter = RatingAdapter { rating ->
-        onRatingClickListener(rating)
+        onRatingClick(rating)
     }
 
     private val adapter = TicketAdapter().apply {
@@ -124,14 +122,15 @@ internal class TicketActivity : ConnectionActivityBase<TicketViewModel>(TicketVi
             copyToClipboard(it)
         }
         setOnRatingClickListener { rating ->
-            onRatingClickListener(rating)
+            onRatingClick(rating)
         }
     }
 
-    private fun onRatingClickListener(rating: Int) {
+    private fun onRatingClick(rating: Int) {
         val bottomSheet = RatingBottomSheetDialogFragment.newInstance(viewModel.getRateUsText())
         bottomSheet.show(supportFragmentManager, bottomSheet.tag)
         viewModel.onRatingClick(rating)
+        binding.rating.root.isVisible = false
     }
 
     private val inputTextWatcher = object : TextWatcher {
@@ -304,9 +303,7 @@ internal class TicketActivity : ConnectionActivityBase<TicketViewModel>(TicketVi
         } ?: false
     }
 
-    private fun setRatingUi(ratingEntry: TicketEntry) {
-        if (ratingEntry !is RatingEntry)
-            return
+    private fun setRatingUi(ratingEntry: RatingEntry) {
         viewModel.setRateUsText(ratingEntry.ratingText)
         binding.rating.rateUsText.text = ratingEntry.ratingText
         binding.rating.ratingTextRv.isVisible = ratingEntry.ratingSettings?.type == 3 //TODO kate
@@ -321,23 +318,24 @@ internal class TicketActivity : ConnectionActivityBase<TicketViewModel>(TicketVi
         setRatingClickListeners()
 
         if (ratingEntry.ratingSettings?.type == 3) {
-            ratingAdapter.submitList(ratingEntry.ratingSettings.ratingTextValues)
+            val list = ratingEntry.ratingSettings.ratingTextValues?.sortedByDescending { it.rating }
+            ratingAdapter.submitList(list)
         }
     }
 
     private fun setRatingClickListeners() {
-        binding.rating.rating1.setOnClickListener { onRatingClickListener(1) }
-        binding.rating.rating2.setOnClickListener { onRatingClickListener(2) }
-        binding.rating.rating3.setOnClickListener { onRatingClickListener(3) }
-        binding.rating.rating4.setOnClickListener { onRatingClickListener(4) }
-        binding.rating.rating5.setOnClickListener { onRatingClickListener(5) }
+        binding.rating.rating1.setOnClickListener { onRatingClick(1) }
+        binding.rating.rating2.setOnClickListener { onRatingClick(2) }
+        binding.rating.rating3.setOnClickListener { onRatingClick(3) }
+        binding.rating.rating4.setOnClickListener { onRatingClick(4) }
+        binding.rating.rating5.setOnClickListener { onRatingClick(5) }
 
-        binding.rating.rating1Mini.setOnClickListener { onRatingClickListener(1) }
-        binding.rating.rating2Mini.setOnClickListener { onRatingClickListener(3) }
-        binding.rating.rating3Mini.setOnClickListener { onRatingClickListener(5) }
+        binding.rating.rating1Mini.setOnClickListener { onRatingClick(1) }
+        binding.rating.rating2Mini.setOnClickListener { onRatingClick(3) }
+        binding.rating.rating3Mini.setOnClickListener { onRatingClick(5) }
 
-        binding.rating.like1.setOnClickListener { onRatingClickListener(1) }
-        binding.rating.like2.setOnClickListener { onRatingClickListener(5) }
+        binding.rating.like1.setOnClickListener { onRatingClick(1) }
+        binding.rating.like2.setOnClickListener { onRatingClick(5) }
     }
 
     private fun getSmileLlVisibility(ratingEntry: RatingEntry): Boolean {
@@ -348,6 +346,12 @@ internal class TicketActivity : ConnectionActivityBase<TicketViewModel>(TicketVi
 
     override fun startObserveData() {
         super.startObserveData()
+        viewModel.getRatingDiffLveData().observe(this) { rating ->
+            binding.rating.root.isVisible = rating != null
+            if (rating != null) {
+                setRatingUi(rating)
+            }
+        }
         viewModel.getCommentDiffLiveData().observe(this) { result ->
             val atEnd = binding.comments.isAtEnd()
             val isEmpty = binding.comments.adapter?.itemCount == 0
@@ -355,12 +359,6 @@ internal class TicketActivity : ConnectionActivityBase<TicketViewModel>(TicketVi
                 binding.refresh.isRefreshing = false
                 adapter.setItems(it.newItems)
                 it.diffResult.dispatchUpdatesTo(adapter)
-            }
-
-            val rating = result.newItems.find { it.type == Type.Rating }
-            binding.rating.root.isVisible = rating != null
-            if (rating != null) {
-                setRatingUi(rating)
             }
 
             if (adapter.itemCount > 0 && atEnd) {
