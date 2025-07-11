@@ -12,8 +12,8 @@
     <string name="psd_organization_support">支持</string>
     <string name="psd_today">今天</string>
     <string name="psd_yesterday">昨天</string>
-    <string name="psd_date_format_d_m_y">MMMM d, yyyy</string>
-    <string name="psd_date_format_d_m">MMMM d</string>
+    <string name="psd_date_format_d_m_y">yyyy年M月d日</string>
+    <string name="psd_date_format_d_m">M月d日</string>
     <string name="psd_gallery">图库</string>
     <plurals name="psd_years_ago">
         <item quantity="other">%d 年前</item>
