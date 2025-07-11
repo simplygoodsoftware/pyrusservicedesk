@@ -16,7 +16,7 @@
     <string name="psd_gallery">Gallery</string>
     <string name="psd_evaluate_the_operators_performance">Evaluate the operator\'s performance</string>
     <string name="psd_close">Close</string>
-    <string name="leave_your_comment">Leave your comment</string>
+    <string name="leave_your_comment">Write a review</string>
 
     <plurals name="psd_years_ago">
         <item quantity="one">%d year ago</item>
