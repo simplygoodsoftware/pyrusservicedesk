@@ -39,7 +39,12 @@ import UIKit
     ///User's name needed for request. If don't set used Default_User_Name
     @objc static private(set) var userName = DEFAULT_USER_NAME
     
-      
+    static var ratingSettings: PSDRatingSettings = PSDRatingSettings(
+        size: 5,
+        type: RatingType.smile.rawValue,
+        ratingTextValues: RatingType.smile.rateArray(size: 5)
+    )
+    
     @objc static let mainSession : URLSession = {
         let config = URLSessionConfiguration.default
         config.requestCachePolicy = .reloadIgnoringLocalCacheData

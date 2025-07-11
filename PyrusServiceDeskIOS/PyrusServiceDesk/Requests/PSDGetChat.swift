@@ -9,6 +9,7 @@ struct PSDGetChat {
     private static let SHOW_RATING_KEY = "show_rating"
     private static let SHOW_RATING_TEXT_KEY = "show_rating_text"
     private static let KEEP_UNREAD_RATING_KEY = "keep_unread"
+    private static let RATING_SETTINGS_KEY = "rating_settings"
     private static var chatGetters : [Int: ChatGetter] = [Int: ChatGetter]()
   //  private static var sessionTask : URLSessionDataTask? = nil
     /**
@@ -106,6 +107,16 @@ struct PSDGetChat {
         let chat = PSDChat(date: Date(), messages: massages)
         chat.showRating = (response[PSDGetChat.SHOW_RATING_KEY] as? Bool) ?? false
         chat.showRatingText = response[PSDGetChat.SHOW_RATING_TEXT_KEY] as? String
+        if let ratingSettings = response[PSDGetChat.RATING_SETTINGS_KEY] as? NSDictionary {
+            do {
+                let jsonData = try JSONSerialization.data(withJSONObject: ratingSettings, options: [])
+                let decoder = JSONDecoder()
+                let settings = try decoder.decode(PSDRatingSettings.self, from: jsonData)
+                PyrusServiceDesk.ratingSettings = settings
+            } catch {
+                print("Error decoding JSON: \(error)")
+            }
+        }
         return chat
     }
     private static func generateMessages(from array:NSArray) -> [PSDMessage]
@@ -153,7 +164,7 @@ struct PSDGetChat {
                     attachmentsForMessage?.append(attachment)
                 }
             }
-            if (attachmentsForMessage?.count ?? 0) > 0 || (textForMessage?.count ?? 0) > 0 || rating != nil{
+            if (attachmentsForMessage?.count ?? 0) > 0 || (textForMessage?.count ?? 0) > 0 {
                 let message = PSDMessage(text: textForMessage, attachments:attachmentsForMessage, messageId: dic.stringOfKey(commentIdParameter), owner: user, date: date)
                 message.rating = rating
                 let clientId = dic.stringOfKey(CLIENT_ID_KEY)

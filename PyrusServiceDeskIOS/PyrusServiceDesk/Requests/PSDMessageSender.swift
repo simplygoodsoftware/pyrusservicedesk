@@ -3,6 +3,7 @@ import Foundation
 let commentIdParameter = "comment_id"
 let ticketIdParameter = "ticket_id"
 let ratingParameter = "rating"
+let ratingCommentParameter = "rating_comment"
 let subjectParameter = "subject"
 let createdAtParameter = "created_at"
 let attachmentsParameter = "attachments"
@@ -18,7 +19,7 @@ class PSDMessageSender: NSObject {
      - parameter completion: comptetion block. 
      */
     func pass(_ messageToPass:PSDMessage, delegate:PSDMessageSendDelegate?, completion: @escaping() -> Void) {
-        let task = PSDMessageSender.pass(messageToPass.text, messageToPass.attachments, rating: messageToPass.rating, clientId: messageToPass.clientId) {
+        let task = PSDMessageSender.pass(messageToPass.text, messageToPass.attachments, rating: messageToPass.rating, ratingComment: messageToPass.ratingComment, clientId: messageToPass.clientId) {
             commentId, attachments in
             if let commentId = commentId, commentId.count > 0 {
                 //put attachments id
@@ -79,13 +80,16 @@ class PSDMessageSender: NSObject {
      - completion: Completion of passing message.
      - commentId: Return id of new message as String. If Request end with error return nil or "0" if received bad data from server.
      */
-    private static func pass(_ message: String, _ attachments: [PSDAttachment]?, rating: Int?, clientId: String, completion: @escaping (_ commentId: String?, _ attachments: NSArray?) -> Void) -> URLSessionDataTask {
+    private static func pass(_ message: String, _ attachments: [PSDAttachment]?, rating: Int?, ratingComment: String?, clientId: String, completion: @escaping (_ commentId: String?, _ attachments: NSArray?) -> Void) -> URLSessionDataTask {
         //Generate additional parameters for request body
         var parameters = [String: Any]()
         parameters[commentParameter] = message
         parameters[CLIENT_ID_KEY] = clientId
         if let rating = rating{
             parameters[ratingParameter] = rating
+        }
+        if let ratingComment {
+            parameters[ratingCommentParameter] = ratingComment
         }
         parameters[userNameParameter] = PyrusServiceDesk.userName
         if let attachments = attachments, attachments.count > 0{
