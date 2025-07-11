@@ -68,7 +68,7 @@ class PSDChatsViewController: UIViewController,PSDChatsTableViewDelegate,CloseBu
     }
     ///Remove from new messages counter 1
     func removeOneNewMessage(){
-        PSDGetChats.refreshNewMessagesCount(PyrusServiceDesk.newMessagesCount-1)
+//        PSDGetChats.refreshNewMessagesCount(PyrusServiceDesk.newMessagesCount-1)
     }
     //*Setting design to navigation bar, title and buttons*/
     func designNavigation()

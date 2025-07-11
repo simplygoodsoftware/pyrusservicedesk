@@ -287,11 +287,31 @@ extension PSDChatViewController : PSDMessageInputViewDelegate{
         PSDMessageSend.pass(newMessage, delegate: self.tableView)
     }
     func sendRate(_ rateValue: Int) {
+        tableView.removeLastMessage()
+        let vc = RatingCommentViewController()
+        vc.delegate = self
+        if let sheet = vc.sheetPresentationController {
+            let smallId = UISheetPresentationController.Detent.Identifier("small")
+            if #available(iOS 16.0, *) {
+                let smallDetent = UISheetPresentationController.Detent.custom(identifier: smallId) { context in
+                    return context.maximumDetentValue * 0.5
+                }
+                sheet.detents = [smallDetent]
+            } else {
+                sheet.detents = [.medium()]
+            }
+            sheet.prefersGrabberVisible = true
+            sheet.prefersScrollingExpandsWhenScrolledToEdge = false
+        }
+        
+        vc.modalPresentationStyle = .pageSheet
+        present(vc, animated: true)
         let newMessage = PSDObjectsCreator.createMessage(rating: rateValue)
-        prepareMessageForDrawing(newMessage)
-        tableView.addNewRow(message: newMessage)
+//        prepareMessageForDrawing(newMessage)
+//        tableView.addNewRow(message: newMessage)
         PSDMessageSend.pass(newMessage, delegate: self.tableView)
     }
+    
     private func prepareMessageForDrawing(_ newMessage: PSDMessage) {
         newMessage.state = .sending
         if let attachments = newMessage.attachments {
@@ -396,6 +416,13 @@ extension PSDChatViewController: PSDChatTableViewDelegate {
             self.messageInputView.inputTextView.becomeFirstResponder()
             firstLoad = false
         }
+    }
+}
+
+extension PSDChatViewController: RatingCommentDelegate {
+    func sendRatingComment(comment: String) {
+        let newMessage = PSDObjectsCreator.createMessage(ratingComment: comment)
+        PSDMessageSend.pass(newMessage, delegate: self.tableView)
     }
 }
 
