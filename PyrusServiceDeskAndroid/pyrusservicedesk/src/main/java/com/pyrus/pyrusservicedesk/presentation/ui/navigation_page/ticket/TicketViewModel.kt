@@ -77,7 +77,7 @@ internal class TicketViewModel(
 
     private val unreadCounter = MutableLiveData<Int>()
     private val commentDiff = MutableLiveData<DiffResultWithNewItems<TicketEntry>>()
-    private val ratingDiff = MutableLiveData<RatingEntry>()
+    private val ratingDiff = MutableLiveData<RatingEntry?>()
 
     private var ticketEntries: List<TicketEntry> = emptyList()
 
@@ -171,7 +171,7 @@ internal class TicketViewModel(
     fun getCommentDiffLiveData(): LiveData<DiffResultWithNewItems<TicketEntry>> = commentDiff
 
 
-    fun getRatingDiffLveData(): LiveData<RatingEntry> = ratingDiff
+    fun getRatingDiffLveData(): LiveData<RatingEntry?> = ratingDiff
 
     /**
      * Callback to be invoked when user input changed.
@@ -365,6 +365,10 @@ internal class TicketViewModel(
             listOfLocalEntries.forEach {
                 maybeAddDate(it as CommentEntry, this)
                 add(it)
+            }
+
+            if (!freshList.showRating && ratingDiff.value != null) {
+                ratingDiff.value = null
             }
 
             if (freshList.showRating && freshList.showRatingText.isNotBlank()) {

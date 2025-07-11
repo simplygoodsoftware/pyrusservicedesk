@@ -34,6 +34,7 @@
         android:background="@drawable/psd_outline_bg"
         android:backgroundTint="#D6D9DC"
         android:hint="@string/psd_comment_input_hint"
+        android:gravity="top"
         android:imeOptions="flagNoExtractUi|flagNoFullscreen"
         android:inputType="textCapSentences|textMultiLine"
         android:maxHeight="@dimen/psd_max_input_height"

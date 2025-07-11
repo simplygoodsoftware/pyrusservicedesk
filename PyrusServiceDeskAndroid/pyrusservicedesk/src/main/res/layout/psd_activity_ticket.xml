@@ -60,6 +60,14 @@
 
         </com.pyrus.pyrusservicedesk.presentation.ui.view.swiperefresh.DirectedSwipeRefresh>
 
+        <View
+            android:id="@+id/gradient"
+            android:layout_width="match_parent"
+            android:layout_height="26dp"
+            android:layout_marginBottom="-16dp"
+            android:background="@drawable/fade_gradient_bg"
+            app:layout_constraintBottom_toTopOf="@+id/rating"/>
+
         <include
             android:id="@+id/rating"
             android:layout_height="wrap_content"

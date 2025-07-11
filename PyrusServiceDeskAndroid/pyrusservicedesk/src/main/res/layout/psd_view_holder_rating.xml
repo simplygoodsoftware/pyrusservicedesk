@@ -53,7 +53,7 @@
             android:gravity="center"
             android:text="👎"
             android:textColor="@color/psd_text_color_bg950"
-            android:background="@drawable/psd_rounded_rectangle_bg"
+            android:background="@drawable/psd_rounded_rectangle_bg_6"
             android:backgroundTint="#F4F5F6"
             android:textSize="24sp"/>
 
@@ -66,7 +66,7 @@
             android:gravity="center"
             android:text="👍"
             android:textColor="@color/psd_text_color_bg950"
-            android:background="@drawable/psd_rounded_rectangle_bg"
+            android:background="@drawable/psd_rounded_rectangle_bg_6"
             android:backgroundTint="#F4F5F6"
             android:textSize="24sp"/>
 
@@ -87,7 +87,9 @@
             android:id="@+id/rating1Mini"
             android:layout_width="84dp"
             android:layout_height="wrap_content"
-            android:paddingHorizontal="4dp"
+            android:padding="5dp"
+            android:layout_marginHorizontal="4dp"
+            android:background="@drawable/psd_rounded_rectangle_bg_6"
             android:backgroundTint="#F4F5F6"
             app:srcCompat="@drawable/ic_emoji_rating_1" />
 
@@ -95,7 +97,9 @@
             android:id="@+id/rating2Mini"
             android:layout_width="84dp"
             android:layout_height="wrap_content"
-            android:paddingHorizontal="4dp"
+            android:padding="5dp"
+            android:layout_marginHorizontal="4dp"
+            android:background="@drawable/psd_rounded_rectangle_bg_6"
             android:backgroundTint="#F4F5F6"
             app:srcCompat="@drawable/ic_emoji_rating_3" />
 
@@ -103,7 +107,9 @@
             android:id="@+id/rating3Mini"
             android:layout_width="84dp"
             android:layout_height="wrap_content"
-            android:paddingHorizontal="4dp"
+            android:padding="5dp"
+            android:layout_marginHorizontal="4dp"
+            android:background="@drawable/psd_rounded_rectangle_bg_6"
             android:backgroundTint="#F4F5F6"
             app:srcCompat="@drawable/ic_emoji_rating_5" />
 
@@ -126,7 +132,9 @@
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:paddingHorizontal="4dp"
+            android:padding="5dp"
+            android:layout_marginHorizontal="4dp"
+            android:background="@drawable/psd_rounded_rectangle_bg_6"
             android:backgroundTint="#F4F5F6"
             app:srcCompat="@drawable/ic_emoji_rating_1" />
 
@@ -135,7 +143,9 @@
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:paddingHorizontal="4dp"
+            android:padding="5dp"
+            android:layout_marginHorizontal="4dp"
+            android:background="@drawable/psd_rounded_rectangle_bg_6"
             android:backgroundTint="#F4F5F6"
             app:srcCompat="@drawable/ic_emoji_rating_2" />
 
@@ -144,7 +154,9 @@
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:paddingHorizontal="4dp"
+            android:padding="5dp"
+            android:layout_marginHorizontal="4dp"
+            android:background="@drawable/psd_rounded_rectangle_bg_6"
             android:backgroundTint="#F4F5F6"
             app:srcCompat="@drawable/ic_emoji_rating_3" />
 
@@ -153,7 +165,9 @@
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:paddingHorizontal="4dp"
+            android:padding="5dp"
+            android:layout_marginHorizontal="4dp"
+            android:background="@drawable/psd_rounded_rectangle_bg_6"
             android:backgroundTint="#F4F5F6"
             app:srcCompat="@drawable/ic_emoji_rating_4" />
 
@@ -163,7 +177,9 @@
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:paddingHorizontal="4dp"
+            android:padding="5dp"
+            android:layout_marginHorizontal="4dp"
+            android:background="@drawable/psd_rounded_rectangle_bg_6"
             android:backgroundTint="#F4F5F6"
             app:srcCompat="@drawable/ic_emoji_rating_5" />
 

@@ -16,6 +16,7 @@ import android.view.MenuInflater
 import android.view.MenuItem
 import android.view.MenuItem.SHOW_AS_ACTION_ALWAYS
 import android.view.View.NO_ID
+import android.view.ViewGroup
 import android.view.ViewTreeObserver.OnGlobalLayoutListener
 import android.view.WindowManager
 import android.widget.Toast
@@ -128,10 +129,10 @@ internal class TicketActivity : ConnectionActivityBase<TicketViewModel>(TicketVi
     }
 
     private fun onRatingClick(rating: Int) {
+        binding.rating.root.isVisible = false
         val bottomSheet = RatingBottomSheetDialogFragment.newInstance(viewModel.getRateUsText())
         bottomSheet.show(supportFragmentManager, bottomSheet.tag)
         viewModel.onRatingClick(rating)
-        binding.rating.root.isVisible = false
     }
 
     private val inputTextWatcher = object : TextWatcher {
@@ -349,6 +350,12 @@ internal class TicketActivity : ConnectionActivityBase<TicketViewModel>(TicketVi
         super.startObserveData()
         viewModel.getRatingDiffLveData().observe(this) { rating ->
             binding.rating.root.isVisible = rating != null
+            binding.gradient.isVisible = rating != null
+
+            val params = binding.refresh.layoutParams as ViewGroup.MarginLayoutParams
+            params.bottomMargin = if (rating != null) -resources.getDimension(R.dimen.psd_offset_default).toInt() else 0
+            binding.refresh.layoutParams = params
+
             if (rating != null) {
                 setRatingUi(rating)
             }
