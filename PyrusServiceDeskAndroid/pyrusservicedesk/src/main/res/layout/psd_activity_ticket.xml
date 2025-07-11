@@ -65,7 +65,8 @@
             android:layout_height="wrap_content"
             android:layout_width="match_parent"
             layout="@layout/psd_view_holder_rating"
-            android:layout_marginBottom="12dp"
+            android:visibility="gone"
+            tools:visibility="visible"
             app:layout_constraintBottom_toTopOf="@+id/divider" />
 
         <View
