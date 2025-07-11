@@ -1,47 +1,188 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:orientation="horizontal"
     android:paddingHorizontal="@dimen/psd_offset_small"
-    tools:ignore="ButtonStyle">
+    android:isScrollContainer="false"
+    android:paddingBottom="12dp">
 
-    <ImageButton
-        android:id="@+id/rating1"
-        android:layout_width="0dp"
+    <TextView
+        android:id="@+id/rateUsText"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_weight="1"
-        app:srcCompat="@drawable/ic_emoji_rating_1" />
+        android:paddingHorizontal="12dp"
+        android:paddingVertical="9dp"
+        android:textColor="#60666C"
+        android:textSize="12sp"
+        android:layout_marginVertical="7dp"
+        tools:text="Пожалуйста, оцените работу оператора"
+        app:layout_constraintBottom_toTopOf="@+id/ratingTextRv"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent" />
 
-    <ImageButton
-        android:id="@+id/rating2"
-        android:layout_width="0dp"
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/ratingTextRv"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_weight="1"
-        app:srcCompat="@drawable/ic_emoji_rating_2" />
+        android:layout_marginStart="8dp"
+        android:layout_marginEnd="8dp"
+        app:layoutManager="LinearLayoutManager"
+        app:layout_constraintBottom_toTopOf="@+id/likeLl"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent" />
 
-    <ImageButton
-        android:id="@+id/rating3"
-        android:layout_width="0dp"
+    <LinearLayout
+        android:id="@+id/likeLl"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_weight="1"
-        app:srcCompat="@drawable/ic_emoji_rating_3" />
+        android:orientation="horizontal"
+        android:visibility="gone"
+        tools:visibility="visible"
+        app:layout_constraintBottom_toTopOf="@+id/smileLl"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent">
 
-    <ImageButton
-        android:id="@+id/rating4"
-        android:layout_width="0dp"
+        <TextView
+            android:id="@+id/like1"
+            android:layout_width="84dp"
+            android:layout_height="wrap_content"
+            android:padding="4dp"
+            android:layout_marginHorizontal="4dp"
+            android:gravity="center"
+            android:text="👎"
+            android:textColor="@color/psd_text_color_bg950"
+            android:background="@drawable/psd_rounded_rectangle_bg_6"
+            android:backgroundTint="#F4F5F6"
+            android:textSize="24sp"/>
+
+        <TextView
+            android:id="@+id/like2"
+            android:layout_width="84dp"
+            android:layout_height="wrap_content"
+            android:padding="4dp"
+            android:layout_marginHorizontal="4dp"
+            android:gravity="center"
+            android:text="👍"
+            android:textColor="@color/psd_text_color_bg950"
+            android:background="@drawable/psd_rounded_rectangle_bg_6"
+            android:backgroundTint="#F4F5F6"
+            android:textSize="24sp"/>
+
+    </LinearLayout>
+
+    <LinearLayout
+        android:id="@+id/smileLl"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_weight="1"
-        app:srcCompat="@drawable/ic_emoji_rating_4" />
+        android:orientation="horizontal"
+        android:visibility="gone"
+        tools:visibility="visible"
+        app:layout_constraintBottom_toTopOf="@+id/smileLl5"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent">
 
-    <ImageButton
-        android:id="@+id/rating5"
-        android:layout_width="0dp"
+        <ImageButton
+            android:id="@+id/rating1Mini"
+            android:layout_width="84dp"
+            android:layout_height="wrap_content"
+            android:padding="5dp"
+            android:layout_marginHorizontal="4dp"
+            android:background="@drawable/psd_rounded_rectangle_bg_6"
+            android:backgroundTint="#F4F5F6"
+            app:srcCompat="@drawable/ic_emoji_rating_1" />
+
+        <ImageButton
+            android:id="@+id/rating2Mini"
+            android:layout_width="84dp"
+            android:layout_height="wrap_content"
+            android:padding="5dp"
+            android:layout_marginHorizontal="4dp"
+            android:background="@drawable/psd_rounded_rectangle_bg_6"
+            android:backgroundTint="#F4F5F6"
+            app:srcCompat="@drawable/ic_emoji_rating_3" />
+
+        <ImageButton
+            android:id="@+id/rating3Mini"
+            android:layout_width="84dp"
+            android:layout_height="wrap_content"
+            android:padding="5dp"
+            android:layout_marginHorizontal="4dp"
+            android:background="@drawable/psd_rounded_rectangle_bg_6"
+            android:backgroundTint="#F4F5F6"
+            app:srcCompat="@drawable/ic_emoji_rating_5" />
+
+    </LinearLayout>
+
+    <LinearLayout
+        android:id="@+id/smileLl5"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_weight="1"
-        app:srcCompat="@drawable/ic_emoji_rating_5" />
+        android:orientation="horizontal"
+        android:visibility="gone"
+        android:paddingHorizontal="@dimen/psd_offset_small"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        tools:visibility="gone">
 
-</LinearLayout>
+        <ImageButton
+            android:id="@+id/rating1"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:padding="5dp"
+            android:layout_marginHorizontal="4dp"
+            android:background="@drawable/psd_rounded_rectangle_bg_6"
+            android:backgroundTint="#F4F5F6"
+            app:srcCompat="@drawable/ic_emoji_rating_1" />
+
+        <ImageButton
+            android:id="@+id/rating2"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:padding="5dp"
+            android:layout_marginHorizontal="4dp"
+            android:background="@drawable/psd_rounded_rectangle_bg_6"
+            android:backgroundTint="#F4F5F6"
+            app:srcCompat="@drawable/ic_emoji_rating_2" />
+
+        <ImageButton
+            android:id="@+id/rating3"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:padding="5dp"
+            android:layout_marginHorizontal="4dp"
+            android:background="@drawable/psd_rounded_rectangle_bg_6"
+            android:backgroundTint="#F4F5F6"
+            app:srcCompat="@drawable/ic_emoji_rating_3" />
+
+        <ImageButton
+            android:id="@+id/rating4"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:padding="5dp"
+            android:layout_marginHorizontal="4dp"
+            android:background="@drawable/psd_rounded_rectangle_bg_6"
+            android:backgroundTint="#F4F5F6"
+            app:srcCompat="@drawable/ic_emoji_rating_4" />
+
+
+        <ImageButton
+            android:id="@+id/rating5"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:padding="5dp"
+            android:layout_marginHorizontal="4dp"
+            android:background="@drawable/psd_rounded_rectangle_bg_6"
+            android:backgroundTint="#F4F5F6"
+            app:srcCompat="@drawable/ic_emoji_rating_5" />
+
+    </LinearLayout>
+
+</androidx.constraintlayout.widget.ConstraintLayout>

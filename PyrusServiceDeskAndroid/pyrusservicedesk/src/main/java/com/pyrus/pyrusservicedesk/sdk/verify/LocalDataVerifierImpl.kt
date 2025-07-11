@@ -8,9 +8,10 @@ internal class LocalDataVerifierImpl(private val fileResolver: FileResolver) : L
 
     override fun isLocalCommentEmpty(localComment: Comment): Boolean {
         return localComment.body?.isEmpty() == true
-                && (localComment.attachments.isNullOrEmpty()
-                || !localComment.attachments.any { isLocalFileExists(it.localUri) })
-                && localComment.rating == null
+            && (localComment.attachments.isNullOrEmpty()
+            || !localComment.attachments.any { isLocalFileExists(it.localUri) })
+            && localComment.rating == null
+            && localComment.ratingComment == null
     }
 
     override fun isLocalFileExists(localFileUri: Uri?): Boolean {
