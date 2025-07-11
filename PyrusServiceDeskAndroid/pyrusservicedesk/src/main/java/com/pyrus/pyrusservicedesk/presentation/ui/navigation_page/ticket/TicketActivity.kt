@@ -37,6 +37,7 @@ import com.pyrus.pyrusservicedesk.presentation.ui.navigation_page.ticket.entries
 import com.pyrus.pyrusservicedesk.presentation.ui.view.recyclerview.item_decorators.SpaceItemDecoration
 import com.pyrus.pyrusservicedesk.sdk.data.Attachment
 import com.pyrus.pyrusservicedesk.sdk.data.intermediate.FileData
+import com.pyrus.pyrusservicedesk.sdk.data.intermediate.SatisfactionDisplayType
 import com.pyrus.pyrusservicedesk.utils.ConfigUtils
 import com.pyrus.pyrusservicedesk.utils.RequestUtils.Companion.getFileUrl
 import com.pyrus.pyrusservicedesk.utils.getColorOnBackground
@@ -306,10 +307,10 @@ internal class TicketActivity : ConnectionActivityBase<TicketViewModel>(TicketVi
     private fun setRatingUi(ratingEntry: RatingEntry) {
         viewModel.setRateUsText(ratingEntry.ratingText)
         binding.rating.rateUsText.text = ratingEntry.ratingText
-        binding.rating.ratingTextRv.isVisible = ratingEntry.ratingSettings?.type == 3 //TODO kate
-        binding.rating.smileLl5.isVisible = ratingEntry.ratingSettings?.type == 1 && ratingEntry.ratingSettings.size == 5
+        binding.rating.ratingTextRv.isVisible = SatisfactionDisplayType.fromInt(ratingEntry.ratingSettings?.type) == SatisfactionDisplayType.Text
+        binding.rating.smileLl5.isVisible = SatisfactionDisplayType.fromInt(ratingEntry.ratingSettings?.type) == SatisfactionDisplayType.Emoji && ratingEntry.ratingSettings?.size == 5
         binding.rating.smileLl.isVisible = getSmileLlVisibility(ratingEntry)
-        binding.rating.likeLl.isVisible = ratingEntry.ratingSettings?.type == 2
+        binding.rating.likeLl.isVisible = SatisfactionDisplayType.fromInt(ratingEntry.ratingSettings?.type) == SatisfactionDisplayType.Like
 
         if (getSmileLlVisibility(ratingEntry)) {
             binding.rating.rating2Mini.isVisible = ratingEntry.ratingSettings?.size == 3
@@ -339,8 +340,8 @@ internal class TicketActivity : ConnectionActivityBase<TicketViewModel>(TicketVi
     }
 
     private fun getSmileLlVisibility(ratingEntry: RatingEntry): Boolean {
-        return ratingEntry.ratingSettings?.type == 1
-            && ratingEntry.ratingSettings.size != null
+        return SatisfactionDisplayType.fromInt(ratingEntry.ratingSettings?.type) == SatisfactionDisplayType.Emoji
+            && ratingEntry.ratingSettings?.size != null
             && ratingEntry.ratingSettings.size < 5
     }
 

@@ -13,9 +13,19 @@ data class RatingSettings (
     val ratingTextValues: List<RatingTextValues>?,
 )
 
-enum class SatisfactionDisplayType {
-    None,
-    Emoji,
-    Like,
-    Text
+enum class SatisfactionDisplayType(val  value: Int) {
+    None(0),
+    Emoji(1),
+    Like(2),
+    Text(3);
+
+    companion object {
+        fun fromInt(value: Int?): SatisfactionDisplayType? {
+            return if (value == null) {
+                null
+            } else {
+                entries.firstOrNull { it.value == value }
+            }
+        }
+    }
 }
