@@ -347,7 +347,7 @@ internal class TicketViewModel(
         }
         val toPublish = mutableListOf<TicketEntry>().apply {
             val freshComments = ArrayList<Comment>()
-            val welcomeMessage = ConfigUtils.getWelcomeMessage()
+            val welcomeMessage = freshList.welcomeMessage ?: ConfigUtils.getWelcomeMessage()
             if (welcomeMessage != null) {
                 val firstComment = freshList.comments.firstOrNull()
                 val welcomeCommentDate = firstComment?.creationDate ?: Date().apply { time = System.currentTimeMillis() }

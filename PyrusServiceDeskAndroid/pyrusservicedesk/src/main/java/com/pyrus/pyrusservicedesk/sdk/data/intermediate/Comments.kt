@@ -18,6 +18,9 @@ internal data class Comments(
     @SerializedName("show_rating_text")
     val showRatingText: String = "",
 
+    @SerializedName("welcome_message")
+    val welcomeMessage: String? = null,
+
     @SerializedName("rating_settings")
     val ratingSettings: RatingSettings? = null,
 )
