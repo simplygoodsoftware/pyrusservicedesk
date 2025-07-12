@@ -1,1 +1,68 @@
 
+
+"Last_Message" = "Ceci est le dernier message de cette conversation";
+"Comment" = "Commentaire...";
+"Default_User_Name" = "Invité(e)";
+"Uploading" = "Téléchargement en cours...";
+"Empty_Description" = "Vide";
+"All_Conversations" = "Toutes les conversations";
+"Support_Default_Name" = "Soutien";
+
+//Buttons' Title
+"New_Conversation" = "Nouvelle conversation";
+"New_Conversation_Short" = "Créer";
+"Cancel" = "Annuler";
+"Settings" = "Paramètres";
+"Send" = "Envoyer";
+"Back" = "Arrière";
+"Done" = "Fait";
+"CancelDownload" = "Annuler le téléchargement";
+"FileLoadError" = "Impossible de charger l'aperçu du fichier";
+"NoPreviewAvailable" = "Aucun aperçu disponible";
+"OpenWith" = "Ouvrir avec";
+"RetryButton" = "Réessayer";
+"DeleteButton" = "Supprimer";
+
+//For attachments
+"Camera" = "Prendre une photo ou une vidéo";
+"Camera_Access_Error" = "Pas d'accès à la caméra ou au microphone";
+"Phone_Gallery" = "Galerie";
+"Phone_Gallery_Access_Error" = "Pas d'accès à la galerie du téléphone";
+"Access_Error" = "Erreur d'accès";
+"Size_Error" = "La taille du fichier ne doit pas dépasser 200 Mo.";
+"No_File_Error" = "Le fichier n'existe pas";
+
+
+//Append time from data
+"Interval_Recent" = "récent";
+"Interval_Minute" = "il y a %% min";
+"Interval_Day" = "il y a %% jours";
+"Interval_Week" = "il y a %% semaines";
+"Interval_Hour" = "il y a %% heures";
+"Interval_Mounth" = "il y a %% mois";
+"Interval_One_Year" = "il y a %% an";
+"Interval_One_End_Year" = "il y a %% ans";
+"Interval_Years_234" = "il y a %% ans";
+"Interval_Years" = "il y a %% ans";
+
+//Date as string
+"Today" = "Aujourd'hui";
+"Yesterday" = "Hier";
+"Date_Format" = "EE, dd MMM";
+"Date_Format_Year" = "EE, dd MMM, yyyy";
+"Time_Format" = "HH:mm";
+"Numbers_Date_Format" = "yyyyMMddHHmmss";
+
+//For requests
+"No_Connection" = "Pas de connexion Internet";
+"Retry" = "RÉESSAYER";
+"Error" = "Erreur";
+"AttachmentLoadError" = "Impossible de charger cette pièce jointe";
+"ErrorServerError" = "Connexion au serveur interrompue";
+"AcсessDenied" = "Accès refusé";
+"OK" = "D'ACCORD";
+"PrepareLog" = "Préparation du journal...";
+"SendLog" = "Envoyer les journaux de la bibliothèque";
+"ExternalSourceWarning" = "Ce lien mène à un %@\nVoulez-vous vraiment suivre ce lien ?";
+"ShortYes" = "Oui";
+"ShortNo" = "Non";
