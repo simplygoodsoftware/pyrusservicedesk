@@ -290,18 +290,20 @@ extension PSDChatViewController : PSDMessageInputViewDelegate{
         tableView.removeLastMessage()
         let vc = RatingCommentViewController()
         vc.delegate = self
-        if let sheet = vc.sheetPresentationController {
-            let smallId = UISheetPresentationController.Detent.Identifier("small")
-            if #available(iOS 16.0, *) {
-                let smallDetent = UISheetPresentationController.Detent.custom(identifier: smallId) { context in
-                    return context.maximumDetentValue * 0.5
+        if #available(iOS 15.0, *) {
+            if let sheet = vc.sheetPresentationController {
+                let smallId = UISheetPresentationController.Detent.Identifier("small")
+                if #available(iOS 16.0, *) {
+                    let smallDetent = UISheetPresentationController.Detent.custom(identifier: smallId) { context in
+                        return context.maximumDetentValue * 0.5
+                    }
+                    sheet.detents = [smallDetent]
+                } else {
+                    sheet.detents = [.medium()]
                 }
-                sheet.detents = [smallDetent]
-            } else {
-                sheet.detents = [.medium()]
+                sheet.prefersGrabberVisible = true
+                sheet.prefersScrollingExpandsWhenScrolledToEdge = false
             }
-            sheet.prefersGrabberVisible = true
-            sheet.prefersScrollingExpandsWhenScrolledToEdge = false
         }
         
         vc.modalPresentationStyle = .pageSheet

@@ -74,7 +74,7 @@ class RatingCommentViewController: UIViewController {
         }
 
         NSLayoutConstraint.activate([
-            titleLabel.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor, constant: 24),
+            titleLabel.topAnchor.constraint(equalTo: view.topAnchor, constant: 24),
             titleLabel.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 16),
 
             commentLabel.topAnchor.constraint(equalTo: titleLabel.bottomAnchor, constant: 24),
