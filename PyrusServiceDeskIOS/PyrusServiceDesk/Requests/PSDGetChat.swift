@@ -8,6 +8,7 @@ Get chat from server.
 struct PSDGetChat {
     private static let SHOW_RATING_KEY = "show_rating"
     private static let SHOW_RATING_TEXT_KEY = "show_rating_text"
+    private static let WELCOME_MESSAGE = "welcome_message"
     private static let KEEP_UNREAD_RATING_KEY = "keep_unread"
     private static var chatGetters : [Int: ChatGetter] = [Int: ChatGetter]()
   //  private static var sessionTask : URLSessionDataTask? = nil
@@ -106,6 +107,9 @@ struct PSDGetChat {
         let chat = PSDChat(date: Date(), messages: massages)
         chat.showRating = (response[PSDGetChat.SHOW_RATING_KEY] as? Bool) ?? false
         chat.showRatingText = response[PSDGetChat.SHOW_RATING_TEXT_KEY] as? String
+        if let welcomeMessage = response[PSDGetChat.WELCOME_MESSAGE] as? String {
+            PyrusServiceDesk.mainController?.customization?.setWelcomeMessage(welcomeMessage)
+        }
         return chat
     }
     private static func generateMessages(from array:NSArray) -> [PSDMessage]
