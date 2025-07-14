@@ -12,6 +12,7 @@ buildscript {
 
 plugins {
     id("com.google.devtools.ksp").version("2.0.21-1.0.27")
+    id "com.vanniktech.maven.publish" version "0.34.0"
 }
 
 apply plugin: 'com.android.library'
@@ -19,10 +20,10 @@ apply plugin: 'com.android.library'
 apply plugin: 'kotlin-android'
 apply plugin: 'kotlin-parcelize'
 
-apply from: "${rootDir}/scripts/publish-module.gradle"
 apply from: "${rootDir}/scripts/android.gradle"
 
 android {
+    namespace 'com.pyrus.pyrusservicedesk'
 
     defaultConfig {
         compileSdk rootProject.compileSdk

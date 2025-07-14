@@ -1,4 +1,3 @@
-apply plugin: 'io.github.gradle-nexus.publish-plugin'
 
 buildscript {
     repositories {
@@ -8,7 +7,6 @@ buildscript {
     }
     dependencies {
         classpath 'com.android.tools.build:gradle:8.9.2'
-        classpath 'io.github.gradle-nexus:publish-plugin:1.1.0'
     }
 }
 
@@ -19,22 +17,9 @@ allprojects {
     }
 }
 
-task clean(type: Delete) {
-    delete rootProject.buildDir
-}
-
 ext {
     buildTools = '29.0.2'
     minSdk = 24
     targetSdk = 35
     compileSdk = targetSdk
-
-    IS_SNAPSHOT = false
-
-    PUBLISH_GROUP_ID = 'com.pyrus'
-    VERSION = '1.6.01'
-    PUBLISH_VERSION = IS_SNAPSHOT ? VERSION + "-SNAPSHOT" : VERSION
-    PUBLISH_ARTIFACT_ID = 'servicedesk'
 }
-
-apply from: "${rootDir}/scripts/publish-root.gradle"
