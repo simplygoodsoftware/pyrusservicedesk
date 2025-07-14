@@ -11,3 +11,58 @@
 "Uploading" = "Yüklənir...";
 "OK" = "Tamam";
 "Error" = "Xəta";
+"Last_Message" = "Bu, söhbətdən gələn son mesajdır";
+"DeleteButton" = "Sil";
+"Phone_Gallery_Access_Error" = "Telefon qalereyasına giriş yoxdur";
+"Interval_One_Year" = "%% il əvvəl";
+"ErrorServerError" = "Server bağlantısı kəsildi";
+"ExternalSourceWarning" = "Bu keçid %@-a aparır\nHəqiqətən keçidi izləmək istəyirsiniz?";
+"Comment" = "Şərh...";
+"Default_User_Name" = "Qonaq";
+"Empty_Description" = "Boş";
+"All_Conversations" = "Bütün söhbətlər";
+"Support_Default_Name" = "Dəstək";
+
+//Buttons' Title
+"New_Conversation" = "Yeni söhbət";
+"New_Conversation_Short" = "Yeni";
+"CancelDownload" = "Yükləməni ləğv edin";
+"FileLoadError" = "Fayl önizləməsini yükləmək mümkün deyil";
+"NoPreviewAvailable" = "Önizləmə mövcud deyil";
+"OpenWith" = "Bununla açın";
+"RetryButton" = "Yenidən cəhd edin";
+
+//For attachments
+"Camera" = "Foto və ya video çəkin";
+"Camera_Access_Error" = "Kamera və ya mikrofona giriş yoxdur";
+"Phone_Gallery" = "Qalereya";
+"Access_Error" = "Giriş xətası";
+"Size_Error" = "Faylın ölçüsü 200 MB-dan çox olmamalıdır.";
+"No_File_Error" = "Fayl mövcud deyil";
+
+
+//Append time from data
+"Interval_Recent" = "son";
+"Interval_Minute" = "%% dəq əvvəl";
+"Interval_Hour" = "%% saat əvvəl";
+"Interval_Day" = "%% gün əvvəl";
+"Interval_Week" = "%% həftə əvvəl";
+"Interval_Mounth" = "%% ay əvvəl";
+"Interval_One_End_Year" = "%% il əvvəl";
+"Interval_Years_234" = "%% il əvvəl";
+"Interval_Years" = "%% il əvvəl";
+"Yesterday" = "Dünən";
+"Date_Format" = "dd MMM, EE";
+"Date_Format_Year" = "dd MMM, EE, yyyy";
+"Time_Format" = "hh:mm a";
+"Numbers_Date_Format" = "yyyyddMMHHmmss";
+
+//For requests
+"No_Connection" = "İnternet Bağlantısı Yoxdur";
+"Retry" = "YENİDƏN CƏHD EDİN";
+"AttachmentLoadError" = "Bu qoşmanı yükləmək mümkün deyil";
+"AcсessDenied" = "Giriş rədd edildi";
+"PrepareLog" = "Jurnal hazırlanır...";
+"SendLog" = "Kitabxana jurnallarını göndər";
+"ShortYes" = "Bəli";
+"ShortNo" = "Xeyr";
