@@ -107,8 +107,8 @@ class PSDMessageView: PSDView{
             attachmentView.addZeroConstraint([.leading,.trailing,.top,.bottom])
             recolor()
         }
-        if let rating = message.rating{
-            ratingLabel.text = rateArray[rating]
+        if let rating = message.rating {
+            ratingLabel.text = PyrusServiceDesk.ratingSettings.ratingTextValues?.first(where: {$0.rating == rating})?.text//rateArray[rating]
             if(message.attachment == nil && message.text.count == 0){
                 self.backgroundColor = .clear
             }
