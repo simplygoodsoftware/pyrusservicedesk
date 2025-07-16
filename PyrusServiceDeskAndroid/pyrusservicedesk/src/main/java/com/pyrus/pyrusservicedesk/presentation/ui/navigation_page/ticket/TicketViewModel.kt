@@ -77,6 +77,7 @@ internal class TicketViewModel(
 
     private val unreadCounter = MutableLiveData<Int>()
     private val commentDiff = MutableLiveData<DiffResultWithNewItems<TicketEntry>>()
+    private val ratingDiff = MutableLiveData<RatingEntry?>()
 
     private var ticketEntries: List<TicketEntry> = emptyList()
 
@@ -94,6 +95,8 @@ internal class TicketViewModel(
     private var userId = PyrusServiceDesk.get().userId
 
     private var currentInterval: Long = 0
+
+    private var rateUsText: String? = null
 
     init {
         draft = draftRepository.getDraft()
@@ -166,6 +169,9 @@ internal class TicketViewModel(
      * changes to UI.
      */
     fun getCommentDiffLiveData(): LiveData<DiffResultWithNewItems<TicketEntry>> = commentDiff
+
+
+    fun getRatingDiffLveData(): LiveData<RatingEntry?> = ratingDiff
 
     /**
      * Callback to be invoked when user input changed.
@@ -361,11 +367,12 @@ internal class TicketViewModel(
                 add(it)
             }
 
-            if (freshList.showRatingText.isNotBlank()) {
-                add(WelcomeMessageEntry(freshList.showRatingText))
+            if (!freshList.showRating && ratingDiff.value != null) {
+                ratingDiff.value = null
             }
-            if (freshList.showRating) {
-                add(RatingEntry())
+
+            if (freshList.showRating && freshList.showRatingText.isNotBlank()) {
+                ratingDiff.value = RatingEntry(freshList.ratingSettings, freshList.showRatingText)
             }
         }
         publishEntries(ticketEntries, toPublish)
@@ -581,6 +588,15 @@ internal class TicketViewModel(
 
     fun onRatingClick(rating: Int) =
         sendAddComment(localDataProvider.createLocalComment(rating = rating))
+
+    fun onRatingCommentSendClick(ratingText: String?) =
+        sendAddComment(localDataProvider.createLocalComment(ratingText = ratingText))
+
+    fun setRateUsText(rateUsText: String?) {
+        this.rateUsText = rateUsText
+    }
+
+    fun getRateUsText() = rateUsText
 
     fun onStart() {
         liveUpdates.increaseActiveScreenCount()

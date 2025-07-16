@@ -1,5 +1,8 @@
 package com.pyrus.pyrusservicedesk.presentation.ui.navigation_page.ticket.entries
 
-internal class RatingEntry : TicketEntry(){
-    override val type: Type = Type.Rating
-}
+import com.pyrus.pyrusservicedesk.sdk.data.intermediate.RatingSettings
+
+internal data class RatingEntry(
+    val ratingSettings: RatingSettings?,
+    val ratingText: String?,
+)
