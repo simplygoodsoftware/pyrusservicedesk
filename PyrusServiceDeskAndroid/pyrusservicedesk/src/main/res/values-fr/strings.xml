@@ -7,7 +7,7 @@
     <string name="psd_uploading">Téléchargement en cours…</string>
     <string name="psd_file_size_mb" formatted="false">%.1f Mo</string>
     <string name="psd_file_size_kb" formatted="false">%.1f Ko</string>
-    <string name="psd_time_format">hh:mm aa</string>
+    <string name="psd_time_format">HH:mm</string>
     <string name="psd_organization_support">Soutien</string>
     <string name="psd_today">Aujourd\'hui</string>
     <string name="psd_yesterday">Hier</string>
@@ -16,17 +16,17 @@
     <string name="psd_photo">Photo</string>
     <string name="psd_gallery">Galerie</string>
     <plurals name="psd_years_ago">
-        <item quantity="one">il y a %d an</item>
-        <item quantity="many">il y a %d ans</item>
-        <item quantity="other">il y a %d ans</item>
+        <item quantity="one">il y a %d ans</item>
+        <item quantity="many">il y a %d années</item>
+        <item quantity="other">il y a %d années</item>
     </plurals>
-    <string name="psd_weeks_ago" formatted="false">il y a %d s</string>
-    <string name="psd_months_ago" formatted="false">il y a %d m</string>
-    <string name="psd_days_ago" formatted="false">il y a %d j</string>
-    <string name="psd_hours_ago" formatted="false">il y a %d h</string>
-    <string name="psd_minutes_ago" formatted="false">il y a %d m</string>
+    <string name="psd_weeks_ago" formatted="false">il y a %d semaines</string>
+    <string name="psd_months_ago" formatted="false">il y a %d mois</string>
+    <string name="psd_days_ago" formatted="false">il y a %d jours</string>
+    <string name="psd_hours_ago" formatted="false">il y a %d heures</string>
+    <string name="psd_minutes_ago" formatted="false">Il y a %d minutes</string>
     <string name="psd_recent">récemment</string>
-    <string name="psd_guest">Invité</string>
+    <string name="psd_guest">Invité(e)</string>
     <string name="psd_file_size_exceeded_message" formatted="false">La taille du fichier ne doit pas dépasser %d Mo.</string>
     <string name="psd_copied_to_clipboard">Copié dans le presse-papiers</string>
     <string name="psd_download">Télécharger</string>
@@ -36,6 +36,6 @@
     <string name="psd_share">Partager</string>
     <string name="psd_delete">Supprimer</string>
     <string name="send_library_logs">Envoyer les journaux de la bibliothèque</string>
-    <string name="link_warning">Ce lien mène à un %s
-\nVoulez-vous vraiment suivre le lien \?</string>
+    <string name="link_warning">Ce lien mène à %s
+\nVoulez-vous vraiment suivre ce lien \?</string>
 </resources>
