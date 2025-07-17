@@ -33,7 +33,7 @@
     <string name="psd_delete">წაშლა</string>
     <string name="send_library_logs">ბიბლიოთეკის ლოგების გაგზავნა</string>
     <string name="psd_send">გაგზავნა</string>
-    <string name="psd_no_connection">არ არის ინტერნეტ კავშირი</string>
+    <string name="psd_no_connection">არ არის კავშირი</string>
     <string name="psd_date_format_d_m_y">MMMM d, yyyy</string>
     <string name="link_warning">ეს ბმული მიდის %s-ზე.
 \nნამდვილად გსურთ ბმულზე გადასვლა\?</string>
