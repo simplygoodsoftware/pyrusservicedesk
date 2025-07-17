@@ -1,1 +1,68 @@
 
+
+"All_Conversations" = "ყველა განხილვა";
+"Last_Message" = "ეს არის ბოლო შეტყობინება ამ საუბრიდან.";
+"Comment" = "თქვენი კომენტარი";
+"Default_User_Name" = "სტუმარი";
+"Uploading" = "ჩატვირთვა...";
+"Empty_Description" = "ცარიელი";
+"Support_Default_Name" = "მხარდაჭერა";
+
+//Buttons' Title
+"New_Conversation" = "ახალი ჩატი";
+"New_Conversation_Short" = "შექმნა";
+"Cancel" = "გაუქმება";
+"Settings" = "პარამეტრები";
+"Send" = "გაგზავნა";
+"Back" = "უკან";
+"Done" = "მზადაა";
+"CancelDownload" = "ჩატვირთვის გაუქმება";
+"FileLoadError" = "ვერ მოხერხდა ფაილის ჩატვირთვა";
+"NoPreviewAvailable" = "გადახედვა მიუწვდომელია";
+"OpenWith" = "გახსნა";
+"RetryButton" = "გამეორება";
+"DeleteButton" = "წაშლა";
+
+//For attachments
+"Camera" = "ფოტოს ან ვიდეოს გადაღება";
+"Camera_Access_Error" = "არ არის წვდომა კამერაზე ან მიკროფონზე";
+"Phone_Gallery" = "გალერეა";
+"Phone_Gallery_Access_Error" = "გალერეაზე წვდომა არ არის";
+"Access_Error" = "წვდომის შეცდომა";
+"Size_Error" = "ფაილის ზომა არ უნდა აღემატებოდეს 200 მბ-ს.";
+"No_File_Error" = "ფაილი ვერ მოიძებნა";
+
+
+//Append time from data
+"Interval_Recent" = "ახლახან";
+"Interval_Minute" = "%% წუთის უკან";
+"Interval_Hour" = "%% სთ-ს წინ";
+"Interval_Day" = "%% დღის წინ";
+"Interval_Week" = "%% კვირის წინ";
+"Interval_Mounth" = "%% წუთის წინ";
+"Interval_One_Year" = "%% წლის წინ";
+"Interval_One_End_Year" = "%% წლის წინ";
+"Interval_Years_234" = "%% წლების წინ";
+"Interval_Years" = "%% წლის წინ";
+
+//Date as string
+"Today" = "დღეს";
+"Yesterday" = "გუშინ";
+"Time_Format" = "HH:mm";
+"Numbers_Date_Format" = "yyyyMMddHHmmss";
+
+//For requests
+"No_Connection" = "ინტერნეტ კავშირი არ არის";
+"Retry" = "სცადე ხელახლა";
+"Date_Format" = "EE, dd MMM";
+"Date_Format_Year" = "EE, dd MMM, yyyy";
+"Error" = "შეცდომა";
+"AttachmentLoadError" = "ვერ ვტვირთავ ამ დანართს";
+"ErrorServerError" = "კავშირი სერვერთან შეწყდა";
+"AcсessDenied" = "არ არის წვდომა";
+"OK" = "კარგი";
+"PrepareLog" = "ლოგის მომზადება...";
+"SendLog" = "ბიბლიოთეკის ლოგების გაგზავნა";
+"ExternalSourceWarning" = "ეს ბმული მიგიყვანთ %@-ზე.\n\nნამდვილად გსურთ იქ გადასვლა?";
+"ShortYes" = "დიახ";
+"ShortNo" = "არა";
