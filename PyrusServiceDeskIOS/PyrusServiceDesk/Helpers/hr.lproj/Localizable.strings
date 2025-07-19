@@ -1,1 +1,68 @@
 
+
+"Last_Message" = "Ovo je posljednja poruka iz tog razgovora";
+"Comment" = "Komentar...";
+"Default_User_Name" = "Gost";
+"Uploading" = "Prijenos...";
+"Empty_Description" = "Prazno";
+"All_Conversations" = "Svi razgovori";
+"Support_Default_Name" = "Podrška";
+
+//Buttons' Title
+"New_Conversation" = "Novi razgovor";
+"New_Conversation_Short" = "Stvoriti";
+"Cancel" = "Otkazati";
+"Settings" = "Postavke";
+"Send" = "Poslati";
+"Back" = "Nazad";
+"Done" = "Gotovo";
+"CancelDownload" = "Otkaži preuzimanje";
+"FileLoadError" = "Nije moguće učitati pregled datoteke";
+"NoPreviewAvailable" = "Nema dostupnog pregleda";
+"OpenWith" = "Otvori uz pomoć";
+"RetryButton" = "Pokušaj ponovno";
+"DeleteButton" = "Izbrisati";
+
+//For attachments
+"Camera" = "Snimi fotografiju ili videozapis";
+"Camera_Access_Error" = "Nema pristupa kameri ili mikrofonu";
+"Phone_Gallery" = "Galerija";
+"Phone_Gallery_Access_Error" = "Nema pristupa galeriji telefona";
+"Access_Error" = "Pogreška pristupa";
+"Size_Error" = "Veličina datoteke ne smije prelaziti 200 MB.";
+"No_File_Error" = "Datoteka ne postoji";
+
+
+//Append time from data
+"Interval_Recent" = "nedavno";
+"Interval_Minute" = "prije %% min";
+"Interval_Hour" = "prije %% sati";
+"Interval_Day" = "prije %% dana";
+"Interval_Week" = "prije %% tjedana";
+"Interval_Mounth" = "prije %% minuta";
+"Interval_One_Year" = "prije %% godine";
+"Interval_One_End_Year" = "prije %% godina";
+"Interval_Years_234" = "prije %% godine";
+"Interval_Years" = "prije %% godina";
+
+//Date as string
+"Today" = "Danas";
+"Yesterday" = "Jučer";
+"Date_Format" = "EE, dd MMM";
+"Date_Format_Year" = "EE, dd MMM, yyyy";
+"Time_Format" = "HH:mm";
+"Numbers_Date_Format" = "yyyyMMddHHmmss";
+
+//For requests
+"No_Connection" = "Nema internetske veze";
+"Retry" = "POKUŠAJ PONOVO";
+"Error" = "Pogreška";
+"AttachmentLoadError" = "Ne mogu učitati ovaj privitak";
+"ErrorServerError" = "Veza sa serverom prekinuta";
+"AcсessDenied" = "Pristup odbijen";
+"OK" = "U REDU";
+"PrepareLog" = "Priprema zapisnika...";
+"SendLog" = "Pošalji zapisnike knjižnice";
+"ExternalSourceWarning" = "Ova poveznica vodi na %@\nŽeliš li zaista slijediti poveznicu?";
+"ShortYes" = "Da";
+"ShortNo" = "Ne";
