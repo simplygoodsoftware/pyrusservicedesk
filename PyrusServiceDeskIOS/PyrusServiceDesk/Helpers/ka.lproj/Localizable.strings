@@ -1,6 +1,6 @@
 
 
-"All_Conversations" = "ყველა განხილვა";
+"All_Conversations" = "ყველა საუბარი";
 "Last_Message" = "ეს არის ბოლო შეტყობინება ამ საუბრიდან.";
 "Comment" = "თქვენი კომენტარი";
 "Default_User_Name" = "სტუმარი";
@@ -42,7 +42,7 @@
 "Interval_Mounth" = "%% წუთის წინ";
 "Interval_One_Year" = "%% წლის წინ";
 "Interval_One_End_Year" = "%% წლის წინ";
-"Interval_Years_234" = "%% წლების წინ";
+"Interval_Years_234" = "%% წლის წინ";
 "Interval_Years" = "%% წლის წინ";
 
 //Date as string
