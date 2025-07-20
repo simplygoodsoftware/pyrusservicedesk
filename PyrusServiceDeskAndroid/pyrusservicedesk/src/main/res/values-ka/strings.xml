@@ -6,35 +6,35 @@
     <string name="psd_file_size_mb" formatted="false">%.1f მბ</string>
     <string name="psd_file_size_kb" formatted="false">%.1f კბ</string>
     <string name="psd_time_format">hh:mm aa</string>
-    <string name="psd_organization_support">დახმარება</string>
+    <string name="psd_organization_support">მხარდაჭერა</string>
     <string name="psd_today">დღეს</string>
     <string name="psd_yesterday">გუშინ</string>
-    <string name="psd_date_format_d_m">MMMM d</string>
+    <string name="psd_date_format_d_m">d MMMM</string>
     <string name="psd_photo">ფოტო</string>
     <string name="psd_gallery">გალერეა</string>
     <plurals name="psd_years_ago">
         <item quantity="one">%d წლის წინ</item>
         <item quantity="other">%d წლის წინ</item>
     </plurals>
-    <string name="psd_months_ago" formatted="false">%d წ წინ</string>
-    <string name="psd_weeks_ago" formatted="false">%d კვ წინ</string>
-    <string name="psd_days_ago" formatted="false">%d დ წინ</string>
-    <string name="psd_hours_ago" formatted="false">%d ს წინ</string>
-    <string name="psd_minutes_ago" formatted="false">%d წ წინ</string>
-    <string name="psd_recent">ბოლო</string>
+    <string name="psd_months_ago" formatted="false">%d თვის წინ</string>
+    <string name="psd_weeks_ago" formatted="false">%d კვირის წინ</string>
+    <string name="psd_days_ago" formatted="false">%d დღის წინ</string>
+    <string name="psd_hours_ago" formatted="false">%d საათის წინ</string>
+    <string name="psd_minutes_ago" formatted="false">%d წთ წინ</string>
+    <string name="psd_recent">ეხლახან</string>
     <string name="psd_guest">სტუმარი</string>
     <string name="psd_file_size_exceeded_message" formatted="false">ფაილის ზომა არ უნდა აღემატებოდეს %d მბ-ს.</string>
-    <string name="psd_copied_to_clipboard">კოპირებულია ბუფერში</string>
-    <string name="psd_download">ჩამოტვირთვა</string>
-    <string name="psd_downloading">ჩამოტვირთვა მიმდინარეობს…</string>
+    <string name="psd_copied_to_clipboard">დაკოპირებულია ბუფერში</string>
+    <string name="psd_download">გადმოწერა</string>
+    <string name="psd_downloading">იტვირთება…</string>
     <string name="psd_open">გახსნა</string>
-    <string name="psd_no_preview_available">წინასწარი ნახვა მიუწვდომელია</string>
+    <string name="psd_no_preview_available">გადახედვა მიუწვდომელია</string>
     <string name="psd_share">გაზიარება</string>
     <string name="psd_delete">წაშლა</string>
-    <string name="send_library_logs">ბიბლიოთეკის ლოგების გაგზავნა</string>
+    <string name="send_library_logs">ბიბლიოთეკის ჟურნალების გაგზავნა</string>
     <string name="psd_send">გაგზავნა</string>
     <string name="psd_no_connection">არ არის კავშირი</string>
-    <string name="psd_date_format_d_m_y">MMMM d, yyyy</string>
-    <string name="link_warning">ეს ბმული მიდის %s-ზე.
+    <string name="psd_date_format_d_m_y">d MMMM yyyy</string>
+    <string name="link_warning">ეს ბმული მიდის %s
 \nნამდვილად გსურთ ბმულზე გადასვლა\?</string>
 </resources>
