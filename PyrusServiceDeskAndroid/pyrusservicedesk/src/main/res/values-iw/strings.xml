@@ -19,4 +19,24 @@
     <string name="psd_delete">מחק</string>
     <string name="psd_organization_support">תמיכה</string>
     <string name="send_library_logs">שלח קבצי לוג של הספריה</string>
+    <plurals name="psd_years_ago">
+        <item quantity="one">לפני שנה %d</item>
+        <item quantity="two">לפני %d שנים</item>
+        <item quantity="many">לפני %d שנים</item>
+        <item quantity="other"></item>
+    </plurals>
+    <string name="psd_months_ago" formatted="false">לפני %d חודשים</string>
+    <string name="psd_weeks_ago" formatted="false">לפני %d שבועות</string>
+    <string name="psd_days_ago" formatted="false">לפני %d ימים</string>
+    <string name="psd_hours_ago" formatted="false">לפני %d שעות</string>
+    <string name="psd_minutes_ago" formatted="false">לפני %d דקות</string>
+    <string name="psd_recent">לא מזמן</string>
+    <string name="psd_guest">אורח</string>
+    <string name="psd_file_size_exceeded_message" formatted="false">גודל הקובץ אינו יותר להיות יותר מ%d מ״ב.</string>
+    <string name="psd_copied_to_clipboard">הועתק ללוח</string>
+    <string name="psd_download">הורדה</string>
+    <string name="psd_downloading">מוריד…</string>
+    <string name="psd_open">פתח</string>
+    <string name="link_warning">הקישור הזה מוביל ל%s
+\nהאם ברצונך לעבור לקישור\?</string>
 </resources>
