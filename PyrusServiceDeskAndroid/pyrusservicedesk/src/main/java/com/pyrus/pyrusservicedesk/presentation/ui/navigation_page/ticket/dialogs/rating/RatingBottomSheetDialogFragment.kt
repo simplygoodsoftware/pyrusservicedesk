@@ -39,10 +39,6 @@ class RatingBottomSheetDialogFragment: BottomSheetDialogFragment() {
         }
 
         binding.closeBtn.setOnClickListener { dismiss() }
-
-
-        val slideIn = AnimationUtils.loadAnimation(context, R.anim.psd_animation_window_exit)
-        view.startAnimation(slideIn)
     }
 
     companion object {
