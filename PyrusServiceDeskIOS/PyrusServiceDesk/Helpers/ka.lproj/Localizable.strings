@@ -48,7 +48,7 @@
 //Date as string
 "Today" = "დღეს";
 "Yesterday" = "გუშინ";
-"Time_Format" = "HH:mm";
+"Time_Format" = "hh:mm";
 "Numbers_Date_Format" = "yyyyMMddHHmmss";
 
 //For requests
