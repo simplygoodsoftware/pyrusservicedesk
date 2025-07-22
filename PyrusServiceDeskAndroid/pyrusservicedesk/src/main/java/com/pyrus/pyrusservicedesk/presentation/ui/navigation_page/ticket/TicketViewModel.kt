@@ -85,11 +85,11 @@ internal class TicketViewModel(
 
     private var ticketEntries: List<TicketEntry> = emptyList()
 
-    private val _onRatingClickEvent = MutableStateFlow<SingleEvent<String>?>(null)
-    val onRatingClickEvent: StateFlow<SingleEvent<String>?> = _onRatingClickEvent.asStateFlow()
+    private val onRateClickEvent = MutableStateFlow<SingleEvent<String>?>(null)
+    val onRatingClickEvent: StateFlow<SingleEvent<String>?> = onRateClickEvent.asStateFlow()
 
     private fun triggerEvent(message: String) {
-        _onRatingClickEvent.value = SingleEvent(message)
+        onRateClickEvent.value = SingleEvent(message)
     }
 
     private val mainHandler = Handler(Looper.getMainLooper())
