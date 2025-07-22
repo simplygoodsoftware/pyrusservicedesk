@@ -76,7 +76,6 @@ internal class TicketAdapter: AdapterBase<TicketEntry>() {
     private var onTextCommentLongClicked: ((String) -> Unit)? = null
     private var onErrorCommentEntryClickListener: ((CommentEntry) -> Unit)? = null
     private var recentInboundCommentPositionWithAvatar = 0
-    private var onRatingClickListener: ((Int) -> Unit)? = null
 
     override fun getItemViewType(position: Int): Int {
         return with(itemsList[position]) {
@@ -133,10 +132,6 @@ internal class TicketAdapter: AdapterBase<TicketEntry>() {
      */
     fun setOnTextCommentLongClicked(listener: (String) -> Unit) {
         onTextCommentLongClicked = listener
-    }
-
-    fun setOnRatingClickListener(listener: ((Int) -> Unit)) {
-        onRatingClickListener = listener
     }
 
     private inner class InboundCommentHolder(parent: ViewGroup) :

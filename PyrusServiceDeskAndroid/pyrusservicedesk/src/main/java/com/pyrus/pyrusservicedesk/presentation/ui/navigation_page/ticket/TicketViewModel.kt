@@ -17,6 +17,7 @@ import com.pyrus.pyrusservicedesk.presentation.call.*
 import com.pyrus.pyrusservicedesk.presentation.ui.navigation_page.ticket.entries.*
 import com.pyrus.pyrusservicedesk.presentation.ui.view.recyclerview.DiffResultWithNewItems
 import com.pyrus.pyrusservicedesk.presentation.viewmodel.ConnectionViewModelBase
+import com.pyrus.pyrusservicedesk.sdk.SingleEvent
 import com.pyrus.pyrusservicedesk.sdk.data.Attachment
 import com.pyrus.pyrusservicedesk.sdk.data.Author
 import com.pyrus.pyrusservicedesk.sdk.data.Comment
@@ -37,6 +38,9 @@ import com.pyrus.pyrusservicedesk.utils.RequestUtils.Companion.MAX_FILE_SIZE_BYT
 import com.pyrus.pyrusservicedesk.utils.RequestUtils.Companion.MAX_FILE_SIZE_MEGABYTES
 import com.pyrus.pyrusservicedesk.utils.getWhen
 import kotlinx.coroutines.*
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import java.lang.Exception
 import java.lang.Runnable
 import java.util.*
@@ -81,6 +85,13 @@ internal class TicketViewModel(
 
     private var ticketEntries: List<TicketEntry> = emptyList()
 
+    private val _onRatingClickEvent = MutableStateFlow<SingleEvent<String>?>(null)
+    val onRatingClickEvent: StateFlow<SingleEvent<String>?> = _onRatingClickEvent.asStateFlow()
+
+    private fun triggerEvent(message: String) {
+        _onRatingClickEvent.value = SingleEvent(message)
+    }
+
     private val mainHandler = Handler(Looper.getMainLooper())
     private val updateRunnable = object : Runnable {
         override fun run() {
@@ -95,8 +106,6 @@ internal class TicketViewModel(
     private var userId = PyrusServiceDesk.get().userId
 
     private var currentInterval: Long = 0
-
-    private var rateUsText: String? = null
 
     init {
         draft = draftRepository.getDraft()
@@ -586,17 +595,13 @@ internal class TicketViewModel(
         }
     }
 
-    fun onRatingClick(rating: Int) =
+    fun onRatingClick(rating: Int) {
         sendAddComment(localDataProvider.createLocalComment(rating = rating))
+        triggerEvent(ratingDiff.value?.ratingText ?: "")
+    }
 
     fun onRatingCommentSendClick(ratingText: String?) =
         sendAddComment(localDataProvider.createLocalComment(ratingText = ratingText))
-
-    fun setRateUsText(rateUsText: String?) {
-        this.rateUsText = rateUsText
-    }
-
-    fun getRateUsText() = rateUsText
 
     fun onStart() {
         liveUpdates.increaseActiveScreenCount()

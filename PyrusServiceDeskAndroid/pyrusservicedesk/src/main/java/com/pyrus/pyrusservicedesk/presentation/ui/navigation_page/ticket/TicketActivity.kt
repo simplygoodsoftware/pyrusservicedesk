@@ -21,6 +21,7 @@ import android.view.ViewTreeObserver.OnGlobalLayoutListener
 import android.view.WindowManager
 import android.widget.Toast
 import androidx.core.view.isVisible
+import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.pyrus.pyrusservicedesk.PyrusServiceDesk
 import com.pyrus.pyrusservicedesk.R
@@ -123,15 +124,9 @@ internal class TicketActivity : ConnectionActivityBase<TicketViewModel>(TicketVi
         setOnTextCommentLongClicked {
             copyToClipboard(it)
         }
-        setOnRatingClickListener { rating ->
-            onRatingClick(rating)
-        }
     }
 
     private fun onRatingClick(rating: Int) {
-        binding.rating.root.isVisible = false
-        val bottomSheet = RatingBottomSheetDialogFragment.newInstance(viewModel.getRateUsText())
-        bottomSheet.show(supportFragmentManager, bottomSheet.tag)
         viewModel.onRatingClick(rating)
     }
 
@@ -257,6 +252,17 @@ internal class TicketActivity : ConnectionActivityBase<TicketViewModel>(TicketVi
         window.clearFlags(WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS)
         window.addFlags(WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS)
         window.statusBarColor = ConfigUtils.getStatusBarColor(this)?: window.statusBarColor
+
+        lifecycleScope.launchWhenStarted {
+            viewModel.onRatingClickEvent.collect { event ->
+                event?.getContentIfNotHandled()?.let { ratingText ->
+                    binding.rating.root.isVisible = false
+                    val bottomSheet = RatingBottomSheetDialogFragment.newInstance(ratingText)
+                    bottomSheet.show(supportFragmentManager, bottomSheet.tag)
+                }
+            }
+        }
+
     }
 
     override fun onStart() {
@@ -306,7 +312,6 @@ internal class TicketActivity : ConnectionActivityBase<TicketViewModel>(TicketVi
     }
 
     private fun setRatingUi(ratingEntry: RatingEntry) {
-        viewModel.setRateUsText(ratingEntry.ratingText)
         binding.rating.rateUsText.text = ratingEntry.ratingText
         binding.rating.ratingTextRv.isVisible = SatisfactionDisplayType.fromInt(ratingEntry.ratingSettings?.type) == SatisfactionDisplayType.Text
         binding.rating.smileLl5.isVisible = SatisfactionDisplayType.fromInt(ratingEntry.ratingSettings?.type) == SatisfactionDisplayType.Emoji && ratingEntry.ratingSettings?.size == 5
