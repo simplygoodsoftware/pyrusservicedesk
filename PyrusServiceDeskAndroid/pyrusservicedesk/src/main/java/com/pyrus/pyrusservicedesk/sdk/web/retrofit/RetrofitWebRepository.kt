@@ -216,7 +216,8 @@ internal class RetrofitWebRepository(
                     cament.attachments,
                     ConfigUtils.getUserName(),
                     cament.rating,
-                    getExtraFields()
+                    comment.ratingComment,
+                    getExtraFields(),
                 )
             )
             return@withContext try {

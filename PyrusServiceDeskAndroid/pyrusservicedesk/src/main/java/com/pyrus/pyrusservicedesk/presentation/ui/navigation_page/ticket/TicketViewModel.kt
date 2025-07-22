@@ -17,6 +17,7 @@ import com.pyrus.pyrusservicedesk.presentation.call.*
 import com.pyrus.pyrusservicedesk.presentation.ui.navigation_page.ticket.entries.*
 import com.pyrus.pyrusservicedesk.presentation.ui.view.recyclerview.DiffResultWithNewItems
 import com.pyrus.pyrusservicedesk.presentation.viewmodel.ConnectionViewModelBase
+import com.pyrus.pyrusservicedesk.sdk.SingleEvent
 import com.pyrus.pyrusservicedesk.sdk.data.Attachment
 import com.pyrus.pyrusservicedesk.sdk.data.Author
 import com.pyrus.pyrusservicedesk.sdk.data.Comment
@@ -37,6 +38,9 @@ import com.pyrus.pyrusservicedesk.utils.RequestUtils.Companion.MAX_FILE_SIZE_BYT
 import com.pyrus.pyrusservicedesk.utils.RequestUtils.Companion.MAX_FILE_SIZE_MEGABYTES
 import com.pyrus.pyrusservicedesk.utils.getWhen
 import kotlinx.coroutines.*
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import java.lang.Exception
 import java.lang.Runnable
 import java.util.*
@@ -77,8 +81,16 @@ internal class TicketViewModel(
 
     private val unreadCounter = MutableLiveData<Int>()
     private val commentDiff = MutableLiveData<DiffResultWithNewItems<TicketEntry>>()
+    private val ratingDiff = MutableLiveData<RatingEntry?>()
 
     private var ticketEntries: List<TicketEntry> = emptyList()
+
+    private val onRateClickEvent = MutableStateFlow<SingleEvent<String>?>(null)
+    val onRatingClickEvent: StateFlow<SingleEvent<String>?> = onRateClickEvent.asStateFlow()
+
+    private fun triggerEvent(message: String) {
+        onRateClickEvent.value = SingleEvent(message)
+    }
 
     private val mainHandler = Handler(Looper.getMainLooper())
     private val updateRunnable = object : Runnable {
@@ -166,6 +178,9 @@ internal class TicketViewModel(
      * changes to UI.
      */
     fun getCommentDiffLiveData(): LiveData<DiffResultWithNewItems<TicketEntry>> = commentDiff
+
+
+    fun getRatingDiffLveData(): LiveData<RatingEntry?> = ratingDiff
 
     /**
      * Callback to be invoked when user input changed.
@@ -361,11 +376,12 @@ internal class TicketViewModel(
                 add(it)
             }
 
-            if (freshList.showRatingText.isNotBlank()) {
-                add(WelcomeMessageEntry(freshList.showRatingText))
+            if (!freshList.showRating && ratingDiff.value != null) {
+                ratingDiff.value = null
             }
-            if (freshList.showRating) {
-                add(RatingEntry())
+
+            if (freshList.showRating && freshList.showRatingText.isNotBlank()) {
+                ratingDiff.value = RatingEntry(freshList.ratingSettings, freshList.showRatingText)
             }
         }
         publishEntries(ticketEntries, toPublish)
@@ -579,8 +595,13 @@ internal class TicketViewModel(
         }
     }
 
-    fun onRatingClick(rating: Int) =
+    fun onRatingClick(rating: Int) {
         sendAddComment(localDataProvider.createLocalComment(rating = rating))
+        triggerEvent(ratingDiff.value?.ratingText ?: "")
+    }
+
+    fun onRatingCommentSendClick(ratingText: String?) =
+        sendAddComment(localDataProvider.createLocalComment(ratingText = ratingText))
 
     fun onStart() {
         liveUpdates.increaseActiveScreenCount()

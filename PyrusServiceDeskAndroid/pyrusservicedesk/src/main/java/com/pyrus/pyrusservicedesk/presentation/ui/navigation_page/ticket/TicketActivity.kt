@@ -16,9 +16,13 @@ import android.view.MenuInflater
 import android.view.MenuItem
 import android.view.MenuItem.SHOW_AS_ACTION_ALWAYS
 import android.view.View.NO_ID
+import android.view.ViewGroup
 import android.view.ViewTreeObserver.OnGlobalLayoutListener
 import android.view.WindowManager
 import android.widget.Toast
+import androidx.core.view.isVisible
+import androidx.lifecycle.lifecycleScope
+import androidx.recyclerview.widget.LinearLayoutManager
 import com.pyrus.pyrusservicedesk.PyrusServiceDesk
 import com.pyrus.pyrusservicedesk.R
 import com.pyrus.pyrusservicedesk.ServiceDeskConfiguration
@@ -29,11 +33,21 @@ import com.pyrus.pyrusservicedesk.presentation.ui.navigation_page.ticket.dialogs
 import com.pyrus.pyrusservicedesk.presentation.ui.navigation_page.ticket.dialogs.attach_files.AttachFileVariantsFragment
 import com.pyrus.pyrusservicedesk.presentation.ui.navigation_page.ticket.dialogs.comment_actions.PendingCommentActionSharedViewModel
 import com.pyrus.pyrusservicedesk.presentation.ui.navigation_page.ticket.dialogs.comment_actions.PendingCommentActionsDialog
+import com.pyrus.pyrusservicedesk.presentation.ui.navigation_page.ticket.dialogs.rating.RatingBottomSheetDialogFragment
+import com.pyrus.pyrusservicedesk.presentation.ui.navigation_page.ticket.dialogs.rating.RatingBottomSheetDialogFragment.Companion.RATING_COMMENT_KEY
+import com.pyrus.pyrusservicedesk.presentation.ui.navigation_page.ticket.entries.RatingEntry
 import com.pyrus.pyrusservicedesk.presentation.ui.view.recyclerview.item_decorators.SpaceItemDecoration
 import com.pyrus.pyrusservicedesk.sdk.data.Attachment
 import com.pyrus.pyrusservicedesk.sdk.data.intermediate.FileData
-import com.pyrus.pyrusservicedesk.utils.*
+import com.pyrus.pyrusservicedesk.sdk.data.intermediate.SatisfactionDisplayType
+import com.pyrus.pyrusservicedesk.utils.ConfigUtils
 import com.pyrus.pyrusservicedesk.utils.RequestUtils.Companion.getFileUrl
+import com.pyrus.pyrusservicedesk.utils.getColorOnBackground
+import com.pyrus.pyrusservicedesk.utils.getSecondaryColorOnBackground
+import com.pyrus.pyrusservicedesk.utils.getViewModel
+import com.pyrus.pyrusservicedesk.utils.isAtEnd
+import com.pyrus.pyrusservicedesk.utils.setCursorColor
+import com.pyrus.pyrusservicedesk.utils.setupWindowInsets
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
@@ -91,6 +105,10 @@ internal class TicketActivity : ConnectionActivityBase<TicketViewModel>(TicketVi
     private val commentActionsSharedViewModel: PendingCommentActionSharedViewModel by getViewModel(
         PendingCommentActionSharedViewModel::class.java)
 
+    private val ratingAdapter: RatingAdapter = RatingAdapter { rating ->
+        onRatingClick(rating)
+    }
+
     private val adapter = TicketAdapter().apply {
         setOnFileReadyForPreviewClickListener { attachment ->
             val fileData = attachment.toFileData()
@@ -106,9 +124,10 @@ internal class TicketActivity : ConnectionActivityBase<TicketViewModel>(TicketVi
         setOnTextCommentLongClicked {
             copyToClipboard(it)
         }
-        setOnRatingClickListener { rating ->
-            viewModel.onRatingClick(rating)
-        }
+    }
+
+    private fun onRatingClick(rating: Int) {
+        viewModel.onRatingClick(rating)
     }
 
     private val inputTextWatcher = object : TextWatcher {
@@ -134,6 +153,11 @@ internal class TicketActivity : ConnectionActivityBase<TicketViewModel>(TicketVi
         setNoConnectionView(binding.noConnection)
         setSupportActionBar(binding.ticketToolbar)
         setRefresher(binding.refresh)
+
+        supportFragmentManager.setFragmentResultListener(RATING_COMMENT_KEY, this) { _, bundle ->
+            val result = bundle.getString(RATING_COMMENT_KEY)
+            viewModel.onRatingCommentSendClick(result)
+        }
 
         val accentColor = ConfigUtils.getAccentColor(this)
 
@@ -178,6 +202,17 @@ internal class TicketActivity : ConnectionActivityBase<TicketViewModel>(TicketVi
             )
             itemAnimator = null
         }
+
+        binding.rating.ratingTextRv.apply {
+            adapter = this@TicketActivity.ratingAdapter
+            layoutManager = LinearLayoutManager(context)
+            addItemDecoration(
+                SpaceItemDecoration(
+                    resources.getDimensionPixelSize(R.dimen.psd_comments_item_space_double)
+                )
+            )
+        }
+
         binding.send.setOnClickListener { onSendCommentClick() }
         val stateList = ColorStateList(
             arrayOf(
@@ -217,6 +252,17 @@ internal class TicketActivity : ConnectionActivityBase<TicketViewModel>(TicketVi
         window.clearFlags(WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS)
         window.addFlags(WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS)
         window.statusBarColor = ConfigUtils.getStatusBarColor(this)?: window.statusBarColor
+
+        lifecycleScope.launchWhenStarted {
+            viewModel.onRatingClickEvent.collect { event ->
+                event?.getContentIfNotHandled()?.let { ratingText ->
+                    binding.rating.root.isVisible = false
+                    val bottomSheet = RatingBottomSheetDialogFragment.newInstance(ratingText)
+                    bottomSheet.show(supportFragmentManager, bottomSheet.tag)
+                }
+            }
+        }
+
     }
 
     override fun onStart() {
@@ -265,8 +311,60 @@ internal class TicketActivity : ConnectionActivityBase<TicketViewModel>(TicketVi
         } ?: false
     }
 
+    private fun setRatingUi(ratingEntry: RatingEntry) {
+        binding.rating.rateUsText.text = ratingEntry.ratingText
+        binding.rating.ratingTextRv.isVisible = SatisfactionDisplayType.fromInt(ratingEntry.ratingSettings?.type) == SatisfactionDisplayType.Text
+        binding.rating.smileLl5.isVisible = SatisfactionDisplayType.fromInt(ratingEntry.ratingSettings?.type) == SatisfactionDisplayType.Emoji && ratingEntry.ratingSettings?.size == 5
+        binding.rating.smileLl.isVisible = getSmileLlVisibility(ratingEntry)
+        binding.rating.likeLl.isVisible = SatisfactionDisplayType.fromInt(ratingEntry.ratingSettings?.type) == SatisfactionDisplayType.Like
+
+        if (getSmileLlVisibility(ratingEntry)) {
+            binding.rating.rating2Mini.isVisible = ratingEntry.ratingSettings?.size == 3
+        }
+
+        setRatingClickListeners()
+
+        if (ratingEntry.ratingSettings?.type == 3) {
+            val list = ratingEntry.ratingSettings.ratingTextValues?.sortedByDescending { it.rating }
+            ratingAdapter.submitList(list)
+        }
+    }
+
+    private fun setRatingClickListeners() {
+        binding.rating.rating1.setOnClickListener { onRatingClick(1) }
+        binding.rating.rating2.setOnClickListener { onRatingClick(2) }
+        binding.rating.rating3.setOnClickListener { onRatingClick(3) }
+        binding.rating.rating4.setOnClickListener { onRatingClick(4) }
+        binding.rating.rating5.setOnClickListener { onRatingClick(5) }
+
+        binding.rating.rating1Mini.setOnClickListener { onRatingClick(1) }
+        binding.rating.rating2Mini.setOnClickListener { onRatingClick(3) }
+        binding.rating.rating3Mini.setOnClickListener { onRatingClick(5) }
+
+        binding.rating.like1.setOnClickListener { onRatingClick(1) }
+        binding.rating.like2.setOnClickListener { onRatingClick(5) }
+    }
+
+    private fun getSmileLlVisibility(ratingEntry: RatingEntry): Boolean {
+        return SatisfactionDisplayType.fromInt(ratingEntry.ratingSettings?.type) == SatisfactionDisplayType.Emoji
+            && ratingEntry.ratingSettings?.size != null
+            && ratingEntry.ratingSettings.size < 5
+    }
+
     override fun startObserveData() {
         super.startObserveData()
+        viewModel.getRatingDiffLveData().observe(this) { rating ->
+            binding.rating.root.isVisible = rating != null
+            binding.gradient.isVisible = rating != null
+
+            val params = binding.refresh.layoutParams as ViewGroup.MarginLayoutParams
+            params.bottomMargin = if (rating != null) -resources.getDimension(R.dimen.psd_offset_default).toInt() else 0
+            binding.refresh.layoutParams = params
+
+            if (rating != null) {
+                setRatingUi(rating)
+            }
+        }
         viewModel.getCommentDiffLiveData().observe(this) { result ->
             val atEnd = binding.comments.isAtEnd()
             val isEmpty = binding.comments.adapter?.itemCount == 0
@@ -275,6 +373,7 @@ internal class TicketActivity : ConnectionActivityBase<TicketViewModel>(TicketVi
                 adapter.setItems(it.newItems)
                 it.diffResult.dispatchUpdatesTo(adapter)
             }
+
             if (adapter.itemCount > 0 && atEnd) {
                 if (isEmpty)
                     binding.comments.scrollToPosition(adapter.itemCount - 1)

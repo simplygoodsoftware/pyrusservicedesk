@@ -23,7 +23,6 @@ import com.pyrus.pyrusservicedesk.presentation.ui.navigation_page.ticket.entries
 import com.pyrus.pyrusservicedesk.presentation.ui.navigation_page.ticket.entries.ButtonsEntry
 import com.pyrus.pyrusservicedesk.presentation.ui.navigation_page.ticket.entries.CommentEntry
 import com.pyrus.pyrusservicedesk.presentation.ui.navigation_page.ticket.entries.DateEntry
-import com.pyrus.pyrusservicedesk.presentation.ui.navigation_page.ticket.entries.RatingEntry
 import com.pyrus.pyrusservicedesk.presentation.ui.navigation_page.ticket.entries.TicketEntry
 import com.pyrus.pyrusservicedesk.presentation.ui.navigation_page.ticket.entries.Type
 import com.pyrus.pyrusservicedesk.presentation.ui.navigation_page.ticket.entries.WelcomeMessageEntry
@@ -45,7 +44,6 @@ private const val VIEW_TYPE_COMMENT_INBOUND = 0
 private const val VIEW_TYPE_COMMENT_OUTBOUND = 1
 private const val VIEW_TYPE_WELCOME_MESSAGE = 2
 private const val VIEW_TYPE_DATE = 3
-private const val VIEW_TYPE_RATING = 4
 private const val VIEW_TYPE_COMMENT_RATING = 5
 private const val VIEW_TYPE_COMMENT_BUTTONS = 6
 
@@ -78,14 +76,12 @@ internal class TicketAdapter: AdapterBase<TicketEntry>() {
     private var onTextCommentLongClicked: ((String) -> Unit)? = null
     private var onErrorCommentEntryClickListener: ((CommentEntry) -> Unit)? = null
     private var recentInboundCommentPositionWithAvatar = 0
-    private var onRatingClickListener: ((Int) -> Unit)? = null
 
     override fun getItemViewType(position: Int): Int {
         return with(itemsList[position]) {
             return@with when {
                 type == Type.Date -> VIEW_TYPE_DATE
                 type == Type.WelcomeMessage -> VIEW_TYPE_WELCOME_MESSAGE
-                type == Type.Rating -> VIEW_TYPE_RATING
                 type == Type.Buttons -> VIEW_TYPE_COMMENT_BUTTONS
                 (this as CommentEntry).comment.rating != null -> VIEW_TYPE_COMMENT_RATING
                 this.comment.isInbound -> VIEW_TYPE_COMMENT_OUTBOUND
@@ -100,7 +96,6 @@ internal class TicketAdapter: AdapterBase<TicketEntry>() {
             VIEW_TYPE_COMMENT_INBOUND -> InboundCommentHolder(parent)
             VIEW_TYPE_COMMENT_OUTBOUND -> OutboundCommentHolder(parent)
             VIEW_TYPE_WELCOME_MESSAGE -> WelcomeMessageHolder(parent)
-            VIEW_TYPE_RATING -> RatingHolder(parent)
             VIEW_TYPE_COMMENT_RATING -> RatingCommentHolder(parent)
             VIEW_TYPE_COMMENT_BUTTONS -> ButtonsHolder(parent)
             else -> DateViewHolder(parent)
@@ -137,10 +132,6 @@ internal class TicketAdapter: AdapterBase<TicketEntry>() {
      */
     fun setOnTextCommentLongClicked(listener: (String) -> Unit) {
         onTextCommentLongClicked = listener
-    }
-
-    fun setOnRatingClickListener(listener: ((Int) -> Unit)) {
-        onRatingClickListener = listener
     }
 
     private inner class InboundCommentHolder(parent: ViewGroup) :
@@ -355,34 +346,6 @@ internal class TicketAdapter: AdapterBase<TicketEntry>() {
         }
     }
 
-    private inner class RatingHolder(parent: ViewGroup) :
-        ViewHolderBase<RatingEntry>(parent, R.layout.psd_view_holder_rating) {
-
-        private val rating1 = itemView.findViewById<ImageView>(R.id.rating1)
-        private val rating2 = itemView.findViewById<ImageView>(R.id.rating2)
-        private val rating3 = itemView.findViewById<ImageView>(R.id.rating3)
-        private val rating4 = itemView.findViewById<ImageView>(R.id.rating4)
-        private val rating5 = itemView.findViewById<ImageView>(R.id.rating5)
-
-        init {
-            ConfigUtils.getSecondaryColorOnMainBackground(itemView.context).apply {
-                rating1.setBackgroundColor(this)
-                rating2.setBackgroundColor(this)
-                rating3.setBackgroundColor(this)
-                rating4.setBackgroundColor(this)
-                rating5.setBackgroundColor(this)
-            }
-        }
-
-        override fun bindItem(item: RatingEntry) {
-            super.bindItem(item)
-            rating1.setOnClickListener { onRatingClickListener?.invoke(1)}
-            rating2.setOnClickListener { onRatingClickListener?.invoke(2)}
-            rating3.setOnClickListener { onRatingClickListener?.invoke(3)}
-            rating4.setOnClickListener { onRatingClickListener?.invoke(4)}
-            rating5.setOnClickListener { onRatingClickListener?.invoke(5)}
-        }
-    }
 
     private fun Int?.ratingToEmojiRes(): Int {
         return when (this) {

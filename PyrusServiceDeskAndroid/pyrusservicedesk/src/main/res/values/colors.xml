@@ -4,6 +4,7 @@
     <color name="psd_accent_secondary">#F4C000</color>
     <color name="psd_text_color_primary">#000000</color>
     <color name="psd_text_color_secondary">#999999</color>
+    <color name="psd_text_color_bg950">#1F2124</color>
     <color name="psd_text_color_primary_inverse">#FFFFFF</color>
     <color name="psd_text_color_secondary_inverse">#666666</color>
     <color name="psd_action_bar_icon_color">#666666</color>
