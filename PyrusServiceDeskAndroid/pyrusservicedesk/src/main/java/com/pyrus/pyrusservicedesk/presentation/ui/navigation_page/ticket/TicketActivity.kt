@@ -314,7 +314,7 @@ internal class TicketActivity : ConnectionActivityBase<TicketViewModel>(TicketVi
     private fun setRatingUi(ratingEntry: RatingEntry) {
         binding.rating.rateUsText.text = ratingEntry.ratingText
         binding.rating.ratingTextRv.isVisible = SatisfactionDisplayType.fromInt(ratingEntry.ratingSettings?.type) == SatisfactionDisplayType.Text
-        binding.rating.smileLl5.isVisible = SatisfactionDisplayType.fromInt(ratingEntry.ratingSettings?.type) == SatisfactionDisplayType.Emoji && ratingEntry.ratingSettings?.size == 5
+        binding.rating.smileLl5.isVisible = getSmile5LlVisibility(ratingEntry)
         binding.rating.smileLl.isVisible = getSmileLlVisibility(ratingEntry)
         binding.rating.likeLl.isVisible = SatisfactionDisplayType.fromInt(ratingEntry.ratingSettings?.type) == SatisfactionDisplayType.Like
 
@@ -349,6 +349,12 @@ internal class TicketActivity : ConnectionActivityBase<TicketViewModel>(TicketVi
         return SatisfactionDisplayType.fromInt(ratingEntry.ratingSettings?.type) == SatisfactionDisplayType.Emoji
             && ratingEntry.ratingSettings?.size != null
             && ratingEntry.ratingSettings.size < 5
+    }
+
+    private fun getSmile5LlVisibility(ratingEntry: RatingEntry): Boolean {
+        return SatisfactionDisplayType.fromInt(ratingEntry.ratingSettings?.type) == SatisfactionDisplayType.Emoji
+            && ratingEntry.ratingSettings?.size == 5
+            || ratingEntry.ratingSettings == null
     }
 
     override fun startObserveData() {
