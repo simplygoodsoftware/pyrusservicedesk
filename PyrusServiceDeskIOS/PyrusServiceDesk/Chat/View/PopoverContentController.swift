@@ -13,7 +13,7 @@ class PopoverContentController: UIViewController, UITableViewDataSource, UITable
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        view.backgroundColor = .backgroundColor
+        view.backgroundColor = .psdBackground
     
        
         tableView.dataSource = self

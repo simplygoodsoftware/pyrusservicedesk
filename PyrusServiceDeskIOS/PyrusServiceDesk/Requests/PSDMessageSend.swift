@@ -129,7 +129,7 @@ struct PSDMessageSend {
         
         let commandId = messageToPass.commandId ?? UUID().uuidString
         delegate?.addMessageToPass(message: messageToPass, commandId: commandId)
-        let requestNewTicket = PyrusServiceDesk.multichats && (messageToPass.ticketId == 0 || messageToPass.requestNewTicket)
+        let requestNewTicket = (messageToPass.ticketId == 0 || messageToPass.requestNewTicket)
         var attachmentsData: [AttachmentData]?
         
 //        if let attachments = messageToPass.attachments, attachments.count > 0 {

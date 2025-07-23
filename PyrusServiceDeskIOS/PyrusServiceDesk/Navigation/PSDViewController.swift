@@ -29,9 +29,9 @@ extension PSDViewController: Recolorable {
         }
     }
     @objc func recolor() {
-        guard PyrusServiceDesk.mainController?.customization?.chatTitleColor != nil || PyrusServiceDesk.mainController?.customization?.customFontName != nil  else {
-            return
-        }
+//        guard PyrusServiceDesk.mainController?.customization?.chatTitleColor != nil || PyrusServiceDesk.mainController?.customization?.customFontName != nil  else {
+//            return
+//        }
         navigationItem.titleView = customNavigationTitle()
         view.sizeToFit()
         navigationController?.navigationBar.layoutIfNeeded()

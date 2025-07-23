@@ -307,7 +307,7 @@ import UIKit
             EventsLogger.logEvent(.openPSD)
             let psd : PyrusServiceDeskController = PyrusServiceDeskController.init(configuration, customPresent: viewController == nil)
             if let viewController = viewController {
-                psd.show(on: viewController, completion: completion, animated: animated)
+                psd.show(on: viewController, completion: completion, animated: true)
             } else {
                 return psd
             }
@@ -443,6 +443,7 @@ import UIKit
         if needReloadUI {
             PyrusServiceDesk.mainController?.updateTitleChat()
         }
+        PyrusServiceDesk.syncManager.firstLoad = true
 //        PyrusServiceDesk.repository.clear()
 //        PSDMessagesStorage.cleanStorage()
     }
@@ -608,6 +609,7 @@ import UIKit
             }
         }
     }
+    static var allMessages: [PSDMessage] = [PSDMessage]()
     static var casheChats: [PSDChat] = [PSDChat]()
 
     ///The main view controller. nil - if chat was closed.

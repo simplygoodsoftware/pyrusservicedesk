@@ -46,7 +46,7 @@ class PSDChatViewController: PSDViewController {
     private lazy var badgeView: UIView = {
         let view = UIView()
         view.layer.cornerRadius = 8
-        view.backgroundColor = .hRose
+        view.backgroundColor = .red//.hRose
         view.translatesAutoresizingMaskIntoConstraints = false
         return view
     }()
@@ -170,7 +170,7 @@ class PSDChatViewController: PSDViewController {
                     //                        oldInset = 0
                 }
                 
-                if isFirstKeyboardShow {
+                if isFirstKeyboardShow && PyrusServiceDesk.multichats {
                     UIView.performWithoutAnimation {
                         self.tableView.contentOffset.y -= keyboardHeight - oldInset
                     }
@@ -274,6 +274,8 @@ class PSDChatViewController: PSDViewController {
         super.viewWillAppear(animated)
         startGettingInfo()
         resizeTable()
+        messageInputView.isHidden = false
+        interactor.doInteraction(.viewWillAppear)
         
         NotificationCenter.default.addObserver(self, selector: #selector(appEnteredBackground), name: UIApplication.didEnterBackgroundNotification, object: nil)
         NotificationCenter.default.addObserver(self, selector: #selector(appEnteredForeground), name: UIApplication.willEnterForegroundNotification, object: nil)
@@ -284,9 +286,11 @@ class PSDChatViewController: PSDViewController {
     override func viewDidAppear(_ animated: Bool) {
         super.viewDidAppear(animated)
         tableView.isVisible = true
-        UIView.performWithoutAnimation {
-//            self.becomeFirstResponder()
-//            messageInputView.inputTextView.resignFirstResponder()
+        if !PyrusServiceDesk.multichats {
+            UIView.performWithoutAnimation {
+                self.becomeFirstResponder()
+                messageInputView.inputTextView.resignFirstResponder()
+            }
         }
         interactor.doInteraction(.viewDidAppear)
     }
@@ -295,7 +299,11 @@ class PSDChatViewController: PSDViewController {
         super.viewWillDisappear(animated)
         NotificationCenter.default.removeObserver(self)
         EventsLogger.logEvent(.resignFirstResponder, additionalInfo: "hideAllKeyboard() called in viewWillDisappear")
-//        hideAllKeyboard()
+        if !PyrusServiceDesk.multichats {
+            hideAllKeyboard()
+            messageInputView.isHidden = true
+        }
+        
         self.tableView.removeListeners()
         interactor.doInteraction(.viewWillDisappear)
         
@@ -606,7 +614,9 @@ private extension PSDChatViewController {
     
     func dataIsShown() {
         if firstLoad {
-           // self.messageInputView.inputTextView.becomeFirstResponder()
+//            if !PyrusServiceDesk.multichats {
+//                self.messageInputView.inputTextView.becomeFirstResponder()
+//            }
             firstLoad = false
         }
     }
@@ -690,8 +700,7 @@ extension PSDChatViewController: PSDChatViewProtocol {
             }
         case .updateInfo(ticketId: let ticketId, userName: let userName, createdAt: let createdAt):
             popoverContentController = PopoverContentController(ticketId: ticketId, userName: userName, createdAt: createdAt)
-        //    chatInfoView.updateItems(items: [ticketId, userName, createdAt])
-            navigationItem.rightBarButtonItem = infoButton//UIBarButtonItem(image: UIImage(systemName: "info.circle")?.imageWith(color: PyrusServiceDesk.mainController?.customization?.themeColor ?? .systemBlue), style: .plain, target: self, action: #selector(showPopover))//infoButton
+            navigationItem.rightBarButtonItem = infoButton
         }
     }
 }

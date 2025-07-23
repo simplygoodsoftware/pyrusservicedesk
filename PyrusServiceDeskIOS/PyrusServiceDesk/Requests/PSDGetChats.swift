@@ -17,7 +17,7 @@ struct PSDGetChats {
             parameters["app_id"] = PyrusServiceDesk.clientId
             parameters["security_key"] = PyrusServiceDesk.securityKey
         }
-        parameters["need_full_info"] = PyrusServiceDesk.multichats
+        parameters["need_full_info"] = true//PyrusServiceDesk.multichats
         parameters["api_sign"] = PyrusServiceDesk.apiSign()
         parameters["author_id"] = PyrusServiceDesk.authorId
         parameters["author_name"] = PyrusServiceDesk.authorName

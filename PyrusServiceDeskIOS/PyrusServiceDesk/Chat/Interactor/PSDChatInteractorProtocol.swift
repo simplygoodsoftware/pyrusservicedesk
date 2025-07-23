@@ -16,6 +16,7 @@ enum PSDChatInteractorCommand {
     case viewDidAppear
     case scrollButtonVisibleUpdated(isHidden: Bool)
     case viewDidLayoutSubviews
+    case viewWillAppear
 }
 
 protocol PSDChatInteractorProtocol: NSObjectProtocol {

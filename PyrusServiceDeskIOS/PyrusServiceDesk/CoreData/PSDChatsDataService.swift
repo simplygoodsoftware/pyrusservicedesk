@@ -25,6 +25,8 @@ extension PSDChatsDataService: PSDChatsDataServiceProtocol {
         coreDataService.deleteAllObjects(forEntityName: "DBTicketCommand")
     }
     
+    // MARK: Clients
+    
     func saveClientModels(with clientModels: [PSDClientInfo]) {
 //        coreDataService.deleteAllObjects(forEntityName: "DBClient")
         let ids = clientModels.compactMap({ $0.clientId })
@@ -78,6 +80,8 @@ extension PSDChatsDataService: PSDChatsDataServiceProtocol {
             return []
         }
     }
+    
+    // MARK: Search
     
     func searchMessages(searchString: String) -> [SearchChatModel] {
         do {
@@ -175,6 +179,8 @@ extension PSDChatsDataService: PSDChatsDataServiceProtocol {
             }
         }
     }
+    
+    // MARK: Chats
 
     func saveChatModels(with chatModels: [PSDChat], completion: ((Result<Void, Error>) -> Void)?) {
         let ids = chatModels.compactMap({ Int64($0.chatId ?? 0) })
@@ -283,109 +289,6 @@ extension PSDChatsDataService: PSDChatsDataServiceProtocol {
                 
                 dbChat.addToMessages(dbMessage)
             }
-        }
-    }
-    
-    func saveTicketCommand(with ticketCommand: TicketCommand, completion: ((Result<Void, Error>) -> Void)?) {
-        print("commandId: \(ticketCommand.commandId), type: \(TicketCommandType(rawValue: ticketCommand.type))")
-        coreDataService.save(completion: completion)  { context in
-            let fetchRequest = DBTicketCommand.fetchRequest()
-            fetchRequest.predicate = NSPredicate(format: "id == %@", ticketCommand.commandId.lowercased() as CVarArg)
-            if let dbTicketCommand = try? context.fetch(fetchRequest).first {
-                guard let attachments = ticketCommand.params.attachments else { return }
-                dbTicketCommand.attachments = NSOrderedSet()
-                for attachmentData in attachments {
-                    let dbAttachmentData = NSEntityDescription.insertNewObject(forEntityName: "DBAttachmentData", into: context) as! DBAttachmentData
-                    dbAttachmentData.guid = attachmentData.guid
-                    dbAttachmentData.type = Int32(attachmentData.type)
-                    dbAttachmentData.name = attachmentData.name
-                    dbTicketCommand.addToAttachments(dbAttachmentData)
-                }
-                return
-            }
-            
-            let dbTicketCommand = NSEntityDescription.insertNewObject(forEntityName: "DBTicketCommand", into: context) as! DBTicketCommand
-            dbTicketCommand.id = ticketCommand.commandId.lowercased()
-            dbTicketCommand.appId = ticketCommand.appId
-            dbTicketCommand.message = ticketCommand.params.message
-            if let messageId = ticketCommand.params.messageId {
-                dbTicketCommand.messageId = Int64(messageId)
-            }
-            if let requestNewTicket = ticketCommand.params.requestNewTicket {
-                dbTicketCommand.requestNewTicket = requestNewTicket
-            }
-            if let ticketId = ticketCommand.params.ticketId {
-                dbTicketCommand.ticketId = Int64(ticketId)
-            }
-            if let rating = ticketCommand.params.rating {
-                dbTicketCommand.rating = Int32(rating)
-            }
-            dbTicketCommand.token = ticketCommand.params.token
-            dbTicketCommand.tokenType = ticketCommand.params.type
-            dbTicketCommand.userId = ticketCommand.userId
-            dbTicketCommand.type = Int32(ticketCommand.type)
-            dbTicketCommand.date = ticketCommand.params.date
-            dbTicketCommand.clientId = ticketCommand.params.messageClientId
-            
-            if dbTicketCommand.attachments == nil {
-                dbTicketCommand.attachments = NSOrderedSet()
-            }
-            
-            for attachmentData in ticketCommand.params.attachments ?? [] {
-                let dbAttachmentData = NSEntityDescription.insertNewObject(forEntityName: "DBAttachmentData", into: context) as! DBAttachmentData
-                dbAttachmentData.guid = attachmentData.guid
-                dbAttachmentData.type = Int32(attachmentData.type)
-                dbAttachmentData.name = attachmentData.name
-                dbTicketCommand.addToAttachments(dbAttachmentData)
-            }            
-        }
-    }
-    
-    func getAllCommands() -> [TicketCommand] {
-        do {
-            let dbCommands = try coreDataService.fetchCommands()
-            let commands: [TicketCommand] = dbCommands.compactMap { dbCommand in
-                guard let commandId = dbCommand.id else { return nil }
-                var attachmentsData: [AttachmentData]? = nil
-                if let dbAttachments = dbCommand.attachments?.array as? [DBAttachmentData] {
-                    let attachments: [AttachmentData] = dbAttachments.compactMap { dbAttachment in
-                        let attachment = AttachmentData(
-                            type: Int(dbAttachment.type),
-                            name: dbAttachment.name ?? "",
-                            guid: dbAttachment.guid
-                        )
-                        return attachment
-                    }
-                    attachmentsData = attachments
-                }
-                
-                let command = TicketCommand(
-                    commandId: dbCommand.id ?? "",
-                    type: TicketCommandType(rawValue: Int(dbCommand.type)) ?? .readTicket,
-                    appId: dbCommand.appId,
-                    userId: dbCommand.userId,
-                    params: TicketCommandParams(
-                        ticketId: Int(dbCommand.ticketId),
-                        appId: dbCommand.appId,
-                        requestNewTicket: dbCommand.requestNewTicket,
-                        userId: dbCommand.userId,
-                        message: dbCommand.message,
-                        attachments: attachmentsData,
-                        authorId: dbCommand.authorId,
-                        token: dbCommand.token,
-                        type: dbCommand.tokenType,
-                        messageId: Int(dbCommand.messageId),
-                        rating: Int(dbCommand.rating),
-                        date: dbCommand.date,
-                        messageClientId: dbCommand.clientId
-                    )
-                )
-                return command
-            }
-            return commands
-        } catch {
-            print("\(error)")
-            return []
         }
     }
     
@@ -588,7 +491,167 @@ extension PSDChatsDataService: PSDChatsDataServiceProtocol {
             return []
         }
     }
-
+    
+    func getChatsHeaders() -> [PSDChat] {
+        do {
+            let dbChats = try coreDataService.fetchChats()
+            let chats: [PSDChat] = dbChats.compactMap { dbChat in
+                let chat = PSDChat(chatId: Int(dbChat.chatId), date: dbChat.date ?? Date(), messages: [])
+                chat.subject = dbChat.subject
+                chat.isActive = dbChat.isActive
+                chat.userId = dbChat.userId
+                chat.isRead = dbChat.isRead
+                chat.showRating = dbChat.showRating
+                chat.showRatingText = dbChat.showRatingText
+                chat.lastReadedCommentId = Int(dbChat.lastReadedCommentId)
+                
+                return chat
+            }
+            return chats
+        } catch {
+            print("\(error)")
+            return []
+        }
+    }
+    
+    func getChatsHeaders(completion: @escaping ([PSDChat]) -> Void) {
+        DispatchQueue.global(qos: .userInitiated).async { [weak self] in
+            guard let self else { return }
+            do {
+                let dbChats = try coreDataService.fetchChats()
+                let chats: [PSDChat] = dbChats.compactMap { dbChat in
+                    let chat = PSDChat(chatId: Int(dbChat.chatId),
+                                       date: dbChat.date ?? Date(),
+                                       messages: [])
+                    chat.subject = dbChat.subject
+                    chat.isActive = dbChat.isActive
+                    chat.userId = dbChat.userId
+                    chat.isRead = dbChat.isRead
+                    chat.showRating = dbChat.showRating
+                    chat.showRatingText = dbChat.showRatingText
+                    chat.lastReadedCommentId = Int(dbChat.lastReadedCommentId)
+                    
+                    return chat
+                }
+                
+                DispatchQueue.main.async {
+                    completion(chats)
+                }
+                
+            } catch {
+                print("Error fetching chats: \(error)")
+                DispatchQueue.main.async {
+                    completion([])
+                }
+            }
+        }
+    }
+    
+    // MARK: Commands
+    
+    func saveTicketCommand(with ticketCommand: TicketCommand, completion: ((Result<Void, Error>) -> Void)?) {
+//        print("commandId: \(ticketCommand.commandId), type: \(TicketCommandType(rawValue: ticketCommand.type))")
+        coreDataService.save(completion: completion)  { context in
+            let fetchRequest = DBTicketCommand.fetchRequest()
+            fetchRequest.predicate = NSPredicate(format: "id == %@", ticketCommand.commandId.lowercased() as CVarArg)
+            if let dbTicketCommand = try? context.fetch(fetchRequest).first {
+                guard let attachments = ticketCommand.params.attachments else { return }
+                dbTicketCommand.attachments = NSOrderedSet()
+                for attachmentData in attachments {
+                    let dbAttachmentData = NSEntityDescription.insertNewObject(forEntityName: "DBAttachmentData", into: context) as! DBAttachmentData
+                    dbAttachmentData.guid = attachmentData.guid
+                    dbAttachmentData.type = Int32(attachmentData.type)
+                    dbAttachmentData.name = attachmentData.name
+                    dbTicketCommand.addToAttachments(dbAttachmentData)
+                }
+                return
+            }
+            
+            let dbTicketCommand = NSEntityDescription.insertNewObject(forEntityName: "DBTicketCommand", into: context) as! DBTicketCommand
+            dbTicketCommand.id = ticketCommand.commandId.lowercased()
+            dbTicketCommand.appId = ticketCommand.appId
+            dbTicketCommand.message = ticketCommand.params.message
+            if let messageId = ticketCommand.params.messageId {
+                dbTicketCommand.messageId = Int64(messageId)
+            }
+            if let requestNewTicket = ticketCommand.params.requestNewTicket {
+                dbTicketCommand.requestNewTicket = requestNewTicket
+            }
+            if let ticketId = ticketCommand.params.ticketId {
+                dbTicketCommand.ticketId = Int64(ticketId)
+            }
+            if let rating = ticketCommand.params.rating {
+                dbTicketCommand.rating = Int32(rating)
+            }
+            dbTicketCommand.token = ticketCommand.params.token
+            dbTicketCommand.tokenType = ticketCommand.params.type
+            dbTicketCommand.userId = ticketCommand.userId
+            dbTicketCommand.type = Int32(ticketCommand.type)
+            dbTicketCommand.date = ticketCommand.params.date
+            dbTicketCommand.clientId = ticketCommand.params.messageClientId
+            
+            if dbTicketCommand.attachments == nil {
+                dbTicketCommand.attachments = NSOrderedSet()
+            }
+            
+            for attachmentData in ticketCommand.params.attachments ?? [] {
+                let dbAttachmentData = NSEntityDescription.insertNewObject(forEntityName: "DBAttachmentData", into: context) as! DBAttachmentData
+                dbAttachmentData.guid = attachmentData.guid
+                dbAttachmentData.type = Int32(attachmentData.type)
+                dbAttachmentData.name = attachmentData.name
+                dbTicketCommand.addToAttachments(dbAttachmentData)
+            }            
+        }
+    }
+    
+    func getAllCommands() -> [TicketCommand] {
+        do {
+            let dbCommands = try coreDataService.fetchCommands()
+            let commands: [TicketCommand] = dbCommands.compactMap { dbCommand in
+                guard let commandId = dbCommand.id else { return nil }
+                var attachmentsData: [AttachmentData]? = nil
+                if let dbAttachments = dbCommand.attachments?.array as? [DBAttachmentData] {
+                    let attachments: [AttachmentData] = dbAttachments.compactMap { dbAttachment in
+                        let attachment = AttachmentData(
+                            type: Int(dbAttachment.type),
+                            name: dbAttachment.name ?? "",
+                            guid: dbAttachment.guid
+                        )
+                        return attachment
+                    }
+                    attachmentsData = attachments
+                }
+                
+                let command = TicketCommand(
+                    commandId: dbCommand.id ?? "",
+                    type: TicketCommandType(rawValue: Int(dbCommand.type)) ?? .readTicket,
+                    appId: dbCommand.appId,
+                    userId: dbCommand.userId,
+                    params: TicketCommandParams(
+                        ticketId: Int(dbCommand.ticketId),
+                        appId: dbCommand.appId,
+                        requestNewTicket: dbCommand.requestNewTicket,
+                        userId: dbCommand.userId,
+                        message: dbCommand.message,
+                        attachments: attachmentsData,
+                        authorId: dbCommand.authorId,
+                        token: dbCommand.token,
+                        type: dbCommand.tokenType,
+                        messageId: Int(dbCommand.messageId),
+                        rating: Int(dbCommand.rating),
+                        date: dbCommand.date,
+                        messageClientId: dbCommand.clientId
+                    )
+                )
+                return command
+            }
+            return commands
+        } catch {
+            print("\(error)")
+            return []
+        }
+    }
+    
     func resaveBeforeDeleteCommand(commanId: String, serverTicketId: Int?, completion: ((Result<Void, Error>) -> Void)?) {
         if let serverTicketId {
             coreDataService.save(completion: completion) { context in
@@ -615,6 +678,176 @@ extension PSDChatsDataService: PSDChatsDataServiceProtocol {
             try coreDataService.deleteCommand(id: id)
         } catch {
             print("\(error)")
+        }
+    }
+    
+    // MARK: Messages
+    
+    func getAllMessages(completion: @escaping ([PSDMessage]) -> Void) {
+        DispatchQueue.global(qos: .userInitiated).async { [weak self] in
+            guard let self else { return }
+            do {
+                let dbMessages = try coreDataService.fetchMessages()
+                
+                let messages: [PSDMessage] = dbMessages.compactMap { dbMessage in
+                    guard dbMessage.text != nil || dbMessage.attachments?.count ?? 0 > 0 || (dbMessage.rating > 0) else {
+                        return nil
+                    }
+                    
+                    let user: PSDUser = dbMessage.authorId == PyrusServiceDesk.authorId ?
+                    PSDUsers.user :
+                    PSDUsers.supportUsersContain(
+                        name: dbMessage.authorName ?? "",
+                        imagePath: dbMessage.authorAvatarId ?? "",
+                        authorId: dbMessage.authorId
+                    )
+                    
+                    let message = PSDMessage(
+                        text: dbMessage.text,
+                        attachments: nil,
+                        messageId: dbMessage.messageId,
+                        owner: user,
+                        date: dbMessage.date
+                    )
+                    
+                    // Настройка свойств сообщения
+                    message.messageId = dbMessage.messageId ?? ""
+                    message.appId = dbMessage.appId
+                    message.userId = dbMessage.userId
+                    message.clientId = dbMessage.clientId ?? ""
+                    message.commandId = dbMessage.commandId
+                    message.fromStrorage = dbMessage.fromStorage
+                    message.isOutgoing = dbMessage.authorId == PyrusServiceDesk.authorId
+                    message.isRatingMessage = dbMessage.isRatingMessage
+                    message.isWelcomeMessage = dbMessage.isWelcomeMessage
+                    message.requestNewTicket = dbMessage.requestNewTicket
+                    message.ticketId = Int(dbMessage.ticketId)
+                    message.rating = Int(dbMessage.rating)
+                    message.isSupportMessage = !dbMessage.isOutgoing
+                    
+                    // Обработка состояния сообщения
+                    switch dbMessage.state {
+                    case 0: message.state = .sending
+                    case 1: message.state = .sent
+                    default: message.state = .cantSend
+                    }
+                    
+                    // Обработка вложений
+                    if let dbAttachments = dbMessage.attachments?.array as? [DBAttachment] {
+                        let attachments: [PSDAttachment] = dbAttachments.compactMap { dbAttachment in
+                            let attachment = PSDAttachment(
+                                localPath: dbAttachment.localPath,
+                                data: dbAttachment.data,
+                                serverIdentifer: dbAttachment.serverIdentifier
+                            )
+                            attachment.name = dbAttachment.name ?? ""
+                            attachment.uploadingProgress = CGFloat(dbAttachment.uploadingProgress)
+                            attachment.isImage = dbAttachment.isImage
+                            attachment.isVideo = dbAttachment.isVideo
+                            attachment.size = Int(dbAttachment.size)
+                            attachment.localId = dbAttachment.localId ?? ""
+                            return attachment
+                        }
+                        message.attachments = attachments
+                    }
+                    
+                    return message
+                }
+                
+                if let lastMessage = messages.last {
+                    PyrusServiceDesk.lastNoteId = Int(lastMessage.messageId)
+                }
+                
+                DispatchQueue.main.async {
+                    completion(messages)
+                }
+                
+            } catch {
+                print("Error fetching messages: \(error)")
+                DispatchQueue.main.async {
+                    completion([])
+                }
+            }
+        }
+    }
+    
+    func getAllMessages() -> [PSDMessage] {
+        do {
+            let dbMessages = try coreDataService.fetchMessages()
+            let messages: [PSDMessage] = dbMessages.compactMap { dbMessage in
+                guard dbMessage.text != nil || dbMessage.attachments?.count ?? 0 > 0 || (dbMessage.rating > 0) else {
+                    return nil
+                }
+                
+                let user: PSDUser = dbMessage.authorId == PyrusServiceDesk.authorId ?
+                PSDUsers.user :
+                PSDUsers.supportUsersContain(
+                    name: dbMessage.authorName ?? "",
+                    imagePath: dbMessage.authorAvatarId ?? "",
+                    authorId: dbMessage.authorId
+                )
+                
+                let message = PSDMessage(
+                    text: dbMessage.text,
+                    attachments: nil,
+                    messageId: dbMessage.messageId,
+                    owner: user,
+                    date: dbMessage.date
+                )
+                
+                // Настройка свойств сообщения
+                message.messageId = dbMessage.messageId ?? ""
+                message.appId = dbMessage.appId
+                message.userId = dbMessage.userId
+                message.clientId = dbMessage.clientId ?? ""
+                message.commandId = dbMessage.commandId
+                message.fromStrorage = dbMessage.fromStorage
+                message.isOutgoing = dbMessage.authorId == PyrusServiceDesk.authorId
+                message.isRatingMessage = dbMessage.isRatingMessage
+                message.isWelcomeMessage = dbMessage.isWelcomeMessage
+                message.requestNewTicket = dbMessage.requestNewTicket
+                message.ticketId = Int(dbMessage.ticketId)
+                message.rating = Int(dbMessage.rating)
+                message.isSupportMessage = !dbMessage.isOutgoing
+                
+                // Обработка состояния сообщения
+                switch dbMessage.state {
+                case 0: message.state = .sending
+                case 1: message.state = .sent
+                default: message.state = .cantSend
+                }
+                
+                // Обработка вложений
+                if let dbAttachments = dbMessage.attachments?.array as? [DBAttachment] {
+                    let attachments: [PSDAttachment] = dbAttachments.compactMap { dbAttachment in
+                        let attachment = PSDAttachment(
+                            localPath: dbAttachment.localPath,
+                            data: dbAttachment.data,
+                            serverIdentifer: dbAttachment.serverIdentifier
+                        )
+                        attachment.name = dbAttachment.name ?? ""
+                        attachment.uploadingProgress = CGFloat(dbAttachment.uploadingProgress)
+                        attachment.isImage = dbAttachment.isImage
+                        attachment.isVideo = dbAttachment.isVideo
+                        attachment.size = Int(dbAttachment.size)
+                        attachment.localId = dbAttachment.localId ?? ""
+                        return attachment
+                    }
+                    message.attachments = attachments
+                }
+                
+                return message
+            }
+            
+            if let lastMessage = messages.last {
+                PyrusServiceDesk.lastNoteId = Int(lastMessage.messageId)
+            }
+            
+            return messages
+            
+        } catch {
+            print("Error fetching messages: \(error)")
+            return []
         }
     }
 }

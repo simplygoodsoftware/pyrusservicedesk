@@ -164,7 +164,7 @@ class PSDMessageInputView: UIView, PSDMessageTextViewDelegate,PSDMessageSendButt
         self.recordingObject?.createWith(self)
         
         let stopView = UIImageView(image: UIImage.PSDImage(name: "stopRecord"))
-        stopView.backgroundColor = .backgroundColor
+        stopView.backgroundColor = .psdBackground
         stopView.layer.cornerRadius = 22
     }
     

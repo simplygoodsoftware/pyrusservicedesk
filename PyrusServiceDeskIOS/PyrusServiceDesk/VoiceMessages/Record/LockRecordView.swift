@@ -40,7 +40,7 @@ class LockView: UIButton {
     
     private func setupView() {
         translatesAutoresizingMaskIntoConstraints = false
-        backgroundColor = .backgroundColor
+        backgroundColor = .psdBackground
         layer.cornerRadius = 22
         alpha = 0
         isUserInteractionEnabled = false

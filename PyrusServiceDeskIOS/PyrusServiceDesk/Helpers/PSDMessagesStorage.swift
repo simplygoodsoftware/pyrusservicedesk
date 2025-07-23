@@ -403,7 +403,7 @@ struct PSDMessagesStorage {
     static func hasRatingInStorage() -> Bool {
         let messages = getMessages()
         for message in messages{
-            guard message.rating != nil else{
+            guard message.rating ?? 0 > 0 else{
                 continue
             }
             return true

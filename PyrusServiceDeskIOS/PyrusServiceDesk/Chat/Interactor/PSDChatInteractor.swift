@@ -27,7 +27,9 @@ class PSDChatInteractor: NSObject {
     private var loadingTimer: Timer?
     private var chat: PSDChat? {
         didSet {
-            presenter.doWork(.updateActive(isActive: chat?.isActive ?? true))
+            if PyrusServiceDesk.multichats {
+                presenter.doWork(.updateActive(isActive: chat?.isActive ?? true))
+            }
         }
     }
     private var messageId: String?
@@ -57,6 +59,25 @@ class PSDChatInteractor: NSObject {
         self.chat = chat
         self.fromPush = fromPush
         self.messageId = messageId
+        
+        if !PyrusServiceDesk.multichats {
+            if let lastChat = PyrusServiceDesk.chats.first {
+                let singleChat = PSDChat(
+                    chatId: lastChat.chatId,
+                    date: lastChat.date ?? Date(),
+                    messages: PyrusServiceDesk.allMessages
+                )
+                singleChat.isActive = lastChat.isActive
+                singleChat.showRating = lastChat.showRating
+                singleChat.showRatingText = lastChat.showRatingText
+                singleChat.userId = lastChat.userId ?? PyrusServiceDesk.customUserId ?? PyrusServiceDesk.userId
+                singleChat.lastReadedCommentId = lastChat.lastReadedCommentId
+                singleChat.createdAt = lastChat.createdAt
+                singleChat.lastMessageDate = lastChat.lastMessageDate
+                
+                self.chat = singleChat
+            }
+        }
         super.init()
     }
     
@@ -69,6 +90,25 @@ extension PSDChatInteractor: PSDChatInteractorProtocol {
     func doInteraction(_ action: PSDChatInteractorCommand) {
         switch action {
         case .viewDidload:
+            if !PyrusServiceDesk.multichats {
+                PyrusServiceDesk.syncManager.syncGetTickets()
+                if let lastChat = PyrusServiceDesk.chats.first {
+                    let singleChat = PSDChat(
+                        chatId: lastChat.chatId,
+                        date: lastChat.date ?? Date(),
+                        messages: PyrusServiceDesk.allMessages
+                    )
+                    singleChat.isActive = lastChat.isActive
+                    singleChat.showRating = lastChat.showRating
+                    singleChat.showRatingText = lastChat.showRatingText
+                    singleChat.userId = lastChat.userId ?? PyrusServiceDesk.customUserId ?? PyrusServiceDesk.userId
+                    singleChat.lastReadedCommentId = lastChat.lastReadedCommentId
+                    singleChat.createdAt = lastChat.createdAt
+                    singleChat.lastMessageDate = lastChat.lastMessageDate
+                    
+                    self.chat = singleChat
+                }
+            }
             isOpen = true
             presenter.doWork(.updateTitle(connectionError: !PyrusServiceDesk.syncManager.networkAvailability))
             if let chat, let chatId = chat.chatId {
@@ -106,7 +146,7 @@ extension PSDChatInteractor: PSDChatInteractorProtocol {
                     }
                 }
             }
-            if !PyrusServiceDesk.multichats || fromPush {
+            if fromPush {
                 reloadChat()
             } else {
                 beginTimer()
@@ -174,6 +214,8 @@ extension PSDChatInteractor: PSDChatInteractorProtocol {
                 )
                 presenter.doWork(.scrollToRow(indexPath: reversedIndex))
             }
+        case .viewWillAppear:
+            break
         }
     }
 }
@@ -189,7 +231,24 @@ private extension PSDChatInteractor {
     @objc func updateChats() {
         DispatchQueue.main.async { [weak self] in
             guard let self else { return }
-            let chat = PyrusServiceDesk.chats.first(where: { $0.chatId == self.chat?.chatId })
+            var chat: PSDChat? = nil
+            if PyrusServiceDesk.multichats {
+               chat = PyrusServiceDesk.chats.first(where: { $0.chatId == self.chat?.chatId })
+            } else if let lastChat = PyrusServiceDesk.chats.first {
+                let singleChat = PSDChat(
+                    chatId: lastChat.chatId,
+                    date: lastChat.date ?? Date(),
+                    messages: PyrusServiceDesk.allMessages
+                )
+                singleChat.isActive = lastChat.isActive
+                singleChat.showRating = lastChat.showRating
+                singleChat.showRatingText = lastChat.showRatingText
+                singleChat.userId = lastChat.userId ?? PyrusServiceDesk.customUserId ?? PyrusServiceDesk.userId
+                singleChat.lastReadedCommentId = lastChat.lastReadedCommentId
+                singleChat.createdAt = lastChat.createdAt
+                singleChat.lastMessageDate = lastChat.lastMessageDate
+                chat = singleChat
+            }
             if let chat {
                 updateChatInfo()
                 if chat.messages.count > self.chat?.messages.count ?? 0,
@@ -220,7 +279,7 @@ private extension PSDChatInteractor {
                 presenter.doWork(.updateTitle(connectionError: !PyrusServiceDesk.syncManager.networkAvailability))
             }
             
-            if firstLoad && !PyrusServiceDesk.multichats || fromPush {
+            if fromPush {
                 isRefresh = true
                 
                 self.updateChat(chat: chat)
@@ -295,7 +354,7 @@ private extension PSDChatInteractor {
     }
     
     func updateChatInfo() {
-        guard let chat, let ticketId = chat.chatId, ticketId != 0 else { return }
+        guard PyrusServiceDesk.multichats, let chat, let ticketId = chat.chatId, ticketId != 0 else { return }
         let userName: String
         if PyrusServiceDesk.customUserId == chat.userId {
             userName = PyrusServiceDesk.userName ?? ""
@@ -433,6 +492,18 @@ private extension PSDChatInteractor {
             if let ticketId = chat?.chatId {
                 newMessage.ticketId = ticketId
             }
+        } else {
+            let requestNewTicket = !(chat?.isActive ?? false) && chat?.chatId ?? 0 >= 0
+            newMessage.requestNewTicket = requestNewTicket
+            if requestNewTicket {
+                let nextId = PSDObjectsCreator.getNextLocalId()
+                chat?.chatId = nextId
+            }
+            
+            if let ticketId = chat?.chatId {
+                newMessage.ticketId = ticketId
+            }
+            
         }
         prepareMessageForDrawing(newMessage)
         messageToSent = newMessage

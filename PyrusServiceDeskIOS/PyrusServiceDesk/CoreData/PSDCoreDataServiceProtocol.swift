@@ -3,6 +3,7 @@ import CoreData
 
 protocol CoreDataServiceProtocol: AnyObject {
     func fetchChats() throws -> [DBChat]
+    func fetchMessages() throws -> [DBMessage]
     func fetchCommands() throws -> [DBTicketCommand]
     func fetchMessages(searchString: String) throws -> [DBMessage]
     func fetchChats(searchString: String) throws -> [DBChat]

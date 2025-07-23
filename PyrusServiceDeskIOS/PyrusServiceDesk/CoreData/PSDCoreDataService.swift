@@ -50,9 +50,34 @@ extension CoreDataService: CoreDataServiceProtocol {
             
             let endTime = DispatchTime.now()
             let nanoseconds = endTime.uptimeNanoseconds - startTime.uptimeNanoseconds
-            print("Fetch executed in: \(Double(nanoseconds)/1_000_000) ms")
+            print("Fetch chats executed in: \(Double(nanoseconds)/1_000_000) ms")
             
             return try result.get() // Разворачиваем Result
+    }
+    
+    func fetchMessages() throws -> [DBMessage] {
+         let context = viewContext
+
+            var result: Result<[DBMessage], Error> = .success([])
+            let startTime = DispatchTime.now()
+            
+            context.performAndWait {
+                do {
+                    let fetchRequest = DBMessage.fetchRequest()
+                    fetchRequest.sortDescriptors = [NSSortDescriptor(key: "date", ascending: true)]
+                    
+                    let fetchedObjects = try context.fetch(fetchRequest)
+                    result = .success(fetchedObjects)
+                } catch {
+                    result = .failure(error)
+                }
+            }
+            
+            let endTime = DispatchTime.now()
+            let nanoseconds = endTime.uptimeNanoseconds - startTime.uptimeNanoseconds
+            print("Fetch messages executed in: \(Double(nanoseconds)/1_000_000) ms")
+            
+            return try result.get()
     }
     
     func fetchMessages(searchString: String) throws -> [DBMessage] {
