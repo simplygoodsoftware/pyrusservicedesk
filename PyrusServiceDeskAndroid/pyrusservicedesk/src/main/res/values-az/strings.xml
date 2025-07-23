@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="psd_comment_input_hint">Şərh əlavə et</string>
+    <string name="psd_comment_input_hint">Şərh əlavə edin</string>
     <string name="psd_days_ago" formatted="false">%d gün əvvəl</string>
     <string name="psd_file_size_exceeded_message" formatted="false">Faylın ölçüsü %d MB-dən çox olmamalıdır.</string>
     <string name="psd_send">Göndər</string>
@@ -13,18 +13,18 @@
     <string name="psd_organization_support">Dəstək</string>
     <string name="psd_today">Bu gün</string>
     <string name="psd_yesterday">Dünən</string>
-    <string name="psd_date_format_d_m_y">MMMM d, yyyy</string>
-    <string name="psd_date_format_d_m">MMMM d</string>
+    <string name="psd_date_format_d_m_y">d MMMM, yyyy</string>
+    <string name="psd_date_format_d_m">d MMMM</string>
     <string name="psd_photo">Foto</string>
     <string name="psd_gallery">Qalereya</string>
     <plurals name="psd_years_ago">
         <item quantity="one">%d il əvvəl</item>
         <item quantity="other">%d il əvvəl</item>
     </plurals>
-    <string name="psd_months_ago" formatted="false">%d dəq əvvəl (%d ay əvvəl)</string>
+    <string name="psd_months_ago" formatted="false">%d ay əvvəl</string>
     <string name="psd_weeks_ago" formatted="false">%d h əvvəl</string>
     <string name="psd_hours_ago" formatted="false">%d saat əvvəl</string>
-    <string name="psd_minutes_ago" formatted="false">%d dəq əvvəl (%d ay əvvəl)</string>
+    <string name="psd_minutes_ago" formatted="false">%d dəq əvvəl</string>
     <string name="psd_recent">son</string>
     <string name="psd_guest">Qonaq</string>
     <string name="psd_copied_to_clipboard">Mübadilə buferinə kopyalandı</string>
@@ -32,7 +32,7 @@
     <string name="psd_download">Endirin</string>
     <string name="psd_open">Aç</string>
     <string name="psd_no_preview_available">Önizləmə mövcud deyil</string>
-    <string name="psd_share">Paylaş</string>
+    <string name="psd_share">Paylaşın</string>
     <string name="psd_delete">Sil</string>
     <string name="send_library_logs">Kitabxana qeydlərini göndər</string>
     <string name="link_warning">Bu keçid %s-ə çıxarır
