@@ -32,7 +32,7 @@ class RatingCommentViewController: UIViewController {
         textView.layer.borderWidth = 1
         textView.layer.cornerRadius = 8
         textView.font = UIFont.systemFont(ofSize: 14)
-        textView.tintColor = PyrusServiceDesk.mainController?.customization?.themeColor
+        textView.tintColor = .appColor
         textView.translatesAutoresizingMaskIntoConstraints = false
         return textView
     }()
@@ -40,7 +40,7 @@ class RatingCommentViewController: UIViewController {
     private let closeButton: UIButton = {
         let button = UIButton(type: .system)
         button.setTitle("Close".localizedPSD(), for: .normal)
-        button.setTitleColor(PyrusServiceDesk.mainController?.customization?.themeColor, for: .normal)
+        button.setTitleColor(.appColor, for: .normal)
         button.backgroundColor = UIColor(hex: "#ECEDEF")
         button.titleLabel?.font = .systemFont(ofSize: 17)
         button.layer.cornerRadius = 8
@@ -51,8 +51,8 @@ class RatingCommentViewController: UIViewController {
     private let sendButton: UIButton = {
         let button = UIButton(type: .system)
         button.setTitle("Send".localizedPSD(), for: .normal)
-        button.setTitleColor(.white, for: .normal)
-        button.backgroundColor = PyrusServiceDesk.mainController?.customization?.themeColor
+        button.setTitleColor(.appTextColor, for: .normal)
+        button.backgroundColor = .appColor
         button.titleLabel?.font = .systemFont(ofSize: 17)
         button.layer.cornerRadius = 8
         button.translatesAutoresizingMaskIntoConstraints = false

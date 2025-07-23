@@ -1,27 +1,6 @@
 import Foundation
-var rateArray = [RatingTextValue]()//[1 : "😩", 2 : "🙁", 3 : "😐", 4 : "🙂", 5 :"😄"]
+var rateArray = [RatingTextValue]()
 private let STACK_SPACING: CGFloat = 8
-
-enum EmojiRateType {
-    case smile
-    case like
-    
-    func rateArray(size: Int) -> [Int: String] {
-        switch self {
-        case .smile:
-            switch size {
-            case 2:
-                return [1: "😩", 2: "😄"]
-            case 3:
-                return [1: "😩", 2: "😐", 3: "😄"]
-            default:
-                return [1: "Ужасно", 2: "Плохо", 3: "Удовлетворительно", 4: "Хорошо", 5: "Отлично"]//[1: "😩", 2: "🙁", 3: "😐", 4: "🙂", 5: "😄"]
-            }
-        case .like:
-            return [1: "👎", 2: "👍"]
-        }
-    }
-}
 
 protocol PSDRateViewDelegate: NSObjectProtocol{
     func didTapRate(_ rateValue: Int)
