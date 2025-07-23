@@ -328,6 +328,14 @@ internal class TicketActivity : ConnectionActivityBase<TicketViewModel>(TicketVi
             val list = ratingEntry.ratingSettings.ratingTextValues?.sortedByDescending { it.rating }
             ratingAdapter.submitList(list)
         }
+
+        if (!binding.rating.ratingTextRv.isVisible
+            && !binding.rating.smileLl5.isVisible
+            && !binding.rating.smileLl.isVisible
+            && !binding.rating.likeLl.isVisible
+        ) {
+            binding.rating.smileLl5.isVisible = true
+        }
     }
 
     private fun setRatingClickListeners() {
