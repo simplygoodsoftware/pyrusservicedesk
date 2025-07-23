@@ -253,7 +253,7 @@ internal class TicketViewModel(
         var prevDateGroup: String? = null
         return foldIndexed(ArrayList(size)) { index, acc, comment ->
             comment.creationDate.getWhen(getApplication(), now).let {
-                if (index == 0 || it != prevDateGroup) {
+                if ((index == 0 || it != prevDateGroup) && !isRating(comment)) {
                     acc.add(DateEntry(it))
                     prevDateGroup = it
                 }
@@ -263,6 +263,11 @@ internal class TicketViewModel(
             }
             acc
         }
+    }
+
+    private fun isRating(comment: Comment): Boolean {
+        return comment.body.isNullOrEmpty()
+            && (!comment.ratingComment.isNullOrEmpty() || comment.rating != null)
     }
 
     private fun sendAddComment(
@@ -472,11 +477,11 @@ internal class TicketViewModel(
 
     private fun maybeAddDate(commentEntry: CommentEntry, newEntries: MutableList<TicketEntry>) {
         commentEntry.comment.creationDate.getWhen(getApplication(), Calendar.getInstance()).let {
-            if (!hasRealComments()
+            if ((!hasRealComments()
                 || newEntries.findLast { entry -> entry.type == Type.Date }
                     ?.let { dateEntry ->
                         (dateEntry as DateEntry).date == it
-                    } == false
+                    } == false) && !isRating(commentEntry.comment)
             ) {
 
                 newEntries.add(
