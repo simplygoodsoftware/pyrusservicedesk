@@ -12,7 +12,7 @@ class ClosedTicketsCell: UITableViewCell {
     
     private var isOpen: Bool = false {
         didSet {
-            openButton.setImage(UIImage(systemName: isOpen ? "chevron.up" : "chevron.down")?.imageWith(color: PyrusServiceDesk.mainController?.customization?.themeColor ?? .blue), for: .normal)
+            openButton.setImage(UIImage(systemName: isOpen ? "chevron.up" : "chevron.down")?.imageWith(color: .appColor), for: .normal)
         }
     }
     
@@ -34,7 +34,7 @@ class ClosedTicketsCell: UITableViewCell {
     
     private let openButton: UIButton = {
         let button = UIButton()
-        button.setImage(UIImage(systemName: "chevron.down")?.imageWith(color: PyrusServiceDesk.mainController?.customization?.themeColor ?? .blue), for: .normal)
+        button.setImage(UIImage(systemName: "chevron.down")?.imageWith(color: .appColor), for: .normal)
         return button;
     }()
     

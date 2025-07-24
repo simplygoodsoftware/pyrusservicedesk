@@ -64,7 +64,7 @@ class VoiceRecordView: UIImageView, CAAnimationDelegate{
     }
     private func setDesign(){
         self.backgroundColor = UIColor.clear
-        self.layer.backgroundColor = PyrusServiceDesk.mainController?.customization?.themeColor?.cgColor//UIColor .requestAcceptBtnBackground.cgColor
+        self.layer.backgroundColor = UIColor.appColor.cgColor
         self.layer.cornerRadius = VoiceRecordView.size.height / 2
         self.tintColor = .white
         clipsToBounds = true

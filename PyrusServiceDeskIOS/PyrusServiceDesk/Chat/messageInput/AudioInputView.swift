@@ -54,7 +54,7 @@ class AudioInputView: UIView {
         let view = UIView()
         view.layer.cornerRadius = 16
         view.translatesAutoresizingMaskIntoConstraints = false
-        view.backgroundColor = PyrusServiceDesk.mainController?.customization?.themeColor
+        view.backgroundColor = .appColor
         return view
     }()
     
@@ -62,16 +62,15 @@ class AudioInputView: UIView {
         let label = UILabel()
         label.text = "00:00"
         label.font = .systemFont(ofSize: 12)
-        label.textColor = .stateLabelColor//UIColor(hex: "#666666")
+        label.textColor = .stateLabelColor
         return label
     }()
     
     var slider: UISlider = {
         let slider = AudioCellSlider()
-        slider.minimumTrackTintColor = PyrusServiceDesk.mainController?.customization?.themeColor
-        slider.maximumTrackTintColor = .trackColor//UIColor(hex: "#D9D9D9")
+        slider.minimumTrackTintColor = .appColor
+        slider.maximumTrackTintColor = .trackColor
         slider.setThumbImage(UIImage.PSDImage(name: "darkCircle"), for: .normal)
-        //slider.tintColor = PyrusServiceDesk.mainController?.customization?.themeColor
         return slider
     }()
     

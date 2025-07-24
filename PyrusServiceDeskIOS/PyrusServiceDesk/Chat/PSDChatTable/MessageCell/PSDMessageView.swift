@@ -96,7 +96,7 @@ class PSDMessageView: PSDView {
         messageTextView.attributedText = message.attributedText
         messageTextView.linkTextAttributes = [
             NSAttributedString.Key.underlineStyle: NSUnderlineStyle.single.rawValue,
-            NSAttributedString.Key.foregroundColor: message.message.isOutgoing ? UIColor.white : PyrusServiceDesk.mainController?.customization?.themeColor ?? .systemBlue
+            NSAttributedString.Key.foregroundColor: message.message.isOutgoing ? UIColor.white : UIColor.appColor
         ]
         attachmentView?.removeFromSuperview()
         placeholderImageView.isHidden = message.message as? PSDPlaceholderMessage == nil

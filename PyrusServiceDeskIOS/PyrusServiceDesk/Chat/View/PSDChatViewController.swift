@@ -85,7 +85,7 @@ class PSDChatViewController: PSDViewController {
     private lazy var infoButton: UIBarButtonItem? = {
         if #available(iOS 14.0, *) {
             let button = UIBarButtonItem(image: UIImage(systemName: "info.circle"), style: .plain, target: self, action: #selector(showPopover))
-            button.tintColor = PyrusServiceDesk.mainController?.customization?.themeColor ?? .systemBlue
+            button.tintColor = .appColor
             return button
         } else {
             return nil

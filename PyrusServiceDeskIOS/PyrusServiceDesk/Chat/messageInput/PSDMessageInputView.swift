@@ -78,7 +78,7 @@ class PSDMessageInputView: UIView, PSDMessageTextViewDelegate,PSDMessageSendButt
         let button = UIButton()
         button.translatesAutoresizingMaskIntoConstraints = false
         button.setTitle("  " + "Cancel".localizedPSD(), for: .normal)
-        button.setTitleColor(PyrusServiceDesk.mainController?.customization?.themeColor, for: .normal)
+        button.setTitleColor(.appColor, for: .normal)
         button.setImage(UIImage.PSDImage(name: "arrowsLeft"), for: .normal)
         button.titleLabel?.font = UIFont.systemFont(ofSize: 16)
         button.alpha = 0

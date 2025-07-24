@@ -272,7 +272,6 @@ private extension PSDChatInteractor {
                 label.font = CustomizationHelper.systemBoldFont(ofSize: 17)
                 label.text = chat?.subject?.count ?? 0 > 0 ? chat?.subject : "NewTicket".localizedPSD()
                 label.translatesAutoresizingMaskIntoConstraints = false
-                //label.widthAnchor.constraint(equalToConstant: 200).isActive = true
                 
                 customization?.setChatTitileView(label)
                 presenter.doWork(.reloadTitle)

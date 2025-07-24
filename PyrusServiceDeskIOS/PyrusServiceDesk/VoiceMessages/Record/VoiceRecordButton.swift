@@ -66,7 +66,7 @@ import Foundation
     private(set) var isRecording: Bool = false{
         didSet{
             if self.isRecording {
-                let mainColor = PyrusServiceDesk.mainController?.customization?.themeColor ?? .blue
+                let mainColor = UIColor.appColor
                 self.setImage(VoiceRecordButton.recordOnImage, for: .normal)
                 lockView.alpha = 1
                 self.setImage(VoiceRecordButton.recordOnImage, for: .highlighted)
