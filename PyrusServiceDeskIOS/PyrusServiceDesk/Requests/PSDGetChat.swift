@@ -117,6 +117,7 @@ struct PSDGetChat {
                 print("Error decoding JSON: \(error)")
             }
         }
+        PyrusServiceDesk.ratingSettings.ratingText = chat.showRatingText
         return chat
     }
     private static func generateMessages(from array:NSArray) -> [PSDMessage]

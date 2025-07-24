@@ -2,6 +2,7 @@ struct PSDRatingSettings: Codable {
     let size: Int
     let type: Int
     let ratingTextValues: [RatingTextValue]?
+    var ratingText: String?
     
     enum CodingKeys: String, CodingKey {
         case size

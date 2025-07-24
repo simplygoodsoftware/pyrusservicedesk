@@ -10,8 +10,10 @@ class RatingCommentViewController: UIViewController {
     
     private let titleLabel: UILabel = {
         let label = UILabel()
-        label.text = "EvaluateQuality".localizedPSD()
+        label.text = PyrusServiceDesk.ratingSettings.ratingText ?? "EvaluateQuality".localizedPSD()
         label.font = UIFont.boldSystemFont(ofSize: 22)
+        label.numberOfLines = 2
+        label.textAlignment = .left
         label.textColor = .black
         label.translatesAutoresizingMaskIntoConstraints = false
         return label
@@ -76,6 +78,7 @@ class RatingCommentViewController: UIViewController {
         NSLayoutConstraint.activate([
             titleLabel.topAnchor.constraint(equalTo: view.topAnchor, constant: 24),
             titleLabel.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 16),
+            titleLabel.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -16),
 
             commentLabel.topAnchor.constraint(equalTo: titleLabel.bottomAnchor, constant: 24),
             commentLabel.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 16),

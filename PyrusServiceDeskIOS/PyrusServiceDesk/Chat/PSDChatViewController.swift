@@ -295,7 +295,7 @@ extension PSDChatViewController : PSDMessageInputViewDelegate{
                 let smallId = UISheetPresentationController.Detent.Identifier("small")
                 if #available(iOS 16.0, *) {
                     let smallDetent = UISheetPresentationController.Detent.custom(identifier: smallId) { context in
-                        return context.maximumDetentValue * 0.5
+                        return context.maximumDetentValue * 0.6
                     }
                     sheet.detents = [smallDetent]
                 } else {
