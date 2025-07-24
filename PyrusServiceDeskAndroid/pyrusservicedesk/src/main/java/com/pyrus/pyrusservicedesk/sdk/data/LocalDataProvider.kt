@@ -82,7 +82,8 @@ internal class LocalDataProvider(offlineRepository: OfflineRepository,
             localComment.creationDate,
             localComment.author,
             localComment.localId,
-            localComment.rating
+            localComment.rating,
+            localComment.ratingComment
         )
     }
 

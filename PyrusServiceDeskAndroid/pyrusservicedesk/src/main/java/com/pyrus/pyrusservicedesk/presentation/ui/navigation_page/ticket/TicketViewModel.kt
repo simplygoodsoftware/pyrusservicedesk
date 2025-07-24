@@ -123,6 +123,7 @@ internal class TicketViewModel(
         }
         maybeStartAutoRefresh()
         liveUpdates.subscribeOnUnreadTicketCountChanged(this)
+        triggerEvent("dhfbvjfk,dsjfncbvjm,dsjmfncv")
     }
 
     override fun onLoadData() {
@@ -478,10 +479,9 @@ internal class TicketViewModel(
     private fun maybeAddDate(commentEntry: CommentEntry, newEntries: MutableList<TicketEntry>) {
         commentEntry.comment.creationDate.getWhen(getApplication(), Calendar.getInstance()).let {
             if ((!hasRealComments()
-                || newEntries.findLast { entry -> entry.type == Type.Date }
-                    ?.let { dateEntry ->
-                        (dateEntry as DateEntry).date == it
-                    } == false) && !isRating(commentEntry.comment)
+                    || newEntries.findLast { entry -> entry.type == Type.Date }
+                    ?.let { dateEntry -> (dateEntry as DateEntry).date == it } == false)
+                && !isRating(commentEntry.comment)
             ) {
 
                 newEntries.add(
@@ -506,11 +506,18 @@ internal class TicketViewModel(
 
     // buttons are displayed in other entries, so if comment contains nothing but buttons we don't need it
     private fun removeEmptyComments(entries: List<TicketEntry>): List<TicketEntry> {
-        return entries.filterNot {
-            it is CommentEntry
-                    && it.comment.attachments.isNullOrEmpty()
-                    && HtmlTagUtils.cleanTags(it.comment.body ?: "").isBlank()
+        val newEntries = entries.filterNot {
+            isEmptyComment(it)
         }
+        if (newEntries.lastOrNull() is DateEntry)
+            newEntries.toMutableList().removeAt(newEntries.lastIndex)
+        return newEntries
+    }
+
+    private fun isEmptyComment(entry: TicketEntry): Boolean {
+        return entry is CommentEntry
+            && entry.comment.attachments.isNullOrEmpty()
+            && HtmlTagUtils.cleanTags(entry.comment.body ?: "").isBlank()
     }
 
     private fun addButtonsIfNeeded(newEntries: List<TicketEntry>): List<TicketEntry> {
