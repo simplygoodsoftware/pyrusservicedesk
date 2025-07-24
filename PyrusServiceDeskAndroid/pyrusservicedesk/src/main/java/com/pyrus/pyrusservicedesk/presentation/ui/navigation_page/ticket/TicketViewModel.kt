@@ -507,8 +507,8 @@ internal class TicketViewModel(
     private fun removeEmptyComments(entries: List<TicketEntry>): List<TicketEntry> {
         return entries.filterNot {
             it is CommentEntry
-                && it.comment.attachments.isNullOrEmpty()
-                && HtmlTagUtils.cleanTags(it.comment.body ?: "").isBlank()
+                    && it.comment.attachments.isNullOrEmpty()
+                    && HtmlTagUtils.cleanTags(it.comment.body ?: "").isBlank()
         }
     }
 
