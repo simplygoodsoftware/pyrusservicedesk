@@ -123,7 +123,6 @@ internal class TicketViewModel(
         }
         maybeStartAutoRefresh()
         liveUpdates.subscribeOnUnreadTicketCountChanged(this)
-        triggerEvent("dhfbvjfk,dsjfncbvjm,dsjmfncv")
     }
 
     override fun onLoadData() {
@@ -506,18 +505,11 @@ internal class TicketViewModel(
 
     // buttons are displayed in other entries, so if comment contains nothing but buttons we don't need it
     private fun removeEmptyComments(entries: List<TicketEntry>): List<TicketEntry> {
-        val newEntries = entries.filterNot {
-            isEmptyComment(it)
+        return entries.filterNot {
+            it is CommentEntry
+                && it.comment.attachments.isNullOrEmpty()
+                && HtmlTagUtils.cleanTags(it.comment.body ?: "").isBlank()
         }
-        if (newEntries.lastOrNull() is DateEntry)
-            newEntries.toMutableList().removeAt(newEntries.lastIndex)
-        return newEntries
-    }
-
-    private fun isEmptyComment(entry: TicketEntry): Boolean {
-        return entry is CommentEntry
-            && entry.comment.attachments.isNullOrEmpty()
-            && HtmlTagUtils.cleanTags(entry.comment.body ?: "").isBlank()
     }
 
     private fun addButtonsIfNeeded(newEntries: List<TicketEntry>): List<TicketEntry> {
