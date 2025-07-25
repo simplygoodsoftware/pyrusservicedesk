@@ -73,16 +73,16 @@ class PyrusServiceDeskController: PSDNavigationController {
     }
     ///Clean all saved data
     static func clean(){
-        //clean main controller
-        PyrusServiceDesk.mainController = nil
-        //remove all saved users, exept owner
-        PSDUsers.supportUsers.removeAll()
-        //remove all saved users images
-        PSDSupportImageSetter.clean()
-        //remove all info about attachment preview download
-        PSDPreviewSetter.clean()
-        //stop all loading exept chat list
-        PSDGetChat.remove()
+//        //clean main controller
+//        PyrusServiceDesk.mainController = nil
+//        //remove all saved users, exept owner
+//        PSDUsers.supportUsers.removeAll()
+//        //remove all saved users images
+//        PSDSupportImageSetter.clean()
+//        //remove all info about attachment preview download
+//        PSDPreviewSetter.clean()
+//        //stop all loading exept chat list
+//        PSDGetChat.remove()
     }
     
     

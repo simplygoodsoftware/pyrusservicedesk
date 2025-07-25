@@ -92,7 +92,7 @@ struct PSDGetChats {
     /**
      Cancel session task if its exist
      */
-    static func remove(){
+    static func remove() {
         if PSDGetChats.sessionTask != nil {
             PSDGetChats.sessionTask?.cancel()
             PSDGetChats.sessionTask = nil

@@ -42,7 +42,7 @@ class SyncManager {
     }
     
     func syncGetTickets(isFilter: Bool = false) {
-        guard PyrusServiceDesk.isStarted else { return }
+        guard PyrusServiceDesk.isStarted || !PyrusServiceDesk.multichats else { return }
         PSDMessagesStorage.loadAttachments()
         
 //        chatsDataService.deleteAllObjects()
@@ -71,7 +71,7 @@ class SyncManager {
         
         let ticketCommands = PyrusServiceDesk.repository.getCommands()
         PSDGetChats.get(commands: ticketCommands.map({ $0.toDictionary() })) { [weak self] chats, commandsResult, authorAccessDenied, clientsArray, complete in
-            guard PyrusServiceDesk.isStarted else { return }
+            guard PyrusServiceDesk.isStarted || !PyrusServiceDesk.multichats else { return }
             guard let self = self else { return }
             
             let userInfo = ["isFilter": isFilter]
@@ -91,10 +91,10 @@ class SyncManager {
                     var unreadChats = 0
                     var lasMessage: PSDMessage?
                     for chat in chats {
-                        lasMessage = chat.messages.last
                         guard !chat.isRead else {
                             continue
                         }
+                        lasMessage = chat.messages.last                        
                         unreadChats = unreadChats + 1
                     }
                     UnreadMessageManager.refreshNewMessagesCount(unreadChats > 0, lastMessage: lasMessage)
