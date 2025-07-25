@@ -6,8 +6,8 @@
     <string name="psd_no_connection">Nessuna Connessione Internet</string>
     <string name="psd_uploading">Caricamento in corso…</string>
     <string name="psd_file_size_mb" formatted="false">%.1f MB</string>
-    <string name="psd_time_format">hh:mm aa</string>
-    <string name="psd_organization_support">Assistenza</string>
+    <string name="psd_time_format">HH:mm</string>
+    <string name="psd_organization_support">Supporto</string>
     <string name="psd_today">Oggi</string>
     <string name="psd_yesterday">Ieri</string>
     <string name="psd_date_format_d_m_y">d MMMM yyyy</string>
@@ -23,19 +23,19 @@
     <string name="psd_weeks_ago" formatted="false">%d w fa</string>
     <string name="psd_days_ago" formatted="false">%d d fa</string>
     <string name="psd_hours_ago" formatted="false">%d h fa</string>
-    <string name="psd_recent">recenti</string>
+    <string name="psd_recent">recente</string>
     <string name="psd_guest">Ospite</string>
-    <string name="psd_file_size_exceeded_message" formatted="false">Le dimensioni del file non possono essere superiori ai %d MB.</string>
+    <string name="psd_file_size_exceeded_message" formatted="false">La dimensione del file non dovrebbe superare i %d MB.</string>
     <string name="psd_copied_to_clipboard">Copiato negli appunti</string>
     <string name="psd_download">Scarica</string>
     <string name="psd_open">Apri</string>
-    <string name="psd_no_preview_available">Anteprima non disponibile</string>
+    <string name="psd_no_preview_available">Nessuna anteprima disponibile</string>
     <string name="psd_share">Condividi</string>
     <string name="psd_delete">Elimina</string>
-    <string name="send_library_logs">Invia i log della Biblioteca</string>
+    <string name="send_library_logs">Manda i registri della biblioteca</string>
     <string name="psd_file_size_kb" formatted="false">%.1f KB</string>
     <string name="psd_minutes_ago" formatted="false">%d m fa</string>
     <string name="psd_downloading">Sto scaricando…</string>
     <string name="link_warning">Questo link porta a %s
-\nSei sicuro di voler seguire il link\?</string>
+\nVuoi davvero seguire il link\?</string>
 </resources>
