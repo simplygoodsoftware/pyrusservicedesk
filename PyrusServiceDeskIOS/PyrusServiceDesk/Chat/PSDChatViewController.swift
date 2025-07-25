@@ -12,7 +12,7 @@ class PSDChatViewController: PSDViewController {
     public func updateTitle(){
         designNavigation()
         self.messageInputView.setToDefault()
-        self.tableView.isLoading = false
+        self.tableView.setIsLoading(false)
         self.tableView.reloadChat()
     }
     private var tableViewTopConstant: NSLayoutConstraint?
@@ -42,7 +42,6 @@ class PSDChatViewController: PSDViewController {
             infoView.centerXAnchor.constraint(equalTo: view.centerXAnchor).isActive = true
             infoView.topAnchor.constraint(equalTo: view.topAnchor, constant: (self.navigationController?.navigationBar.frame.size.height ?? 0) +  UIApplication.shared.statusBarFrame.height).isActive = true
         }
-        
     }
     
     override func viewWillLayoutSubviews() {
@@ -119,10 +118,21 @@ class PSDChatViewController: PSDViewController {
         self.messageInputView.inputTextView.resignFirstResponder()
     }
     ///Opens chat - full reload existing data in tableView according to chat id
-    func openChat(){
-        self.messageInputView.setToDefault()
-        self.tableView.isLoading = true
-        self.tableView.reloadChat()
+    private func openChat(){
+        messageInputView.setToDefault()
+        if let messageToSend = PyrusServiceDesk.messageToSend {
+            tableView.prepare()
+            tableView.setIsLoading(true, show: false)
+            tableView.addNewRow(completion: {
+                self.tableView.setIsLoading(true)
+            }, animated: false)
+            send(messageToSend, [], animated: false)
+            PyrusServiceDesk.messageToSend = nil
+            tableView.reloadChat(clean: false)
+        } else {
+            tableView.setIsLoading(true)
+            tableView.reloadChat()
+        }
         
     }
     lazy private var messageInputView : PSDMessageInputView = {
@@ -278,13 +288,17 @@ class PSDChatViewController: PSDViewController {
         }
         becomeFirstResponder()
     }
+    
+    private func send(_ message: String, _ attachments: [PSDAttachment], animated: Bool){
+        let newMessage = PSDObjectsCreator.createMessage(message, attachments: attachments)
+        prepareMessageForDrawing(newMessage)
+        tableView.addNewRow(message: newMessage, animated: animated)
+        PSDMessageSend.pass(newMessage, delegate: self.tableView)
+    }
 }
 extension PSDChatViewController : PSDMessageInputViewDelegate{
     func send(_ message:String,_ attachments:[PSDAttachment]){
-        let newMessage = PSDObjectsCreator.createMessage(message, attachments: attachments)
-        prepareMessageForDrawing(newMessage)
-        tableView.addNewRow(message: newMessage)
-        PSDMessageSend.pass(newMessage, delegate: self.tableView)
+        send(message, attachments, animated: true)
     }
     func sendRate(_ rateValue: Int) {
         tableView.removeLastMessage()

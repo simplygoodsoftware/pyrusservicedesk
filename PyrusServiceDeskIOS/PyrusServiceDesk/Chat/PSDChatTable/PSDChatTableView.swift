@@ -143,18 +143,28 @@ class PSDChatTableView: PSDTableView {
         self.keyboardDismissMode = .interactive
         self.separatorColor = .clear
     }
-    /**
-     Reloads ChatTableView. Creates the new tableMatrix.
-     */
-    func reloadChat()  {
+    
+    func prepare() {
         self.bottomPSDRefreshControl.insetHeight = 0.0
         self.removeRefreshControls()
         heightsMap = [IndexPath : CGFloat]()
         tableMatrix = [[PSDRowMessage]()] // clean old chat
+        reloadAll()
+    }
+    /**
+     Reloads ChatTableView. Creates the new tableMatrix.
+     */
+    func reloadChat(clean: Bool = true)  {
+        self.bottomPSDRefreshControl.insetHeight = 0.0
+        self.removeRefreshControls()
         beginTimer()
-        DispatchQueue.main.async {
-            self.reloadAll()
-            self.isLoading = true
+        if clean {
+            heightsMap = [IndexPath : CGFloat]()
+            tableMatrix = [[PSDRowMessage]()] // clean old chat
+            DispatchQueue.main.async {
+                self.reloadAll()
+                self.setIsLoading(true)
+            }
         }
         DispatchQueue.global().async {
             [weak self] in
@@ -176,7 +186,7 @@ class PSDChatTableView: PSDTableView {
                     } else {
                         self.needShowRating = chat?.showRating ?? false
                         self.showRateIfNeed()
-                        self.isLoading = false
+                        self.setIsLoading(false)
                         self.buttonsView.updateWithButtons(nil, width: self.frame.size.width)
                     }
                 }
@@ -192,7 +202,7 @@ class PSDChatTableView: PSDTableView {
         needShowRating = storeChat?.showRating ?? false
         showRateIfNeed()
         
-        isLoading = false
+        setIsLoading(false)
         if let chat = storeChat {
             tableMatrix.create(from: chat)
             lastMessageFromServer = chat.messages.last
@@ -421,19 +431,19 @@ class PSDChatTableView: PSDTableView {
 
     ///Adds new row to table view to last index.
     ///- parameter message: PSDMessage object that need to be added.
-    func addNewRow(message: PSDMessage)
+    func addNewRow(message: PSDMessage, animated: Bool = true)
     {
-        if(self.numberOfRows(inSection: 0) == 0){
-            self.addNewRow(){
+        if numberOfRows(inSection: 0) == 0 {
+            self.addNewRow(completion: {
                 var lastSection = self.tableMatrix.count-1
                 let lastRowDate = self.tableMatrix.date(of:lastSection)
                 if(lastRowDate != nil && message.date.compareWithoutTime(with:lastRowDate!)  != .equal){//if massage has other date create new section
                     lastSection = lastSection + 1
                 }
                 for rowMessage in PSDObjectsCreator.parseMessageToRowMessage(message){
-                    self.addRow(at: lastSection, dataForRow: rowMessage)
+                    self.addRow(at: lastSection, dataForRow: rowMessage, animated: animated)
                 }
-            }
+            }, animated: animated)
         }
         else{
             var lastSection = self.tableMatrix.count-1
@@ -442,14 +452,17 @@ class PSDChatTableView: PSDTableView {
                 lastSection = lastSection + 1
             }
             for rowMessage in PSDObjectsCreator.parseMessageToRowMessage(message){
-                self.addRow(at: lastSection, dataForRow: rowMessage)
+                self.addRow(at: lastSection, dataForRow: rowMessage, animated: animated)
             }
         }
         buttonsView.updateWithButtons(PSDChat.draftAnswers(tableMatrix), width: frame.size.width)
-        UIView.animate(withDuration: 0.1, animations: {
-            self.layoutIfNeeded()
-        })
-        
+        if animated {
+            UIView.animate(withDuration: 0.1, animations: {
+                self.layoutIfNeeded()
+            })
+        } else {
+            layoutIfNeeded()
+        }
     }
     ///Returns last PSDChatMessageCell in tableView
     private func lastRow() -> PSDChatMessageCell?{
@@ -458,7 +471,7 @@ class PSDChatTableView: PSDTableView {
     ///Add new row to tableMatrix and insert row to tableView, than scrolls it to bottom position
     ///- parameter index: section where row will be inserted and added new element to tableMatrix
     ///- parameter dataForRow:PSDMessage object for draw in cell.
-    private func addRow(at index:Int, dataForRow: PSDRowMessage)
+    private func addRow(at index:Int, dataForRow: PSDRowMessage, animated: Bool = true)
     {
         UIView.animate(withDuration: 0.0, delay: 0, usingSpringWithDamping: 0.0, initialSpringVelocity: 0.0, options: [], animations: {
             //add new section if need
@@ -466,7 +479,7 @@ class PSDChatTableView: PSDTableView {
                 self.tableMatrix.append([PSDRowMessage]())
                 self.tableMatrix[index].append(dataForRow)
                 if #available(iOS 13.0, *){
-                    self.reloadWithDiffableDataSource(data: self.tableMatrix, animated: true)
+                    self.reloadWithDiffableDataSource(data: self.tableMatrix, animated: animated)
                 } else {
                     self.insertSections([index], with: .none)
                 }
@@ -475,7 +488,7 @@ class PSDChatTableView: PSDTableView {
                 //add row to last section
                 self.tableMatrix[index].append(dataForRow)
                 if #available(iOS 13.0, *){
-                    self.reloadWithDiffableDataSource(data: self.tableMatrix, animated: true)
+                    self.reloadWithDiffableDataSource(data: self.tableMatrix, animated: animated)
                 } else {
                     self.beginUpdates()
                     self.insertRows(at: [self.lastIndexPath()], with: .none)
