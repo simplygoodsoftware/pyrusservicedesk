@@ -1,1 +1,68 @@
 
+
+"Comment" = "Commenta...";
+"Last_Message" = "Questo è l'ultimo messaggio da quella conversazione";
+"Default_User_Name" = "Ospite";
+"Uploading" = "Caricando...";
+"Empty_Description" = "Vuoto";
+"All_Conversations" = "Tutte le conversazioni";
+"Support_Default_Name" = "Supporto";
+
+//Buttons' Title
+"New_Conversation" = "Nuova conversazione";
+"New_Conversation_Short" = "Nuovo";
+"Cancel" = "Annulla";
+"Settings" = "Parametri";
+"Send" = "Manda";
+"Back" = "Indietro";
+"Done" = "Fatto";
+"CancelDownload" = "Annulla il download";
+"FileLoadError" = "Non riesco a caricare l'anteprima del file";
+"NoPreviewAvailable" = "Nessuna anteprima disponibile";
+"OpenWith" = "Apri con";
+"RetryButton" = "Riprova";
+"DeleteButton" = "Elimina";
+
+//For attachments
+"Camera" = "Fai una foto o un video";
+"Camera_Access_Error" = "Nessun accesso a camera o microfono";
+"Phone_Gallery" = "Galleria";
+"Phone_Gallery_Access_Error" = "Nessun accesso alla galleria del telefono";
+"Access_Error" = "Errore di accesso";
+"Size_Error" = "La misura del file non dovrebbe superare i 200 MB.";
+"No_File_Error" = "Il file non esiste";
+
+
+//Append time from data
+"Interval_Recent" = "recente";
+"Interval_Minute" = "%% min fa";
+"Interval_Hour" = "%% h fa";
+"Interval_Day" = "%% d fa";
+"Interval_Week" = "%% w fa";
+"Interval_Mounth" = "%% m fa";
+"Interval_One_End_Year" = "%% anni fa";
+"Interval_One_Year" = "%% anno fa";
+"Interval_Years_234" = "%% anni fa";
+"Interval_Years" = "%% anni fa";
+
+//Date as string
+"Today" = "Oggi";
+"Yesterday" = "Ieri";
+"Date_Format" = "EE dd MMM";
+"Date_Format_Year" = "EE, dd MMM yyyy";
+"Time_Format" = "HH:mm";
+"Numbers_Date_Format" = "yyyyMMddHHmmss";
+
+//For requests
+"No_Connection" = "Nessuna Connessione a Internet";
+"Retry" = "RIPROVA";
+"Error" = "Errore";
+"AttachmentLoadError" = "Non riesco a caricare questo allegato";
+"ErrorServerError" = "La connessione al server è stata interrotta";
+"AcсessDenied" = "Accesso negato";
+"OK" = "OK";
+"PrepareLog" = "Preparazione del registro...";
+"SendLog" = "Invia il registro della biblioteca";
+"ExternalSourceWarning" = "Questo link porta a %@\nVuoi davvero seguire il link?";
+"ShortYes" = "Sì";
+"ShortNo" = "No";
