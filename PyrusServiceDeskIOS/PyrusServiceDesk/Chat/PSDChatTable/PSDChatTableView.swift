@@ -513,6 +513,18 @@ class PSDChatTableView: PSDTableView {
         let index = IndexPath(row: row>0 ? row - 1 : 0, section: section)
         return index
     }
+    
+    func removeLastMessage() {
+        tableMatrix[tableMatrix.count-1].removeLast()
+        if #available(iOS 13.0, *) {
+            self.reloadWithDiffableDataSource(data: self.tableMatrix, animated: false)
+        } else {
+            self.reloadData()
+        }
+        removeRefreshControls()
+        addRefreshControls()
+    }
+    
     private func getMessage(at indexPath: IndexPath) -> PSDMessage? {
         if tableMatrix.count > indexPath.section && tableMatrix[indexPath.section].count > indexPath.row {
             let rowMessage = tableMatrix[indexPath.section][indexPath.row]

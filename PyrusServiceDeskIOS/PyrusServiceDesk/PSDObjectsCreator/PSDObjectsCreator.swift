@@ -50,6 +50,12 @@ class PSDObjectsCreator {
         message.rating = rating
         return message
     }
+    
+    static func createMessage(ratingComment: String) -> PSDMessage {
+        let message = PSDObjectsCreator.createMessage("", attachments: nil, user: PSDUsers.user)
+        message.ratingComment = ratingComment
+        return message
+    }
     /**
      Create a new message that was not sent.
      - parameter data: Any object to message. If has string

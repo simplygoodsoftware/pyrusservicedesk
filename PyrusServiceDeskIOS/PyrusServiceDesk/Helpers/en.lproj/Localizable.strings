@@ -6,6 +6,9 @@
 "Empty_Description" = "Empty";
 "All_Conversations" = "All conversations";
 "Support_Default_Name" = "Support";
+"EvaluateQuality" = "Evaluate the quality of service";
+"PleaseEvaluateQuality" = "Evaluate the quality of service";
+"LeaveYourComment" = "Write a review";
 
 //Buttons' Title
 "New_Conversation" = "New conversation";
@@ -13,6 +16,7 @@
 "Cancel" = "Cancel";
 "Settings" = "Settings";
 "Send" = "Send";
+"Close" = "Close";
 "Back" = "Back";
 "Done" = "Done";
 "CancelDownload" = "Cancel download";
