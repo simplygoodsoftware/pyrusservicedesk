@@ -1,3 +1,67 @@
 
 
 "Settings" = "הגדרות";
+"Interval_One_Year" = "לפני שנה %%";
+"Last_Message" = "זאת ההודעה האחרונה מהדיון הזה";
+"Comment" = "השאר הערה...";
+"Default_User_Name" = "אורח";
+"Uploading" = "טעינה...";
+"Cancel" = "בטל";
+"Empty_Description" = "ריק";
+"All_Conversations" = "כל הדיונים";
+"Support_Default_Name" = "תמיכה";
+
+//Buttons' Title
+"New_Conversation" = "דיון חדש";
+"New_Conversation_Short" = "חדש";
+"Send" = "שלח";
+"Done" = "מוכן";
+"CancelDownload" = "בטל הורדה";
+"FileLoadError" = "אין אפשרות להוריד תצוגה מקדימה של קובץ";
+"NoPreviewAvailable" = "התצוגה המקדימה אינה זמינה";
+"OpenWith" = "פתח באמצעות";
+"RetryButton" = "נסה שוב";
+"DeleteButton" = "מחק";
+
+//For attachments
+"Camera" = "עשה צילום או וידאו";
+"Camera_Access_Error" = "אין גישה למצלמה או למיקרופון";
+"Phone_Gallery" = "גלריה";
+"Phone_Gallery_Access_Error" = "אין גישה לגלריה";
+"Access_Error" = "תקלת גישה";
+"Size_Error" = "גודל קובץ אינו יכול לחרוג מ-200 מ״ב.";
+"No_File_Error" = "הקובץ אינו קיים";
+
+
+//Append time from data
+"Interval_Recent" = "הרגע";
+"Interval_Minute" = "לפני %% דקות";
+"Interval_Hour" = "לפני %% שעות";
+"Interval_Day" = "לפני %% ימים";
+"Interval_Week" = "לפני %% שבועות";
+"Interval_Mounth" = "לפני %% חודשים";
+"Interval_One_End_Year" = "לפני %% שנים";
+"Interval_Years_234" = "לפני %% שנים";
+"Interval_Years" = "לפני %% שנים";
+
+//Date as string
+"Today" = "היום";
+"Yesterday" = "אתמול";
+"OK" = "אוקיי";
+"Date_Format" = "EE, dd MMM";
+"Date_Format_Year" = "EE, dd MMM, yyyy";
+"Time_Format" = "hh:mm a";
+"Numbers_Date_Format" = "yyyyMMddHHmmss";
+
+//For requests
+"No_Connection" = "אין חיבור לאינטרנט";
+"Retry" = "נסה שוב";
+"Error" = "תקלה";
+"AttachmentLoadError" = "אין אפשרות להוריד קובץ זה";
+"ErrorServerError" = "אירעה תקלה בחיבור לשרת";
+"AcсessDenied" = "הגישה נדחתה";
+"PrepareLog" = "מכין לוג...";
+"SendLog" = "שלח לוגיפ של הספרייה";
+"ExternalSourceWarning" = "הקישור הזה מוביל ל%@\nהאם ברצונך לעבור אליו?";
+"ShortYes" = "כן";
+"ShortNo" = "לא";
