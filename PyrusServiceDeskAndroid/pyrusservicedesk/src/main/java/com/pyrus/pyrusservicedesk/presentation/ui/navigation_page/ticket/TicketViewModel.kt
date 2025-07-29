@@ -478,10 +478,9 @@ internal class TicketViewModel(
     private fun maybeAddDate(commentEntry: CommentEntry, newEntries: MutableList<TicketEntry>) {
         commentEntry.comment.creationDate.getWhen(getApplication(), Calendar.getInstance()).let {
             if ((!hasRealComments()
-                || newEntries.findLast { entry -> entry.type == Type.Date }
-                    ?.let { dateEntry ->
-                        (dateEntry as DateEntry).date == it
-                    } == false) && !isRating(commentEntry.comment)
+                    || newEntries.findLast { entry -> entry.type == Type.Date }
+                    ?.let { dateEntry -> (dateEntry as DateEntry).date == it } == false)
+                && !isRating(commentEntry.comment)
             ) {
 
                 newEntries.add(
