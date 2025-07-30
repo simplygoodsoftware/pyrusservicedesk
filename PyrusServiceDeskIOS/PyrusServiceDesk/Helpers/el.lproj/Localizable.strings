@@ -1,3 +1,68 @@
 
 
 "Settings" = "Ρυθμίσεις";
+"RetryButton" = "Επαναπροσπαθήσετε";
+"Camera_Access_Error" = "Δεν έχει πρόσβαση στην κάμερα ή το μικρόφωνο";
+"Size_Error" = "Το μέγεθος του αρχείου δεν πρέπει να υπερβαίνει τα 200 MB.";
+"PrepareLog" = "Προετοιμασία αρχείου καταγραφής ...";
+"Last_Message" = "Αυτό είναι το τελευταίο μήνυμα από αυτήν τη συνομιλία";
+"Comment" = "Σχόλιο...";
+"Default_User_Name" = "Επισκέπτης";
+"Uploading" = "Ανέβασμα...";
+"Empty_Description" = "Κενή";
+"All_Conversations" = "Όλες οι συζητήσεις";
+"Support_Default_Name" = "Βοήθεια";
+
+//Buttons' Title
+"New_Conversation" = "Νέα συζήτηση";
+"New_Conversation_Short" = "Νέα";
+"Cancel" = "Ακύρωση";
+"Send" = "Αποστολή";
+"Back" = "Επιστροφή";
+"Done" = "Ολοκληρώθηκε";
+"CancelDownload" = "Ακύρωση λήψης";
+"FileLoadError" = "Δεν φορτώνεται η προεπισκόπηση αρχείου";
+"NoPreviewAvailable" = "Δε διατίθεται προεπισκόπηση";
+"OpenWith" = "Άνοιγμα με";
+"DeleteButton" = "Διαγραφή";
+
+//For attachments
+"Camera" = "Βγάλτε μια φωτογραφία ή τραβήξτε ένα βίντεο";
+"Phone_Gallery" = "Πινακοθήκη";
+"Phone_Gallery_Access_Error" = "Δεν έχει πρόσβαση στη πινακοθήκη του τηλεφώνου";
+"Access_Error" = "Σφάλμα πρόσβασης";
+"No_File_Error" = "Το αρχείο δεν υπάρχει";
+
+
+//Append time from data
+"Interval_Recent" = "Πρόσφατο";
+"Interval_Minute" = "πριν από %% λεπτά";
+"Interval_Hour" = "πριν από %% ώρες";
+"Interval_Day" = "πριν από %% ημέρες";
+"Interval_Week" = "πριν από %% εβδομάδες";
+"Interval_Mounth" = "πριν από %% μήνες";
+"Interval_One_Year" = "πριν από %% έτη";
+"Interval_One_End_Year" = "πριν από %% έτη";
+"Interval_Years" = "πριν από %% έτη";
+"Interval_Years_234" = "πριν από %% έτη";
+
+//Date as string
+"Today" = "Σήμερα";
+"Yesterday" = "Χθες";
+"Date_Format_Year" = "EE, dd MMM, yyyy";
+"Date_Format" = "EE, dd MMM";
+"Time_Format" = "hh:mm a";
+"Numbers_Date_Format" = "yyyyMMddHHmmss";
+
+//For requests
+"No_Connection" = "Χωρίς σύνδεση στο Διαδίκτυο";
+"Retry" = "ΞΑΝΑ";
+"Error" = "Σφάλμα";
+"AttachmentLoadError" = "Δεν φορτώνεται αυτό το συνημμένο";
+"ErrorServerError" = "Διακοπή σύνδεσης στο διακομιστή";
+"AcсessDenied" = "Απαγορεύεται η πρόσβαση";
+"OK" = "Οκ";
+"SendLog" = "Αποστολή αρχείων καταγραφής της βιβλιοθήκης";
+"ExternalSourceWarning" = "Αυτός ο σύνδεσμος οδηγεί σε %@\nΘέλετε να ακολουθήσετε τον σύνδεσμο;";
+"ShortYes" = "Ναι";
+"ShortNo" = "Όχι";
