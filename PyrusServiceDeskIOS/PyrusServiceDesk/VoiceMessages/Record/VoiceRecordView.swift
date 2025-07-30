@@ -62,13 +62,25 @@ class VoiceRecordView: UIImageView, CAAnimationDelegate{
         super.init(coder: aDecoder)
         setDesign()
     }
+    
+    override func traitCollectionDidChange(_ previousTraitCollection: UITraitCollection?) {
+        super.traitCollectionDidChange(previousTraitCollection)
+        self.backgroundColor = CustomizationHelper.previewBakcgroundColor
+        if PyrusServiceDesk.multichats {
+            self.image = UIImage.PSDImage(name: "recordBackground")
+        }
+    }
+    
     private func setDesign(){
         self.backgroundColor = UIColor.clear
         self.layer.backgroundColor = UIColor.appColor.cgColor
         self.layer.cornerRadius = VoiceRecordView.size.height / 2
         self.tintColor = .white
         clipsToBounds = true
-        self.image = UIImage.PSDImage(name: "recordBackground")
+        self.backgroundColor = CustomizationHelper.previewBakcgroundColor
+        if PyrusServiceDesk.multichats {
+            self.image = UIImage.PSDImage(name: "recordBackground")
+        }
         drawShadow()
         drawDefault()
     }

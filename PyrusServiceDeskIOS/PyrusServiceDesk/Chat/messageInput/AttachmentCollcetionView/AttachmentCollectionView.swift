@@ -40,7 +40,7 @@ extension AttachmentCollectionView: UICollectionViewDelegate, UICollectionViewDa
     
     func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
         let cell : AttachmentCollectionViewCell?
-        if presenter?.canHasPreviewAttachment(at: indexPath.row) ?? false{
+        if presenter?.canHasPreviewAttachment(at: indexPath.row) ?? false {
             let previewCell = collectionView.dequeueReusableCell(withReuseIdentifier: AttachmentCollectionView.previewCellIdentifier, for: indexPath) as? AttachmentPreviewCollectionViewCell
             previewCell?.image = presenter?.imageForAttachment(at:indexPath.row)
             cell = previewCell
@@ -61,6 +61,9 @@ extension AttachmentCollectionView: UICollectionViewDelegate, UICollectionViewDa
 }
 extension AttachmentCollectionView: AttachmentCollectionViewProtocol{
     func reloadCollection(){
+        reloadData()
+        layoutIfNeeded()
+        setNeedsLayout()
         reloadData()
     }
     func addItem(at index: Int){

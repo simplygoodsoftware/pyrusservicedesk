@@ -11,7 +11,7 @@ class PSDViewController: UIViewController {
         if let color = PyrusServiceDesk.mainController?.customization?.customBarColor {
             textColor = UIColor.getTextColor(for: color)
         }
-        label.textColor = textColor
+        label.textColor = CustomizationHelper.colorForChatTitle
         label.font = .titleFont
         label.text = title
         label.lineBreakMode = .byTruncatingTail

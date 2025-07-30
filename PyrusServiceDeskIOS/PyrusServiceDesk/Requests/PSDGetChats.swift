@@ -228,7 +228,7 @@ struct PSDGetChats {
             chat.lastReadedCommentId = dic["last_read_comment_id"] as? Int
             chat.showRating = dic["show_rating"] as? Bool ?? false
             chat.showRatingText = dic["show_rating_text"] as? String
-            if !chat.showRating {
+            if !chat.showRating || !PyrusServiceDesk.multichats {
                 chat.isActive = dic["is_active"] as? Bool ?? true
             }
             chats.append(chat)

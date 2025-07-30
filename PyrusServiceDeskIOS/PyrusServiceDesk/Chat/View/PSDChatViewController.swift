@@ -229,7 +229,7 @@ class PSDChatViewController: PSDViewController {
 //        stopButton.layer.shadowOpacity = 0.2
 //        stopButton.layer.masksToBounds = false
         
-        messageInputView.backgroundView.backgroundColor = .psdMessageInputColor
+        messageInputView.backgroundView.backgroundColor = CustomizationHelper.colorsForInput.0
     }
 
     private var firstLayout: Bool = true
@@ -502,11 +502,12 @@ class PSDChatViewController: PSDViewController {
         navigationController?.navigationBar.isTranslucent = true
         
         if #available(iOS 13.0, *) {
+            let color = PyrusServiceDesk.mainController?.customization?.customBarColor
             let barAppearance = UIBarAppearance()
-            barAppearance.backgroundColor = .navBarColor
+            barAppearance.backgroundColor = color ?? .navBarColor
             let bigAppear = UINavigationBarAppearance(barAppearance: barAppearance)
             bigAppear.configureWithOpaqueBackground()
-            bigAppear.backgroundColor = .navBarColor
+            bigAppear.backgroundColor = color ?? .navBarColor
             bigAppear.backgroundEffect = nil
             navigationItem.scrollEdgeAppearance = bigAppear
             navigationItem.standardAppearance = bigAppear
@@ -677,6 +678,11 @@ extension PSDChatViewController: PSDChatViewProtocol {
             } else {
                 let label = UILabel()
                 label.text = "Waiting_For_Network".localizedPSD()
+                var textColor = PyrusServiceDesk.mainController?.customization?.chatTitleColor ?? .psdLabel
+                if let color = PyrusServiceDesk.mainController?.customization?.customBarColor {
+                    textColor = UIColor.getTextColor(for: color)
+                }
+                label.textColor = CustomizationHelper.colorForChatTitle
                 label.font = CustomizationHelper.systemBoldFont(ofSize: 17)
                 navigationItem.titleView = label
                 tableView.endRefreshing()
@@ -744,6 +750,10 @@ extension PSDChatViewController: PSDUpdateInfo {
 }
 
 extension PSDChatViewController: PSDChatTableViewDelegate {
+    func resignFirstResponderFromInputView() {
+        messageInputView.inputTextView.resignFirstResponder()
+    }
+    
     func updateScrollButton(isAtBottom: Bool, isDragging: Bool) {
         if !isAtBottom && scrollButton.isHidden == true && isDragging {
             UIView.animate(withDuration: 0.2) {

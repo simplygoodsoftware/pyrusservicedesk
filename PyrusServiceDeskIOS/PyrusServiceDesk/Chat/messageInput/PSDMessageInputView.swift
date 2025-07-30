@@ -79,7 +79,7 @@ class PSDMessageInputView: UIView, PSDMessageTextViewDelegate,PSDMessageSendButt
         button.translatesAutoresizingMaskIntoConstraints = false
         button.setTitle("  " + "Cancel".localizedPSD(), for: .normal)
         button.setTitleColor(.appColor, for: .normal)
-        button.setImage(UIImage.PSDImage(name: "arrowsLeft"), for: .normal)
+        button.setImage(UIImage.PSDImage(name: "arrowsLeft")?.imageWith(color: .appColor), for: .normal)
         button.titleLabel?.font = UIFont.systemFont(ofSize: 16)
         button.alpha = 0
         button.addTarget(self, action: #selector(cancel), for: .touchUpInside)
@@ -96,17 +96,21 @@ class PSDMessageInputView: UIView, PSDMessageTextViewDelegate,PSDMessageSendButt
             rateView.isHidden = !showRate
         }
     }
+    
+    override func traitCollectionDidChange(_ previousTraitCollection: UITraitCollection?) {
+        super.traitCollectionDidChange(previousTraitCollection)
+        cancelButton.setImage(UIImage.PSDImage(name: "arrowsLeft")?.imageWith(color: .appColor), for: .normal)
+    }
+    
     override init(frame: CGRect) {
         super.init(frame: frame)
         
         
-        self.backgroundColor = UIColor.clear
+     //   self.backgroundColor = .psdBackground//UIColor.clear
         
         self.backgroundView = UIView()
         self.backgroundView.frame = frame
-        
-        //   backgroundView.backgroundColor = UIColor(hex: "#3D4043")
-        
+                
         topGrayLine = UIView.init(frame: CGRect(x: 0, y: 0, width: frame.size.width, height: 0.5))
         topGrayLine.backgroundColor = UIColor.psdSeparator
         
@@ -258,7 +262,7 @@ class PSDMessageInputView: UIView, PSDMessageTextViewDelegate,PSDMessageSendButt
             self.audioInputView.state = .stopped
             self.audioInputView.layoutIfNeeded()
             self.audioInputView.setNeedsLayout()
-            self.cancelButton.setImage(UIImage.PSDImage(name: "arrowsLeft"), for: .normal)
+            self.cancelButton.setImage(UIImage.PSDImage(name: "arrowsLeft")?.imageWith(color: .appColor), for: .normal)
         })
     }
     
@@ -296,7 +300,7 @@ class PSDMessageInputView: UIView, PSDMessageTextViewDelegate,PSDMessageSendButt
                 self.audioInputView.state = .stopped
                 self.audioInputView.layoutIfNeeded()
                 self.audioInputView.setNeedsLayout()
-                self.cancelButton.setImage(UIImage.PSDImage(name: "arrowsLeft"), for: .normal)
+                self.cancelButton.setImage(UIImage.PSDImage(name: "arrowsLeft")?.imageWith(color: .appColor), for: .normal)
             })
         }
         checkSendButton()
@@ -320,7 +324,7 @@ class PSDMessageInputView: UIView, PSDMessageTextViewDelegate,PSDMessageSendButt
                 self.audioInputView.state = .stopped
                 self.audioInputView.layoutIfNeeded()
                 self.audioInputView.setNeedsLayout()
-                self.cancelButton.setImage(UIImage.PSDImage(name: "arrowsLeft"), for: .normal)
+                self.cancelButton.setImage(UIImage.PSDImage(name: "arrowsLeft")?.imageWith(color: .appColor), for: .normal)
             })
         
         OpusPlayer.shared.stopAllPlay()
@@ -397,7 +401,6 @@ class PSDMessageInputView: UIView, PSDMessageTextViewDelegate,PSDMessageSendButt
         recordButton?.isUserInteractionEnabled = true
         guard let recordButton, let lockRecordView else { return }
         
-//        audioLeadingConstraint = audioInputView.leadingAnchor.constraint(equalTo: attachmentsAddButton.trailingAnchor, constant: frame.width - 94)
         audioLeadingConstraint = audioInputView.widthAnchor.constraint(equalToConstant: 0)
         audioLeadingConstraint?.isActive = true
         NSLayoutConstraint.activate([
@@ -407,6 +410,7 @@ class PSDMessageInputView: UIView, PSDMessageTextViewDelegate,PSDMessageSendButt
             inputTextView.bottomAnchor.constraint(equalTo: backgroundView.layoutMarginsGuide.bottomAnchor),
             inputTextView.heightAnchor.constraint(greaterThanOrEqualToConstant: defaultTextHeight),
             inputTextView.trailingAnchor.constraint(equalTo: backgroundView.layoutMarginsGuide.trailingAnchor, constant: -60),
+            
             // attachmentsAddButton
             attachmentsAddButton.leadingAnchor.constraint(equalTo: backgroundView.layoutMarginsGuide.leadingAnchor),
             attachmentsAddButton.bottomAnchor.constraint(equalTo: backgroundView.layoutMarginsGuide.bottomAnchor),
@@ -418,8 +422,6 @@ class PSDMessageInputView: UIView, PSDMessageTextViewDelegate,PSDMessageSendButt
             deleteAudioButton.widthAnchor.constraint(equalToConstant: 44),
             deleteAudioButton.heightAnchor.constraint(equalToConstant: 44),
             
-            //recordButton.leadingAnchor.constraint(equalTo: inputTextView.trailingAnchor),
-//            recordButton.trailingAnchor.constraint(equalTo: backgroundView.layoutMarginsGuide.trailingAnchor, constant: 0),
             recordButton.centerXAnchor.constraint(equalTo: sendButton.centerXAnchor),
             recordButton.centerYAnchor.constraint(equalTo: sendButton.centerYAnchor),
             lockRecordView.centerXAnchor.constraint(equalTo: recordButton.centerXAnchor),
@@ -428,18 +430,11 @@ class PSDMessageInputView: UIView, PSDMessageTextViewDelegate,PSDMessageSendButt
             cancelButton.centerXAnchor.constraint(equalTo: centerXAnchor),
             cancelButton.centerYAnchor.constraint(equalTo: sendButton.centerYAnchor),
             
-//            recordButton.bottomAnchor.constraint(equalTo: backgroundView.layoutMarginsGuide.bottomAnchor),
-//            recordButton.widthAnchor.constraint(equalToConstant: 44),
-//            recordButton.heightAnchor.constraint(equalToConstant: 44),
-            
-            // sendButton
-            // sendButton.leadingAnchor.constraint(equalTo: inputTextView.trailingAnchor, constant: distTextToSend),
             sendButton.trailingAnchor.constraint(equalTo: backgroundView.layoutMarginsGuide.trailingAnchor, constant: 5),
             sendButton.bottomAnchor.constraint(equalTo: backgroundView.layoutMarginsGuide.bottomAnchor, constant: 1),
             sendButton.widthAnchor.constraint(equalToConstant: 60),
             sendButton.heightAnchor.constraint(equalToConstant: 44),
             
-           // audioInputView.leadingAnchor.constraint(equalTo: attachmentsAddButton.trailingAnchor, constant: 6),
             audioInputView.trailingAnchor.constraint(equalTo: sendButton.leadingAnchor, constant: 0),
             audioInputView.centerYAnchor.constraint(equalTo: sendButton.centerYAnchor, constant: 0),
         ])
@@ -447,7 +442,6 @@ class PSDMessageInputView: UIView, PSDMessageTextViewDelegate,PSDMessageSendButt
         centerXConstraint = recordButton.centerXAnchor.constraint(equalTo: sendButton.centerXAnchor)
         centerYConstraint = recordButton.centerYAnchor.constraint(equalTo: sendButton.centerYAnchor)
         NSLayoutConstraint.activate([centerXConstraint, centerYConstraint])
-        //recordButton.addTarget(self, action: #selector(handlePanGesture(_:)), for: .touchDragInside)
         
         // Отдельно сохраняем heightConstraint для inputTextView
         heightConstraint = inputTextView.heightAnchor.constraint(lessThanOrEqualToConstant: inputTextView.maxVerticalHeight())

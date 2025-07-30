@@ -44,6 +44,7 @@ class PSDChatInteractor: NSObject {
     private var isOpen = false
     private var fromPush = false
     private var isScrollButtonHiden = true
+    private var isLoading: Bool = false
     private var newMessagesCount = 0 {
         didSet {
             if newMessagesCount > 0 {
@@ -76,6 +77,8 @@ class PSDChatInteractor: NSObject {
                 singleChat.lastMessageDate = lastChat.lastMessageDate
                 
                 self.chat = singleChat
+            } else if PyrusServiceDesk.clients.count > 0 {
+                self.chat = PSDChat(chatId: 0, date: Date(), messages: [])
             }
         }
         super.init()
@@ -107,6 +110,8 @@ extension PSDChatInteractor: PSDChatInteractorProtocol {
                     singleChat.lastMessageDate = lastChat.lastMessageDate
                     
                     self.chat = singleChat
+                } else if PyrusServiceDesk.clients.count > 0 {
+                    self.chat = PSDChat(chatId: 0, date: Date(), messages: [])
                 }
             }
             isOpen = true
@@ -146,7 +151,8 @@ extension PSDChatInteractor: PSDChatInteractorProtocol {
                     }
                 }
             }
-            if fromPush {
+            if fromPush || !PyrusServiceDesk.multichats && PyrusServiceDesk.clients.count == 0 {
+                isLoading = true
                 reloadChat()
             } else {
                 beginTimer()
@@ -248,6 +254,8 @@ private extension PSDChatInteractor {
                 singleChat.createdAt = lastChat.createdAt
                 singleChat.lastMessageDate = lastChat.lastMessageDate
                 chat = singleChat
+            } else if !isLoading {
+                chat = PSDChat(chatId: 0, date: Date(), messages: [])
             }
             if let chat {
                 updateChatInfo()
@@ -278,7 +286,7 @@ private extension PSDChatInteractor {
                 presenter.doWork(.updateTitle(connectionError: !PyrusServiceDesk.syncManager.networkAvailability))
             }
             
-            if fromPush {
+            if fromPush || !PyrusServiceDesk.multichats && isLoading {
                 isRefresh = true
                 
                 self.updateChat(chat: chat)
@@ -286,6 +294,7 @@ private extension PSDChatInteractor {
                 self.isRefresh = false
                 fromPush = false
                 firstLoad = false
+                isLoading = false
             } else {
                 if messagesToPass.count == 0 && !isRefresh {
                     redrawChat(chat: chat)
@@ -379,7 +388,7 @@ private extension PSDChatInteractor {
                 self?.updateChatInfo()
             }
         } else {
-            presenter.doWork(.endLoading)
+//            presenter.doWork(.endLoading)
             updateButtons()
         }
         if messageId == nil {
@@ -492,7 +501,7 @@ private extension PSDChatInteractor {
                 newMessage.ticketId = ticketId
             }
         } else {
-            let requestNewTicket = !(chat?.isActive ?? false) && chat?.chatId ?? 0 >= 0
+            let requestNewTicket = !(chat?.isActive ?? false) && chat?.chatId ?? 0 > 0
             newMessage.requestNewTicket = requestNewTicket
             if requestNewTicket {
                 let nextId = PSDObjectsCreator.getNextLocalId()
@@ -576,7 +585,13 @@ private extension PSDChatInteractor {
     }
     
     func sendAgainMessage(indexPath: IndexPath) {
-        if let message = self.getMessage(at: indexPath) {
+        let reversedSection = tableMatrix.count - indexPath.section - 1
+        let reversedIndex =
+        IndexPath(
+            row: tableMatrix[reversedSection].count - indexPath.row - 1,
+            section: reversedSection
+        )
+        if let message = self.getMessage(at: reversedIndex) {
             message.userId = PyrusServiceDesk.currentUserId ?? PyrusServiceDesk.customUserId ?? PyrusServiceDesk.userId
             message.appId = PyrusServiceDesk.currentClientId ?? PyrusServiceDesk.clientId
             message.ticketId = chat?.chatId ?? 0
@@ -587,7 +602,13 @@ private extension PSDChatInteractor {
     }
     ///Delete message from self and from storage
     func deleteMessage(indexPath: IndexPath) {
-        if let message = self.getMessage(at: indexPath) {
+        let reversedSection = tableMatrix.count - indexPath.section - 1
+        let reversedIndex =
+        IndexPath(
+            row: tableMatrix[reversedSection].count - indexPath.row - 1,
+            section: reversedSection
+        )
+        if let message = self.getMessage(at: reversedIndex) {
             remove(message: message)
         }
     }

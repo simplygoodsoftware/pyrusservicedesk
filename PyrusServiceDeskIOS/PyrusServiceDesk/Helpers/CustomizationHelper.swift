@@ -88,6 +88,21 @@ class CustomizationHelper {
         }
         return color
     }
+    
+    static var colorForChatTitle: UIColor {
+        if let textColor = PyrusServiceDesk.mainController?.customization?.chatTitleColor {
+            return textColor
+        }
+        if let color = PyrusServiceDesk.mainController?.customization?.customBarColor {
+            return UIColor.getTextColor(for: color)
+        }
+        return .psdLabel
+    }
+    
+    static var previewBakcgroundColor: UIColor {
+        return CustomizationHelper.userMassageBackgroundColor.mixed(with: CustomizationHelper.userMassageTextColor, amount: 0.1)
+    }
+    
     static var barStyle: UIBarStyle? {
         if #available(iOS 13.0, *) {
             switch UITraitCollection.current.userInterfaceStyle {
@@ -166,3 +181,29 @@ class CustomizationHelper {
 }
 private let GRAY_VIEW_ALPHA: CGFloat = 0.1
 private let LIGHT_GRAY_VIEW_ALPHA: CGFloat = 0.05
+
+
+extension UIColor {
+    /// Смешивает текущий цвет с другим (`other`) в заданной доле (`amount`).
+    /// `amount = 0` — берём только `self`, `amount = 1` — только `other`.
+    func mixed(with other: UIColor, amount: CGFloat) -> UIColor {
+        let t = max(0, min(1, amount))
+        
+        var r1: CGFloat = 0, g1: CGFloat = 0, b1: CGFloat = 0, a1: CGFloat = 0
+        var r2: CGFloat = 0, g2: CGFloat = 0, b2: CGFloat = 0, a2: CGFloat = 0
+        
+        // Приводим оба цвета к sRGB и извлекаем компоненты
+        guard self.getRed(&r1, green: &g1, blue: &b1, alpha: &a1),
+              other.getRed(&r2, green: &g2, blue: &b2, alpha: &a2) else {
+            return self
+        }
+        
+        // Линейная интерполяция
+        let r = r1 * (1 - t) + r2 * t
+        let g = g1 * (1 - t) + g2 * t
+        let b = b1 * (1 - t) + b2 * t
+        let a = a1 * (1 - t) + a2 * t
+        
+        return UIColor(red: r, green: g, blue: b, alpha: a)
+    }
+}

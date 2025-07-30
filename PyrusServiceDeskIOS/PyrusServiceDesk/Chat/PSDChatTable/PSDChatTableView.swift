@@ -8,6 +8,7 @@ protocol PSDChatTableViewDelegate: NSObjectProtocol {
     func reloadChat()
     func updateNoConnectionVisible(visible: Bool)
     func updateScrollButton(isAtBottom: Bool, isDragging: Bool)
+    func resignFirstResponderFromInputView()
 }
 
 class PSDChatTableView: PSDTableView {
@@ -174,7 +175,10 @@ class PSDChatTableView: PSDTableView {
     ///Scroll tableview to its bottom position without animation
     func scrollsToBottom(animated: Bool) {
         if tableMatrix.count > 0, tableMatrix[0].count > 0 {
-            scrollToRow(at: IndexPath(row: 0, section: 0), at: .bottom, animated: animated)
+            scrollToRow(at: IndexPath(row: 0, section: 0), at: .top, animated: animated)
+            layoutIfNeeded()
+            setNeedsLayout()
+            scrollToRow(at: IndexPath(row: 0, section: 0), at: .top, animated: animated)
         }
         
         //chatDelegate?.updateScrollButton(isHidden: true)
@@ -430,6 +434,10 @@ extension PSDChatTableView: PSDNoConnectionViewDelegate{
 
 //MARK: PSDChatMessageCellDelegate
 extension PSDChatTableView: PSDChatMessageCellDelegate {
+    func showAlert() {
+        chatDelegate?.resignFirstResponderFromInputView()
+    }
+    
     ///Send message one more time.
     func sendAgainMessage(from cell: PSDChatMessageCell) {
         if let indexPath = self.indexPath(for: cell) {

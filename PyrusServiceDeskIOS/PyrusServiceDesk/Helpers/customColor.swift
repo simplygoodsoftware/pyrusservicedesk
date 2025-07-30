@@ -72,7 +72,7 @@ extension UIColor {
         var r: CGFloat = 0, g: CGFloat = 0, b: CGFloat = 0, a: CGFloat = 0
         self.getRed(&r, green: &g, blue: &b, alpha: &a)
         let luminance = 0.2126 * toLinear(r) + 0.7152 * toLinear(g) + 0.0722 * toLinear(b)
-        return  luminance < 0.50
+        return  luminance < 0.25//0.50
     }
     func toLinear(_ colorComponent:CGFloat)->CGFloat{
         return colorComponent<0.0045 ? colorComponent/12.92 : pow((colorComponent+0.055)/1.055, 2.4)

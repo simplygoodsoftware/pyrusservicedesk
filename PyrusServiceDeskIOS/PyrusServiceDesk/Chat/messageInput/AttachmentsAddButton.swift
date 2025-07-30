@@ -13,11 +13,16 @@ class AttachmentsAddButton: UIButton {
         self.layer.cornerRadius = BUTTONS_CORNER_RADIUS
         recolor()
     }
-    private func resetImage(){
-        let color = PyrusServiceDesk.mainController?.customization?.addAttachmentButtonColor ?? UIColor.darkAppColor
-        let addImage = UIImage.PSDImage(name: "clip")//?.imageWith(color: color)
+    private func resetImage() {
+        var addImage: UIImage?
+        if let color = PyrusServiceDesk.mainController?.customization?.addAttachmentButtonColor {
+            addImage = UIImage.PSDImage(name: "clip")?.imageWith(color: color)
+        } else {
+            addImage = UIImage.PSDImage(name: "clip")
+        }
         self.setImage(addImage, for: .normal)
     }
+    
     @objc func buttonPressed()
     {
         delegate?.addButtonPressed()
@@ -47,6 +52,5 @@ class AttachmentsAddButton: UIButton {
     }
     private func recolor() {
         resetImage()
-       // self.setBackgroundColor(color: CustomizationHelper.lightGrayInputColor, forState: .highlighted)
     }
 }

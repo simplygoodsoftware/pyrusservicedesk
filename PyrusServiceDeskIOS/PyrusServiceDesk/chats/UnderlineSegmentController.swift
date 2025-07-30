@@ -166,6 +166,15 @@ extension UIColor {
         }
     }
     
+    static let inputViewColor = UIColor {
+        switch $0.userInterfaceStyle {
+        case .dark:
+            return UIColor(hex: "#3D4043") ?? .black
+        default:
+            return .white
+        }
+    }
+    
     static let scrollButtonColor = UIColor {
         switch $0.userInterfaceStyle {
         case .dark:

@@ -187,6 +187,8 @@ extension PSDChatsDataService: PSDChatsDataServiceProtocol {
         do {
             if ids.count > 0 {
                 try coreDataService.deleteChats(ids: ids)
+            } else if chatModels.count == 0 {
+                coreDataService.deleteAllObjects(forEntityName: "DBChat")
             }
         } catch {
             print(error)

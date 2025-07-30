@@ -26,16 +26,21 @@ import Foundation
     private static let shakeAnimationRepeats: Float = 4
     private static let shakeAnimationDeviation: CGFloat = 3
     
-    private static let recordOnImage = UIImage.PSDImage(name: "bigMicrophone")
+    private static var recordOnImage = UIImage.PSDImage(name: "bigMicrophone")?.imageWith(color: CustomizationHelper.userMassageBackgroundColor)
     var customRecordOffImage = VoiceRecordButton.recordOffImage {
         didSet{
             if !self.isRecording{
-                self.setImage(customRecordOffImage, for: .normal)
-                self.setImage(customRecordOffImage, for: .highlighted)
+                if let color = PyrusServiceDesk.mainController?.customization?.addAttachmentButtonColor {
+                    self.setImage(customRecordOffImage?.imageWith(color: color), for: .normal)
+                    self.setImage(customRecordOffImage?.imageWith(color: color), for: .highlighted)
+                } else {
+                    self.setImage(customRecordOffImage, for: .normal)
+                    self.setImage(customRecordOffImage, for: .highlighted)
+                }
             }
         }
     }
-    private static let recordOffImage = UIImage.PSDImage(name: "micro")
+    private static var recordOffImage = UIImage.PSDImage(name: "micro")
     
     private var lockHeightConstraint: NSLayoutConstraint?
     private lazy var lockView: UIButton = {
@@ -49,14 +54,14 @@ import Foundation
     }()
     
     private lazy var lockImageView: UIImageView = {
-        let imageView = UIImageView(image: UIImage.PSDImage(name: "lockAudio"))
+        let imageView = UIImageView(image: UIImage.PSDImage(name: "lockAudio")?.imageWith(color: .appColor))
         imageView.translatesAutoresizingMaskIntoConstraints = false
         imageView.alpha = 0
         return imageView
     }()
     
     private lazy var stopImageView: UIImageView = {
-        let imageView = UIImageView(image: UIImage.PSDImage(name: "arrows"))
+        let imageView = UIImageView(image: UIImage.PSDImage(name: "arrows")?.imageWith(color: .appColor))
         imageView.translatesAutoresizingMaskIntoConstraints = false
         imageView.alpha = 0
         return imageView
@@ -68,6 +73,7 @@ import Foundation
             if self.isRecording {
                 let mainColor = UIColor.appColor
                 self.setImage(VoiceRecordButton.recordOnImage, for: .normal)
+                backgroundColor = .white
                 lockView.alpha = 1
                 self.setImage(VoiceRecordButton.recordOnImage, for: .highlighted)
                 UIView.animate(withDuration: 0.2, animations: {
@@ -79,9 +85,15 @@ import Foundation
                 })
                 lockView.isUserInteractionEnabled = true
             } else {
-                self.setImage(customRecordOffImage, for: .normal)
-                self.setImage(customRecordOffImage, for: .highlighted)
-                stopImageView.image = UIImage.PSDImage(name: "arrows")
+                if let color = PyrusServiceDesk.mainController?.customization?.addAttachmentButtonColor {
+                    self.setImage(customRecordOffImage?.imageWith(color: color), for: .normal)
+                    self.setImage(customRecordOffImage?.imageWith(color: color), for: .highlighted)
+                } else {
+                    self.setImage(customRecordOffImage, for: .normal)
+                    self.setImage(customRecordOffImage, for: .highlighted)
+                }
+                backgroundColor = .clear
+                stopImageView.image = UIImage.PSDImage(name: "arrows")?.imageWith(color: .appColor)
                 lockView.alpha = 0
                 self.lockHeightConstraint?.constant = 0
                 lockImageView.alpha = 0
@@ -100,12 +112,30 @@ import Foundation
     
     override init(frame: CGRect) {
         super.init(frame: frame)
+        backgroundColor = .clear
+        self.layer.cornerRadius = 40
         createButton()
     }
     
     required init?(coder aDecoder: NSCoder) {
         super.init(coder: aDecoder)
         createButton()
+        recolor()
+    }
+    
+    override func traitCollectionDidChange(_ previousTraitCollection: UITraitCollection?) {
+        recolor()
+    }
+    
+    private func recolor() {
+        VoiceRecordButton.recordOnImage = UIImage.PSDImage(name: "bigMicrophone")?.imageWith(color: CustomizationHelper.userMassageBackgroundColor)
+        lockImageView.image = UIImage.PSDImage(name: "lockAudio")?.imageWith(color: .appColor)
+        stopImageView.image = isAutoHoldingRecording ? UIImage.PSDImage(name: "stopRecord")?.imageWith(color: .appColor) :  UIImage.PSDImage(name: "arrows")?.imageWith(color: .appColor)
+        if !self.isRecording,
+            let color = PyrusServiceDesk.mainController?.customization?.addAttachmentButtonColor {
+                self.setImage(customRecordOffImage?.imageWith(color: color), for: .normal)
+                self.setImage(customRecordOffImage?.imageWith(color: color), for: .highlighted)
+            }
     }
     
     private func createButton(){
@@ -194,12 +224,12 @@ import Foundation
                     if distance >= gestureThreshold {
                         isAutoHoldingRecording = true
                         lockImageView.alpha = 0
-                        stopImageView.image = UIImage.PSDImage(name: "stopRecord")
+                        stopImageView.image = UIImage.PSDImage(name: "stopRecord")?.imageWith(color: .appColor)
                         lockView.isUserInteractionEnabled = true
                         UIView.animate(withDuration: 0.3) {
                             self.center = self.initialButtonCenter
                             self.lockHeightConstraint?.constant = 44
-                            self.setImage(UIImage.PSDImage(name: "whiteSend"), for: .normal)
+                            self.setImage(UIImage.PSDImage(name: "whiteSend")?.imageWith(color: .appColor), for: .normal)
                             self.layoutIfNeeded()
                             self.parentView?.layoutIfNeeded()
                         }

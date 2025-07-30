@@ -70,7 +70,7 @@ class AudioInputView: UIView {
         let slider = AudioCellSlider()
         slider.minimumTrackTintColor = .appColor
         slider.maximumTrackTintColor = .trackColor
-        slider.setThumbImage(UIImage.PSDImage(name: "darkCircle"), for: .normal)
+        slider.setThumbImage(UIImage.PSDImage(name: "darkCircle")?.imageWith(color: .appColor), for: .normal)
         return slider
     }()
     
@@ -88,6 +88,11 @@ class AudioInputView: UIView {
     
     override func layoutSubviews() {
         super.layoutSubviews()
+    }
+    
+    override func traitCollectionDidChange(_ previousTraitCollection: UITraitCollection?) {
+        super.traitCollectionDidChange(previousTraitCollection)
+        slider.setThumbImage(UIImage.PSDImage(name: "darkCircle")?.imageWith(color: .appColor), for: .normal)
     }
     
     private func setupViews() {

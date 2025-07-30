@@ -5,6 +5,8 @@ protocol PSDChatMessageCellDelegate : class{
     func sendAgainMessage(from cell:PSDChatMessageCell)
     ///Pass to delegate  that PSDMessageStateButton was pressed while messageState = .cantSend, so need to delete message from local storage
     func deleteMessage(from cell:PSDChatMessageCell)
+    
+    func showAlert()
 }
 class PSDUserMessageCell: PSDChatMessageCell {
     static var identifier = "CellUser"
@@ -103,6 +105,7 @@ extension PSDUserMessageCell: PSDRetryActionDelegate {
         guard message.attachment != nil || message.text.count > 0 || message.rating != nil else{
             return
         }
+        delegate?.showAlert()
         let actions : [UIAlertAction] = [
             UIAlertAction(title: "RetryButton".localizedPSD(), style: .default, handler: { (action) -> Void in self.retryMessage()}),
             UIAlertAction(title: "DeleteButton".localizedPSD(), style: .destructive, handler: { (action) -> Void in self.cancelMessage()}),
