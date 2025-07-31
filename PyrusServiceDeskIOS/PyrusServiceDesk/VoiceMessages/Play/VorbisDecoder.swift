@@ -1,5 +1,5 @@
 import UIKit
-import LibVorbis
+@_implementationOnly import LibVorbis
 
 @objc extension VorbisDecoder {
     @objc static func getFile() -> OggVorbis_File {
@@ -8,12 +8,12 @@ import LibVorbis
     
     static func canOpenFile(url: URL) -> Bool{
         
-        var vorbisFile = VorbisDecoder.getFile()
-        let error = ov_fopen(url.path.cString(using: .utf8), &vorbisFile)
-        if error != 0  {
-            return false
-        }
-        let errorOpen = ov_test_open(&vorbisFile)
+//        var vorbisFile = VorbisDecoder.getFile()
+//        let error = ov_fopen(url.path.cString(using: .utf8), &vorbisFile)
+//        if error != 0  {
+//            return false
+//        }
+//        let errorOpen = ov_test_open(&vorbisFile)
         
         return true
     }

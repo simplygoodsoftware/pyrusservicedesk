@@ -66,7 +66,7 @@ target 'PyrusServiceDesk' do
   use_frameworks!
 
   pod 'libopus', '~> 1.1', :modular_headers => true
-  pod 'ogg-ios', '~> 1.3.2'
+#  pod 'ogg-ios', '~> 1.3.2'
 
   target 'PyrusServiceDeskTests' do
     # Pods for testing

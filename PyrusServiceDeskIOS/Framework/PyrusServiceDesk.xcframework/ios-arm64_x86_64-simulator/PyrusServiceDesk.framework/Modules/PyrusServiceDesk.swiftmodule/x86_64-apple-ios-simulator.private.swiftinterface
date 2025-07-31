@@ -1,0 +1,580 @@
+// swift-interface-format-version: 1.0
+// swift-compiler-version: Apple Swift version 5.10 (swiftlang-5.10.0.13 clang-1500.3.9.4)
+// swift-module-flags: -target x86_64-apple-ios15.0-simulator -enable-objc-interop -enable-library-evolution -swift-version 5 -enforce-exclusivity=checked -O -enable-bare-slash-regex -module-name PyrusServiceDesk
+import AVFAudio
+import AVFoundation
+import AVKit
+import AudioToolbox
+import Compression
+import CoreAudioKit
+import CoreData
+import DeveloperToolsSupport
+import Foundation
+import ImageIO
+import MobileCoreServices
+import Network
+import Photos
+@_exported import PyrusServiceDesk
+import StoreKit
+import Swift
+import SwiftUI
+import UIKit
+import WebKit
+import _Concurrency
+import _StringProcessing
+import _SwiftConcurrencyShims
+import libopus
+import zlib
+@objc public protocol DeniedAccessCallBack {
+  @objc func deleteUsers(userIds: [Swift.String])
+}
+@_inheritsConvenienceInitializers @objc public class RateManager : ObjectiveC.NSObject {
+  @objc public static let rateAppString: Swift.String
+  @objc public static func updateLastRateVersion()
+  @objc public static func getDateForNextRate() -> Foundation.Date?
+  @objc public static func setIfNilDateForNextRate()
+  @objc public static func isNeedRateCurrentVersion() -> Swift.Bool
+  @objc public static func increaseDateForNextRate()
+  @objc public static func incrementActionCount()
+  @objc public static func resetActionCount()
+  @objc public static func isActionPerformed(times: Swift.Int) -> Swift.Bool
+  @objc override dynamic public init()
+  @objc deinit
+}
+@objc public class PSDUserInfo : ObjectiveC.NSObject {
+  public init(appId: Swift.String, clientName: Swift.String, userId: Swift.String, userName: Swift.String, secretKey: Swift.String?)
+  @objc override dynamic public func isEqual(_ object: Any?) -> Swift.Bool
+  @_hasMissingDesignatedInitializers @objc public class AuthorInfo : ObjectiveC.NSObject {
+    @objc deinit
+  }
+  @objc deinit
+}
+@_inheritsConvenienceInitializers @_hasMissingDesignatedInitializers @objc public class ServiceDeskConfiguration : ObjectiveC.NSObject {
+  public var welcomeMessage: Swift.String? {
+    get
+  }
+  @_inheritsConvenienceInitializers @objc(ServiceDeskConfigurationBuilder) public class Builder : ObjectiveC.NSObject {
+    @discardableResult
+    @objc public func setChatTitle(_ chatTitle: Swift.String?) -> ServiceDeskConfiguration.Builder
+    @discardableResult
+    @objc public func setThemeColor(_ themeColor: UIKit.UIColor?) -> ServiceDeskConfiguration.Builder
+    @discardableResult
+    @objc public func setWelcomeMessage(_ welcomeMessage: Swift.String?) -> ServiceDeskConfiguration.Builder
+    @discardableResult
+    @objc public func setAvatarForSupport(_ avatarForSupport: UIKit.UIImage?) -> ServiceDeskConfiguration.Builder
+    @discardableResult
+    @objc public func setLocale(_ locale: Swift.String?) -> ServiceDeskConfiguration.Builder
+    @discardableResult
+    @objc public func setUserName(_ userName: Swift.String?) -> ServiceDeskConfiguration.Builder
+    @discardableResult
+    @objc public func setChatTitleView(_ chatTitleView: UIKit.UIView?) -> ServiceDeskConfiguration.Builder
+    @discardableResult
+    @objc public func setCustomRightBarButtonItem(_ customRightBarButtonItem: UIKit.UIBarButtonItem?) -> ServiceDeskConfiguration.Builder
+    @discardableResult
+    @objc public func setCustomLeftBarButtonItem(_ customLeftBarButtonItem: UIKit.UIBarButtonItem?) -> ServiceDeskConfiguration.Builder
+    @discardableResult
+    @objc public func setChatsLeftBarButtonItem(_ customLeftBarButtonItem: UIKit.UIBarButtonItem?) -> ServiceDeskConfiguration.Builder
+    @discardableResult
+    @objc public func setChatsRightBarButtonItem(_ customRightBarButtonItem: UIKit.UIView?) -> ServiceDeskConfiguration.Builder
+    @discardableResult
+    @objc public func setTitleHandler(_ titleHandler: (() -> Swift.Void)?) -> ServiceDeskConfiguration.Builder
+    @discardableResult
+    @objc public func setInfoView(_ infoView: PSDInfoView?) -> ServiceDeskConfiguration.Builder
+    @discardableResult
+    @objc(setStatusBarStyle:darkBarStyle:) public func setStatusBarStyle(_ barStyle: UIKit.UIStatusBarStyle, _ darkBarStyle: UIKit.UIStatusBarStyle) -> ServiceDeskConfiguration.Builder
+    @discardableResult
+    @objc(setKeyboardAppearance:darkKeyboardAppearance:) public func setKeyboardAppearance(_ keyboardAppearance: UIKit.UIKeyboardAppearance, _ darkKeyboardAppearance: UIKit.UIKeyboardAppearance) -> ServiceDeskConfiguration.Builder
+    @discardableResult
+    @objc public func setKeyboardColor(_ color: UIKit.UIColor) -> ServiceDeskConfiguration.Builder
+    @discardableResult
+    @objc public func setFontName(_ fontName: Swift.String?) -> ServiceDeskConfiguration.Builder
+    @discardableResult
+    @objc public func setUserTextColor(_ color: UIKit.UIColor?) -> ServiceDeskConfiguration.Builder
+    @discardableResult
+    @objc public func setUserMessageBackgroundColor(_ color: UIKit.UIColor?) -> ServiceDeskConfiguration.Builder
+    @discardableResult
+    @objc public func setSupportTextColor(_ color: UIKit.UIColor?) -> ServiceDeskConfiguration.Builder
+    @discardableResult
+    @objc public func setSupportMessageBackgroundColor(_ color: UIKit.UIColor?) -> ServiceDeskConfiguration.Builder
+    @discardableResult
+    @objc public func setChatTitleColor(_ color: UIKit.UIColor?) -> ServiceDeskConfiguration.Builder
+    @discardableResult
+    @objc(setToolbarStyle:darkBarStyle:) public func setToolbarStyle(_ barStyle: UIKit.UIBarStyle, _ darkBarStyle: UIKit.UIBarStyle) -> ServiceDeskConfiguration.Builder
+    @discardableResult
+    @objc public func setToolbarColor(_ color: UIKit.UIColor?) -> ServiceDeskConfiguration.Builder
+    @discardableResult
+    @objc public func setToolbarButtonColor(_ color: UIKit.UIColor?) -> ServiceDeskConfiguration.Builder
+    @discardableResult
+    @objc public func setBackgroundColor(_ color: UIKit.UIColor?) -> ServiceDeskConfiguration.Builder
+    @discardableResult
+    @objc public func setAttachmentMenuTextColor(_ color: UIKit.UIColor?) -> ServiceDeskConfiguration.Builder
+    @discardableResult
+    @objc public func setAttachmentMenuButtonColor(_ color: UIKit.UIColor?) -> ServiceDeskConfiguration.Builder
+    @discardableResult
+    @objc public func setSendButtonColor(_ color: UIKit.UIColor?) -> ServiceDeskConfiguration.Builder
+    @objc public func build() -> ServiceDeskConfiguration
+    @objc override dynamic public init()
+    @objc deinit
+  }
+  @objc deinit
+}
+public enum HorizontalAlignment {
+  case left
+  case right
+  case leading
+  case trailing
+  case justified
+  public static func == (a: HorizontalAlignment, b: HorizontalAlignment) -> Swift.Bool
+  public func hash(into hasher: inout Swift.Hasher)
+  public var hashValue: Swift.Int {
+    get
+  }
+}
+public enum VerticalAlignment {
+  case top
+  case center
+  case bottom
+  public static func == (a: VerticalAlignment, b: VerticalAlignment) -> Swift.Bool
+  public func hash(into hasher: inout Swift.Hasher)
+  public var hashValue: Swift.Int {
+    get
+  }
+}
+@objc public protocol OnStopCallback {
+  @objc func onStop()
+}
+@objc public protocol ExtraUsersCallback {
+  @objc func addUser(user: PSDUserInfo)
+}
+@objc extension UIKit.UIColor {
+  @objc convenience dynamic public init?(hex: Swift.String?)
+}
+@objc public protocol FileChooser {
+  @objc var label: Swift.String { get set }
+  @objc weak var chooserDelegate: (any FileChooserDelegate)? { get set }
+}
+@objc public protocol FileChooserDelegate {
+  @objc func didEndWithSuccess(_ data: Foundation.Data?, url: Foundation.URL?)
+  @objc func didEndWithCancel()
+}
+@objc public protocol CacheLoadedCallBack {
+  @objc func cacheLoaded()
+}
+@objc public protocol NewReplySubscriber {
+  @objc func onNewReply(hasUnreadComments: Swift.Bool, lastCommentText: Swift.String?, lastCommentAttachmentsCount: Swift.Int, lastCommentAttachments: [Swift.String]?, utcTime: Swift.Double)
+}
+@objc public protocol LogEvents {
+  @objc func logPyrusServiceDesk(event: Swift.String)
+}
+@objc @_inheritsConvenienceInitializers @_Concurrency.MainActor(unsafe) public class PSDInfoView : UIKit.UIView {
+  @_Concurrency.MainActor(unsafe) @objc override dynamic public func removeFromSuperview()
+  @_Concurrency.MainActor(unsafe) @objc override dynamic public init(frame: CoreFoundation.CGRect)
+  @_Concurrency.MainActor(unsafe) @objc required dynamic public init?(coder: Foundation.NSCoder)
+  @objc deinit
+}
+public class OpusRecorder {
+  public init()
+  public func start(_ url: Foundation.URL, failure: ((any Swift.Error) -> Swift.Void)? = nil)
+  public func stop()
+  @objc deinit
+}
+@_inheritsConvenienceInitializers @objc public class PyrusServiceDesk : ObjectiveC.NSObject {
+  public static var PSD_CLOSED_NOTIFICATION_NAME: Swift.String
+  public static var trustedUrls: [Swift.String]?
+  public static var multichats: Swift.Bool
+  public static func addUser(appId: Swift.String, clientName: Swift.String, userId: Swift.String, userName: Swift.String, secretKey: Swift.String? = nil)
+  public static func getClients() -> [PSDClientInfo]
+  public static var newUser: PSDUserInfo?
+  public static func addUserFromDiplink(appId: Swift.String, userId: Swift.String, userName: Swift.String)
+  @objc public static func openTicket(ticketId: Swift.Int, userId: Swift.String, messageId: Swift.Int) -> Swift.Bool
+  @objc public static func setPushToken(_ token: Swift.String?, users: [PSDUserInfo]? = nil, completion: @escaping ((any Swift.Error)?) -> Swift.Void)
+  @objc public static func start(on viewController: UIKit.UIViewController, onStopCallback: (any OnStopCallback)? = nil)
+  @objc public static func start(on viewController: UIKit.UIViewController, configuration: ServiceDeskConfiguration?, onStopCallback: (any OnStopCallback)? = nil, deniedAccessCallback: (any DeniedAccessCallBack)? = nil, animated: Swift.Bool = true)
+  @objc public static func getStart(on viewController: UIKit.UIViewController, configuration: ServiceDeskConfiguration?, onStopCallback: (any OnStopCallback)? = nil, deniedAccessCallback: (any DeniedAccessCallBack)? = nil, extraUsersCallback: (any ExtraUsersCallback)? = nil, animated: Swift.Bool = true) -> UIKit.UINavigationController?
+  @objc public static func start(on viewController: UIKit.UIViewController, configuration: ServiceDeskConfiguration?, completion: (() -> Swift.Void)? = nil, onStopCallback: (any OnStopCallback)? = nil)
+  @objc public static func start(with configuration: ServiceDeskConfiguration?, onStopCallback: (any OnStopCallback)? = nil) -> UIKit.UINavigationController?
+  @objc public static func stop()
+  @objc public static var onAuthorizationFailed: (() -> Swift.Void)?
+  @objc public static func subscribeToReplies(_ subscriber: (any NewReplySubscriber)?)
+  @objc public static func unsubscribeFromReplies(_ subscriber: (any NewReplySubscriber)?)
+  @objc public static func subscribeToGogEvents(_ subscriber: any LogEvents)
+  @objc public static func getAuthors(for userId: Swift.String) -> [PSDUserInfo.AuthorInfo]
+  @objc public static func cleanCashe()
+  @objc public static func createWith(_ clientId: Swift.String?, clientName: Swift.String? = nil, multichats: Swift.Bool = false, authorId: Swift.String? = nil, userName: Swift.String? = nil, additionalUsers: [PSDUserInfo] = [], domain: Swift.String? = nil, loggingEnabled: Swift.Bool = false, authorizationToken: Swift.String? = nil)
+  @objc public static func setFieldsData(fieldsData: [Swift.String : Swift.String]? = nil)
+  @objc public static func createWith(_ clientId: Swift.String?, reset: Swift.Bool, domain: Swift.String? = nil, loggingEnabled: Swift.Bool = false, authorizationToken: Swift.String? = nil)
+  @objc public static func createWith(_ clientId: Swift.String?, userId: Swift.String?, securityKey: Swift.String? = nil, userName: Swift.String? = nil, multichats: Swift.Bool = false, authorId: Swift.String? = nil, additionalUsers: [PSDUserInfo] = [], domain: Swift.String? = nil, loggingEnabled: Swift.Bool = false, authorizationToken: Swift.String? = nil)
+  @objc public static func refresh(onError: (((any Swift.Error)?) -> Swift.Void)? = nil)
+  @objc public static func refreshFromPush(messageId: Swift.Int)
+  @objc public static func present(_ viewController: UIKit.UIViewController, animated: Swift.Bool, completion: (() -> Swift.Void)?)
+  @objc public static func setUser(_ userName: Swift.String?)
+  @objc public static func registerFileChooser(_ chooser: (any UIKit.UIViewController & FileChooser)?)
+  @objc override dynamic public init()
+  @objc deinit
+}
+extension Foundation.NSAttributedString {
+  public func lastCharacterMaxX(_ w: CoreFoundation.CGFloat) -> (maxX: CoreFoundation.CGFloat, numberOfLines: Swift.Int)
+}
+extension PyrusServiceDesk {
+  @objc public static func apiSign() -> Swift.String
+}
+@_hasMissingDesignatedInitializers @objc public class PSDClientInfo : ObjectiveC.NSObject {
+  @objc override dynamic public func isEqual(_ object: Any?) -> Swift.Bool
+  @objc deinit
+}
+@_inheritsConvenienceInitializers @objc(DBAttachment) public class DBAttachment : CoreData.NSManagedObject {
+  @objc override dynamic public init(entity: CoreData.NSEntityDescription, insertInto context: CoreData.NSManagedObjectContext?)
+  @objc deinit
+}
+extension DBAttachment {
+  @nonobjc public class func fetchRequest() -> CoreData.NSFetchRequest<DBAttachment>
+  @objc @NSManaged dynamic public var canOpen: Swift.Bool {
+    @objc get
+    @objc set
+  }
+  @objc @NSManaged dynamic public var data: Foundation.Data? {
+    @objc get
+    @objc set
+  }
+  @objc @NSManaged dynamic public var isImage: Swift.Bool {
+    @objc get
+    @objc set
+  }
+  @objc @NSManaged dynamic public var isVideo: Swift.Bool {
+    @objc get
+    @objc set
+  }
+  @objc @NSManaged dynamic public var localId: Swift.String? {
+    @objc get
+    @objc set
+  }
+  @objc @NSManaged dynamic public var localPath: Swift.String? {
+    @objc get
+    @objc set
+  }
+  @objc @NSManaged dynamic public var name: Swift.String? {
+    @objc get
+    @objc set
+  }
+  @objc @NSManaged dynamic public var serverIdentifier: Swift.String? {
+    @objc get
+    @objc set
+  }
+  @objc @NSManaged dynamic public var size: Swift.Int64 {
+    @objc get
+    @objc set
+  }
+  @objc @NSManaged dynamic public var uploadingProgress: Swift.Float {
+    @objc get
+    @objc set
+  }
+  @objc @NSManaged dynamic public var message: DBMessage? {
+    @objc get
+    @objc set
+  }
+}
+extension DBAttachment : Swift.Identifiable {
+  public typealias ID = Swift.ObjectIdentifier
+}
+@_inheritsConvenienceInitializers @objc(DBAttachmentData) public class DBAttachmentData : CoreData.NSManagedObject {
+  @objc override dynamic public init(entity: CoreData.NSEntityDescription, insertInto context: CoreData.NSManagedObjectContext?)
+  @objc deinit
+}
+extension DBAttachmentData {
+  @nonobjc public class func fetchRequest() -> CoreData.NSFetchRequest<DBAttachmentData>
+  @objc @NSManaged dynamic public var guid: Swift.String? {
+    @objc get
+    @objc set
+  }
+  @objc @NSManaged dynamic public var name: Swift.String? {
+    @objc get
+    @objc set
+  }
+  @objc @NSManaged dynamic public var type: Swift.Int32 {
+    @objc get
+    @objc set
+  }
+  @objc @NSManaged dynamic public var ticketCommand: DBTicketCommand? {
+    @objc get
+    @objc set
+  }
+}
+extension DBAttachmentData : Swift.Identifiable {
+  public typealias ID = Swift.ObjectIdentifier
+}
+@objc @_inheritsConvenienceInitializers public class DBChat : CoreData.NSManagedObject {
+  @objc override dynamic public init(entity: CoreData.NSEntityDescription, insertInto context: CoreData.NSManagedObjectContext?)
+  @objc deinit
+}
+extension DBChat {
+  @nonobjc public class func fetchRequest() -> CoreData.NSFetchRequest<DBChat>
+  @objc @NSManaged dynamic public var chatId: Swift.Int64 {
+    @objc get
+    @objc set
+  }
+  @objc @NSManaged dynamic public var date: Foundation.Date? {
+    @objc get
+    @objc set
+  }
+  @objc @NSManaged dynamic public var isActive: Swift.Bool {
+    @objc get
+    @objc set
+  }
+  @objc @NSManaged dynamic public var isRead: Swift.Bool {
+    @objc get
+    @objc set
+  }
+  @objc @NSManaged dynamic public var lastReadedCommentId: Swift.Int64 {
+    @objc get
+    @objc set
+  }
+  @objc @NSManaged dynamic public var showRating: Swift.Bool {
+    @objc get
+    @objc set
+  }
+  @objc @NSManaged dynamic public var showRatingText: Swift.String? {
+    @objc get
+    @objc set
+  }
+  @objc @NSManaged dynamic public var subject: Swift.String? {
+    @objc get
+    @objc set
+  }
+  @objc @NSManaged dynamic public var userId: Swift.String? {
+    @objc get
+    @objc set
+  }
+  @objc @NSManaged dynamic public var messages: Foundation.NSOrderedSet? {
+    @objc get
+    @objc set
+  }
+}
+extension DBChat {
+  @objc(insertObject:inMessagesAtIndex:) @NSManaged dynamic public func insertIntoMessages(_ value: DBMessage, at idx: Swift.Int)
+  @objc(removeObjectFromMessagesAtIndex:) @NSManaged dynamic public func removeFromMessages(at idx: Swift.Int)
+  @objc(insertMessages:atIndexes:) @NSManaged dynamic public func insertIntoMessages(_ values: [DBMessage], at indexes: Foundation.NSIndexSet)
+  @objc(removeMessagesAtIndexes:) @NSManaged dynamic public func removeFromMessages(at indexes: Foundation.NSIndexSet)
+  @objc(replaceObjectInMessagesAtIndex:withObject:) @NSManaged dynamic public func replaceMessages(at idx: Swift.Int, with value: DBMessage)
+  @objc(replaceMessagesAtIndexes:withMessages:) @NSManaged dynamic public func replaceMessages(at indexes: Foundation.NSIndexSet, with values: [DBMessage])
+  @objc(addMessagesObject:) @NSManaged dynamic public func addToMessages(_ value: DBMessage)
+  @objc(removeMessagesObject:) @NSManaged dynamic public func removeFromMessages(_ value: DBMessage)
+  @objc(addMessages:) @NSManaged dynamic public func addToMessages(_ values: Foundation.NSOrderedSet)
+  @objc(removeMessages:) @NSManaged dynamic public func removeFromMessages(_ values: Foundation.NSOrderedSet)
+}
+extension DBChat : Swift.Identifiable {
+  public typealias ID = Swift.ObjectIdentifier
+}
+@_inheritsConvenienceInitializers @objc(DBClient) public class DBClient : CoreData.NSManagedObject {
+  @objc override dynamic public init(entity: CoreData.NSEntityDescription, insertInto context: CoreData.NSManagedObjectContext?)
+  @objc deinit
+}
+extension DBClient {
+  @nonobjc public class func fetchRequest() -> CoreData.NSFetchRequest<DBClient>
+  @objc @NSManaged dynamic public var appIcon: Swift.String? {
+    @objc get
+    @objc set
+  }
+  @objc @NSManaged dynamic public var appId: Swift.String? {
+    @objc get
+    @objc set
+  }
+  @objc @NSManaged dynamic public var descr: Swift.String? {
+    @objc get
+    @objc set
+  }
+  @objc @NSManaged dynamic public var name: Swift.String? {
+    @objc get
+    @objc set
+  }
+}
+extension DBClient : Swift.Identifiable {
+  public typealias ID = Swift.ObjectIdentifier
+}
+@_inheritsConvenienceInitializers @objc(DBMessage) public class DBMessage : CoreData.NSManagedObject {
+  @objc override dynamic public init(entity: CoreData.NSEntityDescription, insertInto context: CoreData.NSManagedObjectContext?)
+  @objc deinit
+}
+extension DBMessage {
+  @nonobjc public class func fetchRequest() -> CoreData.NSFetchRequest<DBMessage>
+  @objc @NSManaged dynamic public var appId: Swift.String? {
+    @objc get
+    @objc set
+  }
+  @objc @NSManaged dynamic public var authorAvatarId: Swift.String? {
+    @objc get
+    @objc set
+  }
+  @objc @NSManaged dynamic public var authorId: Swift.String? {
+    @objc get
+    @objc set
+  }
+  @objc @NSManaged dynamic public var authorName: Swift.String? {
+    @objc get
+    @objc set
+  }
+  @objc @NSManaged dynamic public var clientId: Swift.String? {
+    @objc get
+    @objc set
+  }
+  @objc @NSManaged dynamic public var commandId: Swift.String? {
+    @objc get
+    @objc set
+  }
+  @objc @NSManaged dynamic public var date: Foundation.Date? {
+    @objc get
+    @objc set
+  }
+  @objc @NSManaged dynamic public var fromStorage: Swift.Bool {
+    @objc get
+    @objc set
+  }
+  @objc @NSManaged dynamic public var isOutgoing: Swift.Bool {
+    @objc get
+    @objc set
+  }
+  @objc @NSManaged dynamic public var isRatingMessage: Swift.Bool {
+    @objc get
+    @objc set
+  }
+  @objc @NSManaged dynamic public var isWelcomeMessage: Swift.Bool {
+    @objc get
+    @objc set
+  }
+  @objc @NSManaged dynamic public var messageId: Swift.String? {
+    @objc get
+    @objc set
+  }
+  @objc @NSManaged dynamic public var rating: Swift.Int32 {
+    @objc get
+    @objc set
+  }
+  @objc @NSManaged dynamic public var requestNewTicket: Swift.Bool {
+    @objc get
+    @objc set
+  }
+  @objc @NSManaged dynamic public var state: Swift.Int16 {
+    @objc get
+    @objc set
+  }
+  @objc @NSManaged dynamic public var text: Swift.String? {
+    @objc get
+    @objc set
+  }
+  @objc @NSManaged dynamic public var ticketId: Swift.Int64 {
+    @objc get
+    @objc set
+  }
+  @objc @NSManaged dynamic public var userId: Swift.String? {
+    @objc get
+    @objc set
+  }
+  @objc @NSManaged dynamic public var attachments: Foundation.NSOrderedSet? {
+    @objc get
+    @objc set
+  }
+  @objc @NSManaged dynamic public var chat: DBChat? {
+    @objc get
+    @objc set
+  }
+}
+extension DBMessage {
+  @objc(insertObject:inAttachmentsAtIndex:) @NSManaged dynamic public func insertIntoAttachments(_ value: DBAttachment, at idx: Swift.Int)
+  @objc(removeObjectFromAttachmentsAtIndex:) @NSManaged dynamic public func removeFromAttachments(at idx: Swift.Int)
+  @objc(insertAttachments:atIndexes:) @NSManaged dynamic public func insertIntoAttachments(_ values: [DBAttachment], at indexes: Foundation.NSIndexSet)
+  @objc(removeAttachmentsAtIndexes:) @NSManaged dynamic public func removeFromAttachments(at indexes: Foundation.NSIndexSet)
+  @objc(replaceObjectInAttachmentsAtIndex:withObject:) @NSManaged dynamic public func replaceAttachments(at idx: Swift.Int, with value: DBAttachment)
+  @objc(replaceAttachmentsAtIndexes:withAttachments:) @NSManaged dynamic public func replaceAttachments(at indexes: Foundation.NSIndexSet, with values: [DBAttachment])
+  @objc(addAttachmentsObject:) @NSManaged dynamic public func addToAttachments(_ value: DBAttachment)
+  @objc(removeAttachmentsObject:) @NSManaged dynamic public func removeFromAttachments(_ value: DBAttachment)
+  @objc(addAttachments:) @NSManaged dynamic public func addToAttachments(_ values: Foundation.NSOrderedSet)
+  @objc(removeAttachments:) @NSManaged dynamic public func removeFromAttachments(_ values: Foundation.NSOrderedSet)
+}
+extension DBMessage : Swift.Identifiable {
+  public typealias ID = Swift.ObjectIdentifier
+}
+@_inheritsConvenienceInitializers @objc(DBTicketCommand) public class DBTicketCommand : CoreData.NSManagedObject {
+  @objc override dynamic public init(entity: CoreData.NSEntityDescription, insertInto context: CoreData.NSManagedObjectContext?)
+  @objc deinit
+}
+extension DBTicketCommand {
+  @nonobjc public class func fetchRequest() -> CoreData.NSFetchRequest<DBTicketCommand>
+  @objc @NSManaged dynamic public var appId: Swift.String? {
+    @objc get
+    @objc set
+  }
+  @objc @NSManaged dynamic public var authorId: Swift.String? {
+    @objc get
+    @objc set
+  }
+  @objc @NSManaged dynamic public var clientId: Swift.String? {
+    @objc get
+    @objc set
+  }
+  @objc @NSManaged dynamic public var date: Foundation.Date? {
+    @objc get
+    @objc set
+  }
+  @objc @NSManaged dynamic public var id: Swift.String? {
+    @objc get
+    @objc set
+  }
+  @objc @NSManaged dynamic public var message: Swift.String? {
+    @objc get
+    @objc set
+  }
+  @objc @NSManaged dynamic public var messageId: Swift.Int64 {
+    @objc get
+    @objc set
+  }
+  @objc @NSManaged dynamic public var rating: Swift.Int32 {
+    @objc get
+    @objc set
+  }
+  @objc @NSManaged dynamic public var requestNewTicket: Swift.Bool {
+    @objc get
+    @objc set
+  }
+  @objc @NSManaged dynamic public var ticketId: Swift.Int64 {
+    @objc get
+    @objc set
+  }
+  @objc @NSManaged dynamic public var token: Swift.String? {
+    @objc get
+    @objc set
+  }
+  @objc @NSManaged dynamic public var tokenType: Swift.String? {
+    @objc get
+    @objc set
+  }
+  @objc @NSManaged dynamic public var type: Swift.Int32 {
+    @objc get
+    @objc set
+  }
+  @objc @NSManaged dynamic public var userId: Swift.String? {
+    @objc get
+    @objc set
+  }
+  @objc @NSManaged dynamic public var attachments: Foundation.NSOrderedSet? {
+    @objc get
+    @objc set
+  }
+}
+extension DBTicketCommand {
+  @objc(insertObject:inAttachmentsAtIndex:) @NSManaged dynamic public func insertIntoAttachments(_ value: DBAttachmentData, at idx: Swift.Int)
+  @objc(removeObjectFromAttachmentsAtIndex:) @NSManaged dynamic public func removeFromAttachments(at idx: Swift.Int)
+  @objc(insertAttachments:atIndexes:) @NSManaged dynamic public func insertIntoAttachments(_ values: [DBAttachmentData], at indexes: Foundation.NSIndexSet)
+  @objc(removeAttachmentsAtIndexes:) @NSManaged dynamic public func removeFromAttachments(at indexes: Foundation.NSIndexSet)
+  @objc(replaceObjectInAttachmentsAtIndex:withObject:) @NSManaged dynamic public func replaceAttachments(at idx: Swift.Int, with value: DBAttachmentData)
+  @objc(replaceAttachmentsAtIndexes:withAttachments:) @NSManaged dynamic public func replaceAttachments(at indexes: Foundation.NSIndexSet, with values: [DBAttachmentData])
+  @objc(addAttachmentsObject:) @NSManaged dynamic public func addToAttachments(_ value: DBAttachmentData)
+  @objc(removeAttachmentsObject:) @NSManaged dynamic public func removeFromAttachments(_ value: DBAttachmentData)
+  @objc(addAttachments:) @NSManaged dynamic public func addToAttachments(_ values: Foundation.NSOrderedSet)
+  @objc(removeAttachments:) @NSManaged dynamic public func removeFromAttachments(_ values: Foundation.NSOrderedSet)
+}
+extension DBTicketCommand : Swift.Identifiable {
+  public typealias ID = Swift.String?
+}
+extension HorizontalAlignment : Swift.Equatable {}
+extension HorizontalAlignment : Swift.Hashable {}
+extension VerticalAlignment : Swift.Equatable {}
+extension VerticalAlignment : Swift.Hashable {}

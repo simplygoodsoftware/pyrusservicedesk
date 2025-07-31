@@ -1,10 +1,10 @@
 CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = NO
-FRAMEWORK_SEARCH_PATHS = $(inherited) "${PODS_CONFIGURATION_BUILD_DIR}/libopus" "${PODS_ROOT}/ogg-ios"
+FRAMEWORK_SEARCH_PATHS = $(inherited) "${PODS_CONFIGURATION_BUILD_DIR}/libopus"
 GCC_PREPROCESSOR_DEFINITIONS = $(inherited) COCOAPODS=1
 HEADER_SEARCH_PATHS = $(inherited) "${PODS_CONFIGURATION_BUILD_DIR}/libopus/libopus.framework/Headers" "${PODS_ROOT}/libopus/silk"
 LD_RUNPATH_SEARCH_PATHS = $(inherited) '@executable_path/Frameworks' '@loader_path/Frameworks'
-OTHER_CFLAGS = $(inherited) -isystem "${PODS_CONFIGURATION_BUILD_DIR}/libopus/libopus.framework/Headers" -iframework "${PODS_CONFIGURATION_BUILD_DIR}/libopus" -iframework "${PODS_ROOT}/ogg-ios"
-OTHER_LDFLAGS = $(inherited) -framework "libopus" -framework "ogg"
+OTHER_CFLAGS = $(inherited) -isystem "${PODS_CONFIGURATION_BUILD_DIR}/libopus/libopus.framework/Headers" -iframework "${PODS_CONFIGURATION_BUILD_DIR}/libopus"
+OTHER_LDFLAGS = $(inherited) -framework "libopus"
 PODS_BUILD_DIR = ${BUILD_DIR}
 PODS_CONFIGURATION_BUILD_DIR = ${PODS_BUILD_DIR}/$(CONFIGURATION)$(EFFECTIVE_PLATFORM_NAME)
 PODS_PODFILE_DIR_PATH = ${SRCROOT}/.
