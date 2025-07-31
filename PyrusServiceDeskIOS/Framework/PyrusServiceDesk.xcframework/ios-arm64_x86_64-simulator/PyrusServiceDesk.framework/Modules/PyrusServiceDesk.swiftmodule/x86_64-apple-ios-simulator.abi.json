@@ -4649,14 +4649,20 @@
         "name": "LibOgg",
         "printedName": "LibOgg",
         "declKind": "Import",
-        "moduleName": "PyrusServiceDesk"
+        "moduleName": "PyrusServiceDesk",
+        "declAttributes": [
+          "ImplementationOnly"
+        ]
       },
       {
         "kind": "Import",
         "name": "LibVorbis",
         "printedName": "LibVorbis",
         "declKind": "Import",
-        "moduleName": "PyrusServiceDesk"
+        "moduleName": "PyrusServiceDesk",
+        "declAttributes": [
+          "ImplementationOnly"
+        ]
       },
       {
         "kind": "Import",
@@ -7848,21 +7854,21 @@
     {
       "filePath": "\/Users\/stanislavabobruskina\/pyrusservicedesk\/PyrusServiceDeskIOS\/PyrusServiceDesk\/Navigation\/PyrusServiceDeskController.swift",
       "kind": "BooleanLiteral",
-      "offset": 3494,
+      "offset": 3536,
       "length": 4,
       "value": "true"
     },
     {
       "filePath": "\/Users\/stanislavabobruskina\/pyrusservicedesk\/PyrusServiceDeskIOS\/PyrusServiceDesk\/Navigation\/PyrusServiceDeskController.swift",
       "kind": "StringLiteral",
-      "offset": 88,
+      "offset": 130,
       "length": 26,
       "value": "\"PyrusServiceDesk.PyrusServiceDeskController\""
     },
     {
       "filePath": "\/Users\/stanislavabobruskina\/pyrusservicedesk\/PyrusServiceDeskIOS\/PyrusServiceDesk\/Navigation\/PyrusServiceDeskController.swift",
       "kind": "StringLiteral",
-      "offset": 88,
+      "offset": 130,
       "length": 26,
       "value": "\"PyrusServiceDesk.PyrusServiceDeskController\""
     },

@@ -1,5 +1,5 @@
-import LibOgg
-import LibVorbis
+@_implementationOnly import LibOgg
+@_implementationOnly import LibVorbis
 import UIKit
 
 ///The main service desk controller.

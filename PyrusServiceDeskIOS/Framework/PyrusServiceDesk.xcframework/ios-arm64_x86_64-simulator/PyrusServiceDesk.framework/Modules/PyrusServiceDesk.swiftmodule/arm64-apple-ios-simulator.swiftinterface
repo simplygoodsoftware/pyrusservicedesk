@@ -6,8 +6,6 @@ import AVKit
 import Compression
 import Foundation
 import ImageIO
-import LibOgg
-import LibVorbis
 import MobileCoreServices
 import Photos
 @_exported import PyrusServiceDesk
