@@ -279,11 +279,12 @@
 		4BDDE42F257F7DB900DF40B2 /* PSDVIew.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4BDDE42E257F7DB900DF40B2 /* PSDVIew.swift */; };
 		4BE3450E225F9684009E2135 /* PSDDownloadImage.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4BE3450D225F9684009E2135 /* PSDDownloadImage.swift */; };
 		4BE97A12286BB5310027D5AC /* AlignedCollectionViewFlowLayout.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4BE97A11286BB5300027D5AC /* AlignedCollectionViewFlowLayout.swift */; };
+		55F20CF19FBDA2664A654E8A /* Pods_PyrusServiceDesk_PyrusServiceDeskTests.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = AD5616CC8E671A9A0068FD91 /* Pods_PyrusServiceDesk_PyrusServiceDeskTests.framework */; };
 		7B1E8D58250665F800C1E5AC /* PSDInfoView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7B1E8D57250665F800C1E5AC /* PSDInfoView.swift */; };
-		7B743A8224D2E1A300B34904 /* assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 7B743A8124D2E1A300B34904 /* assets.xcassets */; };
 		7B9545F724D07EE2006F6AED /* icn_cross@3x.png in Resources */ = {isa = PBXBuildFile; fileRef = 7B9545F424D07EE2006F6AED /* icn_cross@3x.png */; };
 		7B9545F824D07EE2006F6AED /* icn_cross.png in Resources */ = {isa = PBXBuildFile; fileRef = 7B9545F524D07EE2006F6AED /* icn_cross.png */; };
 		7B9545F924D07EE2006F6AED /* icn_cross@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 7B9545F624D07EE2006F6AED /* icn_cross@2x.png */; };
+		94D88D97F66A1FDC668EC5D6 /* Pods_PyrusServiceDesk.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 87C8AB4196E431A5170B9FA9 /* Pods_PyrusServiceDesk.framework */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -574,11 +575,16 @@
 		4BDDE42E257F7DB900DF40B2 /* PSDVIew.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PSDVIew.swift; sourceTree = "<group>"; };
 		4BE3450D225F9684009E2135 /* PSDDownloadImage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PSDDownloadImage.swift; sourceTree = "<group>"; };
 		4BE97A11286BB5300027D5AC /* AlignedCollectionViewFlowLayout.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AlignedCollectionViewFlowLayout.swift; sourceTree = "<group>"; };
+		53E6C3A7AF44FEEDD8FEC429 /* Pods-PyrusServiceDesk.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-PyrusServiceDesk.debug.xcconfig"; path = "Target Support Files/Pods-PyrusServiceDesk/Pods-PyrusServiceDesk.debug.xcconfig"; sourceTree = "<group>"; };
+		6DF9B84E40D06AD3BE5D7C2A /* Pods-PyrusServiceDesk-PyrusServiceDeskTests.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-PyrusServiceDesk-PyrusServiceDeskTests.release.xcconfig"; path = "Target Support Files/Pods-PyrusServiceDesk-PyrusServiceDeskTests/Pods-PyrusServiceDesk-PyrusServiceDeskTests.release.xcconfig"; sourceTree = "<group>"; };
 		7B1E8D57250665F800C1E5AC /* PSDInfoView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PSDInfoView.swift; sourceTree = "<group>"; };
-		7B743A8124D2E1A300B34904 /* assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = assets.xcassets; sourceTree = "<group>"; };
 		7B9545F424D07EE2006F6AED /* icn_cross@3x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "icn_cross@3x.png"; sourceTree = "<group>"; };
 		7B9545F524D07EE2006F6AED /* icn_cross.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = icn_cross.png; sourceTree = "<group>"; };
 		7B9545F624D07EE2006F6AED /* icn_cross@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "icn_cross@2x.png"; sourceTree = "<group>"; };
+		87C8AB4196E431A5170B9FA9 /* Pods_PyrusServiceDesk.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_PyrusServiceDesk.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+		9620D80A3CA8F8FCA70180DD /* Pods-PyrusServiceDesk-PyrusServiceDeskTests.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-PyrusServiceDesk-PyrusServiceDeskTests.debug.xcconfig"; path = "Target Support Files/Pods-PyrusServiceDesk-PyrusServiceDeskTests/Pods-PyrusServiceDesk-PyrusServiceDeskTests.debug.xcconfig"; sourceTree = "<group>"; };
+		AD5616CC8E671A9A0068FD91 /* Pods_PyrusServiceDesk_PyrusServiceDeskTests.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_PyrusServiceDesk_PyrusServiceDeskTests.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+		E187FA0859CA8B03A14D7ACD /* Pods-PyrusServiceDesk.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-PyrusServiceDesk.release.xcconfig"; path = "Target Support Files/Pods-PyrusServiceDesk/Pods-PyrusServiceDesk.release.xcconfig"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -586,6 +592,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				94D88D97F66A1FDC668EC5D6 /* Pods_PyrusServiceDesk.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -594,12 +601,24 @@
 			buildActionMask = 2147483647;
 			files = (
 				4B7F34DD21F85E2A00977C6D /* PyrusServiceDesk.framework in Frameworks */,
+				55F20CF19FBDA2664A654E8A /* Pods_PyrusServiceDesk_PyrusServiceDeskTests.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		3C1E5F5FD5D9EF969665E130 /* Pods */ = {
+			isa = PBXGroup;
+			children = (
+				53E6C3A7AF44FEEDD8FEC429 /* Pods-PyrusServiceDesk.debug.xcconfig */,
+				E187FA0859CA8B03A14D7ACD /* Pods-PyrusServiceDesk.release.xcconfig */,
+				9620D80A3CA8F8FCA70180DD /* Pods-PyrusServiceDesk-PyrusServiceDeskTests.debug.xcconfig */,
+				6DF9B84E40D06AD3BE5D7C2A /* Pods-PyrusServiceDesk-PyrusServiceDeskTests.release.xcconfig */,
+			);
+			path = Pods;
+			sourceTree = "<group>";
+		};
 		4B062A862518AC7C00B317D3 /* messagePlaceholder */ = {
 			isa = PBXGroup;
 			children = (
@@ -859,6 +878,8 @@
 				4B7F34D521F85E2A00977C6D /* PyrusServiceDesk */,
 				4B7F34E021F85E2A00977C6D /* PyrusServiceDeskTests */,
 				4B7F34D421F85E2A00977C6D /* Products */,
+				3C1E5F5FD5D9EF969665E130 /* Pods */,
+				B8D7F0D90E08F6351ACE2175 /* Frameworks */,
 			);
 			sourceTree = "<group>";
 		};
@@ -893,7 +914,6 @@
 				4B7F350F21F8A77900977C6D /* images */,
 				4B7F34D721F85E2A00977C6D /* Info.plist */,
 				4B8EE7CC255AE4160068B266 /* LogsSendController.swift */,
-				7B743A8124D2E1A300B34904 /* assets.xcassets */,
 			);
 			path = PyrusServiceDesk;
 			sourceTree = "<group>";
@@ -1174,6 +1194,15 @@
 			path = Back;
 			sourceTree = "<group>";
 		};
+		B8D7F0D90E08F6351ACE2175 /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+				87C8AB4196E431A5170B9FA9 /* Pods_PyrusServiceDesk.framework */,
+				AD5616CC8E671A9A0068FD91 /* Pods_PyrusServiceDesk_PyrusServiceDeskTests.framework */,
+			);
+			name = Frameworks;
+			sourceTree = "<group>";
+		};
 /* End PBXGroup section */
 
 /* Begin PBXHeadersBuildPhase section */
@@ -1192,6 +1221,7 @@
 			isa = PBXNativeTarget;
 			buildConfigurationList = 4B7F34E721F85E2A00977C6D /* Build configuration list for PBXNativeTarget "PyrusServiceDesk" */;
 			buildPhases = (
+				7A99ECC8A20AA4ECFB879490 /* [CP] Check Pods Manifest.lock */,
 				4B7F34CE21F85E2A00977C6D /* Headers */,
 				4B7F34CF21F85E2A00977C6D /* Sources */,
 				4B7F34D021F85E2A00977C6D /* Frameworks */,
@@ -1210,9 +1240,11 @@
 			isa = PBXNativeTarget;
 			buildConfigurationList = 4B7F34EA21F85E2A00977C6D /* Build configuration list for PBXNativeTarget "PyrusServiceDeskTests" */;
 			buildPhases = (
+				7589CC34A600DF0A7D859574 /* [CP] Check Pods Manifest.lock */,
 				4B7F34D821F85E2A00977C6D /* Sources */,
 				4B7F34D921F85E2A00977C6D /* Frameworks */,
 				4B7F34DA21F85E2A00977C6D /* Resources */,
+				9C88186014B4884ED241C341 /* [CP] Embed Pods Frameworks */,
 			);
 			buildRules = (
 			);
@@ -1364,7 +1396,6 @@
 				4BB855AA22086C1900F7CCE5 /* Localizable.strings in Resources */,
 				4B281F332577FBCF0042C235 /* clock-dark-36@3x.png in Resources */,
 				4B63396021FA168500A154B5 /* DownloadWhite.png in Resources */,
-				7B743A8224D2E1A300B34904 /* assets.xcassets in Resources */,
 				4B7F139522157989007C6358 /* SupportIcon@3x.png in Resources */,
 				4B82A4A62268E17600654CE0 /* Back@3x.png in Resources */,
 				4B281F612577FBCF0042C235 /* clock-light-26@3x.png in Resources */,
@@ -1442,6 +1473,70 @@
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXResourcesBuildPhase section */
+
+/* Begin PBXShellScriptBuildPhase section */
+		7589CC34A600DF0A7D859574 /* [CP] Check Pods Manifest.lock */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputFileListPaths = (
+			);
+			inputPaths = (
+				"${PODS_PODFILE_DIR_PATH}/Podfile.lock",
+				"${PODS_ROOT}/Manifest.lock",
+			);
+			name = "[CP] Check Pods Manifest.lock";
+			outputFileListPaths = (
+			);
+			outputPaths = (
+				"$(DERIVED_FILE_DIR)/Pods-PyrusServiceDesk-PyrusServiceDeskTests-checkManifestLockResult.txt",
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "diff \"${PODS_PODFILE_DIR_PATH}/Podfile.lock\" \"${PODS_ROOT}/Manifest.lock\" > /dev/null\nif [ $? != 0 ] ; then\n    # print error to STDERR\n    echo \"error: The sandbox is not in sync with the Podfile.lock. Run 'pod install' or update your CocoaPods installation.\" >&2\n    exit 1\nfi\n# This output is used by Xcode 'outputs' to avoid re-running this script phase.\necho \"SUCCESS\" > \"${SCRIPT_OUTPUT_FILE_0}\"\n";
+			showEnvVarsInLog = 0;
+		};
+		7A99ECC8A20AA4ECFB879490 /* [CP] Check Pods Manifest.lock */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputFileListPaths = (
+			);
+			inputPaths = (
+				"${PODS_PODFILE_DIR_PATH}/Podfile.lock",
+				"${PODS_ROOT}/Manifest.lock",
+			);
+			name = "[CP] Check Pods Manifest.lock";
+			outputFileListPaths = (
+			);
+			outputPaths = (
+				"$(DERIVED_FILE_DIR)/Pods-PyrusServiceDesk-checkManifestLockResult.txt",
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "diff \"${PODS_PODFILE_DIR_PATH}/Podfile.lock\" \"${PODS_ROOT}/Manifest.lock\" > /dev/null\nif [ $? != 0 ] ; then\n    # print error to STDERR\n    echo \"error: The sandbox is not in sync with the Podfile.lock. Run 'pod install' or update your CocoaPods installation.\" >&2\n    exit 1\nfi\n# This output is used by Xcode 'outputs' to avoid re-running this script phase.\necho \"SUCCESS\" > \"${SCRIPT_OUTPUT_FILE_0}\"\n";
+			showEnvVarsInLog = 0;
+		};
+		9C88186014B4884ED241C341 /* [CP] Embed Pods Frameworks */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputFileListPaths = (
+				"${PODS_ROOT}/Target Support Files/Pods-PyrusServiceDesk-PyrusServiceDeskTests/Pods-PyrusServiceDesk-PyrusServiceDeskTests-frameworks-${CONFIGURATION}-input-files.xcfilelist",
+			);
+			name = "[CP] Embed Pods Frameworks";
+			outputFileListPaths = (
+				"${PODS_ROOT}/Target Support Files/Pods-PyrusServiceDesk-PyrusServiceDeskTests/Pods-PyrusServiceDesk-PyrusServiceDeskTests-frameworks-${CONFIGURATION}-output-files.xcfilelist",
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "\"${PODS_ROOT}/Target Support Files/Pods-PyrusServiceDesk-PyrusServiceDeskTests/Pods-PyrusServiceDesk-PyrusServiceDeskTests-frameworks.sh\"\n";
+			showEnvVarsInLog = 0;
+		};
+/* End PBXShellScriptBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
 		4B7F34CF21F85E2A00977C6D /* Sources */ = {
@@ -1735,6 +1830,7 @@
 		};
 		4B7F34E821F85E2A00977C6D /* Debug */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReference = 53E6C3A7AF44FEEDD8FEC429 /* Pods-PyrusServiceDesk.debug.xcconfig */;
 			buildSettings = {
 				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = NO;
 				BUILD_LIBRARY_FOR_DISTRIBUTION = YES;
@@ -1767,6 +1863,7 @@
 		};
 		4B7F34E921F85E2A00977C6D /* Release */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReference = E187FA0859CA8B03A14D7ACD /* Pods-PyrusServiceDesk.release.xcconfig */;
 			buildSettings = {
 				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = NO;
 				BUILD_LIBRARY_FOR_DISTRIBUTION = YES;
@@ -1798,6 +1895,7 @@
 		};
 		4B7F34EB21F85E2A00977C6D /* Debug */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReference = 9620D80A3CA8F8FCA70180DD /* Pods-PyrusServiceDesk-PyrusServiceDeskTests.debug.xcconfig */;
 			buildSettings = {
 				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = NO;
 				CODE_SIGN_STYLE = Automatic;
@@ -1817,6 +1915,7 @@
 		};
 		4B7F34EC21F85E2A00977C6D /* Release */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReference = 6DF9B84E40D06AD3BE5D7C2A /* Pods-PyrusServiceDesk-PyrusServiceDeskTests.release.xcconfig */;
 			buildSettings = {
 				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = NO;
 				CODE_SIGN_STYLE = Automatic;
