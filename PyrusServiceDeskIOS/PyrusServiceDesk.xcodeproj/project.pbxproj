@@ -3,10 +3,12 @@
 	archiveVersion = 1;
 	classes = {
 	};
-	objectVersion = 50;
+	objectVersion = 54;
 	objects = {
 
 /* Begin PBXBuildFile section */
+		1E809CFD2E3B7BC10097E311 /* LibOgg in Frameworks */ = {isa = PBXBuildFile; productRef = 1E809CFC2E3B7BC10097E311 /* LibOgg */; };
+		1E809D002E3B7BDD0097E311 /* LibVorbis in Frameworks */ = {isa = PBXBuildFile; productRef = 1E809CFF2E3B7BDD0097E311 /* LibVorbis */; };
 		4B060F2A2732AD8C002E20A7 /* StringHelper.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4B060F292732AD8C002E20A7 /* StringHelper.swift */; };
 		4B062A832518A8D100B317D3 /* PSDPlaceholderMessage.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4B062A822518A8D100B317D3 /* PSDPlaceholderMessage.swift */; };
 		4B062A882518AC9500B317D3 /* messagePlaceholder@3x.png in Resources */ = {isa = PBXBuildFile; fileRef = 4B062A872518AC9500B317D3 /* messagePlaceholder@3x.png */; };
@@ -592,6 +594,8 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				1E809D002E3B7BDD0097E311 /* LibVorbis in Frameworks */,
+				1E809CFD2E3B7BC10097E311 /* LibOgg in Frameworks */,
 				94D88D97F66A1FDC668EC5D6 /* Pods_PyrusServiceDesk.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -1287,6 +1291,10 @@
 				Base,
 			);
 			mainGroup = 4B7F34C921F85E2A00977C6D;
+			packageReferences = (
+				1E809CFB2E3B7BC10097E311 /* XCRemoteSwiftPackageReference "ogg-swift" */,
+				1E809CFE2E3B7BDD0097E311 /* XCRemoteSwiftPackageReference "vorbis-swift" */,
+			);
 			productRefGroup = 4B7F34D421F85E2A00977C6D /* Products */;
 			projectDirPath = "";
 			projectRoot = "";
@@ -1965,6 +1973,38 @@
 			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
+
+/* Begin XCRemoteSwiftPackageReference section */
+		1E809CFB2E3B7BC10097E311 /* XCRemoteSwiftPackageReference "ogg-swift" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/HealsCodes/ogg-swift";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 1.3.5;
+			};
+		};
+		1E809CFE2E3B7BDD0097E311 /* XCRemoteSwiftPackageReference "vorbis-swift" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/HealsCodes/vorbis-swift.git";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 1.3.7;
+			};
+		};
+/* End XCRemoteSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		1E809CFC2E3B7BC10097E311 /* LibOgg */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 1E809CFB2E3B7BC10097E311 /* XCRemoteSwiftPackageReference "ogg-swift" */;
+			productName = LibOgg;
+		};
+		1E809CFF2E3B7BDD0097E311 /* LibVorbis */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 1E809CFE2E3B7BDD0097E311 /* XCRemoteSwiftPackageReference "vorbis-swift" */;
+			productName = LibVorbis;
+		};
+/* End XCSwiftPackageProductDependency section */
 	};
 	rootObject = 4B7F34CA21F85E2A00977C6D /* Project object */;
 }

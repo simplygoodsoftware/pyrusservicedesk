@@ -1,10 +1,14 @@
-
+import LibOgg
+import LibVorbis
 import UIKit
 
 ///The main service desk controller.
 class PyrusServiceDeskController: PSDNavigationController {
     let customization: ServiceDeskConfiguration?
     required init(_ customization: ServiceDeskConfiguration?, customPresent: Bool) {
+       let a = LibOgg.ogg_int16_t()
+        let t = LibOgg.ogg_page()
+       let b = LibVorbis.vorbis_info()
         self.customization = customization
         if(PyrusServiceDesk.clientId != nil){
             let pyrusChat = PSDChatViewController()
