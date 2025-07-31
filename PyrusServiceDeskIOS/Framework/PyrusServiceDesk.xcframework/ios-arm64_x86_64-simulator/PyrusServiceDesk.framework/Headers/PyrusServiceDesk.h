@@ -1,9 +1,7 @@
 
 #import <UIKit/UIKit.h>
-#import "MeterTableBridge.h"
 #import "opusfile.h"
 #import "OggOpusDecoder.h"
-#import "VorbisDecoder.h"
 #import "opus_multistream.h"
 #import "libopus/opus_multistream.h"
 //! Project version number for PyrusServiceDesk.

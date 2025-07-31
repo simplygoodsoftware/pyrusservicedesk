@@ -1,4 +1,5 @@
 #import "VorbisDecoder.h"
+
 //#import "PSDTestProject2-Swift.h"
 //#import "Helpy-Swift.h"
 
@@ -81,6 +82,9 @@
     return _rate;
 }
 
+- (int64_t)getPcmTotal {
+    return 0;
+}
 
 - (void)dealloc
 {

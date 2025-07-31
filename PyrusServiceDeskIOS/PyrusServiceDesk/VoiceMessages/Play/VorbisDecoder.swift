@@ -1,4 +1,5 @@
 import UIKit
+import PyrusServiceDeskPrivate
 @_implementationOnly import LibVorbis
 
 @objc extension VorbisDecoder {
@@ -18,9 +19,9 @@ import UIKit
         return true
     }
     
-    @objc func getPcmTotal() -> Int64 {
-        var file = VorbisDecoder.getFile()
-        let pcmTotal = ov_pcm_total(&file, -1)
-        return pcmTotal
-    }
+//    @objc func getPcmTotal() -> Int64 {
+//        var file = VorbisDecoder.getFile()
+//        let pcmTotal = ov_pcm_total(&file, -1)
+//        return pcmTotal
+//    }
 }

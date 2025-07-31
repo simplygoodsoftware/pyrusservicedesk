@@ -4367,6 +4367,13 @@
       },
       {
         "kind": "Import",
+        "name": "PyrusServiceDeskPrivate",
+        "printedName": "PyrusServiceDeskPrivate",
+        "declKind": "Import",
+        "moduleName": "PyrusServiceDesk"
+      },
+      {
+        "kind": "Import",
         "name": "Foundation",
         "printedName": "Foundation",
         "declKind": "Import",
@@ -4592,6 +4599,13 @@
       },
       {
         "kind": "Import",
+        "name": "PyrusServiceDeskPrivate",
+        "printedName": "PyrusServiceDeskPrivate",
+        "declKind": "Import",
+        "moduleName": "PyrusServiceDesk"
+      },
+      {
+        "kind": "Import",
         "name": "LibVorbis",
         "printedName": "LibVorbis",
         "declKind": "Import",
@@ -4642,6 +4656,13 @@
         "kind": "Import",
         "name": "AVFoundation",
         "printedName": "AVFoundation",
+        "declKind": "Import",
+        "moduleName": "PyrusServiceDesk"
+      },
+      {
+        "kind": "Import",
+        "name": "PyrusServiceDeskPrivate",
+        "printedName": "PyrusServiceDeskPrivate",
         "declKind": "Import",
         "moduleName": "PyrusServiceDesk"
       },
@@ -20700,49 +20721,49 @@
     {
       "filePath": "\/Users\/kirilllybov\/pyrusservicedesk\/PyrusServiceDeskIOS\/PyrusServiceDesk\/VoiceMessages\/Record\/Recorder.swift",
       "kind": "IntegerLiteral",
-      "offset": 1169,
+      "offset": 1200,
       "length": 5,
       "value": "16000"
     },
     {
       "filePath": "\/Users\/kirilllybov\/pyrusservicedesk\/PyrusServiceDeskIOS\/PyrusServiceDesk\/VoiceMessages\/Record\/Recorder.swift",
       "kind": "BooleanLiteral",
-      "offset": 1722,
+      "offset": 1753,
       "length": 5,
       "value": "false"
     },
     {
       "filePath": "\/Users\/kirilllybov\/pyrusservicedesk\/PyrusServiceDeskIOS\/PyrusServiceDesk\/VoiceMessages\/Record\/Recorder.swift",
       "kind": "IntegerLiteral",
-      "offset": 2571,
+      "offset": 2602,
       "length": 1,
       "value": "0"
     },
     {
       "filePath": "\/Users\/kirilllybov\/pyrusservicedesk\/PyrusServiceDeskIOS\/PyrusServiceDesk\/VoiceMessages\/Record\/Recorder.swift",
       "kind": "IntegerLiteral",
-      "offset": 2616,
+      "offset": 2647,
       "length": 1,
       "value": "0"
     },
     {
       "filePath": "\/Users\/kirilllybov\/pyrusservicedesk\/PyrusServiceDeskIOS\/PyrusServiceDesk\/VoiceMessages\/Record\/Recorder.swift",
       "kind": "IntegerLiteral",
-      "offset": 3334,
+      "offset": 3365,
       "length": 1,
       "value": "0"
     },
     {
       "filePath": "\/Users\/kirilllybov\/pyrusservicedesk\/PyrusServiceDeskIOS\/PyrusServiceDesk\/VoiceMessages\/Record\/Recorder.swift",
       "kind": "IntegerLiteral",
-      "offset": 6855,
+      "offset": 6886,
       "length": 1,
       "value": "0"
     },
     {
       "filePath": "\/Users\/kirilllybov\/pyrusservicedesk\/PyrusServiceDeskIOS\/PyrusServiceDesk\/VoiceMessages\/Record\/Recorder.swift",
       "kind": "IntegerLiteral",
-      "offset": 6870,
+      "offset": 6901,
       "length": 1,
       "value": "0"
     },

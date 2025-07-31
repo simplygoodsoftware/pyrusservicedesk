@@ -398,6 +398,7 @@
 		4BE3450E225F9684009E2135 /* PSDDownloadImage.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4BE3450D225F9684009E2135 /* PSDDownloadImage.swift */; };
 		4BE97A12286BB5310027D5AC /* AlignedCollectionViewFlowLayout.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4BE97A11286BB5300027D5AC /* AlignedCollectionViewFlowLayout.swift */; };
 		7B1E8D58250665F800C1E5AC /* PSDInfoView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7B1E8D57250665F800C1E5AC /* PSDInfoView.swift */; };
+		7B93E9332E3BB47E00883C3C /* InternalHeader.h in Headers */ = {isa = PBXBuildFile; fileRef = 7B93E9322E3BB47E00883C3C /* InternalHeader.h */; };
 		7B9545F724D07EE2006F6AED /* icn_cross@3x.png in Resources */ = {isa = PBXBuildFile; fileRef = 7B9545F424D07EE2006F6AED /* icn_cross@3x.png */; };
 		7B9545F824D07EE2006F6AED /* icn_cross.png in Resources */ = {isa = PBXBuildFile; fileRef = 7B9545F524D07EE2006F6AED /* icn_cross.png */; };
 		7B9545F924D07EE2006F6AED /* icn_cross@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 7B9545F624D07EE2006F6AED /* icn_cross@2x.png */; };
@@ -813,6 +814,8 @@
 		4BE3450D225F9684009E2135 /* PSDDownloadImage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PSDDownloadImage.swift; sourceTree = "<group>"; };
 		4BE97A11286BB5300027D5AC /* AlignedCollectionViewFlowLayout.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AlignedCollectionViewFlowLayout.swift; sourceTree = "<group>"; };
 		7B1E8D57250665F800C1E5AC /* PSDInfoView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PSDInfoView.swift; sourceTree = "<group>"; };
+		7B93E9312E3BB44100883C3C /* module.modulemap */ = {isa = PBXFileReference; lastKnownFileType = "sourcecode.module-map"; path = module.modulemap; sourceTree = "<group>"; };
+		7B93E9322E3BB47E00883C3C /* InternalHeader.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = InternalHeader.h; sourceTree = "<group>"; };
 		7B9545F424D07EE2006F6AED /* icn_cross@3x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "icn_cross@3x.png"; sourceTree = "<group>"; };
 		7B9545F524D07EE2006F6AED /* icn_cross.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = icn_cross.png; sourceTree = "<group>"; };
 		7B9545F624D07EE2006F6AED /* icn_cross@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "icn_cross@2x.png"; sourceTree = "<group>"; };
@@ -1520,6 +1523,8 @@
 				1E809C6E2E3A68040097E311 /* CasheLoadedCallBack.swift */,
 				1E809C702E3A680C0097E311 /* DeniedAccessCallBack.swift */,
 				1E809C722E3A68130097E311 /* ExtraUsersCallback.swift */,
+				7B93E9322E3BB47E00883C3C /* InternalHeader.h */,
+				7B93E9302E3BB41700883C3C /* ProjectModule */,
 			);
 			path = PyrusServiceDesk;
 			sourceTree = "<group>";
@@ -1809,6 +1814,14 @@
 			path = Back;
 			sourceTree = "<group>";
 		};
+		7B93E9302E3BB41700883C3C /* ProjectModule */ = {
+			isa = PBXGroup;
+			children = (
+				7B93E9312E3BB44100883C3C /* module.modulemap */,
+			);
+			path = ProjectModule;
+			sourceTree = "<group>";
+		};
 		99ABEACA2B364C1A585D5CA7 /* Pods */ = {
 			isa = PBXGroup;
 			children = (
@@ -1831,6 +1844,7 @@
 				1E809CBE2E3A686A0097E311 /* MeterTableBridge.h in Headers */,
 				1E809CBF2E3A686A0097E311 /* MeterTable.h in Headers */,
 				1E809CC02E3A686A0097E311 /* VorbisDecoder.h in Headers */,
+				7B93E9332E3BB47E00883C3C /* InternalHeader.h in Headers */,
 				1E809CC12E3A686A0097E311 /* OggOpusDecoder.h in Headers */,
 				4B7F34E421F85E2A00977C6D /* PyrusServiceDesk.h in Headers */,
 				1E809C752E3A68510097E311 /* opusfile.h in Headers */,
@@ -2593,6 +2607,8 @@
 				PRODUCT_BUNDLE_IDENTIFIER = "-23.PyrusServiceDesk";
 				PRODUCT_NAME = "$(TARGET_NAME:c99extidentifier)";
 				SKIP_INSTALL = YES;
+				SWIFT_INCLUDE_PATHS = "$(SRCROOT)/PyrusServiceDesk/ProjectModule";
+				SWIFT_OBJC_BRIDGING_HEADER = "";
 				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
@@ -2626,6 +2642,8 @@
 				PRODUCT_BUNDLE_IDENTIFIER = "-23.PyrusServiceDesk";
 				PRODUCT_NAME = "$(TARGET_NAME:c99extidentifier)";
 				SKIP_INSTALL = YES;
+				SWIFT_INCLUDE_PATHS = "$(SRCROOT)/PyrusServiceDesk/ProjectModule";
+				SWIFT_OBJC_BRIDGING_HEADER = "";
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
 				VALID_ARCHS = "arm64 arm64e armv7 armv7s x86_64";

@@ -30,6 +30,7 @@
 import Foundation
 import AudioToolbox
 import AVFoundation
+import PyrusServiceDeskPrivate
 
 let OpusAudioSampleRate: Double = 16000
 internal class Recorder {
