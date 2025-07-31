@@ -5,13 +5,14 @@ import Foundation
      - Parameter alertMessage: String to show in Alert.
      - Parameter viewController: UIViewController where alert must be presented
      */
-    func showAccessAlert(with alertMessage: String, on viewController:UIViewController){
+    func showAccessAlert(with alertMessage: String, on viewController: UIViewController) {
         let accessAlertController = UIAlertController (title: "Access_Error".localizedPSD() , message: alertMessage, preferredStyle: .alert)
         let settingsAction = UIAlertAction(title: "Settings".localizedPSD(), style: .destructive) { (_) -> Void in
             let settingsUrl = NSURL(string:UIApplication.openSettingsURLString)
             if let url = settingsUrl {
                 UIApplication.shared.openURL(url as URL)
             }
+            viewController.becomeFirstResponder()
         }
         let cancelAction = UIAlertAction(title: "Cancel".localizedPSD(), style: .default, handler: nil)
         accessAlertController .addAction(cancelAction)

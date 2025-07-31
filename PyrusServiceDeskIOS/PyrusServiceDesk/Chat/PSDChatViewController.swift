@@ -246,7 +246,8 @@ class PSDChatViewController: PSDViewController {
         guard
             self.tableView.window != nil,
             !hasNoConnection(),
-            self.presentedViewController == nil else {
+            !(presentedViewController?.isKind(of: UIAlertController.self) ?? false)
+        else {
             return false
         }
         return true
