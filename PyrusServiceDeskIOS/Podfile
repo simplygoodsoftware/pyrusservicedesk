@@ -1,0 +1,74 @@
+platform :ios, '15.0'
+
+use_frameworks!
+inhibit_all_warnings!
+
+post_install do |installer|
+  bitcode_strip_path = `xcrun --find bitcode_strip`.chomp
+
+  def strip_bitcode_from_framework(bitcode_strip_path, framework_relative_path)
+    framework_path = File.join(Dir.pwd, framework_relative_path)
+    command = "#{bitcode_strip_path} #{framework_path} -r -o #{framework_path}"
+    puts "Stripping bitcode: #{command}"
+    system(command)
+  end
+
+  framework_paths = [
+    "Pods/ogg-ios/ogg.framework/ogg"
+  ]
+
+  framework_paths.each do |framework_relative_path|
+    strip_bitcode_from_framework(bitcode_strip_path, framework_relative_path)
+  end
+
+  installer.pods_project.targets.each do |target|
+    if target.name == 'ogg'
+      device_framework_path = 'Pods/ogg-ios/ogg.framework'
+      simulator_framework_path = 'Pods/ogg-ios/ogg.framework'
+      
+      strip_bitcode_from_framework(bitcode_strip_path, device_framework_path)
+      strip_bitcode_from_framework(bitcode_strip_path, simulator_framework_path)
+    end
+
+    target.build_configurations.each do |config|
+      # Отключаем биткод
+      config.build_settings['ENABLE_BITCODE'] = 'NO'
+      config.build_settings['CODE_SIGNING_ALLOWED'] = 'NO'
+      config.build_settings['IPHONEOS_DEPLOYMENT_TARGET'] = '12.0'
+
+      # Исключаем arm64 для симулятора на всех таргетах (важно для Apple Silicon)
+      config.build_settings["EXCLUDED_ARCHS[sdk=iphonesimulator*]"] = "arm64"
+
+      # Принудительно указываем базовый SDK
+      config.build_settings["BASE_SDK"] = "iOS"
+    end
+  end
+
+  # Исправляем ошибку с DT_TOOLCHAIN_DIR (если нужно)
+  installer.aggregate_targets.each do |target|
+    target.xcconfigs.each do |variant, xcconfig|
+      xcconfig_path = target.client_root + target.xcconfig_relative_path(variant)
+      IO.write(xcconfig_path, IO.read(xcconfig_path).gsub("DT_TOOLCHAIN_DIR", "TOOLCHAIN_DIR"))
+    end
+  end
+
+  installer.pods_project.targets.each do |target|
+    target.build_configurations.each do |config|
+      if config.base_configuration_reference.is_a? Xcodeproj::Project::Object::PBXFileReference
+        xcconfig_path = config.base_configuration_reference.real_path
+        IO.write(xcconfig_path, IO.read(xcconfig_path).gsub("DT_TOOLCHAIN_DIR", "TOOLCHAIN_DIR"))
+      end
+    end
+  end
+end
+
+target 'PyrusServiceDesk' do
+  use_frameworks!
+
+  pod 'libopus', '~> 1.1', :modular_headers => true
+  pod 'ogg-ios', '~> 1.3.2'
+
+  target 'PyrusServiceDeskTests' do
+    # Pods for testing
+  end
+end

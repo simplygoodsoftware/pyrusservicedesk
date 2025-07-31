@@ -92,12 +92,6 @@ class PSDChatViewController: PSDViewController {
         }
     }()
     
-    private lazy var chatInfoView: ChatInfoView = {
-        let view = ChatInfoView(frame: .zero)
-        view.translatesAutoresizingMaskIntoConstraints = false
-        return view
-    }()
-    
     private var firstLoad: Bool = true
     private var isActive: Bool = true
     
@@ -337,16 +331,6 @@ class PSDChatViewController: PSDViewController {
         messageInputView.setToDefault()
         tableView.isLoading = false
         tableView.reloadChat()
-    }
-    
-    func setupChatInfoView() {
-        view.addSubview(chatInfoView)
-        NSLayoutConstraint.activate([
-            chatInfoView.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor),
-            chatInfoView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
-            chatInfoView.trailingAnchor.constraint(equalTo: view.trailingAnchor),
-            chatInfoView.heightAnchor.constraint(equalToConstant: 200)
-        ])
     }
     
     ///hide keyboard with inputAccessoryView

@@ -1,5 +1,5 @@
 #import "VorbisDecoder.h"
-#import "PSDTestProject2-Swift.h"
+//#import "PSDTestProject2-Swift.h"
 //#import "Helpy-Swift.h"
 
 #import <vorbis/vorbisfile.h>
@@ -16,12 +16,16 @@
 
 @end
 
+OggVorbis_File VorbisCreateEmptyFile(void) {
+    return (OggVorbis_File){0};
+}
+
 @implementation VorbisDecoder
 
 - (instancetype)initWithUrl:(NSURL*)url offset:(int64_t)psmOffset{
     if (self != nil)
     {
-        _vorbisFile = [VorbisDecoder getFile];
+        _vorbisFile = VorbisCreateEmptyFile();
         int err = ov_fopen([[url path] cStringUsingEncoding:NSUTF8StringEncoding], &_vorbisFile);
         vorbis_info *info = ov_info( &_vorbisFile, -1 );
         if (&_vorbisFile == NULL || err != OPUS_OK)

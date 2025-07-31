@@ -15,4 +15,6 @@ NS_ASSUME_NONNULL_BEGIN
 
 @end
 
+OggVorbis_File VorbisCreateEmptyFile(void);
+
 NS_ASSUME_NONNULL_END

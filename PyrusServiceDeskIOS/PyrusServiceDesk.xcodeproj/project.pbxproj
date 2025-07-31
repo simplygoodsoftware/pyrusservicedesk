@@ -3,7 +3,7 @@
 	archiveVersion = 1;
 	classes = {
 	};
-	objectVersion = 50;
+	objectVersion = 54;
 	objects = {
 
 /* Begin PBXBuildFile section */
@@ -60,7 +60,69 @@
 		1E50691D2D07459C001A9E2D /* ClosedTicketsCellModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1E50691C2D07459C001A9E2D /* ClosedTicketsCellModel.swift */; };
 		1E50691F2D0745A5001A9E2D /* PSDChatsViewModelProtocol.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1E50691E2D0745A5001A9E2D /* PSDChatsViewModelProtocol.swift */; };
 		1E5069252D15AFE9001A9E2D /* PSDChatSectionModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1E5069232D15AFE9001A9E2D /* PSDChatSectionModel.swift */; };
-		1EA6F73A2D673FE3003674CE /* PSDChats.xcdatamodeld in Sources */ = {isa = PBXBuildFile; fileRef = 1EA6F7332D673FE3003674CE /* PSDChats.xcdatamodeld */; };
+		1E809C672E3A67750097E311 /* PSDChats.xcdatamodeld in Sources */ = {isa = PBXBuildFile; fileRef = 1E809C642E3A67750097E311 /* PSDChats.xcdatamodeld */; };
+		1E809C692E3A67950097E311 /* AudioRepository.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1E809C682E3A67950097E311 /* AudioRepository.swift */; };
+		1E809C6B2E3A67A60097E311 /* CacheVersionManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1E809C6A2E3A67A60097E311 /* CacheVersionManager.swift */; };
+		1E809C6D2E3A67B00097E311 /* RateManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1E809C6C2E3A67B00097E311 /* RateManager.swift */; };
+		1E809C6F2E3A68040097E311 /* CasheLoadedCallBack.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1E809C6E2E3A68040097E311 /* CasheLoadedCallBack.swift */; };
+		1E809C712E3A680C0097E311 /* DeniedAccessCallBack.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1E809C702E3A680C0097E311 /* DeniedAccessCallBack.swift */; };
+		1E809C732E3A68140097E311 /* ExtraUsersCallback.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1E809C722E3A68130097E311 /* ExtraUsersCallback.swift */; };
+		1E809C752E3A68510097E311 /* opusfile.h in Headers */ = {isa = PBXBuildFile; fileRef = 1E809C742E3A68510097E311 /* opusfile.h */; };
+		1E809C7C2E3A68590097E311 /* internal.h in Headers */ = {isa = PBXBuildFile; fileRef = 1E809C772E3A68590097E311 /* internal.h */; };
+		1E809C7D2E3A68590097E311 /* info.c in Sources */ = {isa = PBXBuildFile; fileRef = 1E809C762E3A68590097E311 /* info.c */; };
+		1E809C7E2E3A68590097E311 /* opusfile.c in Sources */ = {isa = PBXBuildFile; fileRef = 1E809C792E3A68590097E311 /* opusfile.c */; };
+		1E809C7F2E3A68590097E311 /* internal.c in Sources */ = {isa = PBXBuildFile; fileRef = 1E809C782E3A68590097E311 /* internal.c */; };
+		1E809C802E3A68590097E311 /* stream.c in Sources */ = {isa = PBXBuildFile; fileRef = 1E809C7A2E3A68590097E311 /* stream.c */; };
+		1E809C932E3A68640097E311 /* SearchChatViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1E809C8D2E3A68640097E311 /* SearchChatViewModel.swift */; };
+		1E809C942E3A68640097E311 /* SearchPresenter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1E809C852E3A68640097E311 /* SearchPresenter.swift */; };
+		1E809C952E3A68640097E311 /* SearchChatCellConfigurator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1E809C8C2E3A68640097E311 /* SearchChatCellConfigurator.swift */; };
+		1E809C962E3A68640097E311 /* SearchViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1E809C8F2E3A68640097E311 /* SearchViewController.swift */; };
+		1E809C972E3A68640097E311 /* SearchPresenterProtocol.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1E809C862E3A68640097E311 /* SearchPresenterProtocol.swift */; };
+		1E809C982E3A68640097E311 /* SearchInteractor.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1E809C822E3A68640097E311 /* SearchInteractor.swift */; };
+		1E809C992E3A68640097E311 /* SearchRouter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1E809C882E3A68640097E311 /* SearchRouter.swift */; };
+		1E809C9A2E3A68640097E311 /* SearchChatCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1E809C8B2E3A68640097E311 /* SearchChatCell.swift */; };
+		1E809C9B2E3A68640097E311 /* SearchRouterProtocol.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1E809C892E3A68640097E311 /* SearchRouterProtocol.swift */; };
+		1E809C9C2E3A68640097E311 /* SearchChatModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1E809C812E3A68640097E311 /* SearchChatModel.swift */; };
+		1E809C9D2E3A68640097E311 /* SearchViewProtocol.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1E809C902E3A68640097E311 /* SearchViewProtocol.swift */; };
+		1E809C9E2E3A68640097E311 /* SearchInteractorProtocol.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1E809C832E3A68640097E311 /* SearchInteractorProtocol.swift */; };
+		1E809CBE2E3A686A0097E311 /* MeterTableBridge.h in Headers */ = {isa = PBXBuildFile; fileRef = 1E809CB32E3A686A0097E311 /* MeterTableBridge.h */; };
+		1E809CBF2E3A686A0097E311 /* MeterTable.h in Headers */ = {isa = PBXBuildFile; fileRef = 1E809CB12E3A686A0097E311 /* MeterTable.h */; };
+		1E809CC02E3A686A0097E311 /* VorbisDecoder.h in Headers */ = {isa = PBXBuildFile; fileRef = 1E809CA92E3A686A0097E311 /* VorbisDecoder.h */; };
+		1E809CC12E3A686A0097E311 /* OggOpusDecoder.h in Headers */ = {isa = PBXBuildFile; fileRef = 1E809CA52E3A686A0097E311 /* OggOpusDecoder.h */; };
+		1E809CC22E3A686A0097E311 /* AudioFormatManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1E809CA12E3A686A0097E311 /* AudioFormatManager.swift */; };
+		1E809CC32E3A686A0097E311 /* MeterTableBridge.mm in Sources */ = {isa = PBXBuildFile; fileRef = 1E809CB42E3A686A0097E311 /* MeterTableBridge.mm */; };
+		1E809CC42E3A686A0097E311 /* Session.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1E809CB92E3A686A0097E311 /* Session.swift */; };
+		1E809CC52E3A686A0097E311 /* AudioRecordPresenter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1E809CAE2E3A686A0097E311 /* AudioRecordPresenter.swift */; };
+		1E809CC62E3A686A0097E311 /* OpusPlayer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1E809CA82E3A686A0097E311 /* OpusPlayer.swift */; };
+		1E809CC72E3A686A0097E311 /* OggOpusDecoder.m in Sources */ = {isa = PBXBuildFile; fileRef = 1E809CA62E3A686A0097E311 /* OggOpusDecoder.m */; };
+		1E809CC82E3A686A0097E311 /* AudioAttachmentView + Player.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1E809CA02E3A686A0097E311 /* AudioAttachmentView + Player.swift */; };
+		1E809CC92E3A686A0097E311 /* OggOpusDecoder.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1E809CA72E3A686A0097E311 /* OggOpusDecoder.swift */; };
+		1E809CCA2E3A686A0097E311 /* OpusRecorder.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1E809CB62E3A686A0097E311 /* OpusRecorder.swift */; };
+		1E809CCB2E3A686A0097E311 /* AudioPlayerPresenter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1E809CA22E3A686A0097E311 /* AudioPlayerPresenter.swift */; };
+		1E809CCC2E3A686A0097E311 /* VorbisDecoder.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1E809CAB2E3A686A0097E311 /* VorbisDecoder.swift */; };
+		1E809CCD2E3A686A0097E311 /* CircularProgress.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1E809CA32E3A686A0097E311 /* CircularProgress.swift */; };
+		1E809CCE2E3A686A0097E311 /* VoiceRecordButton.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1E809CBA2E3A686A0097E311 /* VoiceRecordButton.swift */; };
+		1E809CCF2E3A686A0097E311 /* BubleTextView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1E809CAF2E3A686A0097E311 /* BubleTextView.swift */; };
+		1E809CD02E3A686A0097E311 /* Recorder.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1E809CB82E3A686A0097E311 /* Recorder.swift */; };
+		1E809CD12E3A686A0097E311 /* MeterTable.c++ in Sources */ = {isa = PBXBuildFile; fileRef = 1E809CB22E3A686A0097E311 /* MeterTable.c++ */; };
+		1E809CD22E3A686A0097E311 /* RecordableView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1E809CB72E3A686A0097E311 /* RecordableView.swift */; };
+		1E809CD32E3A686A0097E311 /* AudioAttachmentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1E809C9F2E3A686A0097E311 /* AudioAttachmentView.swift */; };
+		1E809CD42E3A686A0097E311 /* VorbisDecoder.m in Sources */ = {isa = PBXBuildFile; fileRef = 1E809CAA2E3A686A0097E311 /* VorbisDecoder.m */; };
+		1E809CD52E3A686A0097E311 /* CustomPlayerCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1E809CA42E3A686A0097E311 /* CustomPlayerCell.swift */; };
+		1E809CD62E3A686A0097E311 /* LockRecordView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1E809CB02E3A686A0097E311 /* LockRecordView.swift */; };
+		1E809CD72E3A686A0097E311 /* AudioRecordingObject.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1E809CAD2E3A686A0097E311 /* AudioRecordingObject.swift */; };
+		1E809CD82E3A686A0097E311 /* VoiceRecordView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1E809CBB2E3A686A0097E311 /* VoiceRecordView.swift */; };
+		1E809CD92E3A686A0097E311 /* OpusEncoder.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1E809CB52E3A686A0097E311 /* OpusEncoder.swift */; };
+		1E809CDB2E3A697A0097E311 /* AudioInputView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1E809CDA2E3A697A0097E311 /* AudioInputView.swift */; };
+		1E809CE22E3A699C0097E311 /* AudioTableViewPlayerPresenter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1E809CDE2E3A699C0097E311 /* AudioTableViewPlayerPresenter.swift */; };
+		1E809CE32E3A699C0097E311 /* AudioLoader.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1E809CDC2E3A699C0097E311 /* AudioLoader.swift */; };
+		1E809CE42E3A699C0097E311 /* MultiAudioPlayer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1E809CE02E3A699C0097E311 /* MultiAudioPlayer.swift */; };
+		1E809CE52E3A699C0097E311 /* AudioSlider.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1E809CDD2E3A699C0097E311 /* AudioSlider.swift */; };
+		1E809CE62E3A699C0097E311 /* CALayer+LoadingCircle.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1E809CDF2E3A699C0097E311 /* CALayer+LoadingCircle.swift */; };
+		1E809CE82E3A69D50097E311 /* PSDChatDiffableDataSource.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1E809CE72E3A69D50097E311 /* PSDChatDiffableDataSource.swift */; };
+		1E809CEA2E3A69E50097E311 /* PSDAudioAttachmentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1E809CE92E3A69E50097E311 /* PSDAudioAttachmentView.swift */; };
+		1E809CED2E3A6AE20097E311 /* LibVorbis in Frameworks */ = {isa = PBXBuildFile; productRef = 1E809CEC2E3A6AE20097E311 /* LibVorbis */; settings = {ATTRIBUTES = (Required, ); }; };
+		1E809CEF2E3A6C2F0097E311 /* PopoverContentController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1E809CEE2E3A6C2F0097E311 /* PopoverContentController.swift */; };
 		1EA6F73B2D673FE3003674CE /* PSDChatsDataService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1EA6F7342D673FE3003674CE /* PSDChatsDataService.swift */; };
 		1EA6F73C2D673FE3003674CE /* PSDChatsDataServiceProtocol.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1EA6F7352D673FE3003674CE /* PSDChatsDataServiceProtocol.swift */; };
 		1EA6F73D2D673FE3003674CE /* PSDCoreDataService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1EA6F7362D673FE3003674CE /* PSDCoreDataService.swift */; };
@@ -336,10 +398,11 @@
 		4BE3450E225F9684009E2135 /* PSDDownloadImage.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4BE3450D225F9684009E2135 /* PSDDownloadImage.swift */; };
 		4BE97A12286BB5310027D5AC /* AlignedCollectionViewFlowLayout.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4BE97A11286BB5300027D5AC /* AlignedCollectionViewFlowLayout.swift */; };
 		7B1E8D58250665F800C1E5AC /* PSDInfoView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7B1E8D57250665F800C1E5AC /* PSDInfoView.swift */; };
-		7B743A8224D2E1A300B34904 /* assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 7B743A8124D2E1A300B34904 /* assets.xcassets */; };
 		7B9545F724D07EE2006F6AED /* icn_cross@3x.png in Resources */ = {isa = PBXBuildFile; fileRef = 7B9545F424D07EE2006F6AED /* icn_cross@3x.png */; };
 		7B9545F824D07EE2006F6AED /* icn_cross.png in Resources */ = {isa = PBXBuildFile; fileRef = 7B9545F524D07EE2006F6AED /* icn_cross.png */; };
 		7B9545F924D07EE2006F6AED /* icn_cross@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 7B9545F624D07EE2006F6AED /* icn_cross@2x.png */; };
+		9F6C57288253B3990F93AF78 /* Pods_PyrusServiceDesk.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = E6CAD8D66AF0CAA8508D34F3 /* Pods_PyrusServiceDesk.framework */; };
+		A79C69BE85CFC74B5BCCDD91 /* Pods_PyrusServiceDesk_PyrusServiceDeskTests.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 3CD4E4A4E5C0474E70F319B5 /* Pods_PyrusServiceDesk_PyrusServiceDeskTests.framework */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -406,12 +469,76 @@
 		1E50691C2D07459C001A9E2D /* ClosedTicketsCellModel.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ClosedTicketsCellModel.swift; sourceTree = "<group>"; };
 		1E50691E2D0745A5001A9E2D /* PSDChatsViewModelProtocol.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PSDChatsViewModelProtocol.swift; sourceTree = "<group>"; };
 		1E5069232D15AFE9001A9E2D /* PSDChatSectionModel.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PSDChatSectionModel.swift; sourceTree = "<group>"; };
+		1E809C652E3A67750097E311 /* PSDChats.xcdatamodel */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcdatamodel; path = PSDChats.xcdatamodel; sourceTree = "<group>"; };
+		1E809C662E3A67750097E311 /* PSDChats 2.xcdatamodel */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcdatamodel; path = "PSDChats 2.xcdatamodel"; sourceTree = "<group>"; };
+		1E809C682E3A67950097E311 /* AudioRepository.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AudioRepository.swift; sourceTree = "<group>"; };
+		1E809C6A2E3A67A60097E311 /* CacheVersionManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CacheVersionManager.swift; sourceTree = "<group>"; };
+		1E809C6C2E3A67B00097E311 /* RateManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RateManager.swift; sourceTree = "<group>"; };
+		1E809C6E2E3A68040097E311 /* CasheLoadedCallBack.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CasheLoadedCallBack.swift; sourceTree = "<group>"; };
+		1E809C702E3A680C0097E311 /* DeniedAccessCallBack.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DeniedAccessCallBack.swift; sourceTree = "<group>"; };
+		1E809C722E3A68130097E311 /* ExtraUsersCallback.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ExtraUsersCallback.swift; sourceTree = "<group>"; };
+		1E809C742E3A68510097E311 /* opusfile.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = opusfile.h; sourceTree = "<group>"; };
+		1E809C762E3A68590097E311 /* info.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = info.c; sourceTree = "<group>"; };
+		1E809C772E3A68590097E311 /* internal.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = internal.h; sourceTree = "<group>"; };
+		1E809C782E3A68590097E311 /* internal.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = internal.c; sourceTree = "<group>"; };
+		1E809C792E3A68590097E311 /* opusfile.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = opusfile.c; sourceTree = "<group>"; };
+		1E809C7A2E3A68590097E311 /* stream.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = stream.c; sourceTree = "<group>"; };
+		1E809C812E3A68640097E311 /* SearchChatModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SearchChatModel.swift; sourceTree = "<group>"; };
+		1E809C822E3A68640097E311 /* SearchInteractor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SearchInteractor.swift; sourceTree = "<group>"; };
+		1E809C832E3A68640097E311 /* SearchInteractorProtocol.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SearchInteractorProtocol.swift; sourceTree = "<group>"; };
+		1E809C852E3A68640097E311 /* SearchPresenter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SearchPresenter.swift; sourceTree = "<group>"; };
+		1E809C862E3A68640097E311 /* SearchPresenterProtocol.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SearchPresenterProtocol.swift; sourceTree = "<group>"; };
+		1E809C882E3A68640097E311 /* SearchRouter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SearchRouter.swift; sourceTree = "<group>"; };
+		1E809C892E3A68640097E311 /* SearchRouterProtocol.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SearchRouterProtocol.swift; sourceTree = "<group>"; };
+		1E809C8B2E3A68640097E311 /* SearchChatCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SearchChatCell.swift; sourceTree = "<group>"; };
+		1E809C8C2E3A68640097E311 /* SearchChatCellConfigurator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SearchChatCellConfigurator.swift; sourceTree = "<group>"; };
+		1E809C8D2E3A68640097E311 /* SearchChatViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SearchChatViewModel.swift; sourceTree = "<group>"; };
+		1E809C8F2E3A68640097E311 /* SearchViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SearchViewController.swift; sourceTree = "<group>"; };
+		1E809C902E3A68640097E311 /* SearchViewProtocol.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SearchViewProtocol.swift; sourceTree = "<group>"; };
+		1E809C9F2E3A686A0097E311 /* AudioAttachmentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AudioAttachmentView.swift; sourceTree = "<group>"; };
+		1E809CA02E3A686A0097E311 /* AudioAttachmentView + Player.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "AudioAttachmentView + Player.swift"; sourceTree = "<group>"; };
+		1E809CA12E3A686A0097E311 /* AudioFormatManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AudioFormatManager.swift; sourceTree = "<group>"; };
+		1E809CA22E3A686A0097E311 /* AudioPlayerPresenter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AudioPlayerPresenter.swift; sourceTree = "<group>"; };
+		1E809CA32E3A686A0097E311 /* CircularProgress.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CircularProgress.swift; sourceTree = "<group>"; };
+		1E809CA42E3A686A0097E311 /* CustomPlayerCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CustomPlayerCell.swift; sourceTree = "<group>"; };
+		1E809CA52E3A686A0097E311 /* OggOpusDecoder.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = OggOpusDecoder.h; sourceTree = "<group>"; };
+		1E809CA62E3A686A0097E311 /* OggOpusDecoder.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = OggOpusDecoder.m; sourceTree = "<group>"; };
+		1E809CA72E3A686A0097E311 /* OggOpusDecoder.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OggOpusDecoder.swift; sourceTree = "<group>"; };
+		1E809CA82E3A686A0097E311 /* OpusPlayer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OpusPlayer.swift; sourceTree = "<group>"; };
+		1E809CA92E3A686A0097E311 /* VorbisDecoder.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = VorbisDecoder.h; sourceTree = "<group>"; };
+		1E809CAA2E3A686A0097E311 /* VorbisDecoder.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = VorbisDecoder.m; sourceTree = "<group>"; };
+		1E809CAB2E3A686A0097E311 /* VorbisDecoder.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VorbisDecoder.swift; sourceTree = "<group>"; };
+		1E809CAD2E3A686A0097E311 /* AudioRecordingObject.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AudioRecordingObject.swift; sourceTree = "<group>"; };
+		1E809CAE2E3A686A0097E311 /* AudioRecordPresenter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AudioRecordPresenter.swift; sourceTree = "<group>"; };
+		1E809CAF2E3A686A0097E311 /* BubleTextView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BubleTextView.swift; sourceTree = "<group>"; };
+		1E809CB02E3A686A0097E311 /* LockRecordView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LockRecordView.swift; sourceTree = "<group>"; };
+		1E809CB12E3A686A0097E311 /* MeterTable.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = MeterTable.h; sourceTree = "<group>"; };
+		1E809CB22E3A686A0097E311 /* MeterTable.c++ */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = "MeterTable.c++"; sourceTree = "<group>"; };
+		1E809CB32E3A686A0097E311 /* MeterTableBridge.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = MeterTableBridge.h; sourceTree = "<group>"; };
+		1E809CB42E3A686A0097E311 /* MeterTableBridge.mm */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.objcpp; path = MeterTableBridge.mm; sourceTree = "<group>"; };
+		1E809CB52E3A686A0097E311 /* OpusEncoder.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OpusEncoder.swift; sourceTree = "<group>"; };
+		1E809CB62E3A686A0097E311 /* OpusRecorder.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OpusRecorder.swift; sourceTree = "<group>"; };
+		1E809CB72E3A686A0097E311 /* RecordableView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RecordableView.swift; sourceTree = "<group>"; };
+		1E809CB82E3A686A0097E311 /* Recorder.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Recorder.swift; sourceTree = "<group>"; };
+		1E809CB92E3A686A0097E311 /* Session.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Session.swift; sourceTree = "<group>"; };
+		1E809CBA2E3A686A0097E311 /* VoiceRecordButton.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VoiceRecordButton.swift; sourceTree = "<group>"; };
+		1E809CBB2E3A686A0097E311 /* VoiceRecordView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VoiceRecordView.swift; sourceTree = "<group>"; };
+		1E809CDA2E3A697A0097E311 /* AudioInputView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AudioInputView.swift; sourceTree = "<group>"; };
+		1E809CDC2E3A699C0097E311 /* AudioLoader.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AudioLoader.swift; sourceTree = "<group>"; };
+		1E809CDD2E3A699C0097E311 /* AudioSlider.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AudioSlider.swift; sourceTree = "<group>"; };
+		1E809CDE2E3A699C0097E311 /* AudioTableViewPlayerPresenter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AudioTableViewPlayerPresenter.swift; sourceTree = "<group>"; };
+		1E809CDF2E3A699C0097E311 /* CALayer+LoadingCircle.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "CALayer+LoadingCircle.swift"; sourceTree = "<group>"; };
+		1E809CE02E3A699C0097E311 /* MultiAudioPlayer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MultiAudioPlayer.swift; sourceTree = "<group>"; };
+		1E809CE72E3A69D50097E311 /* PSDChatDiffableDataSource.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PSDChatDiffableDataSource.swift; sourceTree = "<group>"; };
+		1E809CE92E3A69E50097E311 /* PSDAudioAttachmentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PSDAudioAttachmentView.swift; sourceTree = "<group>"; };
+		1E809CEE2E3A6C2F0097E311 /* PopoverContentController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PopoverContentController.swift; sourceTree = "<group>"; };
 		1EA6F7342D673FE3003674CE /* PSDChatsDataService.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PSDChatsDataService.swift; sourceTree = "<group>"; };
 		1EA6F7352D673FE3003674CE /* PSDChatsDataServiceProtocol.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PSDChatsDataServiceProtocol.swift; sourceTree = "<group>"; };
 		1EA6F7362D673FE3003674CE /* PSDCoreDataService.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PSDCoreDataService.swift; sourceTree = "<group>"; };
 		1EA6F7372D673FE3003674CE /* PSDCoreDataServiceProtocol.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PSDCoreDataServiceProtocol.swift; sourceTree = "<group>"; };
-		1EA6F7392D673FE3003674CE /* PSDChats.xcdatamodel */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcdatamodel; path = PSDChats.xcdatamodel; sourceTree = "<group>"; };
 		1EA6F73F2D674020003674CE /* ImageRepository.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ImageRepository.swift; sourceTree = "<group>"; };
+		35DDB0A6E6931F4215764122 /* Pods-PyrusServiceDesk.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-PyrusServiceDesk.debug.xcconfig"; path = "Target Support Files/Pods-PyrusServiceDesk/Pods-PyrusServiceDesk.debug.xcconfig"; sourceTree = "<group>"; };
+		3CD4E4A4E5C0474E70F319B5 /* Pods_PyrusServiceDesk_PyrusServiceDeskTests.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_PyrusServiceDesk_PyrusServiceDeskTests.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		4B060F292732AD8C002E20A7 /* StringHelper.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StringHelper.swift; sourceTree = "<group>"; };
 		4B062A822518A8D100B317D3 /* PSDPlaceholderMessage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PSDPlaceholderMessage.swift; sourceTree = "<group>"; };
 		4B062A872518AC9500B317D3 /* messagePlaceholder@3x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "messagePlaceholder@3x.png"; sourceTree = "<group>"; };
@@ -687,10 +814,13 @@
 		4BE3450D225F9684009E2135 /* PSDDownloadImage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PSDDownloadImage.swift; sourceTree = "<group>"; };
 		4BE97A11286BB5300027D5AC /* AlignedCollectionViewFlowLayout.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AlignedCollectionViewFlowLayout.swift; sourceTree = "<group>"; };
 		7B1E8D57250665F800C1E5AC /* PSDInfoView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PSDInfoView.swift; sourceTree = "<group>"; };
-		7B743A8124D2E1A300B34904 /* assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = assets.xcassets; sourceTree = "<group>"; };
 		7B9545F424D07EE2006F6AED /* icn_cross@3x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "icn_cross@3x.png"; sourceTree = "<group>"; };
 		7B9545F524D07EE2006F6AED /* icn_cross.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = icn_cross.png; sourceTree = "<group>"; };
 		7B9545F624D07EE2006F6AED /* icn_cross@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "icn_cross@2x.png"; sourceTree = "<group>"; };
+		B24056E15DAC8AA99C356149 /* Pods-PyrusServiceDesk-PyrusServiceDeskTests.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-PyrusServiceDesk-PyrusServiceDeskTests.release.xcconfig"; path = "Target Support Files/Pods-PyrusServiceDesk-PyrusServiceDeskTests/Pods-PyrusServiceDesk-PyrusServiceDeskTests.release.xcconfig"; sourceTree = "<group>"; };
+		DA9FF770D4D2D598767E7B3B /* Pods-PyrusServiceDesk-PyrusServiceDeskTests.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-PyrusServiceDesk-PyrusServiceDeskTests.debug.xcconfig"; path = "Target Support Files/Pods-PyrusServiceDesk-PyrusServiceDeskTests/Pods-PyrusServiceDesk-PyrusServiceDeskTests.debug.xcconfig"; sourceTree = "<group>"; };
+		E6CAD8D66AF0CAA8508D34F3 /* Pods_PyrusServiceDesk.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_PyrusServiceDesk.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+		F0F2B86767AA976FAE63F250 /* Pods-PyrusServiceDesk.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-PyrusServiceDesk.release.xcconfig"; path = "Target Support Files/Pods-PyrusServiceDesk/Pods-PyrusServiceDesk.release.xcconfig"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -698,6 +828,8 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				1E809CED2E3A6AE20097E311 /* LibVorbis in Frameworks */,
+				9F6C57288253B3990F93AF78 /* Pods_PyrusServiceDesk.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -706,6 +838,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				4B7F34DD21F85E2A00977C6D /* PyrusServiceDesk.framework in Frameworks */,
+				A79C69BE85CFC74B5BCCDD91 /* Pods_PyrusServiceDesk_PyrusServiceDeskTests.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -832,6 +965,7 @@
 			children = (
 				1E5068A82CEB14C4001A9E2D /* PSDChatViewController.swift */,
 				1E5068A92CEB14C4001A9E2D /* PSDChatViewProtocol.swift */,
+				1E809CEE2E3A6C2F0097E311 /* PopoverContentController.swift */,
 			);
 			path = View;
 			sourceTree = "<group>";
@@ -840,6 +974,8 @@
 			isa = PBXGroup;
 			children = (
 				1E5068AD2CEB1523001A9E2D /* SyncManager.swift */,
+				1E809C6A2E3A67A60097E311 /* CacheVersionManager.swift */,
+				1E809C6C2E3A67B00097E311 /* RateManager.swift */,
 			);
 			path = Managers;
 			sourceTree = "<group>";
@@ -849,6 +985,7 @@
 			children = (
 				1EA6F73F2D674020003674CE /* ImageRepository.swift */,
 				1E5068B42CEB154B001A9E2D /* TicketCommandRepository.swift */,
+				1E809C682E3A67950097E311 /* AudioRepository.swift */,
 			);
 			path = Repositories;
 			sourceTree = "<group>";
@@ -911,16 +1048,159 @@
 			path = Model;
 			sourceTree = "<group>";
 		};
+		1E809C7B2E3A68590097E311 /* opusfile */ = {
+			isa = PBXGroup;
+			children = (
+				1E809C762E3A68590097E311 /* info.c */,
+				1E809C772E3A68590097E311 /* internal.h */,
+				1E809C782E3A68590097E311 /* internal.c */,
+				1E809C792E3A68590097E311 /* opusfile.c */,
+				1E809C7A2E3A68590097E311 /* stream.c */,
+			);
+			path = opusfile;
+			sourceTree = "<group>";
+		};
+		1E809C842E3A68640097E311 /* Interactor */ = {
+			isa = PBXGroup;
+			children = (
+				1E809C812E3A68640097E311 /* SearchChatModel.swift */,
+				1E809C822E3A68640097E311 /* SearchInteractor.swift */,
+				1E809C832E3A68640097E311 /* SearchInteractorProtocol.swift */,
+			);
+			path = Interactor;
+			sourceTree = "<group>";
+		};
+		1E809C872E3A68640097E311 /* Presenter */ = {
+			isa = PBXGroup;
+			children = (
+				1E809C852E3A68640097E311 /* SearchPresenter.swift */,
+				1E809C862E3A68640097E311 /* SearchPresenterProtocol.swift */,
+			);
+			path = Presenter;
+			sourceTree = "<group>";
+		};
+		1E809C8A2E3A68640097E311 /* Router */ = {
+			isa = PBXGroup;
+			children = (
+				1E809C882E3A68640097E311 /* SearchRouter.swift */,
+				1E809C892E3A68640097E311 /* SearchRouterProtocol.swift */,
+			);
+			path = Router;
+			sourceTree = "<group>";
+		};
+		1E809C8E2E3A68640097E311 /* TableView */ = {
+			isa = PBXGroup;
+			children = (
+				1E809C8B2E3A68640097E311 /* SearchChatCell.swift */,
+				1E809C8C2E3A68640097E311 /* SearchChatCellConfigurator.swift */,
+				1E809C8D2E3A68640097E311 /* SearchChatViewModel.swift */,
+			);
+			path = TableView;
+			sourceTree = "<group>";
+		};
+		1E809C912E3A68640097E311 /* View */ = {
+			isa = PBXGroup;
+			children = (
+				1E809C8E2E3A68640097E311 /* TableView */,
+				1E809C8F2E3A68640097E311 /* SearchViewController.swift */,
+				1E809C902E3A68640097E311 /* SearchViewProtocol.swift */,
+			);
+			path = View;
+			sourceTree = "<group>";
+		};
+		1E809C922E3A68640097E311 /* Search */ = {
+			isa = PBXGroup;
+			children = (
+				1E809C842E3A68640097E311 /* Interactor */,
+				1E809C872E3A68640097E311 /* Presenter */,
+				1E809C8A2E3A68640097E311 /* Router */,
+				1E809C912E3A68640097E311 /* View */,
+			);
+			path = Search;
+			sourceTree = "<group>";
+		};
+		1E809CAC2E3A686A0097E311 /* Play */ = {
+			isa = PBXGroup;
+			children = (
+				1E809C9F2E3A686A0097E311 /* AudioAttachmentView.swift */,
+				1E809CA02E3A686A0097E311 /* AudioAttachmentView + Player.swift */,
+				1E809CA12E3A686A0097E311 /* AudioFormatManager.swift */,
+				1E809CA22E3A686A0097E311 /* AudioPlayerPresenter.swift */,
+				1E809CA32E3A686A0097E311 /* CircularProgress.swift */,
+				1E809CA42E3A686A0097E311 /* CustomPlayerCell.swift */,
+				1E809CA52E3A686A0097E311 /* OggOpusDecoder.h */,
+				1E809CA62E3A686A0097E311 /* OggOpusDecoder.m */,
+				1E809CA72E3A686A0097E311 /* OggOpusDecoder.swift */,
+				1E809CA82E3A686A0097E311 /* OpusPlayer.swift */,
+				1E809CA92E3A686A0097E311 /* VorbisDecoder.h */,
+				1E809CAA2E3A686A0097E311 /* VorbisDecoder.m */,
+				1E809CAB2E3A686A0097E311 /* VorbisDecoder.swift */,
+			);
+			path = Play;
+			sourceTree = "<group>";
+		};
+		1E809CBC2E3A686A0097E311 /* Record */ = {
+			isa = PBXGroup;
+			children = (
+				1E809CAD2E3A686A0097E311 /* AudioRecordingObject.swift */,
+				1E809CAE2E3A686A0097E311 /* AudioRecordPresenter.swift */,
+				1E809CAF2E3A686A0097E311 /* BubleTextView.swift */,
+				1E809CB02E3A686A0097E311 /* LockRecordView.swift */,
+				1E809CB12E3A686A0097E311 /* MeterTable.h */,
+				1E809CB22E3A686A0097E311 /* MeterTable.c++ */,
+				1E809CB32E3A686A0097E311 /* MeterTableBridge.h */,
+				1E809CB42E3A686A0097E311 /* MeterTableBridge.mm */,
+				1E809CB52E3A686A0097E311 /* OpusEncoder.swift */,
+				1E809CB62E3A686A0097E311 /* OpusRecorder.swift */,
+				1E809CB72E3A686A0097E311 /* RecordableView.swift */,
+				1E809CB82E3A686A0097E311 /* Recorder.swift */,
+				1E809CB92E3A686A0097E311 /* Session.swift */,
+				1E809CBA2E3A686A0097E311 /* VoiceRecordButton.swift */,
+				1E809CBB2E3A686A0097E311 /* VoiceRecordView.swift */,
+			);
+			path = Record;
+			sourceTree = "<group>";
+		};
+		1E809CBD2E3A686A0097E311 /* VoiceMessages */ = {
+			isa = PBXGroup;
+			children = (
+				1E809CAC2E3A686A0097E311 /* Play */,
+				1E809CBC2E3A686A0097E311 /* Record */,
+			);
+			path = VoiceMessages;
+			sourceTree = "<group>";
+		};
+		1E809CE12E3A699C0097E311 /* Audio */ = {
+			isa = PBXGroup;
+			children = (
+				1E809CDC2E3A699C0097E311 /* AudioLoader.swift */,
+				1E809CDD2E3A699C0097E311 /* AudioSlider.swift */,
+				1E809CDE2E3A699C0097E311 /* AudioTableViewPlayerPresenter.swift */,
+				1E809CDF2E3A699C0097E311 /* CALayer+LoadingCircle.swift */,
+				1E809CE02E3A699C0097E311 /* MultiAudioPlayer.swift */,
+			);
+			path = Audio;
+			sourceTree = "<group>";
+		};
 		1EA6F7382D673FE3003674CE /* CoreData */ = {
 			isa = PBXGroup;
 			children = (
-				1EA6F7332D673FE3003674CE /* PSDChats.xcdatamodeld */,
+				1E809C642E3A67750097E311 /* PSDChats.xcdatamodeld */,
 				1EA6F7342D673FE3003674CE /* PSDChatsDataService.swift */,
 				1EA6F7352D673FE3003674CE /* PSDChatsDataServiceProtocol.swift */,
 				1EA6F7362D673FE3003674CE /* PSDCoreDataService.swift */,
 				1EA6F7372D673FE3003674CE /* PSDCoreDataServiceProtocol.swift */,
 			);
 			path = CoreData;
+			sourceTree = "<group>";
+		};
+		20AE87D9E7E36F2FB00280C2 /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+				E6CAD8D66AF0CAA8508D34F3 /* Pods_PyrusServiceDesk.framework */,
+				3CD4E4A4E5C0474E70F319B5 /* Pods_PyrusServiceDesk_PyrusServiceDeskTests.framework */,
+			);
+			name = Frameworks;
 			sourceTree = "<group>";
 		};
 		4B062A862518AC7C00B317D3 /* messagePlaceholder */ = {
@@ -993,6 +1273,7 @@
 		4B5AFEA721FB034F00AAF233 /* messageInput */ = {
 			isa = PBXGroup;
 			children = (
+				1E809CDA2E3A697A0097E311 /* AudioInputView.swift */,
 				4B5AFEA521FB00B700AAF233 /* PSDMessageInputView.swift */,
 				4BCEB438220C5FF2008B29B6 /* PSDMessageTextView.swift */,
 				4B5AFEAA21FB0A7B00AAF233 /* PSDMessageSendButton.swift */,
@@ -1116,6 +1397,7 @@
 		4B697CC82254AD7C002B0A10 /* MessageCell */ = {
 			isa = PBXGroup;
 			children = (
+				1E809CE92E3A69E50097E311 /* PSDAudioAttachmentView.swift */,
 				4B63393521FA106400A154B5 /* PSDChatMessageCell.swift */,
 				4B697CC92254AF54002B0A10 /* PSDUserMessageCell.swift */,
 				4B697CCB2254AF6B002B0A10 /* PSDSupportMessageCell.swift */,
@@ -1136,9 +1418,11 @@
 			children = (
 				1E5069242D15AFE9001A9E2D /* Model */,
 				1E5068A62CEB14AE001A9E2D /* PSDChatCellConfigurator.swift */,
+				1E809CE72E3A69D50097E311 /* PSDChatDiffableDataSource.swift */,
 				4B63393321FA0F2C00A154B5 /* PSDChatTableView.swift */,
 				4B13E837286A2BCD00E2428F /* ButtonsView */,
 				4B697CC82254AD7C002B0A10 /* MessageCell */,
+				1E809CE12E3A699C0097E311 /* Audio */,
 			);
 			path = PSDChatTable;
 			sourceTree = "<group>";
@@ -1190,6 +1474,8 @@
 				4B7F34D521F85E2A00977C6D /* PyrusServiceDesk */,
 				4B7F34E021F85E2A00977C6D /* PyrusServiceDeskTests */,
 				4B7F34D421F85E2A00977C6D /* Products */,
+				99ABEACA2B364C1A585D5CA7 /* Pods */,
+				20AE87D9E7E36F2FB00280C2 /* Frameworks */,
 			);
 			sourceTree = "<group>";
 		};
@@ -1205,6 +1491,10 @@
 		4B7F34D521F85E2A00977C6D /* PyrusServiceDesk */ = {
 			isa = PBXGroup;
 			children = (
+				1E809CBD2E3A686A0097E311 /* VoiceMessages */,
+				1E809C922E3A68640097E311 /* Search */,
+				1E809C7B2E3A68590097E311 /* opusfile */,
+				1E809C742E3A68510097E311 /* opusfile.h */,
 				1EA6F7382D673FE3003674CE /* CoreData */,
 				1E5068BB2CEB15DA001A9E2D /* DeniedAccessCallBack.swift */,
 				1E5068B52CEB154B001A9E2D /* Repositories */,
@@ -1228,7 +1518,9 @@
 				4B7F350F21F8A77900977C6D /* images */,
 				4B7F34D721F85E2A00977C6D /* Info.plist */,
 				4B8EE7CC255AE4160068B266 /* LogsSendController.swift */,
-				7B743A8124D2E1A300B34904 /* assets.xcassets */,
+				1E809C6E2E3A68040097E311 /* CasheLoadedCallBack.swift */,
+				1E809C702E3A680C0097E311 /* DeniedAccessCallBack.swift */,
+				1E809C722E3A68130097E311 /* ExtraUsersCallback.swift */,
 			);
 			path = PyrusServiceDesk;
 			sourceTree = "<group>";
@@ -1518,6 +1810,17 @@
 			path = Back;
 			sourceTree = "<group>";
 		};
+		99ABEACA2B364C1A585D5CA7 /* Pods */ = {
+			isa = PBXGroup;
+			children = (
+				35DDB0A6E6931F4215764122 /* Pods-PyrusServiceDesk.debug.xcconfig */,
+				F0F2B86767AA976FAE63F250 /* Pods-PyrusServiceDesk.release.xcconfig */,
+				DA9FF770D4D2D598767E7B3B /* Pods-PyrusServiceDesk-PyrusServiceDeskTests.debug.xcconfig */,
+				B24056E15DAC8AA99C356149 /* Pods-PyrusServiceDesk-PyrusServiceDeskTests.release.xcconfig */,
+			);
+			path = Pods;
+			sourceTree = "<group>";
+		};
 /* End PBXGroup section */
 
 /* Begin PBXHeadersBuildPhase section */
@@ -1525,7 +1828,13 @@
 			isa = PBXHeadersBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				1E809C7C2E3A68590097E311 /* internal.h in Headers */,
+				1E809CBE2E3A686A0097E311 /* MeterTableBridge.h in Headers */,
+				1E809CBF2E3A686A0097E311 /* MeterTable.h in Headers */,
+				1E809CC02E3A686A0097E311 /* VorbisDecoder.h in Headers */,
+				1E809CC12E3A686A0097E311 /* OggOpusDecoder.h in Headers */,
 				4B7F34E421F85E2A00977C6D /* PyrusServiceDesk.h in Headers */,
+				1E809C752E3A68510097E311 /* opusfile.h in Headers */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1536,6 +1845,7 @@
 			isa = PBXNativeTarget;
 			buildConfigurationList = 4B7F34E721F85E2A00977C6D /* Build configuration list for PBXNativeTarget "PyrusServiceDesk" */;
 			buildPhases = (
+				E0133D6178F6032E763AD30B /* [CP] Check Pods Manifest.lock */,
 				4B7F34CE21F85E2A00977C6D /* Headers */,
 				4B7F34CF21F85E2A00977C6D /* Sources */,
 				4B7F34D021F85E2A00977C6D /* Frameworks */,
@@ -1554,9 +1864,11 @@
 			isa = PBXNativeTarget;
 			buildConfigurationList = 4B7F34EA21F85E2A00977C6D /* Build configuration list for PBXNativeTarget "PyrusServiceDeskTests" */;
 			buildPhases = (
+				6E77F7F8A464B6010627DBEF /* [CP] Check Pods Manifest.lock */,
 				4B7F34D821F85E2A00977C6D /* Sources */,
 				4B7F34D921F85E2A00977C6D /* Frameworks */,
 				4B7F34DA21F85E2A00977C6D /* Resources */,
+				500052726A1BD71076F6BA99 /* [CP] Embed Pods Frameworks */,
 			);
 			buildRules = (
 			);
@@ -1599,6 +1911,9 @@
 				Base,
 			);
 			mainGroup = 4B7F34C921F85E2A00977C6D;
+			packageReferences = (
+				1E809CEB2E3A6AE20097E311 /* XCRemoteSwiftPackageReference "vorbis-swift" */,
+			);
 			productRefGroup = 4B7F34D421F85E2A00977C6D /* Products */;
 			projectDirPath = "";
 			projectRoot = "";
@@ -1716,7 +2031,6 @@
 				4BB855AA22086C1900F7CCE5 /* Localizable.strings in Resources */,
 				4B281F332577FBCF0042C235 /* clock-dark-36@3x.png in Resources */,
 				4B63396021FA168500A154B5 /* DownloadWhite.png in Resources */,
-				7B743A8224D2E1A300B34904 /* assets.xcassets in Resources */,
 				4B7F139522157989007C6358 /* SupportIcon@3x.png in Resources */,
 				4B82A4A62268E17600654CE0 /* Back@3x.png in Resources */,
 				4B281F612577FBCF0042C235 /* clock-light-26@3x.png in Resources */,
@@ -1803,6 +2117,70 @@
 		};
 /* End PBXResourcesBuildPhase section */
 
+/* Begin PBXShellScriptBuildPhase section */
+		500052726A1BD71076F6BA99 /* [CP] Embed Pods Frameworks */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputFileListPaths = (
+				"${PODS_ROOT}/Target Support Files/Pods-PyrusServiceDesk-PyrusServiceDeskTests/Pods-PyrusServiceDesk-PyrusServiceDeskTests-frameworks-${CONFIGURATION}-input-files.xcfilelist",
+			);
+			name = "[CP] Embed Pods Frameworks";
+			outputFileListPaths = (
+				"${PODS_ROOT}/Target Support Files/Pods-PyrusServiceDesk-PyrusServiceDeskTests/Pods-PyrusServiceDesk-PyrusServiceDeskTests-frameworks-${CONFIGURATION}-output-files.xcfilelist",
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "\"${PODS_ROOT}/Target Support Files/Pods-PyrusServiceDesk-PyrusServiceDeskTests/Pods-PyrusServiceDesk-PyrusServiceDeskTests-frameworks.sh\"\n";
+			showEnvVarsInLog = 0;
+		};
+		6E77F7F8A464B6010627DBEF /* [CP] Check Pods Manifest.lock */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputFileListPaths = (
+			);
+			inputPaths = (
+				"${PODS_PODFILE_DIR_PATH}/Podfile.lock",
+				"${PODS_ROOT}/Manifest.lock",
+			);
+			name = "[CP] Check Pods Manifest.lock";
+			outputFileListPaths = (
+			);
+			outputPaths = (
+				"$(DERIVED_FILE_DIR)/Pods-PyrusServiceDesk-PyrusServiceDeskTests-checkManifestLockResult.txt",
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "diff \"${PODS_PODFILE_DIR_PATH}/Podfile.lock\" \"${PODS_ROOT}/Manifest.lock\" > /dev/null\nif [ $? != 0 ] ; then\n    # print error to STDERR\n    echo \"error: The sandbox is not in sync with the Podfile.lock. Run 'pod install' or update your CocoaPods installation.\" >&2\n    exit 1\nfi\n# This output is used by Xcode 'outputs' to avoid re-running this script phase.\necho \"SUCCESS\" > \"${SCRIPT_OUTPUT_FILE_0}\"\n";
+			showEnvVarsInLog = 0;
+		};
+		E0133D6178F6032E763AD30B /* [CP] Check Pods Manifest.lock */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputFileListPaths = (
+			);
+			inputPaths = (
+				"${PODS_PODFILE_DIR_PATH}/Podfile.lock",
+				"${PODS_ROOT}/Manifest.lock",
+			);
+			name = "[CP] Check Pods Manifest.lock";
+			outputFileListPaths = (
+			);
+			outputPaths = (
+				"$(DERIVED_FILE_DIR)/Pods-PyrusServiceDesk-checkManifestLockResult.txt",
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "diff \"${PODS_PODFILE_DIR_PATH}/Podfile.lock\" \"${PODS_ROOT}/Manifest.lock\" > /dev/null\nif [ $? != 0 ] ; then\n    # print error to STDERR\n    echo \"error: The sandbox is not in sync with the Podfile.lock. Run 'pod install' or update your CocoaPods installation.\" >&2\n    exit 1\nfi\n# This output is used by Xcode 'outputs' to avoid re-running this script phase.\necho \"SUCCESS\" > \"${SCRIPT_OUTPUT_FILE_0}\"\n";
+			showEnvVarsInLog = 0;
+		};
+/* End PBXShellScriptBuildPhase section */
+
 /* Begin PBXSourcesBuildPhase section */
 		4B7F34CF21F85E2A00977C6D /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
@@ -1823,9 +2201,11 @@
 				4B88C6F522145AB000BDB304 /* PSDGetChat.swift in Sources */,
 				4B56BE492216CC0E004E6685 /* PSDUploader.swift in Sources */,
 				1E5068B82CEB15C4001A9E2D /* ButtonSegmentView.swift in Sources */,
+				1E809C712E3A680C0097E311 /* DeniedAccessCallBack.swift in Sources */,
 				1E1279CE2CC271C00080CB19 /* PSDChatsCellConfigurator.swift in Sources */,
 				4BB7DADF225E280800F6D1F0 /* PSDFileAttachmentView.swift in Sources */,
 				4B82A49C2268C29700654CE0 /* PSDCoverHorizontalAnimator.swift in Sources */,
+				1E809CEF2E3A6C2F0097E311 /* PopoverContentController.swift in Sources */,
 				4B13E839286A46BB00E2428F /* ButtonViewCell.swift in Sources */,
 				4B17DD0523E816B1003CF4D9 /* String + uuid.swift in Sources */,
 				1E1279DF2CC271DC0080CB19 /* ChatsPresenterProtocol.swift in Sources */,
@@ -1839,15 +2219,22 @@
 				4B63393621FA106400A154B5 /* PSDChatMessageCell.swift in Sources */,
 				1E5068B32CEB153C001A9E2D /* TicketCommand.swift in Sources */,
 				1E1279D02CC271C00080CB19 /* PSDChatsSectionModel.swift in Sources */,
+				1E809C6D2E3A67B00097E311 /* RateManager.swift in Sources */,
 				1E50691F2D0745A5001A9E2D /* PSDChatsViewModelProtocol.swift in Sources */,
+				1E809C7D2E3A68590097E311 /* info.c in Sources */,
+				1E809C7E2E3A68590097E311 /* opusfile.c in Sources */,
+				1E809C7F2E3A68590097E311 /* internal.c in Sources */,
+				1E809C802E3A68590097E311 /* stream.c in Sources */,
 				4B10E5F0222844EA00CF118B /* PSDAttachmentLoadViewController.swift in Sources */,
 				4B5AFEA621FB00B700AAF233 /* PSDMessageInputView.swift in Sources */,
+				1E809C692E3A67950097E311 /* AudioRepository.swift in Sources */,
 				4B7EA888221EF61F009C9B41 /* UIApplication+topViewController.swift in Sources */,
 				4B697CCA2254AF54002B0A10 /* PSDUserMessageCell.swift in Sources */,
 				4B9C205D2451904E004DEF7A /* PSDRowMessage.swift in Sources */,
 				4B873BB6224BCA8100A96E93 /* PSDPushToken.swift in Sources */,
 				4B7F139022155F62007C6358 /* String+Date.swift in Sources */,
 				1E1279BF2CC271440080CB19 /* PSDUserInfo.swift in Sources */,
+				1E809CE82E3A69D50097E311 /* PSDChatDiffableDataSource.swift in Sources */,
 				1E1279CF2CC271C00080CB19 /* PSDChatsDiffableDataSource.swift in Sources */,
 				4B66011D223948CE00AA45E6 /* PyrusServiceDeskCustomization.swift in Sources */,
 				4B9BF878224CBCBC006AD05C /* PSDCopyLabel.swift in Sources */,
@@ -1865,7 +2252,13 @@
 				4B3F72E12498C01600318F1F /* PSDRateView.swift in Sources */,
 				4BAA214D222D202900B8BED7 /* UIView+constraints.swift in Sources */,
 				4B2E6511220DE20400E70A2F /* PSDUser.swift in Sources */,
+				1E809CE22E3A699C0097E311 /* AudioTableViewPlayerPresenter.swift in Sources */,
+				1E809CE32E3A699C0097E311 /* AudioLoader.swift in Sources */,
+				1E809CE42E3A699C0097E311 /* MultiAudioPlayer.swift in Sources */,
+				1E809CE52E3A699C0097E311 /* AudioSlider.swift in Sources */,
+				1E809CE62E3A699C0097E311 /* CALayer+LoadingCircle.swift in Sources */,
 				4BDDE42B257F70C800DF40B2 /* Recolorable.swift in Sources */,
+				1E809C732E3A68140097E311 /* ExtraUsersCallback.swift in Sources */,
 				1E50689A2CEB1457001A9E2D /* PSDChatInteractor.swift in Sources */,
 				1E1279EA2CC273130080CB19 /* ColorHexInit.swift in Sources */,
 				4B90E514221D55B800A18245 /* SupportUserImage.swift in Sources */,
@@ -1877,6 +2270,7 @@
 				4B90E517221DB21000A18245 /* PSDNoConnectionView.swift in Sources */,
 				4B9FAFA125542FB700FCE51D /* UnreadMessageManager.swift in Sources */,
 				4B2F47B8224A679A00E3B23A /* String + FilesSupportedExtension.swift in Sources */,
+				1E809C6F2E3A68040097E311 /* CasheLoadedCallBack.swift in Sources */,
 				1E50689B2CEB1457001A9E2D /* PSDChatInteractorProtocol.swift in Sources */,
 				4B81B6FD221FF7FB00EE1253 /* UITableView + swipeForDetail.swift in Sources */,
 				1E5068A52CEB148E001A9E2D /* PSDChatRouterProtocol.swift in Sources */,
@@ -1894,6 +2288,7 @@
 				4BBB9B06249D152900059A23 /* LogEvents.swift in Sources */,
 				4B5AFEAB21FB0A7B00AAF233 /* PSDMessageSendButton.swift in Sources */,
 				1E1279EC2CC2737E0080CB19 /* TableViewCellConfiguratorProtocol.swift in Sources */,
+				1E809CEA2E3A69E50097E311 /* PSDAudioAttachmentView.swift in Sources */,
 				4B9B0BBB2266344200090DB5 /* PSDAttachmentPreviewErrorView.swift in Sources */,
 				1E5069252D15AFE9001A9E2D /* PSDChatSectionModel.swift in Sources */,
 				1E5068A02CEB146F001A9E2D /* PSDChatPresenterProtocol.swift in Sources */,
@@ -1902,6 +2297,30 @@
 				1E1279D62CC271C90080CB19 /* ChatsRouter.swift in Sources */,
 				4BB6CDC325597E4C004C680A /* PyrusLogger.swift in Sources */,
 				4B6D4A39244E1B6A007C6082 /* AttachmentCollectionView.swift in Sources */,
+				1E809CC22E3A686A0097E311 /* AudioFormatManager.swift in Sources */,
+				1E809CC32E3A686A0097E311 /* MeterTableBridge.mm in Sources */,
+				1E809CC42E3A686A0097E311 /* Session.swift in Sources */,
+				1E809CC52E3A686A0097E311 /* AudioRecordPresenter.swift in Sources */,
+				1E809CC62E3A686A0097E311 /* OpusPlayer.swift in Sources */,
+				1E809CC72E3A686A0097E311 /* OggOpusDecoder.m in Sources */,
+				1E809CC82E3A686A0097E311 /* AudioAttachmentView + Player.swift in Sources */,
+				1E809CC92E3A686A0097E311 /* OggOpusDecoder.swift in Sources */,
+				1E809CCA2E3A686A0097E311 /* OpusRecorder.swift in Sources */,
+				1E809CCB2E3A686A0097E311 /* AudioPlayerPresenter.swift in Sources */,
+				1E809CCC2E3A686A0097E311 /* VorbisDecoder.swift in Sources */,
+				1E809CCD2E3A686A0097E311 /* CircularProgress.swift in Sources */,
+				1E809CCE2E3A686A0097E311 /* VoiceRecordButton.swift in Sources */,
+				1E809CCF2E3A686A0097E311 /* BubleTextView.swift in Sources */,
+				1E809CD02E3A686A0097E311 /* Recorder.swift in Sources */,
+				1E809CD12E3A686A0097E311 /* MeterTable.c++ in Sources */,
+				1E809CD22E3A686A0097E311 /* RecordableView.swift in Sources */,
+				1E809CD32E3A686A0097E311 /* AudioAttachmentView.swift in Sources */,
+				1E809CD42E3A686A0097E311 /* VorbisDecoder.m in Sources */,
+				1E809CD52E3A686A0097E311 /* CustomPlayerCell.swift in Sources */,
+				1E809CD62E3A686A0097E311 /* LockRecordView.swift in Sources */,
+				1E809CD72E3A686A0097E311 /* AudioRecordingObject.swift in Sources */,
+				1E809CD82E3A686A0097E311 /* VoiceRecordView.swift in Sources */,
+				1E809CD92E3A686A0097E311 /* OpusEncoder.swift in Sources */,
 				4B659AFE223FA9E400D79489 /* PSDSpinerTableView.swift in Sources */,
 				4B82A49A2268B57B00654CE0 /* PSDAttachmentLoadViewControllerInterface.swift in Sources */,
 				1E5068A42CEB148E001A9E2D /* PSDChatRouter.swift in Sources */,
@@ -1919,8 +2338,8 @@
 				1E50689F2CEB146F001A9E2D /* PSDChatPresenter.swift in Sources */,
 				4BAA214F222D60D000B8BED7 /* Dictionary+asString.swift in Sources */,
 				4B1ED2AC228190BA00B98516 /* PSDMessagesStorage.swift in Sources */,
-				1EA6F73A2D673FE3003674CE /* PSDChats.xcdatamodeld in Sources */,
 				4BDDE42F257F7DB900DF40B2 /* PSDVIew.swift in Sources */,
+				1E809C672E3A67750097E311 /* PSDChats.xcdatamodeld in Sources */,
 				4B9F781C228C2813003CC83D /* PSDTableView.swift in Sources */,
 				4B7F350621F8687000977C6D /* PyrusServiceDeskCreator.swift in Sources */,
 				4BB855A02208593200F7CCE5 /* URLCreator.swift in Sources */,
@@ -1939,12 +2358,25 @@
 				4B1C63E2256D3F3300902C8E /* CustomizationHelper.swift in Sources */,
 				4B7AD4D6250A06C9004E9C48 /* PSDFilesManager.swift in Sources */,
 				4B7EA884221EB01B009C9B41 /* PSDErrorParser.swift in Sources */,
+				1E809C932E3A68640097E311 /* SearchChatViewModel.swift in Sources */,
+				1E809C942E3A68640097E311 /* SearchPresenter.swift in Sources */,
+				1E809C952E3A68640097E311 /* SearchChatCellConfigurator.swift in Sources */,
+				1E809C962E3A68640097E311 /* SearchViewController.swift in Sources */,
+				1E809C972E3A68640097E311 /* SearchPresenterProtocol.swift in Sources */,
+				1E809C982E3A68640097E311 /* SearchInteractor.swift in Sources */,
+				1E809C992E3A68640097E311 /* SearchRouter.swift in Sources */,
+				1E809C9A2E3A68640097E311 /* SearchChatCell.swift in Sources */,
+				1E809C9B2E3A68640097E311 /* SearchRouterProtocol.swift in Sources */,
+				1E809C9C2E3A68640097E311 /* SearchChatModel.swift in Sources */,
+				1E809C9D2E3A68640097E311 /* SearchViewProtocol.swift in Sources */,
+				1E809C9E2E3A68640097E311 /* SearchInteractorProtocol.swift in Sources */,
 				1EA6F73B2D673FE3003674CE /* PSDChatsDataService.swift in Sources */,
 				4BA3FF4022116C1100CE497A /* AttachmentHandler.swift in Sources */,
 				4B56BE4B2216CCC0004E6685 /* PSDAttachment.swift in Sources */,
 				4B060F2A2732AD8C002E20A7 /* StringHelper.swift in Sources */,
 				4B6E9DA3225F3B570037462F /* PSDPreviewSetter.swift in Sources */,
 				1E1279CC2CC271C00080CB19 /* PSDChatInfoTableViewCell.swift in Sources */,
+				1E809C6B2E3A67A60097E311 /* CacheVersionManager.swift in Sources */,
 				4B6E9DA7225F74E50037462F /* PSDDownloadView.swift in Sources */,
 				4B64B8742243D402003116C3 /* CharacterSet+urlEncode.swift in Sources */,
 				1E1279D22CC271C00080CB19 /* PSDChatsViewController.swift in Sources */,
@@ -1958,6 +2390,7 @@
 				1E5068BA2CEB15CB001A9E2D /* UnderlineSegmentController.swift in Sources */,
 				4BC210D822674A5600CFE255 /* PSDNavigationController.swift in Sources */,
 				1E5068AB2CEB14C4001A9E2D /* PSDChatViewController.swift in Sources */,
+				1E809CDB2E3A697A0097E311 /* AudioInputView.swift in Sources */,
 				4B1CD390230BE58000C06F71 /* applicationColors.swift in Sources */,
 				4BA96C3E222EA7BB00F7F9AE /* PSDAvatarImageView.swift in Sources */,
 				4BB7DADD225E1BC300F6D1F0 /* PSDImageAttachmentView.swift in Sources */,
@@ -2039,6 +2472,7 @@
 				ENABLE_BITCODE = YES;
 				ENABLE_STRICT_OBJC_MSGSEND = YES;
 				ENABLE_TESTABILITY = YES;
+				"EXCLUDED_ARCHS[sdk=iphonesimulator*]" = arm64;
 				GCC_C_LANGUAGE_STANDARD = gnu11;
 				GCC_DYNAMIC_NO_PIC = NO;
 				GCC_NO_COMMON_BLOCKS = YES;
@@ -2135,6 +2569,7 @@
 		};
 		4B7F34E821F85E2A00977C6D /* Debug */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReference = 35DDB0A6E6931F4215764122 /* Pods-PyrusServiceDesk.debug.xcconfig */;
 			buildSettings = {
 				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = NO;
 				BUILD_LIBRARY_FOR_DISTRIBUTION = YES;
@@ -2149,6 +2584,7 @@
 				ENABLE_BITCODE = YES;
 				INFOPLIST_FILE = PyrusServiceDesk/Info.plist;
 				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Frameworks";
+				IPHONEOS_DEPLOYMENT_TARGET = 15.0;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
@@ -2167,6 +2603,7 @@
 		};
 		4B7F34E921F85E2A00977C6D /* Release */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReference = F0F2B86767AA976FAE63F250 /* Pods-PyrusServiceDesk.release.xcconfig */;
 			buildSettings = {
 				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = NO;
 				BUILD_LIBRARY_FOR_DISTRIBUTION = YES;
@@ -2182,6 +2619,7 @@
 				"EXCLUDED_ARCHS[sdk=iphonesimulator*]" = "";
 				INFOPLIST_FILE = PyrusServiceDesk/Info.plist;
 				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Frameworks";
+				IPHONEOS_DEPLOYMENT_TARGET = 15.0;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
@@ -2198,6 +2636,7 @@
 		};
 		4B7F34EB21F85E2A00977C6D /* Debug */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReference = DA9FF770D4D2D598767E7B3B /* Pods-PyrusServiceDesk-PyrusServiceDeskTests.debug.xcconfig */;
 			buildSettings = {
 				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = NO;
 				CODE_SIGN_STYLE = Automatic;
@@ -2217,6 +2656,7 @@
 		};
 		4B7F34EC21F85E2A00977C6D /* Release */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReference = B24056E15DAC8AA99C356149 /* Pods-PyrusServiceDesk-PyrusServiceDeskTests.release.xcconfig */;
 			buildSettings = {
 				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = NO;
 				CODE_SIGN_STYLE = Automatic;
@@ -2267,15 +2707,34 @@
 		};
 /* End XCConfigurationList section */
 
+/* Begin XCRemoteSwiftPackageReference section */
+		1E809CEB2E3A6AE20097E311 /* XCRemoteSwiftPackageReference "vorbis-swift" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/HealsCodes/vorbis-swift.git";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 1.3.7;
+			};
+		};
+/* End XCRemoteSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		1E809CEC2E3A6AE20097E311 /* LibVorbis */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 1E809CEB2E3A6AE20097E311 /* XCRemoteSwiftPackageReference "vorbis-swift" */;
+			productName = LibVorbis;
+		};
+/* End XCSwiftPackageProductDependency section */
+
 /* Begin XCVersionGroup section */
-		1EA6F7332D673FE3003674CE /* PSDChats.xcdatamodeld */ = {
+		1E809C642E3A67750097E311 /* PSDChats.xcdatamodeld */ = {
 			isa = XCVersionGroup;
 			children = (
-				1EA6F7392D673FE3003674CE /* PSDChats.xcdatamodel */,
+				1E809C652E3A67750097E311 /* PSDChats.xcdatamodel */,
+				1E809C662E3A67750097E311 /* PSDChats 2.xcdatamodel */,
 			);
-			currentVersion = 1EA6F7392D673FE3003674CE /* PSDChats.xcdatamodel */;
-			name = PSDChats.xcdatamodeld;
-			path = /Users/stanislavabobruskina/pyrusservicedesk/PyrusServiceDeskIOS/PyrusServiceDesk/CoreData/PSDChats.xcdatamodeld;
+			currentVersion = 1E809C662E3A67750097E311 /* PSDChats 2.xcdatamodel */;
+			path = PSDChats.xcdatamodeld;
 			sourceTree = "<group>";
 			versionGroupType = wrapper.xcdatamodel;
 		};
