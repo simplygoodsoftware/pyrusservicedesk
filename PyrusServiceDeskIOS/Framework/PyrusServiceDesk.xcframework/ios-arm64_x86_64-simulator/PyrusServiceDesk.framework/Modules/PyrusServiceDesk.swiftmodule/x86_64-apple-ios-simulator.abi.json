@@ -4625,10 +4625,7 @@
         "name": "PyrusServiceDeskPrivate",
         "printedName": "PyrusServiceDeskPrivate",
         "declKind": "Import",
-        "moduleName": "PyrusServiceDesk",
-        "declAttributes": [
-          "ImplementationOnly"
-        ]
+        "moduleName": "PyrusServiceDesk"
       },
       {
         "kind": "Import",

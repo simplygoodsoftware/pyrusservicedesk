@@ -17,31 +17,31 @@
 
 @end
 
-//OggVorbis_File VorbisCreateEmptyFile(void) {
-//    return (OggVorbis_File){0};
-//}
+OggVorbis_File VorbisCreateEmptyFile(void) {
+    return (OggVorbis_File){0};
+}
 
 @implementation VorbisDecoder
 
 - (instancetype)initWithUrl:(NSURL*)url offset:(int64_t)psmOffset{
     if (self != nil)
     {
-//        _vorbisFile = VorbisCreateEmptyFile();
-//        int err = ov_fopen([[url path] cStringUsingEncoding:NSUTF8StringEncoding], &_vorbisFile);
-//        vorbis_info *info = ov_info( &_vorbisFile, -1 );
-//        if (&_vorbisFile == NULL || err != OPUS_OK)
-//        {
-//            NSLog(@"ERROR OPEN FILE");
-//        }
-//        else if (ov_seekable(&_vorbisFile)){
-//            ov_pcm_seek(&_vorbisFile, psmOffset);
-//        }
-//        _rate = info->rate;
-//        if (_rate <= 0) {
-//            _rate = 44100;
-//        }
-//        numberOfChanels = info->channels;
-//        _totalTime = ov_time_total(&_vorbisFile, -1);
+        _vorbisFile = VorbisCreateEmptyFile();
+        int err = ov_fopen([[url path] cStringUsingEncoding:NSUTF8StringEncoding], &_vorbisFile);
+        vorbis_info *info = ov_info( &_vorbisFile, -1 );
+        if (&_vorbisFile == NULL || err != OPUS_OK)
+        {
+            NSLog(@"ERROR OPEN FILE");
+        }
+        else if (ov_seekable(&_vorbisFile)){
+            ov_pcm_seek(&_vorbisFile, psmOffset);
+        }
+        _rate = info->rate;
+        if (_rate <= 0) {
+            _rate = 44100;
+        }
+        numberOfChanels = info->channels;
+        _totalTime = ov_time_total(&_vorbisFile, -1);
     }
     return self;
 }
@@ -56,20 +56,20 @@
 
 - (BOOL)read:(AudioQueueBufferRef)pBuffer
 {
-//    int nTotalBytesRead = 0;
-//    long nBytesRead = 0;
-//    int sec = 0;
-//    nBytesRead = ov_read(&_vorbisFile, pBuffer->mAudioData, pBuffer->mAudioDataBytesCapacity, 0, 2, 1, &sec);
-//    if(nBytesRead  > 0) {
-//        nTotalBytesRead += nBytesRead;
-//    }
-//    if(nTotalBytesRead == 0)
-//        return NO;
-//    if(nBytesRead < 0)
-//    {
-//        return NO;
-//    }
-//    pBuffer->mAudioDataByteSize = nTotalBytesRead;
+    int nTotalBytesRead = 0;
+    long nBytesRead = 0;
+    int sec = 0;
+    nBytesRead = ov_read(&_vorbisFile, pBuffer->mAudioData, pBuffer->mAudioDataBytesCapacity, 0, 2, 1, &sec);
+    if(nBytesRead  > 0) {
+        nTotalBytesRead += nBytesRead;
+    }
+    if(nTotalBytesRead == 0)
+        return NO;
+    if(nBytesRead < 0)
+    {
+        return NO;
+    }
+    pBuffer->mAudioDataByteSize = nTotalBytesRead;
     return YES;
     
 }
