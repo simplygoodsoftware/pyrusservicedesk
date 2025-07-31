@@ -19,7 +19,8 @@ import UIKit
     }
     
     @objc func getPcmTotal() -> Int64 {
-        let pcmTotal = ov_pcm_total(&vorbisFile, -1)
+        var file = VorbisDecoder.getFile()
+        let pcmTotal = ov_pcm_total(&file, -1)
         return pcmTotal
     }
 }
