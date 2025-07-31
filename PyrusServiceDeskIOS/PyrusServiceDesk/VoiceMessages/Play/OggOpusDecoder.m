@@ -85,6 +85,10 @@
     return 48000;
 }
 
+- (int64_t)getPcmTotal {
+    return 0;
+}
+
 - (void)dealloc
 {
     op_free(_oggFile);

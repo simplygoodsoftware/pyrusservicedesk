@@ -1,5 +1,6 @@
 import Foundation
 import libopus
+import PyrusServiceDeskPrivate
 // import ogg
 
 extension OggOpusDecoder {
@@ -16,8 +17,8 @@ extension OggOpusDecoder {
         return false
     }
     
-    @objc func getPcmTotal() -> Int64 {
-        let pcmTotal = op_pcm_total(oggFile, -1)
-        return pcmTotal
-    }
+//    @objc func getPcmTotal() -> Int64 {
+//        let pcmTotal = op_pcm_total(oggFile, -1)
+//        return pcmTotal
+//    }
 }

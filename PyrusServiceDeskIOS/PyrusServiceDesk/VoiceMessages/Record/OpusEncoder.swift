@@ -29,6 +29,8 @@
 import Foundation
 import AudioToolbox
 import libopus
+import PyrusServiceDeskPrivate
+
 // import ogg
 
 internal class OpusEncoder {

@@ -11,5 +11,9 @@
 
 #import "VorbisDecoder.h"
 #import "MeterTableBridge.h"
+#import "opusfile.h"
+#import "OggOpusDecoder.h"
+#import "opus_multistream.h"
+#import "libopus/opus_multistream.h"
 
 #endif /* InternalHeader_h */
