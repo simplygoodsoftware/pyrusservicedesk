@@ -2,7 +2,7 @@ import Foundation
 import AudioToolbox
 import CoreAudioKit
 import libopus
-import PyrusServiceDeskPrivate
+@_implementationOnly import PyrusServiceDeskPrivate
 
 let bufCount: Int = 3
 let OPUS_PLAYER_NOTIFICATION_KEY = "opusPlayerNotification"

@@ -16,7 +16,6 @@ import MobileCoreServices
 import Network
 import Photos
 @_exported import PyrusServiceDesk
-import PyrusServiceDeskPrivate
 import StoreKit
 import Swift
 import SwiftUI

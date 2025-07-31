@@ -1,6 +1,6 @@
 import Foundation
 import libopus
-import PyrusServiceDeskPrivate
+@_implementationOnly import PyrusServiceDeskPrivate
 // import ogg
 
 extension OggOpusDecoder {

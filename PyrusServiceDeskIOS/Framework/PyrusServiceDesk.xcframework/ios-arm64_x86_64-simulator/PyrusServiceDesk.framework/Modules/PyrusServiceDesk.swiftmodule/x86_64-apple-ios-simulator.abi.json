@@ -4370,7 +4370,10 @@
         "name": "PyrusServiceDeskPrivate",
         "printedName": "PyrusServiceDeskPrivate",
         "declKind": "Import",
-        "moduleName": "PyrusServiceDesk"
+        "moduleName": "PyrusServiceDesk",
+        "declAttributes": [
+          "ImplementationOnly"
+        ]
       },
       {
         "kind": "Import",
@@ -4429,7 +4432,10 @@
         "name": "PyrusServiceDeskPrivate",
         "printedName": "PyrusServiceDeskPrivate",
         "declKind": "Import",
-        "moduleName": "PyrusServiceDesk"
+        "moduleName": "PyrusServiceDesk",
+        "declAttributes": [
+          "ImplementationOnly"
+        ]
       },
       {
         "kind": "Import",
@@ -4450,7 +4456,10 @@
         "name": "PyrusServiceDeskPrivate",
         "printedName": "PyrusServiceDeskPrivate",
         "declKind": "Import",
-        "moduleName": "PyrusServiceDesk"
+        "moduleName": "PyrusServiceDesk",
+        "declAttributes": [
+          "ImplementationOnly"
+        ]
       },
       {
         "kind": "Import",
@@ -4616,7 +4625,10 @@
         "name": "PyrusServiceDeskPrivate",
         "printedName": "PyrusServiceDeskPrivate",
         "declKind": "Import",
-        "moduleName": "PyrusServiceDesk"
+        "moduleName": "PyrusServiceDesk",
+        "declAttributes": [
+          "ImplementationOnly"
+        ]
       },
       {
         "kind": "Import",
@@ -4678,7 +4690,10 @@
         "name": "PyrusServiceDeskPrivate",
         "printedName": "PyrusServiceDeskPrivate",
         "declKind": "Import",
-        "moduleName": "PyrusServiceDesk"
+        "moduleName": "PyrusServiceDesk",
+        "declAttributes": [
+          "ImplementationOnly"
+        ]
       },
       {
         "kind": "Import",
@@ -4737,7 +4752,10 @@
         "name": "PyrusServiceDeskPrivate",
         "printedName": "PyrusServiceDeskPrivate",
         "declKind": "Import",
-        "moduleName": "PyrusServiceDesk"
+        "moduleName": "PyrusServiceDesk",
+        "declAttributes": [
+          "ImplementationOnly"
+        ]
       },
       {
         "kind": "Import",
@@ -20007,119 +20025,119 @@
     {
       "filePath": "\/Users\/kirilllybov\/pyrusservicedesk\/PyrusServiceDeskIOS\/PyrusServiceDesk\/VoiceMessages\/Play\/OpusPlayer.swift",
       "kind": "IntegerLiteral",
-      "offset": 125,
+      "offset": 146,
       "length": 1,
       "value": "3"
     },
     {
       "filePath": "\/Users\/kirilllybov\/pyrusservicedesk\/PyrusServiceDeskIOS\/PyrusServiceDesk\/VoiceMessages\/Play\/OpusPlayer.swift",
       "kind": "StringLiteral",
-      "offset": 162,
+      "offset": 183,
       "length": 24,
       "value": "\"opusPlayerNotification\""
     },
     {
       "filePath": "\/Users\/kirilllybov\/pyrusservicedesk\/PyrusServiceDeskIOS\/PyrusServiceDesk\/VoiceMessages\/Play\/OpusPlayer.swift",
       "kind": "StringLiteral",
-      "offset": 302,
+      "offset": 323,
       "length": 20,
       "value": "\"attachmentIdToStop\""
     },
     {
       "filePath": "\/Users\/kirilllybov\/pyrusservicedesk\/PyrusServiceDeskIOS\/PyrusServiceDesk\/VoiceMessages\/Play\/OpusPlayer.swift",
       "kind": "StringLiteral",
-      "offset": 402,
+      "offset": 423,
       "length": 20,
       "value": "\"attachmentIdToPlay\""
     },
     {
       "filePath": "\/Users\/kirilllybov\/pyrusservicedesk\/PyrusServiceDeskIOS\/PyrusServiceDesk\/VoiceMessages\/Play\/OpusPlayer.swift",
       "kind": "StringLiteral",
-      "offset": 525,
+      "offset": 546,
       "length": 14,
       "value": "\"playProgress\""
     },
     {
       "filePath": "\/Users\/kirilllybov\/pyrusservicedesk\/PyrusServiceDeskIOS\/PyrusServiceDesk\/VoiceMessages\/Play\/OpusPlayer.swift",
       "kind": "Dictionary",
-      "offset": 675,
+      "offset": 696,
       "length": 3,
       "value": "[]"
     },
     {
       "filePath": "\/Users\/kirilllybov\/pyrusservicedesk\/PyrusServiceDeskIOS\/PyrusServiceDesk\/VoiceMessages\/Play\/OpusPlayer.swift",
       "kind": "BooleanLiteral",
-      "offset": 896,
+      "offset": 917,
       "length": 5,
       "value": "false"
     },
     {
       "filePath": "\/Users\/kirilllybov\/pyrusservicedesk\/PyrusServiceDeskIOS\/PyrusServiceDesk\/VoiceMessages\/Play\/OpusPlayer.swift",
       "kind": "BooleanLiteral",
-      "offset": 933,
+      "offset": 954,
       "length": 5,
       "value": "false"
     },
     {
       "filePath": "\/Users\/kirilllybov\/pyrusservicedesk\/PyrusServiceDeskIOS\/PyrusServiceDesk\/VoiceMessages\/Play\/OpusPlayer.swift",
       "kind": "IntegerLiteral",
-      "offset": 975,
+      "offset": 996,
       "length": 1,
       "value": "0"
     },
     {
       "filePath": "\/Users\/kirilllybov\/pyrusservicedesk\/PyrusServiceDeskIOS\/PyrusServiceDesk\/VoiceMessages\/Play\/OpusPlayer.swift",
       "kind": "StringLiteral",
-      "offset": 1159,
+      "offset": 1180,
       "length": 2,
       "value": "\"\""
     },
     {
       "filePath": "\/Users\/kirilllybov\/pyrusservicedesk\/PyrusServiceDeskIOS\/PyrusServiceDesk\/VoiceMessages\/Play\/OpusPlayer.swift",
       "kind": "IntegerLiteral",
-      "offset": 1267,
+      "offset": 1288,
       "length": 5,
       "value": "48000"
     },
     {
       "filePath": "\/Users\/kirilllybov\/pyrusservicedesk\/PyrusServiceDeskIOS\/PyrusServiceDesk\/VoiceMessages\/Play\/OpusPlayer.swift",
       "kind": "BooleanLiteral",
-      "offset": 1318,
+      "offset": 1339,
       "length": 5,
       "value": "false"
     },
     {
       "filePath": "\/Users\/kirilllybov\/pyrusservicedesk\/PyrusServiceDeskIOS\/PyrusServiceDesk\/VoiceMessages\/Play\/OpusPlayer.swift",
       "kind": "StringLiteral",
-      "offset": 1417,
+      "offset": 1438,
       "length": 20,
       "value": "\"Audio : start play\""
     },
     {
       "filePath": "\/Users\/kirilllybov\/pyrusservicedesk\/PyrusServiceDeskIOS\/PyrusServiceDesk\/VoiceMessages\/Play\/OpusPlayer.swift",
       "kind": "StringLiteral",
-      "offset": 1488,
+      "offset": 1509,
       "length": 39,
       "value": "\"Audio : Error: Can't open OggOpusFile\""
     },
     {
       "filePath": "\/Users\/kirilllybov\/pyrusservicedesk\/PyrusServiceDeskIOS\/PyrusServiceDesk\/VoiceMessages\/Play\/OpusPlayer.swift",
       "kind": "BooleanLiteral",
-      "offset": 6376,
+      "offset": 6397,
       "length": 5,
       "value": "false"
     },
     {
       "filePath": "\/Users\/kirilllybov\/pyrusservicedesk\/PyrusServiceDeskIOS\/PyrusServiceDesk\/VoiceMessages\/Play\/OpusPlayer.swift",
       "kind": "IntegerLiteral",
-      "offset": 8597,
+      "offset": 8618,
       "length": 4,
       "value": "4096"
     },
     {
       "filePath": "\/Users\/kirilllybov\/pyrusservicedesk\/PyrusServiceDeskIOS\/PyrusServiceDesk\/VoiceMessages\/Play\/OpusPlayer.swift",
       "kind": "BooleanLiteral",
-      "offset": 11127,
+      "offset": 11148,
       "length": 4,
       "value": "true"
     },
@@ -20742,49 +20760,49 @@
     {
       "filePath": "\/Users\/kirilllybov\/pyrusservicedesk\/PyrusServiceDeskIOS\/PyrusServiceDesk\/VoiceMessages\/Record\/Recorder.swift",
       "kind": "IntegerLiteral",
-      "offset": 1200,
+      "offset": 1221,
       "length": 5,
       "value": "16000"
     },
     {
       "filePath": "\/Users\/kirilllybov\/pyrusservicedesk\/PyrusServiceDeskIOS\/PyrusServiceDesk\/VoiceMessages\/Record\/Recorder.swift",
       "kind": "BooleanLiteral",
-      "offset": 1753,
+      "offset": 1774,
       "length": 5,
       "value": "false"
     },
     {
       "filePath": "\/Users\/kirilllybov\/pyrusservicedesk\/PyrusServiceDeskIOS\/PyrusServiceDesk\/VoiceMessages\/Record\/Recorder.swift",
       "kind": "IntegerLiteral",
-      "offset": 2602,
+      "offset": 2623,
       "length": 1,
       "value": "0"
     },
     {
       "filePath": "\/Users\/kirilllybov\/pyrusservicedesk\/PyrusServiceDeskIOS\/PyrusServiceDesk\/VoiceMessages\/Record\/Recorder.swift",
       "kind": "IntegerLiteral",
-      "offset": 2647,
+      "offset": 2668,
       "length": 1,
       "value": "0"
     },
     {
       "filePath": "\/Users\/kirilllybov\/pyrusservicedesk\/PyrusServiceDeskIOS\/PyrusServiceDesk\/VoiceMessages\/Record\/Recorder.swift",
       "kind": "IntegerLiteral",
-      "offset": 3365,
+      "offset": 3386,
       "length": 1,
       "value": "0"
     },
     {
       "filePath": "\/Users\/kirilllybov\/pyrusservicedesk\/PyrusServiceDeskIOS\/PyrusServiceDesk\/VoiceMessages\/Record\/Recorder.swift",
       "kind": "IntegerLiteral",
-      "offset": 6886,
+      "offset": 6907,
       "length": 1,
       "value": "0"
     },
     {
       "filePath": "\/Users\/kirilllybov\/pyrusservicedesk\/PyrusServiceDeskIOS\/PyrusServiceDesk\/VoiceMessages\/Record\/Recorder.swift",
       "kind": "IntegerLiteral",
-      "offset": 6901,
+      "offset": 6922,
       "length": 1,
       "value": "0"
     },
@@ -21078,42 +21096,42 @@
     {
       "filePath": "\/Users\/kirilllybov\/pyrusservicedesk\/PyrusServiceDeskIOS\/PyrusServiceDesk\/VoiceMessages\/Record\/OpusEncoder.swift",
       "kind": "IntegerLiteral",
-      "offset": 1944,
+      "offset": 1965,
       "length": 4,
       "value": "3832"
     },
     {
       "filePath": "\/Users\/kirilllybov\/pyrusservicedesk\/PyrusServiceDeskIOS\/PyrusServiceDesk\/VoiceMessages\/Record\/OpusEncoder.swift",
       "kind": "BooleanLiteral",
-      "offset": 10870,
+      "offset": 10891,
       "length": 5,
       "value": "false"
     },
     {
       "filePath": "\/Users\/kirilllybov\/pyrusservicedesk\/PyrusServiceDeskIOS\/PyrusServiceDesk\/VoiceMessages\/Record\/OpusEncoder.swift",
       "kind": "BooleanLiteral",
-      "offset": 12635,
+      "offset": 12656,
       "length": 5,
       "value": "false"
     },
     {
       "filePath": "\/Users\/kirilllybov\/pyrusservicedesk\/PyrusServiceDeskIOS\/PyrusServiceDesk\/VoiceMessages\/Record\/OpusEncoder.swift",
       "kind": "IntegerLiteral",
-      "offset": 17658,
+      "offset": 17679,
       "length": 1,
       "value": "0"
     },
     {
       "filePath": "\/Users\/kirilllybov\/pyrusservicedesk\/PyrusServiceDeskIOS\/PyrusServiceDesk\/VoiceMessages\/Record\/OpusEncoder.swift",
       "kind": "IntegerLiteral",
-      "offset": 17678,
+      "offset": 17699,
       "length": 1,
       "value": "1"
     },
     {
       "filePath": "\/Users\/kirilllybov\/pyrusservicedesk\/PyrusServiceDeskIOS\/PyrusServiceDesk\/VoiceMessages\/Record\/OpusEncoder.swift",
       "kind": "IntegerLiteral",
-      "offset": 17701,
+      "offset": 17722,
       "length": 3,
       "value": "255"
     },
