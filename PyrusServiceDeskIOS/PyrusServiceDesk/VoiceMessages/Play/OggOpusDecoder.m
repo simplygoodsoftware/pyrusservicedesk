@@ -86,7 +86,8 @@
 }
 
 - (int64_t)getPcmTotal {
-    return 0;
+    int64_t pcmTotal = op_pcm_total(_oggFile, -1);
+    return pcmTotal;
 }
 
 - (void)dealloc

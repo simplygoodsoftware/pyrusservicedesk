@@ -51,7 +51,7 @@ OggVorbis_File VorbisCreateEmptyFile(void) {
 }
 
 -(int64_t)psmOffset{
-    return 0;//ov_pcm_tell(&_vorbisFile);
+    return ov_pcm_tell(&_vorbisFile);
 }
 
 - (BOOL)read:(AudioQueueBufferRef)pBuffer
@@ -83,7 +83,9 @@ OggVorbis_File VorbisCreateEmptyFile(void) {
 }
 
 - (int64_t)getPcmTotal {
-    return 0;
+    OggVorbis_File file = VorbisCreateEmptyFile();
+        int64_t pcmTotal = ov_pcm_total(&file, -1);
+        return pcmTotal;
 }
 
 - (void)dealloc
