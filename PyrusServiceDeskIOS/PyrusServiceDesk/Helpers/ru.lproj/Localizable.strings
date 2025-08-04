@@ -1,4 +1,72 @@
+"PrivicyCamera" = "Вы сможете отсканировать QR-код для авторизации.";
+"PrivicyLocation" = "Вы сможете находить компании поблизости.";
+"PrivicyMicrophone" = "Вы сможете отправлять голосовые сообщения и видео со звуком.";
 
+"InstantSupport" = "Ваша служба поддержки";
+"EnterPhone" = "Введите номер телефона";
+"ReceiveIikoSupport" = "Мы отправим на него одноразовый код доступа";
+"AgreePrivacyPolicy" = "Нажимая кнопку Далее вы соглашаетесь\nc ";
+"Enter" = "Войти";
+"Continue" = "Продолжить";
+"NoConnection" = "Нет связи с сетью";
+"SMSLimit" = "Вы превысили лимит по отправке СМС. Попробуйте позже.";
+"CannotSendSMS" = "Не удается отправить СМС на номер  %@";
+"IncorrectPhone" = "Введен неправильный номер телефона.";
+"ChangePhone" = " Изменить номер";
+"ConfirmPhone" = "Подтвердите номер телефона";
+"CodeHasBeenSent" = "Код отправлен на номер\n%@";
+"RequestTime" = "Запросить через %@";
+"RequestAgain" = "Запросить код повторно";
+"Repeat" = "Повторить";
+"Cancel" = "Отмена";
+"TryAgainLater" = "Вы превысили количество попыток ввода кода. Попробуйте позже.";
+"Back" = " Назад";
+"WhatsName" = "Имя";
+"SoWeKnowHowToAddressYou" = "Чтобы мы знали как к вам обращаться";
+"YourRestaurant" = "Вход в чат с поддержкой";
+"ToInviteLink" = "Вставьте ссылку-приглашение";
+"ErrorInviteLink" = "Неверно указана ссылка";
+"ScanTerminal" = "Отсканируйте QR-код";
+"ScanQR" = "Сканировать QR-код";
+"IncorrectQR" = "Неправильный QR-код, попробуйте другой";
+"SkipSelection" = "Пропустить выбор ресторана";
+"NoAccessToCamera" = "Нет доступа к камере";
+"ToHelpProcessFaster" = "Чтобы заявка была обработана быстрее, укажите ваш ресторан";
+"AnonymousMessagesInfo" = "Анонимные обращения обрабатываются дольше. Пожалуйста, укажите ресторан.";
+"AllowAccessSetting" = "Разрешите доступ к камере в настройках конфиденциальности приложения.";
+"AllowAccessForQr" = "Разрешите доступ к камере телефона, чтобы отсканировать QR-код.";
+"AllowAccessCamera" = "Разрешить доступ к камере";
+"PrivacySettings" = "Настройки конфиденциальности";
+"Search" = "Поиск...";
+"PleaseWait" = "Пожалуйста подождите. Это может занять немного времени.";
+"RestaurantNotFound" = "Ресторан не найден";
+"ScanningAgain" = "Попробуйте отсканировать QR-код повторно";
+"TurnOnNotifications" = "Включите уведомления";
+"ToReceiveReplies" = "Чтобы получать ответы на ваши сообщения";
+"AllowSendingNotifications" = "Разрешите отправку уведомлений";
+"AllowCamera" = "Разрешите доступ к камере";
+"InviteLink" = "Использовать ссылку\U2011приглашение";
+"ToAuthorization" = "Чтобы открыть чат поддержки по QR-коду, разрешите приложению получить доступ к камере";
+"NotificationsAreTurnedOff" = "Уведомления отключены";
+"YouWillNotReceiveReplies" = "Вы не будете получать ответы на ваши сообщения, пока не зайдете в приложение. Чтобы включить уведомления, откройте приложение Настройки -> Уведомления -> Helpy ";
+"OpenSettings" = "Перейти в настройки";
+"CameraAccess" = "Доступ к камере";
+"Continue" = "Далее";
+"Settings" = "Настройки";
+"YouPhoneNumber" = "Номер телефона";
+"PrivacyPolicy" = "Политика конфиденциальности";
+"Privacy" = "Политикой конфиденциальности";
+"Exit" = "Выход";
+"ExitInfo" = "История ваших обращений будет потеряна. Вы уверены, что хотите выйти из аккаунта?";
+"GreatingMessage" = "Здравствуйте, %@! Чем могу помочь?";
+"OK" = "ОК";
+"iikoSupport" = "Поддержка";
+"nameApplication" = "name_ru";
+"Edit" = "Изменить";
+"Logout" = "Выйти";
+"Version" = "Версия";
+//https://helpy.pyrus.com/n4Mxu60kICP-XtZkGm2zCRlDtRRBi76h1w7FMx~f2F~z3d~Ayz7~Z7Gfxg7q2dI~sNVS965oM44Buy8uX2ngWib4BIIaf~6uIT6KaRzyGn2N6O2zdj-lufplexg1TvYLTviMSw==/251380432/extraFields?user_name=%D0%A0%D0%B5%D1%81%D1%82%D0%BE%D1%80%D0%B0%D0%BD:%20%5B149-039-001%5D%20%D0%9F%D0%B0%D0%BF%D0%B0%20%D0%94%D0%B6%D0%BE%D0%BD%D1%81%20%E2%84%9639%20%D0%91%D1%83%D1%82%D0%BE%D0%B2%D0%BE
+// Mark: HELPY
 "Last_Message" = "Это последнее сообщение из этой беседы";
 "Comment" = "Ваш комментарий";
 "Default_User_Name" = "Гость";
@@ -6,11 +74,12 @@
 "Empty_Description" = "Пусто";
 "All_Conversations" = "Обращения";
 "Support_Default_Name" = "Поддержка";
-
+"Waiting_For_Network" = "Ожидание сети...";
 //Buttons' Title
+"CreatTicket" = "Создать обращение";
 "New_Conversation" = "Новый чат";
 "New_Conversation_Short" = "Создать";
-"Cancel" = "Отмена";
+//"Cancel" = "Отмена";
 "Settings" = "Настройки";
 "Send" = "Отправить";
 "Back" = "Назад";
@@ -69,6 +138,9 @@
 "ShortYes"="Да";
 "ShortNo"="Нет";
 
+
+
+///ДЛЯ SD
 "InviteQRCode" = "QR-код приглашение";
 "GoToChats" = "Перейти к чатам";
 "Participants" = "Участники";
@@ -95,3 +167,5 @@
 "TicketNumber" = "Номер обращения";
 "HoldToRecord" = "Зажмите и удерживайте,\nчтобы начать запись";
 "DTF_Full" = "ddMMyyyy_HHmmss";
+"PyrusCannotAccessYourMicrophone" = "Доступ к микрофону";
+"PleaseEnableAccessMicrophone" = "Вы сможете записывать и прикладывать звуковые сообщения.\nДля этого нажмите «Настройки» ниже и активируйте «Микрофон».";

@@ -17714,7 +17714,7 @@
     {
       "filePath": "\/Users\/stanislavabobruskina\/pyrusservicedesk\/PyrusServiceDeskIOS\/PyrusServiceDesk\/Requests\/PSDGetChats.swift",
       "kind": "StringLiteral",
-      "offset": 13251,
+      "offset": 13614,
       "length": 24,
       "value": "\"CreateMenuNotification\""
     },

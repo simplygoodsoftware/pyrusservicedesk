@@ -1,4 +1,71 @@
+"PrivicyCamera" = "This allows you to scan QR code to authorize and attach photos and videos.";
+"PrivicyLocation" = "Вы сможете находить компании поблизости.";
+"PrivicyMicrophone" = "This allows you to attach voice messages and video files to tickets.";
 
+"InstantSupport" = "Your Customer Support";
+"EnterPhone" = "Enter your phone number";
+"ReceiveIikoSupport" = "We'll send a one-time access code";
+"AgreePrivacyPolicy" = "By tapping Continue, you agree\nwith the ";
+"Enter" = "Enter";
+"Continue" = "Continue";
+"NoConnection" = "No network connection";
+"SMSLimit" = "You have exceeded your SMS limit. Try again later.";
+"CannotSendSMS" = "Cannot send an SMS to %@";
+"IncorrectPhone" = "Incorrect phone number";
+"ChangePhone" = " Change number";
+"ConfirmPhone" = "Confirm your phone number";
+"CodeHasBeenSent" = "The code has been sent to\n%@";
+"RequestTime" = "Request after %@";
+"RequestAgain" = "Request the code again";
+"Repeat" = "Repeat";
+"Cancel" = "Cancel";
+"TryAgainLater" = "You have exceeded the number of attempts to enter the code. Try again later.";
+"Back" = " Back";
+"WhatsName" = "Name";
+"SoWeKnowHowToAddressYou" = "So we know how to address you";
+"YourRestaurant" = "Join support chat";
+"ScanTerminal" = "Scan QR code";
+"ScanQR" = "Scan the QR code";
+"IncorrectQR" = "Incorrect QR code, try another one";
+"SkipSelection" = "Skip restaurant selection";
+"NoAccessToCamera" = "No access to camera";
+"ToHelpProcessFaster" = "To help process the request faster, choose your restaurant";
+"AnonymousMessagesInfo" = "Anonymous messages take longer to be processed. Please indicate your restaurant";
+"AllowAccessSetting" = "Allow access to your camera in the app privacy settings";
+"AllowAccessForQr" = "Allow access to your phone camera to scan the QR code";
+"AllowAccessCamera" = "Allow access to your camera";
+"PrivacySettings" = "Privacy settings";
+"Search" = "Search...";
+"PleaseWait" = "Please wait. This might take a little while.";
+"RestaurantNotFound" = "Restaurant not found";
+"ScanningAgain" = "Try scanning the QR code again";
+"TurnOnNotifications" = "Turn on notifications";
+"ToReceiveReplies" = "Send and receive messages";
+"AllowSendingNotifications" = "Allow notifications";
+"NotificationsAreTurnedOff" = "Notifications are turned off :(";
+"YouWillNotReceiveReplies" = "You will not receive replies to your messages, until you go into the app. To turn on notifications, open the app Settings -> Notifications -> Helpy";
+"OpenSettings" = "Open settings";
+"Continue" = "Continue";
+"Settings" = "Settings";
+"YouPhoneNumber" = "Phone number";
+"PrivacyPolicy" = "Privacy Policy";
+"Privacy" = "Privacy Policy";
+"Exit" = "Exit";
+"ExitInfo" = "Your message history will be lost. Are you sure you want to exit your account?";
+"GreatingMessage" = "Hello, %@! How can I help you?";
+"OK" = "OK";
+"iikoSupport" = "support";
+"AllowCamera" = "Allow access to your camera";
+"InviteLink" = "Use invitation link";
+"ErrorInviteLink" = "Invalid link";
+"ToInviteLink" = "Paste the invitation link";
+"ToAuthorization" = "To open the support chat via QR code, allow the app to access your camera";
+"nameApplication" = "name_en";
+"Edit" = "Edit";
+"Logout" = "Logout";
+"Version" = "Version";
+
+// Mark: HELPY
 "Last_Message" = "This is the last message from that conversation";
 "Comment" = "Comment...";
 "Default_User_Name" = "Guest";
@@ -6,11 +73,13 @@
 "Empty_Description" = "Empty";
 "All_Conversations" = "All conversations";
 "Support_Default_Name" = "Support";
+"Waiting_For_Network" = "Waiting for network...";
 
 //Buttons' Title
+"CreatTicket" = "Create ticket";
 "New_Conversation" = "New conversation";
 "New_Conversation_Short" = "New";
-"Cancel" = "Cancel";
+//"Cancel" = "Cancel";
 "Settings" = "Settings";
 "Send" = "Send";
 "Back" = "Back";
@@ -70,6 +139,7 @@
 "ShortYes" = "Yes";
 "ShortNo" = "No";
 
+///ДЛЯ SD
 "InviteQRCode" = "Invitation QR-code";
 "GoToChats" = "Go to chats";
 "Participants" = "Participants";
@@ -95,3 +165,5 @@
 "TicketNumber" = "Ticket number";
 "HoldToRecord" = "Tap and hold to record an audio";
 "DTF_Full" = "ddMMyyyy_HHmmss";
+"PyrusCannotAccessYourMicrophone" = "Allow microphone access";
+"PleaseEnableAccessMicrophone" = "It will let you record audio messages and attach them to tasks.\nTo enable this, click on Settings and activate Microphone.";
