@@ -425,6 +425,7 @@ import UIKit
             return
         }
         PyrusLogger.shared.logEvent("Created with userId = \(userId ?? "no userId"), reset = \(reset), domain = \(domain ?? "domain is nil") loggingEnabled = \(loggingEnabled)")
+        print("Created with appID = \(userId ?? "no userId"), userId = \(userId ?? "no userId"), securityKey = \(securityKey ?? "no securityKey"), reset = \(reset), domain = \(domain ?? "domain is nil") loggingEnabled = \(loggingEnabled)")
         PyrusServiceDesk.clientId = clientId
         PyrusServiceDesk.domain = domain?.hostString()
         PyrusServiceDesk.securityKey = securityKey
