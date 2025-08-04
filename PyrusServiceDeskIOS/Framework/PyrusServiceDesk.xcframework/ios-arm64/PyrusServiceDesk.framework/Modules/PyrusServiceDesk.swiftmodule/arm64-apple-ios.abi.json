@@ -17756,30 +17756,72 @@
     {
       "filePath": "\/Users\/stanislavabobruskina\/pyrusservicedesk\/PyrusServiceDeskIOS\/PyrusServiceDesk\/CoreData\/PSDCoreDataService.swift",
       "kind": "StringLiteral",
-      "offset": 248,
+      "offset": 243,
       "length": 10,
       "value": "\"PSDChats\""
     },
     {
       "filePath": "\/Users\/stanislavabobruskina\/pyrusservicedesk\/PyrusServiceDeskIOS\/PyrusServiceDesk\/CoreData\/PSDCoreDataService.swift",
       "kind": "StringLiteral",
-      "offset": 385,
-      "length": 44,
-      "value": "\"Failed to load persistent stores: \""
+      "offset": 270,
+      "length": 6,
+      "value": "\"momd\""
     },
     {
       "filePath": "\/Users\/stanislavabobruskina\/pyrusservicedesk\/PyrusServiceDeskIOS\/PyrusServiceDesk\/CoreData\/PSDCoreDataService.swift",
       "kind": "StringLiteral",
-      "offset": 428,
+      "offset": 308,
+      "length": 72,
+      "value": "\"❌ Не найден PSDChats.momd в bundle: \""
+    },
+    {
+      "filePath": "\/Users\/stanislavabobruskina\/pyrusservicedesk\/PyrusServiceDeskIOS\/PyrusServiceDesk\/CoreData\/PSDCoreDataService.swift",
+      "kind": "StringLiteral",
+      "offset": 379,
       "length": 2,
       "value": "\"\""
     },
     {
       "filePath": "\/Users\/stanislavabobruskina\/pyrusservicedesk\/PyrusServiceDeskIOS\/PyrusServiceDesk\/CoreData\/PSDCoreDataService.swift",
       "kind": "StringLiteral",
-      "offset": 455,
-      "length": 39,
-      "value": "\"Persistent stores loaded successfully\""
+      "offset": 492,
+      "length": 82,
+      "value": "\"❌ Не удалось загрузить NSManagedObjectModel из \""
+    },
+    {
+      "filePath": "\/Users\/stanislavabobruskina\/pyrusservicedesk\/PyrusServiceDeskIOS\/PyrusServiceDesk\/CoreData\/PSDCoreDataService.swift",
+      "kind": "StringLiteral",
+      "offset": 573,
+      "length": 2,
+      "value": "\"\""
+    },
+    {
+      "filePath": "\/Users\/stanislavabobruskina\/pyrusservicedesk\/PyrusServiceDeskIOS\/PyrusServiceDesk\/CoreData\/PSDCoreDataService.swift",
+      "kind": "StringLiteral",
+      "offset": 639,
+      "length": 10,
+      "value": "\"PSDChats\""
+    },
+    {
+      "filePath": "\/Users\/stanislavabobruskina\/pyrusservicedesk\/PyrusServiceDeskIOS\/PyrusServiceDesk\/CoreData\/PSDCoreDataService.swift",
+      "kind": "StringLiteral",
+      "offset": 785,
+      "length": 62,
+      "value": "\"❌ Ошибка загрузки persistent store: \""
+    },
+    {
+      "filePath": "\/Users\/stanislavabobruskina\/pyrusservicedesk\/PyrusServiceDeskIOS\/PyrusServiceDesk\/CoreData\/PSDCoreDataService.swift",
+      "kind": "StringLiteral",
+      "offset": 846,
+      "length": 2,
+      "value": "\"\""
+    },
+    {
+      "filePath": "\/Users\/stanislavabobruskina\/pyrusservicedesk\/PyrusServiceDeskIOS\/PyrusServiceDesk\/CoreData\/PSDCoreDataService.swift",
+      "kind": "StringLiteral",
+      "offset": 888,
+      "length": 58,
+      "value": "\"✅ Persistent store загружен из PSDChats.momd\""
     },
     {
       "filePath": "\/Users\/stanislavabobruskina\/pyrusservicedesk\/PyrusServiceDeskIOS\/PyrusServiceDesk\/LogsSendController.swift",

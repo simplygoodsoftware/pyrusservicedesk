@@ -8,13 +8,23 @@ enum EntityType {
 final class CoreDataService {
 
     private lazy var persistentContainer: NSPersistentContainer = {
-        let persistentContainer = NSPersistentContainer(name: "PSDChats")
-        persistentContainer.loadPersistentStores { _, error in
-            guard let error else { return }
-            print("Failed to load persistent stores: \(error)")
+        guard let modelURL = PSD_BUNDLE.url(forResource: "PSDChats", withExtension: "momd") else {
+            fatalError("❌ Не найден PSDChats.momd в bundle: \(PSD_BUNDLE.bundleURL)")
         }
-        print("Persistent stores loaded successfully")
-        return persistentContainer
+
+        guard let model = NSManagedObjectModel(contentsOf: modelURL) else {
+            fatalError("❌ Не удалось загрузить NSManagedObjectModel из \(modelURL)")
+        }
+
+        let container = NSPersistentContainer(name: "PSDChats", managedObjectModel: model)
+        container.loadPersistentStores { _, error in
+            if let error {
+                fatalError("❌ Ошибка загрузки persistent store: \(error)")
+            }
+        }
+
+        print("✅ Persistent store загружен из PSDChats.momd")
+        return container
     }()
 
     private var viewContext: NSManagedObjectContext {
