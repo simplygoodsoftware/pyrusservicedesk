@@ -89,21 +89,32 @@ class SyncManager {
                 if let chats, complete {
                     
                     var unreadChats = 0
-                    var lasMessage: PSDMessage?
+//                    var lasMessage: PSDMessage?
                     for chat in chats {
-                        guard !chat.isRead else {
-                            continue
+                        if !chat.isRead,
+                           let lasMessage = chat.messages.last,
+                           let subscriber = PyrusServiceDesk.subscriber,
+                           !PyrusServiceDeskController.PSDIsOpen(),
+                           !lasMessage.owner.equalTo(user: PSDUsers.user)
+                        {
+                            let lastComment = PSDLastUnreadMessage(message: lasMessage)
+                            subscriber.onNewReply(hasUnreadComments: true, lastCommentText: lastComment.text, lastCommentAttachmentsCount: lastComment.attchmentsCount, lastCommentAttachments: lastComment.attachments, utcTime: lastComment.utcTime)
                         }
-                        lasMessage = chat.messages.last                        
                         unreadChats = unreadChats + 1
                     }
-                    UnreadMessageManager.refreshNewMessagesCount(unreadChats > 0, lastMessage: lasMessage)
+                    if unreadChats == 0,
+                       let subscriber = PyrusServiceDesk.subscriber,
+                       !PyrusServiceDeskController.PSDIsOpen()
+                    {
+                        subscriber.onNewReply(hasUnreadComments: false, lastCommentText: nil, lastCommentAttachmentsCount: 0, lastCommentAttachments: nil, utcTime: 0)
+                    }
+                    //UnreadMessageManager.refreshNewMessagesCount(unreadChats > 0, lastMessage: lasMessage)
                     
                     chatsDataService.saveChatModels(with: chats) { [weak self] _ in
                         DispatchQueue.main.async { [weak self] in
                             guard let self else { return }
                             
-                            if let clients, clients.count > 0, PyrusServiceDesk.isStarted {
+                            if let clients, clients.count > 0  {
                                 updateChatsAndClients(clients: clients, userInfo: userInfo)
                             }
                             
