@@ -156,9 +156,9 @@ extension PSDChatInteractor: PSDChatInteractorProtocol {
             if !needShowLoading && !PyrusServiceDesk.multichats {
                 needShowLoading = PyrusServiceDesk.clients.count == 0 ||
                     PyrusServiceDesk.clientId != PyrusServiceDesk.clients.first?.clientId
-                if !needShowLoading && PyrusServiceDesk.customUserId != nil {
+                if !needShowLoading && PyrusServiceDesk.customUserId != nil && PyrusServiceDesk.chats.count > 0 {
                     needShowLoading = !PyrusServiceDesk.chats.contains(where: {
-                        $0.userId == PyrusServiceDesk.customUserId ?? PyrusServiceDesk.userId
+                        $0.userId == PyrusServiceDesk.customUserId
                     })
                 }
             }

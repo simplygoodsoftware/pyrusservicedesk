@@ -2,13 +2,13 @@ import Foundation
 class AttachmentFileCollectionViewCell: AttachmentCollectionViewCell {
     private static let dist : CGFloat = 8.0
     private static let linesNumber : Int = 2
-    var fileName : String = ""{
-        didSet{
-            label.text = (fileName as NSString).pathExtension.uppercased()
+    var fileName: String = "" {
+        didSet {
+            label.text = ".\((fileName as NSString).pathExtension.uppercased())"
         }
     }
     private static let imageName = "file"
-    private lazy var imageView : UIImageView = {
+    private lazy var imageView: UIImageView = {
         let imageView = UIImageView()
         let image =  UIImage.PSDImage(name: AttachmentFileCollectionViewCell.imageName)?.withRenderingMode(.alwaysTemplate)
         imageView.image = image
