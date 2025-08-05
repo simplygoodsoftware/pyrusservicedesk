@@ -27,6 +27,7 @@ import UIKit
     static var storeMessages: [PSDMessage]?
     static var authors: [PSDUserInfo.AuthorInfo] = []
     static var isStarted: Bool = false
+    static var needShowLoading: Bool = false
     
     static var userName: String?
     ///UserId needed for request
@@ -410,6 +411,9 @@ import UIKit
     }
     private static func createWith(_ clientId: String?, userId: String?, securityKey: String?, reset: Bool, userName: String?, additionalUsers: [PSDUserInfo] = [], authorId: String?, domain: String?, loggingEnabled: Bool, authorizationToken: String?, multichats: Bool = false) {
         isStarted = true
+        if !multichats && PyrusServiceDesk.clientId != nil {
+            PyrusServiceDesk.needShowLoading = PyrusServiceDesk.clientId != clientId || PyrusServiceDesk.customUserId != userId
+        }
         PyrusServiceDesk.chats = []
         PyrusServiceDesk.clients = []
         PyrusServiceDesk.multichats = multichats

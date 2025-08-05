@@ -151,9 +151,19 @@ extension PSDChatInteractor: PSDChatInteractorProtocol {
                     }
                 }
             }
-            if fromPush || !PyrusServiceDesk.multichats && PyrusServiceDesk.clients.count == 0 {
+            
+            var needShowLoading = fromPush || PyrusServiceDesk.needShowLoading
+            if !needShowLoading && !PyrusServiceDesk.multichats {
+                needShowLoading = PyrusServiceDesk.clients.count == 0 ||
+                    PyrusServiceDesk.clientId != PyrusServiceDesk.clients.first?.clientId ||
+                    !PyrusServiceDesk.chats.contains(where: {
+                        $0.userId == PyrusServiceDesk.customUserId ?? PyrusServiceDesk.userId
+                    })
+            }
+            if needShowLoading {
                 isLoading = true
                 reloadChat()
+                PyrusServiceDesk.needShowLoading = false
             } else {
                 beginTimer()
                 updateChat(chat: chat)
@@ -358,7 +368,7 @@ private extension PSDChatInteractor {
             PyrusServiceDesk.syncManager.syncGetTickets()
         }
         tableMatrix = [[PSDRowMessage]()] // clean old chat
-        beginTimer()        
+        beginTimer()
     }
     
     func updateChatInfo() {

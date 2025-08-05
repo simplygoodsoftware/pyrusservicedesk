@@ -13,10 +13,29 @@ class AttachmentCollectionViewCell : UICollectionViewCell{
 //        button.setTitle("✗", for: .normal)
 //        button.titleLabel?.font = .removeButton
 //        button.layer.cornerRadius = AttachmentCollectionViewCell.buttonSize/2
-        button.setImage(UIImage.PSDImage(name: "del"), for: .normal)
+        button.setImage(UIImage.PSDImage(name: "del")?.imageWith(color: CustomizationHelper.userMassageBackgroundColor), for: .normal)
+        button.translatesAutoresizingMaskIntoConstraints = false
         return button
     }()
-    private let removeButtonBack = UIView()
+    
+    private let removeButtonBack: UIView = {
+        let view = UIView()
+        view.backgroundColor = CustomizationHelper.colorsForInput.0
+        view.layer.cornerRadius = AttachmentCollectionViewCell.buttonSize / 2
+        view.clipsToBounds = true
+        view.translatesAutoresizingMaskIntoConstraints = false
+        return view
+    }()
+    
+    private let removeButtonBackCircle: UIView = {
+        let view = UIView()
+        view.backgroundColor = .white
+        view.layer.cornerRadius = 7
+        view.clipsToBounds = true
+        view.translatesAutoresizingMaskIntoConstraints = false
+        return view
+    }()
+    
     lazy var holderView : UIView = {
         let view = UIView()
         view.backgroundColor = .holderBackgroundColor
@@ -37,9 +56,9 @@ class AttachmentCollectionViewCell : UICollectionViewCell{
     private func customInit(){
         addSubview(holderView)
         addSubview(removeButtonBack)
+        removeButtonBack.addSubview(removeButtonBackCircle)
         removeButtonBack.addSubview(removeButton)
-        removeButtonBack.translatesAutoresizingMaskIntoConstraints = false
-        removeButton.translatesAutoresizingMaskIntoConstraints = false
+
         holderView.translatesAutoresizingMaskIntoConstraints = false
         
         holderView.leftAnchor.constraint(equalTo: leftAnchor, constant: AttachmentCollectionViewCell.distToBoard).isActive = true
@@ -51,7 +70,15 @@ class AttachmentCollectionViewCell : UICollectionViewCell{
         removeButtonBack.topAnchor.constraint(equalTo: topAnchor, constant: DEFAULT_LAYOUT_MARGINS).isActive = true
         removeButtonBack.widthAnchor.constraint(equalToConstant: AttachmentCollectionViewCell.buttonSize).isActive = true
         removeButtonBack.heightAnchor.constraint(equalToConstant: AttachmentCollectionViewCell.buttonSize).isActive = true
-        removeButton.addZeroConstraint([.top, .bottom, .left, .right])
+        NSLayoutConstraint.activate([
+            removeButton.centerXAnchor.constraint(equalTo: removeButtonBack.centerXAnchor),
+            removeButton.centerYAnchor.constraint(equalTo: removeButtonBack.centerYAnchor),
+            removeButtonBackCircle.centerXAnchor.constraint(equalTo: removeButtonBack.centerXAnchor),
+            removeButtonBackCircle.centerYAnchor.constraint(equalTo: removeButtonBack.centerYAnchor),
+            removeButtonBackCircle.heightAnchor.constraint(equalToConstant: 13),
+            removeButtonBackCircle.widthAnchor.constraint(equalToConstant: 13)
+        ])
+        //removeButton.addZeroConstraint([.top, .bottom, .left, .right])
         removeButton.addTarget(self, action: #selector(removeButtonPressed), for: .touchUpInside)
         removeButtonBack.layer.cornerRadius = AttachmentCollectionViewCell.buttonSize/2
         recolor()
@@ -72,9 +99,10 @@ extension AttachmentCollectionViewCell: Recolorable {
         }
     }
     func recolor() {
-        removeButton.setTitleColor(CustomizationHelper.textColorForInput.withAlphaComponent(CROSS_ALPHA), for: .normal)
-        removeButtonBack.backgroundColor = .clear
+//        removeButton.setTitleColor(CustomizationHelper.textColorForInput.withAlphaComponent(CROSS_ALPHA), for: .normal)
+//        removeButtonBack.backgroundColor = .clear
  //       removeButton.backgroundColor = CustomizationHelper.grayInputColor.withAlphaComponent(BUTTON_ALPHA)
+        removeButton.setImage(UIImage.PSDImage(name: "del")?.imageWith(color: CustomizationHelper.userMassageBackgroundColor), for: .normal)
         holderView.layer.borderColor = CustomizationHelper.lightGrayInputColor.cgColor
     }
 }
