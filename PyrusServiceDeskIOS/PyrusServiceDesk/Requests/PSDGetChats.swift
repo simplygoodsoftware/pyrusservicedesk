@@ -22,6 +22,11 @@ struct PSDGetChats {
         parameters["author_id"] = PyrusServiceDesk.authorId
         parameters["author_name"] = PyrusServiceDesk.authorName
         parameters["last_note_id"] = PyrusServiceDesk.lastNoteId
+        
+        if PyrusServiceDesk.needShowLoading {
+            parameters["last_note_id"] = 0
+        }
+        
         if PyrusServiceDesk.additionalUsers.count > 0 {
             var additional_users = [[String: Any]]()
             for user in PyrusServiceDesk.additionalUsers {
@@ -201,13 +206,13 @@ struct PSDGetChats {
             }
             
             let userId = dic["user_id"] as? String ?? ""
-            if PyrusServiceDesk.customUserId ?? PyrusServiceDesk.userId == userId,
-               PyrusServiceDesk.lastNoteId ?? 0 < Int(lastMessage?.messageId ?? "") ?? 0 {
-                PyrusServiceDesk.lastNoteId = Int(lastMessage?.messageId ?? "")
-            } else if let user = PyrusServiceDesk.additionalUsers.first(where: { $0.userId == userId }),
-                      user.lastNoteId ?? 0 < Int(lastMessage?.messageId ?? "") ?? 0 {
-                user.lastNoteId = Int(lastMessage?.messageId ?? "")
-            }
+//            if PyrusServiceDesk.customUserId ?? PyrusServiceDesk.userId == userId,
+//               PyrusServiceDesk.lastNoteId ?? 0 < Int(lastMessage?.messageId ?? "") ?? 0 {
+//                PyrusServiceDesk.lastNoteId = Int(lastMessage?.messageId ?? "")
+//            } else if let user = PyrusServiceDesk.additionalUsers.first(where: { $0.userId == userId }),
+//                      user.lastNoteId ?? 0 < Int(lastMessage?.messageId ?? "") ?? 0 {
+//                user.lastNoteId = Int(lastMessage?.messageId ?? "")
+//            }
            
             let ticketId = dic["ticket_id"] as? Int
             var messages: [PSDMessage] = [PSDMessage]()

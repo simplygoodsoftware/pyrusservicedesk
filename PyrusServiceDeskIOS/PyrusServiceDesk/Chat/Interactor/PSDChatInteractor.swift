@@ -155,15 +155,16 @@ extension PSDChatInteractor: PSDChatInteractorProtocol {
             var needShowLoading = fromPush || PyrusServiceDesk.needShowLoading
             if !needShowLoading && !PyrusServiceDesk.multichats {
                 needShowLoading = PyrusServiceDesk.clients.count == 0 ||
-                    PyrusServiceDesk.clientId != PyrusServiceDesk.clients.first?.clientId ||
-                    !PyrusServiceDesk.chats.contains(where: {
+                    PyrusServiceDesk.clientId != PyrusServiceDesk.clients.first?.clientId
+                if !needShowLoading && PyrusServiceDesk.customUserId != nil {
+                    needShowLoading = !PyrusServiceDesk.chats.contains(where: {
                         $0.userId == PyrusServiceDesk.customUserId ?? PyrusServiceDesk.userId
                     })
+                }
             }
             if needShowLoading {
                 isLoading = true
                 reloadChat()
-                PyrusServiceDesk.needShowLoading = false
             } else {
                 beginTimer()
                 updateChat(chat: chat)
@@ -305,6 +306,7 @@ private extension PSDChatInteractor {
                 fromPush = false
                 firstLoad = false
                 isLoading = false
+                PyrusServiceDesk.needShowLoading = false
             } else {
                 if messagesToPass.count == 0 && !isRefresh {
                     redrawChat(chat: chat)

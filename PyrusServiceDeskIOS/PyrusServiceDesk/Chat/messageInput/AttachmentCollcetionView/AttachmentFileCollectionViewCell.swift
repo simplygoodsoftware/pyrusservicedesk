@@ -4,7 +4,7 @@ class AttachmentFileCollectionViewCell: AttachmentCollectionViewCell {
     private static let linesNumber : Int = 2
     var fileName : String = ""{
         didSet{
-            label.text = ".MOV"//fileName
+            label.text = (fileName as NSString).pathExtension.uppercased()
         }
     }
     private static let imageName = "file"

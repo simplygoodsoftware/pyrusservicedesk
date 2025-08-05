@@ -52,7 +52,7 @@ class SyncManager {
 //        
 //        return;
 
-        if firstLoad {
+        if firstLoad && !PyrusServiceDesk.needShowLoading {
             firstLoadUpdates()
         }
         

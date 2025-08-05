@@ -449,8 +449,6 @@ import UIKit
             PyrusServiceDesk.mainController?.updateTitleChat()
         }
         PyrusServiceDesk.syncManager.firstLoad = true
-//        PyrusServiceDesk.repository.clear()
-//        PSDMessagesStorage.cleanStorage()
     }
     
     @objc static public func refresh(onError: ((Error?) -> Void)? = nil) {

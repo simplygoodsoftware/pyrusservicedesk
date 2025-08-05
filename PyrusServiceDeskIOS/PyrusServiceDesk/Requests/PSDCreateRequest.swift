@@ -62,7 +62,7 @@ extension URLRequest {
         } else {
             fullJSOn["user_id"] = PyrusServiceDesk.customUserId ?? PyrusServiceDesk.userId
             fullJSOn["instance_id"] = PyrusServiceDesk.userId
-         //   fullJSOn["version"] = 2
+            fullJSOn["version"] = 2
         }
         if((PyrusServiceDesk.clientId) == nil){
             fatalError("no client Id")
