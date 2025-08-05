@@ -74,7 +74,10 @@ extension CoreDataService: CoreDataServiceProtocol {
             context.performAndWait {
                 do {
                     let fetchRequest = DBMessage.fetchRequest()
-                    fetchRequest.sortDescriptors = [NSSortDescriptor(key: "date", ascending: true)]
+                    fetchRequest.sortDescriptors = [
+                        NSSortDescriptor(key: "date", ascending: true),
+                        NSSortDescriptor(key: "messageId", ascending: true)
+                    ]
                     
                     let fetchedObjects = try context.fetch(fetchRequest)
                     result = .success(fetchedObjects)
