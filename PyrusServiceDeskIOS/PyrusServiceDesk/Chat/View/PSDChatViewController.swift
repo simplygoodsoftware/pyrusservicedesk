@@ -526,6 +526,7 @@ class PSDChatViewController: PSDViewController, PSDMainController {
             navigationItem.standardAppearance = bigAppear
         }
         self.setItems()
+        navigationController?.navigationBar.isHidden = false
     }
     
     @objc func showPopover(_ sender: UIBarButtonItem) {
