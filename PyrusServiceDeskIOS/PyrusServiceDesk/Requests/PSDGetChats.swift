@@ -233,6 +233,9 @@ struct PSDGetChats {
             chat.lastComment = lastMessage
             chat.lastReadedCommentId = dic["last_read_comment_id"] as? Int
             chat.showRating = dic["show_rating"] as? Bool ?? false
+            if isMoreThan24Hours(from: lastMessage?.date ?? Date()) {
+                chat.showRating = false
+            }
             chat.showRatingText = dic["show_rating_text"] as? String
             if !chat.showRating || !PyrusServiceDesk.multichats {
                 chat.isActive = dic["is_active"] as? Bool ?? true
@@ -240,6 +243,11 @@ struct PSDGetChats {
             chats.append(chat)
         }
         return sortByLastMessage(chats)
+    }
+    
+    private static func isMoreThan24Hours(from date: Date) -> Bool {
+        let timeInterval = Date().timeIntervalSince(date)
+        return timeInterval > 24 * 60 * 60 // 24 часа
     }
     
     static func sortByLastMessage(_ chats: [PSDChat]) -> [PSDChat] {

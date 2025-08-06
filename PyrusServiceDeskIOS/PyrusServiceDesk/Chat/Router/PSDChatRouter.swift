@@ -41,7 +41,7 @@ private extension PSDChatRouter {
         }
         
         if let mainController = PyrusServiceDesk.mainController {
-            mainController.remove()//with quick opening - closing can be nil
+            mainController.remove(animated: true)//with quick opening - closing can be nil
         } else if let navigationController = controller?.navigationController as? PyrusServiceDeskController {
             navigationController.remove()
         } else {

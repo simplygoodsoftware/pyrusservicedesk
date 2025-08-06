@@ -1,6 +1,6 @@
 // swift-interface-format-version: 1.0
 // swift-compiler-version: Apple Swift version 5.10 (swiftlang-5.10.0.13 clang-1500.3.9.4)
-// swift-module-flags: -target arm64-apple-ios15.0-simulator -enable-objc-interop -enable-library-evolution -swift-version 5 -enforce-exclusivity=checked -O -enable-bare-slash-regex -module-name PyrusServiceDesk
+// swift-module-flags: -target arm64-apple-ios13.0-simulator -enable-objc-interop -enable-library-evolution -swift-version 5 -enforce-exclusivity=checked -O -enable-bare-slash-regex -module-name PyrusServiceDesk
 import AVFAudio
 import AVFoundation
 import AVKit
@@ -189,10 +189,10 @@ public class OpusRecorder {
   @objc public static func openTicket(ticketId: Swift.Int, userId: Swift.String, messageId: Swift.Int) -> Swift.Bool
   @objc public static func setPushToken(_ token: Swift.String?, users: [PSDUserInfo]? = nil, completion: @escaping ((any Swift.Error)?) -> Swift.Void)
   @objc public static func start(on viewController: UIKit.UIViewController, onStopCallback: (any OnStopCallback)? = nil)
-  @objc public static func start(on viewController: UIKit.UIViewController, configuration: ServiceDeskConfiguration?, onStopCallback: (any OnStopCallback)? = nil, deniedAccessCallback: (any DeniedAccessCallBack)? = nil, animated: Swift.Bool = true)
+  @objc public static func start(on viewController: UIKit.UIViewController, configuration: ServiceDeskConfiguration?, onStopCallback: (any OnStopCallback)? = nil, deniedAccessCallback: (any DeniedAccessCallBack)? = nil, animated: Swift.Bool = true, startWithPush: Swift.Bool = false)
   @objc public static func getStart(on viewController: UIKit.UIViewController, configuration: ServiceDeskConfiguration?, onStopCallback: (any OnStopCallback)? = nil, deniedAccessCallback: (any DeniedAccessCallBack)? = nil, extraUsersCallback: (any ExtraUsersCallback)? = nil, animated: Swift.Bool = true) -> UIKit.UINavigationController?
-  @objc public static func start(on viewController: UIKit.UIViewController, configuration: ServiceDeskConfiguration?, completion: (() -> Swift.Void)? = nil, onStopCallback: (any OnStopCallback)? = nil)
-  @objc public static func start(with configuration: ServiceDeskConfiguration?, onStopCallback: (any OnStopCallback)? = nil) -> UIKit.UINavigationController?
+  @objc public static func start(on viewController: UIKit.UIViewController, configuration: ServiceDeskConfiguration?, completion: (() -> Swift.Void)? = nil, onStopCallback: (any OnStopCallback)? = nil, startWithPush: Swift.Bool = false)
+  @objc public static func start(with configuration: ServiceDeskConfiguration?, onStopCallback: (any OnStopCallback)? = nil, startWithPush: Swift.Bool = false) -> UIKit.UINavigationController?
   @objc public static func stop()
   @objc public static var onAuthorizationFailed: (() -> Swift.Void)?
   @objc public static func subscribeToReplies(_ subscriber: (any NewReplySubscriber)?)

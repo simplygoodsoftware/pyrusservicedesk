@@ -7,7 +7,35 @@ protocol PSDUpdateInfo {
     func refreshChat(showFakeMessage: Int?)
 }
 
-class PSDChatViewController: PSDViewController {
+class PSDChatViewController: PSDViewController, PSDMainController {
+    var customization: ServiceDeskConfiguration?
+    
+    func updateInfo() {
+        startGettingInfo()
+    }
+    
+    func updateTitleChat() {
+        updateTitle()
+    }
+    
+    func closeServiceDesk() {
+        if PyrusServiceDeskController.PSDIsOpen() {
+            let alertAuthorized = UIAlertController(title: nil, message: "AcсessDenied".localizedPSD(), preferredStyle: .alert)
+            alertAuthorized.addAction(UIAlertAction(title: "OK".localizedPSD(), style: .default, handler: { (_) in
+                self.remove(animated: true)
+            }))
+            self.present(alertAuthorized, animated: true, completion: nil)
+        }
+    }
+    
+    func remove(animated: Bool) {
+        navigationController?.popViewController(animated: true)
+        PyrusLogger.shared.saveLocalLogToDisk()
+        PyrusServiceDesk.stopCallback?.onStop()
+        PyrusServiceDeskController.clean()
+        PyrusServiceDesk.isStarted = false
+    }
+    
     private let interactor: PSDChatInteractorProtocol
     private let router: PSDChatRouterProtocol
     
@@ -164,7 +192,7 @@ class PSDChatViewController: PSDViewController {
                     //                        oldInset = 0
                 }
                 
-                if isFirstKeyboardShow && PyrusServiceDesk.multichats {
+                if isFirstKeyboardShow && (PyrusServiceDesk.multichats || PyrusServiceDesk.startWithPush) {
                     UIView.performWithoutAnimation {
                         self.tableView.contentOffset.y -= keyboardHeight - oldInset
                     }
@@ -501,20 +529,24 @@ class PSDChatViewController: PSDViewController {
     
     @objc func showPopover(_ sender: UIBarButtonItem) {
         messageInputView.inputTextView.resignFirstResponder()
-        if let sheet = popoverContentController.sheetPresentationController {
-            let smallId = UISheetPresentationController.Detent.Identifier("small")
-            if #available(iOS 16.0, *) {
-                let smallDetent = UISheetPresentationController.Detent.custom(identifier: smallId) { context in
-                    return context.maximumDetentValue * 0.3
+        if #available(iOS 15.0, *) {
+            if let sheet = popoverContentController.sheetPresentationController {
+                let smallId = UISheetPresentationController.Detent.Identifier("small")
+                if #available(iOS 16.0, *) {
+                    let smallDetent = UISheetPresentationController.Detent.custom(identifier: smallId) { context in
+                        return context.maximumDetentValue * 0.3
+                    }
+                    sheet.detents = [smallDetent]
+                } else {
+                    sheet.detents = [.medium()]
                 }
-                sheet.detents = [smallDetent]
-            } else {
-                sheet.detents = [.medium()]
+                
+                sheet.prefersGrabberVisible = true
+                sheet.preferredCornerRadius = 20
+                sheet.prefersEdgeAttachedInCompactHeight = true
             }
-            
-            sheet.prefersGrabberVisible = true
-            sheet.preferredCornerRadius = 20
-            sheet.prefersEdgeAttachedInCompactHeight = true
+        } else {
+            // Fallback on earlier versions
         }
         
         present(popoverContentController, animated: true, completion: nil)

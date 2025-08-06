@@ -149,12 +149,20 @@ extension ChatsInteractor: ChatsInteractorProtocol {
                 RateManager.setIfNilDateForNextRate()
                 RateManager.incrementActionCount()
                 if let windowScene = UIApplication.shared.connectedScenes.first as? UIWindowScene {
-                    SKStoreReviewController.requestReview(in: windowScene)
+                    if #available(iOS 14.0, *) {
+                        SKStoreReviewController.requestReview(in: windowScene)
+                    } else {
+                        // Fallback on earlier versions
+                    }
                 }
             } else if RateManager.isNeedRateCurrentVersion() {
                 RateManager.increaseDateForNextRate()
                 if let windowScene = UIApplication.shared.connectedScenes.first as? UIWindowScene {
-                    SKStoreReviewController.requestReview(in: windowScene)
+                    if #available(iOS 14.0, *) {
+                        SKStoreReviewController.requestReview(in: windowScene)
+                    } else {
+                        // Fallback on earlier versions
+                    }
                 }
             }
                       
