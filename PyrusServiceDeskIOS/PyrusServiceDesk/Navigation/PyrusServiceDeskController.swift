@@ -56,8 +56,14 @@ class PyrusServiceDeskController: PSDNavigationController, PSDMainController {
     }
     
     func show(on viewController: UIViewController, completion: (() -> Void)? = nil, animated: Bool) {
+        var navigationController: UINavigationController?
+        if let nvc = viewController as? UINavigationController {
+            navigationController = nvc
+        } else if let nvc = viewController.navigationController {
+            navigationController = nvc
+        }
         if PyrusServiceDesk.startWithPush,
-           let navigationController = viewController.navigationController {
+           let navigationController {
             PyrusServiceDesk.mainController = self
             let presenter = PSDChatPresenter()
             let interactor = PSDChatInteractor(presenter: presenter)
@@ -68,6 +74,7 @@ class PyrusServiceDeskController: PSDNavigationController, PSDMainController {
             chatController = controller
             PyrusServiceDesk.mainController = chatController
             chatController?.customization = customization
+            chatController?.hidesBottomBarWhenPushed = true
             navigationController.pushViewController(chatController ?? controller, animated: animated)
         } else {
             DispatchQueue.main.async  {
