@@ -27430,49 +27430,49 @@
     {
       "filePath": "\/Users\/stanislavabobruskina\/pyrusservicedesk\/PyrusServiceDeskIOS\/PyrusServiceDesk\/Chat\/View\/PSDChatViewController.swift",
       "kind": "BooleanLiteral",
-      "offset": 5977,
+      "offset": 6017,
       "length": 5,
       "value": "false"
     },
     {
       "filePath": "\/Users\/stanislavabobruskina\/pyrusservicedesk\/PyrusServiceDeskIOS\/PyrusServiceDesk\/Chat\/View\/PSDChatViewController.swift",
       "kind": "BooleanLiteral",
-      "offset": 6142,
+      "offset": 6182,
       "length": 4,
       "value": "true"
     },
     {
       "filePath": "\/Users\/stanislavabobruskina\/pyrusservicedesk\/PyrusServiceDeskIOS\/PyrusServiceDesk\/Chat\/View\/PSDChatViewController.swift",
       "kind": "IntegerLiteral",
-      "offset": 8154,
+      "offset": 8194,
       "length": 1,
       "value": "0"
     },
     {
       "filePath": "\/Users\/stanislavabobruskina\/pyrusservicedesk\/PyrusServiceDeskIOS\/PyrusServiceDesk\/Chat\/View\/PSDChatViewController.swift",
       "kind": "BooleanLiteral",
-      "offset": 8198,
+      "offset": 8238,
       "length": 5,
       "value": "false"
     },
     {
       "filePath": "\/Users\/stanislavabobruskina\/pyrusservicedesk\/PyrusServiceDeskIOS\/PyrusServiceDesk\/Chat\/View\/PSDChatViewController.swift",
       "kind": "BooleanLiteral",
-      "offset": 10212,
+      "offset": 10252,
       "length": 4,
       "value": "true"
     },
     {
       "filePath": "\/Users\/stanislavabobruskina\/pyrusservicedesk\/PyrusServiceDeskIOS\/PyrusServiceDesk\/Chat\/View\/PSDChatViewController.swift",
       "kind": "StringLiteral",
-      "offset": 25181,
+      "offset": 25221,
       "length": 6,
       "value": "\"Back\""
     },
     {
       "filePath": "\/Users\/stanislavabobruskina\/pyrusservicedesk\/PyrusServiceDeskIOS\/PyrusServiceDesk\/Chat\/View\/PSDChatViewController.swift",
       "kind": "StringLiteral",
-      "offset": 25319,
+      "offset": 25359,
       "length": 6,
       "value": "\"Back\""
     },
@@ -27486,21 +27486,21 @@
     {
       "filePath": "\/Users\/stanislavabobruskina\/pyrusservicedesk\/PyrusServiceDeskIOS\/PyrusServiceDesk\/Chat\/View\/PSDChatViewController.swift",
       "kind": "IntegerLiteral",
-      "offset": 35331,
+      "offset": 35371,
       "length": 2,
       "value": "18"
     },
     {
       "filePath": "\/Users\/stanislavabobruskina\/pyrusservicedesk\/PyrusServiceDeskIOS\/PyrusServiceDesk\/Chat\/View\/PSDChatViewController.swift",
       "kind": "StringLiteral",
-      "offset": 35500,
+      "offset": 35540,
       "length": 11,
       "value": "\"#FFFFFFE5\""
     },
     {
       "filePath": "\/Users\/stanislavabobruskina\/pyrusservicedesk\/PyrusServiceDeskIOS\/PyrusServiceDesk\/Chat\/View\/PSDChatViewController.swift",
       "kind": "StringLiteral",
-      "offset": 35572,
+      "offset": 35612,
       "length": 9,
       "value": "\"#60666C\""
     },

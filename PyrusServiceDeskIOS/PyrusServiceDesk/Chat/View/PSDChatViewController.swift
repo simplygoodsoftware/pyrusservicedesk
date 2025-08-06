@@ -129,6 +129,7 @@ class PSDChatViewController: PSDViewController, PSDMainController {
         super.viewDidLoad()
         presentationController?.delegate = self
         extendedLayoutIncludesOpaqueBars = true
+        hidesBottomBarWhenPushed = true
         automaticallyAdjustsScrollViewInsets = false
         design()
         UIColor.psdBackground
