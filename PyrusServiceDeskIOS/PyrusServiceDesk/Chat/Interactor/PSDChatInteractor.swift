@@ -75,6 +75,7 @@ class PSDChatInteractor: NSObject {
                 singleChat.lastReadedCommentId = lastChat.lastReadedCommentId
                 singleChat.createdAt = lastChat.createdAt
                 singleChat.lastMessageDate = lastChat.lastMessageDate
+                singleChat.lastComment = PyrusServiceDesk.allMessages.last
                 
                 self.chat = singleChat
             } else if PyrusServiceDesk.clients.count > 0 {
@@ -108,6 +109,7 @@ extension PSDChatInteractor: PSDChatInteractorProtocol {
                     singleChat.lastReadedCommentId = lastChat.lastReadedCommentId
                     singleChat.createdAt = lastChat.createdAt
                     singleChat.lastMessageDate = lastChat.lastMessageDate
+                    singleChat.lastComment = PyrusServiceDesk.allMessages.last
                     
                     self.chat = singleChat
                 } else if PyrusServiceDesk.clients.count > 0 {
@@ -264,6 +266,8 @@ private extension PSDChatInteractor {
                 singleChat.lastReadedCommentId = lastChat.lastReadedCommentId
                 singleChat.createdAt = lastChat.createdAt
                 singleChat.lastMessageDate = lastChat.lastMessageDate
+                singleChat.lastComment = PyrusServiceDesk.allMessages.last
+                
                 chat = singleChat
             } else if !isLoading {
                 chat = PSDChat(chatId: 0, date: Date(), messages: [])
@@ -281,6 +285,10 @@ private extension PSDChatInteractor {
                 } else {
                     self.chat = chat
                 }
+            }
+            
+            if !PyrusServiceDesk.multichats {
+                readChat()
             }
             
             if PyrusServiceDesk.multichats {

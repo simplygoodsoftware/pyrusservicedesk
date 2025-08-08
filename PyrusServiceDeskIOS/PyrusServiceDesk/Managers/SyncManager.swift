@@ -87,28 +87,15 @@ class SyncManager {
                 guard let self else { return }
                 
                 if let chats, complete {
-                    
                     var unreadChats = 0
-//                    var lasMessage: PSDMessage?
-                    for chat in chats {
-                        if !chat.isRead,
-                           let lasMessage = chat.messages.last,
-                           let subscriber = PyrusServiceDesk.subscriber,
-                           !PyrusServiceDeskController.PSDIsOpen(),
-                           !lasMessage.owner.equalTo(user: PSDUsers.user)
-                        {
-                            let lastComment = PSDLastUnreadMessage(message: lasMessage)
-                            subscriber.onNewReply(hasUnreadComments: true, lastCommentText: lastComment.text, lastCommentAttachmentsCount: lastComment.attchmentsCount, lastCommentAttachments: lastComment.attachments, utcTime: lastComment.utcTime)
+                    var lasMessage: PSDMessage?
+                    if let chat = chats.first {
+                        if !chat.isRead {
+                            unreadChats += 1
+                            lasMessage = chat.lastComment
                         }
-                        unreadChats = unreadChats + 1
                     }
-                    if unreadChats == 0,
-                       let subscriber = PyrusServiceDesk.subscriber,
-                       !PyrusServiceDeskController.PSDIsOpen()
-                    {
-                        subscriber.onNewReply(hasUnreadComments: false, lastCommentText: nil, lastCommentAttachmentsCount: 0, lastCommentAttachments: nil, utcTime: 0)
-                    }
-                    //UnreadMessageManager.refreshNewMessagesCount(unreadChats > 0, lastMessage: lasMessage)
+                    UnreadMessageManager.refreshNewMessagesCount(unreadChats > 0, lastMessage: lasMessage)
                     
                     chatsDataService.saveChatModels(with: chats) { [weak self] _ in
                         DispatchQueue.main.async { [weak self] in
