@@ -1,0 +1,96 @@
+LOCAL_PATH := $(call my-dir)
+
+include $(CLEAR_VARS)
+
+LOCAL_LDLIBS := -llog
+
+LOCAL_MODULE:= pyrusopus
+
+#################### COMPILE OPTIONS #######################
+
+# It is strongly recommended to uncomment one of these
+#	VAR_ARRAYS: Use C99 variable-length arrays for stack allocation
+# 	USE_ALLOCA: Use alloca() for stack allocation
+# 	If none is defined, then the fallback is a non-threadsafe global array
+LOCAL_CFLAGS := -DUSE_ALLOCA
+#CFLAGS := -DVAR_ARRAYS $(CFLAGS)
+
+# These options affect performance
+#	HAVE_LRINTF: Use C99 intrinsics to speed up float-to-int conversion
+#   inline: Don't use the 'inline' keyword (for ANSI C compilers)
+#   restrict: Don't use the 'restrict' keyword (for pre-C99 compilers)
+LOCAL_CFLAGS += -DHAVE_LRINTF
+#CFLAGS := -Dinline= $(CFLAGS)
+#LOCAL_CFLAGS := -Drestrict= $(CFLAGS)
+
+OPUS_VERSION := "1.3.1"
+PACKAGE_VERSION := $(OPUS_VERSION)
+LOCAL_CFLAGS += -DOPUS_VERSION='$(OPUS_VERSION)'
+WARNINGS := -Wall -W -Wstrict-prototypes -Wextra -Wcast-align -Wnested-externs -Wshadow
+LOCAL_CFLAGS += -O2 -g $(WARNINGS) -DOPUS_BUILD
+
+include $(LOCAL_PATH)/opus/silk_sources.mk
+include $(LOCAL_PATH)/opus/celt_sources.mk
+include $(LOCAL_PATH)/opus/opus_sources.mk
+
+SILK_SOURCES += $(SILK_SOURCES_FLOAT)
+ifdef HAVE_SSE4_1
+SILK_SOURCES += $(SILK_SOURCES_SSE4_1)
+endif
+
+OPUS_SOURCES += $(OPUS_SOURCES_FLOAT)
+
+ifdef HAVE_SSE
+CELT_SOURCES += $(CELT_SOURCES_SSE)
+endif
+ifdef HAVE_SSE2
+CELT_SOURCES += $(CELT_SOURCES_SSE2)
+endif
+ifdef HAVE_SSE4_1
+CELT_SOURCES += $(CELT_SOURCES_SSE4_1)
+endif
+
+ifdef CPU_ARM
+CELT_SOURCES += $(CELT_SOURCES_ARM)
+SILK_SOURCES += $(SILK_SOURCES_ARM)
+
+ifdef HAVE_ARM_NEON_INTR
+CELT_SOURCES += $(CELT_SOURCES_ARM_NEON_INTR)
+SILK_SOURCES += $(SILK_SOURCES_ARM_NEON_INTR)
+endif
+
+ifdef HAVE_ARM_NE10
+CELT_SOURCES += $(CELT_SOURCES_ARM_NE10)
+endif
+endif
+
+LOCAL_SRC_FILES := \
+	$(patsubst %,$(LOCAL_PATH)/opus/%,$(SILK_SOURCES) $(CELT_SOURCES) $(OPUS_SOURCES)) \
+    com_pyrus_audiocontroller_opus_OpusEncoder.c \
+    com_pyrus_audiocontroller_opus_OpusDecoder.c
+
+all:
+	echo $(LOCAL_SRC_FILES)
+
+LOCAL_C_INCLUDES += $(LOCAL_PATH)/opus/include/ \
+	$(LOCAL_PATH)/opus/silk/ \
+	$(LOCAL_PATH)/opus/silk/fixed \
+	$(LOCAL_PATH)/opus/silk/float \
+	$(LOCAL_PATH)/opus/celt/ \
+	$(LOCAL_PATH)/opus/src/ \
+	$(LOCAL_PATH)/opus/
+
+ifdef FIXED_POINT
+CFLAGS += -DFIXED_POINT=1 -DDISABLE_FLOAT_API
+#LOCAL_C_INCLUDES += $(LOCAL_PATH)/opus/silk/fixed
+else
+#LOCAL_C_INCLUDES += $(LOCAL_PATH)/opus/silk/float
+endif
+
+LOCAL_STATIC_LIBRARIES := cpufeatures
+
+# TARGET_ARCH_ABI := armeabi-v7a arm64-v8a
+
+include $(BUILD_SHARED_LIBRARY)
+
+$(call import-module,android/cpufeatures)

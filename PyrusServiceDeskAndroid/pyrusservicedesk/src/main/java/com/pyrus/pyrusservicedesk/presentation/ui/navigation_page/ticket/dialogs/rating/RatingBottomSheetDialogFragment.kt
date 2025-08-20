@@ -8,8 +8,8 @@ import android.view.ViewGroup
 import androidx.core.os.bundleOf
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment
 import com.pyrus.pyrusservicedesk.R
+import com.pyrus.pyrusservicedesk._ref.utils.ConfigUtils
 import com.pyrus.pyrusservicedesk.databinding.PsdFragmentRateUsBinding
-import com.pyrus.pyrusservicedesk.utils.ConfigUtils
 
 class RatingBottomSheetDialogFragment: BottomSheetDialogFragment() {
     private lateinit var binding: PsdFragmentRateUsBinding

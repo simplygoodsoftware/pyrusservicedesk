@@ -1,0 +1,73 @@
+package com.pyrus.pyrusservicedesk._ref.utils
+
+import com.pyrus.pyrusservicedesk._ref.utils.FileFormat.GIF
+import com.pyrus.pyrusservicedesk._ref.utils.FileFormat.JPEG
+import com.pyrus.pyrusservicedesk._ref.utils.FileFormat.JPG
+import com.pyrus.pyrusservicedesk._ref.utils.FileFormat.M4A
+import com.pyrus.pyrusservicedesk._ref.utils.FileFormat.MP3
+import com.pyrus.pyrusservicedesk._ref.utils.FileFormat.MP4
+import com.pyrus.pyrusservicedesk._ref.utils.FileFormat.OGA
+import com.pyrus.pyrusservicedesk._ref.utils.FileFormat.OGG
+import com.pyrus.pyrusservicedesk._ref.utils.FileFormat.OPUS
+import com.pyrus.pyrusservicedesk._ref.utils.FileFormat.PNG
+import com.pyrus.pyrusservicedesk._ref.utils.FileFormat.WAV
+
+internal const val MIME_TYPE_IMAGE_ANY = "image/*"
+internal const val MIME_TYPE_IMAGE_JPEG = "image/jpeg"
+internal const val BYTES_IN_MEGABYTE = 1000000
+internal const val BYTES_IN_KILOBYTE = 1000
+
+/**
+ * @return TRUE if preview for the file format is supported.
+ */
+internal fun String.canBePreviewed() = isImage()
+
+/**
+ * return TRUE if the file is image
+ */
+internal fun String.isImage() = hasAnyFormatOf(JPEG, JPG, PNG, GIF)
+
+/**
+ * return TRUE if the file is audio
+ */
+internal fun String.isAudio() = hasAnyFormatOf(OPUS, MP3, OGA, OGG, M4A, WAV)
+
+/**
+ * return TRUE if the file is video
+ */
+internal fun String.isVideo() = hasAnyFormatOf(MP4)
+
+/**
+ * @return TRUE of file has specified [format]
+ */
+internal fun String.hasFormat(format: FileFormat) = endsWith(format.extension, true)
+
+/**
+ * @return TRUE of file has any format of [formats]
+ */
+internal fun String.hasAnyFormatOf(vararg formats: FileFormat) = formats.any { hasFormat(it) }
+
+/**
+ * Provides extension of the file. If filename doesn't contains extension returns empty string.
+ */
+internal fun String.getExtension(): String {
+    return when{
+        contains('.') -> split('.').last()
+        else -> ""
+    }
+}
+
+internal enum class FileFormat (val extension: String){
+    JPEG(".jpeg"),
+    JPG(".jpg"),
+    GIF(".gif"),
+    PNG(".png"),
+    TXT(".txt"),
+    MP4(".mp4"),
+    OPUS(".opus"),
+    OGA(".oga"),
+    OGG(".ogg"),
+    MP3(".mp3"),
+    M4A(".m4a"),
+    WAV(".wav"),
+}

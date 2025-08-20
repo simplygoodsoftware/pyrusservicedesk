@@ -15,11 +15,11 @@ public class ImFlexboxLayout extends RelativeLayout {
 
     private TypedArray a;
 
-    private RelativeLayout.LayoutParams viewPartMainLayoutParams;
+    private LayoutParams viewPartMainLayoutParams;
     private int viewPartMainWidth;
     private int viewPartMainHeight;
 
-    private RelativeLayout.LayoutParams viewPartSlaveLayoutParams;
+    private LayoutParams viewPartSlaveLayoutParams;
     private int viewPartSlaveWidth;
     private int viewPartSlaveHeight;
 

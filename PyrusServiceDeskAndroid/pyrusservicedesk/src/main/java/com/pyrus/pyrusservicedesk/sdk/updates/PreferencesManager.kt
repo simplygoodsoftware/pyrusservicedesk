@@ -4,13 +4,46 @@ import android.annotation.SuppressLint
 import android.content.SharedPreferences
 import com.google.gson.GsonBuilder
 import com.google.gson.reflect.TypeToken
-import java.lang.Exception
 import java.lang.reflect.Type
+import androidx.core.content.edit
 
 @SuppressLint("ApplySharedPref")
 internal class PreferencesManager(private val preferences: SharedPreferences): Preferences {
 
     private val gson = GsonBuilder().create()
+
+    override fun getCreatedTicketsCount(): Int {
+        return preferences.getInt(CREATED_TICKETS_COUNT, 0)
+    }
+
+    override fun setCreatedTicketsCount(count: Int) {
+        preferences.edit(commit = true) { putInt(CREATED_TICKETS_COUNT, count) }
+    }
+
+    override fun getRecentRatingAppCode(): Int {
+        return preferences.getInt(RECENT_RATING_APP_CODE, 0)
+    }
+
+    override fun setRecentRatingAppCode(appCode: Int) {
+        preferences.edit(commit = true) { putInt(RECENT_RATING_APP_CODE, appCode) }
+    }
+
+    override fun getRecentRatingTime(): Long {
+        return preferences.getLong(RECENT_RATING_TIME, 0L)
+    }
+
+    override fun setRecentRatingTime(time: Long) {
+        preferences.edit(commit = true) { putLong(RECENT_RATING_TIME, time) }
+    }
+
+
+    override fun getReloadCacheVersion(): Long {
+        return preferences.getLong(RELOAD_CACHE_VERSION, 0L)
+    }
+
+    override fun saveReloadCacheVersion(version: Long) {
+        preferences.edit(commit = true) { putLong(RELOAD_CACHE_VERSION, version) }
+    }
 
     override fun saveLastComment(comment: LastComment) {
         preferences.edit()
@@ -123,6 +156,11 @@ internal class PreferencesManager(private val preferences: SharedPreferences): P
         private const val LAST_COMMENT_ATTACHES = "LAST_COMMENT_ATTACHES"
         private const val LAST_COMMENT_ATTACHES_COUNT = "LAST_COMMENT_ATTACHES_COUNT"
         private const val LAST_COMMENT_UTC_TIME = "LAST_COMMENT_UTC_TIME"
+
+        private const val RELOAD_CACHE_VERSION = "RELOAD_CACHE_VERSION"
+        private const val RECENT_RATING_APP_CODE = "RECENT_RATING_APP_CODE"
+        private const val RECENT_RATING_TIME = "RECENT_RATING_TIME"
+        private const val CREATED_TICKETS_COUNT = "CREATED_TICKETS_COUNT"
 
         private const val PREFERENCE_KEY_LAST_ACTIVITY_TIME = "PREFERENCE_KEY_LAST_ACTIVITY_TIME"
 

@@ -1,0 +1,3 @@
+package com.pyrus.pyrusservicedesk
+
+interface NoFullScreenFragment

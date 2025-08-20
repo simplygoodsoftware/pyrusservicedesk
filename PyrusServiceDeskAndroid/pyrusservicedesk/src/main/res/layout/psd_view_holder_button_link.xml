@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:orientation="horizontal"
+    android:layout_margin="@dimen/psd_comments_item_space"
+    android:background="@drawable/chat_button_bg"
+    android:gravity="center"
+    android:minWidth="@dimen/psd_avatar_size_default"
+    android:padding="@dimen/psd_offset_small">
+    <TextView
+        android:id="@+id/btnButton"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textAllCaps="false"
+        android:visibility="visible"
+        tools:text="button"/>
+
+    <ImageView
+        android:id="@+id/shareImageView"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center_vertical"
+        android:layout_marginStart="8dp"
+        android:src="@drawable/ic_share" />
+
+</LinearLayout>
+
+

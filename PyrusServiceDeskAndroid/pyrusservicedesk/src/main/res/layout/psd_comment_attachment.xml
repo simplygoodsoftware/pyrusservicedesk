@@ -1,0 +1,114 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+    android:id="@+id/root"
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:gravity="bottom"
+    android:orientation="horizontal">
+
+    <androidx.appcompat.widget.AppCompatImageView
+        android:id="@+id/statusIcon"
+        android:layout_width="@dimen/psd_comment_error_width"
+        android:layout_height="wrap_content"
+        android:forceDarkAllowed="false"
+        android:visibility="gone"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        tools:srcCompat="@tools:sample/avatars" />
+
+    <androidx.cardview.widget.CardView
+        android:id="@+id/background_parent"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        app:cardCornerRadius="@dimen/psd_comment_radius"
+        app:cardElevation="0dp"
+        app:cardPreventCornerOverlap="false">
+
+        <LinearLayout
+            android:id="@+id/attachment_layout"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:minHeight="@dimen/psd_attachment_layout_min_height"
+            android:gravity="center_vertical"
+            android:orientation="horizontal"
+            tools:visibility="visible">
+
+            <FrameLayout
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent">
+
+                <ProgressBar
+                    android:id="@+id/attachment_progress"
+                    style="?android:attr/progressBarStyleHorizontal"
+                    android:layout_width="50.dp"
+                    android:layout_height="50.dp"
+                    android:layout_marginTop="12.dp"
+                    android:layout_marginLeft="12.dp"
+                    android:layout_marginStart="12.dp"
+                    android:layout_marginBottom="12.dp"
+                    android:layout_gravity="center_vertical"
+                    android:progressDrawable="@drawable/psd_file_progress"
+                    android:indeterminate="false"/>
+
+                <com.pyrus.pyrusservicedesk.presentation.ui.view.OutlineImageView
+                    android:id="@+id/preview_mini"
+                    android:layout_width="@dimen/psd_preview_mini_width"
+                    android:layout_height="match_parent"
+                    android:scaleType="centerCrop"
+                    android:visibility="gone"/>
+
+            </FrameLayout>
+
+            <androidx.constraintlayout.widget.ConstraintLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:gravity="center_vertical"
+                android:padding="@dimen/psd_offset_small">
+
+                <androidx.appcompat.widget.AppCompatTextView
+                    android:id="@+id/file_name"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:textAppearance="?attr/textAppearanceListItem"
+                    android:maxLines="2"
+                    tools:text="filename.jpeg"
+                    app:layout_constraintTop_toTopOf="parent"
+                    app:layout_constraintRight_toRightOf="parent"
+                    app:layout_constraintLeft_toLeftOf="parent"
+                    android:ellipsize="end"/>
+
+                <androidx.appcompat.widget.AppCompatTextView
+                    android:id="@+id/file_size"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/psd_uploading"
+                    android:ellipsize="end"
+                    app:layout_constraintTop_toBottomOf="@id/file_name"
+                    app:layout_constraintLeft_toLeftOf="parent"
+                    app:layout_constraintHorizontal_bias="0"
+                    app:layout_constraintRight_toLeftOf="@id/preview_mini_time"
+                    tools:text="25 Kb"
+                    android:textAppearance="?attr/textAppearanceListItemSecondary"/>
+
+                <androidx.appcompat.widget.AppCompatTextView
+                    android:id="@+id/preview_mini_time"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginLeft="2dp"
+                    android:maxLines="1"
+                    android:textAppearance="?attr/textAppearanceListItemSecondary"
+                    app:layout_constraintRight_toRightOf="parent"
+                    app:layout_constraintTop_toBottomOf="@id/file_name"
+                    tools:text="@tools:sample/date/hhmm" />
+
+
+            </androidx.constraintlayout.widget.ConstraintLayout>
+
+        </LinearLayout>
+
+    </androidx.cardview.widget.CardView>
+
+</LinearLayout>

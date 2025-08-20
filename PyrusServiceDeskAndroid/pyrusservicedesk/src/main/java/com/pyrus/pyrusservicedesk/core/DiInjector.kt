@@ -1,0 +1,302 @@
+package com.pyrus.pyrusservicedesk.core
+
+import android.app.Application
+import android.content.Context
+import android.content.SharedPreferences
+import android.os.Build
+import androidx.media3.common.AudioAttributes
+import androidx.media3.common.C
+import androidx.media3.exoplayer.ExoPlayer
+import androidx.media3.session.MediaSession
+import com.github.terrakok.cicerone.Cicerone
+import com.github.terrakok.cicerone.NavigatorHolder
+import com.pyrus.pyrusservicedesk.AppResourceManager
+import com.pyrus.pyrusservicedesk._ref.helpers.DownloadHelper
+import com.pyrus.pyrusservicedesk._ref.ui_domain.access_denied.AccessDeniedFeatureFactory
+import com.pyrus.pyrusservicedesk._ref.ui_domain.rate_time.TimeToRateUseCase
+import com.pyrus.pyrusservicedesk._ref.ui_domain.screens.search.SearchFeatureFactory
+import com.pyrus.pyrusservicedesk._ref.ui_domain.screens.ticket.TicketFeatureFactory
+import com.pyrus.pyrusservicedesk._ref.ui_domain.screens.ticket.record.AudioRecordControllerFactory
+import com.pyrus.pyrusservicedesk._ref.ui_domain.screens.tickets_list.tickets.TicketsFeatureFactory
+import com.pyrus.pyrusservicedesk._ref.utils.AddUserEventBus
+import com.pyrus.pyrusservicedesk._ref.utils.AudioWrapper
+import com.pyrus.pyrusservicedesk._ref.utils.RequestUtils.getBaseUrl
+import com.pyrus.pyrusservicedesk._ref.utils.call_adapter.TryCallAdapterFactory
+import com.pyrus.pyrusservicedesk._ref.utils.navigation.PyrusRouterImpl
+import com.pyrus.pyrusservicedesk._ref.whitetea.core.DefaultStoreFactory
+import com.pyrus.pyrusservicedesk._ref.whitetea.core.StoreFactory
+import com.pyrus.pyrusservicedesk.core.refresh.AutoRefreshFeatureFactory
+import com.pyrus.pyrusservicedesk.presentation.viewmodel.SharedViewModel
+import com.pyrus.pyrusservicedesk.sdk.AccessDeniedEventBus
+import com.pyrus.pyrusservicedesk.sdk.FileResolver
+import com.pyrus.pyrusservicedesk.sdk.data.FileManager
+import com.pyrus.pyrusservicedesk.sdk.data.json.DateAdapter
+import com.pyrus.pyrusservicedesk.sdk.data.json.UriAdapter
+import com.pyrus.pyrusservicedesk.sdk.repositories.AccountStore
+import com.pyrus.pyrusservicedesk.sdk.repositories.DraftRepository
+import com.pyrus.pyrusservicedesk.sdk.repositories.IdStore
+import com.pyrus.pyrusservicedesk.sdk.repositories.LocalCommandsStore
+import com.pyrus.pyrusservicedesk.sdk.repositories.LocalTicketsStore
+import com.pyrus.pyrusservicedesk.sdk.repositories.RepositoryMapper
+import com.pyrus.pyrusservicedesk.sdk.repositories.SdRepository
+import com.pyrus.pyrusservicedesk.sdk.repositories.data_base.SdDatabase
+import com.pyrus.pyrusservicedesk.sdk.sync.CommandParamsDto
+import com.pyrus.pyrusservicedesk.sdk.sync.Synchronizer
+import com.pyrus.pyrusservicedesk.sdk.updates.LiveUpdates
+import com.pyrus.pyrusservicedesk.sdk.updates.PreferencesManager
+import com.pyrus.pyrusservicedesk.sdk.verify.LocalDataVerifier
+import com.pyrus.pyrusservicedesk.sdk.web.retrofit.RemoteFileStore
+import com.pyrus.pyrusservicedesk.sdk.web.retrofit.ServiceDeskApi
+import com.squareup.moshi.Moshi
+import com.squareup.moshi.kotlin.reflect.KotlinJsonAdapterFactory
+import com.squareup.picasso.OkHttp3Downloader
+import com.squareup.picasso.Picasso
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.cancel
+import okhttp3.Cache
+import okhttp3.OkHttpClient
+import retrofit2.Retrofit
+import retrofit2.converter.moshi.MoshiConverterFactory
+import java.io.File
+import java.util.concurrent.TimeUnit
+
+
+internal class DiInjector(
+    application: Application,
+    initialAccount: Account,
+    private val authToken: String?,
+    private val coreScope: CoroutineScope,
+    preferences: SharedPreferences,
+) {
+
+    val accountStore = AccountStore(initialAccount)
+
+    private val fileResolver: FileResolver = FileResolver(application.contentResolver)
+
+    private val localDataVerifier: LocalDataVerifier = LocalDataVerifier(fileResolver)
+
+    private val moshi = Moshi.Builder()
+        .add(CommandParamsDto.factory)
+        .add(DateAdapter())
+        .add(UriAdapter())
+        .add(KotlinJsonAdapterFactory())
+        .build()
+
+    private fun createOkHttpClientBuilder(): OkHttpClient.Builder {
+        return OkHttpClient.Builder()
+            .connectTimeout(30, TimeUnit.SECONDS)
+            .readTimeout(30, TimeUnit.SECONDS)
+            .writeTimeout(30, TimeUnit.SECONDS)
+            .addInterceptor { chain ->
+                val original = chain.request()
+                val requestBuilder = original.newBuilder()
+                authToken?.let { authToken ->
+                    requestBuilder.header("Authorization", authToken)
+                }
+
+                val userAgent = "ServicedeskClient/android/" +
+                    Build.MANUFACTURER + "/" +
+                    Build.MODEL + "/" +
+                    Build.VERSION.SDK_INT
+
+                requestBuilder.header("User-Agent", userAgent)
+                chain.proceed(requestBuilder.build())
+            }
+    }
+
+    private val okHttpClient = createOkHttpClientBuilder().build()
+
+    // TODO sds сделать мультидоменный retrofit
+    private val retrofit: Retrofit = Retrofit.Builder()
+        .baseUrl(getBaseUrl(initialAccount.domain))
+        .addConverterFactory(MoshiConverterFactory.create(moshi))
+        .addCallAdapterFactory(TryCallAdapterFactory())
+        .client(okHttpClient)
+        .build()
+
+    private val idStore = IdStore()
+
+    private val db = SdDatabase.create(application)
+
+    private val ticketsDao = db.ticketsDao()
+
+    private val commandsDao = db.commandsDao()
+
+    private val searchDao = db.searchDao()
+
+    val localCommandsStore: LocalCommandsStore = LocalCommandsStore(
+        idStore = idStore,
+        commandsDao = commandsDao,
+        searchDao = searchDao
+    )
+
+    private val api: ServiceDeskApi = retrofit.create(ServiceDeskApi::class.java)
+
+    private val fileManager: FileManager = FileManager(application, fileResolver)
+
+    private val repositoryMapper = RepositoryMapper(idStore)
+
+    private val remoteFileStore = RemoteFileStore(api)
+
+    private val localTicketsStore = LocalTicketsStore(idStore, ticketsDao, searchDao)
+
+    private val resourceManager = AppResourceManager(application)
+
+    private val accessDeniedEventBus = AccessDeniedEventBus()
+
+    private val preferencesManager = PreferencesManager(preferences)
+
+    private val synchronizer = Synchronizer(
+        api = api,
+        localTicketsStore = localTicketsStore,
+        accountStore = accountStore,
+        resourceManager = resourceManager,
+        idStore = idStore,
+        commandsStore = localCommandsStore,
+        accessDeniedEventBus = accessDeniedEventBus,
+        preferences = preferencesManager,
+    )
+
+    val repository: SdRepository = SdRepository(
+        commandsStore = localCommandsStore,
+        repositoryMapper = repositoryMapper,
+        fileResolver = fileResolver,
+        remoteFileStore = remoteFileStore,
+        synchronizer = synchronizer,
+        ticketsStore = localTicketsStore,
+        coroutineScope = coreScope,
+        accountStore = accountStore,
+        idStore = idStore,
+    )
+
+    private val storeFactory: StoreFactory = DefaultStoreFactory()
+
+    private val draftRepository = DraftRepository(preferences, idStore, moshi)
+
+    private val cicerone: Cicerone<PyrusRouterImpl> = Cicerone.create(PyrusRouterImpl())
+
+    private val addUserEventBus = AddUserEventBus()
+
+    val router = cicerone.router
+
+    val navHolder: NavigatorHolder = cicerone.getNavigatorHolder()
+
+    private val player: ExoPlayer = ExoPlayer
+        .Builder(application)
+        .setAudioAttributes(
+            AudioAttributes.Builder()
+                .setUsage(C.USAGE_MEDIA)
+                .setContentType(C.AUDIO_CONTENT_TYPE_MUSIC)
+                .build(),
+            true,
+        )
+        .build()
+
+    private var session: MediaSession = MediaSession.Builder(application, player).build()
+
+    private val downloadHelper = DownloadHelper(
+        context = application
+    )
+
+    val audioWrapper = AudioWrapper(session, downloadHelper, coreScope)
+
+    private val audioRecordControllerFactory = AudioRecordControllerFactory(application.cacheDir)
+
+    val ticketFeatureFactory = TicketFeatureFactory(
+        accountStore = accountStore,
+        storeFactory = storeFactory,
+        repository = repository,
+        draftRepository = draftRepository,
+        router = router,
+        fileManager = fileManager,
+        preferencesManager = preferencesManager,
+        audioRecordControllerFactory = audioRecordControllerFactory,
+        audioWrapper = audioWrapper,
+    )
+
+    val ticketsFeatureFactory = TicketsFeatureFactory(
+        storeFactory = storeFactory,
+        repository = repository,
+        router = router,
+        commandsStore = localCommandsStore,
+        addUserEventBus = addUserEventBus,
+        audioWrapper = audioWrapper,
+        accountStore = accountStore,
+    )
+
+    val searchFeatureFactory = SearchFeatureFactory(
+        storeFactory = storeFactory,
+        repository = repository,
+        router = router,
+        accountStore = accountStore,
+    )
+
+    val autoRefreshFeatureFactory = AutoRefreshFeatureFactory(
+        storeFactory = storeFactory,
+        repository = repository,
+        preferencesManager = preferencesManager,
+    )
+
+    val sharedViewModel = SharedViewModel()
+
+    val liveUpdates = LiveUpdates(
+        repository = repository,
+        preferencesManager = preferencesManager,
+        // TODO sds fix live updates
+        userId = initialAccount.getUserId(),
+        coreScope = coreScope,
+    )
+
+    val picasso: Picasso = providePicasso(application)
+
+    private fun providePicasso(appContext : Context): Picasso {
+        val cacheDir = File(appContext.cacheDir, "image-cache")
+        if (!cacheDir.exists()) {
+            cacheDir.mkdirs()
+        }
+        val cacheSize = 50 * 1024 * 1024L // 50 MB
+        val cache = Cache(cacheDir, cacheSize)
+        return Picasso.Builder(appContext)
+            .downloader(OkHttp3Downloader(createOkHttpClientBuilder().cache(cache).build()))
+            .build()
+    }
+
+    val setPushTokenUseCase = SetPushTokenUseCase(accountStore, coreScope, preferencesManager, repository)
+
+    val cleanDataUseCase = CleanDataUseCase(
+        coreScope = coreScope,
+        sdDatabase = db,
+        fileManager = fileManager,
+        downloadHelper = downloadHelper,
+    )
+
+    val addUserUseCase = AddUserUseCase(accountStore, repository, coreScope, addUserEventBus)
+
+    val rateTimeUseCase = TimeToRateUseCase(preferencesManager)
+
+    val accessDeniedFeatureFactory = AccessDeniedFeatureFactory(
+        storeFactory = storeFactory,
+        accountStore = accountStore,
+        accessDeniedEventBus = accessDeniedEventBus,
+        ticketsStore = localTicketsStore
+    )
+
+    fun onCancel() {
+        coreScope.cancel()
+        synchronizer.cancel()
+        releaseSession()
+    }
+
+    fun releaseSession() {
+        session.run {
+            player.release()
+            release()
+        }
+    }
+
+    fun stopSession() {
+        audioWrapper.clearCurrentUrl()
+        session.player.clearMediaItems()
+    }
+
+}

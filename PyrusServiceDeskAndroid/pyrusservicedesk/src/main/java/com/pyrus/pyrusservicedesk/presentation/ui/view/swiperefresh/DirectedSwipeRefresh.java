@@ -3,10 +3,6 @@ package com.pyrus.pyrusservicedesk.presentation.ui.view.swiperefresh;
 import android.content.Context;
 import android.content.res.Resources;
 import android.content.res.TypedArray;
-
-import androidx.annotation.ColorInt;
-import androidx.core.view.MotionEventCompat;
-import androidx.core.view.ViewCompat;
 import android.util.AttributeSet;
 import android.util.DisplayMetrics;
 import android.util.Log;
@@ -18,6 +14,11 @@ import android.view.animation.Animation;
 import android.view.animation.DecelerateInterpolator;
 import android.view.animation.Transformation;
 import android.widget.AbsListView;
+
+import androidx.annotation.ColorInt;
+import androidx.core.view.MotionEventCompat;
+import androidx.core.view.ViewCompat;
+
 import com.pyrus.pyrusservicedesk.R;
 
 
@@ -147,7 +148,9 @@ public class DirectedSwipeRefresh extends ViewGroup {
 
     private Animation mScaleDownToStartAnimation;
 
-    private float mSpinnerFinalOffset;
+    private final float mSpinnerFinalOffset;
+
+    private float bottomSpinnerGap = 0;
 
     private boolean mNotify;
 
@@ -186,8 +189,8 @@ public class DirectedSwipeRefresh extends ViewGroup {
                 if (mScale) {
                     setAnimationProgress(0 /* animation complete and view is hidden */);
                 } else {
-                    setTargetOffsetTopAndBottom(mOriginalOffsetTop - mCurrentTargetOffsetTop,
-                            true /* requires update */);
+                    setTargetOffsetTopAndBottom(mOriginalOffsetTop - mCurrentTargetOffsetTop
+                        /* requires update */);
                 }
             }
             mCurrentTargetOffsetTop = mCircleView.getTop();
@@ -369,7 +372,7 @@ public class DirectedSwipeRefresh extends ViewGroup {
             if (!mUsingCustomStart) {
                 switch (mDirection) {
                     case BOTTOM:
-                        endTarget = getMeasuredHeight() - (int) (mSpinnerFinalOffset);
+                        endTarget = getMeasuredHeight() - (int) (mSpinnerFinalOffset) - (int) bottomSpinnerGap;
                         break;
                     case TOP:
                     default:
@@ -379,8 +382,8 @@ public class DirectedSwipeRefresh extends ViewGroup {
             } else {
                 endTarget = (int) mSpinnerFinalOffset;
             }
-            setTargetOffsetTopAndBottom(endTarget - mCurrentTargetOffsetTop,
-                    true /* requires update */);
+            setTargetOffsetTopAndBottom(endTarget - mCurrentTargetOffsetTop
+                /* requires update */);
             mNotify = false;
             startScaleUpAnimation(mRefreshListener);
         } else {
@@ -532,6 +535,10 @@ public class DirectedSwipeRefresh extends ViewGroup {
      */
     public boolean isRefreshing() {
         return mRefreshing;
+    }
+
+    public void setBottomSpinnerGap(float offset) {
+        bottomSpinnerGap = offset;
     }
 
     private void ensureTarget() {
@@ -721,7 +728,7 @@ public class DirectedSwipeRefresh extends ViewGroup {
 
         switch (action) {
             case MotionEvent.ACTION_DOWN:
-                setTargetOffsetTopAndBottom(mOriginalOffsetTop - mCircleView.getTop(), true);
+                setTargetOffsetTopAndBottom(mOriginalOffsetTop - mCircleView.getTop());
                 mActivePointerId = MotionEventCompat.getPointerId(ev, 0);
                 mIsBeingDragged = false;
                 mIsHorizontalDrag = false;
@@ -930,8 +937,8 @@ public class DirectedSwipeRefresh extends ViewGroup {
                         }
                         float rotation = (-0.25f + .4f * adjustedPercent + tensionPercent * 2) * .5f;
                         mProgress.setProgressRotation(rotation);
-                        setTargetOffsetTopAndBottom(targetY - mCurrentTargetOffsetTop,
-                                true /* requires update */);
+                        setTargetOffsetTopAndBottom(targetY - mCurrentTargetOffsetTop
+                            /* requires update */);
                     }
                     break;
                 }
@@ -1045,7 +1052,7 @@ public class DirectedSwipeRefresh extends ViewGroup {
             if (!mUsingCustomStart) {
                 switch (mDirection) {
                     case BOTTOM:
-                        endTarget = getMeasuredHeight() - (int) (mSpinnerFinalOffset);
+                        endTarget = getMeasuredHeight() - (int) (mSpinnerFinalOffset) - (int) bottomSpinnerGap;
                         break;
                     case TOP:
                     default:
@@ -1057,7 +1064,7 @@ public class DirectedSwipeRefresh extends ViewGroup {
             }
             targetTop = (mFrom + (int) ((endTarget - mFrom) * interpolatedTime));
             int offset = targetTop - mCircleView.getTop();
-            setTargetOffsetTopAndBottom(offset, false /* requires update */);
+            setTargetOffsetTopAndBottom(offset  /* requires update */);
         }
     };
 
@@ -1065,7 +1072,7 @@ public class DirectedSwipeRefresh extends ViewGroup {
         int targetTop = 0;
         targetTop = (mFrom + (int) ((mOriginalOffsetTop - mFrom) * interpolatedTime));
         int offset = targetTop - mCircleView.getTop();
-        setTargetOffsetTopAndBottom(offset, false /* requires update */);
+        setTargetOffsetTopAndBottom(offset  /* requires update */);
     }
 
     private final Animation mAnimateToStartPosition = new Animation() {
@@ -1099,7 +1106,7 @@ public class DirectedSwipeRefresh extends ViewGroup {
         mCircleView.startAnimation(mScaleDownToStartAnimation);
     }
 
-    private void setTargetOffsetTopAndBottom(int offset, boolean requiresUpdate) {
+    private void setTargetOffsetTopAndBottom(int offset) {
         mCircleView.bringToFront();
         mCircleView.offsetTopAndBottom(offset);
 
@@ -1113,9 +1120,6 @@ public class DirectedSwipeRefresh extends ViewGroup {
 //                break;
 //        }
         mCurrentTargetOffsetTop = mCircleView.getTop();
-        if (requiresUpdate && android.os.Build.VERSION.SDK_INT < 11) {
-            invalidate();
-        }
     }
 
     private void onSecondaryPointerUp(MotionEvent ev) {

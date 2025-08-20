@@ -6,17 +6,27 @@
     <dimen name="psd_offset_default">16dp</dimen>
     <dimen name="psd_offset_small">8dp</dimen>
 
+    <dimen name="dp_05">0.5dp</dimen>
+    <dimen name="dp_1">1dp</dimen>
+    <dimen name="dp_4">4dp</dimen>
+
+    <dimen name="dp_11">11dp</dimen>
+    <dimen name="dp_12">12dp</dimen>
+
     <!-- THEME -->
     <dimen name="psd_theme_text_size_default">14sp</dimen>
+    <dimen name="psd_text_20">20sp</dimen>
 
     <dimen name="psd_toolbar_title_text_size">18sp</dimen>
 
     <dimen name="psd_recyclerview_item_height_default">56dp</dimen>
+    <dimen name="psd_toolbar_height">52sp</dimen>
 
     <dimen name="psd_comment_radius">8dp</dimen>
 
     <dimen name="psd_comments_item_space">4dp</dimen>
     <dimen name="psd_comments_item_space_double">8dp</dimen>
+    <dimen name="psd_tab_item_space">24dp</dimen>
     <dimen name="psd_avatar_size_default">32dp</dimen>
     <dimen name="psd_comment_error_width">32dp</dimen>
     <dimen name="psd_max_input_height">80dp</dimen>
@@ -29,5 +39,7 @@
     <dimen name="psd_comment_preview_outline_radius">1dp</dimen>
     <dimen name="psd_preview_mini_width">64dp</dimen>
     <dimen name="psd_attachment_layout_min_height">72dp</dimen>
-    <dimen name="_117">117dp</dimen>
+    <dimen name="psd_bottomSheet_offset">32.dp</dimen>
+    <dimen name="psd_recyclerView_offset">150dp</dimen>
+    <dimen name="psd_blur_height">72dp</dimen>
 </resources>

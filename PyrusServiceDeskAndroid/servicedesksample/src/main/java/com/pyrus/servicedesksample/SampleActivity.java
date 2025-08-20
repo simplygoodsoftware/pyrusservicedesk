@@ -32,7 +32,7 @@ public class SampleActivity extends Activity implements NewReplySubscriber {
                                 .setChatTitle("Sample Support")
                                 .setWelcomeMessage("How can I help you?")
                                 .setAvatarForSupport(com.pyrus.pyrusservicedesk.R.drawable.psd_download_file)
-                                .setChatMenuDelegate(new ChatMenuDelegate())
+                                //.setChatMenuDelegate(new ChatMenuDelegate())
                                 .setTrustedUrls(Collections.singletonList("pyrus.com"))
                                 .build())
         );
