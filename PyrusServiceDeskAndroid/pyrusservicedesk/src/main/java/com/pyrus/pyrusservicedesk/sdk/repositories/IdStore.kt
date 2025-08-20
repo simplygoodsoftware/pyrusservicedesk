@@ -2,6 +2,7 @@ package com.pyrus.pyrusservicedesk.sdk.repositories
 
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.map
+import java.util.concurrent.atomic.AtomicLong
 import java.util.concurrent.locks.ReentrantLock
 import kotlin.concurrent.withLock
 
@@ -9,6 +10,7 @@ internal class IdStore {
 
     private val ticketIdLock = ReentrantLock()
     private val commentIdLock = ReentrantLock()
+    private val lastTicketId: AtomicLong = AtomicLong(0)
 
     private val ticketIdStateFlow = MutableStateFlow(0)
 
@@ -57,7 +59,13 @@ internal class IdStore {
         ticketIdStateFlow.value += 1
     }
 
+    fun setLastTicketId(ticketId: Long) {
+        lastTicketId.set(ticketId)
+    }
 
+    fun getLastTicketId(): Long {
+        return lastTicketId.get()
+    }
 
 
 
