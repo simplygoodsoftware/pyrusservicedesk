@@ -78,8 +78,9 @@ internal class RouterFragment: TeaFragment<Unit, Message.Outer, Effect.Outer>(),
 
                 val user = UserInternal(userId, appId)
                 lifecycleScope.launch(Dispatchers.IO) {
-                    val localId = injector().localCommandsStore.getNextLocalId()
-                    injector().router.newRootScreen(SdScreens.TicketScreen(localId, user).setSlideRightAnimation())
+                    //val localId = injector().localCommandsStore.getNextLocalId()
+                    val lastTicketId = injector().localCommandsStore.getLastTicketId()
+                    injector().router.newRootScreen(SdScreens.TicketScreen(lastTicketId, user).setSlideRightAnimation())
                 }
             }
         }

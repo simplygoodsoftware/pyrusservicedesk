@@ -25,6 +25,7 @@ internal class LocalCommandsStore(
     private val searchDao: SearchDao,
 ) {
 
+    private val lastTicketId: AtomicLong = AtomicLong(0)
     private val lastLocalId: AtomicLong = AtomicLong(0)
     private val lastAttachId: AtomicLong = AtomicLong(0)
 
@@ -135,6 +136,7 @@ internal class LocalCommandsStore(
 
     fun updateCommandsTicketId(localId: Long, serverId: Long) {
         commandsDao.updateTicketId(localId, serverId)
+        lastTicketId.set(serverId)
     }
 
     /**
@@ -292,6 +294,11 @@ internal class LocalCommandsStore(
                 it - 1
             }
         }
+    }
+
+    fun getLastTicketId(): Long {
+        val id = getNextLocalId()
+        return if (lastTicketId.get() > id) lastTicketId.get() else id
     }
 
     private fun getNextAttachmentId(): Long {
