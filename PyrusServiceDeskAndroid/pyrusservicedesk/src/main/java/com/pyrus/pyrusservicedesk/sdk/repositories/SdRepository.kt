@@ -18,6 +18,7 @@ import com.pyrus.pyrusservicedesk._ref.utils.isSuccess
 import com.pyrus.pyrusservicedesk._ref.utils.map
 import com.pyrus.pyrusservicedesk._ref.utils.toTry2
 import com.pyrus.pyrusservicedesk.core.Account
+import com.pyrus.pyrusservicedesk.core.getInstanceId
 import com.pyrus.pyrusservicedesk.core.getUsers
 import com.pyrus.pyrusservicedesk.sdk.FileResolver
 import com.pyrus.pyrusservicedesk.sdk.data.intermediate.FileUploadResponseData
@@ -153,7 +154,7 @@ internal class SdRepository(
 
         val syncTry = synchronizer.syncData(SyncRequest.Data, force).checkResponse(userId)
         if (syncTry.isFailed()) return syncTry
-        val localTicket = ticketsStore.getTicketWithComments(serverId)
+        val localTicket = ticketsStore.getTicketWithComments(301863225)
             ?: return Try2.Failure(GetTicketsError.NoDataFound)
 
         val commands = commandsStore.getCommands(serverId)
@@ -207,7 +208,8 @@ internal class SdRepository(
 
     fun addTextComment(user: UserInternal, ticketId: Long, textBody: String) = coroutineScope.launch(Dispatchers.IO) {
         val serverTicketId = idStore.getTicketServerId(ticketId) ?: ticketId
-        val command: SyncRequest.Command.CreateComment = commandsStore.addTextCommand(user, serverTicketId, textBody)
+        val instanceId = accountStore.getAccount().getInstanceId()
+        val command: SyncRequest.Command.CreateComment = commandsStore.addTextCommand(user, serverTicketId, textBody, instanceId)
         sendCommand(command)
     }
 
@@ -250,7 +252,8 @@ internal class SdRepository(
     fun retryAddComment(user: UserInternal, localId: Long) = coroutineScope.launch(Dispatchers.IO) {
         val commandEntity = commandsStore.getCommand(localId) ?: return@launch
         val command = repositoryMapper.mapToSyncRequest(commandEntity) ?: return@launch
-        commandsStore.addOrUpdatePendingCommand(repositoryMapper.mapToCommandEntity(false, command))
+        val instanceId = accountStore.getAccount().getInstanceId()
+        commandsStore.addOrUpdatePendingCommand(repositoryMapper.mapToCommandEntity(false, command, instanceId))
 
         if (command is SyncRequest.Command.CreateComment) {
             val serverTicketId = idStore.getTicketServerId(command.ticketId) ?: command.ticketId
@@ -305,7 +308,8 @@ internal class SdRepository(
             }
 
             val newCommand = command.copy(attachments = attachments)
-            commandsStore.addOrUpdatePendingCommand(repositoryMapper.mapToCommandEntity(isError, newCommand))
+            val instanceId = accountStore.getAccount().getInstanceId()
+            commandsStore.addOrUpdatePendingCommand(repositoryMapper.mapToCommandEntity(isError, newCommand, instanceId))
         }
 
         for (attachment in attachments) {
@@ -368,7 +372,8 @@ internal class SdRepository(
             commandsStore.removeCommand(command.commandId)
         }
         else {
-            val errorEntity = repositoryMapper.mapToCommandEntity(true, command)
+            val instanceId = accountStore.getAccount().getInstanceId()
+            val errorEntity = repositoryMapper.mapToCommandEntity(true, command, instanceId)
             commandsStore.addOrUpdatePendingCommand(errorEntity)
         }
     }

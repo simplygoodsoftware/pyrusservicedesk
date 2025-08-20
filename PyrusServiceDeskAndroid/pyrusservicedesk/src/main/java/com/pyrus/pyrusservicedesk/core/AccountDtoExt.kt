@@ -41,7 +41,7 @@ internal fun Account.getInstanceId(): String = when(this) {
 }
 
 internal fun Account.getVersion(): Int = when(this) {
-    is Account.V1 -> API_VERSION_1
+    is Account.V1 -> API_VERSION_2
     is Account.V2 -> API_VERSION_2
     is Account.V3 -> API_VERSION_3
 }

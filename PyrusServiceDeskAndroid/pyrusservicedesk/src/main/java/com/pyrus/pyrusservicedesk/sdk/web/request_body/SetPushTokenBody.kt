@@ -12,7 +12,7 @@ import com.squareup.moshi.JsonClass
 @JsonClass(generateAdapter = true)
 internal class SetPushTokenBody(
     appId: String,
-    userId: String,
+    userId: String?,
     securityKey: String?,
     instanceId: String?,
     version: Int,

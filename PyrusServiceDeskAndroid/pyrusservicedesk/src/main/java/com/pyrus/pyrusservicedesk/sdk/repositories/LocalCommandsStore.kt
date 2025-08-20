@@ -51,13 +51,14 @@ internal class LocalCommandsStore(
         user: UserInternal,
         ticketId: Long,
         comment: String,
+        instanceId: String,
     ): SyncRequest.Command.CreateComment {
         val entity = createTextCommandEntity(user, ticketId, comment)
         addOrUpdatePendingCommand(entity)
         return SyncRequest.Command.CreateComment(
             localId = entity.localId,
             commandId = entity.commandId,
-            userId = user.userId,
+            userId = if (user.userId == instanceId) null else user.userId,
             appId = user.appId,
             creationTime = entity.creationTime,
             requestNewTicket = false,

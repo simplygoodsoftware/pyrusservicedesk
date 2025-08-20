@@ -400,14 +400,14 @@ internal class RepositoryMapper(
         }
     }
 
-    fun mapToCommandEntity(isError: Boolean, command: SyncRequest.Command): CommandWithAttachmentsEntity {
+    fun mapToCommandEntity(isError: Boolean, command: SyncRequest.Command, instanceId: String): CommandWithAttachmentsEntity {
         val entity = when(command) {
             is SyncRequest.Command.CreateComment -> CommandEntity(
                 isError = isError,
                 localId = command.localId,
                 commandType = CreateComment.ordinal,
                 commandId = command.commandId,
-                userId = command.userId,
+                userId = command.userId ?: instanceId,
                 appId = command.appId,
                 creationTime = command.creationTime,
                 requestNewTicket = false,
@@ -423,7 +423,7 @@ internal class RepositoryMapper(
                 localId = command.localId,
                 commandType = CreateComment.ordinal,
                 commandId = command.commandId,
-                userId = command.userId,
+                userId = command.userId ?: instanceId,
                 appId = command.appId,
                 creationTime = command.creationTime,
                 requestNewTicket = null,
@@ -439,7 +439,7 @@ internal class RepositoryMapper(
                 localId = command.localId,
                 commandType = CreateComment.ordinal,
                 commandId = command.commandId,
-                userId = command.userId,
+                userId = command.userId ?: instanceId,
                 appId = command.appId,
                 creationTime = command.creationTime,
                 requestNewTicket = null,

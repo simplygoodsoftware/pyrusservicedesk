@@ -8,14 +8,14 @@ internal sealed interface SyncRequest {
 
         val localId: Long
         val commandId: String
-        val userId: String
+        val userId: String?
         val appId: String
         val creationTime: Long
 
         data class CreateComment(
             override val localId: Long,
             override val commandId: String,
-            override val userId: String,
+            override val userId: String?,
             override val appId: String,
             override val creationTime: Long,
             val requestNewTicket: Boolean,
@@ -28,7 +28,7 @@ internal sealed interface SyncRequest {
         data class SetPushToken(
             override val localId: Long,
             override val commandId: String,
-            override val userId: String,
+            override val userId: String?,
             override val appId: String,
             override val creationTime: Long,
             val token: String,
@@ -38,7 +38,7 @@ internal sealed interface SyncRequest {
         data class MarkTicketAsRead(
             override val localId: Long,
             override val commandId: String,
-            override val userId: String,
+            override val userId: String?,
             override val appId: String,
             override val creationTime: Long,
             val ticketId: Long,

@@ -138,7 +138,7 @@ internal class DiInjector(
 
     private val remoteFileStore = RemoteFileStore(api)
 
-    private val localTicketsStore = LocalTicketsStore(idStore, ticketsDao, searchDao)
+    private val localTicketsStore = LocalTicketsStore(idStore, ticketsDao, searchDao, accountStore)
 
     private val resourceManager = AppResourceManager(application)
 

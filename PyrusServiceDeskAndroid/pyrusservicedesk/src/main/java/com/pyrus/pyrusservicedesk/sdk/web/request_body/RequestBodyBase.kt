@@ -30,7 +30,7 @@ internal open class RequestBodyBase(
     @Json(name = "author_id") val authorId: String?,
     @Json(name = "author_name") val authorName: String?,
     @Json(name = "app_id") val appId: String,
-    @Json(name = "user_id") val userId: String,
+    @Json(name = "user_id") val userId: String?,
     @Json(name = "security_key") val securityKey: String?,
     @Json(name = "instance_id") val instanceId: String?,
     @Json(name = "version") val version: Int,

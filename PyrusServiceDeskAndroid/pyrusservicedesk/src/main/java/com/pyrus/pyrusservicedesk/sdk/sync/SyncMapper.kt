@@ -41,7 +41,7 @@ internal object SyncMapper {
             authorId = account.getAuthorId(),
             authorName = ConfigUtils.getAuthorName(resourceManager),
             appId = firstAppId,
-            userId = firstUserId,
+            userId = if (firstUserId == account.getInstanceId()) null else firstUserId,
             securityKey = account.getSecurityKey(),
             instanceId = account.getInstanceId(),
             version = account.getVersion(),

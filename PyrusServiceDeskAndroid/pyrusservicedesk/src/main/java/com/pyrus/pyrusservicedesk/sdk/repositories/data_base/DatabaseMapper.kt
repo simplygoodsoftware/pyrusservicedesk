@@ -3,6 +3,8 @@ package com.pyrus.pyrusservicedesk.sdk.repositories.data_base
 import com.pyrus.pyrusservicedesk.User
 import com.pyrus.pyrusservicedesk._ref.data.multy_chat.Application
 import com.pyrus.pyrusservicedesk._ref.data.multy_chat.Member
+import com.pyrus.pyrusservicedesk.core.Account
+import com.pyrus.pyrusservicedesk.core.getInstanceId
 import com.pyrus.pyrusservicedesk.presentation.ui.navigation_page.ticket.cleanTags
 import com.pyrus.pyrusservicedesk.sdk.data.ApplicationDto
 import com.pyrus.pyrusservicedesk.sdk.data.AttachmentDto
@@ -37,10 +39,10 @@ internal object DatabaseMapper {
         phone = entity.phone
     )
 
-    fun mapToTicketWithComments(dto: TicketDto): TicketWithComments? {
+    fun mapToTicketWithComments(dto: TicketDto, account: Account): TicketWithComments? {
 
         val comments = dto.comments?.map { mapToCommentWithAttachments(it, dto.ticketId) }
-        val ticket = mapToTicketEntity(dto) ?: return null
+        val ticket = mapToTicketEntity(dto, account) ?: return null
 
         return TicketWithComments(
             ticket = ticket,
@@ -102,10 +104,10 @@ internal object DatabaseMapper {
         lastAttachmentName = dto.attachments?.maxByOrNull { it.id }?.name
     )
 
-    private fun mapToTicketEntity(dto: TicketDto): TicketEntity? {
+    private fun mapToTicketEntity(dto: TicketDto, account: Account): TicketEntity? {
         return TicketEntity(
             ticketId = dto.ticketId,
-            userId = dto.userId ?: return null,
+            userId = dto.userId ?: account.getInstanceId(),
             subject = dto.subject,
             unescapedSubject = dto.subject.cleanTags(" "),
             author = dto.author,

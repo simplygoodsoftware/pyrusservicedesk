@@ -19,6 +19,7 @@ internal class LocalTicketsStore(
     private val idStore: IdStore,
     private val ticketsDao: TicketsDao,
     private val searchDao: SearchDao,
+    private val accountStore: AccountStore,
 ) {
 
     fun getApplications(): List<ApplicationEntity> {
@@ -70,7 +71,7 @@ internal class LocalTicketsStore(
     fun storeServerState(users: List<User>, dto: TicketsDto) {
 
         val applications = dto.applications?.mapNotNull(DatabaseMapper::mapToApplicationEntity)?.distinctBy { it.appId } ?: emptyList()
-        val tickets = dto.tickets?.mapNotNull(DatabaseMapper::mapToTicketWithComments) ?: emptyList()
+        val tickets = dto.tickets?.mapNotNull {DatabaseMapper.mapToTicketWithComments(it, accountStore.getAccount())} ?: emptyList()
         val userEntities = users.map(DatabaseMapper::mapToUserEntity)
         val members: MutableList<MemberEntity> = mutableListOf()
         dto.applications?.forEach { application -> application.authorsInfo?.forEach { userMap -> members.addAll(userMap.value.map { DatabaseMapper.mapToMembersEntity(it, userMap.key) }) } }

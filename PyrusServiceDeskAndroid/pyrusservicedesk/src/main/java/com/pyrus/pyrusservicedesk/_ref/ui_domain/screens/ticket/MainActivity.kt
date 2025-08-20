@@ -56,7 +56,7 @@ internal class MainActivity : FragmentActivity() {
         super.overridePendingTransition(R.anim.fade_in, R.anim.no_animation)
         if (savedInstanceState == null) {
             val action = intent.getParcelableExtra<OpenTicketAction>(KEY_OPEN_TICKET_ACTION)
-            injector().router.newRootChain(SdScreens.RootScreen(action), SdScreens.RouterScreen(action))
+            injector().router.newRootScreen(SdScreens.RouterScreen(action))
         }
     }
 

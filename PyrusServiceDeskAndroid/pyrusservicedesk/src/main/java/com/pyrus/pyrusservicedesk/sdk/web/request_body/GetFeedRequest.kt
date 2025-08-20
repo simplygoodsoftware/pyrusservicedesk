@@ -15,7 +15,7 @@ import com.squareup.moshi.JsonClass
 @JsonClass(generateAdapter = true)
 internal open class GetFeedBody(
     appId: String,
-    userId: String,
+    userId: String?,
     securityKey: String?,
     instanceId: String?,
     version: Int,
