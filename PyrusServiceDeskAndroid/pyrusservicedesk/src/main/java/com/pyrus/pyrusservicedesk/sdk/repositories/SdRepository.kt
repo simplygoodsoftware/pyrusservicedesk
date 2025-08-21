@@ -116,7 +116,7 @@ internal class SdRepository(
             val ticket = if (firstCommand != null) {
                 repositoryMapper.mapToFullTicket(
                     ticketId = firstCommand.command.ticketId!!,
-                    userId = firstCommand.command.userId,
+                    userId = firstCommand.command.userId ?: account.getInstanceId(),
                     addCommentCommands = commands,
                     orgLogoUrl = orgLogoUrl
                 )
@@ -184,7 +184,7 @@ internal class SdRepository(
                 if (firstCommand != null) {
                     repositoryMapper.mapToFullTicket(
                         ticketId = firstCommand.command.ticketId!!,
-                        userId = firstCommand.command.userId,
+                        userId = firstCommand.command.userId ?: account.getInstanceId(),
                         addCommentCommands = commands,
                         orgLogoUrl = orgLogoUrl
                     )
@@ -217,7 +217,8 @@ internal class SdRepository(
         val fileData = fileResolver.getFileData(fileUri) ?: return@launch
 
         val serverTicketId = idStore.getTicketServerId(ticketId) ?: ticketId
-        val commandEntity = commandsStore.addAttachmentCommand(user, serverTicketId, fileData)
+        val instanceId = accountStore.getAccount().getInstanceId()
+        val commandEntity = commandsStore.addAttachmentCommand(user, serverTicketId, fileData, instanceId)
 
         val command = repositoryMapper.mapToSyncRequest(commandEntity) ?: return@launch
         sendCommand(command)
@@ -225,14 +226,16 @@ internal class SdRepository(
 
     fun addRatingComment(user: UserInternal, ticketId: Long, rating: Int) = coroutineScope.launch(Dispatchers.IO) {
         val serverTicketId = idStore.getTicketServerId(ticketId) ?: ticketId
-        val command = commandsStore.addRatingCommand(user, serverTicketId, rating)
+        val instanceId = accountStore.getAccount().getInstanceId()
+        val command = commandsStore.addRatingCommand(user, serverTicketId, rating, instanceId)
         sendCommand(command)
     }
 
     fun readTicket(user: UserInternal, ticketId: Long) = coroutineScope.launch(Dispatchers.IO) {
         if (ticketId <= 0) return@launch
         val serverTicketId = idStore.getTicketServerId(ticketId) ?: ticketId
-        val command = commandsStore.addReadCommand(user, serverTicketId)
+        val instanceId = accountStore.getAccount().getInstanceId()
+        val command = commandsStore.addReadCommand(user, serverTicketId, instanceId)
         val syncTry = synchronizer.syncCommand(command)
         if (syncTry.isSuccess()) {
             commandsStore.removeCommand(command.commandId)
@@ -245,7 +248,8 @@ internal class SdRepository(
      * @param tokenType cloud messaging type.
      */
     suspend fun setPushToken(user: UserInternal, token: String, tokenType: String): Try<Unit> {
-        val command = commandsStore.createPushTokenCommand(user, token, tokenType)
+        val instanceId = accountStore.getAccount().getInstanceId()
+        val command = commandsStore.createPushTokenCommand(user, token, tokenType, instanceId)
         return synchronizer.syncCommand(command).map {  }
     }
 

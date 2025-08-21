@@ -62,8 +62,8 @@ internal object RequestUtils{
 
     private fun getPathParams(account: Account, multichatUser: User?): String = when(account) {
         is Account.V1 -> {
-//            "?user_id=" +
-//                URLEncoder.encode(account.userId, "UTF-8") +
+            "?user_id=" +
+                URLEncoder.encode(account.instanceId, "UTF-8") +
                 "&app_id=" +
                 URLEncoder.encode(account.appId, "UTF-8")
         }

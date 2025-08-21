@@ -7,6 +7,7 @@ import androidx.room.RoomDatabase
 import androidx.room.migration.Migration
 import androidx.sqlite.db.SupportSQLiteDatabase
 import com.pyrus.pyrusservicedesk.sdk.repositories.data_base.SdDatabase.Companion.APPLICATIONS_TABLE
+import com.pyrus.pyrusservicedesk.sdk.repositories.data_base.SdDatabase.Companion.COMMANDS_TABLE
 import com.pyrus.pyrusservicedesk.sdk.repositories.data_base.SdDatabase.Companion.COMMENTS_TABLE
 import com.pyrus.pyrusservicedesk.sdk.repositories.data_base.SdDatabase.Companion.MEMBERS_TABLE
 import com.pyrus.pyrusservicedesk.sdk.repositories.data_base.SdDatabase.Companion.TICKETS_TABLE
@@ -34,7 +35,7 @@ import com.pyrus.pyrusservicedesk.sdk.repositories.data_base.data.UserEntity
         MemberEntity::class,
     ],
     exportSchema = false,
-    version = 3
+    version = 4
 )
 internal abstract class SdDatabase : RoomDatabase() {
 
@@ -63,6 +64,7 @@ internal abstract class SdDatabase : RoomDatabase() {
             ).addMigrations(
                 Migration1to2(),
                 Migration2to3(),
+                Migration3to4()
             ).build()
         }
 
@@ -100,5 +102,18 @@ private class Migration2to3: Migration(2, 3) {
             ON $MEMBERS_TABLE (`user_id`)
         """)
 
+    }
+}
+
+private class Migration3to4: Migration(3, 4) {
+    override fun migrate(db: SupportSQLiteDatabase) {
+
+        db.execSQL("ALTER TABLE $COMMANDS_TABLE ADD COLUMN user_id_new TEXT")
+
+        db.execSQL("UPDATE $COMMANDS_TABLE SET user_id_new = user_id")
+
+        db.execSQL("ALTER TABLE $COMMANDS_TABLE DROP COLUMN user_id")
+
+        db.execSQL("ALTER TABLE $COMMANDS_TABLE RENAME COLUMN user_id_new TO user_id")
     }
 }

@@ -111,6 +111,7 @@ internal object TicketMapper {
         is Event.OnCancelRecord -> Message.Outer.OnCancelRecord
         is Event.OnLockRecord -> Message.Outer.OnLockRecord
         is Event.OnRemovePendingAudioClick -> Message.Outer.OnRemovePendingAudioClick
+        is Event.SetAttachVariant -> Message.Outer.SetAttachVariant(event.key, event.uri)
     }
 
     fun map(effect: Effect.Outer): TicketView.Effect = when(effect) {

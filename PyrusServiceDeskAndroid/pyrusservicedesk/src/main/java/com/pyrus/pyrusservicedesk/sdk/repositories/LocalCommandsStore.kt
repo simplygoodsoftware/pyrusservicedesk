@@ -73,8 +73,9 @@ internal class LocalCommandsStore(
         user: UserInternal,
         ticketId: Long,
         fileData: FileData,
+        instanceId: String,
     ): CommandWithAttachmentsEntity {
-        val entity = createLocalAttachComment(user, ticketId, fileData)
+        val entity = createLocalAttachComment(user, ticketId, fileData, instanceId)
         addOrUpdatePendingCommand(entity)
 
         return entity
@@ -84,13 +85,14 @@ internal class LocalCommandsStore(
         user: UserInternal,
         ticketId: Long,
         rating: Int,
+        instanceId: String,
     ): SyncRequest.Command.CreateComment {
         val entity = createRatingCommandEntity(user, ticketId, rating)
         addOrUpdatePendingCommand(entity)
         return SyncRequest.Command.CreateComment(
             localId = entity.localId,
             commandId = entity.commandId,
-            userId = user.userId,
+            userId = if (user.userId == instanceId) null else user.userId,
             appId = user.appId,
             creationTime = entity.creationTime,
             requestNewTicket = false,
@@ -104,13 +106,14 @@ internal class LocalCommandsStore(
     fun addReadCommand(
         user: UserInternal,
         ticketId: Long,
+        instanceId: String,
     ): SyncRequest.Command.MarkTicketAsRead {
         val entity = createReadCommandEntity(user, ticketId)
         addOrUpdatePendingCommand(entity)
         return SyncRequest.Command.MarkTicketAsRead(
             localId = entity.localId,
             commandId = entity.commandId,
-            userId = user.userId,
+            userId = if (user.userId == instanceId) null else user.userId,
             appId = user.appId,
             creationTime = entity.creationTime,
             ticketId = ticketId,
@@ -123,10 +126,11 @@ internal class LocalCommandsStore(
         user: UserInternal,
         token: String,
         tokenType: String,
+        instanceId: String,
     ) = SyncRequest.Command.SetPushToken(
         localId = getNextLocalId(),
         commandId = createCommandId(),
-        userId = user.userId,
+        userId = if (user.userId == instanceId) null else user.userId,
         appId = user.appId,
         creationTime = System.currentTimeMillis(),
         token = token,
@@ -225,6 +229,7 @@ internal class LocalCommandsStore(
         user: UserInternal,
         ticketId: Long,
         fileData: FileData,
+        instanceId: String,
     ): CommandWithAttachmentsEntity {
         val localId = getNextLocalId()
         val commandEntity = CommandEntity(
@@ -232,7 +237,7 @@ internal class LocalCommandsStore(
             localId = localId,
             commandId = createCommandId(),
             commandType = TicketCommandType.CreateComment.ordinal,
-            userId = user.userId,
+            userId = if (user.userId == instanceId) null else user.userId,
             appId = user.appId,
             creationTime = System.currentTimeMillis(),
             requestNewTicket = false,

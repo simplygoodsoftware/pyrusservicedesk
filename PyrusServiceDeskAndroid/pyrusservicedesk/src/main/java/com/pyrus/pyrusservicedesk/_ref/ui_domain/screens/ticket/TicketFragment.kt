@@ -205,6 +205,9 @@ internal class TicketFragment: TeaFragment<Model, Event, Effect>() {
         }
 
         is Effect.ShowAttachVariants -> {
+            injector().router.setResultListener(effect.key) {
+                dispatch(Event.SetAttachVariant(effect.key, it))
+            }
             AttachFileVariantsFragment.newInstance(effect.key).show(parentFragmentManager, null)
         }
 

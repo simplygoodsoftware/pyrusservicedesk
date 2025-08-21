@@ -18,6 +18,7 @@ import com.pyrus.pyrusservicedesk._ref.utils.isAudio
 import com.pyrus.pyrusservicedesk._ref.utils.isImage
 import com.pyrus.pyrusservicedesk.core.Account
 import com.pyrus.pyrusservicedesk.core.getAuthorId
+import com.pyrus.pyrusservicedesk.core.getInstanceId
 import com.pyrus.pyrusservicedesk.core.getUsers
 import com.pyrus.pyrusservicedesk.sdk.repositories.data_base.data.AttachmentEntity
 import com.pyrus.pyrusservicedesk.sdk.repositories.data_base.data.AuthorEntity
@@ -64,7 +65,7 @@ internal class RepositoryMapper(
 
         return SearchResult(
             ticketId = entity.command.command.ticketId ?: return null,
-            userId = entity.command.command.userId,
+            userId = entity.command.command.userId ?: return null, //use in multiChat and in multiChat we mast have user id
             commentId = entity.command.command.commentId ?: return null,
             title = title,
             commentInfo = mapToCommentInfo(account, entity.command),
@@ -136,7 +137,7 @@ internal class RepositoryMapper(
 
         tickets += createTicketCommands.map {
             val ticketCommands = commandsById[it.command.ticketId!!] ?: emptyList()
-            mapToTicketHeader(account, it.command.ticketId, it.command.userId, ticketCommands)
+            mapToTicketHeader(account, it.command.ticketId, it.command.userId ?: account.getInstanceId(), ticketCommands)
         }
 
         val smallUsers = mapToSmallAcc(account)
@@ -331,7 +332,7 @@ internal class RepositoryMapper(
     )
 
     fun map(account: Account, userId: String, entity: AttachmentEntity): Attachment {
-        val url = if (entity.name.isAudio()) {
+        val url = if (entity.name.isAudio()) {//
             RequestUtils.getFileUrl(entity.id, account, findUser(account, userId)).toUri()
         }
         else {

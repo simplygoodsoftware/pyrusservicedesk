@@ -43,6 +43,7 @@ internal interface TicketView {
         data object OnRefresh : Event
         data class OnCancelUploadClick(val localId: Long, val attachmentId: Long) : Event
         data object OnInfoClick : Event
+        data class SetAttachVariant(val key: String, val uri: Any) : Event
 
         object OnStopRecord : Event
         object OnStopEndSendRecord : Event

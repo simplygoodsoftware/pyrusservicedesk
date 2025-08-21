@@ -18,7 +18,7 @@ internal data class CommandEntity(
     @ColumnInfo(name = "local_id") val localId: Long,
     @ColumnInfo(name = "command_id") val commandId: String,
     @ColumnInfo(name = "command_type") val commandType: Int,
-    @ColumnInfo(name = "user_id") val userId: String,
+    @ColumnInfo(name = "user_id") val userId: String?,
     @ColumnInfo(name = "app_id") val appId: String,
     @ColumnInfo(name = "creation_time") val creationTime: Long,
     @ColumnInfo(name = "request_new_ticket") val requestNewTicket: Boolean?,

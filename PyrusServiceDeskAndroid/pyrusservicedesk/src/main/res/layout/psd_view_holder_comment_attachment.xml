@@ -8,7 +8,7 @@
     android:clipChildren="false"
     android:clipToPadding="false"
     android:paddingStart="@dimen/psd_offset_default"
-    android:paddingLeft="@dimen/psd_offset_default">
+    android:paddingEnd="@dimen/psd_offset_default">
 
     <androidx.appcompat.widget.AppCompatImageView
         android:id="@+id/avatar"
