@@ -5,7 +5,7 @@ import android.graphics.Canvas
 import android.graphics.Paint
 import android.util.AttributeSet
 import android.widget.FrameLayout
-import com.pyrus.pyrusservicedesk.R
+import com.pyrus.pyrusservicedesk._ref.utils.ConfigUtils
 import com.pyrus.pyrusservicedesk.utils.dp
 
 class CircleFrameLayout: FrameLayout {
@@ -25,7 +25,7 @@ class CircleFrameLayout: FrameLayout {
     private var circleDiameter = 74f.dp()
     private val circlePaint = Paint().apply {
         style = Paint.Style.FILL
-        color = resources.getColor(R.color.psd_accent, context.theme)
+        color = ConfigUtils.getAccentColor(context)
         isAntiAlias = true
     }
 
