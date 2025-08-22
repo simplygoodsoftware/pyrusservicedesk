@@ -146,6 +146,7 @@ internal class LiveUpdates(
         onUnsubscribe()
     }
 
+    //TODO kate check
     internal fun reset(userId: String?) {
         PLog.d(TAG, "reset")
         this.userId = userId

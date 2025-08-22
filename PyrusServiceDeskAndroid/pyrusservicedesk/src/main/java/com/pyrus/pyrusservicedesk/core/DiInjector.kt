@@ -26,6 +26,7 @@ import com.pyrus.pyrusservicedesk._ref.utils.navigation.PyrusRouterImpl
 import com.pyrus.pyrusservicedesk._ref.whitetea.core.DefaultStoreFactory
 import com.pyrus.pyrusservicedesk._ref.whitetea.core.StoreFactory
 import com.pyrus.pyrusservicedesk.core.refresh.AutoRefreshFeatureFactory
+import com.pyrus.pyrusservicedesk.core.refresh.RefreshUseCase
 import com.pyrus.pyrusservicedesk.presentation.viewmodel.SharedViewModel
 import com.pyrus.pyrusservicedesk.sdk.AccessDeniedEventBus
 import com.pyrus.pyrusservicedesk.sdk.FileResolver
@@ -271,6 +272,8 @@ internal class DiInjector(
     )
 
     val addUserUseCase = AddUserUseCase(accountStore, repository, coreScope, addUserEventBus)
+
+    val refreshUseCase = RefreshUseCase(repository, coreScope)
 
     val rateTimeUseCase = TimeToRateUseCase(preferencesManager)
 

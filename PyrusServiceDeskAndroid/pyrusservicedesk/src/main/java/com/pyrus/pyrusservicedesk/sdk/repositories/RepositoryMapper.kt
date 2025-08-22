@@ -332,7 +332,7 @@ internal class RepositoryMapper(
     )
 
     fun map(account: Account, userId: String, entity: AttachmentEntity): Attachment {
-        val url = if (entity.name.isAudio()) {//
+        val url = if (entity.name.isAudio()) {
             RequestUtils.getFileUrl(entity.id, account, findUser(account, userId)).toUri()
         }
         else {

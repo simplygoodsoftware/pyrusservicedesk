@@ -24,6 +24,7 @@ import com.pyrus.pyrusservicedesk._ref.utils.log.PLog
 import com.pyrus.pyrusservicedesk.core.Account
 import com.pyrus.pyrusservicedesk.core.DiInjector
 import com.pyrus.pyrusservicedesk.core.StaticRepository
+import com.pyrus.pyrusservicedesk.core.getUserId
 import com.pyrus.pyrusservicedesk.core.getUsers
 import com.pyrus.pyrusservicedesk.core.refresh.AutoRefreshFeature
 import com.pyrus.pyrusservicedesk.presentation.viewmodel.SharedViewModel
@@ -325,6 +326,11 @@ class PyrusServiceDesk private constructor(
                 appId = appId,
             )
 
+            // TODO kate sds
+            if (INJECTOR?.accountStore?.getAccount()?.getUserId() != newAccount.getUserId()) {
+                INJECTOR?.liveUpdates?.reset(userId)
+            }
+
             INJECTOR?.onCancel()
 
             INJECTOR = DiInjector(
@@ -339,11 +345,6 @@ class PyrusServiceDesk private constructor(
                 }),
                 preferences = preferences
             )
-
-            // TODO sds
-//            if (INSTANCE != null && get().userId != userId) {
-//                INSTANCE?.liveUpdates?.reset(userId)
-//            }
 
             val validDomain = if (validateDomain(apiDomain)) apiDomain else null
 
@@ -491,7 +492,8 @@ class PyrusServiceDesk private constructor(
         @JvmStatic
         fun stop() {
             PLog.d(TAG, "stop")
-            // TODO
+            // TODO kate check
+            INJECTOR?.onCancel()
 //            get().sharedViewModel.quitServiceDesk()
         }
 
@@ -516,8 +518,8 @@ class PyrusServiceDesk private constructor(
             lastRefreshes.add(System.currentTimeMillis())
             if (lastRefreshes.size > REFRESH_MAX_COUNT)
                 lastRefreshes.removeAt(0)
-            // TODO
-//            get().sharedViewModel.triggerUpdate()
+            // TODO kate check
+            injector().refreshUseCase.refresh()
         }
 
         /**
@@ -539,9 +541,9 @@ class PyrusServiceDesk private constructor(
         }
 
         internal fun onServiceDeskStop() {
-            // TODO
-//            get().onStopCallback?.onServiceDeskStop()
-//            get().onStopCallback = null
+            // TODO kate check
+            get().onStopCallback?.onServiceDeskStop()
+            get().onStopCallback = null
         }
 
         internal fun get(): PyrusServiceDesk {
