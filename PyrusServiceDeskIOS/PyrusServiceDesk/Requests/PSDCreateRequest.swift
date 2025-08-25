@@ -59,10 +59,13 @@ extension URLRequest {
             fullJSOn["security_key"] = securityKey
             fullJSOn["instance_id"] = PyrusServiceDesk.userId
             fullJSOn["version"] = 2
-        } else {
-            fullJSOn["user_id"] = PyrusServiceDesk.customUserId ?? PyrusServiceDesk.userId
+        } else if let customUserId = PyrusServiceDesk.customUserId {
+            fullJSOn["user_id"] = customUserId
             fullJSOn["instance_id"] = PyrusServiceDesk.userId
-//            fullJSOn["version"] = 2
+            fullJSOn["version"] = 2
+        } else {
+            fullJSOn["instance_id"] = PyrusServiceDesk.userId
+            fullJSOn["version"] = 2
         }
         if((PyrusServiceDesk.clientId) == nil){
             fatalError("no client Id")
