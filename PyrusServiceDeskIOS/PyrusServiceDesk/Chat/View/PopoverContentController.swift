@@ -96,6 +96,7 @@ class ChatInfoCell: UITableViewCell {
     private let copyButton: UIButton = {
         let button = UIButton()
         button.setImage(UIImage(systemName: "doc.on.doc")?.imageWith(color: .label), for: .normal)
+        button.isUserInteractionEnabled = false
         button.isHidden = true
         return button;
     }()

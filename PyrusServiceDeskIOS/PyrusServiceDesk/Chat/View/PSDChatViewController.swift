@@ -511,8 +511,9 @@ class PSDChatViewController: PSDViewController {
         if let sheet = popoverContentController.sheetPresentationController {
             let smallId = UISheetPresentationController.Detent.Identifier("small")
             if #available(iOS 16.0, *) {
+                let isZoomed = UIScreen.main.nativeScale > UIScreen.main.scale
                 let smallDetent = UISheetPresentationController.Detent.custom(identifier: smallId) { context in
-                    return context.maximumDetentValue * 0.3
+                    return context.maximumDetentValue * (isZoomed ? 0.4 : 0.3)
                 }
                 sheet.detents = [smallDetent]
             } else {
