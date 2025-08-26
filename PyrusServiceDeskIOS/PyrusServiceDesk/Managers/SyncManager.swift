@@ -80,7 +80,10 @@ class SyncManager {
         sendingMessages = PSDMessagesStorage.getSendingMessages()
         
         let ticketCommands = PyrusServiceDesk.repository.getCommands()
+        let startTime1 = CFAbsoluteTimeGetCurrent()
         PSDGetChats.get(commands: ticketCommands.map({ $0.toDictionary() })) { [weak self] chats, commandsResult, authorAccessDenied, clientsArray, complete in
+            let timeElapsed1 = CFAbsoluteTimeGetCurrent() - startTime1
+            print("⏱ getChats completed in \(timeElapsed1) seconds")
             guard PyrusServiceDesk.isStarted else { return }
             guard let self = self else { return }
             var clients = clientsArray
@@ -153,12 +156,14 @@ class SyncManager {
                     }
                     UnreadMessageManager.refreshNewMessagesCount(unreadChats > 0, lastMessage: lasMessage)
                     
+                    let startTime = CFAbsoluteTimeGetCurrent()
                     self?.chatsDataService.saveChatModels(with: chats) { [weak self] _ in
                         DispatchQueue.main.async { [weak self] in
                             if let clients, clients.count > 0, PyrusServiceDesk.isStarted {
-//                                PyrusServiceDesk.clients = clients
-//                                self?.chatsDataService.saveClientModels(with: clients)
+                               
                                 self?.chatsDataService.getAllChats() { [userInfo] chats in
+                                    let timeElapsed = CFAbsoluteTimeGetCurrent() - startTime
+                                    print("⏱ getAllChats completed in \(timeElapsed) seconds")
                                     DispatchQueue.main.async {
                                         PyrusServiceDesk.clients = clients
                                         self?.chatsDataService.saveClientModels(with: clients)
@@ -166,8 +171,6 @@ class SyncManager {
                                         NotificationCenter.default.post(name: PyrusServiceDesk.chatsUpdateNotification, object: nil, userInfo: userInfo)
                                     }
                                 }
-//                                PyrusServiceDesk.chats = self?.chatsDataService.getAllChats() ?? []
-//                                NotificationCenter.default.post(name: PyrusServiceDesk.chatsUpdateNotification, object: nil, userInfo: userInfo)
                             }
                             
                             if isFilter {
