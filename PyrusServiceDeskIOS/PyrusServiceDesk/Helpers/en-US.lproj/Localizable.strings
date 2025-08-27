@@ -64,6 +64,10 @@
 "Edit" = "Edit";
 "Logout" = "Logout";
 "Version" = "Version";
+"EvaluateQuality" = "Evaluate the quality of service";
+"PleaseEvaluateQuality" = "Evaluate the quality of service";
+"LeaveYourComment" = "Write a review";
+"Close" = "Close";
 
 // Mark: HELPY
 "Last_Message" = "This is the last message from that conversation";

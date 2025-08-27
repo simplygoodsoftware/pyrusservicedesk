@@ -3,6 +3,8 @@ import Foundation
  Get chats from server.
  */
 struct PSDGetChats {
+    private static let RATING_SETTINGS_KEY = "rating_settings"
+    private static let WELCOME_MESSAGE = "welcome_message"
     private static var sessionTask : URLSessionDataTask? = nil
     /**
      Get chats from server.
@@ -70,11 +72,10 @@ struct PSDGetChats {
             } else {
                 do{
                     let chatsData = try JSONSerialization.jsonObject(with: data, options: .allowFragments) as? [String : Any] ?? [String: Any]()
-                    let chatsArray = chatsData["tickets"] as? NSArray ?? NSArray()
-                    let chats = generateChats(from: chatsArray)
-                   // PyrusServiceDesk.chats = chats
                     let clientsArray = chatsData["applications"] as? NSArray ?? NSArray()
                     let clients = generateClients(from: clientsArray)
+                    let chatsArray = chatsData["tickets"] as? NSArray ?? NSArray()
+                    let chats = generateChats(from: chatsArray, clients: clients)
                     let authorAccessDenied = chatsData["author_access_denied"] as? [String]
                     print("количество чатов: \(chats.count)")
                     do {
@@ -86,9 +87,8 @@ struct PSDGetChats {
                     } catch {
                         completion(chats, nil, authorAccessDenied, clients, true)
                     }
-                    //                PyrusServiceDesk.chats = chats
                 } catch { 
-                    //print("PSDGetChats error when convert to dictionary")
+                    print("PSDGetChats error when convert to dictionary")
                 }
             }
             
@@ -194,7 +194,7 @@ struct PSDGetChats {
         
     }
     
-    private static func generateChats(from response:NSArray) -> [PSDChat] {
+    private static func generateChats(from response: NSArray, clients: [PSDClientInfo]) -> [PSDChat] {
         var chats: [PSDChat] = []
         for i in 0..<response.count {
             let dic: [String: Any] = response[i] as! [String: Any]
@@ -206,14 +206,6 @@ struct PSDGetChats {
             }
             
             let userId = dic["user_id"] as? String ?? ""
-//            if PyrusServiceDesk.customUserId ?? PyrusServiceDesk.userId == userId,
-//               PyrusServiceDesk.lastNoteId ?? 0 < Int(lastMessage?.messageId ?? "") ?? 0 {
-//                PyrusServiceDesk.lastNoteId = Int(lastMessage?.messageId ?? "")
-//            } else if let user = PyrusServiceDesk.additionalUsers.first(where: { $0.userId == userId }),
-//                      user.lastNoteId ?? 0 < Int(lastMessage?.messageId ?? "") ?? 0 {
-//                user.lastNoteId = Int(lastMessage?.messageId ?? "")
-//            }
-           
             let ticketId = dic["ticket_id"] as? Int
             var messages: [PSDMessage] = [PSDMessage]()
             let newMessages = PSDGetChat.generateMessages(from: dic["comments"] as? NSArray ?? NSArray())
@@ -239,6 +231,32 @@ struct PSDGetChats {
             chat.showRatingText = dic["show_rating_text"] as? String
             if !chat.showRating || !PyrusServiceDesk.multichats {
                 chat.isActive = dic["is_active"] as? Bool ?? true
+            }
+            let welcomeMessage = dic[PSDGetChats.WELCOME_MESSAGE] as? String
+            var settings: PSDRatingSettings?
+            if let ratingSettings = dic[PSDGetChats.RATING_SETTINGS_KEY] as? NSDictionary {
+                do {
+                    let jsonData = try JSONSerialization.data(withJSONObject: ratingSettings, options: [])
+                    let decoder = JSONDecoder()
+                    settings = try decoder.decode(PSDRatingSettings.self, from: jsonData)
+                    settings?.ratingText = dic["show_rating_text"] as? String
+                } catch {
+                    print("Error decoding JSON: \(error)")
+                }
+            }
+            
+            if PyrusServiceDesk.multichats {
+                var client: PSDClientInfo?
+                if PyrusServiceDesk.customUserId == userId {
+                    client = clients.first(where: { $0.clientId == PyrusServiceDesk.clientId })
+                } else if let user = PyrusServiceDesk.additionalUsers.first(where: { $0.userId == userId }) {
+                    client = clients.first(where: { $0.clientId == user.clientId })
+                }
+                client?.ratingSettings = settings
+                client?.welcomeMessage = welcomeMessage
+            } else {
+                clients.first?.ratingSettings = settings
+                clients.first?.welcomeMessage = welcomeMessage
             }
             chats.append(chat)
         }

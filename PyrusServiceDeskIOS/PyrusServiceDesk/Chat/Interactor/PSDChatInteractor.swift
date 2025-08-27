@@ -235,6 +235,8 @@ extension PSDChatInteractor: PSDChatInteractorProtocol {
             }
         case .viewWillAppear:
             break
+        case .sendRatingComment(comment: let comment):
+            sendRatingComment(comment)
         }
     }
 }
@@ -505,6 +507,11 @@ private extension PSDChatInteractor {
         presenter.doWork(.updateButtons(buttons: PSDChat.draftAnswers(tableMatrix)))
     }
     
+    func removeLastMessage() {
+        tableMatrix[tableMatrix.count - 1].removeLast()
+        presenter.doWork(.reloadAll(animated: true))
+    }
+    
 }
 
 private extension PSDChatInteractor {
@@ -543,13 +550,26 @@ private extension PSDChatInteractor {
     }
     
     func sendRate(_ rateValue: Int) {
+        presenter.doWork(.showRatingComment)
         let newMessage = PSDObjectsCreator.createMessage(rating: rateValue, ticketId: chat?.chatId ?? 0, userId: chat?.userId ?? PyrusServiceDesk.customUserId ?? PyrusServiceDesk.userId)
-        prepareMessageForDrawing(newMessage)
-        messageToSent = newMessage
         newMessage.commandId = UUID().uuidString
         newMessage.userId = PyrusServiceDesk.currentUserId ?? PyrusServiceDesk.customUserId ?? PyrusServiceDesk.userId
         newMessage.appId = PyrusServiceDesk.currentClientId ?? PyrusServiceDesk.clientId
-        presenter.doWork(.addNewRow)
+        if CustomizationHelper.ratingSettings.type != RatingType.text.rawValue {
+            prepareMessageForDrawing(newMessage)
+            messageToSent = newMessage
+            presenter.doWork(.addNewRow)
+        } else {
+            removeLastMessage()
+        }
+        PSDMessageSend.pass(newMessage, delegate: self)
+    }
+    
+    func sendRatingComment(_ ratingComment: String) {
+        let newMessage = PSDObjectsCreator.createMessage(ratingComment: ratingComment, ticketId: chat?.chatId ?? 0, userId: chat?.userId ?? PyrusServiceDesk.customUserId ?? PyrusServiceDesk.userId)
+        newMessage.commandId = UUID().uuidString
+        newMessage.userId = PyrusServiceDesk.currentUserId ?? PyrusServiceDesk.customUserId ?? PyrusServiceDesk.userId
+        newMessage.appId = PyrusServiceDesk.currentClientId ?? PyrusServiceDesk.clientId
         PSDMessageSend.pass(newMessage, delegate: self)
     }
     

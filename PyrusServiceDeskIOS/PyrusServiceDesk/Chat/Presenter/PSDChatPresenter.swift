@@ -60,6 +60,8 @@ extension PSDChatPresenter: PSDChatPresenterProtocol {
                 userName: userName,
                 createdAt: "CreatedAt".localizedPSD() + ": \(createdAt)"
             ))
+        case .showRatingComment:
+            view?.show(.showRatingComment)
         }
     }
 }

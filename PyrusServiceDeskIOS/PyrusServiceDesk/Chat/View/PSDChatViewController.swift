@@ -727,6 +727,12 @@ extension PSDChatViewController: PSDChatViewProtocol {
         case .updateInfo(ticketId: let ticketId, userName: let userName, createdAt: let createdAt):
             popoverContentController = PopoverContentController(ticketId: ticketId, userName: userName, createdAt: createdAt)
             navigationItem.rightBarButtonItem = infoButton
+        case .showRatingComment:
+            messageInputView.inputTextView.resignFirstResponder()
+            DispatchQueue.main.async { [weak self] in
+                self?.router.route(to: .ratingComment)
+
+            }
         }
     }
 }
@@ -830,6 +836,12 @@ extension PSDChatViewController: PSDChatTableViewDelegate {
     
     func showLinkOpenAlert(_ linkString: String) {
         router.route(to: .showLinkOpenAlert(linkString: linkString))
+    }
+}
+
+extension PSDChatViewController: RatingCommentDelegate {
+    func sendRatingComment(comment: String) {
+        interactor.doInteraction(.sendRatingComment(comment: comment))
     }
 }
 

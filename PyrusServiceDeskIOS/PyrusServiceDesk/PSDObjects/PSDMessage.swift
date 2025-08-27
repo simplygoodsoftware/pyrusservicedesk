@@ -30,6 +30,7 @@ class PSDMessage: NSObject {
             }
         }
     }
+    var ratingComment: String?
     var isOutgoing: Bool = true
     var fromStrorage: Bool = false
     var isRatingMessage: Bool = false

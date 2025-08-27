@@ -6,7 +6,23 @@ class CustomizationHelper {
         return PyrusServiceDesk.mainController?.customization?.chatTitle ?? ""
     }
     static var welcomeMessage: String {
+        let clientId = PyrusServiceDesk.currentClientId ?? PyrusServiceDesk.clientId
+        if let welomeMessage = PyrusServiceDesk.clients.first(where: { $0.clientId == clientId })?.welcomeMessage {
+            return welomeMessage
+        }
         return PyrusServiceDesk.mainController?.customization?.welcomeMessage ?? ""
+    }
+    
+    static var ratingSettings: PSDRatingSettings {
+        let clientId = PyrusServiceDesk.currentClientId ?? PyrusServiceDesk.clientId
+        if let ratingSettings = PyrusServiceDesk.clients.first(where: { $0.clientId == clientId })?.ratingSettings {
+            return ratingSettings
+        }
+        return PSDRatingSettings(
+            size: 5,
+            type: RatingType.smile.rawValue,
+            ratingTextValues: RatingType.smile.rateArray(size: 5)
+        )
     }
     
     static var customLocale: String? {

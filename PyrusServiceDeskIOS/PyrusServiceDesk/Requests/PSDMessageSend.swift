@@ -132,19 +132,9 @@ struct PSDMessageSend {
         let requestNewTicket = (messageToPass.ticketId == 0 || messageToPass.requestNewTicket)
         var attachmentsData: [AttachmentData]?
         
-//        if let attachments = messageToPass.attachments, attachments.count > 0 {
-//            for (i,attachment) in attachments.enumerated(){
-//                if attachment.emptyId() {
-//                    PSDMessageSend.passFile(messageToPass, attachmentIdex: i, delegate: delegate)
-//                    break
-//                }
-//            }
-//        }
-        
         if let attachments = messageToPass.attachments {
             attachmentsData = []
             for attachment in attachments {
- //               _ = PSDMessagesStorage.saveToFileAttachment(attachment, messageLocalId: commandId)
                 let attach = AttachmentData(type: 0, name: attachment.name, guid: attachment.serverIdentifer)
                 attachmentsData?.append(attach)
             }
@@ -160,38 +150,6 @@ struct PSDMessageSend {
             PyrusServiceDesk.syncManager.syncGetTickets()
         }
         NotificationCenter.default.post(name: createNewCommand, object: nil, userInfo: nil)
-        
-        dispatchQueue.async {
-            
-//            if PSDMessageSend.passingMessagesIds.contains(messageToPass.clientId) {
-//                //при отпрвке атачей эта же функция вызывается снова, продолжаем отправку не блокируя очередь
-//            }
-//            else{
-//                PSDMessageSend.passingMessagesIds.append(messageToPass.clientId)
-//            }
-//            
-//            var hasUnsendAttachments = false
-//            if let attachments = messageToPass.attachments, attachments.count > 0 {
-//                for (i,attachment) in attachments.enumerated(){
-//                    if attachment.emptyId() {
-//                     //   _ = PSDMessageSend.semaphore.wait(timeout: DispatchTime.distantFuture)
-//                        PSDMessageSend.passFile(messageToPass, attachmentIdex: i, delegate: delegate)
-//                        hasUnsendAttachments = true
-//                        break
-//                    }
-//                    
-//                }
-                
-//            }
-//            if !hasUnsendAttachments{
-//                let sender = PSDMessageSender()
-//                sender.pass(messageToPass, delegate: delegate, completion: {
-//                    didEndPassMessage(messageToPass, delegate: delegate)
-//                })
-//                messageSenders.append(sender)
-//            }
-        }
-        
     }
     static private func didEndPassMessage(_ messageToPass: PSDMessage, delegate: PSDMessageSendDelegate?) {
         PSDMessageSend.passingMessagesIds.removeAll(where: {$0 == messageToPass.clientId})

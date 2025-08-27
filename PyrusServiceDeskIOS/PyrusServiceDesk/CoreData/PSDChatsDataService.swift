@@ -59,6 +59,12 @@ extension PSDChatsDataService: PSDChatsDataServiceProtocol {
             dbClient.name = clientModel.clientName
             dbClient.appIcon = clientModel.clientIcon
             dbClient.descr = clientModel.clientDescription
+            dbClient.welcomeMessage = clientModel.welcomeMessage
+            if let settings = clientModel.ratingSettings {
+                dbClient.ratingType = Int32(settings.type)
+                dbClient.ratingSize = Int16(settings.size)
+                dbClient.ratingText = settings.ratingText
+            }
         }
     }
     
@@ -72,6 +78,16 @@ extension PSDChatsDataService: PSDChatsDataServiceProtocol {
                     clientIcon: dbClient.appIcon ?? ""
                 )
                 client.clientDescription = dbClient.descr
+                client.welcomeMessage = dbClient.welcomeMessage
+                if dbClient.ratingType != 0,
+                   dbClient.ratingSize != 0 {
+                    client.ratingSettings = PSDRatingSettings(
+                        size: Int(dbClient.ratingSize),
+                        type: Int(dbClient.ratingType),
+                        ratingTextValues: [],
+                        ratingText: dbClient.ratingText
+                    )
+                }
                 return client
             }
             return clients

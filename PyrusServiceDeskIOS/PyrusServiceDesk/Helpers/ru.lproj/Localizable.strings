@@ -65,6 +65,11 @@
 "Edit" = "Изменить";
 "Logout" = "Выйти";
 "Version" = "Версия";
+"EvaluateQuality" = "Оцените работу оператора";
+"PleaseEvaluateQuality" = "Пожалуйста, оцените работу оператора";
+"LeaveYourComment" = "Оставьте свой комментарий";
+"Close" = "Закрыть";
+
 //https://helpy.pyrus.com/n4Mxu60kICP-XtZkGm2zCRlDtRRBi76h1w7FMx~f2F~z3d~Ayz7~Z7Gfxg7q2dI~sNVS965oM44Buy8uX2ngWib4BIIaf~6uIT6KaRzyGn2N6O2zdj-lufplexg1TvYLTviMSw==/251380432/extraFields?user_name=%D0%A0%D0%B5%D1%81%D1%82%D0%BE%D1%80%D0%B0%D0%BD:%20%5B149-039-001%5D%20%D0%9F%D0%B0%D0%BF%D0%B0%20%D0%94%D0%B6%D0%BE%D0%BD%D1%81%20%E2%84%9639%20%D0%91%D1%83%D1%82%D0%BE%D0%B2%D0%BE
 // Mark: HELPY
 "Last_Message" = "Это последнее сообщение из этой беседы";

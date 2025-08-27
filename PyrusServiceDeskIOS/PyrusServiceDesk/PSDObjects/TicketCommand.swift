@@ -23,10 +23,11 @@ class TicketCommandParams: Codable {
     let type: String?
     let messageId: Int?
     let rating: Int?
+    let ratingComment: String?
     var date: Date? = nil
     var messageClientId: String? = nil
     
-    init(ticketId: Int?, appId: String?, requestNewTicket: Bool? = nil, userId: String?, message: String? = nil, attachments: [AttachmentData]? = nil, authorId: String? = nil, token: String? = nil, type: String? = nil, messageId: Int? = nil, rating: Int? = nil, date: Date? = nil, messageClientId: String? = nil) {
+    init(ticketId: Int?, appId: String?, requestNewTicket: Bool? = nil, userId: String?, message: String? = nil, attachments: [AttachmentData]? = nil, authorId: String? = nil, token: String? = nil, type: String? = nil, messageId: Int? = nil, rating: Int? = nil, ratingComment: String? = nil, date: Date? = nil, messageClientId: String? = nil) {
         self.ticketId = ticketId
         self.appId = appId
         self.requestNewTicket = requestNewTicket
@@ -37,6 +38,7 @@ class TicketCommandParams: Codable {
         self.type = type
         self.messageId = messageId
         self.rating = rating
+        self.ratingComment = ratingComment
         self.date = date
         self.messageClientId = messageClientId
     }
@@ -52,6 +54,7 @@ class TicketCommandParams: Codable {
         case type = "type"
         case messageId = "comment_id"
         case rating = "rating"
+        case ratingComment = "rating_comment"
     }
 }
 

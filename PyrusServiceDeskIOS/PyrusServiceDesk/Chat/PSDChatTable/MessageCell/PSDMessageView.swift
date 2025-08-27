@@ -134,7 +134,7 @@ class PSDMessageView: PSDView {
             recolor()
         }
         if let rating = message.rating, message.message.isRatingMessage {
-            ratingLabel.text = rateArray[rating]
+            ratingLabel.text = rateArray.first(where: {$0.rating == rating})?.text
             if message.attachment == nil && message.text.count == 0 {
                 self.backgroundColor = .clear
             }
