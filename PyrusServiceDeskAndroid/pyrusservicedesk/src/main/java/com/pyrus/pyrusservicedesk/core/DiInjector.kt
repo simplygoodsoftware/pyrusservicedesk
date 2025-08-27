@@ -269,11 +269,14 @@ internal class DiInjector(
         sdDatabase = db,
         fileManager = fileManager,
         downloadHelper = downloadHelper,
+        draftRepository = draftRepository,
     )
 
     val addUserUseCase = AddUserUseCase(accountStore, repository, coreScope, addUserEventBus)
 
     val refreshUseCase = RefreshUseCase(repository, coreScope)
+
+    val updateUserUseCase = UpdateUserUseCase(accountStore, preferencesManager)
 
     val rateTimeUseCase = TimeToRateUseCase(preferencesManager)
 

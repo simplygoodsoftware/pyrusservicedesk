@@ -42,10 +42,7 @@ class PyrusServiceDesk private constructor(
     internal val appId: String,
     internal val userId: String?,
     internal val securityKey: String?,
-    internal val domain: String?,
-    internal val apiVersion: Int,
     loggingEnabled: Boolean,
-    private val authToken: String?,
 ) {
 
     companion object {
@@ -69,6 +66,8 @@ class PyrusServiceDesk private constructor(
 
         internal var logging = false
             private set
+
+        private var onStopCallback: OnStopCallback? = null
 
         @JvmStatic
         fun getFileChooser(): FileChooser? {
@@ -326,9 +325,10 @@ class PyrusServiceDesk private constructor(
                 appId = appId,
             )
 
-            // TODO kate sds
+            // TODO kate check sds
             if (INJECTOR?.accountStore?.getAccount()?.getUserId() != newAccount.getUserId()) {
                 INJECTOR?.liveUpdates?.reset(userId)
+                clearLocalData {}
             }
 
             INJECTOR?.onCancel()
@@ -345,38 +345,6 @@ class PyrusServiceDesk private constructor(
                 }),
                 preferences = preferences
             )
-
-            val validDomain = if (validateDomain(apiDomain)) apiDomain else null
-
-            // TODO sds
-//            if (INSTANCE != null && get().userId != userId) {
-//                clearLocalData {
-////                    if (CONFIGURATION != null)
-////                        stop()
-//                    INSTANCE = PyrusServiceDesk(
-//                        application,
-//                        appId,
-//                        userId,
-//                        securityKey,
-//                        validDomain,
-//                        apiVersion,
-//                        loggingEnabled,
-//                        authorizationToken,
-//                    )
-//                }
-//            }
-//            else {
-//                INSTANCE = PyrusServiceDesk(
-//                    application,
-//                    appId,
-//                    userId,
-//                    securityKey,
-//                    validDomain,
-//                    apiVersion,
-//                    loggingEnabled,
-//                    authorizationToken,
-//                )
-//            }
         }
 
         private fun validateDomain(domain: String?): Boolean {
@@ -519,7 +487,7 @@ class PyrusServiceDesk private constructor(
             if (lastRefreshes.size > REFRESH_MAX_COUNT)
                 lastRefreshes.removeAt(0)
             // TODO kate check
-            injector().refreshUseCase.refresh()
+            INJECTOR?.refreshUseCase?.refresh()
         }
 
         /**
@@ -542,8 +510,8 @@ class PyrusServiceDesk private constructor(
 
         internal fun onServiceDeskStop() {
             // TODO kate check
-            get().onStopCallback?.onServiceDeskStop()
-            get().onStopCallback = null
+            onStopCallback?.onServiceDeskStop()
+            onStopCallback = null
         }
 
         internal fun get(): PyrusServiceDesk {
@@ -566,48 +534,33 @@ class PyrusServiceDesk private constructor(
         ) {
             StaticRepository.setConfiguration(configuration)
 
-            // TODO
+            // TODO kate check
 //            get().sharedViewModel.clearQuitServiceDesk()
-//            get().onStopCallback = onStopCallback
-
+            this.onStopCallback = onStopCallback
 
             val intent = MainActivity.createLaunchIntent(activity, account, openTicketAction)
             intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK)
             activity.startActivity(MainActivity.createLaunchIntent(activity, account, openTicketAction))
 
-            // TODO sds
-//            if (configuration == null)
-//                return
+            // TODO kate check sds
+            if (configuration == null)
+                return
 
-            // TODO sds добавить логику обновления аккаунта в sp
-//            val currentUserId = get().preferences.getString(PREFERENCE_KEY_USER_ID_V2, null)
-//            if (currentUserId != get().userId)
-//                refresh()
-//            get().preferences.edit().putString(PREFERENCE_KEY_USER_ID_V2, get().userId).apply()
+            // TODO kate check sds добавить логику обновления аккаунта в sp
+            injector().updateUserUseCase.updateUser()
         }
 
         private fun clearLocalData(doOnCleared : () -> Unit) {
-            // TODO sds
-//            GlobalScope.launch {
-//                if (get().serviceDeskProvider.getRequestFactory().getRemoveAllPendingCommentsRequest().execute().hasError().not()) {
-//
-//                    get().fileManager.clearTempDir()
-//
-//                    withContext(Dispatchers.Main) {
-//                        get().draftRepository.saveDraft("")
-//                        refresh()
-//                        doOnCleared.invoke()
-//                    }
-//                }
-//            }
+            // TODO kate check sds
+            INJECTOR?.cleanDataUseCase()
+            refresh()
+            doOnCleared.invoke()
         }
 
 
     }
 
     private var sharedViewModel = SharedViewModel()
-
-    private var onStopCallback: OnStopCallback? = null
 
     init {
         // // TODO sds изменить место инициализации логов, добавить отдельную логику для включения и выключения логов

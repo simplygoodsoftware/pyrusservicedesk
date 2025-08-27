@@ -88,6 +88,7 @@ internal class LiveUpdates(
     /**
      * Registers [subscriber] to on new reply events
      */
+    //TODO kate check it
     @MainThread
     fun subscribeOnReply(subscriber: NewReplySubscriber) {
         PLog.d(TAG, "subscribeOnReply")

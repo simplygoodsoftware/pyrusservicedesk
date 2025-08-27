@@ -84,6 +84,15 @@ internal class PreferencesManager(private val preferences: SharedPreferences): P
         return preferences.getLong(PREFERENCE_KEY_LAST_ACTIVITY_TIME, -1L)
     }
 
+    fun saveCurrentUserId(userId: String) {
+        preferences.edit().putString(PREFERENCE_KEY_USER_ID_V2, userId).commit()
+    }
+
+
+    fun getCurrentUserId(): String? {
+        return preferences.getString(PREFERENCE_KEY_USER_ID_V2, null)
+    }
+
     override fun setTokenRegisterTimeList(timeList: List<Long>) {
         val json = try {
             gson.toJson(timeList, timeListType)
@@ -163,6 +172,8 @@ internal class PreferencesManager(private val preferences: SharedPreferences): P
         private const val CREATED_TICKETS_COUNT = "CREATED_TICKETS_COUNT"
 
         private const val PREFERENCE_KEY_LAST_ACTIVITY_TIME = "PREFERENCE_KEY_LAST_ACTIVITY_TIME"
+
+        internal const val PREFERENCE_KEY_USER_ID_V2 = "PREFERENCE_KEY_USER_ID_V2"
 
         private const val PREFERENCE_KEY_TOKEN_TIME_MAP = "PREFERENCE_KEY_TOKEN_TIME_MAP"
         private const val PREFERENCE_KEY_TOKEN_TIME_LIST = "PREFERENCE_KEY_TOKEN_TIME_LIST"

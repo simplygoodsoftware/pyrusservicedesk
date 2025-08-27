@@ -261,6 +261,14 @@ internal class Synchronizer(
         return syncRequests.map { syncReqRes ->
             val req = syncReqRes.request
             if (req !is SyncRequest.Command.CreateComment) return@map syncReqRes
+            localTicketsStore.getTickets().find { it.ticketId == req.ticketId }?.isActive
+            if (req.ticketId > 0
+                && localTicketsStore.getTickets().find { it.ticketId == req.ticketId }?.isActive == false
+            ) {
+                val newRequest = req.copy(ticketId = commandsStore.getNextLocalId(), requestNewTicket = true)
+                return@map copySyncReqRes(syncReqRes, newRequest)
+            }
+
 
             if (req.ticketId > 0)  return@map syncReqRes
 

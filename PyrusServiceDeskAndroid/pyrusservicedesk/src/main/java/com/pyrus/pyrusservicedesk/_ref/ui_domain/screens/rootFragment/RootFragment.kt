@@ -19,6 +19,7 @@ import com.google.android.play.core.review.ReviewInfo
 import com.google.android.play.core.review.ReviewManagerFactory
 import com.pyrus.pyrusservicedesk.NoFullScreenFragment
 import com.pyrus.pyrusservicedesk.OpenTicketAction
+import com.pyrus.pyrusservicedesk.PyrusServiceDesk
 import com.pyrus.pyrusservicedesk.PyrusServiceDesk.Companion.injector
 import com.pyrus.pyrusservicedesk.R
 import com.pyrus.pyrusservicedesk.ServiceDeskConfiguration
@@ -172,6 +173,11 @@ internal class RootFragment: TeaFragment<Unit, Message.Outer, Effect.Outer>(),
                 })
             }
         })
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        PyrusServiceDesk.onServiceDeskStop()
     }
 
     private fun finish() {

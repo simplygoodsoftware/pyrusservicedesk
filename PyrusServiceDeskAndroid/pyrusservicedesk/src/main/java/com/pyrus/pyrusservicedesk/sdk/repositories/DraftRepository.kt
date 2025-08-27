@@ -52,6 +52,10 @@ internal class DraftRepository(
         writeDrafts(drafts)
     }
 
+    fun clearDrafts() {
+        draftsStateFlow.value.toMutableList().clear()
+    }
+
     private fun readDrafts(): List<DraftEntity> {
         val rawJson = preferences.getString(PREFERENCE_KEY_DRAFTS, "[]")!!
         val draftList = (jsonAdapter.fromJson(rawJson)?: emptyList()).toMutableList()
