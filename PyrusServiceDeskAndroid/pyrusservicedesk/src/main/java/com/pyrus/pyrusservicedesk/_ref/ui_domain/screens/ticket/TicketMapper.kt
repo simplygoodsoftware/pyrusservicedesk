@@ -21,6 +21,7 @@ import com.pyrus.pyrusservicedesk._ref.utils.plus
 import com.pyrus.pyrusservicedesk._ref.utils.textRes
 import com.pyrus.pyrusservicedesk.presentation.ui.navigation_page.ticket.HtmlUtils
 import com.pyrus.pyrusservicedesk.presentation.ui.navigation_page.ticket.cleanTags
+import com.pyrus.pyrusservicedesk.sdk.data.SatisfactionDisplayType
 import java.util.Calendar
 
 internal object TicketMapper {
@@ -148,7 +149,19 @@ internal object TicketMapper {
                 message = freshList.showRatingText,
                 avatarUrl = freshList.orgLogoUrl,
             )
-            entriesWithDates += CommentEntry.RatingSelector(creationTime = lastCreationTime)
+            freshList.
+            entriesWithDates += CommentEntry.RatingSelector(
+                creationTime = lastCreationTime,
+                ratingTextRvVisibility = ,
+                smileLl5Visibility = TODO(),
+                smileLlVisibility = TODO(),
+                likeLlVisibility = TODO(),
+                rating2MiniVisibility = TODO(),
+                ratingText = TODO(),
+                size = TODO(),
+                type = TODO(),
+                ratingTextValues = TODO(),
+            )
         }
 
         if (!freshList.showRating) {
@@ -200,6 +213,12 @@ internal object TicketMapper {
         entriesWithDates.reverse()
 
         return entriesWithDates
+    }
+
+    private fun getSmile5LlVisibility(ratingEntry: RatingEntry): Boolean {
+        return SatisfactionDisplayType.fromInt(ratingEntry.ratingSettings?.type) == SatisfactionDisplayType.Emoji
+            && ratingEntry.ratingSettings?.size == 5
+            || ratingEntry.ratingSettings == null
     }
 
     private fun addWelcomeEntries(

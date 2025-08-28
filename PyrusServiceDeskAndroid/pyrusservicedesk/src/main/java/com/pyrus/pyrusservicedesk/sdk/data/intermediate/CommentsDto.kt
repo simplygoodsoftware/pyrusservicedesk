@@ -1,6 +1,7 @@
 package com.pyrus.pyrusservicedesk.sdk.data.intermediate
 
 import com.pyrus.pyrusservicedesk.sdk.data.CommentDto
+import com.pyrus.pyrusservicedesk.sdk.data.RatingSettingsDto
 import com.squareup.moshi.Json
 import com.squareup.moshi.JsonClass
 
@@ -17,7 +18,9 @@ internal data class CommentsDto(
 
     @Json(name = "show_rating") val showRating: Boolean = false,
 
-    @Json(name = "show_rating_text") val showRatingText: String = ""
+    @Json(name = "show_rating_text") val showRatingText: String = "",
+
+    @Json(name = "rating_settings") val ratingSettings: RatingSettingsDto? = null,
 ) {
     override fun toString(): String {
         return "Comments(comments=${comments.size}, showRating=$showRating, showRatingText='$showRatingText')"

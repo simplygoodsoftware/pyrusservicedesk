@@ -23,7 +23,8 @@
     <string name="psd_date_format_d_m_short">MM.dd</string>
     <string name="psd_date_format_d_m_y_short">MM.dd.yyyy</string>
     <string name="psd_photo">Photo</string>
-    <string name="psd_gallery">Gallery</string><string name="psd_evaluate_the_operators_performance">Evaluate the operator\'s performance</string>
+    <string name="psd_gallery">Gallery</string>
+    <string name="psd_evaluate_the_operators_performance">Evaluate the operator\'s performance</string>
     <string name="psd_close">Close</string>
     <string name="leave_your_comment">Write a review</string>
     <string name="psd_filters">Filters</string>

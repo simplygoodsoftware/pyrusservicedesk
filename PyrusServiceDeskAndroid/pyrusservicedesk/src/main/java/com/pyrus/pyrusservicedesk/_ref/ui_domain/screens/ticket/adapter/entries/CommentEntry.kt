@@ -2,8 +2,11 @@ package com.pyrus.pyrusservicedesk._ref.ui_domain.screens.ticket.adapter.entries
 
 import android.net.Uri
 import androidx.annotation.DrawableRes
+import com.google.gson.annotations.SerializedName
 import com.pyrus.pyrusservicedesk._ref.ui_domain.screens.ticket.adapter.fingerprints.Status
 import com.pyrus.pyrusservicedesk._ref.utils.TextProvider
+import com.pyrus.pyrusservicedesk.sdk.data.RatingSettingsDto
+import com.pyrus.pyrusservicedesk.sdk.data.RatingTextValuesDto
 
 internal sealed interface CommentEntry {
 
@@ -153,7 +156,25 @@ internal sealed interface CommentEntry {
 
     data class RatingSelector(
         override val creationTime: Long,
+        val ratingTextRvVisibility: Boolean,
+        val smileLl5Visibility: Boolean,
+        val smileLlVisibility: Boolean,
+        val likeLlVisibility: Boolean,
+        val rating2MiniVisibility: Boolean,
+        val ratingText: String?,
+        val size: Int?,
+        val type: Int?,
+        val  ratingTextValues: List<RatingTextValues>?,
     ) : CommentEntry, WithCreationTime
+
+//    data class RatingText(
+//
+//    )
+
+    data class RatingTextValues(
+        val rating: Int?,
+        val text: String?
+    )
 
     interface WithCreationTime {
         val creationTime: Long

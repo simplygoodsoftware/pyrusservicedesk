@@ -26,6 +26,7 @@ internal data class CommentDto(
     @Json(name = "created_at") @DateJ val creationDate: Long,
     @Json(name = "author") val author: AuthorDto?,
     @Json(name = "rating") val rating: Int? = null,
+    @Json(name = "rating_comment") val ratingComment: String? = null,
     // TODO "client_id" ??
 ) {
 
@@ -41,5 +42,24 @@ internal data class CommentDto(
         return false
 //        return commentId == COMMENT_ID_EMPTY && localId != COMMENT_ID_EMPTY
 //        return commentId == COMMENT_ID_EMPTY
+    }
+}
+
+
+enum class SatisfactionDisplayType(val  value: Int) {
+    None(0),
+    Emoji(1),
+    Like(2),
+    Text(3);
+
+    companion object {
+        fun fromInt(value: Int?): SatisfactionDisplayType? {
+            return if (value == null) {
+                null
+            }
+            else {
+                entries.firstOrNull { it.value == value }
+            }
+        }
     }
 }

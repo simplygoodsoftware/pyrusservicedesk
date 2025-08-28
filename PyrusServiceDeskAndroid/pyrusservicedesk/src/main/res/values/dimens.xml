@@ -42,4 +42,5 @@
     <dimen name="psd_bottomSheet_offset">32.dp</dimen>
     <dimen name="psd_recyclerView_offset">150dp</dimen>
     <dimen name="psd_blur_height">72dp</dimen>
+    <dimen name="_117">117dp</dimen>
 </resources>
