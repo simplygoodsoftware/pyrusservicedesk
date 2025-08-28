@@ -29,7 +29,7 @@
 import Foundation
 import AudioToolbox
 import libopus
-//@_implementationOnly import PyrusServiceDeskPrivate
+@_implementationOnly import PyrusServiceDeskPrivate
 
 // import ogg
 

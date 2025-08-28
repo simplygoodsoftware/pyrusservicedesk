@@ -25,6 +25,12 @@
 		1E1279EA2CC273130080CB19 /* ColorHexInit.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1E1279E92CC273120080CB19 /* ColorHexInit.swift */; };
 		1E1279EC2CC2737E0080CB19 /* TableViewCellConfiguratorProtocol.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1E1279EB2CC2737E0080CB19 /* TableViewCellConfiguratorProtocol.swift */; };
 		1E1279EE2CC283A50080CB19 /* images.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 1E1279ED2CC283A50080CB19 /* images.xcassets */; };
+		1E3716EB2E608E47003EACE1 /* PSDRatingSettings.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1E3716EA2E608E47003EACE1 /* PSDRatingSettings.swift */; };
+		1E3716F02E608E9B003EACE1 /* PSDTextRateView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1E3716ED2E608E9B003EACE1 /* PSDTextRateView.swift */; };
+		1E3716F12E608E9B003EACE1 /* PSDEmojiRateView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1E3716EC2E608E9B003EACE1 /* PSDEmojiRateView.swift */; };
+		1E3716F22E608E9B003EACE1 /* RatingCommentViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1E3716EE2E608E9B003EACE1 /* RatingCommentViewController.swift */; };
+		1E3716F72E608EF0003EACE1 /* PSDChats.xcdatamodeld in Sources */ = {isa = PBXBuildFile; fileRef = 1E3716F32E608EF0003EACE1 /* PSDChats.xcdatamodeld */; };
+		1E3716F92E608F2F003EACE1 /* RateViewCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1E3716F82E608F2F003EACE1 /* RateViewCell.swift */; };
 		1E50689A2CEB1457001A9E2D /* PSDChatInteractor.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1E5068972CEB1457001A9E2D /* PSDChatInteractor.swift */; };
 		1E50689B2CEB1457001A9E2D /* PSDChatInteractorProtocol.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1E5068982CEB1457001A9E2D /* PSDChatInteractorProtocol.swift */; };
 		1E50689F2CEB146F001A9E2D /* PSDChatPresenter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1E50689C2CEB146F001A9E2D /* PSDChatPresenter.swift */; };
@@ -59,7 +65,6 @@
 		1E50691D2D07459C001A9E2D /* ClosedTicketsCellModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1E50691C2D07459C001A9E2D /* ClosedTicketsCellModel.swift */; };
 		1E50691F2D0745A5001A9E2D /* PSDChatsViewModelProtocol.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1E50691E2D0745A5001A9E2D /* PSDChatsViewModelProtocol.swift */; };
 		1E5069252D15AFE9001A9E2D /* PSDChatSectionModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1E5069232D15AFE9001A9E2D /* PSDChatSectionModel.swift */; };
-		1E809C672E3A67750097E311 /* PSDChats.xcdatamodeld in Sources */ = {isa = PBXBuildFile; fileRef = 1E809C642E3A67750097E311 /* PSDChats.xcdatamodeld */; };
 		1E809C692E3A67950097E311 /* AudioRepository.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1E809C682E3A67950097E311 /* AudioRepository.swift */; };
 		1E809C6B2E3A67A60097E311 /* CacheVersionManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1E809C6A2E3A67A60097E311 /* CacheVersionManager.swift */; };
 		1E809C6D2E3A67B00097E311 /* RateManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1E809C6C2E3A67B00097E311 /* RateManager.swift */; };
@@ -435,6 +440,14 @@
 		1E1279E92CC273120080CB19 /* ColorHexInit.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ColorHexInit.swift; sourceTree = "<group>"; };
 		1E1279EB2CC2737E0080CB19 /* TableViewCellConfiguratorProtocol.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = TableViewCellConfiguratorProtocol.swift; sourceTree = "<group>"; };
 		1E1279ED2CC283A50080CB19 /* images.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = images.xcassets; sourceTree = "<group>"; };
+		1E3716EA2E608E47003EACE1 /* PSDRatingSettings.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PSDRatingSettings.swift; sourceTree = "<group>"; };
+		1E3716EC2E608E9B003EACE1 /* PSDEmojiRateView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PSDEmojiRateView.swift; sourceTree = "<group>"; };
+		1E3716ED2E608E9B003EACE1 /* PSDTextRateView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PSDTextRateView.swift; sourceTree = "<group>"; };
+		1E3716EE2E608E9B003EACE1 /* RatingCommentViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RatingCommentViewController.swift; sourceTree = "<group>"; };
+		1E3716F42E608EF0003EACE1 /* PSDChats.xcdatamodel */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcdatamodel; path = PSDChats.xcdatamodel; sourceTree = "<group>"; };
+		1E3716F52E608EF0003EACE1 /* PSDChats 2.xcdatamodel */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcdatamodel; path = "PSDChats 2.xcdatamodel"; sourceTree = "<group>"; };
+		1E3716F62E608EF0003EACE1 /* PSDChats 3.xcdatamodel */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcdatamodel; path = "PSDChats 3.xcdatamodel"; sourceTree = "<group>"; };
+		1E3716F82E608F2F003EACE1 /* RateViewCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RateViewCell.swift; sourceTree = "<group>"; };
 		1E5068972CEB1457001A9E2D /* PSDChatInteractor.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PSDChatInteractor.swift; sourceTree = "<group>"; };
 		1E5068982CEB1457001A9E2D /* PSDChatInteractorProtocol.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PSDChatInteractorProtocol.swift; sourceTree = "<group>"; };
 		1E50689C2CEB146F001A9E2D /* PSDChatPresenter.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PSDChatPresenter.swift; sourceTree = "<group>"; };
@@ -469,8 +482,6 @@
 		1E50691C2D07459C001A9E2D /* ClosedTicketsCellModel.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ClosedTicketsCellModel.swift; sourceTree = "<group>"; };
 		1E50691E2D0745A5001A9E2D /* PSDChatsViewModelProtocol.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PSDChatsViewModelProtocol.swift; sourceTree = "<group>"; };
 		1E5069232D15AFE9001A9E2D /* PSDChatSectionModel.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PSDChatSectionModel.swift; sourceTree = "<group>"; };
-		1E809C652E3A67750097E311 /* PSDChats.xcdatamodel */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcdatamodel; path = PSDChats.xcdatamodel; sourceTree = "<group>"; };
-		1E809C662E3A67750097E311 /* PSDChats 2.xcdatamodel */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcdatamodel; path = "PSDChats 2.xcdatamodel"; sourceTree = "<group>"; };
 		1E809C682E3A67950097E311 /* AudioRepository.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AudioRepository.swift; sourceTree = "<group>"; };
 		1E809C6A2E3A67A60097E311 /* CacheVersionManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CacheVersionManager.swift; sourceTree = "<group>"; };
 		1E809C6C2E3A67B00097E311 /* RateManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RateManager.swift; sourceTree = "<group>"; };
@@ -936,6 +947,17 @@
 			path = Interactor;
 			sourceTree = "<group>";
 		};
+		1E3716EF2E608E9B003EACE1 /* Rating */ = {
+			isa = PBXGroup;
+			children = (
+				1E3716EC2E608E9B003EACE1 /* PSDEmojiRateView.swift */,
+				1E3716ED2E608E9B003EACE1 /* PSDTextRateView.swift */,
+				1E3716EE2E608E9B003EACE1 /* RatingCommentViewController.swift */,
+				1E3716F82E608F2F003EACE1 /* RateViewCell.swift */,
+			);
+			path = Rating;
+			sourceTree = "<group>";
+		};
 		1E5068992CEB1457001A9E2D /* Interactor */ = {
 			isa = PBXGroup;
 			children = (
@@ -1188,7 +1210,7 @@
 		1EA6F7382D673FE3003674CE /* CoreData */ = {
 			isa = PBXGroup;
 			children = (
-				1E809C642E3A67750097E311 /* PSDChats.xcdatamodeld */,
+				1E3716F32E608EF0003EACE1 /* PSDChats.xcdatamodeld */,
 				1EA6F7342D673FE3003674CE /* PSDChatsDataService.swift */,
 				1EA6F7352D673FE3003674CE /* PSDChatsDataServiceProtocol.swift */,
 				1EA6F7362D673FE3003674CE /* PSDCoreDataService.swift */,
@@ -1249,6 +1271,7 @@
 				4B9C205C2451904E004DEF7A /* PSDRowMessage.swift */,
 				4B062A822518A8D100B317D3 /* PSDPlaceholderMessage.swift */,
 				4B9FAFA4255435CA00FCE51D /* PSDLastUnreadMessage.swift */,
+				1E3716EA2E608E47003EACE1 /* PSDRatingSettings.swift */,
 			);
 			path = PSDObjects;
 			sourceTree = "<group>";
@@ -1284,6 +1307,7 @@
 				4BA3FF3F22116C1100CE497A /* AttachmentHandler.swift */,
 				4B3F72E02498C01600318F1F /* PSDRateView.swift */,
 				4B6D4A40244E2AE3007C6082 /* AttachmentCollcetionView */,
+				1E3716EF2E608E9B003EACE1 /* Rating */,
 			);
 			path = messageInput;
 			sourceTree = "<group>";
@@ -2250,6 +2274,9 @@
 				1E1279BF2CC271440080CB19 /* PSDUserInfo.swift in Sources */,
 				1E809CE82E3A69D50097E311 /* PSDChatDiffableDataSource.swift in Sources */,
 				1E1279CF2CC271C00080CB19 /* PSDChatsDiffableDataSource.swift in Sources */,
+				1E3716F02E608E9B003EACE1 /* PSDTextRateView.swift in Sources */,
+				1E3716F12E608E9B003EACE1 /* PSDEmojiRateView.swift in Sources */,
+				1E3716F22E608E9B003EACE1 /* RatingCommentViewController.swift in Sources */,
 				4B66011D223948CE00AA45E6 /* PyrusServiceDeskCustomization.swift in Sources */,
 				4B9BF878224CBCBC006AD05C /* PSDCopyLabel.swift in Sources */,
 				4B88C6F722145ACA00BDB304 /* PSDGetChats.swift in Sources */,
@@ -2301,6 +2328,7 @@
 				4BBB9B06249D152900059A23 /* LogEvents.swift in Sources */,
 				4B5AFEAB21FB0A7B00AAF233 /* PSDMessageSendButton.swift in Sources */,
 				1E1279EC2CC2737E0080CB19 /* TableViewCellConfiguratorProtocol.swift in Sources */,
+				1E3716F92E608F2F003EACE1 /* RateViewCell.swift in Sources */,
 				1E809CEA2E3A69E50097E311 /* PSDAudioAttachmentView.swift in Sources */,
 				4B9B0BBB2266344200090DB5 /* PSDAttachmentPreviewErrorView.swift in Sources */,
 				1E5069252D15AFE9001A9E2D /* PSDChatSectionModel.swift in Sources */,
@@ -2308,6 +2336,7 @@
 				4BCEB433220C150C008B29B6 /* UIImage+color.swift in Sources */,
 				7B1E8D58250665F800C1E5AC /* PSDInfoView.swift in Sources */,
 				1E1279D62CC271C90080CB19 /* ChatsRouter.swift in Sources */,
+				1E3716F72E608EF0003EACE1 /* PSDChats.xcdatamodeld in Sources */,
 				4BB6CDC325597E4C004C680A /* PyrusLogger.swift in Sources */,
 				4B6D4A39244E1B6A007C6082 /* AttachmentCollectionView.swift in Sources */,
 				1E809CC22E3A686A0097E311 /* AudioFormatManager.swift in Sources */,
@@ -2352,7 +2381,6 @@
 				4BAA214F222D60D000B8BED7 /* Dictionary+asString.swift in Sources */,
 				4B1ED2AC228190BA00B98516 /* PSDMessagesStorage.swift in Sources */,
 				4BDDE42F257F7DB900DF40B2 /* PSDVIew.swift in Sources */,
-				1E809C672E3A67750097E311 /* PSDChats.xcdatamodeld in Sources */,
 				4B9F781C228C2813003CC83D /* PSDTableView.swift in Sources */,
 				4B7F350621F8687000977C6D /* PyrusServiceDeskCreator.swift in Sources */,
 				4BB855A02208593200F7CCE5 /* URLCreator.swift in Sources */,
@@ -2375,6 +2403,7 @@
 				1E809C942E3A68640097E311 /* SearchPresenter.swift in Sources */,
 				1E809C952E3A68640097E311 /* SearchChatCellConfigurator.swift in Sources */,
 				1E809C962E3A68640097E311 /* SearchViewController.swift in Sources */,
+				1E3716EB2E608E47003EACE1 /* PSDRatingSettings.swift in Sources */,
 				1E809C972E3A68640097E311 /* SearchPresenterProtocol.swift in Sources */,
 				1E809C982E3A68640097E311 /* SearchInteractor.swift in Sources */,
 				1E809C992E3A68640097E311 /* SearchRouter.swift in Sources */,
@@ -2755,13 +2784,14 @@
 /* End XCSwiftPackageProductDependency section */
 
 /* Begin XCVersionGroup section */
-		1E809C642E3A67750097E311 /* PSDChats.xcdatamodeld */ = {
+		1E3716F32E608EF0003EACE1 /* PSDChats.xcdatamodeld */ = {
 			isa = XCVersionGroup;
 			children = (
-				1E809C652E3A67750097E311 /* PSDChats.xcdatamodel */,
-				1E809C662E3A67750097E311 /* PSDChats 2.xcdatamodel */,
+				1E3716F42E608EF0003EACE1 /* PSDChats.xcdatamodel */,
+				1E3716F52E608EF0003EACE1 /* PSDChats 2.xcdatamodel */,
+				1E3716F62E608EF0003EACE1 /* PSDChats 3.xcdatamodel */,
 			);
-			currentVersion = 1E809C662E3A67750097E311 /* PSDChats 2.xcdatamodel */;
+			currentVersion = 1E3716F62E608EF0003EACE1 /* PSDChats 3.xcdatamodel */;
 			path = PSDChats.xcdatamodeld;
 			sourceTree = "<group>";
 			versionGroupType = wrapper.xcdatamodel;

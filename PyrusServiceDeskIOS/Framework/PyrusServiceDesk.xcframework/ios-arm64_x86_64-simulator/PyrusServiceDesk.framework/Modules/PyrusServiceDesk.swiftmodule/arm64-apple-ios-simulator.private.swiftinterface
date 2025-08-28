@@ -386,6 +386,22 @@ extension DBClient {
     @objc get
     @objc set
   }
+  @objc @NSManaged dynamic public var ratingSize: Swift.Int16 {
+    @objc get
+    @objc set
+  }
+  @objc @NSManaged dynamic public var ratingText: Swift.String? {
+    @objc get
+    @objc set
+  }
+  @objc @NSManaged dynamic public var ratingType: Swift.Int32 {
+    @objc get
+    @objc set
+  }
+  @objc @NSManaged dynamic public var welcomeMessage: Swift.String? {
+    @objc get
+    @objc set
+  }
 }
 extension DBClient : Swift.Identifiable {
   public typealias ID = Swift.ObjectIdentifier
@@ -527,6 +543,10 @@ extension DBTicketCommand {
     @objc set
   }
   @objc @NSManaged dynamic public var rating: Swift.Int32 {
+    @objc get
+    @objc set
+  }
+  @objc @NSManaged dynamic public var ratingComment: Swift.String? {
     @objc get
     @objc set
   }

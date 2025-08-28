@@ -403,6 +403,10 @@ SWIFT_CLASS_NAMED("DBClient")
 @property (nonatomic, copy) NSString * _Nullable appId;
 @property (nonatomic, copy) NSString * _Nullable descr;
 @property (nonatomic, copy) NSString * _Nullable name;
+@property (nonatomic) int16_t ratingSize;
+@property (nonatomic, copy) NSString * _Nullable ratingText;
+@property (nonatomic) int32_t ratingType;
+@property (nonatomic, copy) NSString * _Nullable welcomeMessage;
 @end
 
 
@@ -481,6 +485,7 @@ SWIFT_CLASS_NAMED("DBTicketCommand")
 @property (nonatomic, copy) NSString * _Nullable message;
 @property (nonatomic) int64_t messageId;
 @property (nonatomic) int32_t rating;
+@property (nonatomic, copy) NSString * _Nullable ratingComment;
 @property (nonatomic) BOOL requestNewTicket;
 @property (nonatomic) int64_t ticketId;
 @property (nonatomic, copy) NSString * _Nullable token;
@@ -777,6 +782,8 @@ SWIFT_CLASS_NAMED("Builder")
 - (ServiceDeskConfiguration * _Nonnull)build SWIFT_WARN_UNUSED_RESULT;
 - (nonnull instancetype)init OBJC_DESIGNATED_INITIALIZER;
 @end
+
+
 
 
 
