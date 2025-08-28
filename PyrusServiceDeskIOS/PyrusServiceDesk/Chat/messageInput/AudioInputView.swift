@@ -54,7 +54,7 @@ class AudioInputView: UIView {
         let view = UIView()
         view.layer.cornerRadius = 16
         view.translatesAutoresizingMaskIntoConstraints = false
-        view.backgroundColor = .appColor
+        view.backgroundColor = CustomizationHelper.userMassageBackgroundColor
         return view
     }()
     
@@ -68,9 +68,10 @@ class AudioInputView: UIView {
     
     var slider: UISlider = {
         let slider = AudioCellSlider()
-        slider.minimumTrackTintColor = .appColor
-        slider.maximumTrackTintColor = .trackColor
-        slider.setThumbImage(UIImage.PSDImage(name: "darkCircle")?.imageWith(color: .appColor), for: .normal)
+        let color = PyrusServiceDesk.mainController?.customization?.themeColor ?? CustomizationHelper.supportMassageTextColor
+        slider.minimumTrackTintColor = color
+        slider.maximumTrackTintColor = CustomizationHelper.supportTrackColor
+        slider.setThumbImage(UIImage.PSDImage(name: "darkCircle")?.imageWith(color: color), for: .normal)
         return slider
     }()
     
@@ -100,7 +101,7 @@ class AudioInputView: UIView {
         addSubview(slider)
         addSubview(playView)
         layer.cornerRadius = 19
-        backgroundColor = .audioBackgroundColor
+        backgroundColor = CustomizationHelper.supportMassageBackgroundColor//.audioBackgroundColor
     }
     
     private func setupConstraints() {

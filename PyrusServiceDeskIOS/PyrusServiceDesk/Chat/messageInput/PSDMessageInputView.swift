@@ -90,7 +90,11 @@ class PSDMessageInputView: UIView, PSDMessageTextViewDelegate,PSDMessageSendButt
     private lazy var deleteAudioButton: UIButton = {
         let button = UIButton()
         button.translatesAutoresizingMaskIntoConstraints = false
-        button.setImage(UIImage.PSDImage(name: "deleteAudio"), for: .normal)
+        if let color = PyrusServiceDesk.mainController?.customization?.barButtonTintColor {
+            button.setImage(UIImage.PSDImage(name: "deleteAudio")?.imageWith(color: color), for: .normal)
+        } else {
+            button.setImage(UIImage.PSDImage(name: "deleteAudio"), for: .normal)
+        }
         button.alpha = 0
         button.addTarget(self, action: #selector(deleteAudioButtonTapped), for: .touchUpInside)
         return button
@@ -100,8 +104,8 @@ class PSDMessageInputView: UIView, PSDMessageTextViewDelegate,PSDMessageSendButt
         let button = UIButton()
         button.translatesAutoresizingMaskIntoConstraints = false
         button.setTitle("  " + "Cancel".localizedPSD(), for: .normal)
-        button.setTitleColor(.appColor, for: .normal)
-        button.setImage(UIImage.PSDImage(name: "arrowsLeft")?.imageWith(color: .appColor), for: .normal)
+        button.setTitleColor(CustomizationHelper.recordImagesColors, for: .normal)
+        button.setImage(UIImage.PSDImage(name: "arrowsLeft")?.imageWith(color: CustomizationHelper.recordImagesColors), for: .normal)
         button.titleLabel?.font = UIFont.systemFont(ofSize: 16)
         button.alpha = 0
         button.addTarget(self, action: #selector(cancel), for: .touchUpInside)
@@ -137,7 +141,7 @@ class PSDMessageInputView: UIView, PSDMessageTextViewDelegate,PSDMessageSendButt
     
     override func traitCollectionDidChange(_ previousTraitCollection: UITraitCollection?) {
         super.traitCollectionDidChange(previousTraitCollection)
-        cancelButton.setImage(UIImage.PSDImage(name: "arrowsLeft")?.imageWith(color: .appColor), for: .normal)
+        cancelButton.setImage(UIImage.PSDImage(name: "arrowsLeft")?.imageWith(color: CustomizationHelper.recordImagesColors), for: .normal)
     }
     
     override init(frame: CGRect) {
@@ -305,7 +309,7 @@ class PSDMessageInputView: UIView, PSDMessageTextViewDelegate,PSDMessageSendButt
             self.audioInputView.state = .stopped
             self.audioInputView.layoutIfNeeded()
             self.audioInputView.setNeedsLayout()
-            self.cancelButton.setImage(UIImage.PSDImage(name: "arrowsLeft")?.imageWith(color: .appColor), for: .normal)
+            self.cancelButton.setImage(UIImage.PSDImage(name: "arrowsLeft")?.imageWith(color: CustomizationHelper.recordImagesColors), for: .normal)
         })
     }
     
@@ -343,7 +347,7 @@ class PSDMessageInputView: UIView, PSDMessageTextViewDelegate,PSDMessageSendButt
                 self.audioInputView.state = .stopped
                 self.audioInputView.layoutIfNeeded()
                 self.audioInputView.setNeedsLayout()
-                self.cancelButton.setImage(UIImage.PSDImage(name: "arrowsLeft")?.imageWith(color: .appColor), for: .normal)
+                self.cancelButton.setImage(UIImage.PSDImage(name: "arrowsLeft")?.imageWith(color: CustomizationHelper.recordImagesColors), for: .normal)
             })
         }
         checkSendButton()
@@ -367,7 +371,7 @@ class PSDMessageInputView: UIView, PSDMessageTextViewDelegate,PSDMessageSendButt
                 self.audioInputView.state = .stopped
                 self.audioInputView.layoutIfNeeded()
                 self.audioInputView.setNeedsLayout()
-                self.cancelButton.setImage(UIImage.PSDImage(name: "arrowsLeft")?.imageWith(color: .appColor), for: .normal)
+                self.cancelButton.setImage(UIImage.PSDImage(name: "arrowsLeft")?.imageWith(color: CustomizationHelper.recordImagesColors), for: .normal)
             })
         
         OpusPlayer.shared.stopAllPlay()

@@ -54,7 +54,7 @@ class PSDChatViewController: PSDViewController, PSDMainController {
     private var bottomScrollButton: NSLayoutConstraint?
     private lazy var scrollButton: UIButton = {
         let button = UIButton()
-        button.backgroundColor = .scrollButtonColor
+        button.backgroundColor = CustomizationHelper.scrollButtonColor//.scrollButtonColor
         button.layer.cornerRadius = 20
         button.translatesAutoresizingMaskIntoConstraints = false
         button.transform = CGAffineTransform(scaleX: 0, y: 0)
@@ -64,7 +64,7 @@ class PSDChatViewController: PSDViewController, PSDMainController {
     private var bottomStopButton: NSLayoutConstraint?
     private lazy var stopButton: UIButton = {
         let button = UIButton()
-        button.backgroundColor = .clear//.scrollButtonColor
+        button.backgroundColor = .clear
         button.layer.cornerRadius = 22
         button.translatesAutoresizingMaskIntoConstraints = false
         button.alpha = 0
@@ -74,7 +74,7 @@ class PSDChatViewController: PSDViewController, PSDMainController {
     private lazy var badgeView: UIView = {
         let view = UIView()
         view.layer.cornerRadius = 8
-        view.backgroundColor = .red//.hRose
+        view.backgroundColor = CustomizationHelper.userMassageBackgroundColor
         view.translatesAutoresizingMaskIntoConstraints = false
         return view
     }()
@@ -517,12 +517,12 @@ class PSDChatViewController: PSDViewController, PSDMainController {
         navigationController?.navigationBar.isTranslucent = true
         
         if #available(iOS 13.0, *) {
-            let color = PyrusServiceDesk.mainController?.customization?.customBarColor
+            let color = CustomizationHelper.navigationBarColor
             let barAppearance = UIBarAppearance()
-            barAppearance.backgroundColor = color ?? .navBarColor
+            barAppearance.backgroundColor = color
             let bigAppear = UINavigationBarAppearance(barAppearance: barAppearance)
             bigAppear.configureWithOpaqueBackground()
-            bigAppear.backgroundColor = color ?? .navBarColor
+            bigAppear.backgroundColor = color
             bigAppear.backgroundEffect = nil
             navigationItem.scrollEdgeAppearance = bigAppear
             navigationItem.standardAppearance = bigAppear

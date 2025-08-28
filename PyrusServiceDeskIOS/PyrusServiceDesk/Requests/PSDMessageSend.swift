@@ -139,7 +139,7 @@ struct PSDMessageSend {
                 attachmentsData?.append(attach)
             }
         }
-        let params = TicketCommandParams(ticketId: messageToPass.ticketId, appId:  PyrusServiceDesk.currentClientId ?? PyrusServiceDesk.clientId, requestNewTicket: requestNewTicket, userId: PyrusServiceDesk.currentUserId ?? PyrusServiceDesk.customUserId, message: messageToPass.text, attachments: attachmentsData, rating: messageToPass.rating, date: messageToPass.date, messageClientId: messageToPass.clientId)
+        let params = TicketCommandParams(ticketId: messageToPass.ticketId, appId:  PyrusServiceDesk.currentClientId ?? PyrusServiceDesk.clientId, requestNewTicket: requestNewTicket, userId: PyrusServiceDesk.currentUserId ?? PyrusServiceDesk.customUserId, message: messageToPass.text, attachments: attachmentsData, rating: messageToPass.rating, ratingComment: messageToPass.ratingComment, date: messageToPass.date, messageClientId: messageToPass.clientId)
         if params.rating != nil {
             params.message = nil
         }

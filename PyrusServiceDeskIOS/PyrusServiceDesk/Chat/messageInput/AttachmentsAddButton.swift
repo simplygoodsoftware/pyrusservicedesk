@@ -15,7 +15,7 @@ class AttachmentsAddButton: UIButton {
     }
     private func resetImage() {
         var addImage: UIImage?
-        if let color = PyrusServiceDesk.mainController?.customization?.addAttachmentButtonColor {
+        if let color = PyrusServiceDesk.mainController?.customization?.addAttachmentButtonColor ?? PyrusServiceDesk.mainController?.customization?.barButtonTintColor  {
             addImage = UIImage.PSDImage(name: "clip")?.imageWith(color: color)
         } else {
             addImage = UIImage.PSDImage(name: "clip")

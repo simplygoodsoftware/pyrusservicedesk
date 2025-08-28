@@ -73,14 +73,14 @@ class PSDAudioAttachmentView: PSDAttachmentView {
         didSet {
             switch sliderColor {
             case .brightColor:
-                //slider.tintColor = .white
-                slider.setThumbImage(UIImage.PSDImage(name: "circle"), for: .normal)
-                slider.minimumTrackTintColor = .white
-                slider.maximumTrackTintColor = UIColor(hex: "#E3E5E84D")?.withAlphaComponent(0.3)
+                slider.setThumbImage(UIImage.PSDImage(name: "circle")?.imageWith(color: CustomizationHelper.userMassageTextColor), for: .normal)
+                slider.minimumTrackTintColor = CustomizationHelper.userMassageTextColor
+                slider.maximumTrackTintColor = CustomizationHelper.userTrackColor
             case .defaultColor:
-                slider.setThumbImage(UIImage.PSDImage(name: "darkCircle")?.imageWith(color: .appColor), for: .normal)
-                slider.minimumTrackTintColor = .appColor
-                slider.maximumTrackTintColor = .trackColor
+                let color = PyrusServiceDesk.mainController?.customization?.themeColor ?? CustomizationHelper.supportMassageTextColor
+                slider.setThumbImage(UIImage.PSDImage(name: "darkCircle")?.imageWith(color: color), for: .normal)
+                slider.minimumTrackTintColor = color
+                slider.maximumTrackTintColor = CustomizationHelper.supportTrackColor
             }
         }
     }

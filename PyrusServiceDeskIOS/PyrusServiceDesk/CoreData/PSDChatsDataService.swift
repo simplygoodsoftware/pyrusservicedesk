@@ -607,6 +607,7 @@ extension PSDChatsDataService: PSDChatsDataServiceProtocol {
             dbTicketCommand.type = Int32(ticketCommand.type)
             dbTicketCommand.date = ticketCommand.params.date
             dbTicketCommand.clientId = ticketCommand.params.messageClientId
+            dbTicketCommand.ratingComment = ticketCommand.params.ratingComment
             
             if dbTicketCommand.attachments == nil {
                 dbTicketCommand.attachments = NSOrderedSet()
@@ -657,6 +658,7 @@ extension PSDChatsDataService: PSDChatsDataServiceProtocol {
                         type: dbCommand.tokenType,
                         messageId: Int(dbCommand.messageId),
                         rating: Int(dbCommand.rating),
+                        ratingComment: dbCommand.ratingComment,
                         date: dbCommand.date,
                         messageClientId: dbCommand.clientId
                     )

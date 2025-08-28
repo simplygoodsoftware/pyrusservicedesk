@@ -13,7 +13,7 @@ class PSDMessageTextView: UITextView, UITextViewDelegate {
         self.autoresizingMask = [.flexibleWidth,.flexibleHeight]
         backgroundColor = .clear
         font = .textFont
-        tintColor = .darkAppColor
+        tintColor = CustomizationHelper.recordImagesColors
         textColor = .psdLabel
         self.delegate = self
         addPlaceholder()

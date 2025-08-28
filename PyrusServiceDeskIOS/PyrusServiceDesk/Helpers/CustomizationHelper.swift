@@ -105,6 +105,36 @@ class CustomizationHelper {
         return color
     }
     
+    static var supportTrackColor: UIColor {
+        return supportMassageBackgroundColor.isDarkColor ? (UIColor(hex: "#E3E5E84D") ?? .white).withAlphaComponent(0.3) : UIColor.trackColor
+    }
+    
+    static var userTrackColor: UIColor {
+        return userMassageBackgroundColor.isDarkColor ? (UIColor(hex: "#E3E5E84D") ?? .white).withAlphaComponent(0.3) : UIColor.trackColor
+    }
+    
+    static var sendButtonColor: UIColor {
+        if let color = PyrusServiceDesk.mainController?.customization?.sendButtonColor {
+            return color
+        } else if let color = PyrusServiceDesk.mainController?.customization?.barButtonTintColor {
+            return color
+        }
+        return UIColor.appColor
+    }
+    
+    static var navigationBarColor: UIColor {
+        if let color = PyrusServiceDesk.mainController?.customization?.customBarColor {
+            return color
+        } else if let color = PyrusServiceDesk.mainController?.customization?.customBackgroundColor {
+            return color
+        }
+        return .navBarColor
+    }
+    
+    static var scrollButtonColor: UIColor {
+        return colorsForInput.0
+    }
+    
     static var colorForChatTitle: UIColor {
         if let textColor = PyrusServiceDesk.mainController?.customization?.chatTitleColor {
             return textColor
@@ -112,7 +142,7 @@ class CustomizationHelper {
         if let color = PyrusServiceDesk.mainController?.customization?.customBarColor {
             return UIColor.getTextColor(for: color)
         }
-        return .psdLabel
+        return UIColor.getTextColor(for: navigationBarColor)
     }
     
     static var previewBakcgroundColor: UIColor {
@@ -159,6 +189,11 @@ class CustomizationHelper {
             return (.psdBackground, .psdLabel)
         }
     }
+    
+    static var recordImagesColors: UIColor {
+        return PyrusServiceDesk.mainController?.customization?.themeColor ?? PyrusServiceDesk.mainController?.customization?.barButtonTintColor ?? CustomizationHelper.colorsForInput.1
+    }
+    
     static func prepareWithCustomizationAlert(_ alert: UIAlertController) {
         alert.view.tintColor = PyrusServiceDesk.mainController?.customization?.attachmentMenuTextColor ?? UIColor.darkAppColor
     }
@@ -197,6 +232,17 @@ class CustomizationHelper {
 }
 private let GRAY_VIEW_ALPHA: CGFloat = 0.1
 private let LIGHT_GRAY_VIEW_ALPHA: CGFloat = 0.05
+
+private extension UIColor {
+    static let trackColor = UIColor {
+        switch $0.userInterfaceStyle {
+        case .dark:
+            return UIColor(hex: "#FFFFFF4D")?.withAlphaComponent(0.3) ?? .white
+        default:
+            return UIColor(hex: "#0000001A")?.withAlphaComponent(0.1) ?? .darkAppColor
+        }
+    }
+}
 
 
 extension UIColor {
