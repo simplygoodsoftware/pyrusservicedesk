@@ -83,4 +83,12 @@ extension UIColor {
     static func getTextColor(for color: UIColor) -> UIColor {
         return color.isDarkColor ? .white : .black
     }
+    
+    static func getSecondTextColor(for color: UIColor) -> UIColor {
+        return color.isDarkColor ? .systemGray4 : .darkGray
+    }
+    
+    static func getBorderColor(for color: UIColor) -> UIColor {
+        return color.isDarkColor ? .systemGray : UIColor(hex: "#D6D9DC") ?? .systemGray4
+    }
 }
