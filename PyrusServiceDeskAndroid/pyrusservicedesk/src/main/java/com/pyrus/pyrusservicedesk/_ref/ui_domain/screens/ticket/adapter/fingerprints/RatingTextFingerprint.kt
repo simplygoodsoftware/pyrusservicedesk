@@ -1,10 +1,12 @@
 package com.pyrus.pyrusservicedesk._ref.ui_domain.screens.ticket.adapter.fingerprints
 
+import android.content.res.ColorStateList
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import com.pyrus.pyrusservicedesk.R
 import com.pyrus.pyrusservicedesk._ref.ui_domain.screens.ticket.TicketView
 import com.pyrus.pyrusservicedesk._ref.ui_domain.screens.ticket.adapter.entries.CommentEntry
+import com.pyrus.pyrusservicedesk._ref.utils.ConfigUtils
 import com.pyrus.pyrusservicedesk.databinding.PsdViewHolderRatingItemBinding
 import com.pyrus.pyrusservicedesk.payload_adapter.BaseViewHolder
 import com.pyrus.pyrusservicedesk.payload_adapter.ItemFingerprint
@@ -42,7 +44,7 @@ internal class RatingTextHolder(
 
     init {
         binding.root.setOnClickListener { rating?.let { rating -> onRatingClick(rating) } }
-        //TODO kate mb color
+        binding.ratingText.backgroundTintList = ColorStateList.valueOf(ConfigUtils.getSupportMessageTextBackgroundColor(binding.root.context))
     }
 
     override fun bind(builder: PayloadActionBuilder<CommentEntry.RatingTextValues>) = builder.diff {

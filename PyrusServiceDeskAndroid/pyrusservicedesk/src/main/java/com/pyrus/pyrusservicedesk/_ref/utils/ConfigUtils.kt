@@ -5,6 +5,7 @@ import android.content.Context
 import android.content.SharedPreferences
 import android.graphics.Bitmap
 import android.graphics.Canvas
+import android.graphics.Color
 import android.graphics.Matrix
 import android.graphics.Paint
 import android.graphics.PorterDuff
@@ -38,6 +39,19 @@ internal class ConfigUtils{
                 StaticRepository.getConfiguration().themeColor != null -> StaticRepository.getConfiguration().themeColor!!
                 else -> getColorByAttrId(context, androidx.appcompat.R.attr.colorAccent)
             }
+        }
+        @ColorInt
+        fun getSecondAccentColor(context: Context): Int {
+            val overlayColor = context.getColor(R.color.psd_color_blue_white_01)
+            val accentColor = getAccentColor(context)
+
+            val overlayAlpha = Color.alpha(overlayColor) / 255f
+            val originalAlpha = 1 - overlayAlpha
+
+            val red = (Color.red(overlayColor) * overlayAlpha + Color.red(accentColor) * originalAlpha).toInt()
+            val green = (Color.green(overlayColor) * overlayAlpha + Color.green(accentColor) * originalAlpha).toInt()
+            val blue = (Color.blue(overlayColor) * overlayAlpha + Color.blue(accentColor) * originalAlpha).toInt()
+            return Color.rgb(red, green, blue)
         }
 
         /**

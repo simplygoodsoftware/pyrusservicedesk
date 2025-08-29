@@ -634,6 +634,20 @@ internal class TicketFragment: TeaFragment<Model, Event, Effect>() {
         binding.playerProgressBar.thumbTintList = ColorStateList.valueOf(accentColor)
         binding.playerProgressBar.progressBackgroundTintList = ColorStateList.valueOf(resources.getColor(R.color.psd_color_black_01))
         binding.trackCurrentTime.setTextColor(ConfigUtils.getSecondaryColorOnMainBackground(requireContext()))
+
+        val ratingBackgroundColor = ColorStateList.valueOf(ConfigUtils.getSupportMessageTextBackgroundColor(binding.root.context))
+        binding.rating.rating1.backgroundTintList = ratingBackgroundColor
+        binding.rating.rating2.backgroundTintList = ratingBackgroundColor
+        binding.rating.rating3.backgroundTintList = ratingBackgroundColor
+        binding.rating.rating4.backgroundTintList = ratingBackgroundColor
+        binding.rating.rating5.backgroundTintList = ratingBackgroundColor
+
+        binding.rating.rating1Mini.backgroundTintList = ratingBackgroundColor
+        binding.rating.rating2Mini.backgroundTintList = ratingBackgroundColor
+        binding.rating.rating3Mini.backgroundTintList = ratingBackgroundColor
+
+        binding.rating.like1.backgroundTintList = ratingBackgroundColor
+        binding.rating.like2.backgroundTintList = ratingBackgroundColor
     }
 
     private fun onMenuItemClicked(menuItem: MenuItem?): Boolean {

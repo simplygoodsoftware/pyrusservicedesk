@@ -16,7 +16,7 @@ import android.view.View;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
-import com.pyrus.pyrusservicedesk.R;
+import com.pyrus.pyrusservicedesk._ref.utils.ConfigUtils;
 
 
 /**
@@ -55,9 +55,9 @@ public class RecordIndicationView extends View {
         bgPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
 
         colorsBackground = new int[] {
-            context.getResources().getColor(R.color.psd_bg_record_gradient_1, context.getTheme()),
-            context.getResources().getColor(R.color.psd_bg_record_gradient_2, context.getTheme()),
-            context.getResources().getColor(R.color.psd_bg_record_gradient_3, context.getTheme())
+            ConfigUtils.Companion.getSecondAccentColor(context),
+            ConfigUtils.Companion.getSecondAccentColor(context),
+            ConfigUtils.Companion.getSecondAccentColor(context)
         };
 
         colorBar = Color.WHITE;
