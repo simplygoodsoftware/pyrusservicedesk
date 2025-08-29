@@ -63,4 +63,6 @@ internal interface Preferences {
      */
     fun getLastTokenRegisterMap(): Map<String, Long>
 
+    fun saveCurrentUserId(userId: String)
+    fun getCurrentUserId(): String?
 }

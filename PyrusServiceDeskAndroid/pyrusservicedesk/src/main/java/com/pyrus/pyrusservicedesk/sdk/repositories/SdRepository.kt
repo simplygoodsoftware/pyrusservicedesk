@@ -2,6 +2,7 @@ package com.pyrus.pyrusservicedesk.sdk.repositories
 
 import android.net.Uri
 import androidx.core.net.toFile
+import com.pyrus.pyrusservicedesk.PyrusServiceDesk.Companion.API_VERSION_2
 import com.pyrus.pyrusservicedesk._ref.data.Attachment
 import com.pyrus.pyrusservicedesk._ref.data.FullTicket
 import com.pyrus.pyrusservicedesk._ref.data.multy_chat.Application
@@ -20,6 +21,7 @@ import com.pyrus.pyrusservicedesk._ref.utils.toTry2
 import com.pyrus.pyrusservicedesk.core.Account
 import com.pyrus.pyrusservicedesk.core.getInstanceId
 import com.pyrus.pyrusservicedesk.core.getUsers
+import com.pyrus.pyrusservicedesk.core.getVersion
 import com.pyrus.pyrusservicedesk.sdk.FileResolver
 import com.pyrus.pyrusservicedesk.sdk.data.intermediate.FileUploadResponseData
 import com.pyrus.pyrusservicedesk.sdk.data.intermediate.TicketsDto
@@ -110,6 +112,14 @@ internal class SdRepository(
         val serverId = idStore.getTicketServerId(ticketId) ?: ticketId
         val orgLogoUrl = getOrgLogoUrl(userId, account)
 
+        if (serverId <= 0 && account.getVersion() == API_VERSION_2) {
+            val syncTry = synchronizer.syncData(SyncRequest.Data, force).checkResponse(userId)
+            if (syncTry.isFailed()) return syncTry
+
+            val lastServerTicket = getLastServerTicket(serverId, account, userId, orgLogoUrl)
+            lastServerTicket?.let { return Try2.Success(it) }
+        }
+
         if (serverId <= 0) {
             val commands = commandsStore.getCommands(serverId)
             val firstCommand = commands.firstOrNull()
@@ -155,12 +165,21 @@ internal class SdRepository(
 
         val syncTry = synchronizer.syncData(SyncRequest.Data, force).checkResponse(userId)
         if (syncTry.isFailed()) return syncTry
-        val localTicket = ticketsStore.getTicketWithComments(301863225)
+
+        val localTicket = ticketsStore.getTicketWithComments(serverId)
             ?: return Try2.Failure(GetTicketsError.NoDataFound)
 
         val commands = commandsStore.getCommands(serverId)
         val ticket = repositoryMapper.mergeTicket(account, userId, localTicket, commands, orgLogoUrl)
         return Try2.Success(ticket)
+    }
+
+    private fun getLastServerTicket(serverId: Long, account: Account, userId: String, orgLogoUrl: String?): FullTicket? {
+        val id = ticketsStore.getTickets().lastOrNull()?.ticketId ?: return null
+        val localTicket = ticketsStore.getTicketWithComments(id) ?: return null
+        val commands = commandsStore.getCommands(serverId)
+        val ticket = repositoryMapper.mergeTicket(account, userId, localTicket, commands, orgLogoUrl)
+        return ticket
     }
 
     fun getFeedFlow(user: UserInternal, ticketId: Long): Flow<FullTicket?> {

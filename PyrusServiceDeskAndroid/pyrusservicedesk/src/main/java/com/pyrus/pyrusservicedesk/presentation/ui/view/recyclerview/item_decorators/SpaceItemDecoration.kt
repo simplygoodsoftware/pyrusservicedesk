@@ -36,7 +36,7 @@ internal class SpaceItemDecoration(
             spaceFinal = (spaceFinal * it.getMultiplier(parent.getChildAdapterPosition(view))).toInt()
         }
 
-        outRect.bottom = spaceFinal
+        outRect.top = spaceFinal
     }
 }
 

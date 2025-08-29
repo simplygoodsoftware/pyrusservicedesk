@@ -20,6 +20,7 @@ import com.pyrus.pyrusservicedesk.AppResourceManager
 import com.pyrus.pyrusservicedesk.R
 import com.pyrus.pyrusservicedesk._ref.data.multy_chat.MultichatButtons
 import com.pyrus.pyrusservicedesk.core.StaticRepository
+import com.pyrus.pyrusservicedesk.sdk.updates.PreferencesManager.Companion.PREFERENCE_KEY_INSTANCE_ID
 import java.util.UUID
 
 internal class ConfigUtils{
@@ -337,10 +338,10 @@ internal class ConfigUtils{
          */
         fun getInstanceId(preference: SharedPreferences): String {
             return when {
-                preference.contains(PREFERENCE_KEY_USER_ID) -> preference.getString(PREFERENCE_KEY_USER_ID, "")!!
+                preference.contains(PREFERENCE_KEY_INSTANCE_ID) -> preference.getString(PREFERENCE_KEY_INSTANCE_ID, "")!!
                 else -> {
                     val userId = UUID.randomUUID().toString()
-                    preference.edit().putString(PREFERENCE_KEY_USER_ID, userId).apply()
+                    preference.edit().putString(PREFERENCE_KEY_INSTANCE_ID, userId).apply()
                     userId
                 }
             }

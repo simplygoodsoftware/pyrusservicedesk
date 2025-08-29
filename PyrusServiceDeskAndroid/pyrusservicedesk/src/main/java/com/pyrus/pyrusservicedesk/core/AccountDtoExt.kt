@@ -6,7 +6,7 @@ import com.pyrus.pyrusservicedesk.sdk.data.UserDataDto
 import com.pyrus.pyrusservicedesk.sdk.repositories.data_base.data.TicketEntity
 import com.pyrus.pyrusservicedesk.sdk.sync.SyncMapper.calcLastNoteId
 
-private const val API_VERSION_1: Int = 0
+private const val API_VERSION_1: Int = 2
 private const val API_VERSION_2: Int = 2
 private const val API_VERSION_3: Int = 3
 
@@ -41,7 +41,7 @@ internal fun Account.getInstanceId(): String = when(this) {
 }
 
 internal fun Account.getVersion(): Int = when(this) {
-    is Account.V1 -> API_VERSION_2
+    is Account.V1 -> API_VERSION_1
     is Account.V2 -> API_VERSION_2
     is Account.V3 -> API_VERSION_3
 }

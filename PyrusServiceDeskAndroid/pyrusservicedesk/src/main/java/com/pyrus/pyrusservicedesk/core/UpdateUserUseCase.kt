@@ -11,7 +11,7 @@ internal class UpdateUserUseCase(
 
     fun updateUser() {
         val currentUserId = preferencesManager.getCurrentUserId()
-        val newUserId = accountStore.getAccount().getUserId()
+        val newUserId = accountStore.getAccount().getUserId() //TODO kate почему-то тот же юзер
         if (currentUserId != newUserId) {
             PyrusServiceDesk.refresh()
             newUserId?.let { preferencesManager.saveCurrentUserId(it) }
