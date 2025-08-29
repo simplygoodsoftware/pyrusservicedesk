@@ -79,6 +79,7 @@ internal object SyncMapper {
                 attachments = request.attachments?.map { AttachmentDataDto(it.guid!!, 0, it.name) },
                 ticketId = request.ticketId,
                 rating = request.rating,
+                ratingComment = request.ratingComment,
             ),
         )
         is SyncRequest.Command.MarkTicketAsRead -> TicketCommandDto(

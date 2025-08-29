@@ -139,11 +139,16 @@ private class FeatureReducer(): Logic<State, Message, Effect>() {
                 effects { +Effect.Inner.OpenPreview(attach, currentState.ticket.userId) }
             }
             is Message.Outer.OnRatingClick -> {
-                if (state !is State.Content) return
+                val currentState = state as? State.Content ?: return
+                val ticket = currentState.ticket
+                state { currentState.copy(ticket = ticket?.copy(showRating = false)) }
                 effects { +Effect.Inner.SendRatingComment(
                     message.rating,
+                    message.ratingComment,
                     ticketId = (state as State.Content).ticketId,
                 ) }
+                if (message.ratingComment == null)
+                    effects { +Effect.Outer.OpenRatingComment(currentState.ticket?.showRatingText) }
             }
             is Message.Outer.OnErrorCommentClick -> {
                 if (state !is State.Content) return
@@ -412,7 +417,9 @@ private class TicketActor(
         }
         is Effect.Inner.SendRatingComment -> flow {
             preferencesManager.saveLastActiveTime(System.currentTimeMillis())
-            repository.addRatingComment(user, ticketId, effect.rating)
+            if (effect.rating == null && effect.ratingComment == null)
+                return@flow
+            repository.addRatingComment(user, ticketId, effect.rating, effect.ratingComment)
         }
         is Effect.Inner.OpenPreview -> singleFlow {
             val user = (accountStore.getAccount() as? Account.V3)?.users?.find { it.userId == effect.userId }

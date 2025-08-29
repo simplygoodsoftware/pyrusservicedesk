@@ -276,6 +276,7 @@ internal class RepositoryMapper(
             orgLogoUrl = orgLogoUrl,
             isActive = ticket.ticket.isActive == true,
             isRead = isRead,
+            ratingSettings = ticket.ticket.ratingSettings,
         )
     }
 
@@ -378,7 +379,8 @@ internal class RepositoryMapper(
                 ticketId = command.ticketId ?: return null,
                 comment = command.comment,
                 attachments = entity.attachments?.map(::map),
-                rating = command.rating
+                rating = command.rating,
+                ratingComment = command.ratingComment,
             )
             CommandsParamsType.MarkTicketAsRead.ordinal -> SyncRequest.Command.MarkTicketAsRead(
                 localId = command.localId,
@@ -418,6 +420,7 @@ internal class RepositoryMapper(
                 rating = command.rating,
                 token = null,
                 tokenType = null,
+                ratingComment = command.ratingComment,
             )
             is SyncRequest.Command.MarkTicketAsRead -> CommandEntity(
                 isError = isError,
@@ -434,6 +437,7 @@ internal class RepositoryMapper(
                 rating = null,
                 token = null,
                 tokenType = null,
+                ratingComment = null,
             )
             is SyncRequest.Command.SetPushToken -> CommandEntity(
                 isError = isError,
@@ -450,6 +454,7 @@ internal class RepositoryMapper(
                 rating = null,
                 token = command.token,
                 tokenType = command.tokenType,
+                ratingComment = null,
             )
         }
         val attachments = when (command) {
@@ -522,6 +527,7 @@ internal class RepositoryMapper(
             orgLogoUrl = orgLogoUrl,
             isActive = true,
             isRead = true,
+            ratingSettings = null,
         )
     }
 

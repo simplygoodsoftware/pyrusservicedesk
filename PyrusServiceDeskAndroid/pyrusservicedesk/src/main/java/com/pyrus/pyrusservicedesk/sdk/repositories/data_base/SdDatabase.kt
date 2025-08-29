@@ -4,8 +4,10 @@ import android.content.Context
 import androidx.room.Database
 import androidx.room.Room
 import androidx.room.RoomDatabase
+import androidx.room.TypeConverters
 import androidx.room.migration.Migration
 import androidx.sqlite.db.SupportSQLiteDatabase
+import com.pyrus.pyrusservicedesk.sdk.Converter
 import com.pyrus.pyrusservicedesk.sdk.repositories.data_base.SdDatabase.Companion.APPLICATIONS_TABLE
 import com.pyrus.pyrusservicedesk.sdk.repositories.data_base.SdDatabase.Companion.COMMANDS_TABLE
 import com.pyrus.pyrusservicedesk.sdk.repositories.data_base.SdDatabase.Companion.COMMENTS_TABLE
@@ -35,8 +37,9 @@ import com.pyrus.pyrusservicedesk.sdk.repositories.data_base.data.UserEntity
         MemberEntity::class,
     ],
     exportSchema = false,
-    version = 4
+    version = 6
 )
+@TypeConverters(Converter::class)
 internal abstract class SdDatabase : RoomDatabase() {
 
     abstract fun ticketsDao(): TicketsDao
@@ -64,7 +67,9 @@ internal abstract class SdDatabase : RoomDatabase() {
             ).addMigrations(
                 Migration1to2(),
                 Migration2to3(),
-                Migration3to4()
+                Migration3to4(),
+                Migration4to5(),
+                Migration5to6(),
             ).build()
         }
 
@@ -105,6 +110,9 @@ private class Migration2to3: Migration(2, 3) {
     }
 }
 
+//TODO kate
+// for merge helpy sd and old sd,
+// should combine migrations
 private class Migration3to4: Migration(3, 4) {
     override fun migrate(db: SupportSQLiteDatabase) {
 
@@ -115,5 +123,20 @@ private class Migration3to4: Migration(3, 4) {
         db.execSQL("ALTER TABLE $COMMANDS_TABLE DROP COLUMN user_id")
 
         db.execSQL("ALTER TABLE $COMMANDS_TABLE RENAME COLUMN user_id_new TO user_id")
+    }
+}
+
+
+private class Migration4to5: Migration(4, 5) {
+    override fun migrate(db: SupportSQLiteDatabase) {
+        db.execSQL("ALTER TABLE $TICKETS_TABLE ADD COLUMN rating_settings_size INTEGER")
+        db.execSQL("ALTER TABLE $TICKETS_TABLE ADD COLUMN rating_settings_type INTEGER")
+        db.execSQL("ALTER TABLE $TICKETS_TABLE ADD COLUMN rating_settings_rating_text_values TEXT")
+    }
+}
+
+private class Migration5to6: Migration(5, 6) {
+    override fun migrate(db: SupportSQLiteDatabase) {
+        db.execSQL("ALTER TABLE $COMMANDS_TABLE ADD COLUMN rating_comment TEXT")
     }
 }

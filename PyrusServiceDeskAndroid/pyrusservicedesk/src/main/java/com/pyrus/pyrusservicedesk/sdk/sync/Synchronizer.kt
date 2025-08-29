@@ -264,6 +264,8 @@ internal class Synchronizer(
             localTicketsStore.getTickets().find { it.ticketId == req.ticketId }?.isActive
             if (req.ticketId > 0
                 && localTicketsStore.getTickets().find { it.ticketId == req.ticketId }?.isActive == false
+                && req.rating == null
+                && req.ratingComment == null
             ) {
                 val newRequest = req.copy(ticketId = commandsStore.getNextLocalId(), requestNewTicket = true)
                 return@map copySyncReqRes(syncReqRes, newRequest)

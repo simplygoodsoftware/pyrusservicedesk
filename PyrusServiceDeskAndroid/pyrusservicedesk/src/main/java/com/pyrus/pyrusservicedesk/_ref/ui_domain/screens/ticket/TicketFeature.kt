@@ -45,7 +45,7 @@ interface TicketContract {
             class OnPreviewClick(val commentId: Long, val attachmentId: Long) : Outer
             class OnErrorCommentClick(val localId: Long) : Outer
             class OnCopyClick(val text: String) : Outer
-            class OnRatingClick(val rating: Int) : Outer
+            class OnRatingClick(val rating: Int?, val ratingComment: String?) : Outer
             object OnShowAttachVariantsClick : Outer
             object OnSendClick : Outer
             object OnCloseClick : Outer
@@ -103,6 +103,7 @@ interface TicketContract {
             object ShowAudioRecordTooltip : Outer
             data object Exit : Outer
             data class OpenPreview(val fileData: FileData) : Outer
+            data class OpenRatingComment(val rateUsText: String?) : Outer
         }
 
         sealed interface Inner : Effect {
@@ -118,7 +119,8 @@ interface TicketContract {
                 val ticketId: Long,
             ) : Inner
             class SendRatingComment(
-                val rating: Int,
+                val rating: Int?,
+                val ratingComment: String?,
                 val ticketId: Long,
             ) : Inner
             class OpenPreview(val attachment: Attachment, val userId: String?) : Inner

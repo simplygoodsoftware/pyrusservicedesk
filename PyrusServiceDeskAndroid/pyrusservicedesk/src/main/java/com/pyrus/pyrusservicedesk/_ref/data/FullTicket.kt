@@ -5,6 +5,7 @@ data class FullTicket(
     val comments: List<Comment>,
     val showRating: Boolean,
     val showRatingText: String?,
+    val ratingSettings: RatingSettings?,
     val orgLogoUrl: String?,
     val userId: String,
     val ticketId: Long,

@@ -28,4 +28,5 @@ internal data class CommandEntity(
     @ColumnInfo(name = "comment_id") val commentId: Long?,
     @ColumnInfo(name = "token") val token: String?,
     @ColumnInfo(name = "token_type") val tokenType: String?,
+    @ColumnInfo(name = "rating_comment")  val ratingComment: String?,
 ) : TicketHeaderEntity

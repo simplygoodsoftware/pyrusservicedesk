@@ -15,7 +15,6 @@ internal interface TicketView {
         val showNoConnectionError: Boolean,
         val isRefreshing: Boolean,
         val toolbarTitleText: TextProvider?,
-        val showCloseInfo: Boolean,
         val showInputPanel: Boolean,
         val wavesIsVisible: Boolean,
         val recordState: TicketContract.RecordState,
@@ -23,6 +22,16 @@ internal interface TicketView {
         val actionButtonIsSend: Boolean,
         val canDragRecordMic: Boolean,
         val scrollDownIsVisible: Boolean,
+        val showRating: Boolean,
+        val ratingTextRvVisibility: Boolean,
+        val smileLl5Visibility: Boolean,
+        val smileLlVisibility: Boolean,
+        val likeLlVisibility: Boolean,
+        val rating2MiniVisibility: Boolean,
+        val ratingText: String?,
+        val size: Int?,
+        val type: Int?,
+        val  ratingTextValues: List<CommentEntry.RatingTextValues>?,
     ) {
         override fun toString(): String {
             return "Model(inputText='$inputText', sendEnabled=$sendEnabled, comments=${comments?.size}, isLoading=$isLoading, showNoConnectionError=$showNoConnectionError)"
@@ -33,7 +42,7 @@ internal interface TicketView {
         data class OnPreviewClick(val commentId: Long, val attachmentId: Long) : Event
         data class OnErrorCommentClick(val localId: Long) : Event
         data class OnCopyClick(val text: String) : Event
-        data class OnRatingClick(val rating: Int) : Event
+        data class OnRatingClick(val rating: Int?, val rateUsText: String?) : Event
         data object OnShowAttachVariantsClick : Event
         data object OnSendClick : Event
         data object OnCloseClick : Event
@@ -69,5 +78,6 @@ internal interface TicketView {
         object ShowAudioRecordTooltip : Effect
         data object Exit : Effect
         data class OpenPreview(val fileData: FileData) : Effect
+        data class OpenRatingComment(val rateUsText: String?) : Effect
     }
 }

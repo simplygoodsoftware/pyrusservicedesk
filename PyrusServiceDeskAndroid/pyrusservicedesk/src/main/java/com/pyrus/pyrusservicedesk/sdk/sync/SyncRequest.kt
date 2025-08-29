@@ -23,6 +23,7 @@ internal sealed interface SyncRequest {
             val comment: String?,
             val attachments: List<Attachment>?,
             val rating: Int?,
+            val ratingComment: String?,
         ) : Command
 
         data class SetPushToken(

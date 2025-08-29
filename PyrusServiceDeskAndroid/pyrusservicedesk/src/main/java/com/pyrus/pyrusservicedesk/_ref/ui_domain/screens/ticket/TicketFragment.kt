@@ -45,7 +45,7 @@ import com.pyrus.pyrusservicedesk._ref.ui_domain.screens.ticket.adapter.fingerpr
 import com.pyrus.pyrusservicedesk._ref.ui_domain.screens.ticket.adapter.fingerprints.CommentTextFingerprint
 import com.pyrus.pyrusservicedesk._ref.ui_domain.screens.ticket.adapter.fingerprints.DateFingerprint
 import com.pyrus.pyrusservicedesk._ref.ui_domain.screens.ticket.adapter.fingerprints.RatingCommentFingerprint
-import com.pyrus.pyrusservicedesk._ref.ui_domain.screens.ticket.adapter.fingerprints.RatingFingerprint
+import com.pyrus.pyrusservicedesk._ref.ui_domain.screens.ticket.adapter.fingerprints.RatingTextFingerprint
 import com.pyrus.pyrusservicedesk._ref.ui_domain.screens.ticket.adapter.fingerprints.SimpleTextFingerprint
 import com.pyrus.pyrusservicedesk._ref.ui_domain.screens.ticket.record.AudioRecordView
 import com.pyrus.pyrusservicedesk._ref.utils.AudioWrapper
@@ -69,8 +69,11 @@ import com.pyrus.pyrusservicedesk.databinding.PsdFragmentTicketBinding
 import com.pyrus.pyrusservicedesk.payload_adapter.PayloadListAdapter
 import com.pyrus.pyrusservicedesk.presentation.ui.navigation_page.ticket.dialogs.attach_files.AttachFileVariantsFragment
 import com.pyrus.pyrusservicedesk.presentation.ui.navigation_page.ticket.dialogs.comment_actions.ErrorCommentActionsDialog
+import com.pyrus.pyrusservicedesk.presentation.ui.navigation_page.ticket.dialogs.rating.RatingBottomSheetDialogFragment
+import com.pyrus.pyrusservicedesk.presentation.ui.navigation_page.ticket.dialogs.rating.RatingBottomSheetDialogFragment.Companion.RATING_COMMENT_KEY
 import com.pyrus.pyrusservicedesk.presentation.ui.view.recyclerview.item_decorators.CommentVerticalItemDecoration
 import com.pyrus.pyrusservicedesk.presentation.ui.view.recyclerview.item_decorators.GroupVerticalItemDecoration
+import com.pyrus.pyrusservicedesk.presentation.ui.view.recyclerview.item_decorators.SpaceItemDecoration
 import com.pyrus.pyrusservicedesk.sdk.repositories.UserInternal
 import com.pyrus.pyrusservicedesk.utils.UiUtils.hideKeyboard
 import com.pyrus.pyrusservicedesk.utils.hapticFeedback
@@ -91,10 +94,13 @@ internal class TicketFragment: TeaFragment<Model, Event, Effect>() {
         CommentAttachmentFingerprint(::dispatch, viewLifecycleOwner),
         CommentPreviewableAttachmentFingerprint(::dispatch, viewLifecycleOwner),
         DateFingerprint(),
-        RatingFingerprint(::dispatch),
         RatingCommentFingerprint(::dispatch),
         SimpleTextFingerprint(),
         CommentAudioFingerprint(audioWrapper, lifecycleScope, ::dispatch),
+    ) }
+
+    private val ratingAdapter: PayloadListAdapter<CommentEntry.RatingTextValues> by lazy { PayloadListAdapter(
+        RatingTextFingerprint(::dispatch)
     ) }
 
     private val inputTextWatcher = object : TextWatcher {
@@ -145,10 +151,6 @@ internal class TicketFragment: TeaFragment<Model, Event, Effect>() {
 
             if (!showInput) hideKeyboard(requireView())
         }
-        diff(Model::showCloseInfo) { showCloseInfo ->
-            binding.closeInfo.isVisible = showCloseInfo
-            binding.closeInfoMock.isVisible = showCloseInfo
-        }
         diff(Model::wavesIsVisible) { wavesIsVisible ->
             audioRecordView.setRecordingIndicationVisibility(wavesIsVisible)
         }
@@ -185,7 +187,42 @@ internal class TicketFragment: TeaFragment<Model, Event, Effect>() {
                 }
             }
         }
+        diff(Model::ratingTextRvVisibility) { ratingTextRvVisibility ->
+            binding.rating.ratingTextRv.isVisible = ratingTextRvVisibility
+        }
 
+        diff(Model::smileLl5Visibility) { smileLl5Visibility ->
+            binding.rating.smileLl5.isVisible = smileLl5Visibility
+        }
+
+        diff(Model::smileLlVisibility) { smileLlVisibility ->
+            binding.rating.smileLl.isVisible = smileLlVisibility
+        }
+
+        diff(Model::likeLlVisibility) { likeLlVisibility ->
+            binding.rating.likeLl.isVisible = likeLlVisibility
+        }
+
+        diff(Model::ratingText) { ratingText ->
+            binding.rating.rateUsText.text = ratingText
+        }
+
+        diff(Model::rating2MiniVisibility) { rating2MiniVisibility ->
+            binding.rating.rating2Mini.isVisible = rating2MiniVisibility
+        }
+
+        diff(Model::ratingTextValues) { ratingTextValues ->
+            val list = ratingTextValues?.sortedByDescending  { it.rating }
+            list?.let { ratingAdapter.submitList(it) }
+        }
+
+        diff(Model::showRating) { showRating ->
+            binding.rating.root.isVisible = showRating
+            binding.gradient.isVisible = showRating
+            val params = binding.refresh.layoutParams as ViewGroup.MarginLayoutParams
+            params.bottomMargin = if (showRating) -resources.getDimension(R.dimen.psd_offset_default).toInt() else 0
+            binding.refresh.layoutParams = params
+        }
     }
 
     override fun handleEffect(effect: Effect) = when(effect) {
@@ -222,11 +259,19 @@ internal class TicketFragment: TeaFragment<Model, Event, Effect>() {
         is Effect.ShowAudioRecordTooltip -> audioRecordView.showAudioRecordTooltip()
         is Effect.Exit -> injector().router.exit()
         is Effect.OpenPreview -> injector().router.navigateTo(SdScreens.ImageScreen(effect.fileData))
+        is Effect.OpenRatingComment -> {
+            val bottomSheet = RatingBottomSheetDialogFragment.newInstance(effect.rateUsText)
+            bottomSheet.show(parentFragmentManager, bottomSheet.tag)
+        }
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         bindFeature()
+        parentFragmentManager.setFragmentResultListener(RATING_COMMENT_KEY, this) { _, bundle ->
+            val result = bundle.getString(RATING_COMMENT_KEY)
+            dispatch(Event.OnRatingClick(null, result))
+        }
         audioWrapper = injector().audioWrapper
     }
 
@@ -291,7 +336,6 @@ internal class TicketFragment: TeaFragment<Model, Event, Effect>() {
                 return WindowInsetsCompat.CONSUMED
             }
         }
-        ViewCompat.setOnApplyWindowInsetsListener(binding.closeInfoText, insetListener)
         ViewCompat.setOnApplyWindowInsetsListener(binding.inputLayout, insetListener)
         ViewCompat.setOnApplyWindowInsetsListener(binding.actionCircleHolder, insetListener)
     }
@@ -398,6 +442,20 @@ internal class TicketFragment: TeaFragment<Model, Event, Effect>() {
                 dispatch(Event.OnStopEndSendRecord)
             }
         }
+
+        binding.rating.rating1.setOnClickListener { dispatch(Event.OnRatingClick(1, null)) }
+        binding.rating.rating2.setOnClickListener { dispatch(Event.OnRatingClick(2, null)) }
+        binding.rating.rating3.setOnClickListener { dispatch(Event.OnRatingClick(3, null)) }
+        binding.rating.rating4.setOnClickListener { dispatch(Event.OnRatingClick(4, null)) }
+        binding.rating.rating5.setOnClickListener { dispatch(Event.OnRatingClick(5, null)) }
+
+        binding.rating.rating1Mini.setOnClickListener { dispatch(Event.OnRatingClick(1, null)) }
+        binding.rating.rating2Mini.setOnClickListener { dispatch(Event.OnRatingClick(3, null)) }
+        binding.rating.rating3Mini.setOnClickListener { dispatch(Event.OnRatingClick(5, null)) }
+
+        binding.rating.like1.setOnClickListener { dispatch(Event.OnRatingClick(1, null)) }
+        binding.rating.like2.setOnClickListener { dispatch(Event.OnRatingClick(5, null)) }
+
     }
 
     private fun requestAudioPermission(): Boolean {
@@ -426,6 +484,18 @@ internal class TicketFragment: TeaFragment<Model, Event, Effect>() {
     private fun initUi() {
         initCommentsRecyclerView()
 
+        binding.rating.ratingTextRv.adapter = ratingAdapter
+        binding.rating.ratingTextRv.layoutManager = LinearLayoutManager(
+            requireContext(),
+            LinearLayoutManager.VERTICAL,
+            true
+        )
+        binding.rating.ratingTextRv.addItemDecoration(
+            SpaceItemDecoration(
+                resources.getDimensionPixelSize(R.dimen.psd_comments_item_space_double)
+            )
+        )
+
         binding.progressBar.indeterminateDrawable.setColorFilter(
             ConfigUtils.getAccentColor(requireContext()),
             PorterDuff.Mode.SRC_IN
@@ -435,13 +505,7 @@ internal class TicketFragment: TeaFragment<Model, Event, Effect>() {
         applyStyle()
     }
 
-    override fun onStart() {
-        binding.closeInfo.setParent(binding.refresh)
-        super.onStart()
-    }
-
     override fun onStop() {
-        binding.closeInfo.cleanParent()
         audioWrapper.stop()
         super.onStop()
     }

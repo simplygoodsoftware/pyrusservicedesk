@@ -4,6 +4,8 @@ import com.pyrus.pyrusservicedesk.R
 import com.pyrus.pyrusservicedesk._ref.data.Attachment
 import com.pyrus.pyrusservicedesk._ref.data.Comment
 import com.pyrus.pyrusservicedesk._ref.data.FullTicket
+import com.pyrus.pyrusservicedesk._ref.data.RatingSettings
+import com.pyrus.pyrusservicedesk._ref.data.RatingTextValues
 import com.pyrus.pyrusservicedesk._ref.ui_domain.screens.ticket.TicketContract.Effect
 import com.pyrus.pyrusservicedesk._ref.ui_domain.screens.ticket.TicketContract.Message
 import com.pyrus.pyrusservicedesk._ref.ui_domain.screens.ticket.TicketContract.RecordState
@@ -39,14 +41,27 @@ internal object TicketMapper {
             isRefreshing = state.isLoading,
             toolbarTitleText = state.ticket?.subject?.cleanTags()?.textRes()
                 ?: (R.string.new_ticket).textRes(),
-            showInputPanel = state.ticket?.isActive == true,
-            showCloseInfo = state.ticket?.isActive != true,
+            showInputPanel = true,
             wavesIsVisible = state.recordState is RecordState.Recording || state.recordState is RecordState.HoldRecording,
             recordState = state.recordState,
             pendingAudio = state.pendingRecord,
             actionButtonIsSend = actionButtonIsSend(state),
             canDragRecordMic = state.recordState is RecordState.None || state.recordState is RecordState.Recording,
             scrollDownIsVisible = state.recordState !is RecordState.Recording && state.recordState !is RecordState.HoldRecording,
+            ratingTextRvVisibility = SatisfactionDisplayType.fromInt(state.ticket?.ratingSettings?.type) == SatisfactionDisplayType.Text,
+            smileLl5Visibility = getSmile5LlVisibility(state.ticket?.ratingSettings),
+            smileLlVisibility = getSmileLlVisibility(state.ticket?.ratingSettings),
+            likeLlVisibility = SatisfactionDisplayType.fromInt(state.ticket?.ratingSettings?.type) == SatisfactionDisplayType.Like,
+            rating2MiniVisibility = getSmileLlVisibility(state.ticket?.ratingSettings) && state.ticket?.ratingSettings?.size == 3,
+            ratingText = state.ticket?.showRatingText,
+            size = state.ticket?.ratingSettings?.size,
+            type = state.ticket?.ratingSettings?.type,
+            ratingTextValues = state.ticket?.ratingSettings?.ratingTextValues?.map {
+                mapToRatingTextValuesEntry(
+                    it
+                )
+            },
+            showRating = state.ticket?.showRating == true,
         )
         State.Loading -> Model(
             inputText = "",
@@ -57,13 +72,22 @@ internal object TicketMapper {
             isRefreshing = false,
             toolbarTitleText = null,
             showInputPanel = false,
-            showCloseInfo = false,
             wavesIsVisible = false,
             recordState = RecordState.None,
             pendingAudio = null,
             actionButtonIsSend = true,
             canDragRecordMic = false,
             scrollDownIsVisible = false,
+            ratingTextRvVisibility = false,
+            smileLl5Visibility = false,
+            smileLlVisibility = false,
+            likeLlVisibility = false,
+            rating2MiniVisibility = false,
+            ratingText = null,
+            size = null,
+            type = null,
+            ratingTextValues = null,
+            showRating = false,
         )
         State.Error -> Model(
             inputText = "",
@@ -74,13 +98,22 @@ internal object TicketMapper {
             isRefreshing = false,
             toolbarTitleText = null,
             showInputPanel = false,
-            showCloseInfo = false,
             wavesIsVisible = false,
             recordState = RecordState.None,
             pendingAudio = null,
             actionButtonIsSend = true,
             canDragRecordMic = false,
             scrollDownIsVisible = false,
+            ratingTextRvVisibility = false,
+            smileLl5Visibility = false,
+            smileLlVisibility = false,
+            likeLlVisibility = false,
+            rating2MiniVisibility = false,
+            ratingText = null,
+            size = null,
+            type = null,
+            ratingTextValues = null,
+            showRating = false,
         )
     }
 
@@ -97,7 +130,7 @@ internal object TicketMapper {
         is Event.OnMessageChanged -> Message.Outer.OnMessageChanged(event.text)
         is Event.OnButtonClick -> Message.Outer.OnButtonClick(event.buttonText)
         is Event.OnPreviewClick -> Message.Outer.OnPreviewClick(event.commentId, event.attachmentId)
-        is Event.OnRatingClick -> Message.Outer.OnRatingClick(event.rating)
+        is Event.OnRatingClick -> Message.Outer.OnRatingClick(event.rating, event.rateUsText)
         is Event.OnErrorCommentClick -> Message.Outer.OnErrorCommentClick(event.localId)
         is Event.OnSendClick -> Message.Outer.OnSendClick
         is Event.OnShowAttachVariantsClick -> Message.Outer.OnShowAttachVariantsClick
@@ -126,6 +159,7 @@ internal object TicketMapper {
         is Effect.Outer.ShowAudioRecordTooltip -> TicketView.Effect.ShowAudioRecordTooltip
         is Effect.Outer.Exit -> TicketView.Effect.Exit
         is Effect.Outer.OpenPreview -> TicketView.Effect.OpenPreview(effect.fileData)
+        is Effect.Outer.OpenRatingComment -> TicketView.Effect.OpenRatingComment(effect.rateUsText)
     }
 
     private fun mapComments(
@@ -139,35 +173,6 @@ internal object TicketMapper {
         addCommentEntries(entries, freshList)
 
         val entriesWithDates = toListWithDates(entries).toMutableList()
-
-        val lastCreationTime = freshList.comments.lastOrNull()?.creationTime ?: System.currentTimeMillis()
-
-        if (freshList.showRating) {
-            if (!freshList.showRatingText.isNullOrBlank()) entriesWithDates += CommentEntry.SimpleText(
-                creationTime = lastCreationTime,
-                entryId = RATING_TEXT_ID,
-                message = freshList.showRatingText,
-                avatarUrl = freshList.orgLogoUrl,
-            )
-            freshList.
-            entriesWithDates += CommentEntry.RatingSelector(
-                creationTime = lastCreationTime,
-                ratingTextRvVisibility = ,
-                smileLl5Visibility = TODO(),
-                smileLlVisibility = TODO(),
-                likeLlVisibility = TODO(),
-                rating2MiniVisibility = TODO(),
-                ratingText = TODO(),
-                size = TODO(),
-                type = TODO(),
-                ratingTextValues = TODO(),
-            )
-        }
-
-        if (!freshList.showRating) {
-            val buttonEntry = freshList.comments.lastOrNull()?.let { extractButtons(it) }
-            if (buttonEntry != null) entriesWithDates += buttonEntry
-        }
 
         entriesWithDates.reverse()
         var resentInbound: Boolean? = null
@@ -215,10 +220,21 @@ internal object TicketMapper {
         return entriesWithDates
     }
 
-    private fun getSmile5LlVisibility(ratingEntry: RatingEntry): Boolean {
-        return SatisfactionDisplayType.fromInt(ratingEntry.ratingSettings?.type) == SatisfactionDisplayType.Emoji
-            && ratingEntry.ratingSettings?.size == 5
-            || ratingEntry.ratingSettings == null
+    private fun mapToRatingTextValuesEntry(ratingTextValue: RatingTextValues) = CommentEntry.RatingTextValues(
+        rating = ratingTextValue.rating,
+        text = ratingTextValue.text
+    )
+
+
+    private fun getSmileLlVisibility(ratingSettings: RatingSettings?): Boolean {
+        return SatisfactionDisplayType.fromInt(ratingSettings?.type) == SatisfactionDisplayType.Emoji
+            && ratingSettings?.size != null
+            && ratingSettings.size < 5
+    }
+    private fun getSmile5LlVisibility(ratingSettings: RatingSettings?): Boolean {
+        return SatisfactionDisplayType.fromInt(ratingSettings?.type) == SatisfactionDisplayType.Emoji
+            && ratingSettings?.size == 5
+            || ratingSettings == null
     }
 
     private fun addWelcomeEntries(

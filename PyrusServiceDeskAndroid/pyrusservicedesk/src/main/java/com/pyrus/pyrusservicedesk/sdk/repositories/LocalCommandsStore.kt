@@ -65,7 +65,8 @@ internal class LocalCommandsStore(
             ticketId = ticketId,
             comment = comment,
             attachments = null,
-            rating = null
+            rating = null,
+            ratingComment = null,
         )
     }
 
@@ -84,10 +85,11 @@ internal class LocalCommandsStore(
     fun addRatingCommand(
         user: UserInternal,
         ticketId: Long,
-        rating: Int,
+        rating: Int?,
+        ratingComment: String?,
         instanceId: String,
     ): SyncRequest.Command.CreateComment {
-        val entity = createRatingCommandEntity(user, ticketId, rating)
+        val entity = createRatingCommandEntity(user, ticketId, rating, ratingComment)
         addOrUpdatePendingCommand(entity)
         return SyncRequest.Command.CreateComment(
             localId = entity.localId,
@@ -99,7 +101,8 @@ internal class LocalCommandsStore(
             ticketId = ticketId,
             comment = null,
             attachments = null,
-            rating = rating
+            rating = rating,
+            ratingComment = ratingComment
         )
     }
 
@@ -198,13 +201,15 @@ internal class LocalCommandsStore(
             commentId = localId,
             token = null,
             tokenType = null,
+            ratingComment = null,
         )
     }
 
     private fun createRatingCommandEntity(
         user: UserInternal,
         ticketId: Long,
-        rating: Int,
+        rating: Int?,
+        ratingComment: String?,
     ): CommandEntity {
         val localId = getNextLocalId()
         return CommandEntity(
@@ -222,6 +227,7 @@ internal class LocalCommandsStore(
             commentId = localId,
             token = null,
             tokenType = null,
+            ratingComment = ratingComment,
         )
     }
 
@@ -247,6 +253,7 @@ internal class LocalCommandsStore(
             commentId = localId,
             token = null,
             tokenType = null,
+            ratingComment = null,
         )
         val attachmentEntities = listOf(createAttachment(commandEntity.commandId, fileData))
 
@@ -283,6 +290,7 @@ internal class LocalCommandsStore(
             commentId = null,
             token = null,
             tokenType = null,
+            ratingComment = null,
         )
     }
 

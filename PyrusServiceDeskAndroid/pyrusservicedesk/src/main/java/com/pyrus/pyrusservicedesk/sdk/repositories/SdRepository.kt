@@ -132,6 +132,7 @@ internal class SdRepository(
                     orgLogoUrl = orgLogoUrl,
                     isActive = true,
                     isRead = true,
+                    ratingSettings = null,
                 )
             }
             return Try2.Success(ticket)
@@ -200,6 +201,7 @@ internal class SdRepository(
                         orgLogoUrl = orgLogoUrl,
                         isActive = true,
                         isRead = true,
+                        ratingSettings = null,
                     )
                 }
             }
@@ -224,10 +226,10 @@ internal class SdRepository(
         sendCommand(command)
     }
 
-    fun addRatingComment(user: UserInternal, ticketId: Long, rating: Int) = coroutineScope.launch(Dispatchers.IO) {
+    fun addRatingComment(user: UserInternal, ticketId: Long, rating: Int?, ratingComment: String?) = coroutineScope.launch(Dispatchers.IO) {
         val serverTicketId = idStore.getTicketServerId(ticketId) ?: ticketId
         val instanceId = accountStore.getAccount().getInstanceId()
-        val command = commandsStore.addRatingCommand(user, serverTicketId, rating, instanceId)
+        val command = commandsStore.addRatingCommand(user, serverTicketId, rating, ratingComment, instanceId)
         sendCommand(command)
     }
 

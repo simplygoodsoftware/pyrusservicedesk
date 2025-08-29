@@ -54,6 +54,6 @@ internal class RatingTextHolder(
     }
 
     private fun onRatingClick(rating: Int) {
-        onEvent(TicketView.Event.OnRatingClick(rating))
+        onEvent(TicketView.Event.OnRatingClick(rating, null))
     }
 }

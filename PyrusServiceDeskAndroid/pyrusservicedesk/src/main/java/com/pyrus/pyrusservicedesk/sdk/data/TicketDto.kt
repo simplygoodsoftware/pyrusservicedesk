@@ -19,6 +19,7 @@ import com.squareup.moshi.JsonClass
  * @param createdAt ticket creation date.
  * @param showRating flag indicating whether the rating should be shown.
  * @param showRatingText rating text if need.
+ * @param ratingSettings rating setting.
  */
 
 @JsonClass(generateAdapter = true)
@@ -34,4 +35,5 @@ internal data class TicketDto(
     @Json(name = "created_at") @DateJ val createdAt: Long?,
     @Json(name = "show_rating") val showRating: Boolean?,
     @Json(name = "show_rating_text") val showRatingText: String?,
+    @Json(name = "rating_settings") val ratingSettings: RatingSettingsDto? = null,
 )

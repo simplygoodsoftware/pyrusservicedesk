@@ -5,6 +5,9 @@ import androidx.room.Embedded
 import androidx.room.Entity
 import androidx.room.ForeignKey
 import androidx.room.Index
+import androidx.room.TypeConverters
+import com.pyrus.pyrusservicedesk._ref.data.RatingSettings
+import com.pyrus.pyrusservicedesk.sdk.Converter
 import com.pyrus.pyrusservicedesk.sdk.repositories.data_base.SdDatabase.Companion.TICKETS_TABLE
 
 @Entity(
@@ -21,6 +24,7 @@ import com.pyrus.pyrusservicedesk.sdk.repositories.data_base.SdDatabase.Companio
         onDelete = ForeignKey.CASCADE
     )],
 )
+@TypeConverters(Converter::class)
 internal data class TicketEntity(
     @ColumnInfo(name = "ticket_id") val ticketId: Long,
     @ColumnInfo(name = "user_id") val userId: String,
@@ -33,4 +37,5 @@ internal data class TicketEntity(
     @ColumnInfo(name = "created_at") val createdAt: Long?,
     @ColumnInfo(name = "show_rating") val showRating: Boolean?,
     @ColumnInfo(name = "show_rating_text") val showRatingText: String?,
+    @Embedded(prefix = "rating_settings_") val ratingSettings: RatingSettings?,
 ) : TicketHeaderEntity

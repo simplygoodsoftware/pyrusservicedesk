@@ -81,7 +81,7 @@
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toTopOf="parent"
-                app:layout_constraintBottom_toTopOf="@+id/input_layout"
+                app:layout_constraintBottom_toTopOf="@+id/rating"
                 app:swipeDirection="both">
 
                 <androidx.recyclerview.widget.RecyclerView
@@ -94,6 +94,24 @@
                     tools:listitem="@layout/psd_view_holder_comment_simple_text" />
 
             </com.pyrus.pyrusservicedesk.presentation.ui.view.swiperefresh.DirectedSwipeRefresh>
+
+            <View
+                android:id="@+id/gradient"
+                android:layout_width="match_parent"
+                android:layout_height="26dp"
+                android:layout_marginBottom="-16dp"
+                android:background="@drawable/fade_gradient_bg"
+                app:layout_constraintBottom_toTopOf="@+id/rating"/>
+
+            <include
+                android:id="@+id/rating"
+                android:layout_height="wrap_content"
+                android:layout_width="match_parent"
+                layout="@layout/psd_view_holder_rating"
+                android:visibility="gone"
+                android:layout_marginBottom="@dimen/psd_offset_default"
+                tools:visibility="visible"
+                app:layout_constraintBottom_toTopOf="@+id/bottom_border" />
 
             <FrameLayout
                 android:id="@+id/scrollDownButtonLayout"
@@ -122,17 +140,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="1dp"
                 android:background="?android:attr/listDivider"
-                app:layout_constraintBottom_toTopOf="@+id/input_layout"
-                app:layout_constraintTop_toBottomOf="@+id/refresh" />
-
-            <View
-                android:id="@+id/closeInfoMock"
-                android:layout_width="match_parent"
-                android:layout_height="@dimen/psd_blur_height"
-                android:visibility="gone"
-                app:layout_constraintBottom_toBottomOf="parent"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintStart_toStartOf="parent"/>
+                app:layout_constraintBottom_toTopOf="@+id/input_layout" />
 
             <FrameLayout
                 android:id="@+id/lockStopLayout"
@@ -198,7 +206,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 app:barrierDirection="top"
-                app:constraint_referenced_ids="closeInfoMock, input_layout" />
+                app:constraint_referenced_ids="input_layout" />
 
             <androidx.constraintlayout.widget.ConstraintLayout
                 android:id="@+id/input_layout"
@@ -464,28 +472,5 @@
             tools:visibility="gone"/>
 
     </androidx.constraintlayout.widget.ConstraintLayout>
-
-    <com.pyrus.pyrusservicedesk._ref.ui_domain.screens.ticket.BlurLayout
-        android:id="@+id/closeInfo"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:visibility="gone"
-        android:background="@color/psd_blur_color"
-        android:layout_gravity="bottom">
-
-        <TextView
-            android:id="@+id/closeInfoText"
-            android:layout_width="match_parent"
-            android:layout_height="@dimen/psd_blur_height"
-            android:gravity="center"
-            android:background="@color/psd_blur_color"
-            android:paddingHorizontal="16dp"
-            android:paddingTop="@dimen/dp_12"
-            android:paddingBottom="16dp"
-            android:textSize="16sp"
-            android:text="@string/ticket_was_closed"
-            android:textColor="@color/psd_not_active_text_color" />
-
-    </com.pyrus.pyrusservicedesk._ref.ui_domain.screens.ticket.BlurLayout>
 
 </FrameLayout>

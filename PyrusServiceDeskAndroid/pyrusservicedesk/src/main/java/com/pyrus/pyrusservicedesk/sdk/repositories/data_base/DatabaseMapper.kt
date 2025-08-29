@@ -1,6 +1,8 @@
 package com.pyrus.pyrusservicedesk.sdk.repositories.data_base
 
 import com.pyrus.pyrusservicedesk.User
+import com.pyrus.pyrusservicedesk._ref.data.RatingSettings
+import com.pyrus.pyrusservicedesk._ref.data.RatingTextValues
 import com.pyrus.pyrusservicedesk._ref.data.multy_chat.Application
 import com.pyrus.pyrusservicedesk._ref.data.multy_chat.Member
 import com.pyrus.pyrusservicedesk.core.Account
@@ -11,6 +13,8 @@ import com.pyrus.pyrusservicedesk.sdk.data.AttachmentDto
 import com.pyrus.pyrusservicedesk.sdk.data.AuthorDto
 import com.pyrus.pyrusservicedesk.sdk.data.AuthorInfoDto
 import com.pyrus.pyrusservicedesk.sdk.data.CommentDto
+import com.pyrus.pyrusservicedesk.sdk.data.RatingSettingsDto
+import com.pyrus.pyrusservicedesk.sdk.data.RatingTextValuesDto
 import com.pyrus.pyrusservicedesk.sdk.data.TicketDto
 import com.pyrus.pyrusservicedesk.sdk.repositories.data_base.data.ApplicationEntity
 import com.pyrus.pyrusservicedesk.sdk.repositories.data_base.data.AttachmentEntity
@@ -116,9 +120,21 @@ internal object DatabaseMapper {
             createdAt = dto.createdAt,
             showRating = dto.showRating,
             showRatingText = dto.showRatingText,
-            lastComment = dto.lastComment?.let { mapToLastCommentInfo(it) }
+            lastComment = dto.lastComment?.let { mapToLastCommentInfo(it) },
+            ratingSettings = dto.ratingSettings?.let { mapToRatingSettings(it) },
         )
     }
+
+    private fun mapToRatingSettings(dto: RatingSettingsDto) = RatingSettings(
+        size = dto.size,
+        type = dto.type,
+        ratingTextValues = dto.ratingTextValues?.map { mapToRatingTextValues(it) }
+    )
+
+    private fun mapToRatingTextValues(dto: RatingTextValuesDto) = RatingTextValues(
+        rating = dto.rating,
+        text = dto.text
+    )
 
     private fun mapToCommentEntity(dto: CommentDto, ticketId: Long) = CommentEntity(
         commentId = dto.commentId,
