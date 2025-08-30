@@ -54,7 +54,7 @@
 "Yesterday" = "Dünən";
 "Date_Format" = "dd MMM, EE";
 "Date_Format_Year" = "dd MMM, EE, yyyy";
-"Time_Format" = "hh:mm a";
+"Time_Format" = "hh:mm";
 "Numbers_Date_Format" = "yyyyddMMHHmmss";
 
 //For requests
