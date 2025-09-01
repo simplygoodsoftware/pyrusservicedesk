@@ -13,7 +13,7 @@ class PSDRowMessage: NSObject {
         self.text = text
         let isInbound = PyrusServiceDesk.multichats
             ? message.isOutgoing :
-            message.owner.personId == PyrusServiceDesk.userId
+        message.owner?.personId == PyrusServiceDesk.userId
         let color: UIColor = isInbound
             ? CustomizationHelper.userMassageTextColor
             : CustomizationHelper.supportMassageTextColor

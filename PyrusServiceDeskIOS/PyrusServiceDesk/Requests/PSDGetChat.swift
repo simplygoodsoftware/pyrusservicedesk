@@ -137,7 +137,7 @@ struct PSDGetChat {
             }
             let date : Date =  (dic[createdAtParameter] as? String)?.dateFromString(format: "yyyy-MM-dd'T'HH:mm:ss'Z'") ?? Date()
             var IsInbound : Bool = dic["is_inbound"] as? Bool ??  true
-            let user :PSDUser
+            let user: PSDUser?
             if PyrusServiceDesk.multichats {
                 if let author = dic["author"] as? [String : Any],
                 let authorId = author["author_id"] as? String {
@@ -147,7 +147,7 @@ struct PSDGetChat {
                 }
             }
             
-            if IsInbound{
+            if IsInbound {
                 user = PSDUsers.user
             }else{
                 user = createUser(from: dic)

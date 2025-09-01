@@ -251,7 +251,7 @@ struct PSDMessagesStorage {
         }
         messageDict[MESSAGE_RATING_KEY] = message.rating
         messageDict[MESSAGE_TICKET_ID_KEY] = message.ticketId
-        messageDict[MESSAGE_AUTHOR_ID_KEY] = message.owner.authorId
+        messageDict[MESSAGE_AUTHOR_ID_KEY] = message.owner?.authorId
         messageDict[MESSAGE_STATE_KEY] = message.state == .sending
         messageDict[COMMAND_ID_KEY] = message.commandId
         messageDict[USER_ID_KEY] = message.userId

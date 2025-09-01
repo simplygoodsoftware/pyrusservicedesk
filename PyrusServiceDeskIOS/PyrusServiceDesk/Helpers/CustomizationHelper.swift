@@ -7,7 +7,8 @@ class CustomizationHelper {
     }
     static var welcomeMessage: String {
         let clientId = PyrusServiceDesk.currentClientId ?? PyrusServiceDesk.clientId
-        if let welomeMessage = PyrusServiceDesk.clients.first(where: { $0.clientId == clientId })?.welcomeMessage {
+        if let welomeMessage = PyrusServiceDesk.clients.first(where: { $0.clientId == clientId })?.welcomeMessage,
+           welomeMessage.count > 0 {
             return welomeMessage
         }
         return PyrusServiceDesk.mainController?.customization?.welcomeMessage ?? ""

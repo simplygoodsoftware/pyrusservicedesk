@@ -328,7 +328,9 @@ extension PSDChatTableView: UITableViewDelegate, UITableViewDataSource {
             userCell.delegate = self
         } else if let supportCell = cell as? PSDSupportMessageCell, supportCell.needShowAvatar {
             supportCell.avatarView.owner = message.message.owner
-            PSDSupportImageSetter.setImage(for: message.message.owner, in: supportCell.avatarView, delagate: self, isSupport: message.message.isSupportMessage)
+            if let owner = message.message.owner {
+                PSDSupportImageSetter.setImage(for: owner, in: supportCell.avatarView, delagate: self, isSupport: message.message.isSupportMessage)
+            }
         }
         
         cell.draw(message: message, width: frame.size.width)

@@ -277,7 +277,7 @@ private extension PSDChatInteractor {
             if let chat {
                 updateChatInfo()
                 if chat.messages.count > self.chat?.messages.count ?? 0,
-                   chat.messages.last?.owner.authorId != PyrusServiceDesk.authorId,
+                   chat.messages.last?.owner?.authorId != PyrusServiceDesk.authorId,
                    isOpen {
                     self.chat = chat
                     readChat()
@@ -453,7 +453,7 @@ private extension PSDChatInteractor {
     
     private func setLastActivityDate(){
         var lastDate: Date?
-        if let lastMessage = self.lastMessageFromServer, lastMessage.owner.personId == PyrusServiceDesk.userId {
+        if let lastMessage = self.lastMessageFromServer, lastMessage.owner?.personId == PyrusServiceDesk.userId {
             lastDate = lastMessage.date
         } else{
             lastDate = self.tableMatrix.lastUserMessageDate()
@@ -612,7 +612,7 @@ private extension PSDChatInteractor {
         } else {
             self.tableMatrix[index].append(dataForRow)
         }
-        let scrollToBottom = dataForRow.message.owner.personId == PyrusServiceDesk.userId
+        let scrollToBottom = dataForRow.message.owner?.personId == PyrusServiceDesk.userId
         presenter.doWork(.addRow(scrollsToBottom: scrollToBottom))
     }
     

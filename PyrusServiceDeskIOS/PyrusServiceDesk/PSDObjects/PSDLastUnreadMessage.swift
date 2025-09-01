@@ -8,7 +8,7 @@ final class PSDLastUnreadMessage: NSObject, Codable {
     private(set) var attchmentsCount: Int = 0
     private(set) var utcTime: Double
     private(set) var messageId: String
-    private(set) var owner: PSDUser
+    private(set) var owner: PSDUser?
     ///Detect if this message was shown to user in chat(chat was opened)
     private var isRead = false
     ///Detect if this message was sent to  NewReplySubscriber

@@ -95,7 +95,7 @@ extension Array where Element == [PSDRowMessage] {
         let unsentMessages: [[PSDRowMessage]] = self
         var section: Int = 0
         var previousMessage: PSDMessage? = nil
-        self.defaultMatrix(createWelcome: !(chat.messages.count > 0 && chat.messages[0].owner.authorId?.count ?? 0 == 0) || !PyrusServiceDesk.multichats)
+        self.defaultMatrix(createWelcome: !(chat.messages.count > 0 && chat.messages[0].owner?.authorId?.count ?? 0 == 0) || !PyrusServiceDesk.multichats)
         
         if !self.isEmpty && self[0].count > 0 && chat.messages.count > 0 {
             //change date of welcome message. Make it same as first message in chat
@@ -247,7 +247,7 @@ extension Array where Element == [PSDRowMessage] {
     func lastUserMessageDate() -> Date? {
         for messageByDate in self.reversed() {
             for messageRow in messageByDate.reversed() {
-                if messageRow.message.owner.personId == PyrusServiceDesk.userId && messageRow.hasId() {
+                if messageRow.message.owner?.personId == PyrusServiceDesk.userId && messageRow.hasId() {
                     return messageRow.message.date
                 }
             }

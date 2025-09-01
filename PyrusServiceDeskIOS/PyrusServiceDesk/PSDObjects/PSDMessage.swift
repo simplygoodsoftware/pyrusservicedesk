@@ -16,7 +16,7 @@ class PSDMessage: NSObject {
     var text: String
     var attributedText: NSAttributedString?
     var attachments: [PSDAttachment]?
-    var owner: PSDUser
+    var owner: PSDUser?
     ///The server Id
     var messageId: String
     ///The local created id

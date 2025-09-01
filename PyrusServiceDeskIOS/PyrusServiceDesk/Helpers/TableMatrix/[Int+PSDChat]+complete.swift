@@ -233,7 +233,7 @@ extension Array where Element == [PSDRowMessage]{
         }
         
         if message.message.messageId == findMessage.message.messageId && findMessage.hasId() {
-            if message.message.owner.personId == PyrusServiceDesk.userId || message.rating ?? 0 != 0 {
+            if message.message.owner?.personId == PyrusServiceDesk.userId || message.rating ?? 0 != 0 {
                 if message.attachment?.name == findMessage.attachment?.name,
                    let _ = Int(findMessage.attachment?.serverIdentifer ?? "") {
                     message.attachment?.serverIdentifer = findMessage.attachment?.serverIdentifer

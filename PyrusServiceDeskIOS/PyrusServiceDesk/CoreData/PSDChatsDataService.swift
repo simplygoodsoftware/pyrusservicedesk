@@ -59,7 +59,9 @@ extension PSDChatsDataService: PSDChatsDataServiceProtocol {
             dbClient.name = clientModel.clientName
             dbClient.appIcon = clientModel.clientIcon
             dbClient.descr = clientModel.clientDescription
-            dbClient.welcomeMessage = clientModel.welcomeMessage
+            if clientModel.welcomeMessage?.count ?? 0 > 0 {
+                dbClient.welcomeMessage = clientModel.welcomeMessage
+            }
             if let settings = clientModel.ratingSettings {
                 dbClient.ratingType = Int32(settings.type)
                 dbClient.ratingSize = Int16(settings.size)
@@ -78,7 +80,9 @@ extension PSDChatsDataService: PSDChatsDataServiceProtocol {
                     clientIcon: dbClient.appIcon ?? ""
                 )
                 client.clientDescription = dbClient.descr
-                client.welcomeMessage = dbClient.welcomeMessage
+                if dbClient.welcomeMessage?.count ?? 0 > 0 {
+                    client.welcomeMessage = dbClient.welcomeMessage
+                }
                 if dbClient.ratingType != 0,
                    dbClient.ratingSize != 0 {
                     client.ratingSettings = PSDRatingSettings(
@@ -107,9 +111,9 @@ extension PSDChatsDataService: PSDChatsDataServiceProtocol {
             
             for dbChat in dbChats {
                 let chat = PyrusServiceDesk.chats.first { $0.chatId == Int(dbChat.chatId) }
-                let authorName = chat?.messages.last?.owner.authorId == PyrusServiceDesk.authorId
+                let authorName = chat?.messages.last?.owner?.authorId == PyrusServiceDesk.authorId
                     ? "Вы"
-                    :  chat?.messages.last?.owner.name ?? ""
+                    :  chat?.messages.last?.owner?.name ?? ""
                 var model = SearchChatModel(
                     id: chat?.chatId ?? 0,
                     date: chat?.lastComment?.date ?? Date(),
@@ -154,9 +158,9 @@ extension PSDChatsDataService: PSDChatsDataServiceProtocol {
                 var chatModels = [SearchChatModel]()
                 for dbChat in dbChats {
                     let chat = PyrusServiceDesk.chats.first { $0.chatId == Int(dbChat.chatId) }
-                    let authorName = chat?.messages.last?.owner.authorId == PyrusServiceDesk.authorId
+                    let authorName = chat?.messages.last?.owner?.authorId == PyrusServiceDesk.authorId
                     ? "Вы"
-                    :  chat?.messages.last?.owner.name ?? ""
+                    :  chat?.messages.last?.owner?.name ?? ""
                     var model = SearchChatModel(
                         id: chat?.chatId ?? 0,
                         date: chat?.lastComment?.date ?? Date(),
@@ -267,9 +271,9 @@ extension PSDChatsDataService: PSDChatsDataServiceProtocol {
                 dbMessage.state = message.state.rawValue
                 dbMessage.text = message.text
                 dbMessage.ticketId = Int64(message.ticketId)
-                dbMessage.authorId = message.owner.authorId
-                dbMessage.authorName = message.owner.name
-                dbMessage.authorAvatarId = message.owner.imagePath
+                dbMessage.authorId = message.owner?.authorId
+                dbMessage.authorName = message.owner?.name
+                dbMessage.authorAvatarId = message.owner?.imagePath
                 if let rating = message.rating {
                     dbMessage.rating = Int32(rating)
                 }
@@ -335,7 +339,7 @@ extension PSDChatsDataService: PSDChatsDataServiceProtocol {
                                 return nil
                             }
                             
-                            let user: PSDUser = dbMessage.authorId == PyrusServiceDesk.authorId ?
+                            let user: PSDUser? = dbMessage.authorId == PyrusServiceDesk.authorId ?
                                 PSDUsers.user :
                                 PSDUsers.supportUsersContain(
                                     name: dbMessage.authorName ?? "",
@@ -443,7 +447,7 @@ extension PSDChatsDataService: PSDChatsDataServiceProtocol {
                         else {
                             return nil
                         }
-                        let user: PSDUser
+                        let user: PSDUser?
                         if dbMessage.authorId == PyrusServiceDesk.authorId {
                             user = PSDUsers.user
                         } else {
@@ -714,7 +718,7 @@ extension PSDChatsDataService: PSDChatsDataServiceProtocol {
                         return nil
                     }
                     
-                    let user: PSDUser = dbMessage.authorId == PyrusServiceDesk.authorId ?
+                    let user: PSDUser? = dbMessage.authorId == PyrusServiceDesk.authorId ?
                     PSDUsers.user :
                     PSDUsers.supportUsersContain(
                         name: dbMessage.authorName ?? "",
@@ -799,7 +803,7 @@ extension PSDChatsDataService: PSDChatsDataServiceProtocol {
                     return nil
                 }
                 
-                let user: PSDUser = dbMessage.authorId == PyrusServiceDesk.authorId ?
+                let user: PSDUser? = dbMessage.authorId == PyrusServiceDesk.authorId ?
                 PSDUsers.user :
                 PSDUsers.supportUsersContain(
                     name: dbMessage.authorName ?? "",

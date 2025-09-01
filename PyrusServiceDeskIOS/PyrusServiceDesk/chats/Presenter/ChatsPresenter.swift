@@ -100,7 +100,7 @@ private extension ChatsPresenter {
                 }
             }
            
-            let author = lastMessage?.isOutgoing ?? false ? "You".localizedPSD() : lastMessage?.owner.name ?? ""
+            let author = lastMessage?.isOutgoing ?? false ? "You".localizedPSD() : lastMessage?.owner?.name ?? ""
             if lastMessage?.attachments?.count ?? 0 > 0 {
                 text = ""
             }
