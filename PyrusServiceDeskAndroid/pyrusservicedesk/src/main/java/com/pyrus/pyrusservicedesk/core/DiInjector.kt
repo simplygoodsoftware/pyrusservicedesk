@@ -147,6 +147,14 @@ internal class DiInjector(
 
     private val preferencesManager = PreferencesManager(preferences)
 
+    val liveUpdates = LiveUpdates(
+        preferencesManager = preferencesManager,
+        // TODO sds fix live updates
+        userId = initialAccount.getUserId(),
+        coreScope = coreScope,
+        localTicketsStore = localTicketsStore,
+    )
+
     private val synchronizer = Synchronizer(
         api = api,
         localTicketsStore = localTicketsStore,
@@ -156,6 +164,7 @@ internal class DiInjector(
         commandsStore = localCommandsStore,
         accessDeniedEventBus = accessDeniedEventBus,
         preferences = preferencesManager,
+        liveUpdates = liveUpdates,
     )
 
     val repository: SdRepository = SdRepository(
@@ -239,14 +248,6 @@ internal class DiInjector(
     )
 
     val sharedViewModel = SharedViewModel()
-
-    val liveUpdates = LiveUpdates(
-        repository = repository,
-        preferencesManager = preferencesManager,
-        // TODO sds fix live updates
-        userId = initialAccount.getUserId(),
-        coreScope = coreScope,
-    )
 
     val picasso: Picasso = providePicasso(application)
 

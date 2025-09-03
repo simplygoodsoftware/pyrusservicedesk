@@ -15,12 +15,12 @@ import com.pyrus.pyrusservicedesk.sdk.repositories.UserInternal
 @Suppress("FunctionName")
 internal object SdScreens {
 
-    fun TicketScreen(ticketId: Long, user: UserInternal) = FragmentScreen(clearContainer = false) {
-        TicketFragment.newInstance(ticketId, null, user)
+    fun TicketScreen(ticketId: Long, user: UserInternal, sendComment: String?) = FragmentScreen(clearContainer = false) {
+        TicketFragment.newInstance(ticketId, null, user, sendComment)
     }
 
-    fun TicketScreen(ticketId: Long, commentId: Long?, user: UserInternal) = FragmentScreen(clearContainer = false) {
-        TicketFragment.newInstance(ticketId, commentId, user)
+    fun TicketScreen(ticketId: Long, commentId: Long?, user: UserInternal, sendComment: String?) = FragmentScreen(clearContainer = false) {
+        TicketFragment.newInstance(ticketId, commentId, user, sendComment)
     }
 
     fun TicketsScreen() = FragmentScreen {
@@ -39,8 +39,8 @@ internal object SdScreens {
         RootFragment.newInstance(openTicketAction)
     }
 
-    fun RouterScreen(openTicketAction: OpenTicketAction?) = FragmentScreen {
-        RouterFragment.newInstance(openTicketAction)
+    fun RouterScreen(openTicketAction: OpenTicketAction?, sendComment: String?) = FragmentScreen {
+        RouterFragment.newInstance(openTicketAction, sendComment)
     }
 
 }

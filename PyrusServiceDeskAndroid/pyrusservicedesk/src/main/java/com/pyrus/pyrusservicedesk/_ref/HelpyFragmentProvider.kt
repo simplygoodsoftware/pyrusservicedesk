@@ -6,7 +6,7 @@ import com.pyrus.pyrusservicedesk._ref.ui_domain.screens.rootFragment.RouterFrag
 
 class HelpyFragmentProvider: FragmentProvider {
     override fun provideFragment(openTicketAction: OpenTicketAction?): Fragment {
-        return RouterFragment.newInstance(openTicketAction)
+        return RouterFragment.newInstance(openTicketAction, null) //TODO kate for multichat
     }
 }
 

@@ -48,7 +48,8 @@ class AddTicketBottomSheetFragment: BottomSheetDialogFragment() {
                         injector().router.navigateTo(
                             SdScreens.TicketScreen(
                                 localId,
-                                UserInternal(user.userId, user.appId)
+                                UserInternal(user.userId, user.appId),
+                                null
                             ).setSlideRightAnimation()
                         )
                         dismiss()

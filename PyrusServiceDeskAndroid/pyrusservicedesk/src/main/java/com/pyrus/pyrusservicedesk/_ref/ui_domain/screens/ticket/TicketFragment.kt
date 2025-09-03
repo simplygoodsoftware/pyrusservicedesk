@@ -50,6 +50,7 @@ import com.pyrus.pyrusservicedesk._ref.ui_domain.screens.ticket.adapter.fingerpr
 import com.pyrus.pyrusservicedesk._ref.ui_domain.screens.ticket.record.AudioRecordView
 import com.pyrus.pyrusservicedesk._ref.utils.AudioWrapper
 import com.pyrus.pyrusservicedesk._ref.utils.ConfigUtils
+import com.pyrus.pyrusservicedesk._ref.utils.ConfigUtils.Companion.getMainBackgroundColor
 import com.pyrus.pyrusservicedesk._ref.utils.TextProvider
 import com.pyrus.pyrusservicedesk._ref.utils.animateVisibility
 import com.pyrus.pyrusservicedesk._ref.utils.getColorOnBackground
@@ -348,11 +349,13 @@ internal class TicketFragment: TeaFragment<Model, Event, Effect>() {
     private fun bindFeature() {
         val user = arguments?.getParcelable<UserInternal>(KEY_USER_INTERNAL)!!
         val ticketId = arguments?.getLong(KEY_TICKET_ID)!!
+        val sendComment = arguments?.getString(KEY_SEND_COMMENT)
 
         val feature = getStore { injector().ticketFeatureFactory.create(
             user = user,
             initialTicketId = ticketId,
-            welcomeMessage = ConfigUtils.getWelcomeMessage()
+            welcomeMessage = ConfigUtils.getWelcomeMessage(),
+            sendComment = sendComment,
         ) }
         bind(BinderLifecycleMode.CREATE_DESTROY) {
             this@TicketFragment.messages.map(TicketMapper::map) bindTo feature
@@ -554,6 +557,7 @@ internal class TicketFragment: TeaFragment<Model, Event, Effect>() {
 
     private fun applyStyle() {
         val accentColor = ConfigUtils.getAccentColor(requireContext())
+        binding.refresh.setBackgroundColor(getMainBackgroundColor(requireContext()))
 
         binding.contentRoot.setBackgroundColor(ConfigUtils.getMainBackgroundColor(requireContext()))
         binding.scrollDownButton.imageTintList = ColorStateList.valueOf(accentColor)
@@ -727,17 +731,20 @@ internal class TicketFragment: TeaFragment<Model, Event, Effect>() {
         private const val KEY_TICKET_ID = "KEY_TICKET_ID"
         private const val KEY_COMMENT_ID = "KEY_COMMENT_ID"
         private const val KEY_USER_INTERNAL = "KEY_USER_INTERNAL"
+        private const val KEY_SEND_COMMENT = "KEY_SEND_COMMENT"
 
         fun newInstance(
             ticketId: Long,
             commentId: Long?,
             user: UserInternal,
+            sendComment: String?,
         ): TicketFragment {
             val fragment = TicketFragment()
             val args = Bundle().apply {
                 putParcelable(KEY_USER_INTERNAL, user)
                 putLong(KEY_TICKET_ID, ticketId)
                 commentId?.let { putLong(KEY_COMMENT_ID, commentId) }
+                putString(KEY_SEND_COMMENT, sendComment)
             }
             fragment.arguments = args
             return fragment

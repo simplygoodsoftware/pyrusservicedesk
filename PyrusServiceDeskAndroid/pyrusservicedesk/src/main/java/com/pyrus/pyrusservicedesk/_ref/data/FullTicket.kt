@@ -11,4 +11,5 @@ data class FullTicket(
     val ticketId: Long,
     val isActive: Boolean,
     val isRead: Boolean,
+    val welcomeMessage: String?,
 )

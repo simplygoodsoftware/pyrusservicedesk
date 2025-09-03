@@ -115,7 +115,7 @@ interface TicketContract {
             object CheckAccount : Inner
             object Close : Inner
             class SendTextComment(
-                val text: String,
+                val text: String?,
                 val ticketId: Long,
             ) : Inner
             class SendRatingComment(

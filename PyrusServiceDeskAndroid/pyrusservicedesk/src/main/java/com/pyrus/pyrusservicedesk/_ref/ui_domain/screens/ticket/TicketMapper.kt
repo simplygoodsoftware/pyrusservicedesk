@@ -35,7 +35,7 @@ internal object TicketMapper {
         is State.Content -> Model(
             inputText = state.inputText,
             sendEnabled = state.sendEnabled,
-            comments = state.ticket?.let { mapComments(it, state.welcomeMessage) },
+            comments = state.ticket?.let { mapComments(it, it.welcomeMessage ?: state.welcomeMessage) },
             isLoading = false,
             showNoConnectionError = false,
             isRefreshing = state.isLoading,

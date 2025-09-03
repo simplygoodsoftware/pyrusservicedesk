@@ -51,6 +51,7 @@ internal class RouterFragment: TeaFragment<Unit, Message.Outer, Effect.Outer>(),
         savedInstanceState?.let { ServiceDeskConfiguration.restore(it) }
          if (savedInstanceState == null) {
              val action = arguments?.getParcelable<OpenTicketAction>(KEY_OPEN_TICKET_ACTION)
+             val sendComment = arguments?.getString(KEY_SEND_COMMENT)
              val rootFragment = RootFragment.newInstance(action)
              fragmentManager?.beginTransaction()
                  ?.add(R.id.fragment_root_container, rootFragment)
@@ -63,7 +64,8 @@ internal class RouterFragment: TeaFragment<Unit, Message.Outer, Effect.Outer>(),
                         SdScreens.TicketsScreen(),
                         SdScreens.TicketScreen(
                             action.ticketId,
-                            UserInternal(action.user.userId, action.user.appId)
+                            UserInternal(action.user.userId, action.user.appId),
+                            null, //TODO sendComment for multichat
                         ).setSlideRightAnimation()
                     )
                 }
@@ -80,7 +82,7 @@ internal class RouterFragment: TeaFragment<Unit, Message.Outer, Effect.Outer>(),
                 lifecycleScope.launch(Dispatchers.IO) {
                     //val localId = injector().localCommandsStore.getNextLocalId()
                     val lastTicketId = injector().localCommandsStore.getLastTicketId()
-                    injector().router.newRootScreen(SdScreens.TicketScreen(lastTicketId, user).setSlideRightAnimation())
+                    injector().router.newRootScreen(SdScreens.TicketScreen(lastTicketId, user, sendComment).setSlideRightAnimation())
                 }
             }
         }
@@ -125,11 +127,13 @@ internal class RouterFragment: TeaFragment<Unit, Message.Outer, Effect.Outer>(),
     companion object {
         private const val KEY_OPEN_TICKET_ACTION = "KEY_OPEN_TICKET_ACTION"
         const val TAG = "RootFragment"
+        private const val KEY_SEND_COMMENT = "KEY_SEND_COMMENT"
 
-        fun newInstance(openTicketAction: OpenTicketAction?): RouterFragment {
+        fun newInstance(openTicketAction: OpenTicketAction?, sendComment: String?): RouterFragment {
             val fragment = RouterFragment()
             val args = Bundle().apply {
                 putParcelable(KEY_OPEN_TICKET_ACTION, openTicketAction)
+                putString(KEY_SEND_COMMENT, sendComment)
             }
             fragment.arguments = args
             return fragment

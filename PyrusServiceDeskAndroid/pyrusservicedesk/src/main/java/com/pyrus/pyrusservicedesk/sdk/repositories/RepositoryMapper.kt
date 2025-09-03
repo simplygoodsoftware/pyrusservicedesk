@@ -277,6 +277,7 @@ internal class RepositoryMapper(
             isActive = ticket.ticket.isActive == true,
             isRead = isRead,
             ratingSettings = ticket.ticket.ratingSettings,
+            welcomeMessage = ticket.ticket.welcomeMessage,
         )
     }
 
@@ -528,6 +529,29 @@ internal class RepositoryMapper(
             isActive = true,
             isRead = true,
             ratingSettings = null,
+            welcomeMessage = null,
+        )
+    }
+
+    fun mapToSingleTicket(
+        ticketsList: List<TicketWithComments>,
+        lastTicket: FullTicket,
+        account: Account,
+        userId: String,
+    ): FullTicket {
+        val comments = ticketsList.flatMap { it.comments }.map { comment -> map(account, userId, comment) }
+        return FullTicket(
+            subject = lastTicket.subject,
+            comments = comments,
+            showRating = lastTicket.showRating,
+            showRatingText = lastTicket.showRatingText,
+            userId = userId,
+            ticketId = lastTicket.ticketId,
+            orgLogoUrl = lastTicket.orgLogoUrl,
+            isActive = lastTicket.isActive,
+            isRead = lastTicket.isRead,
+            ratingSettings = lastTicket.ratingSettings,
+            welcomeMessage = lastTicket.welcomeMessage,
         )
     }
 

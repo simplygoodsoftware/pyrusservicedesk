@@ -354,7 +354,7 @@ internal class TicketsFragment: TeaFragment<Model, Message, Effect.Outer>(), NoF
             }
 
             is Effect.Outer.OpenTicket -> {
-                injector().router.navigateTo(SdScreens.TicketScreen(effect.ticketId, effect.user).setSlideRightAnimation())
+                injector().router.navigateTo(SdScreens.TicketScreen(effect.ticketId, effect.user, null).setSlideRightAnimation())
             }
         }
     }

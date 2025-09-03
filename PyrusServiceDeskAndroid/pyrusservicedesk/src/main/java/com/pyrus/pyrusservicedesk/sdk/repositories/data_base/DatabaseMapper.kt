@@ -122,6 +122,7 @@ internal object DatabaseMapper {
             showRatingText = dto.showRatingText,
             lastComment = dto.lastComment?.let { mapToLastCommentInfo(it) },
             ratingSettings = dto.ratingSettings?.let { mapToRatingSettings(it) },
+            welcomeMessage = dto.welcomeMessage
         )
     }
 

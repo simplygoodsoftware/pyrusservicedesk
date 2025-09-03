@@ -151,19 +151,6 @@ internal sealed interface CommentEntry {
         val avatarUrl: String?,
     ) : CommentEntry, WithCreationTime
 
-    data class RatingSelector(
-        override val creationTime: Long,
-        val ratingTextRvVisibility: Boolean,
-        val smileLl5Visibility: Boolean,
-        val smileLlVisibility: Boolean,
-        val likeLlVisibility: Boolean,
-        val rating2MiniVisibility: Boolean,
-        val ratingText: String?,
-        val size: Int?,
-        val type: Int?,
-        val  ratingTextValues: List<RatingTextValues>?,
-    ) : CommentEntry, WithCreationTime
-
     data class RatingTextValues(
         val rating: Int?,
         val text: String?

@@ -56,7 +56,8 @@ internal class MainActivity : FragmentActivity() {
         super.overridePendingTransition(R.anim.fade_in, R.anim.no_animation)
         if (savedInstanceState == null) {
             val action = intent.getParcelableExtra<OpenTicketAction>(KEY_OPEN_TICKET_ACTION)
-            injector().router.newRootScreen(SdScreens.RouterScreen(action))
+            val sendComment = intent.getStringExtra(KEY_SEND_COMMENT)
+            injector().router.newRootScreen(SdScreens.RouterScreen(action, sendComment))
         }
     }
 
@@ -136,11 +137,13 @@ internal class MainActivity : FragmentActivity() {
 
         private const val KEY_ACCOUNT = "KEY_ACCOUNT"
         private const val KEY_OPEN_TICKET_ACTION = "KEY_OPEN_TICKET_ACTION"
+        private const val KEY_SEND_COMMENT = "KEY_SEND_COMMENT"
 
-        fun createLaunchIntent(context: Context, account: Account, openTicketAction: OpenTicketAction?): Intent {
+        fun createLaunchIntent(context: Context, account: Account, openTicketAction: OpenTicketAction?, sendComment: String?): Intent {
             return Intent(context, MainActivity::class.java)
                 .putExtra(KEY_ACCOUNT, account)
                 .putExtra(KEY_OPEN_TICKET_ACTION, openTicketAction)
+                .putExtra(KEY_SEND_COMMENT, sendComment)
         }
     }
 

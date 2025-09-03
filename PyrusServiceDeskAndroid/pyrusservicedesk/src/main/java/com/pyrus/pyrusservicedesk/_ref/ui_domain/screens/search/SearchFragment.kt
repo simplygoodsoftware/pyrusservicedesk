@@ -132,7 +132,7 @@ internal class SearchFragment: TeaFragment<Model, Event, Effect>(), NoFullScreen
     override fun handleEffect(effect: Effect) = when(effect){
         Effect.CloseKeyboard -> hideKeyboard(binding.searchEditText)
         Effect.Exit -> injector().router.exit()
-        is Effect.OpenTicket -> injector().router.navigateTo(SdScreens.TicketScreen(effect.ticketId, effect.commentId, effect.user))
+        is Effect.OpenTicket -> injector().router.navigateTo(SdScreens.TicketScreen(effect.ticketId, effect.commentId, effect.user, null))
     }
 
     internal companion object {

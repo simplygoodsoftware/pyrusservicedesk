@@ -2,6 +2,7 @@ package com.pyrus.pyrusservicedesk.sdk.repositories
 
 import android.net.Uri
 import androidx.core.net.toFile
+import com.pyrus.pyrusservicedesk.PyrusServiceDesk.Companion.API_VERSION_1
 import com.pyrus.pyrusservicedesk.PyrusServiceDesk.Companion.API_VERSION_2
 import com.pyrus.pyrusservicedesk._ref.data.Attachment
 import com.pyrus.pyrusservicedesk._ref.data.FullTicket
@@ -18,6 +19,7 @@ import com.pyrus.pyrusservicedesk._ref.utils.isFailed
 import com.pyrus.pyrusservicedesk._ref.utils.isSuccess
 import com.pyrus.pyrusservicedesk._ref.utils.map
 import com.pyrus.pyrusservicedesk._ref.utils.toTry2
+import com.pyrus.pyrusservicedesk.core.*
 import com.pyrus.pyrusservicedesk.core.Account
 import com.pyrus.pyrusservicedesk.core.getInstanceId
 import com.pyrus.pyrusservicedesk.core.getUsers
@@ -112,12 +114,23 @@ internal class SdRepository(
         val serverId = idStore.getTicketServerId(ticketId) ?: ticketId
         val orgLogoUrl = getOrgLogoUrl(userId, account)
 
-        if (serverId <= 0 && account.getVersion() == API_VERSION_2) {
+        if (serverId <= 0 && (account.getVersion() == API_VERSION_1 || account.getVersion() == API_VERSION_2)) {
             val syncTry = synchronizer.syncData(SyncRequest.Data, force).checkResponse(userId)
             if (syncTry.isFailed()) return syncTry
 
             val lastServerTicket = getLastServerTicket(serverId, account, userId, orgLogoUrl)
-            lastServerTicket?.let { return Try2.Success(it) }
+            lastServerTicket?.let {
+                val ticket = repositoryMapper.mapToSingleTicket(
+                    ticketsList = ticketsStore.getTicketsWithComments(),
+                    lastTicket = lastServerTicket,
+                    account = account,
+                    userId = account.getUserId() ?: account.getInstanceId()
+                )
+                if (idStore.getTicketServerId(ticket.ticketId) == null) {
+                    idStore.addTicketIdPair(ticketId, ticket.ticketId)
+                }
+                return Try2.Success(ticket)
+            }
         }
 
         if (serverId <= 0) {
@@ -143,12 +156,14 @@ internal class SdRepository(
                     isActive = true,
                     isRead = true,
                     ratingSettings = null,
+                    welcomeMessage = null,
                 )
             }
             return Try2.Success(ticket)
         }
 
         if (!force) {
+            val localTickets = ticketsStore.getTicketsWithComments()
             val localTicket = ticketsStore.getTicketWithComments(serverId)
             val commands = commandsStore.getCommands(serverId)
             if (localTicket != null) {
@@ -159,12 +174,35 @@ internal class SdRepository(
                     commands,
                     orgLogoUrl
                 )
-                return Try.Success(ticket).toTry2()
+                val singleTicket = repositoryMapper.mapToSingleTicket(
+                    ticketsList = localTickets,
+                    lastTicket = ticket,
+                    account = account,
+                    userId = userId
+                )
+                return Try.Success(singleTicket).toTry2()
             }
         }
 
         val syncTry = synchronizer.syncData(SyncRequest.Data, force).checkResponse(userId)
         if (syncTry.isFailed()) return syncTry
+
+        //TODO kate clean code
+        if (account.getVersion() == API_VERSION_1 || account.getVersion() == API_VERSION_2) {
+            val lastServerTicket = getLastServerTicket(serverId, account, userId, orgLogoUrl)
+            lastServerTicket?.let {
+                val ticket = repositoryMapper.mapToSingleTicket(
+                    ticketsList = ticketsStore.getTicketsWithComments(),
+                    lastTicket = lastServerTicket,
+                    account = account,
+                    userId = account.getUserId() ?: account.getInstanceId()
+                )
+                if (idStore.getTicketServerId(ticket.ticketId) == null) {
+                    idStore.addTicketIdPair(ticketId, ticket.ticketId)
+                }
+                return Try2.Success(ticket)
+            }
+        }
 
         val localTicket = ticketsStore.getTicketWithComments(serverId)
             ?: return Try2.Failure(GetTicketsError.NoDataFound)
@@ -189,16 +227,35 @@ internal class SdRepository(
             commandsStore.getCommandsFlow(ticketId),
         ) { account, ticketEntity, commands ->
 
+            val ticketsList = ticketsStore.getTicketsWithComments()
             val orgLogoUrl = getOrgLogoUrl(user.userId, account)
-            if (ticketEntity != null) {
-                repositoryMapper.mergeTicket(
-                    account,
-                    ticketEntity.ticket.userId,
-                    ticketEntity,
-                    commands,
-                    orgLogoUrl
-                )
-            }
+
+             if (ticketEntity != null) {
+                 if ((account.getVersion() == API_VERSION_1
+                         || account.getVersion() == API_VERSION_2)
+                     && ticketsList.isNotEmpty()
+                 ) {
+                     val userId = account.getUserId() ?: account.getInstanceId()
+                     val lastServerTicket = getLastServerTicket(ticketId, account, userId, orgLogoUrl)
+                     lastServerTicket?.let {
+                         repositoryMapper.mapToSingleTicket(
+                             ticketsList = ticketsStore.getTicketsWithComments(),
+                             lastTicket = lastServerTicket,
+                             account = account,
+                             userId = account.getUserId() ?: account.getInstanceId()
+                         )
+                     }
+                 }
+                 else {
+                     repositoryMapper.mergeTicket(
+                         account,
+                         ticketEntity.ticket.userId,
+                         ticketEntity,
+                         commands,
+                         orgLogoUrl
+                     )
+                 }
+             }
             else {
                 val firstCommand = commands.firstOrNull()
                 if (firstCommand != null) {
@@ -221,6 +278,7 @@ internal class SdRepository(
                         isActive = true,
                         isRead = true,
                         ratingSettings = null,
+                        welcomeMessage = null,
                     )
                 }
             }

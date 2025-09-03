@@ -19,6 +19,7 @@ import com.pyrus.pyrusservicedesk.sdk.repositories.IdStore
 import com.pyrus.pyrusservicedesk.sdk.repositories.LocalCommandsStore
 import com.pyrus.pyrusservicedesk.sdk.repositories.LocalTicketsStore
 import com.pyrus.pyrusservicedesk.sdk.sync.SyncMapper.mapToGetFeedRequest
+import com.pyrus.pyrusservicedesk.sdk.updates.*
 import com.pyrus.pyrusservicedesk.sdk.updates.Preferences
 import com.pyrus.pyrusservicedesk.sdk.web.retrofit.ServiceDeskApi
 import kotlinx.coroutines.CoroutineExceptionHandler
@@ -44,6 +45,7 @@ internal class Synchronizer(
     private val idStore: IdStore,
     private val commandsStore: LocalCommandsStore,
     private val preferences: Preferences,
+    private val liveUpdates: LiveUpdates,
 ) : CoroutineScope {
 
     @DelicateCoroutinesApi
@@ -183,6 +185,8 @@ internal class Synchronizer(
             val usersWithData = account.getUsers().filter { it.userId !in authorAccessDenied }
 
             localTicketsStore.storeServerState(usersWithData, getTicketsTry.value)
+
+            liveUpdates.notifyNewReplySubscribers()
 
             val commandRequests = syncRequests.filterIsInstance<SyncReqRes.CommandWithContinuation>()
             for (request in commandRequests) {

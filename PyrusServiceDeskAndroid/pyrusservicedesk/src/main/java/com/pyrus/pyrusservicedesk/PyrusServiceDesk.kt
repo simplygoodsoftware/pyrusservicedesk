@@ -90,9 +90,10 @@ class PyrusServiceDesk private constructor(
         fun getTicketFeature(
             user: UserInternal,
             initialTicketId: Long,
-            welcomeMessage: String?
+            welcomeMessage: String?,
+            sendComment: String?,
         ): TicketFeature {
-            val factory = injector().ticketFeatureFactory.create(user, initialTicketId, welcomeMessage)
+            val factory = injector().ticketFeatureFactory.create(user, initialTicketId, welcomeMessage, sendComment)
             return factory
         }
 
@@ -369,6 +370,7 @@ class PyrusServiceDesk private constructor(
             configuration: ServiceDeskConfiguration? = null,
             onStopCallback: OnStopCallback? = null,
             openTicketAction: OpenTicketAction? = null,
+            sendComment: String? = null,
         ) {
             val account = injector().accountStore.getAccount()
             startImpl(
@@ -377,6 +379,7 @@ class PyrusServiceDesk private constructor(
                 configuration = configuration,
                 onStopCallback = onStopCallback,
                 openTicketAction = openTicketAction,
+                sendComment = sendComment,
             )
         }
 
@@ -531,6 +534,7 @@ class PyrusServiceDesk private constructor(
             configuration: ServiceDeskConfiguration?,
             onStopCallback: OnStopCallback?,
             openTicketAction: OpenTicketAction?,
+            sendComment: String? = null,
         ) {
             StaticRepository.setConfiguration(configuration)
 
@@ -538,9 +542,9 @@ class PyrusServiceDesk private constructor(
 //            get().sharedViewModel.clearQuitServiceDesk()
             this.onStopCallback = onStopCallback
 
-            val intent = MainActivity.createLaunchIntent(activity, account, openTicketAction)
+            val intent = MainActivity.createLaunchIntent(activity, account, openTicketAction, sendComment)
             intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK)
-            activity.startActivity(MainActivity.createLaunchIntent(activity, account, openTicketAction))
+            activity.startActivity(intent)
 
             // TODO kate check sds
             if (configuration == null)

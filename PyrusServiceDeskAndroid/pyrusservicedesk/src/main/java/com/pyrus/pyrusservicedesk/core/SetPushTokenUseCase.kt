@@ -1,5 +1,6 @@
 package com.pyrus.pyrusservicedesk.core
 
+import android.util.Log
 import com.pyrus.pyrusservicedesk.SetPushTokenCallback
 import com.pyrus.pyrusservicedesk.User
 import com.pyrus.pyrusservicedesk._ref.utils.MILLISECONDS_IN_MINUTE
@@ -34,6 +35,7 @@ internal class SetPushTokenUseCase(
                 updateTokenTime(firstUserId, System.currentTimeMillis())
 
                 for (user in account.getUsers()) {
+                    Log.d("EP ", "sendPushToken user: $user, token: $token, tokenType: $tokenType")
                     sendPushToken(user, token, tokenType, callback)
                 }
             }
@@ -54,11 +56,13 @@ internal class SetPushTokenUseCase(
             )
             if (!setPushTokenTry.isSuccess()) {
                 withContext(Dispatchers.Main) {
+                    Log.d("EP ", "setPushTokenTry is not success")
                     callback?.onResult(Exception(setPushTokenTry.error))
                 }
             }
             else {
                 withContext(Dispatchers.Main) {
+                    Log.d("EP ", "setPushTokenTry.isSuccess()")
                     callback?.onResult(null)
                 }
             }

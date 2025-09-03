@@ -1,19 +1,15 @@
 package com.pyrus.pyrusservicedesk.sdk.updates
 
-import android.os.Handler
-import android.os.Looper
+import android.os.*
 import androidx.annotation.MainThread
-import com.pyrus.pyrusservicedesk._ref.utils.MILLISECONDS_IN_DAY
-import com.pyrus.pyrusservicedesk._ref.utils.MILLISECONDS_IN_HOUR
-import com.pyrus.pyrusservicedesk._ref.utils.MILLISECONDS_IN_MINUTE
-import com.pyrus.pyrusservicedesk._ref.utils.MILLISECONDS_IN_SECOND
+import com.pyrus.pyrusservicedesk.PyrusServiceDesk.Companion.injector
+import com.pyrus.pyrusservicedesk._ref.utils.*
 import com.pyrus.pyrusservicedesk._ref.utils.log.PLog
+import com.pyrus.pyrusservicedesk.core.refresh.AutoRefreshFeature
 import com.pyrus.pyrusservicedesk.sdk.data.TicketDto
-import com.pyrus.pyrusservicedesk.sdk.repositories.SdRepository
-import kotlinx.coroutines.CoroutineDispatcher
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
+import com.pyrus.pyrusservicedesk.sdk.repositories.*
+import com.pyrus.pyrusservicedesk.sdk.repositories.data_base.data.TicketEntity
+import kotlinx.coroutines.*
 import kotlin.math.max
 
 /**
@@ -28,7 +24,7 @@ import kotlin.math.max
  * @param userId Id of current user. May by null.
  */
 internal class LiveUpdates(
-    private val repository: SdRepository,
+    private val localTicketsStore: LocalTicketsStore,
     private val preferencesManager: Preferences,
     private var userId: String?,
     //private var ticketId: Int,
@@ -51,6 +47,8 @@ internal class LiveUpdates(
     private val mainHandler = Handler(Looper.getMainLooper())
     private var isStarted = false
     private var firstReplyIsShown = false
+
+    var updateFeature: AutoRefreshFeature? = null
 
     private val ticketsUpdateRunnable = object : Runnable {
         override fun run() {
@@ -93,12 +91,15 @@ internal class LiveUpdates(
     fun subscribeOnReply(subscriber: NewReplySubscriber) {
         PLog.d(TAG, "subscribeOnReply")
         newReplySubscribers.add(subscriber)
-        val lastComment = preferencesManager.getLastComment()
-        if (lastComment != null && !lastComment.isShown) {
-            preferencesManager.saveLastComment(lastComment.copy(isShown = true))
-            notifyNewReplySubscriber(subscriber, lastComment)
+        preferencesManager.saveLastActiveTime(System.currentTimeMillis())
+        updateFeature = injector().autoRefreshFeatureFactory.create()
+        updateFeature?.state
+        coreScope.launch(ioDispatcher) {
+            val lastComment = localTicketsStore.getTickets().lastOrNull()
+            if (lastComment != null && lastComment.isRead != true) {
+                notifyNewReplySubscriber(subscriber, lastComment)
+            }
         }
-        onSubscribe()
     }
 
     /**
@@ -108,7 +109,7 @@ internal class LiveUpdates(
     fun unsubscribeFromReplies(subscriber: NewReplySubscriber) {
         PLog.d(TAG, "unsubscribeFromReplies")
         newReplySubscribers.remove(subscriber)
-        onUnsubscribe()
+        updateFeature?.cancel()
     }
 
     /**
@@ -250,7 +251,7 @@ internal class LiveUpdates(
         mainHandler.removeCallbacks(ticketsUpdateRunnable)
     }
 
-    @MainThread
+    /*@MainThread
     private fun processGetTicketsSuccess(data: List<TicketDto>, newUnreadCount: Int) {
         val isChanged = recentUnreadCounter != newUnreadCount
         PLog.d(TAG, "processSuccess, isChanged: $isChanged, recentUnreadCounter: $recentUnreadCounter, newUnreadCount: $newUnreadCount")
@@ -326,7 +327,7 @@ internal class LiveUpdates(
             }
         }
     }
-
+*/
     private fun notifyUnreadCountSubscribers(isChanged: Boolean, newUnreadCount: Int) {
         if (isChanged) {
             val hasNewComments = newUnreadCount > 0
@@ -343,22 +344,27 @@ internal class LiveUpdates(
         }
     }
 
-    private fun notifyNewReplySubscribers(lastComment: LastComment) {
+    fun notifyNewReplySubscribers() {
         newReplySubscribers.forEach {
-            notifyNewReplySubscriber(it, lastComment)
+            coreScope.launch(ioDispatcher) {
+                val lastComment = localTicketsStore.getTickets().lastOrNull()
+                if (lastComment != null && lastComment.isRead != true) {
+                    notifyNewReplySubscriber(it, lastComment)
+                }
+            }
         }
     }
 
-    private fun notifyNewReplySubscriber(subscriber: NewReplySubscriber, lastComment: LastComment) {
+    private fun notifyNewReplySubscriber(subscriber: NewReplySubscriber, lastComment:  TicketEntity) {
         PLog.d(TAG, "notifyNewReplySubscriber, comment: $lastComment")
         firstReplyIsShown = true
-        val hasNewComments = !lastComment.isRead
+        val hasNewComments = lastComment.isRead != true
         subscriber.onNewReply(
             hasNewComments,
-            if (hasNewComments) lastComment.text else null,
-            if (hasNewComments) lastComment.attachesCount else 0,
-            if (hasNewComments) lastComment.attaches else null,
-            if (hasNewComments) lastComment.utcTime else 0
+            if (hasNewComments) lastComment.lastComment?.body else null,
+            if (hasNewComments && lastComment.lastComment?.lastAttachmentName != null) 1 else 0, //TODO kate check if we need more then 1 attachment
+            if (hasNewComments && lastComment.lastComment?.lastAttachmentName != null) listOf(lastComment.lastComment.lastAttachmentName) else null,
+            if (hasNewComments && lastComment.lastComment?.creationDate != null) lastComment.lastComment.creationDate else 0
         )
     }
 

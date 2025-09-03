@@ -62,6 +62,7 @@ internal class TicketFeatureFactory(
         user: UserInternal,
         initialTicketId: Long,
         welcomeMessage: String?,
+        sendComment: String?,
     ): TicketFeature {
         val audioRecordController = audioRecordControllerFactory.create()
         return storeFactory.create(
@@ -89,9 +90,10 @@ internal class TicketFeatureFactory(
                 Effect.Inner.SubscribeToRecord,
                 Effect.Inner.SubscribeToRecordProgress,
                 Effect.Inner.SubscribeToCancelRecord,
+                Effect.Inner.SendTextComment(sendComment, initialTicketId)
             ),
             onCancelCallback = {
-                audioRecordController.cancelRecord()
+                //audioRecordController.cancelRecord()
             }
         ).adapt { it as? Effect.Outer }
     }
@@ -412,8 +414,10 @@ private class TicketActor(
         }
         is Effect.Inner.Close -> singleFlow { Message.Inner.Exit }
         is Effect.Inner.SendTextComment -> flow {
-            preferencesManager.saveLastActiveTime(System.currentTimeMillis())
-            repository.addTextComment(user, ticketId, effect.text)
+            effect.text?.let {
+                preferencesManager.saveLastActiveTime(System.currentTimeMillis())
+                repository.addTextComment(user, ticketId, effect.text)
+            }
         }
         is Effect.Inner.SendRatingComment -> flow {
             preferencesManager.saveLastActiveTime(System.currentTimeMillis())
@@ -450,26 +454,26 @@ private class TicketActor(
             repository.cancelUploadFile(effect.localId, effect.attachmentId)
         }
 
-        is Effect.Inner.SubscribeToRecord -> callbackFlow {
-            audioRecordController.setAudioRecordedListener { audio ->
-                Log.d("DFD", "listener onAudioRecorded")
-                trySend(Message.Inner.OnAudioRecorded(audio))
-            }
-            awaitClose { audioRecordController.removeRecordListener() }
+        is Effect.Inner.SubscribeToRecord -> flow {
+            // audioRecordController.setAudioRecordedListener { audio ->
+            //     Log.d("DFD", "listener onAudioRecorded")
+            //     trySend(Message.Inner.OnAudioRecorded(audio))
+            // }
+            // awaitClose { audioRecordController.removeRecordListener() }
         }
-        is Effect.Inner.SubscribeToRecordProgress -> callbackFlow {
-            audioRecordController.setProgressListener { segments ->
-                Log.d("DFD", "onRecordingProgressUpdated")
-                trySend(Message.Inner.OnRecordingProgressUpdated(segments))
-            }
-            awaitClose { audioRecordController.removeProgressListener() }
-        }.sample(70)
-        is Effect.Inner.SubscribeToCancelRecord -> callbackFlow {
-            audioRecordController.setRecordCancelledListener {
-                Log.d("DFD", "listener onAudioCancelled")
-                trySend(Message.Inner.OnAudioCancelled)
-            }
-            awaitClose { audioRecordController.removeCancelledListener() }
+        is Effect.Inner.SubscribeToRecordProgress -> flow {
+            // audioRecordController.setProgressListener { segments ->
+            //     Log.d("DFD", "onRecordingProgressUpdated")
+            //     trySend(Message.Inner.OnRecordingProgressUpdated(segments))
+            // }
+            // awaitClose { audioRecordController.removeProgressListener() }
+        }//.sample(70)
+        is Effect.Inner.SubscribeToCancelRecord -> flow {
+            // audioRecordController.setRecordCancelledListener {
+            //     Log.d("DFD", "listener onAudioCancelled")
+            //     trySend(Message.Inner.OnAudioCancelled)
+            // }
+            // awaitClose { audioRecordController.removeCancelledListener() }
         }
 
         is Effect.Inner.StartRecord -> flow {
@@ -482,7 +486,7 @@ private class TicketActor(
         }
         is Effect.Inner.CancelRecord -> flow {
             Log.d("DFD", "CancelRecord")
-            audioRecordController.cancelRecord()
+            //audioRecordController.cancelRecord()
         }
         is Effect.Inner.SendAudio -> flow {
             Log.d("DFD", "SendAudio")
