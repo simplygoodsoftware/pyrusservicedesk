@@ -512,7 +512,6 @@ class PyrusServiceDesk private constructor(
         }
 
         internal fun onServiceDeskStop() {
-            // TODO kate check
             onStopCallback?.onServiceDeskStop()
             onStopCallback = null
         }
@@ -550,12 +549,10 @@ class PyrusServiceDesk private constructor(
             if (configuration == null)
                 return
 
-            // TODO kate check sds добавить логику обновления аккаунта в sp
             injector().updateUserUseCase.updateUser()
         }
 
         private fun clearLocalData(doOnCleared : () -> Unit) {
-            // TODO kate check sds
             INJECTOR?.cleanDataUseCase()
             refresh()
             doOnCleared.invoke()
