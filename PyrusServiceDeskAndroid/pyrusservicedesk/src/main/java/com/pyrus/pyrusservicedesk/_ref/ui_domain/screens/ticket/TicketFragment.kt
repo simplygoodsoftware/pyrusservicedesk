@@ -564,7 +564,7 @@ internal class TicketFragment: TeaFragment<Model, Event, Effect>() {
         binding.inputLayout.setBackgroundColor(ConfigUtils.getMainBackgroundColor(requireContext()))
 
         binding.cancelRecordHint.setTextColor(ConfigUtils.getSecondaryColorOnMainBackground(requireContext()))
-        binding.cancelHoldingRecordButton.setTextColor(accentColor)
+        binding.cancelHoldingRecordButton.setTextColor(ConfigUtils.getCanselColor(requireContext()))
 
         val toolbarColor = ConfigUtils.getHeaderBackgroundColor(requireContext())
         binding.toolbarTitle.setTextColor(ConfigUtils.getChatTitleTextColor(requireContext()))
@@ -633,7 +633,7 @@ internal class TicketFragment: TeaFragment<Model, Event, Effect>() {
             statusBarColor = ConfigUtils.getStatusBarColor(requireContext()) ?: statusBarColor
         }
 
-        binding.playButton.backgroundTintList = ColorStateList.valueOf(ConfigUtils.getAccentColor(requireContext()))
+        binding.playButton.backgroundTintList = ColorStateList.valueOf(ConfigUtils.getSendButtonColor(requireContext()))//ConfigUtils.getPlayButtonColor(requireContext()))//ConfigUtils.getAccentColor(requireContext()))
         binding.playerProgressBar.progressTintList = ColorStateList.valueOf(accentColor)
         binding.playerProgressBar.thumbTintList = ColorStateList.valueOf(accentColor)
         binding.playerProgressBar.progressBackgroundTintList = ColorStateList.valueOf(resources.getColor(R.color.psd_color_black_01))

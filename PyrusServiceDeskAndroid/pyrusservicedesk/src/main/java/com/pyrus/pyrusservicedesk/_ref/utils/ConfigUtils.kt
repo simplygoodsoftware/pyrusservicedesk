@@ -139,6 +139,24 @@ internal class ConfigUtils{
             return getColor(context.applicationContext, colorRes)
         }
 
+        @ColorInt
+        fun getLockColor(context: Context): Int {
+            val colorRes = StaticRepository.getConfiguration().headerBackgroundColor
+                ?: return StaticRepository.getConfiguration().themeColor
+                ?: return getColor(context, R.color.psd_background)
+            return getColor(context.applicationContext, colorRes)
+        }
+
+        @ColorInt
+        fun getCanselColor(context: Context): Int {
+            val accentColor = StaticRepository.getConfiguration().themeColor
+            if (accentColor != null)
+                return accentColor
+            val colorRes = StaticRepository.getConfiguration().headerBackgroundColor
+                ?: return getColor(context, R.color.psd_hint_color)
+            return getColor(context.applicationContext, colorRes)
+        }
+
         /**
          * Provides back button color taking [StaticRepository.CONFIGURATION] into account.
          * @param context Activity context.

@@ -27,7 +27,7 @@ internal class LockStopView : View {
     )
 
     private val paint = Paint().apply {
-        color = ConfigUtils.getAccentColor(context)
+        color = ConfigUtils.getLockColor(context)
         style = Paint.Style.STROKE
         strokeCap = Paint.Cap.ROUND
         strokeWidth = 1f.dp()

@@ -25,7 +25,7 @@ class CircleFrameLayout: FrameLayout {
     private var circleDiameter = 74f.dp()
     private val circlePaint = Paint().apply {
         style = Paint.Style.FILL
-        color = ConfigUtils.getAccentColor(context)
+        color = ConfigUtils.getSendButtonColor(context)
         isAntiAlias = true
     }
 
