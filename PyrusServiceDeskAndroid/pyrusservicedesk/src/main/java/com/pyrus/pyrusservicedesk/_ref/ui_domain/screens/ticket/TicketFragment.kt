@@ -50,6 +50,7 @@ import com.pyrus.pyrusservicedesk._ref.ui_domain.screens.ticket.adapter.fingerpr
 import com.pyrus.pyrusservicedesk._ref.ui_domain.screens.ticket.record.AudioRecordView
 import com.pyrus.pyrusservicedesk._ref.utils.AudioWrapper
 import com.pyrus.pyrusservicedesk._ref.utils.ConfigUtils
+import com.pyrus.pyrusservicedesk._ref.utils.ConfigUtils.Companion.getAccentColor
 import com.pyrus.pyrusservicedesk._ref.utils.ConfigUtils.Companion.getMainBackgroundColor
 import com.pyrus.pyrusservicedesk._ref.utils.TextProvider
 import com.pyrus.pyrusservicedesk._ref.utils.animateVisibility
@@ -561,7 +562,7 @@ internal class TicketFragment: TeaFragment<Model, Event, Effect>() {
 
         binding.contentRoot.setBackgroundColor(ConfigUtils.getMainBackgroundColor(requireContext()))
         binding.scrollDownButton.imageTintList = ColorStateList.valueOf(accentColor)
-        binding.inputLayout.setBackgroundColor(ConfigUtils.getMainBackgroundColor(requireContext()))
+        binding.inputLayout.setBackgroundColor(getMainBackgroundColor(requireContext()))
 
         binding.cancelRecordHint.setTextColor(ConfigUtils.getSecondaryColorOnMainBackground(requireContext()))
         binding.cancelHoldingRecordButton.setTextColor(ConfigUtils.getCanselColor(requireContext()))
@@ -613,13 +614,13 @@ internal class TicketFragment: TeaFragment<Model, Event, Effect>() {
 
         binding.view.setBackgroundColor(
             getColorOnBackground(
-                ConfigUtils.getMainBackgroundColor(requireContext()),
+                getMainBackgroundColor(requireContext()),
                 30
             )
         )
         binding.divider.setBackgroundColor(
             getColorOnBackground(
-                ConfigUtils.getMainBackgroundColor(requireContext()),
+                getMainBackgroundColor(requireContext()),
                 30
             )
         )
@@ -633,12 +634,14 @@ internal class TicketFragment: TeaFragment<Model, Event, Effect>() {
             statusBarColor = ConfigUtils.getStatusBarColor(requireContext()) ?: statusBarColor
         }
 
-        binding.playButton.backgroundTintList = ColorStateList.valueOf(ConfigUtils.getSendButtonColor(requireContext()))//ConfigUtils.getPlayButtonColor(requireContext()))//ConfigUtils.getAccentColor(requireContext()))
+        binding.playButton.backgroundTintList = ColorStateList.valueOf(ConfigUtils.getSendButtonColor(requireContext()))
         binding.playerProgressBar.progressTintList = ColorStateList.valueOf(accentColor)
         binding.playerProgressBar.thumbTintList = ColorStateList.valueOf(accentColor)
         binding.playerProgressBar.progressBackgroundTintList = ColorStateList.valueOf(resources.getColor(R.color.psd_color_black_01))
         binding.trackCurrentTime.setTextColor(ConfigUtils.getSecondaryColorOnMainBackground(requireContext()))
 
+        binding.gradient.backgroundTintList = ColorStateList.valueOf(getMainBackgroundColor(requireContext()))
+        binding.ratingBackground.setBackgroundColor(getMainBackgroundColor(requireContext()))
         val ratingBackgroundColor = ColorStateList.valueOf(ConfigUtils.getSupportMessageTextBackgroundColor(binding.root.context))
         binding.rating.rating1.backgroundTintList = ratingBackgroundColor
         binding.rating.rating2.backgroundTintList = ratingBackgroundColor
