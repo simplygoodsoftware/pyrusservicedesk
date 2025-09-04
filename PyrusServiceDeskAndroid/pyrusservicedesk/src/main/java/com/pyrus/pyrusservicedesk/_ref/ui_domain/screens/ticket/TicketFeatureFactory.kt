@@ -29,10 +29,10 @@ import com.pyrus.pyrusservicedesk.core.getUsers
 import com.pyrus.pyrusservicedesk.presentation.ui.navigation_page.ticket.dialogs.comment_actions.ErrorCommentActionsDialog.Companion.ErrorCommentAction
 import com.pyrus.pyrusservicedesk.sdk.data.FileManager
 import com.pyrus.pyrusservicedesk.sdk.data.intermediate.FileData
+import com.pyrus.pyrusservicedesk.sdk.repositories.*
 import com.pyrus.pyrusservicedesk.sdk.repositories.AccountStore
 import com.pyrus.pyrusservicedesk.sdk.repositories.DraftRepository
 import com.pyrus.pyrusservicedesk.sdk.repositories.SdRepository
-import com.pyrus.pyrusservicedesk.sdk.repositories.UserInternal
 import com.pyrus.pyrusservicedesk.sdk.updates.PreferencesManager
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.FlowPreview
@@ -56,6 +56,7 @@ internal class TicketFeatureFactory(
     private val preferencesManager: PreferencesManager,
     private val audioRecordControllerFactory: AudioRecordControllerFactory,
     private val audioWrapper: AudioWrapper,
+    private val localTicketsStore: LocalTicketsStore,
 ) {
 
     fun create(
@@ -81,6 +82,7 @@ internal class TicketFeatureFactory(
                 preferencesManager = preferencesManager,
                 audioRecordController = audioRecordController,
                 audioWrapper = audioWrapper,
+                localTicketsStore = localTicketsStore,
             ).adaptCast(),
             initialEffects = listOf(
                 Effect.Inner.FeedFlow,
@@ -290,7 +292,7 @@ private class FeatureReducer(): Logic<State, Message, Effect>() {
                     State.Error,
                     State.Loading,
                         -> state {
-                       var welcomeMessage = message.welcomeMessage
+                        var welcomeMessage = message.welcomeMessage
                         if (message.ticket.comments.isNotEmpty() && message.ticket.comments.first().isSupport)
                             welcomeMessage = null
                         State.Content(
@@ -361,7 +363,7 @@ private class FeatureReducer(): Logic<State, Message, Effect>() {
 @OptIn(FlowPreview::class)
 private class TicketActor(
     private val accountStore: AccountStore,
-    private val ticketId: Long,
+    private var ticketId: Long,
     private val user: UserInternal,
     private val repository: SdRepository,
     private val router: PyrusRouter,
@@ -371,6 +373,7 @@ private class TicketActor(
     private val preferencesManager: PreferencesManager,
     private val audioRecordController: AudioRecordController,
     private val audioWrapper: AudioWrapper,
+    private val localTicketsStore: LocalTicketsStore,
 ): Actor<Effect.Inner, Message.Inner> {
 
     override fun handleEffect(effect: Effect.Inner): Flow<Message.Inner> = when (effect) {
@@ -394,6 +397,7 @@ private class TicketActor(
             }
         }
         is Effect.Inner.FeedFlow -> {
+            ticketId = localTicketsStore.getTickets().lastOrNull()?.ticketId ?: ticketId
             repository.getFeedFlow(user, ticketId)
                 .map(Message.Inner::CommentsUpdated)
         }
@@ -414,6 +418,7 @@ private class TicketActor(
         }
         is Effect.Inner.Close -> singleFlow { Message.Inner.Exit }
         is Effect.Inner.SendTextComment -> flow {
+            ticketId = localTicketsStore.getTickets().lastOrNull()?.ticketId ?: ticketId
             effect.text?.let {
                 preferencesManager.saveLastActiveTime(System.currentTimeMillis())
                 repository.addTextComment(user, ticketId, effect.text)
@@ -423,6 +428,7 @@ private class TicketActor(
             preferencesManager.saveLastActiveTime(System.currentTimeMillis())
             if (effect.rating == null && effect.ratingComment == null)
                 return@flow
+            ticketId = localTicketsStore.getTickets().lastOrNull()?.ticketId ?: ticketId
             repository.addRatingComment(user, ticketId, effect.rating, effect.ratingComment)
         }
         is Effect.Inner.OpenPreview -> singleFlow {
@@ -435,10 +441,17 @@ private class TicketActor(
             )
             Message.Inner.OnOpenPreview(fileData)
         }
-        is Effect.Inner.SaveDraft -> flow { draftRepository.saveDraft(ticketId, effect.draft) }
-        is Effect.Inner.ReadTicket -> flow { repository.readTicket(user, effect.ticketId) }
+        is Effect.Inner.SaveDraft -> flow {
+            ticketId = localTicketsStore.getTickets().lastOrNull()?.ticketId ?: ticketId
+            draftRepository.saveDraft(ticketId, effect.draft)
+        }
+        is Effect.Inner.ReadTicket -> flow {
+            ticketId = localTicketsStore.getTickets().lastOrNull()?.ticketId ?: ticketId
+            repository.readTicket(user, effect.ticketId)
+        }
         is Effect.Inner.ListenAttachVariant -> flow {
             if (effect.uri !is Uri) return@flow
+            ticketId = localTicketsStore.getTickets().lastOrNull()?.ticketId ?: ticketId
             val fileUri = runCatching { fileManager.copyFile(effect.uri) }.getOrNull() ?: return@flow
             preferencesManager.saveLastActiveTime(System.currentTimeMillis())
             repository.addAttachComment(user, ticketId, fileUri)
@@ -490,6 +503,7 @@ private class TicketActor(
         }
         is Effect.Inner.SendAudio -> flow {
             Log.d("DFD", "SendAudio")
+            ticketId = localTicketsStore.getTickets().lastOrNull()?.ticketId ?: ticketId
             val fileUri = runCatching { File(effect.file).toUri() }.getOrNull() ?: return@flow
             preferencesManager.saveLastActiveTime(System.currentTimeMillis())
             repository.addAttachComment(user, ticketId, fileUri)

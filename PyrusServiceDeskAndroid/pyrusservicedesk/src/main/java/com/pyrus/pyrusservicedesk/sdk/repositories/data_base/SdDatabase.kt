@@ -37,7 +37,7 @@ import com.pyrus.pyrusservicedesk.sdk.repositories.data_base.data.UserEntity
         MemberEntity::class,
     ],
     exportSchema = false,
-    version = 7
+    version = 4
 )
 @TypeConverters(Converter::class)
 internal abstract class SdDatabase : RoomDatabase() {
@@ -68,9 +68,6 @@ internal abstract class SdDatabase : RoomDatabase() {
                 Migration1to2(),
                 Migration2to3(),
                 Migration3to4(),
-                Migration4to5(),
-                Migration5to6(),
-                Migration6to7(),
             ).build()
         }
 
@@ -111,40 +108,19 @@ private class Migration2to3: Migration(2, 3) {
     }
 }
 
-//TODO kate
-// for merge helpy sd and old sd,
-// should combine migrations
 private class Migration3to4: Migration(3, 4) {
     override fun migrate(db: SupportSQLiteDatabase) {
 
         db.execSQL("ALTER TABLE $COMMANDS_TABLE ADD COLUMN user_id_new TEXT")
-
         db.execSQL("UPDATE $COMMANDS_TABLE SET user_id_new = user_id")
-
         db.execSQL("ALTER TABLE $COMMANDS_TABLE DROP COLUMN user_id")
-
         db.execSQL("ALTER TABLE $COMMANDS_TABLE RENAME COLUMN user_id_new TO user_id")
-    }
-}
 
-
-private class Migration4to5: Migration(4, 5) {
-    override fun migrate(db: SupportSQLiteDatabase) {
         db.execSQL("ALTER TABLE $TICKETS_TABLE ADD COLUMN rating_settings_size INTEGER")
         db.execSQL("ALTER TABLE $TICKETS_TABLE ADD COLUMN rating_settings_type INTEGER")
         db.execSQL("ALTER TABLE $TICKETS_TABLE ADD COLUMN rating_settings_rating_text_values TEXT")
-    }
-}
 
-private class Migration5to6: Migration(5, 6) {
-    override fun migrate(db: SupportSQLiteDatabase) {
         db.execSQL("ALTER TABLE $COMMANDS_TABLE ADD COLUMN rating_comment TEXT")
-    }
-}
-
-
-private class Migration6to7: Migration(6, 7) {
-    override fun migrate(db: SupportSQLiteDatabase) {
         db.execSQL("ALTER TABLE $TICKETS_TABLE ADD COLUMN welcome_message TEXT")
     }
 }

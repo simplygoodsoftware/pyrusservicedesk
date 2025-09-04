@@ -79,9 +79,8 @@ class PyrusServiceDesk private constructor(
             return StaticRepository.logging
         }
 
-        //TODO kate
         @JvmStatic
-        fun getNecessaryFeature(): TicketsFeature {
+        fun getTicketsFeature(): TicketsFeature {
             val factory = injector().ticketsFeatureFactory.create()
             return factory
         }
@@ -489,7 +488,6 @@ class PyrusServiceDesk private constructor(
             lastRefreshes.add(System.currentTimeMillis())
             if (lastRefreshes.size > REFRESH_MAX_COUNT)
                 lastRefreshes.removeAt(0)
-            // TODO kate check
             INJECTOR?.refreshUseCase?.refresh()
         }
 

@@ -2,12 +2,15 @@ package com.pyrus.pyrusservicedesk.sdk.sync
 
 import android.util.Log
 import com.pyrus.pyrusservicedesk.AppResourceManager
+import com.pyrus.pyrusservicedesk.PyrusServiceDesk.Companion.API_VERSION_1
+import com.pyrus.pyrusservicedesk.PyrusServiceDesk.Companion.API_VERSION_2
 import com.pyrus.pyrusservicedesk.User
 import com.pyrus.pyrusservicedesk._ref.utils.ConfigUtils
 import com.pyrus.pyrusservicedesk._ref.utils.Try
 import com.pyrus.pyrusservicedesk._ref.utils.drain
 import com.pyrus.pyrusservicedesk._ref.utils.isSuccess
 import com.pyrus.pyrusservicedesk._ref.utils.log.PLog
+import com.pyrus.pyrusservicedesk.core.*
 import com.pyrus.pyrusservicedesk.core.getAppId
 import com.pyrus.pyrusservicedesk.core.getExtraUsers
 import com.pyrus.pyrusservicedesk.core.getUserId
@@ -265,9 +268,10 @@ internal class Synchronizer(
         return syncRequests.map { syncReqRes ->
             val req = syncReqRes.request
             if (req !is SyncRequest.Command.CreateComment) return@map syncReqRes
-            localTicketsStore.getTickets().find { it.ticketId == req.ticketId }?.isActive
-            if (req.ticketId > 0
-                && localTicketsStore.getTickets().find { it.ticketId == req.ticketId }?.isActive == false
+
+            if ((accountStore.getAccount().getVersion() == API_VERSION_1
+                    ||accountStore.getAccount().getVersion() == API_VERSION_2)
+                && localTicketsStore.getTickets().lastOrNull()?.isActive == false
                 && req.rating == null
                 && req.ratingComment == null
             ) {
