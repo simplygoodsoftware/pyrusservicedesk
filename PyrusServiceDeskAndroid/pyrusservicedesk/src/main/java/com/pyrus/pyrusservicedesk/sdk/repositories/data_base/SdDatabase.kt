@@ -108,7 +108,7 @@ private class Migration2to3: Migration(2, 3) {
     }
 }
 
-private class Migration3to4: Migration(3, 4) {
+internal class Migration3to4: Migration(3, 4) {
     override fun migrate(db: SupportSQLiteDatabase) {
 
         db.execSQL("ALTER TABLE $COMMANDS_TABLE ADD COLUMN user_id_new TEXT")
@@ -116,11 +116,11 @@ private class Migration3to4: Migration(3, 4) {
         db.execSQL("ALTER TABLE $COMMANDS_TABLE DROP COLUMN user_id")
         db.execSQL("ALTER TABLE $COMMANDS_TABLE RENAME COLUMN user_id_new TO user_id")
 
-        db.execSQL("ALTER TABLE $TICKETS_TABLE ADD COLUMN rating_settings_size INTEGER")
-        db.execSQL("ALTER TABLE $TICKETS_TABLE ADD COLUMN rating_settings_type INTEGER")
-        db.execSQL("ALTER TABLE $TICKETS_TABLE ADD COLUMN rating_settings_rating_text_values TEXT")
+        db.execSQL("ALTER TABLE $APPLICATIONS_TABLE ADD COLUMN rating_settings_size INTEGER")
+        db.execSQL("ALTER TABLE $APPLICATIONS_TABLE ADD COLUMN rating_settings_type INTEGER")
+        db.execSQL("ALTER TABLE $APPLICATIONS_TABLE ADD COLUMN rating_settings_rating_text_values TEXT")
 
         db.execSQL("ALTER TABLE $COMMANDS_TABLE ADD COLUMN rating_comment TEXT")
-        db.execSQL("ALTER TABLE $TICKETS_TABLE ADD COLUMN welcome_message TEXT")
+        db.execSQL("ALTER TABLE $APPLICATIONS_TABLE ADD COLUMN welcome_message TEXT")
     }
 }

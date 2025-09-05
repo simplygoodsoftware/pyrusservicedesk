@@ -60,6 +60,8 @@ internal object DatabaseMapper {
             orgName = dto.orgName,
             orgLogoUrl = dto.orgLogoUrl,
             orgDescription = dto.orgDescription,
+            ratingSettings = dto.ratingSettings?.let { mapToRatingSettings(it) },
+            welcomeMessage = dto.welcomeMessage,
         )
     }
 
@@ -121,8 +123,6 @@ internal object DatabaseMapper {
             showRating = dto.showRating,
             showRatingText = dto.showRatingText,
             lastComment = dto.lastComment?.let { mapToLastCommentInfo(it) },
-            ratingSettings = dto.ratingSettings?.let { mapToRatingSettings(it) },
-            welcomeMessage = dto.welcomeMessage
         )
     }
 

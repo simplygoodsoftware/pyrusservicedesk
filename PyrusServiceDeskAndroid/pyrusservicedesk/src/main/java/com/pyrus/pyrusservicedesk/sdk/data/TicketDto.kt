@@ -35,6 +35,4 @@ internal data class TicketDto(
     @Json(name = "created_at") @DateJ val createdAt: Long?,
     @Json(name = "show_rating") val showRating: Boolean?,
     @Json(name = "show_rating_text") val showRatingText: String?,
-    @Json(name = "rating_settings") val ratingSettings: RatingSettingsDto? = null,
-    @Json(name = "welcome_message") val welcomeMessage: String?,
 )

@@ -162,6 +162,10 @@ internal class SdRepository(
             return Try2.Success(ticket)
         }
 
+        val application = ticketsStore.getApplications().find { account.getUsers().find { user -> user.userId == userId }?.appId == it.appId }
+        val ratingSettings = application?.ratingSettings
+        val welcomeMessage = application?.welcomeMessage
+
         if (!force) {
             val localTickets = ticketsStore.getTicketsWithComments()
             val localTicket = ticketsStore.getTicketWithComments(serverId)
@@ -172,7 +176,9 @@ internal class SdRepository(
                     userId,
                     localTicket,
                     commands,
-                    orgLogoUrl
+                    orgLogoUrl,
+                    ratingSettings,
+                    welcomeMessage
                 )
                 val singleTicket = repositoryMapper.mapToSingleTicket(
                     ticketsList = localTickets,
@@ -208,7 +214,7 @@ internal class SdRepository(
             ?: return Try2.Failure(GetTicketsError.NoDataFound)
 
         val commands = commandsStore.getCommands(serverId)
-        val ticket = repositoryMapper.mergeTicket(account, userId, localTicket, commands, orgLogoUrl)
+        val ticket = repositoryMapper.mergeTicket(account, userId, localTicket, commands, orgLogoUrl, ratingSettings, welcomeMessage)
         return Try2.Success(ticket)
     }
 
@@ -216,7 +222,10 @@ internal class SdRepository(
         val id = ticketsStore.getTickets().lastOrNull()?.ticketId ?: return null
         val localTicket = ticketsStore.getTicketWithComments(id) ?: return null
         val commands = commandsStore.getCommands(serverId)
-        val ticket = repositoryMapper.mergeTicket(account, userId, localTicket, commands, orgLogoUrl)
+        val application = ticketsStore.getApplications().find { account.getUsers().find { user -> user.userId == userId }?.appId == it.appId }
+        val ratingSettings = application?.ratingSettings
+        val welcomeMessage = application?.welcomeMessage
+        val ticket = repositoryMapper.mergeTicket(account, userId, localTicket, commands, orgLogoUrl, ratingSettings, welcomeMessage)
         return ticket
     }
 
@@ -229,6 +238,9 @@ internal class SdRepository(
 
             val ticketsList = ticketsStore.getTicketsWithComments()
             val orgLogoUrl = getOrgLogoUrl(user.userId, account)
+            val application = ticketsStore.getApplications().find { account.getUsers().find { u -> u.userId == user.userId }?.appId == it.appId }
+            val ratingSettings = application?.ratingSettings
+            val welcomeMessage = application?.welcomeMessage
 
              if (ticketEntity != null) {
                  if ((account.getVersion() == API_VERSION_1
@@ -252,7 +264,9 @@ internal class SdRepository(
                          ticketEntity.ticket.userId,
                          ticketEntity,
                          commands,
-                         orgLogoUrl
+                         orgLogoUrl,
+                         ratingSettings,
+                         welcomeMessage
                      )
                  }
              }

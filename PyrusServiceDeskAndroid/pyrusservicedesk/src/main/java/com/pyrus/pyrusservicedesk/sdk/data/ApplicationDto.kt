@@ -17,5 +17,7 @@ internal data class ApplicationDto(
     @Json(name = "org_logo_url") val orgLogoUrl: String?,
     @Json(name = "extra_users") val extraUsers: List<ExtraUsers>?,
     @Json(name = "org_description") val orgDescription: String?,
-    @Json(name = "author_info") val authorsInfo: Map<String, List<AuthorInfoDto>>?
+    @Json(name = "author_info") val authorsInfo: Map<String, List<AuthorInfoDto>>?,
+    @Json(name = "rating_settings") val ratingSettings: RatingSettingsDto? = null,
+    @Json(name = "welcome_message") val welcomeMessage: String?,
 )

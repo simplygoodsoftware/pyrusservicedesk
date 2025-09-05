@@ -6,6 +6,7 @@ import com.pyrus.pyrusservicedesk._ref.data.Attachment
 import com.pyrus.pyrusservicedesk._ref.data.Author
 import com.pyrus.pyrusservicedesk._ref.data.Comment
 import com.pyrus.pyrusservicedesk._ref.data.FullTicket
+import com.pyrus.pyrusservicedesk._ref.data.RatingSettings
 import com.pyrus.pyrusservicedesk._ref.data.TicketHeader
 import com.pyrus.pyrusservicedesk._ref.data.multy_chat.TicketSetInfo
 import com.pyrus.pyrusservicedesk._ref.data.multy_chat.TicketsInfo
@@ -177,6 +178,8 @@ internal class RepositoryMapper(
         ticket: TicketWithComments,
         commands: List<CommandWithAttachmentsEntity>,
         orgLogoUrl: String?,
+        ratingSettings: RatingSettings?,
+        welcomeMessage: String?,
     ): FullTicket {
 
         val comments = ticket.comments.map { map(account, userId, it) }.toMutableList()
@@ -194,7 +197,7 @@ internal class RepositoryMapper(
         val hasReadCommands = commands.any { it.command.commandType == MarkTicketAsRead.ordinal }
         val isRead = ticket.ticket.isRead == true || hasReadCommands
 
-        return mapToFullTicket(ticket, comments, userId, orgLogoUrl, isRead)
+        return mapToFullTicket(ticket, comments, userId, orgLogoUrl, isRead, ratingSettings, welcomeMessage)
     }
 
     private fun mergeTicketHeader(
@@ -265,6 +268,8 @@ internal class RepositoryMapper(
         userId: String,
         orgLogoUrl: String?,
         isRead: Boolean,
+        ratingSettings: RatingSettings?,
+        welcomeMessage: String?,
     ): FullTicket {
         return FullTicket(
             comments = comments,
@@ -276,8 +281,8 @@ internal class RepositoryMapper(
             orgLogoUrl = orgLogoUrl,
             isActive = ticket.ticket.isActive == true,
             isRead = isRead,
-            ratingSettings = ticket.ticket.ratingSettings,
-            welcomeMessage = ticket.ticket.welcomeMessage,
+            ratingSettings = ratingSettings,
+            welcomeMessage = welcomeMessage,
         )
     }
 

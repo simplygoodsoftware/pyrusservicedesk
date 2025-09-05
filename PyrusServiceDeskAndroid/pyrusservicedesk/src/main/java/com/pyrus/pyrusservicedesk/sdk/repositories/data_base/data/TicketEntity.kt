@@ -37,6 +37,4 @@ internal data class TicketEntity(
     @ColumnInfo(name = "created_at") val createdAt: Long?,
     @ColumnInfo(name = "show_rating") val showRating: Boolean?,
     @ColumnInfo(name = "show_rating_text") val showRatingText: String?,
-    @Embedded(prefix = "rating_settings_") val ratingSettings: RatingSettings?,
-    @ColumnInfo(name = "welcome_message") val welcomeMessage: String?,
 ) : TicketHeaderEntity

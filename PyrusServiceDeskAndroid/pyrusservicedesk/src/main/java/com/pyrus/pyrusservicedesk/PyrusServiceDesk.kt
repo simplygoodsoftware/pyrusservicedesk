@@ -325,7 +325,6 @@ class PyrusServiceDesk private constructor(
                 appId = appId,
             )
 
-            // TODO kate check sds
             if (INJECTOR?.accountStore?.getAccount()?.getUserId() != newAccount.getUserId()) {
                 INJECTOR?.liveUpdates?.reset(userId)
                 clearLocalData {}
@@ -462,7 +461,6 @@ class PyrusServiceDesk private constructor(
         @JvmStatic
         fun stop() {
             PLog.d(TAG, "stop")
-            // TODO kate check
             INJECTOR?.onCancel()
 //            get().sharedViewModel.quitServiceDesk()
         }
