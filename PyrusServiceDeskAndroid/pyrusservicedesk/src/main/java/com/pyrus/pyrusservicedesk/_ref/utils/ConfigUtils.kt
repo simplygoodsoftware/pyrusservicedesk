@@ -341,12 +341,22 @@ internal class ConfigUtils{
             return StaticRepository.getConfiguration().changeUsersIntent
         }
 
+        private fun String.isValidUUID(): Boolean {
+            return try {
+                UUID.fromString(this)
+                true
+            } catch (e: IllegalArgumentException) {
+                false
+            }
+        }
+
         /**
          * Provides userId. [preference] is used for storing generated user id.
          */
-        fun getInstanceId(preference: SharedPreferences): String {
+        fun getInstanceId(preference: SharedPreferences, isVersion1: Boolean): String {
+            val isValidUUID = preference.getString(PREFERENCE_KEY_USER_ID, "")?.isValidUUID() ?: false
             return when {
-                preference.contains(PREFERENCE_KEY_USER_ID) -> preference.getString(PREFERENCE_KEY_USER_ID, "")!!
+                preference.contains(PREFERENCE_KEY_USER_ID) && (isValidUUID || isVersion1) -> preference.getString(PREFERENCE_KEY_USER_ID, "")!!
                 else -> {
                     val userId = UUID.randomUUID().toString()
                     preference.edit().putString(PREFERENCE_KEY_USER_ID, userId).apply()

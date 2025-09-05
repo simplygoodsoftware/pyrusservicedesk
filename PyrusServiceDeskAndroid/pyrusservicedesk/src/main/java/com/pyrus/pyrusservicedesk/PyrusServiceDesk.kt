@@ -301,7 +301,8 @@ class PyrusServiceDesk private constructor(
             Log.d(TAG, "initInternal, appId: ${appId.getFirstNSymbols(10)}, userId: ${userId?.getFirstNSymbols(10)}, apiVersion: $apiVersion")
 
             val preferences: SharedPreferences = application.getSharedPreferences(PREFERENCE_KEY, Context.MODE_PRIVATE)
-            val instanceId = ConfigUtils.getInstanceId(preferences)
+            val isVersion1 = listUser == null && authorId == null && userId == null && securityKey == null
+            val instanceId = ConfigUtils.getInstanceId(preferences, isVersion1)
 
             val apiDomain =  domain ?: PYRUS_BASE_DOMAIN
 
