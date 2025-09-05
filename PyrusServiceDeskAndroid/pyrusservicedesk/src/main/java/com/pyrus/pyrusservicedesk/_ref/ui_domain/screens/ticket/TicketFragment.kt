@@ -214,7 +214,7 @@ internal class TicketFragment: TeaFragment<Model, Event, Effect>() {
         }
 
         diff(Model::ratingTextValues) { ratingTextValues ->
-            val list = ratingTextValues?.sortedByDescending  { it.rating }
+            val list = ratingTextValues?.sortedByDescending { it.rating }?.reversed()
             list?.let { ratingAdapter.submitList(it) }
         }
 

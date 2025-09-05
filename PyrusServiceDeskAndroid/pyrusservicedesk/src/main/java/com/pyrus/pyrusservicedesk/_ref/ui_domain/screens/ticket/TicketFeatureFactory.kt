@@ -385,10 +385,11 @@ private class TicketActor(
             )
             when {
                 commentsTry.isSuccess() -> {
+                    val application = localTicketsStore.getApplications().find { accountStore.getAccount().getUsers().find { user -> user.userId == commentsTry.value.userId }?.appId == it.appId }
                     Message.Inner.UpdateCommentsCompleted(
                         ticket = commentsTry.value,
                         draft = draftRepository.getDraft(ticketId),
-                        welcomeMessage = welcomeMessage,
+                        welcomeMessage = if (application?.welcomeMessage.isNullOrBlank()) welcomeMessage else application?.welcomeMessage,
                         userName = accountStore.getAccount().getUsers()
                             .find { it.userId == commentsTry.value.userId }?.userName ?: ""
                     )

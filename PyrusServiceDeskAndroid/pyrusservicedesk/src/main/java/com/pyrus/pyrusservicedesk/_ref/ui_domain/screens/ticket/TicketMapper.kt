@@ -35,7 +35,7 @@ internal object TicketMapper {
         is State.Content -> Model(
             inputText = state.inputText,
             sendEnabled = state.sendEnabled,
-            comments = state.ticket?.let { mapComments(it,  if (!it.welcomeMessage.isNullOrBlank()) it.welcomeMessage else state.welcomeMessage) },
+            comments = state.ticket?.let { mapComments(it, state.welcomeMessage) },
             isLoading = false,
             showNoConnectionError = false,
             isRefreshing = state.isLoading,
@@ -173,6 +173,16 @@ internal object TicketMapper {
         addCommentEntries(entries, freshList)
 
         val entriesWithDates = toListWithDates(entries).toMutableList()
+
+        if (freshList.comments.isEmpty()) {
+            val buttonEntry = (entries.lastOrNull() as? CommentEntry.Comment.CommentText)?.let { extractButtonsFromWelcome(it, welcomeMessage) }
+            if (buttonEntry != null) entriesWithDates += buttonEntry
+        }
+
+        if (!freshList.showRating) {
+            val buttonEntry = freshList.comments.lastOrNull()?.let { extractButtons(it) }
+            if (buttonEntry != null) entriesWithDates += buttonEntry
+        }
 
         entriesWithDates.reverse()
         var resentInbound: Boolean? = null
@@ -436,6 +446,15 @@ internal object TicketMapper {
         }
 
         return CommentEntry.Buttons(lastComment.creationTime, lastComment.id, buttons)
+    }
+
+    private fun extractButtonsFromWelcome(welcomeMessage: CommentEntry.Comment.CommentText, text: String?): CommentEntry.Buttons? {
+        val buttons = HtmlUtils.extractButtons(text)
+        if (buttons.isEmpty()) {
+            return null
+        }
+
+        return CommentEntry.Buttons(welcomeMessage.creationTime, welcomeMessage.id, buttons)
     }
 
     private fun toListWithDates(entries: List<CommentEntry>): List<CommentEntry> {
