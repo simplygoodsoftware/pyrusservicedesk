@@ -1,5 +1,7 @@
 import android.content.ContentValues
 import android.database.sqlite.SQLiteDatabase
+import androidx.core.database.getIntOrNull
+import androidx.core.database.getStringOrNull
 import androidx.room.testing.MigrationTestHelper
 import androidx.sqlite.db.SupportSQLiteDatabase
 import androidx.sqlite.db.framework.FrameworkSQLiteOpenHelperFactory
@@ -7,9 +9,6 @@ import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.platform.app.InstrumentationRegistry
 import com.pyrus.pyrusservicedesk.sdk.repositories.data_base.Migration3to4
 import com.pyrus.pyrusservicedesk.sdk.repositories.data_base.SdDatabase
-import com.pyrus.pyrusservicedesk.sdk.repositories.data_base.SdDatabase.Companion.COMMANDS_TABLE
-import com.pyrus.pyrusservicedesk.sdk.repositories.data_base.SdDatabase.Companion.COMMENTS_TABLE
-import com.pyrus.pyrusservicedesk.sdk.repositories.data_base.SdDatabase.Companion.TICKETS_TABLE
 import junit.framework.TestCase.assertEquals
 import org.junit.Rule
 import org.junit.Test
@@ -31,40 +30,40 @@ class MigrationTest {
     fun migrate3To4() {
         var db = helper.createDatabase(TEST_DB, 3)
 
-        db.insertValue(COMMENTS_TABLE, ::putCommandsV3Values)
-        db.insertValue(TICKETS_TABLE, ::putTicketsV3Values)
+        db.insertValue(SdDatabase.COMMANDS_TABLE, ::putCommandsV3Values)
+        db.insertValue(SdDatabase.APPLICATIONS_TABLE, ::putApplicationsV3Values)
 
         db.close()
 
         db = helper.runMigrationsAndValidate(TEST_DB, 4, true, Migration3to4())
 
-        val ticketsCursor = db.query("SELECT * FROM $TICKETS_TABLE")
-        val commandsCursor = db.query("SELECT * FROM $COMMANDS_TABLE")
+        val applicationCursor = db.query("SELECT * FROM ${SdDatabase.APPLICATIONS_TABLE}")
+        val commandsCursor = db.query("SELECT * FROM ${SdDatabase.COMMANDS_TABLE}")
 
-        ticketsCursor.moveToNext()
+        applicationCursor.moveToNext()
         commandsCursor.moveToNext()
 
-        ticketsCursor.getColumnIndexOrThrow("rating_settings_size")
-        ticketsCursor.getColumnIndexOrThrow("rating_settings_type")
-        ticketsCursor.getColumnIndexOrThrow("rating_settings_rating_text_values")
+        applicationCursor.getColumnIndexOrThrow("rating_settings_size")
+        applicationCursor.getColumnIndexOrThrow("rating_settings_type")
+        applicationCursor.getColumnIndexOrThrow("rating_settings_rating_text_values")
 
-        ticketsCursor.getColumnIndexOrThrow("welcome_message")
+        applicationCursor.getColumnIndexOrThrow("welcome_message")
 
         commandsCursor.getColumnIndexOrThrow("user_id")
         commandsCursor.getColumnIndexOrThrow("rating_comment")
 
-        val ratingSettingsSizeIndex = ticketsCursor.getColumnIndexOrThrow("rating_settings_size")
-        val ratingSettingsSizeValue = ticketsCursor.getInt(ratingSettingsSizeIndex)
-        val ratingSettingsTypeIndex = ticketsCursor.getColumnIndexOrThrow("rating_settings_type")
-        val ratingSettingsTypeValue = ticketsCursor.getInt(ratingSettingsTypeIndex)
-        val ratingSettingsRatingTextValuesIndex = ticketsCursor.getColumnIndexOrThrow("rating_settings_rating_text_values")
-        val ratingSettingsRatingTextValuesValue = ticketsCursor.getInt(ratingSettingsRatingTextValuesIndex)
-        val welcomeMessageIndex = ticketsCursor.getColumnIndexOrThrow("welcome_message")
-        val welcomeMessageValue = ticketsCursor.getInt(welcomeMessageIndex)
+        val ratingSettingsSizeIndex = applicationCursor.getColumnIndexOrThrow("rating_settings_size")
+        val ratingSettingsSizeValue = applicationCursor.getIntOrNull(ratingSettingsSizeIndex)
+        val ratingSettingsTypeIndex = applicationCursor.getColumnIndexOrThrow("rating_settings_type")
+        val ratingSettingsTypeValue = applicationCursor.getIntOrNull(ratingSettingsTypeIndex)
+        val ratingSettingsRatingTextValuesIndex = applicationCursor.getColumnIndexOrThrow("rating_settings_rating_text_values")
+        val ratingSettingsRatingTextValuesValue = applicationCursor.getIntOrNull(ratingSettingsRatingTextValuesIndex)
+        val welcomeMessageIndex = applicationCursor.getColumnIndexOrThrow("welcome_message")
+        val welcomeMessageValue = applicationCursor.getStringOrNull(welcomeMessageIndex)
         val ratingCommentIndex = commandsCursor.getColumnIndexOrThrow("rating_comment")
-        val ratingCommentValue = commandsCursor.getInt(ratingCommentIndex)
+        val ratingCommentValue = commandsCursor.getStringOrNull(ratingCommentIndex)
         val userIdIndex = commandsCursor.getColumnIndexOrThrow("user_id")
-        val userIdValue = commandsCursor.getInt(userIdIndex)
+        val userIdValue = commandsCursor.getStringOrNull(userIdIndex)
         assertEquals(null, ratingSettingsSizeValue)
         assertEquals(null, ratingSettingsTypeValue)
         assertEquals(null, ratingSettingsRatingTextValuesValue)
@@ -73,6 +72,7 @@ class MigrationTest {
         assertEquals("543454", userIdValue)
 
     }
+
     private fun SupportSQLiteDatabase.insertValue(table: String, vararg stackers: (values: ContentValues) -> Unit) {
         val personContentValues = ContentValues()
         for (stacker in stackers) {
@@ -112,6 +112,23 @@ class MigrationTest {
         contentValues.put("token_type", "token_type")
     }
 
+    private fun putCommandsV4Values(contentValues: ContentValues) {
+        contentValues.put("is_error", false)
+        contentValues.put("local_id", 5L)
+        contentValues.put("command_id", "jhgkjgkjhg")
+        contentValues.put("command_type", 1)
+        contentValues.put("user_id", "543454")
+        contentValues.put("app_id", "app_idapp_idapp_idapp_idapp_idapp_idapp_id")
+        contentValues.put("creation_time", 1757052450L)
+        contentValues.put("request_new_ticket", false)
+        contentValues.put("comment", "hngvgf152")
+        contentValues.put("ticket_id", 123456789L)
+        contentValues.put("rating", 5)
+        contentValues.put("comment_id", 44565457L)
+        contentValues.put("token", "token7676")
+        contentValues.put("token_type", "token_type")
+    }
+
     private fun putTicketsV3Values(values: ContentValues) {
 
         values.put("ticket_id", 144544444L)
@@ -131,6 +148,13 @@ class MigrationTest {
         values.put("is_active", true)
         values.put("created_at", 1757052450L)
         values.put("show_rating", true)
+    }
+
+    private fun putApplicationsV3Values(values: ContentValues) {
+        values.put("app_id", "hgc87vjhbx98jhbv")
+        values.put("org_name", "organisation")
+        values.put("org_logo_url", "org_logo_url")
+        values.put("org_description", "org_description/information")
     }
 
     companion object {
