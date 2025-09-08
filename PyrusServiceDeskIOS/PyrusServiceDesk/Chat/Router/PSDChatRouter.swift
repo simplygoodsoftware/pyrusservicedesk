@@ -11,16 +11,16 @@ extension PSDChatRouter: PSDChatRouterProtocol {
             showLinkOpenAlert(linkString: linkString)
         case .close:
             close()
-        case .ratingComment:
-            showRatingComment()
+        case .ratingComment(ratingText: let ratingText, rating: let rating):
+            showRatingComment(ratingText: ratingText, rating: rating)
         }
     }
 }
 
 private extension PSDChatRouter {
     
-    func showRatingComment() {
-        let vc = RatingCommentViewController()
+    func showRatingComment(ratingText: String?, rating: Int) {
+        let vc = RatingCommentViewController(rating: rating, ratingText: ratingText)
         vc.delegate = controller
         if #available(iOS 15.0, *) {
             if let sheet = vc.sheetPresentationController {

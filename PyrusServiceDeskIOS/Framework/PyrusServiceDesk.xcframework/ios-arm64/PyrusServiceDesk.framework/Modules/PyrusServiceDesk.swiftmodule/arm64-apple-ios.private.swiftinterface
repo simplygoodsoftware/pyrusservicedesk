@@ -188,11 +188,11 @@ public class OpusRecorder {
   public static func addUserFromDiplink(appId: Swift.String, userId: Swift.String, userName: Swift.String)
   @objc public static func openTicket(ticketId: Swift.Int, userId: Swift.String, messageId: Swift.Int) -> Swift.Bool
   @objc public static func setPushToken(_ token: Swift.String?, users: [PSDUserInfo]? = nil, completion: @escaping ((any Swift.Error)?) -> Swift.Void)
-  @objc public static func start(on viewController: UIKit.UIViewController, onStopCallback: (any OnStopCallback)? = nil)
-  @objc public static func start(on viewController: UIKit.UIViewController, configuration: ServiceDeskConfiguration?, onStopCallback: (any OnStopCallback)? = nil, deniedAccessCallback: (any DeniedAccessCallBack)? = nil, animated: Swift.Bool = true, startWithPush: Swift.Bool = false)
+  @objc public static func start(on viewController: UIKit.UIViewController, onStopCallback: (any OnStopCallback)? = nil, sendComment: Swift.String? = nil)
+  @objc public static func start(on viewController: UIKit.UIViewController, configuration: ServiceDeskConfiguration?, onStopCallback: (any OnStopCallback)? = nil, deniedAccessCallback: (any DeniedAccessCallBack)? = nil, animated: Swift.Bool = true, sendComment: Swift.String? = nil, startWithPush: Swift.Bool = false)
   @objc public static func getStart(on viewController: UIKit.UIViewController, configuration: ServiceDeskConfiguration?, onStopCallback: (any OnStopCallback)? = nil, deniedAccessCallback: (any DeniedAccessCallBack)? = nil, extraUsersCallback: (any ExtraUsersCallback)? = nil, animated: Swift.Bool = true) -> UIKit.UINavigationController?
-  @objc public static func start(on viewController: UIKit.UIViewController, configuration: ServiceDeskConfiguration?, completion: (() -> Swift.Void)? = nil, onStopCallback: (any OnStopCallback)? = nil, startWithPush: Swift.Bool = false)
-  @objc public static func start(with configuration: ServiceDeskConfiguration?, onStopCallback: (any OnStopCallback)? = nil, startWithPush: Swift.Bool = false) -> UIKit.UINavigationController?
+  @objc public static func start(on viewController: UIKit.UIViewController, configuration: ServiceDeskConfiguration?, completion: (() -> Swift.Void)? = nil, onStopCallback: (any OnStopCallback)? = nil, sendComment: Swift.String? = nil, startWithPush: Swift.Bool = false)
+  @objc public static func start(with configuration: ServiceDeskConfiguration?, onStopCallback: (any OnStopCallback)? = nil, sendComment: Swift.String? = nil, startWithPush: Swift.Bool = false) -> UIKit.UINavigationController?
   @objc public static func stop()
   @objc public static var onAuthorizationFailed: (() -> Swift.Void)?
   @objc public static func subscribeToReplies(_ subscriber: (any NewReplySubscriber)?)

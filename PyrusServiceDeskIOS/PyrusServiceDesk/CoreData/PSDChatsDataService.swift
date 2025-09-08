@@ -780,6 +780,8 @@ extension PSDChatsDataService: PSDChatsDataServiceProtocol {
                 
                 if let lastMessage = messages.last {
                     PyrusServiceDesk.lastNoteId = Int(lastMessage.messageId)
+                } else {
+                    PyrusServiceDesk.lastNoteId = 0
                 }
                 
                 DispatchQueue.main.async {
@@ -865,6 +867,8 @@ extension PSDChatsDataService: PSDChatsDataServiceProtocol {
             
             if let lastMessage = messages.last {
                 PyrusServiceDesk.lastNoteId = Int(lastMessage.messageId)
+            } else {
+                PyrusServiceDesk.lastNoteId = 0
             }
             
             return messages

@@ -623,7 +623,7 @@ SWIFT_CLASS("_TtC16PyrusServiceDesk16PyrusServiceDesk")
 ///
 /// \param onStopCallback OnStopCallback object or nil. OnStopCallback is object for getting a notification that PyrusServiceDesk was closed.
 ///
-+ (void)startOn:(UIViewController * _Nonnull)viewController onStopCallback:(id <OnStopCallback> _Nullable)onStopCallback;
++ (void)startOn:(UIViewController * _Nonnull)viewController onStopCallback:(id <OnStopCallback> _Nullable)onStopCallback sendComment:(NSString * _Nullable)sendComment;
 /// Show chat
 /// \param viewController ViewController that must present chat
 ///
@@ -631,7 +631,7 @@ SWIFT_CLASS("_TtC16PyrusServiceDesk16PyrusServiceDesk")
 ///
 /// \param onStopCallback OnStopCallback object or nil. OnStopCallback is object for getting a notification that PyrusServiceDesk was closed.
 ///
-+ (void)startOn:(UIViewController * _Nonnull)viewController configuration:(ServiceDeskConfiguration * _Nullable)configuration onStopCallback:(id <OnStopCallback> _Nullable)onStopCallback deniedAccessCallback:(id <DeniedAccessCallBack> _Nullable)deniedAccessCallback animated:(BOOL)animated startWithPush:(BOOL)startWithPush;
++ (void)startOn:(UIViewController * _Nonnull)viewController configuration:(ServiceDeskConfiguration * _Nullable)configuration onStopCallback:(id <OnStopCallback> _Nullable)onStopCallback deniedAccessCallback:(id <DeniedAccessCallBack> _Nullable)deniedAccessCallback animated:(BOOL)animated sendComment:(NSString * _Nullable)sendComment startWithPush:(BOOL)startWithPush;
 /// Show chat
 /// \param viewController ViewController that must present chat
 ///
@@ -649,13 +649,13 @@ SWIFT_CLASS("_TtC16PyrusServiceDesk16PyrusServiceDesk")
 ///
 /// \param onStopCallback OnStopCallback object or nil. OnStopCallback is object for getting a notification that PyrusServiceDesk was closed.
 ///
-+ (void)startOn:(UIViewController * _Nonnull)viewController configuration:(ServiceDeskConfiguration * _Nullable)configuration completion:(void (^ _Nullable)(void))completion onStopCallback:(id <OnStopCallback> _Nullable)onStopCallback startWithPush:(BOOL)startWithPush;
++ (void)startOn:(UIViewController * _Nonnull)viewController configuration:(ServiceDeskConfiguration * _Nullable)configuration completion:(void (^ _Nullable)(void))completion onStopCallback:(id <OnStopCallback> _Nullable)onStopCallback sendComment:(NSString * _Nullable)sendComment startWithPush:(BOOL)startWithPush;
 /// Show chat
 /// \param configuration ServiceDeskConfiguration object or nil. ServiceDeskConfiguration is object that create custom interface: theme color,welcome message, image for support’s avatar and chat title for navigation bar title. If nil, the default design will be used.
 ///
 /// \param onStopCallback OnStopCallback object or nil. OnStopCallback is object for getting a notification that PyrusServiceDesk was closed.
 ///
-+ (UINavigationController * _Nullable)startWith:(ServiceDeskConfiguration * _Nullable)configuration onStopCallback:(id <OnStopCallback> _Nullable)onStopCallback startWithPush:(BOOL)startWithPush SWIFT_WARN_UNUSED_RESULT;
++ (UINavigationController * _Nullable)startWith:(ServiceDeskConfiguration * _Nullable)configuration onStopCallback:(id <OnStopCallback> _Nullable)onStopCallback sendComment:(NSString * _Nullable)sendComment startWithPush:(BOOL)startWithPush SWIFT_WARN_UNUSED_RESULT;
 /// Close PyrusServiceDesk
 + (void)stop;
 SWIFT_CLASS_PROPERTY(@property (nonatomic, class, copy) void (^ _Nullable onAuthorizationFailed)(void);)

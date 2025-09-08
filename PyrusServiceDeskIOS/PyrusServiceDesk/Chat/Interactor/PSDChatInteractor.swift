@@ -170,6 +170,10 @@ extension PSDChatInteractor: PSDChatInteractorProtocol {
             } else {
                 beginTimer()
                 updateChat(chat: chat)
+                if let message = PyrusServiceDesk.messageToSend {
+                    send(message, [], newTicket: true)
+                    PyrusServiceDesk.messageToSend = nil
+                }
                 
                 if let messageId,
                    let index = tableMatrix.findIndexPath(messageId: messageId).first {
@@ -235,8 +239,8 @@ extension PSDChatInteractor: PSDChatInteractorProtocol {
             }
         case .viewWillAppear:
             break
-        case .sendRatingComment(comment: let comment):
-            sendRatingComment(comment)
+        case .sendRatingComment(comment: let comment, rating: let rating):
+            sendRatingComment(ratingComment: comment, rating: rating)
         }
     }
 }
@@ -311,6 +315,10 @@ private extension PSDChatInteractor {
                 isRefresh = true
                 
                 self.updateChat(chat: chat)
+                if let message = PyrusServiceDesk.messageToSend {
+                    send(message, [], newTicket: true)
+                    PyrusServiceDesk.messageToSend = nil
+                }
                 readChat()
                 self.isRefresh = false
                 fromPush = false
@@ -515,7 +523,7 @@ private extension PSDChatInteractor {
 }
 
 private extension PSDChatInteractor {
-    func send(_ message: String, _ attachments: [PSDAttachment]) {
+    func send(_ message: String, _ attachments: [PSDAttachment], newTicket: Bool = false) {
         let newMessage = PSDObjectsCreator.createMessage(message, attachments: attachments, ticketId: chat?.chatId ?? 0, userId: chat?.userId ?? PyrusServiceDesk.customUserId ?? PyrusServiceDesk.userId)
         if PyrusServiceDesk.multichats {
             if chat?.chatId ?? 0 == 0 {
@@ -528,7 +536,7 @@ private extension PSDChatInteractor {
                 newMessage.ticketId = ticketId
             }
         } else {
-            let requestNewTicket = !(chat?.isActive ?? false) && chat?.chatId ?? 0 > 0
+            let requestNewTicket = !(chat?.isActive ?? false) && chat?.chatId ?? 0 > 0 || newTicket
             newMessage.requestNewTicket = requestNewTicket
             if requestNewTicket {
                 let nextId = PSDObjectsCreator.getNextLocalId()
@@ -550,7 +558,7 @@ private extension PSDChatInteractor {
     }
     
     func sendRate(_ rateValue: Int) {
-        presenter.doWork(.showRatingComment)
+        presenter.doWork(.showRatingComment(ratingText: chat?.showRatingText, rating: rateValue))
         let newMessage = PSDObjectsCreator.createMessage(rating: rateValue, ticketId: chat?.chatId ?? 0, userId: chat?.userId ?? PyrusServiceDesk.customUserId ?? PyrusServiceDesk.userId)
         newMessage.commandId = UUID().uuidString
         newMessage.userId = PyrusServiceDesk.currentUserId ?? PyrusServiceDesk.customUserId ?? PyrusServiceDesk.userId
@@ -565,8 +573,8 @@ private extension PSDChatInteractor {
         PSDMessageSend.pass(newMessage, delegate: self)
     }
     
-    func sendRatingComment(_ ratingComment: String) {
-        let newMessage = PSDObjectsCreator.createMessage(ratingComment: ratingComment, ticketId: chat?.chatId ?? 0, userId: chat?.userId ?? PyrusServiceDesk.customUserId ?? PyrusServiceDesk.userId)
+    func sendRatingComment(ratingComment: String?, rating: Int) {
+        let newMessage = PSDObjectsCreator.createMessage(ratingComment: ratingComment, rating: rating, ticketId: chat?.chatId ?? 0, userId: chat?.userId ?? PyrusServiceDesk.customUserId ?? PyrusServiceDesk.userId)
         newMessage.commandId = UUID().uuidString
         newMessage.userId = PyrusServiceDesk.currentUserId ?? PyrusServiceDesk.customUserId ?? PyrusServiceDesk.userId
         newMessage.appId = PyrusServiceDesk.currentClientId ?? PyrusServiceDesk.clientId

@@ -1,16 +1,28 @@
 import UIKit
 
 protocol RatingCommentDelegate: AnyObject {
-    func sendRatingComment(comment: String)
+    func sendRatingComment(comment: String?, rating: Int)
 }
 
 class RatingCommentViewController: UIViewController {
 
     weak var delegate: RatingCommentDelegate?
-
+    
+    private let rating: Int
+    private let ratingText: String?
+        
+    init(rating: Int, ratingText: String?) {
+        self.rating = rating
+        self.ratingText = ratingText
+        super.init(nibName: nil, bundle: nil)
+    }
+    
+    required init?(coder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
+    }
+    
     private let titleLabel: UILabel = {
         let label = UILabel()
-        label.text = CustomizationHelper.ratingSettings.ratingText ?? "EvaluateQuality".localizedPSD()
         label.font = UIFont.boldSystemFont(ofSize: 22)
         label.numberOfLines = 2
         label.textAlignment = .left
@@ -75,6 +87,8 @@ class RatingCommentViewController: UIViewController {
     }
 
     private func setupLayout() {
+        titleLabel.text = ratingText ?? "EvaluateQuality".localizedPSD()
+
         [titleLabel, commentLabel, textView, closeButton, sendButton].forEach {
             view.addSubview($0)
         }
@@ -110,7 +124,7 @@ class RatingCommentViewController: UIViewController {
 
     @objc private func sendTapped() {
         if !textView.text.isEmpty {
-            delegate?.sendRatingComment(comment: textView.text)
+            delegate?.sendRatingComment(comment: textView.text, rating: rating)
         }
         dismiss(animated: true)
     }

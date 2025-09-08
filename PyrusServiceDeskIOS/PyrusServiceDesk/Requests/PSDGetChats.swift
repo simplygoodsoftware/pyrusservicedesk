@@ -44,7 +44,7 @@ struct PSDGetChats {
         parameters["commands"] = commands
         
         let request: URLRequest = URLRequest.createRequest(type:.chats, parameters: parameters)
-        print("app_id: \(PyrusServiceDesk.clientId), user_id: \(PyrusServiceDesk.customUserId ?? PyrusServiceDesk.userId), secret_key: \(PyrusServiceDesk.securityKey)")
+        print("app_id: \(PyrusServiceDesk.clientId), user_id: \(PyrusServiceDesk.customUserId ?? PyrusServiceDesk.userId), secret_key: \(PyrusServiceDesk.securityKey), lastNoteId: \(parameters["last_note_id"])")
         PSDGetChats.sessionTask = PyrusServiceDesk.mainSession.dataTask(with: request) { data, response, error in
             guard let data = data, error == nil else { // check for fundamental networking error
                 completion(nil, nil, nil, nil, false)
@@ -118,20 +118,25 @@ struct PSDGetChats {
             let clientDescription = dic["org_description"] as? String
             let client = PSDClientInfo(clientId: clientId, clientName: clientName, clientIcon: clientIcon)
             client.clientDescription = clientDescription
-//            """
-//            Техническая поддержка iikoService
-//            Наш сайт: https://iikoservice.ru/
-//            email технической поддержки: support@iiko.ru
-//            117587, г. Москва, Варшавское шоссе д. 118 корп.1 Бизнес-центр «Варшавка Sky», 17-й этаж
-//            
-//            Передавая сообщения в чат в данном мобильном приложении, вы соглашаетесь на обработку персональных данных в соответствии
-//            с условиями оферты https://iiko.ru/oferta-porucheniya-obrabotki-personalnyh-dannyh.pdf
-//            """
+            client.welcomeMessage = dic[PSDGetChats.WELCOME_MESSAGE] as? String
+            if let ratingSettings = dic[PSDGetChats.RATING_SETTINGS_KEY] as? NSDictionary {
+                do {
+                    let jsonData = try JSONSerialization.data(withJSONObject: ratingSettings, options: [])
+                    let decoder = JSONDecoder()
+                    let settings = try decoder.decode(PSDRatingSettings.self, from: jsonData)
+                    client.ratingSettings = settings
+                } catch {
+                    print("Error decoding rating settings JSON: \(error)")
+                }
+            }
+
             if !clients.contains(client) {
                 clients.append(client)
             } else if let storeClient = clients.first(where: { $0.clientId == client.clientId }) {
                 storeClient.clientName = client.clientName
                 storeClient.clientDescription = client.clientDescription
+                storeClient.ratingSettings = client.ratingSettings
+                storeClient.welcomeMessage = client.welcomeMessage
                 if storeClient.clientIcon != client.clientIcon {
                     storeClient.clientIcon = client.clientIcon
                 }
@@ -232,32 +237,7 @@ struct PSDGetChats {
             if !chat.showRating || !PyrusServiceDesk.multichats {
                 chat.isActive = dic["is_active"] as? Bool ?? true
             }
-            let welcomeMessage = dic[PSDGetChats.WELCOME_MESSAGE] as? String
-            var settings: PSDRatingSettings?
-            if let ratingSettings = dic[PSDGetChats.RATING_SETTINGS_KEY] as? NSDictionary {
-                do {
-                    let jsonData = try JSONSerialization.data(withJSONObject: ratingSettings, options: [])
-                    let decoder = JSONDecoder()
-                    settings = try decoder.decode(PSDRatingSettings.self, from: jsonData)
-                    settings?.ratingText = dic["show_rating_text"] as? String
-                } catch {
-                    print("Error decoding JSON: \(error)")
-                }
-            }
-            
-            if PyrusServiceDesk.multichats {
-                var client: PSDClientInfo?
-                if PyrusServiceDesk.customUserId == userId {
-                    client = clients.first(where: { $0.clientId == PyrusServiceDesk.clientId })
-                } else if let user = PyrusServiceDesk.additionalUsers.first(where: { $0.userId == userId }) {
-                    client = clients.first(where: { $0.clientId == user.clientId })
-                }
-                client?.ratingSettings = settings
-                client?.welcomeMessage = welcomeMessage
-            } else {
-                clients.first?.ratingSettings = settings
-                clients.first?.welcomeMessage = welcomeMessage
-            }
+
             chats.append(chat)
         }
         return sortByLastMessage(chats)

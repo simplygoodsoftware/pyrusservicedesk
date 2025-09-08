@@ -7,5 +7,5 @@ protocol PSDChatRouterProtocol: NSObjectProtocol {
 enum PSDChatRouterDestination {
     case showLinkOpenAlert(linkString: String)
     case close
-    case ratingComment
+    case ratingComment(ratingText: String?, rating: Int)
 }

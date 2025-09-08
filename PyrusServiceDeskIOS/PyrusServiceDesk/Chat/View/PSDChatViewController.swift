@@ -727,11 +727,10 @@ extension PSDChatViewController: PSDChatViewProtocol {
         case .updateInfo(ticketId: let ticketId, userName: let userName, createdAt: let createdAt):
             popoverContentController = PopoverContentController(ticketId: ticketId, userName: userName, createdAt: createdAt)
             navigationItem.rightBarButtonItem = infoButton
-        case .showRatingComment:
+        case .showRatingComment(ratingText: let ratingText, rating: let rating):
             messageInputView.inputTextView.resignFirstResponder()
             DispatchQueue.main.async { [weak self] in
-                self?.router.route(to: .ratingComment)
-
+                self?.router.route(to: .ratingComment(ratingText: ratingText, rating: rating))
             }
         }
     }
@@ -840,8 +839,8 @@ extension PSDChatViewController: PSDChatTableViewDelegate {
 }
 
 extension PSDChatViewController: RatingCommentDelegate {
-    func sendRatingComment(comment: String) {
-        interactor.doInteraction(.sendRatingComment(comment: comment))
+    func sendRatingComment(comment: String?, rating: Int) {
+        interactor.doInteraction(.sendRatingComment(comment: comment, rating: rating))
     }
 }
 

@@ -28,6 +28,7 @@ import UIKit
     static var authors: [PSDUserInfo.AuthorInfo] = []
     static var isStarted: Bool = false
     static var needShowLoading: Bool = false
+    static var messageToSend: String?
     static private(set) var startWithPush: Bool = false
     
     static var userName: String?
@@ -253,15 +254,15 @@ import UIKit
     ///Show chat
     ///- parameter viewController: ViewController that must present chat
     ///- parameter onStopCallback: OnStopCallback object or nil. OnStopCallback is object for getting a notification that PyrusServiceDesk was closed.
-    @objc public static func start(on viewController:UIViewController, onStopCallback: OnStopCallback? = nil){
-        let _ = psdStart(on: viewController, configuration: nil, completion: nil, onStopCallback: onStopCallback, startWithPush: false)
+    @objc public static func start(on viewController:UIViewController, onStopCallback: OnStopCallback? = nil, sendComment: String? = nil) {
+        let _ = psdStart(on: viewController, configuration: nil, completion: nil, onStopCallback: onStopCallback, sendComment: sendComment, startWithPush: false)
     }
     ///Show chat
     ///- parameter viewController: ViewController that must present chat
     ///- parameter configuration: ServiceDeskConfiguration object or nil. ServiceDeskConfiguration is object that create custom interface: theme color,welcome message, image for support's avatar and chat title for navigation bar title. If nil, the default design will be used.
     ///- parameter onStopCallback: OnStopCallback object or nil. OnStopCallback is object for getting a notification that PyrusServiceDesk was closed.
-    @objc public static func start(on viewController:UIViewController, configuration:ServiceDeskConfiguration?, onStopCallback: OnStopCallback? = nil, deniedAccessCallback: DeniedAccessCallBack? = nil, animated: Bool = true, startWithPush: Bool = false) {
-        let _ = psdStart(on: viewController, configuration: configuration, completion: nil, onStopCallback: onStopCallback, deniedAccessCallback: deniedAccessCallback, animated: animated, startWithPush: startWithPush)
+    @objc public static func start(on viewController:UIViewController, configuration:ServiceDeskConfiguration?, onStopCallback: OnStopCallback? = nil, deniedAccessCallback: DeniedAccessCallBack? = nil, animated: Bool = true, sendComment: String? = nil, startWithPush: Bool = false) {
+        let _ = psdStart(on: viewController, configuration: configuration, completion: nil, onStopCallback: onStopCallback, deniedAccessCallback: deniedAccessCallback, animated: animated, sendComment: sendComment, startWithPush: startWithPush)
     }
     
     ///Show chat
@@ -286,15 +287,15 @@ import UIKit
     ///- parameter configuration: ServiceDeskConfiguration object or nil. ServiceDeskConfiguration is object that create custom interface: theme color,welcome message, image for support's avatar and chat title for navigation bar title. If nil, the default design will be used.
     ///- parameter completion: The block to execute after the presentation finishes. This block has no return value and takes no parameters. You may specify nil for this parameter.
     ///- parameter onStopCallback: OnStopCallback object or nil. OnStopCallback is object for getting a notification that PyrusServiceDesk was closed.
-    @objc public static func start(on viewController:UIViewController, configuration:ServiceDeskConfiguration?, completion:(() -> Void)? = nil, onStopCallback: OnStopCallback? = nil, startWithPush: Bool = false) {
-        let _ = psdStart(on: viewController, configuration: configuration, completion: completion, onStopCallback: onStopCallback, startWithPush: startWithPush)
+    @objc public static func start(on viewController:UIViewController, configuration:ServiceDeskConfiguration?, completion:(() -> Void)? = nil, onStopCallback: OnStopCallback? = nil, sendComment: String? = nil, startWithPush: Bool = false) {
+        let _ = psdStart(on: viewController, configuration: configuration, completion: completion, onStopCallback: onStopCallback, sendComment: sendComment, startWithPush: startWithPush)
     }
     
     ///Show chat
     ///- parameter configuration: ServiceDeskConfiguration object or nil. ServiceDeskConfiguration is object that create custom interface: theme color,welcome message, image for support's avatar and chat title for navigation bar title. If nil, the default design will be used.
     ///- parameter onStopCallback: OnStopCallback object or nil. OnStopCallback is object for getting a notification that PyrusServiceDesk was closed.
-    @objc public static func start(with configuration:ServiceDeskConfiguration?, onStopCallback: OnStopCallback? = nil, startWithPush: Bool = false) -> UINavigationController? {
-        return psdStart(on: nil, configuration: configuration, completion: nil, onStopCallback: onStopCallback, startWithPush: startWithPush)
+    @objc public static func start(with configuration:ServiceDeskConfiguration?, onStopCallback: OnStopCallback? = nil, sendComment: String? = nil, startWithPush: Bool = false) -> UINavigationController? {
+        return psdStart(on: nil, configuration: configuration, completion: nil, onStopCallback: onStopCallback, sendComment: sendComment, startWithPush: startWithPush)
     }
     
     ///The private function to show chat, all public calles this one.
@@ -302,9 +303,10 @@ import UIKit
     ///- parameter configuration: ServiceDeskConfiguration object or nil. ServiceDeskConfiguration is object that create custom interface: theme color,welcome message, image for support's avatar and chat title for navigation bar title. If nil, the default design will be used.
     ///- parameter completion: The block to execute after the presentation finishes. This block has no return value and takes no parameters. You may specify nil for this parameter.
     ///- parameter onStopCallback: OnStopCallback object or nil. OnStopCallback is object for getting a notification that PyrusServiceDesk was closed.
-    private static func psdStart(on viewController: UIViewController?, configuration: ServiceDeskConfiguration?, completion:(() -> Void)?, onStopCallback: OnStopCallback?, deniedAccessCallback: DeniedAccessCallBack? = nil, animated: Bool = true, startWithPush: Bool) -> UINavigationController? {
+    private static func psdStart(on viewController: UIViewController?, configuration: ServiceDeskConfiguration?, completion:(() -> Void)?, onStopCallback: OnStopCallback?, deniedAccessCallback: DeniedAccessCallBack? = nil, animated: Bool = true, sendComment: String?, startWithPush: Bool) -> UINavigationController? {
         stopCallback = onStopCallback
         self.deniedAccessCallback = deniedAccessCallback
+        messageToSend = sendComment
         self.startWithPush = startWithPush
         if !PyrusServiceDeskController.PSDIsOpen() {
             EventsLogger.logEvent(.openPSD)
@@ -372,6 +374,7 @@ import UIKit
             imageRepository?.clearRepository()
             let audioReportRepository = AudioRepository()
             audioReportRepository?.clearRepository()
+            PyrusServiceDesk.lastNoteId = 0
         }
     }
     
@@ -431,7 +434,7 @@ import UIKit
             return
         }
         PyrusLogger.shared.logEvent("Created with userId = \(userId ?? "no userId"), reset = \(reset), domain = \(domain ?? "domain is nil") loggingEnabled = \(loggingEnabled)")
-        print("Created with appID = \(userId ?? "no userId"), userId = \(userId ?? "no userId"), securityKey = \(securityKey ?? "no securityKey"), reset = \(reset), domain = \(domain ?? "domain is nil") loggingEnabled = \(loggingEnabled)")
+        print("Created with appID = \(clientId), userId = \(userId ?? "no userId"), securityKey = \(securityKey ?? "no securityKey"), reset = \(reset), domain = \(domain ?? "domain is nil") loggingEnabled = \(loggingEnabled)")
         PyrusServiceDesk.clientId = clientId
         PyrusServiceDesk.domain = domain?.hostString()
         PyrusServiceDesk.securityKey = securityKey
