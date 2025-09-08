@@ -193,7 +193,6 @@ internal class SdRepository(
         val syncTry = synchronizer.syncData(SyncRequest.Data, force).checkResponse(userId)
         if (syncTry.isFailed()) return syncTry
 
-        //TODO kate clean code
         if (account.getVersion() == API_VERSION_1 || account.getVersion() == API_VERSION_2) {
             val lastServerTicket = getLastServerTicket(serverId, account, userId, orgLogoUrl)
             lastServerTicket?.let {

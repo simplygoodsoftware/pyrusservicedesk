@@ -35,7 +35,6 @@ internal class SetPushTokenUseCase(
                 updateTokenTime(firstUserId, System.currentTimeMillis())
 
                 for (user in account.getUsers()) {
-                    Log.d("EP ", "sendPushToken user: $user, token: $token, tokenType: $tokenType")
                     sendPushToken(user, token, tokenType, callback)
                 }
             }
@@ -56,13 +55,11 @@ internal class SetPushTokenUseCase(
             )
             if (!setPushTokenTry.isSuccess()) {
                 withContext(Dispatchers.Main) {
-                    Log.d("EP ", "setPushTokenTry is not success")
                     callback?.onResult(Exception(setPushTokenTry.error))
                 }
             }
             else {
                 withContext(Dispatchers.Main) {
-                    Log.d("EP ", "setPushTokenTry.isSuccess()")
                     callback?.onResult(null)
                 }
             }

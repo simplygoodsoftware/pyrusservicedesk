@@ -534,17 +534,11 @@ class PyrusServiceDesk private constructor(
         ) {
             StaticRepository.setConfiguration(configuration)
 
-            // TODO kate check
-//            get().sharedViewModel.clearQuitServiceDesk()
             this.onStopCallback = onStopCallback
 
             val intent = MainActivity.createLaunchIntent(activity, account, openTicketAction, sendComment)
             intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK)
             activity.startActivity(intent)
-
-            // TODO kate check sds
-            if (configuration == null)
-                return
 
             injector().updateUserUseCase.updateUser()
         }
