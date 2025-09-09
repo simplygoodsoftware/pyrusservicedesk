@@ -13,6 +13,7 @@ public class SampleApp extends Application {
     @Override
     public void onCreate() {
         super.onCreate();
+        //TODO kate вернуть как было
         PyrusServiceDesk.init(
                 this,
                 "xZlr1Zf0pZZE43NfjXfY10OvEKwkKLRCO~PYF7SjID-Tp-7sK5EAuWqgOfrCQNOdDUHrZhHlBaqcdzj2ULgf9e~ciFudXo9ff1Y9cx0oXaTGziZKANoCLbWceaF-5g1VAQpfcg==",
