@@ -1,2 +1,1 @@
 include ':pyrusservicedesk', ':servicedesksample'
-include ':audiocontroller'

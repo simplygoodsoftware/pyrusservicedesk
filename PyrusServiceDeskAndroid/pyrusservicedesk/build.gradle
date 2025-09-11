@@ -65,11 +65,16 @@ android {
     lint {
         abortOnError false
     }
+
+    externalNativeBuild {
+        ndkBuild {
+            path "jni/Android.mk"
+        }
+    }
 }
 
 dependencies {
     implementation fileTree(include: ['*.jar'], dir: 'libs')
-    implementation project(':audiocontroller')
     // kotlin
     implementation "org.jetbrains.kotlin:kotlin-stdlib:$kotlin_version"
     //moshi
@@ -93,6 +98,8 @@ dependencies {
     implementation 'androidx.lifecycle:lifecycle-runtime-ktx:2.8.7'
     implementation 'androidx.lifecycle:lifecycle-livedata-ktx:2.8.7' // TODO sds remove
     implementation 'com.google.android.material:material:1.12.0'
+
+    implementation "androidx.annotation:annotation:1.9.1"
     // architecture
     implementation 'androidx.lifecycle:lifecycle-extensions:2.2.0'
     implementation "org.jetbrains.kotlinx:kotlinx-coroutines-core:1.10.1"

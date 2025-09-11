@@ -3,7 +3,6 @@ package com.pyrus.pyrusservicedesk._ref.ui_domain.screens.ticket
 import android.net.Uri
 import android.util.Log
 import androidx.core.net.toUri
-import com.pyrus.audiocontroller.record.AudioRecordController
 import com.pyrus.pyrusservicedesk.R
 import com.pyrus.pyrusservicedesk._ref.data.FullTicket
 import com.pyrus.pyrusservicedesk._ref.ui_domain.screens.ticket.TicketContract.Effect
@@ -24,6 +23,7 @@ import com.pyrus.pyrusservicedesk._ref.whitetea.core.StoreFactory
 import com.pyrus.pyrusservicedesk._ref.whitetea.core.adaptCast
 import com.pyrus.pyrusservicedesk._ref.whitetea.core.logic.Logic
 import com.pyrus.pyrusservicedesk._ref.whitetea.utils.adapt
+import com.pyrus.pyrusservicedesk.audiocontroller.src.main.java.com.pyrus.audiocontroller.record.AudioRecordController
 import com.pyrus.pyrusservicedesk.core.Account
 import com.pyrus.pyrusservicedesk.core.getUsers
 import com.pyrus.pyrusservicedesk.presentation.ui.navigation_page.ticket.dialogs.comment_actions.ErrorCommentActionsDialog.Companion.ErrorCommentAction

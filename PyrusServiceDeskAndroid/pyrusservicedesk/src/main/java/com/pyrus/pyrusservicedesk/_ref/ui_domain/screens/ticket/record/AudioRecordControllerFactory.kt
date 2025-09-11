@@ -1,6 +1,6 @@
 package com.pyrus.pyrusservicedesk._ref.ui_domain.screens.ticket.record
 
-import com.pyrus.audiocontroller.record.AudioRecordController
+import com.pyrus.pyrusservicedesk.audiocontroller.src.main.java.com.pyrus.audiocontroller.record.AudioRecordController
 import java.io.File
 
 internal class AudioRecordControllerFactory(
