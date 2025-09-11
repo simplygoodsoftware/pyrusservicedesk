@@ -13,12 +13,13 @@ public class SampleApp extends Application {
     @Override
     public void onCreate() {
         super.onCreate();
-        //TODO kate вернуть как было
         PyrusServiceDesk.init(
-                this,
-                "xZlr1Zf0pZZE43NfjXfY10OvEKwkKLRCO~PYF7SjID-Tp-7sK5EAuWqgOfrCQNOdDUHrZhHlBaqcdzj2ULgf9e~ciFudXo9ff1Y9cx0oXaTGziZKANoCLbWceaF-5g1VAQpfcg==",
-                null,
-                true
+            this,
+            "my_app_id",
+            "user_id",
+            "security_key",
+            null,
+            true
         );
 
         Map<String, String> map = new HashMap<>();
