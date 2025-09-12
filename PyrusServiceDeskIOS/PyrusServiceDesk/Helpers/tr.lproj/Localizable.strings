@@ -52,7 +52,7 @@
 "Yesterday" = "Dün";
 "Date_Format_Year" = "EE, dd MMM, yyyy";
 "Time_Format" = "hh:mm";
-"Numbers_Date_Format" = "";
+"Numbers_Date_Format" = "MMddyyyyHHmmss";
 
 //For requests
 "No_Connection" = "İnternet bağlantısı yok";
