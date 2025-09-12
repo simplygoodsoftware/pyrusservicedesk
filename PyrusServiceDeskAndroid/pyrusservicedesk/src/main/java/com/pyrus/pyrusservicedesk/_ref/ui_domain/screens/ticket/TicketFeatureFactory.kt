@@ -14,6 +14,7 @@ import com.pyrus.pyrusservicedesk._ref.utils.AudioWrapper
 import com.pyrus.pyrusservicedesk._ref.utils.GetTicketsError
 import com.pyrus.pyrusservicedesk._ref.utils.RequestUtils.getFileUrl
 import com.pyrus.pyrusservicedesk._ref.utils.Try2
+import com.pyrus.pyrusservicedesk._ref.utils.isAudio
 import com.pyrus.pyrusservicedesk._ref.utils.isSuccess
 import com.pyrus.pyrusservicedesk._ref.utils.navigation.PyrusRouter
 import com.pyrus.pyrusservicedesk._ref.utils.singleFlow
@@ -29,10 +30,11 @@ import com.pyrus.pyrusservicedesk.core.getUsers
 import com.pyrus.pyrusservicedesk.presentation.ui.navigation_page.ticket.dialogs.comment_actions.ErrorCommentActionsDialog.Companion.ErrorCommentAction
 import com.pyrus.pyrusservicedesk.sdk.data.FileManager
 import com.pyrus.pyrusservicedesk.sdk.data.intermediate.FileData
-import com.pyrus.pyrusservicedesk.sdk.repositories.*
 import com.pyrus.pyrusservicedesk.sdk.repositories.AccountStore
 import com.pyrus.pyrusservicedesk.sdk.repositories.DraftRepository
+import com.pyrus.pyrusservicedesk.sdk.repositories.LocalTicketsStore
 import com.pyrus.pyrusservicedesk.sdk.repositories.SdRepository
+import com.pyrus.pyrusservicedesk.sdk.repositories.UserInternal
 import com.pyrus.pyrusservicedesk.sdk.updates.PreferencesManager
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.FlowPreview
@@ -92,7 +94,8 @@ internal class TicketFeatureFactory(
                 Effect.Inner.SubscribeToRecord,
                 Effect.Inner.SubscribeToRecordProgress,
                 Effect.Inner.SubscribeToCancelRecord,
-                Effect.Inner.SendTextComment(sendComment, initialTicketId)
+                Effect.Inner.SendTextComment(sendComment, initialTicketId),
+                Effect.Inner.UpdateAudioData
             ),
             onCancelCallback = {
                 audioRecordController.cancelRecord()
@@ -524,6 +527,15 @@ private class TicketActor(
             withContext(Dispatchers.Main) {
                 audioWrapper.pause()
             }
+        }
+        is Effect.Inner.UpdateAudioData -> flow {
+            val ticket = localTicketsStore.getTicketWithComments(ticketId)
+            val account = accountStore.getAccount()
+            val user = account.getUsers().find { it.userId == ticket?.ticket?.userId }
+            val uriList = ticket?.comments?.flatMap { comments ->
+                comments.attachments.filter { it.name.isAudio() }.map { getFileUrl(it.id, account, user) }
+            } ?: return@flow
+            audioWrapper.setAudioDurations(uriList)
         }
     }
 

@@ -279,6 +279,7 @@ internal class AudioWrapper(
                     }
                 }
                 else {
+                    triggerEvent()
                     downloadRequestTry.error.printStackTrace()
                 }
             }
@@ -361,9 +362,12 @@ internal class AudioWrapper(
 
     fun setAudioDurations(audioList: List<String?>) {
         for (audioUrl in audioList) {
-            if (!audioUrl.isNullOrEmpty() && getAudioFile(audioUrl).exists()) {
-                val duration = getAudioFile(audioUrl).getMediaDuration()
-                audioDurations[audioUrl] = duration
+            val start = audioUrl?.indexOf("DownloadFile/")?.plus("DownloadFile/".length) ?: 0
+            val end = audioUrl?.indexOf("?user_id=") ?: 0
+            val url = audioUrl?.substring(start, end)
+            if (!url.isNullOrEmpty() && getAudioFile(url).exists()) {
+                val duration = getAudioFile(url).getMediaDuration()
+                audioDurations[url] = duration
             }
         }
     }

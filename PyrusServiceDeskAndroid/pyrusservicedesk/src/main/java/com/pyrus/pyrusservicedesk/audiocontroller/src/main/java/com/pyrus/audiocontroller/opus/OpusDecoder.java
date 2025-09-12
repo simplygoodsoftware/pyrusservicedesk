@@ -10,7 +10,7 @@ public class OpusDecoder {
     private native boolean nativeReleaseDecoder();
 
     static {
-        System.loadLibrary("pyrusopus");
+        System.loadLibrary("pyrusservicedeskopus");
     }
 
     public void init(@Annotations.SamplingRate int sampleRate,

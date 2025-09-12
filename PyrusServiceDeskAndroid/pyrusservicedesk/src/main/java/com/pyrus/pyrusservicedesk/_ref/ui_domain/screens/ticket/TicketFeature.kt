@@ -140,6 +140,7 @@ interface TicketContract {
             class DeleteFile(val file: String) : Inner
             class PauseAudioIf(val file: String) : Inner
             object PauseAudio : Inner
+            data object UpdateAudioData : Inner
         }
     }
 

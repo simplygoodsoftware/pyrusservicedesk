@@ -400,7 +400,7 @@ internal class TicketsActor(
         is Effect.Inner.OpenSearchScreen -> flow {
             router.navigateTo(SdScreens.SearchScreen().setFadeAnimation())
         }
-
+        //TODO kate fix for multichat
         is Effect.Inner.UpdateAudioData -> flow {
             val tickets1 = repository.getTicketsWithComments()
             val account = accountStore.getAccount()

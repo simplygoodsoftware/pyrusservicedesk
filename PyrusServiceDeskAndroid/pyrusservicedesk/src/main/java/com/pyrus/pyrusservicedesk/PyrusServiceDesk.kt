@@ -463,7 +463,6 @@ class PyrusServiceDesk private constructor(
         fun stop() {
             PLog.d(TAG, "stop")
             INJECTOR?.onCancel()
-//            get().sharedViewModel.quitServiceDesk()
         }
 
         @JvmStatic
@@ -509,6 +508,7 @@ class PyrusServiceDesk private constructor(
         }
 
         internal fun onServiceDeskStop() {
+            injector().releaseSession()
             onStopCallback?.onServiceDeskStop()
             onStopCallback = null
         }

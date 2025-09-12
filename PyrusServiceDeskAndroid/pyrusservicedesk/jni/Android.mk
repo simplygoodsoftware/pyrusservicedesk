@@ -4,7 +4,7 @@ include $(CLEAR_VARS)
 
 LOCAL_LDLIBS := -llog
 
-LOCAL_MODULE:= pyrusopus
+LOCAL_MODULE:= pyrusservicedeskopus
 
 #################### COMPILE OPTIONS #######################
 

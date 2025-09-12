@@ -39,7 +39,7 @@ public class OpusEncoder {
     private native boolean nativeReleaseEncoder();
 
     static {
-        System.loadLibrary("pyrusopus");
+        System.loadLibrary("pyrusservicedeskopus");
     }
 
     public void init(int sampleRate, int channels, int application) {
