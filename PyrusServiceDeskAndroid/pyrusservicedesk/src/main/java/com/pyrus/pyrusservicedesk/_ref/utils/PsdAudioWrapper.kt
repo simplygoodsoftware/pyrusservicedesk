@@ -11,9 +11,9 @@ class PsdAudioWrapper : SdAudioWrapper {
         return audioWrapper.getAudioDataFlow(url)
     }
 
-    override fun playAudio(uri: String) {
+    override fun playAudio(uri: String, fullUrl: String) {
         val audioWrapper = injector().audioWrapper
-        audioWrapper.playAudio(uri)
+        audioWrapper.playAudio(uri, fullUrl) //TODO kate for Helpy
     }
 
     override fun stop() {
@@ -35,6 +35,6 @@ interface SdAudioWrapper {
 
     fun waitForSeek(position: Long, url: String)
 
-    fun playAudio(uri: String)
+    fun playAudio(uri: String, fullUrl: String)
 
 }

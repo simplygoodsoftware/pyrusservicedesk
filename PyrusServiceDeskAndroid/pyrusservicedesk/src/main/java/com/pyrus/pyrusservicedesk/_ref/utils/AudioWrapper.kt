@@ -247,7 +247,7 @@ internal class AudioWrapper(
         return File(musicDir, uri)
     }
 
-    fun playAudio(uri: String) {
+    fun playAudio(uri: String, fullUrl: String) {
         val audioFile = getAudioFile(uri)
         audioInFocus = uri
 
@@ -263,7 +263,7 @@ internal class AudioWrapper(
             downloadingFileJob = coroutineScope.launch(Dispatchers.IO) {
                 downloadingFiles += uri
                 triggerEvent()
-                val downloadRequestTry = downloadHelper.downloadFile(audioFile, uri, coroutineContext)
+                val downloadRequestTry = downloadHelper.downloadFile(audioFile, fullUrl, coroutineContext)
                 downloadingFiles.remove(uri)
                 if (downloadRequestTry.isSuccess()) {
                     val duration = getAudioFile(uri).getMediaDuration()
@@ -271,7 +271,7 @@ internal class AudioWrapper(
                     triggerEvent()
                     withContext(Dispatchers.Main) {
                         if (audioInFocus == uri && mainActivityIsActive) {
-                            playAudio(uri)
+                            playAudio(uri, fullUrl)
                         }
 //                        if (currentAudioFileUrl == url) {
 //                            playAudio(url)

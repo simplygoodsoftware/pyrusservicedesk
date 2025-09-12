@@ -76,6 +76,7 @@ internal class CommentAudioHolder(
     private var attachName: String = ""
     private var isLocal: Boolean = false
     private var attachUri: String? = null
+    private var fullUrl: String? = null
 
     @ColorInt
     private var primaryColor: Int = 0
@@ -92,7 +93,7 @@ internal class CommentAudioHolder(
                 onEvent(TicketView.Event.OnCancelUploadClick(id, attachId))
             }
             else {
-                attachUri?.let(audioPlayer::playAudio)
+                attachUri?.let{ fullUrl?.let { fullUrl -> audioPlayer.playAudio(it, fullUrl) } }
             }
         }
         ConfigUtils.getMainFontTypeface()?.let {
@@ -129,10 +130,13 @@ internal class CommentAudioHolder(
 
         entry.attach::attachUrl.payloadCheck {
             val attachUrl = entry.attach.attachUrl.toString()
-            attachUri = attachUrl
+            val start = attachUrl.indexOf("DownloadFile/").plus("DownloadFile/".length)
+            val end = attachUrl.indexOf("?user_id=")
+            attachUri = attachUrl.substring(start, end)
+            fullUrl = attachUrl
             listenDataJob?.cancel()
             listenDataJob = this@CommentAudioHolder.coroutineScope.launch {
-                this@CommentAudioHolder.audioPlayer.getAudioDataFlow(attachUrl).collect(::applyAudioData)
+                this@CommentAudioHolder.audioPlayer.getAudioDataFlow(attachUrl.substring(start, end)).collect(::applyAudioData)
             }
         }
 

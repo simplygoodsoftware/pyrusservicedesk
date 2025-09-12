@@ -427,7 +427,7 @@ internal class TicketFragment: TeaFragment<Model, Event, Effect>() {
 
         binding.playButton.setOnClickListener {
             Log.d("DFD", "playAudio: $pendingAudioUri")
-            pendingAudioUri?.let(audioWrapper::playAudio)
+            pendingAudioUri?.let { audioWrapper.playAudio(it, it) } //здесь запускается локальный файл, так что и fullUrl локальный
         }
 
         binding.removePendingAudioButton.setOnClickListener {
