@@ -27,7 +27,7 @@
         android:id="@+id/selectedUserIv"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:src="@drawable/ic_check"
+        android:src="@drawable/psd_ic_check"
         android:visibility="gone"
         tools:visibility="visible"
         app:layout_constraintBottom_toBottomOf="parent"

@@ -362,7 +362,7 @@
                         android:minHeight="4dp"
                         android:paddingHorizontal="12dp"
                         android:progressBackgroundTint="#D9D9D9"
-                        android:progressDrawable="@drawable/ic_audio_player_seekbar_progress"
+                        android:progressDrawable="@drawable/psd_ic_audio_player_seekbar_progress"
                         android:progressTint="@color/psd_accent"
                         android:thumbTint="@color/psd_accent"
                         app:layout_constraintEnd_toEndOf="parent"

@@ -59,6 +59,7 @@ import okhttp3.OkHttpClient
 import retrofit2.Retrofit
 import retrofit2.converter.moshi.MoshiConverterFactory
 import java.io.File
+import java.util.UUID
 import java.util.concurrent.TimeUnit
 
 
@@ -202,7 +203,9 @@ internal class DiInjector(
         )
         .build()
 
-    private var session: MediaSession = MediaSession.Builder(application, player).build()
+    private var session: MediaSession = MediaSession.Builder(application, player)
+        .setId("psd_session_" + UUID.randomUUID().toString())
+        .build()
 
     private val downloadHelper = DownloadHelper(
         context = application

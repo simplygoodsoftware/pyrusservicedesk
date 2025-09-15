@@ -288,19 +288,19 @@ internal class CommentAudioHolder(
         when (status) {
             AudioStatus.Paused -> {
                 binding.comment.downloadProgressBar.isVisible = false
-                binding.comment.playButton.setImageResource(R.drawable.ic_audio_play)
+                binding.comment.playButton.setImageResource(R.drawable.psd_ic_audio_play)
             }
             AudioStatus.None -> {
                 binding.comment.downloadProgressBar.isVisible = false
-                binding.comment.playButton.setImageResource(R.drawable.ic_audio_download)
+                binding.comment.playButton.setImageResource(R.drawable.psd_ic_audio_download)
             }
             AudioStatus.Error -> {
                 binding.comment.downloadProgressBar.isVisible = false
-                binding.comment.playButton.setImageResource(R.drawable.ic_audio_download)
+                binding.comment.playButton.setImageResource(R.drawable.psd_ic_audio_download)
             }
             AudioStatus.Playing -> {
                 binding.comment.downloadProgressBar.isVisible = false
-                binding.comment.playButton.setImageResource(R.drawable.ic_audio_pause)
+                binding.comment.playButton.setImageResource(R.drawable.psd_ic_audio_pause)
             }
             AudioStatus.Processing -> {
                 binding.comment.downloadProgressBar.isVisible = true

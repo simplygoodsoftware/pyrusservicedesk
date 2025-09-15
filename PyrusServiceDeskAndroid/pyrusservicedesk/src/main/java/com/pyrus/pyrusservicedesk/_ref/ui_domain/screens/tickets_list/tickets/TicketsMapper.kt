@@ -143,7 +143,7 @@ internal object TicketsMapper {
     fun getLastCommentIconRes(lastCommentName: String?): Int? {
         return when {
             lastCommentName != null && lastCommentName.isAudio() -> R.drawable.ic_audio
-            lastCommentName != null -> R.drawable.ic_attachment
+            lastCommentName != null -> R.drawable.psd_ic_attachment
             else -> null
         }
     }

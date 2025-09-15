@@ -38,12 +38,12 @@
                 android:layout_height="50dp"
                 android:background="@drawable/selectable_round_bg"
                 android:padding="10dp"
-                android:src="@drawable/ic_audio_play"
+                android:src="@drawable/psd_ic_audio_play"
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintLeft_toLeftOf="parent"
                 app:layout_constraintTop_toTopOf="parent"
                 tools:ignore="contentDescription"
-                tools:src="@drawable/ic_audio_play" />
+                tools:src="@drawable/psd_ic_audio_play" />
 
             <!--    <ImageView-->
             <!--        android:id="@+id/errorImage"-->
@@ -65,8 +65,8 @@
                 android:layout_width="48dp"
                 android:layout_height="48dp"
                 android:indeterminate="false"
-                android:indeterminateDrawable="@drawable/animation_audio_player_circular_progress_infinite"
-                android:progressDrawable="@drawable/ic_audio_player_circular_progress"
+                android:indeterminateDrawable="@drawable/psd_animation_audio_player_circular_progress_infinite"
+                android:progressDrawable="@drawable/psd_ic_audio_player_circular_progress"
                 android:progressTint="@color/psd_white"
                 app:layout_constraintBottom_toBottomOf="@+id/playButton"
                 app:layout_constraintEnd_toEndOf="@+id/playButton"
@@ -86,7 +86,7 @@
                 android:paddingVertical="8dp"
                 android:paddingHorizontal="12dp"
                 android:progressBackgroundTint="#4DE3E5E8"
-                android:progressDrawable="@drawable/ic_audio_player_seekbar_progress"
+                android:progressDrawable="@drawable/psd_ic_audio_player_seekbar_progress"
                 android:progressTint="@color/psd_accent"
                 android:thumbTint="@color/psd_accent"
                 app:layout_constraintEnd_toEndOf="parent"
