@@ -372,6 +372,25 @@ import UIKit
         }
     }
     
+    
+    @objc public static func updateAccess(authorId: String, hasAccess: Bool, appId: String, userId: String) {
+        if userId == PyrusServiceDesk.customUserId,
+           let index = authors.firstIndex(where: { $0.id == authorId }) {
+            authors[index].hasAccess = hasAccess
+        } else if let user = PyrusServiceDesk.additionalUsers.first(where: {$0.userId == userId }),
+                  let userIndex = PyrusServiceDesk.additionalUsers.firstIndex(where: {$0.userId == userId }),
+                  let authorIndex = user.authors.firstIndex(where: { $0.id == authorId }) {
+            additionalUsers[userIndex].authors[authorIndex].hasAccess = hasAccess
+        }
+        
+        let params = TicketCommandParams(appId: appId, userId: userId, authorId: authorId, hasAccess: hasAccess)
+        let command = TicketCommand(commandId: UUID().uuidString, type: .updateAccess, appId: appId, userId: userId, params: params)
+        repository.add(command: command)
+        DispatchQueue.main.async {
+            PyrusServiceDesk.syncManager.syncGetTickets()
+        }
+    }
+    
     static var customUserId: String?
     static var authorizationToken: String?
     static var securityKey: String?

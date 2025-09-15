@@ -4,6 +4,7 @@ enum TicketCommandType: Int {
     case createComment
     case readTicket
     case setPushToken
+    case updateAccess
 }
 
 struct AttachmentData: Codable {
@@ -23,10 +24,12 @@ class TicketCommandParams: Codable {
     let type: String?
     let messageId: Int?
     let rating: Int?
+    let authorId: String?
+    let hasAccess: Bool?
     var date: Date? = nil
     var messageClientId: String? = nil
     
-    init(ticketId: Int?, appId: String?, requestNewTicket: Bool? = nil, userId: String?, message: String? = nil, attachments: [AttachmentData]? = nil, authorId: String? = nil, token: String? = nil, type: String? = nil, messageId: Int? = nil, rating: Int? = nil, date: Date? = nil, messageClientId: String? = nil) {
+    init(ticketId: Int? = nil, appId: String?, requestNewTicket: Bool? = nil, userId: String?, message: String? = nil, attachments: [AttachmentData]? = nil, authorId: String? = nil, token: String? = nil, type: String? = nil, messageId: Int? = nil, rating: Int? = nil, date: Date? = nil, messageClientId: String? = nil, hasAccess: Bool? = nil) {
         self.ticketId = ticketId
         self.appId = appId
         self.requestNewTicket = requestNewTicket
@@ -37,8 +40,10 @@ class TicketCommandParams: Codable {
         self.type = type
         self.messageId = messageId
         self.rating = rating
-        self.date = date
+        self.date = date ?? Date()
         self.messageClientId = messageClientId
+        self.authorId = authorId
+        self.hasAccess = hasAccess
     }
     
     enum CodingKeys: String, CodingKey {
@@ -52,6 +57,8 @@ class TicketCommandParams: Codable {
         case type = "type"
         case messageId = "comment_id"
         case rating = "rating"
+        case authorId = "author_id"
+        case hasAccess = "has_access"
     }
 }
 

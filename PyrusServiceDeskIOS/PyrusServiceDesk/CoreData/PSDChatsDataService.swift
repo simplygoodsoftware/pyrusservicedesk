@@ -320,12 +320,17 @@ extension PSDChatsDataService: PSDChatsDataServiceProtocol {
             if let rating = ticketCommand.params.rating {
                 dbTicketCommand.rating = Int32(rating)
             }
+            if let hasAccess = ticketCommand.params.hasAccess {
+                dbTicketCommand.hasAccess = hasAccess
+            }
+            
             dbTicketCommand.token = ticketCommand.params.token
             dbTicketCommand.tokenType = ticketCommand.params.type
             dbTicketCommand.userId = ticketCommand.userId
             dbTicketCommand.type = Int32(ticketCommand.type)
             dbTicketCommand.date = ticketCommand.params.date
             dbTicketCommand.clientId = ticketCommand.params.messageClientId
+            dbTicketCommand.authorId = ticketCommand.params.authorId
             
             if dbTicketCommand.attachments == nil {
                 dbTicketCommand.attachments = NSOrderedSet()
@@ -377,7 +382,8 @@ extension PSDChatsDataService: PSDChatsDataServiceProtocol {
                         messageId: Int(dbCommand.messageId),
                         rating: Int(dbCommand.rating),
                         date: dbCommand.date,
-                        messageClientId: dbCommand.clientId
+                        messageClientId: dbCommand.clientId,
+                        hasAccess: dbCommand.hasAccess
                     )
                 )
                 return command

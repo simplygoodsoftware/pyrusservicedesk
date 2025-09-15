@@ -100,6 +100,7 @@ struct PSDGetChats {
     }
     
     private static func generateClients(from response: NSArray) -> [PSDClientInfo] {
+        let updateAccessCommands = PyrusServiceDesk.repository.getCommands().filter({ $0.type == TicketCommandType.updateAccess.rawValue }).sorted(by: { $0.params.date ?? Date() > $1.params.date ?? Date() })
         var clients = PyrusServiceDesk.clients
         var serverClients = [PSDClientInfo]()
         for i in 0..<response.count {
@@ -112,15 +113,7 @@ struct PSDGetChats {
             let clientDescription = dic["org_description"] as? String
             let client = PSDClientInfo(clientId: clientId, clientName: clientName, clientIcon: clientIcon)
             client.clientDescription = clientDescription
-//            """
-//            Техническая поддержка iikoService
-//            Наш сайт: https://iikoservice.ru/
-//            email технической поддержки: support@iiko.ru
-//            117587, г. Москва, Варшавское шоссе д. 118 корп.1 Бизнес-центр «Варшавка Sky», 17-й этаж
-//            
-//            Передавая сообщения в чат в данном мобильном приложении, вы соглашаетесь на обработку персональных данных в соответствии
-//            с условиями оферты https://iiko.ru/oferta-porucheniya-obrabotki-personalnyh-dannyh.pdf
-//            """
+
             if !clients.contains(client) {
                 clients.append(client)
             } else if let storeClient = clients.first(where: { $0.clientId == client.clientId }) {
@@ -158,13 +151,15 @@ struct PSDGetChats {
                     guard let authorDic: [String: Any] = author as? [String: Any] else {
                         continue
                     }
-                    if authorDic["has_access"] as? Bool ?? false {
-                        let name = authorDic["name"] as? String ?? ""
-                        let id = authorDic["author_id"] as? String ?? ""
-                        let phone = authorDic["phone"] as? String ?? ""
-                        let authorInfo = PSDUserInfo.AuthorInfo(id: id, name: name, phone: phone)
-                        userAuthors.append(authorInfo)
+                    let name = authorDic["name"] as? String ?? ""
+                    let id = authorDic["author_id"] as? String ?? ""
+                    let phone = authorDic["phone"] as? String ?? ""
+                    var hasAccess = authorDic["has_access"] as? Bool ?? true
+                    if let commandHasAccess = updateAccessCommands.first(where: { $0.userId == userId && $0.params.authorId == id })?.params.hasAccess {
+                        hasAccess = commandHasAccess
                     }
+                    let authorInfo = PSDUserInfo.AuthorInfo(id: id, name: name, phone: phone, hasAccess: hasAccess)
+                    userAuthors.append(authorInfo)
                 }
                 if PyrusServiceDesk.customUserId == userId {
                     PyrusServiceDesk.authors = userAuthors

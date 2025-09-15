@@ -29,11 +29,13 @@ import Foundation
         let id: String
         let name: String
         let phone: String?
+        var hasAccess: Bool
         
-        init(id: String, name: String, phone: String?) {
+        init(id: String, name: String, phone: String?, hasAccess: Bool) {
             self.id = id
             self.name = name
             self.phone = phone
+            self.hasAccess = hasAccess
         }
     }
 }
