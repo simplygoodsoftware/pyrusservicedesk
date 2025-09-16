@@ -122,6 +122,9 @@ extension Array where Element == [PSDRowMessage] {
         if chat.showRating, let ratingText = chat.showRatingText {
             _ = addRatingMessage(ratingText)
         }
+        if !chat.isActive, chat.messages.count > 0 {
+            _ = addWelcomeMessage()
+        }
         if comp {
             self.completeWithUnsentMessages(for: chat.chatId ?? 0)///if user has unsent messages add them to bottom
         }

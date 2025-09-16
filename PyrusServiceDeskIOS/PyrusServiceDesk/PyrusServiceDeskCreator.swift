@@ -304,6 +304,7 @@ import UIKit
     ///- parameter completion: The block to execute after the presentation finishes. This block has no return value and takes no parameters. You may specify nil for this parameter.
     ///- parameter onStopCallback: OnStopCallback object or nil. OnStopCallback is object for getting a notification that PyrusServiceDesk was closed.
     private static func psdStart(on viewController: UIViewController?, configuration: ServiceDeskConfiguration?, completion:(() -> Void)?, onStopCallback: OnStopCallback?, deniedAccessCallback: DeniedAccessCallBack? = nil, animated: Bool = true, sendComment: String?, startWithPush: Bool) -> UINavigationController? {
+        PyrusServiceDesk.syncManager.firstLoad = true
         stopCallback = onStopCallback
         self.deniedAccessCallback = deniedAccessCallback
         messageToSend = sendComment

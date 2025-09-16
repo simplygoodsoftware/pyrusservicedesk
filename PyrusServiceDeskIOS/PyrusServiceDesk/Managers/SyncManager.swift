@@ -134,11 +134,13 @@ class SyncManager {
 private extension SyncManager {
     
     func firstLoadUpdates() {
+        PyrusServiceDesk.clients = chatsDataService.getAllClients()
+        PyrusServiceDesk.repository.loadCommands()
         if PyrusServiceDesk.multichats {
             let cashe = chatsDataService.getAllChats()
             PyrusServiceDesk.chats = cashe
         } else {
-            let createMessages = PSDMessagesStorage.getNewCreateTicketMessages(PyrusServiceDesk.customUserId ?? PyrusServiceDesk.userId)
+            let createMessages = PSDMessagesStorage.getNewCreateTicketMessages(PyrusServiceDesk.customUserId)
             var localChats = PSDGetChats.getSortedChatForMessages(createMessages)
             let chats = chatsDataService.getChatsHeaders()
             let messages = chatsDataService.getAllMessages()
@@ -148,8 +150,7 @@ private extension SyncManager {
 //            PyrusServiceDesk.allMessages = chatsDataService.getAllMessages()
         }
         
-        PyrusServiceDesk.clients = chatsDataService.getAllClients()
-        PyrusServiceDesk.repository.loadCommands()
+        
         firstLoad = false
         if CacheVersionManager.shared.checkAndUpdateIfNeeded() {
             PyrusServiceDesk.lastNoteId = 0
