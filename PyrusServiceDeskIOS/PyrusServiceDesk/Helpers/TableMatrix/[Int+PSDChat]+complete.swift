@@ -90,13 +90,14 @@ extension Array where Element == [PSDRowMessage]{
          {
              let ratingMessage = PSDObjectsCreator.createRatingMessage(ratingText).message
              messages.append(ratingMessage)
-         } else if !(lastMessage()?.isRatingMessage ?? false),
-                   !chat.isActive,
-                   !(lastMessage()?.isWelcomeMessage ?? false)
-         {
-             let welcomeMessage = PSDObjectsCreator.createWelcomeMessage().message
-             messages.append(welcomeMessage)
          }
+//         else if !(lastMessage()?.isRatingMessage ?? false),
+//                   !chat.isActive,
+//                   !(lastMessage()?.isWelcomeMessage ?? false)
+//         {
+//             let welcomeMessage = PSDObjectsCreator.createWelcomeMessage().message
+//             messages.append(welcomeMessage)
+//         }
          complete(with: messages, startMessage: startMessage, completion: completion)
     }
     

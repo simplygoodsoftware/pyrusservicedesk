@@ -1,5 +1,5 @@
 import UIKit
-//@_implementationOnly import PyrusServiceDeskPrivate
+@_implementationOnly import PyrusServiceDeskPrivate
 @_implementationOnly import LibVorbis
 
 @objc extension VorbisDecoder {

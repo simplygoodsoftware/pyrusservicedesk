@@ -80,6 +80,7 @@ class PSDChatInteractor: NSObject {
                 self.chat = singleChat
             } else if PyrusServiceDesk.clients.count > 0 {
                 self.chat = PSDChat(chatId: 0, date: Date(), messages: [])
+                self.chat?.isActive = false
             }
         }
         super.init()
@@ -114,6 +115,7 @@ extension PSDChatInteractor: PSDChatInteractorProtocol {
                     self.chat = singleChat
                 } else if PyrusServiceDesk.clients.count > 0 {
                     self.chat = PSDChat(chatId: 0, date: Date(), messages: [])
+                    self.chat?.isActive = false
                 }
             }
             isOpen = true
@@ -277,6 +279,7 @@ private extension PSDChatInteractor {
                 chat = singleChat
             } else if !isLoading {
                 chat = PSDChat(chatId: 0, date: Date(), messages: [])
+                chat?.isActive = false
             }
             if let chat {
                 updateChatInfo()
@@ -536,11 +539,12 @@ private extension PSDChatInteractor {
                 newMessage.ticketId = ticketId
             }
         } else {
-            let requestNewTicket = !(chat?.isActive ?? false) && chat?.chatId ?? 0 > 0 || newTicket
+            let requestNewTicket = !(chat?.isActive ?? false) || newTicket
             newMessage.requestNewTicket = requestNewTicket
             if requestNewTicket {
                 let nextId = PSDObjectsCreator.getNextLocalId()
                 chat?.chatId = nextId
+                chat?.isActive = true
             }
             
             if let ticketId = chat?.chatId {

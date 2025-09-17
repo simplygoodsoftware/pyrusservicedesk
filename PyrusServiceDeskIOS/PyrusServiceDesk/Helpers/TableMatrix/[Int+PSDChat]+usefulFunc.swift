@@ -122,7 +122,7 @@ extension Array where Element == [PSDRowMessage] {
         if chat.showRating, let ratingText = chat.showRatingText {
             _ = addRatingMessage(ratingText)
         }
-        if !chat.isActive, chat.messages.count > 0 {
+        if !chat.isActive, chat.messages.count > 0 && chat.messages.last?.state == .sent {
             _ = addWelcomeMessage()
         }
         if comp {

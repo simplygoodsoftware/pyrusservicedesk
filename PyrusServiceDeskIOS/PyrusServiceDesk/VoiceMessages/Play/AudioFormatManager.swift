@@ -1,5 +1,5 @@
 import Foundation
-//@_implementationOnly import PyrusServiceDeskPrivate
+@_implementationOnly import PyrusServiceDeskPrivate
 
 
 //@objc protocol AudioDecoderProtocol {
