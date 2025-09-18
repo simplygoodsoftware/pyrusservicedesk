@@ -6,6 +6,9 @@
 "Empty_Description" = "Пусто";
 "All_Conversations" = "Все обсуждения";
 "Support_Default_Name" = "Поддержка";
+"EvaluateQuality" = "Оцените работу оператора";
+"PleaseEvaluateQuality" = "Пожалуйста, оцените работу оператора";
+"LeaveYourComment" = "Оставьте свой комментарий";
 
 //Buttons' Title
 "New_Conversation" = "Новый чат";
@@ -13,6 +16,7 @@
 "Cancel" = "Отмена";
 "Settings" = "Настройки";
 "Send" = "Отправить";
+"Close" = "Закрыть";
 "Back" = "Назад";
 "Done" = "Готово";
 "CancelDownload" = "Отменить загрузку";
