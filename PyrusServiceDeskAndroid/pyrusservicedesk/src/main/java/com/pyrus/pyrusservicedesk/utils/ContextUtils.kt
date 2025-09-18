@@ -46,16 +46,26 @@ internal fun <T : ViewModel> Fragment.getViewModelWithActivityScope(viewModelCla
  */
 internal fun getApplicationName(context: Context): String = context.getString(context.applicationInfo.labelRes)
 
+internal fun Fragment.dispatchTakeVideoIntent(requestCode: Int): Uri? {
+    val capturePhotoUri = activity?.createVideoUri()
+
+    capturePhotoUri?.let {
+        Intent(MediaStore.ACTION_VIDEO_CAPTURE).also { intent ->
+            intent.putExtra(MediaStore.EXTRA_OUTPUT, it)
+            intent.addFlags(Intent.FLAG_GRANT_WRITE_URI_PERMISSION)
+            intent.resolveActivity(activity!!.packageManager)?.let {
+                startActivityForResult(intent, requestCode)
+            }
+        }
+    }
+    return capturePhotoUri
+}
+
 /**
  * Dispatches event for taking photo that should be handled by the receiver fragment.
  */
 internal fun Fragment.dispatchTakePhotoIntent(requestCode: Int): Uri? {
-    val capturePhotoUri = activity?.let {
-        when {
-            isCapturingPhotoSupported() ->it.createPhotoUriApi16AndAbove()
-            else -> null
-        }
-    }
+    val capturePhotoUri = activity?.createPhotoUri()
     capturePhotoUri?.let {
         Intent(MediaStore.ACTION_IMAGE_CAPTURE).also { intent ->
             intent.putExtra(MediaStore.EXTRA_OUTPUT, it)
@@ -68,7 +78,34 @@ internal fun Fragment.dispatchTakePhotoIntent(requestCode: Int): Uri? {
     return capturePhotoUri
 }
 
-private fun Context.createPhotoUriApi16AndAbove(): Uri? {
+private fun Context.createVideoUri(): Uri? {
+    val timeStamp: String =
+        SimpleDateFormat(DATE_FORMAT_CAPTURE_IMAGES, Locale.getDefault())
+            .format(Date())
+    val fileName = "VIDEO_$timeStamp.mp4"
+
+    val mediaStorageDir = getExternalFilesDir(Environment.DIRECTORY_DCIM) ?: return null
+
+    if (!mediaStorageDir.exists()) {
+        return null
+    }
+
+    // Return the file target for the photo based on filename
+    val file = File(mediaStorageDir.path + File.separator + fileName)
+
+    if (!file.createNewFile()) {
+        return null
+    }
+
+    return try {
+        FileProvider.getUriForFile(this, "${packageName}.com.pyrus.pyrusservicedesk.sdk.PSDFileProvider", file)
+    }
+    catch (e: kotlin.Exception) {
+        return null
+    }
+}
+
+private fun Context.createPhotoUri(): Uri? {
     val timeStamp: String =
         SimpleDateFormat(DATE_FORMAT_CAPTURE_IMAGES, Locale.getDefault())
             .format(Date())
@@ -76,22 +113,21 @@ private fun Context.createPhotoUriApi16AndAbove(): Uri? {
 
     val mediaStorageDir = getExternalFilesDir(Environment.DIRECTORY_DCIM) ?: return null
 
-    if (!mediaStorageDir.exists())
+    if (!mediaStorageDir.exists()) {
         return null
+    }
 
     // Return the file target for the photo based on filename
     val file = File(mediaStorageDir.path + File.separator + fileName)
 
-    if (!file.createNewFile())
+    if (!file.createNewFile()) {
         return null
+    }
 
-    return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N)
-        try {
-            FileProvider.getUriForFile(this, "${packageName}.com.pyrus.pyrusservicedesk.sdk.PSDFileProvider", file)
-        }
-        catch (e: Exception) {
-            return null
-        }
-    else
-        Uri.fromFile(file)
+    return try {
+        FileProvider.getUriForFile(this, "${packageName}.com.pyrus.pyrusservicedesk.sdk.PSDFileProvider", file)
+    }
+    catch (e: kotlin.Exception) {
+        return null
+    }
 }

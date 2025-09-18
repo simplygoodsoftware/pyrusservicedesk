@@ -12,6 +12,7 @@
     <string name="psd_yesterday">Yesterday</string>
     <string name="psd_date_format_d_m_y">MMMM d, yyyy</string>
     <string name="psd_date_format_d_m">MMMM d</string>
+    <string name="psd_type_video">Video</string>
     <string name="psd_photo">Photo</string>
     <string name="psd_gallery">Gallery</string>
     <string name="psd_evaluate_the_operators_performance">Evaluate the operator\'s performance</string>
