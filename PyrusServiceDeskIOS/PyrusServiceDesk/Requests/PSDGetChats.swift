@@ -25,6 +25,10 @@ struct PSDGetChats {
         parameters["author_name"] = PyrusServiceDesk.authorName
         parameters["last_note_id"] = PyrusServiceDesk.lastNoteId
         
+        if let fieldsData = PyrusServiceDesk.fieldsData {
+            parameters[EXTRA_FIELDS_KEY] = fieldsData
+        }
+        
         if PyrusServiceDesk.needShowLoading {
             parameters["last_note_id"] = 0
         }

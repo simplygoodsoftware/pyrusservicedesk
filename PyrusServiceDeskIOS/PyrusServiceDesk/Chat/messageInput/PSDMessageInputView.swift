@@ -269,11 +269,13 @@ class PSDMessageInputView: UIView, PSDMessageTextViewDelegate,PSDMessageSendButt
     func setToDefault() {
         if inputTextView.text.count == 0 {
             UIView.animate(withDuration: 0.1, animations: {
-                self.sendButton.alpha = 0
-                self.recordButton?.alpha = 1
+                self.sendButton.isUserInteractionEnabled = false || PyrusServiceDesk.voiceMessages
+                self.sendButton.alpha = PyrusServiceDesk.voiceMessages ? 0 : 0.4
+                self.recordButton?.alpha = PyrusServiceDesk.voiceMessages ? 1 : 0
             })
         } else{
             UIView.animate(withDuration: 0.1, animations: {
+                self.sendButton.isUserInteractionEnabled = true
                 self.sendButton.alpha = 1
                 self.recordButton?.alpha = 0
             })
@@ -379,6 +381,12 @@ class PSDMessageInputView: UIView, PSDMessageTextViewDelegate,PSDMessageSendButt
     }
     ///Check is send button need to enabled or not
     private func checkSendButton() {
+        if !PyrusServiceDesk.voiceMessages {
+            self.sendButton.isUserInteractionEnabled = self.inputTextView.text.count != 0 || self.attachmentsPresenter.attachmentsNumber() > 0
+            self.sendButton.alpha = !(self.inputTextView.text.count != 0 || self.attachmentsPresenter.attachmentsNumber() > 0) ? 0.4 : 1
+            self.recordButton?.alpha = 0
+            return
+        }
         UIView.animate(withDuration: 0.1, animations: {
             self.sendButton.alpha = !(self.inputTextView.text.count != 0 || self.attachmentsPresenter.attachmentsNumber() > 0) ? 0 : 1
             self.recordButton?.alpha = (self.inputTextView.text.count != 0 || self.attachmentsPresenter.attachmentsNumber() > 0) ? 0 : 1

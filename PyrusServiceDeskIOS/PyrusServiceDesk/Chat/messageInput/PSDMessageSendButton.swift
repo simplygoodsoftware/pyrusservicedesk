@@ -14,7 +14,7 @@ class PSDMessageSendButton: UIButton {
         super.init(frame: frame)
         let color = CustomizationHelper.sendButtonColor
         setImage(UIImage.PSDImage(name: "sendFill")?.imageWith(color: color), for: .normal)
-        setImage(UIImage.PSDImage(name: "send"), for: .disabled)
+//        setImage(UIImage.PSDImage(name: "sendFill")?.imageWith(color: color.withAlphaComponent(0.4)), for: .disabled)
         self.titleLabel?.font = .title
         setTitleColor(color, for: .normal)
         alpha = 0
@@ -49,6 +49,7 @@ extension PSDMessageSendButton: Recolorable {
             }
             let color = CustomizationHelper.sendButtonColor
             setImage(UIImage.PSDImage(name: "sendFill")?.imageWith(color: color), for: .normal)
+//            setImage(UIImage.PSDImage(name: "sendFill")?.imageWith(color: color.withAlphaComponent(0.4)), for: .disabled)
            // recolor()
         }
     }

@@ -97,7 +97,8 @@ class AudioInputView: UIView {
     
     override func traitCollectionDidChange(_ previousTraitCollection: UITraitCollection?) {
         super.traitCollectionDidChange(previousTraitCollection)
-        slider.setThumbImage(UIImage.PSDImage(name: "darkCircle")?.imageWith(color: .appColor), for: .normal)
+        let color = PyrusServiceDesk.mainController?.customization?.themeColor ?? CustomizationHelper.supportMassageTextColor
+        slider.setThumbImage(UIImage.PSDImage(name: "darkCircle")?.imageWith(color: color), for: .normal)
     }
     
     private func setupViews() {
