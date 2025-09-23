@@ -3,6 +3,8 @@ package com.pyrus.pyrusservicedesk._ref.ui_domain.screens.ticket
 import android.net.Uri
 import android.util.Log
 import androidx.core.net.toUri
+import com.pyrus.pyrusservicedesk.PyrusServiceDesk.Companion.API_VERSION_1
+import com.pyrus.pyrusservicedesk.PyrusServiceDesk.Companion.API_VERSION_2
 import com.pyrus.pyrusservicedesk.R
 import com.pyrus.pyrusservicedesk._ref.data.FullTicket
 import com.pyrus.pyrusservicedesk._ref.ui_domain.screens.ticket.TicketContract.Effect
@@ -27,6 +29,7 @@ import com.pyrus.pyrusservicedesk._ref.whitetea.utils.adapt
 import com.pyrus.pyrusservicedesk.audiocontroller.src.main.java.com.pyrus.audiocontroller.record.AudioRecordController
 import com.pyrus.pyrusservicedesk.core.Account
 import com.pyrus.pyrusservicedesk.core.getUsers
+import com.pyrus.pyrusservicedesk.core.getVersion
 import com.pyrus.pyrusservicedesk.presentation.ui.navigation_page.ticket.dialogs.comment_actions.ErrorCommentActionsDialog.Companion.ErrorCommentAction
 import com.pyrus.pyrusservicedesk.sdk.data.FileManager
 import com.pyrus.pyrusservicedesk.sdk.data.intermediate.FileData
@@ -308,6 +311,7 @@ private class FeatureReducer(): Logic<State, Message, Effect>() {
                             userName = message.userName,
                             recordState = RecordState.None,
                             pendingRecord = null,
+                            previousTicketLastCommentId = message.previousTicketLastCommentId,
                         )
 
                     }
@@ -389,12 +393,20 @@ private class TicketActor(
             when {
                 commentsTry.isSuccess() -> {
                     val application = localTicketsStore.getApplications().find { accountStore.getAccount().getUsers().find { user -> user.userId == commentsTry.value.userId }?.appId == it.appId }
+                    var needAnotherOneWelcomeMessage = false
+                    if (((accountStore.getAccount().getVersion() == API_VERSION_1
+                            ||accountStore.getAccount().getVersion() == API_VERSION_2)
+                            && localTicketsStore.getTickets().lastOrNull()?.isActive == false) && !commentsTry.value.showRating
+                    ) {
+                            needAnotherOneWelcomeMessage = true
+                    }
                     Message.Inner.UpdateCommentsCompleted(
                         ticket = commentsTry.value,
                         draft = draftRepository.getDraft(ticketId),
                         welcomeMessage = if (application?.welcomeMessage.isNullOrBlank()) welcomeMessage else application?.welcomeMessage,
                         userName = accountStore.getAccount().getUsers()
-                            .find { it.userId == commentsTry.value.userId }?.userName ?: ""
+                            .find { it.userId == commentsTry.value.userId }?.userName ?: "",
+                        previousTicketLastCommentId = if (needAnotherOneWelcomeMessage) commentsTry.value.comments.lastOrNull()?.id else null,
                     )
                 }
                 else -> Message.Inner.UpdateCommentsFailed(commentsTry.error)
