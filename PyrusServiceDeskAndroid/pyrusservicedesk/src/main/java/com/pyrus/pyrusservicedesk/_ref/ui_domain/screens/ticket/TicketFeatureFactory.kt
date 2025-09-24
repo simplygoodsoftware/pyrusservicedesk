@@ -11,6 +11,7 @@ import com.pyrus.pyrusservicedesk._ref.ui_domain.screens.ticket.TicketContract.R
 import com.pyrus.pyrusservicedesk._ref.ui_domain.screens.ticket.TicketContract.State
 import com.pyrus.pyrusservicedesk._ref.ui_domain.screens.ticket.record.AudioRecordControllerFactory
 import com.pyrus.pyrusservicedesk._ref.utils.AudioWrapper
+import com.pyrus.pyrusservicedesk._ref.utils.ConfigUtils
 import com.pyrus.pyrusservicedesk._ref.utils.GetTicketsError
 import com.pyrus.pyrusservicedesk._ref.utils.RequestUtils.getFileUrl
 import com.pyrus.pyrusservicedesk._ref.utils.Try2
@@ -308,6 +309,7 @@ private class FeatureReducer(): Logic<State, Message, Effect>() {
                             userName = message.userName,
                             recordState = RecordState.None,
                             pendingRecord = null,
+                            voiceMessage = ConfigUtils.getVoiceMessage(),
                         )
 
                     }

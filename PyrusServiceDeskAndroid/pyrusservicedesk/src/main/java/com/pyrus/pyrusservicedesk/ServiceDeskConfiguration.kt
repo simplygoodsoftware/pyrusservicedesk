@@ -17,6 +17,7 @@ class ServiceDeskConfiguration internal constructor() {
     internal var userName: String? = null
     internal var title: String? = null
     internal var welcomeMessage: String? = null
+    internal var voiceMessage: Boolean = false
     internal var themeColor: Int? = null
     @DrawableRes
     internal var supportAvatar: Int? = null
@@ -49,6 +50,7 @@ class ServiceDeskConfiguration internal constructor() {
         private const val KEY_USER_NAME = "ServiceDeskConfiguration_KEY_USER_NAME"
         private const val KEY_TITLE = "ServiceDeskConfiguration_KEY_TITLE"
         private const val KEY_WELCOME_MESSAGE = "ServiceDeskConfiguration_KEY_WELCOME_MESSAGE"
+        private const val KEY_VOICE_MESSAGE = "ServiceDeskConfiguration_KEY_VOICE_MESSAGE"
         private const val KEY_THEME_COLOR = "ServiceDeskConfiguration_KEY_THEME_COLOR"
         private const val KEY_SUPPORT_AVATAR = "ServiceDeskConfiguration_KEY_SUPPORT_AVATAR"
 
@@ -100,6 +102,7 @@ class ServiceDeskConfiguration internal constructor() {
                     multichatButtons?.let {putParcelable(KEY_MULTICHAT_BUTTONS, it)}
                     changeUsersIntent?.let { putParcelable(KEY_CHANGE_USERS_INTENT, it) }
                     putBoolean(KEY_FORCE_DARK_ALLOWED, forceDarkAllowed)
+                    putBoolean(KEY_VOICE_MESSAGE, voiceMessage)
                 }
             }
         }
@@ -132,6 +135,7 @@ class ServiceDeskConfiguration internal constructor() {
                     forceDarkAllowed = bundle.getBoolean(KEY_FORCE_DARK_ALLOWED, false)
                     multichatButtons = bundle.getParcelable(KEY_MULTICHAT_BUTTONS)
                     changeUsersIntent = bundle.getParcelable(KEY_CHANGE_USERS_INTENT)
+                    voiceMessage = bundle.getBoolean(KEY_VOICE_MESSAGE)
                 }
             )
         }
@@ -171,6 +175,17 @@ class ServiceDeskConfiguration internal constructor() {
          */
         fun setWelcomeMessage(message: String): Builder {
             configuration.welcomeMessage = message
+            return this
+        }
+
+        /**
+         * Assigns the text of the message that is used as first message of the comment feed.
+         * If not assigned, welcome message will be omitted.
+         *
+         * @param voiceMessage flag for voice message
+         */
+        fun setVoiceMessage(voiceMessage: Boolean): Builder {
+            configuration.voiceMessage = voiceMessage
             return this
         }
 

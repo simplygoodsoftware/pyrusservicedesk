@@ -370,6 +370,7 @@ class PyrusServiceDesk private constructor(
             onStopCallback: OnStopCallback? = null,
             openTicketAction: OpenTicketAction? = null,
             sendComment: String? = null,
+            voiceMessage: Boolean = false,
         ) {
             val account = injector().accountStore.getAccount()
             startImpl(
@@ -379,6 +380,7 @@ class PyrusServiceDesk private constructor(
                 onStopCallback = onStopCallback,
                 openTicketAction = openTicketAction,
                 sendComment = sendComment,
+                voiceMessage = voiceMessage,
             )
         }
 
@@ -531,7 +533,9 @@ class PyrusServiceDesk private constructor(
             onStopCallback: OnStopCallback?,
             openTicketAction: OpenTicketAction?,
             sendComment: String? = null,
+            voiceMessage: Boolean = false,
         ) {
+            configuration?.voiceMessage = voiceMessage
             StaticRepository.setConfiguration(configuration)
 
             this.onStopCallback = onStopCallback
