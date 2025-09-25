@@ -2,6 +2,7 @@ package com.pyrus.pyrusservicedesk.sdk.repositories
 
 import android.content.SharedPreferences
 import com.pyrus.pyrusservicedesk._ref.ui_domain.screens.ticket.adapter.fingerprints.Status
+import com.pyrus.pyrusservicedesk._ref.utils.ConfigUtils
 import com.pyrus.pyrusservicedesk.sdk.data.intermediate.FileData
 import com.pyrus.pyrusservicedesk.sdk.repositories.data_base.dao.CommandsDao
 import com.pyrus.pyrusservicedesk.sdk.repositories.data_base.dao.SearchDao
@@ -67,6 +68,7 @@ internal class LocalCommandsStore(
             attachments = null,
             rating = null,
             ratingComment = null,
+            extraFields = entity.extraFields,
         )
     }
 
@@ -102,7 +104,8 @@ internal class LocalCommandsStore(
             comment = null,
             attachments = null,
             rating = rating,
-            ratingComment = ratingComment
+            ratingComment = ratingComment,
+            extraFields = null,
         )
     }
 
@@ -202,6 +205,7 @@ internal class LocalCommandsStore(
             token = null,
             tokenType = null,
             ratingComment = null,
+            extraFields = ConfigUtils.getFieldsData(),
         )
     }
 
@@ -228,6 +232,7 @@ internal class LocalCommandsStore(
             token = null,
             tokenType = null,
             ratingComment = ratingComment,
+            extraFields = null,
         )
     }
 
@@ -254,6 +259,7 @@ internal class LocalCommandsStore(
             token = null,
             tokenType = null,
             ratingComment = null,
+            extraFields = ConfigUtils.getFieldsData(),
         )
         val attachmentEntities = listOf(createAttachment(commandEntity.commandId, fileData))
 
@@ -291,6 +297,7 @@ internal class LocalCommandsStore(
             token = null,
             tokenType = null,
             ratingComment = null,
+            extraFields = null,
         )
     }
 

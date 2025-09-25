@@ -365,6 +365,10 @@ internal class ConfigUtils{
             }
         }
 
+        fun getFieldsData(): Map<String, String>? {
+            return StaticRepository.EXTRA_FIELDS
+        }
+
         private fun makeSupportAvatar(context: Context, drawable: Drawable): Drawable {
             val bmp = Bitmap.createBitmap(drawable.intrinsicHeight, drawable.intrinsicWidth, Bitmap.Config.ARGB_8888)
             val canvas = Canvas(bmp)
