@@ -227,6 +227,7 @@ import UIKit
                 return
             }
         }
+        
         if let users = users {
             for user in users {
                 let userId = user.userId
@@ -241,14 +242,21 @@ import UIKit
             }
             
         } else {
-            PSDPushToken.send(token, completion: {
-                error in
-                completion(error)
-                lastSetPushTokens.append(Date())
-                if error == nil {
-                    lastSetPushToken = Date()
-                }
-            })
+            let command = TicketCommand(commandId: UUID().uuidString, type: .setPushToken, appId: clientId, userId: customUserId, params: TicketCommandParams(ticketId: nil, appId: clientId, userId: customUserId, token: token, type: "ios"))
+            PyrusServiceDesk.repository.add(command: command)
+            DispatchQueue.main.async {
+                PyrusServiceDesk.syncManager.syncGetTickets()
+            }
+            ///todo - добавить обработку ошибки
+            completion(nil)
+//            PSDPushToken.send(token, completion: {
+//                error in
+//                completion(error)
+//                lastSetPushTokens.append(Date())
+//                if error == nil {
+//                    lastSetPushToken = Date()
+//                }
+//            })
         }
     }
     
