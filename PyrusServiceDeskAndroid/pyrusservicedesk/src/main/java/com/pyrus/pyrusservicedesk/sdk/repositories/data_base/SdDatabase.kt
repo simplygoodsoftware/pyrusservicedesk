@@ -37,7 +37,7 @@ import com.pyrus.pyrusservicedesk.sdk.repositories.data_base.data.UserEntity
         MemberEntity::class,
     ],
     exportSchema = false,
-    version = 4
+    version = 5
 )
 @TypeConverters(Converter::class)
 internal abstract class SdDatabase : RoomDatabase() {
@@ -68,6 +68,7 @@ internal abstract class SdDatabase : RoomDatabase() {
                 Migration1to2(),
                 Migration2to3(),
                 Migration3to4(),
+                Migration4to5(),
             ).build()
         }
 
@@ -122,5 +123,11 @@ internal class Migration3to4: Migration(3, 4) {
 
         db.execSQL("ALTER TABLE $COMMANDS_TABLE ADD COLUMN rating_comment TEXT")
         db.execSQL("ALTER TABLE $APPLICATIONS_TABLE ADD COLUMN welcome_message TEXT")
+    }
+}
+
+internal class Migration4to5: Migration(4, 5) {
+    override fun migrate(db: SupportSQLiteDatabase) {
+        db.execSQL("ALTER TABLE $COMMANDS_TABLE ADD COLUMN extra_fields TEXT")
     }
 }

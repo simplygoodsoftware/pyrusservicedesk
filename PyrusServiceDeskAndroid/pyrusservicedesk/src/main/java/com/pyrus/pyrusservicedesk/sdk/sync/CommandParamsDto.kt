@@ -44,6 +44,7 @@ internal sealed interface CommandParamsDto {
         @Json(name = "ticket_id") val ticketId: Long,
         @Json(name = "rating") val rating: Int?,
         @Json(name = "rating_comment")  val ratingComment: String?,
+        @Json(name = "extra_fields") val extraFields: Map<String, String>?,
     ) : CommandParamsDto {
         override val commandType = CommandsParamsType.CreateComment
     }

@@ -80,6 +80,7 @@ internal object SyncMapper {
                 ticketId = request.ticketId,
                 rating = request.rating,
                 ratingComment = request.ratingComment,
+                extraFields = request.extraFields,
             ),
         )
         is SyncRequest.Command.MarkTicketAsRead -> TicketCommandDto(

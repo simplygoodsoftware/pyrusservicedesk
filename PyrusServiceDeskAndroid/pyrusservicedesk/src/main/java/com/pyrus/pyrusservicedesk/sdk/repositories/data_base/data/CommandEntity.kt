@@ -29,4 +29,5 @@ internal data class CommandEntity(
     @ColumnInfo(name = "token") val token: String?,
     @ColumnInfo(name = "token_type") val tokenType: String?,
     @ColumnInfo(name = "rating_comment")  val ratingComment: String?,
+    @ColumnInfo(name = "extra_fields") val extraFields: Map<String, String>?,
 ) : TicketHeaderEntity

@@ -8,6 +8,7 @@ import androidx.sqlite.db.framework.FrameworkSQLiteOpenHelperFactory
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.platform.app.InstrumentationRegistry
 import com.pyrus.pyrusservicedesk.sdk.repositories.data_base.Migration3to4
+import com.pyrus.pyrusservicedesk.sdk.repositories.data_base.Migration4to5
 import com.pyrus.pyrusservicedesk.sdk.repositories.data_base.SdDatabase
 import junit.framework.TestCase.assertEquals
 import org.junit.Rule
@@ -73,6 +74,30 @@ class MigrationTest {
 
     }
 
+    @Test
+    @Throws(IOException::class)
+    fun migrate4To5() {
+        var db = helper.createDatabase(TEST_DB, 4)
+
+        db.insertValue(SdDatabase.COMMANDS_TABLE, ::putCommandsV3Values, ::putCommandsV4Values)
+
+        db.close()
+
+        db = helper.runMigrationsAndValidate(TEST_DB, 5, true, Migration4to5())
+
+        val commandsCursor = db.query("SELECT * FROM ${SdDatabase.COMMANDS_TABLE}")
+
+        commandsCursor.moveToNext()
+
+        commandsCursor.getColumnIndexOrThrow("extra_fields")
+
+        val extraFieldsIndex = commandsCursor.getColumnIndexOrThrow("extra_fields")
+        val extraFieldsValue = commandsCursor.getStringOrNull(extraFieldsIndex)
+
+        assertEquals(null, extraFieldsValue)
+
+    }
+
     private fun SupportSQLiteDatabase.insertValue(table: String, vararg stackers: (values: ContentValues) -> Unit) {
         val personContentValues = ContentValues()
         for (stacker in stackers) {
@@ -113,20 +138,7 @@ class MigrationTest {
     }
 
     private fun putCommandsV4Values(contentValues: ContentValues) {
-        contentValues.put("is_error", false)
-        contentValues.put("local_id", 5L)
-        contentValues.put("command_id", "jhgkjgkjhg")
-        contentValues.put("command_type", 1)
-        contentValues.put("user_id", "543454")
-        contentValues.put("app_id", "app_idapp_idapp_idapp_idapp_idapp_idapp_id")
-        contentValues.put("creation_time", 1757052450L)
-        contentValues.put("request_new_ticket", false)
-        contentValues.put("comment", "hngvgf152")
-        contentValues.put("ticket_id", 123456789L)
-        contentValues.put("rating", 5)
-        contentValues.put("comment_id", 44565457L)
-        contentValues.put("token", "token7676")
-        contentValues.put("token_type", "token_type")
+        contentValues.put("rating_comment", "comment")
     }
 
     private fun putTicketsV3Values(values: ContentValues) {
