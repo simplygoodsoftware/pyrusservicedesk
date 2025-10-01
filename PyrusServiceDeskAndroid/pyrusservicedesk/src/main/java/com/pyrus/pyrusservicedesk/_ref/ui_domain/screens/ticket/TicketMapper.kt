@@ -35,7 +35,7 @@ internal object TicketMapper {
         is State.Content -> Model(
             inputText = state.inputText,
             sendEnabled = state.sendEnabled,
-            comments = state.ticket?.let { mapComments(it, state.welcomeMessage) },
+            comments = state.ticket?.let { mapComments(it, state.welcomeMessage, state.previousTicketLastCommentId) },
             isLoading = false,
             showNoConnectionError = false,
             isRefreshing = state.isLoading,
@@ -165,12 +165,15 @@ internal object TicketMapper {
     private fun mapComments(
         freshList: FullTicket,
         welcomeMessage: String?,
+        previousTicketLastCommentId: Long?,
     ): List<CommentEntry> {
         val entries = ArrayList<CommentEntry>()
 
-        if (welcomeMessage != null) addWelcomeEntries(entries, welcomeMessage, freshList)
+        if (welcomeMessage != null) {
+            entries += welcomeEntry(welcomeMessage, freshList)
+        }
 
-        addCommentEntries(entries, freshList)
+        addCommentEntries(entries, freshList, welcomeMessage, previousTicketLastCommentId)
 
         val entriesWithDates = toListWithDates(entries).toMutableList()
 
@@ -247,16 +250,15 @@ internal object TicketMapper {
             || ratingSettings == null
     }
 
-    private fun addWelcomeEntries(
-        entries: ArrayList<CommentEntry>,
+    private fun welcomeEntry(
         welcomeMessage: String,
         freshList: FullTicket
-    ) {
+    ): CommentEntry. Comment. CommentText {
         val firstComment = freshList.comments.firstOrNull()
         val creationTime = firstComment?.creationTime ?: System.currentTimeMillis()
 
         val entryText = welcomeMessage.cleanTags()
-        val welcomeEntry = CommentEntry.Comment.CommentText(
+        return CommentEntry.Comment.CommentText(
             creationTime = creationTime,
             entryId = WELCOME_MESSAGE_ID.toString(),
             id = WELCOME_MESSAGE_ID,
@@ -274,16 +276,19 @@ internal object TicketMapper {
             isSupport = true,
             text = entryText,
         )
-        entries += welcomeEntry
     }
 
     private fun addCommentEntries(
         entries: ArrayList<CommentEntry>,
         freshList: FullTicket,
+        welcomeMessage: String?,
+        previousTicketLastCommentId: Long?,
     ) {
         val commentEntries = ArrayList<CommentEntry>()
         for (comment in freshList.comments) {
             addCommentEntries(commentEntries, comment, freshList.orgLogoUrl)
+            if (comment.id == previousTicketLastCommentId && welcomeMessage != null)
+                commentEntries += welcomeEntry(welcomeMessage, freshList.copy(comments = emptyList()))
         }
 
         entries += commentEntries

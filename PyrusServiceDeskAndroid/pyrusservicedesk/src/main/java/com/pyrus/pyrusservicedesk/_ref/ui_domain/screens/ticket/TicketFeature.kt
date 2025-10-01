@@ -25,6 +25,7 @@ interface TicketContract {
             val userName: String,
             val recordState: RecordState,
             val pendingRecord: String?,
+            val previousTicketLastCommentId: Long?,
             val voiceMessage: Boolean,
         ) : State {
             override fun toString(): String {
@@ -75,6 +76,7 @@ interface TicketContract {
                 val draft: String,
                 val welcomeMessage: String?,
                 val userName: String,
+                val previousTicketLastCommentId: Long?,
             ) : Inner
 
             class OnAudioRecorded(val file: File) : Inner
