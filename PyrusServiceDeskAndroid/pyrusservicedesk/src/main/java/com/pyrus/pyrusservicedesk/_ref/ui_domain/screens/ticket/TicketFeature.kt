@@ -26,6 +26,7 @@ interface TicketContract {
             val recordState: RecordState,
             val pendingRecord: String?,
             val previousTicketLastCommentId: Long?,
+            val voiceMessage: Boolean,
         ) : State {
             override fun toString(): String {
                 return "State(c=${ticket?.comments?.size})"

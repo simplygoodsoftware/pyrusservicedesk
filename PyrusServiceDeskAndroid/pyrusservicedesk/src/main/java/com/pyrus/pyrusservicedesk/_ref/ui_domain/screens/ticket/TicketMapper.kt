@@ -118,9 +118,9 @@ internal object TicketMapper {
     }
 
     private fun actionButtonIsSend(state: State.Content): Boolean {
-        if (state.recordState is RecordState.HoldRecording) return true
-        if (state.recordState is RecordState.Recording) return false
-        if (state.recordState is RecordState.PendingRecord) return true
+        if (state.voiceMessage && state.recordState is RecordState.HoldRecording) return true
+        if (state.voiceMessage && state.recordState is RecordState.Recording) return false
+        if (state.voiceMessage && state.recordState is RecordState.PendingRecord) return true
         return state.inputText.isNotBlank()
     }
 

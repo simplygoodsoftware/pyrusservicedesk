@@ -170,9 +170,10 @@ internal class TicketFragment: TeaFragment<Model, Event, Effect>() {
         }
         diff(Model::actionButtonIsSend) { actionButtonIsSend ->
             this@TicketFragment.actionButtonIsSend = actionButtonIsSend
-            binding.sendButton.isVisible = actionButtonIsSend
-            binding.recordButton.isVisible = !actionButtonIsSend
+            binding.sendButton.isVisible = actionButtonIsSend || !ConfigUtils.getVoiceMessage()
+            binding.recordButton.isVisible = !actionButtonIsSend && ConfigUtils.getVoiceMessage()
 
+            binding.sendButton.setImageResource(if (actionButtonIsSend) R.drawable.psd_ic_send else  R.drawable.ic_unable_send)
             val actionIconRes = when {
                 actionButtonIsSend -> R.drawable.psd_ic_send_filled
                 else -> R.drawable.psd_ic_mic_filled
@@ -501,7 +502,7 @@ internal class TicketFragment: TeaFragment<Model, Event, Effect>() {
         )
 
         binding.progressBar.indeterminateDrawable.setColorFilter(
-            ConfigUtils.getAccentColor(requireContext()),
+            getAccentColor(requireContext()),
             PorterDuff.Mode.SRC_IN
         )
         binding.toolbarTitle.text = ConfigUtils.getTitle(requireContext())
@@ -557,10 +558,10 @@ internal class TicketFragment: TeaFragment<Model, Event, Effect>() {
     }
 
     private fun applyStyle() {
-        val accentColor = ConfigUtils.getAccentColor(requireContext())
+        val accentColor = getAccentColor(requireContext())
         binding.refresh.setBackgroundColor(getMainBackgroundColor(requireContext()))
 
-        binding.contentRoot.setBackgroundColor(ConfigUtils.getMainBackgroundColor(requireContext()))
+        binding.contentRoot.setBackgroundColor(getMainBackgroundColor(requireContext()))
         binding.scrollDownButton.imageTintList = ColorStateList.valueOf(accentColor)
         binding.inputLayout.setBackgroundColor(getMainBackgroundColor(requireContext()))
 
@@ -582,7 +583,7 @@ internal class TicketFragment: TeaFragment<Model, Event, Effect>() {
         binding.noConnection.noConnectionImageView.setColorFilter(secondaryColor)
         binding.noConnection.noConnectionTextView.setTextColor(secondaryColor)
 
-        binding.noConnection.reconnectButton.setTextColor(ConfigUtils.getAccentColor(requireContext()))
+        binding.noConnection.reconnectButton.setTextColor(getAccentColor(requireContext()))
 
         binding.noConnection.root.setBackgroundColor(ConfigUtils.getNoConnectionBackgroundColor(requireContext()))
 
@@ -602,7 +603,7 @@ internal class TicketFragment: TeaFragment<Model, Event, Effect>() {
         )
         binding.sendButton.imageTintList = stateList
 
-        binding.toolbarBack.setColorFilter(ConfigUtils.getAccentColor(requireContext()))
+        binding.toolbarBack.setColorFilter(getAccentColor(requireContext()))
 
         binding.inputEditText.highlightColor = accentColor
         binding.inputEditText.setCursorColor(accentColor)
@@ -626,7 +627,7 @@ internal class TicketFragment: TeaFragment<Model, Event, Effect>() {
         )
 
         binding.refresh.setProgressBackgroundColor(resources.getColor(R.color.psd_color_fab_scroll_down))
-        binding.refresh.setColorSchemeColors(ConfigUtils.getAccentColor(requireContext()))
+        binding.refresh.setColorSchemeColors(getAccentColor(requireContext()))
 
         with(requireActivity().window) {
             clearFlags(WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS)

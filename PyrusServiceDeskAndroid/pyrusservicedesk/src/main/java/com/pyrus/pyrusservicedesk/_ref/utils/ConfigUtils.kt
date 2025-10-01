@@ -292,6 +292,8 @@ internal class ConfigUtils{
          */
         fun getWelcomeMessage(): String? = StaticRepository.getConfiguration().welcomeMessage
 
+        fun getVoiceMessage(): Boolean = StaticRepository.getConfiguration().voiceMessage
+
         fun getTrustedUrls() = StaticRepository.getConfiguration().trustedUrls
 
         /**
