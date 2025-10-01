@@ -25,6 +25,7 @@ class PSDMessage: NSObject {
     var rating: Int?
     var fromStrorage: Bool = false
     var isRatingMessage: Bool = false
+    var ratingComment: String?
     init(text: String?, attachments: [PSDAttachment]? ,messageId:String? , owner:PSDUser?, date: Date?){
         self.text = text ?? ""        
         self.attachments = attachments

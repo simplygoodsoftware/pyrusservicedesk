@@ -60,18 +60,18 @@
             android:textAppearance="?attr/textAppearanceListItem"
             app:layout_constraintBottom_toTopOf="@+id/custom_variant" />
 
-        <androidx.appcompat.widget.AppCompatTextView
-            android:id="@+id/custom_variant"
-            android:layout_width="match_parent"
-            android:layout_height="@dimen/psd_recyclerview_item_height_default"
-            android:background="?attr/selectableItemBackground"
-            android:gravity="start|center_vertical"
-            android:paddingStart="@dimen/psd_offset_default"
-            android:paddingLeft="@dimen/psd_offset_default"
-            android:paddingEnd="@dimen/psd_offset_default"
-            android:paddingRight="@dimen/psd_offset_default"
-            android:textAppearance="?attr/textAppearanceListItem"
-            app:layout_constraintBottom_toTopOf="@id/custom_variant" />
+    <androidx.appcompat.widget.AppCompatTextView
+        android:id="@+id/custom_variant"
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/psd_recyclerview_item_height_default"
+        android:background="?attr/selectableItemBackground"
+        android:gravity="start|center_vertical"
+        android:paddingStart="@dimen/psd_offset_default"
+        android:paddingLeft="@dimen/psd_offset_default"
+        android:paddingEnd="@dimen/psd_offset_default"
+        android:paddingRight="@dimen/psd_offset_default"
+        android:textAppearance="?attr/textAppearanceListItem"
+        app:layout_constraintBottom_toTopOf="@id/send_logs_variant" />
 
         <androidx.appcompat.widget.AppCompatTextView
             android:id="@+id/send_logs_variant"
