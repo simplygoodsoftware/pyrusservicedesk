@@ -123,7 +123,7 @@ private fun Context.createPhotoUri(): Uri? {
     return try {
         FileProvider.getUriForFile(this, "${packageName}.com.pyrus.pyrusservicedesk.sdk.PSDFileProvider", file)
     }
-    catch (e: Exception) {
+    catch (e: kotlin.Exception) {
         return null
     }
 }

@@ -29,6 +29,15 @@ import com.pyrus.pyrusservicedesk._ref.utils.insets.RootViewDeferringInsetsCallb
 import com.pyrus.pyrusservicedesk._ref.utils.log.PLog
 import com.pyrus.pyrusservicedesk.core.StaticRepository
 import com.pyrus.pyrusservicedesk.databinding.PsdFragmentAttachFileVariantsBinding
+import com.pyrus.pyrusservicedesk.log.PLog
+import com.pyrus.pyrusservicedesk.utils.ConfigUtils
+import com.pyrus.pyrusservicedesk.utils.MIME_TYPE_IMAGE_ANY
+import com.pyrus.pyrusservicedesk.utils.dispatchTakePhotoIntent
+import com.pyrus.pyrusservicedesk.utils.dispatchTakeVideoIntent
+import com.pyrus.pyrusservicedesk.utils.getViewModelWithActivityScope
+import com.pyrus.pyrusservicedesk.utils.hasPermission
+import com.pyrus.pyrusservicedesk.utils.hasPermissionInManifeset
+import com.pyrus.pyrusservicedesk.utils.isCapturingPhotoSupported
 import java.io.File
 
 /**
@@ -151,6 +160,11 @@ internal class AttachFileVariantsFragment: BottomSheetDialogFragment(), View.OnC
     }
 
     private fun sendResultAndClose(uri: Uri) {
+        sharedModel.onFilePicked(uri)
+        dismiss()
+    }
+
+    private fun sendResultAndClose(uri: Uri) {
         val router = injector().router
         router.sendResult(requireArguments().getString(RESULT_KEY)!!, uri)
         dismiss()
@@ -233,7 +247,7 @@ internal class AttachFileVariantsFragment: BottomSheetDialogFragment(), View.OnC
     }
 
     private fun isExpectedResult(requestCode: Int): Boolean {
-        return when (requestCode){
+        return when (requestCode) {
             REQUEST_CODE_TAKE_PHOTO -> true
             REQUEST_CODE_TAKE_VIDEO -> true
             REQUEST_CODE_PICK_IMAGE -> true
