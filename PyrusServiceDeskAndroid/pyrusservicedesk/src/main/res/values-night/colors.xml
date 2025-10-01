@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="psd_accent">#6477FF</color>
+    <color name="psd_background">@color/psd_color_bluegray_900</color>
+    <color name="psd_text_primary">@android:color/white</color>
+    <color name="psd_text_2">@color/psd_color_blue_gray_300</color>
+    <color name="psd_color_divider_250">#3A3B3D</color>
+    <color name="psd_color_divider_300">@color/psd_color_blue_gray_700</color>
+    <color name="psd_comment_inbound_bg">@color/psd_color_bluegray_800</color>
+    <color name="psd_color_fab_scroll_down">#313438</color>
+    <color name="psd_color_scroll_down">@color/psd_color_blue_gray_300</color>
+    <color name="psd_hint_name">@color/psd_color_blue_gray_300</color>
+    <color name="psd_blur_color">#CC3D4043</color>
+    <color name="psd_not_active_text_color">#999999</color>
+    <color name="psd_light_gray_bg">@color/psd_color_blue_gray_750</color>
+
+    <color name="psd_bg_record_gradient_1">#6477FF</color>
+    <color name="psd_bg_record_gradient_2">#E8A1FF</color>
+    <color name="psd_bg_record_gradient_3">#FFB85C</color>
+    <color name="psd_bg_pending_audio">#515254</color>
+    <color name="psd_hint_color">@color/psd_color_blue_gray_600</color>
+</resources>

@@ -6,19 +6,28 @@ import android.app.Activity.RESULT_OK
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.net.Uri
-import android.os.Build
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.View.GONE
 import android.view.View.VISIBLE
 import android.view.ViewGroup
+import androidx.core.os.bundleOf
 import androidx.core.util.Consumer
+import androidx.core.view.ViewCompat
+import androidx.core.view.WindowInsetsCompat
 import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.google.android.material.bottomsheet.BottomSheetDialog
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment
-import com.pyrus.pyrusservicedesk.PyrusServiceDesk
-import com.pyrus.pyrusservicedesk.R
+import com.pyrus.pyrusservicedesk.PyrusServiceDesk.Companion.injector
+import com.pyrus.pyrusservicedesk._ref.utils.ConfigUtils
+import com.pyrus.pyrusservicedesk._ref.utils.dispatchTakePhotoIntent
+import com.pyrus.pyrusservicedesk._ref.utils.dispatchTakeVideoIntent
+import com.pyrus.pyrusservicedesk._ref.utils.hasPermission
+import com.pyrus.pyrusservicedesk._ref.utils.hasPermissionInManifeset
+import com.pyrus.pyrusservicedesk._ref.utils.insets.RootViewDeferringInsetsCallback
+import com.pyrus.pyrusservicedesk._ref.utils.log.PLog
+import com.pyrus.pyrusservicedesk.core.StaticRepository
 import com.pyrus.pyrusservicedesk.databinding.PsdFragmentAttachFileVariantsBinding
 import com.pyrus.pyrusservicedesk.log.PLog
 import com.pyrus.pyrusservicedesk.utils.ConfigUtils
@@ -36,31 +45,17 @@ import java.io.File
  */
 internal class AttachFileVariantsFragment: BottomSheetDialogFragment(), View.OnClickListener {
 
-    private lateinit var binding: PsdFragmentAttachFileVariantsBinding
-
-    private companion object {
-        const val REQUEST_CODE_PERMISSION = 0
-        const val REQUEST_CODE_CUSTOM_CHOOSER = 1
-        const val REQUEST_CODE_PICK_IMAGE = 2
-        const val REQUEST_CODE_TAKE_PHOTO = 3
-        private const val REQUEST_CODE_TAKE_VIDEO = 4
-        private const val REQUEST_CODE_PERMISSION_VIDEO = 5
-
-        const val STATE_KEY_PHOTO_URI = "STATE_KEY_PHOTO_URI"
-    }
-
     private var capturePhotoUri: Uri? = null
-    private val sharedModel: AttachFileSharedViewModel by getViewModelWithActivityScope(
-        AttachFileSharedViewModel::class.java)
 
     private val logSubscriber: Consumer<File> = Consumer {
         val uri = Uri.fromFile(it)
         sendResultAndClose(uri)
     }
 
+    private lateinit var binding: PsdFragmentAttachFileVariantsBinding
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        binding = PsdFragmentAttachFileVariantsBinding.inflate(layoutInflater)
         capturePhotoUri = savedInstanceState?.getParcelable(STATE_KEY_PHOTO_URI)
     }
 
@@ -72,24 +67,32 @@ internal class AttachFileVariantsFragment: BottomSheetDialogFragment(), View.OnC
             val bottomSheetInternal = d.findViewById<View>(com.google.android.material.R.id.design_bottom_sheet)
             BottomSheetBehavior.from(bottomSheetInternal!!).state = BottomSheetBehavior.STATE_EXPANDED
         }
+        binding = PsdFragmentAttachFileVariantsBinding.inflate(inflater)
         binding.root.setBackgroundColor(ConfigUtils.getFileMenuBackgroundColor(inflater.context))
         return binding.root
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+
+        val deferringInsetsListener = RootViewDeferringInsetsCallback(
+            persistentInsetTypes = WindowInsetsCompat.Type.systemBars(),
+            deferredInsetTypes = WindowInsetsCompat.Type.ime()
+        )
+        ViewCompat.setOnApplyWindowInsetsListener(binding.root, deferringInsetsListener)
+
         binding.videoVariant.setOnClickListener(this)
         binding.photoVariant.setOnClickListener(this)
-        binding.photoVariant.visibility = if (isCapturingPhotoSupported()) VISIBLE else GONE
         binding.galleryVariant.setOnClickListener(this)
-        binding.customVariant.visibility = if (PyrusServiceDesk.FILE_CHOOSER != null) VISIBLE else GONE
-        PyrusServiceDesk.FILE_CHOOSER?.let {
+        binding.customVariant.visibility = if (StaticRepository.FILE_CHOOSER != null) VISIBLE else GONE
+        StaticRepository.FILE_CHOOSER?.let {
             binding.customVariant.setOnClickListener(this)
             binding.customVariant.text = it.getLabel()
         }
-        binding.sendLogsVariant.visibility = if (PyrusServiceDesk.logging) VISIBLE else GONE
-        if (PyrusServiceDesk.logging)
-            binding.sendLogsVariant.setOnClickListener(this)
+
+        binding.sendLogsVariant.visibility = if (StaticRepository.logging) VISIBLE else GONE
+        if (StaticRepository.logging) binding.sendLogsVariant.setOnClickListener(this)
+        else binding.sendLogsVariant.setOnClickListener(null)
 
         val textColor = ConfigUtils.getFileMenuTextColor(requireContext())
         binding.videoVariant.setTextColor(textColor)
@@ -102,6 +105,10 @@ internal class AttachFileVariantsFragment: BottomSheetDialogFragment(), View.OnC
             binding.photoVariant.typeface = it
             binding.galleryVariant.typeface = it
             binding.sendLogsVariant.typeface = it
+        }
+
+        binding.backgroundView.setOnClickListener {
+            dismiss()
         }
     }
 
@@ -157,8 +164,14 @@ internal class AttachFileVariantsFragment: BottomSheetDialogFragment(), View.OnC
         dismiss()
     }
 
+    private fun sendResultAndClose(uri: Uri) {
+        val router = injector().router
+        router.sendResult(requireArguments().getString(RESULT_KEY)!!, uri)
+        dismiss()
+    }
+
     private fun openCustomChooser() {
-        val chooserIntent = PyrusServiceDesk.FILE_CHOOSER?.getIntent() ?: return
+        val chooserIntent = StaticRepository.FILE_CHOOSER?.getIntent() ?: return
         activity?.packageManager?.resolveActivity(chooserIntent, 0) ?: return
         startActivityForResult(chooserIntent,
             REQUEST_CODE_CUSTOM_CHOOSER
@@ -173,9 +186,7 @@ internal class AttachFileVariantsFragment: BottomSheetDialogFragment(), View.OnC
             it.action = Intent.ACTION_OPEN_DOCUMENT
             it.flags = it.flags or Intent.FLAG_GRANT_PERSISTABLE_URI_PERMISSION
             it.type = "*/*"
-            startActivityForResult(it,
-                REQUEST_CODE_PICK_IMAGE
-            )
+            startActivityForResult(it, REQUEST_CODE_PICK_IMAGE)
         }
     }
 
@@ -244,4 +255,23 @@ internal class AttachFileVariantsFragment: BottomSheetDialogFragment(), View.OnC
             else -> false
         }
     }
+
+    internal companion object {
+        private const val REQUEST_CODE_PERMISSION = 0
+        private const val REQUEST_CODE_CUSTOM_CHOOSER = 1
+        private const val REQUEST_CODE_PICK_IMAGE = 2
+        private const val REQUEST_CODE_TAKE_PHOTO = 3
+        private const val REQUEST_CODE_TAKE_VIDEO = 4
+        private const val REQUEST_CODE_PERMISSION_VIDEO = 5
+
+        private const val STATE_KEY_PHOTO_URI = "STATE_KEY_PHOTO_URI"
+        private const val RESULT_KEY = "RESULT_KEY"
+
+        fun newInstance(key: String): AttachFileVariantsFragment {
+            val fragment = AttachFileVariantsFragment()
+            fragment.arguments = bundleOf(RESULT_KEY to key)
+            return fragment
+        }
+    }
+
 }

@@ -4,7 +4,7 @@
         android:id="@android:id/background"
         android:gravity="fill">
         <shape android:shape="oval">
-            <size android:width="56dp" android:height="56dp"/>
+            <size android:width="50dp" android:height="50dp"/>
         </shape>
     </item>
     <item

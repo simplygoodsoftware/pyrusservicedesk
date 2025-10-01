@@ -1,10 +1,16 @@
 
 buildscript {
+    ext.kotlin_version = "2.1.10"
     repositories {
-        maven { url "https://plugins.gradle.org/m2/" }
         google()
-        mavenCentral()
+        jcenter()
     }
+
+    dependencies {
+        classpath 'com.android.tools.build:gradle:8.9.2'
+        classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
+    }
+
     dependencies {
         classpath 'com.android.tools.build:gradle:8.9.2'
     }
@@ -13,7 +19,8 @@ buildscript {
 allprojects {
     repositories {
         google()
-        mavenCentral()
+        jcenter()
+        maven { url 'https://jitpack.io' }
     }
 }
 

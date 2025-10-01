@@ -1,9 +1,9 @@
 package com.pyrus.pyrusservicedesk.presentation.ui.navigation_page.ticket.dialogs.attach_files
 
+import android.net.Uri
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
-import android.net.Uri
 
 /**
  * Shared view model of the ticket activity.
@@ -11,7 +11,7 @@ import android.net.Uri
  */
 internal class AttachFileSharedViewModel: ViewModel() {
 
-    private val filePickedData = MutableLiveData<Uri>()
+    private val filePickedData = MutableLiveData<Uri?>()
 
     /**
      * Callback to be invoked when user picked a file in UI that is responsible for file picking.
@@ -31,5 +31,5 @@ internal class AttachFileSharedViewModel: ViewModel() {
      * Result can contain null value that is used for cancelling the current data that is stored in
      * the live data. This provides one-shot behaviour.
      */
-    fun getFilePickedLiveData(): LiveData<Uri> = filePickedData
+    fun getFilePickedLiveData(): LiveData<Uri?> = filePickedData
 }

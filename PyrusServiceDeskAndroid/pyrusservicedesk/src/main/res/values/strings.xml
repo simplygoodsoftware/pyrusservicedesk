@@ -3,21 +3,39 @@
     <string name="psd_comment_input_hint">Add Comment</string>
     <string name="psd_retry">Retry</string>
     <string name="psd_no_connection">No Internet Connection</string>
+    <string name="psd_no_access">No access</string>
+    <string name="psd_no_access_message">Contact your organization manager to restore access to %s</string>
+    <string name="ok">Ok</string>
+    <string name="copied_text">Copied text</string>
     <string name="psd_uploading">Uploading…</string>
     <string name="psd_file_size_mb" formatted="false">%.1f MB</string>
     <string name="psd_file_size_kb" formatted="false">%.1f KB</string>
     <string name="psd_time_format">hh:mm aa</string>
+    <string name="nd_audio_player_time" translatable="false">"%01d:%02d"</string>
+    <string name="nd_audio_player_unknown_time" translatable="false">"--:--"</string>
     <string name="psd_organization_support">Support</string>
+    <string name="psd_support">support</string>
     <string name="psd_today">Today</string>
     <string name="psd_yesterday">Yesterday</string>
     <string name="psd_date_format_d_m_y">MMMM d, yyyy</string>
     <string name="psd_date_format_d_m">MMMM d</string>
-    <string name="psd_type_video">Video</string>
+    <string name="psd_date_format_d">EEE</string>
+    <string name="psd_date_format_d_m_short">MM.dd</string>
+    <string name="psd_date_format_d_m_y_short">MM.dd.yyyy</string>
     <string name="psd_photo">Photo</string>
     <string name="psd_gallery">Gallery</string>
     <string name="psd_evaluate_the_operators_performance">Evaluate the operator\'s performance</string>
     <string name="psd_close">Close</string>
     <string name="leave_your_comment">Write a review</string>
+    <string name="psd_filters">Filters</string>
+    <string name="psd_ticket_number">Ticket number: %s</string>
+    <string name="psd_ticket_data_create">Created at %s</string>
+    <string name="all">All</string>
+    <string name="psd_you">You</string>
+    <string name="psd_type_photo">Photo</string>
+    <string name="psd_type_video">Video</string>
+    <string name="psd_type_file">File</string>
+    <string name="psd_type_audio">Voice message</string>
 
     <plurals name="psd_years_ago">
         <item quantity="one">%d year ago</item>
@@ -41,4 +59,12 @@
     <string name="psd_delete">Delete</string>
     <string name="send_library_logs">Send library logs</string>
     <string name="link_warning">This link leads to a %s\nDo you really want to follow the link?</string>
+    <string name="new_ticket">New ticket</string>
+    <string name="closed_teckets">Closed tickets</string>
+    <string name="ticket_was_closed">Ticket was closed</string>
+    <string name="all_conversations">All conversations</string>
+    <string name="psd_search_by_tickets">Search by tickets</string>
+    <string name="psd_no_suggestions">No suggestions</string>
+    <string name="psd_swipe_cancel">‹‹ cancel</string>
+    <string name="psd_cancel">Cancel</string>
 </resources>

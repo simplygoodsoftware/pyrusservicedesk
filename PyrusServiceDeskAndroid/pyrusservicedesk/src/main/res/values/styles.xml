@@ -2,9 +2,11 @@
 <resources xmlns:tools="http://schemas.android.com/tools">
 
     <style name="BasePyrusServiceDesk" parent="Theme.AppCompat.Light.NoActionBar">
+        <item name="colorBackgroundFloating">@color/psd_blur_color</item>
         <item name="colorAccent">@color/psd_accent</item>
         <item name="colorAccentSecondary">@color/psd_accent_secondary</item>
-        <item name="android:windowBackground">@android:color/white</item>
+        <item name="android:windowBackground">@color/psd_background</item>
+        <item name="android:colorBackgroundFloating">@android:color/white</item>
         <item name="android:textSize">@dimen/psd_theme_text_size_default</item>
         <item name="android:textColorPrimary">@color/psd_text_color_primary</item>
         <item name="android:textColorSecondary">@color/psd_text_color_secondary</item>
@@ -13,8 +15,8 @@
         <item name="textAppearanceListItemSecondary">@style/PsdTextAppearanceListItemSecondary</item>
         <item name="android:listDivider">@color/psd_divider_color</item>
         <item name="actionBarStyle">@style/PsdActionBarStyle</item>
-        <item name="android:windowLightStatusBar">true</item>
         <item name="elevationDefault">@dimen/psd_elevation_default</item>
+        <item name="android:windowLightStatusBar">true</item>
     </style>
 
     <style name="PyrusServiceDesk" parent="BasePyrusServiceDesk"/>
@@ -22,7 +24,6 @@
     <style name="PyrusServiceDesk.Dialog" parent="Base.Theme.AppCompat.Light.Dialog.FixedSize" >
         <item name="colorAccent">@color/psd_accent</item>
         <item name="colorAccentSecondary">@color/psd_accent_secondary</item>
-        <item name="android:windowBackground">@android:color/white</item>
         <item name="android:textSize">@dimen/psd_theme_text_size_default</item>
         <item name="android:textColorPrimary">@color/psd_text_color_primary</item>
         <item name="android:textColorSecondary">@color/psd_text_color_secondary</item>
@@ -34,6 +35,10 @@
         <item name="elevationDefault">@dimen/psd_elevation_default</item>
         <item name="windowNoTitle">true</item>
         <item name="android:excludeFromRecents">true</item>
+
+        <item name="android:colorBackground">@color/psd_background</item>
+        <item name="android:windowBackground">@color/psd_background</item>
+        <item name="android:textViewStyle">@color/psd_accent</item>
     </style>
 
     <style name="PsdTextAppearanceListItemSecondary" parent="TextAppearance.AppCompat">
@@ -57,6 +62,29 @@
     <style name="PsdAppModalStyle"
         parent="Widget.Design.BottomSheet.Modal">
         <item name="android:background">@drawable/bottom_sheet_bg</item>
+    </style>
+
+    <style name="PsdTabStyle" parent="TextAppearance.Design.Tab">
+        <item name="textAllCaps">false</item>
+        <item name="android:textAllCaps">false</item>
+    </style>
+
+    <style name="CommonAlertDialog" parent="Theme.AppCompat.Dialog.Alert">
+        <item name="android:windowBackground">@color/psd_background</item>
+        <item name="colorBackgroundFloating">@color/psd_background</item>
+        <item name="android:textColorPrimary">@color/psd_text_primary</item>
+        <item name="android:textColorSecondary">@color/psd_text_primary</item>
+        <item name="buttonBarNegativeButtonStyle">@style/DialogCustomButton</item>
+        <item name="buttonBarNeutralButtonStyle">@style/DialogCustomButton</item>
+        <item name="buttonBarPositiveButtonStyle">@style/DialogCustomButton</item>
+        <item name="android:buttonBarPositiveButtonStyle">@style/DialogCustomButton</item>
+        <item name="android:buttonBarNeutralButtonStyle">@style/DialogCustomButton</item>
+        <item name="android:buttonBarNegativeButtonStyle">@style/DialogCustomButton</item>
+        <item name="android:textSize">18sp</item>
+    </style>
+
+    <style name="DialogCustomButton" parent="Widget.AppCompat.Button.Borderless">
+        <item name="android:textColor">@color/psd_accent</item>
     </style>
 
 </resources>

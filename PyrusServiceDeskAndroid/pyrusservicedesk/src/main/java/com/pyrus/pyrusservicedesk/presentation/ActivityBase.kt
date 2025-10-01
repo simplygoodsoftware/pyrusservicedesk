@@ -1,25 +1,30 @@
 package com.pyrus.pyrusservicedesk.presentation
 
-import androidx.lifecycle.Observer
 import android.content.Context
 import android.content.pm.PackageManager
+import android.os.Build
 import android.os.Bundle
-import androidx.core.app.ActivityCompat
-import androidx.core.view.ViewCompat
-import androidx.appcompat.app.AppCompatActivity
-import androidx.appcompat.app.AppCompatDelegate
 import android.view.View
 import android.view.inputmethod.InputMethodManager
-import com.pyrus.pyrusservicedesk.PyrusServiceDesk
+import androidx.appcompat.app.AppCompatActivity
+import androidx.appcompat.app.AppCompatDelegate
+import androidx.core.app.ActivityCompat
+import androidx.core.view.ViewCompat
 import com.pyrus.pyrusservicedesk.R
+import com.pyrus.pyrusservicedesk._ref.utils.getViewModel
+import com.pyrus.pyrusservicedesk.core.StaticRepository
 import com.pyrus.pyrusservicedesk.presentation.viewmodel.SharedViewModel
-import com.pyrus.pyrusservicedesk.utils.getViewModel
-import kotlinx.coroutines.*
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.cancel
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 import kotlin.coroutines.CoroutineContext
 
 
 /**
- * Base class for service desk activities.
+ * Old base class for service desk activities.
  */
 internal abstract class ActivityBase: AppCompatActivity(), CoroutineScope {
 
@@ -43,31 +48,21 @@ internal abstract class ActivityBase: AppCompatActivity(), CoroutineScope {
      */
     protected val sharedViewModel: SharedViewModel by getViewModel(SharedViewModel::class.java)
 
-    private var recentContentHeight = 0
-
     override val coroutineContext: CoroutineContext = Dispatchers.Main + Job()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         // Vectors inside another type of drawables may not work without this
         AppCompatDelegate.setCompatVectorFromResourcesEnabled(true)
-        overridePendingTransition()
+        overridePendingTransition(OVERRIDE_TRANSITION_OPEN)
         val theme = when{
-            PyrusServiceDesk.getConfiguration().isDialogTheme -> R.style.PyrusServiceDesk_Dialog
-            PyrusServiceDesk.getConfiguration().forceDarkAllowed -> R.style.PyrusServiceDesk
+            StaticRepository.getConfiguration().isDialogTheme -> R.style.PyrusServiceDesk_Dialog
+            StaticRepository.getConfiguration().forceDarkAllowed -> R.style.PyrusServiceDesk
             else -> R.style.BasePyrusServiceDesk
         }
         setTheme(theme)
         setContentView(layoutResId)
         setSupportActionBar(findViewById(toolbarViewId))
-        findViewById<View>(android.R.id.content).apply {
-            viewTreeObserver.addOnGlobalLayoutListener {
-                val changedHeight = recentContentHeight - height
-                if (changedHeight != 0)
-                    onViewHeightChanged(changedHeight)
-                recentContentHeight = height
-            }
-        }
 
         if (sharedViewModel.getQuitServiceDeskLiveData().value == true)
             finish()
@@ -85,7 +80,7 @@ internal abstract class ActivityBase: AppCompatActivity(), CoroutineScope {
 
     override fun finish() {
         super.finish()
-        overridePendingTransition()
+        overridePendingTransition(OVERRIDE_TRANSITION_CLOSE)
     }
 
     override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<out String>, grantResults: IntArray) {
@@ -141,20 +136,22 @@ internal abstract class ActivityBase: AppCompatActivity(), CoroutineScope {
      * Extenders can safely start observe view model's data here.
      */
     protected open fun startObserveData() {
-        sharedViewModel.getQuitServiceDeskLiveData().observe(
-            this,
-            { quit ->
-                quit?.let {
-                    if (it)
-                        finish()
-                }
+        sharedViewModel.getQuitServiceDeskLiveData().observe(this) { quit ->
+            quit?.let {
+                if (it)
+                    finish()
             }
-        )
+        }
     }
 
-    private fun overridePendingTransition() {
-        val enter = R.anim.psd_animation_window_enter
-        val exit = R.anim.psd_animation_window_exit
-        super.overridePendingTransition(enter, exit)
+    private fun overridePendingTransition(overrideType: Int) {
+        val enter = R.anim.slide_in_right
+        val exit = R.anim.slide_out_right
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
+            super.overrideActivityTransition(overrideType, enter, exit)
+        }
+        else {
+            super.overridePendingTransition(enter, exit)
+        }
     }
 }

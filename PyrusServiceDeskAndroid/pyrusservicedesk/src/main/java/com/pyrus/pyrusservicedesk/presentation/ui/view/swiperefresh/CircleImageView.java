@@ -2,11 +2,16 @@ package com.pyrus.pyrusservicedesk.presentation.ui.view.swiperefresh;
 
 import android.content.Context;
 import android.content.res.Resources;
-import android.graphics.*;
+import android.graphics.Canvas;
+import android.graphics.Color;
+import android.graphics.Paint;
+import android.graphics.RadialGradient;
+import android.graphics.Shader;
 import android.graphics.drawable.ShapeDrawable;
 import android.graphics.drawable.shapes.OvalShape;
-import androidx.core.view.ViewCompat;
 import android.view.animation.Animation;
+
+import androidx.core.view.ViewCompat;
 
 /**
  *

@@ -1,11 +1,13 @@
 package com.pyrus.pyrusservicedesk
 
+import android.app.PendingIntent
 import android.os.Bundle
 import androidx.annotation.ColorInt
 import androidx.annotation.ColorRes
 import androidx.annotation.DrawableRes
 import com.pyrus.pyrusservicedesk.ServiceDeskConfiguration.Builder
-import com.pyrus.pyrusservicedesk.utils.isTablet
+import com.pyrus.pyrusservicedesk._ref.data.multy_chat.MultichatButtons
+import com.pyrus.pyrusservicedesk.core.StaticRepository
 
 /**
  * Represents custom settings that can be applied when service desk is started via [PyrusServiceDesk.start]
@@ -18,7 +20,8 @@ class ServiceDeskConfiguration internal constructor() {
     internal var themeColor: Int? = null
     @DrawableRes
     internal var supportAvatar: Int? = null
-    internal var mainMenuDelegate: MainMenuDelegate? = null
+    internal var multichatButtons: MultichatButtons? = null
+    internal var changeUsersIntent: PendingIntent? = null
 
     internal var mainFontName: String? = null
     internal var userMessageTextBackgroundColor: Int? = null
@@ -38,7 +41,9 @@ class ServiceDeskConfiguration internal constructor() {
 
     internal var trustedUrls: ArrayList<String>? = null
 
-    internal val isDialogTheme: Boolean = PyrusServiceDesk.get().application.isTablet()
+    // TODO
+//    internal val isDialogTheme: Boolean = PyrusServiceDesk.get().application.isTablet()
+    internal val isDialogTheme: Boolean = false
 
     internal companion object {
         private const val KEY_USER_NAME = "ServiceDeskConfiguration_KEY_USER_NAME"
@@ -63,9 +68,11 @@ class ServiceDeskConfiguration internal constructor() {
         private const val KEY_STATUS_BAR_COLOR = "ServiceDeskConfiguration_KEY_STATUS_BAR_COLOR"
         private const val KEY_FORCE_DARK_ALLOWED = "ServiceDeskConfiguration_KKEY_FORCE_DARK_ALLOWED"
         private const val KEY_TRUSTED_URLS = "ServiceDeskConfiguration_KEY_TRUSTED_URLS"
+        private const val KEY_MULTICHAT_BUTTONS = "ServiceDeskConfiguration_KEY_MULTICHAT_BUTTONS"
+        private const val KEY_CHANGE_USERS_INTENT = "ServiceDeskConfiguration_KEY_CHANGE_USERS_INTENT"
 
         fun save(bundle: Bundle) {
-            with(PyrusServiceDesk.getConfiguration()) {
+            with(StaticRepository.getConfiguration()) {
                 bundle.apply {
                     putString(KEY_USER_NAME, userName)
                     putString(KEY_TITLE, title)
@@ -90,6 +97,8 @@ class ServiceDeskConfiguration internal constructor() {
                     sendButtonColor?.let { putInt(KEY_SEND_BUTTON_COLOR, it) }
                     statusBarColor?.let { putInt(KEY_STATUS_BAR_COLOR, it) }
                     trustedUrls?.let { putStringArrayList(KEY_TRUSTED_URLS, it) }
+                    multichatButtons?.let {putParcelable(KEY_MULTICHAT_BUTTONS, it)}
+                    changeUsersIntent?.let { putParcelable(KEY_CHANGE_USERS_INTENT, it) }
                     putBoolean(KEY_FORCE_DARK_ALLOWED, forceDarkAllowed)
                 }
             }
@@ -98,7 +107,7 @@ class ServiceDeskConfiguration internal constructor() {
         fun restore(bundle: Bundle) {
             if (!bundle.containsKey(KEY_USER_NAME))
                 return
-            PyrusServiceDesk.setConfiguration(
+            StaticRepository.setConfiguration(
                 ServiceDeskConfiguration().apply {
                     userName = bundle.getString(KEY_USER_NAME)
                     title = bundle.getString(KEY_TITLE)
@@ -121,6 +130,8 @@ class ServiceDeskConfiguration internal constructor() {
                     sendButtonColor = bundle.getNullableInt(KEY_SEND_BUTTON_COLOR)
                     statusBarColor = bundle.getNullableInt(KEY_STATUS_BAR_COLOR)
                     forceDarkAllowed = bundle.getBoolean(KEY_FORCE_DARK_ALLOWED, false)
+                    multichatButtons = bundle.getParcelable(KEY_MULTICHAT_BUTTONS)
+                    changeUsersIntent = bundle.getParcelable(KEY_CHANGE_USERS_INTENT)
                 }
             )
         }
@@ -193,16 +204,6 @@ class ServiceDeskConfiguration internal constructor() {
          */
         fun setUserName(userName: String): Builder {
             configuration.userName = userName
-            return this
-        }
-
-        /**
-         * Set your own chat menu instead of the standard menu.
-         *
-         * @param mainMenuDelegate Menu interaction interface.
-         */
-        fun setChatMenuDelegate(mainMenuDelegate: MainMenuDelegate): Builder {
-            configuration.mainMenuDelegate = mainMenuDelegate
             return this
         }
 
@@ -385,9 +386,22 @@ class ServiceDeskConfiguration internal constructor() {
             return this
         }
 
+        fun setMultichatButtons(buttons: MultichatButtons): Builder {
+            configuration.multichatButtons = buttons
+            return this
+        }
+
+        fun setChangeUsersIntent(pendingIntent: PendingIntent): Builder {
+            configuration.changeUsersIntent = pendingIntent
+            return this
+        }
+
         /**
          * Composes [ServiceDeskConfiguration] instance.
          */
         fun build() = configuration
     }
+
+
+
 }

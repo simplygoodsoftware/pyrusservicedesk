@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.widget.ConstraintLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
-    android:layout_width="match_parent"
-    android:layout_height="match_parent"
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools">
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/file_preview_root"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
 
     <androidx.appcompat.widget.Toolbar
         android:id="@+id/file_preview_toolbar"
@@ -26,14 +26,14 @@
 
     </androidx.appcompat.widget.Toolbar>
 
-    <WebView
-        android:id="@+id/web_view"
+    <com.github.chrisbanes.photoview.PhotoView
+        android:id="@+id/picture_view"
         android:layout_width="match_parent"
-        android:layout_height="0dp"
+        android:layout_height="match_parent"
+        android:background="@color/psd_no_file_preview_background"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/file_preview_toolbar"
-        tools:visibility="gone">
-    </WebView>
+        android:visibility="gone" />
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/no_preview"
@@ -85,18 +85,6 @@
 
 
     </androidx.constraintlayout.widget.ConstraintLayout>
-
-
-    <ProgressBar
-        android:id="@+id/progress_bar"
-        style="?android:attr/progressBarStyleHorizontal"
-        android:layout_width="0dp"
-        android:layout_height="?attr/elevationDefault"
-        android:indeterminate="false"
-        android:max="@integer/psd_progress_max_value"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/file_preview_toolbar" />
 
     <include
         android:id="@+id/no_connection"

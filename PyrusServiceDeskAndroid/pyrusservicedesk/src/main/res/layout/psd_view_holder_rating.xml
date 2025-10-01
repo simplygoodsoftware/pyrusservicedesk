@@ -4,9 +4,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:paddingHorizontal="@dimen/psd_offset_small"
-    android:isScrollContainer="false"
-    android:paddingBottom="12dp">
+    android:paddingHorizontal="@dimen/psd_offset_small">
 
     <TextView
         android:id="@+id/rateUsText"
@@ -91,7 +89,7 @@
             android:layout_marginHorizontal="4dp"
             android:background="@drawable/psd_rounded_rectangle_bg_6"
             android:backgroundTint="#F4F5F6"
-            app:srcCompat="@drawable/ic_emoji_rating_1" />
+            android:src="@drawable/ic_emoji_rating_1" />
 
         <ImageButton
             android:id="@+id/rating2Mini"
@@ -101,7 +99,7 @@
             android:layout_marginHorizontal="4dp"
             android:background="@drawable/psd_rounded_rectangle_bg_6"
             android:backgroundTint="#F4F5F6"
-            app:srcCompat="@drawable/ic_emoji_rating_3" />
+            android:src="@drawable/ic_emoji_rating_3" />
 
         <ImageButton
             android:id="@+id/rating3Mini"
@@ -111,7 +109,7 @@
             android:layout_marginHorizontal="4dp"
             android:background="@drawable/psd_rounded_rectangle_bg_6"
             android:backgroundTint="#F4F5F6"
-            app:srcCompat="@drawable/ic_emoji_rating_5" />
+            android:src="@drawable/ic_emoji_rating_5" />
 
     </LinearLayout>
 
@@ -125,7 +123,7 @@
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        tools:visibility="gone">
+        tools:visibility="visible">
 
         <ImageButton
             android:id="@+id/rating1"
@@ -136,7 +134,7 @@
             android:layout_marginHorizontal="4dp"
             android:background="@drawable/psd_rounded_rectangle_bg_6"
             android:backgroundTint="#F4F5F6"
-            app:srcCompat="@drawable/ic_emoji_rating_1" />
+            android:src="@drawable/ic_emoji_rating_1" />
 
         <ImageButton
             android:id="@+id/rating2"
@@ -147,7 +145,7 @@
             android:layout_marginHorizontal="4dp"
             android:background="@drawable/psd_rounded_rectangle_bg_6"
             android:backgroundTint="#F4F5F6"
-            app:srcCompat="@drawable/ic_emoji_rating_2" />
+            android:src="@drawable/ic_emoji_rating_2" />
 
         <ImageButton
             android:id="@+id/rating3"
@@ -158,7 +156,7 @@
             android:layout_marginHorizontal="4dp"
             android:background="@drawable/psd_rounded_rectangle_bg_6"
             android:backgroundTint="#F4F5F6"
-            app:srcCompat="@drawable/ic_emoji_rating_3" />
+            android:src="@drawable/ic_emoji_rating_3" />
 
         <ImageButton
             android:id="@+id/rating4"
@@ -169,7 +167,7 @@
             android:layout_marginHorizontal="4dp"
             android:background="@drawable/psd_rounded_rectangle_bg_6"
             android:backgroundTint="#F4F5F6"
-            app:srcCompat="@drawable/ic_emoji_rating_4" />
+            android:src="@drawable/ic_emoji_rating_4" />
 
 
         <ImageButton
@@ -181,7 +179,7 @@
             android:layout_marginHorizontal="4dp"
             android:background="@drawable/psd_rounded_rectangle_bg_6"
             android:backgroundTint="#F4F5F6"
-            app:srcCompat="@drawable/ic_emoji_rating_5" />
+            android:src="@drawable/ic_emoji_rating_5" />
 
     </LinearLayout>
 
