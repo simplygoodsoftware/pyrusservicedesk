@@ -160,7 +160,7 @@ private fun Calendar.minutesFrom(another: Calendar): Int {
             ceil(another.timeInMillis / millisecondsInMinute).toInt()
 }
 
-private fun Calendar.hoursFrom(another: Calendar): Int {
+fun Calendar.hoursFrom(another: Calendar): Int {
     val millisecondsInHour = MILLISECONDS_IN_HOUR.toDouble()
     return ceil(this.timeInMillis / millisecondsInHour).toInt() -
             ceil(another.timeInMillis / millisecondsInHour).toInt()

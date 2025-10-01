@@ -15,6 +15,7 @@ import com.pyrus.pyrusservicedesk._ref.ui_domain.screens.ticket.adapter.fingerpr
 import com.pyrus.pyrusservicedesk._ref.utils.RequestUtils
 import com.pyrus.pyrusservicedesk._ref.utils.RequestUtils.getAvatarUrl
 import com.pyrus.pyrusservicedesk._ref.utils.RequestUtils.getOrganisationLogoUrl
+import com.pyrus.pyrusservicedesk._ref.utils.hoursFrom
 import com.pyrus.pyrusservicedesk._ref.utils.isAudio
 import com.pyrus.pyrusservicedesk._ref.utils.isImage
 import com.pyrus.pyrusservicedesk.core.Account
@@ -38,6 +39,7 @@ import com.pyrus.pyrusservicedesk.sdk.sync.CommandParamsDto.CommandsParamsType
 import com.pyrus.pyrusservicedesk.sdk.sync.SyncRequest
 import com.pyrus.pyrusservicedesk.sdk.sync.TicketCommandType.CreateComment
 import com.pyrus.pyrusservicedesk.sdk.sync.TicketCommandType.MarkTicketAsRead
+import java.util.Calendar
 
 internal class RepositoryMapper(
     private val idStore: IdStore,
@@ -545,10 +547,14 @@ internal class RepositoryMapper(
         userId: String,
     ): FullTicket {
         val comments = ticketsList.flatMap { it.comments }.map { comment -> map(account, userId, comment) }
+        val now = Calendar.getInstance()
+        val calendar = Calendar.getInstance()
+        calendar.timeInMillis = comments.lastOrNull()?.creationTime ?: now.timeInMillis
+        val duration = now.hoursFrom(calendar)
         return FullTicket(
             subject = lastTicket.subject,
             comments = comments,
-            showRating = lastTicket.showRating,
+            showRating = lastTicket.showRating && duration < 24,
             showRatingText = lastTicket.showRatingText,
             userId = userId,
             ticketId = lastTicket.ticketId,
