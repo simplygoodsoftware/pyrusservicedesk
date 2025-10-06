@@ -29,15 +29,8 @@ import com.pyrus.pyrusservicedesk._ref.utils.insets.RootViewDeferringInsetsCallb
 import com.pyrus.pyrusservicedesk._ref.utils.log.PLog
 import com.pyrus.pyrusservicedesk.core.StaticRepository
 import com.pyrus.pyrusservicedesk.databinding.PsdFragmentAttachFileVariantsBinding
-import com.pyrus.pyrusservicedesk.log.PLog
-import com.pyrus.pyrusservicedesk.utils.ConfigUtils
-import com.pyrus.pyrusservicedesk.utils.MIME_TYPE_IMAGE_ANY
-import com.pyrus.pyrusservicedesk.utils.dispatchTakePhotoIntent
-import com.pyrus.pyrusservicedesk.utils.dispatchTakeVideoIntent
-import com.pyrus.pyrusservicedesk.utils.getViewModelWithActivityScope
 import com.pyrus.pyrusservicedesk.utils.hasPermission
 import com.pyrus.pyrusservicedesk.utils.hasPermissionInManifeset
-import com.pyrus.pyrusservicedesk.utils.isCapturingPhotoSupported
 import java.io.File
 
 /**
