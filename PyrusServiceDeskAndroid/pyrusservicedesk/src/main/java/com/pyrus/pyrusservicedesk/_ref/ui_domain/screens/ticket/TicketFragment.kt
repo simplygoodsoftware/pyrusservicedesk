@@ -598,7 +598,7 @@ internal class TicketFragment: TeaFragment<Model, Event, Effect>() {
             ),
             intArrayOf(
                 ConfigUtils.getSendButtonColor(requireContext()),
-                ConfigUtils.getSecondaryColorOnMainBackground(requireContext())
+                resources.getColor(R.color.psd_color_blue_gray_600)
             )
         )
         binding.sendButton.imageTintList = stateList
