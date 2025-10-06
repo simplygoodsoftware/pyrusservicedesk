@@ -5,6 +5,9 @@ include(opus_functions.cmake)
 get_library_version(OPUS_LIBRARY_VERSION OPUS_LIBRARY_VERSION_MAJOR)
 message(STATUS "Opus library version: ${OPUS_LIBRARY_VERSION}")
 
+target_link_options(${PROJECT_NAME} PRIVATE "-Wl,-z,max-page-size=16384")
+target_link_options(${PROJECT_NAME} PRIVATE "-Wl,-z,common-page-size=16384")
+
 get_package_version(PACKAGE_VERSION)
 message(STATUS "Opus package version: ${PACKAGE_VERSION}")
 
