@@ -368,9 +368,9 @@ class PyrusServiceDesk private constructor(
             activity: Activity,
             configuration: ServiceDeskConfiguration? = null,
             onStopCallback: OnStopCallback? = null,
-            openTicketAction: OpenTicketAction? = null,
             sendComment: String? = null,
             voiceMessage: Boolean = false,
+            openTicketAction: OpenTicketAction? = null,
         ) {
             val account = injector().accountStore.getAccount()
             startImpl(
