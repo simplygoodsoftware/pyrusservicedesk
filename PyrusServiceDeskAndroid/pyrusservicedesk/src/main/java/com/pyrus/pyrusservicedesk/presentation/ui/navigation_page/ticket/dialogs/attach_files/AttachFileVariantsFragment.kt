@@ -23,6 +23,7 @@ import com.pyrus.pyrusservicedesk.PyrusServiceDesk.Companion.injector
 import com.pyrus.pyrusservicedesk._ref.utils.ConfigUtils
 import com.pyrus.pyrusservicedesk._ref.utils.dispatchTakePhotoIntent
 import com.pyrus.pyrusservicedesk._ref.utils.dispatchTakeVideoIntent
+import com.pyrus.pyrusservicedesk._ref.utils.getViewModelWithActivityScope
 import com.pyrus.pyrusservicedesk._ref.utils.hasPermission
 import com.pyrus.pyrusservicedesk._ref.utils.hasPermissionInManifeset
 import com.pyrus.pyrusservicedesk._ref.utils.insets.RootViewDeferringInsetsCallback
@@ -44,6 +45,9 @@ internal class AttachFileVariantsFragment: BottomSheetDialogFragment(), View.OnC
         val uri = Uri.fromFile(it)
         sendResultAndClose(uri)
     }
+
+    private val sharedModel: AttachFileSharedViewModel by getViewModelWithActivityScope(
+        AttachFileSharedViewModel::class.java)
 
     private lateinit var binding: PsdFragmentAttachFileVariantsBinding
 
@@ -154,12 +158,6 @@ internal class AttachFileVariantsFragment: BottomSheetDialogFragment(), View.OnC
 
     private fun sendResultAndClose(uri: Uri) {
         sharedModel.onFilePicked(uri)
-        dismiss()
-    }
-
-    private fun sendResultAndClose(uri: Uri) {
-        val router = injector().router
-        router.sendResult(requireArguments().getString(RESULT_KEY)!!, uri)
         dismiss()
     }
 
