@@ -7,6 +7,7 @@ import android.content.Intent
 import android.content.SharedPreferences
 import android.util.Log
 import androidx.annotation.MainThread
+import com.pyrus.pyrusservicedesk.PyrusServiceDesk.Companion.onAuthorizationFailed
 import com.pyrus.pyrusservicedesk.PyrusServiceDesk.Companion.setPushToken
 import com.pyrus.pyrusservicedesk.SdConstants.PYRUS_BASE_DOMAIN
 import com.pyrus.pyrusservicedesk._ref.data.multy_chat.Member
@@ -464,7 +465,8 @@ class PyrusServiceDesk private constructor(
         @JvmStatic
         fun stop() {
             PLog.d(TAG, "stop")
-            INJECTOR?.onCancel()
+            INJECTOR?.finishEventBus?.post(true)
+            //INJECTOR?.onCancel() // TODO kate уточнить логику
         }
 
         @JvmStatic

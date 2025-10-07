@@ -30,6 +30,7 @@ import com.pyrus.pyrusservicedesk.core.refresh.RefreshUseCase
 import com.pyrus.pyrusservicedesk.presentation.viewmodel.SharedViewModel
 import com.pyrus.pyrusservicedesk.sdk.AccessDeniedEventBus
 import com.pyrus.pyrusservicedesk.sdk.FileResolver
+import com.pyrus.pyrusservicedesk.sdk.FinishEventBus
 import com.pyrus.pyrusservicedesk.sdk.data.FileManager
 import com.pyrus.pyrusservicedesk.sdk.data.json.DateAdapter
 import com.pyrus.pyrusservicedesk.sdk.data.json.UriAdapter
@@ -145,6 +146,8 @@ internal class DiInjector(
     private val resourceManager = AppResourceManager(application)
 
     private val accessDeniedEventBus = AccessDeniedEventBus()
+
+    val finishEventBus = FinishEventBus()
 
     private val preferencesManager = PreferencesManager(preferences)
 
@@ -289,7 +292,8 @@ internal class DiInjector(
         storeFactory = storeFactory,
         accountStore = accountStore,
         accessDeniedEventBus = accessDeniedEventBus,
-        ticketsStore = localTicketsStore
+        ticketsStore = localTicketsStore,
+        finishEventBus = finishEventBus,
     )
 
     fun onCancel() {

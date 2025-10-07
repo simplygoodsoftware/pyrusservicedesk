@@ -26,6 +26,8 @@ interface AccessFeatureContract {
                 val users: List<User>,
                 val usersIsEmpty: Boolean,
             ) : Inner
+
+            data object Finish : Inner
         }
 
     }
@@ -46,6 +48,7 @@ interface AccessFeatureContract {
 
         sealed interface Inner : Effect {
             data object AccessDeniedFlow : Inner
+            data object CheckFinishFlow : Inner
         }
     }
 

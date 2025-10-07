@@ -12,6 +12,7 @@ import com.pyrus.pyrusservicedesk._ref.whitetea.core.logic.Logic
 import com.pyrus.pyrusservicedesk._ref.whitetea.utils.adapt
 import com.pyrus.pyrusservicedesk.core.getUsers
 import com.pyrus.pyrusservicedesk.sdk.AccessDeniedEventBus
+import com.pyrus.pyrusservicedesk.sdk.FinishEventBus
 import com.pyrus.pyrusservicedesk.sdk.repositories.AccountStore
 import com.pyrus.pyrusservicedesk.sdk.repositories.LocalTicketsStore
 import kotlinx.coroutines.flow.Flow
@@ -23,6 +24,7 @@ internal class AccessDeniedFeatureFactory(
     private val accountStore: AccountStore,
     private val accessDeniedEventBus: AccessDeniedEventBus,
     private val ticketsStore: LocalTicketsStore,
+    private val finishEventBus: FinishEventBus,
 ) {
 
     fun create(): AccessDeniedFeature = storeFactory.create(
@@ -33,8 +35,9 @@ internal class AccessDeniedFeatureFactory(
             accountStore = accountStore,
             accessDeniedEventBus = accessDeniedEventBus,
             ticketsStore = ticketsStore,
+            finishEventBus = finishEventBus,
         ).adaptCast(),
-        initialEffects = listOf(Effect.Inner.AccessDeniedFlow),
+        initialEffects = listOf(Effect.Inner.AccessDeniedFlow, Effect.Inner.CheckFinishFlow),
         effectAtOnceDelivery = true,
     ).adapt { it as? Effect.Outer }
 
@@ -67,6 +70,8 @@ private class FeatureReducer: Logic<Unit, Message, Effect>() {
                     }
                 }
             }
+
+            Message.Inner.Finish -> effects { +Effect.Outer.CloseServiceDesk }
         }
     }
 
@@ -76,6 +81,7 @@ private class FeatureActor(
     private val accountStore: AccountStore,
     private val accessDeniedEventBus: AccessDeniedEventBus,
     private val ticketsStore: LocalTicketsStore,
+    private val finishEventBus: FinishEventBus,
 ) : Actor<Effect.Inner, Message.Inner> {
 
     override fun handleEffect(effect: Effect.Inner): Flow<Message.Inner> = when(effect) {
@@ -96,6 +102,15 @@ private class FeatureActor(
                 }
 
                 emit(Message.Inner.AccessDenied(accessDeniedUsersWithoutCache, false))
+            }
+        }
+
+        Effect.Inner.CheckFinishFlow -> flow {
+            finishEventBus.events().collect {
+                if (it) {
+                    emit(Message.Inner.Finish)
+                    finishEventBus.post(false)
+                }
             }
         }
     }
