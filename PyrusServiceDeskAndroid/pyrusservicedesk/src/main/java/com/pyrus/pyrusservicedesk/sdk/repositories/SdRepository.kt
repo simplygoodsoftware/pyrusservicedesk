@@ -19,15 +19,16 @@ import com.pyrus.pyrusservicedesk._ref.utils.isFailed
 import com.pyrus.pyrusservicedesk._ref.utils.isSuccess
 import com.pyrus.pyrusservicedesk._ref.utils.map
 import com.pyrus.pyrusservicedesk._ref.utils.toTry2
-import com.pyrus.pyrusservicedesk.core.*
 import com.pyrus.pyrusservicedesk.core.Account
 import com.pyrus.pyrusservicedesk.core.getInstanceId
+import com.pyrus.pyrusservicedesk.core.getUserId
 import com.pyrus.pyrusservicedesk.core.getUsers
 import com.pyrus.pyrusservicedesk.core.getVersion
 import com.pyrus.pyrusservicedesk.sdk.FileResolver
 import com.pyrus.pyrusservicedesk.sdk.data.intermediate.FileUploadResponseData
 import com.pyrus.pyrusservicedesk.sdk.data.intermediate.TicketsDto
 import com.pyrus.pyrusservicedesk.sdk.repositories.data_base.DatabaseMapper
+import com.pyrus.pyrusservicedesk.sdk.repositories.data_base.data.support.CommandWithAttachmentsEntity
 import com.pyrus.pyrusservicedesk.sdk.repositories.data_base.data.support.TicketWithComments
 import com.pyrus.pyrusservicedesk.sdk.sync.SyncRequest
 import com.pyrus.pyrusservicedesk.sdk.sync.Synchronizer
@@ -115,22 +116,8 @@ internal class SdRepository(
         val orgLogoUrl = getOrgLogoUrl(userId, account)
 
         if (serverId <= 0 && (account.getVersion() == API_VERSION_1 || account.getVersion() == API_VERSION_2)) {
-            val syncTry = synchronizer.syncData(SyncRequest.Data, force).checkResponse(userId)
-            if (syncTry.isFailed()) return syncTry
-
-            val lastServerTicket = getLastServerTicket(serverId, account, userId, orgLogoUrl)
-            lastServerTicket?.let {
-                val ticket = repositoryMapper.mapToSingleTicket(
-                    ticketsList = ticketsStore.getTicketsWithComments(),
-                    lastTicket = lastServerTicket,
-                    account = account,
-                    userId = account.getUserId() ?: account.getInstanceId()
-                )
-                if (idStore.getTicketServerId(ticket.ticketId) == null) {
-                    idStore.addTicketIdPair(ticketId, ticket.ticketId)
-                }
-                return Try2.Success(ticket)
-            }
+            val ticket = getSingleTicketAndUpdateServerId(serverId, account, userId, orgLogoUrl, ticketId)
+            ticket?.let { return Try2.Success(ticket) }
         }
 
         if (serverId <= 0) {
@@ -180,13 +167,17 @@ internal class SdRepository(
                     ratingSettings,
                     welcomeMessage
                 )
-                val singleTicket = repositoryMapper.mapToSingleTicket(
-                    ticketsList = localTickets,
-                    lastTicket = ticket,
-                    account = account,
-                    userId = userId
-                )
-                return Try.Success(singleTicket).toTry2()
+                if (account.getVersion() == API_VERSION_1 || account.getVersion() == API_VERSION_2) {
+                    val singleTicket = repositoryMapper.mapToSingleTicket(
+                        ticketsList = localTickets,
+                        lastTicket = ticket,
+                        account = account,
+                        userId = userId,
+                        commands = commands,
+                    )
+                    return Try.Success(singleTicket).toTry2()
+                }
+                return Try.Success(ticket).toTry2()
             }
         }
 
@@ -194,19 +185,8 @@ internal class SdRepository(
         if (syncTry.isFailed()) return syncTry
 
         if (account.getVersion() == API_VERSION_1 || account.getVersion() == API_VERSION_2) {
-            val lastServerTicket = getLastServerTicket(serverId, account, userId, orgLogoUrl)
-            lastServerTicket?.let {
-                val ticket = repositoryMapper.mapToSingleTicket(
-                    ticketsList = ticketsStore.getTicketsWithComments(),
-                    lastTicket = lastServerTicket,
-                    account = account,
-                    userId = account.getUserId() ?: account.getInstanceId()
-                )
-                if (idStore.getTicketServerId(ticket.ticketId) == null) {
-                    idStore.addTicketIdPair(ticketId, ticket.ticketId)
-                }
-                return Try2.Success(ticket)
-            }
+            val ticket = getSingleTicketAndUpdateServerId(serverId, account, userId, orgLogoUrl, ticketId)
+            ticket?.let { return Try2.Success(ticket) }
         }
 
         val localTicket = ticketsStore.getTicketWithComments(serverId)
@@ -215,6 +195,31 @@ internal class SdRepository(
         val commands = commandsStore.getCommands(serverId)
         val ticket = repositoryMapper.mergeTicket(account, userId, localTicket, commands, orgLogoUrl, ratingSettings, welcomeMessage)
         return Try2.Success(ticket)
+    }
+
+    private fun getSingleTicketAndUpdateServerId(
+        serverId: Long,
+        account: Account,
+        userId: String,
+        orgLogoUrl: String?,
+        ticketId: Long,
+    ): FullTicket? {
+        val lastServerTicket = getLastServerTicket(serverId, account, userId, orgLogoUrl)
+        val commands = commandsStore.getCommands(serverId)
+        lastServerTicket?.let {
+            val ticket = repositoryMapper.mapToSingleTicket(
+                ticketsList = ticketsStore.getTicketsWithComments(),
+                commands = commands,
+                lastTicket = lastServerTicket,
+                account = account,
+                userId = account.getUserId() ?: account.getInstanceId()
+            )
+            if (idStore.getTicketServerId(ticket.ticketId) == null) {
+                idStore.addTicketIdPair(ticketId, ticket.ticketId)
+            }
+            return ticket
+        }
+        return null
     }
 
     private fun getLastServerTicket(serverId: Long, account: Account, userId: String, orgLogoUrl: String?): FullTicket? {
@@ -251,6 +256,7 @@ internal class SdRepository(
                      lastServerTicket?.let {
                          repositoryMapper.mapToSingleTicket(
                              ticketsList = ticketsStore.getTicketsWithComments(),
+                             commands = commands,
                              lastTicket = lastServerTicket,
                              account = account,
                              userId = account.getUserId() ?: account.getInstanceId()

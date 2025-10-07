@@ -186,6 +186,15 @@ internal class RepositoryMapper(
 
         val comments = ticket.comments.map { map(account, userId, it) }.toMutableList()
 
+        addLocalComments(comments, commands)
+
+        val hasReadCommands = commands.any { it.command.commandType == MarkTicketAsRead.ordinal }
+        val isRead = ticket.ticket.isRead == true || hasReadCommands
+
+        return mapToFullTicket(ticket, comments, userId, orgLogoUrl, isRead, ratingSettings, welcomeMessage)
+    }
+
+    fun addLocalComments(comments: MutableList<Comment>, commands: List<CommandWithAttachmentsEntity>) {
         val serverCommentIds = comments.map { it.id }.toSet()
         val createCommentCommands = commands.filter { it.command.commandType == CreateComment.ordinal }
         comments += createCommentCommands
@@ -195,11 +204,6 @@ internal class RepositoryMapper(
         comments.sortWith(
             compareBy({ it.isSending }, { it.creationTime }, { it.id })
         )
-
-        val hasReadCommands = commands.any { it.command.commandType == MarkTicketAsRead.ordinal }
-        val isRead = ticket.ticket.isRead == true || hasReadCommands
-
-        return mapToFullTicket(ticket, comments, userId, orgLogoUrl, isRead, ratingSettings, welcomeMessage)
     }
 
     private fun mergeTicketHeader(
@@ -546,11 +550,20 @@ internal class RepositoryMapper(
 
     fun mapToSingleTicket(
         ticketsList: List<TicketWithComments>,
+        commands: List<CommandWithAttachmentsEntity>,
         lastTicket: FullTicket,
         account: Account,
         userId: String,
     ): FullTicket {
-        val comments = ticketsList.flatMap { it.comments }.map { comment -> map(account, userId, comment) }
+        val comments = ticketsList
+            .flatMap { it.comments }
+            .map { comment -> map(account, userId, comment) }
+            .toMutableList()
+        addLocalComments(comments, commands)
+
+        val hasReadCommands = commands.any { it.command.commandType == MarkTicketAsRead.ordinal }
+        val isRead = lastTicket.isRead || hasReadCommands
+
         val now = Calendar.getInstance()
         val calendar = Calendar.getInstance()
         calendar.timeInMillis = comments.lastOrNull()?.creationTime ?: now.timeInMillis
@@ -564,7 +577,7 @@ internal class RepositoryMapper(
             ticketId = lastTicket.ticketId,
             orgLogoUrl = lastTicket.orgLogoUrl,
             isActive = lastTicket.isActive,
-            isRead = lastTicket.isRead,
+            isRead = isRead,
             ratingSettings = lastTicket.ratingSettings,
             welcomeMessage = lastTicket.welcomeMessage,
         )
