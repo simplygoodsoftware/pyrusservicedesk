@@ -146,13 +146,14 @@ internal object TicketMapper {
         is Event.OnLockRecord -> Message.Outer.OnLockRecord
         is Event.OnRemovePendingAudioClick -> Message.Outer.OnRemovePendingAudioClick
         is Event.SetAttachVariant -> Message.Outer.SetAttachVariant(event.key, event.uri)
+        is Event.SetErrorCommentResult -> Message.Outer.SetErrorCommentResult(event.localId, event.key, event.action)
     }
 
     fun map(effect: Effect.Outer): TicketView.Effect = when(effect) {
         is Effect.Outer.CopyToClipboard -> TicketView.Effect.CopyToClipboard(effect.text)
         is Effect.Outer.MakeToast -> TicketView.Effect.MakeToast(effect.text)
         is Effect.Outer.ShowAttachVariants -> TicketView.Effect.ShowAttachVariants(effect.key)
-        is Effect.Outer.ShowErrorCommentDialog -> TicketView.Effect.ShowErrorCommentDialog(effect.key)
+        is Effect.Outer.ShowErrorCommentDialog -> TicketView.Effect.ShowErrorCommentDialog(effect.key, effect.localId)
         is Effect.Outer.ShowInfoBottomSheetFragment -> TicketView.Effect.ShowInfoBottomSheetFragment(effect.ticketId, effect.userName, effect.createData)
         is Effect.Outer.PlayAudio -> TicketView.Effect.PlayAudio(effect.audioFile, effect.guid)
         is Effect.Outer.UpdateRecordWave -> TicketView.Effect.UpdateRecordWave(effect.recordedSegmentValues)

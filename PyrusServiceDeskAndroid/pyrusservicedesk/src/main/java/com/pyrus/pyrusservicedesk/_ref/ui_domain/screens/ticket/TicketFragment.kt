@@ -252,6 +252,9 @@ internal class TicketFragment: TeaFragment<Model, Event, Effect>() {
         }
 
         is Effect.ShowErrorCommentDialog -> {
+            injector().router.setResultListener(effect.key) {
+                dispatch(Event.SetErrorCommentResult(effect.localId, effect.key, it))
+            }
             ErrorCommentActionsDialog
                 .newInstance(effect.key)
                 .show(parentFragmentManager, "")

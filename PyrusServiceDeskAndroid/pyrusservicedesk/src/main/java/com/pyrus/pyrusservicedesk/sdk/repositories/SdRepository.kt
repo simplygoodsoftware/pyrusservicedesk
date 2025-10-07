@@ -355,11 +355,13 @@ internal class SdRepository(
         val commandEntity = commandsStore.getCommand(localId) ?: return@launch
         val command = repositoryMapper.mapToSyncRequest(commandEntity) ?: return@launch
         val instanceId = accountStore.getAccount().getInstanceId()
+        val account = accountStore.getAccount()
         commandsStore.addOrUpdatePendingCommand(repositoryMapper.mapToCommandEntity(false, command, instanceId))
 
         if (command is SyncRequest.Command.CreateComment) {
             val serverTicketId = idStore.getTicketServerId(command.ticketId) ?: command.ticketId
-            sendCommand(command.copy(ticketId = serverTicketId))
+            val userId = if (account.getVersion() == API_VERSION_1 || account.getVersion() == API_VERSION_2) null else command.userId
+            sendCommand(command.copy(ticketId = serverTicketId, userId = userId))
         }
         else {
             sendCommand(command)

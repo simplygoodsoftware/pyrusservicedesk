@@ -61,13 +61,15 @@ internal interface TicketView {
         object OnCancelRecord : Event
         object OnLockRecord : Event
         object OnRemovePendingAudioClick : Event
+
+        data class SetErrorCommentResult(val localId: Long, val key: String, val action: Any) : Event
     }
 
     sealed interface Effect {
         data class CopyToClipboard(val text: String) : Effect
         data class MakeToast(val text: TextProvider) : Effect
         data class ShowAttachVariants(val key: String) : Effect
-        data class ShowErrorCommentDialog(val key: String) : Effect
+        data class ShowErrorCommentDialog(val key: String, val localId: Long) : Effect
         data class ShowInfoBottomSheetFragment(
             val ticketId: Long,
             val userName: String,
