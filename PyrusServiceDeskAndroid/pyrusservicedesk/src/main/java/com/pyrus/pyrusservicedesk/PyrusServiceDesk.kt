@@ -22,6 +22,7 @@ import com.pyrus.pyrusservicedesk._ref.utils.PREFERENCE_KEY
 import com.pyrus.pyrusservicedesk._ref.utils.RequestUtils
 import com.pyrus.pyrusservicedesk._ref.utils.getFirstNSymbols
 import com.pyrus.pyrusservicedesk._ref.utils.log.PLog
+import com.pyrus.pyrusservicedesk._ref.utils.migratePreferences
 import com.pyrus.pyrusservicedesk.core.Account
 import com.pyrus.pyrusservicedesk.core.DiInjector
 import com.pyrus.pyrusservicedesk.core.StaticRepository
@@ -43,7 +44,6 @@ class PyrusServiceDesk private constructor(
     internal val appId: String,
     internal val userId: String?,
     internal val securityKey: String?,
-    loggingEnabled: Boolean,
 ) {
 
     companion object {
@@ -298,6 +298,7 @@ class PyrusServiceDesk private constructor(
             loggingEnabled: Boolean,
             authorizationToken: String?,
         ) {
+            StaticRepository.logging = loggingEnabled
             PLog.d(TAG, "initInternal, appId: ${appId.getFirstNSymbols(10)}, userId: ${userId?.getFirstNSymbols(10)}, apiVersion: $apiVersion")
             Log.d(TAG, "initInternal, appId: ${appId.getFirstNSymbols(10)}, userId: ${userId?.getFirstNSymbols(10)}, apiVersion: $apiVersion")
 
@@ -346,6 +347,8 @@ class PyrusServiceDesk private constructor(
                 }),
                 preferences = preferences
             )
+            migratePreferences(application, preferences)
+            if (loggingEnabled) PLog.instantiate(application)
         }
 
         private fun validateDomain(domain: String?): Boolean {
@@ -466,7 +469,6 @@ class PyrusServiceDesk private constructor(
         fun stop() {
             PLog.d(TAG, "stop")
             INJECTOR?.finishEventBus?.post(true)
-            //INJECTOR?.onCancel() // TODO kate уточнить логику
         }
 
         @JvmStatic
@@ -559,15 +561,6 @@ class PyrusServiceDesk private constructor(
     }
 
     private var sharedViewModel = SharedViewModel()
-
-    init {
-        // // TODO sds изменить место инициализации логов, добавить отдельную логику для включения и выключения логов
-//        migratePreferences(application, preferences)
-
-        // TODO sds
-        if (loggingEnabled) PLog.instantiate(application)
-
-    }
 
     internal fun getSharedViewModel() = sharedViewModel
 }
