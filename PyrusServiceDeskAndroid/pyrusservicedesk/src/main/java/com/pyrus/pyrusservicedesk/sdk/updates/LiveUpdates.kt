@@ -358,13 +358,18 @@ internal class LiveUpdates(
         PLog.d(TAG, "notifyNewReplySubscriber, comment: $lastComment")
         firstReplyIsShown = true
         val hasNewComments = lastComment.isRead != true
-        subscriber.onNewReply(
-            hasNewComments,
-            if (hasNewComments) lastComment.lastComment?.body else null,
-            if (hasNewComments && lastComment.lastComment?.lastAttachmentName != null) 1 else 0, //TODO kate check if we need more then 1 attachment
-            if (hasNewComments && lastComment.lastComment?.lastAttachmentName != null) listOf(lastComment.lastComment.lastAttachmentName) else null,
-            if (hasNewComments && lastComment.lastComment?.creationDate != null) lastComment.lastComment.creationDate else 0
-        )
+        coreScope.launch(Dispatchers.Main) {
+            subscriber.onNewReply(
+                hasNewComments,
+                if (hasNewComments) lastComment.lastComment?.body else null,
+                if (hasNewComments && lastComment.lastComment?.lastAttachmentName != null) 1 else 0, //TODO kate check if we need more then 1 attachment
+                if (hasNewComments && lastComment.lastComment?.lastAttachmentName != null) listOf(
+                    lastComment.lastComment.lastAttachmentName
+                )
+                else null,
+                if (hasNewComments && lastComment.lastComment?.creationDate != null) lastComment.lastComment.creationDate else 0
+            )
+        }
     }
 
     companion object {
