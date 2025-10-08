@@ -2,19 +2,21 @@ package com.pyrus.pyrusservicedesk.sdk.sync
 
 import android.util.Log
 import com.pyrus.pyrusservicedesk.AppResourceManager
+import com.pyrus.pyrusservicedesk.PyrusServiceDesk
 import com.pyrus.pyrusservicedesk.PyrusServiceDesk.Companion.API_VERSION_1
 import com.pyrus.pyrusservicedesk.PyrusServiceDesk.Companion.API_VERSION_2
 import com.pyrus.pyrusservicedesk.User
 import com.pyrus.pyrusservicedesk._ref.utils.ConfigUtils
 import com.pyrus.pyrusservicedesk._ref.utils.Try
+import com.pyrus.pyrusservicedesk._ref.utils.call_adapter.HttpException
 import com.pyrus.pyrusservicedesk._ref.utils.drain
 import com.pyrus.pyrusservicedesk._ref.utils.isSuccess
 import com.pyrus.pyrusservicedesk._ref.utils.log.PLog
-import com.pyrus.pyrusservicedesk.core.*
 import com.pyrus.pyrusservicedesk.core.getAppId
 import com.pyrus.pyrusservicedesk.core.getExtraUsers
 import com.pyrus.pyrusservicedesk.core.getUserId
 import com.pyrus.pyrusservicedesk.core.getUsers
+import com.pyrus.pyrusservicedesk.core.getVersion
 import com.pyrus.pyrusservicedesk.sdk.AccessDeniedEventBus
 import com.pyrus.pyrusservicedesk.sdk.data.intermediate.TicketsDto
 import com.pyrus.pyrusservicedesk.sdk.repositories.AccountStore
@@ -22,16 +24,18 @@ import com.pyrus.pyrusservicedesk.sdk.repositories.IdStore
 import com.pyrus.pyrusservicedesk.sdk.repositories.LocalCommandsStore
 import com.pyrus.pyrusservicedesk.sdk.repositories.LocalTicketsStore
 import com.pyrus.pyrusservicedesk.sdk.sync.SyncMapper.mapToGetFeedRequest
-import com.pyrus.pyrusservicedesk.sdk.updates.*
+import com.pyrus.pyrusservicedesk.sdk.updates.LiveUpdates
 import com.pyrus.pyrusservicedesk.sdk.updates.Preferences
 import com.pyrus.pyrusservicedesk.sdk.web.retrofit.ServiceDeskApi
 import kotlinx.coroutines.CoroutineExceptionHandler
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.DelicateCoroutinesApi
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.newSingleThreadContext
+import kotlinx.coroutines.withContext
 import java.util.concurrent.LinkedBlockingQueue
 import java.util.concurrent.atomic.AtomicBoolean
 import kotlin.coroutines.CoroutineContext
@@ -223,6 +227,15 @@ internal class Synchronizer(
         }
         else {
             getTicketsTry.error.printStackTrace()
+            if ((getTicketsTry.error as? HttpException)?.statusCode == FAILED_AUTHORIZATION_ERROR_CODE
+                || (getTicketsTry.error as? HttpException)?.statusCode == FAILED_AUTHORIZATION_ERROR_CODE_FORBIDDEN) {
+                withContext(Dispatchers.Main) {
+                    PyrusServiceDesk.onAuthorizationFailed?.run()
+                }
+                failDelay.clear()
+                isRunning.set(false)
+                return@launch
+            }
             val getRequests = syncRequests.filterIsInstance<SyncReqRes.Data>()
             for (request in getRequests) request.continuation.resume(getTicketsTry)
             
@@ -316,7 +329,8 @@ internal class Synchronizer(
     companion object {
         private const val RELOAD_CACHE_VERSION = 2_007_001L
         private const val MAX_COMMANDS_PER_SYNC = 50
-
+        const val FAILED_AUTHORIZATION_ERROR_CODE_FORBIDDEN = 403
+        const val FAILED_AUTHORIZATION_ERROR_CODE = 400
         private const val TAG = "SyncRepository"
     }
 

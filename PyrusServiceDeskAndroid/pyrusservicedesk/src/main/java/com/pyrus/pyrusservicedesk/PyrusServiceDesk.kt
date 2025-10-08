@@ -10,12 +10,7 @@ import androidx.annotation.MainThread
 import com.pyrus.pyrusservicedesk.PyrusServiceDesk.Companion.onAuthorizationFailed
 import com.pyrus.pyrusservicedesk.PyrusServiceDesk.Companion.setPushToken
 import com.pyrus.pyrusservicedesk.SdConstants.PYRUS_BASE_DOMAIN
-import com.pyrus.pyrusservicedesk._ref.data.multy_chat.Member
-import com.pyrus.pyrusservicedesk._ref.ui_domain.access_denied.AccessDeniedFeature
-import com.pyrus.pyrusservicedesk._ref.ui_domain.screens.search.SearchFeature
 import com.pyrus.pyrusservicedesk._ref.ui_domain.screens.ticket.MainActivity
-import com.pyrus.pyrusservicedesk._ref.ui_domain.screens.ticket.TicketFeature
-import com.pyrus.pyrusservicedesk._ref.ui_domain.screens.tickets_list.tickets.TicketsFeature
 import com.pyrus.pyrusservicedesk._ref.utils.ConfigUtils
 import com.pyrus.pyrusservicedesk._ref.utils.MILLISECONDS_IN_MINUTE
 import com.pyrus.pyrusservicedesk._ref.utils.PREFERENCE_KEY
@@ -27,10 +22,7 @@ import com.pyrus.pyrusservicedesk.core.Account
 import com.pyrus.pyrusservicedesk.core.DiInjector
 import com.pyrus.pyrusservicedesk.core.StaticRepository
 import com.pyrus.pyrusservicedesk.core.getUserId
-import com.pyrus.pyrusservicedesk.core.getUsers
-import com.pyrus.pyrusservicedesk.core.refresh.AutoRefreshFeature
 import com.pyrus.pyrusservicedesk.presentation.viewmodel.SharedViewModel
-import com.pyrus.pyrusservicedesk.sdk.repositories.UserInternal
 import com.pyrus.pyrusservicedesk.sdk.updates.NewReplySubscriber
 import com.pyrus.pyrusservicedesk.sdk.updates.OnStopCallback
 import kotlinx.coroutines.CoroutineExceptionHandler
