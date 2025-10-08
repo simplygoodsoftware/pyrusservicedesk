@@ -137,7 +137,7 @@ internal class AttachFileVariantsFragment: BottomSheetDialogFragment(), View.OnC
         }
         val isPhoto = requestCode == REQUEST_CODE_TAKE_PHOTO
         val isVideo = requestCode == REQUEST_CODE_TAKE_VIDEO
-        val location: Uri? = if (isPhoto) capturePhotoUri else data?.data
+        val location: Uri? = capturePhotoUri
         if (location != null) {
             if (!isPhoto && !isVideo && requestCode != REQUEST_CODE_CUSTOM_CHOOSER) {
                 context?.contentResolver?.takePersistableUriPermission(
