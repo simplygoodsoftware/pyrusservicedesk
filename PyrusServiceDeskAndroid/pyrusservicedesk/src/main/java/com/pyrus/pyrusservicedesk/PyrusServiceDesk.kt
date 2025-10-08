@@ -65,109 +65,96 @@ class PyrusServiceDesk private constructor(
 
         private const val DEFAULT_TOKEN_TYPE: String = "android"
 
-        internal var logging = false
-            private set
-
         private var onStopCallback: OnStopCallback? = null
 
-        @JvmStatic
-        fun getFileChooser(): FileChooser? {
-            return StaticRepository.FILE_CHOOSER
-        }
-
-        @JvmStatic
-        fun getLogging(): Boolean {
-            return StaticRepository.logging
-        }
-
-        @JvmStatic
-        fun getTicketsFeature(): TicketsFeature {
-            val factory = injector().ticketsFeatureFactory.create()
-            return factory
-        }
-
-        @JvmStatic
-        fun getTicketFeature(
-            user: UserInternal,
-            initialTicketId: Long,
-            welcomeMessage: String?,
-            sendComment: String?,
-        ): TicketFeature {
-            val factory = injector().ticketFeatureFactory.create(user, initialTicketId, welcomeMessage, sendComment)
-            return factory
-        }
-
-        @JvmStatic
-        fun getSearchFeature(): SearchFeature {
-            val factory = injector().searchFeatureFactory.create()
-            return factory
-        }
-
-        @JvmStatic
-        fun getAccessDeniedFeature(): AccessDeniedFeature {
-            val factory = injector().accessDeniedFeatureFactory.create()
-            return factory
-        }
-
-        @JvmStatic
-        fun getAutoRefreshFeature(): AutoRefreshFeature {
-            val factory = injector().autoRefreshFeatureFactory.create()
-            return factory
-        }
-
-        @JvmStatic
-        fun isTimeToRate(): Boolean {
-            return injector().rateTimeUseCase.isTimeToRate()
-        }
-
-        @JvmStatic
-        fun audioClear() {
-            injector().audioWrapper.clearPositions()
-        }
-
-        @JvmStatic
-        fun updateMainActivityIsActive(isActive: Boolean) {
-            injector().audioWrapper.updateMainActivityIsActive(isActive)
-            if (!isActive)
-                injector().stopSession()
-        }
-
-        @JvmStatic
-        fun rateApp() {
-            injector().rateTimeUseCase.onAppRated()
-        }
-
-        @JvmStatic
-        fun getUsers(): List<User> {
-            return injector().accountStore.getAccount().getUsers()
-        }
-
-        @JvmStatic
-        fun getVendors(): List<Vendor> {
-            return injector().repository.getApplications().map {
-                Vendor(
-                    appId = it.appId,
-                    orgName = it.orgName ?: "",
-                    orgUrl = it.orgLogoUrl?.let { url -> RequestUtils.getOrganisationLogoUrl(url, "dev.pyrus.com") },
-                    orgDescription = it.orgDescription
-                )
-            }
-        }
-
-        @JvmStatic
-        fun getMembers(userId: String): List<Member> {
-            return injector().repository.getMembers(userId)
-        }
-
-        @JvmStatic
-        fun addUser(user: User) {
-            injector().addUserUseCase.addUser(user)
-        }
-
-        @JvmStatic
-        fun updateName(name: String) {
-            StaticRepository.getConfiguration().userName = name
-        }
+//        @JvmStatic
+//        fun getTicketsFeature(): TicketsFeature {
+//            val factory = injector().ticketsFeatureFactory.create()
+//            return factory
+//        }
+//
+//        @JvmStatic
+//        fun getTicketFeature(
+//            user: UserInternal,
+//            initialTicketId: Long,
+//            welcomeMessage: String?,
+//            sendComment: String?,
+//        ): TicketFeature {
+//            val factory = injector().ticketFeatureFactory.create(user, initialTicketId, welcomeMessage, sendComment)
+//            return factory
+//        }
+//
+//        @JvmStatic
+//        fun getSearchFeature(): SearchFeature {
+//            val factory = injector().searchFeatureFactory.create()
+//            return factory
+//        }
+//
+//        @JvmStatic
+//        fun getAccessDeniedFeature(): AccessDeniedFeature {
+//            val factory = injector().accessDeniedFeatureFactory.create()
+//            return factory
+//        }
+//
+//        @JvmStatic
+//        fun getAutoRefreshFeature(): AutoRefreshFeature {
+//            val factory = injector().autoRefreshFeatureFactory.create()
+//            return factory
+//        }
+//
+//        @JvmStatic
+//        fun isTimeToRate(): Boolean {
+//            return injector().rateTimeUseCase.isTimeToRate()
+//        }
+//
+//        @JvmStatic
+//        fun audioClear() {
+//            injector().audioWrapper.clearPositions()
+//        }
+//
+//        @JvmStatic
+//        fun updateMainActivityIsActive(isActive: Boolean) {
+//            injector().audioWrapper.updateMainActivityIsActive(isActive)
+//            if (!isActive)
+//                injector().stopSession()
+//        }
+//
+//        @JvmStatic
+//        fun rateApp() {
+//            injector().rateTimeUseCase.onAppRated()
+//        }
+//
+//        @JvmStatic
+//        fun getUsers(): List<User> {
+//            return injector().accountStore.getAccount().getUsers()
+//        }
+//
+//        @JvmStatic
+//        fun getVendors(): List<Vendor> {
+//            return injector().repository.getApplications().map {
+//                Vendor(
+//                    appId = it.appId,
+//                    orgName = it.orgName ?: "",
+//                    orgUrl = it.orgLogoUrl?.let { url -> RequestUtils.getOrganisationLogoUrl(url, "dev.pyrus.com") },
+//                    orgDescription = it.orgDescription
+//                )
+//            }
+//        }
+//
+//        @JvmStatic
+//        fun getMembers(userId: String): List<Member> {
+//            return injector().repository.getMembers(userId)
+//        }
+//
+//        @JvmStatic
+//        fun addUser(user: User) {
+//            injector().addUserUseCase.addUser(user)
+//        }
+//
+//        @JvmStatic
+//        fun updateName(name: String) {
+//            StaticRepository.getConfiguration().userName = name
+//        }
 
         /**
          * Initializes PyrusServiceDesk embeddable module.
@@ -261,31 +248,31 @@ class PyrusServiceDesk private constructor(
          * and they can be sent as a file to chat by clicking the "Send Library Logs" button in the menu under the "+" sign.
          * @param authorizationToken authorization token that is sent to the backend.
          */
-        @JvmStatic
-        @JvmOverloads
-        fun initAsMultichat(
-            application: Application,
-            listUser: List<User>,
-            authorId: String,
-            domain: String? = null,
-            loggingEnabled: Boolean = false,
-            authorizationToken: String? = null,
-        ) {
-            if (listUser.isEmpty()) throw Exception("user list is empty")
-
-            initInternal(
-                application,
-                listUser,
-                listUser.first().appId,
-                null,
-                authorId,
-                null,
-                domain,
-                API_VERSION_3,
-                loggingEnabled,
-                authorizationToken,
-            )
-        }
+//        @JvmStatic
+//        @JvmOverloads
+//        fun initAsMultichat(
+//            application: Application,
+//            listUser: List<User>,
+//            authorId: String,
+//            domain: String? = null,
+//            loggingEnabled: Boolean = false,
+//            authorizationToken: String? = null,
+//        ) {
+//            if (listUser.isEmpty()) throw Exception("user list is empty")
+//
+//            initInternal(
+//                application,
+//                listUser,
+//                listUser.first().appId,
+//                null,
+//                authorId,
+//                null,
+//                domain,
+//                API_VERSION_3,
+//                loggingEnabled,
+//                authorizationToken,
+//            )
+//        }
         private fun initInternal(
             application: Application,
             listUser: List<User>?,
@@ -388,14 +375,6 @@ class PyrusServiceDesk private constructor(
             )
         }
 
-        @JvmStatic
-        @JvmOverloads
-        fun setConfiguration(
-            configuration: ServiceDeskConfiguration? = null,
-        ) {
-            StaticRepository.setConfiguration(configuration)
-        }
-
         /**
          * Registers [subscriber] that will be notified when new replies from support are received
          */
@@ -471,11 +450,11 @@ class PyrusServiceDesk private constructor(
             INJECTOR?.finishEventBus?.post(true)
         }
 
-        @JvmStatic
-        fun clean() {
-            PLog.d(TAG, "clean")
-            INJECTOR?.cleanDataUseCase()
-        }
+//        @JvmStatic
+//        fun clean() {
+//            PLog.d(TAG, "clean")
+//            INJECTOR?.cleanDataUseCase()
+//        }
 
         /**
          * Manually refreshes feed of PyrusServiceDesk.
