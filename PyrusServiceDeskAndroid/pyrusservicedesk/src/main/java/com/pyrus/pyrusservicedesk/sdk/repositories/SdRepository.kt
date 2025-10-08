@@ -17,7 +17,6 @@ import com.pyrus.pyrusservicedesk._ref.utils.Try
 import com.pyrus.pyrusservicedesk._ref.utils.Try2
 import com.pyrus.pyrusservicedesk._ref.utils.isFailed
 import com.pyrus.pyrusservicedesk._ref.utils.isSuccess
-import com.pyrus.pyrusservicedesk._ref.utils.map
 import com.pyrus.pyrusservicedesk._ref.utils.toTry2
 import com.pyrus.pyrusservicedesk.core.Account
 import com.pyrus.pyrusservicedesk.core.getInstanceId
@@ -28,10 +27,10 @@ import com.pyrus.pyrusservicedesk.sdk.FileResolver
 import com.pyrus.pyrusservicedesk.sdk.data.intermediate.FileUploadResponseData
 import com.pyrus.pyrusservicedesk.sdk.data.intermediate.TicketsDto
 import com.pyrus.pyrusservicedesk.sdk.repositories.data_base.DatabaseMapper
-import com.pyrus.pyrusservicedesk.sdk.repositories.data_base.data.support.CommandWithAttachmentsEntity
 import com.pyrus.pyrusservicedesk.sdk.repositories.data_base.data.support.TicketWithComments
 import com.pyrus.pyrusservicedesk.sdk.sync.SyncRequest
 import com.pyrus.pyrusservicedesk.sdk.sync.Synchronizer
+import com.pyrus.pyrusservicedesk.sdk.sync.TicketCommandResultDto
 import com.pyrus.pyrusservicedesk.sdk.web.UploadFileHook
 import com.pyrus.pyrusservicedesk.sdk.web.retrofit.RemoteFileStore
 import kotlinx.coroutines.CoroutineScope
@@ -345,10 +344,10 @@ internal class SdRepository(
      * @param token if null push notifications stop.
      * @param tokenType cloud messaging type.
      */
-    suspend fun setPushToken(user: UserInternal, token: String, tokenType: String): Try<Unit> {
+    suspend fun setPushToken(user: UserInternal, token: String, tokenType: String): Try<TicketCommandResultDto> {
         val instanceId = accountStore.getAccount().getInstanceId()
         val command = commandsStore.createPushTokenCommand(user, token, tokenType, instanceId)
-        return synchronizer.syncCommand(command).map {  }
+        return synchronizer.syncCommand(command)
     }
 
     fun retryAddComment(user: UserInternal, localId: Long) = coroutineScope.launch(Dispatchers.IO) {
