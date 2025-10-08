@@ -359,7 +359,7 @@ internal class SdRepository(
 
         if (command is SyncRequest.Command.CreateComment) {
             val serverTicketId = idStore.getTicketServerId(command.ticketId) ?: command.ticketId
-            val userId = if (account.getVersion() == API_VERSION_1) null else command.userId
+            val userId = if (command.userId == account.getInstanceId()) null else command.userId
             sendCommand(command.copy(ticketId = serverTicketId, userId = userId))
         }
         else {
