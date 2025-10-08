@@ -258,7 +258,7 @@ internal object TicketMapper {
         val firstComment = freshList.comments.firstOrNull()
         val creationTime = firstComment?.creationTime ?: System.currentTimeMillis()
 
-        val entryText = welcomeMessage.cleanTags()
+        val entryText = welcomeMessage.cleanTags(removeLinkTag = false)
         return CommentEntry.Comment.CommentText(
             creationTime = creationTime,
             entryId = WELCOME_MESSAGE_ID.toString(),
