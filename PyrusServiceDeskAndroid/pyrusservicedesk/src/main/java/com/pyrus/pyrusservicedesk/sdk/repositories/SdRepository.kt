@@ -2,8 +2,6 @@ package com.pyrus.pyrusservicedesk.sdk.repositories
 
 import android.net.Uri
 import androidx.core.net.toFile
-import com.pyrus.pyrusservicedesk.PyrusServiceDesk.Companion.API_VERSION_1
-import com.pyrus.pyrusservicedesk.PyrusServiceDesk.Companion.API_VERSION_2
 import com.pyrus.pyrusservicedesk._ref.data.Attachment
 import com.pyrus.pyrusservicedesk._ref.data.FullTicket
 import com.pyrus.pyrusservicedesk._ref.data.multy_chat.Application
@@ -18,6 +16,8 @@ import com.pyrus.pyrusservicedesk._ref.utils.Try2
 import com.pyrus.pyrusservicedesk._ref.utils.isFailed
 import com.pyrus.pyrusservicedesk._ref.utils.isSuccess
 import com.pyrus.pyrusservicedesk._ref.utils.toTry2
+import com.pyrus.pyrusservicedesk.core.API_VERSION_1
+import com.pyrus.pyrusservicedesk.core.API_VERSION_2
 import com.pyrus.pyrusservicedesk.core.Account
 import com.pyrus.pyrusservicedesk.core.getInstanceId
 import com.pyrus.pyrusservicedesk.core.getUserId

@@ -96,6 +96,11 @@ internal class CommentAudioHolder(
                 attachUri?.let{ fullUrl?.let { fullUrl -> audioPlayer.playAudio(it, fullUrl) } }
             }
         }
+        binding.root.setOnClickListener {
+            when {
+                hasError -> onEvent(TicketView.Event.OnErrorCommentClick(id))
+            }
+        }
         ConfigUtils.getMainFontTypeface()?.let {
             binding.authorName.typeface = it
         }
@@ -130,8 +135,11 @@ internal class CommentAudioHolder(
 
         entry.attach::attachUrl.payloadCheck {
             val attachUrl = entry.attach.attachUrl.toString()
-            val start = attachUrl.indexOf("DownloadFile/").plus("DownloadFile/".length)
-            val end = attachUrl.indexOf("?user_id=")
+            val start = if (attachUrl.contains("DownloadFile/"))
+                attachUrl.indexOf("DownloadFile/").plus("DownloadFile/".length)
+                else 0
+            val end = if (attachUrl.contains("?user_id=")) attachUrl.indexOf("?user_id=")
+                else attachUrl.length
             attachUri = attachUrl.substring(start, end)
             fullUrl = attachUrl
             listenDataJob?.cancel()

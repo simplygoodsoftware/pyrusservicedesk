@@ -6,9 +6,9 @@ import com.pyrus.pyrusservicedesk.sdk.data.UserDataDto
 import com.pyrus.pyrusservicedesk.sdk.repositories.data_base.data.TicketEntity
 import com.pyrus.pyrusservicedesk.sdk.sync.SyncMapper.calcLastNoteId
 
-private const val API_VERSION_1: Int = 2
-private const val API_VERSION_2: Int = 2
-private const val API_VERSION_3: Int = 3
+const val API_VERSION_1: Int = 2
+const val API_VERSION_2: Int = 2
+const val API_VERSION_3: Int = 3
 
 internal fun Account.getAuthorId(): String? = when(this) {
     is Account.V1 -> null

@@ -362,8 +362,11 @@ internal class AudioWrapper(
 
     fun setAudioDurations(audioList: List<String?>) {
         for (audioUrl in audioList) {
-            val start = audioUrl?.indexOf("DownloadFile/")?.plus("DownloadFile/".length) ?: 0
-            val end = audioUrl?.indexOf("?user_id=") ?: 0
+            val start = if (audioUrl?.contains("DownloadFile/") == true)
+                audioUrl.indexOf("DownloadFile/").plus("DownloadFile/".length)
+                else 0
+            val end = if (audioUrl?.contains("?user_id=") == true) audioUrl.indexOf("?user_id=")
+                else audioUrl?.length ?: 0
             val url = audioUrl?.substring(start, end)
             if (!url.isNullOrEmpty() && getAudioFile(url).exists()) {
                 val duration = getAudioFile(url).getMediaDuration()
