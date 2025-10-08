@@ -14,6 +14,9 @@
     <color name="psd_not_active_text_color">#999999</color>
     <color name="psd_light_gray_bg">@color/psd_color_blue_gray_750</color>
 
+
+    <color name="psd_rating_text">@android:color/white</color>
+
     <color name="psd_bg_record_gradient_1">#6477FF</color>
     <color name="psd_bg_record_gradient_2">#E8A1FF</color>
     <color name="psd_bg_record_gradient_3">#FFB85C</color>

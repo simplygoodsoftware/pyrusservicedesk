@@ -178,7 +178,7 @@ internal object TicketMapper {
 
         val entriesWithDates = toListWithDates(entries).toMutableList()
 
-        if (freshList.comments.isEmpty()) {
+        if (freshList.comments.isEmpty() || isLastWelcome(entries)) {
             val buttonEntry = (entries.lastOrNull() as? CommentEntry.Comment.CommentText)?.let { extractButtonsFromWelcome(it, welcomeMessage) }
             if (buttonEntry != null) entriesWithDates += buttonEntry
         }
@@ -232,6 +232,15 @@ internal object TicketMapper {
         entriesWithDates.reverse()
 
         return entriesWithDates
+    }
+
+    private fun isLastWelcome(entries: List<CommentEntry>): Boolean {
+        val entry = entries.lastOrNull()
+        if (entry == null)
+            return false
+        if ((entry as? CommentEntry.Comment.CommentText)?.isWelcomeMessage == true)
+            return true
+        return false
     }
 
     private fun mapToRatingTextValuesEntry(ratingTextValue: RatingTextValues) = CommentEntry.RatingTextValues(

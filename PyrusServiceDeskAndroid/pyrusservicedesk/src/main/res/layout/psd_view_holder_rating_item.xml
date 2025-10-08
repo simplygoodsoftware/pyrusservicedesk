@@ -16,7 +16,7 @@
         android:background="@drawable/psd_rounded_rectangle_bg"
         android:paddingHorizontal="12dp"
         android:paddingVertical="9dp"
-        android:textColor="@color/psd_text_color_bg950"
+        android:textColor="@color/psd_rating_text"
         tools:text="not good"/>
 
 </LinearLayout>

@@ -38,6 +38,9 @@
     <color name="psd_color_black_01">#1A000000</color>
     <color name="psd_qr_mask">#77000000</color>
 
+
+    <color name="psd_rating_text">@color/psd_text_color_bg950</color>
+
     <color name="psd_background">@color/psd_white</color>
     <color name="psd_text_primary">@color/psd_color_bluegray_950</color>
     <color name="psd_text_2">@color/psd_color_blue_gray_750</color>
