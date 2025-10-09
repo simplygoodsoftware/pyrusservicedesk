@@ -347,7 +347,7 @@ internal class LiveUpdates(
         newReplySubscribers.forEach {
             coreScope.launch(ioDispatcher) {
                 val lastComment = localTicketsStore.getTickets().lastOrNull()
-                if (lastComment != null && lastComment.isRead != true) {
+                if (lastComment != null && (lastComment.isRead != true || !firstReplyIsShown)) {
                     notifyNewReplySubscriber(it, lastComment)
                 }
             }
