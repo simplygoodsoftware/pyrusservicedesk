@@ -1,6 +1,7 @@
 package com.pyrus.pyrusservicedesk.sdk.updates
 
 import android.os.*
+import android.util.Log
 import androidx.annotation.MainThread
 import com.pyrus.pyrusservicedesk.PyrusServiceDesk.Companion.injector
 import com.pyrus.pyrusservicedesk._ref.utils.*
@@ -35,7 +36,7 @@ internal class LiveUpdates(
 
     private var lastActiveTime: Long = preferencesManager.getLastActiveTime()
     private var activeScreenCount = 0
-    private var lastCommentId = 0L
+    private var lastCommentId: Long? = null
 
     // notified in UI thread
     private val dataSubscribers = mutableSetOf<LiveUpdateSubscriber>()
@@ -46,7 +47,7 @@ internal class LiveUpdates(
 
     private val mainHandler = Handler(Looper.getMainLooper())
     private var isStarted = false
-    private var firstReplyIsShown = false
+    private var replyIsShown = false
 
     var updateFeature: AutoRefreshFeature? = null
 
@@ -347,7 +348,10 @@ internal class LiveUpdates(
         newReplySubscribers.forEach {
             coreScope.launch(ioDispatcher) {
                 val lastComment = localTicketsStore.getTickets().lastOrNull()
-                if (lastComment != null) {
+                val needRoNotify =
+                    (lastCommentId != lastComment?.lastComment?.commentId && lastComment?.isRead == false)
+                        || lastComment?.isRead != replyIsShown
+                if (lastComment != null && needRoNotify) {
                     notifyNewReplySubscriber(it, lastComment)
                 }
             }
@@ -356,7 +360,8 @@ internal class LiveUpdates(
 
     private fun notifyNewReplySubscriber(subscriber: NewReplySubscriber, lastComment:  TicketEntity) {
         PLog.d(TAG, "notifyNewReplySubscriber, comment: $lastComment")
-        firstReplyIsShown = true
+        replyIsShown = lastComment.isRead == true
+        lastCommentId = lastComment.lastComment?.commentId
         val hasNewComments = lastComment.isRead != true
         coreScope.launch(Dispatchers.Main) {
             subscriber.onNewReply(
