@@ -1,6 +1,8 @@
 apply plugin: 'com.android.application'
 apply from: "${rootDir}/scripts/android.gradle"
 
+apply plugin: 'kotlin-android'
+
 android {
 
     def versionMajor = 1

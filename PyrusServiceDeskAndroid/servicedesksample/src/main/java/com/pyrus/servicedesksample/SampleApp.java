@@ -15,9 +15,7 @@ public class SampleApp extends Application {
         super.onCreate();
         PyrusServiceDesk.init(
             this,
-            "my_app_id",
-            "user_id",
-            "security_key",
+            "0HUi7grFuWVFHqWtL3f5YD-4PYJXiOEoLfCDb2yhTthkHBpedNbNU4O01YD2OnsSpvbMiXmweUF8akomZZIW1Ilb-W9mOPuK70L4lCI1mK0dJqXYUp0l-MJlsUv9tr8dSmKCSw==",
             null,
             true
         );
@@ -29,10 +27,6 @@ public class SampleApp extends Application {
         map.put("test_phone", "79778888888");
         map.put("test_email", "sample@email.com");
         PyrusServiceDesk.setFieldsData(map);
-
-        PyrusServiceDesk.setPushToken(
-                "my_push_token",
-                exception -> Log.w("SAMPLE_APP", exception));
 
         PyrusServiceDesk.onAuthorizationFailed(null);
     }

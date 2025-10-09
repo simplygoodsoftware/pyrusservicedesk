@@ -6,6 +6,7 @@ import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.graphics.Color;
 import android.os.Bundle;
+import android.util.Log;
 import android.widget.TextView;
 
 import androidx.annotation.Nullable;
@@ -17,6 +18,8 @@ import com.pyrus.pyrusservicedesk.sdk.updates.NewReplySubscriber;
 import java.util.Collections;
 import java.util.List;
 
+import kotlinx.coroutines.GlobalScope;
+
 public class SampleActivity extends Activity implements NewReplySubscriber {
 
     @Override
@@ -24,16 +27,23 @@ public class SampleActivity extends Activity implements NewReplySubscriber {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_sample);
         findViewById(R.id.support).setOnClickListener(
-                view -> PyrusServiceDesk.start(
-                        this,
-                        new ServiceDeskConfiguration.Builder()
+                view -> {
+                    PyrusServiceDesk.start(
+                            this,
+                            new ServiceDeskConfiguration.Builder()
                                 .setUserName("Ivan Ivanov")
                                 .setThemeColor(Color.parseColor("#FF8300"))
                                 .setChatTitle("Sample Support")
                                 .setWelcomeMessage("How can I help you?")
                                 .setAvatarForSupport(com.pyrus.pyrusservicedesk.R.drawable.psd_download_file)
                                 .setTrustedUrls(Collections.singletonList("pyrus.com"))
-                                .build())
+                                .build(),
+                        null,
+                        null,
+                        true
+                    );
+                    Test.refreshSd();
+                }
         );
 
         PyrusServiceDesk.onAuthorizationFailed(
