@@ -516,7 +516,7 @@ class PyrusServiceDesk private constructor(
             this.onStopCallback = onStopCallback
 
             val intent = MainActivity.createLaunchIntent(activity, account, openTicketAction, sendComment)
-            intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK)
+            intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
             activity.startActivity(intent)
 
             injector().updateUserUseCase.updateUser()
