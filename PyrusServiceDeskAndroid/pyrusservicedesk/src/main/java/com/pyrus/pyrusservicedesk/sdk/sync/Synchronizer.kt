@@ -193,7 +193,7 @@ internal class Synchronizer(
 
             localTicketsStore.storeServerState(usersWithData, getTicketsTry.value)
 
-            liveUpdates.notifyNewReplySubscribers()
+            liveUpdates.notifyNewReplySubscribers(localTicketsStore)
 
             val commandRequests = syncRequests.filterIsInstance<SyncReqRes.CommandWithContinuation>()
             for (request in commandRequests) {

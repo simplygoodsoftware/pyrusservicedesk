@@ -1,16 +1,30 @@
 package com.pyrus.pyrusservicedesk.sdk.updates
 
-import android.os.*
+import android.os.Handler
+import android.os.Looper
 import android.util.Log
 import androidx.annotation.MainThread
 import com.pyrus.pyrusservicedesk.PyrusServiceDesk.Companion.injector
-import com.pyrus.pyrusservicedesk._ref.utils.*
+import com.pyrus.pyrusservicedesk._ref.data.multy_chat.TicketsInfo
+import com.pyrus.pyrusservicedesk._ref.utils.MILLISECONDS_IN_DAY
+import com.pyrus.pyrusservicedesk._ref.utils.MILLISECONDS_IN_HOUR
+import com.pyrus.pyrusservicedesk._ref.utils.MILLISECONDS_IN_MINUTE
+import com.pyrus.pyrusservicedesk._ref.utils.MILLISECONDS_IN_SECOND
 import com.pyrus.pyrusservicedesk._ref.utils.log.PLog
 import com.pyrus.pyrusservicedesk.core.refresh.AutoRefreshFeature
 import com.pyrus.pyrusservicedesk.sdk.data.TicketDto
-import com.pyrus.pyrusservicedesk.sdk.repositories.*
+import com.pyrus.pyrusservicedesk.sdk.repositories.LocalTicketsStore
 import com.pyrus.pyrusservicedesk.sdk.repositories.data_base.data.TicketEntity
-import kotlinx.coroutines.*
+import kotlinx.coroutines.CoroutineExceptionHandler
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.Runnable
+import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.currentCoroutineContext
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.isActive
+import kotlinx.coroutines.launch
 import kotlin.math.max
 
 /**
@@ -25,14 +39,15 @@ import kotlin.math.max
  * @param userId Id of current user. May by null.
  */
 internal class LiveUpdates(
-    private val localTicketsStore: LocalTicketsStore,
     private val preferencesManager: Preferences,
-    private var userId: String?,
-    //private var ticketId: Int,
-    private val mainDispatcher: CoroutineDispatcher = Dispatchers.Main,
-    private val ioDispatcher: CoroutineDispatcher = Dispatchers.IO,
-    private val coreScope: CoroutineScope,
 ) {
+
+    private val coreScope = CoroutineScope(Dispatchers.IO + SupervisorJob() + CoroutineExceptionHandler { _, throwable ->
+        throwable.printStackTrace()
+        Log.e(TAG, "coreScope global error: ${throwable.message}")
+        PLog.e(TAG, "coreScope global error: ${throwable.message}")
+        throwable.printStackTrace()
+    })
 
     private var lastActiveTime: Long = preferencesManager.getLastActiveTime()
     private var activeScreenCount = 0
@@ -51,12 +66,14 @@ internal class LiveUpdates(
 
     var updateFeature: AutoRefreshFeature? = null
 
+    private var replayJob: Job? = null
+
     private val ticketsUpdateRunnable = object : Runnable {
         override fun run() {
-            val requestUserId = userId
-            coreScope.launch(ioDispatcher) {
-                // TODO
-//                val ticketsTry = repository.getTickets()
+            //val requestUserId = userId
+//            replayJob =
+//            GlobalScope.launch(ioDispatcher) {
+//                repository.sync()
 //                if (ticketsTry.isSuccess()) {
 //                    val data = ticketsTry.value
 //                    val newUnread = data.count()//data.count { !it.isRead } //TODO
@@ -73,14 +90,14 @@ internal class LiveUpdates(
 //                else {
 //                    PLog.d(TAG, "ticketsUpdateRunnable, onFailure")
 //                }
-            }
-            val interval = getTicketsUpdateInterval(lastActiveTime)
-            PLog.d(TAG, "ticketsUpdateRunnable, interval: $interval")
-            if (interval == -1L) {
-                stopUpdates()
-                return
-            }
-            mainHandler.postDelayed(this, interval)
+            //}
+//            val interval = getTicketsUpdateInterval(lastActiveTime)
+//            PLog.d(TAG, "ticketsUpdateRunnable, interval: $interval")
+//            if (interval == -1L) {
+//                stopUpdates()
+//                return
+//            }
+//            mainHandler.postDelayed(this, interval)
         }
     }
 
@@ -93,9 +110,9 @@ internal class LiveUpdates(
         PLog.d(TAG, "subscribeOnReply")
         newReplySubscribers.add(subscriber)
         preferencesManager.saveLastActiveTime(System.currentTimeMillis())
-        updateFeature = injector().autoRefreshFeatureFactory.create()
-        updateFeature?.state
-        coreScope.launch(ioDispatcher) {
+        onSubscribe()
+        val localTicketsStore = injector().localTicketsStore
+        coreScope.launch(Dispatchers.IO) {
             val lastComment = localTicketsStore.getTickets().lastOrNull()
             if (lastComment != null && lastComment.isRead != true) {
                 notifyNewReplySubscriber(subscriber, lastComment)
@@ -151,7 +168,7 @@ internal class LiveUpdates(
 
     internal fun reset(userId: String?) {
         PLog.d(TAG, "reset")
-        this.userId = userId
+        //this.userId = userId
         lastCommentId = 0
         preferencesManager.saveLastActiveTime(-1)
         preferencesManager.removeLastComment()
@@ -239,30 +256,44 @@ internal class LiveUpdates(
         }
     }
 
+    @MainThread
     private fun startUpdates() {
         PLog.d(TAG, "startUpdates")
         isStarted = true
-        mainHandler.post(ticketsUpdateRunnable)
+        val repository = injector().repository
+        replayJob = coreScope.launch(Dispatchers.IO) {
+            while (currentCoroutineContext().isActive) {
+                repository.sync()
+                val lastActiveTime = preferencesManager.getLastActiveTime()
+                val interval = getTicketsUpdateInterval(lastActiveTime)
+                PLog.d(TAG, "ticketsUpdateRunnable, interval: $interval")
+                if (interval == -1L) {
+                    stopUpdates()
+                    replayJob?.cancel()
+                }
+                delay(interval)
+            }
+        }
     }
 
     private fun stopUpdates() {
         PLog.d(TAG, "stopUpdates")
         isStarted = false
-        mainHandler.removeCallbacks(ticketsUpdateRunnable)
+        replayJob?.cancel()
     }
 
     /*@MainThread
-    private fun processGetTicketsSuccess(data: List<TicketDto>, newUnreadCount: Int) {
+    private fun processGetTicketsSuccess(ticketsInfo: TicketsInfo, newUnreadCount: Int) {
         val isChanged = recentUnreadCounter != newUnreadCount
         PLog.d(TAG, "processSuccess, isChanged: $isChanged, recentUnreadCounter: $recentUnreadCounter, newUnreadCount: $newUnreadCount")
-        notifyDataSubscribers(data, isChanged, newUnreadCount)
+        notifyDataSubscribers(ticketsInfo, isChanged, newUnreadCount)
         notifyUnreadCountSubscribers(isChanged, newUnreadCount)
         recentUnreadCounter = newUnreadCount
 
         val lastSavedComment = preferencesManager.getLastComment()
         val hasUnreadTickets = newUnreadCount > 0
 
-        val lastCommentId = data.firstOrNull()?.lastComment?.commentId ?: return
+        val lastCommentId = ticketsInfo.firstOrNull()?.lastComment?.commentId ?: return
 
 
         if (lastSavedComment != null && lastSavedComment.id == lastCommentId && !lastSavedComment.isRead && !hasUnreadTickets) {
@@ -282,7 +313,7 @@ internal class LiveUpdates(
 
             val responseUserId = userId
             PLog.d(TAG, "getTicketRequest")
-            for (ticket in data) {
+            for (ticket in ticketsInfo) {
 
 //                coreScope.launch(ioDispatcher) {
 //                    val feedTry = repository.getFeed(ticket.ticketId, ticket.userId ?: "", true) //TODO это удалится вообще?
@@ -326,8 +357,8 @@ internal class LiveUpdates(
 
             }
         }
-    }
-*/
+    }*/
+
     private fun notifyUnreadCountSubscribers(isChanged: Boolean, newUnreadCount: Int) {
         if (isChanged) {
             val hasNewComments = newUnreadCount > 0
@@ -336,17 +367,17 @@ internal class LiveUpdates(
         }
     }
 
-    private fun notifyDataSubscribers(data: List<TicketDto>, isChanged: Boolean, newUnreadCount: Int) {
+    private fun notifyDataSubscribers(ticketsInfo: TicketsInfo, isChanged: Boolean, newUnreadCount: Int) {
         dataSubscribers.forEach {
-            it.onNewData(data)
+            //it.onNewData(ticketsInfo)
             if (isChanged)
                 it.onUnreadTicketCountChanged(newUnreadCount)
         }
     }
 
-    fun notifyNewReplySubscribers() {
+    fun notifyNewReplySubscribers(localTicketsStore: LocalTicketsStore) {
         newReplySubscribers.forEach {
-            coreScope.launch(ioDispatcher) {
+            coreScope.launch(Dispatchers.IO) {
                 val lastComment = localTicketsStore.getTickets().lastOrNull()
                 val needRoNotify =
                     (lastCommentId != lastComment?.lastComment?.commentId && lastComment?.isRead == false)
