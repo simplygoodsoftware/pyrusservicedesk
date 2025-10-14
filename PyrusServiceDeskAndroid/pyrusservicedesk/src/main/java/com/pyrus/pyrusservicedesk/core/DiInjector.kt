@@ -149,11 +149,7 @@ internal class DiInjector(
 
     val finishEventBus = FinishEventBus()
 
-    private val preferencesManager = PreferencesManager(preferences)
-
-    val liveUpdates = LiveUpdates(
-        preferencesManager = preferencesManager
-    )
+    val preferencesManager = PreferencesManager(preferences)
 
     private val synchronizer = Synchronizer(
         api = api,
@@ -164,7 +160,6 @@ internal class DiInjector(
         commandsStore = localCommandsStore,
         accessDeniedEventBus = accessDeniedEventBus,
         preferences = preferencesManager,
-        liveUpdates = liveUpdates,
     )
 
     val repository: SdRepository = SdRepository(
@@ -290,6 +285,7 @@ internal class DiInjector(
         accessDeniedEventBus = accessDeniedEventBus,
         ticketsStore = localTicketsStore,
         finishEventBus = finishEventBus,
+        preferencesManager = preferencesManager,
     )
 
     fun onCancel() {

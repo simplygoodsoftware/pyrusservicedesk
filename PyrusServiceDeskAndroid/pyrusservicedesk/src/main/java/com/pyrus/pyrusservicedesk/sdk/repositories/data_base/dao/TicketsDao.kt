@@ -50,6 +50,11 @@ internal abstract class TicketsDao {
     @Query("SELECT * FROM $TICKETS_TABLE")
     abstract fun getTickets(): List<TicketEntity>
 
+
+    @Transaction
+    @Query("SELECT * FROM $TICKETS_TABLE")
+    abstract fun getTicketsFlow(): Flow<List<TicketEntity>>
+
     @Transaction
     @Query("SELECT * FROM $TICKETS_TABLE")
     abstract fun getTicketsWithComments(): List<TicketWithComments>

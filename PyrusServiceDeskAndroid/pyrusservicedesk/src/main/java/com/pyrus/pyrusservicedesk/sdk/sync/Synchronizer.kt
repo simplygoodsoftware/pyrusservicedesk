@@ -52,7 +52,6 @@ internal class Synchronizer(
     private val idStore: IdStore,
     private val commandsStore: LocalCommandsStore,
     private val preferences: Preferences,
-    private val liveUpdates: LiveUpdates,
 ) : CoroutineScope {
 
     @DelicateCoroutinesApi
@@ -192,8 +191,6 @@ internal class Synchronizer(
             val usersWithData = account.getUsers().filter { it.userId !in authorAccessDenied }
 
             localTicketsStore.storeServerState(usersWithData, getTicketsTry.value)
-
-            liveUpdates.notifyNewReplySubscribers(localTicketsStore)
 
             val commandRequests = syncRequests.filterIsInstance<SyncReqRes.CommandWithContinuation>()
             for (request in commandRequests) {
