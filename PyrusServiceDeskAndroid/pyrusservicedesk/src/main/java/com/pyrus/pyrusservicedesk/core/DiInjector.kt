@@ -141,7 +141,7 @@ internal class DiInjector(
 
     private val remoteFileStore = RemoteFileStore(api)
 
-    private val localTicketsStore = LocalTicketsStore(idStore, ticketsDao, searchDao, accountStore)
+    val localTicketsStore = LocalTicketsStore(idStore, ticketsDao, searchDao, accountStore)
 
     private val resourceManager = AppResourceManager(application)
 
@@ -149,15 +149,7 @@ internal class DiInjector(
 
     val finishEventBus = FinishEventBus()
 
-    private val preferencesManager = PreferencesManager(preferences)
-
-    val liveUpdates = LiveUpdates(
-        preferencesManager = preferencesManager,
-        // TODO sds fix live updates
-        userId = initialAccount.getUserId(),
-        coreScope = coreScope,
-        localTicketsStore = localTicketsStore,
-    )
+    val preferencesManager = PreferencesManager(preferences)
 
     private val synchronizer = Synchronizer(
         api = api,
@@ -168,7 +160,6 @@ internal class DiInjector(
         commandsStore = localCommandsStore,
         accessDeniedEventBus = accessDeniedEventBus,
         preferences = preferencesManager,
-        liveUpdates = liveUpdates,
     )
 
     val repository: SdRepository = SdRepository(
@@ -294,6 +285,7 @@ internal class DiInjector(
         accessDeniedEventBus = accessDeniedEventBus,
         ticketsStore = localTicketsStore,
         finishEventBus = finishEventBus,
+        preferencesManager = preferencesManager,
     )
 
     fun onCancel() {

@@ -22,7 +22,9 @@ import com.pyrus.pyrusservicedesk.core.Account
 import com.pyrus.pyrusservicedesk.core.DiInjector
 import com.pyrus.pyrusservicedesk.core.StaticRepository
 import com.pyrus.pyrusservicedesk.core.getUserId
+import com.pyrus.pyrusservicedesk.core.refresh.AutoRefreshFeature
 import com.pyrus.pyrusservicedesk.presentation.viewmodel.SharedViewModel
+import com.pyrus.pyrusservicedesk.sdk.updates.LiveUpdates
 import com.pyrus.pyrusservicedesk.sdk.updates.NewReplySubscriber
 import com.pyrus.pyrusservicedesk.sdk.updates.OnStopCallback
 import kotlinx.coroutines.CoroutineExceptionHandler
@@ -49,6 +51,8 @@ class PyrusServiceDesk private constructor(
         private var INJECTOR: DiInjector? = null
         private var lastRefreshes = ArrayList<Long>()
 
+        private var autoRefreshFeatureFactory: AutoRefreshFeature? = null
+
         private const val REFRESH_MAX_COUNT = 20 // in minute
 
         internal const val API_VERSION_1: Int = 0
@@ -58,6 +62,9 @@ class PyrusServiceDesk private constructor(
         private const val DEFAULT_TOKEN_TYPE: String = "android"
 
         private var onStopCallback: OnStopCallback? = null
+
+        private val liveUpdates = LiveUpdates()
+        var sdIsOpen = false
 
 //        @JvmStatic
 //        fun getTicketsFeature(): TicketsFeature {
@@ -306,11 +313,8 @@ class PyrusServiceDesk private constructor(
                 instanceId = instanceId,
                 appId = appId,
             )
-
-            if (INJECTOR?.accountStore?.getAccount()?.getUserId() != newAccount.getUserId()) {
-                INJECTOR?.liveUpdates?.reset(userId)
-                clearLocalData {}
-            }
+            val oldUserId = INJECTOR?.accountStore?.getAccount()?.getUserId()
+            autoRefreshFeatureFactory?.cancel()
 
             INJECTOR?.onCancel()
 
@@ -326,6 +330,13 @@ class PyrusServiceDesk private constructor(
                 }),
                 preferences = preferences
             )
+
+            autoRefreshFeatureFactory = INJECTOR?.autoRefreshFeatureFactory?.create(liveUpdates)
+            if (oldUserId != newAccount.getUserId()) {
+                liveUpdates.reset(INJECTOR?.preferencesManager)
+                clearLocalData {}
+            }
+
             migratePreferences(application, preferences)
             if (loggingEnabled) PLog.instantiate(application)
         }
@@ -374,7 +385,7 @@ class PyrusServiceDesk private constructor(
         @MainThread
         fun subscribeToReplies(subscriber: NewReplySubscriber) {
             PLog.d(TAG, "subscribeToReplies")
-            injector().liveUpdates.subscribeOnReply(subscriber)
+            liveUpdates.subscribeOnReply(subscriber)
         }
 
         /**
@@ -384,7 +395,7 @@ class PyrusServiceDesk private constructor(
         @MainThread
         fun unsubscribeFromReplies(subscriber: NewReplySubscriber) {
             PLog.d(TAG, "unsubscribeFromReplies")
-            injector().liveUpdates.unsubscribeFromReplies(subscriber)
+            liveUpdates.unsubscribeFromReplies(subscriber)
         }
 
         /**
@@ -475,16 +486,8 @@ class PyrusServiceDesk private constructor(
             StaticRepository.EXTRA_FIELDS = extraFields
         }
 
-        /**
-         * Start tickets update if it is not already running.
-         *
-         * @param lastActiveTime Time of last user activity in unit millisecond
-         */
-        internal fun startTicketsUpdatesIfNeeded(lastActiveTime: Long) {
-            injector().liveUpdates.updateGetTicketsIntervalIfNeeded(lastActiveTime)
-        }
-
         internal fun onServiceDeskStop() {
+            sdIsOpen = false
             injector().releaseSession()
             onStopCallback?.onServiceDeskStop()
             onStopCallback = null
@@ -518,6 +521,7 @@ class PyrusServiceDesk private constructor(
             val intent = MainActivity.createLaunchIntent(activity, account, openTicketAction, sendComment)
             intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
             activity.startActivity(intent)
+            sdIsOpen = true
 
             injector().updateUserUseCase.updateUser()
         }

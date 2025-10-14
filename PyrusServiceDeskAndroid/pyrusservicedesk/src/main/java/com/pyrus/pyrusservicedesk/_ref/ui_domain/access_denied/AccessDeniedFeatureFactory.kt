@@ -15,6 +15,7 @@ import com.pyrus.pyrusservicedesk.sdk.AccessDeniedEventBus
 import com.pyrus.pyrusservicedesk.sdk.FinishEventBus
 import com.pyrus.pyrusservicedesk.sdk.repositories.AccountStore
 import com.pyrus.pyrusservicedesk.sdk.repositories.LocalTicketsStore
+import com.pyrus.pyrusservicedesk.sdk.updates.PreferencesManager
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 
@@ -25,6 +26,8 @@ internal class AccessDeniedFeatureFactory(
     private val accessDeniedEventBus: AccessDeniedEventBus,
     private val ticketsStore: LocalTicketsStore,
     private val finishEventBus: FinishEventBus,
+    private val preferencesManager: PreferencesManager,
+    
 ) {
 
     fun create(): AccessDeniedFeature = storeFactory.create(
@@ -36,6 +39,7 @@ internal class AccessDeniedFeatureFactory(
             accessDeniedEventBus = accessDeniedEventBus,
             ticketsStore = ticketsStore,
             finishEventBus = finishEventBus,
+            preferencesManager = preferencesManager,
         ).adaptCast(),
         initialEffects = listOf(Effect.Inner.AccessDeniedFlow, Effect.Inner.CheckFinishFlow),
         effectAtOnceDelivery = true,
@@ -82,6 +86,7 @@ private class FeatureActor(
     private val accessDeniedEventBus: AccessDeniedEventBus,
     private val ticketsStore: LocalTicketsStore,
     private val finishEventBus: FinishEventBus,
+    private val preferencesManager: PreferencesManager,
 ) : Actor<Effect.Inner, Message.Inner> {
 
     override fun handleEffect(effect: Effect.Inner): Flow<Message.Inner> = when(effect) {
@@ -106,6 +111,7 @@ private class FeatureActor(
         }
 
         Effect.Inner.CheckFinishFlow -> flow {
+            preferencesManager.saveLastActiveTime(System.currentTimeMillis())
             finishEventBus.events().collect {
                 if (it) {
                     emit(Message.Inner.Finish)

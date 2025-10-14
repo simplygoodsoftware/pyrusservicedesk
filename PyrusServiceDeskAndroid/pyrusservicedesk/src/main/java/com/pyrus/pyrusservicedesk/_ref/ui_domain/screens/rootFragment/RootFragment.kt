@@ -69,10 +69,6 @@ internal class RootFragment: TeaFragment<Unit, Message.Outer, Effect.Outer>(),
         }
 
         savedInstanceState?.let { ServiceDeskConfiguration.restore(it) }
-        val updateFeature: AutoRefreshFeature = getStore {
-            injector().autoRefreshFeatureFactory.create()
-        }
-        updateFeature.state
     }
 
     override fun onCreateView(

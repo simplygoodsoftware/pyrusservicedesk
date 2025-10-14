@@ -46,6 +46,10 @@ internal class LocalTicketsStore(
         return ticketsDao.getTickets()
     }
 
+    fun getTicketsFlow(): Flow<List<TicketEntity>> {
+        return ticketsDao.getTicketsFlow()
+    }
+
     fun getTicketsWithComments(): List<TicketWithComments> {
         return ticketsDao.getTicketsWithComments()
     }
