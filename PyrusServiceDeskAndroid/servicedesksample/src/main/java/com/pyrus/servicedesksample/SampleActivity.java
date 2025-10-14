@@ -6,7 +6,6 @@ import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.graphics.Color;
 import android.os.Bundle;
-import android.util.Log;
 import android.widget.TextView;
 
 import androidx.annotation.Nullable;
@@ -17,8 +16,6 @@ import com.pyrus.pyrusservicedesk.sdk.updates.NewReplySubscriber;
 
 import java.util.Collections;
 import java.util.List;
-
-import kotlinx.coroutines.GlobalScope;
 
 public class SampleActivity extends Activity implements NewReplySubscriber {
 
