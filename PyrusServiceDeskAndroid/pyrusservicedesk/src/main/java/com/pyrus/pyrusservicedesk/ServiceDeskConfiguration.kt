@@ -38,7 +38,7 @@ class ServiceDeskConfiguration internal constructor() {
 
     internal var trustedUrls: ArrayList<String>? = null
 
-    internal val isDialogTheme: Boolean = PyrusServiceDesk.get().application.isTablet()
+    internal val isDialogTheme: Boolean by lazy { PyrusServiceDesk.get().application.isTablet() }
 
     internal companion object {
         private const val KEY_USER_NAME = "ServiceDeskConfiguration_KEY_USER_NAME"
