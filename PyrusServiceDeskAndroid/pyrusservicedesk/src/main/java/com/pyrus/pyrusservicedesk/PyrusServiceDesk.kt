@@ -7,6 +7,8 @@ import android.net.Uri
 import android.os.Build
 import androidx.annotation.MainThread
 import com.google.gson.GsonBuilder
+import com.pyrus.pyrusservicedesk.PyrusServiceDesk.Companion.onAuthorizationFailed
+import com.pyrus.pyrusservicedesk.PyrusServiceDesk.Companion.setPushToken
 import com.pyrus.pyrusservicedesk.log.PLog
 import com.pyrus.pyrusservicedesk.presentation.ui.navigation_page.ticket.TicketActivity
 import com.pyrus.pyrusservicedesk.presentation.viewmodel.SharedViewModel
@@ -81,6 +83,8 @@ class PyrusServiceDesk private constructor(
 
         internal var logging = false
             private set
+
+        private val getLock: Any = Any()
 
         /**
          * Initializes PyrusServiceDesk embeddable module.
@@ -374,7 +378,9 @@ class PyrusServiceDesk private constructor(
         }
 
         internal fun get(): PyrusServiceDesk {
-            return checkNotNull(INSTANCE) { "Instantiate PyrusServiceDesk first" }
+            synchronized(getLock) {
+                return checkNotNull(INSTANCE) { "Instantiate PyrusServiceDesk first" }
+            }
         }
 
         internal fun getAndRemoveSendComment(): String? {
