@@ -361,6 +361,7 @@ private class FeatureReducer(): Logic<State, Message, Effect>() {
             is Message.Inner.OnRecordingProgressUpdated -> {
                 effects { +Effect.Outer.UpdateRecordWave(message.recordedSegmentValues) }
             }
+            is Message.Inner.ShowToast -> effects { +Effect.Outer.MakeToast(message.message) }
 
             Message.Inner.Exit -> effects { +Effect.Outer.Exit }
             is Message.Inner.OnOpenPreview -> effects { +Effect.Outer.OpenPreview(message.fileData) }
@@ -470,7 +471,11 @@ private class TicketActor(
         is Effect.Inner.ListenAttachVariant -> flow {
             if (effect.uri !is Uri) return@flow
             ticketId = localTicketsStore.getTickets().lastOrNull()?.ticketId ?: ticketId
-            val fileUri = runCatching { fileManager.copyFile(effect.uri) }.getOrNull() ?: return@flow
+            val fileUri = runCatching { fileManager.copyFile(effect.uri) }.getOrNull()
+            if (fileUri == null) {
+                emit(Message.Inner.ShowToast(R.string.psd_unsupptorted_attachment.textRes()))
+                return@flow
+            }
             preferencesManager.saveLastActiveTime(System.currentTimeMillis())
             repository.addAttachComment(user, ticketId, fileUri)
         }

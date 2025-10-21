@@ -93,6 +93,9 @@ internal class CommentAttachmentHolder(
     init {
 
         binding.comment.root.setOnClickListener(onCommentClickListener)
+        binding.comment.attachmentProgress.setOnClickListener {
+            onEvent(TicketView.Event.OnCancelUploadClick(id, attachId))
+        }
         ConfigUtils.getMainFontTypeface()?.let {
             binding.authorName.typeface = it
         }
