@@ -23,7 +23,7 @@
         <item quantity="one">לפני שנה %d</item>
         <item quantity="two">לפני %d שנים</item>
         <item quantity="many">לפני %d שנים</item>
-        <item quantity="other"></item>
+        <item quantity="other"/>
     </plurals>
     <string name="psd_months_ago" formatted="false">לפני %d חודשים</string>
     <string name="psd_weeks_ago" formatted="false">לפני %d שבועות</string>
