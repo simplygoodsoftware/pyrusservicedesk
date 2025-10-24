@@ -62,6 +62,9 @@ extension AttachmentCollectionView: UICollectionViewDelegate, UICollectionViewDa
 extension AttachmentCollectionView: AttachmentCollectionViewProtocol{
     func reloadCollection(){
         reloadData()
+        layoutIfNeeded()
+        setNeedsLayout()
+        reloadData()
     }
     func addItem(at index: Int){
         let indexPath = IndexPath.init(row: index, section: 0)

@@ -14,6 +14,7 @@ enum PSDChatPresenterCommand {
     case drawTableWithData
     case updateTableMatrix(matrix: [[PSDRowMessage]])
     case addRow(scrollsToBottom: Bool)
+    case addMessage(scrollsToBottom: Bool, message: PSDRowMessage)
     case addNewRow
     case redrawCell(indexPath: IndexPath, message: PSDRowMessage)
     case showKeyBoard

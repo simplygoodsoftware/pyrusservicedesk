@@ -275,7 +275,6 @@ class PSDMessageInputView: UIView, PSDMessageTextViewDelegate,PSDMessageSendButt
             return
         }
         inputTextView.text = inputTextView.text.trimmingCharacters(in: .whitespacesAndNewlines)
-        inputTextView.textViewDidChange(inputTextView)
         if(inputTextView.text.count > 0 || attachmentsPresenter.attachmentsNumber() > 0) {
             self.delegate?.send(inputTextView.text, attachmentsPresenter.attachmentsForSend())
             inputTextView.text = ""
@@ -291,11 +290,11 @@ class PSDMessageInputView: UIView, PSDMessageTextViewDelegate,PSDMessageSendButt
             }, completion: {_ in
                 self.audioLeadingConstraint?.constant = 0
                 self.audioInputView.state = .stopped
-                self.audioInputView.layoutIfNeeded()
                 self.audioInputView.setNeedsLayout()
+                self.audioInputView.layoutIfNeeded()
                 self.audioInputView.state = .stopped
-                self.audioInputView.layoutIfNeeded()
                 self.audioInputView.setNeedsLayout()
+                self.audioInputView.layoutIfNeeded()
                 self.cancelButton.setImage(UIImage.PSDImage(name: "arrowsLeft"), for: .normal)
             })
         }
@@ -338,6 +337,24 @@ class PSDMessageInputView: UIView, PSDMessageTextViewDelegate,PSDMessageSendButt
         attachmentsHeightConstraint?.constant = attachmentsPresenter.attachmentsNumber() > 0 ? PSDMessageInputView.attachmentsHeight : 0
     }
     
+    private func animateLayout(
+        duration: TimeInterval = 0,
+        delay: TimeInterval = 0,
+        options: UIView.AnimationOptions = [.beginFromCurrentState, .curveEaseInOut],
+        _ changes: () -> Void
+    ) {
+        (self.superview ?? self).layoutIfNeeded()
+        changes()
+        UIView.animate(withDuration: duration, delay: delay, options: options, animations: {
+            (self.superview ?? self).layoutIfNeeded()
+        }, completion: nil)
+    }
+
+    private func showAttachmentsArea(_ show: Bool) {
+        animateLayout {
+            self.attachmentsHeightConstraint?.constant = show ? PSDMessageInputView.attachmentsHeight : 0
+        }
+    }
     
     //MARK: drawing constraints
     
@@ -379,8 +396,8 @@ class PSDMessageInputView: UIView, PSDMessageTextViewDelegate,PSDMessageSendButt
         // Устанавливаем constraints для attachmentsCollection
         attachmentsCollection.translatesAutoresizingMaskIntoConstraints = false
         NSLayoutConstraint.activate([
-            attachmentsCollection.leadingAnchor.constraint(equalTo: leadingAnchor),
-            attachmentsCollection.trailingAnchor.constraint(equalTo: trailingAnchor),
+            attachmentsCollection.leadingAnchor.constraint(equalTo: backgroundView.leadingAnchor),
+            attachmentsCollection.trailingAnchor.constraint(equalTo: backgroundView.trailingAnchor),
             attachmentsCollection.topAnchor.constraint(equalTo: topGrayLine.bottomAnchor)
         ])
         
@@ -565,16 +582,14 @@ extension PSDMessageInputView: RecordableViewProtocol, AudioRecordingObjectDeleg
         let audioPlayerPresenter = AudioPlayerPresenter(view: audioInputView, fileUrl: URL(fileURLWithPath: attachment.localPath ?? ""), attachmentId: attachment.localId, attachment: attachment)
         audioInputView.presenter = audioPlayerPresenter
         
-        UIView.animate(withDuration: 0.2, animations: {
+        animateLayout(duration: 0.2) {
             self.audioInputView.alpha = 1
             self.deleteAudioButton.alpha = 1
             self.attachmentsAddButton.alpha = 0
             self.inputTextView.alpha = 0
             self.cancelButton.alpha = 0
-            self.audioLeadingConstraint?.constant = self.inputTextView.frame.width + 4//self.frame.width - 100
-            self.setNeedsLayout()
-            self.layoutIfNeeded()
-        })
+            self.audioLeadingConstraint?.constant = self.inputTextView.frame.width + 4
+        }
     }
     
     func lastCellRect() -> CGRect {

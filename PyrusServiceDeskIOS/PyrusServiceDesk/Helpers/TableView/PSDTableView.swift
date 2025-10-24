@@ -146,9 +146,9 @@ class PSDTableView : UITableView{
         }
     }
     private func changeInset(){
-        var oldInset : UIEdgeInsets  = self.contentInset
-        oldInset.bottom = isLoading ?  REFRESH_CONTROL_HEIGHT : 0.0
-        self.contentInset = oldInset
+//        var oldInset : UIEdgeInsets  = self.contentInset
+//        oldInset.bottom = isLoading ?  REFRESH_CONTROL_HEIGHT : 0.0
+//        self.contentInset = oldInset
     }
     private static let MAX_LOADER_Y : CGFloat = 160
     private func visibleAreaCenter()->CGFloat{

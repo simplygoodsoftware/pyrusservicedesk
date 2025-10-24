@@ -228,7 +228,7 @@ extension Array where Element == [PSDRowMessage]{
             message.message.messageId = findMessage.message.messageId
         }
         
-        if message.message.clientId.lowercased() == findMessage.message.clientId.lowercased() {
+        if message.message.clientId.lowercased() == findMessage.message.clientId.lowercased() && message.attachment?.name == findMessage.attachment?.name {
             return true
         }
         

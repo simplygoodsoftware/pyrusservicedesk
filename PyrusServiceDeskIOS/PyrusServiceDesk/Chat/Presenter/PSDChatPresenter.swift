@@ -60,6 +60,8 @@ extension PSDChatPresenter: PSDChatPresenterProtocol {
                 userName: userName,
                 createdAt: "CreatedAt".localizedPSD() + ": \(createdAt)"
             ))
+        case .addMessage(scrollsToBottom: let scrollsToBottom, message: let message):
+            view?.show(.addMessage(scrollsToBottom: scrollsToBottom, message: message))
         }
     }
 }

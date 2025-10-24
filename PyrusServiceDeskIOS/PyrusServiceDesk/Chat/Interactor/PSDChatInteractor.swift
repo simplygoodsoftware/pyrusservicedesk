@@ -494,7 +494,8 @@ private extension PSDChatInteractor {
             self.tableMatrix[index].append(dataForRow)
         }
         let scrollToBottom = dataForRow.message.owner.personId == PyrusServiceDesk.userId
-        presenter.doWork(.addRow(scrollsToBottom: scrollToBottom))
+//        presenter.doWork(.addRow(scrollsToBottom: scrollToBottom))
+        presenter.doWork(.addMessage(scrollsToBottom: scrollToBottom, message: dataForRow))
     }
     
     private func getMessage(at indexPath: IndexPath) -> PSDMessage? {

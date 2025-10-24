@@ -210,14 +210,31 @@ class PSDChatTableView: PSDTableView {
             reloadData()
         }
     }
+    
+    func addMessages(_ messages: [PSDRowMessage]) {
+        guard let dataSource = self.customDataSource as? KBDiffableDataSource else {
+            return
+        }
+        let section = PSDChatSectionModel(title: tableMatrix.date(of: 0)?.asString() ?? "")
+        var snapshot = dataSource.snapshot()
+        let lastSection = tableMatrix[0]
+        if lastSection.count > 1 {
+            snapshot.insertItems(messages, beforeItem: lastSection[1])
+        } else if let firstSection = snapshot.sectionIdentifiers.first {
+            snapshot.insertSections([section], beforeSection: firstSection)
+            snapshot.appendItems(messages, toSection: section)
+        }
+        dataSource.apply(snapshot, animatingDifferences: true)
+        let inset = contentInset.top - 20
+        let needAnimate = contentOffset.y > -inset
+        scrollsToBottom(animated: needAnimate)
+    }
 }
 
 private extension PSDChatTableView {
     @available(iOS 13.0, *)
     func reloadWithDiffableDataSource(animated: Bool, completion: (() -> Void)? = nil) {
-        guard
-            let dataSource = self.customDataSource as? KBDiffableDataSource
-        else {
+        guard let dataSource = self.customDataSource as? KBDiffableDataSource else {
             return
         }
         var snapshot = NSDiffableDataSourceSnapshot<PSDChatSectionModel, PSDRowMessage>()

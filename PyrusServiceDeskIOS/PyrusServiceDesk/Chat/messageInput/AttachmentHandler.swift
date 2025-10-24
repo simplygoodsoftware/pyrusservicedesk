@@ -11,12 +11,12 @@ import MobileCoreServices
  }
  */
 
-class AttachmentHandler: NSObject,UIImagePickerControllerDelegate, UINavigationControllerDelegate,FileChooserDelegate{
+class AttachmentHandler: NSObject,UIImagePickerControllerDelegate, UINavigationControllerDelegate,FileChooserDelegate, UIDocumentPickerDelegate{
     
     static let shared = AttachmentHandler()
     private var logsSendController: LogsSendController?
     enum AttachmentType: String{
-        case camera, gallery, customChooser, localLogs
+        case camera, gallery, customChooser, localLogs, files
     }
     //https://medium.com/@deepakrajmurugesan/swift-access-ios-camera-photo-library-video-and-file-from-user-device-6a7fd66beca2
     
@@ -24,6 +24,9 @@ class AttachmentHandler: NSObject,UIImagePickerControllerDelegate, UINavigationC
         var actions : [UIAlertAction] = [
             UIAlertAction(title: "Camera".localizedPSD(), style: .default, handler: { (action) -> Void in self.authorizationStatus(type: .camera, viewController: viewController)}),
             UIAlertAction(title: "Phone_Gallery".localizedPSD(), style: .default, handler: { (action) -> Void in self.authorizationStatus(type: .gallery, viewController: viewController)}),
+            UIAlertAction(title: "Files".localizedPSD(), style: .default, handler: { _ in
+                self.authorizationStatus(type: .files, viewController: viewController)
+            })
         ]
         if PyrusServiceDesk.fileChooserController != nil {
             actions.append(UIAlertAction(title: PyrusServiceDesk.fileChooserController?.label, style: .default, handler: { (action) -> Void in
@@ -106,9 +109,51 @@ class AttachmentHandler: NSObject,UIImagePickerControllerDelegate, UINavigationC
             _alertWindow.windowLevel = .alert
             _alertWindow.isHidden = false
             _alertWindow.rootViewController?.present(controller, animated: true, completion: nil)
+        case .files:
+            openFiles(viewController)
+    }
+}
+
+    private func openFiles(_ viewController: UIViewController) {
+        DispatchQueue.main.async {
+            // Любые типы файлов:
+            let documentTypes = [String(kUTTypeItem)]
+            // Если нужно ограничить список типов — используйте конкретные UTI,
+            // например: [String(kUTTypePDF), String(kUTTypeImage), String(kUTTypeZipArchive)]
+            
+            let picker = UIDocumentPickerViewController(documentTypes: documentTypes, in: .import)
+            picker.delegate = self
+            picker.allowsMultipleSelection = false
+            picker.modalPresentationStyle = .formSheet
+            viewController.present(picker, animated: true, completion: nil)
         }
     }
     
+    func documentPicker(_ controller: UIDocumentPickerViewController, didPickDocumentsAt urls: [URL]) {
+        guard let url = urls.first else {
+            _ = needShowSizeError(for: nil, on: nil)
+            return
+        }
+        let needsAccess = url.startAccessingSecurityScopedResource()
+        defer { if needsAccess { url.stopAccessingSecurityScopedResource() } }
+        
+        do {
+            // Можно также сначала копировать в /tmp, если файл "ленивый"
+            // let localURL = try FileManager.default.secureCopyItem(at: url)
+            let data = try Data(contentsOf: url)
+            if !needShowSizeError(for: data, on: nil) {
+                self.attachmentPickedBlock?(data, url)
+            }
+        } catch {
+            _ = needShowSizeError(for: nil, on: nil)
+        }
+        // Закрывать сам документ-пикер не требуется — он уже закрылся
+        self.closeBlock?(true)
+    }
+    
+    func documentPickerWasCancelled(_ controller: UIDocumentPickerViewController) {
+        self.closeBlock?(true)
+    }
     
     //FileChooserDelegate
     func didEndWithSuccess(_ data: Data?, url: URL?) {
@@ -145,6 +190,10 @@ class AttachmentHandler: NSObject,UIImagePickerControllerDelegate, UINavigationC
                 cameraController.modalPresentationStyle = .fullScreen
                 cameraController.sourceType = .camera
                 cameraController.mediaTypes = [kUTTypeImage as String, kUTTypeMovie as String, kUTTypeVideo as String]
+//                if #available(iOS 11.0, *) {
+//                    self.oldScrollContentInset = UIScrollView.appearance().contentInsetAdjustmentBehavior.rawValue
+//                    UIScrollView.appearance().contentInsetAdjustmentBehavior = .automatic
+//                }
                 viewController.present(cameraController, animated: true, completion: nil)
             }
         }
@@ -156,7 +205,7 @@ class AttachmentHandler: NSObject,UIImagePickerControllerDelegate, UINavigationC
         DispatchQueue.main.async {
             if UIImagePickerController.isSourceTypeAvailable(.photoLibrary){
                 let libraryController = UIImagePickerController()
-                libraryController.modalPresentationStyle = .fullScreen
+                libraryController.modalPresentationStyle = .formSheet//.fullScreen
                 libraryController.delegate = self
                 libraryController.sourceType = .photoLibrary
                 libraryController.mediaTypes = [kUTTypeImage as String, kUTTypeMovie as String, kUTTypeVideo as String]
@@ -217,8 +266,8 @@ class AttachmentHandler: NSObject,UIImagePickerControllerDelegate, UINavigationC
             }
             
         }
-        
     }
+    
     func getURL(ofPhotoWith mPhasset: PHAsset, completionHandler : @escaping ((_ responseURL : URL?) -> Void)) {
         
         if mPhasset.mediaType == .image {
@@ -251,6 +300,7 @@ class AttachmentHandler: NSObject,UIImagePickerControllerDelegate, UINavigationC
         if #available(iOS 11.0, *) {
             if(oldScrollContentInset != nil && UIScrollView.ContentInsetAdjustmentBehavior.init(rawValue: oldScrollContentInset!) != nil){
                 UIScrollView.appearance().contentInsetAdjustmentBehavior = UIScrollView.ContentInsetAdjustmentBehavior.init(rawValue: oldScrollContentInset!)!
+                oldScrollContentInset = nil
             }
         }
     }

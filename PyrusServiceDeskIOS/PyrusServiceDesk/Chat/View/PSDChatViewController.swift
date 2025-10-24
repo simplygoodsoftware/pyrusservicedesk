@@ -257,7 +257,7 @@ class PSDChatViewController: PSDViewController {
         }
         
         coordinator.animateAlongsideTransition(in: self.tableView, animation: { context in
-            self.tableView.reloadData()
+//            self.tableView.reloadData()
             if self.tableView.contentOffset.y > 100,
                self.tableView.numberOfSections > lastVisibleRow.section,
                self.tableView.numberOfRows(inSection: lastVisibleRow.section) > lastVisibleRow.row
@@ -693,6 +693,8 @@ extension PSDChatViewController: PSDChatViewProtocol {
             popoverContentController = PopoverContentController(ticketId: ticketId, userName: userName, createdAt: createdAt)
         //    chatInfoView.updateItems(items: [ticketId, userName, createdAt])
             navigationItem.rightBarButtonItem = infoButton//UIBarButtonItem(image: UIImage(systemName: "info.circle")?.imageWith(color: PyrusServiceDesk.mainController?.customization?.themeColor ?? .systemBlue), style: .plain, target: self, action: #selector(showPopover))//infoButton
+        case .addMessage(scrollsToBottom: let scrollsToBottom, message: let message):
+            tableView.addMessages([message])
         }
     }
 }
