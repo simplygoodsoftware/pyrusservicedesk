@@ -48,7 +48,7 @@
 "Today" = "היום";
 "Yesterday" = "אתמול";
 "OK" = "אוקיי";
-"Date_Format" = "EE, dd MMM";
+"Date_Format" = "EE dd MMM";
 "Date_Format_Year" = "EE, dd MMM, yyyy";
 "Time_Format" = "hh:mm a";
 "Numbers_Date_Format" = "yyyyMMddHHmmss";
