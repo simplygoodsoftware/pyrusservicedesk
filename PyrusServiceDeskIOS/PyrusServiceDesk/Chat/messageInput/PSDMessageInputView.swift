@@ -7,8 +7,8 @@ protocol PSDMessageInputViewDelegate: class {
 }
 let DEFAULT_LAYOUT_MARGINS : CGFloat = 8
 let BUTTONS_CORNER_RADIUS : CGFloat = 8
-class PSDMessageInputView: UIView, PSDMessageTextViewDelegate,PSDMessageSendButtonDelegate {
-    private let RATE_HEIGHT : CGFloat = 64
+class PSDMessageInputView: UIView, PSDMessageTextViewDelegate, PSDMessageSendButtonDelegate {
+    private let RATE_HEIGHT : CGFloat = 92
     private static let heightForAttach : CGFloat = 30
     private static let interItemSpaceForAttach : CGFloat = 0.1
     weak var delegate: PSDMessageInputViewDelegate?
@@ -24,7 +24,28 @@ class PSDMessageInputView: UIView, PSDMessageTextViewDelegate,PSDMessageSendButt
     ///Visible part of input
     var backgroundView : UIView!
     ///The view with rate buttons
-    private var rateView: PSDRateView!
+    private var textRateView: RateViewProtocol!
+    private var emojiRateView: RateViewProtocol!
+    private var rateHeight: CGFloat = 0
+    private lazy var rateLabel: UILabel = {
+        let label = UILabel()
+        label.textColor = CustomizationHelper.textColorForTable.withAlphaComponent(0.6)
+        label.font = .systemFont(ofSize: 12)
+        label.textAlignment = .center
+        label.text = "PleaseEvaluateQuality".localizedPSD()
+        label.translatesAutoresizingMaskIntoConstraints = false
+        return label
+    }()
+    private lazy var textRateLabel: UILabel = {
+        let label = UILabel()
+        label.textColor = CustomizationHelper.textColorForTable.withAlphaComponent(0.6)
+        label.font = .systemFont(ofSize: 12)
+        label.textAlignment = .center
+        label.text = "PleaseEvaluateQuality".localizedPSD()
+        label.translatesAutoresizingMaskIntoConstraints = false
+        return label
+    }()
+    
     ///Stack with attachments
     private var attachmentsCollection : AttachmentCollectionView!
     private var attachmentsPresenter : AttachmentCollectionViewPresenterProtocol!
@@ -33,13 +54,34 @@ class PSDMessageInputView: UIView, PSDMessageTextViewDelegate,PSDMessageSendButt
     let distToAdd : CGFloat = 21
     let distToSend : CGFloat = 15
     private static let attachmentsHeight : CGFloat = 80
-    var showRate = false{
-        didSet(oldValue) {
-            guard oldValue != showRate else{
+    var showRate = false {
+        didSet {
+            switch RatingType(rawValue: PyrusServiceDesk.ratingSettings.type) {
+            case .text:
+                let size = CGFloat(PyrusServiceDesk.ratingSettings.size)
+                let rateItemsHeihgt = size * 40.0 + (size - 1) * 8.0
+                rateHeight = 12 + 36 + rateItemsHeihgt
+                textRateView.configure(with: PyrusServiceDesk.ratingSettings.ratingTextValues ?? [])
+                rateHeightConstraint?.constant = showRate ? rateHeight : 0
+                rateTopConstraint?.isActive = true
+                textRateTopConstraint?.isActive = false
+                textRateHeightConstraint?.constant = 0
+                textRateView.isHidden = !showRate
+                emojiRateView.isHidden = true
+            default:
+                rateHeight = 92
+                emojiRateView.configure(with: RatingType(rawValue: PyrusServiceDesk.ratingSettings.type)?.rateArray(size: PyrusServiceDesk.ratingSettings.size).reversed() ?? [])
+                textRateHeightConstraint?.constant = showRate ? rateHeight : 0
+                rateTopConstraint?.isActive = false
+                textRateTopConstraint?.isActive = true
+                rateHeightConstraint?.constant = 0
+                emojiRateView.isHidden = !showRate
+                textRateView.isHidden = true
+            }
+            guard oldValue != showRate
+            else {
                 return
             }
-            rateHeightConstraint?.constant = showRate ? RATE_HEIGHT : 0
-            rateView.isHidden = !showRate
         }
     }
     override init(frame: CGRect) {
@@ -79,8 +121,10 @@ class PSDMessageInputView: UIView, PSDMessageTextViewDelegate,PSDMessageSendButt
         inputTextView = PSDMessageTextView(frame: CGRect(x: x, y: 0, width: sendButton.frame.origin.x - distTextToSend - x, height: defaultTextHeight))
         inputTextView.messageDelegate = self
        
-        rateView = PSDRateView()
-        rateView.delegate = self
+        textRateView = PSDTextRateView(frame: .zero)
+        emojiRateView = PSDEmojiRateView(frame: .zero)
+        textRateView.tapDelegate = self
+        emojiRateView.tapDelegate = self
     
         self.addSubview(backgroundView)
         backgroundView.addSubview(topGrayLine)
@@ -88,9 +132,12 @@ class PSDMessageInputView: UIView, PSDMessageTextViewDelegate,PSDMessageSendButt
         backgroundView.addSubview(inputTextView)
         backgroundView.addSubview(sendButton)
         backgroundView.addSubview(attachmentsCollection)
-        backgroundView.addSubview(rateView)
-        rateView.isHidden = !showRate
-        
+        backgroundView.addSubview(textRateView)
+        backgroundView.addSubview(emojiRateView)
+        textRateView.addSubview(rateLabel)
+        emojiRateView.addSubview(textRateLabel)
+        textRateView.isHidden = !showRate
+        emojiRateView.isHidden = !showRate
         addConstraints()
     }
     ///In current version this function replase added to message attachments
@@ -172,7 +219,11 @@ class PSDMessageInputView: UIView, PSDMessageTextViewDelegate,PSDMessageSendButt
     ///Text field height constraint. Change when isLandscape.
     var heightConstraint  : NSLayoutConstraint?
     private var attachmentsHeightConstraint :NSLayoutConstraint?
-    private var rateHeightConstraint :NSLayoutConstraint?
+    private var rateHeightConstraint: NSLayoutConstraint?
+    private var textRateHeightConstraint: NSLayoutConstraint?
+    private var rateTopConstraint: NSLayoutConstraint?
+    private var textRateTopConstraint: NSLayoutConstraint?
+    
     func addConstraints() {
         guard let inputTextView = inputTextView, let sendButton = sendButton else{
             return
@@ -181,10 +232,18 @@ class PSDMessageInputView: UIView, PSDMessageTextViewDelegate,PSDMessageSendButt
         addBackgroundViewConstraints()
         addTopGrayLineConstraints()
         
-        rateView.translatesAutoresizingMaskIntoConstraints = false
-        rateView.addZeroConstraint([.left,.right, .top])
-        rateHeightConstraint = rateView.heightAnchor.constraint(equalToConstant: showRate ? RATE_HEIGHT : 0)
+        textRateView.translatesAutoresizingMaskIntoConstraints = false
+        textRateView.addZeroConstraint([.left,.right])
+        rateHeightConstraint = textRateView.heightAnchor.constraint(equalToConstant: showRate ? rateHeight : 0)
+        rateTopConstraint = textRateView.topAnchor.constraint(equalTo: superview?.topAnchor ?? backgroundView.topAnchor, constant: 0)
         rateHeightConstraint?.isActive = true
+        rateTopConstraint?.isActive = true
+        
+        emojiRateView.translatesAutoresizingMaskIntoConstraints = false
+        emojiRateView.addZeroConstraint([.left,.right])
+        textRateHeightConstraint = emojiRateView.heightAnchor.constraint(equalToConstant: showRate ? rateHeight : 0)
+        textRateTopConstraint = emojiRateView.topAnchor.constraint(equalTo: superview?.topAnchor ?? backgroundView.topAnchor, constant: 0)
+        textRateHeightConstraint?.isActive = true
         
         attachmentsCollection.translatesAutoresizingMaskIntoConstraints = false
         attachmentsCollection.addZeroConstraint([.left,.right])
@@ -200,6 +259,18 @@ class PSDMessageInputView: UIView, PSDMessageTextViewDelegate,PSDMessageSendButt
         attachmentsAddButton.translatesAutoresizingMaskIntoConstraints = false
         
         
+        NSLayoutConstraint.activate([
+            textRateLabel.topAnchor.constraint(equalTo: emojiRateView.topAnchor, constant: 12),
+            textRateLabel.centerXAnchor.constraint(equalTo: emojiRateView.centerXAnchor),
+            
+            rateLabel.topAnchor.constraint(equalTo: textRateView.topAnchor, constant: 12),
+            rateLabel.centerXAnchor.constraint(equalTo: textRateView.centerXAnchor),
+            
+            emojiRateView.bottomAnchor.constraint(equalTo: textRateView.topAnchor),
+            
+        ])
+        superview?.topAnchor.constraint(equalTo: emojiRateView.topAnchor).isActive = true
+
         backgroundView.addConstraint(NSLayoutConstraint(
             item: inputTextView,
             attribute: .top,
@@ -295,14 +366,10 @@ class PSDMessageInputView: UIView, PSDMessageTextViewDelegate,PSDMessageSendButt
         topGrayLine.translatesAutoresizingMaskIntoConstraints = false
         topGrayLine.addZeroConstraint([.left,.right])
         topGrayLine.addSizeConstraint([.height], constant: 0.5)
-        topGrayLine.topAnchor.constraint(equalTo: rateView.bottomAnchor).isActive = true
-        
+        topGrayLine.topAnchor.constraint(equalTo: textRateView.bottomAnchor).isActive = true
     }
-    
-    
-    
-    
 }
+
 extension PSDMessageInputView : AttachmentCollectionViewDelegateProtocol{
     func attachmentRemoved(){
         checkCollectionHeight()
@@ -310,25 +377,15 @@ extension PSDMessageInputView : AttachmentCollectionViewDelegateProtocol{
     }
 }
 extension PSDMessageInputView: AttachmentsAddButtonDelegate{
-    func showInput(){
-        if let vc  =  UIApplication.topViewController() as? PSDChatViewController{
-            vc.becomeFirstResponder()
-        }
-    }
-    func prepairToShowAlert(){
-        EventsLogger.logEvent(.resignFirstResponder, additionalInfo: "prepair to show alert")
-        self.inputTextView.resignFirstResponder()
-    }
     func attachmentChoosed(_ data:Data, _ url:URL?)
     {
-        showInput()
-        let attachment : PSDAttachment = PSDObjectsCreator.createAttachment(data,url)
+        let attachment = PSDObjectsCreator.createAttachment(data,url)
         addAttachment(attachment)
     }
 }
 extension PSDMessageInputView: PSDRateViewDelegate {
     func didTapRate(_ rateValue: Int) {
-        showRate = false
         delegate?.sendRate(rateValue)
+        showRate = false
     }
 }

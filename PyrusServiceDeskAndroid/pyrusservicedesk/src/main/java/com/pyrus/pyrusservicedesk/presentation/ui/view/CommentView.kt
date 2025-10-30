@@ -2,9 +2,7 @@ package com.pyrus.pyrusservicedesk.presentation.ui.view
 
 import android.animation.Animator
 import android.animation.ObjectAnimator
-import android.app.Activity
 import android.content.Context
-import android.content.Intent
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.graphics.Color
@@ -15,7 +13,6 @@ import android.graphics.drawable.LayerDrawable
 import android.net.Uri
 import android.text.*
 import android.text.method.LinkMovementMethod
-import android.text.style.ClickableSpan
 import android.text.util.Linkify
 import android.util.AttributeSet
 import android.view.Gravity
@@ -26,7 +23,6 @@ import android.widget.FrameLayout
 import android.widget.ImageView
 import android.widget.LinearLayout
 import androidx.annotation.ColorInt
-import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.content.res.AppCompatResources
 import androidx.appcompat.widget.AppCompatImageView
 import androidx.appcompat.widget.AppCompatTextView
@@ -35,13 +31,15 @@ import androidx.core.text.util.LinkifyCompat
 import androidx.exifinterface.media.ExifInterface
 import com.pyrus.pyrusservicedesk.PyrusServiceDesk
 import com.pyrus.pyrusservicedesk.R
+import com.pyrus.pyrusservicedesk.databinding.PsdCommentBinding
+import com.pyrus.pyrusservicedesk.presentation.ui.navigation_page.ticket.HtmlTagUtils
 import com.pyrus.pyrusservicedesk.presentation.ui.view.OutlineImageView.Companion.EDGE_RIGHT
 import com.pyrus.pyrusservicedesk.utils.*
 import com.squareup.picasso.Picasso
 import com.squareup.picasso.Target
-import kotlinx.android.synthetic.main.psd_comment.view.*
 import java.util.regex.Matcher
 import java.util.regex.Pattern
+import kotlin.math.max
 
 private const val TYPE_INBOUND = 0
 private const val TYPE_OUTBOUND = 1
@@ -59,10 +57,12 @@ private const val PROGRESS_CHANGE_ANIMATION_DURATION = 100L
  * xml declaration of the view. By default [TYPE_INBOUND] is used.
  */
 internal class CommentView @JvmOverloads constructor(
-        context: Context,
-        attrs: AttributeSet? = null,
-        defStyleAttr: Int = 0)
-    : FrameLayout(context, attrs, defStyleAttr) {
+    context: Context,
+    attrs: AttributeSet? = null,
+    defStyleAttr: Int = 0,
+) : FrameLayout(context, attrs, defStyleAttr) {
+
+    private var binding: PsdCommentBinding
 
     companion object {
         private const val PREVIEW_RETRY_STEP_MS = 10 * 1000L
@@ -108,21 +108,21 @@ internal class CommentView @JvmOverloads constructor(
         set(value) {
             when (value) {
                 ContentType.Text -> {
-                    comment_text.visibility = View.VISIBLE
-                    attachment_layout.visibility = View.GONE
-                    preview_layout.visibility = GONE
+                    binding.commentTextLayout.visibility = View.VISIBLE
+                    binding.attachmentLayout.visibility = View.GONE
+                    binding.previewLayout.visibility = GONE
                 }
                 ContentType.Attachment -> {
                     recentProgress = 0
-                    comment_text.visibility = View.GONE
-                    attachment_layout.visibility = View.VISIBLE
-                    preview_layout.visibility = View.GONE
+                    binding.commentTextLayout.visibility = View.GONE
+                    binding.attachmentLayout.visibility = View.VISIBLE
+                    binding.previewLayout.visibility = View.GONE
                 }
                 ContentType.PreviewableAttachment -> {
                     recentProgress = 0
-                    comment_text.visibility = GONE
-                    attachment_layout.visibility = GONE
-                    preview_layout.visibility = View.VISIBLE
+                    binding.commentTextLayout.visibility = GONE
+                    binding.attachmentLayout.visibility = GONE
+                    binding.previewLayout.visibility = View.VISIBLE
                 }
             }
             field = value
@@ -213,57 +213,63 @@ internal class CommentView @JvmOverloads constructor(
 
     init {
         View.inflate(context, R.layout.psd_comment, this)
+        binding = PsdCommentBinding.bind(findViewById(R.id.root))
 
         type = with(getContext().obtainStyledAttributes(attrs, R.styleable.CommentView)){
             getInt(R.styleable.CommentView_type, TYPE_INBOUND).also { recycle() }
         }
 
-        preview_passive_progress.indeterminateDrawable.setColorFilter(Color.BLACK, PorterDuff.Mode.SRC_IN)
+        binding.previewPassiveProgress.indeterminateDrawable.setColorFilter(Color.BLACK, PorterDuff.Mode.SRC_IN)
 
         ConfigUtils.getMainFontTypeface()?.let {
-            file_name.typeface = it
-            file_size.typeface = it
-            comment_text.typeface = it
+            binding.fileName.typeface = it
+            binding.fileSize.typeface = it
+            binding.commentText.typeface = it
+            binding.textTime.typeface = it
+            binding.previewTime.typeface = it
+            binding.previewMiniTime.typeface = it
         }
-        val backgroundColor = when (type){
+        val backgroundColor = when (type) {
             TYPE_INBOUND -> ConfigUtils.getSupportMessageTextBackgroundColor(context)
             else -> ConfigUtils.getUserMessageTextBackgroundColor(context)
-
         }
         primaryColor = getTextColorOnBackground(context, backgroundColor)
         val secondaryColor = adjustColorChannel(primaryColor, ColorChannel.Alpha, SECONDARY_TEXT_COLOR_MULTIPLIER)
 
-        background_parent.setCardBackgroundColor(backgroundColor)
+        binding.backgroundParent.setCardBackgroundColor(backgroundColor)
 
-        comment_text.setTextColor(when(type) {
+        val textColor = when (type) {
             TYPE_INBOUND -> ConfigUtils.getSupportMessageTextColor(context, backgroundColor)
             else -> ConfigUtils.getUserMessageTextColor(context, backgroundColor)
-        })
-        comment_text.setLinkTextColor(primaryColor)
-        file_name.setTextColor(primaryColor)
-        file_size.setTextColor(secondaryColor)
+        }
+        binding.commentText.setTextColor(textColor)
+        binding.commentText.setLinkTextColor(primaryColor)
+        binding.textTime.setTextColor(secondaryColor)
+        binding.fileName.setTextColor(primaryColor)
+        binding.fileSize.setTextColor(secondaryColor)
+        binding.previewMiniTime.setTextColor(secondaryColor)
 
-        fileDownloadDrawable = attachment_progress.progressDrawable as LayerDrawable
+        fileDownloadDrawable = binding.attachmentProgress.progressDrawable as LayerDrawable
         fileDownloadDrawable.adjustSettingsForProgress(primaryColor, secondaryColor)
-        previewDownloadDrawable = preview_progress.progressDrawable as LayerDrawable
+        previewDownloadDrawable = binding.previewProgress.progressDrawable as LayerDrawable
         previewDownloadDrawable.adjustSettingsForProgress(primaryColor, secondaryColor)
 
-        preview_full.outlineColor = ActivityCompat.getColor(context, R.color.psd_comment_preview_outline)
-        preview_full.outlineRadius = resources.getDimensionPixelSize(R.dimen.psd_comment_radius)
-        preview_full.outlineWidth = resources.getDimensionPixelSize(R.dimen.psd_comment_preview_outline_radius)
+        binding.previewFull.outlineColor = ActivityCompat.getColor(context, R.color.psd_comment_preview_outline)
+        binding.previewFull.outlineRadius = resources.getDimensionPixelSize(R.dimen.psd_comment_radius)
+        binding.previewFull.outlineWidth = resources.getDimensionPixelSize(R.dimen.psd_comment_preview_outline_radius)
 
-        preview_mini.outlineColor = backgroundColor
-        preview_mini.outlineRadius = resources.getDimensionPixelSize(R.dimen.psd_comment_radius)
-        preview_mini.outlineWidth = resources.getDimensionPixelSize(R.dimen.psd_comment_preview_outline_radius)
-        preview_mini.edges = preview_mini.edges and EDGE_RIGHT.inv()
+        binding.previewMini.outlineColor = backgroundColor
+        binding.previewMini.outlineRadius = resources.getDimensionPixelSize(R.dimen.psd_comment_radius)
+        binding.previewMini.outlineWidth = resources.getDimensionPixelSize(R.dimen.psd_comment_preview_outline_radius)
+        binding.previewMini.edges = binding.previewMini.edges and EDGE_RIGHT.inv()
 
-        root.gravity = Gravity.BOTTOM or when(type){
+        binding.root.gravity = Gravity.BOTTOM or when(type){
             TYPE_INBOUND -> Gravity.START
             else -> Gravity.END
         }
 
-        preview_progress.setOnClickListener(progressClickListener)
-        attachment_progress.setOnClickListener(progressClickListener)
+        binding.previewProgress.setOnClickListener(progressClickListener)
+        binding.attachmentProgress.setOnClickListener(progressClickListener)
         statusView = AppCompatImageView(context).apply {
             layoutParams = LinearLayout.LayoutParams(
                     resources.getDimension(R.dimen.psd_comment_error_width).toInt(),
@@ -274,26 +280,26 @@ internal class CommentView @JvmOverloads constructor(
     }
 
     override fun setOnClickListener(l: OnClickListener?) {
-        background_parent.setOnClickListener(l)
+        binding.backgroundParent.setOnClickListener(l)
     }
 
     override fun setOnLongClickListener(l: OnLongClickListener?) {
-        background_parent.setOnLongClickListener(l)
+        binding.backgroundParent.setOnLongClickListener(l)
     }
 
     override fun onAttachedToWindow() {
         super.onAttachedToWindow()
-        root.removeView(statusView)
+        binding.root.removeView(statusView)
         (layoutParams as MarginLayoutParams).apply {
             val margin = -statusView.layoutParams.width
             when (type) {
                 TYPE_INBOUND -> {
                     rightMargin = margin
-                    root.addView(statusView)
+                    binding.root.addView(statusView)
                 }
                 else -> {
                     leftMargin = margin
-                    root.addView(statusView, 0)
+                    binding.root.addView(statusView, 0)
                 }
             }
         }
@@ -304,11 +310,17 @@ internal class CommentView @JvmOverloads constructor(
      * Works with [ContentType.Text].
      */
     fun setCommentText(text: String) {
-        val filteredText = text.replace("<br>", "\n").replace(Regex("\\n?<button>(.*?)</button>|\\n *?$|^ *?\\n"), "")
-        comment_text.text = replaceLinkTagsWithSpans(filteredText)
-        LinkifyCompat.addLinks(comment_text, Linkify.WEB_URLS or Linkify.PHONE_NUMBERS)
-        addDeepLinks(comment_text)
-        comment_text.movementMethod = LinkMovementMethod.getInstance()
+        val filteredText = HtmlTagUtils.cleanTags(text)
+        binding.commentText.text = replaceLinkTagsWithSpans(filteredText)
+        LinkifyCompat.addLinks(binding.commentText, Linkify.WEB_URLS or Linkify.PHONE_NUMBERS)
+        addDeepLinks(binding.commentText)
+        binding.commentText.movementMethod = LinkMovementMethod.getInstance()
+    }
+
+    fun setCreationTime(time: String) {
+        binding.textTime.text = time
+        binding.previewTime.text = time
+        binding.previewMiniTime.text = time
     }
 
     private fun replaceLinkTagsWithSpans(text: CharSequence): CharSequence {
@@ -338,7 +350,7 @@ internal class CommentView @JvmOverloads constructor(
 
         ranges.forEach { span ->
             ssb.setSpan(
-                createClickableSpan(span.first, span.second),
+                LinkUtils.createClickableSpan(span.first, context, span.second),
                 span.third.first,
                 span.third.last,
                 Spannable.SPAN_INCLUSIVE_INCLUSIVE
@@ -346,66 +358,6 @@ internal class CommentView @JvmOverloads constructor(
         }
 
         return ssb
-    }
-
-    fun isLinkSafe(url: String, text: String?): Boolean {
-        val urlWithoutProtocol = url
-            .removePrefix("https://")
-            .removePrefix("http://")
-            .removeSuffix("/")
-
-        return text == url
-                || ConfigUtils.getTrustedUrls()?.any { urlWithoutProtocol.startsWith(it) } == true
-                || text == null
-    }
-
-    private fun createClickableSpan(url: String, text: String? = null): ClickableSpan {
-        return object : ClickableSpan() {
-
-            override fun updateDrawState(ds: TextPaint) {
-                super.updateDrawState(ds)
-                ds.isUnderlineText = true
-                ds.color = ConfigUtils.getAccentColor(context)
-            }
-
-            override fun onClick(widget: View) {
-                if (isLinkSafe(url, text)) {
-                    try {
-                        context.startActivity(Intent(Intent.ACTION_VIEW).apply { data = Uri.parse(url) })
-                    }
-                    catch (exception: Exception) {
-                        exception.printStackTrace()
-                    }
-                }
-                else {
-                    showLinkDialog(context as Activity, url) {
-                        try {
-                            context.startActivity(Intent(Intent.ACTION_VIEW).apply { data = Uri.parse(url) })
-                        }
-                        catch (exception: Exception) {
-                            exception.printStackTrace()
-                        }
-                    }
-                }
-            }
-        }
-    }
-
-    private fun showLinkDialog(context: Activity, url: String, onClick: ()-> Unit) {
-        val message = SpannableStringBuilder(context.getString(R.string.link_warning, url))
-        val range = Regex(url).find(message)?.range
-        range?.let {
-            if (range.first != -1 && range.last != -1 && range.last > range.first) {
-                message.setSpan(createClickableSpan(url), range.first, range.last + 1, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE)
-            }
-        }
-
-        AlertDialog.Builder(context)
-            .setPositiveButton(R.string.psd_open) { _, _ -> onClick.invoke() }
-            .setNegativeButton(android.R.string.cancel) { _, _ -> }
-            .setMessage(message)
-            .create()
-            .show()
     }
 
     private fun addDeepLinks(textView: AppCompatTextView) {
@@ -421,7 +373,7 @@ internal class CommentView @JvmOverloads constructor(
 
             anyFound = true
 
-            val clickableSpan = createClickableSpan(matcher.group())
+            val clickableSpan = LinkUtils.createClickableSpan(matcher.group(), context)
 
             ssb.setSpan(clickableSpan, matcher.start(), matcher.end(), 0)
         }
@@ -437,7 +389,7 @@ internal class CommentView @JvmOverloads constructor(
      * Works with [ContentType.Attachment].
      */
     fun setFileName(fileName: String) {
-        file_name.text = fileName
+        binding.fileName.text = fileName
     }
 
     /**
@@ -455,7 +407,7 @@ internal class CommentView @JvmOverloads constructor(
             isMegabytes -> R.string.psd_file_size_mb
             else -> R.string.psd_file_size_kb
         }
-        file_size.text = context.getString(textResId, toShow)
+        binding.fileSize.text = context.getString(textResId, toShow)
     }
 
     /**
@@ -465,8 +417,8 @@ internal class CommentView @JvmOverloads constructor(
     fun setProgress(progress: Int) {
         recentProgress = progress
         val progressBar = when(contentType){
-            ContentType.Attachment -> attachment_progress
-            ContentType.PreviewableAttachment -> preview_progress
+            ContentType.Attachment -> binding.attachmentProgress
+            ContentType.PreviewableAttachment -> binding.previewProgress
             else -> null
         }
         progressBar?.let {
@@ -501,25 +453,25 @@ internal class CommentView @JvmOverloads constructor(
     }
 
     private fun setMiniPreview(previewUri: Uri) {
-        preview_mini.setImageBitmap(null)
-        preview_mini.visibility = GONE
+        binding.previewMini.setImageBitmap(null)
+        binding.previewMini.visibility = GONE
         when {
-            previewUri.isRemote() -> setNetworkPreview(previewUri, preview_mini, false)
+            previewUri.isRemote() -> setNetworkPreview(previewUri, binding.previewMini, false)
         }
     }
 
     private fun setFullSizePreview(previewUri: Uri) {
         val isRemote = previewUri.isRemote()
-        preview_progress.visibility = if (isRemote) GONE else View.VISIBLE
-        preview_full.setImageBitmap(null)
+        binding.previewProgress.visibility = if (isRemote) GONE else View.VISIBLE
+        binding.previewFull.setImageBitmap(null)
         when {
-            isRemote -> setNetworkPreview(previewUri, preview_full, true)
-            else -> setLocalPreview(preview_full, previewUri, true)
+            isRemote -> setNetworkPreview(previewUri, binding.previewFull, true)
+            else -> setLocalPreview(binding.previewFull, previewUri, true)
         }
     }
 
     private fun applyProgressStatusToPreview(status: Status) {
-        preview_progress.visibility = when(status){
+        binding.previewProgress.visibility = when(status){
             Status.Completed -> GONE
             else -> View.VISIBLE
         }
@@ -529,20 +481,24 @@ internal class CommentView @JvmOverloads constructor(
         if (status != Status.Processing)
             setFileSize(recentFileSize)
         else
-            file_size.setText(R.string.psd_uploading)
+            binding.fileSize.setText(R.string.psd_uploading)
     }
 
-    private fun setNetworkPreview(previewUri: Uri,
-                                  target: ImageView,
-                                  adjustTargetDimensions: Boolean) {
+    private fun setNetworkPreview(
+        previewUri: Uri,
+        target: ImageView,
+        adjustTargetDimensions: Boolean,
+    ) {
 
         setNetworkPreviewDelayed(previewUri, target, adjustTargetDimensions, 0)
     }
 
-    private fun setNetworkPreviewDelayed(previewUri: Uri,
-                                         target: ImageView,
-                                         adjustTargetDimensions: Boolean,
-                                         delayMs: Long) {
+    private fun setNetworkPreviewDelayed(
+        previewUri: Uri,
+        target: ImageView,
+        adjustTargetDimensions: Boolean,
+        delayMs: Long,
+    ) {
 
         val allowApplyResult: (Int) -> Boolean = {
             it == previewCallId
@@ -561,7 +517,7 @@ internal class CommentView @JvmOverloads constructor(
             }
         }
 
-        val picassoTarget = when{
+        val picassoTarget = when {
             adjustTargetDimensions -> ChangingSizeTarget(
                 target,
                 previewUri,
@@ -569,8 +525,16 @@ internal class CommentView @JvmOverloads constructor(
                 resources.getDimensionPixelSize(R.dimen.psd_recyclerview_item_height_default),
                 previewRatioMap,
                 allowApplyResult,
-                onFailed)
-            else -> SimpleTarget(target, previewUri, ++previewCallId, allowApplyResult, onFailed) { target.visibility = View.VISIBLE }
+                onFailed
+            )
+
+            else -> SimpleTarget(
+                target,
+                previewUri,
+                ++previewCallId,
+                allowApplyResult,
+                onFailed
+            ) { target.visibility = View.VISIBLE }
         }
         clearCurrentPreviewRequest()
         recentPicassoTarget = picassoTarget
@@ -592,10 +556,12 @@ internal class CommentView @JvmOverloads constructor(
     /**
      * There is a problem with [Picasso] that doesn't allow to use [ChangingSizeTarget] with local files.
      */
-    private fun setLocalPreview(target: ImageView,
-                                previewUri: Uri,
-                                adjustTargetDimension: Boolean,
-                                onFailed: (() -> Unit)? = null) {
+    private fun setLocalPreview(
+        target: ImageView,
+        previewUri: Uri,
+        adjustTargetDimension: Boolean,
+        onFailed: (() -> Unit)? = null,
+    ) {
 
         val bitmap = try {
             val exif = context.contentResolver.openInputStream(previewUri)?.use {
@@ -614,16 +580,20 @@ internal class CommentView @JvmOverloads constructor(
                     this.rotate(getImageRotation(it).toFloat())
                 } ?: this
             }
-        } catch (ex: java.lang.Exception) {
+        }
+        catch (ex: java.lang.Exception) {
             onFailed?.invoke()
             return
         }
 
         if (adjustTargetDimension) {
-            val ratio  = bitmap.width.toFloat() / bitmap.height
+            val ratio = bitmap.width.toFloat() / bitmap.height
             if (!previewRatioMap.containsKey(previewUri))
                 previewRatioMap += previewUri to ratio
-            target.layoutParams.width = getFullSizePreviewWidth(previewUri, target.layoutParams.height)
+            target.layoutParams.width = getFullSizePreviewWidth(
+                previewUri,
+                target.layoutParams.height
+            )
             target.requestLayout()
         }
         target.setImageBitmap(bitmap)
@@ -633,13 +603,15 @@ internal class CommentView @JvmOverloads constructor(
 /**
  * [hashCode] and [equals] are required by [Target] description
  */
-private open class SimpleTarget(protected val targetView: ImageView,
-                                protected val uri: Uri,
-                                val callId: Int,
-                                protected val canApplyResult: (Int) -> Boolean,
-                                protected val onFailed: (Int) -> Unit,
-                                protected val onSuccess: (() -> Unit)? = null)
-    : Target{
+private open class SimpleTarget
+    (
+    protected val targetView: ImageView,
+    protected val uri: Uri,
+    val callId: Int,
+    protected val canApplyResult: (Int) -> Boolean,
+    protected val onFailed: (Int) -> Unit,
+    protected val onSuccess: (() -> Unit)? = null,
+) : Target {
 
     /**
      * [Picasso] stores targets in weak references, which can lead to missing of calling the callbacks as
@@ -659,7 +631,7 @@ private open class SimpleTarget(protected val targetView: ImageView,
     }
 
     override fun onBitmapLoaded(bitmap: Bitmap?, from: Picasso.LoadedFrom?) {
-        if(!canApplyResult.invoke(callId))
+        if (!canApplyResult.invoke(callId))
             return
         targetView.setImageBitmap(bitmap)
         targetView.tag = null
@@ -679,23 +651,25 @@ private open class SimpleTarget(protected val targetView: ImageView,
     }
 }
 
-private class ChangingSizeTarget(targetView: ImageView,
-                                 uri: Uri,
-                                 callId: Int,
-                                 private val minWidth: Int,
-                                 val ratioMap: MutableMap<Uri, Float>,
-                                 canApplyResult: (Int) -> Boolean,
-                                 onFailed: (Int) -> Unit)
-    : SimpleTarget(targetView, uri, callId, canApplyResult, onFailed) {
+private class ChangingSizeTarget(
+    targetView: ImageView,
+    uri: Uri,
+    callId: Int,
+    private val minWidth: Int,
+    val ratioMap: MutableMap<Uri, Float>,
+    canApplyResult: (Int) -> Boolean,
+    onFailed: (Int) -> Unit,
+) : SimpleTarget(targetView, uri, callId, canApplyResult, onFailed) {
 
     private companion object {
         const val CHANGING_SIZE_ANIMATION_DURATION_MS = 150L
     }
 
     init {
-        targetView.layoutParams.width = Math.max(
+        targetView.layoutParams.width = max(
             CommentView.getFullSizePreviewWidth(uri, targetView.layoutParams.height),
-            minWidth)
+            minWidth
+        )
     }
 
     override fun onBitmapLoaded(bitmap: Bitmap?, from: Picasso.LoadedFrom?) {
@@ -711,19 +685,20 @@ private class ChangingSizeTarget(targetView: ImageView,
         val animator = ObjectAnimator.ofFloat(1f, ratio)
         animator.duration = CHANGING_SIZE_ANIMATION_DURATION_MS
         animator.addUpdateListener {
-            targetView.layoutParams.width = Math.max(
+            targetView.layoutParams.width = max(
                 (targetView.layoutParams.height * it.animatedValue as Float).toInt(),
-                minWidth)
+                minWidth
+            )
             targetView.requestLayout()
         }
         fun onAnimationEnd() {
             super.onBitmapLoaded(bitmap, from)
         }
         animator.addListener(object : Animator.AnimatorListener {
-            override fun onAnimationRepeat(animation: Animator?) {}
-            override fun onAnimationEnd(animation: Animator?) = onAnimationEnd()
-            override fun onAnimationCancel(animation: Animator?) {}
-            override fun onAnimationStart(animation: Animator?) {}
+            override fun onAnimationRepeat(animation: Animator) {}
+            override fun onAnimationEnd(animation: Animator) = onAnimationEnd()
+            override fun onAnimationCancel(animation: Animator) {}
+            override fun onAnimationStart(animation: Animator) {}
 
         })
         animator.start()

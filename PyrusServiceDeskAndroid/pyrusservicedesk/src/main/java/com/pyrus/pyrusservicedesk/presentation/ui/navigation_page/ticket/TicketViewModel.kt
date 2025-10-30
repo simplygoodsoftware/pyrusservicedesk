@@ -18,6 +18,7 @@ import com.pyrus.pyrusservicedesk.presentation.ui.navigation_page.ticket.entries
 import com.pyrus.pyrusservicedesk.presentation.ui.view.recyclerview.DiffResultWithNewItems
 import com.pyrus.pyrusservicedesk.presentation.viewmodel.ConnectionViewModelBase
 import com.pyrus.pyrusservicedesk.sdk.data.Attachment
+import com.pyrus.pyrusservicedesk.sdk.data.Author
 import com.pyrus.pyrusservicedesk.sdk.data.Comment
 import com.pyrus.pyrusservicedesk.sdk.data.FileManager
 import com.pyrus.pyrusservicedesk.sdk.data.LocalDataProvider
@@ -39,7 +40,6 @@ import kotlinx.coroutines.*
 import java.lang.Exception
 import java.lang.Runnable
 import java.util.*
-import kotlin.collections.ArrayList
 
 /**
  * ViewModel for the ticket screen.
@@ -65,6 +65,8 @@ internal class TicketViewModel(
      * Drafted text. Assigned once when view model is created.
      */
     val draft: String
+
+    private var sendComment: String?
 
     private val draftRepository = serviceDeskProvider.getDraftRepository()
     private val localDataProvider: LocalDataProvider = serviceDeskProvider.getLocalDataProvider()
@@ -95,6 +97,7 @@ internal class TicketViewModel(
 
     init {
         draft = draftRepository.getDraft()
+        sendComment = PyrusServiceDesk.getAndRemoveSendComment()
 
         runBlocking {
             val response = requests.getPendingFeedCommentsRequest().execute()
@@ -313,8 +316,9 @@ internal class TicketViewModel(
                 }
                 return true
             }
+
+            null -> return false
         }
-        return false
     }
 
     private fun applyTicketUpdate(freshList: Comments, arePendingComments: Boolean) {
@@ -336,8 +340,22 @@ internal class TicketViewModel(
             }
         }
         val toPublish = mutableListOf<TicketEntry>().apply {
-            ConfigUtils.getWelcomeMessage()?.let { add(0, WelcomeMessageEntry(it)) }
-            addAll(freshList.comments.toTicketEntries())
+            val freshComments = ArrayList<Comment>()
+            val welcomeMessage = freshList.welcomeMessage ?: ConfigUtils.getWelcomeMessage()
+            if (welcomeMessage != null) {
+                val firstComment = freshList.comments.firstOrNull()
+                val welcomeCommentDate = firstComment?.creationDate ?: Date().apply { time = System.currentTimeMillis() }
+                val welcomeComment = Comment(
+                    body = welcomeMessage,
+                    creationDate = welcomeCommentDate,
+                    author = Author(""),
+                    isWelcomeMessage = true,
+                )
+                freshComments += welcomeComment
+            }
+            freshComments += freshList.comments
+
+            addAll(freshComments.toTicketEntries())
             listOfLocalEntries.forEach {
                 maybeAddDate(it as CommentEntry, this)
                 add(it)
@@ -353,6 +371,11 @@ internal class TicketViewModel(
         publishEntries(ticketEntries, toPublish)
         if (!arePendingComments)
             onDataLoaded()
+        val message = sendComment
+        if (!message.isNullOrBlank()) {
+            sendComment = null
+            onSendClicked(message)
+        }
     }
 
     private fun needUpdateCommentsList(freshList: List<Comment>): Boolean {
@@ -425,6 +448,12 @@ internal class TicketViewModel(
         publishEntries(ticketEntries, newEntries)
     }
 
+    private fun removeLocalComment(localId: Long) {
+        val newEntries = ticketEntries.toMutableList()
+        newEntries.removeAll { it is CommentEntry && it.comment.localId == localId }
+        publishEntries(ticketEntries, newEntries)
+    }
+
     private fun maybeAddDate(commentEntry: CommentEntry, newEntries: MutableList<TicketEntry>) {
         commentEntry.comment.creationDate.getWhen(getApplication(), Calendar.getInstance()).let {
             if (!hasRealComments()
@@ -454,26 +483,12 @@ internal class TicketViewModel(
         } ?: -1
     }
 
-    private fun CommentEntry.containsButtons(): Boolean {
-        if (this.comment.body == null) { return false }
-        return Regex(BUTTON_PATTERN).containsMatchIn(this.comment.body)
-    }
-
-    private fun extractButtons(comment: Comment): List<String> {
-        if (comment.body == null) {
-            return emptyList()
-        }
-
-        return Regex(BUTTON_PATTERN).findAll(comment.body).map { it.groupValues[1] }.toList()
-    }
-
     // buttons are displayed in other entries, so if comment contains nothing but buttons we don't need it
     private fun removeEmptyComments(entries: List<TicketEntry>): List<TicketEntry> {
         return entries.filterNot {
             it is CommentEntry
                     && it.comment.attachments.isNullOrEmpty()
-                    && it.comment.body?.replace(Regex("\\n?$BUTTON_PATTERN\\n?|<br>|\n"), "")
-                .isNullOrBlank()
+                    && HtmlTagUtils.cleanTags(it.comment.body ?: "").isBlank()
         }
     }
 
@@ -484,11 +499,16 @@ internal class TicketViewModel(
 
         val commentWithButtons = newEntries.last()
 
-        if (commentWithButtons !is CommentEntry || !commentWithButtons.containsButtons()) {
+        if (commentWithButtons !is CommentEntry) {
             return newEntries
         }
 
-        return newEntries + ButtonsEntry(extractButtons(commentWithButtons.comment)) {
+        val buttons = HtmlTagUtils.extractButtons(commentWithButtons.comment)
+        if (buttons.isEmpty()) {
+            return newEntries
+        }
+
+        return newEntries + ButtonsEntry(buttons) {
             onSendClicked(it)
         }
     }
@@ -523,35 +543,40 @@ internal class TicketViewModel(
         if (!this.hasAttachments())
             return listOf(CommentEntry(this, error = pendingError))
         val result = mutableListOf<CommentEntry>()
-        if (body?.isBlank() == false)
+        val commentBody = body ?: ""
+        if (commentBody.isNotBlank()) {
             result.add(
+                CommentEntry(
+                    Comment(
+                        this.commentId,
+                        commentBody,
+                        this.isInbound,
+                        null,
+                        this.creationDate,
+                        this.author,
+                        this.localId
+                    ),
+                    error = pendingError
+                )
+            )
+        }
+        return this.attachments!!.fold(result) { entriesList, attachment ->
+            entriesList.add(
                 CommentEntry(
                     Comment(
                         this.commentId,
                         this.body,
                         this.isInbound,
-                        null,
+                        listOf(attachment),
                         this.creationDate,
                         this.author,
-                        this.localId),
-                    error = pendingError)
-            )
-        return this.attachments!!
-            .fold(result){ entriesList, attachment ->
-                entriesList.add(
-                    CommentEntry(
-                        Comment(
-                            this.commentId,
-                            this.body,
-                            this.isInbound,
-                            listOf(attachment),
-                            this.creationDate,
-                            this.author,
-                            this.localId),
-                        error = pendingError)
+                        this.localId
+                    ),
+                    error = pendingError
                 )
-                entriesList
-            }
+            )
+            entriesList
+        }
     }
 
     fun onRatingClick(rating: Int) =
@@ -566,29 +591,12 @@ internal class TicketViewModel(
     }
 
     private inner class AddCommentObserver(
-        uploadFileHooks: UploadFileHooks?,
-        localComment: Comment
-    ) : AddCommentObserverBase<CallResult<AddCommentResponseData>, AddCommentResponseData>(
-        uploadFileHooks,
-        localComment
-    ) {
-        override fun getAttachments(data: AddCommentResponseData) = data.sentAttachments
+        private val uploadFileHooks: UploadFileHooks?,
+        private val localComment: Comment
+    ) : Observer<CallResult<AddCommentResponseData>> {
 
-        override fun getCommentId(data: AddCommentResponseData): Long = data.commentId
-
-        override fun onSuccess(data: AddCommentResponseData) {
-            liveUpdates.subscribeOnUnreadTicketCountChanged(this@TicketViewModel)
-        }
-
-    }
-
-
-    private abstract inner class AddCommentObserverBase<T : CallResult<U>, U>(
-        val uploadFileHooks: UploadFileHooks?,
-        val localComment: Comment
-    ) : Observer<T> {
-        override fun onChanged(t: T?) {
-            t?.let { result ->
+        override fun onChanged(t: CallResult<AddCommentResponseData>) {
+            t.let { result ->
                 isCreateTicketSent = false
                 if (uploadFileHooks?.isCancelled == true)
                     return@let
@@ -599,27 +607,29 @@ internal class TicketViewModel(
                         error = result.error
                     )
                     else -> {
-                        onSuccess(result.data!!)
-                        val commentId = getCommentId(result.data)
-                        val attachments = getAttachments(result.data)
-                        if (hasComment(commentId))
+                        liveUpdates.subscribeOnUnreadTicketCountChanged(this@TicketViewModel)
+                        val data = result.data!!
+                        if (hasComment(data.commentId)) {
+                            removeLocalComment(localComment.localId)
                             return@let
+                        }
+
                         CommentEntry(
-                            localDataProvider.convertLocalCommentToServer(localComment, commentId, attachments)
+                            localDataProvider.convertLocalCommentToServer(
+                                localComment = localComment,
+                                serverCommentId = data.commentId,
+                                attachments = data.sentAttachments
+                            )
                         )
                     }
                 }
+
                 applyCommentUpdate(entry, ChangeType.Changed)
             }
         }
 
-        abstract fun getAttachments(data: U): List<Attachment>?
-
-        abstract fun getCommentId(data: U): Long
-
-        abstract fun onSuccess(data: U)
-
     }
+
 
     private fun updateFeedIntervalIfNeeded() {
         val interval = getFeedUpdateInterval()

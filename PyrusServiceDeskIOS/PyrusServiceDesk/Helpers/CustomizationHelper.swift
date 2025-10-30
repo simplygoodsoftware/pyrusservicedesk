@@ -8,6 +8,10 @@ class CustomizationHelper {
     static var welcomeMessage: String {
         return PyrusServiceDesk.mainController?.customization?.welcomeMessage ?? ""
     }
+    
+    static var customLocale: String? {
+        return PyrusServiceDesk.mainController?.customization?.customLocale
+    }
     static func statusBarStyle(for controller: UIViewController) -> UIStatusBarStyle? {
         guard PyrusServiceDesk.mainController?.customization?.statusBarStyle != nil || PyrusServiceDesk.mainController?.customization?.statusBarStyleDark != nil  else {
             return nil

@@ -1,8 +1,6 @@
 
 import UIKit
 protocol AttachmentsAddButtonDelegate: class {
-    func prepairToShowAlert()
-    func showInput()
     func attachmentChoosed(_ data:Data, _ url:URL?)
 }
 class AttachmentsAddButton: UIButton {
@@ -21,18 +19,10 @@ class AttachmentsAddButton: UIButton {
     }
     @objc func buttonPressed()
     {
-        self.delegate?.prepairToShowAlert()
         AttachmentHandler.shared.showAttachmentActionSheet(self.findViewController()!, sourseView:self)
         AttachmentHandler.shared.attachmentPickedBlock = { (data,url) in
             DispatchQueue.main.async {
                 self.delegate?.attachmentChoosed(data,url)
-                self.delegate?.showInput()
-            }
-            
-        }
-        AttachmentHandler.shared.closeBlock = { (closed)  in
-            DispatchQueue.main.async {
-                self.delegate?.showInput()
             }
             
         }

@@ -13,6 +13,7 @@
         <item name="textAppearanceListItemSecondary">@style/PsdTextAppearanceListItemSecondary</item>
         <item name="android:listDivider">@color/psd_divider_color</item>
         <item name="actionBarStyle">@style/PsdActionBarStyle</item>
+        <item name="android:windowLightStatusBar">true</item>
         <item name="elevationDefault">@dimen/psd_elevation_default</item>
     </style>
 

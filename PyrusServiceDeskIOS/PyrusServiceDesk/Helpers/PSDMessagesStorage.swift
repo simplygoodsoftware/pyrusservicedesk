@@ -161,6 +161,7 @@ struct PSDMessagesStorage{
         removeFromStorage(messageId: message.messageId)
         saveInStorage(message: message)
     }
+    
     ///Returns [PSDMessage] in storage
     static func messagesFromStorage() -> [PSDMessage] {
         var arrayWithMessages = [PSDMessage]()
@@ -207,5 +208,5 @@ struct PSDMessagesStorage{
             return true
         }
         return false
-    }
+    } 
 }

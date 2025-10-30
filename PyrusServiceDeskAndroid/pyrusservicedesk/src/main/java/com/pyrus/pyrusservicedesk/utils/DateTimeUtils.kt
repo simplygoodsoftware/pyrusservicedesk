@@ -24,7 +24,7 @@ internal fun Date.getTimeText(context: Context): String {
         .format(
             with(TimeZone.getDefault()){
                 Calendar.getInstance(this).apply {
-                    timeInMillis = this@getTimeText.time + rawOffset
+                    timeInMillis = this@getTimeText.time + getOffset(System.currentTimeMillis())
                 }.time
             })
 }

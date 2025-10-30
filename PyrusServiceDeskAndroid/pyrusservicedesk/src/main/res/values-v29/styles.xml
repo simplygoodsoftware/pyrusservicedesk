@@ -2,5 +2,6 @@
 <resources>
     <style name="PyrusServiceDesk" parent="BasePyrusServiceDesk">
         <item name="android:forceDarkAllowed">true</item>
+        <item name="android:windowLightStatusBar">true</item>
     </style>
 </resources>

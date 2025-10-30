@@ -30,9 +30,9 @@ class PSDUserMessageCell: PSDChatMessageCell {
     required init?(coder aDecoder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
     }
-    override func draw(message:PSDRowMessage)
+    override func draw(message:PSDRowMessage, width: CGFloat)
     {
-        super.draw(message: message)
+        super.draw(message: message, width: width)
         self.message = message
         messageStateView._messageState = (message.text.count > 0 || message.rating != nil) ? message.message.state : .sent
         updateTopMessageConstrint()
@@ -71,22 +71,8 @@ class PSDUserMessageCell: PSDChatMessageCell {
         messageStateView.addSizeConstraint([.height,.width],constant:messageStateView.stateSize)
     }
     private func userMessageConstraints(){
-        self.contentView.addConstraint(NSLayoutConstraint(
-            item: cloudView,
-            attribute: .trailing,
-            relatedBy: .equal,
-            toItem: timeLabel,
-            attribute: .leading,
-            multiplier: 1,
-            constant:-TO_BOARD_DISTANCE))
-        self.contentView.addConstraint(NSLayoutConstraint(
-            item: cloudView,
-            attribute: .leading,
-            relatedBy: .greaterThanOrEqual,
-            toItem: self.contentView,
-            attribute: .leading,
-            multiplier: 1,
-            constant:AVATAR_SIZE+(TO_BOARD_DISTANCE*2)))
+        cloudView.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -TO_BOARD_DISTANCE).isActive = true
+        cloudView.leadingAnchor.constraint(greaterThanOrEqualTo: contentView.leadingAnchor, constant: AVATAR_SIZE+(TO_BOARD_DISTANCE*2)).isActive = true
     }
     private func updateTopMessageConstrint(){
         guard !drawEmpty else {
@@ -113,9 +99,6 @@ extension PSDUserMessageCell: PSDRetryActionDelegate {
             UIAlertAction(title: "RetryButton".localizedPSD(), style: .default, handler: { (action) -> Void in self.retryMessage()}),
             UIAlertAction(title: "DeleteButton".localizedPSD(), style: .destructive, handler: { (action) -> Void in self.cancelMessage()}),
         ]
-        if let vc  =  UIApplication.topViewController() as? PSDChatViewController{
-            (vc.inputAccessoryView as? PSDMessageInputView)?.prepairToShowAlert()
-        }
         showMenuAlert(actions, on: viewController, sourseView: nil)
     }
 }

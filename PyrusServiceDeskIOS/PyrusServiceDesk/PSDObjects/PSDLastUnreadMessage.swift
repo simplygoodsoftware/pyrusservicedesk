@@ -8,6 +8,7 @@ final class PSDLastUnreadMessage: NSObject, Codable {
     private(set) var attchmentsCount: Int = 0
     private(set) var utcTime: Double
     private(set) var messageId: String
+    private(set) var owner: PSDUser
     ///Detect if this message was shown to user in chat(chat was opened)
     private var isRead = false
     ///Detect if this message was sent to  NewReplySubscriber
@@ -25,11 +26,12 @@ final class PSDLastUnreadMessage: NSObject, Codable {
                 attachments?.append(String(attachment.name.suffix(MAX_ATTACHMENT_NAME_COUNT)))
             }
         }
+        owner = message.owner
         messageId = message.messageId
         utcTime = message.date.timeIntervalSince1970
     }
     private enum CodingKeys: String, CodingKey {
-        case text, attachments, attchmentsCount, utcTime, messageId, isRead, isShown
+        case text, attachments, attchmentsCount, utcTime, messageId, isRead, isShown, owner
     }
     
     required public init(from decoder: Decoder) throws {
@@ -41,6 +43,7 @@ final class PSDLastUnreadMessage: NSObject, Codable {
         messageId = try values.decode(String.self, forKey: .messageId)
         isRead = try values.decode(Bool.self, forKey: .isRead)
         isShown = try values.decode(Bool.self, forKey: .isShown)
+        owner = try values.decode(PSDUser.self, forKey: .owner)
     }
     func encode(to encoder: Encoder) throws {
         var values = encoder.container(keyedBy: CodingKeys.self)
@@ -51,6 +54,7 @@ final class PSDLastUnreadMessage: NSObject, Codable {
         try values.encode(messageId, forKey: .messageId)
         try values.encode(isRead, forKey: .isRead)
         try values.encode(isShown, forKey: .isShown)
+        try values.encode(owner, forKey: .owner)
     }
 }
 ///MARK: constants

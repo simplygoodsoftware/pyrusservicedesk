@@ -14,24 +14,13 @@ class PSDChatMessageCell: UITableViewCell {
         let view = PSDMessageView()
         return view;
     }()
-    ///A label with time when message was sent.
-    let timeLabel : UILabel =
-    {
-        let label = UILabel()
-        label.textColor = CustomizationHelper.textColorForTable.withAlphaComponent(timeAlpha)
-        label.font = DETAIL_FONT
-        label.frame = CGRect(x: 0, y: 0, width: OFFSET_FOR_DETAIL, height: 30)
-        return label;
-    }()
+    
     override init(style: UITableViewCell.CellStyle, reuseIdentifier: String?) {
         super.init(style: style, reuseIdentifier: reuseIdentifier)
         self.backgroundColor = .clear
         self.contentView.translatesAutoresizingMaskIntoConstraints = true
         self.selectionStyle = .none
-        cloudView.maxWidth = maxMessageWidth()
-
-        self.contentView.addSubview(timeLabel)
-        self.contentView.addSubview(cloudView)
+        contentView.addSubview(cloudView)
         self.addConstraints()
         
     }
@@ -44,23 +33,19 @@ class PSDChatMessageCell: UITableViewCell {
             self.contentView.backgroundColor = .clear
         }
     }
-    func draw(message:PSDRowMessage)
+    func draw(message:PSDRowMessage, width: CGFloat)
     {
-        timeLabel.text = message.message.date.timeAsString()
+        cloudView.maxWidth =  maxMessageWidth(width)
         cloudView.draw(message: message)
     }
     
     //MARK: constraints block
-    override func layoutSubviews() {
-        super.layoutSubviews()
-        cloudView.maxWidth = maxMessageWidth()
-    }
-    private func maxMessageWidth() -> CGFloat {
-        return self.frame.size.width - (TO_BOARD_DISTANCE*3) - (AVATAR_SIZE*2)
+    
+    private func maxMessageWidth(_ width: CGFloat) -> CGFloat {
+        return width - (TO_BOARD_DISTANCE*3) - (AVATAR_SIZE*2)
     }
     private func addConstraints()
     {
-        timeConstraints()
         sameConstraints()
     }
     var firstMessageInDate : Bool = false
@@ -94,13 +79,6 @@ class PSDChatMessageCell: UITableViewCell {
         
         
     }
-    private func timeConstraints()
-    {
-        self.timeLabel.translatesAutoresizingMaskIntoConstraints = false
-        timeLabel.addSizeConstraint([.width], constant: OFFSET_FOR_DETAIL)
-        timeLabel.addConstraint([.trailing], constant: OFFSET_FOR_DETAIL)
-        timeLabel.addConstraint([.bottom], constant: -bottomDistance)
-    }
     
    
    
@@ -118,7 +96,6 @@ extension PSDChatMessageCell: Recolorable {
         }
         recolor()
     }
-    @objc func recolor() {
-        timeLabel.textColor = CustomizationHelper.textColorForTable.withAlphaComponent(PSDChatMessageCell.timeAlpha)
-    }
+    
+    @objc func recolor(){}
 }

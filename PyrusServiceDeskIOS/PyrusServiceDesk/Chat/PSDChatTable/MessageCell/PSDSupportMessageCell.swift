@@ -41,9 +41,9 @@ class PSDSupportMessageCell: PSDChatMessageCell {
     required init?(coder aDecoder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
     }
-    override func draw(message: PSDRowMessage)
+    override func draw(message: PSDRowMessage, width: CGFloat)
     {
-        super.draw(message: message)
+        super.draw(message: message, width: width)
         let name = message.message.owner.name?.count ?? 0 > 0 ? message.message.owner.name : (message.message.owner as? PSDPlaceholderUser == nil ? "" : " ")
         self.nameLabel.text = needShowName ? name :  ""
         self.avatarView.isHidden = !needShowAvatar

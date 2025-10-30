@@ -72,12 +72,13 @@ extension AttachmentCollectionViewCell: Recolorable {
     }
     func recolor() {
         removeButton.setTitleColor(CustomizationHelper.textColorForInput.withAlphaComponent(CROSS_ALPHA), for: .normal)
-        removeButtonBack.backgroundColor = CustomizationHelper.grayInputColor.withAlphaComponent(BUTTON_ALPHA)
+        removeButtonBack.backgroundColor = .psdBackground
+        removeButton.backgroundColor = CustomizationHelper.grayInputColor.withAlphaComponent(BUTTON_ALPHA)
         holderView.layer.borderColor = CustomizationHelper.lightGrayInputColor.cgColor
     }
 }
 let BUTTON_ALPHA: CGFloat = 0.3
 let CROSS_ALPHA: CGFloat = 0.8
 private extension UIFont {
-    static let removeButton = UIFont.boldSystemFont(ofSize: 13)
+    static let removeButton = CustomizationHelper.systemBoldFont(ofSize: 13)
 }

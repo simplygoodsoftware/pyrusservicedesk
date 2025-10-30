@@ -5,6 +5,6 @@ android {
     defaultConfig {
         minSdkVersion rootProject.minSdk
         targetSdkVersion rootProject.targetSdk
-        versionName rootProject.PUBLISH_VERSION
+        versionName VERSION_NAME
     }
 }

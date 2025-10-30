@@ -94,28 +94,28 @@ class PSDChatsTableView: PSDTableView,UITableViewDelegate,UITableViewDataSource,
         if needProgress{
             self.progressView?.startAnimate()
         }
-        DispatchQueue.global().async {
-            [weak self] in
-            PSDGetChats.get(delegate:self, needShowError: !PyrusServiceDesk.hasInfo){
-                (chats:[PSDChat]?) in
-                DispatchQueue.main.async {
-                    if chats != nil && (chats?.count ?? 0)>0{
-                        self?.chats = chats!
-                        self?.reloadData()
-                        if(self != nil){
-                            self!.insertSubview(self!.customRefresh, at: 0)
-                        }
-                        
-                    }
-                    if needProgress{
-                        self?.progressView?.progress = 1.0
-                    }
-                    else{
-                        self?.customRefresh.endRefreshing()
-                    }
-                }
-            }
-        }
+//        DispatchQueue.global().async {
+//            [weak self] in
+//            PSDGetChats.get(delegate:self, needShowError: !PyrusServiceDesk.hasInfo){
+//                (chats:[PSDChat]?) in
+//                DispatchQueue.main.async {
+//                    if chats != nil && (chats?.count ?? 0)>0{
+//                        self?.chats = chats!
+//                        self?.reloadData()
+//                        if(self != nil){
+//                            self!.insertSubview(self!.customRefresh, at: 0)
+//                        }
+//                        
+//                    }
+//                    if needProgress{
+//                        self?.progressView?.progress = 1.0
+//                    }
+//                    else{
+//                        self?.customRefresh.endRefreshing()
+//                    }
+//                }
+//            }
+//        }
     }
     deinit {
         PSDGetChats.remove()
@@ -166,11 +166,11 @@ class PSDChatsTableView: PSDTableView,UITableViewDelegate,UITableViewDataSource,
         return UITableView.automaticDimension
     }
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
-        let chatId :String = chats[indexPath.row].chatId ?? ""
-        if !(chats[indexPath.row].isRead){
-            self.chatsDelegate?.removeOneNewMessage()
-        }
-        self.chatsDelegate?.openChat(chatId,animated: true)
+//        let chatId :String = chats[indexPath.row].chatId ?? ""
+//        if !(chats[indexPath.row].isRead){
+//            self.chatsDelegate?.removeOneNewMessage()
+//        }
+//        self.chatsDelegate?.openChat(chatId,animated: true)
     }
     func tableView(_ tableView: UITableView, viewForFooterInSection section: Int) -> UIView? {
         return UIView()

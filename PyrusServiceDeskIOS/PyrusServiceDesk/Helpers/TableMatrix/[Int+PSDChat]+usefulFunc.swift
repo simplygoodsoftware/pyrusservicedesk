@@ -90,7 +90,7 @@ extension Array where Element == [PSDRowMessage]{
             return false
         }
         if indexPath.row == 0 && indexPath.section == 0 &&  CustomizationHelper.welcomeMessage.count>0 {
-            return false//if first message is welcome - dont show avatar
+            return true//if first message is welcome - do show avatar
         }
         let currentUser = personForMessage(at: IndexPath.init(row: indexPath.row, section: indexPath.section))
         let nextUser = personForMessage(at: nextNotEmpty(indexPath))

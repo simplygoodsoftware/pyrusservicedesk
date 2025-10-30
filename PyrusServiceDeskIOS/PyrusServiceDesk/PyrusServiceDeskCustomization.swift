@@ -13,6 +13,10 @@ import Foundation
     ///A first message that user see in new chat. If not setted - user will not see welcome message.
     private(set) public var welcomeMessage: String?
     
+    func setWelcomeMessage(_ welcomeMessage: String?) {
+        self.welcomeMessage = welcomeMessage
+    }
+    
     ///A icon for support imageView in chat. Show when support user has no image or for welcome message. The default is DEFAULT_SUPPORT_ICON.
     private(set) var avatarForSupport: UIImage?
     
@@ -88,6 +92,9 @@ import Foundation
     ///The custom color for button for sending message.
     private(set) var sendButtonColor: UIColor?
     
+    ///The custom font name for all elements.
+    private(set) var customLocale: String?
+    
     @objc(ServiceDeskConfigurationBuilder) public class Builder: NSObject {
         private var configuration = ServiceDeskConfiguration()
         
@@ -116,6 +123,13 @@ import Foundation
         ///A icon for support imageView in chat. Show when support user has no image or for welcome message. The default is DEFAULT_SUPPORT_ICON.
         @objc public func setAvatarForSupport(_ avatarForSupport: UIImage?) -> Builder {
             configuration.avatarForSupport = avatarForSupport
+            return self
+        }
+        
+        @discardableResult
+        ///Custom locale for service desk
+        @objc public func setLocale(_ locale: String?) -> Builder {
+            configuration.customLocale = locale
             return self
         }
         

@@ -1,18 +1,18 @@
 package com.pyrus.pyrusservicedesk.presentation
 
-import androidx.lifecycle.Observer
 import android.graphics.PorterDuff
 import android.os.Bundle
+import android.view.View
 import android.view.View.GONE
 import android.view.View.VISIBLE
 import android.widget.ProgressBar
 import com.pyrus.pyrusservicedesk.R
+import com.pyrus.pyrusservicedesk.databinding.PsdNoConnectionBinding
+import com.pyrus.pyrusservicedesk.presentation.ui.view.swiperefresh.DirectedSwipeRefresh
 import com.pyrus.pyrusservicedesk.presentation.viewmodel.ConnectionViewModelBase
 import com.pyrus.pyrusservicedesk.utils.ConfigUtils
 import com.pyrus.pyrusservicedesk.utils.getColorByAttrId
 import com.pyrus.pyrusservicedesk.utils.getViewModel
-import kotlinx.android.synthetic.main.psd_activity_ticket.*
-import kotlinx.android.synthetic.main.psd_no_connection.*
 
 private const val ANIMATION_DURATION = 200L
 
@@ -22,6 +22,8 @@ private const val ANIMATION_DURATION = 200L
  */
 internal abstract class ConnectionActivityBase<T: ConnectionViewModelBase>(viewModelClass: Class<T>)
     : ActivityBase() {
+
+    private lateinit var binding: PsdNoConnectionBinding
 
     /**
      * Instance of the view model that is defined by the particular type of the activity.
@@ -34,18 +36,30 @@ internal abstract class ConnectionActivityBase<T: ConnectionViewModelBase>(viewM
     protected abstract val refresherViewId:Int
     protected abstract val progressBarViewId: Int
 
-    private var refresher: com.pyrus.pyrusservicedesk.presentation.ui.view.swiperefresh.DirectedSwipeRefresh? = null
+    private var refresher: DirectedSwipeRefresh? = null
     private var progressBar: ProgressBar? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        progressBar = findViewById(progressBarViewId)
-        progressBar?.progressDrawable?.setColorFilter(
-                getColorByAttrId(this, R.attr.colorAccentSecondary),
-                PorterDuff.Mode.SRC_IN)
-        reconnectButton.setOnClickListener { reconnect() }
-        reconnectButton.setTextColor(ConfigUtils.getAccentColor(this))
-        refresher = findViewById(refresherViewId)
+        binding = PsdNoConnectionBinding.inflate(layoutInflater)
+        setContentView(binding.root)
+    }
+
+    fun setNoConnectionView(binding: PsdNoConnectionBinding) {
+        this.binding = binding
+        this.binding.reconnectButton.setOnClickListener { reconnect() }
+        this.binding.reconnectButton.setTextColor(ConfigUtils.getAccentColor(this))
+    }
+
+    fun setProgressBar(progressBar: ProgressBar) {
+        this.progressBar = progressBar
+        this.progressBar?.progressDrawable?.setColorFilter(
+            getColorByAttrId(this, R.attr.colorAccentSecondary),
+            PorterDuff.Mode.SRC_IN)
+    }
+
+    fun setRefresher(refresh: DirectedSwipeRefresh) {
+        this.refresher = refresh
         refresher?.setOnRefreshListener { viewModel.loadData() }
     }
 
@@ -55,7 +69,7 @@ internal abstract class ConnectionActivityBase<T: ConnectionViewModelBase>(viewM
             this,
             { isConnected ->
                 isConnected?.let {
-                    no_connection.visibility = if (it) GONE else VISIBLE
+                    binding.root.visibility = if (it) GONE else VISIBLE
                 }
             }
         )

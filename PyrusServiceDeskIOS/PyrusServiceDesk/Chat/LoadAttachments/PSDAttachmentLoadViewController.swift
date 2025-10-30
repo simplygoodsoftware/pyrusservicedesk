@@ -14,6 +14,10 @@ class PSDAttachmentLoadViewController: PSDViewController {
     ///The attachment.
     var attachment : PSDAttachment?
     
+    override var canBecomeFirstResponder: Bool {
+        return true
+    }
+    
     private var oldScrollContentInset : Int? = nil
     override func viewDidLoad() {
         super.viewDidLoad()

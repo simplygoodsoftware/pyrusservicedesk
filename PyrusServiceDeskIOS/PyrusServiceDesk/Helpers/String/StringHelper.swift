@@ -342,6 +342,7 @@ class HelpersStrings {
             semiColonRange = (strAttr.string as NSString).range(of: ";", options: .literal, range: semiColonRange)
             range = NSMakeRange(0, subrange.location)
             guard semiColonRange.location != NSNotFound else {
+                subrange = (strAttr.string as NSString).range(of: "&", options: .backwards, range: range)
                 continue
             }
             let escapeRange = NSMakeRange(subrange.location, semiColonRange.location - subrange.location + 1)
@@ -349,6 +350,7 @@ class HelpersStrings {
             let length = escapeString.length
             // a squence must be longer than 3 (&lt;) and less than 11 (&thetasym;)
             if (length < 4 || length > 10) {
+                subrange = (strAttr.string as NSString).range(of: "&", options: .backwards, range: range)
                 continue
             }
             if escapeString.character(at: 1) == unichar("#") {

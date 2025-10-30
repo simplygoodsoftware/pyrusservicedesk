@@ -6,6 +6,7 @@ import com.pyrus.pyrusservicedesk.sdk.FileResolver
 import com.pyrus.pyrusservicedesk.sdk.data.intermediate.FileData
 import com.pyrus.pyrusservicedesk.sdk.repositories.offline.OfflineRepository
 import com.pyrus.pyrusservicedesk.utils.ConfigUtils
+import com.pyrus.pyrusservicedesk.utils.getTimeText
 import kotlinx.coroutines.runBlocking
 import java.util.*
 
@@ -41,6 +42,13 @@ internal class LocalDataProvider(offlineRepository: OfflineRepository,
      */
     @MainThread
     fun createLocalComment(text: String = "", fileUri: Uri? = null, rating: Int? = null): Comment {
+        val calendar = Calendar.getInstance()
+        //it is strange, but it`s work. It is necessary so that the local time and the time from the server to match
+        val data = with(TimeZone.getDefault()) {
+            Calendar.getInstance(this).apply {
+                timeInMillis = calendar.timeInMillis - getOffset(System.currentTimeMillis())
+            }.time
+        }
         return Comment(
             body = text,
             isInbound = true,
@@ -48,7 +56,7 @@ internal class LocalDataProvider(offlineRepository: OfflineRepository,
             attachments = fileResolver.getFileData(fileUri)?.let {
                 listOf(createLocalAttachment(it))
             },
-            creationDate = Calendar.getInstance().time,
+            creationDate = data,
             localId = --lastLocalCommentId,
             rating = rating
         )

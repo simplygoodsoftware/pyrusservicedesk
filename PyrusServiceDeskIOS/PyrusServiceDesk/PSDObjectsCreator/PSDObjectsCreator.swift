@@ -50,14 +50,20 @@ class PSDObjectsCreator {
         message.rating = rating
         return message
     }
+    
+    static func createMessage(ratingComment: String) -> PSDMessage {
+        let message = PSDObjectsCreator.createMessage("", attachments: nil, user: PSDUsers.user)
+        message.ratingComment = ratingComment
+        return message
+    }
     /**
      Create a new message that was not sent.
      - parameter data: Any object to message. If has string
      */
-    private static func createMessage(_ text:String, attachments: [PSDAttachment]?, user:PSDUser)->PSDMessage{
-        let ticketId : String = ""
-        let date : Date = Date()
-        let message = PSDMessage(text:text , attachments:attachments, messageId: ticketId, owner:user, date:date)
+    private static func createMessage(_ text: String, attachments: [PSDAttachment]?, user: PSDUser) -> PSDMessage {
+        let ticketId = ""
+        let date = Date()
+        let message = PSDMessage(text: text, attachments: attachments, messageId: ticketId, owner: user, date: date)
         message.state = .sending
         return message
     }
