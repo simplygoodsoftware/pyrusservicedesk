@@ -65,3 +65,8 @@
 "ExternalSourceWarning" = "הקישור הזה מוביל ל%@\nהאם ברצונך לעבור אליו?";
 "ShortYes" = "כן";
 "ShortNo" = "לא";
+"EvaluateQuality" = "דרגו את איכות השירות";
+"PleaseEvaluateQuality" = "דרגו את איכות השירות";
+"LeaveYourComment" = "השאר תגובה";
+"Close" = "סגור";
+"Back" = "חזרה";
