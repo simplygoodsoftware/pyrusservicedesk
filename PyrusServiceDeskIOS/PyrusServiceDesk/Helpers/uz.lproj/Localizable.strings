@@ -66,3 +66,7 @@
 //For requests
 "No_Connection" = "Internetga ulanish yo'q";
 "SendLog" = "Kutubxona jurnallarini yuboring";
+"EvaluateQuality" = "Xizmat ko'rsatish sifatini baholang";
+"PleaseEvaluateQuality" = "Xizmat ko'rsatish sifatini baholang";
+"LeaveYourComment" = "Sharh yozing";
+"Close" = "Yopish";
