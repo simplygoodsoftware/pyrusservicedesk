@@ -285,63 +285,62 @@ class PyrusServiceDesk private constructor(
             loggingEnabled: Boolean,
             authorizationToken: String?,
         ) {
-            CoroutineScope(Dispatchers.Main).launch {
-                StaticRepository.logging = loggingEnabled
-                PLog.d(TAG, "initInternal, appId: ${appId.getFirstNSymbols(10)}, userId: ${userId?.getFirstNSymbols(10)}, apiVersion: $apiVersion")
-                Log.d(TAG, "initInternal, appId: ${appId.getFirstNSymbols(10)}, userId: ${userId?.getFirstNSymbols(10)}, apiVersion: $apiVersion")
+            StaticRepository.logging = loggingEnabled
+            PLog.d(TAG,"initInternal, appId: ${appId.getFirstNSymbols(10)}, userId: ${userId?.getFirstNSymbols(10)}, apiVersion: $apiVersion")
+            Log.d(TAG,"initInternal, appId: ${appId.getFirstNSymbols(10)}, userId: ${userId?.getFirstNSymbols(10)}, apiVersion: $apiVersion")
 
-                val preferences: SharedPreferences = application.getSharedPreferences(PREFERENCE_KEY, Context.MODE_PRIVATE)
-                val isVersion1 = listUser == null && authorId == null && userId == null && securityKey == null
-                val instanceId = ConfigUtils.getInstanceId(preferences, isVersion1)
+            val preferences: SharedPreferences = application.getSharedPreferences(PREFERENCE_KEY, Context.MODE_PRIVATE)
+            val isVersion1 = listUser == null && authorId == null && userId == null && securityKey == null
+            val instanceId = ConfigUtils.getInstanceId(preferences, isVersion1)
 
-                val apiDomain = domain ?: PYRUS_BASE_DOMAIN
+            val apiDomain = domain ?: PYRUS_BASE_DOMAIN
 
-                val newAccount = if (listUser != null && authorId != null)
-                    Account.V3(
-                        domain = apiDomain,
-                        instanceId = instanceId,
-                        users = listUser,
-                        authorId = authorId,
-                    )
-                else if (userId != null && securityKey != null) Account.V2(
+            val newAccount = if (listUser != null && authorId != null)
+                Account.V3(
                     domain = apiDomain,
                     instanceId = instanceId,
-                    appId = appId,
-                    userId = userId,
-                    securityKey = securityKey,
+                    users = listUser,
+                    authorId = authorId,
                 )
-                else Account.V1(
-                    domain = apiDomain,
-                    instanceId = instanceId,
-                    appId = appId,
-                )
-                val oldUserId = INJECTOR?.accountStore?.getAccount()?.getUserId()
-                autoRefreshFeatureFactory?.cancel()
+            else if (userId != null && securityKey != null) Account.V2(
+                domain = apiDomain,
+                instanceId = instanceId,
+                appId = appId,
+                userId = userId,
+                securityKey = securityKey,
+            )
+            else Account.V1(
+                domain = apiDomain,
+                instanceId = instanceId,
+                appId = appId,
+            )
+            val oldUserId = INJECTOR?.accountStore?.getAccount()?.getUserId()
+            autoRefreshFeatureFactory?.cancel()
 
-                INJECTOR?.onCancel()
+            INJECTOR?.onCancel()
 
-                INJECTOR = DiInjector(
-                    application = application,
-                    initialAccount = newAccount,
-                    authToken = authorizationToken,
-                    coreScope = CoroutineScope(Dispatchers.Main + SupervisorJob() + CoroutineExceptionHandler { _, throwable ->
-                        throwable.printStackTrace()
-                        Log.e(TAG, "coreScope global error: ${throwable.message}")
-                        PLog.e(TAG, "coreScope global error: ${throwable.message}")
-                        throwable.printStackTrace()
-                    }),
-                    preferences = preferences
-                )
+            INJECTOR = DiInjector(
+                application = application,
+                initialAccount = newAccount,
+                authToken = authorizationToken,
+                coreScope = CoroutineScope(Dispatchers.Main + SupervisorJob() + CoroutineExceptionHandler { _, throwable ->
+                    throwable.printStackTrace()
+                    Log.e(TAG, "coreScope global error: ${throwable.message}")
+                    PLog.e(TAG, "coreScope global error: ${throwable.message}")
+                    throwable.printStackTrace()
+                }),
+                preferences = preferences
+            )
 
                 autoRefreshFeatureFactory = INJECTOR?.autoRefreshFeatureFactory?.create(liveUpdates)
-                if (oldUserId != newAccount.getUserId()) {
+                if (oldUserId != null && oldUserId != newAccount.getUserId()) {
                     liveUpdates.reset(INJECTOR?.preferencesManager)
                     clearLocalData {}
                 }
 
-                migratePreferences(application, preferences)
-                if (loggingEnabled) PLog.instantiate(application)
-            }
+            migratePreferences(application, preferences)
+            if (loggingEnabled) PLog.instantiate(application)
+
         }
 
         private fun validateDomain(domain: String?): Boolean {

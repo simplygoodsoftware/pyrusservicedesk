@@ -80,7 +80,6 @@ internal class LocalTicketsStore(
         val members: MutableList<MemberEntity> = mutableListOf()
         dto.applications?.forEach { application -> application.authorsInfo?.forEach { userMap -> members.addAll(userMap.value.map { DatabaseMapper.mapToMembersEntity(it, userMap.key) }) } }
 
-        tickets.lastOrNull()?.ticket?.ticketId?.let { idStore.setLastTicketId(it) }
         ticketsDao.insert(tickets, applications, userEntities, members)
     }
 

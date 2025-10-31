@@ -314,11 +314,6 @@ internal class LocalCommandsStore(
         }
     }
 
-    fun getLastTicketId(): Long {
-        val id = getNextLocalId()
-        return if (idStore.getLastTicketId() > id) idStore.getLastTicketId() else id
-    }
-
     private fun getNextAttachmentId(): Long {
         return lastAttachId.getAndUpdate {
             if (it == 0L) {
