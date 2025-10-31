@@ -66,3 +66,7 @@
 "ExternalSourceWarning" = "Овај линк води до %@\nДа ли заиста желиш да пратиш линк?";
 "ShortYes" = "Да";
 "ShortNo" = "Не";
+"EvaluateQuality" = "Процени квалитет услуге";
+"PleaseEvaluateQuality" = "Процени квалитет услуге";
+"LeaveYourComment" = "Напиши рецензију";
+"Close" = "Затвори";
