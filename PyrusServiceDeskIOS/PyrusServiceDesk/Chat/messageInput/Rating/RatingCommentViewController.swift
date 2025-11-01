@@ -52,6 +52,7 @@ class RatingCommentViewController: UIViewController {
         textView.backgroundColor = backgroundColor
         textView.textColor = UIColor.getTextColor(for: backgroundColor)
         textView.translatesAutoresizingMaskIntoConstraints = false
+        textView.keyboardAppearance = CustomizationHelper.keyboardStyle
         return textView
     }()
 

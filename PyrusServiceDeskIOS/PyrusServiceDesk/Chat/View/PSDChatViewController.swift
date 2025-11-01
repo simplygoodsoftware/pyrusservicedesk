@@ -271,8 +271,7 @@ class PSDChatViewController: PSDViewController, PSDMainController {
     
     override func viewWillTransition(to size: CGSize, with coordinator: UIViewControllerTransitionCoordinator) {
         super.viewWillTransition(to: size, with: coordinator)
-        
-        self.tableView.removeListeners()
+//        self.tableView.removeListeners()
         self.tableView.bottomPSDRefreshControl.isEnabled = false
         guard let lastVisibleCell = self.tableView.visibleCells.last,
               let lastVisibleRow = self.tableView.indexPath(for: lastVisibleCell) else {
@@ -289,7 +288,7 @@ class PSDChatViewController: PSDViewController, PSDMainController {
             }
         }, completion: { context in
             self.tableView.bottomPSDRefreshControl.isEnabled = true
-            self.tableView.addKeyboardListeners()
+//            self.tableView.addKeyboardListeners()
         })
     }
     
@@ -329,7 +328,7 @@ class PSDChatViewController: PSDViewController, PSDMainController {
             messageInputView.isHidden = true
         }
         
-        self.tableView.removeListeners()
+//        self.tableView.removeListeners()
         interactor.doInteraction(.viewWillDisappear)
         
         UIView.animate(withDuration: 0.2, animations: {
@@ -351,10 +350,10 @@ class PSDChatViewController: PSDViewController, PSDMainController {
     }
     
     @objc private func appEnteredForeground(){
-        self.tableView.addKeyboardListeners()
+//        self.tableView.addKeyboardListeners()
     }
     @objc private func appEnteredBackground(){
-        self.tableView.removeListeners()
+//        self.tableView.removeListeners()
     }
     
     public func updateTitle() {
@@ -391,12 +390,10 @@ class PSDChatViewController: PSDViewController, PSDMainController {
         setupScrollButton()
         setupStopButton()
         setupClosedTicketView()
-//        setupChatInfoView()
-      //  setupInfoTableView()
     }
     
     func setupTableView() {
-        tableView.addKeyboardListeners()
+//        tableView.addKeyboardListeners()
         tableView.chatDelegate = self
         if #available(iOS 11.0, *) {
             self.tableView.contentInsetAdjustmentBehavior = .never//.automatic

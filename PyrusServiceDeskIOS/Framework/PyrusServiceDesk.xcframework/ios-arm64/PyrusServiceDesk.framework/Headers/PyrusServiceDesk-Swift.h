@@ -666,7 +666,6 @@ SWIFT_CLASS_PROPERTY(@property (nonatomic, class, copy) void (^ _Nullable onAuth
 /// Unsubscribe [subscriber] from alerts for new messages from chat support.
 + (void)unsubscribeFromReplies:(id <NewReplySubscriber> _Nullable)subscriber;
 + (void)subscribeToGogEvents:(id <LogEvents> _Nonnull)subscriber;
-+ (NSArray<AuthorInfo *> * _Nonnull)getAuthorsFor:(NSString * _Nonnull)userId SWIFT_WARN_UNUSED_RESULT;
 + (void)cleanCashe;
 /// Init PyrusServiceDesk with new clientId.
 /// \param clientId clientId using for all requests. If clientId not setted PyrusServiceDesk Controller will not be created
@@ -718,23 +717,6 @@ SWIFT_CLASS_PROPERTY(@property (nonatomic, class, copy) void (^ _Nullable onAuth
 /// Активирует поддержку фич от бека
 /// Для настройки флагов воспользуйся [ссылкой](https://dev.pyrus.com/admin/api-flags
 + (NSString * _Nonnull)apiSign SWIFT_WARN_UNUSED_RESULT;
-@end
-
-
-SWIFT_CLASS("_TtC16PyrusServiceDesk11RateManager")
-@interface RateManager : NSObject
-SWIFT_CLASS_PROPERTY(@property (nonatomic, class, readonly, copy) NSString * _Nonnull rateAppString;)
-+ (NSString * _Nonnull)rateAppString SWIFT_WARN_UNUSED_RESULT;
-+ (void)updateLastRateVersion;
-+ (NSDate * _Nullable)getDateForNextRate SWIFT_WARN_UNUSED_RESULT;
-+ (void)setIfNilDateForNextRate;
-+ (BOOL)isNeedRateCurrentVersion SWIFT_WARN_UNUSED_RESULT;
-+ (void)increaseDateForNextRate;
-+ (void)incrementActionCount;
-+ (void)resetActionCount;
-/// Проверяет, было ли действие выполнено указанное количество раз
-+ (BOOL)isActionPerformedWithTimes:(NSInteger)times SWIFT_WARN_UNUSED_RESULT;
-- (nonnull instancetype)init OBJC_DESIGNATED_INITIALIZER;
 @end
 
 
@@ -797,8 +779,6 @@ SWIFT_CLASS_NAMED("Builder")
 
 
 
-
-
 @interface UIColor (SWIFT_EXTENSION(PyrusServiceDesk))
 /// Может принимать в себя HEX в разных форматах и если правильно прописать формат - создастся соответствующий объект UIColor
 /// Что очевидно, можно передавать как 3, так и 4 канальные цвета
@@ -808,6 +788,8 @@ SWIFT_CLASS_NAMED("Builder")
 ///
 - (nullable instancetype)initWithHex:(NSString * _Nullable)hex;
 @end
+
+
 
 
 

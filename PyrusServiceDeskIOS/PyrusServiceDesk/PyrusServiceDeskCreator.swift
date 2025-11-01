@@ -63,17 +63,12 @@ import UIKit
     }
     
     static var currentUserId: String?
-//    {
-//        didSet {
-//            print("каког")
-//        }
-//    }
     static var currentClientId: String?
     
     static let repository = TicketCommandRepository()
     static let syncManager = SyncManager()
     
-    public static func addUser(appId: String, clientName: String, userId: String, userName: String, secretKey: String? = nil) {
+    static func addUser(appId: String, clientName: String, userId: String, userName: String, secretKey: String? = nil) {
         DispatchQueue.main.async {
             let user = PSDUserInfo(appId: appId, clientName: clientName, userId: userId, userName: userName, secretKey: secretKey)
             currentUserId = user.userId
@@ -93,12 +88,12 @@ import UIKit
         }
     }
     
-    public static func getClients() -> [PSDClientInfo] {
+    static func getClients() -> [PSDClientInfo] {
         return clients
     }
     
-    public static var newUser: PSDUserInfo?
-    public static func addUserFromDiplink(appId: String, userId: String, userName: String) {
+    static var newUser: PSDUserInfo?
+    static func addUserFromDiplink(appId: String, userId: String, userName: String) {
         guard let _ = PyrusServiceDesk.mainController else {
             let user = PSDUserInfo(appId: appId, clientName: "", userId: userId, userName: userName, secretKey: nil)
             newUser = user
@@ -369,7 +364,7 @@ import UIKit
         PyrusServiceDesk.logEvent = subscriber
     }
     
-    @objc public static func getAuthors(for userId: String) -> [PSDUserInfo.AuthorInfo] {
+    @objc static func getAuthors(for userId: String) -> [PSDUserInfo.AuthorInfo] {
         if userId == PyrusServiceDesk.customUserId {
             return PyrusServiceDesk.authors
         } else if let user = PyrusServiceDesk.additionalUsers.first(where: { $0.userId == userId }) {

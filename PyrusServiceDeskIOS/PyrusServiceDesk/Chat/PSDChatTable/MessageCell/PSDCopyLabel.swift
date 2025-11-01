@@ -10,6 +10,7 @@ class PSDCopyTextView :UITextView,UIGestureRecognizerDelegate, UITextViewDelegat
         super.init(frame: frame, textContainer:textContainer)
         self.isEditable = false
         self.delegate = self
+        self.keyboardAppearance = CustomizationHelper.keyboardStyle
     }
     override var selectedTextRange: UITextRange? {
         get { return nil }

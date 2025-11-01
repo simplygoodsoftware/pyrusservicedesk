@@ -664,7 +664,8 @@ extension PSDChatsDataService: PSDChatsDataServiceProtocol {
                         rating: Int(dbCommand.rating) == 0 ? nil : Int(dbCommand.rating),
                         ratingComment: dbCommand.ratingComment,
                         date: dbCommand.date,
-                        messageClientId: dbCommand.clientId
+                        messageClientId: dbCommand.clientId,
+                        extraFields: dbCommand.requestNewTicket ? PyrusServiceDesk.fieldsData : nil
                     )
                 )
                 return command

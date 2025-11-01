@@ -21,7 +21,7 @@ class PSDMessageTextView: UITextView, UITextViewDelegate {
         
         self.text = self.getDraft()
         self.textViewDidChange(self)
-        
+        self.keyboardAppearance = CustomizationHelper.keyboardStyle
         NotificationCenter.default.addObserver(self, selector: #selector(saveDraft), name: UIApplication.willResignActiveNotification, object: nil)
         
     }

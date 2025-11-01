@@ -142,14 +142,12 @@ class PSDMessageInputView: UIView, PSDMessageTextViewDelegate,PSDMessageSendButt
     override func traitCollectionDidChange(_ previousTraitCollection: UITraitCollection?) {
         super.traitCollectionDidChange(previousTraitCollection)
         cancelButton.setImage(UIImage.PSDImage(name: "arrowsLeft")?.imageWith(color: CustomizationHelper.recordImagesColors), for: .normal)
+        inputTextView.keyboardAppearance = CustomizationHelper.keyboardStyle
     }
     
     override init(frame: CGRect) {
         super.init(frame: frame)
-        
-        
      //   self.backgroundColor = .psdBackground//UIColor.clear
-        
         self.backgroundView = UIView()
         self.backgroundView.frame = frame
                 
@@ -217,6 +215,7 @@ class PSDMessageInputView: UIView, PSDMessageTextViewDelegate,PSDMessageSendButt
         let stopView = UIImageView(image: UIImage.PSDImage(name: "stopRecord"))
         stopView.backgroundColor = .psdBackground
         stopView.layer.cornerRadius = 22
+        inputTextView.keyboardAppearance = CustomizationHelper.keyboardStyle
     }
     
     func setupAudioInputView() {
@@ -317,6 +316,7 @@ class PSDMessageInputView: UIView, PSDMessageTextViewDelegate,PSDMessageSendButt
     
     //MARK: Delegate methods
     func textViewChanged() {
+        inputTextView.keyboardAppearance = CustomizationHelper.keyboardStyle
         if !isRecording {
             checkSendButton()
         }
@@ -559,6 +559,7 @@ extension PSDMessageInputView: AttachmentCollectionViewDelegateProtocol {
 }
 extension PSDMessageInputView: AttachmentsAddButtonDelegate{
     func addButtonPressed() {
+        inputTextView.keyboardAppearance = CustomizationHelper.keyboardStyle
         delegate?.addButtonTapped()
         //        self.becomeFirstResponder()
         //        inputTextView.becomeFirstResponder()

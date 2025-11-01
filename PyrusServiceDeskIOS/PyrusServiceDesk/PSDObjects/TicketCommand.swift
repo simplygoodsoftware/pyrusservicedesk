@@ -26,8 +26,9 @@ class TicketCommandParams: Codable {
     let ratingComment: String?
     var date: Date? = nil
     var messageClientId: String? = nil
+    let extraFields: [String: String]?
     
-    init(ticketId: Int?, appId: String?, requestNewTicket: Bool? = nil, userId: String?, message: String? = nil, attachments: [AttachmentData]? = nil, authorId: String? = nil, token: String? = nil, type: String? = nil, messageId: Int? = nil, rating: Int? = nil, ratingComment: String? = nil, date: Date? = nil, messageClientId: String? = nil) {
+    init(ticketId: Int?, appId: String?, requestNewTicket: Bool? = nil, userId: String?, message: String? = nil, attachments: [AttachmentData]? = nil, authorId: String? = nil, token: String? = nil, type: String? = nil, messageId: Int? = nil, rating: Int? = nil, ratingComment: String? = nil, date: Date? = nil, messageClientId: String? = nil, extraFields: [String: String]? = nil) {
         self.ticketId = ticketId
         self.appId = appId
         self.requestNewTicket = requestNewTicket
@@ -41,6 +42,7 @@ class TicketCommandParams: Codable {
         self.ratingComment = ratingComment
         self.date = date
         self.messageClientId = messageClientId
+        self.extraFields = extraFields
     }
     
     enum CodingKeys: String, CodingKey {
@@ -55,6 +57,7 @@ class TicketCommandParams: Codable {
         case messageId = "comment_id"
         case rating = "rating"
         case ratingComment = "rating_comment"
+        case extraFields = "extra_fields"
     }
 }
 
