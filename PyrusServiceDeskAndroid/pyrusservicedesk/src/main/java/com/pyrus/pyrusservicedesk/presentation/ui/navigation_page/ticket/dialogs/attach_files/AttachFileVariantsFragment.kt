@@ -23,12 +23,12 @@ import com.pyrus.pyrusservicedesk.PyrusServiceDesk.Companion.injector
 import com.pyrus.pyrusservicedesk._ref.utils.ConfigUtils
 import com.pyrus.pyrusservicedesk._ref.utils.dispatchTakePhotoIntent
 import com.pyrus.pyrusservicedesk._ref.utils.dispatchTakeVideoIntent
+import com.pyrus.pyrusservicedesk._ref.utils.hasPermission
+import com.pyrus.pyrusservicedesk._ref.utils.hasPermissionInManifeset
 import com.pyrus.pyrusservicedesk._ref.utils.insets.RootViewDeferringInsetsCallback
 import com.pyrus.pyrusservicedesk._ref.utils.log.PLog
 import com.pyrus.pyrusservicedesk.core.StaticRepository
 import com.pyrus.pyrusservicedesk.databinding.PsdFragmentAttachFileVariantsBinding
-import com.pyrus.pyrusservicedesk.utils.hasPermission
-import com.pyrus.pyrusservicedesk.utils.hasPermissionInManifeset
 import java.io.File
 
 /**
@@ -169,6 +169,7 @@ internal class AttachFileVariantsFragment: BottomSheetDialogFragment(), View.OnC
             it.flags = Intent.FLAG_GRANT_READ_URI_PERMISSION
             // We forced to use Intent.ACTION_OPEN_DOCUMENT to save uri access when the application
             // is restarted
+            it.addCategory(Intent.CATEGORY_OPENABLE)
             it.action = Intent.ACTION_OPEN_DOCUMENT
             it.flags = it.flags or Intent.FLAG_GRANT_PERSISTABLE_URI_PERMISSION
             it.type = "*/*"
