@@ -66,3 +66,7 @@
 "ExternalSourceWarning" = "Այս հղումը տանում է դեպի %@ \nԻսկապե՞ս ուզում եք անցնել հղումով։";
 "ShortYes" = "Այո";
 "ShortNo" = "Ոչ";
+"EvaluateQuality" = "Գնահատել ծառայության որակը";
+"PleaseEvaluateQuality" = "Գնահատել ծառայության որակը";
+"LeaveYourComment" = "Թողնել ակնարկ";
+"Close" = "Փակել";
