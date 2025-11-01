@@ -76,15 +76,37 @@ internal class LocalTicketsStore(
 
         val applications = dto.applications?.mapNotNull(DatabaseMapper::mapToApplicationEntity)?.distinctBy { it.appId } ?: emptyList()
         val tickets = dto.tickets?.mapNotNull {DatabaseMapper.mapToTicketWithComments(it, accountStore.getAccount())} ?: emptyList()
+        val sortedTicketsData = tickets.toHashSet().sortedWith(TicketsComparator())
         val userEntities = users.map(DatabaseMapper::mapToUserEntity)
         val members: MutableList<MemberEntity> = mutableListOf()
         dto.applications?.forEach { application -> application.authorsInfo?.forEach { userMap -> members.addAll(userMap.value.map { DatabaseMapper.mapToMembersEntity(it, userMap.key) }) } }
 
-        ticketsDao.insert(tickets, applications, userEntities, members)
+        ticketsDao.insert(sortedTicketsData, applications, userEntities, members)
     }
 
     fun searchTickets(text: String, limit: Int): List<TicketWithComment> {
         return searchDao.searchTicketsWithComment(text, limit)
     }
 
+}
+
+internal class TicketsComparator : Comparator<TicketWithComments> {
+
+    override fun compare(o1: TicketWithComments, o2: TicketWithComments): Int {
+        return when {
+            o1.ticket.lastComment == null -> return when {
+                o2.ticket.lastComment == null -> {
+                    o2.ticket.createdAt?.let { o1.ticket.createdAt?.compareTo(o2.ticket.createdAt) }
+                        ?: o1.ticket.ticketId.compareTo(o2.ticket.ticketId)
+                }
+                else -> 1
+            }
+            o2.ticket.lastComment == null -> -1
+            o1.ticket.lastComment.creationDate < o2.ticket.lastComment.creationDate -> 1
+            o1.ticket.lastComment.creationDate > o2.ticket.lastComment.creationDate -> -1
+            o1.ticket.lastComment.commentId < o2.ticket.lastComment.commentId -> 1
+            o1.ticket.lastComment.commentId > o2.ticket.lastComment.commentId -> -1
+            else -> 0
+        }
+    }
 }
