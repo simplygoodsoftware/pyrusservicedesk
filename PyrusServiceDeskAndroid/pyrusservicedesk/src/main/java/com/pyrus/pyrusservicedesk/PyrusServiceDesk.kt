@@ -332,11 +332,11 @@ class PyrusServiceDesk private constructor(
                 preferences = preferences
             )
 
-                autoRefreshFeatureFactory = INJECTOR?.autoRefreshFeatureFactory?.create(liveUpdates)
-                if (oldUserId != null && oldUserId != newAccount.getUserId()) {
-                    liveUpdates.reset(INJECTOR?.preferencesManager)
-                    clearLocalData {}
-                }
+            autoRefreshFeatureFactory = INJECTOR?.autoRefreshFeatureFactory?.create(liveUpdates)
+            if (oldUserId != null && oldUserId != newAccount.getUserId()) {
+                liveUpdates.reset(INJECTOR?.preferencesManager)
+                clearLocalData {}
+            }
 
             migratePreferences(application, preferences)
             if (loggingEnabled) PLog.instantiate(application)
