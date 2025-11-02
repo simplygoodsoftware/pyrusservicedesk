@@ -66,3 +66,7 @@
 "No_Connection" = "Интернет қосылымы жоқ";
 "PrepareLog" = "Журнал дайындалуда...";
 "ExternalSourceWarning" = "Бұл сілтеме %@\nСіз шынымен сілтемені орындағыңыз келе ме?";
+"EvaluateQuality" = "Қызмет көрсету сапасын бағалаңыз";
+"PleaseEvaluateQuality" = "Қызмет көрсету сапасын бағалаңыз";
+"LeaveYourComment" = "Пікір жазу";
+"Close" = "Жабу";
