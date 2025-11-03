@@ -66,3 +66,7 @@
 "ExternalSourceWarning" = "Ce lien mène à un %@\nVoulez-vous vraiment suivre ce lien ?";
 "ShortYes" = "Oui";
 "ShortNo" = "Non";
+"EvaluateQuality" = "Évaluer la qualité du service";
+"PleaseEvaluateQuality" = "Évaluer la qualité du service";
+"LeaveYourComment" = "Rédiger un avis";
+"Close" = "Fermer";
