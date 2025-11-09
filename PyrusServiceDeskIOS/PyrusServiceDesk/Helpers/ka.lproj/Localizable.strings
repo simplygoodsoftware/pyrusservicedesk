@@ -66,3 +66,7 @@
 "ExternalSourceWarning" = "ეს ბმული მიგიყვანთ %@-ზე.\n\nნამდვილად გსურთ იქ გადასვლა?";
 "ShortYes" = "დიახ";
 "ShortNo" = "არა";
+"EvaluateQuality" = "მომსახურების ხარისხის შეფასება";
+"PleaseEvaluateQuality" = "მომსახურების ხარისხის შეფასება";
+"LeaveYourComment" = "მიმოხილვის დაწერა";
+"Close" = "დახურვა";
