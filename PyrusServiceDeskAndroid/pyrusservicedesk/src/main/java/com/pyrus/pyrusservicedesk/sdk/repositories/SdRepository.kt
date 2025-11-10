@@ -313,7 +313,6 @@ internal class SdRepository(
 
     fun addAttachComment(user: UserInternal, ticketId: Long, fileUri: Uri) = coroutineScope.launch(Dispatchers.IO) {
 
-        PLog.d("EP ", "addAttachComment")
         val fileData = fileResolver.getFileData(fileUri) ?: return@launch
 
         val serverTicketId = idStore.getTicketServerId(ticketId) ?: ticketId
@@ -395,11 +394,8 @@ internal class SdRepository(
     }
 
     private suspend fun sendCommand(command: SyncRequest.Command) {
-        PLog.d("EP ", "sendCommand command: $command")
         val sendFilesTry = sendAttachments(command)
-        PLog.d("EP ", "sendFilesTry.isSuccess(): ${sendFilesTry.isSuccess()}")
         if (!sendFilesTry.isSuccess()) return
-        PLog.d("EP ", "syncCommand")
         syncCommand(sendFilesTry.value)
     }
 
@@ -478,11 +474,9 @@ internal class SdRepository(
         val syncTry = synchronizer.syncCommand(command)
 
         if (syncTry.isSuccess()) {
-            PLog.d("EP ", "syncTry.isSuccess()")
             commandsStore.removeCommand(command.commandId)
         }
         else {
-            PLog.d("EP ", "syncTry is not Success()")
             val instanceId = accountStore.getAccount().getInstanceId()
             val errorEntity = repositoryMapper.mapToCommandEntity(true, command, instanceId)
             commandsStore.addOrUpdatePendingCommand(errorEntity)

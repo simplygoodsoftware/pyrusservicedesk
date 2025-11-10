@@ -439,7 +439,6 @@ private class TicketActor(
         is Effect.Inner.Close -> singleFlow { Message.Inner.Exit }
         is Effect.Inner.SendTextComment -> flow {
             //TODO for multichat
-            PLog.d("EP ", "SendTextComment")
             ticketId = localTicketsStore.getTickets().lastOrNull()?.ticketId ?: ticketId
             effect.text?.let {
                 preferencesManager.saveLastActiveTime(System.currentTimeMillis())
@@ -474,7 +473,6 @@ private class TicketActor(
         is Effect.Inner.ListenAttachVariant -> flow {
             if (effect.uri !is Uri) return@flow
 
-            PLog.d("EP ", "ListenAttachVariant")
             ticketId = localTicketsStore.getTickets().lastOrNull()?.ticketId ?: ticketId
             val fileUri = runCatching { fileManager.copyFile(effect.uri) }.getOrNull()
             if (fileUri == null) {
