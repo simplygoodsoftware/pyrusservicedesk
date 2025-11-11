@@ -84,6 +84,7 @@ interface TicketContract {
             class OnRecordingProgressUpdated(val recordedSegmentValues: ShortArray) : Inner
             data object Exit : Inner
             data class OnOpenPreview(val fileData: FileData) : Inner
+            class ShowToast(val message: TextProvider): Inner
         }
 
     }

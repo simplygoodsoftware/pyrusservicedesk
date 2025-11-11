@@ -67,95 +67,6 @@ class PyrusServiceDesk private constructor(
         private val liveUpdates = LiveUpdates()
         var sdIsOpen = false
 
-//        @JvmStatic
-//        fun getTicketsFeature(): TicketsFeature {
-//            val factory = injector().ticketsFeatureFactory.create()
-//            return factory
-//        }
-//
-//        @JvmStatic
-//        fun getTicketFeature(
-//            user: UserInternal,
-//            initialTicketId: Long,
-//            welcomeMessage: String?,
-//            sendComment: String?,
-//        ): TicketFeature {
-//            val factory = injector().ticketFeatureFactory.create(user, initialTicketId, welcomeMessage, sendComment)
-//            return factory
-//        }
-//
-//        @JvmStatic
-//        fun getSearchFeature(): SearchFeature {
-//            val factory = injector().searchFeatureFactory.create()
-//            return factory
-//        }
-//
-//        @JvmStatic
-//        fun getAccessDeniedFeature(): AccessDeniedFeature {
-//            val factory = injector().accessDeniedFeatureFactory.create()
-//            return factory
-//        }
-//
-//        @JvmStatic
-//        fun getAutoRefreshFeature(): AutoRefreshFeature {
-//            val factory = injector().autoRefreshFeatureFactory.create()
-//            return factory
-//        }
-//
-//        @JvmStatic
-//        fun isTimeToRate(): Boolean {
-//            return injector().rateTimeUseCase.isTimeToRate()
-//        }
-//
-//        @JvmStatic
-//        fun audioClear() {
-//            injector().audioWrapper.clearPositions()
-//        }
-//
-//        @JvmStatic
-//        fun updateMainActivityIsActive(isActive: Boolean) {
-//            injector().audioWrapper.updateMainActivityIsActive(isActive)
-//            if (!isActive)
-//                injector().stopSession()
-//        }
-//
-//        @JvmStatic
-//        fun rateApp() {
-//            injector().rateTimeUseCase.onAppRated()
-//        }
-//
-//        @JvmStatic
-//        fun getUsers(): List<User> {
-//            return injector().accountStore.getAccount().getUsers()
-//        }
-//
-//        @JvmStatic
-//        fun getVendors(): List<Vendor> {
-//            return injector().repository.getApplications().map {
-//                Vendor(
-//                    appId = it.appId,
-//                    orgName = it.orgName ?: "",
-//                    orgUrl = it.orgLogoUrl?.let { url -> RequestUtils.getOrganisationLogoUrl(url, "dev.pyrus.com") },
-//                    orgDescription = it.orgDescription
-//                )
-//            }
-//        }
-//
-//        @JvmStatic
-//        fun getMembers(userId: String): List<Member> {
-//            return injector().repository.getMembers(userId)
-//        }
-//
-//        @JvmStatic
-//        fun addUser(user: User) {
-//            injector().addUserUseCase.addUser(user)
-//        }
-//
-//        @JvmStatic
-//        fun updateName(name: String) {
-//            StaticRepository.getConfiguration().userName = name
-//        }
-
         /**
          * Initializes PyrusServiceDesk embeddable module.
          * The best approach is to call this in [Application.onCreate]
@@ -233,46 +144,6 @@ class PyrusServiceDesk private constructor(
             )
         }
 
-        /**
-         * Initializes PyrusServiceDesk embeddable module.
-         * This init is used for authorized users with device independent sessions.
-         * The best approach is to call this in [Application.onCreate]
-         * ***PS***: Should be done before other public methods are is called.
-         * Unhandled IllegalStateException is thrown otherwise.
-         *
-         * @param application instance of the enclosing application
-         * @param listUser list of the users.
-         * @param authorId author phone number hash.
-         * @param domain Base domain for network requests. If the [domain] is null, the default pyrus.com will be used.
-         * @param loggingEnabled If true, then the library will write logs,
-         * and they can be sent as a file to chat by clicking the "Send Library Logs" button in the menu under the "+" sign.
-         * @param authorizationToken authorization token that is sent to the backend.
-         */
-//        @JvmStatic
-//        @JvmOverloads
-//        fun initAsMultichat(
-//            application: Application,
-//            listUser: List<User>,
-//            authorId: String,
-//            domain: String? = null,
-//            loggingEnabled: Boolean = false,
-//            authorizationToken: String? = null,
-//        ) {
-//            if (listUser.isEmpty()) throw Exception("user list is empty")
-//
-//            initInternal(
-//                application,
-//                listUser,
-//                listUser.first().appId,
-//                null,
-//                authorId,
-//                null,
-//                domain,
-//                API_VERSION_3,
-//                loggingEnabled,
-//                authorizationToken,
-//            )
-//        }
         private fun initInternal(
             application: Application,
             listUser: List<User>?,
@@ -285,63 +156,62 @@ class PyrusServiceDesk private constructor(
             loggingEnabled: Boolean,
             authorizationToken: String?,
         ) {
-            CoroutineScope(Dispatchers.Main).launch {
-                StaticRepository.logging = loggingEnabled
-                PLog.d(TAG, "initInternal, appId: ${appId.getFirstNSymbols(10)}, userId: ${userId?.getFirstNSymbols(10)}, apiVersion: $apiVersion")
-                Log.d(TAG, "initInternal, appId: ${appId.getFirstNSymbols(10)}, userId: ${userId?.getFirstNSymbols(10)}, apiVersion: $apiVersion")
+            StaticRepository.logging = loggingEnabled
+            PLog.d(TAG,"initInternal, appId: ${appId.getFirstNSymbols(10)}, userId: ${userId?.getFirstNSymbols(10)}, apiVersion: $apiVersion")
+            Log.d(TAG,"initInternal, appId: ${appId.getFirstNSymbols(10)}, userId: ${userId?.getFirstNSymbols(10)}, apiVersion: $apiVersion")
 
-                val preferences: SharedPreferences = application.getSharedPreferences(PREFERENCE_KEY, Context.MODE_PRIVATE)
-                val isVersion1 = listUser == null && authorId == null && userId == null && securityKey == null
-                val instanceId = ConfigUtils.getInstanceId(preferences, isVersion1)
+            val preferences: SharedPreferences = application.getSharedPreferences(PREFERENCE_KEY, Context.MODE_PRIVATE)
+            val isVersion1 = listUser == null && authorId == null && userId == null && securityKey == null
+            val instanceId = ConfigUtils.getInstanceId(preferences, isVersion1)
 
-                val apiDomain = domain ?: PYRUS_BASE_DOMAIN
+            val apiDomain = domain ?: PYRUS_BASE_DOMAIN
 
-                val newAccount = if (listUser != null && authorId != null)
-                    Account.V3(
-                        domain = apiDomain,
-                        instanceId = instanceId,
-                        users = listUser,
-                        authorId = authorId,
-                    )
-                else if (userId != null && securityKey != null) Account.V2(
+            val newAccount = if (listUser != null && authorId != null)
+                Account.V3(
                     domain = apiDomain,
                     instanceId = instanceId,
-                    appId = appId,
-                    userId = userId,
-                    securityKey = securityKey,
+                    users = listUser,
+                    authorId = authorId,
                 )
-                else Account.V1(
-                    domain = apiDomain,
-                    instanceId = instanceId,
-                    appId = appId,
-                )
-                val oldUserId = INJECTOR?.accountStore?.getAccount()?.getUserId()
-                autoRefreshFeatureFactory?.cancel()
+            else if (userId != null && securityKey != null) Account.V2(
+                domain = apiDomain,
+                instanceId = instanceId,
+                appId = appId,
+                userId = userId,
+                securityKey = securityKey,
+            )
+            else Account.V1(
+                domain = apiDomain,
+                instanceId = instanceId,
+                appId = appId,
+            )
+            val oldUserId = INJECTOR?.accountStore?.getAccount()?.getUserId()
+            autoRefreshFeatureFactory?.cancel()
 
-                INJECTOR?.onCancel()
+            INJECTOR?.onCancel()
 
-                INJECTOR = DiInjector(
-                    application = application,
-                    initialAccount = newAccount,
-                    authToken = authorizationToken,
-                    coreScope = CoroutineScope(Dispatchers.Main + SupervisorJob() + CoroutineExceptionHandler { _, throwable ->
-                        throwable.printStackTrace()
-                        Log.e(TAG, "coreScope global error: ${throwable.message}")
-                        PLog.e(TAG, "coreScope global error: ${throwable.message}")
-                        throwable.printStackTrace()
-                    }),
-                    preferences = preferences
-                )
+            INJECTOR = DiInjector(
+                application = application,
+                initialAccount = newAccount,
+                authToken = authorizationToken,
+                coreScope = CoroutineScope(Dispatchers.Main + SupervisorJob() + CoroutineExceptionHandler { _, throwable ->
+                    throwable.printStackTrace()
+                    Log.e(TAG, "coreScope global error: ${throwable.message}")
+                    PLog.e(TAG, "coreScope global error: ${throwable.message}")
+                    throwable.printStackTrace()
+                }),
+                preferences = preferences
+            )
 
-                autoRefreshFeatureFactory = INJECTOR?.autoRefreshFeatureFactory?.create(liveUpdates)
-                if (oldUserId != newAccount.getUserId()) {
-                    liveUpdates.reset(INJECTOR?.preferencesManager)
-                    clearLocalData {}
-                }
-
-                migratePreferences(application, preferences)
-                if (loggingEnabled) PLog.instantiate(application)
+            autoRefreshFeatureFactory = INJECTOR?.autoRefreshFeatureFactory?.create(liveUpdates)
+            if (oldUserId != null && oldUserId != newAccount.getUserId()) {
+                liveUpdates.reset(INJECTOR?.preferencesManager)
+                clearLocalData {}
             }
+
+            migratePreferences(application, preferences)
+            if (loggingEnabled) PLog.instantiate(application)
+
         }
 
         private fun validateDomain(domain: String?): Boolean {
@@ -455,12 +325,6 @@ class PyrusServiceDesk private constructor(
             PLog.d(TAG, "stop")
             INJECTOR?.finishEventBus?.post(true)
         }
-
-//        @JvmStatic
-//        fun clean() {
-//            PLog.d(TAG, "clean")
-//            INJECTOR?.cleanDataUseCase()
-//        }
 
         /**
          * Manually refreshes feed of PyrusServiceDesk.

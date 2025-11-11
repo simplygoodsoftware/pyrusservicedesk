@@ -54,7 +54,9 @@ import com.squareup.moshi.kotlin.reflect.KotlinJsonAdapterFactory
 import com.squareup.picasso.OkHttp3Downloader
 import com.squareup.picasso.Picasso
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.cancel
+import kotlinx.coroutines.launch
 import okhttp3.Cache
 import okhttp3.OkHttpClient
 import retrofit2.Retrofit
@@ -74,7 +76,7 @@ internal class DiInjector(
 
     val accountStore = AccountStore(initialAccount)
 
-    private val fileResolver: FileResolver = FileResolver(application.contentResolver)
+    private val fileResolver: FileResolver = FileResolver(application.contentResolver, application)
 
     private val localDataVerifier: LocalDataVerifier = LocalDataVerifier(fileResolver)
 
@@ -295,15 +297,19 @@ internal class DiInjector(
     }
 
     fun releaseSession() {
-        session.run {
-            player.release()
-            release()
+        coreScope.launch(Dispatchers.Main) {
+            session.run {
+                player.release()
+                release()
+            }
         }
     }
 
     fun stopSession() {
-        audioWrapper.clearCurrentUrl()
-        session.player.clearMediaItems()
+        coreScope.launch(Dispatchers.Main) {
+            audioWrapper.clearCurrentUrl()
+            session.player.clearMediaItems()
+        }
     }
 
 }

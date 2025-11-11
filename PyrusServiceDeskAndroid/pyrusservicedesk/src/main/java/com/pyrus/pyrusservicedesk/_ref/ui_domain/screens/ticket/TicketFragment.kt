@@ -67,6 +67,7 @@ import com.pyrus.pyrusservicedesk._ref.whitetea.androidutils.getStore
 import com.pyrus.pyrusservicedesk._ref.whitetea.bind.BinderLifecycleMode
 import com.pyrus.pyrusservicedesk._ref.whitetea.core.ViewRenderer
 import com.pyrus.pyrusservicedesk._ref.whitetea.utils.diff
+import com.pyrus.pyrusservicedesk.core.isMultiChat
 import com.pyrus.pyrusservicedesk.databinding.PsdFragmentTicketBinding
 import com.pyrus.pyrusservicedesk.payload_adapter.PayloadListAdapter
 import com.pyrus.pyrusservicedesk.presentation.ui.navigation_page.ticket.dialogs.attach_files.AttachFileVariantsFragment
@@ -130,7 +131,7 @@ internal class TicketFragment: TeaFragment<Model, Event, Effect>() {
             binding.ticketContent.isVisible = !isLoading
             binding.progressBar.isVisible = isLoading
         }
-        diff(Model::toolbarTitleText) { text -> binding.toolbarTitle.text = ConfigUtils.getTitle(requireContext(), text?.text(requireContext())) }
+        diff(Model::toolbarTitleText) { text -> binding.toolbarTitle.text = ConfigUtils.getTitle(requireContext(), if (injector().accountStore.getAccount().isMultiChat()) text?.text(requireContext()) else null) }
         diff(Model::isRefreshing) { isRefreshing -> binding.refresh.isRefreshing = isRefreshing }
         diff(Model::showInputPanel) { showInput ->
             binding.inputLayout.isVisible = showInput

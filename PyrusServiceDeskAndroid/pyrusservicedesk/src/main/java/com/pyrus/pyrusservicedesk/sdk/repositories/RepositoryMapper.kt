@@ -202,7 +202,7 @@ internal class RepositoryMapper(
             .map(::map)
 
         comments.sortWith(
-            compareBy({ it.isSending }, { it.creationTime }, { it.id })
+            compareBy({ it.creationTime }, { it.id })
         )
     }
 
@@ -231,12 +231,9 @@ internal class RepositoryMapper(
 
         val lastCommand = filteredCommands.lastOrNull()
 
-        fun CommentInfo?.olderThan(entity: CommandEntity?): Boolean {
-            return (this?.creationDate ?: Long.MIN_VALUE) >= (entity?.creationTime ?: Long.MIN_VALUE)
-        }
-
         val lastComment = when {
-            lastServerComment.olderThan(lastCommand?.command) -> lastServerComment?.let {
+            lastCommand?.command != null -> mapToCommentInfo(account, lastCommand)
+            else -> lastServerComment?.let {
                 TicketHeader.LastComment(
                     id = it.commentId,
                     author = it.author?.let { dto -> map(account, dto) },
@@ -245,7 +242,6 @@ internal class RepositoryMapper(
                     creationDate = it.creationDate
                 )
             }
-            else -> lastCommand?.let { mapToCommentInfo(account, it) }
         }
 
         return TicketHeader(
