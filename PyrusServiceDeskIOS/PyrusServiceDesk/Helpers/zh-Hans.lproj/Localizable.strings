@@ -66,3 +66,7 @@
 "Time_Format" = "aa hh:mm";
 "Date_Format" = "yyyy年MM月dd日 HH时mm分ss秒";
 "Numbers_Date_Format" = "yyyy年MM月dd日 HH时mm分ss秒";
+"EvaluateQuality" = "评估服务质量";
+"PleaseEvaluateQuality" = "评估服务质量";
+"LeaveYourComment" = "撰写评价";
+"Close" = "关闭";
