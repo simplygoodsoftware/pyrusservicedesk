@@ -66,3 +66,7 @@
 "ShortYes" = "Ja";
 "ShortNo" = "Nein";
 "Back" = "Zurück";
+"EvaluateQuality" = "Bewerten Sie die Servicequalität";
+"PleaseEvaluateQuality" = "Bewerten Sie die Servicequalität";
+"LeaveYourComment" = "Schreiben Sie eine Rezension";
+"Close" = "Schließen";
