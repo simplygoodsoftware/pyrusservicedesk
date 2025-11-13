@@ -240,10 +240,8 @@ extension PSDChatsDataService: PSDChatsDataServiceProtocol {
             dbChat.showRatingText = chatModel.showRatingText
             dbChat.subject = chatModel.subject
             dbChat.userId = chatModel.userId
-            if dbChat.messages == nil {
-                dbChat.messages = NSOrderedSet()
-            }
-            
+
+            let messages = dbChat.mutableOrderedSetValue(forKey: "messages")
             for message in chatModel.messages {
                 if message.rating ?? 0 > 0 {
                     continue
@@ -278,10 +276,7 @@ extension PSDChatsDataService: PSDChatsDataServiceProtocol {
                     dbMessage.rating = Int32(rating)
                 }
                 
-                if dbMessage.attachments == nil {
-                    dbMessage.attachments = NSOrderedSet()
-                }
-                
+                let atts = dbMessage.mutableOrderedSetValue(forKey: "attachments")
                 if let attachments = message.attachments {
                     for attachment in attachments {
                         let attachFetchRequest = DBAttachment.fetchRequest()
@@ -293,7 +288,7 @@ extension PSDChatsDataService: PSDChatsDataServiceProtocol {
                         } else {
                             dbAttachment = NSEntityDescription.insertNewObject(forEntityName: "DBAttachment", into: context) as! DBAttachment
                         }
-//                        let dbAttachment = NSEntityDescription.insertNewObject(forEntityName: "DBAttachment", into: context) as! DBAttachment
+                        
                         dbAttachment.name = attachment.name
                         dbAttachment.canOpen = attachment.canOpen
                         dbAttachment.data = attachment.data
@@ -305,11 +300,10 @@ extension PSDChatsDataService: PSDChatsDataServiceProtocol {
                         dbAttachment.localPath = attachment.localPath
                         dbAttachment.uploadingProgress = Float(attachment.uploadingProgress)
                         
-                        dbMessage.addToAttachments(dbAttachment)
+                        if !atts.contains(dbAttachment) { atts.add(dbAttachment) }
                     }
                 }
-                
-                dbChat.addToMessages(dbMessage)
+                if !messages.contains(dbMessage) { messages.add(dbMessage) }
             }
         }
     }
@@ -569,10 +563,9 @@ extension PSDChatsDataService: PSDChatsDataServiceProtocol {
         }
     }
     
-    // MARK: Commands
+    // MARK: - Commands
     
     func saveTicketCommand(with ticketCommand: TicketCommand, completion: ((Result<Void, Error>) -> Void)?) {
-//        print("commandId: \(ticketCommand.commandId), type: \(TicketCommandType(rawValue: ticketCommand.type))")
         coreDataService.save(completion: completion)  { context in
             let fetchRequest = DBTicketCommand.fetchRequest()
             fetchRequest.predicate = NSPredicate(format: "id == %@", ticketCommand.commandId.lowercased() as CVarArg)
@@ -613,16 +606,18 @@ extension PSDChatsDataService: PSDChatsDataServiceProtocol {
             dbTicketCommand.clientId = ticketCommand.params.messageClientId
             dbTicketCommand.ratingComment = ticketCommand.params.ratingComment
             
-            if dbTicketCommand.attachments == nil {
-                dbTicketCommand.attachments = NSOrderedSet()
-            }
+            let attachments = dbTicketCommand.mutableOrderedSetValue(forKey: "attachments")
+//            if dbTicketCommand.attachments == nil {
+//                dbTicketCommand.attachments = NSOrderedSet()
+//            }
             
             for attachmentData in ticketCommand.params.attachments ?? [] {
                 let dbAttachmentData = NSEntityDescription.insertNewObject(forEntityName: "DBAttachmentData", into: context) as! DBAttachmentData
                 dbAttachmentData.guid = attachmentData.guid
                 dbAttachmentData.type = Int32(attachmentData.type)
                 dbAttachmentData.name = attachmentData.name
-                dbTicketCommand.addToAttachments(dbAttachmentData)
+                if !attachments.contains(dbAttachmentData) { attachments.add(dbAttachmentData) }
+//                dbTicketCommand.addToAttachments(dbAttachmentData)
             }            
         }
     }
