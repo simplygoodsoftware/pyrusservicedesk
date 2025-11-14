@@ -1,7 +1,7 @@
 import Foundation
 import AudioToolbox
 import CoreAudioKit
-import libopus
+@_implementationOnly import libopus
 @_implementationOnly import PyrusServiceDeskPrivate
 
 let bufCount: Int = 3

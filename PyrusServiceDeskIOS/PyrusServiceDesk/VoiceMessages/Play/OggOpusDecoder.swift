@@ -1,5 +1,5 @@
 import Foundation
-import libopus
+@_implementationOnly import libopus
 @_implementationOnly import PyrusServiceDeskPrivate
 // import ogg
 
