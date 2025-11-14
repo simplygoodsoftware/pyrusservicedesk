@@ -10,7 +10,6 @@ spec.platform     = :ios, '9.0'
 spec.source       = { :git => 'https://github.com/simplygoodsoftware/pyrusservicedesk.git', :tag => "#{spec.version}" }
 spec.preserve_paths      = 'PyrusServiceDeskIOS/Framework/PyrusServiceDesk.xcframework'
 spec.vendored_frameworks = 'PyrusServiceDeskIOS/Framework/PyrusServiceDesk.xcframework'
-spec.dependency 'libopus', '~> 1.1'
-spec.static_framework = true
+spec.dependency 'opus-swift', '~> 1.3'
 
 end
