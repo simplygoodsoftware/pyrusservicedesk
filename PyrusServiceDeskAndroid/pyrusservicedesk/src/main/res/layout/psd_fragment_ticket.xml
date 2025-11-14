@@ -1,0 +1,485 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:clickable="true">
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/contentRoot"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="@color/psd_background">
+
+        <androidx.appcompat.widget.Toolbar
+            android:id="@+id/ticket_toolbar"
+            android:layout_width="match_parent"
+            android:layout_height="52sp"
+            android:paddingHorizontal="4dp"
+            app:contentInsetStart="0dp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:titleTextAppearance="@style/PsdToolbarTitleTextAppearance">
+
+            <androidx.constraintlayout.widget.ConstraintLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content">
+
+                <ImageButton
+                    android:id="@+id/toolbar_back"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:background="?attr/selectableItemBackgroundBorderless"
+                    android:padding="@dimen/psd_offset_small"
+                    android:src="@drawable/ic_back_24"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toTopOf="parent" />
+
+                <TextView
+                    android:id="@+id/toolbar_title"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center"
+                    android:layout_marginStart="18dp"
+                    android:layout_marginEnd="58dp"
+                    android:layout_weight="1"
+                    android:ellipsize="end"
+                    android:gravity="center"
+                    android:maxLines="1"
+                    android:textColor="@color/psd_text_color_primary"
+                    android:textSize="@dimen/psd_text_20"
+                    android:textStyle="bold"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toEndOf="@+id/toolbar_back"
+                    app:layout_constraintTop_toTopOf="parent"
+                    tools:text="T" />
+
+            </androidx.constraintlayout.widget.ConstraintLayout>
+
+        </androidx.appcompat.widget.Toolbar>
+
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:id="@+id/ticket_content"
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:visibility="visible"
+            android:clipChildren="false"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/ticket_toolbar">
+
+            <com.pyrus.pyrusservicedesk.presentation.ui.view.swiperefresh.DirectedSwipeRefresh
+                android:id="@+id/refresh"
+                android:layout_width="0dp"
+                android:layout_height="0dp"
+                android:background="@color/psd_background"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintBottom_toTopOf="@+id/rating"
+                app:swipeDirection="both">
+
+                <androidx.recyclerview.widget.RecyclerView
+                    android:id="@+id/comments"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:clipChildren="false"
+                    android:clipToPadding="false"
+                    android:paddingTop="@dimen/psd_comments_item_space_double"
+                    tools:listitem="@layout/psd_view_holder_comment_simple_text" />
+
+            </com.pyrus.pyrusservicedesk.presentation.ui.view.swiperefresh.DirectedSwipeRefresh>
+
+            <View
+                android:id="@+id/gradient"
+                android:layout_width="match_parent"
+                android:layout_height="26dp"
+                android:layout_marginBottom="-16dp"
+                android:background="@drawable/fade_gradient_bg"
+                app:layout_constraintBottom_toTopOf="@+id/rating"/>
+
+            <View
+                android:id="@+id/ratingBackground"
+                android:layout_width="match_parent"
+                android:layout_height="0dp"
+                android:layout_marginBottom="-16dp"
+                app:layout_constraintTop_toBottomOf="@+id/gradient"
+                app:layout_constraintBottom_toBottomOf="@+id/rating"
+                />
+
+            <include
+                android:id="@+id/rating"
+                android:layout_height="wrap_content"
+                android:layout_width="match_parent"
+                layout="@layout/psd_view_holder_rating"
+                android:visibility="gone"
+                android:layout_marginBottom="@dimen/psd_offset_default"
+                tools:visibility="visible"
+                app:layout_constraintBottom_toTopOf="@+id/bottom_border" />
+
+            <FrameLayout
+                android:id="@+id/scrollDownButtonLayout"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                app:layout_constraintBottom_toTopOf="@+id/bottom_border"
+                android:layout_marginEnd="@dimen/psd_offset_default"
+                android:layout_marginBottom="28dp"
+                app:layout_constraintEnd_toEndOf="parent">
+
+                <com.google.android.material.floatingactionbutton.FloatingActionButton
+                    android:id="@+id/scrollDownButton"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:background="?attr/selectableItemBackground"
+                    android:src="@drawable/ic_down"
+                    android:visibility="gone"
+                    android:elevation="4dp"
+                    app:backgroundTint="@color/psd_color_fab_scroll_down"
+                    app:fabSize="mini" />
+
+            </FrameLayout>
+
+            <View
+                android:id="@+id/divider"
+                android:layout_width="match_parent"
+                android:layout_height="1dp"
+                android:background="?android:attr/listDivider"
+                app:layout_constraintBottom_toTopOf="@+id/input_layout" />
+
+            <FrameLayout
+                android:id="@+id/lockStopLayout"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="24.dp"
+                android:background="@drawable/bg_lock_stop"
+                android:elevation="2.dp"
+                android:padding="10.dp"
+                android:visibility="gone"
+                app:layout_constraintBottom_toTopOf="@id/input_layout"
+                app:layout_constraintEnd_toEndOf="parent">
+
+                <com.pyrus.pyrusservicedesk._ref.ui_domain.screens.ticket.record.LockStopView
+                    android:id="@+id/lockStopView"
+                    android:layout_width="24.dp"
+                    android:layout_height="24.dp"
+                    android:layout_gravity="center" />
+
+            </FrameLayout>
+
+            <FrameLayout
+                android:id="@+id/actionCircleHolder"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:translationX="15.dp"
+                android:translationY="10.dp"
+                android:elevation="2.dp"
+                android:visibility="gone"
+                tools:visibility="visible"
+                app:layout_constraintBottom_toBottomOf="@id/input_layout"
+                app:layout_constraintEnd_toEndOf="@id/input_layout">
+
+                <com.pyrus.pyrusservicedesk._ref.ui_domain.screens.ticket.record.CircleFrameLayout
+                    android:id="@+id/actionCircle"
+                    android:layout_width="74.dp"
+                    android:layout_height="74.dp"
+                    tools:alpha="0.5">
+
+                    <ImageView
+                        android:id="@+id/actionCircleIcon"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="center"
+                        android:src="@drawable/psd_ic_mic_filled" />
+
+                </com.pyrus.pyrusservicedesk._ref.ui_domain.screens.ticket.record.CircleFrameLayout>
+
+            </FrameLayout>
+
+            <com.pyrus.pyrusservicedesk._ref.ui_domain.screens.ticket.record.RecordIndicationView
+                android:id="@+id/recordWaves"
+                android:layout_width="200.dp"
+                android:layout_height="50.dp"
+                android:visibility="invisible"
+                android:layout_marginBottom="16.dp"
+                app:layout_constraintBottom_toTopOf="@id/bottom_border"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"/>
+
+            <androidx.constraintlayout.widget.Barrier
+                android:id="@+id/bottom_border"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                app:barrierDirection="top"
+                app:constraint_referenced_ids="input_layout" />
+
+            <androidx.constraintlayout.widget.ConstraintLayout
+                android:id="@+id/input_layout"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                tools:visibility="visible"
+                android:clipChildren="false"
+                android:clickable="true"
+                android:minHeight="@dimen/psd_recyclerview_item_height_default"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent">
+
+                <androidx.constraintlayout.widget.Barrier
+                    android:id="@+id/actionButtonTopBarrier"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    app:barrierDirection="top"
+                    app:constraint_referenced_ids="sendButton, recordButton"/>
+
+                <androidx.constraintlayout.widget.Barrier
+                    android:id="@+id/actionButtonBottomBarrier"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    app:barrierDirection="bottom"
+                    app:constraint_referenced_ids="sendButton, recordButton"/>
+
+                <androidx.constraintlayout.widget.Barrier
+                    android:id="@+id/actionButtonLeftBarrier"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    app:barrierDirection="left"
+                    app:constraint_referenced_ids="sendButton, recordButton"/>
+
+                <androidx.appcompat.widget.AppCompatEditText
+                    android:id="@+id/inputEditText"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:background="@android:color/transparent"
+                    android:scrollbars="vertical"
+                    android:maxHeight="@dimen/psd_max_input_height"
+                    android:minHeight="@dimen/psd_min_input_height"
+                    android:paddingTop="@dimen/psd_input_padding"
+                    android:paddingBottom="@dimen/psd_input_padding"
+                    android:hint="@string/psd_comment_input_hint"
+                    android:inputType="textCapSentences|textMultiLine"
+                    android:imeOptions="flagNoExtractUi|flagNoFullscreen"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintEnd_toStartOf="@+id/actionButtonLeftBarrier"
+                    app:layout_constraintStart_toEndOf="@+id/attachButton"
+                    app:layout_constraintTop_toTopOf="parent"
+                    tools:visibility="gone"/>
+
+                <androidx.appcompat.widget.AppCompatImageButton
+                    android:id="@+id/sendButton"
+                    style="?attr/toolbarNavigationButtonStyle"
+                    android:minWidth="44.dp"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="6.dp"
+                    android:padding="10.dp"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:srcCompat="@drawable/psd_ic_send"
+                    tools:visibility="gone" />
+
+                <androidx.appcompat.widget.AppCompatImageButton
+                    android:id="@+id/recordButton"
+                    style="?attr/toolbarNavigationButtonStyle"
+                    android:minWidth="44.dp"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="6.dp"
+                    android:padding="10.dp"
+                    android:visibility="gone"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:srcCompat="@drawable/psd_ic_mic_outline"
+                    tools:visibility="visible" />
+
+                <androidx.appcompat.widget.AppCompatImageButton
+                    android:id="@+id/attachButton"
+                    style="?attr/toolbarNavigationButtonStyle"
+                    android:minWidth="44.dp"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:padding="10.dp"
+                    android:layout_marginBottom="6.dp"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:srcCompat="@drawable/psd_ic_attach"
+                    tools:visibility="gone" />
+
+                <androidx.appcompat.widget.AppCompatImageButton
+                    android:id="@+id/remove_pending_audio_button"
+                    style="?attr/toolbarNavigationButtonStyle"
+                    android:minWidth="44.dp"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:padding="10.dp"
+                    android:layout_marginBottom="6.dp"
+                    android:visibility="gone"
+                    tools:visibility="gone"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:srcCompat="@drawable/psd_ic_trash" />
+
+                <LinearLayout
+                    android:id="@+id/pendingPlayerLayout"
+                    android:layout_width="0.dp"
+                    android:layout_height="38.dp"
+                    android:orientation="horizontal"
+                    android:gravity="center"
+                    android:layout_marginHorizontal="50.dp"
+                    android:background="@drawable/bg_pending_audio"
+                    android:layout_marginBottom="8.dp"
+                    android:visibility="gone"
+                    tools:visibility="gone"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintEnd_toEndOf="parent">
+
+                    <ImageView
+                        android:id="@+id/playButton"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:background="@drawable/selectable_round_bg"
+                        android:padding="8.dp"
+                        android:layout_marginStart="4.dp"
+                        android:src="@drawable/psd_ic_play_16"
+                        app:layout_constraintBottom_toBottomOf="parent"
+                        app:layout_constraintLeft_toLeftOf="parent"
+                        app:layout_constraintTop_toTopOf="parent"
+                        tools:ignore="contentDescription" />
+
+                    <SeekBar
+                        android:id="@+id/playerProgressBar"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:enabled="true"
+                        android:thumb="@drawable/seekbar_thumb"
+                        android:maxHeight="4dp"
+                        android:minHeight="4dp"
+                        android:paddingHorizontal="12dp"
+                        android:progressBackgroundTint="#D9D9D9"
+                        android:progressDrawable="@drawable/psd_ic_audio_player_seekbar_progress"
+                        android:progressTint="@color/psd_accent"
+                        android:thumbTint="@color/psd_accent"
+                        app:layout_constraintEnd_toEndOf="parent"
+                        app:layout_constraintHorizontal_bias="0.0"
+                        app:layout_constraintStart_toEndOf="@id/playButton"
+                        app:layout_constraintTop_toTopOf="parent"
+                        app:layout_constraintBottom_toTopOf="@+id/playerBottom"
+                        tools:progress="50" />
+
+                    <TextView
+                        android:id="@+id/trackCurrentTime"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:maxLines="1"
+                        android:textSize="12sp"
+                        android:visibility="visible"
+                        android:layout_marginEnd="12.dp"
+                        app:layout_constraintBottom_toBottomOf="parent"
+                        app:layout_constraintLeft_toLeftOf="parent"
+                        app:layout_constraintTop_toTopOf="parent"
+                        tools:text="4:24"
+                        tools:visibility="visible" />
+
+                </LinearLayout>
+
+                <TextView
+                    android:id="@+id/cancelRecordHint"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/psd_swipe_cancel"
+                    android:textSize="16.dp"
+                    android:paddingHorizontal="16.dp"
+                    android:paddingVertical="4.dp"
+                    android:layout_marginBottom="10.dp"
+                    android:visibility="gone"
+                    app:layout_constraintTop_toTopOf="@id/actionButtonTopBarrier"
+                    app:layout_constraintBottom_toBottomOf="@id/actionButtonBottomBarrier"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    tools:visibility="visible"/>
+
+                <com.pyrus.pyrusservicedesk._ref.ui_domain.screens.ticket.record.TimerView
+                    android:id="@+id/timerView"
+                    android:layout_width="wrap_content"
+                    android:layout_height="0dp"
+                    android:visibility="visible"
+                    android:layout_marginStart="50.dp"
+                    android:layout_marginBottom="4dp"
+                    app:layout_constraintTop_toTopOf="@id/actionButtonTopBarrier"
+                    app:layout_constraintBottom_toBottomOf="@id/actionButtonBottomBarrier"
+                    app:layout_constraintStart_toStartOf="parent"
+                    tools:visibility="visible"/>
+
+                <Button
+                    android:id="@+id/cancelHoldingRecordButton"
+                    style="?attr/borderlessButtonStyle"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="4dp"
+                    android:paddingHorizontal="16.dp"
+                    android:text="@string/psd_cancel"
+                    android:textAllCaps="false"
+                    android:textSize="18.dp"
+                    android:visibility="gone"
+                    android:alpha="0"
+                    app:layout_constraintTop_toTopOf="@id/actionButtonTopBarrier"
+                    app:layout_constraintBottom_toBottomOf="@id/actionButtonBottomBarrier"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    tools:visibility="visible"
+                    tools:alpha="1"/>
+
+                <View
+                    android:id="@+id/recordDot"
+                    android:layout_width="8.dp"
+                    android:layout_height="8.dp"
+                    android:layout_marginStart="24.dp"
+                    android:background="@drawable/bg_record_dot"
+                    android:visibility="gone"
+                    app:layout_constraintBottom_toBottomOf="@id/timerView"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toTopOf="@id/timerView"
+                    tools:visibility="visible" />
+
+            </androidx.constraintlayout.widget.ConstraintLayout>
+
+        </androidx.constraintlayout.widget.ConstraintLayout>
+
+        <View
+            android:id="@+id/view"
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:background="@color/psd_color_divider_300"
+            app:layout_constraintTop_toBottomOf="@+id/ticket_toolbar" />
+
+        <include
+            android:id="@+id/no_connection"
+            layout="@layout/psd_no_connection"
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:visibility="gone"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/ticket_toolbar" />
+
+        <ProgressBar
+            android:id="@+id/progress_bar"
+            android:layout_width="@dimen/psd_recyclerview_item_height_default"
+            android:layout_height="@dimen/psd_recyclerview_item_height_default"
+            android:visibility="visible"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/ticket_toolbar"
+            tools:visibility="gone"/>
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+</FrameLayout>

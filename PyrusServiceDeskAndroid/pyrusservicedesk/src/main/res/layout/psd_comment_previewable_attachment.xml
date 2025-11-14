@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+    android:id="@+id/root"
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:gravity="bottom"
+    android:orientation="horizontal">
+
+    <androidx.appcompat.widget.AppCompatImageView
+        android:id="@+id/statusIcon"
+        android:layout_width="@dimen/psd_comment_error_width"
+        android:layout_height="wrap_content"
+        android:forceDarkAllowed="false"
+        android:visibility="gone"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        tools:srcCompat="@tools:sample/avatars" />
+
+    <androidx.cardview.widget.CardView
+        android:id="@+id/background_parent"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        app:cardCornerRadius="@dimen/psd_comment_radius"
+        app:cardElevation="0dp"
+        app:cardPreventCornerOverlap="false">
+
+        <FrameLayout
+            android:id="@+id/preview_layout"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:background="@color/psd_comment_inbound_bg"
+            android:visibility="gone"
+            tools:visibility="visible">
+
+            <ProgressBar
+                android:id="@+id/preview_passive_progress"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                tools:visibility="gone"/>
+
+            <com.pyrus.pyrusservicedesk.presentation.ui.view.OutlineImageView
+                android:id="@+id/preview_full"
+                android:scaleType="centerCrop"
+                android:layout_width="wrap_content"
+                android:layout_gravity="center_horizontal"
+                android:layout_height="@dimen/psd_preview_default_size"/>
+
+            <androidx.appcompat.widget.AppCompatTextView
+                android:id="@+id/preview_time"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="right|bottom"
+                android:layout_margin="@dimen/psd_offset_small"
+                android:background="@drawable/psd_bg_time"
+                android:maxLines="1"
+                android:paddingLeft="@dimen/psd_offset_small"
+                android:paddingTop="1dp"
+                android:paddingRight="@dimen/psd_offset_small"
+                android:paddingBottom="1dp"
+                android:textColor="@color/psd_comment_inbound_background"
+                android:textAppearance="?attr/textAppearanceListItemSecondary"
+                android:textSize="13dp"
+                tools:text="@tools:sample/date/hhmm" />
+
+            <ProgressBar
+                android:id="@+id/preview_progress"
+                style="?android:attr/progressBarStyleHorizontal"
+                android:layout_width="@dimen/psd_recyclerview_item_height_default"
+                android:layout_height="@dimen/psd_recyclerview_item_height_default"
+                android:progressDrawable="@drawable/psd_file_progress"
+                android:layout_gravity="center"
+                android:indeterminate="false"/>
+
+        </FrameLayout>
+
+    </androidx.cardview.widget.CardView>
+
+</LinearLayout>

@@ -1,0 +1,89 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:paddingBottom="@dimen/psd_offset_default">
+
+    <LinearLayout
+        android:id="@+id/ticketNumberLl"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:paddingVertical="@dimen/psd_offset_default"
+        android:background="@drawable/bottom_sheet_hilight_bg"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent">
+
+        <TextView
+            android:id="@+id/ticketNumberTextView"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_vertical"
+            android:layout_marginHorizontal="@dimen/psd_offset_default"
+            android:layout_weight="1"
+            android:textColor="@color/psd_text_primary"
+            android:textSize="17sp"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            tools:text="№ 888888888" />
+
+        <ImageView
+            android:id="@+id/copyIb"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_vertical|end"
+            android:paddingHorizontal="@dimen/psd_offset_small"
+            android:src="@drawable/ic_copy"
+            android:clickable="false"
+            app:layout_constraintBottom_toBottomOf="@+id/ticketNumberTextView"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="@+id/ticketNumberTextView" />
+
+    </LinearLayout>
+
+    <View
+        android:id="@+id/view2"
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/psd_comment_preview_outline_radius"
+        android:layout_marginBottom="@dimen/psd_offset_default"
+        android:layout_marginStart="@dimen/psd_offset_default"
+        android:background="#21212114"
+        app:layout_constraintTop_toBottomOf="@+id/ticketNumberLl" />
+
+    <TextView
+        android:id="@+id/userNameTextView"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_margin="@dimen/psd_offset_default"
+        android:textColor="@color/psd_text_primary"
+        android:textSize="17sp"
+        android:maxLines="2"
+        android:ellipsize="end"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/view2"
+        tools:text="User User User User User User User User User User User User User User User User User User User" />
+
+    <View
+        android:id="@+id/view3"
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/psd_comment_preview_outline_radius"
+        android:layout_marginVertical="@dimen/psd_offset_default"
+        android:layout_marginStart="@dimen/psd_offset_default"
+        android:background="#21212114"
+        app:layout_constraintTop_toBottomOf="@+id/userNameTextView" />
+
+    <TextView
+        android:id="@+id/createDateTextView"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_margin="@dimen/psd_offset_default"
+        android:textColor="@color/psd_text_primary"
+        android:textSize="17sp"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/view3"
+        tools:text="Created at 01.01.1111" />
+
+</androidx.constraintlayout.widget.ConstraintLayout>

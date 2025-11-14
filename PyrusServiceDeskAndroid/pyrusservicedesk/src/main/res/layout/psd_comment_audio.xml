@@ -1,0 +1,171 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/root"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:gravity="bottom"
+    android:orientation="horizontal">
+
+    <androidx.appcompat.widget.AppCompatImageView
+        android:id="@+id/statusIcon"
+        android:layout_width="@dimen/psd_comment_error_width"
+        android:layout_height="wrap_content"
+        android:visibility="gone"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        tools:srcCompat="@tools:sample/avatars" />
+
+    <androidx.cardview.widget.CardView
+        android:id="@+id/background_parent"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        app:cardCornerRadius="@dimen/psd_comment_radius"
+        app:cardElevation="0dp"
+        app:cardPreventCornerOverlap="false">
+
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:id="@+id/audioPlayer"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="@dimen/dp_12"
+            android:paddingVertical="10dp">
+
+            <ImageView
+                android:id="@+id/playButton"
+                android:layout_width="50dp"
+                android:layout_height="50dp"
+                android:background="@drawable/selectable_round_bg"
+                android:padding="10dp"
+                android:src="@drawable/psd_ic_audio_play"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintLeft_toLeftOf="parent"
+                app:layout_constraintTop_toTopOf="parent"
+                tools:ignore="contentDescription"
+                tools:src="@drawable/psd_ic_audio_play" />
+
+            <!--    <ImageView-->
+            <!--        android:id="@+id/errorImage"-->
+            <!--        android:layout_width="10dp"-->
+            <!--        android:layout_height="10dp"-->
+            <!--        android:src="@drawable/ic_error"-->
+            <!--        android:clickable="false"-->
+            <!--        android:enabled="false"-->
+            <!--        android:visibility="gone"-->
+            <!--        android:scaleType="centerInside"-->
+            <!--        app:layout_constraintBottom_toBottomOf="@id/playButton"-->
+            <!--        app:layout_constraintRight_toRightOf="@id/playButton"-->
+            <!--        android:elevation="2dp"-->
+            <!--        tools:visibility="visible"-->
+            <!--        tools:ignore="contentDescription"/>-->
+
+            <ProgressBar
+                android:id="@+id/downloadProgressBar"
+                android:layout_width="48dp"
+                android:layout_height="48dp"
+                android:indeterminate="false"
+                android:indeterminateDrawable="@drawable/psd_animation_audio_player_circular_progress_infinite"
+                android:progressDrawable="@drawable/psd_ic_audio_player_circular_progress"
+                android:progressTint="@color/psd_white"
+                app:layout_constraintBottom_toBottomOf="@+id/playButton"
+                app:layout_constraintEnd_toEndOf="@+id/playButton"
+                app:layout_constraintStart_toStartOf="@+id/playButton"
+                app:layout_constraintTop_toTopOf="@+id/playButton"
+                tools:progress="85" />
+
+
+            <SeekBar
+                android:id="@+id/playerProgressBar"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:enabled="true"
+                android:thumb="@drawable/seekbar_thumb"
+                android:maxHeight="4dp"
+                android:minHeight="4dp"
+                android:paddingVertical="8dp"
+                android:paddingHorizontal="12dp"
+                android:progressBackgroundTint="#4DE3E5E8"
+                android:progressDrawable="@drawable/psd_ic_audio_player_seekbar_progress"
+                android:progressTint="@color/psd_accent"
+                android:thumbTint="@color/psd_accent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintHorizontal_bias="0.0"
+                app:layout_constraintStart_toEndOf="@id/playButton"
+                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintBottom_toTopOf="@+id/playerBottom"
+                tools:progress="50" />
+
+            <androidx.constraintlayout.widget.ConstraintLayout
+                android:id="@+id/playerBottom"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginHorizontal="@dimen/dp_12"
+                android:orientation="horizontal"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintRight_toRightOf="parent"
+                app:layout_constraintStart_toEndOf="@+id/playButton"
+                app:layout_constraintTop_toBottomOf="@+id/playerProgressBar">
+
+                <TextView
+                    android:id="@+id/trackCurrentTime"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:maxLines="1"
+                    android:textColor="@color/psd_accent"
+                    android:textSize="12sp"
+                    android:visibility="visible"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintLeft_toLeftOf="parent"
+                    app:layout_constraintTop_toTopOf="parent"
+                    tools:text="4:24"
+                    tools:visibility="visible" />
+
+                <TextView
+                    android:id="@+id/trackTimeDivider"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:maxLines="1"
+                    android:text="text"
+                    android:textColor="@color/psd_accent"
+                    android:textSize="12sp"
+                    android:visibility="gone"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintLeft_toRightOf="@id/trackCurrentTime"
+                    app:layout_constraintTop_toTopOf="parent"
+                    tools:visibility="visible" />
+
+                <TextView
+                    android:id="@+id/trackFullTime"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:maxLines="1"
+                    android:textColor="@color/psd_accent"
+                    android:textSize="12sp"
+                    android:visibility="gone"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintLeft_toRightOf="@id/trackTimeDivider"
+                    app:layout_constraintTop_toTopOf="parent"
+                    tools:text="5:48"
+                    tools:visibility="visible" />
+
+            </androidx.constraintlayout.widget.ConstraintLayout>
+
+            <TextView
+                android:id="@+id/commentTime"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginHorizontal="@dimen/dp_12"
+                android:maxLines="1"
+                android:textColor="@color/psd_accent"
+                android:textSize="12sp"
+                android:visibility="visible"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/playerProgressBar"
+                tools:text="5:48"
+                tools:visibility="visible" />
+
+        </androidx.constraintlayout.widget.ConstraintLayout>
+    </androidx.cardview.widget.CardView>
+</LinearLayout>
