@@ -112,7 +112,8 @@ class PSDMessageView: PSDView {
             if data.isImage {
                 hasImageAttachment = true
                 attachmentView = PSDImageAttachmentView.init(frame: CGRect.zero)
-            } else if data.isAudio {
+            }
+//            else if data.isAudio {
 //                let audioAttachmentView = PSDAudioAttachmentView.init(frame: CGRect.zero)
 //                if let fileUrl = audioRepository?.getAudioURL(name: data.name, id: data.serverIdentifer) {
 //                    let presenter = AudioPlayerPresenter(view: audioAttachmentView, fileUrl: fileUrl, attachmentId: data.serverIdentifer ?? "", attachment: data)
@@ -120,7 +121,8 @@ class PSDMessageView: PSDView {
 //                }
 //                audioAttachmentView.changeState(.loading)
 //                attachmentView = audioAttachmentView
-            } else {
+//            }
+        else {
                 attachmentView = PSDFileAttachmentView.init(frame: CGRect.zero)
             }
             guard let attachmentView = attachmentView else {
