@@ -45,15 +45,15 @@ class PSDMessageView: PSDView {
         case .brightColor:
             self.backgroundColor = CustomizationHelper.userMassageBackgroundColor
             recolorWithTextColor(CustomizationHelper.userMassageTextColor)
-            if let attachmentView = attachmentView as? PSDAudioAttachmentView {
-                attachmentView.sliderColor = .brightColor
-            }
+//            if let attachmentView = attachmentView as? PSDAudioAttachmentView {
+//                attachmentView.sliderColor = .brightColor
+//            }
         case .defaultColor:
             self.backgroundColor = CustomizationHelper.supportMassageBackgroundColor
             recolorWithTextColor(CustomizationHelper.supportMassageTextColor)
-            if let attachmentView = attachmentView as? PSDAudioAttachmentView {
-                attachmentView.sliderColor = .defaultColor
-            }
+//            if let attachmentView = attachmentView as? PSDAudioAttachmentView {
+//                attachmentView.sliderColor = .defaultColor
+//            }
         }
         setColorToTimeView()
     }
@@ -113,13 +113,13 @@ class PSDMessageView: PSDView {
                 hasImageAttachment = true
                 attachmentView = PSDImageAttachmentView.init(frame: CGRect.zero)
             } else if data.isAudio {
-                let audioAttachmentView = PSDAudioAttachmentView.init(frame: CGRect.zero)
-                if let fileUrl = audioRepository?.getAudioURL(name: data.name, id: data.serverIdentifer) {
-                    let presenter = AudioPlayerPresenter(view: audioAttachmentView, fileUrl: fileUrl, attachmentId: data.serverIdentifer ?? "", attachment: data)
-                    audioAttachmentView.presenter = presenter
-                }
-                audioAttachmentView.changeState(.loading)
-                attachmentView = audioAttachmentView
+//                let audioAttachmentView = PSDAudioAttachmentView.init(frame: CGRect.zero)
+//                if let fileUrl = audioRepository?.getAudioURL(name: data.name, id: data.serverIdentifer) {
+//                    let presenter = AudioPlayerPresenter(view: audioAttachmentView, fileUrl: fileUrl, attachmentId: data.serverIdentifer ?? "", attachment: data)
+//                    audioAttachmentView.presenter = presenter
+//                }
+//                audioAttachmentView.changeState(.loading)
+//                attachmentView = audioAttachmentView
             } else {
                 attachmentView = PSDFileAttachmentView.init(frame: CGRect.zero)
             }

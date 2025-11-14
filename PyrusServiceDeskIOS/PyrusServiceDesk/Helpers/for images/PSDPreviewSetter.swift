@@ -26,42 +26,42 @@ struct PSDPreviewSetter {
                 return
             }
              
-             if attachment.isAudio {
-                 (attachmentView as? PSDAudioAttachmentView)?.changeLoadingProggress(0.5)
-                 if !(audioRepository?.audioExists(name: attachment.name, id: attachment.serverIdentifer) ?? false) {
-                     if Int(attachment.serverIdentifer ?? "") == nil {
-                         (attachmentView as? PSDAudioAttachmentView)?.presenter?.update(
-                            fileUrl: URL(fileURLWithPath: attachment.localPath ?? ""),
-                            attachmentId: attachment.serverIdentifer ?? ""
-                         )
-                         (attachmentView as? PSDAudioAttachmentView)?.changeLoadingProggress(1)
-                             (attachmentView as? PSDAudioAttachmentView)?.changeState(.stopped)
-                         return 
-                     }
-                     
-                     if !attachment.emptyId() {
-                         let url = PyrusServiceDeskAPI.PSDURL(type: .download, ticketId: attachment.serverIdentifer!)
-                         PyrusServiceDesk.mainSession.dataTask(with: url) { data, response, error in
-                             if let data, data.count != 0 {
-                                 do {
-                                     try audioRepository?.saveAudio(data, name: attachment.name, id: attachment.serverIdentifer!)
-                                     (attachmentView as? PSDAudioAttachmentView)?.changeLoadingProggress(1)
-                                     DispatchQueue.main.asyncAfter(deadline: .now() + 0.2) {
-                                         (attachmentView as? PSDAudioAttachmentView)?.changeState(.stopped)
-                                     }
-                                     
-                                 } catch {
-                                     
-                                 }
-                                 
-                             }
-                         }.resume()
-                     }
-                 } else {
-                     (attachmentView as? PSDAudioAttachmentView)?.changeLoadingProggress(1)
-                     (attachmentView as? PSDAudioAttachmentView)?.changeState(.stopped)
-                 }
-             }
+//             if attachment.isAudio {
+//                 (attachmentView as? PSDAudioAttachmentView)?.changeLoadingProggress(0.5)
+//                 if !(audioRepository?.audioExists(name: attachment.name, id: attachment.serverIdentifer) ?? false) {
+//                     if Int(attachment.serverIdentifer ?? "") == nil {
+//                         (attachmentView as? PSDAudioAttachmentView)?.presenter?.update(
+//                            fileUrl: URL(fileURLWithPath: attachment.localPath ?? ""),
+//                            attachmentId: attachment.serverIdentifer ?? ""
+//                         )
+//                         (attachmentView as? PSDAudioAttachmentView)?.changeLoadingProggress(1)
+//                             (attachmentView as? PSDAudioAttachmentView)?.changeState(.stopped)
+//                         return 
+//                     }
+//                     
+//                     if !attachment.emptyId() {
+//                         let url = PyrusServiceDeskAPI.PSDURL(type: .download, ticketId: attachment.serverIdentifer!)
+//                         PyrusServiceDesk.mainSession.dataTask(with: url) { data, response, error in
+//                             if let data, data.count != 0 {
+//                                 do {
+//                                     try audioRepository?.saveAudio(data, name: attachment.name, id: attachment.serverIdentifer!)
+//                                     (attachmentView as? PSDAudioAttachmentView)?.changeLoadingProggress(1)
+//                                     DispatchQueue.main.asyncAfter(deadline: .now() + 0.2) {
+//                                         (attachmentView as? PSDAudioAttachmentView)?.changeState(.stopped)
+//                                     }
+//                                     
+//                                 } catch {
+//                                     
+//                                 }
+//                                 
+//                             }
+//                         }.resume()
+//                     }
+//                 } else {
+//                     (attachmentView as? PSDAudioAttachmentView)?.changeLoadingProggress(1)
+//                     (attachmentView as? PSDAudioAttachmentView)?.changeState(.stopped)
+//                 }
+//             }
             if let previewImage = attachment.previewImage {
                 if (attachmentView.previewImage != previewImage) {//if its doesnt set yet - set image
                     attachmentView.setPreviewImage(previewImage, animated: animated)
