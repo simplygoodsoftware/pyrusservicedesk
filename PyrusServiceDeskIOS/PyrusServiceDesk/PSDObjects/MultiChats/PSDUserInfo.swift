@@ -3,13 +3,13 @@ import Foundation
 @objc public class PSDUserInfo: NSObject {
     let clientId: String
     let clientName: String
-    let userId: String
-    var userName: String
+    let userId: String?
+    var userName: String?
     let secretKey: String?
     var lastNoteId: Int?
     var authors: [AuthorInfo] = []
 
-    public init(appId: String, clientName: String, userId: String, userName: String, secretKey: String?) {
+    public init(appId: String, clientName: String, userId: String?, userName: String?, secretKey: String?) {
         self.clientId = appId
         self.clientName = clientName
         self.userId = userId

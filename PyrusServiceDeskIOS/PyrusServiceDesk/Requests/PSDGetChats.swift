@@ -13,7 +13,7 @@ struct PSDGetChats {
         remove()
         var parameters = [String: Any]()
         if PyrusServiceDesk.multichats {
-            parameters["user_id"] = PyrusServiceDesk.customUserId ?? PyrusServiceDesk.userId
+            parameters["user_id"] = PyrusServiceDesk.customUserId
             parameters["app_id"] = PyrusServiceDesk.clientId
             parameters["security_key"] = PyrusServiceDesk.securityKey
         }

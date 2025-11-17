@@ -518,18 +518,18 @@ private extension ChatsInteractor {
             let users =  self?.getUsers() ?? []
             
             for user in users {
-                let userId = user.userId
+                guard let userId = user.userId else { continue }
                 let filterAction = {
                     PyrusServiceDesk.currentUserId = userId
                     self?.currentUserId = userId
-                    self?.presenter.doWork(.setFilter(userName: user.userName))
+                    self?.presenter.doWork(.setFilter(userName: user.userName ?? ""))
                     self?.createMenuActions()
                 }
                 let openNewAction = {
                     self?.openNewChat(userId: userId)
                 }
                 let menuAction = MenuAction(
-                    title: user.userName,
+                    title: user.userName ?? "",
                     isSelect: userId == PyrusServiceDesk.currentUserId,
                     filterAction: filterAction,
                     newChatAction: openNewAction

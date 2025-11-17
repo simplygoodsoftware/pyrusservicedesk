@@ -69,7 +69,7 @@ import UIKit
     static let repository = TicketCommandRepository()
     static let syncManager = SyncManager()
     
-    public static func addUser(appId: String, clientName: String, userId: String, userName: String, secretKey: String? = nil) {
+    public static func addUser(appId: String, clientName: String, userId: String?, userName: String?, secretKey: String? = nil) {
         DispatchQueue.main.async {
             let user = PSDUserInfo(appId: appId, clientName: clientName, userId: userId, userName: userName, secretKey: secretKey)
             currentUserId = user.userId
@@ -94,7 +94,7 @@ import UIKit
     }
     
     public static var newUser: PSDUserInfo?
-    public static func addUserFromDiplink(appId: String, userId: String, userName: String) {
+    public static func addUserFromDiplink(appId: String, userId: String?, userName: String?) {
         guard let _ = PyrusServiceDesk.mainController else {
             let user = PSDUserInfo(appId: appId, clientName: "", userId: userId, userName: userName, secretKey: nil)
             newUser = user
@@ -428,6 +428,8 @@ import UIKit
         createWith(clientId, userId: userId, securityKey: securityKey, reset: false, userName: userName, additionalUsers: additionalUsers, authorId: authorId, domain: domain, loggingEnabled: loggingEnabled, authorizationToken: authorizationToken, multichats: multichats)
     }
     private static func createWith(_ clientId: String?, userId: String?, securityKey: String?, reset: Bool, userName: String?, additionalUsers: [PSDUserInfo] = [], authorId: String?, domain: String?, loggingEnabled: Bool, authorizationToken: String?, multichats: Bool = false) {
+        PyrusLogger.shared.logEvent("Created with userId = \(userId ?? "no userId"), reset = \(reset), domain = \(domain ?? "domain is nil") loggingEnabled = \(loggingEnabled)")
+        
         isStarted = true
         PyrusServiceDesk.chats = []
         PyrusServiceDesk.clients = []
@@ -443,7 +445,6 @@ import UIKit
             EventsLogger.logEvent(.invalidDomain)
             return
         }
-        PyrusLogger.shared.logEvent("Created with userId = \(userId ?? "no userId"), reset = \(reset), domain = \(domain ?? "domain is nil") loggingEnabled = \(loggingEnabled)")
         PyrusServiceDesk.clientId = clientId
         PyrusServiceDesk.domain = domain?.hostString()
         PyrusServiceDesk.securityKey = securityKey
@@ -462,8 +463,6 @@ import UIKit
         if needReloadUI {
             PyrusServiceDesk.mainController?.updateTitleChat()
         }
-//        PyrusServiceDesk.repository.clear()
-//        PSDMessagesStorage.cleanStorage()
     }
     
     @objc static public func refresh(onError: ((Error?) -> Void)? = nil) {
