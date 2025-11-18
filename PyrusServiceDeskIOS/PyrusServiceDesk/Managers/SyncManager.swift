@@ -103,7 +103,7 @@ class SyncManager {
                     for client in clientsArray {
                         var removeClient = true
                         for user in PyrusServiceDesk.additionalUsers {
-                            if user.clientId == client.clientId && !authorAccessDenied.contains(user.userId) {
+                            if user.clientId == client.clientId && !authorAccessDenied.contains(user.userId ?? "") {
                                 removeClient = false
                                 break
                             }
