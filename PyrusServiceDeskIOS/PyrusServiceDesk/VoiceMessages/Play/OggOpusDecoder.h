@@ -20,7 +20,6 @@ typedef enum {
     vorbis
 } OggType;
 
-@import YbridOpus;
 @interface OggOpusDecoder: NSObject<AudioDecoderProtocol>
 @property(assign) OggOpusFile *oggFile;
 

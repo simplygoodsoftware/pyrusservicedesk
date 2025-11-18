@@ -1,10 +1,10 @@
 import Foundation
 import AudioToolbox
 import CoreAudioKit
-import YbridOpus
+//@_implementationOnly import YbridOpus
 
 //@_implementationOnly import libopus
-//@_implementationOnly import PyrusServiceDeskPrivate
+@_implementationOnly import PyrusServiceDeskPrivate
 
 let bufCount: Int = 3
 let OPUS_PLAYER_NOTIFICATION_KEY = "opusPlayerNotification"

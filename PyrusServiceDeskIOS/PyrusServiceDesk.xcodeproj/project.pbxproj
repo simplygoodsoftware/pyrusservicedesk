@@ -65,6 +65,8 @@
 		1E50691D2D07459C001A9E2D /* ClosedTicketsCellModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1E50691C2D07459C001A9E2D /* ClosedTicketsCellModel.swift */; };
 		1E50691F2D0745A5001A9E2D /* PSDChatsViewModelProtocol.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1E50691E2D0745A5001A9E2D /* PSDChatsViewModelProtocol.swift */; };
 		1E5069252D15AFE9001A9E2D /* PSDChatSectionModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1E5069232D15AFE9001A9E2D /* PSDChatSectionModel.swift */; };
+		1E52DC0F2ECC7B1B00AFDAA2 /* YbridOpus in Frameworks */ = {isa = PBXBuildFile; productRef = 1E52DC0E2ECC7B1B00AFDAA2 /* YbridOpus */; };
+		1E535DA32ECC757500126AAE /* YbridOpus in Frameworks */ = {isa = PBXBuildFile; productRef = 1E535DA22ECC757500126AAE /* YbridOpus */; };
 		1E809C692E3A67950097E311 /* AudioRepository.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1E809C682E3A67950097E311 /* AudioRepository.swift */; };
 		1E809C6B2E3A67A60097E311 /* CacheVersionManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1E809C6A2E3A67A60097E311 /* CacheVersionManager.swift */; };
 		1E809C6D2E3A67B00097E311 /* RateManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1E809C6C2E3A67B00097E311 /* RateManager.swift */; };
@@ -133,6 +135,11 @@
 		1EA6F73D2D673FE3003674CE /* PSDCoreDataService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1EA6F7362D673FE3003674CE /* PSDCoreDataService.swift */; };
 		1EA6F73E2D673FE3003674CE /* PSDCoreDataServiceProtocol.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1EA6F7372D673FE3003674CE /* PSDCoreDataServiceProtocol.swift */; };
 		1EA6F7402D674020003674CE /* ImageRepository.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1EA6F73F2D674020003674CE /* ImageRepository.swift */; };
+		1EB1E6CC2ECC6A7D00198A16 /* opus_custom.h in Headers */ = {isa = PBXBuildFile; fileRef = 1EB1E6C82ECC6A7D00198A16 /* opus_custom.h */; };
+		1EB1E6CD2ECC6A7D00198A16 /* opus_defines.h in Headers */ = {isa = PBXBuildFile; fileRef = 1EB1E6C92ECC6A7D00198A16 /* opus_defines.h */; };
+		1EB1E6CE2ECC6A7D00198A16 /* opus_multistream.h in Headers */ = {isa = PBXBuildFile; fileRef = 1EB1E6CA2ECC6A7D00198A16 /* opus_multistream.h */; };
+		1EB1E6CF2ECC6A7D00198A16 /* opus.h in Headers */ = {isa = PBXBuildFile; fileRef = 1EB1E6C72ECC6A7D00198A16 /* opus.h */; };
+		1EB1E6D02ECC6A7D00198A16 /* opus_types.h in Headers */ = {isa = PBXBuildFile; fileRef = 1EB1E6CB2ECC6A7D00198A16 /* opus_types.h */; };
 		4B060F2A2732AD8C002E20A7 /* StringHelper.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4B060F292732AD8C002E20A7 /* StringHelper.swift */; };
 		4B062A832518A8D100B317D3 /* PSDPlaceholderMessage.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4B062A822518A8D100B317D3 /* PSDPlaceholderMessage.swift */; };
 		4B062A882518AC9500B317D3 /* messagePlaceholder@3x.png in Resources */ = {isa = PBXBuildFile; fileRef = 4B062A872518AC9500B317D3 /* messagePlaceholder@3x.png */; };
@@ -548,6 +555,11 @@
 		1EA6F7362D673FE3003674CE /* PSDCoreDataService.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PSDCoreDataService.swift; sourceTree = "<group>"; };
 		1EA6F7372D673FE3003674CE /* PSDCoreDataServiceProtocol.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PSDCoreDataServiceProtocol.swift; sourceTree = "<group>"; };
 		1EA6F73F2D674020003674CE /* ImageRepository.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ImageRepository.swift; sourceTree = "<group>"; };
+		1EB1E6C72ECC6A7D00198A16 /* opus.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = opus.h; sourceTree = "<group>"; };
+		1EB1E6C82ECC6A7D00198A16 /* opus_custom.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = opus_custom.h; sourceTree = "<group>"; };
+		1EB1E6C92ECC6A7D00198A16 /* opus_defines.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = opus_defines.h; sourceTree = "<group>"; };
+		1EB1E6CA2ECC6A7D00198A16 /* opus_multistream.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = opus_multistream.h; sourceTree = "<group>"; };
+		1EB1E6CB2ECC6A7D00198A16 /* opus_types.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = opus_types.h; sourceTree = "<group>"; };
 		35DDB0A6E6931F4215764122 /* Pods-PyrusServiceDesk.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-PyrusServiceDesk.debug.xcconfig"; path = "Target Support Files/Pods-PyrusServiceDesk/Pods-PyrusServiceDesk.debug.xcconfig"; sourceTree = "<group>"; };
 		3CD4E4A4E5C0474E70F319B5 /* Pods_PyrusServiceDesk_PyrusServiceDeskTests.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_PyrusServiceDesk_PyrusServiceDeskTests.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		4B060F292732AD8C002E20A7 /* StringHelper.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StringHelper.swift; sourceTree = "<group>"; };
@@ -843,6 +855,8 @@
 			files = (
 				1E809CED2E3A6AE20097E311 /* LibVorbis in Frameworks */,
 				9F6C57288253B3990F93AF78 /* Pods_PyrusServiceDesk.framework in Frameworks */,
+				1E52DC0F2ECC7B1B00AFDAA2 /* YbridOpus in Frameworks */,
+				1E535DA32ECC757500126AAE /* YbridOpus in Frameworks */,
 				1E809D032E3B9A960097E311 /* LibOgg in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -1081,6 +1095,11 @@
 				1E809C782E3A68590097E311 /* internal.c */,
 				1E809C792E3A68590097E311 /* opusfile.c */,
 				1E809C7A2E3A68590097E311 /* stream.c */,
+				1EB1E6C72ECC6A7D00198A16 /* opus.h */,
+				1EB1E6C82ECC6A7D00198A16 /* opus_custom.h */,
+				1EB1E6C92ECC6A7D00198A16 /* opus_defines.h */,
+				1EB1E6CA2ECC6A7D00198A16 /* opus_multistream.h */,
+				1EB1E6CB2ECC6A7D00198A16 /* opus_types.h */,
 			);
 			path = opusfile;
 			sourceTree = "<group>";
@@ -1867,6 +1886,11 @@
 				1E809C7C2E3A68590097E311 /* internal.h in Headers */,
 				1E809CBE2E3A686A0097E311 /* MeterTableBridge.h in Headers */,
 				1E809CBF2E3A686A0097E311 /* MeterTable.h in Headers */,
+				1EB1E6CC2ECC6A7D00198A16 /* opus_custom.h in Headers */,
+				1EB1E6CD2ECC6A7D00198A16 /* opus_defines.h in Headers */,
+				1EB1E6CE2ECC6A7D00198A16 /* opus_multistream.h in Headers */,
+				1EB1E6CF2ECC6A7D00198A16 /* opus.h in Headers */,
+				1EB1E6D02ECC6A7D00198A16 /* opus_types.h in Headers */,
 				1E809CC02E3A686A0097E311 /* VorbisDecoder.h in Headers */,
 				7B93E9332E3BB47E00883C3C /* InternalHeader.h in Headers */,
 				1E809CC12E3A686A0097E311 /* OggOpusDecoder.h in Headers */,
@@ -1905,7 +1929,6 @@
 				4B7F34D821F85E2A00977C6D /* Sources */,
 				4B7F34D921F85E2A00977C6D /* Frameworks */,
 				4B7F34DA21F85E2A00977C6D /* Resources */,
-				500052726A1BD71076F6BA99 /* [CP] Embed Pods Frameworks */,
 			);
 			buildRules = (
 			);
@@ -1951,6 +1974,7 @@
 			packageReferences = (
 				1E809CEB2E3A6AE20097E311 /* XCRemoteSwiftPackageReference "vorbis-swift" */,
 				1E809D012E3B9A960097E311 /* XCRemoteSwiftPackageReference "ogg-swift" */,
+				1E52DC0D2ECC7B1B00AFDAA2 /* XCRemoteSwiftPackageReference "opus-swift" */,
 			);
 			productRefGroup = 4B7F34D421F85E2A00977C6D /* Products */;
 			projectDirPath = "";
@@ -2156,23 +2180,6 @@
 /* End PBXResourcesBuildPhase section */
 
 /* Begin PBXShellScriptBuildPhase section */
-		500052726A1BD71076F6BA99 /* [CP] Embed Pods Frameworks */ = {
-			isa = PBXShellScriptBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			inputFileListPaths = (
-				"${PODS_ROOT}/Target Support Files/Pods-PyrusServiceDesk-PyrusServiceDeskTests/Pods-PyrusServiceDesk-PyrusServiceDeskTests-frameworks-${CONFIGURATION}-input-files.xcfilelist",
-			);
-			name = "[CP] Embed Pods Frameworks";
-			outputFileListPaths = (
-				"${PODS_ROOT}/Target Support Files/Pods-PyrusServiceDesk-PyrusServiceDeskTests/Pods-PyrusServiceDesk-PyrusServiceDeskTests-frameworks-${CONFIGURATION}-output-files.xcfilelist",
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-			shellPath = /bin/sh;
-			shellScript = "\"${PODS_ROOT}/Target Support Files/Pods-PyrusServiceDesk-PyrusServiceDeskTests/Pods-PyrusServiceDesk-PyrusServiceDeskTests-frameworks.sh\"\n";
-			showEnvVarsInLog = 0;
-		};
 		6E77F7F8A464B6010627DBEF /* [CP] Check Pods Manifest.lock */ = {
 			isa = PBXShellScriptBuildPhase;
 			buildActionMask = 2147483647;
@@ -2752,6 +2759,22 @@
 /* End XCConfigurationList section */
 
 /* Begin XCRemoteSwiftPackageReference section */
+		1E52DC0D2ECC7B1B00AFDAA2 /* XCRemoteSwiftPackageReference "opus-swift" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/ybrid/opus-swift";
+			requirement = {
+				kind = revision;
+				revision = 5ba0e9f103c9dbd75cd30028cf7e20e655bfb94b;
+			};
+		};
+		1E535DA12ECC757500126AAE /* XCRemoteSwiftPackageReference "opus-swift" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/ybrid/opus-swift";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 0.8.0;
+			};
+		};
 		1E809CEB2E3A6AE20097E311 /* XCRemoteSwiftPackageReference "vorbis-swift" */ = {
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://github.com/HealsCodes/vorbis-swift.git";
@@ -2771,6 +2794,16 @@
 /* End XCRemoteSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
+		1E52DC0E2ECC7B1B00AFDAA2 /* YbridOpus */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 1E52DC0D2ECC7B1B00AFDAA2 /* XCRemoteSwiftPackageReference "opus-swift" */;
+			productName = YbridOpus;
+		};
+		1E535DA22ECC757500126AAE /* YbridOpus */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 1E535DA12ECC757500126AAE /* XCRemoteSwiftPackageReference "opus-swift" */;
+			productName = YbridOpus;
+		};
 		1E809CEC2E3A6AE20097E311 /* LibVorbis */ = {
 			isa = XCSwiftPackageProductDependency;
 			package = 1E809CEB2E3A6AE20097E311 /* XCRemoteSwiftPackageReference "vorbis-swift" */;

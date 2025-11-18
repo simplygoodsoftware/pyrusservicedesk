@@ -28,10 +28,10 @@
 
 import Foundation
 import AudioToolbox
-import YbridOpus
+//@_implementationOnly import YbridOpus
 
 //@_implementationOnly import libopus
-//@_implementationOnly import PyrusServiceDeskPrivate
+@_implementationOnly import PyrusServiceDeskPrivate
 
 // import ogg
 

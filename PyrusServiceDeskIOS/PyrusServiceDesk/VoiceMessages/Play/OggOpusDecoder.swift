@@ -1,8 +1,8 @@
 import Foundation
 //@_implementationOnly import libopus
-//@_implementationOnly import PyrusServiceDeskPrivate
+@_implementationOnly import PyrusServiceDeskPrivate
 // import ogg
-import YbridOpus
+//@_implementationOnly import YbridOpus
 
 extension OggOpusDecoder {
     static func canOpenFile(url: URL) -> Bool{
