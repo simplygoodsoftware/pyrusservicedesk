@@ -11,7 +11,11 @@ class ChatInfoViewController: UIViewController, UITableViewDataSource, UITableVi
     let tableView = UITableView()
     
     init(ticketId: String, userName: String, createdAt: String) {
-        items = [ticketId, userName, createdAt]
+        if userName.count > 0 {
+            items = [ticketId, userName, createdAt]
+        } else {
+            items = [ticketId, createdAt]
+        }
         super.init(nibName: nil, bundle: nil)
     }
     

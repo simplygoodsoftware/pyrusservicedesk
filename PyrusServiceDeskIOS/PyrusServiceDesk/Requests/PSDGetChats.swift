@@ -22,18 +22,24 @@ struct PSDGetChats {
         parameters["author_id"] = PyrusServiceDesk.authorId
         parameters["author_name"] = PyrusServiceDesk.authorName
         parameters["last_note_id"] = PyrusServiceDesk.lastNoteId
+        var additional_users = [[String: Any]]()
         if PyrusServiceDesk.additionalUsers.count > 0 {
-            var additional_users = [[String: Any]]()
             for user in PyrusServiceDesk.additionalUsers {
-                var  additional_user = [String: Any]()
+                var additional_user = [String: Any]()
                 additional_user["app_id"] = user.clientId
                 additional_user["user_id"] = user.userId
                 additional_user["security_key"] = user.secretKey
                 additional_user["last_note_id"] = user.lastNoteId
                 additional_users.append(additional_user)
             }
-            parameters["additional_users"] = additional_users
         }
+        for clientId in PyrusServiceDesk.anonimClients {
+            var additional_user = [String: Any]()
+            additional_user["app_id"] = clientId
+            additional_user["last_note_id"] = 0
+            additional_users.append(additional_user)
+        }
+        parameters["additional_users"] = additional_users
         parameters["commands"] = commands
         
         let request: URLRequest = URLRequest.createRequest(type:.chats, parameters: parameters)
@@ -135,7 +141,13 @@ struct PSDGetChats {
                 let userId = extraUserDic["user_id"] as? String ?? ""
                 let userName = extraUserDic["title"] as? String ?? ""
                 let user = PSDUserInfo(appId: clientId, clientName: clientName, userId: userId, userName: userName, secretKey: nil)
-                PyrusServiceDesk.additionalUsers.append(user)
+                if PyrusServiceDesk.clientId == clientId && PyrusServiceDesk.customUserId == nil  {
+                    PyrusServiceDesk.customUserId = userId
+                    PyrusServiceDesk.userName = userName
+                } else {
+                    PyrusServiceDesk.additionalUsers.append(user)
+                    PyrusServiceDesk.additionalUsers.removeAll(where: { $0.clientId == clientId && $0.userId?.count ?? 0 == 0 })
+                }
                 DispatchQueue.main.async {
                     PyrusServiceDesk.syncManager.syncGetTickets()
                     PyrusServiceDesk.extraUsersCallback?.addUser(user: user)

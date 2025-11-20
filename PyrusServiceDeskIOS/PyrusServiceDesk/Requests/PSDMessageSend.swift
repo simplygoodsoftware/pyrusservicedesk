@@ -149,11 +149,13 @@ struct PSDMessageSend {
                 attachmentsData?.append(attach)
             }
         }
-        let params = TicketCommandParams(ticketId: messageToPass.ticketId, appId:  PyrusServiceDesk.currentClientId ?? PyrusServiceDesk.clientId, requestNewTicket: requestNewTicket, userId: PyrusServiceDesk.currentUserId ?? PyrusServiceDesk.customUserId ?? PyrusServiceDesk.userId, message: messageToPass.text, attachments: attachmentsData, rating: messageToPass.rating, date: messageToPass.date, messageClientId: messageToPass.clientId)
+        var userId = PyrusServiceDesk.multichats ? PyrusServiceDesk.currentUserId : PyrusServiceDesk.customUserId
+        userId = userId?.count ?? 0 > 0 ? userId : nil
+        let params = TicketCommandParams(ticketId: messageToPass.ticketId, appId:  PyrusServiceDesk.currentClientId ?? PyrusServiceDesk.clientId, requestNewTicket: requestNewTicket, userId: userId, message: messageToPass.text, attachments: attachmentsData, rating: messageToPass.rating, date: messageToPass.date, messageClientId: messageToPass.clientId)
         if params.rating != nil {
             params.message = nil
         }
-        let command = TicketCommand(commandId: messageToPass.commandId ?? UUID().uuidString, type: .createComment, appId: PyrusServiceDesk.currentClientId ?? PyrusServiceDesk.clientId, userId:  PyrusServiceDesk.currentUserId ?? PyrusServiceDesk.customUserId ?? PyrusServiceDesk.userId, params: params)
+        let command = TicketCommand(commandId: messageToPass.commandId ?? UUID().uuidString, type: .createComment, appId: PyrusServiceDesk.currentClientId ?? PyrusServiceDesk.clientId, userId:  userId, params: params)
         PyrusServiceDesk.repository.add(command: command)
         PSDMessagesStorage.save(message: messageToPass)
         DispatchQueue.main.async {

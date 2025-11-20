@@ -46,11 +46,18 @@ struct PyrusServiceDeskAPI {
                 let instanceIdEncodeed : String = PyrusServiceDesk.userId.addingPercentEncoding(withAllowedCharacters: CharacterSet.rfc3986Unreserved) ?? PyrusServiceDesk.userId
                 urlString = urlString + "/" + ticketId + "?version=1&user_id=" + userIdEncodeed + "&security_key=" + securityKeyEncodeed + "&instance_id=" + instanceIdEncodeed + "&app_id=" + appIdEncodeed
             } else if PyrusServiceDesk.multichats {
-                let userId = PyrusServiceDesk.currentUserId ?? PyrusServiceDesk.customUserId ?? PyrusServiceDesk.userId
+                let userId = PyrusServiceDesk.multichats ? PyrusServiceDesk.currentUserId : PyrusServiceDesk.customUserId
                 let clientId = PyrusServiceDesk.currentClientId ?? PyrusServiceDesk.clientId
-                let userIdEncodeed : String = userId.addingPercentEncoding(withAllowedCharacters: CharacterSet.rfc3986Unreserved) ?? PyrusServiceDesk.userId
                 let appIdEncodeed : String = clientId?.addingPercentEncoding(withAllowedCharacters: CharacterSet.rfc3986Unreserved) ?? PyrusServiceDesk.clientId ?? ""
-                urlString = urlString + "/" + ticketId + "?user_id=" + userIdEncodeed + "&app_id=" + appIdEncodeed
+
+                if let userId, userId.count > 0 {
+                    let userIdEncodeed : String = userId.addingPercentEncoding(withAllowedCharacters: CharacterSet.rfc3986Unreserved) ?? PyrusServiceDesk.userId
+                    urlString = urlString + "/" + ticketId + "?user_id=" + userIdEncodeed + "&app_id=" + appIdEncodeed
+
+                } else {
+                    let userIdEncodeed : String = PyrusServiceDesk.userId.addingPercentEncoding(withAllowedCharacters: CharacterSet.rfc3986Unreserved) ?? PyrusServiceDesk.userId
+                    urlString = urlString + "/" + ticketId + "?user_id=" + userIdEncodeed + "&app_id=" + appIdEncodeed
+                }
             } else {
                 let userIdEncodeed : String = PyrusServiceDesk.userId.addingPercentEncoding(withAllowedCharacters: CharacterSet.rfc3986Unreserved) ?? PyrusServiceDesk.userId
                 let appIdEncodeed : String = PyrusServiceDesk.clientId?.addingPercentEncoding(withAllowedCharacters: CharacterSet.rfc3986Unreserved) ?? PyrusServiceDesk.clientId ?? ""

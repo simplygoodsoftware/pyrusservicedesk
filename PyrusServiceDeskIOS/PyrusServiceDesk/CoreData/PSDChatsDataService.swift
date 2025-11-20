@@ -212,6 +212,9 @@ extension PSDChatsDataService: PSDChatsDataServiceProtocol {
             dbChat.showRatingText = chatModel.showRatingText
             dbChat.subject = chatModel.subject
             dbChat.userId = chatModel.userId
+            if chatModel.appId?.count ?? 0 > 0 {
+                dbChat.appId = chatModel.appId
+            }
             if dbChat.messages == nil {
                 dbChat.messages = NSOrderedSet()
             }
@@ -411,6 +414,7 @@ extension PSDChatsDataService: PSDChatsDataServiceProtocol {
                     chat.showRating = dbChat.showRating
                     chat.showRatingText = dbChat.showRatingText
                     chat.lastReadedCommentId = Int(dbChat.lastReadedCommentId)
+                    chat.appId = dbChat.appId
                     
                     if let dbMessages = dbChat.messages?.array as? [DBMessage] {
                         let messages: [PSDMessage] = dbMessages.compactMap { dbMessage in
@@ -521,6 +525,7 @@ extension PSDChatsDataService: PSDChatsDataServiceProtocol {
                 chat.showRating = dbChat.showRating
                 chat.showRatingText = dbChat.showRatingText
                 chat.lastReadedCommentId = Int(dbChat.lastReadedCommentId)
+                chat.appId = dbChat.appId
                 
                 if let dbMessages = dbChat.messages?.array as? [DBMessage] {
                     let messages: [PSDMessage] = dbMessages.compactMap { dbMessage in

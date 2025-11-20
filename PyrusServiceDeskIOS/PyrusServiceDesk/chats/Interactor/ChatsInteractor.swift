@@ -220,8 +220,9 @@ private extension ChatsInteractor {
         PyrusServiceDesk.currentUserId = chat.userId
         let lastReadedLocalId = max(chat.lastReadedCommentId ?? 0, PyrusServiceDesk.repository.lastLocalReadCommentId(ticketId: chat.chatId) ?? 0)
         if lastReadedLocalId < Int(chat.lastComment?.messageId ?? "") ?? 0 {
-            let params = TicketCommandParams(ticketId: chat.chatId ?? 0, appId: PyrusServiceDesk.currentClientId ?? PyrusServiceDesk.clientId, userId: PyrusServiceDesk.currentUserId ?? PyrusServiceDesk.customUserId ?? PyrusServiceDesk.userId, messageId: Int(chat.lastComment?.messageId ?? ""))
-            let command = TicketCommand(commandId: UUID().uuidString, type: .readTicket, appId: PyrusServiceDesk.currentClientId ?? PyrusServiceDesk.clientId, userId:  PyrusServiceDesk.currentUserId ?? PyrusServiceDesk.customUserId ?? PyrusServiceDesk.userId, params: params)
+            let userId = PyrusServiceDesk.multichats ? PyrusServiceDesk.currentUserId : PyrusServiceDesk.customUserId
+            let params = TicketCommandParams(ticketId: chat.chatId ?? 0, appId: PyrusServiceDesk.currentClientId ?? PyrusServiceDesk.clientId, userId: userId, messageId: Int(chat.lastComment?.messageId ?? ""))
+            let command = TicketCommand(commandId: UUID().uuidString, type: .readTicket, appId: PyrusServiceDesk.currentClientId ?? PyrusServiceDesk.clientId, userId: userId, params: params)
             PyrusServiceDesk.repository.add(command: command)
             DispatchQueue.main.async {
                 PyrusServiceDesk.syncManager.syncGetTickets()
@@ -461,9 +462,12 @@ private extension ChatsInteractor {
                     }
                 } else if PyrusServiceDesk.clientId == clientId && chat.userId == (PyrusServiceDesk.customUserId ?? PyrusServiceDesk.userId) {
                     filterChats.append(chat)
+                } else if chat.userId?.count ?? 0 == 0 && chat.appId == PyrusServiceDesk.currentClientId {
+                    filterChats.append(chat)
                 }
             }
         }
+        
         for chat in filterChats {
             guard let lastMessage = PSDMessagesStorage.getMessages(for: chat.chatId).last else {
                 continue
@@ -498,7 +502,8 @@ private extension ChatsInteractor {
             }
             
             guard let userId = PyrusServiceDesk.currentUserId,
-                  self?.getUsers().count ?? 0 > 1
+                  userId.count > 0,
+                  self?.getUsers().count ?? 0 > 1 || PyrusServiceDesk.anonimClients.contains(PyrusServiceDesk.currentClientId ?? "")
             else {
                 self?.createMenuActions()
                 return
@@ -518,7 +523,7 @@ private extension ChatsInteractor {
             let users =  self?.getUsers() ?? []
             
             for user in users {
-                guard let userId = user.userId else { continue }
+                guard let userId = user.userId, userId.count > 0 else { continue }
                 let filterAction = {
                     PyrusServiceDesk.currentUserId = userId
                     self?.currentUserId = userId
@@ -537,7 +542,7 @@ private extension ChatsInteractor {
                 actions.append(menuAction)
             }
             
-            self?.presenter.doWork(.updateMenu(actions: actions, menuVisible: users.count > 1))
+            self?.presenter.doWork(.updateMenu(actions: actions, menuVisible: actions.count > 1))
         }
     }
     

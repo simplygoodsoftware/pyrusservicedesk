@@ -59,24 +59,43 @@ import UIKit
     }
     
     static var currentUserId: String?
-//    {
-//        didSet {
-//            print("каког")
-//        }
-//    }
     static var currentClientId: String?
+    static var anonimClients: Set<String> = []
     
     static let repository = TicketCommandRepository()
     static let syncManager = SyncManager()
     
     public static func addUser(appId: String, clientName: String, userId: String?, userName: String?, secretKey: String? = nil) {
         DispatchQueue.main.async {
+            if userId?.count ?? 0 == 0,
+               (PyrusServiceDesk.clientId == appId ||
+                PyrusServiceDesk.additionalUsers.first(where: { $0.clientId == appId }) != nil) {
+                currentClientId = clientId
+                currentUserId = nil
+                NotificationCenter.default.post(name: usersUpdateNotification, object: nil)
+                return
+            }
+                  
             let user = PSDUserInfo(appId: appId, clientName: clientName, userId: userId, userName: userName, secretKey: secretKey)
             currentUserId = user.userId
             currentClientId = user.clientId
-            if !additionalUsers.contains(user) && user.userId != customUserId {
+            if PyrusServiceDesk.customUserId?.count ?? 0 == 0 && userId?.count ?? 0 > 0 {
+                if appId == PyrusServiceDesk.clientId {
+                    PyrusServiceDesk.customUserId = userId
+                    PyrusServiceDesk.userName = userName
+                    PyrusServiceDesk.lastNoteId = 0
+                    anonimClients.insert(appId)
+                    NotificationCenter.default.post(name: newUserNotification, object: nil)
+                }
+            } else if !additionalUsers.contains(user) && user.userId != customUserId {
                 additionalUsers.append(user)
                 NotificationCenter.default.post(name: newUserNotification, object: nil)
+                
+                if userId?.count ?? 0 > 0,
+                   let anonAppId = additionalUsers.first(where: { $0.userId?.count ?? 0 == 0 && $0.clientId == appId }) {
+                    anonimClients.insert(anonAppId.clientId)
+                    additionalUsers.removeAll(where: { $0.userId?.count ?? 0 == 0 && $0.clientId == appId })
+                }
             } else if user.userId == customUserId {
                 self.userName = user.userName
                 NotificationCenter.default.post(name: usersUpdateNotification, object: nil)
@@ -459,6 +478,16 @@ import UIKit
         PyrusServiceDesk.lastNoteId = 0
         PyrusServiceDesk.authors = []
         lastSetPushToken = nil
+        for user in additionalUsers {
+            if user.userId == nil,
+               user.clientId == clientId ||
+                additionalUsers.first(where: { $0.clientId == user.clientId && $0.userId?.count ?? 0 > 0}) != nil {
+                anonimClients.insert(user.clientId)
+                PyrusServiceDesk.additionalUsers.removeAll(where: {
+                    $0.clientId == user.clientId && $0.userId?.count ?? 0 == 0
+                })
+            }
+        }
         PyrusServiceDesk.createUserId(reset)
         if needReloadUI {
             PyrusServiceDesk.mainController?.updateTitleChat()

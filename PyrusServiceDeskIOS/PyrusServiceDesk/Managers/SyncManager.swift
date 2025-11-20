@@ -129,6 +129,10 @@ class SyncManager {
                 } catch { }
                 
                 for commandResult in commandsResult {
+                    if let ticketId = commandResult.ticketId,
+                       let command = PyrusServiceDesk.repository.getCommands().first(where: { $0.commandId.lowercased() == commandResult.commandId.lowercased() }){
+                        chats?.first(where: { $0.chatId == ticketId })?.appId = command.appId
+                    }
                     if let message = self.sendingMessages.first(where: { $0.commandId.lowercased() == commandResult.commandId.lowercased() })?.message {
                         PyrusServiceDesk.repository.deleteCommand(withId: commandResult.commandId, serverTicketId: commandResult.ticketId)
                         PSDMessagesStorage.remove(messageId: message.clientId, needSafe: false, serverTicketId: commandResult.ticketId)

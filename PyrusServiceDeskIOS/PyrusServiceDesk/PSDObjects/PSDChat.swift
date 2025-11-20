@@ -29,6 +29,7 @@ class PSDChat: Hashable {
     var lastReadedCommentId: Int?
     var isActive = true
     var createdAt: Date?
+    var appId: String?
     
     init(chatId: Int?, date: Date, messages: [PSDMessage]) {
         self.chatId = chatId

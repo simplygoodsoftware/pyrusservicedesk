@@ -72,7 +72,7 @@ private extension SearchInteractor {
     func openChat(chat: PSDChat, messageId: String) {
         oldClientId = PyrusServiceDesk.currentClientId
         PyrusServiceDesk.currentUserId = chat.userId
-        PyrusServiceDesk.currentClientId = getUsers().first(where: { $0.userId == chat.userId })?.clientId
+        PyrusServiceDesk.currentClientId = getUsers().first(where: { $0.userId == chat.userId })?.clientId ?? chat.appId
         presenter.doWork(.openChat(chat: chat, messageId: messageId))
     }
     

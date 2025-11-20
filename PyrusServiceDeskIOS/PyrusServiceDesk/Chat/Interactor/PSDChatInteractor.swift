@@ -353,8 +353,9 @@ private extension PSDChatInteractor {
         let lastReadedLocalId = max(chat?.lastReadedCommentId ?? 0, PyrusServiceDesk.repository.lastLocalReadCommentId(ticketId: chat?.chatId) ?? 0)
 
         if lastReadedLocalId < Int(chat?.lastComment?.messageId ?? "") ?? 0 {
-            let params = TicketCommandParams(ticketId: ticketId, appId: PyrusServiceDesk.currentClientId ?? PyrusServiceDesk.clientId, userId: PyrusServiceDesk.currentUserId ?? PyrusServiceDesk.customUserId ?? PyrusServiceDesk.userId, messageId: Int(chat?.messages.last?.messageId ?? ""))
-            let command = TicketCommand(commandId: UUID().uuidString, type: .readTicket, appId: PyrusServiceDesk.currentClientId ?? PyrusServiceDesk.clientId, userId:  PyrusServiceDesk.currentUserId ?? PyrusServiceDesk.customUserId ?? PyrusServiceDesk.userId, params: params)
+            let userId = PyrusServiceDesk.multichats ? PyrusServiceDesk.currentUserId : PyrusServiceDesk.customUserId
+            let params = TicketCommandParams(ticketId: ticketId, appId: PyrusServiceDesk.currentClientId ?? PyrusServiceDesk.clientId, userId: userId, messageId: Int(chat?.messages.last?.messageId ?? ""))
+            let command = TicketCommand(commandId: UUID().uuidString, type: .readTicket, appId: PyrusServiceDesk.currentClientId ?? PyrusServiceDesk.clientId, userId: userId, params: params)
             PyrusServiceDesk.repository.add(command: command)
             DispatchQueue.main.async {
                 PyrusServiceDesk.syncManager.syncGetTickets()
@@ -438,17 +439,17 @@ private extension PSDChatInteractor {
         messageToSent = newMessage
         presenter.doWork(.addNewRow)
         newMessage.commandId = UUID().uuidString
-        newMessage.userId = chat?.userId ?? PyrusServiceDesk.currentUserId ?? PyrusServiceDesk.customUserId ?? PyrusServiceDesk.userId
+        newMessage.userId = PyrusServiceDesk.multichats ? PyrusServiceDesk.currentUserId : PyrusServiceDesk.customUserId
         newMessage.appId = PyrusServiceDesk.currentClientId ?? PyrusServiceDesk.clientId
         PSDMessageSend.pass(newMessage, delegate: self)
     }
     
     func sendRate(_ rateValue: Int) {
-        let newMessage = PSDObjectsCreator.createMessage(rating: rateValue, ticketId: chat?.chatId ?? 0, userId: chat?.userId ?? PyrusServiceDesk.customUserId ?? PyrusServiceDesk.userId)
+        let newMessage = PSDObjectsCreator.createMessage(rating: rateValue, ticketId: chat?.chatId ?? 0, userId: chat?.userId ?? PyrusServiceDesk.customUserId)
         prepareMessageForDrawing(newMessage)
         messageToSent = newMessage
         newMessage.commandId = UUID().uuidString
-        newMessage.userId = PyrusServiceDesk.currentUserId ?? PyrusServiceDesk.customUserId ?? PyrusServiceDesk.userId
+        newMessage.userId = PyrusServiceDesk.multichats ? PyrusServiceDesk.currentUserId : PyrusServiceDesk.customUserId
         newMessage.appId = PyrusServiceDesk.currentClientId ?? PyrusServiceDesk.clientId
         presenter.doWork(.addNewRow)
         PSDMessageSend.pass(newMessage, delegate: self)
@@ -508,7 +509,7 @@ private extension PSDChatInteractor {
     
     func sendAgainMessage(indexPath: IndexPath) {
         if let message = self.getMessage(at: indexPath) {
-            message.userId = PyrusServiceDesk.currentUserId ?? PyrusServiceDesk.customUserId ?? PyrusServiceDesk.userId
+            message.userId = PyrusServiceDesk.multichats ? PyrusServiceDesk.currentClientId : PyrusServiceDesk.customUserId
             message.appId = PyrusServiceDesk.currentClientId ?? PyrusServiceDesk.clientId
             message.ticketId = chat?.chatId ?? 0
             message.state = .sending
