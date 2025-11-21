@@ -141,12 +141,17 @@ struct PSDGetChats {
                 let userId = extraUserDic["user_id"] as? String ?? ""
                 let userName = extraUserDic["title"] as? String ?? ""
                 let user = PSDUserInfo(appId: clientId, clientName: clientName, userId: userId, userName: userName, secretKey: nil)
-                if PyrusServiceDesk.clientId == clientId && PyrusServiceDesk.customUserId == nil  {
+                if PyrusServiceDesk.clientId == clientId && PyrusServiceDesk.customUserId?.count ?? 0 == 0  {
                     PyrusServiceDesk.customUserId = userId
                     PyrusServiceDesk.userName = userName
+                    PyrusServiceDesk.lastNoteId = 0
+                    PyrusServiceDesk.anonimClients.insert(clientId)
                 } else {
                     PyrusServiceDesk.additionalUsers.append(user)
-                    PyrusServiceDesk.additionalUsers.removeAll(where: { $0.clientId == clientId && $0.userId?.count ?? 0 == 0 })
+                    if let anonimClient = PyrusServiceDesk.additionalUsers.first(where: { $0.clientId == clientId && $0.userId?.count ?? 0 == 0 }) {
+                        PyrusServiceDesk.additionalUsers.removeAll(where: { $0.clientId == clientId && $0.userId?.count ?? 0 == 0 })
+                        PyrusServiceDesk.anonimClients.insert(clientId)
+                    }
                 }
                 DispatchQueue.main.async {
                     PyrusServiceDesk.syncManager.syncGetTickets()
