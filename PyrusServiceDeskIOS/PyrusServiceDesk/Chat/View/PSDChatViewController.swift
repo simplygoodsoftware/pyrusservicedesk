@@ -175,12 +175,14 @@ class PSDChatViewController: PSDViewController, PSDMainController {
     }
     
     private var isFirstKeyboardShow: Bool = true
+    private var currkeyboardHeight: CGFloat = 0
     @objc private func keyboardWillShow(_ notification: NSNotification) {
         if let infoEndKey: NSValue = notification.userInfo?[UIResponder.keyboardFrameEndUserInfoKey] as? NSValue,
            let center = (notification.userInfo?["UIKeyboardCenterBeginUserInfoKey"] as? NSValue)?.cgPointValue {
             let keyboardEndFrame = infoEndKey.cgRectValue
             let duration = keyboardAnimationDuration(notification)
             let keyboardHeight = keyboardEndFrame.height
+            currkeyboardHeight = keyboardHeight
             // UIView.animate(withDuration: duration, delay: 0, animations: {
             var oldInset = self.tableView.contentInset.top
             if (self.messageInputView.inputTextView.isFirstResponder || !self.isKeyBoardOpen) && !(center.y > self.view.frame.maxY && self.isKeyBoardOpen) {
@@ -218,6 +220,7 @@ class PSDChatViewController: PSDViewController, PSDMainController {
             let keyboardEndFrame = infoEndKey.cgRectValue
             let duration = keyboardAnimationDuration(notification)
             let keyboardHeight = keyboardEndFrame.height
+            currkeyboardHeight = keyboardHeight
          //   if isKeyBoardOpen {
                    UIView.animate(withDuration: duration, delay: 0, animations: {
                 self.bottomScrollButton?.constant = -110
@@ -272,24 +275,24 @@ class PSDChatViewController: PSDViewController, PSDMainController {
     override func viewWillTransition(to size: CGSize, with coordinator: UIViewControllerTransitionCoordinator) {
         super.viewWillTransition(to: size, with: coordinator)
 //        self.tableView.removeListeners()
-        self.tableView.bottomPSDRefreshControl.isEnabled = false
-        guard let lastVisibleCell = self.tableView.visibleCells.last,
-              let lastVisibleRow = self.tableView.indexPath(for: lastVisibleCell) else {
-            return
-        }
-        
-        coordinator.animateAlongsideTransition(in: self.tableView, animation: { context in
-            self.tableView.reloadData()
-            if self.tableView.contentOffset.y > 100,
-               self.tableView.numberOfSections > lastVisibleRow.section,
-               self.tableView.numberOfRows(inSection: lastVisibleRow.section) > lastVisibleRow.row
-            {
-                self.tableView.scrollToRow(at: lastVisibleRow, at: .bottom, animated: false)
-            }
-        }, completion: { context in
-            self.tableView.bottomPSDRefreshControl.isEnabled = true
-//            self.tableView.addKeyboardListeners()
-        })
+//        self.tableView.bottomPSDRefreshControl.isEnabled = false
+//        guard let lastVisibleCell = self.tableView.visibleCells.last,
+//              let lastVisibleRow = self.tableView.indexPath(for: lastVisibleCell) else {
+//            return
+//        }
+//        
+//        coordinator.animateAlongsideTransition(in: self.tableView, animation: { context in
+//            self.tableView.reloadData()
+//            if self.tableView.contentOffset.y > 100,
+//               self.tableView.numberOfSections > lastVisibleRow.section,
+//               self.tableView.numberOfRows(inSection: lastVisibleRow.section) > lastVisibleRow.row
+//            {
+//                self.tableView.scrollToRow(at: lastVisibleRow, at: .bottom, animated: false)
+//            }
+//        }, completion: { context in
+//            self.tableView.bottomPSDRefreshControl.isEnabled = true
+////            self.tableView.addKeyboardListeners()
+//        })
     }
     
     override func viewWillAppear(_ animated: Bool) {
@@ -493,7 +496,7 @@ class PSDChatViewController: PSDViewController, PSDMainController {
     }
     
     @objc func scrollToBottom() {
-        tableView.scrollsToBottom(animated: true)
+        tableView.scrollsToBottom(animated: true, keyBoardHeight: currkeyboardHeight)
     }
     
     func setupInfoView() {
@@ -646,7 +649,7 @@ extension PSDChatViewController: PSDChatViewProtocol {
         case .updateButtons(buttons: let buttons):
             tableView.updateButtonsView(buttons: buttons)
         case .updateRows:
-            tableView.updateRows()
+            tableView.updateRows(keyboardHeight: currkeyboardHeight)
         case .removeNoConnectionView:
             tableView.removeNoConnectionView()
         case .endRefreshing:
@@ -658,7 +661,7 @@ extension PSDChatViewController: PSDChatViewProtocol {
         case .showNoConnectionView:
             tableView.showNoConnectionView()
         case .scrollsToBottom(animated: let animated):
-            tableView.scrollsToBottom(animated: animated)
+            tableView.scrollsToBottom(animated: animated, keyBoardHeight: currkeyboardHeight)
         case .endLoading:
             tableView.isLoading = false
         case .dataIsShown:

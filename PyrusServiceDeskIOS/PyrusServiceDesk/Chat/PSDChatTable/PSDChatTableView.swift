@@ -25,7 +25,7 @@ class PSDChatTableView: PSDTableView {
     
     private lazy var buttonsView: ButtonsView = {
         let view = ButtonsView(frame: .zero)
-        tableHeaderView = view
+//        tableHeaderView = view
         view.autoresizingMask = [.flexibleHeight]
         view.tapDelegate = self
         return view
@@ -80,7 +80,7 @@ class PSDChatTableView: PSDTableView {
             newFrame.size.width = frame.size.width
             newFrame.size.height = buttonsView.collectionView.contentSize.height
             buttonsView.frame = newFrame
-            tableHeaderView = buttonsView
+//            tableHeaderView = buttonsView
             buttonsView.collectionView.transform = CGAffineTransform(rotationAngle: CGFloat.pi)
         }
     }
@@ -108,13 +108,13 @@ class PSDChatTableView: PSDTableView {
         }
     }
     
-    func updateRows() {
+    func updateRows(keyboardHeight: CGFloat) {
         let oldContentOffset = contentOffset
         let oldContentSize = contentSize
         
         reloadAll(animated: true)
         
-        self.scrollToBottomAfterRefresh(with: oldContentOffset, oldContentSize: oldContentSize)
+        self.scrollToBottomAfterRefresh(with: oldContentOffset, oldContentSize: oldContentSize, keyboardHeight: keyboardHeight)
     }
     
     func addRow(scrollsToBottom: Bool) {
@@ -122,7 +122,7 @@ class PSDChatTableView: PSDTableView {
         let needAnimate = contentOffset.y <= -inset
         reloadAll(animated: needAnimate)
         if scrollsToBottom {
-            self.scrollsToBottom(animated: true)
+            self.scrollsToBottom(animated: true, keyBoardHeight: 0, addRow: true)
         }
     }
     
@@ -173,12 +173,19 @@ class PSDChatTableView: PSDTableView {
     }
         
     ///Scroll tableview to its bottom position without animation
-    func scrollsToBottom(animated: Bool) {
+    func scrollsToBottom(animated: Bool, keyBoardHeight: CGFloat, addRow: Bool = false) {
         if tableMatrix.count > 0, tableMatrix[0].count > 0 {
-            scrollToRow(at: IndexPath(row: 0, section: 0), at: .top, animated: animated)
-            layoutIfNeeded()
-            setNeedsLayout()
-            scrollToRow(at: IndexPath(row: 0, section: 0), at: .top, animated: animated)
+            if buttonsView.buttons?.count ?? 0 > 0 && !addRow {
+                setContentOffset(CGPoint(x: 0, y: -keyBoardHeight), animated: animated)
+                
+                layoutIfNeeded()
+                setNeedsLayout()
+            } else {
+                scrollToRow(at: IndexPath(row: 0, section: 0), at: .top, animated: animated)
+                layoutIfNeeded()
+                setNeedsLayout()
+                scrollToRow(at: IndexPath(row: 0, section: 0), at: .top, animated: animated)
+            }
         }
         
         //chatDelegate?.updateScrollButton(isHidden: true)
@@ -252,7 +259,7 @@ private extension PSDChatTableView {
     }
     
     ///Scrolls table to bottom after refresh, if table view was in bottom scroll position and new messages received
-    func scrollToBottomAfterRefresh(with oldOffset: CGPoint?, oldContentSize: CGSize?) {
+    func scrollToBottomAfterRefresh(with oldOffset: CGPoint?, oldContentSize: CGSize?, keyboardHeight: CGFloat) {
         guard let oldOffset = oldOffset, let oldContentSize = oldContentSize else {
             return
         }
@@ -261,7 +268,7 @@ private extension PSDChatTableView {
         let expectedBottomOffset = oldContentSize.height - (self.frame.size.height - contentInset.top - contentInset.bottom)
         let hasChanges = oldContentSize != self.contentSize
         if contentOffset.y <= 0 {//expectedBottomOffset - BOTTOM_INFELICITY < oldOffset.y && hasChanges{
-            self.scrollsToBottom(animated: true)
+            self.scrollsToBottom(animated: true, keyBoardHeight: keyboardHeight)
         }
     }
 
@@ -311,13 +318,20 @@ extension PSDChatTableView: UITableViewDelegate, UITableViewDataSource {
     }
     
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
+        if section == 0 {
+            return tableMatrix[section].count + 1
+        }
         return tableMatrix.count > section ? tableMatrix[section].count : 0
     }
     
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         let message: PSDRowMessage
-        if tableMatrix.count > indexPath.section && tableMatrix[indexPath.section].count > indexPath.row {
-            message = tableMatrix[indexPath.section][indexPath.row]
+        var row = indexPath.row
+        if indexPath.section == 0 {
+            row -= 1
+        }
+        if tableMatrix.count > indexPath.section && tableMatrix[indexPath.section].count > indexPath.row && row >= 0 {
+            message = tableMatrix[indexPath.section][row]
         }
         else {
             message = PSDObjectsCreator.createWelcomeMessage()

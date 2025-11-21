@@ -11,6 +11,7 @@ final class PSDChatCellConfigurator: TableViewCellConfiguratorProtocol {
         self.tableView = tableView
         tableView.register(PSDUserMessageCell.self, forCellReuseIdentifier: PSDUserMessageCell.identifier)
         tableView.register(PSDSupportMessageCell.self, forCellReuseIdentifier: PSDSupportMessageCell.identifier)
+        tableView.register(ButtonsView.self, forCellReuseIdentifier: "Buttons")
     }
 
     func getCell(model: [[PSDRowMessage]], indexPath: IndexPath) -> PSDChatMessageCell {

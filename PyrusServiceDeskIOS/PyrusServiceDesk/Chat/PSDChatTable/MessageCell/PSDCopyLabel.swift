@@ -37,10 +37,11 @@ class PSDCopyTextView :UITextView,UIGestureRecognizerDelegate, UITextViewDelegat
             return false
         }
         if
-            let link = link as? URL,
-            !HelpersStrings.insideDomain(url: link)
+            let str = link as? String,
+            let url = URL(string: str),
+            !HelpersStrings.insideDomain(url: url)
         {
-            linkDelegate?.showLinkOpenAlert(link.absoluteString)
+            linkDelegate?.showLinkOpenAlert(url.absoluteString)
             return false
         }
         return true
