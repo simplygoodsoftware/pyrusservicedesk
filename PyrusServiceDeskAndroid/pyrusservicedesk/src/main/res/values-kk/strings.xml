@@ -16,7 +16,7 @@
     <string name="psd_gallery">Галерея</string>
     <plurals name="psd_years_ago">
         <item quantity="one">%d жыл бұрын</item>
-        <item quantity="other">%d жыл бұрын</item>
+        <item quantity="other">%d жылдар бұрын</item>
     </plurals>
     <string name="psd_months_ago" formatted="false">%d мин бұрын</string>
     <string name="psd_weeks_ago" formatted="false">%d апта бұрын</string>
