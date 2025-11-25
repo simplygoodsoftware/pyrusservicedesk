@@ -2,9 +2,7 @@ package com.pyrus.pyrusservicedesk
 
 import android.app.Application
 import androidx.annotation.MainThread
-import com.pyrus.pyrusservicedesk.sdk.RequestFactory
 import com.pyrus.pyrusservicedesk.sdk.data.FileManager
-import com.pyrus.pyrusservicedesk.sdk.data.LocalDataProvider
 import com.pyrus.pyrusservicedesk.sdk.repositories.draft.DraftRepository
 import com.pyrus.pyrusservicedesk.sdk.updates.LiveUpdates
 import com.pyrus.pyrusservicedesk.sdk.verify.LocalDataVerifier
@@ -22,7 +20,7 @@ internal interface ServiceDeskProvider {
     /**
      * Provides [RequestFactory]
      */
-    fun getRequestFactory(): RequestFactory
+    //fun getRequestFactory(): RequestFactory
 
     /**
      * Provides [DraftRepository]
@@ -37,7 +35,7 @@ internal interface ServiceDeskProvider {
     /**
      * Provides [LocalDataProvider]
      */
-    fun getLocalDataProvider(): LocalDataProvider
+    //fun getLocalDataProvider(): LocalDataProvider
 
     /**
      * Provides [FileManager]

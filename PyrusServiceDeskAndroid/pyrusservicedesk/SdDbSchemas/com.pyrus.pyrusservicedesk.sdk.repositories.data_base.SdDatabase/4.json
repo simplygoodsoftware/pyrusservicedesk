@@ -1,0 +1,692 @@
+{
+  "formatVersion": 1,
+  "database": {
+    "version": 4,
+    "identityHash": "af2c0444ded3269a49d08af862740226",
+    "entities": [
+      {
+        "tableName": "applications_table",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`app_id` TEXT NOT NULL, `org_name` TEXT, `org_logo_url` TEXT, `org_description` TEXT, `welcome_message` TEXT, `rating_settings_size` INTEGER, `rating_settings_type` INTEGER, `rating_settings_rating_text_values` TEXT, PRIMARY KEY(`app_id`))",
+        "fields": [
+          {
+            "fieldPath": "appId",
+            "columnName": "app_id",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "orgName",
+            "columnName": "org_name",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "orgLogoUrl",
+            "columnName": "org_logo_url",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "orgDescription",
+            "columnName": "org_description",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "welcomeMessage",
+            "columnName": "welcome_message",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "ratingSettings.size",
+            "columnName": "rating_settings_size",
+            "affinity": "INTEGER"
+          },
+          {
+            "fieldPath": "ratingSettings.type",
+            "columnName": "rating_settings_type",
+            "affinity": "INTEGER"
+          },
+          {
+            "fieldPath": "ratingSettings.ratingTextValues",
+            "columnName": "rating_settings_rating_text_values",
+            "affinity": "TEXT"
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": false,
+          "columnNames": [
+            "app_id"
+          ]
+        },
+        "indices": [
+          {
+            "name": "index_applications_table_app_id",
+            "unique": true,
+            "columnNames": [
+              "app_id"
+            ],
+            "orders": [],
+            "createSql": "CREATE UNIQUE INDEX IF NOT EXISTS `index_applications_table_app_id` ON `${TABLE_NAME}` (`app_id`)"
+          }
+        ]
+      },
+      {
+        "tableName": "users_table",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`user_id` TEXT NOT NULL, `app_id` TEXT NOT NULL, `user_name` TEXT NOT NULL, PRIMARY KEY(`user_id`), FOREIGN KEY(`app_id`) REFERENCES `applications_table`(`app_id`) ON UPDATE NO ACTION ON DELETE CASCADE )",
+        "fields": [
+          {
+            "fieldPath": "userId",
+            "columnName": "user_id",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "appId",
+            "columnName": "app_id",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "userName",
+            "columnName": "user_name",
+            "affinity": "TEXT",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": false,
+          "columnNames": [
+            "user_id"
+          ]
+        },
+        "indices": [
+          {
+            "name": "index_users_table_app_id",
+            "unique": false,
+            "columnNames": [
+              "app_id"
+            ],
+            "orders": [],
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_users_table_app_id` ON `${TABLE_NAME}` (`app_id`)"
+          }
+        ],
+        "foreignKeys": [
+          {
+            "table": "applications_table",
+            "onDelete": "CASCADE",
+            "onUpdate": "NO ACTION",
+            "columns": [
+              "app_id"
+            ],
+            "referencedColumns": [
+              "app_id"
+            ]
+          }
+        ]
+      },
+      {
+        "tableName": "tickets_table",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`ticket_id` INTEGER NOT NULL, `user_id` TEXT NOT NULL, `subject` TEXT NOT NULL, `unescaped_subject` TEXT NOT NULL, `author` TEXT, `is_read` INTEGER, `is_active` INTEGER, `created_at` INTEGER, `show_rating` INTEGER, `show_rating_text` TEXT, `last_comment_comment_id` INTEGER, `last_comment_created_at` INTEGER, `last_comment_body` TEXT, `last_comment_last_attachment_name` TEXT, `last_comment_author_name` TEXT, `last_comment_author_id` TEXT, `last_comment_author_avatar_id` INTEGER, `last_comment_author_avatar_color` TEXT, PRIMARY KEY(`ticket_id`), FOREIGN KEY(`user_id`) REFERENCES `users_table`(`user_id`) ON UPDATE NO ACTION ON DELETE CASCADE )",
+        "fields": [
+          {
+            "fieldPath": "ticketId",
+            "columnName": "ticket_id",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "userId",
+            "columnName": "user_id",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "subject",
+            "columnName": "subject",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "unescapedSubject",
+            "columnName": "unescaped_subject",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "author",
+            "columnName": "author",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "isRead",
+            "columnName": "is_read",
+            "affinity": "INTEGER"
+          },
+          {
+            "fieldPath": "isActive",
+            "columnName": "is_active",
+            "affinity": "INTEGER"
+          },
+          {
+            "fieldPath": "createdAt",
+            "columnName": "created_at",
+            "affinity": "INTEGER"
+          },
+          {
+            "fieldPath": "showRating",
+            "columnName": "show_rating",
+            "affinity": "INTEGER"
+          },
+          {
+            "fieldPath": "showRatingText",
+            "columnName": "show_rating_text",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "lastComment.commentId",
+            "columnName": "last_comment_comment_id",
+            "affinity": "INTEGER"
+          },
+          {
+            "fieldPath": "lastComment.creationDate",
+            "columnName": "last_comment_created_at",
+            "affinity": "INTEGER"
+          },
+          {
+            "fieldPath": "lastComment.body",
+            "columnName": "last_comment_body",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "lastComment.lastAttachmentName",
+            "columnName": "last_comment_last_attachment_name",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "lastComment.author.name",
+            "columnName": "last_comment_author_name",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "lastComment.author.id",
+            "columnName": "last_comment_author_id",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "lastComment.author.avatarId",
+            "columnName": "last_comment_author_avatar_id",
+            "affinity": "INTEGER"
+          },
+          {
+            "fieldPath": "lastComment.author.avatarColorString",
+            "columnName": "last_comment_author_avatar_color",
+            "affinity": "TEXT"
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": false,
+          "columnNames": [
+            "ticket_id"
+          ]
+        },
+        "indices": [
+          {
+            "name": "index_tickets_table_ticket_id",
+            "unique": true,
+            "columnNames": [
+              "ticket_id"
+            ],
+            "orders": [],
+            "createSql": "CREATE UNIQUE INDEX IF NOT EXISTS `index_tickets_table_ticket_id` ON `${TABLE_NAME}` (`ticket_id`)"
+          },
+          {
+            "name": "index_tickets_table_user_id",
+            "unique": false,
+            "columnNames": [
+              "user_id"
+            ],
+            "orders": [],
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_tickets_table_user_id` ON `${TABLE_NAME}` (`user_id`)"
+          }
+        ],
+        "foreignKeys": [
+          {
+            "table": "users_table",
+            "onDelete": "CASCADE",
+            "onUpdate": "NO ACTION",
+            "columns": [
+              "user_id"
+            ],
+            "referencedColumns": [
+              "user_id"
+            ]
+          }
+        ]
+      },
+      {
+        "tableName": "comments_table",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`comment_id` INTEGER NOT NULL, `ticket_id` INTEGER NOT NULL, `body` TEXT, `unescaped_body` TEXT, `is_inbound` INTEGER NOT NULL, `created_at` INTEGER NOT NULL, `rating` INTEGER, `author_name` TEXT, `author_id` TEXT, `author_avatar_id` INTEGER, `author_avatar_color` TEXT, PRIMARY KEY(`comment_id`))",
+        "fields": [
+          {
+            "fieldPath": "commentId",
+            "columnName": "comment_id",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "ticketId",
+            "columnName": "ticket_id",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "body",
+            "columnName": "body",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "unescapedBody",
+            "columnName": "unescaped_body",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "isInbound",
+            "columnName": "is_inbound",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "creationDate",
+            "columnName": "created_at",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "rating",
+            "columnName": "rating",
+            "affinity": "INTEGER"
+          },
+          {
+            "fieldPath": "author.name",
+            "columnName": "author_name",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "author.id",
+            "columnName": "author_id",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "author.avatarId",
+            "columnName": "author_avatar_id",
+            "affinity": "INTEGER"
+          },
+          {
+            "fieldPath": "author.avatarColorString",
+            "columnName": "author_avatar_color",
+            "affinity": "TEXT"
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": false,
+          "columnNames": [
+            "comment_id"
+          ]
+        },
+        "indices": [
+          {
+            "name": "index_comments_table_comment_id",
+            "unique": true,
+            "columnNames": [
+              "comment_id"
+            ],
+            "orders": [],
+            "createSql": "CREATE UNIQUE INDEX IF NOT EXISTS `index_comments_table_comment_id` ON `${TABLE_NAME}` (`comment_id`)"
+          },
+          {
+            "name": "index_comments_table_ticket_id",
+            "unique": false,
+            "columnNames": [
+              "ticket_id"
+            ],
+            "orders": [],
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_comments_table_ticket_id` ON `${TABLE_NAME}` (`ticket_id`)"
+          }
+        ]
+      },
+      {
+        "tableName": "attachment_table",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER NOT NULL, `comment_id` INTEGER NOT NULL, `guid` TEXT NOT NULL, `type` INTEGER NOT NULL, `name` TEXT NOT NULL, `size` INTEGER NOT NULL, `is_text` INTEGER NOT NULL, `is_video` INTEGER NOT NULL, `local_uri` TEXT, PRIMARY KEY(`id`), FOREIGN KEY(`comment_id`) REFERENCES `comments_table`(`comment_id`) ON UPDATE NO ACTION ON DELETE CASCADE )",
+        "fields": [
+          {
+            "fieldPath": "id",
+            "columnName": "id",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "commentId",
+            "columnName": "comment_id",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "guid",
+            "columnName": "guid",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "type",
+            "columnName": "type",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "name",
+            "columnName": "name",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "bytesSize",
+            "columnName": "size",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "isText",
+            "columnName": "is_text",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "isVideo",
+            "columnName": "is_video",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "localUri",
+            "columnName": "local_uri",
+            "affinity": "TEXT"
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": false,
+          "columnNames": [
+            "id"
+          ]
+        },
+        "indices": [
+          {
+            "name": "index_attachment_table_comment_id",
+            "unique": false,
+            "columnNames": [
+              "comment_id"
+            ],
+            "orders": [],
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_attachment_table_comment_id` ON `${TABLE_NAME}` (`comment_id`)"
+          }
+        ],
+        "foreignKeys": [
+          {
+            "table": "comments_table",
+            "onDelete": "CASCADE",
+            "onUpdate": "NO ACTION",
+            "columns": [
+              "comment_id"
+            ],
+            "referencedColumns": [
+              "comment_id"
+            ]
+          }
+        ]
+      },
+      {
+        "tableName": "commands_table",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`is_error` INTEGER NOT NULL, `local_id` INTEGER NOT NULL, `command_id` TEXT NOT NULL, `command_type` INTEGER NOT NULL, `user_id` TEXT, `app_id` TEXT NOT NULL, `creation_time` INTEGER NOT NULL, `request_new_ticket` INTEGER, `comment` TEXT, `ticket_id` INTEGER, `rating` INTEGER, `comment_id` INTEGER, `token` TEXT, `token_type` TEXT, `rating_comment` TEXT, PRIMARY KEY(`command_id`, `local_id`))",
+        "fields": [
+          {
+            "fieldPath": "isError",
+            "columnName": "is_error",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "localId",
+            "columnName": "local_id",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "commandId",
+            "columnName": "command_id",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "commandType",
+            "columnName": "command_type",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "userId",
+            "columnName": "user_id",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "appId",
+            "columnName": "app_id",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "creationTime",
+            "columnName": "creation_time",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "requestNewTicket",
+            "columnName": "request_new_ticket",
+            "affinity": "INTEGER"
+          },
+          {
+            "fieldPath": "comment",
+            "columnName": "comment",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "ticketId",
+            "columnName": "ticket_id",
+            "affinity": "INTEGER"
+          },
+          {
+            "fieldPath": "rating",
+            "columnName": "rating",
+            "affinity": "INTEGER"
+          },
+          {
+            "fieldPath": "commentId",
+            "columnName": "comment_id",
+            "affinity": "INTEGER"
+          },
+          {
+            "fieldPath": "token",
+            "columnName": "token",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "tokenType",
+            "columnName": "token_type",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "ratingComment",
+            "columnName": "rating_comment",
+            "affinity": "TEXT"
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": false,
+          "columnNames": [
+            "command_id",
+            "local_id"
+          ]
+        },
+        "indices": [
+          {
+            "name": "index_commands_table_command_id",
+            "unique": true,
+            "columnNames": [
+              "command_id"
+            ],
+            "orders": [],
+            "createSql": "CREATE UNIQUE INDEX IF NOT EXISTS `index_commands_table_command_id` ON `${TABLE_NAME}` (`command_id`)"
+          },
+          {
+            "name": "index_commands_table_local_id",
+            "unique": true,
+            "columnNames": [
+              "local_id"
+            ],
+            "orders": [],
+            "createSql": "CREATE UNIQUE INDEX IF NOT EXISTS `index_commands_table_local_id` ON `${TABLE_NAME}` (`local_id`)"
+          }
+        ]
+      },
+      {
+        "tableName": "local_attachment_table",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER NOT NULL, `command_id` TEXT NOT NULL, `name` TEXT NOT NULL, `guid` TEXT, `bytes_size` INTEGER NOT NULL, `uri` TEXT NOT NULL, PRIMARY KEY(`id`), FOREIGN KEY(`command_id`) REFERENCES `commands_table`(`command_id`) ON UPDATE NO ACTION ON DELETE CASCADE )",
+        "fields": [
+          {
+            "fieldPath": "id",
+            "columnName": "id",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "commandId",
+            "columnName": "command_id",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "name",
+            "columnName": "name",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "guid",
+            "columnName": "guid",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "bytesSize",
+            "columnName": "bytes_size",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "uri",
+            "columnName": "uri",
+            "affinity": "TEXT",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": false,
+          "columnNames": [
+            "id"
+          ]
+        },
+        "indices": [
+          {
+            "name": "index_local_attachment_table_command_id",
+            "unique": false,
+            "columnNames": [
+              "command_id"
+            ],
+            "orders": [],
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_local_attachment_table_command_id` ON `${TABLE_NAME}` (`command_id`)"
+          }
+        ],
+        "foreignKeys": [
+          {
+            "table": "commands_table",
+            "onDelete": "CASCADE",
+            "onUpdate": "NO ACTION",
+            "columns": [
+              "command_id"
+            ],
+            "referencedColumns": [
+              "command_id"
+            ]
+          }
+        ]
+      },
+      {
+        "tableName": "members_table",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` TEXT NOT NULL, `user_id` TEXT NOT NULL, `author_id` TEXT NOT NULL, `name` TEXT, `has_access` INTEGER NOT NULL, `phone` TEXT, PRIMARY KEY(`id`))",
+        "fields": [
+          {
+            "fieldPath": "id",
+            "columnName": "id",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "userId",
+            "columnName": "user_id",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "authorId",
+            "columnName": "author_id",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "name",
+            "columnName": "name",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "hasAccess",
+            "columnName": "has_access",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "phone",
+            "columnName": "phone",
+            "affinity": "TEXT"
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": false,
+          "columnNames": [
+            "id"
+          ]
+        },
+        "indices": [
+          {
+            "name": "index_members_table_user_id",
+            "unique": false,
+            "columnNames": [
+              "user_id"
+            ],
+            "orders": [],
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_members_table_user_id` ON `${TABLE_NAME}` (`user_id`)"
+          }
+        ]
+      }
+    ],
+    "setupQueries": [
+      "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, 'af2c0444ded3269a49d08af862740226')"
+    ]
+  }
+}

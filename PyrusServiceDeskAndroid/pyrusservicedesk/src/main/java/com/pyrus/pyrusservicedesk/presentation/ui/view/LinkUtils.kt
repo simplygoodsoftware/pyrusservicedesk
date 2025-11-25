@@ -11,7 +11,7 @@ import android.text.style.ClickableSpan
 import android.view.View
 import androidx.appcompat.app.AlertDialog
 import com.pyrus.pyrusservicedesk.R
-import com.pyrus.pyrusservicedesk.utils.ConfigUtils
+import com.pyrus.pyrusservicedesk._ref.utils.ConfigUtils
 
 internal object LinkUtils {
 
@@ -68,12 +68,21 @@ internal object LinkUtils {
             }
         }
 
-        AlertDialog.Builder(context)
+        val dialog = AlertDialog.Builder(context, R.style.CommonAlertDialog)
             .setPositiveButton(R.string.psd_open) { _, _ -> onClick.invoke() }
             .setNegativeButton(android.R.string.cancel) { _, _ -> }
             .setMessage(message)
             .create()
-            .show()
+
+        dialog.setOnShowListener {
+            val positiveButton = dialog.getButton(AlertDialog.BUTTON_POSITIVE)
+            val negativeButton = dialog.getButton(AlertDialog.BUTTON_NEGATIVE)
+
+            positiveButton.setTextColor(ConfigUtils.getAccentColor(context))
+            negativeButton.setTextColor(ConfigUtils.getAccentColor(context))
+        }
+
+        dialog.show()
     }
 
 }

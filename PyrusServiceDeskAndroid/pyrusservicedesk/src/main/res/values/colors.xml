@@ -4,6 +4,7 @@
     <color name="psd_accent_secondary">#F4C000</color>
     <color name="psd_text_color_primary">#000000</color>
     <color name="psd_text_color_secondary">#999999</color>
+    <color name="psd_text_color_bg950">#1F2124</color>
     <color name="psd_text_color_primary_inverse">#FFFFFF</color>
     <color name="psd_text_color_secondary_inverse">#666666</color>
     <color name="psd_action_bar_icon_color">#666666</color>
@@ -14,4 +15,49 @@
     <color name="psd_no_file_preview_background">#333333</color>
     <color name="psd_comment_preview_outline">#40D9D9D9</color>
     <color name="psd_white">#fff</color>
+    <color name="psd_color_black_03">#4D000000</color>
+    <color name="psd_helpy_temp_accent">#3D54F3</color>
+    <color name="psd_color_blue_gray_100">#F4F5F6</color>
+    <color name="psd_color_blue_gray_250">#D6D9DC</color>
+    <color name="psd_color_blue_gray_300">#C7CCD1</color>
+    <color name="psd_color_bluegray_350">#BABFC4</color>
+    <color name="psd_color_bluegray_500">#9199A1</color>
+    <color name="psd_color_bluegray_550">#858C93</color>
+    <color name="psd_color_blue_gray_600">#788087</color>
+    <color name="psd_color_blue_gray_700">#60666C</color>
+    <color name="psd_color_blue_gray_750">#4C5156</color>
+    <color name="psd_color_bluegray_800">#3D4043</color>
+    <color name="psd_color_bluegray_900">#26292C</color>
+    <color name="psd_color_bluegray_950">#1F2124</color>
+
+    <color name="psd_color_white_09">#E5FFFFFF</color>
+    <color name="psd_color_white_03">#4DE3E5E8</color>
+
+    <color name="psd_color_blue_white_01">#1AE3E5E8</color>
+
+    <color name="psd_color_black_01">#1A000000</color>
+    <color name="psd_qr_mask">#77000000</color>
+
+
+    <color name="psd_rating_text">@color/psd_text_color_bg950</color>
+
+    <color name="psd_background">@color/psd_white</color>
+    <color name="psd_text_primary">@color/psd_color_bluegray_950</color>
+    <color name="psd_text_2">@color/psd_color_blue_gray_750</color>
+    <color name="psd_color_divider_250">@color/psd_color_blue_gray_250</color>
+    <color name="psd_color_divider_300">@color/psd_color_blue_gray_300</color>
+    <color name="psd_comment_inbound_bg">@color/psd_color_blue_gray_100</color>
+    <color name="psd_color_fab_scroll_down">@color/psd_white</color>
+    <color name="psd_color_scroll_down">@color/psd_color_bluegray_500</color>
+    <color name="psd_hint_name">@color/psd_color_blue_gray_700</color>
+    <color name="psd_blur_color">#CCE4E6E7</color>
+    <color name="psd_not_active_text_color">#787878</color>
+    <color name="psd_transparent">#00FFFFFF</color>
+    <color name="psd_light_gray_bg">#E3E6E8</color>
+
+    <color name="psd_bg_record_gradient_1">#3149F1</color>
+    <color name="psd_bg_record_gradient_2">#B75DFB</color>
+    <color name="psd_bg_record_gradient_3">#FFB049</color>
+    <color name="psd_bg_pending_audio">#F3F2F8</color>
+    <color name="psd_hint_color">@color/psd_color_bluegray_350</color>
 </resources>

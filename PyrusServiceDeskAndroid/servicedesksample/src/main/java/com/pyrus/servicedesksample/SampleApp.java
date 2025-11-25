@@ -14,12 +14,12 @@ public class SampleApp extends Application {
     public void onCreate() {
         super.onCreate();
         PyrusServiceDesk.init(
-                this,
-                "my_app_id",
-                "user_id",
-                "security_key",
-                null,
-                true
+            this,
+            "my_app_id",
+            "user_id",
+            "security_key",
+            null,
+            true
         );
 
         Map<String, String> map = new HashMap<>();

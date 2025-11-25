@@ -8,7 +8,7 @@ import androidx.lifecycle.ViewModel
  * For sharing state that user has completely quit the service desk or there need to upgrade
  * the feed.
  */
-internal class SharedViewModel : ViewModel() {
+class SharedViewModel : ViewModel() {
 
     private val quitServiceDesk = MutableLiveData<Boolean>()
     private val updateServiceDesk = MutableLiveData<Any>()

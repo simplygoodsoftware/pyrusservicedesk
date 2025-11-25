@@ -1,9 +1,9 @@
 package com.pyrus.pyrusservicedesk.presentation.ui.view.recyclerview.item_decorators
 
 import android.graphics.Rect
+import android.view.View
 import androidx.annotation.Px
 import androidx.recyclerview.widget.RecyclerView
-import android.view.View
 
 /**
  * [RecyclerView.ItemDecoration] implementation that applies spacing between items in list.
@@ -15,8 +15,10 @@ import android.view.View
  * @param itemSpaceMultiplier [SpaceMultiplier] implementation that is allowed to adjust default [itemSpace]
  * between items
  */
-internal class SpaceItemDecoration(@Px val itemSpace: Int,
-                                   private val itemSpaceMultiplier: SpaceMultiplier? = null)
+internal class SpaceItemDecoration(
+    @Px val itemSpace: Int,
+    private val itemSpaceMultiplier: SpaceMultiplier? = null,
+)
     : RecyclerView.ItemDecoration() {
 
     override fun getItemOffsets(outRect: Rect,
@@ -34,7 +36,7 @@ internal class SpaceItemDecoration(@Px val itemSpace: Int,
             spaceFinal = (spaceFinal * it.getMultiplier(parent.getChildAdapterPosition(view))).toInt()
         }
 
-        outRect.top = spaceFinal
+        outRect.bottom = spaceFinal
     }
 }
 
