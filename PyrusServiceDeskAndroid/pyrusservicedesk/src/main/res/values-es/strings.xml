@@ -38,4 +38,7 @@
         <item quantity="many">hace %d años</item>
         <item quantity="other">hace %d año</item>
     </plurals>
+    <string name="psd_type_audio">Mensaje de voz</string>
+    <string name="psd_swipe_cancel">‹‹ cancelar</string>
+    <string name="psd_cancel">Cancelar</string>
 </resources>
