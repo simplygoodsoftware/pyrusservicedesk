@@ -4,7 +4,7 @@ protocol ButtonsCollectionDelegate: NSObjectProtocol {
     func didTapOnButton(_ text: ButtonData)
 }
 
-class ButtonsView: UITableViewCell {
+class ButtonsView: UIView {
     weak var tapDelegate: ButtonsCollectionDelegate?
     private(set) var buttons: [ButtonData]?
     lazy var collectionView: UICollectionView = {
@@ -27,25 +27,14 @@ class ButtonsView: UITableViewCell {
         return collectionView
     }()
     
-    override init(style: UITableViewCell.CellStyle, reuseIdentifier: String?) {
-        super.init(style: style, reuseIdentifier: reuseIdentifier)
+    override init(frame: CGRect) {
+        super.init(frame: frame)
         addSubview(collectionView)
         collectionView.rightAnchor.constraint(equalTo: rightAnchor, constant: -LEADING_FOOTER).isActive = true
         collectionView.leftAnchor.constraint(equalTo: leftAnchor, constant: TO_BOARD_DISTANCE).isActive = true
         collectionView.topAnchor.constraint(equalTo: topAnchor).isActive = true
         collectionView.bottomAnchor.constraint(equalTo: bottomAnchor).isActive = true
-        contentView.backgroundColor = .clear
     }
-    
-    
-//    override init(frame: CGRect) {
-//        super.init(frame: frame)
-//        addSubview(collectionView)
-//        collectionView.rightAnchor.constraint(equalTo: rightAnchor, constant: -LEADING_FOOTER).isActive = true
-//        collectionView.leftAnchor.constraint(equalTo: leftAnchor, constant: TO_BOARD_DISTANCE).isActive = true
-//        collectionView.topAnchor.constraint(equalTo: topAnchor).isActive = true
-//        collectionView.bottomAnchor.constraint(equalTo: bottomAnchor).isActive = true
-//    }
     
     required init?(coder: NSCoder) {
         fatalError("init(coder:) has not been implemented")

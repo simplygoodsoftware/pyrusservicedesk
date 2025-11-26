@@ -43,6 +43,9 @@ class PSDChatInteractor: NSObject {
     private var isRefreshing = false
     private var isOpen = false
     private var fromPush = false
+    private var drawTable: Bool = false
+    private var needUpdate: Bool = false
+    private var chatForUpdate: PSDChat?
     private var isScrollButtonHiden = true
     private var isLoading: Bool = false
     private var newMessagesCount = 0 {
@@ -256,6 +259,10 @@ private extension PSDChatInteractor {
     }
     
     @objc func updateChats() {
+        guard !drawTable else {
+            needUpdate = true
+            return
+        }
         DispatchQueue.main.async { [weak self] in
             guard let self else { return }
             var chat: PSDChat? = nil
@@ -430,7 +437,9 @@ private extension PSDChatInteractor {
     }
     
     private func drawTableWithData() {
+        drawTable = true
         guard gotData else {
+            drawTable = false
             return
         }
         gotData = false
@@ -446,6 +455,10 @@ private extension PSDChatInteractor {
         setLastActivityDate()
         updateButtons()
         presenter.doWork(.drawTableWithData)
+        drawTable = false
+        if needUpdate {
+            updateChats()
+        }
     }
     
     func readChat() {
@@ -491,8 +504,9 @@ private extension PSDChatInteractor {
             needShowRating = chat.showRating
             showRateIfNeed()
             
-            self.tableMatrix.complete(from: chat, startMessage: lastMessageFromServer) { (hasChanges: Bool) in
-                DispatchQueue.main.async {
+            self.tableMatrix.complete(from: chat, startMessage: lastMessageFromServer) { [weak self] (hasChanges: Bool) in
+                DispatchQueue.main.async { [weak self] in
+                    guard let self else { return }
                     self.presenter.doWork(.removeNoConnectionView)
                     self.lastMessageFromServer = chat.messages.last
                     self.setLastActivityDate()

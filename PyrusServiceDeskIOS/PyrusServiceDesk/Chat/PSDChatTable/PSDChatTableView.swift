@@ -25,7 +25,7 @@ class PSDChatTableView: PSDTableView {
     
     private lazy var buttonsView: ButtonsView = {
         let view = ButtonsView(frame: .zero)
-//        tableHeaderView = view
+        tableHeaderView = view
         view.autoresizingMask = [.flexibleHeight]
         view.tapDelegate = self
         return view
@@ -80,7 +80,7 @@ class PSDChatTableView: PSDTableView {
             newFrame.size.width = frame.size.width
             newFrame.size.height = buttonsView.collectionView.contentSize.height
             buttonsView.frame = newFrame
-//            tableHeaderView = buttonsView
+            tableHeaderView = buttonsView
             buttonsView.collectionView.transform = CGAffineTransform(rotationAngle: CGFloat.pi)
         }
     }
@@ -177,18 +177,17 @@ class PSDChatTableView: PSDTableView {
         if tableMatrix.count > 0, tableMatrix[0].count > 0 {
             if buttonsView.buttons?.count ?? 0 > 0 && !addRow {
                 setContentOffset(CGPoint(x: 0, y: -keyBoardHeight), animated: animated)
-                
-                layoutIfNeeded()
                 setNeedsLayout()
+                layoutIfNeeded()
             } else {
                 scrollToRow(at: IndexPath(row: 0, section: 0), at: .top, animated: animated)
-                layoutIfNeeded()
                 setNeedsLayout()
+                layoutIfNeeded()
                 scrollToRow(at: IndexPath(row: 0, section: 0), at: .top, animated: animated)
             }
         }
         
-        //chatDelegate?.updateScrollButton(isHidden: true)
+//        chatDelegate?.updateScrollButton(isHidden: true)
     }
     
     func redrawCell(at indexPath: IndexPath, with message: PSDRowMessage) {
@@ -318,20 +317,13 @@ extension PSDChatTableView: UITableViewDelegate, UITableViewDataSource {
     }
     
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        if section == 0 {
-            return tableMatrix[section].count + 1
-        }
         return tableMatrix.count > section ? tableMatrix[section].count : 0
     }
     
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         let message: PSDRowMessage
-        var row = indexPath.row
-        if indexPath.section == 0 {
-            row -= 1
-        }
-        if tableMatrix.count > indexPath.section && tableMatrix[indexPath.section].count > indexPath.row && row >= 0 {
-            message = tableMatrix[indexPath.section][row]
+        if tableMatrix.count > indexPath.section && tableMatrix[indexPath.section].count > indexPath.row {
+            message = tableMatrix[indexPath.section][indexPath.row]
         }
         else {
             message = PSDObjectsCreator.createWelcomeMessage()
@@ -521,7 +513,10 @@ extension PSDChatTableView: ButtonsCollectionDelegate {
         if let url = text.url?.absoluteString {
             chatDelegate?.showLinkOpenAlert(url)
         } else if let text = text.string {
-            chatDelegate?.send(text, [])
+            updateButtonsView(buttons: nil)
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.05) {
+                self.chatDelegate?.send(text, [])
+            }
         }
     }
 }

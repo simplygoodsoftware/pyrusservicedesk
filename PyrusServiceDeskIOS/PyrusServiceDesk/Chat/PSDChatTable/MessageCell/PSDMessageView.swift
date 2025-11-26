@@ -307,32 +307,34 @@ class PSDMessageView: PSDView {
     
     private func updateTimeLayout() {
         let maxWidth = self.maxWidth - TEXT_SAFE_AREA
-        let layoutData = messageTextView.attributedText.lastCharacterMaxX(self.maxWidth)//300.6932925581932 for maxWidth = 276.0,
+        let layoutData = messageTextView.attributedText.lastCharacterMaxX(self.maxWidth)
         let maxX = layoutData.maxX + (TEXT_SAFE_AREA / 2)
         let numLines = layoutData.numberOfLines
-        let expectedTimeSize = OFFSET_FOR_DETAIL + TIME_BORDER + TIME_BORDER + TIME_LEFT_OFFSET + TIME_LEFT_OFFSET + TIME_LEFT_OFFSET
-        let size = messageTextView.attributedText.boundingRect(with: CGSize(width: maxWidth, height: CGFloat.greatestFiniteMagnitude),
-                                                               options: [.usesLineFragmentOrigin, .usesFontLeading],
-                                                               context: nil)
+        
+        let expectedTimeSize = OFFSET_FOR_DETAIL + TIME_BORDER + TIME_BORDER + TIME_LEFT_OFFSET * 3
+        
+        let size = messageTextView.attributedText.boundingRect(
+            with: CGSize(width: maxWidth, height: .greatestFiniteMagnitude),
+            options: [.usesLineFragmentOrigin, .usesFontLeading],
+            context: nil
+        )
+        
         let canBeInLine = maxX < maxWidth - expectedTimeSize
         let growWidth = canBeInLine && (size.width + expectedTimeSize < maxWidth)
-        if messageTextView.attributedText.string.count == 0 || (canBeInLine && numLines > 1 && !growWidth) {
-            activate(false, constraintsIn: timeInBottomConstraints)
-            activate(false, constraintsIn: timeInLineConstraints)
-            activate(true, constraintsIn: timeInBottomAndLineConstraints)
-        }
-        else if canBeInLine && growWidth {
-            activate(false, constraintsIn: timeInBottomAndLineConstraints)
-            activate(false, constraintsIn: timeInBottomConstraints)
-            activate(true, constraintsIn: timeInLineConstraints)
+        
+        let useLine = canBeInLine && growWidth
+        
+        if useLine {
+            NSLayoutConstraint.deactivate(timeInBottomConstraints)
+            NSLayoutConstraint.activate(timeInLineConstraints)
         } else {
-            activate(false, constraintsIn: timeInBottomAndLineConstraints)
-            activate(false, constraintsIn: timeInLineConstraints)
-            activate(true, constraintsIn: timeInBottomConstraints)
+            NSLayoutConstraint.deactivate(timeInLineConstraints)
+            NSLayoutConstraint.activate(timeInBottomConstraints)
         }
-        setNeedsLayout()
+        
         layoutIfNeeded()
     }
+
     
     private func activate(_ activate: Bool, constraintsIn constraintsArray: [NSLayoutConstraint]) {
         for con in constraintsArray {
