@@ -43,9 +43,16 @@ class PSDCopyTextView :UITextView,UIGestureRecognizerDelegate, UITextViewDelegat
         {
             linkDelegate?.showLinkOpenAlert(url.absoluteString)
             return false
+        } else if
+            let url = link as? URL,
+            !HelpersStrings.insideDomain(url: url)
+        {
+            linkDelegate?.showLinkOpenAlert(url.absoluteString)
+            return false
         }
         return true
     }
+    
     required init?(coder aDecoder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
     }
