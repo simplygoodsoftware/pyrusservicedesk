@@ -38,7 +38,7 @@ class AttachmentCollectionViewCell : UICollectionViewCell{
     
     lazy var holderView : UIView = {
         let view = UIView()
-        view.backgroundColor = .holderBackgroundColor
+        view.backgroundColor = CustomizationHelper.holderBackgroundColor
         view.layer.cornerRadius = AttachmentCollectionViewCell.holderRadius
         view.layer.borderWidth = AttachmentCollectionViewCell.holderBorderWidth
         view.clipsToBounds = true

@@ -484,9 +484,6 @@ private extension ChatsInteractor {
             chat.isActive = true
         }
         filterChats = PSDGetChats.sortByLastMessage(filterChats)
-        if filterChats.count == 0 {
-            print("JNrelf")
-        }
         return filterChats
     }
     

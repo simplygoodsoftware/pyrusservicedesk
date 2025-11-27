@@ -191,6 +191,32 @@ class CustomizationHelper {
         }
     }
     
+    static var holderBackgroundColor: UIColor {
+        let style = keyboardStyle
+        
+        switch style {
+        case .dark:
+            return UIColor(hex: "#575B5E") ?? .clear
+        case .light:
+            return UIColor(hex: "#F3F2F8") ?? .clear
+        default:
+            return .holderBackgroundColor
+        }
+    }
+    
+    static var labelTextColor: UIColor {
+        let style = keyboardStyle
+        
+        switch style {
+        case .dark:
+            return .white
+        case .light:
+            return UIColor(hex: "#AAA9AE") ?? .gray
+        default:
+            return .labelTextColor
+        }
+    }
+    
     static var recordImagesColors: UIColor {
         return PyrusServiceDesk.mainController?.customization?.themeColor ?? PyrusServiceDesk.mainController?.customization?.barButtonTintColor ?? CustomizationHelper.colorsForInput.1
     }
@@ -241,6 +267,24 @@ private extension UIColor {
             return UIColor(hex: "#FFFFFF4D")?.withAlphaComponent(0.3) ?? .white
         default:
             return UIColor(hex: "#0000001A")?.withAlphaComponent(0.1) ?? .darkAppColor
+        }
+    }
+    
+    static let holderBackgroundColor = UIColor {
+        switch $0.userInterfaceStyle {
+        case .dark:
+            return UIColor(hex: "#575B5E") ?? .clear
+        default:
+            return UIColor(hex: "#F3F2F8") ?? .clear
+        }
+    }
+    
+    static let labelTextColor = UIColor {
+        switch $0.userInterfaceStyle {
+        case .dark:
+            return .white
+        default:
+            return UIColor(hex: "#AAA9AE") ?? .gray
         }
     }
 }

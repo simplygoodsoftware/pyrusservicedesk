@@ -90,9 +90,6 @@ class PSDMessageView: PSDView {
     
     func draw(message: PSDRowMessage) {
         timeLabel.text = message.message.date.timeAsString()
-        if timeLabel.text?.count ?? 0 == 0 {
-            print("")
-        }
         messageTextView.attributedText = message.attributedText
         messageTextView.linkTextAttributes = [
             NSAttributedString.Key.underlineStyle: NSUnderlineStyle.single.rawValue,

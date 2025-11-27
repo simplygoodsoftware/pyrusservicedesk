@@ -111,9 +111,9 @@ class TicketCommandRepository {
 //            }
 //        }
 //        
-        if commandsForSync.count > 0 {
-            print(commandsForSync)
-        }
+//        if commandsForSync.count > 0 {
+//            print(commandsForSync)
+//        }
         return commandsForSync
     }
     

@@ -15,14 +15,14 @@ extension SearchPresenter: SearchPresenterProtocol {
             var endTime = DispatchTime.now()
             var nanoTime = endTime.uptimeNanoseconds - startTime.uptimeNanoseconds
             var timeInterval = Double(nanoTime) / 1_000_000
-            print("⏱ prepareSearchChats выполнена за \(timeInterval) мс (обработано \(chats.count) чатов)")
+//            print("⏱ prepareSearchChats выполнена за \(timeInterval) мс (обработано \(chats.count) чатов)")
             
             startTime = DispatchTime.now()
             view?.show(.updateChats(chats: prepareChars))
             endTime = DispatchTime.now()
             nanoTime = endTime.uptimeNanoseconds - startTime.uptimeNanoseconds
             timeInterval = Double(nanoTime) / 1_000_000
-            print("⏱ showSearchChats выполнена за \(timeInterval) мс (обработано \(chats.count) чатов)")
+//            print("⏱ showSearchChats выполнена за \(timeInterval) мс (обработано \(chats.count) чатов)")
         case .openChat(chat: let chat, messageId: let messageId):
             view?.show(.openChat(chat: chat, messageId: messageId))
         case .endRefresh:

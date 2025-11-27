@@ -48,7 +48,7 @@ struct PSDGetChats {
         parameters["commands"] = commands
         
         let request: URLRequest = URLRequest.createRequest(type:.chats, parameters: parameters)
-        print("app_id: \(PyrusServiceDesk.clientId), user_id: \(PyrusServiceDesk.customUserId ?? PyrusServiceDesk.userId), secret_key: \(PyrusServiceDesk.securityKey), lastNoteId: \(parameters["last_note_id"])")
+//        print("app_id: \(PyrusServiceDesk.clientId), user_id: \(PyrusServiceDesk.customUserId ?? PyrusServiceDesk.userId), secret_key: \(PyrusServiceDesk.securityKey), lastNoteId: \(parameters["last_note_id"])")
         PSDGetChats.sessionTask = PyrusServiceDesk.mainSession.dataTask(with: request) { data, response, error in
             guard let data = data, error == nil else { // check for fundamental networking error
                 completion(nil, nil, nil, nil, false)
@@ -81,7 +81,7 @@ struct PSDGetChats {
                     let chatsArray = chatsData["tickets"] as? NSArray ?? NSArray()
                     let chats = generateChats(from: chatsArray, clients: clients)
                     let authorAccessDenied = chatsData["author_access_denied"] as? [String]
-                    print("количество чатов: \(chats.count)")
+//                    print("количество чатов: \(chats.count)")
                     do {
                         let commandsArray = chatsData["commands_result"] as? NSArray ?? NSArray()
                         let jsonData = try JSONSerialization.data(withJSONObject: commandsArray, options: [])

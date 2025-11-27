@@ -55,7 +55,8 @@ class PSDChatInteractor: NSObject {
             }
         }
     }
-    
+    private let tableMatrixQueue = DispatchQueue(label: "com.psd.tableMatrix.queue")
+
     var isRefresh = false
     
     init(presenter: PSDChatPresenterProtocol, chat: PSDChat? = nil, fromPush: Bool = false, messageId: String? = nil) {
@@ -259,12 +260,12 @@ private extension PSDChatInteractor {
     }
     
     @objc func updateChats() {
-        guard !drawTable else {
-            needUpdate = true
-            return
-        }
         DispatchQueue.main.async { [weak self] in
             guard let self else { return }
+            guard !drawTable else {
+                needUpdate = true
+                return
+            }
             var chat: PSDChat? = nil
             if PyrusServiceDesk.multichats {
                chat = PyrusServiceDesk.chats.first(where: { $0.chatId == self.chat?.chatId })
@@ -449,7 +450,6 @@ private extension PSDChatInteractor {
         
         if let chat {
             tableMatrix.create(from: chat)
-           // presenter.doWork(.updateTableMatrix(matrix: tableMatrix))
             lastMessageFromServer = chat.messages.last
         }
         setLastActivityDate()
@@ -499,33 +499,37 @@ private extension PSDChatInteractor {
     }
     
     func redrawChat(chat: PSDChat?) {
-        if let chat = chat {
-            UnreadMessageManager.removeLastComment()
-            needShowRating = chat.showRating
-            showRateIfNeed()
-            
-            self.tableMatrix.complete(from: chat, startMessage: lastMessageFromServer) { [weak self] (hasChanges: Bool) in
+        tableMatrixQueue.async { [weak self] in
+            guard let self else { return }
+            if let chat = chat {
+                UnreadMessageManager.removeLastComment()
+                needShowRating = chat.showRating
+                showRateIfNeed()
+                
+                self.tableMatrix.complete(from: chat, startMessage: lastMessageFromServer) { [weak self] (hasChanges: Bool) in
+                    DispatchQueue.main.async { [weak self] in
+                        guard let self else { return }
+                        self.presenter.doWork(.removeNoConnectionView)
+                        self.lastMessageFromServer = chat.messages.last
+                        self.setLastActivityDate()
+                        
+                        if hasChanges {
+                            self.presenter.doWork(.updateRows)
+                            self.updateButtons()
+                        }
+                    }
+                }
+                
                 DispatchQueue.main.async { [weak self] in
-                    guard let self else { return }
-                    self.presenter.doWork(.removeNoConnectionView)
-                    self.lastMessageFromServer = chat.messages.last
-                    self.setLastActivityDate()
-                    
-                    if hasChanges {
-                        self.presenter.doWork(.updateRows)
-                        self.updateButtons()
+                    self?.updateButtons()
+                    if self?.isRefreshing ?? false {
+                        self?.presenter.doWork(.endRefreshing)
+                        self?.isRefreshing = false
                     }
                 }
             }
-            
-            DispatchQueue.main.async { [weak self] in
-                self?.updateButtons()
-                if self?.isRefreshing ?? false {
-                    self?.presenter.doWork(.endRefreshing)
-                    self?.isRefreshing = false
-                }
-            }
         }
+        
     }
     
     func updateButtons() {

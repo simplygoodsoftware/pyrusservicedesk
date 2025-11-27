@@ -12,12 +12,12 @@ class AttachmentFileCollectionViewCell: AttachmentCollectionViewCell {
         let imageView = UIImageView()
         let image =  UIImage.PSDImage(name: AttachmentFileCollectionViewCell.imageName)?.withRenderingMode(.alwaysTemplate)
         imageView.image = image
-        imageView.tintColor = .labelTextColor
+        imageView.tintColor = CustomizationHelper.labelTextColor
         return imageView
     }()
     private lazy var label : UILabel = {
         let label = UILabel()
-        label.textColor = UIColor.psdGray
+        label.textColor = CustomizationHelper.labelTextColor//UIColor.psdGray
         label.textAlignment = .center
         label.numberOfLines = AttachmentFileCollectionViewCell.linesNumber
         label.font = .label
