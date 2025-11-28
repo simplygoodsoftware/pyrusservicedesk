@@ -37,4 +37,12 @@
     <string name="psd_file_size_exceeded_message" formatted="false">Ֆայլի չափը չպետք է գերազանցի %d ՄԲ-ը։</string>
     <string name="link_warning">Այս հղումով կանցնեք %s
 \nԻսկապե՞ս ուզում եք անցնել հղումով։</string>
+    <string name="psd_no_access">Անհասանելի</string>
+    <string name="psd_no_access_message">Կապվե՛ք ձեր կազմակերպության ղեկավարի հետ՝ %s-ին մուտքի հասանելիությունը վերականգնելու համար</string>
+    <string name="ok">Այո</string>
+    <string name="copied_text">Պատճենված տեքստ</string>
+    <string name="psd_support">աջակցություն</string>
+    <string name="psd_date_format_d">EEE</string>
+    <string name="psd_date_format_d_m_short">ԱԱ․օօ</string>
+    <string name="psd_date_format_d_m_y_short">ԱԱ․օօ․տտտտ</string>
 </resources>
