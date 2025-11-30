@@ -37,4 +37,33 @@
     <string name="psd_recent">yaqinda</string>
     <string name="psd_file_size_exceeded_message" formatted="false">Fayl hajmi %d MB dan oshmasligi kerak.</string>
     <string name="send_library_logs">Kutubxona jurnallarini yuboring</string>
+    <string name="psd_no_access">Kirish imkoni yo\'q</string>
+    <string name="psd_no_access_message">%s ga kirish huquqini tiklash uchun tashkilotingiz menejeri bilan bog\'laning</string>
+    <string name="ok">Kelishdik</string>
+    <string name="copied_text">Nusxalangan matn</string>
+    <string name="psd_support">qo\'llab-quvvatlash</string>
+    <string name="psd_date_format_d">EEE</string>
+    <string name="psd_date_format_d_m_short">dd.MM</string>
+    <string name="psd_date_format_d_m_y_short">dd.MM.yyyy</string>
+    <string name="psd_evaluate_the_operators_performance">Operatorning ish faoliyatini baholang</string>
+    <string name="psd_close">Yopish</string>
+    <string name="leave_your_comment">Sharh yozing</string>
+    <string name="psd_filters">Filtrlar</string>
+    <string name="psd_ticket_number">Chipta raqami: %s</string>
+    <string name="psd_ticket_data_create">%s da yaratilgan</string>
+    <string name="all">Hammasi</string>
+    <string name="psd_you">Siz</string>
+    <string name="psd_type_photo">Surat</string>
+    <string name="psd_type_video">Video</string>
+    <string name="psd_type_file">Fayl</string>
+    <string name="psd_type_audio">Ovozli xabar</string>
+    <string name="psd_unsupptorted_attachment">Qo\'llab-quvvatlanmaydigan biriktirma</string>
+    <string name="new_ticket">Yangi murojaat</string>
+    <string name="closed_teckets">Yopiq murojaatlar</string>
+    <string name="ticket_was_closed">Ushbu murojaat yopiq</string>
+    <string name="all_conversations">Murojaatlar</string>
+    <string name="psd_search_by_tickets">Qo\'ng\'iroqlar bo\'yicha qidirish</string>
+    <string name="psd_no_suggestions">Tasodiflar yo\'q</string>
+    <string name="psd_swipe_cancel">‹‹ bekor qilish</string>
+    <string name="psd_cancel">Bekor qilish</string>
 </resources>
