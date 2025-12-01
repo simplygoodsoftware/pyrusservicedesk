@@ -45,4 +45,7 @@
     <string name="psd_date_format_d">EEE</string>
     <string name="psd_date_format_d_m_short">ԱԱ․օօ</string>
     <string name="psd_date_format_d_m_y_short">ԱԱ․օօ․տտտտ</string>
+    <string name="psd_evaluate_the_operators_performance">Գնահատել օպերատորի աշխատանքը</string>
+    <string name="psd_close">Փակել</string>
+    <string name="leave_your_comment">Թողնել ակնարկ</string>
 </resources>
