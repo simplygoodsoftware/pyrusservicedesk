@@ -48,4 +48,20 @@
     <string name="psd_evaluate_the_operators_performance">Գնահատել օպերատորի աշխատանքը</string>
     <string name="psd_close">Փակել</string>
     <string name="leave_your_comment">Թողնել ակնարկ</string>
+    <string name="psd_filters">Ֆիլտրեր</string>
+    <string name="psd_ticket_number">Դիմումի համարը ՝%s</string>
+    <string name="psd_ticket_data_create">Ստեղծվել է %s</string>
+    <string name="all">Բոլորը</string>
+    <string name="psd_you">Դուք</string>
+    <string name="psd_type_photo">Լուսանկար</string>
+    <string name="psd_type_video">Տեսագրություն</string>
+    <string name="psd_type_file">Ֆայլ</string>
+    <string name="psd_type_audio">Ձայնային հաղորդագրություն</string>
+    <string name="psd_unsupptorted_attachment">Չաջակցվող կցված ֆայլ</string>
+    <string name="new_ticket">Նոր դիմում</string>
+    <string name="closed_teckets">Փակված դիմումներ</string>
+    <string name="ticket_was_closed">Դիմումը փակվել է</string>
+    <string name="all_conversations">Բոլոր հաղորդակցությունները</string>
+    <string name="psd_search_by_tickets">Որոնել ըստ դիմումների</string>
+    <string name="psd_no_suggestions">Առաջարկություններ չկան</string>
 </resources>
