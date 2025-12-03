@@ -37,4 +37,33 @@
     <string name="psd_date_format_d_m_y">MMMM d, yyyy</string>
     <string name="link_warning">ეს ბმული მიდის %s
 \nნამდვილად გსურთ ბმულზე გადასვლა\?</string>
+    <string name="psd_no_access">წვდომა არ არის</string>
+    <string name="psd_no_access_message">დაუკავშირდით თქვენი ორგანიზაციის მენეჯერს წვდომის აღსადგენად %s</string>
+    <string name="ok">ოკ</string>
+    <string name="copied_text">ტექსტი კოპირებულია</string>
+    <string name="psd_support">მხარდაჭერა</string>
+    <string name="psd_date_format_d">EEE</string>
+    <string name="psd_date_format_d_m_short">MM.dd</string>
+    <string name="psd_date_format_d_m_y_short">MM.dd.yyyy</string>
+    <string name="psd_evaluate_the_operators_performance">ოპერატორის შესრულების შეფასება</string>
+    <string name="psd_close">დახურვა</string>
+    <string name="leave_your_comment">შეფასების დაწერა</string>
+    <string name="psd_filters">ფილტრები</string>
+    <string name="psd_ticket_number">მიმართვის ნომერი: %s</string>
+    <string name="psd_ticket_data_create">შექმნილია %s</string>
+    <string name="all">ყველა</string>
+    <string name="psd_you">თქვენ</string>
+    <string name="psd_type_photo">ფოტო</string>
+    <string name="psd_type_video">ვიდეო</string>
+    <string name="psd_type_file">ფაილი</string>
+    <string name="psd_type_audio">ხმოვანი შეტყობინება</string>
+    <string name="psd_unsupptorted_attachment">მიუღებელი დანართი</string>
+    <string name="new_ticket">ახალი მიმართვა</string>
+    <string name="closed_teckets">დახურული მიმართვები</string>
+    <string name="ticket_was_closed">მიმართვა დაიხურა</string>
+    <string name="all_conversations">ყველა საუბარი</string>
+    <string name="psd_search_by_tickets">მიმართვებით ძებნა</string>
+    <string name="psd_no_suggestions">შეთავაზებები არ არის</string>
+    <string name="psd_swipe_cancel">‹‹ გაუქმება</string>
+    <string name="psd_cancel">გაუქმება</string>
 </resources>
