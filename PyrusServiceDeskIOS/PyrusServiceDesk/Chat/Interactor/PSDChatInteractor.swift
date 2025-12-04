@@ -469,9 +469,9 @@ private extension PSDChatInteractor {
             let params = TicketCommandParams(ticketId: ticketId, appId: PyrusServiceDesk.currentClientId ?? PyrusServiceDesk.clientId, userId: PyrusServiceDesk.currentUserId ?? PyrusServiceDesk.customUserId, messageId: Int(chat?.messages.last?.messageId ?? ""))
             let command = TicketCommand(commandId: UUID().uuidString, type: .readTicket, appId: PyrusServiceDesk.currentClientId ?? PyrusServiceDesk.clientId, userId:  PyrusServiceDesk.currentUserId ?? PyrusServiceDesk.customUserId, params: params)
             PyrusServiceDesk.repository.add(command: command)
-            DispatchQueue.main.async {
-                PyrusServiceDesk.syncManager.syncGetTickets()
-            }
+//            DispatchQueue.main.async {
+//                PyrusServiceDesk.syncManager.syncGetTickets()
+//            }
         }
     }
     

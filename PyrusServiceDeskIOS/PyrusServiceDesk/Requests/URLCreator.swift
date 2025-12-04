@@ -60,7 +60,7 @@ struct PyrusServiceDeskAPI {
         }
         else{
             urlString = ticketId != "0" ? "\(urlString)/\(ticketId)/":urlString
-           urlString += "?test=6"
+//           urlString += "?test=6"
         }
         let components = NSURLComponents(string: urlString)
         return (components?.url)!

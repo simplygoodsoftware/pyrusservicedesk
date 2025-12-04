@@ -635,7 +635,7 @@ import UIKit
             restartTimer()
             PyrusLogger.shared.logEvent("PSDGetChats did begin.")
             DispatchQueue.main.async {
-                syncManager.syncGetTickets()
+//                syncManager.syncGetTickets()
             }
         }
         else{
