@@ -39,4 +39,33 @@
     <string name="psd_open">פתח</string>
     <string name="link_warning">הקישור הזה מוביל ל%s
 \nהאם ברצונך לעבור לקישור\?</string>
+    <string name="psd_no_access">אין גישה</string>
+    <string name="ok">אוקיי</string>
+    <string name="copied_text">טקסט מועתק</string>
+    <string name="psd_support">תמיכה</string>
+    <string name="psd_date_format_d">EEE</string>
+    <string name="psd_date_format_d_m_short">MM.dd</string>
+    <string name="psd_date_format_d_m_y_short">MM.dd.yyyy</string>
+    <string name="all">כולם</string>
+    <string name="psd_you">את\\ה</string>
+    <string name="psd_type_photo">צילום</string>
+    <string name="psd_type_video">וידאו</string>
+    <string name="psd_type_file">קובץ</string>
+    <string name="psd_type_audio">הודעה קולית</string>
+    <string name="psd_unsupptorted_attachment">צירוף שאינו נתמך</string>
+    <string name="new_ticket">פנייה חדשה</string>
+    <string name="closed_teckets">פניות סגורות</string>
+    <string name="ticket_was_closed">הפנייה נסגרה</string>
+    <string name="all_conversations">כל הדיונים</string>
+    <string name="psd_search_by_tickets">חיפוש לפי פניות</string>
+    <string name="psd_no_suggestions">אין הצעות</string>
+    <string name="psd_swipe_cancel">‹‹ ביטול</string>
+    <string name="psd_cancel">ביטול</string>
+    <string name="psd_no_access_message">צור קשר עם הרכז שלך כדי לשחזר גישה ל-%s</string>
+    <string name="psd_evaluate_the_operators_performance">דרג את עבודת המפעיל</string>
+    <string name="psd_close">סגור</string>
+    <string name="leave_your_comment">כתוב סקירה</string>
+    <string name="psd_filters">מסננים</string>
+    <string name="psd_ticket_number">מספר פנייה: %s</string>
+    <string name="psd_ticket_data_create">נוצר ב-%s</string>
 </resources>
