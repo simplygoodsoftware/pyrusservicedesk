@@ -64,4 +64,6 @@
     <string name="all_conversations">Բոլոր հաղորդակցությունները</string>
     <string name="psd_search_by_tickets">Որոնել ըստ դիմումների</string>
     <string name="psd_no_suggestions">Առաջարկություններ չկան</string>
+    <string name="psd_swipe_cancel">‹‹ չեղարկել</string>
+    <string name="psd_cancel">Չեղարկել</string>
 </resources>
