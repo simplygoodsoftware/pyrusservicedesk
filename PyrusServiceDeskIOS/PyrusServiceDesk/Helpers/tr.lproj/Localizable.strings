@@ -66,3 +66,7 @@
 "ExternalSourceWarning" = "Bu bağlantı %@'a yönlendiriyor\nBağlantıyı gerçekten takip etmek istiyor musunuz?";
 "ShortYes" = "Evet";
 "ShortNo" = "Hayır";
+"EvaluateQuality" = "Hizmet kalitesini değerlendirin";
+"PleaseEvaluateQuality" = "Hizmet kalitesini değerlendirin";
+"LeaveYourComment" = "İnceleme yazın";
+"Close" = "Kapat";
