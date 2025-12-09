@@ -37,4 +37,8 @@
     <string name="send_library_logs">Kitabxana qeydlərini göndər</string>
     <string name="link_warning">Bu keçid %s-ə çıxarır
 \nHəqiqətən keçidi izləmək istəyirsiniz\?</string>
+    <string name="psd_no_access">Giriş yoxdur</string>
+    <string name="psd_no_access_message">%s-ə girişi bərpa etmək üçün təşkilat menecerinizlə əlaqə saxlayın</string>
+    <string name="ok">Tamam</string>
+    <string name="copied_text">Kopyalanmış mətn</string>
 </resources>
