@@ -61,4 +61,5 @@
     <string name="psd_unsupptorted_attachment">Nepodržani privitak</string>
     <string name="new_ticket">Novi tiket</string>
     <string name="closed_teckets">Zatvoreni tiketi</string>
+    <string name="ticket_was_closed">Tiket je bio zatvoren</string>
 </resources>
