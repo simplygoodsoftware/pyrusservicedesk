@@ -45,6 +45,15 @@ internal sealed interface SyncRequest {
             override val creationTime: Long,
             val ticketId: Long,
         ) : Command
+
+        data class CalcOperatorTime(
+            override val localId: Long,
+            override val commandId: String,
+            override val userId: String?,
+            override val appId: String,
+            override val creationTime: Long,
+            val ticketId: Long,
+        ) : Command
     }
 
     data object Data : SyncRequest

@@ -107,6 +107,17 @@ internal object SyncMapper {
                 type = request.tokenType,
             ),
         )
+        is SyncRequest.Command.CalcOperatorTime -> TicketCommandDto(
+            commandId = request.commandId,
+            type = TicketCommandType.CalcOperatorTime.ordinal,
+            appId = request.appId,
+            userId = request.userId,
+            params = CommandParamsDto.CalcOperatorTime(
+                ticketId = request.ticketId,
+                userId = request.userId,
+                appId = request.appId,
+            )
+        )
         is SyncRequest.Data -> null
     }
 

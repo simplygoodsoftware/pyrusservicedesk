@@ -47,6 +47,7 @@ import com.pyrus.pyrusservicedesk._ref.ui_domain.screens.ticket.adapter.fingerpr
 import com.pyrus.pyrusservicedesk._ref.ui_domain.screens.ticket.adapter.fingerprints.RatingCommentFingerprint
 import com.pyrus.pyrusservicedesk._ref.ui_domain.screens.ticket.adapter.fingerprints.RatingTextFingerprint
 import com.pyrus.pyrusservicedesk._ref.ui_domain.screens.ticket.adapter.fingerprints.SimpleTextFingerprint
+import com.pyrus.pyrusservicedesk._ref.ui_domain.screens.ticket.adapter.fingerprints.SystemFingerprint
 import com.pyrus.pyrusservicedesk._ref.ui_domain.screens.ticket.record.AudioRecordView
 import com.pyrus.pyrusservicedesk._ref.utils.AudioWrapper
 import com.pyrus.pyrusservicedesk._ref.utils.ConfigUtils
@@ -100,6 +101,7 @@ internal class TicketFragment: TeaFragment<Model, Event, Effect>() {
         RatingCommentFingerprint(::dispatch),
         SimpleTextFingerprint(),
         CommentAudioFingerprint(audioWrapper, lifecycleScope, ::dispatch),
+        SystemFingerprint(),
     ) }
 
     private val ratingAdapter: PayloadListAdapter<CommentEntry.RatingTextValues> by lazy { PayloadListAdapter(
@@ -550,7 +552,7 @@ internal class TicketFragment: TeaFragment<Model, Event, Effect>() {
                 innerDivider = defaultDivider,
                 outerDivider = defaultDivider,
                 invert = true,
-                excludeTypes = setOf(R.layout.psd_view_holder_comment_text, R.layout.psd_view_holder_comment_attachment, R.layout.psd_view_holder_comment_previewable_attachment)
+                excludeTypes = setOf(R.layout.psd_view_holder_comment_text, R.layout.psd_view_holder_comment_attachment, R.layout.psd_view_holder_comment_previewable_attachment, R.layout.psd_view_holder_system_message)
             )
         )
 

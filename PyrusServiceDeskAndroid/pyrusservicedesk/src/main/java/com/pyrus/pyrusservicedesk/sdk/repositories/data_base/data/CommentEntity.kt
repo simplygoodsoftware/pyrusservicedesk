@@ -23,6 +23,7 @@ internal data class CommentEntity(
     @ColumnInfo(name = "created_at") val creationDate: Long,
     @ColumnInfo(name = "rating") val rating: Int?,
     @Embedded("author_") val author: AuthorEntity?,
+    @ColumnInfo(name = "is_system") val isSystem: Boolean,
 ) {
     override fun toString(): String {
         return body.toString()

@@ -27,6 +27,7 @@ internal data class CommentDto(
     @Json(name = "author") val author: AuthorDto?,
     @Json(name = "rating") val rating: Int? = null,
     @Json(name = "rating_comment") val ratingComment: String? = null,
+    @Json(name = "is_system") val isSystem: Boolean,
     // TODO "client_id" ??
 ) {
 

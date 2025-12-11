@@ -22,6 +22,7 @@ internal sealed interface CommandParamsDto {
         CreateComment("CreateComment"),
         MarkTicketAsRead("MarkTicketAsRead"),
         SetPushToken("SetPushToken"),
+        CalcOperatorTime("CalcOperatorTime")
     }
 
     /**
@@ -81,5 +82,18 @@ internal sealed interface CommandParamsDto {
         override val commandType = CommandsParamsType.SetPushToken
     }
 
+    /**
+     * @param userId user id.
+     * @param appId extension id.
+     * @param ticketId ticket id.
+     */
+    @JsonClass(generateAdapter = true)
+    data class CalcOperatorTime(
+        @Json(name = "ticket_id") val ticketId: Long,
+        @Json(name = "user_id") val userId: String?,// TODO kate ?
+        @Json(name = "app_id") val appId: String,// TODO kate ?
+    ) : CommandParamsDto  {
+        override val commandType = CommandsParamsType.CalcOperatorTime
+    }
 
 }
