@@ -221,6 +221,7 @@ extension PSDChatInteractor: PSDChatInteractorProtocol {
             isOpen = false
             if !PyrusServiceDesk.multichats {
                 stopGettingInfo()
+                PyrusServiceDesk.restartTimer()
             }
 //            OpusPlayer.shared.stopAllPlay()
         case .viewDidAppear:
@@ -363,7 +364,7 @@ private extension PSDChatInteractor {
     func showSendMessageResult(messageToPass: PSDMessage, success: Bool) {
         if success {
             let _ = PyrusServiceDesk.setLastActivityDate()
-            PyrusServiceDesk.restartTimer()
+//            PyrusServiceDesk.restartTimer()
         }
         
         let newState: messageState = success ? .sent : .cantSend
@@ -486,7 +487,7 @@ private extension PSDChatInteractor {
             return
         }
         if PyrusServiceDesk.setLastActivityDate(date) {
-            PyrusServiceDesk.restartTimer()
+//            PyrusServiceDesk.restartTimer()
             startGettingInfo()
         }
     }

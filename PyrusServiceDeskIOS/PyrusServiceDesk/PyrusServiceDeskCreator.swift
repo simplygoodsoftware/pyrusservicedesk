@@ -512,7 +512,7 @@ import UIKit
             return
         }
         let userId : String
-        if let existKey =   PSDMessagesStorage.pyrusUserDefaults()?.object(forKey: PSD_USER_ID_KEY) as? String, !reset{
+        if let existKey = PSDMessagesStorage.pyrusUserDefaults()?.object(forKey: PSD_USER_ID_KEY) as? String, !reset{
             userId = existKey
         }else{
             userId = reset ? String.getUiqueString() : (UIDevice.current.identifierForVendor?.uuidString ?? String.getUiqueString())
@@ -620,7 +620,7 @@ import UIKit
     static var chats: [PSDChat] = [PSDChat]() {
         didSet {
             if chats.count == 0 {
-                print(0)
+//                print(0)
             }
         }
     }
@@ -630,12 +630,13 @@ import UIKit
     ///The main view controller. nil - if chat was closed.
     weak static var mainController: PSDMainController?
     ///Updates user info - get chats list from server.
-    @objc private static func updateUserInfo(){
-        if(userId.count > 0){
+    @objc private static func updateUserInfo() {
+        if(userId.count > 0),
+          mainController == nil {
             restartTimer()
             PyrusLogger.shared.logEvent("PSDGetChats did begin.")
             DispatchQueue.main.async {
-//                syncManager.syncGetTickets()
+                syncManager.syncGetTickets()
             }
         }
         else{

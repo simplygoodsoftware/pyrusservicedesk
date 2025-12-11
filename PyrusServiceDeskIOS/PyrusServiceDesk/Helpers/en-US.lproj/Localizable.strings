@@ -171,3 +171,4 @@
 "DTF_Full" = "ddMMyyyy_HHmmss";
 "PyrusCannotAccessYourMicrophone" = "Allow microphone access";
 "PleaseEnableAccessMicrophone" = "It will let you record audio messages and attach them to tasks.\nTo enable this, click on Settings and activate Microphone.";
+"OperatorWillConnect" = "Operator will connect in";

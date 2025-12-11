@@ -174,3 +174,5 @@
 "DTF_Full" = "ddMMyyyy_HHmmss";
 "PyrusCannotAccessYourMicrophone" = "Доступ к микрофону";
 "PleaseEnableAccessMicrophone" = "Вы сможете записывать и прикладывать звуковые сообщения.\nДля этого нажмите «Настройки» ниже и активируйте «Микрофон».";
+
+"OperatorWillConnect" = "Оператор подключится через";

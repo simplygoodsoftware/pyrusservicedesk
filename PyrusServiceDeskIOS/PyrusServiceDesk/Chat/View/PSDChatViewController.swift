@@ -648,6 +648,7 @@ extension PSDChatViewController: PSDChatViewProtocol {
         switch action {
         case .updateButtons(buttons: let buttons):
             tableView.updateButtonsView(buttons: buttons)
+//            tableView.updateOperatorTimeLabel(time: "5 минут")
         case .updateRows:
             tableView.updateRows(keyboardHeight: currkeyboardHeight)
         case .removeNoConnectionView:

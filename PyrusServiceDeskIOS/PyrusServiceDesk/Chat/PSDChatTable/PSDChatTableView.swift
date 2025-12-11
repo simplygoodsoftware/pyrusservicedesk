@@ -31,6 +31,20 @@ class PSDChatTableView: PSDTableView {
         return view
     }()
     
+    private lazy var operatorTimeLabel: UILabel = {
+        let label = UILabel()
+        label.font = UIFont.systemFont(ofSize: 14)
+        label.textColor = CustomizationHelper.textColorForTable
+        label.textAlignment = .center
+        return label
+    }()
+    
+    private lazy var operatorTimeView: UIView = {
+        let view = UIView()
+        view.backgroundColor = PyrusServiceDesk.mainController?.customization?.customBackgroundColor
+        return view
+    }()
+    
     private lazy var customRefresh: PSDRefreshControl = {
         let refreshControl = PSDRefreshControl.init(frame: self.bounds)
         refreshControl.position = .top
@@ -75,14 +89,14 @@ class PSDChatTableView: PSDTableView {
     
     override func layoutSubviews() {
         super.layoutSubviews()
-        var newFrame = buttonsView.frame
-        if newFrame.size.height != buttonsView.collectionView.contentSize.height {
-            newFrame.size.width = frame.size.width
-            newFrame.size.height = buttonsView.collectionView.contentSize.height
-            buttonsView.frame = newFrame
-            tableHeaderView = buttonsView
-            buttonsView.collectionView.transform = CGAffineTransform(rotationAngle: CGFloat.pi)
-        }
+//        var newFrame = buttonsView.frame
+//        if newFrame.size.height != buttonsView.collectionView.contentSize.height {
+//            newFrame.size.width = frame.size.width
+//            newFrame.size.height = buttonsView.collectionView.contentSize.height
+//            buttonsView.frame = newFrame
+//            tableHeaderView = buttonsView
+//            buttonsView.collectionView.transform = CGAffineTransform(rotationAngle: CGFloat.pi)
+//        }
     }
     
     override func recolor() {
@@ -106,6 +120,18 @@ class PSDChatTableView: PSDTableView {
         } else {
             dataSource = self
         }
+        setupOperatorView()
+    }
+    
+    func setupOperatorView() {
+        operatorTimeView.addSubview(operatorTimeLabel)
+        operatorTimeLabel.translatesAutoresizingMaskIntoConstraints = false
+        
+        NSLayoutConstraint.activate([
+            operatorTimeLabel.centerXAnchor.constraint(equalTo: operatorTimeView.centerXAnchor),
+            operatorTimeLabel.bottomAnchor.constraint(equalTo: operatorTimeView.bottomAnchor, constant: -6)
+//            operatorTimeLabel.centerYAnchor.constraint(equalTo: operatorTimeView.centerYAnchor)
+        ])
     }
     
     func updateRows(keyboardHeight: CGFloat) {
@@ -151,6 +177,19 @@ class PSDChatTableView: PSDTableView {
     func updateButtonsView(buttons: [ButtonData]?) {
         buttonsView.updateWithButtons(buttons, width: self.frame.size.width)
         buttonsView.collectionView.collectionViewLayout.invalidateLayout()
+    }
+    
+    func updateOperatorTimeLabel(time: String?) {
+        guard let time else {
+            tableHeaderView = nil
+            return
+        }
+        operatorTimeLabel.text = "\("OperatorWillConnect".localizedPSD()) \(time)"
+        operatorTimeLabel.transform = CGAffineTransform(rotationAngle: CGFloat.pi)
+        operatorTimeView.frame = CGRect(x: 0, y: 0, width: frame.width, height: 42)
+        tableHeaderView = operatorTimeView
+        setNeedsLayout()
+        layoutIfNeeded()
     }
     
     func showNoConnectionView() {
@@ -339,10 +378,12 @@ extension PSDChatTableView: UITableViewDelegate, UITableViewDataSource {
             }
         }
         
-        cell.draw(message: message, width: frame.size.width)
-        PSDPreviewSetter.setPreview(of: message.attachment, in: cell.cloudView.attachmentView, delegate: self, animated: false)
-        self.redrawSendingAttachmentCell(at: indexPath, with: message)
-        cell.cloudView.messageTextView.linkDelegate = self
+        if let chatCell = cell as? PSDChatMessageCell {
+            chatCell.draw(message: message, width: frame.size.width)
+            PSDPreviewSetter.setPreview(of: message.attachment, in: chatCell.cloudView.attachmentView, delegate: self, animated: false)
+            self.redrawSendingAttachmentCell(at: indexPath, with: message)
+            chatCell.cloudView.messageTextView.linkDelegate = self
+        }
         cell.transform = CGAffineTransform(rotationAngle: CGFloat.pi)
         
         return cell

@@ -4,6 +4,7 @@ final class PSDChatCellConfigurator: TableViewCellConfiguratorProtocol {
 
     private let psdUserMessageCellIdentifier = ReuseIdentifier<PSDUserMessageCell>(identifier:  PSDUserMessageCell.identifier)
     private let psdSupportMessageCellIdentifier = ReuseIdentifier<PSDSupportMessageCell>(identifier:  PSDSupportMessageCell.identifier)
+    private let psdSystemMessageCellIdentifier = ReuseIdentifier<PSDSystemMessageCell>(identifier:  PSDSystemMessageCell.reuseIdentifier)
 
     let tableView: UITableView
 
@@ -11,14 +12,19 @@ final class PSDChatCellConfigurator: TableViewCellConfiguratorProtocol {
         self.tableView = tableView
         tableView.register(PSDUserMessageCell.self, forCellReuseIdentifier: PSDUserMessageCell.identifier)
         tableView.register(PSDSupportMessageCell.self, forCellReuseIdentifier: PSDSupportMessageCell.identifier)
+        tableView.register(PSDSystemMessageCell.self, forCellReuseIdentifier: PSDSystemMessageCell.reuseIdentifier)
     }
 
-    func getCell(model: [[PSDRowMessage]], indexPath: IndexPath) -> PSDChatMessageCell {
+    func getCell(model: [[PSDRowMessage]], indexPath: IndexPath) -> UITableViewCell {
         let message: PSDRowMessage
         if model.count > indexPath.section && model[indexPath.section].count > indexPath.row {
             message = model[indexPath.section][indexPath.row]
         } else {
             return PSDChatMessageCell()
+        }
+        
+        if message.isSystemMessage {
+            return getPSDSystemMessageCell(model: message, indexPath: indexPath)
         }
         
         let cell: PSDChatMessageCell
@@ -49,6 +55,12 @@ private extension PSDChatCellConfigurator {
         if cell.needShowAvatar {
             cell.avatarView.owner = model.message.owner
         }
+        return cell
+    }
+    
+    func getPSDSystemMessageCell(model: PSDRowMessage, indexPath: IndexPath) -> PSDSystemMessageCell {
+        let cell = getCell(reuseIdentifier: psdSystemMessageCellIdentifier, indexPath: indexPath)
+        cell.configure(with: model)
         return cell
     }
 }
