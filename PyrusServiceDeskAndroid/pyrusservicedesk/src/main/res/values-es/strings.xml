@@ -12,7 +12,7 @@
     <string name="psd_organization_support">Soporte</string>
     <string name="psd_today">Hoy</string>
     <string name="psd_yesterday">Ayer</string>
-    <string name="psd_date_format_d_m_y">MMMM d, yyyy</string>
+    <string name="psd_date_format_d_m_y">MMMM d, aaaa</string>
     <string name="psd_date_format_d_m">MMMM d</string>
     <string name="psd_photo">Foto</string>
     <string name="psd_gallery">Galería</string>
@@ -48,7 +48,7 @@
     <string name="psd_support">soporte</string>
     <string name="psd_date_format_d">EEE</string>
     <string name="psd_date_format_d_m_short">MM.dd</string>
-    <string name="psd_date_format_d_m_y_short">MM.dd.yyyy</string>
+    <string name="psd_date_format_d_m_y_short">MM.dd.aaaa</string>
     <string name="psd_evaluate_the_operators_performance">Evaluar el rendimiento del operador</string>
     <string name="psd_close">Cerrar</string>
     <string name="leave_your_comment">Escribir una reseña</string>
