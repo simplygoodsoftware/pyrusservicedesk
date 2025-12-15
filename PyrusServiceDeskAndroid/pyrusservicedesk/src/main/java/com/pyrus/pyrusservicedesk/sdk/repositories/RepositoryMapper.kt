@@ -576,6 +576,7 @@ internal class RepositoryMapper(
         lastTicket: FullTicket,
         account: Account,
         userId: String,
+        operatorResponseTimeMessage: String?,
     ): FullTicket {
         val comments = ticketsList
             .flatMap { it.comments }
@@ -602,7 +603,7 @@ internal class RepositoryMapper(
             isRead = isRead,
             ratingSettings = lastTicket.ratingSettings,
             welcomeMessage = lastTicket.welcomeMessage,
-            operatorTimeMessage = null,
+            operatorTimeMessage = operatorResponseTimeMessage,
         )
     }
 

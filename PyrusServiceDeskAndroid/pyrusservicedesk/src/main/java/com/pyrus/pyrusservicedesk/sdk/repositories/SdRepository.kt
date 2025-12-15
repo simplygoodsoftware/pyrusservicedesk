@@ -177,6 +177,7 @@ internal class SdRepository(
                         account = account,
                         userId = userId,
                         commands = commands,
+                        operatorResponseTimeMessage = systemMessageStore.operatorResponseTimeMessageStateFlow().value,
                     )
                     return Try.Success(singleTicket).toTry2()
                 }
@@ -215,7 +216,8 @@ internal class SdRepository(
                 commands = commands,
                 lastTicket = lastServerTicket,
                 account = account,
-                userId = account.getUserId() ?: account.getInstanceId()
+                userId = account.getUserId() ?: account.getInstanceId(),
+                operatorResponseTimeMessage = systemMessageStore.operatorResponseTimeMessageStateFlow().value,
             )
             if (idStore.getTicketServerId(ticket.ticketId) == null) {
                 idStore.addTicketIdPair(ticketId, ticket.ticketId)
@@ -262,7 +264,8 @@ internal class SdRepository(
                              commands = commands,
                              lastTicket = lastServerTicket,
                              account = account,
-                             userId = account.getUserId() ?: account.getInstanceId()
+                             userId = account.getUserId() ?: account.getInstanceId(),
+                             operatorResponseTimeMessage = systemMessageStore.operatorResponseTimeMessageStateFlow().value,
                          )
                      }
                  }

@@ -81,7 +81,7 @@
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toTopOf="parent"
-                app:layout_constraintBottom_toTopOf="@+id/rating"
+                app:layout_constraintBottom_toTopOf="@+id/barrier"
                 app:swipeDirection="both">
 
                 <androidx.recyclerview.widget.RecyclerView
@@ -112,6 +112,14 @@
                 app:layout_constraintBottom_toBottomOf="@+id/rating"
                 />
 
+            <androidx.constraintlayout.widget.Barrier
+                android:id="@+id/barrier"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                app:barrierDirection="top"
+                app:constraint_referenced_ids="rating, operatorTimeMessage"/>
+
+
             <include
                 android:id="@+id/rating"
                 android:layout_height="wrap_content"
@@ -127,8 +135,10 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:visibility="gone"
+                android:gravity="center"
                 android:layout_marginBottom="@dimen/psd_offset_default"
                 tools:visibility="visible"
+                tools:text="test text"
                 app:layout_constraintBottom_toTopOf="@+id/bottom_border"/>
 
             <FrameLayout

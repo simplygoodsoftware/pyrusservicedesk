@@ -103,7 +103,8 @@ internal class TicketFeatureFactory(
                 Effect.Inner.SubscribeToRecordProgress,
                 Effect.Inner.SubscribeToCancelRecord,
                 Effect.Inner.SendTextComment(sendComment, initialTicketId),
-                Effect.Inner.UpdateAudioData
+                Effect.Inner.UpdateAudioData,
+                Effect.Inner.OperatorTimeMessageFeed
             ),
             onCancelCallback = {
                 audioRecordController.cancelRecord()
@@ -371,6 +372,7 @@ private class FeatureReducer(): Logic<State, Message, Effect>() {
             is Message.Inner.OnOpenPreview -> effects { +Effect.Outer.OpenPreview(message.fileData) }
             is Message.Inner.ShowOperatorTimeMessage -> {
                 val currentState = state as? State.Content ?: return
+                Log.d("EP ", "message2: ${message.message}")
                 state { currentState.copy(ticket = currentState.ticket?.copy(operatorTimeMessage = message.message)) }
             }
         }
@@ -584,8 +586,8 @@ private class TicketActor(
         }
 
         Effect.Inner.OperatorTimeMessageFeed -> flow {
-            systemMessageStore.operatorResponseTimeMessageStateFlow().collect { messages ->
-                val message = messages?.get(ticketId)
+            systemMessageStore.operatorResponseTimeMessageStateFlow().collect { message ->
+                Log.d("EP ", "message: $message")
                 emit(Message.Inner.ShowOperatorTimeMessage(message))
             }
         }

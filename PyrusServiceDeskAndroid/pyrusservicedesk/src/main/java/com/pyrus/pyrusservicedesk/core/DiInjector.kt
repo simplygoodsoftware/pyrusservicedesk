@@ -77,8 +77,6 @@ internal class DiInjector(
 
     val accountStore = AccountStore(initialAccount)
 
-    val systemMessageStore = SystemMessageStore()
-
     private val fileResolver: FileResolver = FileResolver(application.contentResolver, application)
 
     private val localDataVerifier: LocalDataVerifier = LocalDataVerifier(fileResolver)
@@ -123,6 +121,9 @@ internal class DiInjector(
         .build()
 
     private val idStore = IdStore()
+
+
+    val systemMessageStore = SystemMessageStore(idStore)
 
     private val db = SdDatabase.create(application)
 

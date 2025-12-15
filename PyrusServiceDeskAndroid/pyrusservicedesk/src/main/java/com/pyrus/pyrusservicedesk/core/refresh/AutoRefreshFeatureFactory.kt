@@ -30,7 +30,7 @@ internal class AutoRefreshFeatureFactory(
 ) {
 
     fun create(
-        liveUpdates: LiveUpdates
+        liveUpdates: LiveUpdates,
     ): AutoRefreshFeature = storeFactory.create(
         name = TAG,
         initialState = Unit,
@@ -41,12 +41,15 @@ internal class AutoRefreshFeatureFactory(
             liveUpdates = liveUpdates,
             systemMessageStore = systemMessageStore
         ),
-        initialEffects = listOf(AutoRefreshContract.Effect.StartUpdates, AutoRefreshContract.Effect.StartUpdatesSystemMessage)
+        initialEffects = listOf(
+            AutoRefreshContract.Effect.StartUpdates,
+            AutoRefreshContract.Effect.StartUpdatesSystemMessage
+        )
     )
 
 }
 
-private class FeatureReducer: Logic<Unit, Unit, AutoRefreshContract.Effect>() {
+private class FeatureReducer : Logic<Unit, Unit, AutoRefreshContract.Effect>() {
     override fun Result.update(message: Unit) {}
 }
 
@@ -55,9 +58,9 @@ private class AutoRefreshActor(
     private val preferencesManager: PreferencesManager,
     private val liveUpdates: LiveUpdates,
     private val systemMessageStore: SystemMessageStore,
-): Actor<AutoRefreshContract.Effect, Unit> {
+) : Actor<AutoRefreshContract.Effect, Unit> {
 
-    override fun handleEffect(effect: AutoRefreshContract.Effect): Flow<Unit> = when(effect) {
+    override fun handleEffect(effect: AutoRefreshContract.Effect): Flow<Unit> = when (effect) {
         is AutoRefreshContract.Effect.StartUpdates -> flow {
             while (currentCoroutineContext().isActive) {
 
@@ -82,28 +85,31 @@ private class AutoRefreshActor(
         }
 
         is AutoRefreshContract.Effect.StartUpdatesSystemMessage -> flow {
-            systemMessageStore.ticketStateFlow().collect { ticketIds ->
-                Log.d("EP ", "ticketIds: $ticketIds")
-                if (ticketIds != null) {
-                    for (ticketId in ticketIds) {
-                        val resultTry = repository.sendCalcOperatorTime(ticketId)
-                        if (resultTry != null && resultTry.isSuccess()) {
-                            systemMessageStore.setOperatorResponseTimeMessage(ticketId, resultTry.value.operatorResponseTimeMessage)
+            systemMessageStore.ticketStateFlow().collect { ticketId ->
+                while (ticketId != null) {
+                    Log.d("EP ", "ticketId: $ticketId")
+
+                    val resultTry = repository.sendCalcOperatorTime(ticketId)
+                    if (resultTry != null && resultTry.isSuccess()) {
+                        Log.d("EP ", "operatorResponseTimeMessage: ${resultTry.value.operatorResponseTimeMessage}")
+                        systemMessageStore.setOperatorResponseTimeMessage(
+                            ticketId,
+                            resultTry.value.operatorResponseTimeMessage
+                        )
+                    }
+                    val startTime = System.currentTimeMillis()
+                    while (true) {
+                        val interval = MILLISECONDS_IN_MINUTE
+
+                        val endTime = startTime + interval
+                        val currentTime = System.currentTimeMillis()
+
+                        if (currentTime > endTime) {
+                            break
                         }
+
+                        delay(1000)
                     }
-                }
-                val startTime = System.currentTimeMillis()
-                while (true) {
-                    val interval = MILLISECONDS_IN_MINUTE
-
-                    val endTime = startTime + interval
-                    val currentTime = System.currentTimeMillis()
-
-                    if (currentTime > endTime) {
-                        break
-                    }
-
-                    delay(1000)
                 }
             }
         }
