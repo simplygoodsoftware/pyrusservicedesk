@@ -85,6 +85,7 @@ interface TicketContract {
             data object Exit : Inner
             data class OnOpenPreview(val fileData: FileData) : Inner
             class ShowToast(val message: TextProvider): Inner
+            data class ShowOperatorTimeMessage(val message: String?): Inner
         }
 
     }
@@ -145,6 +146,7 @@ interface TicketContract {
             class PauseAudioIf(val file: String) : Inner
             object PauseAudio : Inner
             data object UpdateAudioData : Inner
+            data object OperatorTimeMessageFeed : Inner
         }
     }
 

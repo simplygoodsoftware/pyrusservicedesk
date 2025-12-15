@@ -1,6 +1,7 @@
 package com.pyrus.pyrusservicedesk.sdk.repositories
 
 import android.net.Uri
+import android.util.Log
 import androidx.core.net.toFile
 import com.pyrus.pyrusservicedesk._ref.data.Attachment
 import com.pyrus.pyrusservicedesk._ref.data.FullTicket
@@ -55,6 +56,7 @@ internal class SdRepository(
     private val coroutineScope: CoroutineScope,
     private val accountStore: AccountStore,
     private val idStore: IdStore,
+    private val systemMessageStore: SystemMessageStore,
 ) {
 
     private val fileHooks = ConcurrentHashMap<Long, UploadFileHook>()
@@ -144,6 +146,7 @@ internal class SdRepository(
                     isRead = true,
                     ratingSettings = null,
                     welcomeMessage = null,
+                    operatorTimeMessage = null,
                 )
             }
             return Try2.Success(ticket)
@@ -298,6 +301,7 @@ internal class SdRepository(
                         isRead = true,
                         ratingSettings = null,
                         welcomeMessage = null,
+                        operatorTimeMessage = null,
                     )
                 }
             }
@@ -396,6 +400,7 @@ internal class SdRepository(
     private suspend fun sendCommand(command: SyncRequest.Command) {
         val sendFilesTry = sendAttachments(command)
         if (!sendFilesTry.isSuccess()) return
+        //if ((command as? SyncRequest.Command.CreateComment) != null && )
         syncCommand(sendFilesTry.value)
     }
 
@@ -470,6 +475,13 @@ internal class SdRepository(
         return uploadTry
     }
 
+    suspend fun sendCalcOperatorTime(ticketId: Long): Try<TicketCommandResultDto>? { //TODO kate for multichat
+        val instanceId = accountStore.getAccount().getInstanceId()
+        val user = accountStore.getAccount().getUsers().find { it.userId == instanceId } ?: return null
+        val command = commandsStore.createCalcOperatorTimeCommand(user, ticketId, instanceId)
+        Log.d("EP ", "sendCalcOperatorTime")
+        return synchronizer.syncCommand(command)
+    }
     private suspend fun syncCommand(command: SyncRequest.Command) {
         val syncTry = synchronizer.syncCommand(command)
 

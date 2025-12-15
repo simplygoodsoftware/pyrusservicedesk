@@ -286,6 +286,7 @@ internal class RepositoryMapper(
             isRead = isRead,
             ratingSettings = ratingSettings,
             welcomeMessage = welcomeMessage,
+            operatorTimeMessage = null,
         )
     }
 
@@ -565,6 +566,7 @@ internal class RepositoryMapper(
             isRead = true,
             ratingSettings = null,
             welcomeMessage = null,
+            operatorTimeMessage = null,
         )
     }
 
@@ -600,6 +602,7 @@ internal class RepositoryMapper(
             isRead = isRead,
             ratingSettings = lastTicket.ratingSettings,
             welcomeMessage = lastTicket.welcomeMessage,
+            operatorTimeMessage = null,
         )
     }
 

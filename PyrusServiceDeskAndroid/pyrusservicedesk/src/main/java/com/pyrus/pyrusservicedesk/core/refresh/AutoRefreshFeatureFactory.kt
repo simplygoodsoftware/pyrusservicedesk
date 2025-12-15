@@ -1,15 +1,17 @@
 package com.pyrus.pyrusservicedesk.core.refresh
 
+import android.util.Log
 import com.pyrus.pyrusservicedesk.PyrusServiceDesk
 import com.pyrus.pyrusservicedesk._ref.utils.MILLISECONDS_IN_DAY
 import com.pyrus.pyrusservicedesk._ref.utils.MILLISECONDS_IN_HOUR
 import com.pyrus.pyrusservicedesk._ref.utils.MILLISECONDS_IN_MINUTE
 import com.pyrus.pyrusservicedesk._ref.utils.MILLISECONDS_IN_SECOND
+import com.pyrus.pyrusservicedesk._ref.utils.isSuccess
 import com.pyrus.pyrusservicedesk._ref.whitetea.core.Actor
 import com.pyrus.pyrusservicedesk._ref.whitetea.core.StoreFactory
 import com.pyrus.pyrusservicedesk._ref.whitetea.core.logic.Logic
-import com.pyrus.pyrusservicedesk.core.refresh.AutoRefreshContract.StartUpdates
 import com.pyrus.pyrusservicedesk.sdk.repositories.SdRepository
+import com.pyrus.pyrusservicedesk.sdk.repositories.SystemMessageStore
 import com.pyrus.pyrusservicedesk.sdk.updates.LiveUpdates
 import com.pyrus.pyrusservicedesk.sdk.updates.PreferencesManager
 import kotlinx.coroutines.currentCoroutineContext
@@ -24,6 +26,7 @@ internal class AutoRefreshFeatureFactory(
     private val storeFactory: StoreFactory,
     private val repository: SdRepository,
     private val preferencesManager: PreferencesManager,
+    private val systemMessageStore: SystemMessageStore,
 ) {
 
     fun create(
@@ -36,13 +39,14 @@ internal class AutoRefreshFeatureFactory(
             repository = repository,
             preferencesManager = preferencesManager,
             liveUpdates = liveUpdates,
+            systemMessageStore = systemMessageStore
         ),
-        initialEffects = listOf(StartUpdates)
+        initialEffects = listOf(AutoRefreshContract.Effect.StartUpdates, AutoRefreshContract.Effect.StartUpdatesSystemMessage)
     )
 
 }
 
-private class FeatureReducer: Logic<Unit, Unit, StartUpdates>() {
+private class FeatureReducer: Logic<Unit, Unit, AutoRefreshContract.Effect>() {
     override fun Result.update(message: Unit) {}
 }
 
@@ -50,27 +54,57 @@ private class AutoRefreshActor(
     private val repository: SdRepository,
     private val preferencesManager: PreferencesManager,
     private val liveUpdates: LiveUpdates,
-): Actor<StartUpdates, Unit> {
+    private val systemMessageStore: SystemMessageStore,
+): Actor<AutoRefreshContract.Effect, Unit> {
 
-    override fun handleEffect(effect: StartUpdates): Flow<Unit> = flow {
-        while (currentCoroutineContext().isActive) {
+    override fun handleEffect(effect: AutoRefreshContract.Effect): Flow<Unit> = when(effect) {
+        is AutoRefreshContract.Effect.StartUpdates -> flow {
+            while (currentCoroutineContext().isActive) {
 
-            if (liveUpdates.isStarted || PyrusServiceDesk.sdIsOpen)
-                repository.sync()
+                if (liveUpdates.isStarted || PyrusServiceDesk.sdIsOpen)
+                    repository.sync()
 
-            val startTime = System.currentTimeMillis()
-            while (true) {
-                val lastActiveTime = preferencesManager.getLastActiveTime()
-                val interval = getTicketsUpdateInterval(lastActiveTime)
+                val startTime = System.currentTimeMillis()
+                while (true) {
+                    val lastActiveTime = preferencesManager.getLastActiveTime()
+                    val interval = getTicketsUpdateInterval(lastActiveTime)
 
-                val endTime = startTime + interval
-                val currentTime = System.currentTimeMillis()
+                    val endTime = startTime + interval
+                    val currentTime = System.currentTimeMillis()
 
-                if (currentTime > endTime) {
-                    break
+                    if (currentTime > endTime) {
+                        break
+                    }
+
+                    delay(1000)
                 }
+            }
+        }
 
-                delay(1000)
+        is AutoRefreshContract.Effect.StartUpdatesSystemMessage -> flow {
+            systemMessageStore.ticketStateFlow().collect { ticketIds ->
+                Log.d("EP ", "ticketIds: $ticketIds")
+                if (ticketIds != null) {
+                    for (ticketId in ticketIds) {
+                        val resultTry = repository.sendCalcOperatorTime(ticketId)
+                        if (resultTry != null && resultTry.isSuccess()) {
+                            systemMessageStore.setOperatorResponseTimeMessage(ticketId, resultTry.value.operatorResponseTimeMessage)
+                        }
+                    }
+                }
+                val startTime = System.currentTimeMillis()
+                while (true) {
+                    val interval = MILLISECONDS_IN_MINUTE
+
+                    val endTime = startTime + interval
+                    val currentTime = System.currentTimeMillis()
+
+                    if (currentTime > endTime) {
+                        break
+                    }
+
+                    delay(1000)
+                }
             }
         }
     }

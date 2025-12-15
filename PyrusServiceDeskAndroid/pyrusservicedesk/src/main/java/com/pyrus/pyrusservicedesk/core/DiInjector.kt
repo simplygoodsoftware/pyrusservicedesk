@@ -41,6 +41,7 @@ import com.pyrus.pyrusservicedesk.sdk.repositories.LocalCommandsStore
 import com.pyrus.pyrusservicedesk.sdk.repositories.LocalTicketsStore
 import com.pyrus.pyrusservicedesk.sdk.repositories.RepositoryMapper
 import com.pyrus.pyrusservicedesk.sdk.repositories.SdRepository
+import com.pyrus.pyrusservicedesk.sdk.repositories.SystemMessageStore
 import com.pyrus.pyrusservicedesk.sdk.repositories.data_base.SdDatabase
 import com.pyrus.pyrusservicedesk.sdk.sync.CommandParamsDto
 import com.pyrus.pyrusservicedesk.sdk.sync.Synchronizer
@@ -75,6 +76,8 @@ internal class DiInjector(
 ) {
 
     val accountStore = AccountStore(initialAccount)
+
+    val systemMessageStore = SystemMessageStore()
 
     private val fileResolver: FileResolver = FileResolver(application.contentResolver, application)
 
@@ -162,6 +165,7 @@ internal class DiInjector(
         commandsStore = localCommandsStore,
         accessDeniedEventBus = accessDeniedEventBus,
         preferences = preferencesManager,
+        systemMessageStore = systemMessageStore,
     )
 
     val repository: SdRepository = SdRepository(
@@ -174,6 +178,7 @@ internal class DiInjector(
         coroutineScope = coreScope,
         accountStore = accountStore,
         idStore = idStore,
+        systemMessageStore = systemMessageStore,
     )
 
     private val storeFactory: StoreFactory = DefaultStoreFactory()
@@ -222,6 +227,7 @@ internal class DiInjector(
         audioRecordControllerFactory = audioRecordControllerFactory,
         audioWrapper = audioWrapper,
         localTicketsStore = localTicketsStore,
+        systemMessageStore = systemMessageStore,
     )
 
     val ticketsFeatureFactory = TicketsFeatureFactory(
@@ -245,6 +251,7 @@ internal class DiInjector(
         storeFactory = storeFactory,
         repository = repository,
         preferencesManager = preferencesManager,
+        systemMessageStore = systemMessageStore,
     )
 
     val sharedViewModel = SharedViewModel()

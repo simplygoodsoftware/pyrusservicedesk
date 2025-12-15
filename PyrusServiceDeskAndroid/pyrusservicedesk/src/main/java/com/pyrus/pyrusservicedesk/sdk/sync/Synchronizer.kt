@@ -23,6 +23,7 @@ import com.pyrus.pyrusservicedesk.sdk.repositories.AccountStore
 import com.pyrus.pyrusservicedesk.sdk.repositories.IdStore
 import com.pyrus.pyrusservicedesk.sdk.repositories.LocalCommandsStore
 import com.pyrus.pyrusservicedesk.sdk.repositories.LocalTicketsStore
+import com.pyrus.pyrusservicedesk.sdk.repositories.SystemMessageStore
 import com.pyrus.pyrusservicedesk.sdk.sync.SyncMapper.mapToGetFeedRequest
 import com.pyrus.pyrusservicedesk.sdk.updates.LiveUpdates
 import com.pyrus.pyrusservicedesk.sdk.updates.Preferences
@@ -52,6 +53,7 @@ internal class Synchronizer(
     private val idStore: IdStore,
     private val commandsStore: LocalCommandsStore,
     private val preferences: Preferences,
+    private val systemMessageStore: SystemMessageStore,
 ) : CoroutineScope {
 
     @DelicateCoroutinesApi
@@ -285,8 +287,10 @@ internal class Synchronizer(
                 && req.rating == null
                 && req.ratingComment == null
             ) {
-                val newRequest = req.copy(ticketId = commandsStore.getNextLocalId(), requestNewTicket = true)
-                return@map copySyncReqRes(syncReqRes, newRequest)
+                val ticketId = commandsStore.getNextLocalId()
+                val newRequest = req.copy(ticketId = ticketId, requestNewTicket = true)
+                systemMessageStore.setNecessityTimeSystemMessage(ticketId, true)
+                return@map copySyncReqRes(syncReqRes, newRequest)//
             }
 
 
@@ -302,6 +306,7 @@ internal class Synchronizer(
 
             requestNewTicketIds.add(req.ticketId)
             val newRequest = req.copy(requestNewTicket = true)
+            systemMessageStore.setNecessityTimeSystemMessage(req.ticketId, true)
             preferences.setCreatedTicketsCount(preferences.getCreatedTicketsCount() + 1)
             copySyncReqRes(syncReqRes, newRequest)
         }

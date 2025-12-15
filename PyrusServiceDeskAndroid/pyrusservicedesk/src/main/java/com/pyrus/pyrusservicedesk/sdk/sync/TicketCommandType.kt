@@ -4,5 +4,6 @@ internal enum class TicketCommandType {
     CreateComment,
     MarkTicketAsRead,
     SetPushToken,
+    UpdateAccess,
     CalcOperatorTime,
 }

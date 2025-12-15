@@ -122,6 +122,15 @@
                 tools:visibility="visible"
                 app:layout_constraintBottom_toTopOf="@+id/bottom_border" />
 
+            <TextView
+                android:id="@+id/operatorTimeMessage"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:visibility="gone"
+                android:layout_marginBottom="@dimen/psd_offset_default"
+                tools:visibility="visible"
+                app:layout_constraintBottom_toTopOf="@+id/bottom_border"/>
+
             <FrameLayout
                 android:id="@+id/scrollDownButtonLayout"
                 android:layout_width="wrap_content"

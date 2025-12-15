@@ -15,6 +15,7 @@ internal sealed interface CommandParamsDto {
             .withSubtype(CreateComment::class.java, CommandsParamsType.CreateComment.typeName)
             .withSubtype(MarkTicketAsRead::class.java, CommandsParamsType.MarkTicketAsRead.typeName)
             .withSubtype(SetPushToken::class.java, CommandsParamsType.SetPushToken.typeName)
+            .withSubtype(CalcOperatorTime::class.java, CommandsParamsType.CalcOperatorTime.typeName)
             .withDefaultJsonAdapter { moshi -> CommandParamsDto_MarkTicketAsReadJsonAdapter(moshi) }
     }
 

@@ -35,7 +35,13 @@ internal object TicketMapper {
         is State.Content -> Model(
             inputText = state.inputText,
             sendEnabled = state.sendEnabled,
-            comments = state.ticket?.let { mapComments(it, state.welcomeMessage, state.previousTicketLastCommentId) },
+            comments = state.ticket?.let {
+                mapComments(
+                    it,
+                    state.welcomeMessage,
+                    state.previousTicketLastCommentId
+                )
+            },
             isLoading = false,
             showNoConnectionError = false,
             isRefreshing = state.isLoading,
@@ -62,6 +68,7 @@ internal object TicketMapper {
                 )
             },
             showRating = state.ticket?.showRating == true,
+            operatorTimeMessage = state.ticket?.operatorTimeMessage,
         )
         State.Loading -> Model(
             inputText = "",
@@ -88,6 +95,7 @@ internal object TicketMapper {
             type = null,
             ratingTextValues = null,
             showRating = false,
+            operatorTimeMessage = null,
         )
         State.Error -> Model(
             inputText = "",
@@ -114,6 +122,7 @@ internal object TicketMapper {
             type = null,
             ratingTextValues = null,
             showRating = false,
+            operatorTimeMessage = null,
         )
     }
 
