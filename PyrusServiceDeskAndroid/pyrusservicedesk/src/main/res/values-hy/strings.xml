@@ -37,4 +37,33 @@
     <string name="psd_file_size_exceeded_message" formatted="false">Ֆայլի չափը չպետք է գերազանցի %d ՄԲ-ը։</string>
     <string name="link_warning">Այս հղումով կանցնեք %s
 \nԻսկապե՞ս ուզում եք անցնել հղումով։</string>
+    <string name="psd_no_access">Անհասանելի</string>
+    <string name="psd_no_access_message">Կապվե՛ք ձեր կազմակերպության ղեկավարի հետ՝ %s-ին մուտքի հասանելիությունը վերականգնելու համար</string>
+    <string name="ok">Այո</string>
+    <string name="copied_text">Պատճենված տեքստ</string>
+    <string name="psd_support">աջակցություն</string>
+    <string name="psd_date_format_d">EEE</string>
+    <string name="psd_date_format_d_m_short">ԱԱ․օօ</string>
+    <string name="psd_date_format_d_m_y_short">ԱԱ․օօ․տտտտ</string>
+    <string name="psd_evaluate_the_operators_performance">Գնահատել օպերատորի աշխատանքը</string>
+    <string name="psd_close">Փակել</string>
+    <string name="leave_your_comment">Թողնել ակնարկ</string>
+    <string name="psd_filters">Ֆիլտրեր</string>
+    <string name="psd_ticket_number">Դիմումի համարը ՝%s</string>
+    <string name="psd_ticket_data_create">Ստեղծվել է %s</string>
+    <string name="all">Բոլորը</string>
+    <string name="psd_you">Դուք</string>
+    <string name="psd_type_photo">Լուսանկար</string>
+    <string name="psd_type_video">Տեսագրություն</string>
+    <string name="psd_type_file">Ֆայլ</string>
+    <string name="psd_type_audio">Ձայնային հաղորդագրություն</string>
+    <string name="psd_unsupptorted_attachment">Չաջակցվող կցված ֆայլ</string>
+    <string name="new_ticket">Նոր դիմում</string>
+    <string name="closed_teckets">Փակված դիմումներ</string>
+    <string name="ticket_was_closed">Դիմումը փակվել է</string>
+    <string name="all_conversations">Բոլոր հաղորդակցությունները</string>
+    <string name="psd_search_by_tickets">Որոնել ըստ դիմումների</string>
+    <string name="psd_no_suggestions">Առաջարկություններ չկան</string>
+    <string name="psd_swipe_cancel">‹‹ չեղարկել</string>
+    <string name="psd_cancel">Չեղարկել</string>
 </resources>

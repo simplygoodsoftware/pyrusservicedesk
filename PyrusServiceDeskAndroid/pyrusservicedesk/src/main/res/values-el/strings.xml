@@ -37,4 +37,33 @@
     <string name="send_library_logs">Αποστολή αρχείων καταγραφής βιβλιοθήκης</string>
     <string name="link_warning">Αυτός ο σύνδεσμος οδηγεί σε %s
 \nΘέλετε πραγματικά να ακολουθήσετε τον σύνδεσμο;</string>
+    <string name="psd_no_access">Χωρίς πρόσβαση</string>
+    <string name="psd_no_access_message">Επικοινωνήστε με τον διαχειριστή της εταιρίας σας για να αποκαταστήσετε την πρόσβαση σε %s</string>
+    <string name="ok">Οκ</string>
+    <string name="copied_text">Αντιγραμμένο κείμενο</string>
+    <string name="psd_support">υποστήριξη</string>
+    <string name="psd_date_format_d">EEE</string>
+    <string name="psd_date_format_d_m_short">MM.dd</string>
+    <string name="psd_date_format_d_m_y_short">MM.dd.yyyy</string>
+    <string name="psd_evaluate_the_operators_performance">Αξιολογήστε την λειτουργία του χειριστή</string>
+    <string name="psd_close">Κλείσιμο</string>
+    <string name="leave_your_comment">Γράψτε μια κριτική</string>
+    <string name="psd_filters">Φίλτρα</string>
+    <string name="psd_ticket_number">Αριθμός αίτησης: %s</string>
+    <string name="psd_ticket_data_create">Δημιουργήθηκε στις %s</string>
+    <string name="all">Τα όλα</string>
+    <string name="psd_you">Εσείς</string>
+    <string name="psd_type_photo">Φωτογραφία</string>
+    <string name="psd_type_video">Βίντεο</string>
+    <string name="psd_type_file">Αρχείο</string>
+    <string name="psd_type_audio">Φωνητικό μήνυμα</string>
+    <string name="psd_unsupptorted_attachment">Μη υποστηριζόμενο συνημμένο</string>
+    <string name="new_ticket">Νέα αίτηση</string>
+    <string name="closed_teckets">Κλειστές αιτήσεις</string>
+    <string name="ticket_was_closed">Αίτηση κλείστηκε</string>
+    <string name="all_conversations">Όλες οι ομιλίες</string>
+    <string name="psd_search_by_tickets">Αναζήτηση με βάση τις αιτήσεις</string>
+    <string name="psd_no_suggestions">Καμιά ταυτοποίηση</string>
+    <string name="psd_swipe_cancel">‹‹ ακύρωση</string>
+    <string name="psd_cancel">Ακύρωση</string>
 </resources>

@@ -16,7 +16,7 @@
     <string name="psd_gallery">Галерея</string>
     <plurals name="psd_years_ago">
         <item quantity="one">%d жыл бұрын</item>
-        <item quantity="other">%d жыл бұрын</item>
+        <item quantity="other">%d жылдар бұрын</item>
     </plurals>
     <string name="psd_months_ago" formatted="false">%d мин бұрын</string>
     <string name="psd_weeks_ago" formatted="false">%d апта бұрын</string>
@@ -37,4 +37,33 @@
     <string name="psd_date_format_d_m_y">d MMMM yyyy</string>
     <string name="psd_recent">жақында</string>
     <string name="psd_downloading">Жүктеп алынуда…</string>
+    <string name="psd_no_access">Кіру мүмкіндігі жоқ</string>
+    <string name="psd_no_access_message">%s қызметіне кіруді қалпына келтіру үшін ұйым менеджеріне хабарласыңыз</string>
+    <string name="ok">Жарайды</string>
+    <string name="copied_text">Көшірілген мәтін</string>
+    <string name="psd_support">қолдау</string>
+    <string name="psd_date_format_d">EEE</string>
+    <string name="psd_date_format_d_m_short">dd.MM</string>
+    <string name="psd_date_format_d_m_y_short">dd.MM.yyyy</string>
+    <string name="psd_evaluate_the_operators_performance">Оператордың жұмысын бағалаңыз</string>
+    <string name="psd_close">Жабу</string>
+    <string name="leave_your_comment">Пікір жазу</string>
+    <string name="psd_filters">Сүзгілер</string>
+    <string name="psd_ticket_number">Билет нөмірі: %s</string>
+    <string name="psd_ticket_data_create">%s уақытында жасалған</string>
+    <string name="all">Барлығы</string>
+    <string name="psd_you">Сен</string>
+    <string name="psd_type_photo">Фотосурет</string>
+    <string name="psd_type_video">Бейне</string>
+    <string name="psd_type_file">Файл</string>
+    <string name="psd_type_audio">Дауыстық хабарлама</string>
+    <string name="psd_unsupptorted_attachment">Қолдау көрсетілмейтін тіркеме</string>
+    <string name="new_ticket">Жаңа билет</string>
+    <string name="closed_teckets">Билеттер жабық</string>
+    <string name="ticket_was_closed">Билет жабылды</string>
+    <string name="all_conversations">Барлық әңгімелер</string>
+    <string name="psd_search_by_tickets">Билеттер бойынша іздеу</string>
+    <string name="psd_no_suggestions">Ұсыныстар жоқ</string>
+    <string name="psd_swipe_cancel">«бас тарту»</string>
+    <string name="psd_cancel">Бас тарту</string>
 </resources>
