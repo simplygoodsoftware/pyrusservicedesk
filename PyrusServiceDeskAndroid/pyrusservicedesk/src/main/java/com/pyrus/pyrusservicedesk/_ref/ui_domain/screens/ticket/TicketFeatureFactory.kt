@@ -15,7 +15,7 @@ import com.pyrus.pyrusservicedesk._ref.ui_domain.screens.ticket.record.AudioReco
 import com.pyrus.pyrusservicedesk._ref.utils.AudioWrapper
 import com.pyrus.pyrusservicedesk._ref.utils.ConfigUtils
 import com.pyrus.pyrusservicedesk._ref.utils.GetTicketsError
-import com.pyrus.pyrusservicedesk._ref.utils.MILLISECONDS_IN_MINUTE
+import com.pyrus.pyrusservicedesk._ref.utils.MILLISECONDS_IN_HOUR
 import com.pyrus.pyrusservicedesk._ref.utils.RequestUtils.getFileUrl
 import com.pyrus.pyrusservicedesk._ref.utils.Try2
 import com.pyrus.pyrusservicedesk._ref.utils.isAudio
@@ -470,7 +470,7 @@ private class TicketActor(
             ticketId = localTicketsStore.getTickets().lastOrNull()?.ticketId ?: ticketId
             effect.text?.let {
                 val now = Calendar.getInstance()
-                val limit = now.timeInMillis - MILLISECONDS_IN_MINUTE//MILLISECONDS_IN_HOUR
+                val limit = now.timeInMillis - MILLISECONDS_IN_HOUR
                 if (preferencesManager.getLastActiveTime() < limit && ticketId > 0)
                     systemMessageStore.setNecessityTimeSystemMessage(ticketId, true)
                 preferencesManager.saveLastActiveTime(System.currentTimeMillis())
@@ -513,7 +513,7 @@ private class TicketActor(
             }
 
             val now = Calendar.getInstance()
-            val limit = now.timeInMillis - MILLISECONDS_IN_MINUTE//MILLISECONDS_IN_HOUR
+            val limit = now.timeInMillis - MILLISECONDS_IN_HOUR
             if (preferencesManager.getLastActiveTime() < limit && ticketId > 0)
                 systemMessageStore.setNecessityTimeSystemMessage(ticketId, true)
             preferencesManager.saveLastActiveTime(System.currentTimeMillis())
@@ -570,7 +570,7 @@ private class TicketActor(
             val fileUri = runCatching { File(effect.file).toUri() }.getOrNull() ?: return@flow
 
             val now = Calendar.getInstance()
-            val limit = now.timeInMillis - MILLISECONDS_IN_MINUTE//MILLISECONDS_IN_HOUR
+            val limit = now.timeInMillis - MILLISECONDS_IN_HOUR
             if (preferencesManager.getLastActiveTime() < limit && ticketId > 0)
                 systemMessageStore.setNecessityTimeSystemMessage(ticketId, true)
             preferencesManager.saveLastActiveTime(System.currentTimeMillis())
