@@ -648,7 +648,6 @@ extension PSDChatViewController: PSDChatViewProtocol {
         switch action {
         case .updateButtons(buttons: let buttons):
             tableView.updateButtonsView(buttons: buttons)
-//            tableView.updateOperatorTimeLabel(time: "5 минут")
         case .updateRows:
             tableView.updateRows(keyboardHeight: currkeyboardHeight)
         case .removeNoConnectionView:
@@ -672,7 +671,7 @@ extension PSDChatViewController: PSDChatViewProtocol {
         case .updateTableMatrix(matrix: let matrix):
             tableView.tableMatrix = matrix
         case .addRow(scrollsToBottom: let scrollsToBottom):
-            tableView.addRow(scrollsToBottom: scrollsToBottom)
+            tableView.addRow(scrollsToBottom: scrollsToBottom, keyBoardHeight: currkeyboardHeight)
         case .addNewRow:
             if(tableView.numberOfRows(inSection: 0) == 0) {
                 tableView.addNewRow() { [weak self] in
@@ -733,6 +732,8 @@ extension PSDChatViewController: PSDChatViewProtocol {
             DispatchQueue.main.async { [weak self] in
                 self?.router.route(to: .ratingComment(ratingText: ratingText, rating: rating))
             }
+        case .updateOperatorTime(timeMessage: let timeMessage):
+            tableView.updateOperatorTimeLabel(time: timeMessage)
         }
     }
 }

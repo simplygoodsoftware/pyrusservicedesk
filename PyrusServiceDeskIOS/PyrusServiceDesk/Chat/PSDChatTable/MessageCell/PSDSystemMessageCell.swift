@@ -26,11 +26,11 @@ final class PSDSystemMessageCell: UITableViewCell {
         contentView.backgroundColor = PyrusServiceDesk.mainController?.customization?.customBackgroundColor
         contentView.addSubview(messageLabel)
         NSLayoutConstraint.activate([
-            messageLabel.topAnchor.constraint(equalTo: contentView.topAnchor, constant: 9),
+            messageLabel.topAnchor.constraint(equalTo: contentView.topAnchor, constant: 12),
             messageLabel.centerXAnchor.constraint(equalTo: contentView.centerXAnchor),
             messageLabel.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: 16),
             messageLabel.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -16),
-            contentView.bottomAnchor.constraint(equalTo: messageLabel.bottomAnchor, constant: 9)
+            contentView.bottomAnchor.constraint(equalTo: messageLabel.bottomAnchor, constant: 4)
         ])
     }
     

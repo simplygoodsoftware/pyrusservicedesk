@@ -7,6 +7,7 @@ class PSDChatMessageCell: UITableViewCell {
    
     var needShowName = false
     var drawEmpty = false
+    var isPreviousSystemMessage = false
     private static let timeAlpha : CGFloat = 0.4
     ///Cloud that show message body (text OR attachment)
     let cloudView : PSDMessageView =
