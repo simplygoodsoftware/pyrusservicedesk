@@ -253,6 +253,7 @@ internal class DiInjector(
         repository = repository,
         preferencesManager = preferencesManager,
         systemMessageStore = systemMessageStore,
+        localTicketsStore = localTicketsStore
     )
 
     val sharedViewModel = SharedViewModel()

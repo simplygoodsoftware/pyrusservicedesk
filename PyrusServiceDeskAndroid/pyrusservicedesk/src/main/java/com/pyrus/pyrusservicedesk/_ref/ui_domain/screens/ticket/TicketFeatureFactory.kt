@@ -15,7 +15,7 @@ import com.pyrus.pyrusservicedesk._ref.ui_domain.screens.ticket.record.AudioReco
 import com.pyrus.pyrusservicedesk._ref.utils.AudioWrapper
 import com.pyrus.pyrusservicedesk._ref.utils.ConfigUtils
 import com.pyrus.pyrusservicedesk._ref.utils.GetTicketsError
-import com.pyrus.pyrusservicedesk._ref.utils.MILLISECONDS_IN_HOUR
+import com.pyrus.pyrusservicedesk._ref.utils.MILLISECONDS_IN_MINUTE
 import com.pyrus.pyrusservicedesk._ref.utils.RequestUtils.getFileUrl
 import com.pyrus.pyrusservicedesk._ref.utils.Try2
 import com.pyrus.pyrusservicedesk._ref.utils.isAudio
@@ -52,6 +52,7 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.sample
 import kotlinx.coroutines.withContext
 import java.io.File
+import java.util.Calendar
 import java.util.UUID
 
 internal class TicketFeatureFactory(
@@ -372,7 +373,6 @@ private class FeatureReducer(): Logic<State, Message, Effect>() {
             is Message.Inner.OnOpenPreview -> effects { +Effect.Outer.OpenPreview(message.fileData) }
             is Message.Inner.ShowOperatorTimeMessage -> {
                 val currentState = state as? State.Content ?: return
-                Log.d("EP ", "message2: ${message.message}")
                 state { currentState.copy(ticket = currentState.ticket?.copy(operatorTimeMessage = message.message)) }
             }
         }
@@ -414,7 +414,16 @@ private class TicketActor(
                     ) {
                             needAnotherOneWelcomeMessage = true
                     }
-                    if (commentsTry.value.comments.find { it.isSupport } == null) {
+                    val commentsIds = localTicketsStore
+                        .getTicketsWithComments()
+                        .find { it.ticket.ticketId == ticketId }
+                        ?.comments
+                        ?.map { it.comment.commentId }
+                        ?.toSet()
+                    val necessaryComments = commentsTry.value.comments.filter { commentsIds?.contains(
+                        it.id
+                    ) == true  }
+                    if (commentsTry.value.comments.isNotEmpty() && necessaryComments.find { it.isSupport && !it.isSystem } == null) {
                         systemMessageStore.setNecessityTimeSystemMessage(ticketId, true)
                     }
                     if (!commentsTry.value.isRead && commentsTry.value.comments.lastOrNull()?.isSupport == true) {
@@ -459,8 +468,10 @@ private class TicketActor(
         is Effect.Inner.SendTextComment -> flow {
             //TODO for multichat
             ticketId = localTicketsStore.getTickets().lastOrNull()?.ticketId ?: ticketId
-            effect.text?.let {//
-                if (preferencesManager.getLastActiveTime() > MILLISECONDS_IN_HOUR && ticketId > 0)
+            effect.text?.let {
+                val now = Calendar.getInstance()
+                val limit = now.timeInMillis - MILLISECONDS_IN_MINUTE//MILLISECONDS_IN_HOUR
+                if (preferencesManager.getLastActiveTime() < limit && ticketId > 0)
                     systemMessageStore.setNecessityTimeSystemMessage(ticketId, true)
                 preferencesManager.saveLastActiveTime(System.currentTimeMillis())
                 repository.addTextComment(user, ticketId, effect.text)
@@ -500,7 +511,10 @@ private class TicketActor(
                 emit(Message.Inner.ShowToast(R.string.psd_unsupptorted_attachment.textRes()))
                 return@flow
             }
-            if (preferencesManager.getLastActiveTime() > MILLISECONDS_IN_HOUR && ticketId > 0)
+
+            val now = Calendar.getInstance()
+            val limit = now.timeInMillis - MILLISECONDS_IN_MINUTE//MILLISECONDS_IN_HOUR
+            if (preferencesManager.getLastActiveTime() < limit && ticketId > 0)
                 systemMessageStore.setNecessityTimeSystemMessage(ticketId, true)
             preferencesManager.saveLastActiveTime(System.currentTimeMillis())
             repository.addAttachComment(user, ticketId, fileUri)
@@ -554,7 +568,10 @@ private class TicketActor(
             Log.d("DFD", "SendAudio")
             ticketId = localTicketsStore.getTickets().lastOrNull()?.ticketId ?: ticketId
             val fileUri = runCatching { File(effect.file).toUri() }.getOrNull() ?: return@flow
-            if (preferencesManager.getLastActiveTime() > MILLISECONDS_IN_HOUR && ticketId > 0)
+
+            val now = Calendar.getInstance()
+            val limit = now.timeInMillis - MILLISECONDS_IN_MINUTE//MILLISECONDS_IN_HOUR
+            if (preferencesManager.getLastActiveTime() < limit && ticketId > 0)
                 systemMessageStore.setNecessityTimeSystemMessage(ticketId, true)
             preferencesManager.saveLastActiveTime(System.currentTimeMillis())
             repository.addAttachComment(user, ticketId, fileUri)
@@ -587,7 +604,6 @@ private class TicketActor(
 
         Effect.Inner.OperatorTimeMessageFeed -> flow {
             systemMessageStore.operatorResponseTimeMessageStateFlow().collect { message ->
-                Log.d("EP ", "message: $message")
                 emit(Message.Inner.ShowOperatorTimeMessage(message))
             }
         }

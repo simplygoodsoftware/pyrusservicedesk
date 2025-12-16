@@ -210,6 +210,10 @@ internal class Synchronizer(
                         idStore.addTicketIdPair(request.request.ticketId, tryResult.value.ticketId)
                         commandsStore.updateCommandsTicketId(request.request.ticketId, tryResult.value.ticketId)
                     }
+                    val modifiedRequest = modifiedRequests.find { (it.request as? SyncRequest.Command.CreateComment)?.commandId == request.request.commandId } ?: request
+                    if ((modifiedRequest.request as SyncRequest.Command.CreateComment).ticketId <= 0 && tryResult.value.ticketId != null && (modifiedRequest.request as SyncRequest.Command.CreateComment).requestNewTicket) {
+                        systemMessageStore.setNecessityTimeSystemMessage(tryResult.value.ticketId, true)
+                    }
                     if (tryResult.value.commentId != null) {
                         idStore.addCommentIdPair(request.request.localId, tryResult.value.commentId)
                     }
@@ -289,8 +293,7 @@ internal class Synchronizer(
             ) {
                 val ticketId = commandsStore.getNextLocalId()
                 val newRequest = req.copy(ticketId = ticketId, requestNewTicket = true)
-                systemMessageStore.setNecessityTimeSystemMessage(ticketId, true)
-                return@map copySyncReqRes(syncReqRes, newRequest)//
+                return@map copySyncReqRes(syncReqRes, newRequest)
             }
 
 
@@ -306,7 +309,6 @@ internal class Synchronizer(
 
             requestNewTicketIds.add(req.ticketId)
             val newRequest = req.copy(requestNewTicket = true)
-            systemMessageStore.setNecessityTimeSystemMessage(req.ticketId, true)
             preferences.setCreatedTicketsCount(preferences.getCreatedTicketsCount() + 1)
             copySyncReqRes(syncReqRes, newRequest)
         }

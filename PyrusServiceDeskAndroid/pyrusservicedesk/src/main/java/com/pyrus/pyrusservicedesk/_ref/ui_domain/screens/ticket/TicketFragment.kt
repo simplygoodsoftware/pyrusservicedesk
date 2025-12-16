@@ -233,8 +233,9 @@ internal class TicketFragment: TeaFragment<Model, Event, Effect>() {
         }
 
         diff(Model::operatorTimeMessage) { message ->
-            Log.d("EP ", "message3: $message, isVisible: ${message != null}")
             binding.operatorTimeMessage.isVisible = message != null
+            binding.ratingBackground.isVisible = message != null
+            binding.gradient.isVisible = message != null
             binding.operatorTimeMessage.text = message
         }
     }

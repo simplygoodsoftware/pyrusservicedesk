@@ -11,13 +11,13 @@ internal class SystemMessageStore(
     private val ticketState: MutableStateFlow<Long?> = MutableStateFlow(null)
     fun ticketStateFlow(): StateFlow<Long?> = ticketState
 
+    fun ticketId(): Long? = ticketState.value
+
     private val operatorResponseTimeMessageState: MutableStateFlow<String?> = MutableStateFlow(null)
     fun operatorResponseTimeMessageStateFlow(): StateFlow<String?> = operatorResponseTimeMessageState
 
     fun setNecessityTimeSystemMessage(ticketId: Long, isNecessary: Boolean) {
         val id = idStore.getTicketServerId(ticketId) ?: ticketId
-        Log.d("EP ", "ticketId: $id, isNecessary: $isNecessary")
-        //val newMessages = operatorResponseTimeMessageState.value?.toMutableMap()
         if (isNecessary)
             ticketState.value = id
         else {
@@ -27,10 +27,11 @@ internal class SystemMessageStore(
     }
 
     fun setOperatorResponseTimeMessage(ticketId: Long, message: String?) {
-        if (message == null) {
+        if (message.isNullOrBlank()) {
             setNecessityTimeSystemMessage(ticketId, false)
             return
         }
+        setNecessityTimeSystemMessage(ticketId, true)
         operatorResponseTimeMessageState.value = message
     }
 }

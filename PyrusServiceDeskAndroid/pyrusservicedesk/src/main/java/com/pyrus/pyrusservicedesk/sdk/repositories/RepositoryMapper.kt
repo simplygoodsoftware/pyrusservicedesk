@@ -591,6 +591,7 @@ internal class RepositoryMapper(
         val calendar = Calendar.getInstance()
         calendar.timeInMillis = comments.lastOrNull()?.creationTime ?: now.timeInMillis
         val duration = now.hoursFrom(calendar)
+        val operatorTimeMessage = if (lastTicket.isActive) operatorResponseTimeMessage else null
         return FullTicket(
             subject = lastTicket.subject,
             comments = comments,
@@ -603,7 +604,7 @@ internal class RepositoryMapper(
             isRead = isRead,
             ratingSettings = lastTicket.ratingSettings,
             welcomeMessage = lastTicket.welcomeMessage,
-            operatorTimeMessage = operatorResponseTimeMessage,
+            operatorTimeMessage = operatorTimeMessage,
         )
     }
 

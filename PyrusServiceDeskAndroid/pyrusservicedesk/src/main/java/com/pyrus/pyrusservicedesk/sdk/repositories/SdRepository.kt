@@ -482,7 +482,6 @@ internal class SdRepository(
         val instanceId = accountStore.getAccount().getInstanceId()
         val user = accountStore.getAccount().getUsers().find { it.userId == instanceId } ?: return null
         val command = commandsStore.createCalcOperatorTimeCommand(user, ticketId, instanceId)
-        Log.d("EP ", "sendCalcOperatorTime")
         return synchronizer.syncCommand(command)
     }
     private suspend fun syncCommand(command: SyncRequest.Command) {
