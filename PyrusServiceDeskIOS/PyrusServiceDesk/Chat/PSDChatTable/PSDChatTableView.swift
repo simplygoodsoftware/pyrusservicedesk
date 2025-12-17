@@ -89,14 +89,17 @@ class PSDChatTableView: PSDTableView {
     
     override func layoutSubviews() {
         super.layoutSubviews()
-//        var newFrame = buttonsView.frame
-//        if newFrame.size.height != buttonsView.collectionView.contentSize.height {
-//            newFrame.size.width = frame.size.width
-//            newFrame.size.height = buttonsView.collectionView.contentSize.height
-//            buttonsView.frame = newFrame
-//            tableHeaderView = buttonsView
-//            buttonsView.collectionView.transform = CGAffineTransform(rotationAngle: CGFloat.pi)
-//        }
+        buttonsView.collectionView.collectionViewLayout.invalidateLayout()
+        if headerType == .buttons {
+            var newFrame = buttonsView.frame
+            if newFrame.size.height != buttonsView.collectionView.contentSize.height {
+                newFrame.size.width = frame.size.width
+                newFrame.size.height = buttonsView.collectionView.contentSize.height
+                buttonsView.frame = newFrame
+                tableHeaderView = buttonsView
+                buttonsView.collectionView.transform = CGAffineTransform(rotationAngle: CGFloat.pi)
+            }
+        }
     }
     
     override func recolor() {
@@ -192,16 +195,6 @@ class PSDChatTableView: PSDTableView {
         }
         
         headerType = .buttons
-        var newFrame = buttonsView.frame
-        if newFrame.size.height != buttonsView.collectionView.contentSize.height {
-            newFrame.size.width = frame.size.width
-            newFrame.size.height = buttonsView.collectionView.contentSize.height
-            buttonsView.frame = newFrame
-            tableHeaderView = buttonsView
-            buttonsView.collectionView.transform = CGAffineTransform(rotationAngle: CGFloat.pi)
-        }
-        setNeedsLayout()
-        layoutIfNeeded()
     }
     
     func updateOperatorTimeLabel(time: String?) {
