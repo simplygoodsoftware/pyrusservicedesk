@@ -35,6 +35,6 @@ final class PSDSystemMessageCell: UITableViewCell {
     }
     
     func configure(with message: PSDRowMessage) {
-        messageLabel.text = "К сожалению, на данный момент все операторы заняты. Скоро вам ответит первый освободившийся оператор"//message.text
+        messageLabel.text = message.text
     }
 }
