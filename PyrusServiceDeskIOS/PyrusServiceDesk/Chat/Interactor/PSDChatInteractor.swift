@@ -151,7 +151,7 @@ extension PSDChatInteractor: PSDChatInteractorProtocol {
             } else {
                 beginTimer()
                 updateChat(chat: chat)
-                if let message = PyrusServiceDesk.messageToSend {
+                if let message = PyrusServiceDesk.messageToSend, message.count > 0 {
                     send(message, [], newTicket: true)
                     PyrusServiceDesk.messageToSend = nil
                 }
@@ -367,7 +367,7 @@ private extension PSDChatInteractor {
                 isRefresh = true
                 
                 self.updateChat(chat: chat)
-                if let message = PyrusServiceDesk.messageToSend {
+                if let message = PyrusServiceDesk.messageToSend, message.count > 0 {
                     send(message, [], newTicket: true)
                     PyrusServiceDesk.messageToSend = nil
                 }
@@ -873,9 +873,11 @@ extension PSDChatInteractor {
                 return REFRESH_TIME_INTEVAL_5_SECONDS
             } else if difference <= PSD_LAST_ACTIVITY_INTEVAL_5_MINUTES {
                 return REFRESH_TIME_INTEVAL_15_SECONDS
+            } else if difference <=  PSDChatInteractor.PSD_LAST_ACTIVITY_INTEVAL_HOUR {
+                return REFRESH_TIME_INTEVAL_1_MINUTE
             }
         }
-        return REFRESH_TIME_INTEVAL_1_MINUTE
+        return REFRESH_TIME_INTEVAL_3_MINUTES
     }
     
     func startGettingInfo() {

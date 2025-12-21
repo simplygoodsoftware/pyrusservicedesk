@@ -312,7 +312,9 @@ import UIKit
         PyrusServiceDesk.syncManager.firstLoad = true
         stopCallback = onStopCallback
         self.deniedAccessCallback = deniedAccessCallback
-        messageToSend = sendComment
+        if let sendComment, sendComment.count > 0 {
+            messageToSend = sendComment
+        }
         self.startWithPush = startWithPush
         self.voiceMessages = voiceMessages
         if !PyrusServiceDeskController.PSDIsOpen() {
