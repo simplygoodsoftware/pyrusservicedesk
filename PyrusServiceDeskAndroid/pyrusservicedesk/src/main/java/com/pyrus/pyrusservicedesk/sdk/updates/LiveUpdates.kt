@@ -84,8 +84,9 @@ internal class LiveUpdates() {
         PLog.d(TAG, "startUpdates")
         isStarted = true
         val localTicketsStore = injector().localTicketsStore
+        val repository = injector().repository
         replayJob = coreScope.launch(Dispatchers.IO) {
-            injector().repository.sync()
+            repository.sync()
             localTicketsStore.getTicketsFlow().collect { tickets ->
                 notifyNewReplySubscribers(tickets.lastOrNull())
             }
