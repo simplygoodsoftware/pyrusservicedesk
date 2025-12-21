@@ -75,7 +75,7 @@ internal object SyncMapper {
                 requestNewTicket = request.requestNewTicket,
                 userId = request.userId,
                 appId = request.appId,
-                comment = if (request.comment.isNullOrBlank()) null else request.comment,
+                comment = request.comment,
                 attachments = request.attachments?.map { AttachmentDataDto(it.guid!!, 0, it.name) },
                 ticketId = request.ticketId,
                 rating = request.rating,
