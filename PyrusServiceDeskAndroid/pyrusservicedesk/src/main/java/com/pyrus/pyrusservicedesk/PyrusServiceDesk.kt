@@ -205,7 +205,7 @@ class PyrusServiceDesk private constructor(
 
             autoRefreshFeatureFactory = INJECTOR?.autoRefreshFeatureFactory?.create(liveUpdates)
             if (oldUserId != null && oldUserId != newAccount.getUserId()) {
-                liveUpdates.reset()
+                liveUpdates.reset(INJECTOR?.preferencesManager)
                 clearLocalData {}
             }
 
