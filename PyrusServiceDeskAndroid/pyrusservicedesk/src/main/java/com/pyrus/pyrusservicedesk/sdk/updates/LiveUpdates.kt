@@ -69,9 +69,10 @@ internal class LiveUpdates() {
         stopUpdates()
     }
 
-    internal fun reset() {
+    internal fun reset(preferencesManager: PreferencesManager?) {
         PLog.d(TAG, "reset")
         lastCommentId = null
+        preferencesManager?.saveLastActiveTime(-1)
         replayJob?.cancel()
         replayJob = null
         if (isStarted)
@@ -84,6 +85,7 @@ internal class LiveUpdates() {
         isStarted = true
         val localTicketsStore = injector().localTicketsStore
         replayJob = coreScope.launch(Dispatchers.IO) {
+            injector().repository.sync()
             localTicketsStore.getTicketsFlow().collect { tickets ->
                 notifyNewReplySubscribers(tickets.lastOrNull())
             }
