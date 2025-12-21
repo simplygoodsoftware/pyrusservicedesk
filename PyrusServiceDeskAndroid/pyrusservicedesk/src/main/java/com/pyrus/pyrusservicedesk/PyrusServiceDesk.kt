@@ -205,7 +205,7 @@ class PyrusServiceDesk private constructor(
 
             autoRefreshFeatureFactory = INJECTOR?.autoRefreshFeatureFactory?.create(liveUpdates)
             if (oldUserId != null && oldUserId != newAccount.getUserId()) {
-                liveUpdates.reset(INJECTOR?.preferencesManager)
+                liveUpdates.reset()
                 clearLocalData {}
             }
 
@@ -385,7 +385,9 @@ class PyrusServiceDesk private constructor(
 
             this.onStopCallback = onStopCallback
 
-            val intent = MainActivity.createLaunchIntent(activity, account, openTicketAction, sendComment)
+            val comment = if (sendComment.isNullOrBlank()) null else sendComment
+
+            val intent = MainActivity.createLaunchIntent(activity, account, openTicketAction, comment)
             intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
             activity.startActivity(intent)
             sdIsOpen = true

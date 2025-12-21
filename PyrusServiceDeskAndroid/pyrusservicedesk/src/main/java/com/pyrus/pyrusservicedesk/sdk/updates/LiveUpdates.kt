@@ -49,7 +49,6 @@ internal class LiveUpdates() {
     fun subscribeOnReply(subscriber: NewReplySubscriber) {
         PLog.d(TAG, "subscribeOnReply")
         newReplySubscribers.add(subscriber)
-        injector().preferencesManager.saveLastActiveTime(System.currentTimeMillis())
         val localTicketsStore = injector().localTicketsStore
         coreScope.launch(Dispatchers.IO) {
             val lastComment = localTicketsStore.getTickets().lastOrNull()
@@ -70,13 +69,11 @@ internal class LiveUpdates() {
         stopUpdates()
     }
 
-    internal fun reset(preferencesManager: PreferencesManager?) {
+    internal fun reset() {
         PLog.d(TAG, "reset")
         lastCommentId = null
-        preferencesManager?.saveLastActiveTime(-1)
         replayJob?.cancel()
         replayJob = null
-        preferencesManager?.saveLastActiveTime(System.currentTimeMillis())
         if (isStarted)
             startUpdates()
     }
