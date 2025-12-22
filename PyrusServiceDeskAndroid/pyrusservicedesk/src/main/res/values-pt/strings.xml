@@ -38,4 +38,33 @@
     <string name="send_library_logs">Enviar logs da biblioteca</string>
     <string name="link_warning">Este link leva a um%s
 \nVocê realmente quer seguir com o link\?</string>
+    <string name="psd_no_access">Sem acesso</string>
+    <string name="psd_no_access_message">Contate o gerente da sua organização para restaurar o acesso a %s.</string>
+    <string name="ok">OK</string>
+    <string name="copied_text">Texto copiado</string>
+    <string name="psd_support">suporte</string>
+    <string name="psd_date_format_d">EEE</string>
+    <string name="psd_date_format_d_m_short">MM.dd</string>
+    <string name="psd_date_format_d_m_y_short">MM.dd.aaaa</string>
+    <string name="psd_evaluate_the_operators_performance">Avalie o desempenho do operador</string>
+    <string name="psd_close">Fechar</string>
+    <string name="leave_your_comment">Escreva uma avaliação</string>
+    <string name="psd_filters">Filtros</string>
+    <string name="psd_ticket_number">Número do bilhete: %s</string>
+    <string name="psd_ticket_data_create">Criado em %s</string>
+    <string name="all">Todos</string>
+    <string name="psd_you">Você</string>
+    <string name="psd_type_audio">Mensagem de voz</string>
+    <string name="psd_type_photo">Foto</string>
+    <string name="psd_type_video">Vídeo</string>
+    <string name="psd_type_file">Arquivo</string>
+    <string name="psd_unsupptorted_attachment">Anexo não suportado</string>
+    <string name="new_ticket">Nova solicitação</string>
+    <string name="closed_teckets">Solicitações encerradas</string>
+    <string name="psd_swipe_cancel">‹‹ cancelar</string>
+    <string name="ticket_was_closed">A solicitação foi encerrada</string>
+    <string name="psd_cancel">Cancelar</string>
+    <string name="all_conversations">Todas as conversas</string>
+    <string name="psd_search_by_tickets">Pesquisar por solicitações</string>
+    <string name="psd_no_suggestions">Sem sugestões</string>
 </resources>
