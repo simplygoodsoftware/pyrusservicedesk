@@ -403,7 +403,6 @@ internal class SdRepository(
     private suspend fun sendCommand(command: SyncRequest.Command) {
         val sendFilesTry = sendAttachments(command)
         if (!sendFilesTry.isSuccess()) return
-        //if ((command as? SyncRequest.Command.CreateComment) != null && )
         syncCommand(sendFilesTry.value)
     }
 

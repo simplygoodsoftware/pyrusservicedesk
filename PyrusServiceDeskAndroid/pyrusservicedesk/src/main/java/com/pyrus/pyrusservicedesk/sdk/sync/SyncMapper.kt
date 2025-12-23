@@ -109,7 +109,7 @@ internal object SyncMapper {
         )
         is SyncRequest.Command.CalcOperatorTime -> TicketCommandDto(
             commandId = request.commandId,
-            type = TicketCommandType.CalcOperatorTime.ordinal, //TODO kate fix UpdateAccess in Helpy (3)
+            type = TicketCommandType.CalcOperatorTime.ordinal,
             appId = request.appId,
             userId = request.userId,
             params = CommandParamsDto.CalcOperatorTime(

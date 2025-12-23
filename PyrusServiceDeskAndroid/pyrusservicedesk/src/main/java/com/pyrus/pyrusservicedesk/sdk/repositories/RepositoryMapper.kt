@@ -482,7 +482,7 @@ internal class RepositoryMapper(
                     appId = command.appId,
                     creationTime = command.creationTime,
                     requestNewTicket = null,
-                    ticketId = null,
+                    ticketId = command.ticketId,
                     commentId = null,
                     comment = null,
                     rating = null,
@@ -491,7 +491,6 @@ internal class RepositoryMapper(
                     ratingComment = null,
                     extraFields = null,
                 )
-        //TODO kate
         }
         val attachments = when (command) {
             is SyncRequest.Command.CreateComment -> command.attachments?.map {
