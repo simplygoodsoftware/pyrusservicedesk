@@ -224,8 +224,8 @@ internal class Synchronizer(
         }
         else {
             getTicketsTry.error.printStackTrace()
-            if ((getTicketsTry.error as? HttpException)?.statusCode == FAILED_AUTHORIZATION_ERROR_CODE
-                || (getTicketsTry.error as? HttpException)?.statusCode == FAILED_AUTHORIZATION_ERROR_CODE_FORBIDDEN) {
+            val statusCode = (getTicketsTry.error as? HttpException)?.statusCode
+            if (statusCode == FAILED_AUTHORIZATION_ERROR_CODE || statusCode == FAILED_AUTHORIZATION_ERROR_CODE_FORBIDDEN) {
                 withContext(Dispatchers.Main) {
                     PyrusServiceDesk.onAuthorizationFailed?.run()
                 }

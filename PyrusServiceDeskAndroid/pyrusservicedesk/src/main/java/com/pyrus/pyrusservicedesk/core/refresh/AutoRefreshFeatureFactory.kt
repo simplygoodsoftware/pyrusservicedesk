@@ -60,8 +60,7 @@ private class AutoRefreshActor(
 
             val startTime = System.currentTimeMillis()
             while (true) {
-                val lastActiveTime = preferencesManager.getLastActiveTime()
-                val interval = getTicketsUpdateInterval(lastActiveTime)
+                val interval = getTicketsUpdateInterval()
 
                 val endTime = startTime + interval
                 val currentTime = System.currentTimeMillis()
@@ -75,7 +74,8 @@ private class AutoRefreshActor(
         }
     }
 
-    private fun getTicketsUpdateInterval(lastActiveTime: Long): Long {
+    private fun getTicketsUpdateInterval(): Long {
+        val lastActiveTime = preferencesManager.getLastActiveTime()
         val diff = System.currentTimeMillis() - lastActiveTime
         return when {
             diff <= MILLISECONDS_IN_MINUTE -> 5L * MILLISECONDS_IN_SECOND
