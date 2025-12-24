@@ -33,7 +33,12 @@ public class SampleActivity extends Activity implements NewReplySubscriber {
                                 .setWelcomeMessage("How can I help you?")
                                 .setAvatarForSupport(com.pyrus.pyrusservicedesk.R.drawable.psd_download_file)
                                 .setTrustedUrls(Collections.singletonList("pyrus.com"))
-                                .build())
+                                .build(),
+                    null,
+                    "",
+                    false,
+                    null
+                )
         );
 
         PyrusServiceDesk.onAuthorizationFailed(

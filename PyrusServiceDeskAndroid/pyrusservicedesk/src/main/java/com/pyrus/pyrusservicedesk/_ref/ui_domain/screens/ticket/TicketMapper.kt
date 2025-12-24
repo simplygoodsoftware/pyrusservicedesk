@@ -1,5 +1,6 @@
 package com.pyrus.pyrusservicedesk._ref.ui_domain.screens.ticket
 
+import android.util.Log
 import com.pyrus.pyrusservicedesk.R
 import com.pyrus.pyrusservicedesk._ref.data.Attachment
 import com.pyrus.pyrusservicedesk._ref.data.Comment
@@ -25,6 +26,7 @@ import com.pyrus.pyrusservicedesk.presentation.ui.navigation_page.ticket.HtmlUti
 import com.pyrus.pyrusservicedesk.presentation.ui.navigation_page.ticket.cleanTags
 import com.pyrus.pyrusservicedesk.sdk.data.SatisfactionDisplayType
 import java.util.Calendar
+import kotlin.random.Random
 
 internal object TicketMapper {
 
@@ -295,6 +297,7 @@ internal object TicketMapper {
         previousTicketLastCommentId: Long?,
     ) {
         val commentEntries = ArrayList<CommentEntry>()
+        Log.d("SDS", "map")
         for (comment in freshList.comments) {
             addCommentEntries(commentEntries, comment, freshList.orgLogoUrl)
             if (comment.id == previousTicketLastCommentId && welcomeMessage != null)
@@ -319,12 +322,19 @@ internal object TicketMapper {
             return
         }
 
+
+
+        val currentTime = System.currentTimeMillis()
+        val bbbb = currentTime - comment.creationTime < 2000
         val status = when {
             comment.isLocal -> {
                 if (comment.isSending) Status.Processing
-                else Status.Error
+                else if (bbbb) Status.Processing else Status.Completed
             }
-            else -> Status.Completed
+            else -> when {
+                !comment.isInbound -> Status.Completed
+                else -> if (bbbb) Status.Processing else Status.Completed
+            }
         }
 
         val avatarUrl = if (comment.isSupport) orgLogoUrl else null

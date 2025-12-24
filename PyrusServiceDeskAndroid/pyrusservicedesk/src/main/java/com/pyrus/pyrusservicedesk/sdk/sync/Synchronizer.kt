@@ -18,6 +18,10 @@ import com.pyrus.pyrusservicedesk.core.getUserId
 import com.pyrus.pyrusservicedesk.core.getUsers
 import com.pyrus.pyrusservicedesk.core.getVersion
 import com.pyrus.pyrusservicedesk.sdk.AccessDeniedEventBus
+import com.pyrus.pyrusservicedesk.sdk.data.ApplicationDto
+import com.pyrus.pyrusservicedesk.sdk.data.AuthorDto
+import com.pyrus.pyrusservicedesk.sdk.data.CommentDto
+import com.pyrus.pyrusservicedesk.sdk.data.TicketDto
 import com.pyrus.pyrusservicedesk.sdk.data.intermediate.TicketsDto
 import com.pyrus.pyrusservicedesk.sdk.repositories.AccountStore
 import com.pyrus.pyrusservicedesk.sdk.repositories.IdStore
@@ -38,10 +42,12 @@ import kotlinx.coroutines.newSingleThreadContext
 import kotlinx.coroutines.withContext
 import java.util.concurrent.LinkedBlockingQueue
 import java.util.concurrent.atomic.AtomicBoolean
+import java.util.concurrent.atomic.AtomicInteger
 import kotlin.coroutines.CoroutineContext
 import kotlin.coroutines.resume
 import kotlin.coroutines.suspendCoroutine
 import kotlin.math.max
+import kotlin.random.Random
 
 internal class Synchronizer(
     private val api: ServiceDeskApi,
@@ -136,7 +142,7 @@ internal class Synchronizer(
             firstAppId = firstAppId,
         )
 
-        val getTicketsTry = api.getTickets(getTicketsRequest)
+        val getTicketsTry: Try<TicketsDto> = fakeTickets()
         
         if (getTicketsTry.isSuccess()) {
 
@@ -330,5 +336,152 @@ internal class Synchronizer(
         const val FAILED_AUTHORIZATION_ERROR_CODE = 400
         private const val TAG = "SyncRepository"
     }
+
+    private val commentId = java.util.concurrent.atomic.AtomicLong(1L)
+    private val counter = AtomicInteger(1)
+
+    private fun fakeTickets(): Try<TicketsDto> {
+
+        Log.d("SDS", "counter: ${counter.get()}")
+
+        val step = counter.getAndIncrement()
+
+/*        Хочу прекратить списания
+        Счет Иви
+        За что списали деньги?
+        Вопрос про Яндекс на Иви
+        Вопрос по входу в аккаунт
+        Вопрос по подписке
+        Проблемы при просмотре видео
+        Управление аккаунтом/подпиской
+        Другое
+
+        Хочу прекратить списания
+        Поделиться подпиской (пригласить/принять)
+        Турецкие сериалы
+        Авторизоваться на другом устройстве
+        Не вижу оплаченную подписку
+        Управление банковской картой
+        Вопрос по подписке от Яндекс Плюс
+        Ошибки/трудности при просмотре видео
+        Что такое счёт Иви
+        Далее
+
+        */
+
+
+
+
+
+
+
+        val commentBody: String = when(step) {
+            1 -> ""
+            2, 3 -> "<button>Кнопа 1</button>" +
+                "<button>Кнопа 2</button>" +
+                "<button>далее</button>"
+            4 -> "<button>Хочу прекратить списания</button>" +
+                "<button>Счет Иви</button>" +
+                "<button>За что списали деньги?</button>" +
+                "<button>Вопрос про Яндекс на Иви</button>" +
+                "<button>Вопрос по входу в аккаунт</button>" +
+                "<button>Вопрос по подписке</button>" +
+                "<button>Проблемы при просмотре видео</button>" +
+                "<button>Управление аккаунтом/подпиской</button>" +
+                "<button>Другое</button>"
+            5 -> "<button>Хочу прекратить списания</button>" +
+                "<button>Поделиться подпиской (пригласить/принять)</button>" +
+                "<button>Турецкие сериалы</button>" +
+                "<button>Авторизоваться на другом устройстве</button>" +
+                "<button>Не вижу оплаченную подписку</button>" +
+                "<button>Управление банковской картой</button>" +
+                "<button>Вопрос по подписке от Яндекс Плюс</button>" +
+                "<button>Ошибки/трудности при просмотре видео</button>" +
+                "<button>Что такое счёт Иви</button>" +
+                "<button>Далее</button>"
+            else ->
+                if (step % 9 == 0) "comment:::: $step"
+                else {
+                    val sb = StringBuilder()
+                    for (i in 0 until 5) {
+                        sb.append("<button>Кнопа ${step + i}</button>")
+                    }
+                    sb.append("<button>Далее</button>")
+                    sb.toString()
+                }
+        }
+
+        val addComment: Boolean = when(step) {
+            1 -> true
+            2 -> true
+            3 -> false
+            4 -> true
+            5 -> true
+            else -> true
+        }
+
+        val isInbound = when(step) {
+            1 -> true
+            else -> false
+        }
+
+        val comment = createComment(commentBody, isInbound)
+        val tickets = TicketsDto(
+            applications = listOf(ApplicationDto(
+                appId = "0HUi7grFuWVFHqWtL3f5YD-4PYJXiOEoLfCDb2yhTthkHBpedNbNU4O01YD2OnsSpvbMiXmweUF8akomZZIW1Ilb-W9mOPuK70L4lCI1mK0dJqXYUp0l-MJlsUv9tr8dSmKCSw==",
+                authorsInfo = null,
+                extraUsers = null,
+                orgDescription = "",
+                orgLogoUrl = "/mobilelogo?p=0HUi7grFuWVFHqWtL3f5YD-4PYJXiOEoLfCDb2yhTthkHBpedNbNU4O01YD2OnsSpvbMiXmweUF8akomZZIW1Ilb-W9mOPuK70L4lCI1mK0dJqXYUp0l-MJlsUv9tr8dSmKCSw%3D%3D&v=954532399",
+                orgName = "Droid Home (для тестов мобильных разработчиков Pyrus)",
+                ratingSettings = null,
+                welcomeMessage = "Test<br>Test<br>Test<br><a href=\"https://pyrus.com/t#fc838615/mobile-app-chat\">Ссылка</a><br><button>Пречат сообщение</button><a data-type=\"button\" href=\"https://pyrus.com/t#fc838615/mobile-app-chat\">Пречат ссылка</a><button>Пречат-2</button>",
+            )),
+            tickets = listOf(createFakeTicket(comment, addComment)),
+            commandsResult = null,
+            authorAccessDenied = null,
+        )
+
+        return Try.Success(tickets)
+    }
+
+    private fun createFakeTicket(commentDto: CommentDto, addComment: Boolean) = TicketDto(
+        ticketId = 327433149,
+        userId = null,
+        subject = "",
+        author = "",
+        isRead = true,
+        lastComment = CommentDto(
+            commentId = commentDto.commentId,
+            body = commentDto.body,
+            isInbound = commentDto.isInbound,
+            attachments = commentDto.attachments,
+            creationDate = commentDto.creationDate,
+            author = null,
+            rating = commentDto.rating,
+            ratingComment = commentDto.ratingComment
+        ),
+        comments = if (addComment) listOf(commentDto) else null,
+        isActive = true,
+        createdAt = 1766572502000,
+        showRating = false,
+        showRatingText = null
+    )
+
+    private fun createComment(body: String, isInbound: Boolean) = CommentDto(
+        commentId = commentId.getAndIncrement(),
+        body = body,
+        isInbound = isInbound,
+        attachments = null,
+        creationDate = System.currentTimeMillis(),
+        author = AuthorDto(
+            name = "Ivan Ivanov",
+            authorId = null,
+            avatarId = null,
+            avatarColorString = null
+        ),
+        rating = null,
+        ratingComment = null,
+    )
 
 }

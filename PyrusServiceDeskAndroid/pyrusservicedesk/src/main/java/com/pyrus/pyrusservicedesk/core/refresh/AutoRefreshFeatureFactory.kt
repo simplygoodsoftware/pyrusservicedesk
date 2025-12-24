@@ -37,7 +37,7 @@ internal class AutoRefreshFeatureFactory(
             preferencesManager = preferencesManager,
             liveUpdates = liveUpdates,
         ),
-        initialEffects = listOf(StartUpdates)
+//        initialEffects = listOf(StartUpdates)
     )
 
 }

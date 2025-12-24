@@ -15,24 +15,32 @@ public class SampleApp extends Application {
         super.onCreate();
         PyrusServiceDesk.init(
             this,
-            "my_app_id",
-            "user_id",
-            "security_key",
+            "0HUi7grFuWVFHqWtL3f5YD-4PYJXiOEoLfCDb2yhTthkHBpedNbNU4O01YD2OnsSpvbMiXmweUF8akomZZIW1Ilb-W9mOPuK70L4lCI1mK0dJqXYUp0l-MJlsUv9tr8dSmKCSw==",
             null,
             true
         );
 
-        Map<String, String> map = new HashMap<>();
-        map.put("test_text", "test some text");
-        map.put("test_number", "999");
-        map.put("test_money", "555");
-        map.put("test_phone", "79778888888");
-        map.put("test_email", "sample@email.com");
-        PyrusServiceDesk.setFieldsData(map);
+//        PyrusServiceDesk.init(
+//            this,
+//            "Hsdzu8HtZfQtQDv6avpE~Fh8asQPZ32ScwI4k0MSTaJg7W~TcPydLXQMSvQ-dQas30AwKWqBnfkyUzV9fbNSvdCTgRvEc8lLG8JjAbzT66Yc9DfjHaw7LXUfIqJ9ezSIYASlgw==",
+//            "391750",
+//            "buBk2Hna7G28nU6ypYZO0GWJA1rOcFQwnVqNtCftCW2/tMlqTzfDpMmX0Y1Blm4nmQsfOTGcyqAr+FSseJhIHA==",
+//            null,
+//            true
+//        );
 
-        PyrusServiceDesk.setPushToken(
-                "my_push_token",
-                exception -> Log.w("SAMPLE_APP", exception));
+//
+//        Map<String, String> map = new HashMap<>();
+//        map.put("test_text", "test some text");
+//        map.put("test_number", "999");
+//        map.put("test_money", "555");
+//        map.put("test_phone", "79778888888");
+//        map.put("test_email", "sample@email.com");
+//        PyrusServiceDesk.setFieldsData(map);
+
+//        PyrusServiceDesk.setPushToken(
+//                "my_push_token",
+//                exception -> Log.w("SAMPLE_APP", exception));
 
         PyrusServiceDesk.onAuthorizationFailed(null);
     }
