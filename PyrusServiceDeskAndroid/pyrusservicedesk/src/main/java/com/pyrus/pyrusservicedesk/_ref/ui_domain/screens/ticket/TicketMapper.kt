@@ -180,15 +180,17 @@ internal object TicketMapper {
 
         val entriesWithDates = toListWithDates(entries).toMutableList()
 
+        var buttonsEntry: CommentEntry.Buttons? = null
+
         if (freshList.comments.isEmpty() || isLastWelcome(entries)) {
-            val buttonEntry = (entries.lastOrNull() as? CommentEntry.Comment.CommentText)?.let { extractButtonsFromWelcome(it, welcomeMessage) }
-            if (buttonEntry != null) entriesWithDates += buttonEntry
+            buttonsEntry = (entries.lastOrNull() as? CommentEntry.Comment.CommentText)?.let { extractButtonsFromWelcome(it, welcomeMessage) }
         }
 
         if (!freshList.showRating) {
-            val buttonEntry = freshList.comments.lastOrNull()?.let { extractButtons(it) }
-            if (buttonEntry != null) entriesWithDates += buttonEntry
+            buttonsEntry = freshList.comments.lastOrNull()?.let { extractButtons(it) }
         }
+
+        if (buttonsEntry != null) entriesWithDates += buttonsEntry
 
         entriesWithDates.reverse()
         var resentInbound: Boolean? = null
