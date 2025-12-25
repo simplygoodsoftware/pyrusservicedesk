@@ -118,7 +118,7 @@ interface TicketContract {
             object FeedFlow : Inner
             object CheckAccount : Inner
             object Close : Inner
-            class SendTextComment(
+            class SendTextCommentIfIsNotNullOrBlank(
                 val text: String?,
                 val ticketId: Long,
             ) : Inner
