@@ -70,9 +70,6 @@ internal class SdRepository(
                     sendCommand(command)
                 }
             }
-            for (command in initialCommands) {
-                sendCommand(command)
-            }
         }
     }
 
