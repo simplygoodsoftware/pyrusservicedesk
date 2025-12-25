@@ -19,7 +19,6 @@ import com.pyrus.pyrusservicedesk._ref.utils.RequestUtils.getFileUrl
 import com.pyrus.pyrusservicedesk._ref.utils.Try2
 import com.pyrus.pyrusservicedesk._ref.utils.isAudio
 import com.pyrus.pyrusservicedesk._ref.utils.isSuccess
-import com.pyrus.pyrusservicedesk._ref.utils.log.PLog
 import com.pyrus.pyrusservicedesk._ref.utils.navigation.PyrusRouter
 import com.pyrus.pyrusservicedesk._ref.utils.singleFlow
 import com.pyrus.pyrusservicedesk._ref.utils.textRes
@@ -99,7 +98,7 @@ internal class TicketFeatureFactory(
                 Effect.Inner.SubscribeToRecord,
                 Effect.Inner.SubscribeToRecordProgress,
                 Effect.Inner.SubscribeToCancelRecord,
-                Effect.Inner.SendTextComment(sendComment, initialTicketId),
+                Effect.Inner.SendTextCommentIfIsNotNullOrBlank(sendComment, initialTicketId),
                 Effect.Inner.UpdateAudioData
             ),
             onCancelCallback = {
@@ -140,7 +139,7 @@ private class FeatureReducer(): Logic<State, Message, Effect>() {
                 val currentState = state as? State.Content ?: return
                 val buttonComment = message.text
                 if (buttonComment.isBlank()) return
-                effects { +Effect.Inner.SendTextComment(buttonComment, currentState.ticketId) }
+                effects { +Effect.Inner.SendTextCommentIfIsNotNullOrBlank(buttonComment, currentState.ticketId) }
             }
             is Message.Outer.OnPreviewClick -> {
                 val currentState = state as? State.Content ?: return
@@ -180,7 +179,7 @@ private class FeatureReducer(): Logic<State, Message, Effect>() {
                 }
                 val comment = currentState.inputText
                 if (comment.isBlank()) return
-                effects { +Effect.Inner.SendTextComment(comment, currentState.ticketId) }
+                effects { +Effect.Inner.SendTextCommentIfIsNotNullOrBlank(comment, currentState.ticketId) }
             }
             is Message.Outer.OnShowAttachVariantsClick -> {
                 if(state !is State.Content) return
@@ -437,13 +436,13 @@ private class TicketActor(
             }
         }
         is Effect.Inner.Close -> singleFlow { Message.Inner.Exit }
-        is Effect.Inner.SendTextComment -> flow {
+        is Effect.Inner.SendTextCommentIfIsNotNullOrBlank -> flow {
             //TODO for multichat
             ticketId = localTicketsStore.getTickets().lastOrNull()?.ticketId ?: ticketId
-            effect.text?.let {
-                preferencesManager.saveLastActiveTime(System.currentTimeMillis())
-                repository.addTextComment(user, ticketId, effect.text)
-            }
+            if (effect.text.isNullOrBlank())
+                return@flow
+            preferencesManager.saveLastActiveTime(System.currentTimeMillis())
+            repository.addTextComment(user, ticketId, effect.text)
         }
         is Effect.Inner.SendRatingComment -> flow {
             preferencesManager.saveLastActiveTime(System.currentTimeMillis())
