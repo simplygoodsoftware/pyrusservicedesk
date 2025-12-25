@@ -474,7 +474,7 @@ private class TicketActor(
             ticketId = localTicketsStore.getTickets().lastOrNull()?.ticketId ?: ticketId
             val commands = commandsStore.getCommands(ticketId)
             val command = commands.find { it.command.commandType == TicketCommandType.MarkTicketAsRead.ordinal }
-            if (localTicketsStore.getTickets().find { it.ticketId == ticketId }?.isRead == false && command == null )
+            if (localTicketsStore.getTicketWithComments(ticketId)?.ticket?.isRead == false && command == null )
                 repository.readTicket(user, effect.ticketId)
         }
         is Effect.Inner.ListenAttachVariant -> flow {
