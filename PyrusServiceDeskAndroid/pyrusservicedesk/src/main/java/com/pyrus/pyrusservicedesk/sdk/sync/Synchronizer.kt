@@ -24,7 +24,6 @@ import com.pyrus.pyrusservicedesk.sdk.repositories.IdStore
 import com.pyrus.pyrusservicedesk.sdk.repositories.LocalCommandsStore
 import com.pyrus.pyrusservicedesk.sdk.repositories.LocalTicketsStore
 import com.pyrus.pyrusservicedesk.sdk.sync.SyncMapper.mapToGetFeedRequest
-import com.pyrus.pyrusservicedesk.sdk.updates.LiveUpdates
 import com.pyrus.pyrusservicedesk.sdk.updates.Preferences
 import com.pyrus.pyrusservicedesk.sdk.web.retrofit.ServiceDeskApi
 import kotlinx.coroutines.CoroutineExceptionHandler
@@ -230,6 +229,8 @@ internal class Synchronizer(
                     PyrusServiceDesk.onAuthorizationFailed?.run()
                 }
                 failDelay.clear()
+                val getRequests = syncRequests.filterIsInstance<SyncReqRes.Data>()
+                for (request in getRequests) request.continuation.resume(getTicketsTry)
                 isRunning.set(false)
                 return@launch
             }
