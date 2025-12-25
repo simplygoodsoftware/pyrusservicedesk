@@ -104,13 +104,10 @@ internal class CommentTextHolder(
             content = entry.text
             id = entry.id
             hasError = entry.hasError
+            setStatus(entry.status, entry.isInbound)
 
             this.entry::isInbound.payloadCheck {
                 setIsInboundParameters(entry.isInbound)
-                setStatus(Status.Completed, entry.isInbound)
-            }
-            this.entry::status.payloadCheck {
-                setStatus(entry.status, entry.isInbound)
             }
 
             this.entry::text.payloadCheck {
