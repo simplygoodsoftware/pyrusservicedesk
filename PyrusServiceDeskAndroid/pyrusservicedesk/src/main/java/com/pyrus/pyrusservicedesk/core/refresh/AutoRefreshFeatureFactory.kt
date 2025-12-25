@@ -54,8 +54,10 @@ private class AutoRefreshActor(
 
     override fun handleEffect(effect: StartUpdates): Flow<Unit> = flow {
         while (currentCoroutineContext().isActive) {
+            val lastActiveTime = preferencesManager.getLastActiveTime()
+            val interval = getTicketsUpdateInterval(lastActiveTime)
 
-            if (liveUpdates.isStarted || PyrusServiceDesk.sdIsOpen)
+            if ((liveUpdates.isStarted || PyrusServiceDesk.sdIsOpen) && interval != -1L)
                 repository.sync()
 
             val startTime = System.currentTimeMillis()
@@ -81,7 +83,7 @@ private class AutoRefreshActor(
             diff <= MILLISECONDS_IN_MINUTE -> 5L * MILLISECONDS_IN_SECOND
             diff <= 5 * MILLISECONDS_IN_MINUTE -> 15L * MILLISECONDS_IN_SECOND
             diff <= MILLISECONDS_IN_HOUR -> MILLISECONDS_IN_MINUTE.toLong()
-            diff <= 3 * MILLISECONDS_IN_DAY -> 3 * MILLISECONDS_IN_MINUTE.toLong()
+            diff <= 3 * MILLISECONDS_IN_DAY || PyrusServiceDesk.sdIsOpen -> 3 * MILLISECONDS_IN_MINUTE.toLong()
             else -> -1L
         }
     }
