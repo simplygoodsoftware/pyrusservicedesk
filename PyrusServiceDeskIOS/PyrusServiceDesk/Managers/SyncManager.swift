@@ -1,5 +1,6 @@
 import Foundation
 import Network
+import AudioToolbox
 
 class SyncManager {
     private var isRequestInProgress = false
@@ -9,6 +10,7 @@ class SyncManager {
     var firstLoad = true
     private var isFilter = false
     let monitor = NWPathMonitor()
+    private var lastMonitorPathStatus: NWPath.Status = .satisfied
 
     var commandsResult = [TicketCommandResult]()
     var sendingMessages = [MessageToPass]()
@@ -31,12 +33,14 @@ class SyncManager {
     init() {
         coreDataService = CoreDataService()
         chatsDataService = PSDChatsDataService(coreDataService: coreDataService)
-        monitor.pathUpdateHandler = { path in
-            if path.status == .satisfied {
-                self.clearTimer()
-                self.repeatTimeInterval = 1.0
-                self.doSync()
+        monitor.pathUpdateHandler = {[weak self, lastMonitorPathStatus] path in
+            if path.status == .satisfied && (lastMonitorPathStatus == .requiresConnection || lastMonitorPathStatus == .unsatisfied) {
+                AudioServicesPlayAlertSound(SystemSoundID(kSystemSoundID_Vibrate))
+                self?.clearTimer()
+                self?.repeatTimeInterval = 1.0
+                self?.doSync()
             }
+            self?.lastMonitorPathStatus = path.status
         }
         monitor.start(queue: DispatchQueue.main)
     }
@@ -44,13 +48,6 @@ class SyncManager {
     func syncGetTickets(isFilter: Bool = false) {
         guard PyrusServiceDesk.isStarted || !PyrusServiceDesk.multichats else { return }
         PSDMessagesStorage.loadAttachments()
-        
-//        chatsDataService.deleteAllObjects()
-//        PyrusServiceDesk.lastNoteId = 0
-//        let repository = AudioRepository()
-//        repository?.clearRepository()
-//        
-//        return;
 
         if firstLoad && !PyrusServiceDesk.needShowLoading {
             firstLoadUpdates()
@@ -212,6 +209,9 @@ private extension SyncManager {
             } catch { }
             
             for commandResult in commandsResult {
+                if let error = commandResult.error {
+                    print("Comand error: \(error)")
+                }
                 if let message = self.sendingMessages.first(where: { $0.commandId.lowercased() == commandResult.commandId.lowercased() })?.message {
                     PyrusServiceDesk.repository.deleteCommand(withId: commandResult.commandId, serverTicketId: commandResult.ticketId)
                     PSDMessagesStorage.remove(messageId: message.clientId, needSafe: false, serverTicketId: commandResult.ticketId)

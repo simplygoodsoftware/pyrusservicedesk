@@ -655,7 +655,7 @@ extension PSDChatsDataService: PSDChatsDataServiceProtocol {
                         authorId: dbCommand.authorId,
                         token: dbCommand.token,
                         type: dbCommand.tokenType,
-                        messageId: Int(dbCommand.messageId),
+                        messageId: dbCommand.messageId == 0 ? nil : Int(dbCommand.messageId),
                         rating: Int(dbCommand.rating) == 0 ? nil : Int(dbCommand.rating),
                         ratingComment: dbCommand.ratingComment,
                         date: dbCommand.date,

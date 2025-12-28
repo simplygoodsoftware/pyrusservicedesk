@@ -75,7 +75,6 @@ struct PSDMessageSend {
         
     }
     static func fileSendingEndWithError(_ messageToPass: PSDMessage, delegate: PSDMessageSendDelegate?) {
-//        PyrusServiceDesk.syncManager.syncGetTickets()
 //        messageToPass.state = .cantSend
 //        messageToPass.fromStrorage = true
    //     PSDMessagesStorage.saveInStorage(message: messageToPass)
@@ -101,7 +100,7 @@ struct PSDMessageSend {
     static var session : PSDUploader?
     
     ///Array with all PSDMessageSender
-    static private var messageSenders = [PSDMessageSender]()
+//    static private var messageSenders = [PSDMessageSender]()
     
     ///Store an array for messages ids that needs to be send.
     ///PSDMessageSender and PSDUploader must clean themselves after completion, even if they end with unsuccess
@@ -146,18 +145,16 @@ struct PSDMessageSend {
         let command = TicketCommand(commandId: messageToPass.commandId ?? UUID().uuidString, type: .createComment, appId: PyrusServiceDesk.currentClientId ?? PyrusServiceDesk.clientId, userId:  PyrusServiceDesk.currentUserId ?? PyrusServiceDesk.customUserId, params: params)
         PyrusServiceDesk.repository.add(command: command)
         PSDMessagesStorage.save(message: messageToPass)
-//        DispatchQueue.main.async {
-//            PyrusServiceDesk.syncManager.syncGetTickets()
-//        }
+
         NotificationCenter.default.post(name: createNewCommand, object: nil, userInfo: nil)
     }
     static private func didEndPassMessage(_ messageToPass: PSDMessage, delegate: PSDMessageSendDelegate?) {
         PSDMessageSend.passingMessagesIds.removeAll(where: {$0 == messageToPass.clientId})
         semaphore.signal()
     }
-    static func clearAndRemove(sender:PSDMessageSender){
-        if let index = messageSenders.firstIndex(of: sender) {
-            messageSenders.remove(at: index)
-        }
-    }
+//    static func clearAndRemove(sender:PSDMessageSender){
+//        if let index = messageSenders.firstIndex(of: sender) {
+//            messageSenders.remove(at: index)
+//        }
+//    }
 }

@@ -204,7 +204,7 @@ import UIKit
         }
         if
             lastSetPushTokens.count >= SET_PUSH_MAX_COUNT,
-            let firstDate =  lastSetPushTokens.first
+            let firstDate = lastSetPushTokens.first
         {
             let difference = Date().timeIntervalSince(firstDate)
             if difference < SET_PUSH_TIME_INTEVAL {
@@ -229,9 +229,6 @@ import UIKit
                 let appId = user.clientId
                 let command = TicketCommand(commandId: UUID().uuidString, type: .setPushToken, appId: appId, userId: userId, params: TicketCommandParams(ticketId: nil, appId: appId, userId: userId, token: token, type: "ios"))
                 PyrusServiceDesk.repository.add(command: command)
-                DispatchQueue.main.async {
-                    PyrusServiceDesk.syncManager.syncGetTickets()
-                }
                 ///todo - добавить обработку ошибки
                 completion(nil)
             }
@@ -244,14 +241,6 @@ import UIKit
             }
             ///todo - добавить обработку ошибки
             completion(nil)
-//            PSDPushToken.send(token, completion: {
-//                error in
-//                completion(error)
-//                lastSetPushTokens.append(Date())
-//                if error == nil {
-//                    lastSetPushToken = Date()
-//                }
-//            })
         }
     }
     
@@ -478,14 +467,10 @@ import UIKit
         if lastRefreshes.count > REFRESH_MAX_COUNT{
             lastRefreshes.remove(at: 0)
         }
-        if multichats {
-            DispatchQueue.main.async {
-                PyrusServiceDesk.syncManager.syncGetTickets()
-            }
-        } else {
-            PyrusServiceDesk.mainController?.refreshChat(showFakeMessage: 0)
+        PyrusServiceDesk.syncManager.syncGetTickets()
+        DispatchQueue.main.async {
+            PyrusServiceDesk.syncManager.syncGetTickets()
         }
-        
     }
     
     ///Scrolls chat to bottom, starts refreshing chat and shows fake message from support is psd is open.
@@ -512,7 +497,7 @@ import UIKit
             return
         }
         let userId : String
-        if let existKey =   PSDMessagesStorage.pyrusUserDefaults()?.object(forKey: PSD_USER_ID_KEY) as? String, !reset{
+        if let existKey = PSDMessagesStorage.pyrusUserDefaults()?.object(forKey: PSD_USER_ID_KEY) as? String, !reset{
             userId = existKey
         }else{
             userId = reset ? String.getUiqueString() : (UIDevice.current.identifierForVendor?.uuidString ?? String.getUiqueString())
@@ -631,7 +616,7 @@ import UIKit
     weak static var mainController: PSDMainController?
     ///Updates user info - get chats list from server.
     @objc private static func updateUserInfo(){
-        if(userId.count > 0){
+        if userId.count > 0 {
             restartTimer()
             PyrusLogger.shared.logEvent("PSDGetChats did begin.")
             DispatchQueue.main.async {

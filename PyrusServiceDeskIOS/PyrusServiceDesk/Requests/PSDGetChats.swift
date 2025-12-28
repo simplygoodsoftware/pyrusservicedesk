@@ -49,7 +49,7 @@ struct PSDGetChats {
         
         let request: URLRequest = URLRequest.createRequest(type:.chats, parameters: parameters)
 //        print("app_id: \(PyrusServiceDesk.clientId), user_id: \(PyrusServiceDesk.customUserId ?? PyrusServiceDesk.userId), secret_key: \(PyrusServiceDesk.securityKey), lastNoteId: \(parameters["last_note_id"])")
-//        print("GetTickets: \(Date())")
+        print("GetTickets: \(Date()), commands count: \(commands.count)")
         PSDGetChats.sessionTask = PyrusServiceDesk.mainSession.dataTask(with: request) { data, response, error in
             guard let data = data, error == nil else { // check for fundamental networking error
                 completion(nil, nil, nil, nil, false)
@@ -69,9 +69,6 @@ struct PSDGetChats {
                     }
                 }
                 let chatsData = try? JSONSerialization.jsonObject(with: data, options: .allowFragments) as? [String : Any] ?? [String: Any]()
-//                if PyrusServiceDesk.chats.count == 0 {
-//                    PyrusServiceDesk.chats = []
-//                }
                 print("Запрос не прошел, код ошибки (\(httpStatus.statusCode), ошибка: \(String(describing: error))")
                 completion(nil, nil, nil, nil, false)
             } else {

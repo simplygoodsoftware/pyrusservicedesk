@@ -75,6 +75,7 @@ extension URLRequest {
     }
     
     mutating func addCustomHeaders() {
+//        addValue("ivi/test", forHTTPHeaderField: "User-Agent")
         guard let auth = PyrusServiceDesk.authorizationToken else {
             return
         }
