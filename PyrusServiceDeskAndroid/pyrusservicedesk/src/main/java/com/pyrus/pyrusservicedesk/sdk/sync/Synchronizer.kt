@@ -54,6 +54,7 @@ internal class Synchronizer(
     private val idStore: IdStore,
     private val commandsStore: LocalCommandsStore,
     private val preferences: Preferences,
+    private val failDelay: FailDelay,
 ) : CoroutineScope {
 
     @DelicateCoroutinesApi
@@ -70,8 +71,6 @@ internal class Synchronizer(
     private val isRunning: AtomicBoolean = AtomicBoolean(false)
 
     private val syncLoopRequestQueue = LinkedBlockingQueue<SyncReqRes>()
-
-    private val failDelay = FailDelay()
 
     private val lastSyncTime = AtomicLong(0)
 

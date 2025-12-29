@@ -44,8 +44,9 @@ import com.pyrus.pyrusservicedesk.sdk.repositories.RepositoryMapper
 import com.pyrus.pyrusservicedesk.sdk.repositories.SdRepository
 import com.pyrus.pyrusservicedesk.sdk.repositories.data_base.SdDatabase
 import com.pyrus.pyrusservicedesk.sdk.sync.CommandParamsDto
+import com.pyrus.pyrusservicedesk.sdk.sync.FailDelay
+import com.pyrus.pyrusservicedesk.sdk.sync.SdNetworkCallback
 import com.pyrus.pyrusservicedesk.sdk.sync.Synchronizer
-import com.pyrus.pyrusservicedesk.sdk.updates.LiveUpdates
 import com.pyrus.pyrusservicedesk.sdk.updates.PreferencesManager
 import com.pyrus.pyrusservicedesk.sdk.verify.LocalDataVerifier
 import com.pyrus.pyrusservicedesk.sdk.web.retrofit.RemoteFileStore
@@ -156,6 +157,8 @@ internal class DiInjector(
 
     val preferencesManager = PreferencesManager(preferences)
 
+    private val failDelay: FailDelay = FailDelay()
+
     private val synchronizer = Synchronizer(
         api = api,
         localTicketsStore = localTicketsStore,
@@ -165,6 +168,7 @@ internal class DiInjector(
         commandsStore = localCommandsStore,
         accessDeniedEventBus = accessDeniedEventBus,
         preferences = preferencesManager,
+        failDelay = failDelay,
     )
 
     val repository: SdRepository = SdRepository(
@@ -178,6 +182,8 @@ internal class DiInjector(
         accountStore = accountStore,
         idStore = idStore,
     )
+
+    private val sdNetworkCallback: SdNetworkCallback = SdNetworkCallback(application, failDelay)
 
     private val storeFactory: StoreFactory = DefaultStoreFactory()
 
@@ -297,6 +303,7 @@ internal class DiInjector(
     fun onCancel() {
         coreScope.cancel()
         synchronizer.cancel()
+        sdNetworkCallback.stop()
         releaseSession()
     }
 
