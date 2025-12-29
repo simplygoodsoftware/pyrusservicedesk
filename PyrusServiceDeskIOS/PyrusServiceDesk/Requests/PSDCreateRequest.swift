@@ -42,6 +42,7 @@ extension URLRequest {
         request.addValue(contenttype, forHTTPHeaderField: "content-type")
         request.addValue("\(jsonData!.count)", forHTTPHeaderField: "Content-Length")
         request.addCustomHeaders()
+        request.addUserAgent()
         return request
     }
     private static func addStaticKeys(to JSON:[String: Any]) -> [String: Any] {
@@ -75,11 +76,19 @@ extension URLRequest {
     }
     
     mutating func addCustomHeaders() {
-//        addValue("ivi/test", forHTTPHeaderField: "User-Agent")
         guard let auth = PyrusServiceDesk.authorizationToken else {
             return
         }
         addValue(auth, forHTTPHeaderField: authTokenKey)
+    }
+    
+    mutating func addUserAgent() {
+        let sdkVersion = PyrusServiceDesk.PSD_VERSION
+        let appId = (String(PyrusServiceDesk.clientId?.prefix(10) ?? ""))
+        let systemVersion = UIDevice.current.systemVersion
+        let isMultichats = PyrusServiceDesk.multichats ? "1" : "0"
+        let userAgent = "ServiceDesk/ios/\(sdkVersion)/\(appId)/\(systemVersion)/\(isMultichats)"
+        addValue(userAgent, forHTTPHeaderField: "User-Agent")
     }
 }
 

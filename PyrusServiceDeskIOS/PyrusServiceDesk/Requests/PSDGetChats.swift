@@ -58,6 +58,10 @@ struct PSDGetChats {
             
             if let httpStatus = response as? HTTPURLResponse, httpStatus.statusCode != 200 { // check for http errors
                 DispatchQueue.main.async {
+                    if httpStatus.statusCode == 429 {
+                        PyrusServiceDesk.removeLastActivityDate()
+                        completion(nil, nil, nil, nil, true)
+                    }
                     if httpStatus.statusCode == 403 {
                         if let onFailed = PyrusServiceDesk.onAuthorizationFailed {
                             onFailed()

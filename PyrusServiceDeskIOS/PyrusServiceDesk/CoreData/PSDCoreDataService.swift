@@ -16,7 +16,7 @@ final class CoreDataService {
             fatalError("❌ Не удалось загрузить NSManagedObjectModel из \(modelURL)")
         }
 
-        let container = NSPersistentContainer(name: "PSDChats", managedObjectModel: model)
+        let container = NSPersistentContainer(name: "PSDChats_8", managedObjectModel: model)
         container.loadPersistentStores { _, error in
             if let error {
                 fatalError("❌ Ошибка загрузки persistent store: \(error)")

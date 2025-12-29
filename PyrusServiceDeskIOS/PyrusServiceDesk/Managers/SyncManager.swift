@@ -11,7 +11,8 @@ class SyncManager {
     private var isFilter = false
     let monitor = NWPathMonitor()
     private var lastMonitorPathStatus: NWPath.Status = .satisfied
-
+    private let throttle: ThrottleController
+    
     var commandsResult = [TicketCommandResult]()
     var sendingMessages = [MessageToPass]()
     var networkAvailability = true {
@@ -21,24 +22,23 @@ class SyncManager {
     }
     
     private var timerFosSendSync: Timer?
-    private var repeatTimeInterval: Double? {
-        didSet {
-        }
-    }
+    private var previousDelay: Double?
 
     static let commandsResultNotification = Notification.Name("COMMANDS_RESULT")
     static let updateAccessesNotification = Notification.Name("UPDATE_ACCSESSES")
     static let connectionErrorNotification = Notification.Name("CONNECTION_ERROR")
 
     init() {
+        throttle = ThrottleController(interval: 5)
         coreDataService = CoreDataService()
         chatsDataService = PSDChatsDataService(coreDataService: coreDataService)
-        monitor.pathUpdateHandler = {[weak self, lastMonitorPathStatus] path in
+        monitor.pathUpdateHandler = { [weak self] path in
+            guard let lastMonitorPathStatus = self?.lastMonitorPathStatus else { return }
             if path.status == .satisfied && (lastMonitorPathStatus == .requiresConnection || lastMonitorPathStatus == .unsatisfied) {
-                AudioServicesPlayAlertSound(SystemSoundID(kSystemSoundID_Vibrate))
-                self?.clearTimer()
-                self?.repeatTimeInterval = 1.0
-                self?.doSync()
+                if self?.timerFosSendSync != nil {
+                    self?.clearTimer()
+                    self?.updateRepeatSyncTimer()
+                }
             }
             self?.lastMonitorPathStatus = path.status
         }
@@ -46,12 +46,27 @@ class SyncManager {
     }
     
     func syncGetTickets(isFilter: Bool = false) {
+        let ticketCommands = PyrusServiceDesk.repository.getCommands()
+        if ticketCommands.contains(where: { $0.type == TicketCommandType.createComment.rawValue }) {
+            throttle.setInterval(Constants.throttlingCreateCommentInterval)
+        } else {
+            throttle.setInterval(Constants.throttlingMinInterval)
+        }
+        throttle.execute { [weak self, isFilter] in
+            self?.sync(isFilter: isFilter)
+        }
+    }
+    
+    func loadCache() {
+        firstLoadUpdates()
+    }
+}
+
+private extension SyncManager {
+    
+    func sync(isFilter: Bool = false) {
         guard PyrusServiceDesk.isStarted || !PyrusServiceDesk.multichats else { return }
         PSDMessagesStorage.loadAttachments()
-
-        if firstLoad && !PyrusServiceDesk.needShowLoading {
-            firstLoadUpdates()
-        }
         
         if !self.isFilter {
             self.isFilter = isFilter
@@ -106,6 +121,7 @@ class SyncManager {
                                 self.isFilter = false
                             }
                             clearTimer()
+                            previousDelay = Constants.baseDelay
                             networkAvailability = true
                             isRequestInProgress = false
                             
@@ -122,13 +138,14 @@ class SyncManager {
                     if shouldSendAnotherRequest {
                         syncGetTickets(isFilter: self.isFilter)
                     }
+                } else {
+                    clearTimer()
+                    networkAvailability = true
+                    isRequestInProgress = false
                 }
             }
         }
     }
-}
-
-private extension SyncManager {
     
     func firstLoadUpdates() {
         PyrusServiceDesk.clients = chatsDataService.getAllClients()
@@ -138,13 +155,11 @@ private extension SyncManager {
             PyrusServiceDesk.chats = cashe
         } else {
             let createMessages = PSDMessagesStorage.getNewCreateTicketMessages(PyrusServiceDesk.customUserId)
-            var localChats = PSDGetChats.getSortedChatForMessages(createMessages)
+            let localChats = PSDGetChats.getSortedChatForMessages(createMessages)
             let chats = chatsDataService.getChatsHeaders()
             let messages = chatsDataService.getAllMessages()
             PyrusServiceDesk.chats = localChats + chats
             PyrusServiceDesk.allMessages = messages + createMessages
-//            PyrusServiceDesk.chats = chatsDataService.getChatsHeaders()
-//            PyrusServiceDesk.allMessages = chatsDataService.getAllMessages()
         }
         
         
@@ -155,14 +170,12 @@ private extension SyncManager {
                 user.lastNoteId = 0
             }
         }
-//            chatsDataService.getAllChats() { [weak self] chats in
-//                DispatchQueue.main.async { [weak self] in
-//                    guard let self else { return }
-//                    PyrusServiceDesk.clients = chatsDataService.getAllClients()
-//                    PyrusServiceDesk.chats = chats
-//                    PyrusServiceDesk.cacheLoadedCallback?.cacheLoaded()
-//                }
-//            }
+        
+        let commands = PyrusServiceDesk.repository.getCommands()
+        if commands.count > 0,
+           commands.contains(where: { $0.type != TicketCommandType.setPushToken.rawValue }) {
+            syncGetTickets()
+        }
     }
     
     func checkAccesses(authorAccessDenied: [String]?, clientsArray: [PSDClientInfo]?, clients: inout [PSDClientInfo]?, userInfo: [AnyHashable : Any]?) {
@@ -245,7 +258,7 @@ private extension SyncManager {
                         PyrusServiceDesk.clients = clients
                         self?.chatsDataService.saveClientModels(with: clients)
                         let createMessages = PSDMessagesStorage.getNewCreateTicketMessages(PyrusServiceDesk.customUserId ?? PyrusServiceDesk.userId)
-                        var localChats = PSDGetChats.getSortedChatForMessages(createMessages)
+                        let localChats = PSDGetChats.getSortedChatForMessages(createMessages)
                         PyrusServiceDesk.chats = localChats + chats
                         PyrusServiceDesk.allMessages = messages + createMessages
                         NotificationCenter.default.post(name: PyrusServiceDesk.chatsUpdateNotification, object: nil, userInfo: userInfo)
@@ -258,14 +271,19 @@ private extension SyncManager {
     func updateRepeatSyncTimer() {
         DispatchQueue.main.async { [weak self] in
             guard let self else { return }
+
             if timerFosSendSync == nil {
-                repeatTimeInterval = 1
+                previousDelay = 1
             } else {
-                let currentRepeatInterval = repeatTimeInterval ?? 0
-                repeatTimeInterval = (currentRepeatInterval >= 120 || (currentRepeatInterval * 2) > 120) ? 120 : currentRepeatInterval * 2
+                let currentRepeatInterval = previousDelay ?? Constants.baseDelay
+                previousDelay = currentRepeatInterval * 3
                 clearTimer()
             }
-            self.timerFosSendSync = Timer.scheduledTimer(timeInterval: repeatTimeInterval ?? 1, target: self, selector: #selector(self.doSync), userInfo: nil, repeats: false)
+            
+            let random = Bool.random() ? Constants.baseDelay : (previousDelay ?? Constants.baseDelay) * 3
+            let delay = min(random, Constants.maxDelay)
+            
+            self.timerFosSendSync = Timer.scheduledTimer(timeInterval: delay, target: self, selector: #selector(self.doSync), userInfo: nil, repeats: false)
         }
     }
     
@@ -278,5 +296,14 @@ private extension SyncManager {
         DispatchQueue.main.async { [weak self] in
             self?.syncGetTickets(isFilter: self?.isFilter ?? false)
         }
+    }
+}
+
+private extension SyncManager {
+    enum Constants {
+        static let throttlingMinInterval: TimeInterval = 5
+        static let throttlingCreateCommentInterval: TimeInterval = 1
+        static let baseDelay: TimeInterval = 1
+        static let maxDelay: TimeInterval = 3 * 60
     }
 }

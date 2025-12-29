@@ -179,6 +179,19 @@ class TicketCommandRepository {
     }
     
     func add(command: TicketCommand, completion: ((Error?) -> Void)? = nil, needSync: Bool = true) {
+        if command.type == TicketCommandType.setPushToken.rawValue {
+            var idsForDelete = [String]()
+            for cmnd in commandsCache ?? [] {
+                if cmnd.type == TicketCommandType.setPushToken.rawValue,
+                   cmnd.appId == command.appId,
+                   cmnd.userId == command.userId {
+                    idsForDelete.append(cmnd.commandId)
+                }
+            }
+            for id in idsForDelete {
+                deleteCommand(withId: id)
+            }
+        }
         chatsDataService.saveTicketCommand(with: command) { [weak self] _ in
             DispatchQueue.main.async { [weak self] in
                 self?.commandsCache = self?.chatsDataService.getAllCommands()

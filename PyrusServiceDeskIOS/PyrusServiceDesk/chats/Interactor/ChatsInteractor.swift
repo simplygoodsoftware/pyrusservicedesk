@@ -375,7 +375,6 @@ private extension ChatsInteractor {
     }
     
     func reloadChats() {
-        PyrusServiceDesk.restartTimer()
         DispatchQueue.main.async {
             PyrusServiceDesk.syncManager.syncGetTickets()
         }

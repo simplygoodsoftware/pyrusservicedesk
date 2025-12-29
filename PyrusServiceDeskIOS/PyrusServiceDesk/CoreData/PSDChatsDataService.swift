@@ -28,7 +28,6 @@ extension PSDChatsDataService: PSDChatsDataServiceProtocol {
     // MARK: Clients
     
     func saveClientModels(with clientModels: [PSDClientInfo]) {
-//        coreDataService.deleteAllObjects(forEntityName: "DBClient")
         let ids = clientModels.compactMap({ $0.clientId })
         do {
             if ids.count > 0 {
