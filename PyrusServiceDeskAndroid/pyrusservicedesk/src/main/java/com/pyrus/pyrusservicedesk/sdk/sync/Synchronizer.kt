@@ -259,6 +259,17 @@ internal class Synchronizer(
                 isRunning.set(false)
                 return@launch
             }
+            if (statusCode == 429) {
+                preferences.saveLastActiveTime(-1L)
+                failDelay.clear()
+                withContext(Dispatchers.Main) {
+                    PyrusServiceDesk.onAuthorizationFailed?.run()
+                }
+                val getRequests = syncRequests.filterIsInstance<SyncReqRes.Data>()
+                for (request in getRequests) request.continuation.resume(getTicketsTry)
+                isRunning.set(false)
+                return@launch
+            }
             val getRequests = syncRequests.filterIsInstance<SyncReqRes.Data>()
             for (request in getRequests) request.continuation.resume(getTicketsTry)
             
