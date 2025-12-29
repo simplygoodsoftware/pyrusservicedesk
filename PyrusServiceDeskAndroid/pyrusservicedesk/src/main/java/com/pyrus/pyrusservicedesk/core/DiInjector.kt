@@ -101,7 +101,7 @@ internal class DiInjector(
                 }
 
                 val isMultiChat = if (accountStore.getAccount().isMultiChat()) 1 else 0
-                val userAgent = "Servicedesk/Android/" +
+                val userAgent = "ServiceDesk/Android/" +
                     BuildConfig.VERSION_NAME + "/" +
                     accountStore.getAccount().getAppId()?.take(10) + "/" +
                     Build.VERSION.SDK_INT + "/" +
