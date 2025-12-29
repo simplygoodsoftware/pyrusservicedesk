@@ -97,6 +97,9 @@ internal class Synchronizer(
         request: SyncRequest.Command,
     ): Try<TicketCommandResultDto> = suspendCoroutine { continuation ->
         val syncReqRes = SyncReqRes.CommandWithContinuation(request, continuation)
+        if (request is SyncRequest.Command.SetPushToken) {
+            syncLoopRequestQueue.removeIf { it.request is SyncRequest.Command.SetPushToken }
+        }
         syncLoopRequestQueue.add(syncReqRes)
         tryLoop()
     }
