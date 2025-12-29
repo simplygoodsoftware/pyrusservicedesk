@@ -18025,7 +18025,7 @@
     {
       "filePath": "\/Users\/stanislavabobruskina\/pyrusservicedesk\/PyrusServiceDeskIOS\/PyrusServiceDesk\/Requests\/PSDGetChats.swift",
       "kind": "StringLiteral",
-      "offset": 13882,
+      "offset": 13884,
       "length": 24,
       "value": "\"CreateMenuNotification\""
     },
@@ -18066,64 +18066,78 @@
     },
     {
       "filePath": "\/Users\/stanislavabobruskina\/pyrusservicedesk\/PyrusServiceDeskIOS\/PyrusServiceDesk\/CoreData\/PSDCoreDataService.swift",
+      "kind": "IntegerLiteral",
+      "offset": 156,
+      "length": 1,
+      "value": "1"
+    },
+    {
+      "filePath": "\/Users\/stanislavabobruskina\/pyrusservicedesk\/PyrusServiceDeskIOS\/PyrusServiceDesk\/CoreData\/PSDCoreDataService.swift",
       "kind": "StringLiteral",
-      "offset": 243,
+      "offset": 193,
+      "length": 23,
+      "value": "\"PSDChatsSchemaVersion\""
+    },
+    {
+      "filePath": "\/Users\/stanislavabobruskina\/pyrusservicedesk\/PyrusServiceDeskIOS\/PyrusServiceDesk\/CoreData\/PSDCoreDataService.swift",
+      "kind": "StringLiteral",
+      "offset": 393,
       "length": 10,
       "value": "\"PSDChats\""
     },
     {
       "filePath": "\/Users\/stanislavabobruskina\/pyrusservicedesk\/PyrusServiceDeskIOS\/PyrusServiceDesk\/CoreData\/PSDCoreDataService.swift",
       "kind": "StringLiteral",
-      "offset": 270,
+      "offset": 420,
       "length": 6,
       "value": "\"momd\""
     },
     {
       "filePath": "\/Users\/stanislavabobruskina\/pyrusservicedesk\/PyrusServiceDeskIOS\/PyrusServiceDesk\/CoreData\/PSDCoreDataService.swift",
       "kind": "StringLiteral",
-      "offset": 308,
+      "offset": 458,
       "length": 72,
       "value": "\"❌ Не найден PSDChats.momd в bundle: \""
     },
     {
       "filePath": "\/Users\/stanislavabobruskina\/pyrusservicedesk\/PyrusServiceDeskIOS\/PyrusServiceDesk\/CoreData\/PSDCoreDataService.swift",
       "kind": "StringLiteral",
-      "offset": 379,
+      "offset": 529,
       "length": 2,
       "value": "\"\""
     },
     {
       "filePath": "\/Users\/stanislavabobruskina\/pyrusservicedesk\/PyrusServiceDeskIOS\/PyrusServiceDesk\/CoreData\/PSDCoreDataService.swift",
       "kind": "StringLiteral",
-      "offset": 492,
+      "offset": 642,
       "length": 82,
       "value": "\"❌ Не удалось загрузить NSManagedObjectModel из \""
     },
     {
       "filePath": "\/Users\/stanislavabobruskina\/pyrusservicedesk\/PyrusServiceDeskIOS\/PyrusServiceDesk\/CoreData\/PSDCoreDataService.swift",
       "kind": "StringLiteral",
-      "offset": 573,
+      "offset": 723,
       "length": 2,
       "value": "\"\""
     },
     {
       "filePath": "\/Users\/stanislavabobruskina\/pyrusservicedesk\/PyrusServiceDeskIOS\/PyrusServiceDesk\/CoreData\/PSDCoreDataService.swift",
       "kind": "StringLiteral",
-      "offset": 639,
-      "length": 12,
-      "value": "\"PSDChats_8\""
+      "offset": 789,
+      "length": 10,
+      "value": "\"PSDChats\""
     },
     {
       "filePath": "\/Users\/stanislavabobruskina\/pyrusservicedesk\/PyrusServiceDeskIOS\/PyrusServiceDesk\/CoreData\/PSDCoreDataService.swift",
       "kind": "StringLiteral",
-      "offset": 787,
+      "offset": 935,
       "length": 62,
       "value": "\"❌ Ошибка загрузки persistent store: \""
     },
     {
       "filePath": "\/Users\/stanislavabobruskina\/pyrusservicedesk\/PyrusServiceDeskIOS\/PyrusServiceDesk\/CoreData\/PSDCoreDataService.swift",
       "kind": "StringLiteral",
-      "offset": 848,
+      "offset": 996,
       "length": 2,
       "value": "\"\""
     },
@@ -20288,7 +20302,7 @@
       "kind": "StringLiteral",
       "offset": 476,
       "length": 8,
-      "value": "\"2.3.67\""
+      "value": "\"2.3.68\""
     },
     {
       "filePath": "\/Users\/stanislavabobruskina\/pyrusservicedesk\/PyrusServiceDeskIOS\/PyrusServiceDesk\/PyrusServiceDeskCreator.swift",
