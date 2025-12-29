@@ -32,15 +32,18 @@ import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.newSingleThreadContext
 import kotlinx.coroutines.withContext
 import java.util.concurrent.LinkedBlockingQueue
 import java.util.concurrent.atomic.AtomicBoolean
+import java.util.concurrent.atomic.AtomicLong
 import kotlin.coroutines.CoroutineContext
 import kotlin.coroutines.resume
 import kotlin.coroutines.suspendCoroutine
 import kotlin.math.max
+import kotlin.math.min
 
 internal class Synchronizer(
     private val api: ServiceDeskApi,
@@ -69,6 +72,8 @@ internal class Synchronizer(
     private val syncLoopRequestQueue = LinkedBlockingQueue<SyncReqRes>()
 
     private val failDelay = FailDelay()
+
+    private val lastSyncTime = AtomicLong(0)
 
 
     /**
@@ -107,7 +112,24 @@ internal class Synchronizer(
         runLoop(syncRequests)
     }
 
+    private suspend fun trotRequest(syncRequests: List<SyncReqRes>) {
+        val currentTime = System.currentTimeMillis()
+        val passedTime = currentTime - lastSyncTime.get()
+        val hasCommentCommand = syncRequests.any {
+            val req = it.request
+            req is SyncRequest.Command.CreateComment
+        }
+        val rawDelay = if (hasCommentCommand) 1000L else 5000L
+        val diff = rawDelay - passedTime
+        if (diff > 0) {
+            val delay = min(rawDelay, diff)
+            delay(delay)
+        }
+        lastSyncTime.set(currentTime)
+    }
+
     private fun runLoop(syncRequests: List<SyncReqRes>) = launch {
+        trotRequest(syncRequests)
         
         val account = accountStore.getAccount()
 
