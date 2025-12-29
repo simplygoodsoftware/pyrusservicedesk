@@ -2,25 +2,29 @@ package com.pyrus.pyrusservicedesk.sdk.sync
 
 import kotlinx.coroutines.delay
 import java.util.concurrent.atomic.AtomicBoolean
-import java.util.concurrent.atomic.AtomicInteger
-import kotlin.math.pow
+import java.util.concurrent.atomic.AtomicLong
+import kotlin.math.min
+import kotlin.random.Random
 
 internal class FailDelay {
-
-    private val attemptCount = AtomicInteger(0)
+    private val previousDelay = AtomicLong(0L)
     private val isCanceled = AtomicBoolean(false)
 
     /**
      * returns delay in milliseconds
      */
     private fun getNextDelay(): Long {
-        val pov = attemptCount.incrementAndGet().toDouble()
-        if (pov > 8) return 2.0.pow(8).toLong() * 1000
-        return 2.0.pow(pov).toLong() * 1000
+        val delay =
+            if (previousDelay.get() == 0L)
+                BASE_DELAY
+            else min(Random.nextLong(BASE_DELAY, previousDelay.get() * 3), MAX_DELAY)
+
+        previousDelay.set(delay)
+        return delay
     }
 
     fun clear() {
-        attemptCount.set(0)
+        previousDelay.set(0)
     }
 
     fun cancel() {
@@ -35,6 +39,12 @@ internal class FailDelay {
             if (isCanceled.get()) break
             delay(1000L)
         }
+    }
+
+    companion object {
+
+        private const val BASE_DELAY = 1000L
+        private const val MAX_DELAY = 3 * 60 * 1000L
     }
 
 }
