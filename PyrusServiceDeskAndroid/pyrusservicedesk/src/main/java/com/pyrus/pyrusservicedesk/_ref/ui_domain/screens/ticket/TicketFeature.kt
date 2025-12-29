@@ -129,7 +129,7 @@ interface TicketContract {
             ) : Inner
             class OpenPreview(val attachment: Attachment, val userId: String?) : Inner
             class SaveDraft(val draft: String) : Inner
-            class ReadTicket(val ticketId: Long) : Inner
+            class ReadTicketIfNeed(val ticketId: Long) : Inner
             class ListenAttachVariant(val key: String, val uri: Any) : Inner
             class ListenErrorCommentAction(val localId: Long, val key: String, val action: Any) : Inner
             class CancelFileUpload(val localId: Long, val attachmentId: Long) : Inner
