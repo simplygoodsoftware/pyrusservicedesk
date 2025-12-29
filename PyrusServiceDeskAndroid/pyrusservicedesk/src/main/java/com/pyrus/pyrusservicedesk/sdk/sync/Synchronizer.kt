@@ -96,6 +96,16 @@ internal class Synchronizer(
         tryLoop()
     }
 
+    /**
+     * Add command in syncLoopRequestQueue
+     */
+    suspend fun addCommand(
+        request: SyncRequest.Command,
+    ): Try<TicketCommandResultDto> = suspendCoroutine { continuation ->
+        val syncReqRes = SyncReqRes.CommandWithContinuation(request, continuation)
+        syncLoopRequestQueue.add(syncReqRes)
+    }
+
 
     private fun tryLoop() {
         if (isRunning.getAndSet(true)) return

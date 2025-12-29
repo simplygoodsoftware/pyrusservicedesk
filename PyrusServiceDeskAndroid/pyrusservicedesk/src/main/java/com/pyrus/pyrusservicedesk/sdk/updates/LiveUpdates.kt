@@ -2,9 +2,13 @@ package com.pyrus.pyrusservicedesk.sdk.updates
 
 import android.util.Log
 import androidx.annotation.MainThread
+import com.pyrus.pyrusservicedesk.PyrusServiceDesk
 import com.pyrus.pyrusservicedesk.PyrusServiceDesk.Companion.injector
+import com.pyrus.pyrusservicedesk._ref.utils.MILLISECONDS_IN_DAY
+import com.pyrus.pyrusservicedesk._ref.utils.MILLISECONDS_IN_HOUR
+import com.pyrus.pyrusservicedesk._ref.utils.MILLISECONDS_IN_MINUTE
+import com.pyrus.pyrusservicedesk._ref.utils.MILLISECONDS_IN_SECOND
 import com.pyrus.pyrusservicedesk._ref.utils.log.PLog
-import com.pyrus.pyrusservicedesk.sdk.data.TicketDto
 import com.pyrus.pyrusservicedesk.sdk.repositories.data_base.data.TicketEntity
 import kotlinx.coroutines.CoroutineExceptionHandler
 import kotlinx.coroutines.CoroutineScope
@@ -53,7 +57,7 @@ internal class LiveUpdates() {
                 notifyNewReplySubscriber(subscriber, lastComment)
             }
         }
-        startUpdates()
+        startUpdates(injector().preferencesManager)
     }
 
     /**
@@ -73,20 +77,33 @@ internal class LiveUpdates() {
         replayJob?.cancel()
         replayJob = null
         if (isStarted)
-            startUpdates()
+            startUpdates(preferencesManager)
     }
 
     @MainThread
-    private fun startUpdates() {
+    private fun startUpdates(preferencesManager: PreferencesManager?) {
         PLog.d(TAG, "startUpdates")
         isStarted = true
         val localTicketsStore = injector().localTicketsStore
         val repository = injector().repository
         replayJob = coreScope.launch(Dispatchers.IO) {
-            repository.sync()
+            if (getTicketsUpdateInterval(preferencesManager) != -1L)
+                repository.sync()
             localTicketsStore.getTicketsFlow().collect { tickets ->
                 notifyNewReplySubscribers(tickets.lastOrNull())
             }
+        }
+    }
+
+    fun getTicketsUpdateInterval(preferencesManager: PreferencesManager?): Long {
+        val lastActiveTime = preferencesManager?.getLastActiveTime() ?: -1L
+        val diff = System.currentTimeMillis() - lastActiveTime
+        return when {
+            diff <= MILLISECONDS_IN_MINUTE -> 5L * MILLISECONDS_IN_SECOND
+            diff <= 5 * MILLISECONDS_IN_MINUTE -> 15L * MILLISECONDS_IN_SECOND
+            diff <= MILLISECONDS_IN_HOUR -> MILLISECONDS_IN_MINUTE.toLong()
+            diff <= 3 * MILLISECONDS_IN_DAY || PyrusServiceDesk.sdIsOpen -> 3 * MILLISECONDS_IN_MINUTE.toLong()
+            else -> -1L
         }
     }
 

@@ -345,7 +345,7 @@ internal class SdRepository(
     suspend fun setPushToken(user: UserInternal, token: String, tokenType: String): Try<TicketCommandResultDto> {
         val instanceId = accountStore.getAccount().getInstanceId()
         val command = commandsStore.createPushTokenCommand(user, token, tokenType, instanceId)
-        return synchronizer.syncCommand(command)
+        return synchronizer.addCommand(command)
     }
 
     fun retryAddComment(user: UserInternal, localId: Long) = coroutineScope.launch(Dispatchers.IO) {
