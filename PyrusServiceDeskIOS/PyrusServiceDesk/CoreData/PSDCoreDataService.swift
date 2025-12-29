@@ -57,7 +57,7 @@ final class CoreDataService {
         let defaults = UserDefaults.standard
         let savedVersion = defaults.integer(forKey: schemaVersionKey)
 
-        guard savedVersion != currentSchemaVersion else {
+        guard savedVersion < currentSchemaVersion else {
             return
         }
 
