@@ -80,8 +80,12 @@ private extension SyncManager {
         sendingMessages = PSDMessagesStorage.getSendingMessages()
         
         let ticketCommands = PyrusServiceDesk.repository.getCommands()
-        PSDGetChats.get(commands: ticketCommands.map({ $0.toDictionary() })) { [weak self] chats, commandsResult, authorAccessDenied, clientsArray, complete in
+        let userId = PyrusServiceDesk.customUserId
+        PSDGetChats.get(commands: ticketCommands.map({ $0.toDictionary() })) { [weak self, userId] chats, commandsResult, authorAccessDenied, clientsArray, complete in
             guard PyrusServiceDesk.isStarted || !PyrusServiceDesk.multichats else { return }
+            if !PyrusServiceDesk.multichats && userId != PyrusServiceDesk.customUserId {
+                return
+            }
             guard let self = self else { return }
             
             let userInfo = ["isFilter": isFilter]

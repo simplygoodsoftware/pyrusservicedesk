@@ -414,6 +414,9 @@ import UIKit
         isStarted = true
         if !multichats && PyrusServiceDesk.clientId != nil {
             PyrusServiceDesk.needShowLoading = PyrusServiceDesk.clientId != clientId || PyrusServiceDesk.customUserId != userId
+            if needShowLoading {
+                cleanCache()
+            }
         }
         PyrusServiceDesk.chats = []
         PyrusServiceDesk.clients = []
