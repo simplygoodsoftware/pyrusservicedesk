@@ -31,6 +31,20 @@ class PSDChatTableView: PSDTableView {
         return view
     }()
     
+    private lazy var operatorTimeLabel: UILabel = {
+        let label = UILabel()
+        label.font = UIFont.systemFont(ofSize: 14)
+        label.textColor = CustomizationHelper.textColorForTable
+        label.textAlignment = .center
+        return label
+    }()
+    
+    private lazy var operatorTimeView: UIView = {
+        let view = UIView()
+        view.backgroundColor = PyrusServiceDesk.mainController?.customization?.customBackgroundColor
+        return view
+    }()
+    
     private lazy var customRefresh: PSDRefreshControl = {
         let refreshControl = PSDRefreshControl.init(frame: self.bounds)
         refreshControl.position = .top
@@ -75,13 +89,16 @@ class PSDChatTableView: PSDTableView {
     
     override func layoutSubviews() {
         super.layoutSubviews()
-        var newFrame = buttonsView.frame
-        if newFrame.size.height != buttonsView.collectionView.contentSize.height {
-            newFrame.size.width = frame.size.width
-            newFrame.size.height = buttonsView.collectionView.contentSize.height
-            buttonsView.frame = newFrame
-            tableHeaderView = buttonsView
-            buttonsView.collectionView.transform = CGAffineTransform(rotationAngle: CGFloat.pi)
+        buttonsView.collectionView.collectionViewLayout.invalidateLayout()
+        if headerType == .buttons {
+            var newFrame = buttonsView.frame
+            if newFrame.size.height != buttonsView.collectionView.contentSize.height {
+                newFrame.size.width = frame.size.width
+                newFrame.size.height = buttonsView.collectionView.contentSize.height
+                buttonsView.frame = newFrame
+                tableHeaderView = buttonsView
+                buttonsView.collectionView.transform = CGAffineTransform(rotationAngle: CGFloat.pi)
+            }
         }
     }
     
@@ -106,6 +123,18 @@ class PSDChatTableView: PSDTableView {
         } else {
             dataSource = self
         }
+        setupOperatorView()
+    }
+    
+    func setupOperatorView() {
+        operatorTimeView.addSubview(operatorTimeLabel)
+        operatorTimeLabel.translatesAutoresizingMaskIntoConstraints = false
+        
+        NSLayoutConstraint.activate([
+            operatorTimeLabel.centerXAnchor.constraint(equalTo: operatorTimeView.centerXAnchor),
+            operatorTimeLabel.bottomAnchor.constraint(equalTo: operatorTimeView.bottomAnchor, constant: -6)
+//            operatorTimeLabel.centerYAnchor.constraint(equalTo: operatorTimeView.centerYAnchor)
+        ])
     }
     
     func updateRows(keyboardHeight: CGFloat) {
@@ -117,12 +146,12 @@ class PSDChatTableView: PSDTableView {
         self.scrollToBottomAfterRefresh(with: oldContentOffset, oldContentSize: oldContentSize, keyboardHeight: keyboardHeight)
     }
     
-    func addRow(scrollsToBottom: Bool) {
+    func addRow(scrollsToBottom: Bool, keyBoardHeight: CGFloat) {
         let inset = contentInset.top - 20
         let needAnimate = contentOffset.y <= -inset
         reloadAll(animated: needAnimate)
         if scrollsToBottom {
-            self.scrollsToBottom(animated: true, keyBoardHeight: 0, addRow: true)
+            self.scrollsToBottom(animated: true, keyBoardHeight: keyBoardHeight, addRow: true)
         }
     }
     
@@ -148,9 +177,42 @@ class PSDChatTableView: PSDTableView {
         bottomRefresh.endRefreshing()
     }
     
+    private enum tableViewHeaderType {
+        case operatorTime, buttons, none
+    }
+    private var headerType: tableViewHeaderType = .none
+    
     func updateButtonsView(buttons: [ButtonData]?) {
         buttonsView.updateWithButtons(buttons, width: self.frame.size.width)
         buttonsView.collectionView.collectionViewLayout.invalidateLayout()
+        
+        guard let buttons, buttons.count > 0, headerType != .operatorTime else {
+            if headerType != .operatorTime {
+                tableHeaderView = nil
+                headerType = .none
+            }
+            return
+        }
+        
+        headerType = .buttons
+    }
+    
+    func updateOperatorTimeLabel(time: String?) {
+        guard let time, time.count > 0, headerType != .buttons else {
+            if headerType != .buttons {
+                tableHeaderView = nil
+                headerType = .none
+            }
+            return
+        }
+        
+        headerType = .operatorTime
+        operatorTimeLabel.text = time
+        operatorTimeLabel.transform = CGAffineTransform(rotationAngle: CGFloat.pi)
+        operatorTimeView.frame = CGRect(x: 0, y: 0, width: frame.width, height: 42)
+        tableHeaderView = operatorTimeView
+        setNeedsLayout()
+        layoutIfNeeded()
     }
     
     func showNoConnectionView() {
@@ -174,17 +236,43 @@ class PSDChatTableView: PSDTableView {
         
     ///Scroll tableview to its bottom position without animation
     func scrollsToBottom(animated: Bool, keyBoardHeight: CGFloat, addRow: Bool = false) {
+        var keyBoardHeight: CGFloat = keyBoardHeight
+        if 200 < keyBoardHeight && keyBoardHeight < 300 {
+            keyBoardHeight -= PSDMessageInputView.attachmentsHeight
+        }
         if tableMatrix.count > 0, tableMatrix[0].count > 0 {
-            if buttonsView.buttons?.count ?? 0 > 0 && !addRow {
+            switch headerType {
+            case .operatorTime:
                 setContentOffset(CGPoint(x: 0, y: -keyBoardHeight), animated: animated)
                 setNeedsLayout()
                 layoutIfNeeded()
-            } else {
+                setContentOffset(CGPoint(x: 0, y: -keyBoardHeight), animated: animated)
+                setNeedsLayout()
+                layoutIfNeeded()
+            case .buttons:
+                if !addRow {
+                    setContentOffset(CGPoint(x: 0, y: -keyBoardHeight), animated: animated)
+                } else {
+                    scrollToRow(at: IndexPath(row: 0, section: 0), at: .top, animated: animated)
+                }
+                setNeedsLayout()
+                layoutIfNeeded()
+            case .none:
                 scrollToRow(at: IndexPath(row: 0, section: 0), at: .top, animated: animated)
                 setNeedsLayout()
                 layoutIfNeeded()
                 scrollToRow(at: IndexPath(row: 0, section: 0), at: .top, animated: animated)
             }
+//            if buttonsView.buttons?.count ?? 0 > 0 && !addRow {
+//                setContentOffset(CGPoint(x: 0, y: -keyBoardHeight), animated: animated)
+//                setNeedsLayout()
+//                layoutIfNeeded()
+//            } else {
+//                scrollToRow(at: IndexPath(row: 0, section: 0), at: .top, animated: animated)
+//                setNeedsLayout()
+//                layoutIfNeeded()
+//                scrollToRow(at: IndexPath(row: 0, section: 0), at: .top, animated: animated)
+//            }
         }
         
 //        chatDelegate?.updateScrollButton(isHidden: true)
@@ -339,10 +427,12 @@ extension PSDChatTableView: UITableViewDelegate, UITableViewDataSource {
             }
         }
         
-        cell.draw(message: message, width: frame.size.width)
-        PSDPreviewSetter.setPreview(of: message.attachment, in: cell.cloudView.attachmentView, delegate: self, animated: false)
-        self.redrawSendingAttachmentCell(at: indexPath, with: message)
-        cell.cloudView.messageTextView.linkDelegate = self
+        if let chatCell = cell as? PSDChatMessageCell {
+            chatCell.draw(message: message, width: frame.size.width)
+            PSDPreviewSetter.setPreview(of: message.attachment, in: chatCell.cloudView.attachmentView, delegate: self, animated: false)
+            self.redrawSendingAttachmentCell(at: indexPath, with: message)
+            chatCell.cloudView.messageTextView.linkDelegate = self
+        }
         cell.transform = CGAffineTransform(rotationAngle: CGFloat.pi)
         
         return cell

@@ -62,6 +62,8 @@ extension PSDChatPresenter: PSDChatPresenterProtocol {
             ))
         case .showRatingComment(ratingText: let ratingText, rating: let rating):
             view?.show(.showRatingComment(ratingText: ratingText, rating: rating))
+        case .updateOperatorTime(timeMessage: let timeMessage):
+            view?.show(.updateOperatorTime(timeMessage: timeMessage))
         }
     }
 }

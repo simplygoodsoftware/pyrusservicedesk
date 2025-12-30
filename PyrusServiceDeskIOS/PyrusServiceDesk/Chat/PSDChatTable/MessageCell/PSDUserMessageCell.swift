@@ -88,7 +88,9 @@ class PSDUserMessageCell: PSDChatMessageCell {
             self.topMessageConstraint?.constant = 0
             return
         }
-        self.topMessageConstraint?.constant = needShowName && !firstMessageInDate ? PSDChatMessageCell.nameTopDistance : bottomDistance
+        self.topMessageConstraint?.constant = needShowName && !firstMessageInDate
+            ? PSDChatMessageCell.nameTopDistance
+            : bottomDistance
     }
     
     override func awakeFromNib() {

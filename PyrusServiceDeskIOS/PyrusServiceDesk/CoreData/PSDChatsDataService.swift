@@ -272,6 +272,7 @@ extension PSDChatsDataService: PSDChatsDataServiceProtocol {
                 dbMessage.authorId = message.owner?.authorId
                 dbMessage.authorName = message.owner?.name
                 dbMessage.authorAvatarId = message.owner?.imagePath
+                dbMessage.isSystem = message.isSystemMessage
                 if let rating = message.rating {
                     dbMessage.rating = Int32(rating)
                 }
@@ -363,6 +364,7 @@ extension PSDChatsDataService: PSDChatsDataServiceProtocol {
                             message.ticketId = Int(dbMessage.ticketId)
                             message.rating = Int(dbMessage.rating)
                             message.isSupportMessage = !dbMessage.isOutgoing
+                            message.isSystemMessage = dbMessage.isSystem
                             
                             // Обработка состояния сообщения
                             switch dbMessage.state {
@@ -461,6 +463,7 @@ extension PSDChatsDataService: PSDChatsDataServiceProtocol {
                         message.ticketId = Int(dbMessage.ticketId)
                         message.rating = Int(dbMessage.rating)
                         message.isSupportMessage = !dbMessage.isOutgoing
+                        message.isSystemMessage = dbMessage.isSystem
                         
                         switch dbMessage.state {
                         case 0:
@@ -744,6 +747,7 @@ extension PSDChatsDataService: PSDChatsDataServiceProtocol {
                     message.ticketId = Int(dbMessage.ticketId)
                     message.rating = Int(dbMessage.rating)
                     message.isSupportMessage = !dbMessage.isOutgoing
+                    message.isSystemMessage = dbMessage.isSystem
                     
                     // Обработка состояния сообщения
                     switch dbMessage.state {
@@ -831,7 +835,8 @@ extension PSDChatsDataService: PSDChatsDataServiceProtocol {
                 message.ticketId = Int(dbMessage.ticketId)
                 message.rating = Int(dbMessage.rating)
                 message.isSupportMessage = !dbMessage.isOutgoing
-                
+                message.isSystemMessage = dbMessage.isSystem
+
                 // Обработка состояния сообщения
                 switch dbMessage.state {
                 case 0: message.state = .sending

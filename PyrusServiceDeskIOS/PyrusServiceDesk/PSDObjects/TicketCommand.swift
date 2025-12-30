@@ -4,6 +4,7 @@ enum TicketCommandType: Int {
     case createComment
     case readTicket
     case setPushToken
+    case calcOperatorTime = 4
 }
 
 struct AttachmentData: Codable {
@@ -90,11 +91,13 @@ class TicketCommandResult: Codable {
     let commentId: Int?
     let ticketId: Int?
     let error: ServiceError?
+    let operatorResponseTimeMessage: String?
     
     enum CodingKeys: String, CodingKey {
         case commandId = "command_id"
         case commentId = "comment_id"
         case ticketId = "ticket_id"
+        case operatorResponseTimeMessage = "operator_response_time_message"
         case error = "error"
     }
 }
