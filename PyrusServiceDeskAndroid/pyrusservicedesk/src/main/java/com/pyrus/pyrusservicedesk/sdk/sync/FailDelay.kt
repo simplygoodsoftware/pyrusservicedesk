@@ -14,12 +14,13 @@ internal class FailDelay {
      * returns delay in milliseconds
      */
     private fun getNextDelay(): Long {
-        val delay =
+        var delay =
             if (previousDelay.get() == 0L)
                 BASE_DELAY
-            else min(Random.nextLong(BASE_DELAY, previousDelay.get() * 3), MAX_DELAY)
+            else min(previousDelay.get() * 3, MAX_DELAY)
 
         previousDelay.set(delay)
+        delay = Random.nextLong(BASE_DELAY, delay + 1)
         return delay
     }
 
