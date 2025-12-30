@@ -282,7 +282,7 @@ private extension SyncManager {
             clearTimer()
             
             var delay = min(defaultDelay, Constants.maxDelay)
-            delay = Bool.random() ? Constants.baseDelay : delay
+            delay = TimeInterval(Double.random(in: Constants.baseDelay...delay))
             previousDelay = defaultDelay
             
             self.timerFosSendSync = Timer.scheduledTimer(timeInterval: delay, target: self, selector: #selector(self.doSync), userInfo: nil, repeats: false)
