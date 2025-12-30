@@ -227,12 +227,16 @@ class PSDChatViewController: PSDViewController, PSDMainController {
                 self.bottomStopButton?.constant = -110
                 self.view.layoutIfNeeded()
                 if !self.isActive {
-                    self.tableView.contentInset.top = 90
+                    self.tableView.contentInset.top = 90 + self.view.safeAreaInsets.bottom
                 } else
                        if !((self.oldHeight - self.messageInputView.frame.size.height).rounded() == self.view.safeAreaInsets.bottom)
                        {
                     self.isAddButtonTapped = false
-                    self.tableView.contentInset.top = self.messageInputView.frame.size.height
+                    if #available(iOS 26.0, *) {
+                        self.tableView.contentInset.top = self.messageInputView.frame.size.height + self.view.safeAreaInsets.bottom
+                    } else {
+                        self.tableView.contentInset.top = self.messageInputView.frame.size.height
+                    }
                 }
                  })
          //   }
@@ -720,7 +724,7 @@ extension PSDChatViewController: PSDChatViewProtocol {
             self.isActive = isActive
             if !isActive {
                 closedTicketView.isHidden = false
-                tableView.contentInset.top = 90
+                tableView.contentInset.top = 90 + self.view.safeAreaInsets.bottom
                 self.resignFirstResponder()
                 self.messageInputView.inputTextView.resignFirstResponder()
             }
