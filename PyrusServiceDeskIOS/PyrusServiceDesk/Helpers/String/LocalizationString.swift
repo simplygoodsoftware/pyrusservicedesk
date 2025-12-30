@@ -1,5 +1,14 @@
 import Foundation
-let PSD_BUNDLE = Bundle(for: PyrusServiceDesk.self)
+let PSD_BUNDLE: Bundle = {
+    // 1. Swift Package Manager
+    #if SWIFT_PACKAGE
+    return Bundle.module
+    #else
+    // 2. CocoaPods / framework
+    return Bundle(for: PyrusServiceDesk.self)
+    #endif
+}()
+
 extension String {
     func localizedPSD() -> String {
         if 
