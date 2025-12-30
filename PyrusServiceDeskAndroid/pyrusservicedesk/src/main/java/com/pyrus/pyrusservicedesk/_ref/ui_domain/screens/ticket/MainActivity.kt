@@ -14,6 +14,7 @@ import com.google.android.gms.tasks.Task
 import com.google.android.play.core.review.ReviewInfo
 import com.google.android.play.core.review.ReviewManagerFactory
 import com.pyrus.pyrusservicedesk.OpenTicketAction
+import com.pyrus.pyrusservicedesk.PyrusServiceDesk
 import com.pyrus.pyrusservicedesk.PyrusServiceDesk.Companion.injector
 import com.pyrus.pyrusservicedesk.R
 import com.pyrus.pyrusservicedesk.ServiceDeskConfiguration
@@ -109,6 +110,7 @@ internal class MainActivity : FragmentActivity() {
 
     override fun finish() {
         super.finish()
+        PyrusServiceDesk.onServiceDeskStop()
         val enter = R.anim.no_animation
         val exit = R.anim.fade_out
         if (VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
