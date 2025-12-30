@@ -141,11 +141,10 @@ internal class Synchronizer(
             val delay = min(rawDelay, diff)
             delay(delay)
         }
-        lastSyncTime.set(currentTime)
+        lastSyncTime.set(System.currentTimeMillis())
     }
 
     private fun runLoop(syncRequests: List<SyncReqRes>) = launch {
-        trotRequest(syncRequests)
         
         val account = accountStore.getAccount()
 
@@ -173,6 +172,8 @@ internal class Synchronizer(
             firstAppId = firstAppId,
         )
 
+
+        trotRequest(syncRequests)
         val getTicketsTry = api.getTickets(getTicketsRequest)
         
         if (getTicketsTry.isSuccess()) {
