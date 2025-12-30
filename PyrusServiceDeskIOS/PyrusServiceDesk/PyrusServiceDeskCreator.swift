@@ -8,7 +8,7 @@ import UIKit
     private static let REFRESH_TIME_INTEVAL = TimeInterval(1*60)
     private static let REFRESH_MAX_COUNT = 20
     
-    static let PSD_VERSION: String = "2.3.68"
+    static let PSD_VERSION: String = "2.3.69"
     
     ///AppId needed for request
     static var clientId: String?
@@ -335,9 +335,9 @@ import UIKit
     ///Subscribe [subscriber] for notifications that new messages from support have appeared in the chat.
     @objc public static func subscribeToReplies(_ subscriber: NewReplySubscriber?){
         PyrusServiceDesk.subscriber = subscriber
-        if let date = getLastActivityDate() {
+        if let date = SyncManager.getLastActivityDate() {
             let diff = Date().timeIntervalSince(date)
-            if diff < PSDChatInteractor.PSD_LAST_ACTIVITY_INTEVAL_3_DAYS {
+            if diff < SyncManager.PSD_LAST_ACTIVITY_INTERVAL_3_DAYS {
                 startGettingInfo(rightNow: true)
             }
             
@@ -362,7 +362,7 @@ import UIKit
         return []
     }
     
-    @objc public static func cleanCashe() {
+    @objc public static func cleanCache() {
         isStarted = false
         DispatchQueue.global().async {
             syncManager.chatsDataService.deleteAllObjects()
@@ -544,53 +544,9 @@ import UIKit
             updateUserInfo()
         }
         
-        if let interval = getTimerInerval() {
+        if let interval = SyncManager.getTimerInerval() {
             timer = Timer.scheduledTimer(timeInterval: interval, target: self, selector: #selector(updateUserInfo), userInfo: nil, repeats: false)
         }
-    }
-    
-    private static func getTimerInerval() -> TimeInterval? {
-        PyrusLogger.shared.logEvent("getTimerInerval started")
-        if let date = getLastActivityDate() {
-            let difference = Date().timeIntervalSince(date)
-            var timeInterval: TimeInterval? = nil
-            if difference <= PSDChatInteractor.PSD_LAST_ACTIVITY_INTEVAL_MINUTE {
-                timeInterval = PSDChatInteractor.REFRESH_TIME_INTEVAL_5_SECONDS
-            } else if difference <=  PSDChatInteractor.PSD_LAST_ACTIVITY_INTEVAL_5_MINUTES {
-                timeInterval =  PSDChatInteractor.REFRESH_TIME_INTEVAL_15_SECONDS
-            } else if difference <=  PSDChatInteractor.PSD_LAST_ACTIVITY_INTEVAL_HOUR {
-                timeInterval =  PSDChatInteractor.REFRESH_TIME_INTEVAL_1_MINUTE
-            } else if difference <=  PSDChatInteractor.PSD_LAST_ACTIVITY_INTEVAL_3_DAYS {
-                timeInterval =  PSDChatInteractor.REFRESH_TIME_INTEVAL_3_MINUTES
-            }
-            PyrusLogger.shared.logEvent("getTimerInerval ended with time: \(String(describing: timeInterval))")
-            return timeInterval
-        }
-        PyrusLogger.shared.logEvent("getTimerInerval ended with nil, last activity = \(PSDMessagesStorage.pyrusUserDefaults()?.object(forKey: PSDChatInteractor.userLastActivityKey()) ?? "nil")")
-        return nil
-    }
-    
-    private static func getLastActivityDate() -> Date? {
-        return PSDMessagesStorage.pyrusUserDefaults()?.object(forKey: PSDChatInteractor.userLastActivityKey()) as? Date
-    }
-    
-    ///Set last user acivity date to NOW if date paramemeter is nil, returns true if setted
-    static func setLastActivityDate(_ date: Date? = nil) -> Bool {
-        if let pyrusUserDefaults = PSDMessagesStorage.pyrusUserDefaults(){
-            if let newDate = date, let oldDate = pyrusUserDefaults.object(forKey: PSDChatInteractor.userLastActivityKey()) as? Date{
-                if oldDate.compare(newDate) == .orderedDescending || oldDate.compare(newDate) == .orderedSame{
-                    return false
-                }
-            }
-            pyrusUserDefaults.set(date ?? Date(), forKey: PSDChatInteractor.userLastActivityKey())
-            pyrusUserDefaults.synchronize()
-            return true
-        }
-        return false
-    }
-    
-    static func removeLastActivityDate() {
-        PSDMessagesStorage.pyrusUserDefaults()?.removeObject(forKey: PSDChatInteractor.userLastActivityKey())
     }
     
     ///Restart PyrusServiceDesk.timer - move next fire to reloadInterval.
@@ -617,7 +573,6 @@ import UIKit
         }
     }
     static var allMessages: [PSDMessage] = [PSDMessage]()
-    static var casheChats: [PSDChat] = [PSDChat]()
 
     ///The main view controller. nil - if chat was closed.
     weak static var mainController: PSDMainController?

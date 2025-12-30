@@ -191,7 +191,6 @@ extension PSDChatInteractor: PSDChatInteractorProtocol {
                     presenter.doWork(.scrollToRow(indexPath: reversedIndex))
                 }
             }
-            startGettingInfo()
         case .send(message: let message, attachments: let attachments):
             send(message, attachments)
         case .sendRate(rateValue: let rateValue):
@@ -244,7 +243,7 @@ extension PSDChatInteractor: PSDChatInteractorProtocol {
                 presenter.doWork(.scrollToRow(indexPath: reversedIndex))
             }
         case .viewWillAppear:
-            break
+            startGettingInfo()
         case .sendRatingComment(comment: let comment, rating: let rating):
             sendRatingComment(ratingComment: comment, rating: rating)
         }
@@ -365,7 +364,7 @@ private extension PSDChatInteractor {
     
     func showSendMessageResult(messageToPass: PSDMessage, success: Bool) {
         if success {
-            let _ = PyrusServiceDesk.setLastActivityDate()
+            let _ = SyncManager.setLastActivityDate()
             startGettingInfo()
         }
         
@@ -494,7 +493,7 @@ private extension PSDChatInteractor {
         guard let date = lastDate else {
             return
         }
-        if PyrusServiceDesk.setLastActivityDate(date) {
+        if SyncManager.setLastActivityDate(date) {
             startGettingInfo()
         }
     }
@@ -812,15 +811,6 @@ private extension PSDChatInteractor {
 }
 
 extension PSDChatInteractor {
-    public static let PSD_LAST_ACTIVITY_INTEVAL_MINUTE = TimeInterval(60)
-    public static let PSD_LAST_ACTIVITY_INTEVAL_5_MINUTES = TimeInterval(60*5)
-    public static let PSD_LAST_ACTIVITY_INTEVAL_HOUR = TimeInterval(60*60)
-    public static let PSD_LAST_ACTIVITY_INTEVAL_3_DAYS = TimeInterval(3*24*60*60)
-    public static let REFRESH_TIME_INTEVAL_5_SECONDS = TimeInterval(5)
-    public static let REFRESH_TIME_INTEVAL_15_SECONDS = TimeInterval(15)
-    public static let REFRESH_TIME_INTEVAL_1_MINUTE = TimeInterval(60)
-    public static let REFRESH_TIME_INTEVAL_3_MINUTES = TimeInterval(180)
-    private static let PSD_LAST_ACTIVITY_KEY = "PSDLastActivityDate"
     
     private func stopGettingInfo() {
         if timer != nil {
@@ -829,31 +819,10 @@ extension PSDChatInteractor {
         }
     }
     
-    static func userLastActivityKey() -> String{
-        return PSD_LAST_ACTIVITY_KEY + "_" + PyrusServiceDesk.userId
-    }
-    
-    private static func getTimerInerval() -> TimeInterval? {
-        if let pyrusUserDefaults = PSDMessagesStorage.pyrusUserDefaults(), let date = pyrusUserDefaults.object(forKey: PSDChatInteractor.userLastActivityKey()) as? Date{
-            let difference = Date().timeIntervalSince(date)
-            if difference <= PSD_LAST_ACTIVITY_INTEVAL_MINUTE {
-                return REFRESH_TIME_INTEVAL_5_SECONDS
-            } else if difference <= PSD_LAST_ACTIVITY_INTEVAL_5_MINUTES {
-                return REFRESH_TIME_INTEVAL_15_SECONDS
-            } else if difference <= PSDChatInteractor.PSD_LAST_ACTIVITY_INTEVAL_HOUR {
-                return REFRESH_TIME_INTEVAL_1_MINUTE
-            } else if difference <= PSDChatInteractor.PSD_LAST_ACTIVITY_INTEVAL_3_DAYS {
-                return REFRESH_TIME_INTEVAL_3_MINUTES
-            }
-        }
-        return REFRESH_TIME_INTEVAL_3_MINUTES
-    }
-    
     func startGettingInfo() {
         stopGettingInfo()
-        if let timeInterval = PSDChatInteractor.getTimerInerval(), timeInterval > 0 {
-            timer = Timer.scheduledTimer(timeInterval: timeInterval, target: self, selector: #selector(updateTable), userInfo: nil, repeats: false)
-        }
+        let timeInterval = SyncManager.getTimerInerval() ?? SyncManager.REFRESH_TIME_INTERVAL_3_MINUTES
+        timer = Timer.scheduledTimer(timeInterval: timeInterval, target: self, selector: #selector(updateTable), userInfo: nil, repeats: false)
     }
     
     @objc private func updateTable() {

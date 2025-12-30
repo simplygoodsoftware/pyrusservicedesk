@@ -48,8 +48,8 @@ struct PSDGetChats {
         parameters["commands"] = commands
         
         let request: URLRequest = URLRequest.createRequest(type:.chats, parameters: parameters)
-//        print("app_id: \(PyrusServiceDesk.clientId), user_id: \(PyrusServiceDesk.customUserId ?? PyrusServiceDesk.userId), secret_key: \(PyrusServiceDesk.securityKey), lastNoteId: \(parameters["last_note_id"])")
-//        print("GetTickets: \(Date()), commands count: \(commands.count)")
+
+        print("GetTickets: \(Date()), commands count: \(commands.count)")
         PSDGetChats.sessionTask = PyrusServiceDesk.mainSession.dataTask(with: request) { data, response, error in
             guard let data = data, error == nil else { // check for fundamental networking error
                 completion(nil, nil, nil, nil, false)
@@ -59,7 +59,7 @@ struct PSDGetChats {
             if let httpStatus = response as? HTTPURLResponse, httpStatus.statusCode != 200 { // check for http errors
                 DispatchQueue.main.async {
                     if httpStatus.statusCode == 429 {
-                        PyrusServiceDesk.removeLastActivityDate()
+                        SyncManager.removeLastActivityDate()
                         completion(nil, nil, nil, nil, true)
                     }
                     if httpStatus.statusCode == 403 {
@@ -287,3 +287,13 @@ struct PSDGetChats {
 extension Notification.Name {
     static let createMenuNotification = Notification.Name("CreateMenuNotification")
 }
+
+let commentIdParameter = "comment_id"
+let ticketIdParameter = "ticket_id"
+let ratingParameter = "rating"
+let subjectParameter = "subject"
+let createdAtParameter = "created_at"
+let attachmentsParameter = "attachments"
+let guidParameter = "guid"
+let CLIENT_ID_KEY = "client_id"
+let EXTRA_FIELDS_KEY = "extra_fields"

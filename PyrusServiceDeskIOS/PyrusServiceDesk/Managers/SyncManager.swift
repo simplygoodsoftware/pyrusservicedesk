@@ -1,6 +1,5 @@
 import Foundation
 import Network
-import AudioToolbox
 
 class SyncManager {
     private var isRequestInProgress = false
@@ -36,8 +35,7 @@ class SyncManager {
             guard let lastMonitorPathStatus = self?.lastMonitorPathStatus else { return }
             if path.status == .satisfied && (lastMonitorPathStatus == .requiresConnection || lastMonitorPathStatus == .unsatisfied) {
                 if self?.timerFosSendSync != nil {
-                    self?.clearTimer()
-                    self?.updateRepeatSyncTimer()
+                    self?.doSync()
                 }
             }
             self?.lastMonitorPathStatus = path.status
@@ -121,7 +119,7 @@ private extension SyncManager {
                                 self.isFilter = false
                             }
                             clearTimer()
-                            previousDelay = Constants.baseDelay
+                            previousDelay = nil
                             networkAvailability = true
                             isRequestInProgress = false
                             
@@ -140,6 +138,7 @@ private extension SyncManager {
                     }
                 } else {
                     clearTimer()
+                    previousDelay = nil
                     networkAvailability = true
                     isRequestInProgress = false
                 }
@@ -151,8 +150,8 @@ private extension SyncManager {
         PyrusServiceDesk.clients = chatsDataService.getAllClients()
         PyrusServiceDesk.repository.loadCommands()
         if PyrusServiceDesk.multichats {
-            let cashe = chatsDataService.getAllChats()
-            PyrusServiceDesk.chats = cashe
+            let cache = chatsDataService.getAllChats()
+            PyrusServiceDesk.chats = cache
         } else {
             let createMessages = PSDMessagesStorage.getNewCreateTicketMessages(PyrusServiceDesk.customUserId)
             let localChats = PSDGetChats.getSortedChatForMessages(createMessages)
@@ -272,16 +271,19 @@ private extension SyncManager {
         DispatchQueue.main.async { [weak self] in
             guard let self else { return }
 
-            if timerFosSendSync == nil {
-                previousDelay = 1
+            var defaultDelay: TimeInterval = 1
+            if previousDelay == nil {
+                defaultDelay = Constants.baseDelay
             } else {
                 let currentRepeatInterval = previousDelay ?? Constants.baseDelay
-                previousDelay = currentRepeatInterval * 3
-                clearTimer()
+                defaultDelay = currentRepeatInterval * 3
             }
             
-            let random = Bool.random() ? Constants.baseDelay : (previousDelay ?? Constants.baseDelay) * 3
-            let delay = min(random, Constants.maxDelay)
+            clearTimer()
+            
+            var delay = min(defaultDelay, Constants.maxDelay)
+            delay = Bool.random() ? Constants.baseDelay : delay
+            previousDelay = defaultDelay
             
             self.timerFosSendSync = Timer.scheduledTimer(timeInterval: delay, target: self, selector: #selector(self.doSync), userInfo: nil, repeats: false)
         }
@@ -305,5 +307,60 @@ private extension SyncManager {
         static let throttlingCreateCommentInterval: TimeInterval = 1
         static let baseDelay: TimeInterval = 1
         static let maxDelay: TimeInterval = 3 * 60
+    }
+}
+
+extension SyncManager {
+    static let PSD_LAST_ACTIVITY_INTERVAL_MINUTE = TimeInterval(60)
+    static let PSD_LAST_ACTIVITY_INTERVAL_5_MINUTES = TimeInterval(60*5)
+    static let PSD_LAST_ACTIVITY_INTERVAL_HOUR = TimeInterval(60*60)
+    static let PSD_LAST_ACTIVITY_INTERVAL_3_DAYS = TimeInterval(3*24*60*60)
+    static let REFRESH_TIME_INTERVAL_5_SECONDS = TimeInterval(5)
+    static let REFRESH_TIME_INTERVAL_15_SECONDS = TimeInterval(15)
+    static let REFRESH_TIME_INTERVAL_1_MINUTE = TimeInterval(60)
+    static let REFRESH_TIME_INTERVAL_3_MINUTES = TimeInterval(180)
+    static let PSD_LAST_ACTIVITY_KEY = "PSDLastActivityDate"
+    
+    public static func getTimerInerval() -> TimeInterval? {
+        if let date = getLastActivityDate() {
+            let difference = Date().timeIntervalSince(date)
+            if difference <= PSD_LAST_ACTIVITY_INTERVAL_MINUTE {
+                return REFRESH_TIME_INTERVAL_5_SECONDS
+            } else if difference <= PSD_LAST_ACTIVITY_INTERVAL_5_MINUTES {
+                return REFRESH_TIME_INTERVAL_15_SECONDS
+            } else if difference <= PSD_LAST_ACTIVITY_INTERVAL_HOUR {
+                return REFRESH_TIME_INTERVAL_1_MINUTE
+            } else if difference <= PSD_LAST_ACTIVITY_INTERVAL_3_DAYS {
+                return REFRESH_TIME_INTERVAL_3_MINUTES
+            }
+        }
+        return nil
+    }
+    
+    static func userLastActivityKey() -> String{
+        return PSD_LAST_ACTIVITY_KEY + "_" + PyrusServiceDesk.userId
+    }
+    
+    static func getLastActivityDate() -> Date? {
+        return PSDMessagesStorage.pyrusUserDefaults()?.object(forKey: userLastActivityKey()) as? Date
+    }
+    
+    ///Set last user acivity date to NOW if date paramemeter is nil, returns true if setted
+    static func setLastActivityDate(_ date: Date? = nil) -> Bool {
+        if let pyrusUserDefaults = PSDMessagesStorage.pyrusUserDefaults(){
+            if let newDate = date, let oldDate = pyrusUserDefaults.object(forKey: userLastActivityKey()) as? Date{
+                if oldDate.compare(newDate) == .orderedDescending || oldDate.compare(newDate) == .orderedSame{
+                    return false
+                }
+            }
+            pyrusUserDefaults.set(date ?? Date(), forKey: userLastActivityKey())
+            pyrusUserDefaults.synchronize()
+            return true
+        }
+        return false
+    }
+    
+    static func removeLastActivityDate() {
+        PSDMessagesStorage.pyrusUserDefaults()?.removeObject(forKey: userLastActivityKey())
     }
 }

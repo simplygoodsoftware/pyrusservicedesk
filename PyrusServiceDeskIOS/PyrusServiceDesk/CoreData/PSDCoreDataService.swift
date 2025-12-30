@@ -54,8 +54,8 @@ final class CoreDataService {
     }
     
     private func checkAndResetStoreIfNeeded() {
-        let defaults = UserDefaults.standard
-        let savedVersion = defaults.integer(forKey: schemaVersionKey)
+        let defaults = PSDMessagesStorage.pyrusUserDefaults()
+        let savedVersion = defaults?.integer(forKey: schemaVersionKey) ?? 0
 
         guard savedVersion < currentSchemaVersion else {
             return
@@ -69,7 +69,7 @@ final class CoreDataService {
             }
         }
 
-        defaults.set(currentSchemaVersion, forKey: schemaVersionKey)
+        defaults?.set(currentSchemaVersion, forKey: schemaVersionKey)
     }
 
 }
