@@ -4,7 +4,6 @@
 // swift-module-flags-ignorable: -no-verify-emitted-module-interface -formal-cxx-interoperability-mode=off -interface-compiler-version 6.2.3
 import AVFoundation
 import AVKit
-import AudioToolbox
 import Compression
 import CoreData
 import DeveloperToolsSupport
@@ -252,7 +251,7 @@ public enum VerticalAlignment {
   @objc public static func unsubscribeFromReplies(_ subscriber: (any NewReplySubscriber)?)
   #endif
   @objc public static func subscribeToGogEvents(_ subscriber: any LogEvents)
-  @objc public static func cleanCashe()
+  @objc public static func cleanCache()
   #if compiler(>=5.3) && $NonescapableTypes
   @objc public static func createWith(_ clientId: Swift.String?, clientName: Swift.String? = nil, multichats: Swift.Bool = false, authorId: Swift.String? = nil, userName: Swift.String? = nil, additionalUsers: [PSDUserInfo] = [], domain: Swift.String? = nil, loggingEnabled: Swift.Bool = false, authorizationToken: Swift.String? = nil)
   #endif

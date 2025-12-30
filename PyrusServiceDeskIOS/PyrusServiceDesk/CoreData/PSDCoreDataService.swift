@@ -12,15 +12,24 @@ final class CoreDataService {
     private lazy var persistentContainer: NSPersistentContainer = {
         checkAndResetStoreIfNeeded()
         
-        guard let modelURL = PSD_BUNDLE.url(forResource: "PSDChats", withExtension: "momd") else {
-            fatalError("❌ Не найден PSDChats.momd в bundle: \(PSD_BUNDLE.bundleURL)")
-        }
-
-        guard let model = NSManagedObjectModel(contentsOf: modelURL) else {
-            fatalError("❌ Не удалось загрузить NSManagedObjectModel из \(modelURL)")
-        }
-
-        let container = NSPersistentContainer(name: "PSDChats", managedObjectModel: model)
+//        guard let modelURL = PSD_BUNDLE.url(forResource: "PSDChats", withExtension: "momd") else {
+//            fatalError("❌ Не найден PSDChats.momd в bundle: \(PSD_BUNDLE.bundleURL)")
+//        }
+//        
+//        let modelURL = momdURL.appendingPathComponent("PSDChats_8.mom")
+//
+//        guard let model = NSManagedObjectModel(contentsOf: modelURL) else {
+//            fatalError("❌ Не удалось загрузить NSManagedObjectModel из \(modelURL)")
+//        }
+//
+//        let container = NSPersistentContainer(name: "PSDChats", managedObjectModel: model)
+//        container.loadPersistentStores { _, error in
+//            if let error {
+//                fatalError("❌ Ошибка загрузки persistent store: \(error)")
+//            }
+//        }
+        
+        let container = NSPersistentContainer(name: "PSDChats")
         container.loadPersistentStores { _, error in
             if let error {
                 fatalError("❌ Ошибка загрузки persistent store: \(error)")

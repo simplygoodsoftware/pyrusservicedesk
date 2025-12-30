@@ -296,7 +296,6 @@
 		4B63396421FA168500A154B5 /* DownloadBlack@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 4B63395E21FA168500A154B5 /* DownloadBlack@2x.png */; };
 		4B63396521FA168500A154B5 /* DownloadBlack.png in Resources */ = {isa = PBXBuildFile; fileRef = 4B63395F21FA168500A154B5 /* DownloadBlack.png */; };
 		4B64B870224384F3003116C3 /* String+years.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4B64B86F224384F3003116C3 /* String+years.swift */; };
-		4B64B872224399E0003116C3 /* PSDMessageSender.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4B64B871224399E0003116C3 /* PSDMessageSender.swift */; };
 		4B64B8742243D402003116C3 /* CharacterSet+urlEncode.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4B64B8732243D402003116C3 /* CharacterSet+urlEncode.swift */; };
 		4B659AFE223FA9E400D79489 /* PSDSpinerTableView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4B659AFD223FA9E400D79489 /* PSDSpinerTableView.swift */; };
 		4B66011D223948CE00AA45E6 /* PyrusServiceDeskCustomization.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4B66011C223948CE00AA45E6 /* PyrusServiceDeskCustomization.swift */; };
@@ -714,7 +713,6 @@
 		4B63395E21FA168500A154B5 /* DownloadBlack@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "DownloadBlack@2x.png"; sourceTree = "<group>"; };
 		4B63395F21FA168500A154B5 /* DownloadBlack.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = DownloadBlack.png; sourceTree = "<group>"; };
 		4B64B86F224384F3003116C3 /* String+years.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "String+years.swift"; sourceTree = "<group>"; };
-		4B64B871224399E0003116C3 /* PSDMessageSender.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PSDMessageSender.swift; sourceTree = "<group>"; };
 		4B64B8732243D402003116C3 /* CharacterSet+urlEncode.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "CharacterSet+urlEncode.swift"; sourceTree = "<group>"; };
 		4B659AFD223FA9E400D79489 /* PSDSpinerTableView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PSDSpinerTableView.swift; sourceTree = "<group>"; };
 		4B66011C223948CE00AA45E6 /* PyrusServiceDeskCustomization.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PyrusServiceDeskCustomization.swift; sourceTree = "<group>"; };
@@ -1804,7 +1802,6 @@
 				4BB8559F2208593200F7CCE5 /* URLCreator.swift */,
 				4BCEB436220C3CF8008B29B6 /* PSDCreateRequest.swift */,
 				4BCEB43A220C869A008B29B6 /* PSDMessageSend.swift */,
-				4B64B871224399E0003116C3 /* PSDMessageSender.swift */,
 				4B88C6F422145AB000BDB304 /* PSDGetChat.swift */,
 				4B88C6F622145ACA00BDB304 /* PSDGetChats.swift */,
 				4B90E516221DB21000A18245 /* PSDNoConnectionView.swift */,
@@ -2205,7 +2202,6 @@
 				4BA3FF4222117E1600CE497A /* UIView+findViewController.swift in Sources */,
 				4B56BE4D2216E608004E6685 /* PSDAttachmentView.swift in Sources */,
 				4B5AFEA921FB039000AAF233 /* AttachmentsAddButton.swift in Sources */,
-				4B64B872224399E0003116C3 /* PSDMessageSender.swift in Sources */,
 				4BCEB43B220C869A008B29B6 /* PSDMessageSend.swift in Sources */,
 				4BCEB437220C3CF8008B29B6 /* PSDCreateRequest.swift in Sources */,
 				1EA6F73E2D673FE3003674CE /* PSDCoreDataServiceProtocol.swift in Sources */,
