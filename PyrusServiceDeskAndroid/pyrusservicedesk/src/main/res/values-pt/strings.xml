@@ -39,7 +39,7 @@
     <string name="link_warning">Este link leva a um%s
 \nVocê realmente quer seguir com o link\?</string>
     <string name="psd_no_access">Sem acesso</string>
-    <string name="psd_no_access_message">Contate o gerente da sua organização para restaurar o acesso a %s.</string>
+    <string name="psd_no_access_message">Contate o gerente da sua organização para restaurar o acesso a %s</string>
     <string name="ok">OK</string>
     <string name="copied_text">Texto copiado</string>
     <string name="psd_support">suporte</string>
