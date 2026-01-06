@@ -38,4 +38,33 @@
     <string name="send_library_logs">Пошаљи дневнике библиотеке</string>
     <string name="link_warning">Овај линк води до %s
 \nДа ли заиста желиш да пратиш линк\?</string>
+    <string name="psd_no_access">Нема приступа</string>
+    <string name="psd_no_access_message">Контактирај менаџера организације да вратиш приступ %s</string>
+    <string name="ok">У реду</string>
+    <string name="copied_text">Копирани текст</string>
+    <string name="psd_support">подршка</string>
+    <string name="psd_date_format_d">EEE</string>
+    <string name="psd_date_format_d_m_short">dd.MM</string>
+    <string name="psd_date_format_d_m_y_short">dd.MM.yyyy</string>
+    <string name="psd_evaluate_the_operators_performance">Процени рад оператера</string>
+    <string name="psd_close">Затвори</string>
+    <string name="leave_your_comment">Напиши рецензију</string>
+    <string name="psd_filters">Филтери</string>
+    <string name="psd_ticket_number">Број тикета: %s</string>
+    <string name="psd_ticket_data_create">Направљено у %s</string>
+    <string name="all">Сви</string>
+    <string name="psd_you">Ти</string>
+    <string name="psd_type_photo">Фотографија</string>
+    <string name="psd_type_video">Видео</string>
+    <string name="psd_type_file">Датотека</string>
+    <string name="psd_type_audio">Гласовна порука</string>
+    <string name="psd_unsupptorted_attachment">Неподржани прилог</string>
+    <string name="new_ticket">Нови тикет</string>
+    <string name="closed_teckets">Затворени тикети</string>
+    <string name="ticket_was_closed">Тикет је затворен</string>
+    <string name="all_conversations">Сви разговори</string>
+    <string name="psd_search_by_tickets">Претрага по тикетима</string>
+    <string name="psd_no_suggestions">Нема предлога</string>
+    <string name="psd_swipe_cancel">‹‹ откажи</string>
+    <string name="psd_cancel">Откажи</string>
 </resources>
