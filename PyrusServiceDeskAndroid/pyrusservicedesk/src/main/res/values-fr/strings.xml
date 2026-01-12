@@ -50,8 +50,8 @@
     <string name="psd_close">Fermer</string>
     <string name="leave_your_comment">Rédiger un avis</string>
     <string name="psd_filters">Filtres</string>
-    <string name="psd_ticket_number">Numéro de billet : %s</string>
-    <string name="psd_ticket_data_create">Créé le : %s</string>
+    <string name="psd_ticket_number">Numéro de billet: %s</string>
+    <string name="psd_ticket_data_create">Créé le: %s</string>
     <string name="all">Tout</string>
     <string name="psd_you">Vous</string>
     <string name="psd_type_photo">Photo</string>
