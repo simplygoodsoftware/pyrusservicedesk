@@ -8,7 +8,7 @@ import UIKit
     private static let REFRESH_TIME_INTEVAL = TimeInterval(1*60)
     private static let REFRESH_MAX_COUNT = 20
     
-    static let PSD_VERSION: String = "2.3.71"
+    static let PSD_VERSION: String = "2.3.74"
     
     ///AppId needed for request
     static var clientId: String?

@@ -1,10 +1,10 @@
 import Foundation
 let PSD_BUNDLE: Bundle = {
-    // 1. Swift Package Manager
+//     1. Swift Package Manager
     #if SWIFT_PACKAGE
     return Bundle.module
     #else
-    // 2. CocoaPods / framework
+//     2. CocoaPods / framework
     return Bundle(for: PyrusServiceDesk.self)
     #endif
 }()
