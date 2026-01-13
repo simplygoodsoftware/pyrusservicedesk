@@ -26,6 +26,8 @@ class SyncManager {
     static let commandsResultNotification = Notification.Name("COMMANDS_RESULT")
     static let updateAccessesNotification = Notification.Name("UPDATE_ACCSESSES")
     static let connectionErrorNotification = Notification.Name("CONNECTION_ERROR")
+    static let updateOperatorTimeNotification = Notification.Name("OPERATOR_TIME")
+    static let removeOperatorTimeNotification = Notification.Name("REMOVE_OPERATOR_TIME")
 
     init() {
         throttle = ThrottleController(interval: 5)
@@ -218,16 +220,30 @@ private extension SyncManager {
     
     func updateCommandsAndMessageStorage(commandsResult: [TicketCommandResult]?) {
         if let commandsResult {
-            self.commandsResult = commandsResult.sorted(by: { $0.commentId ?? 0 < $1.commentId ?? 0 })
+            self.commandsResult = commandsResult.sorted(by: { $0.commentId ?? Int.max < $1.commentId ?? 0 })
             do {
                 let jsonData = try JSONEncoder().encode(commandsResult)
                 NotificationCenter.default.post(name: SyncManager.commandsResultNotification, object: nil, userInfo: ["tickets": jsonData])
             } catch { }
             
+            let commands = PyrusServiceDesk.repository.getCommands()
             for commandResult in commandsResult {
-                if let error = commandResult.error {
-                    print("Comand error: \(error)")
+                if PyrusServiceDeskController.PSDIsOpen(),
+                   let command = commands.first(where: { $0.commandId == commandResult.commandId }),
+                   command.type == TicketCommandType.calcOperatorTime.rawValue,
+                   let ticketId = commandResult.ticketId {
+                    if let operatorTimeMessage = commandResult.operatorResponseTimeMessage {
+                        NotificationCenter.default.post(name: SyncManager.updateOperatorTimeNotification, object: nil, userInfo: ["ticketId": ticketId, "message": operatorTimeMessage])
+                        DispatchQueue.main.asyncAfter(deadline: .now() + 60) {
+                            let params = TicketCommandParams(ticketId: ticketId, appId: command.appId, userId: command.userId)
+                            let command = TicketCommand(commandId: UUID().uuidString, type: .calcOperatorTime, appId: command.appId, userId: command.userId, params: params)
+                            PyrusServiceDesk.repository.add(command: command)
+                        }
+                    } else {
+                        NotificationCenter.default.post(name: SyncManager.removeOperatorTimeNotification, object: nil, userInfo: ["ticketId": ticketId])
+                    }
                 }
+                
                 if let message = self.sendingMessages.first(where: { $0.commandId.lowercased() == commandResult.commandId.lowercased() })?.message {
                     PyrusServiceDesk.repository.deleteCommand(withId: commandResult.commandId, serverTicketId: commandResult.ticketId)
                     PSDMessagesStorage.remove(messageId: message.clientId, needSafe: false, serverTicketId: commandResult.ticketId)

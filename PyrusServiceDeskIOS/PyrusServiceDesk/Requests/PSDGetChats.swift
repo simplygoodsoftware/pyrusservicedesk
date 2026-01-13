@@ -49,7 +49,7 @@ struct PSDGetChats {
         
         let request: URLRequest = URLRequest.createRequest(type:.chats, parameters: parameters)
 
-//        print("GetTickets: \(Date()), commands count: \(commands.count)")
+        print("GetTickets: \(Date()), commands count: \(commands.count)")
         PSDGetChats.sessionTask = PyrusServiceDesk.mainSession.dataTask(with: request) { data, response, error in
             guard let data = data, error == nil else { // check for fundamental networking error
                 completion(nil, nil, nil, nil, false)

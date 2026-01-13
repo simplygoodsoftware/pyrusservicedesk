@@ -188,6 +188,7 @@ struct PSDGetChat {
                 message.rating = rating
                 message.isOutgoing = IsInbound
                 message.isSupportMessage = (dic["is_inbound"] as? Bool ?? false)
+                message.isSystemMessage = dic["is_system"] as? Bool ?? false
                 let clientId = dic.stringOfKey(CLIENT_ID_KEY)
                 if clientId.count > 0 {
                     message.clientId = clientId

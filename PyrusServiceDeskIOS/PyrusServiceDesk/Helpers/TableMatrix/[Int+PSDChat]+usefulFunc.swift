@@ -189,6 +189,14 @@ extension Array where Element == [PSDRowMessage] {
         return false
     }
     
+    func isPreviousSystemMessage(at indexPath: IndexPath) -> Bool {
+        let indexPath = nextNotEmpty(indexPath)
+        if indexPath.row >= 0 && count > indexPath.section && self[indexPath.section].count > indexPath.row {
+            return self[indexPath.section][indexPath.row].isSystemMessage
+        }
+        return false
+    }
+    
     ///Find ower for massage at IndexPath. If tableMatrix has info - return it, or nil if not.
     private func personForMessage(at indexPath: IndexPath) -> PSDUser? {
         if indexPath.row >= 0 && count > indexPath.section && self[indexPath.section].count > indexPath.row {
