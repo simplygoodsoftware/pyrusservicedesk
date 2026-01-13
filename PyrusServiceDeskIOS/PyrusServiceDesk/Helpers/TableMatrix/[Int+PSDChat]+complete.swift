@@ -204,6 +204,9 @@ extension Array where Element == [PSDRowMessage]{
     ///return row for message according to its time
     private func row(forMessage: PSDMessage, section: Int) -> Int {
         for (row,message) in self[section].enumerated().reversed() {
+            if forMessage.isSystemMessage {
+                return row + 1
+            }
             if message.message.state == .sending, !message.message.isWelcomeMessage {
                 continue
             }

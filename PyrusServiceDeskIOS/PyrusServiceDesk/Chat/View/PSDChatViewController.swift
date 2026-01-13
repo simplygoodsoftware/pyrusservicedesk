@@ -221,16 +221,16 @@ class PSDChatViewController: PSDViewController, PSDMainController {
             let duration = keyboardAnimationDuration(notification)
             let keyboardHeight = keyboardEndFrame.height
             currkeyboardHeight = keyboardHeight
-         //   if isKeyBoardOpen {
-                   UIView.animate(withDuration: duration, delay: 0, animations: {
+            
+            UIView.animate(withDuration: duration, delay: 0, animations: {
                 self.bottomScrollButton?.constant = -110
                 self.bottomStopButton?.constant = -110
                 self.view.layoutIfNeeded()
                 if !self.isActive {
                     self.tableView.contentInset.top = 90 + self.view.safeAreaInsets.bottom
                 } else
-                       if !((self.oldHeight - self.messageInputView.frame.size.height).rounded() == self.view.safeAreaInsets.bottom)
-                       {
+                if !((self.oldHeight - self.messageInputView.frame.size.height).rounded() == self.view.safeAreaInsets.bottom)
+                {
                     self.isAddButtonTapped = false
                     if #available(iOS 26.0, *) {
                         self.tableView.contentInset.top = self.messageInputView.frame.size.height + self.view.safeAreaInsets.bottom
@@ -238,8 +238,8 @@ class PSDChatViewController: PSDViewController, PSDMainController {
                         self.tableView.contentInset.top = self.messageInputView.frame.size.height
                     }
                 }
-                 })
-         //   }
+            })
+            
             oldHeight = self.messageInputView.frame.size.height
         }
     }
@@ -675,7 +675,7 @@ extension PSDChatViewController: PSDChatViewProtocol {
         case .updateTableMatrix(matrix: let matrix):
             tableView.tableMatrix = matrix
         case .addRow(scrollsToBottom: let scrollsToBottom):
-            tableView.addRow(scrollsToBottom: scrollsToBottom)
+            tableView.addRow(scrollsToBottom: scrollsToBottom, keyBoardHeight: currkeyboardHeight)
         case .addNewRow:
             if(tableView.numberOfRows(inSection: 0) == 0) {
                 tableView.addNewRow() { [weak self] in
@@ -736,6 +736,8 @@ extension PSDChatViewController: PSDChatViewProtocol {
             DispatchQueue.main.async { [weak self] in
                 self?.router.route(to: .ratingComment(ratingText: ratingText, rating: rating))
             }
+        case .updateOperatorTime(timeMessage: let timeMessage):
+            tableView.updateOperatorTimeLabel(time: timeMessage)
         }
     }
 }

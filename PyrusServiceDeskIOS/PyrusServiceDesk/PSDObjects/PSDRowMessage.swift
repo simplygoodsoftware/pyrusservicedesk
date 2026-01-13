@@ -7,6 +7,7 @@ class PSDRowMessage: NSObject {
     var attachment: PSDAttachment?
     var message : PSDMessage
     var attributedText: NSAttributedString?
+    var isSystemMessage: Bool = false
     
     init(message: PSDMessage, attachment: PSDAttachment?, text: String) {
         self.message = message
@@ -20,6 +21,7 @@ class PSDRowMessage: NSObject {
         attributedText = HelpersStrings.decodeHTML(in: (text as NSString).parseXMLToAttributedString(fontColor: color).0 ?? NSAttributedString(string: ""))
         self.attachment = attachment
         self.rating = message.rating
+        isSystemMessage = message.isSystemMessage
         super.init()
     }
     
