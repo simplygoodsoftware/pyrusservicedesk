@@ -41,4 +41,9 @@
     <string name="send_library_logs">إرسال سجلات المكتبة</string>
     <string name="link_warning">هذا الرابط يؤدي إلى %s
 \nهل ترغب حقًا في متابعة الرابط؟</string>
+    <string name="psd_no_access">لا توجد صلاحية</string>
+    <string name="psd_no_access_message">تواصل مع مدير مؤسستك لاستعادة الوصول إلى %s</string>
+    <string name="ok">حسنًا</string>
+    <string name="copied_text">نص منسوخ</string>
+    <string name="psd_support">الدعم</string>
 </resources>
