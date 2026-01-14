@@ -12,7 +12,7 @@
 "New_Conversation" = "Nuova conversazione";
 "New_Conversation_Short" = "Nuovo";
 "Cancel" = "Annulla";
-"Settings" = "Parametri";
+"Settings" = "Impostazioni";
 "Send" = "Manda";
 "Back" = "Indietro";
 "Done" = "Fatto";
@@ -69,4 +69,4 @@
 "EvaluateQuality" = "Valuta la qualità del servizio";
 "PleaseEvaluateQuality" = "Per favore valuta la qualità del servizio";
 "LeaveYourComment" = "Scrivi una recensione";
-"Close" = "Chiudi";
+"Close" = "Chiudere";
