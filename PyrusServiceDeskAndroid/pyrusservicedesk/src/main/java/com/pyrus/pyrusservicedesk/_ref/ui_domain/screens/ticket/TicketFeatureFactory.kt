@@ -37,10 +37,12 @@ import com.pyrus.pyrusservicedesk.sdk.data.FileManager
 import com.pyrus.pyrusservicedesk.sdk.data.intermediate.FileData
 import com.pyrus.pyrusservicedesk.sdk.repositories.AccountStore
 import com.pyrus.pyrusservicedesk.sdk.repositories.DraftRepository
+import com.pyrus.pyrusservicedesk.sdk.repositories.LocalCommandsStore
 import com.pyrus.pyrusservicedesk.sdk.repositories.LocalTicketsStore
 import com.pyrus.pyrusservicedesk.sdk.repositories.SdRepository
 import com.pyrus.pyrusservicedesk.sdk.repositories.SystemMessageStore
 import com.pyrus.pyrusservicedesk.sdk.repositories.UserInternal
+import com.pyrus.pyrusservicedesk.sdk.sync.TicketCommandType
 import com.pyrus.pyrusservicedesk.sdk.updates.PreferencesManager
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.FlowPreview
@@ -66,6 +68,7 @@ internal class TicketFeatureFactory(
     private val audioRecordControllerFactory: AudioRecordControllerFactory,
     private val audioWrapper: AudioWrapper,
     private val localTicketsStore: LocalTicketsStore,
+    private val commandsStore: LocalCommandsStore,
     private val systemMessageStore: SystemMessageStore,
 ) {
 
@@ -93,17 +96,18 @@ internal class TicketFeatureFactory(
                 audioRecordController = audioRecordController,
                 audioWrapper = audioWrapper,
                 localTicketsStore = localTicketsStore,
+                commandsStore = commandsStore,
                 systemMessageStore = systemMessageStore,
             ).adaptCast(),
             initialEffects = listOf(
                 Effect.Inner.FeedFlow,
                 Effect.Inner.UpdateComments(force = false, ticketId = initialTicketId),
-                Effect.Inner.ReadTicket(ticketId = initialTicketId),
+                Effect.Inner.ReadTicketIfNeed(ticketId = initialTicketId),
                 Effect.Inner.CheckAccount,
                 Effect.Inner.SubscribeToRecord,
                 Effect.Inner.SubscribeToRecordProgress,
                 Effect.Inner.SubscribeToCancelRecord,
-                Effect.Inner.SendTextComment(sendComment, initialTicketId),
+                Effect.Inner.SendTextCommentIfIsNotNullOrBlank(sendComment, initialTicketId),
                 Effect.Inner.UpdateAudioData,
                 Effect.Inner.OperatorTimeMessageFeed
             ),
@@ -145,7 +149,7 @@ private class FeatureReducer(): Logic<State, Message, Effect>() {
                 val currentState = state as? State.Content ?: return
                 val buttonComment = message.text
                 if (buttonComment.isBlank()) return
-                effects { +Effect.Inner.SendTextComment(buttonComment, currentState.ticketId) }
+                effects { +Effect.Inner.SendTextCommentIfIsNotNullOrBlank(buttonComment, currentState.ticketId) }
             }
             is Message.Outer.OnPreviewClick -> {
                 val currentState = state as? State.Content ?: return
@@ -185,7 +189,7 @@ private class FeatureReducer(): Logic<State, Message, Effect>() {
                 }
                 val comment = currentState.inputText
                 if (comment.isBlank()) return
-                effects { +Effect.Inner.SendTextComment(comment, currentState.ticketId) }
+                effects { +Effect.Inner.SendTextCommentIfIsNotNullOrBlank(comment, currentState.ticketId) }
             }
             is Message.Outer.OnShowAttachVariantsClick -> {
                 if(state !is State.Content) return
@@ -326,7 +330,7 @@ private class FeatureReducer(): Logic<State, Message, Effect>() {
                 }
                 val ticket = message.ticket
                 if (!ticket.isRead) {
-                    effects { +Effect.Inner.ReadTicket(ticket.ticketId) }
+                    effects { +Effect.Inner.ReadTicketIfNeed(ticket.ticketId) }
                 }
             }
             is Message.Inner.CommentsUpdated -> {
@@ -334,7 +338,7 @@ private class FeatureReducer(): Logic<State, Message, Effect>() {
 
                 val ticket = message.ticket
                 if (ticket != null && !ticket.isRead) {
-                    effects { +Effect.Inner.ReadTicket(ticket.ticketId) }
+                    effects { +Effect.Inner.ReadTicketIfNeed(ticket.ticketId) }
                 }
                 state { currentState.copy(ticket = message.ticket) }
             }
@@ -394,6 +398,7 @@ private class TicketActor(
     private val audioRecordController: AudioRecordController,
     private val audioWrapper: AudioWrapper,
     private val localTicketsStore: LocalTicketsStore,
+    private val commandsStore: LocalCommandsStore,
     private val systemMessageStore: SystemMessageStore,
 ): Actor<Effect.Inner, Message.Inner> {
 
@@ -464,17 +469,18 @@ private class TicketActor(
             systemMessageStore.setNecessityTimeSystemMessage(ticketId, false)
             Message.Inner.Exit
         }
-        is Effect.Inner.SendTextComment -> flow {
+        is Effect.Inner.SendTextCommentIfIsNotNullOrBlank -> flow {
             //TODO for multichat
             ticketId = localTicketsStore.getTickets().lastOrNull()?.ticketId ?: ticketId
-            effect.text?.let {
-                val now = Calendar.getInstance()
-                val limit = now.timeInMillis - MILLISECONDS_IN_HOUR
-                if (preferencesManager.getLastActiveTime() < limit && ticketId > 0)
-                    systemMessageStore.setNecessityTimeSystemMessage(ticketId, true)
-                preferencesManager.saveLastActiveTime(System.currentTimeMillis())
-                repository.addTextComment(user, ticketId, effect.text)
-            }
+            if (effect.text.isNullOrBlank())
+                return@flow
+            val now = Calendar.getInstance()
+            val limit = now.timeInMillis - MILLISECONDS_IN_HOUR
+            if (preferencesManager.getLastActiveTime() < limit && ticketId > 0)
+                systemMessageStore.setNecessityTimeSystemMessage(ticketId, true)
+            preferencesManager.saveLastActiveTime(System.currentTimeMillis())
+            repository.addTextComment(user, ticketId, effect.text)
+
         }
         is Effect.Inner.SendRatingComment -> flow {
             preferencesManager.saveLastActiveTime(System.currentTimeMillis())
@@ -497,9 +503,12 @@ private class TicketActor(
             ticketId = localTicketsStore.getTickets().lastOrNull()?.ticketId ?: ticketId
             draftRepository.saveDraft(ticketId, effect.draft)
         }
-        is Effect.Inner.ReadTicket -> flow {
+        is Effect.Inner.ReadTicketIfNeed -> flow {
             ticketId = localTicketsStore.getTickets().lastOrNull()?.ticketId ?: ticketId
-            repository.readTicket(user, effect.ticketId)
+            val commands = commandsStore.getCommands(ticketId)
+            val command = commands.find { it.command.commandType == TicketCommandType.MarkTicketAsRead.ordinal }
+            if (localTicketsStore.getTicketWithComments(ticketId)?.ticket?.isRead == false && command == null )
+                repository.readTicket(user, effect.ticketId)
         }
         is Effect.Inner.ListenAttachVariant -> flow {
             if (effect.uri !is Uri) return@flow

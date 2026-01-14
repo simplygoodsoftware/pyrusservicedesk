@@ -11,6 +11,7 @@ import androidx.media3.session.MediaSession
 import com.github.terrakok.cicerone.Cicerone
 import com.github.terrakok.cicerone.NavigatorHolder
 import com.pyrus.pyrusservicedesk.AppResourceManager
+import com.pyrus.pyrusservicedesk.BuildConfig
 import com.pyrus.pyrusservicedesk._ref.helpers.DownloadHelper
 import com.pyrus.pyrusservicedesk._ref.ui_domain.access_denied.AccessDeniedFeatureFactory
 import com.pyrus.pyrusservicedesk._ref.ui_domain.rate_time.TimeToRateUseCase
@@ -100,10 +101,12 @@ internal class DiInjector(
                     requestBuilder.header("Authorization", authToken)
                 }
 
-                val userAgent = "ServicedeskClient/android/" +
-                    Build.MANUFACTURER + "/" +
-                    Build.MODEL + "/" +
-                    Build.VERSION.SDK_INT
+                val isMultiChat = if (accountStore.getAccount().isMultiChat()) 1 else 0
+                val userAgent = "ServiceDesk/Android/" +
+                    BuildConfig.VERSION_NAME + "/" +
+                    accountStore.getAccount().getAppId()?.take(10) + "/" +
+                    Build.VERSION.SDK_INT + "/" +
+                    isMultiChat
 
                 requestBuilder.header("User-Agent", userAgent)
                 chain.proceed(requestBuilder.build())
@@ -228,6 +231,7 @@ internal class DiInjector(
         audioRecordControllerFactory = audioRecordControllerFactory,
         audioWrapper = audioWrapper,
         localTicketsStore = localTicketsStore,
+        commandsStore = localCommandsStore,
         systemMessageStore = systemMessageStore,
     )
 

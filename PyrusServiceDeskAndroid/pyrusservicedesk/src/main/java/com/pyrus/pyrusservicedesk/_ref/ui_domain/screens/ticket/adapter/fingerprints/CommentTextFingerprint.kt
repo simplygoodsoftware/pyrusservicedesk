@@ -44,7 +44,7 @@ internal class CommentTextFingerprint(
 
     override fun getViewHolder(
         layoutInflater: LayoutInflater,
-        parent: ViewGroup
+        parent: ViewGroup,
     ): BaseViewHolder<CommentEntry.Comment.CommentText> = CommentTextHolder(
         PsdViewHolderCommentTextBinding.inflate(layoutInflater, parent, false),
         onEvent
@@ -52,7 +52,7 @@ internal class CommentTextFingerprint(
 
     override fun areItemsTheSame(
         oldItem: CommentEntry.Comment.CommentText,
-        newItem: CommentEntry.Comment.CommentText
+        newItem: CommentEntry.Comment.CommentText,
     ) = newItem.entryId == oldItem.entryId
 }
 
@@ -104,57 +104,47 @@ internal class CommentTextHolder(
             content = entry.text
             id = entry.id
             hasError = entry.hasError
+            setStatus(entry.status, entry.isInbound)
 
-            this.entry::isInbound.payloadCheck {
-                setIsInboundParameters(entry.isInbound)
-                setStatus(Status.Completed, entry.isInbound)
-            }
-            this.entry::status.payloadCheck {
-                setStatus(entry.status, entry.isInbound)
-            }
 
-            this.entry::text.payloadCheck {
-                val filteredText = entry.text
-                binding.comment.commentText.text = replaceLinkTagsWithSpans(filteredText)
-                LinkifyCompat.addLinks(
-                    binding.comment.commentText,
-                    Linkify.WEB_URLS or Linkify.PHONE_NUMBERS
-                )
-                addDeepLinks(binding.comment.commentText)
-                binding.comment.commentText.movementMethod = LinkMovementMethod.getInstance()
-            }
-            this.entry::timeText.payloadCheck {
-                binding.comment.textTime.text =
-                    entry.timeText?.text(binding.root.context)
-            }
-            this.entry::showAuthorName.payloadCheck {
-                if (!entry.isInbound)
-                    binding.authorName.isVisible = entry.showAuthorName
-                else
-                    binding.authorName.visibility = View.GONE
-            }
-            this.entry::authorName.payloadCheck {
-                if (!entry.isInbound)
-                    binding.authorName.text =
-                        entry.authorName?.text(binding.authorName.context)
-            }
-            this.entry::showAvatar.payloadCheck {
-                binding.avatar.visibility =
-                    if (entry.showAvatar) View.VISIBLE else View.INVISIBLE
-                if (entry.isInbound) binding.avatar.visibility = View.GONE
-            }
-            this.entry::avatarUrl.payloadCheck {
-                if (!entry.isInbound) {
-                    val placeHolder =
-                        if (entry.isSupport) ConfigUtils.getSupportAvatar(itemView.context)
-                        else ConfigUtils.getAuthorAvatar(itemView.context)
-                    if (entry.showAvatar) {
-                        PyrusServiceDesk.injector().picasso
-                            .load(entry.avatarUrl)
-                            .placeholder(placeHolder)
-                            .transform(CIRCLE_TRANSFORMATION)
-                            .into(binding.avatar)
-                    }
+            setIsInboundParameters(entry.isInbound)
+
+            val filteredText = entry.text
+            binding.comment.commentText.text = replaceLinkTagsWithSpans(filteredText)
+            LinkifyCompat.addLinks(
+                binding.comment.commentText,
+                Linkify.WEB_URLS or Linkify.PHONE_NUMBERS
+            )
+            addDeepLinks(binding.comment.commentText)
+            binding.comment.commentText.movementMethod = LinkMovementMethod.getInstance()
+
+
+            binding.comment.textTime.text =
+                entry.timeText?.text(binding.root.context)
+
+            if (!entry.isInbound)
+                binding.authorName.isVisible = entry.showAuthorName
+            else
+                binding.authorName.visibility = View.GONE
+
+            if (!entry.isInbound)
+                binding.authorName.text =
+                    entry.authorName?.text(binding.authorName.context)
+
+            binding.avatar.visibility =
+                if (entry.showAvatar) View.VISIBLE else View.INVISIBLE
+            if (entry.isInbound) binding.avatar.visibility = View.GONE
+
+            if (!entry.isInbound) {
+                val placeHolder =
+                    if (entry.isSupport) ConfigUtils.getSupportAvatar(itemView.context)
+                    else ConfigUtils.getAuthorAvatar(itemView.context)
+                if (entry.showAvatar) {
+                    PyrusServiceDesk.injector().picasso
+                        .load(entry.avatarUrl)
+                        .placeholder(placeHolder)
+                        .transform(CIRCLE_TRANSFORMATION)
+                        .into(binding.avatar)
                 }
             }
         }

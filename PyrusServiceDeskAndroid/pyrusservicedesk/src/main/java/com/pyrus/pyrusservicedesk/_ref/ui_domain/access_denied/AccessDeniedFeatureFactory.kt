@@ -111,7 +111,8 @@ private class FeatureActor(
         }
 
         Effect.Inner.CheckFinishFlow -> flow {
-            preferencesManager.saveLastActiveTime(System.currentTimeMillis())
+            //TODO kate updating for multichat
+            //preferencesManager.saveLastActiveTime(System.currentTimeMillis())
             finishEventBus.events().collect {
                 if (it) {
                     emit(Message.Inner.Finish)
