@@ -41,9 +41,9 @@
     <string name="ok">OK</string>
     <string name="copied_text">已复制文本</string>
     <string name="psd_support">支持</string>
-    <string name="psd_date_format_d">星期X</string>
-    <string name="psd_date_format_d_m_short">MM月dd日</string>
-    <string name="psd_date_format_d_m_y_short">yyyy年MM月dd日</string>
+    <string name="psd_date_format_d">EEE</string>
+    <string name="psd_date_format_d_m_short">MM.dd</string>
+    <string name="psd_date_format_d_m_y_short">MM.dd.yyyy</string>
     <string name="psd_evaluate_the_operators_performance">评估客服的绩效</string>
     <string name="psd_close">关闭</string>
     <string name="leave_your_comment">撰写评价</string>
