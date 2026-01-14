@@ -62,10 +62,10 @@
 "ExternalSourceWarning" = "此链接将跳转到 %@\n您确定要打开此链接吗？";
 "ShortYes" = "是";
 "ShortNo" = "否";
-"Date_Format_Year" = "yyyy年MM月dd日，星期X";
+"Date_Format_Year" = "EE, dd MMM, yyyy";
 "Time_Format" = "aa hh:mm";
-"Date_Format" = "yyyy年MM月dd日 HH时mm分ss秒";
-"Numbers_Date_Format" = "yyyy年MM月dd日 HH时mm分ss秒";
+"Date_Format" = "EE, dd MMM";
+"Numbers_Date_Format" = "yyyyMMddHHmmss";
 "EvaluateQuality" = "评估服务质量";
 "PleaseEvaluateQuality" = "评估服务质量";
 "LeaveYourComment" = "撰写评价";
