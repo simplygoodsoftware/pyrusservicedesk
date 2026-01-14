@@ -415,8 +415,7 @@ private class TicketActor(
                             needAnotherOneWelcomeMessage = true
                     }
                     val commentsIds = localTicketsStore
-                        .getTicketsWithComments()
-                        .find { it.ticket.ticketId == ticketId }
+                        .getTicketWithComments(ticketId)
                         ?.comments
                         ?.map { it.comment.commentId }
                         ?.toSet()

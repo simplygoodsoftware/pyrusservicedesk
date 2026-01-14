@@ -95,7 +95,7 @@ private class AutoRefreshActor(
     }
 
     private suspend fun startSendCalcOperatorTime(ticketId: Long?) {
-        var isActive = localTicketsStore.getTickets().find { it.ticketId == ticketId }?.isActive
+        var isActive = if (ticketId != null) localTicketsStore.getTicketWithComments(ticketId)?.ticket?.isActive else null
         var id = systemMessageStore.ticketId()
         while (ticketId != null && isActive == true && id != null) {
             val resultTry = repository.sendCalcOperatorTime(ticketId)
@@ -118,7 +118,7 @@ private class AutoRefreshActor(
 
                 delay(MILLISECONDS_IN_MINUTE.toLong())
             }
-            isActive = localTicketsStore.getTickets().find { it.ticketId == ticketId }?.isActive
+            isActive = localTicketsStore.getTicketWithComments(ticketId)?.ticket?.isActive
             id = systemMessageStore.ticketId()
         }
     }
