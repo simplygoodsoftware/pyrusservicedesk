@@ -154,7 +154,13 @@ internal class DiInjector(
 
     val finishEventBus = FinishEventBus()
 
-    val preferencesManager = PreferencesManager(preferences)
+    private val initialAccountKey = when(initialAccount) {
+        is Account.V1 -> initialAccount.appId
+        is Account.V2 -> initialAccount.appId
+        is Account.V3 -> initialAccount.authorId
+    }
+
+    val preferencesManager = PreferencesManager(initialAccountKey, preferences)
 
     private val synchronizer = Synchronizer(
         api = api,

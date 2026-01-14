@@ -395,7 +395,7 @@ class PyrusServiceDesk private constructor(
 
         private fun clearLocalData(doOnCleared : () -> Unit) {
             INJECTOR?.cleanDataUseCase()
-            refresh()
+            INJECTOR?.preferencesManager?.let(liveUpdates::reset)
             doOnCleared.invoke()
         }
 
