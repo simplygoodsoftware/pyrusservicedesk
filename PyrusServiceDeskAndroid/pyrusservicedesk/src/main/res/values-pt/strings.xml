@@ -45,7 +45,7 @@
     <string name="psd_support">suporte</string>
     <string name="psd_date_format_d">EEE</string>
     <string name="psd_date_format_d_m_short">MM.dd</string>
-    <string name="psd_date_format_d_m_y_short">MM.dd.aaaa</string>
+    <string name="psd_date_format_d_m_y_short">MM.dd.yyyy</string>
     <string name="psd_evaluate_the_operators_performance">Avalie o desempenho do operador</string>
     <string name="psd_close">Fechar</string>
     <string name="leave_your_comment">Escreva uma avaliação</string>
