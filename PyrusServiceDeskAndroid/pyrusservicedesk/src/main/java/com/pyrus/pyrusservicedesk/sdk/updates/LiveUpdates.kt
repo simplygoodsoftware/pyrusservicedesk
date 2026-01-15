@@ -4,6 +4,7 @@ import android.util.Log
 import androidx.annotation.MainThread
 import com.pyrus.pyrusservicedesk.PyrusServiceDesk
 import com.pyrus.pyrusservicedesk.PyrusServiceDesk.Companion.injector
+import com.pyrus.pyrusservicedesk.PyrusServiceDesk.Companion.refresh
 import com.pyrus.pyrusservicedesk._ref.utils.MILLISECONDS_IN_DAY
 import com.pyrus.pyrusservicedesk._ref.utils.MILLISECONDS_IN_HOUR
 import com.pyrus.pyrusservicedesk._ref.utils.MILLISECONDS_IN_MINUTE
@@ -58,6 +59,7 @@ internal class LiveUpdates() {
             }
         }
         startUpdates(injector().preferencesManager)
+        refresh()
     }
 
     /**
@@ -73,7 +75,6 @@ internal class LiveUpdates() {
     internal fun reset(preferencesManager: PreferencesManager?) {
         PLog.d(TAG, "reset")
         lastCommentId = null
-        preferencesManager?.saveLastActiveTime(-1)
         replayJob?.cancel()
         replayJob = null
         if (isStarted)
