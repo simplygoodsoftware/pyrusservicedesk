@@ -8,6 +8,8 @@ import UIKit
     private static let REFRESH_TIME_INTEVAL = TimeInterval(1*60)
     private static let REFRESH_MAX_COUNT = 20
     
+    static let PSD_VERSION: String = "2.3.76"
+    
     ///AppId needed for request
     static var clientId: String?
     static var clientName: String?
@@ -35,18 +37,10 @@ import UIKit
     static var userName: String?
     ///UserId needed for request
     static private(set) var userId: String = "" {
-        didSet(oldUserId){
-            if userId.count>0 && userId != oldUserId{
+        didSet(oldUserId) {
+            if userId.count > 0 && userId != oldUserId {
                 let user = PSDUser.init(personId: userId, name: PyrusServiceDesk.authorName, type: .user, imagePath: "", authorId: PyrusServiceDesk.authorId)
                 PSDUsers.add(user: user)
-            }
-            if(userId.count > 0){
-                if(oldUserId != userId && clientId != nil){
-                    startGettingInfo(rightNow: true)
-                }
-            }
-            else {
-                stopGettingInfo()
             }
         }
     }
@@ -204,7 +198,7 @@ import UIKit
         }
         if
             lastSetPushTokens.count >= SET_PUSH_MAX_COUNT,
-            let firstDate =  lastSetPushTokens.first
+            let firstDate = lastSetPushTokens.first
         {
             let difference = Date().timeIntervalSince(firstDate)
             if difference < SET_PUSH_TIME_INTEVAL {
@@ -229,29 +223,15 @@ import UIKit
                 let appId = user.clientId
                 let command = TicketCommand(commandId: UUID().uuidString, type: .setPushToken, appId: appId, userId: userId, params: TicketCommandParams(ticketId: nil, appId: appId, userId: userId, token: token, type: "ios"))
                 PyrusServiceDesk.repository.add(command: command)
-                DispatchQueue.main.async {
-                    PyrusServiceDesk.syncManager.syncGetTickets()
-                }
                 ///todo - добавить обработку ошибки
                 completion(nil)
             }
             
         } else {
             let command = TicketCommand(commandId: UUID().uuidString, type: .setPushToken, appId: clientId, userId: customUserId, params: TicketCommandParams(ticketId: nil, appId: clientId, userId: customUserId, token: token, type: "ios"))
-            PyrusServiceDesk.repository.add(command: command)
-            DispatchQueue.main.async {
-                PyrusServiceDesk.syncManager.syncGetTickets()
-            }
+            PyrusServiceDesk.repository.add(command: command, needSync: false)
             ///todo - добавить обработку ошибки
             completion(nil)
-//            PSDPushToken.send(token, completion: {
-//                error in
-//                completion(error)
-//                lastSetPushTokens.append(Date())
-//                if error == nil {
-//                    lastSetPushToken = Date()
-//                }
-//            })
         }
     }
     
@@ -312,7 +292,9 @@ import UIKit
         PyrusServiceDesk.syncManager.firstLoad = true
         stopCallback = onStopCallback
         self.deniedAccessCallback = deniedAccessCallback
-        messageToSend = sendComment
+        if sendComment?.count ?? 0 > 0 {
+            messageToSend = sendComment
+        }
         self.startWithPush = startWithPush
         self.voiceMessages = voiceMessages
         if !PyrusServiceDeskController.PSDIsOpen() {
@@ -353,6 +335,16 @@ import UIKit
     ///Subscribe [subscriber] for notifications that new messages from support have appeared in the chat.
     @objc public static func subscribeToReplies(_ subscriber: NewReplySubscriber?){
         PyrusServiceDesk.subscriber = subscriber
+        if let date = SyncManager.getLastActivityDate() {
+            let diff = Date().timeIntervalSince(date)
+            if diff < SyncManager.PSD_LAST_ACTIVITY_INTERVAL_3_DAYS {
+                startGettingInfo(rightNow: true)
+            } else {
+                syncManager.syncGetTickets()
+            }
+        } else {
+            syncManager.syncGetTickets()
+        }
     }
     ///Unsubscribe [subscriber] from alerts for new messages from chat support.
     @objc public static func unsubscribeFromReplies(_ subscriber: NewReplySubscriber?){
@@ -373,7 +365,7 @@ import UIKit
         return []
     }
     
-    @objc public static func cleanCashe() {
+    @objc public static func cleanCache() {
         isStarted = false
         DispatchQueue.global().async {
             syncManager.chatsDataService.deleteAllObjects()
@@ -425,6 +417,9 @@ import UIKit
         isStarted = true
         if !multichats && PyrusServiceDesk.clientId != nil {
             PyrusServiceDesk.needShowLoading = PyrusServiceDesk.clientId != clientId || PyrusServiceDesk.customUserId != userId
+            if needShowLoading {
+                cleanCache()
+            }
         }
         PyrusServiceDesk.chats = []
         PyrusServiceDesk.clients = []
@@ -461,6 +456,7 @@ import UIKit
             PyrusServiceDesk.mainController?.updateTitleChat()
         }
         PyrusServiceDesk.syncManager.firstLoad = true
+        PyrusServiceDesk.syncManager.loadCache()        
     }
     
     @objc static public func refresh(onError: ((Error?) -> Void)? = nil) {
@@ -478,14 +474,10 @@ import UIKit
         if lastRefreshes.count > REFRESH_MAX_COUNT{
             lastRefreshes.remove(at: 0)
         }
-        if multichats {
-            DispatchQueue.main.async {
-                PyrusServiceDesk.syncManager.syncGetTickets()
-            }
-        } else {
-            PyrusServiceDesk.mainController?.refreshChat(showFakeMessage: 0)
-        }
         
+        DispatchQueue.main.async {
+            PyrusServiceDesk.syncManager.syncGetTickets()
+        }
     }
     
     ///Scrolls chat to bottom, starts refreshing chat and shows fake message from support is psd is open.
@@ -512,7 +504,7 @@ import UIKit
             return
         }
         let userId : String
-        if let existKey =   PSDMessagesStorage.pyrusUserDefaults()?.object(forKey: PSD_USER_ID_KEY) as? String, !reset{
+        if let existKey = PSDMessagesStorage.pyrusUserDefaults()?.object(forKey: PSD_USER_ID_KEY) as? String, !reset{
             userId = existKey
         }else{
             userId = reset ? String.getUiqueString() : (UIDevice.current.identifierForVendor?.uuidString ?? String.getUiqueString())
@@ -552,63 +544,25 @@ import UIKit
     private static var timer :Timer?
     ///Create timer to get chats list from server.
     ///- parameter rightNow: Is need to fire timer.
-    private static func startGettingInfo(rightNow:Bool){
+    private static func startGettingInfo(rightNow: Bool) {
         stopGettingInfo()
         if rightNow {
             updateUserInfo()
-        }else{
-            if let interval = getTimerInerval() {
-                timer = Timer.scheduledTimer(timeInterval: interval, target: self, selector: #selector(updateUserInfo), userInfo:nil , repeats: false)
-                if rightNow{
-                    timer?.fire()
-                }
-            }
+        }
+        
+        if let interval = SyncManager.getTimerInerval() {
+            timer = Timer.scheduledTimer(timeInterval: interval, target: self, selector: #selector(updateUserInfo), userInfo: nil, repeats: false)
         }
     }
     
-    private static func getTimerInerval() -> TimeInterval? {
-        PyrusLogger.shared.logEvent("getTimerInerval started")
-        if let pyrusUserDefaults = PSDMessagesStorage.pyrusUserDefaults(), let date = pyrusUserDefaults.object(forKey: PSDChatInteractor.userLastActivityKey()) as? Date{
-            let difference = Date().timeIntervalSince(date)
-            var timeInterval: TimeInterval? = nil
-            if difference <= PSDChatInteractor.PSD_LAST_ACTIVITY_INTEVAL_MINUTE{
-                timeInterval = PSDChatInteractor.REFRESH_TIME_INTEVAL_5_SECONDS
-            } else if difference <=  PSDChatInteractor.PSD_LAST_ACTIVITY_INTEVAL_5_MINUTES{
-                timeInterval =  PSDChatInteractor.REFRESH_TIME_INTEVAL_15_SECONDS
-            } else if difference <=  PSDChatInteractor.PSD_LAST_ACTIVITY_INTEVAL_HOUR{
-                timeInterval =  PSDChatInteractor.REFRESH_TIME_INTEVAL_1_MINUTE
-            } else if difference <=  PSDChatInteractor.PSD_LAST_ACTIVITY_INTEVAL_3_DAYS{
-                timeInterval =  PSDChatInteractor.REFRESH_TIME_INTEVAL_3_MINUTES
-            }
-            PyrusLogger.shared.logEvent("getTimerInerval ended with time: \(String(describing: timeInterval))")
-            return timeInterval
-        }
-        PyrusLogger.shared.logEvent("getTimerInerval ended with nil, last activity = \(PSDMessagesStorage.pyrusUserDefaults()?.object(forKey: PSDChatInteractor.userLastActivityKey()) ?? "nil")")
-        return nil
-    }
-    
-    ///Set last user acivity date to NOW if date paramemeter is nil, returns true if setted
-    static func setLastActivityDate(_ date: Date? = nil) -> Bool{
-        if let pyrusUserDefaults = PSDMessagesStorage.pyrusUserDefaults(){
-            if let newDate = date, let oldDate = pyrusUserDefaults.object(forKey: PSDChatInteractor.userLastActivityKey()) as? Date{
-                if oldDate.compare(newDate) == .orderedDescending || oldDate.compare(newDate) == .orderedSame{
-                    return false
-                }
-            }
-            pyrusUserDefaults.set(date ?? Date(), forKey: PSDChatInteractor.userLastActivityKey())
-            pyrusUserDefaults.synchronize()
-            return true
-        }
-        return false
-    }
     ///Restart PyrusServiceDesk.timer - move next fire to reloadInterval.
-    static func restartTimer(){
+    static func restartTimer() {
         DispatchQueue.main.async {
             PyrusServiceDesk.startGettingInfo(rightNow: false)
         }
     }
     ///Stops PyrusServiceDesk.timer.
-    private static func stopGettingInfo(){
+    private static func stopGettingInfo() {
         if timer != nil{
             timer?.invalidate()
             timer=nil
@@ -625,20 +579,18 @@ import UIKit
         }
     }
     static var allMessages: [PSDMessage] = [PSDMessage]()
-    static var casheChats: [PSDChat] = [PSDChat]()
 
     ///The main view controller. nil - if chat was closed.
     weak static var mainController: PSDMainController?
     ///Updates user info - get chats list from server.
-    @objc private static func updateUserInfo(){
-        if(userId.count > 0){
+    @objc private static func updateUserInfo() {
+        if userId.count > 0, !PyrusServiceDeskController.PSDIsOpen(), subscriber != nil {
             restartTimer()
             PyrusLogger.shared.logEvent("PSDGetChats did begin.")
             DispatchQueue.main.async {
-//                syncManager.syncGetTickets()
+                syncManager.syncGetTickets()
             }
-        }
-        else{
+        } else {
             PyrusLogger.shared.logEvent("Empty userId, stop requesting PSDGetChats.")
             stopGettingInfo()
         }

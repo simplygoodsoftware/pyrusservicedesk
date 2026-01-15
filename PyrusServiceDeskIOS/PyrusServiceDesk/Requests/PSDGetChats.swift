@@ -48,8 +48,8 @@ struct PSDGetChats {
         parameters["commands"] = commands
         
         let request: URLRequest = URLRequest.createRequest(type:.chats, parameters: parameters)
-//        print("app_id: \(PyrusServiceDesk.clientId), user_id: \(PyrusServiceDesk.customUserId ?? PyrusServiceDesk.userId), secret_key: \(PyrusServiceDesk.securityKey), lastNoteId: \(parameters["last_note_id"])")
-//        print("GetTickets: \(Date())")
+
+//        print("GetTickets: \(Date()), commands count: \(commands.count)")
         PSDGetChats.sessionTask = PyrusServiceDesk.mainSession.dataTask(with: request) { data, response, error in
             guard let data = data, error == nil else { // check for fundamental networking error
                 completion(nil, nil, nil, nil, false)
@@ -58,6 +58,10 @@ struct PSDGetChats {
             
             if let httpStatus = response as? HTTPURLResponse, httpStatus.statusCode != 200 { // check for http errors
                 DispatchQueue.main.async {
+                    if httpStatus.statusCode == 429 {
+                        SyncManager.removeLastActivityDate()
+                        completion(nil, nil, nil, nil, true)
+                    }
                     if httpStatus.statusCode == 403 {
                         if let onFailed = PyrusServiceDesk.onAuthorizationFailed {
                             onFailed()
@@ -69,9 +73,6 @@ struct PSDGetChats {
                     }
                 }
                 let chatsData = try? JSONSerialization.jsonObject(with: data, options: .allowFragments) as? [String : Any] ?? [String: Any]()
-//                if PyrusServiceDesk.chats.count == 0 {
-//                    PyrusServiceDesk.chats = []
-//                }
                 print("Запрос не прошел, код ошибки (\(httpStatus.statusCode), ошибка: \(String(describing: error))")
                 completion(nil, nil, nil, nil, false)
             } else {
@@ -286,3 +287,13 @@ struct PSDGetChats {
 extension Notification.Name {
     static let createMenuNotification = Notification.Name("CreateMenuNotification")
 }
+
+let commentIdParameter = "comment_id"
+let ticketIdParameter = "ticket_id"
+let ratingParameter = "rating"
+let subjectParameter = "subject"
+let createdAtParameter = "created_at"
+let attachmentsParameter = "attachments"
+let guidParameter = "guid"
+let CLIENT_ID_KEY = "client_id"
+let EXTRA_FIELDS_KEY = "extra_fields"

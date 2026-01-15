@@ -6,12 +6,16 @@ enum EntityType {
 }
 
 final class CoreDataService {
-
+    private let currentSchemaVersion = 1
+    private let schemaVersionKey = "PSDChatsSchemaVersion"
+    
     private lazy var persistentContainer: NSPersistentContainer = {
+        checkAndResetStoreIfNeeded()
+        
         guard let modelURL = PSD_BUNDLE.url(forResource: "PSDChats", withExtension: "momd") else {
             fatalError("❌ Не найден PSDChats.momd в bundle: \(PSD_BUNDLE.bundleURL)")
         }
-
+        
         guard let model = NSManagedObjectModel(contentsOf: modelURL) else {
             fatalError("❌ Не удалось загрузить NSManagedObjectModel из \(modelURL)")
         }
@@ -23,7 +27,6 @@ final class CoreDataService {
             }
         }
 
-//        print("✅ Persistent store загружен из PSDChats.momd")
         return container
     }()
 
@@ -34,6 +37,41 @@ final class CoreDataService {
     private var backgroundContext: NSManagedObjectContext {
         persistentContainer.newBackgroundContext()
     }
+    
+    private func persistentStoreURLs() -> [URL] {
+        let storeName = "PSDChats"
+
+        guard let directory = FileManager.default.urls(
+            for: .applicationSupportDirectory,
+            in: .userDomainMask
+        ).first else { return [] }
+
+        return [
+            directory.appendingPathComponent("\(storeName).sqlite"),
+            directory.appendingPathComponent("\(storeName).sqlite-wal"),
+            directory.appendingPathComponent("\(storeName).sqlite-shm")
+        ]
+    }
+    
+    private func checkAndResetStoreIfNeeded() {
+        let defaults = PSDMessagesStorage.pyrusUserDefaults()
+        let savedVersion = defaults?.integer(forKey: schemaVersionKey) ?? 0
+
+        guard savedVersion < currentSchemaVersion else {
+            return
+        }
+
+        let fileManager = FileManager.default
+
+        for url in persistentStoreURLs() {
+            if fileManager.fileExists(atPath: url.path) {
+                try? fileManager.removeItem(at: url)
+            }
+        }
+
+        defaults?.set(currentSchemaVersion, forKey: schemaVersionKey)
+    }
+
 }
 
 extension CoreDataService: CoreDataServiceProtocol {

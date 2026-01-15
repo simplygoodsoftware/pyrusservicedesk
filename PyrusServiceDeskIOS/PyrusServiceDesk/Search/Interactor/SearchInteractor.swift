@@ -93,7 +93,6 @@ private extension SearchInteractor {
     }
     
     func reloadChats() {
-        PyrusServiceDesk.restartTimer()
         DispatchQueue.main.async {
             PyrusServiceDesk.syncManager.syncGetTickets()
         }

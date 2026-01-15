@@ -178,77 +178,36 @@ class TicketCommandRepository {
         }
     }
     
-    func add(command: TicketCommand, completion: ((Error?) -> Void)? = nil) {
-//       commandsCache?.removeAll(where: { $0.commandId.lowercased() == command.commandId.lowercased() })
-//        if command.params.message == "ааа" {
-//            print("фывапролорпавыфывапр")
-//            print(command.commandId)
-//            print(command.params.attachments?[0].guid)
-//        }
-//        commandsCache?.append(command)
+    func add(command: TicketCommand, completion: ((Error?) -> Void)? = nil, needSync: Bool = true) {
+        if command.type == TicketCommandType.setPushToken.rawValue {
+            var idsForDelete = [String]()
+            for cmnd in commandsCache ?? [] {
+                if cmnd.type == TicketCommandType.setPushToken.rawValue,
+                   cmnd.appId == command.appId,
+                   cmnd.userId == command.userId {
+                    idsForDelete.append(cmnd.commandId)
+                }
+            }
+            for id in idsForDelete {
+                deleteCommand(withId: id)
+            }
+        }
         chatsDataService.saveTicketCommand(with: command) { [weak self] _ in
             DispatchQueue.main.async { [weak self] in
                 self?.commandsCache = self?.chatsDataService.getAllCommands()
-                PyrusServiceDesk.syncManager.syncGetTickets()
-//                if let commandsCache = self?.commandsCache {
-//                    PSDMessagesStorage.createMessages(from: commandsCache)
-//                }
+                if needSync {
+                    PyrusServiceDesk.syncManager.syncGetTickets()
+                }
             }
         }
-        
-        
-//        let commands = chatsDataService.getAllCommands()
-//        PyrusServiceDesk.syncManager.syncGetTickets()
-//        loadFromFile { result in
-//            switch result {
-//            case .success(var commands):
-//                commands.append(command)
-//                self.save(commands: commands, completion: completion)
-//            case .failure(let error):
-//                completion?(error)
-//            }
-//        }
     }
     
     func deleteCommand(withId commandId: String, serverTicketId: Int? = nil, completion: ((Error?) -> Void)? = nil) {
-//        commandsCache?.removeAll(where: {
-//            if $0.commandId.lowercased() == commandId.lowercased() {
-//                if $0.params.message == "ааа" {
-//                    print("!!!!!!!!!!!!!!!!!!!!!!!")
-//                    print($0.commandId)
-//                    print($0.params.attachments?[0].guid)
-//                }
-//                return true
-//            }
-//            return false
-//        })
-//        var newId: (Int, Int)? = nil
-//        commandsCache?.removeAll(where: {
-//            if $0.commandId.lowercased() == commandId.lowercased() {
-//                if
-//                    $0.params.requestNewTicket ?? false,
-//                    $0.params.ticketId ?? 0 < 0,
-//                    let serverTicketId = serverTicketId
-//                {
-//                    newId = ($0.params.ticketId ?? 0, serverTicketId)
-//                }
-//                return true
-//            }
-//            return false
-//        })
-//        if let newId = newId {
-//            commandsCache?.forEach({ command in
-//                if command.params.ticketId == newId.0 {
-//                    command.params.ticketId = newId.1
-//                }
-//            })
-//        }
         commandsCache?.removeAll(where: { $0.commandId.lowercased() == commandId.lowercased() })
         if let serverTicketId {
             chatsDataService.resaveBeforeDeleteCommand(commanId: commandId.lowercased(), serverTicketId: serverTicketId) { [weak self] _ in
                 DispatchQueue.main.async { [weak self] in
                     self?.chatsDataService.deleteCommand(with: commandId.lowercased(), serverTicketId: serverTicketId)
-                    let cashe = self?.chatsDataService.getAllCommands()
                     self?.commandsCache = self?.chatsDataService.getAllCommands() ?? []
                 }
             }
