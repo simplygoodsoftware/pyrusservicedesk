@@ -133,11 +133,11 @@ internal class Synchronizer(
     private suspend fun trotRequest(syncRequests: List<SyncReqRes>) {
         val currentTime = System.currentTimeMillis()
         val passedTime = currentTime - lastSyncTime.get()
-        val hasCommentCommand = syncRequests.any {
+        val hasCommentCommandOrOperatorTime = syncRequests.any {
             val req = it.request
-            req is SyncRequest.Command.CreateComment
+            req is SyncRequest.Command.CreateComment || req is SyncRequest.Command.CalcOperatorTime
         }
-        val rawDelay = if (hasCommentCommand) 1000L else 5000L
+        val rawDelay = if (hasCommentCommandOrOperatorTime) 1000L else 5000L
         val diff = rawDelay - passedTime
         if (diff > 0) {
             val delay = min(rawDelay, diff)

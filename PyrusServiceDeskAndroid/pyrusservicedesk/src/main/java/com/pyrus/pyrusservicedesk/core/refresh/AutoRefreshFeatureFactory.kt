@@ -1,10 +1,7 @@
 package com.pyrus.pyrusservicedesk.core.refresh
 
 import com.pyrus.pyrusservicedesk.PyrusServiceDesk
-import com.pyrus.pyrusservicedesk._ref.utils.MILLISECONDS_IN_DAY
-import com.pyrus.pyrusservicedesk._ref.utils.MILLISECONDS_IN_HOUR
 import com.pyrus.pyrusservicedesk._ref.utils.MILLISECONDS_IN_MINUTE
-import com.pyrus.pyrusservicedesk._ref.utils.MILLISECONDS_IN_SECOND
 import com.pyrus.pyrusservicedesk._ref.utils.isSuccess
 import com.pyrus.pyrusservicedesk._ref.whitetea.core.Actor
 import com.pyrus.pyrusservicedesk._ref.whitetea.core.StoreFactory
@@ -66,8 +63,7 @@ private class AutoRefreshActor(
     override fun handleEffect(effect: AutoRefreshContract.Effect): Flow<Unit> = when (effect) {
         is AutoRefreshContract.Effect.StartUpdates -> flow {
             while (currentCoroutineContext().isActive) {
-            val interval = liveUpdates.getTicketsUpdateInterval(preferencesManager)
-
+                val interval = liveUpdates.getTicketsUpdateInterval(preferencesManager)
                 if ((liveUpdates.isStarted || PyrusServiceDesk.sdIsOpen) && interval != -1L)
                     repository.sync()
 
@@ -112,11 +108,12 @@ private class AutoRefreshActor(
                 val endTime = startTime + interval
                 val currentTime = System.currentTimeMillis()
 
-                if (currentTime > endTime) {
+                id = systemMessageStore.ticketId()
+                if (currentTime > endTime || id == null) {
                     break
                 }
 
-                delay(MILLISECONDS_IN_MINUTE.toLong())
+                delay(1000)
             }
             isActive = localTicketsStore.getTicketWithComments(ticketId)?.ticket?.isActive
             id = systemMessageStore.ticketId()
