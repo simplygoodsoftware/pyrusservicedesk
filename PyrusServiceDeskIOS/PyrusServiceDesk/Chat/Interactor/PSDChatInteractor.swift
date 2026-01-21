@@ -77,6 +77,7 @@ extension PSDChatInteractor: PSDChatInteractorProtocol {
             NotificationCenter.default.addObserver(self, selector: #selector(updateChats), name: PyrusServiceDesk.chatsUpdateNotification, object: nil)
             NotificationCenter.default.addObserver(forName: SyncManager.commandsResultNotification, object: nil, queue: .main) { [weak self] notification in
                 DispatchQueue.main.async { [weak self] in
+                    print("COMMANDS NOTIFICATION TIME: \(Date.now)")
                     if let data = notification.userInfo?["tickets"] as? Data {
                         do {
                             let decoder = JSONDecoder()
@@ -579,6 +580,7 @@ extension PSDChatInteractor: PSDMessageSendDelegate {
                     row: tableMatrix[movedIndexPath.section].count - 1 - movedIndexPath.row,
                     section: tableMatrix.count - 1 - movedIndexPath.section
                 )
+                print("REDRAW CELL TIME: \(Date.now)")
                 presenter.doWork(.redrawCell(indexPath: reversedIndexPath, message: rowMessage))
                 
                 // Перемещаем сообщение, если необходимо

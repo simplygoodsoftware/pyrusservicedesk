@@ -2,8 +2,7 @@
 let REPLACE_STRING = "%%"
 import Foundation
 extension Date {
-    static let dateFormatter: DateFormatter = DateFormatter()
-            
+    static let dateFormatter: DateFormatter = DateFormatter()            
     /**
      Returns string with time that has passed from "now"
      */
@@ -125,26 +124,25 @@ extension Date {
     }
     
     func messageTime() -> String {
-        let calendar = NSCalendar.autoupdatingCurrent
-        let components = calendar.dateComponents([.minute,.hour,.day,.month,.year], from: self, to: Date())
-        let minutes :Int = components.minute ?? 0
-        let hours :Int = components.hour ?? 0
-        let days :Int = components.day ?? 0
-        let months :Int = components.month ?? 0
-        let years :Int = components.year ?? 0
+        let calendar = Calendar.current
+        let now = Date()
         
-//        let dateFormatter = DateFormatter()
-
-        if years > 0 {
-            Date.dateFormatter.dateFormat = "dd.MM.YYYY"
-        } else if months > 0 {
-            Date.dateFormatter.dateFormat = "dd.MM"
-        } else if days >= 7 {
-            Date.dateFormatter.dateFormat = "dd.MM"
-        } else if days > 0 {
+        if calendar.isDateInToday(self) {
+            // Сегодня
+            Date.dateFormatter.dateFormat = "HH:mm"
+        } else if calendar.isDateInYesterday(self) {
+            // Вчера
+            Date.dateFormatter.dateFormat = "EEE"
+        } else if let daysAgo = calendar.dateComponents([.day], from: self, to: now).day, daysAgo < 7 {
+            // Последние 7 дней
             Date.dateFormatter.dateFormat = "EEE"
         } else {
-            Date.dateFormatter.dateFormat = "HH:mm"
+            let components = calendar.dateComponents([.year], from: self, to: now)
+            if let years = components.year, years > 0 {
+                Date.dateFormatter.dateFormat = "dd.MM.yyyy"
+            } else {
+                Date.dateFormatter.dateFormat = "dd.MM"
+            }
         }
         
         return Date.dateFormatter.string(from: self)

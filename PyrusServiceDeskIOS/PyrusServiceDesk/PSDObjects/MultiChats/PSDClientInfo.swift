@@ -15,7 +15,7 @@ import Foundation
     var clientIcon: String {
         didSet {
             DispatchQueue.global().async { [weak self] in
-                guard let self else { return }
+                guard let self, clientIcon.count > 0, PyrusServiceDesk.multichats else { return }
                 let url = PyrusServiceDeskAPI.PSDURL(url: self.clientIcon)
                 PyrusServiceDesk.mainSession.dataTask(with: url) { data, response, error in
                     guard let data = data, error == nil else{
@@ -49,7 +49,7 @@ import Foundation
             guard let self else { return }
             if let image = self.imageRepository?.loadImage(name: clientId, id: nil, type: .clientIcon) {
                 self.image = image
-            } else {
+            } else if clientIcon.count > 0, PyrusServiceDesk.multichats {
                 let url = PyrusServiceDeskAPI.PSDURL(url: self.clientIcon)
                 PyrusServiceDesk.mainSession.dataTask(with: url) { data, response, error in
                     guard let data = data, error == nil else{

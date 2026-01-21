@@ -135,7 +135,7 @@ struct PSDGetChat {
             guard let dic :[String:Any] = array[i] as? [String : Any] else{
                 continue
             }
-            let date : Date =  (dic[createdAtParameter] as? String)?.dateFromString(format: "yyyy-MM-dd'T'HH:mm:ss'Z'") ?? Date()
+            let date: Date =  (dic[createdAtParameter] as? String)?.fastParseISODate() ?? Date()
             var IsInbound : Bool = dic["is_inbound"] as? Bool ??  true
             let user :PSDUser
             if PyrusServiceDesk.multichats {

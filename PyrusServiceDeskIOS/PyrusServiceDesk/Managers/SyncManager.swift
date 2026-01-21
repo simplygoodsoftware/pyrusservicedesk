@@ -121,11 +121,16 @@ class SyncManager {
                 }
             }
             
+            let сstartTime = CFAbsoluteTimeGetCurrent()
             if let commandsResult {
                 self.commandsResult = commandsResult.sorted(by: { $0.commentId ?? 0 < $1.commentId ?? 0 })
                 do {
-                    let jsonData = try JSONEncoder().encode(commandsResult)
-                    NotificationCenter.default.post(name: SyncManager.commandsResultNotification, object: nil, userInfo: ["tickets": jsonData])
+                    if commandsResult.count > 0 {
+                        let jsonData = try JSONEncoder().encode(commandsResult)
+                        let timeElapsed = CFAbsoluteTimeGetCurrent() - сstartTime
+                        print("⏱ getAllCommands completed in \(timeElapsed) seconds")
+                        NotificationCenter.default.post(name: SyncManager.commandsResultNotification, object: nil, userInfo: ["tickets": jsonData])
+                    }
                 } catch { }
                 
                 for commandResult in commandsResult {
@@ -172,6 +177,7 @@ class SyncManager {
                                         PyrusServiceDesk.clients = clients
                                         self?.chatsDataService.saveClientModels(with: clients)
                                         PyrusServiceDesk.chats = chats
+                                        print("NOTIFICATION TIME: \(Date.now)")
                                         NotificationCenter.default.post(name: PyrusServiceDesk.chatsUpdateNotification, object: nil, userInfo: userInfo)
                                     }
                                 }

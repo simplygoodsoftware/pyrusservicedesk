@@ -187,23 +187,82 @@ extension PSDChatsDataService: PSDChatsDataServiceProtocol {
         }
         DispatchQueue.global().async { [weak self] in
             self?.coreDataService.save(completion: completion) { [weak self] context in
-                self?.saveChatModel(with: chatModels, context: context)
+                do {
+                    try self?.saveChatModels(with: chatModels, context: context)
+                } catch { }
             }
         }
     }
     
-    func saveChatModel(with chatModels: [PSDChat], context: NSManagedObjectContext) {
-        for chatModel in chatModels {
-            let fetchRequest = DBChat.fetchRequest()
-            fetchRequest.predicate = NSPredicate(format: "chatId == %lld", Int64(chatModel.chatId ?? 0))
-            
-            let dbChat: DBChat
-            if let chat = try? context.fetch(fetchRequest).first {
-                dbChat = chat
-            } else {
-                dbChat = NSEntityDescription.insertNewObject(forEntityName: "DBChat", into: context) as! DBChat
+    func saveChatModels(
+        with chatModels: [PSDChat],
+        context: NSManagedObjectContext
+    ) throws {
+
+        context.mergePolicy = NSMergeByPropertyObjectTrumpMergePolicy
+        context.undoManager = nil
+
+        // MARK: - Collect IDs
+
+        let chatIds: [Int64] = chatModels.compactMap {
+            guard let id = $0.chatId else { return nil }
+            return Int64(id)
+        }
+
+        let allMessages = chatModels.flatMap { $0.messages }
+            .filter { ($0.rating ?? 0) <= 0 }
+
+        let messageIds = allMessages.map { $0.messageId }
+
+        let attachmentIds = allMessages
+            .compactMap { $0.attachments }
+            .flatMap { $0 }
+            .compactMap { $0.serverIdentifer }
+
+        // MARK: - Fetch existing chats
+
+        let chatRequest: NSFetchRequest<DBChat> = DBChat.fetchRequest()
+        chatRequest.predicate = NSPredicate(format: "chatId IN %@", chatIds)
+
+        let existingChats = try context.fetch(chatRequest)
+        let chatsById = Dictionary(uniqueKeysWithValues: existingChats.map {
+            ($0.chatId, $0)
+        })
+
+        // MARK: - Fetch existing messages
+
+        let messageRequest: NSFetchRequest<DBMessage> = DBMessage.fetchRequest()
+        messageRequest.predicate = NSPredicate(format: "messageId IN %@", messageIds)
+
+        let existingMessages = try context.fetch(messageRequest)
+        let messagesById = Dictionary(uniqueKeysWithValues: existingMessages.map {
+            ($0.messageId, $0)
+        })
+
+        // MARK: - Fetch existing attachments
+
+        let attachmentRequest: NSFetchRequest<DBAttachment> = DBAttachment.fetchRequest()
+        attachmentRequest.predicate = NSPredicate(format: "serverIdentifier IN %@", attachmentIds)
+
+        let existingAttachments = try context.fetch(attachmentRequest)
+        let attachmentsById: [String: DBAttachment] = Dictionary(
+            uniqueKeysWithValues: existingAttachments.compactMap {
+                guard let id = $0.serverIdentifier else { return nil }
+                return (id, $0)
             }
-            dbChat.chatId = Int64(chatModel.chatId ?? 0)
+        )
+
+
+        // MARK: - Upsert chats, messages, attachments
+
+        for chatModel in chatModels {
+
+            guard let chatIdValue = chatModel.chatId else { continue }
+            let chatId = Int64(chatIdValue)
+
+            let dbChat = chatsById[chatId] ?? DBChat(context: context)
+
+            dbChat.chatId = chatId
             dbChat.date = chatModel.date
             dbChat.isActive = chatModel.isActive
             dbChat.isRead = chatModel.isRead
@@ -212,26 +271,17 @@ extension PSDChatsDataService: PSDChatsDataServiceProtocol {
             dbChat.showRatingText = chatModel.showRatingText
             dbChat.subject = chatModel.subject
             dbChat.userId = chatModel.userId
-            if chatModel.appId?.count ?? 0 > 0 {
-                dbChat.appId = chatModel.appId
+
+            if let appId = chatModel.appId, !appId.isEmpty {
+                dbChat.appId = appId
             }
-            if dbChat.messages == nil {
-                dbChat.messages = NSOrderedSet()
-            }
-            
-            for message in chatModel.messages {
-                if message.rating ?? 0 > 0 {
-                    continue
-                }
-                let mesFetchRequest = DBMessage.fetchRequest()
-                mesFetchRequest.predicate = NSPredicate(format: "messageId == %@", message.messageId as CVarArg)
-                let dbMessage: DBMessage
-                if let comment = try? context.fetch(mesFetchRequest).first {
-                    dbMessage = comment
-                } else {
-                    dbMessage = NSEntityDescription.insertNewObject(forEntityName: "DBMessage", into: context) as! DBMessage
-                }
-                
+
+            for message in chatModel.messages where (message.rating ?? 0) <= 0 {
+
+                let dbMessage =
+                    messagesById[message.messageId] ??
+                    DBMessage(context: context)
+
                 dbMessage.messageId = message.messageId
                 dbMessage.appId = message.appId
                 dbMessage.userId = message.userId
@@ -249,46 +299,38 @@ extension PSDChatsDataService: PSDChatsDataServiceProtocol {
                 dbMessage.authorId = message.owner.authorId
                 dbMessage.authorName = message.owner.name
                 dbMessage.authorAvatarId = message.owner.imagePath
+
                 if let rating = message.rating {
                     dbMessage.rating = Int32(rating)
                 }
-                
-                if dbMessage.attachments == nil {
-                    dbMessage.attachments = NSOrderedSet()
+
+                for attachment in message.attachments ?? [] {
+
+                    guard let serverId = attachment.serverIdentifer else { continue }
+
+                    let dbAttachment =
+                        attachmentsById[serverId] ??
+                        DBAttachment(context: context)
+
+                    dbAttachment.serverIdentifier = serverId
+                    dbAttachment.name = attachment.name
+                    dbAttachment.canOpen = attachment.canOpen
+                    dbAttachment.data = attachment.data
+                    dbAttachment.isImage = attachment.isImage
+                    dbAttachment.isVideo = attachment.isVideo
+                    dbAttachment.localId = attachment.localId
+                    dbAttachment.size = Int64(attachment.size)
+                    dbAttachment.localPath = attachment.localPath
+                    dbAttachment.uploadingProgress = Float(attachment.uploadingProgress)
+
+                    dbMessage.addToAttachments(dbAttachment)
                 }
-                
-                if let attachments = message.attachments {
-                    for attachment in attachments {
-                        let attachFetchRequest = DBAttachment.fetchRequest()
-                        attachFetchRequest.predicate = NSPredicate(format: "serverIdentifier == %@", attachment.serverIdentifer ?? "" as CVarArg)
-                        let dbAttachment: DBAttachment
-                        if attachment.serverIdentifer != nil,
-                            let comment = try? context.fetch(attachFetchRequest).first {
-                            dbAttachment = comment
-                        } else {
-                            dbAttachment = NSEntityDescription.insertNewObject(forEntityName: "DBAttachment", into: context) as! DBAttachment
-                        }
-//                        let dbAttachment = NSEntityDescription.insertNewObject(forEntityName: "DBAttachment", into: context) as! DBAttachment
-                        dbAttachment.name = attachment.name
-                        dbAttachment.canOpen = attachment.canOpen
-                        dbAttachment.data = attachment.data
-                        dbAttachment.isImage = attachment.isImage
-                        dbAttachment.isVideo = attachment.isVideo
-                        dbAttachment.localId = attachment.localId
-                        dbAttachment.serverIdentifier = attachment.serverIdentifer
-                        dbAttachment.size = Int64(attachment.size)
-                        dbAttachment.localPath = attachment.localPath
-                        dbAttachment.uploadingProgress = Float(attachment.uploadingProgress)
-                        
-                        dbMessage.addToAttachments(dbAttachment)
-                    }
-                }
-                
+
                 dbChat.addToMessages(dbMessage)
             }
         }
     }
-    
+
     func saveTicketCommand(with ticketCommand: TicketCommand, completion: ((Result<Void, Error>) -> Void)?) {
         print("commandId: \(ticketCommand.commandId), type: \(TicketCommandType(rawValue: ticketCommand.type))")
         coreDataService.save(completion: completion)  { context in
@@ -382,8 +424,8 @@ extension PSDChatsDataService: PSDChatsDataServiceProtocol {
                         authorId: dbCommand.authorId,
                         token: dbCommand.token,
                         type: dbCommand.tokenType,
-                        messageId: Int(dbCommand.messageId),
-                        rating: Int(dbCommand.rating),
+                        messageId: dbCommand.messageId == 0 ? nil : Int(dbCommand.messageId),
+                        rating: Int(dbCommand.rating) == 0 ? nil : Int(dbCommand.rating),
                         date: dbCommand.date,
                         messageClientId: dbCommand.clientId,
                         hasAccess: dbCommand.hasAccess
