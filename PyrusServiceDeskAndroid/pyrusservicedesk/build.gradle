@@ -32,6 +32,7 @@ android {
 
         android.buildFeatures.buildConfig = true
 
+        buildConfigField("String", "VERSION_NAME", "\"${project.properties["VERSION_NAME"]}\"")
         buildConfigField("Integer", "MAIN_APP_VERSION_CODE", "${rootProject.configurations {VERSION_NAME}}")
     }
 

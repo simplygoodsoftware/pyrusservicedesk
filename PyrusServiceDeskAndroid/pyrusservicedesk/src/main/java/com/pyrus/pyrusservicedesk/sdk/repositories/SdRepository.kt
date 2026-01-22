@@ -15,7 +15,6 @@ import com.pyrus.pyrusservicedesk._ref.utils.Try
 import com.pyrus.pyrusservicedesk._ref.utils.Try2
 import com.pyrus.pyrusservicedesk._ref.utils.isFailed
 import com.pyrus.pyrusservicedesk._ref.utils.isSuccess
-import com.pyrus.pyrusservicedesk._ref.utils.log.PLog
 import com.pyrus.pyrusservicedesk._ref.utils.toTry2
 import com.pyrus.pyrusservicedesk.core.API_VERSION_1
 import com.pyrus.pyrusservicedesk.core.API_VERSION_2
@@ -69,9 +68,6 @@ internal class SdRepository(
                 for (command in initialCommands) {
                     sendCommand(command)
                 }
-            }
-            for (command in initialCommands) {
-                sendCommand(command)
             }
         }
     }
@@ -349,7 +345,7 @@ internal class SdRepository(
     suspend fun setPushToken(user: UserInternal, token: String, tokenType: String): Try<TicketCommandResultDto> {
         val instanceId = accountStore.getAccount().getInstanceId()
         val command = commandsStore.createPushTokenCommand(user, token, tokenType, instanceId)
-        return synchronizer.syncCommand(command)
+        return synchronizer.addCommand(command)
     }
 
     fun retryAddComment(user: UserInternal, localId: Long) = coroutineScope.launch(Dispatchers.IO) {
