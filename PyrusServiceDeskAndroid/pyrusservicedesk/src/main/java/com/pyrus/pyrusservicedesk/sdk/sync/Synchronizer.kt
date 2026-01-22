@@ -24,7 +24,6 @@ import com.pyrus.pyrusservicedesk.sdk.repositories.IdStore
 import com.pyrus.pyrusservicedesk.sdk.repositories.LocalCommandsStore
 import com.pyrus.pyrusservicedesk.sdk.repositories.LocalTicketsStore
 import com.pyrus.pyrusservicedesk.sdk.sync.SyncMapper.mapToGetFeedRequest
-import com.pyrus.pyrusservicedesk.sdk.updates.LiveUpdates
 import com.pyrus.pyrusservicedesk.sdk.updates.Preferences
 import com.pyrus.pyrusservicedesk.sdk.web.retrofit.ServiceDeskApi
 import kotlinx.coroutines.CoroutineExceptionHandler
@@ -33,15 +32,18 @@ import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.newSingleThreadContext
 import kotlinx.coroutines.withContext
 import java.util.concurrent.LinkedBlockingQueue
 import java.util.concurrent.atomic.AtomicBoolean
+import java.util.concurrent.atomic.AtomicLong
 import kotlin.coroutines.CoroutineContext
 import kotlin.coroutines.resume
 import kotlin.coroutines.suspendCoroutine
 import kotlin.math.max
+import kotlin.math.min
 
 internal class Synchronizer(
     private val api: ServiceDeskApi,
@@ -71,6 +73,8 @@ internal class Synchronizer(
 
     private val failDelay = FailDelay()
 
+    private val lastSyncTime = AtomicLong(0)
+
 
     /**
      * Sync local state and server state
@@ -93,8 +97,24 @@ internal class Synchronizer(
         request: SyncRequest.Command,
     ): Try<TicketCommandResultDto> = suspendCoroutine { continuation ->
         val syncReqRes = SyncReqRes.CommandWithContinuation(request, continuation)
+        if (request is SyncRequest.Command.SetPushToken) {
+            syncLoopRequestQueue.removeIf { it.request is SyncRequest.Command.SetPushToken }
+        }
         syncLoopRequestQueue.add(syncReqRes)
         tryLoop()
+    }
+
+    /**
+     * Add command in syncLoopRequestQueue
+     */
+    suspend fun addCommand(
+        request: SyncRequest.Command,
+    ): Try<TicketCommandResultDto> = suspendCoroutine { continuation ->
+        val syncReqRes = SyncReqRes.CommandWithContinuation(request, continuation)
+        if (request is SyncRequest.Command.SetPushToken) {
+            syncLoopRequestQueue.removeIf { it.request is SyncRequest.Command.SetPushToken }
+        }
+        syncLoopRequestQueue.add(syncReqRes)
     }
 
 
@@ -106,6 +126,22 @@ internal class Synchronizer(
             return
         }
         runLoop(syncRequests)
+    }
+
+    private suspend fun trotRequest(syncRequests: List<SyncReqRes>) {
+        val currentTime = System.currentTimeMillis()
+        val passedTime = currentTime - lastSyncTime.get()
+        val hasCommentCommand = syncRequests.any {
+            val req = it.request
+            req is SyncRequest.Command.CreateComment
+        }
+        val rawDelay = if (hasCommentCommand) 1000L else 5000L
+        val diff = rawDelay - passedTime
+        if (diff > 0) {
+            val delay = min(rawDelay, diff)
+            delay(delay)
+        }
+        lastSyncTime.set(System.currentTimeMillis())
     }
 
     private fun runLoop(syncRequests: List<SyncReqRes>) = launch {
@@ -136,6 +172,8 @@ internal class Synchronizer(
             firstAppId = firstAppId,
         )
 
+
+        trotRequest(syncRequests)
         val getTicketsTry = api.getTickets(getTicketsRequest)
         
         if (getTicketsTry.isSuccess()) {
@@ -224,12 +262,25 @@ internal class Synchronizer(
         }
         else {
             getTicketsTry.error.printStackTrace()
-            if ((getTicketsTry.error as? HttpException)?.statusCode == FAILED_AUTHORIZATION_ERROR_CODE
-                || (getTicketsTry.error as? HttpException)?.statusCode == FAILED_AUTHORIZATION_ERROR_CODE_FORBIDDEN) {
+            val statusCode = (getTicketsTry.error as? HttpException)?.statusCode
+            if (statusCode == FAILED_AUTHORIZATION_ERROR_CODE || statusCode == FAILED_AUTHORIZATION_ERROR_CODE_FORBIDDEN) {
                 withContext(Dispatchers.Main) {
                     PyrusServiceDesk.onAuthorizationFailed?.run()
                 }
                 failDelay.clear()
+                val getRequests = syncRequests.filterIsInstance<SyncReqRes.Data>()
+                for (request in getRequests) request.continuation.resume(getTicketsTry)
+                isRunning.set(false)
+                return@launch
+            }
+            if (statusCode == 429) {
+                preferences.saveLastActiveTime(-1L)
+                failDelay.clear()
+                withContext(Dispatchers.Main) {
+                    PyrusServiceDesk.onAuthorizationFailed?.run()
+                }
+                val getRequests = syncRequests.filterIsInstance<SyncReqRes.Data>()
+                for (request in getRequests) request.continuation.resume(getTicketsTry)
                 isRunning.set(false)
                 return@launch
             }
