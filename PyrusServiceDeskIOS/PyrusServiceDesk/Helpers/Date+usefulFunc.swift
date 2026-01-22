@@ -137,11 +137,10 @@ extension Date {
             // Последние 7 дней
             Date.dateFormatter.dateFormat = "EEE"
         } else {
-            let components = calendar.dateComponents([.year], from: self, to: now)
-            if let years = components.year, years > 0 {
-                Date.dateFormatter.dateFormat = "dd.MM.yyyy"
-            } else {
+            if calendar.isDate(self, equalTo: Date(), toGranularity: .year) {
                 Date.dateFormatter.dateFormat = "dd.MM"
+            } else {
+                Date.dateFormatter.dateFormat = "dd.MM.yyyy"
             }
         }
         
