@@ -39,6 +39,19 @@ internal class ButtonsFingerprint(
         oldItem: CommentEntry.Buttons,
         newItem: CommentEntry.Buttons
     ) = newItem.id == oldItem.id
+
+    override fun getChangePayload(
+        oldItem: CommentEntry.Buttons,
+        newItem: CommentEntry.Buttons,
+    ): Any? {
+        val payload = HashSet<String>()
+
+        if (oldItem.creationTime != newItem.creationTime) payload.add(getPropertyName(CommentEntry.Buttons::creationTime))
+        if (oldItem.id != newItem.id) payload.add(getPropertyName(CommentEntry.Buttons::id))
+        if (oldItem.buttons != newItem.buttons) payload.add(getPropertyName(CommentEntry.Buttons::buttons))
+
+        return payload
+    }
 }
 
 internal class ButtonsHolder(

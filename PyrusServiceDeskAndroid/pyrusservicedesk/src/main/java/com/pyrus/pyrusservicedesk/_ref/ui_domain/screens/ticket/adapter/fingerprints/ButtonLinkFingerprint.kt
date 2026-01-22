@@ -33,6 +33,18 @@ internal class ButtonLinkFingerprint: ItemFingerprint<ButtonEntry.Link>() {
         oldItem: ButtonEntry.Link,
         newItem: ButtonEntry.Link
     ) = true
+
+    override fun getChangePayload(
+        oldItem: ButtonEntry.Link,
+        newItem: ButtonEntry.Link,
+    ): Any? {
+        val payload = HashSet<String>()
+
+        if (oldItem.text != newItem.text) payload.add(getPropertyName(ButtonEntry.Link::text))
+        if (oldItem.link != newItem.link) payload.add(getPropertyName(ButtonEntry.Link::link))
+
+        return payload
+    }
 }
 
 internal class ButtonLinkHolder(

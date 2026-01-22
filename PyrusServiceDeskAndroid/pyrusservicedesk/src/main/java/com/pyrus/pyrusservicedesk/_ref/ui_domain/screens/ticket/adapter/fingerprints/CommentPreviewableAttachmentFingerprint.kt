@@ -67,6 +67,38 @@ internal class CommentPreviewableAttachmentFingerprint(
         oldItem: CommentEntry.Comment.CommentPreviewableAttachment,
         newItem: CommentEntry.Comment.CommentPreviewableAttachment
     ) = newItem.entryId == oldItem.entryId
+
+    override fun getChangePayload(
+        oldItem: CommentEntry.Comment.CommentPreviewableAttachment,
+        newItem: CommentEntry.Comment.CommentPreviewableAttachment,
+    ): Any? {
+        val payload = HashSet<String>()
+
+        if (oldItem.creationTime != newItem.creationTime) payload.add(getPropertyName(CommentEntry.Comment.CommentPreviewableAttachment::creationTime))
+        if (oldItem.entryId != newItem.entryId) payload.add(getPropertyName(CommentEntry.Comment.CommentPreviewableAttachment::entryId))
+        if (oldItem.id != newItem.id) payload.add(getPropertyName(CommentEntry.Comment.CommentPreviewableAttachment::id))
+        if (oldItem.isInbound != newItem.isInbound) payload.add(getPropertyName(CommentEntry.Comment.CommentPreviewableAttachment::isInbound))
+        if (oldItem.isSupport != newItem.isSupport) payload.add(getPropertyName(CommentEntry.Comment.CommentPreviewableAttachment::isSupport))
+        if (oldItem.hasError != newItem.hasError) payload.add(getPropertyName(CommentEntry.Comment.CommentPreviewableAttachment::hasError))
+        if (oldItem.isLocal != newItem.isLocal) payload.add(getPropertyName(CommentEntry.Comment.CommentPreviewableAttachment::isLocal))
+        if (oldItem.isWelcomeMessage != newItem.isWelcomeMessage) payload.add(getPropertyName(CommentEntry.Comment.CommentPreviewableAttachment::isWelcomeMessage))
+        if (oldItem.timeText != newItem.timeText) payload.add(getPropertyName(CommentEntry.Comment.CommentPreviewableAttachment::timeText))
+        if (oldItem.status != newItem.status) payload.add(getPropertyName(CommentEntry.Comment.CommentPreviewableAttachment::status))
+        if (oldItem.authorName != newItem.authorName) payload.add(getPropertyName(CommentEntry.Comment.CommentPreviewableAttachment::authorName))
+        if (oldItem.authorKey != newItem.authorKey) payload.add(getPropertyName(CommentEntry.Comment.CommentPreviewableAttachment::authorKey))
+        if (oldItem.showAuthorName != newItem.showAuthorName) payload.add(getPropertyName(CommentEntry.Comment.CommentPreviewableAttachment::showAuthorName))
+        if (oldItem.avatarUrl != newItem.avatarUrl) payload.add(getPropertyName(CommentEntry.Comment.CommentPreviewableAttachment::avatarUrl))
+        if (oldItem.showAvatar != newItem.showAvatar) payload.add(getPropertyName(CommentEntry.Comment.CommentPreviewableAttachment::showAvatar))
+        if (oldItem.attach.attachId != newItem.attach.attachId) payload.add(getPropertyName(CommentEntry.Attach::attachId))
+        if (oldItem.attach.attachUrl != newItem.attach.attachUrl) payload.add(getPropertyName(CommentEntry.Attach::attachUrl))
+        if (oldItem.attach.attachmentName != newItem.attach.attachmentName) payload.add(getPropertyName(CommentEntry.Attach::attachmentName))
+        if (oldItem.attach.isImage != newItem.attach.isImage) payload.add(getPropertyName(CommentEntry.Attach::isImage))
+        if (oldItem.attach.fileSize != newItem.attach.fileSize) payload.add(getPropertyName(CommentEntry.Attach::fileSize))
+        if (oldItem.attach.fileProgressStatus != newItem.attach.fileProgressStatus) payload.add(getPropertyName(CommentEntry.Attach::fileProgressStatus))
+        if (oldItem.attach.uploadProgress != newItem.attach.uploadProgress) payload.add(getPropertyName(CommentEntry.Attach::uploadProgress))
+
+        return payload
+    }
 }
 
 internal class CommentPreviewableAttachmentHolder(

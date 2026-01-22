@@ -35,6 +35,15 @@ internal class ButtonSimpleFingerprint(
         oldItem: ButtonEntry.Simple,
         newItem: ButtonEntry.Simple
     ) = true
+
+    override fun getChangePayload(
+        oldItem: ButtonEntry.Simple,
+        newItem: ButtonEntry.Simple,
+    ): Any? {
+        val payload = HashSet<String>()
+        if (oldItem.text != newItem.text) payload.add(getPropertyName(ButtonEntry.Simple::text))
+        return payload
+    }
 }
 
 internal class ButtonSimpleHolder(

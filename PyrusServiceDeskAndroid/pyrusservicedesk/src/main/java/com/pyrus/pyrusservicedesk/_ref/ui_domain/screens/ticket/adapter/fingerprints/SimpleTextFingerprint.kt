@@ -35,6 +35,18 @@ internal class SimpleTextFingerprint: ItemFingerprint<CommentEntry.SimpleText>()
         oldItem: CommentEntry.SimpleText,
         newItem: CommentEntry.SimpleText
     ) = newItem.entryId == oldItem.entryId
+
+    override fun getChangePayload(
+        oldItem: CommentEntry.SimpleText,
+        newItem: CommentEntry.SimpleText,
+    ): Any? {
+        val payload = HashSet<String>()
+        if (oldItem.creationTime != newItem.creationTime) payload.add(getPropertyName(CommentEntry.SimpleText::creationTime))
+        if (oldItem.entryId != newItem.entryId) payload.add(getPropertyName(CommentEntry.SimpleText::entryId))
+        if (oldItem.message != newItem.message) payload.add(getPropertyName(CommentEntry.SimpleText::message))
+        if (oldItem.avatarUrl != newItem.avatarUrl) payload.add(getPropertyName(CommentEntry.SimpleText::avatarUrl))
+        return payload
+    }
 }
 
 internal class WelcomeMessageHolder(

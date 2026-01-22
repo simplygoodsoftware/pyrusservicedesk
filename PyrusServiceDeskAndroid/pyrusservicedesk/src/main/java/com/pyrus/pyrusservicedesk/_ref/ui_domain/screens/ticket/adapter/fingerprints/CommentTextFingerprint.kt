@@ -54,6 +54,32 @@ internal class CommentTextFingerprint(
         oldItem: CommentEntry.Comment.CommentText,
         newItem: CommentEntry.Comment.CommentText
     ) = newItem.entryId == oldItem.entryId
+
+    override fun getChangePayload(
+        oldItem: CommentEntry.Comment.CommentText,
+        newItem: CommentEntry.Comment.CommentText,
+    ): Any? {
+        val payload = HashSet<String>()
+
+        if (oldItem.creationTime != newItem.creationTime) payload.add(getPropertyName(CommentEntry.Comment.CommentText::creationTime))
+        if (oldItem.entryId != newItem.entryId) payload.add(getPropertyName(CommentEntry.Comment.CommentText::entryId))
+        if (oldItem.id != newItem.id) payload.add(getPropertyName(CommentEntry.Comment.CommentText::id))
+        if (oldItem.isInbound != newItem.isInbound) payload.add(getPropertyName(CommentEntry.Comment.CommentText::isInbound))
+        if (oldItem.isSupport != newItem.isSupport) payload.add(getPropertyName(CommentEntry.Comment.CommentText::isSupport))
+        if (oldItem.hasError != newItem.hasError) payload.add(getPropertyName(CommentEntry.Comment.CommentText::hasError))
+        if (oldItem.isLocal != newItem.isLocal) payload.add(getPropertyName(CommentEntry.Comment.CommentText::isLocal))
+        if (oldItem.isWelcomeMessage != newItem.isWelcomeMessage) payload.add(getPropertyName(CommentEntry.Comment.CommentText::isWelcomeMessage))
+        if (oldItem.timeText != newItem.timeText) payload.add(getPropertyName(CommentEntry.Comment.CommentText::timeText))
+        if (oldItem.status != newItem.status) payload.add(getPropertyName(CommentEntry.Comment.CommentText::status))
+        if (oldItem.authorName != newItem.authorName) payload.add(getPropertyName(CommentEntry.Comment.CommentText::authorName))
+        if (oldItem.authorKey != newItem.authorKey) payload.add(getPropertyName(CommentEntry.Comment.CommentText::authorKey))
+        if (oldItem.showAuthorName != newItem.showAuthorName) payload.add(getPropertyName(CommentEntry.Comment.CommentText::showAuthorName))
+        if (oldItem.avatarUrl != newItem.avatarUrl) payload.add(getPropertyName(CommentEntry.Comment.CommentText::avatarUrl))
+        if (oldItem.showAvatar != newItem.showAvatar) payload.add(getPropertyName(CommentEntry.Comment.CommentText::showAvatar))
+        if (oldItem.text != newItem.text) payload.add(getPropertyName(CommentEntry.Comment.CommentText::text))
+
+        return payload
+    }
 }
 
 internal class CommentTextHolder(
