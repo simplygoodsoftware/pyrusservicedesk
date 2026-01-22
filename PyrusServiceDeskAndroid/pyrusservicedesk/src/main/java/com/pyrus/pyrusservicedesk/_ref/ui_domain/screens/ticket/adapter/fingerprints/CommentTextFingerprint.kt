@@ -133,8 +133,15 @@ internal class CommentTextHolder(
             setStatus(entry.status, entry.isInbound)
 
 
+        this.entry::isInbound.payloadCheck {
             setIsInboundParameters(entry.isInbound)
+            setStatus(Status.Completed, entry.isInbound)
+        }
+        this.entry::status.payloadCheck {
+            setStatus(entry.status, entry.isInbound)
+        }
 
+        this.entry::text.payloadCheck {
             val filteredText = entry.text
             binding.comment.commentText.text = replaceLinkTagsWithSpans(filteredText)
             LinkifyCompat.addLinks(
@@ -143,24 +150,28 @@ internal class CommentTextHolder(
             )
             addDeepLinks(binding.comment.commentText)
             binding.comment.commentText.movementMethod = LinkMovementMethod.getInstance()
-
-
+        }
+        this.entry::timeText.payloadCheck {
             binding.comment.textTime.text =
                 entry.timeText?.text(binding.root.context)
-
+        }
+        this.entry::showAuthorName.payloadCheck {
             if (!entry.isInbound)
                 binding.authorName.isVisible = entry.showAuthorName
             else
                 binding.authorName.visibility = View.GONE
-
+        }
+        this.entry::authorName.payloadCheck {
             if (!entry.isInbound)
                 binding.authorName.text =
                     entry.authorName?.text(binding.authorName.context)
-
+        }
+        this.entry::showAvatar.payloadCheck {
             binding.avatar.visibility =
                 if (entry.showAvatar) View.VISIBLE else View.INVISIBLE
             if (entry.isInbound) binding.avatar.visibility = View.GONE
-
+        }
+        this.entry::avatarUrl.payloadCheck {
             if (!entry.isInbound) {
                 val placeHolder =
                     if (entry.isSupport) ConfigUtils.getSupportAvatar(itemView.context)
@@ -174,6 +185,7 @@ internal class CommentTextHolder(
                 }
             }
         }
+    }
 
     private fun setIsInboundParameters(isInbound: Boolean) {
         val backgroundColor = if (!isInbound) {
