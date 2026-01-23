@@ -61,7 +61,10 @@ private class AutoRefreshActor(
 
             val startTime = System.currentTimeMillis()
             while (true) {
-                val interval = liveUpdates.getTicketsUpdateInterval(preferencesManager)
+                var interval = liveUpdates.getTicketsUpdateInterval(preferencesManager)
+
+                if (interval == -1L)
+                    interval = 1000
 
                 val endTime = startTime + interval
                 val currentTime = System.currentTimeMillis()
