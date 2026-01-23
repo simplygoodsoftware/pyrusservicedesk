@@ -1,4 +1,3 @@
-
 import Foundation
     /**
      Showing alert Access_Error with actions: cancel and open application settings
@@ -7,10 +6,10 @@ import Foundation
      */
     func showAccessAlert(with alertMessage: String, on viewController:UIViewController){
         let accessAlertController = UIAlertController (title: "Access_Error".localizedPSD() , message: alertMessage, preferredStyle: .alert)
-        let settingsAction = UIAlertAction(title: "Settings".localizedPSD(), style: .destructive) { (_) -> Void in
+        let settingsAction = UIAlertAction(title: "Settings".localizedPSD(), style: .default) { (_) -> Void in
             let settingsUrl = NSURL(string:UIApplication.openSettingsURLString)
             if let url = settingsUrl {
-                UIApplication.shared.openURL(url as URL)
+                UIApplication.shared.open(url as URL, options: [:], completionHandler: nil)
             }
         }
         let cancelAction = UIAlertAction(title: "Cancel".localizedPSD(), style: .default, handler: nil)
