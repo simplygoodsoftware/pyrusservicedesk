@@ -235,9 +235,11 @@ private extension SyncManager {
                     if let operatorTimeMessage = commandResult.operatorResponseTimeMessage {
                         NotificationCenter.default.post(name: SyncManager.updateOperatorTimeNotification, object: nil, userInfo: ["ticketId": ticketId, "message": operatorTimeMessage])
                         DispatchQueue.main.asyncAfter(deadline: .now() + 60) {
-                            let params = TicketCommandParams(ticketId: ticketId, appId: command.appId, userId: command.userId)
-                            let command = TicketCommand(commandId: UUID().uuidString, type: .calcOperatorTime, appId: command.appId, userId: command.userId, params: params)
-                            PyrusServiceDesk.repository.add(command: command)
+                            if PyrusServiceDeskController.PSDIsOpen() {
+                                let params = TicketCommandParams(ticketId: ticketId, appId: command.appId, userId: command.userId)
+                                let command = TicketCommand(commandId: UUID().uuidString, type: .calcOperatorTime, appId: command.appId, userId: command.userId, params: params)
+                                PyrusServiceDesk.repository.add(command: command)
+                            }
                         }
                     } else {
                         NotificationCenter.default.post(name: SyncManager.removeOperatorTimeNotification, object: nil, userInfo: ["ticketId": ticketId])
@@ -363,6 +365,13 @@ extension SyncManager {
     
     static func getLastActivityDate() -> Date? {
         return PSDMessagesStorage.pyrusUserDefaults()?.object(forKey: userLastActivityKey()) as? Date
+    }
+    
+    static func getLastActivityDuration() -> TimeInterval {
+        guard let date = getLastActivityDate() else {
+            return .greatestFiniteMagnitude
+        }
+        return Date().timeIntervalSince(date)
     }
     
     ///Set last user acivity date to NOW if date paramemeter is nil, returns true if setted

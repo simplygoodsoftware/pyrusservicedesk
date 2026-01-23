@@ -47,6 +47,7 @@ class PSDChatInteractor: NSObject {
     private var chatForUpdate: PSDChat?
     private var isScrollButtonHiden = true
     private var isLoading: Bool = false
+    private var hasOperatorTime: Bool = false
     private var newMessagesCount = 0 {
         didSet {
             if newMessagesCount > 0 {
@@ -118,6 +119,7 @@ extension PSDChatInteractor: PSDChatInteractorProtocol {
                     if !(singleChat.lastComment?.isSupportMessage ?? false) ||
                         (singleChat.lastComment?.isSystemMessage ?? false) {
                         sendOperatorCalcCommand(needSync: false)
+                        hasOperatorTime = true
                     }
                     readChat()
                 } else if PyrusServiceDesk.clients.count > 0 {
@@ -275,6 +277,7 @@ private extension PSDChatInteractor {
                    let ticketId = userInfo["ticketId"] as? Int,
                    let message = userInfo["message"] as? String,
                    self?.chat?.chatId == ticketId {
+                    self?.hasOperatorTime = true
                     self?.presenter.doWork(.updateOperatorTime(timeMessage: message))
                 }
             }
@@ -284,6 +287,7 @@ private extension PSDChatInteractor {
                 if let userInfo = notification.userInfo,
                    let ticketId = userInfo["ticketId"] as? Int,
                    self?.chat?.chatId == ticketId {
+                    self?.hasOperatorTime = false
                     self?.presenter.doWork(.updateOperatorTime(timeMessage: nil))
                 }
             }
@@ -624,10 +628,11 @@ private extension PSDChatInteractor {
         newMessage.commandId = UUID().uuidString
         newMessage.userId = chat?.userId ?? PyrusServiceDesk.currentUserId ?? PyrusServiceDesk.customUserId ?? PyrusServiceDesk.userId
         newMessage.appId = PyrusServiceDesk.currentClientId ?? PyrusServiceDesk.clientId
-        PSDMessageSend.pass(newMessage, delegate: self)
-        if newMessage.requestNewTicket {
-            sendOperatorCalcCommand()
+        if !hasOperatorTime && (newMessage.requestNewTicket || SyncManager.getLastActivityDuration() > SyncManager.PSD_LAST_ACTIVITY_INTERVAL_HOUR) {
+            hasOperatorTime = true
+            sendOperatorCalcCommand(needSync: false)
         }
+        PSDMessageSend.pass(newMessage, delegate: self)
     }
     
     func sendRate(_ rateValue: Int) {

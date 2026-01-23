@@ -8,7 +8,7 @@ import UIKit
     private static let REFRESH_TIME_INTEVAL = TimeInterval(1*60)
     private static let REFRESH_MAX_COUNT = 20
     
-    static let PSD_VERSION: String = "2.3.75"
+    static let PSD_VERSION: String = "2.3.77"
     
     ///AppId needed for request
     static var clientId: String?
@@ -339,8 +339,11 @@ import UIKit
             let diff = Date().timeIntervalSince(date)
             if diff < SyncManager.PSD_LAST_ACTIVITY_INTERVAL_3_DAYS {
                 startGettingInfo(rightNow: true)
+            } else {
+                syncManager.syncGetTickets()
             }
-            
+        } else {
+            syncManager.syncGetTickets()
         }
     }
     ///Unsubscribe [subscriber] from alerts for new messages from chat support.
