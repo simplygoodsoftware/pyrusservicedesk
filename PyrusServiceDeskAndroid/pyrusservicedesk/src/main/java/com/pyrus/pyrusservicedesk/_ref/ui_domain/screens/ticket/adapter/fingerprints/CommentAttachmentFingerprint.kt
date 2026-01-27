@@ -60,6 +60,36 @@ internal class CommentAttachmentFingerprint(
         oldItem: CommentEntry.Comment.CommentAttachment,
         newItem: CommentEntry.Comment.CommentAttachment
     ) = newItem.entryId == oldItem.entryId
+
+    override fun getChangePayload(
+        oldItem: CommentEntry.Comment.CommentAttachment,
+        newItem: CommentEntry.Comment.CommentAttachment,
+    ): Any? {
+        val payload = HashSet<String>()
+        if (oldItem.creationTime != newItem.creationTime) payload.add(getPropertyName(CommentEntry.Comment.CommentAttachment::creationTime))
+        if (oldItem.entryId != newItem.entryId) payload.add(getPropertyName(CommentEntry.Comment.CommentAttachment::entryId))
+        if (oldItem.id != newItem.id) payload.add(getPropertyName(CommentEntry.Comment.CommentAttachment::id))
+        if (oldItem.isInbound != newItem.isInbound) payload.add(getPropertyName(CommentEntry.Comment.CommentAttachment::isInbound))
+        if (oldItem.isSupport != newItem.isSupport) payload.add(getPropertyName(CommentEntry.Comment.CommentAttachment::isSupport))
+        if (oldItem.hasError != newItem.hasError) payload.add(getPropertyName(CommentEntry.Comment.CommentAttachment::hasError))
+        if (oldItem.isLocal != newItem.isLocal) payload.add(getPropertyName(CommentEntry.Comment.CommentAttachment::isLocal))
+        if (oldItem.isWelcomeMessage != newItem.isWelcomeMessage) payload.add(getPropertyName(CommentEntry.Comment.CommentAttachment::isWelcomeMessage))
+        if (oldItem.timeText != newItem.timeText) payload.add(getPropertyName(CommentEntry.Comment.CommentAttachment::timeText))
+        if (oldItem.status != newItem.status) payload.add(getPropertyName(CommentEntry.Comment.CommentAttachment::status))
+        if (oldItem.authorName != newItem.authorName) payload.add(getPropertyName(CommentEntry.Comment.CommentAttachment::authorName))
+        if (oldItem.authorKey != newItem.authorKey) payload.add(getPropertyName(CommentEntry.Comment.CommentAttachment::authorKey))
+        if (oldItem.showAuthorName != newItem.showAuthorName) payload.add(getPropertyName(CommentEntry.Comment.CommentAttachment::showAuthorName))
+        if (oldItem.avatarUrl != newItem.avatarUrl) payload.add(getPropertyName(CommentEntry.Comment.CommentAttachment::avatarUrl))
+        if (oldItem.showAvatar != newItem.showAvatar) payload.add(getPropertyName(CommentEntry.Comment.CommentAttachment::showAvatar))
+        if (oldItem.attach.attachId != newItem.attach.attachId) payload.add(getPropertyName(CommentEntry.Attach::attachId))
+        if (oldItem.attach.attachUrl != newItem.attach.attachUrl) payload.add(getPropertyName(CommentEntry.Attach::attachUrl))
+        if (oldItem.attach.attachmentName != newItem.attach.attachmentName) payload.add(getPropertyName(CommentEntry.Attach::attachmentName))
+        if (oldItem.attach.isImage != newItem.attach.isImage) payload.add(getPropertyName(CommentEntry.Attach::isImage))
+        if (oldItem.attach.fileSize != newItem.attach.fileSize) payload.add(getPropertyName(CommentEntry.Attach::fileSize))
+        if (oldItem.attach.fileProgressStatus != newItem.attach.fileProgressStatus) payload.add(getPropertyName(CommentEntry.Attach::fileProgressStatus))
+        if (oldItem.attach.uploadProgress != newItem.attach.uploadProgress) payload.add(getPropertyName(CommentEntry.Attach::uploadProgress))
+        return payload
+    }
 }
 
 internal class CommentAttachmentHolder(

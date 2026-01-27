@@ -1,9 +1,6 @@
 package com.pyrus.pyrusservicedesk.payload_adapter
 
 import androidx.recyclerview.widget.DiffUtil
-import kotlin.reflect.KClass
-import kotlin.reflect.KVisibility
-import kotlin.reflect.full.declaredMemberProperties
 
 class PayloadDiffUtil<Entry: Any>(
     fingerprintList: Array<out ItemFingerprint<out Entry>>,
@@ -22,31 +19,15 @@ class PayloadDiffUtil<Entry: Any>(
         return getFingerprint(oldItem).areContentsTheSame(oldItem, newItem)
     }
 
+    /*
+    Used to determine the payload, but overridden in each fingerprint separately
+    to explicitly compare the content for each entry.
+    Reflection was removed due to this
+    https://pyrus.com/t#kb/article/ploxoe-obnovlenie-ui-v-servicedesk-H8uF3uLJc9w
+     */
     override fun getChangePayload(oldItem: Entry, newItem: Entry): Any? {
-        if (oldItem::class == newItem::class) {
-            val payload = HashSet<String>()
-
-            val oldValues: Map<String, Any?> = oldItem.extract()
-            val newValues: Map<String, Any?> = newItem.extract()
-
-            for (entry in newValues) {
-                if (oldValues[entry.key] != entry.value) {
-                    payload.add(entry.key)
-                }
-            }
-
-            return payload
-        }
-        return super.getChangePayload(oldItem, newItem)
-    }
-
-    @Suppress("UNCHECKED_CAST")
-    private fun <T : Any> T.extract(): Map<String, Any?> {
-
-        val publicProps = (this::class as KClass<T>).declaredMemberProperties.filter {
-            it.visibility == KVisibility.PUBLIC || it.visibility == KVisibility.INTERNAL
-        }
-        return publicProps.associate { p -> p.name to p.get(this) }
+        if (oldItem::class != newItem::class) return super.getChangePayload(oldItem, newItem)
+        return getFingerprint(oldItem).getChangePayload(oldItem, newItem)
     }
 
     @Suppress("UNCHECKED_CAST")
