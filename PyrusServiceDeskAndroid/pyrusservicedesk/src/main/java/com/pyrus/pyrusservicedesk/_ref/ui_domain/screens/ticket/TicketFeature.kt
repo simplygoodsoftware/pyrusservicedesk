@@ -69,7 +69,7 @@ interface TicketContract {
         }
 
         sealed interface Inner : Message {
-            class CommentsUpdated(val ticket: FullTicket?) : Inner
+            class CommentsUpdated(val ticket: FullTicket?, val welcomeMessage: String?) : Inner
             class UpdateCommentsFailed(val getTicketsError: GetTicketsError) : Inner
             class UpdateCommentsCompleted(
                 val ticket: FullTicket,
