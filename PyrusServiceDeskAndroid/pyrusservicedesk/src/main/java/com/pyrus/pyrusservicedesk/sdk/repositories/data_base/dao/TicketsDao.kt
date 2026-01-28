@@ -62,6 +62,10 @@ internal abstract class TicketsDao {
     @Query("SELECT * FROM $APPLICATIONS_TABLE")
     abstract fun getApplications(): List<ApplicationEntity>
 
+
+    @Query("SELECT * FROM $APPLICATIONS_TABLE")
+    abstract fun getOnlyApplicationsFlow(): Flow<List<ApplicationEntity>>
+
     @Query("SELECT * FROM $USERS_TABLE")
     abstract fun getUsers(): List<UserEntity>
 
