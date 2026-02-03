@@ -46,7 +46,6 @@
     <string name="ok">حسنًا</string>
     <string name="copied_text">نص منسوخ</string>
     <string name="psd_support">الدعم</string>
-    <string name="psd_date_format_d"></string>
     <string name="psd_date_format_d_m_short">MM.dd</string>
     <string name="psd_date_format_d_m_y_short">MM.dd.yyyy</string>
     <string name="psd_evaluate_the_operators_performance">تقييم أداء المشغل</string>
