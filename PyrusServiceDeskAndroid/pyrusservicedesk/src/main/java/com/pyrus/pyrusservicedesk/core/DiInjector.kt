@@ -235,6 +235,7 @@ internal class DiInjector(
         audioWrapper = audioWrapper,
         localTicketsStore = localTicketsStore,
         commandsStore = localCommandsStore,
+        idStore = idStore,
     )
 
     val ticketsFeatureFactory = TicketsFeatureFactory(
