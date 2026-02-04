@@ -455,7 +455,12 @@ private class TicketActor(
         is Effect.Inner.FeedFlow -> {
             ticketId = localTicketsStore.getTickets().lastOrNull()?.ticketId ?: ticketId
             repository.getFeedFlow(user, ticketId)
-                .map { Message.Inner.CommentsUpdated(it, welcomeMessage) }
+                .map {
+                    if (it != null && !it.isRead && it.comments.lastOrNull()?.isSupport == true) {
+                        systemMessageStore.setNecessityTimeSystemMessage(ticketId, false)
+                    }
+                    Message.Inner.CommentsUpdated(it, welcomeMessage)
+                }
         }
         is Effect.Inner.CheckAccount -> flow {
             var oldAccount: Account? = null

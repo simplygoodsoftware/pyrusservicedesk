@@ -67,31 +67,32 @@ private class AutoRefreshActor(
     @OptIn(ExperimentalCoroutinesApi::class)
     override fun handleEffect(effect: AutoRefreshContract.Effect): Flow<Unit> = when (effect) {
         is AutoRefreshContract.Effect.StartUpdates -> combine(
-        liveUpdates.isStartedFlow(),
-        preferencesManager.getLastActiveTimeFlow(),
-        PyrusServiceDesk.sdIsOpenFlow(),
-    ) { isStarted, lastActiveTime, sdIsOpen ->
-        val interval = liveUpdates.getTicketsUpdateInterval(lastActiveTime)
-        if (isStarted || sdIsOpen)
-            interval to lastActiveTime
-        else
-            -1L to -1L
-    }
-        .distinctUntilChanged()
-        .flatMapLatest { data ->
-            if (data.first == -1L) {
-                flow { }
-            }
-            else {
-                flow {
-                    while (currentCoroutineContext().isActive) {
-                        val interval = liveUpdates.getTicketsUpdateInterval(data.second)
-                        repository.sync()
-                        delay(interval)
+            liveUpdates.isStartedFlow(),
+            preferencesManager.getLastActiveTimeFlow(),
+            PyrusServiceDesk.sdIsOpenFlow(),
+        ) { isStarted, lastActiveTime, sdIsOpen ->
+            val interval = liveUpdates.getTicketsUpdateInterval(lastActiveTime)
+            if (isStarted || sdIsOpen)
+                interval to lastActiveTime
+            else
+                -1L to -1L
+        }
+            .distinctUntilChanged()
+            .flatMapLatest { data ->
+                if (data.first == -1L) {
+                    flow { }
+                }
+                else {
+                    flow {
+                        while (currentCoroutineContext().isActive) {
+                            val interval = liveUpdates.getTicketsUpdateInterval(data.second)
+                            repository.sync()
+                            delay(interval)
+                        }
                     }
                 }
             }
-        }
+
         is AutoRefreshContract.Effect.StartUpdatesSystemMessage -> flow {
             systemMessageStore.ticketStateFlow().collect { id ->
                 startSendCalcOperatorTime(id)
