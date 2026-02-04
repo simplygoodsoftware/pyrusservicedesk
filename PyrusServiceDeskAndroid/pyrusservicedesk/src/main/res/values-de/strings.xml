@@ -37,4 +37,33 @@
     <string name="psd_comment_input_hint">Kommentar hinzufügen</string>
     <string name="link_warning">Dieser Link führt zu einem %s
 \nMöchten Sie wirklich dem Link folgen\?</string>
+    <string name="psd_no_access">Kein Zugriff</string>
+    <string name="psd_no_access_message">Wenden Sie sich an Ihren Organisationsmanager, um den Zugriff auf %s wiederherzustellen</string>
+    <string name="ok">Ok</string>
+    <string name="copied_text">Kopierter Text</string>
+    <string name="psd_support">support</string>
+    <string name="psd_date_format_d">EEE</string>
+    <string name="psd_date_format_d_m_short">MM.dd</string>
+    <string name="psd_date_format_d_m_y_short">MM.dd.yyyy</string>
+    <string name="psd_evaluate_the_operators_performance">Bewerten Sie die Leistung des Bedieners</string>
+    <string name="psd_close">Schließen</string>
+    <string name="leave_your_comment">Schreiben Sie eine Rezension</string>
+    <string name="psd_filters">Filter</string>
+    <string name="psd_ticket_number">Ticketnummer: %s</string>
+    <string name="psd_ticket_data_create">Erstellt am %s</string>
+    <string name="all">Alle</string>
+    <string name="psd_you">Sie</string>
+    <string name="psd_type_photo">Foto</string>
+    <string name="psd_type_video">Video</string>
+    <string name="psd_type_file">File</string>
+    <string name="psd_type_audio">Sprachnachricht</string>
+    <string name="psd_unsupptorted_attachment">Nicht unterstützte Anlage</string>
+    <string name="new_ticket">Neues Ticket</string>
+    <string name="closed_teckets">Geschlossene Tickets</string>
+    <string name="ticket_was_closed">Das Ticket wurde geschlossen</string>
+    <string name="all_conversations">Alle Gespräche</string>
+    <string name="psd_search_by_tickets">Suche nach Tickets</string>
+    <string name="psd_no_suggestions">Keine Vorschläge</string>
+    <string name="psd_swipe_cancel">&lt;&lt; stornieren</string>
+    <string name="psd_cancel">Stornieren</string>
 </resources>

@@ -36,4 +36,33 @@
     <string name="send_library_logs">发送库日志</string>
     <string name="link_warning">此链接将跳转到 %s
 \n您确定要打开该链接吗？</string>
+    <string name="psd_no_access">无访问权限</string>
+    <string name="psd_no_access_message">请联系您的组织管理员以恢复对 %s 的访问权限</string>
+    <string name="ok">OK</string>
+    <string name="copied_text">已复制文本</string>
+    <string name="psd_support">支持</string>
+    <string name="psd_date_format_d">EEE</string>
+    <string name="psd_date_format_d_m_short">MM.dd</string>
+    <string name="psd_date_format_d_m_y_short">MM.dd.yyyy</string>
+    <string name="psd_evaluate_the_operators_performance">评估客服的绩效</string>
+    <string name="psd_close">关闭</string>
+    <string name="leave_your_comment">撰写评价</string>
+    <string name="psd_filters">筛选器</string>
+    <string name="psd_ticket_number">工单编号：%s</string>
+    <string name="psd_ticket_data_create">创建于 %s</string>
+    <string name="all">全部</string>
+    <string name="psd_you">您</string>
+    <string name="psd_type_photo">照片</string>
+    <string name="psd_type_video">视频</string>
+    <string name="psd_type_file">文件</string>
+    <string name="psd_type_audio">语音消息</string>
+    <string name="psd_unsupptorted_attachment">不支持的附件</string>
+    <string name="new_ticket">新工单</string>
+    <string name="closed_teckets">已关闭工单</string>
+    <string name="ticket_was_closed">工单已关闭</string>
+    <string name="all_conversations">所有对话</string>
+    <string name="psd_search_by_tickets">按工单搜索</string>
+    <string name="psd_no_suggestions">无建议</string>
+    <string name="psd_swipe_cancel">‹‹ 取消</string>
+    <string name="psd_cancel">取消</string>
 </resources>

@@ -38,4 +38,33 @@
     <string name="psd_downloading">Sto scaricando…</string>
     <string name="link_warning">Questo link porta a %s
 \nVuoi davvero seguire il link\?</string>
+    <string name="psd_no_access">Nessun accesso</string>
+    <string name="psd_no_access_message">Contatta il manager della tua azienda per ripristinare l\'accesso a %s</string>
+    <string name="ok">Ok</string>
+    <string name="copied_text">Testo copiato</string>
+    <string name="psd_support">supporto</string>
+    <string name="psd_date_format_d">EEE</string>
+    <string name="psd_date_format_d_m_short">dd.MM</string>
+    <string name="psd_date_format_d_m_y_short">dd.mm.yyyy</string>
+    <string name="psd_evaluate_the_operators_performance">Valuta la prestazione dell\'operatore</string>
+    <string name="psd_close">Chiudere</string>
+    <string name="leave_your_comment">Scrivi una recensione</string>
+    <string name="psd_filters">Filtri</string>
+    <string name="psd_ticket_number">Ticket numero: %s</string>
+    <string name="psd_ticket_data_create">Creato il %s</string>
+    <string name="all">Tutto</string>
+    <string name="psd_you">Tu</string>
+    <string name="psd_type_photo">Foto</string>
+    <string name="psd_type_video">Video</string>
+    <string name="psd_type_file">File</string>
+    <string name="psd_type_audio">Messaggio vocale</string>
+    <string name="psd_unsupptorted_attachment">Allegato non supportato</string>
+    <string name="new_ticket">Nuovo ticket</string>
+    <string name="closed_teckets">Ticket chiusi</string>
+    <string name="ticket_was_closed">Il ticket è stato chiuso</string>
+    <string name="all_conversations">Tutte le conversazioni</string>
+    <string name="psd_search_by_tickets">Cerca per ticket</string>
+    <string name="psd_no_suggestions">Nessun suggerimento</string>
+    <string name="psd_swipe_cancel">‹‹ cancella</string>
+    <string name="psd_cancel">Annulla</string>
 </resources>

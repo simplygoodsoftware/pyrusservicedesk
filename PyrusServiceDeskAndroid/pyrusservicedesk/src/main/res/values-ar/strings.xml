@@ -41,4 +41,31 @@
     <string name="send_library_logs">إرسال سجلات المكتبة</string>
     <string name="link_warning">هذا الرابط يؤدي إلى %s
 \nهل ترغب حقًا في متابعة الرابط؟</string>
+    <string name="psd_no_access">لا توجد صلاحية</string>
+    <string name="psd_no_access_message">تواصل مع مدير مؤسستك لاستعادة الوصول إلى %s</string>
+    <string name="ok">حسنًا</string>
+    <string name="copied_text">نص منسوخ</string>
+    <string name="psd_support">الدعم</string>
+    <string name="psd_date_format_d_m_short">MM.dd</string>
+    <string name="psd_date_format_d_m_y_short">MM.dd.yyyy</string>
+    <string name="psd_evaluate_the_operators_performance">تقييم أداء المشغل</string>
+    <string name="psd_close">إغلاق</string>
+    <string name="leave_your_comment">اكتب تقييمًا</string>
+    <string name="psd_filters">عوامل التصفية</string>
+    <string name="psd_ticket_number">رقم التذكرة: %s</string>
+    <string name="psd_ticket_data_create">تم الإنشاء في %s</string>
+    <string name="all">الكل</string>
+    <string name="psd_you">أنت</string>
+    <string name="psd_type_audio">رسالة صوتية</string>
+    <string name="psd_type_photo">صورة</string>
+    <string name="psd_type_video">فيديو</string>
+    <string name="psd_type_file">ملف</string>
+    <string name="psd_unsupptorted_attachment">مرفق غير مدعوم</string>
+    <string name="new_ticket">تذكرة جديدة</string>
+    <string name="closed_teckets">التذاكر المغلقة</string>
+    <string name="psd_swipe_cancel">‹‹ إلغاء</string>
+    <string name="ticket_was_closed">تم إغلاق التذكرة</string>
+    <string name="psd_cancel">إلغاء</string>
+    <string name="all_conversations">جميع المحادثات</string>
+    <string name="psd_search_by_tickets">البحث حسب التذاكر</string>
 </resources>

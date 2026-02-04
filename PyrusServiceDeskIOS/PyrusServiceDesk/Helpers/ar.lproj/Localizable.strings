@@ -66,3 +66,7 @@
 "ShortYes" = "نعم";
 "ShortNo" = "لا";
 "Back" = "عودة";
+"EvaluateQuality" = "قيّم جودة الخدمة";
+"PleaseEvaluateQuality" = "قيّم جودة الخدمة";
+"LeaveYourComment" = "اكتب مراجعة";
+"Close" = "إغلاق";
