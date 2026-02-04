@@ -59,6 +59,38 @@ internal class CommentAudioFingerprint(
         oldItem: CommentEntry.Comment.CommentAudio,
         newItem: CommentEntry.Comment.CommentAudio
     ) = newItem.entryId == oldItem.entryId
+
+    override fun getChangePayload(
+        oldItem: CommentEntry.Comment.CommentAudio,
+        newItem: CommentEntry.Comment.CommentAudio,
+    ): Any? {
+        val payload = HashSet<String>()
+
+        if (oldItem.creationTime != newItem.creationTime) payload.add(getPropertyName(CommentEntry.Comment.CommentAudio::creationTime))
+        if (oldItem.entryId != newItem.entryId) payload.add(getPropertyName(CommentEntry.Comment.CommentAudio::entryId))
+        if (oldItem.id != newItem.id) payload.add(getPropertyName(CommentEntry.Comment.CommentAudio::id))
+        if (oldItem.isInbound != newItem.isInbound) payload.add(getPropertyName(CommentEntry.Comment.CommentAudio::isInbound))
+        if (oldItem.isSupport != newItem.isSupport) payload.add(getPropertyName(CommentEntry.Comment.CommentAudio::isSupport))
+        if (oldItem.hasError != newItem.hasError) payload.add(getPropertyName(CommentEntry.Comment.CommentAudio::hasError))
+        if (oldItem.isLocal != newItem.isLocal) payload.add(getPropertyName(CommentEntry.Comment.CommentAudio::isLocal))
+        if (oldItem.isWelcomeMessage != newItem.isWelcomeMessage) payload.add(getPropertyName(CommentEntry.Comment.CommentAudio::isWelcomeMessage))
+        if (oldItem.timeText != newItem.timeText) payload.add(getPropertyName(CommentEntry.Comment.CommentAudio::timeText))
+        if (oldItem.status != newItem.status) payload.add(getPropertyName(CommentEntry.Comment.CommentAudio::status))
+        if (oldItem.authorName != newItem.authorName) payload.add(getPropertyName(CommentEntry.Comment.CommentAudio::authorName))
+        if (oldItem.authorKey != newItem.authorKey) payload.add(getPropertyName(CommentEntry.Comment.CommentAudio::authorKey))
+        if (oldItem.showAuthorName != newItem.showAuthorName) payload.add(getPropertyName(CommentEntry.Comment.CommentAudio::showAuthorName))
+        if (oldItem.avatarUrl != newItem.avatarUrl) payload.add(getPropertyName(CommentEntry.Comment.CommentAudio::avatarUrl))
+        if (oldItem.showAvatar != newItem.showAvatar) payload.add(getPropertyName(CommentEntry.Comment.CommentAudio::showAvatar))
+        if (oldItem.attach.attachId != newItem.attach.attachId) payload.add(getPropertyName(CommentEntry.Attach::attachId))
+        if (oldItem.attach.attachUrl != newItem.attach.attachUrl) payload.add(getPropertyName(CommentEntry.Attach::attachUrl))
+        if (oldItem.attach.attachmentName != newItem.attach.attachmentName) payload.add(getPropertyName(CommentEntry.Attach::attachmentName))
+        if (oldItem.attach.isImage != newItem.attach.isImage) payload.add(getPropertyName(CommentEntry.Attach::isImage))
+        if (oldItem.attach.fileSize != newItem.attach.fileSize) payload.add(getPropertyName(CommentEntry.Attach::fileSize))
+        if (oldItem.attach.fileProgressStatus != newItem.attach.fileProgressStatus) payload.add(getPropertyName(CommentEntry.Attach::fileProgressStatus))
+        if (oldItem.attach.uploadProgress != newItem.attach.uploadProgress) payload.add(getPropertyName(CommentEntry.Attach::uploadProgress))
+
+        return payload
+    }
 }
 
 internal class CommentAudioHolder(

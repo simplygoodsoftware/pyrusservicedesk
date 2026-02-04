@@ -34,6 +34,15 @@ internal class DateFingerprint : ItemFingerprint<CommentEntry.Date>() {
         newItem: CommentEntry.Date
     ) = newItem.date == oldItem.date
 
+    override fun getChangePayload(
+        oldItem: CommentEntry.Date,
+        newItem: CommentEntry.Date,
+    ): Any? {
+        val payload = HashSet<String>()
+        if (oldItem.date != newItem.date) payload.add(getPropertyName(CommentEntry.Date::date))
+        return payload
+    }
+
 }
 
 internal class DateViewHolder(

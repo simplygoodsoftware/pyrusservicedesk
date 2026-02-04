@@ -203,20 +203,23 @@ internal class DiInjector(
 
     val navHolder: NavigatorHolder = cicerone.getNavigatorHolder()
 
-    private val player: ExoPlayer = ExoPlayer
-        .Builder(application)
-        .setAudioAttributes(
-            AudioAttributes.Builder()
-                .setUsage(C.USAGE_MEDIA)
-                .setContentType(C.AUDIO_CONTENT_TYPE_MUSIC)
-                .build(),
-            true,
-        )
-        .build()
+    private val player: ExoPlayer by lazy {
+        ExoPlayer
+            .Builder(application)
+            .setAudioAttributes(
+                AudioAttributes.Builder()
+                    .setUsage(C.USAGE_MEDIA)
+                    .setContentType(C.AUDIO_CONTENT_TYPE_MUSIC)
+                    .build(),
+                true,
+            )
+            .build()
+    }
+    private val mediaSessionManager = MediaSessionManager()
 
-    private var session: MediaSession = MediaSession.Builder(application, player)
-        .setId("psd_session_" + UUID.randomUUID().toString())
-        .build()
+    private val session: MediaSession by lazy {
+        mediaSessionManager.createMediaSessionWithRetry(application, player)
+    }
 
     private val downloadHelper = DownloadHelper(
         context = application

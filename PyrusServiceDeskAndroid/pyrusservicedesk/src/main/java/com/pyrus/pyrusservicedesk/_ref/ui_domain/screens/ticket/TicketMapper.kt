@@ -193,7 +193,7 @@ internal object TicketMapper {
             buttonsEntry = (entries.lastOrNull() as? CommentEntry.Comment.CommentText)?.let { extractButtonsFromWelcome(it, welcomeMessage) }
         }
 
-        if (!freshList.showRating) {
+        if (!freshList.showRating && freshList.comments.isNotEmpty() && !isLastWelcome(entries)) {
             buttonsEntry = freshList.comments.lastOrNull()?.let { extractButtons(it) }
         }
 

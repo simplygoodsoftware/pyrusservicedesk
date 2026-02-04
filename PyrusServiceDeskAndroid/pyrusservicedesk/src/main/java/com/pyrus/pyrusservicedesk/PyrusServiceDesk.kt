@@ -31,7 +31,8 @@ import kotlinx.coroutines.CoroutineExceptionHandler
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
-import kotlinx.coroutines.launch
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
 
 
 class PyrusServiceDesk private constructor(
@@ -65,7 +66,13 @@ class PyrusServiceDesk private constructor(
         private var onStopCallback: OnStopCallback? = null
 
         private val liveUpdates = LiveUpdates()
-        var sdIsOpen = false
+        val sdIsOpen = MutableStateFlow(false)
+
+        fun sdIsOpenFlow(): StateFlow<Boolean> = sdIsOpen
+
+        private fun updateSdIsOpen(sdIsOpen: Boolean) {
+            this.sdIsOpen.value = sdIsOpen
+        }
 
         /**
          * Initializes PyrusServiceDesk embeddable module.
@@ -354,7 +361,7 @@ class PyrusServiceDesk private constructor(
         }
 
         internal fun onServiceDeskStop() {
-            sdIsOpen = false
+            updateSdIsOpen(false)
             injector().releaseSession()
             onStopCallback?.onServiceDeskStop()
             onStopCallback = null
@@ -388,7 +395,7 @@ class PyrusServiceDesk private constructor(
             val intent = MainActivity.createLaunchIntent(activity, account, openTicketAction, sendComment)
             intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
             activity.startActivity(intent)
-            sdIsOpen = true
+            updateSdIsOpen(true)
 
             injector().updateUserUseCase.updateUser()
         }

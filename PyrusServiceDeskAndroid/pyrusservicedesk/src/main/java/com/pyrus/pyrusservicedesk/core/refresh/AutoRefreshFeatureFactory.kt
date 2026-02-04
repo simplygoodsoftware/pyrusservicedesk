@@ -11,9 +11,13 @@ import com.pyrus.pyrusservicedesk.sdk.repositories.SdRepository
 import com.pyrus.pyrusservicedesk.sdk.repositories.SystemMessageStore
 import com.pyrus.pyrusservicedesk.sdk.updates.LiveUpdates
 import com.pyrus.pyrusservicedesk.sdk.updates.PreferencesManager
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.currentCoroutineContext
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.isActive
 
@@ -28,7 +32,7 @@ internal class AutoRefreshFeatureFactory(
 ) {
 
     fun create(
-        liveUpdates: LiveUpdates
+        liveUpdates: LiveUpdates,
     ): AutoRefreshFeature = storeFactory.create(
         name = TAG,
         initialState = Unit,
@@ -60,29 +64,34 @@ private class AutoRefreshActor(
     private val localTicketsStore: LocalTicketsStore,
 ) : Actor<AutoRefreshContract.Effect, Unit> {
 
+    @OptIn(ExperimentalCoroutinesApi::class)
     override fun handleEffect(effect: AutoRefreshContract.Effect): Flow<Unit> = when (effect) {
-        is AutoRefreshContract.Effect.StartUpdates -> flow {
-            while (currentCoroutineContext().isActive) {
-                val interval = liveUpdates.getTicketsUpdateInterval(preferencesManager)
-                if ((liveUpdates.isStarted || PyrusServiceDesk.sdIsOpen) && interval != -1L)
-                    repository.sync()
-
-                val startTime = System.currentTimeMillis()
-                while (true) {
-                    val interval = liveUpdates.getTicketsUpdateInterval(preferencesManager)
-
-                    val endTime = startTime + interval
-                    val currentTime = System.currentTimeMillis()
-
-                    if (currentTime > endTime) {
-                        break
+        is AutoRefreshContract.Effect.StartUpdates -> combine(
+        liveUpdates.isStartedFlow(),
+        preferencesManager.getLastActiveTimeFlow(),
+        PyrusServiceDesk.sdIsOpenFlow(),
+    ) { isStarted, lastActiveTime, sdIsOpen ->
+        val interval = liveUpdates.getTicketsUpdateInterval(lastActiveTime)
+        if (isStarted || sdIsOpen)
+            interval to lastActiveTime
+        else
+            -1L to -1L
+    }
+        .distinctUntilChanged()
+        .flatMapLatest { data ->
+            if (data.first == -1L) {
+                flow { }
+            }
+            else {
+                flow {
+                    while (currentCoroutineContext().isActive) {
+                        val interval = liveUpdates.getTicketsUpdateInterval(data.second)
+                        repository.sync()
+                        delay(interval)
                     }
-
-                    delay(1000)
                 }
             }
         }
-
         is AutoRefreshContract.Effect.StartUpdatesSystemMessage -> flow {
             systemMessageStore.ticketStateFlow().collect { id ->
                 startSendCalcOperatorTime(id)

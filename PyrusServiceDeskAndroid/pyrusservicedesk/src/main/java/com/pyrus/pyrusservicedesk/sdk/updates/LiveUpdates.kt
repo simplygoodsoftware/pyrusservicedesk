@@ -16,6 +16,8 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 
 /**
@@ -38,9 +40,14 @@ internal class LiveUpdates() {
 
     // notified in UI thread
     private val newReplySubscribers = mutableSetOf<NewReplySubscriber>()
-    var isStarted = false
+    val isStarted =  MutableStateFlow(false)
+    fun isStartedFlow(): StateFlow<Boolean> = isStarted
     private var replyIsShown = false
     private var replayJob: Job? = null
+
+    private fun updateIsStarted(isStarted: Boolean) {
+        this.isStarted.value = isStarted
+    }
 
 
     /**
@@ -77,18 +84,19 @@ internal class LiveUpdates() {
         lastCommentId = null
         replayJob?.cancel()
         replayJob = null
-        if (isStarted)
+        if (isStarted.value)
             startUpdates(preferencesManager)
     }
 
     @MainThread
     private fun startUpdates(preferencesManager: PreferencesManager?) {
         PLog.d(TAG, "startUpdates")
-        isStarted = true
+        updateIsStarted(true)
         val localTicketsStore = injector().localTicketsStore
         val repository = injector().repository
+        val lastActiveTime = preferencesManager?.getLastActiveTime() ?: -1L
         replayJob = coreScope.launch(Dispatchers.IO) {
-            if (getTicketsUpdateInterval(preferencesManager) != -1L)
+            if (getTicketsUpdateInterval(lastActiveTime) != -1L)
                 repository.sync()
             localTicketsStore.getTicketsFlow().collect { tickets ->
                 notifyNewReplySubscribers(tickets.lastOrNull())
@@ -96,21 +104,20 @@ internal class LiveUpdates() {
         }
     }
 
-    fun getTicketsUpdateInterval(preferencesManager: PreferencesManager?): Long {
-        val lastActiveTime = preferencesManager?.getLastActiveTime() ?: -1L
+    fun getTicketsUpdateInterval(lastActiveTime: Long): Long {
         val diff = System.currentTimeMillis() - lastActiveTime
         return when {
             diff <= MILLISECONDS_IN_MINUTE -> 5L * MILLISECONDS_IN_SECOND
             diff <= 5 * MILLISECONDS_IN_MINUTE -> 15L * MILLISECONDS_IN_SECOND
             diff <= MILLISECONDS_IN_HOUR -> MILLISECONDS_IN_MINUTE.toLong()
-            diff <= 3 * MILLISECONDS_IN_DAY || PyrusServiceDesk.sdIsOpen -> 3 * MILLISECONDS_IN_MINUTE.toLong()
+            diff <= 3 * MILLISECONDS_IN_DAY || PyrusServiceDesk.sdIsOpen.value -> 3 * MILLISECONDS_IN_MINUTE.toLong()
             else -> -1L
         }
     }
 
     private fun stopUpdates() {
         PLog.d(TAG, "stopUpdates")
-        isStarted = false
+        updateIsStarted(false)
         replayJob?.cancel()
     }
 

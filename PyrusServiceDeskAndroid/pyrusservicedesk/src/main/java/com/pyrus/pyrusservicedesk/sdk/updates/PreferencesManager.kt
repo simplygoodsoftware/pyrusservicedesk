@@ -2,10 +2,13 @@ package com.pyrus.pyrusservicedesk.sdk.updates
 
 import android.annotation.SuppressLint
 import android.content.SharedPreferences
+import androidx.core.content.edit
 import com.google.gson.GsonBuilder
 import com.google.gson.reflect.TypeToken
+import kotlinx.coroutines.channels.awaitClose
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.callbackFlow
 import java.lang.reflect.Type
-import androidx.core.content.edit
 
 @SuppressLint("ApplySharedPref")
 internal class PreferencesManager(
@@ -83,6 +86,21 @@ internal class PreferencesManager(
         val timeMap = getLastActiveTimeMap().toMutableMap()
         timeMap[initialAccountKey] = time
         setLastActiveTimeMap(timeMap)
+    }
+
+    fun getLastActiveTimeFlow(): Flow<Long> = callbackFlow {
+        trySend(getLastActiveTimeMap()[initialAccountKey] ?: -1)
+
+        val listener = SharedPreferences.OnSharedPreferenceChangeListener { _, changedKey ->
+            if (changedKey == PREFERENCE_KEY_LAST_ACTIVITY_TIME_MAP) {
+                trySend(getLastActiveTimeMap()[initialAccountKey] ?: -1)
+            }
+        }
+
+        preferences.registerOnSharedPreferenceChangeListener(listener)
+        awaitClose {
+            preferences.unregisterOnSharedPreferenceChangeListener(listener)
+        }
     }
 
     override fun getLastActiveTime(): Long {

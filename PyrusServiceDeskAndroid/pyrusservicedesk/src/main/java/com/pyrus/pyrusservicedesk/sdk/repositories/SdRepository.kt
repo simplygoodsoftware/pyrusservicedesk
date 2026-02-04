@@ -112,9 +112,10 @@ internal class SdRepository(
         val account = accountStore.getAccount()
         val serverId = idStore.getTicketServerId(ticketId) ?: ticketId
         val orgLogoUrl = getOrgLogoUrl(userId, account)
+        val welcomeMessage = getWelcomeMessage(userId, account)
 
         if (serverId <= 0 && (account.getVersion() == API_VERSION_1 || account.getVersion() == API_VERSION_2)) {
-            val ticket = getSingleTicketAndUpdateServerId(serverId, account, userId, orgLogoUrl, ticketId)
+            val ticket = getSingleTicketAndUpdateServerId(serverId, account, userId, orgLogoUrl, ticketId, welcomeMessage)
             ticket?.let { return Try2.Success(ticket) }
         }
 
@@ -126,7 +127,8 @@ internal class SdRepository(
                     ticketId = firstCommand.command.ticketId!!,
                     userId = firstCommand.command.userId ?: account.getInstanceId(),
                     addCommentCommands = commands,
-                    orgLogoUrl = orgLogoUrl
+                    orgLogoUrl = orgLogoUrl,
+                    welcomeMessage = welcomeMessage
                 )
             }
             else {
@@ -150,7 +152,6 @@ internal class SdRepository(
 
         val application = ticketsStore.getApplications().find { account.getUsers().find { user -> user.userId == userId }?.appId == it.appId }
         val ratingSettings = application?.ratingSettings
-        val welcomeMessage = application?.welcomeMessage
 
         if (!force) {
             val localTickets = ticketsStore.getTicketsWithComments()
@@ -185,7 +186,7 @@ internal class SdRepository(
         if (syncTry.isFailed()) return syncTry
 
         if (account.getVersion() == API_VERSION_1 || account.getVersion() == API_VERSION_2) {
-            val ticket = getSingleTicketAndUpdateServerId(serverId, account, userId, orgLogoUrl, ticketId)
+            val ticket = getSingleTicketAndUpdateServerId(serverId, account, userId, orgLogoUrl, ticketId, welcomeMessage)
             ticket?.let { return Try2.Success(ticket) }
         }
 
@@ -203,14 +204,16 @@ internal class SdRepository(
         userId: String,
         orgLogoUrl: String?,
         ticketId: Long,
+        welcomeMessage: String?,
     ): FullTicket? {
         val lastServerTicket = getLastServerTicket(serverId, account, userId, orgLogoUrl)
         val commands = commandsStore.getCommands(serverId)
         lastServerTicket?.let {
+            val serverTicketWithWelcome = lastServerTicket.copy(welcomeMessage = welcomeMessage)
             val ticket = repositoryMapper.mapToSingleTicket(
                 ticketsList = ticketsStore.getTicketsWithComments(),
                 commands = commands,
-                lastTicket = lastServerTicket,
+                lastTicket = serverTicketWithWelcome,
                 account = account,
                 userId = account.getUserId() ?: account.getInstanceId(),
                 operatorResponseTimeMessage = systemMessageStore.operatorResponseTimeMessageStateFlow().value,
@@ -239,11 +242,12 @@ internal class SdRepository(
             accountStore.accountStateFlow(),
             ticketsStore.getTicketWithCommentsFlow(ticketId),
             commandsStore.getCommandsFlow(ticketId),
-        ) { account, ticketEntity, commands ->
+            ticketsStore.getApplicationsFlow(),
+        ) { account, ticketEntity, commands, applications->
 
             val ticketsList = ticketsStore.getTicketsWithComments()
             val orgLogoUrl = getOrgLogoUrl(user.userId, account)
-            val application = ticketsStore.getApplications().find { account.getUsers().find { u -> u.userId == user.userId }?.appId == it.appId }
+            val application = applications.find { account.getUsers().find { u -> u.userId == user.userId }?.appId == it.appId }
             val ratingSettings = application?.ratingSettings
             val welcomeMessage = application?.welcomeMessage
 
@@ -284,7 +288,8 @@ internal class SdRepository(
                         ticketId = firstCommand.command.ticketId!!,
                         userId = firstCommand.command.userId ?: account.getInstanceId(),
                         addCommentCommands = commands,
-                        orgLogoUrl = orgLogoUrl
+                        orgLogoUrl = orgLogoUrl,
+                        welcomeMessage = welcomeMessage,
                     )
                 }
                 else {
@@ -299,7 +304,7 @@ internal class SdRepository(
                         isActive = true,
                         isRead = true,
                         ratingSettings = null,
-                        welcomeMessage = null,
+                        welcomeMessage = welcomeMessage,
                         operatorTimeMessage = null,
                     )
                 }
@@ -457,6 +462,12 @@ internal class SdRepository(
         val applications = ticketsStore.getApplications()
         val orgLogoUrl = applications.find { it.appId == appId }?.orgLogoUrl ?: return null
         return RequestUtils.getOrganisationLogoUrl(orgLogoUrl, account.domain)
+    }
+
+    private fun getWelcomeMessage(userId: String, account: Account): String? {
+        val appId = account.getUsers().find { it.userId == userId }?.appId ?: return null
+        val applications = ticketsStore.getApplications()
+        return applications.find { it.appId == appId }?.welcomeMessage
     }
 
     private suspend fun sendAttachment(

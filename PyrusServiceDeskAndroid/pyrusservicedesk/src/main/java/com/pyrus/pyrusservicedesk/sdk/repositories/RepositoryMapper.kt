@@ -546,6 +546,7 @@ internal class RepositoryMapper(
         userId: String,
         addCommentCommands: List<CommandWithAttachmentsEntity>,
         orgLogoUrl: String?,
+        welcomeMessage: String?
     ): FullTicket {
         val comments = addCommentCommands
             .map(::map)
@@ -564,7 +565,7 @@ internal class RepositoryMapper(
             isActive = true,
             isRead = true,
             ratingSettings = null,
-            welcomeMessage = null,
+            welcomeMessage = welcomeMessage,
             operatorTimeMessage = null,
         )
     }

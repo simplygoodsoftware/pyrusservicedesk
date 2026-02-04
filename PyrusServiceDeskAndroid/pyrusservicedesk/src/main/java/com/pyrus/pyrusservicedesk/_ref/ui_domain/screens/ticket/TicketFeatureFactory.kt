@@ -304,7 +304,8 @@ private class FeatureReducer(): Logic<State, Message, Effect>() {
                     is State.Content -> state { currentState.copy(
                         ticket = message.ticket,
                         isLoading = false,
-                        ticketId = message.ticket.ticketId
+                        ticketId = message.ticket.ticketId,
+                        welcomeMessage = message.welcomeMessage
                     ) }
                     State.Error,
                     State.Loading,
@@ -340,7 +341,13 @@ private class FeatureReducer(): Logic<State, Message, Effect>() {
                 if (ticket != null && !ticket.isRead) {
                     effects { +Effect.Inner.ReadTicketIfNeed(ticket.ticketId) }
                 }
-                state { currentState.copy(ticket = message.ticket) }
+                var welcomeMessage = if (ticket?.welcomeMessage.isNullOrBlank()) message.welcomeMessage else ticket.welcomeMessage
+                if (!ticket?.comments.isNullOrEmpty() && message.ticket.comments.first().isSupport)
+                    welcomeMessage = null
+                state { currentState.copy(
+                    welcomeMessage = welcomeMessage,
+                    ticket = message.ticket
+                ) }
             }
             is Message.Inner.OnAudioRecorded -> {
                 Log.d("DFD", "message OnAudioRecorded")
@@ -448,7 +455,7 @@ private class TicketActor(
         is Effect.Inner.FeedFlow -> {
             ticketId = localTicketsStore.getTickets().lastOrNull()?.ticketId ?: ticketId
             repository.getFeedFlow(user, ticketId)
-                .map(Message.Inner::CommentsUpdated)
+                .map { Message.Inner.CommentsUpdated(it, welcomeMessage) }
         }
         is Effect.Inner.CheckAccount -> flow {
             var oldAccount: Account? = null
