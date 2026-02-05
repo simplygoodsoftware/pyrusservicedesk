@@ -19,6 +19,9 @@ import _Concurrency
 import _StringProcessing
 import _SwiftConcurrencyShims
 import zlib
+@objc extension UIKit.UIColor {
+  @objc convenience dynamic public init?(hex: Swift.String?)
+}
 @_inheritsConvenienceInitializers @_hasMissingDesignatedInitializers @objc public class ServiceDeskConfiguration : ObjectiveC.NSObject {
   public var welcomeMessage: Swift.String? {
     get

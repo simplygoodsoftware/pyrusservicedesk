@@ -510,6 +510,16 @@ SWIFT_CLASS_NAMED("Builder")
 - (nonnull instancetype)init OBJC_DESIGNATED_INITIALIZER;
 @end
 
+@interface UIColor (SWIFT_EXTENSION(PyrusServiceDesk))
+/// Может принимать в себя HEX в разных форматах и если правильно прописать формат - создастся соответствующий объект UIColor
+/// Что очевидно, можно передавать как 3, так и 4 канальные цвета
+/// Если передать 3 канальный, alpha станет равной 1
+/// Регистр букв значения не имеет
+/// \param hex ”#XXXXXX”, “#XXXXXXXX”, “XXXXXX”, “XXXXXXXX”
+///
+- (nullable instancetype)initWithHex:(NSString * _Nullable)hex;
+@end
+
 #endif
 #if __has_attribute(external_source_symbol)
 # pragma clang attribute pop
