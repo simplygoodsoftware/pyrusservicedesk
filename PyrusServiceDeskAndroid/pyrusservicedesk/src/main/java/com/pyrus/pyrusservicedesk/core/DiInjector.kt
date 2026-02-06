@@ -4,6 +4,8 @@ import android.app.Application
 import android.content.Context
 import android.content.SharedPreferences
 import android.os.Build
+import android.os.Handler
+import android.os.Looper
 import androidx.media3.common.AudioAttributes
 import androidx.media3.common.C
 import androidx.media3.exoplayer.ExoPlayer
@@ -304,16 +306,23 @@ internal class DiInjector(
     )
 
     fun onCancel() {
+        releaseSession()
         coreScope.cancel()
         synchronizer.cancel()
-        releaseSession()
     }
 
     fun releaseSession() {
-        coreScope.launch(Dispatchers.Main) {
+        if (Looper.myLooper() == Looper.getMainLooper()) {
             session.run {
                 player.release()
                 release()
+            }
+        } else {
+            Handler(Looper.getMainLooper()).post {
+                session.run {
+                    player.release()
+                    release()
+                }
             }
         }
     }
