@@ -13,6 +13,7 @@ import com.github.terrakok.cicerone.NavigatorHolder
 import com.pyrus.pyrusservicedesk.AppResourceManager
 import com.pyrus.pyrusservicedesk.BuildConfig
 import com.pyrus.pyrusservicedesk._ref.helpers.DownloadHelper
+import com.pyrus.pyrusservicedesk._ref.helpers.ThreadsHelper
 import com.pyrus.pyrusservicedesk._ref.ui_domain.access_denied.AccessDeniedFeatureFactory
 import com.pyrus.pyrusservicedesk._ref.ui_domain.rate_time.TimeToRateUseCase
 import com.pyrus.pyrusservicedesk._ref.ui_domain.screens.search.SearchFeatureFactory
@@ -45,7 +46,6 @@ import com.pyrus.pyrusservicedesk.sdk.repositories.SdRepository
 import com.pyrus.pyrusservicedesk.sdk.repositories.data_base.SdDatabase
 import com.pyrus.pyrusservicedesk.sdk.sync.CommandParamsDto
 import com.pyrus.pyrusservicedesk.sdk.sync.Synchronizer
-import com.pyrus.pyrusservicedesk.sdk.updates.LiveUpdates
 import com.pyrus.pyrusservicedesk.sdk.updates.PreferencesManager
 import com.pyrus.pyrusservicedesk.sdk.verify.LocalDataVerifier
 import com.pyrus.pyrusservicedesk.sdk.web.retrofit.RemoteFileStore
@@ -63,7 +63,6 @@ import okhttp3.OkHttpClient
 import retrofit2.Retrofit
 import retrofit2.converter.moshi.MoshiConverterFactory
 import java.io.File
-import java.util.UUID
 import java.util.concurrent.TimeUnit
 
 
@@ -304,17 +303,15 @@ internal class DiInjector(
     )
 
     fun onCancel() {
+        releaseSession()
         coreScope.cancel()
         synchronizer.cancel()
-        releaseSession()
     }
 
-    fun releaseSession() {
-        coreScope.launch(Dispatchers.Main) {
-            session.run {
-                player.release()
-                release()
-            }
+    fun releaseSession() = ThreadsHelper().syncRunOnMainThread {
+        session.run {
+            player.release()
+            release()
         }
     }
 
