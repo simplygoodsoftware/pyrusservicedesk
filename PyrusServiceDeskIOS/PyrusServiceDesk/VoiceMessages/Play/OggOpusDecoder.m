@@ -1,5 +1,6 @@
 #import "OggOpusDecoder.h"
-#import "Helpy-Swift.h"
+//#import "PSDTestProject2-Swift.h"
+//#import "Helpy-Swift.h"
 #define MIN_OGGOPUS_CHANELS_COUNT 1
 #define MAX_OGGOPUS_CHANELS_COUNT 2
 @interface OggOpusDecoder ()
@@ -82,6 +83,11 @@
 
 - (int64_t)getSampleRate {
     return 48000;
+}
+
+- (int64_t)getPcmTotal {
+    int64_t pcmTotal = op_pcm_total(_oggFile, -1);
+    return pcmTotal;
 }
 
 - (void)dealloc

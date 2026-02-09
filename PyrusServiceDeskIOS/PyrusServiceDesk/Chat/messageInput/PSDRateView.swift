@@ -1,5 +1,5 @@
 import Foundation
-let rateArray = [1 : "😩", 2 : "🙁", 3 : "😐", 4 : "🙂", 5 :"😄"]
+let rateEmodjiArray = [1 : "😩", 2 : "🙁", 3 : "😐", 4 : "🙂", 5 :"😄"]
 private let STACK_SPACING: CGFloat = 10
 
 protocol PSDRateViewDelegate: NSObjectProtocol{
@@ -35,7 +35,7 @@ class PSDRateView: PSDView {
         createRate()
     }
     private func createRate() {
-        for rate  in rateArray.sorted(by: {$0.0 < $1.0}){
+        for rate  in rateEmodjiArray.sorted(by: {$0.0 < $1.0}){
             let button  = UIButton()
             button.layer.cornerRadius = BUTTON_CORNER_RADIUS
             button.setTitle(rate.value, for: .normal)

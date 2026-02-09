@@ -6,7 +6,7 @@ enum userType: String {
 }
 class PSDUsers: NSObject {
     static var supportUsers : [PSDUser] = []
-    static var user : PSDUser!
+    static var user : PSDUser?
     static func add(user:PSDUser)
     {
         let isSupport = PyrusServiceDesk.multichats

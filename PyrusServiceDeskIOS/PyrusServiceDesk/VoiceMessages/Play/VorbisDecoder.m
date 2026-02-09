@@ -1,7 +1,9 @@
 #import "VorbisDecoder.h"
-#import "Helpy-Swift.h"
 
-#import <vorbis/vorbisfile.h>
+//#import "PSDTestProject2-Swift.h"
+//#import "Helpy-Swift.h"
+
+//#import <vorbis/vorbisfile.h>
 
 #define MIN_OGGOPUS_CHANELS_COUNT 1
 #define MAX_OGGOPUS_CHANELS_COUNT 2
@@ -15,12 +17,16 @@
 
 @end
 
+OggVorbis_File VorbisCreateEmptyFile(void) {
+    return (OggVorbis_File){0};
+}
+
 @implementation VorbisDecoder
 
 - (instancetype)initWithUrl:(NSURL*)url offset:(int64_t)psmOffset{
     if (self != nil)
     {
-        _vorbisFile = [VorbisDecoder getFile];
+        _vorbisFile = VorbisCreateEmptyFile();
         int err = ov_fopen([[url path] cStringUsingEncoding:NSUTF8StringEncoding], &_vorbisFile);
         vorbis_info *info = ov_info( &_vorbisFile, -1 );
         if (&_vorbisFile == NULL || err != OPUS_OK)
@@ -76,6 +82,11 @@
     return _rate;
 }
 
+- (int64_t)getPcmTotal {
+    OggVorbis_File file = VorbisCreateEmptyFile();
+        int64_t pcmTotal = ov_pcm_total(&file, -1);
+        return pcmTotal;
+}
 
 - (void)dealloc
 {

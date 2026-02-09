@@ -5,6 +5,7 @@ enum TicketCommandType: Int {
     case readTicket
     case setPushToken
     case updateAccess
+    case calcOperatorTime = 4
 }
 
 struct AttachmentData: Codable {
@@ -26,10 +27,13 @@ class TicketCommandParams: Codable {
     let rating: Int?
     let authorId: String?
     let hasAccess: Bool?
+    let ratingComment: String?
     var date: Date? = nil
     var messageClientId: String? = nil
+    let extraFields: [String: String]?
     
-    init(ticketId: Int? = nil, appId: String?, requestNewTicket: Bool? = nil, userId: String?, message: String? = nil, attachments: [AttachmentData]? = nil, authorId: String? = nil, token: String? = nil, type: String? = nil, messageId: Int? = nil, rating: Int? = nil, date: Date? = nil, messageClientId: String? = nil, hasAccess: Bool? = nil) {
+    init(ticketId: Int? = nil, appId: String?, requestNewTicket: Bool? = nil, userId: String?, message: String? = nil, attachments: [AttachmentData]? = nil, authorId: String? = nil, token: String? = nil, type: String? = nil, messageId: Int? = nil, rating: Int? = nil, ratingComment: String? = nil, date: Date? = nil, messageClientId: String? = nil, hasAccess: Bool? = nil, extraFields: [String: String]? = nil) {
+
         self.ticketId = ticketId
         self.appId = appId
         self.requestNewTicket = requestNewTicket
@@ -44,6 +48,8 @@ class TicketCommandParams: Codable {
         self.messageClientId = messageClientId
         self.authorId = authorId
         self.hasAccess = hasAccess
+        self.ratingComment = ratingComment
+        self.extraFields = extraFields
     }
     
     enum CodingKeys: String, CodingKey {
@@ -59,6 +65,8 @@ class TicketCommandParams: Codable {
         case rating = "rating"
         case authorId = "author_id"
         case hasAccess = "has_access"
+        case ratingComment = "rating_comment"
+        case extraFields = "extra_fields"
     }
 }
 
@@ -91,12 +99,14 @@ class TicketCommandResult: Codable {
     let commentId: Int?
     let ticketId: Int?
     let error: ServiceError?
+    let operatorResponseTimeMessage: String?
     
     enum CodingKeys: String, CodingKey {
         case commandId = "command_id"
         case commentId = "comment_id"
         case ticketId = "ticket_id"
         case error = "error"
+        case operatorResponseTimeMessage = "operator_response_time_message"
     }
 }
 

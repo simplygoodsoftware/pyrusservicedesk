@@ -57,7 +57,7 @@ class PSDUploader: NSObject {
         
         
         request.setValue("gzip, deflate", forHTTPHeaderField:"Accept-Encoding")
-        request.setValue(PSDUploader.userAgent(), forHTTPHeaderField: "User-Agent")
+        request.addUserAgent()
         request.setValue("multipart/form-data; boundary=\(PSDUploader.boundary)", forHTTPHeaderField: "Content-Type")
         
         var data: Data = Data()

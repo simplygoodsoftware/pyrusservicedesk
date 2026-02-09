@@ -145,18 +145,26 @@ extension ChatsInteractor: ChatsInteractorProtocol {
                 presenter.doWork(.endRefresh)
             }
             
-            if RateManager.isActionPerformed(times: 3) {
-                RateManager.setIfNilDateForNextRate()
-                RateManager.incrementActionCount()
-                if let windowScene = UIApplication.shared.connectedScenes.first as? UIWindowScene {
-                    SKStoreReviewController.requestReview(in: windowScene)
-                }
-            } else if RateManager.isNeedRateCurrentVersion() {
-                RateManager.increaseDateForNextRate()
-                if let windowScene = UIApplication.shared.connectedScenes.first as? UIWindowScene {
-                    SKStoreReviewController.requestReview(in: windowScene)
-                }
-            }
+//            if RateManager.isActionPerformed(times: 3) {
+//                RateManager.setIfNilDateForNextRate()
+//                RateManager.incrementActionCount()
+//                if let windowScene = UIApplication.shared.connectedScenes.first as? UIWindowScene {
+//                    if #available(iOS 14.0, *) {
+//                        SKStoreReviewController.requestReview(in: windowScene)
+//                    } else {
+//                        // Fallback on earlier versions
+//                    }
+//                }
+//            } else if RateManager.isNeedRateCurrentVersion() {
+//                RateManager.increaseDateForNextRate()
+//                if let windowScene = UIApplication.shared.connectedScenes.first as? UIWindowScene {
+//                    if #available(iOS 14.0, *) {
+//                        SKStoreReviewController.requestReview(in: windowScene)
+//                    } else {
+//                        // Fallback on earlier versions
+//                    }
+//                }
+//            }
                       
         case .updateSelected(index: let index):
             updateSelected(index: index)
@@ -368,7 +376,6 @@ private extension ChatsInteractor {
     }
     
     func reloadChats() {
-        PyrusServiceDesk.restartTimer()
         DispatchQueue.main.async {
             PyrusServiceDesk.syncManager.syncGetTickets()
         }
@@ -480,9 +487,6 @@ private extension ChatsInteractor {
             chat.isActive = true
         }
         filterChats = PSDGetChats.sortByLastMessage(filterChats)
-        if filterChats.count == 0 {
-            print("JNrelf")
-        }
         return filterChats
     }
     

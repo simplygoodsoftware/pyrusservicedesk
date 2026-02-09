@@ -129,7 +129,7 @@ import AVFAudio
     private(set) var audioUrl: URL?
     private func createFilename() -> String {
         let dateFormat = DateFormatter()
-        dateFormat.dateFormat = "DTF_Full".localizedPSD()
+        dateFormat.dateFormat = "ddMMyyyy_HHmmss"//"DTF_Full".localizedPSD()
         return fileNamePrefix + dateFormat.string(from: Date())
     }
 }

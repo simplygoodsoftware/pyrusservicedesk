@@ -8,12 +8,13 @@ protocol PSDMessageInputViewDelegate: class {
     func addAttachment()
     func recordStart()
     func recordStop()
+    func deletedAllAttachments()
 }
 let DEFAULT_LAYOUT_MARGINS: CGFloat = 8
 let BUTTONS_CORNER_RADIUS: CGFloat = 8
 class PSDMessageInputView: UIView, PSDMessageTextViewDelegate,PSDMessageSendButtonDelegate {
     
-    static let RATE_HEIGHT : CGFloat = 64
+    static let RATE_HEIGHT : CGFloat = 92
     private static let heightForAttach : CGFloat = 30
     private static let interItemSpaceForAttach : CGFloat = 0.1
     weak var delegate: PSDMessageInputViewDelegate?
@@ -30,6 +31,28 @@ class PSDMessageInputView: UIView, PSDMessageTextViewDelegate,PSDMessageSendButt
     var backgroundView : UIView!
     ///The view with rate buttons
     private var rateView: PSDRateView!
+    private var textRateView: RateViewProtocol!
+    private var emojiRateView: RateViewProtocol!
+    private var rateHeight: CGFloat = 0
+    private lazy var rateLabel: UILabel = {
+        let label = UILabel()
+        label.textColor = CustomizationHelper.textColorForTable.withAlphaComponent(0.6)
+        label.font = .systemFont(ofSize: 12)
+        label.textAlignment = .center
+        label.text = "PleaseEvaluateQuality".localizedPSD()
+        label.translatesAutoresizingMaskIntoConstraints = false
+        return label
+    }()
+    private lazy var textRateLabel: UILabel = {
+        let label = UILabel()
+        label.textColor = CustomizationHelper.textColorForTable.withAlphaComponent(0.6)
+        label.font = .systemFont(ofSize: 12)
+        label.textAlignment = .center
+        label.text = "PleaseEvaluateQuality".localizedPSD()
+        label.translatesAutoresizingMaskIntoConstraints = false
+        return label
+    }()
+    
     ///Stack with attachments
     private var attachmentsCollection: AttachmentCollectionView!
     private var attachmentsPresenter: AttachmentCollectionViewPresenterProtocol!
@@ -68,7 +91,11 @@ class PSDMessageInputView: UIView, PSDMessageTextViewDelegate,PSDMessageSendButt
     private lazy var deleteAudioButton: UIButton = {
         let button = UIButton()
         button.translatesAutoresizingMaskIntoConstraints = false
-        button.setImage(UIImage.PSDImage(name: "deleteAudio"), for: .normal)
+        if let color = PyrusServiceDesk.mainController?.customization?.barButtonTintColor {
+            button.setImage(UIImage.PSDImage(name: "deleteAudio")?.imageWith(color: color), for: .normal)
+        } else {
+            button.setImage(UIImage.PSDImage(name: "deleteAudio"), for: .normal)
+        }
         button.alpha = 0
         button.addTarget(self, action: #selector(deleteAudioButtonTapped), for: .touchUpInside)
         return button
@@ -78,8 +105,8 @@ class PSDMessageInputView: UIView, PSDMessageTextViewDelegate,PSDMessageSendButt
         let button = UIButton()
         button.translatesAutoresizingMaskIntoConstraints = false
         button.setTitle("  " + "Cancel".localizedPSD(), for: .normal)
-        button.setTitleColor(PyrusServiceDesk.mainController?.customization?.themeColor, for: .normal)
-        button.setImage(UIImage.PSDImage(name: "arrowsLeft"), for: .normal)
+        button.setTitleColor(CustomizationHelper.recordImagesColors, for: .normal)
+        button.setImage(UIImage.PSDImage(name: "arrowsLeft")?.imageWith(color: CustomizationHelper.recordImagesColors), for: .normal)
         button.titleLabel?.font = UIFont.systemFont(ofSize: 16)
         button.alpha = 0
         button.addTarget(self, action: #selector(cancel), for: .touchUpInside)
@@ -88,25 +115,43 @@ class PSDMessageInputView: UIView, PSDMessageTextViewDelegate,PSDMessageSendButt
     
     var showRate = false {
         didSet {
-            guard oldValue != showRate
-            else {
-                return
+            switch RatingType(rawValue: CustomizationHelper.ratingSettings.type) {
+            case .text:
+                let size = CGFloat(CustomizationHelper.ratingSettings.size)
+                let rateItemsHeihgt = size * 40.0 + (size - 1) * 8.0
+                rateHeight = 12 + 36 + rateItemsHeihgt
+                textRateView.configure(with: CustomizationHelper.ratingSettings.ratingTextValues ?? [])
+                rateHeightConstraint?.constant = showRate ? rateHeight : 0
+                rateTopConstraint?.isActive = true
+                textRateTopConstraint?.isActive = false
+                textRateHeightConstraint?.constant = 0
+                textRateView.isHidden = !showRate
+                emojiRateView.isHidden = true
+            default:
+                rateHeight = 92
+                emojiRateView.configure(with: RatingType(rawValue: CustomizationHelper.ratingSettings.type)?.rateArray(size: CustomizationHelper.ratingSettings.size).reversed() ?? [])
+                textRateHeightConstraint?.constant = showRate ? rateHeight : 0
+                rateTopConstraint?.isActive = false
+                textRateTopConstraint?.isActive = true
+                rateHeightConstraint?.constant = 0
+                emojiRateView.isHidden = !showRate
+                textRateView.isHidden = true
             }
-            rateHeightConstraint?.constant = showRate ? PSDMessageInputView.RATE_HEIGHT : 0
-            rateView.isHidden = !showRate
         }
     }
+    
+    override func traitCollectionDidChange(_ previousTraitCollection: UITraitCollection?) {
+        super.traitCollectionDidChange(previousTraitCollection)
+        cancelButton.setImage(UIImage.PSDImage(name: "arrowsLeft")?.imageWith(color: CustomizationHelper.recordImagesColors), for: .normal)
+        inputTextView.keyboardAppearance = CustomizationHelper.keyboardStyle
+    }
+    
     override init(frame: CGRect) {
         super.init(frame: frame)
-        
-        
-        self.backgroundColor = UIColor.clear
-        
+     //   self.backgroundColor = .psdBackground//UIColor.clear
         self.backgroundView = UIView()
         self.backgroundView.frame = frame
-        
-        //   backgroundView.backgroundColor = UIColor(hex: "#3D4043")
-        
+                
         topGrayLine = UIView.init(frame: CGRect(x: 0, y: 0, width: frame.size.width, height: 0.5))
         topGrayLine.backgroundColor = UIColor.psdSeparator
         
@@ -137,8 +182,10 @@ class PSDMessageInputView: UIView, PSDMessageTextViewDelegate,PSDMessageSendButt
         inputTextView = PSDMessageTextView(frame: CGRect(x: x, y: 0, width: sendButton.frame.origin.x - distTextToSend - x, height: defaultTextHeight))
         inputTextView.messageDelegate = self
         
-        rateView = PSDRateView()
-        rateView.delegate = self
+        textRateView = PSDTextRateView(frame: .zero)
+        emojiRateView = PSDEmojiRateView(frame: .zero)
+        textRateView.tapDelegate = self
+        emojiRateView.tapDelegate = self
         
         setupBottomView()
         self.addSubview(backgroundView)
@@ -148,24 +195,28 @@ class PSDMessageInputView: UIView, PSDMessageTextViewDelegate,PSDMessageSendButt
         backgroundView.addSubview(cancelButton)
         backgroundView.addSubview(sendButton)
         backgroundView.addSubview(attachmentsCollection)
-        backgroundView.addSubview(rateView)
+        backgroundView.addSubview(textRateView)
+        backgroundView.addSubview(emojiRateView)
+        textRateView.addSubview(rateLabel)
+        emojiRateView.addSubview(textRateLabel)
+        textRateView.isHidden = !showRate
+        emojiRateView.isHidden = !showRate
         backgroundView.addSubview(lockRecordView!)
         backgroundView.addSubview(recordButton!)
         backgroundView.addSubview(audioInputView)
         backgroundView.addSubview(deleteAudioButton)
         backgroundView.clipsToBounds = false
         clipsToBounds = false
-        
-        rateView.isHidden = !showRate
-        
+                
         addConstraints()
         
         self.recordingObject = AudioRecordingObject.init()
         self.recordingObject?.createWith(self)
         
         let stopView = UIImageView(image: UIImage.PSDImage(name: "stopRecord"))
-        stopView.backgroundColor = .backgroundColor
+        stopView.backgroundColor = .psdBackground
         stopView.layer.cornerRadius = 22
+        inputTextView.keyboardAppearance = CustomizationHelper.keyboardStyle
     }
     
     func setupAudioInputView() {
@@ -218,11 +269,13 @@ class PSDMessageInputView: UIView, PSDMessageTextViewDelegate,PSDMessageSendButt
     func setToDefault() {
         if inputTextView.text.count == 0 {
             UIView.animate(withDuration: 0.1, animations: {
-                self.sendButton.alpha = 0
-                self.recordButton?.alpha = 1
+                self.sendButton.isUserInteractionEnabled = false || PyrusServiceDesk.voiceMessages
+                self.sendButton.alpha = PyrusServiceDesk.voiceMessages ? 0 : 0.4
+                self.recordButton?.alpha = PyrusServiceDesk.voiceMessages ? 1 : 0
             })
         } else{
             UIView.animate(withDuration: 0.1, animations: {
+                self.sendButton.isUserInteractionEnabled = true
                 self.sendButton.alpha = 1
                 self.recordButton?.alpha = 0
             })
@@ -258,12 +311,13 @@ class PSDMessageInputView: UIView, PSDMessageTextViewDelegate,PSDMessageSendButt
             self.audioInputView.state = .stopped
             self.audioInputView.layoutIfNeeded()
             self.audioInputView.setNeedsLayout()
-            self.cancelButton.setImage(UIImage.PSDImage(name: "arrowsLeft"), for: .normal)
+            self.cancelButton.setImage(UIImage.PSDImage(name: "arrowsLeft")?.imageWith(color: CustomizationHelper.recordImagesColors), for: .normal)
         })
     }
     
     //MARK: Delegate methods
     func textViewChanged() {
+        inputTextView.keyboardAppearance = CustomizationHelper.keyboardStyle
         if !isRecording {
             checkSendButton()
         }
@@ -274,6 +328,7 @@ class PSDMessageInputView: UIView, PSDMessageTextViewDelegate,PSDMessageSendButt
             sendAudioMessage()
             return
         }
+
         inputTextView.text = inputTextView.text.trimmingCharacters(in: .whitespacesAndNewlines)
         if(inputTextView.text.count > 0 || attachmentsPresenter.attachmentsNumber() > 0) {
             self.delegate?.send(inputTextView.text, attachmentsPresenter.attachmentsForSend())
@@ -295,7 +350,7 @@ class PSDMessageInputView: UIView, PSDMessageTextViewDelegate,PSDMessageSendButt
                 self.audioInputView.state = .stopped
                 self.audioInputView.setNeedsLayout()
                 self.audioInputView.layoutIfNeeded()
-                self.cancelButton.setImage(UIImage.PSDImage(name: "arrowsLeft"), for: .normal)
+                self.cancelButton.setImage(UIImage.PSDImage(name: "arrowsLeft")?.imageWith(color: CustomizationHelper.recordImagesColors), for: .normal)
             })
         }
         checkSendButton()
@@ -319,7 +374,7 @@ class PSDMessageInputView: UIView, PSDMessageTextViewDelegate,PSDMessageSendButt
                 self.audioInputView.state = .stopped
                 self.audioInputView.layoutIfNeeded()
                 self.audioInputView.setNeedsLayout()
-                self.cancelButton.setImage(UIImage.PSDImage(name: "arrowsLeft"), for: .normal)
+                self.cancelButton.setImage(UIImage.PSDImage(name: "arrowsLeft")?.imageWith(color: CustomizationHelper.recordImagesColors), for: .normal)
             })
         
         OpusPlayer.shared.stopAllPlay()
@@ -327,6 +382,12 @@ class PSDMessageInputView: UIView, PSDMessageTextViewDelegate,PSDMessageSendButt
     }
     ///Check is send button need to enabled or not
     private func checkSendButton() {
+        if !PyrusServiceDesk.voiceMessages {
+            self.sendButton.isUserInteractionEnabled = self.inputTextView.text.count != 0 || self.attachmentsPresenter.attachmentsNumber() > 0
+            self.sendButton.alpha = !(self.inputTextView.text.count != 0 || self.attachmentsPresenter.attachmentsNumber() > 0) ? 0.4 : 1
+            self.recordButton?.alpha = 0
+            return
+        }
         UIView.animate(withDuration: 0.1, animations: {
             self.sendButton.alpha = !(self.inputTextView.text.count != 0 || self.attachmentsPresenter.attachmentsNumber() > 0) ? 0 : 1
             self.recordButton?.alpha = (self.inputTextView.text.count != 0 || self.attachmentsPresenter.attachmentsNumber() > 0) ? 0 : 1
@@ -374,6 +435,10 @@ class PSDMessageInputView: UIView, PSDMessageTextViewDelegate,PSDMessageSendButt
     private var heightConstraint: NSLayoutConstraint?
     private var attachmentsHeightConstraint: NSLayoutConstraint?
     private var rateHeightConstraint: NSLayoutConstraint?
+    private var textRateHeightConstraint: NSLayoutConstraint?
+    private var rateTopConstraint: NSLayoutConstraint?
+    private var textRateTopConstraint: NSLayoutConstraint?
+
     
     func addConstraints() {
         guard let inputTextView = inputTextView, let sendButton = sendButton else { return }
@@ -383,15 +448,18 @@ class PSDMessageInputView: UIView, PSDMessageTextViewDelegate,PSDMessageSendButt
         addTopGrayLineConstraints()
         
         // Устанавливаем constraints для rateView
-        rateView.translatesAutoresizingMaskIntoConstraints = false
-        NSLayoutConstraint.activate([
-            rateView.leadingAnchor.constraint(equalTo: leadingAnchor),
-            rateView.trailingAnchor.constraint(equalTo: trailingAnchor),
-            rateView.topAnchor.constraint(equalTo: topAnchor)
-        ])
-        
-        rateHeightConstraint = rateView.heightAnchor.constraint(equalToConstant: showRate ? PSDMessageInputView.RATE_HEIGHT : 0)
+        textRateView.translatesAutoresizingMaskIntoConstraints = false
+        textRateView.addZeroConstraint([.left,.right])
+        rateHeightConstraint = textRateView.heightAnchor.constraint(equalToConstant: showRate ? rateHeight : 0)
+        rateTopConstraint = textRateView.topAnchor.constraint(equalTo: superview?.topAnchor ?? backgroundView.topAnchor, constant: 0)
         rateHeightConstraint?.isActive = true
+        rateTopConstraint?.isActive = true
+        
+        emojiRateView.translatesAutoresizingMaskIntoConstraints = false
+        emojiRateView.addZeroConstraint([.left,.right])
+        textRateHeightConstraint = emojiRateView.heightAnchor.constraint(equalToConstant: showRate ? rateHeight : 0)
+        textRateTopConstraint = emojiRateView.topAnchor.constraint(equalTo: superview?.topAnchor ?? backgroundView.topAnchor, constant: 0)
+        textRateHeightConstraint?.isActive = true
         
         // Устанавливаем constraints для attachmentsCollection
         attachmentsCollection.translatesAutoresizingMaskIntoConstraints = false
@@ -414,7 +482,6 @@ class PSDMessageInputView: UIView, PSDMessageTextViewDelegate,PSDMessageSendButt
         recordButton?.isUserInteractionEnabled = true
         guard let recordButton, let lockRecordView else { return }
         
-//        audioLeadingConstraint = audioInputView.leadingAnchor.constraint(equalTo: attachmentsAddButton.trailingAnchor, constant: frame.width - 94)
         audioLeadingConstraint = audioInputView.widthAnchor.constraint(equalToConstant: 0)
         audioLeadingConstraint?.isActive = true
         NSLayoutConstraint.activate([
@@ -424,6 +491,7 @@ class PSDMessageInputView: UIView, PSDMessageTextViewDelegate,PSDMessageSendButt
             inputTextView.bottomAnchor.constraint(equalTo: backgroundView.layoutMarginsGuide.bottomAnchor),
             inputTextView.heightAnchor.constraint(greaterThanOrEqualToConstant: defaultTextHeight),
             inputTextView.trailingAnchor.constraint(equalTo: backgroundView.layoutMarginsGuide.trailingAnchor, constant: -60),
+            
             // attachmentsAddButton
             attachmentsAddButton.leadingAnchor.constraint(equalTo: backgroundView.layoutMarginsGuide.leadingAnchor),
             attachmentsAddButton.bottomAnchor.constraint(equalTo: backgroundView.layoutMarginsGuide.bottomAnchor),
@@ -435,8 +503,6 @@ class PSDMessageInputView: UIView, PSDMessageTextViewDelegate,PSDMessageSendButt
             deleteAudioButton.widthAnchor.constraint(equalToConstant: 44),
             deleteAudioButton.heightAnchor.constraint(equalToConstant: 44),
             
-            //recordButton.leadingAnchor.constraint(equalTo: inputTextView.trailingAnchor),
-//            recordButton.trailingAnchor.constraint(equalTo: backgroundView.layoutMarginsGuide.trailingAnchor, constant: 0),
             recordButton.centerXAnchor.constraint(equalTo: sendButton.centerXAnchor),
             recordButton.centerYAnchor.constraint(equalTo: sendButton.centerYAnchor),
             lockRecordView.centerXAnchor.constraint(equalTo: recordButton.centerXAnchor),
@@ -445,18 +511,11 @@ class PSDMessageInputView: UIView, PSDMessageTextViewDelegate,PSDMessageSendButt
             cancelButton.centerXAnchor.constraint(equalTo: centerXAnchor),
             cancelButton.centerYAnchor.constraint(equalTo: sendButton.centerYAnchor),
             
-//            recordButton.bottomAnchor.constraint(equalTo: backgroundView.layoutMarginsGuide.bottomAnchor),
-//            recordButton.widthAnchor.constraint(equalToConstant: 44),
-//            recordButton.heightAnchor.constraint(equalToConstant: 44),
-            
-            // sendButton
-            // sendButton.leadingAnchor.constraint(equalTo: inputTextView.trailingAnchor, constant: distTextToSend),
             sendButton.trailingAnchor.constraint(equalTo: backgroundView.layoutMarginsGuide.trailingAnchor, constant: 5),
             sendButton.bottomAnchor.constraint(equalTo: backgroundView.layoutMarginsGuide.bottomAnchor, constant: 1),
             sendButton.widthAnchor.constraint(equalToConstant: 60),
             sendButton.heightAnchor.constraint(equalToConstant: 44),
             
-           // audioInputView.leadingAnchor.constraint(equalTo: attachmentsAddButton.trailingAnchor, constant: 6),
             audioInputView.trailingAnchor.constraint(equalTo: sendButton.leadingAnchor, constant: 0),
             audioInputView.centerYAnchor.constraint(equalTo: sendButton.centerYAnchor, constant: 0),
         ])
@@ -469,6 +528,18 @@ class PSDMessageInputView: UIView, PSDMessageTextViewDelegate,PSDMessageSendButt
         // Отдельно сохраняем heightConstraint для inputTextView
         heightConstraint = inputTextView.heightAnchor.constraint(lessThanOrEqualToConstant: inputTextView.maxVerticalHeight())
         heightConstraint?.isActive = true
+        
+        NSLayoutConstraint.activate([
+            textRateLabel.topAnchor.constraint(equalTo: emojiRateView.topAnchor, constant: 12),
+            textRateLabel.centerXAnchor.constraint(equalTo: emojiRateView.centerXAnchor),
+            
+            rateLabel.topAnchor.constraint(equalTo: textRateView.topAnchor, constant: 12),
+            rateLabel.centerXAnchor.constraint(equalTo: textRateView.centerXAnchor),
+            
+            emojiRateView.bottomAnchor.constraint(equalTo: textRateView.topAnchor),
+            
+        ])
+        superview?.topAnchor.constraint(equalTo: emojiRateView.topAnchor).isActive = true
     }
     
     @objc private func deleteAudioButtonTapped() {
@@ -494,7 +565,7 @@ class PSDMessageInputView: UIView, PSDMessageTextViewDelegate,PSDMessageSendButt
         NSLayoutConstraint.activate([
             topGrayLine.leadingAnchor.constraint(equalTo: leadingAnchor),
             topGrayLine.trailingAnchor.constraint(equalTo: trailingAnchor),
-            topGrayLine.topAnchor.constraint(equalTo: rateView.bottomAnchor),
+            topGrayLine.topAnchor.constraint(equalTo: textRateView.bottomAnchor),
             topGrayLine.heightAnchor.constraint(equalToConstant: 0.5)
         ])
     }
@@ -504,10 +575,14 @@ extension PSDMessageInputView: AttachmentCollectionViewDelegateProtocol {
     func attachmentRemoved(){
         checkCollectionHeight()
         checkSendButton()
+        if attachmentsPresenter.attachmentsNumber() == 0 {
+            delegate?.deletedAllAttachments()
+        }
     }
 }
 extension PSDMessageInputView: AttachmentsAddButtonDelegate{
     func addButtonPressed() {
+        inputTextView.keyboardAppearance = CustomizationHelper.keyboardStyle
         delegate?.addButtonTapped()
         //        self.becomeFirstResponder()
         //        inputTextView.becomeFirstResponder()
@@ -524,8 +599,8 @@ extension PSDMessageInputView: AttachmentsAddButtonDelegate{
 }
 extension PSDMessageInputView: PSDRateViewDelegate {
     func didTapRate(_ rateValue: Int) {
-        showRate = false
         delegate?.sendRate(rateValue)
+        showRate = false
     }
 }
 

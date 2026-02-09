@@ -1,6 +1,6 @@
 
 import Foundation
-protocol PSDPreviewSetterDelegate : class{
+protocol PSDPreviewSetterDelegate: class {
     func reloadCells(with attachmentId: String)
 }
 struct PSDPreviewSetter {

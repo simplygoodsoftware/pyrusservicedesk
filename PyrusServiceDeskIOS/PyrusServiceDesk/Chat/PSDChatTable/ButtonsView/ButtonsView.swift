@@ -6,7 +6,7 @@ protocol ButtonsCollectionDelegate: NSObjectProtocol {
 
 class ButtonsView: UIView {
     weak var tapDelegate: ButtonsCollectionDelegate?
-    private var buttons: [ButtonData]?
+    private(set) var buttons: [ButtonData]?
     lazy var collectionView: UICollectionView = {
         let layout = AlignedCollectionViewFlowLayout()
         layout.horizontalAlignment = .right
@@ -15,7 +15,7 @@ class ButtonsView: UIView {
             layout.itemSize = UICollectionViewFlowLayout.automaticSize
         }
         layout.minimumLineSpacing = ROWS_SPACING
-        layout.minimumInteritemSpacing = ROWS_SPACING
+        layout.minimumInteritemSpacing = 10//ROWS_SPACING
         let collectionView = UICollectionView(frame: .zero, collectionViewLayout: layout)
         collectionView.translatesAutoresizingMaskIntoConstraints = false
         collectionView.backgroundColor = .clear
@@ -26,13 +26,14 @@ class ButtonsView: UIView {
         collectionView.semanticContentAttribute = UISemanticContentAttribute.forceLeftToRight
         return collectionView
     }()
+    
     override init(frame: CGRect) {
         super.init(frame: frame)
         addSubview(collectionView)
         collectionView.rightAnchor.constraint(equalTo: rightAnchor, constant: -LEADING_FOOTER).isActive = true
         collectionView.leftAnchor.constraint(equalTo: leftAnchor, constant: TO_BOARD_DISTANCE).isActive = true
         collectionView.topAnchor.constraint(equalTo: topAnchor).isActive = true
-        collectionView.bottomAnchor.constraint(equalTo: bottomAnchor).isActive = true
+        collectionView.bottomAnchor.constraint(equalTo: bottomAnchor, constant: 8).isActive = true
     }
     
     required init?(coder: NSCoder) {
@@ -90,5 +91,5 @@ extension ButtonsView: UICollectionViewDelegate, UICollectionViewDataSource {
 private extension ButtonsView {
     var CELL_IDENT: String { "ButtonCell" }
     var LEADING_FOOTER: CGFloat { TO_BOARD_DISTANCE + (AVATAR_SIZE * 2) + 24 }
-    var ROWS_SPACING: CGFloat { 10.0 }
+    var ROWS_SPACING: CGFloat { 2 }
 }

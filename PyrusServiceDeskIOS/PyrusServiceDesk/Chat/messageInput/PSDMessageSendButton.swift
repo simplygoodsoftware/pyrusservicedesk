@@ -12,15 +12,12 @@ class PSDMessageSendButton: UIButton {
     static let titleDisabledAlpha: CGFloat = 0.3
     override init(frame: CGRect) {
         super.init(frame: frame)
-//        self.setTitle( "Send".localizedPSD() , for:.normal)
-        setImage(UIImage.PSDImage(name: "sendFill"), for: .normal)
-        setImage(UIImage.PSDImage(name: "send"), for: .disabled)
+        let color = CustomizationHelper.sendButtonColor
+        setImage(UIImage.PSDImage(name: "sendFill")?.imageWith(color: color), for: .normal)
+//        setImage(UIImage.PSDImage(name: "sendFill")?.imageWith(color: color.withAlphaComponent(0.4)), for: .disabled)
         self.titleLabel?.font = .title
-        let color = PyrusServiceDesk.mainController?.customization?.sendButtonColor ?? UIColor.darkAppColor
         setTitleColor(color, for: .normal)
-//        isEnabled = false
         alpha = 0
-        //isHidden = true
         self.contentEdgeInsets = UIEdgeInsets(top: 0.0, left: titleHorizontalInsets, bottom: 0.0, right: titleHorizontalInsets)
         
         self.addTarget(self, action: #selector(sendPressed), for: .touchUpInside)
@@ -50,6 +47,9 @@ extension PSDMessageSendButton: Recolorable {
             guard self.traitCollection.hasDifferentColorAppearance(comparedTo: previousTraitCollection) else {
                 return
             }
+            let color = CustomizationHelper.sendButtonColor
+            setImage(UIImage.PSDImage(name: "sendFill")?.imageWith(color: color), for: .normal)
+//            setImage(UIImage.PSDImage(name: "sendFill")?.imageWith(color: color.withAlphaComponent(0.4)), for: .disabled)
            // recolor()
         }
     }

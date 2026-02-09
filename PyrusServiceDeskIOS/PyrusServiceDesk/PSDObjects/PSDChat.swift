@@ -72,7 +72,7 @@ class PSDChat: Hashable {
         return links
     }
 }
-private let MAX_LINKS_COUNT: Int = 10
+private let MAX_LINKS_COUNT: Int = 20
 
 private extension UIFont {
     static let lastMessageInfo = CustomizationHelper.systemFont(ofSize: 15.0)

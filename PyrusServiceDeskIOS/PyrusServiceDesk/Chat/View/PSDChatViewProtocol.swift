@@ -25,6 +25,8 @@ enum PSDChatSearchViewCommand {
     case scrollToRow(indexPath: IndexPath)
     case updateActive(isActive: Bool)
     case updateInfo(ticketId: String, userName: String, createdAt: String)
+    case showRatingComment(ratingText: String?, rating: Int)
+    case updateOperatorTime(timeMessage: String?)
 }
 
 protocol PSDChatViewProtocol: NSObjectProtocol {

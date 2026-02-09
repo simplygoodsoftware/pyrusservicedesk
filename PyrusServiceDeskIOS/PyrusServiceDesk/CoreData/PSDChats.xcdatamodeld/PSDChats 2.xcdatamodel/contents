@@ -29,7 +29,7 @@
         <attribute name="showRatingText" optional="YES" attributeType="String"/>
         <attribute name="subject" optional="YES" attributeType="String"/>
         <attribute name="userId" optional="YES" attributeType="String"/>
-        <relationship name="messages" optional="YES" toMany="YES" deletionRule="Nullify" ordered="YES" destinationEntity="DBMessage" inverseName="chat" inverseEntity="DBMessage"/>
+        <relationship name="messages" optional="YES" toMany="YES" deletionRule="Cascade" ordered="YES" destinationEntity="DBMessage" inverseName="chat" inverseEntity="DBMessage"/>
     </entity>
     <entity name="DBClient" representedClassName="DBClient" syncable="YES" codeGenerationType="class">
         <attribute name="appIcon" optional="YES" attributeType="String"/>

@@ -2,22 +2,23 @@ import Foundation
 class AttachmentFileCollectionViewCell: AttachmentCollectionViewCell {
     private static let dist : CGFloat = 8.0
     private static let linesNumber : Int = 2
-    var fileName : String = "" {
+
+    var fileName: String = "" {
         didSet {
             label.text = ".\((fileName as NSString).pathExtension.uppercased())"
         }
     }
     private static let imageName = "file"
-    private lazy var imageView : UIImageView = {
+    private lazy var imageView: UIImageView = {
         let imageView = UIImageView()
         let image =  UIImage.PSDImage(name: AttachmentFileCollectionViewCell.imageName)?.withRenderingMode(.alwaysTemplate)
         imageView.image = image
-        imageView.tintColor = .labelTextColor
+        imageView.tintColor = CustomizationHelper.labelTextColor
         return imageView
     }()
     private lazy var label : UILabel = {
         let label = UILabel()
-        label.textColor = UIColor.psdGray
+        label.textColor = CustomizationHelper.labelTextColor//UIColor.psdGray
         label.textAlignment = .center
         label.numberOfLines = AttachmentFileCollectionViewCell.linesNumber
         label.font = .label

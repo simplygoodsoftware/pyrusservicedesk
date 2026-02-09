@@ -75,7 +75,6 @@ struct PSDMessageSend {
         
     }
     static func fileSendingEndWithError(_ messageToPass: PSDMessage, delegate: PSDMessageSendDelegate?) {
-//        PyrusServiceDesk.syncManager.syncGetTickets()
 //        messageToPass.state = .cantSend
 //        messageToPass.fromStrorage = true
    //     PSDMessagesStorage.saveInStorage(message: messageToPass)
@@ -101,7 +100,7 @@ struct PSDMessageSend {
     static var session : PSDUploader?
     
     ///Array with all PSDMessageSender
-    static private var messageSenders = [PSDMessageSender]()
+//    static private var messageSenders = [PSDMessageSender]()
     
     ///Store an array for messages ids that needs to be send.
     ///PSDMessageSender and PSDUploader must clean themselves after completion, even if they end with unsuccess
@@ -129,79 +128,34 @@ struct PSDMessageSend {
         
         let commandId = messageToPass.commandId ?? UUID().uuidString
         delegate?.addMessageToPass(message: messageToPass, commandId: commandId)
-        let requestNewTicket = PyrusServiceDesk.multichats && (messageToPass.ticketId == 0 || messageToPass.requestNewTicket)
+        let requestNewTicket = (messageToPass.ticketId == 0 || messageToPass.requestNewTicket)
         var attachmentsData: [AttachmentData]?
-        
-//        if let attachments = messageToPass.attachments, attachments.count > 0 {
-//            for (i,attachment) in attachments.enumerated(){
-//                if attachment.emptyId() {
-//                    PSDMessageSend.passFile(messageToPass, attachmentIdex: i, delegate: delegate)
-//                    break
-//                }
-//            }
-//        }
         
         if let attachments = messageToPass.attachments {
             attachmentsData = []
             for attachment in attachments {
- //               _ = PSDMessagesStorage.saveToFileAttachment(attachment, messageLocalId: commandId)
                 let attach = AttachmentData(type: 0, name: attachment.name, guid: attachment.serverIdentifer)
                 attachmentsData?.append(attach)
             }
         }
-        var userId = PyrusServiceDesk.multichats ? PyrusServiceDesk.currentUserId : PyrusServiceDesk.customUserId
-        userId = userId?.count ?? 0 > 0 ? userId : nil
-        let params = TicketCommandParams(ticketId: messageToPass.ticketId, appId:  PyrusServiceDesk.currentClientId ?? PyrusServiceDesk.clientId, requestNewTicket: requestNewTicket, userId: userId, message: messageToPass.text, attachments: attachmentsData, rating: messageToPass.rating, date: messageToPass.date, messageClientId: messageToPass.clientId)
-        if params.rating != nil {
+
+        let params = TicketCommandParams(ticketId: messageToPass.ticketId, appId:  PyrusServiceDesk.currentClientId ?? PyrusServiceDesk.clientId, requestNewTicket: requestNewTicket, userId: PyrusServiceDesk.currentUserId ?? PyrusServiceDesk.customUserId, message: messageToPass.text, attachments: attachmentsData, rating: messageToPass.rating, ratingComment: messageToPass.ratingComment, date: messageToPass.date, messageClientId: messageToPass.clientId)
+        if params.rating ?? 0 > 0 {
             params.message = nil
         }
-        let command = TicketCommand(commandId: messageToPass.commandId ?? UUID().uuidString, type: .createComment, appId: PyrusServiceDesk.currentClientId ?? PyrusServiceDesk.clientId, userId:  userId, params: params)
+        let command = TicketCommand(commandId: messageToPass.commandId ?? UUID().uuidString, type: .createComment, appId: PyrusServiceDesk.currentClientId ?? PyrusServiceDesk.clientId, userId:  PyrusServiceDesk.currentUserId ?? PyrusServiceDesk.customUserId, params: params)
         PyrusServiceDesk.repository.add(command: command)
         PSDMessagesStorage.save(message: messageToPass)
-        DispatchQueue.main.async {
-            PyrusServiceDesk.syncManager.syncGetTickets()
-        }
+
         NotificationCenter.default.post(name: createNewCommand, object: nil, userInfo: nil)
-        
-        dispatchQueue.async {
-            
-//            if PSDMessageSend.passingMessagesIds.contains(messageToPass.clientId) {
-//                //при отпрвке атачей эта же функция вызывается снова, продолжаем отправку не блокируя очередь
-//            }
-//            else{
-//                PSDMessageSend.passingMessagesIds.append(messageToPass.clientId)
-//            }
-//            
-//            var hasUnsendAttachments = false
-//            if let attachments = messageToPass.attachments, attachments.count > 0 {
-//                for (i,attachment) in attachments.enumerated(){
-//                    if attachment.emptyId() {
-//                     //   _ = PSDMessageSend.semaphore.wait(timeout: DispatchTime.distantFuture)
-//                        PSDMessageSend.passFile(messageToPass, attachmentIdex: i, delegate: delegate)
-//                        hasUnsendAttachments = true
-//                        break
-//                    }
-//                    
-//                }
-                
-//            }
-//            if !hasUnsendAttachments{
-//                let sender = PSDMessageSender()
-//                sender.pass(messageToPass, delegate: delegate, completion: {
-//                    didEndPassMessage(messageToPass, delegate: delegate)
-//                })
-//                messageSenders.append(sender)
-//            }
-        }
-        
     }
     static private func didEndPassMessage(_ messageToPass: PSDMessage, delegate: PSDMessageSendDelegate?) {
         PSDMessageSend.passingMessagesIds.removeAll(where: {$0 == messageToPass.clientId})
         semaphore.signal()
     }
-    static func clearAndRemove(sender:PSDMessageSender){
-        if let index = messageSenders.firstIndex(of: sender) {
-            messageSenders.remove(at: index)
-        }
-    }
+//    static func clearAndRemove(sender:PSDMessageSender){
+//        if let index = messageSenders.firstIndex(of: sender) {
+//            messageSenders.remove(at: index)
+//        }
+//    }
 }

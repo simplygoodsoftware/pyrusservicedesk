@@ -3,6 +3,8 @@ import Foundation
  Get chats from server.
  */
 struct PSDGetChats {
+    private static let RATING_SETTINGS_KEY = "rating_settings"
+    private static let WELCOME_MESSAGE = "welcome_message"
     private static var sessionTask : URLSessionDataTask? = nil
     /**
      Get chats from server.
@@ -13,15 +15,27 @@ struct PSDGetChats {
         remove()
         var parameters = [String: Any]()
         if PyrusServiceDesk.multichats {
-            parameters["user_id"] = PyrusServiceDesk.customUserId
+            if PyrusServiceDesk.customUserId?.count ?? 0 > 0 {
+                parameters["user_id"] = PyrusServiceDesk.customUserId
+            }
             parameters["app_id"] = PyrusServiceDesk.clientId
             parameters["security_key"] = PyrusServiceDesk.securityKey
         }
-        parameters["need_full_info"] = PyrusServiceDesk.multichats
+        parameters["need_full_info"] = true//PyrusServiceDesk.multichats
         parameters["api_sign"] = PyrusServiceDesk.apiSign()
         parameters["author_id"] = PyrusServiceDesk.authorId
         parameters["author_name"] = PyrusServiceDesk.authorName
         parameters["last_note_id"] = PyrusServiceDesk.lastNoteId
+        
+        
+//        if let fieldsData = PyrusServiceDesk.fieldsData {
+//            parameters[EXTRA_FIELDS_KEY] = fieldsData
+//        }
+        
+        if PyrusServiceDesk.needShowLoading {
+            parameters["last_note_id"] = 0
+        }
+        
         var additional_users = [[String: Any]]()
         if PyrusServiceDesk.additionalUsers.count > 0 {
             for user in PyrusServiceDesk.additionalUsers {
@@ -45,7 +59,8 @@ struct PSDGetChats {
         let request: URLRequest = URLRequest.createRequest(type:.chats, parameters: parameters)
         
         let startTime1 = CFAbsoluteTimeGetCurrent()
-        print("GETTICKETS TIME: \(Date.now)")
+        print("GetTickets: \(Date()), commands count: \(commands.count)")
+        
         PSDGetChats.sessionTask = PyrusServiceDesk.mainSession.dataTask(with: request) { data, response, error in
             guard let data = data, error == nil else { // check for fundamental networking error
                 completion(nil, nil, nil, nil, false)
@@ -57,6 +72,10 @@ struct PSDGetChats {
             
             if let httpStatus = response as? HTTPURLResponse, httpStatus.statusCode != 200 { // check for http errors
                 DispatchQueue.main.async {
+                    if httpStatus.statusCode == 429 {
+                        SyncManager.removeLastActivityDate()
+                        completion(nil, nil, nil, nil, true)
+                    }
                     if httpStatus.statusCode == 403 {
                         if let onFailed = PyrusServiceDesk.onAuthorizationFailed {
                             onFailed()
@@ -68,44 +87,37 @@ struct PSDGetChats {
                     }
                 }
                 let chatsData = try? JSONSerialization.jsonObject(with: data, options: .allowFragments) as? [String : Any] ?? [String: Any]()
-//                if PyrusServiceDesk.chats.count == 0 {
-//                    PyrusServiceDesk.chats = []
-//                }
+                print("Запрос не прошел, код ошибки (\(httpStatus.statusCode), ошибка: \(String(describing: error))")
                 completion(nil, nil, nil, nil, false)
             } else {
                 do{
                     let chatsData = try JSONSerialization.jsonObject(with: data, options: .allowFragments) as? [String : Any] ?? [String: Any]()
+                    
+                    let clientsArray = chatsData["applications"] as? NSArray ?? NSArray()
+                    let clients = generateClients(from: clientsArray)
                     var startTime3 = CFAbsoluteTimeGetCurrent() - startTime2
                     print("⏱ getChats serialization completed in \(startTime3) seconds")
                     startTime3 = CFAbsoluteTimeGetCurrent()
                     let chatsArray = chatsData["tickets"] as? [[String : Any]] ?? [[String: Any]]()
-                    let chats = generateChats(from: chatsArray)
+                    let chats = generateChats(from: chatsArray, clients: clients)
                     var startTime4 = CFAbsoluteTimeGetCurrent() - startTime3
                     print("⏱ generateChats completed in \(startTime4) seconds")
                     startTime4 = CFAbsoluteTimeGetCurrent()
                    // PyrusServiceDesk.chats = chats
-                    let clientsArray = chatsData["applications"] as? NSArray ?? NSArray()
-                    let clients = generateClients(from: clientsArray)
-                    var startTime5 = CFAbsoluteTimeGetCurrent() - startTime4
-                    print("⏱ generateClients completed in \(startTime5) seconds")
-                    startTime5 = CFAbsoluteTimeGetCurrent()
 
                     let authorAccessDenied = chatsData["author_access_denied"] as? [String]
-                    
+//                    print("количество чатов: \(chats.count)")
                     do {
                         let commandsArray = chatsData["commands_result"] as? NSArray ?? NSArray()
                         let jsonData = try JSONSerialization.data(withJSONObject: commandsArray, options: [])
                         let decoder = JSONDecoder()
                         let commands = try decoder.decode([TicketCommandResult].self, from: jsonData)
-                        let startTime6 = CFAbsoluteTimeGetCurrent() - startTime5
-                        print("⏱ generateComands completed in \(startTime6) seconds, commandsCount: \(commands.count)")
                         completion(chats, commands, authorAccessDenied, clients, true)
                     } catch {
                         completion(chats, nil, authorAccessDenied, clients, true)
                     }
-                    //                PyrusServiceDesk.chats = chats
                 } catch { 
-                    //print("PSDGetChats error when convert to dictionary")
+                    print("PSDGetChats error when convert to dictionary")
                 }
             }
             
@@ -115,7 +127,7 @@ struct PSDGetChats {
     /**
      Cancel session task if its exist
      */
-    static func remove(){
+    static func remove() {
         if PSDGetChats.sessionTask != nil {
             PSDGetChats.sessionTask?.cancel()
             PSDGetChats.sessionTask = nil
@@ -136,12 +148,25 @@ struct PSDGetChats {
             let clientDescription = dic["org_description"] as? String
             let client = PSDClientInfo(clientId: clientId, clientName: clientName, clientIcon: clientIcon)
             client.clientDescription = clientDescription
+            client.welcomeMessage = dic[PSDGetChats.WELCOME_MESSAGE] as? String
+            if let ratingSettings = dic[PSDGetChats.RATING_SETTINGS_KEY] as? NSDictionary {
+                do {
+                    let jsonData = try JSONSerialization.data(withJSONObject: ratingSettings, options: [])
+                    let decoder = JSONDecoder()
+                    let settings = try decoder.decode(PSDRatingSettings.self, from: jsonData)
+                    client.ratingSettings = settings
+                } catch {
+                    print("Error decoding rating settings JSON: \(error)")
+                }
+            }
 
             if !clients.contains(client) {
                 clients.append(client)
             } else if let storeClient = clients.first(where: { $0.clientId == client.clientId }) {
                 storeClient.clientName = client.clientName
                 storeClient.clientDescription = client.clientDescription
+                storeClient.ratingSettings = client.ratingSettings
+                storeClient.welcomeMessage = client.welcomeMessage
                 if storeClient.clientIcon != client.clientIcon {
                     storeClient.clientIcon = client.clientIcon
                 }
@@ -211,10 +236,9 @@ struct PSDGetChats {
         }
         
         return clients
-    }
+    }    
     
-    private static func generateChats(from response: [[String: Any]]) -> [PSDChat] {
-
+    private static func generateChats(from response: [[String: Any]], clients: [PSDClientInfo]) -> [PSDChat] {
         var chats: [PSDChat] = []
         chats.reserveCapacity(response.count)
 
@@ -282,9 +306,12 @@ struct PSDGetChats {
             chat.lastComment = lastMessage
             chat.lastReadedCommentId = dic["last_read_comment_id"] as? Int
             chat.showRating = dic["show_rating"] as? Bool ?? false
+            if isMoreThan24Hours(from: lastMessage?.date ?? Date()) {
+                chat.showRating = false
+            }
             chat.showRatingText = dic["show_rating_text"] as? String
 
-            if !chat.showRating {
+            if !chat.showRating || !PyrusServiceDesk.multichats {
                 chat.isActive = dic["is_active"] as? Bool ?? true
             }
 
@@ -292,6 +319,11 @@ struct PSDGetChats {
         }
 
         return sortByLastMessage(chats)
+    }
+    
+    private static func isMoreThan24Hours(from date: Date) -> Bool {
+        let timeInterval = Date().timeIntervalSince(date)
+        return timeInterval > 24 * 60 * 60 // 24 часа
     }
     
     static func sortByLastMessage(_ chats: [PSDChat]) -> [PSDChat] {
@@ -334,3 +366,13 @@ struct PSDGetChats {
 extension Notification.Name {
     static let createMenuNotification = Notification.Name("CreateMenuNotification")
 }
+
+let commentIdParameter = "comment_id"
+let ticketIdParameter = "ticket_id"
+let ratingParameter = "rating"
+let subjectParameter = "subject"
+let createdAtParameter = "created_at"
+let attachmentsParameter = "attachments"
+let guidParameter = "guid"
+let CLIENT_ID_KEY = "client_id"
+let EXTRA_FIELDS_KEY = "extra_fields"

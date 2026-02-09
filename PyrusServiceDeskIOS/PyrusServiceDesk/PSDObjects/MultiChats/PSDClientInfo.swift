@@ -11,6 +11,8 @@ import Foundation
         }
     }
     var clientDescription: String?
+    var welcomeMessage: String?
+    var ratingSettings: PSDRatingSettings?
     
     var clientIcon: String {
         didSet {

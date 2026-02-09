@@ -54,7 +54,7 @@ class AudioInputView: UIView {
         let view = UIView()
         view.layer.cornerRadius = 16
         view.translatesAutoresizingMaskIntoConstraints = false
-        view.backgroundColor = PyrusServiceDesk.mainController?.customization?.themeColor
+        view.backgroundColor = CustomizationHelper.userMassageBackgroundColor
         return view
     }()
     
@@ -62,16 +62,20 @@ class AudioInputView: UIView {
         let label = UILabel()
         label.text = "00:00"
         label.font = .systemFont(ofSize: 12)
-        label.textColor = .stateLabelColor//UIColor(hex: "#666666")
+        label.textColor = .stateLabelColor
         return label
     }()
     
     var slider: UISlider = {
         let slider = AudioCellSlider()
-        slider.minimumTrackTintColor = PyrusServiceDesk.mainController?.customization?.themeColor
-        slider.maximumTrackTintColor = .trackColor//UIColor(hex: "#D9D9D9")
-        slider.setThumbImage(UIImage.PSDImage(name: "darkCircle"), for: .normal)
-        //slider.tintColor = PyrusServiceDesk.mainController?.customization?.themeColor
+//        let color = PyrusServiceDesk.mainController?.customization?.themeColor ?? CustomizationHelper.supportMassageTextColor
+//        slider.minimumTrackTintColor = color
+//        slider.maximumTrackTintColor = CustomizationHelper.supportTrackColor
+//        slider.setThumbImage(UIImage.PSDImage(name: "darkCircle")?.imageWith(color: color), for: .normal)
+        let color = PyrusServiceDesk.mainController?.customization?.themeColor ?? CustomizationHelper.supportMassageTextColor
+        slider.setThumbImage(UIImage.PSDImage(name: "darkCircle")?.imageWith(color: color), for: .normal)
+        slider.minimumTrackTintColor = color
+        slider.maximumTrackTintColor = CustomizationHelper.supportTrackColor
         return slider
     }()
     
@@ -91,12 +95,18 @@ class AudioInputView: UIView {
         super.layoutSubviews()
     }
     
+    override func traitCollectionDidChange(_ previousTraitCollection: UITraitCollection?) {
+        super.traitCollectionDidChange(previousTraitCollection)
+        let color = PyrusServiceDesk.mainController?.customization?.themeColor ?? CustomizationHelper.supportMassageTextColor
+        slider.setThumbImage(UIImage.PSDImage(name: "darkCircle")?.imageWith(color: color), for: .normal)
+    }
+    
     private func setupViews() {
         addSubview(stateLabel)
         addSubview(slider)
         addSubview(playView)
         layer.cornerRadius = 19
-        backgroundColor = .audioBackgroundColor
+        backgroundColor = CustomizationHelper.supportMassageBackgroundColor//.audioBackgroundColor
     }
     
     private func setupConstraints() {

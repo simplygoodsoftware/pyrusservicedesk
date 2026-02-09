@@ -1,9 +1,19 @@
 
 import UIKit
 
+protocol PSDMainController: NSObjectProtocol {
+    var customization: ServiceDeskConfiguration? { get }
+    func updateInfo()
+    func refreshChat(showFakeMessage: Int?)
+    func updateTitleChat()
+    func closeServiceDesk()
+    func remove(animated: Bool)
+}
+
 ///The main service desk controller.
-class PyrusServiceDeskController: PSDNavigationController {
+class PyrusServiceDeskController: PSDNavigationController, PSDMainController {
     var customization: ServiceDeskConfiguration?
+    var chatController: PSDChatViewController?
     required init(_ customization: ServiceDeskConfiguration?, customPresent: Bool) {
         self.customization = customization
         if(PyrusServiceDesk.clientId != nil) {
@@ -46,8 +56,30 @@ class PyrusServiceDeskController: PSDNavigationController {
     }
     
     func show(on viewController: UIViewController, completion: (() -> Void)? = nil, animated: Bool) {
-        DispatchQueue.main.async  {
-            viewController.present(self, animated:  animated, completion: completion)
+        var navigationController: UINavigationController?
+        if let nvc = viewController as? UINavigationController {
+            navigationController = nvc
+        } else if let nvc = viewController.navigationController {
+            navigationController = nvc
+        }
+        if PyrusServiceDesk.startWithPush,
+           let navigationController {
+            PyrusServiceDesk.mainController = self
+            let presenter = PSDChatPresenter()
+            let interactor = PSDChatInteractor(presenter: presenter)
+            let router = PSDChatRouter()
+            let controller = PSDChatViewController(interactor: interactor, router: router)
+            presenter.view = controller
+            router.controller = controller
+            chatController = controller
+            PyrusServiceDesk.mainController = chatController
+            chatController?.customization = customization
+            chatController?.hidesBottomBarWhenPushed = true
+            navigationController.pushViewController(chatController ?? controller, animated: animated)
+        } else {
+            DispatchQueue.main.async  {
+                viewController.present(self, animated:  animated, completion: completion)
+            }
         }
     }
     
@@ -73,16 +105,16 @@ class PyrusServiceDeskController: PSDNavigationController {
     }
     ///Clean all saved data
     static func clean(){
-        //clean main controller
-        PyrusServiceDesk.mainController = nil
-        //remove all saved users, exept owner
-        PSDUsers.supportUsers.removeAll()
-        //remove all saved users images
-        PSDSupportImageSetter.clean()
-        //remove all info about attachment preview download
-        PSDPreviewSetter.clean()
-        //stop all loading exept chat list
-        PSDGetChat.remove()
+//        //clean main controller
+//        PyrusServiceDesk.mainController = nil
+//        //remove all saved users, exept owner
+//        PSDUsers.supportUsers.removeAll()
+//        //remove all saved users images
+//        PSDSupportImageSetter.clean()
+//        //remove all info about attachment preview download
+//        PSDPreviewSetter.clean()
+//        //stop all loading exept chat list
+//        PSDGetChat.remove()
     }
     
     
@@ -118,7 +150,7 @@ class PyrusServiceDeskController: PSDNavigationController {
     /**
      Remove Pyrus Service Desk Controllers and clean saved data
  */
-    func remove(animated: Bool = true){
+    func remove(animated: Bool = true) {
         PyrusLogger.shared.saveLocalLogToDisk()
         if self.parent == nil {
             self.dismiss(animated: animated, completion: {
@@ -135,7 +167,6 @@ class PyrusServiceDeskController: PSDNavigationController {
                 PyrusServiceDeskController.clean()
                 PyrusServiceDesk.isStarted = false
             })
-            
         }
     }
     private static func sendCloseMessageToNotificationCenter(){

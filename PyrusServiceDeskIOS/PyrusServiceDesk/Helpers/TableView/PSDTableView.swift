@@ -16,6 +16,14 @@ class PSDTableView : UITableView{
         }
     }
     
+    override var contentInset: UIEdgeInsets {
+        didSet {
+            if contentInset.top == 0 {
+                print("")
+            }
+        }
+    }
+    
     var isVisible: Bool = false
     
     private lazy var activity : UIActivityIndicatorView = {

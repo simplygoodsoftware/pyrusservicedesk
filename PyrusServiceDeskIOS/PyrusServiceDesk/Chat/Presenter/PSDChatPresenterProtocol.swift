@@ -25,6 +25,8 @@ enum PSDChatPresenterCommand {
     case scrollToRow(indexPath: IndexPath)
     case updateActive(isActive: Bool)
     case updateInfo(ticketId: Int, userName: String, createdAt: Date)
+    case showRatingComment(ratingText: String?, rating: Int)
+    case updateOperatorTime(timeMessage: String?)
 }
 
 

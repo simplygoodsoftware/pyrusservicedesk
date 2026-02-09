@@ -39,7 +39,7 @@ class PSDProgressDownloadView: UIView {
     private lazy var progressLoader : UIView = {
         let view = UIView.init(frame: CGRect(x: 0, y: 0, width: PSDProgressDownloadView.progressLoaderSize, height: PSDProgressDownloadView.progressLoaderSize))
         view.layer.borderWidth = 1.0
-        view.layer.borderColor = UIColor.darkAppColor.cgColor
+        view.layer.borderColor = CustomizationHelper.colorForChatTitle.cgColor//UIColor.darkAppColor.cgColor
         view.layer.cornerRadius = PSDProgressDownloadView.progressLoaderSize/2
         
         let bgPath: UIBezierPath = UIBezierPath()
@@ -60,7 +60,7 @@ class PSDProgressDownloadView: UIView {
         progressLayer.fillColor = nil
         progressLayer.strokeEnd = 0.0
         
-        progressLayer.strokeColor = UIColor.darkAppColor.cgColor
+        progressLayer.strokeColor = CustomizationHelper.colorForChatTitle.cgColor//UIColor.darkAppColor.cgColor
         shapeLayer.fillColor = nil
         
         view.layer.addSublayer(shapeLayer)
@@ -73,7 +73,7 @@ class PSDProgressDownloadView: UIView {
         let button = UIButton()
         button.titleLabel?.font = .cancelButton
         button.setTitle("CancelDownload".localizedPSD(), for: .normal)
-        button.setTitleColor(.darkAppColor, for: .normal)
+        button.setTitleColor(CustomizationHelper.colorForChatTitle, for: .normal)
         button.addTarget(self, action: #selector(cancelButtonPressed), for: .touchUpInside)
         return button
     }()

@@ -11,11 +11,37 @@ extension PSDChatRouter: PSDChatRouterProtocol {
             showLinkOpenAlert(linkString: linkString)
         case .close:
             close()
+        case .ratingComment(ratingText: let ratingText, rating: let rating):
+            showRatingComment(ratingText: ratingText, rating: rating)
         }
     }
 }
 
 private extension PSDChatRouter {
+    
+    func showRatingComment(ratingText: String?, rating: Int) {
+        let vc = RatingCommentViewController(rating: rating, ratingText: ratingText)
+        vc.delegate = controller
+        if #available(iOS 15.0, *) {
+            if let sheet = vc.sheetPresentationController {
+                let smallId = UISheetPresentationController.Detent.Identifier("small")
+                if #available(iOS 16.0, *) {
+                    let smallDetent = UISheetPresentationController.Detent.custom(identifier: smallId) { context in
+                        return context.maximumDetentValue * 0.6
+                    }
+                    sheet.detents = [smallDetent]
+                } else {
+                    sheet.detents = [.medium()]
+                }
+                sheet.prefersGrabberVisible = true
+                sheet.prefersScrollingExpandsWhenScrolledToEdge = false
+            }
+        }
+        
+        vc.modalPresentationStyle = .pageSheet
+        controller?.present(vc, animated: true)
+    }
+    
     func showLinkOpenAlert(linkString: String) {
         guard let url = URL(string: linkString) else { return }
         
@@ -41,7 +67,7 @@ private extension PSDChatRouter {
         }
         
         if let mainController = PyrusServiceDesk.mainController {
-            mainController.remove()//with quick opening - closing can be nil
+            mainController.remove(animated: true)//with quick opening - closing can be nil
         } else if let navigationController = controller?.navigationController as? PyrusServiceDeskController {
             navigationController.remove()
         } else {

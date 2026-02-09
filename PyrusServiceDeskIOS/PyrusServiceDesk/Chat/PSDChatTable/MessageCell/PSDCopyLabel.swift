@@ -10,6 +10,7 @@ class PSDCopyTextView :UITextView,UIGestureRecognizerDelegate, UITextViewDelegat
         super.init(frame: frame, textContainer:textContainer)
         self.isEditable = false
         self.delegate = self
+        self.keyboardAppearance = CustomizationHelper.keyboardStyle
     }
     override var selectedTextRange: UITextRange? {
         get { return nil }
@@ -36,14 +37,22 @@ class PSDCopyTextView :UITextView,UIGestureRecognizerDelegate, UITextViewDelegat
             return false
         }
         if
-            let link = link as? URL,
-            !HelpersStrings.insideDomain(url: link)
+            let str = link as? String,
+            let url = URL(string: str),
+            !HelpersStrings.insideDomain(url: url)
         {
-            linkDelegate?.showLinkOpenAlert(link.absoluteString)
+            linkDelegate?.showLinkOpenAlert(url.absoluteString)
+            return false
+        } else if
+            let url = link as? URL,
+            !HelpersStrings.insideDomain(url: url)
+        {
+            linkDelegate?.showLinkOpenAlert(url.absoluteString)
             return false
         }
         return true
     }
+    
     required init?(coder aDecoder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
     }

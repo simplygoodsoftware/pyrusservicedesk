@@ -20,7 +20,7 @@ extension ChatsPresenter: ChatsPresenterProtocol {
             let endTime = DispatchTime.now()
             let nanoTime = endTime.uptimeNanoseconds - startTime.uptimeNanoseconds
             let timeInterval = Double(nanoTime) / 1_000_000
-            print("⏱ updateChats выполнена за \(timeInterval) мс (обработано \(chats.count) чатов)")
+//            print("⏱ updateChats выполнена за \(timeInterval) мс (обработано \(chats.count) чатов)")
         case .openChat(chat: let chat, fromPush: let fromPush):
             view?.show(.openChat(chat: chat, fromPush: fromPush))
         case .deleteFilter:
@@ -100,7 +100,7 @@ private extension ChatsPresenter {
                 }
             }
            
-            let author = lastMessage?.isOutgoing ?? false ? "You".localizedPSD() : lastMessage?.owner.name ?? ""
+            let author = lastMessage?.isOutgoing ?? false ? "You".localizedPSD() : lastMessage?.owner?.name ?? ""
             if lastMessage?.attachments?.count ?? 0 > 0 {
                 text = ""
             }
@@ -134,7 +134,7 @@ private extension ChatsPresenter {
         let endTime = DispatchTime.now()
         let nanoTime = endTime.uptimeNanoseconds - startTime.uptimeNanoseconds
         let timeInterval = Double(nanoTime) / 1_000_000
-        print("⏱ prepareChats выполнена за \(timeInterval) мс (обработано \(chats.count) чатов)")
+//        print("⏱ prepareChats выполнена за \(timeInterval) мс (обработано \(chats.count) чатов)")
         
         if isClosedTicketsOpened {
             return [activeChats, closeChats]

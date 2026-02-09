@@ -4,7 +4,16 @@
 #import <AudioToolbox/AudioToolbox.h>
 #import "opusfile.h"
 
-@protocol AudioDecoderProtocol;
+@protocol AudioDecoderProtocol <NSObject>
+
+- (int)chanelsCount;
+- (int64_t)psmOffset;
+- (BOOL)read:(AudioQueueBufferRef)buffer;
+- (int64_t)getPcmTotal;
+- (CGFloat)getTotalTime;
+- (int64_t)getSampleRate;
+
+@end
 
 typedef enum {
     opus,

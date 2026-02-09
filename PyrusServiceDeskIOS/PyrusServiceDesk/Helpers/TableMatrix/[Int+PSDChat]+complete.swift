@@ -26,6 +26,24 @@ extension Array where Element == [PSDRowMessage]{
         return (indexPaths, IndexSet(addSections))
     }
     
+    mutating func addWelcomeMessage() -> ([IndexPath],IndexSet) {
+        let ratingMessage = PSDObjectsCreator.createWelcomeMessage()
+        let lastSection = self.count > 0 ? self.count - 1 : 0
+        let lastMessage = self[lastSection].last
+        let _ = completeWithMessages([ratingMessage])
+        var indexPaths =  [IndexPath]()
+        var addSections = [Int]()
+        if
+            let lastMessage,
+            ratingMessage.message.date.compareWithoutTime(with: lastMessage.message.date) == .equal
+        {
+            indexPaths.append(IndexPath(row: self[lastSection].count, section: lastSection))
+        } else {
+            addSections.append(lastSection + 1)
+        }
+        return (indexPaths, IndexSet(addSections))
+    }
+    
     ///Complete array with messages. Messages always add to last section, and checked for duplication by localId
     ///- parameter messages: messages to add
     mutating func completeWithMessages(_ messages: [PSDRowMessage]) -> Bool {
@@ -73,6 +91,13 @@ extension Array where Element == [PSDRowMessage]{
              let ratingMessage = PSDObjectsCreator.createRatingMessage(ratingText).message
              messages.append(ratingMessage)
          }
+//         else if !(lastMessage()?.isRatingMessage ?? false),
+//                   !chat.isActive,
+//                   !(lastMessage()?.isWelcomeMessage ?? false)
+//         {
+//             let welcomeMessage = PSDObjectsCreator.createWelcomeMessage().message
+//             messages.append(welcomeMessage)
+//         }
          complete(with: messages, startMessage: startMessage, completion: completion)
     }
     
@@ -179,6 +204,9 @@ extension Array where Element == [PSDRowMessage]{
     ///return row for message according to its time
     private func row(forMessage: PSDMessage, section: Int) -> Int {
         for (row,message) in self[section].enumerated().reversed() {
+            if forMessage.isSystemMessage {
+                return row + 1
+            }
             if message.message.state == .sending, !message.message.isWelcomeMessage {
                 continue
             }
@@ -233,7 +261,7 @@ extension Array where Element == [PSDRowMessage]{
         }
         
         if message.message.messageId == findMessage.message.messageId && findMessage.hasId() {
-            if message.message.owner.personId == PyrusServiceDesk.userId || message.rating ?? 0 != 0 {
+            if message.message.owner?.personId == PyrusServiceDesk.userId || message.rating ?? 0 != 0 {
                 if message.attachment?.name == findMessage.attachment?.name,
                    let _ = Int(findMessage.attachment?.serverIdentifer ?? "") {
                     message.attachment?.serverIdentifer = findMessage.attachment?.serverIdentifer

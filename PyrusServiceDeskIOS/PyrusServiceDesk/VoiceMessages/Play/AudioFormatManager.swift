@@ -1,16 +1,18 @@
 import Foundation
+//@_implementationOnly import PyrusServiceDeskPrivate
 
-@objc protocol AudioDecoderProtocol {
-    func chanelsCount() -> Int
-    func psmOffset() -> Int64
-    func read(_ buffer: AudioQueueBufferRef) -> Bool
-    func getPcmTotal() -> Int64
-    
-    func getTotalTime() -> CGFloat
-    func getSampleRate() -> Int64
-}
 
-class AudioFormatManager {
+//@objc protocol AudioDecoderProtocol {
+//    func chanelsCount() -> Int
+//    func psmOffset() -> Int64
+//    func read(_ buffer: AudioQueueBufferRef) -> Bool
+//    func getPcmTotal() -> Int64
+//    
+//    func getTotalTime() -> CGFloat
+//    func getSampleRate() -> Int64
+//}
+
+@objc class AudioFormatManager: NSObject {
     static func getDecoder(url: URL, offSet: Int64) -> AudioDecoderProtocol? {
         if VorbisDecoder.canOpenFile(url: url) {
             return VorbisDecoder(url: url, offset: offSet)

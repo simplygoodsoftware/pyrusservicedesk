@@ -54,23 +54,30 @@ class PSDObjectsCreator {
         }
         return 1
     }
+    
     static func createMessage(rating: Int, ticketId: Int, userId: String? = nil) -> PSDMessage {
         let message = PSDObjectsCreator.createMessage("", attachments: nil, user: PSDUsers.user, ticketId: ticketId, userId: userId)
         message.rating = rating
         message.isRatingMessage = true
         return message
     }
+    
+    static func createMessage(ratingComment: String?, rating: Int, ticketId: Int, userId: String? = nil) -> PSDMessage {
+        let message = PSDObjectsCreator.createMessage("", attachments: nil, user: PSDUsers.user, ticketId: ticketId, userId: userId)
+        message.ratingComment = ratingComment
+        return message
+    }
     /**
      Create a new message that was not sent.
      - parameter data: Any object to message. If has string
      */
-    private static func createMessage(_ text:String, attachments: [PSDAttachment]?, user:PSDUser, ticketId: Int = 0, userId: String?)->PSDMessage{
+    private static func createMessage(_ text:String, attachments: [PSDAttachment]?, user:PSDUser?, ticketId: Int = 0, userId: String?)->PSDMessage{
         let messageId: String = ""
         let date: Date = Date()
         let message = PSDMessage(text: text, attachments: attachments, messageId: messageId, owner: user, date: date)
         message.state = .sending
         message.ticketId = ticketId
-        message.isOutgoing = PyrusServiceDesk.authorId == user.authorId
+        message.isOutgoing = PyrusServiceDesk.authorId == user?.authorId
         message.userId = userId
         message.isWelcomeMessage = true
         return message

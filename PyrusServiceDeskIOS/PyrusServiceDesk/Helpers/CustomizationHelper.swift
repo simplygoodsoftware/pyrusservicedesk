@@ -6,7 +6,24 @@ class CustomizationHelper {
         return PyrusServiceDesk.mainController?.customization?.chatTitle ?? ""
     }
     static var welcomeMessage: String {
+        let clientId = PyrusServiceDesk.currentClientId ?? PyrusServiceDesk.clientId
+        if let welomeMessage = PyrusServiceDesk.clients.first(where: { $0.clientId == clientId })?.welcomeMessage,
+           welomeMessage.count > 0 {
+            return welomeMessage
+        }
         return PyrusServiceDesk.mainController?.customization?.welcomeMessage ?? ""
+    }
+    
+    static var ratingSettings: PSDRatingSettings {
+        let clientId = PyrusServiceDesk.currentClientId ?? PyrusServiceDesk.clientId
+        if let ratingSettings = PyrusServiceDesk.clients.first(where: { $0.clientId == clientId })?.ratingSettings {
+            return ratingSettings
+        }
+        return PSDRatingSettings(
+            size: 5,
+            type: RatingType.smile.rawValue,
+            ratingTextValues: RatingType.smile.rateArray(size: 5)
+        )
     }
     
     static var customLocale: String? {
@@ -88,6 +105,51 @@ class CustomizationHelper {
         }
         return color
     }
+    
+    static var supportTrackColor: UIColor {
+        return supportMassageBackgroundColor.isDarkColor ? (UIColor(hex: "#E3E5E84D") ?? .white).withAlphaComponent(0.3) : UIColor.trackColor
+    }
+    
+    static var userTrackColor: UIColor {
+        return userMassageBackgroundColor.isDarkColor ? (UIColor(hex: "#E3E5E84D") ?? .white).withAlphaComponent(0.3) : UIColor.trackColor
+    }
+    
+    static var sendButtonColor: UIColor {
+        if let color = PyrusServiceDesk.mainController?.customization?.sendButtonColor {
+            return color
+        } else if let color = PyrusServiceDesk.mainController?.customization?.barButtonTintColor {
+            return color
+        }
+        return UIColor.appColor
+    }
+    
+    static var navigationBarColor: UIColor {
+        if let color = PyrusServiceDesk.mainController?.customization?.customBarColor {
+            return color
+        } else if let color = PyrusServiceDesk.mainController?.customization?.customBackgroundColor {
+            return color
+        }
+        return .navBarColor
+    }
+    
+    static var scrollButtonColor: UIColor {
+        return colorsForInput.0
+    }
+    
+    static var colorForChatTitle: UIColor {
+        if let textColor = PyrusServiceDesk.mainController?.customization?.chatTitleColor {
+            return textColor
+        }
+        if let color = PyrusServiceDesk.mainController?.customization?.customBarColor {
+            return UIColor.getTextColor(for: color)
+        }
+        return UIColor.getTextColor(for: navigationBarColor)
+    }
+    
+    static var previewBakcgroundColor: UIColor {
+        return CustomizationHelper.userMassageBackgroundColor.mixed(with: CustomizationHelper.userMassageTextColor, amount: 0.1)
+    }
+    
     static var barStyle: UIBarStyle? {
         if #available(iOS 13.0, *) {
             switch UITraitCollection.current.userInterfaceStyle {
@@ -128,6 +190,37 @@ class CustomizationHelper {
             return (.psdBackground, .psdLabel)
         }
     }
+    
+    static var holderBackgroundColor: UIColor {
+        let style = keyboardStyle
+        
+        switch style {
+        case .dark:
+            return UIColor(hex: "#575B5E") ?? .clear
+        case .light:
+            return UIColor(hex: "#F3F2F8") ?? .clear
+        default:
+            return .holderBackgroundColor
+        }
+    }
+    
+    static var labelTextColor: UIColor {
+        let style = keyboardStyle
+        
+        switch style {
+        case .dark:
+            return .white
+        case .light:
+            return UIColor(hex: "#AAA9AE") ?? .gray
+        default:
+            return .labelTextColor
+        }
+    }
+    
+    static var recordImagesColors: UIColor {
+        return PyrusServiceDesk.mainController?.customization?.themeColor ?? PyrusServiceDesk.mainController?.customization?.barButtonTintColor ?? CustomizationHelper.colorsForInput.1
+    }
+    
     static func prepareWithCustomizationAlert(_ alert: UIAlertController) {
         alert.view.tintColor = PyrusServiceDesk.mainController?.customization?.attachmentMenuTextColor ?? UIColor.darkAppColor
     }
@@ -166,3 +259,58 @@ class CustomizationHelper {
 }
 private let GRAY_VIEW_ALPHA: CGFloat = 0.1
 private let LIGHT_GRAY_VIEW_ALPHA: CGFloat = 0.05
+
+private extension UIColor {
+    static let trackColor = UIColor {
+        switch $0.userInterfaceStyle {
+        case .dark:
+            return UIColor(hex: "#FFFFFF4D")?.withAlphaComponent(0.3) ?? .white
+        default:
+            return UIColor(hex: "#0000001A")?.withAlphaComponent(0.1) ?? .darkAppColor
+        }
+    }
+    
+    static let holderBackgroundColor = UIColor {
+        switch $0.userInterfaceStyle {
+        case .dark:
+            return UIColor(hex: "#575B5E") ?? .clear
+        default:
+            return UIColor(hex: "#F3F2F8") ?? .clear
+        }
+    }
+    
+    static let labelTextColor = UIColor {
+        switch $0.userInterfaceStyle {
+        case .dark:
+            return .white
+        default:
+            return UIColor(hex: "#AAA9AE") ?? .gray
+        }
+    }
+}
+
+
+extension UIColor {
+    /// Смешивает текущий цвет с другим (`other`) в заданной доле (`amount`).
+    /// `amount = 0` — берём только `self`, `amount = 1` — только `other`.
+    func mixed(with other: UIColor, amount: CGFloat) -> UIColor {
+        let t = max(0, min(1, amount))
+        
+        var r1: CGFloat = 0, g1: CGFloat = 0, b1: CGFloat = 0, a1: CGFloat = 0
+        var r2: CGFloat = 0, g2: CGFloat = 0, b2: CGFloat = 0, a2: CGFloat = 0
+        
+        // Приводим оба цвета к sRGB и извлекаем компоненты
+        guard self.getRed(&r1, green: &g1, blue: &b1, alpha: &a1),
+              other.getRed(&r2, green: &g2, blue: &b2, alpha: &a2) else {
+            return self
+        }
+        
+        // Линейная интерполяция
+        let r = r1 * (1 - t) + r2 * t
+        let g = g1 * (1 - t) + g2 * t
+        let b = b1 * (1 - t) + b2 * t
+        let a = a1 * (1 - t) + a2 * t
+        
+        return UIColor(red: r, green: g, blue: b, alpha: a)
+    }
+}

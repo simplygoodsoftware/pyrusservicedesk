@@ -42,6 +42,7 @@ extension URLRequest {
         request.addValue(contenttype, forHTTPHeaderField: "content-type")
         request.addValue("\(jsonData!.count)", forHTTPHeaderField: "Content-Length")
         request.addCustomHeaders()
+        request.addUserAgent()
         return request
     }
     private static func addStaticKeys(to JSON:[String: Any]) -> [String: Any] {
@@ -59,8 +60,11 @@ extension URLRequest {
             fullJSOn["security_key"] = securityKey
             fullJSOn["instance_id"] = PyrusServiceDesk.userId
             fullJSOn["version"] = 2
+        } else if let customUserId = PyrusServiceDesk.customUserId {
+            fullJSOn["user_id"] = customUserId
+            fullJSOn["instance_id"] = PyrusServiceDesk.userId
+            fullJSOn["version"] = 2
         } else {
-            fullJSOn["user_id"] = PyrusServiceDesk.userId
             fullJSOn["instance_id"] = PyrusServiceDesk.userId
             fullJSOn["version"] = 2
         }
@@ -76,6 +80,15 @@ extension URLRequest {
             return
         }
         addValue(auth, forHTTPHeaderField: authTokenKey)
+    }
+    
+    mutating func addUserAgent() {
+        let sdkVersion = PyrusServiceDesk.PSD_VERSION
+        let appId = (String(PyrusServiceDesk.clientId?.prefix(10) ?? ""))
+        let systemVersion = UIDevice.current.systemVersion
+        let isMultichats = PyrusServiceDesk.multichats ? "1" : "0"
+        let userAgent = "ServiceDesk/ios/\(sdkVersion)/\(appId)/\(systemVersion)/\(isMultichats)"
+        addValue(userAgent, forHTTPHeaderField: "User-Agent")
     }
 }
 

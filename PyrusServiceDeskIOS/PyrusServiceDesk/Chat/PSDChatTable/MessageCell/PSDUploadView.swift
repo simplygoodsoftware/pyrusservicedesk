@@ -64,7 +64,7 @@ class PSDUploadView: UIButton {
               //  }
                 progressLayer.strokeColor = color.cgColor
             shapeLayer.fillColor = UIColor.clear.cgColor
-            backgroundColor = .previewBackgroundColor//UIColor.white.withAlphaComponent(0.1).cgColor
+            backgroundColor = CustomizationHelper.previewBakcgroundColor//.previewBackgroundColor//UIColor.white.withAlphaComponent(0.1).cgColor
             layer.cornerRadius = 25
 //            }
             if self.downloadState != .sent {
@@ -154,7 +154,8 @@ private extension UIColor {
         case .dark:
             return UIColor(hex: "#7182FD") ?? .white
         default:
-            return UIColor(hex: "#4861F2") ?? .darkAppColor
+            return UIColor.appColor.mixed(with: UIColor.white, amount: 0.1)
+           // return UIColor.white.withAlphaComponent(0.1)//UIColor(hex: "#4861F2") ?? .darkAppColor
         }
     }
 }

@@ -73,16 +73,14 @@ class PSDAudioAttachmentView: PSDAttachmentView {
         didSet {
             switch sliderColor {
             case .brightColor:
-                //slider.tintColor = .white
-                slider.setThumbImage(UIImage.PSDImage(name: "circle"), for: .normal)
-                slider.minimumTrackTintColor = .white
-                slider.maximumTrackTintColor = UIColor(hex: "#E3E5E84D")?.withAlphaComponent(0.3)
+                slider.setThumbImage(UIImage.PSDImage(name: "circle")?.imageWith(color: CustomizationHelper.userMassageTextColor), for: .normal)
+                slider.minimumTrackTintColor = CustomizationHelper.userMassageTextColor
+                slider.maximumTrackTintColor = CustomizationHelper.userTrackColor
             case .defaultColor:
-                let mainColor = PyrusServiceDesk.mainController?.customization?.themeColor
-//                slider.tintColor = mainColor
-                slider.setThumbImage(UIImage.PSDImage(name: "darkCircle"), for: .normal)
-                slider.minimumTrackTintColor = mainColor
-                slider.maximumTrackTintColor = .trackColor//UIColor(hex: "#0000001A")?.withAlphaComponent(0.1)
+                let color = PyrusServiceDesk.mainController?.customization?.themeColor ?? CustomizationHelper.supportMassageTextColor
+                slider.setThumbImage(UIImage.PSDImage(name: "darkCircle")?.imageWith(color: color), for: .normal)
+                slider.minimumTrackTintColor = color
+                slider.maximumTrackTintColor = CustomizationHelper.supportTrackColor
             }
         }
     }
@@ -115,7 +113,7 @@ class PSDAudioAttachmentView: PSDAttachmentView {
         let view = UIView()
         view.layer.cornerRadius = 25
         view.translatesAutoresizingMaskIntoConstraints = false
-        view.backgroundColor = .previewBackgroundColor
+        view.backgroundColor = CustomizationHelper.previewBakcgroundColor//.previewBackgroundColor
         view.isHidden = true
         return view
     }()
@@ -153,6 +151,11 @@ class PSDAudioAttachmentView: PSDAttachmentView {
     
     required init?(coder aDecoder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
+    }
+    
+    override func traitCollectionDidChange(_ previousTraitCollection: UITraitCollection?) {
+        super.traitCollectionDidChange(previousTraitCollection)
+        playView.backgroundColor = CustomizationHelper.previewBakcgroundColor
     }
     
     override func draw(_ attachment: PSDAttachment, state: messageState) {
@@ -338,7 +341,7 @@ private extension UIColor {
         case .dark:
             return UIColor(hex: "#7182FD") ?? .white
         default:
-            return UIColor(hex: "#4861F2") ?? .darkAppColor
+            return UIColor.white.withAlphaComponent(0.1)//UIColor(hex: "#4861F2") ?? .darkAppColor
         }
     }
     

@@ -16,7 +16,7 @@ class PSDMessage: NSObject {
     var text: String
     var attributedText: NSAttributedString?
     var attachments: [PSDAttachment]?
-    var owner: PSDUser
+    var owner: PSDUser?
     ///The server Id
     var messageId: String
     ///The local created id
@@ -30,6 +30,7 @@ class PSDMessage: NSObject {
             }
         }
     }
+    var ratingComment: String?
     var isOutgoing: Bool = true
     var fromStrorage: Bool = false
     var isRatingMessage: Bool = false
@@ -40,6 +41,7 @@ class PSDMessage: NSObject {
     var requestNewTicket = false
     var isWelcomeMessage = false
     var isSupportMessage: Bool = false
+    var isSystemMessage: Bool = false
     
     init(text: String?, attachments: [PSDAttachment]?, messageId: String?, owner: PSDUser?, date: Date?) {
         self.text = text ?? ""        

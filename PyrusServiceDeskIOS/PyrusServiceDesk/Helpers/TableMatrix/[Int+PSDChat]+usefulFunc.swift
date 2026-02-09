@@ -95,7 +95,7 @@ extension Array where Element == [PSDRowMessage] {
         let unsentMessages: [[PSDRowMessage]] = self
         var section: Int = 0
         var previousMessage: PSDMessage? = nil
-        self.defaultMatrix(createWelcome: !(chat.messages.count > 0 && chat.messages[0].owner.authorId?.count ?? 0 == 0))
+        self.defaultMatrix(createWelcome: !(chat.messages.count > 0 && chat.messages[0].owner?.authorId?.count ?? 0 == 0) || !PyrusServiceDesk.multichats)
         
         if !self.isEmpty && self[0].count > 0 && chat.messages.count > 0 {
             //change date of welcome message. Make it same as first message in chat
@@ -121,6 +121,9 @@ extension Array where Element == [PSDRowMessage] {
         let comp = self.completeWithMessages(unsentMessages[0])
         if chat.showRating, let ratingText = chat.showRatingText {
             _ = addRatingMessage(ratingText)
+        }
+        if !PyrusServiceDesk.multichats && !chat.isActive && !chat.showRating, chat.messages.count > 0 && chat.messages.last?.state == .sent {
+            _ = addWelcomeMessage()
         }
         if comp {
             self.completeWithUnsentMessages(for: chat.chatId ?? 0)///if user has unsent messages add them to bottom
@@ -186,6 +189,14 @@ extension Array where Element == [PSDRowMessage] {
         return false
     }
     
+    func isPreviousSystemMessage(at indexPath: IndexPath) -> Bool {
+        let indexPath = nextNotEmpty(indexPath)
+        if indexPath.row >= 0 && count > indexPath.section && self[indexPath.section].count > indexPath.row {
+            return self[indexPath.section][indexPath.row].isSystemMessage
+        }
+        return false
+    }
+    
     ///Find ower for massage at IndexPath. If tableMatrix has info - return it, or nil if not.
     private func personForMessage(at indexPath: IndexPath) -> PSDUser? {
         if indexPath.row >= 0 && count > indexPath.section && self[indexPath.section].count > indexPath.row {
@@ -247,7 +258,7 @@ extension Array where Element == [PSDRowMessage] {
     func lastUserMessageDate() -> Date? {
         for messageByDate in self.reversed() {
             for messageRow in messageByDate.reversed() {
-                if messageRow.message.owner.personId == PyrusServiceDesk.userId && messageRow.hasId() {
+                if messageRow.message.owner?.personId == PyrusServiceDesk.userId && messageRow.hasId() {
                     return messageRow.message.date
                 }
             }

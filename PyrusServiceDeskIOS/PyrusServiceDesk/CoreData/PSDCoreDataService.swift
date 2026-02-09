@@ -6,15 +6,28 @@ enum EntityType {
 }
 
 final class CoreDataService {
-
+    private let currentSchemaVersion = 1
+    private let schemaVersionKey = "PSDChatsSchemaVersion"
+    
     private lazy var persistentContainer: NSPersistentContainer = {
-        let persistentContainer = NSPersistentContainer(name: "PSDChats")
-        persistentContainer.loadPersistentStores { _, error in
-            guard let error else { return }
-            print("Failed to load persistent stores: \(error)")
+        checkAndResetStoreIfNeeded()
+        
+        guard let modelURL = PSD_BUNDLE.url(forResource: "PSDChats", withExtension: "momd") else {
+            fatalError("❌ Не найден PSDChats.momd в bundle: \(PSD_BUNDLE.bundleURL)")
         }
-        print("Persistent stores loaded successfully")
-        return persistentContainer
+        
+        guard let model = NSManagedObjectModel(contentsOf: modelURL) else {
+            fatalError("❌ Не удалось загрузить NSManagedObjectModel из \(modelURL)")
+        }
+
+        let container = NSPersistentContainer(name: "PSDChats", managedObjectModel: model)
+        container.loadPersistentStores { _, error in
+            if let error {
+                fatalError("❌ Ошибка загрузки persistent store: \(error)")
+            }
+        }
+
+        return container
     }()
 
     private var viewContext: NSManagedObjectContext {
@@ -24,6 +37,41 @@ final class CoreDataService {
     private var backgroundContext: NSManagedObjectContext {
         persistentContainer.newBackgroundContext()
     }
+    
+    private func persistentStoreURLs() -> [URL] {
+        let storeName = "PSDChats"
+
+        guard let directory = FileManager.default.urls(
+            for: .applicationSupportDirectory,
+            in: .userDomainMask
+        ).first else { return [] }
+
+        return [
+            directory.appendingPathComponent("\(storeName).sqlite"),
+            directory.appendingPathComponent("\(storeName).sqlite-wal"),
+            directory.appendingPathComponent("\(storeName).sqlite-shm")
+        ]
+    }
+    
+    private func checkAndResetStoreIfNeeded() {
+        let defaults = PSDMessagesStorage.pyrusUserDefaults()
+        let savedVersion = defaults?.integer(forKey: schemaVersionKey) ?? 0
+
+        guard savedVersion < currentSchemaVersion else {
+            return
+        }
+
+        let fileManager = FileManager.default
+
+        for url in persistentStoreURLs() {
+            if fileManager.fileExists(atPath: url.path) {
+                try? fileManager.removeItem(at: url)
+            }
+        }
+
+        defaults?.set(currentSchemaVersion, forKey: schemaVersionKey)
+    }
+
 }
 
 extension CoreDataService: CoreDataServiceProtocol {
@@ -50,9 +98,37 @@ extension CoreDataService: CoreDataServiceProtocol {
             
             let endTime = DispatchTime.now()
             let nanoseconds = endTime.uptimeNanoseconds - startTime.uptimeNanoseconds
-            print("Fetch executed in: \(Double(nanoseconds)/1_000_000) ms")
+//            print("Fetch chats executed in: \(Double(nanoseconds)/1_000_000) ms")
             
             return try result.get() // Разворачиваем Result
+    }
+    
+    func fetchMessages() throws -> [DBMessage] {
+         let context = viewContext
+
+            var result: Result<[DBMessage], Error> = .success([])
+            let startTime = DispatchTime.now()
+            
+            context.performAndWait {
+                do {
+                    let fetchRequest = DBMessage.fetchRequest()
+                    fetchRequest.sortDescriptors = [
+                        NSSortDescriptor(key: "date", ascending: true),
+                        NSSortDescriptor(key: "messageId", ascending: true)
+                    ]
+                    
+                    let fetchedObjects = try context.fetch(fetchRequest)
+                    result = .success(fetchedObjects)
+                } catch {
+                    result = .failure(error)
+                }
+            }
+            
+            let endTime = DispatchTime.now()
+            let nanoseconds = endTime.uptimeNanoseconds - startTime.uptimeNanoseconds
+//            print("Fetch messages executed in: \(Double(nanoseconds)/1_000_000) ms")
+            
+            return try result.get()
     }
     
     func fetchMessages(searchString: String) throws -> [DBMessage] {
@@ -149,7 +225,7 @@ extension CoreDataService: CoreDataServiceProtocol {
                 try block(backgroundContext)
                 if backgroundContext.hasChanges {
                     try backgroundContext.save()
-                    print("Successful save")
+//                    print("Successful save")
                 }
                 completion?(.success(()))
             } catch {
@@ -169,7 +245,7 @@ extension CoreDataService: CoreDataServiceProtocol {
             if let dbTicketCommand {
                 privateContext.delete(dbTicketCommand)
                 try privateContext.save()
-                print("Command with ID: \(id) deleted successfully")
+//                print("Command with ID: \(id) deleted successfully")
             } else {
                 print("Command with ID: \(id) not found")
             }
@@ -189,7 +265,7 @@ extension CoreDataService: CoreDataServiceProtocol {
             try privateContext.execute(batchDeleteRequest)
             try privateContext.save()
 
-            print("chats wdeleted successfully")
+//            print("chats wdeleted successfully")
         } catch {
             print("Error deleting chats, \(error)")
             throw error
@@ -206,7 +282,7 @@ extension CoreDataService: CoreDataServiceProtocol {
             try privateContext.execute(batchDeleteRequest)
             try privateContext.save()
 
-            print("clients wdeleted successfully")
+//            print("clients wdeleted successfully")
         } catch {
             print("Error deleting chats, \(error)")
             throw error
@@ -220,7 +296,7 @@ extension CoreDataService: CoreDataServiceProtocol {
         do {
             try backgroundContext.execute(deleteRequest)
             try backgroundContext.save()
-            print("All \(entityName)s deleted successfully")
+//            print("All \(entityName)s deleted successfully")
         } catch let error as NSError {
             print("Error deleting objects: \(error), \(error.userInfo)")
         }

@@ -90,13 +90,10 @@ class PSDMessageView: PSDView {
     
     func draw(message: PSDRowMessage) {
         timeLabel.text = message.message.date.timeAsString()
-        if timeLabel.text?.count ?? 0 == 0 {
-            print("")
-        }
         messageTextView.attributedText = message.attributedText
         messageTextView.linkTextAttributes = [
             NSAttributedString.Key.underlineStyle: NSUnderlineStyle.single.rawValue,
-            NSAttributedString.Key.foregroundColor: message.message.isOutgoing ? UIColor.white : PyrusServiceDesk.mainController?.customization?.themeColor ?? .systemBlue
+            NSAttributedString.Key.foregroundColor: message.message.isOutgoing ? UIColor.white : UIColor.appColor
         ]
         attachmentView?.removeFromSuperview()
         placeholderImageView.isHidden = message.message as? PSDPlaceholderMessage == nil
@@ -134,7 +131,7 @@ class PSDMessageView: PSDView {
             recolor()
         }
         if let rating = message.rating, message.message.isRatingMessage {
-            ratingLabel.text = rateArray[rating]
+            ratingLabel.text = rateArray.first(where: {$0.rating == rating})?.text
             if message.attachment == nil && message.text.count == 0 {
                 self.backgroundColor = .clear
             }
@@ -332,6 +329,7 @@ class PSDMessageView: PSDView {
         
         layoutIfNeeded()
     }
+
     
     private func activate(_ activate: Bool, constraintsIn constraintsArray: [NSLayoutConstraint]) {
         for con in constraintsArray {

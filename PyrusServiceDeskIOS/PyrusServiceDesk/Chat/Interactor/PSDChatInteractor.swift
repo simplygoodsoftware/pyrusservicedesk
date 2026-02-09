@@ -27,11 +27,12 @@ class PSDChatInteractor: NSObject {
     private var loadingTimer: Timer?
     private var chat: PSDChat? {
         didSet {
-            presenter.doWork(.updateActive(isActive: chat?.isActive ?? true))
+            if PyrusServiceDesk.multichats {
+                presenter.doWork(.updateActive(isActive: chat?.isActive ?? true))
+            }
         }
     }
     private var messageId: String?
-    private let reloadInterval = 30.0 //seconds
     private var timer: Timer?
     private var hasNoConnection: Bool = false
     private var gotData: Bool = false
@@ -41,7 +42,12 @@ class PSDChatInteractor: NSObject {
     private var isRefreshing = false
     private var isOpen = false
     private var fromPush = false
+    private var drawTable: Bool = false
+    private var needUpdate: Bool = false
+    private var chatForUpdate: PSDChat?
     private var isScrollButtonHiden = true
+    private var isLoading: Bool = false
+    private var hasOperatorTime: Bool = false
     private var newMessagesCount = 0 {
         didSet {
             if newMessagesCount > 0 {
@@ -49,7 +55,8 @@ class PSDChatInteractor: NSObject {
             }
         }
     }
-    
+    private let tableMatrixQueue = DispatchQueue(label: "com.psd.tableMatrix.queue")
+
     var isRefresh = false
     
     init(presenter: PSDChatPresenterProtocol, chat: PSDChat? = nil, fromPush: Bool = false, messageId: String? = nil) {
@@ -57,6 +64,29 @@ class PSDChatInteractor: NSObject {
         self.chat = chat
         self.fromPush = fromPush
         self.messageId = messageId
+        
+        if !PyrusServiceDesk.multichats {
+            if let lastChat = PyrusServiceDesk.chats.first {
+                let singleChat = PSDChat(
+                    chatId: lastChat.chatId,
+                    date: lastChat.date ?? Date(),
+                    messages: PyrusServiceDesk.allMessages
+                )
+                singleChat.isActive = lastChat.isActive
+                singleChat.showRating = lastChat.showRating
+                singleChat.showRatingText = lastChat.showRatingText
+                singleChat.userId = lastChat.userId ?? PyrusServiceDesk.customUserId ?? PyrusServiceDesk.userId
+                singleChat.lastReadedCommentId = lastChat.lastReadedCommentId
+                singleChat.createdAt = lastChat.createdAt
+                singleChat.lastMessageDate = lastChat.lastMessageDate
+                singleChat.lastComment = PyrusServiceDesk.allMessages.last
+                
+                self.chat = singleChat
+            } else if PyrusServiceDesk.clients.count > 0 {
+                self.chat = PSDChat(chatId: 0, date: Date(), messages: [])
+                self.chat?.isActive = false
+            }
+        }
         super.init()
     }
     
@@ -69,49 +99,65 @@ extension PSDChatInteractor: PSDChatInteractorProtocol {
     func doInteraction(_ action: PSDChatInteractorCommand) {
         switch action {
         case .viewDidload:
+            if !PyrusServiceDesk.multichats {
+                if let lastChat = PyrusServiceDesk.chats.first {
+                    let singleChat = PSDChat(
+                        chatId: lastChat.chatId,
+                        date: lastChat.date ?? Date(),
+                        messages: PyrusServiceDesk.allMessages
+                    )
+                    singleChat.isActive = lastChat.isActive
+                    singleChat.showRating = lastChat.showRating
+                    singleChat.showRatingText = lastChat.showRatingText
+                    singleChat.userId = lastChat.userId ?? PyrusServiceDesk.customUserId ?? PyrusServiceDesk.userId
+                    singleChat.lastReadedCommentId = lastChat.lastReadedCommentId
+                    singleChat.createdAt = lastChat.createdAt
+                    singleChat.lastMessageDate = lastChat.lastMessageDate
+                    singleChat.lastComment = PyrusServiceDesk.allMessages.last
+                    
+                    self.chat = singleChat
+                    if !(singleChat.lastComment?.isSupportMessage ?? false) ||
+                        (singleChat.lastComment?.isSystemMessage ?? false) {
+                        sendOperatorCalcCommand(needSync: false)
+                        hasOperatorTime = true
+                    }
+                    readChat()
+                } else if PyrusServiceDesk.clients.count > 0 {
+                    self.chat = PSDChat(chatId: 0, date: Date(), messages: [])
+                    self.chat?.isActive = false
+                    PyrusServiceDesk.syncManager.syncGetTickets()
+                } else {
+                    PyrusServiceDesk.syncManager.syncGetTickets()
+                }
+            }
             isOpen = true
             presenter.doWork(.updateTitle(connectionError: !PyrusServiceDesk.syncManager.networkAvailability))
             if let chat, let chatId = chat.chatId {
                 messagesToPass = PSDMessagesStorage.getSendingMessages(for: chatId)
             }
-            NotificationCenter.default.addObserver(self, selector: #selector(updateChats), name: PyrusServiceDesk.chatsUpdateNotification, object: nil)
-            NotificationCenter.default.addObserver(forName: SyncManager.commandsResultNotification, object: nil, queue: .main) { [weak self] notification in
-                DispatchQueue.main.async { [weak self] in
-                    print("COMMANDS NOTIFICATION TIME: \(Date.now)")
-                    if let data = notification.userInfo?["tickets"] as? Data {
-                        do {
-                            let decoder = JSONDecoder()
-                            let ticketResults = try decoder.decode([TicketCommandResult].self, from: data)
-                            self?.updateMessages(commandsResult: ticketResults)
-                        } catch { }
-                    }
+            
+            addObservers()
+            
+            var needShowLoading = fromPush || PyrusServiceDesk.needShowLoading
+            if !needShowLoading && !PyrusServiceDesk.multichats {
+                needShowLoading = PyrusServiceDesk.clients.count == 0 ||
+                    PyrusServiceDesk.clientId != PyrusServiceDesk.clients.first?.clientId
+                if !needShowLoading && PyrusServiceDesk.customUserId != nil && PyrusServiceDesk.chats.count > 0 {
+                    needShowLoading = !PyrusServiceDesk.chats.contains(where: {
+                        $0.userId == PyrusServiceDesk.customUserId
+                    })
                 }
             }
-            NotificationCenter.default.addObserver(self, selector: #selector(showConnectionError), name: SyncManager.connectionErrorNotification, object: nil)
-            NotificationCenter.default.addObserver(forName: .refreshNotification, object: nil, queue: .main) { [weak self] notification in
-                DispatchQueue.main.async { [weak self] in
-                    if let userInfo = notification.userInfo,
-                       let commandId = userInfo["commandId"] as? String,
-                       let message = self?.messagesToPass.first(where: { $0.commandId.lowercased() == commandId.lowercased() })?.message {
-                        self?.refresh(message: message, changedToSent: false)
-                    }
-                }
-            }
-            NotificationCenter.default.addObserver(forName: .removeMesssageNotification, object: nil, queue: .main) { [weak self] notification in
-                DispatchQueue.main.async { [weak self] in
-                    if let userInfo = notification.userInfo,
-                       let commandId = userInfo["commandId"] as? String,
-                       let message = self?.messagesToPass.first(where: { $0.commandId.lowercased() == commandId.lowercased() })?.message {
-                        self?.messagesToPass.removeAll(where: { $0.commandId.lowercased() == commandId.lowercased() })
-                        self?.remove(message: message)
-                    }
-                }
-            }
-            if !PyrusServiceDesk.multichats || fromPush {
+            if needShowLoading {
+                isLoading = true
                 reloadChat()
             } else {
                 beginTimer()
                 updateChat(chat: chat)
+                if let message = PyrusServiceDesk.messageToSend, message.count > 0 {
+                    send(message, [], newTicket: true)
+                    PyrusServiceDesk.messageToSend = nil
+                }
                 
                 if let messageId,
                    let index = tableMatrix.findIndexPath(messageId: messageId).first {
@@ -123,7 +169,6 @@ extension PSDChatInteractor: PSDChatInteractorProtocol {
                     presenter.doWork(.scrollToRow(indexPath: reversedIndex))
                 }
             }
-            startGettingInfo()
         case .send(message: let message, attachments: let attachments):
             send(message, attachments)
         case .sendRate(rateValue: let rateValue):
@@ -153,6 +198,7 @@ extension PSDChatInteractor: PSDChatInteractorProtocol {
             isOpen = false
             if !PyrusServiceDesk.multichats {
                 stopGettingInfo()
+                PyrusServiceDesk.restartTimer()
             }
             OpusPlayer.shared.stopAllPlay()
         case .viewDidAppear:
@@ -163,7 +209,6 @@ extension PSDChatInteractor: PSDChatInteractorProtocol {
             isScrollButtonHiden = isHidden
             if isHidden {
                 newMessagesCount = 0
-                readChat()
             }
         case .viewDidLayoutSubviews:
             if let messageId,
@@ -175,11 +220,79 @@ extension PSDChatInteractor: PSDChatInteractorProtocol {
                 )
                 presenter.doWork(.scrollToRow(indexPath: reversedIndex))
             }
+        case .viewWillAppear:
+            startGettingInfo()
+        case .sendRatingComment(comment: let comment, rating: let rating):
+            sendRatingComment(ratingComment: comment, rating: rating)
         }
     }
 }
 
 private extension PSDChatInteractor {
+    
+    func sendOperatorCalcCommand(needSync: Bool = true) {
+        guard let chat else { return }
+        let params = TicketCommandParams(ticketId: chat.chatId, appId: PyrusServiceDesk.currentClientId ?? PyrusServiceDesk.clientId, userId: PyrusServiceDesk.currentUserId ?? PyrusServiceDesk.customUserId)
+        let command = TicketCommand(commandId: UUID().uuidString, type: .calcOperatorTime, appId: PyrusServiceDesk.currentClientId, userId: PyrusServiceDesk.currentUserId ?? PyrusServiceDesk.customUserId, params: params)
+        PyrusServiceDesk.repository.add(command: command, needSync: needSync)
+    }
+
+    func addObservers() {
+        NotificationCenter.default.addObserver(self, selector: #selector(updateChats), name: PyrusServiceDesk.chatsUpdateNotification, object: nil)
+        NotificationCenter.default.addObserver(forName: SyncManager.commandsResultNotification, object: nil, queue: .main) { [weak self] notification in
+            DispatchQueue.main.async { [weak self] in
+                if let data = notification.userInfo?["tickets"] as? Data {
+                    do {
+                        let decoder = JSONDecoder()
+                        let ticketResults = try decoder.decode([TicketCommandResult].self, from: data)
+                        self?.updateMessages(commandsResult: ticketResults)
+                    } catch { }
+                }
+            }
+        }
+        NotificationCenter.default.addObserver(self, selector: #selector(showConnectionError), name: SyncManager.connectionErrorNotification, object: nil)
+        NotificationCenter.default.addObserver(forName: .refreshNotification, object: nil, queue: .main) { [weak self] notification in
+            DispatchQueue.main.async { [weak self] in
+                if let userInfo = notification.userInfo,
+                   let commandId = userInfo["commandId"] as? String,
+                   let message = self?.messagesToPass.first(where: { $0.commandId.lowercased() == commandId.lowercased() })?.message {
+                    self?.refresh(message: message, changedToSent: false)
+                }
+            }
+        }
+        NotificationCenter.default.addObserver(forName: .removeMesssageNotification, object: nil, queue: .main) { [weak self] notification in
+            DispatchQueue.main.async { [weak self] in
+                if let userInfo = notification.userInfo,
+                   let commandId = userInfo["commandId"] as? String,
+                   let message = self?.messagesToPass.first(where: { $0.commandId.lowercased() == commandId.lowercased() })?.message {
+                    self?.messagesToPass.removeAll(where: { $0.commandId.lowercased() == commandId.lowercased() })
+                    self?.remove(message: message)
+                }
+            }
+        }
+        
+        NotificationCenter.default.addObserver(forName: SyncManager.updateOperatorTimeNotification, object: nil, queue: .main) { [weak self] notification in
+            DispatchQueue.main.async { [weak self] in
+                if let userInfo = notification.userInfo,
+                   let ticketId = userInfo["ticketId"] as? Int,
+                   let message = userInfo["message"] as? String,
+                   self?.chat?.chatId == ticketId {
+                    self?.hasOperatorTime = true
+                    self?.presenter.doWork(.updateOperatorTime(timeMessage: message))
+                }
+            }
+        }
+        NotificationCenter.default.addObserver(forName: SyncManager.removeOperatorTimeNotification, object: nil, queue: .main) { [weak self] notification in
+            DispatchQueue.main.async { [weak self] in
+                if let userInfo = notification.userInfo,
+                   let ticketId = userInfo["ticketId"] as? Int,
+                   self?.chat?.chatId == ticketId {
+                    self?.hasOperatorTime = false
+                    self?.presenter.doWork(.updateOperatorTime(timeMessage: nil))
+                }
+            }
+        }
+    }
     
     @objc func showConnectionError() {
         DispatchQueue.main.async { [weak self] in
@@ -187,19 +300,55 @@ private extension PSDChatInteractor {
         }
     }
     
-    @objc func updateChats() {
+    @objc func updateChats(fromSync: Bool = true) {
         DispatchQueue.main.async { [weak self] in
             guard let self else { return }
-            let chat = PyrusServiceDesk.chats.first(where: { $0.chatId == self.chat?.chatId })
+            guard !drawTable else {
+                needUpdate = true
+                return
+            }
+            var chat: PSDChat? = nil
+            if PyrusServiceDesk.multichats {
+               chat = PyrusServiceDesk.chats.first(where: { $0.chatId == self.chat?.chatId })
+            } else if let lastChat = PyrusServiceDesk.chats.first {
+                let singleChat = PSDChat(
+                    chatId: lastChat.chatId,
+                    date: lastChat.date ?? Date(),
+                    messages: PyrusServiceDesk.allMessages
+                )
+                singleChat.isActive = lastChat.isActive
+                singleChat.showRating = lastChat.showRating
+                singleChat.showRatingText = lastChat.showRatingText
+                singleChat.userId = lastChat.userId ?? PyrusServiceDesk.customUserId ?? PyrusServiceDesk.userId
+                singleChat.lastReadedCommentId = lastChat.lastReadedCommentId
+                singleChat.createdAt = lastChat.createdAt
+                singleChat.lastMessageDate = lastChat.lastMessageDate
+                singleChat.lastComment = PyrusServiceDesk.allMessages.last
+                
+                chat = singleChat
+            } else if !isLoading || fromSync {
+                chat = PSDChat(chatId: 0, date: Date(), messages: [])
+                chat?.isActive = false
+            }
             if let chat {
+                if isOpen,
+                   !PyrusServiceDesk.multichats,
+                   chat.lastComment?.messageId != self.chat?.lastComment?.messageId,
+                   chat.lastComment?.isSupportMessage ?? false {
+                    readChat()
+                }
+                
                 updateChatInfo()
                 if chat.messages.count > self.chat?.messages.count ?? 0,
-                   chat.messages.last?.owner.authorId != PyrusServiceDesk.authorId,
+                   chat.messages.last?.owner?.authorId != PyrusServiceDesk.authorId,
                    isOpen {
                     self.chat = chat
                     readChat()
                     if !isScrollButtonHiden {
                         newMessagesCount += 1
+                    }
+                    if chat.messages.last?.isSupportMessage ?? false || chat.messages.last?.isSystemMessage ?? false {
+                        presenter.doWork(.updateOperatorTime(timeMessage: nil))
                     }
                 } else {
                     self.chat = chat
@@ -214,21 +363,26 @@ private extension PSDChatInteractor {
                 label.font = CustomizationHelper.systemBoldFont(ofSize: 17)
                 label.text = chat?.subject?.count ?? 0 > 0 ? chat?.subject : "NewTicket".localizedPSD()
                 label.translatesAutoresizingMaskIntoConstraints = false
-                //label.widthAnchor.constraint(equalToConstant: 200).isActive = true
                 
                 customization?.setChatTitileView(label)
                 presenter.doWork(.reloadTitle)
                 presenter.doWork(.updateTitle(connectionError: !PyrusServiceDesk.syncManager.networkAvailability))
             }
             
-            if firstLoad && !PyrusServiceDesk.multichats || fromPush {
+            if fromPush || !PyrusServiceDesk.multichats && isLoading {
                 isRefresh = true
                 
                 self.updateChat(chat: chat)
+                if let message = PyrusServiceDesk.messageToSend, message.count > 0 {
+                    send(message, [], newTicket: true)
+                    PyrusServiceDesk.messageToSend = nil
+                }
                 readChat()
                 self.isRefresh = false
                 fromPush = false
                 firstLoad = false
+                isLoading = false
+                PyrusServiceDesk.needShowLoading = false
             } else {
                 if messagesToPass.count == 0 && !isRefresh {
                     redrawChat(chat: chat)
@@ -255,8 +409,8 @@ private extension PSDChatInteractor {
     
     func showSendMessageResult(messageToPass: PSDMessage, success: Bool) {
         if success {
-            let _ = PyrusServiceDesk.setLastActivityDate()
-            PyrusServiceDesk.restartTimer()
+            let _ = SyncManager.setLastActivityDate()
+            startGettingInfo()
         }
         
         let newState: messageState = success ? .sent : .cantSend
@@ -292,11 +446,11 @@ private extension PSDChatInteractor {
             PyrusServiceDesk.syncManager.syncGetTickets()
         }
         tableMatrix = [[PSDRowMessage]()] // clean old chat
-        beginTimer()        
+        beginTimer()
     }
     
     func updateChatInfo() {
-        guard let chat, let ticketId = chat.chatId, ticketId != 0 else { return }
+        guard PyrusServiceDesk.multichats, let chat, let ticketId = chat.chatId, ticketId != 0 else { return }
         let userName: String
         if PyrusServiceDesk.customUserId == chat.userId {
             userName = PyrusServiceDesk.userName ?? ""
@@ -322,7 +476,7 @@ private extension PSDChatInteractor {
                 self?.updateChatInfo()
             }
         } else {
-            presenter.doWork(.endLoading)
+//            presenter.doWork(.endLoading)
             updateButtons()
         }
         if messageId == nil {
@@ -331,7 +485,9 @@ private extension PSDChatInteractor {
     }
     
     private func drawTableWithData() {
+        drawTable = true
         guard gotData else {
+            drawTable = false
             return
         }
         gotData = false
@@ -341,32 +497,40 @@ private extension PSDChatInteractor {
         
         if let chat {
             tableMatrix.create(from: chat)
-           // presenter.doWork(.updateTableMatrix(matrix: tableMatrix))
             lastMessageFromServer = chat.messages.last
         }
         setLastActivityDate()
         updateButtons()
         presenter.doWork(.drawTableWithData)
+        drawTable = false
+        if needUpdate {
+            updateChats(fromSync: false)
+        }
     }
     
     func readChat() {
+        if !PyrusServiceDesk.multichats {
+            let params = TicketCommandParams(ticketId: chat?.chatId ?? 0, appId: PyrusServiceDesk.currentClientId ?? PyrusServiceDesk.clientId, userId: PyrusServiceDesk.currentUserId ?? PyrusServiceDesk.customUserId, messageId: nil)
+            let command = TicketCommand(commandId: UUID().uuidString, type: .readTicket, appId: PyrusServiceDesk.currentClientId ?? PyrusServiceDesk.clientId, userId:  PyrusServiceDesk.currentUserId ?? PyrusServiceDesk.customUserId, params: params)
+            PyrusServiceDesk.repository.add(command: command)
+            return
+        }
+        
+        
         let ticketId = chat?.chatId ?? 0
         let lastReadedLocalId = max(chat?.lastReadedCommentId ?? 0, PyrusServiceDesk.repository.lastLocalReadCommentId(ticketId: chat?.chatId) ?? 0)
 
         if lastReadedLocalId < Int(chat?.lastComment?.messageId ?? "") ?? 0 {
-            let userId = PyrusServiceDesk.multichats ? PyrusServiceDesk.currentUserId : PyrusServiceDesk.customUserId
-            let params = TicketCommandParams(ticketId: ticketId, appId: PyrusServiceDesk.currentClientId ?? PyrusServiceDesk.clientId, userId: userId, messageId: Int(chat?.messages.last?.messageId ?? ""))
-            let command = TicketCommand(commandId: UUID().uuidString, type: .readTicket, appId: PyrusServiceDesk.currentClientId ?? PyrusServiceDesk.clientId, userId: userId, params: params)
+            let messageId = Int(chat?.messages.last?.messageId ?? "")
+            let params = TicketCommandParams(ticketId: ticketId, appId: PyrusServiceDesk.currentClientId ?? PyrusServiceDesk.clientId, userId: PyrusServiceDesk.currentUserId ?? PyrusServiceDesk.customUserId, messageId: messageId)
+            let command = TicketCommand(commandId: UUID().uuidString, type: .readTicket, appId: PyrusServiceDesk.currentClientId ?? PyrusServiceDesk.clientId, userId:  PyrusServiceDesk.currentUserId ?? PyrusServiceDesk.customUserId, params: params)
             PyrusServiceDesk.repository.add(command: command)
-            DispatchQueue.main.async {
-                PyrusServiceDesk.syncManager.syncGetTickets()
-            }
         }
     }
     
-    private func setLastActivityDate(){
+    private func setLastActivityDate() {
         var lastDate: Date?
-        if let lastMessage = self.lastMessageFromServer, lastMessage.owner.personId == PyrusServiceDesk.userId {
+        if let lastMessage = self.lastMessageFromServer, lastMessage.owner?.personId == PyrusServiceDesk.userId {
             lastDate = lastMessage.date
         } else{
             lastDate = self.tableMatrix.lastUserMessageDate()
@@ -374,8 +538,7 @@ private extension PSDChatInteractor {
         guard let date = lastDate else {
             return
         }
-        if PyrusServiceDesk.setLastActivityDate(date) {
-            PyrusServiceDesk.restartTimer()
+        if SyncManager.setLastActivityDate(date) {
             startGettingInfo()
         }
     }
@@ -388,53 +551,76 @@ private extension PSDChatInteractor {
     }
     
     func redrawChat(chat: PSDChat?) {
-        if let chat = chat {
-            UnreadMessageManager.removeLastComment()
-            needShowRating = chat.showRating
-            showRateIfNeed()
-            
-            self.tableMatrix.complete(from: chat, startMessage: lastMessageFromServer) { (hasChanges: Bool) in
-                DispatchQueue.main.async {
-                    self.presenter.doWork(.removeNoConnectionView)
-                    self.lastMessageFromServer = chat.messages.last
-                    self.setLastActivityDate()
-                    
-                    if hasChanges {
-                        self.presenter.doWork(.updateRows)
-                        self.updateButtons()
+        tableMatrixQueue.async { [weak self] in
+            guard let self else { return }
+            if let chat = chat {
+                UnreadMessageManager.removeLastComment()
+                needShowRating = chat.showRating
+                showRateIfNeed()
+                
+                self.tableMatrix.complete(from: chat, startMessage: lastMessageFromServer) { [weak self] (hasChanges: Bool) in
+                    DispatchQueue.main.async { [weak self] in
+                        guard let self else { return }
+                        self.presenter.doWork(.removeNoConnectionView)
+                        self.lastMessageFromServer = chat.messages.last
+                        self.setLastActivityDate()
+                        
+                        if hasChanges {
+                            self.presenter.doWork(.updateRows)
+                            self.updateButtons()
+                        }
+                    }
+                }
+                
+                DispatchQueue.main.async { [weak self] in
+                    self?.updateButtons()
+                    if self?.isRefreshing ?? false {
+                        self?.presenter.doWork(.endRefreshing)
+                        self?.isRefreshing = false
                     }
                 }
             }
-            
-            DispatchQueue.main.async { [weak self] in
-                self?.updateButtons()
-                if self?.isRefreshing ?? false {
-                    self?.presenter.doWork(.endRefreshing)
-                    self?.isRefreshing = false
-                }
-            }
         }
+        
     }
     
     func updateButtons() {
         presenter.doWork(.updateButtons(buttons: PSDChat.draftAnswers(tableMatrix)))
     }
     
+    func removeLastMessage() {
+        tableMatrix[tableMatrix.count - 1].removeLast()
+        presenter.doWork(.reloadAll(animated: true))
+    }
+    
 }
 
 private extension PSDChatInteractor {
-    func send(_ message: String, _ attachments: [PSDAttachment]) {
+    func send(_ message: String, _ attachments: [PSDAttachment], newTicket: Bool = false) {
         let newMessage = PSDObjectsCreator.createMessage(message, attachments: attachments, ticketId: chat?.chatId ?? 0, userId: chat?.userId ?? PyrusServiceDesk.customUserId ?? PyrusServiceDesk.userId)
         if PyrusServiceDesk.multichats {
             if chat?.chatId ?? 0 == 0 {
                 let nextId = PSDObjectsCreator.getNextLocalId()
                 newMessage.requestNewTicket = true
                 chat?.chatId = nextId
-                RateManager.incrementActionCount()
+//                RateManager.incrementActionCount()
             }
             if let ticketId = chat?.chatId {
                 newMessage.ticketId = ticketId
             }
+        } else {
+            let requestNewTicket = !(chat?.isActive ?? false) || newTicket
+            newMessage.requestNewTicket = requestNewTicket
+            if requestNewTicket {
+                let nextId = PSDObjectsCreator.getNextLocalId()
+                chat?.chatId = nextId
+                chat?.isActive = true
+            }
+            
+            if let ticketId = chat?.chatId {
+                newMessage.ticketId = ticketId
+            }
+            
         }
         prepareMessageForDrawing(newMessage)
         messageToSent = newMessage
@@ -442,17 +628,34 @@ private extension PSDChatInteractor {
         newMessage.commandId = UUID().uuidString
         newMessage.userId = PyrusServiceDesk.multichats ? PyrusServiceDesk.currentUserId : PyrusServiceDesk.customUserId
         newMessage.appId = PyrusServiceDesk.currentClientId ?? PyrusServiceDesk.clientId
+        if !hasOperatorTime && (newMessage.requestNewTicket || SyncManager.getLastActivityDuration() > SyncManager.PSD_LAST_ACTIVITY_INTERVAL_HOUR) {
+            hasOperatorTime = true
+            sendOperatorCalcCommand(needSync: false)
+        }
         PSDMessageSend.pass(newMessage, delegate: self)
     }
     
     func sendRate(_ rateValue: Int) {
+        presenter.doWork(.showRatingComment(ratingText: chat?.showRatingText, rating: rateValue))
         let newMessage = PSDObjectsCreator.createMessage(rating: rateValue, ticketId: chat?.chatId ?? 0, userId: chat?.userId ?? PyrusServiceDesk.customUserId)
-        prepareMessageForDrawing(newMessage)
-        messageToSent = newMessage
         newMessage.commandId = UUID().uuidString
         newMessage.userId = PyrusServiceDesk.multichats ? PyrusServiceDesk.currentUserId : PyrusServiceDesk.customUserId
         newMessage.appId = PyrusServiceDesk.currentClientId ?? PyrusServiceDesk.clientId
-        presenter.doWork(.addNewRow)
+        if CustomizationHelper.ratingSettings.type != RatingType.text.rawValue {
+            prepareMessageForDrawing(newMessage)
+            messageToSent = newMessage
+            presenter.doWork(.addNewRow)
+        } else {
+            removeLastMessage()
+        }
+        PSDMessageSend.pass(newMessage, delegate: self)
+    }
+    
+    func sendRatingComment(ratingComment: String?, rating: Int) {
+        let newMessage = PSDObjectsCreator.createMessage(ratingComment: ratingComment, rating: rating, ticketId: chat?.chatId ?? 0, userId: chat?.userId ?? PyrusServiceDesk.customUserId ?? PyrusServiceDesk.userId)
+        newMessage.commandId = UUID().uuidString
+        newMessage.userId = PyrusServiceDesk.currentUserId ?? PyrusServiceDesk.customUserId ?? PyrusServiceDesk.userId
+        newMessage.appId = PyrusServiceDesk.currentClientId ?? PyrusServiceDesk.clientId
         PSDMessageSend.pass(newMessage, delegate: self)
     }
     
@@ -495,7 +698,7 @@ private extension PSDChatInteractor {
         } else {
             self.tableMatrix[index].append(dataForRow)
         }
-        let scrollToBottom = dataForRow.message.owner.personId == PyrusServiceDesk.userId
+        let scrollToBottom = dataForRow.message.owner?.personId == PyrusServiceDesk.userId
 //        presenter.doWork(.addRow(scrollsToBottom: scrollToBottom))
         presenter.doWork(.addMessage(scrollsToBottom: scrollToBottom, message: dataForRow))
     }
@@ -509,8 +712,14 @@ private extension PSDChatInteractor {
     }
     
     func sendAgainMessage(indexPath: IndexPath) {
-        if let message = self.getMessage(at: indexPath) {
-            message.userId = PyrusServiceDesk.multichats ? PyrusServiceDesk.currentClientId : PyrusServiceDesk.customUserId
+        let reversedSection = tableMatrix.count - indexPath.section - 1
+        let reversedIndex =
+        IndexPath(
+            row: tableMatrix[reversedSection].count - indexPath.row - 1,
+            section: reversedSection
+        )
+        if let message = self.getMessage(at: reversedIndex) {
+            message.userId = PyrusServiceDesk.currentUserId ?? PyrusServiceDesk.customUserId
             message.appId = PyrusServiceDesk.currentClientId ?? PyrusServiceDesk.clientId
             message.ticketId = chat?.chatId ?? 0
             message.state = .sending
@@ -520,7 +729,13 @@ private extension PSDChatInteractor {
     }
     ///Delete message from self and from storage
     func deleteMessage(indexPath: IndexPath) {
-        if let message = self.getMessage(at: indexPath) {
+        let reversedSection = tableMatrix.count - indexPath.section - 1
+        let reversedIndex =
+        IndexPath(
+            row: tableMatrix[reversedSection].count - indexPath.row - 1,
+            section: reversedSection
+        )
+        if let message = self.getMessage(at: reversedIndex) {
             remove(message: message)
         }
     }
@@ -647,15 +862,6 @@ private extension PSDChatInteractor {
 }
 
 extension PSDChatInteractor {
-    public static let PSD_LAST_ACTIVITY_INTEVAL_MINUTE = TimeInterval(90)
-    public static let PSD_LAST_ACTIVITY_INTEVAL_5_MINUTES = TimeInterval(300)
-    public static let PSD_LAST_ACTIVITY_INTEVAL_HOUR = TimeInterval(3600)
-    public static let PSD_LAST_ACTIVITY_INTEVAL_3_DAYS = TimeInterval(3*24*60*60)
-    public static let REFRESH_TIME_INTEVAL_5_SECONDS = TimeInterval(5)
-    public static let REFRESH_TIME_INTEVAL_15_SECONDS = TimeInterval(15)
-    public static let REFRESH_TIME_INTEVAL_1_MINUTE = TimeInterval(60)
-    public static let REFRESH_TIME_INTEVAL_3_MINUTES = TimeInterval(180)
-    private static let PSD_LAST_ACTIVITY_KEY = "PSDLastActivityDate"
     
     private func stopGettingInfo() {
         if timer != nil {
@@ -664,25 +870,10 @@ extension PSDChatInteractor {
         }
     }
     
-    static func userLastActivityKey() -> String{
-        return PSD_LAST_ACTIVITY_KEY + "_" + PyrusServiceDesk.userId
-    }
-    
-    private static func getTimerInerval() -> TimeInterval {
-        if let pyrusUserDefaults = PSDMessagesStorage.pyrusUserDefaults(), let date = pyrusUserDefaults.object(forKey: PSDChatInteractor.userLastActivityKey()) as? Date{
-            let difference = Date().timeIntervalSince(date)
-            if difference <= PSD_LAST_ACTIVITY_INTEVAL_MINUTE {
-                return REFRESH_TIME_INTEVAL_5_SECONDS
-            } else if difference <= PSD_LAST_ACTIVITY_INTEVAL_5_MINUTES {
-                return REFRESH_TIME_INTEVAL_15_SECONDS
-            }
-        }
-        return REFRESH_TIME_INTEVAL_1_MINUTE
-    }
-    
     func startGettingInfo() {
         stopGettingInfo()
-        timer = Timer.scheduledTimer(timeInterval: PSDChatInteractor.getTimerInerval(), target: self, selector: #selector(updateTable), userInfo:nil , repeats: false)
+        let timeInterval = SyncManager.getTimerInerval() ?? SyncManager.REFRESH_TIME_INTERVAL_3_MINUTES
+        timer = Timer.scheduledTimer(timeInterval: timeInterval, target: self, selector: #selector(updateTable), userInfo: nil, repeats: false)
     }
     
     @objc private func updateTable() {

@@ -116,7 +116,6 @@ private extension SearchViewController {
     func setupEmptyChats() {
         let chatsImage = UIImageView(image: UIImage.PSDImage(name: "search"))
         emptyChatsView.isHidden = true
-        let mainColor = customization?.barButtonTintColor ?? .darkAppColor
        
         emptyChatsInfo.setTitle("SearchChats".localizedPSD(), for: .normal)
         emptyChatsInfo.titleLabel?.font = CustomizationHelper.systemFont(ofSize: 17)
@@ -173,13 +172,13 @@ private extension SearchViewController {
         
         searchNavigationView.addSubview(searchBar)
         searchBar.translatesAutoresizingMaskIntoConstraints = false
-        searchBar.tintColor = customization?.themeColor
+        searchBar.tintColor = .appColor
         searchBar.delegate = self
 //        searchBar.showsCancelButton = true
         searchBar.isUserInteractionEnabled = true
         
         let cancelButton = UIButton(type: .system)
-        cancelButton.tintColor = customization?.themeColor
+        cancelButton.tintColor = .appColor
         cancelButton.setTitle("Cancel".localizedPSD(), for: .normal)
         cancelButton.translatesAutoresizingMaskIntoConstraints = false
         cancelButton.titleLabel?.font = .systemFont(ofSize: 17)
