@@ -11,6 +11,7 @@ import com.pyrus.pyrusservicedesk._ref.utils.MILLISECONDS_IN_MINUTE
 import com.pyrus.pyrusservicedesk._ref.utils.MILLISECONDS_IN_SECOND
 import com.pyrus.pyrusservicedesk._ref.utils.log.PLog
 import com.pyrus.pyrusservicedesk.sdk.repositories.LocalTicketsStore
+import com.pyrus.pyrusservicedesk.sdk.repositories.data_base.data.CommentInfo
 import com.pyrus.pyrusservicedesk.sdk.repositories.data_base.data.TicketEntity
 import com.pyrus.pyrusservicedesk.sdk.repositories.data_base.data.support.CommentWithAttachmentsEntity
 import kotlinx.coroutines.CoroutineExceptionHandler
@@ -147,17 +148,27 @@ internal class LiveUpdates() {
         coreScope.launch(Dispatchers.Main) {
             subscriber.onNewReply(
                 hasNewComments,
-                if (hasNewComments) lastTicket.lastComment?.body else null,
-                if (hasNewComments && lastTicket.lastComment?.lastAttachmentName != null) 1 else 0, //TODO kate check if we need more then 1 attachment
-                if (hasNewComments && lastTicket.lastComment?.lastAttachmentName != null) listOf(
-                    lastTicket.lastComment.lastAttachmentName
-                )
-                else null,
-                if (hasNewComments && lastTicket.lastComment?.creationDate != null) lastTicket.lastComment.creationDate else 0
+                getLastCommentText(hasNewComments, lastTicket),
+                getLastCommentAttachmentsCount(hasNewComments, lastTicket),
+                getLastCommentAttachments(hasNewComments,lastTicket),
+                getUtcTime(hasNewComments, lastTicket)
             )
         }
     }
 
+    private fun getLastCommentText(hasNewComments: Boolean, lastTicket: TicketEntity) =
+        if (hasNewComments) lastTicket.lastComment?.body else null
+
+    private fun getLastCommentAttachmentsCount(hasNewComments: Boolean, lastTicket: TicketEntity) =
+        if (hasNewComments && lastTicket.lastComment?.lastAttachmentName != null) 1 else 0
+
+    private fun getLastCommentAttachments(hasNewComments: Boolean, lastTicket: TicketEntity) =
+        if (hasNewComments && lastTicket.lastComment?.lastAttachmentName != null)
+            listOf(lastTicket.lastComment.lastAttachmentName)
+        else null
+
+    private fun getUtcTime(hasNewComments: Boolean, lastTicket: TicketEntity) =
+        if (hasNewComments && lastTicket.lastComment?.creationDate != null) lastTicket.lastComment.creationDate else 0
 
     private fun getLastMyComment(
         lastTicket: TicketEntity?,
@@ -178,12 +189,16 @@ internal class LiveUpdates() {
             && lastMyCommentId != null
             && lastMyCommentId < commentId
             && commentId > 0
-            && (!lastTicket.lastComment.body.isNullOrBlank() || !lastTicket.lastComment.lastAttachmentName.isNullOrBlank())
+            && !lastTicket.lastComment.isEmptyComment()
 
     }
 
+    fun CommentInfo.isEmptyComment(): Boolean {
+        return this.body.isNullOrBlank() && this.lastAttachmentName.isNullOrBlank()
+    }
+
     companion object {
-        private val TAG = LiveUpdates::class.java.simpleName
+        private const val TAG = "LiveUpdates"
     }
 
 }
