@@ -22,6 +22,7 @@ import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.isActive
 
 private const val TAG = "AutoRefreshFeature"
+private const val NO_UPDATES = -1L
 
 internal class AutoRefreshFeatureFactory(
     private val storeFactory: StoreFactory,
@@ -75,17 +76,19 @@ private class AutoRefreshActor(
             if (isStarted || sdIsOpen)
                 interval to lastActiveTime
             else
-                -1L to -1L
+                NO_UPDATES to NO_UPDATES
         }
             .distinctUntilChanged()
             .flatMapLatest { data ->
-                if (data.first == -1L) {
+                if (data.first == NO_UPDATES) {
                     flow { }
                 }
                 else {
                     flow {
                         while (currentCoroutineContext().isActive) {
                             val interval = liveUpdates.getTicketsUpdateInterval(data.second)
+                            if (interval == NO_UPDATES)
+                                break
                             repository.sync()
                             delay(interval)
                         }
