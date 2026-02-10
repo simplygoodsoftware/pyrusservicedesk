@@ -10,7 +10,9 @@ import com.pyrus.pyrusservicedesk._ref.utils.MILLISECONDS_IN_HOUR
 import com.pyrus.pyrusservicedesk._ref.utils.MILLISECONDS_IN_MINUTE
 import com.pyrus.pyrusservicedesk._ref.utils.MILLISECONDS_IN_SECOND
 import com.pyrus.pyrusservicedesk._ref.utils.log.PLog
+import com.pyrus.pyrusservicedesk.sdk.repositories.LocalTicketsStore
 import com.pyrus.pyrusservicedesk.sdk.repositories.data_base.data.TicketEntity
+import com.pyrus.pyrusservicedesk.sdk.repositories.data_base.data.support.CommentWithAttachmentsEntity
 import kotlinx.coroutines.CoroutineExceptionHandler
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -60,9 +62,10 @@ internal class LiveUpdates() {
         newReplySubscribers.add(subscriber)
         val localTicketsStore = injector().localTicketsStore
         coreScope.launch(Dispatchers.IO) {
-            val lastComment = localTicketsStore.getTickets().lastOrNull()
-            if (lastComment != null && lastComment.isRead != true) {
-                notifyNewReplySubscriber(subscriber, lastComment)
+            val lastTicket = localTicketsStore.getTickets().lastOrNull()
+            val lastMyComment = getLastMyComment(lastTicket, localTicketsStore)
+            if (lastTicket != null && lastTicket.isRead != true) {
+                notifyNewReplySubscriber(subscriber, lastTicket, lastMyComment)
             }
         }
         startUpdates(injector().preferencesManager)
@@ -99,7 +102,9 @@ internal class LiveUpdates() {
             if (getTicketsUpdateInterval(lastActiveTime) != -1L)
                 repository.sync()
             localTicketsStore.getTicketsFlow().collect { tickets ->
-                notifyNewReplySubscribers(tickets.lastOrNull())
+                val lastTicket = tickets.lastOrNull()
+                val lastMyComment = getLastMyComment(lastTicket, localTicketsStore)
+                notifyNewReplySubscribers(lastTicket, lastMyComment)
             }
         }
     }
@@ -121,36 +126,60 @@ internal class LiveUpdates() {
         replayJob?.cancel()
     }
 
-    fun notifyNewReplySubscribers(lastTicket: TicketEntity?) {
+    fun notifyNewReplySubscribers(lastTicket: TicketEntity?, lastMyComment: CommentWithAttachmentsEntity?) {
         newReplySubscribers.forEach {
             coreScope.launch(Dispatchers.IO) {
-                val needRoNotify =
+                val needToNotify =
                     (lastCommentId != lastTicket?.lastComment?.commentId && lastTicket?.isRead == false)
                         || lastTicket?.isRead != replyIsShown
-                if (lastTicket != null && needRoNotify) {
-                    notifyNewReplySubscriber(it, lastTicket)
+                if (lastTicket != null && needToNotify) {
+                    notifyNewReplySubscriber(it, lastTicket, lastMyComment)
                 }
             }
         }
     }
 
-    private fun notifyNewReplySubscriber(subscriber: NewReplySubscriber, lastComment:  TicketEntity) {
-        PLog.d(TAG, "notifyNewReplySubscriber, comment: $lastComment")
-        replyIsShown = lastComment.isRead == true
-        lastCommentId = lastComment.lastComment?.commentId
-        val hasNewComments = lastComment.isRead != true
+    private fun notifyNewReplySubscriber(subscriber: NewReplySubscriber, lastTicket: TicketEntity, lastMyComment: CommentWithAttachmentsEntity?) {
+        PLog.d(TAG, "notifyNewReplySubscriber, comment: $lastTicket")
+        replyIsShown = lastTicket.isRead == true
+        lastCommentId = lastTicket.lastComment?.commentId
+        val hasNewComments = hasNewComments(lastTicket, lastMyComment)
         coreScope.launch(Dispatchers.Main) {
             subscriber.onNewReply(
                 hasNewComments,
-                if (hasNewComments) lastComment.lastComment?.body else null,
-                if (hasNewComments && lastComment.lastComment?.lastAttachmentName != null) 1 else 0, //TODO kate check if we need more then 1 attachment
-                if (hasNewComments && lastComment.lastComment?.lastAttachmentName != null) listOf(
-                    lastComment.lastComment.lastAttachmentName
+                if (hasNewComments) lastTicket.lastComment?.body else null,
+                if (hasNewComments && lastTicket.lastComment?.lastAttachmentName != null) 1 else 0, //TODO kate check if we need more then 1 attachment
+                if (hasNewComments && lastTicket.lastComment?.lastAttachmentName != null) listOf(
+                    lastTicket.lastComment.lastAttachmentName
                 )
                 else null,
-                if (hasNewComments && lastComment.lastComment?.creationDate != null) lastComment.lastComment.creationDate else 0
+                if (hasNewComments && lastTicket.lastComment?.creationDate != null) lastTicket.lastComment.creationDate else 0
             )
         }
+    }
+
+
+    private fun getLastMyComment(
+        lastTicket: TicketEntity?,
+        localTicketsStore: LocalTicketsStore,
+    ): CommentWithAttachmentsEntity? {
+        return lastTicket?.ticketId?.let {
+            localTicketsStore.getTicketWithComments(it)?.comments
+                ?.filter { comment -> comment.comment.isInbound }
+                ?.maxByOrNull { comment -> comment.comment.creationDate }
+        }
+    }
+
+    private fun hasNewComments(lastTicket: TicketEntity, lastMyComment: CommentWithAttachmentsEntity?): Boolean {
+        val commentId = lastTicket.lastComment?.commentId
+        val lastMyCommentId = lastMyComment?.comment?.commentId
+        return lastTicket.isRead != true
+            && commentId != null
+            && lastMyCommentId != null
+            && lastMyCommentId < commentId
+            && commentId > 0
+            && (!lastTicket.lastComment.body.isNullOrBlank() || !lastTicket.lastComment.lastAttachmentName.isNullOrBlank())
+
     }
 
     companion object {
