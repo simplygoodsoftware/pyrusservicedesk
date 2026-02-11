@@ -461,7 +461,7 @@ private class TicketActor(
             idStore.setTicketId(ticketId)
             repository.getFeedFlowByTicketIdFlow(user, idStore.ticketIdFlow)
                 .map {
-                    if (it != null && !it.isRead && it.comments.lastOrNull()?.isSupport == true) {
+                    if (it != null && !it.isRead && it.comments.lastOrNull()?.isSupport == true && it.comments.lastOrNull()?.isSystem == false) {
                         systemMessageStore.setNecessityTimeSystemMessage(ticketId, false)
                     }
                     Message.Inner.CommentsUpdated(it, welcomeMessage)
