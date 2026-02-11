@@ -241,6 +241,7 @@ internal class DiInjector(
         localTicketsStore = localTicketsStore,
         commandsStore = localCommandsStore,
         systemMessageStore = systemMessageStore,
+        idStore = idStore,
     )
 
     val ticketsFeatureFactory = TicketsFeatureFactory(
