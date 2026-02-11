@@ -32,10 +32,13 @@ import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.cancel
+import kotlinx.coroutines.cancelChildren
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.newSingleThreadContext
 import kotlinx.coroutines.withContext
+import java.util.concurrent.ExecutorService
 import java.util.concurrent.LinkedBlockingQueue
 import java.util.concurrent.atomic.AtomicBoolean
 import java.util.concurrent.atomic.AtomicLong
@@ -56,9 +59,11 @@ internal class Synchronizer(
     private val preferences: Preferences,
 ) : CoroutineScope {
 
+    @OptIn(DelicateCoroutinesApi::class, ExperimentalCoroutinesApi::class)
+    private val threadContext = newSingleThreadContext(TAG)
     @DelicateCoroutinesApi
     @ExperimentalCoroutinesApi
-    override val coroutineContext: CoroutineContext = newSingleThreadContext(TAG) +
+    override val coroutineContext: CoroutineContext = threadContext +
         SupervisorJob() +
         CoroutineExceptionHandler { _, throwable ->
             throwable.printStackTrace()
@@ -74,6 +79,32 @@ internal class Synchronizer(
     private val failDelay = FailDelay()
 
     private val lastSyncTime = AtomicLong(0)
+
+    init {
+
+        val threads = Thread.getAllStackTraces().keys
+
+        Log.d("THREAD_DEBUG", "=".repeat(50))
+        Log.d("THREAD_DEBUG", "ВСЕГО ПОТОКОВ: ${threads.size}")
+        Log.d("THREAD_DEBUG", "=".repeat(50))
+
+        threads.sortedBy { it.name }.forEach { thread ->
+            Log.d(
+                "THREAD_DEBUG",
+                "[${thread.id}] ${thread.name} - ${thread.state} - ${thread.priority}"
+            )
+        }
+    }
+
+
+    @OptIn(DelicateCoroutinesApi::class, ExperimentalCoroutinesApi::class)
+    fun close() {
+        coroutineContext.cancelChildren()
+        coroutineContext.cancel()
+
+        (threadContext.executor as? ExecutorService)?.shutdown()
+        threadContext.close()
+    }
 
 
     /**
