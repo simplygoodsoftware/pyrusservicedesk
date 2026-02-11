@@ -91,8 +91,8 @@ internal sealed interface CommandParamsDto {
     @JsonClass(generateAdapter = true)
     data class CalcOperatorTime(
         @Json(name = "ticket_id") val ticketId: Long,
-        @Json(name = "user_id") val userId: String?,// TODO kate ?
-        @Json(name = "app_id") val appId: String,// TODO kate ?
+        @Json(name = "user_id") val userId: String?,
+        @Json(name = "app_id") val appId: String,
     ) : CommandParamsDto  {
         override val commandType = CommandsParamsType.CalcOperatorTime
     }

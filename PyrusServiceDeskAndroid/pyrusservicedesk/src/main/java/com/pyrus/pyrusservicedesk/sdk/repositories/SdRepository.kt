@@ -1,7 +1,6 @@
 package com.pyrus.pyrusservicedesk.sdk.repositories
 
 import android.net.Uri
-import android.util.Log
 import androidx.core.net.toFile
 import com.pyrus.pyrusservicedesk._ref.data.Attachment
 import com.pyrus.pyrusservicedesk._ref.data.FullTicket
