@@ -486,7 +486,7 @@ internal class SdRepository(
 
     suspend fun sendCalcOperatorTime(ticketId: Long): Try<TicketCommandResultDto>? { //TODO kate for multichat
         val instanceId = accountStore.getAccount().getInstanceId()
-        val user = accountStore.getAccount().getUsers().find { it.userId == instanceId } ?: return null
+        val user = accountStore.getAccount().getUsers().firstOrNull() ?: return null
         val command = commandsStore.createCalcOperatorTimeCommand(user, ticketId, instanceId)
         return synchronizer.syncCommand(command)
     }
