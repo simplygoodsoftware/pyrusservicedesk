@@ -36,6 +36,7 @@ import com.pyrus.pyrusservicedesk.sdk.repositories.data_base.data.support.Commen
 import com.pyrus.pyrusservicedesk.sdk.repositories.data_base.data.support.TicketWithComment
 import com.pyrus.pyrusservicedesk.sdk.repositories.data_base.data.support.TicketWithComments
 import com.pyrus.pyrusservicedesk.sdk.sync.CommandParamsDto.CommandsParamsType
+import com.pyrus.pyrusservicedesk.sdk.sync.CommandParamsDto.CommandsParamsType.CalcOperatorTime
 import com.pyrus.pyrusservicedesk.sdk.sync.SyncRequest
 import com.pyrus.pyrusservicedesk.sdk.sync.TicketCommandType.CreateComment
 import com.pyrus.pyrusservicedesk.sdk.sync.TicketCommandType.MarkTicketAsRead
@@ -285,6 +286,7 @@ internal class RepositoryMapper(
             isRead = isRead,
             ratingSettings = ratingSettings,
             welcomeMessage = welcomeMessage,
+            operatorTimeMessage = null,
         )
     }
 
@@ -300,6 +302,7 @@ internal class RepositoryMapper(
         rating = commentEntity.comment.rating,
         author = commentEntity.comment.author?.let { map(account, it) },
         isSending = false,
+        isSystem = commentEntity.comment.isSystem,
     )
 
     fun map(commandEntity: CommandWithAttachmentsEntity): Comment = Comment(
@@ -313,7 +316,8 @@ internal class RepositoryMapper(
         creationTime = commandEntity.command.creationTime,
         rating = commandEntity.command.rating,
         author = null,
-        isSending = !commandEntity.command.isError
+        isSending = !commandEntity.command.isError,
+        isSystem = false,
     )
 
     fun map(attachmentEntity: LocalAttachmentEntity) : Attachment = Attachment(
@@ -468,6 +472,25 @@ internal class RepositoryMapper(
                 ratingComment = null,
                 extraFields = null,
             )
+
+            is SyncRequest.Command.CalcOperatorTime -> CommandEntity(
+                    isError = isError,
+                    localId = command.localId,
+                    commandType = CalcOperatorTime.ordinal,
+                    commandId = command.commandId,
+                    userId = command.userId ?: instanceId,
+                    appId = command.appId,
+                    creationTime = command.creationTime,
+                    requestNewTicket = null,
+                    ticketId = command.ticketId,
+                    commentId = null,
+                    comment = null,
+                    rating = null,
+                    token = null,
+                    tokenType = null,
+                    ratingComment = null,
+                    extraFields = null,
+                )
         }
         val attachments = when (command) {
             is SyncRequest.Command.CreateComment -> command.attachments?.map {
@@ -476,6 +499,7 @@ internal class RepositoryMapper(
 
             is SyncRequest.Command.MarkTicketAsRead -> null
             is SyncRequest.Command.SetPushToken -> null
+            is SyncRequest.Command.CalcOperatorTime -> null
         }
 
 
@@ -542,6 +566,7 @@ internal class RepositoryMapper(
             isRead = true,
             ratingSettings = null,
             welcomeMessage = welcomeMessage,
+            operatorTimeMessage = null,
         )
     }
 
@@ -551,6 +576,7 @@ internal class RepositoryMapper(
         lastTicket: FullTicket,
         account: Account,
         userId: String,
+        operatorResponseTimeMessage: String?,
     ): FullTicket {
         val comments = ticketsList
             .flatMap { it.comments }
@@ -565,6 +591,7 @@ internal class RepositoryMapper(
         val calendar = Calendar.getInstance()
         calendar.timeInMillis = comments.lastOrNull()?.creationTime ?: now.timeInMillis
         val duration = now.hoursFrom(calendar)
+        val operatorTimeMessage = if (lastTicket.isActive) operatorResponseTimeMessage else null
         return FullTicket(
             subject = lastTicket.subject,
             comments = comments,
@@ -577,6 +604,7 @@ internal class RepositoryMapper(
             isRead = isRead,
             ratingSettings = lastTicket.ratingSettings,
             welcomeMessage = lastTicket.welcomeMessage,
+            operatorTimeMessage = operatorTimeMessage,
         )
     }
 

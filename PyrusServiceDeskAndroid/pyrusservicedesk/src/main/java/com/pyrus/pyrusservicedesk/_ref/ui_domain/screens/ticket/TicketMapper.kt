@@ -35,7 +35,13 @@ internal object TicketMapper {
         is State.Content -> Model(
             inputText = state.inputText,
             sendEnabled = state.sendEnabled,
-            comments = state.ticket?.let { mapComments(it, state.welcomeMessage, state.previousTicketLastCommentId) },
+            comments = state.ticket?.let {
+                mapComments(
+                    it,
+                    state.welcomeMessage,
+                    state.previousTicketLastCommentId
+                )
+            },
             isLoading = false,
             showNoConnectionError = false,
             isRefreshing = state.isLoading,
@@ -62,6 +68,7 @@ internal object TicketMapper {
                 )
             },
             showRating = state.ticket?.showRating == true,
+            operatorTimeMessage = state.ticket?.operatorTimeMessage,
         )
         State.Loading -> Model(
             inputText = "",
@@ -88,6 +95,7 @@ internal object TicketMapper {
             type = null,
             ratingTextValues = null,
             showRating = false,
+            operatorTimeMessage = null,
         )
         State.Error -> Model(
             inputText = "",
@@ -114,6 +122,7 @@ internal object TicketMapper {
             type = null,
             ratingTextValues = null,
             showRating = false,
+            operatorTimeMessage = null,
         )
     }
 
@@ -227,6 +236,11 @@ internal object TicketMapper {
                         showAvatar = showAvatar,
                         showAuthorName = showAuthorName
                     )
+
+                    is CommentEntry.Comment.CommentSystemText -> current.copy(
+                        showAvatar = false,
+                        showAuthorName = false,
+                    )
                 }
                 entriesWithDates[i] = updatedEntry
             }
@@ -332,8 +346,12 @@ internal object TicketMapper {
         val avatarUrl = if (comment.isSupport) orgLogoUrl else null
 //        val avatarUrl = comment.author?.avatarUrl ?: if (comment.isSupport) orgLogoUrl else null
 
-        if (!body.isNullOrBlank()) {
+        if (!body.isNullOrBlank() && !comment.isSystem) {
             entries += toTextEntry(comment.body, comment, status, avatarUrl)
+        }
+
+        if (!body.isNullOrBlank() && comment.isSystem) {
+            entries += toSystemTextEntry(comment.body, comment, status, avatarUrl)
         }
 
         attachments?.forEach { attach ->
@@ -353,6 +371,33 @@ internal object TicketMapper {
     ): CommentEntry.Comment.CommentText {
         val entryText = commentBody.cleanTags(removeLinkTag = false)
         return CommentEntry.Comment.CommentText(
+            creationTime = comment.creationTime,
+            entryId = "${comment.persistentId}",
+            id = comment.id,
+            isInbound = comment.isInbound,
+            hasError = status == Status.Error,
+            isLocal = comment.isLocal,
+            isWelcomeMessage = false,
+            timeText = TextProvider.Date(comment.creationTime, R.string.psd_time_format),
+            status = status,
+            authorName = getAuthorName(comment),
+            authorKey = getAuthorKey(comment),
+            showAuthorName = false,
+            avatarUrl = avatarUrl,
+            showAvatar = false,
+            isSupport = comment.isSupport,
+            text = entryText
+        )
+    }
+
+    private fun toSystemTextEntry(
+        commentBody: String,
+        comment: Comment,
+        status: Status,
+        avatarUrl: String?
+    ): CommentEntry.Comment.CommentSystemText {
+        val entryText = commentBody.cleanTags(removeLinkTag = false)
+        return CommentEntry.Comment.CommentSystemText(
             creationTime = comment.creationTime,
             entryId = "${comment.persistentId}",
             id = comment.id,

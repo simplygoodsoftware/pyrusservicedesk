@@ -15,6 +15,7 @@ import com.pyrus.pyrusservicedesk._ref.ui_domain.screens.ticket.record.AudioReco
 import com.pyrus.pyrusservicedesk._ref.utils.AudioWrapper
 import com.pyrus.pyrusservicedesk._ref.utils.ConfigUtils
 import com.pyrus.pyrusservicedesk._ref.utils.GetTicketsError
+import com.pyrus.pyrusservicedesk._ref.utils.MILLISECONDS_IN_HOUR
 import com.pyrus.pyrusservicedesk._ref.utils.RequestUtils.getFileUrl
 import com.pyrus.pyrusservicedesk._ref.utils.Try2
 import com.pyrus.pyrusservicedesk._ref.utils.isAudio
@@ -39,6 +40,7 @@ import com.pyrus.pyrusservicedesk.sdk.repositories.DraftRepository
 import com.pyrus.pyrusservicedesk.sdk.repositories.LocalCommandsStore
 import com.pyrus.pyrusservicedesk.sdk.repositories.LocalTicketsStore
 import com.pyrus.pyrusservicedesk.sdk.repositories.SdRepository
+import com.pyrus.pyrusservicedesk.sdk.repositories.SystemMessageStore
 import com.pyrus.pyrusservicedesk.sdk.repositories.UserInternal
 import com.pyrus.pyrusservicedesk.sdk.sync.TicketCommandType
 import com.pyrus.pyrusservicedesk.sdk.updates.PreferencesManager
@@ -52,6 +54,7 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.sample
 import kotlinx.coroutines.withContext
 import java.io.File
+import java.util.Calendar
 import java.util.UUID
 
 internal class TicketFeatureFactory(
@@ -66,6 +69,7 @@ internal class TicketFeatureFactory(
     private val audioWrapper: AudioWrapper,
     private val localTicketsStore: LocalTicketsStore,
     private val commandsStore: LocalCommandsStore,
+    private val systemMessageStore: SystemMessageStore,
 ) {
 
     fun create(
@@ -93,6 +97,7 @@ internal class TicketFeatureFactory(
                 audioWrapper = audioWrapper,
                 localTicketsStore = localTicketsStore,
                 commandsStore = commandsStore,
+                systemMessageStore = systemMessageStore,
             ).adaptCast(),
             initialEffects = listOf(
                 Effect.Inner.FeedFlow,
@@ -103,7 +108,8 @@ internal class TicketFeatureFactory(
                 Effect.Inner.SubscribeToRecordProgress,
                 Effect.Inner.SubscribeToCancelRecord,
                 Effect.Inner.SendTextCommentIfIsNotNullOrBlank(sendComment, initialTicketId),
-                Effect.Inner.UpdateAudioData
+                Effect.Inner.UpdateAudioData,
+                Effect.Inner.OperatorTimeMessageFeed
             ),
             onCancelCallback = {
                 audioRecordController.cancelRecord()
@@ -376,6 +382,10 @@ private class FeatureReducer(): Logic<State, Message, Effect>() {
 
             Message.Inner.Exit -> effects { +Effect.Outer.Exit }
             is Message.Inner.OnOpenPreview -> effects { +Effect.Outer.OpenPreview(message.fileData) }
+            is Message.Inner.ShowOperatorTimeMessage -> {
+                val currentState = state as? State.Content ?: return
+                state { currentState.copy(ticket = currentState.ticket?.copy(operatorTimeMessage = message.message)) }
+            }
         }
     }
 
@@ -396,6 +406,7 @@ private class TicketActor(
     private val audioWrapper: AudioWrapper,
     private val localTicketsStore: LocalTicketsStore,
     private val commandsStore: LocalCommandsStore,
+    private val systemMessageStore: SystemMessageStore,
 ): Actor<Effect.Inner, Message.Inner> {
 
     override fun handleEffect(effect: Effect.Inner): Flow<Message.Inner> = when (effect) {
@@ -415,6 +426,20 @@ private class TicketActor(
                     ) {
                             needAnotherOneWelcomeMessage = true
                     }
+                    val commentsIds = localTicketsStore
+                        .getTicketWithComments(ticketId)
+                        ?.comments
+                        ?.map { it.comment.commentId }
+                        ?.toSet()
+                    val necessaryComments = commentsTry.value.comments.filter { commentsIds?.contains(
+                        it.id
+                    ) == true  }
+                    if (commentsTry.value.comments.isNotEmpty() && necessaryComments.find { it.isSupport && !it.isSystem } == null) {
+                        systemMessageStore.setNecessityTimeSystemMessage(ticketId, true)
+                    }
+                    if (!commentsTry.value.isRead && commentsTry.value.comments.lastOrNull()?.isSupport == true) {
+                        systemMessageStore.setNecessityTimeSystemMessage(ticketId, false)
+                    }
                     Message.Inner.UpdateCommentsCompleted(
                         ticket = commentsTry.value,
                         draft = draftRepository.getDraft(ticketId),
@@ -430,7 +455,12 @@ private class TicketActor(
         is Effect.Inner.FeedFlow -> {
             ticketId = localTicketsStore.getTickets().lastOrNull()?.ticketId ?: ticketId
             repository.getFeedFlow(user, ticketId)
-                .map { Message.Inner.CommentsUpdated(it, welcomeMessage) }
+                .map {
+                    if (it != null && !it.isRead && it.comments.lastOrNull()?.isSupport == true) {
+                        systemMessageStore.setNecessityTimeSystemMessage(ticketId, false)
+                    }
+                    Message.Inner.CommentsUpdated(it, welcomeMessage)
+                }
         }
         is Effect.Inner.CheckAccount -> flow {
             var oldAccount: Account? = null
@@ -447,14 +477,22 @@ private class TicketActor(
                 oldAccount = account
             }
         }
-        is Effect.Inner.Close -> singleFlow { Message.Inner.Exit }
+        is Effect.Inner.Close -> singleFlow {
+            systemMessageStore.setNecessityTimeSystemMessage(ticketId, false)
+            Message.Inner.Exit
+        }
         is Effect.Inner.SendTextCommentIfIsNotNullOrBlank -> flow {
             //TODO for multichat
             ticketId = localTicketsStore.getTickets().lastOrNull()?.ticketId ?: ticketId
             if (effect.text.isNullOrBlank())
                 return@flow
+            val now = Calendar.getInstance()
+            val limit = now.timeInMillis - MILLISECONDS_IN_HOUR
+            if (preferencesManager.getLastActiveTime() < limit && ticketId > 0)
+                systemMessageStore.setNecessityTimeSystemMessage(ticketId, true)
             preferencesManager.saveLastActiveTime(System.currentTimeMillis())
             repository.addTextComment(user, ticketId, effect.text)
+
         }
         is Effect.Inner.SendRatingComment -> flow {
             preferencesManager.saveLastActiveTime(System.currentTimeMillis())
@@ -493,6 +531,11 @@ private class TicketActor(
                 emit(Message.Inner.ShowToast(R.string.psd_unsupptorted_attachment.textRes()))
                 return@flow
             }
+
+            val now = Calendar.getInstance()
+            val limit = now.timeInMillis - MILLISECONDS_IN_HOUR
+            if (preferencesManager.getLastActiveTime() < limit && ticketId > 0)
+                systemMessageStore.setNecessityTimeSystemMessage(ticketId, true)
             preferencesManager.saveLastActiveTime(System.currentTimeMillis())
             repository.addAttachComment(user, ticketId, fileUri)
         }
@@ -545,6 +588,11 @@ private class TicketActor(
             Log.d("DFD", "SendAudio")
             ticketId = localTicketsStore.getTickets().lastOrNull()?.ticketId ?: ticketId
             val fileUri = runCatching { File(effect.file).toUri() }.getOrNull() ?: return@flow
+
+            val now = Calendar.getInstance()
+            val limit = now.timeInMillis - MILLISECONDS_IN_HOUR
+            if (preferencesManager.getLastActiveTime() < limit && ticketId > 0)
+                systemMessageStore.setNecessityTimeSystemMessage(ticketId, true)
             preferencesManager.saveLastActiveTime(System.currentTimeMillis())
             repository.addAttachComment(user, ticketId, fileUri)
         }
@@ -572,6 +620,12 @@ private class TicketActor(
                 comments.attachments.filter { it.name.isAudio() }.map { getFileUrl(it.id, account, user) }
             } ?: return@flow
             audioWrapper.setAudioDurations(uriList)
+        }
+
+        Effect.Inner.OperatorTimeMessageFeed -> flow {
+            systemMessageStore.operatorResponseTimeMessageStateFlow().collect { message ->
+                emit(Message.Inner.ShowOperatorTimeMessage(message))
+            }
         }
     }
 

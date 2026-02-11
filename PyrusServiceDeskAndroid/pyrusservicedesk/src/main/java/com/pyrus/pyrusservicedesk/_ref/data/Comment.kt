@@ -25,4 +25,5 @@ data class Comment(
     val rating: Int?,
     val author: Author?,
     val isSending: Boolean,
+    val isSystem: Boolean,
 )

@@ -1,6 +1,7 @@
 package com.pyrus.pyrusservicedesk.sdk.repositories
 
 import android.net.Uri
+import android.util.Log
 import androidx.core.net.toFile
 import com.pyrus.pyrusservicedesk._ref.data.Attachment
 import com.pyrus.pyrusservicedesk._ref.data.FullTicket
@@ -54,6 +55,7 @@ internal class SdRepository(
     private val coroutineScope: CoroutineScope,
     private val accountStore: AccountStore,
     private val idStore: IdStore,
+    private val systemMessageStore: SystemMessageStore,
 ) {
 
     private val fileHooks = ConcurrentHashMap<Long, UploadFileHook>()
@@ -142,6 +144,7 @@ internal class SdRepository(
                     isRead = true,
                     ratingSettings = null,
                     welcomeMessage = null,
+                    operatorTimeMessage = null,
                 )
             }
             return Try2.Success(ticket)
@@ -171,6 +174,7 @@ internal class SdRepository(
                         account = account,
                         userId = userId,
                         commands = commands,
+                        operatorResponseTimeMessage = systemMessageStore.operatorResponseTimeMessageStateFlow().value,
                     )
                     return Try.Success(singleTicket).toTry2()
                 }
@@ -211,7 +215,8 @@ internal class SdRepository(
                 commands = commands,
                 lastTicket = serverTicketWithWelcome,
                 account = account,
-                userId = account.getUserId() ?: account.getInstanceId()
+                userId = account.getUserId() ?: account.getInstanceId(),
+                operatorResponseTimeMessage = systemMessageStore.operatorResponseTimeMessageStateFlow().value,
             )
             if (idStore.getTicketServerId(ticket.ticketId) == null) {
                 idStore.addTicketIdPair(ticketId, ticket.ticketId)
@@ -259,7 +264,8 @@ internal class SdRepository(
                              commands = commands,
                              lastTicket = lastServerTicket,
                              account = account,
-                             userId = account.getUserId() ?: account.getInstanceId()
+                             userId = account.getUserId() ?: account.getInstanceId(),
+                             operatorResponseTimeMessage = systemMessageStore.operatorResponseTimeMessageStateFlow().value,
                          )
                      }
                  }
@@ -299,6 +305,7 @@ internal class SdRepository(
                         isRead = true,
                         ratingSettings = null,
                         welcomeMessage = welcomeMessage,
+                        operatorTimeMessage = null,
                     )
                 }
             }
@@ -477,6 +484,12 @@ internal class SdRepository(
         return uploadTry
     }
 
+    suspend fun sendCalcOperatorTime(ticketId: Long): Try<TicketCommandResultDto>? { //TODO kate for multichat
+        val instanceId = accountStore.getAccount().getInstanceId()
+        val user = accountStore.getAccount().getUsers().find { it.userId == instanceId } ?: return null
+        val command = commandsStore.createCalcOperatorTimeCommand(user, ticketId, instanceId)
+        return synchronizer.syncCommand(command)
+    }
     private suspend fun syncCommand(command: SyncRequest.Command) {
         val syncTry = synchronizer.syncCommand(command)
 
