@@ -35,6 +35,7 @@ import com.pyrus.pyrusservicedesk._ref.SdScreens
 import com.pyrus.pyrusservicedesk._ref.data.AudioData
 import com.pyrus.pyrusservicedesk._ref.ui_domain.screens.ticket.TicketView.Effect
 import com.pyrus.pyrusservicedesk._ref.ui_domain.screens.ticket.TicketView.Event
+import com.pyrus.pyrusservicedesk._ref.ui_domain.screens.ticket.TicketView.Event.*
 import com.pyrus.pyrusservicedesk._ref.ui_domain.screens.ticket.TicketView.Model
 import com.pyrus.pyrusservicedesk._ref.ui_domain.screens.ticket.adapter.entries.CommentEntry
 import com.pyrus.pyrusservicedesk._ref.ui_domain.screens.ticket.adapter.fingerprints.AudioStatus
@@ -47,12 +48,14 @@ import com.pyrus.pyrusservicedesk._ref.ui_domain.screens.ticket.adapter.fingerpr
 import com.pyrus.pyrusservicedesk._ref.ui_domain.screens.ticket.adapter.fingerprints.RatingCommentFingerprint
 import com.pyrus.pyrusservicedesk._ref.ui_domain.screens.ticket.adapter.fingerprints.RatingTextFingerprint
 import com.pyrus.pyrusservicedesk._ref.ui_domain.screens.ticket.adapter.fingerprints.SimpleTextFingerprint
+import com.pyrus.pyrusservicedesk._ref.ui_domain.screens.ticket.adapter.fingerprints.SystemFingerprint
 import com.pyrus.pyrusservicedesk._ref.ui_domain.screens.ticket.record.AudioRecordView
 import com.pyrus.pyrusservicedesk._ref.utils.AudioWrapper
 import com.pyrus.pyrusservicedesk._ref.utils.ConfigUtils
 import com.pyrus.pyrusservicedesk._ref.utils.ConfigUtils.Companion.getAccentColor
 import com.pyrus.pyrusservicedesk._ref.utils.ConfigUtils.Companion.getMainBackgroundColor
 import com.pyrus.pyrusservicedesk._ref.utils.TextProvider
+import com.pyrus.pyrusservicedesk._ref.utils.TextProvider.*
 import com.pyrus.pyrusservicedesk._ref.utils.animateVisibility
 import com.pyrus.pyrusservicedesk._ref.utils.getColorOnBackground
 import com.pyrus.pyrusservicedesk._ref.utils.getSecondaryColorOnBackground
@@ -100,6 +103,7 @@ internal class TicketFragment: TeaFragment<Model, Event, Effect>() {
         RatingCommentFingerprint(::dispatch),
         SimpleTextFingerprint(),
         CommentAudioFingerprint(audioWrapper, lifecycleScope, ::dispatch),
+        SystemFingerprint(),
     ) }
 
     private val ratingAdapter: PayloadListAdapter<CommentEntry.RatingTextValues> by lazy { PayloadListAdapter(
@@ -227,6 +231,13 @@ internal class TicketFragment: TeaFragment<Model, Event, Effect>() {
             params.bottomMargin = if (showRating) -resources.getDimension(R.dimen.psd_offset_default).toInt() else 0
             binding.refresh.layoutParams = params
         }
+
+        diff(Model::operatorTimeMessage) { message ->
+            binding.operatorTimeMessage.isVisible = message != null
+            binding.ratingBackground.isVisible = message != null
+            binding.gradient.isVisible = message != null
+            binding.operatorTimeMessage.text = message
+        }
     }
 
     override fun handleEffect(effect: Effect) = when(effect) {
@@ -234,7 +245,7 @@ internal class TicketFragment: TeaFragment<Model, Event, Effect>() {
 
         is Effect.CopyToClipboard -> {
             val clipboard = getSystemService(requireContext(), ClipboardManager::class.java) as ClipboardManager
-            clipboard.setPrimaryClip(ClipData.newPlainText(TextProvider.Res(R.string.copied_text).text(requireContext()), effect.text))
+            clipboard.setPrimaryClip(ClipData.newPlainText(Res(R.string.copied_text).text(requireContext()), effect.text))
         }
 
         is Effect.MakeToast -> {
@@ -247,14 +258,14 @@ internal class TicketFragment: TeaFragment<Model, Event, Effect>() {
 
         is Effect.ShowAttachVariants -> {
             injector().router.setResultListener(effect.key) {
-                dispatch(Event.SetAttachVariant(effect.key, it))
+                dispatch(SetAttachVariant(effect.key, it))
             }
             AttachFileVariantsFragment.newInstance(effect.key).show(parentFragmentManager, null)
         }
 
         is Effect.ShowErrorCommentDialog -> {
             injector().router.setResultListener(effect.key) {
-                dispatch(Event.SetErrorCommentResult(effect.localId, effect.key, it))
+                dispatch(SetErrorCommentResult(effect.localId, effect.key, it))
             }
             ErrorCommentActionsDialog
                 .newInstance(effect.key)
@@ -550,7 +561,7 @@ internal class TicketFragment: TeaFragment<Model, Event, Effect>() {
                 innerDivider = defaultDivider,
                 outerDivider = defaultDivider,
                 invert = true,
-                excludeTypes = setOf(R.layout.psd_view_holder_comment_text, R.layout.psd_view_holder_comment_attachment, R.layout.psd_view_holder_comment_previewable_attachment)
+                excludeTypes = setOf(R.layout.psd_view_holder_comment_text, R.layout.psd_view_holder_comment_attachment, R.layout.psd_view_holder_comment_previewable_attachment, R.layout.psd_view_holder_system_message)
             )
         )
 

@@ -146,6 +146,7 @@ internal object DatabaseMapper {
         creationDate = dto.creationDate,
         rating = dto.rating,
         author = dto.author?.let(::mapToAuthorEntity),
+        isSystem = dto.isSystem
     )
 
     private fun mapToAuthorEntity(dto: AuthorDto) = AuthorEntity(

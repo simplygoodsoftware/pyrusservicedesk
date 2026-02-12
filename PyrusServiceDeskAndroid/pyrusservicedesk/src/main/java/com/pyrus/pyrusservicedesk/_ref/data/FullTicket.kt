@@ -12,4 +12,5 @@ data class FullTicket(
     val isActive: Boolean,
     val isRead: Boolean,
     val welcomeMessage: String?,
+    val operatorTimeMessage: String?,
 )

@@ -23,6 +23,7 @@ import com.pyrus.pyrusservicedesk.sdk.repositories.AccountStore
 import com.pyrus.pyrusservicedesk.sdk.repositories.IdStore
 import com.pyrus.pyrusservicedesk.sdk.repositories.LocalCommandsStore
 import com.pyrus.pyrusservicedesk.sdk.repositories.LocalTicketsStore
+import com.pyrus.pyrusservicedesk.sdk.repositories.SystemMessageStore
 import com.pyrus.pyrusservicedesk.sdk.sync.SyncMapper.mapToGetFeedRequest
 import com.pyrus.pyrusservicedesk.sdk.updates.Preferences
 import com.pyrus.pyrusservicedesk.sdk.web.retrofit.ServiceDeskApi
@@ -54,6 +55,7 @@ internal class Synchronizer(
     private val idStore: IdStore,
     private val commandsStore: LocalCommandsStore,
     private val preferences: Preferences,
+    private val systemMessageStore: SystemMessageStore,
 ) : CoroutineScope {
 
     @DelicateCoroutinesApi
@@ -131,11 +133,11 @@ internal class Synchronizer(
     private suspend fun trotRequest(syncRequests: List<SyncReqRes>) {
         val currentTime = System.currentTimeMillis()
         val passedTime = currentTime - lastSyncTime.get()
-        val hasCommentCommand = syncRequests.any {
+        val hasCommentCommandOrOperatorTime = syncRequests.any {
             val req = it.request
-            req is SyncRequest.Command.CreateComment
+            req is SyncRequest.Command.CreateComment || req is SyncRequest.Command.CalcOperatorTime
         }
-        val rawDelay = if (hasCommentCommand) 1000L else 5000L
+        val rawDelay = if (hasCommentCommandOrOperatorTime) 1000L else 5000L
         val diff = rawDelay - passedTime
         if (diff > 0) {
             val delay = min(rawDelay, diff)
@@ -249,6 +251,10 @@ internal class Synchronizer(
                         idStore.addTicketIdPair(request.request.ticketId, tryResult.value.ticketId)
                         commandsStore.updateCommandsTicketId(request.request.ticketId, tryResult.value.ticketId)
                     }
+                    val modifiedRequest = modifiedRequests.find { (it.request as? SyncRequest.Command.CreateComment)?.commandId == request.request.commandId } ?: request
+                    if ((modifiedRequest.request as SyncRequest.Command.CreateComment).ticketId <= 0 && tryResult.value.ticketId != null && (modifiedRequest.request as SyncRequest.Command.CreateComment).requestNewTicket) {
+                        systemMessageStore.setNecessityTimeSystemMessage(tryResult.value.ticketId, true)
+                    }
                     if (tryResult.value.commentId != null) {
                         idStore.addCommentIdPair(request.request.localId, tryResult.value.commentId)
                     }
@@ -339,7 +345,8 @@ internal class Synchronizer(
                 && req.rating == null
                 && req.ratingComment == null
             ) {
-                val newRequest = req.copy(ticketId = commandsStore.getNextLocalId(), requestNewTicket = true)
+                val ticketId = commandsStore.getNextLocalId()
+                val newRequest = req.copy(ticketId = ticketId, requestNewTicket = true)
                 return@map copySyncReqRes(syncReqRes, newRequest)
             }
 

@@ -31,7 +31,8 @@ internal interface TicketView {
         val ratingText: String?,
         val size: Int?,
         val type: Int?,
-        val  ratingTextValues: List<CommentEntry.RatingTextValues>?,
+        val ratingTextValues: List<CommentEntry.RatingTextValues>?,
+        val operatorTimeMessage: String?,
     ) {
         override fun toString(): String {
             return "Model(inputText='$inputText', sendEnabled=$sendEnabled, comments=${comments?.size}, isLoading=$isLoading, showNoConnectionError=$showNoConnectionError)"
