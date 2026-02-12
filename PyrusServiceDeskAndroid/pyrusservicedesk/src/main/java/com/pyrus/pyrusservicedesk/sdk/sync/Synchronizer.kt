@@ -229,6 +229,9 @@ internal class Synchronizer(
             val usersWithData = account.getUsers().filter { it.userId !in authorAccessDenied }
 
             localTicketsStore.storeServerState(usersWithData, getTicketsTry.value)
+            //TODO for multichat
+            val ticketId = localTicketsStore.getTickets().lastOrNull()?.ticketId ?: idStore.ticketIdFlow.value
+            idStore.setTicketId(ticketId)
 
             val commandRequests = syncRequests.filterIsInstance<SyncReqRes.CommandWithContinuation>()
             for (request in commandRequests) {
