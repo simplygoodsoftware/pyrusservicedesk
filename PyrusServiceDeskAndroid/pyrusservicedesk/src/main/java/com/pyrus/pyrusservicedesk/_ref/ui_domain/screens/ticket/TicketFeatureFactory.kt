@@ -37,6 +37,7 @@ import com.pyrus.pyrusservicedesk.sdk.data.FileManager
 import com.pyrus.pyrusservicedesk.sdk.data.intermediate.FileData
 import com.pyrus.pyrusservicedesk.sdk.repositories.AccountStore
 import com.pyrus.pyrusservicedesk.sdk.repositories.DraftRepository
+import com.pyrus.pyrusservicedesk.sdk.repositories.IdStore
 import com.pyrus.pyrusservicedesk.sdk.repositories.LocalCommandsStore
 import com.pyrus.pyrusservicedesk.sdk.repositories.LocalTicketsStore
 import com.pyrus.pyrusservicedesk.sdk.repositories.SdRepository
@@ -70,6 +71,7 @@ internal class TicketFeatureFactory(
     private val localTicketsStore: LocalTicketsStore,
     private val commandsStore: LocalCommandsStore,
     private val systemMessageStore: SystemMessageStore,
+    private val idStore: IdStore
 ) {
 
     fun create(
@@ -98,6 +100,7 @@ internal class TicketFeatureFactory(
                 localTicketsStore = localTicketsStore,
                 commandsStore = commandsStore,
                 systemMessageStore = systemMessageStore,
+                idStore = idStore,
             ).adaptCast(),
             initialEffects = listOf(
                 Effect.Inner.FeedFlow,
@@ -407,6 +410,7 @@ private class TicketActor(
     private val localTicketsStore: LocalTicketsStore,
     private val commandsStore: LocalCommandsStore,
     private val systemMessageStore: SystemMessageStore,
+    private val idStore: IdStore,
 ): Actor<Effect.Inner, Message.Inner> {
 
     override fun handleEffect(effect: Effect.Inner): Flow<Message.Inner> = when (effect) {
@@ -454,7 +458,8 @@ private class TicketActor(
         }
         is Effect.Inner.FeedFlow -> {
             ticketId = localTicketsStore.getTickets().lastOrNull()?.ticketId ?: ticketId
-            repository.getFeedFlow(user, ticketId)
+            idStore.setTicketId(ticketId)
+            repository.getFeedFlowByTicketIdFlow(user, idStore.ticketIdFlow)
                 .map {
                     if (it != null && !it.isRead && it.comments.lastOrNull()?.isSupport == true && it.comments.lastOrNull()?.isSystem == false) {
                         systemMessageStore.setNecessityTimeSystemMessage(ticketId, false)
@@ -484,6 +489,7 @@ private class TicketActor(
         is Effect.Inner.SendTextCommentIfIsNotNullOrBlank -> flow {
             //TODO for multichat
             ticketId = localTicketsStore.getTickets().lastOrNull()?.ticketId ?: ticketId
+            idStore.setTicketId(ticketId)
             if (effect.text.isNullOrBlank())
                 return@flow
             val now = Calendar.getInstance()
@@ -499,6 +505,7 @@ private class TicketActor(
             if (effect.rating == null && effect.ratingComment == null)
                 return@flow
             ticketId = localTicketsStore.getTickets().lastOrNull()?.ticketId ?: ticketId
+            idStore.setTicketId(ticketId)
             repository.addRatingComment(user, ticketId, effect.rating, effect.ratingComment)
         }
         is Effect.Inner.OpenPreview -> singleFlow {
@@ -513,10 +520,12 @@ private class TicketActor(
         }
         is Effect.Inner.SaveDraft -> flow {
             ticketId = localTicketsStore.getTickets().lastOrNull()?.ticketId ?: ticketId
+            idStore.setTicketId(ticketId)
             draftRepository.saveDraft(ticketId, effect.draft)
         }
         is Effect.Inner.ReadTicketIfNeed -> flow {
             ticketId = localTicketsStore.getTickets().lastOrNull()?.ticketId ?: ticketId
+            idStore.setTicketId(ticketId)
             val commands = commandsStore.getCommands(ticketId)
             val command = commands.find { it.command.commandType == TicketCommandType.MarkTicketAsRead.ordinal }
             if (localTicketsStore.getTicketWithComments(ticketId)?.ticket?.isRead == false && command == null )
@@ -526,6 +535,7 @@ private class TicketActor(
             if (effect.uri !is Uri) return@flow
 
             ticketId = localTicketsStore.getTickets().lastOrNull()?.ticketId ?: ticketId
+            idStore.setTicketId(ticketId)
             val fileUri = runCatching { fileManager.copyFile(effect.uri) }.getOrNull()
             if (fileUri == null) {
                 emit(Message.Inner.ShowToast(R.string.psd_unsupptorted_attachment.textRes()))
@@ -587,6 +597,7 @@ private class TicketActor(
         is Effect.Inner.SendAudio -> flow {
             Log.d("DFD", "SendAudio")
             ticketId = localTicketsStore.getTickets().lastOrNull()?.ticketId ?: ticketId
+            idStore.setTicketId(ticketId)
             val fileUri = runCatching { File(effect.file).toUri() }.getOrNull() ?: return@flow
 
             val now = Calendar.getInstance()

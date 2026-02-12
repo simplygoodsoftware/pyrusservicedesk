@@ -35,8 +35,11 @@ import com.pyrus.pyrusservicedesk.sdk.web.UploadFileHook
 import com.pyrus.pyrusservicedesk.sdk.web.retrofit.RemoteFileStore
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.launch
 import retrofit2.HttpException
 import java.io.InterruptedIOException
@@ -234,6 +237,15 @@ internal class SdRepository(
         val welcomeMessage = application?.welcomeMessage
         val ticket = repositoryMapper.mergeTicket(account, userId, localTicket, commands, orgLogoUrl, ratingSettings, welcomeMessage)
         return ticket
+    }
+
+    @OptIn(ExperimentalCoroutinesApi::class)
+    fun getFeedFlowByTicketIdFlow(user: UserInternal, ticketIdFlow: Flow<Long>): Flow<FullTicket?> {
+        return ticketIdFlow
+            .distinctUntilChanged()
+            .flatMapLatest { ticketId ->
+                getFeedFlow(user, ticketId)
+            }
     }
 
     fun getFeedFlow(user: UserInternal, ticketId: Long): Flow<FullTicket?> {
