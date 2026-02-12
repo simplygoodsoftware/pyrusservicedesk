@@ -80,23 +80,6 @@ internal class Synchronizer(
 
     private val lastSyncTime = AtomicLong(0)
 
-    init {
-
-        val threads = Thread.getAllStackTraces().keys
-
-        Log.d("THREAD_DEBUG", "=".repeat(50))
-        Log.d("THREAD_DEBUG", "ВСЕГО ПОТОКОВ: ${threads.size}")
-        Log.d("THREAD_DEBUG", "=".repeat(50))
-
-        threads.sortedBy { it.name }.forEach { thread ->
-            Log.d(
-                "THREAD_DEBUG",
-                "[${thread.id}] ${thread.name} - ${thread.state} - ${thread.priority}"
-            )
-        }
-    }
-
-
     @OptIn(DelicateCoroutinesApi::class, ExperimentalCoroutinesApi::class)
     fun close() {
         coroutineContext.cancelChildren()
