@@ -271,19 +271,10 @@ internal class DiInjector(
 
     val sharedViewModel = SharedViewModel()
 
-    val picasso: Picasso = providePicasso(application)
 
-    private fun providePicasso(appContext : Context): Picasso {
-        val cacheDir = File(appContext.cacheDir, "image-cache")
-        if (!cacheDir.exists()) {
-            cacheDir.mkdirs()
-        }
-        val cacheSize = 50 * 1024 * 1024L // 50 MB
-        val cache = Cache(cacheDir, cacheSize)
-        return Picasso.Builder(appContext)
-            .downloader(OkHttp3Downloader(createOkHttpClientBuilder().cache(cache).build()))
-            .build()
-    }
+    val picassoManager: PicassoManager = PicassoManager(application)
+
+    val picasso: Picasso = picassoManager.providePicasso(createOkHttpClientBuilder())
 
     val setPushTokenUseCase = SetPushTokenUseCase(accountStore, coreScope, preferencesManager, repository)
 
@@ -314,8 +305,10 @@ internal class DiInjector(
 
     fun onCancel() {
         releaseSession()
+        picassoManager.dispose(picasso)
         coreScope.cancel()
         synchronizer.cancel()
+        synchronizer.close()
     }
 
     fun releaseSession() = ThreadsHelper().syncRunOnMainThread {
