@@ -43,6 +43,7 @@ import com.pyrus.pyrusservicedesk.sdk.repositories.LocalTicketsStore
 import com.pyrus.pyrusservicedesk.sdk.repositories.SdRepository
 import com.pyrus.pyrusservicedesk.sdk.repositories.SystemMessageStore
 import com.pyrus.pyrusservicedesk.sdk.repositories.UserInternal
+import com.pyrus.pyrusservicedesk.sdk.sync.SystemCommentType
 import com.pyrus.pyrusservicedesk.sdk.sync.TicketCommandType
 import com.pyrus.pyrusservicedesk.sdk.updates.PreferencesManager
 import kotlinx.coroutines.Dispatchers
@@ -430,15 +431,7 @@ private class TicketActor(
                     ) {
                             needAnotherOneWelcomeMessage = true
                     }
-                    val commentsIds = localTicketsStore
-                        .getTicketWithComments(ticketId)
-                        ?.comments
-                        ?.map { it.comment.commentId }
-                        ?.toSet()
-                    val necessaryComments = commentsTry.value.comments.filter { commentsIds?.contains(
-                        it.id
-                    ) == true  }
-                    if (commentsTry.value.comments.isNotEmpty() && necessaryComments.find { it.isSupport && !it.isSystem } == null) {
+                    if (neenToShowSystemMessageAtTheStart(commentsTry.value)) {
                         systemMessageStore.setNecessityTimeSystemMessage(ticketId, true)
                     }
                     if (!commentsTry.value.isRead && commentsTry.value.comments.lastOrNull()?.isSupport == true) {
@@ -461,7 +454,7 @@ private class TicketActor(
             idStore.setTicketId(ticketId)
             repository.getFeedFlowByTicketIdFlow(user, idStore.ticketIdFlow)
                 .map {
-                    if (it != null && !it.isRead && it.comments.lastOrNull()?.isSupport == true && it.comments.lastOrNull()?.isSystem == false) {
+                    if (noNeedToShowSystemMessageAfterUpdate(it)) {
                         systemMessageStore.setNecessityTimeSystemMessage(ticketId, false)
                     }
                     Message.Inner.CommentsUpdated(it, welcomeMessage)
@@ -638,6 +631,32 @@ private class TicketActor(
                 emit(Message.Inner.ShowOperatorTimeMessage(message))
             }
         }
+    }
+
+    private fun noNeedToShowSystemMessageAfterUpdate(ticket: FullTicket?): Boolean {
+        if (ticket == null)
+            return true
+        val lastComment = ticket.comments.lastOrNull() ?: return true
+        return !ticket.isRead
+            && lastComment.isSupport
+            && (!lastComment.isSystem
+                || lastComment.systemCommentType == SystemCommentType.OperatorAssigned) //TODO read?
+    }
+
+    private fun neenToShowSystemMessageAtTheStart(ticket: FullTicket): Boolean {
+        val commentsIds = localTicketsStore
+            .getTicketWithComments(ticketId)
+            ?.comments
+            ?.map { it.comment.commentId }
+            ?.toSet()
+        val necessaryComments = ticket.comments.filter { commentsIds?.contains(
+            it.id
+        ) == true  }
+        return ticket.comments.isNotEmpty()
+            && necessaryComments
+                .find { it.isSupport
+                    && (!it.isSystem
+                    || it.systemCommentType == SystemCommentType.OperatorAssigned) } == null
     }
 
 }

@@ -70,6 +70,7 @@ internal abstract class SdDatabase : RoomDatabase() {
                 Migration3to4(),
                 Migration4to5(),
                 Migration5to6(),
+                Migration6to7(),
             ).build()
         }
 
@@ -136,5 +137,11 @@ internal class Migration4to5: Migration(4, 5) {
 internal class Migration5to6: Migration(5, 6) {
     override fun migrate(db: SupportSQLiteDatabase) {
         db.execSQL("ALTER TABLE $COMMENTS_TABLE ADD COLUMN is_system INTEGER NOT NULL DEFAULT 0")
+    }
+}
+
+internal class Migration6to7: Migration(6, 7) {
+    override fun migrate(db: SupportSQLiteDatabase) {
+        db.execSQL("ALTER TABLE $COMMENTS_TABLE ADD COLUMN system_comment_type INTEGER NOT NULL DEFAULT 0")
     }
 }
