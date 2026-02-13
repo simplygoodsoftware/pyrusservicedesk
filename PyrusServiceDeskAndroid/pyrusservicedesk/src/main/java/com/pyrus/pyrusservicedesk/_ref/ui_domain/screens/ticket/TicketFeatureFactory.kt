@@ -640,7 +640,7 @@ private class TicketActor(
         return !ticket.isRead
             && lastComment.isSupport
             && (!lastComment.isSystem
-                || lastComment.systemCommentType == SystemCommentType.OperatorAssigned) //TODO read?
+                || lastComment.systemCommentType == SystemCommentType.OperatorAssigned.ordinal)
     }
 
     private fun neenToShowSystemMessageAtTheStart(ticket: FullTicket): Boolean {
@@ -656,7 +656,7 @@ private class TicketActor(
             && necessaryComments
                 .find { it.isSupport
                     && (!it.isSystem
-                    || it.systemCommentType == SystemCommentType.OperatorAssigned) } == null
+                    || it.systemCommentType == SystemCommentType.OperatorAssigned.ordinal) } == null
     }
 
 }

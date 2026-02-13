@@ -148,7 +148,7 @@ internal object DatabaseMapper {
         rating = dto.rating,
         author = dto.author?.let(::mapToAuthorEntity),
         isSystem = dto.isSystem,
-        systemCommentType = dto.systemCommentType ?: SystemCommentType.Unknown
+        systemCommentType = dto.systemCommentType ?: SystemCommentType.Unknown.ordinal
     )
 
     private fun mapToAuthorEntity(dto: AuthorDto) = AuthorEntity(

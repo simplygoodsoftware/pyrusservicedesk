@@ -28,5 +28,5 @@ data class Comment(
     val author: Author?,
     val isSending: Boolean,
     val isSystem: Boolean,
-    val systemCommentType: SystemCommentType,
+    val systemCommentType: Int,
 )

@@ -37,7 +37,7 @@ import com.pyrus.pyrusservicedesk.sdk.repositories.data_base.data.UserEntity
         MemberEntity::class,
     ],
     exportSchema = false,
-    version = 6
+    version = 7
 )
 @TypeConverters(Converter::class)
 internal abstract class SdDatabase : RoomDatabase() {

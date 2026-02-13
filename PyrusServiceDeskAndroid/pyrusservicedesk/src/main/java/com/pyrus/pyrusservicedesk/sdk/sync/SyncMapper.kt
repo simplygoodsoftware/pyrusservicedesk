@@ -37,7 +37,7 @@ internal object SyncMapper {
             needFullInfo = true,
             additionalUsers = account.getAdditionalUsers(tickets),
             lastNoteId = calcLastNoteId(tickets, firstUserId),
-            commands = syncRequests.mapNotNull { mapToCommand(it.request) },
+            commands = syncRequests.mapNotNull { mapToCommand(it.request, account.getInstanceId()) },
             authorId = account.getAuthorId(),
             authorName = ConfigUtils.getAuthorName(resourceManager),
             appId = firstAppId,
@@ -65,15 +65,15 @@ internal object SyncMapper {
         return lastNoteId
     }
 
-    private fun mapToCommand(request: SyncRequest): TicketCommandDto? = when(request) {
+    private fun mapToCommand(request: SyncRequest, instanceId: String): TicketCommandDto? = when(request) {
         is SyncRequest.Command.CreateComment -> TicketCommandDto(
             commandId = request.commandId,
             type = TicketCommandType.CreateComment.ordinal,
             appId = request.appId,
-            userId = request.userId,
+            userId = if (request.userId != instanceId) request.userId else null,
             params = CommandParamsDto.CreateComment(
                 requestNewTicket = request.requestNewTicket,
-                userId = request.userId,
+                userId = if (request.userId != instanceId) request.userId else null,
                 appId = request.appId,
                 comment = request.comment,
                 attachments = request.attachments?.map { AttachmentDataDto(it.guid!!, 0, it.name) },
@@ -87,10 +87,10 @@ internal object SyncMapper {
             commandId = request.commandId,
             type = TicketCommandType.MarkTicketAsRead.ordinal,
             appId = request.appId,
-            userId = request.userId,
+            userId = if (request.userId != instanceId) request.userId else null,
             params = CommandParamsDto.MarkTicketAsRead(
                 ticketId = request.ticketId,
-                userId = request.userId,
+                userId = if (request.userId != instanceId) request.userId else null,
                 appId = request.appId,
                 commentId = null,
             ),
@@ -99,9 +99,9 @@ internal object SyncMapper {
             commandId = request.commandId,
             type = TicketCommandType.SetPushToken.ordinal,
             appId = request.appId,
-            userId = request.userId,
+            userId = if (request.userId != instanceId) request.userId else null,
             params = CommandParamsDto.SetPushToken(
-                userId = request.userId,
+                userId = if (request.userId != instanceId) request.userId else null,
                 appId = request.appId,
                 token = request.token,
                 type = request.tokenType,

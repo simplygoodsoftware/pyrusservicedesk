@@ -25,7 +25,7 @@ internal data class CommentEntity(
     @ColumnInfo(name = "rating") val rating: Int?,
     @Embedded("author_") val author: AuthorEntity?,
     @ColumnInfo(name = "is_system") val isSystem: Boolean,
-    @ColumnInfo(name = "system_comment_type") val systemCommentType: SystemCommentType
+    @ColumnInfo(name = "system_comment_type") val systemCommentType: Int
 ) {
     override fun toString(): String {
         return body.toString()

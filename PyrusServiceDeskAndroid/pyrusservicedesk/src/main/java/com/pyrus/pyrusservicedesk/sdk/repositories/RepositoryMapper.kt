@@ -320,7 +320,7 @@ internal class RepositoryMapper(
         author = null,
         isSending = !commandEntity.command.isError,
         isSystem = false,
-        systemCommentType = SystemCommentType.Unknown
+        systemCommentType = SystemCommentType.Unknown.ordinal
     )
 
     fun map(attachmentEntity: LocalAttachmentEntity) : Attachment = Attachment(

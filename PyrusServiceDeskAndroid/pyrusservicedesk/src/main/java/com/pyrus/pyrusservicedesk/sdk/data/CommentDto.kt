@@ -29,7 +29,7 @@ internal data class CommentDto(
     @Json(name = "rating") val rating: Int? = null,
     @Json(name = "rating_comment") val ratingComment: String? = null,
     @Json(name = "is_system") val isSystem: Boolean,
-    @Json(name = "system_comment_type") val systemCommentType: SystemCommentType? = SystemCommentType.Unknown
+    @Json(name = "system_comment_type") val systemCommentType: Int? = SystemCommentType.Unknown.ordinal
 ) {
 
     /**
