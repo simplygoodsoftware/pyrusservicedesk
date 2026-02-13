@@ -129,7 +129,7 @@ extension NSString {
         let attrStr = NSMutableAttributedString(string: String(str))
         
         var range = NSRange(location: 0, length: str.length)
-        
+        print(str)
         while range.location != NSNotFound && range.length > 0 {
             //Ищем теги в нашей строке
             let tagRange = (str as NSString).range(of: String.tagRegex, options: .regularExpression, range: range)
@@ -186,21 +186,30 @@ extension NSString {
         
         //Применяем аттрибуты для последнего отрывка нашей строки
         if lastTagLocation != str.length {
+            print(1)
             attrStr.addAttributes(getAttr(for: tags), range: NSRange(location: lastTagLocation, length: str.length - lastTagLocation))
+            print(2)
         }
         //Добавляем последний отрывок нашей строки (если он есть) в результирующий массив
         let subStrRange = NSRange(location: lastRemoveLocation, length: str.length - lastRemoveLocation)
+        print(3)
         let attrSubStr = NSMutableAttributedString(attributedString: attrStr.attributedSubstring(from: subStrRange))
+        print(4)
         if subStrRange.length > 0 {
+            print(5)
             if needDetectLink {
+                print(6)
                 return (HelpersStrings.attributedString(byDecodingHTMLEntities: attrSubStr)
-                                                .detectEmail()
-                                                .detectLink()
-                                                .detectPhoneNumber(), buttons)
+//                                                .detectEmail()
+//                                                .detectLink()
+//                                                .detectPhoneNumber()
+                        , buttons)
              } else {
+                 print(7)
                  return (HelpersStrings.attributedString(byDecodingHTMLEntities: attrSubStr), buttons)
              }
         }
+        print(8)
         return (nil, buttons)
     }
     

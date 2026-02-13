@@ -388,87 +388,88 @@ class HelpersStrings {
     }
     
     static func attributedString(byDecodingHTMLEntities strAttr: NSMutableAttributedString) -> NSMutableAttributedString {
-        var range: NSRange = NSRange(location: 0, length: strAttr.length)
-        var subrange: NSRange = (strAttr.string as NSString).range(of: "&", options: .backwards, range: range)
+        var range = NSRange(location: 0, length: strAttr.length)
+        var subrange = (strAttr.string as NSString).range(of: "&", options: .backwards, range: range)
 
-        // if no ampersands, we've got a quick way out
         guard subrange.length > 0 else {
             strAttr.trailingNewlineChopped()
             return strAttr
         }
+
         while subrange.length != 0 {
-            var semiColonRange = NSMakeRange(subrange.location, NSMaxRange(range) - subrange.location)
-            semiColonRange = (strAttr.string as NSString).range(of: ";", options: .literal, range: semiColonRange)
+            // Ищем точку с запятой справа от текущего амперсанда
+            var semiColonSearchRange = NSRange(location: subrange.location, length: NSMaxRange(range) - subrange.location)
+            let semiColonRange = (strAttr.string as NSString).range(of: ";", options: .literal, range: semiColonSearchRange)
+
+            // Сдвигаем окно поиска влево (до текущего '&')
             range = NSMakeRange(0, subrange.location)
-            guard semiColonRange.location != NSNotFound else {
+
+            // Если ';' не нашли — ПЕРЕЙТИ к предыдущему '&' и продолжить
+            if semiColonRange.location == NSNotFound {
+                subrange = (strAttr.string as NSString).range(of: "&", options: .backwards, range: range)
                 continue
             }
+
             let escapeRange = NSMakeRange(subrange.location, semiColonRange.location - subrange.location + 1)
             let escapeString = (strAttr.string as NSString).substring(with: escapeRange) as NSString
             let length = escapeString.length
-            // a squence must be longer than 3 (&lt;) and less than 11 (&thetasym;)
-            if (length < 4 || length > 10) {
-                continue
-            }
-            if escapeString.character(at: 1) == unichar("#") {
-                let char2 = escapeString.character(at: 2)
-                if char2 == unichar("x") || char2 == unichar("X") {
-                    // Hex escape squences &#xa3;
-                    let hexSequence = escapeString.substring(with: NSMakeRange(3, length - 4))
-                    let scanner = Scanner(string: hexSequence)
-                    var value = UInt64()
-                    if
-                        scanner.scanHexInt64(&value),
-                        value < CUnsignedShort.max,
-                        value > 0,
-                        scanner.scanLocation == length - 4
-                    {
-                        var uchar = UInt16(value)
-                        let charString = NSString(characters: &uchar, length: 1)
-                        strAttr.replaceCharacters(in: escapeRange, with: charString as String)
-                    }
-                } else {
-                    // Decimal Sequences &#123;
-                    let numberSequence = escapeString.substring(with: NSMakeRange(2, length - 3))
-                    let scanner = Scanner(string: numberSequence)
-                    var value = Int()
-                    if
-                        scanner.scanInt(&value),
-                        value > 0,
-                        scanner.scanLocation == length - 3 {
-                        if value < CUnsignedShort.max {
+
+            if length >= 4 && length <= 10 {
+                if escapeString.character(at: 1) == unichar("#") {
+                    let char2 = escapeString.character(at: 2)
+                    if char2 == unichar("x") || char2 == unichar("X") {
+                        let hexSequence = escapeString.substring(with: NSMakeRange(3, length - 4))
+                        let scanner = Scanner(string: hexSequence)
+                        var value = UInt64()
+                        if scanner.scanHexInt64(&value),
+                           value < CUnsignedShort.max,
+                           value > 0,
+                           scanner.scanLocation == length - 4 {
                             var uchar = UInt16(value)
                             let charString = NSString(characters: &uchar, length: 1)
                             strAttr.replaceCharacters(in: escapeRange, with: charString as String)
-                        } else{
-                            if
-                                let escapeStringData = escapeString.data(using: String.Encoding.utf8.rawValue),
-                                let str = String(data:  escapeStringData, encoding: .utf8),
-                                let strData = str.data(using: String.Encoding.utf8),
-                                let newStr = try? NSAttributedString(
-                                    data: strData,
-                                    options: [NSAttributedString.DocumentReadingOptionKey.documentType: NSAttributedString.DocumentType.html,
-                                              NSAttributedString.DocumentReadingOptionKey.characterEncoding: NSNumber(value: String.Encoding.utf8.rawValue)],
-                                    documentAttributes: nil)
-                            {
-                                strAttr.replaceCharacters(in: escapeRange, with: newStr.string)
+                        }
+                    } else {
+                        let numberSequence = escapeString.substring(with: NSMakeRange(2, length - 3))
+                        let scanner = Scanner(string: numberSequence)
+                        var value = Int()
+                        if scanner.scanInt(&value),
+                           value > 0,
+                           scanner.scanLocation == length - 3 {
+                            if value < CUnsignedShort.max {
+                                var uchar = UInt16(value)
+                                let charString = NSString(characters: &uchar, length: 1)
+                                strAttr.replaceCharacters(in: escapeRange, with: charString as String)
+                            } else {
+                                if let escapeStringData = escapeString.data(using: String.Encoding.utf8.rawValue),
+                                   let str = String(data: escapeStringData, encoding: .utf8),
+                                   let strData = str.data(using: .utf8),
+                                   let newStr = try? NSAttributedString(
+                                        data: strData,
+                                        options: [.documentType: NSAttributedString.DocumentType.html,
+                                                  .characterEncoding: NSNumber(value: String.Encoding.utf8.rawValue)],
+                                        documentAttributes: nil) {
+                                    strAttr.replaceCharacters(in: escapeRange, with: newStr.string)
+                                }
                             }
                         }
                     }
-                }
-            } else {
-                // "standard" sequences
-                for i in 0..<(MemoryLayout.size(ofValue: gAsciiHTMLEscapeMap) / MemoryLayout<HTMLEscapeMap>.size) {
-                    if escapeString == gAsciiHTMLEscapeMap[i].escapeSequence {
-                        var uchar = gAsciiHTMLEscapeMap[i].uchar
-                        strAttr.replaceCharacters(in: escapeRange, with: NSString(characters: &uchar, length: 1) as String)
-                        break
+                } else {
+                    // Именованные сущности
+                    for i in 0..<(MemoryLayout.size(ofValue: gAsciiHTMLEscapeMap) / MemoryLayout<HTMLEscapeMap>.size) {
+                        if escapeString == gAsciiHTMLEscapeMap[i].escapeSequence {
+                            var uchar = gAsciiHTMLEscapeMap[i].uchar
+                            strAttr.replaceCharacters(in: escapeRange, with: NSString(characters: &uchar, length: 1) as String)
+                            break
+                        }
                     }
                 }
             }
-                
+
+            // В конце итерации переходим к предыдущему '&'
             subrange = (strAttr.string as NSString).range(of: "&", options: .backwards, range: range)
         }
+
         strAttr.trailingNewlineChopped()
         return strAttr
     }
