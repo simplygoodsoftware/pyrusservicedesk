@@ -70,6 +70,7 @@ import com.pyrus.pyrusservicedesk._ref.whitetea.androidutils.getStore
 import com.pyrus.pyrusservicedesk._ref.whitetea.bind.BinderLifecycleMode
 import com.pyrus.pyrusservicedesk._ref.whitetea.core.ViewRenderer
 import com.pyrus.pyrusservicedesk._ref.whitetea.utils.diff
+import com.pyrus.pyrusservicedesk.core.ResourceContextWrapper
 import com.pyrus.pyrusservicedesk.core.isMultiChat
 import com.pyrus.pyrusservicedesk.databinding.PsdFragmentTicketBinding
 import com.pyrus.pyrusservicedesk.payload_adapter.PayloadListAdapter
@@ -99,7 +100,7 @@ internal class TicketFragment: TeaFragment<Model, Event, Effect>() {
         CommentTextFingerprint(::dispatch),
         CommentAttachmentFingerprint(::dispatch, viewLifecycleOwner),
         CommentPreviewableAttachmentFingerprint(::dispatch, viewLifecycleOwner),
-        DateFingerprint(),
+        DateFingerprint(resourceContextWrapper),
         RatingCommentFingerprint(::dispatch),
         SimpleTextFingerprint(),
         CommentAudioFingerprint(audioWrapper, lifecycleScope, ::dispatch),
@@ -125,6 +126,8 @@ internal class TicketFragment: TeaFragment<Model, Event, Effect>() {
     private val requestAudioPermissionLauncher = registerForActivityResult(RequestPermission()) { }
 
     private lateinit var audioWrapper: AudioWrapper
+
+    private lateinit var resourceContextWrapper: ResourceContextWrapper
 
     override fun createRenderer(): ViewRenderer<Model> = diff {
         diff(Model::inputText) { text -> if (!binding.inputEditText.hasFocus()) binding.inputEditText.setText(text) }
@@ -291,6 +294,8 @@ internal class TicketFragment: TeaFragment<Model, Event, Effect>() {
             dispatch(Event.OnRatingClick(null, result))
         }
         audioWrapper = injector().audioWrapper
+        resourceContextWrapper = injector().resourceContextWrapper
+
     }
 
     override fun onCreateView(
