@@ -9,6 +9,7 @@ import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.platform.app.InstrumentationRegistry
 import com.pyrus.pyrusservicedesk.sdk.repositories.data_base.Migration3to4
 import com.pyrus.pyrusservicedesk.sdk.repositories.data_base.Migration4to5
+import com.pyrus.pyrusservicedesk.sdk.repositories.data_base.Migration6to7
 import com.pyrus.pyrusservicedesk.sdk.repositories.data_base.SdDatabase
 import junit.framework.TestCase.assertEquals
 import org.junit.Rule
@@ -98,6 +99,31 @@ class MigrationTest {
 
     }
 
+
+    @Test
+    @Throws(IOException::class)
+    fun migrate6To7() {
+        var db = helper.createDatabase(TEST_DB, 6)
+
+        db.insertValue(SdDatabase.COMMENTS_TABLE, ::putCommentsV6Values)
+
+        db.close()
+
+        db = helper.runMigrationsAndValidate(TEST_DB, 7, true, Migration6to7())
+
+        val commandsCursor = db.query("SELECT * FROM ${SdDatabase.COMMENTS_TABLE}")
+
+        commandsCursor.moveToNext()
+
+        commandsCursor.getColumnIndexOrThrow("system_comment_type")
+
+        val systemCommentTypeIndex = commandsCursor.getColumnIndexOrThrow("system_comment_type")
+        val systemCommentTypeValue = commandsCursor.getIntOrNull(systemCommentTypeIndex)
+
+        assertEquals(0, systemCommentTypeValue)
+
+    }
+
     private fun SupportSQLiteDatabase.insertValue(table: String, vararg stackers: (values: ContentValues) -> Unit) {
         val personContentValues = ContentValues()
         for (stacker in stackers) {
@@ -106,7 +132,7 @@ class MigrationTest {
         insert(table, SQLiteDatabase.CONFLICT_REPLACE, personContentValues)
     }
 
-    private fun putCommentsV3Values(contentValues: ContentValues) {
+    private fun putCommentsV6Values(contentValues: ContentValues) {
         contentValues.put("comment_id", 1L)
         contentValues.put("ticket_id", 11111111L)
         contentValues.put("body", "Pop")
@@ -118,6 +144,7 @@ class MigrationTest {
         contentValues.put("author_id", "hngvgf152")
         contentValues.put("author_avatar_id", 13)
         contentValues.put("author_avatar_color", "color")
+        contentValues.put("is_system", true)
     }
 
     private fun putCommandsV3Values(contentValues: ContentValues) {

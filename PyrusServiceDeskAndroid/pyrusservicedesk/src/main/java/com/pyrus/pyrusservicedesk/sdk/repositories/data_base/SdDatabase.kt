@@ -36,7 +36,7 @@ import com.pyrus.pyrusservicedesk.sdk.repositories.data_base.data.UserEntity
         LocalAttachmentEntity::class,
         MemberEntity::class,
     ],
-    exportSchema = false,
+    exportSchema = true,
     version = 7
 )
 @TypeConverters(Converter::class)
