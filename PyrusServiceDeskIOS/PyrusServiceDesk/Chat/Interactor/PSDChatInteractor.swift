@@ -369,6 +369,10 @@ private extension PSDChatInteractor {
                 presenter.doWork(.updateTitle(connectionError: !PyrusServiceDesk.syncManager.networkAvailability))
             }
             
+            if chat?.messages.last?.systemCommentType == 1 {
+                presenter.doWork(.updateOperatorTime(timeMessage: nil))
+            }
+            
             if fromPush || !PyrusServiceDesk.multichats && isLoading {
                 isRefresh = true
                 

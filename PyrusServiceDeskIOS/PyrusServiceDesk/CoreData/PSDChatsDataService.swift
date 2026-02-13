@@ -272,6 +272,7 @@ extension PSDChatsDataService: PSDChatsDataServiceProtocol {
                 dbMessage.authorName = message.owner?.name
                 dbMessage.authorAvatarId = message.owner?.imagePath
                 dbMessage.isSystem = message.isSystemMessage
+                dbMessage.systemCommentType = Int16(message.systemCommentType ?? 0)
                 if let rating = message.rating {
                     dbMessage.rating = Int32(rating)
                 }
@@ -364,6 +365,7 @@ extension PSDChatsDataService: PSDChatsDataServiceProtocol {
                             message.rating = Int(dbMessage.rating)
                             message.isSupportMessage = !dbMessage.isOutgoing
                             message.isSystemMessage = dbMessage.isSystem
+                            message.systemCommentType = Int(dbMessage.systemCommentType)
                             
                             // Обработка состояния сообщения
                             switch dbMessage.state {
@@ -463,6 +465,7 @@ extension PSDChatsDataService: PSDChatsDataServiceProtocol {
                         message.rating = Int(dbMessage.rating)
                         message.isSupportMessage = !dbMessage.isOutgoing
                         message.isSystemMessage = dbMessage.isSystem
+                        message.systemCommentType = Int(dbMessage.systemCommentType)
                         
                         switch dbMessage.state {
                         case 0:
@@ -747,6 +750,7 @@ extension PSDChatsDataService: PSDChatsDataServiceProtocol {
                     message.rating = Int(dbMessage.rating)
                     message.isSupportMessage = !dbMessage.isOutgoing
                     message.isSystemMessage = dbMessage.isSystem
+                    message.systemCommentType = Int(dbMessage.systemCommentType)
                     
                     // Обработка состояния сообщения
                     switch dbMessage.state {
@@ -835,6 +839,7 @@ extension PSDChatsDataService: PSDChatsDataServiceProtocol {
                 message.rating = Int(dbMessage.rating)
                 message.isSupportMessage = !dbMessage.isOutgoing
                 message.isSystemMessage = dbMessage.isSystem
+                message.systemCommentType = Int(dbMessage.systemCommentType)
                 
                 // Обработка состояния сообщения
                 switch dbMessage.state {
