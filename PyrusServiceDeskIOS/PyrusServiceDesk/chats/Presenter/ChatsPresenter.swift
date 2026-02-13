@@ -67,7 +67,10 @@ extension ChatsPresenter: ChatsPresenterProtocol {
 @available(iOS 13.0, *)
 private extension ChatsPresenter {
     func updateChats(open: Bool = false) {
-        let chatsModel = self.prepareChats(chats: self.chats)
+        var chatsModel = self.prepareChats(chats: self.chats)
+        let an = NewAnnouncementsModel(logos: [UIImage(named: "iiko") ?? UIImage(), UIImage(named: "iiko") ?? UIImage()], title: "iiko и sun", subtitle: "2 новых объявления")
+        let model = PSDChatsViewModel(data: an, type: .announcements)
+        chatsModel[0] = [model] + chatsModel[0]
         self.view?.show(.updateChats(chats: chatsModel))
         if open {
             self.view?.show(.scrollToClosedTickets)

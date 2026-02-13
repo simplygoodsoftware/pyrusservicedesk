@@ -56,6 +56,8 @@ import UIKit
         }
     }
     
+    static var announcements = [PSDAnnouncement]()
+    
     static var currentUserId: String?
     static var currentClientId: String?
     static var anonimClients: Set<String> = []
@@ -258,6 +260,12 @@ import UIKit
             ///todo - добавить обработку ошибки
             completion(nil)
         }
+    }
+    
+    
+    static func getAnnouncementsController() -> UIViewController {
+        let builder = AnnouncementsBuilder()
+        return builder.makeModule()
     }
     
     ///Show chat

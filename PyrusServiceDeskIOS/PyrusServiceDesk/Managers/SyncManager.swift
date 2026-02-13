@@ -76,10 +76,6 @@ private extension SyncManager {
         guard PyrusServiceDesk.isStarted || !PyrusServiceDesk.multichats else { return }
         PSDMessagesStorage.loadAttachments()
         
-        if isFilter {
-            print("filter 2")
-        }
-        
         if !self.isFilter {
             self.isFilter = isFilter
         }
@@ -100,7 +96,7 @@ private extension SyncManager {
         }
         
         let userId = PyrusServiceDesk.customUserId
-        PSDGetChats.get(commands: ticketCommands.map({ $0.toDictionary() })) { [weak self, userId] chats, commandsResult, authorAccessDenied, clientsArray, complete in
+        PSDGetChats.get(commands: ticketCommands.map({ $0.toDictionary() })) { [weak self, userId] getTicketsResponse in
             guard PyrusServiceDesk.isStarted || !PyrusServiceDesk.multichats else { return }
             if !PyrusServiceDesk.multichats && userId != PyrusServiceDesk.customUserId {
                 return
@@ -108,21 +104,22 @@ private extension SyncManager {
             guard let self = self else { return }
             
             let userInfo = ["isFilter": isFilter]
-            if isFilter {
-                print("filter 3")
-            }
-            var clients = clientsArray
+            var clients = getTicketsResponse.clients
             
             // Проверяем доступы и удаляем вендоров (clients) при необходимости
-            checkAccesses(authorAccessDenied: authorAccessDenied, clientsArray: clientsArray, clients: &clients, userInfo: userInfo)
+            checkAccesses(authorAccessDenied: getTicketsResponse.authorAccessDenied, clientsArray: getTicketsResponse.clients, clients: &clients, userInfo: userInfo)
             
             // Обрабатываем результаты команд
-            updateCommandsAndMessageStorage(commandsResult: commandsResult)
+            updateCommandsAndMessageStorage(commandsResult: getTicketsResponse.commandsResult)
+            
+            if let announcementsResult = getTicketsResponse.announcementsResult {
+                updateAnnouncements(announcementsResult: announcementsResult)
+            }
             
             DispatchQueue.main.async { [weak self] in
                 guard let self else { return }
                 
-                if let chats, complete {
+                if let chats = getTicketsResponse.chats, getTicketsResponse.complete {
                     var unreadChats = 0
                     var lasMessage: PSDMessage?
                     if let chat = chats.first {
@@ -158,7 +155,7 @@ private extension SyncManager {
                         }
                     }
                     
-                } else if !complete {
+                } else if !getTicketsResponse.complete {
                     updateRepeatSyncTimer()
                     networkAvailability = false
                     isRequestInProgress = false
@@ -181,6 +178,12 @@ private extension SyncManager {
         if PyrusServiceDesk.multichats {
             let cache = chatsDataService.getAllChats()
             PyrusServiceDesk.chats = cache
+            let announcements = chatsDataService.getAllAnnouncements()
+            PyrusServiceDesk.announcements = announcements
+            for client in PyrusServiceDesk.clients {
+                client.lasAnnoncementId = announcements.last(where: { $0.appId == client.clientId })?.id
+            }
+            
         } else {
             let createMessages = PSDMessagesStorage.getNewCreateTicketMessages(PyrusServiceDesk.customUserId)
             let localChats = PSDGetChats.getSortedChatForMessages(createMessages)
@@ -308,6 +311,16 @@ private extension SyncManager {
                         NotificationCenter.default.post(name: PyrusServiceDesk.chatsUpdateNotification, object: nil, userInfo: userInfo)
                     }
                 }
+            }
+        }
+    }
+    
+    func updateAnnouncements(announcementsResult: AnnouncementsResult) {
+        coreDataService.deleteAnnouncements(ids: Array( announcementsResult.deletedAnnouncementsIds ?? []))
+        chatsDataService.saveAnnouncementsModels(with: announcementsResult.newAnnouncements ?? []) { [weak self] _ in
+            guard let self else { return }
+            chatsDataService.getAllAnnouncements() { announcements in
+                PyrusServiceDesk.announcements = announcements
             }
         }
     }

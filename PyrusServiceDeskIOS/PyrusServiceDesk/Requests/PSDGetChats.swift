@@ -10,7 +10,7 @@ struct PSDGetChats {
      Get chats from server.
      On completion returns [PSDChat] if it was received, or empty nil, if no connection.
      */
-    static func get(commands: [[String: Any?]?] = [], completion: @escaping (_ chatsArray: [PSDChat]?, _ commandsResults: [TicketCommandResult]?, _ authorAccessDenied: [String]?, _ clients: [PSDClientInfo]?, _ complete: Bool) -> Void) {
+    static func get(commands: [[String: Any?]?] = [], completion: @escaping (GetTicketsResponse) -> Void) {
         //remove old session if it is
         remove()
         var parameters = [String: Any]()
@@ -56,6 +56,16 @@ struct PSDGetChats {
         parameters["additional_users"] = additional_users
         parameters["commands"] = commands
         
+        var announcementsChepoints = [[String: Any]]()
+        for client in PyrusServiceDesk.clients {
+            var announcementsChepoint = [String: Any]()
+            announcementsChepoint["app_id"] = client.clientId
+            announcementsChepoint["last_helpy_announcement_id"] = client.lasAnnoncementId
+            announcementsChepoint["last_helpy_announcement_change_datetime"] = client.lasAnnouncementUpdateDate
+            announcementsChepoints.append(announcementsChepoint)
+        }
+        parameters["helpy_announcement_feed_checkpoints"] = announcementsChepoints
+        
         let request: URLRequest = URLRequest.createRequest(type:.chats, parameters: parameters)
         
         let startTime1 = CFAbsoluteTimeGetCurrent()
@@ -63,7 +73,7 @@ struct PSDGetChats {
         
         PSDGetChats.sessionTask = PyrusServiceDesk.mainSession.dataTask(with: request) { data, response, error in
             guard let data = data, error == nil else { // check for fundamental networking error
-                completion(nil, nil, nil, nil, false)
+                completion(GetTicketsResponse(complete: false))
                 return
             }
             var startTime2 = CFAbsoluteTimeGetCurrent() - startTime1
@@ -74,7 +84,7 @@ struct PSDGetChats {
                 DispatchQueue.main.async {
                     if httpStatus.statusCode == 429 {
                         SyncManager.removeLastActivityDate()
-                        completion(nil, nil, nil, nil, true)
+                        completion(GetTicketsResponse(complete: true))
                     }
                     if httpStatus.statusCode == 403 {
                         if let onFailed = PyrusServiceDesk.onAuthorizationFailed {
@@ -88,13 +98,23 @@ struct PSDGetChats {
                 }
                 let chatsData = try? JSONSerialization.jsonObject(with: data, options: .allowFragments) as? [String : Any] ?? [String: Any]()
                 print("Запрос не прошел, код ошибки (\(httpStatus.statusCode), ошибка: \(String(describing: error))")
-                completion(nil, nil, nil, nil, false)
+                completion(GetTicketsResponse(complete: false))
             } else {
                 do{
-                    let chatsData = try JSONSerialization.jsonObject(with: data, options: .allowFragments) as? [String : Any] ?? [String: Any]()
+                    let jsonString = String(decoding: data, as: UTF8.self)
+                    let fixed = jsonString.replacingOccurrences(
+                        of: #"\"attachments\":\[\s*\"attachments\":"#,
+                        with: "\"attachments\":[",
+                        options: .regularExpression
+                    )
+
+                    let fixedData = Data(fixed.utf8)
+                    let chatsData = try JSONSerialization.jsonObject(with: fixedData, options: .allowFragments) as? [String : Any] ?? [String: Any]()
                     
                     let clientsArray = chatsData["applications"] as? NSArray ?? NSArray()
-                    let clients = generateClients(from: clientsArray)
+                    let clientsResult = generateClients(from: clientsArray)
+                    let clients = clientsResult.clients
+                    let announcementsResult = generateAnnouncements(from: clientsResult.serverAnnouncements)
                     var startTime3 = CFAbsoluteTimeGetCurrent() - startTime2
                     print("⏱ getChats serialization completed in \(startTime3) seconds")
                     startTime3 = CFAbsoluteTimeGetCurrent()
@@ -103,20 +123,20 @@ struct PSDGetChats {
                     var startTime4 = CFAbsoluteTimeGetCurrent() - startTime3
                     print("⏱ generateChats completed in \(startTime4) seconds")
                     startTime4 = CFAbsoluteTimeGetCurrent()
-                   // PyrusServiceDesk.chats = chats
 
                     let authorAccessDenied = chatsData["author_access_denied"] as? [String]
-//                    print("количество чатов: \(chats.count)")
-                    do {
-                        let commandsArray = chatsData["commands_result"] as? NSArray ?? NSArray()
-                        let jsonData = try JSONSerialization.data(withJSONObject: commandsArray, options: [])
-                        let decoder = JSONDecoder()
-                        let commands = try decoder.decode([TicketCommandResult].self, from: jsonData)
-                        completion(chats, commands, authorAccessDenied, clients, true)
-                    } catch {
-                        completion(chats, nil, authorAccessDenied, clients, true)
-                    }
-                } catch { 
+                    let commands = generateCommadsResults(from: chatsData)
+                    
+                    let response = GetTicketsResponse(
+                        complete: true,
+                        chats: chats,
+                        clients: clients,
+                        commandsResult: commands,
+                        authorAccessDenied: authorAccessDenied,
+                        announcementsResult: announcementsResult
+                    )
+                    completion(response)
+                } catch {
                     print("PSDGetChats error when convert to dictionary")
                 }
             }
@@ -134,10 +154,93 @@ struct PSDGetChats {
         }
     }
     
-    private static func generateClients(from response: NSArray) -> [PSDClientInfo] {
+    private static func generateCommadsResults(from chatsData: [String: Any]) -> [TicketCommandResult]? {
+        do {
+            let commandsArray = chatsData["commands_result"] as? NSArray ?? NSArray()
+            let jsonData = try JSONSerialization.data(withJSONObject: commandsArray, options: [])
+            let decoder = JSONDecoder()
+            let commands = try decoder.decode([TicketCommandResult].self, from: jsonData)
+            return commands
+        } catch {
+            return nil
+        }
+    }
+    
+    private static func generateAnnouncements(from announcementsResponse: [String: AnnouncementsResponse]) -> AnnouncementsResult {
+        var announcements: [PSDAnnouncement] = []
+        var deletedAnnouncementsIds = Set<String>()
+        for (appId, announcementResponse) in announcementsResponse {
+            
+            var isRead = true
+            for newAnnouncement in announcementResponse.newAnnouncements ?? [] {
+                let announcement = PSDAnnouncement(
+                    id: newAnnouncement.id,
+                    text: getText(from: newAnnouncement.content),
+                    date: newAnnouncement.createdAt,
+                    isRead: isRead,
+                    attachments: getAttachments(from: newAnnouncement.content),
+                    appId: appId
+                )
+                announcements.append(announcement)
+                if newAnnouncement.id == announcementResponse.inboxItem.lastReadMessageId {
+                    isRead = false
+                }
+            }
+            
+            for changedAnnouncement in announcementResponse.announcementChanges ?? [] {
+                if changedAnnouncement.type == .deleted {
+                    deletedAnnouncementsIds.insert(changedAnnouncement.messageId)
+                    announcements.removeAll(where: { $0.id == changedAnnouncement.messageId })
+                } else if changedAnnouncement.type == .edited {
+                    if !announcements.contains(where: { $0.id == changedAnnouncement.messageId }) {
+                        let announcement = PSDAnnouncement(
+                            id: changedAnnouncement.messageId,
+                            text: getText(from: changedAnnouncement.content),
+                            date: changedAnnouncement.performedAt,
+                            isRead: changedAnnouncement.messageId <= announcementResponse.inboxItem.lastReadMessageId ?? "",
+                            attachments: getAttachments(from: changedAnnouncement.content),
+                            appId: appId
+                        )
+                        announcements.append(announcement)
+                    }
+                }
+            }
+        }
+        
+        return AnnouncementsResult(newAnnouncements: announcements, deletedAnnouncementsIds: deletedAnnouncementsIds)
+        
+        func getText(from content: Content?) -> String {
+            guard let content else { return "" }
+            var text: String = ""
+            for block in content.richTextDocument.richTextBlocks {
+                text += block.richTextInlines.map(\.string).joined() + "\n"
+            }
+            text = text.trimmingCharacters(in: .whitespacesAndNewlines)
+            return text
+        }
+        
+        func getAttachments(from content: Content?) -> [PSDAnnouncementAttachment] {
+            guard let content else { return [] }
+            let attachments: [PSDAnnouncementAttachment] = (content.attachments ?? []).map { attach in
+                PSDAnnouncementAttachment(
+                    id: attach.id,
+                    name: attach.name,
+                    size: attach.size,
+                    width: attach.width,
+                    height: attach.height,
+                    media: attach.media
+                )
+            }
+            return attachments
+        }
+    }
+    
+    private static func generateClients(from response: NSArray) -> ClientsResult {
         let updateAccessCommands = PyrusServiceDesk.repository.getCommands().filter({ $0.type == TicketCommandType.updateAccess.rawValue }).sorted(by: { $0.params.date ?? Date() > $1.params.date ?? Date() })
         var clients = PyrusServiceDesk.clients
         var serverClients = [PSDClientInfo]()
+        var serverAnnouncements = [String: AnnouncementsResponse]()
+        
         for i in 0..<response.count {
             guard let dic: [String: Any] = response[i] as? [String: Any] else {
                 continue
@@ -146,6 +249,7 @@ struct PSDGetChats {
             let clientName = dic["org_name"] as? String ?? "iiko"
             let clientIcon = dic["org_logo_url"] as? String ?? ""
             let clientDescription = dic["org_description"] as? String
+            
             let client = PSDClientInfo(clientId: clientId, clientName: clientName, clientIcon: clientIcon)
             client.clientDescription = clientDescription
             client.welcomeMessage = dic[PSDGetChats.WELCOME_MESSAGE] as? String
@@ -159,6 +263,15 @@ struct PSDGetChats {
                     print("Error decoding rating settings JSON: \(error)")
                 }
             }
+            
+            let announcementsDict = dic["helpy_announcement_feed_delta"] as? [String: Any] ?? [:]
+            let announcementsInfo = decodeAnnouncement(from: announcementsDict)
+            serverAnnouncements[clientId] = announcementsInfo
+            client.lasAnnouncementUpdateDate = announcementsInfo?.inboxItem.lastMessageDatetimeUTC
+            client.lasAnnoncementReadId = announcementsInfo?.inboxItem.lastReadMessageId
+            if let id = announcementsInfo?.newAnnouncements?.last?.id {
+                client.lasAnnoncementId = id
+            }
 
             if !clients.contains(client) {
                 clients.append(client)
@@ -169,6 +282,11 @@ struct PSDGetChats {
                 storeClient.welcomeMessage = client.welcomeMessage
                 if storeClient.clientIcon != client.clientIcon {
                     storeClient.clientIcon = client.clientIcon
+                }
+                storeClient.lasAnnouncementUpdateDate = client.lasAnnouncementUpdateDate
+                storeClient.lasAnnoncementReadId = client.lasAnnoncementReadId
+                if let id = client.lasAnnoncementId {
+                    storeClient.lasAnnoncementId = client.lasAnnoncementId
                 }
             }
             if !serverClients.contains(client) {
@@ -226,7 +344,6 @@ struct PSDGetChats {
                     user.authors = userAuthors
                 }
             }
-            
         }
         
         for client in clients {
@@ -235,8 +352,39 @@ struct PSDGetChats {
             }
         }
         
-        return clients
-    }    
+        return ClientsResult(clients: clients, serverAnnouncements: serverAnnouncements)
+    }
+    
+    private static func decodeAnnouncement(from dict: [String: Any]) -> AnnouncementsResponse? {
+        do {
+            let data = try JSONSerialization.data(
+                withJSONObject: dict,
+                options: []
+            )
+            
+            let decoder = JSONDecoder()
+            
+            let formatter = ISO8601DateFormatter()
+            formatter.formatOptions = [.withInternetDateTime, .withFractionalSeconds]
+            
+            decoder.dateDecodingStrategy = .custom { decoder in
+                let container = try decoder.singleValueContainer()
+                let string = try container.decode(String.self)
+                return formatter.date(from: string)!
+            }
+            
+            let announcementsResponse = try decoder.decode(AnnouncementsResponse.self, from: data)
+            return announcementsResponse
+        } catch {
+            print(error)
+
+            if let decodingError = error as? DecodingError {
+                print(decodingError)
+            }
+            
+            return nil
+        }
+    }
     
     private static func generateChats(from response: [[String: Any]], clients: [PSDClientInfo]) -> [PSDChat] {
         var chats: [PSDChat] = []
@@ -376,3 +524,4 @@ let attachmentsParameter = "attachments"
 let guidParameter = "guid"
 let CLIENT_ID_KEY = "client_id"
 let EXTRA_FIELDS_KEY = "extra_fields"
+

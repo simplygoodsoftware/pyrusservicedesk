@@ -6,6 +6,7 @@ enum TicketCommandType: Int {
     case setPushToken
     case updateAccess
     case calcOperatorTime = 4
+    case readAnnouncemnts = 5
 }
 
 struct AttachmentData: Codable {
@@ -31,8 +32,9 @@ class TicketCommandParams: Codable {
     var date: Date? = nil
     var messageClientId: String? = nil
     let extraFields: [String: String]?
+    let lastReadAnnouncementId: String?
     
-    init(ticketId: Int? = nil, appId: String?, requestNewTicket: Bool? = nil, userId: String?, message: String? = nil, attachments: [AttachmentData]? = nil, authorId: String? = nil, token: String? = nil, type: String? = nil, messageId: Int? = nil, rating: Int? = nil, ratingComment: String? = nil, date: Date? = nil, messageClientId: String? = nil, hasAccess: Bool? = nil, extraFields: [String: String]? = nil) {
+    init(ticketId: Int? = nil, appId: String?, requestNewTicket: Bool? = nil, userId: String?, message: String? = nil, attachments: [AttachmentData]? = nil, authorId: String? = nil, token: String? = nil, type: String? = nil, messageId: Int? = nil, rating: Int? = nil, ratingComment: String? = nil, date: Date? = nil, messageClientId: String? = nil, hasAccess: Bool? = nil, extraFields: [String: String]? = nil, lastReadAnnouncementId: String? = nil) {
 
         self.ticketId = ticketId
         self.appId = appId
@@ -50,6 +52,7 @@ class TicketCommandParams: Codable {
         self.hasAccess = hasAccess
         self.ratingComment = ratingComment
         self.extraFields = extraFields
+        self.lastReadAnnouncementId = lastReadAnnouncementId
     }
     
     enum CodingKeys: String, CodingKey {
@@ -67,6 +70,7 @@ class TicketCommandParams: Codable {
         case hasAccess = "has_access"
         case ratingComment = "rating_comment"
         case extraFields = "extra_fields"
+        case lastReadAnnouncementId = "last_read_announcement_id"
     }
 }
 

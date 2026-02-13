@@ -1,10 +1,10 @@
 import UIKit
 
-@available(iOS 13.0, *)
 final class PSDChatsCellConfigurator: TableViewCellConfiguratorProtocol {
 
     private let psdChatInfoCellIdentifier = ReuseIdentifier<PSDChatInfoTableViewCell>(identifier:  PSDChatInfoTableViewCell.identifier)
     private let psdClosedTicketsCellIdentifier = ReuseIdentifier<ClosedTicketsCell>(identifier: ClosedTicketsCell.identifier)
+    private let psdNewAnnouncementsCelldentifier = ReuseIdentifier<NewAnnouncementsCell>(identifier: NewAnnouncementsCell.identifier)
 
     let tableView: UITableView
 
@@ -12,7 +12,7 @@ final class PSDChatsCellConfigurator: TableViewCellConfiguratorProtocol {
         self.tableView = tableView
         tableView.register(PSDChatInfoTableViewCell.self, forCellReuseIdentifier: PSDChatInfoTableViewCell.identifier)
         tableView.register(ClosedTicketsCell.self, forCellReuseIdentifier: ClosedTicketsCell.identifier)
-
+        tableView.register(NewAnnouncementsCell.self, forCellReuseIdentifier: NewAnnouncementsCell.identifier)
     }
 
     func getCell(model: PSDChatsViewModel, indexPath: IndexPath) -> UITableViewCell {
@@ -28,6 +28,12 @@ final class PSDChatsCellConfigurator: TableViewCellConfiguratorProtocol {
                 let cell = getCell(reuseIdentifier: psdClosedTicketsCellIdentifier, indexPath: indexPath)
                 cell.configure(with: headerModel)
                 cell.selectionStyle = .none
+                return cell
+            }
+        case .announcements:
+            if let announcementsModel = model.data as? NewAnnouncementsModel {
+                let cell = getCell(reuseIdentifier: psdNewAnnouncementsCelldentifier, indexPath: indexPath)
+                cell.configure(with: announcementsModel)
                 return cell
             }
         }

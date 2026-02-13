@@ -74,7 +74,7 @@ class PSDChatsViewController: UIViewController {
     private var isFiltered = false {
         didSet {
             let image = isFiltered ? UIImage.PSDImage(name: "fillFilter") : UIImage.PSDImage(name: "filter")
-            filterImage.image = image?.imageWith(color: customization?.themeColor ?? .darkAppColor)
+            filterImage.image = image
         }
     }
     
@@ -424,7 +424,7 @@ private extension PSDChatsViewController {
     
     func setupFilterButton() {
         let mainColor = customization?.themeColor ?? .darkAppColor
-        filterImage = UIImageView(image: UIImage.PSDImage(name: "filter")?.imageWith(color: mainColor))
+        filterImage = UIImageView(image: UIImage.PSDImage(name: "filter"))//?.imageWith(color: mainColor))
         filterButton.addSubview(filterImage)
         navigationView.addSubview(filterButton)
         filterImage.translatesAutoresizingMaskIntoConstraints = false
@@ -550,6 +550,8 @@ extension PSDChatsViewController: UITableViewDelegate, UITableViewDataSource {
             return 80
         case .header:
             return 48
+        case .announcements:
+            return 84
         }
     }
     
