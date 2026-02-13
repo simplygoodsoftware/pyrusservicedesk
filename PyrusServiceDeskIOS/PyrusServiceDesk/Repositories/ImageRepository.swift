@@ -135,7 +135,7 @@ class ImageRepository: ImageRepositoryProtocol {
             try fileManager.createDirectory(at: directoryURL, withIntermediateDirectories: true, attributes: nil)
             try fileManager.createDirectory(at: clientsDirectoryURL, withIntermediateDirectories: true, attributes: nil)
             
-            print("Репозиторий успешно очищен")
+//            print("Репозиторий успешно очищен")
         } catch {
             print("Ошибка при очистке репозитория: \(error)")
         }
