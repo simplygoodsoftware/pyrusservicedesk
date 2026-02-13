@@ -206,7 +206,12 @@ class PSDChatViewController: PSDViewController {
                        if !((self.oldHeight - self.messageInputView.frame.size.height).rounded() == self.view.safeAreaInsets.bottom)
                        {
                     self.isAddButtonTapped = false
-                    self.tableView.contentInset.top = self.messageInputView.frame.size.height
+                    
+                    if #available(iOS 26.0, *) {
+                        self.tableView.contentInset.top = self.messageInputView.frame.size.height + self.view.safeAreaInsets.bottom
+                    } else {
+                        self.tableView.contentInset.top = self.messageInputView.frame.size.height
+                    }
                 }
                  })
          //   }
