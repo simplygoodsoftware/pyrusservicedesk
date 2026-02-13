@@ -63,6 +63,13 @@ android {
         jvmTarget = JavaVersion.VERSION_17.toString()
     }
 
+    ksp {
+        arg("room.schemaLocation", "$projectDir/SdDbSchemas")
+        arg("room.expandProjection", "true")
+
+        arg("ksp.logging.level", "INFO")
+    }
+
     lint {
         abortOnError false
     }

@@ -1,5 +1,7 @@
 package com.pyrus.pyrusservicedesk._ref.data
 
+import com.pyrus.pyrusservicedesk.sdk.sync.SystemCommentType
+
 /**
  * Represents ticket object.
  * @param id comment id.
@@ -26,4 +28,5 @@ data class Comment(
     val author: Author?,
     val isSending: Boolean,
     val isSystem: Boolean,
+    val systemCommentType: Int,
 )

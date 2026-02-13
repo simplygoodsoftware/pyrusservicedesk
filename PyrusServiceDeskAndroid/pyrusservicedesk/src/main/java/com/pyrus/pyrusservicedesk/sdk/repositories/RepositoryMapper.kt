@@ -38,6 +38,7 @@ import com.pyrus.pyrusservicedesk.sdk.repositories.data_base.data.support.Ticket
 import com.pyrus.pyrusservicedesk.sdk.sync.CommandParamsDto.CommandsParamsType
 import com.pyrus.pyrusservicedesk.sdk.sync.CommandParamsDto.CommandsParamsType.CalcOperatorTime
 import com.pyrus.pyrusservicedesk.sdk.sync.SyncRequest
+import com.pyrus.pyrusservicedesk.sdk.sync.SystemCommentType
 import com.pyrus.pyrusservicedesk.sdk.sync.TicketCommandType.CreateComment
 import com.pyrus.pyrusservicedesk.sdk.sync.TicketCommandType.MarkTicketAsRead
 import java.util.Calendar
@@ -303,6 +304,7 @@ internal class RepositoryMapper(
         author = commentEntity.comment.author?.let { map(account, it) },
         isSending = false,
         isSystem = commentEntity.comment.isSystem,
+        systemCommentType = commentEntity.comment.systemCommentType
     )
 
     fun map(commandEntity: CommandWithAttachmentsEntity): Comment = Comment(
@@ -318,6 +320,7 @@ internal class RepositoryMapper(
         author = null,
         isSending = !commandEntity.command.isError,
         isSystem = false,
+        systemCommentType = SystemCommentType.Unknown.ordinal
     )
 
     fun map(attachmentEntity: LocalAttachmentEntity) : Attachment = Attachment(

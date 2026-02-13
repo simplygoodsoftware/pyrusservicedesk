@@ -26,6 +26,7 @@ import com.pyrus.pyrusservicedesk.sdk.repositories.data_base.data.TicketEntity
 import com.pyrus.pyrusservicedesk.sdk.repositories.data_base.data.UserEntity
 import com.pyrus.pyrusservicedesk.sdk.repositories.data_base.data.support.CommentWithAttachmentsEntity
 import com.pyrus.pyrusservicedesk.sdk.repositories.data_base.data.support.TicketWithComments
+import com.pyrus.pyrusservicedesk.sdk.sync.SystemCommentType
 
 internal object DatabaseMapper {
 
@@ -146,7 +147,8 @@ internal object DatabaseMapper {
         creationDate = dto.creationDate,
         rating = dto.rating,
         author = dto.author?.let(::mapToAuthorEntity),
-        isSystem = dto.isSystem
+        isSystem = dto.isSystem,
+        systemCommentType = dto.systemCommentType ?: SystemCommentType.Unknown.ordinal
     )
 
     private fun mapToAuthorEntity(dto: AuthorDto) = AuthorEntity(

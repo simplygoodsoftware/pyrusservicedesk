@@ -1,6 +1,7 @@
 package com.pyrus.pyrusservicedesk.sdk.data
 
 import com.pyrus.pyrusservicedesk.sdk.data.json.DateJ
+import com.pyrus.pyrusservicedesk.sdk.sync.SystemCommentType
 import com.squareup.moshi.Json
 import com.squareup.moshi.JsonClass
 
@@ -28,7 +29,7 @@ internal data class CommentDto(
     @Json(name = "rating") val rating: Int? = null,
     @Json(name = "rating_comment") val ratingComment: String? = null,
     @Json(name = "is_system") val isSystem: Boolean,
-    // TODO "client_id" ??
+    @Json(name = "system_comment_type") val systemCommentType: Int? = SystemCommentType.Unknown.ordinal
 ) {
 
     /**
