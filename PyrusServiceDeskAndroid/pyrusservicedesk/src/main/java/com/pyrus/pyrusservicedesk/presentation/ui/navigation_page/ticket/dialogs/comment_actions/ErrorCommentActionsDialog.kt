@@ -5,6 +5,7 @@ import android.content.Context
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
+import android.widget.TextView
 import androidx.appcompat.app.AlertDialog
 import androidx.core.os.bundleOf
 import androidx.fragment.app.DialogFragment
@@ -16,8 +17,8 @@ import com.pyrus.pyrusservicedesk.R
  */
 internal class ErrorCommentActionsDialog: DialogFragment(), View.OnClickListener {
 
-    private lateinit var retry: View
-    private lateinit var delete: View
+    private lateinit var retry: TextView
+    private lateinit var delete: TextView
 
     override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
         super.onCreateDialog(savedInstanceState)
@@ -28,6 +29,11 @@ internal class ErrorCommentActionsDialog: DialogFragment(), View.OnClickListener
 
         retry = view.findViewById(R.id.retry)
         delete = view.findViewById(R.id.delete)
+
+        val localizedContext = injector().resourceContextWrapper.createLocalizedContext(activity as Context)
+
+        retry.text = localizedContext.resources.getString(R.string.psd_retry)
+        delete.text = localizedContext.resources.getString(R.string.psd_delete)
 
         retry.setOnClickListener(this)
         delete.setOnClickListener(this)

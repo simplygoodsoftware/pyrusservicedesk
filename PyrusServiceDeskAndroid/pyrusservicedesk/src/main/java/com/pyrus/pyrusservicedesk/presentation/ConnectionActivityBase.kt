@@ -1,6 +1,7 @@
 package com.pyrus.pyrusservicedesk.presentation
 
 
+import android.content.res.Resources
 import android.graphics.PorterDuff
 import android.os.Bundle
 import android.view.View
@@ -8,6 +9,7 @@ import android.view.View.GONE
 import android.view.View.VISIBLE
 import android.widget.Button
 import android.widget.ProgressBar
+import com.pyrus.pyrusservicedesk.PyrusServiceDesk.Companion.injector
 import com.pyrus.pyrusservicedesk.R
 import com.pyrus.pyrusservicedesk._ref.utils.ConfigUtils
 import com.pyrus.pyrusservicedesk._ref.utils.getColorByAttrId
@@ -54,6 +56,7 @@ internal abstract class ConnectionActivityBase<T: ConnectionViewModelBase>(viewM
         noConnectionView = findViewById(noConnectionViewId)
     }
 
+    override fun getResources(): Resources = injector().resourceContextWrapper.createLocalizedContext(baseContext).resources
     override fun startObserveData() {
         super.startObserveData()
         viewModel.getIsNetworkConnectedLiveData().observe(this) { isConnected ->

@@ -31,6 +31,11 @@ class RatingBottomSheetDialogFragment: BottomSheetDialogFragment() {
         binding.closeBtn.setTextColor(ColorStateList.valueOf(accentColor))
 
         binding.rateUs.text = arguments?.getString(RATE_US_TEXT_COMMENT)
+        binding.rateUsSubText.text = binding.root.resources.getString(R.string.leave_your_comment)
+        binding.input.hint = binding.root.resources.getString(R.string.psd_comment_input_hint)
+        binding.closeBtn.text = binding.root.resources.getString(R.string.psd_close)
+        binding.sendBtn.hint = binding.root.resources.getString(R.string.psd_send)
+
 
         binding.sendBtn.setOnClickListener {
             parentFragmentManager.setFragmentResult(RATING_COMMENT_KEY, bundleOf(RATING_COMMENT_KEY to binding.input.text.toString()))

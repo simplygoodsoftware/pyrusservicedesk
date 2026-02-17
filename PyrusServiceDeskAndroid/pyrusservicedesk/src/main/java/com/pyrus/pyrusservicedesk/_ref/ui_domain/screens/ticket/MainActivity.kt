@@ -23,6 +23,7 @@ import com.pyrus.pyrusservicedesk._ref.utils.navigation.PyrusNavigator
 import com.pyrus.pyrusservicedesk.core.Account
 import com.pyrus.pyrusservicedesk.core.StaticRepository
 import com.pyrus.pyrusservicedesk.databinding.PsdActivityMainBinding
+import java.util.Locale
 
 
 internal class MainActivity : FragmentActivity() {
@@ -41,16 +42,19 @@ internal class MainActivity : FragmentActivity() {
         }
         setTheme(theme)
 
-//
-//        val decorView = window.decorView
-//        var flags: Int = decorView.getSystemUiVisibility()
-//        flags = flags and View.SYSTEM_UI_FLAG_LIGHT_NAVIGATION_BAR.inv()
-//        decorView.setSystemUiVisibility(flags)
+        val currentLocale = Locale.getDefault()
+        val localeCountry = intent.getStringExtra(KEY_LOCALE_COUNTRY) ?: ""
+        val localeLanguage = intent.getStringExtra(KEY_LOCALE_LANGUAGE) ?: currentLocale.language
+        val newLocale = Locale.Builder()
+            .setLanguage(localeLanguage)
+            .setRegion(localeCountry)
+            .build()
+
+        injector().resourceContextWrapper.setLocale(newLocale)
 
         binding = PsdActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
-//        setupWindowInsets(binding.root)
         WindowCompat.setDecorFitsSystemWindows(window, false)
 
         savedInstanceState?.let { ServiceDeskConfiguration.restore(it) }
@@ -140,12 +144,16 @@ internal class MainActivity : FragmentActivity() {
         private const val KEY_ACCOUNT = "KEY_ACCOUNT"
         private const val KEY_OPEN_TICKET_ACTION = "KEY_OPEN_TICKET_ACTION"
         private const val KEY_SEND_COMMENT = "KEY_SEND_COMMENT"
+        private const val KEY_LOCALE_COUNTRY = "KEY_LOCALE_COUNTRY"
+        private const val KEY_LOCALE_LANGUAGE = "KEY_LOCALE_LANGUAGE"
 
-        fun createLaunchIntent(context: Context, account: Account, openTicketAction: OpenTicketAction?, sendComment: String?): Intent {
+        fun createLaunchIntent(context: Context, account: Account, openTicketAction: OpenTicketAction?, sendComment: String?, locale: Locale): Intent {
             return Intent(context, MainActivity::class.java)
                 .putExtra(KEY_ACCOUNT, account)
                 .putExtra(KEY_OPEN_TICKET_ACTION, openTicketAction)
                 .putExtra(KEY_SEND_COMMENT, sendComment)
+                .putExtra(KEY_LOCALE_LANGUAGE, locale.language)
+                .putExtra(KEY_LOCALE_COUNTRY, locale.country)
         }
     }
 

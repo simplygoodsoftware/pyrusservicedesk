@@ -271,7 +271,9 @@ internal class FilePreviewActivity: ConnectionActivityBase<FilePreviewViewModel>
 
         binding.noConnection.noConnectionImageView.setColorFilter(secondaryColor)
         binding.noConnection.noConnectionTextView.setTextColor(secondaryColor)
+        binding.noConnection.noConnectionTextView.text = binding.root.resources.getString(R.string.psd_no_connection)
         binding.noConnection.reconnectButton.setTextColor(ConfigUtils.getAccentColor(this))
+        binding.noConnection.reconnectButton.text = binding.root.resources.getString(R.string.psd_retry)
         binding.noConnection.root.setBackgroundColor(ConfigUtils.getNoConnectionBackgroundColor(this))
 
         window.clearFlags(WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS)

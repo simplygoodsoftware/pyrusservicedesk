@@ -61,7 +61,7 @@ internal class DateViewHolder(
 
     override fun bind(builder: PayloadActionBuilder<CommentEntry.Date>) = builder.diff {
         this.entry::date.payloadCheck {
-            binding.date.text = entry.date.text(resourceContextWrapper.getLocalizedContext())
+            binding.date.text = entry.date.text(binding.date.context)
         }
     }
 }

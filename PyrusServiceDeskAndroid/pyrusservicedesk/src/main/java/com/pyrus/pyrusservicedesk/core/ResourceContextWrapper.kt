@@ -1,24 +1,27 @@
 package com.pyrus.pyrusservicedesk.core
 
-import android.app.Application
 import android.content.Context
 import android.content.res.Configuration
+import android.view.ContextThemeWrapper
 import java.util.Locale
 
-class ResourceContextWrapper(private val appContext: Application) {
-    //private val locale: Locale? = getLocaleFromContext()
+class ResourceContextWrapper() {
+    private var appLocale: Locale? = Locale.getDefault()
 
-    fun getLocalizedContext(): Context = appContext.createConfigurationContext(
-        Configuration(appContext.resources.configuration).apply {
-            setLocale(getLocaleFromContext())
-        }
-    )
-    fun getLocaleFromContext(): Locale {
-        val config = appContext.resources.configuration
-        return config.locales.get(0)
+    fun createLocalizedContext(context: Context): Context {
+        val config = Configuration(context.resources.configuration)
+        config.setLocale(appLocale)
+        config.setLayoutDirection(appLocale)
+
+        val newContext = context.createConfigurationContext(config)
+        return ContextThemeWrapper(newContext, context.theme)
     }
 
-//    private fun getLocalizedString(resId: Int): String {
-//        return localizedContext.getString(resId)
-//    }
+    fun setLocale(locale: Locale) {
+        this.appLocale = locale
+    }
+    fun getLocaleFromContext(): Locale {
+        return appLocale ?: Locale.getDefault()
+    }
+
 }

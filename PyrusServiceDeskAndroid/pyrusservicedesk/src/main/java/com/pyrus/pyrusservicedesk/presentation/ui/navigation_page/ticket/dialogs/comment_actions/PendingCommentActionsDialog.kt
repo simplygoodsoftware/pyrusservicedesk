@@ -6,8 +6,10 @@ import android.content.DialogInterface
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
+import android.widget.TextView
 import androidx.appcompat.app.AlertDialog
 import androidx.fragment.app.DialogFragment
+import com.pyrus.pyrusservicedesk.PyrusServiceDesk.Companion.injector
 import com.pyrus.pyrusservicedesk.R
 import com.pyrus.pyrusservicedesk._ref.utils.getViewModelWithActivityScope
 
@@ -19,8 +21,8 @@ internal class PendingCommentActionsDialog: DialogFragment(), View.OnClickListen
     private val sharedModel: PendingCommentActionSharedViewModel by getViewModelWithActivityScope(
         PendingCommentActionSharedViewModel::class.java)
 
-    private lateinit var retry: View
-    private lateinit var delete: View
+    private lateinit var retry: TextView
+    private lateinit var delete: TextView
 
     override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
         super.onCreateDialog(savedInstanceState)
@@ -31,6 +33,11 @@ internal class PendingCommentActionsDialog: DialogFragment(), View.OnClickListen
 
         retry = view.findViewById(R.id.retry)
         delete = view.findViewById(R.id.delete)
+
+        val localizedContext = injector().resourceContextWrapper.createLocalizedContext(activity as Context)
+
+        retry.text = localizedContext.resources.getString(R.string.psd_retry)
+        delete.text = localizedContext.resources.getString(R.string.psd_delete)
 
         retry.setOnClickListener(this)
         delete.setOnClickListener(this)

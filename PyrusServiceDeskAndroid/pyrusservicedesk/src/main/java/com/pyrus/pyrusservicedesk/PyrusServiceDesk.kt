@@ -392,7 +392,8 @@ class PyrusServiceDesk private constructor(
 
             this.onStopCallback = onStopCallback
 
-            val intent = MainActivity.createLaunchIntent(activity, account, openTicketAction, sendComment)
+            val locale = activity.resources.configuration.locales.get(0)
+            val intent = MainActivity.createLaunchIntent(activity, account, openTicketAction, sendComment, locale)
             intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
             activity.startActivity(intent)
             updateSdIsOpen(true)
