@@ -28,7 +28,6 @@ internal object SyncMapper {
         currentLocale: Locale
     ): RequestBodyBase {
 
-        //val currentLocale: Locale = Locale.getDefault()//
         val language = currentLocale.language
         val country = currentLocale.country
         val locale = if (language.isNullOrBlank()) "ru" else
