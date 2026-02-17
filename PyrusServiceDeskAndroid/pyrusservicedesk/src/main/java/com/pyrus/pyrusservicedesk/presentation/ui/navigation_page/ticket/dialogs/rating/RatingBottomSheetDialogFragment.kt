@@ -7,6 +7,7 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.core.os.bundleOf
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment
+import com.pyrus.pyrusservicedesk.PyrusServiceDesk.Companion.injector
 import com.pyrus.pyrusservicedesk.R
 import com.pyrus.pyrusservicedesk._ref.utils.ConfigUtils
 import com.pyrus.pyrusservicedesk.databinding.PsdFragmentRateUsBinding
@@ -31,10 +32,13 @@ class RatingBottomSheetDialogFragment: BottomSheetDialogFragment() {
         binding.closeBtn.setTextColor(ColorStateList.valueOf(accentColor))
 
         binding.rateUs.text = arguments?.getString(RATE_US_TEXT_COMMENT)
-        binding.rateUsSubText.text = binding.root.resources.getString(R.string.leave_your_comment)
-        binding.input.hint = binding.root.resources.getString(R.string.psd_comment_input_hint)
-        binding.closeBtn.text = binding.root.resources.getString(R.string.psd_close)
-        binding.sendBtn.hint = binding.root.resources.getString(R.string.psd_send)
+
+        val localizedContext = injector().resourceContextWrapper.createLocalizedContext(requireContext())
+
+        binding.rateUsSubText.text = localizedContext.resources.getString(R.string.leave_your_comment)
+        binding.input.hint = localizedContext.resources.getString(R.string.psd_comment_input_hint)
+        binding.closeBtn.text = localizedContext.resources.getString(R.string.psd_close)
+        binding.sendBtn.text = localizedContext.resources.getString(R.string.psd_send)
 
 
         binding.sendBtn.setOnClickListener {
