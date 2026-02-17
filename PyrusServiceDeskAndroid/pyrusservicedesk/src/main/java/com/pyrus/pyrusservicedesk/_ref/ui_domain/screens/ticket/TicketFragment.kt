@@ -100,7 +100,7 @@ internal class TicketFragment: TeaFragment<Model, Event, Effect>() {
         CommentTextFingerprint(::dispatch, requireActivity()),
         CommentAttachmentFingerprint(::dispatch, viewLifecycleOwner),
         CommentPreviewableAttachmentFingerprint(::dispatch, viewLifecycleOwner),
-        DateFingerprint(resourceContextWrapper),
+        DateFingerprint(),
         RatingCommentFingerprint(::dispatch),
         SimpleTextFingerprint(),
         CommentAudioFingerprint(audioWrapper, lifecycleScope, ::dispatch),
@@ -126,8 +126,6 @@ internal class TicketFragment: TeaFragment<Model, Event, Effect>() {
     private val requestAudioPermissionLauncher = registerForActivityResult(RequestPermission()) { }
 
     private lateinit var audioWrapper: AudioWrapper
-
-    private lateinit var resourceContextWrapper: ResourceContextWrapper
 
     override fun createRenderer(): ViewRenderer<Model> = diff {
         diff(Model::inputText) { text -> if (!binding.inputEditText.hasFocus()) binding.inputEditText.setText(text) }
@@ -294,7 +292,6 @@ internal class TicketFragment: TeaFragment<Model, Event, Effect>() {
             dispatch(Event.OnRatingClick(null, result))
         }
         audioWrapper = injector().audioWrapper
-        resourceContextWrapper = injector().resourceContextWrapper
 
     }
 
@@ -303,7 +300,7 @@ internal class TicketFragment: TeaFragment<Model, Event, Effect>() {
         container: ViewGroup?,
         savedInstanceState: Bundle?,
     ): View {
-        val localizedInflater = container?.context?.let { LayoutInflater.from(resourceContextWrapper.createLocalizedContext(it)) } ?: inflater
+        val localizedInflater = container?.context?.let { LayoutInflater.from(injector().resourceContextWrapper.createLocalizedContext(it)) } ?: inflater
         binding = PsdFragmentTicketBinding.inflate(localizedInflater, container, false)
 
         audioRecordView = AudioRecordView(
