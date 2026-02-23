@@ -69,4 +69,5 @@
     <string name="all_conversations">جميع المحادثات</string>
     <string name="psd_search_by_tickets">البحث حسب التذاكر</string>
     <string name="psd_no_suggestions">لا اقتراحات</string>
+    <string name="psd_date_format_d">EEE</string>
 </resources>
