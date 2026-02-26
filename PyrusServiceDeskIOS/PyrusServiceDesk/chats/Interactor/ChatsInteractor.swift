@@ -16,12 +16,13 @@ class ChatsInteractor: NSObject {
             DispatchQueue.main.async { [weak self] in
                 guard let self else { return }
                 let chats = prepareChats()
-                presenter.doWork(.updateChats(chats: chats))
+                presenter.doWork(.updateChats(chats: chats, newAnnouncementsInfo: getNewAnnouncementsInfo()))
             }
         }
     }
     
     var selectedIndex: Int? = nil
+    var newAnnouncementsCount: Int = 0
     var isNewQr = false
     var isClear = false
     var isNewUser = false
@@ -108,7 +109,12 @@ extension ChatsInteractor: ChatsInteractorProtocol {
         case .reloadChats:
             reloadChats()
         case .selectChat(index: let index):
-            openChat(chat: chats[index], fromPush: false)
+            if newAnnouncementsCount > 0 && index == 0 {
+                
+            } else {
+                let index = newAnnouncementsCount > 0 ? index - 1 : index
+                openChat(chat: chats[index], fromPush: false)
+            }
         case .newChat:
             if let clientId = PyrusServiceDesk.currentClientId {
                 if let userId = currentUserId {
@@ -124,14 +130,8 @@ extension ChatsInteractor: ChatsInteractorProtocol {
         case .deleteFilter:
             deleteFilter()
         case .viewWillAppear:
-   //         guard PyrusServiceDesk.chats.count > 0 else { break }
             PyrusServiceDesk.syncManager.syncGetTickets()
-//            if !isFiltered {
-//                PyrusServiceDesk.currentUserId = nil
-//            }
-//            if chats.count == 0 {
-//                updateData(firstStart: true)
-//            }
+
             if !isFiltered {
                 PyrusServiceDesk.currentUserId = nil
             }
@@ -140,31 +140,31 @@ extension ChatsInteractor: ChatsInteractorProtocol {
                 chats = filterChats
             }
             if chats.count > 0 {
-                presenter.doWork(.updateChats(chats: prepareChats()))
+                presenter.doWork(.updateChats(chats: prepareChats(), newAnnouncementsInfo: getNewAnnouncementsInfo()))
                 firtLoad = false
                 presenter.doWork(.endRefresh)
             }
             
-//            if RateManager.isActionPerformed(times: 3) {
-//                RateManager.setIfNilDateForNextRate()
-//                RateManager.incrementActionCount()
-//                if let windowScene = UIApplication.shared.connectedScenes.first as? UIWindowScene {
-//                    if #available(iOS 14.0, *) {
-//                        SKStoreReviewController.requestReview(in: windowScene)
-//                    } else {
-//                        // Fallback on earlier versions
-//                    }
-//                }
-//            } else if RateManager.isNeedRateCurrentVersion() {
-//                RateManager.increaseDateForNextRate()
-//                if let windowScene = UIApplication.shared.connectedScenes.first as? UIWindowScene {
-//                    if #available(iOS 14.0, *) {
-//                        SKStoreReviewController.requestReview(in: windowScene)
-//                    } else {
-//                        // Fallback on earlier versions
-//                    }
-//                }
-//            }
+            if RateManager.isActionPerformed(times: 3) {
+                RateManager.setIfNilDateForNextRate()
+                RateManager.incrementActionCount()
+                if let windowScene = UIApplication.shared.connectedScenes.first as? UIWindowScene {
+                    if #available(iOS 14.0, *) {
+                        SKStoreReviewController.requestReview(in: windowScene)
+                    } else {
+                        // Fallback on earlier versions
+                    }
+                }
+            } else if RateManager.isNeedRateCurrentVersion() {
+                RateManager.increaseDateForNextRate()
+                if let windowScene = UIApplication.shared.connectedScenes.first as? UIWindowScene {
+                    if #available(iOS 14.0, *) {
+                        SKStoreReviewController.requestReview(in: windowScene)
+                    } else {
+                        // Fallback on earlier versions
+                    }
+                }
+            }
                       
         case .updateSelected(index: let index):
             updateSelected(index: index)
@@ -180,13 +180,8 @@ extension ChatsInteractor: ChatsInteractorProtocol {
             DispatchQueue.main.async { [weak self] in
                 guard let self else { return }
                 let chats = prepareChats()
-                presenter.doWork(.updateChats(chats: chats))
+                presenter.doWork(.updateChats(chats: chats, newAnnouncementsInfo: getNewAnnouncementsInfo()))
             }
-//            if firstStart {
-//                presenter.doWork(.createChatsOnStart(chats: prepareChats()))
-//            } else {
-//                presenter.doWork(.updateChats(chats: prepareChats()))
-//            }
             
             firtLoad = false
             presenter.doWork(.endRefresh)
@@ -195,6 +190,31 @@ extension ChatsInteractor: ChatsInteractorProtocol {
 }
 
 private extension ChatsInteractor {
+    
+    func getNewAnnouncementsInfo() -> NewAnnouncementsInfo? {
+        var clients: [PSDClientInfo] = []
+        var newAnnouncementsCount: Int = 0
+        
+        for client in PyrusServiceDesk.clients {
+            if client.announcementsUnreadCount > 0 {
+                newAnnouncementsCount += client.announcementsUnreadCount
+                clients.append(client)
+            }
+        }
+        
+        self.newAnnouncementsCount = newAnnouncementsCount
+        
+        if newAnnouncementsCount > 0 {
+            let annInfo = NewAnnouncementsInfo(
+                clients: clients,
+                newAnnouncementsCount: newAnnouncementsCount,
+                lastAnnouncement: newAnnouncementsCount == 1 ? PyrusServiceDesk.announcements.last : nil
+            )
+            return annInfo
+        }
+        
+        return nil
+    }
     
     @objc func showConnectionError() {
         DispatchQueue.main.async { [weak self] in

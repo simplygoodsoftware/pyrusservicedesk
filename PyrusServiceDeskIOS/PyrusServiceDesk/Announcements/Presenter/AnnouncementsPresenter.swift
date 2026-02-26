@@ -10,21 +10,21 @@ class AnnouncementsPresenter: NSObject {
 extension AnnouncementsPresenter: AnnouncementsPresenterProtocol {
     func doWork(_ action: AnnouncementsPresenterCommand) {
         switch action {
-        case .updateAnnouncements(announcements: let announcements):
+        case .updateAnnouncements(announcements: let announcements, lastReadId: let lastReadId):
             let startTime = DispatchTime.now()
             self.announcements = announcements
-            updateAnnouncements()
-            let endTime = DispatchTime.now()
-            let nanoTime = endTime.uptimeNanoseconds - startTime.uptimeNanoseconds
-            let timeInterval = Double(nanoTime) / 1_000_000
+            updateAnnouncements(lastReadId: lastReadId)
+//            let endTime = DispatchTime.now()
+//            let nanoTime = endTime.uptimeNanoseconds - startTime.uptimeNanoseconds
+//            let timeInterval = Double(nanoTime) / 1_000_000
 //            print("⏱ updateChats выполнена за \(timeInterval) мс (обработано \(chats.count) чатов)")
         case .endRefresh:
             view?.show(.endRefresh)
         case .updateTitle(title: let title):
-            view?.show(.updateTitle(title: title ?? "All_Conversations".localizedPSD()))
+            view?.show(.updateTitle(title: title ?? "Announcements".localizedPSD()))
         case .updateTitles(titles: let titles, selectedIndex: let selectedIndex):
             let titles = titles.map({ TitleWithBadge(title: $0) })
-            view?.show(.updateTitle(title: "All_Conversations".localizedPSD()))
+            view?.show(.updateTitle(title: "Announcements".localizedPSD()))
             view?.show(.updateTitles(titles: titles, selectedIndex: selectedIndex))
         case .updateSelected(index: let index):
             view?.show(.updateSelected(index: index))
@@ -41,30 +41,34 @@ extension AnnouncementsPresenter: AnnouncementsPresenterProtocol {
 }
 
 private extension AnnouncementsPresenter {
-    func updateAnnouncements(open: Bool = false) {
-        var announcements = self.announcements
-        let id = PyrusServiceDesk.clients.first(where: {$0.clientId == PyrusServiceDesk.currentClientId })?.lasAnnoncementReadId
+    func updateAnnouncements(lastReadId: String?) {
 
         var isRead = false
-        if id?.count ?? 0 == 0 {
+        if lastReadId?.count ?? 0 == 0 {
            isRead = true
         }
+        var anns = [AnnouncementsViewModel]()
         for (i, announcement) in announcements.enumerated() {
-            if announcement.id == id {
+            if announcement.id == lastReadId {
                 isRead = true
+                if i > 0 {
+                    anns.append(AnnouncementsViewModel(data: AnnouncementsReadModel(id: 0), type: .announcementsRead))
+                }
             }
-            announcements[i].isRead = isRead
+            
+            let ann = PSDAnnouncement(
+                id: announcement.id,
+                text: announcement.text,
+                date: announcement.date,
+                isRead: isRead,
+                attachments: announcement.attachments,
+                appId: announcement.appId
+            )
+            anns.append(AnnouncementsViewModel(data: ann, type: .announcement))
         }
         
-        let anns = announcements.map({
-            AnnouncementsViewModel(data: $0, type: .announcement)
-        })
         view?.show(.updateAnnouncements(announcements: [anns]))
     }
-    
-//    func prepareChats(chats: [ChatPresenterModel]) -> [[PSDChatsViewModel]] {
-//        
-//    }
 }
 
 private extension UIFont {

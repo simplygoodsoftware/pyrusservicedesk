@@ -113,7 +113,8 @@ extension CoreDataService: CoreDataServiceProtocol {
             // Используем performAndWait для синхронного выполнения
             context.performAndWait {
                 do {
-                    let fetchRequest = DBAnnouncement.fetchRequest()                    
+                    let fetchRequest = DBAnnouncement.fetchRequest()
+                    fetchRequest.sortDescriptors = [NSSortDescriptor(key: "orderIndex", ascending: true)]
                     let fetchedObjects = try context.fetch(fetchRequest)
                     result = .success(fetchedObjects)
                 } catch {

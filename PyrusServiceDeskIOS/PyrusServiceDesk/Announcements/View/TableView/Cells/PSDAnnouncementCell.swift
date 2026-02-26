@@ -1,97 +1,220 @@
-//
-//  PSDAnnouncementCell.swift
-//  Helpy
-//
-//  Created by Станислава Бобрускина on 12.02.2026.
-//  Copyright © 2026 Pyrus. All rights reserved.
-//
-
 import UIKit
+
+protocol AnnouncementsAttachmentsDelegate: AnyObject {
+    func selectAttachment(cell: UITableViewCell, index: Int)
+}
 
 final class PSDAnnouncementCell: UITableViewCell {
     static let identifier = "PSDAnnouncementCell"
-
-    private let bubbleView = UIView()
-    private let messageLabel = UILabel()
-    private let timeLabel = UILabel()
-
-    // Ограничим максимальную ширину «пузыря»
-    private var bubbleMaxWidth: NSLayoutConstraint!
+    
+    private let bubbleView: UIView = {
+        let view = UIView()
+        view.layer.cornerRadius = 16
+        view.layer.masksToBounds = true
+        view.translatesAutoresizingMaskIntoConstraints = false
+        return view
+    }()
+    
+    private var topMessageLabelView: NSLayoutConstraint?
+    private var zeroMessageLabelHeight: NSLayoutConstraint?
+    private let messageLabel: UITextView = {
+        let textView = UITextView()
+        textView.font = .systemFont(ofSize: 15)
+        textView.textColor = .label
+        textView.isEditable = false
+        textView.isScrollEnabled = false
+        textView.backgroundColor = .clear
+        textView.dataDetectorTypes = [.link, .phoneNumber]
+        textView.textContainerInset = .zero
+        textView.tintColor = PyrusServiceDesk.mainController?.customization?.themeColor
+        textView.translatesAutoresizingMaskIntoConstraints = false
+        return textView
+    }()
+    
+    private var timeLabelTop: NSLayoutConstraint?
+    private lazy var timeLabel: UILabel = {
+        let label = UILabel()
+        label.font = .systemFont(ofSize: 13)
+        label.adjustsFontForContentSizeCategory = true
+        label.textColor = .secondaryLabel
+        label.setContentCompressionResistancePriority(.required, for: .horizontal)
+        label.setContentHuggingPriority(.required, for: .horizontal)
+        label.translatesAutoresizingMaskIntoConstraints = false
+        return label
+    }()
+    
+    private var imageAttachmentViewHeight: NSLayoutConstraint?
+    private lazy var imagesGridCollectionView: ImagesGridCollectionView = {
+       let collectionView = ImagesGridCollectionView()
+        collectionView.backgroundColor = .clear
+        collectionView.translatesAutoresizingMaskIntoConstraints = false
+        collectionView.layer.cornerRadius = 16
+        collectionView.layer.maskedCorners = [
+            .layerMinXMinYCorner,
+            .layerMaxXMinYCorner
+        ]
+        collectionView.isScrollEnabled = false
+        return collectionView
+    }()
+    
+    private var topAttachmentsTableView: NSLayoutConstraint?
+    private var tableViewHeight: NSLayoutConstraint?
+    private let attachmentsTableView = AttachmentsTableView()
 
     override init(style: UITableViewCell.CellStyle, reuseIdentifier: String?) {
         super.init(style: style, reuseIdentifier: reuseIdentifier)
-        selectionStyle = .none
-        backgroundColor = .systemBackground
-
-        // Bubble
-        bubbleView.layer.cornerRadius = 16
-        bubbleView.layer.masksToBounds = true
-
-        // Message
-        messageLabel.numberOfLines = 0
-        messageLabel.font = .systemFont(ofSize: 15)
-        messageLabel.adjustsFontForContentSizeCategory = true
-        messageLabel.textColor = .label
-
-        // Time
-        timeLabel.font = .systemFont(ofSize: 13)
-        timeLabel.adjustsFontForContentSizeCategory = true
-        timeLabel.textColor = .secondaryLabel
-        timeLabel.setContentCompressionResistancePriority(.required, for: .horizontal)
-        timeLabel.setContentHuggingPriority(.required, for: .horizontal)
+        backgroundColor = .psdDarkBackgroundColor
+        contentView.backgroundColor = .psdDarkBackgroundColor
 
         contentView.addSubview(bubbleView)
-        bubbleView.addSubview(messageLabel)
-        bubbleView.addSubview(timeLabel)
-        bubbleView.translatesAutoresizingMaskIntoConstraints = false
-        messageLabel.translatesAutoresizingMaskIntoConstraints = false
-        timeLabel.translatesAutoresizingMaskIntoConstraints = false
+        
+        bubbleView.addSubview(imagesGridCollectionView)
+        imageAttachmentViewHeight = imagesGridCollectionView.heightAnchor.constraint(equalToConstant: 0)
+        imageAttachmentViewHeight?.isActive = true
+        
+        bubbleView.addSubview(attachmentsTableView)
+        attachmentsTableView.translatesAutoresizingMaskIntoConstraints = false
+        tableViewHeight = attachmentsTableView.heightAnchor.constraint(equalToConstant: 0)
+        tableViewHeight?.isActive = true
+        topAttachmentsTableView = attachmentsTableView.topAnchor.constraint(equalTo: imagesGridCollectionView.bottomAnchor, constant: 8)
+        topAttachmentsTableView?.isActive = true
 
-//        // Внутренний стек: текст сверху, внизу — время, прижатое вправо
-//        let bottomRow = UIStackView(arrangedSubviews: [UIView(), timeLabel])
-//        bottomRow.axis = .horizontal
-//        bottomRow.alignment = .firstBaseline
-//        bottomRow.spacing = 8
-//
-//        let stack = UIStackView(arrangedSubviews: [messageLabel, bottomRow])
-//        stack.axis = .vertical
-//        stack.spacing = 8
-//        stack.translatesAutoresizingMaskIntoConstraints = false
-//        bubbleView.addSubview(stack)
+        
+        bubbleView.addSubview(messageLabel)
+        zeroMessageLabelHeight = messageLabel.heightAnchor.constraint(equalToConstant: 0)
+        
+        bubbleView.addSubview(timeLabel)
 
         NSLayoutConstraint.activate([
-            // Расположение пузыря (входящее — слева)
+            imagesGridCollectionView.topAnchor.constraint(equalTo: bubbleView.topAnchor, constant: 2),
+            imagesGridCollectionView.leadingAnchor.constraint(equalTo: bubbleView.leadingAnchor, constant: 2),
+            imagesGridCollectionView.trailingAnchor.constraint(equalTo: bubbleView.trailingAnchor, constant: -2),
+            
+            attachmentsTableView.leadingAnchor.constraint(equalTo: bubbleView.leadingAnchor),
+            attachmentsTableView.trailingAnchor.constraint(equalTo: bubbleView.trailingAnchor),
+            
             bubbleView.topAnchor.constraint(equalTo: contentView.topAnchor, constant: 12),
             bubbleView.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: 8),
             bubbleView.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -8),
             
-            messageLabel.topAnchor.constraint(equalTo: bubbleView.topAnchor, constant: 10),
+            messageLabel.topAnchor.constraint(equalTo: attachmentsTableView.bottomAnchor, constant: 4),
             messageLabel.leadingAnchor.constraint(equalTo: bubbleView.leadingAnchor, constant: 10),
             messageLabel.trailingAnchor.constraint(equalTo: bubbleView.trailingAnchor, constant: -10),
             
+            timeLabel.topAnchor.constraint(equalTo: messageLabel.bottomAnchor, constant: 2),
             timeLabel.trailingAnchor.constraint(equalTo: bubbleView.trailingAnchor, constant: -10),
-            timeLabel.topAnchor.constraint(equalTo: messageLabel.bottomAnchor, constant: 5),
             bubbleView.bottomAnchor.constraint(equalTo: timeLabel.bottomAnchor, constant: 10),
             
             contentView.bottomAnchor.constraint(equalTo: bubbleView.bottomAnchor)
-//            bubbleView.bottomAnchor.constraint(equalTo: contentView.layoutMarginsGuide.bottomAnchor),
-
-//            // Внутренние отступы пузыря
-//            stack.topAnchor.constraint(equalTo: bubbleView.topAnchor, constant: 10),
-//            stack.leadingAnchor.constraint(equalTo: bubbleView.leadingAnchor, constant: 10),
-//            stack.trailingAnchor.constraint(equalTo: bubbleView.trailingAnchor, constant: -10),
-//            stack.bottomAnchor.constraint(equalTo: bubbleView.bottomAnchor, constant: -10),
         ])
     }
 
     required init?(coder: NSCoder) { fatalError("init(coder:) has not been implemented") }
 
-    func configure(with vm: PSDAnnouncement) {
+    func configure(with vm: PSDAnnouncement, delegate: AnnouncementsAttachmentsDelegate?) {
+        contentView.setNeedsLayout()
+        contentView.layoutIfNeeded()
         messageLabel.text = vm.text
-        timeLabel.text = vm.date.messageTime()
+        
+        timeLabel.text = vm.date.announcementTime()
 
         bubbleView.backgroundColor = vm.isRead ? .bubbleViewColor : .newBubbleViewColor
         messageLabel.textColor = .label
+        
+        let hasText = vm.text?.count ?? 0 > 0
+        zeroMessageLabelHeight?.isActive = !hasText
+        
+        let imageAttachments = vm.attachments
+            .filter({ $0.media && !$0.isVideo })
+            .map({ AnnouncementCellAttachmentModel(attachment: $0, isRead: vm.isRead) })
+        let hasImages = imageAttachments.count > 0
+        
+        let fileAttachments = vm.attachments
+            .filter({ !$0.media || $0.isVideo })
+            .map({ AnnouncementCellAttachmentModel(attachment: $0, isRead: vm.isRead) })
+        let hasFiles = fileAttachments.count > 0
+        
+        if hasFiles && hasImages {
+            topAttachmentsTableView?.constant = 4
+            
+        } else if hasFiles {
+            topAttachmentsTableView?.constant = 8
+            
+        } else if hasImages {
+            topAttachmentsTableView?.constant = 0
+        } else {
+            topAttachmentsTableView?.constant = 4
+        }
+        
+        if hasImages {
+            var height: CGFloat = 0
+            switch imageAttachments.count {
+            case 1:
+                let attach = imageAttachments.first?.attachment
+                height = 2 + min(AnnouncementsHelper.scaledHeight(
+                    originalWidth: attach?.width ?? 0,
+                    originalHeight: attach?.height ?? 0,
+                    maxWidth: imagesGridCollectionView.frame.width
+                ), UIScreen.main.bounds.height * 0.6)
+            case 2:
+                height = 217
+            case 3:
+                height = 333
+            case 4:
+                height = 448
+            case 5:
+                height = 448
+            case 6:
+                height = 448
+            case 7:
+                height = 503
+            case 8:
+                height = 503
+            default:
+                height = 167 * 3
+            }
+            imageAttachmentViewHeight?.constant = height
+            imagesGridCollectionView.update(images: imageAttachments)
+            
+            imagesGridCollectionView.onSelectItem = { attach in
+                delegate?.selectAttachment(cell: self, index: vm.attachments.firstIndex(of: attach.attachment) ?? 0)
+            }
+            imagesGridCollectionView.attachDelegate = delegate
+        } else {
+            imageAttachmentViewHeight?.constant = 0
+        }
+            
+        if hasFiles {
+            attachmentsTableView.update(items: fileAttachments)
+            attachmentsTableView.onSelectItem = { attach in
+                delegate?.selectAttachment(cell: self, index: vm.attachments.firstIndex(of: attach.attachment) ?? 0)
+            }
+            
+            if vm.text?.count ?? 0 == 0 {
+                tableViewHeight?.constant = CGFloat(fileAttachments.count * 54)
+            } else {
+                tableViewHeight?.constant = CGFloat(fileAttachments.count * 54) + 6
+            }
+        } else {
+            attachmentsTableView.update(items: [])
+            tableViewHeight?.constant = 0
+        }
+        
+        contentView.setNeedsLayout()
+        contentView.layoutIfNeeded()
+    }
+    
+    override func prepareForReuse() {
+        tableViewHeight?.constant = 0
+        imageAttachmentViewHeight?.constant = 0
+        topAttachmentsTableView?.constant = 8
+        timeLabelTop?.constant = 2
+        messageLabel.text = nil
+        attachmentsTableView.update(items: [])
+        imagesGridCollectionView.update(images: [])
+        bubbleView.backgroundColor = .bubbleViewColor
+        contentView.setNeedsLayout()
+        contentView.layoutIfNeeded()
     }
 }
 
@@ -114,6 +237,24 @@ private extension UIColor {
             return UIColor(hex: "#29293D") ?? .black
         default:
             return UIColor(hex: "#EEF3FD") ?? .systemGray
+        }
+    }
+    
+    static let imagePreviewColor = UIColor {
+        switch $0.userInterfaceStyle {
+        case .dark:
+            return UIColor(hex: "#3A3B3D") ?? .black
+        default:
+            return UIColor(hex: "#ECEDEF") ?? .systemGray
+        }
+    }
+    
+    static let newImagePreviewColor = UIColor {
+        switch $0.userInterfaceStyle {
+        case .dark:
+            return UIColor(hex: "#35354F") ?? .black
+        default:
+            return UIColor(hex: "#D1DFFA") ?? .systemGray
         }
     }
 }

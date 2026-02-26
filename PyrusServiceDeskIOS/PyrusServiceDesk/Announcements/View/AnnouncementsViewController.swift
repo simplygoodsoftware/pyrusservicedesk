@@ -60,14 +60,14 @@ class AnnouncementsViewController: UIViewController {
     private var announcements: [[AnnouncementsViewModel]] = [[]] {
         didSet {
             reloadDiffable(animated: true)
-            emptyChatsView.isHidden = !(announcements[0].count == 0) || clearTable
+            emptyAnnouncementsView.isHidden = !(announcements[0].count == 0) || clearTable
         }
     }
     
     private var timer: Timer?
     private var customization: ServiceDeskConfiguration?
     
-    private lazy var emptyChatsView = UIView(frame: self.view.bounds)
+    private lazy var emptyAnnouncementsView = UIView(frame: self.view.bounds)
     
     private lazy var searchNavigationView: UIView = {
         let view = UIView()
@@ -86,7 +86,7 @@ class AnnouncementsViewController: UIViewController {
         design()
         designNavigation()
         interactor.doInteraction(.viewDidload)
-        view.backgroundColor = .psdBackgroundColor
+        view.backgroundColor = .psdDarkBackgroundColor
     }
     
     override func viewDidAppear(_ animated: Bool) {
@@ -104,6 +104,7 @@ class AnnouncementsViewController: UIViewController {
     
     override func viewWillDisappear(_ animated: Bool) {
         super.viewWillDisappear(animated)
+        interactor.doInteraction(.viewWillDisappear)
         self.navigationController?.setNavigationBarHidden(false, animated: animated)
     }
     
@@ -117,9 +118,9 @@ private extension AnnouncementsViewController {
     /**Setting design To PSDChatsViewController view, add subviews*/
     
     func design() {
-        view.backgroundColor = UIColor.psdBackgroundColor
+        view.backgroundColor = .psdDarkBackgroundColor
         view.addSubview(tableView)
-        tableView.backgroundView = emptyChatsView
+        tableView.backgroundView = emptyAnnouncementsView
 
         view.addSubview(navigationView)
         view.addSubview(segmentControl)
@@ -137,42 +138,53 @@ private extension AnnouncementsViewController {
     }
     
     func setupEmptyChats() {
-        let chatsImage = UIImageView(image: UIImage.PSDImage(name: "chats"))
-        let openNewButton = UIButton(type: .system)
-        emptyChatsView.isHidden = true
-        let mainColor = customization?.barButtonTintColor ?? .darkAppColor
-       
-        openNewButton.setTitle("CreatTicket".localizedPSD(), for: .normal)
-        openNewButton.titleLabel?.font = CustomizationHelper.systemBoldFont(ofSize: 17)
-        openNewButton.setTitleColor(mainColor, for: .normal)
+        let chatsImage = UIImageView(image: UIImage.PSDImage(name: "noAnnouncements"))
+        let titleLabel = UILabel()
+        let subtitleLabel = UILabel()
         
-        emptyChatsView.addSubview(chatsImage)
-        emptyChatsView.addSubview(openNewButton)
+        titleLabel.font = .boldSystemFont(ofSize: 22)
+        titleLabel.textColor = .label
+        titleLabel.text = "NoAnnouncements".localizedPSD()
+        
+        subtitleLabel.font = .systemFont(ofSize: 18, weight: .regular)
+        subtitleLabel.textColor = .secondaryLabel
+        subtitleLabel.text = "NoAnnouncementsDescr".localizedPSD()
+        subtitleLabel.numberOfLines = 0
+        subtitleLabel.textAlignment = .center
+        
+        emptyAnnouncementsView.isHidden = true
+        emptyAnnouncementsView.addSubview(chatsImage)
+        emptyAnnouncementsView.addSubview(titleLabel)
+        emptyAnnouncementsView.addSubview(subtitleLabel)
 
         chatsImage.translatesAutoresizingMaskIntoConstraints = false
-        openNewButton.translatesAutoresizingMaskIntoConstraints = false
+        titleLabel.translatesAutoresizingMaskIntoConstraints = false
+        subtitleLabel.translatesAutoresizingMaskIntoConstraints = false
       
         NSLayoutConstraint.activate([
             chatsImage.centerXAnchor.constraint(equalTo: tableView.centerXAnchor),
-            chatsImage.bottomAnchor.constraint(equalTo: openNewButton.topAnchor, constant: -16),
-            openNewButton.centerXAnchor.constraint(equalTo: tableView.centerXAnchor),
-            openNewButton.centerYAnchor.constraint(equalTo: tableView.centerYAnchor, constant: -100),
+            chatsImage.bottomAnchor.constraint(equalTo: titleLabel.topAnchor, constant: -16),
+            titleLabel.centerXAnchor.constraint(equalTo: tableView.centerXAnchor),
+            titleLabel.centerYAnchor.constraint(equalTo: tableView.centerYAnchor, constant: -100),
+            subtitleLabel.centerXAnchor.constraint(equalTo: titleLabel.centerXAnchor),
+            subtitleLabel.topAnchor.constraint(equalTo: titleLabel.bottomAnchor, constant: 8),
+            subtitleLabel.leadingAnchor.constraint(equalTo: tableView.leadingAnchor, constant: 16),
+            subtitleLabel.trailingAnchor.constraint(equalTo: tableView.trailingAnchor, constant: -16)
         ])
         
-        openNewButton.isUserInteractionEnabled = true
     }
     
     func setupTableView() {
         tableView.translatesAutoresizingMaskIntoConstraints = false
         NSLayoutConstraint.activate([
             tableView.topAnchor.constraint(equalTo: navigationView.bottomAnchor),
-            tableView.bottomAnchor.constraint(equalTo: view.bottomAnchor),
+            tableView.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor),
             tableView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
             tableView.trailingAnchor.constraint(equalTo: view.trailingAnchor)
         ])
         
         tableView.delegate = self
-        tableView.backgroundColor = .psdBackgroundColor
+        tableView.backgroundColor = .psdDarkBackgroundColor
         tableView.estimatedRowHeight = UITableView.automaticDimension
         tableView.rowHeight = UITableView.automaticDimension
         tableView.separatorStyle = .none
@@ -286,15 +298,20 @@ extension AnnouncementsViewController: UITableViewDelegate, UITableViewDataSourc
     }
     
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-        let cell = cellConfigurator?.getCell(model: announcements[indexPath.section][indexPath.row], indexPath: indexPath) ?? PSDAnnouncementCell()
+        let cell = cellConfigurator?.getCell(model: announcements[indexPath.section][indexPath.row], indexPath: indexPath, delegate: self) ?? PSDAnnouncementCell()
         cell.isHidden = false
-        cell.selectionStyle = .none
+//        cell.selectionStyle = .none
         return cell
     }
     
-//    func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {
-//        return
-//    }
+    func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {
+        switch announcements[indexPath.section][indexPath.row].type {
+        case .announcement:
+            return UITableView.automaticDimension
+        case .announcementsRead:
+            return 78
+        }
+    }
 }
 
 extension AnnouncementsViewController: AnnouncementsViewProtocol {
@@ -317,7 +334,9 @@ extension AnnouncementsViewController: AnnouncementsViewProtocol {
                 self.segmentControl.updateTitle(titles: titles, selectIndex: selectedIndex)
             })
         case .updateSelected(index: let index):
-            segmentControl.selectIndex(index)
+            UIView.performWithoutAnimation {
+                segmentControl.selectIndex(index)
+            }
         case .updateIcon(image: let image):
             icon.image = image
         case .deleteSegmentControl:
@@ -360,6 +379,51 @@ extension AnnouncementsViewController: UITabBarControllerDelegate {
     func tabBarController(_ tabBarController: UITabBarController, didSelect viewController: UIViewController) {
         if tabBarController.selectedIndex == 2 && (self.announcements[0].count > 0) {
             tableView.scrollToRow(at: IndexPath(row: 0, section: 0), at: .top, animated: true)
+        }
+    }
+}
+
+extension AnnouncementsViewController: AnnouncementsAttachmentsDelegate {
+    func selectAttachment(cell: UITableViewCell, index: Int) {
+        
+        guard let indexPath = tableView.indexPath(for: cell),
+        let announcement = announcements[indexPath.section][indexPath.row].data as? PSDAnnouncement,
+            announcement.attachments.count > 0
+        else { return }
+        let selectedAttachment = announcement.attachments[index]
+        if selectedAttachment.media || selectedAttachment.isVideo {
+            let attachments = announcement.attachments.filter({ $0.media || $0.isVideo }).sorted { a, b in
+                // сначала те, у кого isVideo == false
+                (!a.isVideo && b.isVideo)
+            }
+            let initialIndex = attachments.firstIndex(of: selectedAttachment) ?? 0
+            let vc = PSDAnnouncementsAttachmentViewController(attachments: attachments, initialIndex: initialIndex)
+            let navController = PSDNavigationController(rootViewController: vc)
+            navController.modalPresentationStyle = .fullScreen
+            navController.view.alpha = 0
+            present(navController, animated: false) {
+                UIView.animate(withDuration: 0.2) {
+                    navController.view.alpha = 1
+                }
+            }
+        } else {
+            let attachments = announcement.attachments.filter({ !$0.media && !$0.isVideo })
+            let initialIndex = attachments.firstIndex(of: selectedAttachment) ?? 0
+            let vc = PSDAnnouncementsAttachmentViewController(attachments: attachments, initialIndex: initialIndex)
+            let navController = PSDNavigationController(rootViewController: vc)
+            present(navController, animated: true)
+        }
+    }
+    
+}
+
+extension UIColor {
+    static let psdDarkBackgroundColor = UIColor {
+        switch $0.userInterfaceStyle {
+        case .dark:
+            return UIColor(hex: "1C1C1E") ?? .black
+        default:
+            return .white
         }
     }
 }

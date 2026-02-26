@@ -6,7 +6,7 @@ final class NewAnnouncementsCell: UITableViewCell {
     private let cardView: UIView = {
         let v = UIView()
         v.translatesAutoresizingMaskIntoConstraints = false
-        v.backgroundColor = UIColor.systemGray6
+        v.backgroundColor = .bubbleViewColor
         v.layer.cornerRadius = 16
         v.layer.masksToBounds = true
         return v
@@ -31,7 +31,6 @@ final class NewAnnouncementsCell: UITableViewCell {
 
     override init(style: UITableViewCell.CellStyle, reuseIdentifier: String?) {
         super.init(style: style, reuseIdentifier: reuseIdentifier)
-        selectionStyle = .none
         backgroundColor = .clear
         contentView.backgroundColor = .clear
         setupUI()
@@ -56,7 +55,6 @@ final class NewAnnouncementsCell: UITableViewCell {
         hStack.axis = .horizontal
         hStack.alignment = .leading
         hStack.spacing = 4
-//        hStack.translatesAutoresizingMaskIntoConstraints = false
         
         let vStack = UIStackView(arrangedSubviews: [hStack, subtitleLabel])
         vStack.axis = .vertical
@@ -82,5 +80,16 @@ final class NewAnnouncementsCell: UITableViewCell {
             // минимальная ширина под хотя бы один логотип
             avatars.widthAnchor.constraint(greaterThanOrEqualToConstant: 16)
         ])
+    }
+}
+
+private extension UIColor {
+    static let bubbleViewColor = UIColor {
+        switch $0.userInterfaceStyle {
+        case .dark:
+            return UIColor(hex: "#2C2C2F") ?? .systemGray6
+        default:
+            return UIColor(hex: "#F4F5F7") ?? .systemGray6
+        }
     }
 }

@@ -72,17 +72,9 @@ class PSDChatInfoTableViewCell: UITableViewCell {
     func configure(with model: ChatViewModel) {
         timeLabel.text = model.date
         messageLabel.text = model.subject
-//        DispatchQueue.global().async { [weak self] in
-//            guard let self = self else { return }
-//            let attributetText = HelpersStrings.decodeHTML(in: removeLinkAttributes(from: (model.lastMessageText as NSString).parseXMLToAttributedString(fontColor: .lastMessageInfo, font: .lastMessageInfo).0) ?? NSAttributedString(string: ""))
-//            DispatchQueue.main.async { [weak self] in
-//                self?.lastMessageInfo.attributedText = attributetText
-//            }
-//        }
         if model.lastMessageAuthor != "" {
             lastMessageInfo.text = "\(model.lastMessageAuthor): \(model.lastMessageText)"
         }
-        //AttributedStringCache.cachedString(for: model.lastMessageText, fontColor: .lastMessageInfo, font: .lastMessageInfo, key: model.lastMessageId as NSString)//HelpersStrings.decodeHTML(in: removeLinkAttributes(from: (model.lastMessageText as NSString).parseXMLToAttributedString(fontColor: .lastMessageInfo, font: .lastMessageInfo).0) ?? NSAttributedString(string: ""))
         notificationButton.isHidden = model.isRead
         attachmentName.text = model.attachmentText
         attachmentIcon.isHidden = !model.hasAttachment
@@ -90,10 +82,6 @@ class PSDChatInfoTableViewCell: UITableViewCell {
         attachmentName.isHidden = !model.hasAttachment
         messageStateView._messageState = model.state
     }
-    
-//    override func traitCollectionDidChange(_ previousTraitCollection: UITraitCollection?) {
-//        attachmentIcon.image = UIImage.PSDImage(name: "paperclip")?.imageWith(color: .lastMessageInfo)
-//    }
     
     func removeLinkAttributes(from attributedString: NSAttributedString?) -> NSAttributedString? {
         guard let attributedString else { return nil }
@@ -111,7 +99,7 @@ class PSDChatInfoTableViewCell: UITableViewCell {
     
     override init(style: UITableViewCell.CellStyle, reuseIdentifier: String?) {
         super.init(style: style, reuseIdentifier: reuseIdentifier)
-        backgroundColor = .psdBackgroundColor
+        backgroundColor = .psdDarkBackgroundColor
         selectedBackgroundView = self.selectedBackground
         
         contentView.addSubview(timeLabel)

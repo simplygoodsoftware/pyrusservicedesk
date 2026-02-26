@@ -56,6 +56,7 @@ import UIKit
         }
     }
     
+    static let announcementsUpdateNotification = Notification.Name("ANNOUNCEMENTS_UPDATE")
     static var announcements = [PSDAnnouncement]()
     
     static var currentUserId: String?

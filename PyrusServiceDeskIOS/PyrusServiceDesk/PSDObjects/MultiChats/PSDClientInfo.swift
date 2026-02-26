@@ -16,6 +16,7 @@ import Foundation
     var lasAnnoncementId: String?
     var lasAnnoncementReadId: String?
     var lasAnnouncementUpdateDate: String?
+    var announcementsUnreadCount: Int = 0
     
     var clientIcon: String {
         didSet {

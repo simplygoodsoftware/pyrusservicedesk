@@ -57,6 +57,11 @@ struct PSDGetChats {
         parameters["commands"] = commands
         
         var announcementsChepoints = [[String: Any]]()
+        let formatter = ISO8601DateFormatter()
+        formatter.formatOptions = [
+            .withInternetDateTime,
+            .withFractionalSeconds
+        ]
         for client in PyrusServiceDesk.clients {
             var announcementsChepoint = [String: Any]()
             announcementsChepoint["app_id"] = client.clientId
@@ -169,9 +174,10 @@ struct PSDGetChats {
     private static func generateAnnouncements(from announcementsResponse: [String: AnnouncementsResponse]) -> AnnouncementsResult {
         var announcements: [PSDAnnouncement] = []
         var deletedAnnouncementsIds = Set<String>()
+        
         for (appId, announcementResponse) in announcementsResponse {
-            
             var isRead = true
+            var lastOrderIndex = PyrusServiceDesk.announcements.last?.orderIndex ?? -1
             for newAnnouncement in announcementResponse.newAnnouncements ?? [] {
                 let announcement = PSDAnnouncement(
                     id: newAnnouncement.id,
@@ -179,9 +185,11 @@ struct PSDGetChats {
                     date: newAnnouncement.createdAt,
                     isRead: isRead,
                     attachments: getAttachments(from: newAnnouncement.content),
-                    appId: appId
+                    appId: appId,
+                    orderIndex: lastOrderIndex + 1
                 )
                 announcements.append(announcement)
+                lastOrderIndex += 1
                 if newAnnouncement.id == announcementResponse.inboxItem.lastReadMessageId {
                     isRead = false
                 }
@@ -193,13 +201,15 @@ struct PSDGetChats {
                     announcements.removeAll(where: { $0.id == changedAnnouncement.messageId })
                 } else if changedAnnouncement.type == .edited {
                     if !announcements.contains(where: { $0.id == changedAnnouncement.messageId }) {
+                        let localAnn = PyrusServiceDesk.announcements.first(where: { $0.id == changedAnnouncement.messageId })
                         let announcement = PSDAnnouncement(
                             id: changedAnnouncement.messageId,
                             text: getText(from: changedAnnouncement.content),
-                            date: changedAnnouncement.performedAt,
-                            isRead: changedAnnouncement.messageId <= announcementResponse.inboxItem.lastReadMessageId ?? "",
+                            date: localAnn?.date ?? changedAnnouncement.performedAt,
+                            isRead: localAnn?.isRead ?? true,
                             attachments: getAttachments(from: changedAnnouncement.content),
-                            appId: appId
+                            appId: appId,
+                            orderIndex: localAnn?.orderIndex ?? 0
                         )
                         announcements.append(announcement)
                     }
@@ -212,7 +222,7 @@ struct PSDGetChats {
         func getText(from content: Content?) -> String {
             guard let content else { return "" }
             var text: String = ""
-            for block in content.richTextDocument.richTextBlocks {
+            for block in content.richTextDocument.richTextBlocks ?? [] {
                 text += block.richTextInlines.map(\.string).joined() + "\n"
             }
             text = text.trimmingCharacters(in: .whitespacesAndNewlines)
@@ -225,10 +235,10 @@ struct PSDGetChats {
                 PSDAnnouncementAttachment(
                     id: attach.id,
                     name: attach.name,
-                    size: attach.size,
-                    width: attach.width,
-                    height: attach.height,
-                    media: attach.media
+                    size: attach.size ?? 0,
+                    width: attach.width ?? 0,
+                    height: attach.height ?? 0,
+                    media: attach.media ?? false
                 )
             }
             return attachments
@@ -269,6 +279,7 @@ struct PSDGetChats {
             serverAnnouncements[clientId] = announcementsInfo
             client.lasAnnouncementUpdateDate = announcementsInfo?.inboxItem.lastMessageDatetimeUTC
             client.lasAnnoncementReadId = announcementsInfo?.inboxItem.lastReadMessageId
+            client.announcementsUnreadCount = announcementsInfo?.inboxItem.unreadCount ?? 0
             if let id = announcementsInfo?.newAnnouncements?.last?.id {
                 client.lasAnnoncementId = id
             }
@@ -285,8 +296,9 @@ struct PSDGetChats {
                 }
                 storeClient.lasAnnouncementUpdateDate = client.lasAnnouncementUpdateDate
                 storeClient.lasAnnoncementReadId = client.lasAnnoncementReadId
+                storeClient.announcementsUnreadCount = client.announcementsUnreadCount
                 if let id = client.lasAnnoncementId {
-                    storeClient.lasAnnoncementId = client.lasAnnoncementId
+                    storeClient.lasAnnoncementId = id
                 }
             }
             if !serverClients.contains(client) {

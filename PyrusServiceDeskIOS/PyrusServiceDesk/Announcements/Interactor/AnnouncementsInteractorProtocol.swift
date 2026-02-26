@@ -4,6 +4,7 @@ enum AnnouncementsInteractorCommand {
     case viewWillAppear
     case reloadAnnouncements
     case updateSelected(index: Int)
+    case viewWillDisappear
 }
 
 protocol AnnouncementsInteractorProtocol: NSObjectProtocol {

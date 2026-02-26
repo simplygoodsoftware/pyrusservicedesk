@@ -75,7 +75,7 @@ class SearchViewController: UIViewController {
         customization = PyrusServiceDesk.mainController?.customization
         design()
         interactor.doInteraction(.viewDidload)
-        view.backgroundColor = .psdBackgroundColor
+        view.backgroundColor = .psdDarkBackgroundColor
     }
     
     override func viewWillAppear(_ animated: Bool) {
@@ -96,7 +96,7 @@ private extension SearchViewController {
     /**Setting design To PSDChatsViewController view, add subviews*/
     
     func design() {
-        view.backgroundColor = UIColor.psdBackgroundColor
+        view.backgroundColor = UIColor.psdDarkBackgroundColor
         view.addSubview(tableView)
         tableView.backgroundView = emptyChatsView
         view.addSubview(searchNavigationView)

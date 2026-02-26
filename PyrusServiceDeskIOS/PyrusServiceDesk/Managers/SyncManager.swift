@@ -320,7 +320,10 @@ private extension SyncManager {
         chatsDataService.saveAnnouncementsModels(with: announcementsResult.newAnnouncements ?? []) { [weak self] _ in
             guard let self else { return }
             chatsDataService.getAllAnnouncements() { announcements in
-                PyrusServiceDesk.announcements = announcements
+                DispatchQueue.main.async {
+                    PyrusServiceDesk.announcements = announcements
+                    NotificationCenter.default.post(name: PyrusServiceDesk.announcementsUpdateNotification, object: nil, userInfo: nil)
+                }
             }
         }
     }

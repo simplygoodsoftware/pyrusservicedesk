@@ -6,6 +6,7 @@ struct PSDAnnouncement: Hashable {
     var isRead: Bool
     var attachments: [PSDAnnouncementAttachment]
     let appId: String
+    var orderIndex: Int = 0
 }
 
 struct PSDAnnouncementAttachment: Hashable {
@@ -15,4 +16,5 @@ struct PSDAnnouncementAttachment: Hashable {
     let width: Int
     let height: Int
     let media: Bool
+    var isVideo: Bool { name?.isVideoFormat() ?? false }
 }

@@ -154,7 +154,7 @@ class PSDChatsViewController: UIViewController {
         designNavigation()
         startGettingInfo()
         interactor.doInteraction(.viewDidload)
-        view.backgroundColor = .psdBackgroundColor
+        view.backgroundColor = .psdDarkBackgroundColor
     }
     
     override func viewDidAppear(_ animated: Bool) {
@@ -179,7 +179,7 @@ private extension PSDChatsViewController {
     /**Setting design To PSDChatsViewController view, add subviews*/
     
     func design() {
-        view.backgroundColor = UIColor.psdBackgroundColor
+        view.backgroundColor = UIColor.psdDarkBackgroundColor
         view.addSubview(tableView)
         tableView.backgroundView = emptyChatsView
 
@@ -241,7 +241,7 @@ private extension PSDChatsViewController {
         ])
         
         tableView.delegate = self
-        tableView.backgroundColor = .psdBackgroundColor
+        tableView.backgroundColor = .psdDarkBackgroundColor
         tableView.estimatedRowHeight = UITableView.automaticDimension
         tableView.rowHeight = UITableView.automaticDimension
         tableView.separatorInset = UIEdgeInsets(top: 0, left: 16, bottom: 0, right: 0)
@@ -560,6 +560,9 @@ extension PSDChatsViewController: UITableViewDelegate, UITableViewDataSource {
             tableView.deselectRow(at: indexPath, animated: true)
             let index = indexPath.section == 0 ? indexPath.row : indexPath.row + chats[0].count - 1
             interactor.doInteraction(.selectChat(index: index))
+        } else if chats[indexPath.section][indexPath.row].type == .announcements {
+            tableView.deselectRow(at: indexPath, animated: true)
+            tabBarController?.selectedIndex = 2
         }
 
     }
@@ -626,6 +629,8 @@ extension PSDChatsViewController: ChatsViewProtocol {
             tableView.sendSubviewToBack(customRefresh)
         case .scrollToClosedTickets:
             scrollToClosedTickets()
+        case .openAnnouncements:
+            tabBarController?.selectedIndex = 2
         }
     }
 }

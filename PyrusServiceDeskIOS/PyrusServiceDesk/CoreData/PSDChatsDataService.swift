@@ -998,6 +998,7 @@ extension PSDChatsDataService: PSDChatsDataServiceProtocol {
             dbAnn.date = model.date
             dbAnn.isRead = model.isRead
             dbAnn.text = model.text
+            dbAnn.orderIndex = Int64(model.orderIndex)
 
             // Вложения
             for a in model.attachments {
@@ -1030,7 +1031,8 @@ extension PSDChatsDataService: PSDChatsDataServiceProtocol {
                         date: db.date ?? Date(),
                         isRead: db.isRead,
                         attachments: [],
-                        appId: db.appId ?? ""
+                        appId: db.appId ?? "",
+                        orderIndex: Int(db.orderIndex)
                     )
                     
                     if let dbAtts = db.attachments?.array as? [DBAnnouncementAttachment] {
@@ -1071,7 +1073,8 @@ extension PSDChatsDataService: PSDChatsDataServiceProtocol {
                     date: db.date ?? Date(),
                     isRead: db.isRead,
                     attachments: [],
-                    appId: db.appId ?? ""
+                    appId: db.appId ?? "",
+                    orderIndex: Int(db.orderIndex)
                 )
                 
                 if let dbAtts = db.attachments?.array as? [DBAnnouncementAttachment] {

@@ -1,5 +1,6 @@
 enum PSDAnnouncementCellType {
     case announcement
+    case announcementsRead
 }
 
 struct AnnouncementsViewModel: Hashable {

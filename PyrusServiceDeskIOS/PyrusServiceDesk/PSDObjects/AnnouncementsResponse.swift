@@ -17,7 +17,7 @@ struct AnnouncementsResponse: Codable {
 // MARK: - Inbox
 
 struct InboxItem: Codable {
-    let lastMessageDatetimeUTC: String?//Date?
+    let lastMessageDatetimeUTC: String?
     let lastReadMessageId: String?
     let unreadCount: Int
 
@@ -85,10 +85,10 @@ struct Content: Codable {
 struct Attachment: Codable {
     let id: String
     let name: String?
-    let size: Int
-    let width: Int
-    let height: Int
-    let media: Bool
+    let size: Int?
+    let width: Int?
+    let height: Int?
+    let media: Bool?
 }
 
 enum MediaType: Int, Codable {
@@ -99,7 +99,7 @@ enum MediaType: Int, Codable {
 
 struct RichTextDocument: Codable {
     let version: Int
-    let richTextBlocks: [RichTextBlock]
+    let richTextBlocks: [RichTextBlock]?
 
     enum CodingKeys: String, CodingKey {
         case version
@@ -129,6 +129,7 @@ struct RichTextInline: Codable {
 
 enum InlineType: String, Codable {
     case text = "Text"
+    case link = "Link"
 }
 
 // пока заглушка
