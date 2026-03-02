@@ -1,2 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
-<resources></resources>
+<resources>
+    <string name="psd_send">送信</string>
+    <string name="psd_retry">再試行</string>
+    <string name="psd_no_connection">インターネット接続がありません</string>
+</resources>
