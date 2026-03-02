@@ -165,6 +165,12 @@ extension ChatsInteractor: ChatsInteractorProtocol {
                     }
                 }
             }
+            
+            if PyrusServiceDesk.clients.count > 1 {
+                let selectedIndex = PyrusServiceDesk.clients.firstIndex(where: { $0.clientId == PyrusServiceDesk.currentClientId }) ?? 0
+                updateSelected(index: selectedIndex)
+                presenter.doWork(.updateSelected(index: selectedIndex))
+            }
                       
         case .updateSelected(index: let index):
             updateSelected(index: index)

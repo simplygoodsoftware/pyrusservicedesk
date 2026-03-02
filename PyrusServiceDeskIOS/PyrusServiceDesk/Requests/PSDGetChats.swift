@@ -21,16 +21,11 @@ struct PSDGetChats {
             parameters["app_id"] = PyrusServiceDesk.clientId
             parameters["security_key"] = PyrusServiceDesk.securityKey
         }
-        parameters["need_full_info"] = true//PyrusServiceDesk.multichats
+        parameters["need_full_info"] = true
         parameters["api_sign"] = PyrusServiceDesk.apiSign()
         parameters["author_id"] = PyrusServiceDesk.authorId
         parameters["author_name"] = PyrusServiceDesk.authorName
         parameters["last_note_id"] = PyrusServiceDesk.lastNoteId
-        
-        
-//        if let fieldsData = PyrusServiceDesk.fieldsData {
-//            parameters[EXTRA_FIELDS_KEY] = fieldsData
-//        }
         
         if PyrusServiceDesk.needShowLoading {
             parameters["last_note_id"] = 0
@@ -69,6 +64,13 @@ struct PSDGetChats {
             announcementsChepoint["last_helpy_announcement_change_datetime"] = client.lasAnnouncementUpdateDate
             announcementsChepoints.append(announcementsChepoint)
         }
+        
+        if PyrusServiceDesk.clients.count == 0 {
+            var announcementsChepoint = [String: Any]()
+            announcementsChepoint["app_id"] = PyrusServiceDesk.clientId
+            announcementsChepoints.append(announcementsChepoint)
+        }
+        
         parameters["helpy_announcement_feed_checkpoints"] = announcementsChepoints
         
         let request: URLRequest = URLRequest.createRequest(type:.chats, parameters: parameters)
