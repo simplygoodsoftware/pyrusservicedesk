@@ -24,6 +24,7 @@ import com.pyrus.pyrusservicedesk.core.StaticRepository
 import com.pyrus.pyrusservicedesk.core.getUserId
 import com.pyrus.pyrusservicedesk.core.refresh.AutoRefreshFeature
 import com.pyrus.pyrusservicedesk.presentation.viewmodel.SharedViewModel
+import com.pyrus.pyrusservicedesk.sdk.data.StartData
 import com.pyrus.pyrusservicedesk.sdk.updates.LiveUpdates
 import com.pyrus.pyrusservicedesk.sdk.updates.NewReplySubscriber
 import com.pyrus.pyrusservicedesk.sdk.updates.OnStopCallback
@@ -393,7 +394,8 @@ class PyrusServiceDesk private constructor(
             this.onStopCallback = onStopCallback
 
             val locale = activity.resources.configuration.locales.get(0)
-            val intent = MainActivity.createLaunchIntent(activity, account, openTicketAction, sendComment, locale)
+            val startData = StartData(account, openTicketAction, sendComment, locale.language, locale.country)
+            val intent = MainActivity.createLaunchIntent(activity, startData)
             intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
             activity.startActivity(intent)
             updateSdIsOpen(true)

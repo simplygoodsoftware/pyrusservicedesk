@@ -13,16 +13,15 @@ import com.google.android.gms.tasks.OnCompleteListener
 import com.google.android.gms.tasks.Task
 import com.google.android.play.core.review.ReviewInfo
 import com.google.android.play.core.review.ReviewManagerFactory
-import com.pyrus.pyrusservicedesk.OpenTicketAction
 import com.pyrus.pyrusservicedesk.PyrusServiceDesk
 import com.pyrus.pyrusservicedesk.PyrusServiceDesk.Companion.injector
 import com.pyrus.pyrusservicedesk.R
 import com.pyrus.pyrusservicedesk.ServiceDeskConfiguration
 import com.pyrus.pyrusservicedesk._ref.SdScreens
 import com.pyrus.pyrusservicedesk._ref.utils.navigation.PyrusNavigator
-import com.pyrus.pyrusservicedesk.core.Account
 import com.pyrus.pyrusservicedesk.core.StaticRepository
 import com.pyrus.pyrusservicedesk.databinding.PsdActivityMainBinding
+import com.pyrus.pyrusservicedesk.sdk.data.StartData
 import java.util.Locale
 
 
@@ -41,10 +40,11 @@ internal class MainActivity : FragmentActivity() {
             else -> R.style.BasePyrusServiceDesk
         }
         setTheme(theme)
+        val data = intent.getParcelableExtra<StartData>(KEY_DATA)
 
         val currentLocale = Locale.getDefault()
-        val localeCountry = intent.getStringExtra(KEY_LOCALE_COUNTRY) ?: ""
-        val localeLanguage = intent.getStringExtra(KEY_LOCALE_LANGUAGE) ?: currentLocale.language
+        val localeCountry = data?.localeCountry ?: ""
+        val localeLanguage = data?.localeLanguage ?: currentLocale.language
         val newLocale = Locale.Builder()
             .setLanguage(localeLanguage)
             .setRegion(localeCountry)
@@ -60,8 +60,8 @@ internal class MainActivity : FragmentActivity() {
         savedInstanceState?.let { ServiceDeskConfiguration.restore(it) }
         super.overridePendingTransition(R.anim.fade_in, R.anim.no_animation)
         if (savedInstanceState == null) {
-            val action = intent.getParcelableExtra<OpenTicketAction>(KEY_OPEN_TICKET_ACTION)
-            val sendComment = intent.getStringExtra(KEY_SEND_COMMENT)
+            val action = data?.openTicketAction
+            val sendComment = data?.sendComment
             injector().router.newRootScreen(SdScreens.RouterScreen(action, sendComment))
         }
     }
@@ -141,19 +141,11 @@ internal class MainActivity : FragmentActivity() {
 
     companion object {
 
-        private const val KEY_ACCOUNT = "KEY_ACCOUNT"
-        private const val KEY_OPEN_TICKET_ACTION = "KEY_OPEN_TICKET_ACTION"
-        private const val KEY_SEND_COMMENT = "KEY_SEND_COMMENT"
-        private const val KEY_LOCALE_COUNTRY = "KEY_LOCALE_COUNTRY"
-        private const val KEY_LOCALE_LANGUAGE = "KEY_LOCALE_LANGUAGE"
+        private const val KEY_DATA = "KEY_DATA"
 
-        fun createLaunchIntent(context: Context, account: Account, openTicketAction: OpenTicketAction?, sendComment: String?, locale: Locale): Intent {
+        fun createLaunchIntent(context: Context, startData: StartData): Intent {
             return Intent(context, MainActivity::class.java)
-                .putExtra(KEY_ACCOUNT, account)
-                .putExtra(KEY_OPEN_TICKET_ACTION, openTicketAction)
-                .putExtra(KEY_SEND_COMMENT, sendComment)
-                .putExtra(KEY_LOCALE_LANGUAGE, locale.language)
-                .putExtra(KEY_LOCALE_COUNTRY, locale.country)
+                .putExtra(KEY_DATA, startData)
         }
     }
 
