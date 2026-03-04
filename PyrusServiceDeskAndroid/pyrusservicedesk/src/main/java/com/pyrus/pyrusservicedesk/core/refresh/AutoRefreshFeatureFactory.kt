@@ -74,15 +74,14 @@ private class AutoRefreshActor(
         ) { isStarted, lastActiveTime, sdIsOpen ->
             val interval = liveUpdates.getTicketsUpdateInterval(lastActiveTime)
             if (isStarted || sdIsOpen)
-                AutoRefreshData(interval, lastActiveTime, sdIsOpen, isStarted)
+                AutoRefreshData(interval, lastActiveTime, sdIsOpen)
             else
-                AutoRefreshData(NO_UPDATES, NO_UPDATES, sdIsOpen = false, updatesIsStarted = false)
+                AutoRefreshData(NO_UPDATES, NO_UPDATES, sdIsOpen = false)
         }
             .distinctUntilChanged { oldData, newData ->
                 val result = oldData.interval != newData.interval ||
                     oldData.lastActiveTime != newData.lastActiveTime ||
-                    (!oldData.sdIsOpen && newData.sdIsOpen) ||
-                    (!oldData.updatesIsStarted && newData.updatesIsStarted)
+                    (!oldData.sdIsOpen && newData.sdIsOpen)
                 !result
             }
             .flatMapLatest { data ->
