@@ -82,25 +82,29 @@ private class AutoRefreshActor(
                 !isRefreshRequired(oldData, newData)
             }
             .flatMapLatest { data ->
-                if (data.interval == NO_UPDATES) {
-                    flow { }
-                }
-                else {
-                    flow {
-                        while (currentCoroutineContext().isActive) {
-                            val interval = liveUpdates.getTicketsUpdateInterval(data.lastActiveTime)
-                            if (interval == NO_UPDATES)
-                                break
-                            repository.sync()
-                            delay(interval)
-                        }
-                    }
-                }
+                startRefreshingIfNeed(data)
             }
 
         is AutoRefreshContract.Effect.StartUpdatesSystemMessage -> flow {
             systemMessageStore.ticketStateFlow().collect { id ->
                 startSendCalcOperatorTime(id)
+            }
+        }
+    }
+
+    private fun startRefreshingIfNeed(data: AutoRefreshData): Flow<Unit> {
+        return if (data.interval == NO_UPDATES) {
+            flow { }
+        }
+        else {
+            flow {
+                while (currentCoroutineContext().isActive) {
+                    val interval = liveUpdates.getTicketsUpdateInterval(data.lastActiveTime)
+                    if (interval == NO_UPDATES)
+                        break
+                    repository.sync()
+                    delay(interval)
+                }
             }
         }
     }
