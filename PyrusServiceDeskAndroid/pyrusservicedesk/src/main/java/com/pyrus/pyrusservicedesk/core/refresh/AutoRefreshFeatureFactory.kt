@@ -74,32 +74,47 @@ private class AutoRefreshActor(
         ) { isStarted, lastActiveTime, sdIsOpen ->
             val interval = liveUpdates.getTicketsUpdateInterval(lastActiveTime)
             if (isStarted || sdIsOpen)
-                interval to lastActiveTime
+                AutoRefreshData(interval, lastActiveTime, sdIsOpen)
             else
-                NO_UPDATES to NO_UPDATES
+                AutoRefreshData(NO_UPDATES, NO_UPDATES, sdIsOpen = false)
         }
-            .distinctUntilChanged()
+            .distinctUntilChanged { oldData, newData ->
+                !isRefreshRequired(oldData, newData)
+            }
             .flatMapLatest { data ->
-                if (data.first == NO_UPDATES) {
-                    flow { }
-                }
-                else {
-                    flow {
-                        while (currentCoroutineContext().isActive) {
-                            val interval = liveUpdates.getTicketsUpdateInterval(data.second)
-                            if (interval == NO_UPDATES)
-                                break
-                            repository.sync()
-                            delay(interval)
-                        }
-                    }
-                }
+                startRefreshingIfNeed(data)
             }
 
         is AutoRefreshContract.Effect.StartUpdatesSystemMessage -> flow {
             systemMessageStore.ticketStateFlow().collect { id ->
                 startSendCalcOperatorTime(id)
             }
+        }
+    }
+
+    private fun startRefreshingIfNeed(data: AutoRefreshData): Flow<Unit> {
+        return if (data.interval == NO_UPDATES) {
+            flow { }
+        }
+        else {
+            flow {
+                while (currentCoroutineContext().isActive) {
+                    val interval = liveUpdates.getTicketsUpdateInterval(data.lastActiveTime)
+                    if (interval == NO_UPDATES)
+                        break
+                    repository.sync()
+                    delay(interval)
+                }
+            }
+        }
+    }
+
+    private fun isRefreshRequired(oldData: AutoRefreshData, newData: AutoRefreshData): Boolean {
+        return when {
+            oldData.interval != newData.interval -> true
+            oldData.lastActiveTime != newData.lastActiveTime -> true
+            !oldData.sdIsOpen && newData.sdIsOpen -> true
+            else -> false
         }
     }
 
