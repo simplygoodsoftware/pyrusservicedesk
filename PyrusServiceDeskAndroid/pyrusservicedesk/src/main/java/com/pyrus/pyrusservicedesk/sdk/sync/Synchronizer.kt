@@ -319,6 +319,7 @@ internal class Synchronizer(
     private fun onSucceedLoopEnd() {
         failDelay.clear()
         val syncRequests = getQueuedCommands(MAX_COMMANDS_PER_SYNC)
+                .filterNot { it.request is SyncRequest.Command.SetPushToken }
         if (syncRequests.isEmpty()) {
             isRunning.set(false)
         }
