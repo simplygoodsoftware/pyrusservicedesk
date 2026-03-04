@@ -97,9 +97,9 @@ internal class LiveUpdates() {
         updateIsStarted(true)
         val localTicketsStore = injector().localTicketsStore
         val repository = injector().repository
-        val lastActiveTime = preferencesManager?.getLastActiveTime() ?: -1L
+        val lastActiveTime = preferencesManager?.getLastActiveTime() ?: NO_INTERVAL
         replayJob = coreScope.launch(Dispatchers.IO) {
-            if (getTicketsUpdateInterval(lastActiveTime) == -1L && !updatingIsStarted)
+            if (getTicketsUpdateInterval(lastActiveTime) == NO_INTERVAL && !updatingIsStarted)
                 repository.sync()
             localTicketsStore.getTicketsFlow().collect { tickets ->
                 val lastTicket = tickets.lastOrNull()
@@ -197,6 +197,8 @@ internal class LiveUpdates() {
     }
 
     companion object {
+
+        private const val NO_INTERVAL = -1L
         private const val TAG = "LiveUpdates"
     }
 

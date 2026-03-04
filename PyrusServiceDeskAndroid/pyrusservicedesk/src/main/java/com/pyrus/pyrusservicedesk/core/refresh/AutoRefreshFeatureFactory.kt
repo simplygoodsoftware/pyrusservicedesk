@@ -79,10 +79,7 @@ private class AutoRefreshActor(
                 AutoRefreshData(NO_UPDATES, NO_UPDATES, sdIsOpen = false)
         }
             .distinctUntilChanged { oldData, newData ->
-                val result = oldData.interval != newData.interval ||
-                    oldData.lastActiveTime != newData.lastActiveTime ||
-                    (!oldData.sdIsOpen && newData.sdIsOpen)
-                !result
+                !isRefreshRequired(oldData, newData)
             }
             .flatMapLatest { data ->
                 if (data.interval == NO_UPDATES) {
@@ -105,6 +102,15 @@ private class AutoRefreshActor(
             systemMessageStore.ticketStateFlow().collect { id ->
                 startSendCalcOperatorTime(id)
             }
+        }
+    }
+
+    private fun isRefreshRequired(oldData: AutoRefreshData, newData: AutoRefreshData): Boolean {
+        return when {
+            oldData.interval != newData.interval -> true
+            oldData.lastActiveTime != newData.lastActiveTime -> true
+            !oldData.sdIsOpen && newData.sdIsOpen -> true
+            else -> false
         }
     }
 
