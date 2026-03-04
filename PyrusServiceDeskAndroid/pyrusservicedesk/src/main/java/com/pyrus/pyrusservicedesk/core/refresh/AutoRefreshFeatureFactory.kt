@@ -74,19 +74,25 @@ private class AutoRefreshActor(
         ) { isStarted, lastActiveTime, sdIsOpen ->
             val interval = liveUpdates.getTicketsUpdateInterval(lastActiveTime)
             if (isStarted || sdIsOpen)
-                interval to lastActiveTime
+                AutoRefreshData(interval, lastActiveTime, sdIsOpen, isStarted)
             else
-                NO_UPDATES to NO_UPDATES
+                AutoRefreshData(NO_UPDATES, NO_UPDATES, sdIsOpen = false, updatesIsStarted = false)
         }
-            .distinctUntilChanged()
+            .distinctUntilChanged { oldData, newData ->
+                val result = oldData.interval != newData.interval ||
+                    oldData.lastActiveTime != newData.lastActiveTime ||
+                    (!oldData.sdIsOpen && newData.sdIsOpen) ||
+                    (!oldData.updatesIsStarted && newData.updatesIsStarted)
+                !result
+            }
             .flatMapLatest { data ->
-                if (data.first == NO_UPDATES) {
+                if (data.interval == NO_UPDATES) {
                     flow { }
                 }
                 else {
                     flow {
                         while (currentCoroutineContext().isActive) {
-                            val interval = liveUpdates.getTicketsUpdateInterval(data.second)
+                            val interval = liveUpdates.getTicketsUpdateInterval(data.lastActiveTime)
                             if (interval == NO_UPDATES)
                                 break
                             repository.sync()

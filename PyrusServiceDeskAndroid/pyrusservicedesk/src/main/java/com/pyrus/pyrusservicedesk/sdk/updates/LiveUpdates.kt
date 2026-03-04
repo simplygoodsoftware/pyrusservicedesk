@@ -4,7 +4,6 @@ import android.util.Log
 import androidx.annotation.MainThread
 import com.pyrus.pyrusservicedesk.PyrusServiceDesk
 import com.pyrus.pyrusservicedesk.PyrusServiceDesk.Companion.injector
-import com.pyrus.pyrusservicedesk.PyrusServiceDesk.Companion.refresh
 import com.pyrus.pyrusservicedesk._ref.utils.MILLISECONDS_IN_DAY
 import com.pyrus.pyrusservicedesk._ref.utils.MILLISECONDS_IN_HOUR
 import com.pyrus.pyrusservicedesk._ref.utils.MILLISECONDS_IN_MINUTE
@@ -70,7 +69,6 @@ internal class LiveUpdates() {
             }
         }
         startUpdates(injector().preferencesManager)
-        refresh()
     }
 
     /**
@@ -95,12 +93,13 @@ internal class LiveUpdates() {
     @MainThread
     private fun startUpdates(preferencesManager: PreferencesManager?) {
         PLog.d(TAG, "startUpdates")
+        updateIsStarted(false)
         updateIsStarted(true)
         val localTicketsStore = injector().localTicketsStore
         val repository = injector().repository
         val lastActiveTime = preferencesManager?.getLastActiveTime() ?: -1L
         replayJob = coreScope.launch(Dispatchers.IO) {
-            if (getTicketsUpdateInterval(lastActiveTime) != -1L)
+            if (getTicketsUpdateInterval(lastActiveTime) == -1L)
                 repository.sync()
             localTicketsStore.getTicketsFlow().collect { tickets ->
                 val lastTicket = tickets.lastOrNull()
