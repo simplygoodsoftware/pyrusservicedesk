@@ -2,6 +2,7 @@ import Foundation
 import CoreData
 
 protocol CoreDataServiceProtocol: AnyObject {
+    var persistentContainer: NSPersistentContainer { get }
     func fetchChats() throws -> [DBChat]
     func fetchMessages() throws -> [DBMessage]
     func fetchCommands() throws -> [DBTicketCommand]
@@ -15,4 +16,5 @@ protocol CoreDataServiceProtocol: AnyObject {
     func deleteClients(ids: [String]) throws
     func fetchChatsAndMessages(searchString: String,
                                completion: @escaping (Result<([DBMessage], [DBChat]), Error>) -> Void)
+    func deleteCommand(id: String, completion: (() -> Void)?)
 }

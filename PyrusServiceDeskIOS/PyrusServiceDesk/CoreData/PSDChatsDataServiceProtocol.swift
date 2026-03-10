@@ -12,8 +12,10 @@ protocol PSDChatsDataServiceProtocol {
     func getAllMessages(completion: @escaping ([PSDMessage]) -> Void)
     
     func getAllCommands() -> [TicketCommand]
+    func getAllCommandsSafe() -> [TicketCommand]
     func saveTicketCommand(with ticketCommand: TicketCommand, completion: ((Result<Void, Error>) -> Void)?)
     func deleteCommand(with id: String, serverTicketId: Int?)
+    func deleteCommand(with id: String, serverTicketId: Int?, completion: @escaping () -> Void)
     func resaveBeforeDeleteCommand(commanId: String, serverTicketId: Int?, completion: ((Result<Void, Error>) -> Void)?)
     
     func saveClientModels(with clientModels: [PSDClientInfo])

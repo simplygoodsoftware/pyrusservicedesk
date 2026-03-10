@@ -52,7 +52,7 @@ class CustomizationHelper {
             case .light, .unspecified:
                 return PyrusServiceDesk.mainController?.customization?.keyboardAppearance ?? .default
             case .dark:
-                return PyrusServiceDesk.mainController?.customization?.keyboardAppearanceDark ?? .default
+                return PyrusServiceDesk.mainController?.customization?.keyboardAppearanceDark ?? .dark
             @unknown default:
                 return PyrusServiceDesk.mainController?.customization?.keyboardAppearance ?? .default
             }

@@ -74,7 +74,7 @@ class PSDChatViewController: PSDViewController, PSDMainController {
     private lazy var badgeView: UIView = {
         let view = UIView()
         view.layer.cornerRadius = 8
-        view.backgroundColor = CustomizationHelper.userMassageBackgroundColor
+        view.backgroundColor = .hRose
         view.translatesAutoresizingMaskIntoConstraints = false
         return view
     }()
@@ -138,6 +138,11 @@ class PSDChatViewController: PSDViewController, PSDMainController {
         interactor.doInteraction(.viewDidload)
     }
     
+    override func traitCollectionDidChange(_ previousTraitCollection: UITraitCollection?) {
+        super.traitCollectionDidChange(previousTraitCollection)
+        messageInputView.backgroundView.backgroundColor = CustomizationHelper.colorsForInput.0
+    }
+    
     private func keyboardAnimationDuration(_ notification: NSNotification) -> TimeInterval{
         if let  duration = notification.userInfo?[UIResponder.keyboardAnimationDurationUserInfoKey] as? NSValue{
             return duration as? TimeInterval ?? 0
@@ -175,8 +180,16 @@ class PSDChatViewController: PSDViewController, PSDMainController {
     }
     
     private var isFirstKeyboardShow: Bool = true
+    private var blockContentMove: Bool = false
     private var currkeyboardHeight: CGFloat = 0
+    private var defaultMessageInputViewHeight: CGFloat = 0
+    
     @objc private func keyboardWillShow(_ notification: NSNotification) {
+        guard !blockContentMove else {
+            blockContentMove = false
+            return
+        }
+        
         if #available(iOS 26.0, *) {
             if let infoEndKey: NSValue = notification.userInfo?[UIResponder.keyboardFrameEndUserInfoKey] as? NSValue,
                let center = (notification.userInfo?["UIKeyboardCenterBeginUserInfoKey"] as? NSValue)?.cgPointValue {
@@ -185,7 +198,13 @@ class PSDChatViewController: PSDViewController, PSDMainController {
                     return
                 }
                 let duration = keyboardAnimationDuration(notification)
-                let keyboardHeight = keyboardEndFrame.height
+                var keyboardHeight = keyboardEndFrame.height
+                
+//                if defaultMessageInputViewHeight > 0,
+//                   keyboardHeight != defaultMessageInputViewHeight,
+//                   abs(keyboardHeight - defaultMessageInputViewHeight) < PSDMessageInputView.attachmentsHeight {
+//                    keyboardHeight = defaultMessageInputViewHeight
+//                }
                 
                 let oldInset = self.tableView.contentInset.top
                 let oldOffset = self.tableView.contentOffset.y
@@ -201,6 +220,7 @@ class PSDChatViewController: PSDViewController, PSDMainController {
                     }
                     
                     if isFirstKeyboardShow && (PyrusServiceDesk.multichats || PyrusServiceDesk.startWithPush) {
+                        defaultMessageInputViewHeight = messageInputView.frame.height
                         UIView.performWithoutAnimation {
                             self.tableView.contentOffset.y -= keyboardHeight - oldInset
                         }
@@ -211,9 +231,7 @@ class PSDChatViewController: PSDViewController, PSDMainController {
                         if delta > 0 {
                             self.tableView.contentOffset.y -= delta
                         }
-//                        self.tableView.contentOffset.y = oldOffset - keyboardHeight + oldInset//(keyboardHeight - oldKeyboardHeight)//keyboardHeight + oldInset// - self.view.safeAreaInsets.bottom
-//                        self.tableView.contentOffset.y = oldOffset - (keyboardHeight - oldKeyboardHeight)
-//                            self.tableView.contentOffset.y -= keyboardHeight - oldInset
+
                         print("размер: keyboardHeight - oldInset: \(oldOffset - keyboardHeight + oldInset)")
                         print("keyboardHeight: \(keyboardHeight)")
                     }
@@ -286,12 +304,16 @@ class PSDChatViewController: PSDViewController, PSDMainController {
                 } else
                 if !((self.oldHeight - self.messageInputView.frame.size.height).rounded() == self.view.safeAreaInsets.bottom)
                 {
-                    self.isAddButtonTapped = false
                     if #available(iOS 26.0, *) {
-                        self.tableView.contentInset.top = self.messageInputView.frame.size.height + self.view.safeAreaInsets.bottom
+                        self.tableView.contentInset.top = self.messageInputView.frame.size.height
+                        if abs(keyboardHeight - self.defaultMessageInputViewHeight) > 20 {
+                            self.tableView.contentInset.top += self.view.safeAreaInsets.bottom
+                            self.tableView.contentOffset.y -= self.view.safeAreaInsets.bottom
+                        }
                     } else {
                         self.tableView.contentInset.top = self.messageInputView.frame.size.height
                     }
+                    self.isAddButtonTapped = false
                 }
             })
             
@@ -307,12 +329,6 @@ class PSDChatViewController: PSDViewController, PSDMainController {
         scrollButton.layer.shadowRadius = 4
         scrollButton.layer.shadowOpacity = 0.2
         scrollButton.layer.masksToBounds = false
-        
-//        stopButton.layer.shadowColor = UIColor.black.cgColor
-//        stopButton.layer.shadowOffset = CGSize(width: 0, height: 4)
-//        stopButton.layer.shadowRadius = 4
-//        stopButton.layer.shadowOpacity = 0.2
-//        stopButton.layer.masksToBounds = false
         
         messageInputView.backgroundView.backgroundColor = CustomizationHelper.colorsForInput.0
     }
@@ -383,6 +399,7 @@ class PSDChatViewController: PSDViewController, PSDMainController {
         resizeTable()
         messageInputView.isHidden = false
         interactor.doInteraction(.viewWillAppear)
+        messageInputView.inputTextView.updateDraft()
         
         navigationController?.navigationBar.isHidden = false
         navigationController?.setNavigationBarHidden(false, animated: false)
@@ -415,6 +432,7 @@ class PSDChatViewController: PSDViewController, PSDMainController {
         
 //        self.tableView.removeListeners()
         interactor.doInteraction(.viewWillDisappear)
+        messageInputView.inputTextView.saveDraft()
         
         UIView.animate(withDuration: 0.2, animations: {
             self.tabBarController?.tabBar.alpha = 1.0
@@ -578,7 +596,13 @@ class PSDChatViewController: PSDViewController, PSDMainController {
     }
     
     @objc func scrollToBottom() {
-        tableView.scrollsToBottom(animated: true, keyBoardHeight: currkeyboardHeight)
+        let hasNewMessages = !badgeView.isHidden
+        tableView.scrollsToBottom(animated: true, keyBoardHeight: currkeyboardHeight, newMessage: !badgeView.isHidden)
+        if hasNewMessages {
+            badgeView.isHidden = true
+            interactor.doInteraction(.scrollButtonVisibleUpdated(isHidden: true))
+            interactor.doInteraction(.scrollButtonVisibleUpdated(isHidden: false))
+        }
     }
     
     func setupInfoView() {
@@ -614,6 +638,7 @@ class PSDChatViewController: PSDViewController, PSDMainController {
     }
     
     @objc func showPopover(_ sender: UIBarButtonItem) {
+        isAddButtonTapped = true
         if #available(iOS 15.0, *) {
             messageInputView.inputTextView.resignFirstResponder()
             if let sheet = popoverContentController.sheetPresentationController {
@@ -764,7 +789,9 @@ extension PSDChatViewController: PSDChatViewProtocol {
         case .redrawCell(indexPath: let indexPath, message: let message):
             tableView.redrawCell(at: indexPath, with: message)
         case .showKeyBoard:
-            self.messageInputView.inputTextView.becomeFirstResponder()
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.05) {
+                self.messageInputView.inputTextView.becomeFirstResponder()
+            }
         case .reloadAll(animated: let animated):
             tableView.reloadAll(animated: animated)
         case .updateTitle(connectionError: let connectionError):
@@ -797,6 +824,16 @@ extension PSDChatViewController: PSDChatViewProtocol {
             tableView.scrollToRow(at: indexPath, at: .middle, animated: false)
             tableView.setNeedsLayout()
             tableView.layoutIfNeeded()
+        case .scrollToRowTop(indexPath: let indexPath):
+            tableView.scrollToRow(at: indexPath, at: .bottom, animated: false)
+            tableView.setNeedsLayout()
+            tableView.layoutIfNeeded()
+            if tableView.contentOffset.y > 0 {
+                tableView.contentInset.top = messageInputView.frame.height + view.safeAreaInsets.bottom
+                blockContentMove = true
+                isFirstKeyboardShow = false
+                defaultMessageInputViewHeight = messageInputView.frame.height
+            }
         case .updateActive(isActive: let isActive):
             self.isActive = isActive
             if !isActive {
@@ -807,14 +844,14 @@ extension PSDChatViewController: PSDChatViewProtocol {
             }
         case .updateInfo(ticketId: let ticketId, userName: let userName, createdAt: let createdAt):
             popoverContentController = PopoverContentController(ticketId: ticketId, userName: userName, createdAt: createdAt)
-        //    chatInfoView.updateItems(items: [ticketId, userName, createdAt])
-            navigationItem.rightBarButtonItem = infoButton//UIBarButtonItem(image: UIImage(systemName: "info.circle")?.imageWith(color: PyrusServiceDesk.mainController?.customization?.themeColor ?? .systemBlue), style: .plain, target: self, action: #selector(showPopover))//infoButton
-        case .addMessage(scrollsToBottom: let scrollsToBottom, message: let message):
-            tableView.addMessages([message], keyBoardHeight: currkeyboardHeight)
             navigationItem.rightBarButtonItem = infoButton
-            DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
-                self.deletedAllAttachments()
-            }
+        case .addMessage(scrollsToBottom: _, message: let message):
+            self.deletedAllAttachments()
+            tableView.addMessages([message], keyBoardHeight: currkeyboardHeight)
+//            
+//            DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
+//                self.deletedAllAttachments()
+//            }
         case .showRatingComment(ratingText: let ratingText, rating: let rating):
             messageInputView.inputTextView.resignFirstResponder()
             DispatchQueue.main.async { [weak self] in
@@ -822,6 +859,8 @@ extension PSDChatViewController: PSDChatViewProtocol {
             }
         case .updateOperatorTime(timeMessage: let timeMessage):
             tableView.updateOperatorTimeLabel(time: timeMessage)
+        case .updateDraft(ticketId: let ticketId):
+            messageInputView.inputTextView.ticketId = ticketId
         }
     }
 }
@@ -832,7 +871,7 @@ extension PSDChatViewController: PSDMessageInputViewDelegate {
             if isKeyBoardOpen {
                 tableView.contentInset.top = currkeyboardHeight
             } else {
-                tableView.contentInset.top = self.messageInputView.frame.size.height// + self.view.safeAreaInsets.bottom
+                tableView.contentInset.top = defaultMessageInputViewHeight
             }
         }
     }
@@ -884,6 +923,7 @@ extension PSDChatViewController: PSDChatTableViewDelegate {
             UIView.animate(withDuration: 0.2) {
                 self.scrollButton.isHidden = false
                 self.scrollButton.transform = CGAffineTransform(scaleX: 1, y: 1)
+                self.interactor.doInteraction(.scrollButtonVisibleUpdated(isHidden: false))
             }
         } else if isAtBottom && scrollButton.isHidden == false {
             badgeView.isHidden = true
@@ -891,6 +931,7 @@ extension PSDChatViewController: PSDChatTableViewDelegate {
                 self.scrollButton.transform = CGAffineTransform(scaleX: 0, y: 0)
             } completion: { _ in
                 self.scrollButton.isHidden = true
+                self.interactor.doInteraction(.scrollButtonVisibleUpdated(isHidden: true))
             }
         }
     }

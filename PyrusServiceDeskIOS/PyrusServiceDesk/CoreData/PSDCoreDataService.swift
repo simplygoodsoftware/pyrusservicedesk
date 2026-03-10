@@ -9,9 +9,8 @@ final class CoreDataService {
     private let currentSchemaVersion = 1
     private let schemaVersionKey = "PSDChatsSchemaVersion"
     
-    private lazy var persistentContainer: NSPersistentContainer = {
+    lazy var persistentContainer: NSPersistentContainer = {
         checkAndResetStoreIfNeeded()
-        
         guard let modelURL = PSD_BUNDLE.url(forResource: "PSDChats", withExtension: "momd") else {
             fatalError("❌ Не найден PSDChats.momd в bundle: \(PSD_BUNDLE.bundleURL)")
         }
@@ -26,7 +25,8 @@ final class CoreDataService {
                 fatalError("❌ Ошибка загрузки persistent store: \(error)")
             }
         }
-
+        container.viewContext.automaticallyMergesChangesFromParent = true
+        container.viewContext.mergePolicy = NSMergeByPropertyObjectTrumpMergePolicy
         return container
     }()
 
@@ -252,6 +252,22 @@ extension CoreDataService: CoreDataServiceProtocol {
         } catch {
             print("Error deleting command with ID: \(id), \(error)")
             throw error
+        }
+    }
+    
+    func deleteCommand(id: String, completion: (() -> Void)?) {
+        persistentContainer.performBackgroundTask { ctx in
+            let req = NSFetchRequest<DBTicketCommand>(entityName: "DBTicketCommand")
+            req.predicate = NSPredicate(format: "id == %@", id)
+            do {
+                if let obj = try ctx.fetch(req).first {
+                    ctx.delete(obj)
+                    try ctx.save()
+                }
+            } catch {
+                print("BG delete error: \(error)")
+            }
+            DispatchQueue.main.async { completion?() }
         }
     }
     

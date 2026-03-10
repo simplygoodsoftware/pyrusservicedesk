@@ -20,15 +20,13 @@ struct PSDMessageSend {
      - parameter file: PSDAttachment object with data that need to be passed to server.
      - parameter delegate: PSDMessageSendDelegate object to receive completion or error. Used in second step.
      */
-    static func passFile(_ messageWithAttachment: PSDMessage, attachmentIdex: Int, delegate: PSDMessageSendDelegate?)
-    {
-        if(session == nil){
+    static func passFile(_ messageWithAttachment: PSDMessage, attachmentIdex: Int, delegate: PSDMessageSendDelegate?) {
+        if session == nil {
             session = PSDUploader.init()
         }
-        if(messageWithAttachment.attachments != nil){
-            session!.createUploadTask(from: messageWithAttachment, indexOfAttachment: attachmentIdex, delegate: delegate)
+        if messageWithAttachment.attachments != nil {
+            session?.createUploadTask(from: messageWithAttachment, indexOfAttachment: attachmentIdex, delegate: delegate)
         }
-        
     }
     /**
      Stop uploding attachment (if it is)
@@ -51,7 +49,7 @@ struct PSDMessageSend {
         }
         if session != nil {
             for (task, data) in session!.tasksMap {
-                if data.file == attachment {
+                if data.data.file == attachment {
                     session!.stopUpload(task: task)
                     break
                 }

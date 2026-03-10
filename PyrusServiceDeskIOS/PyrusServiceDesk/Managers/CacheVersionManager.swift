@@ -5,7 +5,7 @@ final class CacheVersionManager {
     static let shared = CacheVersionManager()
 
     /// Текущая версия кэша
-    private let currentVersion = 3
+    private let currentVersion = 4
     
     private let userDefaults = UserDefaults.standard
     private let cacheVersionKey = "cacheVersionKey"

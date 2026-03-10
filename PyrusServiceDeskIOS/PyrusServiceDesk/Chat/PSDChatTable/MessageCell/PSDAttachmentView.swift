@@ -80,7 +80,7 @@ class PSDAttachmentView: UIView{
     }
     ///Open attachment in PSDAttachmentLoadViewController
     private func openAttachment(){
-        if downloadState != .sent {
+        if downloadState != .sent || (attachment?.isAudio ?? false) {
             return
         }
         if (self.attachment?.serverIdentifer?.count ?? 0) > 0 {

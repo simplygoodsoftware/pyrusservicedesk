@@ -696,6 +696,53 @@ extension PSDChatsDataService: PSDChatsDataServiceProtocol {
         }
     }
     
+    func getAllCommandsSafe() -> [TicketCommand] {
+        let context = coreDataService.persistentContainer.viewContext
+        var output: [TicketCommand] = []
+        context.performAndWait {
+            do {
+                let dbCommands = try coreDataService.fetchCommands()
+                output = dbCommands.compactMap { dbCommand in
+                    guard let commandId = dbCommand.id else { return nil }
+                    var attachmentsData: [AttachmentData]? = nil
+                    if let dbAttachments = dbCommand.attachments?.array as? [DBAttachmentData] {
+                        attachmentsData = dbAttachments.map {
+                            AttachmentData(type: Int($0.type), name: $0.name ?? "", guid: $0.guid)
+                        }
+                    }
+                    return TicketCommand(
+                        commandId: commandId,
+                        type: TicketCommandType(rawValue: Int(dbCommand.type)) ?? .readTicket,
+                        appId: dbCommand.appId,
+                        userId: dbCommand.userId,
+                        params: TicketCommandParams(
+                            ticketId: Int(dbCommand.ticketId),
+                            appId: dbCommand.appId,
+                            requestNewTicket: dbCommand.requestNewTicket,
+                            userId: dbCommand.userId,
+                            message: dbCommand.message,
+                            attachments: attachmentsData,
+                            authorId: dbCommand.authorId,
+                            token: dbCommand.token,
+                            type: dbCommand.tokenType,
+                            messageId: dbCommand.messageId == 0 ? nil : Int(dbCommand.messageId),
+                            rating: Int(dbCommand.rating) == 0 ? nil : Int(dbCommand.rating),
+                            ratingComment: dbCommand.ratingComment,
+                            date: dbCommand.date,
+                            messageClientId: dbCommand.clientId,
+                            hasAccess: dbCommand.hasAccess,
+                            extraFields: dbCommand.requestNewTicket ? PyrusServiceDesk.fieldsData : nil
+                        )
+                    )
+                }
+            } catch {
+                print(error)
+            }
+        }
+        return output
+    }
+
+    
     func getAllCommands() -> [TicketCommand] {
         do {
             let dbCommands = try coreDataService.fetchCommands()
@@ -774,6 +821,10 @@ extension PSDChatsDataService: PSDChatsDataServiceProtocol {
         } catch {
             print("\(error)")
         }
+    }
+    
+    func deleteCommand(with id: String, serverTicketId: Int?, completion: @escaping () -> Void) {
+        coreDataService.deleteCommand(id: id, completion: completion)
     }
     
     // MARK: Messages

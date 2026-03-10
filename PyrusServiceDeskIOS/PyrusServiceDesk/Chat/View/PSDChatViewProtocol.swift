@@ -23,10 +23,12 @@ enum PSDChatSearchViewCommand {
     case reloadTitle
     case updateBadge(messagesCount: Int)
     case scrollToRow(indexPath: IndexPath)
+    case scrollToRowTop(indexPath: IndexPath)
     case updateActive(isActive: Bool)
     case updateInfo(ticketId: String, userName: String, createdAt: String)
     case showRatingComment(ratingText: String?, rating: Int)
     case updateOperatorTime(timeMessage: String?)
+    case updateDraft(ticketId: Int)
 }
 
 protocol PSDChatViewProtocol: NSObjectProtocol {
