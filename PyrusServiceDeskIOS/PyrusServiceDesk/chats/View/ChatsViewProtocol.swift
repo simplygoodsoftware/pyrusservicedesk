@@ -17,6 +17,7 @@ enum ChatsSearchViewCommand {
     case startRefresh
     case connectionError
     case scrollToClosedTickets
+    case openAnnouncements
 }
 
 @available(iOS 13.0, *)

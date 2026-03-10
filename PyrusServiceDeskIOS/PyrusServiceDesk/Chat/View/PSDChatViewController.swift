@@ -467,7 +467,7 @@ class PSDChatViewController: PSDViewController, PSDMainController {
     
     /**Setting design To PyrusSupportChatViewController view, add subviews*/
     private func design() {
-        view.backgroundColor = PyrusServiceDesk.mainController?.customization?.customBackgroundColor ?? .psdBackgroundColor
+        view.backgroundColor = PyrusServiceDesk.mainController?.customization?.customBackgroundColor ?? .psdDarkBackgroundColor
         designNavigation()
         setupTableView()
         setupInfoView()

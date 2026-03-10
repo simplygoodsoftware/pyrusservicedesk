@@ -23,6 +23,7 @@ extension PSDChatsDataService: PSDChatsDataServiceProtocol {
         coreDataService.deleteAllObjects(forEntityName: "DBMessage")
         coreDataService.deleteAllObjects(forEntityName: "DBChat")
         coreDataService.deleteAllObjects(forEntityName: "DBTicketCommand")
+        coreDataService.deleteAllObjects(forEntityName: "DBAnnouncement")
     }
     
     // MARK: Clients
@@ -199,7 +200,7 @@ extension PSDChatsDataService: PSDChatsDataServiceProtocol {
         }
     }
     
-    // MARK: Chats
+    // MARK: - Chats
 
     func saveChatModels(with chatModels: [PSDChat], completion: ((Result<Void, Error>) -> Void)?) {
         let ids = chatModels.compactMap({ Int64($0.chatId ?? 0) })
@@ -229,7 +230,7 @@ extension PSDChatsDataService: PSDChatsDataServiceProtocol {
         context.mergePolicy = NSMergeByPropertyObjectTrumpMergePolicy
         context.undoManager = nil
 
-        // MARK: - Collect IDs
+        // Collect IDs
 
         let chatIds: [Int64] = chatModels.compactMap {
             guard let id = $0.chatId else { return nil }
@@ -246,7 +247,7 @@ extension PSDChatsDataService: PSDChatsDataServiceProtocol {
             .flatMap { $0 }
             .compactMap { $0.serverIdentifer }
 
-        // MARK: - Fetch existing chats
+        // Fetch existing chats
 
         let chatRequest: NSFetchRequest<DBChat> = DBChat.fetchRequest()
         chatRequest.predicate = NSPredicate(format: "chatId IN %@", chatIds)
@@ -256,7 +257,7 @@ extension PSDChatsDataService: PSDChatsDataServiceProtocol {
             ($0.chatId, $0)
         })
 
-        // MARK: - Fetch existing messages
+        // Fetch existing messages
 
         let messageRequest: NSFetchRequest<DBMessage> = DBMessage.fetchRequest()
         messageRequest.predicate = NSPredicate(format: "messageId IN %@", messageIds)
@@ -266,7 +267,7 @@ extension PSDChatsDataService: PSDChatsDataServiceProtocol {
             ($0.messageId, $0)
         })
 
-        // MARK: - Fetch existing attachments
+        // Fetch existing attachments
 
         let attachmentRequest: NSFetchRequest<DBAttachment> = DBAttachment.fetchRequest()
         attachmentRequest.predicate = NSPredicate(format: "serverIdentifier IN %@", attachmentIds)
@@ -280,7 +281,7 @@ extension PSDChatsDataService: PSDChatsDataServiceProtocol {
         )
 
 
-        // MARK: - Upsert chats, messages, attachments
+        // Upsert chats, messages, attachments
 
         for chatModel in chatModels {
 
@@ -308,20 +309,6 @@ extension PSDChatsDataService: PSDChatsDataServiceProtocol {
                 let dbMessage =
                     messagesById[message.messageId] ??
                     DBMessage(context: context)
-
-//            let messages = dbChat.mutableOrderedSetValue(forKey: "messages")
-//            for message in chatModel.messages {
-//                if message.rating ?? 0 > 0 {
-//                    continue
-//                }
-//                let mesFetchRequest = DBMessage.fetchRequest()
-//                mesFetchRequest.predicate = NSPredicate(format: "messageId == %@", message.messageId as CVarArg)
-//                let dbMessage: DBMessage
-//                if let comment = try? context.fetch(mesFetchRequest).first {
-//                    dbMessage = comment
-//                } else {
-//                    dbMessage = NSEntityDescription.insertNewObject(forEntityName: "DBMessage", into: context) as! DBMessage
-//                }
                 
                 dbMessage.messageId = message.messageId
                 dbMessage.appId = message.appId
@@ -678,6 +665,7 @@ extension PSDChatsDataService: PSDChatsDataServiceProtocol {
             dbTicketCommand.clientId = ticketCommand.params.messageClientId
             dbTicketCommand.authorId = ticketCommand.params.authorId
             dbTicketCommand.ratingComment = ticketCommand.params.ratingComment
+            dbTicketCommand.lastReadAnnouncementId = ticketCommand.params.lastReadAnnouncementId
             
             let attachments = dbTicketCommand.mutableOrderedSetValue(forKey: "attachments")
 //            if dbTicketCommand.attachments == nil {
@@ -720,7 +708,7 @@ extension PSDChatsDataService: PSDChatsDataServiceProtocol {
                     appId: dbCommand.appId,
                     userId: dbCommand.userId,
                     params: TicketCommandParams(
-                        ticketId: Int(dbCommand.ticketId),
+                        ticketId: dbCommand.ticketId == 0 ? nil : Int(dbCommand.ticketId),
                         appId: dbCommand.appId,
                         requestNewTicket: dbCommand.requestNewTicket,
                         userId: dbCommand.userId,
@@ -735,7 +723,8 @@ extension PSDChatsDataService: PSDChatsDataServiceProtocol {
                         date: dbCommand.date,
                         messageClientId: dbCommand.clientId,
                         hasAccess: dbCommand.hasAccess,
-                        extraFields: dbCommand.requestNewTicket ? PyrusServiceDesk.fieldsData : nil
+                        extraFields: dbCommand.requestNewTicket ? PyrusServiceDesk.fieldsData : nil,
+                        lastReadAnnouncementId: dbCommand.lastReadAnnouncementId
                     )
                 )
                 return command
@@ -951,6 +940,170 @@ extension PSDChatsDataService: PSDChatsDataServiceProtocol {
             return []
         }
     }
+    
+    // MARK: - Announcements
+
+    func saveAnnouncementsModels(with announcements: [PSDAnnouncement], completion: ((Result<Void, Error>) -> Void)?) {
+        DispatchQueue.global().async { [weak self] in
+            self?.coreDataService.save(completion: completion) { [weak self] context in
+                do {
+                    try self?.saveAnnouncements(with: announcements, context: context)
+                } catch { }
+            }
+        }
+    }
+    
+    func saveAnnouncements(
+        with announcements: [PSDAnnouncement],
+        context: NSManagedObjectContext
+    ) throws {
+
+        context.mergePolicy = NSMergeByPropertyObjectTrumpMergePolicy
+        context.undoManager = nil
+
+        // 1) Соберём идентификаторы
+        let announcementIds: [String] = announcements.compactMap { $0.id }
+        let allAttachments = announcements.flatMap { $0.attachments }
+        let attachmentIds: [String] = allAttachments.compactMap { $0.id }
+
+        // 2) Получим уже существующие анонсы
+        let annReq: NSFetchRequest<DBAnnouncement> = DBAnnouncement.fetchRequest()
+        annReq.predicate = NSPredicate(format: "id IN %@", announcementIds)
+        let existingAnnouncements = try context.fetch(annReq)
+        let announcementsById: [String: DBAnnouncement] = Dictionary(
+            uniqueKeysWithValues: existingAnnouncements.compactMap {
+                guard let id = $0.id else { return nil }
+                return (id, $0)
+            }
+        )
+
+        // 3) Получим уже существующие вложения анонсов
+        let attReq: NSFetchRequest<DBAnnouncementAttachment> = DBAnnouncementAttachment.fetchRequest()
+        attReq.predicate = NSPredicate(format: "id IN %@", attachmentIds)
+        let existingAtts = try context.fetch(attReq)
+        let attachmentsById: [String: DBAnnouncementAttachment] = Dictionary(
+            uniqueKeysWithValues: existingAtts.compactMap {
+                guard let id = $0.id else { return nil }
+                return (id, $0)
+            }
+        )
+
+        // 4) Апсерт анонсов и их вложений
+        for model in announcements {
+            let id = model.id
+
+            let dbAnn = announcementsById[id] ?? DBAnnouncement(context: context)
+            dbAnn.id = id
+            dbAnn.appId = model.appId
+            dbAnn.date = model.date
+            dbAnn.isRead = model.isRead
+            dbAnn.text = model.text
+            dbAnn.orderIndex = Int64(model.orderIndex)
+
+            // Вложения
+            for a in model.attachments {
+                let attId = a.id
+                let dbAtt = attachmentsById[attId] ?? DBAnnouncementAttachment(context: context)
+                
+                dbAtt.id = attId
+                dbAtt.name = a.name
+                dbAtt.size = Int64(a.size)
+                dbAtt.media = a.media
+                dbAtt.width = Int64(a.width)
+                dbAtt.height = Int64(a.height)
+                
+                dbAnn.addToAttachments(dbAtt)
+            }
+        }
+    }
+    
+    func getAllAnnouncements(completion: @escaping ([PSDAnnouncement]) -> Void) {
+        DispatchQueue.global(qos: .userInitiated).async { [weak self] in
+            guard let self else { return }
+            
+            do {
+                let dbAnns = try coreDataService.fetchAnnouncements()
+                
+                let anns: [PSDAnnouncement] = dbAnns.compactMap { db in
+                    var ann = PSDAnnouncement(
+                        id: db.id ?? "",
+                        text: db.text,
+                        date: db.date ?? Date(),
+                        isRead: db.isRead,
+                        attachments: [],
+                        appId: db.appId ?? "",
+                        orderIndex: Int(db.orderIndex)
+                    )
+                    
+                    if let dbAtts = db.attachments?.array as? [DBAnnouncementAttachment] {
+                        let atts: [PSDAnnouncementAttachment] = dbAtts.map { dba in
+                            let a = PSDAnnouncementAttachment(
+                                id: dba.id ?? "",
+                                name: dba.name,
+                                size: Int(dba.size),
+                                width: Int(dba.width),
+                                height: Int(dba.height),
+                                media: dba.media
+                            )
+                            return a
+                        }
+                        ann.attachments = atts
+                    }
+                    
+                    return ann
+                }
+                
+                DispatchQueue.main.async { completion(anns) }
+                
+            } catch {
+                print("Error fetching announcements: \(error)")
+                DispatchQueue.main.async { completion([]) }
+            }
+        }
+    }
+        
+    func getAllAnnouncements() -> [PSDAnnouncement] {
+        do {
+            let dbAnns = try coreDataService.fetchAnnouncements()
+            
+            let anns: [PSDAnnouncement] = dbAnns.compactMap { db in
+                var ann = PSDAnnouncement(
+                    id: db.id ?? "",
+                    text: db.text,
+                    date: db.date ?? Date(),
+                    isRead: db.isRead,
+                    attachments: [],
+                    appId: db.appId ?? "",
+                    orderIndex: Int(db.orderIndex)
+                )
+                
+                if let dbAtts = db.attachments?.array as? [DBAnnouncementAttachment] {
+                    let atts: [PSDAnnouncementAttachment] = dbAtts.map { dba in
+                        let a = PSDAnnouncementAttachment(
+                            id: dba.id ?? "",
+                            name: dba.name,
+                            size: Int(dba.size),
+                            width: Int(dba.width),
+                            height: Int(dba.height),
+                            media: dba.media
+                        )
+                        return a
+                    }
+                    ann.attachments = atts
+                }
+                
+                return ann
+            }
+            
+            return anns
+            
+        } catch {
+            print("Error fetching announcements: \(error)")
+            return []
+        }
+    }
+
+
 }
 
 private extension UIFont {

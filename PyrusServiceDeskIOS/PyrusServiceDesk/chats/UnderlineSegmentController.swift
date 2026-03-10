@@ -20,7 +20,8 @@ class UnderlineSegmentController: UIView {
     }
     
     public func selectIndex(_ selectedIndex: Int) {
-        guard let sender = stackView.arrangedSubviews[selectedIndex] as? UIButton else {
+        guard stackView.arrangedSubviews.count > selectedIndex,
+              let sender = stackView.arrangedSubviews[selectedIndex] as? UIButton else {
             return
         }
         changeSelection(sender)

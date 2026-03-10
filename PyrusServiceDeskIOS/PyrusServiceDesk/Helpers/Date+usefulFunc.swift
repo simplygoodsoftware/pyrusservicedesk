@@ -2,7 +2,12 @@
 let REPLACE_STRING = "%%"
 import Foundation
 extension Date {
-    static let dateFormatter: DateFormatter = DateFormatter()            
+    static let dateFormatter: DateFormatter = DateFormatter()
+    static let announcementDateFormatter: DateFormatter = {
+        let formatter = DateFormatter()
+        formatter.dateFormat = "dd.MM.yy HH:mm"
+        return formatter
+    }()
     /**
      Returns string with time that has passed from "now"
      */
@@ -121,6 +126,10 @@ extension Date {
     ///Return date second
     private func second()->Int{
         return Calendar.current.component(.second, from: self)
+    }
+    
+    func announcementTime() -> String {
+        return Date.announcementDateFormatter.string(from: self)
     }
     
     func messageTime() -> String {

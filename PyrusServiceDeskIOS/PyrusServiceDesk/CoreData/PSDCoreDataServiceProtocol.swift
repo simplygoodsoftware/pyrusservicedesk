@@ -15,4 +15,6 @@ protocol CoreDataServiceProtocol: AnyObject {
     func deleteClients(ids: [String]) throws
     func fetchChatsAndMessages(searchString: String,
                                completion: @escaping (Result<([DBMessage], [DBChat]), Error>) -> Void)
+    func fetchAnnouncements() throws -> [DBAnnouncement]
+    func deleteAnnouncements(ids: [String])
 }

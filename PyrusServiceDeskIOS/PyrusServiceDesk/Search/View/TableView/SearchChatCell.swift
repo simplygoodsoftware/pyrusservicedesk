@@ -67,7 +67,7 @@ class SearchChatCell: UITableViewCell {
     
     override init(style: UITableViewCell.CellStyle, reuseIdentifier: String?) {
         super.init(style: style, reuseIdentifier: reuseIdentifier)
-        backgroundColor = .psdBackgroundColor
+        backgroundColor = .psdDarkBackgroundColor
         selectedBackgroundView = self.selectedBackground
         
         contentView.addSubview(timeLabel)

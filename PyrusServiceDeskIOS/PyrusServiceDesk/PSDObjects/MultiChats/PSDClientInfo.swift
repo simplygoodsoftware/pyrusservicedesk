@@ -13,6 +13,10 @@ import Foundation
     var clientDescription: String?
     var welcomeMessage: String?
     var ratingSettings: PSDRatingSettings?
+    var lasAnnoncementId: String?
+    var lasAnnoncementReadId: String?
+    var lasAnnouncementUpdateDate: String?
+    var announcementsUnreadCount: Int = 0
     
     var clientIcon: String {
         didSet {

@@ -3,6 +3,7 @@ import Foundation
 enum PSDChatsCellType {
     case chat
     case header
+    case announcements
 }
 
 struct PSDChatsViewModel: Hashable {

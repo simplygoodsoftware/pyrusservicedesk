@@ -103,6 +103,31 @@ extension CoreDataService: CoreDataServiceProtocol {
             return try result.get() // Разворачиваем Result
     }
     
+    func fetchAnnouncements() throws -> [DBAnnouncement] {
+         let context = viewContext
+
+            var result: Result<[DBAnnouncement], Error> = .success([])
+            
+            let startTime = DispatchTime.now()
+            
+            // Используем performAndWait для синхронного выполнения
+            context.performAndWait {
+                do {
+                    let fetchRequest = DBAnnouncement.fetchRequest()
+                    fetchRequest.sortDescriptors = [NSSortDescriptor(key: "orderIndex", ascending: true)]
+                    let fetchedObjects = try context.fetch(fetchRequest)
+                    result = .success(fetchedObjects)
+                } catch {
+                    result = .failure(error)
+                }
+            }
+            
+            let endTime = DispatchTime.now()
+            let nanoseconds = endTime.uptimeNanoseconds - startTime.uptimeNanoseconds
+            
+            return try result.get()
+    }
+    
     func fetchMessages() throws -> [DBMessage] {
          let context = viewContext
 
@@ -284,10 +309,45 @@ extension CoreDataService: CoreDataServiceProtocol {
 
 //            print("clients wdeleted successfully")
         } catch {
-            print("Error deleting chats, \(error)")
+            print("Error deleting clients, \(error)")
             throw error
         }
     }
+    
+    func deleteAnnouncements(ids: [String]) {
+        guard !ids.isEmpty else { return }
+
+        let fetchRequest = NSFetchRequest<NSFetchRequestResult>(entityName: "DBAnnouncement")
+        // Удаляем все, чьи id НЕ входят в список
+        fetchRequest.predicate = NSPredicate(format: "id IN %@", ids)
+        fetchRequest.includesSubentities = false
+
+        let privateContext = persistentContainer.newBackgroundContext()
+
+        privateContext.perform {
+            do {
+                let deleteRequest = NSBatchDeleteRequest(fetchRequest: fetchRequest)
+                // Вернуть ID удалённых объектов
+                deleteRequest.resultType = .resultTypeObjectIDs
+
+                // Выполнить
+                let result = try privateContext.execute(deleteRequest) as? NSBatchDeleteResult
+                try privateContext.save()
+
+                // Смерджить изменения в контексты, чтобы они «забыли» удалённые объекты
+                if let objectIDs = result?.result as? [NSManagedObjectID], !objectIDs.isEmpty {
+                    let changes: [AnyHashable: Any] = [NSDeletedObjectsKey: objectIDs]
+                    NSManagedObjectContext.mergeChanges(
+                        fromRemoteContextSave: changes,
+                        into: [self.persistentContainer.viewContext, privateContext]
+                    )
+                }
+            } catch {
+                print("Error deleting announcements: \(error)")
+            }
+        }
+    }
+
     
     func deleteAllObjects(forEntityName entityName: String) {
         let fetchRequest = NSFetchRequest<NSFetchRequestResult>(entityName: entityName)

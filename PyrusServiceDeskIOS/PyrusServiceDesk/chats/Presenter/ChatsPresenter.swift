@@ -7,16 +7,18 @@ class ChatsPresenter: NSObject {
     weak var view: ChatsViewProtocol?
     private var isClosedTicketsOpened: Bool = false
     private var chats = [ChatPresenterModel]()
+    private var newAnnouncementsInfo: NewAnnouncementsInfo?
 }
 
 @available(iOS 13.0, *)
 extension ChatsPresenter: ChatsPresenterProtocol {
     func doWork(_ action: ChatsPresenterCommand) {
         switch action {
-        case .updateChats(chats: let chats):
+        case .updateChats(chats: let chats, newAnnouncementsInfo: let newAnnouncementsInfo):
             let startTime = DispatchTime.now()
             self.chats = chats
-            updateChats()
+            self.newAnnouncementsInfo = newAnnouncementsInfo
+            updateChats(newAnnouncementsInfo: newAnnouncementsInfo)
             let endTime = DispatchTime.now()
             let nanoTime = endTime.uptimeNanoseconds - startTime.uptimeNanoseconds
             let timeInterval = Double(nanoTime) / 1_000_000
@@ -60,14 +62,20 @@ extension ChatsPresenter: ChatsPresenterProtocol {
         case .createChatsOnStart(chats: let chats):
             self.chats = chats
             loadChatsState()
+        case .openAnnouncements:
+            view?.show(.openAnnouncements)
         }
     }
 }
 
-@available(iOS 13.0, *)
 private extension ChatsPresenter {
-    func updateChats(open: Bool = false) {
-        let chatsModel = self.prepareChats(chats: self.chats)
+    func updateChats(open: Bool = false, newAnnouncementsInfo: NewAnnouncementsInfo?) {
+        var chatsModel = self.prepareChats(chats: self.chats)
+
+        if let newAnnouncementsInfo {
+            let annsModel = getNewAnnouncementsModel(newAnnouncementsInfo: newAnnouncementsInfo)
+            chatsModel[0] = annsModel + chatsModel[0]
+        }
         self.view?.show(.updateChats(chats: chatsModel))
         if open {
             self.view?.show(.scrollToClosedTickets)
@@ -77,6 +85,42 @@ private extension ChatsPresenter {
     private func loadChatsState() {
         let chatsModel = self.prepareChats(chats: self.chats)
         self.view?.show(.updateChats(chats: chatsModel))
+    }
+    
+    func getNewAnnouncementsModel(newAnnouncementsInfo: NewAnnouncementsInfo) -> [PSDChatsViewModel] {
+        var title: String = ""
+        var subtitle: String = ""
+        
+        let count = newAnnouncementsInfo.newAnnouncementsCount
+        if count > 1 {
+            subtitle = "\(count) \(getNewAnnsString(count: count))"
+        } else {
+            let text = newAnnouncementsInfo.lastAnnouncement?.text ?? ""
+            subtitle = text.count > 0 ? text : "\(count) \(getNewAnnsString(count: count))"
+        }
+        
+        if newAnnouncementsInfo.clients.count == 2 {
+            title = "\(newAnnouncementsInfo.clients[0].clientName) \("And".localizedPSD()) \(newAnnouncementsInfo.clients[1].clientName)"
+        } else {
+            title = newAnnouncementsInfo.clients.map(\.clientName).joined(separator: ", ")
+        }
+        
+        let anns = NewAnnouncementsModel(
+            logos: newAnnouncementsInfo.clients.map({ ($0.image ?? UIImage(named: "iiko")) ?? UIImage() }),
+            title: title,
+            subtitle: subtitle
+        )
+        
+        return [PSDChatsViewModel(data: anns, type: .announcements)]
+    }
+    
+    func getNewAnnsString(count: Int) -> String {
+        if (count % 10 == 1 && count % 100 != 11) {
+            return "NewAnnouncements1".localizedPSD()
+        } else if (count % 10 >= 2 && count % 10 <= 4 && (count % 100 < 10 || count % 100 >= 20)) {
+            return "NewAnnouncements2".localizedPSD()
+        }
+        return "NewAnnouncements5".localizedPSD()
     }
     
     func prepareChats(chats: [ChatPresenterModel]) -> [[PSDChatsViewModel]] {
@@ -201,10 +245,7 @@ private extension ChatsPresenter {
 extension ChatsPresenter: ClosedTicketsCellDelegate {
     func redrawChats(open: Bool) {
         isClosedTicketsOpened = open
-        updateChats(open: open)
-//        if open {
-//            view?.show(.scrollToClosedTickets)
-//        }
+        updateChats(open: open, newAnnouncementsInfo: newAnnouncementsInfo)
     }
 }
 

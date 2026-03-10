@@ -1,5 +1,5 @@
 enum ChatsPresenterCommand {
-    case updateChats(chats: [ChatPresenterModel])
+    case updateChats(chats: [ChatPresenterModel], newAnnouncementsInfo: NewAnnouncementsInfo?)
     case openChat(chat: PSDChat, fromPush: Bool)
     case deleteFilter
     case setFilter(userName: String)
@@ -14,6 +14,7 @@ enum ChatsPresenterCommand {
     case startRefresh
     case connectionError
     case createChatsOnStart (chats: [ChatPresenterModel])
+    case openAnnouncements
 }
 
 protocol ChatsPresenterProtocol {
