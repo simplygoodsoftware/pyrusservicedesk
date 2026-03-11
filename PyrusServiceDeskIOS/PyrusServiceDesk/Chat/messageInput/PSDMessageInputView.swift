@@ -419,7 +419,7 @@ class PSDMessageInputView: UIView, PSDMessageTextViewDelegate,PSDMessageSendButt
     
     //MARK: drawing constraints
     
-    let defaultTextHeight : CGFloat = 36.0
+    let defaultTextHeight : CGFloat = 37.0
     
     override func layoutSubviews() {
         super.layoutSubviews()
@@ -640,12 +640,20 @@ extension PSDMessageInputView: RecordableViewProtocol, AudioRecordingObjectDeleg
     }
     
     func sendAudio(attachment: PSDAttachment) {
+        guard attachment.data.count > 0 else {
+            delegate?.recordStop()
+            return
+        }
         attachmentsPresenter.addAttachment(attachment)
         sendMessage()
         delegate?.recordStop()
     }
     
     func didCreateFile(attachment: PSDAttachment, url: URL) {
+        guard attachment.data.count > 0 else {
+            cancelRecording()
+            return
+        }
         inputTextView.resignFirstResponder()
         attachmentsPresenter.addAttachment(attachment)
         checkSendButton()

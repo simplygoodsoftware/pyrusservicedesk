@@ -236,18 +236,19 @@ private extension AnnouncementsViewController {
     func setupNavTitle() {
         let titleView = UIView()
         titleView.addSubview(navTitle)
-        titleView.addSubview(icon)
+//        titleView.addSubview(icon)
         navigationView.addSubview(titleView)
         titleView.translatesAutoresizingMaskIntoConstraints = false
         navTitle.translatesAutoresizingMaskIntoConstraints = false
         icon.translatesAutoresizingMaskIntoConstraints = false
         NSLayoutConstraint.activate([
-            icon.leadingAnchor.constraint(equalTo: titleView.leadingAnchor),
-            icon.heightAnchor.constraint(equalToConstant: 24),
-            icon.widthAnchor.constraint(equalToConstant: 24),
-            navTitle.leadingAnchor.constraint(equalTo: icon.trailingAnchor, constant: 6),
-            navTitle.centerYAnchor.constraint(equalTo: icon.centerYAnchor),
-            //navTitle.widthAnchor.constraint(lessThanOrEqualToConstant: 200),
+//            icon.leadingAnchor.constraint(equalTo: titleView.leadingAnchor),
+//            icon.heightAnchor.constraint(equalToConstant: 24),
+//            icon.widthAnchor.constraint(equalToConstant: 24),
+//            navTitle.leadingAnchor.constraint(equalTo: icon.trailingAnchor, constant: 6),
+//            navTitle.centerYAnchor.constraint(equalTo: icon.centerYAnchor),
+            
+            navTitle.leadingAnchor.constraint(equalTo: titleView.leadingAnchor),
             navTitle.trailingAnchor.constraint(lessThanOrEqualTo: view.trailingAnchor, constant: -52),
             titleView.heightAnchor.constraint(equalToConstant: 28),
             titleView.trailingAnchor.constraint(equalTo: navTitle.trailingAnchor),
@@ -387,8 +388,8 @@ extension AnnouncementsViewController: AnnouncementsAttachmentsDelegate {
     func selectAttachment(cell: UITableViewCell, index: Int) {
         
         guard let indexPath = tableView.indexPath(for: cell),
-        let announcement = announcements[indexPath.section][indexPath.row].data as? PSDAnnouncement,
-            announcement.attachments.count > 0
+              let announcement = (announcements[indexPath.section][indexPath.row].data as? PSDAnnouncementCellModel)?.announcement,
+              announcement.attachments.count > 0
         else { return }
         let selectedAttachment = announcement.attachments[index]
         if selectedAttachment.media || selectedAttachment.isVideo {

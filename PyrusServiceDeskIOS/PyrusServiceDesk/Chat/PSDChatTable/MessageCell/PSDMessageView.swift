@@ -349,11 +349,11 @@ class PSDMessageView: PSDView {
 
 extension UIFont {
     static let ratingLabel = CustomizationHelper.systemFont(ofSize: 40)
-    static let messageTextView = CustomizationHelper.systemFont(ofSize: 18.0)
+    static let messageTextView = CustomizationHelper.systemFont(ofSize: 17.0)
 }
 
 private extension PSDMessageView {
-    var TIME_ALPHA: CGFloat { 0.4 }
+    var TIME_ALPHA: CGFloat { 0.6 }
     var TIME_VIEW_ALPHA: CGFloat { 0.5 }
     var TIME_HEIGHT: CGFloat { 20 }
     var TIME_LEFT_OFFSET: CGFloat { 8 }

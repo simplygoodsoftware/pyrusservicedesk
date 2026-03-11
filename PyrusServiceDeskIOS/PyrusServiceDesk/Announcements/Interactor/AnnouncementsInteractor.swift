@@ -3,12 +3,21 @@ import Foundation
 class AnnouncementsInteractor: NSObject {
     private let presenter: AnnouncementsPresenterProtocol
     
+    private var lastReadIds: [String: String] = [:]
+    private var announcementsDict = [String: [PSDAnnouncement]]()
     private var announcements = [PSDAnnouncement]() {
         didSet {
             DispatchQueue.main.async { [weak self] in
                 guard let self else { return }
                 let announcements = self.announcements.reversed()
-                presenter.doWork(.updateAnnouncements(announcements: Array(announcements), lastReadId: lasReadAnnouncementId))
+                let groupedAndSortedByOrder: [String: [PSDAnnouncement]] =
+                Dictionary(grouping: announcements, by: { $0.appId })
+                    .mapValues { group in
+                        group.sorted { $0.orderIndex > $1.orderIndex }
+                    }
+                announcementsDict = groupedAndSortedByOrder
+                presenter.doWork(.updateAnnouncements(announcements: groupedAndSortedByOrder, lastReadIds: lastReadIds))
+//                presenter.doWork(.updateAnnouncements(announcements: Array(announcements), lastReadId: lasReadAnnouncementId))
             }
         }
     }
@@ -78,62 +87,52 @@ extension AnnouncementsInteractor: AnnouncementsInteractorProtocol {
         switch action {
         case .viewDidload:
             if PyrusServiceDesk.clients.count > 0 {
-                updateClients()
+//                updateClients()
                 announcements = PyrusServiceDesk.announcements
                 presenter.doWork(.endRefresh)
                 isClear = false
             }
             NotificationCenter.default.addObserver(self, selector: #selector(showConnectionError), name: SyncManager.connectionErrorNotification, object: nil)
-            NotificationCenter.default.addObserver(self, selector: #selector(updateClients), name: PyrusServiceDesk.clientsUpdateNotification, object: nil)
             NotificationCenter.default.addObserver(self, selector: #selector(updateAnnouncements), name: PyrusServiceDesk.announcementsUpdateNotification, object: nil)
+//            NotificationCenter.default.addObserver(self, selector: #selector(updateClients), name: PyrusServiceDesk.clientsUpdateNotification, object: nil)
             
         case .reloadAnnouncements:
             reloadAnnouncements()
         case .viewWillAppear:
-            if PyrusServiceDesk.clients.count > 1 {
-                let selectedIndex = PyrusServiceDesk.clients.firstIndex(where: { $0.clientId == PyrusServiceDesk.currentClientId }) ?? 0
-                updateSelected(index: selectedIndex)
-                presenter.doWork(.updateSelected(index: selectedIndex))
-            }
+//            if PyrusServiceDesk.clients.count > 1 {
+//                let selectedIndex = PyrusServiceDesk.clients.firstIndex(where: { $0.clientId == PyrusServiceDesk.currentClientId }) ?? 0
+//                updateSelected(index: selectedIndex)
+//                presenter.doWork(.updateSelected(index: selectedIndex))
+//            }
             isOpen = true
-            if let client = PyrusServiceDesk.clients.first(where: { $0.clientId == PyrusServiceDesk.currentClientId }) {
-                lasReadAnnouncementId = client.lasAnnoncementReadId
+            for client in PyrusServiceDesk.clients {
+                lastReadIds[client.clientId] = client.lasAnnoncementReadId
             }
+
             readAnnouncements()
             PyrusServiceDesk.syncManager.syncGetTickets()
             let filterChats = createAnnouncements()
-            if filterChats != announcements {
-                announcements = filterChats
-            }
-            if announcements.count > 0 {
-                presenter.doWork(.updateAnnouncements(announcements: announcements.reversed(), lastReadId: lasReadAnnouncementId))
+            if filterChats.count > 0 {
                 firtLoad = false
                 presenter.doWork(.endRefresh)
             }
+            announcements = filterChats
+
                       
         case .updateSelected(index: let index):
             updateSelected(index: index)
         case .viewWillDisappear:
             isOpen = false
-            let client = PyrusServiceDesk.clients.first(where: { $0.clientId == PyrusServiceDesk.currentClientId })
-            client?.lasAnnoncementReadId = announcements.last?.id
-            client?.announcementsUnreadCount = 0
-        }
-    }
-    
-    private func updateData(firstStart: Bool = false) {
-        let filterChats = createAnnouncements()
-        if filterChats != announcements {
-            announcements = filterChats
-        }
-        if announcements.count > 0 {
-            DispatchQueue.main.async { [weak self] in
-                guard let self else { return }
-                presenter.doWork(.updateAnnouncements(announcements: announcements.reversed(), lastReadId: lasReadAnnouncementId))
+            for client in PyrusServiceDesk.clients {
+                if let anns = announcementsDict[client.clientId],
+                let id = anns.first?.id {
+                    client.lasAnnoncementReadId = id
+                }
+                client.announcementsUnreadCount = 0
             }
-            
-            firtLoad = false
-            presenter.doWork(.endRefresh)
+//            let client = PyrusServiceDesk.clients.first(where: { $0.clientId == PyrusServiceDesk.currentClientId })
+//            client?.lasAnnoncementReadId = announcements.last?.id
+//            client?.announcementsUnreadCount = 0
         }
     }
 }
@@ -141,9 +140,26 @@ extension AnnouncementsInteractor: AnnouncementsInteractorProtocol {
 private extension AnnouncementsInteractor {
     
     func readAnnouncements() {
-        guard announcements.count > 0 else { return }
-        let command = TicketCommand(commandId: UUID().uuidString, type: .readAnnouncemnts, appId: PyrusServiceDesk.currentClientId ?? PyrusServiceDesk.clientId, userId: PyrusServiceDesk.currentUserId ?? PyrusServiceDesk.customUserId, params: TicketCommandParams(appId: PyrusServiceDesk.currentClientId ?? PyrusServiceDesk.clientId, userId: PyrusServiceDesk.currentUserId ?? PyrusServiceDesk.customUserId, authorId: PyrusServiceDesk.authorId, lastReadAnnouncementId: announcements.last?.id))
-        PyrusServiceDesk.repository.add(command: command, needSync: false)
+        for (appId, announcements) in announcementsDict {
+            var userId = PyrusServiceDesk.customUserId
+            if appId != PyrusServiceDesk.clientId {
+                userId = PyrusServiceDesk.additionalUsers.first(where: { $0.clientId == appId })?.userId
+            }
+            let command = TicketCommand(
+                commandId: UUID().uuidString,
+                type: .readAnnouncemnts,
+                appId: appId,
+                userId: userId,
+                params: TicketCommandParams(
+                    appId: appId,
+                    userId: userId,
+                    authorId: PyrusServiceDesk.authorId,
+                    lastReadAnnouncementId: announcements.first?.id
+                )
+            )
+            PyrusServiceDesk.repository.add(command: command, needSync: false)
+        }
+        PyrusServiceDesk.syncManager.syncGetTickets()
     }
     
     @objc func showConnectionError() {
@@ -154,11 +170,7 @@ private extension AnnouncementsInteractor {
     
     func updateTitle() {
         if PyrusServiceDesk.syncManager.networkAvailability {
-            if self.clients.count == 0 {
-               // presenter.doWork(.updateTitle(title: "All_Conversations".localizedPSD()))
-            } else {
-                presenter.doWork(.updateTitle(title: self.clients.count > 1 ? "Announcements".localizedPSD() : clients[0].clientName))
-            }
+                presenter.doWork(.updateTitle(title: "Announcements".localizedPSD()))
         } else {
             presenter.doWork(.connectionError)
         }
@@ -182,65 +194,65 @@ private extension AnnouncementsInteractor {
     }
     
     func updateIcon(imagePath: String, index: Int) {
-        if let image = clients[index].image {
-            presenter.doWork(.updateIcon(image: image))
-        } else if let image = imageRepository?.loadImage(name: clients[index].clientId, id: nil, type: .clientIcon) {
-            presenter.doWork(.updateIcon(image: image))
-            clients[index].image = image
-            PyrusServiceDesk.clients[index].image = image
-        }
-        loadImage(urlString: imagePath) { [weak self] image in
-            DispatchQueue.main.async { [weak self] in
-                if image != nil || self?.clients[index].image == nil {
-                    self?.clients[index].image = image ?? UIImage.PSDImage(name: "iiko")
-                    PyrusServiceDesk.clients[index].image = image ?? UIImage.PSDImage(name: "iiko")
-                    self?.presenter.doWork(.updateIcon(image: image))
-                    if let image, let name = self?.clients[index].clientId {
-                        self?.imageRepository?.saveImage(image, name: name, id: nil, type: .clientIcon)
-                    }
-                }
-            }
-        }
+//        if let image = clients[index].image {
+//            presenter.doWork(.updateIcon(image: image))
+//        } else if let image = imageRepository?.loadImage(name: clients[index].clientId, id: nil, type: .clientIcon) {
+//            presenter.doWork(.updateIcon(image: image))
+//            clients[index].image = image
+//            PyrusServiceDesk.clients[index].image = image
+//        }
+//        loadImage(urlString: imagePath) { [weak self] image in
+//            DispatchQueue.main.async { [weak self] in
+//                if image != nil || self?.clients[index].image == nil {
+//                    self?.clients[index].image = image ?? UIImage.PSDImage(name: "iiko")
+//                    PyrusServiceDesk.clients[index].image = image ?? UIImage.PSDImage(name: "iiko")
+//                    self?.presenter.doWork(.updateIcon(image: image))
+//                    if let image, let name = self?.clients[index].clientId {
+//                        self?.imageRepository?.saveImage(image, name: name, id: nil, type: .clientIcon)
+//                    }
+//                }
+//            }
+//        }
     }
     
     func updateSelected(index: Int) {
-        let client = PyrusServiceDesk.clients.first(where: { $0.clientId == PyrusServiceDesk.currentClientId })
-        client?.lasAnnoncementReadId = announcements.last?.id
-        client?.announcementsUnreadCount = 0
-        if index < clients.count {
-            selectedIndex = index
-            PyrusServiceDesk.currentClientId = clients[index].clientId
-            lasReadAnnouncementId = clients[index].lasAnnoncementReadId
-            updateAnnouncements()
-            
-            updateIcon(imagePath: clients[index].clientIcon, index: index)
-        }
+//        let client = PyrusServiceDesk.clients.first(where: { $0.clientId == PyrusServiceDesk.currentClientId })
+//        client?.lasAnnoncementReadId = announcements.last?.id
+//        client?.announcementsUnreadCount = 0
+//        if index < clients.count {
+//            selectedIndex = index
+//            PyrusServiceDesk.currentClientId = clients[index].clientId
+//            lasReadAnnouncementId = clients[index].lasAnnoncementReadId
+//            updateAnnouncements()
+//            
+//            updateIcon(imagePath: clients[index].clientIcon, index: index)
+//        }
     }
     
     @objc func updateClients() {
-        guard clients != PyrusServiceDesk.clients else { return }
-        DispatchQueue.main.async { [weak self] in
-            if PyrusServiceDesk.clients.count == 1 {
-                PyrusServiceDesk.currentClientId = PyrusServiceDesk.clientId
-                self?.updateAnnouncements()
-                self?.presenter.doWork(.deleteSegmentControl)
-                self?.presenter.doWork(.updateTitle(title: PyrusServiceDesk.clients[0].clientName))
-                self?.clients = PyrusServiceDesk.clients
-                self?.updateIcon(imagePath: PyrusServiceDesk.clients[0].clientIcon, index: 0)
-                self?.clients = PyrusServiceDesk.clients
-            } else if PyrusServiceDesk.clients.count > 1 {
-                let selectedIndex = self?.clients.count ?? 0 > 0 ? PyrusServiceDesk.clients.count - 1 : 0
-                let titles: [String] = PyrusServiceDesk.clients.map({ $0.clientName })
-                self?.clients = PyrusServiceDesk.clients
-                self?.presenter.doWork(.updateTitles(titles: titles, selectedIndex: selectedIndex))
-            }
-        }
+//        guard clients != PyrusServiceDesk.clients else { return }
+//        DispatchQueue.main.async { [weak self] in
+//            if PyrusServiceDesk.clients.count == 1 {
+//                PyrusServiceDesk.currentClientId = PyrusServiceDesk.clientId
+//                self?.updateAnnouncements()
+//                self?.presenter.doWork(.deleteSegmentControl)
+//                self?.presenter.doWork(.updateTitle(title: PyrusServiceDesk.clients[0].clientName))
+//                self?.clients = PyrusServiceDesk.clients
+//                self?.updateIcon(imagePath: PyrusServiceDesk.clients[0].clientIcon, index: 0)
+//                self?.clients = PyrusServiceDesk.clients
+//            } else if PyrusServiceDesk.clients.count > 1 {
+//                let selectedIndex = self?.clients.count ?? 0 > 0 ? PyrusServiceDesk.clients.count - 1 : 0
+//                let titles: [String] = PyrusServiceDesk.clients.map({ $0.clientName })
+//                self?.clients = PyrusServiceDesk.clients
+//                self?.presenter.doWork(.updateTitles(titles: titles, selectedIndex: selectedIndex))
+//            }
+//        }
     }
     
     
     
     @objc func changedClientId() {
-        updateIfNeedClient()
+//        updateIfNeedClient()
     }
     
     func reloadAnnouncements() {
@@ -274,7 +286,7 @@ private extension AnnouncementsInteractor {
     private func createAnnouncements() -> [PSDAnnouncement] {
         let clientId = PyrusServiceDesk.currentClientId ?? PyrusServiceDesk.clientId
         let allAnnouncements = PyrusServiceDesk.announcements
-        return allAnnouncements.filter({ $0.appId == clientId })
+        return allAnnouncements//allAnnouncements.filter({ $0.appId == clientId })
     }
 }
 

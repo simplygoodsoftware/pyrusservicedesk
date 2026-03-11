@@ -208,7 +208,7 @@ class TicketCommandRepository {
             chatsDataService.resaveBeforeDeleteCommand(commanId: commandId.lowercased(), serverTicketId: serverTicketId) { [weak self] _ in
                 DispatchQueue.main.async { [weak self] in
                     self?.chatsDataService.deleteCommand(with: commandId.lowercased(), serverTicketId: serverTicketId)
-                    self?.commandsCache = self?.chatsDataService.getAllCommands() ?? []
+                    self?.commandsCache = self?.chatsDataService.getAllCommandsSafe() ?? []
                 }
             }
         } else {

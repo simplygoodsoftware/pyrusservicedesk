@@ -10,14 +10,17 @@ class AnnouncementsPresenter: NSObject {
 extension AnnouncementsPresenter: AnnouncementsPresenterProtocol {
     func doWork(_ action: AnnouncementsPresenterCommand) {
         switch action {
-        case .updateAnnouncements(announcements: let announcements, lastReadId: let lastReadId):
-            let startTime = DispatchTime.now()
+        case .updateAnnouncements(announcements: let announcements, lastReadIds: let lastReadIds):
+            updateAnnouncements(announcements: announcements, lastReadIds: lastReadIds)
+        case .uupdateAnnouncements(announcements: let announcements, lastReadId: let lastReadId):
+//            let startTime = DispatchTime.now()
             self.announcements = announcements
             updateAnnouncements(lastReadId: lastReadId)
 //            let endTime = DispatchTime.now()
 //            let nanoTime = endTime.uptimeNanoseconds - startTime.uptimeNanoseconds
 //            let timeInterval = Double(nanoTime) / 1_000_000
 //            print("⏱ updateChats выполнена за \(timeInterval) мс (обработано \(chats.count) чатов)")
+            
         case .endRefresh:
             view?.show(.endRefresh)
         case .updateTitle(title: let title):
@@ -64,7 +67,70 @@ private extension AnnouncementsPresenter {
                 attachments: announcement.attachments,
                 appId: announcement.appId
             )
-            anns.append(AnnouncementsViewModel(data: ann, type: .announcement))
+            let client = PyrusServiceDesk.clients.first(where: { $0.clientId == announcement.appId })
+            let model = PSDAnnouncementCellModel(announcement: ann, client: client)
+            anns.append(AnnouncementsViewModel(data: model, type: .announcement))
+        }
+        
+        view?.show(.updateAnnouncements(announcements: [anns]))
+    }
+    
+    func updateAnnouncements(announcements: [String: [PSDAnnouncement]], lastReadIds: [String: String]) {
+        var unreadAnns: [PSDAnnouncement] = []
+        var readedAnns: [PSDAnnouncement] = []
+        for (appId, value) in announcements {
+            var isRead = true
+            var lastReadId = ""
+            if let id = lastReadIds[appId],
+               id.count > 0 {
+                lastReadId = id
+                isRead = false
+            }
+            for ann in value {
+                if ann.id == lastReadId {
+                    isRead = true
+                }
+                if !isRead {
+                    unreadAnns.append(ann)
+                } else {
+                    readedAnns.append(ann)
+                }
+            }
+        }
+        
+        var anns = [AnnouncementsViewModel]()
+        unreadAnns = unreadAnns.sorted { $0.date > $1.date }
+        readedAnns = readedAnns.sorted { $0.date > $1.date }
+        for announcement in unreadAnns {
+            let ann = PSDAnnouncement(
+                id: announcement.id,
+                text: announcement.text,
+                date: announcement.date,
+                isRead: false,
+                attachments: announcement.attachments,
+                appId: announcement.appId
+            )
+            let client = PyrusServiceDesk.clients.first(where: { $0.clientId == announcement.appId })
+            let model = PSDAnnouncementCellModel(announcement: ann, client: client)
+            anns.append(AnnouncementsViewModel(data: model, type: .announcement))
+        }
+        
+        if unreadAnns.count > 0 {
+            anns.append(AnnouncementsViewModel(data: AnnouncementsReadModel(id: 0), type: .announcementsRead))
+        }
+        
+        for announcement in readedAnns {
+            let ann = PSDAnnouncement(
+                id: announcement.id,
+                text: announcement.text,
+                date: announcement.date,
+                isRead: true,
+                attachments: announcement.attachments,
+                appId: announcement.appId
+            )
+            let client = PyrusServiceDesk.clients.first(where: { $0.clientId == announcement.appId })
+            let model = PSDAnnouncementCellModel(announcement: ann, client: client)
+            anns.append(AnnouncementsViewModel(data: model, type: .announcement))
         }
         
         view?.show(.updateAnnouncements(announcements: [anns]))

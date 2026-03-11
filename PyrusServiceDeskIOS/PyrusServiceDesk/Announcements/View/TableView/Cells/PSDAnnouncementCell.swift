@@ -19,7 +19,7 @@ final class PSDAnnouncementCell: UITableViewCell {
     private var zeroMessageLabelHeight: NSLayoutConstraint?
     private let messageLabel: UITextView = {
         let textView = UITextView()
-        textView.font = .systemFont(ofSize: 15)
+        textView.font = .systemFont(ofSize: 16)
         textView.textColor = .label
         textView.isEditable = false
         textView.isScrollEnabled = false
@@ -57,6 +57,26 @@ final class PSDAnnouncementCell: UITableViewCell {
         return collectionView
     }()
     
+    private lazy var clientcon: UIImageView = {
+        let imageView = UIImageView()
+        imageView.layer.cornerRadius = 10
+        imageView.clipsToBounds = true
+        imageView.translatesAutoresizingMaskIntoConstraints = false
+        imageView.backgroundColor = .orange
+//        imageView.image = UIImage(named: "iiko")
+        return imageView
+    }()
+    
+    private lazy var clientname: UILabel = {
+        let label = UILabel()
+        label.font = .systemFont(ofSize: 15, weight: .medium)
+        label.adjustsFontForContentSizeCategory = true
+        label.textColor = .label
+        label.translatesAutoresizingMaskIntoConstraints = false
+        label.text = "iiko"
+        return label
+    }()
+    
     private var topAttachmentsTableView: NSLayoutConstraint?
     private var tableViewHeight: NSLayoutConstraint?
     private let attachmentsTableView = AttachmentsTableView()
@@ -67,6 +87,7 @@ final class PSDAnnouncementCell: UITableViewCell {
         contentView.backgroundColor = .psdDarkBackgroundColor
 
         contentView.addSubview(bubbleView)
+        setupClientInfo()
         
         bubbleView.addSubview(imagesGridCollectionView)
         imageAttachmentViewHeight = imagesGridCollectionView.heightAnchor.constraint(equalToConstant: 0)
@@ -93,7 +114,7 @@ final class PSDAnnouncementCell: UITableViewCell {
             attachmentsTableView.leadingAnchor.constraint(equalTo: bubbleView.leadingAnchor),
             attachmentsTableView.trailingAnchor.constraint(equalTo: bubbleView.trailingAnchor),
             
-            bubbleView.topAnchor.constraint(equalTo: contentView.topAnchor, constant: 12),
+            bubbleView.topAnchor.constraint(equalTo: clientcon.bottomAnchor, constant: 4),
             bubbleView.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: 8),
             bubbleView.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -8),
             
@@ -108,30 +129,47 @@ final class PSDAnnouncementCell: UITableViewCell {
             contentView.bottomAnchor.constraint(equalTo: bubbleView.bottomAnchor)
         ])
     }
+    
+    func setupClientInfo() {
+        contentView.addSubview(clientcon)
+        contentView.addSubview(clientname)
+        
+        NSLayoutConstraint.activate([
+            clientcon.topAnchor.constraint(equalTo: contentView.topAnchor, constant: 12),
+            clientcon.leadingAnchor.constraint(equalTo: bubbleView.leadingAnchor, constant: 10),
+            clientcon.heightAnchor.constraint(equalToConstant: 20),
+            clientcon.widthAnchor.constraint(equalToConstant: 20),
+//            clientname.centerYAnchor.constraint(equalTo: clientcon.centerYAnchor),
+            clientname.bottomAnchor.constraint(equalTo: clientcon.bottomAnchor),
+            clientname.leadingAnchor.constraint(equalTo: clientcon.trailingAnchor, constant: 4),
+            clientname.trailingAnchor.constraint(equalTo: bubbleView.trailingAnchor, constant: -10)
+        ])
+    }
 
     required init?(coder: NSCoder) { fatalError("init(coder:) has not been implemented") }
 
-    func configure(with vm: PSDAnnouncement, delegate: AnnouncementsAttachmentsDelegate?) {
+    func configure(with vm: PSDAnnouncementCellModel, delegate: AnnouncementsAttachmentsDelegate?) {
         contentView.setNeedsLayout()
         contentView.layoutIfNeeded()
-        messageLabel.text = vm.text
+        let announcement = vm.announcement
+        messageLabel.text = announcement.text
         
-        timeLabel.text = vm.date.announcementTime()
+        timeLabel.text = announcement.date.announcementTime()
 
-        bubbleView.backgroundColor = vm.isRead ? .bubbleViewColor : .newBubbleViewColor
+        bubbleView.backgroundColor = announcement.isRead ? .bubbleViewColor : .newBubbleViewColor
         messageLabel.textColor = .label
         
-        let hasText = vm.text?.count ?? 0 > 0
+        let hasText = announcement.text?.count ?? 0 > 0
         zeroMessageLabelHeight?.isActive = !hasText
         
-        let imageAttachments = vm.attachments
+        let imageAttachments = announcement.attachments
             .filter({ $0.media && !$0.isVideo })
-            .map({ AnnouncementCellAttachmentModel(attachment: $0, isRead: vm.isRead) })
+            .map({ AnnouncementCellAttachmentModel(attachment: $0, isRead: announcement.isRead) })
         let hasImages = imageAttachments.count > 0
         
-        let fileAttachments = vm.attachments
+        let fileAttachments = announcement.attachments
             .filter({ !$0.media || $0.isVideo })
-            .map({ AnnouncementCellAttachmentModel(attachment: $0, isRead: vm.isRead) })
+            .map({ AnnouncementCellAttachmentModel(attachment: $0, isRead: announcement.isRead) })
         let hasFiles = fileAttachments.count > 0
         
         if hasFiles && hasImages {
@@ -177,7 +215,7 @@ final class PSDAnnouncementCell: UITableViewCell {
             imagesGridCollectionView.update(images: imageAttachments)
             
             imagesGridCollectionView.onSelectItem = { attach in
-                delegate?.selectAttachment(cell: self, index: vm.attachments.firstIndex(of: attach.attachment) ?? 0)
+                delegate?.selectAttachment(cell: self, index: announcement.attachments.firstIndex(of: attach.attachment) ?? 0)
             }
             imagesGridCollectionView.attachDelegate = delegate
         } else {
@@ -187,10 +225,10 @@ final class PSDAnnouncementCell: UITableViewCell {
         if hasFiles {
             attachmentsTableView.update(items: fileAttachments)
             attachmentsTableView.onSelectItem = { attach in
-                delegate?.selectAttachment(cell: self, index: vm.attachments.firstIndex(of: attach.attachment) ?? 0)
+                delegate?.selectAttachment(cell: self, index: announcement.attachments.firstIndex(of: attach.attachment) ?? 0)
             }
             
-            if vm.text?.count ?? 0 == 0 {
+            if announcement.text?.count ?? 0 == 0 {
                 tableViewHeight?.constant = CGFloat(fileAttachments.count * 54)
             } else {
                 tableViewHeight?.constant = CGFloat(fileAttachments.count * 54) + 6
@@ -200,8 +238,15 @@ final class PSDAnnouncementCell: UITableViewCell {
             tableViewHeight?.constant = 0
         }
         
+        clientcon.image = vm.client?.image
+        clientname.text = vm.client?.clientName
+        
         contentView.setNeedsLayout()
         contentView.layoutIfNeeded()
+    }
+    
+    func updateClientInfo(with client: PSDClientInfo) {
+        
     }
     
     override func prepareForReuse() {
@@ -213,6 +258,7 @@ final class PSDAnnouncementCell: UITableViewCell {
         attachmentsTableView.update(items: [])
         imagesGridCollectionView.update(images: [])
         bubbleView.backgroundColor = .bubbleViewColor
+        clientcon.image = nil//UIImage(named: "iiko")
         contentView.setNeedsLayout()
         contentView.layoutIfNeeded()
     }

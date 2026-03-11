@@ -48,6 +48,7 @@ class PSDChatInteractor: NSObject {
     private var isScrollButtonHiden = true
     private var isLoading: Bool = false
     private var hasOperatorTime: Bool = false
+    private var lastReadedLocalId: Int = Int.max
     private var newMessagesCount = 0 {
         didSet {
             if newMessagesCount > 0 {
@@ -134,6 +135,7 @@ extension PSDChatInteractor: PSDChatInteractorProtocol {
             presenter.doWork(.updateTitle(connectionError: !PyrusServiceDesk.syncManager.networkAvailability))
             if let chat, let chatId = chat.chatId {
                 messagesToPass = PSDMessagesStorage.getSendingMessages(for: chatId)
+                presenter.doWork(.updateDraft(ticketId: chatId))
             }
             
             addObservers()
@@ -219,6 +221,16 @@ extension PSDChatInteractor: PSDChatInteractorProtocol {
                     section: tableMatrix.count - index.section - 1
                 )
                 presenter.doWork(.scrollToRow(indexPath: reversedIndex))
+            } else if let lastReadedLocalId = chat?.lastReadedCommentId,
+                      lastReadedLocalId < Int(chat?.lastComment?.messageId ?? "") ?? 0,
+                      let messageId = chat?.messages.first(where: { Int($0.messageId) ?? 0 > lastReadedLocalId })?.messageId,
+                      let index = tableMatrix.findIndexPath(messageId: messageId).first {
+                let reversedIndex =
+                IndexPath(
+                    row: tableMatrix[index.section].count - index.row - 1,
+                    section: tableMatrix.count - index.section - 1
+                )
+                presenter.doWork(.scrollToRowTop(indexPath: reversedIndex))
             }
         case .viewWillAppear:
             startGettingInfo()
@@ -399,6 +411,7 @@ private extension PSDChatInteractor {
                 messageToPass.messageId = String(commandResult.commentId ?? 0)
                 if let ticketId = commandResult.ticketId {
                     chat?.chatId = ticketId
+                    presenter.doWork(.updateDraft(ticketId: ticketId))
                 }
                 showSendMessageResult(messageToPass: messageToPass, success: commandResult.error == nil)
                 messagesToPass.removeAll(where: { $0.commandId.lowercased() == commandResult.commandId.lowercased() })
@@ -450,7 +463,7 @@ private extension PSDChatInteractor {
     }
     
     func updateChatInfo() {
-        guard PyrusServiceDesk.multichats, let chat, let ticketId = chat.chatId, ticketId != 0 else { return }
+        guard PyrusServiceDesk.multichats, let chat, let ticketId = chat.chatId, ticketId > 0 else { return }
         let userName: String
         if PyrusServiceDesk.customUserId == chat.userId {
             userName = PyrusServiceDesk.userName ?? ""
@@ -603,6 +616,7 @@ private extension PSDChatInteractor {
                 let nextId = PSDObjectsCreator.getNextLocalId()
                 newMessage.requestNewTicket = true
                 chat?.chatId = nextId
+                presenter.doWork(.updateDraft(ticketId: nextId))
 //                RateManager.incrementActionCount()
             }
             if let ticketId = chat?.chatId {
@@ -837,6 +851,7 @@ extension PSDChatInteractor: PSDMessageSendDelegate {
     
     func updateTicketId(_ ticketId: Int) {
         chat?.chatId = ticketId
+        presenter.doWork(.updateDraft(ticketId: ticketId))
         readChat()
     }
 }

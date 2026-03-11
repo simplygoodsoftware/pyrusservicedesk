@@ -392,16 +392,16 @@ class HelpersStrings {
         // Достаточно 2..20, именованные обычно короткие (&nbsp;,&thetasym;), числовые тоже
         let maxEntityLen = 20
         let nsString = strAttr.string as NSString
-
+        
         var range = NSRange(location: 0, length: nsString.length)
         var subrange = nsString.range(of: "&", options: .backwards, range: range)
-
+        
         // Быстрый выход, если амперсандов нет
         guard subrange.length > 0 else {
             strAttr.trailingNewlineChopped()
             return strAttr
         }
-
+        
         while subrange.length != 0 {
             // Кандидат на сущность: после '&' должна идти буква или '#'
             let nextIdx = subrange.location + 1
@@ -414,32 +414,32 @@ class HelpersStrings {
                     isEntityCandidate = CharacterSet.letters.contains(scalar)
                 }
             }
-
+            
             // Сдвинем окно поиска влево (до текущего '&') заранее —
             // это общий шаг для всех веток в конце итерации
             range = NSMakeRange(0, subrange.location)
-
+            
             if !isEntityCandidate {
                 // Не похоже на сущность — идём к предыдущему '&'
                 subrange = nsString.range(of: "&", options: .backwards, range: range)
                 continue
             }
-
+            
             // Ищем ';' справа, но ограничиваемся разумным размером сущности
             let upperBound = min(NSMaxRange(range) + 1, subrange.location + maxEntityLen)
             let semiColonSearchRange = NSRange(location: subrange.location, length: max(0, upperBound - subrange.location))
             let semiColonRange = nsString.range(of: ";", options: .literal, range: semiColonSearchRange)
-
+            
             // Если ';' не нашли — этот '&' не образует сущность, двигаемся дальше
             if semiColonRange.location == NSNotFound {
                 subrange = nsString.range(of: "&", options: .backwards, range: range)
                 continue
             }
-
+            
             let escapeRange = NSRange(location: subrange.location, length: semiColonRange.location - subrange.location + 1)
             let escapeString = nsString.substring(with: escapeRange) as NSString
             let length = escapeString.length
-
+            
             // Базовая фильтрация длины: >= 4 ("&lt;") и <= maxEntityLen
             if length >= 4 && length <= maxEntityLen {
                 if escapeString.character(at: 1) == unichar("#") {
@@ -488,11 +488,11 @@ class HelpersStrings {
                     }
                 }
             }
-
+            
             // Переходим к предыдущему '&'
             subrange = nsString.range(of: "&", options: .backwards, range: range)
         }
-
+        
         strAttr.trailingNewlineChopped()
         return strAttr
     }

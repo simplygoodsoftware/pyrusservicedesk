@@ -33,8 +33,8 @@ class PSDChatTableView: PSDTableView {
     
     private lazy var operatorTimeLabel: UILabel = {
         let label = UILabel()
-        label.font = UIFont.systemFont(ofSize: 14)
-        label.textColor = CustomizationHelper.textColorForTable
+        label.font = UIFont.systemFont(ofSize: 15)
+        label.textColor = CustomizationHelper.textColorForTable.withAlphaComponent(0.6)
         label.textAlignment = .center
         return label
     }()
@@ -234,11 +234,13 @@ class PSDChatTableView: PSDTableView {
     }
         
     ///Scroll tableview to its bottom position without animation
-    func scrollsToBottom(animated: Bool, keyBoardHeight: CGFloat, addRow: Bool = false) {
+    func scrollsToBottom(animated: Bool, keyBoardHeight: CGFloat, addRow: Bool = false, newMessage: Bool = false) {
         var keyBoardHeight: CGFloat = keyBoardHeight
         if 200 < keyBoardHeight && keyBoardHeight < 300 {
             keyBoardHeight -= PSDMessageInputView.attachmentsHeight
         }
+        
+        let scrollPosition = newMessage ? UITableView.ScrollPosition.bottom : UITableView.ScrollPosition.top
         if tableMatrix.count > 0, tableMatrix[0].count > 0 {
             switch headerType {
             case .operatorTime:
@@ -252,15 +254,15 @@ class PSDChatTableView: PSDTableView {
                 if !addRow {
                     setContentOffset(CGPoint(x: 0, y: -keyBoardHeight), animated: animated)
                 } else {
-                    scrollToRow(at: IndexPath(row: 0, section: 0), at: .top, animated: animated)
+                    scrollToRow(at: IndexPath(row: 0, section: 0), at: scrollPosition, animated: animated)
                 }
                 setNeedsLayout()
                 layoutIfNeeded()
             case .none:
-                scrollToRow(at: IndexPath(row: 0, section: 0), at: .top, animated: animated)
+                scrollToRow(at: IndexPath(row: 0, section: 0), at: scrollPosition, animated: animated)
                 setNeedsLayout()
                 layoutIfNeeded()
-                scrollToRow(at: IndexPath(row: 0, section: 0), at: .top, animated: animated)
+                scrollToRow(at: IndexPath(row: 0, section: 0), at: scrollPosition, animated: animated)
             }
         }
         
@@ -361,7 +363,7 @@ private extension PSDChatTableView {
         let expectedBottomOffset = oldContentSize.height - (self.frame.size.height - contentInset.top - contentInset.bottom)
         let hasChanges = oldContentSize != self.contentSize
         if contentOffset.y <= 0 {//expectedBottomOffset - BOTTOM_INFELICITY < oldOffset.y && hasChanges{
-            self.scrollsToBottom(animated: true, keyBoardHeight: keyboardHeight)
+            self.scrollsToBottom(animated: true, keyBoardHeight: keyboardHeight, newMessage: true)
         }
     }
 
@@ -452,7 +454,7 @@ extension PSDChatTableView: UITableViewDelegate, UITableViewDataSource {
         let view = UIView()
         view.frame = CGRect(x: 0, y: 0, width: self.frame.size.width, height: headerHeight)
         let dateLabel = UILabel()
-        dateLabel.textColor = CustomizationHelper.textColorForTable
+        dateLabel.textColor = CustomizationHelper.textColorForTable.withAlphaComponent(0.6)
         dateLabel.font = .dateLabel
         var labelFrame = view.bounds
         labelFrame.size.width = labelFrame.size.width
@@ -594,7 +596,7 @@ extension PSDChatTableView: PSDSupportImageSetterDelegate {
 }
 
 private extension UIFont {
-    static let dateLabel = CustomizationHelper.systemFont(ofSize: 16.0)
+    static let dateLabel = CustomizationHelper.systemFont(ofSize: 15.0)
     
 }
 

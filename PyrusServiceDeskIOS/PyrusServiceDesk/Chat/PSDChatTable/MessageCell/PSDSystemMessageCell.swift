@@ -6,8 +6,8 @@ final class PSDSystemMessageCell: UITableViewCell {
 
     private lazy var messageLabel: UILabel = {
         let label = UILabel()
-        label.font = .systemFont(ofSize: 14)
-        label.textColor = CustomizationHelper.textColorForTable
+        label.font = .systemFont(ofSize: 15)
+        label.textColor = CustomizationHelper.textColorForTable.withAlphaComponent(0.6)
         label.textAlignment = .center
         label.numberOfLines = 0
         label.translatesAutoresizingMaskIntoConstraints = false

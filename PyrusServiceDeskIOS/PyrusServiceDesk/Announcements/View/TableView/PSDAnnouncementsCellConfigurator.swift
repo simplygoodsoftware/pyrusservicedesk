@@ -16,7 +16,7 @@ final class PSDAnnouncementsCellConfigurator: TableViewCellConfiguratorProtocol 
     func getCell(model: AnnouncementsViewModel, indexPath: IndexPath, delegate: AnnouncementsAttachmentsDelegate) -> UITableViewCell {
         switch model.type {
         case .announcement:
-            if let announcementModel = model.data as? PSDAnnouncement {
+            if let announcementModel = model.data as? PSDAnnouncementCellModel {
                 let cell = getCell(reuseIdentifier: psdAnnouncementCellIdentifier, indexPath: indexPath)
                 cell.configure(with: announcementModel, delegate: delegate)
                 return cell
