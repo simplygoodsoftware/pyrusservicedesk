@@ -15,7 +15,7 @@ import com.pyrus.pyrusservicedesk._ref.utils.ConfigUtils
 
 internal object LinkUtils {
 
-    fun createClickableSpan(url: String, context: Context, text: String? = null): ClickableSpan {
+    fun createClickableSpan(url: String, context: Context, localizedContext: Context, text: String? = null): ClickableSpan {
         return object : ClickableSpan() {
 
             override fun updateDrawState(ds: TextPaint) {
@@ -34,7 +34,7 @@ internal object LinkUtils {
                     }
                 }
                 else {
-                    showLinkDialog(context as Activity, url) {
+                    showLinkDialog(context as Activity, localizedContext, url) {
                         try {
                             context.startActivity(Intent(Intent.ACTION_VIEW).apply { data = Uri.parse(url) })
                         }
@@ -59,18 +59,18 @@ internal object LinkUtils {
             || text == null
     }
 
-    private fun showLinkDialog(context: Activity, url: String, onClick: ()-> Unit) {
-        val message = SpannableStringBuilder(context.getString(R.string.link_warning, url))
+    private fun showLinkDialog(context: Activity, localizedContext: Context, url: String, onClick: ()-> Unit) {
+        val message = SpannableStringBuilder(localizedContext.getString(R.string.link_warning, url))
         val range = Regex(url).find(message)?.range
         range?.let {
             if (range.first != -1 && range.last != -1 && range.last > range.first) {
-                message.setSpan(createClickableSpan(url, context), range.first, range.last + 1, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE)
+                message.setSpan(createClickableSpan(url, context, localizedContext), range.first, range.last + 1, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE)
             }
         }
 
         val dialog = AlertDialog.Builder(context, R.style.CommonAlertDialog)
-            .setPositiveButton(R.string.psd_open) { _, _ -> onClick.invoke() }
-            .setNegativeButton(android.R.string.cancel) { _, _ -> }
+            .setPositiveButton(localizedContext.resources.getString(R.string.psd_open)) { _, _ -> onClick.invoke() }
+            .setNegativeButton(localizedContext.resources.getString(android.R.string.cancel)) { _, _ -> }
             .setMessage(message)
             .create()
 

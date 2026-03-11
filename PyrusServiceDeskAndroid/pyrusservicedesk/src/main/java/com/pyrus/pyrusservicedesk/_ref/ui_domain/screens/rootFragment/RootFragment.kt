@@ -132,7 +132,11 @@ internal class RootFragment: TeaFragment<Unit, Message.Outer, Effect.Outer>(),
         val builder: AlertDialog.Builder = AlertDialog.Builder(requireActivity(), R.style.CommonAlertDialog)
         builder.setTitle(title)
             .setMessage(message)
-            .setPositiveButton(resources.getString(R.string.ok))
+            .setPositiveButton(
+                injector().resourceContextWrapper.createLocalizedContext(
+                    requireActivity()
+                ).resources.getString(R.string.ok)
+            )
             { dialog, id ->
                 dispatch(Message.Outer.OnDialogPositiveButtonClick(usersIsEmpty))
                 dialogIsOpen = false

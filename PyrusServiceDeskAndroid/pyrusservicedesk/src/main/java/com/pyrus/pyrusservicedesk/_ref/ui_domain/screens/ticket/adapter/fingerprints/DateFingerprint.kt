@@ -6,6 +6,7 @@ import com.pyrus.pyrusservicedesk.R
 import com.pyrus.pyrusservicedesk._ref.ui_domain.screens.ticket.adapter.entries.CommentEntry
 import com.pyrus.pyrusservicedesk._ref.utils.ConfigUtils
 import com.pyrus.pyrusservicedesk._ref.utils.text
+import com.pyrus.pyrusservicedesk.core.ResourceContextWrapper
 import com.pyrus.pyrusservicedesk.databinding.PsdViewHolderDateBinding
 import com.pyrus.pyrusservicedesk.payload_adapter.BaseViewHolder
 import com.pyrus.pyrusservicedesk.payload_adapter.ItemFingerprint
@@ -14,7 +15,7 @@ import com.pyrus.pyrusservicedesk.payload_adapter.diff
 import kotlin.reflect.KClass
 
 
-internal class DateFingerprint : ItemFingerprint<CommentEntry.Date>() {
+internal class DateFingerprint() : ItemFingerprint<CommentEntry.Date>() {
 
     override val layoutId: Int = R.layout.psd_view_holder_date
 
@@ -25,7 +26,7 @@ internal class DateFingerprint : ItemFingerprint<CommentEntry.Date>() {
         parent: ViewGroup
     ): BaseViewHolder<CommentEntry.Date> {
         return DateViewHolder(
-            PsdViewHolderDateBinding.inflate(layoutInflater, parent, false)
+            PsdViewHolderDateBinding.inflate(layoutInflater, parent, false),
         )
     }
 
@@ -46,7 +47,7 @@ internal class DateFingerprint : ItemFingerprint<CommentEntry.Date>() {
 }
 
 internal class DateViewHolder(
-    private val binding: PsdViewHolderDateBinding
+    private val binding: PsdViewHolderDateBinding,
 ) : BaseViewHolder<CommentEntry.Date>(binding.root) {
 
     init {
