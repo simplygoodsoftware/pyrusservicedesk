@@ -261,14 +261,12 @@ internal class Synchronizer(
                 }
 
                 if (tryResult.isSuccess() && request.request is SyncRequest.Command.CreateComment) {
-                    if ((request.request.ticketId == null || request.request.ticketId <= 0) && tryResult.value.ticketId != null) {
-                        idStore.addTicketIdPair(request.request.ticketId, tryResult.value.ticketId)
-                        commandsStore.updateCommandsTicketId(request.request.ticketId ?: 0, tryResult.value.ticketId)
+                    if (newCommentCreatedSuccessfully(request.request, tryResult.value)) {
+                        tryResult.value.ticketId?.let { idStore.addTicketIdPair(request.request.ticketId, it) }
+                        tryResult.value.ticketId?.let { commandsStore.updateCommandsTicketId(request.request.ticketId ?: 0, it) }
                     }
-                    val modifiedRequest = modifiedRequests.find { (it.request as? SyncRequest.Command.CreateComment)?.commandId == request.request.commandId } ?: request
-                    val modifiedTicketId = (modifiedRequest.request as SyncRequest.Command.CreateComment).ticketId
-                    if ((modifiedTicketId == null || modifiedTicketId <= 0) && tryResult.value.ticketId != null && (modifiedRequest.request as SyncRequest.Command.CreateComment).requestNewTicket) {
-                        systemMessageStore.setNecessityTimeSystemMessage(tryResult.value.ticketId, true)
+                    if (newTicketCreatedSuccessfully(modifiedRequests, request, tryResult.value)) {
+                        tryResult.value.ticketId?.let { systemMessageStore.setNecessityTimeSystemMessage(it, true) }
                     }
                     if (tryResult.value.commentId != null) {
                         idStore.addCommentIdPair(request.request.localId, tryResult.value.commentId)
@@ -315,6 +313,24 @@ internal class Synchronizer(
             onFailedLoopEnd(commandRequests)
         }
         
+    }
+
+    private fun newCommentCreatedSuccessfully(
+        request: SyncRequest.Command.CreateComment,
+        tryResult: TicketCommandResultDto,
+    ): Boolean {
+        return (request.ticketId == null || request.ticketId <= 0) && tryResult.ticketId != null
+    }
+
+    private fun newTicketCreatedSuccessfully(
+        modifiedRequests: List<SyncReqRes>,
+        request: SyncReqRes.CommandWithContinuation,
+        tryResult: TicketCommandResultDto,
+    ): Boolean {
+
+        val modifiedRequest = modifiedRequests.find { (it.request as? SyncRequest.Command.CreateComment)?.commandId == request.request.commandId } ?: request
+        val modifiedTicketId = (modifiedRequest.request as SyncRequest.Command.CreateComment).ticketId
+        return (modifiedTicketId == null || modifiedTicketId <= 0) && tryResult.ticketId != null && (modifiedRequest.request as SyncRequest.Command.CreateComment).requestNewTicket
     }
 
     private fun onSucceedLoopEnd() {
