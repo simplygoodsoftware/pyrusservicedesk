@@ -71,7 +71,9 @@ internal abstract class SdDatabase : RoomDatabase() {
                 Migration4to5(),
                 Migration5to6(),
                 Migration6to7(),
-            ).build()
+            )
+                .fallbackToDestructiveMigrationOnDowngrade()
+                .build()
         }
 
     }
