@@ -645,13 +645,14 @@ extension PSDChatsDataService: PSDChatsDataServiceProtocol {
                     attachmentsData = attachments
                 }
                 
+                let ticketId = dbCommand.ticketId == 0 ? nil : Int(dbCommand.ticketId)
                 let command = TicketCommand(
                     commandId: dbCommand.id ?? "",
                     type: TicketCommandType(rawValue: Int(dbCommand.type)) ?? .readTicket,
                     appId: dbCommand.appId,
                     userId: dbCommand.userId,
                     params: TicketCommandParams(
-                        ticketId: Int(dbCommand.ticketId),
+                        ticketId: ticketId,
                         appId: dbCommand.appId,
                         requestNewTicket: dbCommand.requestNewTicket,
                         userId: dbCommand.userId,

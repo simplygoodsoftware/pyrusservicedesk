@@ -6,7 +6,7 @@ enum EntityType {
 }
 
 final class CoreDataService {
-    private let currentSchemaVersion = 1
+    private let currentSchemaVersion = 2
     private let schemaVersionKey = "PSDChatsSchemaVersion"
     
     private lazy var persistentContainer: NSPersistentContainer = {
