@@ -614,10 +614,8 @@ private extension PSDChatInteractor {
             }
         } else {
             let requestNewTicket = !(chat?.isActive ?? false) || newTicket
-//            newMessage.requestNewTicket = requestNewTicket
             if requestNewTicket {
-                let nextId = PSDObjectsCreator.getNextLocalId()
-                chat?.chatId = nil//nextId
+                chat?.chatId = nil
                 chat?.isActive = true
             }
             

@@ -238,80 +238,27 @@ enum DataType: String {
 extension String {
     ///Определяем что же за тег нам пришел
     func getHTMLTagForString() -> (tagType: HTMLTag, isOpen: Bool, data: Any?)? {
-        // 1) Открывающий/закрывающий без параметров
+        //Если тег без параметров, он должен определяться по первой проверке
+        //Если тег без параметров и закрывающий, он должен определяться по второй проверке
         var check = HTMLTag.allCases.filter { $0.tag == self && $0.mayBeWithoutParameters }
-        if let found = check.first { return (found, true, nil) }
+        if check.first != nil { return (check.first!, true, nil) }
         check = HTMLTag.allCases.filter { "/\($0.tag)" == self }
-        if let found = check.first { return (found, false, nil) }
-        
-        // 2) Теги с параметрами
-        // Для <a ...> нам важно вытащить оба: data-type и href
-        // Сначала определим, открывающий ли это тег и имя тега
-        let trimmed = self.trimmingCharacters(in: .whitespacesAndNewlines)
-        let isOpen = !trimmed.hasPrefix("/")
-        // Имя тега между возможным "/" и пробелом/концом
-        let nameStartIdx = trimmed.first == "/" ? trimmed.index(after: trimmed.startIndex) : trimmed.startIndex
-        let nameEndIdx = trimmed[nameStartIdx...].firstIndex(where: { $0 == " " || $0 == "\t" || $0 == ">" }) ?? trimmed.endIndex
-        let tagName = String(trimmed[nameStartIdx..<nameEndIdx]).lowercased()
-        
-        // Обрабатываем только те теги, которые нам известны
-        guard let htmlTag = HTMLTag.allCases.first(where: { $0.tag == tagName }) else {
-            return nil
-        }
-        
-        // Если нет атрибутов (или не нужны) — возвращаем
-        if nameEndIdx == trimmed.endIndex {
-            // Например <br> или закрывающие </a>
-            return (htmlTag, isOpen, nil)
-        }
-        
-        // 3) Собираем атрибуты вида key="value"
-        // Простенький парсер атрибутов (без single quotes и без экранирования — как в исходнике)
-        let attrsString = String(trimmed[nameEndIdx..<trimmed.endIndex])
-        // Регекс: пробелы + ключ (буквы/цифры/-:) = "значение"
-        let regex = try? NSRegularExpression(pattern: #"\s+([A-Za-z0-9:-]+)\s*=\s*"([^"]*)""#, options: [])
-        var attributes: [String: String] = [:]
-        if let regex = regex {
-            let ns = attrsString as NSString
-            let matches = regex.matches(in: attrsString, range: NSRange(location: 0, length: ns.length))
-            for m in matches {
-                if m.numberOfRanges >= 3 {
-                    let key = ns.substring(with: m.range(at: 1)).lowercased()
-                    let value = ns.substring(with: m.range(at: 2))
-                    attributes[key] = value
-                }
-            }
-        } else {
-            // fallback на старые функции, если regex не собрался
-            for type in HardTagType.allCases {
-                if self.contains(type.pattern), let val = searchStringParam(name: type.rawValue) {
-                    attributes[type.rawValue] = val
+        if check.first != nil { return (check.first!, false, nil) }
+        //Если тег с параметрами тогда первые проверки не идентифицируют его
+        //Используем поиск по параметрам которые уникальные для определенного тега
+        for type in HardTagType.allCases {
+            if self.contains(type.pattern) {
+                let href = searchURLParam(HardTagType.href.rawValue)
+                let dataType = searchDataType(HardTagType.dataType.rawValue)
+                
+                if dataType == .button {
+                    return (HTMLTag.a, true, ButtonData(string: nil, url: href))
+                } else if href != nil {
+                    return (HTMLTag.a, true, href)
                 }
             }
         }
-        
-        // 4) Логика для <a ...>
-        if htmlTag == .a {
-            if !isOpen {
-                // Закрывающий тег </a>
-                return (.a, false, nil)
-            }
-            
-            let hrefStr = attributes[HardTagType.href.rawValue]
-            let hrefURL = hrefStr.flatMap { URL(string: $0) }
-            let dataType = attributes[HardTagType.dataType.rawValue].flatMap { DataType(rawValue: $0) }
-            
-            // Если это кнопка (data-type="button"), возвращаем ButtonData
-            if dataType == .button {
-                return (.a, true, ButtonData(string: nil, url: hrefURL))
-            } else {
-                // Обычная ссылка
-                return (.a, true, hrefURL)
-            }
-        }
-        
-        // 5) Для других тегов можно вернуть как есть (или дополнить при расширении)
-        return (htmlTag, isOpen, nil)
+        return nil
     }
     
     func searchDataType(_ name: String) -> DataType? {
