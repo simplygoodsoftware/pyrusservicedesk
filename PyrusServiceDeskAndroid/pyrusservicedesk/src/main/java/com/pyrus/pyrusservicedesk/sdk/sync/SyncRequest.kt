@@ -19,7 +19,7 @@ internal sealed interface SyncRequest {
             override val appId: String,
             override val creationTime: Long,
             val requestNewTicket: Boolean,
-            val ticketId: Long,
+            val ticketId: Long?,
             val comment: String?,
             val attachments: List<Attachment>?,
             val rating: Int?,
