@@ -6,8 +6,9 @@ enum EntityType {
 }
 
 final class CoreDataService {
-    private let currentSchemaVersion = 1
+    private let currentSchemaVersion = 2
     private let schemaVersionKey = "PSDChatsSchemaVersion"
+    private let psdVersionKey = "psd.sdk.version"
     
     private lazy var persistentContainer: NSPersistentContainer = {
         checkAndResetStoreIfNeeded()
@@ -54,24 +55,40 @@ final class CoreDataService {
     }
     
     private func checkAndResetStoreIfNeeded() {
-        let defaults = PSDMessagesStorage.pyrusUserDefaults()
-        let savedVersion = defaults?.integer(forKey: schemaVersionKey) ?? 0
+        guard let defaults = PSDMessagesStorage.pyrusUserDefaults() else { return }
 
-        guard savedVersion < currentSchemaVersion else {
-            return
+        let savedSchemaVersion = defaults.object(forKey: schemaVersionKey) as? Int
+        let savedPSDVersion = defaults.string(forKey: psdVersionKey)
+
+        let currentPSDVersion = PyrusServiceDesk.PSD_VERSION
+
+        // Условие сброса:
+        // 1) обновление схемы (savedSchemaVersion отсутствует или меньше текущей)
+        // 2) изменение PSD_VERSION
+        var shouldReset = false
+
+        if (savedSchemaVersion ?? 0) < currentSchemaVersion {
+            shouldReset = true
         }
 
-        let fileManager = FileManager.default
+        if savedPSDVersion != currentPSDVersion {
+            shouldReset = true
+        }
 
+        guard shouldReset else { return }
+
+        let fileManager = FileManager.default
         for url in persistentStoreURLs() {
             if fileManager.fileExists(atPath: url.path) {
-                try? fileManager.removeItem(at: url)
+                do {
+                    try fileManager.removeItem(at: url)
+                } catch { }
             }
         }
 
-        defaults?.set(currentSchemaVersion, forKey: schemaVersionKey)
+        defaults.set(currentSchemaVersion, forKey: schemaVersionKey)
+        defaults.set(currentPSDVersion, forKey: psdVersionKey)
     }
-
 }
 
 extension CoreDataService: CoreDataServiceProtocol {
