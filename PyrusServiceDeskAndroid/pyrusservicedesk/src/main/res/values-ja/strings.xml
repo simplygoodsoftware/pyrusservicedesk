@@ -4,4 +4,64 @@
     <string name="psd_retry">再試行</string>
     <string name="psd_no_connection">インターネット接続がありません</string>
     <string name="psd_comment_input_hint">コメントを追加</string>
+    <string name="new_ticket">新しいチケット</string>
+    <string name="psd_no_access">アクセスなし</string>
+    <string name="ok">Ok</string>
+    <string name="copied_text">コピーしたテキスト</string>
+    <string name="psd_no_access_message">%sへのアクセスを復元するには、組織の管理者にご連絡ください</string>
+    <string name="psd_uploading">読み込み中…</string>
+    <string name="psd_file_size_mb" formatted="false">%.1f MB</string>
+    <string name="psd_file_size_kb" formatted="false">%.1f KB</string>
+    <string name="psd_time_format">時:分　aa</string>
+    <string name="psd_organization_support">サポート</string>
+    <string name="psd_support">サポート</string>
+    <string name="psd_today">今日</string>
+    <string name="psd_yesterday">昨日</string>
+    <string name="psd_date_format_d_m_y">月日,年</string>
+    <string name="psd_date_format_d_m">月日</string>
+    <string name="psd_date_format_d">EEE</string>
+    <string name="psd_date_format_d_m_short">月.日</string>
+    <string name="psd_date_format_d_m_y_short">月.日.年</string>
+    <string name="psd_photo">写真</string>
+    <string name="psd_gallery">ギャラリー</string>
+    <string name="psd_filters">フィルター</string>
+    <string name="psd_ticket_number">チャット番号:%s</string>
+    <string name="psd_ticket_data_create">%sで作成された</string>
+    <string name="all">全て</string>
+    <string name="psd_you">あなた</string>
+    <string name="psd_type_photo">写真</string>
+    <string name="psd_type_video">ビデオ</string>
+    <string name="psd_type_file">ファイル</string>
+    <string name="psd_type_audio">音声メッセージ</string>
+    <plurals name="psd_years_ago">
+        <item quantity="other">"Ед. число\n%d 年前\nМн. число\n%d  年前"</item>
+    </plurals>
+    <string name="psd_months_ago" formatted="false">%d月前</string>
+    <string name="psd_weeks_ago" formatted="false">%d週前</string>
+    <string name="psd_days_ago" formatted="false">%d日前</string>
+    <string name="psd_hours_ago" formatted="false">%d時間前</string>
+    <string name="psd_minutes_ago" formatted="false">%d分前</string>
+    <string name="psd_recent">最近</string>
+    <string name="psd_guest">ゲスト</string>
+    <string name="psd_file_size_exceeded_message" formatted="false">ファイルサイズは%d MBを超えないようにしてください。</string>
+    <string name="psd_download">ダウンロード</string>
+    <string name="psd_copied_to_clipboard">クリップボードにコピーしました</string>
+    <string name="psd_open">開く</string>
+    <string name="psd_no_preview_available">プレビューを表示できません</string>
+    <string name="psd_delete">削除する</string>
+    <string name="psd_downloading">読み込み中…</string>
+    <string name="psd_share">共有</string>
+    <string name="send_library_logs">ライブラリログを送信</string>
+    <string name="link_warning">このリンクは %s に接続します。\n本当にこのリンク先に移動しますか？</string>
+    <string name="all_conversations">全ての会話</string>
+    <string name="psd_search_by_tickets">チケットで検索</string>
+    <string name="closed_teckets">クローズ済みチケット</string>
+    <string name="ticket_was_closed">チャットがクローズされました</string>
+    <string name="psd_no_suggestions">提案はありません</string>
+    <string name="psd_swipe_cancel">‹‹ キャンセル</string>
+    <string name="psd_cancel">キャンセル</string>
+    <string name="psd_close">閉める</string>
+    <string name="leave_your_comment">レビューを作成</string>
+    <string name="psd_evaluate_the_operators_performance">オペレーターのパフォーマンスを評価する</string>
+    <string name="psd_unsupptorted_attachment">サポートされていない添付ファイル</string>
 </resources>
