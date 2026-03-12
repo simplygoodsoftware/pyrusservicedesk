@@ -24,6 +24,7 @@ import com.pyrus.pyrusservicedesk.sdk.repositories.data_base.data.LocalAttachmen
 import com.pyrus.pyrusservicedesk.sdk.repositories.data_base.data.MemberEntity
 import com.pyrus.pyrusservicedesk.sdk.repositories.data_base.data.TicketEntity
 import com.pyrus.pyrusservicedesk.sdk.repositories.data_base.data.UserEntity
+import com.pyrus.pyrusservicedesk.sdk.updates.PreferencesManager
 
 @Database(
     entities = [
@@ -59,7 +60,7 @@ internal abstract class SdDatabase : RoomDatabase() {
         const val LOCAL_ATTACHMENTS_TABLE = "local_attachment_table"
         const val MEMBERS_TABLE = "members_table"
 
-        fun create(appContext: Context): SdDatabase {
+        fun create(appContext: Context, preferencesManager: PreferencesManager): SdDatabase {
             return Room.databaseBuilder(
                 appContext,
                 SdDatabase::class.java,
@@ -71,7 +72,10 @@ internal abstract class SdDatabase : RoomDatabase() {
                 Migration4to5(),
                 Migration5to6(),
                 Migration6to7(),
-            ).build()
+            )
+                .fallbackToDestructiveMigration()
+                .addCallback(SdDatabaseCallback(appContext, preferencesManager))
+                .build()
         }
 
     }

@@ -65,4 +65,7 @@ internal interface Preferences {
 
     fun saveCurrentUserId(userId: String)
     fun getCurrentUserId(): String?
+    fun saveDbVersion(version: Int, destructive: Boolean)
+    fun getDbVersion(): Int
+    fun getDbVersionIsDestructive(): Boolean
 }

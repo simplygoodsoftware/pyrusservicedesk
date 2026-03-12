@@ -127,7 +127,17 @@ internal class DiInjector(
 
     val systemMessageStore = SystemMessageStore(idStore)
 
-    private val db = SdDatabase.create(application)
+
+    private val initialAccountKey = when(initialAccount) {
+        is Account.V1 -> initialAccount.appId
+        is Account.V2 -> initialAccount.appId
+        is Account.V3 -> initialAccount.authorId
+    }
+
+    val preferencesManager = PreferencesManager(initialAccountKey, preferences)
+
+
+    private val db = SdDatabase.create(application, preferencesManager)
 
     private val ticketsDao = db.ticketsDao()
 
@@ -157,13 +167,6 @@ internal class DiInjector(
 
     val finishEventBus = FinishEventBus()
 
-    private val initialAccountKey = when(initialAccount) {
-        is Account.V1 -> initialAccount.appId
-        is Account.V2 -> initialAccount.appId
-        is Account.V3 -> initialAccount.authorId
-    }
-
-    val preferencesManager = PreferencesManager(initialAccountKey, preferences)
 
     private val synchronizer = Synchronizer(
         api = api,

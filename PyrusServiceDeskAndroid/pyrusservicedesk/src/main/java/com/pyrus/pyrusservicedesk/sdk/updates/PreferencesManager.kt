@@ -128,6 +128,19 @@ internal class PreferencesManager(
         }
     }
 
+    override fun saveDbVersion(version: Int, destructive: Boolean) {
+        preferences.edit().putInt(PREFERENCE_KEY_DB_VERSION, version).commit()
+        preferences.edit().putBoolean(PREFERENCE_KEY_DB_VERSION_IS_DESTRUCTIVE, destructive).commit()
+    }
+
+    override fun getDbVersion(): Int {
+        return preferences.getInt(PREFERENCE_KEY_DB_VERSION, 0)
+    }
+
+    override fun getDbVersionIsDestructive(): Boolean {
+        return preferences.getBoolean(PREFERENCE_KEY_DB_VERSION_IS_DESTRUCTIVE, false)
+    }
+
     override fun saveCurrentUserId(userId: String) {
         preferences.edit().putString(PREFERENCE_KEY_USER_ID_V2, userId).commit()
     }
@@ -218,6 +231,9 @@ internal class PreferencesManager(
         private const val PREFERENCE_KEY_LAST_ACTIVITY_TIME_MAP = "PREFERENCE_KEY_LAST_ACTIVITY_TIME_MAP"
 
         internal const val PREFERENCE_KEY_USER_ID_V2 = "PREFERENCE_KEY_USER_ID_V2"
+
+        internal const val PREFERENCE_KEY_DB_VERSION = "PREFERENCE_KEY_DB_VERSION"
+        internal const val PREFERENCE_KEY_DB_VERSION_IS_DESTRUCTIVE = "PREFERENCE_KEY_DB_VERSION_IS_DESTRUCTIVE"
 
         private const val PREFERENCE_KEY_TOKEN_TIME_MAP = "PREFERENCE_KEY_TOKEN_TIME_MAP"
         private const val PREFERENCE_KEY_TOKEN_TIME_LIST = "PREFERENCE_KEY_TOKEN_TIME_LIST"

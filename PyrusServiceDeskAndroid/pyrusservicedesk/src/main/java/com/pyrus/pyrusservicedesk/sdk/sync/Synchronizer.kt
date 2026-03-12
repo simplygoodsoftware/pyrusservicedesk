@@ -172,9 +172,10 @@ internal class Synchronizer(
         }
 
         val reloadCacheVersion = preferences.getReloadCacheVersion()
-
+        val dbVersionIsDestructive = preferences.getDbVersionIsDestructive()
+        Log.d("EP ", "dbVersionIsDestructive: $dbVersionIsDestructive")
         val tickets = when {
-            reloadCacheVersion >= RELOAD_CACHE_VERSION -> localTicketsStore.getTickets()
+            reloadCacheVersion >= RELOAD_CACHE_VERSION && !dbVersionIsDestructive -> localTicketsStore.getTickets()
             else -> emptyList()
         }
 
