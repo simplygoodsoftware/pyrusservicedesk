@@ -13,9 +13,9 @@ internal class IdStore {
     private val ticketIdStateFlow = MutableStateFlow(0)
 
     // <LocalId, ServerId>
-    private val ticketLocalIdMap = HashMap<Long, Long>()
+    private val ticketLocalIdMap = HashMap<Long?, Long>()
     // <ServerId, LocalId>
-    private val ticketServerIdMap = HashMap<Long, Long>()
+    private val ticketServerIdMap = HashMap<Long, Long?>()
 
     // <LocalId, ServerId>
     private val commentsLocalIdMap = HashMap<Long, Long>()
@@ -28,13 +28,13 @@ internal class IdStore {
         ticketIdFlow.value = ticketId
     }
 
-    fun addTicketIdPair(localId: Long, serverId: Long) = ticketIdLock.withLock {
+    fun addTicketIdPair(localId: Long?, serverId: Long) = ticketIdLock.withLock {
         ticketLocalIdMap[localId] = serverId
         ticketServerIdMap[serverId] = localId
         updateTicketIdTrigger()
     }
 
-    fun getTicketServerId(localId: Long): Long? = ticketIdLock.withLock {
+    fun getTicketServerId(localId: Long?): Long? = ticketIdLock.withLock {
         ticketLocalIdMap[localId]
     }
 

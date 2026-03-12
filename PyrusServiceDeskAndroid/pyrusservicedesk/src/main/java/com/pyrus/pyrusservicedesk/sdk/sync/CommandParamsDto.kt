@@ -43,7 +43,7 @@ internal sealed interface CommandParamsDto {
         @Json(name = "app_id") val appId: String,
         @Json(name = "comment") val comment: String?,
         @Json(name = "attachments") val attachments: List<AttachmentDataDto>?,
-        @Json(name = "ticket_id") val ticketId: Long,
+        @Json(name = "ticket_id") val ticketId: Long?,
         @Json(name = "rating") val rating: Int?,
         @Json(name = "rating_comment")  val ratingComment: String?,
         @Json(name = "extra_fields") val extraFields: Map<String, String>?,
