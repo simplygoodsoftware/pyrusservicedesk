@@ -655,6 +655,7 @@ private class TicketActor(
         return ticket.comments.isNotEmpty()
             && necessaryComments
                 .find { it.isSupport
+                    && it.rating == null
                     && (!it.isSystem
                     || it.systemCommentType == SystemCommentType.OperatorAssigned.ordinal) } == null
     }
