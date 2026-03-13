@@ -34,7 +34,7 @@
     <string name="psd_type_file">ファイル</string>
     <string name="psd_type_audio">音声メッセージ</string>
     <plurals name="psd_years_ago">
-        <item quantity="other">"Ед. число\n%d 年前\nМн. число\n%d  年前"</item>
+        <item quantity="other">"%d 年前\n%d  年前"</item>
     </plurals>
     <string name="psd_months_ago" formatted="false">%d月前</string>
     <string name="psd_weeks_ago" formatted="false">%d週前</string>
