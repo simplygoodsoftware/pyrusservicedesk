@@ -133,7 +133,8 @@ extension PSDChatInteractor: PSDChatInteractorProtocol {
             isOpen = true
             presenter.doWork(.updateTitle(connectionError: !PyrusServiceDesk.syncManager.networkAvailability))
             if let chat, let chatId = chat.chatId {
-                messagesToPass = PSDMessagesStorage.getSendingMessages(for: chatId)
+                let ticketId = !PyrusServiceDesk.multichats ? nil : chatId
+                messagesToPass = PSDMessagesStorage.getSendingMessages(for: ticketId)
             }
             
             addObservers()

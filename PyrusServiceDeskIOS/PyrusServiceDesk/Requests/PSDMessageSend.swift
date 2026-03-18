@@ -129,7 +129,8 @@ struct PSDMessageSend {
         let commandId = messageToPass.commandId ?? UUID().uuidString
         delegate?.addMessageToPass(message: messageToPass, commandId: commandId)
         let requestNewTicket = messageToPass.requestNewTicket//(messageToPass.ticketId == 0 || messageToPass.requestNewTicket)
-        let ticketId = messageToPass.ticketId == 0 ? nil : messageToPass.ticketId
+        let ticketId = messageToPass.ticketId == 0 || !PyrusServiceDesk.multichats ? nil : messageToPass.ticketId
+        
         var attachmentsData: [AttachmentData]?
         
         if let attachments = messageToPass.attachments {

@@ -97,12 +97,13 @@ extension Array where Element == [PSDRowMessage] {
         var previousMessage: PSDMessage? = nil
         self.defaultMatrix(createWelcome: !(chat.messages.count > 0 && chat.messages[0].owner?.authorId?.count ?? 0 == 0) || !PyrusServiceDesk.multichats)
         
+        let ticketId = !PyrusServiceDesk.multichats ? nil : chat.chatId
         if !self.isEmpty && self[0].count > 0 && chat.messages.count > 0 {
             //change date of welcome message. Make it same as first message in chat
             self[0][0].message.date = chat.messages[0].date
         } else if !self.isEmpty && self[0].count > 0 && chat.chatId ?? 1 <= 0
-                  && PSDMessagesStorage.getMessages(for: chat.chatId).count > 0 {
-            self[0][0].message.date = (PSDMessagesStorage.getMessages(for: chat.chatId).first?.date ?? Date()) - TimeInterval(1)
+                  && PSDMessagesStorage.getMessages(for: ticketId).count > 0 {
+            self[0][0].message.date = (PSDMessagesStorage.getMessages(for: ticketId).first?.date ?? Date()) - TimeInterval(1)
         }
         
         for message in chat.messages {

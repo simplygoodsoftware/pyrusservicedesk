@@ -3,6 +3,7 @@ import Foundation
 extension Array where Element == [PSDRowMessage]{
     ///complete array with unsent messages from storage
     mutating func completeWithUnsentMessages(for ticketId: Int) {
+        let ticketId = !PyrusServiceDesk.multichats ? nil : ticketId
         let messagesFromStorage = PSDMessagesStorage.getMessages(for: ticketId)
         let sortedMessages = messagesFromStorage.sorted(by: {$0.date < $1.date})
         complete(with: sortedMessages)
