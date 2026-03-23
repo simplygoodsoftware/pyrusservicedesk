@@ -13,7 +13,7 @@ class AttachmentCollectionViewCell : UICollectionViewCell{
 //        button.setTitle("✗", for: .normal)
 //        button.titleLabel?.font = .removeButton
 //        button.layer.cornerRadius = AttachmentCollectionViewCell.buttonSize/2
-        button.setImage(UIImage.PSDImage(name: "del")?.imageWith(color: CustomizationHelper.userMassageBackgroundColor), for: .normal)
+        button.setImage(UIImage.PSDImage(name: "del"), for: .normal)
         button.translatesAutoresizingMaskIntoConstraints = false
         return button
     }()
@@ -102,7 +102,7 @@ extension AttachmentCollectionViewCell: Recolorable {
 //        removeButton.setTitleColor(CustomizationHelper.textColorForInput.withAlphaComponent(CROSS_ALPHA), for: .normal)
 //        removeButtonBack.backgroundColor = .clear
  //       removeButton.backgroundColor = CustomizationHelper.grayInputColor.withAlphaComponent(BUTTON_ALPHA)
-        removeButton.setImage(UIImage.PSDImage(name: "del")?.imageWith(color: CustomizationHelper.userMassageBackgroundColor), for: .normal)
+        removeButton.setImage(UIImage.PSDImage(name: "del"), for: .normal)
         holderView.layer.borderColor = CustomizationHelper.lightGrayInputColor.cgColor
     }
 }

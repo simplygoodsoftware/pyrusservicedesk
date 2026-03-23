@@ -26,7 +26,7 @@ import Foundation
     private static let shakeAnimationRepeats: Float = 4
     private static let shakeAnimationDeviation: CGFloat = 3
     
-    private static var recordOnImage = UIImage.PSDImage(name: "bigMicrophone")?.imageWith(color: CustomizationHelper.userMassageBackgroundColor)
+    private static var recordOnImage = UIImage.PSDImage(name: "bigMicrophone")
     var customRecordOffImage = VoiceRecordButton.recordOffImage {
         didSet{
             if !self.isRecording{
@@ -128,7 +128,7 @@ import Foundation
     }
     
     private func recolor() {
-        VoiceRecordButton.recordOnImage = UIImage.PSDImage(name: "bigMicrophone")?.imageWith(color: CustomizationHelper.userMassageBackgroundColor)
+        VoiceRecordButton.recordOnImage = UIImage.PSDImage(name: "bigMicrophone")
         lockImageView.image = UIImage.PSDImage(name: "lockAudio")?.imageWith(color: CustomizationHelper.recordImagesColors)
         stopImageView.image = isAutoHoldingRecording ? UIImage.PSDImage(name: "stopRecord")?.imageWith(color: CustomizationHelper.recordImagesColors) :  UIImage.PSDImage(name: "arrows")?.imageWith(color: CustomizationHelper.recordImagesColors)
         if !self.isRecording,
@@ -229,7 +229,7 @@ import Foundation
                         UIView.animate(withDuration: 0.3) {
                             self.center = self.initialButtonCenter
                             self.lockHeightConstraint?.constant = 44
-                            self.setImage(UIImage.PSDImage(name: "whiteSend")?.imageWith(color: CustomizationHelper.userMassageBackgroundColor), for: .normal)
+                            self.setImage(UIImage.PSDImage(name: "whiteSend"), for: .normal)
                             self.layoutIfNeeded()
                             self.parentView?.layoutIfNeeded()
                         }
