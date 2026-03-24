@@ -60,8 +60,8 @@ struct PSDGetChats {
         for client in PyrusServiceDesk.clients {
             var announcementsChepoint = [String: Any]()
             announcementsChepoint["app_id"] = client.clientId
-            announcementsChepoint["last_helpy_announcement_id"] = client.lasAnnoncementId
-            announcementsChepoint["last_helpy_announcement_change_datetime"] = client.lasAnnouncementUpdateDate
+           // announcementsChepoint["last_helpy_announcement_id"] = client.lasAnnoncementId
+           // announcementsChepoint["last_helpy_announcement_change_datetime"] = client.lasAnnouncementUpdateDate
             announcementsChepoints.append(announcementsChepoint)
         }
         
@@ -123,7 +123,7 @@ struct PSDGetChats {
                     let clients = clientsResult.clients
                     let announcementsResult = generateAnnouncements(from: clientsResult.serverAnnouncements)
                     var startTime3 = CFAbsoluteTimeGetCurrent() - startTime2
-                    print("⏱ getChats serialization completed in \(startTime3) seconds")
+                    print("⏱ getAnns serialization completed in \(startTime3) seconds")
                     startTime3 = CFAbsoluteTimeGetCurrent()
                     let chatsArray = chatsData["tickets"] as? [[String : Any]] ?? [[String: Any]]()
                     let chats = generateChats(from: chatsArray, clients: clients)
@@ -188,7 +188,8 @@ struct PSDGetChats {
                     isRead: isRead,
                     attachments: getAttachments(from: newAnnouncement.content),
                     appId: appId,
-                    orderIndex: lastOrderIndex + 1
+                    orderIndex: lastOrderIndex + 1,
+                    content: newAnnouncement.content.richTextDocument
                 )
                 announcements.append(announcement)
                 lastOrderIndex += 1
@@ -211,7 +212,8 @@ struct PSDGetChats {
                             isRead: localAnn?.isRead ?? true,
                             attachments: getAttachments(from: changedAnnouncement.content),
                             appId: appId,
-                            orderIndex: localAnn?.orderIndex ?? 0
+                            orderIndex: localAnn?.orderIndex ?? 0,
+                            content: changedAnnouncement.content?.richTextDocument
                         )
                         announcements.append(announcement)
                     }
@@ -225,7 +227,7 @@ struct PSDGetChats {
             guard let content else { return "" }
             var text: String = ""
             for block in content.richTextDocument.richTextBlocks ?? [] {
-                text += block.richTextInlines.map(\.string).joined() + "\n"
+                text += block.richTextInlines.map({$0.string ?? ""}).joined() + "\n"
             }
             text = text.trimmingCharacters(in: .whitespacesAndNewlines)
             return text
@@ -538,4 +540,133 @@ let attachmentsParameter = "attachments"
 let guidParameter = "guid"
 let CLIENT_ID_KEY = "client_id"
 let EXTRA_FIELDS_KEY = "extra_fields"
+
+
+// MARK: - Tests
+
+//func makeSampleAnnouncement() -> Announcement {
+//    // Абзац: комбинированные маркеры + inline code + ссылка + перенос строки
+//    let paragraph = RichTextBlock(
+//        type: .paragraph,
+//        code: nil,
+//        codeLang: nil,
+//        richTextInlines: [
+//            RichTextInline(type: .text, string: "Обычный текст, ", marks: nil, url: nil),
+//            RichTextInline(type: .text, string: "жирный", marks: "Bold", url: nil),
+//            RichTextInline(type: .text, string: ", ", marks: nil, url: nil),
+//            RichTextInline(type: .text, string: "курсив", marks: "Italic", url: nil),
+//            RichTextInline(type: .text, string: ", ", marks: nil, url: nil),
+//            RichTextInline(type: .text, string: "подчёркнутый", marks: "Underline", url: nil),
+//            RichTextInline(type: .text, string: ", ", marks: nil, url: nil),
+//            RichTextInline(type: .text, string: "зачёркнутый", marks: "Strikethrough", url: nil),
+//            RichTextInline(type: .text, string: ", ", marks: nil, url: nil),
+//            RichTextInline(type: .text, string: "жирный+курсив", marks: "Bold, Italic", url: nil),
+//            RichTextInline(type: .text, string: ", inline‑код: ", marks: nil, url: nil),
+//            RichTextInline(type: .text, string: "let x = 42", marks: "Code", url: nil),
+//            RichTextInline(type: .text, string: " и ссылка: ", marks: nil, url: nil),
+//            RichTextInline(type: .link, string: "example.com", marks: nil, url: "https://example.com"),
+//            // Перенос строки внутри абзаца
+//            RichTextInline(type: .lineBreak, string: nil, marks: nil, url: nil),
+//            RichTextInline(type: .text, string: "Новая строка абзаца.", marks: nil, url: nil)
+//        ]
+//    )
+//    
+//    // Маркированные пункты
+//    let bullet1 = RichTextBlock(
+//        type: .bulletListItem,
+//        code: nil,
+//        codeLang: nil,
+//        richTextInlines: [
+//            RichTextInline(type: .text, string: "Маркированный пункт 1", marks: nil, url: nil)
+//        ]
+//    )
+//    let bullet2 = RichTextBlock(
+//        type: .bulletListItem,
+//        code: nil,
+//        codeLang: nil,
+//        richTextInlines: [
+//            RichTextInline(type: .text, string: "Маркированный пункт 2 (курсив)", marks: "Italic", url: nil)
+//        ]
+//    )
+//    
+//    // Нумерованные пункты (идут подряд для проверки нумерации)
+//    let number1 = RichTextBlock(
+//        type: .numberListItem,
+//        code: nil,
+//        codeLang: nil,
+//        richTextInlines: [
+//            RichTextInline(type: .text, string: "Нумерованный пункт 1", marks: nil, url: nil)
+//        ]
+//    )
+//    let number2 = RichTextBlock(
+//        type: .numberListItem,
+//        code: nil,
+//        codeLang: nil,
+//        richTextInlines: [
+//            RichTextInline(type: .text, string: "Нумерованный пункт 2 (жирный)", marks: "Bold", url: nil)
+//        ]
+//    )
+//    let number3 = RichTextBlock(
+//        type: .numberListItem,
+//        code: nil,
+//        codeLang: nil,
+//        richTextInlines: [
+//            RichTextInline(type: .text, string: "Нумерованный пункт 3 (подчёркнутый)", marks: "Underline", url: nil)
+//        ]
+//    )
+//    
+//    // Цитата с переносом строки
+//    let quote = RichTextBlock(
+//        type: .quote,
+//        code: nil,
+//        codeLang: nil,
+//        richTextInlines: [
+//            RichTextInline(type: .text, string: "Это цитата, которая ооооооооооооооооооооооооооооооооочень ооооооооооочень длинная", marks: nil, url: nil),
+//            RichTextInline(type: .lineBreak, string: nil, marks: nil, url: nil),
+//            RichTextInline(type: .text, string: "и она на две строки.", marks: "Italic", url: nil)
+//        ]
+//    )
+//    
+//    // Блочный код (многострочный)
+//    let codeText =
+//    """
+//    func greet(name: String) {
+//        print("Hello, \\(name)!")
+//    }
+//    greet(name: "World")
+//    """
+//    let codeBlock = RichTextBlock(
+//        type: .code,
+//        code: codeText,
+//        codeLang: nil, // формат подсветки пока не используется
+//        richTextInlines: [] // для блока кода инлайны не требуются
+//    )
+//    
+//    let doc = RichTextDocument(
+//        version: 1,
+//        richTextBlocks: [
+//            paragraph,
+//            bullet1, bullet2,
+//            number1, number2, number3,
+//            quote,
+//            codeBlock
+//        ]
+//    )
+//    
+//    // (Опционально) пример вложения
+//    let attachments = [Attachment]()
+//        //Attachment(id: UUID().uuidString, name: "image.png", size: 240_000, width: 1024, height: 768, media: true)
+//  //  ]
+//    
+//    let content = Content(attachments: attachments, richTextDocument: doc)
+//    
+//    return Announcement(
+//        id: UUID().uuidString,
+//        type: .message,
+//        createdAt: Date(),
+//        editedAt: nil,
+//        content: content
+//    )
+//}
+//
 

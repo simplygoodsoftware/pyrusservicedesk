@@ -118,7 +118,7 @@ final class PSDAnnouncementCell: UITableViewCell {
             bubbleView.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: 8),
             bubbleView.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -8),
             
-            messageLabel.topAnchor.constraint(equalTo: attachmentsTableView.bottomAnchor, constant: 4),
+            messageLabel.topAnchor.constraint(equalTo: attachmentsTableView.bottomAnchor, constant: 6),
             messageLabel.leadingAnchor.constraint(equalTo: bubbleView.leadingAnchor, constant: 10),
             messageLabel.trailingAnchor.constraint(equalTo: bubbleView.trailingAnchor, constant: -10),
             
@@ -152,7 +152,8 @@ final class PSDAnnouncementCell: UITableViewCell {
         contentView.setNeedsLayout()
         contentView.layoutIfNeeded()
         let announcement = vm.announcement
-        messageLabel.text = announcement.text
+//        messageLabel.text = announcement.text
+        messageLabel.attributedText = announcement.content?.toAttributedString()
         
         timeLabel.text = announcement.date.announcementTime()
 

@@ -97,7 +97,7 @@ enum MediaType: Int, Codable {
 
 // MARK: - Rich Text
 
-struct RichTextDocument: Codable {
+struct RichTextDocument: Codable, Hashable {
     let version: Int
     let richTextBlocks: [RichTextBlock]?
 
@@ -107,30 +107,46 @@ struct RichTextDocument: Codable {
     }
 }
 
-struct RichTextBlock: Codable {
+struct RichTextBlock: Codable, Hashable {
     let type: BlockType
+    let code: String? // Содержание блока с кодом (перевод строки через \n). Задается только при Type=Code.
+    let codeLang: Int? // Формат подсветки кода в блоке с кодом. - пока не поддерживается
     let richTextInlines: [RichTextInline]
 
     enum CodingKeys: String, CodingKey {
         case type
+        case code = "Code"
+        case codeLang = "CodeLang"
         case richTextInlines = "rich_text_inlines"
     }
 }
 
 enum BlockType: String, Codable {
     case paragraph = "Paragraph"
+    case code = "Code"
+    case bulletListItem = "BulletListItem"
+    case numberListItem = "NumberListItem"
+    case quote = "Quote"
 }
 
-struct RichTextInline: Codable {
+struct RichTextInline: Codable, Hashable {
     let type: InlineType
-    let string: String
-    let marks: String?
+    let string: String?
+    let marks: String?//MarkType?
+    let url: String?
+}
+
+enum MarkType: String, Codable {
+    case none = "None"
+    case bold = "Bold"
+    case italic = "Italic"
+    case code = "Code"
+    case underline = "Underline"
+    case strikethrough = "Strikethrough"
 }
 
 enum InlineType: String, Codable {
     case text = "Text"
+    case lineBreak = "LineBreak"
     case link = "Link"
 }
-
-// пока заглушка
-struct Mark: Codable {}

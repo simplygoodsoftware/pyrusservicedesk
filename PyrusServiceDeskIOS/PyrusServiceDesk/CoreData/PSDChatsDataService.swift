@@ -994,6 +994,8 @@ extension PSDChatsDataService: PSDChatsDataServiceProtocol {
     
     // MARK: - Announcements
 
+    // MARK: - Announcements
+
     func saveAnnouncementsModels(with announcements: [PSDAnnouncement], completion: ((Result<Void, Error>) -> Void)?) {
         DispatchQueue.global().async { [weak self] in
             self?.coreDataService.save(completion: completion) { [weak self] context in
@@ -1003,7 +1005,7 @@ extension PSDChatsDataService: PSDChatsDataServiceProtocol {
             }
         }
     }
-    
+
     func saveAnnouncements(
         with announcements: [PSDAnnouncement],
         context: NSManagedObjectContext
@@ -1050,109 +1052,176 @@ extension PSDChatsDataService: PSDChatsDataServiceProtocol {
             dbAnn.isRead = model.isRead
             dbAnn.text = model.text
             dbAnn.orderIndex = Int64(model.orderIndex)
+            dbAnn.attributeString = model.attributedString
+
+            // Rich Text Content
+            // У блоков и инлайнов нет уникальных ID, поэтому
+            // при обновлении удаляем старые и создаём заново
+            if let existingBlocks = dbAnn.richTextBlocks {
+                for case let block as DBRichTextBlock in existingBlocks {
+                    if let inlines = block.inlines {
+                        for case let inline as DBRichTextInline in inlines {
+                            context.delete(inline)
+                        }
+                    }
+                    context.delete(block)
+                }
+            }
+
+            if let content = model.content {
+                dbAnn.richTextVersion = Int16(content.version)
+
+                if let blocks = content.richTextBlocks {
+                    for block in blocks {
+                        let dbBlock = DBRichTextBlock(context: context)
+                        dbBlock.type = block.type.rawValue
+                        dbBlock.code = block.code
+                        if let codeLang = block.codeLang {
+                            dbBlock.codeLangRaw = Int16(codeLang)
+                        }
+
+                        for inline in block.richTextInlines {
+                            let dbInline = DBRichTextInline(context: context)
+                            dbInline.type = inline.type.rawValue
+                            dbInline.text = inline.string
+                            dbInline.marks = inline.marks
+                            dbInline.url = inline.url
+
+                            dbBlock.addToInlines(dbInline)
+                        }
+
+                        dbAnn.addToRichTextBlocks(dbBlock)
+                    }
+                }
+            } else {
+                dbAnn.richTextVersion = 0
+            }
 
             // Вложения
             for a in model.attachments {
                 let attId = a.id
                 let dbAtt = attachmentsById[attId] ?? DBAnnouncementAttachment(context: context)
-                
+
                 dbAtt.id = attId
                 dbAtt.name = a.name
                 dbAtt.size = Int64(a.size)
                 dbAtt.media = a.media
                 dbAtt.width = Int64(a.width)
                 dbAtt.height = Int64(a.height)
-                
+
                 dbAnn.addToAttachments(dbAtt)
             }
         }
     }
-    
+
     func getAllAnnouncements(completion: @escaping ([PSDAnnouncement]) -> Void) {
         DispatchQueue.global(qos: .userInitiated).async { [weak self] in
             guard let self else { return }
-            
+
             do {
                 let dbAnns = try coreDataService.fetchAnnouncements()
-                
+
                 let anns: [PSDAnnouncement] = dbAnns.compactMap { db in
-                    var ann = PSDAnnouncement(
-                        id: db.id ?? "",
-                        text: db.text,
-                        date: db.date ?? Date(),
-                        isRead: db.isRead,
-                        attachments: [],
-                        appId: db.appId ?? "",
-                        orderIndex: Int(db.orderIndex)
-                    )
-                    
-                    if let dbAtts = db.attachments?.array as? [DBAnnouncementAttachment] {
-                        let atts: [PSDAnnouncementAttachment] = dbAtts.map { dba in
-                            let a = PSDAnnouncementAttachment(
-                                id: dba.id ?? "",
-                                name: dba.name,
-                                size: Int(dba.size),
-                                width: Int(dba.width),
-                                height: Int(dba.height),
-                                media: dba.media
-                            )
-                            return a
-                        }
-                        ann.attachments = atts
-                    }
-                    
-                    return ann
+                    self.mapDBAnnouncement(db)
                 }
-                
+
                 DispatchQueue.main.async { completion(anns) }
-                
+
             } catch {
                 print("Error fetching announcements: \(error)")
                 DispatchQueue.main.async { completion([]) }
             }
         }
     }
-        
+
     func getAllAnnouncements() -> [PSDAnnouncement] {
         do {
             let dbAnns = try coreDataService.fetchAnnouncements()
-            
+
             let anns: [PSDAnnouncement] = dbAnns.compactMap { db in
-                var ann = PSDAnnouncement(
-                    id: db.id ?? "",
-                    text: db.text,
-                    date: db.date ?? Date(),
-                    isRead: db.isRead,
-                    attachments: [],
-                    appId: db.appId ?? "",
-                    orderIndex: Int(db.orderIndex)
-                )
-                
-                if let dbAtts = db.attachments?.array as? [DBAnnouncementAttachment] {
-                    let atts: [PSDAnnouncementAttachment] = dbAtts.map { dba in
-                        let a = PSDAnnouncementAttachment(
-                            id: dba.id ?? "",
-                            name: dba.name,
-                            size: Int(dba.size),
-                            width: Int(dba.width),
-                            height: Int(dba.height),
-                            media: dba.media
-                        )
-                        return a
-                    }
-                    ann.attachments = atts
-                }
-                
-                return ann
+                mapDBAnnouncement(db)
             }
-            
+
             return anns
-            
+
         } catch {
             print("Error fetching announcements: \(error)")
             return []
         }
     }
+
+    // MARK: - Private Mapping
+
+    private func mapDBAnnouncement(_ db: DBAnnouncement) -> PSDAnnouncement {
+        // Attachments
+        var attachments: [PSDAnnouncementAttachment] = []
+        if let dbAtts = db.attachments?.array as? [DBAnnouncementAttachment] {
+            attachments = dbAtts.map { dba in
+                PSDAnnouncementAttachment(
+                    id: dba.id ?? "",
+                    name: dba.name,
+                    size: Int(dba.size),
+                    width: Int(dba.width),
+                    height: Int(dba.height),
+                    media: dba.media
+                )
+            }
+        }
+
+        // Rich Text Content
+        var richTextDocument: RichTextDocument? = nil
+
+        if let dbBlocks = db.richTextBlocks?.array as? [DBRichTextBlock], !dbBlocks.isEmpty {
+            let blocks: [RichTextBlock] = dbBlocks.compactMap { dbBlock in
+                guard
+                    let typeRaw = dbBlock.type,
+                    let blockType = BlockType(rawValue: typeRaw)
+                else { return nil }
+
+                var inlines: [RichTextInline] = []
+                if let dbInlines = dbBlock.inlines?.array as? [DBRichTextInline] {
+                    inlines = dbInlines.compactMap { dbInline in
+                        guard
+                            let inlineTypeRaw = dbInline.type,
+                            let inlineType = InlineType(rawValue: inlineTypeRaw)
+                        else { return nil }
+
+                        return RichTextInline(
+                            type: inlineType,
+                            string: dbInline.text,
+                            marks: dbInline.marks,
+                            url: dbInline.url
+                        )
+                    }
+                }
+
+                return RichTextBlock(
+                    type: blockType,
+                    code: dbBlock.code,
+                    codeLang: dbBlock.codeLangRaw != 0 ? Int(dbBlock.codeLangRaw) : nil,
+                    richTextInlines: inlines
+                )
+            }
+
+            richTextDocument = RichTextDocument(
+                version: Int(db.richTextVersion),
+                richTextBlocks: blocks
+            )
+        }
+
+        return PSDAnnouncement(
+            id: db.id ?? "",
+            text: db.text,
+            date: db.date ?? Date(),
+            isRead: db.isRead,
+            attachments: attachments,
+            appId: db.appId ?? "",
+            orderIndex: Int(db.orderIndex),
+            content: richTextDocument,
+            attributedString: db.attributeString
+        )
+    }
+
 
 
 }

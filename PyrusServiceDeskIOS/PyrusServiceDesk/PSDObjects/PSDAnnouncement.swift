@@ -7,6 +7,8 @@ struct PSDAnnouncement: Hashable {
     var attachments: [PSDAnnouncementAttachment]
     let appId: String
     var orderIndex: Int = 0
+    var content: RichTextDocument?
+    var attributedString: NSAttributedString? = nil
 }
 
 struct PSDAnnouncementAttachment: Hashable {

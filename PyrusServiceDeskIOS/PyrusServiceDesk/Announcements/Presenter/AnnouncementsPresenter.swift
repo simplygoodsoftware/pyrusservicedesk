@@ -65,7 +65,8 @@ private extension AnnouncementsPresenter {
                 date: announcement.date,
                 isRead: isRead,
                 attachments: announcement.attachments,
-                appId: announcement.appId
+                appId: announcement.appId,
+                content: announcement.content
             )
             let client = PyrusServiceDesk.clients.first(where: { $0.clientId == announcement.appId })
             let model = PSDAnnouncementCellModel(announcement: ann, client: client)
@@ -108,7 +109,8 @@ private extension AnnouncementsPresenter {
                 date: announcement.date,
                 isRead: false,
                 attachments: announcement.attachments,
-                appId: announcement.appId
+                appId: announcement.appId,
+                content: announcement.content
             )
             let client = PyrusServiceDesk.clients.first(where: { $0.clientId == announcement.appId })
             let model = PSDAnnouncementCellModel(announcement: ann, client: client)
@@ -126,7 +128,8 @@ private extension AnnouncementsPresenter {
                 date: announcement.date,
                 isRead: true,
                 attachments: announcement.attachments,
-                appId: announcement.appId
+                appId: announcement.appId,
+                content: announcement.content
             )
             let client = PyrusServiceDesk.clients.first(where: { $0.clientId == announcement.appId })
             let model = PSDAnnouncementCellModel(announcement: ann, client: client)
