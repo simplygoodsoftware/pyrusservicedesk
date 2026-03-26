@@ -352,7 +352,7 @@ import UIKit
     }
     
     @objc public static func subscribeToGogEvents(_ subscriber: LogEvents){
-        PyrusLogger.shared.logEvent("Did add logs subscriber.")
+        PyrusLogger.shared.logEvent("Did add logs subscriber. ")
         PyrusServiceDesk.logEvent = subscriber
     }
     

@@ -74,6 +74,7 @@ private extension PSDChatRouter {
             CATransaction.begin()
             CATransaction.setCompletionBlock({
                 PyrusServiceDesk.stopCallback?.onStop()
+                PyrusLogger.shared.logEvent("Chat closed ")
                 PyrusServiceDeskController.clean()
                 PyrusServiceDesk.isStarted = false
             })

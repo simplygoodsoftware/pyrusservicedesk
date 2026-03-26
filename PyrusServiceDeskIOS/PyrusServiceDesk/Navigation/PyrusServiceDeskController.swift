@@ -155,6 +155,7 @@ class PyrusServiceDeskController: PSDNavigationController, PSDMainController {
         if self.parent == nil {
             self.dismiss(animated: animated, completion: {
                 PyrusServiceDesk.stopCallback?.onStop()
+                PyrusLogger.shared.logEvent("Chat closed ")
                 PyrusServiceDeskController.clean()
                 PyrusServiceDesk.isStarted = false
             })
@@ -164,6 +165,7 @@ class PyrusServiceDeskController: PSDNavigationController, PSDMainController {
             let fake = self.parent
             fake?.dismiss(animated: animated, completion: {
                 PyrusServiceDesk.stopCallback?.onStop()
+                PyrusLogger.shared.logEvent("Chat closed ")
                 PyrusServiceDeskController.clean()
                 PyrusServiceDesk.isStarted = false
             })

@@ -179,6 +179,7 @@ class TicketCommandRepository {
     }
     
     func add(command: TicketCommand, completion: ((Error?) -> Void)? = nil, needSync: Bool = true) {
+        logAddCommand(command: command)
         if command.type == TicketCommandType.setPushToken.rawValue {
             var idsForDelete = [String]()
             for cmnd in commandsCache ?? [] {
@@ -200,6 +201,12 @@ class TicketCommandRepository {
                 }
             }
         }
+    }
+    
+    private func logAddCommand(command: TicketCommand) {
+        let ticketId = command.params.ticketId == nil ? "nil" : "\(command.params.ticketId ?? 0)"
+        let messageId = command.params.messageId == nil ? "nil" : "\(command.params.messageId ?? 0)"
+        PyrusLogger.shared.logEvent("Add command: app_id = \(command.appId ?? "nil"), userId = \(command.userId ?? "nil"), commandId = \(command.commandId), type = \(command.type), ticketId = \(ticketId), messageId = \(messageId), requestNewTicket = \(command.params.requestNewTicket ?? false) ")
     }
     
     func deleteCommand(withId commandId: String, serverTicketId: Int? = nil, completion: ((Error?) -> Void)? = nil) {

@@ -32,6 +32,7 @@ class PSDChatViewController: PSDViewController, PSDMainController {
         navigationController?.popViewController(animated: true)
         PyrusLogger.shared.saveLocalLogToDisk()
         PyrusServiceDesk.stopCallback?.onStop()
+        PyrusLogger.shared.logEvent("Chat closed ")
         PyrusServiceDeskController.clean()
         PyrusServiceDesk.isStarted = false
     }
@@ -329,7 +330,7 @@ class PSDChatViewController: PSDViewController, PSDMainController {
     override func viewWillDisappear(_ animated: Bool) {
         super.viewWillDisappear(animated)
         NotificationCenter.default.removeObserver(self)
-        EventsLogger.logEvent(.resignFirstResponder, additionalInfo: "hideAllKeyboard() called in viewWillDisappear")
+//        EventsLogger.logEvent(.resignFirstResponder, additionalInfo: "hideAllKeyboard() called in viewWillDisappear")
         if !PyrusServiceDesk.multichats {
             hideAllKeyboard()
             messageInputView.isHidden = true
@@ -597,7 +598,7 @@ class PSDChatViewController: PSDViewController, PSDMainController {
     
     @objc private func closeButtonAction() {
         router.route(to: .close)
-        EventsLogger.logEvent(.resignFirstResponder, additionalInfo: "hideAllKeyboard() called after press on back button")
+//        EventsLogger.logEvent(.resignFirstResponder, additionalInfo: "hideAllKeyboard() called after press on back button")
         UIView.performWithoutAnimation {
             hideAllKeyboard()
         }

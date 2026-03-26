@@ -209,15 +209,16 @@ struct PSDGetChats {
         var chats: [PSDChat] = []
         for i in 0..<response.count {
             let dic: [String: Any] = response[i] as! [String: Any]
-            var date: Date = dic.stringOfKey(createdAtParameter).dateFromString(format: "yyyy-MM-dd'T'HH:mm:ss'Z'")
+            let ticketId = dic["ticket_id"] as? Int
+            var date: Date = dic.stringOfKey(createdAtParameter).dateFromString(format: "yyyy-MM-dd'T'HH:mm:ss'Z'", callerType: .chat, id: "\(ticketId ?? 0)")
             var lastMessage: PSDMessage?
             if let lastComment = dic["last_comment"] as? [String: Any] {
-                date = lastComment.stringOfKey(createdAtParameter).dateFromString(format: "yyyy-MM-dd'T'HH:mm:ss'Z'")
-                lastMessage = PSDMessage.init(text: lastComment.stringOfKey("body"), attachments:nil, messageId: lastComment.stringOfKey(commentIdParameter), owner: nil, date: date)
+                let messageId = lastComment.stringOfKey(commentIdParameter)
+                date = lastComment.stringOfKey(createdAtParameter).dateFromString(format: "yyyy-MM-dd'T'HH:mm:ss'Z'", callerType: .lastMessage, id: "\(messageId)")
+                lastMessage = PSDMessage.init(text: lastComment.stringOfKey("body"), attachments:nil, messageId: messageId, owner: nil, date: date)
             }
             
             let userId = dic["user_id"] as? String ?? ""
-            let ticketId = dic["ticket_id"] as? Int
             var messages: [PSDMessage] = [PSDMessage]()
             let newMessages = PSDGetChat.generateMessages(from: dic["comments"] as? NSArray ?? NSArray())
             
