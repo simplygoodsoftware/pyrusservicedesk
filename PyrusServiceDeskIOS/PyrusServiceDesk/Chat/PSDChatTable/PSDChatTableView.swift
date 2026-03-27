@@ -194,6 +194,8 @@ class PSDChatTableView: PSDTableView {
         }
         
         headerType = .buttons
+        setNeedsLayout()
+        layoutIfNeeded()
     }
     
     func updateOperatorTimeLabel(time: String?) {
