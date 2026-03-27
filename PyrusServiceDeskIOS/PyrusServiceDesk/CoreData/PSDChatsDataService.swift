@@ -645,13 +645,15 @@ extension PSDChatsDataService: PSDChatsDataServiceProtocol {
                     attachmentsData = attachments
                 }
                 
+                let ticketId = dbCommand.ticketId == 0 ? nil : Int(dbCommand.ticketId)
+                let commandType = TicketCommandType(rawValue: Int(dbCommand.type)) ?? .readTicket
                 let command = TicketCommand(
                     commandId: dbCommand.id ?? "",
-                    type: TicketCommandType(rawValue: Int(dbCommand.type)) ?? .readTicket,
+                    type: commandType,
                     appId: dbCommand.appId,
                     userId: dbCommand.userId,
                     params: TicketCommandParams(
-                        ticketId: Int(dbCommand.ticketId),
+                        ticketId: ticketId,
                         appId: dbCommand.appId,
                         requestNewTicket: dbCommand.requestNewTicket,
                         userId: dbCommand.userId,
@@ -665,7 +667,7 @@ extension PSDChatsDataService: PSDChatsDataServiceProtocol {
                         ratingComment: dbCommand.ratingComment,
                         date: dbCommand.date,
                         messageClientId: dbCommand.clientId,
-                        extraFields: dbCommand.requestNewTicket ? PyrusServiceDesk.fieldsData : nil
+                        extraFields: commandType == .createComment ? PyrusServiceDesk.fieldsData : nil
                     )
                 )
                 return command

@@ -128,7 +128,8 @@ struct PSDMessageSend {
         
         let commandId = messageToPass.commandId ?? UUID().uuidString
         delegate?.addMessageToPass(message: messageToPass, commandId: commandId)
-        let requestNewTicket = (messageToPass.ticketId == 0 || messageToPass.requestNewTicket)
+        let requestNewTicket = messageToPass.requestNewTicket//(messageToPass.ticketId == 0 || messageToPass.requestNewTicket)
+        let ticketId = messageToPass.ticketId == 0 ? nil : messageToPass.ticketId
         var attachmentsData: [AttachmentData]?
         
         if let attachments = messageToPass.attachments {
@@ -138,7 +139,7 @@ struct PSDMessageSend {
                 attachmentsData?.append(attach)
             }
         }
-        let params = TicketCommandParams(ticketId: messageToPass.ticketId, appId:  PyrusServiceDesk.currentClientId ?? PyrusServiceDesk.clientId, requestNewTicket: requestNewTicket, userId: PyrusServiceDesk.currentUserId ?? PyrusServiceDesk.customUserId, message: messageToPass.text, attachments: attachmentsData, rating: messageToPass.rating, ratingComment: messageToPass.ratingComment, date: messageToPass.date, messageClientId: messageToPass.clientId)
+        let params = TicketCommandParams(ticketId: ticketId, appId:  PyrusServiceDesk.currentClientId ?? PyrusServiceDesk.clientId, requestNewTicket: requestNewTicket, userId: PyrusServiceDesk.currentUserId ?? PyrusServiceDesk.customUserId, message: messageToPass.text, attachments: attachmentsData, rating: messageToPass.rating, ratingComment: messageToPass.ratingComment, date: messageToPass.date, messageClientId: messageToPass.clientId)
         if params.rating != nil {
             params.message = nil
         }

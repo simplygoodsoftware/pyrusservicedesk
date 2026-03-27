@@ -222,7 +222,8 @@ private extension SyncManager {
         if let commandsResult {
             self.commandsResult = commandsResult.sorted(by: { $0.commentId ?? Int.max < $1.commentId ?? 0 })
             do {
-                let jsonData = try JSONEncoder().encode(commandsResult)
+                let commandsWithTicketIds = commandsResult.filter({ $0.ticketId != nil && $0.commentId != nil })
+                let jsonData = try JSONEncoder().encode(commandsWithTicketIds)
                 NotificationCenter.default.post(name: SyncManager.commandsResultNotification, object: nil, userInfo: ["tickets": jsonData])
             } catch { }
             
