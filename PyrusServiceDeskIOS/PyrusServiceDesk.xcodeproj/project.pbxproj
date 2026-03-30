@@ -64,6 +64,8 @@
 		1E50691D2D07459C001A9E2D /* ClosedTicketsCellModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1E50691C2D07459C001A9E2D /* ClosedTicketsCellModel.swift */; };
 		1E50691F2D0745A5001A9E2D /* PSDChatsViewModelProtocol.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1E50691E2D0745A5001A9E2D /* PSDChatsViewModelProtocol.swift */; };
 		1E5069252D15AFE9001A9E2D /* PSDChatSectionModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1E5069232D15AFE9001A9E2D /* PSDChatSectionModel.swift */; };
+		1E7535CF2F7A44A100B7F20D /* PSDLogHelper.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1E7535CE2F7A44A100B7F20D /* PSDLogHelper.swift */; };
+		1E7535D12F7A44AA00B7F20D /* PSDLogService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1E7535D02F7A44AA00B7F20D /* PSDLogService.swift */; };
 		1E809C692E3A67950097E311 /* AudioRepository.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1E809C682E3A67950097E311 /* AudioRepository.swift */; };
 		1E809C6B2E3A67A60097E311 /* CacheVersionManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1E809C6A2E3A67A60097E311 /* CacheVersionManager.swift */; };
 		1E809C6D2E3A67B00097E311 /* RateManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1E809C6C2E3A67B00097E311 /* RateManager.swift */; };
@@ -477,6 +479,8 @@
 		1E50691C2D07459C001A9E2D /* ClosedTicketsCellModel.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ClosedTicketsCellModel.swift; sourceTree = "<group>"; };
 		1E50691E2D0745A5001A9E2D /* PSDChatsViewModelProtocol.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PSDChatsViewModelProtocol.swift; sourceTree = "<group>"; };
 		1E5069232D15AFE9001A9E2D /* PSDChatSectionModel.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PSDChatSectionModel.swift; sourceTree = "<group>"; };
+		1E7535CE2F7A44A100B7F20D /* PSDLogHelper.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PSDLogHelper.swift; sourceTree = "<group>"; };
+		1E7535D02F7A44AA00B7F20D /* PSDLogService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PSDLogService.swift; sourceTree = "<group>"; };
 		1E809C682E3A67950097E311 /* AudioRepository.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AudioRepository.swift; sourceTree = "<group>"; };
 		1E809C6A2E3A67A60097E311 /* CacheVersionManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CacheVersionManager.swift; sourceTree = "<group>"; };
 		1E809C6C2E3A67B00097E311 /* RateManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RateManager.swift; sourceTree = "<group>"; };
@@ -1795,6 +1799,8 @@
 			children = (
 				4BBB9B05249D152900059A23 /* LogEvents.swift */,
 				4BB6CDC225597E4C004C680A /* PyrusLogger.swift */,
+				1E7535CE2F7A44A100B7F20D /* PSDLogHelper.swift */,
+				1E7535D02F7A44AA00B7F20D /* PSDLogService.swift */,
 			);
 			path = Logs;
 			sourceTree = "<group>";
@@ -2250,6 +2256,7 @@
 				4B873BB6224BCA8100A96E93 /* PSDPushToken.swift in Sources */,
 				4B7F139022155F62007C6358 /* String+Date.swift in Sources */,
 				1E1279BF2CC271440080CB19 /* PSDUserInfo.swift in Sources */,
+				1E7535CF2F7A44A100B7F20D /* PSDLogHelper.swift in Sources */,
 				1E809CE82E3A69D50097E311 /* PSDChatDiffableDataSource.swift in Sources */,
 				1E1279CF2CC271C00080CB19 /* PSDChatsDiffableDataSource.swift in Sources */,
 				1E3716F02E608E9B003EACE1 /* PSDTextRateView.swift in Sources */,
@@ -2312,6 +2319,7 @@
 				4B9B0BBB2266344200090DB5 /* PSDAttachmentPreviewErrorView.swift in Sources */,
 				1E5069252D15AFE9001A9E2D /* PSDChatSectionModel.swift in Sources */,
 				1E5068A02CEB146F001A9E2D /* PSDChatPresenterProtocol.swift in Sources */,
+				1E7535D12F7A44AA00B7F20D /* PSDLogService.swift in Sources */,
 				4BCEB433220C150C008B29B6 /* UIImage+color.swift in Sources */,
 				7B1E8D58250665F800C1E5AC /* PSDInfoView.swift in Sources */,
 				1E1279D62CC271C90080CB19 /* ChatsRouter.swift in Sources */,
