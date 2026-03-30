@@ -20,28 +20,19 @@ import io.mockk.every
 import io.mockk.mockk
 import io.mockk.unmockkAll
 import io.mockk.unmockkStatic
-import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.Job
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.cancelChildren
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.launch
 import kotlinx.coroutines.test.StandardTestDispatcher
-import kotlinx.coroutines.test.TestDispatcher
-import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.advanceTimeBy
 import kotlinx.coroutines.test.resetMain
 import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
-import kotlinx.coroutines.test.setMain
-import kotlinx.coroutines.yield
-import org.bouncycastle.util.test.SimpleTest.runTest
 import org.junit.After
 import org.junit.Before
 import org.junit.Test
-import kotlin.coroutines.ContinuationInterceptor
 import kotlin.time.Duration.Companion.seconds
 
 @OptIn(ExperimentalCoroutinesApi::class)
@@ -105,7 +96,7 @@ class AutoRefreshFeatureTest {
         coEvery { liveUpdates.isStartedFlow() } returns isStartedFlow
         coEvery { preferencesManager.getLastActiveTimeFlow() } returns lastActiveTimeFlow
 
-        val initialInterval = MILLISECONDS_IN_MINUTE * 5L
+        val initialInterval = MILLISECONDS_IN_SECOND * 5L
         every { liveUpdates.getTicketsUpdateInterval(any()) } returns initialInterval
 
         val autoRefreshFeatureFactory = AutoRefreshFeatureFactory(
@@ -148,8 +139,8 @@ class AutoRefreshFeatureTest {
         coEvery { liveUpdates.isStartedFlow() } returns isStartedFlow
         coEvery { preferencesManager.getLastActiveTimeFlow() } returns lastActiveTimeFlow
 
-        val initialInterval = MILLISECONDS_IN_MINUTE * 5L
-        val checkInterval = MILLISECONDS_IN_MINUTE * 20L
+        val initialInterval = MILLISECONDS_IN_SECOND * 5L
+        val checkInterval = MILLISECONDS_IN_SECOND * 20L
         every { liveUpdates.getTicketsUpdateInterval(any()) } returns initialInterval
 
         val autoRefreshFeatureFactory = AutoRefreshFeatureFactory(
@@ -186,8 +177,8 @@ class AutoRefreshFeatureTest {
         coEvery { liveUpdates.isStartedFlow() } returns isStartedFlow
         coEvery { preferencesManager.getLastActiveTimeFlow() } returns lastActiveTimeFlow
 
-        val initialInterval = MILLISECONDS_IN_MINUTE * 15L
-        val checkInterval = MILLISECONDS_IN_MINUTE * 15L * 2
+        val initialInterval = MILLISECONDS_IN_SECOND * 15L
+        val checkInterval = MILLISECONDS_IN_SECOND * 15L * 2
         every { liveUpdates.getTicketsUpdateInterval(any()) } returns initialInterval
 
         val autoRefreshFeatureFactory = AutoRefreshFeatureFactory(
@@ -224,8 +215,8 @@ class AutoRefreshFeatureTest {
         coEvery { liveUpdates.isStartedFlow() } returns isStartedFlow
         coEvery { preferencesManager.getLastActiveTimeFlow() } returns lastActiveTimeFlow
 
-        val initialInterval = MILLISECONDS_IN_MINUTE * 60L
-        val checkInterval = MILLISECONDS_IN_MINUTE * 60L * 2
+        val initialInterval = MILLISECONDS_IN_SECOND * 60L
+        val checkInterval = MILLISECONDS_IN_SECOND * 60L * 2
         every { liveUpdates.getTicketsUpdateInterval(any()) } returns initialInterval
 
         val autoRefreshFeatureFactory = AutoRefreshFeatureFactory(
@@ -269,7 +260,7 @@ class AutoRefreshFeatureTest {
         PyrusServiceDesk.updateSdIsOpen(true)
 
         val interval = getTestTicketsUpdateInterval(calendar.timeInMillis)
-        val checkInterval = MILLISECONDS_IN_MINUTE * 15L * 2
+        val checkInterval = MILLISECONDS_IN_SECOND * 15L * 2
         every { liveUpdates.getTicketsUpdateInterval(any()) } returns interval
 
         val autoRefreshFeatureFactory = AutoRefreshFeatureFactory(
@@ -296,9 +287,8 @@ class AutoRefreshFeatureTest {
      * sdOpenFlow.value = true
      * isStartedFlow.value = false
      */
-    //TODO wtf??
     @Test
-    fun whenSdIsOpenShouldStartWithNOUPDATESInterval() = runTest {
+    fun whenSdIsOpenShouldStartEvenIfLastActiveTimeIsMoreThen3DaysAgo() = runTest {
         val testDispatcher = StandardTestDispatcher(testScheduler)
         clearAllMocks()
         unmockkAll()
@@ -313,7 +303,7 @@ class AutoRefreshFeatureTest {
         PyrusServiceDesk.updateSdIsOpen(true)
 
         val interval = getTestTicketsUpdateInterval(calendar.timeInMillis)
-        val checkInterval = MILLISECONDS_IN_MINUTE * 60L * 6
+        val checkInterval = MILLISECONDS_IN_SECOND * 60L * 6
         every { liveUpdates.getTicketsUpdateInterval(any()) } returns interval
 
         val autoRefreshFeatureFactory = AutoRefreshFeatureFactory(
@@ -355,7 +345,7 @@ class AutoRefreshFeatureTest {
         PyrusServiceDesk.updateSdIsOpen(false)
 
         var interval = getTestTicketsUpdateInterval(calendar.timeInMillis)
-        val checkInterval = MILLISECONDS_IN_MINUTE * 60L * 6
+        val checkInterval = MILLISECONDS_IN_SECOND * 60L * 6
         every { liveUpdates.getTicketsUpdateInterval(any()) } returns interval
         val autoRefreshFeatureFactory = AutoRefreshFeatureFactory(
                 storeFactory = storeFactory,
@@ -402,7 +392,7 @@ class AutoRefreshFeatureTest {
         PyrusServiceDesk.updateSdIsOpen(false)
 
         var interval = getTestTicketsUpdateInterval(calendar.timeInMillis)
-        val checkInterval = MILLISECONDS_IN_MINUTE * 15L * 2 + MILLISECONDS_IN_MINUTE * 5L
+        val checkInterval = MILLISECONDS_IN_SECOND * 15L * 2 + MILLISECONDS_IN_SECOND * 5L
         every { liveUpdates.getTicketsUpdateInterval(any()) } returns interval
 
         val autoRefreshFeatureFactory = AutoRefreshFeatureFactory(
@@ -420,7 +410,7 @@ class AutoRefreshFeatureTest {
         PyrusServiceDesk.updateSdIsOpen(true)
         interval = getTestTicketsUpdateInterval(calendar.timeInMillis)
         every { liveUpdates.getTicketsUpdateInterval(any()) } returns interval
-        val checkInterval2 = MILLISECONDS_IN_MINUTE * 2L
+        val checkInterval2 = MILLISECONDS_IN_SECOND * 2L
         advanceTimeBy(checkInterval2)
         runCurrent()
         coVerify(exactly = 4) { repository.sync() }
@@ -450,7 +440,7 @@ class AutoRefreshFeatureTest {
         coEvery { preferencesManager.getLastActiveTimeFlow() } returns lastActiveTimeFlow
 
         var interval = getTestTicketsUpdateInterval(NO_UPDATES)
-        val checkInterval = MILLISECONDS_IN_MINUTE * 60L * 2
+        val checkInterval = MILLISECONDS_IN_SECOND * 60L * 2
         every { liveUpdates.getTicketsUpdateInterval(any()) } returns interval
 
         val autoRefreshFeatureFactory = AutoRefreshFeatureFactory(
@@ -494,7 +484,7 @@ class AutoRefreshFeatureTest {
         coEvery { preferencesManager.getLastActiveTimeFlow() } returns lastActiveTimeFlow
 
         var interval = getTestTicketsUpdateInterval(calendar.timeInMillis)
-        val checkInterval = MILLISECONDS_IN_MINUTE * 15L * 2 + MILLISECONDS_IN_MINUTE * 5L
+        val checkInterval = MILLISECONDS_IN_SECOND * 15L * 2 + MILLISECONDS_IN_SECOND * 5L
         every { liveUpdates.getTicketsUpdateInterval(any()) } returns interval
 
         val autoRefreshFeatureFactory = AutoRefreshFeatureFactory(
@@ -512,7 +502,7 @@ class AutoRefreshFeatureTest {
         PyrusServiceDesk.updateSdIsOpen(true)
         interval = getTestTicketsUpdateInterval(calendar.timeInMillis)
         every { liveUpdates.getTicketsUpdateInterval(any()) } returns interval
-        val checkInterval2 = MILLISECONDS_IN_MINUTE * 2L
+        val checkInterval2 = MILLISECONDS_IN_SECOND * 2L
         advanceTimeBy(checkInterval2)
         runCurrent()
         coVerify(exactly = 3) { repository.sync() }
@@ -544,7 +534,7 @@ class AutoRefreshFeatureTest {
         coEvery { preferencesManager.getLastActiveTimeFlow() } returns lastActiveTimeFlow
 
         var interval = getTestTicketsUpdateInterval(calendar.timeInMillis)
-        val checkInterval = MILLISECONDS_IN_MINUTE * 15L * 2
+        val checkInterval = MILLISECONDS_IN_SECOND * 15L * 2
         every { liveUpdates.getTicketsUpdateInterval(any()) } returns interval
 
         val autoRefreshFeatureFactory = AutoRefreshFeatureFactory(
@@ -593,7 +583,7 @@ class AutoRefreshFeatureTest {
         coEvery { preferencesManager.getLastActiveTimeFlow() } returns lastActiveTimeFlow
 
         var interval = getTestTicketsUpdateInterval(calendar.timeInMillis)
-        val checkInterval = MILLISECONDS_IN_MINUTE * 15L * 2
+        val checkInterval = MILLISECONDS_IN_SECOND * 15L * 2
         every { liveUpdates.getTicketsUpdateInterval(any()) } returns interval
 
         val autoRefreshFeatureFactory = AutoRefreshFeatureFactory(
@@ -612,7 +602,7 @@ class AutoRefreshFeatureTest {
         interval = getTestTicketsUpdateInterval(newLastActiveTime)
         every { liveUpdates.getTicketsUpdateInterval(any()) } returns interval
         lastActiveTimeFlow.value = newLastActiveTime
-        advanceTimeBy(MILLISECONDS_IN_MINUTE * 15L)
+        advanceTimeBy(MILLISECONDS_IN_SECOND * 15L)
         runCurrent()
         coVerify(exactly = 7) { repository.sync() }
 
@@ -640,8 +630,8 @@ class AutoRefreshFeatureTest {
         coEvery { liveUpdates.isStartedFlow() } returns isStartedFlow
         coEvery { preferencesManager.getLastActiveTimeFlow() } returns lastActiveTimeFlow
 
-        var interval = MILLISECONDS_IN_MINUTE * 5L
-        val checkInterval = MILLISECONDS_IN_MINUTE * 30L
+        var interval = MILLISECONDS_IN_SECOND * 5L
+        val checkInterval = MILLISECONDS_IN_SECOND * 30L
         every { liveUpdates.getTicketsUpdateInterval(any()) } returns interval
 
         val autoRefreshFeatureFactory = AutoRefreshFeatureFactory(
@@ -656,10 +646,10 @@ class AutoRefreshFeatureTest {
         runCurrent()
         coVerify(exactly = 7) { repository.sync() }
 
-        interval = MILLISECONDS_IN_MINUTE * 15L
+        interval = MILLISECONDS_IN_SECOND * 15L
         every { liveUpdates.getTicketsUpdateInterval(any()) } returns interval
 
-        advanceTimeBy(MILLISECONDS_IN_MINUTE * 15L)
+        advanceTimeBy(MILLISECONDS_IN_SECOND * 15L)
         runCurrent()
         coVerify(exactly = 8) { repository.sync() }
 
