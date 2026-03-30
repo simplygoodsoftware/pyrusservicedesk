@@ -62,12 +62,6 @@ class AutoRefreshFeatureTest {
 
     }
 
-    @After
-    fun tearDown() {
-        Dispatchers.resetMain()
-        unmockkStatic(PyrusServiceDesk.Companion::class)
-    }
-
     internal fun getTestTicketsUpdateInterval(lastActiveTime: Long): Long {
         val diff = System.currentTimeMillis() - lastActiveTime
         return when {
