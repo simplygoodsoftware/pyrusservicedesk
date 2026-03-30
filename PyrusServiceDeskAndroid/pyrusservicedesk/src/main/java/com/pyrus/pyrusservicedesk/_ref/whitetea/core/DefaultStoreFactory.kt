@@ -4,6 +4,7 @@ import android.util.Log
 import com.pyrus.pyrusservicedesk._ref.whitetea.core.logic.L
 import kotlinx.coroutines.CoroutineExceptionHandler
 import kotlinx.coroutines.Dispatchers
+import kotlin.coroutines.CoroutineContext
 
 internal class DefaultStoreFactory : StoreFactory {
 
@@ -16,6 +17,7 @@ internal class DefaultStoreFactory : StoreFactory {
         actors: List<Actor<Effect, Message>>,
         effectAtOnceDelivery: Boolean,
         onCancelCallback: ((state: State) -> Unit)?,
+        actorContext: CoroutineContext?, //only for unit-tests!!!
     ): Store<State, Message, Effect> {
         return DefaultStore(
             initialState = initialState,
@@ -23,7 +25,7 @@ internal class DefaultStoreFactory : StoreFactory {
             reducer = reducer,
             actors = actors,
             runtimeContext = Dispatchers.Main,
-            actorContext = Dispatchers.IO,
+            actorContext = actorContext ?: Dispatchers.IO,
             onCancelCallback = onCancelCallback,
             exceptionHandler = CoroutineExceptionHandler { _, throwable ->
                 throwable.printStackTrace()
@@ -47,6 +49,7 @@ internal class DefaultStoreFactory : StoreFactory {
         actor: Actor<Effect, Message>,
         effectAtOnceDelivery: Boolean,
         onCancelCallback: ((state: State) -> Unit)?,
+        actorContext: CoroutineContext?,
     ): Store<State, Message, Effect> {
         return create(
             name = name,
@@ -56,7 +59,8 @@ internal class DefaultStoreFactory : StoreFactory {
             reducer = reducer,
             actors = listOf(actor),
             effectAtOnceDelivery = effectAtOnceDelivery,
-            onCancelCallback = onCancelCallback
+            onCancelCallback = onCancelCallback,
+            actorContext = actorContext,
         )
     }
 

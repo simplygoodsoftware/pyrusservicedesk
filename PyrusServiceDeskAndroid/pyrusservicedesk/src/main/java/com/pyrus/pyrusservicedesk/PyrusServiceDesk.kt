@@ -71,7 +71,7 @@ class PyrusServiceDesk private constructor(
 
         fun sdIsOpenFlow(): StateFlow<Boolean> = sdIsOpen
 
-        private fun updateSdIsOpen(sdIsOpen: Boolean) {
+        internal fun updateSdIsOpen(sdIsOpen: Boolean) {
             this.sdIsOpen.value = sdIsOpen
         }
 

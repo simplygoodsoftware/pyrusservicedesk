@@ -11,6 +11,7 @@ import com.pyrus.pyrusservicedesk.sdk.repositories.SdRepository
 import com.pyrus.pyrusservicedesk.sdk.repositories.SystemMessageStore
 import com.pyrus.pyrusservicedesk.sdk.updates.LiveUpdates
 import com.pyrus.pyrusservicedesk.sdk.updates.PreferencesManager
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.currentCoroutineContext
 import kotlinx.coroutines.delay
@@ -20,6 +21,7 @@ import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.isActive
+import kotlin.coroutines.CoroutineContext
 
 private const val TAG = "AutoRefreshFeature"
 private const val NO_UPDATES = -1L
@@ -34,6 +36,7 @@ internal class AutoRefreshFeatureFactory(
 
     fun create(
         liveUpdates: LiveUpdates,
+        actorContext: CoroutineContext? = Dispatchers.IO
     ): AutoRefreshFeature = storeFactory.create(
         name = TAG,
         initialState = Unit,
@@ -48,7 +51,8 @@ internal class AutoRefreshFeatureFactory(
         initialEffects = listOf(
             AutoRefreshContract.Effect.StartUpdates,
             AutoRefreshContract.Effect.StartUpdatesSystemMessage
-        )
+        ),
+        actorContext = actorContext
     )
 
 }
