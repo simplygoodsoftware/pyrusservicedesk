@@ -615,7 +615,10 @@ private extension PSDChatInteractor {
         } else {
             let requestNewTicket = !(chat?.isActive ?? false) || newTicket
             if requestNewTicket {
-                PSDLogService.sendLog(createRequestNewTicketLog(newTicket: newTicket), needCheckLimit: false)
+                PSDLogService.sendLog(
+                    PSDLogHelper.createRequestNewTicketLog(chat: chat, newTicket: newTicket),
+                    needCheckLimit: false
+                )
 
                 chat?.chatId = nil
                 chat?.isActive = true
@@ -642,35 +645,7 @@ private extension PSDChatInteractor {
         }
         PSDMessageSend.pass(newMessage, delegate: self)
     }
-    
-    func createRequestNewTicketLog(newTicket: Bool) -> Logs {
-        let formatter = DateFormatter()
-        formatter.dateFormat = "dd.MM.yy HH:mm:ss zzz"
-        struct TicketInfo: Codable {
-            let ticketId: String
-            let isActive: Bool
-            let date: String
-            let lastReadedCommentId: Int?
-        }
-        let tickets = PyrusServiceDesk.chats.map {
-            let ticketId = $0.chatId == nil ? "nil" : "\($0.chatId ?? 0)"
-            let date = $0.date == nil ? "nil" : "\(formatter.string(from: $0.date ?? Date()))"
-            return TicketInfo(ticketId: ticketId, isActive: $0.isActive, date: date, lastReadedCommentId: $0.lastReadedCommentId ?? 0)
-        }
-        var ticketsInfo = ""
-        do {
-            let data = try JSONEncoder().encode(tickets)
-            ticketsInfo = String(data: data, encoding: .utf8) ?? ""
-        } catch { }
         
-        let createMessages = PSDMessagesStorage.getNewCreateTicketMessages(PyrusServiceDesk.customUserId)
-        
-        let message = """
-            \(formatter.string(from: Date())) Create new ticket: appId: \(PyrusServiceDesk.clientId ?? "nil"), userId: \(PyrusServiceDesk.customUserId ?? "nil"), ticketId: \(chat?.chatId == nil ? "nil" : "\(chat?.chatId ?? 0)"), isActive: \(chat?.isActive ?? false), newTicketFlag: \(newTicket), chatsCount: \(PyrusServiceDesk.chats.count), chats: \(ticketsInfo), localMessagesCount = \(createMessages.count)
-            """
-        return Logs(exceptions: [LogInfo(message: message, stack: "", serial: 1)])
-    }
-    
     func sendRate(_ rateValue: Int) {
         presenter.doWork(.showRatingComment(ratingText: chat?.showRatingText, rating: rateValue))
         let newMessage = PSDObjectsCreator.createMessage(rating: rateValue, ticketId: chat?.chatId ?? 0, userId: chat?.userId ?? PyrusServiceDesk.customUserId ?? PyrusServiceDesk.userId)

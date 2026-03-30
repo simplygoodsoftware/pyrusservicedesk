@@ -14,10 +14,10 @@ extension String {
      Returns date (timeZone is UTC) from string with expected format.
      - parameter format: Is expected format of date.
      */
-    func dateFromString(format: String, callerType: CallersType = .none, id: String? = nil) -> Date {
+    func dateFromString(format: String, callerType: CallersType = .none, id: String? = nil) -> Date? {
         if self.count == 0 {
             addLog(callerType: callerType, id: id)
-            return Date()
+            return nil
         }
         
         let dateFormatter = DateFormatter()
@@ -26,7 +26,7 @@ extension String {
         guard let date = dateFormatter.date(from: self) else {
             print("Pyrus Service Desk Error: Date conversion failed due to mismatched format.")
             addLog(callerType: callerType, id: id)
-            return Date()
+            return nil
         }
         return date
     }

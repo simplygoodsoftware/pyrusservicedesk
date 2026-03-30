@@ -210,11 +210,11 @@ struct PSDGetChats {
         for i in 0..<response.count {
             let dic: [String: Any] = response[i] as! [String: Any]
             let ticketId = dic["ticket_id"] as? Int
-            var date: Date = dic.stringOfKey(createdAtParameter).dateFromString(format: "yyyy-MM-dd'T'HH:mm:ss'Z'", callerType: .chat, id: "\(ticketId ?? 0)")
+            var date: Date = dic.stringOfKey(createdAtParameter).dateFromString(format: "yyyy-MM-dd'T'HH:mm:ss'Z'", callerType: .chat, id: "\(ticketId ?? 0)") ?? Date()
             var lastMessage: PSDMessage?
             if let lastComment = dic["last_comment"] as? [String: Any] {
                 let messageId = lastComment.stringOfKey(commentIdParameter)
-                date = lastComment.stringOfKey(createdAtParameter).dateFromString(format: "yyyy-MM-dd'T'HH:mm:ss'Z'", callerType: .lastMessage, id: "\(messageId)")
+                date = lastComment.stringOfKey(createdAtParameter).dateFromString(format: "yyyy-MM-dd'T'HH:mm:ss'Z'", callerType: .lastMessage, id: "\(messageId)") ?? Date()
                 lastMessage = PSDMessage.init(text: lastComment.stringOfKey("body"), attachments:nil, messageId: messageId, owner: nil, date: date)
             }
             

@@ -32,7 +32,7 @@ class PSDChatViewController: PSDViewController, PSDMainController {
         navigationController?.popViewController(animated: true)
         PyrusLogger.shared.saveLocalLogToDisk()
         PyrusServiceDesk.stopCallback?.onStop()
-        PyrusLogger.shared.logEvent("Chat closed ")
+        PyrusLogger.shared.logEvent(" Chat closed ")
         PyrusServiceDeskController.clean()
         PyrusServiceDesk.isStarted = false
     }
@@ -245,10 +245,6 @@ class PSDChatViewController: PSDViewController, PSDMainController {
                 if self.messageInputView.inputTextView.isFirstResponder {
                     self.bottomScrollButton?.constant -= keyboardHeight - oldInset
                     self.bottomStopButton?.constant -= keyboardHeight - oldInset
-                    //                    self.view.layoutIfNeeded()
-                }
-                if keyboardHeight < 200 {
-                    //                        oldInset = 0
                 }
                 
                 if isFirstKeyboardShow && (PyrusServiceDesk.multichats || PyrusServiceDesk.startWithPush) {
@@ -265,7 +261,6 @@ class PSDChatViewController: PSDViewController, PSDMainController {
                 self.tableView.contentInset.top = keyboardHeight
                 self.isKeyBoardOpen = self.messageInputView.inputTextView.isFirstResponder
             }
-            //  })
         }
     }
     
@@ -283,7 +278,7 @@ class PSDChatViewController: PSDViewController, PSDMainController {
                 self.bottomStopButton?.constant = -110
                 self.view.layoutIfNeeded()
                 if !self.isActive {
-                    self.tableView.contentInset.top = 90 // + self.view.safeAreaInsets.bottom
+                    self.tableView.contentInset.top = 90
                 } else
                 if !((self.oldHeight - self.messageInputView.frame.size.height).rounded() == self.view.safeAreaInsets.bottom)
                 {
@@ -389,13 +384,11 @@ class PSDChatViewController: PSDViewController, PSDMainController {
     override func viewWillDisappear(_ animated: Bool) {
         super.viewWillDisappear(animated)
         NotificationCenter.default.removeObserver(self)
-//        EventsLogger.logEvent(.resignFirstResponder, additionalInfo: "hideAllKeyboard() called in viewWillDisappear")
         if !PyrusServiceDesk.multichats {
             hideAllKeyboard()
             messageInputView.isHidden = true
         }
         
-//        self.tableView.removeListeners()
         interactor.doInteraction(.viewWillDisappear)
         
         UIView.animate(withDuration: 0.2, animations: {
@@ -460,7 +453,6 @@ class PSDChatViewController: PSDViewController, PSDMainController {
     }
     
     func setupTableView() {
-        //        tableView.addKeyboardListeners()
         tableView.chatDelegate = self
         if #available(iOS 11.0, *) {
             self.tableView.contentInsetAdjustmentBehavior = .never//.automatic

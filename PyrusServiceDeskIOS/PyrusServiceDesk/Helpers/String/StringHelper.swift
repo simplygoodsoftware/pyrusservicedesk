@@ -1,4 +1,6 @@
 import Foundation
+import CoreFoundation
+
 private struct HTMLEscapeMap {
     let escapeSequence: NSString
     let uchar: UInt16
@@ -391,94 +393,13 @@ class HelpersStrings {
     static func decodingHTMLEntitiesInLink(_ urlString: String) -> String {
         guard urlString.contains("&") else { return urlString }
         
-        let maxEntityLen = 20
-        let nsString = NSMutableString(string: urlString)
-        
-        var searchRange = NSRange(location: 0, length: nsString.length)
-        var subrange = nsString.range(of: "&", options: .backwards, range: searchRange)
-        
-        guard subrange.length > 0 else { return urlString }
-        
-        while subrange.length != 0 {
-            let nextIdx = subrange.location + 1
-            var isEntityCandidate = false
-            if nextIdx < nsString.length {
-                let nextChar = nsString.character(at: nextIdx)
-                if nextChar == unichar("#") {
-                    isEntityCandidate = true
-                } else if let scalar = UnicodeScalar(nextChar) {
-                    isEntityCandidate = CharacterSet.letters.contains(scalar)
-                }
-            }
-            
-            // Диапазон для поиска СЛЕДУЮЩЕГО '&' (левее текущего)
-            searchRange = NSMakeRange(0, subrange.location)
-            
-            if !isEntityCandidate {
-                subrange = nsString.range(of: "&", options: .backwards, range: searchRange)
-                continue
-            }
-            
-            // Ищем ';' ВПЕРЁД от '&', ограничиваясь maxEntityLen
-            let semiColonSearchEnd = min(subrange.location + maxEntityLen, nsString.length)
-            let semiColonSearchRange = NSRange(
-                location: subrange.location,
-                length: semiColonSearchEnd - subrange.location
-            )
-            let semiColonRange = nsString.range(of: ";", options: .literal, range: semiColonSearchRange)
-            
-            if semiColonRange.location == NSNotFound {
-                subrange = nsString.range(of: "&", options: .backwards, range: searchRange)
-                continue
-            }
-            
-            let escapeRange = NSRange(
-                location: subrange.location,
-                length: semiColonRange.location - subrange.location + 1
-            )
-            let escapeString = nsString.substring(with: escapeRange) as NSString
-            let length = escapeString.length
-            
-            if length >= 4 && length <= maxEntityLen {
-                if escapeString.character(at: 1) == unichar("#") {
-                    let char2 = escapeString.character(at: 2)
-                    if char2 == unichar("x") || char2 == unichar("X") {
-                        let hexSequence = escapeString.substring(with: NSMakeRange(3, length - 4))
-                        let scanner = Scanner(string: hexSequence)
-                        var value: UInt64 = 0
-                        if scanner.scanHexInt64(&value),
-                           value > 0,
-                           scanner.scanLocation == hexSequence.utf16.count,
-                           let scalar = UnicodeScalar(UInt32(value)) {
-                            nsString.replaceCharacters(in: escapeRange, with: String(scalar))
-                        }
-                    } else {
-                        let numberSequence = escapeString.substring(with: NSMakeRange(2, length - 3))
-                        let scanner = Scanner(string: numberSequence)
-                        var value: Int = 0
-                        if scanner.scanInt(&value),
-                           value > 0,
-                           scanner.scanLocation == numberSequence.utf16.count,
-                           let scalar = UnicodeScalar(value) {
-                            nsString.replaceCharacters(in: escapeRange, with: String(scalar))
-                        }
-                    }
-                } else {
-                    for entry in gAsciiHTMLEscapeMap {
-                        if escapeString.isEqual(to: entry.escapeSequence as String) {
-                            var uchar = entry.uchar
-                            let replacement = NSString(characters: &uchar, length: 1) as String
-                            nsString.replaceCharacters(in: escapeRange, with: replacement)
-                            break
-                        }
-                    }
-                }
-            }
-            
-            subrange = nsString.range(of: "&", options: .backwards, range: searchRange)
-        }
-        
-        return nsString as String
+        return urlString
+            .replacingOccurrences(of: "&amp;", with: "&")
+            .replacingOccurrences(of: "&#38;", with: "&")
+            .replacingOccurrences(of: "&#x26;", with: "&", options: [.caseInsensitive])
+            .replacingOccurrences(of: "&quot;", with: "\"")
+            .replacingOccurrences(of: "&#34;", with: "\"")
+            .replacingOccurrences(of: "&#x22;", with: "\"", options: [.caseInsensitive])
     }
     
     
