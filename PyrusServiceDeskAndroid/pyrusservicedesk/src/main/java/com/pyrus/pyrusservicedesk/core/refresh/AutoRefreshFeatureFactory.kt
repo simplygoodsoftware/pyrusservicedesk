@@ -36,7 +36,7 @@ internal class AutoRefreshFeatureFactory(
 
     fun create(
         liveUpdates: LiveUpdates,
-        actorContext: CoroutineContext? = Dispatchers.IO
+        actorContext: CoroutineContext? = Dispatchers.IO //only for unit-tests!!!
     ): AutoRefreshFeature = storeFactory.create(
         name = TAG,
         initialState = Unit,
@@ -76,6 +76,7 @@ private class AutoRefreshActor(
             preferencesManager.getLastActiveTimeFlow(),
             PyrusServiceDesk.sdIsOpenFlow(),
         ) { isStarted, lastActiveTime, sdIsOpen ->
+            println("handleEffect")
             val interval = liveUpdates.getTicketsUpdateInterval(lastActiveTime)
             if (isStarted || sdIsOpen)
                 AutoRefreshData(interval, lastActiveTime, sdIsOpen)
@@ -104,8 +105,10 @@ private class AutoRefreshActor(
             flow {
                 while (currentCoroutineContext().isActive) {
                     val interval = liveUpdates.getTicketsUpdateInterval(data.lastActiveTime)
+                    println("interval: $interval")
                     if (interval == NO_UPDATES)
                         break
+                    println("sync")
                     repository.sync()
                     delay(interval)
                 }
