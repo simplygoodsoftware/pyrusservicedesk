@@ -24,6 +24,7 @@ import com.pyrus.pyrusservicedesk.sdk.repositories.LocalCommandsStore
 import com.pyrus.pyrusservicedesk.sdk.repositories.LocalTicketsStore
 import com.pyrus.pyrusservicedesk.sdk.repositories.SystemMessageStore
 import com.pyrus.pyrusservicedesk.sdk.sync.SyncRequest
+import com.pyrus.pyrusservicedesk.sdk.sync.SyncRequest.Data
 import com.pyrus.pyrusservicedesk.sdk.sync.Synchronizer
 import com.pyrus.pyrusservicedesk.sdk.sync.Synchronizer.Companion.FAILED_AUTHORIZATION_ERROR_CODE
 import com.pyrus.pyrusservicedesk.sdk.sync.Synchronizer.Companion.FAILED_AUTHORIZATION_ERROR_CODE_FORBIDDEN
@@ -83,7 +84,10 @@ class SynchronizerTest {
         commandsStore = mockk(relaxed = true, relaxUnitFun = true)
 
         val app = RuntimeEnvironment.application
-        val preferences: SharedPreferences = app.getSharedPreferences(PREFERENCE_KEY, Context.MODE_PRIVATE)
+        val preferences: SharedPreferences = app.getSharedPreferences(
+            PREFERENCE_KEY,
+            Context.MODE_PRIVATE
+        )
         preferencesManager = PreferencesManager(TEST_APP_ID, preferences)
 
         synchronizer = TestSynchronizer(
@@ -100,7 +104,12 @@ class SynchronizerTest {
             testDispatcher = testDispatcher,
         )
 
-        coEvery { localTicketsStore.getTickets().lastOrNull()?.ticketId } returns TEST_TICKET_ID
+        coEvery {
+            localTicketsStore
+                .getTickets()
+                .lastOrNull()
+                ?.ticketId
+        } returns TEST_TICKET_ID
 
         Dispatchers.setMain(testDispatcher)
     }
@@ -118,7 +127,7 @@ class SynchronizerTest {
     fun runSyncEmptyTickets() = runTest {
         TestServiceDeskApi.setGetTicketsResponse(emptyTickets)
 
-        val ticketsTry = synchronizer.syncData(SyncRequest.Data, true)
+        val ticketsTry = synchronizer.syncData(Data, true)
         assertEquals(true, ticketsTry.isSuccess())
         assertEquals(1, TestServiceDeskApi.getSyncCount())
     }
@@ -127,8 +136,8 @@ class SynchronizerTest {
     fun trotSimpleGetData() = runTest {
         TestServiceDeskApi.setGetTicketsResponse(emptyTickets)
 
-        val ticketsTry = synchronizer.syncData(SyncRequest.Data, true)
-        val ticketsTry2 = synchronizer.syncData(SyncRequest.Data, true)
+        val ticketsTry = synchronizer.syncData(Data, true)
+        val ticketsTry2 = synchronizer.syncData(Data, true)
         assertEquals(true, ticketsTry.isSuccess())
         assertEquals(true, ticketsTry2.isSuccess())
         assertEquals(2, TestServiceDeskApi.getSyncCount())
@@ -140,7 +149,7 @@ class SynchronizerTest {
     fun trotMarkTicketIsRead() = testScope.runTest {
         TestServiceDeskApi.setGetTicketsResponse(emptyTickets)
 
-        val ticketsTry = synchronizer.syncData(SyncRequest.Data, true)
+        val ticketsTry = synchronizer.syncData(Data, true)
         TestServiceDeskApi.setGetTicketsResponse(markTicketIsRead)
         val ticketsTry2 = synchronizer.syncCommand(markTicketIsReadRequest)
         assertEquals(true, ticketsTry.isSuccess())
@@ -154,7 +163,7 @@ class SynchronizerTest {
     fun trotSetPushToken() = runTest {
         TestServiceDeskApi.setGetTicketsResponse(emptyTickets)
 
-        val ticketsTry = synchronizer.syncData(SyncRequest.Data, true)
+        val ticketsTry = synchronizer.syncData(Data, true)
         TestServiceDeskApi.setGetTicketsResponse(setPushTokenResponse)
         val ticketsTry2 = synchronizer.syncCommand(setPushTokenRequest)
         assertEquals(true, ticketsTry.isSuccess())
@@ -168,7 +177,7 @@ class SynchronizerTest {
     fun trotCreateComment() = runTest {
         TestServiceDeskApi.setGetTicketsResponse(emptyTickets)
 
-        val ticketsTry = synchronizer.syncData(SyncRequest.Data, true)
+        val ticketsTry = synchronizer.syncData(Data, true)
         TestServiceDeskApi.setGetTicketsResponse(createComment)
         val ticketsTry2 = synchronizer.syncCommand(createCommentRequest)
         assertEquals(true, ticketsTry.isSuccess())
@@ -182,7 +191,7 @@ class SynchronizerTest {
     fun trotCalcOperatorTimeCommand() = runTest {
         TestServiceDeskApi.setGetTicketsResponse(emptyTickets)
 
-        val ticketsTry = synchronizer.syncData(SyncRequest.Data, true)
+        val ticketsTry = synchronizer.syncData(Data, true)
         TestServiceDeskApi.setGetTicketsResponse(calcOperatorTime)
         val ticketsTry2 = synchronizer.syncCommand(calcOperatorTimeRequest)
         assertEquals(true, ticketsTry.isSuccess())
@@ -196,10 +205,15 @@ class SynchronizerTest {
     fun syncIfNoConnection() = runTest {
         TestServiceDeskApi.setGetTicketsResponse(null)
 
-        val ticketsTry = synchronizer.syncData(SyncRequest.Data, true)
+        val ticketsTry = synchronizer.syncData(Data, true)
         advanceTimeBy(5000)
 
-        val exception = if (!ticketsTry.isSuccess()) ticketsTry.error else null
+        val exception = if (!ticketsTry.isSuccess()) {
+            ticketsTry.error
+        }
+        else {
+            null
+        }
         println("exception: $exception")
         synchronizer.close()
         assertEquals(false, ticketsTry.isSuccess())
@@ -209,9 +223,14 @@ class SynchronizerTest {
     fun syncFailDelayIfNoConnection() = runTest {
         TestServiceDeskApi.setGetTicketsResponse(null)
 
-        val ticketsTry = synchronizer.syncData(SyncRequest.Data, true)
+        val ticketsTry = synchronizer.syncData(Data, true)
 
-        val exception = if (!ticketsTry.isSuccess()) ticketsTry.error else null
+        val exception = if (!ticketsTry.isSuccess()) {
+            ticketsTry.error
+        }
+        else {
+            null
+        }
         println("exception: $exception")
         synchronizer.close()
         assertEquals(false, ticketsTry.isSuccess())
@@ -226,7 +245,7 @@ class SynchronizerTest {
     fun syncMinFailDelayIfNoConnection() = runTest {
         TestServiceDeskApi.setGetTicketsResponse(null)
 
-        synchronizer.syncData(SyncRequest.Data, true)
+        synchronizer.syncData(Data, true)
         advanceTimeBy(6000)
 
         val syncCount = TestServiceDeskApi.getSyncCount()
@@ -296,9 +315,13 @@ class SynchronizerTest {
     @Test
     fun syncWithErrorCode400() = runTest {
         TestServiceDeskApi.setGetTicketsResponse(null)
-        TestServiceDeskApi.setGetTicketsException(HttpException(FAILED_AUTHORIZATION_ERROR_CODE))
+        TestServiceDeskApi.setGetTicketsException(
+            HttpException(
+                FAILED_AUTHORIZATION_ERROR_CODE
+            )
+        )
 
-        synchronizer.syncData(SyncRequest.Data, true)
+        synchronizer.syncData(Data, true)
         advanceTimeBy(50000L)
 
         val syncCount = TestServiceDeskApi.getSyncCount()
@@ -308,9 +331,13 @@ class SynchronizerTest {
     @Test
     fun syncWithErrorCode403() = runTest {
         TestServiceDeskApi.setGetTicketsResponse(null)
-        TestServiceDeskApi.setGetTicketsException(HttpException(FAILED_AUTHORIZATION_ERROR_CODE_FORBIDDEN))
+        TestServiceDeskApi.setGetTicketsException(
+            HttpException(
+                FAILED_AUTHORIZATION_ERROR_CODE_FORBIDDEN
+            )
+        )
 
-        synchronizer.syncData(SyncRequest.Data, true)
+        synchronizer.syncData(Data, true)
         advanceTimeBy(50000L)
 
         val syncCount = TestServiceDeskApi.getSyncCount()
@@ -320,11 +347,15 @@ class SynchronizerTest {
     @Test
     fun syncWithErrorCode429() = runTest {
         TestServiceDeskApi.setGetTicketsResponse(null)
-        TestServiceDeskApi.setGetTicketsException(HttpException(FAILED_SYNC_ERROR_CODE))
+        TestServiceDeskApi.setGetTicketsException(
+            HttpException(
+                FAILED_SYNC_ERROR_CODE
+            )
+        )
 
         preferencesManager.saveLastActiveTime(System.currentTimeMillis())
 
-        synchronizer.syncData(SyncRequest.Data, true)
+        synchronizer.syncData(Data, true)
         advanceTimeBy(50000L)
 
         val syncCount = TestServiceDeskApi.getSyncCount()
@@ -346,16 +377,44 @@ class SynchronizerTest {
         assertEquals(1, syncCount)
     }
 
-    fun List<Long>.assertDifferenceAtLeast(index1: Int, index2: Int, min: Long) {
-        val diff = this[index2] - this[index1]
-        println("Expected time: ≥ $min, actual time: $diff")
-        assertTrue("Difference should be at least $min, but was $diff", diff >= min)
+    @Test
+    fun addCommand() = runTest {
+        TestServiceDeskApi.setGetTicketsResponse(createComment)
+
+        val job = testScope.launch {
+            synchronizer.addCommand(createCommentRequest)
+        }
+        advanceTimeBy(50000L)
+        job.cancel()
+
+        val syncCount = TestServiceDeskApi.getSyncCount()
+        assertEquals(0, syncCount)
     }
 
-    fun List<Long>.assertDifferenceInRange(index1: Int, index2: Int, range: LongRange) {
+    fun List<Long>.assertDifferenceAtLeast(
+        index1: Int,
+        index2: Int,
+        min: Long,
+    ) {
+        val diff = this[index2] - this[index1]
+        println("Expected time: ≥ $min, actual time: $diff")
+        assertTrue(
+            "Difference should be at least $min, but was $diff",
+            diff >= min
+        )
+    }
+
+    fun List<Long>.assertDifferenceInRange(
+        index1: Int,
+        index2: Int,
+        range: LongRange,
+    ) {
         val diff = this[index2] - this[index1]
         println("Expected time: $range, actual time: $diff")
-        assertTrue("Difference should be in $range, but was $diff", diff in range)
+        assertTrue(
+            "Difference should be in $range, but was $diff",
+            diff in range
+        )
     }
 
 }
