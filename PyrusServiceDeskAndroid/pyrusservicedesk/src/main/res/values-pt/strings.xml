@@ -52,7 +52,7 @@
     <string name="psd_filters">Filtros</string>
     <string name="psd_ticket_number">Número do bilhete: %s</string>
     <string name="psd_ticket_data_create">Criado em %s</string>
-    <string name="all">Todos</string>
+    <string name="all">Tudo</string>
     <string name="psd_you">Você</string>
     <string name="psd_type_audio">Mensagem de voz</string>
     <string name="psd_type_photo">Foto</string>
