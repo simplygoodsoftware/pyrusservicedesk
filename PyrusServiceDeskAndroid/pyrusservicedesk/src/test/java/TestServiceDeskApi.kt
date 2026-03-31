@@ -54,7 +54,7 @@ internal class TestServiceDeskApi(
         return Try.Failure(Throwable()) //TODO kate
     }
 
-    fun unexpectedCall(): Try.Failure = Try.Failure(UnknownHostException("pyrus.com"))
+    fun unexpectedCall(): Try.Failure = Try.Failure(exception)
 
     inline fun <reified Response> String?.fromJson(): Try<Response> {
         if (this == null) return unexpectedCall()
@@ -63,6 +63,7 @@ internal class TestServiceDeskApi(
     }
 
     companion object {
+        private var exception: Exception = UnknownHostException("pyrus.com")
         private var syncCount = 0
         private val listSyncTime = mutableListOf<Long>()
         private var response: String? = Responses.emptyTickets
@@ -72,9 +73,14 @@ internal class TestServiceDeskApi(
             this.response = response
         }
 
+        fun setGetTicketsException(exception: Exception) {
+            this.exception = exception
+        }
+
         fun cleanSyncData() {
             syncCount = 0
             listSyncTime.clear()
+            exception = UnknownHostException("pyrus.com")
         }
     }
 
