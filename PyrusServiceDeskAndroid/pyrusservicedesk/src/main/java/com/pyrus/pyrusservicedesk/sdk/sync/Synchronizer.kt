@@ -54,7 +54,7 @@ import kotlin.coroutines.suspendCoroutine
 import kotlin.math.max
 import kotlin.math.min
 
-internal class Synchronizer(
+internal open class Synchronizer(
     private val api: ServiceDeskApi,
     private val localTicketsStore: LocalTicketsStore,
     private val accessDeniedEventBus: AccessDeniedEventBus,
