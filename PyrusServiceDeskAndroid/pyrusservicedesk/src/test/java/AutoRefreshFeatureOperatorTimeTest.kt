@@ -197,7 +197,8 @@ class AutoRefreshFeatureOperatorTimeTest {
     }
 
     /**
-     * 5 потому что за это время успевает выполниться еще 1 запрос
+     * We're waiting for 5 because the null result in message is only processed
+     * when we receive the result of sendCalcOperatorTime
      */
     @Test
     fun shouldStopWhenOperatorTimeMessageBecomesNullDuringLoop() = runTest {
