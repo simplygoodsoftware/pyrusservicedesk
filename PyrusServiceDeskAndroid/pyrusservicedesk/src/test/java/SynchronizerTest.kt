@@ -23,13 +23,14 @@ import com.pyrus.pyrusservicedesk.sdk.repositories.IdStore
 import com.pyrus.pyrusservicedesk.sdk.repositories.LocalCommandsStore
 import com.pyrus.pyrusservicedesk.sdk.repositories.LocalTicketsStore
 import com.pyrus.pyrusservicedesk.sdk.repositories.SystemMessageStore
-import com.pyrus.pyrusservicedesk.sdk.sync.SyncRequest
 import com.pyrus.pyrusservicedesk.sdk.sync.SyncRequest.Data
 import com.pyrus.pyrusservicedesk.sdk.sync.Synchronizer
 import com.pyrus.pyrusservicedesk.sdk.sync.Synchronizer.Companion.FAILED_AUTHORIZATION_ERROR_CODE
 import com.pyrus.pyrusservicedesk.sdk.sync.Synchronizer.Companion.FAILED_AUTHORIZATION_ERROR_CODE_FORBIDDEN
 import com.pyrus.pyrusservicedesk.sdk.sync.Synchronizer.Companion.FAILED_SYNC_ERROR_CODE
 import com.pyrus.pyrusservicedesk.sdk.sync.Synchronizer.Companion.NO_UPDATES
+import com.pyrus.pyrusservicedesk.sdk.sync.Synchronizer.Companion.TROT_TIME_1000
+import com.pyrus.pyrusservicedesk.sdk.sync.Synchronizer.Companion.TROT_TIME_5000
 import com.pyrus.pyrusservicedesk.sdk.updates.PreferencesManager
 import io.mockk.coEvery
 import io.mockk.mockk
@@ -123,6 +124,11 @@ class SynchronizerTest {
         synchronizer.close()
     }
 
+    /**
+     * SyncData
+     * return: Try<TicketsDto>
+     * no repeat and delay
+     */
     @Test
     fun runSyncEmptyTickets() = runTest {
         TestServiceDeskApi.setGetTicketsResponse(emptyTickets)
@@ -132,6 +138,11 @@ class SynchronizerTest {
         assertEquals(1, TestServiceDeskApi.getSyncCount())
     }
 
+    /**
+     * Throttling for syncData should be 5000 ms
+     * syncData return: Try<TicketsDto>
+     * no repeat
+     */
     @Test
     fun trotSimpleGetData() = runTest {
         TestServiceDeskApi.setGetTicketsResponse(emptyTickets)
@@ -142,9 +153,14 @@ class SynchronizerTest {
         assertEquals(true, ticketsTry2.isSuccess())
         assertEquals(2, TestServiceDeskApi.getSyncCount())
         val listSyncTime = TestServiceDeskApi.getListSyncTime()
-        listSyncTime.assertDifferenceAtLeast(0, 1, 5000L)
+        listSyncTime.assertDifferenceAtLeast(0, 1, TROT_TIME_5000)
     }
 
+    /**
+     * Throttling for command MarkTicketIsRead should be 5000 ms
+     * syncCommand return:  Try<TicketCommandResultDto>
+     * no repeat
+     */
     @Test
     fun trotMarkTicketIsRead() = testScope.runTest {
         TestServiceDeskApi.setGetTicketsResponse(emptyTickets)
@@ -156,9 +172,14 @@ class SynchronizerTest {
         assertEquals(true, ticketsTry2.isSuccess())
         assertEquals(2, TestServiceDeskApi.getSyncCount())
         val listSyncTime = TestServiceDeskApi.getListSyncTime()
-        listSyncTime.assertDifferenceAtLeast(0, 1, 5000L)
+        listSyncTime.assertDifferenceAtLeast(0, 1, TROT_TIME_5000)
     }
 
+    /**
+     * Throttling for command SetPushToken should be 5000 ms
+     * syncCommand return:  Try<TicketCommandResultDto>
+     * no repeat
+     */
     @Test
     fun trotSetPushToken() = runTest {
         TestServiceDeskApi.setGetTicketsResponse(emptyTickets)
@@ -170,9 +191,14 @@ class SynchronizerTest {
         assertEquals(true, ticketsTry2.isSuccess())
         assertEquals(2, TestServiceDeskApi.getSyncCount())
         val listSyncTime = TestServiceDeskApi.getListSyncTime()
-        listSyncTime.assertDifferenceAtLeast(0, 1, 5000L)
+        listSyncTime.assertDifferenceAtLeast(0, 1, TROT_TIME_5000)
     }
 
+    /**
+     * Throttling for command CreateComment should be 1000 ms
+     * syncCommand return:  Try<TicketCommandResultDto>
+     * no repeat
+     */
     @Test
     fun trotCreateComment() = runTest {
         TestServiceDeskApi.setGetTicketsResponse(emptyTickets)
@@ -184,9 +210,14 @@ class SynchronizerTest {
         assertEquals(true, ticketsTry2.isSuccess())
         assertEquals(2, TestServiceDeskApi.getSyncCount())
         val listSyncTime = TestServiceDeskApi.getListSyncTime()
-        listSyncTime.assertDifferenceAtLeast(0, 1, 1000L)
+        listSyncTime.assertDifferenceAtLeast(0, 1, TROT_TIME_1000)
     }
 
+    /**
+     * Throttling for command CalcOperatorTime should be 1000 ms
+     * syncCommand return:  Try<TicketCommandResultDto>
+     * no repeat
+     */
     @Test
     fun trotCalcOperatorTimeCommand() = runTest {
         TestServiceDeskApi.setGetTicketsResponse(emptyTickets)
@@ -198,15 +229,20 @@ class SynchronizerTest {
         assertEquals(true, ticketsTry2.isSuccess())
         assertEquals(2, TestServiceDeskApi.getSyncCount())
         val listSyncTime = TestServiceDeskApi.getListSyncTime()
-        listSyncTime.assertDifferenceAtLeast(0, 1, 1000L)
+        listSyncTime.assertDifferenceAtLeast(0, 1, TROT_TIME_1000)
     }
 
+    /**
+     * If there is no connection, an error should appear.
+     * syncData return: Try<TicketsDto>
+     * has repeat
+     */
     @Test
     fun syncIfNoConnection() = runTest {
         TestServiceDeskApi.setGetTicketsResponse(null)
 
         val ticketsTry = synchronizer.syncData(Data, true)
-        advanceTimeBy(5000)
+        advanceTimeBy(5000L)
 
         val exception = if (!ticketsTry.isSuccess()) {
             ticketsTry.error
@@ -219,6 +255,11 @@ class SynchronizerTest {
         assertEquals(false, ticketsTry.isSuccess())
     }
 
+    /**
+     * If there is no connection, an error should appear.
+     * syncData return: Try<TicketsDto>
+     * has repeat
+     */
     @Test
     fun syncFailDelayIfNoConnection() = runTest {
         TestServiceDeskApi.setGetTicketsResponse(null)
@@ -237,6 +278,9 @@ class SynchronizerTest {
     }
 
     /**
+     * If there is no connection, an error should appear.
+     * syncData return: Try<TicketsDto>
+     * has repeat with fail delay
      * If it is a SyncRequest.Data min delay is 5 second (due to throttling)
      * Even if fail delay is 1 second
      * p.s. since the throttling timer uses real time, both delay fail delay and throttling delay are used in the test
@@ -256,6 +300,14 @@ class SynchronizerTest {
         synchronizer.close()
     }
 
+    /**
+     * If there is no connection, an error should appear.
+     * syncCommand return:  Try<TicketCommandResultDto>
+     * has repeat with fail delay
+     * If it is a createComment min delay is 2 second (due to throttling)
+     * Even if fail delay is 1 second
+     * p.s. since the throttling timer uses real time, both delay fail delay and throttling delay are used in the test
+     */
     @Test
     fun syncMinFailDelayWhenCreateCommentIfNoConnection() = runTest {
         TestServiceDeskApi.setGetTicketsResponse(null)
@@ -275,6 +327,10 @@ class SynchronizerTest {
     }
 
     /**
+     * If there is no connection, an error should appear.
+     * syncCommand return:  Try<TicketCommandResultDto>
+     * If it is a createComment min delay is 2 second (due to throttling)
+     * Even if fail delay is 1 second
      * Since the throttling timer uses real time,
      * both delay fail delay and throttling delay are used in the test (+1s in this case)
      */
@@ -297,6 +353,14 @@ class SynchronizerTest {
 
     }
 
+    /**
+     * If there is no connection, an error should appear.
+     * syncCommand return:  Try<TicketCommandResultDto>
+     * If it is a createComment min delay is 2 second (due to throttling)
+     * Even if fail delay is 1 second
+     * Since the throttling timer uses real time,
+     * both delay fail delay and throttling delay are used in the test (+1s in this case)
+     */
     @Test
     fun sync5FailDelayWhenCreateCommentIfNoConnection() = runTest {
         TestServiceDeskApi.setGetTicketsResponse(null)
@@ -312,6 +376,11 @@ class SynchronizerTest {
         assertEquals(true, syncCount >= 4)
     }
 
+    /**
+     * If there is error 400, an error should appear.
+     * syncData return: Try<TicketsDto>
+     * no repeats and delay
+     */
     @Test
     fun syncWithErrorCode400() = runTest {
         TestServiceDeskApi.setGetTicketsResponse(null)
@@ -328,6 +397,11 @@ class SynchronizerTest {
         assertEquals(1, syncCount)
     }
 
+    /**
+     * If there is error 403, an error should appear.
+     * syncData return: Try<TicketsDto>
+     * no repeats and delay
+     */
     @Test
     fun syncWithErrorCode403() = runTest {
         TestServiceDeskApi.setGetTicketsResponse(null)
@@ -344,6 +418,11 @@ class SynchronizerTest {
         assertEquals(1, syncCount)
     }
 
+    /**
+     * If there is error 429, an error should appear.
+     * syncData return: Try<TicketsDto>
+     * no repeats and delay + LastActiveTime is set to NO_UPDATES
+     */
     @Test
     fun syncWithErrorCode429() = runTest {
         TestServiceDeskApi.setGetTicketsResponse(null)
@@ -365,6 +444,11 @@ class SynchronizerTest {
         assertEquals(NO_UPDATES, lastActiveTimeAfter429)
     }
 
+    /**
+     * If there is error in command, an error should appear.
+     * syncCommand return:  Try<TicketCommandResultDto>
+     * no repeats and delay
+     */
     @Test
     fun syncWithErrorInCommand() = runTest {
         TestServiceDeskApi.setGetTicketsResponse(createCommentError)
@@ -377,6 +461,10 @@ class SynchronizerTest {
         assertEquals(1, syncCount)
     }
 
+
+    /**
+     * AddCommand should not call sync
+     */
     @Test
     fun addCommand() = runTest {
         TestServiceDeskApi.setGetTicketsResponse(createComment)
