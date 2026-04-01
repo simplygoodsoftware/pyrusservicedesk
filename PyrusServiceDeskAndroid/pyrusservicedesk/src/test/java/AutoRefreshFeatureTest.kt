@@ -6,6 +6,7 @@ import com.pyrus.pyrusservicedesk._ref.utils.MILLISECONDS_IN_MINUTE
 import com.pyrus.pyrusservicedesk._ref.utils.MILLISECONDS_IN_SECOND
 import com.pyrus.pyrusservicedesk._ref.whitetea.core.DefaultStoreFactory
 import com.pyrus.pyrusservicedesk._ref.whitetea.core.StoreFactory
+import com.pyrus.pyrusservicedesk.core.refresh.AutoRefreshFeature
 import com.pyrus.pyrusservicedesk.core.refresh.AutoRefreshFeatureFactory
 import com.pyrus.pyrusservicedesk.sdk.repositories.IdStore
 import com.pyrus.pyrusservicedesk.sdk.repositories.LocalTicketsStore
@@ -19,18 +20,16 @@ import io.mockk.coVerify
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.unmockkAll
-import io.mockk.unmockkStatic
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.cancelChildren
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.test.StandardTestDispatcher
+import kotlinx.coroutines.test.TestDispatcher
+import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.advanceTimeBy
-import kotlinx.coroutines.test.resetMain
 import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
-import org.junit.After
 import org.junit.Before
 import org.junit.Test
 import kotlin.time.Duration.Companion.seconds
@@ -81,39 +80,24 @@ class AutoRefreshFeatureTest {
     @Test
     fun whenIntervalBecomesNOUPDATESShouldStopCallingSync() = runTest {
         val testDispatcher = StandardTestDispatcher(testScheduler)
-        clearAllMocks()
-        unmockkAll()
-        isStartedFlow = MutableStateFlow(true)
-        lastActiveTimeFlow = MutableStateFlow(System.currentTimeMillis())
-        sdOpenFlow = MutableStateFlow(false)
-
-        coEvery { liveUpdates.isStartedFlow() } returns isStartedFlow
-        coEvery { preferencesManager.getLastActiveTimeFlow() } returns lastActiveTimeFlow
+        setupMocks(
+            lastActiveTime = System.currentTimeMillis(),
+            sdkIsOpen = false,
+            flowIsStarted = true
+        )
 
         val initialInterval = MILLISECONDS_IN_SECOND * 5L
         every { liveUpdates.getTicketsUpdateInterval(any()) } returns initialInterval
 
-        val autoRefreshFeatureFactory = AutoRefreshFeatureFactory(
-            storeFactory = storeFactory,
-            repository = repository,
-            preferencesManager = preferencesManager,
-            systemMessageStore = systemMessageStore,
-            localTicketsStore = localTicketsStore
-        ).create(liveUpdates, testDispatcher)
+        val autoRefreshFeatureFactory = createAutoRefreshFeature(testDispatcher)
 
-        advanceTimeBy(initialInterval)
-        runCurrent()
-        coVerify(exactly = 2) { repository.sync() }
+        checkSyncCount(initialInterval, 2)
 
         every { liveUpdates.getTicketsUpdateInterval(any()) } returns NO_UPDATES
 
-        advanceTimeBy(initialInterval)
-        runCurrent()
-        coVerify(exactly = 2) { repository.sync() }
+        checkSyncCount(initialInterval, 2)
 
-        autoRefreshFeatureFactory.cancel()
-        testDispatcher.cancelChildren()
-        testDispatcher.cancel()
+        cancelTest(testDispatcher, autoRefreshFeatureFactory)
     }
 
     /**
@@ -124,34 +108,21 @@ class AutoRefreshFeatureTest {
     @Test
     fun whenInterval5000CountCallingSync() = runTest {
         val testDispatcher = StandardTestDispatcher(testScheduler)
-        clearAllMocks()
-        unmockkAll()
-        isStartedFlow = MutableStateFlow(true)
-        lastActiveTimeFlow = MutableStateFlow(System.currentTimeMillis())
-        sdOpenFlow = MutableStateFlow(false)
-
-        coEvery { liveUpdates.isStartedFlow() } returns isStartedFlow
-        coEvery { preferencesManager.getLastActiveTimeFlow() } returns lastActiveTimeFlow
+        setupMocks(
+            lastActiveTime = System.currentTimeMillis(),
+            sdkIsOpen = false,
+            flowIsStarted = true
+        )
 
         val initialInterval = MILLISECONDS_IN_SECOND * 5L
         val checkInterval = MILLISECONDS_IN_SECOND * 20L
         every { liveUpdates.getTicketsUpdateInterval(any()) } returns initialInterval
 
-        val autoRefreshFeatureFactory = AutoRefreshFeatureFactory(
-            storeFactory = storeFactory,
-            repository = repository,
-            preferencesManager = preferencesManager,
-            systemMessageStore = systemMessageStore,
-            localTicketsStore = localTicketsStore
-        ).create(liveUpdates, testDispatcher)
+        val autoRefreshFeatureFactory = createAutoRefreshFeature(testDispatcher)
 
-        advanceTimeBy(checkInterval)
-        runCurrent()
-        coVerify(exactly = 5) { repository.sync() }
+        checkSyncCount(checkInterval, 5)
 
-        autoRefreshFeatureFactory.cancel()
-        testDispatcher.cancelChildren()
-        testDispatcher.cancel()
+        cancelTest(testDispatcher, autoRefreshFeatureFactory)
     }
 
     /**
@@ -162,34 +133,21 @@ class AutoRefreshFeatureTest {
     @Test
     fun whenInterval15000CountCallingSync() = runTest {
         val testDispatcher = StandardTestDispatcher(testScheduler)
-        clearAllMocks()
-        unmockkAll()
-        isStartedFlow = MutableStateFlow(true)
-        lastActiveTimeFlow = MutableStateFlow(System.currentTimeMillis())
-        sdOpenFlow = MutableStateFlow(false)
-
-        coEvery { liveUpdates.isStartedFlow() } returns isStartedFlow
-        coEvery { preferencesManager.getLastActiveTimeFlow() } returns lastActiveTimeFlow
+        setupMocks(
+            lastActiveTime = System.currentTimeMillis(),
+            sdkIsOpen = false,
+            flowIsStarted = true
+        )
 
         val initialInterval = MILLISECONDS_IN_SECOND * 15L
         val checkInterval = MILLISECONDS_IN_SECOND * 15L * 2
         every { liveUpdates.getTicketsUpdateInterval(any()) } returns initialInterval
 
-        val autoRefreshFeatureFactory = AutoRefreshFeatureFactory(
-            storeFactory = storeFactory,
-            repository = repository,
-            preferencesManager = preferencesManager,
-            systemMessageStore = systemMessageStore,
-            localTicketsStore = localTicketsStore
-        ).create(liveUpdates, testDispatcher)
+        val autoRefreshFeatureFactory = createAutoRefreshFeature(testDispatcher)
 
-        advanceTimeBy(checkInterval)
-        runCurrent()
-        coVerify(exactly = 3) { repository.sync() }
+        checkSyncCount(checkInterval, 3)
 
-        autoRefreshFeatureFactory.cancel()
-        testDispatcher.cancelChildren()
-        testDispatcher.cancel()
+        cancelTest(testDispatcher, autoRefreshFeatureFactory)
     }
 
     /**
@@ -200,34 +158,23 @@ class AutoRefreshFeatureTest {
     @Test
     fun whenInterval60CountCallingSync() = runTest {
         val testDispatcher = StandardTestDispatcher(testScheduler)
-        clearAllMocks()
-        unmockkAll()
-        isStartedFlow = MutableStateFlow(true)
-        lastActiveTimeFlow = MutableStateFlow(System.currentTimeMillis())
-        sdOpenFlow = MutableStateFlow(false)
 
-        coEvery { liveUpdates.isStartedFlow() } returns isStartedFlow
-        coEvery { preferencesManager.getLastActiveTimeFlow() } returns lastActiveTimeFlow
+        setupMocks(
+            lastActiveTime = System.currentTimeMillis(),
+            sdkIsOpen = false,
+            flowIsStarted = true
+        )
+
 
         val initialInterval = MILLISECONDS_IN_SECOND * 60L
         val checkInterval = MILLISECONDS_IN_SECOND * 60L * 2
         every { liveUpdates.getTicketsUpdateInterval(any()) } returns initialInterval
 
-        val autoRefreshFeatureFactory = AutoRefreshFeatureFactory(
-            storeFactory = storeFactory,
-            repository = repository,
-            preferencesManager = preferencesManager,
-            systemMessageStore = systemMessageStore,
-            localTicketsStore = localTicketsStore
-        ).create(liveUpdates, testDispatcher)
+        val autoRefreshFeatureFactory = createAutoRefreshFeature(testDispatcher)
 
-        advanceTimeBy(checkInterval)
-        runCurrent()
-        coVerify(exactly = 3) { repository.sync() }
+        checkSyncCount(checkInterval, 3)
 
-        autoRefreshFeatureFactory.cancel()
-        testDispatcher.cancelChildren()
-        testDispatcher.cancel()
+        cancelTest(testDispatcher, autoRefreshFeatureFactory)
     }
 
 
@@ -239,39 +186,27 @@ class AutoRefreshFeatureTest {
      * isStartedFlow.value = false
      */
     @Test
-    fun whenSdIsOpenShouldStartWithInterval() = runTest() {
+    fun whenSdIsOpenShouldStartWithInterval() = runTest {
         val testDispatcher = StandardTestDispatcher(testScheduler)
-        clearAllMocks()
-        unmockkAll()
-        val calendar = Calendar.getInstance()
-        calendar.add(Calendar.MINUTE, -3)
-        isStartedFlow = MutableStateFlow(false)
-        lastActiveTimeFlow = MutableStateFlow(calendar.timeInMillis)
-        sdOpenFlow = MutableStateFlow(true)
 
-        coEvery { liveUpdates.isStartedFlow() } returns isStartedFlow
-        coEvery { preferencesManager.getLastActiveTimeFlow() } returns lastActiveTimeFlow
-        PyrusServiceDesk.updateSdIsOpen(true)
+        val threeMinutesAgo = Calendar.getInstance().apply {
+            add(Calendar.MINUTE, -3)
+        }.timeInMillis
 
-        val interval = getTestTicketsUpdateInterval(calendar.timeInMillis)
+        setupMocks(
+            lastActiveTime = threeMinutesAgo,
+            sdkIsOpen = true,
+            flowIsStarted = false
+        )
+
+        setInterval(threeMinutesAgo)
         val checkInterval = MILLISECONDS_IN_SECOND * 15L * 2
-        every { liveUpdates.getTicketsUpdateInterval(any()) } returns interval
 
-        val autoRefreshFeatureFactory = AutoRefreshFeatureFactory(
-            storeFactory = storeFactory,
-            repository = repository,
-            preferencesManager = preferencesManager,
-            systemMessageStore = systemMessageStore,
-            localTicketsStore = localTicketsStore
-        ).create(liveUpdates, testDispatcher)
+        val autoRefreshFeatureFactory = createAutoRefreshFeature(testDispatcher)
 
-        advanceTimeBy(checkInterval)
-        runCurrent()
-        coVerify(exactly = 3) { repository.sync() }
+        checkSyncCount(checkInterval, 3)
 
-        autoRefreshFeatureFactory.cancel()
-        testDispatcher.cancelChildren()
-        testDispatcher.cancel()
+        cancelTest(testDispatcher, autoRefreshFeatureFactory)
     }
 
     /**
@@ -284,37 +219,25 @@ class AutoRefreshFeatureTest {
     @Test
     fun whenSdIsOpenShouldStartEvenIfLastActiveTimeIsMoreThen3DaysAgo() = runTest {
         val testDispatcher = StandardTestDispatcher(testScheduler)
-        clearAllMocks()
-        unmockkAll()
-        val calendar = Calendar.getInstance()
-        calendar.add(Calendar.DAY_OF_YEAR, -4)
-        isStartedFlow = MutableStateFlow(false)
-        lastActiveTimeFlow = MutableStateFlow(calendar.timeInMillis)
-        sdOpenFlow = MutableStateFlow(true)
 
-        coEvery { liveUpdates.isStartedFlow() } returns isStartedFlow
-        coEvery { preferencesManager.getLastActiveTimeFlow() } returns lastActiveTimeFlow
-        PyrusServiceDesk.updateSdIsOpen(true)
+        val fourDaysAgo = Calendar.getInstance().apply {
+            add(Calendar.DAY_OF_YEAR, -4)
+        }.timeInMillis
 
-        val interval = getTestTicketsUpdateInterval(calendar.timeInMillis)
+        setupMocks(
+            lastActiveTime = fourDaysAgo,
+            sdkIsOpen = true,
+            flowIsStarted = false
+        )
+
+        setInterval(fourDaysAgo)
         val checkInterval = MILLISECONDS_IN_SECOND * 60L * 6
-        every { liveUpdates.getTicketsUpdateInterval(any()) } returns interval
 
-        val autoRefreshFeatureFactory = AutoRefreshFeatureFactory(
-            storeFactory = storeFactory,
-            repository = repository,
-            preferencesManager = preferencesManager,
-            systemMessageStore = systemMessageStore,
-            localTicketsStore = localTicketsStore
-        ).create(liveUpdates, testDispatcher)
+        val autoRefreshFeatureFactory = createAutoRefreshFeature(testDispatcher)
 
-        advanceTimeBy(checkInterval)
-        runCurrent()
-        coVerify(exactly = 3) { repository.sync() }
+        checkSyncCount(checkInterval, 3)
 
-        autoRefreshFeatureFactory.cancel()
-        testDispatcher.cancelChildren()
-        testDispatcher.cancel()
+        cancelTest(testDispatcher, autoRefreshFeatureFactory)
     }
 
     /**
@@ -327,40 +250,30 @@ class AutoRefreshFeatureTest {
     @Test
     fun whenSdIsOpenedShouldStartUpdates() = runTest(testDispatcher, 60.seconds) {
         val testDispatcher = StandardTestDispatcher(testScheduler)
-        clearAllMocks()
-        unmockkAll()
-        val calendar = Calendar.getInstance()
-        calendar.add(Calendar.DAY_OF_YEAR, -4)
-        isStartedFlow = MutableStateFlow(false)
-        lastActiveTimeFlow = MutableStateFlow(calendar.timeInMillis)
 
-        coEvery { liveUpdates.isStartedFlow() } returns isStartedFlow
-        coEvery { preferencesManager.getLastActiveTimeFlow() } returns lastActiveTimeFlow
-        PyrusServiceDesk.updateSdIsOpen(false)
+        val fourDaysAgo = Calendar.getInstance().apply {
+            add(Calendar.DAY_OF_YEAR, -4)
+        }.timeInMillis
 
-        var interval = getTestTicketsUpdateInterval(calendar.timeInMillis)
+        setupMocks(
+            lastActiveTime = fourDaysAgo,
+            sdkIsOpen = false,
+            flowIsStarted = false
+        )
+
+        setInterval(fourDaysAgo)
         val checkInterval = MILLISECONDS_IN_SECOND * 60L * 6
-        every { liveUpdates.getTicketsUpdateInterval(any()) } returns interval
-        val autoRefreshFeatureFactory = AutoRefreshFeatureFactory(
-                storeFactory = storeFactory,
-                repository = repository,
-                preferencesManager = preferencesManager,
-                systemMessageStore = systemMessageStore,
-                localTicketsStore = localTicketsStore
-            ).create(liveUpdates, testDispatcher)
 
-        advanceTimeBy(checkInterval)
-        runCurrent()
-        coVerify(exactly = 0) { repository.sync() }
+        val autoRefreshFeatureFactory = createAutoRefreshFeature(testDispatcher)
+
+        checkSyncCount(checkInterval, 0)
 
         PyrusServiceDesk.updateSdIsOpen(true)
-        interval = getTestTicketsUpdateInterval(calendar.timeInMillis)
-        every { liveUpdates.getTicketsUpdateInterval(any()) } returns interval
-        advanceTimeBy(checkInterval)
-        runCurrent()
-        coVerify(exactly = 3) { repository.sync() }
-        autoRefreshFeatureFactory.cancel()
-        testDispatcher.cancelChildren()
+
+        setInterval(fourDaysAgo)
+        checkSyncCount(checkInterval, 3)
+
+        cancelTest(testDispatcher, autoRefreshFeatureFactory)
     }
 
     /**
@@ -374,44 +287,29 @@ class AutoRefreshFeatureTest {
     @Test
     fun whenSdIsOpenedShouldStartUpdatesEvenLiveUpdatesIsStarted() = runTest {
         val testDispatcher = StandardTestDispatcher(testScheduler)
-        clearAllMocks()
-        unmockkAll()
-        val calendar = Calendar.getInstance()
-        calendar.add(Calendar.MINUTE, -3)
-        isStartedFlow = MutableStateFlow(true)
-        lastActiveTimeFlow = MutableStateFlow(calendar.timeInMillis)
+        val threeMinutesAgo = Calendar.getInstance().apply {
+            add(Calendar.MINUTE, -3)
+        }.timeInMillis
 
-        coEvery { liveUpdates.isStartedFlow() } returns isStartedFlow
-        coEvery { preferencesManager.getLastActiveTimeFlow() } returns lastActiveTimeFlow
-        PyrusServiceDesk.updateSdIsOpen(false)
+        setupMocks(
+            lastActiveTime = threeMinutesAgo,
+            sdkIsOpen = false,
+            flowIsStarted = true
+        )
 
-        var interval = getTestTicketsUpdateInterval(calendar.timeInMillis)
+        setInterval(threeMinutesAgo)
         val checkInterval = MILLISECONDS_IN_SECOND * 15L * 2 + MILLISECONDS_IN_SECOND * 5L
-        every { liveUpdates.getTicketsUpdateInterval(any()) } returns interval
 
-        val autoRefreshFeatureFactory = AutoRefreshFeatureFactory(
-            storeFactory = storeFactory,
-            repository = repository,
-            preferencesManager = preferencesManager,
-            systemMessageStore = systemMessageStore,
-            localTicketsStore = localTicketsStore
-        ).create(liveUpdates, testDispatcher)
+        val autoRefreshFeatureFactory = createAutoRefreshFeature(testDispatcher)
 
-        advanceTimeBy(checkInterval)
-        runCurrent()
-        coVerify(exactly = 3) { repository.sync() }
+        checkSyncCount(checkInterval, 3)
 
         PyrusServiceDesk.updateSdIsOpen(true)
-        interval = getTestTicketsUpdateInterval(calendar.timeInMillis)
-        every { liveUpdates.getTicketsUpdateInterval(any()) } returns interval
-        val checkInterval2 = MILLISECONDS_IN_SECOND * 2L
-        advanceTimeBy(checkInterval2)
-        runCurrent()
-        coVerify(exactly = 4) { repository.sync() }
 
-        autoRefreshFeatureFactory.cancel()
-        testDispatcher.cancelChildren()
-        testDispatcher.cancel()
+        val checkInterval2 = MILLISECONDS_IN_SECOND * 2L
+        checkSyncCount(checkInterval2, 4)
+
+        cancelTest(testDispatcher, autoRefreshFeatureFactory)
     }
 
     /**
@@ -424,34 +322,21 @@ class AutoRefreshFeatureTest {
     @Test
     fun whenSdIsOpenedFalseAndLiveUpdatesIsStartedFalseStartWithNOUPDATES() = runTest {
         val testDispatcher = StandardTestDispatcher(testScheduler)
-        clearAllMocks()
-        unmockkAll()
-        isStartedFlow = MutableStateFlow(false)
-        lastActiveTimeFlow = MutableStateFlow(NO_UPDATES)
-        PyrusServiceDesk.updateSdIsOpen(false)
 
-        coEvery { liveUpdates.isStartedFlow() } returns isStartedFlow
-        coEvery { preferencesManager.getLastActiveTimeFlow() } returns lastActiveTimeFlow
+        setupMocks(
+            lastActiveTime = NO_UPDATES,
+            sdkIsOpen = false,
+            flowIsStarted = false
+        )
 
-        var interval = getTestTicketsUpdateInterval(NO_UPDATES)
+        setInterval(NO_UPDATES)
         val checkInterval = MILLISECONDS_IN_SECOND * 60L * 2
-        every { liveUpdates.getTicketsUpdateInterval(any()) } returns interval
 
-        val autoRefreshFeatureFactory = AutoRefreshFeatureFactory(
-            storeFactory = storeFactory,
-            repository = repository,
-            preferencesManager = preferencesManager,
-            systemMessageStore = systemMessageStore,
-            localTicketsStore = localTicketsStore
-        ).create(liveUpdates, testDispatcher)
+        val autoRefreshFeatureFactory = createAutoRefreshFeature(testDispatcher)
 
-        advanceTimeBy(checkInterval)
-        runCurrent()
-        coVerify(exactly = 0) { repository.sync() }
+        checkSyncCount(checkInterval, 0)
 
-        autoRefreshFeatureFactory.cancel()
-        testDispatcher.cancelChildren()
-        testDispatcher.cancel()
+        cancelTest(testDispatcher, autoRefreshFeatureFactory)
     }
 
     /**
@@ -465,45 +350,29 @@ class AutoRefreshFeatureTest {
     @Test
     fun whenSdIsOpenSecondNotShouldStartNewInterval() = runTest {
         val testDispatcher = StandardTestDispatcher(testScheduler)
-        clearAllMocks()
-        unmockkAll()
-        val calendar = Calendar.getInstance()
-        calendar.add(Calendar.MINUTE, -3)
-        isStartedFlow = MutableStateFlow(false)
-        lastActiveTimeFlow = MutableStateFlow(calendar.timeInMillis)
-        PyrusServiceDesk.updateSdIsOpen(true)
+        val threeMinutesAgo = Calendar.getInstance().apply {
+            add(Calendar.MINUTE, -3)
+        }.timeInMillis
+
+        setupMocks(
+            lastActiveTime = threeMinutesAgo,
+            sdkIsOpen = true,
+            flowIsStarted = false
+        )
 
 
-        coEvery { liveUpdates.isStartedFlow() } returns isStartedFlow
-        coEvery { preferencesManager.getLastActiveTimeFlow() } returns lastActiveTimeFlow
-
-        var interval = getTestTicketsUpdateInterval(calendar.timeInMillis)
+        setInterval(threeMinutesAgo)
         val checkInterval = MILLISECONDS_IN_SECOND * 15L * 2 + MILLISECONDS_IN_SECOND * 5L
-        every { liveUpdates.getTicketsUpdateInterval(any()) } returns interval
 
-        val autoRefreshFeatureFactory = AutoRefreshFeatureFactory(
-            storeFactory = storeFactory,
-            repository = repository,
-            preferencesManager = preferencesManager,
-            systemMessageStore = systemMessageStore,
-            localTicketsStore = localTicketsStore
-        ).create(liveUpdates, testDispatcher)
+        val autoRefreshFeatureFactory = createAutoRefreshFeature(testDispatcher)
 
-        advanceTimeBy(checkInterval)
-        runCurrent()
-        coVerify(exactly = 3) { repository.sync() }
+        checkSyncCount(checkInterval, 3)
 
         PyrusServiceDesk.updateSdIsOpen(true)
-        interval = getTestTicketsUpdateInterval(calendar.timeInMillis)
-        every { liveUpdates.getTicketsUpdateInterval(any()) } returns interval
         val checkInterval2 = MILLISECONDS_IN_SECOND * 2L
-        advanceTimeBy(checkInterval2)
-        runCurrent()
-        coVerify(exactly = 3) { repository.sync() }
+        checkSyncCount(checkInterval2, 3)
 
-        autoRefreshFeatureFactory.cancel()
-        testDispatcher.cancelChildren()
-        testDispatcher.cancel()
+        cancelTest(testDispatcher, autoRefreshFeatureFactory)
     }
 
     /**
@@ -516,43 +385,27 @@ class AutoRefreshFeatureTest {
     @Test
     fun whenLiveUpdatesIsStartedShouldStartUpdates() = runTest {
         val testDispatcher = StandardTestDispatcher(testScheduler)
-        clearAllMocks()
-        unmockkAll()
-        val calendar = Calendar.getInstance()
-        calendar.add(Calendar.MINUTE, -3)
-        isStartedFlow = MutableStateFlow(false)
-        lastActiveTimeFlow = MutableStateFlow(calendar.timeInMillis)
-        PyrusServiceDesk.updateSdIsOpen(false)
+        val threeMinutesAgo = Calendar.getInstance().apply {
+            add(Calendar.MINUTE, -3)
+        }.timeInMillis
 
-        coEvery { liveUpdates.isStartedFlow() } returns isStartedFlow
-        coEvery { preferencesManager.getLastActiveTimeFlow() } returns lastActiveTimeFlow
+        setupMocks(
+            lastActiveTime = threeMinutesAgo,
+            sdkIsOpen = false,
+            flowIsStarted = false
+        )
 
-        var interval = getTestTicketsUpdateInterval(calendar.timeInMillis)
+        setInterval(threeMinutesAgo)
         val checkInterval = MILLISECONDS_IN_SECOND * 15L * 2
-        every { liveUpdates.getTicketsUpdateInterval(any()) } returns interval
 
-        val autoRefreshFeatureFactory = AutoRefreshFeatureFactory(
-            storeFactory = storeFactory,
-            repository = repository,
-            preferencesManager = preferencesManager,
-            systemMessageStore = systemMessageStore,
-            localTicketsStore = localTicketsStore
-        ).create(liveUpdates, testDispatcher)
+        val autoRefreshFeatureFactory = createAutoRefreshFeature(testDispatcher)
 
-        advanceTimeBy(checkInterval)
-        runCurrent()
-        coVerify(exactly = 0) { repository.sync() }
+        checkSyncCount(checkInterval, 0)
 
         isStartedFlow.value = true
-        interval = getTestTicketsUpdateInterval(calendar.timeInMillis)
-        every { liveUpdates.getTicketsUpdateInterval(any()) } returns interval
-        advanceTimeBy(checkInterval)
-        runCurrent()
-        coVerify(exactly = 3) { repository.sync() }
+        checkSyncCount(checkInterval, 3)
 
-        autoRefreshFeatureFactory.cancel()
-        testDispatcher.cancelChildren()
-        testDispatcher.cancel()
+        cancelTest(testDispatcher, autoRefreshFeatureFactory)
     }
 
 
@@ -565,44 +418,28 @@ class AutoRefreshFeatureTest {
     @Test
     fun whenLastActiveTimeChangedShouldStartWithNewInterval() = runTest {
         val testDispatcher = StandardTestDispatcher(testScheduler)
-        clearAllMocks()
-        unmockkAll()
-        val calendar = Calendar.getInstance()
-        calendar.add(Calendar.MINUTE, -3)
-        isStartedFlow = MutableStateFlow(true)
-        lastActiveTimeFlow = MutableStateFlow(calendar.timeInMillis)
-        PyrusServiceDesk.updateSdIsOpen(false)
+        val threeMinutesAgo = Calendar.getInstance().apply {
+            add(Calendar.MINUTE, -3)
+        }.timeInMillis
+        setupMocks(
+            lastActiveTime = threeMinutesAgo,
+            sdkIsOpen = false,
+            flowIsStarted = true
+        )
 
-        coEvery { liveUpdates.isStartedFlow() } returns isStartedFlow
-        coEvery { preferencesManager.getLastActiveTimeFlow() } returns lastActiveTimeFlow
-
-        var interval = getTestTicketsUpdateInterval(calendar.timeInMillis)
+        setInterval(threeMinutesAgo)
         val checkInterval = MILLISECONDS_IN_SECOND * 15L * 2
-        every { liveUpdates.getTicketsUpdateInterval(any()) } returns interval
 
-        val autoRefreshFeatureFactory = AutoRefreshFeatureFactory(
-            storeFactory = storeFactory,
-            repository = repository,
-            preferencesManager = preferencesManager,
-            systemMessageStore = systemMessageStore,
-            localTicketsStore = localTicketsStore
-        ).create(liveUpdates, testDispatcher)
+        val autoRefreshFeatureFactory = createAutoRefreshFeature(testDispatcher)
 
-        advanceTimeBy(checkInterval)
-        runCurrent()
-        coVerify(exactly = 3) { repository.sync() }
+        checkSyncCount(checkInterval, 3)
 
         val newLastActiveTime = System.currentTimeMillis()
-        interval = getTestTicketsUpdateInterval(newLastActiveTime)
-        every { liveUpdates.getTicketsUpdateInterval(any()) } returns interval
+        setInterval(newLastActiveTime)
         lastActiveTimeFlow.value = newLastActiveTime
-        advanceTimeBy(MILLISECONDS_IN_SECOND * 15L)
-        runCurrent()
-        coVerify(exactly = 7) { repository.sync() }
+        checkSyncCount(MILLISECONDS_IN_SECOND * 15L, 7)
 
-        autoRefreshFeatureFactory.cancel()
-        testDispatcher.cancelChildren()
-        testDispatcher.cancel()
+        cancelTest(testDispatcher, autoRefreshFeatureFactory)
     }
 
     /**
@@ -614,42 +451,73 @@ class AutoRefreshFeatureTest {
     @Test
     fun updatesAfterAMinute() = runTest {
         val testDispatcher = StandardTestDispatcher(testScheduler)
+        val calendar = Calendar.getInstance()
+        setupMocks(
+            lastActiveTime = calendar.timeInMillis,
+            sdkIsOpen = false,
+            flowIsStarted = true
+        )
+
+        var interval = MILLISECONDS_IN_SECOND * 5L
+        every {
+            liveUpdates.getTicketsUpdateInterval(any())
+        } returns interval
+
+        val checkInterval = MILLISECONDS_IN_SECOND * 30L
+
+        val autoRefreshFeatureFactory = createAutoRefreshFeature(testDispatcher)
+
+        checkSyncCount(checkInterval, 7)
+
+        interval = MILLISECONDS_IN_SECOND * 15L
+        every {
+            liveUpdates.getTicketsUpdateInterval(any())
+        } returns interval
+
+        checkSyncCount(MILLISECONDS_IN_SECOND * 15L, 8)
+
+        cancelTest(testDispatcher, autoRefreshFeatureFactory)
+    }
+
+    private fun setupMocks(lastActiveTime: Long, sdkIsOpen: Boolean, flowIsStarted: Boolean) {
         clearAllMocks()
         unmockkAll()
-        val calendar = Calendar.getInstance()
-        isStartedFlow = MutableStateFlow(true)
-        lastActiveTimeFlow = MutableStateFlow(calendar.timeInMillis)
-        PyrusServiceDesk.updateSdIsOpen(false)
+
+        isStartedFlow = MutableStateFlow(flowIsStarted)
+        lastActiveTimeFlow = MutableStateFlow(lastActiveTime)
 
         coEvery { liveUpdates.isStartedFlow() } returns isStartedFlow
         coEvery { preferencesManager.getLastActiveTimeFlow() } returns lastActiveTimeFlow
+        PyrusServiceDesk.updateSdIsOpen(sdkIsOpen)
+    }
 
-        var interval = MILLISECONDS_IN_SECOND * 5L
-        val checkInterval = MILLISECONDS_IN_SECOND * 30L
-        every { liveUpdates.getTicketsUpdateInterval(any()) } returns interval
-
-        val autoRefreshFeatureFactory = AutoRefreshFeatureFactory(
+    private fun createAutoRefreshFeature(testDispatcher: TestDispatcher): AutoRefreshFeature {
+        return AutoRefreshFeatureFactory(
             storeFactory = storeFactory,
             repository = repository,
             preferencesManager = preferencesManager,
             systemMessageStore = systemMessageStore,
             localTicketsStore = localTicketsStore
         ).create(liveUpdates, testDispatcher)
+    }
 
-        advanceTimeBy(checkInterval)
-        runCurrent()
-        coVerify(exactly = 7) { repository.sync() }
-
-        interval = MILLISECONDS_IN_SECOND * 15L
-        every { liveUpdates.getTicketsUpdateInterval(any()) } returns interval
-
-        advanceTimeBy(MILLISECONDS_IN_SECOND * 15L)
-        runCurrent()
-        coVerify(exactly = 8) { repository.sync() }
-
+    private fun cancelTest(testDispatcher: TestDispatcher, autoRefreshFeatureFactory: AutoRefreshFeature) {
         autoRefreshFeatureFactory.cancel()
         testDispatcher.cancelChildren()
         testDispatcher.cancel()
+    }
+
+    private fun TestScope.checkSyncCount(checkInterval: Long, expectedCount: Int) {
+        advanceTimeBy(checkInterval)
+        runCurrent()
+        coVerify(exactly = expectedCount) { repository.sync() }
+    }
+
+    private fun setInterval(lastActiveTime: Long) {
+        val interval = getTestTicketsUpdateInterval(lastActiveTime)
+        every {
+            liveUpdates.getTicketsUpdateInterval(any())
+        } returns interval
     }
 
     companion object {
