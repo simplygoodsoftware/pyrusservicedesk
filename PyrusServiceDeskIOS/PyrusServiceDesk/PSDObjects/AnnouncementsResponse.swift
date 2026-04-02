@@ -127,6 +127,7 @@ enum BlockType: String, Codable {
     case bulletListItem = "BulletListItem"
     case numberListItem = "NumberListItem"
     case quote = "Quote"
+    case header = "Header"
 }
 
 struct RichTextInline: Codable, Hashable {

@@ -145,6 +145,8 @@ extension RichTextDocument {
                 
             case .code:
                 break
+            case .header:
+                break
             }
             
             // Инлайны
