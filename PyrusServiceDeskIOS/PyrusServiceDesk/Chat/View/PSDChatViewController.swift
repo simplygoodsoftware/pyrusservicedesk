@@ -32,6 +32,7 @@ class PSDChatViewController: PSDViewController, PSDMainController {
         navigationController?.popViewController(animated: true)
         PyrusLogger.shared.saveLocalLogToDisk()
         PyrusServiceDesk.stopCallback?.onStop()
+        PyrusLogger.shared.logEvent(" Chat closed ")
         PyrusServiceDeskController.clean()
         PyrusServiceDesk.isStarted = false
     }
@@ -166,9 +167,9 @@ class PSDChatViewController: PSDViewController, PSDMainController {
             return true
         }
         return false
-    
+        
     }
-       
+    
     private var isKeyBoardOpen = false
     @objc private func keyboardDidHide(_ notification: NSNotification) {
         isKeyBoardOpen = false
@@ -176,23 +177,74 @@ class PSDChatViewController: PSDViewController, PSDMainController {
     
     private var isFirstKeyboardShow: Bool = true
     private var currkeyboardHeight: CGFloat = 0
+    private var defaultMessageInputViewHeight: CGFloat = 0
+    
     @objc private func keyboardWillShow(_ notification: NSNotification) {
+        if #available(iOS 26.0, *) {
+            if let infoEndKey: NSValue = notification.userInfo?[UIResponder.keyboardFrameEndUserInfoKey] as? NSValue,
+               let center = (notification.userInfo?["UIKeyboardCenterBeginUserInfoKey"] as? NSValue)?.cgPointValue {
+                let keyboardEndFrame = infoEndKey.cgRectValue
+                guard keyboardEndFrame.height != 0 else {
+                    return
+                }
+                let duration = keyboardAnimationDuration(notification)
+                var keyboardHeight = keyboardEndFrame.height
+                
+                let oldInset = self.tableView.contentInset.top
+                let oldOffset = self.tableView.contentOffset.y
+                let oldKeyboardHeight = self.currkeyboardHeight
+                
+                currkeyboardHeight = keyboardHeight
+                
+                if (self.messageInputView.inputTextView.isFirstResponder || !self.isKeyBoardOpen) && !(center.y > self.view.frame.maxY && self.isKeyBoardOpen) {
+                    if self.messageInputView.inputTextView.isFirstResponder {
+                        self.bottomScrollButton?.constant -= keyboardHeight - oldInset
+                        self.bottomStopButton?.constant -= keyboardHeight - oldInset
+                        self.view.layoutIfNeeded()
+                    }
+                    
+                    if isFirstKeyboardShow && (PyrusServiceDesk.multichats || PyrusServiceDesk.startWithPush) {
+                        defaultMessageInputViewHeight = messageInputView.frame.height
+                        UIView.performWithoutAnimation {
+                            self.tableView.contentOffset.y -= keyboardHeight - oldInset
+                        }
+                        isFirstKeyboardShow = false
+                    } else {
+                        let delta = keyboardHeight - oldKeyboardHeight
+                        
+                        if delta > 0 {
+                            self.tableView.contentOffset.y -= delta
+                        }
+                        
+                        print("размер: keyboardHeight - oldInset: \(oldOffset - keyboardHeight + oldInset)")
+                        print("keyboardHeight: \(keyboardHeight)")
+                    }
+                    
+                }
+                if !(center.y > self.view.frame.maxY && self.isKeyBoardOpen) {
+                    self.tableView.contentInset.top = keyboardHeight
+                    self.isKeyBoardOpen = self.messageInputView.inputTextView.isFirstResponder
+                }
+            }
+            return
+        }
+        
+        
         if let infoEndKey: NSValue = notification.userInfo?[UIResponder.keyboardFrameEndUserInfoKey] as? NSValue,
            let center = (notification.userInfo?["UIKeyboardCenterBeginUserInfoKey"] as? NSValue)?.cgPointValue {
             let keyboardEndFrame = infoEndKey.cgRectValue
+            guard keyboardEndFrame.height != 0 else {
+                return
+            }
             let duration = keyboardAnimationDuration(notification)
             let keyboardHeight = keyboardEndFrame.height
             currkeyboardHeight = keyboardHeight
-            // UIView.animate(withDuration: duration, delay: 0, animations: {
+            
             var oldInset = self.tableView.contentInset.top
             if (self.messageInputView.inputTextView.isFirstResponder || !self.isKeyBoardOpen) && !(center.y > self.view.frame.maxY && self.isKeyBoardOpen) {
                 if self.messageInputView.inputTextView.isFirstResponder {
                     self.bottomScrollButton?.constant -= keyboardHeight - oldInset
                     self.bottomStopButton?.constant -= keyboardHeight - oldInset
-                    self.view.layoutIfNeeded()
-                }
-                if keyboardHeight < 200 {
-                    //                        oldInset = 0
                 }
                 
                 if isFirstKeyboardShow && (PyrusServiceDesk.multichats || PyrusServiceDesk.startWithPush) {
@@ -209,7 +261,6 @@ class PSDChatViewController: PSDViewController, PSDMainController {
                 self.tableView.contentInset.top = keyboardHeight
                 self.isKeyBoardOpen = self.messageInputView.inputTextView.isFirstResponder
             }
-            //  })
         }
     }
     
@@ -227,16 +278,20 @@ class PSDChatViewController: PSDViewController, PSDMainController {
                 self.bottomStopButton?.constant = -110
                 self.view.layoutIfNeeded()
                 if !self.isActive {
-                    self.tableView.contentInset.top = 90 + self.view.safeAreaInsets.bottom
+                    self.tableView.contentInset.top = 90
                 } else
                 if !((self.oldHeight - self.messageInputView.frame.size.height).rounded() == self.view.safeAreaInsets.bottom)
                 {
-                    self.isAddButtonTapped = false
                     if #available(iOS 26.0, *) {
-                        self.tableView.contentInset.top = self.messageInputView.frame.size.height + self.view.safeAreaInsets.bottom
+                        self.tableView.contentInset.top = self.messageInputView.frame.size.height
+                        if abs(keyboardHeight - self.defaultMessageInputViewHeight) > 20 {
+                            self.tableView.contentInset.top += self.view.safeAreaInsets.bottom
+                            self.tableView.contentOffset.y -= self.view.safeAreaInsets.bottom
+                        }
                     } else {
                         self.tableView.contentInset.top = self.messageInputView.frame.size.height
                     }
+                    self.isAddButtonTapped = false
                 }
             })
             
@@ -329,13 +384,11 @@ class PSDChatViewController: PSDViewController, PSDMainController {
     override func viewWillDisappear(_ animated: Bool) {
         super.viewWillDisappear(animated)
         NotificationCenter.default.removeObserver(self)
-        EventsLogger.logEvent(.resignFirstResponder, additionalInfo: "hideAllKeyboard() called in viewWillDisappear")
         if !PyrusServiceDesk.multichats {
             hideAllKeyboard()
             messageInputView.isHidden = true
         }
         
-//        self.tableView.removeListeners()
         interactor.doInteraction(.viewWillDisappear)
         
         UIView.animate(withDuration: 0.2, animations: {
@@ -400,7 +453,6 @@ class PSDChatViewController: PSDViewController, PSDMainController {
     }
     
     func setupTableView() {
-//        tableView.addKeyboardListeners()
         tableView.chatDelegate = self
         if #available(iOS 11.0, *) {
             self.tableView.contentInsetAdjustmentBehavior = .never//.automatic
@@ -410,7 +462,7 @@ class PSDChatViewController: PSDViewController, PSDMainController {
             tableView.automaticallyAdjustsScrollIndicatorInsets = false
         }
         tableView.semanticContentAttribute = .forceRightToLeft
-
+        
         tableView.contentInset.top = 10
         
         view.addSubview(tableView)
@@ -575,7 +627,7 @@ class PSDChatViewController: PSDViewController, PSDMainController {
             navigationItem.leftBarButtonItem = item
         }
     }
-
+    
     private lazy var leftButton: UIButton = {
         let button = UIButton.init(type: .custom)
         let mainColor = PyrusServiceDesk.mainController?.customization?.barButtonTintColor ?? UIColor.darkAppColor
@@ -597,7 +649,6 @@ class PSDChatViewController: PSDViewController, PSDMainController {
     
     @objc private func closeButtonAction() {
         router.route(to: .close)
-        EventsLogger.logEvent(.resignFirstResponder, additionalInfo: "hideAllKeyboard() called after press on back button")
         UIView.performWithoutAnimation {
             hideAllKeyboard()
         }
@@ -677,6 +728,7 @@ extension PSDChatViewController: PSDChatViewProtocol {
         case .addRow(scrollsToBottom: let scrollsToBottom):
             tableView.addRow(scrollsToBottom: scrollsToBottom, keyBoardHeight: currkeyboardHeight)
         case .addNewRow:
+            self.deletedAllAttachments()
             if(tableView.numberOfRows(inSection: 0) == 0) {
                 tableView.addNewRow() { [weak self] in
                     self?.interactor.doInteraction(.addNewRow)
@@ -743,6 +795,16 @@ extension PSDChatViewController: PSDChatViewProtocol {
 }
 
 extension PSDChatViewController: PSDMessageInputViewDelegate {
+    func deletedAllAttachments() {
+        if #available(iOS 26.0, *) {
+            if isKeyBoardOpen {
+                tableView.contentInset.top = currkeyboardHeight
+            } else {
+                tableView.contentInset.top = defaultMessageInputViewHeight
+            }
+        }
+    }
+    
     func recordStop() {
         stopButton.alpha = 0
     }

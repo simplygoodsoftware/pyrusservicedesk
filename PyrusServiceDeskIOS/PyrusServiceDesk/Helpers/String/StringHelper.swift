@@ -1,4 +1,6 @@
 import Foundation
+import CoreFoundation
+
 private struct HTMLEscapeMap {
     let escapeSequence: NSString
     let uchar: UInt16
@@ -367,10 +369,10 @@ class HelpersStrings {
             // Декодируем HTML-сущность
             if let decodedData = entity.data(using: .utf8),
                let decodedString = try? NSAttributedString(
-                    data: decodedData,
-                    options: [.documentType: NSAttributedString.DocumentType.html,
-                             .characterEncoding: String.Encoding.utf8.rawValue],
-                    documentAttributes: nil) {
+                data: decodedData,
+                options: [.documentType: NSAttributedString.DocumentType.html,
+                          .characterEncoding: String.Encoding.utf8.rawValue],
+                documentAttributes: nil) {
                 
                 // Сохраняем оригинальные атрибуты для этого диапазона
                 let originalAttributes = mutableResult.attributes(at: entityRange.location, effectiveRange: nil)
@@ -387,23 +389,33 @@ class HelpersStrings {
         return NSAttributedString(attributedString: mutableResult)
     }
     
+    /// Декодирует HTML-сущности в URL-строке.
+    static func decodingHTMLEntitiesInLink(_ urlString: String) -> String {
+        guard urlString.contains("&") else { return urlString }
+        
+        return urlString
+            .replacingOccurrences(of: "&amp;", with: "&")
+            .replacingOccurrences(of: "&#38;", with: "&")
+            .replacingOccurrences(of: "&#x26;", with: "&", options: [.caseInsensitive])
+            .replacingOccurrences(of: "&quot;", with: "\"")
+            .replacingOccurrences(of: "&#34;", with: "\"")
+            .replacingOccurrences(of: "&#x22;", with: "\"", options: [.caseInsensitive])
+    }
+    
+    
     static func attributedString(byDecodingHTMLEntities strAttr: NSMutableAttributedString) -> NSMutableAttributedString {
-        // Максимальная допустимая длина сущности вида &...; (включая & и ;)
-        // Достаточно 2..20, именованные обычно короткие (&nbsp;,&thetasym;), числовые тоже
         let maxEntityLen = 20
         let nsString = strAttr.string as NSString
-
+        
         var range = NSRange(location: 0, length: nsString.length)
         var subrange = nsString.range(of: "&", options: .backwards, range: range)
-
-        // Быстрый выход, если амперсандов нет
+        
         guard subrange.length > 0 else {
             strAttr.trailingNewlineChopped()
             return strAttr
         }
-
+        
         while subrange.length != 0 {
-            // Кандидат на сущность: после '&' должна идти буква или '#'
             let nextIdx = subrange.location + 1
             var isEntityCandidate = false
             if nextIdx < nsString.length {
@@ -414,54 +426,46 @@ class HelpersStrings {
                     isEntityCandidate = CharacterSet.letters.contains(scalar)
                 }
             }
-
-            // Сдвинем окно поиска влево (до текущего '&') заранее —
-            // это общий шаг для всех веток в конце итерации
+            
             range = NSMakeRange(0, subrange.location)
-
+            
             if !isEntityCandidate {
-                // Не похоже на сущность — идём к предыдущему '&'
                 subrange = nsString.range(of: "&", options: .backwards, range: range)
                 continue
             }
-
-            // Ищем ';' справа, но ограничиваемся разумным размером сущности
-            let upperBound = min(NSMaxRange(range) + 1, subrange.location + maxEntityLen)
-            let semiColonSearchRange = NSRange(location: subrange.location, length: max(0, upperBound - subrange.location))
+            
+            
+            let semiColonSearchEnd = min(subrange.location + maxEntityLen, nsString.length)
+            let semiColonSearchRange = NSRange(
+                location: subrange.location,
+                length: semiColonSearchEnd - subrange.location
+            )
             let semiColonRange = nsString.range(of: ";", options: .literal, range: semiColonSearchRange)
-
-            // Если ';' не нашли — этот '&' не образует сущность, двигаемся дальше
+            
             if semiColonRange.location == NSNotFound {
                 subrange = nsString.range(of: "&", options: .backwards, range: range)
                 continue
             }
-
+            
             let escapeRange = NSRange(location: subrange.location, length: semiColonRange.location - subrange.location + 1)
             let escapeString = nsString.substring(with: escapeRange) as NSString
             let length = escapeString.length
-
-            // Базовая фильтрация длины: >= 4 ("&lt;") и <= maxEntityLen
+            
             if length >= 4 && length <= maxEntityLen {
                 if escapeString.character(at: 1) == unichar("#") {
-                    // Числовые сущности: десятичные (&#123;) и шестнадцатеричные (&#x1F60A;)
                     let char2 = escapeString.character(at: 2)
                     if char2 == unichar("x") || char2 == unichar("X") {
-                        // Hex
                         let hexSequence = escapeString.substring(with: NSMakeRange(3, length - 4))
                         let scanner = Scanner(string: hexSequence)
                         var value: UInt64 = 0
                         if scanner.scanHexInt64(&value),
                            value > 0,
                            scanner.scanLocation == hexSequence.utf16.count {
-                            // До U+10FFFF включительно
                             if let scalar = UnicodeScalar(UInt32(value)) {
                                 strAttr.replaceCharacters(in: escapeRange, with: String(scalar))
-                            } else {
-                                // Некорректное значение — пропускаем
                             }
                         }
                     } else {
-                        // Decimal
                         let numberSequence = escapeString.substring(with: NSMakeRange(2, length - 3))
                         let scanner = Scanner(string: numberSequence)
                         var value: Int = 0
@@ -470,15 +474,11 @@ class HelpersStrings {
                            scanner.scanLocation == numberSequence.utf16.count {
                             if let scalar = UnicodeScalar(value) {
                                 strAttr.replaceCharacters(in: escapeRange, with: String(scalar))
-                            } else {
-                                // Некорректное значение — пропускаем
                             }
                         }
                     }
                 } else {
-                    // Именованные сущности (&amp;, &lt;, &gt;, &nbsp;, и т.п.)
-                    // Ищем в карте соответствий
-                    for i in 0..<(MemoryLayout.size(ofValue: gAsciiHTMLEscapeMap) / MemoryLayout<HTMLEscapeMap>.size) {
+                    for i in 0..<gAsciiHTMLEscapeMap.count {
                         if escapeString.isEqual(to: gAsciiHTMLEscapeMap[i].escapeSequence as String) {
                             var uchar = gAsciiHTMLEscapeMap[i].uchar
                             let replacement = NSString(characters: &uchar, length: 1) as String
@@ -488,11 +488,10 @@ class HelpersStrings {
                     }
                 }
             }
-
-            // Переходим к предыдущему '&'
+            
             subrange = nsString.range(of: "&", options: .backwards, range: range)
         }
-
+        
         strAttr.trailingNewlineChopped()
         return strAttr
     }

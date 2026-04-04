@@ -36,20 +36,26 @@ class PSDCopyTextView :UITextView,UIGestureRecognizerDelegate, UITextViewDelegat
         guard let link = attributedText.attribute(.link, at: startIndex, effectiveRange: nil) else {
             return false
         }
-        if
-            let str = link as? String,
-            let url = URL(string: str),
-            !HelpersStrings.insideDomain(url: url)
-        {
-            linkDelegate?.showLinkOpenAlert(url.absoluteString)
-            return false
-        } else if
-            let url = link as? URL,
-            !HelpersStrings.insideDomain(url: url)
-        {
-            linkDelegate?.showLinkOpenAlert(url.absoluteString)
+        
+        let url: URL?
+        if let str = link as? String {
+            url = URL(string: HelpersStrings.decodingHTMLEntitiesInLink(str))
+        } else if let linkURL = link as? URL {
+            url = URL(string: HelpersStrings.decodingHTMLEntitiesInLink(linkURL.absoluteString))
+        } else {
+            url = nil
+        }
+        
+        if let url, HelpersStrings.insideDomain(url: url) {
+            UIApplication.shared.open(url)
             return false
         }
+        
+        guard let url, !HelpersStrings.insideDomain(url: url) else {
+            return true
+        }
+        
+        linkDelegate?.showLinkOpenAlert(url.absoluteString)
         return true
     }
     

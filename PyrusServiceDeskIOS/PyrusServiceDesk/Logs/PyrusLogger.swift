@@ -30,7 +30,7 @@ class PyrusLogger: NSObject {
             guard let self = self else{
                 return
             }
-            if self.loglines.count >= LOGLINES_BUFFER{
+            if self.loglines.count >= LOGLINES_BUFFER {
                 self.flush2disk()
             }
             self.loglines.append(line)
@@ -55,7 +55,17 @@ class PyrusLogger: NSObject {
             }
         }
     }
+    
+    /// Возвращает содержимое лог-файла в виде строки
+    func getLogFileContent() -> String {
+        var result = ""
+        PyrusLogger.loggerQueue.sync { [weak self] in
+            result = self?.getLocalLog() ?? ""
+        }
+        return result
+    }
 }
+
 private extension PyrusLogger {
     static let loggerQueue = DispatchQueue(label: "com.pyrus_service_desk.logger.queue.serial")
     static let logPath: URL = {
@@ -63,11 +73,13 @@ private extension PyrusLogger {
         pyrusPath.appendPathComponent(LOG_FILE_PATH, isDirectory: false)
         return pyrusPath
     }()
+    
     static func directoryOldLogs() -> URL? {
         let paths = NSSearchPathForDirectoriesInDomains(.cachesDirectory, .userDomainMask, true)
         let cachesDirectory = URL(fileURLWithPath: paths.last ?? "")
         return cachesDirectory.appendingPathComponent(OLD_LOGS_PATH, isDirectory: true)
     }
+    
     static func oldLogFileURL() -> URL? {
         let fileManager = FileManager.default
         guard let directoryToOldLogs = directoryOldLogs() else {
@@ -78,8 +90,8 @@ private extension PyrusLogger {
         }
         let oldLogFileName = Date().stringWithFormat(LOG_DATE_FILE_FORMAT)
         return directoryToOldLogs.appendingPathComponent(oldLogFileName, isDirectory: false)
-        
     }
+    
     func flush2disk() {
         guard loglines.count > 0 else {
             return
@@ -94,7 +106,7 @@ private extension PyrusLogger {
         var fileHandler = FileHandle(forWritingAtPath: PyrusLogger.logPath.path)
         if fileHandler == nil {
             try? "".write(toFile: PyrusLogger.logPath.path, atomically: true, encoding: .utf8)
-                fileHandler = FileHandle(forWritingAtPath: PyrusLogger.logPath.path)
+            fileHandler = FileHandle(forWritingAtPath: PyrusLogger.logPath.path)
         }
         guard let data = lines.data(using: .utf8) else {
             return
@@ -104,8 +116,29 @@ private extension PyrusLogger {
         fileHandler?.write(data)
         fileHandler?.synchronizeFile()
         fileHandler?.closeFile()
+
+        checkLogLinesCountAndClearIfNeeded()
         checkFileSize()
     }
+    
+    func checkLogLinesCountAndClearIfNeeded() {
+        guard FileManager.default.fileExists(atPath: PyrusLogger.logPath.path) else {
+            return
+        }
+        
+        guard let content = try? String(contentsOfFile: PyrusLogger.logPath.path, encoding: .utf8) else {
+            return
+        }
+        
+        let linesCount = content.split(whereSeparator: \.isNewline).count
+        
+        guard linesCount > MAX_LOG_LINES_COUNT else {
+            return
+        }
+        
+        try? "".write(to: PyrusLogger.logPath, atomically: true, encoding: .utf8)
+    }
+    
     func checkFileSize() {
         guard let attributes = try? FileManager.default.attributesOfItem(atPath:  PyrusLogger.logPath.path) else {
             return
@@ -114,9 +147,8 @@ private extension PyrusLogger {
         if fileSize ?? 0 > MAX_LOG_SIZE, let url = PyrusLogger.oldLogFileURL() {
             try? FileManager.default.moveItem(at: PyrusLogger.logPath, to: url)
         }
-            
-        
     }
+    
     func getLocalLog() -> String {
         flush2disk()
         let log = try? String(contentsOfFile: PyrusLogger.logPath.path, encoding: .utf8)
@@ -135,6 +167,7 @@ private extension PyrusLogger {
         }
         return log_
     }
+    
     func getSortedLogFiles() -> [String] {
         let fileManger = FileManager.default
         var logFiles = [String]()
@@ -150,20 +183,24 @@ private extension PyrusLogger {
             (str1, str2) in
             let firstFileName = (str1 as NSString).deletingPathExtension
             let secondFileName = (str2 as NSString).deletingPathExtension
-            guard let firstDate = Date.getDate(from: firstFileName, with: LOG_DATE_FILE_FORMAT), let secondDate = Date.getDate(from: secondFileName, with: LOG_DATE_FILE_FORMAT) else {
+            guard let firstDate = Date.getDate(from: firstFileName, with: LOG_DATE_FILE_FORMAT),
+                  let secondDate = Date.getDate(from: secondFileName, with: LOG_DATE_FILE_FORMAT) else {
                 return false
             }
             return firstDate.compare(secondDate) == .orderedDescending
         })
         return logFiles
     }
+    
     func checkAndRemoveOldLogs() {
         PyrusLogger.loggerQueue.async { [weak self] in
-            guard let pathForLogs = PyrusLogger.directoryOldLogs(), let logFiles = self?.getSortedLogFiles(), logFiles.count > MAX_LOG_FILES_COUNT else {
+            guard let pathForLogs = PyrusLogger.directoryOldLogs(),
+                  let logFiles = self?.getSortedLogFiles(),
+                  logFiles.count > MAX_LOG_FILES_COUNT else {
                 return
             }
             let fileManger = FileManager.default
-            for (i,path) in logFiles.enumerated(){
+            for (i, path) in logFiles.enumerated() {
                 guard i < logFiles.count - MAX_LOG_FILES_COUNT else {
                     return
                 }
@@ -173,6 +210,7 @@ private extension PyrusLogger {
         }
     }
 }
+
 private let LOGLINES_BUFFER = 300
 private let MAX_LOG_SIZE = 10000000
 private let MAX_LOG_FILES_COUNT = 1
@@ -183,3 +221,4 @@ private let DEFAULT_VERSION = "error get version"
 private let LOG_FILE_NAME = "pyrus_ios_%lu.txt.gz"
 private let LOG_DATE_FORMAT = "dd(Z) HH:mm:ss.SSS"
 private let LOG_DATE_FILE_FORMAT = "d_MM_YYYY_HH_mm_ss"
+private let MAX_LOG_LINES_COUNT = 305

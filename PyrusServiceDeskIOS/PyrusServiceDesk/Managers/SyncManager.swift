@@ -20,6 +20,8 @@ class SyncManager {
         }
     }
     
+    var logsToSend: [LogInfo] = []
+    
     private var timerFosSendSync: Timer?
     private var previousDelay: Double?
 
@@ -65,6 +67,12 @@ class SyncManager {
 private extension SyncManager {
     
     func sync(isFilter: Bool = false) {
+        if logsToSend.count > 0 {
+            let logs = Logs(exceptions: logsToSend)
+            PSDLogService.sendLog(logs)
+            logsToSend.removeAll()
+        }
+        
         guard PyrusServiceDesk.isStarted || !PyrusServiceDesk.multichats else { return }
         PSDMessagesStorage.loadAttachments()
         
@@ -251,6 +259,16 @@ private extension SyncManager {
                     PyrusServiceDesk.repository.deleteCommand(withId: commandResult.commandId, serverTicketId: commandResult.ticketId)
                     PSDMessagesStorage.remove(messageId: message.clientId, needSafe: false, serverTicketId: commandResult.ticketId)
                     if commandResult.error != nil {
+                        let formatter = DateFormatter()
+                        formatter.dateFormat = "dd.MM.yy HH:mm:ss zzz"
+                        let errorMessage = "\(formatter.string(from: Date())) Error command result: commandId = \(commandResult.commandId), error = \(String(describing: commandResult.error)) "
+                        PyrusLogger.shared.logEvent(errorMessage)
+                        let log = LogInfo(
+                            message: errorMessage,
+                            stack: PyrusLogger.shared.getLogFileContent()
+                        )
+                        logsToSend.append(log)
+                        
                         message.state = .cantSend
                         PSDMessagesStorage.save(message: message)
                     }

@@ -8,7 +8,7 @@ import UIKit
     private static let REFRESH_TIME_INTEVAL = TimeInterval(1*60)
     private static let REFRESH_MAX_COUNT = 20
     
-    static let PSD_VERSION: String = "3.0.57"
+    static let PSD_VERSION: String = "3.0.59"
     
     ///AppId needed for request
     static var clientId: String?
@@ -352,7 +352,7 @@ import UIKit
     }
     
     @objc public static func subscribeToGogEvents(_ subscriber: LogEvents){
-        PyrusLogger.shared.logEvent("Did add logs subscriber.")
+        PyrusLogger.shared.logEvent("Did add logs subscriber. ")
         PyrusServiceDesk.logEvent = subscriber
     }
     

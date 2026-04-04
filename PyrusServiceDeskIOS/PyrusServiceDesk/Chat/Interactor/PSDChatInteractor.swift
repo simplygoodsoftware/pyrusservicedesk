@@ -615,6 +615,11 @@ private extension PSDChatInteractor {
         } else {
             let requestNewTicket = !(chat?.isActive ?? false) || newTicket
             if requestNewTicket {
+                PSDLogService.sendLog(
+                    PSDLogHelper.createRequestNewTicketLog(chat: chat, newTicket: newTicket),
+                    needCheckLimit: false
+                )
+
                 chat?.chatId = nil
                 chat?.isActive = true
             }
@@ -640,7 +645,7 @@ private extension PSDChatInteractor {
         }
         PSDMessageSend.pass(newMessage, delegate: self)
     }
-    
+        
     func sendRate(_ rateValue: Int) {
         presenter.doWork(.showRatingComment(ratingText: chat?.showRatingText, rating: rateValue))
         let newMessage = PSDObjectsCreator.createMessage(rating: rateValue, ticketId: chat?.chatId ?? 0, userId: chat?.userId ?? PyrusServiceDesk.customUserId ?? PyrusServiceDesk.userId)

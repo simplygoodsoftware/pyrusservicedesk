@@ -1,14 +1,16 @@
 
 import UIKit
 
-protocol PSDMessageInputViewDelegate: class {
+protocol PSDMessageInputViewDelegate: AnyObject {
     func send(_ message: String, _ attachments: [PSDAttachment])
     func sendRate(_ rateValue: Int)
     func addButtonTapped()
     func addAttachment()
     func recordStart()
     func recordStop()
+    func deletedAllAttachments()
 }
+
 let DEFAULT_LAYOUT_MARGINS: CGFloat = 8
 let BUTTONS_CORNER_RADIUS: CGFloat = 8
 class PSDMessageInputView: UIView, PSDMessageTextViewDelegate,PSDMessageSendButtonDelegate {
@@ -555,6 +557,9 @@ extension PSDMessageInputView: AttachmentCollectionViewDelegateProtocol {
     func attachmentRemoved(){
         checkCollectionHeight()
         checkSendButton()
+        if attachmentsPresenter.attachmentsNumber() == 0 {
+            delegate?.deletedAllAttachments()
+        }
     }
 }
 extension PSDMessageInputView: AttachmentsAddButtonDelegate{
