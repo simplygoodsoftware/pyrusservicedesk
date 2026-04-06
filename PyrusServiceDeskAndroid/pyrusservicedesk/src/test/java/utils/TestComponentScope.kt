@@ -49,7 +49,7 @@ class TestComponentScope<Model : Any, Intent : Any, Effect : Any>(
     }
 
     companion object {
-        private const val BASE_DELAY_TIME = 5000L
+        private const val BASE_DELAY_TIME = 1000L
     }
 
 }

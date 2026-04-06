@@ -56,6 +56,7 @@ import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 import org.robolectric.RuntimeEnvironment
+import utils.TestComponentResult
 import utils.testComponent
 import java.io.File
 
@@ -79,7 +80,7 @@ class TicketFeatureFactoryTest {
     private lateinit var audioRecordController: AudioRecordController
     private val idStore = IdStore()
     private val systemMessageStore = SystemMessageStore(idStore)
-    private lateinit var testDispatcher: TestDispatcher// = StandardTestDispatcher()
+    private lateinit var testDispatcher: TestDispatcher
 
 
     @Before
@@ -91,12 +92,19 @@ class TicketFeatureFactoryTest {
         draftRepository = mockk(relaxed = true, relaxUnitFun = true)
         router = mockk(relaxed = true, relaxUnitFun = true)
         fileManager = mockk(relaxed = true, relaxUnitFun = true)
-        audioRecordControllerFactory = mockk(relaxed = true, relaxUnitFun = true)
+        audioRecordControllerFactory =
+            mockk(relaxed = true, relaxUnitFun = true)
         audioWrapper = mockk(relaxed = true, relaxUnitFun = true)
         localTicketsStore = mockk(relaxed = true, relaxUnitFun = true)
         commandsStore = mockk(relaxed = true, relaxUnitFun = true)
         audioRecordController = mockk(relaxed = true)
-        accountStore = AccountStore(Account.V1(PYRUS_BASE_DOMAIN, TEST_INSTANCE_ID, TEST_APP_ID))
+        accountStore = AccountStore(
+            Account.V1(
+                PYRUS_BASE_DOMAIN,
+                TEST_INSTANCE_ID,
+                TEST_APP_ID
+            )
+        )
         val app = RuntimeEnvironment.application
         val preferences: SharedPreferences = app.getSharedPreferences(
             PREFERENCE_KEY,
@@ -120,196 +128,233 @@ class TicketFeatureFactoryTest {
     fun shouldUpdateStateWhenInputTextChanged() {
         setupMocks()
         val feature = createTicketFeature()
+        var testResult: TestComponentResult<State, TicketContract.Effect.Outer>? =
+            null
 
         testComponent(feature, testDispatcher) {
 
             dispatch(Message.Outer.OnMessageChanged("test text from input"))
-            println(testResult.models.size)
-            println((testResult.models.firstOrNull() as? State.Content)?.inputText)
-            println((testResult.models.lastOrNull() as? State.Content)?.inputText)
-
-            println(testResult.models)
-            assertEquals(2, testResult.models.size)
-            assertTrue((testResult.models.firstOrNull() as? State.Content)?.inputText.isNullOrBlank())
-            assertEquals("test text from input", (testResult.models.lastOrNull() as? State.Content)?.inputText)
+            testResult = this.testResult
         }
+
+        println(testResult?.models?.size)
+        println((testResult?.models?.lastOrNull() as? State.Content)?.inputText)
+        assertEquals(2, testResult?.models?.size)
+
+        val firstInputTextFromModel =
+            (testResult?.models?.firstOrNull() as? State.Content)
+            ?.inputText
+        assertTrue(firstInputTextFromModel.isNullOrBlank())
+
+        val lastInputText =
+            (testResult?.models?.lastOrNull() as? State.Content)
+                ?.inputText
+        assertEquals("test text from input", lastInputText)
     }
 
     @Test
     fun shouldSendCommentWhenClickOnButtonWithText() {
         setupMocks()
         val feature = createTicketFeature()
+        var testResult: TestComponentResult<State, TicketContract.Effect.Outer>? =
+            null
 
         testComponent(feature, testDispatcher) {
 
             dispatch(Message.Outer.OnButtonClick("test text from button"))
-
-            assertEquals(2, testResult.models.size)
-            coVerify(exactly = 1) { repository.addTextComment(any(), any(), any()) }
-
-            val time = preferencesManager.getLastActiveTime()
-            println("lastActiveTime: $time")
-            assertTrue(NO_UPDATES != time)
+            testResult = this.testResult
         }
+
+        assertEquals(2, testResult?.models?.size)
+        coVerify(exactly = 1) { repository.addTextComment(any(), any(), any()) }
+
+        checkLastActiveTime(false)
     }
 
     @Test
     fun shouldSendCommentWhenClickOnButtonWithEmptyText() {
         setupMocks()
         val feature = createTicketFeature()
+        var testResult: TestComponentResult<State, TicketContract.Effect.Outer>? =
+            null
 
         testComponent(feature, testDispatcher) {
 
             dispatch(Message.Outer.OnButtonClick("  "))
-
-            assertEquals(2, testResult.models.size)
-            coVerify(exactly = 0) { repository.addTextComment(any(), any(), any()) }
-
-            val time = preferencesManager.getLastActiveTime()
-            println("lastActiveTime: $time")
-            assertTrue(NO_UPDATES == time)
+            testResult = this.testResult
         }
+
+        assertEquals(2, testResult?.models?.size)
+        coVerify(exactly = 0) { repository.addTextComment(any(), any(), any()) }
+
+        checkLastActiveTime(true)
     }
 
     @Test
     fun shouldSendCommentWhenOnRatingClick() {
         setupMocks()
         val feature = createTicketFeature()
+        var testResult: TestComponentResult<State, TicketContract.Effect.Outer>? =
+            null
 
         testComponent(feature, testDispatcher) {
 
             dispatch(Message.Outer.OnRatingClick(5, null))
-
-            println(testResult.models)
-            assertEquals(2, testResult.models.size)
-            val model = testResult.models.lastOrNull() as? State.Content
-            assertTrue(model?.ticket?.showRating == false)
-            coVerify(exactly = 1) { repository.addRatingComment(any(), any(), any(), any()) }
-
-            val effect = testResult.effects.firstOrNull()
-            assertEquals(
-                TicketContract.Effect.Outer.OpenRatingComment(
-                    rateUsText = null
-                ), effect
-            )
-            val time = preferencesManager.getLastActiveTime()
-            println("lastActiveTime: $time")
-            assertTrue(NO_UPDATES != time)
+            testResult = this.testResult
         }
+
+        assertEquals(2, testResult?.models?.size)
+        val model = testResult?.models?.lastOrNull() as? State.Content
+        assertTrue(model?.ticket?.showRating == false)
+        coVerify(exactly = 1) {
+            repository.addRatingComment(
+                any(),
+                any(),
+                any(),
+                any()
+            )
+        }
+
+        val effect = testResult?.effects?.firstOrNull()
+        assertEquals(
+            TicketContract.Effect.Outer.OpenRatingComment(
+                rateUsText = null
+            ), effect
+        )
+        checkLastActiveTime(false)
     }
 
     @Test
     fun shouldSendCommentWhenOnRatingTextClick() {
         setupMocks()
         val feature = createTicketFeature()
+        var testResult: TestComponentResult<State, TicketContract.Effect.Outer>? =
+            null
 
         testComponent(feature, testDispatcher) {
 
             dispatch(Message.Outer.OnRatingClick(null, "rating text"))
-
-            assertEquals(2, testResult.models.size)
-            coVerify(exactly = 1) { repository.addRatingComment(any(), any(), any(), any()) }
-
-            assertEquals(0, testResult.effects.size)
-            val time = preferencesManager.getLastActiveTime()
-            println("lastActiveTime: $time")
-            assertTrue(NO_UPDATES != time)
+            testResult = this.testResult
         }
+
+        assertEquals(2, testResult?.models?.size)
+        coVerify(exactly = 1) {
+            repository.addRatingComment(
+                any(),
+                any(),
+                any(),
+                any()
+            )
+        }
+
+        assertEquals(0, testResult?.effects?.size)
+        checkLastActiveTime(false)
     }
 
     @Test
     fun notShouldSendCommentIfRatingIsNull() {
         setupMocks()
         val feature = createTicketFeature()
+        var testResult: TestComponentResult<State, TicketContract.Effect.Outer>? =
+            null
 
         testComponent(feature, testDispatcher) {
 
             dispatch(Message.Outer.OnRatingClick(null, null))
-
-            assertEquals(2, testResult.models.size)
-            coVerify(exactly = 0) { repository.addRatingComment(any(), any(), any(), any()) }
-            val time = preferencesManager.getLastActiveTime()
-            println("lastActiveTime: $time")
-            assertTrue(NO_UPDATES == time)
+            testResult = this.testResult
         }
+
+        assertEquals(2, testResult?.models?.size)
+        coVerify(exactly = 0) {
+            repository.addRatingComment(
+                any(),
+                any(),
+                any(),
+                any()
+            )
+        }
+        checkLastActiveTime(true)
     }
 
     @Test
     fun shouldOpenErrorCommentDialogWhenOnErrorCommentClick() {
         setupMocks()
         val feature = createTicketFeature()
+        var testResult: TestComponentResult<State, TicketContract.Effect.Outer>? =
+            null
 
         testComponent(feature, testDispatcher) {
 
             dispatch(Message.Outer.OnErrorCommentClick(1))
-
-            assertEquals(2, testResult.models.size)
-            val effect = testResult.effects.firstOrNull()
-            assertTrue(effect is TicketContract.Effect.Outer.ShowErrorCommentDialog)
-            val time = preferencesManager.getLastActiveTime()
-            println("lastActiveTime: $time")
-            assertTrue(NO_UPDATES == time)
+            testResult = this.testResult
         }
+
+        assertEquals(2, testResult?.models?.size)
+        val effect = testResult?.effects?.firstOrNull()
+        assertTrue(effect is TicketContract.Effect.Outer.ShowErrorCommentDialog)
+        checkLastActiveTime(true)
     }
 
     @Test
     fun shouldSendCommentWhenOnSendClick() {
         setupMocks()
         val feature = createTicketFeature()
+        var testResult: TestComponentResult<State, TicketContract.Effect.Outer>? =
+            null
 
         testComponent(feature, testDispatcher) {
 
             dispatch(Message.Outer.OnMessageChanged("test text from input"))
-
             dispatch(Message.Outer.OnSendClick)
-
-            println(testResult.models)
-            assertEquals(3, testResult.models.size)
-            coVerify(exactly = 1) { repository.addTextComment(any(), any(), any()) }
-
-            val time = preferencesManager.getLastActiveTime()
-            println("lastActiveTime: $time")
-            assertTrue(NO_UPDATES != time)
+            testResult = this.testResult
         }
+
+        println(testResult?.models)
+        assertEquals(3, testResult?.models?.size)
+        coVerify(exactly = 1) { repository.addTextComment(any(), any(), any()) }
+
+        checkLastActiveTime(false)
     }
 
     @Test
     fun notShouldSendCommentWhenOnSendClickEmptyText() {
         setupMocks()
         val feature = createTicketFeature()
+        var testResult: TestComponentResult<State, TicketContract.Effect.Outer>? =
+            null
 
         testComponent(feature, testDispatcher) {
 
             dispatch(Message.Outer.OnSendClick)
-
-            assertEquals(2, testResult.models.size)
-            coVerify(exactly = 0) { repository.addTextComment(any(), any(), any()) }
-
-            val time = preferencesManager.getLastActiveTime()
-            println("lastActiveTime: $time")
-            assertTrue(NO_UPDATES == time)
+            testResult = this.testResult
         }
+
+        assertEquals(2, testResult?.models?.size)
+        coVerify(exactly = 0) { repository.addTextComment(any(), any(), any()) }
+
+        checkLastActiveTime(true)
     }
 
     @Test
     fun shouldShowAttachVariantsWhenOnShowAttachVariantsClick() {
         setupMocks()
         val feature = createTicketFeature()
+        var testResult: TestComponentResult<State, TicketContract.Effect.Outer>? =
+            null
 
         testComponent(feature, testDispatcher) {
 
             dispatch(Message.Outer.OnShowAttachVariantsClick)
-
-
-            println(testResult.models)
-            assertEquals(2, testResult.models.size)
-            val effect = testResult.effects.firstOrNull()
-            assertTrue(effect is TicketContract.Effect.Outer.ShowAttachVariants)
-
-            val time = preferencesManager.getLastActiveTime()
-            println("lastActiveTime: $time")
-            assertTrue(NO_UPDATES == time)
+            testResult = this.testResult
         }
+
+
+        println(testResult?.models)
+        assertEquals(2, testResult?.models?.size)
+        val effect = testResult?.effects?.firstOrNull()
+        assertTrue(effect is TicketContract.Effect.Outer.ShowAttachVariants)
+
+        checkLastActiveTime(true)
     }
 
 
@@ -317,110 +362,115 @@ class TicketFeatureFactoryTest {
     fun shouldRefreshWhenOnRefresh() {
         setupMocks()
         val feature = createTicketFeature()
+        var testResult: TestComponentResult<State, TicketContract.Effect.Outer>? =
+            null
 
         testComponent(feature, testDispatcher) {
 
             dispatch(Message.Outer.OnRefresh)
-
-            assertTrue(testResult.models.size >= 2)
-            val model = testResult.models[1] as? State.Content
-            assertEquals(true, model?.isLoading)
-            coVerify(exactly = 2) { repository.getFeed(any(), any(), any()) }
-
-            val time = preferencesManager.getLastActiveTime()
-            println("lastActiveTime: $time")
-            assertTrue(NO_UPDATES == time)
+            testResult = this.testResult
         }
+
+        assertEquals(3, testResult?.models?.size)
+        val model = testResult?.models[1] as? State.Content
+        assertEquals(true, model?.isLoading)
+        coVerify(exactly = 2) { repository.getFeed(any(), any(), any()) }
+
+        checkLastActiveTime(true)
     }
 
     @Test
     fun testOnCancelUploadClick() {
         setupMocks()
         val feature = createTicketFeature()
+        var testResult: TestComponentResult<State, TicketContract.Effect.Outer>? =
+            null
 
         testComponent(feature, testDispatcher) {
 
             dispatch(Message.Outer.OnCancelUploadClick(1, 1))
-
-
-            println(testResult.models)
-            assertEquals(2, testResult.models.size)
-            coVerify(exactly = 1) { repository.cancelUploadFile(any(), any()) }
-
-            val time = preferencesManager.getLastActiveTime()
-            println("lastActiveTime: $time")
-            assertTrue(NO_UPDATES == time)
+            testResult = this.testResult
         }
+
+        println(testResult?.models)
+        assertEquals(2, testResult?.models?.size)
+        coVerify(exactly = 1) { repository.cancelUploadFile(any(), any()) }
+
+        checkLastActiveTime(true)
     }
 
     @Test
     fun testOnInfoClick() {
         setupMocks()
         val feature = createTicketFeature()
+        var testResult: TestComponentResult<State, TicketContract.Effect.Outer>? =
+            null
 
         testComponent(feature, testDispatcher) {
 
             dispatch(Message.Outer.OnInfoClick)
-
-            println(testResult.models)
-            assertEquals(2, testResult.models.size)
-            val effect = testResult.effects.firstOrNull()
-            assertTrue(effect is TicketContract.Effect.Outer.ShowInfoBottomSheetFragment)
-
-            val time = preferencesManager.getLastActiveTime()
-            println("lastActiveTime: $time")
-            assertTrue(NO_UPDATES == time)
+            testResult = this.testResult
         }
+
+        println(testResult?.models)
+        assertEquals(2, testResult?.models?.size)
+        val effect = testResult?.effects?.firstOrNull()
+        assertTrue(effect is TicketContract.Effect.Outer.ShowInfoBottomSheetFragment)
+
+        checkLastActiveTime(true)
     }
 
     @Test
     fun testOnStartRecord() {
         setupMocks()
         val feature = createTicketFeature()
+        var testResult: TestComponentResult<State, TicketContract.Effect.Outer>? =
+            null
 
         testComponent(feature, testDispatcher) {
 
             dispatch(Message.Outer.OnStartRecord)
-
-            assertEquals(2, testResult.models.size)
-            coVerify(exactly = 1) { audioRecordController.startRecord() }
-
-            val model = testResult.models.lastOrNull() as? State.Content
-            assertTrue(model?.recordState is RecordState.Recording)
-
-
-            val time = preferencesManager.getLastActiveTime()
-            println("lastActiveTime: $time")
-            assertTrue(NO_UPDATES == time)
+            testResult = this.testResult
         }
+
+        assertEquals(2, testResult?.models?.size)
+        coVerify(exactly = 1) { audioRecordController.startRecord() }
+
+        val model = testResult?.models?.lastOrNull() as? State.Content
+        assertTrue(model?.recordState is RecordState.Recording)
+
+
+        checkLastActiveTime(true)
     }
 
     @Test
     fun testOnStopRecord() {
         setupMocks()
         val feature = createTicketFeature()
+        var testResult: TestComponentResult<State, TicketContract.Effect.Outer>? =
+            null
 
         testComponent(feature, testDispatcher) {
 
             dispatch(Message.Outer.OnStopRecord)
-
-            assertEquals(2, testResult.models.size)
-            coVerify(exactly = 1) { audioRecordController.stopRecord() }
-
-            val model = testResult.models.lastOrNull() as? State.Content
-            assertTrue(model?.recordState is RecordState.None)
-
-
-            val time = preferencesManager.getLastActiveTime()
-            println("lastActiveTime: $time")
-            assertTrue(NO_UPDATES == time)
+            testResult = this.testResult
         }
+
+        assertEquals(2, testResult?.models?.size)
+        coVerify(exactly = 1) { audioRecordController.stopRecord() }
+
+        val model = testResult?.models?.lastOrNull() as? State.Content
+        assertTrue(model?.recordState is RecordState.None)
+
+        checkLastActiveTime(true)
     }
 
     @Test
     fun testOnStopPendingRecord() {
         setupMocks()
         val feature = createTicketFeature()
+        var testResult: TestComponentResult<State, TicketContract.Effect.Outer>? =
+            null
 
         testComponent(feature, StandardTestDispatcher()) {
 
@@ -428,24 +478,26 @@ class TicketFeatureFactoryTest {
             dispatch(Message.Outer.OnLockRecord)
             dispatch(Message.Outer.OnStopRecord)
 
-            println(testResult.models)
-            assertEquals(4, testResult.models.size)
-            coVerify(exactly = 1) { audioRecordController.stopRecord() }
-
-            val model = testResult.models.lastOrNull() as? State.Content
-            assertTrue(model?.recordState is RecordState.PendingRecord)
-
-
-            val time = preferencesManager.getLastActiveTime()
-            println("lastActiveTime: $time")
-            assertTrue(NO_UPDATES == time)
+            testResult = this.testResult
         }
+
+        println(testResult?.models)
+        assertEquals(4, testResult?.models?.size)
+        coVerify(exactly = 1) { audioRecordController.stopRecord() }
+
+        val model = testResult?.models?.lastOrNull() as? State.Content
+        assertTrue(model?.recordState is RecordState.PendingRecord)
+
+
+        checkLastActiveTime(true)
     }
 
     @Test
     fun onStopPendingRecordTestPendingRecord() {
         setupMocks()
         val feature = createTicketFeature()
+        var testResult: TestComponentResult<State, TicketContract.Effect.Outer>? =
+            null
 
         testComponent(feature, testDispatcher) {
 
@@ -456,24 +508,24 @@ class TicketFeatureFactoryTest {
             val mockFile = mockk<File>()
             every { mockFile.path } returns "/mocked/path/file.audio"
             dispatch(Message.Inner.OnAudioRecorded(mockFile))
-
-            println(testResult.models)
-            assertEquals(5, testResult.models.size)
-
-            val model = testResult.models.lastOrNull() as? State.Content
-            assertEquals(model?.pendingRecord, "/mocked/path/file.audio")
-
-
-            val time = preferencesManager.getLastActiveTime()
-            println("lastActiveTime: $time")
-            assertTrue(NO_UPDATES == time)
+            testResult = this.testResult
         }
+
+        println(testResult?.models)
+        assertEquals(5, testResult?.models?.size)
+
+        val model = testResult?.models?.lastOrNull() as? State.Content
+        assertEquals(model?.pendingRecord, "/mocked/path/file.audio")
+
+        checkLastActiveTime(true)
     }
 
     @Test
     fun onStopRecordTestPendingRecord() {
         setupMocks()
         val feature = createTicketFeature()
+        var testResult: TestComponentResult<State, TicketContract.Effect.Outer>? =
+            null
 
         testComponent(feature, testDispatcher) {
 
@@ -485,55 +537,56 @@ class TicketFeatureFactoryTest {
 
             dispatch(Message.Inner.OnAudioRecorded(tempFile))
 
-            assertEquals(4, testResult.models.size)
-            coVerify { repository.addAttachComment(any(), any(), any()) }
-
-            val time = preferencesManager.getLastActiveTime()
-            println("lastActiveTime: $time")
-            assertTrue(NO_UPDATES != time)
+            testResult = this.testResult
         }
+
+        assertEquals(4, testResult?.models?.size)
+        coVerify { repository.addAttachComment(any(), any(), any()) }
+
+        checkLastActiveTime(false)
     }
 
-        @Test
+    @Test
     fun testOnStopEndSendRecord() {
         setupMocks()
         val feature = createTicketFeature()
+        var testResult: TestComponentResult<State, TicketContract.Effect.Outer>? =
+            null
 
         testComponent(feature, testDispatcher) {
 
             dispatch(Message.Outer.OnStopEndSendRecord)
-
-            assertEquals(2, testResult.models.size)
-            coVerify(exactly = 1) { audioRecordController.stopRecord() }
-
-            val model = testResult.models.lastOrNull() as? State.Content
-            assertTrue(model?.recordState is RecordState.None)
-
-
-            val time = preferencesManager.getLastActiveTime()
-            println("lastActiveTime: $time")
-            assertTrue(NO_UPDATES == time)
+            testResult = this.testResult
         }
+
+        assertEquals(2, testResult?.models?.size)
+        coVerify(exactly = 1) { audioRecordController.stopRecord() }
+
+        val model = testResult?.models?.lastOrNull() as? State.Content
+        assertTrue(model?.recordState is RecordState.None)
+
+        checkLastActiveTime(true)
     }
 
     @Test
     fun testOnMicShortClicked() {
         setupMocks()
         val feature = createTicketFeature()
+        var testResult: TestComponentResult<State, TicketContract.Effect.Outer>? =
+            null
 
         testComponent(feature, testDispatcher) {
 
             dispatch(Message.Outer.OnMicShortClicked)
-
-            assertEquals(2, testResult.models.size)
-
-            val effect = testResult.effects.firstOrNull()
-            assertTrue(effect is TicketContract.Effect.Outer.ShowAudioRecordTooltip)
-
-            val time = preferencesManager.getLastActiveTime()
-            println("lastActiveTime: $time")
-            assertTrue(NO_UPDATES == time)
+            testResult = this.testResult
         }
+
+        assertEquals(2, testResult?.models?.size)
+
+        val effect = testResult?.effects?.firstOrNull()
+        assertTrue(effect is TicketContract.Effect.Outer.ShowAudioRecordTooltip)
+
+        checkLastActiveTime(true)
     }
 
     @Test
@@ -541,19 +594,25 @@ class TicketFeatureFactoryTest {
         setupMocks()
         val feature = createTicketFeature()
 
+        var models: List<State>? = null
+
         testComponent(feature, testDispatcher) {
 
             dispatch(Message.Outer.OnCancelRecord)
-
-            assertEquals(2, testResult.models.size)
-            val model = testResult.models.lastOrNull() as? State.Content
-            assertTrue(model?.recordState is RecordState.None)
-            coVerify(exactly = 1) { audioRecordController.setRecordCancelledListener(any()) }
-
-            val time = preferencesManager.getLastActiveTime()
-            println("lastActiveTime: $time")
-            assertTrue(NO_UPDATES == time)
+            models = testResult.models
         }
+
+        assertEquals(2, models?.size)
+        val model = models?.lastOrNull() as? State.Content
+        assertTrue(model?.recordState is RecordState.None)
+        coVerify(exactly = 1) {
+            audioRecordController.setRecordCancelledListener(
+                any()
+            )
+        }
+
+        checkLastActiveTime(true)
+
     }
 
     @Test
@@ -561,39 +620,42 @@ class TicketFeatureFactoryTest {
         setupMocks()
         val feature = createTicketFeature()
 
+        var models: List<State>? = null
+
         testComponent(feature, testDispatcher) {
-
             dispatch(Message.Outer.OnLockRecord)
-
-            assertEquals(2, testResult.models.size)
-            val model = testResult.models.lastOrNull() as? State.Content
-            assertTrue(model?.recordState is RecordState.None)
-
-            val time = preferencesManager.getLastActiveTime()
-            println("lastActiveTime: $time")
-            assertTrue(NO_UPDATES == time)
+            models = testResult.models
         }
+
+        feature.cancel()
+
+        assertEquals(2, models?.size)
+        val model = models?.lastOrNull() as? State.Content
+        assertTrue(model?.recordState is RecordState.None)
+
+        checkLastActiveTime(true)
     }
 
     @Test
     fun testOnLockRecordIfItIsRecording() {
         setupMocks()
         val feature = createTicketFeature()
+        var models: List<State>? = null
 
         testComponent(feature, testDispatcher) {
 
             dispatch(Message.Outer.OnStartRecord)
-
             dispatch(Message.Outer.OnLockRecord)
 
-            assertEquals(3, testResult.models.size)
-            val model = testResult.models.lastOrNull() as? State.Content
-            assertTrue(model?.recordState is RecordState.HoldRecording)
-
-            val time = preferencesManager.getLastActiveTime()
-            println("lastActiveTime: $time")
-            assertTrue(NO_UPDATES == time)
+            models = testResult.models
         }
+
+        assertEquals(3, models?.size)
+        val model = models?.lastOrNull() as? State.Content
+        assertTrue(model?.recordState is RecordState.HoldRecording)
+
+        checkLastActiveTime(true)
+
     }
 
     @Test
@@ -601,20 +663,21 @@ class TicketFeatureFactoryTest {
         setupMocks()
         val feature = createTicketFeature()
 
+        var models: List<State>? = null
+
         testComponent(feature, testDispatcher) {
 
             dispatch(Message.Outer.OnStartRecord)
-
             dispatch(Message.Outer.OnLockRecord)
-
-            assertEquals(3, testResult.models.size)
-            val model = testResult.models.lastOrNull() as? State.Content
-            assertTrue(model?.recordState is RecordState.HoldRecording)
-
-            val time = preferencesManager.getLastActiveTime()
-            println("lastActiveTime: $time")
-            assertTrue(NO_UPDATES == time)
+            models = testResult.models
         }
+
+        assertEquals(3, models?.size)
+        val model = models?.lastOrNull() as? State.Content
+        assertTrue(model?.recordState is RecordState.HoldRecording)
+
+        checkLastActiveTime(true)
+
     }
 
     @Test
@@ -623,20 +686,21 @@ class TicketFeatureFactoryTest {
         val feature = createTicketFeature()
         every { fileManager.copyFile(any()) } returns "url".toUri()
 
+        var models: List<State>? = null
+
         testComponent(feature, testDispatcher) {
 
             val tempFile = File.createTempFile("test", ".tmp")
             tempFile.deleteOnExit()
-
             dispatch(Message.Outer.SetAttachVariant("key", tempFile.toUri()))
 
-            assertEquals(2, testResult.models.size)
-            coVerify { repository.addAttachComment(any(), any(), any()) }
-
-            val time = preferencesManager.getLastActiveTime()
-            println("lastActiveTime: $time")
-            assertTrue(NO_UPDATES != time)
+            models = testResult.models
         }
+
+        assertEquals(2, models?.size)
+        coVerify { repository.addAttachComment(any(), any(), any()) }
+
+        checkLastActiveTime(false)
     }
 
     @Test
@@ -645,20 +709,37 @@ class TicketFeatureFactoryTest {
         val feature = createTicketFeature()
         every { fileManager.copyFile(any()) } returns null
 
+        var models: List<State>? = null
+
         testComponent(feature, testDispatcher) {
 
             val tempFile = File.createTempFile("test", ".tmp")
             tempFile.deleteOnExit()
 
             dispatch(Message.Outer.SetAttachVariant("key", tempFile.toUri()))
-
-            assertEquals(2, testResult.models.size)
-            coVerify (exactly = 0) { repository.addAttachComment(any(), any(), any()) }
-
-            val time = preferencesManager.getLastActiveTime()
-            println("lastActiveTime: $time")
-            assertTrue(NO_UPDATES == time)
+            models = testResult.models
         }
+
+        assertEquals(2, models?.size)
+        coVerify(exactly = 0) {
+            repository.addAttachComment(
+                any(),
+                any(),
+                any()
+            )
+        }
+
+        checkLastActiveTime(true)
+    }
+
+    private fun checkLastActiveTime(isNoUpdates: Boolean) {
+        val time = preferencesManager.getLastActiveTime()
+        println("lastActiveTime: $time")
+        val res = when {
+            isNoUpdates -> NO_UPDATES == time
+            else -> NO_UPDATES != time
+        }
+        assertTrue(res)
     }
 
     private fun setupMocks() {
