@@ -423,7 +423,11 @@ private class TicketActor(
             )
             when {
                 commentsTry.isSuccess() -> {
-                    val application = localTicketsStore.getApplications().find { accountStore.getAccount().getUsers().find { user -> user.userId == commentsTry.value.userId }?.appId == it.appId }
+                    val application = localTicketsStore.getApplications().find {
+                        accountStore.getAccount().getUsers().find { user ->
+                            user.userId == commentsTry.value.userId
+                        }?.appId == it.appId
+                    }
                     var needAnotherOneWelcomeMessage = false
                     if (((accountStore.getAccount().getVersion() == API_VERSION_1
                             ||accountStore.getAccount().getVersion() == API_VERSION_2)
@@ -494,9 +498,9 @@ private class TicketActor(
 
         }
         is Effect.Inner.SendRatingComment -> flow {
-            preferencesManager.saveLastActiveTime(System.currentTimeMillis())
             if (effect.rating == null && effect.ratingComment == null)
                 return@flow
+            preferencesManager.saveLastActiveTime(System.currentTimeMillis())
             ticketId = localTicketsStore.getTickets().lastOrNull()?.ticketId ?: ticketId
             idStore.setTicketId(ticketId)
             repository.addRatingComment(user, ticketId, effect.rating, effect.ratingComment)
