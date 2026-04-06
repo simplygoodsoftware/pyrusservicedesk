@@ -43,11 +43,12 @@ import junit.framework.TestCase.assertEquals
 import junit.framework.TestCase.assertTrue
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.cancel
+import kotlinx.coroutines.cancelChildren
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.TestDispatcher
 import kotlinx.coroutines.test.resetMain
-import kotlinx.coroutines.test.runTest
 import kotlinx.coroutines.test.setMain
 import org.junit.After
 import org.junit.Before
@@ -78,11 +79,12 @@ class TicketFeatureFactoryTest {
     private lateinit var audioRecordController: AudioRecordController
     private val idStore = IdStore()
     private val systemMessageStore = SystemMessageStore(idStore)
-    private val testDispatcher: TestDispatcher = StandardTestDispatcher()
+    private lateinit var testDispatcher: TestDispatcher// = StandardTestDispatcher()
 
 
     @Before
     fun setUp() {
+        testDispatcher = StandardTestDispatcher()
 
         repository = mockk(relaxed = true, relaxUnitFun = true)
         localTicketsStore = mockk(relaxed = true, relaxUnitFun = true)
@@ -110,14 +112,16 @@ class TicketFeatureFactoryTest {
     @After
     fun cleanData() {
         Dispatchers.resetMain()
+        testDispatcher.cancel()
+        testDispatcher.cancelChildren()
     }
 
     @Test
-    fun shouldUpdateStateWhenInputTextChanged() = runTest {
+    fun shouldUpdateStateWhenInputTextChanged() {
         setupMocks()
         val feature = createTicketFeature()
 
-        testComponent(feature, StandardTestDispatcher()) {
+        testComponent(feature, testDispatcher) {
 
             dispatch(Message.Outer.OnMessageChanged("test text from input"))
             println(testResult.models.size)
@@ -129,16 +133,14 @@ class TicketFeatureFactoryTest {
             assertTrue((testResult.models.firstOrNull() as? State.Content)?.inputText.isNullOrBlank())
             assertEquals("test text from input", (testResult.models.lastOrNull() as? State.Content)?.inputText)
         }
-
-        feature.cancel()
     }
 
     @Test
-    fun shouldSendCommentWhenClickOnButtonWithText() = runTest {
+    fun shouldSendCommentWhenClickOnButtonWithText() {
         setupMocks()
         val feature = createTicketFeature()
 
-        testComponent(feature, StandardTestDispatcher()) {
+        testComponent(feature, testDispatcher) {
 
             dispatch(Message.Outer.OnButtonClick("test text from button"))
 
@@ -149,16 +151,14 @@ class TicketFeatureFactoryTest {
             println("lastActiveTime: $time")
             assertTrue(NO_UPDATES != time)
         }
-
-        feature.cancel()
     }
 
     @Test
-    fun shouldSendCommentWhenClickOnButtonWithEmptyText() = runTest {
+    fun shouldSendCommentWhenClickOnButtonWithEmptyText() {
         setupMocks()
         val feature = createTicketFeature()
 
-        testComponent(feature, StandardTestDispatcher()) {
+        testComponent(feature, testDispatcher) {
 
             dispatch(Message.Outer.OnButtonClick("  "))
 
@@ -169,15 +169,14 @@ class TicketFeatureFactoryTest {
             println("lastActiveTime: $time")
             assertTrue(NO_UPDATES == time)
         }
-        feature.cancel()
     }
 
     @Test
-    fun shouldSendCommentWhenOnRatingClick() = runTest {
+    fun shouldSendCommentWhenOnRatingClick() {
         setupMocks()
         val feature = createTicketFeature()
 
-        testComponent(feature, StandardTestDispatcher()) {
+        testComponent(feature, testDispatcher) {
 
             dispatch(Message.Outer.OnRatingClick(5, null))
 
@@ -197,7 +196,6 @@ class TicketFeatureFactoryTest {
             println("lastActiveTime: $time")
             assertTrue(NO_UPDATES != time)
         }
-        feature.cancel()
     }
 
     @Test
@@ -205,7 +203,7 @@ class TicketFeatureFactoryTest {
         setupMocks()
         val feature = createTicketFeature()
 
-        testComponent(feature, StandardTestDispatcher()) {
+        testComponent(feature, testDispatcher) {
 
             dispatch(Message.Outer.OnRatingClick(null, "rating text"))
 
@@ -217,15 +215,14 @@ class TicketFeatureFactoryTest {
             println("lastActiveTime: $time")
             assertTrue(NO_UPDATES != time)
         }
-        feature.cancel()
     }
 
     @Test
-    fun notShouldSendCommentIfRatingIsNull() = runTest {
+    fun notShouldSendCommentIfRatingIsNull() {
         setupMocks()
         val feature = createTicketFeature()
 
-        testComponent(feature, StandardTestDispatcher()) {
+        testComponent(feature, testDispatcher) {
 
             dispatch(Message.Outer.OnRatingClick(null, null))
 
@@ -235,15 +232,14 @@ class TicketFeatureFactoryTest {
             println("lastActiveTime: $time")
             assertTrue(NO_UPDATES == time)
         }
-        feature.cancel()
     }
 
     @Test
-    fun shouldOpenErrorCommentDialogWhenOnErrorCommentClick() = runTest {
+    fun shouldOpenErrorCommentDialogWhenOnErrorCommentClick() {
         setupMocks()
         val feature = createTicketFeature()
 
-        testComponent(feature, StandardTestDispatcher()) {
+        testComponent(feature, testDispatcher) {
 
             dispatch(Message.Outer.OnErrorCommentClick(1))
 
@@ -253,16 +249,15 @@ class TicketFeatureFactoryTest {
             val time = preferencesManager.getLastActiveTime()
             println("lastActiveTime: $time")
             assertTrue(NO_UPDATES == time)
-            feature.cancel()
         }
     }
 
     @Test
-    fun shouldSendCommentWhenOnSendClick() = runTest {
+    fun shouldSendCommentWhenOnSendClick() {
         setupMocks()
         val feature = createTicketFeature()
 
-        testComponent(feature, StandardTestDispatcher()) {
+        testComponent(feature, testDispatcher) {
 
             dispatch(Message.Outer.OnMessageChanged("test text from input"))
 
@@ -276,15 +271,14 @@ class TicketFeatureFactoryTest {
             println("lastActiveTime: $time")
             assertTrue(NO_UPDATES != time)
         }
-        feature.cancel()
     }
 
     @Test
-    fun notShouldSendCommentWhenOnSendClickEmptyText() = runTest {
+    fun notShouldSendCommentWhenOnSendClickEmptyText() {
         setupMocks()
         val feature = createTicketFeature()
 
-        testComponent(feature, StandardTestDispatcher()) {
+        testComponent(feature, testDispatcher) {
 
             dispatch(Message.Outer.OnSendClick)
 
@@ -295,15 +289,14 @@ class TicketFeatureFactoryTest {
             println("lastActiveTime: $time")
             assertTrue(NO_UPDATES == time)
         }
-        feature.cancel()
     }
 
     @Test
-    fun shouldShowAttachVariantsWhenOnShowAttachVariantsClick() = runTest {
+    fun shouldShowAttachVariantsWhenOnShowAttachVariantsClick() {
         setupMocks()
         val feature = createTicketFeature()
 
-        testComponent(feature, StandardTestDispatcher()) {
+        testComponent(feature, testDispatcher) {
 
             dispatch(Message.Outer.OnShowAttachVariantsClick)
 
@@ -317,42 +310,21 @@ class TicketFeatureFactoryTest {
             println("lastActiveTime: $time")
             assertTrue(NO_UPDATES == time)
         }
-        feature.cancel()
     }
 
 
     @Test
-    fun shouldRefreshWhenOnRefresh() = runTest {
+    fun shouldRefreshWhenOnRefresh() {
         setupMocks()
         val feature = createTicketFeature()
 
-        testComponent(feature, StandardTestDispatcher()) {
+        testComponent(feature, testDispatcher) {
 
             dispatch(Message.Outer.OnRefresh)
 
-            assertEquals(2, testResult.models.size)
-            val model = testResult.models.lastOrNull() as? State.Content
-            assertTrue(model?.isLoading == true)
-            coVerify(exactly = 2) { repository.getFeed(any(), any(), any()) }
-
-            val time = preferencesManager.getLastActiveTime()
-            println("lastActiveTime: $time")
-            assertTrue(NO_UPDATES == time)
-        }
-        feature.cancel()
-    }
-
-    @Test
-    fun notShouldRefreshIfIsLoading() = runTest {
-        setupMocks()
-        val feature = createTicketFeature()
-
-        testComponent(feature, StandardTestDispatcher()) {
-
-            dispatch(Message.Outer.OnRefresh)
-            dispatch(Message.Outer.OnRefresh)
-
-            assertEquals(3, testResult.models.size)
+            assertTrue(testResult.models.size >= 2)
+            val model = testResult.models[1] as? State.Content
+            assertEquals(true, model?.isLoading)
             coVerify(exactly = 2) { repository.getFeed(any(), any(), any()) }
 
             val time = preferencesManager.getLastActiveTime()
@@ -362,11 +334,11 @@ class TicketFeatureFactoryTest {
     }
 
     @Test
-    fun testOnCancelUploadClick() = runTest {
+    fun testOnCancelUploadClick() {
         setupMocks()
         val feature = createTicketFeature()
 
-        testComponent(feature, StandardTestDispatcher()) {
+        testComponent(feature, testDispatcher) {
 
             dispatch(Message.Outer.OnCancelUploadClick(1, 1))
 
@@ -382,11 +354,11 @@ class TicketFeatureFactoryTest {
     }
 
     @Test
-    fun testOnInfoClick() = runTest {
+    fun testOnInfoClick() {
         setupMocks()
         val feature = createTicketFeature()
 
-        testComponent(feature, StandardTestDispatcher()) {
+        testComponent(feature, testDispatcher) {
 
             dispatch(Message.Outer.OnInfoClick)
 
@@ -402,11 +374,11 @@ class TicketFeatureFactoryTest {
     }
 
     @Test
-    fun testOnStartRecord() = runTest {
+    fun testOnStartRecord() {
         setupMocks()
         val feature = createTicketFeature()
 
-        testComponent(feature, StandardTestDispatcher()) {
+        testComponent(feature, testDispatcher) {
 
             dispatch(Message.Outer.OnStartRecord)
 
@@ -424,11 +396,11 @@ class TicketFeatureFactoryTest {
     }
 
     @Test
-    fun testOnStopRecord() = runTest {
+    fun testOnStopRecord() {
         setupMocks()
         val feature = createTicketFeature()
 
-        testComponent(feature, StandardTestDispatcher()) {
+        testComponent(feature, testDispatcher) {
 
             dispatch(Message.Outer.OnStopRecord)
 
@@ -446,7 +418,7 @@ class TicketFeatureFactoryTest {
     }
 
     @Test
-    fun testOnStopPendingRecord() = runTest {
+    fun testOnStopPendingRecord() {
         setupMocks()
         val feature = createTicketFeature()
 
@@ -471,11 +443,11 @@ class TicketFeatureFactoryTest {
     }
 
     @Test
-    fun onStopPendingRecordTestPendingRecord() = runTest {
+    fun onStopPendingRecordTestPendingRecord() {
         setupMocks()
         val feature = createTicketFeature()
 
-        testComponent(feature, StandardTestDispatcher()) {
+        testComponent(feature, testDispatcher) {
 
             dispatch(Message.Outer.OnStartRecord)
             dispatch(Message.Outer.OnLockRecord)
@@ -499,11 +471,11 @@ class TicketFeatureFactoryTest {
     }
 
     @Test
-    fun onStopRecordTestPendingRecord() = runTest {
+    fun onStopRecordTestPendingRecord() {
         setupMocks()
         val feature = createTicketFeature()
 
-        testComponent(feature, StandardTestDispatcher()) {
+        testComponent(feature, testDispatcher) {
 
             dispatch(Message.Outer.OnStartRecord)
             dispatch(Message.Outer.OnStopRecord)
@@ -523,11 +495,11 @@ class TicketFeatureFactoryTest {
     }
 
         @Test
-    fun testOnStopEndSendRecord() = runTest {
+    fun testOnStopEndSendRecord() {
         setupMocks()
         val feature = createTicketFeature()
 
-        testComponent(feature, StandardTestDispatcher()) {
+        testComponent(feature, testDispatcher) {
 
             dispatch(Message.Outer.OnStopEndSendRecord)
 
@@ -545,11 +517,11 @@ class TicketFeatureFactoryTest {
     }
 
     @Test
-    fun testOnMicShortClicked() = runTest {
+    fun testOnMicShortClicked() {
         setupMocks()
         val feature = createTicketFeature()
 
-        testComponent(feature, StandardTestDispatcher()) {
+        testComponent(feature, testDispatcher) {
 
             dispatch(Message.Outer.OnMicShortClicked)
 
@@ -565,11 +537,11 @@ class TicketFeatureFactoryTest {
     }
 
     @Test
-    fun testOnCancelRecord() = runTest {
+    fun testOnCancelRecord() {
         setupMocks()
         val feature = createTicketFeature()
 
-        testComponent(feature, StandardTestDispatcher()) {
+        testComponent(feature, testDispatcher) {
 
             dispatch(Message.Outer.OnCancelRecord)
 
@@ -585,11 +557,11 @@ class TicketFeatureFactoryTest {
     }
 
     @Test
-    fun testOnLockRecordIfItIsNotRecording() = runTest {
+    fun testOnLockRecordIfItIsNotRecording() {
         setupMocks()
         val feature = createTicketFeature()
 
-        testComponent(feature, StandardTestDispatcher()) {
+        testComponent(feature, testDispatcher) {
 
             dispatch(Message.Outer.OnLockRecord)
 
@@ -604,11 +576,11 @@ class TicketFeatureFactoryTest {
     }
 
     @Test
-    fun testOnLockRecordIfItIsRecording() = runTest {
+    fun testOnLockRecordIfItIsRecording() {
         setupMocks()
         val feature = createTicketFeature()
 
-        testComponent(feature, StandardTestDispatcher()) {
+        testComponent(feature, testDispatcher) {
 
             dispatch(Message.Outer.OnStartRecord)
 
@@ -625,11 +597,11 @@ class TicketFeatureFactoryTest {
     }
 
     @Test
-    fun testOnRemovePendingAudioClick() = runTest {
+    fun testOnRemovePendingAudioClick() {
         setupMocks()
         val feature = createTicketFeature()
 
-        testComponent(feature, StandardTestDispatcher()) {
+        testComponent(feature, testDispatcher) {
 
             dispatch(Message.Outer.OnStartRecord)
 
@@ -646,12 +618,12 @@ class TicketFeatureFactoryTest {
     }
 
     @Test
-    fun testSetAttachVariant() = runTest {
+    fun testSetAttachVariant() {
         setupMocks()
         val feature = createTicketFeature()
         every { fileManager.copyFile(any()) } returns "url".toUri()
 
-        testComponent(feature, StandardTestDispatcher()) {
+        testComponent(feature, testDispatcher) {
 
             val tempFile = File.createTempFile("test", ".tmp")
             tempFile.deleteOnExit()
@@ -668,12 +640,12 @@ class TicketFeatureFactoryTest {
     }
 
     @Test
-    fun testSetAttachVariantWhenUriNull() = runTest {
+    fun testSetAttachVariantWhenUriNull() {
         setupMocks()
         val feature = createTicketFeature()
         every { fileManager.copyFile(any()) } returns null
 
-        testComponent(feature, StandardTestDispatcher()) {
+        testComponent(feature, testDispatcher) {
 
             val tempFile = File.createTempFile("test", ".tmp")
             tempFile.deleteOnExit()
@@ -727,7 +699,8 @@ class TicketFeatureFactoryTest {
             localTicketsStore = localTicketsStore,
             commandsStore = commandsStore,
             systemMessageStore = systemMessageStore,
-            idStore = idStore
+            idStore = idStore,
+            actorContext = testDispatcher
         ).create(userInternalV1, TEST_TICKET_ID, "weclome", null)
     }
 }

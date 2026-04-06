@@ -5,7 +5,8 @@ import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.toList
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.test.TestScope
-import kotlinx.coroutines.test.advanceUntilIdle
+import kotlinx.coroutines.test.advanceTimeBy
+import kotlinx.coroutines.test.runCurrent
 
 class TestComponentScope<Model : Any, Intent : Any, Effect : Any>(
     private val testScope: TestScope,
@@ -38,12 +39,17 @@ class TestComponentScope<Model : Any, Intent : Any, Effect : Any>(
 
         testAction()
 
-        advanceUntilIdle()
+        advanceTimeBy(BASE_DELAY_TIME)
+        runCurrent()
 
         modelsJob.cancel()
         effectsJob.cancel()
 
         return testResult
+    }
+
+    companion object {
+        private const val BASE_DELAY_TIME = 5000L
     }
 
 }

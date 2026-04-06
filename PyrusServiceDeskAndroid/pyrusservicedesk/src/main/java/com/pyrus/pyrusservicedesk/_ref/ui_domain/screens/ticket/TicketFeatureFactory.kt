@@ -58,6 +58,7 @@ import kotlinx.coroutines.withContext
 import java.io.File
 import java.util.Calendar
 import java.util.UUID
+import kotlin.coroutines.CoroutineContext
 
 internal class TicketFeatureFactory(
     private val accountStore: AccountStore,
@@ -72,7 +73,8 @@ internal class TicketFeatureFactory(
     private val localTicketsStore: LocalTicketsStore,
     private val commandsStore: LocalCommandsStore,
     private val systemMessageStore: SystemMessageStore,
-    private val idStore: IdStore
+    private val idStore: IdStore,
+    private val actorContext: CoroutineContext? = Dispatchers.IO //only for test
 ) {
 
     fun create(
@@ -117,7 +119,8 @@ internal class TicketFeatureFactory(
             ),
             onCancelCallback = {
                 audioRecordController.cancelRecord()
-            }
+            },
+            actorContext = actorContext
         ).adapt { it as? Effect.Outer }
     }
 
