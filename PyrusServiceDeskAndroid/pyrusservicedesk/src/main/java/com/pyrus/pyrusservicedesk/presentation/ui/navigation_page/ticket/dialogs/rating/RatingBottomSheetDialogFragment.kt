@@ -6,10 +6,15 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.core.os.bundleOf
+import androidx.core.view.ViewCompat
+import androidx.core.view.WindowInsetsCompat
+import com.google.android.material.bottomsheet.BottomSheetBehavior
+import com.google.android.material.bottomsheet.BottomSheetDialog
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment
 import com.pyrus.pyrusservicedesk.PyrusServiceDesk.Companion.injector
 import com.pyrus.pyrusservicedesk.R
 import com.pyrus.pyrusservicedesk._ref.utils.ConfigUtils
+import com.pyrus.pyrusservicedesk._ref.utils.insets.RootViewDeferringInsetsCallback
 import com.pyrus.pyrusservicedesk.databinding.PsdFragmentRateUsBinding
 
 class RatingBottomSheetDialogFragment: BottomSheetDialogFragment() {
@@ -42,11 +47,33 @@ class RatingBottomSheetDialogFragment: BottomSheetDialogFragment() {
 
 
         binding.sendBtn.setOnClickListener {
-            parentFragmentManager.setFragmentResult(RATING_COMMENT_KEY, bundleOf(RATING_COMMENT_KEY to binding.input.text.toString()))
+            parentFragmentManager.setFragmentResult(
+                RATING_COMMENT_KEY,
+                bundleOf(RATING_COMMENT_KEY to binding.input.text.toString())
+            )
             dismiss()
         }
 
+        val rootInsetsListener = RootViewDeferringInsetsCallback(
+            persistentInsetTypes = WindowInsetsCompat.Type.captionBar() or WindowInsetsCompat.Type.statusBars(),
+            deferredInsetTypes = WindowInsetsCompat.Type.ime(),
+        )
+        ViewCompat.setOnApplyWindowInsetsListener(binding.root, rootInsetsListener)
+
         binding.closeBtn.setOnClickListener { dismiss() }
+    }
+
+    override fun onStart() {
+        super.onStart()
+        val dialog = dialog as? BottomSheetDialog
+        val bottomSheet = dialog?.findViewById<View>(com.google.android.material.R.id.design_bottom_sheet)
+
+        bottomSheet?.let {
+            val behavior = BottomSheetBehavior.from(it)
+            val displayMetrics = resources.displayMetrics
+            behavior.peekHeight = displayMetrics.heightPixels
+            behavior.state = BottomSheetBehavior.STATE_COLLAPSED
+        }
     }
 
     companion object {
