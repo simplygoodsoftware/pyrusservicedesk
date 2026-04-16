@@ -35,8 +35,7 @@ internal class AutoRefreshFeatureFactory(
 ) {
 
     fun create(
-        liveUpdates: LiveUpdates,
-        actorContext: CoroutineContext? = Dispatchers.IO //only for unit-tests!!!
+        liveUpdates: LiveUpdates
     ): AutoRefreshFeature = storeFactory.create(
         name = TAG,
         initialState = Unit,
@@ -52,7 +51,6 @@ internal class AutoRefreshFeatureFactory(
             AutoRefreshContract.Effect.StartUpdates,
             AutoRefreshContract.Effect.StartUpdatesSystemMessage
         ),
-        actorContext = actorContext
     )
 
 }

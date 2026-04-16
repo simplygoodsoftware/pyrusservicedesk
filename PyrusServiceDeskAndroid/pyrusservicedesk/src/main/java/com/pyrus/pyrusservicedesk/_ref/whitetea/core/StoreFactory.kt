@@ -1,7 +1,6 @@
 package com.pyrus.pyrusservicedesk._ref.whitetea.core
 
 import com.pyrus.pyrusservicedesk._ref.whitetea.core.logic.L
-import kotlin.coroutines.CoroutineContext
 
 internal interface StoreFactory {
 
@@ -14,7 +13,6 @@ internal interface StoreFactory {
         actors: List<Actor<Effect, Message>>,
         effectAtOnceDelivery: Boolean = false,
         onCancelCallback: ((state: State) -> Unit)? = null,
-        actorContext: CoroutineContext? = null
     ): Store<State, Message, Effect>
 
     fun <State : Any, Message : Any, Effect : Any> create(
@@ -26,7 +24,6 @@ internal interface StoreFactory {
         actor: Actor<Effect, Message>,
         effectAtOnceDelivery: Boolean = false,
         onCancelCallback: ((state: State) -> Unit)? = null,
-        actorContext: CoroutineContext? = null
     ): Store<State, Message, Effect>
 
 }
