@@ -258,28 +258,6 @@ class SynchronizerTest {
     /**
      * If there is no connection, an error should appear.
      * syncData return: Try<TicketsDto>
-     * has repeat
-     */
-    @Test
-    fun syncFailDelayIfNoConnection() = runTest {
-        TestServiceDeskApi.setGetTicketsResponse(null)
-
-        val ticketsTry = synchronizer.syncData(Data, true)
-
-        val exception = if (!ticketsTry.isSuccess()) {
-            ticketsTry.error
-        }
-        else {
-            null
-        }
-        println("exception: $exception")
-        synchronizer.close()
-        assertEquals(false, ticketsTry.isSuccess())
-    }
-
-    /**
-     * If there is no connection, an error should appear.
-     * syncData return: Try<TicketsDto>
      * has repeat with fail delay
      * If it is a SyncRequest.Data min delay is 5 second (due to throttling)
      * Even if fail delay is 1 second
