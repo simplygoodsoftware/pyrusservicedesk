@@ -91,6 +91,7 @@ internal class AttachFileVariantsFragment: BottomSheetDialogFragment(), View.OnC
         binding.photoVariant.setTextColor(textColor)
         binding.galleryVariant.setTextColor(textColor)
         binding.sendLogsVariant.setTextColor(textColor)
+        binding.customVariant.setTextColor(textColor)
 
         val localizedContext = injector().resourceContextWrapper.createLocalizedContext(requireContext())
 
