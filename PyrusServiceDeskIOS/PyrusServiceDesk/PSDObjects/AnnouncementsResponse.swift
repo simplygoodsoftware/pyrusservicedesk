@@ -112,12 +112,14 @@ struct RichTextBlock: Codable, Hashable {
     let code: String? // Содержание блока с кодом (перевод строки через \n). Задается только при Type=Code.
     let codeLang: Int? // Формат подсветки кода в блоке с кодом. - пока не поддерживается
     let richTextInlines: [RichTextInline]
+    let headerLevel: Int?
 
     enum CodingKeys: String, CodingKey {
         case type
         case code = "Code"
         case codeLang = "CodeLang"
         case richTextInlines = "rich_text_inlines"
+        case headerLevel = "HeaderLevel"
     }
 }
 

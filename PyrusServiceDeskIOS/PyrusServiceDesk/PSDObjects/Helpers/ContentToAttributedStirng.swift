@@ -21,7 +21,7 @@ public struct RichTextRenderOptions {
     public var quoteIndent: CGFloat = 20
     public var quotePrefix: String = "▎"
     public var quotePrefixColor: UIColor = .gray
-    public var quotePrefixAsAttachment: Bool = false      // если true — рисуем серую черту как attachment
+    public var quotePrefixAsAttachment: Bool = true      // если true — рисуем серую черту как attachment
     public var quotePrefixWidth: CGFloat = 3
     public var quotePrefixCornerRadius: CGFloat = 1
     
@@ -45,11 +45,24 @@ public struct RichTextRenderOptions {
     public var codeBlockParagraphSpacing: CGFloat = 8
     
     // Заголовок для первой строки
-    public var makeFirstLineHeader: Bool = true
+    public var makeFirstLineHeader: Bool = false
     public var headerFont: UIFont = .systemFont(ofSize: 17, weight: .semibold)
     public var headerColor: UIColor? = nil                // nil -> оставить базовый цвет
     public var headerSkipCodeBlocks: Bool = true          // пропускать Code как первый блок
     
+    // ─── Header blocks (H1 / H2 / H3) ───────────────────────────
+    public var h1Font: UIFont   = .systemFont(ofSize: 19, weight: .bold)
+    public var h1Color: UIColor? = nil          // nil → базовый textColor
+    public var h1ParagraphSpacing: CGFloat = 8
+
+    public var h2Font: UIFont   = .systemFont(ofSize: 18, weight: .bold)
+    public var h2Color: UIColor? = nil
+    public var h2ParagraphSpacing: CGFloat = 6
+
+    public var h3Font: UIFont   = .systemFont(ofSize: 17, weight: .semibold)
+    public var h3Color: UIColor? = nil
+    public var h3ParagraphSpacing: CGFloat = 4
+
     public init() {}
 }
 
@@ -59,12 +72,13 @@ extension RichTextDocument {
     func toAttributedString(options: RichTextRenderOptions = .init()) -> NSAttributedString {
         let result = NSMutableAttributedString()
         let blocks = richTextBlocks ?? []
-        
+
         var orderedListCounter = 0
         var previousType: BlockType? = nil
         var didApplyHeader = false
-        
+
         for (i, block) in blocks.enumerated() {
+
             // --- Блочный код отдельно ---
             if block.type == .code {
                 appendCodeBlock(block, to: result, options: options)
@@ -78,176 +92,273 @@ extension RichTextDocument {
                 previousType = .code
                 continue
             }
-            
+
             // Буфер блока
             let blockBuffer = NSMutableAttributedString()
             let baseAttrs: [NSAttributedString.Key: Any] = [
                 .font: options.baseFont,
                 .foregroundColor: options.textColor
             ]
-            
+
             // Счётчик нумерованного списка
             if block.type == .numberListItem {
-                orderedListCounter = (previousType == .numberListItem) ? (orderedListCounter + 1) : 1
+                orderedListCounter = (previousType == .numberListItem)
+                    ? (orderedListCounter + 1) : 1
             } else {
                 orderedListCounter = 0
             }
             previousType = block.type
-            
+
             // Префикс и отступы
             var prefixRangeInBlock: NSRange?
             var indent: CGFloat = 0
             var needsIndent = false
             let isQuote = (block.type == .quote)
-            
+
             switch block.type {
             case .paragraph:
                 break
+
             case .bulletListItem:
                 indent = options.listIndent
                 needsIndent = true
                 let prefix = "\(options.bulletSymbol)\t"
-                blockBuffer.append(NSAttributedString(string: prefix, attributes: baseAttrs))
-                prefixRangeInBlock = NSRange(location: 0, length: (prefix as NSString).length)
-                
+                blockBuffer.append(NSAttributedString(string: prefix,
+                                                       attributes: baseAttrs))
+                prefixRangeInBlock = NSRange(location: 0,
+                                             length: (prefix as NSString).length)
+
             case .numberListItem:
                 indent = options.listIndent
                 needsIndent = true
                 let prefix = "\(orderedListCounter)\(options.numberSuffix)\t"
-                blockBuffer.append(NSAttributedString(string: prefix, attributes: baseAttrs))
-                prefixRangeInBlock = NSRange(location: 0, length: (prefix as NSString).length)
-                
+                blockBuffer.append(NSAttributedString(string: prefix,
+                                                       attributes: baseAttrs))
+                prefixRangeInBlock = NSRange(location: 0,
+                                             length: (prefix as NSString).length)
+
             case .quote:
                 indent = options.quoteIndent
                 needsIndent = true
-                
+
                 if options.quotePrefixAsAttachment {
-                    // Attachment-черта (100% сохраняет серый цвет)
-                    let attach = makeQuoteBarAttachment(font: options.baseFont,
-                                                        color: options.quotePrefixColor,
-                                                        width: options.quotePrefixWidth,
-                                                        radius: options.quotePrefixCornerRadius)
+                    let attach = makeQuoteBarAttachment(
+                        font: options.baseFont,
+                        color: options.quotePrefixColor,
+                        width: options.quotePrefixWidth,
+                        radius: options.quotePrefixCornerRadius
+                    )
                     let start = blockBuffer.length
                     blockBuffer.append(NSAttributedString(attachment: attach))
-                    blockBuffer.append(NSAttributedString(string: "\t", attributes: baseAttrs))
-                    prefixRangeInBlock = NSRange(location: start, length: 2) // аттач + таб
+                    blockBuffer.append(NSAttributedString(string: "\t",
+                                                           attributes: baseAttrs))
+                    prefixRangeInBlock = NSRange(location: start, length: 2)
                 } else {
-                    // Символ «▎» + таб
                     let prefix = "\(options.quotePrefix)\t"
                     let prefixAttrs: [NSAttributedString.Key: Any] = [
                         .font: options.baseFont,
                         .foregroundColor: options.quotePrefixColor
                     ]
                     let start = blockBuffer.length
-                    blockBuffer.append(NSAttributedString(string: prefix, attributes: prefixAttrs))
-                    prefixRangeInBlock = NSRange(location: start, length: (prefix as NSString).length)
+                    blockBuffer.append(NSAttributedString(string: prefix,
+                                                           attributes: prefixAttrs))
+                    prefixRangeInBlock = NSRange(location: start,
+                                                 length: (prefix as NSString).length)
                 }
-                
+
             case .code:
                 break
-            case .header:
-                break
+
+            case .header:                                        // 🔸 NEW
+                break // шрифт / цвет применяется ниже, после инлайнов
             }
-            
+
             // Инлайны
             for inline in block.richTextInlines {
                 switch inline.type {
                 case .lineBreak:
-                    blockBuffer.append(NSAttributedString(string: "\n", attributes: baseAttrs))
+                    blockBuffer.append(
+                        NSAttributedString(string: "\n", attributes: baseAttrs))
                 case .text, .link:
                     let attrs = attributes(for: inline, base: options)
                     if let s = inline.string, !s.isEmpty {
-                        blockBuffer.append(NSAttributedString(string: s, attributes: attrs))
+                        blockBuffer.append(
+                            NSAttributedString(string: s, attributes: attrs))
                     }
                 }
             }
-            
+
+            // ─────────────────────────────────────────────────
+            // 🔸 NEW — Header block: накладываем шрифт и цвет
+            // ─────────────────────────────────────────────────
+            var effectiveParagraphSpacing = options.paragraphSpacing   // 🔸 NEW
+
+            if block.type == .header {
+                let cfg = headerConfig(level: block.headerLevel,
+                                       options: options)
+                effectiveParagraphSpacing = cfg.paragraphSpacing
+
+                let fullRange = NSRange(location: 0,
+                                        length: blockBuffer.length)
+                guard fullRange.length > 0 else { break }
+
+                // Перебираем шрифты — сохраняем bold/italic трейты,
+                // а моноширинный (code) не трогаем.
+                blockBuffer.enumerateAttribute(
+                    .font, in: fullRange, options: []
+                ) { value, range, _ in
+                    guard let currentFont = value as? UIFont else { return }
+
+                    // Сохраняем inline-code шрифт «как есть»
+                    if currentFont.fontDescriptor.symbolicTraits
+                        .contains(.traitMonoSpace) { return }
+
+                    let traits = currentFont.fontDescriptor.symbolicTraits
+                    let isBold   = traits.contains(.traitBold)
+                    let isItalic = traits.contains(.traitItalic)
+
+                    if isBold || isItalic {
+                        blockBuffer.addAttribute(
+                            .font,
+                            value: deriveFont(from: cfg.font,
+                                              bold: isBold,
+                                              italic: isItalic),
+                            range: range)
+                    } else {
+                        blockBuffer.addAttribute(.font,
+                                                  value: cfg.font,
+                                                  range: range)
+                    }
+                }
+
+                // Цвет заголовка (если задан)
+                if let hColor = cfg.color {
+                    blockBuffer.addAttribute(.foregroundColor,
+                                              value: hColor,
+                                              range: fullRange)
+                }
+            }
+
             // Параграфные стили
             if !needsIndent {
                 let p = NSMutableParagraphStyle()
-                p.paragraphSpacing = options.paragraphSpacing
+                p.paragraphSpacing = effectiveParagraphSpacing  // 🔸 CHANGED
                 p.lineSpacing = options.lineSpacing
                 if blockBuffer.length > 0 {
-                    blockBuffer.addAttribute(.paragraphStyle, value: p, range: NSRange(location: 0, length: blockBuffer.length))
+                    blockBuffer.addAttribute(
+                        .paragraphStyle, value: p,
+                        range: NSRange(location: 0,
+                                       length: blockBuffer.length))
                 }
             } else {
-                // pAll: все абзацы стартуют с отступа
                 let pAll = NSMutableParagraphStyle()
-                pAll.paragraphSpacing = options.paragraphSpacing
+                pAll.paragraphSpacing = effectiveParagraphSpacing // 🔸 CHANGED
                 pAll.lineSpacing = options.lineSpacing
                 pAll.firstLineHeadIndent = indent
                 pAll.headIndent = indent
-                pAll.tabStops = [NSTextTab(textAlignment: .left, location: indent, options: [:])]
+                pAll.tabStops = [NSTextTab(textAlignment: .left,
+                                           location: indent,
+                                           options: [:])]
                 pAll.defaultTabInterval = indent
-                
+
                 if blockBuffer.length > 0 {
-                    blockBuffer.addAttribute(.paragraphStyle, value: pAll, range: NSRange(location: 0, length: blockBuffer.length))
+                    blockBuffer.addAttribute(
+                        .paragraphStyle, value: pAll,
+                        range: NSRange(location: 0,
+                                       length: blockBuffer.length))
                 }
-                
-                // pFirst: первая строка первого абзаца без отступа (идёт префикс)
+
                 let pFirst = pAll.mutableCopy() as! NSMutableParagraphStyle
                 pFirst.firstLineHeadIndent = 0
                 let ns = blockBuffer.string as NSString
-                var firstParaRange = NSRange(location: 0, length: ns.length)
+                var firstParaRange = NSRange(location: 0,
+                                             length: ns.length)
                 let nl = ns.range(of: "\n")
                 if nl.location != NSNotFound {
-                    firstParaRange.length = nl.location + nl.length // включая \n
+                    firstParaRange.length = nl.location + nl.length
                 }
                 if firstParaRange.length > 0 {
-                    blockBuffer.addAttribute(.paragraphStyle, value: pFirst, range: firstParaRange)
+                    blockBuffer.addAttribute(.paragraphStyle,
+                                              value: pFirst,
+                                              range: firstParaRange)
                 }
             }
-            
-            // Гарантируем серый цвет префикса цитаты (если не attachment)
-            if isQuote, !options.quotePrefixAsAttachment, let r = prefixRangeInBlock, r.length > 0 {
-                blockBuffer.addAttribute(.foregroundColor, value: options.quotePrefixColor, range: r)
-                blockBuffer.addAttribute(.font, value: options.baseFont, range: r)
+
+            // Гарантируем серый цвет префикса цитаты
+            if isQuote, !options.quotePrefixAsAttachment,
+               let r = prefixRangeInBlock, r.length > 0 {
+                blockBuffer.addAttribute(.foregroundColor,
+                                          value: options.quotePrefixColor,
+                                          range: r)
+                blockBuffer.addAttribute(.font,
+                                          value: options.baseFont,
+                                          range: r)
             }
-            
-            // -------------------------------
-            // Заголовок: первая строка всего контента
-            // -------------------------------
+
+            // ─────────────────────────────────────────────────
+            // «Первая строка — заголовок» (makeFirstLineHeader)
+            // 🔸 CHANGED — пропускаем, если первый контентный
+            //              блок уже .header
+            // ─────────────────────────────────────────────────
             if options.makeFirstLineHeader && !didApplyHeader {
-                // Пропускаем кодовые блоки (по опции)
-                let blockIsSkippable = (block.type == .code) && options.headerSkipCodeBlocks
+                let blockIsSkippable =
+                    (block.type == .code && options.headerSkipCodeBlocks)
+                    || block.type == .header                     // 🔸 NEW
+
                 if !blockIsSkippable {
-                    // Начало первой строки — после префикса (если он есть), иначе с начала блока
                     let headerStartInBlock: Int = {
-                        if let r = prefixRangeInBlock { return r.location + r.length }
+                        if let r = prefixRangeInBlock {
+                            return r.location + r.length
+                        }
                         return 0
                     }()
-                    
-                    // Конец первой строки — до первого '\n' или до конца блока
+
                     let ns = blockBuffer.string as NSString
-                    let searchRange = NSRange(location: max(0, headerStartInBlock), length: ns.length - max(0, headerStartInBlock))
+                    let searchRange = NSRange(
+                        location: max(0, headerStartInBlock),
+                        length: ns.length - max(0, headerStartInBlock))
                     var headerEndInBlock = ns.length
-                    let nl = ns.range(of: "\n", options: [], range: searchRange)
+                    let nl = ns.range(of: "\n", options: [],
+                                      range: searchRange)
                     if nl.location != NSNotFound {
                         headerEndInBlock = nl.location
                     }
-                    
+
                     if headerEndInBlock > headerStartInBlock {
-                        let headerRange = NSRange(location: headerStartInBlock, length: headerEndInBlock - headerStartInBlock)
-                        // Накладываем атрибуты заголовка поверх (font/цвет)
-                        blockBuffer.addAttribute(.font, value: options.headerFont, range: headerRange)
+                        let headerRange = NSRange(
+                            location: headerStartInBlock,
+                            length: headerEndInBlock - headerStartInBlock)
+                        blockBuffer.addAttribute(.font,
+                                                  value: options.headerFont,
+                                                  range: headerRange)
                         if let headerColor = options.headerColor {
-                            blockBuffer.addAttribute(.foregroundColor, value: headerColor, range: headerRange)
+                            blockBuffer.addAttribute(.foregroundColor,
+                                                      value: headerColor,
+                                                      range: headerRange)
                         }
                         didApplyHeader = true
                     }
                 }
+
+                // 🔸 NEW — если блок .header, всё равно считаем,
+                //          что заголовок уже «был»
+                if block.type == .header {
+                    didApplyHeader = true
+                }
             }
-            
+
             // Вставляем блок и разделитель
             result.append(blockBuffer)
             if i < blocks.count - 1 {
-                result.append(NSAttributedString(string: "\n", attributes: baseAttrs))
+                result.append(NSAttributedString(string: "\n",
+                                                  attributes: baseAttrs))
             }
         }
-        
+
         return result
     }
 }
+
 
 // MARK: - Code block
 
@@ -393,4 +504,17 @@ private func makeQuoteBarAttachment(font: UIFont, color: UIColor,
     // Центрируем относительно базовой линии
     attach.bounds = CGRect(x: 0, y: font.descender, width: width, height: height)
     return attach
+}
+
+// MARK: - Header level attributes
+
+private func headerConfig(
+    level: Int?,
+    options: RichTextRenderOptions
+) -> (font: UIFont, color: UIColor?, paragraphSpacing: CGFloat) {
+    switch level {
+    case 1:  return (options.h1Font, options.h1Color, options.h1ParagraphSpacing)
+    case 2:  return (options.h2Font, options.h2Color, options.h2ParagraphSpacing)
+    default: return (options.h3Font, options.h3Color, options.h3ParagraphSpacing) // 3 и любой нестандартный
+    }
 }

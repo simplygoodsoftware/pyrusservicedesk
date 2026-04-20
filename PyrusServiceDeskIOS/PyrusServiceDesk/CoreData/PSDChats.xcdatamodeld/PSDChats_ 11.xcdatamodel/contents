@@ -89,6 +89,7 @@
     <entity name="DBRichTextBlock" representedClassName="DBRichTextBlock" syncable="YES" codeGenerationType="class">
         <attribute name="code" optional="YES" attributeType="String"/>
         <attribute name="codeLangRaw" optional="YES" attributeType="Integer 16" defaultValueString="0" usesScalarValueType="YES"/>
+        <attribute name="headerLevelRaw" optional="YES" attributeType="Integer 16" defaultValueString="0" usesScalarValueType="YES"/>
         <attribute name="type" optional="YES" attributeType="String"/>
         <relationship name="announcemet" optional="YES" maxCount="1" deletionRule="Nullify" destinationEntity="DBAnnouncement" inverseName="richTextBlocks" inverseEntity="DBAnnouncement"/>
         <relationship name="inlines" optional="YES" toMany="YES" deletionRule="Cascade" ordered="YES" destinationEntity="DBRichTextInline" inverseName="block" inverseEntity="DBRichTextInline" spotlightIndexingEnabled="YES"/>

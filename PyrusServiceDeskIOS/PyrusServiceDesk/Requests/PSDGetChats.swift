@@ -60,8 +60,8 @@ struct PSDGetChats {
         for client in PyrusServiceDesk.clients {
             var announcementsChepoint = [String: Any]()
             announcementsChepoint["app_id"] = client.clientId
-           // announcementsChepoint["last_helpy_announcement_id"] = client.lasAnnoncementId
-           // announcementsChepoint["last_helpy_announcement_change_datetime"] = client.lasAnnouncementUpdateDate
+            announcementsChepoint["last_helpy_announcement_id"] = client.lasAnnoncementId
+            announcementsChepoint["last_helpy_announcement_change_datetime"] = client.lasAnnouncementUpdateDate
             announcementsChepoints.append(announcementsChepoint)
         }
         

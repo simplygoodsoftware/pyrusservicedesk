@@ -1199,7 +1199,8 @@ extension PSDChatsDataService: PSDChatsDataServiceProtocol {
                     type: blockType,
                     code: dbBlock.code,
                     codeLang: dbBlock.codeLangRaw != 0 ? Int(dbBlock.codeLangRaw) : nil,
-                    richTextInlines: inlines
+                    richTextInlines: inlines,
+                    headerLevel: dbBlock.headerLevelRaw != 0 ? Int(dbBlock.headerLevelRaw) : nil
                 )
             }
 
