@@ -6,7 +6,6 @@ import com.pyrus.pyrusservicedesk.R
 import com.pyrus.pyrusservicedesk._ref.ui_domain.screens.ticket.adapter.entries.CommentEntry
 import com.pyrus.pyrusservicedesk._ref.utils.ConfigUtils
 import com.pyrus.pyrusservicedesk._ref.utils.text
-import com.pyrus.pyrusservicedesk.core.ResourceContextWrapper
 import com.pyrus.pyrusservicedesk.databinding.PsdViewHolderDateBinding
 import com.pyrus.pyrusservicedesk.payload_adapter.BaseViewHolder
 import com.pyrus.pyrusservicedesk.payload_adapter.ItemFingerprint
@@ -15,7 +14,7 @@ import com.pyrus.pyrusservicedesk.payload_adapter.diff
 import kotlin.reflect.KClass
 
 
-internal class DateFingerprint(private val resourceContextWrapper: ResourceContextWrapper) : ItemFingerprint<CommentEntry.Date>() {
+internal class DateFingerprint : ItemFingerprint<CommentEntry.Date>() {
 
     override val layoutId: Int = R.layout.psd_view_holder_date
 
@@ -26,8 +25,7 @@ internal class DateFingerprint(private val resourceContextWrapper: ResourceConte
         parent: ViewGroup
     ): BaseViewHolder<CommentEntry.Date> {
         return DateViewHolder(
-            PsdViewHolderDateBinding.inflate(layoutInflater, parent, false),
-            resourceContextWrapper
+            PsdViewHolderDateBinding.inflate(layoutInflater, parent, false)
         )
     }
 
@@ -48,8 +46,7 @@ internal class DateFingerprint(private val resourceContextWrapper: ResourceConte
 }
 
 internal class DateViewHolder(
-    private val binding: PsdViewHolderDateBinding,
-    private val resourceContextWrapper: ResourceContextWrapper,
+    private val binding: PsdViewHolderDateBinding
 ) : BaseViewHolder<CommentEntry.Date>(binding.root) {
 
     init {
@@ -61,7 +58,7 @@ internal class DateViewHolder(
 
     override fun bind(builder: PayloadActionBuilder<CommentEntry.Date>) = builder.diff {
         this.entry::date.payloadCheck {
-            binding.date.text = entry.date.text(resourceContextWrapper.getLocalizedContext())
+            binding.date.text = entry.date.text(binding.date.context)
         }
     }
 }
