@@ -10,6 +10,4 @@ internal data class StartData(
     val account: Account,
     val openTicketAction: OpenTicketAction?,
     val sendComment: String?,
-    val localeLanguage: String?,
-    val localeCountry: String?,
 ) : Parcelable

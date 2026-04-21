@@ -41,12 +41,6 @@ internal class MainActivity : FragmentActivity() {
         setTheme(theme)
         val data = intent.getParcelableExtra<StartData>(KEY_DATA)
 
-//
-//        val decorView = window.decorView
-//        var flags: Int = decorView.getSystemUiVisibility()
-//        flags = flags and View.SYSTEM_UI_FLAG_LIGHT_NAVIGATION_BAR.inv()
-//        decorView.setSystemUiVisibility(flags)
-
         binding = PsdActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
