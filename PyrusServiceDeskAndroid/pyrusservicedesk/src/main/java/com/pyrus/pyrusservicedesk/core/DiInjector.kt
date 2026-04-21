@@ -166,7 +166,7 @@ internal class DiInjector(
     val preferencesManager = PreferencesManager(initialAccountKey, preferences)
 
 
-    val resourceContextWrapper = ResourceContextWrapper()
+    val resourceContextWrapper = ResourceContextWrapper(application)
 
     private val synchronizer = Synchronizer(
         api = api,

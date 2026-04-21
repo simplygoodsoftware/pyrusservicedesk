@@ -35,8 +35,7 @@ import com.pyrus.pyrusservicedesk._ref.SdScreens
 import com.pyrus.pyrusservicedesk._ref.data.AudioData
 import com.pyrus.pyrusservicedesk._ref.ui_domain.screens.ticket.TicketView.Effect
 import com.pyrus.pyrusservicedesk._ref.ui_domain.screens.ticket.TicketView.Event
-import com.pyrus.pyrusservicedesk._ref.ui_domain.screens.ticket.TicketView.Event.SetAttachVariant
-import com.pyrus.pyrusservicedesk._ref.ui_domain.screens.ticket.TicketView.Event.SetErrorCommentResult
+import com.pyrus.pyrusservicedesk._ref.ui_domain.screens.ticket.TicketView.Event.*
 import com.pyrus.pyrusservicedesk._ref.ui_domain.screens.ticket.TicketView.Model
 import com.pyrus.pyrusservicedesk._ref.ui_domain.screens.ticket.adapter.entries.CommentEntry
 import com.pyrus.pyrusservicedesk._ref.ui_domain.screens.ticket.adapter.fingerprints.AudioStatus
@@ -55,7 +54,8 @@ import com.pyrus.pyrusservicedesk._ref.utils.AudioWrapper
 import com.pyrus.pyrusservicedesk._ref.utils.ConfigUtils
 import com.pyrus.pyrusservicedesk._ref.utils.ConfigUtils.Companion.getAccentColor
 import com.pyrus.pyrusservicedesk._ref.utils.ConfigUtils.Companion.getMainBackgroundColor
-import com.pyrus.pyrusservicedesk._ref.utils.TextProvider.Res
+import com.pyrus.pyrusservicedesk._ref.utils.TextProvider
+import com.pyrus.pyrusservicedesk._ref.utils.TextProvider.*
 import com.pyrus.pyrusservicedesk._ref.utils.animateVisibility
 import com.pyrus.pyrusservicedesk._ref.utils.getColorOnBackground
 import com.pyrus.pyrusservicedesk._ref.utils.getSecondaryColorOnBackground
@@ -97,7 +97,7 @@ internal class TicketFragment: TeaFragment<Model, Event, Effect>() {
 
     private val adapter: PayloadListAdapter<CommentEntry> by lazy { PayloadListAdapter(
         ButtonsFingerprint(::dispatch),
-        CommentTextFingerprint(::dispatch, requireActivity()),
+        CommentTextFingerprint(::dispatch),
         CommentAttachmentFingerprint(::dispatch, viewLifecycleOwner),
         CommentPreviewableAttachmentFingerprint(::dispatch, viewLifecycleOwner),
         DateFingerprint(resourceContextWrapper),
@@ -303,8 +303,7 @@ internal class TicketFragment: TeaFragment<Model, Event, Effect>() {
         container: ViewGroup?,
         savedInstanceState: Bundle?,
     ): View {
-        val localizedInflater = container?.context?.let { LayoutInflater.from(resourceContextWrapper.createLocalizedContext(it)) } ?: inflater
-        binding = PsdFragmentTicketBinding.inflate(localizedInflater, container, false)
+        binding = PsdFragmentTicketBinding.inflate(inflater, container, false)
 
         audioRecordView = AudioRecordView(
             recordWaves = binding.recordWaves,
@@ -587,9 +586,7 @@ internal class TicketFragment: TeaFragment<Model, Event, Effect>() {
         binding.inputLayout.setBackgroundColor(getMainBackgroundColor(requireContext()))
 
         binding.cancelRecordHint.setTextColor(ConfigUtils.getSecondaryColorOnMainBackground(requireContext()))
-        binding.cancelRecordHint.text = binding.root.resources.getString(R.string.psd_swipe_cancel)
         binding.cancelHoldingRecordButton.setTextColor(ConfigUtils.getCanselColor(requireContext()))
-        binding.cancelHoldingRecordButton.text = binding.root.resources.getString(R.string.psd_cancel)
 
         val toolbarColor = ConfigUtils.getHeaderBackgroundColor(requireContext())
         binding.toolbarTitle.setTextColor(ConfigUtils.getChatTitleTextColor(requireContext()))
@@ -605,11 +602,8 @@ internal class TicketFragment: TeaFragment<Model, Event, Effect>() {
             getSecondaryColorOnBackground(ConfigUtils.getNoPreviewBackgroundColor(requireContext()))
         binding.noConnection.noConnectionImageView.setColorFilter(secondaryColor)
         binding.noConnection.noConnectionTextView.setTextColor(secondaryColor)
-        binding.noConnection.noConnectionTextView.text = binding.root.resources.getString(R.string.psd_no_connection)
-
 
         binding.noConnection.reconnectButton.setTextColor(getAccentColor(requireContext()))
-        binding.noConnection.reconnectButton.text = binding.root.resources.getString(R.string.psd_retry)
 
         binding.noConnection.root.setBackgroundColor(ConfigUtils.getNoConnectionBackgroundColor(requireContext()))
 
@@ -638,7 +632,6 @@ internal class TicketFragment: TeaFragment<Model, Event, Effect>() {
         }
         binding.inputEditText.setHintTextColor(resources.getColor(R.color.psd_hint_color))
         binding.inputEditText.setTextColor(ConfigUtils.getInputTextColor(requireContext()))
-        binding.inputEditText.hint = binding.root.context.getString(R.string.psd_comment_input_hint)
 
         binding.view.setBackgroundColor(
             getColorOnBackground(
