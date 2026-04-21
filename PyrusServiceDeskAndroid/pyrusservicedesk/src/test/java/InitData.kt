@@ -1,3 +1,6 @@
+import com.pyrus.pyrusservicedesk.User
+import com.pyrus.pyrusservicedesk._ref.data.Comment
+import com.pyrus.pyrusservicedesk._ref.data.FullTicket
 import com.pyrus.pyrusservicedesk.sdk.repositories.UserInternal
 import com.pyrus.pyrusservicedesk.sdk.repositories.data_base.data.CommentEntity
 import com.pyrus.pyrusservicedesk.sdk.repositories.data_base.data.CommentInfo
@@ -20,6 +23,12 @@ internal object InitData {
     val userInternalV1 = UserInternal(
         userId = TEST_INSTANCE_ID,
         appId = TEST_APP_ID
+    )
+
+    val userV1 = User(
+        userId = TEST_INSTANCE_ID,
+        appId = TEST_APP_ID,
+        userName = "testddddd",
     )
 
     val markTicketIsReadRequest = SyncRequest.Command.MarkTicketAsRead(
@@ -71,6 +80,68 @@ internal object InitData {
         author = null,
         body = "testComment",
         lastAttachmentName = null
+    )
+
+    val comment1 = Comment(
+        id = 1234567890,
+        persistentId = 1234567890,
+        body = "testComment",
+        isInbound = true,
+        creationTime = 1773925754,
+        rating = null,
+        author = null,
+        isSystem = false,
+        systemCommentType = SystemCommentType.Unknown.ordinal,
+        isLocal = false,
+        isSupport = false,
+        attachments = emptyList(),
+        isSending = false
+    )
+
+    val ticket = FullTicket(
+        subject = "test",
+        comments = listOf(
+            Comment(
+                id = 1234567890,
+                persistentId = 0,
+                body = "testComment",
+                isInbound = true,
+                creationTime = 1773925754,
+                rating = null,
+                author = null,
+                isSystem = false,
+                systemCommentType = SystemCommentType.Unknown.ordinal,
+                isLocal = false,
+                isSupport = false,
+                attachments = emptyList(),
+                isSending = false
+            ),
+            Comment(
+                id = 1234567880,
+                persistentId = 0,
+                body = "test",
+                isInbound = true,
+                creationTime = 1748093446000,
+                rating = null,
+                author = null,
+                isSystem = false,
+                systemCommentType = SystemCommentType.Unknown.ordinal,
+                isLocal = false,
+                isSupport = false,
+                attachments = emptyList(),
+                isSending = false
+            )
+        ),
+        showRating = false,
+        showRatingText = null,
+        ratingSettings = null,
+        orgLogoUrl = null,
+        userId = TEST_INSTANCE_ID,
+        ticketId = TEST_TICKET_ID,
+        isActive = true,
+        isRead = true,
+        welcomeMessage = null,
+        operatorTimeMessage = null
     )
 
     val ticketEntity = TicketEntity(
