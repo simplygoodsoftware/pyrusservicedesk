@@ -278,7 +278,9 @@ internal class DiInjector(
 
     val picassoManager: PicassoManager = PicassoManager(application)
 
-    val picasso: Picasso = picassoManager.providePicasso(createOkHttpClientBuilder())
+    val picasso: Picasso = ThreadsHelper().syncRunOnMainThreadWithResult {
+        picassoManager.providePicasso(createOkHttpClientBuilder())
+    }
 
     val setPushTokenUseCase = SetPushTokenUseCase(accountStore, coreScope, preferencesManager, repository)
 
@@ -309,10 +311,14 @@ internal class DiInjector(
 
     fun onCancel() {
         releaseSession()
-        picassoManager.dispose(picasso)
+        disposePicasso()
         coreScope.cancel()
         synchronizer.cancel()
         synchronizer.close()
+    }
+
+    fun disposePicasso() = ThreadsHelper().syncRunOnMainThread {
+        picassoManager.dispose(picasso)
     }
 
     fun releaseSession() = ThreadsHelper().syncRunOnMainThread {
