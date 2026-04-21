@@ -27,6 +27,8 @@ internal class TestServiceDeskApi(
 
     private var lastTime = System.currentTimeMillis()
 
+    private var moshi = createMoshi()
+
     private fun createMoshi() = Moshi.Builder()
         .add(CommandParamsDto.factory)
         .add(DateAdapter())
@@ -58,7 +60,7 @@ internal class TestServiceDeskApi(
 
     inline fun <reified Response> String?.fromJson(): Try<Response> {
         if (this == null) return unexpectedCall()
-        val response = createMoshi().adapter(Response::class.java).fromJson(this)
+        val response = moshi.adapter(Response::class.java).fromJson(this)
         return Try.Success(response!!)
     }
 

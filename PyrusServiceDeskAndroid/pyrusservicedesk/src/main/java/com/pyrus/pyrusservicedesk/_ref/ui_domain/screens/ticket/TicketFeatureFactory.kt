@@ -58,6 +58,7 @@ import kotlinx.coroutines.withContext
 import java.io.File
 import java.util.Calendar
 import java.util.UUID
+import kotlin.coroutines.CoroutineContext
 
 internal class TicketFeatureFactory(
     private val accountStore: AccountStore,
@@ -72,7 +73,8 @@ internal class TicketFeatureFactory(
     private val localTicketsStore: LocalTicketsStore,
     private val commandsStore: LocalCommandsStore,
     private val systemMessageStore: SystemMessageStore,
-    private val idStore: IdStore
+    private val idStore: IdStore,
+    private val actorContext: CoroutineContext? = Dispatchers.IO //only for test
 ) {
 
     fun create(
@@ -117,7 +119,8 @@ internal class TicketFeatureFactory(
             ),
             onCancelCallback = {
                 audioRecordController.cancelRecord()
-            }
+            },
+            actorContext = actorContext
         ).adapt { it as? Effect.Outer }
     }
 
@@ -423,7 +426,11 @@ private class TicketActor(
             )
             when {
                 commentsTry.isSuccess() -> {
-                    val application = localTicketsStore.getApplications().find { accountStore.getAccount().getUsers().find { user -> user.userId == commentsTry.value.userId }?.appId == it.appId }
+                    val application = localTicketsStore.getApplications().find {
+                        accountStore.getAccount().getUsers().find { user ->
+                            user.userId == commentsTry.value.userId
+                        }?.appId == it.appId
+                    }
                     var needAnotherOneWelcomeMessage = false
                     if (((accountStore.getAccount().getVersion() == API_VERSION_1
                             ||accountStore.getAccount().getVersion() == API_VERSION_2)
@@ -494,9 +501,9 @@ private class TicketActor(
 
         }
         is Effect.Inner.SendRatingComment -> flow {
-            preferencesManager.saveLastActiveTime(System.currentTimeMillis())
             if (effect.rating == null && effect.ratingComment == null)
                 return@flow
+            preferencesManager.saveLastActiveTime(System.currentTimeMillis())
             ticketId = localTicketsStore.getTickets().lastOrNull()?.ticketId ?: ticketId
             idStore.setTicketId(ticketId)
             repository.addRatingComment(user, ticketId, effect.rating, effect.ratingComment)

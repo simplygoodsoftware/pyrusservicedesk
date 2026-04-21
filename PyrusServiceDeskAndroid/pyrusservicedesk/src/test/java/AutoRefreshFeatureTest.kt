@@ -89,7 +89,7 @@ class AutoRefreshFeatureTest {
         val initialInterval = MILLISECONDS_IN_SECOND * 5L
         every { liveUpdates.getTicketsUpdateInterval(any()) } returns initialInterval
 
-        val autoRefreshFeatureFactory = createAutoRefreshFeature(testDispatcher)
+        val autoRefreshFeatureFactory = createAutoRefreshFeature(testDispatcher, this)
 
         checkSyncCount(initialInterval, 2)
 
@@ -118,7 +118,7 @@ class AutoRefreshFeatureTest {
         val checkInterval = MILLISECONDS_IN_SECOND * 20L
         every { liveUpdates.getTicketsUpdateInterval(any()) } returns initialInterval
 
-        val autoRefreshFeatureFactory = createAutoRefreshFeature(testDispatcher)
+        val autoRefreshFeatureFactory = createAutoRefreshFeature(testDispatcher, this)
 
         checkSyncCount(checkInterval, 5)
 
@@ -143,7 +143,7 @@ class AutoRefreshFeatureTest {
         val checkInterval = MILLISECONDS_IN_SECOND * 15L * 2
         every { liveUpdates.getTicketsUpdateInterval(any()) } returns initialInterval
 
-        val autoRefreshFeatureFactory = createAutoRefreshFeature(testDispatcher)
+        val autoRefreshFeatureFactory = createAutoRefreshFeature(testDispatcher, this)
 
         checkSyncCount(checkInterval, 3)
 
@@ -170,7 +170,7 @@ class AutoRefreshFeatureTest {
         val checkInterval = MILLISECONDS_IN_SECOND * 60L * 2
         every { liveUpdates.getTicketsUpdateInterval(any()) } returns initialInterval
 
-        val autoRefreshFeatureFactory = createAutoRefreshFeature(testDispatcher)
+        val autoRefreshFeatureFactory = createAutoRefreshFeature(testDispatcher, this)
 
         checkSyncCount(checkInterval, 3)
 
@@ -202,7 +202,7 @@ class AutoRefreshFeatureTest {
         setInterval(threeMinutesAgo)
         val checkInterval = MILLISECONDS_IN_SECOND * 15L * 2
 
-        val autoRefreshFeatureFactory = createAutoRefreshFeature(testDispatcher)
+        val autoRefreshFeatureFactory = createAutoRefreshFeature(testDispatcher, this)
 
         checkSyncCount(checkInterval, 3)
 
@@ -233,7 +233,7 @@ class AutoRefreshFeatureTest {
         setInterval(fourDaysAgo)
         val checkInterval = MILLISECONDS_IN_SECOND * 60L * 6
 
-        val autoRefreshFeatureFactory = createAutoRefreshFeature(testDispatcher)
+        val autoRefreshFeatureFactory = createAutoRefreshFeature(testDispatcher, this)
 
         checkSyncCount(checkInterval, 3)
 
@@ -264,7 +264,7 @@ class AutoRefreshFeatureTest {
         setInterval(fourDaysAgo)
         val checkInterval = MILLISECONDS_IN_SECOND * 60L * 6
 
-        val autoRefreshFeatureFactory = createAutoRefreshFeature(testDispatcher)
+        val autoRefreshFeatureFactory = createAutoRefreshFeature(testDispatcher, this)
 
         checkSyncCount(checkInterval, 0)
 
@@ -300,7 +300,7 @@ class AutoRefreshFeatureTest {
         setInterval(threeMinutesAgo)
         val checkInterval = MILLISECONDS_IN_SECOND * 15L * 2 + MILLISECONDS_IN_SECOND * 5L
 
-        val autoRefreshFeatureFactory = createAutoRefreshFeature(testDispatcher)
+        val autoRefreshFeatureFactory = createAutoRefreshFeature(testDispatcher, this)
 
         checkSyncCount(checkInterval, 3)
 
@@ -332,7 +332,7 @@ class AutoRefreshFeatureTest {
         setInterval(NO_UPDATES)
         val checkInterval = MILLISECONDS_IN_SECOND * 60L * 2
 
-        val autoRefreshFeatureFactory = createAutoRefreshFeature(testDispatcher)
+        val autoRefreshFeatureFactory = createAutoRefreshFeature(testDispatcher, this)
 
         checkSyncCount(checkInterval, 0)
 
@@ -364,7 +364,7 @@ class AutoRefreshFeatureTest {
         setInterval(threeMinutesAgo)
         val checkInterval = MILLISECONDS_IN_SECOND * 15L * 2 + MILLISECONDS_IN_SECOND * 5L
 
-        val autoRefreshFeatureFactory = createAutoRefreshFeature(testDispatcher)
+        val autoRefreshFeatureFactory = createAutoRefreshFeature(testDispatcher, this)
 
         checkSyncCount(checkInterval, 3)
 
@@ -398,7 +398,7 @@ class AutoRefreshFeatureTest {
         setInterval(threeMinutesAgo)
         val checkInterval = MILLISECONDS_IN_SECOND * 15L * 2
 
-        val autoRefreshFeatureFactory = createAutoRefreshFeature(testDispatcher)
+        val autoRefreshFeatureFactory = createAutoRefreshFeature(testDispatcher, this)
 
         checkSyncCount(checkInterval, 0)
 
@@ -430,7 +430,7 @@ class AutoRefreshFeatureTest {
         setInterval(threeMinutesAgo)
         val checkInterval = MILLISECONDS_IN_SECOND * 15L * 2
 
-        val autoRefreshFeatureFactory = createAutoRefreshFeature(testDispatcher)
+        val autoRefreshFeatureFactory = createAutoRefreshFeature(testDispatcher, this)
 
         checkSyncCount(checkInterval, 3)
 
@@ -465,7 +465,7 @@ class AutoRefreshFeatureTest {
 
         val checkInterval = MILLISECONDS_IN_SECOND * 30L
 
-        val autoRefreshFeatureFactory = createAutoRefreshFeature(testDispatcher)
+        val autoRefreshFeatureFactory = createAutoRefreshFeature(testDispatcher, this)
 
         checkSyncCount(checkInterval, 7)
 
@@ -491,13 +491,14 @@ class AutoRefreshFeatureTest {
         PyrusServiceDesk.updateSdIsOpen(sdkIsOpen)
     }
 
-    private fun createAutoRefreshFeature(testDispatcher: TestDispatcher): AutoRefreshFeature {
+    private fun createAutoRefreshFeature(testDispatcher: TestDispatcher, testScope: TestScope): AutoRefreshFeature {
         return AutoRefreshFeatureFactory(
             storeFactory = storeFactory,
             repository = repository,
             preferencesManager = preferencesManager,
             systemMessageStore = systemMessageStore,
-            localTicketsStore = localTicketsStore
+            localTicketsStore = localTicketsStore,
+            timeProvider = TestTimeProvider(testScope),
         ).create(liveUpdates, testDispatcher)
     }
 
