@@ -224,41 +224,35 @@ internal class DiInjector(
         context = application
     )
 
-    val audioWrapper: AudioWrapper by lazy {
-        AudioWrapper(session, downloadHelper, coreScope)
-    }
+    val audioWrapper = AudioWrapper(session, downloadHelper, coreScope)
 
     private val audioRecordControllerFactory = AudioRecordControllerFactory(application.cacheDir)
 
-    val ticketFeatureFactory: TicketFeatureFactory by lazy {
-        TicketFeatureFactory(
-            accountStore = accountStore,
-            storeFactory = storeFactory,
-            repository = repository,
-            draftRepository = draftRepository,
-            router = router,
-            fileManager = fileManager,
-            preferencesManager = preferencesManager,
-            audioRecordControllerFactory = audioRecordControllerFactory,
-            audioWrapper = audioWrapper,
-            localTicketsStore = localTicketsStore,
-            commandsStore = localCommandsStore,
-            systemMessageStore = systemMessageStore,
-            idStore = idStore,
-        )
-    }
+    val ticketFeatureFactory = TicketFeatureFactory(
+        accountStore = accountStore,
+        storeFactory = storeFactory,
+        repository = repository,
+        draftRepository = draftRepository,
+        router = router,
+        fileManager = fileManager,
+        preferencesManager = preferencesManager,
+        audioRecordControllerFactory = audioRecordControllerFactory,
+        audioWrapper = audioWrapper,
+        localTicketsStore = localTicketsStore,
+        commandsStore = localCommandsStore,
+        systemMessageStore = systemMessageStore,
+        idStore = idStore,
+    )
 
-    val ticketsFeatureFactory: TicketsFeatureFactory by lazy {
-        TicketsFeatureFactory(
-            storeFactory = storeFactory,
-            repository = repository,
-            router = router,
-            commandsStore = localCommandsStore,
-            addUserEventBus = addUserEventBus,
-            audioWrapper = audioWrapper,
-            accountStore = accountStore,
-        )
-    }
+    val ticketsFeatureFactory = TicketsFeatureFactory(
+        storeFactory = storeFactory,
+        repository = repository,
+        router = router,
+        commandsStore = localCommandsStore,
+        addUserEventBus = addUserEventBus,
+        audioWrapper = audioWrapper,
+        accountStore = accountStore,
+    )
 
     val searchFeatureFactory = SearchFeatureFactory(
         storeFactory = storeFactory,
