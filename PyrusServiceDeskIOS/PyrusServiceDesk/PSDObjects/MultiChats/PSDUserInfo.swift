@@ -30,12 +30,14 @@ import Foundation
         let name: String
         let phone: String?
         var hasAccess: Bool
+        var hasAdminAccess: Bool
         
-        init(id: String, name: String, phone: String?, hasAccess: Bool) {
+        init(id: String, name: String, phone: String?, hasAccess: Bool, hasAdminAccess: Bool) {
             self.id = id
             self.name = name
             self.phone = phone
             self.hasAccess = hasAccess
+            self.hasAdminAccess = hasAdminAccess
         }
     }
 }

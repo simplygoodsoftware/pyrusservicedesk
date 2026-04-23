@@ -27,12 +27,13 @@ class TicketCommandParams: Codable {
     let rating: Int?
     let authorId: String?
     let hasAccess: Bool?
+    let hasAdminAccess: Bool?
     let ratingComment: String?
     var date: Date? = nil
     var messageClientId: String? = nil
     let extraFields: [String: String]?
     
-    init(ticketId: Int? = nil, appId: String?, requestNewTicket: Bool? = nil, userId: String?, message: String? = nil, attachments: [AttachmentData]? = nil, authorId: String? = nil, token: String? = nil, type: String? = nil, messageId: Int? = nil, rating: Int? = nil, ratingComment: String? = nil, date: Date? = nil, messageClientId: String? = nil, hasAccess: Bool? = nil, extraFields: [String: String]? = nil) {
+    init(ticketId: Int? = nil, appId: String? = nil, requestNewTicket: Bool? = nil, userId: String? = nil, message: String? = nil, attachments: [AttachmentData]? = nil, authorId: String? = nil, token: String? = nil, type: String? = nil, messageId: Int? = nil, rating: Int? = nil, ratingComment: String? = nil, date: Date? = nil, messageClientId: String? = nil, hasAccess: Bool? = nil, hasAdminAccess: Bool? = nil, extraFields: [String: String]? = nil) {
 
         self.ticketId = ticketId
         self.appId = appId
@@ -48,6 +49,7 @@ class TicketCommandParams: Codable {
         self.messageClientId = messageClientId
         self.authorId = authorId
         self.hasAccess = hasAccess
+        self.hasAdminAccess = hasAdminAccess
         self.ratingComment = ratingComment
         self.extraFields = extraFields
     }
@@ -65,6 +67,7 @@ class TicketCommandParams: Codable {
         case rating = "rating"
         case authorId = "author_id"
         case hasAccess = "has_access"
+        case hasAdminAccess = "has_admin_access"
         case ratingComment = "rating_comment"
         case extraFields = "extra_fields"
     }

@@ -670,6 +670,9 @@ extension PSDChatsDataService: PSDChatsDataServiceProtocol {
             if let hasAccess = ticketCommand.params.hasAccess {
                 dbTicketCommand.hasAccess = hasAccess
             }
+            if let hasAdminAccess = ticketCommand.params.hasAdminAccess {
+                dbTicketCommand.hasAdminAccess = hasAdminAccess
+            }
             dbTicketCommand.token = ticketCommand.params.token
             dbTicketCommand.tokenType = ticketCommand.params.type
             dbTicketCommand.userId = ticketCommand.userId
@@ -782,6 +785,7 @@ extension PSDChatsDataService: PSDChatsDataServiceProtocol {
                         date: dbCommand.date,
                         messageClientId: dbCommand.clientId,
                         hasAccess: dbCommand.hasAccess,
+                        hasAdminAccess: dbCommand.hasAdminAccess,
                         extraFields: dbCommand.requestNewTicket ? PyrusServiceDesk.fieldsData : nil
                     )
                 )
