@@ -22,7 +22,6 @@ import com.pyrus.pyrusservicedesk._ref.utils.navigation.PyrusNavigator
 import com.pyrus.pyrusservicedesk.core.StaticRepository
 import com.pyrus.pyrusservicedesk.databinding.PsdActivityMainBinding
 import com.pyrus.pyrusservicedesk.sdk.data.StartData
-import java.util.Locale
 
 
 internal class MainActivity : FragmentActivity() {
@@ -41,16 +40,6 @@ internal class MainActivity : FragmentActivity() {
         }
         setTheme(theme)
         val data = intent.getParcelableExtra<StartData>(KEY_DATA)
-
-        val currentLocale = Locale.getDefault()
-        val localeCountry = data?.localeCountry ?: ""
-        val localeLanguage = data?.localeLanguage ?: currentLocale.language
-        val newLocale = Locale.Builder()
-            .setLanguage(localeLanguage)
-            .setRegion(localeCountry)
-            .build()
-
-        injector().resourceContextWrapper.setLocale(newLocale)
 
         binding = PsdActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)

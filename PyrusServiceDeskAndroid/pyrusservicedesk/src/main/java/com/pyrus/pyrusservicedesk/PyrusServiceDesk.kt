@@ -393,8 +393,7 @@ class PyrusServiceDesk private constructor(
 
             this.onStopCallback = onStopCallback
 
-            val locale = activity.resources.configuration.locales.get(0)
-            val startData = StartData(account, openTicketAction, sendComment, locale.language, locale.country)
+            val startData = StartData(account, openTicketAction, sendComment)
             val intent = MainActivity.createLaunchIntent(activity, startData)
             intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
             activity.startActivity(intent)

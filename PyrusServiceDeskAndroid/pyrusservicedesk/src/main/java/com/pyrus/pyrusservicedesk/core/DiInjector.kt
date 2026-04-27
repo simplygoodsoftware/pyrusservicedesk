@@ -165,9 +165,6 @@ internal class DiInjector(
 
     val preferencesManager = PreferencesManager(initialAccountKey, preferences)
 
-
-    val resourceContextWrapper = ResourceContextWrapper()
-
     private val synchronizer = Synchronizer(
         api = api,
         localTicketsStore = localTicketsStore,
@@ -178,7 +175,6 @@ internal class DiInjector(
         accessDeniedEventBus = accessDeniedEventBus,
         preferences = preferencesManager,
         systemMessageStore = systemMessageStore,
-        resourceContextWrapper = resourceContextWrapper,
     )
 
     val repository: SdRepository = SdRepository(

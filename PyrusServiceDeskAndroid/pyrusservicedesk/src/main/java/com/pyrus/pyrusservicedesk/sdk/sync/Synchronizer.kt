@@ -12,7 +12,6 @@ import com.pyrus.pyrusservicedesk._ref.utils.call_adapter.HttpException
 import com.pyrus.pyrusservicedesk._ref.utils.drain
 import com.pyrus.pyrusservicedesk._ref.utils.isSuccess
 import com.pyrus.pyrusservicedesk._ref.utils.log.PLog
-import com.pyrus.pyrusservicedesk.core.ResourceContextWrapper
 import com.pyrus.pyrusservicedesk.core.getAppId
 import com.pyrus.pyrusservicedesk.core.getExtraUsers
 import com.pyrus.pyrusservicedesk.core.getUserId
@@ -60,7 +59,6 @@ internal class Synchronizer(
     private val commandsStore: LocalCommandsStore,
     private val preferences: Preferences,
     private val systemMessageStore: SystemMessageStore,
-    private val resourceContextWrapper: ResourceContextWrapper,
 ) : CoroutineScope {
 
     @OptIn(DelicateCoroutinesApi::class, ExperimentalCoroutinesApi::class)
@@ -188,7 +186,6 @@ internal class Synchronizer(
             resourceManager = resourceManager,
             firstUserId = firstUserId,
             firstAppId = firstAppId,
-            currentLocale = resourceContextWrapper.getLocaleFromContext(),
         )
 
 
