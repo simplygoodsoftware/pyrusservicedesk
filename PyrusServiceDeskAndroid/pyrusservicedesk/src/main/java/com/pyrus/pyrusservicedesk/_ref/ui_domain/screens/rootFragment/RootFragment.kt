@@ -173,8 +173,12 @@ internal class RootFragment: TeaFragment<Unit, Message.Outer, Effect.Outer>(),
     }
 
     override fun onDestroy() {
+        // necessary for the actual destruction of activity
+        val activityIsFinishing = activity?.isFinishing == true
         super.onDestroy()
-        PyrusServiceDesk.onServiceDeskStop()
+        if (activityIsFinishing) {
+            PyrusServiceDesk.onServiceDeskStop()
+        }
     }
 
     private fun finish() {

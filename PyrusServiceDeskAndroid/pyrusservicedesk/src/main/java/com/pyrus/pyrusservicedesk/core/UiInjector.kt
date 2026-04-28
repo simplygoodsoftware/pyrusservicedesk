@@ -39,8 +39,12 @@ import kotlinx.coroutines.launch
 /**
  * UI-only dependency subgraph.
  *
- * This object must be created on the main thread when the SDK UI is opened (PyrusServiceDesk.start),
- * and it must be closed when UI is fully stopped to avoid leaking threads/resources.
+ * Created on the main thread when the SDK UI is opened ([PyrusServiceDesk.ensureUiInjector] from
+ * `MainActivity.onCreate`) and closed when the activity is actually finishing.
+ *
+ * Heavy / main-thread-bound resources (Picasso, ExoPlayer, MediaSession) are kept lazy so
+ * `UiInjector` construction itself is cheap and never blocks main with `Thread.sleep` from
+ * MediaSession retries — they're created only on first real use.
  */
 internal class UiInjector(
     private val application: Application,
@@ -65,7 +69,7 @@ internal class UiInjector(
         ensureMainThread("UiInjector")
     }
 
-    private val picassoManager: PicassoManager = PicassoManager(application)
+    val picassoManager: PicassoManager = PicassoManager(application)
 
     private var picassoCreated = false
     val picasso: Picasso by lazy(LazyThreadSafetyMode.NONE) {
@@ -74,23 +78,17 @@ internal class UiInjector(
         picassoManager.providePicasso(okHttpClientProvider().newBuilder())
     }
 
-    private val cicerone: Cicerone<PyrusRouterImpl> by lazy(LazyThreadSafetyMode.NONE) {
-        ensureMainThread("Cicerone")
-        Cicerone.create(PyrusRouterImpl())
-    }
+    private val cicerone: Cicerone<PyrusRouterImpl> = Cicerone.create(PyrusRouterImpl())
 
-    val router: PyrusRouterImpl get() = cicerone.router
-    val navHolder: NavigatorHolder get() = cicerone.getNavigatorHolder()
+    val router: PyrusRouterImpl = cicerone.router
+    val navHolder: NavigatorHolder = cicerone.getNavigatorHolder()
 
-    val sharedViewModel: SharedViewModel by lazy(LazyThreadSafetyMode.NONE) { SharedViewModel() }
+    val sharedViewModel: SharedViewModel = SharedViewModel()
 
-    private val downloadHelper: DownloadHelper by lazy(LazyThreadSafetyMode.NONE) {
-        DownloadHelper(context = application)
-    }
+    private val downloadHelper: DownloadHelper = DownloadHelper(context = application)
 
-    private val audioRecordControllerFactory: AudioRecordControllerFactory by lazy(LazyThreadSafetyMode.NONE) {
+    private val audioRecordControllerFactory: AudioRecordControllerFactory =
         AudioRecordControllerFactory(application.cacheDir)
-    }
 
     private val mediaSessionManager = MediaSessionManager()
 
@@ -124,6 +122,10 @@ internal class UiInjector(
         AudioWrapper(session, downloadHelper, coreScope)
     }
 
+    // Factories themselves are lightweight, but TicketFeatureFactory / TicketsFeatureFactory
+    // capture `audioWrapper`. Building them eagerly would force the audio stack lazy chain
+    // (audioWrapper -> session -> MediaSession with Thread.sleep retry) to fire during
+    // UiInjector construction, defeating the laziness. Keep the factories lazy too.
     val ticketFeatureFactory: TicketFeatureFactory by lazy(LazyThreadSafetyMode.NONE) {
         TicketFeatureFactory(
             accountStore = accountStore,
@@ -174,14 +176,6 @@ internal class UiInjector(
         )
     }
 
-    fun warmUpLightUiDependencies() {
-        // Must remain light: don't force media init here (MediaSession has retry sleeps).
-        @Suppress("UNUSED_EXPRESSION") picasso
-        @Suppress("UNUSED_EXPRESSION") router
-        @Suppress("UNUSED_EXPRESSION") navHolder
-        @Suppress("UNUSED_EXPRESSION") sharedViewModel
-    }
-
     fun stopSession() {
         if (!audioWrapperCreated) return
         coreScope.launch(Dispatchers.Main) {
@@ -192,7 +186,6 @@ internal class UiInjector(
 
     fun close() {
         ThreadsHelper().syncRunOnMainThread {
-            // Media is optional; never force-init it just to release.
             if (sessionCreated) {
                 runCatching {
                     session.run {
@@ -215,9 +208,4 @@ internal class UiInjector(
             "$name must be used on the main thread, was: ${Thread.currentThread().name}"
         }
     }
-
-    // Note: we intentionally track initialization via explicit flags above, so `close()` can
-    // release only the resources that were actually created without accidentally initializing
-    // lazy properties during teardown.
 }
-

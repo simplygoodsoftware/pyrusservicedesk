@@ -21,6 +21,8 @@ import com.pyrus.pyrusservicedesk._ref.utils.migratePreferences
 import com.pyrus.pyrusservicedesk.core.Account
 import com.pyrus.pyrusservicedesk.core.DiInjector
 import com.pyrus.pyrusservicedesk.core.StaticRepository
+import com.pyrus.pyrusservicedesk.core.UiInjector
+import com.pyrus.pyrusservicedesk.core.getAppId
 import com.pyrus.pyrusservicedesk.core.getUserId
 import com.pyrus.pyrusservicedesk.core.refresh.AutoRefreshFeature
 import com.pyrus.pyrusservicedesk.presentation.viewmodel.SharedViewModel
@@ -54,23 +56,7 @@ class PyrusServiceDesk private constructor(
         private var INJECTOR: DiInjector? = null
 
         @Volatile
-        private var UI_INJECTOR: com.pyrus.pyrusservicedesk.core.UiInjector? = null
-
-        @Volatile
-        private var PENDING_INIT: PendingInit? = null
-
-        private data class PendingInit(
-            val application: Application,
-            val listUser: List<User>?,
-            val appId: String,
-            val userId: String?,
-            val authorId: String?,
-            val securityKey: String?,
-            val domain: String?,
-            val apiVersion: Int,
-            val loggingEnabled: Boolean,
-            val authorizationToken: String?,
-        )
+        private var UI_INJECTOR: UiInjector? = null
 
         private var lastRefreshes = ArrayList<Long>()
 
@@ -172,6 +158,15 @@ class PyrusServiceDesk private constructor(
             )
         }
 
+        private fun initDataIsChanged(
+            appId: String?,
+            userId: String?,
+            newAppId: String,
+            newUserId: String?,
+        ) : Boolean {
+            return appId != newAppId || userId != newUserId
+        }
+
         private fun initInternal(
             application: Application,
             listUser: List<User>?,
@@ -213,35 +208,27 @@ class PyrusServiceDesk private constructor(
                 instanceId = instanceId,
                 appId = appId,
             )
-            val oldUserId = INJECTOR?.accountStore?.getAccount()?.getUserId()
-            autoRefreshFeatureFactory?.cancel()
+            val oldAccount = INJECTOR?.accountStore?.getAccount()
+            val oldUserId = oldAccount?.getUserId()
 
-            // If UI is currently open, we must NOT tear down or recreate graphs, otherwise the
-            // running activity/fragments will crash. To keep `init()` idempotent and safe, we:
-            // - do nothing if we already have a core injector (no-op init)
-            // - remember the latest init params and apply them automatically after UI closes
+            // If UI is currently open, we must NOT tear down or recreate injectors, otherwise the
+            // running activity/fragments will crash. Behaviour:
+            // - same credentials  -> keep existing injectors
+            // - different credentials -> close the SD
             if (UI_INJECTOR != null || sdIsOpen.value) {
-                PENDING_INIT = PendingInit(
-                    application = application,
-                    listUser = listUser,
-                    appId = appId,
-                    userId = userId,
-                    authorId = authorId,
-                    securityKey = securityKey,
-                    domain = domain,
-                    apiVersion = apiVersion,
-                    loggingEnabled = loggingEnabled,
-                    authorizationToken = authorizationToken,
+                val dataIsChanged = initDataIsChanged(
+                    oldAccount?.getAppId(),
+                    oldAccount?.getUserId(),
+                    appId,
+                    userId
                 )
-                if (INJECTOR != null) {
-                    PLog.w(TAG, "init() called while UI is open; ignored (will apply after UI closes)")
-                    Log.w(TAG, "init() called while UI is open; ignored (will apply after UI closes)")
-                    return
+                if (dataIsChanged) {
+                    stop()
                 }
-                // If core injector is absent (should be rare), we still proceed to initialize it
-                // so at least one init exists as required.
+                return
             }
 
+            autoRefreshFeatureFactory?.cancel()
             INJECTOR?.onCancel()
 
             INJECTOR = DiInjector(
@@ -373,6 +360,11 @@ class PyrusServiceDesk private constructor(
 
         /**
          * Stops PyrusServiceDesk. If UI was hidden, it will be finished during creating.
+         *
+         * Note: we do NOT call [releaseUiInjector] here. Tearing down the UI graph synchronously
+         * would race with pending lifecycle callbacks (`onPause`/`onStop`/effects) on the live
+         * MainActivity and crash. We only signal the activity to finish; UI graph teardown is
+         * owned by [MainActivity.onDestroy] when `isFinishing == true`.
          */
         @JvmStatic
         fun stop() {
@@ -407,33 +399,17 @@ class PyrusServiceDesk private constructor(
             StaticRepository.EXTRA_FIELDS = extraFields
         }
 
+        /**
+         * Called when the SDK UI is finishing. Owned by [MainActivity.finish] / RootFragment
+         * teardown. Intentionally does NOT touch [UI_INJECTOR]: the activity is still going
+         * through `onPause`/`onStop` after this returns and may legitimately access
+         * `uiInjector()` (navigator, audio, picasso) during that window. UI graph release
+         * happens in [MainActivity.onDestroy] under `isFinishing`.
+         */
         internal fun onServiceDeskStop() {
             updateSdIsOpen(false)
-            // UI lifecycle is owned by MainActivity (onDestroy releases UI_INJECTOR).
-            // Calling releaseUiInjector() here would be a no-op if MainActivity has already
-            // released it. We keep it as a belt-and-suspenders guarantee in case the activity
-            // was destroyed without going through its normal teardown path.
-            releaseUiInjector()
             onStopCallback?.onServiceDeskStop()
             onStopCallback = null
-
-            // Apply deferred init (if any) now that UI is fully stopped.
-            val pending = PENDING_INIT
-            if (pending != null) {
-                PENDING_INIT = null
-                initInternal(
-                    application = pending.application,
-                    listUser = pending.listUser,
-                    appId = pending.appId,
-                    userId = pending.userId,
-                    authorId = pending.authorId,
-                    securityKey = pending.securityKey,
-                    domain = pending.domain,
-                    apiVersion = pending.apiVersion,
-                    loggingEnabled = pending.loggingEnabled,
-                    authorizationToken = pending.authorizationToken,
-                )
-            }
         }
 
         internal fun get(): PyrusServiceDesk {
@@ -452,7 +428,7 @@ class PyrusServiceDesk private constructor(
          * Throws if accessed too early (before [start] has caused MainActivity to ensure UI)
          * or too late (after MainActivity teardown).
          */
-        internal fun uiInjector(): com.pyrus.pyrusservicedesk.core.UiInjector {
+        internal fun uiInjector(): UiInjector {
             return checkNotNull(UI_INJECTOR) {
                 "PyrusServiceDesk UI is not started. Open SDK via PyrusServiceDesk.start(...) and " +
                     "let MainActivity create the UI subgraph in its lifecycle."
@@ -465,7 +441,7 @@ class PyrusServiceDesk private constructor(
          * the UI subgraph matches the lifetime of the SDK activity.
          */
         @androidx.annotation.MainThread
-        internal fun ensureUiInjector(): com.pyrus.pyrusservicedesk.core.UiInjector {
+        internal fun ensureUiInjector(): UiInjector {
             check(android.os.Looper.myLooper() == android.os.Looper.getMainLooper()) {
                 "ensureUiInjector() must be called on the main thread"
             }
@@ -517,10 +493,9 @@ class PyrusServiceDesk private constructor(
         private fun clearLocalData(doOnCleared : () -> Unit) {
             INJECTOR?.cleanDataUseCase()
             INJECTOR?.preferencesManager?.let(liveUpdates::reset)
+            UI_INJECTOR?.picassoManager?.clearImageCache()
             doOnCleared.invoke()
         }
-
-
     }
 
     private var sharedViewModel = SharedViewModel()
