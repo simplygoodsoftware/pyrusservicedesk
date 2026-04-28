@@ -1,35 +1,19 @@
 package com.pyrus.pyrusservicedesk.core
 
 import android.app.Application
-import android.content.Context
 import android.content.SharedPreferences
 import android.os.Build
-import androidx.media3.common.AudioAttributes
-import androidx.media3.common.C
-import androidx.media3.exoplayer.ExoPlayer
-import androidx.media3.session.MediaSession
-import com.github.terrakok.cicerone.Cicerone
-import com.github.terrakok.cicerone.NavigatorHolder
 import com.pyrus.pyrusservicedesk.AppResourceManager
 import com.pyrus.pyrusservicedesk.BuildConfig
 import com.pyrus.pyrusservicedesk._ref.helpers.DownloadHelper
-import com.pyrus.pyrusservicedesk._ref.helpers.ThreadsHelper
-import com.pyrus.pyrusservicedesk._ref.ui_domain.access_denied.AccessDeniedFeatureFactory
 import com.pyrus.pyrusservicedesk._ref.ui_domain.rate_time.TimeToRateUseCase
-import com.pyrus.pyrusservicedesk._ref.ui_domain.screens.search.SearchFeatureFactory
-import com.pyrus.pyrusservicedesk._ref.ui_domain.screens.ticket.TicketFeatureFactory
-import com.pyrus.pyrusservicedesk._ref.ui_domain.screens.ticket.record.AudioRecordControllerFactory
-import com.pyrus.pyrusservicedesk._ref.ui_domain.screens.tickets_list.tickets.TicketsFeatureFactory
 import com.pyrus.pyrusservicedesk._ref.utils.AddUserEventBus
-import com.pyrus.pyrusservicedesk._ref.utils.AudioWrapper
 import com.pyrus.pyrusservicedesk._ref.utils.RequestUtils.getBaseUrl
 import com.pyrus.pyrusservicedesk._ref.utils.call_adapter.TryCallAdapterFactory
-import com.pyrus.pyrusservicedesk._ref.utils.navigation.PyrusRouterImpl
 import com.pyrus.pyrusservicedesk._ref.whitetea.core.DefaultStoreFactory
 import com.pyrus.pyrusservicedesk._ref.whitetea.core.StoreFactory
 import com.pyrus.pyrusservicedesk.core.refresh.AutoRefreshFeatureFactory
 import com.pyrus.pyrusservicedesk.core.refresh.RefreshUseCase
-import com.pyrus.pyrusservicedesk.presentation.viewmodel.SharedViewModel
 import com.pyrus.pyrusservicedesk.sdk.AccessDeniedEventBus
 import com.pyrus.pyrusservicedesk.sdk.FileResolver
 import com.pyrus.pyrusservicedesk.sdk.FinishEventBus
@@ -53,22 +37,26 @@ import com.pyrus.pyrusservicedesk.sdk.web.retrofit.RemoteFileStore
 import com.pyrus.pyrusservicedesk.sdk.web.retrofit.ServiceDeskApi
 import com.squareup.moshi.Moshi
 import com.squareup.moshi.kotlin.reflect.KotlinJsonAdapterFactory
-import com.squareup.picasso.OkHttp3Downloader
-import com.squareup.picasso.Picasso
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.cancel
-import kotlinx.coroutines.launch
-import okhttp3.Cache
 import okhttp3.OkHttpClient
 import retrofit2.Retrofit
 import retrofit2.converter.moshi.MoshiConverterFactory
-import java.io.File
 import java.util.concurrent.TimeUnit
 
 
+/**
+ * Core (non-UI) dependency graph. Created in `PyrusServiceDesk.init(...)` and lives until the
+ * next `init(...)` call or until `stop()`/`onCancel()`.
+ *
+ * This class is intentionally free of UI-only dependencies (Picasso, ExoPlayer/MediaSession,
+ * Cicerone, feature factories, etc.). Those live in [UiInjector] and are owned/lifecycled by
+ * `PyrusServiceDesk` companion together with `MainActivity`. This lets the host application call
+ * `init()` from any thread without the SDK accidentally creating UI-thread-bound resources off
+ * the main looper.
+ */
 internal class DiInjector(
-    application: Application,
+    private val application: Application,
     initialAccount: Account,
     private val authToken: String?,
     private val coreScope: CoroutineScope,
@@ -194,71 +182,10 @@ internal class DiInjector(
 
     private val draftRepository = DraftRepository(preferences, idStore, moshi)
 
-    private val cicerone: Cicerone<PyrusRouterImpl> = Cicerone.create(PyrusRouterImpl())
-
     private val addUserEventBus = AddUserEventBus()
-
-    val router = cicerone.router
-
-    val navHolder: NavigatorHolder = cicerone.getNavigatorHolder()
-
-    private val player: ExoPlayer by lazy {
-        ExoPlayer
-            .Builder(application)
-            .setAudioAttributes(
-                AudioAttributes.Builder()
-                    .setUsage(C.USAGE_MEDIA)
-                    .setContentType(C.AUDIO_CONTENT_TYPE_MUSIC)
-                    .build(),
-                true,
-            )
-            .build()
-    }
-    private val mediaSessionManager = MediaSessionManager()
-
-    private val session: MediaSession by lazy {
-        mediaSessionManager.createMediaSessionWithRetry(application, player)
-    }
 
     private val downloadHelper = DownloadHelper(
         context = application
-    )
-
-    val audioWrapper = AudioWrapper(session, downloadHelper, coreScope)
-
-    private val audioRecordControllerFactory = AudioRecordControllerFactory(application.cacheDir)
-
-    val ticketFeatureFactory = TicketFeatureFactory(
-        accountStore = accountStore,
-        storeFactory = storeFactory,
-        repository = repository,
-        draftRepository = draftRepository,
-        router = router,
-        fileManager = fileManager,
-        preferencesManager = preferencesManager,
-        audioRecordControllerFactory = audioRecordControllerFactory,
-        audioWrapper = audioWrapper,
-        localTicketsStore = localTicketsStore,
-        commandsStore = localCommandsStore,
-        systemMessageStore = systemMessageStore,
-        idStore = idStore,
-    )
-
-    val ticketsFeatureFactory = TicketsFeatureFactory(
-        storeFactory = storeFactory,
-        repository = repository,
-        router = router,
-        commandsStore = localCommandsStore,
-        addUserEventBus = addUserEventBus,
-        audioWrapper = audioWrapper,
-        accountStore = accountStore,
-    )
-
-    val searchFeatureFactory = SearchFeatureFactory(
-        storeFactory = storeFactory,
-        repository = repository,
-        router = router,
-        accountStore = accountStore,
     )
 
     val autoRefreshFeatureFactory = AutoRefreshFeatureFactory(
@@ -268,13 +195,6 @@ internal class DiInjector(
         systemMessageStore = systemMessageStore,
         localTicketsStore = localTicketsStore
     )
-
-    val sharedViewModel = SharedViewModel()
-
-
-    val picassoManager: PicassoManager = PicassoManager(application)
-
-    val picasso: Picasso = picassoManager.providePicasso(createOkHttpClientBuilder())
 
     val setPushTokenUseCase = SetPushTokenUseCase(accountStore, coreScope, preferencesManager, repository)
 
@@ -294,35 +214,41 @@ internal class DiInjector(
 
     val rateTimeUseCase = TimeToRateUseCase(preferencesManager)
 
-    val accessDeniedFeatureFactory = AccessDeniedFeatureFactory(
-        storeFactory = storeFactory,
+    /**
+     * Factory for the UI subgraph. Must be invoked on the main thread (enforced by [UiInjector]'s
+     * own init block). The returned [UiInjector] holds Picasso/ExoPlayer/MediaSession/Cicerone
+     * and other UI-thread-bound resources, and must be `close()`-d when the SDK UI is torn down.
+     */
+    fun createUiInjector(): UiInjector = UiInjector(
+        application = application,
+        coreScope = coreScope,
+        okHttpClientProvider = { okHttpClient },
         accountStore = accountStore,
-        accessDeniedEventBus = accessDeniedEventBus,
-        ticketsStore = localTicketsStore,
-        finishEventBus = finishEventBus,
         preferencesManager = preferencesManager,
+        idStore = idStore,
+        localCommandsStore = localCommandsStore,
+        localTicketsStore = localTicketsStore,
+        systemMessageStore = systemMessageStore,
+        repository = repository,
+        draftRepository = draftRepository,
+        fileManager = fileManager,
+        addUserEventBus = addUserEventBus,
+        storeFactory = storeFactory,
+        accessDeniedEventBus = accessDeniedEventBus,
+        finishEventBus = finishEventBus,
     )
 
     fun onCancel() {
-        releaseSession()
-        picassoManager.dispose(picasso)
         coreScope.cancel()
         synchronizer.cancel()
         synchronizer.close()
+        shutdownOkHttpClient(okHttpClient)
     }
 
-    fun releaseSession() = ThreadsHelper().syncRunOnMainThread {
-        session.run {
-            player.release()
-            release()
-        }
-    }
-
-    fun stopSession() {
-        coreScope.launch(Dispatchers.Main) {
-            audioWrapper.clearCurrentUrl()
-            session.player.clearMediaItems()
-        }
+    private fun shutdownOkHttpClient(client: OkHttpClient) {
+        runCatching { client.dispatcher().executorService().shutdown() }
+        runCatching { client.connectionPool().evictAll() }
+        runCatching { client.cache()?.close() }
     }
 
 }

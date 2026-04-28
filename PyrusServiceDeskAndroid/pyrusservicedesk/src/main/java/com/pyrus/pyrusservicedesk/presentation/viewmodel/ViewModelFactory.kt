@@ -17,7 +17,7 @@ internal class ViewModelFactory(private val arguments: Intent, private val appli
     @Suppress("UNCHECKED_CAST")
     override fun <T : ViewModel> create(modelClass: Class<T>): T {
         return when (modelClass) {
-            SharedViewModel::class.java -> PyrusServiceDesk.injector().sharedViewModel as T
+            SharedViewModel::class.java -> PyrusServiceDesk.uiInjector().sharedViewModel as T
             FilePreviewViewModel::class.java -> FilePreviewViewModel(application, arguments) as T
             else -> throw IllegalStateException("View model for class $modelClass was not found")
         }

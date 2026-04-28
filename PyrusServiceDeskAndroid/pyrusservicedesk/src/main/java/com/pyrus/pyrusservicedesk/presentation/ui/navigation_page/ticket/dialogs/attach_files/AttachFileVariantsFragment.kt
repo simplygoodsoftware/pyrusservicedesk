@@ -19,7 +19,7 @@ import androidx.core.view.WindowInsetsCompat
 import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.google.android.material.bottomsheet.BottomSheetDialog
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment
-import com.pyrus.pyrusservicedesk.PyrusServiceDesk.Companion.injector
+import com.pyrus.pyrusservicedesk.PyrusServiceDesk.Companion.uiInjector
 import com.pyrus.pyrusservicedesk._ref.utils.ConfigUtils
 import com.pyrus.pyrusservicedesk._ref.utils.dispatchTakePhotoIntent
 import com.pyrus.pyrusservicedesk._ref.utils.dispatchTakeVideoIntent
@@ -151,7 +151,7 @@ internal class AttachFileVariantsFragment: BottomSheetDialogFragment(), View.OnC
     }
 
     private fun sendResultAndClose(uri: Uri) {
-        val router = injector().router
+        val router = uiInjector().router
         router.sendResult(requireArguments().getString(RESULT_KEY)!!, uri)
         dismiss()
     }

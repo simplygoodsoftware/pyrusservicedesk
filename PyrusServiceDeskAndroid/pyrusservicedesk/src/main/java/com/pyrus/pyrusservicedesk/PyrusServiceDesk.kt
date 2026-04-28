@@ -52,6 +52,26 @@ class PyrusServiceDesk private constructor(
         }
         private var INSTANCE: PyrusServiceDesk? = null
         private var INJECTOR: DiInjector? = null
+
+        @Volatile
+        private var UI_INJECTOR: com.pyrus.pyrusservicedesk.core.UiInjector? = null
+
+        @Volatile
+        private var PENDING_INIT: PendingInit? = null
+
+        private data class PendingInit(
+            val application: Application,
+            val listUser: List<User>?,
+            val appId: String,
+            val userId: String?,
+            val authorId: String?,
+            val securityKey: String?,
+            val domain: String?,
+            val apiVersion: Int,
+            val loggingEnabled: Boolean,
+            val authorizationToken: String?,
+        )
+
         private var lastRefreshes = ArrayList<Long>()
 
         private var autoRefreshFeatureFactory: AutoRefreshFeature? = null
@@ -195,6 +215,32 @@ class PyrusServiceDesk private constructor(
             )
             val oldUserId = INJECTOR?.accountStore?.getAccount()?.getUserId()
             autoRefreshFeatureFactory?.cancel()
+
+            // If UI is currently open, we must NOT tear down or recreate graphs, otherwise the
+            // running activity/fragments will crash. To keep `init()` idempotent and safe, we:
+            // - do nothing if we already have a core injector (no-op init)
+            // - remember the latest init params and apply them automatically after UI closes
+            if (UI_INJECTOR != null || sdIsOpen.value) {
+                PENDING_INIT = PendingInit(
+                    application = application,
+                    listUser = listUser,
+                    appId = appId,
+                    userId = userId,
+                    authorId = authorId,
+                    securityKey = securityKey,
+                    domain = domain,
+                    apiVersion = apiVersion,
+                    loggingEnabled = loggingEnabled,
+                    authorizationToken = authorizationToken,
+                )
+                if (INJECTOR != null) {
+                    PLog.w(TAG, "init() called while UI is open; ignored (will apply after UI closes)")
+                    Log.w(TAG, "init() called while UI is open; ignored (will apply after UI closes)")
+                    return
+                }
+                // If core injector is absent (should be rare), we still proceed to initialize it
+                // so at least one init exists as required.
+            }
 
             INJECTOR?.onCancel()
 
@@ -363,9 +409,31 @@ class PyrusServiceDesk private constructor(
 
         internal fun onServiceDeskStop() {
             updateSdIsOpen(false)
-            injector().releaseSession()
+            // UI lifecycle is owned by MainActivity (onDestroy releases UI_INJECTOR).
+            // Calling releaseUiInjector() here would be a no-op if MainActivity has already
+            // released it. We keep it as a belt-and-suspenders guarantee in case the activity
+            // was destroyed without going through its normal teardown path.
+            releaseUiInjector()
             onStopCallback?.onServiceDeskStop()
             onStopCallback = null
+
+            // Apply deferred init (if any) now that UI is fully stopped.
+            val pending = PENDING_INIT
+            if (pending != null) {
+                PENDING_INIT = null
+                initInternal(
+                    application = pending.application,
+                    listUser = pending.listUser,
+                    appId = pending.appId,
+                    userId = pending.userId,
+                    authorId = pending.authorId,
+                    securityKey = pending.securityKey,
+                    domain = pending.domain,
+                    apiVersion = pending.apiVersion,
+                    loggingEnabled = pending.loggingEnabled,
+                    authorizationToken = pending.authorizationToken,
+                )
+            }
         }
 
         internal fun get(): PyrusServiceDesk {
@@ -377,6 +445,47 @@ class PyrusServiceDesk private constructor(
                 Log.d("SDS", "INJECTOR == null")
             }
             return checkNotNull(INJECTOR)
+        }
+
+        /**
+         * UI subgraph accessor. Must be invoked only while SDK UI (MainActivity) is alive.
+         * Throws if accessed too early (before [start] has caused MainActivity to ensure UI)
+         * or too late (after MainActivity teardown).
+         */
+        internal fun uiInjector(): com.pyrus.pyrusservicedesk.core.UiInjector {
+            return checkNotNull(UI_INJECTOR) {
+                "PyrusServiceDesk UI is not started. Open SDK via PyrusServiceDesk.start(...) and " +
+                    "let MainActivity create the UI subgraph in its lifecycle."
+            }
+        }
+
+        /**
+         * Creates UI subgraph if it has not been created yet. MUST be called on the main thread
+         * — it is intended to be invoked from `MainActivity.onCreate(...)` so the lifetime of
+         * the UI subgraph matches the lifetime of the SDK activity.
+         */
+        @androidx.annotation.MainThread
+        internal fun ensureUiInjector(): com.pyrus.pyrusservicedesk.core.UiInjector {
+            check(android.os.Looper.myLooper() == android.os.Looper.getMainLooper()) {
+                "ensureUiInjector() must be called on the main thread"
+            }
+            UI_INJECTOR?.let { return it }
+            val core = injector()
+            val newOne = core.createUiInjector()
+            UI_INJECTOR = newOne
+            return newOne
+        }
+
+        /**
+         * Releases the UI subgraph if alive. Safe to call multiple times.
+         * Intended to be called from `MainActivity.onDestroy(...)` (when finishing) and as a
+         * defensive cleanup from [onCancel]/[stop] paths.
+         */
+        @MainThread
+        internal fun releaseUiInjector() {
+            val current = UI_INJECTOR ?: return
+            UI_INJECTOR = null
+            current.close()
         }
 
         private fun startImpl(
@@ -393,6 +502,9 @@ class PyrusServiceDesk private constructor(
 
             this.onStopCallback = onStopCallback
 
+            // The UI subgraph is owned by MainActivity (created in its onCreate, released in
+            // its onDestroy). We only schedule activity launch here; nothing UI-related is
+            // touched on whatever thread `start()` was called from.
             val startData = StartData(account, openTicketAction, sendComment)
             val intent = MainActivity.createLaunchIntent(activity, startData)
             intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK)

@@ -21,6 +21,7 @@ import com.pyrus.pyrusservicedesk.NoFullScreenFragment
 import com.pyrus.pyrusservicedesk.OpenTicketAction
 import com.pyrus.pyrusservicedesk.PyrusServiceDesk
 import com.pyrus.pyrusservicedesk.PyrusServiceDesk.Companion.injector
+import com.pyrus.pyrusservicedesk.PyrusServiceDesk.Companion.uiInjector
 import com.pyrus.pyrusservicedesk.R
 import com.pyrus.pyrusservicedesk.ServiceDeskConfiguration
 import com.pyrus.pyrusservicedesk._ref.ui_domain.access_denied.AccessDeniedFeature
@@ -54,7 +55,7 @@ internal class RootFragment: TeaFragment<Unit, Message.Outer, Effect.Outer>(),
 
         val window: Window = requireActivity().window
         accessDeniedFeature = getStore {
-            injector().accessDeniedFeatureFactory.create()
+            uiInjector().accessDeniedFeatureFactory.create()
         }
         bind(requireActivity().lifecycleScope, requireActivity().lifecycle, BinderLifecycleMode.CREATE_DESTROY) {
             messages bindTo accessDeniedFeature
@@ -97,7 +98,7 @@ internal class RootFragment: TeaFragment<Unit, Message.Outer, Effect.Outer>(),
                 if (injector().rateTimeUseCase.isTimeToRate()) {
                     showRateUsDialog()
                 }
-                injector().audioWrapper.clearPositions()
+                uiInjector().audioWrapper.clearPositions()
             }
         }
     }
@@ -143,11 +144,11 @@ internal class RootFragment: TeaFragment<Unit, Message.Outer, Effect.Outer>(),
 
     override fun onResume() {
         super.onResume()
-        injector().navHolder.setNavigator(navigator)
+        uiInjector().navHolder.setNavigator(navigator)
     }
 
     override fun onPause() {
-        injector().navHolder.removeNavigator()
+        uiInjector().navHolder.removeNavigator()
         super.onPause()
     }
 

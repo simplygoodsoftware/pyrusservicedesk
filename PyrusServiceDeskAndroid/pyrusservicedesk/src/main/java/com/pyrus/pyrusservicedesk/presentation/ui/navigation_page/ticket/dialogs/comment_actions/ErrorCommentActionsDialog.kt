@@ -8,7 +8,7 @@ import android.view.View
 import androidx.appcompat.app.AlertDialog
 import androidx.core.os.bundleOf
 import androidx.fragment.app.DialogFragment
-import com.pyrus.pyrusservicedesk.PyrusServiceDesk.Companion.injector
+import com.pyrus.pyrusservicedesk.PyrusServiceDesk.Companion.uiInjector
 import com.pyrus.pyrusservicedesk.R
 
 /**
@@ -39,7 +39,7 @@ internal class ErrorCommentActionsDialog: DialogFragment(), View.OnClickListener
     }
 
     override fun onClick(v: View?) {
-        val router = injector().router
+        val router = uiInjector().router
         val key = requireArguments().getString(KEY_OBSERVER)!!
         when(v) {
             retry -> router.sendResult(key, ErrorCommentAction.RETRY)

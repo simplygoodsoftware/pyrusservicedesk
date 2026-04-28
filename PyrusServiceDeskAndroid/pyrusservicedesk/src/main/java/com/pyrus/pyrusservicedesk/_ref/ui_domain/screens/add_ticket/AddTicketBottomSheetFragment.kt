@@ -9,6 +9,7 @@ import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment
 import com.pyrus.pyrusservicedesk.PyrusServiceDesk.Companion.injector
+import com.pyrus.pyrusservicedesk.PyrusServiceDesk.Companion.uiInjector
 import com.pyrus.pyrusservicedesk.R
 import com.pyrus.pyrusservicedesk.User
 import com.pyrus.pyrusservicedesk._ref.SdScreens
@@ -45,7 +46,7 @@ class AddTicketBottomSheetFragment: BottomSheetDialogFragment() {
                     val localId = injector().localCommandsStore.getNextLocalId()
 
                     withContext(Dispatchers.Main) {
-                        injector().router.navigateTo(
+                        uiInjector().router.navigateTo(
                             SdScreens.TicketScreen(
                                 localId,
                                 UserInternal(user.userId, user.appId),

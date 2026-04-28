@@ -15,6 +15,7 @@ import com.google.android.play.core.review.ReviewInfo
 import com.google.android.play.core.review.ReviewManagerFactory
 import com.pyrus.pyrusservicedesk.PyrusServiceDesk
 import com.pyrus.pyrusservicedesk.PyrusServiceDesk.Companion.injector
+import com.pyrus.pyrusservicedesk.PyrusServiceDesk.Companion.uiInjector
 import com.pyrus.pyrusservicedesk.R
 import com.pyrus.pyrusservicedesk.ServiceDeskConfiguration
 import com.pyrus.pyrusservicedesk._ref.SdScreens
@@ -32,6 +33,11 @@ internal class MainActivity : FragmentActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
+        // Create UI subgraph as the very first step of SDK UI lifecycle. From this point on
+        // any fragment / adapter / dialog can safely access `PyrusServiceDesk.uiInjector()`.
+        // It will be released in onDestroy() when the activity is finishing.
+        PyrusServiceDesk.ensureUiInjector()
 
         val theme = when{
             StaticRepository.getConfiguration().isDialogTheme -> R.style.PyrusServiceDesk_Dialog
@@ -51,8 +57,18 @@ internal class MainActivity : FragmentActivity() {
         if (savedInstanceState == null) {
             val action = data?.openTicketAction
             val sendComment = data?.sendComment
-            injector().router.newRootScreen(SdScreens.RouterScreen(action, sendComment))
+            uiInjector().router.newRootScreen(SdScreens.RouterScreen(action, sendComment))
         }
+    }
+
+    override fun onDestroy() {
+        // Release UI subgraph only when the activity is actually finishing (not on config
+        // changes). This guarantees no Picasso / ExoPlayer / MediaSession / Cicerone leaks
+        // across SDK open/close cycles.
+        if (isFinishing) {
+            PyrusServiceDesk.releaseUiInjector()
+        }
+        super.onDestroy()
     }
 
     override fun onNewIntent(intent: Intent, caller: ComponentCaller) {
@@ -87,11 +103,11 @@ internal class MainActivity : FragmentActivity() {
 
     override fun onResume() {
         super.onResume()
-        injector().navHolder.setNavigator(navigator)
+        uiInjector().navHolder.setNavigator(navigator)
     }
 
     override fun onPause() {
-        injector().navHolder.removeNavigator()
+        uiInjector().navHolder.removeNavigator()
         super.onPause()
     }
 
