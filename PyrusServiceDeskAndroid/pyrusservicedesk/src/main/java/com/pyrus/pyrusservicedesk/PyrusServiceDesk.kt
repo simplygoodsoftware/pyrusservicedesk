@@ -7,9 +7,14 @@ import android.content.Intent
 import android.content.SharedPreferences
 import android.util.Log
 import androidx.annotation.MainThread
+import com.pyrus.pyrusservicedesk.PyrusServiceDesk.Companion.UI_INJECTOR
 import com.pyrus.pyrusservicedesk.PyrusServiceDesk.Companion.onAuthorizationFailed
+import com.pyrus.pyrusservicedesk.PyrusServiceDesk.Companion.releaseUiInjector
 import com.pyrus.pyrusservicedesk.PyrusServiceDesk.Companion.setPushToken
+import com.pyrus.pyrusservicedesk.PyrusServiceDesk.Companion.start
+import com.pyrus.pyrusservicedesk.PyrusServiceDesk.Companion.stop
 import com.pyrus.pyrusservicedesk.SdConstants.PYRUS_BASE_DOMAIN
+import com.pyrus.pyrusservicedesk._ref.helpers.ThreadsHelper
 import com.pyrus.pyrusservicedesk._ref.ui_domain.screens.ticket.MainActivity
 import com.pyrus.pyrusservicedesk._ref.utils.ConfigUtils
 import com.pyrus.pyrusservicedesk._ref.utils.MILLISECONDS_IN_MINUTE
@@ -52,13 +57,14 @@ class PyrusServiceDesk private constructor(
         internal var onAuthorizationFailed: Runnable? = Runnable {
             stop()
         }
-        private var INSTANCE: PyrusServiceDesk? = null
-        private var INJECTOR: DiInjector? = null
+        internal var INSTANCE: PyrusServiceDesk? = null
+
+        internal var INJECTOR: DiInjector? = null
 
         @Volatile
-        private var UI_INJECTOR: UiInjector? = null
+        internal var UI_INJECTOR: UiInjector? = null
 
-        private var lastRefreshes = ArrayList<Long>()
+        internal var lastRefreshes = ArrayList<Long>()
 
         private var autoRefreshFeatureFactory: AutoRefreshFeature? = null
 
@@ -70,7 +76,7 @@ class PyrusServiceDesk private constructor(
 
         private const val DEFAULT_TOKEN_TYPE: String = "android"
 
-        private var onStopCallback: OnStopCallback? = null
+        internal var onStopCallback: OnStopCallback? = null
 
         private val liveUpdates = LiveUpdates()
         val sdIsOpen = MutableStateFlow(false)
@@ -440,7 +446,7 @@ class PyrusServiceDesk private constructor(
          * — it is intended to be invoked from `MainActivity.onCreate(...)` so the lifetime of
          * the UI subgraph matches the lifetime of the SDK activity.
          */
-        @androidx.annotation.MainThread
+        @MainThread
         internal fun ensureUiInjector(): UiInjector {
             check(android.os.Looper.myLooper() == android.os.Looper.getMainLooper()) {
                 "ensureUiInjector() must be called on the main thread"
@@ -478,13 +484,15 @@ class PyrusServiceDesk private constructor(
 
             this.onStopCallback = onStopCallback
 
-            // The UI subgraph is owned by MainActivity (created in its onCreate, released in
+            // The UiInjector is owned by MainActivity (created in its onCreate, released in
             // its onDestroy). We only schedule activity launch here; nothing UI-related is
             // touched on whatever thread `start()` was called from.
-            val startData = StartData(account, openTicketAction, sendComment)
-            val intent = MainActivity.createLaunchIntent(activity, startData)
-            intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-            activity.startActivity(intent)
+            ThreadsHelper().syncRunOnMainThread {
+                val startData = StartData(account, openTicketAction, sendComment)
+                val intent = MainActivity.createLaunchIntent(activity, startData)
+                intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                activity.startActivity(intent)
+            }
             updateSdIsOpen(true)
 
             injector().updateUserUseCase.updateUser()
