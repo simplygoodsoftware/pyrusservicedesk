@@ -295,7 +295,6 @@ internal class Synchronizer(
                 failDelay.clear()
                 val getRequests = syncRequests.filterIsInstance<SyncReqRes.Data>()
                 for (request in getRequests) request.continuation.resume(getTicketsTry)
-                //it's impossible to have commands with this error, but just in case
                 val getRequestsCommand = syncRequests.filterIsInstance<SyncReqRes.CommandWithContinuation>()
                 for (request in getRequestsCommand) request.continuation.resume(getTicketsTry)
                 isRunning.set(false)
