@@ -443,10 +443,13 @@ class PyrusServiceDesk private constructor(
         }
 
         /**
-         * Releases the UIInjector.
+         * Releases the UIInjector. Must be called on the main thread.
          */
         @MainThread
         internal fun releaseUiInjector() {
+            check(android.os.Looper.myLooper() == android.os.Looper.getMainLooper()) {
+                "releaseUiInjector() must be called on the main thread"
+            }
             val current = UI_INJECTOR ?: return
             UI_INJECTOR = null
             current.close()

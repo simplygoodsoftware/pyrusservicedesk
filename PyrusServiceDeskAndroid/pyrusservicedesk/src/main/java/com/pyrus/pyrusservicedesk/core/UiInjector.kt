@@ -33,8 +33,6 @@ import com.pyrus.pyrusservicedesk.sdk.repositories.SystemMessageStore
 import com.pyrus.pyrusservicedesk.sdk.updates.PreferencesManager
 import com.squareup.picasso.Picasso
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
 
 internal class UiInjector(
     private val application: Application,
@@ -59,13 +57,16 @@ internal class UiInjector(
         ensureMainThread("UiInjector")
     }
 
+    private var released = false
+
     val picassoManager: PicassoManager = PicassoManager(application)
 
     private var picassoCreated = false
     val picasso: Picasso by lazy(LazyThreadSafetyMode.NONE) {
         ensureMainThread("Picasso")
+        val instance = picassoManager.providePicasso(okHttpClientProvider().newBuilder())
         picassoCreated = true
-        picassoManager.providePicasso(okHttpClientProvider().newBuilder())
+        instance
     }
 
     private val cicerone: Cicerone<PyrusRouterImpl> = Cicerone.create(PyrusRouterImpl())
@@ -85,8 +86,7 @@ internal class UiInjector(
     private var playerCreated = false
     private val player: ExoPlayer by lazy(LazyThreadSafetyMode.NONE) {
         ensureMainThread("ExoPlayer")
-        playerCreated = true
-        ExoPlayer
+        val instance = ExoPlayer
             .Builder(application)
             .setAudioAttributes(
                 AudioAttributes.Builder()
@@ -96,20 +96,24 @@ internal class UiInjector(
                 true,
             )
             .build()
+        playerCreated = true
+        instance
     }
 
     private var sessionCreated = false
     private val session: MediaSession by lazy(LazyThreadSafetyMode.NONE) {
         ensureMainThread("MediaSession")
+        val instance = mediaSessionManager.createMediaSession(application, player)
         sessionCreated = true
-        mediaSessionManager.createMediaSessionWithRetry(application, player)
+        instance
     }
 
     private var audioWrapperCreated = false
     val audioWrapper: AudioWrapper by lazy(LazyThreadSafetyMode.NONE) {
         ensureMainThread("AudioWrapper")
+        val instance = AudioWrapper(session, downloadHelper, coreScope)
         audioWrapperCreated = true
-        AudioWrapper(session, downloadHelper, coreScope)
+        instance
     }
 
     val ticketFeatureFactory: TicketFeatureFactory by lazy(LazyThreadSafetyMode.NONE) {
@@ -163,22 +167,21 @@ internal class UiInjector(
     }
 
     fun stopSession() {
-        if (!audioWrapperCreated) return
-        coreScope.launch(Dispatchers.Main) {
-            audioWrapper.clearCurrentUrl()
-            session.player.clearMediaItems()
+        if (released || !audioWrapperCreated) return
+        ThreadsHelper().syncRunOnMainThread {
+            if (released) return@syncRunOnMainThread
+            runCatching { audioWrapper.clearCurrentUrl() }
+            runCatching { session.player.clearMediaItems() }
         }
     }
 
     fun close() {
         ThreadsHelper().syncRunOnMainThread {
+            if (released) return@syncRunOnMainThread
+            released = true
             if (sessionCreated) {
-                runCatching {
-                    session.run {
-                        player.release()
-                        release()
-                    }
-                }
+                runCatching { session.release() }
+                runCatching { session.player.release() }
             } else if (playerCreated) {
                 runCatching { player.release() }
             }
