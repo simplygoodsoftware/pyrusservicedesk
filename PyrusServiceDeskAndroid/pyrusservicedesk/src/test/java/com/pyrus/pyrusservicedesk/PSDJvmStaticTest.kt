@@ -4,7 +4,6 @@ import android.app.Activity
 import android.app.Application
 import android.content.Intent
 import androidx.test.core.app.ApplicationProvider
-import com.pyrus.pyrusservicedesk._ref.ui_domain.screens.ticket.MainActivity
 import com.pyrus.pyrusservicedesk.core.Account
 import com.pyrus.pyrusservicedesk.core.DiInjector
 import com.pyrus.pyrusservicedesk.core.StaticRepository
@@ -40,14 +39,12 @@ import org.robolectric.Robolectric
 import org.robolectric.RobolectricTestRunner
 import org.robolectric.Shadows.shadowOf
 import org.robolectric.annotation.Config
-import java.util.concurrent.CountDownLatch
-import java.util.concurrent.TimeUnit
 import java.util.concurrent.atomic.AtomicReference
 
 @OptIn(ExperimentalCoroutinesApi::class)
 @RunWith(RobolectricTestRunner::class)
 @Config(sdk = [33])
-class PyrusServiceDeskJvmStaticTest {
+class PSDJvmStaticTest {
 
     private lateinit var application: Application
 
@@ -108,6 +105,18 @@ class PyrusServiceDeskJvmStaticTest {
 
         PyrusServiceDesk.onAuthorizationFailed(null)
         assertNull(PyrusServiceDesk.onAuthorizationFailed)
+    }
+
+    @Test
+    fun defaultOnAuthorizationFailedStopsServiceDeskViaStop() = runTest {
+        // By default onAuthorizationFailed is Runnable { stop() }
+        PyrusServiceDesk.init(application, "appA")
+        val bus = (PyrusServiceDesk.INJECTOR as DiInjector).finishEventBus
+
+        PyrusServiceDesk.onAuthorizationFailed?.run()
+
+        val event = bus.events().first()
+        assertTrue("Default onAuthorizationFailed must call stop() and post finishEventBus(true)", event)
     }
 
     @Test
@@ -309,7 +318,7 @@ class PyrusServiceDeskJvmStaticTest {
         // MainActivity intent issued
         val nextIntent: Intent? = shadowOf(activity).peekNextStartedActivity()
         assertNotNull("start() must call activity.startActivity(MainActivity)", nextIntent)
-        assertEquals("MainActivity", nextIntent!!.component?.className)
+        assertEquals("com.pyrus.pyrusservicedesk._ref.ui_domain.screens.ticket.MainActivity", nextIntent!!.component?.className)
         assertTrue(
             "Intent must include FLAG_ACTIVITY_NEW_TASK",
             nextIntent.flags and Intent.FLAG_ACTIVITY_NEW_TASK == Intent.FLAG_ACTIVITY_NEW_TASK,
