@@ -45,16 +45,6 @@ import retrofit2.converter.moshi.MoshiConverterFactory
 import java.util.concurrent.TimeUnit
 
 
-/**
- * Core (non-UI) dependency graph. Created in `PyrusServiceDesk.init(...)` and lives until the
- * next `init(...)` call or until `stop()`/`onCancel()`.
- *
- * This class is intentionally free of UI-only dependencies (Picasso, ExoPlayer/MediaSession,
- * Cicerone, feature factories, etc.). Those live in [UiInjector] and are owned/lifecycled by
- * `PyrusServiceDesk` companion together with `MainActivity`. This lets the host application call
- * `init()` from any thread without the SDK accidentally creating UI-thread-bound resources off
- * the main looper.
- */
 internal class DiInjector(
     private val application: Application,
     initialAccount: Account,
@@ -215,9 +205,7 @@ internal class DiInjector(
     val rateTimeUseCase = TimeToRateUseCase(preferencesManager)
 
     /**
-     * Factory for the UI subgraph. Must be invoked on the main thread (enforced by [UiInjector]'s
-     * own init block). The returned [UiInjector] holds Picasso/ExoPlayer/MediaSession/Cicerone
-     * and other UI-thread-bound resources, and must be `close()`-d when the SDK UI is torn down.
+     * Factory for the UiInjector. Must be invoked on the main thread.
      */
     fun createUiInjector(): UiInjector = UiInjector(
         application = application,

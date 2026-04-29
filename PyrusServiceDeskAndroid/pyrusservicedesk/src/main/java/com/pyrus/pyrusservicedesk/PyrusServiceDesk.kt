@@ -366,11 +366,6 @@ class PyrusServiceDesk private constructor(
 
         /**
          * Stops PyrusServiceDesk. If UI was hidden, it will be finished during creating.
-         *
-         * Note: we do NOT call [releaseUiInjector] here. Tearing down the UI graph synchronously
-         * would race with pending lifecycle callbacks (`onPause`/`onStop`/effects) on the live
-         * MainActivity and crash. We only signal the activity to finish; UI graph teardown is
-         * owned by [MainActivity.onDestroy] when `isFinishing == true`.
          */
         @JvmStatic
         fun stop() {
@@ -406,11 +401,7 @@ class PyrusServiceDesk private constructor(
         }
 
         /**
-         * Called when the SDK UI is finishing. Owned by [MainActivity.finish] / RootFragment
-         * teardown. Intentionally does NOT touch [UI_INJECTOR]: the activity is still going
-         * through `onPause`/`onStop` after this returns and may legitimately access
-         * `uiInjector()` (navigator, audio, picasso) during that window. UI graph release
-         * happens in [MainActivity.onDestroy] under `isFinishing`.
+         * Called when the SDK UI is finishing.
          */
         internal fun onServiceDeskStop() {
             updateSdIsOpen(false)
@@ -429,22 +420,15 @@ class PyrusServiceDesk private constructor(
             return checkNotNull(INJECTOR)
         }
 
-        /**
-         * UI subgraph accessor. Must be invoked only while SDK UI (MainActivity) is alive.
-         * Throws if accessed too early (before [start] has caused MainActivity to ensure UI)
-         * or too late (after MainActivity teardown).
-         */
         internal fun uiInjector(): UiInjector {
             return checkNotNull(UI_INJECTOR) {
                 "PyrusServiceDesk UI is not started. Open SDK via PyrusServiceDesk.start(...) and " +
-                    "let MainActivity create the UI subgraph in its lifecycle."
+                    "let MainActivity create the UiInjector in its lifecycle."
             }
         }
 
         /**
-         * Creates UI subgraph if it has not been created yet. MUST be called on the main thread
-         * — it is intended to be invoked from `MainActivity.onCreate(...)` so the lifetime of
-         * the UI subgraph matches the lifetime of the SDK activity.
+         * Creates UIInjector.
          */
         @MainThread
         internal fun ensureUiInjector(): UiInjector {
@@ -459,9 +443,7 @@ class PyrusServiceDesk private constructor(
         }
 
         /**
-         * Releases the UI subgraph if alive. Safe to call multiple times.
-         * Intended to be called from `MainActivity.onDestroy(...)` (when finishing) and as a
-         * defensive cleanup from [onCancel]/[stop] paths.
+         * Releases the UIInjector.
          */
         @MainThread
         internal fun releaseUiInjector() {

@@ -57,8 +57,6 @@ class PSDJvmStaticTest {
 
     @After
     fun tearDown() {
-        // Best-effort: cancel any DiInjector that ended up alive at the end of the test
-        // before we wipe the references.
         runCatching { (PyrusServiceDesk.INJECTOR as DiInjector?)?.onCancel() }
         resetCompanionState()
         resetStaticRepository()
@@ -386,7 +384,6 @@ class PSDJvmStaticTest {
     fun setPushTokenFromABackgroundThreadAfterInitDoesNotCrash() = runTest {
         PyrusServiceDesk.init(application, "appA", "user-1", "key-1")
         launch(Dispatchers.IO) {
-            // No callback, null token (fast path that just returns Exception via callback).
             PyrusServiceDesk.setPushToken(null, null)
             PyrusServiceDesk.setPushToken("real-token", null)
         }.join()
@@ -428,7 +425,6 @@ class PSDJvmStaticTest {
         PyrusServiceDesk.init(application, "appA")
         assertSame(chooser, StaticRepository.FILE_CHOOSER)
 
-        // Even after injector is replaced.
         PyrusServiceDesk.init(application, "appB")
         assertSame(chooser, StaticRepository.FILE_CHOOSER)
 
@@ -448,15 +444,13 @@ class PSDJvmStaticTest {
     }
 
     private fun resetCompanionState() {
-        // Wipe singletons / mutable state so each test starts from a clean slate.
         runCatching { PyrusServiceDesk.INSTANCE = null }
         runCatching { PyrusServiceDesk.INJECTOR = null }
         runCatching { PyrusServiceDesk.UI_INJECTOR = null }
-//        runCatching { PyrusServiceDesk.autoRefreshFeatureFactory = null }
         runCatching { PyrusServiceDesk.onStopCallback = null }
         runCatching { PyrusServiceDesk.lastRefreshes = ArrayList() }
         PyrusServiceDesk.sdIsOpen.value = false
-        PyrusServiceDesk.onAuthorizationFailed(Runnable { PyrusServiceDesk.stop() })
+        PyrusServiceDesk.onAuthorizationFailed { PyrusServiceDesk.stop() }
     }
 
     private fun resetStaticRepository() {

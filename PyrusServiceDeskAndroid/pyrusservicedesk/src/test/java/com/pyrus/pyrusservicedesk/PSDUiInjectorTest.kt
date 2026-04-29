@@ -30,14 +30,6 @@ import java.util.concurrent.CountDownLatch
 import java.util.concurrent.TimeUnit
 import java.util.concurrent.atomic.AtomicReference
 
-/**
- * Focused tests for UiInjector lifecycle and threading behaviour.
- *
- * These specifically target the changes made in the branch:
- *  - creation on demand via ensureUiInjector();
- *  - main-thread only restriction;
- *  - separation from stop()/init() semantics.
- */
 @OptIn(ExperimentalCoroutinesApi::class)
 @RunWith(RobolectricTestRunner::class)
 @Config(sdk = [33])
@@ -99,7 +91,7 @@ class PSDUiInjectorTest {
         assertNull(PyrusServiceDesk.UI_INJECTOR)
         assertThrowsIllegalState { PyrusServiceDesk.uiInjector() }
 
-        // second release must be no-op
+        // second release must be no action
         PyrusServiceDesk.releaseUiInjector()
         assertNull(PyrusServiceDesk.UI_INJECTOR)
     }

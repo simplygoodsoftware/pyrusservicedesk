@@ -26,9 +26,6 @@ class PicassoManager(private val appContext: Application) {
      * Shuts down the Picasso instance. We intentionally do not wipe the on-disk image cache
      * here: that would force re-download of every image on each SDK open / config change.
      * Disk cache cleanup belongs to a full data reset path (see [clearImageCache]).
-     *
-     * Note: previously this called `picasso.cancelTag(this)`, but no `picasso.load(...).tag(this)`
-     * is used anywhere — that call was a silent no-op. Removed.
      */
     fun dispose(picasso: Picasso) {
         picasso.shutdown()

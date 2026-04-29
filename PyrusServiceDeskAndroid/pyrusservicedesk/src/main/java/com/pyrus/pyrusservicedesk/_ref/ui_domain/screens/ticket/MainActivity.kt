@@ -34,7 +34,7 @@ internal class MainActivity : FragmentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        // Create UI subgraph as the very first step of SDK UI lifecycle. From this point on
+        // Create UiInjector as the very first step of SDK UI lifecycle. From this point on
         // any fragment / adapter / dialog can safely access `PyrusServiceDesk.uiInjector()`.
         // It will be released in onDestroy() when the activity is finishing.
         PyrusServiceDesk.ensureUiInjector()
@@ -62,7 +62,7 @@ internal class MainActivity : FragmentActivity() {
     }
 
     override fun onDestroy() {
-        // Release UI subgraph only when the activity is actually finishing (not on config
+        // Release UiInjector only when the activity is actually finishing (not on config
         // changes). This guarantees no Picasso / ExoPlayer / MediaSession / Cicerone leaks
         // across SDK open/close cycles.
         if (isFinishing) {

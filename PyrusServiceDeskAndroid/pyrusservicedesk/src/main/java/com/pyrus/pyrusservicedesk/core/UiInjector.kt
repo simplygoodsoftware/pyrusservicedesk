@@ -36,16 +36,6 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 
-/**
- * UI-only dependency subgraph.
- *
- * Created on the main thread when the SDK UI is opened ([PyrusServiceDesk.ensureUiInjector] from
- * `MainActivity.onCreate`) and closed when the activity is actually finishing.
- *
- * Heavy / main-thread-bound resources (Picasso, ExoPlayer, MediaSession) are kept lazy so
- * `UiInjector` construction itself is cheap and never blocks main with `Thread.sleep` from
- * MediaSession retries — they're created only on first real use.
- */
 internal class UiInjector(
     private val application: Application,
     private val coreScope: CoroutineScope,
@@ -122,10 +112,6 @@ internal class UiInjector(
         AudioWrapper(session, downloadHelper, coreScope)
     }
 
-    // Factories themselves are lightweight, but TicketFeatureFactory / TicketsFeatureFactory
-    // capture `audioWrapper`. Building them eagerly would force the audio stack lazy chain
-    // (audioWrapper -> session -> MediaSession with Thread.sleep retry) to fire during
-    // UiInjector construction, defeating the laziness. Keep the factories lazy too.
     val ticketFeatureFactory: TicketFeatureFactory by lazy(LazyThreadSafetyMode.NONE) {
         TicketFeatureFactory(
             accountStore = accountStore,
