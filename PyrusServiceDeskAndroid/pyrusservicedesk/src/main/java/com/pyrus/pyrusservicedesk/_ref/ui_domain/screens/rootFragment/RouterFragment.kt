@@ -80,10 +80,11 @@ internal class RouterFragment: TeaFragment<Unit, Message.Outer, Effect.Outer>(),
                 if (userId == null || appId == null) return
 
                 val user = UserInternal(userId, appId)
+                val router = uiInjector().router
                 lifecycleScope.launch(Dispatchers.IO) {
                     val lastTicketId = injector().localTicketsStore.getTickets().lastOrNull()?.ticketId
                         ?: injector().localCommandsStore.getNextLocalId()
-                    uiInjector().router.newRootScreen(SdScreens.TicketScreen(lastTicketId, user, sendComment).setSlideRightAnimation())
+                    router.newRootScreen(SdScreens.TicketScreen(lastTicketId, user, sendComment).setSlideRightAnimation())
                 }
             }
         }
