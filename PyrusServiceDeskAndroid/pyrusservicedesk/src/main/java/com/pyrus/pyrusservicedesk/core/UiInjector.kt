@@ -62,7 +62,7 @@ internal class UiInjector(
     val picassoManager: PicassoManager = PicassoManager(application)
 
     private var picassoCreated = false
-    val picasso: Picasso by lazy(LazyThreadSafetyMode.NONE) {
+    val picasso: Picasso by lazy {
         ensureMainThread("Picasso")
         val instance = picassoManager.providePicasso(okHttpClientProvider().newBuilder())
         picassoCreated = true
@@ -84,7 +84,7 @@ internal class UiInjector(
     private val mediaSessionManager = MediaSessionManager()
 
     private var playerCreated = false
-    private val player: ExoPlayer by lazy(LazyThreadSafetyMode.NONE) {
+    private val player: ExoPlayer by lazy {
         ensureMainThread("ExoPlayer")
         val instance = ExoPlayer
             .Builder(application)
@@ -101,7 +101,7 @@ internal class UiInjector(
     }
 
     private var sessionCreated = false
-    private val session: MediaSession by lazy(LazyThreadSafetyMode.NONE) {
+    private val session: MediaSession by lazy {
         ensureMainThread("MediaSession")
         val instance = mediaSessionManager.createMediaSession(application, player)
         sessionCreated = true
@@ -109,14 +109,14 @@ internal class UiInjector(
     }
 
     private var audioWrapperCreated = false
-    val audioWrapper: AudioWrapper by lazy(LazyThreadSafetyMode.NONE) {
+    val audioWrapper: AudioWrapper by lazy {
         ensureMainThread("AudioWrapper")
         val instance = AudioWrapper(session, downloadHelper, coreScope)
         audioWrapperCreated = true
         instance
     }
 
-    val ticketFeatureFactory: TicketFeatureFactory by lazy(LazyThreadSafetyMode.NONE) {
+    val ticketFeatureFactory: TicketFeatureFactory by lazy {
         TicketFeatureFactory(
             accountStore = accountStore,
             storeFactory = storeFactory,
@@ -134,7 +134,7 @@ internal class UiInjector(
         )
     }
 
-    val ticketsFeatureFactory: TicketsFeatureFactory by lazy(LazyThreadSafetyMode.NONE) {
+    val ticketsFeatureFactory: TicketsFeatureFactory by lazy {
         TicketsFeatureFactory(
             storeFactory = storeFactory,
             repository = repository,
@@ -146,7 +146,7 @@ internal class UiInjector(
         )
     }
 
-    val searchFeatureFactory: SearchFeatureFactory by lazy(LazyThreadSafetyMode.NONE) {
+    val searchFeatureFactory: SearchFeatureFactory by lazy {
         SearchFeatureFactory(
             storeFactory = storeFactory,
             repository = repository,
@@ -155,7 +155,7 @@ internal class UiInjector(
         )
     }
 
-    val accessDeniedFeatureFactory: AccessDeniedFeatureFactory by lazy(LazyThreadSafetyMode.NONE) {
+    val accessDeniedFeatureFactory: AccessDeniedFeatureFactory by lazy {
         AccessDeniedFeatureFactory(
             storeFactory = storeFactory,
             accountStore = accountStore,
