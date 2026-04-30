@@ -204,7 +204,7 @@ internal class CommentAttachmentHolder(
                         if (entry.isSupport) ConfigUtils.getSupportAvatar(itemView.context)
                         else ConfigUtils.getAuthorAvatar(itemView.context)
                     if (entry.showAvatar) {
-                        PyrusServiceDesk.injector().picasso
+                        PyrusServiceDesk.uiInjector().picasso
                             .load(entry.avatarUrl)
                             .placeholder(placeHolder)
                             .transform(CIRCLE_TRANSFORMATION)
@@ -302,7 +302,7 @@ internal class CommentAttachmentHolder(
             ) { target.visibility = View.VISIBLE }
         }
         recentPicassoTarget = picassoTarget
-        PyrusServiceDesk.injector().picasso.load(previewUri).into(picassoTarget)
+        PyrusServiceDesk.uiInjector().picasso.load(previewUri).into(picassoTarget)
     }
 
     private fun LayerDrawable.adjustSettingsForProgress(primaryColor: Int, secondaryColor: Int) {

@@ -29,10 +29,13 @@ import androidx.core.view.isVisible
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import com.pyrus.pyrusservicedesk.PyrusServiceDesk
 import com.pyrus.pyrusservicedesk.PyrusServiceDesk.Companion.injector
+import com.pyrus.pyrusservicedesk.PyrusServiceDesk.Companion.uiInjector
 import com.pyrus.pyrusservicedesk.R
 import com.pyrus.pyrusservicedesk._ref.SdScreens
 import com.pyrus.pyrusservicedesk._ref.data.AudioData
+import com.pyrus.pyrusservicedesk._ref.data.multy_chat.Application
 import com.pyrus.pyrusservicedesk._ref.ui_domain.screens.ticket.TicketView.Effect
 import com.pyrus.pyrusservicedesk._ref.ui_domain.screens.ticket.TicketView.Event
 import com.pyrus.pyrusservicedesk._ref.ui_domain.screens.ticket.TicketView.Event.*
@@ -257,14 +260,14 @@ internal class TicketFragment: TeaFragment<Model, Event, Effect>() {
         }
 
         is Effect.ShowAttachVariants -> {
-            injector().router.setResultListener(effect.key) {
+            uiInjector().router.setResultListener(effect.key) {
                 dispatch(SetAttachVariant(effect.key, it))
             }
             AttachFileVariantsFragment.newInstance(effect.key).show(parentFragmentManager, null)
         }
 
         is Effect.ShowErrorCommentDialog -> {
-            injector().router.setResultListener(effect.key) {
+            uiInjector().router.setResultListener(effect.key) {
                 dispatch(SetErrorCommentResult(effect.localId, effect.key, it))
             }
             ErrorCommentActionsDialog
@@ -275,8 +278,8 @@ internal class TicketFragment: TeaFragment<Model, Event, Effect>() {
         is Effect.ShowInfoBottomSheetFragment -> {}
         is Effect.UpdateRecordWave -> audioRecordView.updateFrequency(effect.recordedSegmentValues)
         is Effect.ShowAudioRecordTooltip -> audioRecordView.showAudioRecordTooltip()
-        is Effect.Exit -> injector().router.exit()
-        is Effect.OpenPreview -> injector().router.navigateTo(SdScreens.ImageScreen(effect.fileData))
+        is Effect.Exit -> uiInjector().router.exit()
+        is Effect.OpenPreview -> uiInjector().router.navigateTo(SdScreens.ImageScreen(effect.fileData))
         is Effect.OpenRatingComment -> {
             val bottomSheet = RatingBottomSheetDialogFragment.newInstance(effect.rateUsText)
             bottomSheet.show(parentFragmentManager, bottomSheet.tag)
@@ -290,7 +293,7 @@ internal class TicketFragment: TeaFragment<Model, Event, Effect>() {
             val result = bundle.getString(RATING_COMMENT_KEY)
             dispatch(Event.OnRatingClick(null, result))
         }
-        audioWrapper = injector().audioWrapper
+        audioWrapper = uiInjector().audioWrapper
     }
 
     override fun onCreateView(
@@ -368,7 +371,7 @@ internal class TicketFragment: TeaFragment<Model, Event, Effect>() {
         val ticketId = arguments?.getLong(KEY_TICKET_ID)!!
         val sendComment = arguments?.getString(KEY_SEND_COMMENT)
 
-        val feature = getStore { injector().ticketFeatureFactory.create(
+        val feature = getStore { uiInjector().ticketFeatureFactory.create(
             user = user,
             initialTicketId = ticketId,
             welcomeMessage = ConfigUtils.getWelcomeMessage(),

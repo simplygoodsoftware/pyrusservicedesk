@@ -212,7 +212,7 @@ internal class CommentAudioHolder(
                     if (entry.isSupport) ConfigUtils.getSupportAvatar(itemView.context)
                     else ConfigUtils.getAuthorAvatar(itemView.context)
                 if (entry.showAvatar) {
-                    PyrusServiceDesk.injector().picasso
+                    PyrusServiceDesk.uiInjector().picasso
                         .load(entry.avatarUrl)
                         .placeholder(placeHolder)
                         .transform(CIRCLE_TRANSFORMATION)

@@ -5,31 +5,29 @@ import androidx.media3.common.Player
 import androidx.media3.session.MediaSession
 import java.util.UUID
 
-internal class MediaSessionManager() {
-    fun createMediaSessionWithRetry(application: Application, player: Player): MediaSession {
-        var exception: Exception? = null
-
-        for (i in 1..MAX_RETRIES) {
+internal class MediaSessionManager {
+    fun createMediaSession(
+        application: Application,
+        player: Player,
+    ): MediaSession {
+        var lastError: Throwable? = null
+        repeat(MAX_ATTEMPTS) {
             try {
-                return MediaSession.Builder(application, player)
-                    .setId("psd_session_retry_${i}_" + UUID.randomUUID().toString())
+                return MediaSession
+                    .Builder(application, player)
+                    .setId("psd_session_${UUID.randomUUID()}")
                     .build()
             } catch (e: Exception) {
-                exception = e
-                if (i < MAX_RETRIES) {
-                    Thread.sleep(RETRY_DELAY_MS * i)
-                }
+                lastError = e
             }
         }
-
         throw IllegalStateException(
-            "Failed to create MediaSession",
-            exception
+            "Failed to create MediaSession after $MAX_ATTEMPTS attempts",
+            lastError,
         )
     }
 
-    companion object {
-        private const val MAX_RETRIES = 3
-        private const val RETRY_DELAY_MS = 100L
+    private companion object {
+        private const val MAX_ATTEMPTS = 3
     }
 }

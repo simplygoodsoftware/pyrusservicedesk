@@ -78,7 +78,7 @@ internal class WelcomeMessageHolder(
             setCommentText(entry.message)
         }
         this.entry::avatarUrl.payloadCheck {
-            PyrusServiceDesk.injector().picasso
+            PyrusServiceDesk.uiInjector().picasso
                 .load(entry.avatarUrl)
                 .placeholder(ConfigUtils.getSupportAvatar(itemView.context))
                 .transform(CIRCLE_TRANSFORMATION)
