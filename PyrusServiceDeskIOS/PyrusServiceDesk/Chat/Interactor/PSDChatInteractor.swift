@@ -154,9 +154,9 @@ extension PSDChatInteractor: PSDChatInteractorProtocol {
             } else {
                 beginTimer()
                 updateChat(chat: chat)
+                
                 if let message = PyrusServiceDesk.messageToSend, message.count > 0 {
-                    send(message, [], newTicket: true)
-                    PyrusServiceDesk.messageToSend = nil
+                    presenter.doWork(.updateButtons(buttons: nil))
                 }
                 
                 if let messageId,
@@ -222,6 +222,12 @@ extension PSDChatInteractor: PSDChatInteractorProtocol {
             }
         case .viewWillAppear:
             startGettingInfo()
+            if !isLoading,
+               let message = PyrusServiceDesk.messageToSend,
+               message.count > 0 {
+                send(message, [], newTicket: true)
+                PyrusServiceDesk.messageToSend = nil
+            }
         case .sendRatingComment(comment: let comment, rating: let rating):
             sendRatingComment(ratingComment: comment, rating: rating)
         }
