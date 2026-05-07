@@ -203,9 +203,13 @@ class PSDChatViewController: PSDViewController, PSDMainController {
                         self.view.layoutIfNeeded()
                     }
                     
-                    if isFirstKeyboardShow && (PyrusServiceDesk.multichats || PyrusServiceDesk.startWithPush) {
+                    if isFirstKeyboardShow {
                         defaultMessageInputViewHeight = messageInputView.frame.height
-                        UIView.performWithoutAnimation {
+                        if PyrusServiceDesk.startWithPush {
+                            UIView.performWithoutAnimation {
+                                self.tableView.contentOffset.y -= keyboardHeight - oldInset
+                            }
+                        } else {
                             self.tableView.contentOffset.y -= keyboardHeight - oldInset
                         }
                         isFirstKeyboardShow = false
