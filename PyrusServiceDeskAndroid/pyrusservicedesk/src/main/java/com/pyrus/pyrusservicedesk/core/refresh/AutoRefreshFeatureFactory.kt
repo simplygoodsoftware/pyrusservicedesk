@@ -12,7 +12,6 @@ import com.pyrus.pyrusservicedesk.sdk.repositories.SdRepository
 import com.pyrus.pyrusservicedesk.sdk.repositories.SystemMessageStore
 import com.pyrus.pyrusservicedesk.sdk.updates.LiveUpdates
 import com.pyrus.pyrusservicedesk.sdk.updates.PreferencesManager
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.currentCoroutineContext
 import kotlinx.coroutines.delay
@@ -22,7 +21,6 @@ import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.isActive
-import kotlin.coroutines.CoroutineContext
 
 private const val TAG = "AutoRefreshFeature"
 private const val NO_UPDATES = -1L
@@ -78,7 +76,6 @@ private class AutoRefreshActor(
             preferencesManager.getLastActiveTimeFlow(),
             PyrusServiceDesk.sdIsOpenFlow(),
         ) { isStarted, lastActiveTime, sdIsOpen ->
-            println("handleEffect")
             val interval = liveUpdates.getTicketsUpdateInterval(lastActiveTime)
             if (isStarted || sdIsOpen)
                 AutoRefreshData(interval, lastActiveTime, sdIsOpen)
