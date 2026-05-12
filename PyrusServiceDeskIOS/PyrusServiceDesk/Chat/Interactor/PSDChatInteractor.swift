@@ -154,6 +154,12 @@ extension PSDChatInteractor: PSDChatInteractorProtocol {
                 isLoading = true
                 reloadChat()
             } else {
+                if chat?.messages.count ?? 0 > 0 &&
+                    (!(chat?.lastComment?.isSupportMessage ?? false) ||
+                    (chat?.lastComment?.isSystemMessage ?? false)) {
+                    sendOperatorCalcCommand(needSync: false)
+                    hasOperatorTime = true
+                }
                 beginTimer()
                 updateChat(chat: chat)
                 if let message = PyrusServiceDesk.messageToSend, message.count > 0 {
