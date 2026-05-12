@@ -33,6 +33,7 @@ import com.pyrus.pyrusservicedesk.sdk.sync.Synchronizer
 import com.pyrus.pyrusservicedesk.sdk.sync.TicketCommandResultDto
 import com.pyrus.pyrusservicedesk.sdk.web.UploadFileHook
 import com.pyrus.pyrusservicedesk.sdk.web.retrofit.RemoteFileStore
+import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -58,12 +59,13 @@ internal class SdRepository(
     private val accountStore: AccountStore,
     private val idStore: IdStore,
     private val systemMessageStore: SystemMessageStore,
+    private val ioDispatcher: CoroutineDispatcher = Dispatchers.IO //only for test!!!
 ) {
 
     private val fileHooks = ConcurrentHashMap<Long, UploadFileHook>()
 
     init {
-        coroutineScope.launch(Dispatchers.IO) {
+        coroutineScope.launch(ioDispatcher) {
             val initialCommands = commandsStore.getCommands()
                 .filter { !it.command.isError }
                 .mapNotNull(repositoryMapper::mapToSyncRequest)
@@ -323,14 +325,14 @@ internal class SdRepository(
         }
     }
 
-    fun addTextComment(user: UserInternal, ticketId: Long, textBody: String) = coroutineScope.launch(Dispatchers.IO) {
+    fun addTextComment(user: UserInternal, ticketId: Long, textBody: String) = coroutineScope.launch(ioDispatcher) {
         val serverTicketId = idStore.getTicketServerId(ticketId) ?: ticketId
         val instanceId = accountStore.getAccount().getInstanceId()
         val command: SyncRequest.Command.CreateComment = commandsStore.addTextCommand(user, serverTicketId, textBody, instanceId)
         sendCommand(command)
     }
 
-    fun addAttachComment(user: UserInternal, ticketId: Long, fileUri: Uri) = coroutineScope.launch(Dispatchers.IO) {
+    fun addAttachComment(user: UserInternal, ticketId: Long, fileUri: Uri) = coroutineScope.launch(ioDispatcher) {
 
         val fileData = fileResolver.getFileData(fileUri) ?: return@launch
 
@@ -342,14 +344,14 @@ internal class SdRepository(
         sendCommand(command)
     }
 
-    fun addRatingComment(user: UserInternal, ticketId: Long, rating: Int?, ratingComment: String?) = coroutineScope.launch(Dispatchers.IO) {
+    fun addRatingComment(user: UserInternal, ticketId: Long, rating: Int?, ratingComment: String?) = coroutineScope.launch(ioDispatcher) {
         val serverTicketId = idStore.getTicketServerId(ticketId) ?: ticketId
         val instanceId = accountStore.getAccount().getInstanceId()
         val command = commandsStore.addRatingCommand(user, serverTicketId, rating, ratingComment, instanceId)
         sendCommand(command)
     }
 
-    fun readTicket(user: UserInternal, ticketId: Long) = coroutineScope.launch(Dispatchers.IO) {
+    fun readTicket(user: UserInternal, ticketId: Long) = coroutineScope.launch(ioDispatcher) {
         if (ticketId <= 0) return@launch
         val serverTicketId = idStore.getTicketServerId(ticketId) ?: ticketId
         val instanceId = accountStore.getAccount().getInstanceId()
@@ -371,7 +373,7 @@ internal class SdRepository(
         return synchronizer.addCommand(command)
     }
 
-    fun retryAddComment(user: UserInternal, localId: Long) = coroutineScope.launch(Dispatchers.IO) {
+    fun retryAddComment(user: UserInternal, localId: Long) = coroutineScope.launch(ioDispatcher) {
         val commandEntity = commandsStore.getCommand(localId) ?: return@launch
         val command = repositoryMapper.mapToSyncRequest(commandEntity) ?: return@launch
         val instanceId = accountStore.getAccount().getInstanceId()

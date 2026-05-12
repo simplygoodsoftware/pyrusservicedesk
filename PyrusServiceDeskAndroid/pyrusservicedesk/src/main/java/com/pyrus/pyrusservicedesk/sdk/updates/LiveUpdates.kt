@@ -109,7 +109,7 @@ internal class LiveUpdates() {
         }
     }
 
-    fun getTicketsUpdateInterval(lastActiveTime: Long): Long {
+    internal fun getTicketsUpdateInterval(lastActiveTime: Long): Long {
         val diff = System.currentTimeMillis() - lastActiveTime
         return when {
             diff <= MILLISECONDS_IN_MINUTE -> 5L * MILLISECONDS_IN_SECOND

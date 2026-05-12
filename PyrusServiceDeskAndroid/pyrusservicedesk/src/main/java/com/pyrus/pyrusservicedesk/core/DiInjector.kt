@@ -5,6 +5,7 @@ import android.content.SharedPreferences
 import android.os.Build
 import com.pyrus.pyrusservicedesk.AppResourceManager
 import com.pyrus.pyrusservicedesk.BuildConfig
+import com.pyrus.pyrusservicedesk._ref.PsdTimeProvider
 import com.pyrus.pyrusservicedesk._ref.helpers.DownloadHelper
 import com.pyrus.pyrusservicedesk._ref.ui_domain.rate_time.TimeToRateUseCase
 import com.pyrus.pyrusservicedesk._ref.utils.AddUserEventBus
@@ -178,12 +179,15 @@ internal class DiInjector(
         context = application
     )
 
+    val timeProvider = PsdTimeProvider()
+
     val autoRefreshFeatureFactory = AutoRefreshFeatureFactory(
         storeFactory = storeFactory,
         repository = repository,
         preferencesManager = preferencesManager,
         systemMessageStore = systemMessageStore,
-        localTicketsStore = localTicketsStore
+        localTicketsStore = localTicketsStore,
+        timeProvider = timeProvider,
     )
 
     val setPushTokenUseCase = SetPushTokenUseCase(accountStore, coreScope, preferencesManager, repository)
