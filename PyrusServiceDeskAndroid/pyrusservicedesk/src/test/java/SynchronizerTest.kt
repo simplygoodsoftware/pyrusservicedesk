@@ -16,7 +16,6 @@ import com.pyrus.pyrusservicedesk.AppResourceManager
 import com.pyrus.pyrusservicedesk._ref.utils.PREFERENCE_KEY
 import com.pyrus.pyrusservicedesk._ref.utils.call_adapter.HttpException
 import com.pyrus.pyrusservicedesk._ref.utils.isSuccess
-import com.pyrus.pyrusservicedesk.core.ResourceContextWrapper
 import com.pyrus.pyrusservicedesk.sdk.AccessDeniedEventBus
 import com.pyrus.pyrusservicedesk.sdk.repositories.AccountStore
 import com.pyrus.pyrusservicedesk.sdk.repositories.IdStore
@@ -66,7 +65,6 @@ class SynchronizerTest {
     private lateinit var accessDeniedEventBus: AccessDeniedEventBus
     private lateinit var preferencesManager: PreferencesManager
     private lateinit var systemMessageStore: SystemMessageStore
-    private lateinit var resourceContextWrapper: ResourceContextWrapper
     private lateinit var commandsStore: LocalCommandsStore
     private val testDispatcher = StandardTestDispatcher()
     private val testScope = TestScope(testDispatcher)
@@ -81,7 +79,6 @@ class SynchronizerTest {
         localCommandsStore = mockk(relaxed = true, relaxUnitFun = true)
         accessDeniedEventBus = mockk(relaxed = true, relaxUnitFun = true)
         systemMessageStore = mockk(relaxed = true, relaxUnitFun = true)
-        resourceContextWrapper = mockk(relaxed = true, relaxUnitFun = true)
         commandsStore = mockk(relaxed = true, relaxUnitFun = true)
 
         val app = RuntimeEnvironment.application
@@ -101,7 +98,6 @@ class SynchronizerTest {
             commandsStore = localCommandsStore,
             preferences = preferencesManager,
             systemMessageStore = systemMessageStore,
-            resourceContextWrapper = resourceContextWrapper,
             testDispatcher = testDispatcher,
         )
 

@@ -1,7 +1,6 @@
 import android.util.Log
 import com.pyrus.pyrusservicedesk.AppResourceManager
 import com.pyrus.pyrusservicedesk._ref.utils.log.PLog
-import com.pyrus.pyrusservicedesk.core.ResourceContextWrapper
 import com.pyrus.pyrusservicedesk.sdk.AccessDeniedEventBus
 import com.pyrus.pyrusservicedesk.sdk.repositories.AccountStore
 import com.pyrus.pyrusservicedesk.sdk.repositories.IdStore
@@ -28,7 +27,6 @@ internal class TestSynchronizer(
     commandsStore: LocalCommandsStore,
     preferences: Preferences,
     systemMessageStore: SystemMessageStore,
-    resourceContextWrapper: ResourceContextWrapper,
     testDispatcher: TestDispatcher
 ) : Synchronizer(
     api,
@@ -40,7 +38,6 @@ internal class TestSynchronizer(
     commandsStore,
     preferences,
     systemMessageStore,
-    resourceContextWrapper
 ) {
     @DelicateCoroutinesApi
     @ExperimentalCoroutinesApi

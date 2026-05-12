@@ -19,7 +19,6 @@ import com.pyrus.pyrusservicedesk._ref.data.FullTicket
 import com.pyrus.pyrusservicedesk._ref.utils.PREFERENCE_KEY
 import com.pyrus.pyrusservicedesk._ref.utils.isSuccess
 import com.pyrus.pyrusservicedesk.core.Account
-import com.pyrus.pyrusservicedesk.core.ResourceContextWrapper
 import com.pyrus.pyrusservicedesk.sdk.AccessDeniedEventBus
 import com.pyrus.pyrusservicedesk.sdk.FileResolver
 import com.pyrus.pyrusservicedesk.sdk.repositories.AccountStore
@@ -78,7 +77,6 @@ class SdRepositoryTest {
     private lateinit var accessDeniedEventBus: AccessDeniedEventBus
     private lateinit var preferencesManager: PreferencesManager
     private lateinit var systemMessageStore: SystemMessageStore
-    private lateinit var resourceContextWrapper: ResourceContextWrapper
     private lateinit var repositoryMapper: RepositoryMapper
     private lateinit var remoteFileStore: RemoteFileStore
 
@@ -96,7 +94,6 @@ class SdRepositoryTest {
         localCommandsStore = mockk(relaxed = true, relaxUnitFun = true)
         accessDeniedEventBus = mockk(relaxed = true, relaxUnitFun = true)
         systemMessageStore = mockk(relaxed = true, relaxUnitFun = true)
-        resourceContextWrapper = mockk(relaxed = true, relaxUnitFun = true)
         fileResolver = mockk()
         remoteFileStore = mockk()
 
@@ -126,7 +123,6 @@ class SdRepositoryTest {
             commandsStore = localCommandsStore,
             preferences = preferencesManager,
             systemMessageStore = systemMessageStore,
-            resourceContextWrapper = resourceContextWrapper,
             testDispatcher = testDispatcher,
         )
 
