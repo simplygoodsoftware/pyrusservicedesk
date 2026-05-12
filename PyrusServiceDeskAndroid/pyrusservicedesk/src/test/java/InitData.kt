@@ -1,16 +1,37 @@
+import com.pyrus.pyrusservicedesk.User
+import com.pyrus.pyrusservicedesk._ref.data.Comment
+import com.pyrus.pyrusservicedesk._ref.data.FullTicket
 import com.pyrus.pyrusservicedesk.sdk.repositories.UserInternal
+import com.pyrus.pyrusservicedesk.sdk.repositories.data_base.data.CommandEntity
+import com.pyrus.pyrusservicedesk.sdk.repositories.data_base.data.CommentEntity
+import com.pyrus.pyrusservicedesk.sdk.repositories.data_base.data.CommentInfo
+import com.pyrus.pyrusservicedesk.sdk.repositories.data_base.data.TicketEntity
+import com.pyrus.pyrusservicedesk.sdk.repositories.data_base.data.support.CommandWithAttachmentsEntity
+import com.pyrus.pyrusservicedesk.sdk.repositories.data_base.data.support.CommentWithAttachmentsEntity
+import com.pyrus.pyrusservicedesk.sdk.repositories.data_base.data.support.TicketWithComments
 import com.pyrus.pyrusservicedesk.sdk.sync.SyncRequest
+import com.pyrus.pyrusservicedesk.sdk.sync.SystemCommentType
+import com.pyrus.pyrusservicedesk.sdk.sync.TicketCommandResultDto
+import com.pyrus.pyrusservicedesk.sdk.sync.TicketCommandType
 
 internal object InitData {
 
     const val TEST_TICKET_ID = 1L
-    const val TEST_COMMAND_MARK_TICKET_IS_READ_ID = "a16c1c7c-a301-4eae-b9de-b47816b42533"
+    const val TEST_COMMAND_MARK_TICKET_IS_READ_ID =
+        "a16c1c7c-a301-4eae-b9de-b47816b42533"
 
     const val TEST_INSTANCE_ID = "instanceId"
-    const val TEST_APP_ID = "xZlr1Zf0pZZE43NfjXfY10OvEKwkKLRCO~PYF7SjID-Tp-7sK5EAuWqgOfrCQNOdDUHrZhHlBaqcdzj2ULgf9e~ciFudXo9ff1Y9cx0oXaTGziZKANoCLbWceaF-5g1VAQpfcg=="
+    const val TEST_APP_ID =
+        "xZlr1Zf0pZZE43NfjXfY10OvEKwkKLRCO~PYF7SjID-Tp-7sK5EAuWqgOfrCQNOdDUHrZhHlBaqcdzj2ULgf9e~ciFudXo9ff1Y9cx0oXaTGziZKANoCLbWceaF-5g1VAQpfcg=="
     val userInternalV1 = UserInternal(
         userId = TEST_INSTANCE_ID,
         appId = TEST_APP_ID
+    )
+
+    val userV1 = User(
+        userId = TEST_INSTANCE_ID,
+        appId = TEST_APP_ID,
+        userName = "testddddd",
     )
 
     val markTicketIsReadRequest = SyncRequest.Command.MarkTicketAsRead(
@@ -56,4 +77,321 @@ internal object InitData {
         ticketId = TEST_TICKET_ID,
     )
 
+    val lastComment = CommentInfo(
+        commentId = 1234567890,
+        creationDate = 1773925754,
+        author = null,
+        body = "testComment",
+        lastAttachmentName = null
+    )
+
+    val lastComment2 = CommentInfo(
+        commentId = 1234567891,
+        creationDate = 1773925755,
+        author = null,
+        body = "testComment",
+        lastAttachmentName = null
+    )
+
+    val comment1 = Comment(
+        id = 1234567890,
+        persistentId = 1234567890,
+        body = "testComment",
+        isInbound = true,
+        creationTime = 1773925754,
+        rating = null,
+        author = null,
+        isSystem = false,
+        systemCommentType = SystemCommentType.Unknown.ordinal,
+        isLocal = false,
+        isSupport = false,
+        attachments = emptyList(),
+        isSending = false
+    )
+
+    val ticket = FullTicket(
+        subject = "test",
+        comments = listOf(
+            Comment(
+                id = 1234567890,
+                persistentId = 0,
+                body = "testComment",
+                isInbound = true,
+                creationTime = 1773925754,
+                rating = null,
+                author = null,
+                isSystem = false,
+                systemCommentType = SystemCommentType.Unknown.ordinal,
+                isLocal = false,
+                isSupport = false,
+                attachments = emptyList(),
+                isSending = false
+            ),
+            Comment(
+                id = 1234567880,
+                persistentId = 0,
+                body = "test",
+                isInbound = true,
+                creationTime = 1748093446000,
+                rating = null,
+                author = null,
+                isSystem = false,
+                systemCommentType = SystemCommentType.Unknown.ordinal,
+                isLocal = false,
+                isSupport = false,
+                attachments = emptyList(),
+                isSending = false
+            )
+        ),
+        showRating = false,
+        showRatingText = null,
+        ratingSettings = null,
+        orgLogoUrl = null,
+        userId = TEST_INSTANCE_ID,
+        ticketId = TEST_TICKET_ID,
+        isActive = true,
+        isRead = true,
+        welcomeMessage = null,
+        operatorTimeMessage = null
+    )
+
+    val singleTicket = FullTicket(
+        subject = "test2",
+        comments = listOf(
+            Comment(
+                id = 1234567890,
+                persistentId = 0,
+                body = "testComment",
+                isInbound = true,
+                creationTime = 1773925754,
+                rating = null,
+                author = null,
+                isSystem = false,
+                systemCommentType = SystemCommentType.Unknown.ordinal,
+                isLocal = false,
+                isSupport = false,
+                attachments = emptyList(),
+                isSending = false
+            ),
+            Comment(
+                id = 1234567880,
+                persistentId = 0,
+                body = "test",
+                isInbound = true,
+                creationTime = 1748093446000,
+                rating = null,
+                author = null,
+                isSystem = false,
+                systemCommentType = SystemCommentType.Unknown.ordinal,
+                isLocal = false,
+                isSupport = false,
+                attachments = emptyList(),
+                isSending = false
+            ),
+            Comment(
+                id = 1234567891,
+                persistentId = 0,
+                body = "testComment",
+                isInbound = true,
+                creationTime = 1748093446001,
+                rating = null,
+                author = null,
+                isSystem = false,
+                systemCommentType = SystemCommentType.Unknown.ordinal,
+                isLocal = false,
+                isSupport = false,
+                attachments = emptyList(),
+                isSending = false
+            ),
+            Comment(
+                id = 1234567900,
+                persistentId = 0,
+                body = "test",
+                isInbound = true,
+                creationTime = 1748093446002,
+                rating = null,
+                author = null,
+                isSystem = false,
+                systemCommentType = SystemCommentType.Unknown.ordinal,
+                isLocal = false,
+                isSupport = false,
+                attachments = emptyList(),
+                isSending = false
+            )
+        ),
+        showRating = false,
+        showRatingText = null,
+        ratingSettings = null,
+        orgLogoUrl = null,
+        userId = TEST_INSTANCE_ID,
+        ticketId = TEST_TICKET_ID + 1,
+        isActive = true,
+        isRead = true,
+        welcomeMessage = null,
+        operatorTimeMessage = null
+    )
+
+    val ticketEntity = TicketEntity(
+        ticketId = TEST_TICKET_ID,
+        userId = userInternalV1.userId,
+        subject = "test",
+        unescapedSubject = "test",
+        author = null,
+        isRead = true,
+        lastComment = lastComment,
+        isActive = true,
+        createdAt = 1748093446000,
+        showRating = false,
+        showRatingText = null
+    )
+
+    val ticketEntity2 = TicketEntity(
+        ticketId = TEST_TICKET_ID + 1,
+        userId = userInternalV1.userId,
+        subject = "test2",
+        unescapedSubject = "test2",
+        author = null,
+        isRead = true,
+        lastComment = lastComment2,
+        isActive = true,
+        createdAt = 1748093446001,
+        showRating = false,
+        showRatingText = null
+    )
+
+    val inActiveTicketEntity = TicketEntity(
+        ticketId = TEST_TICKET_ID,
+        userId = userInternalV1.userId,
+        subject = "test",
+        unescapedSubject = "test",
+        author = null,
+        isRead = true,
+        lastComment = lastComment,
+        isActive = false,
+        createdAt = 1748093446000,
+        showRating = false,
+        showRatingText = null
+    )
+
+    val comments = listOf(
+        CommentWithAttachmentsEntity(
+            comment = CommentEntity(
+                commentId = 1234567890,
+                ticketId = TEST_TICKET_ID,
+                body = "testComment",
+                unescapedBody = "testComment",
+                isInbound = true,
+                creationDate = 1773925754,
+                rating = null,
+                author = null,
+                isSystem = false,
+                systemCommentType = SystemCommentType.Unknown.ordinal
+            ),
+            attachments = emptyList()
+        ),
+
+        CommentWithAttachmentsEntity(
+            comment = CommentEntity(
+                commentId = 1234567880,
+                ticketId = TEST_TICKET_ID,
+                body = "test",
+                unescapedBody = "test",
+                isInbound = true,
+                creationDate = 1748093446000,
+                rating = null,
+                author = null,
+                isSystem = false,
+                systemCommentType = SystemCommentType.Unknown.ordinal
+            ),
+            attachments = emptyList()
+        )
+    )
+
+    val comments2 = listOf(
+        CommentWithAttachmentsEntity(
+            comment = CommentEntity(
+                commentId = 1234567891,
+                ticketId = TEST_TICKET_ID + 1,
+                body = "testComment",
+                unescapedBody = "testComment",
+                isInbound = true,
+                creationDate = 1748093446001,
+                rating = null,
+                author = null,
+                isSystem = false,
+                systemCommentType = SystemCommentType.Unknown.ordinal
+            ),
+            attachments = emptyList()
+        ),
+
+        CommentWithAttachmentsEntity(
+            comment = CommentEntity(
+                commentId = 1234567900,
+                ticketId = TEST_TICKET_ID + 1,
+                body = "test",
+                unescapedBody = "test",
+                isInbound = true,
+                creationDate = 1748093446002,
+                rating = null,
+                author = null,
+                isSystem = false,
+                systemCommentType = SystemCommentType.Unknown.ordinal
+            ),
+            attachments = emptyList()
+        )
+    )
+
+    val ticketWithComments = TicketWithComments(
+        ticket = ticketEntity,
+        comments = comments
+    )
+
+    val ticketWithComments2 = TicketWithComments(
+        ticket = ticketEntity2,
+        comments = comments2
+    )
+
+    val inActiveTicketWithComments = TicketWithComments(
+        ticket = inActiveTicketEntity,
+        comments = comments
+    )
+
+
+    val calcOperatorTimeResultNotNull = TicketCommandResultDto(
+        commandId = "b5c9c6b0-5584-4f6b-a8c4-0017998db261",
+        commentId = null,
+        ticketId = TEST_TICKET_ID,
+        error = null,
+        operatorResponseTimeMessage = "подождите 5 минут"
+    )
+
+    val calcOperatorTimeResultNull = TicketCommandResultDto(
+        commandId = "b5c9c6b0-5584-4f6b-a8c4-0017998db261",
+        commentId = null,
+        ticketId = TEST_TICKET_ID,
+        error = null,
+        operatorResponseTimeMessage = null
+    )
+
+    val firstCommand = CommandWithAttachmentsEntity(
+        command = CommandEntity(
+            isError = false,
+            localId = -3,
+            commandId = "b5c9c6b0-5584-4f6b-a8c4-0017998db26e",
+            commandType = TicketCommandType.CreateComment.ordinal,
+            userId = null,
+            appId = TEST_APP_ID,
+            creationTime = 1775538530550,
+            requestNewTicket = true,
+            comment = "test",
+            ticketId = -1,
+            rating = null,
+            commentId = null,
+            token = null,
+            tokenType = null,
+            ratingComment = null,
+            extraFields = null
+        ),
+        attachments = null
+    )
 }

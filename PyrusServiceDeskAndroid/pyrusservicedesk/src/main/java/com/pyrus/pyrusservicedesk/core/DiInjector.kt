@@ -11,6 +11,7 @@ import com.github.terrakok.cicerone.Cicerone
 import com.github.terrakok.cicerone.NavigatorHolder
 import com.pyrus.pyrusservicedesk.AppResourceManager
 import com.pyrus.pyrusservicedesk.BuildConfig
+import com.pyrus.pyrusservicedesk._ref.PsdTimeProvider
 import com.pyrus.pyrusservicedesk._ref.helpers.DownloadHelper
 import com.pyrus.pyrusservicedesk._ref.helpers.ThreadsHelper
 import com.pyrus.pyrusservicedesk._ref.ui_domain.access_denied.AccessDeniedFeatureFactory
@@ -260,13 +261,16 @@ internal class DiInjector(
         router = router,
         accountStore = accountStore,
     )
+    
+    val timeProvider = PsdTimeProvider()
 
     val autoRefreshFeatureFactory = AutoRefreshFeatureFactory(
         storeFactory = storeFactory,
         repository = repository,
         preferencesManager = preferencesManager,
         systemMessageStore = systemMessageStore,
-        localTicketsStore = localTicketsStore
+        localTicketsStore = localTicketsStore,
+        timeProvider = timeProvider,
     )
 
     val sharedViewModel = SharedViewModel()
