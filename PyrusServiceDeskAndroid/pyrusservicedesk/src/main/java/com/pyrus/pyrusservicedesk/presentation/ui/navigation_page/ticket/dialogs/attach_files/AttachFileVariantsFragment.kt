@@ -19,8 +19,7 @@ import androidx.core.view.WindowInsetsCompat
 import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.google.android.material.bottomsheet.BottomSheetDialog
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment
-import com.pyrus.pyrusservicedesk.PyrusServiceDesk.Companion.injector
-import com.pyrus.pyrusservicedesk.R
+import com.pyrus.pyrusservicedesk.PyrusServiceDesk.Companion.uiInjector
 import com.pyrus.pyrusservicedesk._ref.utils.ConfigUtils
 import com.pyrus.pyrusservicedesk._ref.utils.dispatchTakePhotoIntent
 import com.pyrus.pyrusservicedesk._ref.utils.dispatchTakeVideoIntent
@@ -92,13 +91,6 @@ internal class AttachFileVariantsFragment: BottomSheetDialogFragment(), View.OnC
         binding.galleryVariant.setTextColor(textColor)
         binding.sendLogsVariant.setTextColor(textColor)
 
-        val localizedContext = injector().resourceContextWrapper.createLocalizedContext(requireContext())
-
-        binding.videoVariant.text = localizedContext.resources.getString(R.string.psd_type_video)
-        binding.photoVariant.text = localizedContext.resources.getString(R.string.psd_type_photo)
-        binding.galleryVariant.text = localizedContext.resources.getString(R.string.psd_gallery)
-        binding.sendLogsVariant.text = localizedContext.resources.getString(R.string.send_library_logs)
-
         ConfigUtils.getMainFontTypeface()?.let {
             binding.videoVariant.typeface = it
             binding.photoVariant.typeface = it
@@ -159,7 +151,7 @@ internal class AttachFileVariantsFragment: BottomSheetDialogFragment(), View.OnC
     }
 
     private fun sendResultAndClose(uri: Uri) {
-        val router = injector().router
+        val router = uiInjector().router
         router.sendResult(requireArguments().getString(RESULT_KEY)!!, uri)
         dismiss()
     }

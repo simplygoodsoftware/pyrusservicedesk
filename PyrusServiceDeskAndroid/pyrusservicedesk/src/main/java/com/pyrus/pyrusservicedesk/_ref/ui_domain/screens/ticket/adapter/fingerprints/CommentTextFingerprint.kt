@@ -1,6 +1,5 @@
 package com.pyrus.pyrusservicedesk._ref.ui_domain.screens.ticket.adapter.fingerprints
 
-import android.app.Activity
 import android.graphics.PorterDuff
 import android.graphics.drawable.AnimationDrawable
 import android.text.Spannable
@@ -37,7 +36,6 @@ import kotlin.reflect.KClass
 
 internal class CommentTextFingerprint(
     private val onEvent: (event: TicketView.Event) -> Unit,
-    private val activity: Activity
 ) : ItemFingerprint<CommentEntry.Comment.CommentText>() {
     override val layoutId: Int = R.layout.psd_view_holder_comment_text
 
@@ -49,8 +47,7 @@ internal class CommentTextFingerprint(
         parent: ViewGroup,
     ): BaseViewHolder<CommentEntry.Comment.CommentText> = CommentTextHolder(
         PsdViewHolderCommentTextBinding.inflate(layoutInflater, parent, false),
-        onEvent,
-        activity
+        onEvent
     )
 
     override fun areItemsTheSame(
@@ -88,7 +85,6 @@ internal class CommentTextFingerprint(
 internal class CommentTextHolder(
     val binding: PsdViewHolderCommentTextBinding,
     onEvent: (event: TicketView.Event) -> Unit,
-    private val activity: Activity
 ) : BaseViewHolder<CommentEntry.Comment.CommentText>(binding.root) {
 
     var content: String? = null
@@ -181,7 +177,7 @@ internal class CommentTextHolder(
                     if (entry.isSupport) ConfigUtils.getSupportAvatar(itemView.context)
                     else ConfigUtils.getAuthorAvatar(itemView.context)
                 if (entry.showAvatar) {
-                    PyrusServiceDesk.injector().picasso
+                    PyrusServiceDesk.uiInjector().picasso
                         .load(entry.avatarUrl)
                         .placeholder(placeHolder)
                         .transform(CIRCLE_TRANSFORMATION)
@@ -283,7 +279,7 @@ internal class CommentTextHolder(
 
         ranges.forEach { span ->
             ssb.setSpan(
-                LinkUtils.createClickableSpan(span.first, activity, binding.root.context, span.second),
+                LinkUtils.createClickableSpan(span.first, binding.root.context, span.second),
                 span.third.first,
                 span.third.last,
                 Spannable.SPAN_INCLUSIVE_INCLUSIVE
@@ -306,7 +302,7 @@ internal class CommentTextHolder(
 
             anyFound = true
 
-            val clickableSpan = LinkUtils.createClickableSpan(matcher.group(), activity, binding.root.context)
+            val clickableSpan = LinkUtils.createClickableSpan(matcher.group(), binding.root.context)
 
             ssb.setSpan(clickableSpan, matcher.start(), matcher.end(), 0)
         }

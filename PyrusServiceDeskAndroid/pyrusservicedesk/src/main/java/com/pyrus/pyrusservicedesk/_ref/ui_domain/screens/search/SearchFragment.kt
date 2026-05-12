@@ -13,7 +13,7 @@ import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.isVisible
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.pyrus.pyrusservicedesk.NoFullScreenFragment
-import com.pyrus.pyrusservicedesk.PyrusServiceDesk.Companion.injector
+import com.pyrus.pyrusservicedesk.PyrusServiceDesk.Companion.uiInjector
 import com.pyrus.pyrusservicedesk._ref.SdScreens
 import com.pyrus.pyrusservicedesk._ref.ui_domain.screens.search.SearchView.Effect
 import com.pyrus.pyrusservicedesk._ref.ui_domain.screens.search.SearchView.Event
@@ -55,7 +55,7 @@ internal class SearchFragment: TeaFragment<Model, Event, Effect>(), NoFullScreen
     @OptIn(FlowPreview::class)
     private fun bindFeature() {
 
-        val feature = getStore { injector().searchFeatureFactory.create() }
+        val feature = getStore { uiInjector().searchFeatureFactory.create() }
 
         bind(BinderLifecycleMode.CREATE_DESTROY) {
             this@SearchFragment.messages.mapNotNull(SearchMapper::map) bindTo feature
@@ -131,8 +131,8 @@ internal class SearchFragment: TeaFragment<Model, Event, Effect>(), NoFullScreen
 
     override fun handleEffect(effect: Effect) = when(effect){
         Effect.CloseKeyboard -> hideKeyboard(binding.searchEditText)
-        Effect.Exit -> injector().router.exit()
-        is Effect.OpenTicket -> injector().router.navigateTo(SdScreens.TicketScreen(effect.ticketId, effect.commentId, effect.user, null))
+        Effect.Exit -> uiInjector().router.exit()
+        is Effect.OpenTicket -> uiInjector().router.navigateTo(SdScreens.TicketScreen(effect.ticketId, effect.commentId, effect.user, null))
     }
 
     internal companion object {

@@ -29,14 +29,16 @@ import androidx.core.view.isVisible
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import com.pyrus.pyrusservicedesk.PyrusServiceDesk
 import com.pyrus.pyrusservicedesk.PyrusServiceDesk.Companion.injector
+import com.pyrus.pyrusservicedesk.PyrusServiceDesk.Companion.uiInjector
 import com.pyrus.pyrusservicedesk.R
 import com.pyrus.pyrusservicedesk._ref.SdScreens
 import com.pyrus.pyrusservicedesk._ref.data.AudioData
+import com.pyrus.pyrusservicedesk._ref.data.multy_chat.Application
 import com.pyrus.pyrusservicedesk._ref.ui_domain.screens.ticket.TicketView.Effect
 import com.pyrus.pyrusservicedesk._ref.ui_domain.screens.ticket.TicketView.Event
-import com.pyrus.pyrusservicedesk._ref.ui_domain.screens.ticket.TicketView.Event.SetAttachVariant
-import com.pyrus.pyrusservicedesk._ref.ui_domain.screens.ticket.TicketView.Event.SetErrorCommentResult
+import com.pyrus.pyrusservicedesk._ref.ui_domain.screens.ticket.TicketView.Event.*
 import com.pyrus.pyrusservicedesk._ref.ui_domain.screens.ticket.TicketView.Model
 import com.pyrus.pyrusservicedesk._ref.ui_domain.screens.ticket.adapter.entries.CommentEntry
 import com.pyrus.pyrusservicedesk._ref.ui_domain.screens.ticket.adapter.fingerprints.AudioStatus
@@ -55,7 +57,8 @@ import com.pyrus.pyrusservicedesk._ref.utils.AudioWrapper
 import com.pyrus.pyrusservicedesk._ref.utils.ConfigUtils
 import com.pyrus.pyrusservicedesk._ref.utils.ConfigUtils.Companion.getAccentColor
 import com.pyrus.pyrusservicedesk._ref.utils.ConfigUtils.Companion.getMainBackgroundColor
-import com.pyrus.pyrusservicedesk._ref.utils.TextProvider.Res
+import com.pyrus.pyrusservicedesk._ref.utils.TextProvider
+import com.pyrus.pyrusservicedesk._ref.utils.TextProvider.*
 import com.pyrus.pyrusservicedesk._ref.utils.animateVisibility
 import com.pyrus.pyrusservicedesk._ref.utils.getColorOnBackground
 import com.pyrus.pyrusservicedesk._ref.utils.getSecondaryColorOnBackground
@@ -70,7 +73,6 @@ import com.pyrus.pyrusservicedesk._ref.whitetea.androidutils.getStore
 import com.pyrus.pyrusservicedesk._ref.whitetea.bind.BinderLifecycleMode
 import com.pyrus.pyrusservicedesk._ref.whitetea.core.ViewRenderer
 import com.pyrus.pyrusservicedesk._ref.whitetea.utils.diff
-import com.pyrus.pyrusservicedesk.core.ResourceContextWrapper
 import com.pyrus.pyrusservicedesk.core.isMultiChat
 import com.pyrus.pyrusservicedesk.databinding.PsdFragmentTicketBinding
 import com.pyrus.pyrusservicedesk.payload_adapter.PayloadListAdapter
@@ -97,7 +99,7 @@ internal class TicketFragment: TeaFragment<Model, Event, Effect>() {
 
     private val adapter: PayloadListAdapter<CommentEntry> by lazy { PayloadListAdapter(
         ButtonsFingerprint(::dispatch),
-        CommentTextFingerprint(::dispatch, requireActivity()),
+        CommentTextFingerprint(::dispatch),
         CommentAttachmentFingerprint(::dispatch, viewLifecycleOwner),
         CommentPreviewableAttachmentFingerprint(::dispatch, viewLifecycleOwner),
         DateFingerprint(),
@@ -258,14 +260,14 @@ internal class TicketFragment: TeaFragment<Model, Event, Effect>() {
         }
 
         is Effect.ShowAttachVariants -> {
-            injector().router.setResultListener(effect.key) {
+            uiInjector().router.setResultListener(effect.key) {
                 dispatch(SetAttachVariant(effect.key, it))
             }
             AttachFileVariantsFragment.newInstance(effect.key).show(parentFragmentManager, null)
         }
 
         is Effect.ShowErrorCommentDialog -> {
-            injector().router.setResultListener(effect.key) {
+            uiInjector().router.setResultListener(effect.key) {
                 dispatch(SetErrorCommentResult(effect.localId, effect.key, it))
             }
             ErrorCommentActionsDialog
@@ -276,8 +278,8 @@ internal class TicketFragment: TeaFragment<Model, Event, Effect>() {
         is Effect.ShowInfoBottomSheetFragment -> {}
         is Effect.UpdateRecordWave -> audioRecordView.updateFrequency(effect.recordedSegmentValues)
         is Effect.ShowAudioRecordTooltip -> audioRecordView.showAudioRecordTooltip()
-        is Effect.Exit -> injector().router.exit()
-        is Effect.OpenPreview -> injector().router.navigateTo(SdScreens.ImageScreen(effect.fileData))
+        is Effect.Exit -> uiInjector().router.exit()
+        is Effect.OpenPreview -> uiInjector().router.navigateTo(SdScreens.ImageScreen(effect.fileData))
         is Effect.OpenRatingComment -> {
             val bottomSheet = RatingBottomSheetDialogFragment.newInstance(effect.rateUsText)
             bottomSheet.show(parentFragmentManager, bottomSheet.tag)
@@ -291,8 +293,7 @@ internal class TicketFragment: TeaFragment<Model, Event, Effect>() {
             val result = bundle.getString(RATING_COMMENT_KEY)
             dispatch(Event.OnRatingClick(null, result))
         }
-        audioWrapper = injector().audioWrapper
-
+        audioWrapper = uiInjector().audioWrapper
     }
 
     override fun onCreateView(
@@ -300,8 +301,7 @@ internal class TicketFragment: TeaFragment<Model, Event, Effect>() {
         container: ViewGroup?,
         savedInstanceState: Bundle?,
     ): View {
-        val localizedInflater = container?.context?.let { LayoutInflater.from(injector().resourceContextWrapper.createLocalizedContext(it)) } ?: inflater
-        binding = PsdFragmentTicketBinding.inflate(localizedInflater, container, false)
+        binding = PsdFragmentTicketBinding.inflate(inflater, container, false)
 
         audioRecordView = AudioRecordView(
             recordWaves = binding.recordWaves,
@@ -371,7 +371,7 @@ internal class TicketFragment: TeaFragment<Model, Event, Effect>() {
         val ticketId = arguments?.getLong(KEY_TICKET_ID)!!
         val sendComment = arguments?.getString(KEY_SEND_COMMENT)
 
-        val feature = getStore { injector().ticketFeatureFactory.create(
+        val feature = getStore { uiInjector().ticketFeatureFactory.create(
             user = user,
             initialTicketId = ticketId,
             welcomeMessage = ConfigUtils.getWelcomeMessage(),
@@ -584,9 +584,7 @@ internal class TicketFragment: TeaFragment<Model, Event, Effect>() {
         binding.inputLayout.setBackgroundColor(getMainBackgroundColor(requireContext()))
 
         binding.cancelRecordHint.setTextColor(ConfigUtils.getSecondaryColorOnMainBackground(requireContext()))
-        binding.cancelRecordHint.text = binding.root.resources.getString(R.string.psd_swipe_cancel)
         binding.cancelHoldingRecordButton.setTextColor(ConfigUtils.getCanselColor(requireContext()))
-        binding.cancelHoldingRecordButton.text = binding.root.resources.getString(R.string.psd_cancel)
 
         val toolbarColor = ConfigUtils.getHeaderBackgroundColor(requireContext())
         binding.toolbarTitle.setTextColor(ConfigUtils.getChatTitleTextColor(requireContext()))
@@ -602,11 +600,8 @@ internal class TicketFragment: TeaFragment<Model, Event, Effect>() {
             getSecondaryColorOnBackground(ConfigUtils.getNoPreviewBackgroundColor(requireContext()))
         binding.noConnection.noConnectionImageView.setColorFilter(secondaryColor)
         binding.noConnection.noConnectionTextView.setTextColor(secondaryColor)
-        binding.noConnection.noConnectionTextView.text = binding.root.resources.getString(R.string.psd_no_connection)
-
 
         binding.noConnection.reconnectButton.setTextColor(getAccentColor(requireContext()))
-        binding.noConnection.reconnectButton.text = binding.root.resources.getString(R.string.psd_retry)
 
         binding.noConnection.root.setBackgroundColor(ConfigUtils.getNoConnectionBackgroundColor(requireContext()))
 
@@ -635,7 +630,6 @@ internal class TicketFragment: TeaFragment<Model, Event, Effect>() {
         }
         binding.inputEditText.setHintTextColor(resources.getColor(R.color.psd_hint_color))
         binding.inputEditText.setTextColor(ConfigUtils.getInputTextColor(requireContext()))
-        binding.inputEditText.hint = binding.root.context.getString(R.string.psd_comment_input_hint)
 
         binding.view.setBackgroundColor(
             getColorOnBackground(

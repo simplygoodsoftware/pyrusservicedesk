@@ -15,6 +15,7 @@ import com.github.terrakok.cicerone.Navigator
 import com.pyrus.pyrusservicedesk.NoFullScreenFragment
 import com.pyrus.pyrusservicedesk.OpenTicketAction
 import com.pyrus.pyrusservicedesk.PyrusServiceDesk.Companion.injector
+import com.pyrus.pyrusservicedesk.PyrusServiceDesk.Companion.uiInjector
 import com.pyrus.pyrusservicedesk.R
 import com.pyrus.pyrusservicedesk.ServiceDeskConfiguration
 import com.pyrus.pyrusservicedesk._ref.SdScreens
@@ -60,7 +61,7 @@ internal class RouterFragment: TeaFragment<Unit, Message.Outer, Effect.Outer>(),
 
             if (account.isMultiChat()) {
                 if (action != null) {
-                    injector().router.newRootChain(
+                    uiInjector().router.newRootChain(
                         SdScreens.TicketsScreen(),
                         SdScreens.TicketScreen(
                             action.ticketId,
@@ -70,7 +71,7 @@ internal class RouterFragment: TeaFragment<Unit, Message.Outer, Effect.Outer>(),
                     )
                 }
                 else {
-                    injector().router.newRootScreen(SdScreens.TicketsScreen())
+                    uiInjector().router.newRootScreen(SdScreens.TicketsScreen())
                 }
             }
             else {
@@ -79,10 +80,11 @@ internal class RouterFragment: TeaFragment<Unit, Message.Outer, Effect.Outer>(),
                 if (userId == null || appId == null) return
 
                 val user = UserInternal(userId, appId)
+                val router = uiInjector().router
                 lifecycleScope.launch(Dispatchers.IO) {
                     val lastTicketId = injector().localTicketsStore.getTickets().lastOrNull()?.ticketId
                         ?: injector().localCommandsStore.getNextLocalId()
-                    injector().router.newRootScreen(SdScreens.TicketScreen(lastTicketId, user, sendComment).setSlideRightAnimation())
+                    router.newRootScreen(SdScreens.TicketScreen(lastTicketId, user, sendComment).setSlideRightAnimation())
                 }
             }
         }
@@ -110,11 +112,11 @@ internal class RouterFragment: TeaFragment<Unit, Message.Outer, Effect.Outer>(),
 
     override fun onResume() {
         super.onResume()
-        injector().navHolder.setNavigator(navigator)
+        uiInjector().navHolder.setNavigator(navigator)
     }
 
     override fun onPause() {
-        injector().navHolder.removeNavigator()
+        uiInjector().navHolder.removeNavigator()
         super.onPause()
     }
 

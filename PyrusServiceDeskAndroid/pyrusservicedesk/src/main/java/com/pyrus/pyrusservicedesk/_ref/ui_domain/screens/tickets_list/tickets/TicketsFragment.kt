@@ -19,6 +19,7 @@ import androidx.recyclerview.widget.RecyclerView
 import com.github.terrakok.cicerone.Navigator
 import com.pyrus.pyrusservicedesk.NoFullScreenFragment
 import com.pyrus.pyrusservicedesk.PyrusServiceDesk.Companion.injector
+import com.pyrus.pyrusservicedesk.PyrusServiceDesk.Companion.uiInjector
 import com.pyrus.pyrusservicedesk.R
 import com.pyrus.pyrusservicedesk._ref.SdScreens
 import com.pyrus.pyrusservicedesk._ref.ui_domain.screens.add_ticket.AddTicketBottomSheetFragment
@@ -75,7 +76,7 @@ internal class TicketsFragment: TeaFragment<Model, Message, Effect.Outer>(), NoF
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        val feature = getStore { injector().ticketsFeatureFactory.create() }
+        val feature = getStore { uiInjector().ticketsFeatureFactory.create() }
 
         bind(BinderLifecycleMode.CREATE_DESTROY) {
             messages.map { it } bindTo feature
@@ -168,14 +169,14 @@ internal class TicketsFragment: TeaFragment<Model, Message, Effect.Outer>(), NoF
 
     override fun onResume() {
         super.onResume()
-        injector().audioWrapper.updateMainActivityIsActive(true)
-        injector().navHolder.setNavigator(navigator)
+        uiInjector().audioWrapper.updateMainActivityIsActive(true)
+        uiInjector().navHolder.setNavigator(navigator)
     }
 
     override fun onPause() {
-        injector().navHolder.removeNavigator()
-        injector().audioWrapper.updateMainActivityIsActive(false)
-        injector().stopSession()
+        uiInjector().navHolder.removeNavigator()
+        uiInjector().audioWrapper.updateMainActivityIsActive(false)
+        uiInjector().stopSession()
         super.onPause()
     }
 
@@ -231,7 +232,7 @@ internal class TicketsFragment: TeaFragment<Model, Message, Effect.Outer>(), NoF
             var drawable = ConfigUtils.getSupportAvatar(requireContext())
             if (!url.isNullOrBlank())
                 drawable = resources.getDrawable(R.drawable.transparent_bg)
-            injector().picasso
+            uiInjector().picasso
                 .load(url)
                 .placeholder(drawable)
                 .error(ConfigUtils.getSupportAvatar(requireContext()))
@@ -354,7 +355,7 @@ internal class TicketsFragment: TeaFragment<Model, Message, Effect.Outer>(), NoF
             }
 
             is Effect.Outer.OpenTicket -> {
-                injector().router.navigateTo(SdScreens.TicketScreen(effect.ticketId, effect.user, null).setSlideRightAnimation())
+                uiInjector().router.navigateTo(SdScreens.TicketScreen(effect.ticketId, effect.user, null).setSlideRightAnimation())
             }
         }
     }

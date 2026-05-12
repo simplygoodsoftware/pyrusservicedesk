@@ -97,7 +97,7 @@ open class SimpleTarget
                 delayMs = if (delayMs == 0L) PREVIEW_RETRY_STEP_MS
                 else min(delayMs + PREVIEW_RETRY_STEP_MS, MAX_PREVIEW_RETRY_MS)
                 delay(retryDelay)
-                PyrusServiceDesk.injector().picasso.load(uri).into(this@SimpleTarget)
+                PyrusServiceDesk.uiInjector().picasso.load(uri).into(this@SimpleTarget)
             }
         }
 
