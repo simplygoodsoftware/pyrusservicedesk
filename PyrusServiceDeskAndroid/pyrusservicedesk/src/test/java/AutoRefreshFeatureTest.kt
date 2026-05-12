@@ -5,7 +5,6 @@ import com.pyrus.pyrusservicedesk._ref.utils.MILLISECONDS_IN_HOUR
 import com.pyrus.pyrusservicedesk._ref.utils.MILLISECONDS_IN_MINUTE
 import com.pyrus.pyrusservicedesk._ref.utils.MILLISECONDS_IN_SECOND
 import com.pyrus.pyrusservicedesk._ref.whitetea.core.DefaultStoreFactory
-import com.pyrus.pyrusservicedesk._ref.whitetea.core.StoreFactory
 import com.pyrus.pyrusservicedesk.core.refresh.AutoRefreshFeature
 import com.pyrus.pyrusservicedesk.core.refresh.AutoRefreshFeatureFactory
 import com.pyrus.pyrusservicedesk.sdk.repositories.IdStore
@@ -36,9 +35,6 @@ import kotlin.time.Duration.Companion.seconds
 
 @OptIn(ExperimentalCoroutinesApi::class)
 class AutoRefreshFeatureTest {
-
-    private val storeFactory: StoreFactory = DefaultStoreFactory()
-
     private val idStore = IdStore()
 
     private val systemMessageStore = SystemMessageStore(idStore)
@@ -68,7 +64,7 @@ class AutoRefreshFeatureTest {
             diff <= 5 * MILLISECONDS_IN_MINUTE -> 15L * MILLISECONDS_IN_SECOND
             diff <= MILLISECONDS_IN_HOUR -> MILLISECONDS_IN_MINUTE.toLong()
             diff <= 3 * MILLISECONDS_IN_DAY || PyrusServiceDesk.sdIsOpen.value -> 3 * MILLISECONDS_IN_MINUTE.toLong()
-            else -> -1L
+            else -> NO_UPDATES
         }
     }
 
@@ -492,6 +488,7 @@ class AutoRefreshFeatureTest {
     }
 
     private fun createAutoRefreshFeature(testDispatcher: TestDispatcher, testScope: TestScope): AutoRefreshFeature {
+        val storeFactory = DefaultStoreFactory(testDispatcher, testDispatcher)
         return AutoRefreshFeatureFactory(
             storeFactory = storeFactory,
             repository = repository,
@@ -499,7 +496,7 @@ class AutoRefreshFeatureTest {
             systemMessageStore = systemMessageStore,
             localTicketsStore = localTicketsStore,
             timeProvider = TestTimeProvider(testScope),
-        ).create(liveUpdates, testDispatcher)
+        ).create(liveUpdates)
     }
 
     private fun cancelTest(testDispatcher: TestDispatcher, autoRefreshFeatureFactory: AutoRefreshFeature) {

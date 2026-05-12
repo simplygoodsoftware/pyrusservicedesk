@@ -49,7 +49,9 @@ import java.util.concurrent.LinkedBlockingQueue
 import java.util.concurrent.atomic.AtomicBoolean
 import java.util.concurrent.atomic.AtomicLong
 import kotlin.coroutines.CoroutineContext
+import kotlin.coroutines.cancellation.CancellationException
 import kotlin.coroutines.resume
+import kotlin.coroutines.resumeWithException
 import kotlin.coroutines.suspendCoroutine
 import kotlin.math.max
 import kotlin.math.min
@@ -120,6 +122,11 @@ internal open class Synchronizer(
     ): Try<TicketCommandResultDto> = suspendCoroutine { continuation ->
         val syncReqRes = CommandWithContinuation(request, continuation)
         if (request is SetPushToken) {
+            val setPushTokenCommands = syncLoopRequestQueue.filter { it.request is SetPushToken }
+
+            setPushTokenCommands.forEach {
+                (it as? CommandWithContinuation)?.continuation?.resumeWithException(CancellationException("Replaced by new token"))
+            }
             syncLoopRequestQueue.removeIf { it.request is SetPushToken }
         }
         syncLoopRequestQueue.add(syncReqRes)
@@ -134,6 +141,10 @@ internal open class Synchronizer(
     ): Try<TicketCommandResultDto> = suspendCoroutine { continuation ->
         val syncReqRes = CommandWithContinuation(request, continuation)
         if (request is SetPushToken) {
+            val setPushTokenCommands = syncLoopRequestQueue.filter { it.request is SetPushToken }
+            setPushTokenCommands.forEach {
+                (it as? CommandWithContinuation)?.continuation?.resumeWithException(CancellationException("Replaced by new token"))
+            }
             syncLoopRequestQueue.removeIf { it.request is SetPushToken }
         }
         syncLoopRequestQueue.add(syncReqRes)
@@ -335,9 +346,17 @@ internal open class Synchronizer(
         tryResult: TicketCommandResultDto,
     ): Boolean {
 
-        val modifiedRequest = modifiedRequests.find { (it.request as? CreateComment)?.commandId == request.request.commandId } ?: request
+        val modifiedRequest = modifiedRequests.find {
+            (it.request as? CreateComment)?.commandId == request.request.commandId
+        } ?: request
         val modifiedTicketId = (modifiedRequest.request as CreateComment).ticketId
-        return (modifiedTicketId == null || modifiedTicketId <= 0) && tryResult.ticketId != null && (modifiedRequest.request as CreateComment).requestNewTicket
+        return isValidTicketId(modifiedTicketId)
+            && tryResult.ticketId != null
+            && (modifiedRequest.request as CreateComment).requestNewTicket
+    }
+
+    private fun isValidTicketId(modifiedTicketId: Long?): Boolean {
+        return modifiedTicketId == null || modifiedTicketId <= 0
     }
 
     private fun onSucceedLoopEnd() {
