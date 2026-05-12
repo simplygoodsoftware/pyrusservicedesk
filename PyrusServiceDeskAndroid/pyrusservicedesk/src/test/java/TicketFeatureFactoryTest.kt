@@ -21,7 +21,6 @@ import com.pyrus.pyrusservicedesk._ref.utils.PREFERENCE_KEY
 import com.pyrus.pyrusservicedesk._ref.utils.Try2
 import com.pyrus.pyrusservicedesk._ref.utils.navigation.PyrusRouter
 import com.pyrus.pyrusservicedesk._ref.whitetea.core.DefaultStoreFactory
-import com.pyrus.pyrusservicedesk._ref.whitetea.core.StoreFactory
 import com.pyrus.pyrusservicedesk.audiocontroller.src.main.java.com.pyrus.audiocontroller.record.AudioRecordController
 import com.pyrus.pyrusservicedesk.core.Account
 import com.pyrus.pyrusservicedesk.sdk.data.FileManager
@@ -65,8 +64,6 @@ import java.io.File
 class TicketFeatureFactoryTest {
 
     private lateinit var accountStore: AccountStore
-
-    private val storeFactory: StoreFactory = DefaultStoreFactory()
     private lateinit var repository: SdRepository
     private lateinit var draftRepository: DraftRepository
     private lateinit var router: PyrusRouter
@@ -767,6 +764,7 @@ class TicketFeatureFactoryTest {
     }
 
     private fun createTicketFeature(): TicketFeature {
+        val storeFactory = DefaultStoreFactory(testDispatcher, testDispatcher)
         return TicketFeatureFactory(
             accountStore = accountStore,
             storeFactory = storeFactory,
@@ -780,8 +778,7 @@ class TicketFeatureFactoryTest {
             localTicketsStore = localTicketsStore,
             commandsStore = commandsStore,
             systemMessageStore = systemMessageStore,
-            idStore = idStore,
-            actorContext = testDispatcher
+            idStore = idStore
         ).create(userInternalV1, TEST_TICKET_ID, "weclome", null)
     }
 }

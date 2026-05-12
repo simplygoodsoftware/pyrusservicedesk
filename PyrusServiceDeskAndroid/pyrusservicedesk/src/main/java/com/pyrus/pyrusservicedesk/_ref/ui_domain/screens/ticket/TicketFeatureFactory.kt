@@ -73,8 +73,7 @@ internal class TicketFeatureFactory(
     private val localTicketsStore: LocalTicketsStore,
     private val commandsStore: LocalCommandsStore,
     private val systemMessageStore: SystemMessageStore,
-    private val idStore: IdStore,
-    private val actorContext: CoroutineContext? = Dispatchers.IO //only for test
+    private val idStore: IdStore
 ) {
 
     fun create(
@@ -119,8 +118,7 @@ internal class TicketFeatureFactory(
             ),
             onCancelCallback = {
                 audioRecordController.cancelRecord()
-            },
-            actorContext = actorContext
+            }
         ).adapt { it as? Effect.Outer }
     }
 

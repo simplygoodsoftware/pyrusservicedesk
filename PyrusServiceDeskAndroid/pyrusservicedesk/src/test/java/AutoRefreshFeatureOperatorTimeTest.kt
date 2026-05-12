@@ -38,8 +38,6 @@ import org.junit.Test
 @OptIn(ExperimentalCoroutinesApi::class)
 class AutoRefreshFeatureOperatorTimeTest {
 
-    private val storeFactory: StoreFactory = DefaultStoreFactory()
-
     private lateinit var idStore: IdStore
 
     private lateinit var systemMessageStore: SystemMessageStore
@@ -249,6 +247,7 @@ class AutoRefreshFeatureOperatorTimeTest {
         testDispatcher: TestDispatcher,
         testScope: TestScope,
     ): AutoRefreshFeature {
+        val storeFactory = DefaultStoreFactory(testDispatcher, testDispatcher)
         return AutoRefreshFeatureFactory(
             storeFactory = storeFactory,
             repository = repository,
@@ -256,7 +255,7 @@ class AutoRefreshFeatureOperatorTimeTest {
             systemMessageStore = systemMessageStore,
             localTicketsStore = localTicketsStore,
             timeProvider = TestTimeProvider(testScope),
-        ).create(liveUpdates, testDispatcher)
+        ).create(liveUpdates)
     }
 
     private fun TestScope.checkSendCalcOperatorTimeCount(
