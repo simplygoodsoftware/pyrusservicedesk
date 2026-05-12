@@ -1,3 +1,15 @@
 <resources>
     <string name="app_name">ServiceDeskSample</string>
+    <string name="sample_status_hint">Tap Init on a profile, then Start. Init with another appId while the desk is open will stop the UI if credentials differ.</string>
+    <string name="sample_profile_a_title">Окружение Иви (Анонимная авторизация)</string>
+    <string name="sample_profile_b_title">UserId - userId\nsecurityKey - securityKey</string>
+    <string name="sample_logging">loggingEnabled</string>
+    <string name="sample_init">Init</string>
+    <string name="sample_start">Start</string>
+    <string name="sample_subscribe">Subscribe replies</string>
+    <string name="sample_unsubscribe">Unsubscribe</string>
+    <string name="sample_status_last_init">Last init: profile %1$s — appId=%2$s userId=%3$s</string>
+    <string name="sample_status_started">Opened desk (UI %1$s). Last Init button: profile %2$s.</string>
+    <string name="sample_reply_placeholder_a">[A] replies after Subscribe appear here.</string>
+    <string name="sample_reply_placeholder_b">[B] replies after Subscribe appear here.</string>
 </resources>

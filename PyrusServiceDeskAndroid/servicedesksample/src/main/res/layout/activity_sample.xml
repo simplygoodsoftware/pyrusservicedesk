@@ -1,31 +1,163 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.widget.ConstraintLayout
-        xmlns:android="http://schemas.android.com/apk/res/android"
-        xmlns:tools="http://schemas.android.com/tools"
-        xmlns:app="http://schemas.android.com/apk/res-auto"
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:fillViewport="true"
+    tools:context="com.pyrus.servicedesksample.SampleActivity">
+
+    <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        tools:context="com.pyrus.servicedesksample.SampleActivity">
-
-    <Button
-        android:id="@+id/support"
-        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="SUPPORT!"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintLeft_toLeftOf="parent"
-        app:layout_constraintRight_toRightOf="parent"
-        app:layout_constraintTop_toTopOf="parent"/>
+        android:orientation="vertical"
+        android:padding="12dp">
 
-    <TextView
-        android:id="@+id/info"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:padding="16dp"
-        app:layout_constraintBottom_toTopOf="@+id/support"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.8" />
+        <TextView
+            android:id="@+id/status"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:paddingBottom="8dp"
+            android:text="@string/sample_status_hint"
+            android:textSize="13sp" />
 
-</androidx.constraintlayout.widget.ConstraintLayout>
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:background="#33000000" />
+
+        <!-- Profile A -->
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:paddingTop="12dp"
+            android:text="@string/sample_profile_a_title"
+            android:textStyle="bold" />
+
+        <CheckBox
+            android:id="@+id/a_logging"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:checked="true"
+            android:text="@string/sample_logging" />
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal">
+
+            <Button
+                android:id="@+id/a_init"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="@string/sample_init" />
+
+            <Button
+                android:id="@+id/a_start"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="@string/sample_start" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal">
+
+            <Button
+                android:id="@+id/a_subscribe"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="@string/sample_subscribe" />
+
+            <Button
+                android:id="@+id/a_unsubscribe"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="@string/sample_unsubscribe" />
+        </LinearLayout>
+
+        <TextView
+            android:id="@+id/a_reply_info"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:minLines="5"
+            android:paddingTop="4dp"
+            android:textSize="12sp"
+            tools:text="[A] replies…" />
+
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:layout_marginTop="8dp"
+            android:background="#33000000" />
+
+        <!-- Profile B -->
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:paddingTop="12dp"
+            android:text="@string/sample_profile_b_title"
+            android:textStyle="bold" />
+
+        <CheckBox
+            android:id="@+id/b_logging"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:checked="false"
+            android:text="@string/sample_logging" />
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal">
+
+            <Button
+                android:id="@+id/b_init"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="@string/sample_init" />
+
+            <Button
+                android:id="@+id/b_start"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="@string/sample_start" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal">
+
+            <Button
+                android:id="@+id/b_subscribe"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="@string/sample_subscribe" />
+
+            <Button
+                android:id="@+id/b_unsubscribe"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="@string/sample_unsubscribe" />
+        </LinearLayout>
+
+        <TextView
+            android:id="@+id/b_reply_info"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:minLines="5"
+            android:paddingTop="4dp"
+            android:paddingBottom="24dp"
+            android:textSize="12sp"
+            tools:text="[B] replies…" />
+    </LinearLayout>
+</ScrollView>
