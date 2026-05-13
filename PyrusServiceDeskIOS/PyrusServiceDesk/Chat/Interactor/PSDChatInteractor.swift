@@ -306,7 +306,7 @@ private extension PSDChatInteractor {
         }
     }
     
-    @objc func updateChats(fromSync: Bool = true) {
+    @objc func updateChats() {
         DispatchQueue.main.async { [weak self] in
             guard let self else { return }
             guard !drawTable else {
@@ -332,7 +332,7 @@ private extension PSDChatInteractor {
                 singleChat.lastComment = PyrusServiceDesk.allMessages.last
                 
                 chat = singleChat
-            } else if !isLoading || fromSync {
+            } else {
                 chat = PSDChat(chatId: 0, date: Date(), messages: [])
                 chat?.isActive = false
             }
@@ -514,7 +514,7 @@ private extension PSDChatInteractor {
         presenter.doWork(.drawTableWithData)
         drawTable = false
         if needUpdate {
-            updateChats(fromSync: false)
+            updateChats()
         }
     }
     
@@ -871,7 +871,7 @@ private extension PSDChatInteractor {
     
     @objc func stopLoading(sender: Timer) {
         clearTimer()
-        drawTableWithData()
+//        drawTableWithData()
     }
     var LOADING_INTERVAL: Double { 1 }
 }

@@ -155,7 +155,7 @@ private extension SyncManager {
         if PyrusServiceDesk.multichats {
             let cache = chatsDataService.getAllChats()
             PyrusServiceDesk.chats = cache
-        } else {
+        } else if PyrusServiceDesk.clients.first?.clientId == PyrusServiceDesk.clientId {
             let createMessages = PSDMessagesStorage.getNewCreateTicketMessages(PyrusServiceDesk.customUserId)
             let localChats = PSDGetChats.getSortedChatForMessages(createMessages)
             let chats = chatsDataService.getChatsHeaders()

@@ -456,7 +456,9 @@ import UIKit
             PyrusServiceDesk.mainController?.updateTitleChat()
         }
         PyrusServiceDesk.syncManager.firstLoad = true
-        PyrusServiceDesk.syncManager.loadCache()        
+        if !needShowLoading {
+            PyrusServiceDesk.syncManager.loadCache()
+        }
     }
     
     @objc static public func refresh(onError: ((Error?) -> Void)? = nil) {
