@@ -115,11 +115,51 @@ private class Migration2to3: Migration(2, 3) {
 
 internal class Migration3to4: Migration(3, 4) {
     override fun migrate(db: SupportSQLiteDatabase) {
+        //создаем новую таблицу для изменения NULLABLE user_id
+        db.execSQL("""
+            CREATE TABLE commands_table_new (
+                is_error INTEGER NOT NULL,
+                local_id INTEGER NOT NULL,
+                command_id TEXT NOT NULL,
+                command_type INTEGER NOT NULL,
+                user_id TEXT,
+                app_id TEXT NOT NULL,
+                creation_time INTEGER NOT NULL,
+                request_new_ticket INTEGER,
+                comment TEXT,
+                ticket_id INTEGER,
+                rating INTEGER,
+                comment_id INTEGER,
+                token TEXT,
+                token_type TEXT,
+                PRIMARY KEY (command_id, local_id)
+            )
+        """)
+        // 2. Копируем все данные
+        db.execSQL("""
+            INSERT INTO commands_table_new (
+                is_error, local_id, command_id, command_type, user_id,
+                app_id, creation_time, request_new_ticket, comment,
+                ticket_id, rating, comment_id, token, token_type
+            )
+            SELECT 
+                is_error, local_id, command_id, command_type, user_id,
+                app_id, creation_time, request_new_ticket, comment,
+                ticket_id, rating, comment_id, token, token_type
+            FROM $COMMANDS_TABLE
+        """)
 
-        db.execSQL("ALTER TABLE $COMMANDS_TABLE ADD COLUMN user_id_new TEXT")
-        db.execSQL("UPDATE $COMMANDS_TABLE SET user_id_new = user_id")
-        db.execSQL("ALTER TABLE $COMMANDS_TABLE DROP COLUMN user_id")
-        db.execSQL("ALTER TABLE $COMMANDS_TABLE RENAME COLUMN user_id_new TO user_id")
+        // 3. Заменяем таблицу
+        db.execSQL("DROP TABLE $COMMANDS_TABLE")
+        db.execSQL("ALTER TABLE commands_table_new RENAME TO $COMMANDS_TABLE")
+        db.execSQL(
+            "CREATE UNIQUE INDEX IF NOT EXISTS `index_commands_table_command_id` " +
+                "ON `$COMMANDS_TABLE` (`command_id`)"
+        )
+        db.execSQL(
+            "CREATE UNIQUE INDEX IF NOT EXISTS `index_commands_table_local_id` " +
+                "ON `$COMMANDS_TABLE` (`local_id`)"
+        )
 
         db.execSQL("ALTER TABLE $APPLICATIONS_TABLE ADD COLUMN rating_settings_size INTEGER")
         db.execSQL("ALTER TABLE $APPLICATIONS_TABLE ADD COLUMN rating_settings_type INTEGER")
