@@ -84,7 +84,7 @@ class UnreadMessageManager {
         guard let subscriber = PyrusServiceDesk.subscriber,
               !PyrusServiceDeskController.PSDIsOpen(),
               !lastComment.isShown,
-              !(lastComment.owner?.equalTo(user: PSDUsers.user) ?? true)
+              !lastComment.isOutgoing
         else {
             return
         }

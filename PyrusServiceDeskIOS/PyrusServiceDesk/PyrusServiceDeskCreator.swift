@@ -8,7 +8,7 @@ import UIKit
     private static let REFRESH_TIME_INTEVAL = TimeInterval(1*60)
     private static let REFRESH_MAX_COUNT = 20
     
-    static let PSD_VERSION: String = "3.0.59"
+    static let PSD_VERSION: String = "3.0.60"
     
     ///AppId needed for request
     static var clientId: String?
@@ -456,7 +456,9 @@ import UIKit
             PyrusServiceDesk.mainController?.updateTitleChat()
         }
         PyrusServiceDesk.syncManager.firstLoad = true
-        PyrusServiceDesk.syncManager.loadCache()        
+        if !needShowLoading {
+            PyrusServiceDesk.syncManager.loadCache()
+        }
     }
     
     @objc static public func refresh(onError: ((Error?) -> Void)? = nil) {

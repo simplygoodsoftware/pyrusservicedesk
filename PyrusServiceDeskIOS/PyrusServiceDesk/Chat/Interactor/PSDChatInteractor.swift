@@ -154,9 +154,9 @@ extension PSDChatInteractor: PSDChatInteractorProtocol {
             } else {
                 beginTimer()
                 updateChat(chat: chat)
+                
                 if let message = PyrusServiceDesk.messageToSend, message.count > 0 {
-                    send(message, [], newTicket: true)
-                    PyrusServiceDesk.messageToSend = nil
+                    presenter.doWork(.updateButtons(buttons: nil))
                 }
                 
                 if let messageId,
@@ -222,6 +222,12 @@ extension PSDChatInteractor: PSDChatInteractorProtocol {
             }
         case .viewWillAppear:
             startGettingInfo()
+            if !isLoading,
+               let message = PyrusServiceDesk.messageToSend,
+               message.count > 0 {
+                send(message, [], newTicket: true)
+                PyrusServiceDesk.messageToSend = nil
+            }
         case .sendRatingComment(comment: let comment, rating: let rating):
             sendRatingComment(ratingComment: comment, rating: rating)
         }
@@ -300,7 +306,7 @@ private extension PSDChatInteractor {
         }
     }
     
-    @objc func updateChats(fromSync: Bool = true) {
+    @objc func updateChats() {
         DispatchQueue.main.async { [weak self] in
             guard let self else { return }
             guard !drawTable else {
@@ -326,7 +332,7 @@ private extension PSDChatInteractor {
                 singleChat.lastComment = PyrusServiceDesk.allMessages.last
                 
                 chat = singleChat
-            } else if !isLoading || fromSync {
+            } else {
                 chat = PSDChat(chatId: 0, date: Date(), messages: [])
                 chat?.isActive = false
             }
@@ -508,7 +514,7 @@ private extension PSDChatInteractor {
         presenter.doWork(.drawTableWithData)
         drawTable = false
         if needUpdate {
-            updateChats(fromSync: false)
+            updateChats()
         }
     }
     
@@ -865,7 +871,7 @@ private extension PSDChatInteractor {
     
     @objc func stopLoading(sender: Timer) {
         clearTimer()
-        drawTableWithData()
+//        drawTableWithData()
     }
     var LOADING_INTERVAL: Double { 1 }
 }

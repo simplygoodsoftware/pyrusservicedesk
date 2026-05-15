@@ -102,63 +102,138 @@ extension Array where Element == [PSDRowMessage]{
     }
     
     
-    mutating private func complete(with messages: [PSDMessage], startMessage: PSDMessage?, completion: ((_ hasChanges: Bool) -> Void)?) {
+//    mutating private func complete(with messages: [PSDMessage], startMessage: PSDMessage?, completion: ((_ hasChanges: Bool) -> Void)?) {
+//        
+//        var hasChanges = false
+//        let startMessageIndexPath = self.index(of: startMessage)
+//        var index: Int = 0 //the index of message in received chat
+//        if let startMessage {
+//            index = self.index(of: startMessage, in: messages)
+//            //start with next message
+//            index += 1
+//        }
+//        
+//        if messages.count > index {
+//            for i in index..<messages.count {
+//                let message = messages[i]
+//                //if self have this message ignore it
+//                var alreadyHasMessage = false
+//                let rowMessages = PSDObjectsCreator.parseMessageToRowMessage(message)
+//                for (_, rowMessage) in rowMessages.enumerated(){
+//                    if self.has(findMessage: rowMessage, startFrom: startMessageIndexPath) {
+//                        alreadyHasMessage = true
+//                        break
+//                    }
+//                }
+//                
+//                if alreadyHasMessage {
+//                    let indexPaths = findIndexPath(messageId: message.messageId).reversed()
+//                    for (i, index) in indexPaths.enumerated() {
+//                        let rowMessage = self[index.section][index.row]
+//                        if rowMessage.attachment != nil,
+//                           let attachment = message.attachments?[i] {
+//                            rowMessage.attachment?.serverIdentifer = attachment.serverIdentifer
+//                        }
+//                    }
+//                    continue
+//                }
+//                
+//                hasChanges = true
+//                let section = self.section(forMessage: message)
+//                //detect this section exist
+//                if self.count > section {
+//                    //if section is exist check if this is correct date or need to move indexes down
+//                    if self[section].count == 0 || self[section].count > 0 && self[section][0].message.date.compareWithoutTime(with: message.date) == .equal {
+//                        //has some messages with same date add new
+//                        let row = self.row(forMessage: message, section: section)
+//                        self[section].insert(contentsOf: PSDObjectsCreator.parseMessageToRowMessage(message), at: row)
+//                    } else {
+//                        //no messages with this date need insert new
+//                        self.insert(PSDObjectsCreator.parseMessageToRowMessage(message), at: section)
+//                    }
+//                } else {
+//                    self.insert(PSDObjectsCreator.parseMessageToRowMessage(message), at: section)
+//                }
+//            }
+//        }
+//        completion?(hasChanges)
+//    }
+        
+    private mutating func complete(with messages: [PSDMessage], startMessage: PSDMessage?, completion: ((_ hasChanges: Bool) -> Void)?) {
         
         var hasChanges = false
         let startMessageIndexPath = self.index(of: startMessage)
-        var index: Int = 0 //the index of message in received chat
+        var index: Int = 0
         if let startMessage {
             index = self.index(of: startMessage, in: messages)
-            //start with next message
             index += 1
         }
         
-        if messages.count > index {
-            for i in index..<messages.count {
-                let message = messages[i]
-                //if self have this message ignore it
-                var alreadyHasMessage = false
-                let rowMessages = PSDObjectsCreator.parseMessageToRowMessage(message)
-                for (_, rowMessage) in rowMessages.enumerated(){
-                    if self.has(findMessage: rowMessage, startFrom: startMessageIndexPath) {
-                        alreadyHasMessage = true
-                        break
-                    }
-                }
+        guard messages.count > index else {
+            completion?(hasChanges)
+            return
+        }
+        
+        for i in index..<messages.count {
+            let message = messages[i]
+            
+            // Проверяем, есть ли уже это сообщение
+            let rowMessages = PSDObjectsCreator.parseMessageToRowMessage(message)
+            let alreadyHasMessage = rowMessages.contains { rowMessage in
+                self.has(findMessage: rowMessage, startFrom: startMessageIndexPath)
+            }
+            
+            if alreadyHasMessage {
+                let indexPaths = findIndexPath(messageId: message.messageId).reversed()
+                let attachments = message.attachments ?? []
                 
-                if alreadyHasMessage {
-                    let indexPaths = findIndexPath(messageId: message.messageId).reversed()
-                    for (i, index) in indexPaths.enumerated() {
-                        let rowMessage = self[index.section][index.row]
-                        if rowMessage.attachment != nil,
-                           let attachment = message.attachments?[i] {
-                            rowMessage.attachment?.serverIdentifer = attachment.serverIdentifer
-                        }
+                for (i, indexPath) in indexPaths.enumerated() {
+                    // Безопасная проверка границ секции/строки
+                    guard indexPath.section < self.count,
+                          indexPath.row < self[indexPath.section].count else {
+                        continue
                     }
-                    continue
+                    
+                    let rowMessage = self[indexPath.section][indexPath.row]
+                    
+                    // Безопасный доступ к attachments по индексу
+                    guard rowMessage.attachment != nil,
+                          i < attachments.count else {
+                        continue
+                    }
+                    
+                    rowMessage.attachment?.serverIdentifer = attachments[i].serverIdentifer
                 }
+                continue
+            }
+            
+            hasChanges = true
+            let section = self.section(forMessage: message)
+            let newRowMessages = PSDObjectsCreator.parseMessageToRowMessage(message)
+            
+            if section < self.count {
+                let sectionMessages = self[section]
+                let sameDate = sectionMessages.first.map {
+                    $0.message.date.compareWithoutTime(with: message.date) == .equal
+                } ?? true  // пустая секция считается подходящей
                 
-                hasChanges = true
-                let section = self.section(forMessage: message)
-                //detect this section exist
-                if self.count > section {
-                    //if section is exist check if this is correct date or need to move indexes down
-                    if self[section].count == 0 || self[section].count > 0 && self[section][0].message.date.compareWithoutTime(with: message.date) == .equal {
-                        //has some messages with same date add new
-                        let row = self.row(forMessage: message, section: section)
-                        self[section].insert(contentsOf: PSDObjectsCreator.parseMessageToRowMessage(message), at: row)
-                    } else {
-                        //no messages with this date need insert new
-                        self.insert(PSDObjectsCreator.parseMessageToRowMessage(message), at: section)
-                    }
+                if sameDate {
+                    let row = self.row(forMessage: message, section: section)
+                    // Защита от выхода за границы при insert
+                    let safeRow = Swift.min(Swift.max(row, 0), self[section].count)
+                    self[section].insert(contentsOf: newRowMessages, at: safeRow)
                 } else {
-                    self.insert(PSDObjectsCreator.parseMessageToRowMessage(message), at: section)
+                    self.insert(newRowMessages, at: section)
                 }
+            } else {
+                // section >= self.count — добавляем в конец, а не по конкретному индексу
+                self.insert(newRowMessages, at: self.count)
             }
         }
+        
         completion?(hasChanges)
     }
-        
+    
     mutating private func complete(with messages: [PSDMessage]) {
         let index: Int = 0//the index of message in received chat
         var adddedMessages = [PSDRowMessage]()

@@ -111,16 +111,6 @@ private extension SyncManager {
                 guard let self else { return }
                 
                 if let chats, complete {
-                    var unreadChats = 0
-                    var lasMessage: PSDMessage?
-                    if let chat = chats.first {
-                        if !chat.isRead {
-                            unreadChats += 1
-                            lasMessage = chat.lastComment
-                        }
-                    }
-                    UnreadMessageManager.refreshNewMessagesCount(unreadChats > 0, lastMessage: lasMessage)
-                    
                     chatsDataService.saveChatModels(with: chats) { [weak self] _ in
                         DispatchQueue.main.async { [weak self] in
                             guard let self else { return }
@@ -142,7 +132,6 @@ private extension SyncManager {
                             }
                         }
                     }
-                    
                 } else if !complete {
                     updateRepeatSyncTimer()
                     networkAvailability = false
@@ -166,7 +155,7 @@ private extension SyncManager {
         if PyrusServiceDesk.multichats {
             let cache = chatsDataService.getAllChats()
             PyrusServiceDesk.chats = cache
-        } else {
+        } else if PyrusServiceDesk.clients.first?.clientId == PyrusServiceDesk.clientId {
             let createMessages = PSDMessagesStorage.getNewCreateTicketMessages(PyrusServiceDesk.customUserId)
             let localChats = PSDGetChats.getSortedChatForMessages(createMessages)
             let chats = chatsDataService.getChatsHeaders()
@@ -301,6 +290,17 @@ private extension SyncManager {
                         let localChats = PSDGetChats.getSortedChatForMessages(createMessages)
                         PyrusServiceDesk.chats = localChats + chats
                         PyrusServiceDesk.allMessages = messages + createMessages
+                        
+                        var unreadChats = 0
+                        var lastMessage: PSDMessage?
+                        if let chat = chats.first {
+                            if !chat.isRead {
+                                unreadChats += 1
+                                lastMessage = messages.last
+                            }
+                        }
+                        UnreadMessageManager.refreshNewMessagesCount(unreadChats > 0, lastMessage: lastMessage)
+                        
                         NotificationCenter.default.post(name: PyrusServiceDesk.chatsUpdateNotification, object: nil, userInfo: userInfo)
                     }
                 }
