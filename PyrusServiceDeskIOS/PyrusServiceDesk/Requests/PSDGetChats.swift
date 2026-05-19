@@ -209,7 +209,7 @@ struct PSDGetChats {
                     let id = authorDic["author_id"] as? String ?? ""
                     let phone = authorDic["phone"] as? String ?? ""
                     var hasAccess = authorDic["has_access"] as? Bool ?? true
-                    var hasAdminAccess = authorDic["has_admin_access"] as? Bool ?? false
+                    var hasAdminAccess = hasAccess ? authorDic["has_admin_access"] as? Bool ?? false : false
                     if let commandHasAccess = updateAccessCommands.first(where: { $0.userId == userId && $0.params.authorId == id }) {
                         hasAccess = commandHasAccess.params.hasAccess ?? hasAccess
                         hasAdminAccess = commandHasAccess.params.hasAdminAccess ?? hasAdminAccess

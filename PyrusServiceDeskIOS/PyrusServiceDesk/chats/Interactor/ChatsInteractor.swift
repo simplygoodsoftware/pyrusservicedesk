@@ -261,7 +261,7 @@ private extension ChatsInteractor {
                         return
                     }
                 } else if let user = PyrusServiceDesk.additionalUsers.first(where: { $0.userId == userId }) {
-                    userNames += "\(user.userName), "
+                    userNames += "\(user.userName ?? ""), "
                     PyrusServiceDesk.additionalUsers.removeAll(where: { $0.userId == userId })
                 }
             }
