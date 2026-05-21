@@ -469,7 +469,7 @@ private extension ChatsInteractor {
                     }
                 } else if PyrusServiceDesk.clientId == clientId && chat.userId == (PyrusServiceDesk.customUserId ?? PyrusServiceDesk.userId) {
                     filterChats.append(chat)
-                } else if chat.userId?.count ?? 0 == 0 && chat.appId == PyrusServiceDesk.currentClientId {
+                } else if chat.userId?.count ?? 0 == 0 && PyrusServiceDesk.anonimClients.contains(PyrusServiceDesk.currentClientId ?? "") {//}&& chat.appId == PyrusServiceDesk.currentClientId {
                     filterChats.append(chat)
                 }
             }
