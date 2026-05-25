@@ -32,12 +32,17 @@ internal class MainActivity : FragmentActivity() {
     private val navigator: Navigator = PyrusNavigator(this, R.id.fragment_container)
 
     override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
+        if (PyrusServiceDesk.INJECTOR == null) {
+            super.onCreate(null)
+            finish()
+            return
+        }
 
         // Create UiInjector as the very first step of SDK UI lifecycle. From this point on
         // any fragment / adapter / dialog can safely access `PyrusServiceDesk.uiInjector()`.
         // It will be released in onDestroy() when the activity is finishing.
         PyrusServiceDesk.ensureUiInjector()
+        super.onCreate(savedInstanceState)
 
         val theme = when{
             StaticRepository.getConfiguration().isDialogTheme -> R.style.PyrusServiceDesk_Dialog

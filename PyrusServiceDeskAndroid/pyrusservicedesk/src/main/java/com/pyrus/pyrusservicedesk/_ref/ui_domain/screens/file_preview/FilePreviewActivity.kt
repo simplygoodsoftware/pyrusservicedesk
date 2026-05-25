@@ -56,6 +56,14 @@ internal class FilePreviewActivity: ConnectionActivityBase<FilePreviewViewModel>
     private lateinit var binding: PsdActivityFilePreviewBinding
 
     override fun onCreate(savedInstanceState: Bundle?) {
+        if (PyrusServiceDesk.INJECTOR == null || PyrusServiceDesk.UI_INJECTOR == null) {
+            // Cold restore after process death. Drop the parcelled state so the
+            // framework does not resurrect views/observers that would crash on
+            // ViewModelFactory.create() / uiInjector().sharedViewModel.
+            super.onCreate(null)
+            finish()
+            return
+        }
         super.onCreate(savedInstanceState)
         // if you don't set empty text, Android will set the app name
         supportActionBar?.title = ""
