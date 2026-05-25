@@ -6,6 +6,7 @@ import android.content.Intent
 import android.os.Build
 import android.os.Build.VERSION
 import android.os.Bundle
+import android.util.Log
 import androidx.core.view.WindowCompat
 import androidx.fragment.app.FragmentActivity
 import com.github.terrakok.cicerone.Navigator
@@ -19,6 +20,7 @@ import com.pyrus.pyrusservicedesk.PyrusServiceDesk.Companion.uiInjector
 import com.pyrus.pyrusservicedesk.R
 import com.pyrus.pyrusservicedesk.ServiceDeskConfiguration
 import com.pyrus.pyrusservicedesk._ref.SdScreens
+import com.pyrus.pyrusservicedesk._ref.utils.log.PLog
 import com.pyrus.pyrusservicedesk._ref.utils.navigation.PyrusNavigator
 import com.pyrus.pyrusservicedesk.core.StaticRepository
 import com.pyrus.pyrusservicedesk.databinding.PsdActivityMainBinding
@@ -32,7 +34,13 @@ internal class MainActivity : FragmentActivity() {
     private val navigator: Navigator = PyrusNavigator(this, R.id.fragment_container)
 
     override fun onCreate(savedInstanceState: Bundle?) {
+        // If the host has never called PyrusServiceDesk.init() in this process,
+        // we cannot recreate UI_INJECTOR. Drop the restored state and bail out
+        // BEFORE super.onCreate, otherwise the framework will resurrect fragments
+        // that immediately call uiInjector() and crash.
         if (PyrusServiceDesk.INJECTOR == null) {
+            Log.d(TAG, "PyrusServiceDesk.INJECTOR == null")
+            PLog.d(TAG, "PyrusServiceDesk.INJECTOR == null")
             super.onCreate(null)
             finish()
             return
@@ -151,6 +159,7 @@ internal class MainActivity : FragmentActivity() {
 
     companion object {
 
+        private const val TAG = "MainActivity"
         private const val KEY_DATA = "KEY_DATA"
 
         fun createLaunchIntent(context: Context, startData: StartData): Intent {

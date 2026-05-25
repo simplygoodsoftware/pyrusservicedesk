@@ -11,6 +11,7 @@ import android.net.Uri
 import android.os.Build
 import android.os.Build.VERSION
 import android.os.Bundle
+import android.util.Log
 import android.view.Menu
 import android.view.MenuInflater
 import android.view.MenuItem
@@ -31,6 +32,7 @@ import com.pyrus.pyrusservicedesk._ref.utils.getColorOnBackground
 import com.pyrus.pyrusservicedesk._ref.utils.getSecondaryColorOnBackground
 import com.pyrus.pyrusservicedesk._ref.utils.getTextColorOnBackground
 import com.pyrus.pyrusservicedesk._ref.utils.insets.RootViewDeferringInsetsCallback
+import com.pyrus.pyrusservicedesk._ref.utils.log.PLog
 import com.pyrus.pyrusservicedesk.databinding.PsdActivityFilePreviewBinding
 import com.pyrus.pyrusservicedesk.presentation.ConnectionActivityBase
 import com.pyrus.pyrusservicedesk.sdk.data.intermediate.FileData
@@ -60,6 +62,8 @@ internal class FilePreviewActivity: ConnectionActivityBase<FilePreviewViewModel>
             // Cold restore after process death. Drop the parcelled state so the
             // framework does not resurrect views/observers that would crash on
             // ViewModelFactory.create() / uiInjector().sharedViewModel.
+            Log.d(TAG, "INJECTOR or UI_INJECTOR is null, INJECTOR: ${PyrusServiceDesk.INJECTOR}, UI_INJECTOR: ${PyrusServiceDesk.UI_INJECTOR}")
+            PLog.d(TAG, "INJECTOR or UI_INJECTOR is null, INJECTOR: ${PyrusServiceDesk.INJECTOR}, UI_INJECTOR: ${PyrusServiceDesk.UI_INJECTOR}")
             super.onCreate(null)
             finish()
             return
@@ -290,6 +294,8 @@ internal class FilePreviewActivity: ConnectionActivityBase<FilePreviewViewModel>
     }
 
     companion object {
+
+        private const val TAG = "FilePreviewActivity"
 
         internal const val KEY_FILE_DATA = "KEY_FILE_DATA"
         private const val REQUEST_PERMISSION_WRITE_EXTERNAL_STORAGE = 1
