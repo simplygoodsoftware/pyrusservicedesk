@@ -1,15 +1,45 @@
 
 import UIKit
 
+protocol PSDMainController: NSObjectProtocol {
+    var customization: ServiceDeskConfiguration? { get }
+    func updateInfo()
+    func refreshChat(showFakeMessage: Int?)
+    func updateTitleChat()
+    func closeServiceDesk()
+    func remove(animated: Bool)
+}
+
 ///The main service desk controller.
-class PyrusServiceDeskController: PSDNavigationController {
-    let customization: ServiceDeskConfiguration?
+class PyrusServiceDeskController: PSDNavigationController, PSDMainController {
+    var customization: ServiceDeskConfiguration?
+    var chatController: PSDChatViewController?
     required init(_ customization: ServiceDeskConfiguration?, customPresent: Bool) {
         self.customization = customization
-        if(PyrusServiceDesk.clientId != nil){
-            let pyrusChat = PSDChatViewController()
+        if(PyrusServiceDesk.clientId != nil) {
             super.init(nibName: nil, bundle: nil)
-            pushViewController(pyrusChat, animated: false)
+            if PyrusServiceDesk.multichats {
+                if #available(iOS 13.0, *) {
+                    let presenter = ChatsPresenter()
+                    let interactor = ChatsInteractor(presenter: presenter)
+                    let router = ChatsRouter()
+                    let controller = PSDChatsViewController(interactor: interactor, router: router)
+                    router.controller = controller
+                    presenter.view = controller
+                    customization?.setCustomLeftBarButtonItem(backBarButtonItem())
+                    
+                    pushViewController(controller, animated: false)
+                }
+            } else {
+                let presenter = PSDChatPresenter()
+                let interactor = PSDChatInteractor(presenter: presenter)
+                let router = PSDChatRouter()
+                let controller = PSDChatViewController(interactor: interactor, router: router)
+                presenter.view = controller
+                router.controller = controller
+                pushViewController(controller, animated: false)
+            }
+            
             if !customPresent {
                 self.transitioningDelegate  = self
                 self.isModalInPopover = true
@@ -24,13 +54,38 @@ class PyrusServiceDeskController: PSDNavigationController {
     required init?(coder aDecoder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
     }
-    func show(on viewController: UIViewController, completion: (() -> Void)? = nil) {
-        DispatchQueue.main.async  {
-            viewController.present(self, animated:  true, completion: completion)
+    
+    func show(on viewController: UIViewController, completion: (() -> Void)? = nil, animated: Bool) {
+        var navigationController: UINavigationController?
+        if let nvc = viewController as? UINavigationController {
+            navigationController = nvc
+        } else if let nvc = viewController.navigationController {
+            navigationController = nvc
+        }
+        if PyrusServiceDesk.startWithPush,
+           let navigationController {
+            PyrusServiceDesk.mainController = self
+            let presenter = PSDChatPresenter()
+            let interactor = PSDChatInteractor(presenter: presenter)
+            let router = PSDChatRouter()
+            let controller = PSDChatViewController(interactor: interactor, router: router)
+            presenter.view = controller
+            router.controller = controller
+            chatController = controller
+            PyrusServiceDesk.mainController = chatController
+            chatController?.customization = customization
+            chatController?.hidesBottomBarWhenPushed = true
+            navigationController.pushViewController(chatController ?? controller, animated: animated)
+        } else {
+            DispatchQueue.main.async  {
+                viewController.present(self, animated:  animated, completion: completion)
+            }
         }
     }
+    
     override public func viewDidLoad() {
         super.viewDidLoad()
+        view.backgroundColor = .white
         PyrusServiceDesk.mainController = self
         recolor()
     }
@@ -50,16 +105,16 @@ class PyrusServiceDeskController: PSDNavigationController {
     }
     ///Clean all saved data
     static func clean(){
-        //clean main controller
-        PyrusServiceDesk.mainController = nil
-        //remove all saved users, exept owner
-        PSDUsers.supportUsers.removeAll()
-        //remove all saved users images
-        PSDSupportImageSetter.clean()
-        //remove all info about attachment preview download
-        PSDPreviewSetter.clean()
-        //stop all loading exept chat list
-        PSDGetChat.remove()
+//        //clean main controller
+//        PyrusServiceDesk.mainController = nil
+//        //remove all saved users, exept owner
+//        PSDUsers.supportUsers.removeAll()
+//        //remove all saved users images
+//        PSDSupportImageSetter.clean()
+//        //remove all info about attachment preview download
+//        PSDPreviewSetter.clean()
+//        //stop all loading exept chat list
+//        PSDGetChat.remove()
     }
     
     
@@ -73,6 +128,10 @@ class PyrusServiceDeskController: PSDNavigationController {
     }
     
     func closeServiceDesk() {
+        if PyrusServiceDesk.multichats {
+            remove(animated: false)
+            return
+        }
         if PyrusServiceDeskController.PSDIsOpen() {
             let alertAuthorized = UIAlertController(title: nil, message: "AcсessDenied".localizedPSD(), preferredStyle: .alert)
             alertAuthorized.addAction(UIAlertAction(title: "OK".localizedPSD(), style: .default, handler: { (_) in
@@ -91,12 +150,14 @@ class PyrusServiceDeskController: PSDNavigationController {
     /**
      Remove Pyrus Service Desk Controllers and clean saved data
  */
-    func remove(animated: Bool = true){
+    func remove(animated: Bool = true) {
         PyrusLogger.shared.saveLocalLogToDisk()
-        if self.parent == nil{
+        if self.parent == nil {
             self.dismiss(animated: animated, completion: {
                 PyrusServiceDesk.stopCallback?.onStop()
+                PyrusLogger.shared.logEvent(" Chat closed ")
                 PyrusServiceDeskController.clean()
+                PyrusServiceDesk.isStarted = false
             })
             
         }
@@ -104,9 +165,10 @@ class PyrusServiceDeskController: PSDNavigationController {
             let fake = self.parent
             fake?.dismiss(animated: animated, completion: {
                 PyrusServiceDesk.stopCallback?.onStop()
+                PyrusLogger.shared.logEvent(" Chat closed ")
                 PyrusServiceDeskController.clean()
+                PyrusServiceDesk.isStarted = false
             })
-            
         }
     }
     private static func sendCloseMessageToNotificationCenter(){
@@ -161,5 +223,27 @@ class PyrusServiceDeskController: PSDNavigationController {
     
     public static func PSDIsOpen() -> Bool {
         return PyrusServiceDesk.mainController != nil
+    }
+    
+    private func backBarButtonItem() -> UIBarButtonItem {
+        let mainColor = customization?.themeColor ?? .darkAppColor
+        let button = UIButton()
+        button.titleLabel?.font = CustomizationHelper.systemFont(ofSize: 18)
+        button.setTitle(" " + "Back".localizedPSD(), for: .normal)
+        button.setTitleColor(mainColor, for: .normal)
+        button.setTitleColor(mainColor.withAlphaComponent(0.2), for: .highlighted)
+        if #available(iOS 13.0, *) {
+            let backImage = UIImage(systemName: "chevron.left", withConfiguration: UIImage.SymbolConfiguration(pointSize: 18, weight: .semibold, scale: .large))
+            button.setImage(backImage?.imageWith(color: mainColor), for: .normal)
+            button.setImage(backImage?.imageWith(color: mainColor.withAlphaComponent(0.2)), for: .highlighted)
+        }
+        
+        button.addTarget(self, action: #selector(goBack), for: .touchUpInside)
+        button.sizeToFit()
+        return UIBarButtonItem(customView: button)
+    }
+    
+    @objc func goBack() {
+        popViewController(animated: true)
     }
 }

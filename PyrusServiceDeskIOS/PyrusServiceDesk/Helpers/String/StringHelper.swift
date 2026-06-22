@@ -1,4 +1,6 @@
 import Foundation
+import CoreFoundation
+
 private struct HTMLEscapeMap {
     let escapeSequence: NSString
     let uchar: UInt16
@@ -328,90 +330,169 @@ class HelpersStrings {
         return domains.contains(host)
     }
     
+    static func decodeHTMLString(_ string: String) -> String? {
+        guard let data = string.data(using: .utf8) else { return nil }
+        
+        let options: [NSAttributedString.DocumentReadingOptionKey: Any] = [
+            .documentType: NSAttributedString.DocumentType.html,
+            .characterEncoding: String.Encoding.utf8.rawValue
+        ]
+        
+        guard let attributedString = try? NSAttributedString(
+            data: data,
+            options: options,
+            documentAttributes: nil
+        ) else { return nil }
+        
+        return attributedString.string
+    }
+    
+    static func decodeHTML(in attributedString: NSAttributedString) -> NSAttributedString {
+        // Создаем мутабельную копию входного attributedString
+        let mutableResult = NSMutableAttributedString(attributedString: attributedString)
+        
+        // Ищем все HTML-сущности в тексте
+        let string = mutableResult.string
+        let pattern = "&(?:[a-z]+|#x?[0-9]+);"
+        
+        guard let regex = try? NSRegularExpression(pattern: pattern, options: .caseInsensitive) else {
+            return attributedString
+        }
+        
+        // Обрабатываем совпадения с конца, чтобы не сбивались индексы при замене
+        let matches = regex.matches(in: string, range: NSRange(location: 0, length: string.utf16.count)).reversed()
+        
+        for match in matches {
+            let entityRange = match.range
+            let entity = (string as NSString).substring(with: entityRange)
+            
+            // Декодируем HTML-сущность
+            if let decodedData = entity.data(using: .utf8),
+               let decodedString = try? NSAttributedString(
+                data: decodedData,
+                options: [.documentType: NSAttributedString.DocumentType.html,
+                          .characterEncoding: String.Encoding.utf8.rawValue],
+                documentAttributes: nil) {
+                
+                // Сохраняем оригинальные атрибуты для этого диапазона
+                let originalAttributes = mutableResult.attributes(at: entityRange.location, effectiveRange: nil)
+                
+                // Заменяем сущность на декодированный символ
+                mutableResult.replaceCharacters(in: entityRange, with: decodedString.string)
+                
+                // Восстанавливаем оригинальные атрибуты
+                let newRange = NSRange(location: entityRange.location, length: decodedString.string.utf16.count)
+                mutableResult.addAttributes(originalAttributes, range: newRange)
+            }
+        }
+        
+        return NSAttributedString(attributedString: mutableResult)
+    }
+    
+    /// Декодирует HTML-сущности в URL-строке.
+    static func decodingHTMLEntitiesInLink(_ urlString: String) -> String {
+        guard urlString.contains("&") else { return urlString }
+        
+        return urlString
+            .replacingOccurrences(of: "&amp;", with: "&")
+            .replacingOccurrences(of: "&#38;", with: "&")
+            .replacingOccurrences(of: "&#x26;", with: "&", options: [.caseInsensitive])
+            .replacingOccurrences(of: "&quot;", with: "\"")
+            .replacingOccurrences(of: "&#34;", with: "\"")
+            .replacingOccurrences(of: "&#x22;", with: "\"", options: [.caseInsensitive])
+    }
+    
+    
     static func attributedString(byDecodingHTMLEntities strAttr: NSMutableAttributedString) -> NSMutableAttributedString {
-        var range: NSRange = NSRange(location: 0, length: strAttr.length)
-        var subrange: NSRange = (strAttr.string as NSString).range(of: "&", options: .backwards, range: range)
-
-        // if no ampersands, we've got a quick way out
+        let maxEntityLen = 20
+        let nsString = strAttr.string as NSString
+        
+        var range = NSRange(location: 0, length: nsString.length)
+        var subrange = nsString.range(of: "&", options: .backwards, range: range)
+        
         guard subrange.length > 0 else {
             strAttr.trailingNewlineChopped()
             return strAttr
         }
+        
         while subrange.length != 0 {
-            var semiColonRange = NSMakeRange(subrange.location, NSMaxRange(range) - subrange.location)
-            semiColonRange = (strAttr.string as NSString).range(of: ";", options: .literal, range: semiColonRange)
+            let nextIdx = subrange.location + 1
+            var isEntityCandidate = false
+            if nextIdx < nsString.length {
+                let nextChar = nsString.character(at: nextIdx)
+                if nextChar == unichar("#") {
+                    isEntityCandidate = true
+                } else if let scalar = UnicodeScalar(nextChar) {
+                    isEntityCandidate = CharacterSet.letters.contains(scalar)
+                }
+            }
+            
             range = NSMakeRange(0, subrange.location)
-            guard semiColonRange.location != NSNotFound else {
-                subrange = (strAttr.string as NSString).range(of: "&", options: .backwards, range: range)
+
+            
+            if !isEntityCandidate {
+                subrange = nsString.range(of: "&", options: .backwards, range: range)
                 continue
             }
-            let escapeRange = NSMakeRange(subrange.location, semiColonRange.location - subrange.location + 1)
-            let escapeString = (strAttr.string as NSString).substring(with: escapeRange) as NSString
+            
+            
+            let semiColonSearchEnd = min(subrange.location + maxEntityLen, nsString.length)
+            let semiColonSearchRange = NSRange(
+                location: subrange.location,
+                length: semiColonSearchEnd - subrange.location
+            )
+            let semiColonRange = nsString.range(of: ";", options: .literal, range: semiColonSearchRange)
+            
+            if semiColonRange.location == NSNotFound {
+                subrange = nsString.range(of: "&", options: .backwards, range: range)
+                continue
+            }
+            
+            let escapeRange = NSRange(location: subrange.location, length: semiColonRange.location - subrange.location + 1)
+            let escapeString = nsString.substring(with: escapeRange) as NSString
             let length = escapeString.length
-            // a squence must be longer than 3 (&lt;) and less than 11 (&thetasym;)
-            if (length < 4 || length > 10) {
-                subrange = (strAttr.string as NSString).range(of: "&", options: .backwards, range: range)
-                continue
-            }
-            if escapeString.character(at: 1) == unichar("#") {
-                let char2 = escapeString.character(at: 2)
-                if char2 == unichar("x") || char2 == unichar("X") {
-                    // Hex escape squences &#xa3;
-                    let hexSequence = escapeString.substring(with: NSMakeRange(3, length - 4))
-                    let scanner = Scanner(string: hexSequence)
-                    var value = UInt64()
-                    if
-                        scanner.scanHexInt64(&value),
-                        value < CUnsignedShort.max,
-                        value > 0,
-                        scanner.scanLocation == length - 4
-                    {
-                        var uchar = UInt16(value)
-                        let charString = NSString(characters: &uchar, length: 1)
-                        strAttr.replaceCharacters(in: escapeRange, with: charString as String)
-                    }
-                } else {
-                    // Decimal Sequences &#123;
-                    let numberSequence = escapeString.substring(with: NSMakeRange(2, length - 3))
-                    let scanner = Scanner(string: numberSequence)
-                    var value = Int()
-                    if
-                        scanner.scanInt(&value),
-                        value > 0,
-                        scanner.scanLocation == length - 3 {
-                        if value < CUnsignedShort.max {
-                            var uchar = UInt16(value)
-                            let charString = NSString(characters: &uchar, length: 1)
-                            strAttr.replaceCharacters(in: escapeRange, with: charString as String)
-                        } else{
-                            if
-                                let escapeStringData = escapeString.data(using: String.Encoding.utf8.rawValue),
-                                let str = String(data:  escapeStringData, encoding: .utf8),
-                                let strData = str.data(using: String.Encoding.utf8),
-                                let newStr = try? NSAttributedString(
-                                    data: strData,
-                                    options: [NSAttributedString.DocumentReadingOptionKey.documentType: NSAttributedString.DocumentType.html,
-                                              NSAttributedString.DocumentReadingOptionKey.characterEncoding: NSNumber(value: String.Encoding.utf8.rawValue)],
-                                    documentAttributes: nil)
-                            {
-                                strAttr.replaceCharacters(in: escapeRange, with: newStr.string)
+            
+            if length >= 4 && length <= maxEntityLen {
+                if escapeString.character(at: 1) == unichar("#") {
+                    let char2 = escapeString.character(at: 2)
+                    if char2 == unichar("x") || char2 == unichar("X") {
+                        let hexSequence = escapeString.substring(with: NSMakeRange(3, length - 4))
+                        let scanner = Scanner(string: hexSequence)
+                        var value: UInt64 = 0
+                        if scanner.scanHexInt64(&value),
+                           value > 0,
+                           scanner.scanLocation == hexSequence.utf16.count {
+                            if let scalar = UnicodeScalar(UInt32(value)) {
+                                strAttr.replaceCharacters(in: escapeRange, with: String(scalar))
+                            }
+                        }
+                    } else {
+                        let numberSequence = escapeString.substring(with: NSMakeRange(2, length - 3))
+                        let scanner = Scanner(string: numberSequence)
+                        var value: Int = 0
+                        if scanner.scanInt(&value),
+                           value > 0,
+                           scanner.scanLocation == numberSequence.utf16.count {
+                            if let scalar = UnicodeScalar(value) {
+                                strAttr.replaceCharacters(in: escapeRange, with: String(scalar))
                             }
                         }
                     }
-                }
-            } else {
-                // "standard" sequences
-                for i in 0..<(MemoryLayout.size(ofValue: gAsciiHTMLEscapeMap) / MemoryLayout<HTMLEscapeMap>.size) {
-                    if escapeString == gAsciiHTMLEscapeMap[i].escapeSequence {
-                        var uchar = gAsciiHTMLEscapeMap[i].uchar
-                        strAttr.replaceCharacters(in: escapeRange, with: NSString(characters: &uchar, length: 1) as String)
-                        break
+                } else {
+                    for i in 0..<gAsciiHTMLEscapeMap.count {
+                        if escapeString.isEqual(to: gAsciiHTMLEscapeMap[i].escapeSequence as String) {
+                            var uchar = gAsciiHTMLEscapeMap[i].uchar
+                            let replacement = NSString(characters: &uchar, length: 1) as String
+                            strAttr.replaceCharacters(in: escapeRange, with: replacement)
+                            break
+                        }
                     }
                 }
             }
-                
-            subrange = (strAttr.string as NSString).range(of: "&", options: .backwards, range: range)
+            
+            subrange = nsString.range(of: "&", options: .backwards, range: range)
         }
+        
         strAttr.trailingNewlineChopped()
         return strAttr
     }

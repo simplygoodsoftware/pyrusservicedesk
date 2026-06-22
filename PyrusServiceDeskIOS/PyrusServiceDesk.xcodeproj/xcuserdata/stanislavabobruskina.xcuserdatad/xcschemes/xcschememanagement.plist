@@ -22,7 +22,11 @@
 		<key>PyrusServiceDeskTests.xcscheme_^#shared#^_</key>
 		<dict>
 			<key>orderHint</key>
+<<<<<<< HEAD
 			<integer>3</integer>
+=======
+			<integer>5</integer>
+>>>>>>> sb/sd/3.0.61
 		</dict>
 	</dict>
 </dict>

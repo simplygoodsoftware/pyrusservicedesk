@@ -35,7 +35,7 @@ enum RatingType: Int {
         case .like:
             return [RatingTextValue(rating: 1, text: "👎"), RatingTextValue(rating: 5, text: "👍")]
         case .text:
-            return PyrusServiceDesk.ratingSettings.ratingTextValues ?? []
+            return []
         }
     }
 }

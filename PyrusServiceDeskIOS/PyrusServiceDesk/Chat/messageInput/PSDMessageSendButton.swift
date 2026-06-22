@@ -12,23 +12,27 @@ class PSDMessageSendButton: UIButton {
     static let titleDisabledAlpha: CGFloat = 0.3
     override init(frame: CGRect) {
         super.init(frame: frame)
-        self.setTitle( "Send".localizedPSD() , for:.normal)
+        let color = CustomizationHelper.sendButtonColor
+        setImage(UIImage.PSDImage(name: "sendFill")?.imageWith(color: color), for: .normal)
+//        setImage(UIImage.PSDImage(name: "sendFill")?.imageWith(color: color.withAlphaComponent(0.4)), for: .disabled)
         self.titleLabel?.font = .title
-        let color = PyrusServiceDesk.mainController?.customization?.sendButtonColor ?? UIColor.darkAppColor
         setTitleColor(color, for: .normal)
-        isEnabled = false
+        alpha = 0
         self.contentEdgeInsets = UIEdgeInsets(top: 0.0, left: titleHorizontalInsets, bottom: 0.0, right: titleHorizontalInsets)
         
         self.addTarget(self, action: #selector(sendPressed), for: .touchUpInside)
         self.layer.cornerRadius = BUTTONS_CORNER_RADIUS
-        recolor()
+       // recolor()
         self.sizeToFit()
     }
-    @objc func sendPressed()
-    {
-        isEnabled = false
+    
+    @objc func sendPressed() {
+        alpha = 0
+        //isHidden = true
+        //isEnabled = false
         self.delegate?.sendMessage()
     }
+    
     required init?(coder aDecoder: NSCoder) {
         super.init(coder: aDecoder)
     }
@@ -43,7 +47,10 @@ extension PSDMessageSendButton: Recolorable {
             guard self.traitCollection.hasDifferentColorAppearance(comparedTo: previousTraitCollection) else {
                 return
             }
-            recolor()
+            let color = CustomizationHelper.sendButtonColor
+            setImage(UIImage.PSDImage(name: "sendFill")?.imageWith(color: color), for: .normal)
+//            setImage(UIImage.PSDImage(name: "sendFill")?.imageWith(color: color.withAlphaComponent(0.4)), for: .disabled)
+           // recolor()
         }
     }
     func recolor() {

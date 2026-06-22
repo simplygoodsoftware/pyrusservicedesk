@@ -4,7 +4,7 @@ import UIKit
 let DEFAULT_SUPPORT_ICON = UIImage.PSDImage(name: "SupportIcon")
 
 protocol PSDSupportImageSetterDelegate: class {
-    func reloadCells(with owner:PSDUser)
+    func reloadCells(with owner:PSDUser, isSupport: Bool)
 }
 struct PSDSupportImageSetter {
     static func defaultSupportImage() -> UIImage? {
@@ -30,7 +30,7 @@ struct PSDSupportImageSetter {
     ///For each user contain Bool flag, if it is true - for this user image is loading now, if false - already loaded or did not loading yet.
     private static var loadingUsers: [PSDUser:Bool] = [PSDUser:Bool]()
     ///Return image for support user. Or start load it if need
-    static func setImage(for user: PSDUser, in imageView:UIImageView, delagate: PSDSupportImageSetterDelegate?) {
+    static func setImage(for user: PSDUser, in imageView:UIImageView, delagate: PSDSupportImageSetterDelegate?, isSupport: Bool) {
         if user as? PSDPlaceholderUser != nil {
             imageView.image = nil
             imageView.backgroundColor = UIColor.psdLightGray
@@ -38,8 +38,32 @@ struct PSDSupportImageSetter {
         }
         imageView.backgroundColor = defaultBackAvatarColor()
         imageView.image = DEFAULT_SUPPORT_IMAGE
-        if (user.image) != nil{
+        if (user.image) != nil {
             imageView.image = user.image!
+        }
+        else if PyrusServiceDesk.multichats && user.authorId?.count ?? 0 == 0 && isSupport,
+                let clientId = PyrusServiceDesk.currentClientId ?? PyrusServiceDesk.clientId,
+                let client = PyrusServiceDesk.clients.first(where: { $0.clientId == clientId }) {
+            if let image = client.image {
+                user.image = image
+                imageView.image = image
+                loadingUsers[user] = false
+                delagate?.reloadCells(with: user, isSupport: isSupport)
+            }
+            DispatchQueue.global().async { [weak user, weak delagate] in
+                loadImage(urlString: client.clientIcon) { (image: UIImage?) in
+                    DispatchQueue.main.async {
+                        if image != nil || user?.image == nil {
+                            user?.image = image ?? UIImage.PSDImage(name: "iiko")
+                            imageView.image = image
+                            if user != nil {
+                                loadingUsers[user!] = false
+                                delagate?.reloadCells(with: user!, isSupport: isSupport)
+                            }
+                        }
+                    }
+                }
+            }
         }
         else if user.imagePath != nil && (user.imagePath?.count)!>0 {
             if !(loadingUsers[user] ?? false) {
@@ -54,7 +78,7 @@ struct PSDSupportImageSetter {
                             }
                             if user != nil{
                                 loadingUsers[user!]=false
-                                delagate?.reloadCells(with: user!)
+                                delagate?.reloadCells(with: user!, isSupport: isSupport)
                             }
                             
                         }
@@ -87,5 +111,22 @@ struct PSDSupportImageSetter {
                 }
             }.resume()
         }
+    }
+    
+    private static func loadImage(urlString: String, completion: @escaping (_ image: UIImage?) -> Void){
+        let url = PyrusServiceDeskAPI.PSDURL(url: urlString)
+        PyrusServiceDesk.mainSession.dataTask(with: url) { data, response, error in
+            guard let data = data, error == nil else{
+                completion(nil)
+                return
+            }
+            if data.count != 0{
+                let image = UIImage(data: data)
+                completion(image)
+            }
+            else{
+                completion(nil)
+            }
+        }.resume()
     }
 }

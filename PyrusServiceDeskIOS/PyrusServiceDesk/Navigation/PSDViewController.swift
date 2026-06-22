@@ -11,7 +11,7 @@ class PSDViewController: UIViewController {
         if let color = PyrusServiceDesk.mainController?.customization?.customBarColor {
             textColor = UIColor.getTextColor(for: color)
         }
-        label.textColor = textColor
+        label.textColor = CustomizationHelper.colorForChatTitle
         label.font = .titleFont
         label.text = title
         label.lineBreakMode = .byTruncatingTail
@@ -29,9 +29,9 @@ extension PSDViewController: Recolorable {
         }
     }
     @objc func recolor() {
-        guard PyrusServiceDesk.mainController?.customization?.chatTitleColor != nil || PyrusServiceDesk.mainController?.customization?.customFontName != nil  else {
-            return
-        }
+//        guard PyrusServiceDesk.mainController?.customization?.chatTitleColor != nil || PyrusServiceDesk.mainController?.customization?.customFontName != nil  else {
+//            return
+//        }
         navigationItem.titleView = customNavigationTitle()
         view.sizeToFit()
         navigationController?.navigationBar.layoutIfNeeded()

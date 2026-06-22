@@ -5,6 +5,8 @@ protocol PSDMessageSendDelegate: AnyObject {
     ///- parameter changedToSent: If state of message was changed from !.sent to .sent
     func refresh(message:PSDMessage, changedToSent: Bool)
     func remove(message:PSDMessage)
+    func updateTicketId(_ ticketId: Int)
+    func addMessageToPass(message: PSDMessage, commandId: String)
 }
 
 struct PSDMessageSend {
@@ -18,32 +20,66 @@ struct PSDMessageSend {
      - parameter file: PSDAttachment object with data that need to be passed to server.
      - parameter delegate: PSDMessageSendDelegate object to receive completion or error. Used in second step.
      */
-    static private func passFile(_ messageWithAttachment: PSDMessage, attachmentIdex: Int,delegate: PSDMessageSendDelegate?)
+    static func passFile(_ messageWithAttachment: PSDMessage, attachmentIdex: Int, delegate: PSDMessageSendDelegate?)
     {
         if(session == nil){
             session = PSDUploader.init()
         }
         if(messageWithAttachment.attachments != nil){
-            session!.createUploadTask(from: messageWithAttachment,indexOfAttachment:attachmentIdex, delegate: delegate)
+            session!.createUploadTask(from: messageWithAttachment, indexOfAttachment: attachmentIdex, delegate: delegate)
         }
         
     }
     /**
      Stop uploding attachment (if it is)
      */
-    static func stopUpload(_ attachment:PSDAttachment){
-        if session != nil{
-            for (task, data) in session!.tasksMap{
-                if(data.file == attachment){
+    static func stopUpload(_ attachment:PSDAttachment) {
+        let messages = PSDMessagesStorage.getSendingMessages()
+        for message in messages {
+            if message.message.attachments?.count ?? 0 > 0 {
+                for attach in message.message.attachments ?? [] {
+                    if attach.localId == attachment.localId {
+                        let userInfo: [String: Any] = [
+                            "commandId": message.message.commandId ?? ""
+                        ]
+                        NotificationCenter.default.post(name: .removeMesssageNotification, object: nil, userInfo: userInfo)
+                        PSDMessagesStorage.remove(messageId: message.message.clientId)
+                        PyrusServiceDesk.repository.deleteCommand(withId: message.commandId)
+                    }
+                }
+            }
+        }
+        if session != nil {
+            for (task, data) in session!.tasksMap {
+                if data.file == attachment {
                     session!.stopUpload(task: task)
                     break
+                }
+            }
+        } else {
+            let messages = PSDMessagesStorage.getSendingMessages()
+            for message in messages {
+                if message.message.attachments?.count ?? 0 > 0 {
+                    for attach in message.message.attachments ?? [] {
+                        if attach.localId == attachment.localId {
+                            let userInfo: [String: Any] = [
+                                "commandId": message.message.commandId ?? ""
+                            ]
+                            NotificationCenter.default.post(name: .removeMesssageNotification, object: nil, userInfo: userInfo)
+                            PSDMessagesStorage.remove(messageId: message.message.clientId)
+                        }
+                    }
                 }
             }
         }
         
     }
     static func fileSendingEndWithError(_ messageToPass: PSDMessage, delegate: PSDMessageSendDelegate?) {
-        didEndPassMessage(messageToPass, delegate: delegate)
+//        messageToPass.state = .cantSend
+//        messageToPass.fromStrorage = true
+   //     PSDMessagesStorage.saveInStorage(message: messageToPass)
+   //     pass(messageToPass, delegate: delegate)
+//        didEndPassMessage(messageToPass, delegate: delegate)
     }
     /**
      Stops all current session tasks and uploads.
@@ -64,13 +100,17 @@ struct PSDMessageSend {
     static var session : PSDUploader?
     
     ///Array with all PSDMessageSender
-    static private var messageSenders = [PSDMessageSender]()
+//    static private var messageSenders = [PSDMessageSender]()
     
     ///Store an array for messages ids that needs to be send.
     ///PSDMessageSender and PSDUploader must clean themselves after completion, even if they end with unsuccess
     static private var passingMessagesIds = [String]()
     
     static private let dispatchQueue = DispatchQueue(label: "PSDSendMesasges", attributes: .concurrent)
+    
+    ///Name for notification when chats' number was received.
+    static let createNewCommand = Notification.Name("NEW_COMMAND_CREATE")
+
     /**
      Pass message to server.
      - parameter messageToPass: PSDMessage need to be passed.
@@ -85,46 +125,37 @@ struct PSDMessageSend {
                 attachment.uploadingProgress = 0
             }
         }
-        PSDMessagesStorage.saveInStorage(message:messageToPass)
-        dispatchQueue.async {
-            if PSDMessageSend.passingMessagesIds.contains(messageToPass.clientId) {
-                //при отпрвке атачей эта же функция вызывается снова, продолжаем отправку не блокируя очередь
-            }
-            else{
-                PSDMessageSend.passingMessagesIds.append(messageToPass.clientId)
-                _ = PSDMessageSend.semaphore.wait(timeout: DispatchTime.distantFuture)
-            }
         
-        var hasUnsendAttachments = false
-        if let attachments = messageToPass.attachments, attachments.count > 0{
-            for (i,attachment) in attachments.enumerated(){
-                if attachment.emptyId(){
-                    PSDMessageSend.passFile(messageToPass, attachmentIdex: i, delegate: delegate)
-                    hasUnsendAttachments = true
-                    break
-                }
-                
-            }
-            
-        }
-        if !hasUnsendAttachments{
-            let sender = PSDMessageSender()
-                sender.pass(messageToPass, delegate: delegate, completion: {
-                    didEndPassMessage(messageToPass, delegate: delegate)
-                })
-            messageSenders.append(sender)
-        }
-        }
+        let commandId = messageToPass.commandId ?? UUID().uuidString
+        delegate?.addMessageToPass(message: messageToPass, commandId: commandId)
+        let requestNewTicket = messageToPass.requestNewTicket//(messageToPass.ticketId == 0 || messageToPass.requestNewTicket)
+        let ticketId = messageToPass.ticketId == 0 ? nil : messageToPass.ticketId
+        var attachmentsData: [AttachmentData]?
         
+        if let attachments = messageToPass.attachments {
+            attachmentsData = []
+            for attachment in attachments {
+                let attach = AttachmentData(type: 0, name: attachment.name, guid: attachment.serverIdentifer)
+                attachmentsData?.append(attach)
+            }
+        }
+        let params = TicketCommandParams(ticketId: ticketId, appId:  PyrusServiceDesk.currentClientId ?? PyrusServiceDesk.clientId, requestNewTicket: requestNewTicket, userId: PyrusServiceDesk.currentUserId ?? PyrusServiceDesk.customUserId, message: messageToPass.text, attachments: attachmentsData, rating: messageToPass.rating, ratingComment: messageToPass.ratingComment, date: messageToPass.date, messageClientId: messageToPass.clientId)
+        if params.rating != nil {
+            params.message = nil
+        }
+        let command = TicketCommand(commandId: messageToPass.commandId ?? UUID().uuidString, type: .createComment, appId: PyrusServiceDesk.currentClientId ?? PyrusServiceDesk.clientId, userId:  PyrusServiceDesk.currentUserId ?? PyrusServiceDesk.customUserId, params: params)
+        PyrusServiceDesk.repository.add(command: command)
+        PSDMessagesStorage.save(message: messageToPass)
+
+        NotificationCenter.default.post(name: createNewCommand, object: nil, userInfo: nil)
     }
     static private func didEndPassMessage(_ messageToPass: PSDMessage, delegate: PSDMessageSendDelegate?) {
         PSDMessageSend.passingMessagesIds.removeAll(where: {$0 == messageToPass.clientId})
         semaphore.signal()
     }
-    static func clearAndRemove(sender:PSDMessageSender){
-        if let index = messageSenders.firstIndex(of: sender) {
-            messageSenders.remove(at: index)
-        }
-    }
-    
+//    static func clearAndRemove(sender:PSDMessageSender){
+//        if let index = messageSenders.firstIndex(of: sender) {
+//            messageSenders.remove(at: index)
+//        }
+//    }
 }

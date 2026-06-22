@@ -13,7 +13,7 @@ class PSDMessageTextView: UITextView, UITextViewDelegate {
         self.autoresizingMask = [.flexibleWidth,.flexibleHeight]
         backgroundColor = .clear
         font = .textFont
-        tintColor = .darkAppColor
+        tintColor = CustomizationHelper.recordImagesColors
         textColor = .psdLabel
         self.delegate = self
         addPlaceholder()
@@ -21,7 +21,7 @@ class PSDMessageTextView: UITextView, UITextViewDelegate {
         
         self.text = self.getDraft()
         self.textViewDidChange(self)
-        
+        self.keyboardAppearance = CustomizationHelper.keyboardStyle
         NotificationCenter.default.addObserver(self, selector: #selector(saveDraft), name: UIApplication.willResignActiveNotification, object: nil)
         
     }

@@ -22,6 +22,7 @@ class AttachmentCollectionView : UICollectionView{
     }
     fileprivate static let previewCellIdentifier = "AttachPreviewCell"
     fileprivate static let fileCellIdentifier = "AttachFileCell"
+    fileprivate static let playerCellIdentifier = "AttachPlayerCell"
     private func scrollToLastRow(){
         let curRow: Int = self.numberOfItems(inSection: 0)-1
         if curRow > 0{
@@ -39,11 +40,17 @@ extension AttachmentCollectionView: UICollectionViewDelegate, UICollectionViewDa
     
     func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
         let cell : AttachmentCollectionViewCell?
-        if presenter?.canHasPreviewAttachment(at: indexPath.row) ?? false{
+        if presenter?.canHasPreviewAttachment(at: indexPath.row) ?? false {
             let previewCell = collectionView.dequeueReusableCell(withReuseIdentifier: AttachmentCollectionView.previewCellIdentifier, for: indexPath) as? AttachmentPreviewCollectionViewCell
             previewCell?.image = presenter?.imageForAttachment(at:indexPath.row)
             cell = previewCell
-        }else{
+        }
+//        else if presenter?.canHasPlayerAttachment(at: indexPath.row) ?? false {
+//            let playerCell = collectionView.dequeueReusableCell(withReuseIdentifier: AttachmentCollectionView.playerCellIdentifier, for: indexPath) as? CustomPlayerCell
+//            playerCell?.loadMediaCell(from: presenter?.getAttachmentPath(at: indexPath.row) ?? "", attachmentId: "123")
+//            cell = playerCell
+//        }
+        else {
             let fileCell = collectionView.dequeueReusableCell(withReuseIdentifier: AttachmentCollectionView.fileCellIdentifier, for: indexPath) as? AttachmentFileCollectionViewCell
             fileCell?.fileName = presenter?.nameForAttachment(at: indexPath.row) ?? ""
             cell = fileCell
@@ -54,6 +61,9 @@ extension AttachmentCollectionView: UICollectionViewDelegate, UICollectionViewDa
 }
 extension AttachmentCollectionView: AttachmentCollectionViewProtocol{
     func reloadCollection(){
+        reloadData()
+        layoutIfNeeded()
+        setNeedsLayout()
         reloadData()
     }
     func addItem(at index: Int){

@@ -1,0 +1,6 @@
+framework module Pods_PyrusServiceDesk_PyrusServiceDeskTests {
+  umbrella header "Pods-PyrusServiceDesk-PyrusServiceDeskTests-umbrella.h"
+
+  export *
+  module * { export * }
+}
