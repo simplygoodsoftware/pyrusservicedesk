@@ -107,7 +107,7 @@ class RootViewDeferringInsetsCallback(
         insets: WindowInsetsCompat,
         runningAnims: List<WindowInsetsAnimationCompat>
     ): WindowInsetsCompat {
-        // This is a no-op. We don't actually want to handle any WindowInsetsAnimations
+        // This is a no action. We don't actually want to handle any WindowInsetsAnimations
         return insets
     }
 

@@ -23,8 +23,8 @@ import com.pyrus.pyrusservicedesk.sdk.repositories.AccountStore
 import com.pyrus.pyrusservicedesk.sdk.repositories.IdStore
 import com.pyrus.pyrusservicedesk.sdk.repositories.LocalCommandsStore
 import com.pyrus.pyrusservicedesk.sdk.repositories.LocalTicketsStore
+import com.pyrus.pyrusservicedesk.sdk.repositories.SystemMessageStore
 import com.pyrus.pyrusservicedesk.sdk.sync.SyncMapper.mapToGetFeedRequest
-import com.pyrus.pyrusservicedesk.sdk.updates.LiveUpdates
 import com.pyrus.pyrusservicedesk.sdk.updates.Preferences
 import com.pyrus.pyrusservicedesk.sdk.web.retrofit.ServiceDeskApi
 import kotlinx.coroutines.CoroutineExceptionHandler
@@ -33,15 +33,21 @@ import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.cancel
+import kotlinx.coroutines.cancelChildren
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.newSingleThreadContext
 import kotlinx.coroutines.withContext
+import java.util.concurrent.ExecutorService
 import java.util.concurrent.LinkedBlockingQueue
 import java.util.concurrent.atomic.AtomicBoolean
+import java.util.concurrent.atomic.AtomicLong
 import kotlin.coroutines.CoroutineContext
 import kotlin.coroutines.resume
 import kotlin.coroutines.suspendCoroutine
 import kotlin.math.max
+import kotlin.math.min
 
 internal class Synchronizer(
     private val api: ServiceDeskApi,
@@ -52,11 +58,14 @@ internal class Synchronizer(
     private val idStore: IdStore,
     private val commandsStore: LocalCommandsStore,
     private val preferences: Preferences,
+    private val systemMessageStore: SystemMessageStore,
 ) : CoroutineScope {
 
+    @OptIn(DelicateCoroutinesApi::class, ExperimentalCoroutinesApi::class)
+    private val threadContext = newSingleThreadContext(TAG)
     @DelicateCoroutinesApi
     @ExperimentalCoroutinesApi
-    override val coroutineContext: CoroutineContext = newSingleThreadContext(TAG) +
+    override val coroutineContext: CoroutineContext = threadContext +
         SupervisorJob() +
         CoroutineExceptionHandler { _, throwable ->
             throwable.printStackTrace()
@@ -70,6 +79,17 @@ internal class Synchronizer(
     private val syncLoopRequestQueue = LinkedBlockingQueue<SyncReqRes>()
 
     private val failDelay = FailDelay()
+
+    private val lastSyncTime = AtomicLong(0)
+
+    @OptIn(DelicateCoroutinesApi::class, ExperimentalCoroutinesApi::class)
+    fun close() {
+        coroutineContext.cancelChildren()
+        coroutineContext.cancel()
+
+        (threadContext.executor as? ExecutorService)?.shutdown()
+        threadContext.close()
+    }
 
 
     /**
@@ -93,8 +113,24 @@ internal class Synchronizer(
         request: SyncRequest.Command,
     ): Try<TicketCommandResultDto> = suspendCoroutine { continuation ->
         val syncReqRes = SyncReqRes.CommandWithContinuation(request, continuation)
+        if (request is SyncRequest.Command.SetPushToken) {
+            syncLoopRequestQueue.removeIf { it.request is SyncRequest.Command.SetPushToken }
+        }
         syncLoopRequestQueue.add(syncReqRes)
         tryLoop()
+    }
+
+    /**
+     * Add command in syncLoopRequestQueue
+     */
+    suspend fun addCommand(
+        request: SyncRequest.Command,
+    ): Try<TicketCommandResultDto> = suspendCoroutine { continuation ->
+        val syncReqRes = SyncReqRes.CommandWithContinuation(request, continuation)
+        if (request is SyncRequest.Command.SetPushToken) {
+            syncLoopRequestQueue.removeIf { it.request is SyncRequest.Command.SetPushToken }
+        }
+        syncLoopRequestQueue.add(syncReqRes)
     }
 
 
@@ -106,6 +142,22 @@ internal class Synchronizer(
             return
         }
         runLoop(syncRequests)
+    }
+
+    private suspend fun trotRequest(syncRequests: List<SyncReqRes>) {
+        val currentTime = System.currentTimeMillis()
+        val passedTime = currentTime - lastSyncTime.get()
+        val hasCommentCommandOrOperatorTime = syncRequests.any {
+            val req = it.request
+            req is SyncRequest.Command.CreateComment || req is SyncRequest.Command.CalcOperatorTime
+        }
+        val rawDelay = if (hasCommentCommandOrOperatorTime) 1000L else 5000L
+        val diff = rawDelay - passedTime
+        if (diff > 0) {
+            val delay = min(rawDelay, diff)
+            delay(delay)
+        }
+        lastSyncTime.set(System.currentTimeMillis())
     }
 
     private fun runLoop(syncRequests: List<SyncReqRes>) = launch {
@@ -136,6 +188,8 @@ internal class Synchronizer(
             firstAppId = firstAppId,
         )
 
+
+        trotRequest(syncRequests)
         val getTicketsTry = api.getTickets(getTicketsRequest)
         
         if (getTicketsTry.isSuccess()) {
@@ -191,6 +245,9 @@ internal class Synchronizer(
             val usersWithData = account.getUsers().filter { it.userId !in authorAccessDenied }
 
             localTicketsStore.storeServerState(usersWithData, getTicketsTry.value)
+            //TODO for multichat
+            val ticketId = localTicketsStore.getTickets().lastOrNull()?.ticketId ?: idStore.ticketIdFlow.value
+            idStore.setTicketId(ticketId)
 
             val commandRequests = syncRequests.filterIsInstance<SyncReqRes.CommandWithContinuation>()
             for (request in commandRequests) {
@@ -204,9 +261,12 @@ internal class Synchronizer(
                 }
 
                 if (tryResult.isSuccess() && request.request is SyncRequest.Command.CreateComment) {
-                    if (request.request.ticketId <= 0 && tryResult.value.ticketId != null) {
-                        idStore.addTicketIdPair(request.request.ticketId, tryResult.value.ticketId)
-                        commandsStore.updateCommandsTicketId(request.request.ticketId, tryResult.value.ticketId)
+                    if (newCommentCreatedSuccessfully(request.request, tryResult.value)) {
+                        tryResult.value.ticketId?.let { idStore.addTicketIdPair(request.request.ticketId, it) }
+                        tryResult.value.ticketId?.let { commandsStore.updateCommandsTicketId(request.request.ticketId ?: 0, it) }
+                    }
+                    if (newTicketCreatedSuccessfully(modifiedRequests, request, tryResult.value)) {
+                        tryResult.value.ticketId?.let { systemMessageStore.setNecessityTimeSystemMessage(it, true) }
                     }
                     if (tryResult.value.commentId != null) {
                         idStore.addCommentIdPair(request.request.localId, tryResult.value.commentId)
@@ -224,12 +284,25 @@ internal class Synchronizer(
         }
         else {
             getTicketsTry.error.printStackTrace()
-            if ((getTicketsTry.error as? HttpException)?.statusCode == FAILED_AUTHORIZATION_ERROR_CODE
-                || (getTicketsTry.error as? HttpException)?.statusCode == FAILED_AUTHORIZATION_ERROR_CODE_FORBIDDEN) {
+            val statusCode = (getTicketsTry.error as? HttpException)?.statusCode
+            if (statusCode == FAILED_AUTHORIZATION_ERROR_CODE || statusCode == FAILED_AUTHORIZATION_ERROR_CODE_FORBIDDEN) {
                 withContext(Dispatchers.Main) {
                     PyrusServiceDesk.onAuthorizationFailed?.run()
                 }
                 failDelay.clear()
+                val getRequests = syncRequests.filterIsInstance<SyncReqRes.Data>()
+                for (request in getRequests) request.continuation.resume(getTicketsTry)
+                isRunning.set(false)
+                return@launch
+            }
+            if (statusCode == 429) {
+                preferences.saveLastActiveTime(-1L)
+                failDelay.clear()
+                withContext(Dispatchers.Main) {
+                    PyrusServiceDesk.onAuthorizationFailed?.run()
+                }
+                val getRequests = syncRequests.filterIsInstance<SyncReqRes.Data>()
+                for (request in getRequests) request.continuation.resume(getTicketsTry)
                 isRunning.set(false)
                 return@launch
             }
@@ -242,9 +315,28 @@ internal class Synchronizer(
         
     }
 
+    private fun newCommentCreatedSuccessfully(
+        request: SyncRequest.Command.CreateComment,
+        tryResult: TicketCommandResultDto,
+    ): Boolean {
+        return (request.ticketId == null || request.ticketId <= 0) && tryResult.ticketId != null
+    }
+
+    private fun newTicketCreatedSuccessfully(
+        modifiedRequests: List<SyncReqRes>,
+        request: SyncReqRes.CommandWithContinuation,
+        tryResult: TicketCommandResultDto,
+    ): Boolean {
+
+        val modifiedRequest = modifiedRequests.find { (it.request as? SyncRequest.Command.CreateComment)?.commandId == request.request.commandId } ?: request
+        val modifiedTicketId = (modifiedRequest.request as SyncRequest.Command.CreateComment).ticketId
+        return (modifiedTicketId == null || modifiedTicketId <= 0) && tryResult.ticketId != null && (modifiedRequest.request as SyncRequest.Command.CreateComment).requestNewTicket
+    }
+
     private fun onSucceedLoopEnd() {
         failDelay.clear()
         val syncRequests = getQueuedCommands(MAX_COMMANDS_PER_SYNC)
+                .filterNot { it.request is SyncRequest.Command.SetPushToken }
         if (syncRequests.isEmpty()) {
             isRunning.set(false)
         }
@@ -273,7 +365,7 @@ internal class Synchronizer(
     }
 
     private fun modifyRequests(syncRequests: List<SyncReqRes>): List<SyncReqRes> {
-        val requestNewTicketIds = hashSetOf<Long>()
+        val requestNewTicketIds = hashSetOf<Long?>()
 
         return syncRequests.map { syncReqRes ->
             val req = syncReqRes.request
@@ -285,12 +377,12 @@ internal class Synchronizer(
                 && req.rating == null
                 && req.ratingComment == null
             ) {
-                val newRequest = req.copy(ticketId = commandsStore.getNextLocalId(), requestNewTicket = true)
+                val newRequest = req.copy(ticketId = null, requestNewTicket = false)
                 return@map copySyncReqRes(syncReqRes, newRequest)
             }
 
 
-            if (req.ticketId > 0)  return@map syncReqRes
+            if (req.ticketId != null && req.ticketId > 0)  return@map syncReqRes
 
             val serverId = idStore.getTicketServerId(req.ticketId)
             if (serverId != null && serverId > 0L) {

@@ -13,15 +13,16 @@ import com.google.android.gms.tasks.OnCompleteListener
 import com.google.android.gms.tasks.Task
 import com.google.android.play.core.review.ReviewInfo
 import com.google.android.play.core.review.ReviewManagerFactory
-import com.pyrus.pyrusservicedesk.OpenTicketAction
+import com.pyrus.pyrusservicedesk.PyrusServiceDesk
 import com.pyrus.pyrusservicedesk.PyrusServiceDesk.Companion.injector
+import com.pyrus.pyrusservicedesk.PyrusServiceDesk.Companion.uiInjector
 import com.pyrus.pyrusservicedesk.R
 import com.pyrus.pyrusservicedesk.ServiceDeskConfiguration
 import com.pyrus.pyrusservicedesk._ref.SdScreens
 import com.pyrus.pyrusservicedesk._ref.utils.navigation.PyrusNavigator
-import com.pyrus.pyrusservicedesk.core.Account
 import com.pyrus.pyrusservicedesk.core.StaticRepository
 import com.pyrus.pyrusservicedesk.databinding.PsdActivityMainBinding
+import com.pyrus.pyrusservicedesk.sdk.data.StartData
 
 
 internal class MainActivity : FragmentActivity() {
@@ -33,32 +34,41 @@ internal class MainActivity : FragmentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
+        // Create UiInjector as the very first step of SDK UI lifecycle. From this point on
+        // any fragment / adapter / dialog can safely access `PyrusServiceDesk.uiInjector()`.
+        // It will be released in onDestroy() when the activity is finishing.
+        PyrusServiceDesk.ensureUiInjector()
+
         val theme = when{
             StaticRepository.getConfiguration().isDialogTheme -> R.style.PyrusServiceDesk_Dialog
             StaticRepository.getConfiguration().forceDarkAllowed -> R.style.PyrusServiceDesk
             else -> R.style.BasePyrusServiceDesk
         }
         setTheme(theme)
-
-//
-//        val decorView = window.decorView
-//        var flags: Int = decorView.getSystemUiVisibility()
-//        flags = flags and View.SYSTEM_UI_FLAG_LIGHT_NAVIGATION_BAR.inv()
-//        decorView.setSystemUiVisibility(flags)
+        val data = intent.getParcelableExtra<StartData>(KEY_DATA)
 
         binding = PsdActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
-//        setupWindowInsets(binding.root)
         WindowCompat.setDecorFitsSystemWindows(window, false)
 
         savedInstanceState?.let { ServiceDeskConfiguration.restore(it) }
         super.overridePendingTransition(R.anim.fade_in, R.anim.no_animation)
         if (savedInstanceState == null) {
-            val action = intent.getParcelableExtra<OpenTicketAction>(KEY_OPEN_TICKET_ACTION)
-            val sendComment = intent.getStringExtra(KEY_SEND_COMMENT)
-            injector().router.newRootScreen(SdScreens.RouterScreen(action, sendComment))
+            val action = data?.openTicketAction
+            val sendComment = data?.sendComment
+            uiInjector().router.newRootScreen(SdScreens.RouterScreen(action, sendComment))
         }
+    }
+
+    override fun onDestroy() {
+        // Release UiInjector only when the activity is actually finishing (not on config
+        // changes). This guarantees no Picasso / ExoPlayer / MediaSession / Cicerone leaks
+        // across SDK open/close cycles.
+        if (isFinishing) {
+            PyrusServiceDesk.releaseUiInjector()
+        }
+        super.onDestroy()
     }
 
     override fun onNewIntent(intent: Intent, caller: ComponentCaller) {
@@ -93,11 +103,11 @@ internal class MainActivity : FragmentActivity() {
 
     override fun onResume() {
         super.onResume()
-        injector().navHolder.setNavigator(navigator)
+        uiInjector().navHolder.setNavigator(navigator)
     }
 
     override fun onPause() {
-        injector().navHolder.removeNavigator()
+        uiInjector().navHolder.removeNavigator()
         super.onPause()
     }
 
@@ -109,6 +119,7 @@ internal class MainActivity : FragmentActivity() {
 
     override fun finish() {
         super.finish()
+        PyrusServiceDesk.onServiceDeskStop()
         val enter = R.anim.no_animation
         val exit = R.anim.fade_out
         if (VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
@@ -135,15 +146,11 @@ internal class MainActivity : FragmentActivity() {
 
     companion object {
 
-        private const val KEY_ACCOUNT = "KEY_ACCOUNT"
-        private const val KEY_OPEN_TICKET_ACTION = "KEY_OPEN_TICKET_ACTION"
-        private const val KEY_SEND_COMMENT = "KEY_SEND_COMMENT"
+        private const val KEY_DATA = "KEY_DATA"
 
-        fun createLaunchIntent(context: Context, account: Account, openTicketAction: OpenTicketAction?, sendComment: String?): Intent {
+        fun createLaunchIntent(context: Context, startData: StartData): Intent {
             return Intent(context, MainActivity::class.java)
-                .putExtra(KEY_ACCOUNT, account)
-                .putExtra(KEY_OPEN_TICKET_ACTION, openTicketAction)
-                .putExtra(KEY_SEND_COMMENT, sendComment)
+                .putExtra(KEY_DATA, startData)
         }
     }
 

@@ -15,6 +15,7 @@ internal sealed interface CommandParamsDto {
             .withSubtype(CreateComment::class.java, CommandsParamsType.CreateComment.typeName)
             .withSubtype(MarkTicketAsRead::class.java, CommandsParamsType.MarkTicketAsRead.typeName)
             .withSubtype(SetPushToken::class.java, CommandsParamsType.SetPushToken.typeName)
+            .withSubtype(CalcOperatorTime::class.java, CommandsParamsType.CalcOperatorTime.typeName)
             .withDefaultJsonAdapter { moshi -> CommandParamsDto_MarkTicketAsReadJsonAdapter(moshi) }
     }
 
@@ -22,6 +23,7 @@ internal sealed interface CommandParamsDto {
         CreateComment("CreateComment"),
         MarkTicketAsRead("MarkTicketAsRead"),
         SetPushToken("SetPushToken"),
+        CalcOperatorTime("CalcOperatorTime")
     }
 
     /**
@@ -41,7 +43,7 @@ internal sealed interface CommandParamsDto {
         @Json(name = "app_id") val appId: String,
         @Json(name = "comment") val comment: String?,
         @Json(name = "attachments") val attachments: List<AttachmentDataDto>?,
-        @Json(name = "ticket_id") val ticketId: Long,
+        @Json(name = "ticket_id") val ticketId: Long?,
         @Json(name = "rating") val rating: Int?,
         @Json(name = "rating_comment")  val ratingComment: String?,
         @Json(name = "extra_fields") val extraFields: Map<String, String>?,
@@ -81,5 +83,18 @@ internal sealed interface CommandParamsDto {
         override val commandType = CommandsParamsType.SetPushToken
     }
 
+    /**
+     * @param userId user id.
+     * @param appId extension id.
+     * @param ticketId ticket id.
+     */
+    @JsonClass(generateAdapter = true)
+    data class CalcOperatorTime(
+        @Json(name = "ticket_id") val ticketId: Long,
+        @Json(name = "user_id") val userId: String?,
+        @Json(name = "app_id") val appId: String,
+    ) : CommandParamsDto  {
+        override val commandType = CommandsParamsType.CalcOperatorTime
+    }
 
 }

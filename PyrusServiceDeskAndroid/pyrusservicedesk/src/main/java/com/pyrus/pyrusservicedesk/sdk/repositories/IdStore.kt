@@ -2,7 +2,6 @@ package com.pyrus.pyrusservicedesk.sdk.repositories
 
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.map
-import java.util.concurrent.atomic.AtomicLong
 import java.util.concurrent.locks.ReentrantLock
 import kotlin.concurrent.withLock
 
@@ -14,22 +13,28 @@ internal class IdStore {
     private val ticketIdStateFlow = MutableStateFlow(0)
 
     // <LocalId, ServerId>
-    private val ticketLocalIdMap = HashMap<Long, Long>()
+    private val ticketLocalIdMap = HashMap<Long?, Long>()
     // <ServerId, LocalId>
-    private val ticketServerIdMap = HashMap<Long, Long>()
+    private val ticketServerIdMap = HashMap<Long, Long?>()
 
     // <LocalId, ServerId>
     private val commentsLocalIdMap = HashMap<Long, Long>()
     // <ServerId, LocalId>
     private val commentsServerIdMap = HashMap<Long, Long>()
 
-    fun addTicketIdPair(localId: Long, serverId: Long) = ticketIdLock.withLock {
+    val ticketIdFlow = MutableStateFlow(0L)
+
+    fun setTicketId(ticketId: Long) {
+        ticketIdFlow.value = ticketId
+    }
+
+    fun addTicketIdPair(localId: Long?, serverId: Long) = ticketIdLock.withLock {
         ticketLocalIdMap[localId] = serverId
         ticketServerIdMap[serverId] = localId
         updateTicketIdTrigger()
     }
 
-    fun getTicketServerId(localId: Long): Long? = ticketIdLock.withLock {
+    fun getTicketServerId(localId: Long?): Long? = ticketIdLock.withLock {
         ticketLocalIdMap[localId]
     }
 

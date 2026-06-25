@@ -41,6 +41,17 @@ internal class ClosedTicketsTitleFingerprint(
         oldItem: TicketsView.Model.TicketsEntry.ClosedTicketTitleEntry,
         newItem: TicketsView.Model.TicketsEntry.ClosedTicketTitleEntry
     ) = true
+
+    override fun getChangePayload(
+        oldItem: TicketsView.Model.TicketsEntry.ClosedTicketTitleEntry,
+        newItem: TicketsView.Model.TicketsEntry.ClosedTicketTitleEntry,
+    ): Any? {
+        val payload = HashSet<String>()
+        if (oldItem.isExpanded != newItem.isExpanded) payload.add(getPropertyName(TicketsView.Model.TicketsEntry.ClosedTicketTitleEntry::isExpanded))
+        if (oldItem.count != newItem.count) payload.add(getPropertyName(TicketsView.Model.TicketsEntry.ClosedTicketTitleEntry::count))
+
+        return payload
+    }
 }
 
 private class ClosedTicketsTitleViewHolder(

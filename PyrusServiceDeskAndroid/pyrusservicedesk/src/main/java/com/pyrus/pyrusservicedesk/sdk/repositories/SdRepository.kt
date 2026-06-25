@@ -15,7 +15,6 @@ import com.pyrus.pyrusservicedesk._ref.utils.Try
 import com.pyrus.pyrusservicedesk._ref.utils.Try2
 import com.pyrus.pyrusservicedesk._ref.utils.isFailed
 import com.pyrus.pyrusservicedesk._ref.utils.isSuccess
-import com.pyrus.pyrusservicedesk._ref.utils.log.PLog
 import com.pyrus.pyrusservicedesk._ref.utils.toTry2
 import com.pyrus.pyrusservicedesk.core.API_VERSION_1
 import com.pyrus.pyrusservicedesk.core.API_VERSION_2
@@ -36,8 +35,11 @@ import com.pyrus.pyrusservicedesk.sdk.web.UploadFileHook
 import com.pyrus.pyrusservicedesk.sdk.web.retrofit.RemoteFileStore
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.launch
 import retrofit2.HttpException
 import java.io.InterruptedIOException
@@ -55,6 +57,7 @@ internal class SdRepository(
     private val coroutineScope: CoroutineScope,
     private val accountStore: AccountStore,
     private val idStore: IdStore,
+    private val systemMessageStore: SystemMessageStore,
 ) {
 
     private val fileHooks = ConcurrentHashMap<Long, UploadFileHook>()
@@ -69,9 +72,6 @@ internal class SdRepository(
                 for (command in initialCommands) {
                     sendCommand(command)
                 }
-            }
-            for (command in initialCommands) {
-                sendCommand(command)
             }
         }
     }
@@ -114,9 +114,10 @@ internal class SdRepository(
         val account = accountStore.getAccount()
         val serverId = idStore.getTicketServerId(ticketId) ?: ticketId
         val orgLogoUrl = getOrgLogoUrl(userId, account)
+        val welcomeMessage = getWelcomeMessage(userId, account)
 
         if (serverId <= 0 && (account.getVersion() == API_VERSION_1 || account.getVersion() == API_VERSION_2)) {
-            val ticket = getSingleTicketAndUpdateServerId(serverId, account, userId, orgLogoUrl, ticketId)
+            val ticket = getSingleTicketAndUpdateServerId(serverId, account, userId, orgLogoUrl, ticketId, welcomeMessage)
             ticket?.let { return Try2.Success(ticket) }
         }
 
@@ -128,7 +129,8 @@ internal class SdRepository(
                     ticketId = firstCommand.command.ticketId!!,
                     userId = firstCommand.command.userId ?: account.getInstanceId(),
                     addCommentCommands = commands,
-                    orgLogoUrl = orgLogoUrl
+                    orgLogoUrl = orgLogoUrl,
+                    welcomeMessage = welcomeMessage
                 )
             }
             else {
@@ -144,6 +146,7 @@ internal class SdRepository(
                     isRead = true,
                     ratingSettings = null,
                     welcomeMessage = null,
+                    operatorTimeMessage = null,
                 )
             }
             return Try2.Success(ticket)
@@ -151,7 +154,6 @@ internal class SdRepository(
 
         val application = ticketsStore.getApplications().find { account.getUsers().find { user -> user.userId == userId }?.appId == it.appId }
         val ratingSettings = application?.ratingSettings
-        val welcomeMessage = application?.welcomeMessage
 
         if (!force) {
             val localTickets = ticketsStore.getTicketsWithComments()
@@ -174,6 +176,7 @@ internal class SdRepository(
                         account = account,
                         userId = userId,
                         commands = commands,
+                        operatorResponseTimeMessage = systemMessageStore.operatorResponseTimeMessageStateFlow().value,
                     )
                     return Try.Success(singleTicket).toTry2()
                 }
@@ -185,7 +188,7 @@ internal class SdRepository(
         if (syncTry.isFailed()) return syncTry
 
         if (account.getVersion() == API_VERSION_1 || account.getVersion() == API_VERSION_2) {
-            val ticket = getSingleTicketAndUpdateServerId(serverId, account, userId, orgLogoUrl, ticketId)
+            val ticket = getSingleTicketAndUpdateServerId(serverId, account, userId, orgLogoUrl, ticketId, welcomeMessage)
             ticket?.let { return Try2.Success(ticket) }
         }
 
@@ -203,16 +206,19 @@ internal class SdRepository(
         userId: String,
         orgLogoUrl: String?,
         ticketId: Long,
+        welcomeMessage: String?,
     ): FullTicket? {
         val lastServerTicket = getLastServerTicket(serverId, account, userId, orgLogoUrl)
         val commands = commandsStore.getCommands(serverId)
         lastServerTicket?.let {
+            val serverTicketWithWelcome = lastServerTicket.copy(welcomeMessage = welcomeMessage)
             val ticket = repositoryMapper.mapToSingleTicket(
                 ticketsList = ticketsStore.getTicketsWithComments(),
                 commands = commands,
-                lastTicket = lastServerTicket,
+                lastTicket = serverTicketWithWelcome,
                 account = account,
-                userId = account.getUserId() ?: account.getInstanceId()
+                userId = account.getUserId() ?: account.getInstanceId(),
+                operatorResponseTimeMessage = systemMessageStore.operatorResponseTimeMessageStateFlow().value,
             )
             if (idStore.getTicketServerId(ticket.ticketId) == null) {
                 idStore.addTicketIdPair(ticketId, ticket.ticketId)
@@ -233,16 +239,26 @@ internal class SdRepository(
         return ticket
     }
 
+    @OptIn(ExperimentalCoroutinesApi::class)
+    fun getFeedFlowByTicketIdFlow(user: UserInternal, ticketIdFlow: Flow<Long>): Flow<FullTicket?> {
+        return ticketIdFlow
+            .distinctUntilChanged()
+            .flatMapLatest { ticketId ->
+                getFeedFlow(user, ticketId)
+            }
+    }
+
     fun getFeedFlow(user: UserInternal, ticketId: Long): Flow<FullTicket?> {
         return combine(
             accountStore.accountStateFlow(),
             ticketsStore.getTicketWithCommentsFlow(ticketId),
             commandsStore.getCommandsFlow(ticketId),
-        ) { account, ticketEntity, commands ->
+            ticketsStore.getApplicationsFlow(),
+        ) { account, ticketEntity, commands, applications->
 
             val ticketsList = ticketsStore.getTicketsWithComments()
             val orgLogoUrl = getOrgLogoUrl(user.userId, account)
-            val application = ticketsStore.getApplications().find { account.getUsers().find { u -> u.userId == user.userId }?.appId == it.appId }
+            val application = applications.find { account.getUsers().find { u -> u.userId == user.userId }?.appId == it.appId }
             val ratingSettings = application?.ratingSettings
             val welcomeMessage = application?.welcomeMessage
 
@@ -259,7 +275,8 @@ internal class SdRepository(
                              commands = commands,
                              lastTicket = lastServerTicket,
                              account = account,
-                             userId = account.getUserId() ?: account.getInstanceId()
+                             userId = account.getUserId() ?: account.getInstanceId(),
+                             operatorResponseTimeMessage = systemMessageStore.operatorResponseTimeMessageStateFlow().value,
                          )
                      }
                  }
@@ -282,7 +299,8 @@ internal class SdRepository(
                         ticketId = firstCommand.command.ticketId!!,
                         userId = firstCommand.command.userId ?: account.getInstanceId(),
                         addCommentCommands = commands,
-                        orgLogoUrl = orgLogoUrl
+                        orgLogoUrl = orgLogoUrl,
+                        welcomeMessage = welcomeMessage,
                     )
                 }
                 else {
@@ -297,7 +315,8 @@ internal class SdRepository(
                         isActive = true,
                         isRead = true,
                         ratingSettings = null,
-                        welcomeMessage = null,
+                        welcomeMessage = welcomeMessage,
+                        operatorTimeMessage = null,
                     )
                 }
             }
@@ -349,7 +368,7 @@ internal class SdRepository(
     suspend fun setPushToken(user: UserInternal, token: String, tokenType: String): Try<TicketCommandResultDto> {
         val instanceId = accountStore.getAccount().getInstanceId()
         val command = commandsStore.createPushTokenCommand(user, token, tokenType, instanceId)
-        return synchronizer.syncCommand(command)
+        return synchronizer.addCommand(command)
     }
 
     fun retryAddComment(user: UserInternal, localId: Long) = coroutineScope.launch(Dispatchers.IO) {
@@ -456,6 +475,12 @@ internal class SdRepository(
         return RequestUtils.getOrganisationLogoUrl(orgLogoUrl, account.domain)
     }
 
+    private fun getWelcomeMessage(userId: String, account: Account): String? {
+        val appId = account.getUsers().find { it.userId == userId }?.appId ?: return null
+        val applications = ticketsStore.getApplications()
+        return applications.find { it.appId == appId }?.welcomeMessage
+    }
+
     private suspend fun sendAttachment(
         attachment: Attachment,
         progressListener: (Int) -> Unit,
@@ -470,6 +495,12 @@ internal class SdRepository(
         return uploadTry
     }
 
+    suspend fun sendCalcOperatorTime(ticketId: Long): Try<TicketCommandResultDto>? { //TODO kate for multichat
+        val instanceId = accountStore.getAccount().getInstanceId()
+        val user = accountStore.getAccount().getUsers().firstOrNull() ?: return null
+        val command = commandsStore.createCalcOperatorTimeCommand(user, ticketId, instanceId)
+        return synchronizer.syncCommand(command)
+    }
     private suspend fun syncCommand(command: SyncRequest.Command) {
         val syncTry = synchronizer.syncCommand(command)
 

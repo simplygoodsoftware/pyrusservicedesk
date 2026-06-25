@@ -16,4 +16,5 @@ internal data class TicketCommandResultDto(
     @Json(name = "comment_id") val commentId: Long?,
     @Json(name = "ticket_id") val ticketId: Long?,
     @Json(name = "error") val error: ErrorDto?,
+    @Json(name = "operator_response_time_message") val operatorResponseTimeMessage: String?,
 )

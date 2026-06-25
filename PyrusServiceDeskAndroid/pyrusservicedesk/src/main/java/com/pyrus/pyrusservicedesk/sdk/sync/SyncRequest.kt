@@ -19,7 +19,7 @@ internal sealed interface SyncRequest {
             override val appId: String,
             override val creationTime: Long,
             val requestNewTicket: Boolean,
-            val ticketId: Long,
+            val ticketId: Long?,
             val comment: String?,
             val attachments: List<Attachment>?,
             val rating: Int?,
@@ -38,6 +38,15 @@ internal sealed interface SyncRequest {
         ) : Command
 
         data class MarkTicketAsRead(
+            override val localId: Long,
+            override val commandId: String,
+            override val userId: String?,
+            override val appId: String,
+            override val creationTime: Long,
+            val ticketId: Long,
+        ) : Command
+
+        data class CalcOperatorTime(
             override val localId: Long,
             override val commandId: String,
             override val userId: String?,

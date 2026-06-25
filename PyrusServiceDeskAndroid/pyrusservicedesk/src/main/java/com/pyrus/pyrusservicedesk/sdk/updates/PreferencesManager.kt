@@ -2,13 +2,19 @@ package com.pyrus.pyrusservicedesk.sdk.updates
 
 import android.annotation.SuppressLint
 import android.content.SharedPreferences
+import androidx.core.content.edit
 import com.google.gson.GsonBuilder
 import com.google.gson.reflect.TypeToken
+import kotlinx.coroutines.channels.awaitClose
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.callbackFlow
 import java.lang.reflect.Type
-import androidx.core.content.edit
 
 @SuppressLint("ApplySharedPref")
-internal class PreferencesManager(private val preferences: SharedPreferences): Preferences {
+internal class PreferencesManager(
+    private val initialAccountKey: String,
+    private val preferences: SharedPreferences
+): Preferences {
 
     private val gson = GsonBuilder().create()
 
@@ -77,11 +83,49 @@ internal class PreferencesManager(private val preferences: SharedPreferences): P
     }
 
     override fun saveLastActiveTime(time: Long) {
-        preferences.edit().putLong(PREFERENCE_KEY_LAST_ACTIVITY_TIME, time).commit()
+        val timeMap = getLastActiveTimeMap().toMutableMap()
+        timeMap[initialAccountKey] = time
+        setLastActiveTimeMap(timeMap)
+    }
+
+    fun getLastActiveTimeFlow(): Flow<Long> = callbackFlow {
+        trySend(getLastActiveTimeMap()[initialAccountKey] ?: -1)
+
+        val listener = SharedPreferences.OnSharedPreferenceChangeListener { _, changedKey ->
+            if (changedKey == PREFERENCE_KEY_LAST_ACTIVITY_TIME_MAP) {
+                trySend(getLastActiveTimeMap()[initialAccountKey] ?: -1)
+            }
+        }
+
+        preferences.registerOnSharedPreferenceChangeListener(listener)
+        awaitClose {
+            preferences.unregisterOnSharedPreferenceChangeListener(listener)
+        }
     }
 
     override fun getLastActiveTime(): Long {
-        return preferences.getLong(PREFERENCE_KEY_LAST_ACTIVITY_TIME, -1L)
+        return getLastActiveTimeMap()[initialAccountKey] ?: -1
+    }
+
+    private fun setLastActiveTimeMap(timeMap: Map<String, Long>) {
+        val json = try {
+            gson.toJson(timeMap, lastActiveTimeMapType)
+        }
+        catch (e: Exception) {
+            return
+        }
+        preferences.edit().putString(PREFERENCE_KEY_LAST_ACTIVITY_TIME_MAP, json).commit()
+    }
+
+    private fun getLastActiveTimeMap(): Map<String, Long> {
+        val timeMapJson =
+            preferences.getString(PREFERENCE_KEY_LAST_ACTIVITY_TIME_MAP, null) ?: return emptyMap()
+        return try {
+            gson.fromJson(timeMapJson, lastActiveTimeMapType)
+        }
+        catch (e: Exception) {
+            emptyMap()
+        }
     }
 
     override fun saveCurrentUserId(userId: String) {
@@ -92,15 +136,6 @@ internal class PreferencesManager(private val preferences: SharedPreferences): P
     override fun getCurrentUserId(): String? {
         return preferences.getString(PREFERENCE_KEY_USER_ID_V2, null)
     }
-
-    fun setInstanceId(instanceId: String) {
-        preferences.edit().putString(PREFERENCE_KEY_INSTANCE_ID, instanceId).commit()
-    }
-
-    fun getInstanceId(): String? {
-        return preferences.getString(PREFERENCE_KEY_INSTANCE_ID, null)
-    }
-
 
     override fun setTokenRegisterTimeList(timeList: List<Long>) {
         val json = try {
@@ -180,17 +215,15 @@ internal class PreferencesManager(private val preferences: SharedPreferences): P
         private const val RECENT_RATING_TIME = "RECENT_RATING_TIME"
         private const val CREATED_TICKETS_COUNT = "CREATED_TICKETS_COUNT"
 
-        private const val PREFERENCE_KEY_LAST_ACTIVITY_TIME = "PREFERENCE_KEY_LAST_ACTIVITY_TIME"
+        private const val PREFERENCE_KEY_LAST_ACTIVITY_TIME_MAP = "PREFERENCE_KEY_LAST_ACTIVITY_TIME_MAP"
 
         internal const val PREFERENCE_KEY_USER_ID_V2 = "PREFERENCE_KEY_USER_ID_V2"
-
-        internal const val PREFERENCE_KEY_INSTANCE_ID = "PREFERENCE_KEY_INSTANCE_ID"
-
 
         private const val PREFERENCE_KEY_TOKEN_TIME_MAP = "PREFERENCE_KEY_TOKEN_TIME_MAP"
         private const val PREFERENCE_KEY_TOKEN_TIME_LIST = "PREFERENCE_KEY_TOKEN_TIME_LIST"
 
         private val timeMapType: Type = object : TypeToken<Map<String, Long>>(){}.type
+        private val lastActiveTimeMapType: Type = object : TypeToken<Map<String, Long>>(){}.type
         private val timeListType: Type = object : TypeToken<List<Long>>(){}.type
     }
 
