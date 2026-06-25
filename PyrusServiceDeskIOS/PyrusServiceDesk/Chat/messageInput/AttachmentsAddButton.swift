@@ -2,6 +2,7 @@
 import UIKit
 protocol AttachmentsAddButtonDelegate: class {
     func attachmentChoosed(_ data:Data, _ url:URL?)
+    func addButtonPressed()
 }
 class AttachmentsAddButton: UIButton {
     weak var delegate: AttachmentsAddButtonDelegate?
@@ -12,19 +13,28 @@ class AttachmentsAddButton: UIButton {
         self.layer.cornerRadius = BUTTONS_CORNER_RADIUS
         recolor()
     }
-    private func resetImage(){
-        let color = PyrusServiceDesk.mainController?.customization?.addAttachmentButtonColor ?? UIColor.darkAppColor
-        let addImage = UIImage.PSDImage(name: "Add")?.imageWith(color: color)
+    private func resetImage() {
+        var addImage: UIImage?
+        if let color = PyrusServiceDesk.mainController?.customization?.addAttachmentButtonColor ?? PyrusServiceDesk.mainController?.customization?.barButtonTintColor  {
+            addImage = UIImage.PSDImage(name: "clip")?.imageWith(color: color)
+        } else {
+            addImage = UIImage.PSDImage(name: "clip")
+        }
         self.setImage(addImage, for: .normal)
     }
+    
     @objc func buttonPressed()
     {
-        AttachmentHandler.shared.showAttachmentActionSheet(self.findViewController()!, sourseView:self)
-        AttachmentHandler.shared.attachmentPickedBlock = { (data,url) in
-            DispatchQueue.main.async {
-                self.delegate?.attachmentChoosed(data,url)
+        delegate?.addButtonPressed()
+        DispatchQueue.main.asyncAfter(deadline: .now() + .milliseconds(560)) {
+      //  DispatchQueue.main.async {
+            AttachmentHandler.shared.showAttachmentActionSheet(self.findViewController()!, sourseView:self)
+            AttachmentHandler.shared.attachmentPickedBlock = { (data,url) in
+                DispatchQueue.main.async {
+                    self.delegate?.attachmentChoosed(data,url)
+                }
+                
             }
-            
         }
     }
     required init?(coder aDecoder: NSCoder) {
@@ -41,6 +51,5 @@ class AttachmentsAddButton: UIButton {
     }
     private func recolor() {
         resetImage()
-        self.setBackgroundColor(color: CustomizationHelper.lightGrayInputColor, forState: .highlighted)
     }
 }

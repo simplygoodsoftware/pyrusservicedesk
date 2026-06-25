@@ -2,6 +2,8 @@
 let REPLACE_STRING = "%%"
 import Foundation
 extension Date {
+    static let dateFormatter: DateFormatter = DateFormatter()
+            
     /**
      Returns string with time that has passed from "now"
      */
@@ -122,6 +124,32 @@ extension Date {
         return Calendar.current.component(.second, from: self)
     }
     
+    func messageTime() -> String {
+        let calendar = NSCalendar.autoupdatingCurrent
+        let components = calendar.dateComponents([.minute,.hour,.day,.month,.year], from: self, to: Date())
+        let minutes :Int = components.minute ?? 0
+        let hours :Int = components.hour ?? 0
+        let days :Int = components.day ?? 0
+        let months :Int = components.month ?? 0
+        let years :Int = components.year ?? 0
+        
+//        let dateFormatter = DateFormatter()
+
+        if years > 0 {
+            Date.dateFormatter.dateFormat = "dd.MM.YYYY"
+        } else if months > 0 {
+            Date.dateFormatter.dateFormat = "dd.MM"
+        } else if days >= 7 {
+            Date.dateFormatter.dateFormat = "dd.MM"
+        } else if days > 0 {
+            Date.dateFormatter.dateFormat = "EEE"
+        } else {
+            Date.dateFormatter.dateFormat = "HH:mm"
+        }
+        
+        return Date.dateFormatter.string(from: self)
+    }
+    
    /* func compareWithoutTime(with date:Date)->Bool
     {
         if date.year() == self.year() &&  date.month() == self.month() && date.day() == self.day(){
@@ -136,19 +164,17 @@ extension Date {
         case more
     }
     ///Compares to date without the time portion. Returns compareType
-    func compareWithoutTime(with date:Date)->compareType
-    {
-        if date.year() == self.year() &&  date.month() == self.month() && date.day() == self.day(){
+    func compareWithoutTime(with date:Date) -> compareType {
+        if date.year() == self.year() &&  date.month() == self.month() && date.day() == self.day() {
             return .equal
         }
-        if date.year() < self.year(){
+        if date.year() < self.year() {
             return .less
-        }
-        else if date.year() == self.year(){
-            if date.month() < self.month(){
+        } else if date.year() == self.year() {
+            if date.month() < self.month() {
                 return .less
-            }else if date.month() == self.month(){
-                if date.day() < self.day(){
+            } else if date.month() == self.month() {
+                if date.day() < self.day() {
                     return .less
                 }
             }

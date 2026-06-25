@@ -2,22 +2,22 @@ import Foundation
 class AttachmentFileCollectionViewCell: AttachmentCollectionViewCell {
     private static let dist : CGFloat = 8.0
     private static let linesNumber : Int = 2
-    var fileName : String = ""{
-        didSet{
-            label.text = fileName
+    var fileName: String = "" {
+        didSet {
+            label.text = ".\((fileName as NSString).pathExtension.uppercased())"
         }
     }
-    private static let imageName = "file2"
-    private lazy var imageView : UIImageView = {
+    private static let imageName = "file"
+    private lazy var imageView: UIImageView = {
         let imageView = UIImageView()
         let image =  UIImage.PSDImage(name: AttachmentFileCollectionViewCell.imageName)?.withRenderingMode(.alwaysTemplate)
         imageView.image = image
-        imageView.tintColor = UIColor.psdGray
+        imageView.tintColor = CustomizationHelper.labelTextColor
         return imageView
     }()
     private lazy var label : UILabel = {
         let label = UILabel()
-        label.textColor = UIColor.psdGray
+        label.textColor = CustomizationHelper.labelTextColor//UIColor.psdGray
         label.textAlignment = .center
         label.numberOfLines = AttachmentFileCollectionViewCell.linesNumber
         label.font = .label
@@ -40,7 +40,9 @@ class AttachmentFileCollectionViewCell: AttachmentCollectionViewCell {
         
         imageView.centerXAnchor.constraint(equalTo: holderView.centerXAnchor, constant: 0).isActive = true
         imageView.topAnchor.constraint(greaterThanOrEqualTo: holderView.topAnchor, constant: AttachmentFileCollectionViewCell.dist).isActive = true
-        imageView.bottomAnchor.constraint(equalTo: label.topAnchor, constant: -AttachmentFileCollectionViewCell.dist/2).isActive = true
+        imageView.heightAnchor.constraint(equalToConstant: 33).isActive = true
+        imageView.widthAnchor.constraint(equalToConstant: 33).isActive = true
+        //imageView.bottomAnchor.constraint(equalTo: label.topAnchor, constant: -AttachmentFileCollectionViewCell.dist/2).isActive = true
         
         label.leftAnchor.constraint(equalTo: holderView.leftAnchor, constant: AttachmentFileCollectionViewCell.dist).isActive = true
         label.rightAnchor.constraint(equalTo: holderView.rightAnchor, constant: -AttachmentFileCollectionViewCell.dist).isActive = true
@@ -48,5 +50,16 @@ class AttachmentFileCollectionViewCell: AttachmentCollectionViewCell {
     }
 }
 private extension UIFont {
-    static let label = CustomizationHelper.systemFont(ofSize: 9)
+    static let label = CustomizationHelper.systemFont(ofSize: 10)
+}
+
+private extension UIColor {
+    static let labelTextColor = UIColor {
+        switch $0.userInterfaceStyle {
+        case .dark:
+            return .white
+        default:
+            return UIColor(hex: "#AAA9AE") ?? .gray
+        }
+    }
 }

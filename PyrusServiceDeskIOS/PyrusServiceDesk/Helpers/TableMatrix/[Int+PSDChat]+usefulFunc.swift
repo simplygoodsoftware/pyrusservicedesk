@@ -1,36 +1,77 @@
 import Foundation
-extension Array where Element == [PSDRowMessage]{
-    mutating func removeMessage(at indexPath: IndexPath){
-        if self.count > indexPath.section && self[indexPath.section].count > indexPath.row{
-            self[indexPath.section].remove(at: indexPath.row)
-        }
-        
-    }
+extension Array where Element == [PSDRowMessage] {
     ///Create new matrix with no elements or with welcome message if it was setted.
-    mutating func defaultMatrix(){
-        if CustomizationHelper.welcomeMessage.count>0
-        {
+    mutating func defaultMatrix(createWelcome: Bool) {
+        if createWelcome && CustomizationHelper.welcomeMessage.count > 0 {
             self = [[PSDObjectsCreator.createWelcomeMessage()]]
-        }
-        else{
+        } else {
             self = [[PSDRowMessage]()]
         }
     }
+    
     ///Find indexPath of message by its local id start from bottom.
-    func findIndexPath(ofMessage localId:String)-> [IndexPath: PSDRowMessage]{
-        var indexPaths = [IndexPath:PSDRowMessage]()
-        for (section,messages) in self.enumerated().reversed(){
-            for (row,message) in messages.enumerated().reversed(){
-                if message.message.clientId.lowercased() == localId.lowercased()
-                {
+    func findIndexPath(ofMessage localId: String) -> [IndexPath: PSDRowMessage] {
+        var indexPaths = [IndexPath: PSDRowMessage]()
+        for (section, messages) in self.enumerated().reversed() {
+            for (row, message) in messages.enumerated().reversed() {
+                if message.message.clientId.lowercased() == localId.lowercased() {
                     indexPaths[IndexPath.init(row: row, section: section)] = message
                 }
             }
         }
         return indexPaths
     }
+    
+    ///Find indexPath of message by its local id start from bottom.
+    func findIndexPath(messageId: String) -> [IndexPath] {
+        var indexPaths = [IndexPath]()
+        for (section, messages) in self.enumerated().reversed() {
+            for (row, message) in messages.enumerated().reversed() {
+                if message.message.messageId == messageId {
+                    indexPaths.append(IndexPath.init(row: row, section: section))
+                }
+            }
+        }
+        return indexPaths
+    }
+    
+    ///Return last sent message index path
+    func indexPathsAfterSent(for message: PSDMessage) -> [IndexPath]? {
+        guard self.count > 0 else {
+            return nil
+        }
+        var lastSection = count - 1
+        var firstRow = 0
+        
+        var lastSentMessage = message
+        outerLoop: for (sectionIndex, row) in self.enumerated().reversed() {
+            for (itemIndex, message) in row.enumerated().reversed() {
+                if message.message.state == .sent {
+                    lastSection = sectionIndex
+                    firstRow = itemIndex
+                    lastSentMessage = message.message
+                    break outerLoop
+                }
+            }
+        }
+        
+        var indexPaths = [IndexPath]()
+        if lastSentMessage == message {
+            for i in 0...PSDObjectsCreator.rowMessagesCount(for: message) - 1 {
+                indexPaths.append(IndexPath(row: firstRow - i, section: lastSection))
+            }
+            indexPaths = indexPaths.reversed()
+        } else {
+            for _ in 0...PSDObjectsCreator.rowMessagesCount(for: message) - 1 {
+                indexPaths.append(IndexPath(row: firstRow, section: lastSection))
+            }
+        }
+        
+        return indexPaths
+    }
+    
     ///Return last index path
-    func indexPathsAfterSent(for message: PSDMessage) -> [IndexPath]?{
+    func indexPathsAfterSentStoreMessage(for message: PSDMessage) -> [IndexPath]? {
         guard self.count > 0 else {
             return nil
         }
@@ -38,81 +79,93 @@ extension Array where Element == [PSDRowMessage]{
         let lastSectionDate = self[lastSection][0].message.date
         var firstRow = 0
         var section = lastSection + 1
-        if lastSectionDate.compareWithoutTime(with: message.date) == .equal{
+        if lastSectionDate.compareWithoutTime(with: message.date) == .equal {
             firstRow = self[lastSection].count - 1
             section = lastSection
         }
         var indexPaths = [IndexPath]()
-        for i in 0...PSDObjectsCreator.rowMessagesCount(for: message)-1{
+        for i in 0...PSDObjectsCreator.rowMessagesCount(for: message) - 1 {
             indexPaths.append(IndexPath(row: firstRow + i, section: section))
         }
         return indexPaths
     }
+    
     ///Creates table matrix in format [[PSDMessage]] where in every index are messages with same date
-    mutating func create(from chat : PSDChat)
-    {
-        let unsentMessages : [[PSDRowMessage]] = self
+    mutating func create(from chat: PSDChat) {
+        let unsentMessages: [[PSDRowMessage]] = self
         var section: Int = 0
-        var previousMessage : PSDMessage? = nil
-        self.defaultMatrix()
-        if !self.isEmpty && self[0].count>0 && chat.messages.count>0{//change date of welcome message. Make it same as first message in chat
+        var previousMessage: PSDMessage? = nil
+        self.defaultMatrix(createWelcome: !(chat.messages.count > 0 && chat.messages[0].owner?.authorId?.count ?? 0 == 0) || !PyrusServiceDesk.multichats)
+        
+        if !self.isEmpty && self[0].count > 0 && chat.messages.count > 0 {
+            //change date of welcome message. Make it same as first message in chat
             self[0][0].message.date = chat.messages[0].date
+        } else if !self.isEmpty && self[0].count > 0 && chat.chatId ?? 1 <= 0
+                  && PSDMessagesStorage.getMessages(for: chat.chatId).count > 0 {
+            self[0][0].message.date = (PSDMessagesStorage.getMessages(for: chat.chatId).first?.date ?? Date()) - TimeInterval(1)
         }
-        for message in chat.messages{
-            if previousMessage == nil{
+        
+        for message in chat.messages {
+            if previousMessage == nil {
                 self[section].append(contentsOf: PSDObjectsCreator.parseMessageToRowMessage(message))
-            }
-            else if message.date.compareWithoutTime(with: previousMessage!.date)  == .equal{
+            } else if message.date.compareWithoutTime(with: previousMessage!.date) == .equal {
                 self[section].append(contentsOf: PSDObjectsCreator.parseMessageToRowMessage(message))
-            }
-            else{
-                section = section + 1
+            } else {
+                section += 1
                 self.insert(PSDObjectsCreator.parseMessageToRowMessage(message), at: section)
-                
             }
             previousMessage = message
         }
-        let comp = self.completeWithMessages(unsentMessages[0])//if user has had time to type new messages - add them to bottom
-        if(comp){
-            self.completeWithUnsentMessages()///if user has unsent messages add them to bottom
-        }
-        if
-            chat.showRating,
-            let ratingText = chat.showRatingText
-        {
+        
+        //if user has had time to type new messages - add them to bottom
+        let comp = self.completeWithMessages(unsentMessages[0])
+        if chat.showRating, let ratingText = chat.showRatingText {
             _ = addRatingMessage(ratingText)
         }
+        if !PyrusServiceDesk.multichats && !chat.isActive && !chat.showRating, chat.messages.count > 0 && chat.messages.last?.state == .sent {
+            _ = addWelcomeMessage()
+        }
+        if comp {
+            self.completeWithUnsentMessages(for: chat.chatId ?? 0)///if user has unsent messages add them to bottom
+        }
         
+        if self.count > 0 && chat.chatId == 0 {
+            self[0].sort(by: { $0.message.date < $1.message.date })
+        }
     }
+    
     ///Detect if need show avatar. If current user is same as next don't show avatar
-    func needShowAvatar(at indexPath: IndexPath)->Bool{
+    func needShowAvatar(at indexPath: IndexPath) -> Bool {
         if emptyMessage(at: indexPath) {
             return false
         }
-        if indexPath.row == 0 && indexPath.section == 0 &&  CustomizationHelper.welcomeMessage.count>0 {
-            return true//if first message is welcome - do show avatar
+        if indexPath.row == 0 && indexPath.section == 0 && CustomizationHelper.welcomeMessage.count > 0 {
+            return true //if first message is welcome - do show avatar
         }
+        
         let currentUser = personForMessage(at: IndexPath.init(row: indexPath.row, section: indexPath.section))
-        let nextUser = personForMessage(at: nextNotEmpty(indexPath))
+        let nextUser = personForMessage(at: previousNotEmpty(indexPath))
         if currentUser as? PSDPlaceholderUser != nil{
-            let previousUser = personForMessage(at: previousNotEmpty(indexPath))
+            let previousUser = personForMessage(at: nextNotEmpty(indexPath))
             if let previousUser = previousUser, previousUser.personId != PyrusServiceDesk.userId{
                 return false
             }else{
                 return true
             }
         }
-        if(!(currentUser?.equalTo(user:nextUser) ?? false) || nextUser == nil){
+        
+        if !(currentUser?.equalTo(user:nextUser) ?? false) || nextUser == nil {
             return true
         }
         return false
     }
+    
     ///If current user is same as previous don't show name
-    func needShowName(at indexPath: IndexPath)->Bool{
+    func needShowName(at indexPath: IndexPath) -> Bool {
         if emptyMessage(at: indexPath) {
             return false
         }
-        let previousUser = personForMessage(at: previousNotEmpty(indexPath))
+        let previousUser = personForMessage(at: nextNotEmpty(indexPath))
         let currentUser = personForMessage(at: IndexPath.init(row: indexPath.row, section: indexPath.section))
         if
             let currentUser = currentUser,
@@ -121,21 +174,32 @@ extension Array where Element == [PSDRowMessage]{
         {
             return false
         }
-        if currentUser as? PSDPlaceholderUser != nil{
-            if let previousUser = previousUser, previousUser.personId != PyrusServiceDesk.userId{
+        
+        if currentUser as? PSDPlaceholderUser != nil {
+            if let previousUser = previousUser, previousUser.personId != PyrusServiceDesk.userId {
                 return false
             }else{
                 return true
             }
         }
-        if(!(currentUser?.equalTo(user:previousUser) ?? false) || previousUser == nil){
+        
+        if !(currentUser?.equalTo(user:previousUser) ?? false) || previousUser == nil {
             return true
         }
         return false
     }
+    
+    func isPreviousSystemMessage(at indexPath: IndexPath) -> Bool {
+        let indexPath = nextNotEmpty(indexPath)
+        if indexPath.row >= 0 && count > indexPath.section && self[indexPath.section].count > indexPath.row {
+            return self[indexPath.section][indexPath.row].isSystemMessage
+        }
+        return false
+    }
+    
     ///Find ower for massage at IndexPath. If tableMatrix has info - return it, or nil if not.
-    private func personForMessage(at indexPath: IndexPath)->PSDUser?{
-        if(indexPath.row>=0 && count>indexPath.section && self[indexPath.section].count > indexPath.row){
+    private func personForMessage(at indexPath: IndexPath) -> PSDUser? {
+        if indexPath.row >= 0 && count > indexPath.section && self[indexPath.section].count > indexPath.row {
             return self[indexPath.section][indexPath.row].message.owner
         }
         return nil
@@ -149,7 +213,8 @@ extension Array where Element == [PSDRowMessage]{
             self[indexPath.section].count > indexPath.row
         {
             let rowMessage = self[indexPath.section][indexPath.row]
-            return rowMessage.message.attachments?.count ?? 0 == 0 && rowMessage.attributedText?.string.count ?? 0 == 0
+            return rowMessage.message.attachments?.count ?? 0 == 0
+            && rowMessage.attributedText?.string.count ?? 0 == 0
         }
         return false
     }
@@ -174,27 +239,26 @@ extension Array where Element == [PSDRowMessage]{
     
     ///Returns first date in section
     ///- parameter section: section wich date need to be retrn
-    func date(of section:Int)->Date?
-    {
-        if count > section &&  self[section].count > 0
-        {
+    func date(of section: Int) -> Date? {
+        if count > section && self[section].count > 0 {
             let rowMessage = self[section][0]
             return rowMessage.message.date
         }
         return nil
     }
     
-    func has(indexPath:IndexPath)->Bool{
-        if self.count > indexPath.section && self[indexPath.section].count > indexPath.row{
+    func has(indexPath: IndexPath) -> Bool {
+        if self.count > indexPath.section && self[indexPath.section].count > indexPath.row {
             return true
         }
         return false
     }
+    
     ///Returns the date of last  message from user
     func lastUserMessageDate() -> Date? {
-        for messageByDate in self.reversed(){
-            for messageRow in messageByDate.reversed(){
-                if messageRow.message.owner.personId == PyrusServiceDesk.userId && messageRow.hasId(){
+        for messageByDate in self.reversed() {
+            for messageRow in messageByDate.reversed() {
+                if messageRow.message.owner?.personId == PyrusServiceDesk.userId && messageRow.hasId() {
                     return messageRow.message.date
                 }
             }

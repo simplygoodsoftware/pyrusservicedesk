@@ -15,7 +15,7 @@ struct PSDFilesManager {
         guard fileName.count > 0, messageLocalId.count > 0 else {
             return nil
         }
-        let url = localURL(fileName: fileName,messageLocalId: messageLocalId)
+        let url = localURL(fileName: fileName, messageLocalId: messageLocalId)
         guard let data = dataFrom(url: url) else{
             return nil
         }
@@ -39,7 +39,7 @@ struct PSDFilesManager {
         return dataFrom(url: url)
     }
     ///Return data from file placed in url
-    private static func dataFrom(url: URL) -> Data? {
+    static func dataFrom(url: URL) -> Data? {
         do {
             let data: Data = try Data(contentsOf: url)
             return data

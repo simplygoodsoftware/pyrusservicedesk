@@ -1,6 +1,11 @@
 import Foundation
+<<<<<<< HEAD:PyrusServiceDeskIOS/PyrusServiceDesk/Chat/messageInput/PSDTextRateView.swift
 var rateArray = [RatingTextValue]()
 private let STACK_SPACING: CGFloat = 8
+=======
+let rateEmodjiArray = [1 : "😩", 2 : "🙁", 3 : "😐", 4 : "🙂", 5 :"😄"]
+private let STACK_SPACING: CGFloat = 10
+>>>>>>> sb/sd/3.0.61:PyrusServiceDeskIOS/PyrusServiceDesk/Chat/messageInput/PSDRateView.swift
 
 protocol PSDRateViewDelegate: NSObjectProtocol{
     func didTapRate(_ rateValue: Int)
@@ -45,6 +50,7 @@ class PSDTextRateView: PSDView, RateViewProtocol {
     }
     
     private func createRate() {
+<<<<<<< HEAD:PyrusServiceDeskIOS/PyrusServiceDesk/Chat/messageInput/PSDTextRateView.swift
         stackView.arrangedSubviews.forEach { subview in
             stackView.removeArrangedSubview(subview)
             subview.removeFromSuperview()
@@ -57,6 +63,14 @@ class PSDTextRateView: PSDView, RateViewProtocol {
             button.layer.cornerRadius = 8
             button.contentEdgeInsets = UIEdgeInsets(top: 9.5, left: 12, bottom: 9.5, right: 12)
             button.setBackgroundColor(color: CustomizationHelper.supportMassageBackgroundColor, forState: .normal)
+=======
+        for rate  in rateEmodjiArray.sorted(by: {$0.0 < $1.0}){
+            let button  = UIButton()
+            button.layer.cornerRadius = BUTTON_CORNER_RADIUS
+            button.setTitle(rate.value, for: .normal)
+            button.tag = rate.key
+            button.setBackgroundColor(color: CustomizationHelper.lightGrayViewColor, forState: .normal)
+>>>>>>> sb/sd/3.0.61:PyrusServiceDeskIOS/PyrusServiceDesk/Chat/messageInput/PSDRateView.swift
             button.setBackgroundColor(color: CustomizationHelper.grayViewColor, forState: .highlighted)
             button.tag = rate.rating
             

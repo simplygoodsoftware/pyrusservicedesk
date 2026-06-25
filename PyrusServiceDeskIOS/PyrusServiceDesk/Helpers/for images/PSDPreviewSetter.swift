@@ -10,6 +10,9 @@ struct PSDPreviewSetter {
         case loaded//file was download
         case needLoad // file is not downloaded and need to download
     }
+    
+    private static let imageRepository = ImageRepository()
+    private static let audioRepository = AudioRepository()
     ///Load preview of PSDAttachment and set it to PSDAttachmentView
     ///- parameter attachment: PSDAttachment which preview need to be loaded
     ///- parameter localId: the local id of message
@@ -18,12 +21,53 @@ struct PSDPreviewSetter {
         setPreview(of: attachment, in: attachmentView, delegate: delegate, animated: animated, startAfter: 0)
     }
     private static func setPreview(of attachment:PSDAttachment?, in attachmentView: PSDAttachmentView?, delegate: PSDPreviewSetterDelegate?, animated: Bool, startAfter:Int){
-         DispatchQueue.main.asyncAfter(deadline: .now() + .seconds(startAfter), execute:{
+         DispatchQueue.main.asyncAfter(deadline: .now() + .seconds(startAfter), execute: { [weak imageRepository] in
             guard let attachment = attachment, let attachmentView = attachmentView else{
                 return
             }
-            if let previewImage = attachment.previewImage{
-                if(attachmentView.previewImage != previewImage){//if its doesnt set yet - set image
+             
+//             if attachment.isAudio {
+//                 (attachmentView as? PSDAudioAttachmentView)?.changeLoadingProggress(0.5)
+//                 if !(audioRepository?.audioExists(name: attachment.name, id: attachment.serverIdentifer) ?? false) {
+//                     if Int(attachment.serverIdentifer ?? "") == nil {
+//                         (attachmentView as? PSDAudioAttachmentView)?.presenter?.update(
+//                            fileUrl: URL(fileURLWithPath: attachment.localPath ?? ""),
+//                            attachmentId: attachment.serverIdentifer ?? ""
+//                         )
+//                         (attachmentView as? PSDAudioAttachmentView)?.changeLoadingProggress(1)
+//                             (attachmentView as? PSDAudioAttachmentView)?.changeState(.stopped)
+//                         return 
+//                     }
+//                     
+//                     if !attachment.emptyId() {
+//                         let url = PyrusServiceDeskAPI.PSDURL(type: .download, ticketId: attachment.serverIdentifer!)
+//                         PyrusServiceDesk.mainSession.dataTask(with: url) { data, response, error in
+//                             if let data, data.count != 0 {
+//                                 do {
+//                                     try audioRepository?.saveAudio(data, name: attachment.name, id: attachment.serverIdentifer!)
+//                                     (attachmentView as? PSDAudioAttachmentView)?.changeLoadingProggress(1)
+//                                     DispatchQueue.main.asyncAfter(deadline: .now() + 0.2) {
+//                                         (attachmentView as? PSDAudioAttachmentView)?.changeState(.stopped)
+//                                     }
+//                                     
+//                                 } catch {
+//                                     
+//                                 }
+//                                 
+//                             }
+//                         }.resume()
+//                     }
+//                 } else {
+//                     (attachmentView as? PSDAudioAttachmentView)?.changeLoadingProggress(1)
+//                     (attachmentView as? PSDAudioAttachmentView)?.changeState(.stopped)
+//                 }
+//             }
+            if let previewImage = attachment.previewImage {
+                if (attachmentView.previewImage != previewImage) {//if its doesnt set yet - set image
+                    attachmentView.setPreviewImage(previewImage, animated: animated)
+                }
+            } else if let previewImage = imageRepository?.loadImage(name: attachment.name, id: attachment.serverIdentifer, type: .image) {
+                if attachmentView.previewImage != previewImage {//if its doesnt set yet - set image
                     attachmentView.setPreviewImage(previewImage, animated: animated)
                 }
             }
@@ -36,10 +80,11 @@ struct PSDPreviewSetter {
                     }
                     loadPreview(of: attachment){
                         (image : UIImage?, retryAfter:Bool) in
-                        DispatchQueue.main.async {
-                            if image != nil{
+                        DispatchQueue.main.async { //[weak imageRepository] in
+                            if let image {
                                 loadingAttachments[attachment.localId] = .loaded
                                 attachment.previewImage = image
+                               // imageRepository?.saveImage(image, name: attachment.name, type: .image)
                                 attachmentView?.setPreviewImage(image, animated: true)//set image with animation
                                 DispatchQueue.main.async {delegate?.reloadCells(with: attachment.localId)}
                             }else{

@@ -142,7 +142,7 @@ class AttachmentHandler: NSObject,UIImagePickerControllerDelegate, UINavigationC
             if UIImagePickerController.isSourceTypeAvailable(.camera){
                 let cameraController = UIImagePickerController()
                 cameraController.delegate = self
-                cameraController.modalPresentationStyle = .overFullScreen
+                cameraController.modalPresentationStyle = .fullScreen
                 cameraController.sourceType = .camera
                 cameraController.mediaTypes = [kUTTypeImage as String, kUTTypeMovie as String, kUTTypeVideo as String]
                 viewController.present(cameraController, animated: true, completion: nil)
@@ -156,7 +156,7 @@ class AttachmentHandler: NSObject,UIImagePickerControllerDelegate, UINavigationC
         DispatchQueue.main.async {
             if UIImagePickerController.isSourceTypeAvailable(.photoLibrary){
                 let libraryController = UIImagePickerController()
-                libraryController.modalPresentationStyle = .overFullScreen
+                libraryController.modalPresentationStyle = .fullScreen
                 libraryController.delegate = self
                 libraryController.sourceType = .photoLibrary
                 libraryController.mediaTypes = [kUTTypeImage as String, kUTTypeMovie as String, kUTTypeVideo as String]

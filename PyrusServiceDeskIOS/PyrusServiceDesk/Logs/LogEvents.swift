@@ -1,6 +1,6 @@
 import Foundation
 ///The protocol for log some events from PyrusServiceDesk
-@objc public protocol LogEvents{
+@objc public protocol LogEvents {
     ///The callback that PyrusServiceDesk was closed
     @objc func logPyrusServiceDesk(event: String)
 }

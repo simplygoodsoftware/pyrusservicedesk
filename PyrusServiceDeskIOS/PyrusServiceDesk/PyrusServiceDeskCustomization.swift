@@ -7,6 +7,10 @@ import Foundation
     ///Chat title using to show in navigation Bar title
     private(set) var chatTitle: String?
     
+    func setChatTitile(_ title: String?) {
+        chatTitle = title
+    }
+    
     /// Customize color. If not set, the application tint color or blue is used.
     private(set) var themeColor: UIColor?
     
@@ -30,11 +34,25 @@ import Foundation
     ///View to show in  chat navigation bar
     private(set) var chatTitleView: UIView?
     
+    func setChatTitileView(_ title: UIView?) {
+        chatTitleView = title
+    }
+    
     ///Custom UIBarButtonItem to show in right side of navigationBar. Default is nil.
     private(set) var customRightBarButtonItem: UIBarButtonItem?
     
     ///Custom UIBarButtonItem to show in left side of navigation Bar. Default value is nil. If nil there will be drawn back button. If specify custom left button, Pyrus ServiceDesk cannot be closed.
     private(set) var customLeftBarButtonItem: UIBarButtonItem?
+    
+    func setCustomLeftBarButtonItem(_ button: UIBarButtonItem?) {
+        customLeftBarButtonItem = button
+    }
+    
+    private(set) var chatsLeftBarButtonItem: UIBarButtonItem?
+    
+    private(set) var chatsRightBarButtonItem: UIView?
+    
+    private(set) var titleHandler: (() -> Void)?
     
     ///The view to show additional information under chat
     private(set) var infoView: PSDInfoView?
@@ -158,6 +176,27 @@ import Foundation
         ///Custom UIBarButtonItem to show in left side of navigation Bar. Default value is nil. If nil there will be drawn back button. If specify custom left button, Pyrus ServiceDesk cannot be closed.
         @objc public func setCustomLeftBarButtonItem(_ customLeftBarButtonItem: UIBarButtonItem?) -> Builder {
             configuration.customLeftBarButtonItem = customLeftBarButtonItem
+            return self
+        }
+        
+        @discardableResult
+
+        @objc public func setChatsLeftBarButtonItem(_ customLeftBarButtonItem: UIBarButtonItem?) -> Builder {
+            configuration.chatsLeftBarButtonItem = customLeftBarButtonItem
+            return self
+        }
+        
+        @discardableResult
+
+        @objc public func setChatsRightBarButtonItem(_ customRightBarButtonItem: UIView?) -> Builder {
+            configuration.chatsRightBarButtonItem = customRightBarButtonItem
+            return self
+        }
+        
+        @discardableResult
+
+        @objc public func setTitleHandler(_ titleHandler: (() -> Void)?) -> Builder {
+            configuration.titleHandler = titleHandler
             return self
         }
         

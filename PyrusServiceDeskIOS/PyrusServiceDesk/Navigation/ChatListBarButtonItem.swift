@@ -173,10 +173,10 @@ class ChatListBarButtonItem: UIBarButtonItem {
             object: nil)
     }
     private func checkAvailability()->Bool{
-//        if(PyrusServiceDesk.newMessagesCount == 0 && PyrusServiceDesk.chatsCount==0 && !PyrusServiceDesk.hasInfo){
-//            return false
+        //if(PyrusServiceDesk.newMessagesCount == 0 && PyrusServiceDesk.chatsCount==0 && !PyrusServiceDesk.hasInfo){
+            return false
 //        }
-        return true
+//        return true
     }
     
     required init?(coder aDecoder: NSCoder) {

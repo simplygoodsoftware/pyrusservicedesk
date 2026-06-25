@@ -58,8 +58,9 @@ extension NSString {
     /// - Parameter needMention: Хак для черновика и редактирования комментария, по дефолту true, можно не заполнять
     func parseXMLToAttributedString(needDetectLink: Bool = true,
                                     needMention: Bool = true,
-                                    fontColor: UIColor) -> (NSAttributedString?, [ButtonData]?) {
-        return parseXMLToAttributedString(needDetectLink: needDetectLink, needMention: needMention, font: .messageTextView, fontColor: fontColor)
+                                    fontColor: UIColor,
+                                    font: UIFont = .messageTextView) -> (NSAttributedString?, [ButtonData]?) {
+        return parseXMLToAttributedString(needDetectLink: needDetectLink, needMention: needMention, font: font, fontColor: fontColor)
     }
     
     /// Преобразует текст из **HTML** разметки в массив библиотек, **ключ** в которых - тип текста, а **значение** - сам NSAttrinbutedString
@@ -247,30 +248,13 @@ extension String {
         //Используем поиск по параметрам которые уникальные для определенного тега
         for type in HardTagType.allCases {
             if self.contains(type.pattern) {
-                switch type {
-                case .href:
-                    return (HTMLTag.a, true, searchURLParam(type.parametr))
-                case .dataType:
-                    guard
-                        let dataType = searchDataType(type.parametr)
-                    else {
-                        continue
-                    }
-                    switch dataType {
-                    case .button:
-                        for type in HardTagType.allCases {
-                            if self.contains(type.pattern) {
-                                switch type {
-                                case .href:
-                                    let urlParam = searchURLParam(type.rawValue)
-                                    return (HTMLTag.a, true, ButtonData(string: nil, url: urlParam))
-                                default:
-                                    break
-                                }
-                            }
-                        }
-                        return (HTMLTag.a, true, ButtonData(string: nil, url: nil))
-                    }
+                let href = searchURLParam(HardTagType.href.rawValue)
+                let dataType = searchDataType(HardTagType.dataType.rawValue)
+                
+                if dataType == .button {
+                    return (HTMLTag.a, true, ButtonData(string: nil, url: href))
+                } else if href != nil {
+                    return (HTMLTag.a, true, href)
                 }
             }
         }

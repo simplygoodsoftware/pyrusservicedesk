@@ -3,6 +3,8 @@ protocol AttachmentCollectionViewPresenterProtocol : NSObjectProtocol{
     func attachmentsNumber() -> Int
     func attachmentsForSend()->[PSDAttachment]
     func canHasPreviewAttachment(at index:Int)->Bool
+    func canHasPlayerAttachment(at index:Int)->Bool
+    func getAttachmentPath(at index: Int) -> String?
     func imageForAttachment(at index:Int)->UIImage?
     func nameForAttachment(at index:Int)->String
     func addAttachment(_ attachment : PSDAttachment)
@@ -38,6 +40,14 @@ extension AttachmentCollectionViewPresenter : AttachmentCollectionViewPresenterP
         let attachment = attachments[index]
         return attachment.isImage
     }
+    func canHasPlayerAttachment(at index:Int) -> Bool {
+        if attachments.count <= index {
+            return false
+        }
+        let attachment = attachments[index]
+
+        return attachment.isAudio
+    }
     func imageForAttachment(at index:Int)->UIImage?{
         if attachments.count <= index{
             return nil
@@ -52,6 +62,11 @@ extension AttachmentCollectionViewPresenter : AttachmentCollectionViewPresenterP
         let attachment = attachments[index]
         return attachment.name
     }
+    
+    func getAttachmentPath(at index: Int) -> String? {
+        return attachments[index].localPath
+    }
+    
     func addAttachment(_ attachment : PSDAttachment){
         attachments.append(attachment)
         
