@@ -186,7 +186,7 @@ internal class FilePreviewActivity: ConnectionActivityBase<FilePreviewViewModel>
                 binding.pictureView.visibility = VISIBLE
                 binding.noConnection.root.visibility = GONE
                 if (!pageFinishedSuccessfully) {
-                    PyrusServiceDesk.injector().picasso
+                    PyrusServiceDesk.uiInjector().picasso
                         .load(model.fileUri)
                         .into(binding.pictureView)
                 }

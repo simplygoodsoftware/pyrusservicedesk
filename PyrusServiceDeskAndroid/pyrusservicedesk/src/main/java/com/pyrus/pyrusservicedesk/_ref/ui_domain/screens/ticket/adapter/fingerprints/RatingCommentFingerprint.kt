@@ -36,6 +36,22 @@ internal class RatingCommentFingerprint(
         oldItem: CommentEntry.Rating,
         newItem: CommentEntry.Rating
     ) = true
+
+    override fun getChangePayload(
+        oldItem: CommentEntry.Rating,
+        newItem: CommentEntry.Rating,
+    ): Any? {
+        val payload = HashSet<String>()
+
+        if (oldItem.creationTime != newItem.creationTime) payload.add(getPropertyName(CommentEntry.Rating::creationTime))
+        if (oldItem.id != newItem.id) payload.add(getPropertyName(CommentEntry.Rating::id))
+        if (oldItem.hasError != newItem.hasError) payload.add(getPropertyName(CommentEntry.Rating::hasError))
+        if (oldItem.isLocal != newItem.isLocal) payload.add(getPropertyName(CommentEntry.Rating::isLocal))
+        if (oldItem.rating != newItem.rating) payload.add(getPropertyName(CommentEntry.Rating::rating))
+        if (oldItem.statusIconRes != newItem.statusIconRes) payload.add(getPropertyName(CommentEntry.Rating::statusIconRes))
+        if (oldItem.statusIconIsVisible != newItem.statusIconIsVisible) payload.add(getPropertyName(CommentEntry.Rating::statusIconIsVisible))
+        return payload
+    }
 }
 
 internal class RatingCommentHolder(

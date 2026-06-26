@@ -5,6 +5,7 @@ import androidx.room.Embedded
 import androidx.room.Entity
 import androidx.room.Index
 import com.pyrus.pyrusservicedesk.sdk.repositories.data_base.SdDatabase.Companion.COMMENTS_TABLE
+import com.pyrus.pyrusservicedesk.sdk.sync.SystemCommentType
 
 @Entity(
     tableName = COMMENTS_TABLE,
@@ -23,6 +24,8 @@ internal data class CommentEntity(
     @ColumnInfo(name = "created_at") val creationDate: Long,
     @ColumnInfo(name = "rating") val rating: Int?,
     @Embedded("author_") val author: AuthorEntity?,
+    @ColumnInfo(name = "is_system") val isSystem: Boolean,
+    @ColumnInfo(name = "system_comment_type") val systemCommentType: Int
 ) {
     override fun toString(): String {
         return body.toString()

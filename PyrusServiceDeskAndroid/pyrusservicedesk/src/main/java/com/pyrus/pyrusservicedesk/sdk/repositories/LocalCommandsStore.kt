@@ -1,6 +1,7 @@
 package com.pyrus.pyrusservicedesk.sdk.repositories
 
 import android.content.SharedPreferences
+import com.pyrus.pyrusservicedesk.User
 import com.pyrus.pyrusservicedesk._ref.ui_domain.screens.ticket.adapter.fingerprints.Status
 import com.pyrus.pyrusservicedesk._ref.utils.ConfigUtils
 import com.pyrus.pyrusservicedesk.sdk.data.intermediate.FileData
@@ -141,6 +142,19 @@ internal class LocalCommandsStore(
         creationTime = System.currentTimeMillis(),
         token = token,
         tokenType = tokenType
+    )
+
+    fun createCalcOperatorTimeCommand(
+        user: User,
+        ticketId: Long,
+        instanceId: String,
+    ) = SyncRequest.Command.CalcOperatorTime(
+        localId = getNextLocalId(),
+        commandId = createCommandId(),
+        userId = if (user.userId == instanceId) null else user.userId,
+        appId = user.appId,
+        creationTime = System.currentTimeMillis(),
+        ticketId = ticketId,
     )
 
     fun updateCommandsTicketId(localId: Long, serverId: Long) {

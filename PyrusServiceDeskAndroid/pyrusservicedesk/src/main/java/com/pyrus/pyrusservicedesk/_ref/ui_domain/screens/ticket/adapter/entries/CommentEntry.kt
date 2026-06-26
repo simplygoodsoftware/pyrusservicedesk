@@ -43,6 +43,25 @@ internal sealed interface CommentEntry {
             val text: String
         ) : Comment
 
+        data class CommentSystemText(
+            override val creationTime: Long,
+            override val entryId: String,
+            override val id: Long,
+            override val isInbound: Boolean,
+            override val isSupport: Boolean,
+            override val hasError: Boolean,
+            override val isLocal: Boolean,
+            override val isWelcomeMessage: Boolean,
+            override val timeText: TextProvider?,
+            override val status: Status,
+            override val authorName: TextProvider?,
+            override val authorKey: String?,
+            override val showAuthorName: Boolean,
+            override val avatarUrl: String?,
+            override val showAvatar: Boolean,
+            val text: String
+        ) : Comment
+
         data class CommentPreviewableAttachment(
             override val creationTime: Long,
             override val entryId: String,

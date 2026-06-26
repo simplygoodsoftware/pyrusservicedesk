@@ -8,9 +8,8 @@ Get chat from server.
 struct PSDGetChat {
     private static let SHOW_RATING_KEY = "show_rating"
     private static let SHOW_RATING_TEXT_KEY = "show_rating_text"
-    private static let WELCOME_MESSAGE = "welcome_message"
     private static let KEEP_UNREAD_RATING_KEY = "keep_unread"
-    private static let RATING_SETTINGS_KEY = "rating_settings"
+    private static let TICKET_ID_KEY = "ticket_id"
     private static var chatGetters : [Int: ChatGetter] = [Int: ChatGetter]()
   //  private static var sessionTask : URLSessionDataTask? = nil
     /**
@@ -19,9 +18,14 @@ struct PSDGetChat {
      - parameter delegate: PSDGetDelegate. Works only if showError is true. If not equal to nil - calls showNoConnectionView(), when no internet connection. Else remembers the current ViewController. And if it has not changed when response receive, on it displays an error.
      On completion returns PSDChat object if it was received.
      */
-    static func get(needShowError: Bool, delegate: PSDGetDelegate?, keepUnread: Bool = false, completion: @escaping (_ chat: PSDChat?) -> Void) {
+    static func get(needShowError: Bool, delegate: PSDGetDelegate?, keepUnread: Bool = false, ticketId: Int = 0, userId: String? = nil, completion: @escaping (_ chat: PSDChat?) -> Void) {
         //remove old session if it is
         remove()
+        if PyrusServiceDesk.multichats && ticketId == 0 {
+            let chat = PSDChat(chatId: nil, date: Date(), messages: [])
+            completion(chat)
+            return
+        }
         var topViewController : UIViewController? = nil
         DispatchQueue.main.async {
             //if need show error - remember current top UIViewController
@@ -29,7 +33,15 @@ struct PSDGetChat {
                 topViewController = UIApplication.topViewController()
             }
         }
-        let parameters = [KEEP_UNREAD_RATING_KEY: keepUnread, "api_sign":  PyrusServiceDesk.apiSign()] as [String : Any]
+        var parameters = [KEEP_UNREAD_RATING_KEY: keepUnread, "api_sign":  PyrusServiceDesk.apiSign()] as [String : Any]
+        if ticketId != 0 {
+            parameters[TICKET_ID_KEY] = ticketId
+        }
+        if PyrusServiceDesk.multichats {
+            parameters["user_id"] = userId ?? PyrusServiceDesk.currentUserId ?? PyrusServiceDesk.customUserId ?? PyrusServiceDesk.userId
+            parameters["app_id"] = PyrusServiceDesk.currentClientId ?? PyrusServiceDesk.clientId
+           // parameters["author_id"] = PyrusServiceDesk.authorId
+        }
         let request = URLRequest.createRequest(type: .chatFeed, parameters: parameters)
     
         let localId = UUID().uuidString
@@ -105,48 +117,42 @@ struct PSDGetChat {
     {
         var massages : [PSDMessage] = [PSDMessage]()
         massages = PSDGetChat.generateMessages(from: response["comments"] as? NSArray ?? NSArray())
-        let chat = PSDChat(date: Date(), messages: massages)
+        let ticketId = response[PSDGetChat.TICKET_ID_KEY] as? Int
+        let chat = PSDChat(chatId: ticketId, date: Date(), messages: massages)
         chat.showRating = (response[PSDGetChat.SHOW_RATING_KEY] as? Bool) ?? false
         chat.showRatingText = response[PSDGetChat.SHOW_RATING_TEXT_KEY] as? String
-        if let ratingSettings = response[PSDGetChat.RATING_SETTINGS_KEY] as? NSDictionary {
-            do {
-                let jsonData = try JSONSerialization.data(withJSONObject: ratingSettings, options: [])
-                let decoder = JSONDecoder()
-                let settings = try decoder.decode(PSDRatingSettings.self, from: jsonData)
-                PyrusServiceDesk.ratingSettings = settings
-            } catch {
-                print("Error decoding JSON: \(error)")
-            }
-        }
-        PyrusServiceDesk.ratingSettings.ratingText = chat.showRatingText
-        if let welcomeMessage = response[PSDGetChat.WELCOME_MESSAGE] as? String {
-            PyrusServiceDesk.mainController?.customization?.setWelcomeMessage(welcomeMessage)
-        }
+        chat.lastReadedCommentId = response["last_read_comment_id"] as? Int
+        chat.isActive = response["is_active"] as? Bool ?? true
         return chat
     }
-    private static func generateMessages(from array:NSArray) -> [PSDMessage]
+    static func generateMessages(from array:NSArray) -> [PSDMessage]
     {
-        var messages = [PSDMessage]()
-        if array.count == 0 {
+        var messages : [PSDMessage] = []
+        if(array.count == 0){
             return messages
         }
-        for i in 0...array.count-1 {
-            guard let dic = array[i] as? [String: Any] else {
+        for i in 0...array.count-1{
+            guard let dic :[String:Any] = array[i] as? [String : Any] else{
                 continue
             }
-            let serverDate = (dic[createdAtParameter] as? String)?.dateFromString(format: "yyyy-MM-dd'T'HH:mm:ss'Z'")
-            if serverDate == nil  {
-                EventsLogger.logEvent(.invalidDate, additionalInfo: "\(dic[createdAtParameter])")
+            let date: Date = (dic[createdAtParameter] as? String)?.dateFromString(format: "yyyy-MM-dd'T'HH:mm:ss'Z'", callerType: .message, id: dic.stringOfKey(commentIdParameter)) ?? Date()
+            var IsInbound : Bool = dic["is_inbound"] as? Bool ??  true
+            let user: PSDUser?
+            if PyrusServiceDesk.multichats {
+                if let author = dic["author"] as? [String : Any],
+                let authorId = author["author_id"] as? String {
+                    IsInbound = authorId == PyrusServiceDesk.authorId
+                } else {
+                    IsInbound = false
+                }
             }
-            let date: Date = serverDate ?? Date()
-            let IsInbound : Bool = dic["is_inbound"] as? Bool ??  true
-            let user :PSDUser
-            if IsInbound{
+            
+            if IsInbound {
                 user = PSDUsers.user
             }else{
                 user = createUser(from: dic)
-                
             }
+            
             var textForMessage: String? = nil
             var attachmentsForMessage: [PSDAttachment]? = nil
             var rating: Int? = nil
@@ -169,9 +175,21 @@ struct PSDGetChat {
                     attachmentsForMessage?.append(attachment)
                 }
             }
-            if (attachmentsForMessage?.count ?? 0) > 0 || (textForMessage?.count ?? 0) > 0 {
+            
+            if let author = dic["author"] as? [String : Any],
+            let authorId = author["author_id"] as? String {
+                IsInbound = authorId == PyrusServiceDesk.authorId
+            } else {
+                IsInbound = false
+            }
+            
+            if (attachmentsForMessage?.count ?? 0) > 0 || (textForMessage?.count ?? 0) > 0 || rating != nil{
                 let message = PSDMessage(text: textForMessage, attachments:attachmentsForMessage, messageId: dic.stringOfKey(commentIdParameter), owner: user, date: date)
                 message.rating = rating
+                message.isOutgoing = IsInbound
+                message.isSupportMessage = (dic["is_inbound"] as? Bool ?? false)
+                message.isSystemMessage = dic["is_system"] as? Bool ?? false
+                message.systemCommentType = dic["system_comment_type"] as? Int
                 let clientId = dic.stringOfKey(CLIENT_ID_KEY)
                 if clientId.count > 0 {
                     message.clientId = clientId
@@ -192,7 +210,11 @@ struct PSDGetChat {
         let response = dic["author"] as? [String : Any]
         
         if(response != nil){
-            let user : PSDUser = PSDUsers.supportUsersContain(name: response!.stringOfKey("name"), imagePath: response!.stringOfKey("avatar_id"))
+            let user : PSDUser = PSDUsers.supportUsersContain(
+                name: response!.stringOfKey("name"),
+                imagePath: response!.stringOfKey("avatar_id"),
+                authorId: response?.stringOfKey("author_id")
+            )
             return user
         }
         else{

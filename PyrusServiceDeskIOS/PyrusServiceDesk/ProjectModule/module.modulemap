@@ -1,0 +1,4 @@
+module PyrusServiceDeskPrivate {
+    header "../InternalHeader.h"
+    export *
+}

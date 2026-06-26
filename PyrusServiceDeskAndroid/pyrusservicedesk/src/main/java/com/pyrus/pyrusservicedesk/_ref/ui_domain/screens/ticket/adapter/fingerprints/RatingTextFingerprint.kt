@@ -34,6 +34,16 @@ internal class RatingTextFingerprint(
         oldItem: CommentEntry.RatingTextValues,
         newItem: CommentEntry.RatingTextValues
     ) = true
+
+    override fun getChangePayload(
+        oldItem: CommentEntry.RatingTextValues,
+        newItem: CommentEntry.RatingTextValues,
+    ): Any? {
+        val payload = HashSet<String>()
+        if (oldItem.rating != newItem.rating) payload.add(getPropertyName(CommentEntry.RatingTextValues::rating))
+        if (oldItem.text != newItem.text) payload.add(getPropertyName(CommentEntry.RatingTextValues::text))
+        return payload
+    }
 }
 
 internal class RatingTextHolder(

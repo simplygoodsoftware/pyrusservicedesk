@@ -49,17 +49,28 @@ class PSDUploadView: UIButton {
     }
     var color: UIColor = .white {
         didSet {
-            if color.isDarkColor {
-                self.setImage(self.image(for: .selected)?.imageWith(color: .black), for: .selected)
-                self.setImage(UIImage.PSDImage(name: "DownloadBlack"), for: .normal)
-                progressLayer.strokeColor = UIColor.black.cgColor
-                shapeLayer.fillColor = UIColor.black.withAlphaComponent(0.1).cgColor
-            }
-            else {
+//            if color.isDarkColor {
+//                self.setImage(self.image(for: .selected)?.imageWith(color: .black), for: .selected)
+//               // if self.downloadState == .sent {
+//                    self.setImage(UIImage.PSDImage(name: "DownloadBlack"), for: .normal)
+//              //  }
+//                progressLayer.strokeColor = UIColor.black.cgColor
+//                shapeLayer.fillColor = UIColor.black.withAlphaComponent(0.1).cgColor
+//            }
+//            else {
                 self.setImage(self.image(for: .selected)?.imageWith(color: color), for: .selected)
-                self.setImage(UIImage.PSDImage(name: "DownloadWhite"), for: .normal)
+              //  if self.downloadState == .sent {
+                    self.setImage(UIImage.PSDImage(name: "downloadFile"), for: .normal)
+              //  }
                 progressLayer.strokeColor = color.cgColor
+            shapeLayer.fillColor = UIColor.clear.cgColor
+            backgroundColor = CustomizationHelper.previewBakcgroundColor//.previewBackgroundColor//UIColor.white.withAlphaComponent(0.1).cgColor
+            layer.cornerRadius = 25
+//            }
+            if self.downloadState != .sent {
+                backgroundColor = .clear
                 shapeLayer.fillColor = UIColor.white.withAlphaComponent(0.1).cgColor
+                drawWithLoad()
             }
         }
     }
@@ -104,7 +115,7 @@ class PSDUploadView: UIButton {
         if downloadState == .cantSend{
             self.progress = 0.0
         }
-        else if progress != 1{
+        else if progress != 1 {
             self.delegate?.stopUpload()
         }
         
@@ -135,4 +146,16 @@ class PSDUploadView: UIButton {
     }
     
 
+}
+
+private extension UIColor {
+    static let previewBackgroundColor = UIColor {
+        switch $0.userInterfaceStyle {
+        case .dark:
+            return UIColor(hex: "#7182FD") ?? .white
+        default:
+            return UIColor.appColor.mixed(with: UIColor.white, amount: 0.1)
+           // return UIColor.white.withAlphaComponent(0.1)//UIColor(hex: "#4861F2") ?? .darkAppColor
+        }
+    }
 }

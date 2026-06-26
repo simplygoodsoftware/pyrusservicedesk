@@ -1,12 +1,14 @@
-
 import UIKit
+
 let MESSAGE_CORNER_RADIUS : CGFloat = 15.0
-class PSDMessageView: PSDView{
+
+enum ColorType {
+    case brightColor
+    case defaultColor
+}
+
+class PSDMessageView: PSDView {
     weak var delegate: PSDRetryActionDelegate?
-    enum colorType {
-        case brightColor
-        case defaultColor
-    }
     
     private lazy var timeView: UIView = {
         let view = UIView()
@@ -24,29 +26,34 @@ class PSDMessageView: PSDView{
     }()
     
     ///A label with time when message was sent.
-    private lazy var timeLabel: UILabel =
-    {
+    private lazy var timeLabel: UILabel = {
         let label = UILabel()
         label.textColor = CustomizationHelper.textColorForTable.withAlphaComponent(TIME_ALPHA)
         label.font = DETAIL_FONT
         return label;
     }()
     
-    var color : colorType = .brightColor
-    {
+    var color : ColorType = .brightColor {
         didSet{
             recolor()
         }
     }
-    override func recolor(){
+    
+    override func recolor() {
         super.recolor()
         switch (color) {
         case .brightColor:
             self.backgroundColor = CustomizationHelper.userMassageBackgroundColor
             recolorWithTextColor(CustomizationHelper.userMassageTextColor)
+//            if let attachmentView = attachmentView as? PSDAudioAttachmentView {
+//                attachmentView.sliderColor = .brightColor
+//            }
         case .defaultColor:
             self.backgroundColor = CustomizationHelper.supportMassageBackgroundColor
             recolorWithTextColor(CustomizationHelper.supportMassageTextColor)
+//            if let attachmentView = attachmentView as? PSDAudioAttachmentView {
+//                attachmentView.sliderColor = .defaultColor
+//            }
         }
         setColorToTimeView()
     }
@@ -72,48 +79,66 @@ class PSDMessageView: PSDView{
         attachmentView?.color = color
         separatorView.tintColor = color.withAlphaComponent(PSDMessageView.separatorAlpha)
     }
+    
     private static let distToBoard : CGFloat = 10.0
     private let PLACEHOLDER_HEIGHT: CGFloat = 20
     private let PLACEHOLDER_WIDTH: CGFloat = 50
     var maxWidth: CGFloat = 50
     private static let separatorAlpha :CGFloat = 0.8
-    func draw(message:PSDRowMessage)
-    {
+    
+    let audioRepository: AudioRepositoryProtocol? = AudioRepository()
+    
+    func draw(message: PSDRowMessage) {
         timeLabel.text = message.message.date.timeAsString()
         messageTextView.attributedText = message.attributedText
+        messageTextView.linkTextAttributes = [
+            NSAttributedString.Key.underlineStyle: NSUnderlineStyle.single.rawValue,
+            NSAttributedString.Key.foregroundColor: message.message.isOutgoing ? UIColor.appColor : UIColor.appColor
+        ]
         attachmentView?.removeFromSuperview()
         placeholderImageView.isHidden = message.message as? PSDPlaceholderMessage == nil
         placeholderBottomConstraint?.isActive = message.message as? PSDPlaceholderMessage != nil
         placeholderRightConstraint?.isActive = message.message as? PSDPlaceholderMessage != nil
         attachmentView = nil
-        if(self.backgroundColor == .clear){
+        
+        if backgroundColor == .clear {
             self.recolor()
         }
         var hasImageAttachment = false
-        if let data = message.attachment{
-            if data.isImage{
+        if let data = message.attachment {
+            if data.isImage {
                 hasImageAttachment = true
                 attachmentView = PSDImageAttachmentView.init(frame: CGRect.zero)
             }
-            else{
+//            else if data.isAudio {
+//                let audioAttachmentView = PSDAudioAttachmentView.init(frame: CGRect.zero)
+//                if let fileUrl = audioRepository?.getAudioURL(name: data.name, id: data.serverIdentifer) {
+//                    let presenter = AudioPlayerPresenter(view: audioAttachmentView, fileUrl: fileUrl, attachmentId: data.serverIdentifer ?? "", attachment: data)
+//                    audioAttachmentView.presenter = presenter
+//                }
+//                audioAttachmentView.changeState(.loading)
+//                attachmentView = audioAttachmentView
+//            }
+        else {
                 attachmentView = PSDFileAttachmentView.init(frame: CGRect.zero)
             }
-            guard let attachmentView = attachmentView else{
+            guard let attachmentView = attachmentView else {
                 return
             }
+            
             attachmentHolderView.addSubview(attachmentView)
             attachmentView.maxWidth = maxWidth
             attachmentView.draw(data, state: message.message.state)
             attachmentView.addZeroConstraint([.leading,.trailing,.top,.bottom])
             recolor()
         }
-        if let rating = message.rating {
-            ratingLabel.text = PyrusServiceDesk.ratingSettings.ratingTextValues?.first(where: {$0.rating == rating})?.text//rateArray[rating]
-            if(message.attachment == nil && message.text.count == 0){
+        if let rating = message.rating, message.message.isRatingMessage {
+            ratingLabel.text = rateArray.first(where: {$0.rating == rating})?.text
+            if message.attachment == nil && message.text.count == 0 {
                 self.backgroundColor = .clear
             }
             timeLabel.text = nil
-        }else{
+        } else {
             ratingLabel.text = nil
         }
         
@@ -125,14 +150,17 @@ class PSDMessageView: PSDView{
         messageEmptyHeightConstraint?.isActive = messageTextView.text.count == 0
         updateTimeLayout()
     }
+    
     lazy private var tapGesture : UITapGestureRecognizer = {
         let gesture = UITapGestureRecognizer(target: self, action: #selector(handleTap))
         gesture.cancelsTouchesInView = false
         return gesture
     }()
+    
     @objc private func handleTap(sender: UITapGestureRecognizer) {
         self.delegate?.tryShowRetryAction()
     }
+    
     private static let messageTextViewFontSize : CGFloat = 18.0
     private static let separatorHeight : CGFloat = 3.0
     private(set) var messageTextView : PSDCopyTextView = {
@@ -148,26 +176,30 @@ class PSDMessageView: PSDView{
         text.contentInset = UIEdgeInsets.zero
         
         text.dataDetectorTypes = [.link,.phoneNumber]
-        text.linkTextAttributes = [ NSAttributedString.Key.underlineStyle: NSUnderlineStyle.single.rawValue]
+//        text.linkTextAttributes = [NSAttributedString.Key.underlineStyle: NSUnderlineStyle.single.rawValue]
         
         return text
     }()
+    
     private let placeholderImageView: UIImageView = {
         let imageView = UIImageView()
         imageView.image = UIImage.PSDImage(name: "messagePlaceholder")
         imageView.contentMode = .scaleAspectFit
         return imageView
     }()
+    
     private var ratingLabel: UILabel = {
         let label = UILabel()
         label.font = .ratingLabel
         return label
     }()
+    
     private lazy var attachmentHolderView : UIView = {
         let view = UIView()
         view.backgroundColor = .clear
         return view
     }()
+    
     private lazy var separatorView : UIImageView = {
         let view = UIImageView()
         let image = UIImage.PSDImage(name: "dotted_line")?.withRenderingMode(.alwaysTemplate)
@@ -175,6 +207,7 @@ class PSDMessageView: PSDView{
         view.contentMode = .scaleAspectFit
         return view
     }()
+    
     var attachmentView : PSDAttachmentView?
     override init(frame: CGRect) {
         super.init(frame: frame)
@@ -188,9 +221,11 @@ class PSDMessageView: PSDView{
         addSubview(timeView)
         addConstraints()
     }
+    
     required init?(coder aDecoder: NSCoder) {
         super.init(coder: aDecoder)
     }
+    
     private var placeholderBottomConstraint: NSLayoutConstraint?
     private var placeholderRightConstraint: NSLayoutConstraint?
     private var separatorWidthConstraint: NSLayoutConstraint?
@@ -202,8 +237,7 @@ class PSDMessageView: PSDView{
     private var timeInBottomAndLineConstraints = [NSLayoutConstraint]()
     private var timeInLineConstraints = [NSLayoutConstraint]()
     
-    private func addConstraints()
-    {
+    private func addConstraints() {
         timeConstraints()
         messageTextView.translatesAutoresizingMaskIntoConstraints = false
         attachmentHolderView.translatesAutoresizingMaskIntoConstraints = false
@@ -245,15 +279,15 @@ class PSDMessageView: PSDView{
         
         let bTrailingConstraint = messageTextView.trailingAnchor.constraint(lessThanOrEqualTo: trailingAnchor, constant: 0)
         bTrailingConstraint.isActive = true
-        let bBottomConstraint = messageTextView.bottomAnchor.constraint(equalTo: timeView.topAnchor)
+        let bBottomConstraint = messageTextView.bottomAnchor.constraint(equalTo: timeView.topAnchor, constant: 12)
         bBottomConstraint.isActive = true
         timeInBottomConstraints.append(bTrailingConstraint)
         timeInBottomConstraints.append(bBottomConstraint)
         timeInBottomAndLineConstraints.append(bTrailingConstraint)
         
-        let lTrailingConstraint = messageTextView.trailingAnchor.constraint(lessThanOrEqualTo: timeView.leadingAnchor, constant: 0)
+        let lTrailingConstraint = messageTextView.trailingAnchor.constraint(lessThanOrEqualTo: timeView.leadingAnchor, constant: 8)
         lTrailingConstraint.isActive = false
-        let lBottomConstaint = messageTextView.bottomAnchor.constraint(equalTo: bottomAnchor)
+        let lBottomConstaint = messageTextView.bottomAnchor.constraint(equalTo: bottomAnchor, constant: 0)
         lBottomConstaint.isActive = false
         timeInLineConstraints.append(lBottomConstaint)
         timeInLineConstraints.append(lTrailingConstraint)
@@ -262,41 +296,42 @@ class PSDMessageView: PSDView{
         messageEmptyHeightConstraint = messageTextView.heightAnchor.constraint(equalToConstant: 0)
     }
     
-    private func timeConstraints()
-    {
+    private func timeConstraints() {
         timeView.translatesAutoresizingMaskIntoConstraints = false
         timeView.trailingAnchor.constraint(equalTo: trailingAnchor, constant: -TIME_LEFT_OFFSET).isActive = true
-        timeView.bottomAnchor.constraint(equalTo: bottomAnchor, constant: -TIME_LEFT_OFFSET).isActive = true
+        timeView.bottomAnchor.constraint(equalTo: bottomAnchor, constant: -4).isActive = true
     }
     
     private func updateTimeLayout() {
         let maxWidth = self.maxWidth - TEXT_SAFE_AREA
-        let layoutData = messageTextView.attributedText.lastCharacterMaxX(self.maxWidth)//300.6932925581932 for maxWidth = 276.0,
+        let layoutData = messageTextView.attributedText.lastCharacterMaxX(self.maxWidth)
         let maxX = layoutData.maxX + (TEXT_SAFE_AREA / 2)
         let numLines = layoutData.numberOfLines
-        let expectedTimeSize = OFFSET_FOR_DETAIL + TIME_BORDER + TIME_BORDER + TIME_LEFT_OFFSET + TIME_LEFT_OFFSET + TIME_LEFT_OFFSET
-        let size = messageTextView.attributedText.boundingRect(with: CGSize(width: maxWidth, height: CGFloat.greatestFiniteMagnitude),
-                                                               options: [.usesLineFragmentOrigin, .usesFontLeading],
-                                                               context: nil)
+        
+        let expectedTimeSize = OFFSET_FOR_DETAIL + TIME_BORDER + TIME_BORDER + TIME_LEFT_OFFSET * 3
+        
+        let size = messageTextView.attributedText.boundingRect(
+            with: CGSize(width: maxWidth, height: .greatestFiniteMagnitude),
+            options: [.usesLineFragmentOrigin, .usesFontLeading],
+            context: nil
+        )
+        
         let canBeInLine = maxX < maxWidth - expectedTimeSize
         let growWidth = canBeInLine && (size.width + expectedTimeSize < maxWidth)
-        if messageTextView.attributedText.string.count == 0 || (canBeInLine && numLines > 1 && !growWidth) {
-            activate(false, constraintsIn: timeInBottomConstraints)
-            activate(false, constraintsIn: timeInLineConstraints)
-            activate(true, constraintsIn: timeInBottomAndLineConstraints)
-        }
-        else if canBeInLine && growWidth {
-            activate(false, constraintsIn: timeInBottomAndLineConstraints)
-            activate(false, constraintsIn: timeInBottomConstraints)
-            activate(true, constraintsIn: timeInLineConstraints)
+        
+        let useLine = canBeInLine && growWidth
+        
+        if useLine {
+            NSLayoutConstraint.deactivate(timeInBottomConstraints)
+            NSLayoutConstraint.activate(timeInLineConstraints)
         } else {
-            activate(false, constraintsIn: timeInBottomAndLineConstraints)
-            activate(false, constraintsIn: timeInLineConstraints)
-            activate(true, constraintsIn: timeInBottomConstraints)
+            NSLayoutConstraint.deactivate(timeInLineConstraints)
+            NSLayoutConstraint.activate(timeInBottomConstraints)
         }
-        setNeedsLayout()
+        
         layoutIfNeeded()
     }
+
     
     private func activate(_ activate: Bool, constraintsIn constraintsArray: [NSLayoutConstraint]) {
         for con in constraintsArray {
@@ -308,7 +343,8 @@ class PSDMessageView: PSDView{
         let width = self.frame.size.width - (PSDMessageView.distToBoard*2)
         separatorWidthConstraint?.constant = width > 0 ? width : 0//change separator width, or it will resize its parent view
     }
-    override var intrinsicContentSize: CGSize{
+    
+    override var intrinsicContentSize: CGSize {
         return CGSize.zero
     }
 }

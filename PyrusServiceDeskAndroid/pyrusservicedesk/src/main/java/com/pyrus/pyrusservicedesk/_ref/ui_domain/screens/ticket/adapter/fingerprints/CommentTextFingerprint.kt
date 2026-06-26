@@ -44,7 +44,7 @@ internal class CommentTextFingerprint(
 
     override fun getViewHolder(
         layoutInflater: LayoutInflater,
-        parent: ViewGroup
+        parent: ViewGroup,
     ): BaseViewHolder<CommentEntry.Comment.CommentText> = CommentTextHolder(
         PsdViewHolderCommentTextBinding.inflate(layoutInflater, parent, false),
         onEvent
@@ -52,8 +52,34 @@ internal class CommentTextFingerprint(
 
     override fun areItemsTheSame(
         oldItem: CommentEntry.Comment.CommentText,
-        newItem: CommentEntry.Comment.CommentText
+        newItem: CommentEntry.Comment.CommentText,
     ) = newItem.entryId == oldItem.entryId
+
+    override fun getChangePayload(
+        oldItem: CommentEntry.Comment.CommentText,
+        newItem: CommentEntry.Comment.CommentText,
+    ): Any? {
+        val payload = HashSet<String>()
+
+        if (oldItem.creationTime != newItem.creationTime) payload.add(getPropertyName(CommentEntry.Comment.CommentText::creationTime))
+        if (oldItem.entryId != newItem.entryId) payload.add(getPropertyName(CommentEntry.Comment.CommentText::entryId))
+        if (oldItem.id != newItem.id) payload.add(getPropertyName(CommentEntry.Comment.CommentText::id))
+        if (oldItem.isInbound != newItem.isInbound) payload.add(getPropertyName(CommentEntry.Comment.CommentText::isInbound))
+        if (oldItem.isSupport != newItem.isSupport) payload.add(getPropertyName(CommentEntry.Comment.CommentText::isSupport))
+        if (oldItem.hasError != newItem.hasError) payload.add(getPropertyName(CommentEntry.Comment.CommentText::hasError))
+        if (oldItem.isLocal != newItem.isLocal) payload.add(getPropertyName(CommentEntry.Comment.CommentText::isLocal))
+        if (oldItem.isWelcomeMessage != newItem.isWelcomeMessage) payload.add(getPropertyName(CommentEntry.Comment.CommentText::isWelcomeMessage))
+        if (oldItem.timeText != newItem.timeText) payload.add(getPropertyName(CommentEntry.Comment.CommentText::timeText))
+        if (oldItem.status != newItem.status) payload.add(getPropertyName(CommentEntry.Comment.CommentText::status))
+        if (oldItem.authorName != newItem.authorName) payload.add(getPropertyName(CommentEntry.Comment.CommentText::authorName))
+        if (oldItem.authorKey != newItem.authorKey) payload.add(getPropertyName(CommentEntry.Comment.CommentText::authorKey))
+        if (oldItem.showAuthorName != newItem.showAuthorName) payload.add(getPropertyName(CommentEntry.Comment.CommentText::showAuthorName))
+        if (oldItem.avatarUrl != newItem.avatarUrl) payload.add(getPropertyName(CommentEntry.Comment.CommentText::avatarUrl))
+        if (oldItem.showAvatar != newItem.showAvatar) payload.add(getPropertyName(CommentEntry.Comment.CommentText::showAvatar))
+        if (oldItem.text != newItem.text) payload.add(getPropertyName(CommentEntry.Comment.CommentText::text))
+
+        return payload
+    }
 }
 
 internal class CommentTextHolder(
@@ -104,60 +130,62 @@ internal class CommentTextHolder(
             content = entry.text
             id = entry.id
             hasError = entry.hasError
+            setStatus(entry.status, entry.isInbound)
 
-            this.entry::isInbound.payloadCheck {
-                setIsInboundParameters(entry.isInbound)
-                setStatus(Status.Completed, entry.isInbound)
-            }
-            this.entry::status.payloadCheck {
-                setStatus(entry.status, entry.isInbound)
-            }
 
-            this.entry::text.payloadCheck {
-                val filteredText = entry.text
-                binding.comment.commentText.text = replaceLinkTagsWithSpans(filteredText)
-                LinkifyCompat.addLinks(
-                    binding.comment.commentText,
-                    Linkify.WEB_URLS or Linkify.PHONE_NUMBERS
-                )
-                addDeepLinks(binding.comment.commentText)
-                binding.comment.commentText.movementMethod = LinkMovementMethod.getInstance()
-            }
-            this.entry::timeText.payloadCheck {
-                binding.comment.textTime.text =
-                    entry.timeText?.text(binding.root.context)
-            }
-            this.entry::showAuthorName.payloadCheck {
-                if (!entry.isInbound)
-                    binding.authorName.isVisible = entry.showAuthorName
-                else
-                    binding.authorName.visibility = View.GONE
-            }
-            this.entry::authorName.payloadCheck {
-                if (!entry.isInbound)
-                    binding.authorName.text =
-                        entry.authorName?.text(binding.authorName.context)
-            }
-            this.entry::showAvatar.payloadCheck {
-                binding.avatar.visibility =
-                    if (entry.showAvatar) View.VISIBLE else View.INVISIBLE
-                if (entry.isInbound) binding.avatar.visibility = View.GONE
-            }
-            this.entry::avatarUrl.payloadCheck {
-                if (!entry.isInbound) {
-                    val placeHolder =
-                        if (entry.isSupport) ConfigUtils.getSupportAvatar(itemView.context)
-                        else ConfigUtils.getAuthorAvatar(itemView.context)
-                    if (entry.showAvatar) {
-                        PyrusServiceDesk.injector().picasso
-                            .load(entry.avatarUrl)
-                            .placeholder(placeHolder)
-                            .transform(CIRCLE_TRANSFORMATION)
-                            .into(binding.avatar)
-                    }
+        this.entry::isInbound.payloadCheck {
+            setIsInboundParameters(entry.isInbound)
+            setStatus(Status.Completed, entry.isInbound)
+        }
+        this.entry::status.payloadCheck {
+            setStatus(entry.status, entry.isInbound)
+        }
+
+        this.entry::text.payloadCheck {
+            val filteredText = entry.text
+            binding.comment.commentText.text = replaceLinkTagsWithSpans(filteredText)
+            LinkifyCompat.addLinks(
+                binding.comment.commentText,
+                Linkify.WEB_URLS or Linkify.PHONE_NUMBERS
+            )
+            addDeepLinks(binding.comment.commentText)
+            binding.comment.commentText.movementMethod = LinkMovementMethod.getInstance()
+        }
+        this.entry::timeText.payloadCheck {
+            binding.comment.textTime.text =
+                entry.timeText?.text(binding.root.context)
+        }
+        this.entry::showAuthorName.payloadCheck {
+            if (!entry.isInbound)
+                binding.authorName.isVisible = entry.showAuthorName
+            else
+                binding.authorName.visibility = View.GONE
+        }
+        this.entry::authorName.payloadCheck {
+            if (!entry.isInbound)
+                binding.authorName.text =
+                    entry.authorName?.text(binding.authorName.context)
+        }
+        this.entry::showAvatar.payloadCheck {
+            binding.avatar.visibility =
+                if (entry.showAvatar) View.VISIBLE else View.INVISIBLE
+            if (entry.isInbound) binding.avatar.visibility = View.GONE
+        }
+        this.entry::avatarUrl.payloadCheck {
+            if (!entry.isInbound) {
+                val placeHolder =
+                    if (entry.isSupport) ConfigUtils.getSupportAvatar(itemView.context)
+                    else ConfigUtils.getAuthorAvatar(itemView.context)
+                if (entry.showAvatar) {
+                    PyrusServiceDesk.uiInjector().picasso
+                        .load(entry.avatarUrl)
+                        .placeholder(placeHolder)
+                        .transform(CIRCLE_TRANSFORMATION)
+                        .into(binding.avatar)
                 }
             }
         }
+    }
 
     private fun setIsInboundParameters(isInbound: Boolean) {
         val backgroundColor = if (!isInbound) {

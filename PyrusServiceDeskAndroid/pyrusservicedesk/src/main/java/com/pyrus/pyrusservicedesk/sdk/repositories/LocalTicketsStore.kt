@@ -26,6 +26,10 @@ internal class LocalTicketsStore(
         return ticketsDao.getApplications()
     }
 
+    fun getApplicationsFlow(): Flow<List<ApplicationEntity>> {
+        return ticketsDao.getOnlyApplicationsFlow()
+    }
+
     fun getMembersByUserId(userId: String): List<MemberEntity> {
         return ticketsDao.getMembers(userId)
     }

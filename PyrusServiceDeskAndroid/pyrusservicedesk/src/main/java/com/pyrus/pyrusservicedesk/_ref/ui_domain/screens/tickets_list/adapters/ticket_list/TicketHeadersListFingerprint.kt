@@ -50,6 +50,24 @@ internal class TicketHeadersListFingerprint(
         newItem: TicketsView.Model.TicketsEntry.TicketHeaderEntry
     ) = oldItem.ticketId == newItem.ticketId
 
+    override fun getChangePayload(
+        oldItem: TicketsView.Model.TicketsEntry.TicketHeaderEntry,
+        newItem: TicketsView.Model.TicketsEntry.TicketHeaderEntry,
+    ): Any? {
+        val payload = HashSet<String>()
+
+        if (oldItem.ticketId != newItem.ticketId) payload.add(getPropertyName(TicketsView.Model.TicketsEntry.TicketHeaderEntry::ticketId))
+        if (oldItem.userId != newItem.userId) payload.add(getPropertyName(TicketsView.Model.TicketsEntry.TicketHeaderEntry::userId))
+        if (oldItem.title != newItem.title) payload.add(getPropertyName(TicketsView.Model.TicketsEntry.TicketHeaderEntry::title))
+        if (oldItem.lastCommentText != newItem.lastCommentText) payload.add(getPropertyName(TicketsView.Model.TicketsEntry.TicketHeaderEntry::lastCommentText))
+        if (oldItem.lastCommentIconRes != newItem.lastCommentIconRes) payload.add(getPropertyName(TicketsView.Model.TicketsEntry.TicketHeaderEntry::lastCommentIconRes))
+        if (oldItem.lastCommentCreationTime != newItem.lastCommentCreationTime) payload.add(getPropertyName(TicketsView.Model.TicketsEntry.TicketHeaderEntry::lastCommentCreationTime))
+        if (oldItem.isRead != newItem.isRead) payload.add(getPropertyName(TicketsView.Model.TicketsEntry.TicketHeaderEntry::isRead))
+        if (oldItem.isLoading != newItem.isLoading) payload.add(getPropertyName(TicketsView.Model.TicketsEntry.TicketHeaderEntry::isLoading))
+
+
+        return payload
+    }
 }
 
 internal class TicketsListViewHolder(

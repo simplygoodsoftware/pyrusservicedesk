@@ -69,7 +69,7 @@ interface TicketContract {
         }
 
         sealed interface Inner : Message {
-            class CommentsUpdated(val ticket: FullTicket?) : Inner
+            class CommentsUpdated(val ticket: FullTicket?, val welcomeMessage: String?) : Inner
             class UpdateCommentsFailed(val getTicketsError: GetTicketsError) : Inner
             class UpdateCommentsCompleted(
                 val ticket: FullTicket,
@@ -85,6 +85,7 @@ interface TicketContract {
             data object Exit : Inner
             data class OnOpenPreview(val fileData: FileData) : Inner
             class ShowToast(val message: TextProvider): Inner
+            data class ShowOperatorTimeMessage(val message: String?): Inner
         }
 
     }
@@ -118,7 +119,7 @@ interface TicketContract {
             object FeedFlow : Inner
             object CheckAccount : Inner
             object Close : Inner
-            class SendTextComment(
+            class SendTextCommentIfIsNotNullOrBlank(
                 val text: String?,
                 val ticketId: Long,
             ) : Inner
@@ -129,7 +130,7 @@ interface TicketContract {
             ) : Inner
             class OpenPreview(val attachment: Attachment, val userId: String?) : Inner
             class SaveDraft(val draft: String) : Inner
-            class ReadTicket(val ticketId: Long) : Inner
+            class ReadTicketIfNeed(val ticketId: Long) : Inner
             class ListenAttachVariant(val key: String, val uri: Any) : Inner
             class ListenErrorCommentAction(val localId: Long, val key: String, val action: Any) : Inner
             class CancelFileUpload(val localId: Long, val attachmentId: Long) : Inner
@@ -145,6 +146,7 @@ interface TicketContract {
             class PauseAudioIf(val file: String) : Inner
             object PauseAudio : Inner
             data object UpdateAudioData : Inner
+            data object OperatorTimeMessageFeed : Inner
         }
     }
 

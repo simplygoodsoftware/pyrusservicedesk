@@ -62,7 +62,7 @@ class ButtonViewCell: UICollectionViewCell {
         backView.addSubview(linkIcon)
         
         backView.leadingAnchor.constraint(equalTo: contentView.leadingAnchor).isActive = true
-        backView.topAnchor.constraint(equalTo: contentView.topAnchor).isActive = true
+        backView.topAnchor.constraint(equalTo: contentView.topAnchor, constant: 8).isActive = true
         backView.bottomAnchor.constraint(equalTo: contentView.bottomAnchor).isActive = true
         backView.trailingAnchor.constraint(equalTo: contentView.trailingAnchor).isActive = true
         

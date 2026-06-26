@@ -38,6 +38,19 @@ internal class AppTabFingerprint(
     override fun areItemsTheSame(oldItem: TabEntry, newItem: TabEntry) =
         oldItem.appId == newItem.appId
 
+    override fun getChangePayload(
+        oldItem: TabEntry,
+        newItem: TabEntry,
+    ): Any? {
+        val payload = HashSet<String>()
+
+        if (oldItem.appId != newItem.appId) payload.add(getPropertyName(TabEntry::appId))
+        if (oldItem.titleText != newItem.titleText) payload.add(getPropertyName(TabEntry::titleText))
+        if (oldItem.isSelected != newItem.isSelected) payload.add(getPropertyName(TabEntry::isSelected))
+
+        return payload
+    }
+
 }
 
 private class TabViewHolder(

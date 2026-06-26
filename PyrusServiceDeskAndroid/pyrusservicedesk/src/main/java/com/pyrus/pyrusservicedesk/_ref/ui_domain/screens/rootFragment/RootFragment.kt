@@ -4,6 +4,7 @@ import android.app.AlertDialog
 import android.os.Build
 import android.os.Build.VERSION
 import android.os.Bundle
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -21,6 +22,7 @@ import com.pyrus.pyrusservicedesk.NoFullScreenFragment
 import com.pyrus.pyrusservicedesk.OpenTicketAction
 import com.pyrus.pyrusservicedesk.PyrusServiceDesk
 import com.pyrus.pyrusservicedesk.PyrusServiceDesk.Companion.injector
+import com.pyrus.pyrusservicedesk.PyrusServiceDesk.Companion.uiInjector
 import com.pyrus.pyrusservicedesk.R
 import com.pyrus.pyrusservicedesk.ServiceDeskConfiguration
 import com.pyrus.pyrusservicedesk._ref.ui_domain.access_denied.AccessDeniedFeature
@@ -29,13 +31,13 @@ import com.pyrus.pyrusservicedesk._ref.ui_domain.access_denied.AccessFeatureCont
 import com.pyrus.pyrusservicedesk._ref.ui_domain.screens.tickets_list.tickets.TicketsFragment
 import com.pyrus.pyrusservicedesk._ref.utils.ConfigUtils
 import com.pyrus.pyrusservicedesk._ref.utils.insets.RootViewDeferringInsetsCallback
+import com.pyrus.pyrusservicedesk._ref.utils.log.PLog
 import com.pyrus.pyrusservicedesk._ref.utils.navigation.PyrusNavigator
 import com.pyrus.pyrusservicedesk._ref.utils.text
 import com.pyrus.pyrusservicedesk._ref.whitetea.android.TeaFragment
 import com.pyrus.pyrusservicedesk._ref.whitetea.androidutils.getStore
 import com.pyrus.pyrusservicedesk._ref.whitetea.bind.BinderLifecycleMode
 import com.pyrus.pyrusservicedesk._ref.whitetea.bind.bind
-import com.pyrus.pyrusservicedesk.core.refresh.AutoRefreshFeature
 import com.pyrus.pyrusservicedesk.databinding.PsdRootFragmentBinding
 
 internal class RootFragment: TeaFragment<Unit, Message.Outer, Effect.Outer>(),
@@ -54,7 +56,7 @@ internal class RootFragment: TeaFragment<Unit, Message.Outer, Effect.Outer>(),
 
         val window: Window = requireActivity().window
         accessDeniedFeature = getStore {
-            injector().accessDeniedFeatureFactory.create()
+            uiInjector().accessDeniedFeatureFactory.create()
         }
         bind(requireActivity().lifecycleScope, requireActivity().lifecycle, BinderLifecycleMode.CREATE_DESTROY) {
             messages bindTo accessDeniedFeature
@@ -97,7 +99,7 @@ internal class RootFragment: TeaFragment<Unit, Message.Outer, Effect.Outer>(),
                 if (injector().rateTimeUseCase.isTimeToRate()) {
                     showRateUsDialog()
                 }
-                injector().audioWrapper.clearPositions()
+                uiInjector().audioWrapper.clearPositions()
             }
         }
     }
@@ -143,11 +145,11 @@ internal class RootFragment: TeaFragment<Unit, Message.Outer, Effect.Outer>(),
 
     override fun onResume() {
         super.onResume()
-        injector().navHolder.setNavigator(navigator)
+        uiInjector().navHolder.setNavigator(navigator)
     }
 
     override fun onPause() {
-        injector().navHolder.removeNavigator()
+        uiInjector().navHolder.removeNavigator()
         super.onPause()
     }
 
@@ -172,8 +174,16 @@ internal class RootFragment: TeaFragment<Unit, Message.Outer, Effect.Outer>(),
     }
 
     override fun onDestroy() {
+        // necessary for the actual destruction of activity
+        if (activity == null) {
+            Log.d("RootFragment", "activity is null")
+            PLog.d("RootFragment", "activity is null")
+        }
+        val activityIsFinishing = activity?.isFinishing == true
         super.onDestroy()
-        PyrusServiceDesk.onServiceDeskStop()
+        if (activityIsFinishing) {
+            PyrusServiceDesk.onServiceDeskStop()
+        }
     }
 
     private fun finish() {
