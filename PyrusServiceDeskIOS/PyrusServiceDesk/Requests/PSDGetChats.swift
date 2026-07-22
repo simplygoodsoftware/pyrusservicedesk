@@ -177,10 +177,28 @@ struct PSDGetChats {
         var announcements: [PSDAnnouncement] = []
         var deletedAnnouncementsIds = Set<String>()
         
+        // База orderIndex — глобальная и берётся один раз до цикла:
+        // если считать её внутри цикла по клиентам, объявления разных клиентов
+        // получают одинаковые индексы и порядок ленты становится недетерминированным.
+        var lastOrderIndex = PyrusServiceDesk.announcements.map(\.orderIndex).max() ?? -1
+        let existingById = Dictionary(
+            PyrusServiceDesk.announcements.map { ($0.id, $0) },
+            uniquingKeysWith: { first, _ in first }
+        )
+
         for (appId, announcementResponse) in announcementsResponse {
             var isRead = true
-            var lastOrderIndex = PyrusServiceDesk.announcements.last?.orderIndex ?? -1
             for newAnnouncement in announcementResponse.newAnnouncements ?? [] {
+                // Уже известное объявление (повторная выгрузка) сохраняет свой
+                // orderIndex — иначе оно «перепрыгивает» в конец ленты.
+                let orderIndex: Int
+                if let existing = existingById[newAnnouncement.id] {
+                    orderIndex = existing.orderIndex
+                } else {
+                    lastOrderIndex += 1
+                    orderIndex = lastOrderIndex
+                }
+
                 let announcement = PSDAnnouncement(
                     id: newAnnouncement.id,
                     text: getText(from: newAnnouncement.content),
@@ -188,11 +206,10 @@ struct PSDGetChats {
                     isRead: isRead,
                     attachments: getAttachments(from: newAnnouncement.content),
                     appId: appId,
-                    orderIndex: lastOrderIndex + 1,
+                    orderIndex: orderIndex,
                     content: newAnnouncement.content.richTextDocument
                 )
                 announcements.append(announcement)
-                lastOrderIndex += 1
                 if newAnnouncement.id == announcementResponse.inboxItem.lastReadMessageId {
                     isRead = false
                 }
@@ -204,7 +221,16 @@ struct PSDGetChats {
                     announcements.removeAll(where: { $0.id == changedAnnouncement.messageId })
                 } else if changedAnnouncement.type == .edited {
                     if !announcements.contains(where: { $0.id == changedAnnouncement.messageId }) {
-                        let localAnn = PyrusServiceDesk.announcements.first(where: { $0.id == changedAnnouncement.messageId })
+                        let localAnn = existingById[changedAnnouncement.messageId]
+                        // Правка объявления сохраняет позицию; если локальной копии
+                        // нет — ставим в конец, а не в начало (orderIndex 0).
+                        let orderIndex: Int
+                        if let localAnn {
+                            orderIndex = localAnn.orderIndex
+                        } else {
+                            lastOrderIndex += 1
+                            orderIndex = lastOrderIndex
+                        }
                         let announcement = PSDAnnouncement(
                             id: changedAnnouncement.messageId,
                             text: getText(from: changedAnnouncement.content),
@@ -212,7 +238,7 @@ struct PSDGetChats {
                             isRead: localAnn?.isRead ?? true,
                             attachments: getAttachments(from: changedAnnouncement.content),
                             appId: appId,
-                            orderIndex: localAnn?.orderIndex ?? 0,
+                            orderIndex: orderIndex,
                             content: changedAnnouncement.content?.richTextDocument
                         )
                         announcements.append(announcement)
@@ -388,13 +414,24 @@ struct PSDGetChats {
             
             let decoder = JSONDecoder()
             
-            let formatter = ISO8601DateFormatter()
-            formatter.formatOptions = [.withInternetDateTime, .withFractionalSeconds]
+            // Сервер может прислать дату как с миллисекундами, так и без —
+            // пробуем оба формата. Force unwrap здесь ронял всё приложение
+            // на любой нестандартной дате.
+            let fractionalFormatter = ISO8601DateFormatter()
+            fractionalFormatter.formatOptions = [.withInternetDateTime, .withFractionalSeconds]
+            let plainFormatter = ISO8601DateFormatter()
+            plainFormatter.formatOptions = [.withInternetDateTime]
             
             decoder.dateDecodingStrategy = .custom { decoder in
                 let container = try decoder.singleValueContainer()
                 let string = try container.decode(String.self)
-                return formatter.date(from: string)!
+                if let date = fractionalFormatter.date(from: string) ?? plainFormatter.date(from: string) {
+                    return date
+                }
+                throw DecodingError.dataCorruptedError(
+                    in: container,
+                    debugDescription: "Unsupported ISO8601 date: \(string)"
+                )
             }
             
             let announcementsResponse = try decoder.decode(AnnouncementsResponse.self, from: data)
@@ -578,7 +615,7 @@ let EXTRA_FIELDS_KEY = "extra_fields"
 //            RichTextInline(type: .text, string: "Новая строка абзаца.", marks: nil, url: nil)
 //        ]
 //    )
-//    
+//
 //    // Маркированные пункты
 //    let bullet1 = RichTextBlock(
 //        type: .bulletListItem,
@@ -596,7 +633,7 @@ let EXTRA_FIELDS_KEY = "extra_fields"
 //            RichTextInline(type: .text, string: "Маркированный пункт 2 (курсив)", marks: "Italic", url: nil)
 //        ]
 //    )
-//    
+//
 //    // Нумерованные пункты (идут подряд для проверки нумерации)
 //    let number1 = RichTextBlock(
 //        type: .numberListItem,
@@ -622,7 +659,7 @@ let EXTRA_FIELDS_KEY = "extra_fields"
 //            RichTextInline(type: .text, string: "Нумерованный пункт 3 (подчёркнутый)", marks: "Underline", url: nil)
 //        ]
 //    )
-//    
+//
 //    // Цитата с переносом строки
 //    let quote = RichTextBlock(
 //        type: .quote,
@@ -634,7 +671,7 @@ let EXTRA_FIELDS_KEY = "extra_fields"
 //            RichTextInline(type: .text, string: "и она на две строки.", marks: "Italic", url: nil)
 //        ]
 //    )
-//    
+//
 //    // Блочный код (многострочный)
 //    let codeText =
 //    """
@@ -649,7 +686,7 @@ let EXTRA_FIELDS_KEY = "extra_fields"
 //        codeLang: nil, // формат подсветки пока не используется
 //        richTextInlines: [] // для блока кода инлайны не требуются
 //    )
-//    
+//
 //    let doc = RichTextDocument(
 //        version: 1,
 //        richTextBlocks: [
@@ -660,14 +697,14 @@ let EXTRA_FIELDS_KEY = "extra_fields"
 //            codeBlock
 //        ]
 //    )
-//    
+//
 //    // (Опционально) пример вложения
 //    let attachments = [Attachment]()
 //        //Attachment(id: UUID().uuidString, name: "image.png", size: 240_000, width: 1024, height: 768, media: true)
 //  //  ]
-//    
+//
 //    let content = Content(attachments: attachments, richTextDocument: doc)
-//    
+//
 //    return Announcement(
 //        id: UUID().uuidString,
 //        type: .message,
@@ -677,4 +714,3 @@ let EXTRA_FIELDS_KEY = "extra_fields"
 //    )
 //}
 //
-

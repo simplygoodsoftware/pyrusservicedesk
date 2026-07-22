@@ -2,8 +2,8 @@ import UIKit
 
 final class PSDAnnouncementsCellConfigurator: TableViewCellConfiguratorProtocol {
 
-    private let psdAnnouncementCellIdentifier = ReuseIdentifier<PSDAnnouncementCell>(identifier:  PSDAnnouncementCell.identifier)
-    private let psdAnnouncementsReadedCellIdentifier = ReuseIdentifier<AnnouncementsReadCell>(identifier:  AnnouncementsReadCell.identifier)
+    private let psdAnnouncementCellIdentifier = ReuseIdentifier<PSDAnnouncementCell>(identifier: PSDAnnouncementCell.identifier)
+    private let psdAnnouncementsReadedCellIdentifier = ReuseIdentifier<AnnouncementsReadCell>(identifier: AnnouncementsReadCell.identifier)
 
     let tableView: UITableView
 
@@ -13,18 +13,21 @@ final class PSDAnnouncementsCellConfigurator: TableViewCellConfiguratorProtocol 
         tableView.register(AnnouncementsReadCell.self, forCellReuseIdentifier: AnnouncementsReadCell.identifier)
     }
 
-    func getCell(model: AnnouncementsViewModel, indexPath: IndexPath, delegate: AnnouncementsAttachmentsDelegate) -> UITableViewCell {
+    func getCell(model: AnnouncementsViewModel, indexPath: IndexPath, delegate: AnnouncementsAttachmentsDelegate?) -> UITableViewCell {
         switch model.type {
         case .announcement:
             if let announcementModel = model.data as? PSDAnnouncementCellModel {
                 let cell = getCell(reuseIdentifier: psdAnnouncementCellIdentifier, indexPath: indexPath)
-                cell.configure(with: announcementModel, delegate: delegate)
+                cell.configure(
+                    with: announcementModel,
+                    availableWidth: tableView.bounds.width,
+                    delegate: delegate
+                )
                 return cell
             }
         case .announcementsRead:
             if model.data is AnnouncementsReadModel {
-                let cell = getCell(reuseIdentifier: psdAnnouncementsReadedCellIdentifier, indexPath: indexPath)
-                return cell
+                return getCell(reuseIdentifier: psdAnnouncementsReadedCellIdentifier, indexPath: indexPath)
             }
         }
         return UITableViewCell()

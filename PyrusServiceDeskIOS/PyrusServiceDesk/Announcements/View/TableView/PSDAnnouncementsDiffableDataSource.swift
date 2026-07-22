@@ -1,17 +1,21 @@
 import UIKit
 
-class PSDAnnouncementsDiffableDataSource: UITableViewDiffableDataSource<AnnouncementsSectionModel, AnnouncementsViewModel> {
-    private weak var cellProvider: UITableViewDataSource?
-    
-    static func createDataSource(for table: UITableView, cellCreator: UITableViewDataSource) -> UITableViewDiffableDataSource<AnnouncementsSectionModel, AnnouncementsViewModel> {
-        let data = PSDAnnouncementsDiffableDataSource(
+final class PSDAnnouncementsDiffableDataSource: UITableViewDiffableDataSource<AnnouncementsSection, AnnouncementsViewModel> {
+
+    /// Ячейка конфигурируется из item identifier'а снапшота, а не из внешнего массива
+    /// по indexPath — во время анимированного apply массив и снапшот могут разъехаться.
+    static func createDataSource(
+        for table: UITableView,
+        cellConfigurator: PSDAnnouncementsCellConfigurator,
+        attachmentsDelegate: AnnouncementsAttachmentsDelegate
+    ) -> PSDAnnouncementsDiffableDataSource {
+        let dataSource = PSDAnnouncementsDiffableDataSource(
             tableView: table,
-            cellProvider: {[weak cellCreator]  table, indexPath, _ in
-                return cellCreator?.tableView(table, cellForRowAt: indexPath)
+            cellProvider: { [weak cellConfigurator, weak attachmentsDelegate] _, indexPath, item in
+                cellConfigurator?.getCell(model: item, indexPath: indexPath, delegate: attachmentsDelegate)
             }
         )
-        data.cellProvider = cellCreator
-        data.defaultRowAnimation = .fade
-        return data
+        dataSource.defaultRowAnimation = .fade
+        return dataSource
     }
 }

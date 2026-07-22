@@ -335,7 +335,7 @@ extension CoreDataService: CoreDataServiceProtocol {
         guard !ids.isEmpty else { return }
 
         let fetchRequest = NSFetchRequest<NSFetchRequestResult>(entityName: "DBAnnouncement")
-        // Удаляем все, чьи id НЕ входят в список
+        // Удаляем объявления с перечисленными id (SyncManager передаёт deletedAnnouncementsIds)
         fetchRequest.predicate = NSPredicate(format: "id IN %@", ids)
         fetchRequest.includesSubentities = false
 
@@ -379,4 +379,3 @@ extension CoreDataService: CoreDataServiceProtocol {
         }
     }
 }
-

@@ -1,7 +1,7 @@
 import UIKit
 
 enum AnnouncementsViewCommand {
-    case updateAnnouncements(announcements: [[AnnouncementsViewModel]])
+    case updateAnnouncements(announcements: [AnnouncementsViewModel])
     case endRefresh
     case updateTitle(title: String)
     case updateTitles(titles: [TitleWithBadge], selectedIndex: Int)

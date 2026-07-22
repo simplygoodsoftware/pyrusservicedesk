@@ -17,13 +17,10 @@ public struct RichTextRenderOptions {
     public var bulletSymbol: String = "•"
     public var numberSuffix: String = "."
     
-    // Цитаты
-    public var quoteIndent: CGFloat = 20
-    public var quotePrefix: String = "▎"
-    public var quotePrefixColor: UIColor = .gray
-    public var quotePrefixAsAttachment: Bool = true      // если true — рисуем серую черту как attachment
-    public var quotePrefixWidth: CGFloat = 3
-    public var quotePrefixCornerRadius: CGFloat = 1
+    // Цитаты. Вертикальную черту рисует QuoteBarLayoutManager (см. QuoteBarRendering.swift)
+    // по атрибуту .psdQuoteGroup — attachment-черта высотой в одну строку больше не используется.
+    public var quoteTextIndent: CGFloat = 12         // отступ текста цитаты от черты
+    public var quoteSpacingInsideGroup: CGFloat = 2  // спейсинг между подряд идущими quote-блоками
     
     // Inline code
     public var codeFont: UIFont = .monospacedSystemFont(ofSize: 15, weight: .regular)
@@ -76,6 +73,7 @@ extension RichTextDocument {
         var orderedListCounter = 0
         var previousType: BlockType? = nil
         var didApplyHeader = false
+        var quoteGroupId = 0
 
         for (i, block) in blocks.enumerated() {
 
@@ -106,6 +104,12 @@ extension RichTextDocument {
                     ? (orderedListCounter + 1) : 1
             } else {
                 orderedListCounter = 0
+            }
+
+            // Подряд идущие quote-блоки объединяются в одну группу —
+            // черта рисуется непрерывной линией на всю группу.
+            if block.type == .quote, previousType != .quote {
+                quoteGroupId += 1
             }
             previousType = block.type
 
@@ -138,33 +142,10 @@ extension RichTextDocument {
                                              length: (prefix as NSString).length)
 
             case .quote:
-                indent = options.quoteIndent
+                indent = options.quoteTextIndent
                 needsIndent = true
-
-                if options.quotePrefixAsAttachment {
-                    let attach = makeQuoteBarAttachment(
-                        font: options.baseFont,
-                        color: options.quotePrefixColor,
-                        width: options.quotePrefixWidth,
-                        radius: options.quotePrefixCornerRadius
-                    )
-                    let start = blockBuffer.length
-                    blockBuffer.append(NSAttributedString(attachment: attach))
-                    blockBuffer.append(NSAttributedString(string: "\t",
-                                                           attributes: baseAttrs))
-                    prefixRangeInBlock = NSRange(location: start, length: 2)
-                } else {
-                    let prefix = "\(options.quotePrefix)\t"
-                    let prefixAttrs: [NSAttributedString.Key: Any] = [
-                        .font: options.baseFont,
-                        .foregroundColor: options.quotePrefixColor
-                    ]
-                    let start = blockBuffer.length
-                    blockBuffer.append(NSAttributedString(string: prefix,
-                                                           attributes: prefixAttrs))
-                    prefixRangeInBlock = NSRange(location: start,
-                                                 length: (prefix as NSString).length)
-                }
+                // Никаких префиксов и табов в тексте:
+                // черту на всю высоту цитаты рисует QuoteBarLayoutManager.
 
             case .code:
                 break
@@ -192,6 +173,10 @@ extension RichTextDocument {
             // 🔸 NEW — Header block: накладываем шрифт и цвет
             // ─────────────────────────────────────────────────
             var effectiveParagraphSpacing = options.paragraphSpacing   // 🔸 NEW
+            let nextIsQuote = i + 1 < blocks.count && blocks[i + 1].type == .quote
+            if isQuote && nextIsQuote {
+                effectiveParagraphSpacing = options.quoteSpacingInsideGroup
+            }
 
             if block.type == .header {
                 let cfg = headerConfig(level: block.headerLevel,
@@ -256,10 +241,13 @@ extension RichTextDocument {
                 pAll.lineSpacing = options.lineSpacing
                 pAll.firstLineHeadIndent = indent
                 pAll.headIndent = indent
-                pAll.tabStops = [NSTextTab(textAlignment: .left,
-                                           location: indent,
-                                           options: [:])]
-                pAll.defaultTabInterval = indent
+
+                if !isQuote {
+                    pAll.tabStops = [NSTextTab(textAlignment: .left,
+                                               location: indent,
+                                               options: [:])]
+                    pAll.defaultTabInterval = indent
+                }
 
                 if blockBuffer.length > 0 {
                     blockBuffer.addAttribute(
@@ -268,31 +256,32 @@ extension RichTextDocument {
                                        length: blockBuffer.length))
                 }
 
-                let pFirst = pAll.mutableCopy() as! NSMutableParagraphStyle
-                pFirst.firstLineHeadIndent = 0
-                let ns = blockBuffer.string as NSString
-                var firstParaRange = NSRange(location: 0,
-                                             length: ns.length)
-                let nl = ns.range(of: "\n")
-                if nl.location != NSNotFound {
-                    firstParaRange.length = nl.location + nl.length
-                }
-                if firstParaRange.length > 0 {
-                    blockBuffer.addAttribute(.paragraphStyle,
-                                              value: pFirst,
-                                              range: firstParaRange)
+                // «Висячая» первая строка — только для списков (у них префикс в тексте).
+                // У цитаты отступ единый: все строки начинаются на одной вертикали.
+                if !isQuote,
+                   let pFirst = pAll.mutableCopy() as? NSMutableParagraphStyle {
+                    pFirst.firstLineHeadIndent = 0
+                    let ns = blockBuffer.string as NSString
+                    var firstParaRange = NSRange(location: 0,
+                                                 length: ns.length)
+                    let nl = ns.range(of: "\n")
+                    if nl.location != NSNotFound {
+                        firstParaRange.length = nl.location + nl.length
+                    }
+                    if firstParaRange.length > 0 {
+                        blockBuffer.addAttribute(.paragraphStyle,
+                                                  value: pFirst,
+                                                  range: firstParaRange)
+                    }
                 }
             }
 
-            // Гарантируем серый цвет префикса цитаты
-            if isQuote, !options.quotePrefixAsAttachment,
-               let r = prefixRangeInBlock, r.length > 0 {
-                blockBuffer.addAttribute(.foregroundColor,
-                                          value: options.quotePrefixColor,
-                                          range: r)
-                blockBuffer.addAttribute(.font,
-                                          value: options.baseFont,
-                                          range: r)
+            // Помечаем цитату атрибутом группы — по нему рисуется вертикальная черта.
+            if isQuote, blockBuffer.length > 0 {
+                blockBuffer.addAttribute(
+                    .psdQuoteGroup,
+                    value: quoteGroupId,
+                    range: NSRange(location: 0, length: blockBuffer.length))
             }
 
             // ─────────────────────────────────────────────────
@@ -350,8 +339,14 @@ extension RichTextDocument {
             // Вставляем блок и разделитель
             result.append(blockBuffer)
             if i < blocks.count - 1 {
+                var separatorAttrs = baseAttrs
+                // Перевод строки между двумя цитатами тоже входит в группу —
+                // иначе черта «порвётся» на границе блоков.
+                if isQuote && nextIsQuote {
+                    separatorAttrs[.psdQuoteGroup] = quoteGroupId
+                }
                 result.append(NSAttributedString(string: "\n",
-                                                  attributes: baseAttrs))
+                                                  attributes: separatorAttrs))
             }
         }
 
@@ -482,28 +477,6 @@ private func deriveFont(from base: UIFont, bold: Bool, italic: Bool) -> UIFont {
     } else {
         return base
     }
-}
-
-// Attachment для серой черты (если нужно «зацементировать» цвет)
-private func makeQuoteBarAttachment(font: UIFont, color: UIColor,
-                                    width: CGFloat,
-                                    radius: CGFloat) -> NSTextAttachment {
-    let height = font.lineHeight
-    let size = CGSize(width: width, height: height * 0.9)
-    let renderer = UIGraphicsImageRenderer(size: CGSize(width: width, height: height))
-    let image = renderer.image { ctx in
-        color.setFill()
-        let rect = CGRect(x: 0,
-                          y: (height - size.height) / 2,
-                          width: size.width,
-                          height: size.height)
-        UIBezierPath(roundedRect: rect, cornerRadius: radius).fill()
-    }
-    let attach = NSTextAttachment()
-    attach.image = image
-    // Центрируем относительно базовой линии
-    attach.bounds = CGRect(x: 0, y: font.descender, width: width, height: height)
-    return attach
 }
 
 // MARK: - Header level attributes

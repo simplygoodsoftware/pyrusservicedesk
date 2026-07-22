@@ -12,7 +12,6 @@ actor AnnouncementAttachmentsRepository {
     // MARK: - Конфиг
     private let maxStoredObjects = 100
     private let baseURLString = "https://files.pyrus.com/services/me/helpy/chats/attachments"
-    private let contentTypeHeaderValue = contenttype // используйте ваш существующий contenttype
 
     // MARK: - Кеши/состояние
     private let memoryCache = NSCache<NSString, NSData>()
@@ -92,7 +91,9 @@ actor AnnouncementAttachmentsRepository {
     // MARK: - Сеть
 
     private func downloadAttachment(authorId: String, attachmentId: String) async throws -> Data {
-        var components = URLComponents(string: baseURLString)!
+        guard var components = URLComponents(string: baseURLString) else {
+            throw URLError(.badURL)
+        }
         components.queryItems = [
             URLQueryItem(name: "id", value: attachmentId),
             URLQueryItem(name: "authorId", value: authorId)
@@ -116,7 +117,10 @@ actor AnnouncementAttachmentsRepository {
     // MARK: - Диск (LRU по modificationDate)
 
     private var diskDirectoryURL: URL {
-        let base = FileManager.default.urls(for: .cachesDirectory, in: .userDomainMask).first!
+        // Caches-директория существует всегда, но force unwrap здесь не нужен:
+        // fallback на temporaryDirectory безопасен для кеша.
+        let base = FileManager.default.urls(for: .cachesDirectory, in: .userDomainMask).first
+            ?? FileManager.default.temporaryDirectory
         return base.appendingPathComponent("AnnouncementAttachments", isDirectory: true)
     }
 
@@ -196,3 +200,43 @@ Task {
     }
 }
 */
+
+// MARK: - Декодер превью
+
+import UIKit
+import ImageIO
+
+/// Даунсэмплинг картинок для превью в гриде объявлений.
+/// Полноразмерный декод через UIImage(data:) происходит лениво на главном
+/// потоке при первом рендере — для длинных лент это гарантированные фризы.
+enum AnnouncementImageDecoder {
+
+    /// Возвращает картинку, ужатую до `maxDimension` поинтов по большей стороне.
+    /// Декод выполняется на фоновой очереди.
+    static func downsampledImage(from data: Data, maxDimension: CGFloat) async -> UIImage? {
+        let scale = await MainActor.run { UIScreen.main.scale }
+        return await withCheckedContinuation { continuation in
+            DispatchQueue.global(qos: .userInitiated).async {
+                continuation.resume(returning: downsample(data: data, maxDimension: maxDimension, scale: scale))
+            }
+        }
+    }
+
+    private static func downsample(data: Data, maxDimension: CGFloat, scale: CGFloat) -> UIImage? {
+        let sourceOptions: [CFString: Any] = [kCGImageSourceShouldCache: false]
+        guard let source = CGImageSourceCreateWithData(data as CFData, sourceOptions as CFDictionary) else {
+            return UIImage(data: data)
+        }
+
+        let thumbnailOptions: [CFString: Any] = [
+            kCGImageSourceCreateThumbnailFromImageAlways: true,
+            kCGImageSourceShouldCacheImmediately: true, // декод здесь, а не при рендере
+            kCGImageSourceCreateThumbnailWithTransform: true,
+            kCGImageSourceThumbnailMaxPixelSize: maxDimension * scale
+        ]
+        guard let cgImage = CGImageSourceCreateThumbnailAtIndex(source, 0, thumbnailOptions as CFDictionary) else {
+            return UIImage(data: data)
+        }
+        return UIImage(cgImage: cgImage, scale: scale, orientation: .up)
+    }
+}

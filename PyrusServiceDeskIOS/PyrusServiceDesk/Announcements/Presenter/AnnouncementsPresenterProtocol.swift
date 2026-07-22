@@ -1,6 +1,6 @@
+import UIKit
 
 enum AnnouncementsPresenterCommand {
-    case uupdateAnnouncements(announcements: [PSDAnnouncement], lastReadId: String?)
     case updateAnnouncements(announcements: [String: [PSDAnnouncement]], lastReadIds: [String: String])
     case endRefresh
     case updateTitle(title: String?)

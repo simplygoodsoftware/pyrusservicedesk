@@ -1,22 +1,9 @@
 import UIKit
 
-// MARK: - Model
-
-public struct AttachmentItem: Hashable {
-    public let id: UUID
-    public let fileName: String
-    public let sizeText: String
-
-    public init(id: UUID = .init(), fileName: String, sizeText: String) {
-        self.id = id
-        self.fileName = fileName
-        self.sizeText = sizeText
-    }
-}
-
-// MARK: - Table
-
+/// Список файловых вложений внутри ячейки объявления (без собственного скролла).
 public final class AttachmentsTableView: UITableView {
+
+    static let rowHeight: CGFloat = 54
 
     // Публичные события
     var onSelectItem: ((AnnouncementCellAttachmentModel) -> Void)?
@@ -38,7 +25,7 @@ public final class AttachmentsTableView: UITableView {
     private func commonInit() {
         backgroundColor = .clear
         separatorStyle = .none
-        estimatedRowHeight = 54
+        estimatedRowHeight = Self.rowHeight
         isScrollEnabled = false
 
         register(FileAttachmentCell.self, forCellReuseIdentifier: FileAttachmentCell.reuseID)
@@ -61,7 +48,12 @@ extension AttachmentsTableView: UITableViewDataSource, UITableViewDelegate {
     }
 
     public func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-        let cell = tableView.dequeueReusableCell(withIdentifier: FileAttachmentCell.reuseID, for: indexPath) as! FileAttachmentCell
+        guard
+            let cell = tableView.dequeueReusableCell(withIdentifier: FileAttachmentCell.reuseID, for: indexPath) as? FileAttachmentCell,
+            items.indices.contains(indexPath.row)
+        else {
+            return UITableViewCell()
+        }
         let item = items[indexPath.row]
         cell.configure(with: item)
         cell.onTapIcon = { [weak self] in
@@ -72,10 +64,11 @@ extension AttachmentsTableView: UITableViewDataSource, UITableViewDelegate {
 
     public func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         tableView.deselectRow(at: indexPath, animated: true)
+        guard items.indices.contains(indexPath.row) else { return }
         onSelectItem?(items[indexPath.row])
     }
-    
+
     public func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {
-        return 54
+        Self.rowHeight
     }
 }

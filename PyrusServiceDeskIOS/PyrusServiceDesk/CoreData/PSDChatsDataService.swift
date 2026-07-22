@@ -683,7 +683,7 @@ extension PSDChatsDataService: PSDChatsDataServiceProtocol {
                 if !attachments.contains(dbAttachmentData) { attachments.add(dbAttachmentData)
                 }
 //                dbTicketCommand.addToAttachments(dbAttachmentData)
-            }            
+            }
         }
     }
     
@@ -1111,7 +1111,6 @@ extension PSDChatsDataService: PSDChatsDataServiceProtocol {
             dbAnn.isRead = model.isRead
             dbAnn.text = model.text
             dbAnn.orderIndex = Int64(model.orderIndex)
-            dbAnn.attributeString = model.attributedString
 
             // Rich Text Content
             // У блоков и инлайнов нет уникальных ID, поэтому
@@ -1138,6 +1137,9 @@ extension PSDChatsDataService: PSDChatsDataServiceProtocol {
                         if let codeLang = block.codeLang {
                             dbBlock.codeLangRaw = Int16(codeLang)
                         }
+                        // 0 — сентинел «нет уровня» (валидные значения 1...3).
+                        // Без этой строки headerLevel не переживал рестарт.
+                        dbBlock.headerLevelRaw = Int16(block.headerLevel ?? 0)
 
                         for inline in block.richTextInlines {
                             let dbInline = DBRichTextInline(context: context)
@@ -1277,8 +1279,7 @@ extension PSDChatsDataService: PSDChatsDataServiceProtocol {
             attachments: attachments,
             appId: db.appId ?? "",
             orderIndex: Int(db.orderIndex),
-            content: richTextDocument,
-            attributedString: db.attributeString
+            content: richTextDocument
         )
     }
 

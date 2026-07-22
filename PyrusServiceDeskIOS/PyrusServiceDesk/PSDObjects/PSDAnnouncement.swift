@@ -1,3 +1,4 @@
+import Foundation
 
 struct PSDAnnouncement: Hashable {
     let id: String
@@ -8,7 +9,6 @@ struct PSDAnnouncement: Hashable {
     let appId: String
     var orderIndex: Int = 0
     var content: RichTextDocument?
-    var attributedString: NSAttributedString? = nil
 }
 
 struct PSDAnnouncementAttachment: Hashable {
