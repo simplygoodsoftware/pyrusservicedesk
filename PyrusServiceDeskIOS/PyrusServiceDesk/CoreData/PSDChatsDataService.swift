@@ -657,6 +657,9 @@ extension PSDChatsDataService: PSDChatsDataServiceProtocol {
             if let hasAccess = ticketCommand.params.hasAccess {
                 dbTicketCommand.hasAccess = hasAccess
             }
+            if let hasAdminAccess = ticketCommand.params.hasAdminAccess {
+                dbTicketCommand.hasAdminAccess = hasAdminAccess
+            }
             dbTicketCommand.token = ticketCommand.params.token
             dbTicketCommand.tokenType = ticketCommand.params.type
             dbTicketCommand.userId = ticketCommand.userId
@@ -770,6 +773,7 @@ extension PSDChatsDataService: PSDChatsDataServiceProtocol {
                         date: dbCommand.date,
                         messageClientId: dbCommand.clientId,
                         hasAccess: dbCommand.hasAccess,
+                        hasAdminAccess: dbCommand.hasAdminAccess,
                         extraFields: dbCommand.requestNewTicket ? PyrusServiceDesk.fieldsData : nil,
                         lastReadAnnouncementId: dbCommand.lastReadAnnouncementId
                     )
@@ -816,7 +820,62 @@ extension PSDChatsDataService: PSDChatsDataServiceProtocol {
         coreDataService.deleteCommand(id: id, completion: completion)
     }
     
-    // MARK: Messages
+    func deleteCommandsBatch(
+        requests: [CommandDeletionRequest],
+        completion: ((Result<Void, Error>) -> Void)?
+    ) {
+        guard !requests.isEmpty else {
+            DispatchQueue.main.async { completion?(.success(())) }
+            return
+        }
+
+        coreDataService.save(completion: completion) { context in
+            context.mergePolicy = NSMergeByPropertyObjectTrumpMergePolicy
+            context.undoManager = nil
+
+            // для команд с serverTicketId переписываем ticketId
+            // у всех команд, у которых был тот же отрицательный ticketId.
+            for request in requests {
+                guard let serverTicketId = request.serverTicketId else { continue }
+
+                let fetchRequest = DBTicketCommand.fetchRequest()
+                fetchRequest.predicate = NSPredicate(
+                    format: "id ==[c] %@",
+                    request.commandId.lowercased()
+                )
+                fetchRequest.fetchLimit = 1
+
+                guard
+                    let target = try context.fetch(fetchRequest).first,
+                    target.requestNewTicket,
+                    target.ticketId < 0
+                else { continue }
+
+                let oldTicketId = target.ticketId
+
+                let relatedRequest = DBTicketCommand.fetchRequest()
+                relatedRequest.predicate = NSPredicate(
+                    format: "ticketId == %lld", oldTicketId
+                )
+                let related = try context.fetch(relatedRequest)
+                for command in related {
+                    command.ticketId = Int64(serverTicketId)
+                }
+            }
+
+            // одним запросом находим все команды и удаляем их.
+            let ids = requests.map { $0.commandId.lowercased() }
+            let deleteRequest = DBTicketCommand.fetchRequest()
+            deleteRequest.predicate = NSPredicate(format: "id IN %@", ids)
+
+            let toDelete = try context.fetch(deleteRequest)
+            for object in toDelete {
+                context.delete(object)
+            }
+        }
+    }
+    
+    // MARK: - Messages
     
     func getAllMessages(completion: @escaping ([PSDMessage]) -> Void) {
         DispatchQueue.global(qos: .userInitiated).async { [weak self] in

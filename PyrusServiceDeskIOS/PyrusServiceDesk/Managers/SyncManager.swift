@@ -245,47 +245,96 @@ private extension SyncManager {
     }
     
     func updateCommandsAndMessageStorage(commandsResult: [TicketCommandResult]?) {
-        if let commandsResult {
-            self.commandsResult = commandsResult.sorted(by: { $0.commentId ?? Int.max < $1.commentId ?? 0 })
-            do {
-                let jsonData = try JSONEncoder().encode(commandsResult)
-                NotificationCenter.default.post(name: SyncManager.commandsResultNotification, object: nil, userInfo: ["tickets": jsonData])
-            } catch { }
-            
-            let commands = PyrusServiceDesk.repository.getCommands()
-            for commandResult in commandsResult {
-                if PyrusServiceDeskController.PSDIsOpen(),
-                   let command = commands.first(where: { $0.commandId == commandResult.commandId }),
-                   command.type == TicketCommandType.calcOperatorTime.rawValue,
-                   let ticketId = commandResult.ticketId {
-                    if let operatorTimeMessage = commandResult.operatorResponseTimeMessage {
-                        NotificationCenter.default.post(name: SyncManager.updateOperatorTimeNotification, object: nil, userInfo: ["ticketId": ticketId, "message": operatorTimeMessage])
-                        DispatchQueue.main.asyncAfter(deadline: .now() + 60) {
-                            if PyrusServiceDeskController.PSDIsOpen() {
-                                let params = TicketCommandParams(ticketId: ticketId, appId: command.appId, userId: command.userId)
-                                let command = TicketCommand(commandId: UUID().uuidString, type: .calcOperatorTime, appId: command.appId, userId: command.userId, params: params)
-                                PyrusServiceDesk.repository.add(command: command)
-                            }
+        guard let commandsResult else { return }
+
+        self.commandsResult = commandsResult.sorted(by: {
+            $0.commentId ?? Int.max < $1.commentId ?? 0
+        })
+
+        do {
+            let jsonData = try JSONEncoder().encode(commandsResult)
+            NotificationCenter.default.post(
+                name: SyncManager.commandsResultNotification,
+                object: nil,
+                userInfo: ["tickets": jsonData]
+            )
+        } catch { }
+
+        let commands = PyrusServiceDesk.repository.getCommands()
+
+        // Накапливаем запросы на удаление, чтобы выполнить их одной транзакцией.
+        var deletionRequests: [CommandDeletionRequest] = []
+
+        for commandResult in commandsResult {
+            // --- calcOperatorTime: нотификации, состояние команды не удаляем здесь ---
+            if PyrusServiceDeskController.PSDIsOpen(),
+               let command = commands.first(where: { $0.commandId == commandResult.commandId }),
+               command.type == TicketCommandType.calcOperatorTime.rawValue,
+               let ticketId = commandResult.ticketId {
+                if let operatorTimeMessage = commandResult.operatorResponseTimeMessage {
+                    NotificationCenter.default.post(
+                        name: SyncManager.updateOperatorTimeNotification,
+                        object: nil,
+                        userInfo: ["ticketId": ticketId, "message": operatorTimeMessage]
+                    )
+                    DispatchQueue.main.asyncAfter(deadline: .now() + 60) {
+                        if PyrusServiceDeskController.PSDIsOpen() {
+                            let params = TicketCommandParams(
+                                ticketId: ticketId,
+                                appId: command.appId,
+                                userId: command.userId
+                            )
+                            let newCommand = TicketCommand(
+                                commandId: UUID().uuidString,
+                                type: .calcOperatorTime,
+                                appId: command.appId,
+                                userId: command.userId,
+                                params: params
+                            )
+                            PyrusServiceDesk.repository.add(command: newCommand)
                         }
-                    } else {
-                        NotificationCenter.default.post(name: SyncManager.removeOperatorTimeNotification, object: nil, userInfo: ["ticketId": ticketId])
-                    }
-                }
-                
-                if let message = self.sendingMessages.first(where: { $0.commandId.lowercased() == commandResult.commandId.lowercased() })?.message {
-                    PyrusServiceDesk.repository.deleteCommand(withId: commandResult.commandId, serverTicketId: commandResult.ticketId)
-                    PSDMessagesStorage.remove(messageId: message.clientId, needSafe: false, serverTicketId: commandResult.ticketId)
-                    if commandResult.error != nil {
-                        message.state = .cantSend
-                        PSDMessagesStorage.save(message: message)
                     }
                 } else {
-                    PyrusServiceDesk.repository.deleteCommand(withId: commandResult.commandId)
+                    NotificationCenter.default.post(
+                        name: SyncManager.removeOperatorTimeNotification,
+                        object: nil,
+                        userInfo: ["ticketId": ticketId]
+                    )
                 }
             }
-            
-            PSDMessagesStorage.saveMessagesToFile()
+
+            // --- Удаление команды + работа с локальным storage сообщений ---
+            if let message = self.sendingMessages.first(where: {
+                $0.commandId.lowercased() == commandResult.commandId.lowercased()
+            })?.message {
+                deletionRequests.append(
+                    CommandDeletionRequest(
+                        commandId: commandResult.commandId,
+                        serverTicketId: commandResult.ticketId
+                    )
+                )
+                PSDMessagesStorage.remove(
+                    messageId: message.clientId,
+                    needSafe: false,
+                    serverTicketId: commandResult.ticketId
+                )
+                if commandResult.error != nil {
+                    message.state = .cantSend
+                    PSDMessagesStorage.save(message: message)
+                }
+            } else {
+                deletionRequests.append(
+                    CommandDeletionRequest(commandId: commandResult.commandId)
+                )
+            }
         }
+
+        // Одна транзакция на всё удаление команд из БД.
+        if !deletionRequests.isEmpty {
+            PyrusServiceDesk.repository.deleteCommands(requests: deletionRequests)
+        }
+
+        PSDMessagesStorage.saveMessagesToFile()
     }
     
     func updateChatsAndClients(clients: [PSDClientInfo], userInfo: [AnyHashable: Any]) {

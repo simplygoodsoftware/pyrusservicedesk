@@ -1,9 +1,23 @@
 import Foundation
 
+struct CommandDeletionRequest {
+    let commandId: String
+    let serverTicketId: Int?
+
+    init(commandId: String, serverTicketId: Int? = nil) {
+        self.commandId = commandId
+        self.serverTicketId = serverTicketId
+    }
+}
+
 class TicketCommandRepository {
     private let fileURL: URL
     private var commandsCache: [TicketCommand]?
     private let chatsDataService: PSDChatsDataServiceProtocol
+    private let deletionQueue = DispatchQueue(
+        label: "TicketCommandRepository.deletion",
+        qos: .userInitiated
+    )
     
     init(filename: String = "ticketCommands.json") {
         let paths = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask)
@@ -202,20 +216,61 @@ class TicketCommandRepository {
         }
     }
     
-    func deleteCommand(withId commandId: String, serverTicketId: Int? = nil, completion: ((Error?) -> Void)? = nil) {
-        commandsCache?.removeAll(where: { $0.commandId.lowercased() == commandId.lowercased() })
-        if let serverTicketId {
-            chatsDataService.resaveBeforeDeleteCommand(commanId: commandId.lowercased(), serverTicketId: serverTicketId) { [weak self] _ in
-                DispatchQueue.main.async { [weak self] in
-                    self?.chatsDataService.deleteCommand(with: commandId.lowercased(), serverTicketId: serverTicketId)
-                    self?.commandsCache = self?.chatsDataService.getAllCommandsSafe() ?? []
-                }
-            }
-        } else {
-            chatsDataService.deleteCommand(with: commandId.lowercased(), serverTicketId: serverTicketId)
-            commandsCache = chatsDataService.getAllCommands()
+    /// Удалить одну команду.
+    func deleteCommand(
+        withId commandId: String,
+        serverTicketId: Int? = nil,
+        completion: ((Error?) -> Void)? = nil
+    ) {
+        let request = CommandDeletionRequest(
+            commandId: commandId,
+            serverTicketId: serverTicketId
+        )
+        deleteCommands(requests: [request], completion: completion)
+    }
+
+    /// Удалить несколько команд за одну транзакцию.
+    func deleteCommands(
+        requests: [CommandDeletionRequest],
+        completion: ((Error?) -> Void)? = nil
+    ) {
+        guard !requests.isEmpty else {
+            completion?(nil)
+            return
         }
-        
+
+        // Нормализуем id один раз.
+        let normalized = requests.map {
+            CommandDeletionRequest(
+                commandId: $0.commandId.lowercased(),
+                serverTicketId: $0.serverTicketId
+            )
+        }
+
+        deletionQueue.async { [weak self] in
+            guard let self else { return }
+
+            let group = DispatchGroup()
+            group.enter()
+
+            var dbError: Error?
+            self.chatsDataService.deleteCommandsBatch(requests: normalized) { result in
+                if case .failure(let error) = result {
+                    dbError = error
+                }
+                group.leave()
+            }
+            group.wait()
+
+            // Кэш обновляем ТОЛЬКО после фактического коммита транзакции.
+            // Если была ошибка — оперативку не трогаем, данные сохранятся.
+            DispatchQueue.main.async {
+                if dbError == nil {
+                    self.commandsCache = self.chatsDataService.getAllCommandsSafe()
+                }
+                completion?(dbError)
+            }
+        }
     }
     
     func clear(completion: ((Error?) -> Void)? = nil) {

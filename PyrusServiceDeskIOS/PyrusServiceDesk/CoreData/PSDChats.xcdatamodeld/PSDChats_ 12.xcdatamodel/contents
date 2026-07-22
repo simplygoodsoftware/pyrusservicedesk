@@ -1,26 +1,5 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
-<model type="com.apple.IDECoreDataModeler.DataModel" documentVersion="1.0" lastSavedToolsVersion="22757" systemVersion="23J520" minimumToolsVersion="Automatic" sourceLanguage="Swift" usedWithSwiftData="YES" userDefinedModelVersionIdentifier="">
-    <entity name="DBAnnouncement" representedClassName="DBAnnouncement" syncable="YES" codeGenerationType="class">
-        <attribute name="appId" optional="YES" attributeType="String"/>
-        <attribute name="attributeString" optional="YES" attributeType="Transformable" valueTransformerName="AttributedStringTransformer" customClassName="NSAttributedString"/>
-        <attribute name="date" optional="YES" attributeType="Date" usesScalarValueType="NO"/>
-        <attribute name="id" optional="YES" attributeType="String"/>
-        <attribute name="isRead" optional="YES" attributeType="Boolean" usesScalarValueType="YES"/>
-        <attribute name="orderIndex" optional="YES" attributeType="Integer 64" defaultValueString="0" usesScalarValueType="YES"/>
-        <attribute name="richTextVersion" optional="YES" attributeType="Integer 16" defaultValueString="0" usesScalarValueType="YES"/>
-        <attribute name="text" optional="YES" attributeType="String"/>
-        <relationship name="attachments" optional="YES" toMany="YES" deletionRule="Cascade" ordered="YES" destinationEntity="DBAnnouncementAttachment" inverseName="announcement" inverseEntity="DBAnnouncementAttachment"/>
-        <relationship name="richTextBlocks" optional="YES" toMany="YES" deletionRule="Nullify" ordered="YES" destinationEntity="DBRichTextBlock" inverseName="announcemet" inverseEntity="DBRichTextBlock"/>
-    </entity>
-    <entity name="DBAnnouncementAttachment" representedClassName="DBAnnouncementAttachment" syncable="YES" codeGenerationType="class">
-        <attribute name="height" optional="YES" attributeType="Integer 64" defaultValueString="0" usesScalarValueType="YES"/>
-        <attribute name="id" optional="YES" attributeType="String"/>
-        <attribute name="media" optional="YES" attributeType="Boolean" usesScalarValueType="YES"/>
-        <attribute name="name" optional="YES" attributeType="String"/>
-        <attribute name="size" optional="YES" attributeType="Integer 64" defaultValueString="0" usesScalarValueType="YES"/>
-        <attribute name="width" optional="YES" attributeType="Integer 64" defaultValueString="0" usesScalarValueType="YES"/>
-        <relationship name="announcement" optional="YES" maxCount="1" deletionRule="Nullify" destinationEntity="DBAnnouncement" inverseName="attachments" inverseEntity="DBAnnouncement"/>
-    </entity>
+<model type="com.apple.IDECoreDataModeler.DataModel" documentVersion="1.0" lastSavedToolsVersion="24512" systemVersion="25C56" minimumToolsVersion="Automatic" sourceLanguage="Swift" usedWithSwiftData="YES" userDefinedModelVersionIdentifier="">
     <entity name="DBAttachment" representedClassName="DBAttachment" syncable="YES" codeGenerationType="class">
         <attribute name="canOpen" optional="YES" attributeType="Boolean" usesScalarValueType="YES"/>
         <attribute name="data" optional="YES" attributeType="Binary"/>
@@ -86,21 +65,6 @@
         <relationship name="attachments" optional="YES" toMany="YES" deletionRule="Nullify" ordered="YES" destinationEntity="DBAttachment" inverseName="message" inverseEntity="DBAttachment"/>
         <relationship name="chat" optional="YES" maxCount="1" deletionRule="Nullify" destinationEntity="DBChat" inverseName="messages" inverseEntity="DBChat"/>
     </entity>
-    <entity name="DBRichTextBlock" representedClassName="DBRichTextBlock" syncable="YES" codeGenerationType="class">
-        <attribute name="code" optional="YES" attributeType="String"/>
-        <attribute name="codeLangRaw" optional="YES" attributeType="Integer 16" defaultValueString="0" usesScalarValueType="YES"/>
-        <attribute name="headerLevelRaw" optional="YES" attributeType="Integer 16" defaultValueString="0" usesScalarValueType="YES"/>
-        <attribute name="type" optional="YES" attributeType="String"/>
-        <relationship name="announcemet" optional="YES" maxCount="1" deletionRule="Nullify" destinationEntity="DBAnnouncement" inverseName="richTextBlocks" inverseEntity="DBAnnouncement"/>
-        <relationship name="inlines" optional="YES" toMany="YES" deletionRule="Cascade" ordered="YES" destinationEntity="DBRichTextInline" inverseName="block" inverseEntity="DBRichTextInline" spotlightIndexingEnabled="YES"/>
-    </entity>
-    <entity name="DBRichTextInline" representedClassName="DBRichTextInline" syncable="YES" codeGenerationType="class">
-        <attribute name="marks" optional="YES" attributeType="String"/>
-        <attribute name="text" optional="YES" attributeType="String"/>
-        <attribute name="type" optional="YES" attributeType="String"/>
-        <attribute name="url" optional="YES" attributeType="String"/>
-        <relationship name="block" optional="YES" maxCount="1" deletionRule="Nullify" destinationEntity="DBRichTextBlock" inverseName="inlines" inverseEntity="DBRichTextBlock"/>
-    </entity>
     <entity name="DBTicketCommand" representedClassName="DBTicketCommand" syncable="YES" codeGenerationType="class">
         <attribute name="appId" optional="YES" attributeType="String"/>
         <attribute name="authorId" optional="YES" attributeType="String"/>
@@ -109,7 +73,6 @@
         <attribute name="hasAccess" optional="YES" attributeType="Boolean" usesScalarValueType="YES"/>
         <attribute name="hasAdminAccess" optional="YES" attributeType="Boolean" usesScalarValueType="YES"/>
         <attribute name="id" optional="YES" attributeType="String"/>
-        <attribute name="lastReadAnnouncementId" optional="YES" attributeType="String"/>
         <attribute name="message" optional="YES" attributeType="String"/>
         <attribute name="messageId" optional="YES" attributeType="Integer 64" defaultValueString="0" usesScalarValueType="YES"/>
         <attribute name="rating" optional="YES" attributeType="Integer 32" defaultValueString="0" usesScalarValueType="YES"/>

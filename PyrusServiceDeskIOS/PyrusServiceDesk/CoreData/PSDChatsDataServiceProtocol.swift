@@ -16,6 +16,7 @@ protocol PSDChatsDataServiceProtocol {
     func saveTicketCommand(with ticketCommand: TicketCommand, completion: ((Result<Void, Error>) -> Void)?)
     func deleteCommand(with id: String, serverTicketId: Int?)
     func deleteCommand(with id: String, serverTicketId: Int?, completion: @escaping () -> Void)
+    func deleteCommandsBatch(requests: [CommandDeletionRequest],completion: ((Result<Void, Error>) -> Void)?)
     func resaveBeforeDeleteCommand(commanId: String, serverTicketId: Int?, completion: ((Result<Void, Error>) -> Void)?)
     
     func saveClientModels(with clientModels: [PSDClientInfo])

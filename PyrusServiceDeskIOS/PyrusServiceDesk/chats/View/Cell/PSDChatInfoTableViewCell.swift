@@ -24,7 +24,7 @@ class PSDChatInfoTableViewCell: UITableViewCell {
     
     private let notificationButton: UIButton = {
         let button = UIButton()
-        button.backgroundColor = .secondColor
+        button.backgroundColor = .hRose
         button.setTitleColor(UIColor.appTextColor, for: .normal)
         button.titleLabel?.font = .notificationButton
         button.layer.cornerRadius = 6
@@ -167,7 +167,8 @@ class PSDChatInfoTableViewCell: UITableViewCell {
             attachmentIcon.centerYAnchor.constraint(equalTo: lastMessageInfo.centerYAnchor),
             
             attachmentName.centerYAnchor.constraint(equalTo: lastMessageInfo.centerYAnchor),
-            attachmentName.leadingAnchor.constraint(equalTo: attachmentIcon.trailingAnchor, constant: 2)
+            attachmentName.leadingAnchor.constraint(equalTo: attachmentIcon.trailingAnchor, constant: 2),
+            attachmentName.trailingAnchor.constraint(lessThanOrEqualTo: contentView.trailingAnchor, constant: -40),
         ])
     }
     

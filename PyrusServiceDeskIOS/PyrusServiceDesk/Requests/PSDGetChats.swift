@@ -348,10 +348,18 @@ struct PSDGetChats {
                     let id = authorDic["author_id"] as? String ?? ""
                     let phone = authorDic["phone"] as? String ?? ""
                     var hasAccess = authorDic["has_access"] as? Bool ?? true
-                    if let commandHasAccess = updateAccessCommands.first(where: { $0.userId == userId && $0.params.authorId == id })?.params.hasAccess {
-                        hasAccess = commandHasAccess
+                    var hasAdminAccess = hasAccess ? authorDic["has_admin_access"] as? Bool ?? false : false
+                    if let commandHasAccess = updateAccessCommands.first(where: { $0.userId == userId && $0.params.authorId == id }) {
+                        hasAccess = commandHasAccess.params.hasAccess ?? hasAccess
+                        hasAdminAccess = commandHasAccess.params.hasAdminAccess ?? hasAdminAccess
                     }
-                    let authorInfo = PSDUserInfo.AuthorInfo(id: id, name: name, phone: phone, hasAccess: hasAccess)
+                    let authorInfo = PSDUserInfo.AuthorInfo(
+                        id: id,
+                        name: name,
+                        phone: phone,
+                        hasAccess: hasAccess,
+                        hasAdminAccess: hasAdminAccess
+                    )
                     userAuthors.append(authorInfo)
                 }
                 if PyrusServiceDesk.customUserId == userId {
