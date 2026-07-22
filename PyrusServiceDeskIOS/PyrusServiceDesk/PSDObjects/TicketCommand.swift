@@ -35,7 +35,7 @@ class TicketCommandParams: Codable {
     let extraFields: [String: String]?
     let lastReadAnnouncementId: String?
     
-    init(ticketId: Int? = nil, appId: String?, requestNewTicket: Bool? = nil, userId: String?, message: String? = nil, attachments: [AttachmentData]? = nil, authorId: String? = nil, token: String? = nil, type: String? = nil, messageId: Int? = nil, rating: Int? = nil, ratingComment: String? = nil, date: Date? = nil, messageClientId: String? = nil, hasAccess: Bool? = nil, hasAdminAccess: Bool? = nil, extraFields: [String: String]? = nil, lastReadAnnouncementId: String? = nil) {
+    init(ticketId: Int? = nil, appId: String? = nil, requestNewTicket: Bool? = nil, userId: String? = nil, message: String? = nil, attachments: [AttachmentData]? = nil, authorId: String? = nil, token: String? = nil, type: String? = nil, messageId: Int? = nil, rating: Int? = nil, ratingComment: String? = nil, date: Date? = nil, messageClientId: String? = nil, hasAccess: Bool? = nil, hasAdminAccess: Bool? = nil, extraFields: [String: String]? = nil, lastReadAnnouncementId: String? = nil) {
 
         self.ticketId = ticketId
         self.appId = appId
