@@ -42,6 +42,8 @@ extension AnnouncementsPresenter: AnnouncementsPresenterProtocol {
             view?.show(.startRefresh)
         case .connectionError:
             view?.show(.connectionError)
+        case .scrollToTop:
+            view?.show(.scrollToTop)
         }
     }
 }

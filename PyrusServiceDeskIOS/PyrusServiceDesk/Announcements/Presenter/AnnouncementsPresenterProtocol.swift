@@ -10,6 +10,7 @@ enum AnnouncementsPresenterCommand {
     case deleteSegmentControl
     case startRefresh
     case connectionError
+    case scrollToTop
 }
 
 protocol AnnouncementsPresenterProtocol {

@@ -446,6 +446,10 @@ extension AnnouncementsViewController: AnnouncementsViewProtocol {
             }
             refreshControl.endRefreshing()
             tableView.sendSubviewToBack(refreshControl)
+        case .scrollToTop:
+            if items.count > 0 {
+                tableView.scrollToRow(at: IndexPath(row: 0, section: 0), at: .top, animated: false)
+            }
         }
     }
 }

@@ -90,7 +90,9 @@ extension AnnouncementsInteractor: AnnouncementsInteractorProtocol {
                 presenter.doWork(.endRefresh)
             }
             announcements = filtered
-
+            if PyrusServiceDesk.clients.contains(where: { $0.announcementsUnreadCount > 0 }) {
+                presenter.doWork(.scrollToTop)
+            }
             // Порядок важен: сначала обновили announcements (и announcementsDict),
             // потом шлём readAnnouncements — иначе на сервер уйдёт устаревший lastReadId.
             readAnnouncements()

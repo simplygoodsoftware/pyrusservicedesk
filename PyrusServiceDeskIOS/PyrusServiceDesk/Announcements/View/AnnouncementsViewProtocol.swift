@@ -10,6 +10,7 @@ enum AnnouncementsViewCommand {
     case deleteSegmentControl
     case startRefresh
     case connectionError
+    case scrollToTop
 }
 
 protocol AnnouncementsViewProtocol: NSObjectProtocol {
