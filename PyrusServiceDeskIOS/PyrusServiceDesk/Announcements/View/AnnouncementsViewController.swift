@@ -26,6 +26,9 @@ final class AnnouncementsViewController: UIViewController {
         }
     }
 
+    /// Задачи прогрева миниатюр по indexPath (см. UITableViewDataSourcePrefetching).
+    private var prefetchTasks: [IndexPath: Task<Void, Never>] = [:]
+
     // MARK: - UI
 
     private lazy var tableView = UITableView()
@@ -216,6 +219,7 @@ private extension AnnouncementsViewController {
         ])
 
         tableView.delegate = self
+        tableView.prefetchDataSource = self
         tableView.backgroundColor = .psdDarkBackgroundColor
         tableView.rowHeight = UITableView.automaticDimension
         tableView.estimatedRowHeight = Layout.estimatedAnnouncementRowHeight
@@ -340,6 +344,42 @@ private extension AnnouncementsViewController {
     }
 }
 
+// MARK: - UITableViewDataSourcePrefetching
+
+extension AnnouncementsViewController: UITableViewDataSourcePrefetching {
+
+    /// Греет миниатюры медиа-вложений рядов, к которым приближается скролл:
+    /// загрузка и декод происходят до появления ряда на экране, ячейка
+    /// подставляет готовую миниатюру из кеша синхронно. Это разгружает
+    /// кадры прокрутки — основная причина «заеданий» при появлении картинок.
+    func tableView(_ tableView: UITableView, prefetchRowsAt indexPaths: [IndexPath]) {
+        let scale = max(view.traitCollection.displayScale, 1)
+
+        for indexPath in indexPaths {
+            guard
+                prefetchTasks[indexPath] == nil,
+                let item = diffableDataSource?.itemIdentifier(for: indexPath),
+                let model = item.data as? PSDAnnouncementCellModel
+            else { continue }
+
+            let mediaAttachments = model.announcement.attachments.filter { $0.media }
+            guard !mediaAttachments.isEmpty else { continue }
+
+            prefetchTasks[indexPath] = Task { [weak self] in
+                await AnnouncementThumbnailPrefetcher.warm(attachments: mediaAttachments, scale: scale)
+                self?.prefetchTasks[indexPath] = nil
+            }
+        }
+    }
+
+    func tableView(_ tableView: UITableView, cancelPrefetchingForRowsAt indexPaths: [IndexPath]) {
+        for indexPath in indexPaths {
+            prefetchTasks[indexPath]?.cancel()
+            prefetchTasks[indexPath] = nil
+        }
+    }
+}
+
 // MARK: - UITableViewDelegate
 
 extension AnnouncementsViewController: UITableViewDelegate {
@@ -448,16 +488,17 @@ extension AnnouncementsViewController: AnnouncementsAttachmentsDelegate {
         else { return }
 
         let selectedAttachment = announcement.attachments[index]
-        let isMedia = selectedAttachment.media || selectedAttachment.isVideo
+        let isMedia = selectedAttachment.media //|| selectedAttachment.isVideo
 
         let attachments: [PSDAnnouncementAttachment]
         if isMedia {
-            // Медиа-просмотрщик: сначала фото, затем видео (стабильная сортировка).
-            attachments = announcement.attachments
-                .filter { $0.media || $0.isVideo }
-                .sorted { !$0.isVideo && $1.isVideo }
+            // Порядок листания: сначала медиа в том же порядке, что и в сетке,
+            // затем — видео из списка файлов (media == false), в своём порядке.
+            let gridMedia = announcement.attachments.filter { $0.media }
+//            let fileVideos = announcement.attachments.filter { !$0.media && $0.isVideo }
+            attachments = gridMedia //+ fileVideos
         } else {
-            attachments = announcement.attachments.filter { !$0.media && !$0.isVideo }
+            attachments = announcement.attachments.filter { !$0.media }
         }
 
         let initialIndex = attachments.firstIndex(of: selectedAttachment) ?? 0

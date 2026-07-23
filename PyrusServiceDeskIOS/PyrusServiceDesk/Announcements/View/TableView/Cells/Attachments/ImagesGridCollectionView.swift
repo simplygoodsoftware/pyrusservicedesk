@@ -17,6 +17,9 @@ enum AnnouncementsImageGridMetrics {
     static let fiveSmallRowHeight: CGFloat = 111.25
     static let sixTopRowHeight: CGFloat = 153
     static let sixMiddleRowHeight: CGFloat = 140
+    /// Дефолтная пропорция одиночного вложения, когда сервер не прислал
+    /// размеры (типично для видео) — 16:9 от ширины грида.
+    static let singleItemDefaultAspectRatio: CGFloat = 9.0 / 16.0
 
     /// Высоты рядов для заданного количества картинок (2+).
     static func rowHeights(forCount count: Int) -> [CGFloat] {
@@ -48,8 +51,15 @@ enum AnnouncementsImageGridMetrics {
                 originalHeight: singleImageAttachment?.height ?? 0,
                 maxWidth: gridWidth
             )
-            let maxHeight = UIScreen.main.bounds.height * singleImageMaxHeightRatio
-            return singleImageTopInset + min(scaled, maxHeight)
+            let height: CGFloat
+            if scaled > 0 {
+                let maxHeight = UIScreen.main.bounds.height * singleImageMaxHeightRatio
+                height = min(scaled, maxHeight)
+            } else {
+                // scaledHeight вернул 0 — размеры неизвестны (обычно видео).
+                height = gridWidth * singleItemDefaultAspectRatio
+            }
+            return singleImageTopInset + height
         default:
             let rows = rowHeights(forCount: count)
             return rows.reduce(0, +) + spacing * CGFloat(max(0, rows.count - 1))
@@ -62,9 +72,9 @@ enum AnnouncementsImageGridMetrics {
 final class GridImageCell: UICollectionViewCell {
     static let reuseID = "GridImageCell"
 
-    /// Максимальный размер декодированной картинки (в поинтах) —
-    /// декодировать полноразмерные фото ради превью 170×170 незачем.
-    private static let maxThumbnailDimension: CGFloat = 500
+    private enum Layout {
+        static let imageFadeDuration: TimeInterval = 0.2
+    }
 
     private var loadTask: Task<Void, Never>?
     /// Id вложения, которое сейчас показано или грузится.
@@ -72,10 +82,18 @@ final class GridImageCell: UICollectionViewCell {
     /// это источник моргания при любом reload с теми же данными.
     private var currentAttachmentId: String?
 
+    /// Цвет плейсхолдера живёт на contentView, а не на imageView:
+    /// фейд картинки идёт по альфе imageView, и плейсхолдер под ней
+    /// должен оставаться видимым до конца анимации.
     private var isRead: Bool = false {
         didSet {
-            imageView.backgroundColor = isRead ? .imagePreviewColor : .newImagePreviewColor
+            contentView.backgroundColor = isRead ? .imagePreviewColor : .newImagePreviewColor
         }
+    }
+
+    private var displayScale: CGFloat {
+        let scale = traitCollection.displayScale
+        return scale > 0 ? scale : UIScreen.main.scale
     }
 
     let imageView: UIImageView = {
@@ -86,15 +104,26 @@ final class GridImageCell: UICollectionViewCell {
         return imageView
     }()
 
+    /// Оверлей «Play» для видео-вложений (см. VideoPlayBadgeView).
+    private let playBadgeView: VideoPlayBadgeView = {
+        let view = VideoPlayBadgeView()
+        view.isHidden = true
+        view.translatesAutoresizingMaskIntoConstraints = false
+        return view
+    }()
+
     override init(frame: CGRect) {
         super.init(frame: frame)
         contentView.addSubview(imageView)
+        contentView.addSubview(playBadgeView)
         imageView.translatesAutoresizingMaskIntoConstraints = false
         NSLayoutConstraint.activate([
             imageView.topAnchor.constraint(equalTo: contentView.topAnchor),
             imageView.leadingAnchor.constraint(equalTo: contentView.leadingAnchor),
             imageView.trailingAnchor.constraint(equalTo: contentView.trailingAnchor),
             imageView.bottomAnchor.constraint(equalTo: contentView.bottomAnchor),
+            playBadgeView.centerXAnchor.constraint(equalTo: contentView.centerXAnchor),
+            playBadgeView.centerYAnchor.constraint(equalTo: contentView.centerYAnchor),
         ])
     }
 
@@ -104,20 +133,28 @@ final class GridImageCell: UICollectionViewCell {
         isRead = model.isRead
 
         let attachment = model.attachment
+        playBadgeView.isHidden = !attachment.isVideo
 
-        if attachment.id == currentAttachmentId {
-            // То же вложение. Если картинка уже показана или грузится —
-            // ничего не трогаем: любой reload проходит для глаза бесшовно.
-            if imageView.image != nil || loadTask != nil { return }
-            // Загрузка была отменена в prepareForReuse — перезапускаем ниже.
-        } else {
-            // Ячейку переиспользовали под другое вложение —
-            // только в этом случае убираем старую картинку.
-            imageView.image = nil
+        // То же вложение: картинка уже показана или грузится —
+        // ничего не трогаем, любой reload проходит для глаза бесшовно.
+        if attachment.id == currentAttachmentId, imageView.image != nil || loadTask != nil {
+            return
         }
 
         currentAttachmentId = attachment.id
         loadTask?.cancel()
+        loadTask = nil
+
+        // Мгновенный путь: миниатюра уже декодирована ранее (в т.ч. префетчем) —
+        // подставляем синхронно и без анимации, иначе кеш-хиты мерцали бы.
+        if let cached = AnnouncementThumbnailCache.shared.image(for: attachment.id) {
+            setImage(cached, animated: false)
+            return
+        }
+
+        setImage(nil, animated: false)
+
+        let scale = displayScale // читается на main, до ухода задачи на фон
         loadTask = Task { [weak self] in
             do {
                 let data = try await AnnouncementAttachmentsRepository.shared.data(
@@ -125,14 +162,29 @@ final class GridImageCell: UICollectionViewCell {
                     authorId: PyrusServiceDesk.authorId ?? ""
                 )
                 guard !Task.isCancelled else { return }
-                // Декод и даунсэмплинг — на фоне: UIImage(data:) декодирует
-                // при первом рендере на главном потоке и дёргает скролл.
-                let image = await AnnouncementImageDecoder.downsampledImage(
-                    from: data,
-                    maxDimension: Self.maxThumbnailDimension
-                )
+                // Декод — на фоне: UIImage(data:) декодирует при первом рендере
+                // на главном потоке и дёргает скролл. Для видео — кадр ролика.
+                let image: UIImage?
+                if attachment.isVideo {
+                    image = await AnnouncementImageDecoder.videoThumbnail(
+                        from: data,
+                        fileName: attachment.name,
+                        maxDimension: AnnouncementImageDecoder.gridThumbnailMaxDimension,
+                        scale: scale
+                    )
+                } else {
+                    image = await AnnouncementImageDecoder.downsampledImage(
+                        from: data,
+                        maxDimension: AnnouncementImageDecoder.gridThumbnailMaxDimension,
+                        scale: scale
+                    )
+                }
                 guard !Task.isCancelled, self?.currentAttachmentId == attachment.id else { return }
-                self?.imageView.image = image
+                if let image {
+                    AnnouncementThumbnailCache.shared.set(image, for: attachment.id)
+                }
+                // Загруженная картинка появляется с плавным фейдом.
+                self?.setImage(image, animated: true)
             } catch is CancellationError {
             } catch {
                 // Плейсхолдер (цвет фона) уже стоит. Сбрасываем id,
@@ -145,6 +197,28 @@ final class GridImageCell: UICollectionViewCell {
         }
     }
 
+    /// Единая точка установки картинки.
+    /// - animated == false: мгновенно (кеш, очистка под плейсхолдер).
+    /// - animated == true: появление через альфу поверх плейсхолдера.
+    private func setImage(_ image: UIImage?, animated: Bool) {
+        imageView.layer.removeAllAnimations()
+        imageView.image = image
+
+        guard animated, image != nil else {
+            imageView.alpha = 1
+            return
+        }
+
+        imageView.alpha = 0
+        UIView.animate(
+            withDuration: Layout.imageFadeDuration,
+            delay: 0,
+            options: [.allowUserInteraction, .curveEaseOut]
+        ) {
+            self.imageView.alpha = 1
+        }
+    }
+
     override func prepareForReuse() {
         super.prepareForReuse()
         loadTask?.cancel()
@@ -154,6 +228,117 @@ final class GridImageCell: UICollectionViewCell {
         // вложение — показываем её мгновенно, без «моргания» плейсхолдером.
         // Если вложение другое, configure(with:) сам очистит imageView.
     }
+}
+
+// MARK: - Бейдж «Play»
+
+/// Индикатор видео поверх превью. Параметры из дизайна:
+/// круг 40×40, фон #000000 с прозрачностью 40% поверх background blur (12),
+/// белый треугольник по центру.
+///
+/// Про блюр: UIKit не позволяет задать произвольный радиус, а «плотные» стили
+/// (.regular и т.п.) несут собственную матовую подложку — в паре с чёрным 40%
+/// блюр переставал читаться и круг выглядел плоским. Ближайший к макету
+/// системный вариант — самый «прозрачный» тёмный материал
+/// (.systemUltraThinMaterialDark): сквозь него видно смазанный фон,
+/// а тёмность добирается лёгкой подложкой dimAlpha.
+final class VideoPlayBadgeView: UIView {
+
+    private enum Layout {
+        static let size: CGFloat = 40
+        /// Материал уже тёмный: суммарная тёмность с подложкой ≈ 40% из макета.
+        static let dimAlpha: CGFloat = 0.1
+        static let triangleSize = CGSize(width: 14, height: 16)
+        static let triangleCornerRadius: CGFloat = 1.5
+    }
+
+    override var intrinsicContentSize: CGSize {
+        CGSize(width: Layout.size, height: Layout.size)
+    }
+
+    init() {
+        super.init(frame: CGRect(origin: .zero, size: CGSize(width: Layout.size, height: Layout.size)))
+        isUserInteractionEnabled = false
+        clipsToBounds = true
+        layer.cornerRadius = Layout.size / 2
+
+        let blurView = UIVisualEffectView(effect: UIBlurEffect(style: .systemUltraThinMaterialDark))
+        blurView.translatesAutoresizingMaskIntoConstraints = false
+
+        let dimView = UIView()
+        dimView.backgroundColor = UIColor.black.withAlphaComponent(Layout.dimAlpha)
+        dimView.translatesAutoresizingMaskIntoConstraints = false
+
+        let triangleView = PlayTriangleView(
+            size: Layout.triangleSize,
+            cornerRadius: Layout.triangleCornerRadius
+        )
+        triangleView.translatesAutoresizingMaskIntoConstraints = false
+
+        addSubview(blurView)
+        addSubview(dimView)
+        addSubview(triangleView)
+
+        NSLayoutConstraint.activate([
+            widthAnchor.constraint(equalToConstant: Layout.size),
+            heightAnchor.constraint(equalToConstant: Layout.size),
+
+            blurView.topAnchor.constraint(equalTo: topAnchor),
+            blurView.leadingAnchor.constraint(equalTo: leadingAnchor),
+            blurView.trailingAnchor.constraint(equalTo: trailingAnchor),
+            blurView.bottomAnchor.constraint(equalTo: bottomAnchor),
+
+            dimView.topAnchor.constraint(equalTo: topAnchor),
+            dimView.leadingAnchor.constraint(equalTo: leadingAnchor),
+            dimView.trailingAnchor.constraint(equalTo: trailingAnchor),
+            dimView.bottomAnchor.constraint(equalTo: bottomAnchor),
+
+            // Строго геометрический центр круга.
+            triangleView.centerXAnchor.constraint(equalTo: centerXAnchor, constant: 2),
+            triangleView.centerYAnchor.constraint(equalTo: centerYAnchor),
+            triangleView.widthAnchor.constraint(equalToConstant: Layout.triangleSize.width),
+            triangleView.heightAnchor.constraint(equalToConstant: Layout.triangleSize.height),
+        ])
+    }
+
+    required init?(coder: NSCoder) { fatalError("init(coder:) has not been implemented") }
+}
+
+/// Треугольник «Play» со скруглёнными углами, нарисованный вручную.
+/// SF Symbol (play.fill) несёт в себе поля под шрифтовые метрики,
+/// из-за чего в круге вставал не по геометрическому центру.
+private final class PlayTriangleView: UIView {
+
+    private let shapeSize: CGSize
+
+    override var intrinsicContentSize: CGSize { shapeSize }
+
+    init(size: CGSize, cornerRadius: CGFloat) {
+        shapeSize = size
+        super.init(frame: CGRect(origin: .zero, size: size))
+        backgroundColor = .clear
+        isOpaque = false
+
+        // Скругление углов у залитого треугольника: путь строится с отступом
+        // на радиус, а обводка той же белой краской с round-join возвращает
+        // фигуре исходный габарит, скругляя вершины.
+        let insetRect = CGRect(origin: .zero, size: size).insetBy(dx: cornerRadius, dy: cornerRadius)
+        let path = UIBezierPath()
+        path.move(to: CGPoint(x: insetRect.minX, y: insetRect.minY))
+        path.addLine(to: CGPoint(x: insetRect.maxX, y: insetRect.midY))
+        path.addLine(to: CGPoint(x: insetRect.minX, y: insetRect.maxY))
+        path.close()
+
+        let shapeLayer = CAShapeLayer()
+        shapeLayer.path = path.cgPath
+        shapeLayer.fillColor = UIColor.white.cgColor
+        shapeLayer.strokeColor = UIColor.white.cgColor
+        shapeLayer.lineWidth = cornerRadius * 2
+        shapeLayer.lineJoin = .round
+        layer.addSublayer(shapeLayer)
+    }
+
+    required init?(coder: NSCoder) { fatalError("init(coder:) has not been implemented") }
 }
 
 // MARK: - Грид

@@ -189,12 +189,14 @@ final class PSDAnnouncementCell: UITableViewCell {
         let hasText = (viewModel.attributedText?.length ?? 0) > 0
         zeroMessageLabelHeight?.isActive = !hasText
 
+        // В сетку — всё медийное (фото и видео с media == true),
+        // в список файлов — только немедийные вложения.
         let imageAttachments = announcement.attachments
-            .filter { $0.media && !$0.isVideo }
+            .filter { $0.media }
             .map { AnnouncementCellAttachmentModel(attachment: $0, isRead: announcement.isRead) }
 
         let fileAttachments = announcement.attachments
-            .filter { !$0.media || $0.isVideo }
+            .filter { !$0.media }
             .map { AnnouncementCellAttachmentModel(attachment: $0, isRead: announcement.isRead) }
 
         configureFilesTableTop(hasImages: !imageAttachments.isEmpty, hasFiles: !fileAttachments.isEmpty)
