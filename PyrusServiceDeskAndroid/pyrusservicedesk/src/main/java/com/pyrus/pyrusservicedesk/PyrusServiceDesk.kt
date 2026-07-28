@@ -469,15 +469,14 @@ class PyrusServiceDesk private constructor(
 
             this.onStopCallback = onStopCallback
 
-            // The UiInjector is owned by MainActivity (created in its onCreate, released in
-            // its onDestroy). We only schedule activity launch here; nothing UI-related is
-            // touched on whatever thread `start()` was called from.
-            ThreadsHelper().syncRunOnMainThread {
-                val startData = StartData(account, openTicketAction, sendComment)
-                val intent = MainActivity.createLaunchIntent(activity, startData)
-                intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-                activity.startActivity(intent)
-            }
+            val startData = StartData(account, openTicketAction, sendComment)
+            val intent = MainActivity.createLaunchIntent(activity, startData)
+            intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+
+            // start() may be called from any thread. We only bounce the actual activity launch to
+            // the UI thread: runOnUiThread runs inline when already on main and does a NON-blocking
+            // post otherwise.
+            activity.runOnUiThread { activity.startActivity(intent) }
             updateSdIsOpen(true)
 
             injector().updateUserUseCase.updateUser()
