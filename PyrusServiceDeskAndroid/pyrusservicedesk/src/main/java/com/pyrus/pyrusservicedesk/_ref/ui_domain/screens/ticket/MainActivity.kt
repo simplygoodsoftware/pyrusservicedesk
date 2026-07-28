@@ -63,7 +63,9 @@ internal class MainActivity : FragmentActivity() {
         binding = PsdActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
-        WindowCompat.setDecorFitsSystemWindows(window, false)
+        if (VERSION.SDK_INT > Build.VERSION_CODES.Q) {
+            WindowCompat.setDecorFitsSystemWindows(window, false)
+        }
 
         savedInstanceState?.let { ServiceDeskConfiguration.restore(it) }
         super.overridePendingTransition(R.anim.fade_in, R.anim.no_animation)
