@@ -1,19 +1,19 @@
 package com.pyrus.pyrusservicedesk
 
 import android.app.Application
-import android.app.Activity
-import android.content.Intent
+import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.ViewModelStore
 import androidx.test.core.app.ApplicationProvider
-import com.pyrus.pyrusservicedesk._ref.ui_domain.screens.ticket.MainActivity
 import com.pyrus.pyrusservicedesk.core.DiInjector
-import com.pyrus.pyrusservicedesk.sdk.updates.OnStopCallback
+import com.pyrus.pyrusservicedesk.core.UiGraphViewModel
+import com.pyrus.pyrusservicedesk.core.UiInjector
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.test.runTest
 import org.junit.After
-import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNotNull
+import org.junit.Assert.assertNotSame
 import org.junit.Assert.assertNull
 import org.junit.Assert.assertSame
 import org.junit.Assert.assertTrue
@@ -21,15 +21,21 @@ import org.junit.Assert.fail
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
-import org.mockito.Mockito.mock
-import org.robolectric.Robolectric
 import org.robolectric.RobolectricTestRunner
-import org.robolectric.Shadows.shadowOf
 import org.robolectric.annotation.Config
 import java.util.concurrent.CountDownLatch
 import java.util.concurrent.TimeUnit
 import java.util.concurrent.atomic.AtomicReference
 
+/**
+ * Covers the UI graph lifecycle after the ViewModel-scoped refactor:
+ *  - the null-safe accessors ([PyrusServiceDesk.uiInjector] / [PyrusServiceDesk.uiInjectorOrNull]);
+ *  - publish / clear with the identity check that protects a freshly launched activity from a
+ *    finishing one tearing the graph down (the 1.8.13 `uiInjector() == null` crash / close-reopen
+ *    overlap);
+ *  - the [UiGraphViewModel] ownership: it publishes on creation, survives configuration changes
+ *    (retention), and closes exactly once on real finish (ViewModelStore.clear()).
+ */
 @OptIn(ExperimentalCoroutinesApi::class)
 @RunWith(RobolectricTestRunner::class)
 @Config(sdk = [33])
@@ -49,96 +55,116 @@ class PSDUiInjectorTest {
         resetCompanionState()
     }
 
+    // region accessor contract
+
     @Test
-    fun uiInjectorAccessorThrowsBeforeUiIsStarted() {
+    fun uiInjectorOrNullIsNullBeforeUiIsPublished() {
         PyrusServiceDesk.init(application, "appA")
-        assertThrowsIllegalState {
-            PyrusServiceDesk.uiInjector()
-        }
+        assertNull(PyrusServiceDesk.uiInjectorOrNull())
     }
 
     @Test
-    fun ensureUiInjectorCreatesAndCachesSingleInstance() {
+    fun uiInjectorThrowsBeforeUiIsPublished() {
         PyrusServiceDesk.init(application, "appA")
-
-        val first = PyrusServiceDesk.ensureUiInjector()
-        val second = PyrusServiceDesk.ensureUiInjector()
-
-        assertSame(first, second)
-        assertSame(first, PyrusServiceDesk.uiInjector())
-        assertSame(first, PyrusServiceDesk.UI_INJECTOR)
+        assertThrowsIllegalState { PyrusServiceDesk.uiInjector() }
     }
 
     @Test
-    fun createUiInjectorFromCoreInjectorOnMainThreadSucceeds() {
+    fun publishUiInjectorMakesAccessorsReturnTheSameInstance() {
         PyrusServiceDesk.init(application, "appA")
-        val core = PyrusServiceDesk.INJECTOR as DiInjector
+        val ui = coreCreateUi()
 
-        val ui = core.createUiInjector()
+        PyrusServiceDesk.publishUiInjector(ui)
 
-        assertNotNull(ui)
-        // Avoid leaks in this test: directly close manually created graph.
-        ui.close()
+        assertSame(ui, PyrusServiceDesk.uiInjector())
+        assertSame(ui, PyrusServiceDesk.uiInjectorOrNull())
+        assertSame(ui, PyrusServiceDesk.UI_INJECTOR)
+
+        PyrusServiceDesk.clearUiInjector(ui)
     }
 
-    @Test
-    fun releaseUiInjectorClearsAccessorAndIsIdempotent() {
-        PyrusServiceDesk.init(application, "appA")
-        val created = PyrusServiceDesk.ensureUiInjector()
-        assertNotNull(created)
+    // endregion
 
-        PyrusServiceDesk.releaseUiInjector()
+    // region publish / clear + identity check (overlap-race protection)
+
+    @Test
+    fun clearUiInjectorDetachesTheStaticForTheCurrentInstance() {
+        PyrusServiceDesk.init(application, "appA")
+        val ui = coreCreateUi()
+        PyrusServiceDesk.publishUiInjector(ui)
+
+        PyrusServiceDesk.clearUiInjector(ui)
+
         assertNull(PyrusServiceDesk.UI_INJECTOR)
         assertThrowsIllegalState { PyrusServiceDesk.uiInjector() }
-
-        // second release must be no action
-        PyrusServiceDesk.releaseUiInjector()
-        assertNull(PyrusServiceDesk.UI_INJECTOR)
     }
 
     @Test
-    fun stopDoesNotReleaseUiInjector() {
+    fun clearingAStaleGraphMustNotDetachTheFreshlyPublishedOne() {
+        // Close/reopen overlap: session A publishes, then session B publishes (static -> B).
+        // When the finishing session A clears, the identity check must keep B alive.
         PyrusServiceDesk.init(application, "appA")
-        val ui = PyrusServiceDesk.ensureUiInjector()
+        val a = coreCreateUi()
+        PyrusServiceDesk.publishUiInjector(a)
+        val b = coreCreateUi()
+        PyrusServiceDesk.publishUiInjector(b)
+
+        PyrusServiceDesk.clearUiInjector(a) // stale (old) session teardown
+
+        assertSame(
+            "Clearing the old graph must not detach the newly published one",
+            b,
+            PyrusServiceDesk.UI_INJECTOR,
+        )
+
+        PyrusServiceDesk.clearUiInjector(b)
+        assertNull(PyrusServiceDesk.UI_INJECTOR)
+    }
+
+    // endregion
+
+    // region interplay with stop() / init()
+
+    @Test
+    fun stopDoesNotDetachUiInjector() {
+        PyrusServiceDesk.init(application, "appA")
+        val ui = coreCreateUi()
+        PyrusServiceDesk.publishUiInjector(ui)
 
         PyrusServiceDesk.stop()
 
-        assertSame("stop() must not null UI injector while UI lifecycle is active", ui, PyrusServiceDesk.UI_INJECTOR)
-        assertSame(ui, PyrusServiceDesk.uiInjector())
+        assertSame("stop() must not detach the UI graph while UI is alive", ui, PyrusServiceDesk.UI_INJECTOR)
+        PyrusServiceDesk.clearUiInjector(ui)
     }
 
     @Test
-    fun initWithChangedCredentialsWhileUiInjectorExistsDoesNotReplaceUiInjector() {
+    fun initWithChangedCredentialsWhileUiIsPublishedKeepsUiInjector() {
         PyrusServiceDesk.init(application, "appA")
-        val uiBefore = PyrusServiceDesk.ensureUiInjector()
+        val ui = coreCreateUi()
+        PyrusServiceDesk.publishUiInjector(ui)
 
         PyrusServiceDesk.init(application, "appB")
 
         assertSame(
-            "init() with changed credentials while UI is alive should only signal stop and keep ui graph intact",
-            uiBefore,
-            PyrusServiceDesk.UI_INJECTOR
+            "init() with changed credentials while UI is alive must only signal stop and keep the graph",
+            ui,
+            PyrusServiceDesk.UI_INJECTOR,
         )
+        PyrusServiceDesk.clearUiInjector(ui)
     }
 
+    // endregion
+
+    // region core.createUiInjector thread affinity (UiInjector requires the main thread)
+
     @Test
-    fun ensureUiInjectorOnBackgroundThreadThrows() = runTest {
+    fun createUiInjectorFromCoreInjectorOnMainThreadSucceeds() {
         PyrusServiceDesk.init(application, "appA")
-        val crash = AtomicReference<Throwable?>(null)
-        val latch = CountDownLatch(1)
-        launch(Dispatchers.IO) {
-            try {
-                PyrusServiceDesk.ensureUiInjector()
-            } catch (t: Throwable) {
-                crash.set(t)
-            } finally {
-                latch.countDown()
-            }
-        }.join()
-        assertTrue("background ensureUiInjector thread timeout", latch.await(5, TimeUnit.SECONDS))
-        val thrown = crash.get()
-        assertNotNull("ensureUiInjector() from background thread must throw", thrown)
-        assertTrue("Expected IllegalStateException, got: $thrown", thrown is IllegalStateException)
+
+        val ui = coreCreateUi()
+
+        assertNotNull(ui)
+        ui.close()
     }
 
     @Test
@@ -160,27 +186,91 @@ class PSDUiInjectorTest {
 
         assertTrue("background createUiInjector thread timeout", latch.await(5, TimeUnit.SECONDS))
         val thrown = crash.get()
-        assertNotNull("createUiInjector() from background thread must throw", thrown)
+        assertNotNull("createUiInjector() from a background thread must throw", thrown)
         assertTrue("Expected IllegalStateException, got: $thrown", thrown is IllegalStateException)
     }
 
+    // endregion
+
+    // region UiGraphViewModel ownership (the real lifecycle mechanism)
+
     @Test
-    fun startLaunchesMainActivityAndUiInjectorIsCreatedWhenMainActivityCreatesUiGraph() {
+    fun uiGraphViewModelPublishesGraphOnCreation() {
         PyrusServiceDesk.init(application, "appA")
-        val hostActivity = Robolectric.buildActivity(Activity::class.java).setup().get()
-        val callback = mock(OnStopCallback::class.java)
+        val store = ViewModelStore()
 
-        PyrusServiceDesk.start(hostActivity, onStopCallback = callback)
+        obtainUiGraphViewModel(store)
 
-        val launchIntent: Intent? = shadowOf(hostActivity).peekNextStartedActivity()
-        assertNotNull("start() must schedule MainActivity launch", launchIntent)
-        assertEquals(MainActivity::class.java.name, launchIntent!!.component?.className)
+        assertNotNull("Creating the UiGraphViewModel must publish the graph", PyrusServiceDesk.UI_INJECTOR)
+        assertSame(PyrusServiceDesk.UI_INJECTOR, PyrusServiceDesk.uiInjector())
 
-        // In production MainActivity.onCreate() calls ensureUiInjector().
-        assertNull("Before MainActivity.onCreate(), UI injector is not created yet", PyrusServiceDesk.UI_INJECTOR)
-        PyrusServiceDesk.ensureUiInjector()
-        assertNotNull(PyrusServiceDesk.uiInjector())
+        store.clear()
     }
+
+    @Test
+    fun uiGraphViewModelIsRetainedAcrossReObtainAndGraphIsNotRebuilt() {
+        // A configuration change re-obtains the ViewModel from the same store: it must be the same
+        // instance and must NOT rebuild the graph (Picasso / ExoPlayer / Cicerone survive rotation).
+        PyrusServiceDesk.init(application, "appA")
+        val store = ViewModelStore()
+
+        val vm1 = obtainUiGraphViewModel(store)
+        val graphAfterFirst = PyrusServiceDesk.UI_INJECTOR
+        val vm2 = obtainUiGraphViewModel(store)
+
+        assertSame("Same store must return the retained ViewModel", vm1, vm2)
+        assertSame("Rotation must not rebuild the UI graph", graphAfterFirst, PyrusServiceDesk.UI_INJECTOR)
+
+        store.clear()
+    }
+
+    @Test
+    fun clearingViewModelStoreClosesAndDetachesGraph() {
+        PyrusServiceDesk.init(application, "appA")
+        val store = ViewModelStore()
+        obtainUiGraphViewModel(store)
+        assertNotNull(PyrusServiceDesk.UI_INJECTOR)
+
+        store.clear() // real finish -> onCleared
+
+        assertNull("Finishing (store.clear) must detach the graph", PyrusServiceDesk.UI_INJECTOR)
+    }
+
+    @Test
+    fun overlappingSessionsOldViewModelClearDoesNotTearDownNewGraph() {
+        // The exact 1.8.13 crash shape, at the ViewModel level: session A open, session B launched,
+        // then A finishes. A's onCleared must not detach B's freshly published graph.
+        PyrusServiceDesk.init(application, "appA")
+        val storeA = ViewModelStore()
+        val storeB = ViewModelStore()
+
+        obtainUiGraphViewModel(storeA)
+        val graphA = PyrusServiceDesk.UI_INJECTOR
+        obtainUiGraphViewModel(storeB)
+        val graphB = PyrusServiceDesk.UI_INJECTOR
+
+        assertNotNull(graphA)
+        assertNotNull(graphB)
+        assertNotSame("Each session owns its own graph", graphA, graphB)
+
+        storeA.clear() // old session finishes AFTER the new one started
+
+        assertSame("Old session teardown must not detach the new session's graph", graphB, PyrusServiceDesk.UI_INJECTOR)
+
+        storeB.clear()
+        assertNull(PyrusServiceDesk.UI_INJECTOR)
+    }
+
+    // endregion
+
+    private fun coreCreateUi(): UiInjector =
+        (PyrusServiceDesk.INJECTOR as DiInjector).createUiInjector()
+
+    private fun obtainUiGraphViewModel(store: ViewModelStore): UiGraphViewModel =
+        ViewModelProvider(
+            store,
+            ViewModelProvider.AndroidViewModelFactory(application),
+        )[UiGraphViewModel::class.java]
 
     private fun assertThrowsIllegalState(block: () -> Unit) {
         try {
@@ -203,4 +293,3 @@ class PSDUiInjectorTest {
         PyrusServiceDesk.onAuthorizationFailed { PyrusServiceDesk.stop() }
     }
 }
-
