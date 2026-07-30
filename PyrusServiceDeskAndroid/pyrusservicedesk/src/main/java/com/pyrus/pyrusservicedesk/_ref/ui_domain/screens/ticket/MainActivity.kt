@@ -63,7 +63,7 @@ internal class MainActivity : FragmentActivity() {
         binding = PsdActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
-        if (VERSION.SDK_INT > Build.VERSION_CODES.Q) {
+        if (VERSION.SDK_INT >= Build.VERSION_CODES.R) {
             WindowCompat.setDecorFitsSystemWindows(window, false)
         }
 
