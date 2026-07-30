@@ -54,6 +54,13 @@ internal class RootFragment: TeaFragment<Unit, Message.Outer, Effect.Outer>(),
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
+        // The UI graph can be absent if the fragment was restored without a live SDK session
+        // (process death / close-reopen race). Bail out gracefully instead of crashing.
+        if (PyrusServiceDesk.uiInjectorOrNull() == null) {
+            activity?.finish()
+            return
+        }
+
         val window: Window = requireActivity().window
         accessDeniedFeature = getStore {
             uiInjector().accessDeniedFeatureFactory.create()

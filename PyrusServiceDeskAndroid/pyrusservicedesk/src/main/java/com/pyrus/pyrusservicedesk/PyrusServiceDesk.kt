@@ -54,6 +54,7 @@ class PyrusServiceDesk private constructor(
         }
         internal var INSTANCE: PyrusServiceDesk? = null
 
+        @Volatile
         internal var INJECTOR: DiInjector? = null
 
         @Volatile
@@ -71,6 +72,7 @@ class PyrusServiceDesk private constructor(
 
         private const val DEFAULT_TOKEN_TYPE: String = "android"
 
+        @Volatile
         internal var onStopCallback: OnStopCallback? = null
 
         private val liveUpdates = LiveUpdates()
@@ -418,39 +420,40 @@ class PyrusServiceDesk private constructor(
             return checkNotNull(INJECTOR)
         }
 
-        internal fun uiInjector(): UiInjector {
-            return checkNotNull(UI_INJECTOR) {
-                "PyrusServiceDesk UI is not started. Open SDK via PyrusServiceDesk.start(...) and " +
-                    "let MainActivity create the UiInjector in its lifecycle."
-            }
+        /**
+         * Null-safe accessor for the UI graph. The graph is created and owned by
+         * [com.pyrus.pyrusservicedesk.core.UiGraphViewModel], which is scoped to the SDK
+         * activity, so this is non-null for the whole activity lifecycle (including its
+         * fragments). Returns null only when there is genuinely no live UI session — callers
+         * restored without one (process death / orphaned fragment) must bail gracefully.
+         */
+        internal fun uiInjectorOrNull(): UiInjector? = UI_INJECTOR
+
+        internal fun uiInjector(): UiInjector = UI_INJECTOR ?: error(
+            "PyrusServiceDesk UI is not started. Open SDK via PyrusServiceDesk.start(...) and " +
+                "let MainActivity create the UiInjector in its lifecycle."
+        )
+
+        /**
+         * Publishes the UI graph created by the activity-scoped [UiGraphViewModel] so the
+         * global accessors can serve it to fragments / adapters. Called on the main thread.
+         */
+        @MainThread
+        internal fun publishUiInjector(instance: UiInjector) {
+            UI_INJECTOR = instance
         }
 
         /**
-         * Creates UIInjector.
+         * Closes [instance] and detaches it from the global reference when the owning
+         * [UiGraphViewModel] is cleared (activity really finishing). The detach is identity
+         * checked, so a finishing activity's ViewModel can not tear down a graph that a newly
+         * launched activity has already published (singleTask close/reopen overlap).
+         * Called on the main thread.
          */
         @MainThread
-        internal fun ensureUiInjector(): UiInjector {
-            check(android.os.Looper.myLooper() == android.os.Looper.getMainLooper()) {
-                "ensureUiInjector() must be called on the main thread"
-            }
-            UI_INJECTOR?.let { return it }
-            val core = injector()
-            val newOne = core.createUiInjector()
-            UI_INJECTOR = newOne
-            return newOne
-        }
-
-        /**
-         * Releases the UIInjector. Must be called on the main thread.
-         */
-        @MainThread
-        internal fun releaseUiInjector() {
-            check(android.os.Looper.myLooper() == android.os.Looper.getMainLooper()) {
-                "releaseUiInjector() must be called on the main thread"
-            }
-            val current = UI_INJECTOR ?: return
-            UI_INJECTOR = null
-            current.close()
+        internal fun clearUiInjector(instance: UiInjector) {
+            if (UI_INJECTOR === instance) UI_INJECTOR = null
+            instance.close()
         }
 
         private fun startImpl(
