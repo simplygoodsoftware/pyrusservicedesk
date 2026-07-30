@@ -23,11 +23,13 @@ import com.pyrus.pyrusservicedesk.OpenTicketAction
 import com.pyrus.pyrusservicedesk.PyrusServiceDesk
 import com.pyrus.pyrusservicedesk.PyrusServiceDesk.Companion.injector
 import com.pyrus.pyrusservicedesk.PyrusServiceDesk.Companion.uiInjector
+import com.pyrus.pyrusservicedesk.PyrusServiceDesk.Companion.uiInjectorOrNull
 import com.pyrus.pyrusservicedesk.R
 import com.pyrus.pyrusservicedesk.ServiceDeskConfiguration
 import com.pyrus.pyrusservicedesk._ref.ui_domain.access_denied.AccessDeniedFeature
 import com.pyrus.pyrusservicedesk._ref.ui_domain.access_denied.AccessFeatureContract.Effect
 import com.pyrus.pyrusservicedesk._ref.ui_domain.access_denied.AccessFeatureContract.Message
+import com.pyrus.pyrusservicedesk._ref.ui_domain.screens.ticket.MainActivity
 import com.pyrus.pyrusservicedesk._ref.ui_domain.screens.tickets_list.tickets.TicketsFragment
 import com.pyrus.pyrusservicedesk._ref.utils.ConfigUtils
 import com.pyrus.pyrusservicedesk._ref.utils.insets.RootViewDeferringInsetsCallback
@@ -57,6 +59,8 @@ internal class RootFragment: TeaFragment<Unit, Message.Outer, Effect.Outer>(),
         // The UI graph can be absent if the fragment was restored without a live SDK session
         // (process death / close-reopen race). Bail out gracefully instead of crashing.
         if (PyrusServiceDesk.uiInjectorOrNull() == null) {
+            Log.d(TAG, "PyrusServiceDesk.uiInjectorOrNull == null")
+            PLog.d(TAG, "PyrusServiceDesk.uiInjectorOrNull == null")
             activity?.finish()
             return
         }
@@ -106,7 +110,7 @@ internal class RootFragment: TeaFragment<Unit, Message.Outer, Effect.Outer>(),
                 if (injector().rateTimeUseCase.isTimeToRate()) {
                     showRateUsDialog()
                 }
-                uiInjector().audioWrapper.clearPositions()
+                uiInjectorOrNull()?.audioWrapper?.clearPositions()
             }
         }
     }
@@ -152,11 +156,14 @@ internal class RootFragment: TeaFragment<Unit, Message.Outer, Effect.Outer>(),
 
     override fun onResume() {
         super.onResume()
-        uiInjector().navHolder.setNavigator(navigator)
+        // activity?.finish() in onCreate() is asynchronous, so the framework still drives this
+        // fragment through onResume()/onPause() even when the graph was absent. Guard the access so
+        // the original crash does not simply relocate here.
+        uiInjectorOrNull()?.navHolder?.setNavigator(navigator)
     }
 
     override fun onPause() {
-        uiInjector().navHolder.removeNavigator()
+        uiInjectorOrNull()?.navHolder?.removeNavigator()
         super.onPause()
     }
 

@@ -129,6 +129,12 @@ internal class TicketFragment: TeaFragment<Model, Event, Effect>() {
 
     private lateinit var audioWrapper: AudioWrapper
 
+    // Set when onCreate() found no live UI graph and called activity?.finish(). finish() is async, so
+    // the framework still drives this fragment through onCreateView()/onViewCreated()/onStop(); this
+    // flag makes those callbacks bail before touching the graph or the uninitialized [audioWrapper]
+    // / [binding], so the original crash does not relocate to a less obvious stack trace.
+    private var uiGraphMissing = false
+
     override fun createRenderer(): ViewRenderer<Model> = diff {
         diff(Model::inputText) { text -> if (!binding.inputEditText.hasFocus()) binding.inputEditText.setText(text) }
         diff(Model::sendEnabled) { sendEnabled -> binding.sendButton.isEnabled = sendEnabled }
@@ -292,6 +298,7 @@ internal class TicketFragment: TeaFragment<Model, Event, Effect>() {
         // The UI graph can be absent if the fragment was restored without a live SDK session
         // (process death / close-reopen race). Bail out gracefully instead of crashing.
         if (PyrusServiceDesk.uiInjectorOrNull() == null) {
+            uiGraphMissing = true
             activity?.finish()
             return
         }
@@ -309,6 +316,10 @@ internal class TicketFragment: TeaFragment<Model, Event, Effect>() {
         container: ViewGroup?,
         savedInstanceState: Bundle?,
     ): View {
+        // No live graph: onCreate() already called finish(). Don't build the UI (that would realize
+        // the adapter -> CommentAudioFingerprint(audioWrapper) and initListeners(), both touching the
+        // uninitialized audioWrapper). Return a throwaway view while the activity finishes.
+        if (uiGraphMissing) return View(requireContext())
         binding = PsdFragmentTicketBinding.inflate(inflater, container, false)
 
         audioRecordView = AudioRecordView(
@@ -340,6 +351,7 @@ internal class TicketFragment: TeaFragment<Model, Event, Effect>() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+        if (uiGraphMissing) return
 
         if (savedInstanceState == null && requireArguments().getLong(KEY_TICKET_ID, 0) < 0) {
             showKeyboardOn(binding.inputEditText)
@@ -371,6 +383,7 @@ internal class TicketFragment: TeaFragment<Model, Event, Effect>() {
 
     override fun onSaveInstanceState(outState: Bundle) {
         super.onSaveInstanceState(outState)
+        if (uiGraphMissing) return // binding was never inflated
         outState.putBoolean(STATE_KEYBOARD_SHOWN, binding.inputEditText.hasFocus())
     }
 
@@ -537,7 +550,7 @@ internal class TicketFragment: TeaFragment<Model, Event, Effect>() {
     }
 
     override fun onStop() {
-        audioWrapper.stop()
+        if (!uiGraphMissing) audioWrapper.stop()
         super.onStop()
     }
 

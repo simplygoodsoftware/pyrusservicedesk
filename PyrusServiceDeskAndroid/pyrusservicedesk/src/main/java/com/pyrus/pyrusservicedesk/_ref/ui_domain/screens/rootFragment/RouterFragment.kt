@@ -3,6 +3,7 @@ package com.pyrus.pyrusservicedesk._ref.ui_domain.screens.rootFragment
 import android.os.Build
 import android.os.Build.VERSION
 import android.os.Bundle
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -23,6 +24,7 @@ import com.pyrus.pyrusservicedesk._ref.SdScreens
 import com.pyrus.pyrusservicedesk._ref.ui_domain.access_denied.AccessFeatureContract.Effect
 import com.pyrus.pyrusservicedesk._ref.ui_domain.access_denied.AccessFeatureContract.Message
 import com.pyrus.pyrusservicedesk._ref.utils.insets.RootViewDeferringInsetsCallback
+import com.pyrus.pyrusservicedesk._ref.utils.log.PLog
 import com.pyrus.pyrusservicedesk._ref.utils.navigation.PyrusNavigator
 import com.pyrus.pyrusservicedesk._ref.utils.navigation.setSlideRightAnimation
 import com.pyrus.pyrusservicedesk._ref.whitetea.android.TeaFragment
@@ -47,6 +49,8 @@ internal class RouterFragment: TeaFragment<Unit, Message.Outer, Effect.Outer>(),
         // The UI graph can be absent if the fragment was restored without a live SDK session
         // (process death / close-reopen race). Bail out gracefully instead of crashing.
         if (uiInjectorOrNull() == null) {
+            Log.d(RootFragment.TAG, "PyrusServiceDesk.uiInjectorOrNull == null")
+            PLog.d(RootFragment.TAG, "PyrusServiceDesk.uiInjectorOrNull == null")
             activity?.finish()
             return
         }
@@ -120,11 +124,11 @@ internal class RouterFragment: TeaFragment<Unit, Message.Outer, Effect.Outer>(),
 
     override fun onResume() {
         super.onResume()
-        uiInjector().navHolder.setNavigator(navigator)
+        uiInjectorOrNull()?.navHolder?.setNavigator(navigator)
     }
 
     override fun onPause() {
-        uiInjector().navHolder.removeNavigator()
+        uiInjectorOrNull()?.navHolder?.removeNavigator()
         super.onPause()
     }
 
