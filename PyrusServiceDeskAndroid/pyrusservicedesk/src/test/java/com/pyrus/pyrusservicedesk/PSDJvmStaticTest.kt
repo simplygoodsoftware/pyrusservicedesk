@@ -446,7 +446,7 @@ class PSDJvmStaticTest {
     private fun resetCompanionState() {
         runCatching { PyrusServiceDesk.INSTANCE = null }
         runCatching { PyrusServiceDesk.INJECTOR = null }
-        runCatching { PyrusServiceDesk.UI_INJECTOR = null }
+        runCatching { PyrusServiceDesk.resetUiGraphForTest() }
         runCatching { PyrusServiceDesk.onStopCallback = null }
         runCatching { PyrusServiceDesk.lastRefreshes = ArrayList() }
         PyrusServiceDesk.sdIsOpen.value = false

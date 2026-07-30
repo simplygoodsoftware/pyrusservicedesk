@@ -19,6 +19,7 @@ import com.pyrus.pyrusservicedesk._ref.utils.log.PLog
 import com.pyrus.pyrusservicedesk._ref.utils.migratePreferences
 import com.pyrus.pyrusservicedesk.core.Account
 import com.pyrus.pyrusservicedesk.core.DiInjector
+import com.pyrus.pyrusservicedesk.core.SharedUiGraph
 import com.pyrus.pyrusservicedesk.core.StaticRepository
 import com.pyrus.pyrusservicedesk.core.UiInjector
 import com.pyrus.pyrusservicedesk.core.getAppId
@@ -57,8 +58,15 @@ class PyrusServiceDesk private constructor(
         @Volatile
         internal var INJECTOR: DiInjector? = null
 
-        @Volatile
-        internal var UI_INJECTOR: UiInjector? = null
+        /**
+         * The SDK UI graph, shared by every SDK activity in the task and ref-counted so it outlives
+         * any single activity (see [com.pyrus.pyrusservicedesk.core.SharedUiGraph]).
+         */
+        private val uiGraph = SharedUiGraph { injector().createUiInjector() }
+
+        /** The currently published UI graph, or null when no SDK activity is retaining one. */
+        internal val UI_INJECTOR: UiInjector?
+            get() = uiGraph.instance
 
         internal var lastRefreshes = ArrayList<Long>()
 
@@ -435,26 +443,30 @@ class PyrusServiceDesk private constructor(
         )
 
         /**
-         * Publishes the UI graph created by the activity-scoped [UiGraphViewModel] so the
-         * global accessors can serve it to fragments / adapters. Called on the main thread.
+         * Retains the shared UI graph for one [com.pyrus.pyrusservicedesk.core.UiGraphViewModel]
+         * owner, building it on the first acquire and reusing the same instance afterwards. Every
+         * acquire must be balanced by exactly one [releaseUiInjector]. Because the graph is built on
+         * demand, an SDK activity that outlived MainActivity ("Don't keep activities") rebuilds it
+         * here instead of finding a null [UI_INJECTOR] and crashing. Called on the main thread.
          */
         @MainThread
-        internal fun publishUiInjector(instance: UiInjector) {
-            UI_INJECTOR = instance
-        }
+        internal fun acquireUiInjector(): UiInjector = uiGraph.acquire()
 
         /**
-         * Closes [instance] and detaches it from the global reference when the owning
-         * [UiGraphViewModel] is cleared (activity really finishing). The detach is identity
-         * checked, so a finishing activity's ViewModel can not tear down a graph that a newly
-         * launched activity has already published (singleTask close/reopen overlap).
-         * Called on the main thread.
+         * Releases one owner's retention of the shared UI graph. The graph is closed and detached
+         * only when the last owner is released, so a finishing / DKA-destroyed MainActivity can not
+         * tear down a graph that a still-alive FilePreviewActivity — or a freshly launched activity
+         * in a close/reopen overlap — is still using. Called on the main thread.
          */
         @MainThread
-        internal fun clearUiInjector(instance: UiInjector) {
-            if (UI_INJECTOR === instance) UI_INJECTOR = null
-            instance.close()
-        }
+        internal fun releaseUiInjector() = uiGraph.release()
+
+        /** Test-only: reset the shared graph (drop the instance and the owner count). */
+        internal fun resetUiGraphForTest() = uiGraph.resetForTest()
+
+        /** Test-only: number of live owners currently retaining the shared graph. */
+        internal val uiGraphOwnerCountForTest: Int
+            get() = uiGraph.ownerCount
 
         private fun startImpl(
             activity: Activity,

@@ -10,6 +10,7 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.app.AppCompatDelegate
 import androidx.core.app.ActivityCompat
 import androidx.core.view.ViewCompat
+import com.pyrus.pyrusservicedesk.PyrusServiceDesk
 import com.pyrus.pyrusservicedesk.R
 import com.pyrus.pyrusservicedesk._ref.utils.getViewModel
 import com.pyrus.pyrusservicedesk.core.StaticRepository
@@ -51,6 +52,15 @@ internal abstract class ActivityBase: AppCompatActivity(), CoroutineScope {
     override val coroutineContext: CoroutineContext = Dispatchers.Main + Job()
 
     override fun onCreate(savedInstanceState: Bundle?) {
+        if (PyrusServiceDesk.uiInjectorOrNull() == null) {
+            // No live UI graph (e.g. cold restore after process death). Bail out BEFORE touching
+            // sharedViewModel / uiInjector() below — that would throw IllegalStateException and
+            // crash the host process. Concrete activities acquire the graph before super.onCreate,
+            // so this only triggers when it genuinely can not be built.
+            super.onCreate(null)
+            finish()
+            return
+        }
         super.onCreate(savedInstanceState)
         // Vectors inside another type of drawables may not work without this
         AppCompatDelegate.setCompatVectorFromResourcesEnabled(true)

@@ -24,6 +24,7 @@ import android.view.animation.LinearInterpolator
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowCompat
 import androidx.core.view.WindowInsetsCompat
+import androidx.lifecycle.ViewModelProvider
 import com.pyrus.pyrusservicedesk.PyrusServiceDesk
 import com.pyrus.pyrusservicedesk.R
 import com.pyrus.pyrusservicedesk._ref.utils.ConfigUtils
@@ -33,6 +34,7 @@ import com.pyrus.pyrusservicedesk._ref.utils.getSecondaryColorOnBackground
 import com.pyrus.pyrusservicedesk._ref.utils.getTextColorOnBackground
 import com.pyrus.pyrusservicedesk._ref.utils.insets.RootViewDeferringInsetsCallback
 import com.pyrus.pyrusservicedesk._ref.utils.log.PLog
+import com.pyrus.pyrusservicedesk.core.UiGraphViewModel
 import com.pyrus.pyrusservicedesk.databinding.PsdActivityFilePreviewBinding
 import com.pyrus.pyrusservicedesk.presentation.ConnectionActivityBase
 import com.pyrus.pyrusservicedesk.sdk.data.intermediate.FileData
@@ -58,16 +60,21 @@ internal class FilePreviewActivity: ConnectionActivityBase<FilePreviewViewModel>
     private lateinit var binding: PsdActivityFilePreviewBinding
 
     override fun onCreate(savedInstanceState: Bundle?) {
-        if (PyrusServiceDesk.INJECTOR == null || PyrusServiceDesk.UI_INJECTOR == null) {
-            // Cold restore after process death. Drop the parcelled state so the
-            // framework does not resurrect views/observers that would crash on
-            // ViewModelFactory.create() / uiInjector().sharedViewModel.
-            Log.d(TAG, "INJECTOR or UI_INJECTOR is null, INJECTOR: ${PyrusServiceDesk.INJECTOR}, UI_INJECTOR: ${PyrusServiceDesk.UI_INJECTOR}")
-            PLog.d(TAG, "INJECTOR or UI_INJECTOR is null, INJECTOR: ${PyrusServiceDesk.INJECTOR}, UI_INJECTOR: ${PyrusServiceDesk.UI_INJECTOR}")
+        if (PyrusServiceDesk.INJECTOR == null) {
+            // Cold restore after process death without a re-init: the core graph can not be rebuilt.
+            // Drop the parcelled state so the framework does not resurrect views/observers that would
+            // crash on ViewModelFactory.create() / uiInjector().sharedViewModel.
+            Log.d(TAG, "INJECTOR is null, finishing. UI_INJECTOR: ${PyrusServiceDesk.UI_INJECTOR}")
+            PLog.d(TAG, "INJECTOR is null, finishing. UI_INJECTOR: ${PyrusServiceDesk.UI_INJECTOR}")
             super.onCreate(null)
             finish()
             return
         }
+        // This activity shares MainActivity's UI graph but is a SEPARATE activity in the task. Under
+        // "Don't keep activities" the backgrounded MainActivity is destroyed, releasing its ref to
+        // the graph — so we retain our own ref here (and rebuild the graph if it was the last one)
+        // BEFORE super.onCreate touches uiInjector()/sharedViewModel.
+        ViewModelProvider(this)[UiGraphViewModel::class.java]
         super.onCreate(savedInstanceState)
         // if you don't set empty text, Android will set the app name
         supportActionBar?.title = ""

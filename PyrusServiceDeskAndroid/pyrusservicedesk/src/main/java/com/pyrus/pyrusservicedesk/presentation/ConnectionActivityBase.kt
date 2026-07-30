@@ -41,6 +41,9 @@ internal abstract class ConnectionActivityBase<T: ConnectionViewModelBase>(viewM
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        // ActivityBase.onCreate bails and finishes when there is no live UI graph (cold restore
+        // after process death). In that case setContentView was never called, so don't touch views.
+        if (isFinishing) return
         progressBar = findViewById(progressBarViewId)
         progressBar?.progressDrawable?.setColorFilter(
                 getColorByAttrId(this, R.attr.colorAccentSecondary),
