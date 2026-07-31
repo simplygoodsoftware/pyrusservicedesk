@@ -18,6 +18,7 @@ import com.google.android.play.core.review.ReviewManagerFactory
 import com.pyrus.pyrusservicedesk.PyrusServiceDesk
 import com.pyrus.pyrusservicedesk.PyrusServiceDesk.Companion.injector
 import com.pyrus.pyrusservicedesk.PyrusServiceDesk.Companion.uiInjector
+import com.pyrus.pyrusservicedesk.PyrusServiceDesk.Companion.uiInjectorOrNull
 import com.pyrus.pyrusservicedesk.R
 import com.pyrus.pyrusservicedesk.ServiceDeskConfiguration
 import com.pyrus.pyrusservicedesk._ref.SdScreens
@@ -111,11 +112,13 @@ internal class MainActivity : FragmentActivity() {
 
     override fun onResume() {
         super.onResume()
-        uiInjector().navHolder.setNavigator(navigator)
+        // A graph-absent onCreate() bails via finish(), which is async — guard so this does not
+        // relocate the crash here if the framework still runs onResume().
+        uiInjectorOrNull()?.navHolder?.setNavigator(navigator)
     }
 
     override fun onPause() {
-        uiInjector().navHolder.removeNavigator()
+        uiInjectorOrNull()?.navHolder?.removeNavigator()
         super.onPause()
     }
 

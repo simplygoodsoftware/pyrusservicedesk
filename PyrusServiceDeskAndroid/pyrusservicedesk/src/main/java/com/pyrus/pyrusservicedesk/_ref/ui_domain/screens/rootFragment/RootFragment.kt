@@ -89,7 +89,6 @@ internal class RootFragment: TeaFragment<Unit, Message.Outer, Effect.Outer>(),
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
-        super.onCreate(savedInstanceState)
         binding = PsdRootFragmentBinding.inflate(layoutInflater)
         return binding.root
     }

@@ -461,13 +461,6 @@ class PyrusServiceDesk private constructor(
         @MainThread
         internal fun releaseUiInjector() = uiGraph.release()
 
-        /** Test-only: reset the shared graph (drop the instance and the owner count). */
-        internal fun resetUiGraphForTest() = uiGraph.resetForTest()
-
-        /** Test-only: number of live owners currently retaining the shared graph. */
-        internal val uiGraphOwnerCountForTest: Int
-            get() = uiGraph.ownerCount
-
         private fun startImpl(
             activity: Activity,
             account: Account,

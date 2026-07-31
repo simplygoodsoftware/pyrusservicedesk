@@ -1,5 +1,6 @@
 package com.pyrus.pyrusservicedesk.core
 
+import android.os.Looper
 import android.util.Log
 import androidx.annotation.MainThread
 import com.pyrus.pyrusservicedesk._ref.utils.log.PLog
@@ -15,7 +16,8 @@ import com.pyrus.pyrusservicedesk._ref.utils.log.PLog
  * main-thread work on the launch path — the ANR this code already fixes), so it is built lazily by
  * whichever activity's [UiGraphViewModel] acquires it first.
  *
- * Contract (all calls on the main thread, driven by [UiGraphViewModel] init / onCleared):
+ * Contract (all calls on the main thread, driven by [UiGraphViewModel] init / onCleared — enforced
+ * at runtime because the owner count is a plain, non-synchronized Int):
  *  - [acquire] builds the graph on the first owner and reuses it for every later owner;
  *  - [release] closes and detaches the graph only when the last owner is released.
  *
@@ -28,38 +30,36 @@ internal class SharedUiGraph(private val build: () -> UiInjector) {
     var instance: UiInjector? = null
         private set
 
-    private var ownerCountInternal = 0
-
-    /** Number of live owners currently retaining the graph. */
-    val ownerCount: Int
-        get() = ownerCountInternal
+    private var ownerCount = 0
 
     @MainThread
     fun acquire(): UiInjector {
+        ensureMainThread()
         val graph = instance ?: build().also {
             instance = it
             log("built a new UI graph #${id(it)}")
         }
-        ownerCountInternal++
-        log("acquire: graph #${id(graph)}, owners=$ownerCountInternal")
+        ownerCount++
+        log("acquire: graph #${id(graph)}, owners=$ownerCount")
         return graph
     }
 
     @MainThread
     fun release() {
-        if (ownerCountInternal > 0) ownerCountInternal--
-        log("release: graph #${id(instance)}, owners=$ownerCountInternal")
-        if (ownerCountInternal == 0) {
+        ensureMainThread()
+        if (ownerCount > 0) ownerCount--
+        log("release: graph #${id(instance)}, owners=$ownerCount")
+        if (ownerCount == 0) {
             val graph = instance
             instance = null
             graph?.close()
         }
     }
 
-    /** Test-only: drop the graph and reset the owner count without going through the lifecycle. */
-    fun resetForTest() {
-        instance = null
-        ownerCountInternal = 0
+    private fun ensureMainThread() {
+        check(Looper.myLooper() == Looper.getMainLooper()) {
+            "SharedUiGraph must be used on the main thread, was: ${Thread.currentThread().name}"
+        }
     }
 
     private fun id(graph: UiInjector?): Int = System.identityHashCode(graph)

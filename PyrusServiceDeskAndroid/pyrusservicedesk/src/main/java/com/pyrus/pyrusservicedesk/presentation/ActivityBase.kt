@@ -4,6 +4,7 @@ import android.content.Context
 import android.content.pm.PackageManager
 import android.os.Build
 import android.os.Bundle
+import android.util.Log
 import android.view.View
 import android.view.inputmethod.InputMethodManager
 import androidx.appcompat.app.AppCompatActivity
@@ -13,6 +14,7 @@ import androidx.core.view.ViewCompat
 import com.pyrus.pyrusservicedesk.PyrusServiceDesk
 import com.pyrus.pyrusservicedesk.R
 import com.pyrus.pyrusservicedesk._ref.utils.getViewModel
+import com.pyrus.pyrusservicedesk._ref.utils.log.PLog
 import com.pyrus.pyrusservicedesk.core.StaticRepository
 import com.pyrus.pyrusservicedesk.presentation.viewmodel.SharedViewModel
 import kotlinx.coroutines.CoroutineScope
@@ -28,10 +30,6 @@ import kotlin.coroutines.CoroutineContext
  * Old base class for service desk activities.
  */
 internal abstract class ActivityBase: AppCompatActivity(), CoroutineScope {
-
-    private companion object {
-        const val SHOW_KEYBOARD_RETRY_DELAY_MS = 100L
-    }
 
     /**
      * Implementations should provide layout resource ids to be inflated to content view
@@ -57,6 +55,8 @@ internal abstract class ActivityBase: AppCompatActivity(), CoroutineScope {
             // sharedViewModel / uiInjector() below — that would throw IllegalStateException and
             // crash the host process. Concrete activities acquire the graph before super.onCreate,
             // so this only triggers when it genuinely can not be built.
+            Log.d(TAG, "PyrusServiceDesk.uiInjectorOrNull == null")
+            PLog.d(TAG, "PyrusServiceDesk.uiInjectorOrNull == null")
             super.onCreate(null)
             finish()
             return
@@ -85,6 +85,13 @@ internal abstract class ActivityBase: AppCompatActivity(), CoroutineScope {
 
     override fun onPostCreate(savedInstanceState: Bundle?) {
         super.onPostCreate(savedInstanceState)
+        // onCreate() bailed and finished when there was no live graph; finish() is async, so skip
+        // starting observers that touch sharedViewModel / uiInjector() in that case.
+        if (PyrusServiceDesk.uiInjectorOrNull() == null) {
+            Log.d(TAG, "onPostCreate: uiInjectorOrNull == null, skip startObserveData")
+            PLog.d(TAG, "onPostCreate: uiInjectorOrNull == null, skip startObserveData")
+            return
+        }
         startObserveData()
     }
 
@@ -163,5 +170,10 @@ internal abstract class ActivityBase: AppCompatActivity(), CoroutineScope {
         else {
             super.overridePendingTransition(enter, exit)
         }
+    }
+
+    private companion object {
+        const val SHOW_KEYBOARD_RETRY_DELAY_MS = 100L
+        const val TAG = "ActivityBase"
     }
 }

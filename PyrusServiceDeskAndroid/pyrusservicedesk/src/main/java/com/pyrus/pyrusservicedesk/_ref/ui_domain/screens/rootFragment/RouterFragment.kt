@@ -35,6 +35,7 @@ import com.pyrus.pyrusservicedesk.databinding.PsdRootFragmentBinding
 import com.pyrus.pyrusservicedesk.sdk.repositories.UserInternal
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
 internal class RouterFragment: TeaFragment<Unit, Message.Outer, Effect.Outer>(),
     NoFullScreenFragment {
@@ -93,9 +94,11 @@ internal class RouterFragment: TeaFragment<Unit, Message.Outer, Effect.Outer>(),
 
                 val user = UserInternal(userId, appId)
                 val router = uiInjector().router
-                lifecycleScope.launch(Dispatchers.IO) {
-                    val lastTicketId = injector().localTicketsStore.getTickets().lastOrNull()?.ticketId
-                        ?: injector().localCommandsStore.getNextLocalId()
+                lifecycleScope.launch {
+                    val lastTicketId = withContext(Dispatchers.IO) {
+                        injector().localTicketsStore.getTickets().lastOrNull()?.ticketId
+                            ?: injector().localCommandsStore.getNextLocalId()
+                    }
                     router.newRootScreen(SdScreens.TicketScreen(lastTicketId, user, sendComment).setSlideRightAnimation())
                 }
             }
@@ -107,7 +110,6 @@ internal class RouterFragment: TeaFragment<Unit, Message.Outer, Effect.Outer>(),
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
-        super.onCreate(savedInstanceState)
         binding = PsdRootFragmentBinding.inflate(layoutInflater)
         return binding.root
     }

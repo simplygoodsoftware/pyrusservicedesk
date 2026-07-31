@@ -15,7 +15,6 @@ import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.test.runTest
 import org.junit.After
-import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNotNull
 import org.junit.Assert.assertNotSame
 import org.junit.Assert.assertNull
@@ -133,14 +132,22 @@ class PSDUiInjectorTest {
     }
 
     @Test
-    fun releaseWithoutAcquireIsSafeAndDoesNotUnderflow() {
+    fun releaseWithoutAcquireDoesNotCorruptTheCounter() {
         PyrusServiceDesk.init(application, "appA")
 
-        // No matching acquire: must clamp at 0, not go negative or crash.
+        // Stray release with no matching acquire. If the owner count underflowed below 0, a later
+        // balanced acquire/release would leave the graph published (the count would never return to
+        // 0). Assert it stays balanced through a full cycle instead of reading the internal count.
         PyrusServiceDesk.releaseUiInjector()
-
         assertNull(PyrusServiceDesk.UI_INJECTOR)
-        assertEquals(0, PyrusServiceDesk.uiGraphOwnerCountForTest)
+
+        val graph = PyrusServiceDesk.acquireUiInjector()
+        assertSame(graph, PyrusServiceDesk.UI_INJECTOR)
+        PyrusServiceDesk.releaseUiInjector()
+        assertNull(
+            "A balanced acquire/release after a stray release must still close the graph",
+            PyrusServiceDesk.UI_INJECTOR,
+        )
     }
 
     // endregion
@@ -428,7 +435,8 @@ class PSDUiInjectorTest {
     private fun resetCompanionState() {
         runCatching { PyrusServiceDesk.INSTANCE = null }
         runCatching { PyrusServiceDesk.INJECTOR = null }
-        runCatching { PyrusServiceDesk.resetUiGraphForTest() }
+        // Drain any graph an unbalanced/failed test left behind, using the real release API.
+        runCatching { while (PyrusServiceDesk.UI_INJECTOR != null) PyrusServiceDesk.releaseUiInjector() }
         runCatching { PyrusServiceDesk.onStopCallback = null }
         runCatching { PyrusServiceDesk.lastRefreshes = ArrayList() }
         PyrusServiceDesk.sdIsOpen.value = false

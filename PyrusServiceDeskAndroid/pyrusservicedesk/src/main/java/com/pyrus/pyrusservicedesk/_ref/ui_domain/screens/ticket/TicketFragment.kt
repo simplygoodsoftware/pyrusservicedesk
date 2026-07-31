@@ -35,10 +35,10 @@ import com.pyrus.pyrusservicedesk.PyrusServiceDesk.Companion.uiInjector
 import com.pyrus.pyrusservicedesk.R
 import com.pyrus.pyrusservicedesk._ref.SdScreens
 import com.pyrus.pyrusservicedesk._ref.data.AudioData
-import com.pyrus.pyrusservicedesk._ref.data.multy_chat.Application
 import com.pyrus.pyrusservicedesk._ref.ui_domain.screens.ticket.TicketView.Effect
 import com.pyrus.pyrusservicedesk._ref.ui_domain.screens.ticket.TicketView.Event
-import com.pyrus.pyrusservicedesk._ref.ui_domain.screens.ticket.TicketView.Event.*
+import com.pyrus.pyrusservicedesk._ref.ui_domain.screens.ticket.TicketView.Event.SetAttachVariant
+import com.pyrus.pyrusservicedesk._ref.ui_domain.screens.ticket.TicketView.Event.SetErrorCommentResult
 import com.pyrus.pyrusservicedesk._ref.ui_domain.screens.ticket.TicketView.Model
 import com.pyrus.pyrusservicedesk._ref.ui_domain.screens.ticket.adapter.entries.CommentEntry
 import com.pyrus.pyrusservicedesk._ref.ui_domain.screens.ticket.adapter.fingerprints.AudioStatus
@@ -57,13 +57,13 @@ import com.pyrus.pyrusservicedesk._ref.utils.AudioWrapper
 import com.pyrus.pyrusservicedesk._ref.utils.ConfigUtils
 import com.pyrus.pyrusservicedesk._ref.utils.ConfigUtils.Companion.getAccentColor
 import com.pyrus.pyrusservicedesk._ref.utils.ConfigUtils.Companion.getMainBackgroundColor
-import com.pyrus.pyrusservicedesk._ref.utils.TextProvider
-import com.pyrus.pyrusservicedesk._ref.utils.TextProvider.*
+import com.pyrus.pyrusservicedesk._ref.utils.TextProvider.Res
 import com.pyrus.pyrusservicedesk._ref.utils.animateVisibility
 import com.pyrus.pyrusservicedesk._ref.utils.getColorOnBackground
 import com.pyrus.pyrusservicedesk._ref.utils.getSecondaryColorOnBackground
 import com.pyrus.pyrusservicedesk._ref.utils.getTimeString
 import com.pyrus.pyrusservicedesk._ref.utils.insets.RootViewDeferringInsetsCallback
+import com.pyrus.pyrusservicedesk._ref.utils.log.PLog
 import com.pyrus.pyrusservicedesk._ref.utils.setCursorColor
 import com.pyrus.pyrusservicedesk._ref.utils.showKeyboardOn
 import com.pyrus.pyrusservicedesk._ref.utils.text
@@ -298,6 +298,8 @@ internal class TicketFragment: TeaFragment<Model, Event, Effect>() {
         // The UI graph can be absent if the fragment was restored without a live SDK session
         // (process death / close-reopen race). Bail out gracefully instead of crashing.
         if (PyrusServiceDesk.uiInjectorOrNull() == null) {
+            Log.d(TAG, "PyrusServiceDesk.uiInjectorOrNull == null")
+            PLog.d(TAG, "PyrusServiceDesk.uiInjectorOrNull == null")
             uiGraphMissing = true
             activity?.finish()
             return
@@ -770,6 +772,7 @@ internal class TicketFragment: TeaFragment<Model, Event, Effect>() {
     }
 
     companion object {
+        private const val TAG = "TicketFragment"
         private const val STATE_KEYBOARD_SHOWN = "STATE_KEYBOARD_SHOWN"
         private const val KEY_TICKET_ID = "KEY_TICKET_ID"
         private const val KEY_COMMENT_ID = "KEY_COMMENT_ID"

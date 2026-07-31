@@ -110,7 +110,7 @@ class PSDStartThreadingTest {
     private fun resetCompanionState() {
         runCatching { PyrusServiceDesk.INSTANCE = null }
         runCatching { PyrusServiceDesk.INJECTOR = null }
-        runCatching { PyrusServiceDesk.resetUiGraphForTest() }
+        runCatching { while (PyrusServiceDesk.UI_INJECTOR != null) PyrusServiceDesk.releaseUiInjector() }
         runCatching { PyrusServiceDesk.onStopCallback = null }
         runCatching { PyrusServiceDesk.lastRefreshes = ArrayList() }
         PyrusServiceDesk.sdIsOpen.value = false

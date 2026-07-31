@@ -3,6 +3,7 @@ package com.pyrus.pyrusservicedesk.presentation
 
 import android.graphics.PorterDuff
 import android.os.Bundle
+import android.util.Log
 import android.view.View
 import android.view.View.GONE
 import android.view.View.VISIBLE
@@ -12,9 +13,11 @@ import com.pyrus.pyrusservicedesk.R
 import com.pyrus.pyrusservicedesk._ref.utils.ConfigUtils
 import com.pyrus.pyrusservicedesk._ref.utils.getColorByAttrId
 import com.pyrus.pyrusservicedesk._ref.utils.getViewModel
+import com.pyrus.pyrusservicedesk._ref.utils.log.PLog
 import com.pyrus.pyrusservicedesk.presentation.viewmodel.ConnectionViewModelBase
 
 private const val ANIMATION_DURATION = 200L
+private const val TAG = "ConnectionActivityBase"
 
 /**
  * Old base class for activities that are able to show progress and connection error.
@@ -43,7 +46,11 @@ internal abstract class ConnectionActivityBase<T: ConnectionViewModelBase>(viewM
         super.onCreate(savedInstanceState)
         // ActivityBase.onCreate bails and finishes when there is no live UI graph (cold restore
         // after process death). In that case setContentView was never called, so don't touch views.
-        if (isFinishing) return
+        if (isFinishing) {
+            Log.d(TAG, "onCreate: isFinishing (no UI graph), skip view setup")
+            PLog.d(TAG, "onCreate: isFinishing (no UI graph), skip view setup")
+            return
+        }
         progressBar = findViewById(progressBarViewId)
         progressBar?.progressDrawable?.setColorFilter(
                 getColorByAttrId(this, R.attr.colorAccentSecondary),
