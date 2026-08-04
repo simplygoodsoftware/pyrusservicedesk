@@ -25,6 +25,8 @@ internal object SyncMapper {
         resourceManager: AppResourceManager,
         firstUserId: String,
         firstAppId: String,
+        // Max comment id among stored comment bodies (single user in V1/V2). Used only for single-chat.
+        maxStoredNoteIdProvider: () -> Long?,
     ): RequestBodyBase {
 
         val currentLocale: Locale = Locale.getDefault()
@@ -36,7 +38,10 @@ internal object SyncMapper {
         val request = RequestBodyBase(
             needFullInfo = true,
             additionalUsers = account.getAdditionalUsers(tickets),
-            lastNoteId = calcLastNoteId(tickets, firstUserId),
+            // Multichat (V3) keeps the per-user, header-based calc; single-chat (V1/V2) uses the max
+            // comment id actually stored in the bodies table, so a missing/incomplete thread is refetched.
+            lastNoteId = if (account is Account.V3) calcLastNoteId(tickets, firstUserId)
+                         else maxStoredNoteIdProvider(),
             commands = syncRequests.mapNotNull { mapToCommand(it.request, account.getInstanceId()) },
             authorId = account.getAuthorId(),
             authorName = ConfigUtils.getAuthorName(resourceManager),

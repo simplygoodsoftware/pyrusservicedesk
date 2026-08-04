@@ -201,6 +201,7 @@ internal open class Synchronizer(
             resourceManager = resourceManager,
             firstUserId = firstUserId,
             firstAppId = firstAppId,
+            maxStoredNoteIdProvider = { localTicketsStore.getMaxStoredCommentId() },
         )
 
 

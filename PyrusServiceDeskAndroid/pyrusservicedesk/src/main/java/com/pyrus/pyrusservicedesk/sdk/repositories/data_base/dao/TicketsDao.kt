@@ -69,6 +69,14 @@ internal abstract class TicketsDao {
     @Query("SELECT * FROM $USERS_TABLE")
     abstract fun getUsers(): List<UserEntity>
 
+    /**
+     * Maximum comment id on the device.
+     * Basis for last_note_id in single-chat (V1/V2) — there is a single user, so no per-user filter
+     * is needed.
+     */
+    @Query("SELECT MAX(comment_id) FROM $COMMENTS_TABLE")
+    abstract fun getMaxStoredCommentId(): Long?
+
     @Query("SELECT * FROM $MEMBERS_TABLE WHERE user_id = :userId")
     abstract fun getMembers(userId: String): List<MemberEntity>
 

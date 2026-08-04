@@ -58,6 +58,11 @@ internal class LocalTicketsStore(
         return ticketsDao.getTicketsWithComments()
     }
 
+    // Max comment id among stored comment BODIES (basis for last_note_id in single-chat V1/V2).
+    fun getMaxStoredCommentId(): Long? {
+        return ticketsDao.getMaxStoredCommentId()
+    }
+
     fun getTicketWithComments(ticketId: Long): TicketWithComments? {
         val serverTicketId = idStore.getTicketServerId(ticketId) ?: ticketId
         if (serverTicketId <= 0) return null
