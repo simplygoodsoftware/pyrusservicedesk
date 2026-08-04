@@ -2,6 +2,7 @@ package com.pyrus.pyrusservicedesk._ref.ui_domain.screens.ticket
 
 import android.net.Uri
 import android.util.Log
+import com.pyrus.pyrusservicedesk._ref.utils.log.PLog
 import androidx.core.net.toUri
 import com.pyrus.pyrusservicedesk.PyrusServiceDesk.Companion.API_VERSION_1
 import com.pyrus.pyrusservicedesk.PyrusServiceDesk.Companion.API_VERSION_2
@@ -422,6 +423,8 @@ private class TicketActor(
                 ticketId = effect.ticketId,
                 force = effect.force
             )
+            Log.d("TicketActor", "SDDBG UpdateComments: ticketId=${effect.ticketId} force=${effect.force} success=${commentsTry.isSuccess()}")
+            PLog.d("TicketActor", "SDDBG UpdateComments: ticketId=${effect.ticketId} force=${effect.force} success=${commentsTry.isSuccess()}")
             when {
                 commentsTry.isSuccess() -> {
                     val application = localTicketsStore.getApplications().find {
@@ -456,6 +459,8 @@ private class TicketActor(
         }
         is Effect.Inner.FeedFlow -> {
             ticketId = localTicketsStore.getTickets().lastOrNull()?.ticketId ?: ticketId
+            Log.d("TicketActor", "SDDBG FeedFlow: bound ticketId=$ticketId localTickets=${localTicketsStore.getTickets().size} (flow watches this id; won't self-heal if it's a local id)")
+            PLog.d("TicketActor", "SDDBG FeedFlow: bound ticketId=$ticketId localTickets=${localTicketsStore.getTickets().size}")
             idStore.setTicketId(ticketId)
             repository.getFeedFlowByTicketIdFlow(user, idStore.ticketIdFlow)
                 .map {

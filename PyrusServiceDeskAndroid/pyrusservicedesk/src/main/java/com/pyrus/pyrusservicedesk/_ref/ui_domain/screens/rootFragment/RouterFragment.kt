@@ -3,6 +3,7 @@ package com.pyrus.pyrusservicedesk._ref.ui_domain.screens.rootFragment
 import android.os.Build
 import android.os.Build.VERSION
 import android.os.Bundle
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -22,6 +23,7 @@ import com.pyrus.pyrusservicedesk._ref.SdScreens
 import com.pyrus.pyrusservicedesk._ref.ui_domain.access_denied.AccessFeatureContract.Effect
 import com.pyrus.pyrusservicedesk._ref.ui_domain.access_denied.AccessFeatureContract.Message
 import com.pyrus.pyrusservicedesk._ref.utils.insets.RootViewDeferringInsetsCallback
+import com.pyrus.pyrusservicedesk._ref.utils.log.PLog
 import com.pyrus.pyrusservicedesk._ref.utils.navigation.PyrusNavigator
 import com.pyrus.pyrusservicedesk._ref.utils.navigation.setSlideRightAnimation
 import com.pyrus.pyrusservicedesk._ref.whitetea.android.TeaFragment
@@ -59,6 +61,11 @@ internal class RouterFragment: TeaFragment<Unit, Message.Outer, Effect.Outer>(),
                  ?.commit()
             val account = injector().accountStore.getAccount()
 
+            // NB: do NOT read localTicketsStore here — onCreate is the main thread and Room throws
+            // assertNotMainThread. Ticket counts are logged from the IO context below.
+            PLog.d(RootFragment.TAG, "SDDBG RouterFragment: isMultiChat=${account.isMultiChat()} userId=${account.getUserId()} appId=${account.getAppId()} openTicketAction=$action")
+            Log.d(RootFragment.TAG, "SDDBG RouterFragment: isMultiChat=${account.isMultiChat()} userId=${account.getUserId()} openTicketAction=$action")
+
             if (account.isMultiChat()) {
                 if (action != null) {
                     uiInjector().router.newRootChain(
@@ -84,6 +91,8 @@ internal class RouterFragment: TeaFragment<Unit, Message.Outer, Effect.Outer>(),
                 lifecycleScope.launch(Dispatchers.IO) {
                     val lastTicketId = injector().localTicketsStore.getTickets().lastOrNull()?.ticketId
                         ?: injector().localCommandsStore.getNextLocalId()
+                    PLog.d(RootFragment.TAG, "SDDBG RouterFragment single-chat: localTicketsCount=$localTicketsCount lastServerTicketId=$lastServerTicketId chosenTicketId=$lastTicketId isLocalNewId=${lastServerTicketId == null}")
+                    Log.d(RootFragment.TAG, "SDDBG RouterFragment single-chat: localTicketsCount=$localTicketsCount chosenTicketId=$lastTicketId isLocalNewId=${lastServerTicketId == null}")
                     router.newRootScreen(SdScreens.TicketScreen(lastTicketId, user, sendComment).setSlideRightAnimation())
                 }
             }

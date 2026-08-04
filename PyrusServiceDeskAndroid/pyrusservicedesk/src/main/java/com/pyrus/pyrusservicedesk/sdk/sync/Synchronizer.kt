@@ -204,9 +204,15 @@ internal open class Synchronizer(
         )
 
 
+        PLog.d(TAG, "SDDBG getTickets REQUEST: appId=${firstAppId.take(8)} userId=$firstUserId version=${account.getVersion()} cachedTickets=${tickets.size} reqCount=${modifiedRequests.size}")
+        Log.d(TAG, "SDDBG getTickets REQUEST: appId=${firstAppId.take(8)} userId=$firstUserId version=${account.getVersion()} cachedTickets=${tickets.size} reqCount=${modifiedRequests.size}")
+
         trotRequest(syncRequests)
         val getTicketsTry = api.getTickets(getTicketsRequest)
-        
+
+        PLog.d(TAG, "SDDBG getTickets RESPONSE: success=${getTicketsTry.isSuccess()}")
+        Log.d(TAG, "SDDBG getTickets RESPONSE: success=${getTicketsTry.isSuccess()}")
+
         if (getTicketsTry.isSuccess()) {
 
             if (reloadCacheVersion < RELOAD_CACHE_VERSION) {
@@ -260,8 +266,11 @@ internal open class Synchronizer(
             val usersWithData = account.getUsers().filter { it.userId !in authorAccessDenied }
 
             localTicketsStore.storeServerState(usersWithData, getTicketsTry.value)
+            PLog.d(TAG, "SDDBG getTickets STORED: localTickets=${localTicketsStore.getTickets().size} apps=${getTicketsTry.value.applications?.size} accessDenied=${getTicketsTry.value.authorAccessDenied} usersWithData=${usersWithData.map { it.userId }}")
+            Log.d(TAG, "SDDBG getTickets STORED: localTickets=${localTicketsStore.getTickets().size} apps=${getTicketsTry.value.applications?.size} accessDenied=${getTicketsTry.value.authorAccessDenied}")
             //TODO for multichat
             val ticketId = localTicketsStore.getTickets().lastOrNull()?.ticketId ?: idStore.ticketIdFlow.value
+            PLog.d(TAG, "SDDBG getTickets STORED: setTicketId=$ticketId")
             idStore.setTicketId(ticketId)
 
             val commandRequests = syncRequests.filterIsInstance<CommandWithContinuation>()
@@ -300,6 +309,8 @@ internal open class Synchronizer(
         else {
             getTicketsTry.error.printStackTrace()
             val statusCode = (getTicketsTry.error as? HttpException)?.statusCode
+            PLog.d(TAG, "SDDBG getTickets FAILED: statusCode=$statusCode error=${getTicketsTry.error.message} (appId=${firstAppId.take(8)} userId=$firstUserId)")
+            Log.d(TAG, "SDDBG getTickets FAILED: statusCode=$statusCode error=${getTicketsTry.error.message}")
             if (statusCode == FAILED_AUTHORIZATION_ERROR_CODE || statusCode == FAILED_AUTHORIZATION_ERROR_CODE_FORBIDDEN) {
                 withContext(Dispatchers.Main) {
                     PyrusServiceDesk.onAuthorizationFailed?.run()
