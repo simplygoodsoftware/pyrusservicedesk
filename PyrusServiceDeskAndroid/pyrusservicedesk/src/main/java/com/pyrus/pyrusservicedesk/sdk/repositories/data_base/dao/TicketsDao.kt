@@ -71,8 +71,7 @@ internal abstract class TicketsDao {
 
     /**
      * Maximum comment id on the device.
-     * Basis for last_note_id in single-chat (V1/V2) — there is a single user, so no per-user filter
-     * is needed.
+     * Basis for last_note_id in single-chat (V1/V2)
      */
     @Query("SELECT MAX(comment_id) FROM $COMMENTS_TABLE")
     abstract fun getMaxStoredCommentId(): Long?
