@@ -52,6 +52,7 @@ internal class RootFragment: TeaFragment<Unit, Message.Outer, Effect.Outer>(),
     private val navigator: Navigator by lazy { PyrusNavigator(requireActivity(), R.id.fragment_container) }
 
     private var dialogIsOpen: Boolean = false
+    private var uiGraphMissing = false
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -61,6 +62,7 @@ internal class RootFragment: TeaFragment<Unit, Message.Outer, Effect.Outer>(),
         if (PyrusServiceDesk.uiInjectorOrNull() == null) {
             Log.d(TAG, "PyrusServiceDesk.uiInjectorOrNull == null")
             PLog.d(TAG, "PyrusServiceDesk.uiInjectorOrNull == null")
+            uiGraphMissing = true
             activity?.finish()
             return
         }
@@ -89,12 +91,17 @@ internal class RootFragment: TeaFragment<Unit, Message.Outer, Effect.Outer>(),
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
+        // No live graph: onCreate() already called finish(). Don't build the UI (that would realize
+        // the adapter -> CommentAudioFingerprint(audioWrapper) and initListeners(), both touching the
+        // uninitialized audioWrapper). Return a throwaway view while the activity finishes.
+        if (uiGraphMissing) return View(requireContext())
         binding = PsdRootFragmentBinding.inflate(layoutInflater)
         return binding.root
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+        if (uiGraphMissing) return
 
         val deferringInsetsListener = RootViewDeferringInsetsCallback(
             persistentInsetTypes = WindowInsetsCompat.Type.systemBars(),
@@ -168,6 +175,7 @@ internal class RootFragment: TeaFragment<Unit, Message.Outer, Effect.Outer>(),
 
     override fun onSaveInstanceState(outState: Bundle) {
         super.onSaveInstanceState(outState)
+        if (uiGraphMissing) return // binding was never inflated
 
         ServiceDeskConfiguration.save(outState)
     }

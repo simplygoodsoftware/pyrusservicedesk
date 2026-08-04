@@ -44,6 +44,8 @@ internal class RouterFragment: TeaFragment<Unit, Message.Outer, Effect.Outer>(),
 
     private val navigator: Navigator by lazy { PyrusNavigator(requireActivity(), R.id.fragment_container) }
 
+    private var uiGraphMissing = false
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
@@ -52,6 +54,7 @@ internal class RouterFragment: TeaFragment<Unit, Message.Outer, Effect.Outer>(),
         if (uiInjectorOrNull() == null) {
             Log.d(RootFragment.TAG, "PyrusServiceDesk.uiInjectorOrNull == null")
             PLog.d(RootFragment.TAG, "PyrusServiceDesk.uiInjectorOrNull == null")
+            uiGraphMissing = true
             activity?.finish()
             return
         }
@@ -110,12 +113,14 @@ internal class RouterFragment: TeaFragment<Unit, Message.Outer, Effect.Outer>(),
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
+        if (uiGraphMissing) return View(requireContext())
         binding = PsdRootFragmentBinding.inflate(layoutInflater)
         return binding.root
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+        if (uiGraphMissing) return
 
         val deferringInsetsListener = RootViewDeferringInsetsCallback(
             persistentInsetTypes = WindowInsetsCompat.Type.systemBars(),
@@ -136,6 +141,7 @@ internal class RouterFragment: TeaFragment<Unit, Message.Outer, Effect.Outer>(),
 
     override fun onSaveInstanceState(outState: Bundle) {
         super.onSaveInstanceState(outState)
+        if (uiGraphMissing) return // binding was never inflated
 
         ServiceDeskConfiguration.save(outState)
     }

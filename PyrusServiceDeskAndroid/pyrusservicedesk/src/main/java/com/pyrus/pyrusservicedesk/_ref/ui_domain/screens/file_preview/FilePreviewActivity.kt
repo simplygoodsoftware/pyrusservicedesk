@@ -67,6 +67,9 @@ internal class FilePreviewActivity: ConnectionActivityBase<FilePreviewViewModel>
             Log.d(TAG, "INJECTOR is null, finishing. UI_INJECTOR: ${PyrusServiceDesk.UI_INJECTOR}")
             PLog.d(TAG, "INJECTOR is null, finishing. UI_INJECTOR: ${PyrusServiceDesk.UI_INJECTOR}")
             super.onCreate(null)
+            // Safety net: ActivityBase.onCreate() already calls finish() when the UI graph is absent
+            // (its uiInjectorOrNull() guard). This explicit call backs that up for the case where only
+            // the core INJECTOR is gone while UI_INJECTOR still lingers.
             finish()
             return
         }
