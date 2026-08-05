@@ -35,10 +35,10 @@ import com.pyrus.pyrusservicedesk.PyrusServiceDesk.Companion.uiInjector
 import com.pyrus.pyrusservicedesk.R
 import com.pyrus.pyrusservicedesk._ref.SdScreens
 import com.pyrus.pyrusservicedesk._ref.data.AudioData
-import com.pyrus.pyrusservicedesk._ref.data.multy_chat.Application
 import com.pyrus.pyrusservicedesk._ref.ui_domain.screens.ticket.TicketView.Effect
 import com.pyrus.pyrusservicedesk._ref.ui_domain.screens.ticket.TicketView.Event
-import com.pyrus.pyrusservicedesk._ref.ui_domain.screens.ticket.TicketView.Event.*
+import com.pyrus.pyrusservicedesk._ref.ui_domain.screens.ticket.TicketView.Event.SetAttachVariant
+import com.pyrus.pyrusservicedesk._ref.ui_domain.screens.ticket.TicketView.Event.SetErrorCommentResult
 import com.pyrus.pyrusservicedesk._ref.ui_domain.screens.ticket.TicketView.Model
 import com.pyrus.pyrusservicedesk._ref.ui_domain.screens.ticket.adapter.entries.CommentEntry
 import com.pyrus.pyrusservicedesk._ref.ui_domain.screens.ticket.adapter.fingerprints.AudioStatus
@@ -57,13 +57,13 @@ import com.pyrus.pyrusservicedesk._ref.utils.AudioWrapper
 import com.pyrus.pyrusservicedesk._ref.utils.ConfigUtils
 import com.pyrus.pyrusservicedesk._ref.utils.ConfigUtils.Companion.getAccentColor
 import com.pyrus.pyrusservicedesk._ref.utils.ConfigUtils.Companion.getMainBackgroundColor
-import com.pyrus.pyrusservicedesk._ref.utils.TextProvider
-import com.pyrus.pyrusservicedesk._ref.utils.TextProvider.*
+import com.pyrus.pyrusservicedesk._ref.utils.TextProvider.Res
 import com.pyrus.pyrusservicedesk._ref.utils.animateVisibility
 import com.pyrus.pyrusservicedesk._ref.utils.getColorOnBackground
 import com.pyrus.pyrusservicedesk._ref.utils.getSecondaryColorOnBackground
 import com.pyrus.pyrusservicedesk._ref.utils.getTimeString
 import com.pyrus.pyrusservicedesk._ref.utils.insets.RootViewDeferringInsetsCallback
+import com.pyrus.pyrusservicedesk._ref.utils.log.PLog
 import com.pyrus.pyrusservicedesk._ref.utils.setCursorColor
 import com.pyrus.pyrusservicedesk._ref.utils.showKeyboardOn
 import com.pyrus.pyrusservicedesk._ref.utils.text
@@ -128,6 +128,12 @@ internal class TicketFragment: TeaFragment<Model, Event, Effect>() {
     private val requestAudioPermissionLauncher = registerForActivityResult(RequestPermission()) { }
 
     private lateinit var audioWrapper: AudioWrapper
+
+    // Set when onCreate() found no live UI graph and called activity?.finish(). finish() is async, so
+    // the framework still drives this fragment through onCreateView()/onViewCreated()/onStop(); this
+    // flag makes those callbacks bail before touching the graph or the uninitialized [audioWrapper]
+    // / [binding], so the original crash does not relocate to a less obvious stack trace.
+    private var uiGraphMissing = false
 
     override fun createRenderer(): ViewRenderer<Model> = diff {
         diff(Model::inputText) { text -> if (!binding.inputEditText.hasFocus()) binding.inputEditText.setText(text) }
@@ -288,6 +294,17 @@ internal class TicketFragment: TeaFragment<Model, Event, Effect>() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
+        // The UI graph can be absent if the fragment was restored without a live SDK session
+        // (process death / close-reopen race). Bail out gracefully instead of crashing.
+        if (PyrusServiceDesk.uiInjectorOrNull() == null) {
+            Log.d(TAG, "PyrusServiceDesk.uiInjectorOrNull == null")
+            PLog.d(TAG, "PyrusServiceDesk.uiInjectorOrNull == null")
+            uiGraphMissing = true
+            activity?.finish()
+            return
+        }
+
         bindFeature()
         parentFragmentManager.setFragmentResultListener(RATING_COMMENT_KEY, this) { _, bundle ->
             val result = bundle.getString(RATING_COMMENT_KEY)
@@ -301,6 +318,10 @@ internal class TicketFragment: TeaFragment<Model, Event, Effect>() {
         container: ViewGroup?,
         savedInstanceState: Bundle?,
     ): View {
+        // No live graph: onCreate() already called finish(). Don't build the UI (that would realize
+        // the adapter -> CommentAudioFingerprint(audioWrapper) and initListeners(), both touching the
+        // uninitialized audioWrapper). Return a throwaway view while the activity finishes.
+        if (uiGraphMissing) return View(requireContext())
         binding = PsdFragmentTicketBinding.inflate(inflater, container, false)
 
         audioRecordView = AudioRecordView(
@@ -332,6 +353,7 @@ internal class TicketFragment: TeaFragment<Model, Event, Effect>() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+        if (uiGraphMissing) return
 
         if (savedInstanceState == null && requireArguments().getLong(KEY_TICKET_ID, 0) < 0) {
             showKeyboardOn(binding.inputEditText)
@@ -363,6 +385,7 @@ internal class TicketFragment: TeaFragment<Model, Event, Effect>() {
 
     override fun onSaveInstanceState(outState: Bundle) {
         super.onSaveInstanceState(outState)
+        if (uiGraphMissing) return // binding was never inflated
         outState.putBoolean(STATE_KEYBOARD_SHOWN, binding.inputEditText.hasFocus())
     }
 
@@ -529,7 +552,7 @@ internal class TicketFragment: TeaFragment<Model, Event, Effect>() {
     }
 
     override fun onStop() {
-        audioWrapper.stop()
+        if (!uiGraphMissing) audioWrapper.stop()
         super.onStop()
     }
 
@@ -749,6 +772,7 @@ internal class TicketFragment: TeaFragment<Model, Event, Effect>() {
     }
 
     companion object {
+        private const val TAG = "TicketFragment"
         private const val STATE_KEYBOARD_SHOWN = "STATE_KEYBOARD_SHOWN"
         private const val KEY_TICKET_ID = "KEY_TICKET_ID"
         private const val KEY_COMMENT_ID = "KEY_COMMENT_ID"

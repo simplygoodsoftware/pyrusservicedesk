@@ -1,6 +1,5 @@
 package com.pyrus.pyrusservicedesk._ref.utils
 
-import android.annotation.SuppressLint
 import android.content.Context
 import android.content.SharedPreferences
 
@@ -49,19 +48,18 @@ private fun isMigrationRequired(preferences: SharedPreferences): Boolean {
     return MIGRATE_TO_VERSION > preferences.getInt(PREFERENCE_KEY_VERSION, 0)
 }
 
-@SuppressLint("ApplySharedPref")
 private fun toVersion1(context: Context, preferences: SharedPreferences) {
     val legacy = context.getSharedPreferences(PREFERENCE_KEY_LEGACY, Context.MODE_PRIVATE)
+    // apply() (not commit()) so this one-time migration never blocks the calling thread on an
+    // fsync during init(). apply() updates the in-memory values synchronously, so the recursive
+    // isMigrationRequired() check and any later reads still observe the migrated state.
     if (legacy.all?.isEmpty() == false) {
         preferences
             .edit()
             .putString(PREFERENCE_KEY_DRAFT, legacy.getString(PREFERENCE_KEY_DRAFT_LEGACY, ""))
-            .commit()
-        preferences
-            .edit()
             .putString(PREFERENCE_KEY_USER_ID, legacy.getString(PREFERENCE_KEY_USER_ID_LEGACY, ""))
-            .commit()
+            .apply()
         legacy.edit().clear().apply()
     }
-    preferences.edit().putInt(PREFERENCE_KEY_VERSION, 1).commit()
+    preferences.edit().putInt(PREFERENCE_KEY_VERSION, 1).apply()
 }

@@ -17,6 +17,7 @@ import com.pyrus.pyrusservicedesk.NoFullScreenFragment
 import com.pyrus.pyrusservicedesk.OpenTicketAction
 import com.pyrus.pyrusservicedesk.PyrusServiceDesk.Companion.injector
 import com.pyrus.pyrusservicedesk.PyrusServiceDesk.Companion.uiInjector
+import com.pyrus.pyrusservicedesk.PyrusServiceDesk.Companion.uiInjectorOrNull
 import com.pyrus.pyrusservicedesk.R
 import com.pyrus.pyrusservicedesk.ServiceDeskConfiguration
 import com.pyrus.pyrusservicedesk._ref.SdScreens
@@ -34,6 +35,7 @@ import com.pyrus.pyrusservicedesk.databinding.PsdRootFragmentBinding
 import com.pyrus.pyrusservicedesk.sdk.repositories.UserInternal
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
 internal class RouterFragment: TeaFragment<Unit, Message.Outer, Effect.Outer>(),
     NoFullScreenFragment {
@@ -42,8 +44,20 @@ internal class RouterFragment: TeaFragment<Unit, Message.Outer, Effect.Outer>(),
 
     private val navigator: Navigator by lazy { PyrusNavigator(requireActivity(), R.id.fragment_container) }
 
+    private var uiGraphMissing = false
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
+        // The UI graph can be absent if the fragment was restored without a live SDK session
+        // (process death / close-reopen race). Bail out gracefully instead of crashing.
+        if (uiInjectorOrNull() == null) {
+            Log.d(RootFragment.TAG, "PyrusServiceDesk.uiInjectorOrNull == null")
+            PLog.d(RootFragment.TAG, "PyrusServiceDesk.uiInjectorOrNull == null")
+            uiGraphMissing = true
+            activity?.finish()
+            return
+        }
 
         val window: Window = requireActivity().window
 
@@ -91,7 +105,7 @@ internal class RouterFragment: TeaFragment<Unit, Message.Outer, Effect.Outer>(),
                 lifecycleScope.launch(Dispatchers.IO) {
                     val tickets = localTicketsStore.getTickets()
                     val lastTicketId = tickets.lastOrNull()?.ticketId
-                        ?: localCommandsStore.getNextLocalId()
+                            ?: localCommandsStore.getNextLocalId()
                     PLog.d(RootFragment.TAG, "ET RouterFragment single-chat: localTicketsCount=${tickets.size}, lastTicketId=${tickets.lastOrNull()?.ticketId}, lastServerTicketId=${tickets.maxByOrNull { it.ticketId }?.ticketId} chosenTicketId=$lastTicketId")
                     PLog.d(RootFragment.TAG, "ET RouterFragment single-chat: localTicketsCount=${tickets.size}, lastTicketId=${tickets.lastOrNull()?.ticketId}, lastServerTicketId=${tickets.maxByOrNull { it.ticketId }?.ticketId} chosenTicketId=$lastTicketId")
                     router.newRootScreen(SdScreens.TicketScreen(lastTicketId, user, sendComment).setSlideRightAnimation())
@@ -105,13 +119,14 @@ internal class RouterFragment: TeaFragment<Unit, Message.Outer, Effect.Outer>(),
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
-        super.onCreate(savedInstanceState)
+        if (uiGraphMissing) return View(requireContext())
         binding = PsdRootFragmentBinding.inflate(layoutInflater)
         return binding.root
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+        if (uiGraphMissing) return
 
         val deferringInsetsListener = RootViewDeferringInsetsCallback(
             persistentInsetTypes = WindowInsetsCompat.Type.systemBars(),
@@ -122,16 +137,17 @@ internal class RouterFragment: TeaFragment<Unit, Message.Outer, Effect.Outer>(),
 
     override fun onResume() {
         super.onResume()
-        uiInjector().navHolder.setNavigator(navigator)
+        uiInjectorOrNull()?.navHolder?.setNavigator(navigator)
     }
 
     override fun onPause() {
-        uiInjector().navHolder.removeNavigator()
+        uiInjectorOrNull()?.navHolder?.removeNavigator()
         super.onPause()
     }
 
     override fun onSaveInstanceState(outState: Bundle) {
         super.onSaveInstanceState(outState)
+        if (uiGraphMissing) return // binding was never inflated
 
         ServiceDeskConfiguration.save(outState)
     }
