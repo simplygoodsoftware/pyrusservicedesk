@@ -5,6 +5,7 @@ final class AnnouncementsInteractor: NSObject {
     // MARK: - Dependencies
 
     private let presenter: AnnouncementsPresenterProtocol
+    private let readStorage = AnnouncementsReadStorage.shared
 
     // MARK: - State (только main thread)
 
@@ -90,11 +91,16 @@ extension AnnouncementsInteractor: AnnouncementsInteractorProtocol {
                 presenter.doWork(.endRefresh)
             }
             announcements = filtered
-            if PyrusServiceDesk.clients.contains(where: { $0.announcementsUnreadCount > 0 }) {
+
+            // Скролл к новым проверяем ДО локальной пометки —
+            // после неё непрочитанных уже не будет.
+            if readStorage.hasUnread() {
                 presenter.doWork(.scrollToTop)
             }
+
             // Порядок важен: сначала обновили announcements (и announcementsDict),
-            // потом шлём readAnnouncements — иначе на сервер уйдёт устаревший lastReadId.
+            // потом пометка и отправка — иначе на сервер уйдёт устаревший lastReadId.
+            markLocalAsRead()
             readAnnouncements()
             PyrusServiceDesk.syncManager.syncGetTickets()
 
@@ -104,7 +110,8 @@ extension AnnouncementsInteractor: AnnouncementsInteractorProtocol {
 
         case .viewWillDisappear:
             isOpen = false
-            markVisibleAnnouncementsAsRead()
+            // Подчищает объявления, пришедшие пока экран был открыт.
+            markLocalAsRead()
         }
     }
 }
@@ -113,22 +120,35 @@ extension AnnouncementsInteractor: AnnouncementsInteractorProtocol {
 
 private extension AnnouncementsInteractor {
 
+    /// Снапшот прочитанности на момент открытия экрана:
+    /// серверное состояние с наложенной локальной пометкой.
     func refreshLastReadIds() {
         for client in PyrusServiceDesk.clients {
-            lastReadIds[client.clientId] = client.lasAnnoncementReadId
+            lastReadIds[client.clientId] = readStorage.effectiveLastReadId(for: client.clientId)
         }
     }
 
-    /// Локально фиксирует прочитанность при закрытии экрана:
-    /// пользователь видел всю ленту, обнуляем счётчики и двигаем lastReadId.
-    func markVisibleAnnouncementsAsRead() {
+    /// Локально помечает видимую ленту прочитанной и уведомляет экран чатов,
+    /// чтобы тот убрал плашку о новых объявлениях.
+    ///
+    /// Объекты клиентов не мутируем: синк заменяет их целиком,
+    /// и любая пометка в них живёт до первого эха с сервера.
+    func markLocalAsRead() {
+        var didChange = false
+
         for client in PyrusServiceDesk.clients {
-            if let clientAnnouncements = announcementsDict[client.clientId],
-               let newestId = clientAnnouncements.first?.id {
-                client.lasAnnoncementReadId = newestId
-            }
-            client.announcementsUnreadCount = 0
+            guard readStorage.unreadCount(for: client.clientId) > 0,
+                  let newestId = announcementsDict[client.clientId]?.first?.id
+            else { continue }
+            readStorage.markRead(clientId: client.clientId, lastReadId: newestId)
+            didChange = true
         }
+
+        guard didChange else { return }
+        NotificationCenter.default.post(
+            name: PyrusServiceDesk.announcementsReadNotification,
+            object: nil
+        )
     }
 
     /// Отправляет на сервер lastReadId по каждому клиенту.
@@ -207,8 +227,9 @@ private extension AnnouncementsInteractor {
             }
 
             // Экран открыт и пришло новое — сразу помечаем прочитанным
-            // (уже с обновлённым announcementsDict).
+            // локально и на сервере (уже с обновлённым announcementsDict).
             if hasNewAnnouncements && isOpen {
+                markLocalAsRead()
                 readAnnouncements()
             }
         }

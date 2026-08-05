@@ -6,6 +6,16 @@ struct PSDGetChats {
     private static let RATING_SETTINGS_KEY = "rating_settings"
     private static let WELCOME_MESSAGE = "welcome_message"
     private static var sessionTask : URLSessionDataTask? = nil
+
+    /// Максимальный выданный orderIndex объявлений.
+    /// PyrusServiceDesk.announcements обновляется асинхронно
+    /// (parse → save → fetch → main.async), поэтому при быстрых
+    /// последовательных синках max() по нему может быть устаревшим —
+    /// новые объявления получили бы повторные индексы и «спрятались»
+    /// за указателем прочитанности, а порядок ленты сломался бы.
+    /// Доступ сериализован синк-менеджером: один запрос за раз.
+    private static var lastAssignedOrderIndex = -1
+
     /**
      Get chats from server.
      On completion returns [PSDChat] if it was received, or empty nil, if no connection.
@@ -177,80 +187,118 @@ struct PSDGetChats {
     }
     
     private static func generateAnnouncements(from announcementsResponse: [String: AnnouncementsResponse]) -> AnnouncementsResult {
-        var announcements: [PSDAnnouncement] = []
+        var result: [PSDAnnouncement] = []
         var deletedAnnouncementsIds = Set<String>()
         
         // База orderIndex — глобальная и берётся один раз до цикла:
         // если считать её внутри цикла по клиентам, объявления разных клиентов
         // получают одинаковые индексы и порядок ленты становится недетерминированным.
-        var lastOrderIndex = PyrusServiceDesk.announcements.map(\.orderIndex).max() ?? -1
-        let existingById = Dictionary(
-            PyrusServiceDesk.announcements.map { ($0.id, $0) },
-            uniquingKeysWith: { first, _ in first }
+        // max с lastAssignedOrderIndex защищает от гонки: PyrusServiceDesk.announcements
+        // мог ещё не обновиться после предыдущего синка.
+        var lastOrderIndex = max(
+            PyrusServiceDesk.announcements.map(\.orderIndex).max() ?? -1,
+            lastAssignedOrderIndex
         )
+        defer { lastAssignedOrderIndex = max(lastAssignedOrderIndex, lastOrderIndex) }
 
         for (appId, announcementResponse) in announcementsResponse {
-            var isRead = true
+            // 1) Полный известный набор объявлений клиента: локальный кэш + дельта.
+            var announcementsById: [String: PSDAnnouncement] = [:]
+            var cachedIsRead: [String: Bool] = [:]
+            for announcement in PyrusServiceDesk.announcements where announcement.appId == appId {
+                announcementsById[announcement.id] = announcement
+                cachedIsRead[announcement.id] = announcement.isRead
+            }
+
+            /// id, пришедшие в этой дельте, — их сохраняем в любом случае.
+            var deltaIds = Set<String>()
+
             for newAnnouncement in announcementResponse.newAnnouncements ?? [] {
                 // Уже известное объявление (повторная выгрузка) сохраняет свой
                 // orderIndex — иначе оно «перепрыгивает» в конец ленты.
                 let orderIndex: Int
-                if let existing = existingById[newAnnouncement.id] {
+                if let existing = announcementsById[newAnnouncement.id] {
                     orderIndex = existing.orderIndex
                 } else {
                     lastOrderIndex += 1
                     orderIndex = lastOrderIndex
                 }
 
-                let announcement = PSDAnnouncement(
+                announcementsById[newAnnouncement.id] = PSDAnnouncement(
                     id: newAnnouncement.id,
                     text: getText(from: newAnnouncement.content),
                     date: newAnnouncement.createdAt,
-                    isRead: isRead,
+                    isRead: false, // финальное значение выставит пересчёт ниже
                     attachments: getAttachments(from: newAnnouncement.content),
                     appId: appId,
                     orderIndex: orderIndex,
                     content: newAnnouncement.content.richTextDocument
                 )
-                announcements.append(announcement)
-                if newAnnouncement.id == announcementResponse.inboxItem.lastReadMessageId {
-                    isRead = false
-                }
+                deltaIds.insert(newAnnouncement.id)
             }
             
             for changedAnnouncement in announcementResponse.announcementChanges ?? [] {
-                if changedAnnouncement.type == .deleted {
+                switch changedAnnouncement.type {
+                case .deleted:
                     deletedAnnouncementsIds.insert(changedAnnouncement.messageId)
-                    announcements.removeAll(where: { $0.id == changedAnnouncement.messageId })
-                } else if changedAnnouncement.type == .edited {
-                    if !announcements.contains(where: { $0.id == changedAnnouncement.messageId }) {
-                        let localAnn = existingById[changedAnnouncement.messageId]
-                        // Правка объявления сохраняет позицию; если локальной копии
-                        // нет — ставим в конец, а не в начало (orderIndex 0).
-                        let orderIndex: Int
-                        if let localAnn {
-                            orderIndex = localAnn.orderIndex
-                        } else {
-                            lastOrderIndex += 1
-                            orderIndex = lastOrderIndex
-                        }
-                        let announcement = PSDAnnouncement(
-                            id: changedAnnouncement.messageId,
-                            text: getText(from: changedAnnouncement.content),
-                            date: localAnn?.date ?? changedAnnouncement.performedAt,
-                            isRead: localAnn?.isRead ?? true,
-                            attachments: getAttachments(from: changedAnnouncement.content),
-                            appId: appId,
-                            orderIndex: orderIndex,
-                            content: changedAnnouncement.content?.richTextDocument
-                        )
-                        announcements.append(announcement)
+                    announcementsById[changedAnnouncement.messageId] = nil
+                    deltaIds.remove(changedAnnouncement.messageId)
+
+                case .edited:
+                    let localAnn = announcementsById[changedAnnouncement.messageId]
+                    // Правка объявления сохраняет позицию; если локальной копии
+                    // нет — ставим в конец, а не в начало (orderIndex 0).
+                    let orderIndex: Int
+                    if let localAnn {
+                        orderIndex = localAnn.orderIndex
+                    } else {
+                        lastOrderIndex += 1
+                        orderIndex = lastOrderIndex
                     }
+                    announcementsById[changedAnnouncement.messageId] = PSDAnnouncement(
+                        id: changedAnnouncement.messageId,
+                        text: getText(from: changedAnnouncement.content),
+                        date: localAnn?.date ?? changedAnnouncement.performedAt,
+                        isRead: false, // финальное значение выставит пересчёт ниже
+                        attachments: getAttachments(from: changedAnnouncement.content),
+                        appId: appId,
+                        orderIndex: orderIndex,
+                        content: changedAnnouncement.content?.richTextDocument
+                    )
+                    deltaIds.insert(changedAnnouncement.messageId)
+                }
+            }
+
+            // 2) Прочитанность — только от серверного unread_count:
+            // непрочитанными являются ровно unreadCount самых свежих
+            // объявлений клиента, всё более старое прочитано.
+            // Позиционного флипа по lastReadMessageId здесь сознательно нет:
+            // он зависел от порядка элементов в пачке и от того, входит ли
+            // указатель в дельту, — оба допущения о сервере ненадёжны
+            // и уже приводили к объявлениям, «прочитанным с рождения».
+            var clientAnnouncements = announcementsById.values
+                .sorted { $0.orderIndex < $1.orderIndex }
+            let unreadCount = min(
+                max(0, announcementResponse.inboxItem.unreadCount),
+                clientAnnouncements.count
+            )
+            let readCount = clientAnnouncements.count - unreadCount
+            for index in clientAnnouncements.indices {
+                clientAnnouncements[index].isRead = index < readCount
+            }
+
+            // 3) На апсерт отдаём только то, что реально изменилось:
+            // пришедшее в дельте и кэшированные записи со сменившимся isRead.
+            // Так серверное «прочитано» доезжает и до старых записей в БД,
+            // но БД не переписывается целиком на каждом синке.
+            for announcement in clientAnnouncements {
+                if deltaIds.contains(announcement.id) || cachedIsRead[announcement.id] != announcement.isRead {
+                    result.append(announcement)
                 }
             }
         }
         
-        return AnnouncementsResult(newAnnouncements: announcements, deletedAnnouncementsIds: deletedAnnouncementsIds)
+        return AnnouncementsResult(newAnnouncements: result, deletedAnnouncementsIds: deletedAnnouncementsIds)
         
         func getText(from content: Content?) -> String {
             guard let content else { return "" }
@@ -588,132 +636,3 @@ let attachmentsParameter = "attachments"
 let guidParameter = "guid"
 let CLIENT_ID_KEY = "client_id"
 let EXTRA_FIELDS_KEY = "extra_fields"
-
-
-// MARK: - Tests
-
-//func makeSampleAnnouncement() -> Announcement {
-//    // Абзац: комбинированные маркеры + inline code + ссылка + перенос строки
-//    let paragraph = RichTextBlock(
-//        type: .paragraph,
-//        code: nil,
-//        codeLang: nil,
-//        richTextInlines: [
-//            RichTextInline(type: .text, string: "Обычный текст, ", marks: nil, url: nil),
-//            RichTextInline(type: .text, string: "жирный", marks: "Bold", url: nil),
-//            RichTextInline(type: .text, string: ", ", marks: nil, url: nil),
-//            RichTextInline(type: .text, string: "курсив", marks: "Italic", url: nil),
-//            RichTextInline(type: .text, string: ", ", marks: nil, url: nil),
-//            RichTextInline(type: .text, string: "подчёркнутый", marks: "Underline", url: nil),
-//            RichTextInline(type: .text, string: ", ", marks: nil, url: nil),
-//            RichTextInline(type: .text, string: "зачёркнутый", marks: "Strikethrough", url: nil),
-//            RichTextInline(type: .text, string: ", ", marks: nil, url: nil),
-//            RichTextInline(type: .text, string: "жирный+курсив", marks: "Bold, Italic", url: nil),
-//            RichTextInline(type: .text, string: ", inline‑код: ", marks: nil, url: nil),
-//            RichTextInline(type: .text, string: "let x = 42", marks: "Code", url: nil),
-//            RichTextInline(type: .text, string: " и ссылка: ", marks: nil, url: nil),
-//            RichTextInline(type: .link, string: "example.com", marks: nil, url: "https://example.com"),
-//            // Перенос строки внутри абзаца
-//            RichTextInline(type: .lineBreak, string: nil, marks: nil, url: nil),
-//            RichTextInline(type: .text, string: "Новая строка абзаца.", marks: nil, url: nil)
-//        ]
-//    )
-//
-//    // Маркированные пункты
-//    let bullet1 = RichTextBlock(
-//        type: .bulletListItem,
-//        code: nil,
-//        codeLang: nil,
-//        richTextInlines: [
-//            RichTextInline(type: .text, string: "Маркированный пункт 1", marks: nil, url: nil)
-//        ]
-//    )
-//    let bullet2 = RichTextBlock(
-//        type: .bulletListItem,
-//        code: nil,
-//        codeLang: nil,
-//        richTextInlines: [
-//            RichTextInline(type: .text, string: "Маркированный пункт 2 (курсив)", marks: "Italic", url: nil)
-//        ]
-//    )
-//
-//    // Нумерованные пункты (идут подряд для проверки нумерации)
-//    let number1 = RichTextBlock(
-//        type: .numberListItem,
-//        code: nil,
-//        codeLang: nil,
-//        richTextInlines: [
-//            RichTextInline(type: .text, string: "Нумерованный пункт 1", marks: nil, url: nil)
-//        ]
-//    )
-//    let number2 = RichTextBlock(
-//        type: .numberListItem,
-//        code: nil,
-//        codeLang: nil,
-//        richTextInlines: [
-//            RichTextInline(type: .text, string: "Нумерованный пункт 2 (жирный)", marks: "Bold", url: nil)
-//        ]
-//    )
-//    let number3 = RichTextBlock(
-//        type: .numberListItem,
-//        code: nil,
-//        codeLang: nil,
-//        richTextInlines: [
-//            RichTextInline(type: .text, string: "Нумерованный пункт 3 (подчёркнутый)", marks: "Underline", url: nil)
-//        ]
-//    )
-//
-//    // Цитата с переносом строки
-//    let quote = RichTextBlock(
-//        type: .quote,
-//        code: nil,
-//        codeLang: nil,
-//        richTextInlines: [
-//            RichTextInline(type: .text, string: "Это цитата, которая ооооооооооооооооооооооооооооооооочень ооооооооооочень длинная", marks: nil, url: nil),
-//            RichTextInline(type: .lineBreak, string: nil, marks: nil, url: nil),
-//            RichTextInline(type: .text, string: "и она на две строки.", marks: "Italic", url: nil)
-//        ]
-//    )
-//
-//    // Блочный код (многострочный)
-//    let codeText =
-//    """
-//    func greet(name: String) {
-//        print("Hello, \\(name)!")
-//    }
-//    greet(name: "World")
-//    """
-//    let codeBlock = RichTextBlock(
-//        type: .code,
-//        code: codeText,
-//        codeLang: nil, // формат подсветки пока не используется
-//        richTextInlines: [] // для блока кода инлайны не требуются
-//    )
-//
-//    let doc = RichTextDocument(
-//        version: 1,
-//        richTextBlocks: [
-//            paragraph,
-//            bullet1, bullet2,
-//            number1, number2, number3,
-//            quote,
-//            codeBlock
-//        ]
-//    )
-//
-//    // (Опционально) пример вложения
-//    let attachments = [Attachment]()
-//        //Attachment(id: UUID().uuidString, name: "image.png", size: 240_000, width: 1024, height: 768, media: true)
-//  //  ]
-//
-//    let content = Content(attachments: attachments, richTextDocument: doc)
-//
-//    return Announcement(
-//        id: UUID().uuidString,
-//        type: .message,
-//        createdAt: Date(),
-//        editedAt: nil,
-//        content: content
-//    )
-//}
-//

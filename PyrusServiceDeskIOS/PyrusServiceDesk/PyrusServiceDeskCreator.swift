@@ -8,7 +8,7 @@ import UIKit
     private static let REFRESH_TIME_INTEVAL = TimeInterval(1*60)
     private static let REFRESH_MAX_COUNT = 20
     
-    static let PSD_VERSION: String = "2.30"
+    static let PSD_VERSION: String = "2.31"
     
     ///AppId needed for request
     static var clientId: String?
@@ -47,6 +47,7 @@ import UIKit
     
     static let usersUpdateNotification = Notification.Name("USERS_UPDATE")
     static let newUserNotification = Notification.Name("NEW_USER")
+    static let announcementsReadNotification = Notification.Name("ANNOUNCEMENTS_READ")
     static var additionalUsers = [PSDUserInfo]()
     
     static let clientsUpdateNotification = Notification.Name("CLIENTS_UPDATE")
