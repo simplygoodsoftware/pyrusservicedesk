@@ -61,8 +61,6 @@ internal class RouterFragment: TeaFragment<Unit, Message.Outer, Effect.Outer>(),
                  ?.commit()
             val account = injector().accountStore.getAccount()
 
-            // NB: do NOT read localTicketsStore here — onCreate is the main thread and Room throws
-            // assertNotMainThread. Ticket counts are logged from the IO context below.
             PLog.d(RootFragment.TAG, "ET RouterFragment: isMultiChat=${account.isMultiChat()} userId=${account.getUserId()} appId=${account.getAppId()?.take(8)} openTicketId=${action?.ticketId}")
             Log.d(RootFragment.TAG, "ET RouterFragment: isMultiChat=${account.isMultiChat()} userId=${account.getUserId()} openTicketId=${action?.ticketId}")
 
@@ -89,10 +87,11 @@ internal class RouterFragment: TeaFragment<Unit, Message.Outer, Effect.Outer>(),
                 val user = UserInternal(userId, appId)
                 val router = uiInjector().router
                 val localTicketsStore = injector().localTicketsStore
+                val localCommandsStore = injector().localCommandsStore
                 lifecycleScope.launch(Dispatchers.IO) {
                     val tickets = localTicketsStore.getTickets()
                     val lastTicketId = tickets.lastOrNull()?.ticketId
-                        ?: injector().localCommandsStore.getNextLocalId()
+                        ?: localCommandsStore.getNextLocalId()
                     PLog.d(RootFragment.TAG, "ET RouterFragment single-chat: localTicketsCount=${tickets.size}, lastTicketId=${tickets.lastOrNull()?.ticketId}, lastServerTicketId=${tickets.maxBy { it.ticketId }.ticketId} chosenTicketId=$lastTicketId")
                     PLog.d(RootFragment.TAG, "ET RouterFragment single-chat: localTicketsCount=${tickets.size}, lastTicketId=${tickets.lastOrNull()?.ticketId}, lastServerTicketId=${tickets.maxBy { it.ticketId }.ticketId} chosenTicketId=$lastTicketId")
                     router.newRootScreen(SdScreens.TicketScreen(lastTicketId, user, sendComment).setSlideRightAnimation())
