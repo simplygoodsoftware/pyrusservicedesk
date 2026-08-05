@@ -19,6 +19,7 @@ import com.pyrus.pyrusservicedesk._ref.utils.log.PLog
 import com.pyrus.pyrusservicedesk._ref.utils.migratePreferences
 import com.pyrus.pyrusservicedesk.core.Account
 import com.pyrus.pyrusservicedesk.core.DiInjector
+import com.pyrus.pyrusservicedesk.core.SharedUiGraph
 import com.pyrus.pyrusservicedesk.core.StaticRepository
 import com.pyrus.pyrusservicedesk.core.UiInjector
 import com.pyrus.pyrusservicedesk.core.getAppId
@@ -54,10 +55,18 @@ class PyrusServiceDesk private constructor(
         }
         internal var INSTANCE: PyrusServiceDesk? = null
 
+        @Volatile
         internal var INJECTOR: DiInjector? = null
 
-        @Volatile
-        internal var UI_INJECTOR: UiInjector? = null
+        /**
+         * The SDK UI graph, shared by every SDK activity in the task and ref-counted so it outlives
+         * any single activity (see [com.pyrus.pyrusservicedesk.core.SharedUiGraph]).
+         */
+        private val uiGraph = SharedUiGraph { injector().createUiInjector() }
+
+        /** The currently published UI graph, or null when no SDK activity is retaining one. */
+        internal val UI_INJECTOR: UiInjector?
+            get() = uiGraph.instance
 
         internal var lastRefreshes = ArrayList<Long>()
 
@@ -71,6 +80,7 @@ class PyrusServiceDesk private constructor(
 
         private const val DEFAULT_TOKEN_TYPE: String = "android"
 
+        @Volatile
         internal var onStopCallback: OnStopCallback? = null
 
         private val liveUpdates = LiveUpdates()
@@ -418,40 +428,38 @@ class PyrusServiceDesk private constructor(
             return checkNotNull(INJECTOR)
         }
 
-        internal fun uiInjector(): UiInjector {
-            return checkNotNull(UI_INJECTOR) {
-                "PyrusServiceDesk UI is not started. Open SDK via PyrusServiceDesk.start(...) and " +
-                    "let MainActivity create the UiInjector in its lifecycle."
-            }
-        }
+        /**
+         * Null-safe accessor for the UI graph. The graph is created and owned by
+         * [com.pyrus.pyrusservicedesk.core.UiGraphViewModel], which is scoped to the SDK
+         * activity, so this is non-null for the whole activity lifecycle (including its
+         * fragments). Returns null only when there is genuinely no live UI session — callers
+         * restored without one (process death / orphaned fragment) must bail gracefully.
+         */
+        internal fun uiInjectorOrNull(): UiInjector? = UI_INJECTOR
+
+        internal fun uiInjector(): UiInjector = UI_INJECTOR ?: error(
+            "PyrusServiceDesk UI is not started. Open SDK via PyrusServiceDesk.start(...) and " +
+                "let MainActivity create the UiInjector in its lifecycle."
+        )
 
         /**
-         * Creates UIInjector.
+         * Retains the shared UI graph for one [com.pyrus.pyrusservicedesk.core.UiGraphViewModel]
+         * owner, building it on the first acquire and reusing the same instance afterwards. Every
+         * acquire must be balanced by exactly one [releaseUiInjector]. Because the graph is built on
+         * demand, an SDK activity that outlived MainActivity ("Don't keep activities") rebuilds it
+         * here instead of finding a null [UI_INJECTOR] and crashing. Called on the main thread.
          */
         @MainThread
-        internal fun ensureUiInjector(): UiInjector {
-            check(android.os.Looper.myLooper() == android.os.Looper.getMainLooper()) {
-                "ensureUiInjector() must be called on the main thread"
-            }
-            UI_INJECTOR?.let { return it }
-            val core = injector()
-            val newOne = core.createUiInjector()
-            UI_INJECTOR = newOne
-            return newOne
-        }
+        internal fun acquireUiInjector(): UiInjector = uiGraph.acquire()
 
         /**
-         * Releases the UIInjector. Must be called on the main thread.
+         * Releases one owner's retention of the shared UI graph. The graph is closed and detached
+         * only when the last owner is released, so a finishing / DKA-destroyed MainActivity can not
+         * tear down a graph that a still-alive FilePreviewActivity — or a freshly launched activity
+         * in a close/reopen overlap — is still using. Called on the main thread.
          */
         @MainThread
-        internal fun releaseUiInjector() {
-            check(android.os.Looper.myLooper() == android.os.Looper.getMainLooper()) {
-                "releaseUiInjector() must be called on the main thread"
-            }
-            val current = UI_INJECTOR ?: return
-            UI_INJECTOR = null
-            current.close()
-        }
+        internal fun releaseUiInjector() = uiGraph.release()
 
         private fun startImpl(
             activity: Activity,

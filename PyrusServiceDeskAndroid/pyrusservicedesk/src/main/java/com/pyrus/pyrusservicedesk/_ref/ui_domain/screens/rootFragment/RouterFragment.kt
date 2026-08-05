@@ -3,6 +3,7 @@ package com.pyrus.pyrusservicedesk._ref.ui_domain.screens.rootFragment
 import android.os.Build
 import android.os.Build.VERSION
 import android.os.Bundle
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -16,12 +17,14 @@ import com.pyrus.pyrusservicedesk.NoFullScreenFragment
 import com.pyrus.pyrusservicedesk.OpenTicketAction
 import com.pyrus.pyrusservicedesk.PyrusServiceDesk.Companion.injector
 import com.pyrus.pyrusservicedesk.PyrusServiceDesk.Companion.uiInjector
+import com.pyrus.pyrusservicedesk.PyrusServiceDesk.Companion.uiInjectorOrNull
 import com.pyrus.pyrusservicedesk.R
 import com.pyrus.pyrusservicedesk.ServiceDeskConfiguration
 import com.pyrus.pyrusservicedesk._ref.SdScreens
 import com.pyrus.pyrusservicedesk._ref.ui_domain.access_denied.AccessFeatureContract.Effect
 import com.pyrus.pyrusservicedesk._ref.ui_domain.access_denied.AccessFeatureContract.Message
 import com.pyrus.pyrusservicedesk._ref.utils.insets.RootViewDeferringInsetsCallback
+import com.pyrus.pyrusservicedesk._ref.utils.log.PLog
 import com.pyrus.pyrusservicedesk._ref.utils.navigation.PyrusNavigator
 import com.pyrus.pyrusservicedesk._ref.utils.navigation.setSlideRightAnimation
 import com.pyrus.pyrusservicedesk._ref.whitetea.android.TeaFragment
@@ -32,6 +35,7 @@ import com.pyrus.pyrusservicedesk.databinding.PsdRootFragmentBinding
 import com.pyrus.pyrusservicedesk.sdk.repositories.UserInternal
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
 internal class RouterFragment: TeaFragment<Unit, Message.Outer, Effect.Outer>(),
     NoFullScreenFragment {
@@ -40,8 +44,20 @@ internal class RouterFragment: TeaFragment<Unit, Message.Outer, Effect.Outer>(),
 
     private val navigator: Navigator by lazy { PyrusNavigator(requireActivity(), R.id.fragment_container) }
 
+    private var uiGraphMissing = false
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
+        // The UI graph can be absent if the fragment was restored without a live SDK session
+        // (process death / close-reopen race). Bail out gracefully instead of crashing.
+        if (uiInjectorOrNull() == null) {
+            Log.d(RootFragment.TAG, "PyrusServiceDesk.uiInjectorOrNull == null")
+            PLog.d(RootFragment.TAG, "PyrusServiceDesk.uiInjectorOrNull == null")
+            uiGraphMissing = true
+            activity?.finish()
+            return
+        }
 
         val window: Window = requireActivity().window
 
@@ -81,9 +97,11 @@ internal class RouterFragment: TeaFragment<Unit, Message.Outer, Effect.Outer>(),
 
                 val user = UserInternal(userId, appId)
                 val router = uiInjector().router
-                lifecycleScope.launch(Dispatchers.IO) {
-                    val lastTicketId = injector().localTicketsStore.getTickets().lastOrNull()?.ticketId
-                        ?: injector().localCommandsStore.getNextLocalId()
+                lifecycleScope.launch {
+                    val lastTicketId = withContext(Dispatchers.IO) {
+                        injector().localTicketsStore.getTickets().lastOrNull()?.ticketId
+                            ?: injector().localCommandsStore.getNextLocalId()
+                    }
                     router.newRootScreen(SdScreens.TicketScreen(lastTicketId, user, sendComment).setSlideRightAnimation())
                 }
             }
@@ -95,13 +113,14 @@ internal class RouterFragment: TeaFragment<Unit, Message.Outer, Effect.Outer>(),
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
-        super.onCreate(savedInstanceState)
+        if (uiGraphMissing) return View(requireContext())
         binding = PsdRootFragmentBinding.inflate(layoutInflater)
         return binding.root
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+        if (uiGraphMissing) return
 
         val deferringInsetsListener = RootViewDeferringInsetsCallback(
             persistentInsetTypes = WindowInsetsCompat.Type.systemBars(),
@@ -112,16 +131,17 @@ internal class RouterFragment: TeaFragment<Unit, Message.Outer, Effect.Outer>(),
 
     override fun onResume() {
         super.onResume()
-        uiInjector().navHolder.setNavigator(navigator)
+        uiInjectorOrNull()?.navHolder?.setNavigator(navigator)
     }
 
     override fun onPause() {
-        uiInjector().navHolder.removeNavigator()
+        uiInjectorOrNull()?.navHolder?.removeNavigator()
         super.onPause()
     }
 
     override fun onSaveInstanceState(outState: Bundle) {
         super.onSaveInstanceState(outState)
+        if (uiGraphMissing) return // binding was never inflated
 
         ServiceDeskConfiguration.save(outState)
     }

@@ -9,6 +9,7 @@ import android.os.Bundle
 import android.util.Log
 import androidx.core.view.WindowCompat
 import androidx.fragment.app.FragmentActivity
+import androidx.lifecycle.ViewModelProvider
 import com.github.terrakok.cicerone.Navigator
 import com.google.android.gms.tasks.OnCompleteListener
 import com.google.android.gms.tasks.Task
@@ -17,12 +18,14 @@ import com.google.android.play.core.review.ReviewManagerFactory
 import com.pyrus.pyrusservicedesk.PyrusServiceDesk
 import com.pyrus.pyrusservicedesk.PyrusServiceDesk.Companion.injector
 import com.pyrus.pyrusservicedesk.PyrusServiceDesk.Companion.uiInjector
+import com.pyrus.pyrusservicedesk.PyrusServiceDesk.Companion.uiInjectorOrNull
 import com.pyrus.pyrusservicedesk.R
 import com.pyrus.pyrusservicedesk.ServiceDeskConfiguration
 import com.pyrus.pyrusservicedesk._ref.SdScreens
 import com.pyrus.pyrusservicedesk._ref.utils.log.PLog
 import com.pyrus.pyrusservicedesk._ref.utils.navigation.PyrusNavigator
 import com.pyrus.pyrusservicedesk.core.StaticRepository
+import com.pyrus.pyrusservicedesk.core.UiGraphViewModel
 import com.pyrus.pyrusservicedesk.databinding.PsdActivityMainBinding
 import com.pyrus.pyrusservicedesk.sdk.data.StartData
 
@@ -34,10 +37,9 @@ internal class MainActivity : FragmentActivity() {
     private val navigator: Navigator = PyrusNavigator(this, R.id.fragment_container)
 
     override fun onCreate(savedInstanceState: Bundle?) {
-        // If the host has never called PyrusServiceDesk.init() in this process,
-        // we cannot recreate UI_INJECTOR. Drop the restored state and bail out
-        // BEFORE super.onCreate, otherwise the framework will resurrect fragments
-        // that immediately call uiInjector() and crash.
+        // If the host has never called PyrusServiceDesk.init() in this process, we cannot create
+        // the UI graph. Drop the restored state and bail out BEFORE super.onCreate, otherwise the
+        // framework would resurrect fragments that immediately call uiInjector() and crash.
         if (PyrusServiceDesk.INJECTOR == null) {
             Log.d(TAG, "PyrusServiceDesk.INJECTOR == null")
             PLog.d(TAG, "PyrusServiceDesk.INJECTOR == null")
@@ -46,10 +48,12 @@ internal class MainActivity : FragmentActivity() {
             return
         }
 
-        // Create UiInjector as the very first step of SDK UI lifecycle. From this point on
-        // any fragment / adapter / dialog can safely access `PyrusServiceDesk.uiInjector()`.
-        // It will be released in onDestroy() when the activity is finishing.
-        PyrusServiceDesk.ensureUiInjector()
+        // Obtain the activity-scoped owner of the UI graph as the very first step, BEFORE
+        // super.onCreate restores fragments — its constructor creates and publishes the graph, so
+        // restored fragments can safely access uiInjector(). The ViewModel is retained across
+        // configuration changes (the graph is not rebuilt on rotation) and closes the graph in
+        // onCleared() only when the activity really finishes — no manual lifecycle bookkeeping.
+        ViewModelProvider(this)[UiGraphViewModel::class.java]
         super.onCreate(savedInstanceState)
 
         val theme = when{
@@ -74,16 +78,6 @@ internal class MainActivity : FragmentActivity() {
             val sendComment = data?.sendComment
             uiInjector().router.newRootScreen(SdScreens.RouterScreen(action, sendComment))
         }
-    }
-
-    override fun onDestroy() {
-        // Release UiInjector only when the activity is actually finishing (not on config
-        // changes). This guarantees no Picasso / ExoPlayer / MediaSession / Cicerone leaks
-        // across SDK open/close cycles.
-        if (isFinishing) {
-            PyrusServiceDesk.releaseUiInjector()
-        }
-        super.onDestroy()
     }
 
     override fun onNewIntent(intent: Intent, caller: ComponentCaller) {
@@ -118,11 +112,13 @@ internal class MainActivity : FragmentActivity() {
 
     override fun onResume() {
         super.onResume()
-        uiInjector().navHolder.setNavigator(navigator)
+        // A graph-absent onCreate() bails via finish(), which is async — guard so this does not
+        // relocate the crash here if the framework still runs onResume().
+        uiInjectorOrNull()?.navHolder?.setNavigator(navigator)
     }
 
     override fun onPause() {
-        uiInjector().navHolder.removeNavigator()
+        uiInjectorOrNull()?.navHolder?.removeNavigator()
         super.onPause()
     }
 
