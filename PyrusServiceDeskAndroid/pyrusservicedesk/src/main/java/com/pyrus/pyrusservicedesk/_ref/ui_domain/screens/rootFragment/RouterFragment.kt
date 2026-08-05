@@ -108,7 +108,9 @@ internal class RouterFragment: TeaFragment<Unit, Message.Outer, Effect.Outer>(),
                             ?: localCommandsStore.getNextLocalId()
                     PLog.d(RootFragment.TAG, "ET RouterFragment single-chat: localTicketsCount=${tickets.size}, lastTicketId=${tickets.lastOrNull()?.ticketId}, lastServerTicketId=${tickets.maxByOrNull { it.ticketId }?.ticketId} chosenTicketId=$lastTicketId")
                     PLog.d(RootFragment.TAG, "ET RouterFragment single-chat: localTicketsCount=${tickets.size}, lastTicketId=${tickets.lastOrNull()?.ticketId}, lastServerTicketId=${tickets.maxByOrNull { it.ticketId }?.ticketId} chosenTicketId=$lastTicketId")
-                    router.newRootScreen(SdScreens.TicketScreen(lastTicketId, user, sendComment).setSlideRightAnimation())
+                    withContext(Dispatchers.Main) {
+                        router.newRootScreen(SdScreens.TicketScreen(lastTicketId, user, sendComment).setSlideRightAnimation())
+                    }
                 }
             }
         }
