@@ -59,8 +59,14 @@ internal class LocalTicketsStore(
     }
 
     // Max comment id among stored comment BODIES (basis for last_note_id in single-chat V1/V2).
+    // Empty/reload handling is decided by the caller (SyncMapper) from the ticket list.
     fun getMaxStoredCommentId(): Long? {
         return ticketsDao.getMaxStoredCommentId()
+    }
+
+    // ET: number of stored comment bodies (whole table) — for logging.
+    fun getCommentsCount(): Int {
+        return ticketsDao.getCommentsCount()
     }
 
     fun getTicketWithComments(ticketId: Long): TicketWithComments? {
