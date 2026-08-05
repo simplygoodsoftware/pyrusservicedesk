@@ -9,7 +9,7 @@ extension URLRequest {
      Create URLRequest with RequestType that don't need any id.
      - Parameter parameters: [String: Any] is an additional parameters to "AppId" and "UserId". If no need in additional parameters send nil.
      */
-    static func createRequest(type: urlType, parameters:[String: Any]) -> URLRequest{
+    static func createRequest(type: urlType, parameters:[String: Any]) -> URLRequest? {
         if(type == .upload){
             fatalError("Bad type in this method")
         }
@@ -33,8 +33,10 @@ extension URLRequest {
         return request
     }
     
-    private static func createRequest(url: URL, json:[String: Any]) -> URLRequest {
-        let body = addStaticKeys(to: json)
+    private static func createRequest(url: URL, json:[String: Any]) -> URLRequest? {
+        guard let body = addStaticKeys(to: json) else {
+            return nil
+        }
         let jsonData = try? JSONSerialization.data(withJSONObject: body)
         var request = URLRequest(url: url, cachePolicy: .reloadIgnoringLocalCacheData, timeoutInterval: 60)
         request.httpMethod = "POST"
@@ -45,34 +47,27 @@ extension URLRequest {
         request.addUserAgent()
         return request
     }
-    private static func addStaticKeys(to JSON:[String: Any]) -> [String: Any] {
-        var fullJSOn = JSON
-        fullJSOn["locale"] = Locale.current.languageCode ?? "en"
-        guard !PyrusServiceDesk.multichats else {
-            fullJSOn["instance_id"] = PyrusServiceDesk.userId
-            fullJSOn["version"] = 2
-            return fullJSOn
+    
+    private static func addStaticKeys(to JSON: [String: Any]) -> [String: Any]? {
+        guard PyrusServiceDesk.clientId != nil || PyrusServiceDesk.multichats else {
+            EventsLogger.logEvent(.emptyClientId)
+            return nil
         }
-        
-        fullJSOn["app_id"] = PyrusServiceDesk.clientId
-        if let securityKey = PyrusServiceDesk.securityKey, let customUserId = PyrusServiceDesk.customUserId {
-            fullJSOn["user_id"] = customUserId
-            fullJSOn["security_key"] = securityKey
-            fullJSOn["instance_id"] = PyrusServiceDesk.userId
-            fullJSOn["version"] = 2
-        } else if let customUserId = PyrusServiceDesk.customUserId {
-            fullJSOn["user_id"] = customUserId
-            fullJSOn["instance_id"] = PyrusServiceDesk.userId
-            fullJSOn["version"] = 2
-        } else {
-            fullJSOn["instance_id"] = PyrusServiceDesk.userId
-            fullJSOn["version"] = 2
+        var fullJSON = JSON
+        fullJSON["locale"] = Locale.current.languageCode ?? "en"
+        fullJSON["instance_id"] = PyrusServiceDesk.userId
+        fullJSON["version"] = 2
+
+        guard !PyrusServiceDesk.multichats else { return fullJSON }
+
+        fullJSON["app_id"] = PyrusServiceDesk.clientId
+        if let customUserId = PyrusServiceDesk.customUserId {
+            fullJSON["user_id"] = customUserId
+            if let securityKey = PyrusServiceDesk.securityKey {
+                fullJSON["security_key"] = securityKey
+            }
         }
-        if((PyrusServiceDesk.clientId) == nil){
-            fatalError("no client Id")
-        }
-        
-        return fullJSOn
+        return fullJSON
     }
     
     mutating func addCustomHeaders() {

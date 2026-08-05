@@ -42,7 +42,9 @@ struct PSDGetChat {
             parameters["app_id"] = PyrusServiceDesk.currentClientId ?? PyrusServiceDesk.clientId
            // parameters["author_id"] = PyrusServiceDesk.authorId
         }
-        let request = URLRequest.createRequest(type: .chatFeed, parameters: parameters)
+        guard let request = URLRequest.createRequest(type: .chatFeed, parameters: parameters) else {
+            return
+        }
     
         let localId = UUID().uuidString
         let task = PyrusServiceDesk.mainSession.dataTask(with: request) { data, response, error in

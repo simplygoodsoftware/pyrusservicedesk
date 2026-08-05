@@ -31,7 +31,10 @@ struct PSDPushToken {
     }
     
     static private func send(parameters: [String: Any], completion: @escaping(Error?) -> Void) {
-        let  request = URLRequest.createRequest(type:.token, parameters: parameters)
+        guard let request = URLRequest.createRequest(type:.token, parameters: parameters) else {
+            completion(PSDError.init(description: "No clientId"))
+            return
+        }
         
         let task = PyrusServiceDesk.mainSession.dataTask(with: request) { data, response, error in
             guard let data = data, error == nil else {

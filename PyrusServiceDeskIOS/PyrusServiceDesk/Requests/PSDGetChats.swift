@@ -73,7 +73,10 @@ struct PSDGetChats {
         
         parameters["helpy_announcement_feed_checkpoints"] = announcementsChepoints
         
-        let request: URLRequest = URLRequest.createRequest(type:.chats, parameters: parameters)
+        guard let request: URLRequest = URLRequest.createRequest(type:.chats, parameters: parameters) else {
+            completion(GetTicketsResponse(complete: true))
+            return
+        }
         
         let startTime1 = CFAbsoluteTimeGetCurrent()
         print("GetTickets: \(Date()), commands count: \(commands.count)")
