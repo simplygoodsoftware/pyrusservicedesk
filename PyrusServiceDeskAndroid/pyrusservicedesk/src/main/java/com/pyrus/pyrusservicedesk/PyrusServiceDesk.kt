@@ -222,6 +222,9 @@ class PyrusServiceDesk private constructor(
             val oldAccount = INJECTOR?.accountStore?.getAccount()
             val oldUserId = oldAccount?.getUserId()
 
+            PLog.d(TAG, "ET initInternal: old(appId=${oldAccount?.getAppId()?.getFirstNSymbols(8)}, userId=$oldUserId) new(appId=${appId.getFirstNSymbols(8)}, userId=$userId) apiVersion=$apiVersion UI_INJECTOR=${UI_INJECTOR != null} sdIsOpen=${sdIsOpen.value}")
+            Log.d(TAG, "ET initInternal: old(appId=${oldAccount?.getAppId()?.getFirstNSymbols(8)}, userId=$oldUserId) new(appId=${appId.getFirstNSymbols(8)}, userId=$userId) apiVersion=$apiVersion UI_INJECTOR=${UI_INJECTOR != null} sdIsOpen=${sdIsOpen.value}")
+
             // If UI is currently open, we must NOT tear down or recreate injectors, otherwise the
             // running activity/fragments will crash. Behaviour:
             // - same credentials  -> keep existing injectors
@@ -233,12 +236,16 @@ class PyrusServiceDesk private constructor(
                     appId,
                     userId
                 )
+                PLog.d(TAG, "ET initInternal: guard hit (UI open / sdIsOpen), dataIsChanged=$dataIsChanged (note: securityKey NOT compared) -> ${if (dataIsChanged) "stop()" else "KEEP old injector, ignore new key"}")
+                Log.d(TAG, "ET initInternal: guard hit, dataIsChanged=$dataIsChanged -> ${if (dataIsChanged) "stop()" else "keep old injector"}")
                 if (dataIsChanged) {
                     stop()
                 }
                 return
             }
 
+            PLog.d(TAG, "ET initInternal: creating NEW DiInjector (userId=$userId)")
+            Log.d(TAG, "ET initInternal: creating NEW DiInjector (userId=$userId)")
             autoRefreshFeatureFactory?.cancel()
             INJECTOR?.onCancel()
 
@@ -258,6 +265,8 @@ class PyrusServiceDesk private constructor(
 
             autoRefreshFeatureFactory = INJECTOR?.autoRefreshFeatureFactory?.create(liveUpdates)
             if (oldUserId != null && oldUserId != newAccount.getUserId()) {
+                PLog.d(TAG, "ET initInternal: userId changed ($oldUserId -> ${newAccount.getUserId()}) -> clearLocalData()")
+                Log.d(TAG, "ET initInternal: userId changed -> clearLocalData()")
                 liveUpdates.reset(INJECTOR?.preferencesManager)
                 clearLocalData {}
             }
@@ -478,6 +487,8 @@ class PyrusServiceDesk private constructor(
             val startData = StartData(account, openTicketAction, sendComment)
             val intent = MainActivity.createLaunchIntent(activity, startData)
             intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+            PLog.d(TAG, "ET startImpl: userId=${account.getUserId()} appId=${account.getAppId()?.getFirstNSymbols(8)} openTicketId=${openTicketAction?.ticketId}")
+            Log.d(TAG, "ET startImpl: userId=${account.getUserId()} appId=${account.getAppId()?.getFirstNSymbols(8)}")
 
             // start() may be called from any thread. We only bounce the actual activity launch to
             // the UI thread: runOnUiThread runs inline when already on main and does a NON-blocking
@@ -489,6 +500,8 @@ class PyrusServiceDesk private constructor(
         }
 
         private fun clearLocalData(doOnCleared : () -> Unit) {
+            PLog.d(TAG, "ET clearLocalData: WIPING all local SD data (tickets + comment bodies)")
+            Log.d(TAG, "ET clearLocalData: WIPING all local SD data (tickets + comment bodies)")
             INJECTOR?.cleanDataUseCase()
             INJECTOR?.preferencesManager?.let(liveUpdates::reset)
             UI_INJECTOR?.picassoManager?.clearImageCache()

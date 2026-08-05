@@ -201,13 +201,26 @@ internal open class Synchronizer(
             resourceManager = resourceManager,
             firstUserId = firstUserId,
             firstAppId = firstAppId,
+            maxStoredNoteIdProvider = { localTicketsStore.getMaxStoredCommentId() },
         )
 
 
+        PLog.d(TAG, "ET getTickets REQUEST: appId=${firstAppId.take(8)} userId=$firstUserId version=${account.getVersion()} cachedTickets=${tickets.size} reqCount=${modifiedRequests.size}")
+        Log.d(TAG, "ET getTickets REQUEST: appId=${firstAppId.take(8)} userId=$firstUserId version=${account.getVersion()} cachedTickets=${tickets.size} reqCount=${modifiedRequests.size}")
+        PLog.d(TAG, "ET getTickets REQUEST detail: last_note_id=${getTicketsRequest.lastNoteId} storedBodies=${localTicketsStore.getCommentsCount()} reloadCacheVersion=$reloadCacheVersion (last_note_id=null -> server sends full thread)")
+
         trotRequest(syncRequests)
         val getTicketsTry = api.getTickets(getTicketsRequest)
-        
+
+        PLog.d(TAG, "ET getTickets RESPONSE: success=${getTicketsTry.isSuccess()}")
+        Log.d(TAG, "ET getTickets RESPONSE: success=${getTicketsTry.isSuccess()}")
+
         if (getTicketsTry.isSuccess()) {
+            val respTickets = getTicketsTry.value.tickets
+            PLog.d(TAG, "ET getTickets RESPONSE detail: tickets=${respTickets?.size ?: 0}" +
+                    " ticketsWithBodies=${respTickets?.count { !it.comments.isNullOrEmpty() } ?: 0}" +
+                    " totalBodies=${respTickets?.sumOf { it.comments?.size ?: 0 } ?: 0}")
+
 
             if (reloadCacheVersion < RELOAD_CACHE_VERSION) {
                 preferences.saveReloadCacheVersion(RELOAD_CACHE_VERSION)
@@ -260,8 +273,12 @@ internal open class Synchronizer(
             val usersWithData = account.getUsers().filter { it.userId !in authorAccessDenied }
 
             localTicketsStore.storeServerState(usersWithData, getTicketsTry.value)
+            PLog.d(TAG, "ET getTickets STORED: localTickets=${localTicketsStore.getTickets().size} apps=${getTicketsTry.value.applications?.size} accessDenied=${getTicketsTry.value.authorAccessDenied} usersWithData=${usersWithData.map { it.userId }}")
+            Log.d(TAG, "ET getTickets STORED: localTickets=${localTicketsStore.getTickets().size} apps=${getTicketsTry.value.applications?.size} accessDenied=${getTicketsTry.value.authorAccessDenied}")
+            PLog.d(TAG, "ET getTickets STORED detail: storedBodies=${localTicketsStore.getCommentsCount()} maxStoredCommentId=${localTicketsStore.getMaxStoredCommentId()}")
             //TODO for multichat
             val ticketId = localTicketsStore.getTickets().lastOrNull()?.ticketId ?: idStore.ticketIdFlow.value
+            PLog.d(TAG, "ET getTickets STORED: setTicketId=$ticketId")
             idStore.setTicketId(ticketId)
 
             val commandRequests = syncRequests.filterIsInstance<CommandWithContinuation>()
@@ -300,6 +317,9 @@ internal open class Synchronizer(
         else {
             getTicketsTry.error.printStackTrace()
             val statusCode = (getTicketsTry.error as? HttpException)?.statusCode
+            PLog.d(TAG, "ET getTickets FAILED: statusCode=$statusCode error=${getTicketsTry.error.message} (appId=${firstAppId.take(8)} userId=$firstUserId)")
+            Log.d(TAG, "ET getTickets FAILED: statusCode=$statusCode error=${getTicketsTry.error.message}")
+            PLog.d(TAG, "ET getTickets FAILED -> cache KEPT: cachedTickets=${localTicketsStore.getTickets().size} cachedBodies=${localTicketsStore.getCommentsCount()} (empty chat now = NOT loaded yet / offline, data not wiped)")
             if (statusCode == FAILED_AUTHORIZATION_ERROR_CODE || statusCode == FAILED_AUTHORIZATION_ERROR_CODE_FORBIDDEN) {
                 withContext(Dispatchers.Main) {
                     PyrusServiceDesk.onAuthorizationFailed?.run()

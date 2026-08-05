@@ -1,7 +1,9 @@
 package com.pyrus.pyrusservicedesk.sdk.repositories
 
 import android.net.Uri
+import android.util.Log
 import androidx.core.net.toFile
+import com.pyrus.pyrusservicedesk._ref.utils.log.PLog
 import com.pyrus.pyrusservicedesk._ref.data.Attachment
 import com.pyrus.pyrusservicedesk._ref.data.FullTicket
 import com.pyrus.pyrusservicedesk._ref.data.multy_chat.Application
@@ -79,6 +81,8 @@ internal class SdRepository(
     }
 
     suspend fun sync() {
+        Log.d("SdRepository", "ET sync() called -> syncData(Data, force=false)")
+        PLog.d("SdRepository", "ET sync() called -> syncData(Data, force=false)")
         synchronizer.syncData(SyncRequest.Data, false)
     }
 
@@ -99,6 +103,8 @@ internal class SdRepository(
         val syncTry = synchronizer.syncData(SyncRequest.Data, force)
         if (!syncTry.isSuccess()) return syncTry
         val applications = ticketsStore.getApplicationsWithTickets()
+        Log.d("SdRepository", "ET getTicketsInfo: force=$force syncOk=true applicationsWithTickets=${applications.size}")
+        PLog.d("SdRepository", "ET getTicketsInfo: force=$force syncOk=true applicationsWithTickets=${applications.size}")
 
         val tickets = repositoryMapper.mergeData(account, applications, commandsStore.getCommands())
         return Try.Success(tickets)
@@ -115,6 +121,8 @@ internal class SdRepository(
     suspend fun getFeed(userId: String, ticketId: Long, force: Boolean): Try2<FullTicket, GetTicketsError> {
         val account = accountStore.getAccount()
         val serverId = idStore.getTicketServerId(ticketId) ?: ticketId
+        Log.d("SdRepository", "ET getFeed: userId=$userId ticketId=$ticketId -> serverId=$serverId force=$force version=${account.getVersion()} localTickets=${ticketsStore.getTickets().size}")
+        PLog.d("SdRepository", "ET getFeed: userId=$userId ticketId=$ticketId -> serverId=$serverId force=$force version=${account.getVersion()} localTickets=${ticketsStore.getTickets().size}")
         val orgLogoUrl = getOrgLogoUrl(userId, account)
         val welcomeMessage = getWelcomeMessage(userId, account)
 
@@ -151,6 +159,8 @@ internal class SdRepository(
                     operatorTimeMessage = null,
                 )
             }
+            Log.d("SdRepository", "ET getFeed: serverId<=0 branch -> returning ticket comments=${ticket.comments.size} (EMPTY placeholder if 0; NO network sync happens in this branch)")
+            PLog.d("SdRepository", "ET getFeed: serverId<=0 branch -> comments=${ticket.comments.size} localCommands=${commands.size} (NO sync in this branch)")
             return Try2.Success(ticket)
         }
 
@@ -231,7 +241,11 @@ internal class SdRepository(
     }
 
     private fun getLastServerTicket(serverId: Long, account: Account, userId: String, orgLogoUrl: String?): FullTicket? {
-        val id = ticketsStore.getTickets().lastOrNull()?.ticketId ?: return null
+        val id = ticketsStore.getTickets().lastOrNull()?.ticketId ?: run {
+            Log.d("SdRepository", "ET getLastServerTicket: NO local tickets -> null (feed can't render server ticket, empty screen)")
+            PLog.d("SdRepository", "ET getLastServerTicket: NO local tickets -> null")
+            return null
+        }
         val localTicket = ticketsStore.getTicketWithComments(id) ?: return null
         val commands = commandsStore.getCommands(serverId)
         val application = ticketsStore.getApplications().find { account.getUsers().find { user -> user.userId == userId }?.appId == it.appId }
@@ -264,7 +278,7 @@ internal class SdRepository(
             val ratingSettings = application?.ratingSettings
             val welcomeMessage = application?.welcomeMessage
 
-             if (ticketEntity != null) {
+             val feed: FullTicket? = if (ticketEntity != null) {
                  if ((account.getVersion() == API_VERSION_1
                          || account.getVersion() == API_VERSION_2)
                      && ticketsList.isNotEmpty()
@@ -322,6 +336,9 @@ internal class SdRepository(
                     )
                 }
             }
+
+            PLog.d("SdRepository", "ET getFeedFlow RESULT: ticketId=$ticketId comments=${feed?.comments?.size ?: -1} ticketsInStore=${ticketsList.size} (comments=0 & tickets>0 -> thread not downloaded; -1 -> null/empty screen)")
+            feed
         }
     }
 

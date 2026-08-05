@@ -75,6 +75,9 @@ internal class RouterFragment: TeaFragment<Unit, Message.Outer, Effect.Outer>(),
                  ?.commit()
             val account = injector().accountStore.getAccount()
 
+            PLog.d(RootFragment.TAG, "ET RouterFragment: isMultiChat=${account.isMultiChat()} userId=${account.getUserId()} appId=${account.getAppId()?.take(8)} openTicketId=${action?.ticketId}")
+            Log.d(RootFragment.TAG, "ET RouterFragment: isMultiChat=${account.isMultiChat()} userId=${account.getUserId()} openTicketId=${action?.ticketId}")
+
             if (account.isMultiChat()) {
                 if (action != null) {
                     uiInjector().router.newRootChain(
@@ -97,12 +100,17 @@ internal class RouterFragment: TeaFragment<Unit, Message.Outer, Effect.Outer>(),
 
                 val user = UserInternal(userId, appId)
                 val router = uiInjector().router
-                lifecycleScope.launch {
-                    val lastTicketId = withContext(Dispatchers.IO) {
-                        injector().localTicketsStore.getTickets().lastOrNull()?.ticketId
-                            ?: injector().localCommandsStore.getNextLocalId()
+                val localTicketsStore = injector().localTicketsStore
+                val localCommandsStore = injector().localCommandsStore
+                lifecycleScope.launch(Dispatchers.IO) {
+                    val tickets = localTicketsStore.getTickets()
+                    val lastTicketId = tickets.lastOrNull()?.ticketId
+                            ?: localCommandsStore.getNextLocalId()
+                    PLog.d(RootFragment.TAG, "ET RouterFragment single-chat: localTicketsCount=${tickets.size}, lastTicketId=${tickets.lastOrNull()?.ticketId}, lastServerTicketId=${tickets.maxByOrNull { it.ticketId }?.ticketId} chosenTicketId=$lastTicketId")
+                    PLog.d(RootFragment.TAG, "ET RouterFragment single-chat: localTicketsCount=${tickets.size}, lastTicketId=${tickets.lastOrNull()?.ticketId}, lastServerTicketId=${tickets.maxByOrNull { it.ticketId }?.ticketId} chosenTicketId=$lastTicketId")
+                    withContext(Dispatchers.Main) {
+                        router.newRootScreen(SdScreens.TicketScreen(lastTicketId, user, sendComment).setSlideRightAnimation())
                     }
-                    router.newRootScreen(SdScreens.TicketScreen(lastTicketId, user, sendComment).setSlideRightAnimation())
                 }
             }
         }
