@@ -96,78 +96,94 @@ private extension SyncManager {
         }
         
         let userId = PyrusServiceDesk.customUserId
-        PSDGetChats.get(commands: ticketCommands.map({ $0.toDictionary() })) { [weak self, userId] getTicketsResponse in
-            guard PyrusServiceDesk.isStarted || !PyrusServiceDesk.multichats else { return }
-            if !PyrusServiceDesk.multichats && userId != PyrusServiceDesk.customUserId {
-                return
-            }
-            guard let self = self else { return }
+        let completion: (GetTicketsResponse) -> Void = { [weak self, userId] getTicketsResponse in
+            self?.handleSyncResponse(getTicketsResponse, isFilter: isFilter, requestUserId: userId)
+        }
+        
+        // По спеке на новый запрос HelpySync переводится только приложение
+        // Помощник (режим мультичатов) — остальные потребители библиотеки
+        // остаются на GetTickets, чтобы не затрагивать их функционал.
+        if PyrusServiceDesk.multichats {
+            PSDHelpySync.get(commands: ticketCommands, completion: completion)
+        } else {
+            PSDGetChats.get(commands: ticketCommands.map({ $0.toDictionary() }), completion: completion)
+        }
+    }
+    
+    func handleSyncResponse(
+        _ getTicketsResponse: GetTicketsResponse,
+        isFilter: Bool,
+        requestUserId: String?
+    ) {
+        guard PyrusServiceDesk.isStarted || !PyrusServiceDesk.multichats else { return }
+        if !PyrusServiceDesk.multichats && requestUserId != PyrusServiceDesk.customUserId {
+            return
+        }
+        
+        let userInfo = ["isFilter": isFilter]
+        var clients = getTicketsResponse.clients
+        
+        // Проверяем доступы и удаляем вендоров (clients) при необходимости
+        checkAccesses(authorAccessDenied: getTicketsResponse.authorAccessDenied, clientsArray: getTicketsResponse.clients, clients: &clients, userInfo: userInfo)
+        
+        // Обрабатываем результаты команд
+        updateCommandsAndMessageStorage(commandsResult: getTicketsResponse.commandsResult)
+        
+        if let announcementsResult = getTicketsResponse.announcementsResult {
+            updateAnnouncements(announcementsResult: announcementsResult)
+        }
+        
+        DispatchQueue.main.async { [weak self] in
+            guard let self else { return }
             
-            let userInfo = ["isFilter": isFilter]
-            var clients = getTicketsResponse.clients
-            
-            // Проверяем доступы и удаляем вендоров (clients) при необходимости
-            checkAccesses(authorAccessDenied: getTicketsResponse.authorAccessDenied, clientsArray: getTicketsResponse.clients, clients: &clients, userInfo: userInfo)
-            
-            // Обрабатываем результаты команд
-            updateCommandsAndMessageStorage(commandsResult: getTicketsResponse.commandsResult)
-            
-            if let announcementsResult = getTicketsResponse.announcementsResult {
-                updateAnnouncements(announcementsResult: announcementsResult)
-            }
-            
-            DispatchQueue.main.async { [weak self] in
-                guard let self else { return }
-                
-                if let chats = getTicketsResponse.chats, getTicketsResponse.complete {
-                    var unreadChats = 0
-                    var lasMessage: PSDMessage?
-                    if let chat = chats.first {
-                        if !chat.isRead {
-                            unreadChats += 1
-                            lasMessage = chat.lastComment
-                        }
+            if let chats = getTicketsResponse.chats, getTicketsResponse.complete {
+                var unreadChats = 0
+                var lasMessage: PSDMessage?
+                if let chat = chats.first {
+                    if !chat.isRead {
+                        unreadChats += 1
+                        lasMessage = chat.lastComment
                     }
-                    UnreadMessageManager.refreshNewMessagesCount(unreadChats > 0, lastMessage: lasMessage)
-                    
-                    let startTime = CFAbsoluteTimeGetCurrent()
-                    chatsDataService.saveChatModels(with: chats) { [weak self] _ in
-                        DispatchQueue.main.async { [weak self] in
-                            guard let self else { return }
-                            
-                            if let clients, clients.count > 0  {
-                                updateChatsAndClients(clients: clients, userInfo: userInfo)
-                                let timeElapsed = CFAbsoluteTimeGetCurrent() - startTime
-                                print("⏱ getAllChats completed in \(timeElapsed) seconds")
-                            }
-                            
-                            if isFilter {
-                                self.isFilter = false
-                            }
-                            clearTimer()
-                            previousDelay = nil
-                            networkAvailability = true
-                            isRequestInProgress = false
-                            
-                            if shouldSendAnotherRequest {
-                                syncGetTickets(isFilter: self.isFilter)
-                            }
-                        }
-                    }
-                    
-                } else if !getTicketsResponse.complete {
-                    updateRepeatSyncTimer()
-                    networkAvailability = false
-                    isRequestInProgress = false
-                    if shouldSendAnotherRequest {
-                        syncGetTickets(isFilter: self.isFilter)
-                    }
-                } else {
-                    clearTimer()
-                    previousDelay = nil
-                    networkAvailability = true
-                    isRequestInProgress = false
                 }
+                UnreadMessageManager.refreshNewMessagesCount(unreadChats > 0, lastMessage: lasMessage)
+                
+                let startTime = CFAbsoluteTimeGetCurrent()
+                chatsDataService.saveChatModels(with: chats) { [weak self] _ in
+                    DispatchQueue.main.async { [weak self] in
+                        guard let self else { return }
+                        
+                        if let clients, clients.count > 0  {
+                            updateChatsAndClients(clients: clients, userInfo: userInfo)
+                            let timeElapsed = CFAbsoluteTimeGetCurrent() - startTime
+                            print("⏱ getAllChats completed in \(timeElapsed) seconds")
+                        }
+                        
+                        if isFilter {
+                            self.isFilter = false
+                        }
+                        clearTimer()
+                        previousDelay = nil
+                        networkAvailability = true
+                        isRequestInProgress = false
+                        
+                        if shouldSendAnotherRequest {
+                            syncGetTickets(isFilter: self.isFilter)
+                        }
+                    }
+                }
+                
+            } else if !getTicketsResponse.complete {
+                updateRepeatSyncTimer()
+                networkAvailability = false
+                isRequestInProgress = false
+                if shouldSendAnotherRequest {
+                    syncGetTickets(isFilter: self.isFilter)
+                }
+            } else {
+                clearTimer()
+                previousDelay = nil
+                networkAvailability = true
+                isRequestInProgress = false
             }
         }
     }

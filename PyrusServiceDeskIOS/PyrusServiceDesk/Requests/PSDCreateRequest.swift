@@ -4,6 +4,7 @@ import MobileCoreServices
 
 let contenttype = "application/json; charset=utf-8"
 private let authTokenKey = "Authorization"
+private let requestTimeout: TimeInterval = 60
 extension URLRequest {
     /**
      Create URLRequest with RequestType that don't need any id.
@@ -15,6 +16,44 @@ extension URLRequest {
         }
         let url = PyrusServiceDeskAPI.PSDURL(type:type)
         return createRequest(url:url, json:parameters)
+    }
+    
+    /**
+     Create URLRequest with a Codable body.
+     
+     Тело кодируется как есть, без добавления статических ключей
+     (`addStaticKeys`): по спеке HelpySync корневые `app_id`, `user_id`,
+     `last_note_id` и `security_key` в запрос не передаются, а `instance_id`,
+     `locale` и `version` модель запроса несёт сама.
+     */
+    static func createRequest<Body: Encodable>(
+        type: urlType,
+        body: Body,
+        encoder: JSONEncoder = JSONEncoder()
+    ) -> URLRequest? {
+        if type == .upload {
+            fatalError("Bad type in this method")
+        }
+        guard PyrusServiceDesk.clientId != nil || PyrusServiceDesk.multichats else {
+            EventsLogger.logEvent(.emptyClientId)
+            return nil
+        }
+        let jsonData: Data
+        do {
+            jsonData = try encoder.encode(body)
+        } catch {
+            PyrusLogger.shared.logEvent("Failed to encode request body for \(type.rawValue): \(error)")
+            return nil
+        }
+        let url = PyrusServiceDeskAPI.PSDURL(type: type)
+        var request = URLRequest(url: url, cachePolicy: .reloadIgnoringLocalCacheData, timeoutInterval: requestTimeout)
+        request.httpMethod = "POST"
+        request.httpBody = jsonData
+        request.addValue(contenttype, forHTTPHeaderField: "content-type")
+        request.addValue("\(jsonData.count)", forHTTPHeaderField: "Content-Length")
+        request.addCustomHeaders()
+        request.addUserAgent()
+        return request
     }
     
     /**
@@ -37,12 +76,14 @@ extension URLRequest {
         guard let body = addStaticKeys(to: json) else {
             return nil
         }
-        let jsonData = try? JSONSerialization.data(withJSONObject: body)
-        var request = URLRequest(url: url, cachePolicy: .reloadIgnoringLocalCacheData, timeoutInterval: 60)
+        guard let jsonData = try? JSONSerialization.data(withJSONObject: body) else {
+            return nil
+        }
+        var request = URLRequest(url: url, cachePolicy: .reloadIgnoringLocalCacheData, timeoutInterval: requestTimeout)
         request.httpMethod = "POST"
         request.httpBody = jsonData
         request.addValue(contenttype, forHTTPHeaderField: "content-type")
-        request.addValue("\(jsonData!.count)", forHTTPHeaderField: "Content-Length")
+        request.addValue("\(jsonData.count)", forHTTPHeaderField: "Content-Length")
         request.addCustomHeaders()
         request.addUserAgent()
         return request
@@ -86,4 +127,3 @@ extension URLRequest {
         addValue(userAgent, forHTTPHeaderField: "User-Agent")
     }
 }
-

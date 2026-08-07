@@ -4,6 +4,8 @@ import Foundation
 enum urlType : String{
     ///Add gettickets to baseURLString. Use PSDURL(type:urlType).
     case chats = "gettickets"
+    ///Add helpysync to baseURLString. New sync request for Helpy app (replaces gettickets in multichats mode). Use PSDURL(type:urlType).
+    case helpySync = "helpysync"
     ///Add GetTicketFeed to baseURLString. Use PSDURL(type:urlType).
     case chatFeed = "GetTicketFeed"
     ///Add UpdateTicketFeed to baseURLString. Use PSDURL(type:urlType).
@@ -25,7 +27,7 @@ struct PyrusServiceDeskAPI {
     }
     ///Create URL for urlType in [.chats, .createNew, .upload, .chatFeed, .updateFeed, .token]
     static func PSDURL(type: urlType) -> URL {
-        let validTypes : [urlType] = [.chats, .upload, .chatFeed, .updateFeed, .token]
+        let validTypes : [urlType] = [.chats, .helpySync, .upload, .chatFeed, .updateFeed, .token]
         if !(validTypes.contains(type)){
             fatalError("Bad urlType for this function, type = \(urlType.RawValue())")
         }
