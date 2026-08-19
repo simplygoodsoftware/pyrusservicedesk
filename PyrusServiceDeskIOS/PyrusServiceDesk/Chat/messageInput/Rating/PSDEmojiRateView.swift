@@ -46,7 +46,6 @@ class PSDEmojiRateView: UIView, RateViewProtocol {
     }
     
     func configure(with rateValues: [RatingTextValue]) {
-        rateArray = rateValues
         self.buttons = rateValues
         maxWidth = rateValues.count > 3 ? maxWidth : 82
         collectionView.reloadData()
