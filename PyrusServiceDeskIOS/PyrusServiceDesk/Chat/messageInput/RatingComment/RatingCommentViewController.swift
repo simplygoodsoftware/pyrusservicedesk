@@ -1,20 +1,32 @@
 import UIKit
 
 protocol RatingCommentDelegate: AnyObject {
-    func sendRatingComment(comment: String)
+    func sendRatingComment(comment: String?, rating: Int)
 }
 
 class RatingCommentViewController: UIViewController {
 
     weak var delegate: RatingCommentDelegate?
     
+    private let rating: Int
+    private let ratingText: String?
+        
+    init(rating: Int, ratingText: String?) {
+        self.rating = rating
+        self.ratingText = ratingText
+        super.init(nibName: nil, bundle: nil)
+    }
+    
+    required init?(coder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
+    }
+    
     private let titleLabel: UILabel = {
         let label = UILabel()
-        label.text = PyrusServiceDesk.ratingSettings.ratingText ?? "EvaluateQuality".localizedPSD()
         label.font = UIFont.boldSystemFont(ofSize: 22)
         label.numberOfLines = 2
         label.textAlignment = .left
-        label.textColor = .black
+        label.textColor = UIColor.getTextColor(for: PyrusServiceDesk.mainController?.customization?.customBackgroundColor ?? .psdBackground)
         label.translatesAutoresizingMaskIntoConstraints = false
         return label
     }()
@@ -23,27 +35,32 @@ class RatingCommentViewController: UIViewController {
         let label = UILabel()
         label.text = "LeaveYourComment".localizedPSD()
         label.font = UIFont.systemFont(ofSize: 13)
-        label.textColor = .darkGray
+        let backgroundColor = PyrusServiceDesk.mainController?.customization?.customBackgroundColor ?? .psdBackground
+        label.textColor = UIColor.getSecondTextColor(for: backgroundColor)
         label.translatesAutoresizingMaskIntoConstraints = false
         return label
     }()
 
     private let textView: UITextView = {
         let textView = UITextView()
-        textView.layer.borderColor = UIColor(hex: "#D6D9DC")?.cgColor
         textView.layer.borderWidth = 1
         textView.layer.cornerRadius = 8
         textView.font = UIFont.systemFont(ofSize: 14)
-        textView.tintColor = .appColor
+        let backgroundColor = PyrusServiceDesk.mainController?.customization?.customBackgroundColor ?? .psdBackground
+        textView.layer.borderColor = UIColor.getBorderColor(for: backgroundColor).cgColor//UIColor(hex: "#D6D9DC")?.cgColor
+        textView.tintColor = PyrusServiceDesk.mainController?.customization?.themeColor ?? UIColor.getTextColor(for: backgroundColor)
+        textView.backgroundColor = backgroundColor
+        textView.textColor = UIColor.getTextColor(for: backgroundColor)
         textView.translatesAutoresizingMaskIntoConstraints = false
+        textView.keyboardAppearance = CustomizationHelper.keyboardStyle
         return textView
     }()
 
     private let closeButton: UIButton = {
         let button = UIButton(type: .system)
         button.setTitle("Close".localizedPSD(), for: .normal)
-        button.setTitleColor(.appColor, for: .normal)
-        button.backgroundColor = UIColor(hex: "#ECEDEF")
+        button.setTitleColor(PyrusServiceDesk.mainController?.customization?.themeColor ?? CustomizationHelper.supportMassageTextColor, for: .normal)
+        button.backgroundColor = CustomizationHelper.supportMassageBackgroundColor//UIColor(hex: "#ECEDEF")
         button.titleLabel?.font = .systemFont(ofSize: 17)
         button.layer.cornerRadius = 8
         button.translatesAutoresizingMaskIntoConstraints = false
@@ -53,8 +70,8 @@ class RatingCommentViewController: UIViewController {
     private let sendButton: UIButton = {
         let button = UIButton(type: .system)
         button.setTitle("Send".localizedPSD(), for: .normal)
-        button.setTitleColor(.appTextColor, for: .normal)
-        button.backgroundColor = .appColor
+        button.setTitleColor(CustomizationHelper.userMassageTextColor, for: .normal)
+        button.backgroundColor = CustomizationHelper.userMassageBackgroundColor//.appColor
         button.titleLabel?.font = .systemFont(ofSize: 17)
         button.layer.cornerRadius = 8
         button.translatesAutoresizingMaskIntoConstraints = false
@@ -63,7 +80,7 @@ class RatingCommentViewController: UIViewController {
 
     override func viewDidLoad() {
         super.viewDidLoad()
-        view.backgroundColor = .white
+        view.backgroundColor = PyrusServiceDesk.mainController?.customization?.customBackgroundColor ?? .psdBackground
 
         setupLayout()
         closeButton.addTarget(self, action: #selector(closeTapped), for: .touchUpInside)
@@ -71,6 +88,8 @@ class RatingCommentViewController: UIViewController {
     }
 
     private func setupLayout() {
+        titleLabel.text = ratingText ?? "EvaluateQuality".localizedPSD()
+
         [titleLabel, commentLabel, textView, closeButton, sendButton].forEach {
             view.addSubview($0)
         }
@@ -106,7 +125,7 @@ class RatingCommentViewController: UIViewController {
 
     @objc private func sendTapped() {
         if !textView.text.isEmpty {
-            delegate?.sendRatingComment(comment: textView.text)
+            delegate?.sendRatingComment(comment: textView.text, rating: rating)
         }
         dismiss(animated: true)
     }
