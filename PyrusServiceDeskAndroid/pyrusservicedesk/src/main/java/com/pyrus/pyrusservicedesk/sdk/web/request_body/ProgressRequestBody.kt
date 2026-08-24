@@ -1,6 +1,8 @@
 package com.pyrus.pyrusservicedesk.sdk.web.request_body
 
+import com.pyrus.pyrusservicedesk._ref.utils.log.PLog
 import com.pyrus.pyrusservicedesk.sdk.web.UploadFileHook
+import com.pyrus.pyrusservicedesk.sdk.web.retrofit.UploadCancelledException
 import okhttp3.MediaType
 import okhttp3.RequestBody
 import okio.BufferedSink
@@ -28,19 +30,27 @@ internal class ProgressRequestBody(
         val fileLength = file.length()
         val buffer = ByteArray(BUFFER_SIZE)
         var uploaded: Long = 0
+        var publishedProgress = -1
         FileInputStream(file).use { stream ->
             var read: Int
             while ((stream.read(buffer).also { read = it }) != -1) {
-                if (cancelHook.isCancelled) throw IOException("Upload file canceled")
+                if (cancelHook.isCancelled) {
+                    PLog.d(TAG, "writeTo: ${file.name} is cancelled on $publishedProgress%")
+                    throw UploadCancelledException()
+                }
                 uploaded += read.toLong()
                 sink.write(buffer, 0, read)
                 val progress = (uploaded.toDouble() / fileLength * 100).toInt()
-                progressListener(progress)
+                if (progress != publishedProgress) {
+                    publishedProgress = progress
+                    progressListener(progress)
+                }
             }
         }
     }
 
     private companion object {
+        const val TAG = "ProgressRequestBody"
         const val MEDIA_TYPE = "multipart/form-responseData"
         private const val BUFFER_SIZE = 1024
     }

@@ -35,6 +35,7 @@ import com.pyrus.pyrusservicedesk.sdk.sync.Synchronizer
 import com.pyrus.pyrusservicedesk.sdk.sync.TicketCommandResultDto
 import com.pyrus.pyrusservicedesk.sdk.web.UploadFileHook
 import com.pyrus.pyrusservicedesk.sdk.web.retrofit.RemoteFileStore
+import com.pyrus.pyrusservicedesk.sdk.web.retrofit.UploadCancelledException
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -65,6 +66,13 @@ internal class SdRepository(
 ) {
 
     private val fileHooks = ConcurrentHashMap<Long, UploadFileHook>()
+
+    /**
+     * Local ids of the commands whose file uploading has been cancelled by the user. Such a command
+     * is already removed from the store and must not be added back by the uploading that is still
+     * being finished in the background, otherwise the comment hangs in the uploading state forever.
+     */
+    private val canceledCommands: MutableSet<Long> = ConcurrentHashMap.newKeySet<Long>()
 
     init {
         coroutineScope.launch(ioDispatcher) {
@@ -412,10 +420,18 @@ internal class SdRepository(
     }
 
     fun cancelUploadFile(commandId: Long, attachmentId: Long) {
+        canceledCommands.add(commandId)
+
+        val hook = fileHooks.remove(attachmentId)
+        PLog.d(TAG, "cancelUploadFile: localId: $commandId, attachmentId: $attachmentId, " +
+            "uploading has started: ${hook != null}")
+
+        if (hook != null) {
+            hook.cancelUploading()
+            remoteFileStore.cancelUploading(hook)
+        }
+
         removeCommand(commandId)
-        val hook = fileHooks[attachmentId]
-        hook?.cancelUploading()
-        fileHooks.remove(attachmentId)
     }
 
     suspend fun searchTickets(text: String, limit: Int): List<SearchResult> {
@@ -432,9 +448,18 @@ internal class SdRepository(
     }
 
     private suspend fun sendCommand(command: SyncRequest.Command) {
-        val sendFilesTry = sendAttachments(command)
-        if (!sendFilesTry.isSuccess()) return
-        syncCommand(sendFilesTry.value)
+        try {
+            val sendFilesTry = sendAttachments(command)
+            if (!sendFilesTry.isSuccess()) return
+            if (command.localId in canceledCommands) {
+                PLog.d(TAG, "sendCommand: localId: ${command.localId} has been cancelled, it is not sent")
+                return
+            }
+            syncCommand(sendFilesTry.value)
+        }
+        finally {
+            canceledCommands.remove(command.localId)
+        }
     }
 
     private suspend fun sendAttachments(command: SyncRequest.Command): Try<SyncRequest.Command> {
@@ -450,23 +475,41 @@ internal class SdRepository(
                 else it
             }
 
+            if (command.localId in canceledCommands) {
+                PLog.d(TAG, "updateAttachment: localId: ${command.localId} has been cancelled, it is not saved")
+                return
+            }
+
             val newCommand = command.copy(attachments = attachments)
             val instanceId = accountStore.getAccount().getInstanceId()
             commandsStore.addOrUpdatePendingCommand(repositoryMapper.mapToCommandEntity(isError, newCommand, instanceId))
         }
 
+        PLog.d(TAG, "sendAttachments: localId: ${command.localId}, attachments to upload: ${attachments.size}")
+
         for (attachment in attachments) {
+            if (command.localId in canceledCommands) {
+                PLog.d(TAG, "sendAttachments: localId: ${command.localId} has been cancelled, " +
+                    "attachment ${attachment.id} is not uploaded")
+                return Try.Failure(UploadCancelledException())
+            }
+
+            PLog.d(TAG, "sendAttachments: attachment ${attachment.id} (${attachment.name}, " +
+                "${attachment.bytesSize} bytes) uploading is started")
+
             val uploadTry = sendAttachment(attachment) { progress ->
                 val newAttachment = attachment.copy(progress = progress)
                 updateAttachment(isError = false, attachment = newAttachment)
             }
             when(uploadTry) {
                 is Try.Failure -> {
+                    PLog.e(TAG, "sendAttachments: attachment ${attachment.id} uploading is failed: ${uploadTry.error}")
                     val newAttachment = attachment.copy(status = Status.Error, progress = null)
                     updateAttachment(isError = true, attachment = newAttachment)
                     return uploadTry
                 }
                 is Try.Success -> {
+                    PLog.d(TAG, "sendAttachments: attachment ${attachment.id} is uploaded, guid: ${uploadTry.value.guid}")
                     val newAttachment = attachment.copy(
                         guid = uploadTry.value.guid,
                         status = Status.Completed,
@@ -557,6 +600,10 @@ internal class SdRepository(
 
         val res = Try.Success(tickets)
         return res.toTry2()
+    }
+
+    private companion object {
+        const val TAG = "SdRepository"
     }
 
 }
