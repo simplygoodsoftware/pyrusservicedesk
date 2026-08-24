@@ -22,6 +22,7 @@ import com.pyrus.pyrusservicedesk.sdk.repositories.IdStore
 import com.pyrus.pyrusservicedesk.sdk.repositories.LocalCommandsStore
 import com.pyrus.pyrusservicedesk.sdk.repositories.LocalTicketsStore
 import com.pyrus.pyrusservicedesk.sdk.repositories.SystemMessageStore
+import com.pyrus.pyrusservicedesk.sdk.sync.FailDelay.Companion.BASE_DELAY
 import com.pyrus.pyrusservicedesk.sdk.sync.SyncRequest.Data
 import com.pyrus.pyrusservicedesk.sdk.sync.Synchronizer
 import com.pyrus.pyrusservicedesk.sdk.sync.Synchronizer.Companion.FAILED_AUTHORIZATION_ERROR_CODE
@@ -149,7 +150,7 @@ class SynchronizerTest {
         assertEquals(true, ticketsTry2.isSuccess())
         assertEquals(2, TestServiceDeskApi.getSyncCount())
         val listSyncTime = TestServiceDeskApi.getListSyncTime()
-        listSyncTime.assertDifferenceAtLeast(0, 1, TROT_TIME_5000)
+        listSyncTime.assertDifferenceAtLeast(0, 1, TROT_TIME_5000 - REAL_CLOCK_TOLERANCE)
     }
 
     /**
@@ -168,7 +169,7 @@ class SynchronizerTest {
         assertEquals(true, ticketsTry2.isSuccess())
         assertEquals(2, TestServiceDeskApi.getSyncCount())
         val listSyncTime = TestServiceDeskApi.getListSyncTime()
-        listSyncTime.assertDifferenceAtLeast(0, 1, TROT_TIME_5000)
+        listSyncTime.assertDifferenceAtLeast(0, 1, TROT_TIME_5000 - REAL_CLOCK_TOLERANCE)
     }
 
     /**
@@ -187,7 +188,7 @@ class SynchronizerTest {
         assertEquals(true, ticketsTry2.isSuccess())
         assertEquals(2, TestServiceDeskApi.getSyncCount())
         val listSyncTime = TestServiceDeskApi.getListSyncTime()
-        listSyncTime.assertDifferenceAtLeast(0, 1, TROT_TIME_5000)
+        listSyncTime.assertDifferenceAtLeast(0, 1, TROT_TIME_5000 - REAL_CLOCK_TOLERANCE)
     }
 
     /**
@@ -206,7 +207,7 @@ class SynchronizerTest {
         assertEquals(true, ticketsTry2.isSuccess())
         assertEquals(2, TestServiceDeskApi.getSyncCount())
         val listSyncTime = TestServiceDeskApi.getListSyncTime()
-        listSyncTime.assertDifferenceAtLeast(0, 1, TROT_TIME_1000)
+        listSyncTime.assertDifferenceAtLeast(0, 1, TROT_TIME_1000 - REAL_CLOCK_TOLERANCE)
     }
 
     /**
@@ -225,7 +226,7 @@ class SynchronizerTest {
         assertEquals(true, ticketsTry2.isSuccess())
         assertEquals(2, TestServiceDeskApi.getSyncCount())
         val listSyncTime = TestServiceDeskApi.getListSyncTime()
-        listSyncTime.assertDifferenceAtLeast(0, 1, TROT_TIME_1000)
+        listSyncTime.assertDifferenceAtLeast(0, 1, TROT_TIME_1000 - REAL_CLOCK_TOLERANCE)
     }
 
     /**
@@ -264,14 +265,18 @@ class SynchronizerTest {
         TestServiceDeskApi.setGetTicketsResponse(null)
 
         synchronizer.syncData(Data, true)
-        advanceTimeBy(6000)
+        advanceTimeBy(TROT_TIME_5000)
+        val syncCountBeforeRepeat = TestServiceDeskApi.getSyncCount()
 
+        advanceTimeBy(REPEAT_TIME_RESERVE)
         val syncCount = TestServiceDeskApi.getSyncCount()
-        println(syncCount)
-        assertEquals(2, syncCount)
-        val listSyncTime = TestServiceDeskApi.getListSyncTime()
-        listSyncTime.assertDifferenceAtLeast(0, 1, 6000L)
+        val listSyncTime = TestServiceDeskApi.getListSyncTime().toList()
+
         synchronizer.close()
+
+        assertEquals(1, syncCountBeforeRepeat)
+        assertEquals(2, syncCount)
+        listSyncTime.assertDifferenceAtLeast(0, 1, BASE_DELAY + TROT_TIME_5000 - REAL_CLOCK_TOLERANCE)
     }
 
     /**
@@ -289,15 +294,20 @@ class SynchronizerTest {
         val job = testScope.launch {
             synchronizer.syncCommand(createCommentRequest)
         }
-        advanceTimeBy(3000L)
-        job.cancel()
 
+        advanceTimeBy(TROT_TIME_1000)
+        val syncCountBeforeRepeat = TestServiceDeskApi.getSyncCount()
+
+        advanceTimeBy(REPEAT_TIME_RESERVE)
         val syncCount = TestServiceDeskApi.getSyncCount()
-        assertEquals(2, syncCount)
-        val listSyncTime = TestServiceDeskApi.getListSyncTime()
-        listSyncTime.assertDifferenceAtLeast(0, 1, 2000L)
+        val listSyncTime = TestServiceDeskApi.getListSyncTime().toList()
+
+        job.cancel()
         synchronizer.close()
 
+        assertEquals(1, syncCountBeforeRepeat)
+        assertEquals(2, syncCount)
+        listSyncTime.assertDifferenceAtLeast(0, 1, BASE_DELAY + TROT_TIME_1000 - REAL_CLOCK_TOLERANCE)
     }
 
     /**
@@ -322,8 +332,12 @@ class SynchronizerTest {
         val syncCount = TestServiceDeskApi.getSyncCount()
         assertEquals(true, syncCount >= 3)
         val listSyncTime = TestServiceDeskApi.getListSyncTime()
-        listSyncTime.assertDifferenceAtLeast(0, 1, 2000L)
-        listSyncTime.assertDifferenceInRange(1, 2, 2000L..4000L)
+        listSyncTime.assertDifferenceAtLeast(0, 1, BASE_DELAY + TROT_TIME_1000 - REAL_CLOCK_TOLERANCE)
+        listSyncTime.assertDifferenceInRange(
+            1,
+            2,
+            (BASE_DELAY + TROT_TIME_1000 - REAL_CLOCK_TOLERANCE)..(MAX_SECOND_FAIL_DELAY + TROT_TIME_1000 + REAL_CLOCK_TOLERANCE),
+        )
 
     }
 
@@ -477,6 +491,22 @@ class SynchronizerTest {
             "Difference should be in $range, but was $diff",
             diff in range
         )
+    }
+
+    private companion object {
+
+        /** Reserve of the virtual time that makes the repeat of the sync happen for sure. */
+        const val REPEAT_TIME_RESERVE = 2000L
+
+        /** The biggest delay before the second repeat of the sync, see FailDelay.getNextDelay. */
+        const val MAX_SECOND_FAIL_DELAY = 3000L
+
+        /**
+         * The throttling measures the passed time by the real clock and waits in the virtual one,
+         * so the awaited delay differs from the expected one by the real milliseconds that are
+         * spent between the syncs. These milliseconds must not decide whether the test passes.
+         */
+        const val REAL_CLOCK_TOLERANCE = 100L
     }
 
 }
