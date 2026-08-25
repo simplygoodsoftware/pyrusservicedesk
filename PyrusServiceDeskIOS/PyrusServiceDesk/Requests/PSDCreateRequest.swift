@@ -53,6 +53,7 @@ extension URLRequest {
         request.addValue("\(jsonData.count)", forHTTPHeaderField: "Content-Length")
         request.addCustomHeaders()
         request.addUserAgent()
+        print(request.allHTTPHeaderFields ?? "Нет заголовков")
         return request
     }
     

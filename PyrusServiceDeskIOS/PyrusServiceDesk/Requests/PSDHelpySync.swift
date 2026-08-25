@@ -23,6 +23,7 @@ struct PSDHelpySync {
         static let logSnippetLength = 2000
         /// Сколько тикетов с дельтой максимум печатать в лог ответа.
         static let maxLoggedDeltaTickets = 30
+        static let dumpLabel = "HelpySync"
     }
 
     private static var sessionTask: URLSessionDataTask?
@@ -60,8 +61,23 @@ struct PSDHelpySync {
         PyrusLogger.shared.logEvent("HelpySync did begin, commands count: \(commands.count)")
         let requestStartTime = CFAbsoluteTimeGetCurrent()
 
+        let dumpToken = NetworkDumpWriter.saveRequest(
+            label: Constants.dumpLabel,
+            request: request,
+            fallbackBody: try? HelpySyncWireFormat.makeEncoder().encode(requestBody)
+        )
+        
         sessionTask = PyrusServiceDesk.mainSession.dataTask(with: request) { data, response, error in
             let elapsed = CFAbsoluteTimeGetCurrent() - requestStartTime
+            
+            NetworkDumpWriter.saveResponse(
+                for: dumpToken,
+                body: data,
+                statusCode: (response as? HTTPURLResponse)?.statusCode,
+                error: error,
+                duration: elapsed
+            )
+            
             guard let data, error == nil else {
                 PyrusLogger.shared.logEvent(
                     "HelpySync network error after \(String(format: "%.2f", elapsed))s:"

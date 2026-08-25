@@ -14,7 +14,6 @@ struct HelpySyncRequest: Encodable {
     let instanceId: String
     /// id устройства (не меняется при переустановке).
     let deviceId: String
-    let version: Int
     let locale: String
     let apiSign: String
     /// Хэш номера телефона — определяет автора комментариев
@@ -33,7 +32,6 @@ struct HelpySyncRequest: Encodable {
     enum CodingKeys: String, CodingKey {
         case instanceId = "instance_id"
         case deviceId = "device_id"
-        case version
         case locale
         case apiSign = "api_sign"
         case authorId = "author_id"

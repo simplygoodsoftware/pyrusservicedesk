@@ -198,7 +198,8 @@ private extension HelpySyncChatsMapper {
     // MARK: Read state
 
     /// Тикет не прочитан, если среди известных клиенту комментариев
-    /// (дельта + кэш) есть чужой комментарий с id больше last_read_comment_id.
+    /// (дельта + кэш) есть комментарий с id больше last_read_comment_id,
+    /// который должен учитываться в непрочитанном (см. `countsTowardUnread`).
     static func isTicketRead(
         lastReadCommentId: Int?,
         deltaMessages: [PSDMessage],
@@ -211,10 +212,34 @@ private extension HelpySyncChatsMapper {
             guard
                 let messageId = Int(message.messageId),
                 messageId > lastReadId,
-                message.owner?.authorId != PyrusServiceDesk.authorId
+                countsTowardUnread(message)
             else {
                 continue
             }
+            return false
+        }
+        return true
+    }
+
+    /// Учитывается ли сообщение при вычислении непрочитанности тикета.
+    ///
+    /// Не учитываются:
+    /// - собственные сообщения пользователя — по флагу `isOutgoing`
+    ///   (проставляется и маппером для дельты, и загрузкой из кэша)
+    ///   либо по совпадению authorId владельца;
+    /// - сообщения с оценкой: рейтинг — собственное действие пользователя,
+    ///   и такие сообщения сознательно НЕ сохраняются в кэш
+    ///   (фильтр `(rating ?? 0) <= 0` в saveChatModels). Их id никогда
+    ///   не попадает в отправляемый markTicketAsRead comment_id, поэтому
+    ///   без этого исключения тикет, где рейтинг — последний комментарий,
+    ///   навсегда оставался бы непрочитанным. Отрисовка рейтинга при этом
+    ///   не меняется: она управляется showRating/isRatingMessage
+    ///   и от прочитанности не зависит.
+    static func countsTowardUnread(_ message: PSDMessage) -> Bool {
+        if message.isOutgoing || message.owner?.authorId == PyrusServiceDesk.authorId {
+            return false
+        }
+        if message.isRatingMessage || (message.rating ?? 0) > 0 {
             return false
         }
         return true

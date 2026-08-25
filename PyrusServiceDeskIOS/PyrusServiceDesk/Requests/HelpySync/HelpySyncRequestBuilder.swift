@@ -35,7 +35,6 @@ enum HelpySyncRequestBuilder {
         let request = HelpySyncRequest(
             instanceId: PyrusServiceDesk.userId,
             deviceId: PSDDeviceIdentifier.deviceId,
-            version: Constants.protocolVersion,
             locale: Locale.current.languageCode ?? Constants.defaultLocale,
             apiSign: PyrusServiceDesk.apiSign(),
             authorId: PyrusServiceDesk.authorId,
