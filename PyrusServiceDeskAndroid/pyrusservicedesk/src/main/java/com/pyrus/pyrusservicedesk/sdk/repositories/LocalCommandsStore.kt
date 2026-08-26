@@ -179,6 +179,10 @@ internal class LocalCommandsStore(
         return commandsDao.getCommand(localId)
     }
 
+    fun hasCommand(localId: Long): Boolean {
+        return commandsDao.hasCommand(localId)
+    }
+
     /**
      * Removes pending command from offline repository
      */
@@ -315,30 +319,15 @@ internal class LocalCommandsStore(
         )
     }
 
-    fun getNextLocalId(): Long {
-        return lastLocalId.getAndUpdate {
-            if (it == 0L) {
-                val minId = commandsDao.getCommandMinLocalId()
-                if (minId == null) -1
-                else minId - 1
-            }
-            else {
-                it - 1
-            }
-        }
-    }
+    fun getNextLocalId(): Long = getNextId(lastLocalId, commandsDao::getCommandMinLocalId)
 
-    private fun getNextAttachmentId(): Long {
-        return lastAttachId.getAndUpdate {
-            if (it == 0L) {
-                val minId = commandsDao.getAttachmentMinLocalId()
-                if (minId == null) -1
-                else minId - 1
-            }
-            else {
-                it - 1
-            }
+    private fun getNextAttachmentId(): Long = getNextId(lastAttachId, commandsDao::getAttachmentMinLocalId)
+
+    private fun getNextId(counter: AtomicLong, minStoredId: () -> Long?): Long {
+        if (counter.get() == 0L) {
+            counter.compareAndSet(0L, minStoredId() ?: 0L)
         }
+        return counter.decrementAndGet()
     }
 
     private fun createCommandId(): String {

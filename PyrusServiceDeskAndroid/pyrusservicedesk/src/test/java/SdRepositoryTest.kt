@@ -73,6 +73,7 @@ import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 import org.robolectric.RuntimeEnvironment
+import java.io.File
 
 @RunWith(RobolectricTestRunner::class)
 @OptIn(ExperimentalCoroutinesApi::class)
@@ -93,6 +94,9 @@ class SdRepositoryTest {
 
     private lateinit var fileResolver: FileResolver
 
+    /** Local ids that have been removed from the store, see LocalCommandsStore.hasCommand. */
+    private val removedCommandIds = mutableSetOf<Long>()
+
     private val testDispatcher = StandardTestDispatcher()
     private val testScope = TestScope(testDispatcher)
 
@@ -107,6 +111,9 @@ class SdRepositoryTest {
         systemMessageStore = mockk(relaxed = true, relaxUnitFun = true)
         fileResolver = mockk()
         remoteFileStore = mockk()
+
+        every { localCommandsStore.hasCommand(any()) } answers { firstArg<Long>() !in removedCommandIds }
+        every { localCommandsStore.removeCommand(any<Long>()) } answers { removedCommandIds += firstArg<Long>() }
 
         accountStore = AccountStore(
             Account.V1(
@@ -498,6 +505,72 @@ class SdRepositoryTest {
         )
     }
 
+    /**
+     * The pending commands are sent one by one on the start, so a command can be cancelled while
+     * it is still waiting in the queue. The sending that reaches it later must skip it.
+     */
+    @Test
+    fun shouldNotSendCommandRemovedWhileItWaitsInTheQueue() = runTest(testDispatcher) {
+        TestServiceDeskApi.setGetTicketsResponse(Responses.emptyTickets)
+        val firstUpload = CompletableDeferred<Try<FileUploadResponseData>>()
+        every { localCommandsStore.getCommands() } returns listOf(
+            attachmentCommandEntity(),
+            attachmentCommandEntity(
+                localId = QUEUED_ATTACH_COMMAND_LOCAL_ID,
+                commandId = QUEUED_ATTACH_COMMAND_ID,
+                attachmentId = QUEUED_ATTACHMENT_ID,
+                fileName = QUEUED_FILE_NAME,
+                fileUri = QUEUED_FILE_URI,
+            ),
+        )
+        coEvery { remoteFileStore.uploadFile(any(), any(), any()) } coAnswers {
+            if (firstArg<File>().name == TEST_FILE_NAME) firstUpload.await()
+            else Try.Success(FileUploadResponseData(TEST_GUID, null))
+        }
+        setupMocks(this)
+        setupAttachmentMocks()
+        advanceUntilIdle()
+
+        // the first command is uploading, the second one is still waiting in the queue
+        repository.cancelUploadFile(QUEUED_ATTACH_COMMAND_LOCAL_ID, QUEUED_ATTACHMENT_ID)
+        firstUpload.complete(Try.Success(FileUploadResponseData(TEST_GUID, null)))
+        advanceUntilIdle()
+
+        coVerify(exactly = 1) { remoteFileStore.uploadFile(any(), any(), any()) }
+    }
+
+    /**
+     * The comment can be cancelled when its files are already uploaded and the command is being
+     * synced. A failed sync must not return such a command to the store as an error one, otherwise
+     * the cancelled comment appears in the chat again.
+     */
+    @Test
+    fun shouldNotSaveCommandCancelledWhileSyncing() = runTest(testDispatcher) {
+        TestServiceDeskApi.setGetTicketsResponse(Responses.emptyTickets)
+        setupMocks(this)
+        val savedCommands = setupAttachmentMocks()
+        val finishUpload = CompletableDeferred<Try<FileUploadResponseData>>()
+        coEvery { remoteFileStore.uploadFile(any(), any(), any()) } coAnswers { finishUpload.await() }
+
+        repository.addAttachComment(userInternalV1, TEST_TICKET_ID, TEST_FILE_URI)
+        advanceUntilIdle()
+
+        // the file is uploaded, the command is passed to the synchronizer
+        finishUpload.complete(Try.Success(FileUploadResponseData(TEST_GUID, null)))
+        testDispatcher.scheduler.runCurrent()
+        val savedBeforeCancel = savedCommands.size
+
+        repository.cancelUploadFile(TEST_ATTACH_COMMAND_LOCAL_ID, TEST_ATTACHMENT_ID)
+        advanceUntilIdle()
+
+        verify { localCommandsStore.removeCommand(TEST_ATTACH_COMMAND_LOCAL_ID) }
+        assertEquals(
+            "the command cancelled while syncing must not be saved as an error one",
+            savedBeforeCancel,
+            savedCommands.size,
+        )
+    }
+
     @Test
     fun shouldSaveGuidOfUploadedAttachment() = runTest(testDispatcher) {
         TestServiceDeskApi.setGetTicketsResponse(createComment)
@@ -539,11 +612,17 @@ class SdRepositoryTest {
         return savedCommands
     }
 
-    private fun attachmentCommandEntity() = CommandWithAttachmentsEntity(
+    private fun attachmentCommandEntity(
+        localId: Long = TEST_ATTACH_COMMAND_LOCAL_ID,
+        commandId: String = TEST_ATTACH_COMMAND_ID,
+        attachmentId: Long = TEST_ATTACHMENT_ID,
+        fileName: String = TEST_FILE_NAME,
+        fileUri: Uri = TEST_FILE_URI,
+    ) = CommandWithAttachmentsEntity(
         command = CommandEntity(
             isError = false,
-            localId = TEST_ATTACH_COMMAND_LOCAL_ID,
-            commandId = TEST_ATTACH_COMMAND_ID,
+            localId = localId,
+            commandId = commandId,
             commandType = TicketCommandType.CreateComment.ordinal,
             userId = null,
             appId = TEST_APP_ID,
@@ -560,12 +639,12 @@ class SdRepositoryTest {
         ),
         attachments = listOf(
             LocalAttachmentEntity(
-                id = TEST_ATTACHMENT_ID,
-                commandId = TEST_ATTACH_COMMAND_ID,
-                name = TEST_FILE_NAME,
+                id = attachmentId,
+                commandId = commandId,
+                name = fileName,
                 guid = null,
                 bytesSize = TEST_FILE_SIZE,
-                uri = TEST_FILE_URI.toString(),
+                uri = fileUri.toString(),
             )
         ),
     )
@@ -620,5 +699,11 @@ class SdRepositoryTest {
         const val TEST_PROGRESS = 50
         const val TEST_GUID = "test-guid"
         val TEST_FILE_URI: Uri = Uri.parse("file:///tmp/test.txt")
+
+        const val QUEUED_ATTACH_COMMAND_LOCAL_ID = -11L
+        const val QUEUED_ATTACH_COMMAND_ID = "1f7b6d90-2c34-4e58-8a11-9b0c5d3e7f22"
+        const val QUEUED_ATTACHMENT_ID = 101L
+        const val QUEUED_FILE_NAME = "queued.txt"
+        val QUEUED_FILE_URI: Uri = Uri.parse("file:///tmp/queued.txt")
     }
 }

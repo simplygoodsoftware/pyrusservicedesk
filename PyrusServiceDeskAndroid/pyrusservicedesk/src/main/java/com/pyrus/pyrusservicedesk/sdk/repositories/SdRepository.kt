@@ -67,13 +67,6 @@ internal class SdRepository(
 
     private val fileHooks = ConcurrentHashMap<Long, UploadFileHook>()
 
-    /**
-     * Local ids of the commands whose file uploading has been cancelled by the user. Such a command
-     * is already removed from the store and must not be added back by the uploading that is still
-     * being finished in the background, otherwise the comment hangs in the uploading state forever.
-     */
-    private val canceledCommands: MutableSet<Long> = ConcurrentHashMap.newKeySet<Long>()
-
     init {
         coroutineScope.launch(ioDispatcher) {
             val initialCommands = commandsStore.getCommands()
@@ -420,7 +413,7 @@ internal class SdRepository(
     }
 
     fun cancelUploadFile(commandId: Long, attachmentId: Long) {
-        canceledCommands.add(commandId)
+        removeCommand(commandId)
 
         val hook = fileHooks.remove(attachmentId)
         PLog.d(TAG, "cancelUploadFile: localId: $commandId, attachmentId: $attachmentId, " +
@@ -430,8 +423,6 @@ internal class SdRepository(
             hook.cancelUploading()
             remoteFileStore.cancelUploading(hook)
         }
-
-        removeCommand(commandId)
     }
 
     suspend fun searchTickets(text: String, limit: Int): List<SearchResult> {
@@ -447,19 +438,22 @@ internal class SdRepository(
         return result.distinctBy { it.commentId }.sortedByDescending { it.creationTime }
     }
 
+    /**
+     * The command is removed from the store when the user cancels the uploading of its file or
+     * deletes the comment. Everything that is still being finished in the background must not add
+     * such a command back, otherwise the comment returns to the chat and hangs in the uploading
+     * state forever.
+     */
+    private fun isCommandRemoved(localId: Long): Boolean = !commandsStore.hasCommand(localId)
+
     private suspend fun sendCommand(command: SyncRequest.Command) {
-        try {
-            val sendFilesTry = sendAttachments(command)
-            if (!sendFilesTry.isSuccess()) return
-            if (command.localId in canceledCommands) {
-                PLog.d(TAG, "sendCommand: localId: ${command.localId} has been cancelled, it is not sent")
-                return
-            }
-            syncCommand(sendFilesTry.value)
+        val sendFilesTry = sendAttachments(command)
+        if (!sendFilesTry.isSuccess()) return
+        if (isCommandRemoved(command.localId)) {
+            PLog.d(TAG, "sendCommand: localId: ${command.localId} has been removed, it is not sent")
+            return
         }
-        finally {
-            canceledCommands.remove(command.localId)
-        }
+        syncCommand(sendFilesTry.value)
     }
 
     private suspend fun sendAttachments(command: SyncRequest.Command): Try<SyncRequest.Command> {
@@ -475,8 +469,8 @@ internal class SdRepository(
                 else it
             }
 
-            if (command.localId in canceledCommands) {
-                PLog.d(TAG, "updateAttachment: localId: ${command.localId} has been cancelled, it is not saved")
+            if (isCommandRemoved(command.localId)) {
+                PLog.d(TAG, "updateAttachment: localId: ${command.localId} has been removed, it is not saved")
                 return
             }
 
@@ -488,8 +482,8 @@ internal class SdRepository(
         PLog.d(TAG, "sendAttachments: localId: ${command.localId}, attachments to upload: ${attachments.size}")
 
         for (attachment in attachments) {
-            if (command.localId in canceledCommands) {
-                PLog.d(TAG, "sendAttachments: localId: ${command.localId} has been cancelled, " +
+            if (isCommandRemoved(command.localId)) {
+                PLog.d(TAG, "sendAttachments: localId: ${command.localId} has been removed, " +
                     "attachment ${attachment.id} is not uploaded")
                 return Try.Failure(UploadCancelledException())
             }
@@ -568,12 +562,17 @@ internal class SdRepository(
 
         if (syncTry.isSuccess()) {
             commandsStore.removeCommand(command.commandId)
+            return
         }
-        else {
-            val instanceId = accountStore.getAccount().getInstanceId()
-            val errorEntity = repositoryMapper.mapToCommandEntity(true, command, instanceId)
-            commandsStore.addOrUpdatePendingCommand(errorEntity)
+
+        if (isCommandRemoved(command.localId)) {
+            PLog.d(TAG, "syncCommand: localId: ${command.localId} has been removed, it is not saved")
+            return
         }
+
+        val instanceId = accountStore.getAccount().getInstanceId()
+        val errorEntity = repositoryMapper.mapToCommandEntity(true, command, instanceId)
+        commandsStore.addOrUpdatePendingCommand(errorEntity)
     }
 
     private fun Try<TicketsDto>.checkResponse(userId: String): Try2<TicketsDto, GetTicketsError> {
