@@ -1,0 +1,784 @@
+import InitData.TEST_APP_ID
+import InitData.TEST_INSTANCE_ID
+import InitData.TEST_TICKET_ID
+import InitData.ticket
+import InitData.ticketEntity
+import InitData.ticketWithComments
+import InitData.userInternalV1
+import android.content.Context
+import android.content.SharedPreferences
+import androidx.core.net.toUri
+import com.pyrus.pyrusservicedesk.SdConstants.PYRUS_BASE_DOMAIN
+import com.pyrus.pyrusservicedesk._ref.ui_domain.screens.ticket.TicketContract
+import com.pyrus.pyrusservicedesk._ref.ui_domain.screens.ticket.TicketContract.Message
+import com.pyrus.pyrusservicedesk._ref.ui_domain.screens.ticket.TicketContract.RecordState
+import com.pyrus.pyrusservicedesk._ref.ui_domain.screens.ticket.TicketContract.State
+import com.pyrus.pyrusservicedesk._ref.ui_domain.screens.ticket.TicketFeature
+import com.pyrus.pyrusservicedesk._ref.ui_domain.screens.ticket.TicketFeatureFactory
+import com.pyrus.pyrusservicedesk._ref.ui_domain.screens.ticket.record.AudioRecordControllerFactory
+import com.pyrus.pyrusservicedesk._ref.utils.AudioWrapper
+import com.pyrus.pyrusservicedesk._ref.utils.PREFERENCE_KEY
+import com.pyrus.pyrusservicedesk._ref.utils.Try2
+import com.pyrus.pyrusservicedesk._ref.utils.navigation.PyrusRouter
+import com.pyrus.pyrusservicedesk._ref.whitetea.core.DefaultStoreFactory
+import com.pyrus.pyrusservicedesk.audiocontroller.src.main.java.com.pyrus.audiocontroller.record.AudioRecordController
+import com.pyrus.pyrusservicedesk.core.Account
+import com.pyrus.pyrusservicedesk.sdk.data.FileManager
+import com.pyrus.pyrusservicedesk.sdk.repositories.AccountStore
+import com.pyrus.pyrusservicedesk.sdk.repositories.DraftRepository
+import com.pyrus.pyrusservicedesk.sdk.repositories.IdStore
+import com.pyrus.pyrusservicedesk.sdk.repositories.LocalCommandsStore
+import com.pyrus.pyrusservicedesk.sdk.repositories.LocalTicketsStore
+import com.pyrus.pyrusservicedesk.sdk.repositories.SdRepository
+import com.pyrus.pyrusservicedesk.sdk.repositories.SystemMessageStore
+import com.pyrus.pyrusservicedesk.sdk.repositories.data_base.data.ApplicationEntity
+import com.pyrus.pyrusservicedesk.sdk.sync.Synchronizer.Companion.NO_UPDATES
+import com.pyrus.pyrusservicedesk.sdk.updates.PreferencesManager
+import io.mockk.coEvery
+import io.mockk.coVerify
+import io.mockk.every
+import io.mockk.mockk
+import junit.framework.TestCase.assertEquals
+import junit.framework.TestCase.assertTrue
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.cancel
+import kotlinx.coroutines.cancelChildren
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.test.StandardTestDispatcher
+import kotlinx.coroutines.test.TestDispatcher
+import kotlinx.coroutines.test.resetMain
+import kotlinx.coroutines.test.setMain
+import org.junit.After
+import org.junit.Before
+import org.junit.Test
+import org.junit.runner.RunWith
+import org.robolectric.RobolectricTestRunner
+import org.robolectric.RuntimeEnvironment
+import utils.TestComponentResult
+import utils.testComponent
+import java.io.File
+
+@RunWith(RobolectricTestRunner::class)
+@OptIn(ExperimentalCoroutinesApi::class)
+class TicketFeatureFactoryTest {
+
+    private lateinit var accountStore: AccountStore
+    private lateinit var repository: SdRepository
+    private lateinit var draftRepository: DraftRepository
+    private lateinit var router: PyrusRouter
+    private lateinit var fileManager: FileManager
+    private lateinit var preferencesManager: PreferencesManager
+    private lateinit var audioRecordControllerFactory: AudioRecordControllerFactory
+    private lateinit var audioWrapper: AudioWrapper
+    private lateinit var localTicketsStore: LocalTicketsStore
+    private lateinit var commandsStore: LocalCommandsStore
+
+    private lateinit var audioRecordController: AudioRecordController
+    private val idStore = IdStore()
+    private val systemMessageStore = SystemMessageStore(idStore)
+    private lateinit var testDispatcher: TestDispatcher
+
+
+    @Before
+    fun setUp() {
+        testDispatcher = StandardTestDispatcher()
+
+        repository = mockk(relaxed = true, relaxUnitFun = true)
+        localTicketsStore = mockk(relaxed = true, relaxUnitFun = true)
+        draftRepository = mockk(relaxed = true, relaxUnitFun = true)
+        router = mockk(relaxed = true, relaxUnitFun = true)
+        fileManager = mockk(relaxed = true, relaxUnitFun = true)
+        audioRecordControllerFactory =
+            mockk(relaxed = true, relaxUnitFun = true)
+        audioWrapper = mockk(relaxed = true, relaxUnitFun = true)
+        localTicketsStore = mockk(relaxed = true, relaxUnitFun = true)
+        commandsStore = mockk(relaxed = true, relaxUnitFun = true)
+        audioRecordController = mockk(relaxed = true)
+        accountStore = AccountStore(
+            Account.V1(
+                PYRUS_BASE_DOMAIN,
+                TEST_INSTANCE_ID,
+                TEST_APP_ID
+            )
+        )
+        val app = RuntimeEnvironment.application
+        val preferences: SharedPreferences = app.getSharedPreferences(
+            PREFERENCE_KEY,
+            Context.MODE_PRIVATE
+        )
+        preferencesManager = PreferencesManager(TEST_APP_ID, preferences)
+        preferencesManager.saveLastActiveTime(NO_UPDATES)
+        every { audioRecordControllerFactory.create() } returns audioRecordController
+
+        Dispatchers.setMain(testDispatcher)
+    }
+
+    @After
+    fun cleanData() {
+        Dispatchers.resetMain()
+        testDispatcher.cancel()
+        testDispatcher.cancelChildren()
+    }
+
+    @Test
+    fun shouldUpdateStateWhenInputTextChanged() {
+        setupMocks()
+        val feature = createTicketFeature()
+        var testResult: TestComponentResult<State, TicketContract.Effect.Outer>? =
+            null
+
+        testComponent(feature, testDispatcher) {
+
+            dispatch(Message.Outer.OnMessageChanged("test text from input"))
+            testResult = this.testResult
+        }
+
+        println(testResult?.models?.size)
+        println((testResult?.models?.lastOrNull() as? State.Content)?.inputText)
+        assertEquals(2, testResult?.models?.size)
+
+        val firstInputTextFromModel =
+            (testResult?.models?.firstOrNull() as? State.Content)
+            ?.inputText
+        assertTrue(firstInputTextFromModel.isNullOrBlank())
+
+        val lastInputText =
+            (testResult?.models?.lastOrNull() as? State.Content)
+                ?.inputText
+        assertEquals("test text from input", lastInputText)
+    }
+
+    @Test
+    fun shouldSendCommentWhenClickOnButtonWithText() {
+        setupMocks()
+        val feature = createTicketFeature()
+        var testResult: TestComponentResult<State, TicketContract.Effect.Outer>? =
+            null
+
+        testComponent(feature, testDispatcher) {
+
+            dispatch(Message.Outer.OnButtonClick("test text from button"))
+            testResult = this.testResult
+        }
+
+        assertEquals(2, testResult?.models?.size)
+        coVerify(exactly = 1) { repository.addTextComment(any(), any(), any()) }
+
+        checkLastActiveTime(false)
+    }
+
+    @Test
+    fun shouldSendCommentWhenClickOnButtonWithEmptyText() {
+        setupMocks()
+        val feature = createTicketFeature()
+        var testResult: TestComponentResult<State, TicketContract.Effect.Outer>? =
+            null
+
+        testComponent(feature, testDispatcher) {
+
+            dispatch(Message.Outer.OnButtonClick("  "))
+            testResult = this.testResult
+        }
+
+        assertEquals(2, testResult?.models?.size)
+        coVerify(exactly = 0) { repository.addTextComment(any(), any(), any()) }
+
+        checkLastActiveTime(true)
+    }
+
+    @Test
+    fun shouldSendCommentWhenOnRatingClick() {
+        setupMocks()
+        val feature = createTicketFeature()
+        var testResult: TestComponentResult<State, TicketContract.Effect.Outer>? =
+            null
+
+        testComponent(feature, testDispatcher) {
+
+            dispatch(Message.Outer.OnRatingClick(5, null))
+            testResult = this.testResult
+        }
+
+        assertEquals(2, testResult?.models?.size)
+        val model = testResult?.models?.lastOrNull() as? State.Content
+        assertTrue(model?.ticket?.showRating == false)
+        coVerify(exactly = 1) {
+            repository.addRatingComment(
+                any(),
+                any(),
+                any(),
+                any()
+            )
+        }
+
+        val effect = testResult?.effects?.firstOrNull()
+        assertEquals(
+            TicketContract.Effect.Outer.OpenRatingComment(
+                rateUsText = null
+            ), effect
+        )
+        checkLastActiveTime(false)
+    }
+
+    @Test
+    fun shouldSendCommentWhenOnRatingTextClick() {
+        setupMocks()
+        val feature = createTicketFeature()
+        var testResult: TestComponentResult<State, TicketContract.Effect.Outer>? =
+            null
+
+        testComponent(feature, testDispatcher) {
+
+            dispatch(Message.Outer.OnRatingClick(null, "rating text"))
+            testResult = this.testResult
+        }
+
+        assertEquals(2, testResult?.models?.size)
+        coVerify(exactly = 1) {
+            repository.addRatingComment(
+                any(),
+                any(),
+                any(),
+                any()
+            )
+        }
+
+        assertEquals(0, testResult?.effects?.size)
+        checkLastActiveTime(false)
+    }
+
+    @Test
+    fun notShouldSendCommentIfRatingIsNull() {
+        setupMocks()
+        val feature = createTicketFeature()
+        var testResult: TestComponentResult<State, TicketContract.Effect.Outer>? =
+            null
+
+        testComponent(feature, testDispatcher) {
+
+            dispatch(Message.Outer.OnRatingClick(null, null))
+            testResult = this.testResult
+        }
+
+        assertEquals(2, testResult?.models?.size)
+        coVerify(exactly = 0) {
+            repository.addRatingComment(
+                any(),
+                any(),
+                any(),
+                any()
+            )
+        }
+        checkLastActiveTime(true)
+    }
+
+    @Test
+    fun shouldOpenErrorCommentDialogWhenOnErrorCommentClick() {
+        setupMocks()
+        val feature = createTicketFeature()
+        var testResult: TestComponentResult<State, TicketContract.Effect.Outer>? =
+            null
+
+        testComponent(feature, testDispatcher) {
+
+            dispatch(Message.Outer.OnErrorCommentClick(1))
+            testResult = this.testResult
+        }
+
+        assertEquals(2, testResult?.models?.size)
+        val effect = testResult?.effects?.firstOrNull()
+        assertTrue(effect is TicketContract.Effect.Outer.ShowErrorCommentDialog)
+        checkLastActiveTime(true)
+    }
+
+    @Test
+    fun shouldSendCommentWhenOnSendClick() {
+        setupMocks()
+        val feature = createTicketFeature()
+        var testResult: TestComponentResult<State, TicketContract.Effect.Outer>? =
+            null
+
+        testComponent(feature, testDispatcher) {
+
+            dispatch(Message.Outer.OnMessageChanged("test text from input"))
+            dispatch(Message.Outer.OnSendClick)
+            testResult = this.testResult
+        }
+
+        println(testResult?.models)
+        assertEquals(3, testResult?.models?.size)
+        coVerify(exactly = 1) { repository.addTextComment(any(), any(), any()) }
+
+        checkLastActiveTime(false)
+    }
+
+    @Test
+    fun notShouldSendCommentWhenOnSendClickEmptyText() {
+        setupMocks()
+        val feature = createTicketFeature()
+        var testResult: TestComponentResult<State, TicketContract.Effect.Outer>? =
+            null
+
+        testComponent(feature, testDispatcher) {
+
+            dispatch(Message.Outer.OnSendClick)
+            testResult = this.testResult
+        }
+
+        assertEquals(2, testResult?.models?.size)
+        coVerify(exactly = 0) { repository.addTextComment(any(), any(), any()) }
+
+        checkLastActiveTime(true)
+    }
+
+    @Test
+    fun shouldShowAttachVariantsWhenOnShowAttachVariantsClick() {
+        setupMocks()
+        val feature = createTicketFeature()
+        var testResult: TestComponentResult<State, TicketContract.Effect.Outer>? =
+            null
+
+        testComponent(feature, testDispatcher) {
+
+            dispatch(Message.Outer.OnShowAttachVariantsClick)
+            testResult = this.testResult
+        }
+
+
+        println(testResult?.models)
+        assertEquals(2, testResult?.models?.size)
+        val effect = testResult?.effects?.firstOrNull()
+        assertTrue(effect is TicketContract.Effect.Outer.ShowAttachVariants)
+
+        checkLastActiveTime(true)
+    }
+
+
+    @Test
+    fun shouldRefreshWhenOnRefresh() {
+        setupMocks()
+        val feature = createTicketFeature()
+        var testResult: TestComponentResult<State, TicketContract.Effect.Outer>? =
+            null
+
+        testComponent(feature, testDispatcher) {
+
+            dispatch(Message.Outer.OnRefresh)
+            testResult = this.testResult
+        }
+
+        assertEquals(3, testResult?.models?.size)
+        val model = testResult?.models[1] as? State.Content
+        assertEquals(true, model?.isLoading)
+        coVerify(exactly = 2) { repository.getFeed(any(), any(), any()) }
+
+        checkLastActiveTime(true)
+    }
+
+    @Test
+    fun testOnCancelUploadClick() {
+        setupMocks()
+        val feature = createTicketFeature()
+        var testResult: TestComponentResult<State, TicketContract.Effect.Outer>? =
+            null
+
+        testComponent(feature, testDispatcher) {
+
+            dispatch(Message.Outer.OnCancelUploadClick(1, 1))
+            testResult = this.testResult
+        }
+
+        println(testResult?.models)
+        assertEquals(2, testResult?.models?.size)
+        coVerify(exactly = 1) { repository.cancelUploadFile(any(), any()) }
+
+        checkLastActiveTime(true)
+    }
+
+    @Test
+    fun testOnInfoClick() {
+        setupMocks()
+        val feature = createTicketFeature()
+        var testResult: TestComponentResult<State, TicketContract.Effect.Outer>? =
+            null
+
+        testComponent(feature, testDispatcher) {
+
+            dispatch(Message.Outer.OnInfoClick)
+            testResult = this.testResult
+        }
+
+        println(testResult?.models)
+        assertEquals(2, testResult?.models?.size)
+        val effect = testResult?.effects?.firstOrNull()
+        assertTrue(effect is TicketContract.Effect.Outer.ShowInfoBottomSheetFragment)
+
+        checkLastActiveTime(true)
+    }
+
+    @Test
+    fun testOnStartRecord() {
+        setupMocks()
+        val feature = createTicketFeature()
+        var testResult: TestComponentResult<State, TicketContract.Effect.Outer>? =
+            null
+
+        testComponent(feature, testDispatcher) {
+
+            dispatch(Message.Outer.OnStartRecord)
+            testResult = this.testResult
+        }
+
+        assertEquals(2, testResult?.models?.size)
+        coVerify(exactly = 1) { audioRecordController.startRecord() }
+
+        val model = testResult?.models?.lastOrNull() as? State.Content
+        assertTrue(model?.recordState is RecordState.Recording)
+
+
+        checkLastActiveTime(true)
+    }
+
+    @Test
+    fun testOnStopRecord() {
+        setupMocks()
+        val feature = createTicketFeature()
+        var testResult: TestComponentResult<State, TicketContract.Effect.Outer>? =
+            null
+
+        testComponent(feature, testDispatcher) {
+
+            dispatch(Message.Outer.OnStopRecord)
+            testResult = this.testResult
+        }
+
+        assertEquals(2, testResult?.models?.size)
+        coVerify(exactly = 1) { audioRecordController.stopRecord() }
+
+        val model = testResult?.models?.lastOrNull() as? State.Content
+        assertTrue(model?.recordState is RecordState.None)
+
+        checkLastActiveTime(true)
+    }
+
+    @Test
+    fun testOnStopPendingRecord() {
+        setupMocks()
+        val feature = createTicketFeature()
+        var testResult: TestComponentResult<State, TicketContract.Effect.Outer>? =
+            null
+
+        testComponent(feature, StandardTestDispatcher()) {
+
+            dispatch(Message.Outer.OnStartRecord)
+            dispatch(Message.Outer.OnLockRecord)
+            dispatch(Message.Outer.OnStopRecord)
+
+            testResult = this.testResult
+        }
+
+        println(testResult?.models)
+        assertEquals(4, testResult?.models?.size)
+        coVerify(exactly = 1) { audioRecordController.stopRecord() }
+
+        val model = testResult?.models?.lastOrNull() as? State.Content
+        assertTrue(model?.recordState is RecordState.PendingRecord)
+
+
+        checkLastActiveTime(true)
+    }
+
+    @Test
+    fun onStopPendingRecordTestPendingRecord() {
+        setupMocks()
+        val feature = createTicketFeature()
+        var testResult: TestComponentResult<State, TicketContract.Effect.Outer>? =
+            null
+
+        testComponent(feature, testDispatcher) {
+
+            dispatch(Message.Outer.OnStartRecord)
+            dispatch(Message.Outer.OnLockRecord)
+            dispatch(Message.Outer.OnStopRecord)
+
+            val mockFile = mockk<File>()
+            every { mockFile.path } returns "/mocked/path/file.audio"
+            dispatch(Message.Inner.OnAudioRecorded(mockFile))
+            testResult = this.testResult
+        }
+
+        println(testResult?.models)
+        assertEquals(5, testResult?.models?.size)
+
+        val model = testResult?.models?.lastOrNull() as? State.Content
+        assertEquals(model?.pendingRecord, "/mocked/path/file.audio")
+
+        checkLastActiveTime(true)
+    }
+
+    @Test
+    fun onStopRecordTestPendingRecord() {
+        setupMocks()
+        val feature = createTicketFeature()
+        var testResult: TestComponentResult<State, TicketContract.Effect.Outer>? =
+            null
+
+        testComponent(feature, testDispatcher) {
+
+            dispatch(Message.Outer.OnStartRecord)
+            dispatch(Message.Outer.OnStopRecord)
+
+            val tempFile = File.createTempFile("test", ".tmp")
+            tempFile.deleteOnExit()
+
+            dispatch(Message.Inner.OnAudioRecorded(tempFile))
+
+            testResult = this.testResult
+        }
+
+        assertEquals(4, testResult?.models?.size)
+        coVerify { repository.addAttachComment(any(), any(), any()) }
+
+        checkLastActiveTime(false)
+    }
+
+    @Test
+    fun testOnStopEndSendRecord() {
+        setupMocks()
+        val feature = createTicketFeature()
+        var testResult: TestComponentResult<State, TicketContract.Effect.Outer>? =
+            null
+
+        testComponent(feature, testDispatcher) {
+
+            dispatch(Message.Outer.OnStopEndSendRecord)
+            testResult = this.testResult
+        }
+
+        assertEquals(2, testResult?.models?.size)
+        coVerify(exactly = 1) { audioRecordController.stopRecord() }
+
+        val model = testResult?.models?.lastOrNull() as? State.Content
+        assertTrue(model?.recordState is RecordState.None)
+
+        checkLastActiveTime(true)
+    }
+
+    @Test
+    fun testOnMicShortClicked() {
+        setupMocks()
+        val feature = createTicketFeature()
+        var testResult: TestComponentResult<State, TicketContract.Effect.Outer>? =
+            null
+
+        testComponent(feature, testDispatcher) {
+
+            dispatch(Message.Outer.OnMicShortClicked)
+            testResult = this.testResult
+        }
+
+        assertEquals(2, testResult?.models?.size)
+
+        val effect = testResult?.effects?.firstOrNull()
+        assertTrue(effect is TicketContract.Effect.Outer.ShowAudioRecordTooltip)
+
+        checkLastActiveTime(true)
+    }
+
+    @Test
+    fun testOnCancelRecord() {
+        setupMocks()
+        val feature = createTicketFeature()
+
+        var models: List<State>? = null
+
+        testComponent(feature, testDispatcher) {
+
+            dispatch(Message.Outer.OnCancelRecord)
+            models = testResult.models
+        }
+
+        assertEquals(2, models?.size)
+        val model = models?.lastOrNull() as? State.Content
+        assertTrue(model?.recordState is RecordState.None)
+        coVerify(exactly = 1) {
+            audioRecordController.setRecordCancelledListener(
+                any()
+            )
+        }
+
+        checkLastActiveTime(true)
+
+    }
+
+    @Test
+    fun testOnLockRecordIfItIsNotRecording() {
+        setupMocks()
+        val feature = createTicketFeature()
+
+        var models: List<State>? = null
+
+        testComponent(feature, testDispatcher) {
+            dispatch(Message.Outer.OnLockRecord)
+            models = testResult.models
+        }
+
+        feature.cancel()
+
+        assertEquals(2, models?.size)
+        val model = models?.lastOrNull() as? State.Content
+        assertTrue(model?.recordState is RecordState.None)
+
+        checkLastActiveTime(true)
+    }
+
+    @Test
+    fun testOnLockRecordIfItIsRecording() {
+        setupMocks()
+        val feature = createTicketFeature()
+        var models: List<State>? = null
+
+        testComponent(feature, testDispatcher) {
+
+            dispatch(Message.Outer.OnStartRecord)
+            dispatch(Message.Outer.OnLockRecord)
+
+            models = testResult.models
+        }
+
+        assertEquals(3, models?.size)
+        val model = models?.lastOrNull() as? State.Content
+        assertTrue(model?.recordState is RecordState.HoldRecording)
+
+        checkLastActiveTime(true)
+
+    }
+
+    @Test
+    fun testOnRemovePendingAudioClick() {
+        setupMocks()
+        val feature = createTicketFeature()
+
+        var models: List<State>? = null
+
+        testComponent(feature, testDispatcher) {
+
+            dispatch(Message.Outer.OnStartRecord)
+            dispatch(Message.Outer.OnLockRecord)
+            models = testResult.models
+        }
+
+        assertEquals(3, models?.size)
+        val model = models?.lastOrNull() as? State.Content
+        assertTrue(model?.recordState is RecordState.HoldRecording)
+
+        checkLastActiveTime(true)
+
+    }
+
+    @Test
+    fun testSetAttachVariant() {
+        setupMocks()
+        val feature = createTicketFeature()
+        every { fileManager.copyFile(any()) } returns "url".toUri()
+
+        var models: List<State>? = null
+
+        testComponent(feature, testDispatcher) {
+
+            val tempFile = File.createTempFile("test", ".tmp")
+            tempFile.deleteOnExit()
+            dispatch(Message.Outer.SetAttachVariant("key", tempFile.toUri()))
+
+            models = testResult.models
+        }
+
+        assertEquals(2, models?.size)
+        coVerify { repository.addAttachComment(any(), any(), any()) }
+
+        checkLastActiveTime(false)
+    }
+
+    @Test
+    fun testSetAttachVariantWhenUriNull() {
+        setupMocks()
+        val feature = createTicketFeature()
+        every { fileManager.copyFile(any()) } returns null
+
+        var models: List<State>? = null
+
+        testComponent(feature, testDispatcher) {
+
+            val tempFile = File.createTempFile("test", ".tmp")
+            tempFile.deleteOnExit()
+
+            dispatch(Message.Outer.SetAttachVariant("key", tempFile.toUri()))
+            models = testResult.models
+        }
+
+        assertEquals(2, models?.size)
+        coVerify(exactly = 0) {
+            repository.addAttachComment(
+                any(),
+                any(),
+                any()
+            )
+        }
+
+        checkLastActiveTime(true)
+    }
+
+    private fun checkLastActiveTime(isNoUpdates: Boolean) {
+        val time = preferencesManager.getLastActiveTime()
+        println("lastActiveTime: $time")
+        val res = when {
+            isNoUpdates -> NO_UPDATES == time
+            else -> NO_UPDATES != time
+        }
+        assertTrue(res)
+    }
+
+    private fun setupMocks() {
+
+        coEvery {
+            repository.getFeed(any(), any(), any())
+        } returns Try2.Success(ticket)
+        coEvery {
+            repository.getFeedFlowByTicketIdFlow(any(), any())
+        } returns MutableStateFlow(ticket)
+        coEvery { localTicketsStore.getTickets() } returns listOf(ticketEntity)
+        coEvery { localTicketsStore.getTicketWithComments(any()) } returns ticketWithComments
+        coEvery { draftRepository.getDraft(any()) } returns ""
+
+        coEvery { localTicketsStore.getApplications() } returns listOf(
+            ApplicationEntity(
+                appId = TEST_APP_ID,
+                orgName = "TEST",
+                orgLogoUrl = "ff",
+                orgDescription = null,
+                ratingSettings = null,
+                welcomeMessage = "hhh"
+            )
+        )
+    }
+
+    private fun createTicketFeature(): TicketFeature {
+        val storeFactory = DefaultStoreFactory(testDispatcher, testDispatcher)
+        return TicketFeatureFactory(
+            accountStore = accountStore,
+            storeFactory = storeFactory,
+            repository = repository,
+            draftRepository = draftRepository,
+            router = router,
+            fileManager = fileManager,
+            preferencesManager = preferencesManager,
+            audioRecordControllerFactory = audioRecordControllerFactory,
+            audioWrapper = audioWrapper,
+            localTicketsStore = localTicketsStore,
+            commandsStore = commandsStore,
+            systemMessageStore = systemMessageStore,
+            idStore = idStore
+        ).create(userInternalV1, TEST_TICKET_ID, "weclome", null)
+    }
+}

@@ -13,7 +13,7 @@ internal class FailDelay {
     /**
      * returns delay in milliseconds
      */
-    private fun getNextDelay(): Long {
+    internal fun getNextDelay(): Long {
         var delay =
             if (previousDelay.get() == 0L)
                 BASE_DELAY
@@ -44,8 +44,8 @@ internal class FailDelay {
 
     companion object {
 
-        private const val BASE_DELAY = 1000L
-        private const val MAX_DELAY = 3 * 60 * 1000L
+        internal const val BASE_DELAY = 1000L
+        internal const val MAX_DELAY = 3 * 60 * 1000L
     }
 
 }
