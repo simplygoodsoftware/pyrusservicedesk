@@ -322,9 +322,11 @@ internal class LocalCommandsStore(
     /**
      * Returns a free id for a command, or for a ticket that is not created on the server yet.
      *
-     * The id is negative, while the ids that come from the server are positive, and the sign is
-     * what tells a local entity from a stored one: [RepositoryMapper.mergeData] collects the
-     * locally created tickets by `ticketId < 0`.
+     * The ids are counted down, not up: every call returns a value smaller than the previous one,
+     * starting below the smallest id that is already stored. So they are negative, while the ids
+     * that come from the server are positive, and the sign is what tells a local entity from a
+     * stored one: [RepositoryMapper.mergeData] collects the locally created tickets by
+     * `ticketId < 0`.
      */
     fun getNextLocalId(): Long = getNextId(lastLocalId, commandsDao::getCommandMinLocalId)
 
