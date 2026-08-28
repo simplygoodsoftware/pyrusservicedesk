@@ -490,10 +490,7 @@ class PyrusServiceDesk private constructor(
             PLog.d(TAG, "ET startImpl: userId=${account.getUserId()} appId=${account.getAppId()?.getFirstNSymbols(8)} openTicketId=${openTicketAction?.ticketId}")
             Log.d(TAG, "ET startImpl: userId=${account.getUserId()} appId=${account.getAppId()?.getFirstNSymbols(8)}")
 
-            // start() may be called from any thread. We only bounce the actual activity launch to
-            // the UI thread: runOnUiThread runs inline when already on main and does a NON-blocking
-            // post otherwise.
-            activity.runOnUiThread { activity.startActivity(intent) }
+            activity.startActivity(intent)
             updateSdIsOpen(true)
 
             injector().updateUserUseCase.updateUser()
