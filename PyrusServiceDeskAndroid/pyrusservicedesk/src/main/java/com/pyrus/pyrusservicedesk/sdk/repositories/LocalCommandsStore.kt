@@ -179,6 +179,10 @@ internal class LocalCommandsStore(
         return commandsDao.getCommand(localId)
     }
 
+    fun hasCommand(localId: Long): Boolean {
+        return commandsDao.hasCommand(localId)
+    }
+
     /**
      * Removes pending command from offline repository
      */
@@ -315,30 +319,25 @@ internal class LocalCommandsStore(
         )
     }
 
-    fun getNextLocalId(): Long {
-        return lastLocalId.getAndUpdate {
-            if (it == 0L) {
-                val minId = commandsDao.getCommandMinLocalId()
-                if (minId == null) -1
-                else minId - 1
-            }
-            else {
-                it - 1
-            }
-        }
-    }
+    /**
+     * Returns a free id for a command, or for a ticket that is not created on the server yet.
+     *
+     * The ids are counted down, not up: every call returns a value smaller than the previous one,
+     * starting below the smallest id that is already stored. So they are negative, while the ids
+     * that come from the server are positive, and the sign is what tells a local entity from a
+     * stored one: [RepositoryMapper.mergeData] collects the locally created tickets by
+     * `ticketId < 0`.
+     */
+    fun getNextLocalId(): Long = getNextId(lastLocalId, commandsDao::getCommandMinLocalId)
 
-    private fun getNextAttachmentId(): Long {
-        return lastAttachId.getAndUpdate {
-            if (it == 0L) {
-                val minId = commandsDao.getAttachmentMinLocalId()
-                if (minId == null) -1
-                else minId - 1
-            }
-            else {
-                it - 1
-            }
+    /** The same as [getNextLocalId], but for the attachments of the local comments. */
+    private fun getNextAttachmentId(): Long = getNextId(lastAttachId, commandsDao::getAttachmentMinLocalId)
+
+    private fun getNextId(counter: AtomicLong, minStoredId: () -> Long?): Long {
+        if (counter.get() == 0L) {
+            counter.compareAndSet(0L, minStoredId() ?: 0L)
         }
+        return counter.decrementAndGet()
     }
 
     private fun createCommandId(): String {

@@ -6,6 +6,7 @@ import com.pyrus.pyrusservicedesk.sdk.data.intermediate.FileUploadResponseData
 import com.pyrus.pyrusservicedesk.sdk.sync.FailDelay
 import com.pyrus.pyrusservicedesk.sdk.web.UploadFileHook
 import com.pyrus.pyrusservicedesk.sdk.web.request_body.ProgressRequestBody
+import kotlinx.coroutines.CancellableContinuation
 import kotlinx.coroutines.CoroutineExceptionHandler
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.DelicateCoroutinesApi
@@ -13,14 +14,13 @@ import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.newSingleThreadContext
+import kotlinx.coroutines.suspendCancellableCoroutine
 import okhttp3.MultipartBody
 import java.io.File
 import java.util.concurrent.ConcurrentLinkedDeque
 import java.util.concurrent.atomic.AtomicBoolean
-import kotlin.coroutines.Continuation
 import kotlin.coroutines.CoroutineContext
 import kotlin.coroutines.resume
-import kotlin.coroutines.suspendCoroutine
 
 internal class RemoteFileStore(
     private val api: ServiceDeskApi,
@@ -44,46 +44,107 @@ internal class RemoteFileStore(
         file: File,
         cancelHook: UploadFileHook,
         progressListener: (Int) -> Unit,
-    ): Try<FileUploadResponseData> = suspendCoroutine {
+    ): Try<FileUploadResponseData> = suspendCancellableCoroutine {
         val request = UploadRequest(file, cancelHook, progressListener, it)
+
+        if (cancelHook.isCancelled) {
+            PLog.d(TAG, "uploadFile: ${file.name} has already been cancelled, nothing to upload")
+            request.resume(cancelledTry())
+            return@suspendCancellableCoroutine
+        }
+
+        it.invokeOnCancellation { filesQueue.remove(request) }
+
         filesQueue.add(request)
+        PLog.d(TAG, "uploadFile: ${file.name} is added to the queue, bytes: ${file.length()}, " +
+            "queue size: ${filesQueue.size}, isUploading: ${isUploading.get()}")
 
         tryStartUpload()
     }
 
+    fun cancelUploading(cancelHook: UploadFileHook) {
+        var removedCount = 0
+        val iterator = filesQueue.iterator()
+        while (iterator.hasNext()) {
+            val request = iterator.next()
+            if (request.cancelHook !== cancelHook) continue
+            iterator.remove()
+            request.resume(cancelledTry())
+            removedCount++
+        }
+
+        PLog.d(TAG, "cancelUploading: removed from the queue: $removedCount, " +
+            "queue size: ${filesQueue.size}, isUploading: ${isUploading.get()}")
+
+        failDelay.cancel()
+    }
+
     private fun tryStartUpload() {
         if (!isUploading.getAndSet(true)) {
+            PLog.d(TAG, "tryStartUpload: uploading is started, queue size: ${filesQueue.size}")
             launch {
                 startUpload()
             }
         }
+        else {
+            PLog.d(TAG, "tryStartUpload: uploading is already in progress, queue size: ${filesQueue.size}")
+        }
     }
 
     private suspend fun startUpload() {
-        val request = filesQueue.pollFirst()
-        if (request != null) {
-            uploadFileInternal(request)
+        try {
+            var request = filesQueue.pollFirst()
+            while (request != null) {
+                try {
+                    uploadFileInternal(request)
+                }
+                catch (t: Throwable) {
+                    PLog.e(TAG, "startUpload: unexpected error on ${request.file.name}: $t")
+                    request.resume(Try.Failure(t))
+                    throw t
+                }
+                request = filesQueue.pollFirst()
+            }
         }
-        if (filesQueue.isNotEmpty()) {
-            startUpload()
-        }
-        else {
+        finally {
             isUploading.set(false)
+            PLog.d(TAG, "startUpload: the queue is drained, isUploading: false")
+            if (filesQueue.isNotEmpty()) {
+                PLog.d(TAG, "startUpload: a new file has appeared in the queue, restart uploading")
+                tryStartUpload()
+            }
         }
     }
 
     private suspend fun uploadFileInternal(request: UploadRequest) {
-        val uploadTry = uploadFileInternal(request.file, request.cancelHook, request.progressListener)
-        when (uploadTry) {
-            is Try.Success -> {
+        val fileName = request.file.name
+        var attempt = 0
+
+        while (!request.cancelHook.isCancelled) {
+            attempt++
+            PLog.d(TAG, "upload $fileName: attempt $attempt is started")
+            val uploadTry = uploadFileInternal(request.file, request.cancelHook, request.progressListener)
+
+            if (uploadTry is Try.Success) {
+                PLog.d(TAG, "upload $fileName: attempt $attempt is succeeded, guid: ${uploadTry.value.guid}")
                 failDelay.cancel()
-                request.continuation.resume(uploadTry)
+                failDelay.clear()
+                request.resume(uploadTry)
+                return
             }
-            is Try.Failure -> {
-                failDelay.cancelableDelay()
-                uploadFileInternal(request)
+
+            val error = (uploadTry as Try.Failure).error
+            if (request.cancelHook.isCancelled) {
+                PLog.d(TAG, "upload $fileName: attempt $attempt is cancelled by the user, no retry")
+                break
             }
+
+            PLog.e(TAG, "upload $fileName: attempt $attempt is failed: $error, retry after delay")
+            failDelay.cancelableDelay()
         }
+
+        PLog.d(TAG, "upload $fileName: uploading is cancelled after $attempt attempt(s)")
+        request.resume(cancelledTry())
     }
 
     private suspend fun uploadFileInternal(
@@ -102,12 +163,22 @@ internal class RemoteFileStore(
         return api.uploadFile(filePart)
     }
 
-    private data class UploadRequest(
+    private fun cancelledTry(): Try<FileUploadResponseData> = Try.Failure(UploadCancelledException())
+
+    private class UploadRequest(
         val file: File,
         val cancelHook: UploadFileHook,
         val progressListener: (Int) -> Unit,
-        val continuation: Continuation<Try<FileUploadResponseData>>
-    )
+        private val continuation: CancellableContinuation<Try<FileUploadResponseData>>,
+    ) {
+
+        private val isResumed = AtomicBoolean(false)
+
+        fun resume(result: Try<FileUploadResponseData>) {
+            if (isResumed.getAndSet(true)) return
+            continuation.resume(result)
+        }
+    }
 
     companion object {
         const val TAG = "RemoteFileStore"

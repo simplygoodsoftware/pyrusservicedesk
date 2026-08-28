@@ -12,15 +12,19 @@ import InitData.userInternalV1
 import Responses.createComment
 import android.content.Context
 import android.content.SharedPreferences
+import android.net.Uri
 import com.pyrus.pyrusservicedesk.AppResourceManager
 import com.pyrus.pyrusservicedesk.SdConstants.PYRUS_BASE_DOMAIN
 import com.pyrus.pyrusservicedesk._ref.data.Comment
 import com.pyrus.pyrusservicedesk._ref.data.FullTicket
 import com.pyrus.pyrusservicedesk._ref.utils.PREFERENCE_KEY
+import com.pyrus.pyrusservicedesk._ref.utils.Try
 import com.pyrus.pyrusservicedesk._ref.utils.isSuccess
 import com.pyrus.pyrusservicedesk.core.Account
 import com.pyrus.pyrusservicedesk.sdk.AccessDeniedEventBus
 import com.pyrus.pyrusservicedesk.sdk.FileResolver
+import com.pyrus.pyrusservicedesk.sdk.data.intermediate.FileData
+import com.pyrus.pyrusservicedesk.sdk.data.intermediate.FileUploadResponseData
 import com.pyrus.pyrusservicedesk.sdk.repositories.AccountStore
 import com.pyrus.pyrusservicedesk.sdk.repositories.IdStore
 import com.pyrus.pyrusservicedesk.sdk.repositories.LocalCommandsStore
@@ -30,18 +34,25 @@ import com.pyrus.pyrusservicedesk.sdk.repositories.SdRepository
 import com.pyrus.pyrusservicedesk.sdk.repositories.SystemMessageStore
 import com.pyrus.pyrusservicedesk.sdk.repositories.data_base.data.ApplicationEntity
 import com.pyrus.pyrusservicedesk.sdk.repositories.data_base.data.CommandEntity
+import com.pyrus.pyrusservicedesk.sdk.repositories.data_base.data.LocalAttachmentEntity
 import com.pyrus.pyrusservicedesk.sdk.repositories.data_base.data.support.CommandWithAttachmentsEntity
 import com.pyrus.pyrusservicedesk.sdk.sync.Synchronizer
 import com.pyrus.pyrusservicedesk.sdk.sync.TicketCommandType
 import com.pyrus.pyrusservicedesk.sdk.updates.PreferencesManager
+import com.pyrus.pyrusservicedesk.sdk.web.UploadFileHook
 import com.pyrus.pyrusservicedesk.sdk.web.retrofit.RemoteFileStore
+import com.pyrus.pyrusservicedesk.sdk.web.retrofit.UploadCancelledException
+import io.mockk.Runs
 import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.every
+import io.mockk.just
 import io.mockk.mockk
+import io.mockk.verify
 import junit.framework.TestCase.assertEquals
 import junit.framework.TestCase.assertFalse
 import junit.framework.TestCase.assertTrue
+import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -62,6 +73,7 @@ import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 import org.robolectric.RuntimeEnvironment
+import java.io.File
 
 @RunWith(RobolectricTestRunner::class)
 @OptIn(ExperimentalCoroutinesApi::class)
@@ -82,6 +94,9 @@ class SdRepositoryTest {
 
     private lateinit var fileResolver: FileResolver
 
+    /** Local ids that have been removed from the store, see LocalCommandsStore.hasCommand. */
+    private val removedCommandIds = mutableSetOf<Long>()
+
     private val testDispatcher = StandardTestDispatcher()
     private val testScope = TestScope(testDispatcher)
 
@@ -96,6 +111,9 @@ class SdRepositoryTest {
         systemMessageStore = mockk(relaxed = true, relaxUnitFun = true)
         fileResolver = mockk()
         remoteFileStore = mockk()
+
+        every { localCommandsStore.hasCommand(any()) } answers { firstArg<Long>() !in removedCommandIds }
+        every { localCommandsStore.removeCommand(any<Long>()) } answers { removedCommandIds += firstArg<Long>() }
 
         accountStore = AccountStore(
             Account.V1(
@@ -454,6 +472,183 @@ class SdRepositoryTest {
         job.cancel()
     }
 
+    /**
+     * The comment that has been cancelled must not be returned to the store by the uploading that
+     * is still being finished, otherwise it hangs in the uploading state forever.
+     */
+    @Test
+    fun shouldNotSaveCommandAfterCancelUploadFile() = runTest(testDispatcher) {
+        setupMocks(this)
+        val savedCommands = setupAttachmentMocks()
+        val finishUpload = CompletableDeferred<Try<FileUploadResponseData>>()
+        coEvery { remoteFileStore.uploadFile(any(), any(), any()) } coAnswers {
+            thirdArg<(Int) -> Unit>().invoke(TEST_PROGRESS)
+            finishUpload.await()
+        }
+
+        repository.addAttachComment(userInternalV1, TEST_TICKET_ID, TEST_FILE_URI)
+        advanceUntilIdle()
+
+        assertTrue("the progress must be saved while the file is uploading", savedCommands.isNotEmpty())
+        val savedBeforeCancel = savedCommands.size
+
+        repository.cancelUploadFile(TEST_ATTACH_COMMAND_LOCAL_ID, TEST_ATTACHMENT_ID)
+        finishUpload.complete(Try.Failure(UploadCancelledException()))
+        advanceUntilIdle()
+
+        verify { localCommandsStore.removeCommand(TEST_ATTACH_COMMAND_LOCAL_ID) }
+        verify { remoteFileStore.cancelUploading(any()) }
+        assertEquals(
+            "the cancelled command must not be saved again",
+            savedBeforeCancel,
+            savedCommands.size,
+        )
+    }
+
+    /**
+     * The pending commands are sent one by one on the start, so a command can be cancelled while
+     * it is still waiting in the queue. The sending that reaches it later must skip it.
+     */
+    @Test
+    fun shouldNotSendCommandRemovedWhileItWaitsInTheQueue() = runTest(testDispatcher) {
+        TestServiceDeskApi.setGetTicketsResponse(Responses.emptyTickets)
+        val firstUpload = CompletableDeferred<Try<FileUploadResponseData>>()
+        every { localCommandsStore.getCommands() } returns listOf(
+            attachmentCommandEntity(),
+            attachmentCommandEntity(
+                localId = QUEUED_ATTACH_COMMAND_LOCAL_ID,
+                commandId = QUEUED_ATTACH_COMMAND_ID,
+                attachmentId = QUEUED_ATTACHMENT_ID,
+                fileName = QUEUED_FILE_NAME,
+                fileUri = QUEUED_FILE_URI,
+            ),
+        )
+        coEvery { remoteFileStore.uploadFile(any(), any(), any()) } coAnswers {
+            if (firstArg<File>().name == TEST_FILE_NAME) firstUpload.await()
+            else Try.Success(FileUploadResponseData(TEST_GUID, null))
+        }
+        setupMocks(this)
+        setupAttachmentMocks()
+        advanceUntilIdle()
+
+        // the first command is uploading, the second one is still waiting in the queue
+        repository.cancelUploadFile(QUEUED_ATTACH_COMMAND_LOCAL_ID, QUEUED_ATTACHMENT_ID)
+        firstUpload.complete(Try.Success(FileUploadResponseData(TEST_GUID, null)))
+        advanceUntilIdle()
+
+        coVerify(exactly = 1) { remoteFileStore.uploadFile(any(), any(), any()) }
+    }
+
+    /**
+     * The comment can be cancelled when its files are already uploaded and the command is being
+     * synced. A failed sync must not return such a command to the store as an error one, otherwise
+     * the cancelled comment appears in the chat again.
+     */
+    @Test
+    fun shouldNotSaveCommandCancelledWhileSyncing() = runTest(testDispatcher) {
+        TestServiceDeskApi.setGetTicketsResponse(Responses.emptyTickets)
+        setupMocks(this)
+        val savedCommands = setupAttachmentMocks()
+        val finishUpload = CompletableDeferred<Try<FileUploadResponseData>>()
+        coEvery { remoteFileStore.uploadFile(any(), any(), any()) } coAnswers { finishUpload.await() }
+
+        repository.addAttachComment(userInternalV1, TEST_TICKET_ID, TEST_FILE_URI)
+        advanceUntilIdle()
+
+        // the file is uploaded, the command is passed to the synchronizer
+        finishUpload.complete(Try.Success(FileUploadResponseData(TEST_GUID, null)))
+        testDispatcher.scheduler.runCurrent()
+        val savedBeforeCancel = savedCommands.size
+
+        repository.cancelUploadFile(TEST_ATTACH_COMMAND_LOCAL_ID, TEST_ATTACHMENT_ID)
+        advanceUntilIdle()
+
+        verify { localCommandsStore.removeCommand(TEST_ATTACH_COMMAND_LOCAL_ID) }
+        assertEquals(
+            "the command cancelled while syncing must not be saved as an error one",
+            savedBeforeCancel,
+            savedCommands.size,
+        )
+    }
+
+    @Test
+    fun shouldSaveGuidOfUploadedAttachment() = runTest(testDispatcher) {
+        TestServiceDeskApi.setGetTicketsResponse(createComment)
+        setupMocks(this)
+        val savedCommands = setupAttachmentMocks()
+        coEvery { remoteFileStore.uploadFile(any(), any(), any()) } coAnswers {
+            thirdArg<(Int) -> Unit>().invoke(TEST_PROGRESS)
+            Try.Success(FileUploadResponseData(TEST_GUID, null))
+        }
+
+        repository.addAttachComment(userInternalV1, TEST_TICKET_ID, TEST_FILE_URI)
+        advanceUntilIdle()
+
+        assertTrue(
+            "the guid of the uploaded file must be saved",
+            savedCommands.any { it.attachments?.firstOrNull()?.guid == TEST_GUID },
+        )
+    }
+
+    /**
+     * Mocks the creation of a comment with one not uploaded attachment and returns the list of the
+     * commands that have been saved to the store.
+     */
+    private fun setupAttachmentMocks(): List<CommandWithAttachmentsEntity> {
+        val savedCommands = mutableListOf<CommandWithAttachmentsEntity>()
+
+        every { fileResolver.getFileData(any()) } returns FileData(
+            fileName = TEST_FILE_NAME,
+            bytesSize = TEST_FILE_SIZE,
+            uri = TEST_FILE_URI,
+            isLocal = true,
+        )
+        every {
+            localCommandsStore.addAttachmentCommand(any(), any(), any(), any())
+        } returns attachmentCommandEntity()
+        every { localCommandsStore.addOrUpdatePendingCommand(capture(savedCommands)) } just Runs
+        every { remoteFileStore.cancelUploading(any<UploadFileHook>()) } just Runs
+
+        return savedCommands
+    }
+
+    private fun attachmentCommandEntity(
+        localId: Long = TEST_ATTACH_COMMAND_LOCAL_ID,
+        commandId: String = TEST_ATTACH_COMMAND_ID,
+        attachmentId: Long = TEST_ATTACHMENT_ID,
+        fileName: String = TEST_FILE_NAME,
+        fileUri: Uri = TEST_FILE_URI,
+    ) = CommandWithAttachmentsEntity(
+        command = CommandEntity(
+            isError = false,
+            localId = localId,
+            commandId = commandId,
+            commandType = TicketCommandType.CreateComment.ordinal,
+            userId = null,
+            appId = TEST_APP_ID,
+            creationTime = System.currentTimeMillis(),
+            requestNewTicket = false,
+            comment = null,
+            ticketId = TEST_TICKET_ID,
+            rating = null,
+            commentId = null,
+            token = null,
+            tokenType = null,
+            ratingComment = null,
+            extraFields = null,
+        ),
+        attachments = listOf(
+            LocalAttachmentEntity(
+                id = attachmentId,
+                commandId = commandId,
+                name = fileName,
+                guid = null,
+                bytesSize = TEST_FILE_SIZE,
+                uri = fileUri.toString(),
+            )
+        ),
+    )
+
     private fun setupMocks(coroutineScope: CoroutineScope) {
         val applicationFlow = MutableStateFlow(
             listOf(
@@ -493,5 +688,22 @@ class SdRepositoryTest {
         )
         every { localTicketsStore.getApplicationsFlow() } returns applicationFlow
 
+    }
+
+    private companion object {
+        const val TEST_ATTACH_COMMAND_LOCAL_ID = -10L
+        const val TEST_ATTACH_COMMAND_ID = "8e2c0a24-3b1f-4a7c-9d55-6f0a1c2b3d4e"
+        const val TEST_ATTACHMENT_ID = 100L
+        const val TEST_FILE_NAME = "test.txt"
+        const val TEST_FILE_SIZE = 2048
+        const val TEST_PROGRESS = 50
+        const val TEST_GUID = "test-guid"
+        val TEST_FILE_URI: Uri = Uri.parse("file:///tmp/test.txt")
+
+        const val QUEUED_ATTACH_COMMAND_LOCAL_ID = -11L
+        const val QUEUED_ATTACH_COMMAND_ID = "1f7b6d90-2c34-4e58-8a11-9b0c5d3e7f22"
+        const val QUEUED_ATTACHMENT_ID = 101L
+        const val QUEUED_FILE_NAME = "queued.txt"
+        val QUEUED_FILE_URI: Uri = Uri.parse("file:///tmp/queued.txt")
     }
 }

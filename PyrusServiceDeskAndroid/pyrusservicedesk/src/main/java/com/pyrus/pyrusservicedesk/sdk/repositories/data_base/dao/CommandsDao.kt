@@ -33,6 +33,9 @@ internal abstract class CommandsDao {
     @Query("DELETE FROM $COMMANDS_TABLE WHERE local_id = :localId")
     abstract fun deleteCommandByLocalId(localId: Long)
 
+    @Query("SELECT EXISTS(SELECT 1 FROM $COMMANDS_TABLE WHERE local_id = :localId)")
+    abstract fun hasCommand(localId: Long): Boolean
+
     @Query("SELECT min(local_id) FROM $COMMANDS_TABLE")
     abstract fun getCommandMinLocalId(): Long?
 
