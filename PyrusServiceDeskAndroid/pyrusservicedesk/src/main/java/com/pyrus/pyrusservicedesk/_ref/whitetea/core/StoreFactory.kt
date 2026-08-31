@@ -12,7 +12,7 @@ internal interface StoreFactory {
         reducer: L<State, Message, Effect>,
         actors: List<Actor<Effect, Message>>,
         effectAtOnceDelivery: Boolean = false,
-        onCancelCallback: ((state: State) -> Unit)? = null
+        onCancelCallback: ((state: State) -> Unit)? = null,
     ): Store<State, Message, Effect>
 
     fun <State : Any, Message : Any, Effect : Any> create(
@@ -23,7 +23,7 @@ internal interface StoreFactory {
         reducer: L<State, Message, Effect>,
         actor: Actor<Effect, Message>,
         effectAtOnceDelivery: Boolean = false,
-        onCancelCallback: ((state: State) -> Unit)? = null
+        onCancelCallback: ((state: State) -> Unit)? = null,
     ): Store<State, Message, Effect>
 
 }
