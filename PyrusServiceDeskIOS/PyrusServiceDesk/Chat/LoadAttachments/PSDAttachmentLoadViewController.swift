@@ -71,8 +71,7 @@ class PSDAttachmentLoadViewController: PSDViewController {
         //В Liquid Glass вместо слова «Готово» — крестик; действие то же, closeButtonAction().
         if PSDLiquidGlassStyle.isEnabled,
            let closeItem = PSDNavigationItemFactory.makeCloseItem(target: self,
-                                                                  action: #selector(closeButtonAction),
-                                                                  tintColor: barButtonTintColor) {
+                                                                  action: #selector(closeButtonAction)) {
             self.navigationItem.leftBarButtonItem = closeItem
             return
         }
@@ -83,8 +82,9 @@ class PSDAttachmentLoadViewController: PSDViewController {
         let item = PSDShareBarItemView.init()
         item.tintColor = barButtonTintColor
         if PSDLiquidGlassStyle.isEnabled, let shareImage = PSDNavigationItemFactory.image(for: .share) {
-            //Символ в едином с остальными кнопками бара начертании; логика элемента не меняется.
+            //Символ и цвет в едином с остальными кнопками бара стиле; логика элемента не меняется.
             item.image = shareImage
+            item.tintColor = PSDLiquidGlassStyle.iconColor
         }
         return item
     }()

@@ -231,8 +231,7 @@ class PyrusServiceDeskController: PSDNavigationController, PSDMainController {
         //оформление под Liquid Glass нужно задавать здесь, а не на экранах.
         if PSDLiquidGlassStyle.isEnabled,
            let glassItem = PSDChatNavigationItemFactory.makeBackItem(target: self,
-                                                                     action: #selector(goBack),
-                                                                     tintColor: mainColor) {
+                                                                     action: #selector(goBack)) {
             return glassItem
         }
         let button = UIButton()

@@ -20,4 +20,13 @@ enum PSDLiquidGlassStyle {
     static var isEnabled: Bool {
         PyrusServiceDesk.liquidGlass && isSupportedBySystem
     }
+    
+    /// Цвет иконок на стеклянных кнопках: чёрный в светлой теме, белый в тёмной.
+    ///
+    /// Стекло само подстраивается под фон, поэтому иконкам не нужны цвета кастомизации —
+    /// только контраст со стеклом. Цвет динамический: при смене темы перекрашивать
+    /// ничего не надо, достаточно, чтобы иконка была template-картинкой с tintColor.
+    static var iconColor: UIColor {
+        UIColor.themedColor(lightColor: .black, darkColor: .white)
+    }
 }

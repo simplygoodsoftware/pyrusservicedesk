@@ -123,8 +123,7 @@ class PSDChatViewController: PSDViewController, PSDMainController {
     private lazy var infoButton: UIBarButtonItem? = {
         if PSDLiquidGlassStyle.isEnabled,
            let glassItem = PSDChatNavigationItemFactory.makeInfoItem(target: self,
-                                                                     action: #selector(showPopover),
-                                                                     tintColor: .appColor) {
+                                                                     action: #selector(showPopover)) {
             return glassItem
         }
         if #available(iOS 14.0, *) {
@@ -600,6 +599,10 @@ class PSDChatViewController: PSDViewController, PSDMainController {
         view.addSubview(scrollControlView)
         let image = UIImageView(image: UIImage.PSDImage(name: "down"))
         image.translatesAutoresizingMaskIntoConstraints = false
+        if PSDLiquidGlassStyle.isEnabled {
+            image.image = image.image?.withRenderingMode(.alwaysTemplate)
+            image.tintColor = PSDLiquidGlassStyle.iconColor
+        }
         scrollButton.addSubview(image)
         badgeView.addSubview(newMessageCount)
         //Бейдж выступает за край кнопки, а стекло режет содержимое по своей форме —
@@ -782,8 +785,7 @@ class PSDChatViewController: PSDViewController, PSDMainController {
     private func makeDefaultBackItem() -> UIBarButtonItem {
         if PSDLiquidGlassStyle.isEnabled,
            let glassItem = PSDChatNavigationItemFactory.makeBackItem(target: self,
-                                                                     action: #selector(closeButtonAction),
-                                                                     tintColor: barButtonTintColor) {
+                                                                     action: #selector(closeButtonAction)) {
             return glassItem
         }
         return UIBarButtonItem(customView: leftButton)
@@ -856,6 +858,9 @@ class PSDChatViewController: PSDViewController, PSDMainController {
     }()
     
     private func customiseDesign(color: UIColor) {
+        //В Liquid Glass цвет иконок задаёт фабрика, а кнопки интегратора
+        //остаются с его цветом — перекрашивать здесь нечего.
+        guard !PSDLiquidGlassStyle.isEnabled else { return }
         self.navigationItem.leftBarButtonItem?.tintColor = color
         self.navigationItem.rightBarButtonItem?.tintColor = color
     }

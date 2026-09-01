@@ -4,6 +4,7 @@ import UIKit
 ///
 /// Стеклянную подложку под элементами бара на iOS 26+ рисует сама система,
 /// поэтому здесь достаточно иконки без текста — как в макете.
+/// Цвет иконок единый для всех стеклянных кнопок — `PSDLiquidGlassStyle.iconColor`.
 enum PSDNavigationItemFactory {
     
     ///Системные символы, которыми рисуются кнопки бара.
@@ -22,35 +23,29 @@ enum PSDNavigationItemFactory {
     /// Кнопка «Назад» — шеврон без подписи.
     /// - Returns: `nil`, если системные символы недоступны на текущей версии iOS.
     static func makeBackItem(target: Any?,
-                             action: Selector,
-                             tintColor: UIColor) -> UIBarButtonItem? {
+                             action: Selector) -> UIBarButtonItem? {
         makeItem(symbol: .back,
                  accessibilityLabel: "Back".localizedPSD(),
                  target: target,
-                 action: action,
-                 tintColor: tintColor)
+                 action: action)
     }
     
     /// Кнопка информации о заявке.
     static func makeInfoItem(target: Any?,
-                             action: Selector,
-                             tintColor: UIColor) -> UIBarButtonItem? {
+                             action: Selector) -> UIBarButtonItem? {
         makeItem(symbol: .info,
                  accessibilityLabel: nil,
                  target: target,
-                 action: action,
-                 tintColor: tintColor)
+                 action: action)
     }
     
     /// Кнопка закрытия — крестик без подписи.
     static func makeCloseItem(target: Any?,
-                              action: Selector,
-                              tintColor: UIColor) -> UIBarButtonItem? {
+                              action: Selector) -> UIBarButtonItem? {
         makeItem(symbol: .close,
                  accessibilityLabel: "Close".localizedPSD(),
                  target: target,
-                 action: action,
-                 tintColor: tintColor)
+                 action: action)
     }
     
     /// Картинка символа в едином для бара размере и начертании.
@@ -66,12 +61,11 @@ enum PSDNavigationItemFactory {
     private static func makeItem(symbol: Symbol,
                                  accessibilityLabel: String?,
                                  target: Any?,
-                                 action: Selector,
-                                 tintColor: UIColor) -> UIBarButtonItem? {
+                                 action: Selector) -> UIBarButtonItem? {
         guard let image = image(for: symbol) else { return nil }
         
         let item = UIBarButtonItem(image: image, style: .plain, target: target, action: action)
-        item.tintColor = tintColor
+        item.tintColor = PSDLiquidGlassStyle.iconColor
         if let accessibilityLabel = accessibilityLabel {
             item.accessibilityLabel = accessibilityLabel
         }

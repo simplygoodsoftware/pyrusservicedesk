@@ -18,6 +18,13 @@ class AttachmentsAddButton: UIButton {
         recolor()
     }
     private func resetImage() {
+        if PSDLiquidGlassStyle.isEnabled {
+            //На стекле иконка одного цвета с остальными стеклянными кнопками.
+            //Template + динамический tintColor: при смене темы перекрашивается сама.
+            self.setImage(UIImage.PSDImage(name: "clip")?.withRenderingMode(.alwaysTemplate), for: .normal)
+            self.tintColor = PSDLiquidGlassStyle.iconColor
+            return
+        }
         var addImage: UIImage?
         if let color = PyrusServiceDesk.mainController?.customization?.addAttachmentButtonColor ?? PyrusServiceDesk.mainController?.customization?.barButtonTintColor  {
             addImage = UIImage.PSDImage(name: "clip")?.imageWith(color: color)

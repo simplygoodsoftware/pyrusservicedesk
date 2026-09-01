@@ -130,7 +130,7 @@ class PSDMessageInputView: UIView, PSDMessageTextViewDelegate,PSDMessageSendButt
         if #available(iOS 13.0, *) {
             button.setImage(UIImage(systemName: "mic")?.withRenderingMode(.alwaysTemplate), for: .normal)
         }
-        button.tintColor = CustomizationHelper.recordImagesColors
+        button.tintColor = PSDLiquidGlassStyle.iconColor
         button.addTarget(self, action: #selector(micButtonTapped), for: .touchUpInside)
         return button
     }()
@@ -257,7 +257,7 @@ class PSDMessageInputView: UIView, PSDMessageTextViewDelegate,PSDMessageSendButt
         cancelButton.setImage(UIImage.PSDImage(name: "arrowsLeft")?.imageWith(color: CustomizationHelper.recordImagesColors), for: .normal)
         inputTextView.keyboardAppearance = CustomizationHelper.keyboardStyle
         if PSDLiquidGlassStyle.isEnabled {
-            micButton.tintColor = CustomizationHelper.recordImagesColors
+            //Цвет иконки динамический и переключается сам; пересобирать надо только подложку.
             inputBackdropView.dimColor = Self.backdropDimColor
         }
     }
@@ -760,7 +760,7 @@ class PSDMessageInputView: UIView, PSDMessageTextViewDelegate,PSDMessageSendButt
         micGlassBackground.glassContentView.addSubview(micButton)
         
         //Внутри капсулы кнопка отправки квадратная — отступы широкого варианта ей не подходят.
-        sendButton.applyCompactStyle()
+        sendButton.applyLiquidGlassStyle()
         
         topGrayLine.isHidden = true
     }
