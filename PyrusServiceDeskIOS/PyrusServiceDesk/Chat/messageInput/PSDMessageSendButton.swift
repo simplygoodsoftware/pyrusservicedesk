@@ -1,4 +1,3 @@
-
 import UIKit
 
 protocol PSDMessageSendButtonDelegate: class {
@@ -31,6 +30,16 @@ class PSDMessageSendButton: UIButton {
         //isHidden = true
         //isEnabled = false
         self.delegate?.sendMessage()
+    }
+    
+    ///Оформление для стеклянной капсулы, где кнопка квадратная и маленькая.
+    ///
+    ///Боковые `contentEdgeInsets` рассчитаны на широкую кнопку 60×44: в квадрате 32×32
+    ///они оставляют под картинку 24×32, и UIButton ужимает иконку в этот прямоугольник
+    ///без сохранения пропорций. Отступы снимаем, а картинку вписываем по пропорциям.
+    func applyCompactStyle() {
+        contentEdgeInsets = .zero
+        imageView?.contentMode = .scaleAspectFit
     }
     
     required init?(coder aDecoder: NSCoder) {

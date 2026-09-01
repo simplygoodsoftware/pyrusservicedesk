@@ -1,14 +1,20 @@
 import UIKit
 
-/// Собирает кнопки навигационного бара чата для Liquid Glass оформления.
+/// Собирает кнопки навигационного бара для Liquid Glass оформления.
 ///
 /// Стеклянную подложку под элементами бара на iOS 26+ рисует сама система,
 /// поэтому здесь достаточно иконки без текста — как в макете.
-enum PSDChatNavigationItemFactory {
+enum PSDNavigationItemFactory {
+    
+    ///Системные символы, которыми рисуются кнопки бара.
+    enum Symbol: String {
+        case back = "chevron.backward"
+        case info = "info.circle"
+        case close = "xmark"
+        case share = "square.and.arrow.up"
+    }
     
     private enum Constants {
-        static let backSymbolName = "chevron.backward"
-        static let infoSymbolName = "info.circle"
         static let symbolPointSize: CGFloat = 17
         static let symbolWeight: UIImage.SymbolWeight = .semibold
     }
@@ -18,7 +24,7 @@ enum PSDChatNavigationItemFactory {
     static func makeBackItem(target: Any?,
                              action: Selector,
                              tintColor: UIColor) -> UIBarButtonItem? {
-        makeItem(symbolName: Constants.backSymbolName,
+        makeItem(symbol: .back,
                  accessibilityLabel: "Back".localizedPSD(),
                  target: target,
                  action: action,
@@ -26,29 +32,43 @@ enum PSDChatNavigationItemFactory {
     }
     
     /// Кнопка информации о заявке.
-    /// - Returns: `nil`, если системные символы недоступны на текущей версии iOS.
     static func makeInfoItem(target: Any?,
                              action: Selector,
                              tintColor: UIColor) -> UIBarButtonItem? {
-        makeItem(symbolName: Constants.infoSymbolName,
+        makeItem(symbol: .info,
                  accessibilityLabel: nil,
                  target: target,
                  action: action,
                  tintColor: tintColor)
     }
     
-    private static func makeItem(symbolName: String,
+    /// Кнопка закрытия — крестик без подписи.
+    static func makeCloseItem(target: Any?,
+                              action: Selector,
+                              tintColor: UIColor) -> UIBarButtonItem? {
+        makeItem(symbol: .close,
+                 accessibilityLabel: "Close".localizedPSD(),
+                 target: target,
+                 action: action,
+                 tintColor: tintColor)
+    }
+    
+    /// Картинка символа в едином для бара размере и начертании.
+    /// Для элементов, которые нельзя пересоздать через фабрику, — например,
+    /// `PSDShareBarItemView`, живущего своей логикой поверх `UIBarButtonItem`.
+    static func image(for symbol: Symbol) -> UIImage? {
+        guard #available(iOS 13.0, *) else { return nil }
+        let configuration = UIImage.SymbolConfiguration(pointSize: Constants.symbolPointSize,
+                                                        weight: Constants.symbolWeight)
+        return UIImage(systemName: symbol.rawValue, withConfiguration: configuration)
+    }
+    
+    private static func makeItem(symbol: Symbol,
                                  accessibilityLabel: String?,
                                  target: Any?,
                                  action: Selector,
                                  tintColor: UIColor) -> UIBarButtonItem? {
-        guard #available(iOS 14.0, *) else { return nil }
-        
-        let configuration = UIImage.SymbolConfiguration(pointSize: Constants.symbolPointSize,
-                                                        weight: Constants.symbolWeight)
-        guard let image = UIImage(systemName: symbolName, withConfiguration: configuration) else {
-            return nil
-        }
+        guard let image = image(for: symbol) else { return nil }
         
         let item = UIBarButtonItem(image: image, style: .plain, target: target, action: action)
         item.tintColor = tintColor
@@ -58,3 +78,6 @@ enum PSDChatNavigationItemFactory {
         return item
     }
 }
+
+///Прежнее имя фабрики. Оставлено, чтобы не трогать существующие вызовы в экране чата.
+typealias PSDChatNavigationItemFactory = PSDNavigationItemFactory

@@ -61,6 +61,16 @@ class PSDChatViewController: PSDViewController, PSDMainController {
         return button
     }()
     
+    ///Стеклянный круг под кнопкой скролла. Используется только в Liquid Glass оформлении.
+    private lazy var scrollButtonGlass = PSDGlassBackgroundView(isInteractive: true)
+    
+    ///Вью, которую позиционируем, прячем и масштабируем: под флагом — стеклянный круг
+    ///с кнопкой внутри, иначе — сама кнопка. Все внешние манипуляции идут через неё,
+    ///чтобы стекло и кнопка не разъезжались.
+    private var scrollControlView: UIView {
+        PSDLiquidGlassStyle.isEnabled ? scrollButtonGlass : scrollButton
+    }
+    
     private var bottomStopButton: NSLayoutConstraint?
     private lazy var stopButton: UIButton = {
         let button = UIButton()
@@ -321,11 +331,14 @@ class PSDChatViewController: PSDViewController, PSDMainController {
     override func viewWillLayoutSubviews() {
         super.viewWillLayoutSubviews()
         resizeTable()
-        scrollButton.layer.shadowColor = UIColor.black.cgColor
-        scrollButton.layer.shadowOffset = CGSize(width: 0, height: 4)
-        scrollButton.layer.shadowRadius = 4
-        scrollButton.layer.shadowOpacity = 0.2
-        scrollButton.layer.masksToBounds = false
+        if !PSDLiquidGlassStyle.isEnabled {
+            //У стекла своя объёмность, тень ему не нужна.
+            scrollButton.layer.shadowColor = UIColor.black.cgColor
+            scrollButton.layer.shadowOffset = CGSize(width: 0, height: 4)
+            scrollButton.layer.shadowRadius = 4
+            scrollButton.layer.shadowOpacity = 0.2
+            scrollButton.layer.masksToBounds = false
+        }
         
 //        stopButton.layer.shadowColor = UIColor.black.cgColor
 //        stopButton.layer.shadowOffset = CGSize(width: 0, height: 4)
@@ -333,7 +346,9 @@ class PSDChatViewController: PSDViewController, PSDMainController {
 //        stopButton.layer.shadowOpacity = 0.2
 //        stopButton.layer.masksToBounds = false
         
-        messageInputView.backgroundView.backgroundColor = CustomizationHelper.colorsForInput.0
+        if !PSDLiquidGlassStyle.isEnabled {
+            messageInputView.backgroundView.backgroundColor = CustomizationHelper.colorsForInput.0
+        }
     }
 
     private var firstLayout: Bool = true
@@ -484,7 +499,8 @@ class PSDChatViewController: PSDViewController, PSDMainController {
         let style = CustomizationHelper.keyboardStyle
         input.inputTextView.keyboardAppearance = style
         let (backInputColor, textInputColor) = CustomizationHelper.colorsForInput
-        input.backgroundView.backgroundColor = backInputColor
+        //В Liquid Glass панель прозрачная: её фон рисует блюр-подложка внутри самой панели.
+        input.backgroundView.backgroundColor = PSDLiquidGlassStyle.isEnabled ? .clear : backInputColor
         input.inputTextView.textColor = textInputColor
         input.sendButton.setTitleColor(textInputColor.withAlphaComponent(PSDMessageSendButton.titleDisabledAlpha), for: .disabled)
     }
@@ -580,17 +596,20 @@ class PSDChatViewController: PSDViewController, PSDMainController {
     }
     
     func setupScrollButton() {
-        view.addSubview(scrollButton)
+        embedScrollButtonIntoGlassIfNeeded()
+        view.addSubview(scrollControlView)
         let image = UIImageView(image: UIImage.PSDImage(name: "down"))
         image.translatesAutoresizingMaskIntoConstraints = false
         scrollButton.addSubview(image)
         badgeView.addSubview(newMessageCount)
-        scrollButton.addSubview(badgeView)
+        //Бейдж выступает за край кнопки, а стекло режет содержимое по своей форме —
+        //поэтому в Liquid Glass бейдж лежит на контейнере, поверх стекла.
+        scrollControlView.addSubview(badgeView)
         
         NSLayoutConstraint.activate([
-            scrollButton.heightAnchor.constraint(equalToConstant: 40),
-            scrollButton.widthAnchor.constraint(equalToConstant: 40),
-            scrollButton.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -11),
+            scrollControlView.heightAnchor.constraint(equalToConstant: 40),
+            scrollControlView.widthAnchor.constraint(equalToConstant: 40),
+            scrollControlView.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -11),
             image.centerXAnchor.constraint(equalTo: scrollButton.centerXAnchor),
             image.centerYAnchor.constraint(equalTo: scrollButton.centerYAnchor),
             badgeView.bottomAnchor.constraint(equalTo: scrollButton.bottomAnchor, constant: -28),
@@ -602,11 +621,31 @@ class PSDChatViewController: PSDViewController, PSDMainController {
             newMessageCount.centerYAnchor.constraint(equalTo: badgeView.centerYAnchor),
             badgeView.leadingAnchor.constraint(equalTo: newMessageCount.leadingAnchor, constant: -4)
         ])
-        bottomScrollButton = scrollButton.bottomAnchor.constraint(equalTo: view.bottomAnchor, constant: -110)
+        bottomScrollButton = scrollControlView.bottomAnchor.constraint(equalTo: view.bottomAnchor, constant: -110)
         bottomScrollButton?.isActive = true
         
         scrollButton.addTarget(self, action: #selector(scrollToBottom), for: .touchUpInside)
         updateScrollButton(isHidden: true)
+    }
+    
+    ///Кладёт кнопку скролла внутрь интерактивного стекла. Кнопка — внутри контента стекла,
+    ///а не поверх него: так тап доходит до кнопки, а стекло анимирует нажатие.
+    ///Заливку и стартовый масштаб кнопки перенимает контейнер.
+    private func embedScrollButtonIntoGlassIfNeeded() {
+        guard PSDLiquidGlassStyle.isEnabled else { return }
+        scrollButtonGlass.translatesAutoresizingMaskIntoConstraints = false
+        scrollButtonGlass.transform = scrollButton.transform
+        scrollButton.transform = .identity
+        scrollButton.backgroundColor = .clear
+        
+        let content = scrollButtonGlass.glassContentView
+        content.addSubview(scrollButton)
+        NSLayoutConstraint.activate([
+            scrollButton.topAnchor.constraint(equalTo: content.topAnchor),
+            scrollButton.bottomAnchor.constraint(equalTo: content.bottomAnchor),
+            scrollButton.leadingAnchor.constraint(equalTo: content.leadingAnchor),
+            scrollButton.trailingAnchor.constraint(equalTo: content.trailingAnchor)
+        ])
     }
     
     func setupStopButton() {
@@ -983,6 +1022,10 @@ extension PSDChatViewController: PSDMessageInputViewDelegate {
         messageInputView.inputTextView.resignFirstResponder()
     }
     
+    func presenterForInputMenus() -> UIViewController? {
+        return self
+    }
+    
     func send(_ message:String, _ attachments: [PSDAttachment]) {
         interactor.doInteraction(.send(message: message, attachments: attachments))
     }
@@ -1008,33 +1051,33 @@ extension PSDChatViewController: PSDChatTableViewDelegate {
     }
     
     func updateScrollButton(isAtBottom: Bool, isDragging: Bool) {
-        if !isAtBottom && scrollButton.isHidden == true && isDragging {
+        if !isAtBottom && scrollControlView.isHidden == true && isDragging {
             UIView.animate(withDuration: 0.2) {
-                self.scrollButton.isHidden = false
-                self.scrollButton.transform = CGAffineTransform(scaleX: 1, y: 1)
+                self.scrollControlView.isHidden = false
+                self.scrollControlView.transform = CGAffineTransform(scaleX: 1, y: 1)
             }
-        } else if isAtBottom && scrollButton.isHidden == false {
+        } else if isAtBottom && scrollControlView.isHidden == false {
             badgeView.isHidden = true
             UIView.animate(withDuration: 0.2) {
-                self.scrollButton.transform = CGAffineTransform(scaleX: 0, y: 0)
+                self.scrollControlView.transform = CGAffineTransform(scaleX: 0, y: 0)
             } completion: { _ in
-                self.scrollButton.isHidden = true
+                self.scrollControlView.isHidden = true
             }
         }
     }
     
     func updateScrollButton(isHidden: Bool) {
-        if !isHidden && scrollButton.isHidden == true {
+        if !isHidden && scrollControlView.isHidden == true {
             UIView.animate(withDuration: 0.2) {
-                self.scrollButton.isHidden = false
-                self.scrollButton.transform = CGAffineTransform(scaleX: 1, y: 1)
+                self.scrollControlView.isHidden = false
+                self.scrollControlView.transform = CGAffineTransform(scaleX: 1, y: 1)
             }
-        } else if isHidden && scrollButton.isHidden == false {
+        } else if isHidden && scrollControlView.isHidden == false {
             badgeView.isHidden = true
             UIView.animate(withDuration: 0.2) {
-                self.scrollButton.transform = CGAffineTransform(scaleX: 0, y: 0)
+                self.scrollControlView.transform = CGAffineTransform(scaleX: 0, y: 0)
             } completion: { _ in
-                self.scrollButton.isHidden = true
+                self.scrollControlView.isHidden = true
             }
         }
         

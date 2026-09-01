@@ -1,4 +1,3 @@
-
 import UIKit
 
 /**
@@ -60,21 +59,58 @@ class PSDAttachmentLoadViewController: PSDViewController {
   
     private func design() {
         self.view.backgroundColor = PyrusServiceDesk.mainController?.customization?.customBackgroundColor ?? UIColor.psdBackground
+        if #available(iOS 13.0, *), PSDLiquidGlassStyle.isEnabled {
+            //Снимаем своё оформление, чтобы бар и капсулы под кнопками рисовала система.
+            PSDNavigationBarStyler.applySystem(to: navigationItem)
+        }
         self.setCloseButton()
         self.setDownloadButton()
     }
     private func setCloseButton()
     {
+        //В Liquid Glass вместо слова «Готово» — крестик; действие то же, closeButtonAction().
+        if PSDLiquidGlassStyle.isEnabled,
+           let closeItem = PSDNavigationItemFactory.makeCloseItem(target: self,
+                                                                  action: #selector(closeButtonAction),
+                                                                  tintColor: barButtonTintColor) {
+            self.navigationItem.leftBarButtonItem = closeItem
+            return
+        }
         self.navigationItem.leftBarButtonItem = CloseButtonItem.init(self)
     }
     ///UIBarButtonItem that open share menu
     lazy var shareBarItem : PSDShareBarItemView = {
         let item = PSDShareBarItemView.init()
-        item.tintColor = PyrusServiceDesk.mainController?.customization?.barButtonTintColor ?? UIColor.darkAppColor
+        item.tintColor = barButtonTintColor
+        if PSDLiquidGlassStyle.isEnabled, let shareImage = PSDNavigationItemFactory.image(for: .share) {
+            //Символ в едином с остальными кнопками бара начертании; логика элемента не меняется.
+            item.image = shareImage
+        }
         return item
     }()
     private func setDownloadButton(){
         self.navigationItem.rightBarButtonItem = shareBarItem
+    }
+    
+    //MARK: Liquid Glass
+    
+    ///Заголовок на стеклянной капсуле. Используется только в Liquid Glass оформлении.
+    private lazy var glassTitleView = PSDChatGlassTitleView()
+    
+    private var barButtonTintColor: UIColor {
+        PyrusServiceDesk.mainController?.customization?.barButtonTintColor ?? UIColor.darkAppColor
+    }
+    
+    ///PSDViewController.recolor() кладёт в titleView собственный лейбл при каждой установке
+    ///title и смене темы — возвращаем поверх него капсулу.
+    override func recolor() {
+        super.recolor()
+        guard PSDLiquidGlassStyle.isEnabled, let title = title, !title.isEmpty else { return }
+        glassTitleView.title = title
+        glassTitleView.titleColor = CustomizationHelper.colorForChatTitle
+        glassTitleView.sizeToFit()
+        navigationItem.titleView = glassTitleView
+        navigationController?.navigationBar.layoutIfNeeded()
     }
     private lazy var previewView : PSDAttachmentPreviewView  = {
         let view = PSDAttachmentPreviewView.init(frame: self.view.bounds)
@@ -178,4 +214,3 @@ class PSDAttachmentLoadViewController: PSDViewController {
         }
     }
 }
-
